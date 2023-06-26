@@ -7,8 +7,8 @@
 interface SeqCollection
 {
     // IMO, this method should return $this so it's more conveniently chainable.
-	public function add(mixed $value) : void;
-
+    public function add(mixed $value) : void;
+/*
     // Modifies in place.  Equivalent of -=.
     public function remove(mixed $value) : static;
 
@@ -27,21 +27,21 @@ interface SeqCollection
 
     // This should really be static $other, but the language doesn't allow that.
     // Equivalent of + static.
-    public function concat(self $other): static;
+    public function concat(SeqCollection $other): static;
 
     // True if both seqs have the same values in the same order.
-    public function equals(self $other): bool;
+    public function equals(SeqCollection $other): bool;
 
     // $fn is callable(mixed $val)
     // The return type is $targetType, but that can't be expressed statically.
     public function map(callable $fn, string $targetType): SeqCollection;
-
+*/
 }
 
 interface DictCollection
 {
-	public function add(mixed $key, mixed $value) : void;
-
+    public function add(mixed $key, mixed $value) : void;
+/*
     public function remove(mixed $key) : static;
 
     public function has(mixed $key) : bool;
@@ -59,12 +59,13 @@ interface DictCollection
 
     // This should really be static $other, but the language doesn't allow that.
     // Equivalent of + static.
-    public function concat(self $other): static;
+    public function concat(DictCollection $other): static;
 
     // True if both dicts have the same key/values in the same order.
-    public function equals(self $other): bool;
+    public function equals(DictCollection $other): bool;
 
     // $fn is callable(mixed $val, mixed $key)
     // The return type is $targetType, but that can't be expressed statically.
-    public function map(callable $fn, string $targetType): SeqCollection;
+    public function map(callable $fn, string $targetType): DictCollection;
+*/
 }
