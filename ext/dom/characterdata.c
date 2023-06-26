@@ -38,19 +38,13 @@ Since:
 int dom_characterdata_data_read(dom_object *obj, zval *retval)
 {
 	xmlNodePtr nodep = dom_object_get_node(obj);
-	xmlChar *content;
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
-	if ((content = xmlNodeGetContent(nodep)) != NULL) {
-		ZVAL_STRING(retval, (char *) content);
-		xmlFree(content);
-	} else {
-		ZVAL_EMPTY_STRING(retval);
-	}
+	php_dom_get_content_into_zval(nodep, retval, false);
 
 	return SUCCESS;
 }
@@ -86,7 +80,6 @@ Since:
 int dom_characterdata_length_read(dom_object *obj, zval *retval)
 {
 	xmlNodePtr nodep = dom_object_get_node(obj);
-	xmlChar *content;
 	long length = 0;
 
 	if (nodep == NULL) {
@@ -94,11 +87,8 @@ int dom_characterdata_length_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	content = xmlNodeGetContent(nodep);
-
-	if (content) {
-		length = xmlUTF8Strlen(content);
-		xmlFree(content);
+	if (nodep->content) {
+		length = xmlUTF8Strlen(nodep->content);
 	}
 
 	ZVAL_LONG(retval, length);
@@ -128,7 +118,7 @@ PHP_METHOD(DOMCharacterData, substringData)
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
-	cur = xmlNodeGetContent(node);
+	cur = node->content;
 	if (cur == NULL) {
 		RETURN_FALSE;
 	}
@@ -136,7 +126,6 @@ PHP_METHOD(DOMCharacterData, substringData)
 	length = xmlUTF8Strlen(cur);
 
 	if (offset < 0 || count < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count) || offset > length) {
-		xmlFree(cur);
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
@@ -146,7 +135,6 @@ PHP_METHOD(DOMCharacterData, substringData)
 	}
 
 	substring = xmlUTF8Strsub(cur, (int)offset, (int)count);
-	xmlFree(cur);
 
 	if (substring) {
 		RETVAL_STRING((char *) substring);
@@ -200,7 +188,7 @@ PHP_METHOD(DOMCharacterData, insertData)
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
-	cur = xmlNodeGetContent(node);
+	cur = node->content;
 	if (cur == NULL) {
 		RETURN_FALSE;
 	}
@@ -208,14 +196,12 @@ PHP_METHOD(DOMCharacterData, insertData)
 	length = xmlUTF8Strlen(cur);
 
 	if (offset < 0 || ZEND_LONG_INT_OVFL(offset) || offset > length) {
-		xmlFree(cur);
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
 
 	first = xmlUTF8Strndup(cur, (int)offset);
 	second = xmlUTF8Strsub(cur, (int)offset, length - (int)offset);
-	xmlFree(cur);
 
 	xmlNodeSetContent(node, first);
 	xmlNodeAddContent(node, (xmlChar *) arg);
@@ -247,7 +233,7 @@ PHP_METHOD(DOMCharacterData, deleteData)
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
-	cur = xmlNodeGetContent(node);
+	cur = node->content;
 	if (cur == NULL) {
 		RETURN_FALSE;
 	}
@@ -255,7 +241,6 @@ PHP_METHOD(DOMCharacterData, deleteData)
 	length = xmlUTF8Strlen(cur);
 
 	if (offset < 0 || count < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count) || offset > length) {
-		xmlFree(cur);
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
@@ -275,7 +260,6 @@ PHP_METHOD(DOMCharacterData, deleteData)
 
 	xmlNodeSetContent(node, substring);
 
-	xmlFree(cur);
 	xmlFree(second);
 	xmlFree(substring);
 
@@ -304,7 +288,7 @@ PHP_METHOD(DOMCharacterData, replaceData)
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
-	cur = xmlNodeGetContent(node);
+	cur = node->content;
 	if (cur == NULL) {
 		RETURN_FALSE;
 	}
@@ -312,7 +296,6 @@ PHP_METHOD(DOMCharacterData, replaceData)
 	length = xmlUTF8Strlen(cur);
 
 	if (offset < 0 || count < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count) || offset > length) {
-		xmlFree(cur);
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
@@ -336,7 +319,6 @@ PHP_METHOD(DOMCharacterData, replaceData)
 
 	xmlNodeSetContent(node, substring);
 
-	xmlFree(cur);
 	if (second) {
 		xmlFree(second);
 	}

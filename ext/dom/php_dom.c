@@ -1741,6 +1741,39 @@ void dom_remove_all_children(xmlNodePtr nodep)
 	}
 }
 
+void php_dom_get_content_into_zval(const xmlNode *nodep, zval *retval, bool default_is_null)
+{
+	ZEND_ASSERT(nodep != NULL);
+
+	if (nodep->type == XML_TEXT_NODE
+		|| nodep->type == XML_CDATA_SECTION_NODE
+		|| nodep->type == XML_PI_NODE
+		|| nodep->type == XML_COMMENT_NODE) {
+		char *str = (char * ) nodep->content;
+		if (str != NULL) {
+			ZVAL_STRING(retval, str);
+		} else {
+			goto failure;
+		}
+		return;
+	}
+
+	char *str = (char *) xmlNodeGetContent(nodep);
+
+	if (str != NULL) {
+		ZVAL_STRING(retval, str);
+		xmlFree(str);
+		return;
+	}
+
+failure:
+	if (default_is_null) {
+		ZVAL_NULL(retval);
+	} else {
+		ZVAL_EMPTY_STRING(retval);
+	}
+}
+
 static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int type, zval *rv) /* {{{ */
 {
 	if (UNEXPECTED(!offset)) {

@@ -124,7 +124,6 @@ Since:
 int dom_node_node_value_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
-	char *str = NULL;
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
@@ -139,25 +138,24 @@ int dom_node_node_value_read(dom_object *obj, zval *retval)
 		case XML_COMMENT_NODE:
 		case XML_CDATA_SECTION_NODE:
 		case XML_PI_NODE:
-			str = (char *) xmlNodeGetContent(nodep);
+			php_dom_get_content_into_zval(nodep, retval, true);
 			break;
-		case XML_NAMESPACE_DECL:
-			str = (char *) xmlNodeGetContent(nodep->children);
+		case XML_NAMESPACE_DECL: {
+			char *str = (char *) xmlNodeGetContent(nodep->children);
+			if (str != NULL) {
+				ZVAL_STRING(retval, str);
+				xmlFree(str);
+			} else {
+				ZVAL_NULL(retval);
+			}
 			break;
+		}
 		default:
-			str = NULL;
+			ZVAL_NULL(retval);
 			break;
-	}
-
-	if(str != NULL) {
-		ZVAL_STRING(retval, str);
-		xmlFree(str);
-	} else {
-		ZVAL_NULL(retval);
 	}
 
 	return SUCCESS;
-
 }
 
 int dom_node_node_value_write(dom_object *obj, zval *newval)
@@ -733,21 +731,13 @@ Since: DOM Level 3
 int dom_node_text_content_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
-	char *str = NULL;
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
-	str = (char *) xmlNodeGetContent(nodep);
-
-	if (str != NULL) {
-		ZVAL_STRING(retval, str);
-		xmlFree(str);
-	} else {
-		ZVAL_EMPTY_STRING(retval);
-	}
+	php_dom_get_content_into_zval(nodep, retval, false);
 
 	return SUCCESS;
 }
