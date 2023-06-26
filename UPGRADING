@@ -240,6 +240,9 @@ PHP 8.3 UPGRADE NOTES
 - Sockets:
   . Added socket_atmark to checks if the socket is OOB marked.
 
+- Zip:
+  . Added ZipArchive::setArchiveFlag and ZipArchive::getArchiveFlag methods.
+
 ========================================
 7. New Classes and Interfaces
 ========================================
@@ -299,6 +302,14 @@ PHP 8.3 UPGRADE NOTES
   . TCP_REPAIR (Linux only).
   . SO_REUSEPORT_LB (FreeBSD only).
   . IP_BIND_ADDRESS_NO_PORT (Linux only).
+
+- Zip:
+  . ZipArchive::ER_DATA_LENGTH (libzip >= 1.10)
+  . ZipArchive::ER_NOT_ALLOWED (libzip >= 1.10)
+  . ZipArchive::AFL_RDONLY (libzip >= 1.10)
+  . ZipArchive::AFL_IS_TORRENTZIP (libzip >= 1.10)
+  . ZipArchive::AFL_WANT_TORRENTZIP (libzip >= 1.10)
+  . ZipArchive::AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE (libzip >= 1.10)
 
 ========================================
 11. Changes to INI File Handling
