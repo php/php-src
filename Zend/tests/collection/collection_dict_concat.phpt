@@ -1,5 +1,7 @@
 --TEST--
-Concatenating a dictionary
+Collection: Dictionary: Concat
+--XFAIL--
+Unimplemented
 --FILE--
 <?php
 

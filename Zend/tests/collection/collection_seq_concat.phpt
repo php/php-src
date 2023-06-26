@@ -1,5 +1,7 @@
 --TEST--
-Sequence equality
+Collection: Sequence: Concat
+--XFAIL--
+Unimplemented
 --FILE--
 <?php
 
@@ -9,25 +11,22 @@ class Book {
 
 collection(Seq) Books(Book) {}
 
-
 $c1 = new Books();
 $c2 = new Books();
 
 $c1->add(new Book('Title 1'));
 $c1->add(new Book('Title 2'));
 
-$c2->add(new Book('Title 1'));
-$c2->add(new Book('Title 2'));
+$c2->add(new Book('Title 3'));
+$c2->add(new Book('Title 4'));
 
-// True
-var_dump($c1->equals($c2));
-var_dump($c1 == $c2);
+$c3 = $c->concat($c2);
 
-$c2[] = new Book('Title 3');
+// Four items.
+var_dump($c3);
 
-// False
-var_dump($c1->equals($c2));
-var_dump($c1 == $c2);
+// Still two items.
+var_dump($c1);
 
 ?>
 --EXPECTF--

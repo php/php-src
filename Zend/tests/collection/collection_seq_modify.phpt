@@ -1,5 +1,7 @@
 --TEST--
-Modifying a sequence
+Collection: Sequence: Modify
+--XFAIL--
+Unimplemented
 --FILE--
 <?php
 

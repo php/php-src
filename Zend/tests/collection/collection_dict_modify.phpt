@@ -1,5 +1,7 @@
 --TEST--
-Modifying a dictionary
+Collection: Dictionary: Modify
+--XFAIL--
+Unimplemented
 --FILE--
 <?php
 

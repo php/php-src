@@ -1,5 +1,7 @@
 --TEST--
-Mapping a sequence
+Collection: Sequence: map
+--XFAIL--
+Unimplemented
 --FILE--
 <?php
 

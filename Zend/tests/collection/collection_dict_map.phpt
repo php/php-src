@@ -1,5 +1,7 @@
 --TEST--
-Mapping a dictionary
+Collection: Dictionary: map
+--XFAIL--
+Unimplemented
 --FILE--
 <?php
 
