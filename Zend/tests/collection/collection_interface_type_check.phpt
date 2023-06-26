@@ -1,5 +1,5 @@
 --TEST--
-Collection: Type checking
+Collection: Type checking against interface
 --FILE--
 <?php
 collection(Dict) Articles(int => Article)

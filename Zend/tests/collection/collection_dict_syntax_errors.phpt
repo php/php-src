@@ -7,4 +7,4 @@ collection(Dict) Articles(Article)
 }
 ?>
 --EXPECTF--
-Fatal error: Collection dictionaries must have a key type defined in %scollection_9.php on line %d
+Fatal error: Collection dictionaries must have a key type defined in %s on line %d
