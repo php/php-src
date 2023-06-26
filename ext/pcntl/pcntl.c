@@ -1338,15 +1338,13 @@ static void pcntl_signal_handler(int signo, siginfo_t *siginfo, void *context)
 static void pcntl_signal_handler(int signo)
 #endif
 {
-	struct php_pcntl_pending_signal *psig;
-
-	psig = PCNTL_G(spares);
-	if (!psig) {
+	struct php_pcntl_pending_signal *psig_first = PCNTL_G(spares);
+	if (!psig_first) {
 		/* oops, too many signals for us to track, so we'll forget about this one */
 		return;
 	}
 
-	struct php_pcntl_pending_signal *psig_first = psig;
+	struct php_pcntl_pending_signal *psig = NULL;
 
 	/* Standard signals may be merged into a single one.
 	 * POSIX specifies that SIGCHLD has the si_pid field (https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/signal.h.html),
@@ -1365,13 +1363,14 @@ static void pcntl_signal_handler(int signo)
 				pid = waitpid(WAIT_ANY, &status, WNOHANG | WUNTRACED);
 			} while (pid <= 0 && errno == EINTR);
 			if (pid <= 0) {
-				if (UNEXPECTED(psig == psig_first)) {
-					/* Don't handle multiple, revert back to the single signal handling. */
-					goto single_signal;
+				if (UNEXPECTED(!psig)) {
+					/* The child might've been consumed by another thread and will be handled there. */
+					return;
 				}
 				break;
 			}
 
+			psig = psig ? psig->next : psig_first;
 			psig->signo = signo;
 
 #ifdef HAVE_STRUCT_SIGINFO_T
@@ -1379,14 +1378,12 @@ static void pcntl_signal_handler(int signo)
 			psig->siginfo.si_pid = pid;
 #endif
 
-			if (EXPECTED(psig->next)) {
-				psig = psig->next;
-			} else {
+			if (UNEXPECTED(!psig->next)) {
 				break;
 			}
 		}
 	} else {
-single_signal:;
+		psig = psig_first;
 		psig->signo = signo;
 
 #ifdef HAVE_STRUCT_SIGINFO_T
