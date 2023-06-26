@@ -140,7 +140,7 @@ int dom_node_node_value_read(dom_object *obj, zval *retval)
 		case XML_PI_NODE:
 			php_dom_get_content_into_zval(nodep, retval, true);
 			break;
-		case XML_NAMESPACE_DECL:
+		case XML_NAMESPACE_DECL: {
 			char *str = (char *) xmlNodeGetContent(nodep->children);
 			if (str != NULL) {
 				ZVAL_STRING(retval, str);
@@ -149,6 +149,7 @@ int dom_node_node_value_read(dom_object *obj, zval *retval)
 				ZVAL_NULL(retval);
 			}
 			break;
+		}
 		default:
 			ZVAL_NULL(retval);
 			break;
