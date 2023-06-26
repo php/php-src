@@ -31,7 +31,7 @@ extern zend_module_entry zip_module_entry;
 #define ZIP_OVERWRITE ZIP_TRUNCATE
 #endif
 
-#define PHP_ZIP_VERSION "1.21.1"
+#define PHP_ZIP_VERSION "1.22.0"
 
 #ifdef HAVE_LIBZIP_VERSION
 #define LIBZIP_VERSION_STR zip_libzip_version()
