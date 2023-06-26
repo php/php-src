@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 69d4e8a343f237a7192728c805fb3a98bb04ca38 */
+ * Stub hash: 28437141f4e401f2a50984e6eb3b5ee33e91e605 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -115,6 +115,16 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_setAr
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_ZipArchive_getArchiveComment, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_setArchiveFlag, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, flag, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_getArchiveFlag, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, flag, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -333,6 +343,8 @@ ZEND_METHOD(ZipArchive, renameIndex);
 ZEND_METHOD(ZipArchive, renameName);
 ZEND_METHOD(ZipArchive, setArchiveComment);
 ZEND_METHOD(ZipArchive, getArchiveComment);
+ZEND_METHOD(ZipArchive, setArchiveFlag);
+ZEND_METHOD(ZipArchive, getArchiveFlag);
 ZEND_METHOD(ZipArchive, setCommentIndex);
 ZEND_METHOD(ZipArchive, setCommentName);
 #if defined(HAVE_SET_MTIME)
@@ -425,6 +437,8 @@ static const zend_function_entry class_ZipArchive_methods[] = {
 	ZEND_ME(ZipArchive, renameName, arginfo_class_ZipArchive_renameName, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, setArchiveComment, arginfo_class_ZipArchive_setArchiveComment, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, getArchiveComment, arginfo_class_ZipArchive_getArchiveComment, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, setArchiveFlag, arginfo_class_ZipArchive_setArchiveFlag, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, getArchiveFlag, arginfo_class_ZipArchive_getArchiveFlag, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, setCommentIndex, arginfo_class_ZipArchive_setCommentIndex, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, setCommentName, arginfo_class_ZipArchive_setCommentName, ZEND_ACC_PUBLIC)
 #if defined(HAVE_SET_MTIME)
@@ -942,6 +956,54 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *const_ER_CANCELLED_name = zend_string_init_interned("ER_CANCELLED", sizeof("ER_CANCELLED") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_ER_CANCELLED_name, &const_ER_CANCELLED_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_ER_CANCELLED_name);
+#endif
+#if defined(ZIP_ER_DATA_LENGTH)
+
+	zval const_ER_DATA_LENGTH_value;
+	ZVAL_LONG(&const_ER_DATA_LENGTH_value, ZIP_ER_DATA_LENGTH);
+	zend_string *const_ER_DATA_LENGTH_name = zend_string_init_interned("ER_DATA_LENGTH", sizeof("ER_DATA_LENGTH") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_ER_DATA_LENGTH_name, &const_ER_DATA_LENGTH_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_ER_DATA_LENGTH_name);
+#endif
+#if defined(ZIP_ER_NOT_ALLOWED)
+
+	zval const_ER_NOT_ALLOWED_value;
+	ZVAL_LONG(&const_ER_NOT_ALLOWED_value, ZIP_ER_NOT_ALLOWED);
+	zend_string *const_ER_NOT_ALLOWED_name = zend_string_init_interned("ER_NOT_ALLOWED", sizeof("ER_NOT_ALLOWED") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_ER_NOT_ALLOWED_name, &const_ER_NOT_ALLOWED_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_ER_NOT_ALLOWED_name);
+#endif
+#if defined(ZIP_AFL_RDONLY)
+
+	zval const_AFL_RDONLY_value;
+	ZVAL_LONG(&const_AFL_RDONLY_value, ZIP_AFL_RDONLY);
+	zend_string *const_AFL_RDONLY_name = zend_string_init_interned("AFL_RDONLY", sizeof("AFL_RDONLY") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_AFL_RDONLY_name, &const_AFL_RDONLY_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_AFL_RDONLY_name);
+#endif
+#if defined(ZIP_AFL_IS_TORRENTZIP)
+
+	zval const_AFL_IS_TORRENTZIP_value;
+	ZVAL_LONG(&const_AFL_IS_TORRENTZIP_value, ZIP_AFL_IS_TORRENTZIP);
+	zend_string *const_AFL_IS_TORRENTZIP_name = zend_string_init_interned("AFL_IS_TORRENTZIP", sizeof("AFL_IS_TORRENTZIP") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_AFL_IS_TORRENTZIP_name, &const_AFL_IS_TORRENTZIP_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_AFL_IS_TORRENTZIP_name);
+#endif
+#if defined(ZIP_AFL_WANT_TORRENTZIP)
+
+	zval const_AFL_WANT_TORRENTZIP_value;
+	ZVAL_LONG(&const_AFL_WANT_TORRENTZIP_value, ZIP_AFL_WANT_TORRENTZIP);
+	zend_string *const_AFL_WANT_TORRENTZIP_name = zend_string_init_interned("AFL_WANT_TORRENTZIP", sizeof("AFL_WANT_TORRENTZIP") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_AFL_WANT_TORRENTZIP_name, &const_AFL_WANT_TORRENTZIP_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_AFL_WANT_TORRENTZIP_name);
+#endif
+#if defined(ZIP_AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE)
+
+	zval const_AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE_value;
+	ZVAL_LONG(&const_AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE_value, ZIP_AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE);
+	zend_string *const_AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE_name = zend_string_init_interned("AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE", sizeof("AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE_name, &const_AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE_name);
 #endif
 #if defined(ZIP_OPSYS_DEFAULT)
 
