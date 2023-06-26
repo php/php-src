@@ -140,6 +140,18 @@ static void zend_collection_register_func(zend_class_entry *ce, zend_known_strin
 	}
 }
 
+#define REGISTER_FUNCTION(name, php_handler, arginfo, argc) \
+	{ \
+		zend_internal_function *zif_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1); \
+		zif_function->handler = (php_handler); \
+		zif_function->function_name = ZSTR_KNOWN((name)); \
+		zif_function->fn_flags = fn_flags; \
+		zif_function->num_args = (argc); \
+		zif_function->required_num_args = (argc); \
+		zif_function->arg_info = (zend_internal_arg_info *) ((arginfo) + 1); \
+		zend_collection_register_func(ce, (name), zif_function); \
+	}
+
 
 void zend_collection_register_funcs(zend_class_entry *ce)
 {
@@ -147,24 +159,10 @@ void zend_collection_register_funcs(zend_class_entry *ce)
 
 	switch (ce->collection_data_structure) {
 		case ZEND_COLLECTION_SEQ:
-			zend_internal_function *seq_add_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
-			seq_add_function->handler = zend_collection_seq_add_func;
-			seq_add_function->function_name = ZSTR_KNOWN(ZEND_STR_ADD);
-			seq_add_function->fn_flags = fn_flags;
-			seq_add_function->num_args = 1;
-			seq_add_function->required_num_args = 1;
-			seq_add_function->arg_info = (zend_internal_arg_info *) (arginfo_class_SeqCollection_add + 1);
-			zend_collection_register_func(ce, ZEND_STR_ADD, seq_add_function);
+			REGISTER_FUNCTION(ZEND_STR_ADD, zend_collection_seq_add_func, arginfo_class_SeqCollection_add, 1);
 			break;
 		case ZEND_COLLECTION_DICT:
-			zend_internal_function *dict_add_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
-			dict_add_function->handler = zend_collection_dict_add_func;
-			dict_add_function->function_name = ZSTR_KNOWN(ZEND_STR_ADD);
-			dict_add_function->fn_flags = fn_flags;
-			dict_add_function->num_args = 2;
-			dict_add_function->required_num_args = 2;
-			dict_add_function->arg_info = (zend_internal_arg_info *) (arginfo_class_DictCollection_add + 1);
-			zend_collection_register_func(ce, ZEND_STR_ADD, dict_add_function);
+			REGISTER_FUNCTION(ZEND_STR_ADD, zend_collection_dict_add_func, arginfo_class_DictCollection_add, 2);
 			break;
 	}
 }
