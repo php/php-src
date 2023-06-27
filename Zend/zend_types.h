@@ -171,6 +171,9 @@ typedef struct {
 	(((t).type_mask & _ZEND_TYPE_MASK) != 0)
 
 
+/* To determine if the type resolved type was written with "self" or "parent" */
+#define ZEND_TYPE_IS_RELATIVE_TYPE(t) \
+	((((t).type_mask) & _ZEND_TYPE_RELATIVE_TYPE_MASK) != 0)
 /* To determine if the type resolved type was written with "self" */
 #define ZEND_TYPE_IS_RELATIVE_SELF(t) \
 	((((t).type_mask) & _ZEND_TYPE_SELF_BIT) != 0)
