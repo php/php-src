@@ -1962,7 +1962,6 @@ static zend_type zend_resolve_name_type(zend_type type, const zend_class_entry *
 		if (!ce->parent) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use trait which has \"parent\" as a type when current class scope has no parent");
-			return (zend_type) ZEND_TYPE_INIT_NONE(0);
 		}
 		zend_type resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(ce->parent->name), /* allows_null */ false, /* extra_flags */ ZEND_TYPE_FULL_MASK(type));
 		return resolved_type;
