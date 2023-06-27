@@ -20,11 +20,11 @@
 #ifndef ZEND_GC_H
 #define ZEND_GC_H
 
+#include "zend_hrtime.h"
+
 #ifndef GC_BENCH
 # define GC_BENCH 0
 #endif
-
-#include "zend_hrtime.h"
 
 BEGIN_EXTERN_C()
 

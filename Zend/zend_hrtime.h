@@ -18,6 +18,9 @@
 #ifndef ZEND_HRTIME_H
 #define ZEND_HRTIME_H
 
+#include "zend_portability.h"
+#include "zend_types.h"
+
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -52,9 +55,6 @@
 #endif
 
 #define ZEND_HRTIME_AVAILABLE (ZEND_HRTIME_PLATFORM_POSIX || ZEND_HRTIME_PLATFORM_WINDOWS || ZEND_HRTIME_PLATFORM_APPLE || ZEND_HRTIME_PLATFORM_HPUX || ZEND_HRTIME_PLATFORM_AIX)
-
-#include "zend_portability.h"
-#include "zend_types.h"
 
 BEGIN_EXTERN_C()
 
