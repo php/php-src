@@ -1,5 +1,5 @@
 --TEST--
-bcadd() function with zero
+bcadd() function - tests with number zero
 --EXTENSIONS--
 bcmath
 --INI--
@@ -15,7 +15,7 @@ foreach($scales as $scale) {
 	foreach($basicNumbers as $firstNumber) {
     	echo "Number \"$firstNumber\" (scale $scale)\n";
 		foreach(array_merge($basicNumbers, $allTestNumbers) as $secondNumber) {
-			echo str_pad($firstNumber,6, ' ', STR_PAD_LEFT), " + ", str_pad($secondNumber,30), ' = ' ,bcadd($firstNumber, $secondNumber, $scale),"\n";
+			echo str_pad($firstNumber, 6, ' ', STR_PAD_LEFT), " + ", str_pad($secondNumber, 30), ' = ', bcadd($firstNumber, $secondNumber, $scale),"\n";
 		}
 		echo "\n";
 	}

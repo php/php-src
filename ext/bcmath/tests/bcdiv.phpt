@@ -1,5 +1,5 @@
 --TEST--
-bcdiv() function
+bcdiv() function - basic tests
 --EXTENSIONS--
 bcmath
 --INI--

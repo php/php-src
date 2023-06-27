@@ -1,5 +1,5 @@
 --TEST--
-bcadd() function
+bcadd() function - basic tests
 --EXTENSIONS--
 bcmath
 --INI--
