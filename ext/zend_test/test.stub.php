@@ -25,6 +25,14 @@ namespace {
 
     /** @alias _ZendTestClassAlias */
     class _ZendTestClass implements _ZendTestInterface {
+        public const mixed TYPED_CLASS_CONST1 = [];
+        public const int|array TYPED_CLASS_CONST2 = 42;
+        /**
+         * @var int
+         * @cvalue 1
+         */
+        public const int|string TYPED_CLASS_CONST3 = UNKNOWN;
+
         /** @var mixed */
         public static $_StaticProp;
         public static int $staticIntProp = 123;

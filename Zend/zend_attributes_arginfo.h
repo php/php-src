@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ab85fd8b8d2b1f1d2bc6c72c9663b112b8d6d2f8 */
+ * Stub hash: 32f0458c20f04099e353a8300ffb19e40bc38f69 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -83,49 +83,49 @@ static zend_class_entry *register_class_Attribute(void)
 	zval const_TARGET_CLASS_value;
 	ZVAL_LONG(&const_TARGET_CLASS_value, ZEND_ATTRIBUTE_TARGET_CLASS);
 	zend_string *const_TARGET_CLASS_name = zend_string_init_interned("TARGET_CLASS", sizeof("TARGET_CLASS") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_TARGET_CLASS_name, &const_TARGET_CLASS_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_TARGET_CLASS_name, &const_TARGET_CLASS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TARGET_CLASS_name);
 
 	zval const_TARGET_FUNCTION_value;
 	ZVAL_LONG(&const_TARGET_FUNCTION_value, ZEND_ATTRIBUTE_TARGET_FUNCTION);
 	zend_string *const_TARGET_FUNCTION_name = zend_string_init_interned("TARGET_FUNCTION", sizeof("TARGET_FUNCTION") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_TARGET_FUNCTION_name, &const_TARGET_FUNCTION_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_TARGET_FUNCTION_name, &const_TARGET_FUNCTION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TARGET_FUNCTION_name);
 
 	zval const_TARGET_METHOD_value;
 	ZVAL_LONG(&const_TARGET_METHOD_value, ZEND_ATTRIBUTE_TARGET_METHOD);
 	zend_string *const_TARGET_METHOD_name = zend_string_init_interned("TARGET_METHOD", sizeof("TARGET_METHOD") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_TARGET_METHOD_name, &const_TARGET_METHOD_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_TARGET_METHOD_name, &const_TARGET_METHOD_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TARGET_METHOD_name);
 
 	zval const_TARGET_PROPERTY_value;
 	ZVAL_LONG(&const_TARGET_PROPERTY_value, ZEND_ATTRIBUTE_TARGET_PROPERTY);
 	zend_string *const_TARGET_PROPERTY_name = zend_string_init_interned("TARGET_PROPERTY", sizeof("TARGET_PROPERTY") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_TARGET_PROPERTY_name, &const_TARGET_PROPERTY_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_TARGET_PROPERTY_name, &const_TARGET_PROPERTY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TARGET_PROPERTY_name);
 
 	zval const_TARGET_CLASS_CONSTANT_value;
 	ZVAL_LONG(&const_TARGET_CLASS_CONSTANT_value, ZEND_ATTRIBUTE_TARGET_CLASS_CONST);
 	zend_string *const_TARGET_CLASS_CONSTANT_name = zend_string_init_interned("TARGET_CLASS_CONSTANT", sizeof("TARGET_CLASS_CONSTANT") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_TARGET_CLASS_CONSTANT_name, &const_TARGET_CLASS_CONSTANT_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_TARGET_CLASS_CONSTANT_name, &const_TARGET_CLASS_CONSTANT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TARGET_CLASS_CONSTANT_name);
 
 	zval const_TARGET_PARAMETER_value;
 	ZVAL_LONG(&const_TARGET_PARAMETER_value, ZEND_ATTRIBUTE_TARGET_PARAMETER);
 	zend_string *const_TARGET_PARAMETER_name = zend_string_init_interned("TARGET_PARAMETER", sizeof("TARGET_PARAMETER") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_TARGET_PARAMETER_name, &const_TARGET_PARAMETER_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_TARGET_PARAMETER_name, &const_TARGET_PARAMETER_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TARGET_PARAMETER_name);
 
 	zval const_TARGET_ALL_value;
 	ZVAL_LONG(&const_TARGET_ALL_value, ZEND_ATTRIBUTE_TARGET_ALL);
 	zend_string *const_TARGET_ALL_name = zend_string_init_interned("TARGET_ALL", sizeof("TARGET_ALL") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_TARGET_ALL_name, &const_TARGET_ALL_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_TARGET_ALL_name, &const_TARGET_ALL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TARGET_ALL_name);
 
 	zval const_IS_REPEATABLE_value;
 	ZVAL_LONG(&const_IS_REPEATABLE_value, ZEND_ATTRIBUTE_IS_REPEATABLE);
 	zend_string *const_IS_REPEATABLE_name = zend_string_init_interned("IS_REPEATABLE", sizeof("IS_REPEATABLE") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_IS_REPEATABLE_name, &const_IS_REPEATABLE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_IS_REPEATABLE_name, &const_IS_REPEATABLE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_IS_REPEATABLE_name);
 
 	zval property_flags_default_value;
