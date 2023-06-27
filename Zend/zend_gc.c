@@ -448,6 +448,7 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 	gc_globals->collector_time = 0;
 	gc_globals->dtor_time = 0;
 	gc_globals->free_time = 0;
+	gc_globals->activated_at = 0;
 
 #if GC_BENCH
 	gc_globals->root_buf_length = 0;
