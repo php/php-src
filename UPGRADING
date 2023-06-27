@@ -371,3 +371,9 @@ PHP 8.3 UPGRADE NOTES
 
 - Standard:
   . The file() flags error check is now about 7% faster.
+
+- DOM:
+  . Looping over a DOMNodeList now uses caching. Therefore requesting items no
+    longer takes quadratic time by default.
+  . Getting text content from nodes now avoids an allocation, resulting in a
+    performance gain.
