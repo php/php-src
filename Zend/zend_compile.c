@@ -6791,14 +6791,11 @@ static void zend_is_type_list_redundant_by_single_type(zend_type_list *type_list
 		}
 		if (zend_string_equals_ci(ZEND_TYPE_NAME(type_list->types[i]), ZEND_TYPE_NAME(type))) {
 			zend_string *single_type_str = zend_type_to_string(type);
-			if (
-				ZEND_TYPE_IS_RELATIVE_SELF(type)
-				|| ZEND_TYPE_IS_RELATIVE_PARENT(type)
-			) {
+			if (ZEND_TYPE_IS_RELATIVE_TYPE(type)) {
 				if ( (
 					ZEND_TYPE_FULL_MASK(type)
 					& ZEND_TYPE_FULL_MASK(type_list->types[i])
-					& (_ZEND_TYPE_SELF_BIT|_ZEND_TYPE_PARENT_BIT)) != 0
+					& (_ZEND_TYPE_RELATIVE_TYPE_MASK)) != 0
 				) {
 					zend_error_noreturn(E_COMPILE_ERROR, "Duplicate type %s is redundant", ZSTR_VAL(single_type_str));
 				}
@@ -6807,10 +6804,7 @@ static void zend_is_type_list_redundant_by_single_type(zend_type_list *type_list
 				zend_error_noreturn(E_COMPILE_ERROR, "%s resolves to %s which is redundant",
 					ZSTR_VAL(single_type_str), ZSTR_VAL(ZEND_TYPE_NAME(type))
 				);
-			} else if (
-				ZEND_TYPE_IS_RELATIVE_SELF(type_list->types[i])
-				|| ZEND_TYPE_IS_RELATIVE_PARENT(type_list->types[i])
-			) {
+			} else if (ZEND_TYPE_IS_RELATIVE_TYPE(type_list->types[i])) {
 				/* zend_type_to_string() will return "self" or "parent" where the resolved type is stored in
 				 * ZEND_TYPE_NAME() */
 				zend_error_noreturn(E_COMPILE_ERROR, "%s resolves to %s which is redundant",

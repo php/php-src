@@ -2003,7 +2003,7 @@ static zend_type zend_resolve_single_type(zend_type type, const zend_class_entry
 		}
 
 		zend_type resolved_type = zend_resolve_name_type(single_type, ce);
-		if (zend_was_type_resolved(type, resolved_type)) {
+		if (zend_was_type_resolved(single_type, resolved_type)) {
 			if (!has_resolved_type) {
 				const zend_type_list *old_union_type_list = ZEND_TYPE_LIST(type);
 				union_type_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(old_union_type_list->num_types));

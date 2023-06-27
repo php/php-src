@@ -1367,9 +1367,9 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 
 typedef enum {
 	NAMED_TYPE = 0,
-	RELATIVE_TYPE = 3,
 	UNION_TYPE = 1,
-	INTERSECTION_TYPE = 2
+	INTERSECTION_TYPE = 2,
+	RELATIVE_TYPE = 3
 } reflection_type_kind;
 
 /* For backwards compatibility reasons, we need to return T|null style unions
@@ -1397,7 +1397,7 @@ static reflection_type_kind get_type_kind(zend_type type) {
 		}
 
 		ZEND_ASSERT(ZEND_TYPE_HAS_NAME(type));
-		if (ZEND_TYPE_IS_RELATIVE_SELF(type) || ZEND_TYPE_IS_RELATIVE_PARENT(type)) {
+		if (ZEND_TYPE_IS_RELATIVE_TYPE(type)) {
 			return RELATIVE_TYPE;
 		}
 		return NAMED_TYPE;
@@ -1410,7 +1410,6 @@ static reflection_type_kind get_type_kind(zend_type type) {
 		return UNION_TYPE;
 	}
 
-	/* "static" is a relative type */
 	if (type_mask_without_null == MAY_BE_STATIC) {
 		return RELATIVE_TYPE;
 	}
@@ -3189,7 +3188,7 @@ ZEND_METHOD(ReflectionRelativeClassType, resolveToNamedType)
 		}
 		resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(intern->ce->name, allows_null, /*extra flags */ 0);
 	} else {
-		ZEND_ASSERT(ZEND_TYPE_IS_RELATIVE_SELF(param->type) || ZEND_TYPE_IS_RELATIVE_PARENT(param->type));
+		ZEND_ASSERT(ZEND_TYPE_IS_RELATIVE_TYPE(param->type));
 		ZEND_ASSERT(ZEND_TYPE_HAS_NAME(param->type));
 		resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(ZEND_TYPE_NAME(param->type), allows_null, /*extra flags */ 0);
 	}
