@@ -19,18 +19,18 @@ $c->add(new Book('Title 2'));
 // Should have 2 items.
 var_dump($c);
 
-$c->remove(new Book('Title 1'));
+$c->remove(0);
 
 // Should have one item.
 var_dump($c);
 
 // Should be false
-var_dump($c->has(new Book('Title 1')));
-var_dump(isset($c[new Book('Title 1')]));
+var_dump($c->has(0));
+var_dump(isset($c[0]));
 
 // Should be true
-var_dump($c->has(new Book('Title 2')));
-var_dump(isset($c[new Book('Title 2')]));
+var_dump($c->has(1));
+var_dump(isset($c[1]));
 
 $c2 = $c->with(new Book('Title 3'));
 
@@ -40,7 +40,7 @@ var_dump($c);
 // But this has 2 items.
 var_dump($c2);
 
-$c3 = $c2->without(new Book('Title 2'));
+$c3 = $c2->without(1);
 
 // Still two items.
 var_dump($c2);
@@ -58,5 +58,11 @@ unset($c3[0]);
 // Empty
 var_dump($c3);
 
+// Throws OutOfBoundsException
+try {
+	$c3->set(42, new Book('Title 1'));
+} catch (OutOfBoundsException $e) {
+	echo $e->getClass, ': ', $e->getMessage(), "\n";
+}
 ?>
 --EXPECTF--

@@ -98,6 +98,9 @@ void zend_collection_register_handlers(zend_class_entry *ce)
 
 static void seq_add_item(zend_object *object, zval *value);
 static void dict_add_item(zend_object *object, zval *key, zval *value);
+int zend_collection_has_item(zend_object *object, zval *offset);
+zval *zend_collection_read_item(zend_object *object, zval *offset);
+void zend_collection_unset_item(zend_object *object, zval *offset);
 
 static ZEND_NAMED_FUNCTION(zend_collection_seq_add_func)
 {
@@ -108,7 +111,47 @@ static ZEND_NAMED_FUNCTION(zend_collection_seq_add_func)
 	ZEND_PARSE_PARAMETERS_END();
 
 	seq_add_item(Z_OBJ_P(ZEND_THIS), value);
+
+	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
 }
+
+static ZEND_NAMED_FUNCTION(zend_collection_seq_remove_func)
+{
+	zval *index;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_collection_unset_item(Z_OBJ_P(ZEND_THIS), index);
+
+	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
+}
+
+static ZEND_NAMED_FUNCTION(zend_collection_seq_has_func)
+{
+	zval *index;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(zend_collection_has_item(Z_OBJ_P(ZEND_THIS), index));
+}
+
+static ZEND_NAMED_FUNCTION(zend_collection_seq_get_func)
+{
+	zval *index, *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	value = zend_collection_read_item(Z_OBJ_P(ZEND_THIS), index);
+
+	RETURN_COPY_VALUE(value);
+}
+
 
 static ZEND_NAMED_FUNCTION(zend_collection_dict_add_func)
 {
@@ -160,6 +203,12 @@ void zend_collection_register_funcs(zend_class_entry *ce)
 	switch (ce->collection_data_structure) {
 		case ZEND_COLLECTION_SEQ:
 			REGISTER_FUNCTION(ZEND_STR_ADD, zend_collection_seq_add_func, arginfo_class_SeqCollection_add, 1);
+			REGISTER_FUNCTION(ZEND_STR_REMOVE, zend_collection_seq_remove_func, arginfo_class_SeqCollection_remove, 1);
+			REGISTER_FUNCTION(ZEND_STR_HAS, zend_collection_seq_has_func, arginfo_class_SeqCollection_has, 1);
+			REGISTER_FUNCTION(ZEND_STR_GET, zend_collection_seq_get_func, arginfo_class_SeqCollection_get, 1);
+			REGISTER_FUNCTION(ZEND_STR_WITH, zend_collection_seq_with_func, arginfo_class_SeqCollection_with, 1);
+			REGISTER_FUNCTION(ZEND_STR_WITHOUT, zend_collection_seq_without_func, arginfo_class_SeqCollection_without, 1);
+			REGISTER_FUNCTION(ZEND_STR_SET, zend_collection_seq_set_func, arginfo_class_SeqCollection_set, 2);
 			break;
 		case ZEND_COLLECTION_DICT:
 			REGISTER_FUNCTION(ZEND_STR_ADD, zend_collection_dict_add_func, arginfo_class_DictCollection_add, 2);

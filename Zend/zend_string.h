@@ -634,6 +634,12 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_COUNT,                  "count") \
 	_(ZEND_STR_SENSITIVEPARAMETER,     "SensitiveParameter") \
 	_(ZEND_STR_ADD,                    "add") \
+	_(ZEND_STR_REMOVE,                 "remove") \
+	_(ZEND_STR_HAS,                    "has") \
+	_(ZEND_STR_GET,                    "get") \
+	_(ZEND_STR_SET,                    "set") \
+	_(ZEND_STR_WITH,                   "with") \
+	_(ZEND_STR_WITHOUT,                "without") \
 	_(ZEND_STR_CONST_EXPR_PLACEHOLDER, "[constant expression]") \
 	_(ZEND_STR_DEPRECATED,             "Deprecated") \
 	_(ZEND_STR_SINCE,                  "since") \

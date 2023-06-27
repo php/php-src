@@ -6,13 +6,11 @@
 // This sounds like what namespaces are good for.
 interface SeqCollection
 {
-    // IMO, this method should return $this so it's more conveniently chainable.
-    public function add(mixed $value) : void;
-/*
-    // Modifies in place.  Equivalent of -=.
-    public function remove(mixed $value) : static;
+    public function add(mixed $value) : static;
 
-    public function has(mixed $value) : bool;
+    public function remove(int $index) : static;
+
+    public function has(int $value) : bool;
 
     public function get(int $index) : mixed;
 
@@ -20,11 +18,11 @@ interface SeqCollection
     public function with(mixed $value) : static;
 
     // Returns new object with the value removed if it was there.  Equivalent of -
-    public function without(mixed $value) : static;
+    public function without(int $index) : static;
 
     // returns self.  Throws OutOfBoundsException if $index is not yet defined.
     public function set(int $index, mixed $value): static;
-
+/*
     // This should really be static $other, but the language doesn't allow that.
     // Equivalent of + static.
     public function concat(SeqCollection $other): static;

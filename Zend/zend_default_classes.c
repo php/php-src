@@ -28,6 +28,7 @@
 #include "zend_weakrefs.h"
 #include "zend_enum.h"
 #include "zend_fibers.h"
+#include "zend_collection.h"
 
 ZEND_API void zend_register_default_classes(void)
 {
