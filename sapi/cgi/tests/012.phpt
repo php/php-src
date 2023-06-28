@@ -14,7 +14,7 @@ function run_and_output($cmd) {
     }
     exec($cmd, $output, $exit_code);
     print_r($output);
-    var_dump($exit_code == 0);
+    var_dump($exit_code);
 }
 
 $php = get_cgi_path();
@@ -33,9 +33,6 @@ echo "hi";
 
 file_put_contents($filename_good, $code);
 
-run_and_output("$php -n -l $filename_good_escaped $filename_good_escaped");
-run_and_output("$php -n -l $filename_good_escaped some.unknown $filename_good_escaped");
-
 $code = '
 <?php
 
@@ -48,6 +45,8 @@ class test
 
 file_put_contents($filename_bad, $code);
 
+run_and_output("$php -n -l $filename_good_escaped $filename_good_escaped");
+run_and_output("$php -n -l $filename_good_escaped some.unknown $filename_good_escaped");
 run_and_output("$php -n -l $filename_good_escaped $filename_bad_escaped $filename_good_escaped");
 run_and_output("$php -n -l $filename_bad_escaped $filename_bad_escaped");
 run_and_output("$php -n -l $filename_bad_escaped some.unknown $filename_bad_escaped");
@@ -66,13 +65,13 @@ Array
     [0] => No syntax errors detected in %s012_good.test.php
     [1] => No syntax errors detected in %s012_good.test.php
 )
-bool(true)
+int(0)
 Array
 (
     [0] => No syntax errors detected in %s012_good.test.php
     [1] => No input file specified.
 )
-bool(false)
+int(255)
 Array
 (
     [0] => No syntax errors detected in %s012_good.test.php
@@ -81,7 +80,7 @@ Array
     [3] => Errors parsing %s012_bad.test.php
     [4] => No syntax errors detected in %s012_good.test.php
 )
-bool(false)
+int(255)
 Array
 (
     [0] => <br />
@@ -91,7 +90,7 @@ Array
     [4] => <b>Parse error</b>:  syntax error, unexpected token &quot;private&quot;, expecting &quot;{&quot; in <b>%s012_bad.test.php</b> on line <b>5</b><br />
     [5] => Errors parsing %s012_bad.test.php
 )
-bool(false)
+int(255)
 Array
 (
     [0] => <br />
@@ -99,7 +98,7 @@ Array
     [2] => Errors parsing %s012_bad.test.php
     [3] => No input file specified.
 )
-bool(false)
+int(255)
 Array
 (
     [0] => <br />
@@ -110,5 +109,5 @@ Array
     [5] => Errors parsing %s012_bad.test.php
     [6] => No input file specified.
 )
-bool(false)
+int(255)
 Done

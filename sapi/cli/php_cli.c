@@ -1131,14 +1131,14 @@ out:
 	}
 	if (request_started) {
 		php_request_shutdown((void *) 0);
+		request_started = 0;
 	}
 	if (translated_path) {
 		free(translated_path);
+		translated_path = NULL;
 	}
 	if (behavior == PHP_MODE_LINT && argc > php_optind && strcmp(argv[php_optind],"--")) {
 		script_file = NULL;
-		request_started = 0;
-		translated_path = NULL;
 		goto do_repeat;
 	}
 	/* Don't repeat fork()ed processes. */
