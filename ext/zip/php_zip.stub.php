@@ -114,11 +114,15 @@ class ZipArchive implements Countable
      * @cvalue ZIP_FL_UNCHANGED
      */
     public const FL_UNCHANGED = UNKNOWN;
+/* deprecated in libzip 1.10.0 */
+#ifdef ZIP_FL_RECOMPRESS
     /**
      * @var int
      * @cvalue ZIP_FL_RECOMPRESS
+     * @deprecated
      */
     public const FL_RECOMPRESS = UNKNOWN;
+#endif
     /**
      * @var int
      * @cvalue ZIP_FL_ENCRYPTED

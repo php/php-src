@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 28437141f4e401f2a50984e6eb3b5ee33e91e605 */
+ * Stub hash: 65df723218ea5ca470163ebaf540ea5bde541824 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -563,12 +563,14 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *const_FL_UNCHANGED_name = zend_string_init_interned("FL_UNCHANGED", sizeof("FL_UNCHANGED") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_FL_UNCHANGED_name, &const_FL_UNCHANGED_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_FL_UNCHANGED_name);
+#if defined(ZIP_FL_RECOMPRESS)
 
 	zval const_FL_RECOMPRESS_value;
 	ZVAL_LONG(&const_FL_RECOMPRESS_value, ZIP_FL_RECOMPRESS);
 	zend_string *const_FL_RECOMPRESS_name = zend_string_init_interned("FL_RECOMPRESS", sizeof("FL_RECOMPRESS") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_FL_RECOMPRESS_name, &const_FL_RECOMPRESS_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_class_constant_ex(class_entry, const_FL_RECOMPRESS_name, &const_FL_RECOMPRESS_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL);
 	zend_string_release(const_FL_RECOMPRESS_name);
+#endif
 
 	zval const_FL_ENCRYPTED_value;
 	ZVAL_LONG(&const_FL_ENCRYPTED_value, ZIP_FL_ENCRYPTED);
