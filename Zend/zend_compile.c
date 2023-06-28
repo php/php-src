@@ -6686,8 +6686,6 @@ static zend_type zend_compile_typename_ex(
 			/* Inform that the type list is a DNF type */
 			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_UNION_BIT;
 			ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
-
-			*forced_allow_null = true;
 		} else {
 			ZEND_TYPE_SET_LIST(type, type_list);
 			/* Inform that the type list is an intersection type */
