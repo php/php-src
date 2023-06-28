@@ -28,6 +28,7 @@ INSERT INTO `test` (`name`) VALUES ('test1');
 SQL);
 
 $pdo2 = MySQLPDOTest::factory();
+$pdo2->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 $stmt = $pdo2->prepare('select * from test');
 var_dump('PDO-1:', $stmt->execute(), $stmt->fetchAll());
 
