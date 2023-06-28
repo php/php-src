@@ -28,6 +28,9 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug GH-11529 (Crash after dealing with an Apache request). (nielsdos)
 
+- Standard:
+  . Fix serialization of RC1 objects appearing in object graph twice. (ilutov)
+
 - zip:
   . zip extension version 1.22.0 for libzip 1.10.0. (Remi)
   . add new error macros (ER_DATA_LENGTH and ER_NOT_ALLOWED). (Remi)
