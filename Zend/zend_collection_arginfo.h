@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 35953abbd50e7a1021de43de279ec0e3882b6c2c */
+ * Stub hash: a3806b60e4a436709ef26623ef4f94afb737b90f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SeqCollection_add, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
@@ -26,10 +26,28 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SeqCollection_set, 0, 2, I
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DictCollection_add, 0, 2, IS_VOID, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DictCollection_add, 0, 2, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DictCollection_remove, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DictCollection_has, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DictCollection_get, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_DictCollection_with arginfo_class_DictCollection_add
+
+#define arginfo_class_DictCollection_without arginfo_class_DictCollection_remove
+
+#define arginfo_class_DictCollection_set arginfo_class_DictCollection_add
 
 
 
@@ -48,6 +66,12 @@ static const zend_function_entry class_SeqCollection_methods[] = {
 
 static const zend_function_entry class_DictCollection_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DictCollection, add, arginfo_class_DictCollection_add, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DictCollection, remove, arginfo_class_DictCollection_remove, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DictCollection, has, arginfo_class_DictCollection_has, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DictCollection, get, arginfo_class_DictCollection_get, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DictCollection, with, arginfo_class_DictCollection_with, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DictCollection, without, arginfo_class_DictCollection_without, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DictCollection, set, arginfo_class_DictCollection_set, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
 

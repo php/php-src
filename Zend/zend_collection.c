@@ -218,6 +218,98 @@ static ZEND_NAMED_FUNCTION(zend_collection_dict_add_func)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_collection_add_item(Z_OBJ_P(ZEND_THIS), key, value);
+
+	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
+}
+
+static ZEND_NAMED_FUNCTION(zend_collection_dict_remove_func)
+{
+	zval *index;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_collection_unset_item(Z_OBJ_P(ZEND_THIS), index);
+
+	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
+}
+
+static ZEND_NAMED_FUNCTION(zend_collection_dict_has_func)
+{
+	zval *index;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(zend_collection_has_item(Z_OBJ_P(ZEND_THIS), index));
+}
+
+static ZEND_NAMED_FUNCTION(zend_collection_dict_get_func)
+{
+	zval *index, *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	value = zend_collection_read_item(Z_OBJ_P(ZEND_THIS), index);
+
+	RETURN_COPY_VALUE(value);
+}
+
+static ZEND_NAMED_FUNCTION(zend_collection_dict_with_func)
+{
+	zval *index, *value;
+	zend_object *clone;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(index)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	clone = zend_objects_clone_obj(Z_OBJ_P(ZEND_THIS));
+
+	zend_collection_add_item(clone, index, value);
+
+	RETURN_OBJ(clone);
+}
+
+static ZEND_NAMED_FUNCTION(zend_collection_dict_without_func)
+{
+	zval *index;
+	zend_object *clone;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	clone = zend_objects_clone_obj(Z_OBJ_P(ZEND_THIS));
+
+	zend_collection_unset_item(clone, index);
+
+	RETURN_OBJ(clone);
+}
+
+static ZEND_NAMED_FUNCTION(zend_collection_dict_update_func)
+{
+	zval *index;
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(index)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!zend_collection_has_item(Z_OBJ_P(ZEND_THIS), index)) {
+		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Index '%ld' does not exist in the sequence", Z_LVAL_P(index));
+		return;
+	}
+
+	zend_collection_update_item(Z_OBJ_P(ZEND_THIS), index, value);
+
+	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
 }
 
 static void zend_collection_register_func(zend_class_entry *ce, zend_known_string_id name_id, zend_internal_function *zif)
@@ -267,6 +359,12 @@ void zend_collection_register_funcs(zend_class_entry *ce)
 			break;
 		case ZEND_COLLECTION_DICT:
 			REGISTER_FUNCTION(ZEND_STR_ADD, zend_collection_dict_add_func, arginfo_class_DictCollection_add, 2);
+			REGISTER_FUNCTION(ZEND_STR_REMOVE, zend_collection_dict_remove_func, arginfo_class_DictCollection_remove, 1);
+			REGISTER_FUNCTION(ZEND_STR_HAS, zend_collection_dict_has_func, arginfo_class_DictCollection_has, 1);
+			REGISTER_FUNCTION(ZEND_STR_GET, zend_collection_dict_get_func, arginfo_class_DictCollection_get, 1);
+			REGISTER_FUNCTION(ZEND_STR_WITH, zend_collection_dict_with_func, arginfo_class_DictCollection_with, 2);
+			REGISTER_FUNCTION(ZEND_STR_WITHOUT, zend_collection_dict_without_func, arginfo_class_DictCollection_without, 1);
+			REGISTER_FUNCTION(ZEND_STR_SET, zend_collection_dict_update_func, arginfo_class_DictCollection_set, 2);
 			break;
 	}
 }
@@ -333,12 +431,14 @@ static void dict_add_or_update_item(zend_object *object, zval *offset, zval *val
 	if (ce->collection_key_type == IS_LONG && Z_TYPE_P(offset) == IS_LONG) {
 		create_array_if_needed(ce, object);
 		value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
+		SEPARATE_ARRAY(value_prop);
 		Z_ADDREF_P(value);
 		add_index_zval(value_prop, Z_LVAL_P(offset), value);
 		return;
 	} else if (ce->collection_key_type == IS_STRING && Z_TYPE_P(offset) == IS_STRING) {
 		create_array_if_needed(ce, object);
 		value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
+		SEPARATE_ARRAY(value_prop);
 		Z_ADDREF_P(value);
 		add_assoc_zval_ex(value_prop, Z_STRVAL_P(offset), Z_STRLEN_P(offset), value);
 		return;

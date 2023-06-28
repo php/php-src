@@ -38,8 +38,8 @@ interface SeqCollection
 
 interface DictCollection
 {
-    public function add(mixed $key, mixed $value) : void;
-/*
+    public function add(mixed $key, mixed $value) : static;
+
     public function remove(mixed $key) : static;
 
     public function has(mixed $key) : bool;
@@ -54,7 +54,7 @@ interface DictCollection
 
     // returns self.  Overwrites existing value if already set.
     public function set(mixed $key, mixed $value): static;
-
+/*
     // This should really be static $other, but the language doesn't allow that.
     // Equivalent of + static.
     public function concat(DictCollection $other): static;
