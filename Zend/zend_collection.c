@@ -20,8 +20,11 @@
 #include "zend_API.h"
 #include "zend_collection_arginfo.h"
 #include "zend_execute.h"
+#include "zend_exceptions.h"
 #include "zend_extensions.h"
 #include "zend_observer.h"
+
+#include "ext/spl/spl_exceptions.h"
 
 ZEND_API zend_class_entry *zend_ce_seq_collection;
 ZEND_API zend_class_entry *zend_ce_dict_collection;
@@ -96,8 +99,8 @@ void zend_collection_register_handlers(zend_class_entry *ce)
 	ce->default_object_handlers = &zend_dict_collection_object_handlers;
 }
 
-static void seq_add_item(zend_object *object, zval *value);
-static void dict_add_item(zend_object *object, zval *key, zval *value);
+void zend_collection_add_item(zend_object *object, zval *offset, zval *value);
+void zend_collection_update_item(zend_object *object, zval *offset, zval *value);
 int zend_collection_has_item(zend_object *object, zval *offset);
 zval *zend_collection_read_item(zend_object *object, zval *offset);
 void zend_collection_unset_item(zend_object *object, zval *offset);
@@ -110,7 +113,7 @@ static ZEND_NAMED_FUNCTION(zend_collection_seq_add_func)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	seq_add_item(Z_OBJ_P(ZEND_THIS), value);
+	zend_collection_add_item(Z_OBJ_P(ZEND_THIS), NULL, value);
 
 	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
 }
@@ -152,6 +155,58 @@ static ZEND_NAMED_FUNCTION(zend_collection_seq_get_func)
 	RETURN_COPY_VALUE(value);
 }
 
+static ZEND_NAMED_FUNCTION(zend_collection_seq_with_func)
+{
+	zval *value;
+	zend_object *clone;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	clone = zend_objects_clone_obj(Z_OBJ_P(ZEND_THIS));
+
+	zend_collection_add_item(clone, NULL, value);
+
+	RETURN_OBJ(clone);
+}
+
+static ZEND_NAMED_FUNCTION(zend_collection_seq_without_func)
+{
+	zval *index;
+	zend_object *clone;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	clone = zend_objects_clone_obj(Z_OBJ_P(ZEND_THIS));
+
+	zend_collection_unset_item(clone, index);
+
+	RETURN_OBJ(clone);
+}
+
+static ZEND_NAMED_FUNCTION(zend_collection_seq_update_func)
+{
+	zval *index;
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(index)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!zend_collection_has_item(Z_OBJ_P(ZEND_THIS), index)) {
+		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Index '%ld' does not exist in the sequence", Z_LVAL_P(index));
+		return;
+	}
+
+	zend_collection_update_item(Z_OBJ_P(ZEND_THIS), index, value);
+
+	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
+}
+
 
 static ZEND_NAMED_FUNCTION(zend_collection_dict_add_func)
 {
@@ -162,7 +217,7 @@ static ZEND_NAMED_FUNCTION(zend_collection_dict_add_func)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	dict_add_item(Z_OBJ_P(ZEND_THIS), key, value);
+	zend_collection_add_item(Z_OBJ_P(ZEND_THIS), key, value);
 }
 
 static void zend_collection_register_func(zend_class_entry *ce, zend_known_string_id name_id, zend_internal_function *zif)
@@ -208,7 +263,7 @@ void zend_collection_register_funcs(zend_class_entry *ce)
 			REGISTER_FUNCTION(ZEND_STR_GET, zend_collection_seq_get_func, arginfo_class_SeqCollection_get, 1);
 			REGISTER_FUNCTION(ZEND_STR_WITH, zend_collection_seq_with_func, arginfo_class_SeqCollection_with, 1);
 			REGISTER_FUNCTION(ZEND_STR_WITHOUT, zend_collection_seq_without_func, arginfo_class_SeqCollection_without, 1);
-			REGISTER_FUNCTION(ZEND_STR_SET, zend_collection_seq_set_func, arginfo_class_SeqCollection_set, 2);
+			REGISTER_FUNCTION(ZEND_STR_SET, zend_collection_seq_update_func, arginfo_class_SeqCollection_set, 2);
 			break;
 		case ZEND_COLLECTION_DICT:
 			REGISTER_FUNCTION(ZEND_STR_ADD, zend_collection_dict_add_func, arginfo_class_DictCollection_add, 2);
@@ -251,11 +306,25 @@ static void seq_add_item(zend_object *object, zval *value)
 
 	create_array_if_needed(ce, object);
 	value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
+	SEPARATE_ARRAY(value_prop);
 	Z_ADDREF_P(value);
 	add_next_index_zval(value_prop, value);
 }
 
-static void dict_add_item(zend_object *object, zval *offset, zval *value)
+static void seq_update_item(zend_object *object, zend_long index, zval *value)
+{
+	zend_class_entry *ce = object->ce;
+	zval rv;
+	zval *value_prop;
+
+	create_array_if_needed(ce, object);
+	value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
+	SEPARATE_ARRAY(value_prop);
+	Z_ADDREF_P(value);
+	add_index_zval(value_prop, index, value);
+}
+
+static void dict_add_or_update_item(zend_object *object, zval *offset, zval *value)
 {
 	zend_class_entry *ce = object->ce;
 	zval rv;
@@ -314,7 +383,44 @@ void zend_collection_add_item(zend_object *object, zval *offset, zval *value)
 			seq_add_item(object, value);
 			break;
 		case ZEND_COLLECTION_DICT:
-			dict_add_item(object, offset, value);
+			dict_add_or_update_item(object, offset, value);
+			break;
+	}
+}
+
+void zend_collection_update_item(zend_object *object, zval *offset, zval *value)
+{
+	zend_class_entry *ce = object->ce;
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_COLLECTION);
+
+	if (Z_TYPE_P(offset) != IS_LONG && ce->collection_data_structure == ZEND_COLLECTION_SEQ) {
+		zend_value_error("Specifying a non-integer offset for sequence collections is not allowed");
+		return;
+	}
+
+	if (!((Z_TYPE_P(offset) == IS_LONG || Z_TYPE_P(offset) == IS_STRING)) && ce->collection_data_structure == ZEND_COLLECTION_DICT) {
+		zend_value_error("Specifying a non-integer/non-string offset for sequence collections is not allowed");
+		return;
+	}
+
+
+	if (!zend_check_type(&ce->collection_item_type, value, NULL, ce, 0, false)) {
+		zend_string *type_str = zend_type_to_string(ce->collection_item_type);
+		zend_type_error(
+			"Value type %s does not match collection item type %s",
+			zend_zval_type_name(value),
+			ZSTR_VAL(type_str)
+		);
+		zend_string_release(type_str);
+		return;
+	}
+
+	switch (ce->collection_data_structure) {
+		case ZEND_COLLECTION_SEQ:
+			seq_update_item(object, Z_LVAL_P(offset), value);
+			break;
+		case ZEND_COLLECTION_DICT:
+			dict_add_or_update_item(object, offset, value);
 			break;
 	}
 }
@@ -388,6 +494,7 @@ void zend_collection_unset_item(zend_object *object, zval *offset)
 	}
 
 	value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
+	SEPARATE_ARRAY(value_prop);
 
 	if (Z_TYPE_P(offset) == IS_STRING) {
 		zend_hash_del(HASH_OF(value_prop), Z_STR_P(offset));
