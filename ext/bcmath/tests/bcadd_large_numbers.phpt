@@ -15,7 +15,7 @@ foreach($scales as $scale) {
 	foreach($basicNumbers as $firstNumber) {
     	echo "Number \"$firstNumber\" (scale $scale)\n";
 		foreach(array_merge($basicNumbers, $allTestNumbers) as $secondNumber) {
-			echo $firstNumber, " + ", str_pad($secondNumber,30), ' = ' ,bcadd($firstNumber, $secondNumber, $scale),"\n";
+			echo $firstNumber, " + ", str_pad($secondNumber, 30), ' = ', bcadd($firstNumber, $secondNumber, $scale),"\n";
 		}
 		echo "\n";
 	}

@@ -11,6 +11,11 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
+try {
+    var_dump(bcpowmod('1', '0', '2'));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
 --EXPECT--
 bcpowmod(): Argument #2 ($exponent) must be greater than or equal to 0
