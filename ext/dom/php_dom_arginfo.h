@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 060166e1fd79f7447f0eaafb626b33e12791e93b */
+ * Stub hash: 00d59fd45c44eb14bbf8f51ee4f61e0464786d69 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -420,7 +420,9 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DOMDocument_xinc
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOMDocument_adoptNode arginfo_class_DOMNode_appendChild
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOMDocument_adoptNode, 0, 1, DOMNode, MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMDocument_append arginfo_class_DOMParentNode_append
 

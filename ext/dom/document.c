@@ -1051,18 +1051,73 @@ PHP_METHOD(DOMDocument, getElementById)
 }
 /* }}} end dom_document_get_element_by_id */
 
+static void php_dom_transfer_document_ref(xmlNodePtr node, dom_object *dom_object_document, xmlDocPtr document)
+{
+	if (node->children) {
+		php_dom_transfer_document_ref(node->children, dom_object_document, document);
+	}
+	while (node) {
+		php_libxml_node_ptr *iteration_object_ptr = node->_private;
+		if (iteration_object_ptr) {
+			php_libxml_node_object *iteration_object = iteration_object_ptr->_private;
+			ZEND_ASSERT(iteration_object != NULL);
+			/* Must increase refcount first because we could be the last reference holder, and the document may be equal. */
+			dom_object_document->document->refcount++;
+			php_libxml_decrement_doc_ref(iteration_object);
+			iteration_object->document = dom_object_document->document;
+		}
+		node = node->next;
+	}
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-adoptNode
 Since: DOM Level 3
+Modern spec URL: https://dom.spec.whatwg.org/#dom-document-adoptnode
 */
 PHP_METHOD(DOMDocument, adoptNode)
 {
-	zval *nodep = NULL;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &nodep, dom_node_class_entry) == FAILURE) {
+	zval *node_zval;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node_zval, dom_node_class_entry) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	DOM_NOT_IMPLEMENTED();
+	xmlNodePtr nodep;
+	dom_object *dom_object_nodep;
+	DOM_GET_OBJ(nodep, node_zval, xmlNodePtr, dom_object_nodep);
+
+	if (UNEXPECTED(nodep->type == XML_DOCUMENT_NODE
+		|| nodep->type == XML_HTML_DOCUMENT_NODE
+		|| nodep->type == XML_DOCUMENT_TYPE_NODE
+		|| nodep->type == XML_DTD_NODE
+		|| nodep->type == XML_ENTITY_NODE
+		|| nodep->type == XML_NOTATION_NODE)) {
+		php_dom_throw_error(NOT_SUPPORTED_ERR, true);
+		RETURN_THROWS();
+	}
+
+	xmlDocPtr new_document;
+	dom_object *dom_object_new_document;
+	zval *new_document_zval = ZEND_THIS;
+	DOM_GET_OBJ(new_document, new_document_zval, xmlDocPtr, dom_object_new_document);
+
+	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+
+	if (nodep->doc != new_document) {
+		php_libxml_invalidate_node_list_cache_from_doc(new_document);
+
+		/* Note for ATTRIBUTE_NODE: specified is always true in ext/dom,
+		 * and since this unlink it; the owner element will be unset (i.e. parentNode). */
+		int ret = xmlDOMWrapAdoptNode(NULL, nodep->doc, nodep, new_document, NULL, /* options, unused */ 0);
+		if (UNEXPECTED(ret != 0)) {
+			RETURN_FALSE;
+		}
+
+		php_dom_transfer_document_ref(nodep, dom_object_new_document, new_document);
+	} else {
+		xmlUnlinkNode(nodep);
+	}
+
+	RETURN_OBJ_COPY(&dom_object_nodep->std);
 }
 /* }}} end dom_document_adopt_node */
 
