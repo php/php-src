@@ -29,6 +29,9 @@ PHP                                                                        NEWS
 - Session:
   . Removed broken url support for transferring session ID. (ilutov)
 
+- Standard:
+  . Fix serialization of RC1 objects appearing in object graph twice. (ilutov)
+
 06 Jul 2023, PHP 8.2.8
 
 - CLI:
