@@ -314,6 +314,7 @@ PHP 8.3 UPGRADE NOTES
   . ZipArchive::AFL_IS_TORRENTZIP (libzip >= 1.10)
   . ZipArchive::AFL_WANT_TORRENTZIP (libzip >= 1.10)
   . ZipArchive::AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE (libzip >= 1.10)
+  . ZipArchive::FL_OPEN_FILE_NOW
 
 ========================================
 11. Changes to INI File Handling
