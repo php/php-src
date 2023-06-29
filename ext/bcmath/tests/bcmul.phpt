@@ -1,5 +1,5 @@
 --TEST--
-bcmul() function - extended basic tests
+bcmul() function
 --EXTENSIONS--
 bcmath
 --INI--
@@ -7,15 +7,15 @@ bcmath.scale=0
 --FILE--
 <?php
 
-$basicNumbers = ["15", "-15", "1", "-9", "14.14", "-16.60", "0.15", "-0.01"];
-$allTestNumbers = ["0", "0.00", "-0", "-0.00", "15151324141414.412312232141241", "-132132245132134.1515123765412", "141241241241241248267654747412", "-149143276547656984948124912", "0.1322135476547459213732911312", "-0.123912932193769965476541321"];
+$firstFactors = ["15", "-15", "1", "-9", "14.14", "-16.60", "0.15", "-0.01"];
+$secondFactors = array_merge($firstFactors, ["0", "0.00", "-0", "-0.00", "15151324141414.412312232141241", "-132132245132134.1515123765412", "141241241241241248267654747412", "-149143276547656984948124912", "0.1322135476547459213732911312", "-0.123912932193769965476541321"]);
 $scales = [0,10];
 
 foreach($scales as $scale) {
-	foreach($basicNumbers as $firstNumber) {
-    	echo "Number \"$firstNumber\" (scale $scale)\n";
-		foreach(array_merge($basicNumbers, $allTestNumbers) as $secondNumber) {
-			echo str_pad($firstNumber, 6, ' ', STR_PAD_LEFT), " × " , str_pad($secondNumber,30), ' = ', bcmul($firstNumber, $secondNumber, $scale),"\n";
+	foreach($firstFactors as $firstFactor) {
+    	echo "Number \"$firstFactor\" (scale $scale)\n";
+		foreach($secondFactors as $secondFactor) {
+			echo str_pad($firstFactor, 6, ' ', STR_PAD_LEFT), " × " , str_pad($secondFactor, 30), ' = ', bcmul($firstFactor, $secondFactor, $scale),"\n";
 		}
 		echo "\n";
 	}

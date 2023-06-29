@@ -7,7 +7,7 @@ bcmath.scale=0
 --FILE--
 <?php
 
-$numbers = [
+$radicants = [
     "0",
     "0.00",
     "-0",
@@ -25,8 +25,8 @@ $numbers = [
 $scales = [0,10];
 
 foreach($scales as $scale) {
-    foreach($numbers as $number) {
-        echo bcsqrt($number, $scale),"\n";
+    foreach($radicants as $radicant) {
+        echo bcsqrt($radicant, $scale),"\n";
     }
 }
 ?>

@@ -1,5 +1,5 @@
 --TEST--
-bcsub() function - tests with large numbers
+bcsub() function with large numbers
 --EXTENSIONS--
 bcmath
 --INI--
@@ -7,15 +7,15 @@ bcmath.scale=0
 --FILE--
 <?php
 
-$basicNumbers = ["15151324141414.412312232141241", "-132132245132134.1515123765412", "141241241241241248267654747412", "-149143276547656984948124912", "0.1322135476547459213732911312", "-0.123912932193769965476541321"];
-$allTestNumbers = ["0", "0.00", "-0", "-0.00", "15", "-15", "1", "-9", "14.14", "-16.60", "0.15", "-0.01",];
+$minuends = ["15151324141414.412312232141241", "-132132245132134.1515123765412", "141241241241241248267654747412", "-149143276547656984948124912", "0.1322135476547459213732911312", "-0.123912932193769965476541321"];
+$subtrahends = array_merge($minuends, ["0", "0.00", "-0", "-0.00", "15", "-15", "1", "-9", "14.14", "-16.60", "0.15", "-0.01"]);
 $scales = [0,10];
 
 foreach($scales as $scale) {
-	foreach($basicNumbers as $firstNumber) {
-    	echo "Number \"$firstNumber\" (scale $scale)\n";
-		foreach(array_merge($basicNumbers, $allTestNumbers) as $secondNumber) {
-			echo $firstNumber, " + ", str_pad($secondNumber, 30), ' = ', bcsub($firstNumber, $secondNumber, $scale),"\n";
+	foreach($minuends as $minuend) {
+    	echo "Number \"$minuend\" (scale $scale)\n";
+		foreach($subtrahends as $subtrahend) {
+			echo $minuend, " + ", str_pad($subtrahend, 30), ' = ', bcsub($minuend, $subtrahend, $scale),"\n";
 		}
 		echo "\n";
 	}

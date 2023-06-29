@@ -7,15 +7,15 @@ bcmath.scale=0
 --FILE--
 <?php
 
-$basicNumbers = ["15151324141414.412312232141241", "-132132245132134.1515123765412", "141241241241241248267654747412", "-149143276547656984948124912", "0.1322135476547459213732911312", "-0.123912932193769965476541321"];
-$allTestNumbers = ["15", "-15", "1", "-9", "14.14", "-16.60", "0.15", "-0.01",];
+$dividends = ["15151324141414.412312232141241", "-132132245132134.1515123765412", "141241241241241248267654747412", "-149143276547656984948124912", "0.1322135476547459213732911312", "-0.123912932193769965476541321"];
+$divisors = array_merge($dividends, ["15", "-15", "1", "-9", "14.14", "-16.60", "0.15", "-0.01"]);
 $scales = [0,10];
 
 foreach($scales as $scale) {
-	foreach($basicNumbers as $firstNumber) {
-    	echo "Number \"$firstNumber\" (scale $scale)\n";
-		foreach(array_merge($basicNumbers, $allTestNumbers) as $secondNumber) {
-			echo $firstNumber, " ÷ ", str_pad($secondNumber, 30), ' = ', bcdiv($firstNumber, $secondNumber, $scale),"\n";
+	foreach($dividends as $dividend) {
+    	echo "Number \"$dividend\" (scale $scale)\n";
+		foreach($divisors as $divisor) {
+			echo $dividend, " ÷ ", str_pad($divisor, 30), ' = ', bcdiv($dividend, $divisor, $scale),"\n";
 		}
 		echo "\n";
 	}
