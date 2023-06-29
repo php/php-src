@@ -14,6 +14,10 @@ function run_and_output($cmd) {
     }
     exec($cmd, $output, $exit_code);
     print_r($output);
+    // Normalize Windows vs Linux exit codes. On Windows exit code -1 is actually -1 instead of 255.
+    if ($exit_code < 0) {
+        $exit_code += 256;
+    }
     var_dump($exit_code);
 }
 
