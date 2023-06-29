@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed GH-11488 (Missing "Optional parameter before required" deprecation on
     union null type). (ilutov)
+  . Implement the #[\Override] attribute RFC. (timwolla)
 
 - DOM:
   . Fixed bug GH-11500 (Namespace reuse in createElementNS() generates wrong
