@@ -38,12 +38,12 @@ class test
 
 file_put_contents($filename_bad, $code);
 
-run_and_output("$php -n -l $filename_good_escaped $filename_good_escaped");
-run_and_output("$php -n -l $filename_good_escaped some.unknown $filename_good_escaped");
-run_and_output("$php -n -l $filename_good_escaped $filename_bad_escaped $filename_good_escaped");
-run_and_output("$php -n -l $filename_bad_escaped $filename_bad_escaped");
-run_and_output("$php -n -l $filename_bad_escaped some.unknown $filename_bad_escaped");
-run_and_output("$php -n -l $filename_bad_escaped $filename_bad_escaped some.unknown");
+run_and_output("$php -n -l $filename_good_escaped $filename_good_escaped 2>&1");
+run_and_output("$php -n -l $filename_good_escaped some.unknown $filename_good_escaped 2>&1");
+run_and_output("$php -n -l $filename_good_escaped $filename_bad_escaped $filename_good_escaped 2>&1");
+run_and_output("$php -n -l $filename_bad_escaped $filename_bad_escaped 2>&1");
+run_and_output("$php -n -l $filename_bad_escaped some.unknown $filename_bad_escaped 2>&1");
+run_and_output("$php -n -l $filename_bad_escaped $filename_bad_escaped some.unknown 2>&1");
 
 echo "Done\n";
 ?>
