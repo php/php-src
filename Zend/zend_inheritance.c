@@ -1174,6 +1174,11 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		}
 		perform_delayable_implementation_check(ce, child, child_scope, parent, parent_scope);
 	}
+
+	if (!check_only && child->common.scope == ce) {
+		child->common.fn_flags &= ~ZEND_ACC_OVERRIDE;
+	}
+
 	return INHERITANCE_SUCCESS;
 }
 /* }}} */
@@ -1895,6 +1900,28 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 	}
 }
 /* }}} */
+
+
+void zend_inheritance_check_override(zend_class_entry *ce)
+{
+	zend_function *f;
+
+	if (ce->ce_flags & ZEND_ACC_TRAIT) {
+		return;
+	}
+
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, f) {
+		if (f->common.fn_flags & ZEND_ACC_OVERRIDE) {
+			ZEND_ASSERT(f->type != ZEND_INTERNAL_FUNCTION);
+
+			zend_error_at_noreturn(
+				E_COMPILE_ERROR, f->op_array.filename, f->op_array.line_start,
+				"%s::%s() has #[\\Override] attribute, but no matching parent method exists",
+				ZEND_FN_SCOPE_NAME(f), ZSTR_VAL(f->common.function_name));
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
 
 static zend_class_entry *fixup_trait_scope(const zend_function *fn, zend_class_entry *ce)
 {
@@ -2772,6 +2799,8 @@ static void resolve_delayed_variance_obligations(zend_class_entry *ce) {
 		check_variance_obligation(obligation);
 	} ZEND_HASH_FOREACH_END();
 
+	zend_inheritance_check_override(ce);
+
 	ce->ce_flags &= ~ZEND_ACC_UNRESOLVED_VARIANCE;
 	ce->ce_flags |= ZEND_ACC_LINKED;
 	zend_hash_index_del(all_obligations, num_key);
@@ -3131,6 +3160,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	EG(record_errors) = orig_record_errors;
 
 	if (!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE)) {
+		zend_inheritance_check_override(ce);
 		ce->ce_flags |= ZEND_ACC_LINKED;
 	} else {
 		ce->ce_flags |= ZEND_ACC_NEARLY_LINKED;
@@ -3342,6 +3372,7 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 			if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 				zend_verify_abstract_class(ce);
 			}
+			zend_inheritance_check_override(ce);
 			ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_UNRESOLVED_VARIANCE));
 			ce->ce_flags |= ZEND_ACC_LINKED;
 
