@@ -9522,9 +9522,9 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 
 			for (i = call_num_args; i < func->op_array.last_var; i++) {
 				uint32_t n = EX_NUM_TO_VAR(i);
-				zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, n);
+				zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, n);
 
-				jit_set_Z_TYPE_INFO(jit, var_addr, IS_UNDEF);
+				jit_set_Z_TYPE_INFO_ex(jit, var_addr, ir_CONST_U32(IS_UNDEF));
 			}
 
 			if (call_num_args <= func->op_array.num_args) {
