@@ -1171,7 +1171,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		perform_delayable_implementation_check(ce, child, child_scope, parent, parent_scope);
 	}
 
-	if (child->common.scope == ce) {
+	if (!check_only && child->common.scope == ce) {
 		child->common.fn_flags &= ~ZEND_ACC_OVERRIDE;
 	}
 
