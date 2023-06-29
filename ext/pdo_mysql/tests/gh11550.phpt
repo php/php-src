@@ -5,12 +5,12 @@ pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
 $pdo = MySQLPDOTest::factory();
 $pdo->exec(<<<'SQL'
 DROP TABLE IF EXISTS `test`
@@ -44,7 +44,7 @@ echo 'Done';
 ?>
 --CLEAN--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
 $pdo = MySQLPDOTest::factory();
 $pdo->query('DROP TABLE IF EXISTS test_11550');
 ?>

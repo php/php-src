@@ -4,13 +4,12 @@ Bug GH-11550 (MySQL Statement has a empty query result when the response field h
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 
-/*** test mysqli_connect 127.0.0.1 ***/
 $link = new \mysqli($host, $user, $passwd, $db, $port, $socket);
 $link->query(<<<'SQL'
 DROP TABLE IF EXISTS `test`
@@ -41,7 +40,7 @@ echo 'Done';
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 
 $link = new \mysqli($host, $user, $passwd, $db, $port, $socket);
 $link->query('DROP TABLE IF EXISTS test_11550');
