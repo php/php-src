@@ -1066,9 +1066,8 @@ static void perform_delayable_implementation_check(
 }
 
 /**
- * @param check_only Set to false to throw compile errors on incompatible methods, or true to return
- *                   INHERITANCE_ERROR.
- * @param checked Whether the compatibility check has already been performed by zend_can_early_bind().
+ * @param check_only Set to false to throw compile errors on incompatible methods, or true to return INHERITANCE_ERROR.
+ * @param checked Whether the compatibility check has already succeeded in zend_can_early_bind().
  */
 static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		zend_function *child, zend_class_entry *child_scope,
