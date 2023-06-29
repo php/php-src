@@ -132,7 +132,7 @@ PHP_METHOD(DOMText, splitText)
 		RETURN_FALSE;
 	}
 
-	cur = xmlNodeGetContent(node);
+	cur = node->content;
 	if (cur == NULL) {
 		/* TODO Add warning? */
 		RETURN_FALSE;
@@ -141,14 +141,11 @@ PHP_METHOD(DOMText, splitText)
 
 	if (ZEND_LONG_INT_OVFL(offset) || (int)offset > length) {
 		/* TODO Add warning? */
-		xmlFree(cur);
 		RETURN_FALSE;
 	}
 
 	first = xmlUTF8Strndup(cur, (int)offset);
 	second = xmlUTF8Strsub(cur, (int)offset, (int)(length - offset));
-
-	xmlFree(cur);
 
 	xmlNodeSetContent(node, first);
 	nnode = xmlNewDocText(node->doc, second);

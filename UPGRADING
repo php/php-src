@@ -110,6 +110,10 @@ PHP 8.3 UPGRADE NOTES
   . The U_MULTIPLE_DECIMAL_SEP*E*RATORS constant had been deprecated, using
     the U_MULTIPLE_DECIMAL_SEP*A*RATORS instead is recommended.
 
+- Zip:
+  . The ZipArchive::FL_RECOMPRESS constant is deprecated and will be removed
+    in a future version of libzip
+
 ========================================
 5. Changed Functions
 ========================================
@@ -310,6 +314,7 @@ PHP 8.3 UPGRADE NOTES
   . ZipArchive::AFL_IS_TORRENTZIP (libzip >= 1.10)
   . ZipArchive::AFL_WANT_TORRENTZIP (libzip >= 1.10)
   . ZipArchive::AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE (libzip >= 1.10)
+  . ZipArchive::FL_OPEN_FILE_NOW
 
 ========================================
 11. Changes to INI File Handling
@@ -371,3 +376,9 @@ PHP 8.3 UPGRADE NOTES
 
 - Standard:
   . The file() flags error check is now about 7% faster.
+
+- DOM:
+  . Looping over a DOMNodeList now uses caching. Therefore requesting items no
+    longer takes quadratic time by default.
+  . Getting text content from nodes now avoids an allocation, resulting in a
+    performance gain.

@@ -14,10 +14,11 @@ $processes = [];
 
 pcntl_async_signals(true);
 pcntl_signal(SIGCHLD, function($sig, $info) use (&$processes) {
+    echo "SIGCHLD\n";
     unset($processes[$info['pid']]);
 }, false);
 
-foreach (range(0, 5) as $i) {
+for ($i = 0; $i <= 5; $i++) {
     $process = proc_open('echo $$ > /dev/null', [], $pipes);
     $pid = proc_get_status($process)['pid'];
     $processes[$pid] = $process;
@@ -32,4 +33,10 @@ while (!empty($processes) && $iters > 0) {
 var_dump(empty($processes));
 ?>
 --EXPECT--
+SIGCHLD
+SIGCHLD
+SIGCHLD
+SIGCHLD
+SIGCHLD
+SIGCHLD
 bool(true)

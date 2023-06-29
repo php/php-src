@@ -121,6 +121,7 @@ int dom_attr_value_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
+	/* Can't avoid a content copy because it's an attribute node */
 	if ((content = xmlNodeGetContent((xmlNodePtr) attrp)) != NULL) {
 		ZVAL_STRING(retval, (char *) content);
 		xmlFree(content);

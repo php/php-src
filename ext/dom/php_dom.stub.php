@@ -787,8 +787,8 @@ class DOMDocument extends DOMNode implements DOMParentNode
     /** @tentative-return-type */
     public function xinclude(int $options = 0): int|false {}
 
-    /** @return DOMNode|false */
-    public function adoptNode(DOMNode $node) {}
+    /** @tentative-return-type */
+    public function adoptNode(DOMNode $node): DOMNode|false {}
 
     /** @param DOMNode|string $nodes */
     public function append(...$nodes): void {}

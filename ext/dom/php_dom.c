@@ -32,6 +32,10 @@
 #define PHP_XPATH 1
 #define PHP_XPTR 2
 
+/* libxml2 doesn't expose this constant as part of their public API.
+ * See xmlDOMReconcileNSOptions in tree.c */
+#define PHP_LIBXML2_DOM_RECONNS_REMOVEREDUND (1 << 0)
+
 /* {{{ class entries */
 PHP_DOM_EXPORT zend_class_entry *dom_node_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domexception_class_entry;
@@ -1494,7 +1498,8 @@ static void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep
 	 * Although libxml2 currently does not use this for the reconciliation, it still
 	 * makes sense to do this just in case libxml2's internal change in the future. */
 	xmlDOMWrapCtxt dummy_ctxt = {0};
-	xmlDOMWrapReconcileNamespaces(&dummy_ctxt, nodep, /* options */ 0);
+	bool remove_redundant = nodep->nsDef == NULL && nodep->ns != NULL;
+	xmlDOMWrapReconcileNamespaces(&dummy_ctxt, nodep, /* options */ remove_redundant ? PHP_LIBXML2_DOM_RECONNS_REMOVEREDUND : 0);
 }
 
 void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
@@ -1631,7 +1636,7 @@ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 	if (node == NULL)
 		return NULL;
 
-	if (localName == NULL || xmlStrEqual(localName, (xmlChar *)"")) {
+	if (localName == NULL || localName[0] == '\0') {
 		cur = node->nsDef;
 		while (cur != NULL) {
 			if (cur->prefix == NULL  && cur->href != NULL) {
@@ -1733,6 +1738,39 @@ void dom_remove_all_children(xmlNodePtr nodep)
 		php_libxml_node_free_list((xmlNodePtr) nodep->children);
 		nodep->children = NULL;
 		nodep->last = NULL;
+	}
+}
+
+void php_dom_get_content_into_zval(const xmlNode *nodep, zval *retval, bool default_is_null)
+{
+	ZEND_ASSERT(nodep != NULL);
+
+	if (nodep->type == XML_TEXT_NODE
+		|| nodep->type == XML_CDATA_SECTION_NODE
+		|| nodep->type == XML_PI_NODE
+		|| nodep->type == XML_COMMENT_NODE) {
+		char *str = (char * ) nodep->content;
+		if (str != NULL) {
+			ZVAL_STRING(retval, str);
+		} else {
+			goto failure;
+		}
+		return;
+	}
+
+	char *str = (char *) xmlNodeGetContent(nodep);
+
+	if (str != NULL) {
+		ZVAL_STRING(retval, str);
+		xmlFree(str);
+		return;
+	}
+
+failure:
+	if (default_is_null) {
+		ZVAL_NULL(retval);
+	} else {
+		ZVAL_EMPTY_STRING(retval);
 	}
 }
 
