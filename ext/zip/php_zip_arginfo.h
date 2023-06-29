@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 37a7b865d0fe62419f677382fa713a800d48da5e */
+ * Stub hash: fb9b6fa0a8e3da62a85e13b455573ee876ea2d61 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -625,6 +625,12 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *const_FL_ENC_CP437_name = zend_string_init_interned("FL_ENC_CP437", sizeof("FL_ENC_CP437") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_FL_ENC_CP437_name, &const_FL_ENC_CP437_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_FL_ENC_CP437_name);
+
+	zval const_FL_OPEN_FILE_NOW_value;
+	ZVAL_LONG(&const_FL_OPEN_FILE_NOW_value, ZIP_FL_OPEN_FILE_NOW);
+	zend_string *const_FL_OPEN_FILE_NOW_name = zend_string_init_interned("FL_OPEN_FILE_NOW", sizeof("FL_OPEN_FILE_NOW") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_FL_OPEN_FILE_NOW_name, &const_FL_OPEN_FILE_NOW_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_FL_OPEN_FILE_NOW_name);
 
 	zval const_CM_DEFAULT_value;
 	ZVAL_LONG(&const_CM_DEFAULT_value, ZIP_CM_DEFAULT);
