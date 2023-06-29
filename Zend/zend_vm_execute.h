@@ -1446,6 +1446,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 	zend_function *fbc = call->func;
 	zval *ret;
 
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+		zend_deprecated_function(fbc);
+	}
+
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
@@ -1470,6 +1474,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_RETV
 	zend_function *fbc = call->func;
 	zval *ret;
 
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+		zend_deprecated_function(fbc);
+	}
+
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
@@ -1493,6 +1501,10 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_UCALL_SPEC_OBS
 	zend_execute_data *call = EX(call);
 	zend_function *fbc = call->func;
 	zval *ret;
+
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+		zend_deprecated_function(fbc);
+	}
 
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
@@ -1526,6 +1538,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		ret = NULL;
 		if (0) {
 			ret = EX_VAR(opline->result.var);
+		}
+
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+			zend_deprecated_function(fbc);
 		}
 
 		call->prev_execute_data = execute_data;
@@ -1621,6 +1637,14 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		ret = NULL;
 		if (1) {
 			ret = EX_VAR(opline->result.var);
+		}
+
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+			zend_deprecated_function(fbc);
+		}
+
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+			zend_deprecated_function(fbc);
 		}
 
 		call->prev_execute_data = execute_data;
@@ -1816,6 +1840,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 			ret = EX_VAR(opline->result.var);
 		}
 
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+			zend_deprecated_function(fbc);
+		}
+
 		call->prev_execute_data = execute_data;
 		execute_data = call;
 		i_init_func_execute_data(&fbc->op_array, ret, 1 EXECUTE_DATA_CC);
@@ -1923,6 +1951,14 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		ret = NULL;
 		if (1) {
 			ret = EX_VAR(opline->result.var);
+		}
+
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+			zend_deprecated_function(fbc);
+		}
+
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+			zend_deprecated_function(fbc);
 		}
 
 		call->prev_execute_data = execute_data;

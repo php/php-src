@@ -43,6 +43,7 @@
 #include "zend_observer.h"
 #include "zend_system_id.h"
 #include "zend_call_stack.h"
+#include "zend_attributes.h"
 #include "Optimizer/zend_func_info.h"
 
 /* Virtual current working directory support */
@@ -1719,13 +1720,45 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc)
 {
-	if (fbc->common.scope) {
-		zend_error(E_DEPRECATED, "Method %s::%s() is deprecated",
-			ZSTR_VAL(fbc->common.scope->name),
-			ZSTR_VAL(fbc->common.function_name)
-		);
+	zend_attribute *deprecated;
+	zend_string *message_suffix = NULL;
+
+	if (fbc->common.attributes != NULL) {
+		deprecated = zend_get_attribute_str(fbc->common.attributes, "deprecated", sizeof("deprecated")-1);
+
+		if (deprecated->argc >= 1) {
+			zval message;
+
+			if (FAILURE != zend_get_attribute_value(&message, deprecated, 0, fbc->common.scope)) {
+				message_suffix = Z_STR(message);
+			}
+		}
+	}
+
+	if (message_suffix != NULL) {
+		if (fbc->common.scope) {
+			zend_error(E_DEPRECATED, "Method %s::%s() is deprecated, %s",
+				ZSTR_VAL(fbc->common.scope->name),
+				ZSTR_VAL(fbc->common.function_name),
+				ZSTR_VAL(message_suffix)
+			);
+		} else {
+			zend_error(E_DEPRECATED, "Function %s() is deprecated, %s",
+				ZSTR_VAL(fbc->common.function_name),
+				ZSTR_VAL(message_suffix)
+			);
+		}
+
+		zend_string_release(message_suffix);
 	} else {
-		zend_error(E_DEPRECATED, "Function %s() is deprecated", ZSTR_VAL(fbc->common.function_name));
+		if (fbc->common.scope) {
+			zend_error(E_DEPRECATED, "Method %s::%s() is deprecated",
+				ZSTR_VAL(fbc->common.scope->name),
+				ZSTR_VAL(fbc->common.function_name)
+			);
+		} else {
+			zend_error(E_DEPRECATED, "Function %s() is deprecated", ZSTR_VAL(fbc->common.function_name));
+		}
 	}
 }
 
