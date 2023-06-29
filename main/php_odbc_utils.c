@@ -61,7 +61,7 @@ PHPAPI bool php_odbc_connstr_is_quoted(const char *str)
  *
  * The ODBC specification mentions:
  * "Because of connection string and initialization file grammar, keywords and
- * and attribute values that contain the characters []{}(),;?*=!@ not enclosed
+ * attribute values that contain the characters []{}(),;?*=!@ not enclosed
  * with braces should be avoided."
  *
  * Note that it assumes that the string is *not* already quoted. You should
