@@ -32,6 +32,10 @@ PHP                                                                        NEWS
 - Standard:
   . Fix serialization of RC1 objects appearing in object graph twice. (ilutov)
 
+- XMLReader:
+  . Fix GH-11548 (Argument corruption when calling XMLReader::open or
+    XMLReader::XML non-statically with observer active). (Bob)
+
 - zip:
   . zip extension version 1.22.0 for libzip 1.10.0. (Remi)
   . add new error macros (ER_DATA_LENGTH and ER_NOT_ALLOWED). (Remi)
