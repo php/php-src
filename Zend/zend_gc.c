@@ -303,13 +303,6 @@ struct _gc_stack {
 	zend_refcounted *data[GC_STACK_SEGMENT_SIZE];
 };
 
-typedef struct _gc_stack_handle gc_stack_handle;
-
-struct _gc_stack_handle {
-	gc_stack *stack;
-	size_t   top;
-};
-
 #define GC_STACK_DCL(init) \
 	gc_stack *_stack = init; \
 	size_t    _top = 0;
