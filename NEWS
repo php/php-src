@@ -32,6 +32,10 @@ PHP                                                                        NEWS
 - Standard:
   . Fix serialization of RC1 objects appearing in object graph twice. (ilutov)
 
+- XMLReader:
+  . Fix GH-11548 (Argument corruption when calling XMLReader::open or
+    XMLReader::XML non-statically with observer active). (Bob)
+
 06 Jul 2023, PHP 8.2.8
 
 - CLI:
