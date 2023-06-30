@@ -70,6 +70,8 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 * _php_stream_dirent now has an extra d_type field that is used to store the
   directory entry type. This can be used to avoid additional stat calls for
   types when the type is already known.
+* zend_std_get_properties_for now calls the cast_object handler when casting
+  objects to arrays.
 
 ========================
 2. Build system changes
