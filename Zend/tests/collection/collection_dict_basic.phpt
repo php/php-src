@@ -64,4 +64,4 @@ object(Article)#%d (%d) {
   string(10) "First Test"
 }
 bool(false)
-TypeError: Key type int of element does not match collection key type string
+TypeError: Key type int of element does not match Articles dictionary key type string

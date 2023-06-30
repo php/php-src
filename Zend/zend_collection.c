@@ -100,10 +100,49 @@ void zend_collection_register_handlers(zend_class_entry *ce)
 }
 
 void zend_collection_add_item(zend_object *object, zval *offset, zval *value);
-void zend_collection_update_item(zend_object *object, zval *offset, zval *value);
+void zend_collection_set_item(zend_object *object, zval *offset, zval *value);
 int zend_collection_has_item(zend_object *object, zval *offset);
 zval *zend_collection_read_item(zend_object *object, zval *offset);
 void zend_collection_unset_item(zend_object *object, zval *offset);
+
+static const char *get_data_structure_name(zend_class_entry *ce)
+{
+	if (ce->collection_data_structure == ZEND_COLLECTION_SEQ) {
+		return "sequence";
+	}
+	if (ce->collection_data_structure == ZEND_COLLECTION_DICT) {
+		return "dictionary";
+	}
+	return "unknown";
+}
+
+static int key_type_allowed(zend_class_entry *ce, zval *offset)
+{
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_COLLECTION);
+
+	if (Z_TYPE_P(offset) != IS_LONG && Z_TYPE_P(offset) != IS_STRING) {
+		zend_type_error(
+			"Key type %s is not allowed for %s %s",
+			ZSTR_VAL(ce->name),
+			offset ? zend_zval_type_name(offset) : zend_get_type_by_const(IS_NULL),
+			get_data_structure_name(ce)
+		);
+	}
+
+	if (ce->collection_key_type != Z_TYPE_P(offset)) {
+		zend_type_error(
+			"Key type %s of element does not match %s %s key type %s",
+			offset ? zend_zval_type_name(offset) : zend_get_type_by_const(IS_NULL),
+			ZSTR_VAL(ce->name),
+			get_data_structure_name(ce),
+			zend_get_type_by_const(ce->collection_key_type)
+		);
+		return false;
+	}
+
+	return true;
+}
+
 
 static ZEND_NAMED_FUNCTION(zend_collection_seq_add_func)
 {
@@ -151,6 +190,9 @@ static ZEND_NAMED_FUNCTION(zend_collection_seq_get_func)
 	ZEND_PARSE_PARAMETERS_END();
 
 	value = zend_collection_read_item(Z_OBJ_P(ZEND_THIS), index);
+	if (!value) {
+		return;
+	}
 
 	RETURN_COPY_VALUE(value);
 }
@@ -187,7 +229,7 @@ static ZEND_NAMED_FUNCTION(zend_collection_seq_without_func)
 	RETURN_OBJ(clone);
 }
 
-static ZEND_NAMED_FUNCTION(zend_collection_seq_update_func)
+static ZEND_NAMED_FUNCTION(zend_collection_seq_set_func)
 {
 	zval *index;
 	zval *value;
@@ -197,12 +239,19 @@ static ZEND_NAMED_FUNCTION(zend_collection_seq_update_func)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!zend_collection_has_item(Z_OBJ_P(ZEND_THIS), index)) {
-		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Index '%ld' does not exist in the sequence", Z_LVAL_P(index));
+	if (!key_type_allowed(Z_OBJCE_P(ZEND_THIS), index)) {
 		return;
 	}
 
-	zend_collection_update_item(Z_OBJ_P(ZEND_THIS), index, value);
+	if (!zend_collection_has_item(Z_OBJ_P(ZEND_THIS), index)) {
+		zend_throw_exception_ex(
+			spl_ce_OutOfBoundsException, 0,
+			"Index '%ld' does not exist in the %s sequence",
+			Z_LVAL_P(index), ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name)
+		);
+	}
+
+	zend_collection_set_item(Z_OBJ_P(ZEND_THIS), index, value);
 
 	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
 }
@@ -292,7 +341,7 @@ static ZEND_NAMED_FUNCTION(zend_collection_dict_without_func)
 	RETURN_OBJ(clone);
 }
 
-static ZEND_NAMED_FUNCTION(zend_collection_dict_update_func)
+static ZEND_NAMED_FUNCTION(zend_collection_dict_set_func)
 {
 	zval *index;
 	zval *value;
@@ -302,12 +351,30 @@ static ZEND_NAMED_FUNCTION(zend_collection_dict_update_func)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!zend_collection_has_item(Z_OBJ_P(ZEND_THIS), index)) {
-		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Index '%ld' does not exist in the sequence", Z_LVAL_P(index));
+	if (!key_type_allowed(Z_OBJCE_P(ZEND_THIS), index)) {
 		return;
 	}
 
-	zend_collection_update_item(Z_OBJ_P(ZEND_THIS), index, value);
+	if (!zend_collection_has_item(Z_OBJ_P(ZEND_THIS), index)) {
+		switch (Z_TYPE_P(index)) {
+			case IS_LONG:
+				zend_throw_exception_ex(
+					spl_ce_OutOfBoundsException, 0,
+					"Index '%ld' does not exist in the %s dictionary",
+					Z_LVAL_P(index), ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name)
+				);
+				return;
+			case IS_STRING:
+				zend_throw_exception_ex(
+					spl_ce_OutOfBoundsException, 0,
+					"Index '%s' does not exist in the %s dictionary",
+					Z_STRVAL_P(index), ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name)
+					);
+				return;
+		}
+	}
+
+	zend_collection_set_item(Z_OBJ_P(ZEND_THIS), index, value);
 
 	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
 }
@@ -355,7 +422,7 @@ void zend_collection_register_funcs(zend_class_entry *ce)
 			REGISTER_FUNCTION(ZEND_STR_GET, zend_collection_seq_get_func, arginfo_class_SeqCollection_get, 1);
 			REGISTER_FUNCTION(ZEND_STR_WITH, zend_collection_seq_with_func, arginfo_class_SeqCollection_with, 1);
 			REGISTER_FUNCTION(ZEND_STR_WITHOUT, zend_collection_seq_without_func, arginfo_class_SeqCollection_without, 1);
-			REGISTER_FUNCTION(ZEND_STR_SET, zend_collection_seq_update_func, arginfo_class_SeqCollection_set, 2);
+			REGISTER_FUNCTION(ZEND_STR_SET, zend_collection_seq_set_func, arginfo_class_SeqCollection_set, 2);
 			break;
 		case ZEND_COLLECTION_DICT:
 			REGISTER_FUNCTION(ZEND_STR_ADD, zend_collection_dict_add_func, arginfo_class_DictCollection_add, 2);
@@ -364,7 +431,7 @@ void zend_collection_register_funcs(zend_class_entry *ce)
 			REGISTER_FUNCTION(ZEND_STR_GET, zend_collection_dict_get_func, arginfo_class_DictCollection_get, 1);
 			REGISTER_FUNCTION(ZEND_STR_WITH, zend_collection_dict_with_func, arginfo_class_DictCollection_with, 2);
 			REGISTER_FUNCTION(ZEND_STR_WITHOUT, zend_collection_dict_without_func, arginfo_class_DictCollection_without, 1);
-			REGISTER_FUNCTION(ZEND_STR_SET, zend_collection_dict_update_func, arginfo_class_DictCollection_set, 2);
+			REGISTER_FUNCTION(ZEND_STR_SET, zend_collection_dict_set_func, arginfo_class_DictCollection_set, 2);
 			break;
 	}
 }
@@ -396,6 +463,7 @@ static void create_array_if_needed(zend_class_entry *ce, zend_object *object)
 	zval_ptr_dtor(&new_array);
 }
 
+
 static void seq_add_item(zend_object *object, zval *value)
 {
 	zend_class_entry *ce = object->ce;
@@ -409,7 +477,7 @@ static void seq_add_item(zend_object *object, zval *value)
 	add_next_index_zval(value_prop, value);
 }
 
-static void seq_update_item(zend_object *object, zend_long index, zval *value)
+static void seq_set_item(zend_object *object, zend_long index, zval *value)
 {
 	zend_class_entry *ce = object->ce;
 	zval rv;
@@ -422,32 +490,33 @@ static void seq_update_item(zend_object *object, zend_long index, zval *value)
 	add_index_zval(value_prop, index, value);
 }
 
-static void dict_add_or_update_item(zend_object *object, zval *offset, zval *value)
+static void dict_add_or_set_item(zend_object *object, zval *offset, zval *value)
 {
 	zend_class_entry *ce = object->ce;
 	zval rv;
 	zval *value_prop;
 
-	if (ce->collection_key_type == IS_LONG && Z_TYPE_P(offset) == IS_LONG) {
-		create_array_if_needed(ce, object);
-		value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
-		SEPARATE_ARRAY(value_prop);
-		Z_ADDREF_P(value);
-		add_index_zval(value_prop, Z_LVAL_P(offset), value);
+	if (!key_type_allowed(ce, offset)) {
 		return;
-	} else if (ce->collection_key_type == IS_STRING && Z_TYPE_P(offset) == IS_STRING) {
-		create_array_if_needed(ce, object);
-		value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
-		SEPARATE_ARRAY(value_prop);
-		Z_ADDREF_P(value);
-		add_assoc_zval_ex(value_prop, Z_STRVAL_P(offset), Z_STRLEN_P(offset), value);
-		return;
-	} else {
-		zend_type_error(
-			"Key type %s of element does not match collection key type %s",
-			offset ? zend_zval_type_name(offset) : zend_get_type_by_const(IS_NULL),
-			zend_get_type_by_const(ce->collection_key_type)
-		);
+	}
+
+	switch (ce->collection_key_type) {
+		case IS_LONG: {
+			create_array_if_needed(ce, object);
+			value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
+			SEPARATE_ARRAY(value_prop);
+			Z_ADDREF_P(value);
+			add_index_zval(value_prop, Z_LVAL_P(offset), value);
+			break;
+		}
+		case IS_STRING: {
+			create_array_if_needed(ce, object);
+			value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
+			SEPARATE_ARRAY(value_prop);
+			Z_ADDREF_P(value);
+			add_assoc_zval_ex(value_prop, Z_STRVAL_P(offset), Z_STRLEN_P(offset), value);
+			break;
+		}
 	}
 }
 
@@ -470,7 +539,8 @@ void zend_collection_add_item(zend_object *object, zval *offset, zval *value)
 	if (!zend_check_type(&ce->collection_item_type, value, NULL, ce, 0, false)) {
 		zend_string *type_str = zend_type_to_string(ce->collection_item_type);
 		zend_type_error(
-			"Value type %s does not match collection item type %s",
+			"Value type %s does not match %s collection item type %s",
+			ZSTR_VAL(ce->name),
 			zend_zval_type_name(value),
 			ZSTR_VAL(type_str)
 		);
@@ -483,12 +553,12 @@ void zend_collection_add_item(zend_object *object, zval *offset, zval *value)
 			seq_add_item(object, value);
 			break;
 		case ZEND_COLLECTION_DICT:
-			dict_add_or_update_item(object, offset, value);
+			dict_add_or_set_item(object, offset, value);
 			break;
 	}
 }
 
-void zend_collection_update_item(zend_object *object, zval *offset, zval *value)
+void zend_collection_set_item(zend_object *object, zval *offset, zval *value)
 {
 	zend_class_entry *ce = object->ce;
 	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_COLLECTION);
@@ -503,11 +573,11 @@ void zend_collection_update_item(zend_object *object, zval *offset, zval *value)
 		return;
 	}
 
-
 	if (!zend_check_type(&ce->collection_item_type, value, NULL, ce, 0, false)) {
 		zend_string *type_str = zend_type_to_string(ce->collection_item_type);
 		zend_type_error(
-			"Value type %s does not match collection item type %s",
+			"Value type %s does not match %s collection item type %s",
+			ZSTR_VAL(ce->name),
 			zend_zval_type_name(value),
 			ZSTR_VAL(type_str)
 		);
@@ -515,30 +585,16 @@ void zend_collection_update_item(zend_object *object, zval *offset, zval *value)
 		return;
 	}
 
+
+
 	switch (ce->collection_data_structure) {
 		case ZEND_COLLECTION_SEQ:
-			seq_update_item(object, Z_LVAL_P(offset), value);
+			seq_set_item(object, Z_LVAL_P(offset), value);
 			break;
 		case ZEND_COLLECTION_DICT:
-			dict_add_or_update_item(object, offset, value);
+			dict_add_or_set_item(object, offset, value);
 			break;
 	}
-}
-
-static int key_type_allowed(zend_class_entry *ce, zval *offset)
-{
-	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_COLLECTION);
-
-	if (ce->collection_key_type != Z_TYPE_P(offset)) {
-		zend_type_error(
-			"Key type %s of element does not match collection key type %s",
-			offset ? zend_zval_type_name(offset) : zend_get_type_by_const(IS_NULL),
-			zend_get_type_by_const(ce->collection_key_type)
-		);
-		return false;
-	}
-
-	return true;
 }
 
 int zend_collection_has_item(zend_object *object, zval *offset)

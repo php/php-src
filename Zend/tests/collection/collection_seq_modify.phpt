@@ -179,4 +179,4 @@ object(Books)#5 (1) {
 }
 
 Throws OutOfBoundsException:
-OutOfBoundsException: Index '42' does not exist in the sequence
+OutOfBoundsException: Index '42' does not exist in the Books sequence

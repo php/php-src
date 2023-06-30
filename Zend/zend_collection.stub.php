@@ -10,7 +10,7 @@ interface SeqCollection
 
     public function remove(int $index) : static;
 
-    public function has(int $value) : bool;
+    public function has(int $index) : bool;
 
     public function get(int $index) : mixed;
 

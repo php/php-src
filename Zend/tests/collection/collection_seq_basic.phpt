@@ -65,4 +65,4 @@ object(Article)#%d (%d) {
   string(11) "Second Test"
 }
 bool(false)
-TypeError: Key type string of element does not match collection key type int
+TypeError: Key type string of element does not match Articles sequence key type int

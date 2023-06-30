@@ -58,7 +58,7 @@ var_dump($c3);
 
 echo "\nThrows OutOfBoundsException:\n";
 try {
-	$c3->set(42, new Book('Title 1'));
+	$c3->set('fourtytwo', new Book('Title 1'));
 } catch (OutOfBoundsException $e) {
 	echo get_class($e), ': ', $e->getMessage(), "\n";
 }
@@ -179,4 +179,4 @@ object(Books)#5 (1) {
 }
 
 Throws OutOfBoundsException:
-OutOfBoundsException: Index '42' does not exist in the sequence
+OutOfBoundsException: Index 'fourtytwo' does not exist in the Books dictionary
