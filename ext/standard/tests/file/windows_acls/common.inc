@@ -19,7 +19,7 @@ function skipif() {
     if (getenv('GITHUB_ACTIONS')) {
         // bug44859_4.phpt test fails on the 1st run
         // other ACL tests cannot be run twice
-        die('skip failing on Github Actions (but passes in AppVeyor)');
+        die('skip failing on Github Actions');
     }
 }
 
