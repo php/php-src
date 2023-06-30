@@ -818,7 +818,7 @@ tail_call:
 				}
 			}
 
-			if (UNEXPECTED(obj->ce == zend_ce_weakmap)) {
+			if (UNEXPECTED(obj->handlers->get_gc == zend_weakmap_get_gc)) {
 				zend_weakmap_get_key_entry_gc(obj, &table, &len);
 				n = len;
 				zv = table;
@@ -1007,7 +1007,7 @@ tail_call:
 				}
 			}
 
-			if (UNEXPECTED(obj->ce == zend_ce_weakmap)) {
+			if (UNEXPECTED(obj->handlers->get_gc == zend_weakmap_get_gc)) {
 				zend_weakmap_get_entry_gc(obj, &table, &len);
 				n = len;
 				zv = table;
@@ -1458,7 +1458,7 @@ tail_call:
 				}
 			}
 
-			if (UNEXPECTED(obj->ce == zend_ce_weakmap)) {
+			if (UNEXPECTED(obj->handlers->get_gc == zend_weakmap_get_gc)) {
 				zend_weakmap_get_entry_gc(obj, &table, &len);
 				n = len;
 				zv = table;
