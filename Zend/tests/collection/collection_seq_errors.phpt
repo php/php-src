@@ -9,7 +9,7 @@ class Article
 	}
 }
 
-collection(Seq) Articles(Article)
+collection(Seq) Articles<<Article>>
 {
 }
 

@@ -2,11 +2,11 @@
 Collection: Type checking against interface
 --FILE--
 <?php
-collection(Dict) Articles(int => Article)
+collection(Dict) Articles<<int => Article>>
 {
 }
 
-collection(Seq) ArticleList(Article)
+collection(Seq) ArticleList<<Article>>
 {
 }
 

@@ -662,7 +662,7 @@ enum_case_expr:
 collection_declaration_statement:
 		T_COLLECTION { $<num>$ = CG(zend_lineno); }
 		'(' T_STRING ')'
-		T_STRING '(' collection_type_list ')' backup_doc_comment '{' class_statement_list '}'
+		T_STRING T_SL collection_type_list T_SR backup_doc_comment '{' class_statement_list '}'
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_COLLECTION|ZEND_ACC_FINAL, $<num>2, $10, zend_ast_get_str($6), NULL, $4, $12, NULL, $8); }
 ;
 
