@@ -1975,6 +1975,16 @@ ZEND_API HashTable *zend_std_get_properties_for(zend_object *obj, zend_prop_purp
 			}
 			ZEND_FALLTHROUGH;
 		case ZEND_PROP_PURPOSE_ARRAY_CAST:
+			if (obj->handlers->cast_object != std_object_handlers.cast_object) {
+				zval result;
+				if (obj->handlers->cast_object(obj, &result, IS_ARRAY) == SUCCESS) {
+					return Z_ARRVAL(result);
+				}
+				if (EG(exception)) {
+					return NULL;
+				}
+			}
+			ZEND_FALLTHROUGH;
 		case ZEND_PROP_PURPOSE_SERIALIZE:
 		case ZEND_PROP_PURPOSE_VAR_EXPORT:
 		case ZEND_PROP_PURPOSE_JSON:
