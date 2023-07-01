@@ -1,33 +1,24 @@
+# JIS0201.TXT
+# Date: 2015-12-02 23:49:00 GMT [KW]
+# © 2015 Unicode®, Inc.
+# For terms of use, see http://www.unicode.org/terms_of_use.html
 #
 #	Name:             JIS X 0201 (1976) to Unicode 1.1 Table
 #	Unicode version:  1.1
-#	Table version:    0.9
+#	Table version:    2.0
 #	Table format:     Format A
-#	Date:             8 March 1994
-#	Authors:          Glenn Adams <glenn@metis.com>
-#                     John H. Jenkins <John_Jenkins@taligent.com>
-#
-#	Copyright (c) 1991-1994 Unicode, Inc.  All Rights reserved.
-#
-#	This file is provided as-is by Unicode, Inc. (The Unicode Consortium).
-#	No claims are made as to fitness for any particular purpose.  No
-#	warranties of any kind are expressed or implied.  The recipient
-#	agrees to determine applicability of information provided.  If this
-#	file has been provided on magnetic media by Unicode, Inc., the sole
-#	remedy for any claim will be exchange of defective media within 90
-#	days of receipt.
-#
-#	Recipient is granted the right to make copies in any form for
-#	internal distribution and to freely use the information supplied
-#	in the creation of products supporting Unicode.  Unicode, Inc.
-#	specifically excludes the right to re-distribute this file directly
-#	to third parties or other organizations whether for profit or not.
+#	Date:             2011 October 14 (header updated: 2015 December 02)
 #
 #	General notes:
 #
-#	This table contains the data the Unicode Consortium has on how
-#	single-byte JIS X 0201 characters map into Unicode 1.1
-#	(ISO/IEC 10646:1-1993 UCS-2).
+#
+# This table contains one set of mappings from JIS X 0201 into Unicode.
+# Note that these data are *possible* mappings only and may not be the
+# same as those used by actual products, nor may they be the best suited
+# for all uses.  For more information on the mappings between various code
+# pages incorporating the repertoire of JIS X 0201 and Unicode, consult the
+# VENDORS mapping data.
+#
 #
 #	Format:  Three tab-separated columns
 #		Column #1 is the shift JIS code (in hex as 0xXX)
@@ -36,11 +27,22 @@
 #
 #	The entries are in JIS order
 #
-#   These mappings are provisional, pending definition of
-#       official mappings by Japanese standards bodies.
+#  Revision History:
 #
-#	Any comments or problems, contact <John_Jenkins@taligent.com>
+#    [v2.0, 2015 December 02]
+#    updates to copyright notice and terms of use
+#    no changes to character mappings
 #
+#    [v1.0, 2011 October 14]
+#    Updated terms of use to current wording.
+#    Updated contact information.
+#    No changes to the mapping data.
+#
+#    [v0.9, 8 March 1994]
+#    First release.
+#
+#  Use the Unicode reporting form <http://www.unicode.org/reporting.html>
+#    for any questions or comments or to report errors in the data.
 #
 0x20	0x0020	# SPACE
 0x21	0x0021	# EXCLAMATION MARK

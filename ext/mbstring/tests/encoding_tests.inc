@@ -14,6 +14,10 @@ function readConversionTable($path, &$from, &$to, $utf32 = false) {
         if ($line[0] == '#')
             continue;
         if (sscanf($line, "0x%x\t0x%x", $char, $codepoint) == 2) {
+            // Skip codepoints that do not have a mapping (e.g. in BIG5.txt)
+            if ($codepoint === 0xFFFD) {
+                continue;
+            }
             $codepoint = $utf32 ? pack('N', $codepoint) : pack('n', $codepoint);
             if ($char == PHP_INT_MAX) {
                 // We may be on a 32-bit machine and testing a text encoding with 4-byte codes
