@@ -4843,6 +4843,88 @@ static bool date_period_initialize(timelib_time **st, timelib_time **et, timelib
 	return retval;
 } /* }}} */
 
+static bool date_period_init_iso8601_string(php_period_obj *dpobj, char *isostr, size_t isostr_len, zend_long options, zend_long *recurrences) {
+	if (!date_period_initialize(&(dpobj->start), &(dpobj->end), &(dpobj->interval), recurrences, isostr, isostr_len)) {
+		return false;
+	}
+
+	if (dpobj->start == NULL) {
+		zend_string *func = get_active_function_or_method_name();
+		zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "%s(): ISO interval must contain a start date, \"%s\" given", ZSTR_VAL(func), isostr);
+		zend_string_release(func);
+		return false;
+	}
+	if (dpobj->interval == NULL) {
+		zend_string *func = get_active_function_or_method_name();
+		zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "%s(): ISO interval must contain an interval, \"%s\" given", ZSTR_VAL(func), isostr);
+		zend_string_release(func);
+		return false;
+	}
+	if (dpobj->end == NULL && recurrences == 0) {
+		zend_string *func = get_active_function_or_method_name();
+		zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "%s(): ISO interval must contain an end date or a recurrence count, \"%s\" given", ZSTR_VAL(func), isostr);
+		zend_string_release(func);
+		return false;
+	}
+
+	if (dpobj->start) {
+		timelib_update_ts(dpobj->start, NULL);
+	}
+	if (dpobj->end) {
+		timelib_update_ts(dpobj->end, NULL);
+	}
+	dpobj->start_ce = date_ce_date;
+
+	return true;
+}
+
+static bool date_period_init_finish(php_period_obj *dpobj, zend_long options, zend_long recurrences) {
+	if (dpobj->end == NULL && recurrences < 1) {
+		zend_string *func = get_active_function_or_method_name();
+		zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "%s(): Recurrence count must be greater than 0", ZSTR_VAL(func));
+		zend_string_release(func);
+		return false;
+	}
+
+	/* options */
+	dpobj->include_start_date = !(options & PHP_DATE_PERIOD_EXCLUDE_START_DATE);
+	dpobj->include_end_date = options & PHP_DATE_PERIOD_INCLUDE_END_DATE;
+
+	/* recurrrences */
+	dpobj->recurrences = recurrences + dpobj->include_start_date + dpobj->include_end_date;
+
+	dpobj->initialized = 1;
+
+	initialize_date_period_properties(dpobj);
+
+	return true;
+}
+
+PHP_METHOD(DatePeriod, createFromISO8601String)
+{
+	php_period_obj *dpobj;
+	zend_long recurrences = 0, options = 0;
+	char *isostr = NULL;
+	size_t isostr_len = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &isostr, &isostr_len, &options) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_period);
+	dpobj = Z_PHPPERIOD_P(return_value);
+
+	dpobj->current = NULL;
+
+	if (!date_period_init_iso8601_string(dpobj, isostr, isostr_len, options, &recurrences)) {
+		RETURN_THROWS();
+	}
+
+	if (!date_period_init_finish(dpobj, options, recurrences)) {
+		RETURN_THROWS();
+	}
+}
+
 /* {{{ Creates new DatePeriod object. */
 PHP_METHOD(DatePeriod, __construct)
 {
@@ -4867,36 +4949,9 @@ PHP_METHOD(DatePeriod, __construct)
 	dpobj->current = NULL;
 
 	if (isostr) {
-		if (!date_period_initialize(&(dpobj->start), &(dpobj->end), &(dpobj->interval), &recurrences, isostr, isostr_len)) {
+		if (!date_period_init_iso8601_string(dpobj, isostr, isostr_len, options, &recurrences)) {
 			RETURN_THROWS();
 		}
-
-		if (dpobj->start == NULL) {
-			zend_string *func = get_active_function_or_method_name();
-			zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "%s(): ISO interval must contain a start date, \"%s\" given", ZSTR_VAL(func), isostr);
-			zend_string_release(func);
-			RETURN_THROWS();
-		}
-		if (dpobj->interval == NULL) {
-			zend_string *func = get_active_function_or_method_name();
-			zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "%s(): ISO interval must contain an interval, \"%s\" given", ZSTR_VAL(func), isostr);
-			zend_string_release(func);
-			RETURN_THROWS();
-		}
-		if (dpobj->end == NULL && recurrences == 0) {
-			zend_string *func = get_active_function_or_method_name();
-			zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "%s(): ISO interval must contain an end date or a recurrence count, \"%s\" given", ZSTR_VAL(func), isostr);
-			zend_string_release(func);
-			RETURN_THROWS();
-		}
-
-		if (dpobj->start) {
-			timelib_update_ts(dpobj->start, NULL);
-		}
-		if (dpobj->end) {
-			timelib_update_ts(dpobj->end, NULL);
-		}
-		dpobj->start_ce = date_ce_date;
 	} else {
 		/* init */
 		php_interval_obj *intobj = Z_PHPINTERVAL_P(interval);
@@ -4925,23 +4980,9 @@ PHP_METHOD(DatePeriod, __construct)
 		}
 	}
 
-	if (dpobj->end == NULL && recurrences < 1) {
-		zend_string *func = get_active_function_or_method_name();
-		zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "%s(): Recurrence count must be greater than 0", ZSTR_VAL(func));
-		zend_string_release(func);
+	if (!date_period_init_finish(dpobj, options, recurrences)) {
 		RETURN_THROWS();
 	}
-
-	/* options */
-	dpobj->include_start_date = !(options & PHP_DATE_PERIOD_EXCLUDE_START_DATE);
-	dpobj->include_end_date = options & PHP_DATE_PERIOD_INCLUDE_END_DATE;
-
-	/* recurrrences */
-	dpobj->recurrences = recurrences + dpobj->include_start_date + dpobj->include_end_date;
-
-	dpobj->initialized = 1;
-
-	initialize_date_period_properties(dpobj);
 }
 /* }}} */
 

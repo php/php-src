@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ce0bc9fd067a6598f66a65a9159674392e6cac4d */
+ * Stub hash: 30e6ffeefc0c0ecd66f3f40c9211277ce02d7187 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -461,6 +461,11 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateInterval___se
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DatePeriod_createFromISO8601String, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, specification, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DatePeriod___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, start)
 	ZEND_ARG_INFO(0, interval)
@@ -577,6 +582,7 @@ ZEND_METHOD(DateInterval, __serialize);
 ZEND_METHOD(DateInterval, __unserialize);
 ZEND_METHOD(DateInterval, __wakeup);
 ZEND_METHOD(DateInterval, __set_state);
+ZEND_METHOD(DatePeriod, createFromISO8601String);
 ZEND_METHOD(DatePeriod, __construct);
 ZEND_METHOD(DatePeriod, getStartDate);
 ZEND_METHOD(DatePeriod, getEndDate);
@@ -738,6 +744,7 @@ static const zend_function_entry class_DateInterval_methods[] = {
 
 
 static const zend_function_entry class_DatePeriod_methods[] = {
+	ZEND_ME(DatePeriod, createFromISO8601String, arginfo_class_DatePeriod_createFromISO8601String, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(DatePeriod, __construct, arginfo_class_DatePeriod___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, getStartDate, arginfo_class_DatePeriod_getStartDate, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, getEndDate, arginfo_class_DatePeriod_getEndDate, ZEND_ACC_PUBLIC)
