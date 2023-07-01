@@ -1129,8 +1129,6 @@ ZEND_FUNCTION(trigger_error)
 	}
 
 	zend_error((int)error_type, "%s", message);
-	// TODO Change to void
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1187,9 +1185,6 @@ ZEND_FUNCTION(restore_error_handler)
 		ZVAL_COPY_VALUE(&EG(user_error_handler), tmp);
 		zend_stack_del_top(&EG(user_error_handlers));
 	}
-
-	// TODO Change to void
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1233,9 +1228,6 @@ ZEND_FUNCTION(restore_exception_handler)
 		ZVAL_COPY_VALUE(&EG(user_exception_handler), tmp);
 		zend_stack_del_top(&EG(user_exception_handlers));
 	}
-
-	// TODO Change to void
-	RETURN_TRUE;
 }
 /* }}} */
 

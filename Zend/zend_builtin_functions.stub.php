@@ -95,20 +95,20 @@ function get_included_files(): array {}
  */
 function get_required_files(): array {}
 
-function trigger_error(string $message, int $error_level = E_USER_NOTICE): bool {}
+function trigger_error(string $message, int $error_level = E_USER_NOTICE): void {}
 
 /** @alias trigger_error */
-function user_error(string $message, int $error_level = E_USER_NOTICE): bool {}
+function user_error(string $message, int $error_level = E_USER_NOTICE): void {}
 
 /** @return callable|null */
 function set_error_handler(?callable $callback, int $error_levels = E_ALL) {}
 
-function restore_error_handler(): true {}
+function restore_error_handler(): void {}
 
 /** @return callable|null */
 function set_exception_handler(?callable $callback) {}
 
-function restore_exception_handler(): true {}
+function restore_exception_handler(): void {}
 
 /**
  * @return array<int, string>
