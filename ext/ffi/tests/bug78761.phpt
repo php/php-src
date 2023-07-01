@@ -14,7 +14,7 @@ opcache.preload={PWD}/bug78761_preload.php
 --FILE--
 <?php
 try {
-    FFI::cast('char[10]', FFI::new('char[1]'));
+    FFI::cdef()->cast('char[10]', FFI::cdef()->new('char[1]'));
 } catch (FFI\Exception $ex) {
     echo $ex->getMessage(), PHP_EOL;
 }
