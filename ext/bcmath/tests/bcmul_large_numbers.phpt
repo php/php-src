@@ -7,19 +7,45 @@ bcmath.scale=0
 --FILE--
 <?php
 
-$firstFactors = ["15151324141414.412312232141241", "-132132245132134.1515123765412", "141241241241241248267654747412", "-149143276547656984948124912", "0.1322135476547459213732911312", "-0.123912932193769965476541321"];
-$secondFactors = array_merge($firstFactors, ["0", "0.00", "-0", "-0.00", "15", "-15", "1", "-9", "14.14", "-16.60", "0.15", "-0.01"]);
-$scales = [0,10];
+$firstFactors = [
+    "15151324141414.412312232141241",
+    "-132132245132134.1515123765412",
+    "141241241241241248267654747412",
+    "-149143276547656984948124912",
+    "0.1322135476547459213732911312",
+    "-0.123912932193769965476541321",
+];
+$secondFactors = array_merge($firstFactors, [
+    "0",
+    "0.00",
+    "-0",
+    "-0.00",
+    "15",
+    "-15",
+    "1",
+    "-9",
+    "14.14",
+    "-16.60",
+    "0.15",
+    "-0.01",
+]);
+$scales = [0, 10];
 
-foreach($scales as $scale) {
-	foreach($firstFactors as $firstFactor) {
-    	echo "Number \"$firstFactor\" (scale $scale)\n";
-		foreach($secondFactors as $secondFactor) {
-			echo $firstFactor, " × ", str_pad($secondFactor, 30), ' = ', bcmul($firstFactor, $secondFactor, $scale),"\n";
-		}
-		echo "\n";
-	}
+foreach ($scales as $scale) {
+    foreach ($firstFactors as $firstFactor) {
+        echo "Number \"$firstFactor\" (scale $scale)\n";
+        foreach ($secondFactors as $secondFactor) {
+            echo $firstFactor,
+                " × ",
+                str_pad($secondFactor, 30),
+                " = ",
+                bcmul($firstFactor, $secondFactor, $scale),
+                "\n";
+        }
+        echo "\n";
+    }
 }
+
 ?>
 --EXPECT--
 Number "15151324141414.412312232141241" (scale 0)

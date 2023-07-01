@@ -20,15 +20,16 @@ $radicants = [
     "15",
     "1",
     "14.14",
-    "0.15"
-    ];
-$scales = [0,10];
+    "0.15",
+];
+$scales = [0, 10];
 
-foreach($scales as $scale) {
-    foreach($radicants as $radicant) {
-        echo bcsqrt($radicant, $scale),"\n";
+foreach ($scales as $scale) {
+    foreach ($radicants as $radicant) {
+        echo bcsqrt($radicant, $scale), "\n";
     }
 }
+
 ?>
 --EXPECT--
 0

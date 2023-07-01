@@ -8,18 +8,37 @@ bcmath.scale=0
 <?php
 
 $exponents = ["15", "-15", "1", "-9", "0", "-0", "252", "-112"];
-$baseNumbers = array_merge($exponents, ["0.00", "-0.00", "14.14", "-16.60", "0.15", "-0.01", "15151324141414.412312232141241", "141241241241241248267654747412", "-149143276547656984948124912", "-132132245132134.1515123765412", "0.1322135476547459213732911312", "-0.123912932193769965476541321"]);
-$scales = [0,10];
+$baseNumbers = array_merge($exponents, [
+    "0.00",
+    "-0.00",
+    "14.14",
+    "-16.60",
+    "0.15",
+    "-0.01",
+    "15151324141414.412312232141241",
+    "141241241241241248267654747412",
+    "-149143276547656984948124912",
+    "-132132245132134.1515123765412",
+    "0.1322135476547459213732911312",
+    "-0.123912932193769965476541321",
+]);
+$scales = [0, 10];
 
-foreach($scales as $scale) {
-	foreach($baseNumbers as $baseNumber) {
-    	echo "Number \"$baseNumber\" (scale $scale)\n";
-		foreach($exponents as $exponent) {
-			echo str_pad($baseNumber, 6, ' ', STR_PAD_LEFT), " ^ " , str_pad($exponent,30), ' = ', bcpow($baseNumber, $exponent, $scale),"\n";
-		}
-		echo "\n";
-	}
+foreach ($scales as $scale) {
+    foreach ($baseNumbers as $baseNumber) {
+        echo "Number \"$baseNumber\" (scale $scale)\n";
+        foreach ($exponents as $exponent) {
+            echo str_pad($baseNumber, 6, " ", STR_PAD_LEFT),
+                " ^ ",
+                str_pad($exponent, 30),
+                " = ",
+                bcpow($baseNumber, $exponent, $scale),
+                "\n";
+        }
+        echo "\n";
+    }
 }
+
 ?>
 --EXPECT--
 Number "15" (scale 0)

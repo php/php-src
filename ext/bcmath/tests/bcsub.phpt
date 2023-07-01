@@ -8,18 +8,35 @@ bcmath.scale=0
 <?php
 
 $minuends = ["15", "-15", "1", "-9", "14.14", "-16.60", "0.15", "-0.01"];
-$subtrahends = array_merge($minuends, ["0", "0.00", "-0", "-0.00", "15151324141414.412312232141241", "-132132245132134.1515123765412", "141241241241241248267654747412", "-149143276547656984948124912", "0.1322135476547459213732911312", "-0.123912932193769965476541321"]);
-$scales = [0,10];
+$subtrahends = array_merge($minuends, [
+    "0",
+    "0.00",
+    "-0",
+    "-0.00",
+    "15151324141414.412312232141241",
+    "-132132245132134.1515123765412",
+    "141241241241241248267654747412",
+    "-149143276547656984948124912",
+    "0.1322135476547459213732911312",
+    "-0.123912932193769965476541321",
+]);
+$scales = [0, 10];
 
-foreach($scales as $scale) {
-	foreach($minuends as $minuend) {
-    	echo "Number \"$minuend\" (scale $scale)\n";
-		foreach($subtrahends as $subtrahend) {
-			echo str_pad($minuend, 6, ' ', STR_PAD_LEFT), " - ", str_pad($subtrahend, 30), ' = ', bcsub($minuend, $subtrahend, $scale),"\n";
-		}
-		echo "\n";
-	}
+foreach ($scales as $scale) {
+    foreach ($minuends as $minuend) {
+        echo "Number \"$minuend\" (scale $scale)\n";
+        foreach ($subtrahends as $subtrahend) {
+            echo str_pad($minuend, 6, " ", STR_PAD_LEFT),
+                " - ",
+                str_pad($subtrahend, 30),
+                " = ",
+                bcsub($minuend, $subtrahend, $scale),
+                "\n";
+        }
+        echo "\n";
+    }
 }
+
 
 ?>
 --EXPECT--

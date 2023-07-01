@@ -8,18 +8,39 @@ bcmath.scale=0
 <?php
 
 $dividends = ["0", "0.00", "-0", "-0.00"];
-$divisors = ["15", "-15", "1", "-9", "14.14", "-16.60", "0.15", "-0.01", "15151324141414.412312232141241", "-132132245132134.1515123765412", "141241241241241248267654747412", "-149143276547656984948124912", "0.1322135476547459213732911312", "-0.123912932193769965476541321"];
-$scales = [0,10];
+$divisors = [
+    "15",
+    "-15",
+    "1",
+    "-9",
+    "14.14",
+    "-16.60",
+    "0.15",
+    "-0.01",
+    "15151324141414.412312232141241",
+    "-132132245132134.1515123765412",
+    "141241241241241248267654747412",
+    "-149143276547656984948124912",
+    "0.1322135476547459213732911312",
+    "-0.123912932193769965476541321",
+];
+$scales = [0, 10];
 
-foreach($scales as $scale) {
-	foreach($dividends as $dividend) {
-    	echo "Number \"$dividend\" (scale $scale)\n";
-		foreach($divisors as $divisor) {
-			echo str_pad($dividend, 6, ' ', STR_PAD_LEFT), " ÷ ", str_pad($divisor, 30), ' = ', bcdiv($dividend, $divisor, $scale),"\n";
-		}
-		echo "\n";
-	}
+foreach ($scales as $scale) {
+    foreach ($dividends as $dividend) {
+        echo "Number \"$dividend\" (scale $scale)\n";
+        foreach ($divisors as $divisor) {
+            echo str_pad($dividend, 6, " ", STR_PAD_LEFT),
+                " ÷ ",
+                str_pad($divisor, 30),
+                " = ",
+                bcdiv($dividend, $divisor, $scale),
+                "\n";
+        }
+        echo "\n";
+    }
 }
+
 ?>
 --EXPECT--
 Number "0" (scale 0)
