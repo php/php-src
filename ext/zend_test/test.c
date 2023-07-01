@@ -37,6 +37,7 @@ ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 static zend_class_entry *zend_test_interface;
 static zend_class_entry *zend_test_class;
 static zend_class_entry *zend_test_child_class;
+static zend_class_entry *zend_attribute_test_class;
 static zend_class_entry *zend_test_trait;
 static zend_class_entry *zend_test_attribute;
 static zend_class_entry *zend_test_repeatable_attribute;
@@ -597,6 +598,12 @@ static ZEND_METHOD(_ZendTestChildClass, returnsThrowable)
 	zend_throw_error(NULL, "Dummy");
 }
 
+static ZEND_METHOD(ZendAttributeTest, testMethod)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_TRUE;
+}
+
 static ZEND_METHOD(_ZendTestTrait, testMethod)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -726,6 +733,8 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	memcpy(&zend_test_class_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
+
+	zend_attribute_test_class = register_class_ZendAttributeTest();
 
 	zend_test_trait = register_class__ZendTestTrait();
 

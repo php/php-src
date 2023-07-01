@@ -52,7 +52,7 @@ namespace {
         public function returnsThrowable(): Exception {}
     }
 
-    trait _ZendTestTrait {
+    class ZendAttributeTest {
         /** @var int */
         #[ZendTestRepeatableAttribute]
         #[ZendTestRepeatableAttribute]
@@ -64,6 +64,13 @@ namespace {
         public $testProp;
 
         #[ZendTestAttribute]
+        public function testMethod(): bool {}
+    }
+
+    trait _ZendTestTrait {
+        /** @var mixed */
+        public $testProp;
+
         public function testMethod(): bool {}
     }
 

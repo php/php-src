@@ -5,19 +5,15 @@ zend_test
 --FILE--
 <?php
 
-class Foo {
-    use _ZendTestTrait;
-}
-
-$reflectionConstant = new ReflectionClassConstant(Foo::class, "TEST_CONST");
+$reflectionConstant = new ReflectionClassConstant(ZendAttributeTest::class, "TEST_CONST");
 var_dump($reflectionConstant->getAttributes()[0]->newInstance());
 var_dump($reflectionConstant->getAttributes()[1]->newInstance());
 
-$reflectionProperty = new ReflectionProperty(Foo::class, "testProp");
+$reflectionProperty = new ReflectionProperty(ZendAttributeTest::class, "testProp");
 var_dump($reflectionProperty->getAttributes()[0]->newInstance());
 var_dump($reflectionProperty->getAttributes()[1]->newInstance());
 
-$reflectionMethod = new ReflectionMethod(Foo::class, "testMethod");
+$reflectionMethod = new ReflectionMethod(ZendAttributeTest::class, "testMethod");
 var_dump($reflectionMethod->getAttributes()[0]->newInstance());
 
 ?>
