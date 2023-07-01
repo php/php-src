@@ -45,4 +45,6 @@ array(%d) {
   string(10) "video/webm"
   ["%s/resources/test.woff"]=>
   string(9) "font/woff"
+  ["%s/resources/test.xz"]=>
+  string(16) "application/x-xz"
 }
