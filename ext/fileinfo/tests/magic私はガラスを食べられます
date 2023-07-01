@@ -7439,7 +7439,7 @@
 0	string		msc		Message Sequence Chart (chart)
 0	string		submsc		Message Sequence Chart (subchart)
 #------------------------------------------------------------------------------
-# $File: compress,v 1.80 2021/03/15 17:49:24 christos Exp $
+# $File: compress,v 1.81 2021/04/19 17:01:45 christos Exp $
 # compress:  file(1) magic for pure-compression formats (no archives)
 #
 # compress, gzip, pack, compact, huf, squeeze, crunch, freeze, yabba, etc.
@@ -7705,13 +7705,12 @@
 
 # http://tukaani.org/xz/xz-file-format.txt
 0	ustring		\xFD7zXZ\x00		XZ compressed data, checksum
+!:strength * 2
+!:mime	application/x-xz
 >7	byte&0xf	0x0			NONE
 >7	byte&0xf	0x1			CRC32
 >7	byte&0xf	0x4			CRC64
 >7	byte&0xf	0xa			SHA-256
-
-!:strength * 2
-!:mime	application/x-xz
 
 # https://github.com/ckolivas/lrzip/blob/master/doc/magic.header.txt
 0	string		LRZI			LRZIP compressed data
