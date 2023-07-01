@@ -6,6 +6,7 @@ bcmath
 bcmath.scale=0
 --FILE--
 <?php
+require "helpers/run_bcmath_function.php";
 
 $dividends = ["15", "-15", "1", "-9", "14.14", "-16.60", "0.15", "-0.01"];
 $divisors = array_merge($dividends, [
@@ -16,22 +17,8 @@ $divisors = array_merge($dividends, [
     "0.1322135476547459213732911312",
     "-0.123912932193769965476541321",
 ]);
-$scales = [0, 10];
 
-foreach ($scales as $scale) {
-    foreach ($dividends as $dividend) {
-        echo "Number \"$dividend\" (scale $scale)\n";
-        foreach ($divisors as $divisor) {
-            echo $dividend,
-                " / ",
-                str_pad($divisor, 30),
-                " = ",
-                bcdiv($dividend, $divisor, $scale),
-                "\n";
-        }
-        echo "\n";
-    }
-}
+run_bcmath_tests($dividends, $divisors, "/", bcdiv(...));
 
 ?>
 --EXPECT--

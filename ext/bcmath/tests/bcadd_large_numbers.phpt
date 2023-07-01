@@ -6,8 +6,9 @@ bcmath
 bcmath.scale=0
 --FILE--
 <?php
+require "helpers/run_bcmath_function.php";
 
-$firstSummands = [
+$leftSummands = [
     "15151324141414.412312232141241",
     "-132132245132134.1515123765412",
     "141241241241241248267654747412",
@@ -15,7 +16,7 @@ $firstSummands = [
     "0.1322135476547459213732911312",
     "-0.123912932193769965476541321",
 ];
-$secondSummands = array_merge($firstSummands, [
+$rightSummands = array_merge($leftSummands, [
     "0",
     "0.00",
     "-0",
@@ -29,22 +30,8 @@ $secondSummands = array_merge($firstSummands, [
     "0.15",
     "-0.01",
 ]);
-$scales = [0, 10];
 
-foreach ($scales as $scale) {
-    foreach ($firstSummands as $firstSummand) {
-        echo "Number \"$firstSummand\" (scale $scale)\n";
-        foreach ($secondSummands as $secondSummand) {
-            echo $firstSummand,
-                " + ",
-                str_pad($secondSummand, 30),
-                " = ",
-                bcadd($firstSummand, $secondSummand, $scale),
-                "\n";
-        }
-        echo "\n";
-    }
-}
+run_bcmath_tests($leftSummands, $rightSummands, "+", bcadd(...));
 
 ?>
 --EXPECT--
