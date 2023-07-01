@@ -40,6 +40,8 @@ PHP                                                                        NEWS
 - Standard:
   . Added support for rounding negative places in number_format().
     (Marc Bennewitz)
+  . Prevent precision loss on formatting decimal integers in number_format().
+    (Marc Bennewitz)
   . Added usage of posix_spawn for proc_open when supported by OS. 
     (Cristian Rodriguez)
 

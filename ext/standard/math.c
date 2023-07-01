@@ -1130,16 +1130,134 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	return res;
 }
 
+PHPAPI zend_string *_php_math_number_format_long(zend_long num, zend_long dec, const char *dec_point,
+		size_t dec_point_len, const char *thousand_sep, size_t thousand_sep_len)
+{
+	static const zend_ulong powers[] = {
+		1, 10, 100, 1000, 10000,
+		100000, 1000000, 10000000, 100000000, 1000000000,
+#if SIZEOF_ZEND_LONG == 8
+		10000000000, 100000000000, 1000000000000, 10000000000000, 100000000000000,
+		1000000000000000, 10000000000000000, 100000000000000000, 1000000000000000000, 10000000000000000000ul
+#elif SIZEOF_ZEND_LONG > 8
+# error "Unknown SIZEOF_ZEND_LONG"
+#endif
+	};
+
+	int is_negative = 0;
+	zend_ulong tmpnum;
+	zend_ulong power;
+	zend_ulong power_half;
+	zend_ulong rest;
+
+	zend_string *tmpbuf;
+	zend_string *res;
+	size_t reslen;
+	char *s, *t;  /* source, target */
+	int count = 0;
+	size_t topad;
+
+	// unsigned absolute number and memorize negative sign
+	if (num < 0) {
+		is_negative = 1;
+		tmpnum = ((zend_ulong)-(num + 1)) + 1;
+	} else {
+		tmpnum = (zend_ulong)num;
+	}
+
+	// rounding the number
+	if (dec < 0) {
+		// Check rounding to more negative places than possible
+		if (dec < -(sizeof(powers) / sizeof(powers[0]) - 1)) {
+			tmpnum = 0;
+		} else {
+			power = powers[-dec];
+			power_half = power / 2;
+			rest = tmpnum % power;
+			tmpnum = tmpnum / power;
+
+			if (rest >= power_half) {
+				tmpnum = tmpnum * power + power;
+			} else {
+				tmpnum = tmpnum * power;
+			}
+		}
+
+		// prevent resulting in negative zero
+		if (tmpnum == 0) {
+			is_negative = 0;
+		}
+	}
+
+	tmpbuf = strpprintf(0, ZEND_ULONG_FMT, tmpnum);
+	reslen = ZSTR_LEN(tmpbuf);
+
+	/* allow for thousand separators */
+	if (thousand_sep) {
+		reslen = zend_safe_addmult((reslen-1)/3, thousand_sep_len, reslen, "number formatting");
+	}
+
+	reslen += is_negative;
+
+	if (dec > 0) {
+		reslen += dec;
+
+		if (dec_point) {
+			reslen = zend_safe_addmult(reslen, 1, dec_point_len, "number formatting");
+		}
+	}
+
+	res = zend_string_alloc(reslen, 0);
+
+	s = ZSTR_VAL(tmpbuf) + ZSTR_LEN(tmpbuf) - 1;
+	t = ZSTR_VAL(res) + reslen;
+	*t-- = '\0';
+
+	/* copy the decimal places. */
+	if (dec > 0) {
+		topad = (size_t)dec;
+
+		/* pad with '0's */
+		while (topad--) {
+			*t-- = '0';
+		}
+
+		/* add decimal point */
+		if (dec_point) {
+			t -= dec_point_len;
+			memcpy(t + 1, dec_point, dec_point_len);
+		}
+	}
+
+	/* copy the numbers before the decimal point, adding thousand
+	 * separator every three digits */
+	while (s >= ZSTR_VAL(tmpbuf)) {
+		*t-- = *s--;
+		if (thousand_sep && (++count % 3) == 0 && s >= ZSTR_VAL(tmpbuf)) {
+			t -= thousand_sep_len;
+			memcpy(t + 1, thousand_sep, thousand_sep_len);
+		}
+	}
+
+	if (is_negative) {
+		*t-- = '-';
+	}
+
+	ZSTR_LEN(res) = reslen;
+	zend_string_release_ex(tmpbuf, 0);
+	return res;
+}
+
 /* {{{ Formats a number with grouped thousands */
 PHP_FUNCTION(number_format)
 {
-	double num;
+	zval* num;
 	zend_long dec = 0;
 	char *thousand_sep = NULL, *dec_point = NULL;
 	size_t thousand_sep_len = 0, dec_point_len = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
-		Z_PARAM_DOUBLE(num)
+		Z_PARAM_NUMBER(num)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(dec)
 		Z_PARAM_STRING_OR_NULL(dec_point, dec_point_len)
@@ -1155,7 +1273,17 @@ PHP_FUNCTION(number_format)
 		thousand_sep_len = 1;
 	}
 
-	RETURN_STR(_php_math_number_format_ex(num, (int)dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+	switch (Z_TYPE_P(num)) {
+		case IS_LONG:
+			RETURN_STR(_php_math_number_format_long(Z_LVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+			break;
+
+		case IS_DOUBLE:
+			RETURN_STR(_php_math_number_format_ex(Z_DVAL_P(num), (int)dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+			break;
+
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
 }
 /* }}} */
 
