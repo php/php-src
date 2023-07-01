@@ -4,7 +4,7 @@ Test DatePeriod::__serialize and DatePeriod::__unserialize (ISO String)
 <?php
 date_default_timezone_set("Europe/London");
 
-$d = new DatePeriod('R4/2012-07-01T00:00:00Z/P7D');
+$d = DatePeriod::createFromISO8601String('R4/2012-07-01T00:00:00Z/P7D');
 echo "Original object:\n";
 var_dump($d);
 
