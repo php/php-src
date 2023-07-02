@@ -118,6 +118,7 @@ PHP 8.3 INTERNALS UPGRADE NOTES
  e. ext/spl
    - The PHPAPI spl_iterator_apply() function now returns zend_result instead of int.
      There are no functional changes.
+   - The field _spl_filesystem_object->is_recursive has been removed.
 
  f. ext/dom
    - A new function dom_get_doc_props_read_only() is added to gather the document

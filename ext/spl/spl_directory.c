@@ -759,8 +759,6 @@ static void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_l
 
 	}
 	zend_restore_error_handling(&error_handling);
-
-	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator) ? 1 : 0;
 }
 /* }}} */
 
