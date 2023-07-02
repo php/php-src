@@ -375,7 +375,7 @@ static zend_always_inline zend_result zendi_try_convert_scalar_to_number(zval *o
 }
 /* }}} */
 
-static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bool *failed) /* {{{ */
+static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(const zval *op, bool *failed) /* {{{ */
 {
 	*failed = 0;
 	switch (Z_TYPE_P(op)) {
@@ -452,6 +452,15 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 	}
 }
 /* }}} */
+
+ZEND_API zend_long ZEND_FASTCALL zval_try_get_long(const zval *op, bool *failed)
+{
+	if (EXPECTED(Z_TYPE_P(op) == IS_LONG)) {
+		*failed = false;
+		return Z_LVAL_P(op);
+	}
+	return zendi_try_get_long(op, failed);
+}
 
 #define ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(opcode) \
 	if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT) \
@@ -2048,16 +2057,17 @@ has_op2_string:;
 		}
 
 		if (result == op1) {
-			/* special case, perform operations on result */
-			result_str = zend_string_extend(op1_string, result_len, 0);
-			/* Free result after zend_string_extend(), as it may throw an out-of-memory error. If we
-			 * free it before we would leave the released variable on the stack with shutdown trying
-			 * to free it again. */
+			/* Destroy the old result first to drop the refcount, such that $x .= ...; may happen in-place. */
 			if (free_op1_string) {
 				/* op1_string will be used as the result, so we should not free it */
 				i_zval_ptr_dtor(result);
+				/* Set it to NULL in case that the extension will throw an out-of-memory error.
+				 * Otherwise the shutdown sequence will try to free this again. */
+				ZVAL_NULL(result);
 				free_op1_string = false;
 			}
+			/* special case, perform operations on result */
+			result_str = zend_string_extend(op1_string, result_len, 0);
 			/* account for the case where result_str == op1_string == op2_string and the realloc is done */
 			if (op1_string == op2_string) {
 				if (free_op2_string) {

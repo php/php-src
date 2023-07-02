@@ -178,6 +178,7 @@ static void pgsql_link_free(pgsql_link_handle *link)
 		PQclear(res);
 	}
 	if (!link->persistent) {
+		PQuntrace(link->conn);
 		PQfinish(link->conn);
 	}
 	PGG(num_links)--;
@@ -2833,6 +2834,7 @@ PHP_FUNCTION(pg_set_error_verbosity)
 }
 /* }}} */
 
+#ifdef HAVE_PG_CONTEXT_VISIBILITY
 PHP_FUNCTION(pg_set_error_context_visibility)
 {
 	zval *pgsql_link = NULL;
@@ -2855,6 +2857,7 @@ PHP_FUNCTION(pg_set_error_context_visibility)
 		RETURN_THROWS();
 	}
 }
+#endif
 
 /* {{{ Set client encoding */
 PHP_FUNCTION(pg_set_client_encoding)

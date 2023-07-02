@@ -1,4 +1,4 @@
---TEST--n
+--TEST--
 Bug #24220 (range() numeric string handling)
 --FILE--
 <?php

@@ -38,7 +38,7 @@ if (count($workersBefore) === 0) {
 proc_terminate($cliServerInfo->processHandle, 9); // SIGKILL
 
 $try = 1;
-$max_tries = 5;
+$max_tries = 20;
 while (true) {
     $workersAfter = find_workers_by_pids($workersBefore);
     if (count($workersAfter) === 0) {

@@ -379,7 +379,7 @@ typedef struct _timelib_tzdb {
 #define TIMELIB_OVERRIDE_TIME    0x01
 #define TIMELIB_NO_CLONE         0x02
 
-#define TIMELIB_UNSET   -99999
+#define TIMELIB_UNSET   -9999999
 
 /* An entry for each of these error codes is also in the
  * timelib_error_messages array in timelib.c.

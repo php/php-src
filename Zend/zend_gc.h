@@ -20,6 +20,10 @@
 #ifndef ZEND_GC_H
 #define ZEND_GC_H
 
+#ifndef GC_BENCH
+# define GC_BENCH 0
+#endif
+
 BEGIN_EXTERN_C()
 
 typedef struct _zend_gc_status {

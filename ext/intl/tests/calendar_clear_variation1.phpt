@@ -4,6 +4,9 @@ IntlCalendar::clear() 1 arg variation
 date.timezone=Atlantic/Azores
 --EXTENSIONS--
 intl
+--XFAIL--
+May currently fail with ICU 73.
+See https://github.com/php/php-src/issues/11128
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);

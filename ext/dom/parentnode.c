@@ -553,6 +553,8 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 		return;
 	}
 
+	php_libxml_invalidate_node_list_cache_from_doc(context->document->ptr);
+
 	xmlNodePtr insertion_point = child->next;
 
 	xmlNodePtr fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
