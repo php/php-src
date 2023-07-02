@@ -6,7 +6,7 @@ bcmath
 bcmath.scale=0
 --FILE--
 <?php
-require(__DIR__."/helpers/run_bcmath_function.php");
+require(__DIR__."/run_bcmath_tests_function.inc");
 
 $leftSummands = [
     "15151324141414.412312232141241",

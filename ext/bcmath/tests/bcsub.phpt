@@ -6,7 +6,7 @@ bcmath
 bcmath.scale=0
 --FILE--
 <?php
-require(__DIR__."/helpers/run_bcmath_function.php");
+require(__DIR__."/run_bcmath_tests_function.inc");
 
 $minuends = ["15", "-15", "1", "-9", "14.14", "-16.60", "0.15", "-0.01"];
 $subtrahends = array_merge($minuends, [
