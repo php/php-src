@@ -772,18 +772,15 @@ Since:
 */
 PHP_METHOD(DOMDocument, getElementsByTagName)
 {
-	zval *id;
-	xmlDocPtr docp;
 	size_t name_len;
 	dom_object *intern, *namednode;
 	char *name;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
+	DOM_GET_THIS_INTERN(intern);
 
 	php_dom_create_iterator(return_value, DOM_NODELIST);
 	namednode = Z_DOMOBJ_P(return_value);
@@ -796,7 +793,7 @@ Since: DOM Level 2
 */
 PHP_METHOD(DOMDocument, importNode)
 {
-	zval *id, *node;
+	zval *node;
 	xmlDocPtr docp;
 	xmlNodePtr nodep, retnodep;
 	dom_object *intern, *nodeobj;
@@ -805,12 +802,11 @@ PHP_METHOD(DOMDocument, importNode)
 	/* See http://www.xmlsoft.org/html/libxml-tree.html#xmlDocCopyNode for meaning of values */
 	int extended_recursive;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &node, dom_node_class_entry, &recursive) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
+	DOM_GET_OBJ(docp, ZEND_THIS, xmlDocPtr, intern);
 
 	DOM_GET_OBJ(nodep, node, xmlNodePtr, nodeobj);
 
@@ -982,18 +978,15 @@ Since: DOM Level 2
 */
 PHP_METHOD(DOMDocument, getElementsByTagNameNS)
 {
-	zval *id;
-	xmlDocPtr docp;
 	size_t uri_len, name_len;
 	dom_object *intern, *namednode;
 	char *uri, *name;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
+	DOM_GET_THIS_INTERN(intern);
 
 	php_dom_create_iterator(return_value, DOM_NODELIST);
 	namednode = Z_DOMOBJ_P(return_value);
@@ -2130,18 +2123,15 @@ PHP_METHOD(DOMDocument, saveHTML)
 /* {{{ Register extended class used to create base node type */
 PHP_METHOD(DOMDocument, registerNodeClass)
 {
-	zval *id;
-	xmlDoc *docp;
 	zend_class_entry *basece = dom_node_class_entry, *ce = NULL;
 	dom_object *intern;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "CC!", &basece, &ce) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	if (ce == NULL || instanceof_function(ce, basece)) {
-		DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
+		DOM_GET_THIS_INTERN(intern);
 		dom_set_doc_classmap(intern->document, basece, ce);
 		RETURN_TRUE;
 	}
@@ -2156,16 +2146,14 @@ Since: DOM Living Standard (DOM4)
 PHP_METHOD(DOMDocument, append)
 {
 	uint32_t argc;
-	zval *args, *id;
+	zval *args;
 	dom_object *intern;
-	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	id = ZEND_THIS;
-	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+	DOM_GET_THIS_INTERN(intern);
 
 	dom_parent_node_append(intern, args, argc);
 }
@@ -2177,16 +2165,14 @@ Since: DOM Living Standard (DOM4)
 PHP_METHOD(DOMDocument, prepend)
 {
 	uint32_t argc;
-	zval *args, *id;
+	zval *args;
 	dom_object *intern;
-	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	id = ZEND_THIS;
-	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+	DOM_GET_THIS_INTERN(intern);
 
 	dom_parent_node_prepend(intern, args, argc);
 }
