@@ -79,8 +79,8 @@ zend_string* intl_charFromString(const UnicodeString &from, UErrorCode *status)
 		zend_string_free(u8res);
 		return NULL;
 	}
+	u8res = zend_string_truncate(u8res, actual_len, 0);
 	ZSTR_VAL(u8res)[actual_len] = '\0';
-	ZSTR_LEN(u8res) = actual_len;
 
 	return u8res;
 }
