@@ -339,10 +339,10 @@ static zend_class_entry *register_class_Random_Randomizer(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
-	zend_string *property_engine_class_Random_Engine = zend_string_init("Random\\Engine", sizeof("Random\\Engine")-1, 1);
 	zval property_engine_default_value;
 	ZVAL_UNDEF(&property_engine_default_value);
 	zend_string *property_engine_name = zend_string_init("engine", sizeof("engine") - 1, 1);
+	zend_string *property_engine_class_Random_Engine = zend_string_init("Random\\Engine", sizeof("Random\\Engine")-1, 1);
 	zend_declare_typed_property(class_entry, property_engine_name, &property_engine_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_engine_class_Random_Engine, 0, 0));
 	zend_string_release(property_engine_name);
 

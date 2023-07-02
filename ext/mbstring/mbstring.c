@@ -5529,7 +5529,7 @@ PHP_FUNCTION(mb_chr)
 
 PHP_FUNCTION(mb_str_pad)
 {
-	zend_string *input, *encoding_str = NULL, *pad = NULL;
+	zend_string *input, *encoding_str = NULL, *pad = ZSTR_CHAR(' ');
 	zend_long pad_to_length;
 	zend_long pad_type_val = PHP_STR_PAD_RIGHT;
 

@@ -21,7 +21,8 @@ const PHP_70_VERSION_ID = 70000;
 const PHP_80_VERSION_ID = 80000;
 const PHP_81_VERSION_ID = 80100;
 const PHP_82_VERSION_ID = 80200;
-const ALL_PHP_VERSION_IDS = [PHP_70_VERSION_ID, PHP_80_VERSION_ID, PHP_81_VERSION_ID, PHP_82_VERSION_ID];
+const PHP_83_VERSION_ID = 80300;
+const ALL_PHP_VERSION_IDS = [PHP_70_VERSION_ID, PHP_80_VERSION_ID, PHP_81_VERSION_ID, PHP_82_VERSION_ID, PHP_83_VERSION_ID];
 
 /**
  * @return FileInfo[]
@@ -1584,22 +1585,22 @@ class EvaluatedValue
         // This visitor replaces the PHP constants by C constants. It allows direct expansion of the compiled constants, e.g. later in the pretty printer.
         $visitor = new class($allConstInfos) extends PhpParser\NodeVisitorAbstract
         {
+            /** @var iterable<ConstInfo> */
             public array $visitedConstants = [];
             /** @var iterable<ConstInfo> */
             public iterable $allConstInfos;
 
-            /**
-             * @param iterable<ConstInfo> $allConstInfos
-             */
+            /** @param iterable<ConstInfo> $allConstInfos */
             public function __construct(iterable $allConstInfos)
             {
                 $this->allConstInfos = $allConstInfos;
             }
 
+            /** @return Node|null */
             public function enterNode(Node $expr)
             {
                 if (!$expr instanceof Expr\ConstFetch && !$expr instanceof Expr\ClassConstFetch) {
-                    return;
+                    return null;
                 }
 
                 if ($expr instanceof Expr\ClassConstFetch) {
@@ -1609,7 +1610,7 @@ class EvaluatedValue
                 }
 
                 if ($originatingConstName->isUnknown()) {
-                    return;
+                    return null;
                 }
 
                 foreach ($this->allConstInfos as $const) {
@@ -1628,7 +1629,7 @@ class EvaluatedValue
         $isUnknownConstValue = false;
 
         $evaluator = new ConstExprEvaluator(
-            function (Expr $expr) use ($allConstInfos, &$isUnknownConstValue) {
+            static function (Expr $expr) use ($allConstInfos, &$isUnknownConstValue) {
                 // $expr is a ConstFetch with a name of a C macro here
                 if (!$expr instanceof Expr\ConstFetch) {
                     throw new Exception($this->getVariableTypeName() . " " . $this->getVariableLikeName() . " has an unsupported value");
@@ -1645,8 +1646,8 @@ class EvaluatedValue
                         continue;
                     }
 
-                    if ($const->phpDocType) {
-                        $constType = $const->phpDocType->tryToSimpleType();
+                    $constType = ($const->phpDocType ?? $const->type)->tryToSimpleType();
+                    if ($constType) {
                         if ($constType->isBool()) {
                             return true;
                         } elseif ($constType->isInt()) {
@@ -1730,7 +1731,7 @@ class EvaluatedValue
                 throw new Exception("Unimplemented default value");
             }
         } else {
-            throw new Exception("Invalid default value: " . print_r($this->type, true));
+            throw new Exception("Invalid default value: " . print_r($this->value, true) . ", type: " . print_r($this->type, true));
         }
 
         return $code;
@@ -1747,18 +1748,21 @@ class EvaluatedValue
 
 abstract class VariableLike
 {
-    public ?Type $phpDocType;
     public int $flags;
+    public ?Type $type;
+    public ?Type $phpDocType;
     public ?string $link;
     public ?int $phpVersionIdMinimumCompatibility;
 
     public function __construct(
         int $flags,
+        ?Type $type,
         ?Type $phpDocType,
         ?string $link,
         ?int $phpVersionIdMinimumCompatibility
     ) {
         $this->flags = $flags;
+        $this->type = $type;
         $this->phpDocType = $phpDocType;
         $this->link = $link;
         $this->phpVersionIdMinimumCompatibility = $phpVersionIdMinimumCompatibility;
@@ -1770,8 +1774,6 @@ abstract class VariableLike
 
     abstract protected function getVariableLikeName(): string;
 
-    abstract protected function addTypeToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement): void;
-
     abstract protected function getFieldSynopsisDefaultLinkend(): string;
 
     abstract protected function getFieldSynopsisName(): string;
@@ -1782,6 +1784,16 @@ abstract class VariableLike
     abstract protected function getFieldSynopsisValueString(iterable $allConstInfos): ?string;
 
     abstract public function discardInfoForOldPhpVersions(): void;
+
+    protected function addTypeToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement): void
+    {
+        $type = $this->phpDocType ?? $this->type;
+
+        if ($type) {
+            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
+            $fieldsynopsisElement->appendChild($type->getTypeForDoc($doc));
+        }
+    }
 
     /**
      * @return array<int, string[]>
@@ -1800,7 +1812,56 @@ abstract class VariableLike
             PHP_80_VERSION_ID => [$flags],
             PHP_81_VERSION_ID => [$flags],
             PHP_82_VERSION_ID => [$flags],
+            PHP_83_VERSION_ID => [$flags],
         ];
+    }
+
+    protected function getTypeCode(string $variableLikeName, string &$code): string
+    {
+        $variableLikeType = $this->getVariableTypeName();
+
+        $typeCode = "";
+
+        if ($this->type) {
+            $arginfoType = $this->type->toArginfoType();
+            if ($arginfoType->hasClassType()) {
+                if (count($arginfoType->classTypes) >= 2) {
+                    foreach ($arginfoType->classTypes as $classType) {
+                        $escapedClassName = $classType->toEscapedName();
+                        $varEscapedClassName = $classType->toVarEscapedName();
+                        $code .= "\tzend_string *{$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"{$escapedClassName}\") - 1, 1);\n";
+                    }
+
+                    $classTypeCount = count($arginfoType->classTypes);
+                    $code .= "\tzend_type_list *{$variableLikeType}_{$variableLikeName}_type_list = malloc(ZEND_TYPE_LIST_SIZE($classTypeCount));\n";
+                    $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->num_types = $classTypeCount;\n";
+
+                    foreach ($arginfoType->classTypes as $k => $classType) {
+                        $escapedClassName = $classType->toEscapedName();
+                        $code .= "\t{$variableLikeType}_{$variableLikeName}_type_list->types[$k] = (zend_type) ZEND_TYPE_INIT_CLASS({$variableLikeType}_{$variableLikeName}_class_{$escapedClassName}, 0, 0);\n";
+                    }
+
+                    $typeMaskCode = $this->type->toArginfoType()->toTypeMask();
+
+                    if ($this->type->isIntersection) {
+                        $code .= "\tzend_type {$variableLikeType}_{$variableLikeName}_type = ZEND_TYPE_INIT_INTERSECTION({$variableLikeType}_{$variableLikeName}_type_list, $typeMaskCode);\n";
+                    } else {
+                        $code .= "\tzend_type {$variableLikeType}_{$variableLikeName}_type = ZEND_TYPE_INIT_UNION({$variableLikeType}_{$variableLikeName}_type_list, $typeMaskCode);\n";
+                    }
+                    $typeCode = "{$variableLikeType}_{$variableLikeName}_type";
+                } else {
+                    $escapedClassName = $arginfoType->classTypes[0]->toEscapedName();
+                    $varEscapedClassName = $arginfoType->classTypes[0]->toVarEscapedName();
+                    $code .= "\tzend_string *{$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"{$escapedClassName}\")-1, 1);\n";
+
+                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS({$variableLikeType}_{$variableLikeName}_class_{$varEscapedClassName}, 0, " . $arginfoType->toTypeMask() . ")";
+                }
+            } else {
+                $typeCode = "(zend_type) ZEND_TYPE_INIT_MASK(" . $arginfoType->toTypeMask() . ")";
+            }
+        }
+
+        return $typeCode;
     }
 
     /**
@@ -1883,6 +1944,7 @@ class ConstInfo extends VariableLike
         int $flags,
         Expr $value,
         ?string $valueString,
+        ?Type $type,
         ?Type $phpDocType,
         bool $isDeprecated,
         ?string $cond,
@@ -1896,7 +1958,7 @@ class ConstInfo extends VariableLike
         $this->isDeprecated = $isDeprecated;
         $this->cond = $cond;
         $this->cValue = $cValue;
-        parent::__construct($flags, $phpDocType, $link, $phpVersionIdMinimumCompatibility);
+        parent::__construct($flags, $type, $phpDocType, $link, $phpVersionIdMinimumCompatibility);
     }
 
     /**
@@ -1906,7 +1968,7 @@ class ConstInfo extends VariableLike
     {
         return EvaluatedValue::createFromExpression(
             $this->value,
-            $this->phpDocType->tryToSimpleType(),
+            ($this->phpDocType ?? $this->type)->tryToSimpleType(),
             $this->cValue,
             $allConstInfos
         );
@@ -1931,20 +1993,12 @@ class ConstInfo extends VariableLike
     {
         $className = str_replace(["\\", "_"], ["-", "-"], $this->name->class->toLowerString());
 
-        return "$className.constants." . strtolower(str_replace("_", "-", $this->name->const));
+        return "$className.constants." . strtolower(str_replace("_", "-", $this->getVariableLikeName()));
     }
 
     protected function getFieldSynopsisName(): string
     {
         return $this->name->__toString();
-    }
-
-    protected function addTypeToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement): void
-    {
-        if ($this->phpDocType) {
-            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
-            $fieldsynopsisElement->appendChild($this->phpDocType->getTypeForDoc($doc));
-        }
     }
 
     /**
@@ -1967,6 +2021,7 @@ class ConstInfo extends VariableLike
     }
 
     public function discardInfoForOldPhpVersions(): void {
+        $this->type = null;
         $this->flags &= ~Class_::MODIFIER_FINAL;
         $this->isDeprecated = false;
     }
@@ -1976,14 +2031,18 @@ class ConstInfo extends VariableLike
      */
     public function getDeclaration(iterable $allConstInfos): string
     {
-        $type = $this->phpDocType->tryToSimpleType();
-        if ($type === null || !$type->isBuiltin) {
-            throw new Exception("Constant " . $this->name->__toString() . " must have a simple built-in type");
+        $simpleType = ($this->phpDocType ?? $this->type)->tryToSimpleType();
+        if ($simpleType && $simpleType->name === "mixed") {
+            $simpleType = null;
         }
 
-        $value = EvaluatedValue::createFromExpression($this->value, $type, $this->cValue, $allConstInfos);
+        $value = EvaluatedValue::createFromExpression($this->value, $simpleType, $this->cValue, $allConstInfos);
+        if ($value->isUnknownConstValue && ($simpleType === null || !$simpleType->isBuiltin)) {
+            throw new Exception("Constant " . $this->name->__toString() . " must have a built-in PHPDoc type as the type couldn't be inferred from its value");
+        }
+
         // i.e. const NAME = UNKNOWN;, without the annotation
-        if ($value->isUnknownConstValue && $this->cValue === null && $value->expr instanceof Expr\ConstFetch && $value->expr->name->__toString() == $this->name->__toString()) {
+        if ($value->isUnknownConstValue && $this->cValue === null && $value->expr instanceof Expr\ConstFetch && $value->expr->name->__toString() === "UNKNOWN") {
             throw new Exception("Constant " . $this->name->__toString() . " must have a @cvalue annotation");
         }
 
@@ -2060,13 +2119,41 @@ class ConstInfo extends VariableLike
         $code .= "\tzend_string *const_{$constName}_name = zend_string_init_interned(\"$constName\", sizeof(\"$constName\") - 1, 1);\n";
         $nameCode = "const_{$constName}_name";
 
-        $template = "\tzend_declare_class_constant_ex(class_entry, $nameCode, &const_{$constName}_value, %s, NULL);\n";
-        $flagsCode = generateVersionDependentFlagCode(
-            $template,
-            $this->getFlagsByPhpVersion(),
-            $this->phpVersionIdMinimumCompatibility
-        );
-        $code .= implode("", $flagsCode);
+        $php83MinimumCompatibility = $this->phpVersionIdMinimumCompatibility === null || $this->phpVersionIdMinimumCompatibility >= PHP_83_VERSION_ID;
+
+        if ($this->type && !$php83MinimumCompatibility) {
+            $code .= "#if (PHP_VERSION_ID >= " . PHP_83_VERSION_ID . ")\n";
+        }
+
+        if ($this->type) {
+            $typeCode = $this->getTypeCode($constName, $code);
+            $template = "\tzend_declare_typed_class_constant(class_entry, $nameCode, &const_{$constName}_value, %s, NULL, $typeCode);\n";
+            $flagsCode = generateVersionDependentFlagCode(
+                $template,
+                $this->getFlagsByPhpVersion(),
+                $this->phpVersionIdMinimumCompatibility
+            );
+            $code .= implode("", $flagsCode);
+        }
+
+        if ($this->type && !$php83MinimumCompatibility) {
+            $code .= "#else\n";
+        }
+
+        if (!$this->type || !$php83MinimumCompatibility) {
+            $template = "\tzend_declare_class_constant_ex(class_entry, $nameCode, &const_{$constName}_value, %s, NULL);\n";
+            $flagsCode = generateVersionDependentFlagCode(
+                $template,
+                $this->getFlagsByPhpVersion(),
+                $this->phpVersionIdMinimumCompatibility
+            );
+            $code .= implode("", $flagsCode);
+        }
+
+        if ($this->type && !$php83MinimumCompatibility) {
+            $code .= "#endif\n";
+        }
+
         $code .= "\tzend_string_release(const_{$constName}_name);\n";
 
         return $code;
@@ -2143,7 +2230,6 @@ class ConstInfo extends VariableLike
 class PropertyInfo extends VariableLike
 {
     public PropertyName $name;
-    public ?Type $type;
     public ?Expr $defaultValue;
     public ?string $defaultValueString;
     public bool $isDocReadonly;
@@ -2160,11 +2246,10 @@ class PropertyInfo extends VariableLike
         ?int $phpVersionIdMinimumCompatibility
     ) {
         $this->name = $name;
-        $this->type = $type;
         $this->defaultValue = $defaultValue;
         $this->defaultValueString = $defaultValueString;
         $this->isDocReadonly = $isDocReadonly;
-        parent::__construct($flags, $phpDocType, $link, $phpVersionIdMinimumCompatibility);
+        parent::__construct($flags, $type, $phpDocType, $link, $phpVersionIdMinimumCompatibility);
     }
 
     protected function getVariableTypeCode(): string
@@ -2186,12 +2271,12 @@ class PropertyInfo extends VariableLike
     {
         $className = str_replace(["\\", "_"], ["-", "-"], $this->name->class->toLowerString());
 
-        return "$className.props." . strtolower(str_replace("_", "-", $this->name->property));
+        return "$className.props." . strtolower(str_replace("_", "-", $this->getVariableLikeName()));
     }
 
     protected function getFieldSynopsisName(): string
     {
-        return $this->name->property;
+        return $this->getVariableLikeName();
     }
 
     /**
@@ -2213,7 +2298,7 @@ class PropertyInfo extends VariableLike
     public function getDeclaration(iterable $allConstInfos): string {
         $code = "\n";
 
-        $propertyName = $this->name->property;
+        $propertyName = $this->getVariableLikeName();
 
         if ($this->defaultValue === null) {
             $defaultValue = EvaluatedValue::null();
@@ -2225,47 +2310,7 @@ class PropertyInfo extends VariableLike
             }
         }
 
-        $typeCode = "";
-        if ($this->type) {
-            $arginfoType = $this->type->toArginfoType();
-            if ($arginfoType->hasClassType()) {
-                if (count($arginfoType->classTypes) >= 2) {
-                    foreach ($arginfoType->classTypes as $classType) {
-                        $escapedClassName = $classType->toEscapedName();
-                        $varEscapedClassName = $classType->toVarEscapedName();
-                        $code .= "\tzend_string *property_{$propertyName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"{$escapedClassName}\") - 1, 1);\n";
-                    }
-
-                    $classTypeCount = count($arginfoType->classTypes);
-                    $code .= "\tzend_type_list *property_{$propertyName}_type_list = malloc(ZEND_TYPE_LIST_SIZE($classTypeCount));\n";
-                    $code .= "\tproperty_{$propertyName}_type_list->num_types = $classTypeCount;\n";
-
-                    foreach ($arginfoType->classTypes as $k => $classType) {
-                        $escapedClassName = $classType->toEscapedName();
-                        $code .= "\tproperty_{$propertyName}_type_list->types[$k] = (zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$escapedClassName}, 0, 0);\n";
-                    }
-
-                    $typeMaskCode = $this->type->toArginfoType()->toTypeMask();
-
-                    if ($this->type->isIntersection) {
-                        $code .= "\tzend_type property_{$propertyName}_type = ZEND_TYPE_INIT_INTERSECTION(property_{$propertyName}_type_list, $typeMaskCode);\n";
-                    } else {
-                        $code .= "\tzend_type property_{$propertyName}_type = ZEND_TYPE_INIT_UNION(property_{$propertyName}_type_list, $typeMaskCode);\n";
-                    }
-                    $typeCode = "property_{$propertyName}_type";
-                } else {
-                    $escapedClassName = $arginfoType->classTypes[0]->toEscapedName();
-                    $varEscapedClassName = $arginfoType->classTypes[0]->toVarEscapedName();
-                    $code .= "\tzend_string *property_{$propertyName}_class_{$varEscapedClassName} = zend_string_init(\"{$escapedClassName}\", sizeof(\"{$escapedClassName}\")-1, 1);\n";
-
-                    $typeCode = "(zend_type) ZEND_TYPE_INIT_CLASS(property_{$propertyName}_class_{$varEscapedClassName}, 0, " . $arginfoType->toTypeMask() . ")";
-                }
-            } else {
-                $typeCode = "(zend_type) ZEND_TYPE_INIT_MASK(" . $arginfoType->toTypeMask() . ")";
-            }
-        }
-
-        $zvalName = "property_{$this->name->property}_default_value";
+        $zvalName = "property_{$propertyName}_default_value";
         if ($this->defaultValue === null && $this->type !== null) {
             $code .= "\tzval $zvalName;\n\tZVAL_UNDEF(&$zvalName);\n";
         } else {
@@ -2276,6 +2321,7 @@ class PropertyInfo extends VariableLike
         $nameCode = "property_{$propertyName}_name";
 
         if ($this->type !== null) {
+            $typeCode = $this->getTypeCode($propertyName, $code);
             $template = "\tzend_declare_typed_property(class_entry, $nameCode, &$zvalName, %s, NULL, $typeCode);\n";
         } else {
             $template = "\tzend_declare_property_ex(class_entry, $nameCode, &$zvalName, %s, NULL);\n";
@@ -2322,16 +2368,6 @@ class PropertyInfo extends VariableLike
         if ($this->flags & Class_::MODIFIER_READONLY || $this->isDocReadonly) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "readonly"));
-        }
-    }
-
-    protected function addTypeToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement): void
-    {
-        $type = $this->phpDocType ?? $this->type;
-
-        if ($type) {
-            $fieldsynopsisElement->appendChild(new DOMText("\n     "));
-            $fieldsynopsisElement->appendChild($type->getTypeForDoc($doc));
         }
     }
 
@@ -2662,11 +2698,14 @@ class ClassInfo {
             }
         }
 
+        $php83Flags = $php82Flags;
+
         return [
             PHP_70_VERSION_ID => $php70Flags,
             PHP_80_VERSION_ID => $php80Flags,
             PHP_81_VERSION_ID => $php81Flags,
             PHP_82_VERSION_ID => $php82Flags,
+            PHP_83_VERSION_ID => $php83Flags,
         ];
     }
 
@@ -3416,6 +3455,7 @@ function parseConstLike(
     ConstOrClassConstName $name,
     Node\Const_ $const,
     int $flags,
+    ?Node $type,
     ?DocComment $docComment,
     ?string $cond,
     ?int $phpVersionIdMinimumCompatibility
@@ -3439,7 +3479,7 @@ function parseConstLike(
         }
     }
 
-    if ($phpDocType === null) {
+    if ($type === null && $phpDocType === null) {
         throw new Exception("Missing type for constant " . $name->__toString());
     }
 
@@ -3448,7 +3488,8 @@ function parseConstLike(
         $flags,
         $const->value,
         $prettyPrinter->prettyPrintExpr($const->value),
-        Type::fromString($phpDocType),
+        $type ? Type::fromNode($type) : null,
+        $phpDocType ? Type::fromString($phpDocType) : null,
         $deprecated,
         $cond,
         $cValue,
@@ -3686,6 +3727,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                     new ConstName($const->namespacedName, $const->name->toString()),
                     $const,
                     0,
+                    null,
                     $stmt->getDocComment(),
                     $cond,
                     $fileInfo->generateLegacyArginfoForPhpVersionId
@@ -3729,6 +3771,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                             new ClassConstName($className, $const->name->toString()),
                             $const,
                             $classStmt->flags,
+                            $classStmt->type,
                             $classStmt->getDocComment(),
                             $cond,
                             $fileInfo->generateLegacyArginfoForPhpVersionId
@@ -3817,7 +3860,8 @@ function parseStubFile(string $code): FileInfo {
                 if ($tag->value && !in_array((int) $tag->value, ALL_PHP_VERSION_IDS, true)) {
                     throw new Exception(
                         "Legacy PHP version must be one of: \"" . PHP_70_VERSION_ID . "\" (PHP 7.0), \"" . PHP_80_VERSION_ID . "\" (PHP 8.0), " .
-                        "\"" . PHP_81_VERSION_ID . "\" (PHP 8.1), \"" . PHP_82_VERSION_ID . "\" (PHP 8.2), \"" . $tag->value . "\" provided"
+                        "\"" . PHP_81_VERSION_ID . "\" (PHP 8.1), \"" . PHP_82_VERSION_ID . "\" (PHP 8.2), \"" . PHP_83_VERSION_ID . "\" (PHP 8.3), " .
+                        "\"" . $tag->value . "\" provided"
                     );
                 }
 

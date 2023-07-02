@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed GH-11488 (Missing "Optional parameter before required" deprecation on
     union null type). (ilutov)
+  . Implement the #[\Override] attribute RFC. (timwolla)
 
 - DOM:
   . Fixed bug GH-11500 (Namespace reuse in createElementNS() generates wrong
@@ -30,6 +31,10 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fix serialization of RC1 objects appearing in object graph twice. (ilutov)
+
+- XMLReader:
+  . Fix GH-11548 (Argument corruption when calling XMLReader::open or
+    XMLReader::XML non-statically with observer active). (Bob)
 
 - zip:
   . zip extension version 1.22.0 for libzip 1.10.0. (Remi)
