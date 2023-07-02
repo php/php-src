@@ -421,7 +421,9 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(prop_handlers, string_key, entry) {
 		zval value;
 
-		if (entry->read_func(obj, &value) == FAILURE || !string_key) {
+		ZEND_ASSERT(string_key != NULL);
+
+		if (entry->read_func(obj, &value) == FAILURE) {
 			continue;
 		}
 
