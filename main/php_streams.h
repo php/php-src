@@ -112,6 +112,7 @@ typedef struct _php_stream_dirent {
 #else
 	char d_name[MAXPATHLEN];
 #endif
+	unsigned char d_type;
 } php_stream_dirent;
 
 /* operations on streams that are file-handles */

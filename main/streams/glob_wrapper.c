@@ -150,6 +150,7 @@ static ssize_t php_glob_stream_read(php_stream *stream, char *buf, size_t count)
 			php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[index], pglob->flags & GLOB_APPEND, &path);
 			++pglob->index;
 			PHP_STRLCPY(ent->d_name, path, sizeof(ent->d_name), strlen(path));
+			ent->d_type = DT_UNKNOWN;
 			return sizeof(php_stream_dirent);
 		}
 		pglob->index = glob_result_count;

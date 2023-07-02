@@ -1485,6 +1485,11 @@ PHP_METHOD(RecursiveDirectoryIterator, hasChildren)
 	if (spl_filesystem_is_invalid_or_dot(intern->u.dir.entry.d_name)) {
 		RETURN_FALSE;
 	} else {
+		if (intern->u.dir.entry.d_type == DT_DIR) {
+			RETURN_TRUE;
+		} else if (intern->u.dir.entry.d_type == DT_REG) {
+			RETURN_FALSE;
+		}
 		if (spl_filesystem_object_get_file_name(intern) == FAILURE) {
 			RETURN_THROWS();
 		}
