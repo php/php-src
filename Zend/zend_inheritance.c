@@ -732,6 +732,11 @@ static inheritance_status zend_do_perform_arg_type_hint_check(
 }
 /* }}} */
 
+static bool is_abstract_or_interface_method(const zend_function *proto) {
+	return (proto->common.scope->ce_flags & ZEND_ACC_INTERFACE)
+		|| (proto->common.fn_flags & ZEND_ACC_ABSTRACT);
+}
+
 /* For trait methods, fe_scope/proto_scope may differ from fe/proto->common.scope,
  * as self will refer to the self of the class the trait is used in, not the trait
  * the method was declared in. */
@@ -746,9 +751,7 @@ static inheritance_status zend_do_perform_implementation_check(
 	/* Checks for constructors only if they are declared in an interface,
 	 * or explicitly marked as abstract
 	 */
-	ZEND_ASSERT(!((fe->common.fn_flags & ZEND_ACC_CTOR)
-		&& ((proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
-			&& (proto->common.fn_flags & ZEND_ACC_ABSTRACT) == 0)));
+	ZEND_ASSERT(!(fe->common.fn_flags & ZEND_ACC_CTOR) || !is_abstract_or_interface_method(proto));
 
 	/* If the prototype method is private and not abstract, we do not enforce a signature.
 	 * private abstract methods can only occur in traits. */
@@ -1111,13 +1114,16 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 	}
 
 	/* Disallow making an inherited method abstract. */
-	if (!checked && UNEXPECTED((child_flags & ZEND_ACC_ABSTRACT) > (parent_flags & ZEND_ACC_ABSTRACT))) {
+	if (!checked && UNEXPECTED((child_flags & ZEND_ACC_ABSTRACT) > (parent_flags & ZEND_ACC_ABSTRACT) && !(parent_flags & ZEND_ACC_DEFAULT_METHOD))) {
 		if (check_only) {
 			return INHERITANCE_ERROR;
 		}
+
 		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
 			"Cannot make non abstract method %s::%s() abstract in class %s",
-			ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
+			ZEND_FN_SCOPE_NAME(parent),
+			ZSTR_VAL(child->common.function_name),
+			ZEND_FN_SCOPE_NAME(child));
 	}
 
 	if (!check_only && (parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED))) {
@@ -1130,7 +1136,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 	if (parent_flags & ZEND_ACC_CTOR) {
 		/* ctors only have a prototype if is abstract (or comes from an interface) */
 		/* and if that is the case, we want to check inheritance against it */
-		if (!(proto->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+		if (!is_abstract_or_interface_method(proto)) {
 			return INHERITANCE_SUCCESS;
 		}
 		parent = proto;
