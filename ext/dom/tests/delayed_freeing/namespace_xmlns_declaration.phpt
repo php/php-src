@@ -14,14 +14,10 @@ echo $doc->saveXML(), "\n";
 
 var_dump($el->namespaceURI);
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <container xmlns="http://php.net"><example/></container>
 
 <?xml version="1.0"?>
 
-
-Fatal error: Uncaught Error: Couldn't fetch DOMElement. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+string(14) "http://php.net"

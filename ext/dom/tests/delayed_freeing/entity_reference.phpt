@@ -29,14 +29,20 @@ unset($doc);
 var_dump($entityRef->nodeName);
 var_dump($entityRef->textContent);
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <container xmlns="some:ns">&nbsp;</container>
 
 <?xml version="1.0"?>
 
+NULL
+string(4) "nbsp"
+string(0) ""
+<?xml version="1.0"?>
+<!DOCTYPE books [
+<!ENTITY test "entity is only for test purposes">
+]>
+<div>&test;</div>
 
-Fatal error: Uncaught Error: Couldn't fetch DOMEntityReference. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+string(4) "test"
+string(0) ""

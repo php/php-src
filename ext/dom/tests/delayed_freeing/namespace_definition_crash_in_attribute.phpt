@@ -37,13 +37,17 @@ var_dump($attr3->namespaceURI);
 echo $doc->saveXML($attr3), "\n";
 echo $doc->saveXML($attr3->parentNode), "\n";
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <container xmlns="some:ns2"><child xmlns="some:ns" hello="hello content 2" hello2=""><childcontainer hello=""/></child></container>
 <?xml version="1.0"?>
 <container xmlns="some:ns2"/>
-
-Fatal error: Uncaught Error: Couldn't fetch DOMAttr. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+string(15) "hello content 2"
+string(0) ""
+string(8) "some:ns2"
+NULL
+string(0) ""
+string(7) "some:ns"
+string(7) "some:ns"
+ hello=""
+<?xml version="1.0"?>

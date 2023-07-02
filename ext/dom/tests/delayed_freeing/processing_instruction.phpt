@@ -13,14 +13,11 @@ echo $doc->saveXML(), "\n";
 var_dump($pi->parentNode);
 var_dump($pi->nodeValue);
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <container xmlns="some:ns"><?hello world?></container>
 
 <?xml version="1.0"?>
 
-
-Fatal error: Uncaught Error: Couldn't fetch DOMProcessingInstruction. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+NULL
+string(5) "world"

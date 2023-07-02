@@ -17,15 +17,15 @@ echo $doc->saveXML($text2), "\n";
 var_dump($text1->parentNode, $text2->parentNode);
 var_dump($text1->nextSibling, $text2->previousSibling);
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <container>my text 1my text 2</container>
 
 <?xml version="1.0"?>
 
-
-Fatal error: Uncaught Error: Couldn't fetch DOMText in %s:%d
-Stack trace:
-#0 %s(%d): DOMDocument->saveXML(Object(DOMText))
-#1 {main}
-  thrown in %s on line %d
+my text 1
+my text 2
+NULL
+NULL
+NULL
+NULL

@@ -17,13 +17,9 @@ echo $doc->saveXML();
 unset($child);
 var_dump($child_child->namespaceURI);
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <container><child xmlns="some:ns"><x/></child></container>
 <?xml version="1.0"?>
 <container/>
-
-Fatal error: Uncaught Error: Couldn't fetch DOMElement. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+string(7) "some:ns"

@@ -13,10 +13,6 @@ unset($d);
 
 echo $ret->textContent, "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 <div><b/><xxx/></div>
-
-Fatal error: Uncaught Error: Couldn't fetch DOMElement. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+Done

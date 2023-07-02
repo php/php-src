@@ -25,8 +25,8 @@ var_dump($child->parentNode);
 --EXPECTF--
 string(12) "text content"
 string(0) ""
+string(12) "text content"
 
-Fatal error: Uncaught Error: Couldn't fetch DOMElement. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+Warning: DOMNode::appendChild(): Document Fragment is empty in %s on line %d
+string(0) ""
+NULL

@@ -18,7 +18,6 @@ var_dump($cdata->wholeText, $cdata->parentNode->tagName);
 string(34) "This is a CDATA section<p>test</p>"
 string(9) "container"
 
-Fatal error: Uncaught Error: Couldn't fetch DOMCdataSection. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+Warning: Attempt to read property "tagName" on null in %s on line %d
+string(34) "This is a CDATA section<p>test</p>"
+NULL

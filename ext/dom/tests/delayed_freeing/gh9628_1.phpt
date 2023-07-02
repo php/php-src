@@ -35,11 +35,14 @@ echo $doc->saveXML();
 var_dump($inner_span->getAttribute('id'));
 var_dump($inner_span->namespaceURI);
 ?>
---EXPECTF--
+--EXPECT--
 string(7) "some:ns"
-
-Fatal error: Uncaught Error: Couldn't fetch DOMElement in %s:%d
-Stack trace:
-#0 %s(%d): DOMElement->getAttribute('id')
-#1 {main}
-  thrown in %s on line %d
+string(1) "2"
+string(7) "some:ns"
+<?xml version="1.0"?>
+<span xmlns:test="some:ns2" xmlns="some:ns" id="1">
+        
+    </span>
+<span xmlns="some:ns" id="2">Test <test:test xmlns:test="some:ns2"/></span>
+string(1) "2"
+string(7) "some:ns"

@@ -51,9 +51,5 @@ foreach ($spans as $span) {
 
 echo $spans[0]->textContent . "\n"; // Hello World
 ?>
---EXPECTF--
-Fatal error: Uncaught Error: Couldn't fetch DOMElement in %s:%d
-Stack trace:
-#0 %s(%d): DOMElement->hasAttribute('test')
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+Hello World

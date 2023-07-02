@@ -17,11 +17,8 @@ var_dump($entity->nodeName, $entity->parentNode->nodeName);
 $doc->removeChild($doc->doctype);
 var_dump($entity->nodeName, $entity->parentNode);
 ?>
---EXPECTF--
+--EXPECT--
 string(4) "test"
 string(5) "books"
-
-Fatal error: Uncaught Error: Couldn't fetch DOMEntity. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+string(4) "test"
+NULL

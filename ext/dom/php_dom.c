@@ -310,10 +310,6 @@ zval *dom_read_property(zend_object *object, zend_string *name, int type, void *
 
 	if (obj->prop_handler != NULL) {
 		hnd = zend_hash_find_ptr(obj->prop_handler, name);
-	} else if (instanceof_function(obj->std.ce, dom_node_class_entry)) {
-		zend_throw_error(NULL, "Couldn't fetch %s. Node no longer exists", ZSTR_VAL(obj->std.ce->name));
-		retval = &EG(uninitialized_zval);
-		return retval;
 	}
 
 	if (hnd) {
