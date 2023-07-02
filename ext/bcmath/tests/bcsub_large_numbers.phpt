@@ -6,7 +6,7 @@ bcmath
 bcmath.scale=0
 --FILE--
 <?php
-require "helpers/run_bcmath_function.php";
+require(__DIR__."/helpers/run_bcmath_function.php");
 
 $minuends = [
     "15151324141414.412312232141241",

@@ -6,7 +6,7 @@ bcmath
 bcmath.scale=0
 --FILE--
 <?php
-require "helpers/run_bcmath_function.php";
+require(__DIR__."/helpers/run_bcmath_function.php");
 
 $exponents = ["252", "-112"];
 $baseNumbers = array_merge($exponents, [

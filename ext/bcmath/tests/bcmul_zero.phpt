@@ -6,7 +6,7 @@ bcmath
 bcmath.scale=0
 --FILE--
 <?php
-require "helpers/run_bcmath_function.php";
+require(__DIR__."/helpers/run_bcmath_function.php");
 
 $firstFactors = ["0", "0.00", "-0", "-0.00"];
 $secondFactors = array_merge($firstFactors, [
