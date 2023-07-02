@@ -98,16 +98,14 @@ Since: DOM Living Standard (DOM4)
 PHP_METHOD(DOMDocumentFragment, append)
 {
 	uint32_t argc;
-	zval *args, *id;
+	zval *args;
 	dom_object *intern;
-	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	id = ZEND_THIS;
-	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+	DOM_GET_THIS_INTERN(intern);
 
 	dom_parent_node_append(intern, args, argc);
 }
@@ -119,16 +117,14 @@ Since: DOM Living Standard (DOM4)
 PHP_METHOD(DOMDocumentFragment, prepend)
 {
 	uint32_t argc;
-	zval *args, *id;
+	zval *args;
 	dom_object *intern;
-	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	id = ZEND_THIS;
-	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+	DOM_GET_THIS_INTERN(intern);
 
 	dom_parent_node_prepend(intern, args, argc);
 }
