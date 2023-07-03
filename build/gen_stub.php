@@ -3017,6 +3017,10 @@ class ClassInfo {
                 $ooElement->appendChild($doc->createElement('modifier', 'abstract'));
                 $ooElement->appendChild(new DOMText("\n$indentation "));
             }
+            if ($classInfo->flags & Class_::MODIFIER_READONLY) {
+                $ooElement->appendChild($doc->createElement('modifier', 'readonly'));
+                $ooElement->appendChild(new DOMText("\n$indentation "));
+            }
         }
 
         $nameElement = $doc->createElement("{$type}name", $classInfo->name->toString());
