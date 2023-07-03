@@ -1,5 +1,5 @@
 --TEST--
-PDO_firebird coonect through PDO::connect
+PDO_firebird connect through PDO::connect
 --EXTENSIONS--
 PDO_odbc
 --FILE--

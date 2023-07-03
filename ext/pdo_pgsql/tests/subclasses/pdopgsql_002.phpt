@@ -1,5 +1,5 @@
 --TEST--
-PdoPgsql coonect through PDO::connect
+PdoPgsql connect through PDO::connect
 --EXTENSIONS--
 pdo_mysql
 --FILE--

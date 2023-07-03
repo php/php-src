@@ -1,5 +1,5 @@
 --TEST--
-PDO_oci coonect through PDO::connect
+PDO_oci connect through PDO::connect
 --EXTENSIONS--
 pdo_oci
 --FILE--
