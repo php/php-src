@@ -3,7 +3,7 @@
 /** @generate-class-entries */
 
 /** @not-serializable */
-class PDOMySql extends PDO
+class PdoMysql extends PDO
 {
     public function getWarningCount(): int {}
 }

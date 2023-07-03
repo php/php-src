@@ -21,5 +21,5 @@ try {
 
 ?>
 --EXPECT--
-PDOSqlite::createAggregate(): Argument #2 ($step) must be a valid callback, function "a" not found or invalid function name
-PDOSqlite::createAggregate(): Argument #3 ($finalize) must be a valid callback, function "" not found or invalid function name
+PdoSqlite::createAggregate(): Argument #2 ($step) must be a valid callback, function "a" not found or invalid function name
+PdoSqlite::createAggregate(): Argument #3 ($finalize) must be a valid callback, function "" not found or invalid function name

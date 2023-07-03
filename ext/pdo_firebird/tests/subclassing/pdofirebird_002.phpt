@@ -7,18 +7,18 @@ PDO_odbc
 
 require_once __DIR__ . "/../config_functions.inc";
 
-if (class_exists(PDOFirebird::class) === false) {
-    echo "PDOFirebird class does not exist.\n";
+if (class_exists(PdoFirebird::class) === false) {
+    echo "PdoFirebird class does not exist.\n";
     exit(-1);
 }
 
-echo "PDOFirebird class exists.\n";
+echo "PdoFirebird class exists.\n";
 
 [$dsn, $user, $pass] = getDsnUserAndPassword();
 
 $db =  Pdo::connect($dsn, $user, $pass);
 
-if (!$db instanceof PDOFirebird) {
+if (!$db instanceof PdoFirebird) {
     echo "Wrong class type. Should be PdoOdbc but is [" . get_class($db) . "\n";
 }
 
@@ -37,7 +37,7 @@ $db->query('DROP TABLE test');
 echo "Fin.";
 ?>
 --EXPECT--
-PDOFirebird class exists.
+PdoFirebird class exists.
 array(2) {
   ["NAME"]=>
   string(1) "A"

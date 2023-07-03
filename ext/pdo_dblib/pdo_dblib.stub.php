@@ -3,7 +3,7 @@
 /** @generate-class-entries */
 
 /** @not-serializable */
-class PDODBLIB extends PDO
+class PdoDblib extends PDO
 {
 
 }

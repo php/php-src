@@ -4,15 +4,15 @@
 
 
 
-static const zend_function_entry class_PDODBLIB_methods[] = {
+static const zend_function_entry class_PdoDblib_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_PDODBLIB(zend_class_entry *class_entry_PDO)
+static zend_class_entry *register_class_PdoDblib(zend_class_entry *class_entry_PDO)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "PDODBLIB", class_PDODBLIB_methods);
+	INIT_CLASS_ENTRY(ce, "PdoDblib", class_PdoDblib_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_PDO);
 	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 

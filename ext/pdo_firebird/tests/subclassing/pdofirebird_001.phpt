@@ -7,16 +7,16 @@ pdo_firebird
 
 require_once __DIR__ . "/../config_functions.inc";
 
-if (class_exists(PDOFirebird::class) === false) {
-    echo "PDOFirebird class does not exist.\n";
+if (class_exists(PdoFirebird::class) === false) {
+    echo "PdoFirebird class does not exist.\n";
     exit(-1);
 }
-echo "PDOFirebird class exists.\n";
+echo "PdoFirebird class exists.\n";
 
 
 [$dsn, $user, $pass] = getDsnUserAndPassword();
 
-$db = new PDOFirebird($dsn, $user, $pass);
+$db = new PdoFirebird($dsn, $user, $pass);
 
 $db->query('RECREATE TABLE foobar (idx int NOT NULL PRIMARY KEY, name VARCHAR(20))');
 $db->query("INSERT INTO foobar VALUES (1, 'PHP')");
@@ -31,7 +31,7 @@ $db->query('DROP TABLE foobar');
 echo "Fin.";
 ?>
 --EXPECT--
-PDOFirebird class exists.
+PdoFirebird class exists.
 array(2) {
   ["NAME"]=>
   string(3) "PHP"

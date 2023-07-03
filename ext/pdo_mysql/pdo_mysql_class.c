@@ -33,7 +33,7 @@
 /* {{{ proto string PDO::mysqlGetWarningCount()
     Returns the number of SQL warnings during the execution of the last statement
 */
-PHP_METHOD(PDOMySql, getWarningCount)
+PHP_METHOD(PdoMysql, getWarningCount)
 {
 	pdo_dbh_t *dbh;
 	pdo_mysql_db_handle *H;

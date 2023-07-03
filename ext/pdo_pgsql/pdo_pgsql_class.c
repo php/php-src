@@ -80,7 +80,7 @@
 ///* }}} */
 
 /* {{{ Escape a identifier for insertion into a text field	*/
-PHP_METHOD(PDOPgSql, escapeIdentifier)
+PHP_METHOD(PdoPgsql, escapeIdentifier)
 {
 	zend_string *from = NULL;
 	char *tmp;
@@ -113,7 +113,7 @@ PHP_METHOD(PDOPgSql, escapeIdentifier)
 
 
 /* {{{ Returns true if the copy worked fine or false if error */
-PHP_METHOD(PDOPgSql, copyFromArray)
+PHP_METHOD(PdoPgsql, copyFromArray)
 {
 	pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -121,14 +121,14 @@ PHP_METHOD(PDOPgSql, copyFromArray)
 
 
 /* {{{ Returns true if the copy worked fine or false if error */
-PHP_METHOD(PDOPgSql, copyFromFile)
+PHP_METHOD(PdoPgsql, copyFromFile)
 {
 	pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ Returns true if the copy worked fine or false if error */
-PHP_METHOD(PDOPgSql, copyToFile)
+PHP_METHOD(PdoPgsql, copyToFile)
 {
 	pgsqlCopyToFile_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
@@ -136,42 +136,42 @@ PHP_METHOD(PDOPgSql, copyToFile)
 /* }}} */
 
 /* {{{ Returns true if the copy worked fine or false if error */
-PHP_METHOD(PDOPgSql, copyToArray)
+PHP_METHOD(PdoPgsql, copyToArray)
 {
 	pgsqlCopyToArray_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ Creates a new large object, returning its identifier.  Must be called inside a transaction. */
-PHP_METHOD(PDOPgSql, lobCreate)
+PHP_METHOD(PdoPgsql, lobCreate)
 {
 	pgsqlLOBCreate_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ Opens an existing large object stream.  Must be called inside a transaction. */
-PHP_METHOD(PDOPgSql, lobOpen)
+PHP_METHOD(PdoPgsql, lobOpen)
 {
 	pgsqlLOBOpen_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ Deletes the large object identified by oid.  Must be called inside a transaction. */
-PHP_METHOD(PDOPgSql, lobUnlink)
+PHP_METHOD(PdoPgsql, lobUnlink)
 {
 	pgsqlLOBUnlink_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ Get asynchronous notification */
-PHP_METHOD(PDOPgSql, getNotify)
+PHP_METHOD(PdoPgsql, getNotify)
 {
 	pgsqlGetNotify_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ Get backend(server) pid */
-PHP_METHOD(PDOPgSql, getPid)
+PHP_METHOD(PdoPgsql, getPid)
 {
 	pgsqlGetPid_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
