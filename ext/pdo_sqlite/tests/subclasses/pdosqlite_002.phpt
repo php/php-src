@@ -1,5 +1,5 @@
 --TEST--
-PDOSqlite create through PDO::connect and function define.
+PdoSqlite create through PDO::connect and function define.
 --EXTENSIONS--
 pdo
 --FILE--

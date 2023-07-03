@@ -73,7 +73,7 @@ PHP_MINIT_FUNCTION(pdo_sqlite)
 	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_ATTR_READONLY_STATEMENT", (zend_long)PDO_SQLITE_ATTR_READONLY_STATEMENT);
 	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_ATTR_EXTENDED_RESULT_CODES", (zend_long)PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES);
 
-	pdosqlite_ce = register_class_PDOSqlite(pdo_dbh_ce);
+	pdosqlite_ce = register_class_PdoSqlite(pdo_dbh_ce);
 	pdosqlite_ce->create_object = pdo_dbh_new;
 
 	pdosqlite_pdo_driver_class_entry.driver_name = "sqlite";

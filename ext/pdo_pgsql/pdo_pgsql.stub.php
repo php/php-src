@@ -3,9 +3,8 @@
 /** @generate-class-entries */
 
 /** @not-serializable */
-class PDOPgSql extends PDO
+class PdoPgsql extends PDO
 {
-
     /**
      * @var int
      * @cname PDO_PGSQL_ATTR_DISABLE_PREPARES

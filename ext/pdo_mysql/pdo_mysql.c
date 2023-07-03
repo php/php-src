@@ -136,7 +136,7 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api);
 #endif
 
-	pdomysql_ce = register_class_PDOMySql(pdo_dbh_ce);
+	pdomysql_ce = register_class_PdoMysql(pdo_dbh_ce);
 	pdomysql_ce->create_object = pdo_dbh_new;
 
 	pdomysql_pdo_driver_class_entry.driver_name = "mysql";

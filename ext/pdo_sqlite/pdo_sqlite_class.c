@@ -207,10 +207,10 @@ static void php_pgsql_func_final_callback(sqlite3_context *context)
 
 
 
-/* {{{ proto bool PDOSqlite::createFunction(string $function_name, callable $callback, int $num_args = -1, int $flags = 0)
+/* {{{ proto bool PdoSqlite::createFunction(string $function_name, callable $callback, int $num_args = -1, int $flags = 0)
     Creates a function that can be used in a query
 */
-PHP_METHOD(PDOSqlite, createFunction)
+PHP_METHOD(PdoSqlite, createFunction)
 {
 	//copied from sqlite_driver.c
 
@@ -261,7 +261,7 @@ PHP_METHOD(PDOSqlite, createFunction)
 
 #ifndef SQLITE_OMIT_LOAD_EXTENSION
 /* {{{ Attempts to load an SQLite extension library. */
-PHP_METHOD(PDOSqlite, loadExtension)
+PHP_METHOD(PdoSqlite, loadExtension)
 {
 	char *extension, *lib_path, *errtext = NULL;
 	char fullpath[MAXPATHLEN];
@@ -330,21 +330,20 @@ PHP_METHOD(PDOSqlite, loadExtension)
 //		RETURN_FALSE;
 //	}
 
-// note: expected 'sqlite3 *' but argument is of type 'pdo_sqlite_db_handle *'
 	sqlite3 *sqlite_handle;
 
 	sqlite_handle = db_handle->db;
 
-	/* Extension loading should only be enabled for when we attempt to load */
-	sqlite3_enable_load_extension(sqlite_handle, 1);
+	// This only enables extension loading for the C api, not for SQL
+	sqlite3_db_config(db, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 1);
+
 	if (sqlite3_load_extension(sqlite_handle, fullpath, 0, &errtext) != SQLITE_OK) {
-		//php_sqlite3_error(db_obj, "%s", errtext);
+		// TODO - check exception message is acceptable
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, errtext);
-		sqlite3_free(errtext);
-		sqlite3_enable_load_extension(sqlite_handle, 0);
+		sqlite3_db_config(db, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 1);
 		RETURN_FALSE;
 	}
-	sqlite3_enable_load_extension(sqlite_handle, 0);
+	sqlite3_db_config(db, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 1);
 
 	RETURN_TRUE;
 }
@@ -513,7 +512,7 @@ static const php_stream_ops php_stream_pdosqlite3_ops = {
 
 
 /* {{{ Open a blob as a stream which we can read / write to. */
-PHP_METHOD(PDOSqlite, openBlob)
+PHP_METHOD(PdoSqlite, openBlob)
 {
 	char *table, *column, *dbname = "main", *mode = "rb";
 	size_t table_len, column_len, dbname_len;
@@ -606,7 +605,7 @@ static int php_pgsql_collation_callback(void *context,
 }
 
 
-PHP_METHOD(PDOSqlite, createAggregate)
+PHP_METHOD(PdoSqlite, createAggregate)
 {
 	struct pdo_sqlite_func *func;
 	zend_fcall_info step_fci, fini_fci;
@@ -659,7 +658,7 @@ PHP_METHOD(PDOSqlite, createAggregate)
 
 /* {{{ bool SQLite::createCollation(string name, callable callback)
    Registers a collation with the sqlite db handle */
-PHP_METHOD(PDOSqlite, createCollation)
+PHP_METHOD(PdoSqlite, createCollation)
 {
 	struct pdo_sqlite_collation *collation;
 	zend_fcall_info fci;
@@ -668,8 +667,6 @@ PHP_METHOD(PDOSqlite, createCollation)
 	size_t collation_name_len;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
-//	pdo_dbh_t *dbh;
-//	pdo_sqlite_db_handle *db_handle;
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)

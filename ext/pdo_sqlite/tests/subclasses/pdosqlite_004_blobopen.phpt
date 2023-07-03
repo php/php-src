@@ -1,5 +1,5 @@
 --TEST--
-PDOSqlite::blobOpen stream test
+PdoSqlite::blobOpen stream test
 --EXTENSIONS--
 pdo
 --FILE--

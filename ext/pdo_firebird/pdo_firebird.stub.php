@@ -3,7 +3,7 @@
 /** @generate-class-entries */
 
 /** @not-serializable */
-class PDOFirebird extends PDO
+class PdoFirebird extends PDO
 {
-    // not methods asdad
+
 }

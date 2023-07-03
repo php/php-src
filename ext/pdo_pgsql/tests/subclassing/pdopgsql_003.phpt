@@ -1,5 +1,5 @@
 --TEST--
-PdoPgSql getWarningCount
+PdoPgsql getWarningCount
 --EXTENSIONS--
 pdo_mysql
 --FILE--
@@ -7,8 +7,8 @@ pdo_mysql
 
 require_once __DIR__ . "/../config_functions.inc";
 
-if (class_exists(PdoPgSql::class) === false) {
-    echo "PdoPgSql class does not exist.\n";
+if (class_exists(PdoPgsql::class) === false) {
+    echo "PdoPgsql class does not exist.\n";
     exit(-1);
 }
 
@@ -16,8 +16,8 @@ $dsn = getDsn();
 
 $db =  Pdo::connect($dsn);
 
-if (!$db instanceof PdoPgSql) {
-    echo "Wrong class type. Should be PdoPgSql but is [" . get_class($db) . "\n";
+if (!$db instanceof PdoPgsql) {
+    echo "Wrong class type. Should be PdoPgsql but is [" . get_class($db) . "\n";
 }
 
 $result = $db->escapeIdentifier("This is a quote\"");

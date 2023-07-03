@@ -106,7 +106,7 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_DRIVER", SQL_CUR_USE_DRIVER);
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_ODBC", SQL_CUR_USE_ODBC);
 
-	pdoodbc_ce = register_class_PDOOdbc(pdo_dbh_ce);
+	pdoodbc_ce = register_class_PdoOdbc(pdo_dbh_ce);
 	pdoodbc_ce->create_object = pdo_dbh_new;
 
 	pdoodbc_pdo_driver_class_entry.driver_name = "odbc";

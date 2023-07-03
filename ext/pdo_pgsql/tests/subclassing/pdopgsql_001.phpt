@@ -1,5 +1,5 @@
 --TEST--
-PdoPgSql subclass basic
+PdoPgsql subclass basic
 --EXTENSIONS--
 pdo_mysql
 --FILE--
@@ -7,15 +7,15 @@ pdo_mysql
 
 require_once __DIR__ . "/../config_functions.inc";
 
-if (class_exists(PdoPgSql::class) === false) {
-    echo "PdoPgSql class does not exist.\n";
+if (class_exists(PdoPgsql::class) === false) {
+    echo "PdoPgsql class does not exist.\n";
     exit(-1);
 }
-echo "PdoPgSql class exists.\n";
+echo "PdoPgsql class exists.\n";
 
 $dsn = getDsn();
 
-$db = new PdoPgSql($dsn);
+$db = new PdoPgsql($dsn);
 
 $db->query('CREATE TABLE IF NOT EXISTS foobar (id INT, name TEXT)');
 
@@ -31,7 +31,7 @@ $db->query('DROP TABLE foobar');
 echo "Fin.";
 ?>
 --EXPECT--
-PdoPgSql class exists.
+PdoPgsql class exists.
 array(2) {
   ["name"]=>
   string(3) "PHP"

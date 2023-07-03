@@ -3,8 +3,61 @@
 /** @generate-class-entries */
 
 /** @not-serializable */
-class PDOSqlite extends PDO
+class PdoSqlite extends PDO
 {
+    /**
+     * @var int
+     * @cname SQLITE_DETERMINISTIC
+     */
+    public const SQLITE_DETERMINISTIC = UNKNOWN;
+
+    /**
+     * @var int
+     * @cname SQLITE_ATTR_OPEN_FLAGS
+     */
+    public const SQLITE_ATTR_OPEN_FLAGS = UNKNOWN;
+
+    /**
+     * @var int
+     * @cname SQLITE_OPEN_READONLY
+     */
+    public const SQLITE_OPEN_READONLY = UNKNOWN;
+
+    /**
+     * @var int
+     * @cname SQLITE_OPEN_READWRITE
+     */
+    public const SQLITE_OPEN_READWRITE = UNKNOWN;
+
+    /**
+     * @var int
+     * @cname SQLITE_OPEN_CREATE
+     */
+    public const SQLITE_OPEN_CREATE = UNKNOWN;
+
+    /**
+     * @var int
+     * @cname SQLITE_ATTR_READONLY_STATEMENT
+     */
+    public const SQLITE_ATTR_READONLY_STATEMENT = UNKNOWN;
+
+    /**
+     * @var int
+     * @cname
+     */
+    public const SQLITE_ATTR_EXTENDED_RESULT_CODES = UNKNOWN;
+
+    // Registers an aggregating User Defined Function for use in SQL statements
+    public function createAggregate(
+        string $name,
+        callable $step,
+        callable $finalize,
+        int $numArgs = -1
+    ): bool {}
+
+    // Registers a User Defined Function for use as a collating function in SQL statements
+    public function createCollation(string $name, callable $callback): bool {}
+
     public function createFunction(
         string $function_name,
         callable $callback,
@@ -23,23 +76,6 @@ class PDOSqlite extends PDO
         string $column,
         int $rowid,
         ?string $dbname = "main", //null,
-        int $flags = PDO::SQLITE_OPEN_READONLY
+        int $flags = PdoSqlite::SQLITE_OPEN_READONLY
     ): mixed /* resource|false */ {}
-
-//SQLITE_OPEN_READONLY
-//SQLITE_OPEN_READWRITE
-//SQLITE_OPEN_CREATE
-
-
-    // Registers an aggregating User Defined Function for use in SQL statements
-    public function createAggregate(
-        string $name,
-        callable $step,
-        callable $finalize,
-        int $numArgs = -1
-    ): bool {}
-
-    // Registers a User Defined Function for use as a collating function in SQL statements
-    public function createCollation(string $name, callable $callback): bool {}
-
 }

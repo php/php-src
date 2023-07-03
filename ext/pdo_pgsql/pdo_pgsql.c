@@ -27,14 +27,14 @@
 #include "php_pdo_pgsql_int.h"
 #include "pdo_pgsql_arginfo.h"
 
-#define REGISTER_PDOPGSQL_CLASS_CONST_LONG(const_name, value) \
+#define REGISTER_PdoPgsql_CLASS_CONST_LONG(const_name, value) \
 	zend_declare_class_constant_long(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, (zend_long)value);
 
-#define REGISTER_PDOPGSQL_CLASS_CONST_STRING(const_name, value) \
+#define REGISTER_PdoPgsql_CLASS_CONST_STRING(const_name, value) \
 	zend_declare_class_constant_stringl(php_pdo_get_dbh_ce(), const_name, sizeof(const_name)-1, value, sizeof(value)-1);
 
-zend_class_entry *pdopgsql_ce;
-static pdo_driver_class_entry pdopgsql_pdo_driver_class_entry;
+zend_class_entry *PdoPgsql_ce;
+static pdo_driver_class_entry PdoPgsql_pdo_driver_class_entry;
 
 /* {{{ pdo_sqlite_deps */
 static const zend_module_dep pdo_pgsql_deps[] = {
@@ -75,12 +75,12 @@ PHP_MINIT_FUNCTION(pdo_pgsql)
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INERROR", (zend_long)PGSQL_TRANSACTION_INERROR);
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_UNKNOWN", (zend_long)PGSQL_TRANSACTION_UNKNOWN);
 
-	pdopgsql_ce = register_class_PDOPgSql(pdo_dbh_ce);
-	pdopgsql_ce->create_object = pdo_dbh_new;
+	PdoPgsql_ce = register_class_PdoPgsql(pdo_dbh_ce);
+	PdoPgsql_ce->create_object = pdo_dbh_new;
 
-	pdopgsql_pdo_driver_class_entry.driver_name = "pgsql";
-	pdopgsql_pdo_driver_class_entry.driver_ce = pdopgsql_ce;
-	pdo_register_driver_specific_class(&pdopgsql_pdo_driver_class_entry);
+	PdoPgsql_pdo_driver_class_entry.driver_name = "pgsql";
+	PdoPgsql_pdo_driver_class_entry.driver_ce = PdoPgsql_ce;
+	pdo_register_driver_specific_class(&PdoPgsql_pdo_driver_class_entry);
 
 	return php_pdo_register_driver(&pdo_pgsql_driver);
 }

@@ -1,5 +1,5 @@
 --TEST--
-PDOSqlite basic
+PdoSqlite basic
 --EXTENSIONS--
 pdo
 --FILE--
