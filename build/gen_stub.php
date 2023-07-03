@@ -2803,6 +2803,9 @@ class ClassInfo {
     public function getClassSynopsisElement(DOMDocument $doc, array $classMap, iterable $allConstInfos): ?DOMElement {
 
         $classSynopsis = $doc->createElement("classsynopsis");
+        if ($this->type === "interface") {
+            $classSynopsis->setAttribute("class", "interface");
+        }
         $classSynopsis->appendChild(new DOMText("\n    "));
 
         $ooElement = self::createOoElement($doc, $this, true, false, false, 4);
@@ -2831,9 +2834,9 @@ class ClassInfo {
             $ooElement = self::createOoElement(
                 $doc,
                 $parentInfo,
-                $this->type === "interface",
                 false,
-                $k === 0,
+                false,
+                $k === 0 && $this->type === "class",
                 5
             );
             if (!$ooElement) {
