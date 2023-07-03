@@ -108,6 +108,7 @@ static ssize_t phar_dir_read(php_stream *stream, char *buf, size_t count) /* {{{
 	memset(buf, 0, sizeof(php_stream_dirent));
 	memcpy(((php_stream_dirent *) buf)->d_name, ZSTR_VAL(str_key), to_read);
 	((php_stream_dirent *) buf)->d_name[to_read + 1] = '\0';
+	((php_stream_dirent *) buf)->d_type = DT_UNKNOWN;
 
 	return sizeof(php_stream_dirent);
 }
