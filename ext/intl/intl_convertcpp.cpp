@@ -80,7 +80,6 @@ zend_string* intl_charFromString(const UnicodeString &from, UErrorCode *status)
 		return NULL;
 	}
 	u8res = zend_string_truncate(u8res, actual_len, 0);
-	ZSTR_VAL(u8res)[actual_len] = '\0';
 
 	return u8res;
 }
