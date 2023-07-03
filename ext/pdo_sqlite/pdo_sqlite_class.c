@@ -263,7 +263,7 @@ PHP_METHOD(PdoSqlite, createFunction)
 /* {{{ Attempts to load an SQLite extension library. */
 PHP_METHOD(PdoSqlite, loadExtension)
 {
-	char *extension, *lib_path, *errtext = NULL;
+	char *extension, *errtext = NULL;
 	char fullpath[MAXPATHLEN];
 	size_t extension_len;// , extension_dir_len;
 
@@ -279,71 +279,36 @@ PHP_METHOD(PdoSqlite, loadExtension)
 
 	db_handle = (pdo_sqlite_db_handle *)dbh->driver_data;
 
-	// SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
-
 #ifdef ZTS
 	if ((strncmp(sapi_module.name, "cgi", 3) != 0) &&
 		(strcmp(sapi_module.name, "cli") != 0) &&
 		(strncmp(sapi_module.name, "embed", 5) != 0)
 	) {
 		// TODO - needs test.
-		php_sqlite3_error(db_obj, "Not supported in multithreaded Web servers");
-		// and converting to exception zend_throw_exception_ex(php_pdo_get_exception(), 0, errtext);
-
+		zend_throw_exception_ex(php_pdo_get_exception(), 0, "Not supported in multithreaded Web servers");
 		RETURN_FALSE;
 	}
 #endif
 
-//	if (!SQLITE3G(extension_dir)) {
-//		php_sqlite3_error(db_obj, "SQLite Extension are disabled");
-//		RETURN_FALSE;
-//	}
-//
-//	if (extension_len == 0) {
-//		php_sqlite3_error(db_obj, "Empty string as an extension");
-//		RETURN_FALSE;
-//	}
 
-//	extension_dir = SQLITE3G(extension_dir);
-//	extension_dir_len = strlen(SQLITE3G(extension_dir));
-
-//	if (IS_SLASH(extension_dir[extension_dir_len-1])) {
-//		spprintf(&lib_path, 0, "%s%s", extension_dir, extension);
-//	} else {
-//		spprintf(&lib_path, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, extension);
-//	}
-
-	spprintf(&lib_path, 0, "%s",extension);
-
-	if (!VCWD_REALPATH(lib_path, fullpath)) {
-//		php_sqlite3_error(db_obj, "Unable to load extension at '%s'", lib_path);
-		// TODO - enable this error
-//		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is no active transaction");
-		efree(lib_path);
+	if (!VCWD_REALPATH(extension, fullpath)) {
+		zend_throw_exception_ex(php_pdo_get_exception(), 0, "Unable to load extension '%s'", extension);
 		RETURN_FALSE;
 	}
 
-	efree(lib_path);
-
-//	if (strncmp(fullpath, extension_dir, extension_dir_len) != 0) {
-//		php_sqlite3_error(db_obj, "Unable to open extensions outside the defined directory");
-//		RETURN_FALSE;
-//	}
-
 	sqlite3 *sqlite_handle;
-
 	sqlite_handle = db_handle->db;
 
 	// This only enables extension loading for the C api, not for SQL
-	sqlite3_db_config(db, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 1);
+	sqlite3_db_config(sqlite_handle, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 1, NULL);
 
 	if (sqlite3_load_extension(sqlite_handle, fullpath, 0, &errtext) != SQLITE_OK) {
-		// TODO - check exception message is acceptable
-		zend_throw_exception_ex(php_pdo_get_exception(), 0, errtext);
-		sqlite3_db_config(db, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 1);
+
+		zend_throw_exception_ex(php_pdo_get_exception(), 0, "Unable to load extension '%s'", errtext);
+		sqlite3_db_config(sqlite_handle, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 0, NULL);
 		RETURN_FALSE;
 	}
-	sqlite3_db_config(db, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 1);
+	sqlite3_db_config(sqlite_handle, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 0, NULL);
 
 	RETURN_TRUE;
 }

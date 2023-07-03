@@ -33,7 +33,7 @@ var_dump(fwrite($stream, 'ABCD'));
 echo "Closing Stream\n";
 var_dump(fclose($stream));
 echo "Opening stream in write mode\n";
-$stream = $db->openBlob('test', 'data', 1, 'main', PDO::SQLITE_OPEN_READWRITE);
+$stream = $db->openBlob('test', 'data', 1, 'main', PdoSqlite::OPEN_READWRITE);
 var_dump($stream);
 echo "Writing to blob\n";
 var_dump(fwrite($stream, 'ABCD'));

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0b4ccc19bba532b56c7b6936a01bfccc4a7bea79 */
+ * Stub hash: 151e8bf9fb5870f4b2793c8f1549815ca036c64e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoMysql_getWarningCount, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
