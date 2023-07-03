@@ -1,5 +1,5 @@
 --TEST--
-PDO_mysql coonect through PDO::connect
+PDO_mysql connect through PDO::connect
 --EXTENSIONS--
 PDO_odbc
 --FILE--
