@@ -117,6 +117,11 @@ PHP 8.3 UPGRADE NOTES
   . The ZipArchive::FL_RECOMPRESS constant is deprecated and will be removed
     in a future version of libzip
 
+- SQLite3
+  . Using exceptions is now preferred, warnings will be removed in the future.
+    Calling SQLite3::enableExceptions(false) will trigger a depreciation warning
+    in this version.
+
 ========================================
 5. Changed Functions
 ========================================
@@ -261,6 +266,12 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 9. Other Changes to Extensions
 ========================================
+
+- SQLite3
+  . The SQLite3 class now throws \SQLite3Exception (extends \Exception) instead
+    of \Exception.
+  . The SQLite error code is now passed in the exception error code instead of being
+    included in the error message.
 
 ========================================
 10. New Global Constants
