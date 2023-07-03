@@ -30,55 +30,6 @@
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
 
-//static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_literal) /* {{{ */ {
-//	zend_string *from = NULL;
-//	zval *pgsql_link = NULL;
-//	PGconn *pgsql;
-//	char *tmp;
-//	pgsql_link_handle *link;
-//
-//	switch (ZEND_NUM_ARGS()) {
-//		case 1:
-//			if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &from) == FAILURE) {
-//				RETURN_THROWS();
-//			}
-//			link = FETCH_DEFAULT_LINK();
-//			CHECK_DEFAULT_LINK(link);
-//			break;
-//
-//		default:
-//			if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS", &pgsql_link, pgsql_link_ce, &from) == FAILURE) {
-//				RETURN_THROWS();
-//			}
-//			link = Z_PGSQL_LINK_P(pgsql_link);
-//			CHECK_PGSQL_LINK(link);
-//			break;
-//	}
-//
-//	pgsql = link->conn;
-//
-//	if (escape_literal) {
-//		tmp = PQescapeLiteral(pgsql, ZSTR_VAL(from), ZSTR_LEN(from));
-//	} else {
-//		tmp = PQescapeIdentifier(pgsql, ZSTR_VAL(from), ZSTR_LEN(from));
-//	}
-//	if (!tmp) {
-//		php_error_docref(NULL, E_WARNING,"Failed to escape");
-//		RETURN_FALSE;
-//	}
-//
-//	RETVAL_STRING(tmp);
-//	PQfreemem(tmp);
-//}
-///* }}} */
-
-///* {{{ Escape parameter as string literal (i.e. parameter)	*/
-//PHP_FUNCTION(pg_escape_literal)
-//{
-//	php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-//}
-///* }}} */
-
 /* {{{ Escape a identifier for insertion into a text field	*/
 PHP_METHOD(PdoPgsql, escapeIdentifier)
 {

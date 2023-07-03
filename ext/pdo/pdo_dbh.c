@@ -223,13 +223,18 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
 /* }}} */
 
 
-
+#define MAX_PDO_SUB_CLASSES 64
 static int number_of_pdo_driver_class_entries = 0;
-static pdo_driver_class_entry *pdo_driver_class_entries[64];
+static pdo_driver_class_entry *pdo_driver_class_entries[MAX_PDO_SUB_CLASSES];
 
-// TODO - remove this and roll it into the standard driver class entries
+// It would be possible remove this and roll it into the standard driver class entries
+// I chose not to do it at this time, as that would break existing PDO extensions
 void pdo_register_driver_specific_class(pdo_driver_class_entry *driver_class_entry)
 {
+	if (number_of_pdo_driver_class_entries >= MAX_PDO_SUB_CLASSES) {
+
+	}
+
 	pdo_driver_class_entries[number_of_pdo_driver_class_entries] = driver_class_entry;
 	number_of_pdo_driver_class_entries += 1;
 }
@@ -319,9 +324,8 @@ void internal_construct(INTERNAL_FUNCTION_PARAMETERS, zval *object, zval *new_zv
 		RETURN_THROWS();
 	}
 
-	// TODO - turn into a function?
 	if (object == NULL) {
-		// could this every happen?
+		// could this ever happen?
 		if (driver->driver_name == NULL) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "Driver name is NULL");
 			RETURN_THROWS();
@@ -492,15 +496,7 @@ PHP_METHOD(PDO, __construct)
 /* {{{ */
 PHP_METHOD(PDO, connect)
 {
-//	zval *new_object = NULL;
-//	return_value = NULL;
 	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, return_value);
-
-	if (return_value == NULL) {
-		// Fix stuff up here?
-		printf("Retval is still null.\n");
-		exit(-1);
-	}
 }
 /* }}} */
 
