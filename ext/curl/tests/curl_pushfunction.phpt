@@ -10,8 +10,8 @@ curl
 include 'skipif-nocaddy.inc';
 
 $curl_version = curl_version();
-if ($curl_version['version_number'] < 0x073d00) {
-    exit("skip: test may crash with curl < 7.61.0");
+if ($curl_version['version_number'] < 0x080100) {
+    exit("skip: test may crash with curl < 8.1.0");
 }
 ?>
 --FILE--
