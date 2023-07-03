@@ -215,7 +215,9 @@ typedef struct {
 
 } pdo_driver_t;
 
-// TODO - remove this separate struct, and roll it into pdo_driver_t
+// NOTE - This separate struct, could be rolled it into pdo_driver_t
+// I chose not to, as that would cause BC break and require a lot of
+// downstream work.
 typedef struct {
 	char *driver_name;
 	zend_class_entry *driver_ce;

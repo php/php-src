@@ -585,9 +585,6 @@ PHP_METHOD(PdoSqlite, createAggregate)
 	pdo_sqlite_db_handle *H;
 	int ret;
 
-//	pdo_dbh_t *dbh;
-//	pdo_sqlite_db_handle *db_handle;
-
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
