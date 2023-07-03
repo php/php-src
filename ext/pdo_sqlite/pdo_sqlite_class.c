@@ -265,7 +265,7 @@ PHP_METHOD(PdoSqlite, loadExtension)
 {
 	char *extension, *errtext = NULL;
 	char fullpath[MAXPATHLEN];
-	size_t extension_len;// , extension_dir_len;
+	size_t extension_len;
 
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *db_handle;
@@ -303,7 +303,6 @@ PHP_METHOD(PdoSqlite, loadExtension)
 	sqlite3_db_config(sqlite_handle, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 1, NULL);
 
 	if (sqlite3_load_extension(sqlite_handle, fullpath, 0, &errtext) != SQLITE_OK) {
-
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "Unable to load extension '%s'", errtext);
 		sqlite3_db_config(sqlite_handle, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 0, NULL);
 		RETURN_FALSE;
