@@ -308,6 +308,10 @@ PHP_METHOD(PdoSqlite, loadExtension)
 		sqlite3_db_config(sqlite_handle, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 0, NULL);
 		RETURN_FALSE;
 	}
+
+	// We disable extension loading for a vague feeling of safety. This is probably not necessary
+	// as extensions can only be loaded through C code, not through SQL, and if someone can get
+	// some C code to run on the server, they can do anything.
 	sqlite3_db_config(sqlite_handle, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, 0, NULL);
 
 	RETURN_TRUE;
