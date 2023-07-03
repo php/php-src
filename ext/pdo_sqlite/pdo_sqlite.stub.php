@@ -9,43 +9,43 @@ class PdoSqlite extends PDO
      * @var int
      * @cname SQLITE_DETERMINISTIC
      */
-    public const SQLITE_DETERMINISTIC = UNKNOWN;
-
-    /**
-     * @var int
-     * @cname SQLITE_ATTR_OPEN_FLAGS
-     */
-    public const SQLITE_ATTR_OPEN_FLAGS = UNKNOWN;
+    public const DETERMINISTIC = UNKNOWN;
 
     /**
      * @var int
      * @cname SQLITE_OPEN_READONLY
      */
-    public const SQLITE_OPEN_READONLY = UNKNOWN;
+    public const OPEN_READONLY = UNKNOWN;
 
     /**
      * @var int
      * @cname SQLITE_OPEN_READWRITE
      */
-    public const SQLITE_OPEN_READWRITE = UNKNOWN;
+    public const OPEN_READWRITE = UNKNOWN;
 
     /**
      * @var int
      * @cname SQLITE_OPEN_CREATE
      */
-    public const SQLITE_OPEN_CREATE = UNKNOWN;
+    public const OPEN_CREATE = UNKNOWN;
 
     /**
      * @var int
-     * @cname SQLITE_ATTR_READONLY_STATEMENT
+     * @cname PDO_SQLITE_ATTR_OPEN_FLAGS
      */
-    public const SQLITE_ATTR_READONLY_STATEMENT = UNKNOWN;
+    public const ATTR_OPEN_FLAGS = UNKNOWN;
 
     /**
      * @var int
-     * @cname
+     * @cname PDO_SQLITE_ATTR_READONLY_STATEMENT
      */
-    public const SQLITE_ATTR_EXTENDED_RESULT_CODES = UNKNOWN;
+    public const ATTR_READONLY_STATEMENT = UNKNOWN;
+
+    /**
+     * @var int
+     * @cname PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES
+     */
+    public const ATTR_EXTENDED_RESULT_CODES = UNKNOWN;
 
     // Registers an aggregating User Defined Function for use in SQL statements
     public function createAggregate(
@@ -76,6 +76,6 @@ class PdoSqlite extends PDO
         string $column,
         int $rowid,
         ?string $dbname = "main", //null,
-        int $flags = PdoSqlite::SQLITE_OPEN_READONLY
+        int $flags = PdoSqlite::OPEN_READONLY
     ): mixed /* resource|false */ {}
 }

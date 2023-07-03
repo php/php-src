@@ -78,4 +78,7 @@ enum {
 	PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES
 };
 
+#define REGISTER_PDO_SQLITE_CLASS_CONST_LONG(const_name, value) \
+	zend_declare_class_constant_long(pdosqlite_ce, const_name, sizeof(const_name)-1, (zend_long)value);
+
 #endif
