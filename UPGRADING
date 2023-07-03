@@ -267,6 +267,10 @@ PHP 8.3 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- DOM:
+  . The DOM lifetime mechanism has been reworked such that implicitly removed
+    nodes can still be fetched. Previously this resulted in an exception.
+
 - SQLite3
   . The SQLite3 class now throws \SQLite3Exception (extends \Exception) instead
     of \Exception.

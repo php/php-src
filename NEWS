@@ -16,6 +16,8 @@ PHP                                                                        NEWS
     output). (nielsdos)
   . Implemented DOMDocument::adoptNode(). Previously this always threw a
     "not yet implemented" exception. (nielsdos)
+  . Fixed bug GH-9628 (Implicitly removing nodes from \DOMDocument breaks
+    existing references). (nielsdos)
 
 - Fileinfo:
   . Fix GH-11408 (Unable to build PHP 8.3.0 alpha 1 / fileinfo extension).
