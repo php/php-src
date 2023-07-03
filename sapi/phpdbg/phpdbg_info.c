@@ -100,15 +100,14 @@ PHPDBG_INFO(constants) /* {{{ */
 {
 	HashTable consts;
 	zend_constant *data;
-	zend_string *name;
 
 	zend_hash_init(&consts, 8, NULL, NULL, 0);
 
 	if (EG(zend_constants)) {
 		phpdbg_try_access {
-			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(zend_constants), name, data) {
+			ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), data) {
 				if (ZEND_CONSTANT_MODULE_NUMBER(data) == PHP_USER_CONSTANT) {
-					zend_hash_update_ptr(&consts, name, data);
+					zend_hash_update_ptr(&consts, data->name, data);
 				}
 			} ZEND_HASH_FOREACH_END();
 		} phpdbg_catch_access {
@@ -120,14 +119,14 @@ PHPDBG_INFO(constants) /* {{{ */
 
 	if (zend_hash_num_elements(&consts)) {
 		phpdbg_out("Address            Refs    Type      Constant\n");
-		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&consts, name, data) {
+		ZEND_HASH_MAP_FOREACH_PTR(&consts, data) {
 
 #define VARIABLEINFO(msg, ...) \
 	phpdbg_writeln( \
 		"%-18p %-7d %-9s %.*s" msg, &data->value, \
 		Z_REFCOUNTED(data->value) ? Z_REFCOUNT(data->value) : 1, \
 		zend_get_type_by_const(Z_TYPE(data->value)), \
-		(int) ZSTR_LEN(name), ZSTR_VAL(name), ##__VA_ARGS__)
+		(int) ZSTR_LEN(data->name), ZSTR_VAL(data->name), ##__VA_ARGS__)
 
 			switch (Z_TYPE(data->value)) {
 				case IS_STRING:
