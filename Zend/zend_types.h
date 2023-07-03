@@ -269,28 +269,36 @@ typedef struct {
 #define ZEND_TYPE_ALLOW_NULL(t) \
 	(((t).type_mask & _ZEND_TYPE_NULLABLE_BIT) != 0)
 
+#ifdef __cplusplus
+# define _ZEND_TYPE_PREFIX zend_type
+#else
+/* FIXME: We could add (zend_type) here at some point but this breaks in MSVC because
+ * (zend_type)(zend_type){} is no longer considered constant. */
+# define _ZEND_TYPE_PREFIX
+#endif
+
 #define ZEND_TYPE_INIT_NONE(extra_flags) \
-	{ NULL, (extra_flags) }
+	_ZEND_TYPE_PREFIX { NULL, (extra_flags) }
 
 #define ZEND_TYPE_INIT_MASK(_type_mask) \
-	{ NULL, (_type_mask) }
+	_ZEND_TYPE_PREFIX { NULL, (_type_mask) }
 
 #define ZEND_TYPE_INIT_CODE(code, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? MAY_BE_BOOL : ( (code) == IS_ITERABLE ? _ZEND_TYPE_ITERABLE_BIT : ((code) == IS_MIXED ? MAY_BE_ANY : (1 << (code))))) \
 		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags))
 
 #define ZEND_TYPE_INIT_PTR(ptr, type_kind, allow_null, extra_flags) \
-	{ (void *) (ptr), \
+	_ZEND_TYPE_PREFIX { (void *) (ptr), \
 		(type_kind) | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags) }
 
 #define ZEND_TYPE_INIT_PTR_MASK(ptr, type_mask) \
-	{ (void *) (ptr), (type_mask) }
+	_ZEND_TYPE_PREFIX { (void *) (ptr), (type_mask) }
 
 #define ZEND_TYPE_INIT_UNION(ptr, extra_flags) \
-	{ (void *) (ptr), (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_UNION_BIT) | (extra_flags) }
+	_ZEND_TYPE_PREFIX { (void *) (ptr), (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_UNION_BIT) | (extra_flags) }
 
 #define ZEND_TYPE_INIT_INTERSECTION(ptr, extra_flags) \
-	{ (void *) (ptr), (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_INTERSECTION_BIT) | (extra_flags) }
+	_ZEND_TYPE_PREFIX { (void *) (ptr), (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_INTERSECTION_BIT) | (extra_flags) }
 
 #define ZEND_TYPE_INIT_CLASS(class_name, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_NAME_BIT, allow_null, extra_flags)
