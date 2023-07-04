@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 83df0ee51c0d1923855ade64b2138b7980bcab1c */
+ * Stub hash: 40148bca498fada6bb93e82cd36948a382170f9b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -107,7 +107,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopyresampled, 0, 10, _IS_B
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_GD_COPY_ROTATED)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopyrotated, 0, 9, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopyrotated, 0, 9, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, dst_image, GdImage, 0)
 	ZEND_ARG_OBJ_INFO(0, src_image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, dst_x, IS_DOUBLE, 0)

@@ -1073,12 +1073,37 @@ PHP_FUNCTION(imagecopyrotated)
 
 	srcX = SX;
 	srcY = SY;
-	srcH = SH;
 	srcW = SW;
+	srcH = SH;
 	angle = A;
 
+	if (srcX < 0) {
+		zend_argument_value_error(5, "must be positive");
+		RETURN_THROWS();
+	}
+
+	if (srcY < 0) {
+		zend_argument_value_error(6, "must be positive");
+		RETURN_THROWS();
+	}
+
+	if (srcW <= 0) {
+		zend_argument_value_error(7, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (srcH <= 0) {
+		zend_argument_value_error(8, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (angle <= 0) {
+		zend_argument_value_error(9, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+
 	gdImageCopyRotated(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, angle);
-	RETURN_TRUE;
 }
 #endif
 

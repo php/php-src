@@ -521,7 +521,7 @@ function imagecolorexactalpha(GdImage $image, int $red, int $green, int $blue, i
 function imagecopyresampled(GdImage $dst_image, GdImage $src_image, int $dst_x, int $dst_y, int $src_x, int $src_y, int $dst_width, int $dst_height, int $src_width, int $src_height): bool {}
 
 #ifdef HAVE_GD_COPY_ROTATED
-function imagecopyrotated(GdImage $dst_image, GdImage $src_image, float $dst_x, float $dst_y, int $src_x, int $src_y, int $src_width, int $src_height, int $angle): bool {}
+function imagecopyrotated(GdImage $dst_image, GdImage $src_image, float $dst_x, float $dst_y, int $src_x, int $src_y, int $src_width, int $src_height, int $angle): void {}
 #endif
 
 #ifdef PHP_WIN32

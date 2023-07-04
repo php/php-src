@@ -26,7 +26,42 @@ if ($p1 && $p2 && $p3) {
     echo "TC/TC: ok\n";
 }
 
+try {
+	imagecopyrotated($dst_tc, $src_tc, 3.0,3.0, -10,0, imagesx($src_tc), imagesy($src_tc), 180);
+} catch (\ValueError $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
+
+try {
+	imagecopyrotated($dst_tc, $src_tc, 3.0,3.0, 0,PHP_INT_MAX, imagesx($src_tc), imagesy($src_tc), 180);
+} catch (\ValueError $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
+
+try {
+	imagecopyrotated($dst_tc, $src_tc, 3.0,3.0, 0,0, -5, imagesy($src_tc), 180);
+} catch (\ValueError $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
+
+try {
+	imagecopyrotated($dst_tc, $src_tc, 3.0,3.0, 0,0, imagesx($src_tc), PHP_INT_MAX, 180);
+} catch (\ValueError $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
+
+try {
+	imagecopyrotated($dst_tc, $src_tc, 3.0,3.0, 0,0, imagesx($src_tc), imagesy($src_tc), PHP_INT_MAX);
+} catch (\ValueError $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
+
 imagedestroy($src_tc); imagedestroy($dst_tc);
 ?>
 --EXPECT--
 TC/TC: ok
+imagecopyrotated(): Argument #5 ($src_x) must be positive
+imagecopyrotated(): Argument #6 ($src_y) must be positive
+imagecopyrotated(): Argument #7 ($src_width) must be greater than 0
+imagecopyrotated(): Argument #8 ($src_height) must be greater than 0
+imagecopyrotated(): Argument #9 ($angle) must be greater than 0
