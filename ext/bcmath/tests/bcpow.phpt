@@ -6,7 +6,7 @@ bcmath
 bcmath.scale=0
 --FILE--
 <?php
-require(__DIR__."/run_bcmath_tests_function.inc");
+require(__DIR__ . "/run_bcmath_tests_function.inc");
 
 $exponents = ["15", "-15", "1", "-9", "0", "-0"];
 $baseNumbers = array_merge($exponents, [
