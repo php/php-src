@@ -42,6 +42,10 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 * The order of members of zend_op_array, zend_ssa_var, zend_ssa_var_info,
   zend_executor_globals and php_core_globals have changed to improve
   struct packing which reduces their size.
+* The name field have been removed from the zend_constant struct. Now,
+  constant names are only stored as keys of the global constants table.
+  That's why the `zend_register_constant()` function now expects the
+  constant name as its first parameter.
 * Many calls to zend_assign_to_variable have been replaced with
   zend_assign_to_variable_ex which allows delaying the releasing of the old
   variable value. This avoids side-effects through destructors between the
