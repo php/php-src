@@ -18,12 +18,12 @@ array(4) {
   int(42)
   ["ZEND_CONSTANT_A"]=>
   string(6) "global"
-  ["ZendTestNS2\ZEND_CONSTANT_A"]=>
+  ["zendtestns2\ZEND_CONSTANT_A"]=>
   string(10) "namespaced"
-  ["ZendTestNS2\ZendSubNS\ZEND_CONSTANT_A"]=>
+  ["zendtestns2\zendsubns\ZEND_CONSTANT_A"]=>
   string(10) "namespaced"
 }
 array(1) {
-  ["NS1\ns2\Const1"]=>
+  ["ns1\ns2\Const1"]=>
   string(6) "value1"
 }
