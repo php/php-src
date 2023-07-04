@@ -65,9 +65,10 @@ class PdoSqlite extends PDO
         int $flags = 0
     ): bool {}
 
-// Whether SQLITE_OMIT_LOAD_EXTENSION is defined or not depends on how
-// SQLite was compiled: https://www.sqlite.org/compile.html
-#ifndef SQLITE_OMIT_LOAD_EXTENSION
+// PDO_SQLITE_OMIT_LOAD_EXTENSION might be defined by ext/pdo_sqlite/config.m4
+// if Sqlite3 did not have the sqlite3_load_extension function present
+// which can deepend on how SQLite was compiled: https://www.sqlite.org/compile.html
+#ifndef PDO_SQLITE_OMIT_LOAD_EXTENSION
     public function loadExtension(string $name): bool {}
 #endif
 

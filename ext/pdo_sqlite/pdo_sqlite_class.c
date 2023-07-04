@@ -259,7 +259,7 @@ PHP_METHOD(PdoSqlite, createFunction)
 }
 /* }}} */
 
-#ifndef SQLITE_OMIT_LOAD_EXTENSION
+#ifndef PDO_SQLITE_OMIT_LOAD_EXTENSION
 /* {{{ Attempts to load an SQLite extension library. */
 PHP_METHOD(PdoSqlite, loadExtension)
 {
