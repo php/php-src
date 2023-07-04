@@ -4589,14 +4589,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		if (runtime_resolution) {
 			if (zend_string_equals_literal_ci(zend_ast_get_str(name_ast), "assert")
 					&& !is_callable_convert) {
-				if (CG(memoize_mode) == ZEND_MEMOIZE_NONE) {
-					zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL, ast->lineno);
-				} else {
-					/* We want to always memoize assert calls, even if they are positioned in
-					 * write-context. This prevents memoizing their arguments that might not be
-					 * evaluated if assertions are disabled, using a TMPVAR that wasn't initialized. */
-					zend_compile_memoized_expr(result, ast);
-				}
+				zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL, ast->lineno);
 			} else {
 				zend_compile_ns_call(result, &name_node, args_ast, ast->lineno);
 			}
@@ -4615,14 +4608,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 		/* Special assert() handling should apply independently of compiler flags. */
 		if (fbc && zend_string_equals_literal(lcname, "assert") && !is_callable_convert) {
-			if (CG(memoize_mode) == ZEND_MEMOIZE_NONE) {
-				zend_compile_assert(result, zend_ast_get_list(args_ast), lcname, fbc, ast->lineno);
-			} else {
-				/* We want to always memoize assert calls, even if they are positioned in
-				 * write-context. This prevents memoizing their arguments that might not be
-				 * evaluated if assertions are disabled, using a TMPVAR that wasn't initialized. */
-				zend_compile_memoized_expr(result, ast);
-			}
+			zend_compile_assert(result, zend_ast_get_list(args_ast), lcname, fbc, ast->lineno);
 			zend_string_release(lcname);
 			zval_ptr_dtor(&name_node.u.constant);
 			return;
@@ -10590,6 +10576,17 @@ static void zend_compile_expr(znode *result, zend_ast *ast)
 static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t type, bool by_ref)
 {
 	CG(zend_lineno) = zend_ast_get_lineno(ast);
+
+	if (CG(memoize_mode) != ZEND_MEMOIZE_NONE) {
+		switch (ast->kind) {
+			case ZEND_AST_CALL:
+			case ZEND_AST_METHOD_CALL:
+			case ZEND_AST_NULLSAFE_METHOD_CALL:
+			case ZEND_AST_STATIC_CALL:
+				zend_compile_memoized_expr(result, ast);
+				return &CG(active_op_array)->opcodes[CG(active_op_array)->last - 1];
+		}
+	}
 
 	switch (ast->kind) {
 		case ZEND_AST_VAR:
