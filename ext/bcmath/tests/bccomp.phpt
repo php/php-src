@@ -12,7 +12,7 @@ echo bccomp("1.00000000000000000001", "1", 2), "\n";
 echo bccomp("97321", "2321"), "\n";
 echo bccomp("0", "14"), "\n";
 echo bccomp("1", "0"), "\n";
-echo bccomp("0.000", "0", 3);
+echo bccomp("0.000", "0", 3), "\n";
 
 ?>
 --EXPECT--

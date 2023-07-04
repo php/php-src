@@ -24,5 +24,3 @@ function run_bcmath_tests(
         }
     }
 }
-
-?>
