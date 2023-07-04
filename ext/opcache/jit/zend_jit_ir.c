@@ -7996,7 +7996,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 		}
 		ref = ir_MUL_U32(ref, ir_CONST_U32(sizeof(zval)));
 		if (sizeof(void*) == 8) {
-			ref = ir_SEXT_A(ref);
+			ref = ir_ZEXT_A(ref);
 		}
 		ref = ir_SUB_A(used_stack_ref, ref);
 
