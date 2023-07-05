@@ -147,7 +147,7 @@ ZEND_API bool zend_gdb_present(void)
 
     if (proc) {
         if ((proc->ki_flag & P_TRACED) != 0) {
-            struct kinfo_proc *dbg = kinfo_getproc(proc->ki_tracer);
+            struct kinfo_proc *dbg = kinfo_getproc(proc->ki_tracep);
 
             ret = (dbg && strstr(dbg->ki_comm, "gdb"));
         }
