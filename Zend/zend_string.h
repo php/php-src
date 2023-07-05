@@ -413,7 +413,7 @@ static zend_always_inline bool zend_string_starts_with(const zend_string *str, c
 
 static zend_always_inline bool zend_string_starts_with_cstr_ci(const zend_string *str, const char *prefix, size_t prefix_length)
 {
-	return ZSTR_LEN(str) >= prefix_length && !zend_binary_strcasecmp(ZSTR_VAL(str), prefix, prefix_length);
+	return ZSTR_LEN(str) >= prefix_length && !strncasecmp(ZSTR_VAL(str), prefix, prefix_length);
 }
 
 static zend_always_inline bool zend_string_starts_with_ci(const zend_string *str, const zend_string *prefix)
