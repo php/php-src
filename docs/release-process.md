@@ -56,7 +56,6 @@ releases.
 3. Ensure that the relevant tests on CI are green.
 
    - https://travis-ci.com/github/php/php-src
-   - https://ci.appveyor.com/project/php/php-src
    - https://dev.azure.com/phpazuredevops/PHP/
    - https://cirrus-ci.com/github/php/php-src
 
