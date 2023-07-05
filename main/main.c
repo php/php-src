@@ -2355,6 +2355,8 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	php_ini_register_extensions();
 	zend_startup_modules();
 
+	zend_mm_observers_startup(NULL);
+
 	/* start Zend extensions */
 	zend_startup_extensions();
 
@@ -2499,6 +2501,10 @@ void php_module_shutdown(void)
 	if (!module_initialized) {
 		return;
 	}
+
+	// we need to shutdown ZendMM observers before modules are unloaded
+	zend_mm_observers_shutdown(NULL);
+	zend_mm_observers_unregister();
 
 	zend_interned_strings_switch_storage(0);
 
