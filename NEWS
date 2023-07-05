@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed oss-fuzz #60011 (Mis-compilation of by-reference nullsafe operator).
     (ilutov)
+  . Fixed line number of JMP instruction over else block. (ilutov)
 
 - Date:
   . Fixed bug GH-11368 (Date modify returns invalid datetime). (Derick)
