@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Implement GH-10024 (support linting multiple files at once using php -l).
     (nielsdos)
 
+- Core:
+  . Fixed line number of JMP instruction over else block. (ilutov)
+
 06 Jul 2023, PHP 8.3.0alpha3
 
 - Core:
