@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b0767630614e040866bd7ffdaf50dd31298a64f3 */
+ * Stub hash: 69e01162b971df128f6f976a45ffa6950b9a97ec */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2197,6 +2197,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_generate_ctrl_event
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_num_cpus, 0, 0, IS_LONG, 1)
+ZEND_END_ARG_INFO()
+
 
 ZEND_FUNCTION(set_time_limit);
 ZEND_FUNCTION(header_register_callback);
@@ -2815,6 +2818,7 @@ ZEND_FUNCTION(sapi_windows_set_ctrl_handler);
 #if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_generate_ctrl_event);
 #endif
+ZEND_FUNCTION(num_cpus);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -3463,6 +3467,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(PHP_WIN32)
 	ZEND_FE(sapi_windows_generate_ctrl_event, arginfo_sapi_windows_generate_ctrl_event)
 #endif
+	ZEND_FE(num_cpus, arginfo_num_cpus)
 	ZEND_FE_END
 };
 

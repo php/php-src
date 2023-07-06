@@ -3745,3 +3745,5 @@ function sapi_windows_set_ctrl_handler(?callable $handler, bool $add = true): bo
 
 function sapi_windows_generate_ctrl_event(int $event, int $pid = 0): bool {}
 #endif
+
+function num_cpus(): ?int {}
