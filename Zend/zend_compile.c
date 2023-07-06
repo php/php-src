@@ -4095,6 +4095,10 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 		zend_op *opline;
 		uint32_t check_op_number = get_next_op_number();
 
+		/* Assert expression may not be memoized and reused as it may not actually be evaluated. */
+		int orig_memoize_mode = CG(memoize_mode);
+		CG(memoize_mode) = ZEND_MEMOIZE_NONE;
+
 		zend_emit_op(NULL, ZEND_ASSERT_CHECK, NULL, NULL);
 
 		if (fbc && fbc_is_finalized(fbc)) {
@@ -4128,6 +4132,8 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 		opline = &CG(active_op_array)->opcodes[check_op_number];
 		opline->op2.opline_num = get_next_op_number();
 		SET_NODE(opline->result, result);
+
+		CG(memoize_mode) = orig_memoize_mode;
 	} else {
 		if (!fbc) {
 			zend_string_release_ex(name, 0);
