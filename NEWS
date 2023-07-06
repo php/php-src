@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 
 - FTP:
   . Fix context option check for "overwrite". (JonasQuinten)
+  . Fixed bug GH-10562 (Memory leak and invalid state with consecutive
+    ftp_nb_fget). (nielsdos)
 
 - GD:
   . Fix most of the external libgd test failures. (Michael Orlitzky)

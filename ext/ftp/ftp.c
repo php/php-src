@@ -2063,6 +2063,15 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t 
 		return PHP_FTP_FAILED;
 	}
 
+	if (ftp->data != NULL) {
+		/* If there is a transfer in action, abort it.
+		 * If we don't, we get an invalid state and memory leaks when the new connection gets opened. */
+		data_close(ftp, ftp->data);
+		if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
+			goto bail;
+		}
+	}
+
 	if (!ftp_type(ftp, type)) {
 		goto bail;
 	}
