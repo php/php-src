@@ -1010,11 +1010,7 @@ cleanup_args:
 
 	if (UNEXPECTED(EG(exception))) {
 		if (UNEXPECTED(!EG(current_execute_data))) {
-			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
-				zend_user_exception_handler();
-			} else {
-				zend_throw_exception_internal(NULL);
-			}
+			zend_throw_exception_internal(NULL);
 		} else if (EG(current_execute_data)->func &&
 		           ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
 			zend_rethrow_exception(EG(current_execute_data));
