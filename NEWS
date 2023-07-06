@@ -23,6 +23,9 @@ PHP                                                                        NEWS
 - FTP:
   . Fix context option check for "overwrite". (JonasQuinten)
 
+- GD:
+  . Fix most of the external libgd test failures. (Michael Orlitzky)
+
 - MBString:
   . Fix GH-11300 (license issue: restricted unicode license headers).
     (nielsdos)
