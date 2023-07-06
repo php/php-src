@@ -46,6 +46,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fix serialization of RC1 objects appearing in object graph twice. (ilutov)
 
+- SQLite3:
+  . Fix replaced error handling in SQLite3Stmt::__construct. (nielsdos)
+
 06 Jul 2023, PHP 8.1.21
 
 - CLI:
