@@ -282,7 +282,7 @@ static zend_always_inline zend_constant* _zend_quick_get_constant(
 
 	if (!check_defined_only) {
 		if (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED) {
-			zend_error(E_DEPRECATED, "Constant %s is deprecated", ZSTR_VAL(Z_STR_P(key)));
+			zend_error(E_DEPRECATED, "Constant %s is deprecated", ZSTR_VAL(c->name));
 			if (EG(exception)) {
 				return NULL;
 			}
