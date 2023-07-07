@@ -926,7 +926,7 @@ PHP_FUNCTION(ldap_connect)
 	LDAP *ldap = NULL;
 
 	if (ZEND_NUM_ARGS() == 2) {
-	    zend_error(E_DEPRECATED, "Usage of ldap_connect with two arguments is deprecated.");
+	    zend_error(E_DEPRECATED, "Usage of ldap_connect with two arguments is deprecated");
 	}
 
 #ifdef HAVE_ORALDAP
