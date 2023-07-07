@@ -45,7 +45,11 @@
 # include <sys/user.h>
 #endif
 #ifdef __OpenBSD__
+typedef int boolean_t;
+# include <tib.h>
 # include <pthread_np.h>
+# include <sys/sysctl.h>
+# include <sys/user.h>
 #endif
 #ifdef __linux__
 #include <sys/syscall.h>
@@ -435,8 +439,9 @@ static bool zend_call_stack_get_macos(zend_call_stack *stack)
 }
 #endif /* defined(__APPLE__) && defined(HAVE_PTHREAD_GET_STACKADDR_NP) */
 
+#if defined(__OpenBSD__)
 #if defined(HAVE_PTHREAD_STACKSEG_NP)
-static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
+static bool zend_call_stack_get_openbsd_pthread(zend_call_stack *stack)
 {
 	stack_t ss;
 
@@ -450,11 +455,55 @@ static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
 	return true;
 }
 #else
-static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
+static bool zend_call_stack_get_openbsd_pthread(zend_call_stack *stack)
 {
 	return false;
 }
 #endif /* defined(HAVE_PTHREAD_STACKSEG_NP) */
+
+static bool zend_call_stack_get_openbsd_vm(zend_call_stack *stack)
+{
+	struct _ps_strings ps;
+	struct rlimit rlim;
+	int mib[2] = {CTL_VM, VM_PSSTRINGS };
+	size_t len = sizeof(ps), pagesize;
+
+	if (sysctl(mib, 2, &ps, &len, NULL, 0) != 0) {
+		return false;
+	}
+
+	if (getrlimit(RLIMIT_STACK, &rlim) != 0) {
+		return false;
+	}
+
+	if (rlim.rlim_cur == RLIM_INFINITY) {
+		return false;
+	}
+
+	pagesize = sysconf(_SC_PAGE_SIZE);
+
+	stack->base = (void *)((uintptr_t)ps.val + (pagesize - 1) & ~(pagesize - 1));
+	stack->max_size = rlim.rlim_cur - pagesize;
+
+	return true;
+}
+
+static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
+{
+	// TIB_THREAD_INITIAL_STACK is private and here we avoid using pthread's api (ie pthread_main_np)
+	if (!TIB_GET()->tib_thread || (TIB_GET()->tib_thread_flags & 0x002) != 0) {
+		return zend_call_stack_get_openbsd_vm(stack);
+	}
+
+	return zend_call_stack_get_openbsd_pthread(stack);
+}
+
+#else
+static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
+{
+	return false;
+}
+#endif /* defined(__OpenBSD__) */
 
 /** Get the stack information for the calling thread */
 ZEND_API bool zend_call_stack_get(zend_call_stack *stack)
