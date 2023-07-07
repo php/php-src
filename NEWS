@@ -38,12 +38,12 @@ PHP                                                                        NEWS
 - PCRE:
   . Mangle PCRE regex cache key with JIT option. (mvorisek)
 
-- PHPDBG:
-  . Fixed bug GH-9669 (phpdbg -h options doesn't list the -z option). (adsr)
-
 - PDO SQLite:
   . Fix GH-11492 (Make test failure: ext/pdo_sqlite/tests/bug_42589.phpt).
     (KapitanOczywisty, CViniciusSDias)
+
+- PHPDBG:
+  . Fixed bug GH-9669 (phpdbg -h options doesn't list the -z option). (adsr)
 
 - Session:
   . Removed broken url support for transferring session ID. (ilutov)
