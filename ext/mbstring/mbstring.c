@@ -2649,6 +2649,8 @@ PHP_FUNCTION(mb_strimwidth)
 	}
 
 	if (width < 0) {
+		php_error_docref(NULL, E_DEPRECATED,
+			"passing a negative integer to argument #3 ($width) is deprecated");
 		width += mb_get_strwidth(str, enc);
 
 		if (from > 0) {
