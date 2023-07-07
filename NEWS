@@ -56,6 +56,11 @@ PHP                                                                        NEWS
 - PCRE:
   . Mangle PCRE regex cache key with JIT option. (mvorisek)
 
+- PDO:
+  . Fix GH-11587 (After php8.1, when PDO::ATTR_EMULATE_PREPARES is true
+    and PDO::ATTR_STRINGIFY_FETCHES is true, decimal zeros are no longer
+    filled). (SakiTakamachi)
+
 - PDO SQLite:
   . Fix GH-11492 (Make test failure: ext/pdo_sqlite/tests/bug_42589.phpt).
     (KapitanOczywisty, CViniciusSDias)
