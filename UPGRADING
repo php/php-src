@@ -116,14 +116,14 @@ PHP 8.3 UPGRADE NOTES
   . The U_MULTIPLE_DECIMAL_SEP*E*RATORS constant had been deprecated, using
     the U_MULTIPLE_DECIMAL_SEP*A*RATORS instead is recommended.
 
-- Zip:
-  . The ZipArchive::FL_RECOMPRESS constant is deprecated and will be removed
-    in a future version of libzip
-
 - SQLite3
   . Using exceptions is now preferred, warnings will be removed in the future.
     Calling SQLite3::enableExceptions(false) will trigger a depreciation warning
     in this version.
+
+- Zip:
+  . The ZipArchive::FL_RECOMPRESS constant is deprecated and will be removed
+    in a future version of libzip
 
 ========================================
 5. Changed Functions
