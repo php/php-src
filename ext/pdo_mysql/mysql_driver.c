@@ -459,7 +459,19 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			((pdo_mysql_db_handle *)dbh->driver_data)->fetch_table_names = bval;
 			PDO_DBG_RETURN(true);
 
-#ifndef PDO_USE_MYSQLND
+#ifdef PDO_USE_MYSQLND
+		case PDO_ATTR_STRINGIFY_FETCHES:
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			unsigned int int_and_float_native = !bval;
+			pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
+			if (mysql_options(H->server, MYSQLND_OPT_INT_AND_FLOAT_NATIVE, (const char *) &int_and_float_native)) {
+				pdo_mysql_error(dbh);
+				return false;
+			}
+			PDO_DBG_RETURN(true);
+#else
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
 			if (!pdo_get_long_param(&lval, val)) {
 				PDO_DBG_RETURN(false);
@@ -891,7 +903,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	}
 
 #ifdef PDO_USE_MYSQLND
-	unsigned int int_and_float_native = 1;
+	!pdo_attr_lval(driver_options, PDO_ATTR_STRINGIFY_FETCHES, dbh->stringify);
 	if (mysql_options(H->server, MYSQLND_OPT_INT_AND_FLOAT_NATIVE, (const char *) &int_and_float_native)) {
 		pdo_mysql_error(dbh);
 		goto cleanup;
