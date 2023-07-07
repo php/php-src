@@ -43,6 +43,8 @@ jobs:
         uses: ./.github/actions/setup-mssql
       - name: Create Oracle container
         uses: ./.github/actions/setup-oracle
+      - name: Setup Caddy server
+        uses: ./.github/actions/setup-caddy
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: ccache
