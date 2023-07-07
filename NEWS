@@ -15,6 +15,9 @@ PHP                                                                        NEWS
 - OpenSSL
   . Added support for additional EC parameters in openssl_pkey_new. (Eno-CN)
 
+- Random
+  . Deprecate MT_RAND_PHP. (timwolla)
+
 06 Jul 2023, PHP 8.3.0alpha3
 
 - Core:

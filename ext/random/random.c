@@ -488,6 +488,11 @@ PHP_FUNCTION(mt_srand)
 
 	state->mode = mode;
 
+	/* Anything that is not MT_RAND_MT19937 was interpreted as MT_RAND_PHP. */
+	if (state->mode != MT_RAND_MT19937) {
+		zend_error(E_DEPRECATED, "The MT_RAND_PHP variant of Mt19937 is deprecated");
+	}
+
 	if (seed_is_null) {
 		php_random_mt19937_seed_default(status->state);
 	} else {
