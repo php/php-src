@@ -35,7 +35,7 @@
 #  include <sys/types.h>
 # endif
 #endif /* ZEND_WIN32 */
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__)
 # include <pthread.h>
 #endif
 #ifdef __FreeBSD__
@@ -43,6 +43,9 @@
 # include <sys/mman.h>
 # include <sys/sysctl.h>
 # include <sys/user.h>
+#endif
+#ifdef __OpenBSD__
+# include <pthread_np.h>
 #endif
 #ifdef __linux__
 #include <sys/syscall.h>
@@ -432,6 +435,27 @@ static bool zend_call_stack_get_macos(zend_call_stack *stack)
 }
 #endif /* defined(__APPLE__) && defined(HAVE_PTHREAD_GET_STACKADDR_NP) */
 
+#if defined(HAVE_PTHREAD_STACKSEG_NP)
+static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
+{
+	stack_t ss;
+
+	if (pthread_stackseg_np(pthread_self(), &ss) != 0) {
+		return false;
+	}
+
+	stack->base = (char *)ss.ss_sp - ss.ss_size;
+	stack->max_size = ss.ss_size - sysconf(_SC_PAGE_SIZE);
+
+	return true;
+}
+#else
+static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
+{
+	return false;
+}
+#endif /* defined(HAVE_PTHREAD_STACKSEG_NP) */
+
 /** Get the stack information for the calling thread */
 ZEND_API bool zend_call_stack_get(zend_call_stack *stack)
 {
@@ -448,6 +472,10 @@ ZEND_API bool zend_call_stack_get(zend_call_stack *stack)
 	}
 
 	if (zend_call_stack_get_macos(stack)) {
+		return true;
+	}
+
+	if (zend_call_stack_get_openbsd(stack)) {
 		return true;
 	}
 
