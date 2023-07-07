@@ -236,7 +236,7 @@ typedef struct _zend_fcall_info_cache {
 
 #define ZEND_GET_MODULE(name) \
     BEGIN_EXTERN_C()\
-	ZEND_DLEXPORT zend_module_entry *get_module(void) { return &name##_module_entry; }\
+	ZEND_DLEXPORT zend_module_entry *get_module(void) { return (zend_module_entry*) &name##_module_entry; }\
     END_EXTERN_C()
 
 #define ZEND_BEGIN_MODULE_GLOBALS(module_name)		\
