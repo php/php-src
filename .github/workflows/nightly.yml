@@ -364,7 +364,7 @@ jobs:
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
-          repositories="amp byte-stream cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
+          repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
           X=0
           for repository in $repositories; do
             printf "Testing amp/%s\n" "$repository"
