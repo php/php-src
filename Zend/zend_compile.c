@@ -99,6 +99,26 @@ static void zend_compile_expr(znode *result, zend_ast *ast);
 static void zend_compile_stmt(zend_ast *ast);
 static void zend_compile_assign(znode *result, zend_ast *ast);
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+zend_never_inline static void zend_stack_limit_error(void)
+{
+	zend_error_noreturn(E_COMPILE_ERROR,
+		"Maximum call stack size of %zu bytes reached during compilation. Try splitting expression",
+		(size_t) ((uintptr_t) EG(stack_base) - (uintptr_t) EG(stack_limit)));
+}
+
+static void zend_check_stack_limit(void)
+{
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_stack_limit_error();
+	}
+}
+#else /* ZEND_CHECK_STACK_LIMIT */
+static void zend_check_stack_limit(void)
+{
+}
+#endif /* ZEND_CHECK_STACK_LIMIT */
+
 static void init_op(zend_op *op)
 {
 	MAKE_NOP(op);
@@ -10550,13 +10570,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 
 static void zend_compile_expr(znode *result, zend_ast *ast)
 {
-#ifdef ZEND_CHECK_STACK_LIMIT
-	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"Maximum call stack size of %zu bytes reached during compilation. Try splitting expression",
-			(size_t) ((uintptr_t) EG(stack_base) - (uintptr_t) EG(stack_limit)));
-	}
-#endif /* ZEND_CHECK_STACK_LIMIT */
+	zend_check_stack_limit();
 
 	uint32_t checkpoint = zend_short_circuiting_checkpoint();
 	zend_compile_expr_inner(result, ast);
@@ -10641,6 +10655,8 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 	if (!ast) {
 		return;
 	}
+
+	zend_check_stack_limit();
 
 	switch (ast->kind) {
 		case ZEND_AST_BINARY_OP:
