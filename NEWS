@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed GH-11573 (RecursiveDirectoryIterator::hasChildren is slow).
     (nielsdos)
 
+- Streams:
+  . Implemented GH-11242 (_php_stream_copy_to_mem: Allow specifying a maximum
+    length without allocating a buffer of that size). (Jakub Zelenka)
+
 06 Jul 2023, PHP 8.3.0alpha3
 
 - Core:
