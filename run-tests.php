@@ -2477,7 +2477,10 @@ TEST $file
     if ($test->hasSection('XLEAK')) {
         $env['ZEND_ALLOC_PRINT_LEAKS'] = '0';
         if (isset($env['SKIP_ASAN'])) {
-            $env['LSAN_OPTIONS'] = 'detect_leaks=0';
+            // $env['LSAN_OPTIONS'] = 'detect_leaks=0';
+            /* For unknown reasons, LSAN_OPTIONS=detect_leaks=0 would occasionally not be picked up
+             * in CI. Skip the test with ASAN, as it's not worth investegating. */
+            return skip_test($tested, $tested_file, $shortname, 'xleak does not work with asan');
         }
     }
 
