@@ -54,12 +54,20 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 numfmt_format(): Argument #3 ($type) must be a NumberFormatter::TYPE_* constant
 NumberFormatter::format(): Argument #2 ($type) must be a NumberFormatter::TYPE_* constant
 numfmt_parse(): Argument #3 ($type) must be a NumberFormatter::TYPE_* constant
 NumberFormatter::parse(): Argument #2 ($type) must be a NumberFormatter::TYPE_* constant
+
+Deprecated: Constant NumberFormatter::TYPE_CURRENCY is deprecated in %s on line %d
 numfmt_format(): Argument #3 ($type) cannot be NumberFormatter::TYPE_CURRENCY constant, use numfmt_format_currency() function instead
+
+Deprecated: Constant NumberFormatter::TYPE_CURRENCY is deprecated in %s on line %d
 NumberFormatter::format(): Argument #2 ($type) cannot be NumberFormatter::TYPE_CURRENCY constant, use NumberFormatter::formatCurrency() method instead
+
+Deprecated: Constant NumberFormatter::TYPE_CURRENCY is deprecated in %s on line %d
 numfmt_parse(): Argument #3 ($type) cannot be NumberFormatter::TYPE_CURRENCY constant, use numfmt_parse_currency() function instead
+
+Deprecated: Constant NumberFormatter::TYPE_CURRENCY is deprecated in %s on line %d
 NumberFormatter::parse(): Argument #2 ($type) cannot be NumberFormatter::TYPE_CURRENCY constant, use NumberFormatter::parseCurrency() method instead
