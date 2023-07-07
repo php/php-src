@@ -760,20 +760,22 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 	}
 
 	do {
-		/* Try to hit the cache first */
-		if (flags & PHP_STREAM_URL_STAT_LINK) {
-			if (filename == BG(CurrentLStatFile)
-			 || (BG(CurrentLStatFile)
-			  && zend_string_equal_content(filename, BG(CurrentLStatFile)))) {
-				memcpy(&ssb, &BG(lssb), sizeof(php_stream_statbuf));
-				break;
-			}
-		} else {
-			if (filename == BG(CurrentStatFile)
-			 || (BG(CurrentStatFile)
-			  && zend_string_equal_content(filename, BG(CurrentStatFile)))) {
-				memcpy(&ssb, &BG(ssb), sizeof(php_stream_statbuf));
-				break;
+		if (CWDG(enable_stat_cache)) {
+			/* Try to hit the cache first */
+			if (flags & PHP_STREAM_URL_STAT_LINK) {
+				if (filename == BG(CurrentLStatFile)
+				 || (BG(CurrentLStatFile)
+				  && zend_string_equal_content(filename, BG(CurrentLStatFile)))) {
+					memcpy(&ssb, &BG(lssb), sizeof(php_stream_statbuf));
+					break;
+				}
+			} else {
+				if (filename == BG(CurrentStatFile)
+				 || (BG(CurrentStatFile)
+				  && zend_string_equal_content(filename, BG(CurrentStatFile)))) {
+					memcpy(&ssb, &BG(ssb), sizeof(php_stream_statbuf));
+					break;
+				}
 			}
 		}
 
@@ -801,21 +803,23 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 			RETURN_FALSE;
 		}
 
-		/* Drop into cache */
-		if (flags & PHP_STREAM_URL_STAT_LINK) {
-			if (BG(CurrentLStatFile)) {
-				zend_string_release(BG(CurrentLStatFile));
+		if (CWDG(enable_stat_cache)) {
+			/* Drop into cache */
+			if (flags & PHP_STREAM_URL_STAT_LINK) {
+				if (BG(CurrentLStatFile)) {
+					zend_string_release(BG(CurrentLStatFile));
+				}
+				BG(CurrentLStatFile) = zend_string_copy(filename);
+				memcpy(&BG(lssb), &ssb, sizeof(php_stream_statbuf));
 			}
-			BG(CurrentLStatFile) = zend_string_copy(filename);
-			memcpy(&BG(lssb), &ssb, sizeof(php_stream_statbuf));
-		}
-		if (!(flags & PHP_STREAM_URL_STAT_LINK)
-		 || !S_ISLNK(ssb.sb.st_mode)) {
-			if (BG(CurrentStatFile)) {
-				zend_string_release(BG(CurrentStatFile));
+			if (!(flags & PHP_STREAM_URL_STAT_LINK)
+			 || !S_ISLNK(ssb.sb.st_mode)) {
+				if (BG(CurrentStatFile)) {
+					zend_string_release(BG(CurrentStatFile));
+				}
+				BG(CurrentStatFile) = zend_string_copy(filename);
+				memcpy(&BG(ssb), &ssb, sizeof(php_stream_statbuf));
 			}
-			BG(CurrentStatFile) = zend_string_copy(filename);
-			memcpy(&BG(ssb), &ssb, sizeof(php_stream_statbuf));
 		}
 	} while (0);
 
