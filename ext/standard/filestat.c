@@ -706,8 +706,8 @@ PHP_FUNCTION(clearstatcache)
 /* {{{ php_stat */
 PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 {
-	zend_stat_t *stat_sb = {0};
 	php_stream_statbuf ssb = {0};
+	zend_stat_t *stat_sb = &ssb.sb;
 	int flags = 0, rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
 	const char *local = NULL;
 	php_stream_wrapper *wrapper = NULL;
@@ -765,14 +765,14 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 			if (filename == BG(CurrentLStatFile)
 			 || (BG(CurrentLStatFile)
 			  && zend_string_equal_content(filename, BG(CurrentLStatFile)))) {
-				memcpy(&ssb, &BG(lssb), sizeof(php_stream_statbuf));
+				stat_sb = &BG(lssb).sb;
 				break;
 			}
 		} else {
 			if (filename == BG(CurrentStatFile)
 			 || (BG(CurrentStatFile)
 			  && zend_string_equal_content(filename, BG(CurrentStatFile)))) {
-				memcpy(&ssb, &BG(ssb), sizeof(php_stream_statbuf));
+				stat_sb = &BG(ssb).sb;
 				break;
 			}
 		}
@@ -819,14 +819,12 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 		}
 	} while (0);
 
-	stat_sb = &ssb.sb;
-
 	if (type >= FS_IS_W && type <= FS_IS_X) {
-		if(ssb.sb.st_uid==getuid()) {
+		if(stat_sb->st_uid==getuid()) {
 			rmask=S_IRUSR;
 			wmask=S_IWUSR;
 			xmask=S_IXUSR;
-		} else if(ssb.sb.st_gid==getgid()) {
+		} else if(stat_sb->st_gid==getgid()) {
 			rmask=S_IRGRP;
 			wmask=S_IWGRP;
 			xmask=S_IXGRP;
@@ -839,7 +837,7 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 				gids=(gid_t *)safe_emalloc(groups, sizeof(gid_t), 0);
 				n=getgroups(groups, gids);
 				for(i=0;i<n;i++){
-					if(ssb.sb.st_gid==gids[i]) {
+					if(stat_sb->st_gid==gids[i]) {
 						rmask=S_IRGRP;
 						wmask=S_IWGRP;
 						xmask=S_IXGRP;
@@ -865,26 +863,26 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 	switch (type) {
 	case FS_PERMS:
 	case FS_LPERMS:
-		RETURN_LONG((zend_long)ssb.sb.st_mode);
+		RETURN_LONG((zend_long)stat_sb->st_mode);
 	case FS_INODE:
-		RETURN_LONG((zend_long)ssb.sb.st_ino);
+		RETURN_LONG((zend_long)stat_sb->st_ino);
 	case FS_SIZE:
-		RETURN_LONG((zend_long)ssb.sb.st_size);
+		RETURN_LONG((zend_long)stat_sb->st_size);
 	case FS_OWNER:
-		RETURN_LONG((zend_long)ssb.sb.st_uid);
+		RETURN_LONG((zend_long)stat_sb->st_uid);
 	case FS_GROUP:
-		RETURN_LONG((zend_long)ssb.sb.st_gid);
+		RETURN_LONG((zend_long)stat_sb->st_gid);
 	case FS_ATIME:
-		RETURN_LONG((zend_long)ssb.sb.st_atime);
+		RETURN_LONG((zend_long)stat_sb->st_atime);
 	case FS_MTIME:
-		RETURN_LONG((zend_long)ssb.sb.st_mtime);
+		RETURN_LONG((zend_long)stat_sb->st_mtime);
 	case FS_CTIME:
-		RETURN_LONG((zend_long)ssb.sb.st_ctime);
+		RETURN_LONG((zend_long)stat_sb->st_ctime);
 	case FS_TYPE:
-		if (S_ISLNK(ssb.sb.st_mode)) {
+		if (S_ISLNK(stat_sb->st_mode)) {
 			RETURN_STRING("link");
 		}
-		switch(ssb.sb.st_mode & S_IFMT) {
+		switch(stat_sb->st_mode & S_IFMT) {
 		case S_IFIFO: RETURN_STRING("fifo");
 		case S_IFCHR: RETURN_STRING("char");
 		case S_IFDIR: RETURN_STRING("dir");
@@ -894,20 +892,20 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 		case S_IFSOCK: RETURN_STRING("socket");
 #endif
 		}
-		php_error_docref(NULL, E_NOTICE, "Unknown file type (%d)", ssb.sb.st_mode&S_IFMT);
+		php_error_docref(NULL, E_NOTICE, "Unknown file type (%d)", stat_sb->st_mode&S_IFMT);
 		RETURN_STRING("unknown");
 	case FS_IS_W:
-		RETURN_BOOL((ssb.sb.st_mode & wmask) != 0);
+		RETURN_BOOL((stat_sb->st_mode & wmask) != 0);
 	case FS_IS_R:
-		RETURN_BOOL((ssb.sb.st_mode&rmask)!=0);
+		RETURN_BOOL((stat_sb->st_mode & rmask) != 0);
 	case FS_IS_X:
-		RETURN_BOOL((ssb.sb.st_mode&xmask)!=0);
+		RETURN_BOOL((stat_sb->st_mode & xmask) != 0);
 	case FS_IS_FILE:
-		RETURN_BOOL(S_ISREG(ssb.sb.st_mode));
+		RETURN_BOOL(S_ISREG(stat_sb->st_mode));
 	case FS_IS_DIR:
-		RETURN_BOOL(S_ISDIR(ssb.sb.st_mode));
+		RETURN_BOOL(S_ISDIR(stat_sb->st_mode));
 	case FS_IS_LINK:
-		RETURN_BOOL(S_ISLNK(ssb.sb.st_mode));
+		RETURN_BOOL(S_ISLNK(stat_sb->st_mode));
 	case FS_EXISTS:
 		RETURN_TRUE; /* the false case was done earlier */
 	case FS_LSTAT:
