@@ -116,6 +116,10 @@ PHP 8.3 UPGRADE NOTES
   . The U_MULTIPLE_DECIMAL_SEP*E*RATORS constant had been deprecated, using
     the U_MULTIPLE_DECIMAL_SEP*A*RATORS instead is recommended.
 
+- Random
+  . The MT_RAND_PHP Mt19937 variant is deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_3#mt_rand_php
+
 - SQLite3
   . Using exceptions is now preferred, warnings will be removed in the future.
     Calling SQLite3::enableExceptions(false) will trigger a depreciation warning
