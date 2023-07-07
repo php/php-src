@@ -23,7 +23,7 @@ foreach([
     var_dump($optionval);
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 int(0)
 bool(true)

@@ -12,5 +12,5 @@ require "connect.inc";
 $link = ldap_connect($uri);
 var_dump(ldap_rename($link, "cn=userNotFound,$base", "cn=userZ", "$base", true));
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)

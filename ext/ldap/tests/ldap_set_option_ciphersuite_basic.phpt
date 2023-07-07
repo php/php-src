@@ -15,6 +15,6 @@ var_dump($result);
 ldap_get_option($link, LDAP_OPT_X_TLS_CIPHER_SUITE, $optionval);
 var_dump($optionval);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 string(4) "3DES"

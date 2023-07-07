@@ -48,7 +48,7 @@ var_dump(
     $option
 );
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 int(0)
 bool(true)

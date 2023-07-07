@@ -11,5 +11,5 @@ $link = ldap_connect($uri);
 $result = ldap_set_option($link, LDAP_OPT_X_TLS_CRLCHECK, 9001);
 var_dump($result);
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
