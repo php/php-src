@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - Random:
   . Deprecate MT_RAND_PHP. (timwolla)
 
+- SPL:
+  . Fixed GH-11573 (RecursiveDirectoryIterator::hasChildren is slow).
+    (nielsdos)
+
 06 Jul 2023, PHP 8.3.0alpha3
 
 - Core:
