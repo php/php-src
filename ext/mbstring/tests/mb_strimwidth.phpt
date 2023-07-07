@@ -71,7 +71,8 @@ testStrimwidth($utf16le, -3, 5, 'UTF-16LE');
 // We'll count back 4 characters, then allow a width of ((4 * 2) - 2) = 6
 // Since the output will not reach the END of the string, the trim marker
 // will have to be added, and will consume a width of 3
-testStrimwidth($utf16le, -4, -2, 'UTF-16LE');
+// We also suppress the deprecation for negative width as of PHP 8.3
+@testStrimwidth($utf16le, -4, -2, 'UTF-16LE');
 
 echo "\n== EUC-JP ==\n";
 
@@ -103,11 +104,13 @@ testStrimwidth($euc_jp, 9, 5, 'EUC-JP');
 
 // Skip 15 characters, which leaves a total width of 42. Then trim string down
 // to 5 less than that, which is a width of 37.
-testStrimwidth($euc_jp, 15, -5, 'EUC-JP');
+// We also suppress the deprecation for negative width as of PHP 8.3
+@testStrimwidth($euc_jp, 15, -5, 'EUC-JP');
 
 // Take the last 30 characters, which have a width of 54. Trim string down to
 // 25 less than that, which is 29.
-testStrimwidth($euc_jp, -30, -25, 'EUC-JP');
+// We also suppress the deprecation for negative width as of PHP 8.3
+@testStrimwidth($euc_jp, -30, -25, 'EUC-JP');
 
 // Skip over 39 characters... but since string is only 39 characters long,
 // it takes us to the end of the string, and output is empty
@@ -115,10 +118,12 @@ testStrimwidth($euc_jp, 39, 10, 'EUC-JP');
 
 // Take the last 10 characters, which have a width of 20. Trim string down to
 // 12 less than that, which is a width of 8.
-testStrimwidth($euc_jp, -10, -12, 'EUC-JP');
+// We also suppress the deprecation for negative width as of PHP 8.3
+@testStrimwidth($euc_jp, -10, -12, 'EUC-JP');
 
 try {
-    var_dump(mb_strimwidth($euc_jp, 0, -100,'...','EUC-JP'));
+    // We also suppress the deprecation for negative width as of PHP 8.3
+    var_dump(@mb_strimwidth($euc_jp, 0, -100,'...','EUC-JP'));
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
@@ -133,7 +138,8 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 try {
-    var_dump(mb_strimwidth($euc_jp, -10, -21,'...','EUC-JP'));
+    // We also suppress the deprecation for negative width as of PHP 8.3
+    var_dump(@mb_strimwidth($euc_jp, -10, -21,'...','EUC-JP'));
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
@@ -147,7 +153,8 @@ for ($from = -5; $from <= 5; $from++) {
             // This case is illegal and will throw an exception
             $pass = false;
             try {
-                mb_strimwidth($str, $from, $width, '...', 'ASCII');
+                /* Shut up deprecation notice for now */
+                @mb_strimwidth($str, $from, $width, '...', 'ASCII');
             } catch (\ValueError $e) {
                 $pass = true;
             }
@@ -156,7 +163,8 @@ for ($from = -5; $from <= 5; $from++) {
             continue;
         }
 
-        $result = mb_strimwidth($str, $from, $width, '...', 'ASCII');
+        /* Shut up deprecation notice for now */
+        $result = @mb_strimwidth($str, $from, $width, '...', 'ASCII');
 
         if ($from < 0 && $width < 0 && ($width - $from) <= 3) {
             if ($result !== '...')
@@ -211,7 +219,8 @@ testStrimwidth("日本語abc", -3, 10, 'UTF-8');
 // Regression test; old implementation did not handle positive 'from' argument
 // combined with negative 'width' argument correctly when portion being skipped
 // over included fullwidth characters
-testStrimwidth("日本語abcdef", 3, -1, 'UTF-8');
+// We also suppress the deprecation for negative width as of PHP 8.3
+@testStrimwidth("日本語abcdef", 3, -1, 'UTF-8');
 
 ?>
 --EXPECT--
