@@ -83,6 +83,12 @@ PHP 8.3 UPGRADE NOTES
     declarations. RFC: https://wiki.php.net/rfc/typed_class_constants
   . Closures created from magic methods can now accept named arguments.
   . The final modifier may now be used when using a method from a trait.
+  . Added the #[\Override] attribute to check that a method exists
+    in a parent class or implemented interface.
+    RFC: https://wiki.php.net/rfc/marking_overriden_methods
+
+- CLI
+  . It is now possible to lint multiple files.
 
 - Posix
   . posix_getrlimit() now takes an optional $res parameter to allow fetching a
@@ -113,6 +119,11 @@ PHP 8.3 UPGRADE NOTES
 - Zip:
   . The ZipArchive::FL_RECOMPRESS constant is deprecated and will be removed
     in a future version of libzip
+
+- SQLite3
+  . Using exceptions is now preferred, warnings will be removed in the future.
+    Calling SQLite3::enableExceptions(false) will trigger a depreciation warning
+    in this version.
 
 ========================================
 5. Changed Functions
@@ -259,6 +270,16 @@ PHP 8.3 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- DOM:
+  . The DOM lifetime mechanism has been reworked such that implicitly removed
+    nodes can still be fetched. Previously this resulted in an exception.
+
+- SQLite3
+  . The SQLite3 class now throws \SQLite3Exception (extends \Exception) instead
+    of \Exception.
+  . The SQLite error code is now passed in the exception error code instead of being
+    included in the error message.
+
 ========================================
 10. New Global Constants
 ========================================
@@ -314,6 +335,7 @@ PHP 8.3 UPGRADE NOTES
   . ZipArchive::AFL_IS_TORRENTZIP (libzip >= 1.10)
   . ZipArchive::AFL_WANT_TORRENTZIP (libzip >= 1.10)
   . ZipArchive::AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE (libzip >= 1.10)
+  . ZipArchive::FL_OPEN_FILE_NOW
 
 ========================================
 11. Changes to INI File Handling

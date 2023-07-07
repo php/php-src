@@ -330,15 +330,13 @@ PHP_METHOD(DOMCharacterData, replaceData)
 
 PHP_METHOD(DOMCharacterData, remove)
 {
-	zval *id = ZEND_THIS;
-	xmlNodePtr child;
 	dom_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	DOM_GET_OBJ(child, id, xmlNodePtr, intern);
+	DOM_GET_THIS_INTERN(intern);
 
 	dom_child_node_remove(intern);
 	RETURN_NULL();
@@ -347,16 +345,14 @@ PHP_METHOD(DOMCharacterData, remove)
 PHP_METHOD(DOMCharacterData, after)
 {
 	uint32_t argc;
-	zval *args, *id;
+	zval *args;
 	dom_object *intern;
-	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	id = ZEND_THIS;
-	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+	DOM_GET_THIS_INTERN(intern);
 
 	dom_parent_node_after(intern, args, argc);
 }
@@ -364,16 +360,14 @@ PHP_METHOD(DOMCharacterData, after)
 PHP_METHOD(DOMCharacterData, before)
 {
 	uint32_t argc;
-	zval *args, *id;
+	zval *args;
 	dom_object *intern;
-	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	id = ZEND_THIS;
-	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+	DOM_GET_THIS_INTERN(intern);
 
 	dom_parent_node_before(intern, args, argc);
 }
@@ -381,16 +375,14 @@ PHP_METHOD(DOMCharacterData, before)
 PHP_METHOD(DOMCharacterData, replaceWith)
 {
 	uint32_t argc;
-	zval *args, *id;
+	zval *args;
 	dom_object *intern;
-	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	id = ZEND_THIS;
-	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+	DOM_GET_THIS_INTERN(intern);
 
 	dom_parent_node_after(intern, args, argc);
 	dom_child_node_remove(intern);

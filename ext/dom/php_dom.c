@@ -310,10 +310,6 @@ zval *dom_read_property(zend_object *object, zend_string *name, int type, void *
 
 	if (obj->prop_handler != NULL) {
 		hnd = zend_hash_find_ptr(obj->prop_handler, name);
-	} else if (instanceof_function(obj->std.ce, dom_node_class_entry)) {
-		zend_throw_error(NULL, "Couldn't fetch %s. Node no longer exists", ZSTR_VAL(obj->std.ce->name));
-		retval = &EG(uninitialized_zval);
-		return retval;
 	}
 
 	if (hnd) {
@@ -421,7 +417,9 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(prop_handlers, string_key, entry) {
 		zval value;
 
-		if (entry->read_func(obj, &value) == FAILURE || !string_key) {
+		ZEND_ASSERT(string_key != NULL);
+
+		if (entry->read_func(obj, &value) == FAILURE) {
 			continue;
 		}
 

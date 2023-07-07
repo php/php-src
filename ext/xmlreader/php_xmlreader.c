@@ -22,6 +22,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "zend_observer.h"
 #include "php_xmlreader.h"
 #ifdef HAVE_DOM
 #include "ext/dom/xml_common.h"
@@ -1147,6 +1148,18 @@ PHP_METHOD(XMLReader, expand)
 }
 /* }}} */
 
+static zend_result (*prev_zend_post_startup_cb)(void);
+static zend_result xmlreader_fixup_temporaries(void) {
+	if (ZEND_OBSERVER_ENABLED) {
+		++xmlreader_open_fn.T;
+		++xmlreader_xml_fn.T;
+	}
+	if (prev_zend_post_startup_cb) {
+		return prev_zend_post_startup_cb();
+	}
+	return SUCCESS;
+}
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(xmlreader)
 {
@@ -1168,6 +1181,9 @@ PHP_MINIT_FUNCTION(xmlreader)
 	xmlreader_open_fn.fn_flags &= ~ZEND_ACC_STATIC;
 	memcpy(&xmlreader_xml_fn, zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "xml", sizeof("xml")-1), sizeof(zend_internal_function));
 	xmlreader_xml_fn.fn_flags &= ~ZEND_ACC_STATIC;
+
+	prev_zend_post_startup_cb = zend_post_startup_cb;
+	zend_post_startup_cb = xmlreader_fixup_temporaries;
 
 	zend_hash_init(&xmlreader_prop_handlers, 0, NULL, php_xmlreader_free_prop_handler, 1);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "attributeCount", xmlTextReaderAttributeCount, NULL, IS_LONG);
