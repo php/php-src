@@ -19,6 +19,7 @@
 static zend_op_array dummy_op_array;
 static zend_jit_trace_info *zend_jit_traces = NULL;
 static const void **zend_jit_exit_groups = NULL;
+static zend_atomic_bool jit_counters_stopped;
 
 #define ZEND_JIT_COUNTER_NUM   zend_jit_traces[0].root
 #define ZEND_JIT_TRACE_NUM     zend_jit_traces[0].id
@@ -63,6 +64,7 @@ static int zend_jit_trace_startup(zend_bool reattached)
 		ZEND_JIT_EXIT_COUNTERS = 0;
 		ZCSG(jit_traces) = zend_jit_traces;
 		ZCSG(jit_exit_groups) = zend_jit_exit_groups;
+		ZEND_ATOMIC_BOOL_INIT(&jit_counters_stopped, false);
 	} else {
 		zend_jit_traces = ZCSG(jit_traces);
 		if (!zend_jit_traces) {
@@ -7242,6 +7244,10 @@ static void zend_jit_stop_persistent_script(zend_persistent_script *script)
 /* Get all scripts which are accelerated by JIT */
 static void zend_jit_stop_counter_handlers(void)
 {
+	if (zend_atomic_bool_exchange_ex(&jit_counters_stopped, true)) {
+		return;
+	}
+
 	zend_shared_alloc_lock();
 	/* mprotect has an extreme overhead, avoid calls to it for every function. */
 	SHM_UNPROTECT();
