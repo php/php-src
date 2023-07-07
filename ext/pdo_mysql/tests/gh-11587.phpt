@@ -51,7 +51,7 @@ foreach ($results as $result) {
 }
 
 // PDO::ATTR_EMULATE_PREPARES = false, PDO::ATTR_STRINGIFY_FETCHES = true
-$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false;
+$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 $results = $db->query('SELECT * FROM test');
 foreach ($results as $result) {
