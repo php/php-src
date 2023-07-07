@@ -46,6 +46,7 @@
 #endif
 #ifdef __OpenBSD__
 # include <pthread_np.h>
+# include <machine/vmparam.h>
 #endif
 #ifdef __linux__
 #include <sys/syscall.h>
@@ -435,8 +436,9 @@ static bool zend_call_stack_get_macos(zend_call_stack *stack)
 }
 #endif /* defined(__APPLE__) && defined(HAVE_PTHREAD_GET_STACKADDR_NP) */
 
+#if defined(__OpenBSD__)
 #if defined(HAVE_PTHREAD_STACKSEG_NP)
-static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
+static bool zend_call_stack_get_openbsd_pthread(zend_call_stack *stack)
 {
 	stack_t ss;
 
@@ -450,11 +452,48 @@ static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
 	return true;
 }
 #else
-static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
+static bool zend_call_stack_get_openbsd_pthread(zend_call_stack *stack)
 {
 	return false;
 }
 #endif /* defined(HAVE_PTHREAD_STACKSEG_NP) */
+
+static bool zend_call_stack_get_openbsd_vm(zend_call_stack *stack)
+{
+	void *stack_base;
+	struct rlimit rlim;
+
+
+	if (getrlimit(RLIMIT_STACK, &rlim) != 0) {
+		return false;
+	}
+
+	if (rlim.rlim_cur == RLIM_INFINITY) {
+		return false;
+	}
+
+	// arch dependent top user's stack
+	stack->base = USRSTACK - rlim.rlim_cur;
+	stack->max_size = rlim.rlim_cur - sysconf(_SC_PAGE_SIZE);
+
+	return true;
+}
+
+static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
+{
+	if (getthrid() == getpid()) {
+		return zend_call_stack_get_openbsd_vm(stack);
+	}
+
+	return zend_call_stack_get_openbsd_pthread(stack);
+}
+
+#else
+static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
+{
+	return false;
+}
+#endif /* defined(__OpenBSD__) */
 
 /** Get the stack information for the calling thread */
 ZEND_API bool zend_call_stack_get(zend_call_stack *stack)
