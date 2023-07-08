@@ -13,6 +13,10 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed use-of-uninitialized-value with ??= on assert. (ilutov)
 
+- Curl:
+  . Fix crash when an invalid callback function is passed to
+    CURLMOPT_PUSHFUNCTION. (nielsdos)
+
 - Date:
   . Fixed bug GH-11368 (Date modify returns invalid datetime). (Derick)
 
