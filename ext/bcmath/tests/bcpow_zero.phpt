@@ -8,7 +8,7 @@ bcmath.scale=0
 <?php
 require(__DIR__ . "/run_bcmath_tests_function.inc");
 
-$exponents = ["0", "-0", "1", "3128321638"];
+$exponents = ["0", "-0", "1", "1128321638"];
 $baseNumbers = [
     "0.00",
     "-0.00",
