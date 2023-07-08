@@ -45,8 +45,11 @@
 # include <sys/user.h>
 #endif
 #ifdef __OpenBSD__
+typedef int boolean_t;
+# include <tib.h>
 # include <pthread_np.h>
-# include <machine/vmparam.h>
+# include <sys/sysctl.h>
+# include <sys/user.h>
 #endif
 #ifdef __linux__
 #include <sys/syscall.h>
@@ -460,9 +463,14 @@ static bool zend_call_stack_get_openbsd_pthread(zend_call_stack *stack)
 
 static bool zend_call_stack_get_openbsd_vm(zend_call_stack *stack)
 {
-	void *stack_base;
+	struct _ps_strings ps;
 	struct rlimit rlim;
+	int mib[2] = {CTL_VM, VM_PSSTRINGS };
+	size_t len = sizeof(ps), pagesize;
 
+	if (sysctl(mib, 2, &ps, &len, NULL, 0) != 0) {
+		return false;
+	}
 
 	if (getrlimit(RLIMIT_STACK, &rlim) != 0) {
 		return false;
@@ -472,16 +480,18 @@ static bool zend_call_stack_get_openbsd_vm(zend_call_stack *stack)
 		return false;
 	}
 
-	// arch dependent top user's stack
-	stack->base = USRSTACK - rlim.rlim_cur;
-	stack->max_size = rlim.rlim_cur - sysconf(_SC_PAGE_SIZE);
+	pagesize = sysconf(_SC_PAGE_SIZE);
+
+	stack->base = (void *)((uintptr_t)ps.val + (pagesize - 1) & ~(pagesize - 1));
+	stack->max_size = rlim.rlim_cur - pagesize;
 
 	return true;
 }
 
 static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
 {
-	if (getthrid() == getpid()) {
+	// TIB_THREAD_INITIAL_STACK is private and here we avoid using pthread's api (ie pthread_main_np)
+	if (!TIB_GET()->tib_thread || (TIB_GET()->tib_thread_flags & 0x002) != 0) {
 		return zend_call_stack_get_openbsd_vm(stack);
 	}
 
