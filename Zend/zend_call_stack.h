@@ -30,6 +30,7 @@
 typedef struct _zend_call_stack {
 	void *base;
 	size_t max_size;
+	void *buf;
 } zend_call_stack;
 
 ZEND_API void zend_call_stack_init(void);

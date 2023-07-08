@@ -63,6 +63,7 @@ typedef int boolean_t;
 
 /* Called once per process or thread */
 ZEND_API void zend_call_stack_init(void) {
+	EG(call_stack).buf = NULL;
 	if (!zend_call_stack_get(&EG(call_stack))) {
 		EG(call_stack) = (zend_call_stack){0};
 	}
@@ -96,6 +97,10 @@ ZEND_API void zend_call_stack_init(void) {
 			EG(stack_limit) = zend_call_stack_limit(base, EG(max_allowed_stack_size), EG(reserved_stack_size));
 			break;
 		}
+	}
+
+	if (EG(call_stack).buf) {
+		free(EG(call_stack).buf);
 	}
 }
 
@@ -553,9 +558,7 @@ static bool zend_call_stack_get_netbsd_vm(zend_call_stack *stack)
 	 * however NetBSD's mid/long term plan is to remove it completely.
 	 */
 	char *start, *end;
-	uintptr_t prev_end;
 	struct kinfo_vmentry *entry;
-	char *ebuf;
 	size_t len, max_size;
 	char buffer[4096];
 	uintptr_t addr_on_stack = (uintptr_t)&buffer;
@@ -569,15 +572,14 @@ static bool zend_call_stack_get_netbsd_vm(zend_call_stack *stack)
 
 	// kinfo_getvmmap uses the same formula, only we do not want to rely on libkvm
 	len = len * 4 / 3 ;
-	ebuf = emalloc(len);
+	stack->buf = malloc(len);
 
-	if (sysctl(mib, 5, ebuf, &len, NULL, 0) != 0) {
+	if (sysctl(mib, 5, stack->buf, &len, NULL, 0) != 0) {
 		return false;
 	}
 
-	start = ebuf;
-	end = ebuf + len;
-	prev_end = 0;
+	start = (char *)stack->buf;
+	end = start + len;
 
 	while (start < end) {
 		entry = (struct kinfo_vmentry *)start;
@@ -586,36 +588,29 @@ static bool zend_call_stack_get_netbsd_vm(zend_call_stack *stack)
 			break;
 		}
 
-		prev_end = entry->kve_end;
 		start += sizeof(struct kinfo_vmentry);
 	}
 
 	if (!found) {
-		efree(ebuf);
 		return false;
 	}
 
 	if (getrlimit(RLIMIT_STACK, &rlim) || rlim.rlim_cur == RLIM_INFINITY) {
-		efree(ebuf);
 		return false;
 	}
 
 	max_size = rlim.rlim_cur;
 
-	if (entry->kve_end - max_size < prev_end) {
-		max_size = prev_end - entry->kve_end;
-	}
-
 	stack->base = (void *)entry->kve_end;
 	stack->max_size = max_size;
 
-	efree(ebuf);
+	return true;
 }
 
 
 static bool zend_call_stack_get_netbsd(zend_call_stack *stack)
 {
-	if (syscall(SYS__lwp_self) == getpid()) {
+	if (syscall(SYS__lwp_self) == 1) {
 		return zend_call_stack_get_netbsd_vm(stack);
 	}
 
