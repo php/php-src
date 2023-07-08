@@ -1839,7 +1839,6 @@ PHP_METHOD(SQLite3Stmt, __construct)
 	zval *db_zval;
 	zend_string *sql;
 	int errcode;
-	zend_error_handling error_handling;
 	php_sqlite3_free_list *free_item;
 
 	stmt_obj = Z_SQLITE3_STMT_P(object);
@@ -1850,9 +1849,7 @@ PHP_METHOD(SQLite3Stmt, __construct)
 
 	db_obj = Z_SQLITE3_DB_P(db_zval);
 
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
-	zend_restore_error_handling(&error_handling);
 
 	if (!ZSTR_LEN(sql)) {
 		RETURN_FALSE;
