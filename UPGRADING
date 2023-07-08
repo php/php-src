@@ -369,6 +369,9 @@ PHP 8.3 UPGRADE NOTES
 12. Windows Support
 ========================================
 
+- Minimum supported Windows version has been bumped to Windows 8 or
+  Windows Server 2012
+
 ========================================
 13. Other Changes
 ========================================
