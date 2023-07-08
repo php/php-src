@@ -7,6 +7,7 @@ Core:
     closures). (ilutov)
   . Fixed bug GH-12102 (Incorrect compile error when using array access on TMP
     value in function call). (ilutov)
+  . Added zend_call_stack_get implementation for NetBSD. (David Carlier)
 
 DOM:
   . Added DOMNode::compareDocumentPosition(). (nielsdos)

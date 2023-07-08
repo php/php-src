@@ -35,7 +35,7 @@
 #  include <sys/types.h>
 # endif
 #endif /* ZEND_WIN32 */
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
 # include <pthread.h>
 #endif
 #ifdef __FreeBSD__
@@ -50,6 +50,10 @@ typedef int boolean_t;
 # include <pthread_np.h>
 # include <sys/sysctl.h>
 # include <sys/user.h>
+#endif
+#ifdef __NetBSD__
+# include <sys/sysctl.h>
+# include <sys/syscall.h>
 #endif
 #ifdef __linux__
 #include <sys/syscall.h>
@@ -504,6 +508,119 @@ static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
 }
 #endif /* defined(__OpenBSD__) */
 
+#if defined(__NetBSD__)
+# ifdef HAVE_PTHREAD_GETATTR_NP
+static bool zend_call_stack_get_netbsd_pthread(zend_call_stack *stack)
+{
+	pthread_attr_t attr;
+	int error;
+	void *addr;
+	size_t max_size, guard_size;
+
+	error = pthread_getattr_np(pthread_self(), &attr);
+	if (error) {
+		return false;
+	}
+
+	error = pthread_attr_getstack(&attr, &addr, &max_size);
+	if (error) {
+		return false;
+	}
+
+	error = pthread_attr_getguardsize(&attr, &guard_size);
+	if (error) {
+		return false;
+	}
+
+	addr = (char *)addr + guard_size;
+	max_size -= guard_size;
+
+	stack->base = (char *)addr + max_size;
+	stack->max_size = max_size;
+
+	return true;
+}
+# else
+static bool zend_call_stack_get_netbsd_pthread(zend_call_stack *stack)
+{
+	return false;
+}
+# endif /* HAVE_PTHREAD_GETATTR_NP */
+static bool zend_call_stack_get_netbsd_vm(zend_call_stack *stack, void **ptr)
+{
+	/**
+	 * NetBSD supports procfs in a similar fashion as Linux
+	 * however NetBSD's mid/long term plan is to remove it completely.
+	 */
+	char *start, *end;
+	struct kinfo_vmentry *entry;
+	size_t len, max_size;
+	char buffer[4096];
+	uintptr_t addr_on_stack = (uintptr_t)&buffer;
+	int mib[5] = { CTL_VM, VM_PROC, VM_PROC_MAP, getpid(), sizeof(struct kinfo_vmentry) };
+	bool found = false;
+	struct rlimit rlim;
+
+	if (sysctl(mib, 5, NULL, &len, NULL, 0) != 0) {
+		return false;
+	}
+
+	// kinfo_getvmmap uses the same formula, only we do not want to rely on libkvm
+	len = len * 4 / 3 ;
+	*ptr = malloc(len);
+
+	if (sysctl(mib, 5, *ptr, &len, NULL, 0) != 0) {
+		return false;
+	}
+
+	start = (char *)*ptr;
+	end = start + len;
+
+	while (start < end) {
+		entry = (struct kinfo_vmentry *)start;
+		if (entry->kve_start <= addr_on_stack && entry->kve_end >= addr_on_stack) {
+			found = true;
+			break;
+		}
+
+		start += sizeof(struct kinfo_vmentry);
+	}
+
+	if (!found) {
+		return false;
+	}
+
+	if (getrlimit(RLIMIT_STACK, &rlim) || rlim.rlim_cur == RLIM_INFINITY) {
+		return false;
+	}
+
+	max_size = rlim.rlim_cur;
+
+	stack->base = (void *)entry->kve_end;
+	stack->max_size = max_size;
+
+	return true;
+}
+
+
+static bool zend_call_stack_get_netbsd(zend_call_stack *stack)
+{
+	if (syscall(SYS__lwp_self) == 1) {
+		void *ptr = NULL;
+		bool r = zend_call_stack_get_netbsd_vm(stack, &ptr);
+		free(ptr);
+		return r;
+	}
+
+	return zend_call_stack_get_netbsd_pthread(stack);
+}
+#else
+static bool zend_call_stack_get_netbsd(zend_call_stack *stack)
+{
+	return false;
+}
+#endif /* defined(__NetBSD__) */
+
 /** Get the stack information for the calling thread */
 ZEND_API bool zend_call_stack_get(zend_call_stack *stack)
 {
@@ -524,6 +641,10 @@ ZEND_API bool zend_call_stack_get(zend_call_stack *stack)
 	}
 
 	if (zend_call_stack_get_openbsd(stack)) {
+		return true;
+	}
+
+	if (zend_call_stack_get_netbsd(stack)) {
 		return true;
 	}
 
