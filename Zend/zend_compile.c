@@ -5430,7 +5430,9 @@ static void zend_compile_for(zend_ast *ast) /* {{{ */
 	zend_compile_expr_list(&result, init_ast);
 	zend_do_free(&result);
 
-	opnum_jmp = zend_emit_jump(0);
+	zend_compile_expr_list(&result, cond_ast);
+	zend_do_extended_stmt();
+	opnum_jmp = zend_emit_cond_jump(ZEND_JMPZ, &result, 0);
 
 	zend_begin_loop(ZEND_NOP, NULL, 0);
 
@@ -5441,11 +5443,11 @@ static void zend_compile_for(zend_ast *ast) /* {{{ */
 	zend_compile_expr_list(&result, loop_ast);
 	zend_do_free(&result);
 
-	zend_update_jump_target_to_next(opnum_jmp);
 	zend_compile_expr_list(&result, cond_ast);
 	zend_do_extended_stmt();
 
 	zend_emit_cond_jump(ZEND_JMPNZ, &result, opnum_start);
+	zend_update_jump_target_to_next(opnum_jmp);
 
 	zend_end_loop(opnum_loop, NULL);
 }
