@@ -437,6 +437,10 @@ class IntlCalendar
      */
     public function set(int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN) {} // TODO make return type void
 
+    public function setDate(int $year, int $month, int $dayOfMonth): void {}
+
+    public function setDateTime(int $year, int $month, int $dayOfMonth, int $hour, int $minute, ?int $second = null): void {}
+
     /**
      * @return true
      * @alias intlcal_set_first_day_of_week
