@@ -9355,13 +9355,17 @@ ZEND_VM_COLD_CONST_HANDLER(191, ZEND_GET_CLASS, UNUSED|CONST|TMPVAR|CV, UNUSED)
 	USE_OPLINE
 
 	if (OP1_TYPE == IS_UNUSED) {
+		SAVE_OPLINE();
 		if (UNEXPECTED(!EX(func)->common.scope)) {
-			SAVE_OPLINE();
 			zend_throw_error(NULL, "get_class() without arguments must be called from within a class");
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
 		} else {
+			zend_error(E_DEPRECATED, "Calling get_class() without arguments is deprecated");
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(func)->common.scope->name);
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
 			ZEND_VM_NEXT_OPCODE();
 		}
 	} else {

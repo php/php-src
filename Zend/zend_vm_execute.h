@@ -10953,13 +10953,17 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_CO
 	USE_OPLINE
 
 	if (IS_CONST == IS_UNUSED) {
+		SAVE_OPLINE();
 		if (UNEXPECTED(!EX(func)->common.scope)) {
-			SAVE_OPLINE();
 			zend_throw_error(NULL, "get_class() without arguments must be called from within a class");
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
 		} else {
+			zend_error(E_DEPRECATED, "Calling get_class() without arguments is deprecated");
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(func)->common.scope->name);
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
 			ZEND_VM_NEXT_OPCODE();
 		}
 	} else {
@@ -18217,13 +18221,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_TMPVAR_UNUSED_H
 	USE_OPLINE
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
+		SAVE_OPLINE();
 		if (UNEXPECTED(!EX(func)->common.scope)) {
-			SAVE_OPLINE();
 			zend_throw_error(NULL, "get_class() without arguments must be called from within a class");
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
 		} else {
+			zend_error(E_DEPRECATED, "Calling get_class() without arguments is deprecated");
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(func)->common.scope->name);
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
 			ZEND_VM_NEXT_OPCODE();
 		}
 	} else {
@@ -37032,13 +37040,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_UNUSED_UNUSED_H
 	USE_OPLINE
 
 	if (IS_UNUSED == IS_UNUSED) {
+		SAVE_OPLINE();
 		if (UNEXPECTED(!EX(func)->common.scope)) {
-			SAVE_OPLINE();
 			zend_throw_error(NULL, "get_class() without arguments must be called from within a class");
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
 		} else {
+			zend_error(E_DEPRECATED, "Calling get_class() without arguments is deprecated");
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(func)->common.scope->name);
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
 			ZEND_VM_NEXT_OPCODE();
 		}
 	} else {
@@ -49848,13 +49860,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_CV_UNUSED_HANDL
 	USE_OPLINE
 
 	if (IS_CV == IS_UNUSED) {
+		SAVE_OPLINE();
 		if (UNEXPECTED(!EX(func)->common.scope)) {
-			SAVE_OPLINE();
 			zend_throw_error(NULL, "get_class() without arguments must be called from within a class");
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
 		} else {
+			zend_error(E_DEPRECATED, "Calling get_class() without arguments is deprecated");
 			ZVAL_STR_COPY(EX_VAR(opline->result.var), EX(func)->common.scope->name);
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
 			ZEND_VM_NEXT_OPCODE();
 		}
 	} else {
