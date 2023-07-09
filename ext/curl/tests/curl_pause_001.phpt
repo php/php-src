@@ -2,6 +2,13 @@
 Test CURL_READFUNC_PAUSE and curl_pause()
 --EXTENSIONS--
 curl
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) {
+    // finished in 1.32s in a best-of-3 on an idle Intel Xeon X5670 on PHP 8.3.0-dev
+    die("skip slow test");
+}
+?>
 --FILE--
 <?php
 include 'server.inc';

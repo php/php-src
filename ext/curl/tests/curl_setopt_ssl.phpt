@@ -4,6 +4,10 @@ CURLOPT_SSL* basic client auth tests
 curl
 --SKIPIF--
 <?php
+if (getenv("SKIP_SLOW_TESTS")) {
+    // finished in 1.57s in a best-of-3 on an idle Intel Xeon X5670 on PHP 8.3.0-dev
+    die("skip slow test");
+}
 if (!function_exists("proc_open")) die("skip no proc_open");
 exec('openssl version', $out, $code);
 if ($code > 0) die("skip couldn't locate openssl binary");

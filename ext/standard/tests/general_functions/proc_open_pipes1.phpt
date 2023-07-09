@@ -1,5 +1,12 @@
 --TEST--
 proc_open() with > 16 pipes
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) {
+    // finished in 1.14s in a best-of-3 on an idle Intel Xeon X5670 on PHP 8.3.0-dev
+    die("skip slow test");
+}
+?>
 --FILE--
 <?php
 
