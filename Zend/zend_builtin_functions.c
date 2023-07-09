@@ -557,6 +557,10 @@ ZEND_FUNCTION(get_class)
 		zend_class_entry *scope = zend_get_executed_scope();
 
 		if (scope) {
+			zend_error(E_DEPRECATED, "Calling get_class() without arguments is deprecated");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
 			RETURN_STR_COPY(scope->name);
 		} else {
 			zend_throw_error(NULL, "get_class() without arguments must be called from within a class");
@@ -596,6 +600,10 @@ ZEND_FUNCTION(get_parent_class)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ce) {
+		zend_error(E_DEPRECATED, "Calling get_parent_class() without arguments is deprecated");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 		ce = zend_get_executed_scope();
 	}
 
