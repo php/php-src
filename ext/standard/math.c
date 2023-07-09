@@ -286,7 +286,7 @@ PHP_FUNCTION(round)
 		if (precision >= 0) {
 			places = precision > INT_MAX ? INT_MAX : (int)precision;
 		} else {
-			places = precision <= INT_MIN ? INT_MIN+1 : (int)precision;
+			places = precision <= INT_MIN ? INT_MIN : (int)precision;
 		}
 #else
 		places = precision;
@@ -1007,12 +1007,12 @@ PHP_FUNCTION(base_convert)
 /* }}} */
 
 /* {{{ _php_math_number_format */
-PHPAPI zend_string *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep)
+PHPAPI zend_string *_php_math_number_format(double d, zend_long dec, char dec_point, char thousand_sep)
 {
 	return _php_math_number_format_ex(d, dec, &dec_point, 1, &thousand_sep, 1);
 }
 
-PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *dec_point,
+PHPAPI zend_string *_php_math_number_format_ex(double d, zend_long dec, const char *dec_point,
 		size_t dec_point_len, const char *thousand_sep, size_t thousand_sep_len)
 {
 	zend_string *res;
@@ -1023,15 +1023,30 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	size_t reslen = 0;
 	int count = 0;
 	int is_negative = 0;
+	int dec_round;
+
+	// prevent integer overflow
+#if SIZEOF_ZEND_LONG > SIZEOF_INT
+	if (dec >= 0) {
+		dec_round = dec > INT_MAX ? INT_MAX : (int)dec;
+	} else {
+		dec_round = dec <= INT_MIN ? INT_MIN : (int)dec;
+	}
+#else
+	dec_round = dec;
+#endif
 
 	if (d < 0) {
 		is_negative = 1;
 		d = -d;
 	}
 
-	d = _php_math_round(d, dec, PHP_ROUND_HALF_UP);
+	d = _php_math_round(d, dec_round, PHP_ROUND_HALF_UP);
 	dec = MAX(0, dec);
-	tmpbuf = strpprintf(0, "%.*F", dec, d);
+	dec_round = MAX(0, dec_round);
+
+	tmpbuf = strpprintf(0, "%.*F", dec_round, d);
+
 	if (tmpbuf == NULL) {
 		return NULL;
 	} else if (!isdigit((int)ZSTR_VAL(tmpbuf)[0])) {
@@ -1114,7 +1129,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	 * separator every three digits */
 	while (s >= ZSTR_VAL(tmpbuf)) {
 		*t-- = *s--;
-		if (thousand_sep && (++count%3)==0 && s >= ZSTR_VAL(tmpbuf)) {
+		if (thousand_sep && (++count % 3) == 0 && s >= ZSTR_VAL(tmpbuf)) {
 			t -= thousand_sep_len;
 			memcpy(t + 1, thousand_sep, thousand_sep_len);
 		}
@@ -1279,7 +1294,7 @@ PHP_FUNCTION(number_format)
 			break;
 
 		case IS_DOUBLE:
-			RETURN_STR(_php_math_number_format_ex(Z_DVAL_P(num), (int)dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+			RETURN_STR(_php_math_number_format_ex(Z_DVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 			break;
 
 		EMPTY_SWITCH_DEFAULT_CASE()
