@@ -13,6 +13,7 @@ PHP                                                                        NEWS
   . Fixed oss-fuzz #60011 (Mis-compilation of by-reference nullsafe operator).
     (ilutov)
   . Fixed use-of-uninitialized-value with ??= on assert. (ilutov)
+  . Fixed build for FreeBSD before the 11.0 releases. (David Carlier)
 
 - Curl:
   . Fix crash when an invalid callback function is passed to
