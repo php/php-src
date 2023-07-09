@@ -44,6 +44,9 @@ PHP                                                                        NEWS
   . Fix GH-11492 (Make test failure: ext/pdo_sqlite/tests/bug_42589.phpt).
     (KapitanOczywisty, CViniciusSDias)
 
+- Phar:
+  . Add missing check on EVP_VerifyUpdate() in phar util. (nielsdos)
+
 - PHPDBG:
   . Fixed bug GH-9669 (phpdbg -h options doesn't list the -z option). (adsr)
 
