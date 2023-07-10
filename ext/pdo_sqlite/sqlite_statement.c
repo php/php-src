@@ -129,6 +129,8 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						return 0;
 
 					case PDO_PARAM_LOB:
+					// For SQLite BLOB columns, these are identical
+					case PDO_PARAM_BINARY:
 						if (Z_ISREF(param->parameter)) {
 							parameter = Z_REFVAL(param->parameter);
 						} else {
@@ -329,9 +331,11 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 			break;
 
 		case SQLITE_BLOB:
-			add_next_index_string(&flags, "blob");
-			/* TODO Check this is correct */
-			ZEND_FALLTHROUGH;
+			// add_next_index_string(&flags, "blob");
+			add_assoc_str(return_value, "native_type", ZSTR_KNOWN(ZEND_STR_STRING));
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_BINARY);
+			break;
+
 		case SQLITE_TEXT:
 			add_assoc_str(return_value, "native_type", ZSTR_KNOWN(ZEND_STR_STRING));
 			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
