@@ -202,6 +202,12 @@ PHP 8.3 UPGRADE NOTES
   . pg_insert and pg_convert raises a ValueError or a TypeError instead of a WARNING when the
     value/type of a field does not match properly with a PostGreSQL's type.
 
+- Random:
+  . Changed mt_srand() and srand() to not check the number of arguments to
+    determine whether a random seed should be used. Passing null will generate
+    a random seed, 0 will use zero as the seed. The functions are now consistent
+    with Mt19937::__construct().
+
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING.
     RFC: https://wiki.php.net/rfc/improve_unserialize_error_handling
@@ -252,10 +258,6 @@ PHP 8.3 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/randomizer_additions
   . Added Randomizer::nextFloat(), ::getFloat(), and IntervalBoundary.
     RFC: https://wiki.php.net/rfc/randomizer_additions
-  . Changed mt_srand() and srand() to not check the number of arguments to
-    determine whether a random seed should be used. Passing null will generate
-    a random seed, 0 will use zero as the seed. The functions are now consistent
-    with Mt19937::__construct().
 
 - Reflection:
   . Return type of ReflectionClass::getStaticProperties() is no longer nullable.
