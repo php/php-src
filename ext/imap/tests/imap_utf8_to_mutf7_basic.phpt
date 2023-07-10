@@ -4,12 +4,11 @@ imap_utf8_to_mutf7
 imap
 --SKIPIF--
 <?php
-    // The underlying utf8_to_mutf7 function can be missing; there's
-    // a ./configure check for it that disables the corresponding PHP
-    // function.
-    if (!function_exists('imap_utf8_to_mutf7')) {
-        die("skip no imap_utf8_to_mutf7 function");
-    }
+// The underlying imap_utf8_to_mutf7 function can be missing; there's a
+// ./configure check for it that disables the corresponding PHP function.
+if (!function_exists('imap_utf8_to_mutf7')) {
+    die("skip no imap_utf8_to_mutf7 function");
+}
 ?>
 --FILE--
 <?php
