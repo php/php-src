@@ -145,7 +145,7 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
-	bool use_national_character_set = 0;
+	bool use_national_character_set = 0, is_binary = false;
 	size_t i;
 	char *q;
 	size_t quotedlen = 0;
@@ -159,6 +159,29 @@ static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 	}
 	if ((paramtype & PDO_PARAM_STR_CHAR) == PDO_PARAM_STR_CHAR) {
 		use_national_character_set = 0;
+	}
+	/*
+	 * A user could be passing a binary (i.e. an image file) in a query.
+	 * It's fragile trying to escape it as a string, so encode it as a
+	 * binary literal instead.
+	 */
+	if (paramtype == PDO_PARAM_BINARY) {
+		is_binary = true;
+	}
+
+	if (is_binary) {
+		/* 1 char = 2 chars in hex, plus 0x */
+		quotedlen = ZSTR_LEN(unquoted) * 2; /* XXX: Overflow? */
+		quotedlen += 2;
+
+		quoted_str = zend_string_alloc(quotedlen, 0);
+		q = ZSTR_VAL(quoted_str);
+		*q++ = '0';
+		*q++ = 'x';
+		for (i = 0; i < ZSTR_LEN(unquoted); i++) {
+			q += sprintf(q, "%02X", (unsigned char)ZSTR_VAL(unquoted)[i]);
+		}
+		return quoted_str;
 	}
 
 	/* Detect quoted length, adding extra char for doubled single quotes */
