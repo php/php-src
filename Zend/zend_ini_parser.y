@@ -167,18 +167,39 @@ static void zend_ini_get_constant(zval *result, zval *name)
 static void zend_ini_get_var(zval *result, zval *name)
 {
 	zval *curval;
-	char *envvar;
+	char *envvar, *default_val;
 
 	/* Fetch configuration option value */
 	if ((curval = zend_get_configuration_directive(Z_STR_P(name))) != NULL) {
 		ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(curval), Z_STRLEN_P(curval), ZEND_SYSTEM_INI));
-	/* ..or if not found, try ENV */
-	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name))) != NULL ||
+		return;
+	}
+
+	/* ...or if not found, try ENV */
+	if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name))) != NULL ||
 			   (envvar = getenv(Z_STRVAL_P(name))) != NULL) {
 		ZVAL_NEW_STR(result, zend_string_init(envvar, strlen(envvar), ZEND_SYSTEM_INI));
-	} else {
-		zend_ini_init_string(result);
+		return;
 	}
+
+	/* ...or if not found, try ENV with :DefaultValue */
+	if ((default_val = strrchr(Z_STRVAL_P(name), ':')) != NULL) {
+		zend_string *effective_name = zend_string_init(Z_STRVAL_P(name), default_val - Z_STRVAL_P(name), false);
+
+		if ((envvar = zend_getenv(ZSTR_VAL(effective_name), ZSTR_LEN(effective_name))) != NULL) {
+			ZVAL_NEW_STR(result, zend_string_init(envvar, strlen(envvar), ZEND_SYSTEM_INI));
+		} else if ((envvar = getenv(ZSTR_VAL(effective_name))) != NULL) {
+			ZVAL_NEW_STR(result, zend_string_init(envvar, strlen(envvar), ZEND_SYSTEM_INI));
+		} else {
+			ZVAL_NEW_STR(result, zend_string_init(default_val + 1, strlen(default_val + 1), ZEND_SYSTEM_INI));
+		}
+
+		zend_string_release(effective_name);
+		return;
+	}
+
+	/* ...give up and return an empty string */
+	zend_ini_init_string(result);
 }
 /* }}} */
 
