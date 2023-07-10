@@ -1,5 +1,9 @@
 --TEST--
 Casting a stream can lose data and needs to emit a warning
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === "Windows") die("skip non-Windows tests (popen cannot delete file as open in cmd.exe)");
+?>
 --FILE--
 <?php
 
