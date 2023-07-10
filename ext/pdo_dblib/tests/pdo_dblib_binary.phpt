@@ -41,6 +41,6 @@ Key: Position #0:
 paramno=0
 name=[0] ""
 is_param=1
-param_type=3
+param_type=6
 NULL
 string(96) "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2NgYGD4DwABBAEAwS2OUAAAAABJRU5ErkJggg=="
