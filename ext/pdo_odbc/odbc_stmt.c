@@ -332,6 +332,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 							sqltype = SQL_INTEGER;
 							break;
 						case PDO_PARAM_LOB:
+						case PDO_PARAM_BINARY:
 							sqltype = SQL_LONGVARBINARY;
 							break;
 						default:
