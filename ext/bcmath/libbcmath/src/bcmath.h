@@ -55,6 +55,7 @@ typedef struct bc_struct {
 #include "config.h"
 #endif
 
+#include "zend.h"
 #include <stdbool.h>
 #include "zend_string.h"
 #include "../../php_bcmath.h" /* Needed for BCG() macro */
