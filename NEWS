@@ -21,6 +21,11 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug GH-11368 (Date modify returns invalid datetime). (Derick)
 
+- DOM:
+  . Fixed bug GH-11625 (DOMElement::replaceWith() doesn't replace node with
+    DOMDocumentFragment but just deletes node or causes wrapping <></>
+    depending on libxml2 version). (nielsdos)
+
 - Fileinfo:
   . Fixed bug GH-11298 (finfo returns wrong mime type for xz files). (Anatol)
 
