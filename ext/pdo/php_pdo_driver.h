@@ -47,6 +47,8 @@ enum pdo_param_type {
 	/* get_col: Not supported (yet?) */
 	PDO_PARAM_STMT = 4, /* hierarchical result set */
 
+	PDO_PARAM_BINARY = 6,
+
 	/* magic flag to denote a parameter as being input/output */
 	PDO_PARAM_INPUT_OUTPUT = 0x80000000,
 

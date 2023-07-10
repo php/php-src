@@ -269,7 +269,7 @@ static bool really_register_bound_param(struct pdo_bound_param_data *param, pdo_
 		parameter = Z_REFVAL(param->parameter);
 	}
 
-	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && !Z_ISNULL_P(parameter)) {
+	if ((PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR || PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BINARY) && param->max_value_len <= 0 && !Z_ISNULL_P(parameter)) {
 		if (!try_convert_to_string(parameter)) {
 			return 0;
 		}
@@ -517,6 +517,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, enum pdo
 				convert_to_boolean(dest);
 				break;
 			case PDO_PARAM_STR:
+			case PDO_PARAM_BINARY:
 				if (Z_TYPE_P(dest) == IS_FALSE) {
 					/* Return "0" rather than "", because this is what database drivers that
 					 * don't have a dedicated boolean type would return. */
