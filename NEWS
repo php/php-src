@@ -3,7 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.2.9
 
 - Build:
-  . Fix GH-11522: PHP version check fails with '-' separator. (SVGAnimate)
+  . Fixed bug GH-11522 (PHP version check fails with '-' separator).
+    (SVGAnimate)
 
 - CLI:
   . Fix interrupted CLI output causing the process to exit. (nielsdos)
