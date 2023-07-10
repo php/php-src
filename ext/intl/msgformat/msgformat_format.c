@@ -125,21 +125,27 @@ PHP_FUNCTION( msgfmt_format_message )
 		efree(spattern);
 	}
 
-	if (INTL_DATA_ERROR_CODE( mfo ) == U_PATTERN_SYNTAX_ERROR) {
-		char *msg = NULL;
-		smart_str parse_error_str;
-		parse_error_str = intl_parse_error_to_string( &parse_error );
-		spprintf( &msg, 0, "pattern syntax error (%s)", parse_error_str.s? ZSTR_VAL(parse_error_str.s) : "unknown parser error" );
-		smart_str_free( &parse_error_str );
+	/* Cannot use INTL_METHOD_CHECK_STATUS() as we need to free the message object formatter */
+	if (U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
+		if (INTL_DATA_ERROR_CODE( mfo ) == U_PATTERN_SYNTAX_ERROR) {
+			char *msg = NULL;
+			smart_str parse_error_str;
+			parse_error_str = intl_parse_error_to_string( &parse_error );
+			spprintf( &msg, 0, "pattern syntax error (%s)", parse_error_str.s? ZSTR_VAL(parse_error_str.s) : "unknown parser error" );
+			smart_str_free( &parse_error_str );
 
-		intl_error_set_code( NULL, INTL_DATA_ERROR_CODE( mfo ) );
-		intl_errors_set_custom_msg( INTL_DATA_ERROR_P( mfo ), msg, 1 );
+			intl_error_set_code( NULL, INTL_DATA_ERROR_CODE( mfo ) );
+			intl_errors_set_custom_msg( INTL_DATA_ERROR_P( mfo ), msg, 1 );
 
-		efree( msg );
+			efree( msg );
+		} else {
+			intl_errors_set_custom_msg( INTL_DATA_ERROR_P(mfo), "Creating message formatter failed", 0 );
+		}
+		/* Reset custom error message as this is a static method that has no object  */
+		intl_errors_reset(INTL_DATA_ERROR_P(mfo));
+		umsg_close(MSG_FORMAT_OBJECT(mfo));
 		RETURN_FALSE;
-	}
-
-	INTL_METHOD_CHECK_STATUS(mfo, "Creating message formatter failed");
+    }
 
 	msgfmt_do_format(mfo, args, return_value);
 

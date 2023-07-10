@@ -37,6 +37,9 @@ PHP                                                                        NEWS
 - GD:
   . Fix most of the external libgd test failures. (Michael Orlitzky)
 
+- Intl:
+  . Fix memory leak in MessageFormatter::format() on failure. (Girgias)
+
 - MBString:
   . Fix GH-11300 (license issue: restricted unicode license headers).
     (nielsdos)
