@@ -636,6 +636,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_node_prop_handlers, "nodeValue", sizeof("nodeValue")-1, dom_node_node_value_read, dom_node_node_value_write);
 	dom_register_prop_handler(&dom_node_prop_handlers, "nodeType", sizeof("nodeType")-1, dom_node_node_type_read, NULL);
 	dom_register_prop_handler(&dom_node_prop_handlers, "parentNode", sizeof("parentNode")-1, dom_node_parent_node_read, NULL);
+	dom_register_prop_handler(&dom_node_prop_handlers, "parentElement", sizeof("parentElement")-1, dom_node_parent_element_read, NULL);
 	dom_register_prop_handler(&dom_node_prop_handlers, "childNodes", sizeof("childNodes")-1, dom_node_child_nodes_read, NULL);
 	dom_register_prop_handler(&dom_node_prop_handlers, "firstChild", sizeof("firstChild")-1, dom_node_first_child_read, NULL);
 	dom_register_prop_handler(&dom_node_prop_handlers, "lastChild", sizeof("lastChild")-1, dom_node_last_child_read, NULL);
@@ -664,6 +665,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "isConnected", sizeof("isConnected")-1, dom_node_is_connected_read, NULL);
 	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "ownerDocument", sizeof("ownerDocument")-1, dom_node_owner_document_read, NULL);
 	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "parentNode", sizeof("parentNode")-1, dom_node_parent_node_read, NULL);
+	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "parentElement", sizeof("parentElement")-1, dom_node_parent_element_read, NULL);
 	zend_hash_add_ptr(&classes, dom_namespace_node_class_entry->name, &dom_namespace_node_prop_handlers);
 
 	dom_documentfragment_class_entry = register_class_DOMDocumentFragment(dom_node_class_entry, dom_parentnode_class_entry);

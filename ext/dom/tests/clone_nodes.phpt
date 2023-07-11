@@ -44,7 +44,7 @@ var_dump($barClone->parentNode);
 ?>
 --EXPECT--
 -- Clone DOMNameSpaceNode --
-object(DOMNameSpaceNode)#3 (9) {
+object(DOMNameSpaceNode)#3 (10) {
   ["nodeName"]=>
   string(5) "xmlns"
   ["nodeValue"]=>
@@ -62,6 +62,8 @@ object(DOMNameSpaceNode)#3 (9) {
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["parentNode"]=>
+  string(22) "(object value omitted)"
+  ["parentElement"]=>
   string(22) "(object value omitted)"
 }
 string(19) "http://php.net/test"

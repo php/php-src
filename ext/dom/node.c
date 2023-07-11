@@ -237,30 +237,45 @@ int dom_node_node_type_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ parentNode	DomNode
-readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1060184317
-Since:
-*/
-int dom_node_parent_node_read(dom_object *obj, zval *retval)
+static zend_result dom_node_parent_get(dom_object *obj, zval *retval, bool only_element)
 {
-	xmlNode *nodep, *nodeparent;
-
-	nodep = dom_object_get_node(obj);
+	xmlNodePtr nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
-	nodeparent = nodep->parent;
-	if (!nodeparent) {
+	xmlNodePtr nodeparent = nodep->parent;
+	if (!nodeparent || (only_element && nodeparent->type != XML_ELEMENT_NODE)) {
 		ZVAL_NULL(retval);
 		return SUCCESS;
 	}
 
 	php_dom_create_object(nodeparent, retval, obj);
 	return SUCCESS;
+}
+
+/* {{{ parentNode	?DomNode
+readonly=yes
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1060184317
+Since:
+*/
+int dom_node_parent_node_read(dom_object *obj, zval *retval)
+{
+	return dom_node_parent_get(obj, retval, false);
+}
+
+/* }}} */
+
+/* {{{ parentElement	?DomElement
+readonly=yes
+URL: https://dom.spec.whatwg.org/#parent-element
+Since:
+*/
+zend_result dom_node_parent_element_read(dom_object *obj, zval *retval)
+{
+	return dom_node_parent_get(obj, retval, true);
 }
 
 /* }}} */

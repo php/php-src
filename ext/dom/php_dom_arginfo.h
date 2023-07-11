@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 78e4089fa17aa0faa371917aeb48fa0dfe1819b0 */
+ * Stub hash: 02e8c582a3a7d88fc32ef8931c23c0c6de5a94e2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1096,6 +1096,13 @@ static zend_class_entry *register_class_DOMNode(void)
 	zend_declare_typed_property(class_entry, property_parentNode_name, &property_parentNode_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_parentNode_class_DOMNode, 0, MAY_BE_NULL));
 	zend_string_release(property_parentNode_name);
 
+	zval property_parentElement_default_value;
+	ZVAL_UNDEF(&property_parentElement_default_value);
+	zend_string *property_parentElement_name = zend_string_init("parentElement", sizeof("parentElement") - 1, 1);
+	zend_string *property_parentElement_class_DOMElement = zend_string_init("DOMElement", sizeof("DOMElement")-1, 1);
+	zend_declare_typed_property(class_entry, property_parentElement_name, &property_parentElement_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_parentElement_class_DOMElement, 0, MAY_BE_NULL));
+	zend_string_release(property_parentElement_name);
+
 	zval property_childNodes_default_value;
 	ZVAL_UNDEF(&property_childNodes_default_value);
 	zend_string *property_childNodes_name = zend_string_init("childNodes", sizeof("childNodes") - 1, 1);
@@ -1247,6 +1254,13 @@ static zend_class_entry *register_class_DOMNameSpaceNode(void)
 	zend_string *property_parentNode_class_DOMNode = zend_string_init("DOMNode", sizeof("DOMNode")-1, 1);
 	zend_declare_typed_property(class_entry, property_parentNode_name, &property_parentNode_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_parentNode_class_DOMNode, 0, MAY_BE_NULL));
 	zend_string_release(property_parentNode_name);
+
+	zval property_parentElement_default_value;
+	ZVAL_UNDEF(&property_parentElement_default_value);
+	zend_string *property_parentElement_name = zend_string_init("parentElement", sizeof("parentElement") - 1, 1);
+	zend_string *property_parentElement_class_DOMElement = zend_string_init("DOMElement", sizeof("DOMElement")-1, 1);
+	zend_declare_typed_property(class_entry, property_parentElement_name, &property_parentElement_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_parentElement_class_DOMElement, 0, MAY_BE_NULL));
+	zend_string_release(property_parentElement_name);
 
 	return class_entry;
 }

@@ -99,6 +99,7 @@ int dom_node_node_value_read(dom_object *obj, zval *retval);
 int dom_node_node_value_write(dom_object *obj, zval *newval);
 int dom_node_node_type_read(dom_object *obj, zval *retval);
 int dom_node_parent_node_read(dom_object *obj, zval *retval);
+zend_result dom_node_parent_element_read(dom_object *obj, zval *retval);
 int dom_node_child_nodes_read(dom_object *obj, zval *retval);
 int dom_node_first_child_read(dom_object *obj, zval *retval);
 int dom_node_last_child_read(dom_object *obj, zval *retval);
