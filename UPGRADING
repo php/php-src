@@ -238,6 +238,9 @@ PHP 8.3 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- DOM:
+  . Added DOMNode::contains() and DOMNameSpaceNode::contains().
+
 - JSON:
   . Added json_validate(), which returns whether the json is valid for
     the given $depth and $options.

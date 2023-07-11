@@ -389,6 +389,8 @@ class DOMNode
 
     /** @return DOMNode|false */
     public function replaceChild(DOMNode $node, DOMNode $child) {}
+
+    public function contains(DOMNode|DOMNameSpaceNode|null $other): bool {}
 }
 
 /** @not-serializable */
