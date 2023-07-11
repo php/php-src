@@ -129,6 +129,18 @@ static ZEND_FUNCTION(zend_terminate_string)
 
 	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 }
+/* Allow undeclared variable as output parameter. */
+static ZEND_FUNCTION(zend_out_param)
+{
+	zval *z_ref_preg_match;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL_EX2(z_ref_preg_match, ZEND_RECEIVE_CONTAINER, ZEND_RECEIVE_BY_REF, 0)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *z_preg_match = &(Z_REF_P(z_ref_preg_match)->val);
+	ZVAL_LONG(z_preg_match, 8);
+}
 
 /* Cause an intentional memory leak, for testing/debugging purposes */
 static ZEND_FUNCTION(zend_leak_bytes)
