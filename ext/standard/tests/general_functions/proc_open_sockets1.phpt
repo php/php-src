@@ -3,10 +3,9 @@ proc_open() with output socketpairs
 --FILE--
 <?php
 
-$cmd = [
-    getenv("TEST_PHP_EXECUTABLE"),
-    __DIR__ . '/proc_open_sockets1.inc'
-];
+$php = getenv("TEST_PHP_EXECUTABLE");
+$args = getenv("TEST_PHP_EXTRA_ARGS");
+$cmd = "$php $args " . __DIR__ . '/proc_open_sockets1.inc';
 
 $spec = [
     ['null'],
