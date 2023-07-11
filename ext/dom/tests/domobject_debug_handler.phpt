@@ -54,6 +54,7 @@ DOMDocument Object
     [previousSibling] => 
     [nextSibling] => 
     [attributes] => 
+    [isConnected] => 1
     [ownerDocument] => 
     [namespaceURI] => 
     [prefix] => 
