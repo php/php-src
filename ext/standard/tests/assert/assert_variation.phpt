@@ -193,5 +193,3 @@ Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
 
 Deprecated: Function assert_options() is deprecated in %s on line %d
 float(3.141)
-
-Deprecated: PHP Request Shutdown: assert.callback INI setting is deprecated in Unknown on line 0

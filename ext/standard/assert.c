@@ -48,7 +48,9 @@ static PHP_INI_MH(OnChangeCallback) /* {{{ */
 			ZVAL_UNDEF(&ASSERTG(callback));
 		}
 		if (new_value && (Z_TYPE(ASSERTG(callback)) != IS_UNDEF || ZSTR_LEN(new_value))) {
-			php_error_docref(NULL, E_DEPRECATED, "assert.callback INI setting is deprecated");
+			if (stage != ZEND_INI_STAGE_DEACTIVATE && stage != ZEND_INI_STAGE_SHUTDOWN && stage != ZEND_INI_STAGE_ASSERT_OPTIONS) {
+				php_error_docref(NULL, E_DEPRECATED, "assert.callback INI setting is deprecated");
+			}
 			ZVAL_STR_COPY(&ASSERTG(callback), new_value);
 		}
 	} else {
@@ -56,7 +58,9 @@ static PHP_INI_MH(OnChangeCallback) /* {{{ */
 			pefree(ASSERTG(cb), 1);
 		}
 		if (new_value && ZSTR_LEN(new_value)) {
-			php_error_docref(NULL, E_DEPRECATED, "assert.callback INI setting is deprecated");
+			if (stage != ZEND_INI_STAGE_DEACTIVATE && stage != ZEND_INI_STAGE_SHUTDOWN && stage != ZEND_INI_STAGE_ASSERT_OPTIONS) {
+				php_error_docref(NULL, E_DEPRECATED, "assert.callback INI setting is deprecated");
+			}
 			ASSERTG(cb) = pemalloc(ZSTR_LEN(new_value) + 1, 1);
 			memcpy(ASSERTG(cb), ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 			ASSERTG(cb)[ZSTR_LEN(new_value)] = '\0';
