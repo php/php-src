@@ -5,6 +5,9 @@ intl
 --FILE--
 <?php
 
+$intlcal = IntlCalendar::createInstance('UTC');
+$intlcal->clear();
+
 //two minutes to midnight!
 $intlcal->setDateTime(2012, 1, 29, 23, 58);
 var_dump($intlcal->getTime(), strtotime('2012-02-29 23:58:00 +0000') * 1000.);
