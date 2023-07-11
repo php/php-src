@@ -48,6 +48,7 @@ DOMDocument Object
     [nodeValue] => 
     [nodeType] => 9
     [parentNode] => 
+    [parentElement] => 
     [childNodes] => (object value omitted)
     [firstChild] => (object value omitted)
     [lastChild] => (object value omitted)

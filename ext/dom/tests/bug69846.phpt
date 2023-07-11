@@ -28,9 +28,9 @@ foreach ($dataNodes AS $node) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 int(3)
-object(DOMText)#%d (21) {
+object(DOMText)#7 (22) {
   ["wholeText"]=>
   string(3) "
   "
@@ -51,6 +51,8 @@ object(DOMText)#%d (21) {
   ["nodeType"]=>
   int(3)
   ["parentNode"]=>
+  NULL
+  ["parentElement"]=>
   NULL
   ["childNodes"]=>
   string(22) "(object value omitted)"
@@ -78,7 +80,7 @@ object(DOMText)#%d (21) {
   string(3) "
   "
 }
-object(DOMElement)#7 (23) {
+object(DOMElement)#7 (24) {
   ["schemaTypeInfo"]=>
   NULL
   ["tagName"]=>
@@ -105,6 +107,8 @@ object(DOMElement)#7 (23) {
   int(1)
   ["parentNode"]=>
   NULL
+  ["parentElement"]=>
+  NULL
   ["childNodes"]=>
   string(22) "(object value omitted)"
   ["firstChild"]=>
@@ -134,7 +138,7 @@ object(DOMElement)#7 (23) {
     Value C
   "
 }
-object(DOMText)#%d (21) {
+object(DOMText)#7 (22) {
   ["wholeText"]=>
   string(1) "
 "
@@ -155,6 +159,8 @@ object(DOMText)#%d (21) {
   ["nodeType"]=>
   int(3)
   ["parentNode"]=>
+  NULL
+  ["parentElement"]=>
   NULL
   ["childNodes"]=>
   string(22) "(object value omitted)"

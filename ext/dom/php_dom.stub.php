@@ -306,6 +306,9 @@ class DOMNode
     public ?DOMNode $parentNode;
 
     /** @readonly */
+    public ?DOMElement $parentElement;
+
+    /** @readonly */
     public DOMNodeList $childNodes;
 
     /** @readonly */
@@ -417,6 +420,9 @@ class DOMNameSpaceNode
 
     /** @readonly */
     public ?DOMNode $parentNode;
+
+    /** @readonly */
+    public ?DOMElement $parentElement;
 }
 
 class DOMImplementation

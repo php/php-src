@@ -13,7 +13,7 @@ var_dump($attr);
 
 ?>
 --EXPECT--
-object(DOMNameSpaceNode)#3 (8) {
+object(DOMNameSpaceNode)#3 (9) {
   ["nodeName"]=>
   string(5) "xmlns"
   ["nodeValue"]=>
@@ -29,5 +29,7 @@ object(DOMNameSpaceNode)#3 (8) {
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["parentNode"]=>
+  string(22) "(object value omitted)"
+  ["parentElement"]=>
   string(22) "(object value omitted)"
 }

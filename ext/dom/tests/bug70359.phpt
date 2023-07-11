@@ -59,6 +59,7 @@ DOMNameSpaceNode Object
     [namespaceURI] => http://www.sitemaps.org/schemas/sitemap/0.9
     [ownerDocument] => (object value omitted)
     [parentNode] => (object value omitted)
+    [parentElement] => (object value omitted)
 )
 -- Test with parent and non-ns attribute --
 int(2)
@@ -75,5 +76,6 @@ DOMNameSpaceNode Object
     [namespaceURI] => fooooooooooooooooooooo
     [ownerDocument] => (object value omitted)
     [parentNode] => (object value omitted)
+    [parentElement] => (object value omitted)
 )
 string(3) "url"
