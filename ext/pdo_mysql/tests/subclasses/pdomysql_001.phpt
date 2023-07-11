@@ -7,11 +7,11 @@ pdo_mysql
 
 require_once __DIR__ . "/../config_functions.inc";
 
-if (class_exists(PdoMySql::class) === false) {
-    echo "PdoMySql class does not exist.\n";
+if (class_exists(PdoMysql::class) === false) {
+    echo "PdoMysql class does not exist.\n";
     exit(-1);
 }
-echo "PdoMySql class exists.\n";
+echo "PdoMysql class exists.\n";
 
 
 [$dsn, $user, $pass] = getDsnUserAndPassword();
@@ -32,7 +32,7 @@ $db->query('DROP TABLE foobar');
 echo "Fin.";
 ?>
 --EXPECT--
-PdoMySql class exists.
+PdoMysql class exists.
 array(2) {
   ["name"]=>
   string(3) "PHP"
