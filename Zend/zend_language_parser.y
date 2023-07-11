@@ -255,6 +255,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> extends_from parameter optional_type_without_static argument global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
+%type <ast> anonymous_class_use_clause property_capture_list property_capture_spec
 %type <ast> new_expr anonymous_class class_name class_name_reference simple_variable
 %type <ast> internal_functions_in_yacc
 %type <ast> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
@@ -1114,13 +1115,52 @@ non_empty_for_exprs:
 ;
 
 anonymous_class:
-		anonymous_class_modifiers_optional T_CLASS { $<num>$ = CG(zend_lineno); } ctor_arguments
+		anonymous_class_modifiers_optional T_CLASS { $<num>$ = CG(zend_lineno); } ctor_arguments anonymous_class_use_clause
 		extends_from implements_list backup_doc_comment '{' class_statement_list '}' {
+			zend_ast *class_body = $10;
+			zend_ast_list *capture_list = zend_ast_get_list($5);
+
+			zend_ast *constructor_args = $4;
+
+			if(capture_list->children != 0) {
+				constructor_args = zend_captured_properties_to_constructor_args(capture_list, constructor_args);
+				if(constructor_args == NULL) {
+					YYERROR;
+				}
+
+				class_body = zend_ast_list_add(class_body, (zend_ast*)capture_list);
+			}
+
 			zend_ast *decl = zend_ast_create_decl(
-				ZEND_AST_CLASS, ZEND_ACC_ANON_CLASS | $1, $<num>3, $7, NULL,
-				$5, $6, $9, NULL, NULL);
-			$$ = zend_ast_create(ZEND_AST_NEW, decl, $4);
+				ZEND_AST_CLASS, ZEND_ACC_ANON_CLASS | $1, $<num>3, $8, NULL,
+				$6, $7, class_body, NULL, NULL);
+			$$ = zend_ast_create(ZEND_AST_NEW, decl, constructor_args);
 		}
+;
+
+anonymous_class_use_clause:
+		%empty	{ $$ = zend_ast_create_list(0, ZEND_AST_PROP_CAPTURE_LIST); }
+	|	T_USE '(' property_capture_list possible_comma ')' { $$ = $3; }
+;
+
+property_capture_list:
+		property_capture_list ',' property_capture_spec { $$ = zend_ast_list_add($1, $3); }
+	|	property_capture_spec { $$ = zend_ast_create_list(1, ZEND_AST_PROP_CAPTURE_LIST, $1); }
+;
+
+property_capture_spec:
+		is_reference T_VARIABLE
+			{ $$ = zend_ast_create_ex(ZEND_AST_PROP_CAPTURE, $1, $2, NULL, $2); }
+	|	is_reference T_VARIABLE T_AS optional_cpp_modifiers optional_type_without_static T_VARIABLE
+			{ $$ = zend_ast_create_ex(ZEND_AST_PROP_CAPTURE, $1 | $4, $2, $5, $6); }
+	|	is_reference T_VARIABLE T_AS optional_cpp_modifiers type_expr_without_static
+			{ $$ = zend_ast_create_ex(ZEND_AST_PROP_CAPTURE, $1 | $4, $2, $5, $2); }
+	|	is_reference T_VARIABLE T_AS non_empty_member_modifiers
+			{
+				uint32_t modifiers = zend_modifier_list_to_flags(ZEND_MODIFIER_TARGET_CPP, $4);
+				if (!modifiers) { YYERROR; }
+				$$ = zend_ast_create_ex(ZEND_AST_PROP_CAPTURE, $1 | modifiers, $2, NULL, $2);
+			}
 ;
 
 new_expr:

@@ -213,6 +213,9 @@ typedef struct _zend_oparray_context {
 /* Final class or method                                  |     |     |     */
 #define ZEND_ACC_FINAL                   (1 <<  5) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
+/* Anonymous class captured property / parameter          |     |     |     */
+#define ZEND_ACC_CAPTURED                (1 <<  6) /*     |     |  X  |  X  */
+/*                                                        |     |     |     */
 /* Abstract method                                        |     |     |     */
 #define ZEND_ACC_ABSTRACT                (1 <<  6) /*  X  |  X  |     |     */
 #define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS (1 <<  6) /*  X  |     |     |     */
@@ -833,6 +836,8 @@ uint32_t zend_modifier_list_to_flags(zend_modifier_target target, zend_ast *modi
 
 bool zend_handle_encoding_declaration(zend_ast *ast);
 
+zend_ast *zend_captured_properties_to_constructor_args(zend_ast_list *capture_list, zend_ast *constructor_args_ast);
+
 ZEND_API zend_class_entry *zend_bind_class_in_slot(
 		zval *class_table_slot, zval *lcname, zend_string *lc_parent_name);
 ZEND_API zend_result do_bind_function(zend_function *func, zval *lcname);
@@ -1030,6 +1035,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define _ZEND_IS_VARIADIC_BIT (1 << (_ZEND_TYPE_EXTRA_FLAGS_SHIFT + 2))
 #define _ZEND_IS_PROMOTED_BIT (1 << (_ZEND_TYPE_EXTRA_FLAGS_SHIFT + 3))
 #define _ZEND_IS_TENTATIVE_BIT (1 << (_ZEND_TYPE_EXTRA_FLAGS_SHIFT + 4))
+#define _ZEND_IS_CAPTURED_BIT (1 << (_ZEND_TYPE_EXTRA_FLAGS_SHIFT + 5))
 #define ZEND_ARG_SEND_MODE(arg_info) \
 	((ZEND_TYPE_FULL_MASK((arg_info)->type) >> _ZEND_SEND_MODE_SHIFT) & 3)
 #define ZEND_ARG_IS_VARIADIC(arg_info) \
@@ -1038,6 +1044,8 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 	((ZEND_TYPE_FULL_MASK((arg_info)->type) & _ZEND_IS_PROMOTED_BIT) != 0)
 #define ZEND_ARG_TYPE_IS_TENTATIVE(arg_info) \
 	((ZEND_TYPE_FULL_MASK((arg_info)->type) & _ZEND_IS_TENTATIVE_BIT) != 0)
+#define ZEND_ARG_IS_CAPTURED(arg_info) \
+	((ZEND_TYPE_FULL_MASK((arg_info)->type) & _ZEND_IS_CAPTURED_BIT) != 0)
 
 #define ZEND_DIM_IS					(1 << 0) /* isset fetch needed for null coalesce. Set in zend_compile.c for ZEND_AST_DIM nested within ZEND_AST_COALESCE. */
 #define ZEND_DIM_ALTERNATIVE_SYNTAX	(1 << 1) /* deprecated curly brace usage */
