@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 
 - Date:
   . Fixed bug GH-11368 (Date modify returns invalid datetime). (Derick)
+  . Fixed bug GH-11600 (Can't parse time strings which include (narrow)
+    non-breaking space characters). (Derick)
 
 - DOM:
   . Fixed bug GH-11625 (DOMElement::replaceWith() doesn't replace node with
