@@ -9,5 +9,6 @@ try {
     echo $e->getMessage();
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function assert_options() is deprecated in %s on line %d
 assert_options(): Argument #1 ($option) must be an ASSERT_* constant

@@ -1,6 +1,7 @@
 --TEST--
 Test exception doesn't cause RSHUTDOWN bypass, variation 0
 --INI--
+zend.assertions=1
 assert.bail=1
 assert.exception=1
 --FILE--
@@ -22,3 +23,5 @@ Stack trace:
 #0 %sexception_011.php(%d): assert(false, 'assert(false)')
 #1 {main}
   thrown in %sexception_011.php on line %d
+
+Deprecated: PHP Startup: assert.bail INI setting is deprecated in Unknown on line 0
