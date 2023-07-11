@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 00d59fd45c44eb14bbf8f51ee4f61e0464786d69 */
+ * Stub hash: fd3acd731f178c2f1034b206b46d53c236823b9f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -98,6 +98,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_replaceChild, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
 	ZEND_ARG_OBJ_INFO(0, child, DOMNode, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_contains, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, other, DOMNode|DOMNameSpaceNode, MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMImplementation_getFeature, 0, 2, IS_NEVER, 0)
@@ -512,6 +516,7 @@ ZEND_METHOD(DOMNode, lookupPrefix);
 ZEND_METHOD(DOMNode, normalize);
 ZEND_METHOD(DOMNode, removeChild);
 ZEND_METHOD(DOMNode, replaceChild);
+ZEND_METHOD(DOMNode, contains);
 ZEND_METHOD(DOMImplementation, getFeature);
 ZEND_METHOD(DOMImplementation, hasFeature);
 ZEND_METHOD(DOMImplementation, createDocumentType);
@@ -693,6 +698,7 @@ static const zend_function_entry class_DOMNode_methods[] = {
 	ZEND_ME(DOMNode, normalize, arginfo_class_DOMNode_normalize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, removeChild, arginfo_class_DOMNode_removeChild, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, replaceChild, arginfo_class_DOMNode_replaceChild, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNode, contains, arginfo_class_DOMNode_contains, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
