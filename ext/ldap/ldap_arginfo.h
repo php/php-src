@@ -1,10 +1,19 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 893c86a23c81c32d2c8a4b2ca14a785cd8a99a37 */
+ * Stub hash: 63ed5b30556367b8ce48a421a85b92ecf41413b7 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, uri, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, port, IS_LONG, 0, "389")
+	ZEND_ARG_TYPE_INFO(0, wallet, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, auth_mode, IS_LONG, 0, "GSLC_SSL_NO_AUTH")
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect_wallet, 0, 3, LDAP\\Connection, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, uri, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO(0, wallet, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, auth_mode, IS_LONG, 0, "GSLC_SSL_NO_AUTH")
@@ -344,6 +353,9 @@ ZEND_END_ARG_INFO()
 #if defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_connect);
 #endif
+#if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
+ZEND_FUNCTION(ldap_connect_wallet);
+#endif
 #if !(defined(HAVE_ORALDAP))
 ZEND_FUNCTION(ldap_connect);
 #endif
@@ -443,6 +455,9 @@ ZEND_FUNCTION(ldap_parse_exop);
 static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_connect, arginfo_ldap_connect)
+#endif
+#if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
+	ZEND_FE(ldap_connect_wallet, arginfo_ldap_connect_wallet)
 #endif
 #if !(defined(HAVE_ORALDAP))
 	ZEND_FE(ldap_connect, arginfo_ldap_connect)
@@ -833,6 +848,10 @@ static void register_ldap_symbols(int module_number)
 #if defined(HAVE_ORALDAP)
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect", sizeof("ldap_connect") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#endif
+#if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect_wallet", sizeof("ldap_connect_wallet") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_bind", sizeof("ldap_bind") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
