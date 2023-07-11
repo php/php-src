@@ -107,6 +107,7 @@ int dom_node_next_sibling_read(dom_object *obj, zval *retval);
 int dom_node_previous_element_sibling_read(dom_object *obj, zval *retval);
 int dom_node_next_element_sibling_read(dom_object *obj, zval *retval);
 int dom_node_attributes_read(dom_object *obj, zval *retval);
+zend_result dom_node_is_connected_read(dom_object *obj, zval *retval);
 int dom_node_owner_document_read(dom_object *obj, zval *retval);
 int dom_node_namespace_uri_read(dom_object *obj, zval *retval);
 int dom_node_prefix_read(dom_object *obj, zval *retval);

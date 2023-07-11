@@ -327,6 +327,9 @@ class DOMNode
     public ?DOMNamedNodeMap $attributes;
 
     /** @readonly */
+    public bool $isConnected;
+
+    /** @readonly */
     public ?DOMDocument $ownerDocument;
 
     /** @readonly */
@@ -418,6 +421,9 @@ class DOMNameSpaceNode
 
     /** @readonly */
     public ?string $namespaceURI;
+
+    /** @readonly */
+    public bool $isConnected;
 
     /** @readonly */
     public ?DOMDocument $ownerDocument;

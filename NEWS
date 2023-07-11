@@ -25,6 +25,7 @@ PHP                                                                        NEWS
   . Added DOMNode::getRootNode(). (nielsdos)
   . Added DOMElement::className and DOMElement::id. (nielsdos)
   . Added DOMParentNode::replaceChildren(). (nielsdos)
+  . Added DOMNode::isConnected and DOMNameSpaceNode::isConnected. (nielsdos)
 
 - FPM:
   . Added warning to log when fpm socket was not registered on the expected

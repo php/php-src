@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 95dc217251318b625cad5b282b1adbb8eedaf1a5 */
+ * Stub hash: 78e4089fa17aa0faa371917aeb48fa0dfe1819b0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1138,6 +1138,12 @@ static zend_class_entry *register_class_DOMNode(void)
 	zend_declare_typed_property(class_entry, property_attributes_name, &property_attributes_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_attributes_class_DOMNamedNodeMap, 0, MAY_BE_NULL));
 	zend_string_release(property_attributes_name);
 
+	zval property_isConnected_default_value;
+	ZVAL_UNDEF(&property_isConnected_default_value);
+	zend_string *property_isConnected_name = zend_string_init("isConnected", sizeof("isConnected") - 1, 1);
+	zend_declare_typed_property(class_entry, property_isConnected_name, &property_isConnected_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_isConnected_name);
+
 	zval property_ownerDocument_default_value;
 	ZVAL_UNDEF(&property_ownerDocument_default_value);
 	zend_string *property_ownerDocument_name = zend_string_init("ownerDocument", sizeof("ownerDocument") - 1, 1);
@@ -1221,6 +1227,12 @@ static zend_class_entry *register_class_DOMNameSpaceNode(void)
 	zend_string *property_namespaceURI_name = zend_string_init("namespaceURI", sizeof("namespaceURI") - 1, 1);
 	zend_declare_typed_property(class_entry, property_namespaceURI_name, &property_namespaceURI_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release(property_namespaceURI_name);
+
+	zval property_isConnected_default_value;
+	ZVAL_UNDEF(&property_isConnected_default_value);
+	zend_string *property_isConnected_name = zend_string_init("isConnected", sizeof("isConnected") - 1, 1);
+	zend_declare_typed_property(class_entry, property_isConnected_name, &property_isConnected_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_isConnected_name);
 
 	zval property_ownerDocument_default_value;
 	ZVAL_UNDEF(&property_ownerDocument_default_value);

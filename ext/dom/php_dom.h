@@ -150,7 +150,9 @@ xmlNodePtr php_dom_create_fake_namespace_decl(xmlNodePtr nodep, xmlNsPtr origina
 void php_dom_get_content_into_zval(const xmlNode *nodep, zval *target, bool default_is_null);
 zend_string *dom_node_concatenated_name_helper(size_t name_len, const char *name, size_t prefix_len, const char *prefix);
 zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep);
+bool php_dom_is_node_connected(const xmlNode *node);
 
+/* parentnode */
 void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_parent_node_append(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc);

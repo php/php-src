@@ -57,6 +57,7 @@ DOMNameSpaceNode Object
     [prefix] => 
     [localName] => xmlns
     [namespaceURI] => http://www.sitemaps.org/schemas/sitemap/0.9
+    [isConnected] => 1
     [ownerDocument] => (object value omitted)
     [parentNode] => (object value omitted)
 )
@@ -73,6 +74,7 @@ DOMNameSpaceNode Object
     [prefix] => xsi
     [localName] => xsi
     [namespaceURI] => fooooooooooooooooooooo
+    [isConnected] => 1
     [ownerDocument] => (object value omitted)
     [parentNode] => (object value omitted)
 )

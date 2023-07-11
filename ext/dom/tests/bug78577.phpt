@@ -13,7 +13,7 @@ var_dump($attr);
 
 ?>
 --EXPECT--
-object(DOMNameSpaceNode)#3 (8) {
+object(DOMNameSpaceNode)#3 (9) {
   ["nodeName"]=>
   string(5) "xmlns"
   ["nodeValue"]=>
@@ -26,6 +26,8 @@ object(DOMNameSpaceNode)#3 (8) {
   string(5) "xmlns"
   ["namespaceURI"]=>
   string(19) "http://php.net/test"
+  ["isConnected"]=>
+  bool(true)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["parentNode"]=>

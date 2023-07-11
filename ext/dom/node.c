@@ -52,6 +52,18 @@ zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep)
 	}
 }
 
+bool php_dom_is_node_connected(const xmlNode *node)
+{
+	ZEND_ASSERT(node != NULL);
+	do {
+		if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE) {
+			return true;
+		}
+		node = node->parent;
+	} while (node != NULL);
+	return false;
+}
+
 /* {{{ nodeName	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D095
@@ -486,6 +498,25 @@ int dom_node_attributes_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
+/* }}} */
+
+/* {{{ isConnected	boolean
+readonly=yes
+URL: https://dom.spec.whatwg.org/#dom-node-isconnected
+Since:
+*/
+zend_result dom_node_is_connected_read(dom_object *obj, zval *retval)
+{
+	xmlNode *nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		return FAILURE;
+	}
+
+	ZVAL_BOOL(retval, php_dom_is_node_connected(nodep));
+	return SUCCESS;
+}
 /* }}} */
 
 /* {{{ ownerDocument	DomDocument

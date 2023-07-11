@@ -642,6 +642,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_node_prop_handlers, "previousSibling", sizeof("previousSibling")-1, dom_node_previous_sibling_read, NULL);
 	dom_register_prop_handler(&dom_node_prop_handlers, "nextSibling", sizeof("nextSibling")-1, dom_node_next_sibling_read, NULL);
 	dom_register_prop_handler(&dom_node_prop_handlers, "attributes", sizeof("attributes")-1, dom_node_attributes_read, NULL);
+	dom_register_prop_handler(&dom_node_prop_handlers, "isConnected", sizeof("isConnected")-1, dom_node_is_connected_read, NULL);
 	dom_register_prop_handler(&dom_node_prop_handlers, "ownerDocument", sizeof("ownerDocument")-1, dom_node_owner_document_read, NULL);
 	dom_register_prop_handler(&dom_node_prop_handlers, "namespaceURI", sizeof("namespaceURI")-1, dom_node_namespace_uri_read, NULL);
 	dom_register_prop_handler(&dom_node_prop_handlers, "prefix", sizeof("prefix")-1, dom_node_prefix_read, dom_node_prefix_write);
@@ -660,6 +661,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "prefix", sizeof("prefix")-1, dom_node_prefix_read, NULL);
 	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "localName", sizeof("localName")-1, dom_node_local_name_read, NULL);
 	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "namespaceURI", sizeof("namespaceURI")-1, dom_node_namespace_uri_read, NULL);
+	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "isConnected", sizeof("isConnected")-1, dom_node_is_connected_read, NULL);
 	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "ownerDocument", sizeof("ownerDocument")-1, dom_node_owner_document_read, NULL);
 	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "parentNode", sizeof("parentNode")-1, dom_node_parent_node_read, NULL);
 	zend_hash_add_ptr(&classes, dom_namespace_node_class_entry->name, &dom_namespace_node_prop_handlers);

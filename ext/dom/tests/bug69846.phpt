@@ -30,7 +30,7 @@ foreach ($dataNodes AS $node) {
 ?>
 --EXPECTF--
 int(3)
-object(DOMText)#%d (21) {
+object(DOMText)#%d (22) {
   ["wholeText"]=>
   string(3) "
   "
@@ -64,6 +64,8 @@ object(DOMText)#%d (21) {
   NULL
   ["attributes"]=>
   NULL
+  ["isConnected"]=>
+  bool(false)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["namespaceURI"]=>
@@ -78,7 +80,7 @@ object(DOMText)#%d (21) {
   string(3) "
   "
 }
-object(DOMElement)#7 (25) {
+object(DOMElement)#7 (26) {
   ["schemaTypeInfo"]=>
   NULL
   ["tagName"]=>
@@ -121,6 +123,8 @@ object(DOMElement)#7 (25) {
   NULL
   ["attributes"]=>
   string(22) "(object value omitted)"
+  ["isConnected"]=>
+  bool(false)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["namespaceURI"]=>
@@ -138,7 +142,7 @@ object(DOMElement)#7 (25) {
     Value C
   "
 }
-object(DOMText)#%d (21) {
+object(DOMText)#%d (22) {
   ["wholeText"]=>
   string(1) "
 "
@@ -172,6 +176,8 @@ object(DOMText)#%d (21) {
   NULL
   ["attributes"]=>
   NULL
+  ["isConnected"]=>
+  bool(false)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["namespaceURI"]=>
