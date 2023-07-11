@@ -518,7 +518,6 @@ PHP_FUNCTION(posix_isatty)
 				zend_zval_value_name(z_fd));
 			RETURN_FALSE;
 		}
-		fd = zval_get_long(z_fd);
 	}
 
 	/* A valid file descriptor must fit in an int and be positive */
