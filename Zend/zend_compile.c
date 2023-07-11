@@ -8950,23 +8950,26 @@ static void zend_compile_enum_backing_type(zend_class_entry *ce, zend_ast *enum_
 
 static void zend_compile_collection_data_structure(zend_class_entry *ce, zend_ast *collection_data_structure_ast)
 {
-	zend_string *struct_type = zend_ast_get_str(collection_data_structure_ast);
+	zval *struct_type = zend_ast_get_zval(collection_data_structure_ast);
 
-	if (zend_string_equals_literal_ci(struct_type, "seq")) {
-		if (ce->collection_key_type != IS_UNDEF) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Collection sequences may not have a key type defined");
-		}
-		ce->collection_key_type = IS_LONG;
-		ce->collection_data_structure = ZEND_COLLECTION_SEQ;
-	} else if (zend_string_equals_literal_ci(struct_type, "dict")) {
-		if (ce->collection_key_type == IS_UNDEF) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Collection dictionaries must have a key type defined");
-		}
-		ce->collection_data_structure = ZEND_COLLECTION_DICT;
-	} else {
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"Collection data structure must be Seq or Dict, %s given",
-			ZSTR_VAL(struct_type));
+	ZEND_ASSERT(Z_TYPE_P(struct_type) == IS_LONG);
+	ZEND_ASSERT(Z_LVAL_P(struct_type) == ZEND_COLLECTION_SEQ || Z_LVAL_P(struct_type) == ZEND_COLLECTION_DICT);
+
+	switch (Z_LVAL_P(struct_type)) {
+		case ZEND_COLLECTION_SEQ:
+			if (ce->collection_key_type != IS_UNDEF) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Collection sequences may not have a key type defined");
+			}
+			ce->collection_key_type = IS_LONG;
+			ce->collection_data_structure = ZEND_COLLECTION_SEQ;
+			break;
+
+		case ZEND_COLLECTION_DICT:
+			if (ce->collection_key_type == IS_UNDEF) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Collection dictionaries must have a key type defined");
+			}
+			ce->collection_data_structure = ZEND_COLLECTION_DICT;
+			break;
 	}
 }
 

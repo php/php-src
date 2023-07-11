@@ -164,7 +164,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_TRAIT         "'trait'"
 %token <ident> T_INTERFACE     "'interface'"
 %token <ident> T_ENUM          "'enum'"
-%token <ident> T_COLLECTION    "'collection'"
+%token <ident> T_COLLECTION_SEQ  "'collection(Seq)'"
+%token <ident> T_COLLECTION_DICT "'collection(Dict)'"
 %token <ident> T_EXTENDS       "'extends'"
 %token <ident> T_IMPLEMENTS    "'implements'"
 %token <ident> T_NAMESPACE     "'namespace'"
@@ -660,10 +661,12 @@ enum_case_expr:
 ;
 
 collection_declaration_statement:
-		T_COLLECTION { $<num>$ = CG(zend_lineno); }
-		'(' T_STRING ')'
+		T_COLLECTION_SEQ { $<num>$ = CG(zend_lineno); }
 		T_STRING T_SL collection_type_list T_SR backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_COLLECTION|ZEND_ACC_FINAL, $<num>2, $10, zend_ast_get_str($6), NULL, $4, $12, NULL, $8); }
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_COLLECTION|ZEND_ACC_FINAL, $<num>2, $7, zend_ast_get_str($3), NULL, zend_ast_create_zval_from_long(ZEND_COLLECTION_SEQ), $9, NULL, $5); }
+	|	T_COLLECTION_DICT { $<num>$ = CG(zend_lineno); }
+		T_STRING T_SL collection_type_list T_SR backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_COLLECTION|ZEND_ACC_FINAL, $<num>2, $7, zend_ast_get_str($3), NULL, zend_ast_create_zval_from_long(ZEND_COLLECTION_DICT), $9, NULL, $5); }
 ;
 
 collection_type_list:

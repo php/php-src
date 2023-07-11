@@ -7,4 +7,4 @@ collection(Foobar) Articles<<int => Article>>
 }
 ?>
 --EXPECTF--
-Fatal error: Collection data structure must be Seq or Dict, Foobar given in %s on line %d
+Parse error: syntax error, unexpected identifier "Articles" in %s on line %d

@@ -6,12 +6,21 @@ collection(Dict) Articles<<int => Article>>
 {
 }
 
-$c = new Articles;
+CoLleCtION(dICT) Books<<string => Book>>
+{
+}
 
-var_dump($c);
+$a = new Articles;
+$b = new Books;
+
+var_dump($a, $b);
 ?>
 --EXPECTF--
 object(Articles)#%d (%d) {
+  ["value"]=>
+  uninitialized(array)
+}
+object(Books)#%d (%d) {
   ["value"]=>
   uninitialized(array)
 }
