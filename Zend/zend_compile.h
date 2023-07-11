@@ -1021,6 +1021,19 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_SEND_BY_REF     1u
 #define ZEND_SEND_PREFER_REF 2u
 
+/* allow_null for zend_internal_arg_info.type.type_mask */
+#define ZEND_SEND_OPTIONAL     1u
+#define ZEND_SEND_NOTNULL      0u
+
+/* Z_PARAM_ZVAL_EX2 check_null */
+#define ZEND_RECEIVE_CONTAINER 0
+#define ZEND_RECEIVE_OPTIONAL 1
+
+/* Z_PARAM_ZVAL_EX2 deref */
+#define ZEND_RECEIVE_BY_REF 0
+#define ZEND_RECEIVE_BY_VAL 1
+
+
 #define ZEND_THROW_IS_EXPR 1u
 
 #define ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS 1
