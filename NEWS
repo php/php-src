@@ -13,6 +13,10 @@ PHP                                                                        NEWS
     exceptions). (ilutov)
   . Added zend_call_stack_get implementation for OpenBSD. (David Carlier)
 
+- LDAP:
+  . Deprecate calling ldap_connect() with separate hostname and port.
+    (heiglandreas)
+
 - OpenSSL:
   . Added support for additional EC parameters in openssl_pkey_new. (Eno-CN)
 
