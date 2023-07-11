@@ -488,6 +488,10 @@ class IntlCalendar
 /** @not-serializable */
 class IntlGregorianCalendar extends IntlCalendar
 {
+    public static function createFromDate(int $year, int $month, int $dayOfMonth): static {}
+
+    public static function createFromDateTime(int $year, int $month, int $dayOfMonth, int $hour, int $minute, ?int $second = null): static {}
+
     /**
      * @param DateTimeZone|IntlTimeZone|string|int|null $timezoneOrYear
      * @param string|int|null $localeOrMonth
