@@ -4,26 +4,29 @@ Redirection support in proc_open
 <?php
 
 $php = getenv('TEST_PHP_EXECUTABLE');
+$args = getenv('TEST_PHP_EXTRA_ARGS');
+$cmd = "$php $args";
+
 try {
-    proc_open([$php], [['redirect']], $pipes);
+    proc_open($cmd, [['redirect']], $pipes);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 
 try {
-    proc_open([$php], [['redirect', 'foo']], $pipes);
+    proc_open($cmd, [['redirect', 'foo']], $pipes);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 
 try {
-    proc_open([$php], [['redirect', 42]], $pipes);
+    proc_open($cmd, [['redirect', 42]], $pipes);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 
 echo "\nWith pipe:\n";
-$cmd = [$php, '-r', 'echo "Test\n"; fprintf(STDERR, "Error");'];
+$cmd = "$php $args -r 'echo \"Test\n\"; fprintf(STDERR, \"Error\");'";
 $proc = proc_open($cmd, [1 => ['pipe', 'w'], 2 => ['redirect', 1]], $pipes);
 var_dump($pipes);
 var_dump(stream_get_contents($pipes[1]));
