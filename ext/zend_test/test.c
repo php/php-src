@@ -395,8 +395,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_iterable_legacy, 0, 1, IS_I
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg2, IS_ITERABLE, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_out_param, 0, ZEND_SEND_BY_VAL, 1)
+    ZEND_ARG_TYPE_INFO(ZEND_SEND_BY_REF, z_ref_preg_match, IS_LONG, ZEND_SEND_OPTIONAL)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry ext_function_legacy[] = {
 	ZEND_FE(zend_iterable_legacy, arginfo_zend_iterable_legacy)
+	ZEND_FE(zend_out_param, arginfo_zend_out_param)
 	ZEND_FE_END
 };
 
