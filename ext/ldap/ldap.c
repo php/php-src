@@ -1016,6 +1016,75 @@ PHP_FUNCTION(ldap_connect)
 }
 /* }}} */
 
+#if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
+PHP_FUNCTION(ldap_connect_wallet) {
+	char *host = NULL;
+	size_t hostlen = 0;
+	char *wallet = NULL, *walletpasswd = NULL;
+	size_t walletlen = 0, walletpasswdlen = 0;
+	zend_long authmode = GSLC_SSL_NO_AUTH;
+	bool ssl = false;
+
+	ldap_linkdata *ld;
+	LDAP *ldap = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!ss|l",
+		&host, &hostlen, &wallet, &walletlen, &walletpasswd, &walletpasswdlen, &authmode) != SUCCESS
+	) {
+		RETURN_THROWS();
+	}
+
+	if (authmode != 0) {
+		ssl = true;
+	}
+
+	if (LDAPG(max_links) != -1 && LDAPG(num_links) >= LDAPG(max_links)) {
+		php_error_docref(NULL, E_WARNING, "Too many open links (" ZEND_LONG_FMT ")", LDAPG(num_links));
+		RETURN_FALSE;
+	}
+
+	object_init_ex(return_value, ldap_link_ce);
+	ld = Z_LDAP_LINK_P(return_value);
+
+	{
+		int rc = LDAP_SUCCESS;
+		char *url = host;
+		if (url && !ldap_is_ldap_url(url)) {
+			size_t urllen = hostlen + sizeof( "ldap://:65535" );
+
+			url = emalloc(urllen);
+			snprintf( url, urllen, "ldap://%s", host );
+		}
+
+		/* ldap_init() is deprecated, use ldap_initialize() instead. */
+		rc = ldap_initialize(&ldap, url);
+		if (url != host) {
+			efree(url);
+		}
+		if (rc != LDAP_SUCCESS) {
+			zval_ptr_dtor(return_value);
+			php_error_docref(NULL, E_WARNING, "Could not create session handle: %s", ldap_err2string(rc));
+			RETURN_FALSE;
+		}
+	}
+
+	if (ldap == NULL) {
+		zval_ptr_dtor(return_value);
+		RETURN_FALSE;
+	} else {
+		if (ssl) {
+			if (ldap_init_SSL(&ldap->ld_sb, wallet, walletpasswd, authmode)) {
+				zval_ptr_dtor(return_value);
+				php_error_docref(NULL, E_WARNING, "SSL init failed");
+				RETURN_FALSE;
+			}
+		}
+		LDAPG(num_links)++;
+		ld->link = ldap;
+	}
+}
+#endif
+
 /* {{{ _get_lderrno */
 static int _get_lderrno(LDAP *ldap)
 {
