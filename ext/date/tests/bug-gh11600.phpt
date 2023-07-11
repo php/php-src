@@ -1,5 +1,7 @@
 --TEST--
 Bug GH-11600: Intl patterns are not parseable DateTime Strings
+--EXTENSIONS--
+intl
 --INI--
 date.timezone=UTC
 --FILE--
@@ -14,6 +16,6 @@ $timestamp = strtotime($timeString);
 var_dump($pattern, $timeString, $timestamp);
 ?>
 --EXPECTF--
-string(8) "h:mm a"
-string(9) "4:02 PM"
+string(%d) "h:mm%sa"
+string(%d) "4:02%sPM"
 int(1689091320)
