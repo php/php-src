@@ -68,6 +68,13 @@ const SQLITE3_OPEN_CREATE = UNKNOWN;
 const SQLITE3_DETERMINISTIC = UNKNOWN;
 #endif
 
+/**
+ * @strict-properties
+ */
+class SQLite3Exception extends \Exception
+{
+}
+
 /** @not-serializable */
 class SQLite3
 {

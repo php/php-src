@@ -46,6 +46,12 @@ var_dump(mb_str_pad('▶▶', 1, ' ', STR_PAD_BOTH));
 var_dump(mb_str_pad('▶▶', 0, ' ', STR_PAD_BOTH));
 var_dump(mb_str_pad('▶▶', -1, ' ', STR_PAD_BOTH));
 
+echo "--- No pad string ---\n";
+var_dump(mb_str_pad('▶▶', 4));
+var_dump(mb_str_pad('▶▶', 3));
+var_dump(mb_str_pad('▶▶', 2));
+var_dump(mb_str_pad('▶▶', 1));
+
 echo "--- Empty input string ---\n";
 var_dump(mb_str_pad('', 2, ' ', STR_PAD_BOTH));
 var_dump(mb_str_pad('', 1, ' ', STR_PAD_BOTH));
@@ -96,6 +102,11 @@ string(10) "World+-+-+"
 --- Edge cases pad length ---
 string(6) "▶▶"
 string(6) "▶▶"
+string(6) "▶▶"
+string(6) "▶▶"
+--- No pad string ---
+string(8) "▶▶  "
+string(7) "▶▶ "
 string(6) "▶▶"
 string(6) "▶▶"
 --- Empty input string ---

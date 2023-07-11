@@ -83,6 +83,12 @@ PHP 8.3 UPGRADE NOTES
     declarations. RFC: https://wiki.php.net/rfc/typed_class_constants
   . Closures created from magic methods can now accept named arguments.
   . The final modifier may now be used when using a method from a trait.
+  . Added the #[\Override] attribute to check that a method exists
+    in a parent class or implemented interface.
+    RFC: https://wiki.php.net/rfc/marking_overriden_methods
+
+- CLI
+  . It is now possible to lint multiple files.
 
 - Posix
   . posix_getrlimit() now takes an optional $res parameter to allow fetching a
@@ -109,6 +115,19 @@ PHP 8.3 UPGRADE NOTES
 - Intl
   . The U_MULTIPLE_DECIMAL_SEP*E*RATORS constant had been deprecated, using
     the U_MULTIPLE_DECIMAL_SEP*A*RATORS instead is recommended.
+
+- Random
+  . The MT_RAND_PHP Mt19937 variant is deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_3#mt_rand_php
+
+- SQLite3
+  . Using exceptions is now preferred, warnings will be removed in the future.
+    Calling SQLite3::enableExceptions(false) will trigger a depreciation warning
+    in this version.
+
+- Zip:
+  . The ZipArchive::FL_RECOMPRESS constant is deprecated and will be removed
+    in a future version of libzip
 
 ========================================
 5. Changed Functions
@@ -191,6 +210,12 @@ PHP 8.3 UPGRADE NOTES
   . pg_insert and pg_convert raises a ValueError or a TypeError instead of a WARNING when the
     value/type of a field does not match properly with a PostGreSQL's type.
 
+- Random:
+  . Changed mt_srand() and srand() to not check the number of arguments to
+    determine whether a random seed should be used. Passing null will generate
+    a random seed, 0 will use zero as the seed. The functions are now consistent
+    with Mt19937::__construct().
+
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING.
     RFC: https://wiki.php.net/rfc/improve_unserialize_error_handling
@@ -208,6 +233,10 @@ PHP 8.3 UPGRADE NOTES
     Previously arrays and objects where ignored whilst every other value was cast to int.
     Moreover, objects that define a numeric cast (e.g. GMP) are now casted instead of ignored.
     RFC: https://wiki.php.net/rfc/saner-array-sum-product
+  . number_format() $decimal parameter handles rounding to negative places. It
+    means that when $decimals is negative, $num is rounded to $decimals
+    significant digits before the decimal point. Previously negative $decimals
+    got silently ignored and the number got rounded to zero decimal places.
 
 ========================================
 6. New Functions
@@ -237,16 +266,15 @@ PHP 8.3 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/randomizer_additions
   . Added Randomizer::nextFloat(), ::getFloat(), and IntervalBoundary.
     RFC: https://wiki.php.net/rfc/randomizer_additions
-  . Changed mt_srand() and srand() to not check the number of arguments to
-    determine whether a random seed should be used. Passing null will generate
-    a random seed, 0 will use zero as the seed. The functions are now consistent
-    with Mt19937::__construct().
 
 - Reflection:
   . Return type of ReflectionClass::getStaticProperties() is no longer nullable.
 
 - Sockets:
   . Added socket_atmark to checks if the socket is OOB marked.
+
+- Zip:
+  . Added ZipArchive::setArchiveFlag and ZipArchive::getArchiveFlag methods.
 
 ========================================
 7. New Classes and Interfaces
@@ -259,6 +287,16 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 9. Other Changes to Extensions
 ========================================
+
+- DOM:
+  . The DOM lifetime mechanism has been reworked such that implicitly removed
+    nodes can still be fetched. Previously this resulted in an exception.
+
+- SQLite3
+  . The SQLite3 class now throws \SQLite3Exception (extends \Exception) instead
+    of \Exception.
+  . The SQLite error code is now passed in the exception error code instead of being
+    included in the error message.
 
 ========================================
 10. New Global Constants
@@ -308,6 +346,15 @@ PHP 8.3 UPGRADE NOTES
   . SO_REUSEPORT_LB (FreeBSD only).
   . IP_BIND_ADDRESS_NO_PORT (Linux only).
 
+- Zip:
+  . ZipArchive::ER_DATA_LENGTH (libzip >= 1.10)
+  . ZipArchive::ER_NOT_ALLOWED (libzip >= 1.10)
+  . ZipArchive::AFL_RDONLY (libzip >= 1.10)
+  . ZipArchive::AFL_IS_TORRENTZIP (libzip >= 1.10)
+  . ZipArchive::AFL_WANT_TORRENTZIP (libzip >= 1.10)
+  . ZipArchive::AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE (libzip >= 1.10)
+  . ZipArchive::FL_OPEN_FILE_NOW
+
 ========================================
 11. Changes to INI File Handling
 ========================================
@@ -335,6 +382,9 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 12. Windows Support
 ========================================
+
+- Minimum supported Windows version has been bumped to Windows 8 or
+  Windows Server 2012
 
 ========================================
 13. Other Changes
@@ -366,5 +416,15 @@ PHP 8.3 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
+- DOM:
+  . Looping over a DOMNodeList now uses caching. Therefore requesting items no
+    longer takes quadratic time by default.
+  . Getting text content from nodes now avoids an allocation, resulting in a
+    performance gain.
+
 - Standard:
   . The file() flags error check is now about 7% faster.
+
+- SPL:
+  . RecursiveDirectoryIterator now performs less I/O when looping over a
+    directory.

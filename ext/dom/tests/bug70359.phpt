@@ -29,11 +29,7 @@ var_dump($spaceNode->nodeType);
 var_dump($spaceNode->nodeValue);
 
 $dom->documentElement->firstElementChild->remove();
-try {
-    print_r($spaceNode->parentNode);
-} catch (\Error $e) {
-    echo $e->getMessage(), "\n";
-}
+var_dump($spaceNode->parentNode);
 
 echo "-- Test with parent and ns attribute --\n";
 
@@ -67,7 +63,7 @@ DOMNameSpaceNode Object
 -- Test with parent and non-ns attribute --
 int(2)
 string(3) "bar"
-Couldn't fetch DOMAttr. Node no longer exists
+NULL
 -- Test with parent and ns attribute --
 DOMNameSpaceNode Object
 (

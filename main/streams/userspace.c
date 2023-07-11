@@ -1320,6 +1320,7 @@ static ssize_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t co
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_FALSE && Z_TYPE(retval) != IS_TRUE) {
 		convert_to_string(&retval);
 		PHP_STRLCPY(ent->d_name, Z_STRVAL(retval), sizeof(ent->d_name), Z_STRLEN(retval));
+		ent->d_type = DT_UNKNOWN;
 
 		didread = sizeof(php_stream_dirent);
 	} else if (call_result == FAILURE) {

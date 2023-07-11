@@ -182,7 +182,15 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 					goto err;
 				}
 
-				if (newNode->parent != NULL) {
+				if (newNode->type == XML_DOCUMENT_FRAG_NODE) {
+					/* Unpack document fragment nodes, the behaviour differs for different libxml2 versions. */
+					newNode = newNode->children;
+					if (UNEXPECTED(newNode == NULL)) {
+						/* No nodes to add, nothing to do here */
+						continue;
+					}
+					xmlUnlinkNode(newNode);
+				} else if (newNode->parent != NULL) {
 					xmlUnlinkNode(newNode);
 				}
 
@@ -371,7 +379,7 @@ static void dom_pre_insert(xmlNodePtr insertion_point, xmlNodePtr parentNode, xm
 			insertion_point->prev->next = newchild;
 			newchild->prev = insertion_point->prev;
 		}
-		insertion_point->prev = newchild;
+		insertion_point->prev = fragment->last;
 		if (parentNode->children == insertion_point) {
 			parentNode->children = newchild;
 		}
@@ -565,14 +573,14 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 	xmlNodePtr newchild = fragment->children;
 	xmlDocPtr doc = parentNode->doc;
 
+	/* Unlink it unless it became a part of the fragment.
+	 * Freeing will be taken care of by the lifetime of the returned dom object. */
+	if (child->parent != fragment) {
+		xmlUnlinkNode(child);
+	}
+
 	if (newchild) {
 		xmlNodePtr last = fragment->last;
-
-		/* Unlink it unless it became a part of the fragment.
-		 * Freeing will be taken care of by the lifetime of the returned dom object. */
-		if (child->parent != fragment) {
-			xmlUnlinkNode(child);
-		}
 
 		dom_pre_insert(insertion_point, parentNode, newchild, fragment);
 

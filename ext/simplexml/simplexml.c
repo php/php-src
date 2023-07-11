@@ -1602,7 +1602,7 @@ PHP_METHOD(SimpleXMLElement, children)
 }
 /* }}} */
 
-/* {{{ Finds children of given node */
+/* {{{ Returns name of given node */
 PHP_METHOD(SimpleXMLElement, getName)
 {
 	php_sxe_object *sxe;

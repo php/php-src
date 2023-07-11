@@ -147,6 +147,7 @@ xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 void dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce);
 xmlNodePtr php_dom_create_fake_namespace_decl(xmlNodePtr nodep, xmlNsPtr original, zval *return_value, dom_object *parent_intern);
+void php_dom_get_content_into_zval(const xmlNode *nodep, zval *target, bool default_is_null);
 
 void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_parent_node_append(dom_object *context, zval *nodes, uint32_t nodesc);
@@ -166,12 +167,19 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 int php_dom_get_namednodemap_length(dom_object *obj);
 int php_dom_get_nodelist_length(dom_object *obj);
 
-#define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
+#define DOM_GET_INTERN(__id, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
-	if (__intern->ptr == NULL || !(__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node)) { \
+	if (UNEXPECTED(__intern->ptr == NULL)) { \
 		zend_throw_error(NULL, "Couldn't fetch %s", ZSTR_VAL(__intern->std.ce->name));\
 		RETURN_THROWS();\
   	} \
+}
+
+#define DOM_GET_THIS_INTERN(__intern) DOM_GET_INTERN(ZEND_THIS, __intern)
+
+#define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
+	DOM_GET_INTERN(__id, __intern); \
+	__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node; \
 }
 
 #define DOM_NO_ARGS() \

@@ -15,7 +15,7 @@ $im = imagecreatefromxbm($filepath);
 var_dump($im);
 ?>
 --EXPECTF--
-Warning: imagecreatefromxbm(): Invalid XBM in %s on line %d
+Warning: imagecreatefromxbm(): %cnvalid XBM in %s on line %d
 
 Warning: imagecreatefromxbm(): "%s" is not a valid XBM file in %s on line %d
 bool(false)
