@@ -156,7 +156,7 @@ namespace {
 
     function zend_terminate_string(string &$str): void {}
 
-    function zend_out_param(?int &$preg_match=null): void {}
+    function zend_out_param(int &$preg_match=null): void {}
 
     function zend_leak_variable(mixed $variable): void {}
 
