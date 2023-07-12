@@ -43,6 +43,8 @@ PHP 8.3 UPGRADE NOTES
     next index is n+1 instead of 0.
   . Static variable initializers can now contain arbitrary expressions.
     RFC: https://wiki.php.net/rfc/arbitrary_static_variable_initializers
+  . Class constant visibility variance is now correctly checked when inherited
+    from interfaces.
 
 - FFI:
   . C functions that have a return type of void now return null instead of
