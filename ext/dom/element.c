@@ -137,6 +137,55 @@ int dom_element_tag_name_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
+/* {{{ className	string
+URL: https://dom.spec.whatwg.org/#dom-element-classname
+Since:
+*/
+int dom_element_class_name_read(dom_object *obj, zval *retval)
+{
+	xmlNodePtr nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		return FAILURE;
+	}
+
+	xmlChar *content = xmlGetNoNsProp(nodep, (const xmlChar *) "class");
+	if (content == NULL) {
+		ZVAL_EMPTY_STRING(retval);
+		return SUCCESS;
+	}
+
+	ZVAL_STRING(retval, (const char *) content);
+	xmlFree(content);
+
+	return SUCCESS;
+}
+
+int dom_element_class_name_write(dom_object *obj, zval *newval)
+{
+	xmlNode *nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		return FAILURE;
+	}
+
+	if (dom_node_is_read_only(nodep) == SUCCESS) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(obj->document));
+		return FAILURE;
+	}
+
+	/* Typed property, so it is a string already */
+	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
+	xmlSetProp(nodep, (const xmlChar *) "class", (const xmlChar *) Z_STRVAL_P(newval));
+
+	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ schemaTypeInfo	typeinfo
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Element-schemaTypeInfo
