@@ -391,6 +391,8 @@ class DOMNode
     public function replaceChild(DOMNode $node, DOMNode $child) {}
 
     public function contains(DOMNode|DOMNameSpaceNode|null $other): bool {}
+
+    public function getRootNode(?array $options = null): DOMNode {}
 }
 
 /** @not-serializable */
