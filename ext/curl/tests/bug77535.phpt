@@ -2,18 +2,14 @@
 Bug #77535 (Invalid callback, h2 server push)
 --EXTENSIONS--
 curl
---XFAIL--
-http2.golang.org/serverpush is gone
 --SKIPIF--
 <?php
-if (getenv("SKIP_ONLINE_TESTS")) {
-    die("skip online test");
-}
+include 'skipif-nocaddy.inc';
+
 $curl_version = curl_version();
-if ($curl_version['version_number'] < 0x073d00) {
-    exit("skip: test may crash with curl < 7.61.0");
+if ($curl_version['version_number'] < 0x080100) {
+    exit("skip: test may crash with curl < 8.1.0");
 }
-die("skip test is slow due to timeout, and XFAILs anyway");
 ?>
 --FILE--
 <?php
@@ -36,7 +32,7 @@ class MyHttpClient
         curl_setopt($this->curl, CURLOPT_HEADER, false);
         curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, false);
         curl_setopt($this->curl, CURLOPT_FAILONERROR, false);
-        curl_setopt($this->curl, CURLOPT_URL, 'https://http2.golang.org/serverpush');
+        curl_setopt($this->curl, CURLOPT_URL, 'https://localhost/serverpush');
         curl_setopt($this->curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
         curl_setopt($this->curl, CURLOPT_HEADERFUNCTION, function ($ch, $data) {
             return \strlen($data);

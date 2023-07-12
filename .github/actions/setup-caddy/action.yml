@@ -1,0 +1,10 @@
+name: Setup Caddy server
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        sudo curl 'https://caddyserver.com/api/download?os=linux&arch=amd64' -o /usr/bin/caddy
+        sudo chmod +x /usr/bin/caddy
+        sudo caddy start --config ext/curl/tests/Caddyfile

@@ -426,10 +426,15 @@ static int php_posix_stream_get_fd(zval *zfp, zend_long *fd) /* {{{ */
 	if (stream == NULL) {
 		return 0;
 	}
-	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)fd, 0);
-	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)fd, 0);
+
+	/* get the fd.
+	 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag when casting.
+	 * It is only used here so that the buffered data warning is not displayed.
+	 */
+	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&fd, 0);
+	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void*)&fd, 0);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not use stream of type '%s'",
 				stream->ops->label);
@@ -511,7 +516,7 @@ PHP_FUNCTION(posix_isatty)
 		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ NULL, /* check_null */ false, /* arg_num */ 1)) {
 			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be of type int|resource, %s given",
 				zend_zval_value_name(z_fd));
-			fd = zval_get_long(z_fd);
+			RETURN_FALSE;
 		}
 	}
 

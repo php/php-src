@@ -7,7 +7,7 @@ Edwin Hoksberg <edwin@edwinhoksberg.nl>
 --FILE--
 <?php
 require "connect.inc";
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 
 foreach([
     LDAP_OPT_X_TLS_NEVER,

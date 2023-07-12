@@ -1198,7 +1198,7 @@ if test "$ac_cv_lib_crypt_crypt" = "yes"; then
   EXTRA_LIBS="-lcrypt $EXTRA_LIBS -lcrypt"
 fi
 
-unset LIBS LDFLAGS
+unset LIBS
 
 dnl PEAR
 dnl ----------------------------------------------------------------------------
@@ -1371,7 +1371,7 @@ if test "$abs_srcdir" != "$abs_builddir"; then
 fi
 
 ZEND_EXTRA_LIBS="$LIBS"
-unset LIBS LDFLAGS
+unset LIBS
 
 PHP_HELP_SEPARATOR([TSRM:])
 PHP_CONFIGURE_PART(Configuring TSRM)

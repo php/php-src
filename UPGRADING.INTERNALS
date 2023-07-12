@@ -67,10 +67,16 @@ PHP 8.3 INTERNALS UPGRADE NOTES
   - zend_set_user_opcode_handler
   - zend_ssa_inference
 * Removed unused macros PHP_FNV1_32A_INIT and PHP_FNV1A_64_INIT. See GH-11114.
+* _php_stream_dirent now has an extra d_type field that is used to store the
+  directory entry type. This can be used to avoid additional stat calls for
+  types when the type is already known.
 
 ========================
 2. Build system changes
 ========================
+
+* LDFLAGS are not unset anymore allowing them to be adjusted e.g.
+  LDFLAGS="..." ./configure
 
 * Removed the HAVE_DEV_URANDOM compile time check.  HAVE_DEV_URANDOM will
   now never be defined. Any checks relying on HAVE_DEV_URANDOM should be
@@ -115,6 +121,7 @@ PHP 8.3 INTERNALS UPGRADE NOTES
  e. ext/spl
    - The PHPAPI spl_iterator_apply() function now returns zend_result instead of int.
      There are no functional changes.
+   - The field _spl_filesystem_object->is_recursive has been removed.
 
  f. ext/dom
    - A new function dom_get_doc_props_read_only() is added to gather the document

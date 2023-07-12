@@ -87,6 +87,16 @@ typedef unsigned short mode_t;
 #else
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
+
+#ifndef DT_UNKNOWN
+# define DT_UNKNOWN 0
+#endif
+#ifndef DT_DIR
+# define DT_DIR 4
+#endif
+#ifndef DT_REG
+# define DT_REG 8
+#endif
 #endif
 
 #define DEFAULT_SLASH '/'

@@ -2,18 +2,14 @@
 Bug #76675 (Segfault with H2 server push write/writeheader handlers)
 --EXTENSIONS--
 curl
---XFAIL--
-http2.golang.org/serverpush is gone
 --SKIPIF--
 <?php
-if (getenv("SKIP_ONLINE_TESTS")) {
-    die("skip online test");
-}
+include 'skipif-nocaddy.inc';
+
 $curl_version = curl_version();
-if ($curl_version['version_number'] < 0x073d00) {
-    exit("skip: test may crash with curl < 7.61.0");
+if ($curl_version['version_number'] < 0x080100) {
+    exit("skip: test may crash with curl < 8.1.0");
 }
-die("skip test is slow due to timeout, and XFAILs anyway");
 ?>
 --FILE--
 <?php
@@ -30,7 +26,7 @@ $mh = curl_multi_init();
 curl_multi_setopt($mh, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 curl_multi_setopt($mh, CURLMOPT_PUSHFUNCTION, $callback);
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, 'https://http2.golang.org/serverpush');
+curl_setopt($ch, CURLOPT_URL, 'https://localhost/serverpush');
 curl_setopt($ch, CURLOPT_HTTP_VERSION, 3);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);

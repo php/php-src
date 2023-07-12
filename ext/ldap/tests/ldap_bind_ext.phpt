@@ -14,7 +14,7 @@ skipifunsupportedcontrol(LDAP_CONTROL_PASSWORDPOLICYREQUEST);
 <?php
 require "connect.inc";
 
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
 
 var_dump(

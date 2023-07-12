@@ -1782,4 +1782,40 @@ PHP_METHOD(DOMNode, getLineNo)
 }
 /* }}} */
 
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-node-contains
+Since:
+*/
+PHP_METHOD(DOMNode, contains)
+{
+	zval *other, *id;
+	xmlNodePtr otherp, thisp;
+	dom_object *unused_intern;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OR_NULL(other)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (other == NULL) {
+		RETURN_FALSE;
+	}
+
+	if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(other), dom_node_class_entry) && !instanceof_function(Z_OBJCE_P(other), dom_namespace_node_class_entry))) {
+		zend_argument_type_error(1, "must be of type DOMNode|DOMNameSpaceNode|null, %s given", zend_zval_value_name(other));
+		RETURN_THROWS();
+	}
+
+	DOM_GET_OBJ(otherp, other, xmlNodePtr, unused_intern);
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, unused_intern);
+
+	do {
+		if (otherp == thisp) {
+			RETURN_TRUE;
+		}
+		otherp = otherp->parent;
+	} while (otherp);
+
+	RETURN_FALSE;
+}
+/* }}} */
+
 #endif

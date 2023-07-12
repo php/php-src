@@ -99,6 +99,26 @@ static void zend_compile_expr(znode *result, zend_ast *ast);
 static void zend_compile_stmt(zend_ast *ast);
 static void zend_compile_assign(znode *result, zend_ast *ast);
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+zend_never_inline static void zend_stack_limit_error(void)
+{
+	zend_error_noreturn(E_COMPILE_ERROR,
+		"Maximum call stack size of %zu bytes reached during compilation. Try splitting expression",
+		(size_t) ((uintptr_t) EG(stack_base) - (uintptr_t) EG(stack_limit)));
+}
+
+static void zend_check_stack_limit(void)
+{
+	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
+		zend_stack_limit_error();
+	}
+}
+#else /* ZEND_CHECK_STACK_LIMIT */
+static void zend_check_stack_limit(void)
+{
+}
+#endif /* ZEND_CHECK_STACK_LIMIT */
+
 static void init_op(zend_op *op)
 {
 	MAKE_NOP(op);
@@ -4203,10 +4223,6 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 		zend_op *opline;
 		uint32_t check_op_number = get_next_op_number();
 
-		/* Assert expression may not be memoized and reused as it may not actually be evaluated. */
-		int orig_memoize_mode = CG(memoize_mode);
-		CG(memoize_mode) = ZEND_MEMOIZE_NONE;
-
 		zend_emit_op(NULL, ZEND_ASSERT_CHECK, NULL, NULL);
 
 		if (fbc && fbc_is_finalized(fbc)) {
@@ -4240,8 +4256,6 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 		opline = &CG(active_op_array)->opcodes[check_op_number];
 		opline->op2.opline_num = get_next_op_number();
 		SET_NODE(opline->result, result);
-
-		CG(memoize_mode) = orig_memoize_mode;
 	} else {
 		if (!fbc) {
 			zend_string_release_ex(name, 0);
@@ -4573,7 +4587,14 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		if (runtime_resolution) {
 			if (zend_string_equals_literal_ci(zend_ast_get_str(name_ast), "assert")
 					&& !is_callable_convert) {
-				zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL, ast->lineno);
+				if (CG(memoize_mode) == ZEND_MEMOIZE_NONE) {
+					zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL, ast->lineno);
+				} else {
+					/* We want to always memoize assert calls, even if they are positioned in
+					 * write-context. This prevents memoizing their arguments that might not be
+					 * evaluated if assertions are disabled, using a TMPVAR that wasn't initialized. */
+					zend_compile_memoized_expr(result, ast);
+				}
 			} else {
 				zend_compile_ns_call(result, &name_node, args_ast, ast->lineno);
 			}
@@ -4592,7 +4613,14 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 		/* Special assert() handling should apply independently of compiler flags. */
 		if (fbc && zend_string_equals_literal(lcname, "assert") && !is_callable_convert) {
-			zend_compile_assert(result, zend_ast_get_list(args_ast), lcname, fbc, ast->lineno);
+			if (CG(memoize_mode) == ZEND_MEMOIZE_NONE) {
+				zend_compile_assert(result, zend_ast_get_list(args_ast), lcname, fbc, ast->lineno);
+			} else {
+				/* We want to always memoize assert calls, even if they are positioned in
+				 * write-context. This prevents memoizing their arguments that might not be
+				 * evaluated if assertions are disabled, using a TMPVAR that wasn't initialized. */
+				zend_compile_memoized_expr(result, ast);
+			}
 			zend_string_release(lcname);
 			zval_ptr_dtor(&name_node.u.constant);
 			return;
@@ -7593,7 +7621,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 		zend_compile_closure_uses(uses_ast);
 	}
 
-	if (ast->kind == ZEND_AST_ARROW_FUNC) {
+	if (ast->kind == ZEND_AST_ARROW_FUNC && decl->child[2]->kind != ZEND_AST_RETURN) {
 		bool needs_return = true;
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			zend_arg_info *return_info = CG(active_op_array)->arg_info - 1;
@@ -10550,13 +10578,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 
 static void zend_compile_expr(znode *result, zend_ast *ast)
 {
-#ifdef ZEND_CHECK_STACK_LIMIT
-	if (UNEXPECTED(zend_call_stack_overflowed(EG(stack_limit)))) {
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"Maximum call stack size of %zu bytes reached during compilation. Try splitting expression",
-			(size_t) ((uintptr_t) EG(stack_base) - (uintptr_t) EG(stack_limit)));
-	}
-#endif /* ZEND_CHECK_STACK_LIMIT */
+	zend_check_stack_limit();
 
 	uint32_t checkpoint = zend_short_circuiting_checkpoint();
 	zend_compile_expr_inner(result, ast);
@@ -10641,6 +10663,8 @@ static void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 	if (!ast) {
 		return;
 	}
+
+	zend_check_stack_limit();
 
 	switch (ast->kind) {
 		case ZEND_AST_BINARY_OP:
