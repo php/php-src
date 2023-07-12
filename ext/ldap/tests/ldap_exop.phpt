@@ -41,7 +41,12 @@ var_dump(
     ldap_exop($link, LDAP_EXOP_WHO_AM_I, NULL, NULL, $retdata, $retoid),
     $retdata,
     $retoid,
+    ldap_exop_sync($link, LDAP_EXOP_WHO_AM_I, NULL, NULL, $retdata, $retoid),
+    $retdata,
+    $retoid,
     ldap_exop($link, LDAP_EXOP_WHO_AM_I, NULL, [['oid' => LDAP_CONTROL_PROXY_AUTHZ, 'value' => "dn:cn=userA,$base"]], $retdata),
+    $retdata,
+    ldap_exop_sync($link, LDAP_EXOP_WHO_AM_I, NULL, [['oid' => LDAP_CONTROL_PROXY_AUTHZ, 'value' => "dn:cn=userA,$base"]], $retdata),
     $retdata,
     $r = ldap_exop($link, LDAP_EXOP_WHO_AM_I),
     ldap_parse_exop($link, $r, $retdata2),
@@ -66,6 +71,11 @@ remove_dummy_data($link, $base);
 bool(true)
 string(%d) "dn:%s"
 string(0) ""
+bool(true)
+string(%d) "dn:%s"
+string(0) ""
+bool(true)
+string(%d) "dn:cn=user%s"
 bool(true)
 string(%d) "dn:cn=user%s"
 object(LDAP\Result)#%d (0) {

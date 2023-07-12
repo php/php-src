@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 63ed5b30556367b8ce48a421a85b92ecf41413b7 */
+ * Stub hash: fec87d81c21ac5d56e62a5e0b4bbe673ea76edd5 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -316,6 +316,17 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_exop, 0, 2, LDAP\\Resul
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_exop_sync, 0, 2, LDAP\\Result, MAY_BE_BOOL)
+	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
+	ZEND_ARG_TYPE_INFO(0, request_oid, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, request_data, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "NULL")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, response_data, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, response_oid, "null")
+ZEND_END_ARG_INFO()
+#endif
+
 #if defined(HAVE_LDAP_PASSWD)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_exop_passwd, 0, 1, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
@@ -438,6 +449,9 @@ ZEND_FUNCTION(ldap_8859_to_t61);
 #if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 ZEND_FUNCTION(ldap_exop);
 #endif
+#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
+ZEND_FUNCTION(ldap_exop_sync);
+#endif
 #if defined(HAVE_LDAP_PASSWD)
 ZEND_FUNCTION(ldap_exop_passwd);
 #endif
@@ -543,6 +557,9 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 	ZEND_FE(ldap_exop, arginfo_ldap_exop)
+#endif
+#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
+	ZEND_FE(ldap_exop_sync, arginfo_ldap_exop_sync)
 #endif
 #if defined(HAVE_LDAP_PASSWD)
 	ZEND_FE(ldap_exop_passwd, arginfo_ldap_exop_passwd)

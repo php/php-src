@@ -3883,9 +3883,7 @@ PHP_FUNCTION(ldap_8859_to_t61)
 
 /* {{{ Extended operations, Pierangelo Masarati */
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
-/* {{{ Extended operation */
-PHP_FUNCTION(ldap_exop)
-{
+static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 	zval *serverctrls = NULL;
 	zval *link, *retdata = NULL, *retoid = NULL;
 	char *lretoid = NULL;
@@ -3919,7 +3917,7 @@ PHP_FUNCTION(ldap_exop)
 		}
 	}
 
-	if (retdata) {
+	if (force_sync || retdata) {
 		/* synchronous call */
 		rc = ldap_extended_operation_s(ld->link, ZSTR_VAL(reqoid),
 			lreqdata.bv_len > 0 ? &lreqdata: NULL,
@@ -3978,12 +3976,23 @@ PHP_FUNCTION(ldap_exop)
 	result = Z_LDAP_RESULT_P(return_value);
 	result->result = ldap_res;
 
-	cleanup:
+cleanup:
 	if (lserverctrls) {
 		_php_ldap_controls_free(&lserverctrls);
 	}
 }
+
+/* {{{ Extended operation */
+PHP_FUNCTION(ldap_exop)
+{
+	php_ldap_exop(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
 /* }}} */
+
+PHP_FUNCTION(ldap_exop_sync)
+{
+	php_ldap_exop(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
 #endif
 
 #ifdef HAVE_LDAP_PASSWD
