@@ -30,6 +30,28 @@
 * Since:
 */
 
+zend_string *dom_node_concatenated_name_helper(size_t name_len, const char *name, size_t prefix_len, const char *prefix)
+{
+	if (UNEXPECTED(prefix_len > ZSTR_MAX_LEN / 2 - 1 || name_len > ZSTR_MAX_LEN / 2 - 1)) {
+		return zend_empty_string;
+	}
+	zend_string *str = zend_string_alloc(prefix_len + 1 + name_len, false);
+	memcpy(ZSTR_VAL(str), prefix, prefix_len);
+	ZSTR_VAL(str)[prefix_len] = ':';
+	memcpy(ZSTR_VAL(str) + prefix_len + 1, name, name_len + 1 /* include \0 */);
+	return str;
+}
+
+zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep)
+{
+	size_t name_len = strlen((const char *) nodep->name);
+	if (nodep->ns != NULL && nodep->ns->prefix != NULL) {
+		return dom_node_concatenated_name_helper(name_len, (const char *) nodep->name, strlen((const char *) nodep->ns->prefix), (const char *) nodep->ns->prefix);
+	} else {
+		return zend_string_init((const char *) nodep->name, name_len, false);
+	}
+}
+
 /* {{{ nodeName	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D095
@@ -37,12 +59,7 @@ Since:
 */
 int dom_node_node_name_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep;
-	xmlNsPtr ns;
-	char *str = NULL;
-	xmlChar *qname = NULL;
-
-	nodep = dom_object_get_node(obj);
+	xmlNode *nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
@@ -52,66 +69,49 @@ int dom_node_node_name_read(dom_object *obj, zval *retval)
 	switch (nodep->type) {
 		case XML_ATTRIBUTE_NODE:
 		case XML_ELEMENT_NODE:
-			ns = nodep->ns;
+			ZVAL_STR(retval, dom_node_get_node_name_attribute_or_element(nodep));
+			break;
+		case XML_NAMESPACE_DECL: {
+			xmlNsPtr ns = nodep->ns;
 			if (ns != NULL && ns->prefix) {
-				qname = xmlStrdup(ns->prefix);
+				xmlChar *qname = xmlStrdup((xmlChar *) "xmlns");
 				qname = xmlStrcat(qname, (xmlChar *) ":");
 				qname = xmlStrcat(qname, nodep->name);
-				str = (char *) qname;
+				ZVAL_STRING(retval, (const char *) qname);
+				xmlFree(qname);
 			} else {
-				str = (char *) nodep->name;
+				ZVAL_STRING(retval, (const char *) nodep->name);
 			}
 			break;
-		case XML_NAMESPACE_DECL:
-			ns = nodep->ns;
-			if (ns != NULL && ns->prefix) {
-				qname = xmlStrdup((xmlChar *) "xmlns");
-				qname = xmlStrcat(qname, (xmlChar *) ":");
-				qname = xmlStrcat(qname, nodep->name);
-				str = (char *) qname;
-			} else {
-				str = (char *) nodep->name;
-			}
-			break;
+		}
 		case XML_DOCUMENT_TYPE_NODE:
 		case XML_DTD_NODE:
 		case XML_PI_NODE:
 		case XML_ENTITY_DECL:
 		case XML_ENTITY_REF_NODE:
 		case XML_NOTATION_NODE:
-			str = (char *) nodep->name;
+			ZVAL_STRING(retval, (char *) nodep->name);
 			break;
 		case XML_CDATA_SECTION_NODE:
-			str = "#cdata-section";
+			ZVAL_STRING(retval, "#cdata-section");
 			break;
 		case XML_COMMENT_NODE:
-			str = "#comment";
+			ZVAL_STRING(retval, "#comment");
 			break;
 		case XML_HTML_DOCUMENT_NODE:
 		case XML_DOCUMENT_NODE:
-			str = "#document";
+			ZVAL_STRING(retval, "#document");
 			break;
 		case XML_DOCUMENT_FRAG_NODE:
-			str = "#document-fragment";
+			ZVAL_STRING(retval, "#document-fragment");
 			break;
 		case XML_TEXT_NODE:
-			str = "#text";
+			ZVAL_STRING(retval, "#text");
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
-	if (str != NULL) {
-		ZVAL_STRING(retval, str);
-	} else {
-		ZVAL_EMPTY_STRING(retval);
-	}
-
-	if (qname != NULL) {
-		xmlFree(qname);
-	}
-
 	return SUCCESS;
-
 }
 
 /* }}} */
