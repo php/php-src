@@ -1,6 +1,5 @@
 --TEST--
 Bug GH-11600: Intl patterns are not parseable DateTime Strings
---XFAIL--
 --EXTENSIONS--
 intl
 --INI--
@@ -12,7 +11,7 @@ $pattern = $formatter->getPattern();
 
 $timeString = $formatter->format(strtotime('2023-07-11 16:02'));
 
-$timestamp = strtotime($timeString);
+$timestamp = strtotime("2023-07-11 {$timeString}");
 
 var_dump($pattern, $timeString, $timestamp);
 ?>
