@@ -1394,6 +1394,9 @@ static inheritance_status class_constant_types_compatible(const zend_class_const
 	return zend_perform_covariant_type_check(child->ce, child->type, parent->ce, parent->type);
 }
 
+static bool do_inherit_constant_check(
+	zend_class_entry *ce, zend_class_constant *parent_constant, zend_string *name);
+
 static void do_inherit_class_constant(zend_string *name, zend_class_constant *parent_const, zend_class_entry *ce) /* {{{ */
 {
 	zval *zv = zend_hash_find_known_hash(&ce->constants_table, name);
@@ -1411,21 +1414,8 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 			);
 		}
 
-		if (UNEXPECTED((ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_FINAL))) {
-			zend_error_noreturn(
-				E_COMPILE_ERROR, "%s::%s cannot override final constant %s::%s",
-				ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(parent_const->ce->name), ZSTR_VAL(name)
-			);
-		}
-
-		if (!(ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PRIVATE) && UNEXPECTED(ZEND_TYPE_IS_SET(parent_const->type))) {
-			inheritance_status status = class_constant_types_compatible(parent_const, c);
-			if (status == INHERITANCE_ERROR) {
-				emit_incompatible_class_constant_error(c, parent_const, name);
-			} else if (status == INHERITANCE_UNRESOLVED) {
-				add_class_constant_compatibility_obligation(ce, c, parent_const, name);
-			}
-		}
+		bool inherit = do_inherit_constant_check(ce, parent_const, name);
+		ZEND_ASSERT(!inherit);
 	} else if (!(ZEND_CLASS_CONST_FLAGS(parent_const) & ZEND_ACC_PRIVATE)) {
 		if (Z_TYPE(parent_const->value) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
@@ -1718,6 +1708,7 @@ static zend_always_inline bool check_trait_property_or_constant_value_compatibil
 }
 /* }}} */
 
+/** @return bool Returns true if the class constant should be inherited, i.e. whether it doesn't already exist. */
 static bool do_inherit_constant_check(
 	zend_class_entry *ce, zend_class_constant *parent_constant, zend_string *name
 ) {
@@ -1726,21 +1717,31 @@ static bool do_inherit_constant_check(
 		return true;
 	}
 
-	zend_class_constant *old_constant = Z_PTR_P(zv);
-	if (parent_constant->ce != old_constant->ce && (ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_FINAL)) {
+	zend_class_constant *child_constant = Z_PTR_P(zv);
+	if (parent_constant->ce != child_constant->ce && (ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_FINAL)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "%s::%s cannot override final constant %s::%s",
-			ZSTR_VAL(old_constant->ce->name), ZSTR_VAL(name),
+			ZSTR_VAL(child_constant->ce->name), ZSTR_VAL(name),
 			ZSTR_VAL(parent_constant->ce->name), ZSTR_VAL(name)
 		);
 	}
 
-	if (old_constant->ce != parent_constant->ce && old_constant->ce != ce) {
+	if (child_constant->ce != parent_constant->ce && child_constant->ce != ce) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"%s %s inherits both %s::%s and %s::%s, which is ambiguous",
 			zend_get_object_type_uc(ce),
 			ZSTR_VAL(ce->name),
-			ZSTR_VAL(old_constant->ce->name), ZSTR_VAL(name),
+			ZSTR_VAL(child_constant->ce->name), ZSTR_VAL(name),
 			ZSTR_VAL(parent_constant->ce->name), ZSTR_VAL(name));
+	}
+
+
+	if (!(ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_PRIVATE) && UNEXPECTED(ZEND_TYPE_IS_SET(parent_constant->type))) {
+		inheritance_status status = class_constant_types_compatible(parent_constant, child_constant);
+		if (status == INHERITANCE_ERROR) {
+			emit_incompatible_class_constant_error(child_constant, parent_constant, name);
+		} else if (status == INHERITANCE_UNRESOLVED) {
+			add_class_constant_compatibility_obligation(ce, child_constant, parent_constant, name);
+		}
 	}
 
 	return false;
