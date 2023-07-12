@@ -28,6 +28,7 @@ PHP                                                                        NEWS
   . Added DOMNode::isConnected and DOMNameSpaceNode::isConnected. (nielsdos)
   . Added DOMNode::parentElement and DOMNameSpaceNode::parentElement.
     (nielsdos)
+  . Added DOMNode::isEqualNode(). (nielsdos)
 
 - FPM:
   . Added warning to log when fpm socket was not registered on the expected

@@ -1471,6 +1471,155 @@ PHP_METHOD(DOMNode, isSameNode)
 }
 /* }}} end dom_node_is_same_node */
 
+static bool php_dom_node_is_content_equal(const xmlNode *this, const xmlNode *other)
+{
+	xmlChar *this_content = xmlNodeGetContent(this);
+	xmlChar *other_content = xmlNodeGetContent(other);
+	bool result = xmlStrEqual(this_content, other_content);
+	xmlFree(this_content);
+	xmlFree(other_content);
+	return result;
+}
+
+static bool php_dom_node_is_ns_uri_equal(const xmlNode *this, const xmlNode *other)
+{
+	const xmlChar *this_ns = this->ns ? this->ns->href : NULL;
+	const xmlChar *other_ns = other->ns ? other->ns->href : NULL;
+	return xmlStrEqual(this_ns, other_ns);
+}
+
+static bool php_dom_node_is_ns_prefix_equal(const xmlNode *this, const xmlNode *other)
+{
+	const xmlChar *this_ns = this->ns ? this->ns->prefix : NULL;
+	const xmlChar *other_ns = other->ns ? other->ns->prefix : NULL;
+	return xmlStrEqual(this_ns, other_ns);
+}
+
+static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other);
+
+#define PHP_DOM_FUNC_CAT(prefix, suffix) prefix##_##suffix
+/* xmlNode and xmlNs have incompatible struct layouts, i.e. the next field is in a different offset */
+#define PHP_DOM_DEFINE_LIST_EQUALITY_HELPER(type)																\
+	static size_t PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(const type *node)						\
+	{																											\
+		size_t counter = 0;																						\
+		while (node) {																							\
+			counter++;																							\
+			node = node->next;																					\
+		}																										\
+		return counter;																							\
+	}																											\
+	static bool PHP_DOM_FUNC_CAT(php_dom_node_list_equality_check, type)(const type *list1, const type *list2)	\
+	{																											\
+		size_t count = PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list1);								\
+		if (count != PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list2)) {								\
+			return false;																						\
+		}																										\
+		for (size_t i = 0; i < count; i++) {																	\
+			if (!php_dom_node_is_equal_node((const xmlNode *) list1, (const xmlNode *) list2)) {				\
+				return false;																					\
+			}																									\
+			list1 = list1->next;																				\
+			list2 = list2->next;																				\
+		}																										\
+		return true;																							\
+	}
+PHP_DOM_DEFINE_LIST_EQUALITY_HELPER(xmlNode)
+PHP_DOM_DEFINE_LIST_EQUALITY_HELPER(xmlNs)
+
+static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other)
+{
+	ZEND_ASSERT(this != NULL);
+	ZEND_ASSERT(other != NULL);
+
+	if (this->type != other->type) {
+		return false;
+	}
+
+	/* Notes:
+	 *   - XML_DOCUMENT_TYPE_NODE is no longer created by libxml2, we only have to support XML_DTD_NODE.
+	 *   - element and attribute declarations are not exposed as nodes in DOM, so no comparison is needed for those. */
+	if (this->type == XML_ELEMENT_NODE) {
+		return xmlStrEqual(this->name, other->name)
+			&& php_dom_node_is_ns_prefix_equal(this, other)
+			&& php_dom_node_is_ns_uri_equal(this, other)
+			/* Check attributes first, then namespace declarations, then children */
+			&& php_dom_node_list_equality_check_xmlNode((const xmlNode *) this->properties, (const xmlNode *) other->properties)
+			&& php_dom_node_list_equality_check_xmlNs(this->nsDef, other->nsDef)
+			&& php_dom_node_list_equality_check_xmlNode(this->children, other->children);
+	} else if (this->type == XML_DTD_NODE) {
+		/* Note: in the living spec entity declarations and notations are no longer compared because they're considered obsolete. */
+		const xmlDtd *this_dtd = (const xmlDtd *) this;
+		const xmlDtd *other_dtd = (const xmlDtd *) other;
+		return xmlStrEqual(this_dtd->name, other_dtd->name)
+			&& xmlStrEqual(this_dtd->ExternalID, other_dtd->ExternalID)
+			&& xmlStrEqual(this_dtd->SystemID, other_dtd->SystemID);
+	} else if (this->type == XML_PI_NODE) {
+		return xmlStrEqual(this->name, other->name) && xmlStrEqual(this->content, other->content);
+	} else if (this->type == XML_TEXT_NODE || this->type == XML_COMMENT_NODE || this->type == XML_CDATA_SECTION_NODE) {
+		return xmlStrEqual(this->content, other->content);
+	} else if (this->type == XML_ATTRIBUTE_NODE) {
+		const xmlAttr *this_attr = (const xmlAttr *) this;
+		const xmlAttr *other_attr = (const xmlAttr *) other;
+		return xmlStrEqual(this_attr->name, other_attr->name)
+			&& php_dom_node_is_ns_uri_equal(this, other)
+			&& php_dom_node_is_content_equal(this, other);
+	} else if (this->type == XML_ENTITY_REF_NODE) {
+		return xmlStrEqual(this->name, other->name);
+	} else if (this->type == XML_ENTITY_DECL || this->type == XML_NOTATION_NODE || this->type == XML_ENTITY_NODE) {
+		const xmlEntity *this_entity = (const xmlEntity *) this;
+		const xmlEntity *other_entity = (const xmlEntity *) other;
+		return this_entity->etype == other_entity->etype
+			&& xmlStrEqual(this_entity->name, other_entity->name)
+			&& xmlStrEqual(this_entity->ExternalID, other_entity->ExternalID)
+			&& xmlStrEqual(this_entity->SystemID, other_entity->SystemID)
+			&& php_dom_node_is_content_equal(this, other);
+	} else if (this->type == XML_NAMESPACE_DECL) {
+		const xmlNs *this_ns = (const xmlNs *) this;
+		const xmlNs *other_ns = (const xmlNs *) other;
+		return xmlStrEqual(this_ns->prefix, other_ns->prefix) && xmlStrEqual(this_ns->href, other_ns->href);
+	} else if (this->type == XML_DOCUMENT_FRAG_NODE || this->type == XML_HTML_DOCUMENT_NODE || this->type == XML_DOCUMENT_NODE) {
+		return php_dom_node_list_equality_check_xmlNode(this->children, other->children);
+	}
+
+	return false;
+}
+
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-node-isequalnode (for everything still in the living spec)
+*      URL: https://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/DOM3-Core.html#core-Node3-isEqualNode (for old nodes removed from the living spec)
+Since: DOM Level 3
+*/
+PHP_METHOD(DOMNode, isEqualNode)
+{
+	zval *id, *node;
+	xmlNodePtr otherp, nodep;
+	dom_object *unused_intern;
+
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O!", &node, dom_node_class_entry) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (node == NULL) {
+		RETURN_FALSE;
+	}
+
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, unused_intern);
+	DOM_GET_OBJ(otherp, node, xmlNodePtr, unused_intern);
+
+	if (nodep == otherp) {
+		RETURN_TRUE;
+	}
+
+	/* Empty fragments/documents only match if they're both empty */
+	if (UNEXPECTED(nodep == NULL || otherp == NULL)) {
+		RETURN_BOOL(nodep == NULL && otherp == NULL);
+	}
+
+	RETURN_BOOL(php_dom_node_is_equal_node(nodep, otherp));
+}
+/* }}} end DOMNode::isEqualNode */
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-lookupNamespacePrefix
 Since: DOM Level 3
 */

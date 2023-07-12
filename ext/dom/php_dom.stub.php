@@ -381,6 +381,8 @@ class DOMNode
     /** @tentative-return-type */
     public function isSameNode(DOMNode $otherNode): bool {}
 
+    public function isEqualNode(?DOMNode $otherNode): bool {}
+
     /** @tentative-return-type */
     public function isSupported(string $feature, string $version): bool {}
 

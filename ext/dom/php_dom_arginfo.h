@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 02e8c582a3a7d88fc32ef8931c23c0c6de5a94e2 */
+ * Stub hash: 7070b07b2dee16222242b7e516372a6562d87036 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -75,6 +75,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_isSameNode, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, otherNode, DOMNode, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_isEqualNode, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, otherNode, DOMNode, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_isSupported, 0, 2, _IS_BOOL, 0)
@@ -525,6 +529,7 @@ ZEND_METHOD(DOMNode, hasChildNodes);
 ZEND_METHOD(DOMNode, insertBefore);
 ZEND_METHOD(DOMNode, isDefaultNamespace);
 ZEND_METHOD(DOMNode, isSameNode);
+ZEND_METHOD(DOMNode, isEqualNode);
 ZEND_METHOD(DOMNode, isSupported);
 ZEND_METHOD(DOMNode, lookupNamespaceURI);
 ZEND_METHOD(DOMNode, lookupPrefix);
@@ -713,6 +718,7 @@ static const zend_function_entry class_DOMNode_methods[] = {
 	ZEND_ME(DOMNode, insertBefore, arginfo_class_DOMNode_insertBefore, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, isDefaultNamespace, arginfo_class_DOMNode_isDefaultNamespace, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, isSameNode, arginfo_class_DOMNode_isSameNode, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNode, isEqualNode, arginfo_class_DOMNode_isEqualNode, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, isSupported, arginfo_class_DOMNode_isSupported, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, lookupNamespaceURI, arginfo_class_DOMNode_lookupNamespaceURI, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, lookupPrefix, arginfo_class_DOMNode_lookupPrefix, ZEND_ACC_PUBLIC)
