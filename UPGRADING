@@ -242,6 +242,7 @@ PHP 8.3 UPGRADE NOTES
 
 - DOM:
   . Added DOMNode::contains() and DOMNameSpaceNode::contains().
+  . Added DOMElement::getAttributeNames().
 
 - JSON:
   . Added json_validate(), which returns whether the json is valid for

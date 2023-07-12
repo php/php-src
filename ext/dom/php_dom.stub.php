@@ -563,6 +563,8 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
     /** @tentative-return-type */
     public function getAttribute(string $qualifiedName): string {}
 
+    public function getAttributeNames(): array {}
+
     /** @tentative-return-type */
     public function getAttributeNS(?string $namespace, string $localName): string {}
 

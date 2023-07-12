@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fd3acd731f178c2f1034b206b46d53c236823b9f */
+ * Stub hash: e3efd06d963e7a29d9869b7204133ccc8a22bf3b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -191,6 +191,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_getAttribute, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_getAttributeNames, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_getAttributeNS, 0, 2, IS_STRING, 0)
@@ -541,6 +544,7 @@ ZEND_METHOD(DOMAttr, __construct);
 ZEND_METHOD(DOMAttr, isId);
 ZEND_METHOD(DOMElement, __construct);
 ZEND_METHOD(DOMElement, getAttribute);
+ZEND_METHOD(DOMElement, getAttributeNames);
 ZEND_METHOD(DOMElement, getAttributeNS);
 ZEND_METHOD(DOMElement, getAttributeNode);
 ZEND_METHOD(DOMElement, getAttributeNodeNS);
@@ -758,6 +762,7 @@ static const zend_function_entry class_DOMAttr_methods[] = {
 static const zend_function_entry class_DOMElement_methods[] = {
 	ZEND_ME(DOMElement, __construct, arginfo_class_DOMElement___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, getAttribute, arginfo_class_DOMElement_getAttribute, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMElement, getAttributeNames, arginfo_class_DOMElement_getAttributeNames, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, getAttributeNS, arginfo_class_DOMElement_getAttributeNS, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, getAttributeNode, arginfo_class_DOMElement_getAttributeNode, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, getAttributeNodeNS, arginfo_class_DOMElement_getAttributeNodeNS, ZEND_ACC_PUBLIC)
