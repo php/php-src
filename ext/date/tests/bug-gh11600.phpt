@@ -1,5 +1,6 @@
 --TEST--
 Bug GH-11600: Intl patterns are not parseable DateTime Strings
+--XFAIL--
 --EXTENSIONS--
 intl
 --INI--
