@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Added zend_call_stack_get implementation for OpenBSD. (David Carlier)
   . Fixed oss-fuzz #60411 (Fix double-compilation of arrow-functions). (ilutov)
 
+- Intl:
+  . Fix memory leak in MessageFormatter::format() on failure. (Girgias)
+
 - LDAP:
   . Deprecate calling ldap_connect() with separate hostname and port.
     (heiglandreas)
