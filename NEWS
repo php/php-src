@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - DOM:
   . Added DOMNode::contains() and DOMNameSpaceNode::contains(). (nielsdos)
   . Added DOMElement::getAttributeNames(). (nielsdos)
+  . Added DOMNode::getRootNode(). (nielsdos)
 
 - Intl:
   . Fix memory leak in MessageFormatter::format() on failure. (Girgias)

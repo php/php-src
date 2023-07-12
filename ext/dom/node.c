@@ -1818,4 +1818,30 @@ PHP_METHOD(DOMNode, contains)
 }
 /* }}} */
 
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-node-getrootnode
+Since:
+*/
+PHP_METHOD(DOMNode, getRootNode)
+{
+	zval *id;
+	xmlNodePtr thisp;
+	dom_object *intern;
+	/* Unused now because we don't support the shadow DOM nodes. Options only influence shadow DOM nodes. */
+	zval *options = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a!", &options) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
+
+	while (thisp->parent) {
+		thisp = thisp->parent;
+	}
+
+	int ret;
+	DOM_RET_OBJ(thisp, &ret, intern);
+}
+/* }}} */
+
 #endif

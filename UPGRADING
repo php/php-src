@@ -243,6 +243,9 @@ PHP 8.3 UPGRADE NOTES
 - DOM:
   . Added DOMNode::contains() and DOMNameSpaceNode::contains().
   . Added DOMElement::getAttributeNames().
+  . Added DOMNode::getRootNode(). The $options argument does nothing at the
+    moment because it only influences the shadow DOM, which we do not support
+    yet.
 
 - JSON:
   . Added json_validate(), which returns whether the json is valid for
