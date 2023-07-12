@@ -87,7 +87,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent);
 static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 static void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
-static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
+static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type, bool nullable_row);
 static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS,int entry_type);
 
 static ssize_t php_pgsql_fd_write(php_stream *stream, const char *buf, size_t count);
