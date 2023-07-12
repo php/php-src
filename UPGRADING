@@ -252,6 +252,8 @@ PHP 8.3 UPGRADE NOTES
   . Added DOMNode::getRootNode(). The $options argument does nothing at the
     moment because it only influences the shadow DOM, which we do not support
     yet.
+  . Added DOMElement::className. This is not binary-safe at the moment
+    because of underlying limitations of libxml2.
 
 - JSON:
   . Added json_validate(), which returns whether the json is valid for

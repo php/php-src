@@ -71,6 +71,8 @@ int dom_documenttype_internal_subset_read(dom_object *obj, zval *retval);
 
 /* element properties */
 int dom_element_tag_name_read(dom_object *obj, zval *retval);
+int dom_element_class_name_read(dom_object *obj, zval *retval);
+int dom_element_class_name_write(dom_object *obj, zval *newval);
 int dom_element_schema_type_info_read(dom_object *obj, zval *retval);
 
 /* entity properties */
