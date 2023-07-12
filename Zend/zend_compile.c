@@ -4095,10 +4095,6 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 		zend_op *opline;
 		uint32_t check_op_number = get_next_op_number();
 
-		/* Assert expression may not be memoized and reused as it may not actually be evaluated. */
-		int orig_memoize_mode = CG(memoize_mode);
-		CG(memoize_mode) = ZEND_MEMOIZE_NONE;
-
 		zend_emit_op(NULL, ZEND_ASSERT_CHECK, NULL, NULL);
 
 		if (fbc && fbc_is_finalized(fbc)) {
@@ -4132,8 +4128,6 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 		opline = &CG(active_op_array)->opcodes[check_op_number];
 		opline->op2.opline_num = get_next_op_number();
 		SET_NODE(opline->result, result);
-
-		CG(memoize_mode) = orig_memoize_mode;
 	} else {
 		if (!fbc) {
 			zend_string_release_ex(name, 0);
@@ -4465,7 +4459,14 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		if (runtime_resolution) {
 			if (zend_string_equals_literal_ci(zend_ast_get_str(name_ast), "assert")
 					&& !is_callable_convert) {
-				zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL, ast->lineno);
+				if (CG(memoize_mode) == ZEND_MEMOIZE_NONE) {
+					zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL, ast->lineno);
+				} else {
+					/* We want to always memoize assert calls, even if they are positioned in
+					 * write-context. This prevents memoizing their arguments that might not be
+					 * evaluated if assertions are disabled, using a TMPVAR that wasn't initialized. */
+					zend_compile_memoized_expr(result, ast);
+				}
 			} else {
 				zend_compile_ns_call(result, &name_node, args_ast, ast->lineno);
 			}
@@ -4484,7 +4485,14 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 		/* Special assert() handling should apply independently of compiler flags. */
 		if (fbc && zend_string_equals_literal(lcname, "assert") && !is_callable_convert) {
-			zend_compile_assert(result, zend_ast_get_list(args_ast), lcname, fbc, ast->lineno);
+			if (CG(memoize_mode) == ZEND_MEMOIZE_NONE) {
+				zend_compile_assert(result, zend_ast_get_list(args_ast), lcname, fbc, ast->lineno);
+			} else {
+				/* We want to always memoize assert calls, even if they are positioned in
+				 * write-context. This prevents memoizing their arguments that might not be
+				 * evaluated if assertions are disabled, using a TMPVAR that wasn't initialized. */
+				zend_compile_memoized_expr(result, ast);
+			}
 			zend_string_release(lcname);
 			zval_ptr_dtor(&name_node.u.constant);
 			return;
