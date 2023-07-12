@@ -1694,6 +1694,7 @@ PHP_FUNCTION(pg_fetch_result)
 	zval *result;
 	zend_string *field_name;
 	zend_long row, field_offset;
+	bool row_is_null = false;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int pgsql_row;
@@ -1706,7 +1707,11 @@ PHP_FUNCTION(pg_fetch_result)
 	} else {
 		ZEND_PARSE_PARAMETERS_START(3, 3)
 			Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
-			Z_PARAM_LONG(row)
+			if (zend_string_equals_literal(EG(current_execute_data)->func->common.function_name, "pg_result")) {
+				Z_PARAM_LONG(row)
+			} else {
+				Z_PARAM_LONG_OR_NULL(row, row_is_null)
+			}
 			Z_PARAM_STR_OR_LONG(field_name, field_offset)
 		ZEND_PARSE_PARAMETERS_END();
 	}
@@ -1715,7 +1720,7 @@ PHP_FUNCTION(pg_fetch_result)
 	CHECK_PGSQL_RESULT(pg_result);
 	pgsql_result = pg_result->result;
 
-	if (ZEND_NUM_ARGS() == 2) {
+	if (ZEND_NUM_ARGS() == 2 || row_is_null) {
 		if (pg_result->row < 0) {
 			pg_result->row = 0;
 		}
@@ -1995,11 +2000,12 @@ PHP_FUNCTION(pg_result_seek)
 #define PHP_PG_DATA_ISNULL 2
 
 /* {{{ php_pgsql_data_info */
-static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
+static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type, bool nullable_row)
 {
 	zval *result;
 	zend_string *field_name;
 	zend_long row, field_offset;
+	bool row_is_null = false;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 	int pgsql_row;
@@ -2012,7 +2018,11 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	} else {
 		ZEND_PARSE_PARAMETERS_START(3, 3)
 			Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
-			Z_PARAM_LONG(row)
+			if (nullable_row) {
+				Z_PARAM_LONG_OR_NULL(row, row_is_null)
+			} else {
+				Z_PARAM_LONG(row)
+			}
 			Z_PARAM_STR_OR_LONG(field_name, field_offset)
 		ZEND_PARSE_PARAMETERS_END();
 	}
@@ -2021,7 +2031,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	CHECK_PGSQL_RESULT(pg_result);
 	pgsql_result = pg_result->result;
 
-	if (ZEND_NUM_ARGS() == 2) {
+	if (ZEND_NUM_ARGS() == 2 || row_is_null) {
 		if (pg_result->row < 0) {
 			pg_result->row = 0;
 		}
@@ -2062,14 +2072,28 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 /* {{{ Returns the printed length */
 PHP_FUNCTION(pg_field_prtlen)
 {
-	php_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_DATA_LENGTH);
+	php_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_DATA_LENGTH, true);
+}
+/* }}} */
+
+/* {{{ Returns the printed length */
+PHP_FUNCTION(pg_fieldprtlen)
+{
+	php_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_DATA_LENGTH, false);
 }
 /* }}} */
 
 /* {{{ Test if a field is NULL */
 PHP_FUNCTION(pg_field_is_null)
 {
-	php_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_DATA_ISNULL);
+	php_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_DATA_ISNULL, true);
+}
+/* }}} */
+
+/* {{{ Test if a field is NULL */
+PHP_FUNCTION(pg_fieldisnull)
+{
+	php_pgsql_data_info(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_DATA_ISNULL, false);
 }
 /* }}} */
 

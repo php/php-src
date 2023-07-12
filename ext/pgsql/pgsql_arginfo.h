@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fb57575ac2153c888b95c18a7bf6d6a7e200f5dc */
+ * Stub hash: 0d6ef9904082180bf9205d61c2f45c0752be8f7b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -516,7 +516,9 @@ ZEND_FUNCTION(pg_fetch_all);
 ZEND_FUNCTION(pg_fetch_all_columns);
 ZEND_FUNCTION(pg_result_seek);
 ZEND_FUNCTION(pg_field_prtlen);
+ZEND_FUNCTION(pg_fieldprtlen);
 ZEND_FUNCTION(pg_field_is_null);
+ZEND_FUNCTION(pg_fieldisnull);
 ZEND_FUNCTION(pg_free_result);
 ZEND_FUNCTION(pg_last_oid);
 ZEND_FUNCTION(pg_trace);
@@ -633,9 +635,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_fetch_all_columns, arginfo_pg_fetch_all_columns)
 	ZEND_FE(pg_result_seek, arginfo_pg_result_seek)
 	ZEND_FE(pg_field_prtlen, arginfo_pg_field_prtlen)
-	ZEND_DEP_FALIAS(pg_fieldprtlen, pg_field_prtlen, arginfo_pg_fieldprtlen)
+	ZEND_DEP_FE(pg_fieldprtlen, arginfo_pg_fieldprtlen)
 	ZEND_FE(pg_field_is_null, arginfo_pg_field_is_null)
-	ZEND_DEP_FALIAS(pg_fieldisnull, pg_field_is_null, arginfo_pg_fieldisnull)
+	ZEND_DEP_FE(pg_fieldisnull, arginfo_pg_fieldisnull)
 	ZEND_FE(pg_free_result, arginfo_pg_free_result)
 	ZEND_DEP_FALIAS(pg_freeresult, pg_free_result, arginfo_pg_freeresult)
 	ZEND_FE(pg_last_oid, arginfo_pg_last_oid)
