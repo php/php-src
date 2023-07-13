@@ -432,9 +432,9 @@ static int php_posix_stream_get_fd(zval *zfp, zend_long *fd) /* {{{ */
 	 * It is only used here so that the buffered data warning is not displayed.
 	 */
 	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&fd, 0);
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)fd, 0);
 	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void*)&fd, 0);
+		php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void*)fd, 0);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not use stream of type '%s'",
 				stream->ops->label);
@@ -449,7 +449,7 @@ PHP_FUNCTION(posix_ttyname)
 {
 	zval *z_fd;
 	char *p;
-	zend_long fd;
+	zend_long fd = 0;
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
 	zend_long buflen;
 #endif
@@ -502,7 +502,7 @@ PHP_FUNCTION(posix_ttyname)
 PHP_FUNCTION(posix_isatty)
 {
 	zval *z_fd;
-	zend_long fd;
+	zend_long fd = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(z_fd)
@@ -1272,7 +1272,7 @@ PHP_FUNCTION(posix_pathconf)
 
 PHP_FUNCTION(posix_fpathconf)
 {
-	zend_long name, ret, fd;
+	zend_long name, ret, fd = 0;
 	zval *z_fd;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
