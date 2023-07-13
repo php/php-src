@@ -2178,4 +2178,23 @@ PHP_METHOD(DOMDocument, prepend)
 }
 /* }}} */
 
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
+Since:
+*/
+PHP_METHOD(DOMDocument, replaceChildren)
+{
+	uint32_t argc;
+	zval *args;
+	dom_object *intern;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_INTERN(intern);
+
+	dom_parent_node_replace_children(intern, args, argc);
+}
+/* }}} */
+
 #endif  /* HAVE_LIBXML && HAVE_DOM */

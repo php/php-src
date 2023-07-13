@@ -254,6 +254,7 @@ PHP 8.3 UPGRADE NOTES
     yet.
   . Added DOMElement::className. This is not binary-safe at the moment
     because of underlying limitations of libxml2.
+  . Added DOMParentNode::replaceChildren().
 
 - JSON:
   . Added json_validate(), which returns whether the json is valid for
