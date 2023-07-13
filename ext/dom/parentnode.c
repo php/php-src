@@ -182,15 +182,7 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 					goto err;
 				}
 
-				if (newNode->type == XML_DOCUMENT_FRAG_NODE) {
-					/* Unpack document fragment nodes, the behaviour differs for different libxml2 versions. */
-					newNode = newNode->children;
-					if (UNEXPECTED(newNode == NULL)) {
-						/* No nodes to add, nothing to do here */
-						continue;
-					}
-					xmlUnlinkNode(newNode);
-				} else if (newNode->parent != NULL) {
+				if (newNode->parent != NULL) {
 					xmlUnlinkNode(newNode);
 				}
 
@@ -209,14 +201,23 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 					newNode = xmlCopyNode(newNode, 1);
 				}
 
-				if (!xmlAddChild(fragment, newNode)) {
+				if (newNode->type == XML_DOCUMENT_FRAG_NODE) {
+					/* Unpack document fragment nodes, the behaviour differs for different libxml2 versions. */
+					newNode = newNode->children;
+					while (newNode) {
+						xmlNodePtr next = newNode->next;
+						xmlUnlinkNode(newNode);
+						if (!xmlAddChild(fragment, newNode)) {
+							goto hierarchy_request_err;
+						}
+						newNode = next;
+					}
+				} else if (!xmlAddChild(fragment, newNode)) {
 					if (will_free) {
 						xmlFreeNode(newNode);
 					}
 					goto hierarchy_request_err;
 				}
-
-				continue;
 			} else {
 				zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_value_name(&nodes[i]));
 				goto err;
@@ -364,14 +365,13 @@ static void dom_pre_insert(xmlNodePtr insertion_point, xmlNodePtr parentNode, xm
 		/* Place it as last node */
 		if (parentNode->children) {
 			/* There are children */
-			fragment->last->prev = parentNode->last;
-			newchild->prev = parentNode->last->prev;
+			newchild->prev = parentNode->last;
 			parentNode->last->next = newchild;
 		} else {
 			/* No children, because they moved out when they became a fragment */
 			parentNode->children = newchild;
-			parentNode->last = newchild;
 		}
+		parentNode->last = fragment->last;
 	} else {
 		/* Insert fragment before insertion_point */
 		fragment->last->next = insertion_point;
