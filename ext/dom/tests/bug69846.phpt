@@ -78,12 +78,14 @@ object(DOMText)#%d (21) {
   string(3) "
   "
 }
-object(DOMElement)#7 (24) {
+object(DOMElement)#7 (25) {
   ["schemaTypeInfo"]=>
   NULL
   ["tagName"]=>
   string(5) "form1"
   ["className"]=>
+  string(0) ""
+  ["id"]=>
   string(0) ""
   ["firstElementChild"]=>
   string(22) "(object value omitted)"

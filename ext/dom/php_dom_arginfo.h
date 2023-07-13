@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 91732c51635f43f016f4b531d9aa8e00312084ec */
+ * Stub hash: 44fb8e555fcd54e4b40c1a998d338f5021cbc965 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1379,6 +1379,12 @@ static zend_class_entry *register_class_DOMElement(zend_class_entry *class_entry
 	zend_string *property_className_name = zend_string_init("className", sizeof("className") - 1, 1);
 	zend_declare_typed_property(class_entry, property_className_name, &property_className_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_className_name);
+
+	zval property_id_default_value;
+	ZVAL_UNDEF(&property_id_default_value);
+	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, 1);
+	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_id_name);
 
 	zval property_schemaTypeInfo_default_value;
 	ZVAL_NULL(&property_schemaTypeInfo_default_value);
