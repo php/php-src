@@ -159,8 +159,7 @@ static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) /* {{{ 
 	nqname = xmlSplitQName3(name, &len);
 	if (nqname != NULL) {
 		xmlNsPtr ns;
-		xmlChar *prefix = xmlStrndup(name, len);
-		if (prefix && xmlStrEqual(prefix, (xmlChar *)"xmlns")) {
+		if (strncmp((const char *) name, "xmlns:", len + 1) == 0) {
 			ns = elem->nsDef;
 			while (ns) {
 				if (xmlStrEqual(ns->prefix, nqname)) {
@@ -168,9 +167,9 @@ static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) /* {{{ 
 				}
 				ns = ns->next;
 			}
-			xmlFree(prefix);
 			return (xmlNodePtr)ns;
 		}
+		xmlChar *prefix = xmlStrndup(name, len);
 		ns = xmlSearchNs(elem->doc, elem, prefix);
 		if (prefix != NULL) {
 			xmlFree(prefix);
