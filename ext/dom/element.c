@@ -137,11 +137,7 @@ int dom_element_tag_name_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ className	string
-URL: https://dom.spec.whatwg.org/#dom-element-classname
-Since:
-*/
-int dom_element_class_name_read(dom_object *obj, zval *retval)
+static int dom_element_reflected_attribute_read(dom_object *obj, zval *retval, const char *name)
 {
 	xmlNodePtr nodep = dom_object_get_node(obj);
 
@@ -150,7 +146,7 @@ int dom_element_class_name_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	xmlChar *content = xmlGetNoNsProp(nodep, (const xmlChar *) "class");
+	xmlChar *content = xmlGetNoNsProp(nodep, (const xmlChar *) name);
 	if (content == NULL) {
 		ZVAL_EMPTY_STRING(retval);
 		return SUCCESS;
@@ -162,26 +158,61 @@ int dom_element_class_name_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-int dom_element_class_name_write(dom_object *obj, zval *newval)
+static xmlAttrPtr dom_element_reflected_attribute_write(dom_object *obj, zval *newval, const char *name)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
+		return NULL;
 	}
 
 	if (dom_node_is_read_only(nodep) == SUCCESS) {
 		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(obj->document));
-		return FAILURE;
+		return NULL;
 	}
 
 	/* Typed property, so it is a string already */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
-	xmlSetProp(nodep, (const xmlChar *) "class", (const xmlChar *) Z_STRVAL_P(newval));
+	return xmlSetProp(nodep, (const xmlChar *) name, (const xmlChar *) Z_STRVAL_P(newval));
+}
 
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+/* {{{ className	string
+URL: https://dom.spec.whatwg.org/#dom-element-classname
+Since:
+*/
+int dom_element_class_name_read(dom_object *obj, zval *retval)
+{
+	return dom_element_reflected_attribute_read(obj, retval, "class");
+}
 
+int dom_element_class_name_write(dom_object *obj, zval *newval)
+{
+	if (dom_element_reflected_attribute_write(obj, newval, "class")) {
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+/* }}} */
+
+/* {{{ id	string
+URL: https://dom.spec.whatwg.org/#dom-element-id
+Since:
+*/
+int dom_element_id_read(dom_object *obj, zval *retval)
+{
+	return dom_element_reflected_attribute_read(obj, retval, "id");
+}
+
+static void php_set_attribute_id(xmlAttrPtr attrp, bool is_id);
+
+int dom_element_id_write(dom_object *obj, zval *newval)
+{
+	xmlAttrPtr attr = dom_element_reflected_attribute_write(obj, newval, "id");
+	if (!attr) {
+		return FAILURE;
+	}
+	php_set_attribute_id(attr, true);
 	return SUCCESS;
 }
 /* }}} */

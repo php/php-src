@@ -19,7 +19,7 @@ PHP                                                                        NEWS
   . Added DOMNode::contains() and DOMNameSpaceNode::contains(). (nielsdos)
   . Added DOMElement::getAttributeNames(). (nielsdos)
   . Added DOMNode::getRootNode(). (nielsdos)
-  . Added DOMElement::className. (nielsdos)
+  . Added DOMElement::className and DOMElement::id. (nielsdos)
   . Added DOMParentNode::replaceChildren(). (nielsdos)
 
 - Intl:

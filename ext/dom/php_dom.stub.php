@@ -550,6 +550,8 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
 
     public string $className;
 
+    public string $id;
+
     /** @readonly */
     public mixed $schemaTypeInfo = null;
 
