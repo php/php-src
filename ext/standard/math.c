@@ -98,7 +98,11 @@ static inline double php_round_helper(double value, int mode) {
 
 	switch (mode) {
 		case PHP_ROUND_HALF_UP:
-			tmp_value = round(value);
+			if (value >= 0.0) {
+				tmp_value = floor(value + 0.5);
+			} else {
+				tmp_value = ceil(value - 0.5);
+			}
 			break;
 		case PHP_ROUND_HALF_DOWN:
 			if (value >= 0.0) {
