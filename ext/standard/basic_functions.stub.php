@@ -3334,6 +3334,9 @@ function stream_context_get_params($context): array {}
 /** @param resource $context */
 function stream_context_set_option($context, array|string $wrapper_or_options, ?string $option_name = null, mixed $value = UNKNOWN): bool {}
 
+/** @param resource $context */
+function stream_context_set_options($context, array $options): bool {}
+
 /**
  * @param resource $stream_or_context
  * @return array<string, mixed>

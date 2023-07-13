@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e01f6a979e72b1c3baf4602421cc966edfe50312 */
+ * Stub hash: decfa1e3d862d81880ea18150e2ba239bf15b8af */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1849,6 +1849,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_option, 0, 2,
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_options, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_get_options, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, stream_or_context)
 ZEND_END_ARG_INFO()
@@ -2718,6 +2723,7 @@ ZEND_FUNCTION(stream_context_create);
 ZEND_FUNCTION(stream_context_set_params);
 ZEND_FUNCTION(stream_context_get_params);
 ZEND_FUNCTION(stream_context_set_option);
+ZEND_FUNCTION(stream_context_set_options);
 ZEND_FUNCTION(stream_context_get_options);
 ZEND_FUNCTION(stream_context_get_default);
 ZEND_FUNCTION(stream_context_set_default);
@@ -3358,6 +3364,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(stream_context_set_params, arginfo_stream_context_set_params)
 	ZEND_FE(stream_context_get_params, arginfo_stream_context_get_params)
 	ZEND_FE(stream_context_set_option, arginfo_stream_context_set_option)
+	ZEND_FE(stream_context_set_options, arginfo_stream_context_set_options)
 	ZEND_FE(stream_context_get_options, arginfo_stream_context_get_options)
 	ZEND_FE(stream_context_get_default, arginfo_stream_context_get_default)
 	ZEND_FE(stream_context_set_default, arginfo_stream_context_set_default)
