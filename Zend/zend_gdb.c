@@ -25,7 +25,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) && __FreeBSD_version >= 1100000
 # include <sys/user.h>
 # include <libutil.h>
 #endif
@@ -142,7 +142,7 @@ ZEND_API bool zend_gdb_present(void)
 
 		close(fd);
 	}
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) && __FreeBSD_version >= 1100000
     struct kinfo_proc *proc = kinfo_getproc(getpid());
 
     if (proc) {

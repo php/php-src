@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   . Fixed line number of JMP instruction over else block. (ilutov)
   . Fixed use-of-uninitialized-value with ??= on assert. (ilutov)
   . Fixed oss-fuzz #60411 (Fix double-compilation of arrow-functions). (ilutov)
+  . Fixed build for FreeBSD before the 11.0 releases. (David Carlier)
 
 - Curl:
   . Fix crash when an invalid callback function is passed to
