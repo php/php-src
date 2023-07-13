@@ -7,7 +7,8 @@ PHP_ARG_ENABLE([fpm],,
 dnl Configure checks.
 AC_DEFUN([AC_FPM_STDLIBS],
 [
-  AC_CHECK_FUNCS(clearenv setproctitle setproctitle_fast)
+  AC_CHECK_FUNCS(clearenv setproctitle setproctitle_fast cpuset_setaffinity sched_setaffinity)
+  AC_CHECK_HEADERS([sys/cpuset.h sched.h])
 
   AC_SEARCH_LIBS(socket, socket)
   AC_SEARCH_LIBS(inet_addr, nsl)

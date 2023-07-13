@@ -44,6 +44,9 @@ struct fpm_global_config_s {
 	int systemd_watchdog;
 	int systemd_interval;
 #endif
+#if HAVE_FPM_CPUAFFINITY
+	char *process_cpu_list;
+#endif
 };
 
 extern struct fpm_global_config_s fpm_global_config;
@@ -106,6 +109,9 @@ struct fpm_worker_pool_config_s {
 #endif
 #ifdef SO_SETFIB
 	int listen_setfib;
+#endif
+#if HAVE_FPM_CPUAFFINITY
+	char *process_cpu_list;
 #endif
 };
 
