@@ -93,47 +93,39 @@ static inline double php_intpow10(int power) {
 /* {{{ php_round_helper
        Actually performs the rounding of a value to integer in a certain mode */
 static inline double php_round_helper(double value, int mode) {
-	double tmp_value;
-
 	switch (mode) {
 		case PHP_ROUND_HALF_UP:
 			if (value >= 0.0) {
-				tmp_value = floor(value + 0.5);
+				return floor(value + 0.5);
 			} else {
-				tmp_value = ceil(value - 0.5);
+				return ceil(value - 0.5);
 			}
 			break;
 		case PHP_ROUND_HALF_DOWN:
 			if (value >= 0.0) {
-				tmp_value = ceil(value - 0.5);
+				return ceil(value - 0.5);
 			} else {
-				tmp_value = floor(value + 0.5);
+				return floor(value + 0.5);
 			}
-			break;
 		case PHP_ROUND_UP:
-			tmp_value = ceil(value);
-			break;
+			return ceil(value);
 		case PHP_ROUND_DOWN:
-			tmp_value = floor(value);
-			break;
+			return floor(value);
 		case PHP_ROUND_HALF_EVEN:
-			tmp_value = floor(value + 0.5);
-			if(tmp_value == value + 0.5 && fmod(tmp_value, 2.0) != 0.0) {
-				tmp_value = tmp_value - 1.0;
+			double tmp_value_half_even = floor(value + 0.5);
+			if (tmp_value_half_even == value + 0.5 && fmod(tmp_value_half_even, 2.0) != 0.0) {
+				tmp_value_half_even = tmp_value_half_even - 1.0;
 			}
-			break;
+			return tmp_value_half_even;
 		case PHP_ROUND_HALF_ODD:
-			tmp_value = floor(value + 0.5);
-			if(tmp_value == value + 0.5 && fmod(tmp_value, 2.0) == 0.0) {
-				tmp_value = tmp_value - 1.0;
+			double tmp_value_half_odd = floor(value + 0.5);
+			if (tmp_value_half_odd == value + 0.5 && fmod(tmp_value_half_odd, 2.0) == 0.0) {
+				tmp_value_half_odd = tmp_value_half_odd - 1.0;
 			}
-			break;
+			return tmp_value_half_odd;
 		default:
-			tmp_value = round(value);
-			break;
+			ZEND_ASSERT(0 && "Unexpected type");
 	}
-
-	return tmp_value;
 }
 /* }}} */
 
