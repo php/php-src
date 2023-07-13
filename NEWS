@@ -31,6 +31,7 @@ PHP                                                                        NEWS
   . Added DOMNode::isEqualNode(). (nielsdos)
   . Added DOMElement::insertAdjacentElement() and
     DOMElement::insertAdjacentText(). (nielsdos)
+  . Added DOMElement::toggleAttribute(). (nielsdos)
 
 - FPM:
   . Added warning to log when fpm socket was not registered on the expected

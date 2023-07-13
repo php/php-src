@@ -281,6 +281,7 @@ PHP 8.3 UPGRADE NOTES
   . Added DOMNode::isEqualNode().
   . Added DOMElement::insertAdjacentElement() and
     DOMElement::insertAdjacentText().
+  . Added DOMElement::toggleAttribute().
 
 - JSON:
   . Added json_validate(), which returns whether the json is valid for

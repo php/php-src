@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 850ab297bd3e6162e0497769cace87a41e8e8a00 */
+ * Stub hash: 3a37adaf011606d10ae1fa12ce135a23b3e07cf4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -280,6 +280,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_setIdAttributeNode, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, attr, DOMAttr, 0)
 	ZEND_ARG_TYPE_INFO(0, isId, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_toggleAttribute, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, force, _IS_BOOL, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMElement_remove arginfo_class_DOMChildNode_remove
@@ -591,6 +596,7 @@ ZEND_METHOD(DOMElement, setAttributeNodeNS);
 ZEND_METHOD(DOMElement, setIdAttribute);
 ZEND_METHOD(DOMElement, setIdAttributeNS);
 ZEND_METHOD(DOMElement, setIdAttributeNode);
+ZEND_METHOD(DOMElement, toggleAttribute);
 ZEND_METHOD(DOMElement, remove);
 ZEND_METHOD(DOMElement, before);
 ZEND_METHOD(DOMElement, after);
@@ -817,6 +823,7 @@ static const zend_function_entry class_DOMElement_methods[] = {
 	ZEND_ME(DOMElement, setIdAttribute, arginfo_class_DOMElement_setIdAttribute, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, setIdAttributeNS, arginfo_class_DOMElement_setIdAttributeNS, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, setIdAttributeNode, arginfo_class_DOMElement_setIdAttributeNode, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMElement, toggleAttribute, arginfo_class_DOMElement_toggleAttribute, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, remove, arginfo_class_DOMElement_remove, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, before, arginfo_class_DOMElement_before, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, after, arginfo_class_DOMElement_after, ZEND_ACC_PUBLIC)
