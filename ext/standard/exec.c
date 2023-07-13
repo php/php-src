@@ -104,6 +104,8 @@ static size_t handle_line(int type, zval *array, char *buf, size_t bufl) {
 	return bufl;
 }
 
+#ifndef PHP_WASI
+
 /* {{{ php_exec
  * If type==0, only last line of output is returned (exec)
  * If type==1, all lines will be printed and last lined returned (system)
@@ -202,6 +204,12 @@ err:
 	goto done;
 }
 /* }}} */
+
+#else
+
+int php_exec(int type, const char *cmd, zval *array, zval *return_value);
+
+#endif // PHP_WASI
 
 static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
@@ -509,8 +517,9 @@ PHP_FUNCTION(escapeshellarg)
 }
 /* }}} */
 
-/* {{{ Execute command via shell and return complete output as string */
-PHP_FUNCTION(shell_exec)
+#ifndef PHP_WASI
+
+static void php_shell_exec_ex(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
 	FILE *in;
 	char *command;
@@ -547,6 +556,19 @@ PHP_FUNCTION(shell_exec)
 	if (ret && ZSTR_LEN(ret) > 0) {
 		RETVAL_STR(ret);
 	}
+ }
+/* }}} */
+
+#else
+
+void php_shell_exec_ex(INTERNAL_FUNCTION_PARAMETERS);
+
+#endif // PHP_WASI
+
+/* {{{ Execute command via shell and return complete output as string */
+PHP_FUNCTION(shell_exec) /* {{{ */
+{
+	php_shell_exec_ex(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 

@@ -76,6 +76,11 @@ TSRMLS_MAIN_CACHE_EXTERN()
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
+#undef PHP_WASI
+#ifdef __wasi__
+#define PHP_WASI __wasi__
+#endif
+
 struct _zend_serialize_data;
 struct _zend_unserialize_data;
 
@@ -257,6 +262,7 @@ typedef size_t (*zend_write_func_t)(const char *str, size_t str_length);
 
 #define zend_bailout()		_zend_bailout(__FILE__, __LINE__)
 
+#ifndef PHP_WASI
 #define zend_try												\
 	{															\
 		JMP_BUF *__orig_bailout = EG(bailout);					\
@@ -272,6 +278,19 @@ typedef size_t (*zend_write_func_t)(const char *str, size_t str_length);
 		EG(bailout) = __orig_bailout;							\
 	}
 #define zend_first_try		EG(bailout)=NULL;	zend_try
+
+#else // PHP_WASI
+#define zend_try												\
+	{															\
+		if (1) {
+#define zend_catch												\
+		} else {
+#define zend_end_try()											\
+		}														\
+	}
+#define zend_first_try		zend_try
+#endif // PHP_WASI
+
 
 BEGIN_EXTERN_C()
 void zend_startup(zend_utility_functions *utility_functions);

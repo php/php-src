@@ -1,0 +1,46 @@
+name: Test
+inputs:
+  testArtifacts:
+    default: null
+    required: false
+  runTestsParameters:
+    default: ''
+    required: false
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        cat <<-'EOF' > /opt/bin/wasmtime-run-cli.sh
+        	#!/bin/bash
+        	WASMTIME_BACKTRACE_DETAILS=1 /opt/bin/wasmtime run --mapdir /::/ "$PWD/sapi/cli/php.optimized" 2> /dev/null -- "$@"
+        EOF
+        chmod +x /opt/bin/wasmtime-run-cli.sh
+        cat <<-'EOF' > /opt/bin/wasmtime-run-cgi.sh
+        	#!/bin/bash
+        	WASMTIME_BACKTRACE_DETAILS=1 /opt/bin/wasmtime run --mapdir /::/ "$PWD/sapi/cgi/php-cgi.optimized" 2> /dev/null -- "$@"
+        EOF
+        chmod +x /opt/bin/wasmtime-run-cgi.sh
+    - shell: bash
+      run: |
+        set -x
+        export SKIP_IO_CAPTURE_TESTS=1
+        export TEST_PHP_JUNIT=junit.out.xml
+        export STACK_LIMIT_DEFAULTS_CHECK=1
+        export TEST_PHP_EXECUTABLE=/opt/bin/wasmtime-run-cli.sh
+        export TEST_PHP_CGI_EXECUTABLE=/opt/bin/wasmtime-run-cgi.sh
+        export TEST_PHPDBG_EXECUTABLE=""
+        php run-tests.php -q ${{ inputs.runTestsParameters }} \
+          -j$(/usr/bin/nproc) \
+          -g FAIL,BORK,LEAK,XLEAK \
+          --no-progress \
+          --offline \
+          --show-diff \
+          --show-slow 1000 \
+          --set-timeout 120
+    - uses: actions/upload-artifact@v3
+      if: always() && inputs.testArtifacts != null
+      with:
+        name: ${{ github.job }}_${{ inputs.testArtifacts }}
+        path: ${{ github.workspace }}/junit.out.xml
+        retention-days: 5

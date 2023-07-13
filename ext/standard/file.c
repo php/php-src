@@ -55,7 +55,9 @@
 # endif
 # include <sys/socket.h>
 # include <netinet/in.h>
-# include <netdb.h>
+# ifndef PHP_WASI
+#  include <netdb.h>
+# endif // PHP_WASI
 # if HAVE_ARPA_INET_H
 #  include <arpa/inet.h>
 # endif
@@ -790,8 +792,9 @@ PHPAPI PHP_FUNCTION(fclose)
 }
 /* }}} */
 
-/* {{{ Execute a command and open either a read or a write pipe to it */
-PHP_FUNCTION(popen)
+#ifndef PHP_WASI
+
+static void php_popen(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
 	char *command, *mode;
 	size_t command_len, mode_len;
@@ -842,6 +845,19 @@ PHP_FUNCTION(popen)
 	}
 
 	efree(posix_mode);
+}
+/* }}} */
+
+#else
+
+void php_popen(INTERNAL_FUNCTION_PARAMETERS);
+
+#endif // PHP_WASI
+
+/* {{{ Execute a command and open either a read or a write pipe to it */
+PHP_FUNCTION(popen) /* {{{ */
+{
+  php_popen(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -1220,8 +1236,9 @@ PHP_FUNCTION(readfile)
 }
 /* }}} */
 
-/* {{{ Return or change the umask */
-PHP_FUNCTION(umask)
+#ifndef PHP_WASI
+
+static void php_umask(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
 	zend_long mask = 0;
 	bool mask_is_null = 1;
@@ -1245,6 +1262,19 @@ PHP_FUNCTION(umask)
 	}
 
 	RETURN_LONG(oldumask);
+}
+/* }}} */
+
+#else
+
+void php_umask(INTERNAL_FUNCTION_PARAMETERS);
+
+#endif // PHP_WASI
+
+/* {{{ Return or change the umask */
+PHP_FUNCTION(umask) /* {{{ */
+{
+	php_umask(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 

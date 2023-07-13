@@ -43,10 +43,11 @@
 # include <ws2ipdef.h>
 # include <Ws2tcpip.h>
 # include <iphlpapi.h>
-#else
+#elif !defined(PHP_WASI)
 # include <netdb.h>
 #endif
 
+#ifndef PHP_WASI
 PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 	socklen_t addrlen = sizeof(struct sockaddr_in);
 
@@ -101,6 +102,7 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 
 	return NULL;
 }
+#endif // PHP_WASI
 
 #if defined(PHP_WIN32) || defined(HAVE_GETIFADDRS) || defined(__PASE__)
 static void iface_append_unicast(zval *unicast, zend_long flags,
@@ -151,6 +153,7 @@ array(
   ), // etc...
 )
 */
+#ifndef PHP_WASI
 PHP_FUNCTION(net_get_interfaces) {
 #ifdef PHP_WIN32
 # define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
@@ -311,3 +314,4 @@ PHP_FUNCTION(net_get_interfaces) {
 }
 #endif
 /* }}} */
+#endif // PHP_WASI

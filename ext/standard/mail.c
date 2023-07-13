@@ -371,6 +371,8 @@ static int php_mail_detect_multiple_crlf(const char *hdr) {
 }
 
 
+#ifndef PHP_WASI
+
 /* {{{ php_mail */
 PHPAPI int php_mail(const char *to, const char *subject, const char *message, const char *headers, const char *extra_cmd)
 {
@@ -557,6 +559,8 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 	MAIL_RET(1); /* never reached */
 }
 /* }}} */
+
+#endif // PHP_WASI
 
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(mail)

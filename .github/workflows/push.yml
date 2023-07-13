@@ -312,3 +312,37 @@ jobs:
             ${{ github.sha }} \
             $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.sha }}) \
             > $GITHUB_STEP_SUMMARY
+  WASM32_WASI:
+    name: "WASM32_WASI_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: ubuntu-20.04
+    env:
+      CC: clang
+      CXX: clang++
+      LD: wasm-ld
+      AR: llvm-ar
+      RANLIB: llvm-ranlib
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v3
+      - name: apt
+        uses: ./.github/actions/apt-wasi
+      - name: ./configure
+        uses: ./.github/actions/configure-wasi
+        with:
+          configurationParameters: >-
+            --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            --${{ matrix.zts && 'enable' || 'disable' }}-zts
+      - name: make
+        env:
+          CFLAGS: "-D_WASI_EMULATED_GETPID -D_WASI_EMULATED_SIGNAL -D_WASI_EMULATED_PROCESS_CLOCKS"
+          LDFLAGS: "-lwasi-emulated-getpid -lwasi-emulated-signal -lwasi-emulated-process-clocks"
+        run: make -j$(/usr/bin/nproc) cgi cli
+      - name: Optimize
+        uses: ./.github/actions/optimize-wasi
+      # To be defined how to approach test coverage on this platform.
+      # - name: Test
+      #   uses: ./.github/actions/test-wasi
+      #   with:
+      #     testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
+      # - name: Verify generated files are up to date
+      #   uses: ./.github/actions/verify-generated-files

@@ -95,7 +95,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 # include "valgrind/callgrind.h"
 #endif
 
-#ifndef PHP_WIN32
+#if !defined(PHP_WIN32) && !defined(PHP_WASI)
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
 struct sigaction act, old_term, old_quit, old_int;
 #endif
@@ -1450,7 +1450,7 @@ static void init_request_info(fcgi_request *request)
 }
 /* }}} */
 
-#ifndef PHP_WIN32
+#if !defined(PHP_WIN32) && !defined(PHP_WASI)
 /**
  * Clean up child processes upon exit
  */
@@ -1471,7 +1471,7 @@ void fastcgi_cleanup(int signal)
 		exit(0);
 	}
 }
-#else
+#elif defined(PHP_WIN32)
 BOOL WINAPI fastcgi_cleanup(DWORD sig)
 {
 	int i = kids;
@@ -1982,7 +1982,7 @@ consult the installation file that came with this distribution, or visit \n\
 			fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  "1", sizeof("1")-1);
 		}
 
-#ifndef PHP_WIN32
+#if !defined(PHP_WIN32) && !defined(PHP_WASI)
 		if (children) {
 			int running = 0;
 			pid_t pid;
@@ -2070,7 +2070,7 @@ consult the installation file that came with this distribution, or visit \n\
 			zend_signal_init();
 		}
 
-#else
+#elif defined(PHP_WIN32)
 		if (children) {
 			wchar_t *cmd_line_tmp, cmd_line[PHP_WIN32_IOUTIL_MAXPATHLEN];
 			size_t cmd_line_len;

@@ -21,7 +21,10 @@
 #define ZEND_GLOBALS_H
 
 
+#ifndef PHP_WASI
 #include <setjmp.h>
+#endif
+
 #include <stdint.h>
 #include <sys/types.h>
 
@@ -174,7 +177,9 @@ struct _zend_executor_globals {
 
 	HashTable included_files;	/* files already included */
 
+#ifndef PHP_WASI
 	JMP_BUF *bailout;
+#endif
 
 	int error_reporting;
 	int exit_status;

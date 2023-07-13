@@ -1,0 +1,48 @@
+name: apt
+inputs:
+  wasi_sdk_version:
+    default: 19
+  wasmtime_version:
+    default: 5.0.0
+  binaryen_version:
+    default: 111
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+
+        sudo apt-get update
+        sudo apt-get install \
+          php \
+          libtool-bin \
+          bison \
+          re2c \
+          tcl
+    - shell: bash
+      run: |
+        set -x
+
+        wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${{ inputs.wasi_sdk_version }}/wasi-sdk_${{ inputs.wasi_sdk_version }}.0_amd64.deb
+        sudo dpkg -i wasi-sdk_${{ inputs.wasi_sdk_version }}.0_amd64.deb
+    - shell: bash
+      run: |
+        echo /opt/wasi-sdk/bin >> $GITHUB_PATH
+    - shell: bash
+      run: |
+        set -x
+
+        mkdir -p /opt/bin
+
+        wget https://github.com/bytecodealliance/wasmtime/releases/download/v${{ inputs.wasmtime_version }}/wasmtime-v${{ inputs.wasmtime_version }}-x86_64-linux.tar.xz
+        tar -xvf wasmtime-v${{ inputs.wasmtime_version }}-x86_64-linux.tar.xz
+        mv wasmtime-v${{ inputs.wasmtime_version }}-x86_64-linux/wasmtime /opt/bin/
+    - shell: bash
+      run: |
+        set -x
+
+        mkdir -p /opt/bin
+
+        wget https://github.com/WebAssembly/binaryen/releases/download/version_${{ inputs.binaryen_version }}/binaryen-version_${{ inputs.binaryen_version }}-x86_64-linux.tar.gz
+        tar -xvf binaryen-version_${{ inputs.binaryen_version }}-x86_64-linux.tar.gz --strip-components=2 -C /opt/bin binaryen-version_${{ inputs.binaryen_version }}/bin/wasm-opt

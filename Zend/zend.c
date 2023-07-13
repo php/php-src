@@ -788,7 +788,9 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 #endif
 	executor_globals->saved_fpu_cw_ptr = NULL;
 	executor_globals->active = 0;
+#ifndef PHP_WASI
 	executor_globals->bailout = NULL;
+#endif // PHP_WASI
 	executor_globals->error_handling  = EH_NORMAL;
 	executor_globals->exception_class = NULL;
 	executor_globals->exception = NULL;
@@ -1179,6 +1181,7 @@ ZEND_COLD void zenderror(const char *error) /* {{{ */
 }
 /* }}} */
 
+#ifndef PHP_WASI
 ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32_t lineno) /* {{{ */
 {
 
@@ -1195,6 +1198,7 @@ ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32
 	LONGJMP(*EG(bailout), FAILURE);
 }
 /* }}} */
+#endif // PHP_WASI
 
 ZEND_API size_t zend_get_page_size(void)
 {

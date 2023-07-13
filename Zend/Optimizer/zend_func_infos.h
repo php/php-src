@@ -512,13 +512,19 @@ static const func_info_t func_infos[] = {
 #if defined(HAVE_STRPTIME)
 	F1("strptime", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 #endif
-#if defined(HAVE_GETHOSTNAME)
+#if !defined(PHP_WASI) && defined(HAVE_GETHOSTNAME)
 	F1("gethostname", MAY_BE_STRING|MAY_BE_FALSE),
 #endif
+#if !defined(PHP_WASI)
 	F1("gethostbyaddr", MAY_BE_STRING|MAY_BE_FALSE),
+#endif
+#if !defined(PHP_WASI)
 	F1("gethostbyname", MAY_BE_STRING),
+#endif
+#if !defined(PHP_WASI)
 	F1("gethostbynamel", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
+#endif
+#if !defined(PHP_WASI) && (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 	F1("dns_get_record", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
 #endif
 	F1("md5", MAY_BE_STRING),

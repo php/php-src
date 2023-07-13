@@ -1839,6 +1839,9 @@ int php_init_stream_wrappers(int module_number)
 	zend_hash_init(php_get_stream_filters_hash_global(), 8, NULL, NULL, 1);
 	zend_hash_init(php_stream_xport_get_hash(), 8, NULL, NULL, 1);
 
+#ifdef PHP_WASI
+	return SUCCESS;
+#else
 	return (php_stream_xport_register("tcp", php_stream_generic_socket_factory) == SUCCESS
 			&&
 			php_stream_xport_register("udp", php_stream_generic_socket_factory) == SUCCESS
@@ -1849,6 +1852,7 @@ int php_init_stream_wrappers(int module_number)
 			php_stream_xport_register("udg", php_stream_generic_socket_factory) == SUCCESS
 #endif
 		) ? SUCCESS : FAILURE;
+#endif // PHP_WASI
 }
 
 void php_shutdown_stream_wrappers(int module_number)
