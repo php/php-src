@@ -13,6 +13,7 @@ PHP                                                                        NEWS
     exceptions). (ilutov)
   . Added zend_call_stack_get implementation for OpenBSD. (David Carlier)
   . Fixed oss-fuzz #60411 (Fix double-compilation of arrow-functions). (ilutov)
+  . Fixed build for FreeBSD before the 11.0 releases. (David Carlier)
 
 - DOM:
   . Added DOMNode::contains() and DOMNameSpaceNode::contains(). (nielsdos)
