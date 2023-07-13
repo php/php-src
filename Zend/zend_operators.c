@@ -2532,7 +2532,6 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 		}
 	}
 
-
 	if (!Z_REFCOUNTED_P(str)) {
 		Z_STR_P(str) = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
@@ -2666,7 +2665,7 @@ try_again:
 			if (Z_OBJ_HT_P(op1)->cast_object(Z_OBJ_P(op1), &tmp, _IS_NUMBER) == SUCCESS) {
 				ZEND_ASSERT(Z_TYPE(tmp) == IS_LONG || Z_TYPE(tmp) == IS_DOUBLE);
 				zval_ptr_dtor(op1);
-				ZVAL_COPY(op1, &tmp);
+				ZVAL_COPY_VALUE(op1, &tmp);
 				goto try_again;
 			}
 			ZEND_FALLTHROUGH;

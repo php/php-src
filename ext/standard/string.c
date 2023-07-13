@@ -1215,7 +1215,8 @@ PHP_FUNCTION(str_increment)
 
 	do {
 		char c = ZSTR_VAL(incremented)[position];
-		if (EXPECTED( (c >= 'a' && c < 'z') || (c >= 'A' && c < 'Z') || (c >= '0' && c < '9') )) {
+		/* We know c is in ['a', 'z'], ['A', 'Z'], or ['0', '9'] range from zend_string_only_has_ascii_alphanumeric() */
+		if (EXPECTED( c != 'z' && c != 'Z' && c != '9' )) {
 			carry = false;
 			ZSTR_VAL(incremented)[position]++;
 		} else { /* if 'z', 'Z', or '9' */
@@ -1270,7 +1271,8 @@ PHP_FUNCTION(str_decrement)
 
 	do {
 		char c = ZSTR_VAL(decremented)[position];
-		if (EXPECTED( (c > 'a' && c <= 'z') || (c > 'A' && c <= 'Z') || (c > '0' && c <= '9') )) {
+		/* We know c is in ['a', 'z'], ['A', 'Z'], or ['0', '9'] range from zend_string_only_has_ascii_alphanumeric() */
+		if (EXPECTED( c != 'a' && c != 'A' && c != '0' )) {
 			carry = false;
 			ZSTR_VAL(decremented)[position]--;
 		} else { /* if 'a', 'A', or '0' */
