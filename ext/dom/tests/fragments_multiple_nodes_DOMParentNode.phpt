@@ -29,10 +29,10 @@ echo $dom->saveXML();
 --EXPECT--
 <?xml version="1.0"?>
 <!DOCTYPE HTML>
-<html><p>1</p></html>
+<html><p>1</p><b>2</b></html>
 <?xml version="1.0"?>
 <!DOCTYPE HTML>
-<html><p>1</p>foo</html>
+<html><p>1</p><b>2</b>foo</html>
 <?xml version="1.0"?>
 <!DOCTYPE HTML>
-<html><p>3</p><p>1</p>foo</html>
+<html><p>3</p><b>4</b><p>1</p><b>2</b>foo</html>
