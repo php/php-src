@@ -375,6 +375,16 @@ const PHP_ROUND_HALF_EVEN = UNKNOWN;
  * @cvalue PHP_ROUND_HALF_ODD
  */
 const PHP_ROUND_HALF_ODD = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_UP
+ */
+const PHP_ROUND_UP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_DOWN
+ */
+const PHP_ROUND_DOWN = UNKNOWN;
 
 /* crypt.c */
 

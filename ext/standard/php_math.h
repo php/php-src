@@ -114,4 +114,12 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base);
 #define PHP_ROUND_HALF_ODD       0x04
 #endif
 
+#ifndef PHP_ROUND_UP
+#define PHP_ROUND_UP       	     0x05
+#endif
+
+#ifndef PHP_ROUND_DOWN
+#define PHP_ROUND_DOWN           0x06
+#endif
+
 #endif /* PHP_MATH_H */
