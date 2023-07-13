@@ -205,6 +205,7 @@ PHP_METHOD(DOMElement, getAttribute)
 	dom_object *intern;
 	xmlNodePtr attr;
 	size_t name_len;
+	bool should_free;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
@@ -218,12 +219,15 @@ PHP_METHOD(DOMElement, getAttribute)
 		switch (attr->type) {
 			case XML_ATTRIBUTE_NODE:
 				value = xmlNodeListGetString(attr->doc, attr->children, 1);
+				should_free = true;
 				break;
 			case XML_NAMESPACE_DECL:
-				value = xmlStrdup(((xmlNsPtr)attr)->href);
+				value = (xmlChar *) ((xmlNsPtr)attr)->href;
+				should_free = false;
 				break;
 			default:
-				value = xmlStrdup(((xmlAttributePtr)attr)->defaultValue);
+				value = (xmlChar *) ((xmlAttributePtr)attr)->defaultValue;
+				should_free = false;
 		}
 	}
 
@@ -231,7 +235,9 @@ PHP_METHOD(DOMElement, getAttribute)
 		RETURN_EMPTY_STRING();
 	} else {
 		RETVAL_STRING((char *)value);
-		xmlFree(value);
+		if (should_free) {
+			xmlFree(value);
+		}
 	}
 }
 /* }}} end dom_element_get_attribute */
