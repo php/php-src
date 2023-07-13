@@ -23,7 +23,7 @@ assert(0 && ($a = function () {
     echo $e->getMessage(), PHP_EOL;
 }
 
-try{
+try {
 assert(0 && ($a = function &(array &$a, ?X $b = null) use ($c,&$d) : ?X {
     abstract class A extends B implements C, D {
         const X = 12;
@@ -72,7 +72,7 @@ assert(0 && ($a = function &(array &$a, ?X $b = null) use ($c,&$d) : ?X {
     echo $e->getMessage(), PHP_EOL;
 }
 
-try{
+try {
 assert(0 && ($a = function &(array &$a, X $b = null, int|float $c) use ($c,&$d) : X {
     final class A {
         final protected function f2() {
@@ -108,7 +108,7 @@ L0:
     echo $e->getMessage(), PHP_EOL;
 }
 
-try{
+try {
 assert(0 && ($a = function &(?array &$a, X $b = null) use ($c,&$d) : X {
     class A {
         use T1, T2 {
@@ -124,7 +124,7 @@ assert(0 && ($a = function &(?array &$a, X $b = null) use ($c,&$d) : X {
     echo $e->getMessage(), PHP_EOL;
 }
 
-try{
+try {
 assert(0 && ($a = function &(array &...$a) {
     declare(A=1,B=2);
     try {
@@ -141,7 +141,7 @@ assert(0 && ($a = function &(array &...$a) {
     echo $e->getMessage(), PHP_EOL;
 }
 
-try{
+try {
 assert(0 && ($a = function (): ?static {
     declare(C=1) { echo 1; }
     $x = '\'"`$a';
