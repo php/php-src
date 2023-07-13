@@ -20,6 +20,7 @@ PHP                                                                        NEWS
   . Added DOMElement::getAttributeNames(). (nielsdos)
   . Added DOMNode::getRootNode(). (nielsdos)
   . Added DOMElement::className. (nielsdos)
+  . Added DOMParentNode::replaceChildren(). (nielsdos)
 
 - Intl:
   . Fix memory leak in MessageFormatter::format() on failure. (Girgias)

@@ -591,4 +591,37 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 	xmlFree(fragment);
 }
 
+void dom_parent_node_replace_children(dom_object *context, zval *nodes, uint32_t nodesc)
+{
+	/* Spec link: https://dom.spec.whatwg.org/#dom-parentnode-replacechildren */
+
+	xmlNodePtr thisp = dom_object_get_node(context);
+	/* Note: Only rule 2 of pre-insertion validity can be broken */
+	if (dom_hierarchy_node_list(thisp, nodes, nodesc)) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(context->document));
+		return;
+	}
+
+	xmlNodePtr fragment = dom_zvals_to_fragment(context->document, thisp, nodes, nodesc);
+	if (UNEXPECTED(fragment == NULL)) {
+		return;
+	}
+
+	php_libxml_invalidate_node_list_cache_from_doc(context->document->ptr);
+
+	dom_remove_all_children(thisp);
+
+	xmlNodePtr newchild = fragment->children;
+	if (newchild) {
+		xmlNodePtr last = fragment->last;
+
+		dom_pre_insert(NULL, thisp, newchild, fragment);
+
+		dom_fragment_assign_parent_node(thisp, fragment);
+		dom_reconcile_ns_list(thisp->doc, newchild, last);
+	}
+
+	xmlFree(fragment);
+}
+
 #endif

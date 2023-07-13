@@ -275,6 +275,9 @@ interface DOMParentNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void;
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void;
 }
 
 interface DOMChildNode
@@ -459,6 +462,9 @@ class DOMDocumentFragment extends DOMNode implements DOMParentNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void {}
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void {}
 }
 
 class DOMNodeList implements IteratorAggregate, Countable
@@ -636,6 +642,9 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void {}
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void {}
 }
 
 class DOMDocument extends DOMNode implements DOMParentNode
@@ -803,6 +812,9 @@ class DOMDocument extends DOMNode implements DOMParentNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void {}
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void {}
 }
 
 final class DOMException extends Exception

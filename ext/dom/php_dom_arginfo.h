@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 91732c51635f43f016f4b531d9aa8e00312084ec */
+ * Stub hash: 5ce5f3c6715ab8ee1d8af7b03f2d2fecc757e7e0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -18,6 +18,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMParentNode_append, 0, 0
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMParentNode_prepend arginfo_class_DOMParentNode_append
+
+#define arginfo_class_DOMParentNode_replaceChildren arginfo_class_DOMParentNode_append
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMChildNode_remove, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -137,6 +139,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOMDocumentFragment_append arginfo_class_DOMParentNode_append
 
 #define arginfo_class_DOMDocumentFragment_prepend arginfo_class_DOMParentNode_append
+
+#define arginfo_class_DOMDocumentFragment_replaceChildren arginfo_class_DOMParentNode_append
 
 #define arginfo_class_DOMNodeList_count arginfo_class_DOMNode_getLineNo
 
@@ -285,6 +289,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOMElement_append arginfo_class_DOMParentNode_append
 
 #define arginfo_class_DOMElement_prepend arginfo_class_DOMParentNode_append
+
+#define arginfo_class_DOMElement_replaceChildren arginfo_class_DOMParentNode_append
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, version, IS_STRING, 0, "\"1.0\"")
@@ -439,6 +445,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMDocument_prepend arginfo_class_DOMParentNode_append
 
+#define arginfo_class_DOMDocument_replaceChildren arginfo_class_DOMParentNode_append
+
 #define arginfo_class_DOMText___construct arginfo_class_DOMComment___construct
 
 #define arginfo_class_DOMText_isWhitespaceInElementContent arginfo_class_DOMNode_hasAttributes
@@ -533,6 +541,7 @@ ZEND_METHOD(DOMDocumentFragment, __construct);
 ZEND_METHOD(DOMDocumentFragment, appendXML);
 ZEND_METHOD(DOMDocumentFragment, append);
 ZEND_METHOD(DOMDocumentFragment, prepend);
+ZEND_METHOD(DOMDocumentFragment, replaceChildren);
 ZEND_METHOD(DOMNodeList, count);
 ZEND_METHOD(DOMNodeList, getIterator);
 ZEND_METHOD(DOMNodeList, item);
@@ -573,6 +582,7 @@ ZEND_METHOD(DOMElement, after);
 ZEND_METHOD(DOMElement, replaceWith);
 ZEND_METHOD(DOMElement, append);
 ZEND_METHOD(DOMElement, prepend);
+ZEND_METHOD(DOMElement, replaceChildren);
 ZEND_METHOD(DOMDocument, __construct);
 ZEND_METHOD(DOMDocument, createAttribute);
 ZEND_METHOD(DOMDocument, createAttributeNS);
@@ -623,6 +633,7 @@ ZEND_METHOD(DOMDocument, xinclude);
 ZEND_METHOD(DOMDocument, adoptNode);
 ZEND_METHOD(DOMDocument, append);
 ZEND_METHOD(DOMDocument, prepend);
+ZEND_METHOD(DOMDocument, replaceChildren);
 ZEND_METHOD(DOMText, __construct);
 ZEND_METHOD(DOMText, isWhitespaceInElementContent);
 ZEND_METHOD(DOMText, splitText);
@@ -676,6 +687,7 @@ static const zend_function_entry class_DOMComment_methods[] = {
 static const zend_function_entry class_DOMParentNode_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DOMParentNode, append, arginfo_class_DOMParentNode_append, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DOMParentNode, prepend, arginfo_class_DOMParentNode_prepend, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DOMParentNode, replaceChildren, arginfo_class_DOMParentNode_replaceChildren, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
 
@@ -732,6 +744,7 @@ static const zend_function_entry class_DOMDocumentFragment_methods[] = {
 	ZEND_ME(DOMDocumentFragment, appendXML, arginfo_class_DOMDocumentFragment_appendXML, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMDocumentFragment, append, arginfo_class_DOMDocumentFragment_append, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMDocumentFragment, prepend, arginfo_class_DOMDocumentFragment_prepend, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMDocumentFragment, replaceChildren, arginfo_class_DOMDocumentFragment_replaceChildren, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -792,6 +805,7 @@ static const zend_function_entry class_DOMElement_methods[] = {
 	ZEND_ME(DOMElement, replaceWith, arginfo_class_DOMElement_replaceWith, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, append, arginfo_class_DOMElement_append, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, prepend, arginfo_class_DOMElement_prepend, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMElement, replaceChildren, arginfo_class_DOMElement_replaceChildren, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -847,6 +861,7 @@ static const zend_function_entry class_DOMDocument_methods[] = {
 	ZEND_ME(DOMDocument, adoptNode, arginfo_class_DOMDocument_adoptNode, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMDocument, append, arginfo_class_DOMDocument_append, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMDocument, prepend, arginfo_class_DOMDocument_prepend, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMDocument, replaceChildren, arginfo_class_DOMDocument_replaceChildren, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
