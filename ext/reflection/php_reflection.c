@@ -5720,6 +5720,22 @@ ZEND_METHOD(ReflectionProperty, setValue)
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &tmp, &value) == FAILURE) {
 				RETURN_THROWS();
 			}
+
+			if (Z_TYPE_P(tmp) != IS_NULL && Z_TYPE_P(tmp) != IS_OBJECT) {
+				zend_string *method_name = get_active_function_or_method_name();
+				zend_error(E_DEPRECATED, "Calling %s() with a 1st argument which is not null or an object is deprecated", ZSTR_VAL(method_name));
+				zend_string_release(method_name);
+				if (UNEXPECTED(EG(exception))) {
+					RETURN_THROWS();
+				}
+			}
+		} else {
+			zend_string *method_name = get_active_function_or_method_name();
+			zend_error(E_DEPRECATED, "Calling %s() with a single argument is deprecated", ZSTR_VAL(method_name));
+			zend_string_release(method_name);
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
 		}
 
 		zend_update_static_property_ex(intern->ce, ref->unmangled_name, value);

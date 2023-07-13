@@ -19,11 +19,11 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-$rp->setValue("24");
+$rp->setValue(null, "24");
 var_dump($rp->getValue());
 
 try {
-    $rp->setValue("foo");
+    $rp->setValue(null, "foo");
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -33,7 +33,7 @@ Test::$z =& Test::$y;
 
 $rp = new ReflectionProperty('Test', 'z');
 try {
-    $rp->setValue("foo");
+    $rp->setValue(null, "foo");
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
