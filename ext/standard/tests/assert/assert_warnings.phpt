@@ -10,4 +10,6 @@ assert.exception=0
 assert(0, null);
 ?>
 --EXPECTF--
+Deprecated: PHP Startup: assert.exception INI setting is deprecated in Unknown on line 0
+
 Warning: assert(): Assertion failed in %s on line %d

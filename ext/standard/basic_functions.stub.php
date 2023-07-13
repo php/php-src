@@ -124,26 +124,31 @@ const ARRAY_FILTER_USE_KEY = UNKNOWN;
 
 /**
  * @var int
+ * @deprecated
  * @cvalue PHP_ASSERT_ACTIVE
  */
 const ASSERT_ACTIVE = UNKNOWN;
 /**
  * @var int
+ * @deprecated
  * @cvalue PHP_ASSERT_CALLBACK
  */
 const ASSERT_CALLBACK = UNKNOWN;
 /**
  * @var int
+ * @deprecated
  * @cvalue PHP_ASSERT_BAIL
  */
 const ASSERT_BAIL = UNKNOWN;
 /**
  * @var int
+ * @deprecated
  * @cvalue PHP_ASSERT_WARNING
  */
 const ASSERT_WARNING = UNKNOWN;
 /**
  * @var int
+ * @deprecated
  * @cvalue PHP_ASSERT_EXCEPTION
  */
 const ASSERT_EXCEPTION = UNKNOWN;
@@ -2264,6 +2269,7 @@ function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags =
 
 function assert(mixed $assertion, Throwable|string|null $description = null): bool {}
 
+/** @deprecated */
 function assert_options(int $option, mixed $value = UNKNOWN): mixed {}
 
 /* string.c */

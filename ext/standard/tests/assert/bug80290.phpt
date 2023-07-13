@@ -12,6 +12,9 @@ assert(false, 'Dynamic message: ' . $x);
 
 ?>
 --EXPECTF--
+Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 string(18) "Dynamic message: x"
 
 Fatal error: Uncaught AssertionError: Dynamic message: x in %s:%d

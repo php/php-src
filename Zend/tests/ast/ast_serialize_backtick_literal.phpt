@@ -1,15 +1,16 @@
 --TEST--
-ZEND_POW_ASSIGN
+Serialization of backtick literal is incorrect
 --INI--
 zend.assertions=1
 --FILE--
 <?php
 
 try {
-    assert(false && ($a **= 2));
+    assert(false && `echo -n ""`);
 } catch (AssertionError $e) {
     echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
 }
+
 ?>
 --EXPECT--
-assert(): assert(false && ($a **= 2)) failed
+assert(): assert(false && `echo -n ""`) failed

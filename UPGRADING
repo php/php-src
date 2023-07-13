@@ -126,6 +126,12 @@ PHP 8.3 UPGRADE NOTES
   . The MT_RAND_PHP Mt19937 variant is deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_3#mt_rand_php
 
+- Standard:
+  . The assert_option() function is now deprecated.
+  . The ASSERT_ACTIVE, ASSERT_BAIL,ASSERT_CALLBACK, ASSERT_EXCEPTION, and
+    ASSERT_WARNING constants have been deprecated.
+    RFC: https://wiki.php.net/rfc/assert-string-eval-cleanup
+
 - SQLite3
   . Using exceptions is now preferred, warnings will be removed in the future.
     Calling SQLite3::enableExceptions(false) will trigger a depreciation warning
@@ -363,6 +369,18 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 11. Changes to INI File Handling
 ========================================
+
+- assert.*
+  . The assert.* INI settings have been deprecated.
+    This comprises the following INI settings:
+     - assert.active
+     - assert.bail
+     - assert.callback
+     - assert.exception
+     - assert.warning
+    If the value of the setting is equal to the default value, no deprecation
+    notice is emitted.
+    The zend.assertions INI setting should be used instead.
 
 - zend.max_allowed_stack_size
   . New INI directive to set the maximum allowed stack size. Possible
