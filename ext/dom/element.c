@@ -1470,5 +1470,111 @@ PHP_METHOD(DOMElement, insertAdjacentText)
 	}
 }
 /* }}} end DOMElement::insertAdjacentText */
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-element-toggleattribute
+Since:
+*/
+PHP_METHOD(DOMElement, toggleAttribute)
+{
+	char *qname, *qname_tmp = NULL;
+	size_t qname_length;
+	bool force, force_is_null = true;
+	xmlNodePtr thisp;
+	zval *id;
+	dom_object *intern;
+	bool retval;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b!", &qname, &qname_length, &force, &force_is_null) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
+
+	/* Step 1 */
+	if (xmlValidateName((xmlChar *) qname, 0) != 0) {
+		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
+		RETURN_THROWS();
+	}
+
+	/* Step 2 */
+	if (thisp->doc->type == XML_HTML_DOCUMENT_NODE && (thisp->ns == NULL || xmlStrEqual(thisp->ns->href, (const xmlChar *) "http://www.w3.org/1999/xhtml"))) {
+		qname_tmp = zend_str_tolower_dup_ex(qname, qname_length);
+		if (qname_tmp != NULL) {
+			qname = qname_tmp;
+		}
+	}
+
+	/* Step 3 */
+	xmlNodePtr attribute = dom_get_dom1_attribute(thisp, (xmlChar *) qname);
+
+	/* Step 4 */
+	if (attribute == NULL) {
+		/* Step 4.1 */
+		if (force_is_null || force) {
+			/* The behaviour for namespaces isn't defined by spec, but this is based on observing browers behaviour.
+			 * It follows the same rules when you'd manually add an attribute using the other APIs. */
+			int len;
+			const xmlChar *split = xmlSplitQName3((const xmlChar *) qname, &len);
+			if (split == NULL || strncmp(qname, "xmlns:", len + 1) != 0) {
+				/* unqualified name, or qualified name with no xml namespace declaration */
+				dom_create_attribute(thisp, qname, "");
+			} else {
+				/* qualified name with xml namespace declaration */
+				xmlNewNs(thisp, (const xmlChar *) "", (const xmlChar *) (qname + len + 1));
+			}
+			retval = true;
+			goto out;
+		}
+		/* Step 4.2 */
+		retval = false;
+		goto out;
+	}
+
+	/* Step 5 */
+	if (force_is_null || !force) {
+		if (attribute->type == XML_NAMESPACE_DECL) {
+			/* The behaviour isn't defined by spec, but by observing browsers I found
+			 * that you can remove the nodes, but they'll get reconciled.
+			 * So if any reference was left to the namespace, the only effect is that
+			 * the definition is potentially moved closer to the element using it.
+			 * If no reference was left, it is actually removed. */
+			xmlNsPtr ns = (xmlNsPtr) attribute;
+			if (thisp->nsDef == ns) {
+				thisp->nsDef = ns->next;
+			} else if (thisp->nsDef != NULL) {
+				xmlNsPtr prev = thisp->nsDef;
+				xmlNsPtr cur = prev->next;
+				while (cur) {
+					if (cur == ns) {
+						prev->next = cur->next;
+						break;
+					}
+					prev = cur;
+					cur = cur->next;
+				}
+			}
+
+			ns->next = NULL;
+			dom_set_old_ns(thisp->doc, ns);
+			dom_reconcile_ns(thisp->doc, thisp);
+		} else {
+			/* TODO: in the future when namespace bugs are fixed,
+			 * the above if-branch should be merged into this called function
+			 * such that the removal will work properly with all APIs. */
+			dom_remove_attribute(attribute);
+		}
+		retval = false;
+		goto out;
+	}
+
+	/* Step 6 */
+	retval = true;
+
+out:
+	if (qname_tmp) {
+		efree(qname_tmp);
+	}
+	RETURN_BOOL(retval);
+}
+/* }}} end DOMElement::prepend */
 
 #endif

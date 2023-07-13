@@ -642,6 +642,8 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
     /** @tentative-return-type */
     public function setIdAttributeNode(DOMAttr $attr, bool $isId): void {}
 
+    public function toggleAttribute(string $qualifiedName, ?bool $force = null): bool {}
+
     public function remove(): void {}
 
     /** @param DOMNode|string $nodes */
