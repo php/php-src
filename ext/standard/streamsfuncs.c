@@ -1064,6 +1064,26 @@ PHP_FUNCTION(stream_context_set_option)
 }
 /* }}} */
 
+PHP_FUNCTION(stream_context_set_options)
+{
+	zval *zcontext = NULL;
+	php_stream_context *context;
+	HashTable *options;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(zcontext)
+		Z_PARAM_ARRAY_HT(options)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* figure out where the context is coming from exactly */
+	if (!(context = decode_context_param(zcontext))) {
+		zend_argument_type_error(1, "must be a valid stream/context");
+		RETURN_THROWS();
+	}
+
+	RETURN_BOOL(parse_context_options(context, options) == SUCCESS);
+}
+
 /* {{{ Set parameters for a file context */
 PHP_FUNCTION(stream_context_set_params)
 {
