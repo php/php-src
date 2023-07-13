@@ -355,6 +355,15 @@ PHP_METHOD(DOMElement, getAttributeNames)
 }
 /* }}} end DOMElement::getAttributeNames() */
 
+static xmlNodePtr dom_create_attribute(xmlNodePtr nodep, const char *name, const char* value)
+{
+	if (xmlStrEqual((xmlChar *)name, (xmlChar *)"xmlns")) {
+		return (xmlNodePtr) xmlNewNs(nodep, (xmlChar *)value, NULL);
+	} else {
+		return (xmlNodePtr) xmlSetProp(nodep, (xmlChar *) name, (xmlChar *)value);
+	}
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68F082
 Since:
 */
@@ -405,22 +414,39 @@ PHP_METHOD(DOMElement, setAttribute)
 
 	}
 
-	if (xmlStrEqual((xmlChar *)name, (xmlChar *)"xmlns")) {
-		if (xmlNewNs(nodep, (xmlChar *)value, NULL)) {
-			RETURN_TRUE;
-		}
-	} else {
-		attr = (xmlNodePtr)xmlSetProp(nodep, (xmlChar *) name, (xmlChar *)value);
-	}
+	attr = dom_create_attribute(nodep, name, value);
 	if (!attr) {
 		zend_argument_value_error(1, "must be a valid XML attribute");
 		RETURN_THROWS();
+	}
+	if (attr->type == XML_NAMESPACE_DECL) {
+		RETURN_TRUE;
 	}
 
 	DOM_RET_OBJ(attr, &ret, intern);
 
 }
 /* }}} end dom_element_set_attribute */
+
+static bool dom_remove_attribute(xmlNodePtr attrp)
+{
+	ZEND_ASSERT(attrp != NULL);
+	switch (attrp->type) {
+		case XML_ATTRIBUTE_NODE:
+			if (php_dom_object_get_data(attrp) == NULL) {
+				node_list_unlink(attrp->children);
+				xmlUnlinkNode(attrp);
+				xmlFreeProp((xmlAttrPtr)attrp);
+			} else {
+				xmlUnlinkNode(attrp);
+			}
+			break;
+		case XML_NAMESPACE_DECL:
+			return false;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+	return true;
+}
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D6AC0F9
 Since:
@@ -450,23 +476,7 @@ PHP_METHOD(DOMElement, removeAttribute)
 		RETURN_FALSE;
 	}
 
-	switch (attrp->type) {
-		case XML_ATTRIBUTE_NODE:
-			if (php_dom_object_get_data(attrp) == NULL) {
-			node_list_unlink(attrp->children);
-				xmlUnlinkNode(attrp);
-				xmlFreeProp((xmlAttrPtr)attrp);
-		} else {
-				xmlUnlinkNode(attrp);
-		}
-			break;
-		case XML_NAMESPACE_DECL:
-			RETURN_FALSE;
-		default:
-			break;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(dom_remove_attribute(attrp));
 }
 /* }}} end dom_element_remove_attribute */
 
