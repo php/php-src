@@ -29,6 +29,8 @@ PHP                                                                        NEWS
   . Added DOMNode::parentElement and DOMNameSpaceNode::parentElement.
     (nielsdos)
   . Added DOMNode::isEqualNode(). (nielsdos)
+  . Added DOMElement::insertAdjacentElement() and
+    DOMElement::insertAdjacentText(). (nielsdos)
 
 - FPM:
   . Added warning to log when fpm socket was not registered on the expected

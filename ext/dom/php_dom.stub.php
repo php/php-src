@@ -661,6 +661,10 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
 
     /** @param DOMNode|string $nodes */
     public function replaceChildren(...$nodes): void {}
+
+    public function insertAdjacentElement(string $where, DOMElement $element): ?DOMElement {}
+
+    public function insertAdjacentText(string $where, string $data): void {}
 }
 
 class DOMDocument extends DOMNode implements DOMParentNode

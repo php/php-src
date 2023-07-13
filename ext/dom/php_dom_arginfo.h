@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7070b07b2dee16222242b7e516372a6562d87036 */
+ * Stub hash: 850ab297bd3e6162e0497769cace87a41e8e8a00 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -296,6 +296,16 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMElement_replaceChildren arginfo_class_DOMParentNode_append
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOMElement_insertAdjacentElement, 0, 2, DOMElement, 1)
+	ZEND_ARG_TYPE_INFO(0, where, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, element, DOMElement, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_insertAdjacentText, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, where, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, version, IS_STRING, 0, "\"1.0\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 0, "\"\"")
@@ -588,6 +598,8 @@ ZEND_METHOD(DOMElement, replaceWith);
 ZEND_METHOD(DOMElement, append);
 ZEND_METHOD(DOMElement, prepend);
 ZEND_METHOD(DOMElement, replaceChildren);
+ZEND_METHOD(DOMElement, insertAdjacentElement);
+ZEND_METHOD(DOMElement, insertAdjacentText);
 ZEND_METHOD(DOMDocument, __construct);
 ZEND_METHOD(DOMDocument, createAttribute);
 ZEND_METHOD(DOMDocument, createAttributeNS);
@@ -812,6 +824,8 @@ static const zend_function_entry class_DOMElement_methods[] = {
 	ZEND_ME(DOMElement, append, arginfo_class_DOMElement_append, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, prepend, arginfo_class_DOMElement_prepend, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, replaceChildren, arginfo_class_DOMElement_replaceChildren, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMElement, insertAdjacentElement, arginfo_class_DOMElement_insertAdjacentElement, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMElement, insertAdjacentText, arginfo_class_DOMElement_insertAdjacentText, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
