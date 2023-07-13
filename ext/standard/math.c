@@ -19,13 +19,13 @@
 
 #include "php.h"
 #include "php_math.h"
-#include "zend_multiply.h"
-#include "zend_exceptions.h"
-#include "zend_portability.h"
 #include "zend_bitset.h"
+#include "zend_exceptions.h"
+#include "zend_multiply.h"
+#include "zend_portability.h"
 
-#include <math.h>
 #include <float.h>
+#include <math.h>
 #include <stdlib.h>
 
 #include "basic_functions.h"
@@ -33,19 +33,18 @@
 /* {{{ php_intlog10abs
    Returns floor(log10(fabs(val))), uses fast binary search */
 static inline int php_intlog10abs(double value) {
-	int result;
 	value = fabs(value);
 
 	if (value < 1e-8 || value > 1e22) {
-		result = (int)floor(log10(value));
+		return (int)floor(log10(value));
 	} else {
-		static const double values[] = {
-			1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1,
-			1e0,  1e1,  1e2,  1e3,  1e4,  1e5,  1e6,  1e7,
-			1e8,  1e9,  1e10, 1e11, 1e12, 1e13, 1e14, 1e15,
-			1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22};
 		/* Do a binary search with 5 steps */
-		result = 15;
+		int result = 15;
+		static const double values[] = {
+				1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2,
+				1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13,
+				1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22};
+
 		if (value < values[result]) {
 			result -= 8;
 		} else {
@@ -70,23 +69,23 @@ static inline int php_intlog10abs(double value) {
 			result -= 1;
 		}
 		result -= 8;
+		return result;
 	}
-	return result;
 }
 /* }}} */
 
 /* {{{ php_intpow10
        Returns pow(10.0, (double)power), uses fast lookup table for exact powers */
 static inline double php_intpow10(int power) {
-	static const double powers[] = {
-		1e0,  1e1,  1e2,  1e3,  1e4,  1e5,  1e6,  1e7,
-		1e8,  1e9,  1e10, 1e11, 1e12, 1e13, 1e14, 1e15,
-		1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22};
-
 	/* Not in lookup table */
 	if (power < 0 || power > 22) {
 		return pow(10.0, (double)power);
 	}
+
+	static const double powers[] = {
+			1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11,
+			1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22};
+
 	return powers[power];
 }
 /* }}} */
@@ -1023,7 +1022,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	size_t integral;
 	size_t reslen = 0;
 	int count = 0;
-	int is_negative=0;
+	int is_negative = 0;
 
 	if (d < 0) {
 		is_negative = 1;
