@@ -135,7 +135,7 @@ Since:
 */
 PHP_METHOD(DOMDocumentFragment, replaceChildren)
 {
-	uint32_t argc;
+	uint32_t argc = 0;
 	zval *args;
 	dom_object *intern;
 

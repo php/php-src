@@ -2183,7 +2183,7 @@ Since:
 */
 PHP_METHOD(DOMDocument, replaceChildren)
 {
-	uint32_t argc;
+	uint32_t argc = 0;
 	zval *args;
 	dom_object *intern;
 
