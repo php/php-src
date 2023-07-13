@@ -22,7 +22,7 @@ abstract class AbstractClass {
 }
 
 $foo = new ReflectionMethod('TestClass', 'foo');
-$privateMethod = new ReflectionMethod("TestClass::privateMethod");
+$privateMethod = ReflectionMethod::createFromMethodName("TestClass::privateMethod");
 
 $testClassInstance = new TestClass();
 $testClassInstance->prop = "Hello";
@@ -45,7 +45,7 @@ echo "\nPrivate method:\n";
 var_dump($privateMethod->invoke($testClassInstance));
 
 echo "\nAbstract method:\n";
-$abstractMethod = new ReflectionMethod("AbstractClass::foo");
+$abstractMethod = ReflectionMethod::createFromMethodName("AbstractClass::foo");
 try {
     $abstractMethod->invoke(true);
 } catch (ReflectionException $e) {

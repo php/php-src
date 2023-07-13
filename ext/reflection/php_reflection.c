@@ -3185,9 +3185,9 @@ ZEND_METHOD(ReflectionIntersectionType, getTypes)
 /* }}} */
 
 /* {{{ Constructor. Throws an Exception in case the given method does not exist */
-ZEND_METHOD(ReflectionMethod, __construct)
+static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 {
-	zend_object *arg1_obj;
+	zend_object *arg1_obj = NULL;
 	zend_string *arg1_str;
 	zend_string *arg2_str = NULL;
 
@@ -3202,11 +3202,17 @@ ZEND_METHOD(ReflectionMethod, __construct)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_OBJ_OR_STR(arg1_obj, arg1_str)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_NULL(arg2_str)
-	ZEND_PARSE_PARAMETERS_END();
+	if (is_constructor) {
+		ZEND_PARSE_PARAMETERS_START(1, 2)
+			Z_PARAM_OBJ_OR_STR(arg1_obj, arg1_str)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_STR_OR_NULL(arg2_str)
+		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_STR(arg1_str)
+		ZEND_PARSE_PARAMETERS_END();
+	}
 
 	if (arg1_obj) {
 		if (!arg2_str) {
@@ -3250,7 +3256,12 @@ ZEND_METHOD(ReflectionMethod, __construct)
 		zend_string_release(class_name);
 	}
 
-	object = ZEND_THIS;
+	if (is_constructor) {
+		object = ZEND_THIS;
+	} else {
+		object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : reflection_method_ptr);
+		object = return_value;
+	}
 	intern = Z_REFLECTION_P(object);
 
 	lcname = zend_str_tolower_dup(method_name, method_name_len);
@@ -3276,7 +3287,16 @@ ZEND_METHOD(ReflectionMethod, __construct)
 	intern->ref_type = REF_TYPE_FUNCTION;
 	intern->ce = ce;
 }
+
+/* {{{ Constructor. Throws an Exception in case the given method does not exist */
+ZEND_METHOD(ReflectionMethod, __construct) {
+	instantiate_reflection_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
 /* }}} */
+
+ZEND_METHOD(ReflectionMethod, createFromMethodName) {
+	instantiate_reflection_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
 
 /* {{{ Returns a string representation */
 ZEND_METHOD(ReflectionMethod, __toString)
