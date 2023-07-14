@@ -37,7 +37,10 @@ double zend_hrtime_timer_scale = .0;
 
 # include <mach/mach_time.h>
 # include <string.h>
-mach_timebase_info_data_t zend_hrtime_timerlib_info;
+mach_timebase_info_data_t zend_hrtime_timerlib_info = {
+	.numer = 0,
+	.denom = 1,
+};
 
 #elif ZEND_HRTIME_PLATFORM_HPUX
 
@@ -50,44 +53,18 @@ mach_timebase_info_data_t zend_hrtime_timerlib_info;
 
 #endif
 
-zend_result zend_startup_hrtime(void)
+void zend_startup_hrtime(void)
 {
 #if ZEND_HRTIME_PLATFORM_WINDOWS
 
 	LARGE_INTEGER tf = {0};
-	if (!QueryPerformanceFrequency(&tf) || 0 == tf.QuadPart) {
-		return FAILURE;
+	if (QueryPerformanceFrequency(&tf) || 0 != tf.QuadPart) {
+		zend_hrtime_timer_scale = (double)ZEND_NANO_IN_SEC / (zend_hrtime_t)tf.QuadPart;
 	}
-	zend_hrtime_timer_scale = (double)ZEND_NANO_IN_SEC / (zend_hrtime_t)tf.QuadPart;
 
 #elif ZEND_HRTIME_PLATFORM_APPLE
 
-	if (mach_timebase_info(&zend_hrtime_timerlib_info)) {
-		return FAILURE;
-	}
+	mach_timebase_info(&zend_hrtime_timerlib_info);
 
-#elif ZEND_HRTIME_PLATFORM_POSIX
-
-#if !_POSIX_MONOTONIC_CLOCK
-#ifdef _SC_MONOTONIC_CLOCK
-	if (0 >= sysconf(_SC_MONOTONIC_CLOCK)) {
-		return FAILURE;
-	}
 #endif
-#endif
-
-#elif ZEND_HRTIME_PLATFORM_HPUX
-
-	/* pass */
-
-#elif ZEND_HRTIME_PLATFORM_AIX
-
-	/* pass */
-
-#else
-	/* Timer unavailable. */
-	return FAILURE;
-#endif
-
-	return SUCCESS;
 }

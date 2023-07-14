@@ -70,11 +70,11 @@ extern mach_timebase_info_data_t zend_hrtime_timerlib_info;
 
 #endif
 
-#define ZEND_NANO_IN_SEC 1000000000
+#define ZEND_NANO_IN_SEC UINT64_C(1000000000)
 
 typedef uint64_t zend_hrtime_t;
 
-zend_result zend_startup_hrtime(void);
+void zend_startup_hrtime(void);
 
 static zend_always_inline zend_hrtime_t zend_hrtime(void)
 {
@@ -86,7 +86,7 @@ static zend_always_inline zend_hrtime_t zend_hrtime(void)
 	return (zend_hrtime_t)mach_absolute_time() * zend_hrtime_timerlib_info.numer / zend_hrtime_timerlib_info.denom;
 #elif ZEND_HRTIME_PLATFORM_POSIX
 	struct timespec ts = { .tv_sec = 0, .tv_nsec = 0 };
-	if (0 == clock_gettime(CLOCK_MONOTONIC, &ts)) {
+	if (EXPECTED(0 == clock_gettime(CLOCK_MONOTONIC, &ts))) {
 		return ((zend_hrtime_t) ts.tv_sec * (zend_hrtime_t)ZEND_NANO_IN_SEC) + ts.tv_nsec;
 	}
 	return 0;
