@@ -1381,21 +1381,22 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 						&& ctx->scdf.ssa->vars[ssa_op->op1_def].escape_state == ESCAPE_STATE_NO_ESCAPE) {
 					zval tmp1, tmp2;
 
-					if (ct_eval_fetch_obj(&tmp1, op1, op2) == SUCCESS
-							&& ct_eval_incdec(&tmp2, opline->opcode, &tmp1) == SUCCESS) {
-
-						dup_partial_object(&zv, op1);
-						ct_eval_assign_obj(&zv, &tmp2, op2);
-						if (opline->opcode == ZEND_PRE_INC_OBJ || opline->opcode == ZEND_PRE_DEC_OBJ) {
-							SET_RESULT(result, &tmp2);
-						} else {
-							SET_RESULT(result, &tmp1);
+					if (ct_eval_fetch_obj(&tmp1, op1, op2) == SUCCESS) {
+						if (ct_eval_incdec(&tmp2, opline->opcode, &tmp1) == SUCCESS) {
+							dup_partial_object(&zv, op1);
+							ct_eval_assign_obj(&zv, &tmp2, op2);
+							if (opline->opcode == ZEND_PRE_INC_OBJ || opline->opcode == ZEND_PRE_DEC_OBJ) {
+								SET_RESULT(result, &tmp2);
+							} else {
+								SET_RESULT(result, &tmp1);
+							}
+							zval_ptr_dtor_nogc(&tmp1);
+							zval_ptr_dtor_nogc(&tmp2);
+							SET_RESULT(op1, &zv);
+							zval_ptr_dtor_nogc(&zv);
+							break;
 						}
 						zval_ptr_dtor_nogc(&tmp1);
-						zval_ptr_dtor_nogc(&tmp2);
-						SET_RESULT(op1, &zv);
-						zval_ptr_dtor_nogc(&zv);
-						break;
 					}
 				}
 			}
