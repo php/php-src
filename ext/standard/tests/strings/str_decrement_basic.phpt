@@ -13,6 +13,15 @@ $strictlyAlphaNumeric = [
     "zA",
     "Z0",
     "z0",
+    // Underflow, removing leading character
+    "Aa",
+    "aA",
+    "A0",
+    "a0",
+    "10",
+    "1A",
+    "1a",
+    "10a",
     // string interpretable as a number in scientific notation
     "5e6",
     // Interned strings
@@ -44,6 +53,22 @@ string(2) "Y9"
 string(2) "Z0"
 string(2) "y9"
 string(2) "z0"
+string(1) "z"
+string(2) "Aa"
+string(1) "Z"
+string(2) "aA"
+string(1) "9"
+string(2) "A0"
+string(1) "9"
+string(2) "a0"
+string(1) "9"
+string(2) "10"
+string(1) "Z"
+string(2) "1A"
+string(1) "z"
+string(2) "1a"
+string(2) "9z"
+string(3) "10a"
 string(3) "5e5"
 string(3) "5e6"
 string(1) "c"

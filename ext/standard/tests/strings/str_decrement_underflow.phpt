@@ -4,14 +4,11 @@ str_decrement(): Out of Range ValueErrors for strings that cannot be decremented
 <?php
 
 $strings = [
+    "",
     "0",
     "a",
     "A",
     "00",
-    "Aa",
-    "aA",
-    "A0",
-    "a0",
     "0a",
     "0A",
 ];
@@ -26,13 +23,10 @@ foreach ($strings as $s) {
 
 ?>
 --EXPECT--
+str_decrement(): Argument #1 ($string) cannot be empty
 str_decrement(): Argument #1 ($string) "0" is out of decrement range
 str_decrement(): Argument #1 ($string) "a" is out of decrement range
 str_decrement(): Argument #1 ($string) "A" is out of decrement range
 str_decrement(): Argument #1 ($string) "00" is out of decrement range
-str_decrement(): Argument #1 ($string) "Aa" is out of decrement range
-str_decrement(): Argument #1 ($string) "aA" is out of decrement range
-str_decrement(): Argument #1 ($string) "A0" is out of decrement range
-str_decrement(): Argument #1 ($string) "a0" is out of decrement range
 str_decrement(): Argument #1 ($string) "0a" is out of decrement range
 str_decrement(): Argument #1 ($string) "0A" is out of decrement range

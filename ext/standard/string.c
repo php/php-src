@@ -1209,7 +1209,7 @@ PHP_FUNCTION(str_increment)
 		RETURN_THROWS();
 	}
 
-	zend_string *incremented = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), /* persistant */ false);
+	zend_string *incremented = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), /* persistent */ false);
 	size_t position = ZSTR_LEN(str)-1;
 	bool carry = false;
 
@@ -1241,7 +1241,7 @@ PHP_FUNCTION(str_increment)
 				ZSTR_VAL(tmp)[0] = ZSTR_VAL(incremented)[0];
 				break;
 		}
-		zend_string_release_ex(incremented, /* persistant */ false);
+		zend_string_release_ex(incremented, /* persistent */ false);
 		RETURN_STR(tmp);
 	}
 	RETURN_STR(incremented);
@@ -1264,8 +1264,12 @@ PHP_FUNCTION(str_decrement)
 		zend_argument_value_error(1, "must be composed only of alphanumeric ASCII characters");
 		RETURN_THROWS();
 	}
+	if (ZSTR_LEN(str) >= 1 && ZSTR_VAL(str)[0] == '0') {
+		zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
+		RETURN_THROWS();
+	}
 
-	zend_string *decremented = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), /* persistant */ false);
+	zend_string *decremented = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), /* persistent */ false);
 	size_t position = ZSTR_LEN(str)-1;
 	bool carry = false;
 
@@ -1285,10 +1289,17 @@ PHP_FUNCTION(str_decrement)
 		}
 	} while (carry && position-- > 0);
 
-	if (UNEXPECTED(carry)) {
-		zend_string_release_ex(decremented, /* persistant */ false);
-		zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
-		RETURN_THROWS();
+	if (UNEXPECTED(carry || ZSTR_VAL(decremented)[0] == '0')) {
+		if (ZSTR_LEN(decremented) == 1) {
+			zend_string_release_ex(decremented, /* persistent */ false);
+			zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
+			RETURN_THROWS();
+		}
+		zend_string *tmp = zend_string_alloc(ZSTR_LEN(decremented) - 1, 0);
+		memcpy(ZSTR_VAL(tmp), ZSTR_VAL(decremented) + 1, ZSTR_LEN(decremented) - 1);
+		ZSTR_VAL(tmp)[ZSTR_LEN(decremented) - 1] = '\0';
+		zend_string_release_ex(decremented, /* persistent */ false);
+		RETURN_STR(tmp);
 	}
 	RETURN_STR(decremented);
 }
