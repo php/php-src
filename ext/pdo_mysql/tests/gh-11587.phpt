@@ -4,10 +4,10 @@ GH-11587 PHP8.1: Fixed the condition for result set values to be of native type,
 pdo_mysql
 --SKIPIF--
 <?php
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::skip();
 if (!extension_loaded('mysqli') || !extension_loaded('mysqlnd')) {
-    /* Need connection to detect library version */
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-    MySQLPDOTest::skip();
+    die('skip: This test requires the loading of mysqli and mysqlnd');
 }
 ?>
 --FILE--
@@ -34,7 +34,7 @@ SQL;
 
 $db->exec($insertTestTable);
 
-// PDO::ATTR_EMULATE_PREPARES = true, PDO::ATTR_STRINGIFY_FETCHES = true
+echo "PDO::ATTR_EMULATE_PREPARES = true, PDO::ATTR_STRINGIFY_FETCHES = true\n";
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 $results = $db->query('SELECT * FROM test');
@@ -42,7 +42,9 @@ foreach ($results as $result) {
     var_dump($result);
 }
 
-// PDO::ATTR_EMULATE_PREPARES = true, PDO::ATTR_STRINGIFY_FETCHES = false
+echo "\n";
+
+echo "PDO::ATTR_EMULATE_PREPARES = true, PDO::ATTR_STRINGIFY_FETCHES = false\n";
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 $results = $db->query('SELECT * FROM test');
@@ -50,7 +52,9 @@ foreach ($results as $result) {
     var_dump($result);
 }
 
-// PDO::ATTR_EMULATE_PREPARES = false, PDO::ATTR_STRINGIFY_FETCHES = true
+echo "\n";
+
+echo "PDO::ATTR_EMULATE_PREPARES = false, PDO::ATTR_STRINGIFY_FETCHES = true\n";
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 $results = $db->query('SELECT * FROM test');
@@ -58,13 +62,17 @@ foreach ($results as $result) {
     var_dump($result);
 }
 
-// PDO::ATTR_EMULATE_PREPARES = false, PDO::ATTR_STRINGIFY_FETCHES = false
+echo "\n";
+
+echo "PDO::ATTR_EMULATE_PREPARES = false, PDO::ATTR_STRINGIFY_FETCHES = false\n";
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 $results = $db->query('SELECT * FROM test');
 foreach ($results as $result) {
     var_dump($result);
 }
+
+echo "\n";
 
 echo 'done!';
 ?>
@@ -74,6 +82,7 @@ require __DIR__ . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--
+PDO::ATTR_EMULATE_PREPARES = true, PDO::ATTR_STRINGIFY_FETCHES = true
 array(8) {
   ["id"]=>
   string(1) "1"
@@ -92,6 +101,8 @@ array(8) {
   [3]=>
   string(4) "4.60"
 }
+
+PDO::ATTR_EMULATE_PREPARES = true, PDO::ATTR_STRINGIFY_FETCHES = false
 array(8) {
   ["id"]=>
   int(1)
@@ -110,6 +121,8 @@ array(8) {
   [3]=>
   string(4) "4.60"
 }
+
+PDO::ATTR_EMULATE_PREPARES = false, PDO::ATTR_STRINGIFY_FETCHES = true
 array(8) {
   ["id"]=>
   string(1) "1"
@@ -128,6 +141,8 @@ array(8) {
   [3]=>
   string(4) "4.60"
 }
+
+PDO::ATTR_EMULATE_PREPARES = false, PDO::ATTR_STRINGIFY_FETCHES = false
 array(8) {
   ["id"]=>
   int(1)
@@ -146,4 +161,5 @@ array(8) {
   [3]=>
   string(4) "4.60"
 }
+
 done!
