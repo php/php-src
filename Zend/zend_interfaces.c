@@ -118,7 +118,7 @@ static void zend_user_it_dtor(zend_object_iterator *_iter)
 /* }}} */
 
 /* {{{ zend_user_it_valid */
-ZEND_API int zend_user_it_valid(zend_object_iterator *_iter)
+ZEND_API zend_result zend_user_it_valid(zend_object_iterator *_iter)
 {
 	if (_iter) {
 		zend_user_iterator *iter = (zend_user_iterator*)_iter;
@@ -198,7 +198,8 @@ ZEND_API HashTable *zend_user_it_get_gc(zend_object_iterator *_iter, zval **tabl
 
 static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 	zend_user_it_dtor,
-	zend_user_it_valid,
+	// FIXME: Adjust the actual function prototype in zend_object_iterator_funcs
+	(int (*)(zend_object_iterator *)) zend_user_it_valid,
 	zend_user_it_get_current_data,
 	zend_user_it_get_current_key,
 	zend_user_it_move_forward,
@@ -343,8 +344,8 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 		&class_type->function_table, "rewind", sizeof("rewind") - 1);
 	funcs_ptr->zf_valid = zend_hash_str_find_ptr(
 		&class_type->function_table, "valid", sizeof("valid") - 1);
-	funcs_ptr->zf_key = zend_hash_str_find_ptr(
-		&class_type->function_table, "key", sizeof("key") - 1);
+	funcs_ptr->zf_key = zend_hash_find_ptr(
+		&class_type->function_table, ZSTR_KNOWN(ZEND_STR_KEY));
 	funcs_ptr->zf_current = zend_hash_str_find_ptr(
 		&class_type->function_table, "current", sizeof("current") - 1);
 	funcs_ptr->zf_next = zend_hash_str_find_ptr(

@@ -299,9 +299,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	return stream;
 
 connect_errexit:
-	if (resource) {
-		php_url_free(resource);
-	}
+	php_url_free(resource);
 
 	if (stream) {
 		php_stream_close(stream);
@@ -490,7 +488,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	} else if (read_write == 2) {
 		/* when writing file (but not appending), it must NOT exist, unless a context option exists which allows it */
 		if (context && (tmpzval = php_stream_context_get_option(context, "ftp", "overwrite")) != NULL) {
-			allow_overwrite = Z_LVAL_P(tmpzval) ? 1 : 0;
+			allow_overwrite = zend_is_true(tmpzval);
 		}
 		if (result <= 299 && result >= 200) {
 			if (allow_overwrite) {
@@ -631,6 +629,7 @@ static ssize_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t coun
 	memcpy(ent->d_name, ZSTR_VAL(basename), tmp_len);
 	ent->d_name[tmp_len - 1] = '\0';
 	zend_string_release_ex(basename, 0);
+	ent->d_type = DT_UNKNOWN;
 
 	/* Trim off trailing whitespace characters */
 	while (tmp_len > 0 &&
@@ -916,7 +915,7 @@ static int php_stream_ftp_unlink(php_stream_wrapper *wrapper, const char *url, i
 	}
 
 	/* Attempt to delete the file */
-	php_stream_printf(stream, "DELE %s\r\n", (resource->path != NULL ? ZSTR_VAL(resource->path) : "/"));
+	php_stream_printf(stream, "DELE %s\r\n", ZSTR_VAL(resource->path));
 
 	result = GET_FTP_RESULT(stream);
 	if (result < 200 || result > 299) {
@@ -979,7 +978,7 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 	}
 
 	/* Rename FROM */
-	php_stream_printf(stream, "RNFR %s\r\n", (resource_from->path != NULL ? ZSTR_VAL(resource_from->path) : "/"));
+	php_stream_printf(stream, "RNFR %s\r\n", ZSTR_VAL(resource_from->path));
 
 	result = GET_FTP_RESULT(stream);
 	if (result < 300 || result > 399) {
@@ -990,7 +989,7 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 	}
 
 	/* Rename TO */
-	php_stream_printf(stream, "RNTO %s\r\n", (resource_to->path != NULL ? ZSTR_VAL(resource_to->path) : "/"));
+	php_stream_printf(stream, "RNTO %s\r\n", ZSTR_VAL(resource_to->path));
 
 	result = GET_FTP_RESULT(stream);
 	if (result < 200 || result > 299) {

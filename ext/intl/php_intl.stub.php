@@ -201,12 +201,12 @@ function intlcal_after(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
 function intlcal_before(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
-function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): bool {}
+function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): true {}
 
 /** @param int|bool $value */
 function intlcal_roll(IntlCalendar $calendar, int $field, $value): bool {}
 
-function intlcal_clear(IntlCalendar $calendar, ?int $field = null): bool {}
+function intlcal_clear(IntlCalendar $calendar, ?int $field = null): true {}
 
 function intlcal_field_difference(IntlCalendar $calendar, float $timestamp, int $field): int|false {}
 
@@ -228,7 +228,7 @@ function intlcal_get_maximum(IntlCalendar $calendar, int $field): int|false {}
 
 function intlcal_get_minimal_days_in_first_week(IntlCalendar $calendar): int|false {}
 
-function intlcal_set_minimal_days_in_first_week(IntlCalendar $calendar, int $days): bool {}
+function intlcal_set_minimal_days_in_first_week(IntlCalendar $calendar, int $days): true {}
 
 function intlcal_get_minimum(IntlCalendar $calendar, int $field): int|false {}
 
@@ -248,9 +248,9 @@ function intlcal_is_equivalent_to(IntlCalendar $calendar, IntlCalendar $other): 
 
 function intlcal_is_weekend(IntlCalendar $calendar, ?float $timestamp = null): bool {}
 
-function intlcal_set_first_day_of_week(IntlCalendar $calendar, int $dayOfWeek): bool {}
+function intlcal_set_first_day_of_week(IntlCalendar $calendar, int $dayOfWeek): true {}
 
-function intlcal_set_lenient(IntlCalendar $calendar, bool $lenient): bool {}
+function intlcal_set_lenient(IntlCalendar $calendar, bool $lenient): true {}
 
 function intlcal_get_repeated_wall_time_option(IntlCalendar $calendar): int {}
 
@@ -258,9 +258,9 @@ function intlcal_equals(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
 function intlcal_get_skipped_wall_time_option(IntlCalendar $calendar): int {}
 
-function intlcal_set_repeated_wall_time_option(IntlCalendar $calendar, int $option): bool {}
+function intlcal_set_repeated_wall_time_option(IntlCalendar $calendar, int $option): true {}
 
-function intlcal_set_skipped_wall_time_option(IntlCalendar $calendar, int $option): bool {}
+function intlcal_set_skipped_wall_time_option(IntlCalendar $calendar, int $option): true {}
 
 function intlcal_from_date_time(DateTime|string $datetime, ?string $locale = null): ?IntlCalendar {}
 
@@ -351,7 +351,7 @@ function datefmt_get_calendar_object(IntlDateFormatter $formatter): IntlCalendar
 function datefmt_get_timezone(IntlDateFormatter $formatter): IntlTimeZone|false {}
 
 /** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function datefmt_set_timezone(IntlDateFormatter $formatter, $timezone): ?bool {}
+function datefmt_set_timezone(IntlDateFormatter $formatter, $timezone): bool {}
 
 function datefmt_set_pattern(IntlDateFormatter $formatter, string $pattern): bool {}
 

@@ -39,6 +39,7 @@
 #ifdef PHP_WIN32
 #include "win32/winutil.h"
 #include "win32/time.h"
+#include <Ws2tcpip.h>
 #include <Wincrypt.h>
 /* These are from Wincrypt.h, they conflict with OpenSSL */
 #undef X509_NAME
@@ -48,6 +49,10 @@
 
 #ifndef MSG_DONTWAIT
 # define MSG_DONTWAIT 0
+#endif
+
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
 #endif
 
 /* Flags for determining allowed stream crypto methods */
@@ -124,6 +129,24 @@
 /* Used for peer verification in windows */
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) \
 	ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
+
+#if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
+/* Used for IPv6 Address peer verification */
+#define EXPAND_IPV6_ADDRESS(_str, _bytes) \
+	do { \
+		snprintf(_str, 40, "%X:%X:%X:%X:%X:%X:%X:%X", \
+			_bytes[0] << 8 | _bytes[1], \
+			_bytes[2] << 8 | _bytes[3], \
+			_bytes[4] << 8 | _bytes[5], \
+			_bytes[6] << 8 | _bytes[7], \
+			_bytes[8] << 8 | _bytes[9], \
+			_bytes[10] << 8 | _bytes[11], \
+			_bytes[12] << 8 | _bytes[13], \
+			_bytes[14] << 8 | _bytes[15] \
+		); \
+	} while(0)
+#define HAVE_IPV6_SAN 1
+#endif
 
 #if PHP_OPENSSL_API_VERSION < 0x10100
 static RSA *php_openssl_tmp_rsa_cb(SSL *s, int is_export, int keylength);
@@ -436,6 +459,19 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 	GENERAL_NAMES *alt_names = X509_get_ext_d2i(peer, NID_subject_alt_name, 0, 0);
 	int alt_name_count = sk_GENERAL_NAME_num(alt_names);
 
+#ifdef HAVE_IPV6_SAN
+	/* detect if subject name is an IPv6 address and expand once if required */
+	char subject_name_ipv6_expanded[40];
+	unsigned char ipv6[16];
+	bool subject_name_is_ipv6 = false;
+	subject_name_ipv6_expanded[0] = 0;
+
+	if (inet_pton(AF_INET6, subject_name, &ipv6)) {
+		EXPAND_IPV6_ADDRESS(subject_name_ipv6_expanded, ipv6);
+		subject_name_is_ipv6 = true;
+	}
+#endif
+
 	for (i = 0; i < alt_name_count; i++) {
 		GENERAL_NAME *san = sk_GENERAL_NAME_value(alt_names, i);
 
@@ -474,10 +510,17 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 					return 1;
 				}
 			}
-			/* No, we aren't bothering to check IPv6 addresses. Why?
-			 * Because IP SAN names are officially deprecated and are
-			 * not allowed by CAs starting in 2015. Deal with it.
-			 */
+#ifdef HAVE_IPV6_SAN
+			else if (san->d.ip->length == 16 && subject_name_is_ipv6) {
+				ipbuffer[0] = 0;
+				EXPAND_IPV6_ADDRESS(ipbuffer, san->d.iPAddress->data);
+				if (strcasecmp((const char*)subject_name_ipv6_expanded, (const char*)ipbuffer) == 0) {
+					sk_GENERAL_NAME_pop_free(alt_names, GENERAL_NAME_free);
+
+					return 1;
+				}
+			}
+#endif
 		}
 	}
 
@@ -513,7 +556,7 @@ static bool php_openssl_matches_common_name(X509 *peer, const char *subject_name
 }
 /* }}} */
 
-static int php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stream) /* {{{ */
+static zend_result php_openssl_apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stream) /* {{{ */
 {
 	zval *val = NULL;
 	zval *peer_fingerprint;
@@ -840,7 +883,7 @@ static long php_openssl_load_stream_cafile(X509_STORE *cert_store, const char *c
 }
 /* }}} */
 
-static int php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream) /* {{{ */
+static zend_result php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream) /* {{{ */
 {
 	zval *val = NULL;
 	char *cafile = NULL;
@@ -900,7 +943,7 @@ static void php_openssl_disable_peer_verification(SSL_CTX *ctx, php_stream *stre
 }
 /* }}} */
 
-static int php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ */
+static zend_result php_openssl_set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ */
 {
 	zval *val = NULL;
 	char *certfile = NULL;
@@ -1204,7 +1247,7 @@ static RSA *php_openssl_tmp_rsa_cb(SSL *s, int is_export, int keylength)
 }
 #endif
 
-static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /* {{{ */
+static zend_result php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /* {{{ */
 {
 	zval *zdhpath = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "dh_param");
 	if (zdhpath == NULL) {
@@ -1237,7 +1280,7 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 		return FAILURE;
 	}
 
-	if (SSL_CTX_set0_tmp_dh_pkey(ctx, pkey) < 0) {
+	if (SSL_CTX_set0_tmp_dh_pkey(ctx, pkey) == 0) {
 		php_error_docref(NULL, E_WARNING, "Failed assigning DH params");
 		EVP_PKEY_free(pkey);
 		return FAILURE;
@@ -1251,7 +1294,7 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 		return FAILURE;
 	}
 
-	if (SSL_CTX_set_tmp_dh(ctx, dh) < 0) {
+	if (SSL_CTX_set_tmp_dh(ctx, dh) == 0) {
 		php_error_docref(NULL, E_WARNING, "Failed assigning DH params");
 		DH_free(dh);
 		return FAILURE;
@@ -1265,7 +1308,7 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 /* }}} */
 
 #if defined(HAVE_ECDH) && PHP_OPENSSL_API_VERSION < 0x10100
-static int php_openssl_set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx) /* {{{ */
+static zend_result php_openssl_set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 {
 	zval *zvcurve;
 	int curve_nid;
@@ -1301,7 +1344,7 @@ static int php_openssl_set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx) /
 /* }}} */
 #endif
 
-static int php_openssl_set_server_specific_opts(php_stream *stream, SSL_CTX *ctx) /* {{{ */
+static zend_result php_openssl_set_server_specific_opts(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 {
 	zval *zv;
 	long ssl_ctx_options = SSL_CTX_get_options(ctx);
@@ -1320,7 +1363,10 @@ static int php_openssl_set_server_specific_opts(php_stream *stream, SSL_CTX *ctx
 		php_error_docref(NULL, E_WARNING, "rsa_key_size context option has been removed");
 	}
 
-	php_openssl_set_server_dh_param(stream, ctx);
+	if (php_openssl_set_server_dh_param(stream, ctx) == FAILURE) {
+		return FAILURE;
+	}
+
 	zv = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "single_dh_use");
 	if (zv == NULL || zend_is_true(zv)) {
 		ssl_ctx_options |= SSL_OP_SINGLE_DH_USE;
@@ -1397,7 +1443,7 @@ static SSL_CTX *php_openssl_create_sni_server_ctx(char *cert_path, char *key_pat
 }
 /* }}} */
 
-static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock)  /* {{{ */
+static zend_result php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock)  /* {{{ */
 {
 	zval *val;
 	zval *current;
@@ -1608,7 +1654,7 @@ static int php_openssl_server_alpn_callback(SSL *ssl_handle,
 
 #endif
 
-int php_openssl_setup_crypto(php_stream *stream,
+zend_result php_openssl_setup_crypto(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock,
 		php_stream_xport_crypto_param *cparam) /* {{{ */
 {
@@ -1633,7 +1679,7 @@ int php_openssl_setup_crypto(php_stream *stream,
 	ERR_clear_error();
 
 	/* We need to do slightly different things based on client/server method
-	 * so lets remember which method was selected */
+	 * so let's remember which method was selected */
 	sslsock->is_client = cparam->inputs.method & STREAM_CRYPTO_IS_CLIENT;
 	method_flags = cparam->inputs.method & ~STREAM_CRYPTO_IS_CLIENT;
 
@@ -2426,8 +2472,15 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 
 				if (sslsock->s.socket == -1) {
 					alive = 0;
-				} else if ((!sslsock->ssl_active && value == 0 && ((MSG_DONTWAIT != 0) || !sslsock->s.is_blocked)) ||
-					   php_pollfd_for(sslsock->s.socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0) {
+				} else if (
+					(
+						!sslsock->ssl_active &&
+						value == 0 &&
+						!(stream->flags & PHP_STREAM_FLAG_NO_IO) &&
+						((MSG_DONTWAIT != 0) || !sslsock->s.is_blocked)
+					) ||
+					php_pollfd_for(sslsock->s.socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0
+				) {
 					/* the poll() call was skipped if the socket is non-blocking (or MSG_DONTWAIT is available) and if the timeout is zero */
 					/* additionally, we don't use this optimization if SSL is active because in that case, we're not using MSG_DONTWAIT */
 					if (sslsock->ssl_active) {

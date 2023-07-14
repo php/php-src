@@ -708,7 +708,7 @@ ftp_mlsd_parse_line(HashTable *ht, const char *input) {
 
 	/* Extract pathname */
 	ZVAL_STRINGL(&zstr, sp + 1, end - sp - 1);
-	zend_hash_str_update(ht, "name", sizeof("name")-1, &zstr);
+	zend_hash_update(ht, ZSTR_KNOWN(ZEND_STR_NAME), &zstr);
 	end = sp;
 
 	while (input < end) {
@@ -867,7 +867,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t pat
 {
 	databuf_t		*data = NULL;
 	size_t			rcvd;
-	char			arg[11];
+	char			arg[MAX_LENGTH_OF_LONG];
 
 	if (ftp == NULL) {
 		return 0;
@@ -964,7 +964,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *inst
 	zend_long			size;
 	char			*ptr;
 	int			ch;
-	char			arg[11];
+	char			arg[MAX_LENGTH_OF_LONG];
 
 	if (ftp == NULL) {
 		return 0;
@@ -2057,10 +2057,19 @@ int
 ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t path_len, ftptype_t type, zend_long resumepos)
 {
 	databuf_t		*data = NULL;
-	char			arg[11];
+	char			arg[MAX_LENGTH_OF_LONG];
 
 	if (ftp == NULL) {
 		return PHP_FTP_FAILED;
+	}
+
+	if (ftp->data != NULL) {
+		/* If there is a transfer in action, abort it.
+		 * If we don't, we get an invalid state and memory leaks when the new connection gets opened. */
+		data_close(ftp, ftp->data);
+		if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
+			goto bail;
+		}
 	}
 
 	if (!ftp_type(ftp, type)) {
@@ -2176,7 +2185,7 @@ int
 ftp_nb_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *instream, ftptype_t type, zend_long startpos)
 {
 	databuf_t		*data = NULL;
-	char			arg[11];
+	char			arg[MAX_LENGTH_OF_LONG];
 
 	if (ftp == NULL) {
 		return 0;

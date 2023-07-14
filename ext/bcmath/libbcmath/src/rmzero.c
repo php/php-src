@@ -30,10 +30,6 @@
 *************************************************************************/
 
 #include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
 #include "private.h"
 
@@ -41,9 +37,7 @@
    _bc_rm_leading_zeros just moves the data "value" pointer to the
    correct place and adjusts the length. */
 
- void
-_bc_rm_leading_zeros (num)
-     bc_num num;
+void _bc_rm_leading_zeros(bc_num num)
 {
   /* We can move n_value to point to the first non zero digit! */
   while (*num->n_value == 0 && num->n_len > 1) {

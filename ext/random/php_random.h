@@ -31,6 +31,8 @@
 #ifndef PHP_RANDOM_H
 # define PHP_RANDOM_H
 
+# include "php.h"
+
 PHPAPI double php_combined_lcg(void);
 
 /*
@@ -62,9 +64,9 @@ PHPAPI double php_combined_lcg(void);
 	(__n) = (__min) + (zend_long) ((double) ( (double) (__max) - (__min) + 1.0) * ((__n) / ((__tmax) + 1.0)))
 
 # ifdef PHP_WIN32
-#  define GENERATE_SEED() (((zend_long) (time(0) * GetCurrentProcessId())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
+#  define GENERATE_SEED() (((zend_long) ((zend_ulong) time(NULL) * (zend_ulong) GetCurrentProcessId())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
 # else
-#  define GENERATE_SEED() (((zend_long) (time(0) * getpid())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
+#  define GENERATE_SEED() (((zend_long) ((zend_ulong) time(NULL) * (zend_ulong) getpid())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
 # endif
 
 # define PHP_MT_RAND_MAX ((zend_long) (0x7FFFFFFF)) /* (1<<31) - 1 */
@@ -193,13 +195,28 @@ static inline uint64_t php_random_pcgoneseq128xslrr64_rotr64(php_random_uint128_
 }
 # endif
 
-# define php_random_bytes_throw(b, s) php_random_bytes((b), (s), 1)
-# define php_random_bytes_silent(b, s) php_random_bytes((b), (s), 0)
-# define php_random_int_throw(min, max, result) php_random_int((min), (max), (result), 1)
-# define php_random_int_silent(min, max, result) php_random_int((min), (max), (result), 0)
+PHPAPI zend_result php_random_bytes(void *bytes, size_t size, bool should_throw);
+PHPAPI zend_result php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw);
 
-PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw);
-PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw);
+static inline zend_result php_random_bytes_throw(void *bytes, size_t size)
+{
+	return php_random_bytes(bytes, size, true);
+}
+
+static inline zend_result php_random_bytes_silent(void *bytes, size_t size)
+{
+	return php_random_bytes(bytes, size, false);
+}
+
+static inline zend_result php_random_int_throw(zend_long min, zend_long max, zend_long *result)
+{
+	return php_random_int(min, max, result, true);
+}
+
+static inline zend_result php_random_int_silent(zend_long min, zend_long max, zend_long *result)
+{
+	return php_random_int(min, max, result, false);
+}
 
 typedef struct _php_random_status_ {
 	size_t last_generated_size;

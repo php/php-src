@@ -1978,7 +1978,7 @@ PHP_FUNCTION(iconv_mime_encode)
 	if (pref != NULL) {
 		zval *pzval;
 
-		if ((pzval = zend_hash_str_find_deref(Z_ARRVAL_P(pref), "scheme", sizeof("scheme") - 1)) != NULL) {
+		if ((pzval = zend_hash_find_deref(Z_ARRVAL_P(pref), ZSTR_KNOWN(ZEND_STR_SCHEME))) != NULL) {
 			if (Z_TYPE_P(pzval) == IS_STRING && Z_STRLEN_P(pzval) > 0) {
 				switch (Z_STRVAL_P(pzval)[0]) {
 					case 'B': case 'b':
@@ -2236,11 +2236,11 @@ PHP_FUNCTION(iconv_set_encoding)
 	}
 
 	if(zend_string_equals_literal_ci(type, "input_encoding")) {
-		name = zend_string_init("iconv.input_encoding", sizeof("iconv.input_encoding") - 1, 0);
+		name = ZSTR_INIT_LITERAL("iconv.input_encoding", 0);
 	} else if(zend_string_equals_literal_ci(type, "output_encoding")) {
-		name = zend_string_init("iconv.output_encoding", sizeof("iconv.output_encoding") - 1, 0);
+		name = ZSTR_INIT_LITERAL("iconv.output_encoding", 0);
 	} else if(zend_string_equals_literal_ci(type, "internal_encoding")) {
-		name = zend_string_init("iconv.internal_encoding", sizeof("iconv.internal_encoding") - 1, 0);
+		name = ZSTR_INIT_LITERAL("iconv.internal_encoding", 0);
 	} else {
 		RETURN_FALSE;
 	}

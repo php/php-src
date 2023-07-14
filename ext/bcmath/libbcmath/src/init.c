@@ -39,9 +39,7 @@
 
 /* new_num allocates a number and sets fields to known values. */
 
-bc_num
-_bc_new_num_ex (length, scale, persistent)
-     int length, scale, persistent;
+bc_num _bc_new_num_ex (int length, int scale, int persistent)
 {
   bc_num temp;
   /* PHP Change:  malloc() -> pemalloc(), removed free_list code */
@@ -61,10 +59,7 @@ _bc_new_num_ex (length, scale, persistent)
 /* "Frees" a bc_num NUM.  Actually decreases reference count and only
    frees the storage if reference count is zero. */
 
-void
-_bc_free_num_ex (num, persistent)
-    bc_num *num;
-    int persistent;
+void _bc_free_num_ex(bc_num *num, int persistent)
 {
   if (*num == NULL) return;
   (*num)->n_refs--;
@@ -80,8 +75,7 @@ _bc_free_num_ex (num, persistent)
 
 /* Initialize the number package! */
 
-void
-bc_init_numbers (void)
+void bc_init_numbers(void)
 {
   BCG(_zero_) = _bc_new_num_ex (1,0,1);
   BCG(_one_)  = _bc_new_num_ex (1,0,1);
@@ -93,8 +87,7 @@ bc_init_numbers (void)
 
 /* Make a copy of a number!  Just increments the reference count! */
 
-bc_num
-bc_copy_num (bc_num num)
+bc_num bc_copy_num(bc_num num)
 {
   num->n_refs++;
   return num;
@@ -103,8 +96,7 @@ bc_copy_num (bc_num num)
 
 /* Initialize a number NUM by making it a copy of zero. */
 
-void
-bc_init_num (bc_num *num)
+void bc_init_num(bc_num *num)
 {
   *num = bc_copy_num (BCG(_zero_));
 }

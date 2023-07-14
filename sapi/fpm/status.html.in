@@ -215,7 +215,7 @@
 					doc_rate.disabled = false;
 				} else {
 					delay = parseInt(doc_rate.value);
-					if (!delay || delay < 1) {
+					if (isNaN(delay) || delay < 1) {
 						doc_status.innerHTML = "Not valid 'refresh' value";
 						return;
 					}

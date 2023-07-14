@@ -30,20 +30,12 @@
 *************************************************************************/
 
 #include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
-#include "private.h"
 
 
 /* Convert an integer VAL to a bc number NUM. */
 
-void
-bc_int2num (num, val)
-     bc_num *num;
-     int val;
+void bc_int2num(bc_num *num, int val)
 {
   char buffer[30];
   char *bptr, *vptr;

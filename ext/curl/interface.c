@@ -60,6 +60,13 @@
 #include "ext/standard/file.h"
 #include "ext/standard/url.h"
 #include "curl_private.h"
+
+#ifdef __GNUC__
+/* don't complain about deprecated CURLOPT_* we're exposing to PHP; we
+   need to keep using those to avoid breaking PHP API compatibiltiy */
+# pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include "curl_arginfo.h"
 
 #ifdef PHP_CURL_NEED_OPENSSL_TSL /* {{{ */
@@ -98,7 +105,7 @@ static ZEND_ATTRIBUTE_UNUSED unsigned long php_curl_ssl_id(void)
 
 static zend_result php_curl_option_str(php_curl *ch, zend_long option, const char *str, const size_t len)
 {
-	if (strlen(str) != len) {
+	if (zend_char_has_nul_byte(str, len)) {
 		zend_value_error("%s(): cURL option must not contain any null bytes", get_active_function_name());
 		return FAILURE;
 	}
@@ -109,7 +116,7 @@ static zend_result php_curl_option_str(php_curl *ch, zend_long option, const cha
 	return error == CURLE_OK ? SUCCESS : FAILURE;
 }
 
-static zend_result php_curl_option_url(php_curl *ch, const char *url, const size_t len) /* {{{ */
+static zend_result php_curl_option_url(php_curl *ch, const zend_string *url) /* {{{ */
 {
 	/* Disable file:// if open_basedir are used */
 	if (PG(open_basedir) && *PG(open_basedir)) {
@@ -117,17 +124,21 @@ static zend_result php_curl_option_url(php_curl *ch, const char *url, const size
 	}
 
 #if LIBCURL_VERSION_NUM > 0x073800 && defined(PHP_WIN32)
-	if (len > sizeof("file://") - 1 && '/' != url[sizeof("file://") - 1] && !strncmp("file://", url, sizeof("file://") - 1) && len < MAXPATHLEN - 2) {
+	if (
+		zend_string_starts_with_literal_ci(url, "file://")
+		&& '/' != ZSTR_VAL(url)[sizeof("file://") - 1]
+		&& ZSTR_LEN(url) < MAXPATHLEN - 2
+	) {
 		char _tmp[MAXPATHLEN] = {0};
 
 		memmove(_tmp, "file:///", sizeof("file:///") - 1);
-		memmove(_tmp + sizeof("file:///") - 1, url + sizeof("file://") - 1, len - sizeof("file://") + 1);
+		memmove(_tmp + sizeof("file:///") - 1, ZSTR_VAL(url) + sizeof("file://") - 1, ZSTR_LEN(url) - sizeof("file://") + 1);
 
-		return php_curl_option_str(ch, CURLOPT_URL, _tmp, len + 1);
+		return php_curl_option_str(ch, CURLOPT_URL, _tmp, ZSTR_LEN(url) + 1);
 	}
 #endif
 
-	return php_curl_option_str(ch, CURLOPT_URL, url, len);
+	return php_curl_option_str(ch, CURLOPT_URL, ZSTR_VAL(url), ZSTR_LEN(url));
 }
 /* }}} */
 
@@ -805,6 +816,8 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 				if (Z_TYPE(retval) == IS_STRING) {
 					length = MIN((int) (size * nmemb), Z_STRLEN(retval));
 					memcpy(data, Z_STRVAL(retval), length);
+				} else if (Z_TYPE(retval) == IS_LONG) {
+					length = Z_LVAL_P(&retval);
 				}
 				zval_ptr_dtor(&retval);
 			}
@@ -1134,7 +1147,7 @@ PHP_FUNCTION(curl_init)
 	_php_curl_set_default_options(ch);
 
 	if (url) {
-		if (php_curl_option_url(ch, ZSTR_VAL(url), ZSTR_LEN(url)) == FAILURE) {
+		if (php_curl_option_url(ch, url) == FAILURE) {
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
@@ -1364,7 +1377,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 			curl_seek_callback seekfunc = seek_cb;
 #endif
 
-			prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(current), "name", sizeof("name")-1, 0, &rv);
+			prop = zend_read_property_ex(curl_CURLFile_class, Z_OBJ_P(current), ZSTR_KNOWN(ZEND_STR_NAME), /* silent */ false, &rv);
 			ZVAL_DEREF(prop);
 			if (Z_TYPE_P(prop) != IS_STRING) {
 				php_error_docref(NULL, E_WARNING, "Invalid filename for key %s", ZSTR_VAL(string_key));
@@ -1372,7 +1385,7 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 				postval = Z_STR_P(prop);
 
 				if (php_check_open_basedir(ZSTR_VAL(postval))) {
-					return 1;
+					return FAILURE;
 				}
 
 				prop = zend_read_property(curl_CURLFile_class, Z_OBJ_P(current), "mime", sizeof("mime")-1, 0, &rv);
@@ -1826,7 +1839,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_TLSAUTH_TYPE:
 		case CURLOPT_TLSAUTH_PASSWORD:
 		case CURLOPT_TLSAUTH_USERNAME:
-		case CURLOPT_ACCEPT_ENCODING:
 		case CURLOPT_TRANSFER_ENCODING:
 		case CURLOPT_DNS_SERVERS:
 		case CURLOPT_MAIL_AUTH:
@@ -1901,6 +1913,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_RANGE:
 		case CURLOPT_FTP_ACCOUNT:
 		case CURLOPT_RTSP_SESSION_ID:
+		case CURLOPT_ACCEPT_ENCODING:
 #if LIBCURL_VERSION_NUM >= 0x072100 /* Available since 7.33.0 */
 		case CURLOPT_DNS_INTERFACE:
 		case CURLOPT_DNS_LOCAL_IP4:
@@ -1943,7 +1956,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		{
 			zend_string *tmp_str;
 			zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
-			zend_result ret = php_curl_option_url(ch, ZSTR_VAL(str), ZSTR_LEN(str));
+			zend_result ret = php_curl_option_url(ch, str);
 			zend_tmp_string_release(tmp_str);
 			return ret;
 		}
@@ -2067,7 +2080,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			struct curl_slist *slist = NULL;
 
 			if (Z_TYPE_P(zvalue) != IS_ARRAY) {
-				char *name = NULL;
+				const char *name = NULL;
 				switch (option) {
 					case CURLOPT_HTTPHEADER:
 						name = "CURLOPT_HTTPHEADER";

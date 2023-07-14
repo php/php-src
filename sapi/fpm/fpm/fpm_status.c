@@ -13,7 +13,8 @@
 #include "fpm_atomic.h"
 #include "fpm_conf.h"
 #include "fpm_php.h"
-#include <ext/standard/html.h>
+#include "ext/standard/html.h"
+#include "ext/json/php_json.h"
 
 static char *fpm_status_uri = NULL;
 static char *fpm_status_ping_uri = NULL;
@@ -140,10 +141,10 @@ int fpm_status_handle_request(void) /* {{{ */
 	struct fpm_scoreboard_proc_s *proc;
 	char *buffer, *time_format, time_buffer[64];
 	time_t now_epoch;
-	int full, encode, has_start_time;
+	int full, has_start_time;
+	bool encode_html, encode_json;
 	char *short_syntax, *short_post;
 	char *full_pre, *full_syntax, *full_post, *full_separator;
-	zend_string *_GET_str;
 
 	if (!SG(request_info).request_uri) {
 		return 0;
@@ -168,14 +169,17 @@ int fpm_status_handle_request(void) /* {{{ */
 
 	/* STATUS */
 	if (fpm_status_uri && !strcmp(fpm_status_uri, SG(request_info).request_uri)) {
+		zend_string *_GET_str;
+
 		fpm_request_executing();
 
 		/* full status ? */
-		_GET_str = zend_string_init("_GET", sizeof("_GET")-1, 0);
-		full = (fpm_php_get_string_from_table(_GET_str, "full") != NULL);
+		_GET_str = ZSTR_INIT_LITERAL("_GET", 0);
+		full = fpm_php_is_key_in_table(_GET_str, ZEND_STRL("full"));
 		short_syntax = short_post = NULL;
 		full_separator = full_pre = full_syntax = full_post = NULL;
-		encode = 0;
+		encode_html = false;
+		encode_json = false;
 		has_start_time = 1;
 
 		scoreboard_p = fpm_scoreboard_get();
@@ -215,10 +219,10 @@ int fpm_status_handle_request(void) /* {{{ */
 		}
 
 		/* HTML */
-		if (fpm_php_get_string_from_table(_GET_str, "html")) {
+		if (fpm_php_is_key_in_table(_GET_str, ZEND_STRL("html"))) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/html"), 1, 1);
 			time_format = "%d/%b/%Y:%H:%M:%S %z";
-			encode = 1;
+			encode_html = true;
 
 			short_syntax =
 				"<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n"
@@ -284,10 +288,10 @@ int fpm_status_handle_request(void) /* {{{ */
 			}
 
 		/* XML */
-		} else if (fpm_php_get_string_from_table(_GET_str, "xml")) {
+		} else if (fpm_php_is_key_in_table(_GET_str, ZEND_STRL("xml"))) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/xml"), 1, 1);
 			time_format = "%s";
-			encode = 1;
+			encode_html = true;
 
 			short_syntax =
 				"<?xml version=\"1.0\" ?>\n"
@@ -332,9 +336,11 @@ int fpm_status_handle_request(void) /* {{{ */
 				}
 
 			/* JSON */
-		} else if (fpm_php_get_string_from_table(_GET_str, "json")) {
+		} else if (fpm_php_is_key_in_table(_GET_str, ZEND_STRL("json"))) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: application/json"), 1, 1);
 			time_format = "%s";
+
+			encode_json = true;
 
 			short_syntax =
 				"{"
@@ -379,7 +385,7 @@ int fpm_status_handle_request(void) /* {{{ */
 			}
 
 			/* OpenMetrics */
-		} else if (fpm_php_get_string_from_table(_GET_str, "openmetrics")) {
+		} else if (fpm_php_is_key_in_table(_GET_str, ZEND_STRL("openmetrics"))) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: application/openmetrics-text; version=1.0.0; charset=utf-8"), 1, 1);
 			time_format = "%s";
 
@@ -549,11 +555,24 @@ int fpm_status_handle_request(void) /* {{{ */
 				query_string = NULL;
 				tmp_query_string = NULL;
 				if (proc->query_string[0] != '\0') {
-					if (!encode) {
-						query_string = proc->query_string;
+					if (encode_html) {
+						tmp_query_string = php_escape_html_entities_ex(
+								(const unsigned char *) proc->query_string,
+								strlen(proc->query_string), 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT,
+								NULL, /* double_encode */ 1, /* quiet */ 0);
+					} else if (encode_json) {
+						tmp_query_string = php_json_encode_string(proc->query_string,
+								strlen(proc->query_string), PHP_JSON_INVALID_UTF8_IGNORE);
 					} else {
-						tmp_query_string = php_escape_html_entities_ex((const unsigned char *) proc->query_string, strlen(proc->query_string), 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT, NULL, /* double_encode */ 1, /* quiet */ 0);
+						query_string = proc->query_string;
+					}
+					if (tmp_query_string) {
 						query_string = ZSTR_VAL(tmp_query_string);
+						/* remove quotes around the string */
+						if (encode_json && ZSTR_LEN(tmp_query_string) >= 2) {
+							query_string[ZSTR_LEN(tmp_query_string) - 1] = '\0';
+							++query_string;
+						}
 					}
 				}
 

@@ -36,6 +36,7 @@
 #include "zend_observer.h"
 #include "zend_fibers.h"
 #include "zend_call_stack.h"
+#include "zend_max_execution_timer.h"
 #include "Optimizer/zend_optimizer.h"
 
 static size_t global_map_ptr_last = 0;
@@ -223,7 +224,7 @@ static ZEND_INI_MH(OnUpdateReservedStackSize) /* {{{ */
 static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 {
 	if (new_value) {
-		EG(fiber_stack_size) = zend_ini_parse_quantity_warn(new_value, entry->name);
+		EG(fiber_stack_size) = zend_ini_parse_uquantity_warn(new_value, entry->name);
 	} else {
 		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_C_STACK_SIZE;
 	}
@@ -674,69 +675,6 @@ static void auto_global_dtor(zval *zv) /* {{{ */
 /* }}} */
 
 #ifdef ZTS
-static void function_copy_ctor(zval *zv) /* {{{ */
-{
-	zend_function *old_func = Z_FUNC_P(zv);
-	zend_function *func;
-
-	if (old_func->type == ZEND_USER_FUNCTION) {
-		ZEND_ASSERT(old_func->op_array.fn_flags & ZEND_ACC_IMMUTABLE);
-		return;
-	}
-	func = pemalloc(sizeof(zend_internal_function), 1);
-	Z_FUNC_P(zv) = func;
-	memcpy(func, old_func, sizeof(zend_internal_function));
-	function_add_ref(func);
-	if ((old_func->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))
-	 && old_func->common.arg_info) {
-		uint32_t i;
-		uint32_t num_args = old_func->common.num_args + 1;
-		zend_arg_info *arg_info = old_func->common.arg_info - 1;
-		zend_arg_info *new_arg_info;
-
-		if (old_func->common.fn_flags & ZEND_ACC_VARIADIC) {
-			num_args++;
-		}
-		new_arg_info = pemalloc(sizeof(zend_arg_info) * num_args, 1);
-		memcpy(new_arg_info, arg_info, sizeof(zend_arg_info) * num_args);
-		for (i = 0 ; i < num_args; i++) {
-			if (ZEND_TYPE_HAS_LIST(arg_info[i].type)) {
-				zend_type_list *old_list = ZEND_TYPE_LIST(arg_info[i].type);
-				zend_type_list *new_list = pemalloc(ZEND_TYPE_LIST_SIZE(old_list->num_types), 1);
-				memcpy(new_list, old_list, ZEND_TYPE_LIST_SIZE(old_list->num_types));
-				ZEND_TYPE_SET_PTR(new_arg_info[i].type, new_list);
-
-				zend_type *list_type;
-				ZEND_TYPE_LIST_FOREACH(new_list, list_type) {
-					zend_string *name = zend_string_dup(ZEND_TYPE_NAME(*list_type), 1);
-					ZEND_TYPE_SET_PTR(*list_type, name);
-				} ZEND_TYPE_LIST_FOREACH_END();
-			} else if (ZEND_TYPE_HAS_NAME(arg_info[i].type)) {
-				zend_string *name = zend_string_dup(ZEND_TYPE_NAME(arg_info[i].type), 1);
-				ZEND_TYPE_SET_PTR(new_arg_info[i].type, name);
-			}
-		}
-		func->common.arg_info = new_arg_info + 1;
-	}
-	if (old_func->common.attributes) {
-		zend_attribute *old_attr;
-
-		func->common.attributes = NULL;
-
-		ZEND_HASH_PACKED_FOREACH_PTR(old_func->common.attributes, old_attr) {
-			uint32_t i;
-			zend_attribute *attr;
-
-			attr = zend_add_attribute(&func->common.attributes, old_attr->name, old_attr->argc, old_attr->flags, old_attr->offset, old_attr->lineno);
-
-			for (i = 0 ; i < old_attr->argc; i++) {
-				ZVAL_DUP(&attr->args[i].value, &old_attr->args[i].value);
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
-}
-/* }}} */
-
 static void auto_global_copy_ctor(zval *zv) /* {{{ */
 {
 	zend_auto_global *old_ag = (zend_auto_global *) Z_PTR_P(zv);
@@ -756,7 +694,8 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init(compiler_globals->function_table, 1024, NULL, ZEND_FUNCTION_DTOR, 1);
-	zend_hash_copy(compiler_globals->function_table, global_function_table, function_copy_ctor);
+	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL);
+	compiler_globals->copied_functions_count = zend_hash_num_elements(compiler_globals->function_table);
 
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init(compiler_globals->class_table, 64, NULL, ZEND_CLASS_DTOR, 1);
@@ -790,6 +729,21 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{{ */
 {
 	if (compiler_globals->function_table != GLOBAL_FUNCTION_TABLE) {
+		uint32_t n = compiler_globals->copied_functions_count;
+
+	    /* Prevent destruction of functions copied from the main process context */
+		if (zend_hash_num_elements(compiler_globals->function_table) <= n) {
+			compiler_globals->function_table->nNumUsed = 0;
+		} else {
+			Bucket *p = compiler_globals->function_table->arData;
+
+			compiler_globals->function_table->nNumOfElements -= n;
+			while (n != 0) {
+				ZVAL_UNDEF(&p->val);
+				p++;
+				n--;
+			}
+		}
 		zend_hash_destroy(compiler_globals->function_table);
 		free(compiler_globals->function_table);
 	}
@@ -853,6 +807,10 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->stack_limit = (void*)0;
 	executor_globals->stack_base = (void*)0;
 #endif
+#ifdef ZEND_MAX_EXECUTION_TIMERS
+	executor_globals->pid = 0;
+	executor_globals->oldact = (struct sigaction){0};
+#endif
 }
 /* }}} */
 
@@ -877,6 +835,7 @@ static void zend_new_thread_end_handler(THREAD_T thread_id) /* {{{ */
 #ifdef ZEND_CHECK_STACK_LIMIT
 	zend_call_stack_init();
 #endif
+	zend_max_execution_timer_init();
 }
 /* }}} */
 #endif
@@ -1231,6 +1190,7 @@ ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32
 	CG(unclean_shutdown) = 1;
 	CG(active_class_entry) = NULL;
 	CG(in_compilation) = 0;
+	CG(memoize_mode) = 0;
 	EG(current_execute_data) = NULL;
 	LONGJMP(*EG(bailout), FAILURE);
 }
@@ -1326,17 +1286,36 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 
 	zend_destroy_rsrc_list(&EG(regular_list));
 
+	/* See GH-8646: https://github.com/php/php-src/issues/8646
+	 *
+	 * Interned strings that hold class entries can get a corresponding slot in map_ptr for the CE cache.
+	 * map_ptr works like a bump allocator: there is a counter which increases to allocate the next slot in the map.
+	 *
+	 * For class name strings in non-opcache we have:
+	 *   - on startup: permanent + interned
+	 *   - on request: interned
+	 * For class name strings in opcache we have:
+	 *   - on startup: permanent + interned
+	 *   - on request: either not interned at all, which we can ignore because they won't get a CE cache entry
+	 *                 or they were already permanent + interned
+	 *                 or we get a new permanent + interned string in the opcache persistence code
+	 *
+	 * Notice that the map_ptr layout always has the permanent strings first, and the request strings after.
+	 * In non-opcache, a request string may get a slot in map_ptr, and that interned request string
+	 * gets destroyed at the end of the request. The corresponding map_ptr slot can thereafter never be used again.
+	 * This causes map_ptr to keep reallocating to larger and larger sizes.
+	 *
+	 * We solve it as follows:
+	 * We can check whether we had any interned request strings, which only happens in non-opcache.
+	 * If we have any, we reset map_ptr to the last permanent string.
+	 * We can't lose any permanent strings because of map_ptr's layout.
+	 */
+	if (zend_hash_num_elements(&CG(interned_strings)) > 0) {
+		zend_map_ptr_reset();
+	}
+
 #if GC_BENCH
-	fprintf(stderr, "GC Statistics\n");
-	fprintf(stderr, "-------------\n");
-	fprintf(stderr, "Runs:               %d\n", GC_G(gc_runs));
-	fprintf(stderr, "Collected:          %d\n", GC_G(collected));
-	fprintf(stderr, "Root buffer length: %d\n", GC_G(root_buf_length));
-	fprintf(stderr, "Root buffer peak:   %d\n\n", GC_G(root_buf_peak));
-	fprintf(stderr, "      Possible            Remove from  Marked\n");
-	fprintf(stderr, "        Root    Buffered     buffer     grey\n");
-	fprintf(stderr, "      --------  --------  -----------  ------\n");
-	fprintf(stderr, "ZVAL  %8d  %8d  %9d  %8d\n", GC_G(zval_possible_root), GC_G(zval_buffered), GC_G(zval_remove_from_buffer), GC_G(zval_marked_grey));
+	gc_bench_print();
 #endif
 }
 /* }}} */
@@ -1658,6 +1637,18 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *
 	abort();
 }
 
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn, const char *message)
+{
+#ifdef HAVE_STR_ERROR_R
+	char buf[1024];
+	strerror_r(errn, buf, sizeof(buf));
+#else
+	char *buf = strerror(errn);
+#endif
+
+	zend_error_noreturn(type, "%s: %s (%d)", message, buf, errn);
+}
+
 ZEND_API ZEND_COLD void zend_error_zstr(int type, zend_string *message) {
 	zend_string *filename;
 	uint32_t lineno;
@@ -1727,6 +1718,29 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 	va_end(va);
 }
 /* }}} */
+
+/* type should be one of the BP_VAR_* constants, only special messages happen for isset/empty and unset */
+ZEND_API ZEND_COLD void zend_illegal_container_offset(const zend_string *container, const zval *offset, int type)
+{
+	switch (type) {
+		case BP_VAR_IS:
+			zend_type_error("Cannot access offset of type %s in isset or empty",
+				zend_zval_type_name(offset));
+			return;
+		case BP_VAR_UNSET:
+			/* Consistent error for when trying to unset a string offset */
+			if (zend_string_equals(container, ZSTR_KNOWN(ZEND_STR_STRING))) {
+				zend_throw_error(NULL, "Cannot unset string offsets");
+			} else {
+				zend_type_error("Cannot unset offset of type %s on %s", zend_zval_type_name(offset), ZSTR_VAL(container));
+			}
+			return;
+		default:
+			zend_type_error("Cannot access offset of type %s on %s",
+				zend_zval_type_name(offset), ZSTR_VAL(container));
+			return;
+	}
+}
 
 ZEND_API ZEND_COLD void zend_type_error(const char *format, ...) /* {{{ */
 {
@@ -1805,6 +1819,7 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 	EG(exception) = NULL;
 	ZVAL_OBJ(&params[0], old_exception);
 	ZVAL_COPY_VALUE(&orig_user_exception_handler, &EG(user_exception_handler));
+	ZVAL_UNDEF(&EG(user_exception_handler));
 
 	if (call_user_function(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params) == SUCCESS) {
 		zval_ptr_dtor(&retval2);
@@ -1816,6 +1831,8 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 	} else {
 		EG(exception) = old_exception;
 	}
+
+	zval_ptr_dtor(&orig_user_exception_handler);
 } /* }}} */
 
 ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...) /* {{{ */

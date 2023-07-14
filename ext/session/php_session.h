@@ -154,6 +154,8 @@ typedef struct _php_ps_globals {
 	const ps_module *default_mod;
 	void *mod_data;
 	php_session_status session_status;
+	zend_string *session_started_filename;
+	uint32_t session_started_lineno;
 	zend_long gc_probability;
 	zend_long gc_divisor;
 	zend_long gc_maxlifetime;

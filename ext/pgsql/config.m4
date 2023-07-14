@@ -65,6 +65,7 @@ if test "$PHP_PGSQL" != "no"; then
   AC_CHECK_LIB(pq, PQlibVersion,, AC_MSG_ERROR([Unable to build the PostgreSQL extension: at least libpq 9.1 is required]))
   AC_CHECK_LIB(pq, pg_encoding_to_char,AC_DEFINE(HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT,1,[Whether libpq is compiled with --enable-multibyte]))
   AC_CHECK_LIB(pq, lo_truncate64, AC_DEFINE(HAVE_PG_LO64,1,[PostgreSQL 9.3 or later]))
+  AC_CHECK_LIB(pq, PQsetErrorContextVisibility, AC_DEFINE(HAVE_PG_CONTEXT_VISIBILITY,1,[PostgreSQL 9.6 or later]))
   LIBS=$old_LIBS
   LDFLAGS=$old_LDFLAGS
 

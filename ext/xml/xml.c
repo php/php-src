@@ -132,7 +132,7 @@ ZEND_GET_MODULE(xml)
 
 #define XML_MAXLEVEL 255 /* XXX this should be dynamic */
 
-#define SKIP_TAGSTART(str) ((str) + (parser->toffset > (int)strlen(str) ? strlen(str) : parser->toffset))
+#define SKIP_TAGSTART(str) ((str) + (parser->toffset > strlen(str) ? strlen(str) : parser->toffset))
 
 static zend_class_entry *xml_parser_ce;
 static zend_object_handlers xml_parser_object_handlers;
@@ -517,7 +517,7 @@ static zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XML_Cha
 			c = '?';
 		}
 
-		ZSTR_VAL(str)[ZSTR_LEN(str)++] = decoder ? (unsigned int)decoder(c) : c;
+		ZSTR_VAL(str)[ZSTR_LEN(str)++] = (unsigned int)decoder(c);
 	}
 	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 	if (ZSTR_LEN(str) < len) {
@@ -762,7 +762,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 	if (parser->lastwasopen) {
 		zval *myval;
 		/* check if the current tag already has a value - if yes append to that! */
-		if ((myval = zend_hash_str_find(Z_ARRVAL_P(parser->ctag), "value", sizeof("value") - 1))) {
+		if ((myval = zend_hash_find(Z_ARRVAL_P(parser->ctag), ZSTR_KNOWN(ZEND_STR_VALUE)))) {
 			size_t newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
 			Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
 			strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
@@ -781,7 +781,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL(parser->data), curtag) {
 			if ((mytype = zend_hash_str_find(Z_ARRVAL_P(curtag),"type", sizeof("type") - 1))) {
 				if (zend_string_equals_literal(Z_STR_P(mytype), "cdata")) {
-					if ((myval = zend_hash_str_find(Z_ARRVAL_P(curtag), "value", sizeof("value") - 1))) {
+					if ((myval = zend_hash_find(Z_ARRVAL_P(curtag), ZSTR_KNOWN(ZEND_STR_VALUE)))) {
 						size_t newlen = Z_STRLEN_P(myval) + ZSTR_LEN(decoded_value);
 						Z_STR_P(myval) = zend_string_extend(Z_STR_P(myval), newlen, 0);
 						strncpy(Z_STRVAL_P(myval) + Z_STRLEN_P(myval) - ZSTR_LEN(decoded_value),
@@ -1392,37 +1392,51 @@ PHP_FUNCTION(xml_parser_free)
 PHP_FUNCTION(xml_parser_set_option)
 {
 	xml_parser *parser;
-	zval *pind, *val;
+	zval *pind;
 	zend_long opt;
+	zval *value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Olz", &pind, xml_parser_ce, &opt, &val) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Olz", &pind, xml_parser_ce, &opt, &value) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	if (Z_TYPE_P(value) != IS_FALSE && Z_TYPE_P(value) != IS_TRUE &&
+		Z_TYPE_P(value) != IS_LONG && Z_TYPE_P(value) != IS_STRING) {
+		php_error_docref(NULL, E_WARNING,
+			"Argument #3 ($value) must be of type string|int|bool, %s given", zend_zval_type_name(value));
 	}
 
 	parser = Z_XMLPARSER_P(pind);
 	switch (opt) {
+		/* Boolean option */
 		case PHP_XML_OPTION_CASE_FOLDING:
-			parser->case_folding = zval_get_long(val);
+			parser->case_folding = zend_is_true(value);
 			break;
+		/* Boolean option */
+		case PHP_XML_OPTION_SKIP_WHITE:
+			parser->skipwhite = zend_is_true(value);
+			break;
+		/* Integer option */
 		case PHP_XML_OPTION_SKIP_TAGSTART:
-			parser->toffset = zval_get_long(val);
+			/* The tag start offset is stored in an int */
+			/* TODO Improve handling of values? */
+			parser->toffset = zval_get_long(value);
 			if (parser->toffset < 0) {
-				php_error_docref(NULL, E_WARNING, "tagstart ignored, because it is out of range");
-				parser->toffset = 0;
 				/* TODO Promote to ValueError in PHP 9.0 */
+				php_error_docref(NULL, E_WARNING, "Argument #3 ($value) must be between 0 and %d"
+					" for option XML_OPTION_SKIP_TAGSTART", INT_MAX);
+				parser->toffset = 0;
 				RETURN_FALSE;
 			}
 			break;
-		case PHP_XML_OPTION_SKIP_WHITE:
-			parser->skipwhite = zval_get_long(val);
-			break;
+		/* String option */
 		case PHP_XML_OPTION_TARGET_ENCODING: {
 			const xml_encoding *enc;
-			if (!try_convert_to_string(val)) {
+			if (!try_convert_to_string(value)) {
 				RETURN_THROWS();
 			}
 
-			enc = xml_get_encoding((XML_Char*)Z_STRVAL_P(val));
+			enc = xml_get_encoding((XML_Char*)Z_STRVAL_P(value));
 			if (enc == NULL) {
 				zend_argument_value_error(3, "is not a supported target encoding");
 				RETURN_THROWS();
@@ -1432,7 +1446,7 @@ PHP_FUNCTION(xml_parser_set_option)
 			break;
 		}
 		default:
-			zend_argument_value_error(2, "must be a PHP_XML_OPTION_* constant");
+			zend_argument_value_error(2, "must be a XML_OPTION_* constant");
 			RETURN_THROWS();
 			break;
 	}
@@ -1455,19 +1469,19 @@ PHP_FUNCTION(xml_parser_get_option)
 	parser = Z_XMLPARSER_P(pind);
 	switch (opt) {
 		case PHP_XML_OPTION_CASE_FOLDING:
-			RETURN_LONG(parser->case_folding);
+			RETURN_BOOL(parser->case_folding);
 			break;
 		case PHP_XML_OPTION_SKIP_TAGSTART:
 			RETURN_LONG(parser->toffset);
 			break;
 		case PHP_XML_OPTION_SKIP_WHITE:
-			RETURN_LONG(parser->skipwhite);
+			RETURN_BOOL(parser->skipwhite);
 			break;
 		case PHP_XML_OPTION_TARGET_ENCODING:
 			RETURN_STRING((char *)parser->target_encoding);
 			break;
 		default:
-			zend_argument_value_error(2, "must be a PHP_XML_OPTION_* constant");
+			zend_argument_value_error(2, "must be a XML_OPTION_* constant");
 			RETURN_THROWS();
 	}
 }

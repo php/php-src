@@ -103,6 +103,16 @@ zend_module_entry libxml_module_entry = {
 
 /* }}} */
 
+static void php_libxml_unlink_entity(void *data, void *table, const xmlChar *name)
+{
+	xmlEntityPtr entity = data;
+	if (entity->_private != NULL) {
+		if (xmlHashLookup(table, name) == entity) {
+			xmlHashRemoveEntry(table, name, NULL);
+		}
+	}
+}
+
 /* {{{ internal functions for interoperability */
 static int php_libxml_clear_object(php_libxml_node_object *object)
 {
@@ -113,7 +123,7 @@ static int php_libxml_clear_object(php_libxml_node_object *object)
 	return php_libxml_decrement_doc_ref(object);
 }
 
-static int php_libxml_unregister_node(xmlNodePtr nodep)
+static void php_libxml_unregister_node(xmlNodePtr nodep)
 {
 	php_libxml_node_object *wrapper;
 
@@ -130,8 +140,20 @@ static int php_libxml_unregister_node(xmlNodePtr nodep)
 			nodeptr->node = NULL;
 		}
 	}
+}
 
-	return -1;
+/* Workaround for libxml2 peculiarity */
+static void php_libxml_unlink_entity_decl(xmlEntityPtr entity)
+{
+	xmlDtdPtr dtd = entity->parent;
+	if (dtd != NULL) {
+		if (xmlHashLookup(dtd->entities, entity->name) == entity) {
+			xmlHashRemoveEntry(dtd->entities, entity->name, NULL);
+		}
+		if (xmlHashLookup(dtd->pentities, entity->name) == entity) {
+			xmlHashRemoveEntry(dtd->pentities, entity->name, NULL);
+		}
+	}
 }
 
 static void php_libxml_node_free(xmlNodePtr node)
@@ -144,22 +166,35 @@ static void php_libxml_node_free(xmlNodePtr node)
 			case XML_ATTRIBUTE_NODE:
 				xmlFreeProp((xmlAttrPtr) node);
 				break;
-			case XML_ENTITY_DECL:
-			case XML_ELEMENT_DECL:
-			case XML_ATTRIBUTE_DECL:
+			/* libxml2 has a peculiarity where if you unlink an entity it'll only unlink it from the dtd if the
+			 * dtd is attached to the document. This works around the issue by inspecting the parent directly. */
+			case XML_ENTITY_DECL: {
+				xmlEntityPtr entity = (xmlEntityPtr) node;
+				php_libxml_unlink_entity_decl(entity);
+				if (entity->orig != NULL) {
+					xmlFree((char *) entity->orig);
+					entity->orig = NULL;
+				}
+				xmlFreeNode(node);
 				break;
-			case XML_NOTATION_NODE:
-				/* These require special handling */
+			}
+			case XML_NOTATION_NODE: {
+				/* See create_notation(), these aren't regular XML_NOTATION_NODE, but entities in disguise... */
+				xmlEntityPtr entity = (xmlEntityPtr) node;
 				if (node->name != NULL) {
 					xmlFree((char *) node->name);
 				}
-				if (((xmlEntityPtr) node)->ExternalID != NULL) {
-					xmlFree((char *) ((xmlEntityPtr) node)->ExternalID);
+				if (entity->ExternalID != NULL) {
+					xmlFree((char *) entity->ExternalID);
 				}
-				if (((xmlEntityPtr) node)->SystemID != NULL) {
-					xmlFree((char *) ((xmlEntityPtr) node)->SystemID);
+				if (entity->SystemID != NULL) {
+					xmlFree((char *) entity->SystemID);
 				}
 				xmlFree(node);
+				break;
+			}
+			case XML_ELEMENT_DECL:
+			case XML_ATTRIBUTE_DECL:
 				break;
 			case XML_NAMESPACE_DECL:
 				if (node->ns) {
@@ -167,9 +202,22 @@ static void php_libxml_node_free(xmlNodePtr node)
 					node->ns = NULL;
 				}
 				node->type = XML_ELEMENT_NODE;
+				xmlFreeNode(node);
+				break;
+			case XML_DTD_NODE: {
+				xmlDtdPtr dtd = (xmlDtdPtr) node;
+				if (dtd->_private == NULL) {
+					/* There's no userland reference to the dtd,
+					 * but there might be entities referenced from userland. Unlink those. */
+					xmlHashScan(dtd->entities, php_libxml_unlink_entity, dtd->entities);
+					xmlHashScan(dtd->pentities, php_libxml_unlink_entity, dtd->pentities);
+					/* No unlinking of notations, see remark above at case XML_NOTATION_NODE. */
+				}
 				ZEND_FALLTHROUGH;
+			}
 			default:
 				xmlFreeNode(node);
+				break;
 		}
 	}
 }
@@ -181,11 +229,29 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 	if (node != NULL) {
 		curnode = node;
 		while (curnode != NULL) {
+			/* If the _private field is set, there's still a userland reference somewhere. We'll delay freeing in this case. */
+			if (curnode->_private) {
+				xmlNodePtr next = curnode->next;
+				/* Must unlink such that freeing of the parent doesn't free this child. */
+				xmlUnlinkNode(curnode);
+				if (curnode->type == XML_ELEMENT_NODE) {
+					/* This ensures that namespace references in this subtree are defined within this subtree,
+					 * otherwise a use-after-free would be possible when the original namespace holder gets freed. */
+					xmlDOMWrapCtxt dummy_ctxt = {0};
+					xmlDOMWrapReconcileNamespaces(&dummy_ctxt, curnode, /* options */ 0);
+				}
+				/* Skip freeing */
+				curnode = next;
+				continue;
+			}
+
 			node = curnode;
 			switch (node->type) {
 				/* Skip property freeing for the following types */
 				case XML_NOTATION_NODE:
+					break;
 				case XML_ENTITY_DECL:
+					php_libxml_unlink_entity_decl((xmlEntityPtr) node);
 					break;
 				case XML_ENTITY_REF_NODE:
 					php_libxml_node_free_list((xmlNodePtr) node->properties);
@@ -209,9 +275,7 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 
 			curnode = node->next;
 			xmlUnlinkNode(node);
-			if (php_libxml_unregister_node(node) == 0) {
-				node->doc = NULL;
-			}
+			php_libxml_unregister_node(node);
 			php_libxml_node_free(node);
 		}
 	}
@@ -514,6 +578,8 @@ static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg)
 		} else {
 			php_error_docref(NULL, level, "%s in Entity, line: %d", msg, parser->input->line);
 		}
+	} else {
+		php_error_docref(NULL, E_WARNING, "%s", msg);
 	}
 }
 
@@ -707,7 +773,7 @@ PHP_LIBXML_API void php_libxml_ctx_warning(void *ctx, const char *msg, ...)
 	va_end(args);
 }
 
-PHP_LIBXML_API void php_libxml_structured_error_handler(void *userData, xmlErrorPtr error)
+static void php_libxml_structured_error_handler(void *userData, xmlErrorPtr error)
 {
 	_php_list_set_error_structure(error, NULL);
 
@@ -1161,8 +1227,14 @@ PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object,
 				object->node->_private = private_data;
 			}
 		} else {
+			if (UNEXPECTED(node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE)) {
+				php_libxml_doc_ptr *doc_ptr = emalloc(sizeof(php_libxml_doc_ptr));
+				doc_ptr->cache_tag.modification_nr = 1; /* iterators start at 0, such that they will start in an uninitialised state */
+				object->node = (php_libxml_node_ptr *) doc_ptr; /* downcast */
+			} else {
+				object->node = emalloc(sizeof(php_libxml_node_ptr));
+			}
 			ret_refcount = 1;
-			object->node = emalloc(sizeof(php_libxml_node_ptr));
 			object->node->node = node;
 			object->node->refcount = 1;
 			object->node->_private = private_data;
@@ -1262,9 +1334,7 @@ PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node)
 					default:
 						php_libxml_node_free_list((xmlNodePtr) node->properties);
 				}
-				if (php_libxml_unregister_node(node) == 0) {
-					node->doc = NULL;
-				}
+				php_libxml_unregister_node(node);
 				php_libxml_node_free(node);
 			} else {
 				php_libxml_unregister_node(node);
@@ -1274,18 +1344,14 @@ PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node)
 
 PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *object)
 {
-	int ret_refcount = -1;
-	xmlNodePtr nodep;
-	php_libxml_node_ptr *obj_node;
-
 	if (object != NULL && object->node != NULL) {
-		obj_node = (php_libxml_node_ptr *) object->node;
-		nodep = object->node->node;
-		ret_refcount = php_libxml_decrement_node_ptr(object);
+		php_libxml_node_ptr *obj_node = (php_libxml_node_ptr *) object->node;
+		xmlNodePtr nodep = obj_node->node;
+		int ret_refcount = php_libxml_decrement_node_ptr(object);
 		if (ret_refcount == 0) {
 			php_libxml_node_free_resource(nodep);
 		} else {
-			if (obj_node && object == obj_node->_private) {
+			if (object == obj_node->_private) {
 				obj_node->_private = NULL;
 			}
 		}

@@ -26,7 +26,10 @@
 # include <arm_neon.h>
 #endif
 
-#ifdef __SSE2__
+/* Prefer to use AVX2 instructions for better latency and throughput */
+#if defined(__AVX2__)
+# include <immintrin.h>
+#elif defined( __SSE2__)
 # include <mmintrin.h>
 # include <emmintrin.h>
 #endif
@@ -176,7 +179,14 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 		HT_SET_DATA_ADDR(ht, data);
 		/* Don't overwrite iterator count. */
 		ht->u.v.flags = HASH_FLAG_STATIC_KEYS;
-#ifdef __SSE2__
+#if defined(__AVX2__)
+		do {
+			__m256i ymm0 = _mm256_setzero_si256();
+			ymm0 = _mm256_cmpeq_epi64(ymm0, ymm0);
+			_mm256_storeu_si256((__m256i*)&HT_HASH_EX(data,  0), ymm0);
+			_mm256_storeu_si256((__m256i*)&HT_HASH_EX(data,  8), ymm0);
+		} while(0);
+#elif defined (__SSE2__)
 		do {
 			__m128i xmm0 = _mm_setzero_si128();
 			xmm0 = _mm_cmpeq_epi8(xmm0, xmm0);
@@ -240,12 +250,12 @@ ZEND_API const HashTable zend_empty_array = {
 	.gc.u.type_info = IS_ARRAY | (GC_IMMUTABLE << GC_FLAGS_SHIFT),
 	.u.flags = HASH_FLAG_UNINITIALIZED,
 	.nTableMask = HT_MIN_MASK,
-	.arData = (Bucket*)&uninitialized_bucket[2],
+	{.arData = (Bucket*)&uninitialized_bucket[2]},
 	.nNumUsed = 0,
 	.nNumOfElements = 0,
 	.nTableSize = HT_MIN_SIZE,
 	.nInternalPointer = 0,
-	.nNextFreeElement = 0,
+	.nNextFreeElement = ZEND_LONG_MIN,
 	.pDestructor = ZVAL_PTR_DTOR
 };
 
@@ -304,8 +314,9 @@ ZEND_API void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht)
 	if (ht->nTableSize >= HT_MAX_SIZE) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%u * %zu + %zu)", ht->nTableSize * 2, sizeof(Bucket), sizeof(Bucket));
 	}
-	ht->nTableSize += ht->nTableSize;
-	HT_SET_DATA_ADDR(ht, perealloc2(HT_GET_DATA_ADDR(ht), HT_PACKED_SIZE_EX(ht->nTableSize, HT_MIN_MASK), HT_PACKED_USED_SIZE(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
+	uint32_t newTableSize = ht->nTableSize * 2;
+	HT_SET_DATA_ADDR(ht, perealloc2(HT_GET_DATA_ADDR(ht), HT_PACKED_SIZE_EX(newTableSize, HT_MIN_MASK), HT_PACKED_USED_SIZE(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
+	ht->nTableSize = newTableSize;
 }
 
 ZEND_API void ZEND_FASTCALL zend_hash_real_init(HashTable *ht, bool packed)
@@ -343,8 +354,9 @@ ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht)
 	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
 
 	HT_ASSERT_RC1(ht);
-	HT_FLAGS(ht) &= ~HASH_FLAG_PACKED;
+	// Alloc before assign to avoid inconsistencies on OOM
 	new_data = pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+	HT_FLAGS(ht) &= ~HASH_FLAG_PACKED;
 	ht->nTableMask = HT_SIZE_TO_MASK(ht->nTableSize);
 	HT_SET_DATA_ADDR(ht, new_data);
 	dst = ht->arData;
@@ -398,8 +410,9 @@ ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool
 		if (packed) {
 			ZEND_ASSERT(HT_IS_PACKED(ht));
 			if (nSize > ht->nTableSize) {
-				ht->nTableSize = zend_hash_check_size(nSize);
-				HT_SET_DATA_ADDR(ht, perealloc2(HT_GET_DATA_ADDR(ht), HT_PACKED_SIZE_EX(ht->nTableSize, HT_MIN_MASK), HT_PACKED_USED_SIZE(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
+				uint32_t newTableSize = zend_hash_check_size(nSize);
+				HT_SET_DATA_ADDR(ht, perealloc2(HT_GET_DATA_ADDR(ht), HT_PACKED_SIZE_EX(newTableSize, HT_MIN_MASK), HT_PACKED_USED_SIZE(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
+				ht->nTableSize = newTableSize;
 			}
 		} else {
 			ZEND_ASSERT(!HT_IS_PACKED(ht));
@@ -407,8 +420,8 @@ ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, bool
 				void *new_data, *old_data = HT_GET_DATA_ADDR(ht);
 				Bucket *old_buckets = ht->arData;
 				nSize = zend_hash_check_size(nSize);
-				ht->nTableSize = nSize;
 				new_data = pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+				ht->nTableSize = nSize;
 				ht->nTableMask = HT_SIZE_TO_MASK(ht->nTableSize);
 				HT_SET_DATA_ADDR(ht, new_data);
 				memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
@@ -1237,8 +1250,8 @@ static void ZEND_FASTCALL zend_hash_do_resize(HashTable *ht)
 
 		ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
 
-		ht->nTableSize = nSize;
 		new_data = pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+		ht->nTableSize = nSize;
 		ht->nTableMask = HT_SIZE_TO_MASK(ht->nTableSize);
 		HT_SET_DATA_ADDR(ht, new_data);
 		memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
@@ -1299,7 +1312,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 						}
 					}
 				} else {
-					uint32_t iter_pos = zend_hash_iterators_lower_pos(ht, 0);
+					uint32_t iter_pos = zend_hash_iterators_lower_pos(ht, i + 1);
 
 					while (++i < ht->nNumUsed) {
 						p++;

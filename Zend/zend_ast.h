@@ -145,7 +145,6 @@ enum _zend_ast_kind {
 	ZEND_AST_USE_ELEM,
 	ZEND_AST_TRAIT_ALIAS,
 	ZEND_AST_GROUP_USE,
-	ZEND_AST_CLASS_CONST_GROUP,
 	ZEND_AST_ATTRIBUTE,
 	ZEND_AST_MATCH,
 	ZEND_AST_MATCH_ARM,
@@ -162,6 +161,7 @@ enum _zend_ast_kind {
 	ZEND_AST_PROP_GROUP,
 	ZEND_AST_PROP_ELEM,
 	ZEND_AST_CONST_ELEM,
+	ZEND_AST_CLASS_CONST_GROUP,
 
 	// Pseudo node for initializing enums
 	ZEND_AST_CONST_ENUM_INIT,
@@ -351,6 +351,9 @@ static zend_always_inline uint32_t zend_ast_get_num_children(zend_ast *ast) {
 static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
+		return Z_LINENO_P(zv);
+	} else if (ast->kind == ZEND_AST_CONSTANT) {
+		zval *zv = &((zend_ast_zval *) ast)->val;
 		return Z_LINENO_P(zv);
 	} else {
 		return ast->lineno;

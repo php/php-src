@@ -208,7 +208,7 @@ typedef struct php_cli_server_http_response_status_code_pair {
 	const char *str;
 } php_cli_server_http_response_status_code_pair;
 
-static php_cli_server_http_response_status_code_pair template_map[] = {
+static const php_cli_server_http_response_status_code_pair template_map[] = {
 	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
 	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
 	{ 405, "<h1>%s</h1><p>Requested method not allowed.</p>" },
@@ -361,7 +361,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 	zval *val;
 	struct timeval tv = {0};
 
-	if (NULL != (val = zend_hash_str_find(&client->request.headers, "host", sizeof("host")-1))) {
+	if (NULL != (val = zend_hash_find(&client->request.headers, ZSTR_KNOWN(ZEND_STR_HOST)))) {
 		smart_str_appends_ex(buffer, "Host: ", persistent);
 		smart_str_append_ex(buffer, Z_STR_P(val), persistent);
 		smart_str_appends_ex(buffer, "\r\n", persistent);
@@ -696,7 +696,7 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 		}
 	}
 	{
-		zend_string *tmp = strpprintf(0, "PHP %s Development Server", PHP_VERSION);
+		zend_string *tmp = strpprintf(0, "PHP/%s (Development Server)", PHP_VERSION);
 		sapi_cli_server_register_known_var_str(track_vars_array, "SERVER_SOFTWARE", strlen("SERVER_SOFTWARE"), tmp);
 		zend_string_release_ex(tmp, /* persistent */ false);
 	}
@@ -1785,8 +1785,10 @@ static int php_cli_server_client_read_request_on_message_complete(php_http_parse
 	php_cli_server_client *client = parser->data;
 	client->request.protocol_version = parser->http_major * 100 + parser->http_minor;
 	php_cli_server_request_translate_vpath(&client->request, client->server->document_root, client->server->document_root_len);
-	{
-		const char *vpath = client->request.vpath, *end = vpath + client->request.vpath_len, *p = end;
+	if (client->request.vpath) {
+		const char *vpath = client->request.vpath;
+		const char *end = vpath + client->request.vpath_len;
+		const char *p = end;
 		client->request.ext = end;
 		client->request.ext_len = 0;
 		while (p > vpath) {

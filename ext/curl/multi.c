@@ -382,6 +382,11 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 		return rval;
 	}
 
+	if (UNEXPECTED(zend_fcall_info_init(&t->func_name, 0, &fci, &t->fci_cache, NULL, NULL) == FAILURE)) {
+		php_error_docref(NULL, E_WARNING, "Cannot call the CURLMOPT_PUSHFUNCTION");
+		return rval;
+	}
+
 	parent = Z_CURL_P(pz_parent_ch);
 
 	ch = init_curl_handle_into_zval(&pz_ch);
@@ -394,8 +399,6 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 		header = curl_pushheader_bynum(push_headers, i);
 		add_next_index_string(&headers, header);
 	}
-
-	zend_fcall_info_init(&t->func_name, 0, &fci, &t->fci_cache, NULL, NULL);
 
 	ZEND_ASSERT(pz_parent_ch);
 	zval call_args[3] = {*pz_parent_ch, pz_ch, headers};
@@ -523,7 +526,7 @@ static zend_function *curl_multi_get_constructor(zend_object *object) {
 	return NULL;
 }
 
-void curl_multi_free_obj(zend_object *object)
+static void curl_multi_free_obj(zend_object *object)
 {
 	php_curlm *mh = curl_multi_from_obj(object);
 

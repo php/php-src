@@ -11,18 +11,18 @@ foreach ( [ '+99:60', '+99:62', '-99:62', '-99:60', '+9960', '-9960', '+9959', '
 		$d = new DateTimeZone($test);
 		echo $d->getName(), "\n";
 	} catch (Exception $e) {
-		echo $e->getMessage(), "\n";
+		echo $e::class, ': ', $e->getMessage(), "\n";
 	}
 }
 
 
 ?>
 --EXPECT--
-Testing +99:60: DateTimeZone::__construct(): Timezone offset is out of range (+99:60)
-Testing +99:62: DateTimeZone::__construct(): Timezone offset is out of range (+99:62)
-Testing -99:62: DateTimeZone::__construct(): Timezone offset is out of range (-99:62)
-Testing -99:60: DateTimeZone::__construct(): Timezone offset is out of range (-99:60)
-Testing +9960: DateTimeZone::__construct(): Timezone offset is out of range (+9960)
-Testing -9960: DateTimeZone::__construct(): Timezone offset is out of range (-9960)
+Testing +99:60: DateInvalidTimeZoneException: DateTimeZone::__construct(): Timezone offset is out of range (+99:60)
+Testing +99:62: DateInvalidTimeZoneException: DateTimeZone::__construct(): Timezone offset is out of range (+99:62)
+Testing -99:62: DateInvalidTimeZoneException: DateTimeZone::__construct(): Timezone offset is out of range (-99:62)
+Testing -99:60: DateInvalidTimeZoneException: DateTimeZone::__construct(): Timezone offset is out of range (-99:60)
+Testing +9960: DateInvalidTimeZoneException: DateTimeZone::__construct(): Timezone offset is out of range (+9960)
+Testing -9960: DateInvalidTimeZoneException: DateTimeZone::__construct(): Timezone offset is out of range (-9960)
 Testing +9959: +99:59
 Testing -9959: -99:59

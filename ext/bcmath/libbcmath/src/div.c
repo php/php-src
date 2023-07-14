@@ -79,8 +79,7 @@ static void _one_mult (unsigned char *num, int size, int digit, unsigned char *r
    digits after the decimal point is SCALE. It returns -1 if division
    by zero is tried.  The algorithm is found in Knuth Vol 2. p237. */
 
-int
-bc_divide (bc_num n1, bc_num n2, bc_num *quot, int scale)
+int bc_divide (bc_num n1, bc_num n2, bc_num *quot, int scale)
 {
   bc_num qval;
   unsigned char *num1, *num2;

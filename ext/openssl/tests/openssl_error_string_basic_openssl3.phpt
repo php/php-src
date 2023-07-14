@@ -114,9 +114,6 @@ expect_openssl_errors('openssl_pkey_export_to_file write', ['10080002']);
 // successful export
 @openssl_pkey_export($private_key_file_with_pass, $out, 'wrong pwd', $options);
 expect_openssl_errors('openssl_pkey_export', ['1C800064', '04800065']);
-// invalid x509 for getting public key
-@openssl_pkey_get_public($private_key_file);
-expect_openssl_errors('openssl_pkey_get_public', [$err_pem_no_start_line]);
 // private encrypt with unknown padding
 @openssl_private_encrypt("data", $crypted, $private_key_file, 1000);
 expect_openssl_errors('openssl_private_encrypt', ['1C8000A5']);
@@ -126,7 +123,7 @@ expect_openssl_errors('openssl_private_decrypt', ['0200009F', '02000072']);
 // public encrypt and decrypt with failed padding check and padding
 @openssl_public_encrypt("data", $crypted, $public_key_file, 1000);
 @openssl_public_decrypt("data", $crypted, $public_key_file);
-expect_openssl_errors('openssl_private_(en|de)crypt padding', [$err_pem_no_start_line, '02000076', '0200008A', '02000072', '1C880004']);
+expect_openssl_errors('openssl_private_(en|de)crypt padding', ['02000076', '0200008A', '02000072', '1C880004']);
 
 // X509
 echo "X509 errors\n";
@@ -170,7 +167,6 @@ openssl_pkey_export_to_file opening: ok
 openssl_pkey_export_to_file pem: ok
 openssl_pkey_export_to_file write: ok
 openssl_pkey_export: ok
-openssl_pkey_get_public: ok
 openssl_private_encrypt: ok
 openssl_private_decrypt: ok
 openssl_private_(en|de)crypt padding: ok

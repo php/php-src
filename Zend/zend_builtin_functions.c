@@ -110,7 +110,7 @@ ZEND_FUNCTION(gc_enable)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	key = zend_string_init("zend.enable_gc", sizeof("zend.enable_gc")-1, 0);
+	key = ZSTR_INIT_LITERAL("zend.enable_gc", 0);
 	zend_alter_ini_entry_chars(key, "1", sizeof("1")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 	zend_string_release_ex(key, 0);
 }
@@ -123,7 +123,7 @@ ZEND_FUNCTION(gc_disable)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	key = zend_string_init("zend.enable_gc", sizeof("zend.enable_gc")-1, 0);
+	key = ZSTR_INIT_LITERAL("zend.enable_gc", 0);
 	zend_alter_ini_entry_chars(key, "0", sizeof("0")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 	zend_string_release_ex(key, 0);
 }
@@ -138,7 +138,7 @@ ZEND_FUNCTION(gc_status)
 
 	zend_gc_get_status(&status);
 
-	array_init_size(return_value, 3);
+	array_init_size(return_value, 8);
 
 	add_assoc_bool_ex(return_value, "running", sizeof("running")-1, status.active);
 	add_assoc_bool_ex(return_value, "protected", sizeof("protected")-1, status.gc_protected);
@@ -511,8 +511,7 @@ ZEND_FUNCTION(define)
 register_constant:
 	/* non persistent */
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
-	c.name = zend_string_copy(name);
-	if (zend_register_constant(&c) == SUCCESS) {
+	if (zend_register_constant(name, &c) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -868,6 +867,7 @@ ZEND_FUNCTION(method_exists)
 	zend_class_entry *ce;
 	zend_function *func;
 
+	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ZVAL(klass)
 		Z_PARAM_STR(method_name)
@@ -930,6 +930,7 @@ ZEND_FUNCTION(property_exists)
 	zend_class_entry *ce;
 	zend_property_info *property_info;
 
+	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zS", &object, &property) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -1074,16 +1075,11 @@ ZEND_FUNCTION(class_alias)
 	ce = zend_lookup_class_ex(class_name, NULL, !autoload ? ZEND_FETCH_CLASS_NO_AUTOLOAD : 0);
 
 	if (ce) {
-		if (ce->type == ZEND_USER_CLASS) {
-			if (zend_register_class_alias_ex(ZSTR_VAL(alias_name), ZSTR_LEN(alias_name), ce, 0) == SUCCESS) {
-				RETURN_TRUE;
-			} else {
-				zend_error(E_WARNING, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(alias_name));
-				RETURN_FALSE;
-			}
+		if (zend_register_class_alias_ex(ZSTR_VAL(alias_name), ZSTR_LEN(alias_name), ce, false) == SUCCESS) {
+			RETURN_TRUE;
 		} else {
-			zend_argument_value_error(1, "must be a user-defined class name, internal class name given");
-			RETURN_THROWS();
+			zend_error(E_WARNING, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(alias_name));
+			RETURN_FALSE;
 		}
 	} else {
 		zend_error(E_WARNING, "Class \"%s\" not found", ZSTR_VAL(class_name));
@@ -1326,7 +1322,7 @@ ZEND_FUNCTION(get_defined_functions)
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "internal", sizeof("internal")-1, &internal);
-	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "user", sizeof("user")-1, &user);
+	zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_USER), &user);
 }
 /* }}} */
 
@@ -1483,6 +1479,7 @@ ZEND_FUNCTION(get_defined_constants)
 		zend_constant *val;
 		int module_number;
 		zval *modules, const_val;
+		zend_string *const_name;
 		char **module_names;
 		zend_module_entry *module;
 		int i = 1;
@@ -1497,12 +1494,7 @@ ZEND_FUNCTION(get_defined_constants)
 		} ZEND_HASH_FOREACH_END();
 		module_names[i] = "user";
 
-		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), val) {
-			if (!val->name) {
-				/* skip special constants */
-				continue;
-			}
-
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(zend_constants), const_name, val) {
 			if (ZEND_CONSTANT_MODULE_NUMBER(val) == PHP_USER_CONSTANT) {
 				module_number = i;
 			} else if (ZEND_CONSTANT_MODULE_NUMBER(val) > i) {
@@ -1518,22 +1510,19 @@ ZEND_FUNCTION(get_defined_constants)
 			}
 
 			ZVAL_COPY_OR_DUP(&const_val, &val->value);
-			zend_hash_add_new(Z_ARRVAL(modules[module_number]), val->name, &const_val);
+			zend_hash_add_new(Z_ARRVAL(modules[module_number]), const_name, &const_val);
 		} ZEND_HASH_FOREACH_END();
 
 		efree(module_names);
 		efree(modules);
 	} else {
 		zend_constant *constant;
+		zend_string *const_name;
 		zval const_val;
 
-		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), constant) {
-			if (!constant->name) {
-				/* skip special constants */
-				continue;
-			}
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(zend_constants), const_name, constant) {
 			ZVAL_COPY_OR_DUP(&const_val, &constant->value);
-			zend_hash_add_new(Z_ARRVAL_P(return_value), constant->name, &const_val);
+			zend_hash_add_new(Z_ARRVAL_P(return_value), const_name, &const_val);
 		} ZEND_HASH_FOREACH_END();
 	}
 }
@@ -1722,6 +1711,32 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	call = EG(current_execute_data);
 	if (!call) {
 		return;
+	}
+
+	if (EG(filename_override)) {
+		// Add the current execution point to the frame so we don't lose it
+		zend_string *filename_override = EG(filename_override);
+		zend_long lineno_override = EG(lineno_override);
+		EG(filename_override) = NULL;
+		EG(lineno_override) = -1;
+
+		zend_string *filename = zend_get_executed_filename_ex();
+		zend_long lineno = zend_get_executed_lineno();
+		if (filename && (!zend_string_equals(filename, filename_override) || lineno != lineno_override)) {
+			stack_frame = zend_new_array(8);
+			zend_hash_real_init_mixed(stack_frame);
+			ZVAL_STR_COPY(&tmp, filename);
+			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FILE), &tmp, 1);
+			ZVAL_LONG(&tmp, lineno);
+			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_LINE), &tmp, 1);
+			ZVAL_STR_COPY(&tmp, ZSTR_KNOWN(ZEND_STR_CONST_EXPR_PLACEHOLDER));
+			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp, 1);
+			ZVAL_ARR(&tmp, stack_frame);
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+		}
+
+		EG(filename_override) = filename_override;
+		EG(lineno_override) = lineno_override;
 	}
 
 	if (skip_last) {

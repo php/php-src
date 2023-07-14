@@ -43,7 +43,15 @@ for ($i = 0; $i < 10_000; $i++) {
 die('success');
 
 ?>
---EXPECT--
+--EXPECTF--
 MT_RAND_PHP
+
+Deprecated: Constant MT_RAND_PHP is deprecated in %s on line %d
+
+Deprecated: The MT_RAND_PHP variant of Mt19937 is deprecated in %s on line %d
+
+Deprecated: Constant MT_RAND_PHP is deprecated in %s on line %d
+
+Deprecated: The MT_RAND_PHP variant of Mt19937 is deprecated in %s on line %d
 MT_RAND_MT19937
 success

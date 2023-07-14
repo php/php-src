@@ -426,10 +426,15 @@ static int php_posix_stream_get_fd(zval *zfp, zend_long *fd) /* {{{ */
 	if (stream == NULL) {
 		return 0;
 	}
-	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT, (void*)fd, 0);
-	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
-		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)fd, 0);
+
+	/* get the fd.
+	 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag when casting.
+	 * It is only used here so that the buffered data warning is not displayed.
+	 */
+	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)fd, 0);
+	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL) == SUCCESS) {
+		php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL, (void*)fd, 0);
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not use stream of type '%s'",
 				stream->ops->label);
@@ -444,7 +449,7 @@ PHP_FUNCTION(posix_ttyname)
 {
 	zval *z_fd;
 	char *p;
-	zend_long fd;
+	zend_long fd = 0;
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
 	zend_long buflen;
 #endif
@@ -458,7 +463,7 @@ PHP_FUNCTION(posix_ttyname)
 			RETURN_FALSE;
 		}
 	} else {
-		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ false, /* check_null */ false, /* arg_num */ 1)) {
+		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ NULL, /* check_null */ false, /* arg_num */ 1)) {
 			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be of type int|resource, %s given",
 				zend_zval_value_name(z_fd));
 			fd = zval_get_long(z_fd);
@@ -497,7 +502,7 @@ PHP_FUNCTION(posix_ttyname)
 PHP_FUNCTION(posix_isatty)
 {
 	zval *z_fd;
-	zend_long fd;
+	zend_long fd = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(z_fd)
@@ -508,10 +513,10 @@ PHP_FUNCTION(posix_isatty)
 			RETURN_FALSE;
 		}
 	} else {
-		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ false, /* check_null */ false, /* arg_num */ 1)) {
+		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ NULL, /* check_null */ false, /* arg_num */ 1)) {
 			php_error_docref(NULL, E_WARNING, "Argument #1 ($file_descriptor) must be of type int|resource, %s given",
 				zend_zval_value_name(z_fd));
-			fd = zval_get_long(z_fd);
+			RETURN_FALSE;
 		}
 	}
 
@@ -713,6 +718,44 @@ PHP_FUNCTION(posix_access)
 
 	RETURN_TRUE;
 }
+
+#ifdef HAVE_EACCESS
+PHP_FUNCTION(posix_eaccess)
+{
+	zend_long mode = 0;
+	size_t filename_len, ret;
+	char *filename, *path;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
+
+	path = expand_filepath(filename, NULL);
+	if (!path) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	if (php_check_open_basedir_ex(path, 0)) {
+		efree(path);
+		POSIX_G(last_error) = EPERM;
+		RETURN_FALSE;
+	}
+
+	ret = eaccess(path, mode);
+	efree(path);
+
+	if (ret) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+#endif
+
 /* }}} */
 
 /*
@@ -1229,7 +1272,7 @@ PHP_FUNCTION(posix_pathconf)
 
 PHP_FUNCTION(posix_fpathconf)
 {
-	zend_long name, ret, fd;
+	zend_long name, ret, fd = 0;
 	zval *z_fd;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
@@ -1242,7 +1285,7 @@ PHP_FUNCTION(posix_fpathconf)
 			RETURN_FALSE;
 		}
 	} else {
-		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ false, /* check_null */ false, /* arg_num */ 1)) {
+		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ NULL, /* check_null */ false, /* arg_num */ 1)) {
 			zend_argument_type_error(1, "must be of type int|resource, %s given",
 				zend_zval_value_name(z_fd));
 			RETURN_THROWS();

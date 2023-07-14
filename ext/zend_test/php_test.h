@@ -49,10 +49,12 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int observer_fiber_init;
 	int observer_fiber_switch;
 	int observer_fiber_destroy;
+	int observer_execute_internal;
 	HashTable global_weakmap;
 	int replace_zend_execute_ex;
 	int register_passes;
 	bool print_stderr_mshutdown;
+	zend_long limit_copy_file_range;
 	zend_test_fiber *active_fiber;
 	zend_long quantity_value;
 	zend_string *str_test;

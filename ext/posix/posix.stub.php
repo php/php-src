@@ -379,6 +379,10 @@ function posix_mknod(string $filename, int $flags, int $major = 0, int $minor = 
 
 function posix_access(string $filename, int $flags = 0): bool {}
 
+#ifdef HAVE_EACCESS
+function posix_eaccess(string $filename, int $flags = 0): bool {}
+#endif
+
 /**
  * @return array<string, int|string|array|null>|false
  * @refcount 1

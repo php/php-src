@@ -83,7 +83,7 @@ typedef char* (*php_rfc1867_basename_t)(const zend_encoding *encoding, char *str
 SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler);
 
 PHPAPI void destroy_uploaded_files_hash(void);
-extern PHPAPI int (*php_rfc1867_callback)(unsigned int event, void *event_data, void **extra);
+extern PHPAPI zend_result (*php_rfc1867_callback)(unsigned int event, void *event_data, void **extra);
 
 SAPI_API void php_rfc1867_set_multibyte_callbacks(
 					php_rfc1867_encoding_translation_t encoding_translation,

@@ -11,7 +11,7 @@ if (readline_info('done') === NULL) {
 ?>
 --FILE--
 <?php
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 // disallow console escape sequences that may break the output
 putenv('TERM=VT100');
@@ -56,7 +56,7 @@ EOT;
 foreach ($codes as $key => $code) {
     echo "\n--------------\nSnippet no. $key:\n--------------\n";
     $code = escapeshellarg($code);
-    echo `echo $code | "$php" -a`, "\n";
+    echo `echo $code | $php -a`, "\n";
 }
 
 echo "\nDone\n";

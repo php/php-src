@@ -72,8 +72,8 @@ typedef struct _spl_dllist_it spl_dllist_it;
 
 struct _spl_dllist_object {
 	spl_ptr_llist         *llist;
-	int                    traverse_position;
 	spl_ptr_llist_element *traverse_pointer;
+	int                    traverse_position;
 	int                    flags;
 	zend_function         *fptr_offset_get;
 	zend_function         *fptr_offset_set;
@@ -375,7 +375,8 @@ static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zend_
 		if (intern->fptr_offset_del->common.scope == parent) {
 			intern->fptr_offset_del = NULL;
 		}
-		intern->fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", sizeof("count") - 1);
+		/* Find count() method */
+		intern->fptr_count = zend_hash_find_ptr(&class_type->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
 		if (intern->fptr_count->common.scope == parent) {
 			intern->fptr_count = NULL;
 		}
@@ -1223,7 +1224,7 @@ static const zend_object_iterator_funcs spl_dllist_it_funcs = {
 	NULL, /* get_gc */
 }; /* }}} */
 
-zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
+static zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
 	spl_dllist_object *dllist_object = Z_SPLDLLIST_P(object);
 

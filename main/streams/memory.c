@@ -349,7 +349,7 @@ static ssize_t php_stream_temp_write(php_stream *stream, const char *buf, size_t
 	}
 	if (php_stream_is(ts->innerstream, PHP_STREAM_IS_MEMORY)) {
 		zend_off_t pos = php_stream_tell(ts->innerstream);
-		
+
 		if (pos + count >= ts->smax) {
 			zend_string *membuf = php_stream_memory_get_buffer(ts->innerstream);
 			php_stream *file = php_stream_fopen_temporary_file(ts->tmpdir, "php", NULL);
@@ -614,6 +614,8 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 	int base64 = 0;
 	zend_string *base64_comma = NULL;
 
+	ZEND_ASSERT(mode);
+
 	ZVAL_NULL(&meta);
 	if (memcmp(path, "data:", 5)) {
 		return NULL;
@@ -729,7 +731,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 		stream->ops = &php_stream_rfc2397_ops;
 		ts = (php_stream_temp_data*)stream->abstract;
 		assert(ts != NULL);
-		ts->mode = mode && mode[0] == 'r' && mode[1] != '+' ? TEMP_STREAM_READONLY : 0;
+		ts->mode = mode[0] == 'r' && mode[1] != '+' ? TEMP_STREAM_READONLY : 0;
 		ZVAL_COPY_VALUE(&ts->meta, &meta);
 	}
 	if (base64_comma) {

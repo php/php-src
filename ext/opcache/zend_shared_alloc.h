@@ -80,7 +80,7 @@ typedef struct _zend_shared_segment {
     void   *p;
 } zend_shared_segment;
 
-typedef int (*create_segments_t)(size_t requested_size, zend_shared_segment ***shared_segments, int *shared_segment_count, char **error_in);
+typedef int (*create_segments_t)(size_t requested_size, zend_shared_segment ***shared_segments, int *shared_segment_count, const char **error_in);
 typedef int (*detach_segment_t)(zend_shared_segment *shared_segment);
 
 typedef struct {
@@ -141,7 +141,7 @@ static inline void *zend_shared_alloc_aligned(size_t size) {
 #if defined(__AVX__) || defined(__SSE2__)
 	/* Align to 64-byte boundary */
 	void *p = zend_shared_alloc(size + 64);
-	return (void *)(((zend_uintptr_t)p + 63L) & ~63L);
+	return (void *)(((uintptr_t)p + 63L) & ~63L);
 #else
 	return zend_shared_alloc(size);
 #endif
@@ -157,7 +157,7 @@ void *zend_shared_memdup(void *source, size_t size);
 
 int  zend_shared_memdup_size(void *p, size_t size);
 
-int zend_accel_in_shm(void *ptr);
+bool zend_accel_in_shm(void *ptr);
 
 typedef union _align_test {
 	void   *ptr;
@@ -193,8 +193,13 @@ void zend_shared_alloc_save_state(void);
 void zend_shared_alloc_restore_state(void);
 const char *zend_accel_get_shared_model(void);
 
-/* memory write protection */
-void zend_accel_shared_protect(int mode);
+/**
+ * Memory write protection
+ *
+ * @param protected true to protect shared memory (read-only), false
+ * to unprotect shared memory (writable)
+ */
+void zend_accel_shared_protect(bool protected);
 
 #ifdef USE_MMAP
 extern const zend_shared_memory_handlers zend_alloc_mmap_handlers;

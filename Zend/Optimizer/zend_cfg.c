@@ -41,7 +41,7 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 			zend_basic_block *succ = blocks + b->successors[i];
 
 			if (b->len != 0) {
-				zend_uchar opcode = opcodes[b->start + b->len - 1].opcode;
+				uint8_t opcode = opcodes[b->start + b->len - 1].opcode;
 				if (opcode == ZEND_MATCH) {
 					succ->flags |= ZEND_BB_TARGET;
 				} else if (opcode == ZEND_SWITCH_LONG || opcode == ZEND_SWITCH_STRING) {
@@ -369,6 +369,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
 			case ZEND_JMP_NULL:
+			case ZEND_BIND_INIT_STATIC_OR_JMP:
 				BB_START(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes);
 				BB_START(i + 1);
 				break;
@@ -522,6 +523,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
 			case ZEND_JMP_NULL:
+			case ZEND_BIND_INIT_STATIC_OR_JMP:
 				block->successors_count = 2;
 				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes];
 				block->successors[1] = j + 1;

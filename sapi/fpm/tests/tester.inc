@@ -385,7 +385,7 @@ class Tester
     public function testConfig($silent = false)
     {
         $configFile = $this->createConfig();
-        $cmd        = self::findExecutable() . ' -tt -y ' . $configFile . ' 2>&1';
+        $cmd        = self::findExecutable() . ' -n -tt -y ' . $configFile . ' 2>&1';
         $this->trace('Testing config using command', $cmd, true);
         exec($cmd, $output, $code);
         if ($code) {
@@ -426,7 +426,7 @@ class Tester
         $configFile = $this->createConfig();
         $desc       = $this->outDesc ? [] : [1 => array('pipe', 'w'), 2 => array('redirect', 1)];
 
-        $cmd = [self::findExecutable(), '-y', $configFile];
+        $cmd = [self::findExecutable(), '-n', '-y', $configFile];
 
         if ($forceStderr) {
             $cmd[] = '-O';
@@ -614,21 +614,25 @@ class Tester
         array $headers = [],
         string $uri = null,
         string $scriptFilename = null,
+        string $scriptName = null,
         ?string $stdin = null
     ): array {
         if (is_null($scriptFilename)) {
             $scriptFilename = $this->makeSourceFile();
         }
         if (is_null($uri)) {
-            $uri = "/" . basename($scriptFilename);
+            $uri = '/' . basename($scriptFilename);
+        }
+        if (is_null($scriptName)) {
+            $scriptName = $uri;
         }
 
         $params = array_merge(
             [
                 'GATEWAY_INTERFACE' => 'FastCGI/1.0',
                 'REQUEST_METHOD'    => is_null($stdin) ? 'GET' : 'POST',
-                'SCRIPT_FILENAME'   => $scriptFilename ?: $uri,
-                'SCRIPT_NAME'       => $uri,
+                'SCRIPT_FILENAME'   => $scriptFilename === '' ? null : $scriptFilename,
+                'SCRIPT_NAME'       => $scriptName,
                 'QUERY_STRING'      => $query,
                 'REQUEST_URI'       => $uri . ($query ? '?' . $query : ""),
                 'DOCUMENT_URI'      => $uri,
@@ -652,20 +656,86 @@ class Tester
     }
 
     /**
+     * Parse stdin and generate data for multipart config.
+     *
+     * @param array $stdin
+     * @param array $headers
+     *
+     * @return void
+     * @throws \Exception
+     */
+    private function parseStdin(array $stdin, array &$headers)
+    {
+        $parts = $stdin['parts'] ?? null;
+        if (empty($parts)) {
+            throw new \Exception('The stdin array needs to contain parts');
+        }
+        $boundary = $stdin['boundary'] ?? 'AaB03x';
+        if ( ! isset($headers['CONTENT_TYPE'])) {
+            $headers['CONTENT_TYPE'] = 'multipart/form-data; boundary=' . $boundary;
+        }
+        $count = $parts['count'] ?? null;
+        if ( ! is_null($count)) {
+            $dispositionType  = $parts['disposition'] ?? 'form-data';
+            $dispositionParam = $parts['param'] ?? 'name';
+            $namePrefix       = $parts['prefix'] ?? 'f';
+            $nameSuffix       = $parts['suffix'] ?? '';
+            $value            = $parts['value'] ?? 'test';
+            $parts            = [];
+            for ($i = 0; $i < $count; $i++) {
+                $parts[] = [
+                    'disposition' => $dispositionType,
+                    'param'       => $dispositionParam,
+                    'name'        => "$namePrefix$i$nameSuffix",
+                    'value'       => $value
+                ];
+            }
+        }
+        $out = '';
+        $nl  = "\r\n";
+        foreach ($parts as $part) {
+            if (!is_array($part)) {
+                $part = ['name' => $part];
+            } elseif ( ! isset($part['name'])) {
+                throw new \Exception('Each part has to have a name');
+            }
+            $name             = $part['name'];
+            $dispositionType  = $part['disposition'] ?? 'form-data';
+            $dispositionParam = $part['param'] ?? 'name';
+            $value            = $part['value'] ?? 'test';
+            $partHeaders          = $part['headers'] ?? [];
+
+            $out .= "--$boundary$nl";
+            $out .= "Content-disposition: $dispositionType; $dispositionParam=\"$name\"$nl";
+            foreach ($partHeaders as $headerName => $headerValue) {
+                $out .= "$headerName: $headerValue$nl";
+            }
+            $out .= $nl;
+            $out .= "$value$nl";
+        }
+        $out .= "--$boundary--$nl";
+
+        return $out;
+    }
+
+    /**
      * Execute request.
      *
-     * @param string      $query
-     * @param array       $headers
-     * @param string|null $uri
-     * @param string|null $address
-     * @param string|null $successMessage
-     * @param string|null $errorMessagereadLimit
-     * @param bool        $connKeepAlive
-     * @param string|null $scriptFilename = null
-     * @param bool        $expectError
-     * @param int         $readLimit
+     * @param string            $query
+     * @param array             $headers
+     * @param string|null       $uri
+     * @param string|null       $address
+     * @param string|null       $successMessage
+     * @param string|null       $errorMessage
+     * @param bool              $connKeepAlive
+     * @param string|null       $scriptFilename = null
+     * @param string|null       $scriptName = null
+     * @param string|array|null $stdin          = null
+     * @param bool              $expectError
+     * @param int               $readLimit
      *
      * @return Response
+     * @throws \Exception
      */
     public function request(
         string $query = '',
@@ -676,7 +746,8 @@ class Tester
         string $errorMessage = null,
         bool $connKeepAlive = false,
         string $scriptFilename = null,
-        string $stdin = null,
+        string $scriptName = null,
+        string|array $stdin = null,
         bool $expectError = false,
         int $readLimit = -1,
     ): Response {
@@ -684,7 +755,11 @@ class Tester
             return new Response(null, true);
         }
 
-        $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename, $stdin);
+        if (is_array($stdin)) {
+            $stdin = $this->parseStdin($stdin, $headers);
+        }
+
+        $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename, $scriptName, $stdin);
         $this->trace('Request params', $params);
 
         try {
@@ -750,6 +825,10 @@ class Tester
                     $requestData['headers'] ?? [],
                     $requestData['uri'] ?? null
                 );
+
+                if (isset($requestData['delay'])) {
+                    usleep($requestData['delay']);
+                }
 
                 return [
                     'client'    => $client,
@@ -1254,6 +1333,18 @@ class Tester
     public function makeSourceFile(): string
     {
         return $this->makeFile('src.php', $this->code, overwrite: false);
+    }
+
+    /**
+     * Create a source file and script name.
+     *
+     * @return string[]
+     */
+    public function createSourceFileAndScriptName(): array
+    {
+        $sourceFile = $this->makeFile('src.php', $this->code, overwrite: false);
+
+        return [$sourceFile, '/' . basename($sourceFile)];
     }
 
     /**

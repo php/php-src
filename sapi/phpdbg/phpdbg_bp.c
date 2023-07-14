@@ -31,7 +31,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_method(zend_op_array*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t);
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar);
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(uint8_t);
 static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execute_data *execute_data); /* }}} */
 
 /*
@@ -1009,7 +1009,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_pt
 	return (phpdbg_breakbase_t *) brake;
 } /* }}} */
 
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar opcode) /* {{{ */
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(uint8_t opcode) /* {{{ */
 {
 	const char *opname = zend_get_opcode_name(opcode);
 

@@ -308,7 +308,7 @@ zval* collator_convert_string_to_double( zval* str, zval *rv )
  */
 zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 {
-	zend_uchar is_numeric = 0;
+	uint8_t is_numeric = 0;
 	zend_long lval      = 0;
 	double dval    = 0;
 
@@ -370,7 +370,7 @@ zval* collator_normalize_sort_argument( zval* arg, zval *rv )
 
 	if( Z_TYPE_P( arg ) != IS_STRING )
 	{
-		/* If its not a string then nothing to do.
+		/* If it's not a string then nothing to do.
 		 * Return original arg.
 		 */
 		COLLATOR_CONVERT_RETURN_FAILED( arg );

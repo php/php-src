@@ -1161,11 +1161,31 @@ static void init_request_info(void)
 									 * As we can extract PATH_INFO from PATH_TRANSLATED
 									 * it is probably also in SCRIPT_NAME and need to be removed
 									 */
-									int snlen = strlen(env_script_name);
-									if (snlen>slen && !strcmp(env_script_name+snlen-slen, path_info)) {
+									char *decoded_path_info = NULL;
+									size_t decoded_path_info_len = 0;
+									if (strchr(path_info, '%')) {
+										decoded_path_info = estrdup(path_info);
+										decoded_path_info_len = php_url_decode(decoded_path_info, strlen(path_info));
+									}
+									size_t snlen = strlen(env_script_name);
+									size_t env_script_file_info_start = 0;
+									if (
+										(
+											snlen > slen &&
+											!strcmp(env_script_name + (env_script_file_info_start = snlen - slen), path_info)
+										) ||
+										(
+											decoded_path_info &&
+											snlen > decoded_path_info_len &&
+											!strcmp(env_script_name + (env_script_file_info_start = snlen - decoded_path_info_len), decoded_path_info)
+										)
+									) {
 										FCGI_PUTENV(request, "ORIG_SCRIPT_NAME", orig_script_name);
-										env_script_name[snlen-slen] = 0;
+										env_script_name[env_script_file_info_start] = 0;
 										SG(request_info).request_uri = FCGI_PUTENV(request, "SCRIPT_NAME", env_script_name);
+									}
+									if (decoded_path_info) {
+										efree(decoded_path_info);
 									}
 								}
 								env_path_info = FCGI_PUTENV(request, "PATH_INFO", path_info);
@@ -1537,7 +1557,6 @@ int main(int argc, char *argv[])
 	int force_stderr = 0;
 	int php_information = 0;
 	int php_allow_to_run_as_root = 0;
-	int ret;
 #if ZEND_RC_DEBUG
 	bool old_rc_debug;
 #endif
@@ -1784,14 +1803,13 @@ consult the installation file that came with this distribution, or visit \n\
 	zend_rc_debug = 0;
 #endif
 
-	ret = fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon, force_stderr);
+	enum fpm_init_return_status ret = fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon, force_stderr);
 
 #if ZEND_RC_DEBUG
 	zend_rc_debug = old_rc_debug;
 #endif
 
-	if (ret < 0) {
-
+	if (ret == FPM_INIT_ERROR) {
 		if (fpm_globals.send_config_pipe[1]) {
 			int writeval = 0;
 			zlog(ZLOG_DEBUG, "Sending \"0\" (error) to parent via fd=%d", fpm_globals.send_config_pipe[1]);
@@ -1799,6 +1817,9 @@ consult the installation file that came with this distribution, or visit \n\
 			close(fpm_globals.send_config_pipe[1]);
 		}
 		exit_status = FPM_EXIT_CONFIG;
+		goto out;
+	} else if (ret == FPM_INIT_EXIT_OK) {
+		exit_status = FPM_EXIT_OK;
 		goto out;
 	}
 
@@ -1888,19 +1909,23 @@ consult the installation file that came with this distribution, or visit \n\
 					}
 				} zend_catch {
 				} zend_end_try();
-				/* we want to serve more requests if this is fastcgi
-				 * so cleanup and continue, request shutdown is
-				 * handled later */
+				/* We want to serve more requests if this is fastcgi so cleanup and continue,
+				 * request shutdown is handled later. */
+			} else {
+				fpm_request_executing();
 
-				goto fastcgi_request_done;
+				/* Reset exit status from the previous execution */
+				EG(exit_status) = 0;
+
+				php_execute_script(&file_handle);
 			}
 
-			fpm_request_executing();
-
-			/* Reset exit status from the previous execution */
-			EG(exit_status) = 0;
-
-			php_execute_script(&file_handle);
+			/* Without opcache, or the first time with opcache, the file handle will be placed
+			 * in the CG(open_files) list by open_file_for_scanning(). Starting from the second
+			 * request in opcache, the file handle won't be in the list and therefore won't be destroyed for us. */
+			if (!file_handle.in_list) {
+				zend_destroy_file_handle(&file_handle);
+			}
 
 fastcgi_request_done:
 			if (EXPECTED(primary_script)) {

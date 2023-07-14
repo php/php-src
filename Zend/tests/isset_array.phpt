@@ -46,5 +46,5 @@ bool(false)
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 bool(false)
-Illegal offset type in isset or empty
-Illegal offset type in isset or empty
+Cannot access offset of type array in isset or empty
+Cannot access offset of type stdClass in isset or empty

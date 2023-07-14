@@ -63,10 +63,27 @@ static void fpm_child_free(struct fpm_child_s *child) /* {{{ */
 }
 /* }}} */
 
+static void fpm_postponed_child_free(struct fpm_event_s *ev, short which, void *arg)
+{
+	struct fpm_child_s *child = (struct fpm_child_s *) arg;
+
+	if (child->fd_stdout != -1) {
+		fpm_event_del(&child->ev_stdout);
+		close(child->fd_stdout);
+	}
+	if (child->fd_stderr != -1) {
+		fpm_event_del(&child->ev_stderr);
+		close(child->fd_stderr);
+	}
+
+	fpm_child_free((struct fpm_child_s *) child);
+}
+
 static void fpm_child_close(struct fpm_child_s *child, int in_event_loop) /* {{{ */
 {
 	if (child->fd_stdout != -1) {
 		if (in_event_loop) {
+			child->postponed_free = true;
 			fpm_event_fire(&child->ev_stdout);
 		}
 		if (child->fd_stdout != -1) {
@@ -76,6 +93,7 @@ static void fpm_child_close(struct fpm_child_s *child, int in_event_loop) /* {{{
 
 	if (child->fd_stderr != -1) {
 		if (in_event_loop) {
+			child->postponed_free = true;
 			fpm_event_fire(&child->ev_stderr);
 		}
 		if (child->fd_stderr != -1) {
@@ -83,7 +101,12 @@ static void fpm_child_close(struct fpm_child_s *child, int in_event_loop) /* {{{
 		}
 	}
 
-	fpm_child_free(child);
+	if (in_event_loop && child->postponed_free) {
+		fpm_event_set_timer(&child->ev_free, 0, &fpm_postponed_child_free, child);
+		fpm_event_add(&child->ev_free, 1000);
+	} else {
+		fpm_child_free(child);
+	}
 }
 /* }}} */
 
@@ -297,8 +320,10 @@ void fpm_children_bury(void)
 					break;
 				}
 			}
+		} else if (fpm_globals.parent_pid == 1) {
+			zlog(ZLOG_DEBUG, "unknown child (%d) exited %s - most likely an orphan process (master process is the init process)", pid, buf);
 		} else {
-			zlog(ZLOG_ALERT, "oops, unknown child (%d) exited %s. Please open a bug report (https://github.com/php/php-src/issues).", pid, buf);
+			zlog(ZLOG_WARNING, "unknown child (%d) exited %s - potentially a bug or pre exec child (e.g. s6-notifyoncheck)", pid, buf);
 		}
 	}
 }

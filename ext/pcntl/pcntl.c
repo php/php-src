@@ -58,6 +58,8 @@
 
 #include "pcntl_arginfo.h"
 
+#include "Zend/zend_max_execution_timer.h"
+
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
 
@@ -184,6 +186,8 @@ PHP_FUNCTION(pcntl_fork)
 	if (id == -1) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error %d", errno);
+	} else if (id == 0) {
+		zend_max_execution_timer_init();
 	}
 
 	RETURN_LONG((zend_long) id);
@@ -1044,28 +1048,68 @@ static void pcntl_signal_handler(int signo, siginfo_t *siginfo, void *context)
 static void pcntl_signal_handler(int signo)
 #endif
 {
-	struct php_pcntl_pending_signal *psig;
-
-	psig = PCNTL_G(spares);
-	if (!psig) {
+	struct php_pcntl_pending_signal *psig_first = PCNTL_G(spares);
+	if (!psig_first) {
 		/* oops, too many signals for us to track, so we'll forget about this one */
 		return;
 	}
-	PCNTL_G(spares) = psig->next;
 
-	psig->signo = signo;
-	psig->next = NULL;
+	struct php_pcntl_pending_signal *psig = NULL;
+
+	/* Standard signals may be merged into a single one.
+	 * POSIX specifies that SIGCHLD has the si_pid field (https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/signal.h.html),
+	 * so we'll handle the merging for that signal.
+	 * See also: https://www.gnu.org/software/libc/manual/html_node/Merged-Signals.html */
+	if (signo == SIGCHLD) {
+		/* Note: The first waitpid result is not necessarily the pid that was passed above!
+		 *       We therefore cannot avoid the first waitpid() call. */
+		int status;
+		pid_t pid;
+		while (true) {
+			do {
+				errno = 0;
+				/* Although Linux specifies that WNOHANG will never result in EINTR, POSIX doesn't say so:
+				 * https://pubs.opengroup.org/onlinepubs/9699919799/functions/waitpid.html */
+				pid = waitpid(-1, &status, WNOHANG | WUNTRACED);
+			} while (pid <= 0 && errno == EINTR);
+			if (pid <= 0) {
+				if (UNEXPECTED(!psig)) {
+					/* The child might've been consumed by another thread and will be handled there. */
+					return;
+				}
+				break;
+			}
+
+			psig = psig ? psig->next : psig_first;
+			psig->signo = signo;
 
 #ifdef HAVE_STRUCT_SIGINFO_T
-	psig->siginfo = *siginfo;
+			psig->siginfo = *siginfo;
+			psig->siginfo.si_pid = pid;
 #endif
+
+			if (UNEXPECTED(!psig->next)) {
+				break;
+			}
+		}
+	} else {
+		psig = psig_first;
+		psig->signo = signo;
+
+#ifdef HAVE_STRUCT_SIGINFO_T
+		psig->siginfo = *siginfo;
+#endif
+	}
+
+	PCNTL_G(spares) = psig->next;
+	psig->next = NULL;
 
 	/* the head check is important, as the tick handler cannot atomically clear both
 	 * the head and tail */
 	if (PCNTL_G(head) && PCNTL_G(tail)) {
-		PCNTL_G(tail)->next = psig;
+		PCNTL_G(tail)->next = psig_first;
 	} else {
-		PCNTL_G(head) = psig;
+		PCNTL_G(head) = psig_first;
 	}
 	PCNTL_G(tail) = psig;
 	PCNTL_G(pending_signals) = 1;
@@ -1074,7 +1118,7 @@ static void pcntl_signal_handler(int signo)
 	}
 }
 
-void pcntl_signal_dispatch()
+void pcntl_signal_dispatch(void)
 {
 	zval params[2], *handle, retval;
 	struct php_pcntl_pending_signal *queue, *next;
@@ -1291,7 +1335,7 @@ PHP_FUNCTION(pcntl_forkx)
 	zend_long flags;
 	pid_t pid;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 

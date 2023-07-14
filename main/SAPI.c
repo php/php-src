@@ -683,7 +683,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 
 	switch (op) {
 		case SAPI_HEADER_SET_STATUS:
-			sapi_update_response_code((int)(zend_intptr_t) arg);
+			sapi_update_response_code((int)(intptr_t) arg);
 			return SUCCESS;
 
 		case SAPI_HEADER_ADD:
@@ -801,7 +801,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				 * to disable compression altogether. This contributes to making scripts
 				 * portable between setups that have and don't have zlib compression
 				 * enabled globally. See req #44164 */
-				zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
+				zend_string *key = ZSTR_INIT_LITERAL("zlib.output_compression", 0);
 				zend_alter_ini_entry_chars(key,
 					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 				zend_string_release_ex(key, 0);

@@ -46,7 +46,7 @@ var_dump($b[0]);
 ?>
 --EXPECT--
 RuntimeException: Index invalid or out of range
-TypeError: Illegal offset type
+TypeError: Cannot access offset of type string on SplFixedArray
 RuntimeException: Index invalid or out of range
 string(6) "value0"
 string(6) "value2"

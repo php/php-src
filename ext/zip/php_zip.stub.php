@@ -114,11 +114,15 @@ class ZipArchive implements Countable
      * @cvalue ZIP_FL_UNCHANGED
      */
     public const FL_UNCHANGED = UNKNOWN;
+/* deprecated in libzip 1.10.0 */
+#ifdef ZIP_FL_RECOMPRESS
     /**
      * @var int
      * @cvalue ZIP_FL_RECOMPRESS
+     * @deprecated
      */
     public const FL_RECOMPRESS = UNKNOWN;
+#endif
     /**
      * @var int
      * @cvalue ZIP_FL_ENCRYPTED
@@ -167,6 +171,13 @@ class ZipArchive implements Countable
      * @cvalue ZIP_FL_ENC_CP437
      */
     public const FL_ENC_CP437 = UNKNOWN;
+
+    /**
+     * Additionnal flags not from libzip
+     * @var int
+     * @cvalue ZIP_FL_OPEN_FILE_NOW
+     */
+    public const FL_OPEN_FILE_NOW = UNKNOWN;
 
     /**
      * @var int
@@ -492,6 +503,56 @@ class ZipArchive implements Countable
     public const ER_CANCELLED = UNKNOWN;
 #endif
 
+    /* since 1.10.0 */
+#ifdef ZIP_ER_DATA_LENGTH
+    /**
+     * N Unexpected length of data
+     * @var int
+     * @cvalue ZIP_ER_DATA_LENGTH
+     */
+    public const ER_DATA_LENGTH = UNKNOWN;
+#endif
+#ifdef ZIP_ER_NOT_ALLOWED
+    /**
+     * Not allowed in torrentzip
+     * @var int
+     * @cvalue ZIP_ER_NOT_ALLOWED
+     */
+    public const ER_NOT_ALLOWED = UNKNOWN;
+#endif
+#ifdef ZIP_AFL_RDONLY
+    /**
+     * read only -- cannot be cleared
+     * @var int
+     * @cvalue ZIP_AFL_RDONLY
+     */
+    public const AFL_RDONLY = UNKNOWN;
+#endif
+#ifdef ZIP_AFL_IS_TORRENTZIP
+    /**
+     * current archive is torrentzipped
+     * @var int
+     * @cvalue ZIP_AFL_IS_TORRENTZIP
+     */
+    public const AFL_IS_TORRENTZIP = UNKNOWN;
+#endif
+#ifdef ZIP_AFL_WANT_TORRENTZIP
+    /**
+     * write archive in torrentzip format
+     * @var int
+     * @cvalue ZIP_AFL_WANT_TORRENTZIP
+     */
+    public const AFL_WANT_TORRENTZIP = UNKNOWN;
+#endif
+#ifdef ZIP_AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE
+    /**
+     * don't remove file if archive is empty
+     * @var int
+     * @cvalue ZIP_AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE
+     */
+    public const AFL_CREATE_OR_KEEP_FILE_FOR_EMPTY_ARCHIVE = UNKNOWN;
+#endif
+
 #ifdef ZIP_OPSYS_DEFAULT
     /**
      * @var int
@@ -721,6 +782,10 @@ class ZipArchive implements Countable
 
     /** @tentative-return-type */
     public function getArchiveComment(int $flags = 0): string|false {}
+
+    public function setArchiveFlag(int $flag, int $value): bool {}
+
+    public function getArchiveFlag(int $flag, int $flags = 0): int {}
 
     /** @tentative-return-type */
     public function setCommentIndex(int $index, string $comment): bool {}

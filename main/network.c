@@ -969,7 +969,7 @@ connected:
 /* }}} */
 
 /* {{{ php_any_addr
- * Fills the any (wildcard) address into php_sockaddr_storage
+ * Fills any (wildcard) address into php_sockaddr_storage
  */
 PHPAPI void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port)
 {

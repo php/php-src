@@ -157,7 +157,7 @@ typedef uintptr_t zend_jit_addr;
 			zend_ival_is_last_use(ra[ssa_op->op], ssa_op - ssa->ops) \
 		) : ZREG_NONE)
 
-static zend_always_inline zend_jit_addr _zend_jit_decode_op(zend_uchar op_type, znode_op op, const zend_op *opline, zend_reg reg)
+static zend_always_inline zend_jit_addr _zend_jit_decode_op(uint8_t op_type, znode_op op, const zend_op *opline, zend_reg reg)
 {
 	if (op_type == IS_CONST) {
 #if ZEND_USE_ABS_CONST_ADDR
@@ -602,6 +602,8 @@ struct _zend_jit_trace_stack_frame {
 	uint32_t                    call_level;
 	uint32_t                    _info;
 	int                         used_stack;
+	int                         old_checked_stack;
+	int                         old_peek_checked_stack;
 	zend_jit_trace_stack        stack[1];
 };
 

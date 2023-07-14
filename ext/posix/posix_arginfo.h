@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5359511a464e0d35c7d5c4ea3320c70210b2b9a7 */
+ * Stub hash: 5a4a863892761475f2d34d9463e0660b0a8ede5d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_kill, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
@@ -115,6 +115,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_access, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
+#if defined(HAVE_EACCESS)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_eaccess, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_getgrnam, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -226,6 +233,9 @@ ZEND_FUNCTION(posix_mkfifo);
 ZEND_FUNCTION(posix_mknod);
 #endif
 ZEND_FUNCTION(posix_access);
+#if defined(HAVE_EACCESS)
+ZEND_FUNCTION(posix_eaccess);
+#endif
 ZEND_FUNCTION(posix_getgrnam);
 ZEND_FUNCTION(posix_getgrgid);
 ZEND_FUNCTION(posix_getpwnam);
@@ -298,6 +308,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(posix_mknod, arginfo_posix_mknod)
 #endif
 	ZEND_FE(posix_access, arginfo_posix_access)
+#if defined(HAVE_EACCESS)
+	ZEND_FE(posix_eaccess, arginfo_posix_eaccess)
+#endif
 	ZEND_FE(posix_getgrnam, arginfo_posix_getgrnam)
 	ZEND_FE(posix_getgrgid, arginfo_posix_getgrgid)
 	ZEND_FE(posix_getpwnam, arginfo_posix_getpwnam)

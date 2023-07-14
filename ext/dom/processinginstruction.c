@@ -93,22 +93,14 @@ Since:
 */
 int dom_processinginstruction_data_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep;
-	xmlChar *content;
-
-	nodep = dom_object_get_node(obj);
+	xmlNodePtr nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
-	if ((content = xmlNodeGetContent(nodep)) != NULL) {
-		ZVAL_STRING(retval, (char *) content);
-		xmlFree(content);
-	} else {
-		ZVAL_EMPTY_STRING(retval);
-	}
+	php_dom_get_content_into_zval(nodep, retval, false);
 
 	return SUCCESS;
 }
@@ -128,7 +120,9 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
+	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+
+	xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
 
 	zend_string_release_ex(str, 0);
 	return SUCCESS;

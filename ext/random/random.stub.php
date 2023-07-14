@@ -10,6 +10,7 @@ namespace {
     const MT_RAND_MT19937 = UNKNOWN;
     /**
      * @var int
+     * @deprecated
      * @cvalue MT_RAND_PHP
      */
     const MT_RAND_PHP = UNKNOWN;

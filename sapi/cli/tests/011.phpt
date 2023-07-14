@@ -5,9 +5,10 @@ syntax check
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 $filename = __DIR__."/011.test.php";
+$filename_escaped = escapeshellarg($filename);
 
 $code = '
 <?php
@@ -25,8 +26,8 @@ echo test::$var;
 
 file_put_contents($filename, $code);
 
-var_dump(`"$php" -n -l $filename`);
-var_dump(`"$php" -n -l some.unknown`);
+var_dump(`$php -n -l $filename_escaped`);
+var_dump(`$php -n -l some.unknown`);
 
 $code = '
 <?php
@@ -40,7 +41,7 @@ class test
 
 file_put_contents($filename, $code);
 
-var_dump(`"$php" -n -l $filename`);
+var_dump(`$php -n -l $filename_escaped`);
 
 @unlink($filename);
 
@@ -49,8 +50,8 @@ echo "Done\n";
 --EXPECTF--
 string(%d) "No syntax errors detected in %s011.test.php
 "
-string(40) "Could not open input file: some.unknown
-"
+Could not open input file: some.unknown
+NULL
 string(%d) "
 Parse error: %s expecting %s{%s in %s on line %d
 Errors parsing %s011.test.php

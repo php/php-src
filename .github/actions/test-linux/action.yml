@@ -28,6 +28,8 @@ runs:
         export PDO_OCI_TEST_USER="system"
         export PDO_OCI_TEST_PASS="pass"
         export PDO_OCI_TEST_DSN="oci:dbname=localhost/XEPDB1;charset=AL32UTF8"
+        export PGSQL_TEST_CONNSTR="host=postgres dbname=test port=5432 user=postgres password=postgres"
+        export PDO_PGSQL_TEST_DSN="host=postgres dbname=test port=5432 user=postgres password=postgres"
         export SKIP_IO_CAPTURE_TESTS=1
         export TEST_PHP_JUNIT=junit.out.xml
         export STACK_LIMIT_DEFAULTS_CHECK=1

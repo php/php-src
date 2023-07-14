@@ -702,7 +702,7 @@ static void lsapi_clean_shutdown(void)
     setitimer(ITIMER_PROF, &tmv, NULL);
 
 #if PHP_MAJOR_VERSION >= 7
-    key = zend_string_init("error_reporting", 15, 1);
+    key = ZSTR_INIT_LITERAL("error_reporting", 1);
     zend_alter_ini_entry_chars_ex(key, "0", 1,
                         PHP_INI_SYSTEM, PHP_INI_STAGE_SHUTDOWN, 1);
     zend_string_release(key);
@@ -1347,7 +1347,7 @@ static int cli_main( int argc, char * argv[] )
                         php_request_shutdown( NULL );
                     }
                 } else {
-                    php_printf("Could not open input file: %s.\n", *p);
+                    fprintf(stderr, "Could not open input file: %s.\n", *p);
                 }
             } else {
                 cli_usage();

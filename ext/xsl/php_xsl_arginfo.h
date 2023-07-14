@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a0615bef7b2211570d9da95a31857832a06360dd */
+ * Stub hash: 7d747e7b5989c18169e67d9a9d70256583fffd8e */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_importStylesheet, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, stylesheet, IS_OBJECT, 0)

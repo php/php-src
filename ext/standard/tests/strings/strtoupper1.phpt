@@ -28,6 +28,11 @@ $strings = array (
   "zzzzzzzzzzzzzzzzzzzz",
   "````````````````````",
   "{{{{{{{{{{{{{{{{{{{{",
+  /* And the AVX2 implementation also */
+  "{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{",
+  "abcdefghijklmnopqrstuvwxyz01234",
+  "abcdefghijklmnopqrstuvwxyz012345",
+  "abcdefghijklmnopqrstuvwxyz0123456",
   "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 );
 
@@ -348,6 +353,18 @@ string(20) "````````````````````"
 string(20) "{{{{{{{{{{{{{{{{{{{{"
 
 -- Iteration 12 --
+string(40) "{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{"
+
+-- Iteration 13 --
+string(31) "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234"
+
+-- Iteration 14 --
+string(32) "ABCDEFGHIJKLMNOPQRSTUVWXYZ012345"
+
+-- Iteration 15 --
+string(33) "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456"
+
+-- Iteration 16 --
 string(62) "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 *** Testing strtoupper() with two different case strings ***

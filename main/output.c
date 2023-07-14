@@ -156,7 +156,7 @@ PHPAPI void php_output_shutdown(void)
 /* }}} */
 
 /* {{{ SUCCESS|FAILURE php_output_activate(void)
- * Reset output globals and setup the output handler stack */
+ * Reset output globals and set up the output handler stack */
 PHPAPI int php_output_activate(void)
 {
 #ifdef ZTS
@@ -348,7 +348,7 @@ PHPAPI void php_output_discard_all(void)
 /* }}} */
 
 /* {{{ int php_output_get_level(void)
- * Get output buffering level, ie. how many output handlers the stack contains */
+ * Get output buffering level, i.e. how many output handlers the stack contains */
 PHPAPI int php_output_get_level(void)
 {
 	return OG(active) ? zend_stack_count(&OG(handlers)) : 0;

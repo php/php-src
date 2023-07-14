@@ -101,7 +101,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_string *name, ze
 
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_class_const_or_name(zend_ast *class_name, zend_ast *name) {
 	zend_string *name_str = zend_ast_get_str(name);
-	if (zend_string_equals_literal_ci(name_str, "class")) {
+	if (zend_string_equals_ci(name_str, ZSTR_KNOWN(ZEND_STR_CLASS))) {
 		zend_string_release(name_str);
 		return zend_ast_create(ZEND_AST_CLASS_NAME, class_name);
 	} else {
@@ -496,7 +496,38 @@ zend_class_entry *zend_ast_fetch_class(zend_ast *ast, zend_class_entry *scope)
 	return zend_fetch_class_with_scope(zend_ast_get_str(ast), (ast->attr >> ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT) | ZEND_FETCH_CLASS_EXCEPTION, scope);
 }
 
+ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
+	zval *result,
+	zend_ast *ast,
+	zend_class_entry *scope,
+	bool *short_circuited_ptr,
+	zend_ast_evaluate_ctx *ctx
+);
+
 ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(
+	zval *result,
+	zend_ast *ast,
+	zend_class_entry *scope,
+	bool *short_circuited_ptr,
+	zend_ast_evaluate_ctx *ctx
+) {
+	zend_string *previous_filename;
+	zend_long previous_lineno;
+	if (scope) {
+		previous_filename = EG(filename_override);
+		previous_lineno = EG(lineno_override);
+		EG(filename_override) = scope->info.user.filename;
+		EG(lineno_override) = zend_ast_get_lineno(ast);
+	}
+	zend_result r = zend_ast_evaluate_inner(result, ast, scope, short_circuited_ptr, ctx);
+	if (scope) {
+		EG(filename_override) = previous_filename;
+		EG(lineno_override) = previous_lineno;
+	}
+	return r;
+}
+
+ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_inner(
 	zval *result,
 	zend_ast *ast,
 	zend_class_entry *scope,
@@ -681,8 +712,8 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(
 			if (UNEXPECTED(zend_ast_evaluate_ex(&op2, ast->child[0], scope, &short_circuited, ctx) != SUCCESS)) {
 				ret = FAILURE;
 			} else {
-				ZVAL_LONG(&op1, 0);
-				ret = sub_function(result, &op1, &op2);
+				ZVAL_LONG(&op1, -1);
+				ret = mul_function(result, &op1, &op2);
 				zval_ptr_dtor_nogc(&op2);
 			}
 			break;
@@ -803,7 +834,15 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(
 		case ZEND_AST_CLASS_CONST:
 		{
 			zend_string *class_name = zend_ast_get_str(ast->child[0]);
-			zend_string *const_name = zend_ast_get_str(ast->child[1]);
+			if (UNEXPECTED(zend_ast_evaluate_ex(&op2, ast->child[1], scope, &short_circuited, ctx) != SUCCESS)) {
+				return FAILURE;
+			}
+			if (UNEXPECTED(Z_TYPE(op2) != IS_STRING)) {
+				zend_invalid_class_constant_type_error(Z_TYPE(op2));
+				zval_ptr_dtor_nogc(&op2);
+				return FAILURE;
+			}
+			zend_string *const_name = Z_STR(op2);
 
 			zend_string *previous_filename;
 			zend_long previous_lineno;
@@ -821,9 +860,11 @@ ZEND_API zend_result ZEND_FASTCALL zend_ast_evaluate_ex(
 
 			if (UNEXPECTED(zv == NULL)) {
 				ZVAL_UNDEF(result);
+				zval_ptr_dtor_nogc(&op2);
 				return FAILURE;
 			}
 			ZVAL_COPY_OR_DUP(result, zv);
+			zval_ptr_dtor_nogc(&op2);
 			break;
 		}
 		case ZEND_AST_NEW:
@@ -1022,12 +1063,14 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		new->kind = ZEND_AST_ZVAL;
 		new->attr = ast->attr;
 		ZVAL_COPY(&new->val, zend_ast_get_zval(ast));
+		Z_LINENO(new->val) = zend_ast_get_lineno(ast);
 		buf = (void*)((char*)buf + sizeof(zend_ast_zval));
 	} else if (ast->kind == ZEND_AST_CONSTANT) {
 		zend_ast_zval *new = (zend_ast_zval*)buf;
 		new->kind = ZEND_AST_CONSTANT;
 		new->attr = ast->attr;
 		ZVAL_STR_COPY(&new->val, zend_ast_get_constant_name(ast));
+		Z_LINENO(new->val) = zend_ast_get_lineno(ast);
 		buf = (void*)((char*)buf + sizeof(zend_ast_zval));
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
@@ -1036,6 +1079,7 @@ static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 		new->kind = list->kind;
 		new->attr = list->attr;
 		new->children = list->children;
+		new->lineno = list->lineno;
 		buf = (void*)((char*)buf + zend_ast_list_size(list->children));
 		for (i = 0; i < list->children; i++) {
 			if (list->child[i]) {
@@ -1880,6 +1924,10 @@ simple_list:
 
 			zend_ast_export_visibility(str, ast->attr);
 			smart_str_appends(str, "const ");
+			if (ast->child[2]) {
+				zend_ast_export_type(str, ast->child[2], indent);
+				smart_str_appendc(str, ' ');
+			}
 
 			ast = ast->child[0];
 

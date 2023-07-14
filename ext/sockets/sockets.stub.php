@@ -173,6 +173,13 @@ const SO_REUSEADDR = UNKNOWN;
  */
 const SO_REUSEPORT = UNKNOWN;
 #endif
+#ifdef SO_REUSEPORT_LB
+/**
+ * @var int
+ * @cvalue SO_REUSEPORT_LB
+ */
+const SO_REUSEPORT_LB = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SO_KEEPALIVE
@@ -292,6 +299,27 @@ const SO_SETFIB = UNKNOWN;
  * @cvalue SO_ACCEPTFILTER
  */
 const SO_ACCEPTFILTER = UNKNOWN;
+#endif
+#ifdef SO_RERROR
+/**
+ * @var int
+ * @cvalue SO_RERROR
+ */
+const SO_RERROR = UNKNOWN;
+#endif
+#ifdef SO_SOPLICE
+/**
+ * @var int
+ * @cvalue SO_SPLICE
+ */
+const SO_SPLICE = UNKNOWN;
+#endif
+#ifdef SO_ZEROIZE
+/**
+ * @var int
+ * @cvalue SO_ZEROIZE
+ */
+const SO_ZEROIZE = UNKNOWN;
 #endif
 #ifdef SOL_FILTER
 /**
@@ -614,6 +642,13 @@ const IP_MULTICAST_TTL = UNKNOWN;
  * @cvalue IP_MULTICAST_LOOP
  */
 const IP_MULTICAST_LOOP = UNKNOWN;
+#ifdef IP_BIND_ADDRESS_NO_PORT
+/**
+ * @var int
+ * @cvalue IP_BIND_ADDRESS_NO_PORT
+ */
+const IP_BIND_ADDRESS_NO_PORT = UNKNOWN;
+#endif
 #if HAVE_IPV6
 /**
  * @var int
@@ -1525,6 +1560,13 @@ const SOL_TCP = UNKNOWN;
  * @cvalue IPPROTO_UDP
  */
 const SOL_UDP = UNKNOWN;
+#ifdef IPPROTO_UDPLITE
+/**
+ * @var int
+ * @cvalue IPPROTO_UDPLITE
+ */
+const SOL_UDPLITE = UNKNOWN;
+#endif
 
 #if HAVE_IPV6
 /**
@@ -1713,6 +1755,13 @@ const SO_DETACH_BPF = UNKNOWN;
  */
 const TCP_QUICKACK = UNKNOWN;
 #endif
+#if defined(TCP_REPAIR)
+/**
+ * @var int
+ * @cvalue TCP_REPAIR
+ */
+const TCP_REPAIR = UNKNOWN;
+#endif
 #if defined(IP_DONTFRAG)
 /**
  * @var int
@@ -1768,6 +1817,20 @@ const IP_PMTUDISC_INTERFACE = UNKNOWN;
  * @cvalue IP_PMTUDISC_OMIT
  */
 const IP_PMTUDISC_OMIT = UNKNOWN;
+#endif
+#if defined(UDPLITE_SEND_CSCOV)
+/**
+ * @var int
+ * @cvalue UDPLITE_SEND_CSCOV
+ */
+const UDPLITE_SEND_CSCOV = UNKNOWN;
+#endif
+#if defined(UDPLITE_RECV_CSCOV)
+/**
+ * @var int
+ * @cvalue UDPLITE_RECV_CSCOV
+ */
+const UDPLITE_RECV_CSCOV = UNKNOWN;
 #endif
 
 /**

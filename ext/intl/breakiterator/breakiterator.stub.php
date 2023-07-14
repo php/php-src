@@ -164,7 +164,7 @@ class IntlBreakIterator implements IteratorAggregate
     public function previous(): int {}
 
     /** @tentative-return-type */
-    public function setText(string $text): ?bool {} // TODO return false instead of null in case of failure
+    public function setText(string $text): bool {}
 
     public function getIterator(): Iterator {}
 }

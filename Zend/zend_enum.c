@@ -41,9 +41,17 @@ zend_object *zend_enum_new(zval *result, zend_class_entry *ce, zend_string *case
 	zend_object *zobj = zend_objects_new(ce);
 	ZVAL_OBJ(result, zobj);
 
-	ZVAL_STR_COPY(OBJ_PROP_NUM(zobj, 0), case_name);
+	zval *zname = OBJ_PROP_NUM(zobj, 0);
+	ZVAL_STR_COPY(zname, case_name);
+	/* ZVAL_COPY does not set Z_PROP_FLAG, this needs to be cleared to avoid leaving IS_PROP_REINITABLE set */
+	Z_PROP_FLAG_P(zname) = 0;
+
 	if (backing_value_zv != NULL) {
-		ZVAL_COPY(OBJ_PROP_NUM(zobj, 1), backing_value_zv);
+		zval *prop = OBJ_PROP_NUM(zobj, 1);
+
+		ZVAL_COPY(prop, backing_value_zv);
+		/* ZVAL_COPY does not set Z_PROP_FLAG, this needs to be cleared to avoid leaving IS_PROP_REINITABLE set */
+		Z_PROP_FLAG_P(prop) = 0;
 	}
 
 	return zobj;
@@ -54,12 +62,12 @@ static void zend_verify_enum_properties(zend_class_entry *ce)
 	zend_property_info *property_info;
 
 	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, property_info) {
-		if (zend_string_equals_literal(property_info->name, "name")) {
+		if (zend_string_equals(property_info->name, ZSTR_KNOWN(ZEND_STR_NAME))) {
 			continue;
 		}
 		if (
 			ce->enum_backing_type != IS_UNDEF
-			&& zend_string_equals_literal(property_info->name, "value")
+			&& zend_string_equals(property_info->name, ZSTR_KNOWN(ZEND_STR_VALUE))
 		) {
 			continue;
 		}
@@ -85,7 +93,7 @@ static void zend_verify_enum_magic_methods(zend_class_entry *ce)
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__serialize, "__serialize");
 	ZEND_ENUM_DISALLOW_MAGIC_METHOD(__unserialize, "__unserialize");
 
-	const char *forbidden_methods[] = {
+	static const char *const forbidden_methods[] = {
 		"__sleep",
 		"__wakeup",
 		"__set_state",
@@ -175,11 +183,11 @@ void zend_enum_add_interfaces(zend_class_entry *ce)
 	ce->interface_names = erealloc(ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
 
 	ce->interface_names[num_interfaces_before].name = zend_string_copy(zend_ce_unit_enum->name);
-	ce->interface_names[num_interfaces_before].lc_name = zend_string_init("unitenum", sizeof("unitenum") - 1, 0);
+	ce->interface_names[num_interfaces_before].lc_name = ZSTR_INIT_LITERAL("unitenum", 0);
 
 	if (ce->enum_backing_type != IS_UNDEF) {
 		ce->interface_names[num_interfaces_before + 1].name = zend_string_copy(zend_ce_backed_enum->name);
-		ce->interface_names[num_interfaces_before + 1].lc_name = zend_string_init("backedenum", sizeof("backedenum") - 1, 0);	
+		ce->interface_names[num_interfaces_before + 1].lc_name = ZSTR_INIT_LITERAL("backedenum", 0);
 	}
 
 	ce->default_object_handlers = &zend_enum_object_handlers;
@@ -481,7 +489,7 @@ static const zend_function_entry backed_enum_methods[] = {
 };
 
 ZEND_API zend_class_entry *zend_register_internal_enum(
-	const char *name, zend_uchar type, const zend_function_entry *functions)
+	const char *name, uint8_t type, const zend_function_entry *functions)
 {
 	ZEND_ASSERT(type == IS_UNDEF || type == IS_LONG || type == IS_STRING);
 
@@ -589,6 +597,7 @@ ZEND_API void zend_enum_add_case_cstr(zend_class_entry *ce, const char *name, zv
 
 ZEND_API zend_object *zend_enum_get_case(zend_class_entry *ce, zend_string *name) {
 	zend_class_constant *c = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), name);
+	ZEND_ASSERT(c && "Must be a valid enum case");
 	ZEND_ASSERT(ZEND_CLASS_CONST_FLAGS(c) & ZEND_CLASS_CONST_IS_CASE);
 
 	if (Z_TYPE(c->value) == IS_CONSTANT_AST) {

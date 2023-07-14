@@ -7,11 +7,11 @@ include "skipif.inc";
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-var_dump(`"$php" -n --rc unknown`);
-var_dump(`"$php" -n --rc stdclass`);
-var_dump(`"$php" -n --rc exception`);
+var_dump(`$php -n --rc unknown`);
+var_dump(`$php -n --rc stdclass`);
+var_dump(`$php -n --rc exception`);
 
 echo "Done\n";
 ?>

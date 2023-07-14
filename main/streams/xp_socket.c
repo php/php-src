@@ -168,7 +168,7 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 	/* Special handling for blocking read. */
 	if (sock->is_blocked) {
 		/* Find out if there is any data buffered from the previous read. */
-		bool has_buffered_data = stream->didread > 0;
+		bool has_buffered_data = stream->has_buffered_data;
 		/* No need to wait if there is any data buffered or no timeout. */
 		bool dont_wait = has_buffered_data ||
 				(sock->timeout.tv_sec == 0 && sock->timeout.tv_usec == 0);
@@ -359,7 +359,14 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 
 				if (sock->socket == -1) {
 					alive = 0;
-				} else if ((value == 0 && ((MSG_DONTWAIT != 0) || !sock->is_blocked)) || php_pollfd_for(sock->socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0) {
+				} else if (
+					(
+						value == 0 &&
+						!(stream->flags & PHP_STREAM_FLAG_NO_IO) &&
+						((MSG_DONTWAIT != 0) || !sock->is_blocked)
+					) ||
+					php_pollfd_for(sock->socket, PHP_POLLREADABLE|POLLPRI, &tv) > 0
+				) {
 					/* the poll() call was skipped if the socket is non-blocking (or MSG_DONTWAIT is available) and if the timeout is zero */
 #ifdef PHP_WIN32
 					int ret;
@@ -957,10 +964,6 @@ PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t p
 	if (stream == NULL)	{
 		pefree(sock, persistent_id ? 1 : 0);
 		return NULL;
-	}
-
-	if (flags == 0) {
-		return stream;
 	}
 
 	return stream;

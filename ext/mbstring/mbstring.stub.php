@@ -140,7 +140,6 @@ function mb_detect_encoding(string $string, array|string|null $encodings = null,
 
 /**
  * @return array<int, string>
- * @refcount 1
  */
 function mb_list_encodings(): array {}
 
@@ -183,6 +182,8 @@ function mb_scrub(string $string, ?string $encoding = null): string {}
 function mb_ord(string $string, ?string $encoding = null): int|false {}
 
 function mb_chr(int $codepoint, ?string $encoding = null): string|false {}
+
+function mb_str_pad(string $string, int $length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT, ?string $encoding = null): string {}
 
 #ifdef HAVE_MBREGEX
 /** @refcount 1 */

@@ -530,9 +530,8 @@ function imagegrabscreen(): GdImage|false {}
 
 #endif
 
-// TODO: $ignore_transparent is ignored???
 /** @refcount 1 */
-function imagerotate(GdImage $image, float $angle, int $background_color, bool $ignore_transparent = false): GdImage|false {}
+function imagerotate(GdImage $image, float $angle, int $background_color): GdImage|false {}
 
 function imagesettile(GdImage $image, GdImage $tile): bool {}
 
@@ -541,6 +540,7 @@ function imagesetbrush(GdImage $image, GdImage $brush): bool {}
 /** @refcount 1 */
 function imagecreate(int $width, int $height): GdImage|false {}
 
+/** @compile-time-eval */
 function imagetypes(): int {}
 
 /** @refcount 1 */
@@ -628,7 +628,7 @@ function imagewbmp(GdImage $image, $file = null, ?int $foreground_color = null):
 
 function imagegd(GdImage $image, ?string $file = null): bool {}
 
-function imagegd2(GdImage $image, ?string $file = null, int $chunk_size = UNKNOWN, int $mode = UNKNOWN): bool {}
+function imagegd2(GdImage $image, ?string $file = null, int $chunk_size = 128, int $mode = IMG_GD2_RAW): bool {}
 
 #ifdef HAVE_GD_BMP
 /** @param resource|string|null $file */

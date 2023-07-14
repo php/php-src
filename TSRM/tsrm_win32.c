@@ -89,7 +89,7 @@ static void tsrm_win32_dtor(tsrm_win32_globals *globals)
 TSRM_API void tsrm_win32_startup(void)
 {/*{{{*/
 #ifdef ZTS
-	ts_allocate_id(&win32_globals_id, sizeof(tsrm_win32_globals), (ts_allocate_ctor)tsrm_win32_ctor, (ts_allocate_ctor)tsrm_win32_dtor);
+	ts_allocate_id(&win32_globals_id, sizeof(tsrm_win32_globals), (ts_allocate_ctor)tsrm_win32_ctor, (ts_allocate_dtor)tsrm_win32_dtor);
 #else
 	tsrm_win32_ctor(&win32_globals);
 #endif

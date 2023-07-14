@@ -435,6 +435,11 @@ max_input_time = 60
 ; How many GET/POST/COOKIE input variables may be accepted
 ;max_input_vars = 1000
 
+; How many multipart body parts (combined input variable and file uploads) may
+; be accepted.
+; Default Value: -1 (Sum of max_input_vars and max_file_uploads)
+;max_multipart_body_parts = 1500
+
 ; Maximum amount of memory a script may consume
 ; https://php.net/memory-limit
 memory_limit = 128M
@@ -1598,32 +1603,13 @@ session.sid_bits_per_character = 5
 ; -1: Do not compile at all
 ;  0: Jump over assertion at run-time
 ;  1: Execute assertions
-; Changing from or to a negative value is only possible in php.ini! (For turning assertions on and off at run-time, see assert.active, when zend.assertions = 1)
+; Changing from or to a negative value is only possible in php.ini!
+; (For turning assertions on and off at run-time, toggle zend.assertions between the values 1 and 0)
 ; Default Value: 1
 ; Development Value: 1
 ; Production Value: -1
 ; https://php.net/zend.assertions
 zend.assertions = -1
-
-; Assert(expr); active by default.
-; https://php.net/assert.active
-;assert.active = On
-
-; Throw an AssertionError on failed assertions
-; https://php.net/assert.exception
-;assert.exception = On
-
-; Issue a PHP warning for each failed assertion. (Overridden by assert.exception if active)
-; https://php.net/assert.warning
-;assert.warning = On
-
-; Don't bail out by default.
-; https://php.net/assert.bail
-;assert.bail = Off
-
-; User-function to be called if an assertion fails.
-; https://php.net/assert.callback
-;assert.callback = 0
 
 [COM]
 ; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
@@ -1912,8 +1898,13 @@ ldap.max_links = -1
 ;opcache.file_cache_fallback=1
 
 ; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
-; This should improve performance, but requires appropriate OS configuration.
-;opcache.huge_code_pages=1
+; Under certain circumstances (if only a single global PHP process is
+; started from which all others fork), this can increase performance
+; by a tiny amount because TLB misses are reduced.  On the other hand, this
+; delays PHP startup, increases memory usage and degrades performance
+; under memory pressure - use with care.
+; Requires appropriate OS configuration.
+;opcache.huge_code_pages=0
 
 ; Validate cached file permissions.
 ;opcache.validate_permission=0

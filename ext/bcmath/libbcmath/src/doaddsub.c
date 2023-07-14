@@ -42,10 +42,7 @@
    returned.  The signs of N1 and N2 are ignored.
    SCALE_MIN is to set the minimum scale of the result. */
 
- bc_num
-_bc_do_add (n1, n2, scale_min)
-     bc_num n1, n2;
-     int scale_min;
+bc_num _bc_do_add(bc_num n1, bc_num n2, int scale_min)
 {
   bc_num sum;
   int sum_scale, sum_digits;
@@ -134,10 +131,7 @@ _bc_do_add (n1, n2, scale_min)
    assumed to be larger than N2.  SCALE_MIN is the minimum scale
    of the result. */
 
- bc_num
-_bc_do_sub (n1, n2, scale_min)
-     bc_num n1, n2;
-     int scale_min;
+bc_num _bc_do_sub(bc_num n1, bc_num n2, int scale_min)
 {
   bc_num diff;
   int diff_scale, diff_len;

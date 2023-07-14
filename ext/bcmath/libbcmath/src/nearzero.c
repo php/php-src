@@ -29,22 +29,14 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
+#include <stdbool.h>
 #include "bcmath.h"
-#include "private.h"
 
 /* In some places we need to check if the number NUM is almost zero.
    Specifically, all but the last digit is 0 and the last digit is 1.
    Last digit is defined by scale. */
 
-char
-bc_is_near_zero (num, scale)
-     bc_num num;
-     int scale;
+bool bc_is_near_zero(bc_num num, int scale)
 {
   int  count;
   char *nptr;
@@ -61,7 +53,7 @@ bc_is_near_zero (num, scale)
   while ((count > 0) && (*nptr++ == 0)) count--;
 
   if (count != 0 && (count != 1 || *--nptr != 1))
-    return FALSE;
+    return false;
   else
-    return TRUE;
+    return true;
 }
