@@ -669,8 +669,7 @@ static inline zend_result ct_eval_incdec(zval *result, uint8_t opcode, zval *op1
 		return FAILURE;
 	}
 	*/
-	/* Decrement on null emits a deprecation notice */
-	if (Z_TYPE_P(op1) != IS_LONG && Z_TYPE_P(op1) != IS_DOUBLE /* && Z_TYPE_P(op1) != IS_NULL */) {
+	if (Z_TYPE_P(op1) != IS_LONG && Z_TYPE_P(op1) != IS_DOUBLE && Z_TYPE_P(op1) != IS_NULL) {
 		return FAILURE;
 	}
 
@@ -681,6 +680,11 @@ static inline zend_result ct_eval_incdec(zval *result, uint8_t opcode, zval *op1
 			|| opcode == ZEND_POST_INC_OBJ) {
 		increment_function(result);
 	} else {
+		/* Decrement on null emits a deprecation notice */
+		if (Z_TYPE_P(op1) == IS_NULL) {
+			zval_ptr_dtor(result);
+			return FAILURE;
+		}
 		decrement_function(result);
 	}
 	return SUCCESS;
