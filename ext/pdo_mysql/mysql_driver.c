@@ -417,7 +417,7 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
 			if (!pdo_get_bool_param(&bval, val)) {
-				return false;
+				PDO_DBG_RETURN(false);
 			}
 			/* ignore if the new value equals the old one */
 			if (dbh->auto_commit ^ bval) {
@@ -437,7 +437,7 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 
 		case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
 			if (!pdo_get_bool_param(&bval, val)) {
-				return false;
+				PDO_DBG_RETURN(false);
 			}
 			/* ignore if the new value equals the old one */
 			((pdo_mysql_db_handle *)dbh->driver_data)->buffered = bval;
@@ -446,7 +446,7 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 		case PDO_ATTR_EMULATE_PREPARES:
 			if (!pdo_get_bool_param(&bval, val)) {
-				return false;
+				PDO_DBG_RETURN(false);
 			}
 			/* ignore if the new value equals the old one */
 			((pdo_mysql_db_handle *)dbh->driver_data)->emulate_prepare = bval;
@@ -454,7 +454,7 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
 			if (!pdo_get_bool_param(&bval, val)) {
-				return false;
+				PDO_DBG_RETURN(false);
 			}
 			((pdo_mysql_db_handle *)dbh->driver_data)->fetch_table_names = bval;
 			PDO_DBG_RETURN(true);
@@ -462,13 +462,13 @@ static bool pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 #ifdef PDO_USE_MYSQLND
 		case PDO_ATTR_STRINGIFY_FETCHES:
 			if (!pdo_get_bool_param(&bval, val)) {
-				return false;
+				PDO_DBG_RETURN(false);
 			}
 			unsigned int int_and_float_native = !bval;
 			pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 			if (mysql_options(H->server, MYSQLND_OPT_INT_AND_FLOAT_NATIVE, (const char *) &int_and_float_native)) {
 				pdo_mysql_error(dbh);
-				return false;
+				PDO_DBG_RETURN(false);
 			}
 			PDO_DBG_RETURN(true);
 #else
