@@ -331,6 +331,19 @@ class Tester
     }
 
     /**
+     * Skip test if supplied shell command fails.
+     *
+     * @param string $command
+     */
+    static public function skipIfShellCommandFails($command)
+    {
+        $output = system($command, $code);
+        if ($code) {
+            die("skip command '$command' faield with code $code and output: $output");
+        }
+    }
+
+    /**
      * Skip if posix extension not loaded.
      */
     static public function skipIfUserDoesNotExist($userName)
