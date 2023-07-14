@@ -19,7 +19,6 @@ test();
 ?>
 DONE
 --EXPECTF--
-Warning: Decrement on type null has no effect, this will change in the next major version of PHP in Unknown on line 0
 
-Warning: Decrement on type null has no effect, this will change in the next major version of PHP in %s on line %d
+Warning: Decrement on type null has no effect, this will change in the next major version of PHP in %sinference_019.php on line %d
 DONE

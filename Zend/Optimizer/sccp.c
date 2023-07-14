@@ -664,7 +664,13 @@ static inline zend_result ct_eval_assign_obj(zval *result, zval *value, const zv
 }
 
 static inline zend_result ct_eval_incdec(zval *result, uint8_t opcode, zval *op1) {
+	/* As of PHP 8.3 with the warning/deprecation notices any type other than int/double/null will emit a diagnostic
 	if (Z_TYPE_P(op1) == IS_ARRAY || IS_PARTIAL_ARRAY(op1)) {
+		return FAILURE;
+	}
+	*/
+	/* Decrement on null emits a deprecation notice */
+	if (Z_TYPE_P(op1) != IS_LONG && Z_TYPE_P(op1) != IS_DOUBLE /* && Z_TYPE_P(op1) != IS_NULL */) {
 		return FAILURE;
 	}
 
@@ -2109,7 +2115,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 							break;
 						default:
 							break;
-					}	
+					}
 				}
 				/* we cannot remove instruction that defines other variables */
 				return 0;

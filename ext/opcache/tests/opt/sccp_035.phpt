@@ -13,6 +13,6 @@ function test() {
 }
 ?>
 DONE
---EXPECT--
-Deprecated: Decrement on empty string is deprecated as non-numeric in Unknown on line 0
+--EXPECTF--
+Deprecated: Decrement on empty string is deprecated as non-numeric in %ssccp_035.php on line 5
 DONE
