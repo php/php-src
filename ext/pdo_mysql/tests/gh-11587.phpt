@@ -6,9 +6,7 @@ pdo_mysql
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-if (!extension_loaded('mysqli') || !extension_loaded('mysqlnd')) {
-    die('skip: This test requires the loading of mysqli and mysqlnd');
-}
+if (!extension_loaded('mysqlnd')) die('skip: This test requires the loading of mysqlnd');
 ?>
 --FILE--
 <?php
