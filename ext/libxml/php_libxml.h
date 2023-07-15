@@ -118,6 +118,42 @@ PHP_LIBXML_API void php_libxml_shutdown(void);
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
+/* Other extension may override the global state options, these global options
+ * are copied initially to ctxt->options. Set the options to a known good value.
+ * See libxml2 globals.c and parserInternals.c.
+ * The unique_name argument allows multiple sanitizes and restores within the
+ * same function, even nested is necessary. */
+#define PHP_LIBXML_SANITIZE_GLOBALS(unique_name) \
+	int xml_old_loadsubset_##unique_name = xmlLoadExtDtdDefaultValue; \
+	xmlLoadExtDtdDefaultValue = 0; \
+	int xml_old_validate_##unique_name = xmlDoValidityCheckingDefaultValue; \
+	xmlDoValidityCheckingDefaultValue = 0; \
+	int xml_old_pedantic_##unique_name = xmlPedanticParserDefault(0); \
+	int xml_old_substitute_##unique_name = xmlSubstituteEntitiesDefault(0); \
+	int xml_old_linenrs_##unique_name = xmlLineNumbersDefault(0); \
+	int xml_old_blanks_##unique_name = xmlKeepBlanksDefault(1);
+
+#define PHP_LIBXML_RESTORE_GLOBALS(unique_name) \
+	xmlLoadExtDtdDefaultValue = xml_old_loadsubset_##unique_name; \
+	xmlDoValidityCheckingDefaultValue = xml_old_validate_##unique_name; \
+	(void) xmlPedanticParserDefault(xml_old_pedantic_##unique_name); \
+	(void) xmlSubstituteEntitiesDefault(xml_old_substitute_##unique_name); \
+	(void) xmlLineNumbersDefault(xml_old_linenrs_##unique_name); \
+	(void) xmlKeepBlanksDefault(xml_old_blanks_##unique_name);
+
+/* Alternative for above, working directly on the context and not setting globals.
+ * Generally faster because no locking is involved, and this has the advantage that it sets the options to a known good value. */
+static zend_always_inline void php_libxml_sanitize_parse_ctxt_options(xmlParserCtxtPtr ctxt)
+{
+	ctxt->loadsubset = 0;
+	ctxt->validate = 0;
+	ctxt->pedantic = 0;
+	ctxt->replaceEntities = 0;
+	ctxt->linenumbers = 0;
+	ctxt->keepBlanks = 1;
+	ctxt->options = 0;
+}
+
 #else /* HAVE_LIBXML */
 #define libxml_module_ptr NULL
 #endif
