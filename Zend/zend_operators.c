@@ -2506,7 +2506,7 @@ ZEND_API bool zend_string_only_has_ascii_alphanumeric(const zend_string *str)
 	return true;
 }
 
-static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
+static bool ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 {
 	int carry=0;
 	size_t pos=Z_STRLEN_P(str)-1;
@@ -2515,20 +2515,25 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 	int last=0; /* Shut up the compiler warning */
 	int ch;
 
-	if (Z_STRLEN_P(str) == 0) {
+	if (UNEXPECTED(Z_STRLEN_P(str) == 0)) {
 		zend_error(E_DEPRECATED, "Increment on non-alphanumeric string is deprecated");
 		if (EG(exception)) {
-			return;
+			return false;
 		}
-		zval_ptr_dtor_str(str);
+		/* A userland error handler can change the type from string to something else */
+		zval_ptr_dtor(str);
 		ZVAL_CHAR(str, '1');
-		return;
+		return true;
 	}
 
 	if (UNEXPECTED(!zend_string_only_has_ascii_alphanumeric(Z_STR_P(str)))) {
 		zend_error(E_DEPRECATED, "Increment on non-alphanumeric string is deprecated");
 		if (EG(exception)) {
-			return;
+			return false;
+		}
+		/* A userland error handler can change the type from string to something else */
+		if (Z_TYPE_P(str) != IS_STRING) {
+			return false;
 		}
 	}
 
@@ -2601,6 +2606,7 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 		zend_string_free(Z_STR_P(str));
 		ZVAL_NEW_STR(str, t);
 	}
+	return true;
 }
 /* }}} */
 
@@ -2699,7 +2705,8 @@ try_again:
 				if (EG(exception)) {
 					return FAILURE;
 				}
-				zval_ptr_dtor_str(op1);
+				/* A userland error handler can change the type from string to something else */
+				zval_ptr_dtor(op1);
 				ZVAL_LONG(op1, -1);
 				break;
 			}
