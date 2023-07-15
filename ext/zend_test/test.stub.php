@@ -121,6 +121,10 @@ namespace {
     function zend_get_map_ptr_last(): int {}
 
     function zend_test_crash(?string $message = null): void {}
+
+#ifdef HAVE_LIBXML
+function zend_test_override_libxml_global_state(): void {}
+#endif
 }
 
 namespace ZendTestNS {

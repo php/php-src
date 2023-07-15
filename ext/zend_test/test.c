@@ -31,6 +31,11 @@
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "test_arginfo.h"
 
+#ifdef HAVE_LIBXML
+# include <libxml/globals.h>
+# include <libxml/parser.h>
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 
 static zend_class_entry *zend_test_interface;
@@ -264,6 +269,18 @@ static ZEND_FUNCTION(zend_get_current_func_name)
     zend_string *function_name = get_function_or_method_name(EG(current_execute_data)->prev_execute_data->func);
 
     RETURN_STR(function_name);
+}
+
+static ZEND_FUNCTION(zend_test_override_libxml_global_state)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	xmlLoadExtDtdDefaultValue = 1;
+	xmlDoValidityCheckingDefaultValue = 1;
+	(void) xmlPedanticParserDefault(1);
+	(void) xmlSubstituteEntitiesDefault(1);
+	(void) xmlLineNumbersDefault(1);
+	(void) xmlKeepBlanksDefault(0);
 }
 
 /* TESTS Z_PARAM_ITERABLE and Z_PARAM_ITERABLE_OR_NULL */
