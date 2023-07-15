@@ -26,7 +26,9 @@ try {
 }
 
 echo "\nWith pipe:\n";
-$cmd = "$php $args -r 'echo \"Test\n\"; fprintf(STDERR, \"Error\");'";
+$fn = tempnam(sys_get_temp_dir(), "PROC_OPEN_TEST");
+file_put_contents($fn, '<?php echo "Test\n"; fprintf(STDERR, "Error");');
+$cmd = "$php $args " . escapeshellarg($fn);
 $proc = proc_open($cmd, [1 => ['pipe', 'w'], 2 => ['redirect', 1]], $pipes);
 var_dump($pipes);
 var_dump(stream_get_contents($pipes[1]));
@@ -52,6 +54,7 @@ unlink($fileName);
 echo "\nWith inherited stdout:\n";
 $proc = proc_open($cmd, [2 => ['redirect', 1]], $pipes);
 proc_close($proc);
+unlink($fn);
 
 ?>
 --EXPECTF--
@@ -63,7 +66,7 @@ Warning: proc_open(): Redirection target 42 not found in %s
 With pipe:
 array(1) {
   [1]=>
-  resource(4) of type (stream)
+  resource(6) of type (stream)
 }
 string(10) "Test
 Error"
