@@ -283,15 +283,11 @@ PHP_FUNCTION(round)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() >= 2) {
-#if SIZEOF_ZEND_LONG > SIZEOF_INT
 		if (precision >= 0) {
-			places = precision > INT_MAX ? INT_MAX : (int)precision;
+			places = ZEND_LONG_INT_OVFL(precision) ? INT_MAX : (int)precision;
 		} else {
-			places = precision <= INT_MIN ? INT_MIN+1 : (int)precision;
+			places = ZEND_LONG_INT_UDFL(precision) ? INT_MIN : (int)precision;
 		}
-#else
-		places = precision;
-#endif
 	}
 
 	switch (Z_TYPE_P(value)) {
@@ -1136,6 +1132,7 @@ PHP_FUNCTION(number_format)
 {
 	double num;
 	zend_long dec = 0;
+	int dec_int;
 	char *thousand_sep = NULL, *dec_point = NULL;
 	size_t thousand_sep_len = 0, dec_point_len = 0;
 
@@ -1156,7 +1153,13 @@ PHP_FUNCTION(number_format)
 		thousand_sep_len = 1;
 	}
 
-	RETURN_STR(_php_math_number_format_ex(num, (int)dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+	if (dec >= 0) {
+		dec_int = ZEND_LONG_INT_OVFL(dec) ? INT_MAX : (int)dec;
+	} else {
+		dec_int = ZEND_LONG_INT_UDFL(dec) ? INT_MIN : (int)dec;
+	}
+
+	RETURN_STR(_php_math_number_format_ex(num, dec_int, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 }
 /* }}} */
 

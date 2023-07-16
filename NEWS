@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-11715 (opcache.interned_strings_buffer either has no effect or
     opcache_get_status() / phpinfo() is wrong). (nielsdos)
 
+- Standard:
+  . Prevent int overflow on $decimals in number_format. (Marc Bennewitz)
+
 03 Aug 2023, PHP 8.1.22
 
 - Build:
