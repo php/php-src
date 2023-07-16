@@ -1136,6 +1136,7 @@ PHP_FUNCTION(number_format)
 {
 	double num;
 	zend_long dec = 0;
+	int dec_int;
 	char *thousand_sep = NULL, *dec_point = NULL;
 	size_t thousand_sep_len = 0, dec_point_len = 0;
 
@@ -1156,7 +1157,17 @@ PHP_FUNCTION(number_format)
 		thousand_sep_len = 1;
 	}
 
-	RETURN_STR(_php_math_number_format_ex(num, (int)dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+#if SIZEOF_ZEND_LONG > SIZEOF_INT
+	if (dec >= 0) {
+		dec_int = dec > INT_MAX ? INT_MAX : (int)dec;
+	} else {
+		dec_int = dec <= INT_MIN ? INT_MIN : (int)dec;
+	}
+#else
+	dec_int = dec;
+#endif
+
+	RETURN_STR(_php_math_number_format_ex(num, dec_int, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 }
 /* }}} */
 
