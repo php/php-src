@@ -146,12 +146,20 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 
 - Core:
-  . gc_status() has added the following 4 fields:
+  . gc_status() has added the following 8 fields:
     "running" => bool
     "protected" => bool
     "full" => bool
     "buffer_size" => int
-    See GH-9336
+    "application_time" => float: Total application time, in seconds (including
+    collector_time)
+    "collector_time" => float: Time spent collecting cycles, in seconds
+    (including destructor_time and free_time)
+    "destructor_time" => float: Time spent executing destructors during
+    cycle collection, in seconds
+    "free_time" => float: Time spent freeing values during cycle collection, in
+    seconds
+    See GH-9336, GH-11523
   . class_alias() now supports creating an alias of an internal class.
   . Setting `open_basedir` at runtime using `ini_set('open_basedir', ...);` no
     longer accepts paths containing the parent directory (`..`). Previously,

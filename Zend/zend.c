@@ -37,6 +37,7 @@
 #include "zend_fibers.h"
 #include "zend_call_stack.h"
 #include "zend_max_execution_timer.h"
+#include "zend_hrtime.h"
 #include "Optimizer/zend_optimizer.h"
 
 static size_t global_map_ptr_last = 0;
@@ -899,6 +900,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	fpsetmask(0);
 #endif
 
+	zend_startup_hrtime();
 	zend_startup_strtod();
 	zend_startup_extensions_mechanism();
 

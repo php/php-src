@@ -67,6 +67,10 @@ PHP 8.3 INTERNALS UPGRADE NOTES
   - zend_set_user_opcode_handler
   - zend_ssa_inference
 * Removed unused macros PHP_FNV1_32A_INIT and PHP_FNV1A_64_INIT. See GH-11114.
+* ext/standard/hrtime.h was moved to Zend/zend_hrtime.h
+  * The prefix of the PHP_HRTIME_ macros was changed to ZEND_HRTIME_
+  * The HRTIME_AVAILABLE macro was renamed to ZEND_HRTIME_AVAILABLE
+  * The php_hrtime_current() function was renamed to zend_hrtime()
 * _php_stream_dirent now has an extra d_type field that is used to store the
   directory entry type. This can be used to avoid additional stat calls for
   types when the type is already known.
