@@ -616,6 +616,7 @@ static size_t mb_utf7imap_to_wchar(unsigned char **in, size_t *in_len, uint32_t 
 	if (p == e && base64) {
 		/* UTF7-IMAP doesn't allow strings to end in Base64 mode
 		 * One space in output buffer was reserved just for this */
+		ZEND_ASSERT(out < limit);
 		*out++ = MBFL_BAD_INPUT;
 	}
 
