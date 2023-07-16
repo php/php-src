@@ -2527,14 +2527,18 @@ static bool ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 	}
 
 	if (UNEXPECTED(!zend_string_only_has_ascii_alphanumeric(Z_STR_P(str)))) {
+		zend_string *zstr = Z_STR_P(str);
+		GC_TRY_ADDREF(zstr);
 		zend_error(E_DEPRECATED, "Increment on non-alphanumeric string is deprecated");
 		if (EG(exception)) {
+			GC_TRY_DELREF(zstr);
+			if (!GC_REFCOUNT(zstr)) {
+				efree(zstr);
+			}
 			return false;
 		}
-		/* A userland error handler can change the type from string to something else */
-		if (Z_TYPE_P(str) != IS_STRING) {
-			return false;
-		}
+		zval_ptr_dtor(str);
+		ZVAL_STR(str, zstr);
 	}
 
 	if (!Z_REFCOUNTED_P(str)) {

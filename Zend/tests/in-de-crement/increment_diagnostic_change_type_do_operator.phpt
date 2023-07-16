@@ -24,13 +24,7 @@ var_dump($x);
 DONE
 --EXPECT--
 string(50) "Increment on non-alphanumeric string is deprecated"
-object(GMP)#2 (1) {
-  ["num"]=>
-  string(2) "10"
-}
+string(4) "foo!"
 string(50) "Increment on non-alphanumeric string is deprecated"
-object(GMP)#2 (1) {
-  ["num"]=>
-  string(2) "10"
-}
+string(1) "!"
 DONE

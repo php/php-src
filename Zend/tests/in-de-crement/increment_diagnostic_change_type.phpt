@@ -32,9 +32,7 @@ DONE
 --EXPECT--
 string(1) "1"
 string(50) "Increment on non-alphanumeric string is deprecated"
-object(stdClass)#3 (0) {
-}
+string(4) "foo!"
 string(50) "Increment on non-alphanumeric string is deprecated"
-object(stdClass)#3 (0) {
-}
+string(1) "!"
 DONE
