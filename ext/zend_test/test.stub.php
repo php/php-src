@@ -25,6 +25,14 @@ namespace {
 
     /** @alias _ZendTestClassAlias */
     class _ZendTestClass implements _ZendTestInterface {
+        public const mixed TYPED_CLASS_CONST1 = [];
+        public const int|array TYPED_CLASS_CONST2 = 42;
+        /**
+         * @var int
+         * @cvalue 1
+         */
+        public const int|string TYPED_CLASS_CONST3 = UNKNOWN;
+
         /** @var mixed */
         public static $_StaticProp;
         public static int $staticIntProp = 123;
@@ -162,6 +170,10 @@ namespace {
     /** @param stdClass|string|null $param */
     function zend_string_or_stdclass_or_null($param): stdClass|string|null {}
 
+    function zend_number_or_string(string|int|float $param): string|int|float {}
+
+    function zend_number_or_string_or_null(string|int|float|null $param): string|int|float|null {}
+
     function zend_iterable(iterable $arg1, ?iterable $arg2 = null): void {}
 
     function zend_weakmap_attach(object $object, mixed $value): bool {}
@@ -192,6 +204,13 @@ namespace {
     function zend_test_is_string_marked_as_valid_utf8(string $string): bool {}
 
     function zend_get_map_ptr_last(): int {}
+
+    function zend_test_crash(?string $message = null): void {}
+
+    function zend_test_fill_packed_array(array &$array): void {}
+
+    /** @return resource */
+    function zend_test_create_throwing_resource() {}
 }
 
 namespace ZendTestNS {

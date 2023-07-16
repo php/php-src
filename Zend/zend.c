@@ -37,6 +37,7 @@
 #include "zend_fibers.h"
 #include "zend_call_stack.h"
 #include "zend_max_execution_timer.h"
+#include "zend_hrtime.h"
 #include "Optimizer/zend_optimizer.h"
 
 static size_t global_map_ptr_last = 0;
@@ -94,6 +95,10 @@ void (*zend_on_timeout)(int seconds);
 
 static void (*zend_message_dispatcher_p)(zend_long message, const void *data);
 static zval *(*zend_get_configuration_directive_p)(zend_string *name);
+
+#if ZEND_RC_DEBUG
+ZEND_API bool zend_rc_debug = 0;
+#endif
 
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 {
@@ -895,6 +900,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	fpsetmask(0);
 #endif
 
+	zend_startup_hrtime();
 	zend_startup_strtod();
 	zend_startup_extensions_mechanism();
 
@@ -1186,6 +1192,7 @@ ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32
 	CG(unclean_shutdown) = 1;
 	CG(active_class_entry) = NULL;
 	CG(in_compilation) = 0;
+	CG(memoize_mode) = 0;
 	EG(current_execute_data) = NULL;
 	LONGJMP(*EG(bailout), FAILURE);
 }
@@ -1714,6 +1721,29 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 }
 /* }}} */
 
+/* type should be one of the BP_VAR_* constants, only special messages happen for isset/empty and unset */
+ZEND_API ZEND_COLD void zend_illegal_container_offset(const zend_string *container, const zval *offset, int type)
+{
+	switch (type) {
+		case BP_VAR_IS:
+			zend_type_error("Cannot access offset of type %s in isset or empty",
+				zend_zval_type_name(offset));
+			return;
+		case BP_VAR_UNSET:
+			/* Consistent error for when trying to unset a string offset */
+			if (zend_string_equals(container, ZSTR_KNOWN(ZEND_STR_STRING))) {
+				zend_throw_error(NULL, "Cannot unset string offsets");
+			} else {
+				zend_type_error("Cannot unset offset of type %s on %s", zend_zval_type_name(offset), ZSTR_VAL(container));
+			}
+			return;
+		default:
+			zend_type_error("Cannot access offset of type %s on %s",
+				zend_zval_type_name(offset), ZSTR_VAL(container));
+			return;
+	}
+}
+
 ZEND_API ZEND_COLD void zend_type_error(const char *format, ...) /* {{{ */
 {
 	va_list va;
@@ -1791,6 +1821,7 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 	EG(exception) = NULL;
 	ZVAL_OBJ(&params[0], old_exception);
 	ZVAL_COPY_VALUE(&orig_user_exception_handler, &EG(user_exception_handler));
+	ZVAL_UNDEF(&EG(user_exception_handler));
 
 	if (call_user_function(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params) == SUCCESS) {
 		zval_ptr_dtor(&retval2);
@@ -1802,6 +1833,8 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 	} else {
 		EG(exception) = old_exception;
 	}
+
+	zval_ptr_dtor(&orig_user_exception_handler);
 } /* }}} */
 
 ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...) /* {{{ */

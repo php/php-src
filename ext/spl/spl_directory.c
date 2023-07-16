@@ -454,7 +454,9 @@ static void spl_filesystem_info_set_filename(spl_filesystem_object *intern, zend
 
 	path_len = ZSTR_LEN(path);
 	if (path_len > 1 && IS_SLASH_AT(ZSTR_VAL(path), path_len-1)) {
-		path_len--;
+		do {
+			path_len--;
+		} while (path_len > 1 && IS_SLASH_AT(ZSTR_VAL(path), path_len - 1));
 		intern->file_name = zend_string_init(ZSTR_VAL(path), path_len, 0);
 	} else {
 		intern->file_name = zend_string_copy(path);
@@ -757,8 +759,6 @@ static void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_l
 
 	}
 	zend_restore_error_handling(&error_handling);
-
-	intern->u.dir.is_recursive = instanceof_function(intern->std.ce, spl_ce_RecursiveDirectoryIterator) ? 1 : 0;
 }
 /* }}} */
 
@@ -1485,6 +1485,11 @@ PHP_METHOD(RecursiveDirectoryIterator, hasChildren)
 	if (spl_filesystem_is_invalid_or_dot(intern->u.dir.entry.d_name)) {
 		RETURN_FALSE;
 	} else {
+		if (intern->u.dir.entry.d_type == DT_DIR) {
+			RETURN_TRUE;
+		} else if (intern->u.dir.entry.d_type == DT_REG) {
+			RETURN_FALSE;
+		}
 		if (spl_filesystem_object_get_file_name(intern) == FAILURE) {
 			RETURN_THROWS();
 		}

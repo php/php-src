@@ -41,7 +41,10 @@ foreach ($engines as $engine) {
 die('success');
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Constant MT_RAND_PHP is deprecated in %s on line %d
+
+Deprecated: The MT_RAND_PHP variant of Mt19937 is deprecated in %s on line %d
 Random\Engine\Mt19937
 string(10) "aaaaaaaaaa"
 string(5) "aaaaa"

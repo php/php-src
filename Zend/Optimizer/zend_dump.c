@@ -23,6 +23,7 @@
 #include "zend_func_info.h"
 #include "zend_call_graph.h"
 #include "zend_dump.h"
+#include "ext/standard/php_string.h"
 
 void zend_dump_ht(HashTable *ht)
 {
@@ -65,8 +66,12 @@ void zend_dump_const(const zval *zv)
 		case IS_DOUBLE:
 			fprintf(stderr, " float(%g)", Z_DVAL_P(zv));
 			break;
-		case IS_STRING:
-			fprintf(stderr, " string(\"%s\")", Z_STRVAL_P(zv));
+		case IS_STRING:;
+			zend_string *escaped_string = php_addcslashes(Z_STR_P(zv), "\"\\", 2);
+
+			fprintf(stderr, " string(\"%s\")", ZSTR_VAL(escaped_string));
+
+			zend_string_release(escaped_string);
 			break;
 		case IS_ARRAY:
 			fprintf(stderr, " array(...)");

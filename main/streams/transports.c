@@ -59,7 +59,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 {
 	php_stream *stream = NULL;
 	php_stream_transport_factory factory = NULL;
-	const char *p, *protocol = NULL;
+	const char *p, *protocol, *orig_path = NULL;
 	size_t n = 0;
 	bool failed = false;
 	bool bailout = false;
@@ -76,7 +76,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	if (persistent_id) {
 		switch(php_stream_from_persistent_id(persistent_id, &stream)) {
 			case PHP_STREAM_PERSISTENT_SUCCESS:
-				/* use a 0 second timeout when checking if the socket
+				/* use a 0-second timeout when checking if the socket
 				 * has already died */
 				if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_CHECK_LIVENESS, 0, NULL)) {
 					return stream;
@@ -94,6 +94,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 		}
 	}
 
+	orig_path = name;
 	for (p = name; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
 		n++;
 	}
@@ -135,6 +136,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	if (stream) {
 		zend_try {
 			php_stream_context_set(stream, context);
+			stream->orig_path = pestrdup(orig_path, persistent_id ? 1 : 0);
 
 			if ((flags & STREAM_XPORT_SERVER) == 0) {
 				/* client */
@@ -168,6 +170,9 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 							ERR_RETURN(error_string, error_text, "listen() failed: %s");
 							failed = true;
 						}
+					}
+					if (!failed) {
+						stream->flags |= PHP_STREAM_FLAG_NO_IO;
 					}
 				}
 			}

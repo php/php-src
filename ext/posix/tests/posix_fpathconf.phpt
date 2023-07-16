@@ -15,7 +15,7 @@ try {
 } catch (\TypeError $e) {
 	echo $e->getMessage() . "\n";
 }
-$fd = fopen(sys_get_temp_dir(), "r");
+$fd = fopen(__DIR__, "r");
 var_dump(posix_fpathconf($fd, POSIX_PC_PATH_MAX));
 fclose($fd);
 ?>

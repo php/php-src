@@ -1822,6 +1822,8 @@ PHP_METHOD(CallbackFilterIterator, accept)
 	zend_call_known_fcc(fcc, return_value, 3, params, NULL);
 	if (Z_ISUNDEF_P(return_value)) {
 		RETURN_FALSE;
+	} else if (Z_ISREF_P(return_value)) {
+		zend_unwrap_reference(return_value);
 	}
 }
 /* }}} */

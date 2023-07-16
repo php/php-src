@@ -1851,11 +1851,16 @@ function run_test(string $php, $file, array $env): string
         $skipCache = new SkipCache($enableSkipCache, $cfg['keep']['skip']);
     }
 
+    $orig_php = $php;
+    $php = escapeshellarg($php);
+
+    $retriable = true;
+    $retried = false;
+retry:
+
     $temp_filenames = null;
     $org_file = $file;
-    $orig_php = $php;
 
-    $php = escapeshellarg($php);
     $php_cgi = $env['TEST_PHP_CGI_EXECUTABLE'] ?? null;
     $phpdbg = $env['TEST_PHPDBG_EXECUTABLE'] ?? null;
 
@@ -1891,8 +1896,11 @@ TEST $file
 
     $tested = $test->getName();
 
-    if ($num_repeats > 1 && $test->hasSection('FILE_EXTERNAL')) {
-        return skip_test($tested, $tested_file, $shortname, 'Test with FILE_EXTERNAL might not be repeatable');
+    if ($test->hasSection('FILE_EXTERNAL')) {
+        $retriable = false;
+        if ($num_repeats > 1) {
+            return skip_test($tested, $tested_file, $shortname, 'Test with FILE_EXTERNAL might not be repeatable');
+        }
     }
 
     if ($test->hasSection('CAPTURE_STDIO')) {
@@ -1918,6 +1926,7 @@ TEST $file
         }
         $php = escapeshellarg($php_cgi) . ' -C ';
         $uses_cgi = true;
+        $retriable = false;
         if ($num_repeats > 1) {
             return skip_test($tested, $tested_file, $shortname, 'CGI does not support --repeat');
         }
@@ -1935,20 +1944,18 @@ TEST $file
         } else {
             return skip_test($tested, $tested_file, $shortname, 'phpdbg not available');
         }
+        $retriable = false;
         if ($num_repeats > 1) {
             return skip_test($tested, $tested_file, $shortname, 'phpdbg does not support --repeat');
         }
     }
 
-    if ($num_repeats > 1) {
-        if ($test->hasSection('CLEAN')) {
-            return skip_test($tested, $tested_file, $shortname, 'Test with CLEAN might not be repeatable');
-        }
-        if ($test->hasSection('STDIN')) {
-            return skip_test($tested, $tested_file, $shortname, 'Test with STDIN might not be repeatable');
-        }
-        if ($test->hasSection('CAPTURE_STDIO')) {
-            return skip_test($tested, $tested_file, $shortname, 'Test with CAPTURE_STDIO might not be repeatable');
+    foreach (['CLEAN', 'STDIN', 'CAPTURE_STDIO'] as $section) {
+        if ($test->hasSection($section)) {
+            $retriable = false;
+            if ($num_repeats > 1) {
+                return skip_test($tested, $tested_file, $shortname, "Test with $section might not be repeatable");
+            }
         }
     }
 
@@ -2140,8 +2147,11 @@ TEST $file
         }
         settings2array(preg_split("/[\n\r]+/", $ini), $ini_settings);
 
-        if ($num_repeats > 1 && isset($ini_settings['opcache.opt_debug_level'])) {
-            return skip_test($tested, $tested_file, $shortname, 'opt_debug_level tests are not repeatable');
+        if (isset($ini_settings['opcache.opt_debug_level'])) {
+            $retriable = false;
+            if ($num_repeats > 1) {
+                return skip_test($tested, $tested_file, $shortname, 'opt_debug_level tests are not repeatable');
+            }
         }
     }
 
@@ -2207,6 +2217,9 @@ TEST $file
         } elseif (!strncasecmp('xfail', $output, 5)) {
             // Pretend we have an XFAIL section
             $test->setSection('XFAIL', ltrim(substr($output, 5)));
+        } elseif (!strncasecmp('xleak', $output, 5)) {
+            // Pretend we have an XLEAK section
+            $test->setSection('XLEAK', ltrim(substr($output, 5)));
         } elseif ($output !== '') {
             show_result("BORK", $output, $tested_file, 'reason: invalid output from SKIPIF', $temp_filenames);
             $PHP_FAILED_TESTS['BORKED'][] = [
@@ -2461,6 +2474,16 @@ TEST $file
         $cmd = $valgrind->wrapCommand($cmd, $memcheck_filename, strpos($test_file, "pcre") !== false);
     }
 
+    if ($test->hasSection('XLEAK')) {
+        $env['ZEND_ALLOC_PRINT_LEAKS'] = '0';
+        if (isset($env['SKIP_ASAN'])) {
+            // $env['LSAN_OPTIONS'] = 'detect_leaks=0';
+            /* For unknown reasons, LSAN_OPTIONS=detect_leaks=0 would occasionally not be picked up
+             * in CI. Skip the test with ASAN, as it's not worth investegating. */
+            return skip_test($tested, $tested_file, $shortname, 'xleak does not work with asan');
+        }
+    }
+
     if ($DETAILED) {
         echo "
 CONTENT_LENGTH  = " . $env['CONTENT_LENGTH'] . "
@@ -2630,6 +2653,10 @@ COMMAND $cmd
 
         $wanted_re = null;
     }
+    if (!$passed && !$retried && $retriable && error_may_be_retried($test, $output)) {
+        $retried = true;
+        goto retry;
+    }
 
     if ($passed) {
         if (!$cfg['keep']['php'] && !$leaked) {
@@ -2657,9 +2684,13 @@ COMMAND $cmd
             if ($test->hasSection('XFAIL')) {
                 $warn = true;
                 $info = " (warn: XFAIL section but test passes)";
-            } elseif ($test->hasSection('XLEAK')) {
+            } elseif ($test->hasSection('XLEAK') && $valgrind) {
+                // XLEAK with ASAN completely disables LSAN so the test is expected to pass
                 $warn = true;
                 $info = " (warn: XLEAK section but test passes)";
+            } elseif ($retried) {
+                $warn = true;
+                $info = " (warn: Test passed on retry attempt)";
             } else {
                 show_result("PASS", $tested, $tested_file, '', $temp_filenames);
                 $junit->markTestAs('PASS', $shortname, $tested);
@@ -2694,7 +2725,8 @@ COMMAND $cmd
         if ($test->hasSection('XFAIL')) {
             $restype[] = 'XFAIL';
             $info = '  XFAIL REASON: ' . rtrim($test->getSection('XFAIL'));
-        } elseif ($test->hasSection('XLEAK')) {
+        } elseif ($test->hasSection('XLEAK') && $valgrind) {
+            // XLEAK with ASAN completely disables LSAN so the test is expected to pass
             $restype[] = 'XLEAK';
             $info = '  XLEAK REASON: ' . rtrim($test->getSection('XLEAK'));
         } else {
@@ -2801,6 +2833,12 @@ SH;
     $junit->markTestAs($restype, $shortname, $tested, null, $info, $diff);
 
     return $restype[0] . 'ED';
+}
+
+function error_may_be_retried(TestFile $test, string $output): bool
+{
+    return preg_match('((timed out)|(connection refused)|(404: page not found)|(address already in use)|(mailbox already exists))i', $output) === 1
+        || $test->hasSection('FLAKY');
 }
 
 function expectf_to_regex(?string $wanted): string
@@ -3693,6 +3731,7 @@ class TestFile
         'INI', 'ENV', 'EXTENSIONS',
         'SKIPIF', 'XFAIL', 'XLEAK', 'CLEAN',
         'CREDITS', 'DESCRIPTION', 'CONFLICTS', 'WHITESPACE_SENSITIVE',
+        'FLAKY',
     ];
 
     /**
@@ -3982,11 +4021,11 @@ final class Differ
         reset($to);
 
         foreach ($common as $token) {
-            while (!($this->isEqual)($fromToken = reset($from), $token)) {
+            while (!empty($from) && !($this->isEqual)(reset($from), $token)) {
                 $diff[] = [array_shift($from), self::REMOVED, $fromLine++];
             }
 
-            while (!($this->isEqual)($toToken = reset($to), $token)) {
+            while (!empty($to) && !($this->isEqual)($token, reset($to))) {
                 $diff[] = [array_shift($to), self::ADDED, $toLine++];
             }
 
@@ -4065,8 +4104,10 @@ final class Differ
         }
 
         if ($cFrom === 1) {
-            if (in_array($from[0], $to, true)) {
-                return [$from[0]];
+            foreach ($to as $toV) {
+                if (($this->isEqual)($from[0], $toV)) {
+                    return [$from[0]];
+                }
             }
 
             return [];

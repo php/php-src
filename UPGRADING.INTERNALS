@@ -42,10 +42,45 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 * The order of members of zend_op_array, zend_ssa_var, zend_ssa_var_info,
   zend_executor_globals and php_core_globals have changed to improve
   struct packing which reduces their size.
+* The name field have been removed from the zend_constant struct. Now,
+  constant names are only stored as keys of the global constants table.
+  That's why the `zend_register_constant()` function now expects the
+  constant name as its first parameter.
+* Many calls to zend_assign_to_variable have been replaced with
+  zend_assign_to_variable_ex which allows delaying the releasing of the old
+  variable value. This avoids side-effects through destructors between the
+  assignment of the variable and the assignment to the result zval in the VM
+  (i.e. it may free the new value). See GH-10168 for details.
+* The return types of the following functions were changed from int to
+  zend_result:
+  - open_file_for_scanning
+  - php_rfc1867_callback
+  - virtual_chdir
+  - zend_execute_scripts
+  - zend_get_module_started
+  - zend_handle_undef_args
+  - zend_list_delete
+  - zend_multibyte_parse_encoding_list
+  - zend_multibyte_set_internal_encoding
+  - zend_parse_ini_file
+  - zend_parse_ini_string
+  - zend_set_user_opcode_handler
+  - zend_ssa_inference
+* Removed unused macros PHP_FNV1_32A_INIT and PHP_FNV1A_64_INIT. See GH-11114.
+* ext/standard/hrtime.h was moved to Zend/zend_hrtime.h
+  * The prefix of the PHP_HRTIME_ macros was changed to ZEND_HRTIME_
+  * The HRTIME_AVAILABLE macro was renamed to ZEND_HRTIME_AVAILABLE
+  * The php_hrtime_current() function was renamed to zend_hrtime()
+* _php_stream_dirent now has an extra d_type field that is used to store the
+  directory entry type. This can be used to avoid additional stat calls for
+  types when the type is already known.
 
 ========================
 2. Build system changes
 ========================
+
+* LDFLAGS are not unset anymore allowing them to be adjusted e.g.
+  LDFLAGS="..." ./configure
 
 * Removed the HAVE_DEV_URANDOM compile time check.  HAVE_DEV_URANDOM will
   now never be defined. Any checks relying on HAVE_DEV_URANDOM should be
@@ -90,6 +125,34 @@ PHP 8.3 INTERNALS UPGRADE NOTES
  e. ext/spl
    - The PHPAPI spl_iterator_apply() function now returns zend_result instead of int.
      There are no functional changes.
+   - The field _spl_filesystem_object->is_recursive has been removed.
+
+ f. ext/dom
+   - A new function dom_get_doc_props_read_only() is added to gather the document
+     properties in a read-only way. This function avoids allocation when there are
+     no document properties changed yet.
+   - The node list returned by DOMNode::getElementsByTagName() and
+	   DOMNode::getElementsByTagNameNS() now caches the length and the last requested item.
+	   This means that the length and the last requested item are not recalculated
+	   when the node list is iterated over multiple times.
+	   If you do not use the internal PHP dom APIs to modify the document, you need to
+	   manually invalidate the cache using php_libxml_invalidate_node_list_cache_from_doc().
+	   Furthermore, the following internal APIs were added to handle the cache:
+	     . php_dom_is_cache_tag_stale_from_doc_ptr()
+	     . php_dom_is_cache_tag_stale_from_node()
+	     . php_dom_mark_cache_tag_up_to_date_from_node()
+   - The function dom_get_elements_by_tag_name_ns_raw() has an additional parameter to indicate
+     the base node of the node list. This function also no longer accepts -1 as the index argument.
+   - The function dom_namednode_iter() has additional arguments to avoid recomputing the length of
+     the strings.
+   - The functions dom_parent_node_prepend(), dom_parent_node_append(), dom_parent_node_after(), and
+     dom_parent_node_before() now use an uint32_t argument for the number of nodes instead of int.
+   - There is now a helper function php_dom_get_content_into_zval() to get the contents of a node.
+     This avoids allocation if possible.
+
+ g. ext/libxml
+   - Two new functions: php_libxml_invalidate_node_list_cache_from_doc() and
+     php_libxml_invalidate_node_list_cache() were added to invalidate the cache of a node list.
 
 ========================
 4. OpCode changes

@@ -45,22 +45,22 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
     public function setFlags(int $flags): void {}
 
     /** @tentative-return-type */
-    public function asort(int $flags = SORT_REGULAR): bool {}
+    public function asort(int $flags = SORT_REGULAR): true {}
 
     /** @tentative-return-type */
-    public function ksort(int $flags = SORT_REGULAR): bool {}
+    public function ksort(int $flags = SORT_REGULAR): true {}
 
     /** @tentative-return-type */
-    public function uasort(callable $callback): bool {}
+    public function uasort(callable $callback): true {}
 
     /** @tentative-return-type */
-    public function uksort(callable $callback): bool {}
+    public function uksort(callable $callback): true {}
 
     /** @tentative-return-type */
-    public function natsort(): bool {}
+    public function natsort(): true {}
 
     /** @tentative-return-type */
-    public function natcasesort(): bool {}
+    public function natcasesort(): true {}
 
     /** @tentative-return-type */
     public function unserialize(string $data): void {}
@@ -163,37 +163,37 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
      * @tentative-return-type
      * @implementation-alias ArrayObject::asort
      */
-    public function asort(int $flags = SORT_REGULAR): bool {}
+    public function asort(int $flags = SORT_REGULAR): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::ksort
      */
-    public function ksort(int $flags = SORT_REGULAR): bool {}
+    public function ksort(int $flags = SORT_REGULAR): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::uasort
      */
-    public function uasort(callable $callback): bool {}
+    public function uasort(callable $callback): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::uksort
      */
-    public function uksort(callable $callback): bool {}
+    public function uksort(callable $callback): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::natsort
      */
-    public function natsort(): bool {}
+    public function natsort(): true {}
 
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::natcasesort
      */
-    public function natcasesort(): bool {}
+    public function natcasesort(): true {}
 
     /**
      * @tentative-return-type

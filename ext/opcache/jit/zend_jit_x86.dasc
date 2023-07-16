@@ -3070,6 +3070,12 @@ static int zend_jit_align_func(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_align_stub(dasm_State **Dst)
+{
+	|.align 16
+	return 1;
+}
+
 static int zend_jit_prologue(dasm_State **Dst)
 {
 	|	ENDBR
@@ -5286,7 +5292,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 				}
 			}
 		} else {
-			if (!op2_range || (op2_range->min <= 0 && op2_range->max >= 0)) {
+			if ((op2_type & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) || !op2_range || (op2_range->min <= 0 && op2_range->max >= 0)) {
 				if (Z_MODE(op2_addr) == IS_MEM_ZVAL) {
 					|	cmp aword [Ra(Z_REG(op2_addr))+Z_OFFSET(op2_addr)], 0
 				} else if (Z_MODE(op2_addr) == IS_REG) {
@@ -6285,22 +6291,39 @@ static int zend_jit_assign_to_typed_ref(dasm_State         **Dst,
 	if (opline) {
 		|	SET_EX_OPLINE opline, r0
 	}
-	if (val_type == IS_CONST) {
-		|	EXT_CALL zend_jit_assign_const_to_typed_ref, r0
-	} else if (val_type == IS_TMP_VAR) {
-		|	EXT_CALL zend_jit_assign_tmp_to_typed_ref, r0
-	} else if (val_type == IS_VAR) {
-		|	EXT_CALL zend_jit_assign_var_to_typed_ref, r0
-	} else if (val_type == IS_CV) {
-		|	EXT_CALL zend_jit_assign_cv_to_typed_ref, r0
+	if (!res_addr) {
+		if (val_type == IS_CONST) {
+			|	EXT_CALL zend_jit_assign_const_to_typed_ref, r0
+		} else if (val_type == IS_TMP_VAR) {
+			|	EXT_CALL zend_jit_assign_tmp_to_typed_ref, r0
+		} else if (val_type == IS_VAR) {
+			|	EXT_CALL zend_jit_assign_var_to_typed_ref, r0
+		} else if (val_type == IS_CV) {
+			|	EXT_CALL zend_jit_assign_cv_to_typed_ref, r0
+		} else {
+			ZEND_UNREACHABLE();
+		}
 	} else {
-		ZEND_UNREACHABLE();
-	}
-	if (res_addr) {
-		zend_jit_addr ret_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0);
-
-		|	ZVAL_COPY_VALUE res_addr, -1, ret_addr, -1, ZREG_R1, ZREG_R2
-		|	TRY_ADDREF -1, ch, r2
+		|.if X64
+			|	LOAD_ZVAL_ADDR CARG3, res_addr
+		|.else
+			|	sub r4, 12
+			|	PUSH_ZVAL_ADDR res_addr, r0
+		|.endif
+		if (val_type == IS_CONST) {
+			|	EXT_CALL zend_jit_assign_const_to_typed_ref2, r0
+		} else if (val_type == IS_TMP_VAR) {
+			|	EXT_CALL zend_jit_assign_tmp_to_typed_ref2, r0
+		} else if (val_type == IS_VAR) {
+			|	EXT_CALL zend_jit_assign_var_to_typed_ref2, r0
+		} else if (val_type == IS_CV) {
+			|	EXT_CALL zend_jit_assign_cv_to_typed_ref2, r0
+		} else {
+			ZEND_UNREACHABLE();
+		}
+		|.if not(X64)
+		|	add r4, 12
+		|.endif
 	}
 	if (check_exception) {
 		|	// if (UNEXPECTED(EG(exception) != NULL)) {
@@ -9369,8 +9392,28 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		|	// if (CACHED_PTR(opline->result.num))
 		|	mov r2, EX->run_time_cache
 		|	mov r0, aword [r2 + opline->result.num]
-		|	test r0, r0
-		|	jz >1
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE
+		 && func
+		 && (func->common.fn_flags & ZEND_ACC_IMMUTABLE)
+		 && opline->opcode != ZEND_INIT_FCALL) {
+			/* Called func may be changed because of recompilation. See ext/opcache/tests/jit/init_fcall_003.phpt */
+			|   .if X64
+			||		if (!IS_SIGNED_32BIT(func)) {
+			|			mov64 r1, ((ptrdiff_t)func)
+			|			cmp r0, r1
+			||		} else {
+			|			cmp r0, func
+			||		}
+			|	.else
+			|		cmp r0, func
+			|	.endif
+			|	jnz >1
+			|.cold_code
+			|1:
+		} else {
+			|	test r0, r0
+			|	jz >1
+		}
 		|.cold_code
 		|1:
 		if (opline->opcode == ZEND_INIT_FCALL

@@ -812,7 +812,6 @@ parameter:
 					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL); }
 ;
 
-
 optional_type_without_static:
 		%empty	{ $$ = NULL; }
 	|	type_expr_without_static	{ $$ = $1; }
@@ -941,7 +940,10 @@ attributed_class_statement:
 			{ $$ = zend_ast_create(ZEND_AST_PROP_GROUP, $2, $3, NULL);
 			  $$->attr = $1; }
 	|	class_const_modifiers T_CONST class_const_list ';'
-			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST_GROUP, $3, NULL);
+			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST_GROUP, $3, NULL, NULL);
+			  $$->attr = $1; }
+	|	class_const_modifiers T_CONST type_expr class_const_list ';'
+			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST_GROUP, $4, NULL, $3);
 			  $$->attr = $1; }
 	|	method_modifiers function returns_ref identifier backup_doc_comment '(' parameter_list ')'
 		return_type backup_fn_flags method_body backup_fn_flags
@@ -1081,7 +1083,12 @@ class_const_list:
 ;
 
 class_const_decl:
-	identifier '=' expr backup_doc_comment { $$ = zend_ast_create(ZEND_AST_CONST_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
+		T_STRING '=' expr backup_doc_comment { $$ = zend_ast_create(ZEND_AST_CONST_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
+	|	semi_reserved '=' expr backup_doc_comment {
+			zval zv;
+			if (zend_lex_tstring(&zv, $1) == FAILURE) { YYABORT; }
+			$$ = zend_ast_create(ZEND_AST_CONST_ELEM, zend_ast_create_zval(&zv), $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL));
+		}
 ;
 
 const_decl:
@@ -1317,8 +1324,8 @@ function_call:
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
-	|	callable_expr { $<num>$ = CG(zend_lineno); } argument_list { 
-			$$ = zend_ast_create(ZEND_AST_CALL, $1, $3); 
+	|	callable_expr { $<num>$ = CG(zend_lineno); } argument_list {
+			$$ = zend_ast_create(ZEND_AST_CALL, $1, $3);
 			$$->lineno = $<num>2;
 		}
 ;

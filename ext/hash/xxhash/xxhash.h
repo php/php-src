@@ -1376,6 +1376,23 @@ XXH3_128bits_reset_withSecretandSeed(XXH3_state_t* statePtr,
 #  define XXH_NO_INLINE_HINTS 0
 
 /*!
+ * @def XXH3_INLINE_SECRET
+ * @brief Determines whether to inline the XXH3 withSecret code.
+ *
+ * When the secret size is known, the compiler can improve the performance
+ * of XXH3_64bits_withSecret() and XXH3_128bits_withSecret().
+ *
+ * However, if the secret size is not known, it doesn't have any benefit. This
+ * happens when xxHash is compiled into a global symbol. Therefore, if
+ * @ref XXH_INLINE_ALL is *not* defined, this will be defined to 0.
+ *
+ * Additionally, this defaults to 0 on GCC 12+, which has an issue with function pointers
+ * that are *sometimes* force inline on -Og, and it is impossible to automatically
+ * detect this optimization level.
+ */
+#  define XXH3_INLINE_SECRET 0
+
+/*!
  * @def XXH32_ENDJMP
  * @brief Whether to use a jump for `XXH32_finalize`.
  *
@@ -1436,6 +1453,15 @@ XXH3_128bits_reset_withSecretandSeed(XXH3_state_t* statePtr,
 #    define XXH_NO_INLINE_HINTS 1
 #  else
 #    define XXH_NO_INLINE_HINTS 0
+#  endif
+#endif
+
+#ifndef XXH3_INLINE_SECRET
+#  if (defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 12) \
+     || !defined(XXH_INLINE_ALL)
+#    define XXH3_INLINE_SECRET 0
+#  else
+#    define XXH3_INLINE_SECRET 1
 #  endif
 #endif
 
@@ -1515,6 +1541,11 @@ static void* XXH_memcpy(void* dest, const void* src, size_t size)
 #  define XXH_NO_INLINE static
 #endif
 
+#if XXH3_INLINE_SECRET
+#  define XXH3_WITH_SECRET_INLINE XXH_FORCE_INLINE
+#else
+#  define XXH3_WITH_SECRET_INLINE XXH_NO_INLINE
+#endif
 
 
 /* *************************************
@@ -4465,7 +4496,7 @@ XXH3_hashLong_64b_internal(const void* XXH_RESTRICT input, size_t len,
  * so that the compiler can properly optimize the vectorized loop.
  * This makes a big performance difference for "medium" keys (<1 KB) when using AVX instruction set.
  */
-XXH_FORCE_INLINE XXH64_hash_t
+XXH3_WITH_SECRET_INLINE XXH64_hash_t
 XXH3_hashLong_64b_withSecret(const void* XXH_RESTRICT input, size_t len,
                              XXH64_hash_t seed64, const xxh_u8* XXH_RESTRICT secret, size_t secretLen)
 {
@@ -5263,7 +5294,7 @@ XXH3_hashLong_128b_default(const void* XXH_RESTRICT input, size_t len,
  * It's important for performance to pass @secretLen (when it's static)
  * to the compiler, so that it can properly optimize the vectorized loop.
  */
-XXH_FORCE_INLINE XXH128_hash_t
+XXH3_WITH_SECRET_INLINE XXH128_hash_t
 XXH3_hashLong_128b_withSecret(const void* XXH_RESTRICT input, size_t len,
                               XXH64_hash_t seed64,
                               const void* XXH_RESTRICT secret, size_t secretLen)

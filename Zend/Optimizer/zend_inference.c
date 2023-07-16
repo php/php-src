@@ -432,7 +432,7 @@ static void zend_ssa_range_or(zend_long a, zend_long b, zend_long c, zend_long d
 	int x = ((a < 0) ? 8 : 0) |
 	        ((b < 0) ? 4 : 0) |
 	        ((c < 0) ? 2 : 0) |
-	        ((d < 0) ? 2 : 0);
+	        ((d < 0) ? 1 : 0);
 	switch (x) {
 		case 0x0:
 		case 0x3:
@@ -480,7 +480,7 @@ static void zend_ssa_range_and(zend_long a, zend_long b, zend_long c, zend_long 
 	int x = ((a < 0) ? 8 : 0) |
 	        ((b < 0) ? 4 : 0) |
 	        ((c < 0) ? 2 : 0) |
-	        ((d < 0) ? 2 : 0);
+	        ((d < 0) ? 1 : 0);
 	switch (x) {
 		case 0x0:
 		case 0x3:
@@ -2944,6 +2944,10 @@ static zend_always_inline zend_result _zend_update_type_info(
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 			break;
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
+			tmp = MAY_BE_UNDEF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_REF;
+			UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
+			break;
 		case ZEND_SEND_VAR:
 			if (ssa_op->op1_def >= 0) {
 				tmp = t1;
@@ -3472,6 +3476,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 					tmp |= zend_fetch_prop_type(script, prop_info, &ce);
 					if (opline->opcode != ZEND_FETCH_OBJ_R && opline->opcode != ZEND_FETCH_OBJ_IS) {
 						tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
+						if ((opline->extended_value & ZEND_FETCH_OBJ_FLAGS) == ZEND_FETCH_DIM_WRITE) {
+							tmp |= MAY_BE_UNDEF;
+						}
 						ce = NULL;
 					} else if (!(opline->op1_type & (IS_VAR|IS_TMP_VAR)) || !(t1 & MAY_BE_RC1)) {
 						const zend_class_entry *ce = NULL;
@@ -3511,6 +3518,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 			if (opline->opcode != ZEND_FETCH_STATIC_PROP_R
 					&& opline->opcode != ZEND_FETCH_STATIC_PROP_IS) {
 				tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
+				if ((opline->extended_value & ZEND_FETCH_OBJ_FLAGS) == ZEND_FETCH_DIM_WRITE) {
+					tmp |= MAY_BE_UNDEF;
+				}
 				ce = NULL;
 			} else {
 				if (!result_may_be_separated(ssa, ssa_op)) {
@@ -3559,12 +3569,6 @@ static zend_always_inline zend_result _zend_update_type_info(
 			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY, ssa_op->result_def);
 			break;
 		case ZEND_STRLEN:
-			tmp = MAY_BE_LONG;
-			if (t1 & (MAY_BE_ANY - (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING))) {
-				tmp |= MAY_BE_NULL;
-			}
-			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
-			break;
 		case ZEND_COUNT:
 		case ZEND_FUNC_NUM_ARGS:
 			UPDATE_SSA_TYPE(MAY_BE_LONG, ssa_op->result_def);
@@ -3574,7 +3578,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			break;
 		case ZEND_GET_CLASS:
 		case ZEND_GET_CALLED_CLASS:
-			UPDATE_SSA_TYPE(MAY_BE_FALSE|MAY_BE_STRING|MAY_BE_RCN, ssa_op->result_def);
+			UPDATE_SSA_TYPE(MAY_BE_STRING|MAY_BE_RCN, ssa_op->result_def);
 			break;
 		case ZEND_GET_TYPE:
 			UPDATE_SSA_TYPE(MAY_BE_STRING|MAY_BE_RC1|MAY_BE_RCN, ssa_op->result_def);
@@ -4357,6 +4361,7 @@ static void zend_mark_cv_references(const zend_op_array *op_array, const zend_sc
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_FUNC_ARG:
+					case ZEND_BIND_INIT_STATIC_OR_JMP:
 						break;
 					case ZEND_INIT_ARRAY:
 					case ZEND_ADD_ARRAY_ELEMENT:
@@ -4512,6 +4517,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				case ZEND_ASSIGN_REF:
 				case ZEND_BIND_GLOBAL:
 				case ZEND_BIND_STATIC:
+				case ZEND_BIND_INIT_STATIC_OR_JMP:
 				case ZEND_FETCH_DIM_IS:
 				case ZEND_FETCH_OBJ_IS:
 				case ZEND_SEND_REF:
@@ -4749,14 +4755,12 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_UNSET_VAR:
 			return (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY));
 		case ZEND_BIND_STATIC:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
 			if (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) {
 				/* Destructor may throw. */
 				return 1;
-			} else {
-				zval *value = (zval*)((char*)op_array->static_variables->arData + (opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
-				/* May throw if initializer is CONSTANT_AST. */
-				return Z_TYPE_P(value) == IS_CONSTANT_AST;
 			}
+			return 0;
 		case ZEND_ASSIGN_DIM:
 			if ((opline+1)->op1_type == IS_CV) {
 				if (_ssa_op1_info(op_array, ssa, opline+1, ssa_op+1) & MAY_BE_UNDEF) {

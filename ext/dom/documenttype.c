@@ -65,7 +65,7 @@ int dom_documenttype_entities_read(dom_object *obj, zval *retval)
 	entityht = (xmlHashTable *) doctypep->entities;
 
 	intern = Z_DOMOBJ_P(retval);
-	dom_namednode_iter(obj, XML_ENTITY_NODE, intern, entityht, NULL, NULL);
+	dom_namednode_iter(obj, XML_ENTITY_NODE, intern, entityht, NULL, 0, NULL, 0);
 
 	return SUCCESS;
 }
@@ -93,7 +93,7 @@ int dom_documenttype_notations_read(dom_object *obj, zval *retval)
 	notationht = (xmlHashTable *) doctypep->notations;
 
 	intern = Z_DOMOBJ_P(retval);
-	dom_namednode_iter(obj, XML_NOTATION_NODE, intern, notationht, NULL, NULL);
+	dom_namednode_iter(obj, XML_NOTATION_NODE, intern, notationht, NULL, 0, NULL, 0);
 
 	return SUCCESS;
 }

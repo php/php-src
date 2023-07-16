@@ -2297,7 +2297,7 @@ PHP_FUNCTION(socket_export_stream)
 		getsockopt(socket->bsd_socket, SOL_SOCKET, SO_TYPE, (char *) &protoid, &protoidlen);
 
 		if (protoid == SOCK_STREAM) {
-			/* SO_PROTOCOL is not (yet?) supported on OS X, so lets assume it's TCP there */
+			/* SO_PROTOCOL is not (yet?) supported on OS X, so let's assume it's TCP there */
 #ifdef SO_PROTOCOL
 			protoidlen = sizeof(protoid);
 			getsockopt(socket->bsd_socket, SOL_SOCKET, SO_PROTOCOL, (char *) &protoid, &protoidlen);

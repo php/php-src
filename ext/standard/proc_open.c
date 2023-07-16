@@ -36,6 +36,18 @@
 #include <fcntl.h>
 #endif
 
+#ifdef HAVE_POSIX_SPAWN_FILE_ACTIONS_ADDCHDIR_NP
+/* Only defined on glibc >= 2.29, FreeBSD CURRENT, musl >= 1.1.24,
+ * MacOS Catalina or later..
+ * It should be posible to modify this so it is also
+ * used in older systems when $cwd == NULL but care must be taken
+ * as at least glibc < 2.24 has a legacy implementation known
+ * to be really buggy.
+ */
+#include <spawn.h>
+#define USE_POSIX_SPAWN
+#endif
+
 /* This symbol is defined in ext/standard/config.m4.
  * Essentially, it is set if you HAVE_FORK || PHP_WIN32
  * Other platforms may modify that configure check and add suitable #ifdefs
@@ -917,7 +929,7 @@ static zend_result set_proc_descriptor_from_array(zval *descitem, descriptorspec
 	} else if (zend_string_equals_literal(ztype, "socket")) {
 		/* Set descriptor to socketpair */
 		retval = set_proc_descriptor_to_socket(&descriptors[ndesc]);
-	} else if (zend_string_equals_literal(ztype, "file")) {
+	} else if (zend_string_equals(ztype, ZSTR_KNOWN(ZEND_STR_FILE))) {
 		/* Set descriptor to file */
 		if ((zfile = get_string_parameter(descitem, 1, "file name parameter for 'file'")) == NULL) {
 			goto finish;
@@ -940,7 +952,7 @@ static zend_result set_proc_descriptor_from_array(zval *descitem, descriptorspec
 
 		retval = redirect_proc_descriptor(
 			&descriptors[ndesc], (int)Z_LVAL_P(ztarget), descriptors, ndesc, nindex);
-	} else if (zend_string_equals_literal(ztype, "null")) {
+	} else if (zend_string_equals(ztype, ZSTR_KNOWN(ZEND_STR_NULL_LOWERCASE))) {
 		/* Set descriptor to blackhole (discard all data written) */
 		retval = set_proc_descriptor_to_blackhole(&descriptors[ndesc]);
 	} else if (zend_string_equals_literal(ztype, "pty")) {
@@ -982,6 +994,36 @@ static zend_result set_proc_descriptor_from_resource(zval *resource, descriptors
 }
 
 #ifndef PHP_WIN32
+#if defined(USE_POSIX_SPAWN)
+static zend_result close_parentends_of_pipes(posix_spawn_file_actions_t * actions, descriptorspec_item *descriptors, int ndesc)
+{
+	int r;
+	for (int i = 0; i < ndesc; i++) {
+		if (descriptors[i].type != DESCRIPTOR_TYPE_STD) {
+			r = posix_spawn_file_actions_addclose(actions, descriptors[i].parentend);
+			if (r != 0) {
+				php_error_docref(NULL, E_WARNING, "Cannot close file descriptor %d: %s", descriptors[i].parentend, strerror(r));
+				return FAILURE;
+			}
+		}
+		if (descriptors[i].childend != descriptors[i].index) {
+			r = posix_spawn_file_actions_adddup2(actions, descriptors[i].childend, descriptors[i].index);
+			if (r != 0) {
+				php_error_docref(NULL, E_WARNING, "Unable to copy file descriptor %d (for pipe) into "
+						"file descriptor %d: %s", descriptors[i].childend, descriptors[i].index, strerror(r));
+				return FAILURE;
+			}
+			r = posix_spawn_file_actions_addclose(actions, descriptors[i].childend);
+			if (r != 0) {
+				php_error_docref(NULL, E_WARNING, "Cannot close file descriptor %d: %s", descriptors[i].childend, strerror(r));
+				return FAILURE;
+			}
+		}
+	}
+
+	return SUCCESS;
+}
+#else
 static zend_result close_parentends_of_pipes(descriptorspec_item *descriptors, int ndesc)
 {
 	/* We are running in child process
@@ -1004,6 +1046,7 @@ static zend_result close_parentends_of_pipes(descriptorspec_item *descriptors, i
 
 	return SUCCESS;
 }
+#endif
 #endif
 
 static void close_all_descriptors(descriptorspec_item *descriptors, int ndesc)
@@ -1216,6 +1259,37 @@ PHP_FUNCTION(proc_open)
 	childHandle = pi.hProcess;
 	child       = pi.dwProcessId;
 	CloseHandle(pi.hThread);
+#elif defined(USE_POSIX_SPAWN)
+	posix_spawn_file_actions_t factions;
+	int r;
+	posix_spawn_file_actions_init(&factions);
+
+	if (close_parentends_of_pipes(&factions, descriptors, ndesc) == FAILURE) {
+		posix_spawn_file_actions_destroy(&factions);
+		close_all_descriptors(descriptors, ndesc);
+		goto exit_fail;
+	}
+
+	if (cwd) {
+		r = posix_spawn_file_actions_addchdir_np(&factions, cwd);
+		if (r != 0) {
+			php_error_docref(NULL, E_WARNING, "posix_spawn_file_actions_addchdir_np() failed: %s", strerror(r));
+		}
+	}
+
+	if (argv) {
+		r = posix_spawnp(&child, ZSTR_VAL(command_str), &factions, NULL, argv, (env.envarray ? env.envarray : environ));
+	} else {
+		r = posix_spawn(&child, "/bin/sh" , &factions, NULL,
+				(char * const[]) {"sh", "-c", ZSTR_VAL(command_str), NULL},
+				env.envarray ? env.envarray : environ);
+	}
+	posix_spawn_file_actions_destroy(&factions);
+	if (r != 0) {
+		close_all_descriptors(descriptors, ndesc);
+		php_error_docref(NULL, E_WARNING, "posix_spawn() failed: %s", strerror(r));
+		goto exit_fail;
+	}
 #elif HAVE_FORK
 	/* the Unix way */
 	child = fork();

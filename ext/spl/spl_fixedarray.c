@@ -83,11 +83,6 @@ static bool spl_fixedarray_empty(spl_fixedarray *array)
 	return true;
 }
 
-static void spl_fixedarray_illegal_offset(const zval *offset)
-{
-	zend_type_error("Cannot access offset of type %s on FixedArray", zend_get_type_by_const(Z_TYPE_P(offset)));
-}
-
 static void spl_fixedarray_default_ctor(spl_fixedarray *array)
 {
 	array->size = 0;
@@ -287,7 +282,8 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	ZEND_ASSERT(parent);
 
 	if (UNEXPECTED(inherited)) {
-		zend_function *fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", sizeof("count") - 1);
+		/* Find count() method */
+		zend_function *fptr_count = zend_hash_find_ptr(&class_type->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
 		if (fptr_count->common.scope == parent) {
 			fptr_count = NULL;
 		}
@@ -338,7 +334,8 @@ static zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 			return Z_RES_HANDLE_P(offset);
 	}
 
-	spl_fixedarray_illegal_offset(offset);
+	/* Use SplFixedArray name from the CE */
+	zend_illegal_container_offset(spl_ce_SplFixedArray->name, offset, BP_VAR_R);
 	return 0;
 }
 
@@ -586,8 +583,8 @@ PHP_METHOD(SplFixedArray, __serialize)
 		RETURN_THROWS();
 	}
 
-	uint32_t num_properties =
-		intern->std.properties ? zend_hash_num_elements(intern->std.properties) : 0;
+	HashTable *ht = zend_std_get_properties(&intern->std);
+	uint32_t num_properties = zend_hash_num_elements(ht);
 	array_init_size(return_value, intern->array.size + num_properties);
 
 	/* elements */
@@ -598,17 +595,15 @@ PHP_METHOD(SplFixedArray, __serialize)
 	}
 
 	/* members */
-	if (intern->std.properties) {
-		ZEND_HASH_FOREACH_STR_KEY_VAL(intern->std.properties, key, current) {
-			/* The properties hash table can also contain the array elements if the properties table was already rebuilt.
-			 * In this case we'd have a NULL key. We can't simply use the properties table in all cases because it's
-			 * potentially out of sync (missing elements, or containing removed elements) and might need a rebuild. */
-			if (key != NULL) {
-				zend_hash_add_new(Z_ARRVAL_P(return_value), key, current);
-				Z_TRY_ADDREF_P(current);
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
+	ZEND_HASH_FOREACH_STR_KEY_VAL_IND(ht, key, current) {
+		/* If the properties table was already rebuild, it will also contain the
+		 * array elements. The array elements are already added in the above loop.
+		 * We can detect array elements by the fact that their key == NULL. */
+		if (key != NULL) {
+			zend_hash_add_new(Z_ARRVAL_P(return_value), key, current);
+			Z_TRY_ADDREF_P(current);
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 
 PHP_METHOD(SplFixedArray, __unserialize)

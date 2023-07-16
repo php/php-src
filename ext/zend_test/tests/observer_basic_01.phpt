@@ -5,6 +5,7 @@ zend_test
 --INI--
 zend_test.observer.enabled=1
 zend_test.observer.observe_all=1
+opcache.optimization_level=0x7FFFBFFF & ~0x0080
 --FILE--
 <?php
 function bar()

@@ -22,7 +22,7 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter.c
+ * The source code included in this file was separated from mbfilter.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
  *
  */
@@ -537,8 +537,10 @@ static size_t mb_utf7_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 			if (p == e) {
 				/* It is an error if trailing padding bits are not zeroes or if we were
 				 * expecting the 2nd part of a surrogate pair when Base64 section ends */
-				if ((n3 & 0x3) || surrogate1)
+				if ((n3 & 0x3) || surrogate1) {
 					*out++ = MBFL_BAD_INPUT;
+					surrogate1 = 0;
+				}
 				break;
 			}
 
@@ -562,8 +564,10 @@ static size_t mb_utf7_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 			}
 			out = handle_utf16_cp((n3 << 14) | (n4 << 8) | (n5 << 2) | ((n6 & 0x30) >> 4), out, &surrogate1);
 			if (p == e) {
-				if ((n6 & 0xF) || surrogate1)
+				if ((n6 & 0xF) || surrogate1) {
 					*out++ = MBFL_BAD_INPUT;
+					surrogate1 = 0;
+				}
 				break;
 			}
 
@@ -601,6 +605,11 @@ static size_t mb_utf7_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 				*out++ = MBFL_BAD_INPUT;
 			}
 		}
+	}
+
+	if (p == e && surrogate1) {
+		ZEND_ASSERT(out < limit);
+		*out++ = MBFL_BAD_INPUT;
 	}
 
 	*state = (surrogate1 << 1) | base64;

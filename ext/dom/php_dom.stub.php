@@ -275,6 +275,9 @@ interface DOMParentNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void;
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void;
 }
 
 interface DOMChildNode
@@ -389,6 +392,10 @@ class DOMNode
 
     /** @return DOMNode|false */
     public function replaceChild(DOMNode $node, DOMNode $child) {}
+
+    public function contains(DOMNode|DOMNameSpaceNode|null $other): bool {}
+
+    public function getRootNode(?array $options = null): DOMNode {}
 }
 
 /** @not-serializable */
@@ -455,6 +462,9 @@ class DOMDocumentFragment extends DOMNode implements DOMParentNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void {}
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void {}
 }
 
 class DOMNodeList implements IteratorAggregate, Countable
@@ -467,7 +477,7 @@ class DOMNodeList implements IteratorAggregate, Countable
 
     public function getIterator(): Iterator {}
 
-    /** @return DOMNode|DOMNameSpaceNode|null */
+    /** @return DOMElement|DOMNode|DOMNameSpaceNode|null */
     public function item(int $index) {}
 }
 
@@ -538,6 +548,10 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
     /** @readonly */
     public string $tagName;
 
+    public string $className;
+
+    public string $id;
+
     /** @readonly */
     public mixed $schemaTypeInfo = null;
 
@@ -560,6 +574,8 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
 
     /** @tentative-return-type */
     public function getAttribute(string $qualifiedName): string {}
+
+    public function getAttributeNames(): array {}
 
     /** @tentative-return-type */
     public function getAttributeNS(?string $namespace, string $localName): string {}
@@ -628,6 +644,9 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void {}
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void {}
 }
 
 class DOMDocument extends DOMNode implements DOMParentNode
@@ -787,14 +806,17 @@ class DOMDocument extends DOMNode implements DOMParentNode
     /** @tentative-return-type */
     public function xinclude(int $options = 0): int|false {}
 
-    /** @return DOMNode|false */
-    public function adoptNode(DOMNode $node) {}
+    /** @tentative-return-type */
+    public function adoptNode(DOMNode $node): DOMNode|false {}
 
     /** @param DOMNode|string $nodes */
     public function append(...$nodes): void {}
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void {}
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void {}
 }
 
 final class DOMException extends Exception

@@ -361,7 +361,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 	zval *val;
 	struct timeval tv = {0};
 
-	if (NULL != (val = zend_hash_str_find(&client->request.headers, "host", sizeof("host")-1))) {
+	if (NULL != (val = zend_hash_find(&client->request.headers, ZSTR_KNOWN(ZEND_STR_HOST)))) {
 		smart_str_appends_ex(buffer, "Host: ", persistent);
 		smart_str_append_ex(buffer, Z_STR_P(val), persistent);
 		smart_str_appends_ex(buffer, "\r\n", persistent);
@@ -696,7 +696,7 @@ static void sapi_cli_server_register_variables(zval *track_vars_array) /* {{{ */
 		}
 	}
 	{
-		zend_string *tmp = strpprintf(0, "PHP %s Development Server", PHP_VERSION);
+		zend_string *tmp = strpprintf(0, "PHP/%s (Development Server)", PHP_VERSION);
 		sapi_cli_server_register_known_var_str(track_vars_array, "SERVER_SOFTWARE", strlen("SERVER_SOFTWARE"), tmp);
 		zend_string_release_ex(tmp, /* persistent */ false);
 	}

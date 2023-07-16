@@ -25,7 +25,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) && __FreeBSD_version >= 1100000
 # include <sys/user.h>
 # include <libutil.h>
 #endif
@@ -113,7 +113,7 @@ ZEND_API bool zend_gdb_present(void)
 #if defined(__linux__) /* netbsd while having this procfs part, does not hold the tracer pid */
 	int fd = open("/proc/self/status", O_RDONLY);
 
-	if (fd > 0) {
+	if (fd >= 0) {
 		char buf[1024];
 		ssize_t n = read(fd, buf, sizeof(buf) - 1);
 		char *s;
@@ -142,7 +142,7 @@ ZEND_API bool zend_gdb_present(void)
 
 		close(fd);
 	}
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) && __FreeBSD_version >= 1100000
     struct kinfo_proc *proc = kinfo_getproc(getpid());
 
     if (proc) {

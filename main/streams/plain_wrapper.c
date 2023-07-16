@@ -539,7 +539,7 @@ static int php_stdiop_flush(php_stream *stream)
 
 	/*
 	 * stdio buffers data in user land. By calling fflush(3), this
-	 * data is send to the kernel using write(2). fsync'ing is
+	 * data is sent to the kernel using write(2). fsync'ing is
 	 * something completely different.
 	 */
 	if (data->file) {
@@ -1032,6 +1032,11 @@ static ssize_t php_plain_files_dirstream_read(php_stream *stream, char *buf, siz
 	result = readdir(dir);
 	if (result) {
 		PHP_STRLCPY(ent->d_name, result->d_name, sizeof(ent->d_name), strlen(result->d_name));
+#ifdef _DIRENT_HAVE_D_TYPE
+		ent->d_type = result->d_type;
+#else
+		ent->d_type = DT_UNKNOWN;
+#endif
 		return sizeof(php_stream_dirent);
 	}
 	return 0;
@@ -1671,7 +1676,7 @@ not_relative_path:
 
 	/* check in provided path */
 	/* append the calling scripts' current working directory
-	 * as a fall back case
+	 * as a fallback case
 	 */
 	if (zend_is_executing() &&
 	    (exec_filename = zend_get_executed_filename_ex()) != NULL) {

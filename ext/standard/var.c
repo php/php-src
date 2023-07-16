@@ -655,9 +655,12 @@ PHP_FUNCTION(var_export)
 }
 /* }}} */
 
-static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash);
+static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash, bool in_rcn_array, bool is_root);
 
-static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var) /* {{{ */
+/**
+ * @param bool in_rcn_array Whether the element appears in a potentially nested array with RC > 1.
+ */
+static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var, bool in_rcn_array) /* {{{ */
 {
 	zval *zv;
 	zend_ulong key;
@@ -669,7 +672,9 @@ static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var) /
 		/* pass */
 	} else if (Z_TYPE_P(var) != IS_OBJECT) {
 		return 0;
-	} else if (Z_REFCOUNT_P(var) == 1 && (Z_OBJ_P(var)->properties == NULL || GC_REFCOUNT(Z_OBJ_P(var)->properties) == 1)) {
+	} else if (!in_rcn_array
+	 && Z_REFCOUNT_P(var) == 1
+	 && (Z_OBJ_P(var)->properties == NULL || GC_REFCOUNT(Z_OBJ_P(var)->properties) == 1)) {
 		return 0;
 	}
 
@@ -764,28 +769,13 @@ static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* 
 
 static HashTable* php_var_serialize_call_sleep(zend_object *obj, zend_function *fn) /* {{{ */
 {
-	zend_result res;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fci_cache;
 	zval retval;
 
-	fci.size = sizeof(fci);
-	fci.object = obj;
-	fci.retval = &retval;
-	fci.param_count = 0;
-	fci.params = NULL;
-	fci.named_params = NULL;
-	ZVAL_UNDEF(&fci.function_name);
-
-	fci_cache.function_handler = fn;
-	fci_cache.object = obj;
-	fci_cache.called_scope = obj->ce;
-
 	BG(serialize_lock)++;
-	res = zend_call_function(&fci, &fci_cache);
+	zend_call_known_instance_method(fn, obj, &retval, /* param_count */ 0, /* params */ NULL);
 	BG(serialize_lock)--;
 
-	if (res == FAILURE || Z_ISUNDEF(retval)) {
+	if (Z_ISUNDEF(retval) || EG(exception)) {
 		zval_ptr_dtor(&retval);
 		return NULL;
 	}
@@ -926,7 +916,7 @@ static int php_var_serialize_get_sleep_props(
 }
 /* }}} */
 
-static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable *ht, uint32_t count, bool incomplete_class, php_serialize_data_t var_hash) /* {{{ */
+static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable *ht, uint32_t count, bool incomplete_class, php_serialize_data_t var_hash, bool in_rcn_array) /* {{{ */
 {
 	smart_str_append_unsigned(buf, count);
 	smart_str_appendl(buf, ":{", 2);
@@ -956,19 +946,19 @@ static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable
 			if (Z_TYPE_P(data) == IS_ARRAY) {
 				if (UNEXPECTED(Z_IS_RECURSIVE_P(data))
 					|| UNEXPECTED(Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))) {
-					php_add_var_hash(var_hash, struc);
+					php_add_var_hash(var_hash, struc, in_rcn_array);
 					smart_str_appendl(buf, "N;", 2);
 				} else {
 					if (Z_REFCOUNTED_P(data)) {
 						Z_PROTECT_RECURSION_P(data);
 					}
-					php_var_serialize_intern(buf, data, var_hash);
+					php_var_serialize_intern(buf, data, var_hash, in_rcn_array, false);
 					if (Z_REFCOUNTED_P(data)) {
 						Z_UNPROTECT_RECURSION_P(data);
 					}
 				}
 			} else {
-				php_var_serialize_intern(buf, data, var_hash);
+				php_var_serialize_intern(buf, data, var_hash, in_rcn_array, false);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -983,13 +973,13 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, HashTable *ht, 
 	if (php_var_serialize_get_sleep_props(&props, struc, ht) == SUCCESS) {
 		php_var_serialize_class_name(buf, struc);
 		php_var_serialize_nested_data(
-			buf, struc, &props, zend_hash_num_elements(&props), /* incomplete_class */ 0, var_hash);
+			buf, struc, &props, zend_hash_num_elements(&props), /* incomplete_class */ 0, var_hash, GC_REFCOUNT(&props) > 1);
 	}
 	zend_hash_destroy(&props);
 }
 /* }}} */
 
-static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash) /* {{{ */
+static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash, bool in_rcn_array, bool is_root) /* {{{ */
 {
 	zend_long var_already;
 	HashTable *myht;
@@ -998,7 +988,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_
 		return;
 	}
 
-	if (var_hash && (var_already = php_add_var_hash(var_hash, struc))) {
+	if (var_hash && (var_already = php_add_var_hash(var_hash, struc, in_rcn_array))) {
 		if (var_already == -1) {
 			/* Reference to an object that failed to serialize, replace with null. */
 			smart_str_appendl(buf, "N;", 2);
@@ -1107,7 +1097,7 @@ again:
 						if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
 							data = Z_REFVAL_P(data);
 						}
-						php_var_serialize_intern(buf, data, var_hash);
+						php_var_serialize_intern(buf, data, var_hash, Z_REFCOUNT(retval) > 1, false);
 					} ZEND_HASH_FOREACH_END();
 					smart_str_appendc(buf, '}');
 
@@ -1229,7 +1219,7 @@ again:
 								prop = Z_REFVAL_P(prop);
 							}
 
-							php_var_serialize_intern(buf, prop, var_hash);
+							php_var_serialize_intern(buf, prop, var_hash, false, false);
 						}
 						smart_str_appendc(buf, '}');
 					} else {
@@ -1244,7 +1234,7 @@ again:
 				if (count > 0 && incomplete_class) {
 					--count;
 				}
-				php_var_serialize_nested_data(buf, struc, myht, count, incomplete_class, var_hash);
+				php_var_serialize_nested_data(buf, struc, myht, count, incomplete_class, var_hash, GC_REFCOUNT(myht) > 1);
 				zend_release_properties(myht);
 				return;
 			}
@@ -1252,7 +1242,8 @@ again:
 			smart_str_appendl(buf, "a:", 2);
 			myht = Z_ARRVAL_P(struc);
 			php_var_serialize_nested_data(
-				buf, struc, myht, zend_array_count(myht), /* incomplete_class */ 0, var_hash);
+				buf, struc, myht, zend_array_count(myht), /* incomplete_class */ 0, var_hash,
+					!is_root && (in_rcn_array || GC_REFCOUNT(myht) > 1));
 			return;
 		case IS_REFERENCE:
 			struc = Z_REFVAL_P(struc);
@@ -1266,7 +1257,7 @@ again:
 
 PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t *data) /* {{{ */
 {
-	php_var_serialize_intern(buf, struc, *data);
+	php_var_serialize_intern(buf, struc, *data, false, true);
 	smart_str_0(buf);
 }
 /* }}} */
@@ -1406,11 +1397,19 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 			zval_ptr_dtor(return_value);
 		}
 		RETVAL_FALSE;
-	} else if (BG(unserialize).level > 1) {
-		ZVAL_COPY(return_value, retval);
-	} else if (Z_REFCOUNTED_P(return_value)) {
-		zend_refcounted *ref = Z_COUNTED_P(return_value);
-		gc_check_possible_root(ref);
+	} else {
+		if ((char*)p < buf + buf_len) {
+			if (!EG(exception)) {
+				php_error_docref(NULL, E_WARNING, "Extra data starting at offset " ZEND_LONG_FMT " of %zd bytes",
+					(zend_long)((char*)p - buf), buf_len);
+			}
+		}
+		if (BG(unserialize).level > 1) {
+			ZVAL_COPY(return_value, retval);
+		} else if (Z_REFCOUNTED_P(return_value)) {
+			zend_refcounted *ref = Z_COUNTED_P(return_value);
+			gc_check_possible_root(ref);
+		}
 	}
 
 cleanup:

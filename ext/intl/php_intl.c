@@ -251,7 +251,7 @@ PHP_RSHUTDOWN_FUNCTION( intl )
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION( intl )
 {
-#ifndef UCONFIG_NO_FORMATTING
+#if !UCONFIG_NO_FORMATTING
 	UErrorCode status = U_ZERO_ERROR;
 	const char *tzdata_ver = NULL;
 #endif
@@ -262,7 +262,7 @@ PHP_MINFO_FUNCTION( intl )
 #ifdef U_ICU_DATA_VERSION
 	php_info_print_table_row( 2, "ICU Data version", U_ICU_DATA_VERSION );
 #endif
-#ifndef UCONFIG_NO_FORMATTING
+#if !UCONFIG_NO_FORMATTING
 	tzdata_ver = ucal_getTZDataVersion(&status);
 	if (U_ZERO_ERROR == status) {
 		php_info_print_table_row( 2, "ICU TZData version", tzdata_ver);

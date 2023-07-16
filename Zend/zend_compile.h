@@ -304,7 +304,7 @@ typedef struct _zend_oparray_context {
 /* Class cannot be serialized or unserialized             |     |     |     */
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags (unused: 28-30)                         |     |     |     */
+/* Function Flags (unused: 29-30)                         |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
@@ -363,6 +363,9 @@ typedef struct _zend_oparray_context {
 /* supports opcache compile-time evaluation (funcs)       |     |     |     */
 #define ZEND_ACC_COMPILE_TIME_EVAL       (1 << 27) /*     |  X  |     |     */
 /*                                                        |     |     |     */
+/* has #[\Override] attribute                             |     |     |     */
+#define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |     |     */
+/*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */
 #define ZEND_ACC_STRICT_TYPES            (1U << 31) /*    |  X  |     |     */
 
@@ -407,6 +410,7 @@ typedef struct _zend_class_constant {
 	zend_string *doc_comment;
 	HashTable *attributes;
 	zend_class_entry *ce;
+	zend_type type;
 } zend_class_constant;
 
 #define ZEND_CLASS_CONST_FLAGS(c) Z_CONSTANT_FLAGS((c)->value)
@@ -606,8 +610,12 @@ struct _zend_execute_data {
 #define ZEND_CALL_NUM_ARGS(call) \
 	(call)->This.u2.num_args
 
+/* Ensure the correct alignment before slots calculation */
+ZEND_STATIC_ASSERT(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
+                   "zval must be aligned by ZEND_MM_ALIGNMENT");
+/* A number of call frame slots (zvals) reserved for zend_execute_data. */
 #define ZEND_CALL_FRAME_SLOT \
-	((int)((ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval))))
+	((int)((sizeof(zend_execute_data) + sizeof(zval) - 1) / sizeof(zval)))
 
 #define ZEND_CALL_VAR(call, n) \
 	((zval*)(((char*)(call)) + ((int)(n))))
@@ -846,8 +854,8 @@ ZEND_API zend_op_array *compile_string(zend_string *source_string, const char *f
 ZEND_API zend_op_array *compile_filename(int type, zend_string *filename);
 ZEND_API zend_ast *zend_compile_string_to_ast(
 		zend_string *code, struct _zend_arena **ast_arena, zend_string *filename);
-ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...);
-ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
+ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...);
+ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_destroy_static_vars(zend_op_array *op_array);

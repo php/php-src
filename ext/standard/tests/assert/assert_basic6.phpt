@@ -31,10 +31,25 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 string(2) "f1"
 foo
 assert(false)
 
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 NULL
 assert(false)

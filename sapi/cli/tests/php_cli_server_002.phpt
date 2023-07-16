@@ -14,7 +14,7 @@ var_dump(file_get_contents("http://" . PHP_CLI_SERVER_ADDRESS));
 ?>
 --EXPECTF--
 string(%d) "string(%d) "%sphp_cli_server_002"
-string(%d) "PHP %s Development Server"
+string(%d) "PHP/%s (Development Server)"
 string(%d) "localhost"
 string(%d) "%s"
 "

@@ -56,6 +56,11 @@ typedef struct _spl_array_object {
 	zend_object       std;
 } spl_array_object;
 
+typedef struct _spl_array_iterator {
+	zend_object_iterator it;
+	bool by_ref;
+} spl_array_iterator;
+
 static inline spl_array_object *spl_array_from_obj(zend_object *obj) /* {{{ */ {
 	return (spl_array_object*)((char*)(obj) - XtOffsetOf(spl_array_object, std));
 }
@@ -89,21 +94,6 @@ static inline HashTable **spl_array_get_hash_table_ptr(spl_array_object* intern)
 	}
 }
 /* }}} */
-
-static void spl_array_illegal_offset(const zval *offset)
-{
-	zend_type_error("Cannot access offset of type %s on ArrayObject", zend_get_type_by_const(Z_TYPE_P(offset)));
-}
-
-static void spl_array_illegal_empty_or_isset_offset(const zval *offset)
-{
-	zend_type_error("Cannot access offset of type %s in isset or empty", zend_get_type_by_const(Z_TYPE_P(offset)));
-}
-
-static void spl_array_illegal_unset_offset(const zval *offset)
-{
-	zend_type_error("Cannot access offset of type %s in unset", zend_get_type_by_const(Z_TYPE_P(offset)));
-}
 
 static inline HashTable *spl_array_get_hash_table(spl_array_object* intern) { /* {{{ */
 	return *spl_array_get_hash_table_ptr(intern);
@@ -221,7 +211,8 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 		if (intern->fptr_offset_del->common.scope == parent) {
 			intern->fptr_offset_del = NULL;
 		}
-		intern->fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", sizeof("count") - 1);
+		/* Find count() method */
+		intern->fptr_count = zend_hash_find_ptr(&class_type->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
 		if (intern->fptr_count->common.scope == parent) {
 			intern->fptr_count = NULL;
 		}
@@ -264,6 +255,8 @@ static void spl_hash_key_release(spl_hash_key *key) {
 	}
 }
 
+/* This function does not throw any exceptions for illegal offsets, calls to
+ * zend_illegal_container_offset(); need to be made if the return value is FAILURE */
 static zend_result get_hash_key(spl_hash_key *key, spl_array_object *intern, zval *offset)
 {
 	key->release_key = false;
@@ -304,7 +297,6 @@ try_again:
 		ZVAL_DEREF(offset);
 		goto try_again;
 	default:
-		spl_array_illegal_offset(offset);
 		return FAILURE;
 	}
 
@@ -315,7 +307,8 @@ try_again:
 	return SUCCESS;
 }
 
-static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *intern, zval *offset, int type) /* {{{ */
+static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object *intern, const zend_string *ce_name,
+	zval *offset, int type) /* {{{ */
 {
 	zval *retval;
 	spl_hash_key key;
@@ -331,7 +324,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *
 	}
 
 	if (get_hash_key(&key, intern, offset) == FAILURE) {
-		spl_array_illegal_offset(offset);
+		zend_illegal_container_offset(ce_name, offset, type);
 		return (type == BP_VAR_W || type == BP_VAR_RW) ?
 			&EG(error_zval) : &EG(uninitialized_zval);
 	}
@@ -433,7 +426,7 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zend_object *objec
 		}
 	}
 
-	ret = spl_array_get_dimension_ptr(check_inherited, intern, offset, type);
+	ret = spl_array_get_dimension_ptr(check_inherited, intern, object->ce->name, offset, type);
 
 	/* When in a write context,
 	 * ZE has to be fooled into thinking this is in a reference set
@@ -507,7 +500,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	if (get_hash_key(&key, intern, offset) == FAILURE) {
-		spl_array_illegal_offset(offset);
+		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_W);
 		zval_ptr_dtor(value);
 		return;
 	}
@@ -548,7 +541,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	if (get_hash_key(&key, intern, offset) == FAILURE) {
-		spl_array_illegal_unset_offset(offset);
+		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_UNSET);
 		return;
 	}
 
@@ -618,7 +611,7 @@ static bool spl_array_has_dimension_ex(bool check_inherited, zend_object *object
 		spl_hash_key key;
 
 		if (get_hash_key(&key, intern, offset) == FAILURE) {
-			spl_array_illegal_empty_or_isset_offset(offset);
+			zend_illegal_container_offset(object->ce->name, offset, BP_VAR_IS);
 			return 0;
 		}
 
@@ -856,7 +849,7 @@ static zval *spl_array_get_property_ptr_ptr(zend_object *object, zend_string *na
 			return NULL;
 		}
 		ZVAL_STR(&member, name);
-		return spl_array_get_dimension_ptr(1, intern, &member, type);
+		return spl_array_get_dimension_ptr(1, intern, object->ce->name, &member, type);
 	}
 	return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 } /* }}} */
@@ -978,11 +971,34 @@ static int spl_array_it_valid(zend_object_iterator *iter) /* {{{ */
 
 static zval *spl_array_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 {
+	spl_array_iterator *array_iter = (spl_array_iterator*)iter;
 	spl_array_object *object = Z_SPLARRAY_P(&iter->data);
 	HashTable *aht = spl_array_get_hash_table(object);
 	zval *data = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, object));
 	if (data && Z_TYPE_P(data) == IS_INDIRECT) {
 		data = Z_INDIRECT_P(data);
+	}
+	// ZEND_FE_FETCH_RW converts the value to a reference but doesn't know the source is a property.
+	// Typed properties must add a type source to the reference, and readonly properties must fail.
+	if (array_iter->by_ref
+	 && Z_TYPE_P(data) != IS_REFERENCE
+	 && Z_TYPE(object->array) == IS_OBJECT
+	 && !(object->ar_flags & (SPL_ARRAY_IS_SELF|SPL_ARRAY_USE_OTHER))) {
+		zend_string *key;
+		zend_hash_get_current_key_ex(aht, &key, NULL, spl_array_get_pos_ptr(aht, object));
+		zend_class_entry *ce = Z_OBJCE(object->array);
+		zend_property_info *prop_info = zend_get_property_info(ce, key, true);
+		ZEND_ASSERT(prop_info != ZEND_WRONG_PROPERTY_INFO);
+		if (EXPECTED(prop_info != NULL) && ZEND_TYPE_IS_SET(prop_info->type)) {
+			if (prop_info->flags & ZEND_ACC_READONLY) {
+				zend_throw_error(NULL,
+					"Cannot acquire reference to readonly property %s::$%s",
+					ZSTR_VAL(prop_info->ce->name), ZSTR_VAL(key));
+				return NULL;
+			}
+			ZVAL_NEW_REF(data, data);
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(data), prop_info);
+		}
 	}
 	return data;
 }
@@ -1103,13 +1119,14 @@ static const zend_object_iterator_funcs spl_array_it_funcs = {
 
 static zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
-	zend_object_iterator *iterator = emalloc(sizeof(zend_object_iterator));
-	zend_iterator_init(iterator);
+	spl_array_iterator *iterator = emalloc(sizeof(spl_array_iterator));
+	zend_iterator_init(&iterator->it);
 
-	ZVAL_OBJ_COPY(&iterator->data, Z_OBJ_P(object));
-	iterator->funcs = &spl_array_it_funcs;
+	ZVAL_OBJ_COPY(&iterator->it.data, Z_OBJ_P(object));
+	iterator->it.funcs = &spl_array_it_funcs;
+	iterator->by_ref = by_ref;
 
-	return iterator;
+	return &iterator->it;
 }
 /* }}} */
 

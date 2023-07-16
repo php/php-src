@@ -101,11 +101,29 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 			*end = '\0';
 			end++;
 		}
-		if (ptr[0] == '.' && ptr[1] == '.' && (ptr[2] == '\0' || IS_SLASH(ptr[2]))) {
-			/* Don't allow paths with a leading .. path component to be set at runtime */
-			efree(pathbuf);
-			return FAILURE;
+		/* Don't allow paths with a parent dir component (..) to be set at runtime */
+		char *substr_pos = ptr;
+		while (*substr_pos) {
+			// Check if we have a .. path component
+			if (substr_pos[0] == '.'
+			 && substr_pos[1] == '.'
+			 && (substr_pos[2] == '\0' || IS_SLASH(substr_pos[2]))) {
+				efree(pathbuf);
+				return FAILURE;
+			}
+			// Skip to the next path component
+			while (true) {
+				substr_pos++;
+				if (*substr_pos == '\0' || *substr_pos == DEFAULT_DIR_SEPARATOR) {
+					goto no_parent_dir_component;
+				} else if (IS_SLASH(*substr_pos)) {
+					// Also skip the slash
+					substr_pos++;
+					break;
+				}
+			}
 		}
+no_parent_dir_component:
 		if (php_check_open_basedir_ex(ptr, 0) != 0) {
 			/* At least one portion of this open_basedir is less restrictive than the prior one, FAIL */
 			efree(pathbuf);
@@ -572,7 +590,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 		}
 	} /* end provided path */
 
-	/* check in calling scripts' current working directory as a fall back case
+	/* check in calling scripts' current working directory as a fallback case
 	 */
 	if (zend_is_executing() &&
 	    (exec_filename = zend_get_executed_filename_ex()) != NULL) {
@@ -652,7 +670,7 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 
 	/* check in provided path */
 	/* append the calling scripts' current working directory
-	 * as a fall back case
+	 * as a fallback case
 	 */
 	if (zend_is_executing() &&
 	    (exec_filename = zend_get_executed_filename_ex()) != NULL) {
@@ -788,7 +806,7 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 			fdtest = VCWD_OPEN(filepath, O_RDONLY);
 			if (fdtest != -1) {
 				/* return a relative file path if for any reason
-				 * we cannot cannot getcwd() and the requested,
+				 * we cannot getcwd() and the requested,
 				 * relatively referenced file is accessible */
 				copy_len = path_len > MAXPATHLEN - 1 ? MAXPATHLEN - 1 : path_len;
 				if (real_path) {

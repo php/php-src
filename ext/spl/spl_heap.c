@@ -247,7 +247,7 @@ static int spl_ptr_pqueue_elem_cmp_long(void *x, void *y, zval *object) {
 static int spl_ptr_pqueue_elem_cmp_double(void *x, void *y, zval *object) {
 	double a = Z_DVAL(((spl_pqueue_elem*) x)->priority);
 	double b = Z_DVAL(((spl_pqueue_elem*) y)->priority);
-	return ZEND_NORMALIZE_BOOL(a - b);
+	return ZEND_THREEWAY_COMPARE(a, b);
 }
 
 static spl_ptr_heap *spl_ptr_heap_init(spl_ptr_heap_cmp_func cmp, spl_ptr_heap_ctor_func ctor, spl_ptr_heap_dtor_func dtor, size_t elem_size) /* {{{ */
@@ -451,7 +451,8 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zend_ob
 		if (intern->fptr_cmp->common.scope == parent) {
 			intern->fptr_cmp = NULL;
 		}
-		intern->fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", sizeof("count") - 1);
+		/* Find count() method */
+		intern->fptr_count = zend_hash_find_ptr(&class_type->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
 		if (intern->fptr_count->common.scope == parent) {
 			intern->fptr_count = NULL;
 		}

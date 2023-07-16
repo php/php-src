@@ -373,6 +373,16 @@ if test "$ac_cv_func_dlopen" = "yes"; then
 fi
 AC_CHECK_LIB(m, sin)
 
+case $host_alias in
+  riscv64*)
+    AC_CHECK_LIB(atomic, __atomic_exchange_1, [
+      PHP_ADD_LIBRARY(atomic)
+    ], [
+      AC_MSG_ERROR([Problem with enabling atomic. Please check config.log for details.])
+    ])
+    ;;
+esac
+
 dnl Check for inet_aton in -lc, -lbind and -lresolv.
 PHP_CHECK_FUNC(inet_aton, resolv, bind)
 
@@ -386,6 +396,7 @@ dirent.h \
 sys/param.h \
 sys/types.h \
 sys/time.h \
+time.h \
 netinet/in.h \
 alloca.h \
 arpa/inet.h \
@@ -781,7 +792,7 @@ PHP_ARG_WITH([valgrind],
   [whether to enable valgrind support],
   [AS_HELP_STRING([--with-valgrind],
     [Enable valgrind support])],
-  [yes],
+  [no],
   [no])
 
 if test "$PHP_VALGRIND" != "no"; then
@@ -1188,7 +1199,7 @@ if test "$ac_cv_lib_crypt_crypt" = "yes"; then
   EXTRA_LIBS="-lcrypt $EXTRA_LIBS -lcrypt"
 fi
 
-unset LIBS LDFLAGS
+unset LIBS
 
 dnl PEAR
 dnl ----------------------------------------------------------------------------
@@ -1361,7 +1372,7 @@ if test "$abs_srcdir" != "$abs_builddir"; then
 fi
 
 ZEND_EXTRA_LIBS="$LIBS"
-unset LIBS LDFLAGS
+unset LIBS
 
 PHP_HELP_SEPARATOR([TSRM:])
 PHP_CONFIGURE_PART(Configuring TSRM)
@@ -1723,7 +1734,8 @@ PHP_ADD_SOURCES(Zend, \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
     zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c \
     zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c zend_atomic.c \
-    zend_rc_debug.c zend_max_execution_timer.c \
+    zend_max_execution_timer.c \
+    zend_hrtime.c \
 	Optimizer/zend_optimizer.c \
 	Optimizer/pass1.c \
 	Optimizer/pass3.c \

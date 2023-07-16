@@ -41,7 +41,7 @@ $encoding = mb_convert_variables('JIS', 'EUC-JP', $s);
 print("$encoding\n"); // EUC-JP
 print(base64_encode($s)."\n"); // Converted to JIS (base64 encoded)
 
-// Test for multiple slcaler
+// Test for multiple scalar
 $s1 = $euc_jp;
 $s2 = $euc_jp;
 $s3 = $euc_jp;
@@ -49,8 +49,7 @@ $encoding = mb_convert_variables('EUC-JP', 'auto', $s1, $s2, $s3);
 print("$encoding\n"); // EUC-JP
 echo bin2hex("$s1$s2$s3"), "\n"; // Converted to EUC-JP
 
-// Note: Mixing encoding in array/object is not supported?
-// Test for array
+// Note: Mixing encoding in array/object is not supported
 echo "== ARRAY TEST ==\n";
 $a = array($s3, $s2, $s1);
 $aa = $a;
@@ -116,6 +115,7 @@ echo "== SCALAR, ARRAY AND OBJECT TEST ==\n";
 $s1 = $euc_jp;
 $s2 = $euc_jp;
 $s3 = $euc_jp;
+$a = array($s1, $s2, $s3);
 $aa = $a;
 $oo = $o;
 
@@ -161,6 +161,17 @@ mb_convert_variables('UTF-16LE', 'UTF-8', $nested);
 echo bin2hex($nested[0]->inner), "\n";
 echo "# of illegal characters detected: ", mb_get_info('illegal_chars') - $illegalCount, "\n";
 
+echo "== ENCODING AUTO-DETECTION TEST ==\n";
+
+ini_set('mbstring.strict_detection', '1');
+$bad_utf7 = "abc + abc";
+var_dump(mb_convert_variables('UTF-8', 'UTF-7,UTF-8', $bad_utf7));
+var_dump($bad_utf7);
+
+$bad_utf7imap = "abc &";
+var_dump(mb_convert_variables('UTF-8', 'UTF7-IMAP,UTF-8', $bad_utf7imap));
+var_dump($bad_utf7imap);
+
 ?>
 --EXPECT--
 == SCALAR TEST ==
@@ -197,3 +208,8 @@ UTF-8
 # of illegal characters detected: 1
 2600
 # of illegal characters detected: 1
+== ENCODING AUTO-DETECTION TEST ==
+string(5) "UTF-8"
+string(9) "abc + abc"
+string(5) "UTF-8"
+string(5) "abc &"

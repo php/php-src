@@ -5,7 +5,7 @@ pspell
 --SKIPIF--
 <?php
 if (!@pspell_new('en')) die('skip English dictionary is not available');
-if (getenv('SKIP_ASAN')) die('skip pspell leaks memory for invalid dicationaries');
+if (getenv('SKIP_ASAN')) die('xleak pspell leaks memory for invalid dicationaries');
 ?>
 --FILE--
 <?php

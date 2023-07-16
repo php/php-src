@@ -6,10 +6,10 @@ repository available according to the release schedule.
 The release schedule for each version is published on the
 [PHP wiki](https://wiki.php.net):
 
+- [PHP 8.3](https://wiki.php.net/todo/php83)
 - [PHP 8.2](https://wiki.php.net/todo/php82)
 - [PHP 8.1](https://wiki.php.net/todo/php81)
 - [PHP 8.0](https://wiki.php.net/todo/php80)
-- [PHP 7.4](https://wiki.php.net/todo/php74)
 
 The PHP project publishes builds every two weeks.
 
@@ -56,7 +56,6 @@ releases.
 3. Ensure that the relevant tests on CI are green.
 
    - https://travis-ci.com/github/php/php-src
-   - https://ci.appveyor.com/project/php/php-src
    - https://cirrus-ci.com/github/php/php-src
    - https://github.com/php/php-src/actions
 
@@ -426,7 +425,6 @@ slightly different steps. We'll call attention where the steps differ.
    * `internals@lists.php.net`
    * `php-general@lists.php.net`
    * `php-qa@lists.php.net`
-   * `primary-qa-tester@lists.php.net`
 
    In the announcement message, point out the location of the release and the
    possible release date of either the next RC or the final release. Also
@@ -605,7 +603,7 @@ slightly different steps. We'll call attention where the steps differ.
     git fetch --all
     git pull --rebase upstream master
     cd ..
-    git commit distributions
+    git commit distributions -m "X.Y.Z tarballs"
     git push upstream master
     ```
 
@@ -988,25 +986,28 @@ volunteers to begin the selection process for the next release managers.
    git push
    ```
 
-4. Request moderation access to php-announce@lists.php.net and
-   primary-qa-tester@lists.php.net lists, so you are able to moderate your
-   release announcements. All the announcements should be sent from your
-   @php.net address.
+   `web-php-distributions` is a submodule of `web-php`. You'll now have to update
+   the commit reference to reflect the change made in web-php-distributions.
+
+   ```shell
+   cd /path/to/repos/php/web-php
+   git submodule update
+   cd distributions           # This is the submodule refering to web-php-distributions
+   git pull origin master
+   cd ..
+   git add distributions
+   git commit --gpg-sign=YOURKEYID -m "Update php-keyring.gpg in distributions"
+   git push
+   ```
+
+4. Request moderation access to php-announce@lists.php.net
+   so you are able to moderate your release announcements. All the announcements
+   should be sent from your @php.net address.
 
    > 💬 **Hint** \
    > To send email from your @php.net address, you will need to use a custom
    > SMTP server. If you use Gmail, you may
    > "[Send emails from a different address or alias][]."
-
-   > 💡 **Tip** \
-   > Make sure that you are set as a moderator for
-   > `primary-qa-tester@lists.php.net` by having someone (Hannes, Dan, Derick)
-   > run the following commands for you:
-   >
-   > ```shell
-   > ssh lists.php.net
-   > sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester mod moderator-email-address
-   > ```
 
 5. Make sure you have the following repositories cloned locally:
 

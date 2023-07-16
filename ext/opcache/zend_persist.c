@@ -578,6 +578,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_FE_RESET_RW:
 					case ZEND_ASSERT_CHECK:
 					case ZEND_JMP_NULL:
+					case ZEND_BIND_INIT_STATIC_OR_JMP:
 						opline->op2.jmp_addr = &new_opcodes[opline->op2.jmp_addr - op_array->opcodes];
 						break;
 					case ZEND_CATCH:
@@ -840,6 +841,7 @@ static void zend_persist_class_constant(zval *zv)
 	if (c->attributes) {
 		c->attributes = zend_persist_attributes(c->attributes);
 	}
+	zend_persist_type(&c->type);
 }
 
 zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
@@ -1082,7 +1084,15 @@ void zend_update_parent_ce(zend_class_entry *ce)
 				end = parent->parent ? parent->parent->default_static_members_count : 0;
 				for (; i >= end; i--) {
 					zval *p = &ce->default_static_members_table[i];
-					ZVAL_INDIRECT(p, &parent->default_static_members_table[i]);
+					/* The static property may have been overridden by a trait
+					 * during inheritance. In that case, the property default
+					 * value is replaced by zend_declare_typed_property() at the
+					 * property index of the parent property. Make sure we only
+					 * point to the parent property value if the child value was
+					 * already indirect. */
+					if (Z_TYPE_P(p) == IS_INDIRECT) {
+						ZVAL_INDIRECT(p, &parent->default_static_members_table[i]);
+					}
 				}
 
 				parent = parent->parent;
@@ -1111,7 +1121,7 @@ void zend_update_parent_ce(zend_class_entry *ce)
 			if (zend_class_implements_interface(ce, zend_ce_iterator)) {
 				ce->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&ce->function_table, "rewind", sizeof("rewind") - 1);
 				ce->iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&ce->function_table, "valid", sizeof("valid") - 1);
-				ce->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&ce->function_table, "key", sizeof("key") - 1);
+				ce->iterator_funcs_ptr->zf_key = zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_KEY));
 				ce->iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&ce->function_table, "current", sizeof("current") - 1);
 				ce->iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&ce->function_table, "next", sizeof("next") - 1);
 			}

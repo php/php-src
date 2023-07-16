@@ -161,7 +161,7 @@ PHP_HASH_API void PHP_FNV164Final(unsigned char digest[8], PHP_FNV164_CTX * cont
  *  alternate - if > 0 use the alternate version
  *
  * returns:
- *  32 bit hash as a static hash type
+ *  32-bit hash as a static hash type
  */
 static uint32_t
 fnv_32_buf(void *buf, size_t len, uint32_t hval, int alternate)
@@ -204,7 +204,7 @@ fnv_32_buf(void *buf, size_t len, uint32_t hval, int alternate)
  *  alternate - if > 0 use the alternate version
  *
  * returns:
- *  64 bit hash as a static hash type
+ *  64-bit hash as a static hash type
  */
 static uint64_t
 fnv_64_buf(void *buf, size_t len, uint64_t hval, int alternate)

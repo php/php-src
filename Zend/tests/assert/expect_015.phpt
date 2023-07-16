@@ -2,9 +2,9 @@
 AST pretty-peinter
 --INI--
 zend.assertions=1
-assert.exception=0
 --FILE--
 <?php
+try {
 assert(0 && ($a = function () {
     global $a, $$b;
     static $c, $d = 0;
@@ -19,7 +19,11 @@ assert(0 && ($a = function () {
     yield 1 => 2;
     yield from $x;
 }));
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
 
+try {
 assert(0 && ($a = function &(array &$a, ?X $b = null) use ($c,&$d) : ?X {
     abstract class A extends B implements C, D {
         const X = 12;
@@ -64,7 +68,11 @@ assert(0 && ($a = function &(array &$a, ?X $b = null) use ($c,&$d) : ?X {
         }
     }
 }));
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
 
+try {
 assert(0 && ($a = function &(array &$a, X $b = null, int|float $c) use ($c,&$d) : X {
     final class A {
         final protected function f2() {
@@ -96,7 +104,11 @@ L0:
         }
     }
 }));
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
 
+try {
 assert(0 && ($a = function &(?array &$a, X $b = null) use ($c,&$d) : X {
     class A {
         use T1, T2 {
@@ -108,7 +120,11 @@ assert(0 && ($a = function &(?array &$a, X $b = null) use ($c,&$d) : X {
         use T3;
     }
 }));
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
 
+try {
 assert(0 && ($a = function &(array &...$a) {
     declare(A=1,B=2);
     try {
@@ -121,7 +137,11 @@ assert(0 && ($a = function &(array &...$a) {
         echo 3;
     }
 }));
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
 
+try {
 assert(0 && ($a = function (): ?static {
     declare(C=1) { echo 1; }
     $x = '\'"`$a';
@@ -145,10 +165,13 @@ assert(0 && ($a = function (): ?static {
     }
     if ($a); else;
 }));
+} catch (AssertionError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Warning: assert(): assert(0 && ($a = function () {
+--EXPECT--
+assert(0 && ($a = function () {
     global $a;
     global $$b;
     static $c;
@@ -163,9 +186,8 @@ Warning: assert(): assert(0 && ($a = function () {
     $y = clone $x;
     yield 1 => 2;
     yield from $x;
-})) failed in %s on line %d
-
-Warning: assert(): assert(0 && ($a = function &(array &$a, ?X $b = null) use($c, &$d): ?X {
+}))
+assert(0 && ($a = function &(array &$a, ?X $b = null) use($c, &$d): ?X {
     abstract class A extends B implements C, D {
         public const X = 12;
         public const Y = self::X, Z = 'aaa';
@@ -208,9 +230,8 @@ Warning: assert(): assert(0 && ($a = function &(array &$a, ?X $b = null) use($c,
 
     }
 
-})) failed in %s on line %d
-
-Warning: assert(): assert(0 && ($a = function &(array &$a, X $b = null, int|float $c) use($c, &$d): X {
+}))
+assert(0 && ($a = function &(array &$a, X $b = null, int|float $c) use($c, &$d): X {
     final class A {
         protected final function f2() {
             if (!$x) {
@@ -248,9 +269,8 @@ Warning: assert(): assert(0 && ($a = function &(array &$a, X $b = null, int|floa
 
     }
 
-})) failed in %s on line %d
-
-Warning: assert(): assert(0 && ($a = function &(?array &$a, X $b = null) use($c, &$d): X {
+}))
+assert(0 && ($a = function &(?array &$a, X $b = null) use($c, &$d): X {
     class A {
         use T1, T2 {
             T1::foo insteadof foo;
@@ -261,9 +281,8 @@ Warning: assert(): assert(0 && ($a = function &(?array &$a, X $b = null) use($c,
         use T3;
     }
 
-})) failed in %s on line %d
-
-Warning: assert(): assert(0 && ($a = function &(array &...$a) {
+}))
+assert(0 && ($a = function &(array &...$a) {
     declare(A = 1, B = 2);
     try {
         $i++;
@@ -274,9 +293,8 @@ Warning: assert(): assert(0 && ($a = function &(array &...$a) {
     } finally {
         echo 3;
     }
-})) failed in %s on line %d
-
-Warning: assert(): assert(0 && ($a = function (): ?static {
+}))
+assert(0 && ($a = function (): ?static {
     declare(C = 1) {
         echo 1;
     }
@@ -302,4 +320,4 @@ Warning: assert(): assert(0 && ($a = function (): ?static {
     if ($a) {
     } else {
     }
-})) failed in %s on line %d
+}))

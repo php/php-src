@@ -38,4 +38,4 @@ try {
 Trampoline for authorizer
 int(1)
 Trampoline for authorizer
-Unable to prepare statement: 23, not authorized
+Unable to prepare statement: not authorized

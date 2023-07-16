@@ -488,7 +488,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	} else if (read_write == 2) {
 		/* when writing file (but not appending), it must NOT exist, unless a context option exists which allows it */
 		if (context && (tmpzval = php_stream_context_get_option(context, "ftp", "overwrite")) != NULL) {
-			allow_overwrite = Z_LVAL_P(tmpzval) ? 1 : 0;
+			allow_overwrite = zend_is_true(tmpzval);
 		}
 		if (result <= 299 && result >= 200) {
 			if (allow_overwrite) {
@@ -629,6 +629,7 @@ static ssize_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t coun
 	memcpy(ent->d_name, ZSTR_VAL(basename), tmp_len);
 	ent->d_name[tmp_len - 1] = '\0';
 	zend_string_release_ex(basename, 0);
+	ent->d_type = DT_UNKNOWN;
 
 	/* Trim off trailing whitespace characters */
 	while (tmp_len > 0 &&

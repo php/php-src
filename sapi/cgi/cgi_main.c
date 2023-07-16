@@ -2219,6 +2219,8 @@ parent_loop_end:
 #ifdef HAVE_VALGRIND
 							if (warmup_repeats > 0) {
 								CALLGRIND_STOP_INSTRUMENTATION;
+								/* We're not interested in measuring startup */
+								CALLGRIND_ZERO_STATS;
 							}
 #endif
 						} else {
@@ -2370,6 +2372,7 @@ parent_loop_end:
 					}
 				}
 
+do_repeat:
 				if (script_file) {
 					/* override path_translated if -f on command line */
 					if (SG(request_info).path_translated) efree(SG(request_info).path_translated);
@@ -2426,6 +2429,12 @@ parent_loop_end:
 					free_query_string = 1;
 				}
 			} /* end !cgi && !fastcgi */
+
+#ifdef HAVE_VALGRIND
+			if (warmup_repeats == 0) {
+				CALLGRIND_START_INSTRUMENTATION;
+			}
+#endif
 
 			/* request startup only after we've done all we can to
 			 * get path_translated */
@@ -2504,7 +2513,6 @@ parent_loop_end:
 					PG(during_request_startup) = 0;
 					if (php_lint_script(&file_handle) == SUCCESS) {
 						zend_printf("No syntax errors detected in %s\n", ZSTR_VAL(file_handle.filename));
-						exit_status = 0;
 					} else {
 						zend_printf("Errors parsing %s\n", ZSTR_VAL(file_handle.filename));
 						exit_status = -1;
@@ -2546,6 +2554,11 @@ fastcgi_request_done:
 				SG(request_info).query_string = NULL;
 			}
 
+#ifdef HAVE_VALGRIND
+			/* We're not interested in measuring shutdown */
+			CALLGRIND_STOP_INSTRUMENTATION;
+#endif
+
 			if (!fastcgi) {
 				if (benchmark) {
 					if (warmup_repeats) {
@@ -2555,9 +2568,6 @@ fastcgi_request_done:
 							gettimeofday(&start, NULL);
 #else
 							time(&start);
-#endif
-#ifdef HAVE_VALGRIND
-							CALLGRIND_START_INSTRUMENTATION;
 #endif
 						}
 						continue;
@@ -2570,6 +2580,11 @@ fastcgi_request_done:
 							continue;
 						}
 					}
+				}
+				if (behavior == PHP_MODE_LINT && argc - 1 > php_optind) {
+					php_optind++;
+					script_file = NULL;
+					goto do_repeat;
 				}
 				break;
 			}

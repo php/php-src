@@ -94,6 +94,10 @@ END_EXTERN_C()
 	php_stream_notification_notify((context), PHP_STREAM_NOTIFY_PROGRESS, PHP_STREAM_NOTIFY_SEVERITY_INFO, \
 			NULL, 0, (bsofar), (bmax), NULL); } } while(0)
 
+#define php_stream_notify_completed(context) do { if ((context) && (context)->notifier) { \
+	php_stream_notification_notify((context), PHP_STREAM_NOTIFY_COMPLETED, PHP_STREAM_NOTIFY_SEVERITY_INFO, \
+			NULL, 0, (context)->notifier->progress, (context)->notifier->progress_max, NULL); } } while(0)
+
 #define php_stream_notify_progress_init(context, sofar, bmax) do { if ((context) && (context)->notifier) { \
 	(context)->notifier->progress = (sofar); \
 	(context)->notifier->progress_max = (bmax); \

@@ -20,6 +20,12 @@
 #ifndef ZEND_GC_H
 #define ZEND_GC_H
 
+#include "zend_hrtime.h"
+
+#ifndef GC_BENCH
+# define GC_BENCH 0
+#endif
+
 BEGIN_EXTERN_C()
 
 typedef struct _zend_gc_status {
@@ -31,6 +37,10 @@ typedef struct _zend_gc_status {
 	uint32_t threshold;
 	uint32_t buf_size;
 	uint32_t num_roots;
+	zend_hrtime_t application_time;
+	zend_hrtime_t collector_time;
+	zend_hrtime_t dtor_time;
+	zend_hrtime_t free_time;
 } zend_gc_status;
 
 ZEND_API extern int (*gc_collect_cycles)(void);
@@ -84,6 +94,14 @@ static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 		}
 		ref = Z_COUNTED_P(zv);
 	}
+	if (UNEXPECTED(GC_MAY_LEAK(ref))) {
+		gc_possible_root(ref);
+	}
+}
+
+static zend_always_inline void gc_check_possible_root_no_ref(zend_refcounted *ref)
+{
+	ZEND_ASSERT(GC_TYPE_INFO(ref) != GC_REFERENCE);
 	if (UNEXPECTED(GC_MAY_LEAK(ref))) {
 		gc_possible_root(ref);
 	}

@@ -177,7 +177,6 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	size_t n, num = 1, *len_list = NULL;
 	size_t new_val_len;
 	const mbfl_encoding *from_encoding = NULL;
-	mbfl_encoding_detector *identd = NULL;
 
 	if (!res || *res == '\0') {
 		goto out;
@@ -235,23 +234,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	} else if (info->num_from_encodings == 1) {
 		from_encoding = info->from_encodings[0];
 	} else {
-		/* auto detect */
-		from_encoding = NULL;
-		identd = mbfl_encoding_detector_new(info->from_encodings, info->num_from_encodings, MBSTRG(strict_detection));
-		if (identd != NULL) {
-			n = 0;
-			while (n < num) {
-				mbfl_string string;
-				string.val = (unsigned char *)val_list[n];
-				string.len = len_list[n];
-				if (mbfl_encoding_detector_feed(identd, &string)) {
-					break;
-				}
-				n++;
-			}
-			from_encoding = mbfl_encoding_detector_judge(identd);
-			mbfl_encoding_detector_delete(identd);
-		}
+		from_encoding = mb_guess_encoding_for_strings((const unsigned char**)val_list, len_list, num, info->from_encodings, info->num_from_encodings, MBSTRG(strict_detection), false);
 		if (!from_encoding) {
 			if (info->report_errors) {
 				php_error_docref(NULL, E_WARNING, "Unable to detect encoding");

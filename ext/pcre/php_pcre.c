@@ -2406,6 +2406,10 @@ PHP_FUNCTION(preg_replace_callback_array)
 			zend_argument_type_error(1, "must contain only valid callbacks");
 			goto error;
 		}
+		if (!str_idx_regex) {
+			zend_argument_type_error(1, "must contain only string patterns as keys");
+			goto error;
+		}
 
 		ZVAL_COPY_VALUE(&fci.function_name, replace);
 
@@ -2438,7 +2442,12 @@ PHP_FUNCTION(preg_replace_callback_array)
 	}
 
 	if (subject_ht) {
-		RETURN_ARR(subject_ht);
+		RETVAL_ARR(subject_ht);
+		// Unset the type_flags of immutable arrays to prevent the VM from performing refcounting
+		if (GC_FLAGS(subject_ht) & IS_ARRAY_IMMUTABLE) {
+			Z_TYPE_FLAGS_P(return_value) = 0;
+		}
+		return;
 	} else {
 		RETURN_STR(subject_str);
 	}

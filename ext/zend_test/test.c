@@ -31,6 +31,7 @@
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "test_arginfo.h"
 #include "zend_call_stack.h"
+#include "zend_exceptions.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 
@@ -52,6 +53,8 @@ static zend_class_entry *zend_test_unit_enum;
 static zend_class_entry *zend_test_string_enum;
 static zend_class_entry *zend_test_int_enum;
 static zend_object_handlers zend_test_class_handlers;
+
+static int le_throwing_resource;
 
 static ZEND_FUNCTION(zend_test_func)
 {
@@ -260,6 +263,50 @@ static ZEND_FUNCTION(zend_string_or_stdclass_or_null)
 		RETURN_OBJ_COPY(object);
 	} else {
 		RETURN_NULL();
+	}
+}
+
+/* Tests Z_PARAM_NUMBER_OR_STR */
+static ZEND_FUNCTION(zend_number_or_string)
+{
+	zval *input;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_NUMBER_OR_STR(input)
+	ZEND_PARSE_PARAMETERS_END();
+
+	switch (Z_TYPE_P(input)) {
+		case IS_LONG:
+			RETURN_LONG(Z_LVAL_P(input));
+		case IS_DOUBLE:
+			RETURN_DOUBLE(Z_DVAL_P(input));
+		case IS_STRING:
+			RETURN_STR_COPY(Z_STR_P(input));
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
+/* Tests Z_PARAM_NUMBER_OR_STR_OR_NULL */
+static ZEND_FUNCTION(zend_number_or_string_or_null)
+{
+	zval *input;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_NUMBER_OR_STR_OR_NULL(input)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!input) {
+		RETURN_NULL();
+	}
+
+	switch (Z_TYPE_P(input)) {
+		case IS_LONG:
+			RETURN_LONG(Z_LVAL_P(input));
+		case IS_DOUBLE:
+			RETURN_DOUBLE(Z_DVAL_P(input));
+		case IS_STRING:
+			RETURN_STR_COPY(Z_STR_P(input));
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 }
 
@@ -531,6 +578,46 @@ static ZEND_FUNCTION(zend_get_map_ptr_last)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RETURN_LONG(CG(map_ptr_last));
+}
+
+static ZEND_FUNCTION(zend_test_crash)
+{
+	zend_string *message = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(message)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (message) {
+		php_printf("%s", ZSTR_VAL(message));
+	}
+
+	char *invalid = (char *) 1;
+	php_printf("%s", invalid);
+}
+
+static ZEND_FUNCTION(zend_test_fill_packed_array)
+{
+	HashTable *parameter;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT_EX(parameter, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!HT_IS_PACKED(parameter)) {
+		zend_argument_value_error(1, "must be a packed array");
+		RETURN_THROWS();
+	}
+
+	zend_hash_extend(parameter, parameter->nNumUsed + 10, true);
+	ZEND_HASH_FILL_PACKED(parameter) {
+		for (int i = 0; i < 10; i++) {
+			zval value;
+			ZVAL_LONG(&value, i);
+			ZEND_HASH_FILL_ADD(&value);
+		}
+	} ZEND_HASH_FILL_END();
 }
 
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
@@ -870,6 +957,11 @@ static void custom_zend_execute_ex(zend_execute_data *execute_data)
 	old_zend_execute_ex(execute_data);
 }
 
+static void le_throwing_resource_dtor(zend_resource *rsrc)
+{
+	zend_throw_exception(NULL, "Throwing resource destructor called", 0);
+}
+
 PHP_MINIT_FUNCTION(zend_test)
 {
 	zend_test_interface = register_class__ZendTestInterface();
@@ -940,6 +1032,8 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	zend_test_observer_init(INIT_FUNC_ARGS_PASSTHRU);
 	zend_test_fiber_init();
+
+	le_throwing_resource = zend_register_list_destructors_ex(le_throwing_resource_dtor, NULL, "throwing resource", module_number);
 
 	return SUCCESS;
 }
@@ -1110,3 +1204,11 @@ PHP_ZEND_TEST_API ssize_t copy_file_range(int fd_in, off64_t *off_in, int fd_out
 	return original_copy_file_range(fd_in, off_in, fd_out, off_out, len, flags);
 }
 #endif
+
+
+static PHP_FUNCTION(zend_test_create_throwing_resource)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	zend_resource *res = zend_register_resource(NULL, le_throwing_resource);
+	ZVAL_RES(return_value, res);
+}

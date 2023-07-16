@@ -7,6 +7,7 @@ snmp
 --SKIPIF--
 <?php
 require_once(__DIR__.'/skipif.inc');
+if (getenv('SKIP_ASAN')) die('xfail Timeouts under ASAN');
 ?>
 --ENV--
 MIBS=

@@ -264,6 +264,7 @@ PHP_METHOD(Random_Engine_Mt19937, __construct)
 			state->mode = MT_RAND_MT19937;
 			break;
 		case MT_RAND_PHP:
+			zend_error(E_DEPRECATED, "The MT_RAND_PHP variant of Mt19937 is deprecated");
 			state->mode = MT_RAND_PHP;
 			break;
 		default:

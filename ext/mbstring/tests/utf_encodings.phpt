@@ -1074,6 +1074,9 @@ testInvalidString('+' . rawEncode("\x00.\x00.\xD8\x01\xD9\x02") . '-', "\x00\x00
 // First half of surrogate pair appearing at end of string
 testInvalidString('+' . rawEncode("\xD8\x01") . '-', "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
 testInvalidString('+' . rawEncode("\xD8\x01"), "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
+testInvalidString("+999999uJ", "\xEF\x9F\x9F\xE7\xB7\xB7%", 'UTF-7', 'UTF-8');
+testInvalidString("+999euJ", "\xEF\x9F\x9F\xE5\xBA\xB8%", "UTF-7", "UTF-8");
+testInvalidString("+euJ", "\xE7\xAB\xA2%", "UTF-7", "UTF-8");
 
 // Truncated string
 testInvalidString('+' . rawEncode("\x01") . '-', "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');

@@ -18,7 +18,7 @@ var_dump(
 );
 ?>
 --EXPECTF--
-Warning: unpack(): Type Z: not enough input, need 2, have 1 in %s on line %d
+Warning: unpack(): Type Z: not enough input values, need 2 values but only 1 was provided in %s on line %d
 string(0) ""
 string(5) "foo%c%c"
 string(4) "foo%c"
