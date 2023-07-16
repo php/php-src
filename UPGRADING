@@ -45,6 +45,10 @@ PHP 8.3 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/arbitrary_static_variable_initializers
   . Class constant visibility variance is now correctly checked when inherited
     from interfaces.
+  . WeakMaps entries whose key maps to itself (possibly transitively) may now be
+    removed during cycle collection if the key is not reachable except by
+    iterating over the WeakMap (reachability via iteration is considered weak).
+    Previously, such entries would never be automatically removed.
 
 - FFI:
   . C functions that have a return type of void now return null instead of
@@ -310,6 +314,13 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 9. Other Changes to Extensions
 ========================================
+
+- Core:
+  . WeakMaps now have ephemeron-like behavior: Entries whose key maps to itself
+    (possibly transitively) may be removed during cycle collection if the key is
+    not reachable except by iterating over the WeakMap (reachability via
+    iteration is considered weak). Previously, such entries would never be
+    automatically removed. (See GH-10932.)
 
 - DOM:
   . The DOM lifetime mechanism has been reworked such that implicitly removed

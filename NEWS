@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Added zend_call_stack_get implementation for OpenBSD. (David Carlier)
   . Fixed oss-fuzz #60411 (Fix double-compilation of arrow-functions). (ilutov)
   . Fixed build for FreeBSD before the 11.0 releases. (David Carlier)
+  . Add stack limit check in zend_eval_const_expr(). (Arnaud)
+  . Expose time spent collecting cycles in gc_status(). (Arnaud)
+  . Remove WeakMap entries whose key is only reachable through the entry value.
+    (Arnaud)
 
 - DOM:
   . Added DOMNode::contains() and DOMNameSpaceNode::contains(). (nielsdos)
@@ -48,7 +52,7 @@ PHP                                                                        NEWS
     (Marc Bennewitz)
   . Prevent precision loss on formatting decimal integers in number_format().
     (Marc Bennewitz)
-  . Added usage of posix_spawn for proc_open when supported by OS. 
+  . Added usage of posix_spawn for proc_open when supported by OS.
     (Cristian Rodriguez)
 
 - Streams:
