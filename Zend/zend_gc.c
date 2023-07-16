@@ -70,6 +70,11 @@
 #include "zend_API.h"
 #include "zend_fibers.h"
 #include "zend_hrtime.h"
+#include "zend_weakrefs.h"
+
+#ifndef GC_BENCH
+# define GC_BENCH 0
+#endif
 
 #ifndef ZEND_GC_DEBUG
 # define ZEND_GC_DEBUG 0
@@ -182,6 +187,40 @@
 
 /* GC flags */
 #define GC_HAS_DESTRUCTORS  (1<<0)
+
+/* Weak maps */
+#define Z_FROM_WEAKMAP_KEY		(1<<0)
+#define Z_FROM_WEAKMAP			(1<<1)
+
+/* The WeakMap entry zv is reachable from roots by following the virtual
+ * reference from the a WeakMap key to the entry */
+#define GC_FROM_WEAKMAP_KEY(zv) \
+	(Z_TYPE_INFO_P((zv)) & (Z_FROM_WEAKMAP_KEY << Z_TYPE_INFO_EXTRA_SHIFT))
+
+#define GC_SET_FROM_WEAKMAP_KEY(zv) do {									   \
+	zval *_z = (zv);														   \
+	Z_TYPE_INFO_P(_z) = Z_TYPE_INFO_P(_z) | (Z_FROM_WEAKMAP_KEY << Z_TYPE_INFO_EXTRA_SHIFT); \
+} while (0)
+
+#define GC_UNSET_FROM_WEAKMAP_KEY(zv) do {									   \
+	zval *_z = (zv);														   \
+	Z_TYPE_INFO_P(_z) = Z_TYPE_INFO_P(_z) & ~(Z_FROM_WEAKMAP_KEY << Z_TYPE_INFO_EXTRA_SHIFT); \
+} while (0)
+
+/* The WeakMap entry zv is reachable from roots by following the reference from
+ * the WeakMap */
+#define GC_FROM_WEAKMAP(zv) \
+	(Z_TYPE_INFO_P((zv)) & (Z_FROM_WEAKMAP << Z_TYPE_INFO_EXTRA_SHIFT))
+
+#define GC_SET_FROM_WEAKMAP(zv) do {									       \
+	zval *_z = (zv);														   \
+	Z_TYPE_INFO_P(_z) = Z_TYPE_INFO_P(_z) | (Z_FROM_WEAKMAP << Z_TYPE_INFO_EXTRA_SHIFT); \
+} while (0)
+
+#define GC_UNSET_FROM_WEAKMAP(zv) do {										   \
+	zval *_z = (zv);														   \
+	Z_TYPE_INFO_P(_z) = Z_TYPE_INFO_P(_z) & ~(Z_FROM_WEAKMAP << Z_TYPE_INFO_EXTRA_SHIFT); \
+} while (0)
 
 /* unused buffers */
 #define GC_HAS_UNUSED() \
@@ -672,6 +711,39 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
 }
 
+static void ZEND_FASTCALL gc_extra_root(zend_refcounted *ref)
+{
+	uint32_t idx;
+	gc_root_buffer *newRoot;
+
+	if (EXPECTED(GC_HAS_UNUSED())) {
+		idx = GC_FETCH_UNUSED();
+	} else if (EXPECTED(GC_HAS_NEXT_UNUSED_UNDER_THRESHOLD())) {
+		idx = GC_FETCH_NEXT_UNUSED();
+	} else {
+		gc_grow_root_buffer();
+		if (UNEXPECTED(!GC_HAS_NEXT_UNUSED())) {
+			/* TODO: can this really happen? */
+			return;
+		}
+		idx = GC_FETCH_NEXT_UNUSED();
+	}
+
+	ZEND_ASSERT(GC_TYPE(ref) == IS_ARRAY || GC_TYPE(ref) == IS_OBJECT);
+	ZEND_ASSERT(GC_REF_ADDRESS(ref) == 0);
+
+	newRoot = GC_IDX2PTR(idx);
+	newRoot->ref = ref; /* GC_ROOT tag is 0 */
+
+	idx = gc_compress(idx);
+	GC_REF_SET_INFO(ref, idx | GC_REF_COLOR(ref));
+	GC_G(num_roots)++;
+
+	GC_BENCH_INC(zval_buffered);
+	GC_BENCH_INC(root_buf_length);
+	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
+}
+
 static zend_never_inline void ZEND_FASTCALL gc_remove_compressed(zend_refcounted *ref, uint32_t idx)
 {
 	gc_root_buffer *root = gc_decompress(ref, idx);
@@ -716,6 +788,82 @@ tail_call:
 		if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 			zval *table;
 			int len;
+
+			if (UNEXPECTED(GC_FLAGS(obj) & IS_OBJ_WEAKLY_REFERENCED)) {
+				zend_weakmap_get_object_key_entry_gc(obj, &table, &len);
+				n = len;
+				zv = table;
+				for (; n != 0; n-=2) {
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
+					zval *entry = (zval*) Z_PTR_P(zv);
+					zval *weakmap = zv+1;
+					ZEND_ASSERT(Z_REFCOUNTED_P(weakmap));
+					if (Z_OPT_REFCOUNTED_P(entry)) {
+						GC_UNSET_FROM_WEAKMAP_KEY(entry);
+						if (GC_REF_CHECK_COLOR(Z_COUNTED_P(weakmap), GC_GREY)) {
+							/* Weakmap was scanned in gc_mark_roots, we must
+							 * ensure that it's eventually scanned in
+							 * gc_scan_roots as well. */
+							if (!GC_REF_ADDRESS(Z_COUNTED_P(weakmap))) {
+								gc_extra_root(Z_COUNTED_P(weakmap));
+							}
+						} else if (/* GC_REF_CHECK_COLOR(Z_COUNTED_P(weakmap), GC_BLACK) && */ !GC_FROM_WEAKMAP(entry)) {
+							/* Both the entry weakmap and key are BLACK, so we
+							 * can mark the entry BLACK as well.
+							 * !GC_FROM_WEAKMAP(entry) means that the weakmap
+							 * was already scanned black (or will not be
+							 * scanned), so it's our responsibility to mark the
+							 * entry */
+							ZEND_ASSERT(GC_REF_CHECK_COLOR(Z_COUNTED_P(weakmap), GC_BLACK));
+							ref = Z_COUNTED_P(entry);
+							GC_ADDREF(ref);
+							if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
+								GC_REF_SET_BLACK(ref);
+								GC_STACK_PUSH(ref);
+							}
+						}
+					}
+					zv+=2;
+				}
+			}
+
+			if (UNEXPECTED(obj->handlers->get_gc == zend_weakmap_get_gc)) {
+				zend_weakmap_get_key_entry_gc(obj, &table, &len);
+				n = len;
+				zv = table;
+				for (; n != 0; n-=2) {
+					ZEND_ASSERT(Z_TYPE_P(zv+1) == IS_PTR);
+					zval *key = zv;
+					zval *entry = (zval*) Z_PTR_P(zv+1);
+					if (Z_OPT_REFCOUNTED_P(entry)) {
+						GC_UNSET_FROM_WEAKMAP(entry);
+						if (GC_REF_CHECK_COLOR(Z_COUNTED_P(key), GC_GREY)) {
+							/* Key was scanned in gc_mark_roots, we must
+							 * ensure that it's eventually scanned in
+							 * gc_scan_roots as well. */
+							if (!GC_REF_ADDRESS(Z_COUNTED_P(key))) {
+								gc_extra_root(Z_COUNTED_P(key));
+							}
+						} else if (/* GC_REF_CHECK_COLOR(Z_COUNTED_P(key), GC_BLACK) && */ !GC_FROM_WEAKMAP_KEY(entry)) {
+							/* Both the entry weakmap and key are BLACK, so we
+							 * can mark the entry BLACK as well.
+							 * !GC_FROM_WEAKMAP_KEY(entry) means that the key
+							 * was already scanned black (or will not be
+							 * scanned), so it's our responsibility to mark the
+							 * entry */
+							ZEND_ASSERT(GC_REF_CHECK_COLOR(Z_COUNTED_P(key), GC_BLACK));
+							ref = Z_COUNTED_P(entry);
+							GC_ADDREF(ref);
+							if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
+								GC_REF_SET_BLACK(ref);
+								GC_STACK_PUSH(ref);
+							}
+						}
+					}
+					zv += 2;
+				}
+				goto next;
+			}
 
 			ht = obj->handlers->get_gc(obj, &table, &len);
 			n = len;
@@ -817,6 +965,7 @@ handle_ht:
 		}
 	}
 
+next:
 	ref = GC_STACK_POP();
 	if (ref) {
 		goto tail_call;
@@ -840,6 +989,57 @@ tail_call:
 		if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED))) {
 			zval *table;
 			int len;
+
+			if (UNEXPECTED(GC_FLAGS(obj) & IS_OBJ_WEAKLY_REFERENCED)) {
+				zend_weakmap_get_object_key_entry_gc(obj, &table, &len);
+				n = len;
+				zv = table;
+				for (; n != 0; n-=2) {
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
+					zval *entry = (zval*) Z_PTR_P(zv);
+					zval *weakmap = zv+1;
+					ZEND_ASSERT(Z_REFCOUNTED_P(weakmap));
+					if (Z_REFCOUNTED_P(entry)) {
+						GC_SET_FROM_WEAKMAP_KEY(entry);
+						ref = Z_COUNTED_P(entry);
+						/* Only DELREF if the contribution from the weakmap has
+						 * not been cancelled yet */
+						if (!GC_FROM_WEAKMAP(entry)) {
+							GC_DELREF(ref);
+						}
+						if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
+							GC_REF_SET_COLOR(ref, GC_GREY);
+							GC_STACK_PUSH(ref);
+						}
+					}
+					zv+=2;
+				}
+			}
+
+			if (UNEXPECTED(obj->handlers->get_gc == zend_weakmap_get_gc)) {
+				zend_weakmap_get_entry_gc(obj, &table, &len);
+				n = len;
+				zv = table;
+				for (; n != 0; n--) {
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
+					zval *entry = (zval*) Z_PTR_P(zv);
+					if (Z_REFCOUNTED_P(entry)) {
+						GC_SET_FROM_WEAKMAP(entry);
+						ref = Z_COUNTED_P(entry);
+						/* Only DELREF if the contribution from the weakmap key
+						 * has not been cancelled yet */
+						if (!GC_FROM_WEAKMAP_KEY(entry)) {
+							GC_DELREF(ref);
+						}
+						if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
+							GC_REF_SET_COLOR(ref, GC_GREY);
+							GC_STACK_PUSH(ref);
+						}
+					}
+					zv++;
+				}
+				goto next;
+			}
 
 			ht = obj->handlers->get_gc(obj, &table, &len);
 			n = len;
@@ -940,6 +1140,7 @@ handle_ht:
 		}
 	}
 
+next:
 	ref = GC_STACK_POP();
 	if (ref) {
 		goto tail_call;
@@ -1035,6 +1236,24 @@ tail_call:
 			zval *table;
 			int len;
 
+			if (UNEXPECTED(GC_FLAGS(obj) & IS_OBJ_WEAKLY_REFERENCED)) {
+				zend_weakmap_get_object_entry_gc(obj, &table, &len);
+				n = len;
+				zv = table;
+				for (; n != 0; n--) {
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
+					zval *entry = (zval*) Z_PTR_P(zv);
+					if (Z_OPT_REFCOUNTED_P(entry)) {
+						ref = Z_COUNTED_P(entry);
+						if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
+							GC_REF_SET_COLOR(ref, GC_WHITE);
+							GC_STACK_PUSH(ref);
+						}
+					}
+					zv++;
+				}
+			}
+
 			ht = obj->handlers->get_gc(obj, &table, &len);
 			n = len;
 			zv = table;
@@ -1082,7 +1301,7 @@ handle_zvals:
 	} else if (GC_TYPE(ref) == IS_ARRAY) {
 		ht = (HashTable *)ref;
 		ZEND_ASSERT(ht != &EG(symbol_table));
-		
+
 handle_ht:
 		n = ht->nNumUsed;
 		if (HT_IS_PACKED(ht)) {
@@ -1139,17 +1358,34 @@ next:
 
 static void gc_scan_roots(gc_stack *stack)
 {
-	gc_root_buffer *current = GC_IDX2PTR(GC_FIRST_ROOT);
-	gc_root_buffer *last = GC_IDX2PTR(GC_G(first_unused));
+	uint32_t idx, end;
+	gc_root_buffer *current;
 
-	while (current != last) {
+	/* Root buffer might be reallocated during gc_scan,
+	 * make sure to reload pointers. */
+	idx = GC_FIRST_ROOT;
+	end = GC_G(first_unused);
+	while (idx != end) {
+		current = GC_IDX2PTR(idx);
 		if (GC_IS_ROOT(current->ref)) {
 			if (GC_REF_CHECK_COLOR(current->ref, GC_GREY)) {
 				GC_REF_SET_COLOR(current->ref, GC_WHITE);
 				gc_scan(current->ref, stack);
 			}
 		}
-		current++;
+		idx++;
+	}
+
+	/* Scan extra roots added during gc_scan */
+	while (idx != GC_G(first_unused)) {
+		current = GC_IDX2PTR(idx);
+		if (GC_IS_ROOT(current->ref)) {
+			if (GC_REF_CHECK_COLOR(current->ref, GC_GREY)) {
+				GC_REF_SET_COLOR(current->ref, GC_WHITE);
+				gc_scan(current->ref, stack);
+			}
+		}
+		idx++;
 	}
 }
 
@@ -1209,6 +1445,50 @@ tail_call:
 			  || obj->ce->destructor != NULL)) {
 				*flags |= GC_HAS_DESTRUCTORS;
 			}
+
+			if (UNEXPECTED(GC_FLAGS(obj) & IS_OBJ_WEAKLY_REFERENCED)) {
+				zend_weakmap_get_object_entry_gc(obj, &table, &len);
+				n = len;
+				zv = table;
+				for (; n != 0; n--) {
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
+					zval *entry = (zval*) Z_PTR_P(zv);
+					if (Z_REFCOUNTED_P(entry) && GC_FROM_WEAKMAP_KEY(entry)) {
+						GC_UNSET_FROM_WEAKMAP_KEY(entry);
+						GC_UNSET_FROM_WEAKMAP(entry);
+						ref = Z_COUNTED_P(entry);
+						GC_ADDREF(ref);
+						if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
+							GC_REF_SET_BLACK(ref);
+							GC_STACK_PUSH(ref);
+						}
+					}
+					zv++;
+				}
+			}
+
+			if (UNEXPECTED(obj->handlers->get_gc == zend_weakmap_get_gc)) {
+				zend_weakmap_get_entry_gc(obj, &table, &len);
+				n = len;
+				zv = table;
+				for (; n != 0; n--) {
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
+					zval *entry = (zval*) Z_PTR_P(zv);
+					if (Z_REFCOUNTED_P(entry) && GC_FROM_WEAKMAP(entry)) {
+						GC_UNSET_FROM_WEAKMAP_KEY(entry);
+						GC_UNSET_FROM_WEAKMAP(entry);
+						ref = Z_COUNTED_P(entry);
+						GC_ADDREF(ref);
+						if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
+							GC_REF_SET_BLACK(ref);
+							GC_STACK_PUSH(ref);
+						}
+					}
+					zv++;
+				}
+				goto next;
+			}
+
 			ht = obj->handlers->get_gc(obj, &table, &len);
 			n = len;
 			zv = table;
@@ -1231,7 +1511,7 @@ tail_call:
 				}
 			}
 
-handle_zvals:				
+handle_zvals:
 			for (; n != 0; n--) {
 				if (Z_REFCOUNTED_P(zv)) {
 					ref = Z_COUNTED_P(zv);
@@ -1313,6 +1593,7 @@ handle_ht:
 		}
 	}
 
+next:
 	ref = GC_STACK_POP();
 	if (ref) {
 		goto tail_call;
@@ -1396,6 +1677,21 @@ tail_call:
 			int len;
 			zval *table;
 
+			if (UNEXPECTED(GC_FLAGS(obj) & IS_OBJ_WEAKLY_REFERENCED)) {
+				zend_weakmap_get_object_entry_gc(obj, &table, &len);
+				n = len;
+				zv = table;
+				for (; n != 0; n--) {
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
+					zval *entry = (zval*) Z_PTR_P(zv);
+					if (Z_OPT_REFCOUNTED_P(entry)) {
+						ref = Z_COUNTED_P(entry);
+						GC_STACK_PUSH(ref);
+					}
+					zv++;
+				}
+			}
+
 			ht = obj->handlers->get_gc(obj, &table, &len);
 			n = len;
 			zv = table;
@@ -1472,7 +1768,7 @@ next:
 	if (ref) {
 		goto tail_call;
 	}
-	
+
 	return count;
 }
 

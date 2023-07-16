@@ -140,6 +140,15 @@ static zend_always_inline void zend_get_gc_buffer_add_obj(
 	gc_buffer->cur++;
 }
 
+static zend_always_inline void zend_get_gc_buffer_add_ptr(
+		zend_get_gc_buffer *gc_buffer, void *ptr) {
+	if (UNEXPECTED(gc_buffer->cur == gc_buffer->end)) {
+		zend_get_gc_buffer_grow(gc_buffer);
+	}
+	ZVAL_PTR(gc_buffer->cur, ptr);
+	gc_buffer->cur++;
+}
+
 static zend_always_inline void zend_get_gc_buffer_use(
 		zend_get_gc_buffer *gc_buffer, zval **table, int *n) {
 	*table = gc_buffer->start;
