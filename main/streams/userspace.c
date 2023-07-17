@@ -1375,8 +1375,6 @@ static int php_userstreamop_rewinddir(php_stream *stream, zend_off_t offset, int
 
 }
 
-/* The user stream overloads the castas parameter by accepting PHP_STREAM_FLAG_SUPPRESS_ERRORS as a bitmask
- * If present the call is silent, otherwise it will report errors  */
 static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 {
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
@@ -1386,8 +1384,8 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 	php_stream * intstream = NULL;
 	int call_result;
 	int ret = FAILURE;
-	bool report_errors = !(castas & PHP_STREAM_FLAG_SUPPRESS_ERRORS);
-	castas &= ~PHP_STREAM_FLAG_SUPPRESS_ERRORS;
+	/* If we a checking if the stream can cast, no return pointer is provided, so do not emit errors */
+	bool report_errors = retptr;
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_CAST, sizeof(USERSTREAM_CAST)-1);
 
