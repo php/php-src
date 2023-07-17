@@ -24,7 +24,7 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-#ifdef HAVE_TIME_H
+#ifndef PHP_WIN32
 # include <time.h>
 #endif
 

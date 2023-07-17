@@ -398,7 +398,6 @@ dirent.h \
 sys/param.h \
 sys/types.h \
 sys/time.h \
-time.h \
 netinet/in.h \
 alloca.h \
 arpa/inet.h \
