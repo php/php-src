@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - FFI:
   . Fix leaking definitions when using FFI::cdef()->new(...). (ilutov)
 
+- Opcache:
+  . Fixed bug GH-11715 (opcache.interned_strings_buffer either has no effect or
+    opcache_get_status() / phpinfo() is wrong). (nielsdos)
+
 03 Aug 2023, PHP 8.1.22
 
 - Build:
