@@ -40,6 +40,11 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Added support for additional EC parameters in openssl_pkey_new. (Eno-CN)
 
+- PDO:
+  . Fix	GH-11587 (After php8.1, when PDO::ATTR_EMULATE_PREPARES is true
+    and PDO::ATTR_STRINGIFY_FETCHES is true, decimal zeros are no longer
+    filled). (SakiTakamachi)
+
 - Random:
   . Deprecate MT_RAND_PHP. (timwolla)
 

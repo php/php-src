@@ -795,6 +795,9 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 				return false;
 			}
 			dbh->stringify = bval;
+			if (dbh->methods->set_attribute) {
+				dbh->methods->set_attribute(dbh, attr, value);
+			}
 			return true;
 
 		case PDO_ATTR_STATEMENT_CLASS: {
