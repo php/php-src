@@ -794,7 +794,7 @@ static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key,
 	GC_ADDREF(&ch->std);
 	ZVAL_OBJ(&argv[0], &ch->std);
 	ZVAL_LONG(&argv[1], keytype);
-	ZVAL_STRING(&argv[2], key);
+	ZVAL_STRINGL(&argv[2], key, keylen);
 	ZVAL_LONG(&argv[3], keylen);
 
 	fci.size = sizeof(fci);
