@@ -939,6 +939,116 @@ PHP_METHOD(DoOperationNoCast, __construct)
 	ZVAL_LONG(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), l);
 }
 
+static zend_class_entry *long_castable_no_operation_ce;
+static zend_object_handlers long_castable_no_operation_object_handlers;
+
+static zend_object* long_castable_no_operation_object_create_ex(zend_class_entry* ce, zend_long l) {
+	zend_object *obj = zend_objects_new(ce);
+	object_properties_init(obj, ce);
+	obj->handlers = &long_castable_no_operation_object_handlers;
+	ZVAL_LONG(OBJ_PROP_NUM(obj, 0), l);
+	return obj;
+}
+
+static zend_object *long_castable_no_operation_object_create(zend_class_entry *ce)
+{
+	return long_castable_no_operation_object_create_ex(ce, 0);
+}
+
+static zend_result long_castable_no_operation_cast_object(zend_object *obj, zval *result, int type)
+{
+	if (type == IS_LONG) {
+		ZVAL_COPY(result, OBJ_PROP_NUM(obj, 0));
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+
+PHP_METHOD(LongCastableNoOperations, __construct)
+{
+	zend_long l;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(l)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_LONG(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), l);
+}
+
+static zend_class_entry *float_castable_no_operation_ce;
+static zend_object_handlers float_castable_no_operation_object_handlers;
+
+static zend_object* float_castable_no_operation_object_create_ex(zend_class_entry* ce, double d) {
+	zend_object *obj = zend_objects_new(ce);
+	object_properties_init(obj, ce);
+	obj->handlers = &float_castable_no_operation_object_handlers;
+	ZVAL_DOUBLE(OBJ_PROP_NUM(obj, 0), d);
+	return obj;
+}
+
+static zend_object *float_castable_no_operation_object_create(zend_class_entry *ce)
+{
+	return float_castable_no_operation_object_create_ex(ce, 0.0);
+}
+
+static zend_result float_castable_no_operation_cast_object(zend_object *obj, zval *result, int type)
+{
+	if (type == IS_DOUBLE) {
+		ZVAL_COPY(result, OBJ_PROP_NUM(obj, 0));
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+
+PHP_METHOD(FloatCastableNoOperations, __construct)
+{
+	double d;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_DOUBLE(d)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_DOUBLE(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), d);
+}
+
+static zend_class_entry *numeric_castable_no_operation_ce;
+static zend_object_handlers numeric_castable_no_operation_object_handlers;
+
+static zend_object* numeric_castable_no_operation_object_create_ex(zend_class_entry* ce, const zval *n) {
+	zend_object *obj = zend_objects_new(ce);
+	object_properties_init(obj, ce);
+	obj->handlers = &numeric_castable_no_operation_object_handlers;
+	ZVAL_COPY(OBJ_PROP_NUM(obj, 0), n);
+	return obj;
+}
+
+static zend_object *numeric_castable_no_operation_object_create(zend_class_entry *ce)
+{
+	zval tmp;
+	ZVAL_LONG(&tmp, 0);
+	return numeric_castable_no_operation_object_create_ex(ce, &tmp);
+}
+
+static zend_result numeric_castable_no_operation_cast_object(zend_object *obj, zval *result, int type)
+{
+	if (type == _IS_NUMBER) {
+		ZVAL_COPY(result, OBJ_PROP_NUM(obj, 0));
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+
+PHP_METHOD(NumericCastableNoOperations, __construct)
+{
+	zval *n;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_NUMBER(n)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_COPY(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), n);
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
@@ -1010,6 +1120,22 @@ PHP_MINIT_FUNCTION(zend_test)
 	donc_ce->create_object = donc_object_create;
 	memcpy(&donc_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	donc_object_handlers.do_operation = donc_do_operation;
+
+	/* CastableNoOperation classes */
+	long_castable_no_operation_ce = register_class_LongCastableNoOperations();
+	long_castable_no_operation_ce->create_object = long_castable_no_operation_object_create;
+	memcpy(&long_castable_no_operation_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	long_castable_no_operation_object_handlers.cast_object = long_castable_no_operation_cast_object;
+
+	float_castable_no_operation_ce = register_class_FloatCastableNoOperations();
+	float_castable_no_operation_ce->create_object = float_castable_no_operation_object_create;
+	memcpy(&float_castable_no_operation_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	float_castable_no_operation_object_handlers.cast_object = float_castable_no_operation_cast_object;
+
+	numeric_castable_no_operation_ce = register_class_NumericCastableNoOperations();
+	numeric_castable_no_operation_ce->create_object = numeric_castable_no_operation_object_create;
+	memcpy(&numeric_castable_no_operation_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	numeric_castable_no_operation_object_handlers.cast_object = numeric_castable_no_operation_cast_object;
 
 	zend_register_functions(NULL, ext_function_legacy, NULL, EG(current_module)->type);
 

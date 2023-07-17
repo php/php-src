@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a15bbbd1d29dfd674dd2174b3be5678a0832116a */
+ * Stub hash: e01f6a979e72b1c3baf4602421cc966edfe50312 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -871,6 +871,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_strtoupper arginfo_base64_encode
 
 #define arginfo_strtolower arginfo_base64_encode
+
+#define arginfo_str_increment arginfo_base64_encode
+
+#define arginfo_str_decrement arginfo_base64_encode
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_basename, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
@@ -2447,6 +2451,8 @@ ZEND_FUNCTION(implode);
 ZEND_FUNCTION(strtok);
 ZEND_FUNCTION(strtoupper);
 ZEND_FUNCTION(strtolower);
+ZEND_FUNCTION(str_increment);
+ZEND_FUNCTION(str_decrement);
 ZEND_FUNCTION(basename);
 ZEND_FUNCTION(dirname);
 ZEND_FUNCTION(pathinfo);
@@ -3081,6 +3087,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strtok, arginfo_strtok)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strtoupper, arginfo_strtoupper)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strtolower, arginfo_strtolower)
+	ZEND_FE(str_increment, arginfo_str_increment)
+	ZEND_FE(str_decrement, arginfo_str_decrement)
 	ZEND_FE(basename, arginfo_basename)
 	ZEND_FE(dirname, arginfo_dirname)
 	ZEND_FE(pathinfo, arginfo_pathinfo)

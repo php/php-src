@@ -2348,6 +2348,10 @@ function strtoupper(string $string): string {}
 /** @compile-time-eval */
 function strtolower(string $string): string {}
 
+function str_increment(string $string): string {}
+
+function str_decrement(string $string): string {}
+
 /** @refcount 1 */
 function basename(string $path, string $suffix = ""): string {}
 

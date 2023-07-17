@@ -21615,6 +21615,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_inc_help
 			}
 		}
 		increment_function(var_ptr);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
+		}
 	} while (0);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -21685,6 +21688,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_dec_help
 			}
 		}
 		decrement_function(var_ptr);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
+		}
 	} while (0);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -21757,6 +21763,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_inc_hel
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 
 		increment_function(var_ptr);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
+		}
 	} while (0);
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -21805,6 +21814,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_dec_hel
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 
 		decrement_function(var_ptr);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
+		}
 	} while (0);
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
@@ -38974,6 +38986,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_inc_help
 			}
 		}
 		increment_function(var_ptr);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
+		}
 	} while (0);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -39043,6 +39058,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_dec_help
 			}
 		}
 		decrement_function(var_ptr);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
+		}
 	} while (0);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -39114,6 +39132,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_inc_hel
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 
 		increment_function(var_ptr);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
+		}
 	} while (0);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -39161,6 +39182,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_dec_hel
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 
 		decrement_function(var_ptr);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
+		}
 	} while (0);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();

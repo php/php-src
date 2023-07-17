@@ -118,6 +118,14 @@ PHP 8.3 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Core
+  . Using the ++ operator on empty, non-numeric, or non-alphanumeric strings
+    is now deprecated. Moreover, incrementing non-numeric strings is soft
+    deprecated and the new str_increment() function should be used instead.
+    RFC: https://wiki.php.net/rfc/saner-inc-dec-operators
+  . Using the -- operator on empty or non-numeric strings is now deprecated.
+    RFC: https://wiki.php.net/rfc/saner-inc-dec-operators
+
 - Intl
   . The U_MULTIPLE_DECIMAL_SEP*E*RATORS constant had been deprecated, using
     the U_MULTIPLE_DECIMAL_SEP*A*RATORS instead is recommended.
@@ -303,6 +311,10 @@ PHP 8.3 UPGRADE NOTES
 - Sockets:
   . Added socket_atmark to checks if the socket is OOB marked.
 
+- Standard:
+  . Added the str_increment() and str_decrement() functions.
+    RFC: https://wiki.php.net/rfc/saner-inc-dec-operators
+
 - Zip:
   . Added ZipArchive::setArchiveFlag and ZipArchive::getArchiveFlag methods.
 
@@ -324,6 +336,13 @@ PHP 8.3 UPGRADE NOTES
     not reachable except by iterating over the WeakMap (reachability via
     iteration is considered weak). Previously, such entries would never be
     automatically removed. (See GH-10932.)
+  . The ++ and -- operators now emit warnings when attempting to increment
+    values of type bool as this will change in the next major version.
+    A warning is emitted when trying to decrement values of type null, as
+    this will change in the next major version.
+    Internal objects that implement an _IS_NUMBER cast but not a do_operator
+    handler that overrides addition and substraction now can be incremented
+    and decrement as if one would do $o += 1 or $o -= 1
 
 - DOM:
   . The DOM lifetime mechanism has been reworked such that implicitly removed

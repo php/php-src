@@ -4681,9 +4681,11 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 			return (t1 & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_PRE_INC:
 		case ZEND_POST_INC:
+			return (t1 & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+		/* null emits a warning as it has no effect compared to ++ which converts the value to 1 */
 		case ZEND_PRE_DEC:
 		case ZEND_POST_DEC:
-			return (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+			return (t1 & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_BOOL_NOT:
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
