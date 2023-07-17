@@ -273,7 +273,7 @@ readonly=yes
 URL: https://dom.spec.whatwg.org/#parent-element
 Since:
 */
-zend_result dom_node_parent_element_read(dom_object *obj, zval *retval)
+int dom_node_parent_element_read(dom_object *obj, zval *retval)
 {
 	return dom_node_parent_get(obj, retval, true);
 }
@@ -520,7 +520,7 @@ readonly=yes
 URL: https://dom.spec.whatwg.org/#dom-node-isconnected
 Since:
 */
-zend_result dom_node_is_connected_read(dom_object *obj, zval *retval)
+int dom_node_is_connected_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 
