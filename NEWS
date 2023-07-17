@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Remove WeakMap entries whose key is only reachable through the entry value.
     (Arnaud)
 
+- Curl:
+  . Added Curl options and constants up to (including) version 7.87.
+    (nielsdos, adoy)
+
 - DOM:
   . Added DOMNode::contains() and DOMNameSpaceNode::contains(). (nielsdos)
   . Added DOMElement::getAttributeNames(). (nielsdos)
