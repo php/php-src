@@ -10,8 +10,10 @@ opcache.interned_strings_buffer=16
 <?php
 
 $info = opcache_get_status()['interned_strings_usage'];
-var_dump($info['used_memory'] + $info['free_memory'] === $info['buffer_size']);
+var_dump($info['used_memory'] + $info['free_memory']);
+var_dump($info['buffer_size']);
 
 ?>
 --EXPECT--
-bool(true)
+int(16777216)
+int(16777216)
