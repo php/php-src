@@ -184,78 +184,66 @@ function snmp_read_mib(string $filename): bool {}
 class SNMP
 {
     /**
-     * @var int
      * @cvalue SNMP_VERSION_1
      * @link snmp.class.constants.version-1
      */
-    public const VERSION_1 = UNKNOWN;
+    public const int VERSION_1 = UNKNOWN;
     /**
-     * @var int
      * @cvalue SNMP_VERSION_2c
      * @link snmp.class.constants.version-2c
      */
-    public const VERSION_2c = UNKNOWN;
+    public const int VERSION_2c = UNKNOWN;
     /**
-     * @var int
      * @cvalue SNMP_VERSION_2c
      * @link snmp.class.constants.version-2c
      */
-    public const VERSION_2C = UNKNOWN;
+    public const int VERSION_2C = UNKNOWN;
     /**
-     * @var int
      * @cvalue SNMP_VERSION_3
      * @link snmp.class.constants.version-3
      */
-    public const VERSION_3 = UNKNOWN;
+    public const int VERSION_3 = UNKNOWN;
 
     /**
-     * @var int
      * @cvalue PHP_SNMP_ERRNO_NOERROR
      * @link snmp.class.constants.errno-noerror
      */
-    public const ERRNO_NOERROR = UNKNOWN;
+    public const int ERRNO_NOERROR = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHP_SNMP_ERRNO_ANY
      * @link snmp.class.constants.errno-any
      */
-    public const ERRNO_ANY = UNKNOWN;
+    public const int ERRNO_ANY = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHP_SNMP_ERRNO_GENERIC
      * @link snmp.class.constants.errno-generic
      */
-    public const ERRNO_GENERIC = UNKNOWN;
+    public const int ERRNO_GENERIC = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHP_SNMP_ERRNO_TIMEOUT
      * @link snmp.class.constants.errno-timeout
      */
-    public const ERRNO_TIMEOUT = UNKNOWN;
+    public const int ERRNO_TIMEOUT = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHP_SNMP_ERRNO_ERROR_IN_REPLY
      * @link snmp.class.constants.errno-error-in-reply
      */
-    public const ERRNO_ERROR_IN_REPLY = UNKNOWN;
+    public const int ERRNO_ERROR_IN_REPLY = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHP_SNMP_ERRNO_OID_NOT_INCREASING
      * @link snmp.class.constants.errno-oid-not-increasing
      */
-    public const ERRNO_OID_NOT_INCREASING = UNKNOWN;
+    public const int ERRNO_OID_NOT_INCREASING = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHP_SNMP_ERRNO_OID_PARSING_ERROR
      * @link snmp.class.constants.errno-oid-parsing-error
      */
-    public const ERRNO_OID_PARSING_ERROR = UNKNOWN;
+    public const int ERRNO_OID_PARSING_ERROR = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHP_SNMP_ERRNO_MULTIPLE_SET_QUERIES
      * @link snmp.class.constants.errno-multiple-set-queries
      */
-    public const ERRNO_MULTIPLE_SET_QUERIES = UNKNOWN;
+    public const int ERRNO_MULTIPLE_SET_QUERIES = UNKNOWN;
 
     /** @readonly */
     public array $info;
