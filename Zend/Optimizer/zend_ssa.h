@@ -67,8 +67,7 @@ struct _zend_ssa_phi {
 	int                    var;           /* Original CV, VAR or TMP variable index */
 	int                    ssa_var;       /* SSA variable index */
 	int                    block;         /* current BB index */
-	int                    visited : 1;   /* flag to avoid recursive processing */
-	int                    has_range_constraint : 1;
+	bool                   has_range_constraint : 1;
 	zend_ssa_phi         **use_chains;
 	zend_ssa_phi          *sym_use_chain;
 	int                   *sources;       /* Array of SSA IDs that produce this var.
