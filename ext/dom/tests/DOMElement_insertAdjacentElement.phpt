@@ -33,19 +33,31 @@ foreach (['beforebegin', 'afterbegin', 'beforeend', 'afterend'] as $where) {
     }
 }
 
-echo "--- Normal cases ---\n";
+function testNormalCases($dom, $uppercase) {
+    $container = $dom->documentElement;
+    $p = $container->firstElementChild;
+    $transform = fn ($s) => $uppercase ? strtoupper($s) : $s;
 
-var_dump($p->insertAdjacentElement("beforebegin", $dom->createElement('A'))->tagName);
-echo $dom->saveXML();
+    var_dump($p->insertAdjacentElement($transform("beforebegin"), $dom->createElement('A'))->tagName);
+    echo $dom->saveXML();
 
-var_dump($p->insertAdjacentElement("afterbegin", $dom->createElement('B'))->tagName);
-echo $dom->saveXML();
+    var_dump($p->insertAdjacentElement($transform("afterbegin"), $dom->createElement('B'))->tagName);
+    echo $dom->saveXML();
 
-var_dump($p->insertAdjacentElement("beforeend", $dom->createElement('C'))->tagName);
-echo $dom->saveXML();
+    var_dump($p->insertAdjacentElement($transform("beforeend"), $dom->createElement('C'))->tagName);
+    echo $dom->saveXML();
 
-var_dump($p->insertAdjacentElement("afterend", $dom->createElement('D'))->tagName);
-echo $dom->saveXML();
+    var_dump($p->insertAdjacentElement($transform("afterend"), $dom->createElement('D'))->tagName);
+    echo $dom->saveXML();
+}
+
+echo "--- Normal cases uppercase ---\n";
+
+testNormalCases(clone $dom, true);
+
+echo "--- Normal cases lowercase ---\n";
+
+testNormalCases($dom, false);
 
 $empty = $dom->createElement('empty');
 var_dump($empty->insertAdjacentElement("afterbegin", $dom->createElement('A'))->tagName);
@@ -78,7 +90,20 @@ Hierarchy Request Error
 Hierarchy Request Error
 Hierarchy Request Error
 Hierarchy Request Error
---- Normal cases ---
+--- Normal cases uppercase ---
+string(1) "A"
+<?xml version="1.0"?>
+<container><A/><p>foo</p></container>
+string(1) "B"
+<?xml version="1.0"?>
+<container><A/><p><B/>foo</p></container>
+string(1) "C"
+<?xml version="1.0"?>
+<container><A/><p><B/>foo<C/></p></container>
+string(1) "D"
+<?xml version="1.0"?>
+<container><A/><p><B/>foo<C/></p><D/></container>
+--- Normal cases lowercase ---
 string(1) "A"
 <?xml version="1.0"?>
 <container><A/><p>foo</p></container>

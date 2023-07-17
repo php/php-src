@@ -7,8 +7,6 @@ dom
 
 $dom = new DOMDocument();
 $dom->loadXML('<?xml version="1.0"?><container><p>foo</p></container>');
-$container = $dom->documentElement;
-$p = $container->firstElementChild;
 
 echo "--- Edge cases ---\n";
 
@@ -18,19 +16,33 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-echo "--- Normal cases ---\n";
+function testNormalCases($dom, $uppercase) {
+    $container = $dom->documentElement;
+    $p = $container->firstElementChild;
+    $transform = fn ($s) => $uppercase ? strtoupper($s) : $s;
 
-$p->insertAdjacentText("beforebegin", 'A');
-echo $dom->saveXML();
+    $p->insertAdjacentText("beforebegin", 'A');
+    echo $dom->saveXML();
 
-$p->insertAdjacentText("afterbegin", 'B');
-echo $dom->saveXML();
+    $p->insertAdjacentText("afterbegin", 'B');
+    echo $dom->saveXML();
 
-$p->insertAdjacentText("beforeend", 'C');
-echo $dom->saveXML();
+    $p->insertAdjacentText("beforeend", 'C');
+    echo $dom->saveXML();
 
-$p->insertAdjacentText("afterend", 'D');
-echo $dom->saveXML();
+    $p->insertAdjacentText("afterend", 'D');
+    echo $dom->saveXML();
+}
+
+echo "--- Normal cases uppercase ---\n";
+
+testNormalCases(clone $dom, true);
+
+echo "--- Normal cases lowercase ---\n";
+
+testNormalCases($dom, false);
+
+echo "--- Normal cases starting from empty element ---\n";
 
 $empty = $dom->createElement('empty');
 $empty->insertAdjacentText("afterbegin", 'A');
@@ -45,7 +57,7 @@ var_dump($AText->textContent);
 --EXPECT--
 --- Edge cases ---
 Syntax Error
---- Normal cases ---
+--- Normal cases uppercase ---
 <?xml version="1.0"?>
 <container>A<p>foo</p></container>
 <?xml version="1.0"?>
@@ -54,6 +66,16 @@ Syntax Error
 <container>A<p>BfooC</p></container>
 <?xml version="1.0"?>
 <container>A<p>BfooC</p>D</container>
+--- Normal cases lowercase ---
+<?xml version="1.0"?>
+<container>A<p>foo</p></container>
+<?xml version="1.0"?>
+<container>A<p>Bfoo</p></container>
+<?xml version="1.0"?>
+<container>A<p>BfooC</p></container>
+<?xml version="1.0"?>
+<container>A<p>BfooC</p>D</container>
+--- Normal cases starting from empty element ---
 <empty>A</empty>
 <empty>BA</empty>
 string(2) "BA"

@@ -1426,6 +1426,8 @@ PHP_METHOD(DOMElement, insertAdjacentElement)
 		RETURN_NULL();
 	} else if (result != INSERT_ADJACENT_RES_FAILED) {
 		DOM_RET_OBJ(otherp, &ret, other_intern);
+	} else {
+		RETURN_THROWS();
 	}
 }
 /* }}} end DOMElement::insertAdjacentElement */
