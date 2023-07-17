@@ -8,7 +8,7 @@ dom
 $html = new DOMDocument();
 $html->loadHTML('<!DOCTYPE HTML><html id="test"></html>');
 $xml = new DOMDocument();
-$xml->loadXML('<!DOCTYPE HTML><html id="test"></html>');
+$xml->loadXML('<?xml version="1.0"?><html id="test"></html>');
 
 try {
     var_dump($html->documentElement->toggleAttribute("\0"));
@@ -58,11 +58,14 @@ var_dump($dom->documentElement->toggleAttribute('xmlns:anotherone'));
 echo $dom->saveXML();
 var_dump($dom->documentElement->toggleAttribute('xmlns:foo'));
 echo $dom->saveXML();
+var_dump($dom->documentElement->toggleAttribute('xmlns:nope', false));
+echo $dom->saveXML();
 
 echo "Toggling namespaced attributes:\n";
 var_dump($dom->documentElement->toggleAttribute('test:test'));
 var_dump($dom->documentElement->firstElementChild->toggleAttribute('foo:test'));
 var_dump($dom->documentElement->firstElementChild->toggleAttribute('doesnotexist:test'));
+var_dump($dom->documentElement->firstElementChild->toggleAttribute('doesnotexist:test2', false));
 echo $dom->saveXML();
 
 echo "namespace of test:test = ";
@@ -76,6 +79,8 @@ echo "Toggling namespaced attributes:\n";
 var_dump($dom->documentElement->toggleAttribute('test:test'));
 var_dump($dom->documentElement->firstElementChild->toggleAttribute('foo:test'));
 var_dump($dom->documentElement->firstElementChild->toggleAttribute('doesnotexist:test'));
+var_dump($dom->documentElement->firstElementChild->toggleAttribute('doesnotexist:test2', true));
+var_dump($dom->documentElement->firstElementChild->toggleAttribute('doesnotexist:test3', false));
 echo $dom->saveXML();
 
 echo "Checking toggled namespace:\n";
@@ -100,19 +105,15 @@ bool(false)
 --- Selected attribute tests (XML) ---
 bool(false)
 <?xml version="1.0"?>
-<!DOCTYPE HTML>
 <html id="test"/>
 bool(true)
 <?xml version="1.0"?>
-<!DOCTYPE HTML>
 <html id="test" SELECTED=""/>
 bool(true)
 <?xml version="1.0"?>
-<!DOCTYPE HTML>
 <html id="test" SELECTED="" selected=""/>
 bool(false)
 <?xml version="1.0"?>
-<!DOCTYPE HTML>
 <html id="test" SELECTED=""/>
 --- id attribute tests ---
 bool(false)
@@ -132,10 +133,14 @@ bool(true)
 bool(false)
 <?xml version="1.0"?>
 <container xmlns="some:ns" xmlns:anotherone=""><foo:bar xmlns:foo="some:ns2"/><baz/></container>
+bool(false)
+<?xml version="1.0"?>
+<container xmlns="some:ns" xmlns:anotherone=""><foo:bar xmlns:foo="some:ns2"/><baz/></container>
 Toggling namespaced attributes:
 bool(true)
 bool(true)
 bool(true)
+bool(false)
 <?xml version="1.0"?>
 <container xmlns="some:ns" xmlns:anotherone="" test:test=""><foo:bar xmlns:foo="some:ns2" foo:test="" doesnotexist:test=""/><baz/></container>
 namespace of test:test = NULL
@@ -145,7 +150,9 @@ Toggling namespaced attributes:
 bool(false)
 bool(false)
 bool(false)
+bool(true)
+bool(false)
 <?xml version="1.0"?>
-<container xmlns="some:ns" xmlns:anotherone=""><foo:bar xmlns:foo="some:ns2"/><baz/></container>
+<container xmlns="some:ns" xmlns:anotherone=""><foo:bar xmlns:foo="some:ns2" doesnotexist:test2=""/><baz/></container>
 Checking toggled namespace:
 string(0) ""
