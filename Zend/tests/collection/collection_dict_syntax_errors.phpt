@@ -2,7 +2,7 @@
 Collection: Dictionary without key type defined
 --FILE--
 <?php
-collection(Dict) Articles<<Article>>
+collection(Dict) Articles<Article>
 {
 }
 ?>

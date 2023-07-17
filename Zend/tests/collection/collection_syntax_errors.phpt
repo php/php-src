@@ -2,7 +2,7 @@
 Collection: Syntax Errors
 --FILE--
 <?php
-collection(Dict) Articles<<int => Article => three>>
+collection(Dict) Articles<int => Article => three>
 {
 }
 ?>

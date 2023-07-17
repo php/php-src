@@ -2,7 +2,7 @@
 Collection: Sequence with key type defined
 --FILE--
 <?php
-collection(Seq) Articles<<int => Article>>
+collection(Seq) Articles<int => Article>
 {
 }
 ?>

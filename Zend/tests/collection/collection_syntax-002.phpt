@@ -2,7 +2,7 @@
 Collection: Sequence syntax with scalars
 --FILE--
 <?php
-collection(Seq) Titles<<string>>
+collection(Seq) Titles<string>
 {
 }
 

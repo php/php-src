@@ -14,7 +14,7 @@ trait Shuffler
 }
 
 
-collection(Dict) Articles<<int => Article>>
+collection(Dict) Articles<int => Article>
 {
 	use Shuffler;
 }

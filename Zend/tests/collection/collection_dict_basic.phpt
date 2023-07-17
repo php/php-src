@@ -9,7 +9,7 @@ class Article
 	}
 }
 
-collection(Dict) Articles<<string => Article>>
+collection(Dict) Articles<string => Article>
 {
 }
 

@@ -2,11 +2,11 @@
 Collection: Syntax
 --FILE--
 <?php
-collection(Dict) Articles<<int => Article>>
+collection(Dict) Articles<int => Article>
 {
 }
 
-CoLleCtION(dICT) Books<<string => Book>>
+CoLleCtION(dICT) Books<string => Book>
 {
 }
 

@@ -13,9 +13,9 @@ class Book {
 class NormalTitle {
 }
 
-collection(Seq) Titles<<string>> {}
+collection(Seq) Titles<string> {}
 
-collection(Seq) Books<<Book>> {}
+collection(Seq) Books<Book> {}
 
 $c1 = new Books();
 

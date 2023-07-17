@@ -2,7 +2,7 @@
 Collection with unsupported structure type
 --FILE--
 <?php
-collection(Foobar) Articles<<int => Article>>
+collection(Foobar) Articles<int => Article>
 {
 }
 ?>

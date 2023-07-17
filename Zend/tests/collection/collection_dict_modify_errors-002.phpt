@@ -7,7 +7,7 @@ class Book {
     public function __construct(public string $title) {}
 }
 
-collection(Dict) Books<<int => Book>> {}
+collection(Dict) Books<int => Book> {}
 
 $c = new Books();
 

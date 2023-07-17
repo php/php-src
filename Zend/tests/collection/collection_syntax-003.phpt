@@ -5,7 +5,7 @@ Collection: Syntax with 'Collection' class
 class Collection {}
 class Article extends Collection {}
 
-collection(SEQ) Articles<<Article>>
+collection(SEQ) Articles<Article>
 {
 }
 

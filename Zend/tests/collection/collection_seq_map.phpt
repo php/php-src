@@ -7,9 +7,9 @@ class Book {
     public function __construct(public string $title) {}
 }
 
-collection(Seq) Books<<Book>> {}
+collection(Seq) Books<Book> {}
 
-collection(Seq) Titles<<string>> {}
+collection(Seq) Titles<string> {}
 
 $c1 = new Books();
 
