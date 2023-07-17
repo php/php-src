@@ -142,7 +142,7 @@ static void pi_range(
 	constraint->range.underflow = underflow;
 	constraint->range.overflow = overflow;
 	constraint->negative = negative ? NEG_INIT : NEG_NONE;
-	phi->has_range_constraint = 1;
+	phi->has_range_constraint = true;
 }
 /* }}} */
 
@@ -160,7 +160,7 @@ static inline void pi_range_max(zend_ssa_phi *phi, int var, zend_long val) {
 }
 
 static void pi_type_mask(zend_ssa_phi *phi, uint32_t type_mask) {
-	phi->has_range_constraint = 0;
+	phi->has_range_constraint = false;
 	phi->constraint.type.ce = NULL;
 	phi->constraint.type.type_mask = MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN;
 	phi->constraint.type.type_mask |= type_mask;
