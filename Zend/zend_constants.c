@@ -150,7 +150,7 @@ void zend_shutdown_constants(void)
 
 ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number)
 {
-	zend_constant c;
+	zend_constant c = {0};
 
 	ZVAL_NULL(&c.value);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
@@ -160,7 +160,7 @@ ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int
 
 ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, bool bval, int flags, int module_number)
 {
-	zend_constant c;
+	zend_constant c = {0};
 
 	ZVAL_BOOL(&c.value, bval);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
