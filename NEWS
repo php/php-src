@@ -57,6 +57,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-11498 (SIGCHLD is not always returned from proc_open).
     (nielsdos)
 
+- PDO:
+  . Fix	GH-11587 (After php8.1, when PDO::ATTR_EMULATE_PREPARES is true
+    and PDO::ATTR_STRINGIFY_FETCHES is true, decimal zeros are no longer
+    filled). (SakiTakamachi)
+
 - PDO SQLite:
   . Fix GH-11492 (Make test failure: ext/pdo_sqlite/tests/bug_42589.phpt).
     (KapitanOczywisty, CViniciusSDias)
