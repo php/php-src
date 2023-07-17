@@ -640,6 +640,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_SET,                    "set") \
 	_(ZEND_STR_WITH,                   "with") \
 	_(ZEND_STR_WITHOUT,                "without") \
+	_(ZEND_STR_MAP,                    "map") \
 	_(ZEND_STR_CONST_EXPR_PLACEHOLDER, "[constant expression]") \
 	_(ZEND_STR_DEPRECATED,             "Deprecated") \
 	_(ZEND_STR_SINCE,                  "since") \

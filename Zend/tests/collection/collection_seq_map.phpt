@@ -1,7 +1,5 @@
 --TEST--
 Collection: Sequence: map
---XFAIL--
-Unimplemented
 --FILE--
 <?php
 
@@ -28,3 +26,13 @@ var_dump($c2);
 
 ?>
 --EXPECTF--
+bool(true)
+object(Titles)#5 (1) {
+  ["value"]=>
+  array(2) {
+    [0]=>
+    string(7) "Title 1"
+    [1]=>
+    string(7) "Title 2"
+  }
+}
