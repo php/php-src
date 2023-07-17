@@ -195,6 +195,11 @@ PHP 8.3 UPGRADE NOTES
   . IntlChar::enumCharNames is now returning a boolean.
     Previously it returned null on success and false on failure.
 
+- Curl:
+  . curl_getinfo() now supports two new constants: CURLINFO_CAPATH and CURLINFO_CAINFO.
+    If option is null, the following two additional keys are present:
+    "capath" and "cainfo".
+
 - MBString:
   . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional
     casing rules for the Greek letter sigma. For mb_convert_case, conditional
@@ -360,6 +365,23 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 10. New Global Constants
 ========================================
+
+- Curl:
+  . CURLINFO_CAPATH
+  . CURLINFO_CAINFO
+  . CURLOPT_MIME_OPTIONS
+  . CURLMIMEOPT_FORMESCAPE
+  . CURLOPT_WS_OPTIONS
+  . CURLWS_RAW_MODE
+  . CURLOPT_SSH_HOSTKEYFUNCTION
+  . CURLOPT_PROTOCOLS_STR
+  . CURLOPT_REDIR_PROTOCOLS_STR
+  . CURLOPT_CA_CACHE_TIMEOUT
+  . CURLOPT_QUICK_EXIT
+  . CURLKHMATCH_OK
+  . CURLKHMATCH_MISMATCH
+  . CURLKHMATCH_MISSING
+  . CURLKHMATCH_LAST
 
 - Intl:
   . MIXED_NUMBERS (Spoofchecker).
