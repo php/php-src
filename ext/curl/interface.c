@@ -820,7 +820,7 @@ static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key,
 				zend_throw_error(NULL, "The CURLOPT_SSH_HOSTKEYFUNCTION callback must return either CURLKHMATCH_OK or CURLKHMATCH_MISMATCH");
 			}
 		} else {
-			zend_type_error("The CURLOPT_SSH_HOSTKEYFUNCTION callback must return either CURLKHMATCH_OK or CURLKHMATCH_MISMATCH");
+			zend_throw_error(NULL, "The CURLOPT_SSH_HOSTKEYFUNCTION callback must return either CURLKHMATCH_OK or CURLKHMATCH_MISMATCH");
 		}
 	}
 	zval_ptr_dtor(&argv[0]);
