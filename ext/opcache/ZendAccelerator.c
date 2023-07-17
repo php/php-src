@@ -2863,8 +2863,8 @@ static int zend_accel_init_shm(void)
 		accel_shared_globals = zend_shared_alloc(sizeof(zend_accel_shared_globals) + sizeof(uint32_t));
 	}
 	if (!accel_shared_globals) {
-		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
 		zend_shared_alloc_unlock();
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
 		return FAILURE;
 	}
 	memset(accel_shared_globals, 0, sizeof(zend_accel_shared_globals));
