@@ -1345,4 +1345,120 @@ PHP_METHOD(DOMElement, replaceChildren)
 }
 /* }}} */
 
+#define INSERT_ADJACENT_RES_FAILED ((void*) -1)
+
+static xmlNodePtr dom_insert_adjacent(const zend_string *where, xmlNodePtr thisp, dom_object *this_intern, xmlNodePtr otherp)
+{
+	if (zend_string_equals_literal_ci(where, "beforebegin")) {
+		if (thisp->parent == NULL) {
+			return NULL;
+		}
+		if (dom_hierarchy(thisp->parent, otherp) == FAILURE) {
+			php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(this_intern->document));
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		if (!php_dom_adopt_node(otherp, this_intern, thisp->doc)) {
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		otherp = xmlAddPrevSibling(thisp, otherp);
+	} else if (zend_string_equals_literal_ci(where, "afterbegin")) {
+		if (dom_hierarchy(thisp, otherp) == FAILURE) {
+			php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(this_intern->document));
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		if (!php_dom_adopt_node(otherp, this_intern, thisp->doc)) {
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		if (thisp->children == NULL) {
+			otherp = xmlAddChild(thisp, otherp);
+		} else {
+			otherp = xmlAddPrevSibling(thisp->children, otherp);
+		}
+	} else if (zend_string_equals_literal_ci(where, "beforeend")) {
+		if (dom_hierarchy(thisp, otherp) == FAILURE) {
+			php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(this_intern->document));
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		if (!php_dom_adopt_node(otherp, this_intern, thisp->doc)) {
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		otherp = xmlAddChild(thisp, otherp);
+	} else if (zend_string_equals_literal_ci(where, "afterend")) {
+		if (thisp->parent == NULL) {
+			return NULL;
+		}
+		if (dom_hierarchy(thisp->parent, otherp) == FAILURE) {
+			php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(this_intern->document));
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		if (!php_dom_adopt_node(otherp, this_intern, thisp->doc)) {
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		otherp = xmlAddNextSibling(thisp, otherp);
+	} else {
+		php_dom_throw_error(SYNTAX_ERR, dom_get_strict_error(this_intern->document));
+		return INSERT_ADJACENT_RES_FAILED;
+	}
+	dom_reconcile_ns(thisp->doc, otherp);
+	return otherp;
+}
+
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-element-insertadjacentelement
+Since:
+*/
+PHP_METHOD(DOMElement, insertAdjacentElement)
+{
+	zend_string *where;
+	zval *element_zval, *id;
+	xmlNodePtr thisp, otherp;
+	dom_object *this_intern, *other_intern;
+	int ret;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SO", &where, &element_zval, dom_element_class_entry) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
+	DOM_GET_OBJ(otherp, element_zval, xmlNodePtr, other_intern);
+
+	xmlNodePtr result = dom_insert_adjacent(where, thisp, this_intern, otherp);
+	if (result == NULL) {
+		RETURN_NULL();
+	} else if (result != INSERT_ADJACENT_RES_FAILED) {
+		DOM_RET_OBJ(otherp, &ret, other_intern);
+	} else {
+		RETURN_THROWS();
+	}
+}
+/* }}} end DOMElement::insertAdjacentElement */
+
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-element-insertadjacenttext
+Since:
+*/
+PHP_METHOD(DOMElement, insertAdjacentText)
+{
+	zend_string *where, *data;
+	dom_object *this_intern;
+	zval *id;
+	xmlNodePtr thisp;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &where, &data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
+
+	if (UNEXPECTED(ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(data)))) {
+		zend_argument_value_error(2, "is too long");
+		RETURN_THROWS();
+	}
+
+	xmlNodePtr otherp = xmlNewDocTextLen(thisp->doc, (const xmlChar *) ZSTR_VAL(data), ZSTR_LEN(data));
+	xmlNodePtr result = dom_insert_adjacent(where, thisp, this_intern, otherp);
+	if (result == NULL || result == INSERT_ADJACENT_RES_FAILED) {
+		xmlFreeNode(otherp);
+	}
+}
+/* }}} end DOMElement::insertAdjacentText */
+
 #endif

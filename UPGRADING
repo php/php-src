@@ -279,6 +279,8 @@ PHP 8.3 UPGRADE NOTES
   . Added DOMNode::isConnected and DOMNameSpaceNode::isConnected.
   . Added DOMNode::parentElement and DOMNameSpaceNode::parentElement.
   . Added DOMNode::isEqualNode().
+  . Added DOMElement::insertAdjacentElement() and
+    DOMElement::insertAdjacentText().
 
 - JSON:
   . Added json_validate(), which returns whether the json is valid for

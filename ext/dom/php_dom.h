@@ -151,6 +151,7 @@ void php_dom_get_content_into_zval(const xmlNode *nodep, zval *target, bool defa
 zend_string *dom_node_concatenated_name_helper(size_t name_len, const char *name, size_t prefix_len, const char *prefix);
 zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep);
 bool php_dom_is_node_connected(const xmlNode *node);
+bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, xmlDocPtr new_document);
 
 /* parentnode */
 void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc);
