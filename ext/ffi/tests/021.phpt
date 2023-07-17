@@ -7,7 +7,7 @@ ffi.enable=1
 --FILE--
 <?php
 function test($size, $type) {
-    if (FFI::sizeof(FFI::new($type)) !== $size) {
+    if (FFI::sizeof(FFI::cdef()->new($type)) !== $size) {
         echo "FAIL: sizeof($type) != $size\n";
     }
 }

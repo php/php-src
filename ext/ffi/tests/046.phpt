@@ -6,26 +6,28 @@ ffi
 ffi.enable=1
 --FILE--
 <?php
-$x = FFI::type("uint8_t");
+$ffi = FFI::cdef();
+
+$x = $ffi->type("uint8_t");
 var_dump($x->getKind() === $x::TYPE_UINT8);
 var_dump($x->getSize());
 var_dump($x->getAlignment());
 
-$x = FFI::type("enum __attribute__((packed)) {a2, b2}");
+$x = $ffi->type("enum __attribute__((packed)) {a2, b2}");
 var_dump($x->getKind() === $x::TYPE_ENUM);
 var_dump($x->getEnumKind() === $x::TYPE_UINT8);
 
-$x = FFI::type("char[5]");
+$x = $ffi->type("char[5]");
 var_dump($x->getKind() === $x::TYPE_ARRAY);
 var_dump($x->getSize());
 var_dump($x->getArrayElementType()->getKind() === $x::TYPE_CHAR);
 var_dump($x->getArrayLength());
 
-$x = FFI::type("void*");
+$x = $ffi->type("void*");
 var_dump($x->getKind() === $x::TYPE_POINTER);
 var_dump($x->getPointerType()->getKind() === $x::TYPE_VOID);
 
-$x = FFI::type("struct {double x; double y;}");
+$x = $ffi->type("struct {double x; double y;}");
 var_dump($x->getKind() === $x::TYPE_STRUCT);
 var_dump(($x->getAttributes() & $x::ATTR_UNION) != 0);
 var_dump($x->getStructFieldNames());
@@ -34,7 +36,7 @@ var_dump($x->getStructFieldOffset("y"));
 var_dump($x->getStructFieldType("x")->getKind() == $x::TYPE_DOUBLE);
 var_dump($x->getStructFieldType("y")->getKind() == $x::TYPE_DOUBLE);
 
-$x = FFI::type("union {double x; double y;}");
+$x = $ffi->type("union {double x; double y;}");
 var_dump($x->getKind() === $x::TYPE_STRUCT);
 var_dump(($x->getAttributes() & $x::ATTR_UNION) != 0);
 var_dump($x->getStructFieldNames());
@@ -43,7 +45,7 @@ var_dump($x->getStructFieldOffset("y"));
 var_dump($x->getStructFieldType("x")->getKind() == $x::TYPE_DOUBLE);
 var_dump($x->getStructFieldType("y")->getKind() == $x::TYPE_DOUBLE);
 
-$x = FFI::type("void (*)(double,int32_t)");
+$x = $ffi->type("void (*)(double,int32_t)");
 var_dump($x->getKind() === $x::TYPE_POINTER);
 var_dump($x->getPointerType()->getKind() === $x::TYPE_FUNC);
 var_dump($x->getPointerType()->getFuncReturnType()->getKind() === $x::TYPE_VOID);

@@ -6,18 +6,20 @@ ffi
 ffi.enable=1
 --FILE--
 <?php
+$ffi = FFI::cdef();
+
 try {
-    var_dump(FFI::new("struct X {void x();}"));
+    var_dump($ffi->new("struct X {void x();}"));
 } catch (Throwable $e) {
     echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-    var_dump(FFI::new("struct X {struct X x;}"));
+    var_dump($ffi->new("struct X {struct X x;}"));
 } catch (Throwable $e) {
     echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-    var_dump(FFI::new("struct X {struct X *ptr;}"));
+    var_dump($ffi->new("struct X {struct X *ptr;}"));
 } catch (Throwable $e) {
     echo get_class($e) . ": " . $e->getMessage()."\n";
 }
