@@ -38,6 +38,10 @@ PHP                                                                        NEWS
 - GD:
   . Fix most of the external libgd test failures. (Michael Orlitzky)
 
+- Hash:
+  . Fix use-of-uninitialized-value in hash_pbkdf2(), fix missing $options
+    parameter in signature. (ilutov)
+
 - Intl:
   . Fix memory leak in MessageFormatter::format() on failure. (Girgias)
 
