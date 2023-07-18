@@ -91,6 +91,11 @@ static zend_always_inline size_t zend_object_properties_size(zend_class_entry *c
 static zend_always_inline void *zend_object_alloc(size_t obj_size, zend_class_entry *ce) {
 	void *obj = emalloc(obj_size + zend_object_properties_size(ce));
 	memset(obj, 0, obj_size - sizeof(zend_object));
+	/* Set to std_object_handlers in case there is an OOM error before any other handlers are
+	 * installed. This avoids a use-of-uninitialized-value on shutdown. This would be more fitting in
+	 * zend_object_std_init(), but some extensions set handlers before calling
+	 * zend_object_std_init(). */
+	((zend_object *)((uintptr_t)obj + obj_size - sizeof(zend_object)))->handlers = &std_object_handlers;
 	return obj;
 }
 
