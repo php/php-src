@@ -60,9 +60,9 @@ interface DictCollection
 
     // True if both dicts have the same key/values in the same order.
     public function equals(DictCollection $other): bool;
+*/
 
     // $fn is callable(mixed $val, mixed $key)
     // The return type is $targetType, but that can't be expressed statically.
-    public function map(callable $fn, string $targetType): DictCollection;
-*/
+    public function map(callable $fn, string $targetType): object;
 }

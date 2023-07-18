@@ -444,6 +444,81 @@ static ZEND_NAMED_FUNCTION(zend_collection_dict_set_func)
 	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
 }
 
+static ZEND_NAMED_FUNCTION(zend_collection_dict_map_func)
+{
+	zend_object *object = Z_OBJ_P(ZEND_THIS);
+	zend_class_entry *ce = Z_OBJCE_P(ZEND_THIS);
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	zval *value_prop;
+	zend_string *type;
+	zval *operand;
+	zend_ulong index;
+	zend_string *key;
+	zval retval;
+	zval args[2];
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_FUNC(fci, fci_cache)
+		Z_PARAM_STR(type)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_class_entry *return_ce = zend_lookup_class(type);
+	if (!return_ce) {
+		zend_type_error(
+			"Type '%s' can not be fetched",
+			ZSTR_VAL(type)
+		);
+		return;
+	}
+
+	if (!instanceof_function(return_ce, zend_ce_dict_collection)) {
+		zend_type_error(
+			"Type '%s' must implement DictCollection interface",
+			ZSTR_VAL(type)
+		);
+		return;
+	}
+
+	create_array_if_needed(ce, object);
+	value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, NULL);
+
+	object_init_ex(return_value, return_ce);
+	Z_OBJCE_P(return_value)->collection_data_structure = return_ce->collection_data_structure;
+
+	fci.retval = &retval;
+	fci.param_count = 2;
+
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(value_prop), index, key, operand) {
+		ZVAL_COPY(&args[0], operand);
+		if (key != NULL) {
+			ZVAL_STR_COPY(&args[1], key);
+		} else {
+			ZVAL_LONG(&args[1], index);
+		}
+
+		fci.params = args;
+
+		if (zend_call_function(&fci, &fci_cache) == SUCCESS) {
+			bool ok = zend_collection_add_item(Z_OBJ_P(return_value), &args[1], &retval);
+
+			zval_ptr_dtor(&args[0]);
+			zval_ptr_dtor(&args[1]);
+
+			if (!ok) {
+				return;
+			}
+		} else {
+			zval_ptr_dtor(&args[0]);
+			zval_ptr_dtor(&args[1]);
+
+			return;
+		}
+
+	} ZEND_HASH_FOREACH_END();
+}
+
+
 static void zend_collection_register_func(zend_class_entry *ce, zend_known_string_id name_id, zend_internal_function *zif)
 {
 	zend_string *name = ZSTR_KNOWN(name_id);
@@ -498,6 +573,7 @@ void zend_collection_register_funcs(zend_class_entry *ce)
 			REGISTER_FUNCTION(ZEND_STR_WITH, zend_collection_dict_with_func, arginfo_class_DictCollection_with, 2);
 			REGISTER_FUNCTION(ZEND_STR_WITHOUT, zend_collection_dict_without_func, arginfo_class_DictCollection_without, 1);
 			REGISTER_FUNCTION(ZEND_STR_SET, zend_collection_dict_set_func, arginfo_class_DictCollection_set, 2);
+			REGISTER_FUNCTION(ZEND_STR_MAP, zend_collection_dict_map_func, arginfo_class_DictCollection_map, 2);
 			break;
 	}
 }
@@ -571,7 +647,7 @@ static void dict_add_or_set_item(zend_object *object, zval *offset, zval *value)
 			create_array_if_needed(ce, object);
 			value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
 			SEPARATE_ARRAY(value_prop);
-			Z_ADDREF_P(value);
+			zval_add_ref(value);
 			add_index_zval(value_prop, Z_LVAL_P(offset), value);
 			break;
 		}
@@ -579,7 +655,7 @@ static void dict_add_or_set_item(zend_object *object, zval *offset, zval *value)
 			create_array_if_needed(ce, object);
 			value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
 			SEPARATE_ARRAY(value_prop);
-			Z_ADDREF_P(value);
+			zval_add_ref(value);
 			add_assoc_zval_ex(value_prop, Z_STRVAL_P(offset), Z_STRLEN_P(offset), value);
 			break;
 		}
