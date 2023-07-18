@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.0beta1
+?? ??? ????, PHP 8.3.0beta2
+
+
+20 Jul 2023, PHP 8.3.0beta1
 
 - CLI:
   . Implement GH-10024 (support linting multiple files at once using php -l).
