@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 90e72918989ba39299db8af818e17d17a610eba3 */
+ * Stub hash: 7702f8a3d098844742a87bcea211c6f23eb5b270 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoSqlite_createAggregate, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -20,7 +20,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoSqlite_createFunction, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-#if !defined(SQLITE_OMIT_LOAD_EXTENSION)
+#if !defined(PDO_SQLITE_OMIT_LOAD_EXTENSION)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoSqlite_loadExtension, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -38,7 +38,7 @@ ZEND_END_ARG_INFO()
 ZEND_METHOD(PdoSqlite, createAggregate);
 ZEND_METHOD(PdoSqlite, createCollation);
 ZEND_METHOD(PdoSqlite, createFunction);
-#if !defined(SQLITE_OMIT_LOAD_EXTENSION)
+#if !defined(PDO_SQLITE_OMIT_LOAD_EXTENSION)
 ZEND_METHOD(PdoSqlite, loadExtension);
 #endif
 ZEND_METHOD(PdoSqlite, openBlob);
@@ -48,7 +48,7 @@ static const zend_function_entry class_PdoSqlite_methods[] = {
 	ZEND_ME(PdoSqlite, createAggregate, arginfo_class_PdoSqlite_createAggregate, ZEND_ACC_PUBLIC)
 	ZEND_ME(PdoSqlite, createCollation, arginfo_class_PdoSqlite_createCollation, ZEND_ACC_PUBLIC)
 	ZEND_ME(PdoSqlite, createFunction, arginfo_class_PdoSqlite_createFunction, ZEND_ACC_PUBLIC)
-#if !defined(SQLITE_OMIT_LOAD_EXTENSION)
+#if !defined(PDO_SQLITE_OMIT_LOAD_EXTENSION)
 	ZEND_ME(PdoSqlite, loadExtension, arginfo_class_PdoSqlite_loadExtension, ZEND_ACC_PUBLIC)
 #endif
 	ZEND_ME(PdoSqlite, openBlob, arginfo_class_PdoSqlite_openBlob, ZEND_ACC_PUBLIC)
