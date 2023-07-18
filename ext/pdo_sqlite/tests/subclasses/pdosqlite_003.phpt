@@ -14,7 +14,8 @@ if (!$db instanceof PdoSqlite) {
 $extension_location = null;
 $locations = [
     '/usr/lib/aarch64-linux-gnu/mod_spatialite.so',
-    "/usr/lib/x86_64-linux-gnu/mod_spatialite.so"
+    '/usr/lib/x86_64-linux-gnu/mod_spatialite.so',
+    '/usr/lib/mod_spatialite.so', // location of the file on Alpine
 ];
 
 foreach ($locations as $location) {
