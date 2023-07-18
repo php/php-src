@@ -42,6 +42,10 @@ PHP                                                                        NEWS
   . Added warning to log when fpm socket was not registered on the expected
     path. (Joshua Behrens, Jakub Zelenka)
 
+- Hash:
+  . Fix use-of-uninitialized-value in hash_pbkdf2(), fix missing $options
+    parameter in signature. (ilutov)
+
 - Intl:
   . Fix memory leak in MessageFormatter::format() on failure. (Girgias)
 
