@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b7c035384e0a8dcd15bee4879277c14b46ddd6e9 */
+ * Stub hash: decfa1e3d862d81880ea18150e2ba239bf15b8af */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -871,6 +871,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_strtoupper arginfo_base64_encode
 
 #define arginfo_strtolower arginfo_base64_encode
+
+#define arginfo_str_increment arginfo_base64_encode
+
+#define arginfo_str_decrement arginfo_base64_encode
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_basename, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
@@ -1845,6 +1849,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_option, 0, 2,
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_options, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_get_options, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, stream_or_context)
 ZEND_END_ARG_INFO()
@@ -2447,6 +2456,8 @@ ZEND_FUNCTION(implode);
 ZEND_FUNCTION(strtok);
 ZEND_FUNCTION(strtoupper);
 ZEND_FUNCTION(strtolower);
+ZEND_FUNCTION(str_increment);
+ZEND_FUNCTION(str_decrement);
 ZEND_FUNCTION(basename);
 ZEND_FUNCTION(dirname);
 ZEND_FUNCTION(pathinfo);
@@ -2712,6 +2723,7 @@ ZEND_FUNCTION(stream_context_create);
 ZEND_FUNCTION(stream_context_set_params);
 ZEND_FUNCTION(stream_context_get_params);
 ZEND_FUNCTION(stream_context_set_option);
+ZEND_FUNCTION(stream_context_set_options);
 ZEND_FUNCTION(stream_context_get_options);
 ZEND_FUNCTION(stream_context_get_default);
 ZEND_FUNCTION(stream_context_set_default);
@@ -3061,7 +3073,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(htmlentities, arginfo_htmlentities)
 	ZEND_FE(get_html_translation_table, arginfo_get_html_translation_table)
 	ZEND_FE(assert, arginfo_assert)
-	ZEND_FE(assert_options, arginfo_assert_options)
+	ZEND_DEP_FE(assert_options, arginfo_assert_options)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(bin2hex, arginfo_bin2hex)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(hex2bin, arginfo_hex2bin)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strspn, arginfo_strspn)
@@ -3081,6 +3093,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strtok, arginfo_strtok)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strtoupper, arginfo_strtoupper)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strtolower, arginfo_strtolower)
+	ZEND_FE(str_increment, arginfo_str_increment)
+	ZEND_FE(str_decrement, arginfo_str_decrement)
 	ZEND_FE(basename, arginfo_basename)
 	ZEND_FE(dirname, arginfo_dirname)
 	ZEND_FE(pathinfo, arginfo_pathinfo)
@@ -3350,6 +3364,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(stream_context_set_params, arginfo_stream_context_set_params)
 	ZEND_FE(stream_context_get_params, arginfo_stream_context_get_params)
 	ZEND_FE(stream_context_set_option, arginfo_stream_context_set_option)
+	ZEND_FE(stream_context_set_options, arginfo_stream_context_set_options)
 	ZEND_FE(stream_context_get_options, arginfo_stream_context_get_options)
 	ZEND_FE(stream_context_get_default, arginfo_stream_context_get_default)
 	ZEND_FE(stream_context_set_default, arginfo_stream_context_set_default)
@@ -3500,11 +3515,11 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("COUNT_RECURSIVE", PHP_COUNT_RECURSIVE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_BOTH", ARRAY_FILTER_USE_BOTH, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_KEY", ARRAY_FILTER_USE_KEY, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_ACTIVE", PHP_ASSERT_ACTIVE, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_CALLBACK", PHP_ASSERT_CALLBACK, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_BAIL", PHP_ASSERT_BAIL, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_WARNING", PHP_ASSERT_WARNING, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_EXCEPTION", PHP_ASSERT_EXCEPTION, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ASSERT_ACTIVE", PHP_ASSERT_ACTIVE, CONST_PERSISTENT | CONST_DEPRECATED);
+	REGISTER_LONG_CONSTANT("ASSERT_CALLBACK", PHP_ASSERT_CALLBACK, CONST_PERSISTENT | CONST_DEPRECATED);
+	REGISTER_LONG_CONSTANT("ASSERT_BAIL", PHP_ASSERT_BAIL, CONST_PERSISTENT | CONST_DEPRECATED);
+	REGISTER_LONG_CONSTANT("ASSERT_WARNING", PHP_ASSERT_WARNING, CONST_PERSISTENT | CONST_DEPRECATED);
+	REGISTER_LONG_CONSTANT("ASSERT_EXCEPTION", PHP_ASSERT_EXCEPTION, CONST_PERSISTENT | CONST_DEPRECATED);
 	REGISTER_LONG_CONSTANT("CONNECTION_ABORTED", PHP_CONNECTION_ABORTED, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CONNECTION_NORMAL", PHP_CONNECTION_NORMAL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CONNECTION_TIMEOUT", PHP_CONNECTION_TIMEOUT, CONST_PERSISTENT);
@@ -3565,6 +3580,8 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_DOWN", PHP_ROUND_HALF_DOWN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_EVEN", PHP_ROUND_HALF_EVEN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_ODD", PHP_ROUND_HALF_ODD, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHP_ROUND_UP", PHP_ROUND_UP, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHP_ROUND_DOWN", PHP_ROUND_DOWN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_SALT_LENGTH", PHP_MAX_SALT_LEN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_STD_DES", 1, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_EXT_DES", 1, CONST_PERSISTENT);
