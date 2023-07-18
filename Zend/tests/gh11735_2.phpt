@@ -3,12 +3,15 @@ GH-11735: Use-after-free when unregistering user stream wrapper from user stream
 --FILE--
 <?php
 class FooWrapper {
+    public $context;
     public function stream_open($path, $mode, $options, &$opened_path) {
         stream_wrapper_unregister('foo');
         return false;
     }
 }
 stream_wrapper_register('foo', 'FooWrapper');
-@fopen('foo://bar', 'r');
+var_dump(fopen('foo://bar', 'r'));
 ?>
---EXPECT--
+--EXPECTF--
+Warning: fopen(foo://bar): Failed to open stream: "FooWrapper::stream_open" call failed in %s on line %d
+bool(false)
