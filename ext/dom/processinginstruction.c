@@ -108,23 +108,20 @@ int dom_processinginstruction_data_read(dom_object *obj, zval *retval)
 int dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
-	zend_string *str;
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
-	str = zval_try_get_string(newval);
-	if (UNEXPECTED(!str)) {
-		return FAILURE;
-	}
+	/* Typed property, this is already a string */
+	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
+	zend_string *str = Z_STR_P(newval);
 
 	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
 
 	xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
 
-	zend_string_release_ex(str, 0);
 	return SUCCESS;
 }
 

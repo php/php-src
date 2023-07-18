@@ -669,10 +669,9 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 					nsnode = xmlDocGetRootElement(nodep->doc);
 				}
 			}
-			prefix_str = zval_try_get_string(newval);
-			if (UNEXPECTED(!prefix_str)) {
-				return FAILURE;
-			}
+			/* Typed property, this is already a string */
+			ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
+			prefix_str = Z_STR_P(newval);
 
 			prefix = ZSTR_VAL(prefix_str);
 			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
@@ -698,14 +697,12 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 				}
 
 				if (ns == NULL) {
-					zend_string_release_ex(prefix_str, 0);
 					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document));
 					return FAILURE;
 				}
 
 				xmlSetNs(nodep, ns);
 			}
-			zend_string_release_ex(prefix_str, 0);
 			break;
 		default:
 			break;
@@ -791,21 +788,17 @@ int dom_node_text_content_read(dom_object *obj, zval *retval)
 int dom_node_text_content_write(dom_object *obj, zval *newval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
-	zend_string *str;
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
-	str = zval_try_get_string(newval);
-	if (UNEXPECTED(!str)) {
-		return FAILURE;
-	}
-
 	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
 
-	const xmlChar *xmlChars = (const xmlChar *) ZSTR_VAL(str);
+	/* Typed property, this is already a string */
+	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
+	const xmlChar *xmlChars = (const xmlChar *) Z_STRVAL_P(newval);
 	int type = nodep->type;
 
 	/* We can't directly call xmlNodeSetContent, because it might encode the string through
@@ -821,8 +814,6 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 	} else {
 		xmlNodeSetContent(nodep, xmlChars);
 	}
-
-	zend_string_release_ex(str, 0);
 
 	return SUCCESS;
 }
