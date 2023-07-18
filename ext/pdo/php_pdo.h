@@ -22,7 +22,7 @@
 extern zend_module_entry pdo_module_entry;
 #define phpext_pdo_ptr &pdo_module_entry
 
-extern zend_class_entry *pdo_dbh_ce;
+extern ZEND_API zend_class_entry *pdo_dbh_ce;
 extern ZEND_API zend_object *pdo_dbh_new(zend_class_entry *ce);
 
 #include "php_version.h"
