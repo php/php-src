@@ -1431,6 +1431,8 @@ void pdo_dbh_init(int module_number)
 	pdo_dbh_object_handlers.compare = zend_objects_not_comparable;
 	pdo_dbh_object_handlers.get_gc = dbh_get_gc;
 
+/* These are now magically generated?
+
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_BOOL", (zend_long)PDO_PARAM_BOOL);
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_NULL", (zend_long)PDO_PARAM_NULL);
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_INT",  (zend_long)PDO_PARAM_INT);
@@ -1515,7 +1517,7 @@ void pdo_dbh_init(int module_number)
 
 	REGISTER_PDO_CLASS_CONST_LONG("CURSOR_FWDONLY", (zend_long)PDO_CURSOR_FWDONLY);
 	REGISTER_PDO_CLASS_CONST_LONG("CURSOR_SCROLL", (zend_long)PDO_CURSOR_SCROLL);
-
+*/
 
 	memcpy(&pdosqlite_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdosqlite_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);
