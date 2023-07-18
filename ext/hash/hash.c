@@ -993,7 +993,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	bool raw_output = 0;
 	const php_hash_ops *ops;
 	void *context;
-	HashTable *args;
+	HashTable *args = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sssl|lbh", &algo, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output, &args) == FAILURE) {
 		RETURN_THROWS();

@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.10
 
+- Hash:
+  . Fix use-of-uninitialized-value in hash_pbkdf2(), fix missing $options
+    parameter in signature. (ilutov)
 
 03 Aug 2023, PHP 8.2.9
 
