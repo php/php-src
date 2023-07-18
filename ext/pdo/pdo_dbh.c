@@ -339,8 +339,7 @@ void internal_construct(INTERNAL_FUNCTION_PARAMETERS, zval *object, zval *new_zv
 		}
 
 		dbh = Z_PDO_DBH_P(new_zval_object);
-	}
-	else {
+	} else {
 		dbh = Z_PDO_DBH_P(object);
 	}
 
