@@ -345,6 +345,7 @@ PHP 8.3 UPGRADE NOTES
     means that when $decimals is negative, $num is rounded to $decimals
     significant digits before the decimal point. Previously negative $decimals
     got silently ignored and the number got rounded to zero decimal places.
+  . round() accepts two new rounding flags PHP_ROUND_UP and PHP_ROUND_DOWN.
 
 ========================================
 6. New Functions
