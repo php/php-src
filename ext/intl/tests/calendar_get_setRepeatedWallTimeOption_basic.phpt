@@ -10,7 +10,7 @@ ini_set("intl.default_locale", "nl");
 date_default_timezone_set('Europe/Amsterdam');
 
 //28 October 2012, transition from DST
-$intlcal = new IntlGregorianCalendar(2012, 9, 28, 0, 0, 0);
+$intlcal = IntlGregorianCalendar::createFromDateTime(2012, 9, 28, 0, 0, 0);
 var_dump($intlcal->setRepeatedWallTimeOption(IntlCalendar::WALLTIME_LAST));
 var_dump($intlcal->getRepeatedWallTimeOption());
 $intlcal->set(IntlCalendar::FIELD_HOUR_OF_DAY, 2);

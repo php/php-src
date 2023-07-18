@@ -664,7 +664,12 @@ static inline zend_result ct_eval_assign_obj(zval *result, zval *value, const zv
 }
 
 static inline zend_result ct_eval_incdec(zval *result, uint8_t opcode, zval *op1) {
+	/* As of PHP 8.3 with the warning/deprecation notices any type other than int/double/null will emit a diagnostic
 	if (Z_TYPE_P(op1) == IS_ARRAY || IS_PARTIAL_ARRAY(op1)) {
+		return FAILURE;
+	}
+	*/
+	if (Z_TYPE_P(op1) != IS_LONG && Z_TYPE_P(op1) != IS_DOUBLE && Z_TYPE_P(op1) != IS_NULL) {
 		return FAILURE;
 	}
 
@@ -675,6 +680,11 @@ static inline zend_result ct_eval_incdec(zval *result, uint8_t opcode, zval *op1
 			|| opcode == ZEND_POST_INC_OBJ) {
 		increment_function(result);
 	} else {
+		/* Decrement on null emits a deprecation notice */
+		if (Z_TYPE_P(op1) == IS_NULL) {
+			zval_ptr_dtor(result);
+			return FAILURE;
+		}
 		decrement_function(result);
 	}
 	return SUCCESS;
@@ -1375,21 +1385,22 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 						&& ctx->scdf.ssa->vars[ssa_op->op1_def].escape_state == ESCAPE_STATE_NO_ESCAPE) {
 					zval tmp1, tmp2;
 
-					if (ct_eval_fetch_obj(&tmp1, op1, op2) == SUCCESS
-							&& ct_eval_incdec(&tmp2, opline->opcode, &tmp1) == SUCCESS) {
-
-						dup_partial_object(&zv, op1);
-						ct_eval_assign_obj(&zv, &tmp2, op2);
-						if (opline->opcode == ZEND_PRE_INC_OBJ || opline->opcode == ZEND_PRE_DEC_OBJ) {
-							SET_RESULT(result, &tmp2);
-						} else {
-							SET_RESULT(result, &tmp1);
+					if (ct_eval_fetch_obj(&tmp1, op1, op2) == SUCCESS) {
+						if (ct_eval_incdec(&tmp2, opline->opcode, &tmp1) == SUCCESS) {
+							dup_partial_object(&zv, op1);
+							ct_eval_assign_obj(&zv, &tmp2, op2);
+							if (opline->opcode == ZEND_PRE_INC_OBJ || opline->opcode == ZEND_PRE_DEC_OBJ) {
+								SET_RESULT(result, &tmp2);
+							} else {
+								SET_RESULT(result, &tmp1);
+							}
+							zval_ptr_dtor_nogc(&tmp1);
+							zval_ptr_dtor_nogc(&tmp2);
+							SET_RESULT(op1, &zv);
+							zval_ptr_dtor_nogc(&zv);
+							break;
 						}
 						zval_ptr_dtor_nogc(&tmp1);
-						zval_ptr_dtor_nogc(&tmp2);
-						SET_RESULT(op1, &zv);
-						zval_ptr_dtor_nogc(&zv);
-						break;
 					}
 				}
 			}
@@ -2109,7 +2120,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 							break;
 						default:
 							break;
-					}	
+					}
 				}
 				/* we cannot remove instruction that defines other variables */
 				return 0;

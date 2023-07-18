@@ -1,10 +1,11 @@
 --TEST--
 Pretty printing for match expression
 --INI--
-assert.exception=0
+zend.assertions=1
 --FILE--
 <?php
 
+try {
 assert((function () {
     match ('foo') {
         'foo', 'bar' => false,
@@ -12,13 +13,16 @@ assert((function () {
         default => 'b',
     };
 })());
+} catch (AssertionError $e) {
+    echo 'assert(): ', $e->getMessage(), ' failed', PHP_EOL;
+}
 
 ?>
 --EXPECTF--
-Warning: assert(): assert(function () {
+assert(): assert(function () {
     match ('foo') {
         'foo', 'bar' => false,
         'baz' => 'a',
         default => 'b',
     };
-}()) failed in %s on line %d
+}()) failed

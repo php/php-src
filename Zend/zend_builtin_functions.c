@@ -138,7 +138,7 @@ ZEND_FUNCTION(gc_status)
 
 	zend_gc_get_status(&status);
 
-	array_init_size(return_value, 8);
+	array_init_size(return_value, 16);
 
 	add_assoc_bool_ex(return_value, "running", sizeof("running")-1, status.active);
 	add_assoc_bool_ex(return_value, "protected", sizeof("protected")-1, status.gc_protected);
@@ -148,6 +148,12 @@ ZEND_FUNCTION(gc_status)
 	add_assoc_long_ex(return_value, "threshold", sizeof("threshold")-1, (long)status.threshold);
 	add_assoc_long_ex(return_value, "buffer_size", sizeof("buffer_size")-1, (long)status.buf_size);
 	add_assoc_long_ex(return_value, "roots", sizeof("roots")-1, (long)status.num_roots);
+
+	/* Using double because zend_long may be too small on some platforms */
+	add_assoc_double_ex(return_value, "application_time", sizeof("application_time")-1, (double) status.application_time / ZEND_NANO_IN_SEC);
+	add_assoc_double_ex(return_value, "collector_time", sizeof("collector_time")-1, (double) status.collector_time / ZEND_NANO_IN_SEC);
+	add_assoc_double_ex(return_value, "destructor_time", sizeof("destructor_time")-1, (double) status.dtor_time / ZEND_NANO_IN_SEC);
+	add_assoc_double_ex(return_value, "free_time", sizeof("free_time")-1, (double) status.free_time / ZEND_NANO_IN_SEC);
 }
 /* }}} */
 
@@ -511,7 +517,8 @@ ZEND_FUNCTION(define)
 register_constant:
 	/* non persistent */
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
-	if (zend_register_constant(name, &c) == SUCCESS) {
+	c.name = zend_string_copy(name);
+	if (zend_register_constant(&c) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -550,6 +557,10 @@ ZEND_FUNCTION(get_class)
 		zend_class_entry *scope = zend_get_executed_scope();
 
 		if (scope) {
+			zend_error(E_DEPRECATED, "Calling get_class() without arguments is deprecated");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
 			RETURN_STR_COPY(scope->name);
 		} else {
 			zend_throw_error(NULL, "get_class() without arguments must be called from within a class");
@@ -589,6 +600,10 @@ ZEND_FUNCTION(get_parent_class)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ce) {
+		zend_error(E_DEPRECATED, "Calling get_parent_class() without arguments is deprecated");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 		ce = zend_get_executed_scope();
 	}
 
@@ -1479,7 +1494,6 @@ ZEND_FUNCTION(get_defined_constants)
 		zend_constant *val;
 		int module_number;
 		zval *modules, const_val;
-		zend_string *const_name;
 		char **module_names;
 		zend_module_entry *module;
 		int i = 1;
@@ -1494,7 +1508,12 @@ ZEND_FUNCTION(get_defined_constants)
 		} ZEND_HASH_FOREACH_END();
 		module_names[i] = "user";
 
-		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(zend_constants), const_name, val) {
+		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), val) {
+			if (!val->name) {
+				/* skip special constants */
+				continue;
+			}
+
 			if (ZEND_CONSTANT_MODULE_NUMBER(val) == PHP_USER_CONSTANT) {
 				module_number = i;
 			} else if (ZEND_CONSTANT_MODULE_NUMBER(val) > i) {
@@ -1510,19 +1529,22 @@ ZEND_FUNCTION(get_defined_constants)
 			}
 
 			ZVAL_COPY_OR_DUP(&const_val, &val->value);
-			zend_hash_add_new(Z_ARRVAL(modules[module_number]), const_name, &const_val);
+			zend_hash_add_new(Z_ARRVAL(modules[module_number]), val->name, &const_val);
 		} ZEND_HASH_FOREACH_END();
 
 		efree(module_names);
 		efree(modules);
 	} else {
 		zend_constant *constant;
-		zend_string *const_name;
 		zval const_val;
 
-		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(zend_constants), const_name, constant) {
+		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), constant) {
+			if (!constant->name) {
+				/* skip special constants */
+				continue;
+			}
 			ZVAL_COPY_OR_DUP(&const_val, &constant->value);
-			zend_hash_add_new(Z_ARRVAL_P(return_value), const_name, &const_val);
+			zend_hash_add_new(Z_ARRVAL_P(return_value), constant->name, &const_val);
 		} ZEND_HASH_FOREACH_END();
 	}
 }

@@ -1728,7 +1728,9 @@ static bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_ast *c
 /* We don't use zend_verify_const_access because we need to deal with unlinked classes. */
 static bool zend_verify_ct_const_access(zend_class_constant *c, zend_class_entry *scope)
 {
-	if (c->ce->ce_flags & ZEND_ACC_TRAIT) {
+	if (ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED) {
+		return 0;
+	} else if (c->ce->ce_flags & ZEND_ACC_TRAIT) {
 		/* This condition is only met on directly accessing trait constants,
 		 * because the ce is replaced to the class entry of the composing class
 		 * on binding. */
@@ -4223,10 +4225,6 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 		zend_op *opline;
 		uint32_t check_op_number = get_next_op_number();
 
-		/* Assert expression may not be memoized and reused as it may not actually be evaluated. */
-		int orig_memoize_mode = CG(memoize_mode);
-		CG(memoize_mode) = ZEND_MEMOIZE_NONE;
-
 		zend_emit_op(NULL, ZEND_ASSERT_CHECK, NULL, NULL);
 
 		if (fbc && fbc_is_finalized(fbc)) {
@@ -4260,8 +4258,6 @@ static void zend_compile_assert(znode *result, zend_ast_list *args, zend_string 
 		opline = &CG(active_op_array)->opcodes[check_op_number];
 		opline->op2.opline_num = get_next_op_number();
 		SET_NODE(opline->result, result);
-
-		CG(memoize_mode) = orig_memoize_mode;
 	} else {
 		if (!fbc) {
 			zend_string_release_ex(name, 0);
@@ -7613,7 +7609,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 		zend_compile_closure_uses(uses_ast);
 	}
 
-	if (ast->kind == ZEND_AST_ARROW_FUNC) {
+	if (ast->kind == ZEND_AST_ARROW_FUNC && decl->child[2]->kind != ZEND_AST_RETURN) {
 		bool needs_return = true;
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			zend_arg_info *return_info = CG(active_op_array)->arg_info - 1;
@@ -10580,6 +10576,17 @@ static void zend_compile_expr(znode *result, zend_ast *ast)
 static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t type, bool by_ref)
 {
 	CG(zend_lineno) = zend_ast_get_lineno(ast);
+
+	if (CG(memoize_mode) != ZEND_MEMOIZE_NONE) {
+		switch (ast->kind) {
+			case ZEND_AST_CALL:
+			case ZEND_AST_METHOD_CALL:
+			case ZEND_AST_NULLSAFE_METHOD_CALL:
+			case ZEND_AST_STATIC_CALL:
+				zend_compile_memoized_expr(result, ast);
+				return &CG(active_op_array)->opcodes[CG(active_op_array)->last - 1];
+		}
+	}
 
 	switch (ast->kind) {
 		case ZEND_AST_VAR:

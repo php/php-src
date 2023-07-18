@@ -21,7 +21,7 @@ if (PHP_OS_FAMILY !== 'Windows') {
     }
 }
 
-$array = FFI::new("off_t[3]");
+$array = FFI::cdef()->new("off_t[3]");
 $ffi->bug79532($array, 3);
 var_dump($array);
 ?>

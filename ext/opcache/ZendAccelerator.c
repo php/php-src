@@ -735,6 +735,9 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			p->key = new_interned_string(p->key);
 		}
 		c = (zend_constant*)Z_PTR(p->val);
+		if (c->name) {
+			c->name = new_interned_string(c->name);
+		}
 		if (Z_TYPE(c->value) == IS_STRING) {
 			ZVAL_STR(&c->value, new_interned_string(Z_STR(c->value)));
 		}
@@ -2870,10 +2873,10 @@ static zend_result zend_accel_init_shm(void)
 
 	accel_shared_globals = zend_shared_alloc(accel_shared_globals_size);
 	if (!accel_shared_globals) {
+		zend_shared_alloc_unlock();
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL,
 				"Insufficient shared memory for interned strings buffer! (tried to allocate %zu bytes)",
 				accel_shared_globals_size);
-		zend_shared_alloc_unlock();
 		return FAILURE;
 	}
 	memset(accel_shared_globals, 0, sizeof(zend_accel_shared_globals));

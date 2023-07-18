@@ -48,12 +48,14 @@ DOMDocument Object
     [nodeValue] => 
     [nodeType] => 9
     [parentNode] => 
+    [parentElement] => 
     [childNodes] => (object value omitted)
     [firstChild] => (object value omitted)
     [lastChild] => (object value omitted)
     [previousSibling] => 
     [nextSibling] => 
     [attributes] => 
+    [isConnected] => 1
     [ownerDocument] => 
     [namespaceURI] => 
     [prefix] => 

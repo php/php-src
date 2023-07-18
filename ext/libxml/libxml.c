@@ -1344,18 +1344,14 @@ PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node)
 
 PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *object)
 {
-	int ret_refcount = -1;
-	xmlNodePtr nodep;
-	php_libxml_node_ptr *obj_node;
-
 	if (object != NULL && object->node != NULL) {
-		obj_node = (php_libxml_node_ptr *) object->node;
-		nodep = object->node->node;
-		ret_refcount = php_libxml_decrement_node_ptr(object);
+		php_libxml_node_ptr *obj_node = (php_libxml_node_ptr *) object->node;
+		xmlNodePtr nodep = obj_node->node;
+		int ret_refcount = php_libxml_decrement_node_ptr(object);
 		if (ret_refcount == 0) {
 			php_libxml_node_free_resource(nodep);
 		} else {
-			if (obj_node && object == obj_node->_private) {
+			if (object == obj_node->_private) {
 				obj_node->_private = NULL;
 			}
 		}

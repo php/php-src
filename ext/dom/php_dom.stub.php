@@ -275,6 +275,9 @@ interface DOMParentNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void;
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void;
 }
 
 interface DOMChildNode
@@ -306,6 +309,9 @@ class DOMNode
     public ?DOMNode $parentNode;
 
     /** @readonly */
+    public ?DOMElement $parentElement;
+
+    /** @readonly */
     public DOMNodeList $childNodes;
 
     /** @readonly */
@@ -322,6 +328,9 @@ class DOMNode
 
     /** @readonly */
     public ?DOMNamedNodeMap $attributes;
+
+    /** @readonly */
+    public bool $isConnected;
 
     /** @readonly */
     public ?DOMDocument $ownerDocument;
@@ -372,6 +381,8 @@ class DOMNode
     /** @tentative-return-type */
     public function isSameNode(DOMNode $otherNode): bool {}
 
+    public function isEqualNode(?DOMNode $otherNode): bool {}
+
     /** @tentative-return-type */
     public function isSupported(string $feature, string $version): bool {}
 
@@ -389,6 +400,10 @@ class DOMNode
 
     /** @return DOMNode|false */
     public function replaceChild(DOMNode $node, DOMNode $child) {}
+
+    public function contains(DOMNode|DOMNameSpaceNode|null $other): bool {}
+
+    public function getRootNode(?array $options = null): DOMNode {}
 }
 
 /** @not-serializable */
@@ -413,10 +428,16 @@ class DOMNameSpaceNode
     public ?string $namespaceURI;
 
     /** @readonly */
+    public bool $isConnected;
+
+    /** @readonly */
     public ?DOMDocument $ownerDocument;
 
     /** @readonly */
     public ?DOMNode $parentNode;
+
+    /** @readonly */
+    public ?DOMElement $parentElement;
 }
 
 class DOMImplementation
@@ -455,6 +476,9 @@ class DOMDocumentFragment extends DOMNode implements DOMParentNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void {}
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void {}
 }
 
 class DOMNodeList implements IteratorAggregate, Countable
@@ -538,6 +562,10 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
     /** @readonly */
     public string $tagName;
 
+    public string $className;
+
+    public string $id;
+
     /** @readonly */
     public mixed $schemaTypeInfo = null;
 
@@ -560,6 +588,8 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
 
     /** @tentative-return-type */
     public function getAttribute(string $qualifiedName): string {}
+
+    public function getAttributeNames(): array {}
 
     /** @tentative-return-type */
     public function getAttributeNS(?string $namespace, string $localName): string {}
@@ -612,6 +642,8 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
     /** @tentative-return-type */
     public function setIdAttributeNode(DOMAttr $attr, bool $isId): void {}
 
+    public function toggleAttribute(string $qualifiedName, ?bool $force = null): bool {}
+
     public function remove(): void {}
 
     /** @param DOMNode|string $nodes */
@@ -628,6 +660,13 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void {}
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void {}
+
+    public function insertAdjacentElement(string $where, DOMElement $element): ?DOMElement {}
+
+    public function insertAdjacentText(string $where, string $data): void {}
 }
 
 class DOMDocument extends DOMNode implements DOMParentNode
@@ -795,6 +834,9 @@ class DOMDocument extends DOMNode implements DOMParentNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void {}
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void {}
 }
 
 final class DOMException extends Exception

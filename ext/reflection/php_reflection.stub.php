@@ -205,6 +205,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract
 
     public function __construct(object|string $objectOrMethod, ?string $method = null) {}
 
+    public static function createFromMethodName(string $method): static {}
+
     public function __toString(): string {}
 
     /** @tentative-return-type */

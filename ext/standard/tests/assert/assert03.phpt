@@ -31,6 +31,23 @@ ini_set("assert.callback", "b");
 assert($a != 0);
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: PHP Startup: assert.warning INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: assert.exception INI setting is deprecated in Unknown on line 0
+
+Deprecated: Constant ASSERT_ACTIVE is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
+
+Deprecated: Constant ASSERT_WARNING is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 assertion failed - a - 18,"assert($a != 0)"
+
+Deprecated: ini_set(): assert.callback INI setting is deprecated in %s on line %d
 assertion failed - b - 22,"assert($a != 0)"

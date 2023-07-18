@@ -137,6 +137,86 @@ int dom_element_tag_name_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
+static int dom_element_reflected_attribute_read(dom_object *obj, zval *retval, const char *name)
+{
+	xmlNodePtr nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		return FAILURE;
+	}
+
+	xmlChar *content = xmlGetNoNsProp(nodep, (const xmlChar *) name);
+	if (content == NULL) {
+		ZVAL_EMPTY_STRING(retval);
+		return SUCCESS;
+	}
+
+	ZVAL_STRING(retval, (const char *) content);
+	xmlFree(content);
+
+	return SUCCESS;
+}
+
+static xmlAttrPtr dom_element_reflected_attribute_write(dom_object *obj, zval *newval, const char *name)
+{
+	xmlNode *nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		return NULL;
+	}
+
+	if (dom_node_is_read_only(nodep) == SUCCESS) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(obj->document));
+		return NULL;
+	}
+
+	/* Typed property, so it is a string already */
+	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
+	return xmlSetProp(nodep, (const xmlChar *) name, (const xmlChar *) Z_STRVAL_P(newval));
+}
+
+/* {{{ className	string
+URL: https://dom.spec.whatwg.org/#dom-element-classname
+Since:
+*/
+int dom_element_class_name_read(dom_object *obj, zval *retval)
+{
+	return dom_element_reflected_attribute_read(obj, retval, "class");
+}
+
+int dom_element_class_name_write(dom_object *obj, zval *newval)
+{
+	if (dom_element_reflected_attribute_write(obj, newval, "class")) {
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+/* }}} */
+
+/* {{{ id	string
+URL: https://dom.spec.whatwg.org/#dom-element-id
+Since:
+*/
+int dom_element_id_read(dom_object *obj, zval *retval)
+{
+	return dom_element_reflected_attribute_read(obj, retval, "id");
+}
+
+static void php_set_attribute_id(xmlAttrPtr attrp, bool is_id);
+
+int dom_element_id_write(dom_object *obj, zval *newval)
+{
+	xmlAttrPtr attr = dom_element_reflected_attribute_write(obj, newval, "id");
+	if (!attr) {
+		return FAILURE;
+	}
+	php_set_attribute_id(attr, true);
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ schemaTypeInfo	typeinfo
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Element-schemaTypeInfo
@@ -159,8 +239,7 @@ static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) /* {{{ 
 	nqname = xmlSplitQName3(name, &len);
 	if (nqname != NULL) {
 		xmlNsPtr ns;
-		xmlChar *prefix = xmlStrndup(name, len);
-		if (prefix && xmlStrEqual(prefix, (xmlChar *)"xmlns")) {
+		if (strncmp((const char *) name, "xmlns:", len + 1) == 0) {
 			ns = elem->nsDef;
 			while (ns) {
 				if (xmlStrEqual(ns->prefix, nqname)) {
@@ -168,9 +247,9 @@ static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) /* {{{ 
 				}
 				ns = ns->next;
 			}
-			xmlFree(prefix);
 			return (xmlNodePtr)ns;
 		}
+		xmlChar *prefix = xmlStrndup(name, len);
 		ns = xmlSearchNs(elem->doc, elem, prefix);
 		if (prefix != NULL) {
 			xmlFree(prefix);
@@ -206,6 +285,7 @@ PHP_METHOD(DOMElement, getAttribute)
 	dom_object *intern;
 	xmlNodePtr attr;
 	size_t name_len;
+	bool should_free;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
@@ -219,12 +299,15 @@ PHP_METHOD(DOMElement, getAttribute)
 		switch (attr->type) {
 			case XML_ATTRIBUTE_NODE:
 				value = xmlNodeListGetString(attr->doc, attr->children, 1);
+				should_free = true;
 				break;
 			case XML_NAMESPACE_DECL:
-				value = xmlStrdup(((xmlNsPtr)attr)->href);
+				value = (xmlChar *) ((xmlNsPtr)attr)->href;
+				should_free = false;
 				break;
 			default:
-				value = xmlStrdup(((xmlAttributePtr)attr)->defaultValue);
+				value = (xmlChar *) ((xmlAttributePtr)attr)->defaultValue;
+				should_free = false;
 		}
 	}
 
@@ -232,10 +315,54 @@ PHP_METHOD(DOMElement, getAttribute)
 		RETURN_EMPTY_STRING();
 	} else {
 		RETVAL_STRING((char *)value);
-		xmlFree(value);
+		if (should_free) {
+			xmlFree(value);
+		}
 	}
 }
 /* }}} end dom_element_get_attribute */
+
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-element-getattributenames
+Since:
+*/
+PHP_METHOD(DOMElement, getAttributeNames)
+{
+	zval *id;
+	xmlNode *nodep;
+	dom_object *unused_intern;
+	zval tmp;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, unused_intern);
+
+	array_init(return_value);
+	HashTable *ht = Z_ARRVAL_P(return_value);
+	zend_hash_real_init_packed(ht);
+
+	for (xmlNsPtr nsptr = nodep->nsDef; nsptr; nsptr = nsptr->next) {
+		const char *prefix = (const char *) nsptr->prefix;
+		ZVAL_STR(&tmp, dom_node_concatenated_name_helper(strlen(prefix), prefix, strlen("xmlns"), (const char *) "xmlns"));
+		zend_hash_next_index_insert(ht, &tmp);
+	}
+
+	for (xmlAttrPtr attr = nodep->properties; attr; attr = attr->next) {
+		ZVAL_STR(&tmp, dom_node_get_node_name_attribute_or_element((const xmlNode *) attr));
+		zend_hash_next_index_insert(ht, &tmp);
+	}
+}
+/* }}} end DOMElement::getAttributeNames() */
+
+static xmlNodePtr dom_create_attribute(xmlNodePtr nodep, const char *name, const char* value)
+{
+	if (xmlStrEqual((xmlChar *)name, (xmlChar *)"xmlns")) {
+		return (xmlNodePtr) xmlNewNs(nodep, (xmlChar *)value, NULL);
+	} else {
+		return (xmlNodePtr) xmlSetProp(nodep, (xmlChar *) name, (xmlChar *)value);
+	}
+}
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68F082
 Since:
@@ -287,22 +414,39 @@ PHP_METHOD(DOMElement, setAttribute)
 
 	}
 
-	if (xmlStrEqual((xmlChar *)name, (xmlChar *)"xmlns")) {
-		if (xmlNewNs(nodep, (xmlChar *)value, NULL)) {
-			RETURN_TRUE;
-		}
-	} else {
-		attr = (xmlNodePtr)xmlSetProp(nodep, (xmlChar *) name, (xmlChar *)value);
-	}
+	attr = dom_create_attribute(nodep, name, value);
 	if (!attr) {
 		zend_argument_value_error(1, "must be a valid XML attribute");
 		RETURN_THROWS();
+	}
+	if (attr->type == XML_NAMESPACE_DECL) {
+		RETURN_TRUE;
 	}
 
 	DOM_RET_OBJ(attr, &ret, intern);
 
 }
 /* }}} end dom_element_set_attribute */
+
+static bool dom_remove_attribute(xmlNodePtr attrp)
+{
+	ZEND_ASSERT(attrp != NULL);
+	switch (attrp->type) {
+		case XML_ATTRIBUTE_NODE:
+			if (php_dom_object_get_data(attrp) == NULL) {
+				node_list_unlink(attrp->children);
+				xmlUnlinkNode(attrp);
+				xmlFreeProp((xmlAttrPtr)attrp);
+			} else {
+				xmlUnlinkNode(attrp);
+			}
+			break;
+		case XML_NAMESPACE_DECL:
+			return false;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+	return true;
+}
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D6AC0F9
 Since:
@@ -332,23 +476,7 @@ PHP_METHOD(DOMElement, removeAttribute)
 		RETURN_FALSE;
 	}
 
-	switch (attrp->type) {
-		case XML_ATTRIBUTE_NODE:
-			if (php_dom_object_get_data(attrp) == NULL) {
-			node_list_unlink(attrp->children);
-				xmlUnlinkNode(attrp);
-				xmlFreeProp((xmlAttrPtr)attrp);
-		} else {
-				xmlUnlinkNode(attrp);
-		}
-			break;
-		case XML_NAMESPACE_DECL:
-			RETURN_FALSE;
-		default:
-			break;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(dom_remove_attribute(attrp));
 }
 /* }}} end dom_element_remove_attribute */
 
@@ -1205,6 +1333,247 @@ PHP_METHOD(DOMElement, replaceWith)
 	DOM_GET_THIS_INTERN(intern);
 
 	dom_child_replace_with(intern, args, argc);
+}
+/* }}} end DOMElement::prepend */
+
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
+Since:
+*/
+PHP_METHOD(DOMElement, replaceChildren)
+{
+	uint32_t argc = 0;
+	zval *args;
+	dom_object *intern;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_INTERN(intern);
+
+	dom_parent_node_replace_children(intern, args, argc);
+}
+/* }}} */
+
+#define INSERT_ADJACENT_RES_FAILED ((void*) -1)
+
+static xmlNodePtr dom_insert_adjacent(const zend_string *where, xmlNodePtr thisp, dom_object *this_intern, xmlNodePtr otherp)
+{
+	if (zend_string_equals_literal_ci(where, "beforebegin")) {
+		if (thisp->parent == NULL) {
+			return NULL;
+		}
+		if (dom_hierarchy(thisp->parent, otherp) == FAILURE) {
+			php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(this_intern->document));
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		if (!php_dom_adopt_node(otherp, this_intern, thisp->doc)) {
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		otherp = xmlAddPrevSibling(thisp, otherp);
+	} else if (zend_string_equals_literal_ci(where, "afterbegin")) {
+		if (dom_hierarchy(thisp, otherp) == FAILURE) {
+			php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(this_intern->document));
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		if (!php_dom_adopt_node(otherp, this_intern, thisp->doc)) {
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		if (thisp->children == NULL) {
+			otherp = xmlAddChild(thisp, otherp);
+		} else {
+			otherp = xmlAddPrevSibling(thisp->children, otherp);
+		}
+	} else if (zend_string_equals_literal_ci(where, "beforeend")) {
+		if (dom_hierarchy(thisp, otherp) == FAILURE) {
+			php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(this_intern->document));
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		if (!php_dom_adopt_node(otherp, this_intern, thisp->doc)) {
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		otherp = xmlAddChild(thisp, otherp);
+	} else if (zend_string_equals_literal_ci(where, "afterend")) {
+		if (thisp->parent == NULL) {
+			return NULL;
+		}
+		if (dom_hierarchy(thisp->parent, otherp) == FAILURE) {
+			php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(this_intern->document));
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		if (!php_dom_adopt_node(otherp, this_intern, thisp->doc)) {
+			return INSERT_ADJACENT_RES_FAILED;
+		}
+		otherp = xmlAddNextSibling(thisp, otherp);
+	} else {
+		php_dom_throw_error(SYNTAX_ERR, dom_get_strict_error(this_intern->document));
+		return INSERT_ADJACENT_RES_FAILED;
+	}
+	dom_reconcile_ns(thisp->doc, otherp);
+	return otherp;
+}
+
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-element-insertadjacentelement
+Since:
+*/
+PHP_METHOD(DOMElement, insertAdjacentElement)
+{
+	zend_string *where;
+	zval *element_zval, *id;
+	xmlNodePtr thisp, otherp;
+	dom_object *this_intern, *other_intern;
+	int ret;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SO", &where, &element_zval, dom_element_class_entry) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
+	DOM_GET_OBJ(otherp, element_zval, xmlNodePtr, other_intern);
+
+	xmlNodePtr result = dom_insert_adjacent(where, thisp, this_intern, otherp);
+	if (result == NULL) {
+		RETURN_NULL();
+	} else if (result != INSERT_ADJACENT_RES_FAILED) {
+		DOM_RET_OBJ(otherp, &ret, other_intern);
+	} else {
+		RETURN_THROWS();
+	}
+}
+/* }}} end DOMElement::insertAdjacentElement */
+
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-element-insertadjacenttext
+Since:
+*/
+PHP_METHOD(DOMElement, insertAdjacentText)
+{
+	zend_string *where, *data;
+	dom_object *this_intern;
+	zval *id;
+	xmlNodePtr thisp;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &where, &data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, this_intern);
+
+	if (UNEXPECTED(ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(data)))) {
+		zend_argument_value_error(2, "is too long");
+		RETURN_THROWS();
+	}
+
+	xmlNodePtr otherp = xmlNewDocTextLen(thisp->doc, (const xmlChar *) ZSTR_VAL(data), ZSTR_LEN(data));
+	xmlNodePtr result = dom_insert_adjacent(where, thisp, this_intern, otherp);
+	if (result == NULL || result == INSERT_ADJACENT_RES_FAILED) {
+		xmlFreeNode(otherp);
+	}
+}
+/* }}} end DOMElement::insertAdjacentText */
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-element-toggleattribute
+Since:
+*/
+PHP_METHOD(DOMElement, toggleAttribute)
+{
+	char *qname, *qname_tmp = NULL;
+	size_t qname_length;
+	bool force, force_is_null = true;
+	xmlNodePtr thisp;
+	zval *id;
+	dom_object *intern;
+	bool retval;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b!", &qname, &qname_length, &force, &force_is_null) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
+
+	/* Step 1 */
+	if (xmlValidateName((xmlChar *) qname, 0) != 0) {
+		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
+		RETURN_THROWS();
+	}
+
+	/* Step 2 */
+	if (thisp->doc->type == XML_HTML_DOCUMENT_NODE && (thisp->ns == NULL || xmlStrEqual(thisp->ns->href, (const xmlChar *) "http://www.w3.org/1999/xhtml"))) {
+		qname_tmp = zend_str_tolower_dup_ex(qname, qname_length);
+		if (qname_tmp != NULL) {
+			qname = qname_tmp;
+		}
+	}
+
+	/* Step 3 */
+	xmlNodePtr attribute = dom_get_dom1_attribute(thisp, (xmlChar *) qname);
+
+	/* Step 4 */
+	if (attribute == NULL) {
+		/* Step 4.1 */
+		if (force_is_null || force) {
+			/* The behaviour for namespaces isn't defined by spec, but this is based on observing browers behaviour.
+			 * It follows the same rules when you'd manually add an attribute using the other APIs. */
+			int len;
+			const xmlChar *split = xmlSplitQName3((const xmlChar *) qname, &len);
+			if (split == NULL || strncmp(qname, "xmlns:", len + 1) != 0) {
+				/* unqualified name, or qualified name with no xml namespace declaration */
+				dom_create_attribute(thisp, qname, "");
+			} else {
+				/* qualified name with xml namespace declaration */
+				xmlNewNs(thisp, (const xmlChar *) "", (const xmlChar *) (qname + len + 1));
+			}
+			retval = true;
+			goto out;
+		}
+		/* Step 4.2 */
+		retval = false;
+		goto out;
+	}
+
+	/* Step 5 */
+	if (force_is_null || !force) {
+		if (attribute->type == XML_NAMESPACE_DECL) {
+			/* The behaviour isn't defined by spec, but by observing browsers I found
+			 * that you can remove the nodes, but they'll get reconciled.
+			 * So if any reference was left to the namespace, the only effect is that
+			 * the definition is potentially moved closer to the element using it.
+			 * If no reference was left, it is actually removed. */
+			xmlNsPtr ns = (xmlNsPtr) attribute;
+			if (thisp->nsDef == ns) {
+				thisp->nsDef = ns->next;
+			} else if (thisp->nsDef != NULL) {
+				xmlNsPtr prev = thisp->nsDef;
+				xmlNsPtr cur = prev->next;
+				while (cur) {
+					if (cur == ns) {
+						prev->next = cur->next;
+						break;
+					}
+					prev = cur;
+					cur = cur->next;
+				}
+			}
+
+			ns->next = NULL;
+			dom_set_old_ns(thisp->doc, ns);
+			dom_reconcile_ns(thisp->doc, thisp);
+		} else {
+			/* TODO: in the future when namespace bugs are fixed,
+			 * the above if-branch should be merged into this called function
+			 * such that the removal will work properly with all APIs. */
+			dom_remove_attribute(attribute);
+		}
+		retval = false;
+		goto out;
+	}
+
+	/* Step 6 */
+	retval = true;
+
+out:
+	if (qname_tmp) {
+		efree(qname_tmp);
+	}
+	RETURN_BOOL(retval);
 }
 /* }}} end DOMElement::prepend */
 

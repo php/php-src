@@ -21,7 +21,8 @@ foreach (ExtendedTest::gen() as $i) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Calling get_class() without arguments is deprecated in %s on line %d
 string(4) "Test"
 string(12) "ExtendedTest"
 int(1)

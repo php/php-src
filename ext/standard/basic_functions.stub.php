@@ -124,26 +124,31 @@ const ARRAY_FILTER_USE_KEY = UNKNOWN;
 
 /**
  * @var int
+ * @deprecated
  * @cvalue PHP_ASSERT_ACTIVE
  */
 const ASSERT_ACTIVE = UNKNOWN;
 /**
  * @var int
+ * @deprecated
  * @cvalue PHP_ASSERT_CALLBACK
  */
 const ASSERT_CALLBACK = UNKNOWN;
 /**
  * @var int
+ * @deprecated
  * @cvalue PHP_ASSERT_BAIL
  */
 const ASSERT_BAIL = UNKNOWN;
 /**
  * @var int
+ * @deprecated
  * @cvalue PHP_ASSERT_WARNING
  */
 const ASSERT_WARNING = UNKNOWN;
 /**
  * @var int
+ * @deprecated
  * @cvalue PHP_ASSERT_EXCEPTION
  */
 const ASSERT_EXCEPTION = UNKNOWN;
@@ -2274,6 +2279,7 @@ function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags =
 
 function assert(mixed $assertion, Throwable|string|null $description = null): bool {}
 
+/** @deprecated */
 function assert_options(int $option, mixed $value = UNKNOWN): mixed {}
 
 /* string.c */
@@ -2351,6 +2357,10 @@ function strtoupper(string $string): string {}
 
 /** @compile-time-eval */
 function strtolower(string $string): string {}
+
+function str_increment(string $string): string {}
+
+function str_decrement(string $string): string {}
 
 /** @refcount 1 */
 function basename(string $path, string $suffix = ""): string {}
@@ -3333,6 +3343,9 @@ function stream_context_get_params($context): array {}
 
 /** @param resource $context */
 function stream_context_set_option($context, array|string $wrapper_or_options, ?string $option_name = null, mixed $value = UNKNOWN): bool {}
+
+/** @param resource $context */
+function stream_context_set_options($context, array $options): bool {}
 
 /**
  * @param resource $stream_or_context

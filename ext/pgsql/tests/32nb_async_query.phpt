@@ -59,8 +59,8 @@ pg_field_name($result, 0);
 pg_field_num($result, $field_name);
 pg_field_size($result, 0);
 pg_field_type($result, 0);
-pg_field_prtlen($result, 0);
-pg_field_is_null($result, 0);
+pg_field_prtlen($result, null, 0);
+pg_field_is_null($result, null, 0);
 
 $nb_send = pg_send_query($db, "INSERT INTO ".$table_name." VALUES (8888, 'GGG');");
 if ($nb_send === FALSE) {

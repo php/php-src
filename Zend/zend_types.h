@@ -666,6 +666,7 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 #define Z_TYPE_FLAGS_MASK			0xff00
 
 #define Z_TYPE_FLAGS_SHIFT			8
+#define Z_TYPE_INFO_EXTRA_SHIFT		16
 
 #define GC_REFCOUNT(p)				zend_gc_refcount(&(p)->gc)
 #define GC_SET_REFCOUNT(p, rc)		zend_gc_set_refcount(&(p)->gc, rc)

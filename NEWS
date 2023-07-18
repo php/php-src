@@ -12,9 +12,54 @@ PHP                                                                        NEWS
   . Fixed bug GH-11601 (Incorrect handling of unwind and graceful exit
     exceptions). (ilutov)
   . Added zend_call_stack_get implementation for OpenBSD. (David Carlier)
+  . Fixed oss-fuzz #60411 (Fix double-compilation of arrow-functions). (ilutov)
+  . Fixed build for FreeBSD before the 11.0 releases. (David Carlier)
+  . Add stack limit check in zend_eval_const_expr(). (Arnaud)
+  . Expose time spent collecting cycles in gc_status(). (Arnaud)
+  . Remove WeakMap entries whose key is only reachable through the entry value.
+    (Arnaud)
+  . Resolve open_basedir paths on INI update. (ilutov)
+
+- Curl:
+  . Added Curl options and constants up to (including) version 7.87.
+    (nielsdos, adoy)
+
+- DOM:
+  . Added DOMNode::contains() and DOMNameSpaceNode::contains(). (nielsdos)
+  . Added DOMElement::getAttributeNames(). (nielsdos)
+  . Added DOMNode::getRootNode(). (nielsdos)
+  . Added DOMElement::className and DOMElement::id. (nielsdos)
+  . Added DOMParentNode::replaceChildren(). (nielsdos)
+  . Added DOMNode::isConnected and DOMNameSpaceNode::isConnected. (nielsdos)
+  . Added DOMNode::parentElement and DOMNameSpaceNode::parentElement.
+    (nielsdos)
+  . Added DOMNode::isEqualNode(). (nielsdos)
+  . Added DOMElement::insertAdjacentElement() and
+    DOMElement::insertAdjacentText(). (nielsdos)
+  . Added DOMElement::toggleAttribute(). (nielsdos)
+
+- FPM:
+  . Added warning to log when fpm socket was not registered on the expected
+    path. (Joshua Behrens, Jakub Zelenka)
+
+- Hash:
+  . Fix use-of-uninitialized-value in hash_pbkdf2(), fix missing $options
+    parameter in signature. (ilutov)
+
+- Intl:
+  . Fix memory leak in MessageFormatter::format() on failure. (Girgias)
+
+- LDAP:
+  . Deprecate calling ldap_connect() with separate hostname and port.
+    (heiglandreas)
 
 - OpenSSL:
   . Added support for additional EC parameters in openssl_pkey_new. (Eno-CN)
+
+- PDO:
+  . Fix	GH-11587 (After php8.1, when PDO::ATTR_EMULATE_PREPARES is true
+    and PDO::ATTR_STRINGIFY_FETCHES is true, decimal zeros are no longer
+    filled). (SakiTakamachi)
 
 - Random:
   . Deprecate MT_RAND_PHP. (timwolla)
@@ -22,6 +67,14 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed GH-11573 (RecursiveDirectoryIterator::hasChildren is slow).
     (nielsdos)
+
+- Standard:
+  . Added support for rounding negative places in number_format().
+    (Marc Bennewitz)
+  . Prevent precision loss on formatting decimal integers in number_format().
+    (Marc Bennewitz)
+  . Added usage of posix_spawn for proc_open when supported by OS.
+    (Cristian Rodriguez)
 
 - Streams:
   . Implemented GH-11242 (_php_stream_copy_to_mem: Allow specifying a maximum

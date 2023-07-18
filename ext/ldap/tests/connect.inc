@@ -7,6 +7,7 @@ Change the LDAP_TEST_* environment values if you want to use another configurati
 
 $host			= getenv("LDAP_TEST_HOST")	?: "localhost";
 $port			= getenv("LDAP_TEST_PORT")	?: 389;
+$uri            = getenv("LDAP_TEST_URI") ?: 'ldap://localhost:389';
 $base			= getenv("LDAP_TEST_BASE")	?: "dc=my-domain,dc=com";
 $user			= getenv("LDAP_TEST_USER")	?: "cn=Manager,$base";
 $passwd			= getenv("LDAP_TEST_PASSWD")	?: "secret";
@@ -15,15 +16,15 @@ $sasl_passwd    = getenv("LDAP_TEST_SASL_PASSWD")   ?: "oops";
 $protocol_version	= getenv("LDAP_TEST_OPT_PROTOCOL_VERSION")	?: 3;
 $skip_on_bind_failure	= getenv("LDAP_TEST_SKIP_BIND_FAILURE") ?: true;
 
-function ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version) {
-    $link = ldap_connect($host, $port);
+function ldap_connect_and_bind($uri, $user, $passwd, $protocol_version) {
+    $link = ldap_connect($uri);
     ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
     ldap_bind($link, $user, $passwd);
     return $link;
 }
 
-function test_bind($host, $port, $user, $passwd, $protocol_version) {
-    $link = ldap_connect($host, $port);
+function test_bind($uri, $user, $passwd, $protocol_version) {
+    $link = ldap_connect($uri);
     ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
     return ldap_bind($link, $user, $passwd);
 }

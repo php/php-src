@@ -26,12 +26,27 @@ var_dump($n= assert_options(ASSERT_CALLBACK));
 assert(0);
 ?>
 --EXPECTF--
+Deprecated: PHP Startup: assert.callback INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: assert.exception INI setting is deprecated in Unknown on line 0
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 string(2) "f1"
 f1 called
 
-Warning: assert(): assert(0) failed in %s on line 13
+Warning: assert(): assert(0) failed in %s on line %d
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 string(2) "f1"
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 string(2) "f2"
 f2 called
 
-Warning: assert(): assert(0) failed in %s on line 17
+Warning: assert(): assert(0) failed in %s on line %d

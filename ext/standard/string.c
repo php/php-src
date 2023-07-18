@@ -1192,6 +1192,118 @@ PHP_FUNCTION(strtolower)
 }
 /* }}} */
 
+PHP_FUNCTION(str_increment)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(str) == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+	if (!zend_string_only_has_ascii_alphanumeric(str)) {
+		zend_argument_value_error(1, "must be composed only of alphanumeric ASCII characters");
+		RETURN_THROWS();
+	}
+
+	zend_string *incremented = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), /* persistent */ false);
+	size_t position = ZSTR_LEN(str)-1;
+	bool carry = false;
+
+	do {
+		char c = ZSTR_VAL(incremented)[position];
+		/* We know c is in ['a', 'z'], ['A', 'Z'], or ['0', '9'] range from zend_string_only_has_ascii_alphanumeric() */
+		if (EXPECTED( c != 'z' && c != 'Z' && c != '9' )) {
+			carry = false;
+			ZSTR_VAL(incremented)[position]++;
+		} else { /* if 'z', 'Z', or '9' */
+			carry = true;
+			if (c == '9') {
+				ZSTR_VAL(incremented)[position] = '0';
+			} else {
+				ZSTR_VAL(incremented)[position] -= 25;
+			}
+		}
+	} while (carry && position-- > 0);
+
+	if (UNEXPECTED(carry)) {
+		zend_string *tmp = zend_string_alloc(ZSTR_LEN(incremented)+1, 0);
+		memcpy(ZSTR_VAL(tmp) + 1, ZSTR_VAL(incremented), ZSTR_LEN(incremented));
+		ZSTR_VAL(tmp)[ZSTR_LEN(incremented)+1] = '\0';
+		switch (ZSTR_VAL(incremented)[0]) {
+			case '0':
+				ZSTR_VAL(tmp)[0] = '1';
+				break;
+			default:
+				ZSTR_VAL(tmp)[0] = ZSTR_VAL(incremented)[0];
+				break;
+		}
+		zend_string_release_ex(incremented, /* persistent */ false);
+		RETURN_STR(tmp);
+	}
+	RETURN_STR(incremented);
+}
+
+
+PHP_FUNCTION(str_decrement)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(str) == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+	if (!zend_string_only_has_ascii_alphanumeric(str)) {
+		zend_argument_value_error(1, "must be composed only of alphanumeric ASCII characters");
+		RETURN_THROWS();
+	}
+	if (ZSTR_LEN(str) >= 1 && ZSTR_VAL(str)[0] == '0') {
+		zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
+		RETURN_THROWS();
+	}
+
+	zend_string *decremented = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), /* persistent */ false);
+	size_t position = ZSTR_LEN(str)-1;
+	bool carry = false;
+
+	do {
+		char c = ZSTR_VAL(decremented)[position];
+		/* We know c is in ['a', 'z'], ['A', 'Z'], or ['0', '9'] range from zend_string_only_has_ascii_alphanumeric() */
+		if (EXPECTED( c != 'a' && c != 'A' && c != '0' )) {
+			carry = false;
+			ZSTR_VAL(decremented)[position]--;
+		} else { /* if 'a', 'A', or '0' */
+			carry = true;
+			if (c == '0') {
+				ZSTR_VAL(decremented)[position] = '9';
+			} else {
+				ZSTR_VAL(decremented)[position] += 25;
+			}
+		}
+	} while (carry && position-- > 0);
+
+	if (UNEXPECTED(carry || ZSTR_VAL(decremented)[0] == '0')) {
+		if (ZSTR_LEN(decremented) == 1) {
+			zend_string_release_ex(decremented, /* persistent */ false);
+			zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
+			RETURN_THROWS();
+		}
+		zend_string *tmp = zend_string_alloc(ZSTR_LEN(decremented) - 1, 0);
+		memcpy(ZSTR_VAL(tmp), ZSTR_VAL(decremented) + 1, ZSTR_LEN(decremented) - 1);
+		ZSTR_VAL(tmp)[ZSTR_LEN(decremented) - 1] = '\0';
+		zend_string_release_ex(decremented, /* persistent */ false);
+		RETURN_STR(tmp);
+	}
+	RETURN_STR(decremented);
+}
+
 #if defined(PHP_WIN32)
 static bool _is_basename_start(const char *start, const char *pos)
 {

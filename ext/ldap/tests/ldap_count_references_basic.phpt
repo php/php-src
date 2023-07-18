@@ -7,7 +7,7 @@ ldap
 --FILE--
 <?php
 require "connect.inc";
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 ldap_add($link, "cn=userref,$base", array(
         "objectClass" => array("extensibleObject", "referral"),
@@ -27,7 +27,7 @@ var_dump(ldap_count_references($link, $result));
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 // Referral can only be removed with Manage DSA IT Control
 ldap_delete($link, "cn=userref,$base", [['oid' => LDAP_CONTROL_MANAGEDSAIT, 'iscritical' => TRUE]]);
 ldap_delete($link, "cn=userref2,$base", [['oid' => LDAP_CONTROL_MANAGEDSAIT, 'iscritical' => TRUE]]);

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 00d59fd45c44eb14bbf8f51ee4f61e0464786d69 */
+ * Stub hash: 3a37adaf011606d10ae1fa12ce135a23b3e07cf4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -18,6 +18,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMParentNode_append, 0, 0
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMParentNode_prepend arginfo_class_DOMParentNode_append
+
+#define arginfo_class_DOMParentNode_replaceChildren arginfo_class_DOMParentNode_append
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMChildNode_remove, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -75,6 +77,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_isSameNo
 	ZEND_ARG_OBJ_INFO(0, otherNode, DOMNode, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_isEqualNode, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, otherNode, DOMNode, 1)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_isSupported, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, feature, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, version, IS_STRING, 0)
@@ -98,6 +104,14 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_replaceChild, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
 	ZEND_ARG_OBJ_INFO(0, child, DOMNode, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_contains, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, other, DOMNode|DOMNameSpaceNode, MAY_BE_NULL, NULL)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOMNode_getRootNode, 0, 0, DOMNode, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMImplementation_getFeature, 0, 2, IS_NEVER, 0)
@@ -129,6 +143,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOMDocumentFragment_append arginfo_class_DOMParentNode_append
 
 #define arginfo_class_DOMDocumentFragment_prepend arginfo_class_DOMParentNode_append
+
+#define arginfo_class_DOMDocumentFragment_replaceChildren arginfo_class_DOMParentNode_append
 
 #define arginfo_class_DOMNodeList_count arginfo_class_DOMNode_getLineNo
 
@@ -187,6 +203,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_getAttribute, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_getAttributeNames, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_getAttributeNS, 0, 2, IS_STRING, 0)
@@ -263,6 +282,11 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_setId
 	ZEND_ARG_TYPE_INFO(0, isId, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_toggleAttribute, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, force, _IS_BOOL, 1, "null")
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_DOMElement_remove arginfo_class_DOMChildNode_remove
 
 #define arginfo_class_DOMElement_before arginfo_class_DOMParentNode_append
@@ -274,6 +298,18 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOMElement_append arginfo_class_DOMParentNode_append
 
 #define arginfo_class_DOMElement_prepend arginfo_class_DOMParentNode_append
+
+#define arginfo_class_DOMElement_replaceChildren arginfo_class_DOMParentNode_append
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOMElement_insertAdjacentElement, 0, 2, DOMElement, 1)
+	ZEND_ARG_TYPE_INFO(0, where, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, element, DOMElement, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_insertAdjacentText, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, where, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMDocument___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, version, IS_STRING, 0, "\"1.0\"")
@@ -428,6 +464,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMDocument_prepend arginfo_class_DOMParentNode_append
 
+#define arginfo_class_DOMDocument_replaceChildren arginfo_class_DOMParentNode_append
+
 #define arginfo_class_DOMText___construct arginfo_class_DOMComment___construct
 
 #define arginfo_class_DOMText_isWhitespaceInElementContent arginfo_class_DOMNode_hasAttributes
@@ -506,12 +544,15 @@ ZEND_METHOD(DOMNode, hasChildNodes);
 ZEND_METHOD(DOMNode, insertBefore);
 ZEND_METHOD(DOMNode, isDefaultNamespace);
 ZEND_METHOD(DOMNode, isSameNode);
+ZEND_METHOD(DOMNode, isEqualNode);
 ZEND_METHOD(DOMNode, isSupported);
 ZEND_METHOD(DOMNode, lookupNamespaceURI);
 ZEND_METHOD(DOMNode, lookupPrefix);
 ZEND_METHOD(DOMNode, normalize);
 ZEND_METHOD(DOMNode, removeChild);
 ZEND_METHOD(DOMNode, replaceChild);
+ZEND_METHOD(DOMNode, contains);
+ZEND_METHOD(DOMNode, getRootNode);
 ZEND_METHOD(DOMImplementation, getFeature);
 ZEND_METHOD(DOMImplementation, hasFeature);
 ZEND_METHOD(DOMImplementation, createDocumentType);
@@ -520,6 +561,7 @@ ZEND_METHOD(DOMDocumentFragment, __construct);
 ZEND_METHOD(DOMDocumentFragment, appendXML);
 ZEND_METHOD(DOMDocumentFragment, append);
 ZEND_METHOD(DOMDocumentFragment, prepend);
+ZEND_METHOD(DOMDocumentFragment, replaceChildren);
 ZEND_METHOD(DOMNodeList, count);
 ZEND_METHOD(DOMNodeList, getIterator);
 ZEND_METHOD(DOMNodeList, item);
@@ -536,6 +578,7 @@ ZEND_METHOD(DOMAttr, __construct);
 ZEND_METHOD(DOMAttr, isId);
 ZEND_METHOD(DOMElement, __construct);
 ZEND_METHOD(DOMElement, getAttribute);
+ZEND_METHOD(DOMElement, getAttributeNames);
 ZEND_METHOD(DOMElement, getAttributeNS);
 ZEND_METHOD(DOMElement, getAttributeNode);
 ZEND_METHOD(DOMElement, getAttributeNodeNS);
@@ -553,12 +596,16 @@ ZEND_METHOD(DOMElement, setAttributeNodeNS);
 ZEND_METHOD(DOMElement, setIdAttribute);
 ZEND_METHOD(DOMElement, setIdAttributeNS);
 ZEND_METHOD(DOMElement, setIdAttributeNode);
+ZEND_METHOD(DOMElement, toggleAttribute);
 ZEND_METHOD(DOMElement, remove);
 ZEND_METHOD(DOMElement, before);
 ZEND_METHOD(DOMElement, after);
 ZEND_METHOD(DOMElement, replaceWith);
 ZEND_METHOD(DOMElement, append);
 ZEND_METHOD(DOMElement, prepend);
+ZEND_METHOD(DOMElement, replaceChildren);
+ZEND_METHOD(DOMElement, insertAdjacentElement);
+ZEND_METHOD(DOMElement, insertAdjacentText);
 ZEND_METHOD(DOMDocument, __construct);
 ZEND_METHOD(DOMDocument, createAttribute);
 ZEND_METHOD(DOMDocument, createAttributeNS);
@@ -609,6 +656,7 @@ ZEND_METHOD(DOMDocument, xinclude);
 ZEND_METHOD(DOMDocument, adoptNode);
 ZEND_METHOD(DOMDocument, append);
 ZEND_METHOD(DOMDocument, prepend);
+ZEND_METHOD(DOMDocument, replaceChildren);
 ZEND_METHOD(DOMText, __construct);
 ZEND_METHOD(DOMText, isWhitespaceInElementContent);
 ZEND_METHOD(DOMText, splitText);
@@ -662,6 +710,7 @@ static const zend_function_entry class_DOMComment_methods[] = {
 static const zend_function_entry class_DOMParentNode_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DOMParentNode, append, arginfo_class_DOMParentNode_append, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DOMParentNode, prepend, arginfo_class_DOMParentNode_prepend, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DOMParentNode, replaceChildren, arginfo_class_DOMParentNode_replaceChildren, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
 
@@ -687,12 +736,15 @@ static const zend_function_entry class_DOMNode_methods[] = {
 	ZEND_ME(DOMNode, insertBefore, arginfo_class_DOMNode_insertBefore, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, isDefaultNamespace, arginfo_class_DOMNode_isDefaultNamespace, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, isSameNode, arginfo_class_DOMNode_isSameNode, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNode, isEqualNode, arginfo_class_DOMNode_isEqualNode, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, isSupported, arginfo_class_DOMNode_isSupported, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, lookupNamespaceURI, arginfo_class_DOMNode_lookupNamespaceURI, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, lookupPrefix, arginfo_class_DOMNode_lookupPrefix, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, normalize, arginfo_class_DOMNode_normalize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, removeChild, arginfo_class_DOMNode_removeChild, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, replaceChild, arginfo_class_DOMNode_replaceChild, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNode, contains, arginfo_class_DOMNode_contains, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNode, getRootNode, arginfo_class_DOMNode_getRootNode, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -716,6 +768,7 @@ static const zend_function_entry class_DOMDocumentFragment_methods[] = {
 	ZEND_ME(DOMDocumentFragment, appendXML, arginfo_class_DOMDocumentFragment_appendXML, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMDocumentFragment, append, arginfo_class_DOMDocumentFragment_append, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMDocumentFragment, prepend, arginfo_class_DOMDocumentFragment_prepend, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMDocumentFragment, replaceChildren, arginfo_class_DOMDocumentFragment_replaceChildren, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -752,6 +805,7 @@ static const zend_function_entry class_DOMAttr_methods[] = {
 static const zend_function_entry class_DOMElement_methods[] = {
 	ZEND_ME(DOMElement, __construct, arginfo_class_DOMElement___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, getAttribute, arginfo_class_DOMElement_getAttribute, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMElement, getAttributeNames, arginfo_class_DOMElement_getAttributeNames, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, getAttributeNS, arginfo_class_DOMElement_getAttributeNS, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, getAttributeNode, arginfo_class_DOMElement_getAttributeNode, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, getAttributeNodeNS, arginfo_class_DOMElement_getAttributeNodeNS, ZEND_ACC_PUBLIC)
@@ -769,12 +823,16 @@ static const zend_function_entry class_DOMElement_methods[] = {
 	ZEND_ME(DOMElement, setIdAttribute, arginfo_class_DOMElement_setIdAttribute, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, setIdAttributeNS, arginfo_class_DOMElement_setIdAttributeNS, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, setIdAttributeNode, arginfo_class_DOMElement_setIdAttributeNode, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMElement, toggleAttribute, arginfo_class_DOMElement_toggleAttribute, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, remove, arginfo_class_DOMElement_remove, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, before, arginfo_class_DOMElement_before, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, after, arginfo_class_DOMElement_after, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, replaceWith, arginfo_class_DOMElement_replaceWith, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, append, arginfo_class_DOMElement_append, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, prepend, arginfo_class_DOMElement_prepend, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMElement, replaceChildren, arginfo_class_DOMElement_replaceChildren, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMElement, insertAdjacentElement, arginfo_class_DOMElement_insertAdjacentElement, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMElement, insertAdjacentText, arginfo_class_DOMElement_insertAdjacentText, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -830,6 +888,7 @@ static const zend_function_entry class_DOMDocument_methods[] = {
 	ZEND_ME(DOMDocument, adoptNode, arginfo_class_DOMDocument_adoptNode, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMDocument, append, arginfo_class_DOMDocument_append, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMDocument, prepend, arginfo_class_DOMDocument_prepend, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMDocument, replaceChildren, arginfo_class_DOMDocument_replaceChildren, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1064,6 +1123,13 @@ static zend_class_entry *register_class_DOMNode(void)
 	zend_declare_typed_property(class_entry, property_parentNode_name, &property_parentNode_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_parentNode_class_DOMNode, 0, MAY_BE_NULL));
 	zend_string_release(property_parentNode_name);
 
+	zval property_parentElement_default_value;
+	ZVAL_UNDEF(&property_parentElement_default_value);
+	zend_string *property_parentElement_name = zend_string_init("parentElement", sizeof("parentElement") - 1, 1);
+	zend_string *property_parentElement_class_DOMElement = zend_string_init("DOMElement", sizeof("DOMElement")-1, 1);
+	zend_declare_typed_property(class_entry, property_parentElement_name, &property_parentElement_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_parentElement_class_DOMElement, 0, MAY_BE_NULL));
+	zend_string_release(property_parentElement_name);
+
 	zval property_childNodes_default_value;
 	ZVAL_UNDEF(&property_childNodes_default_value);
 	zend_string *property_childNodes_name = zend_string_init("childNodes", sizeof("childNodes") - 1, 1);
@@ -1105,6 +1171,12 @@ static zend_class_entry *register_class_DOMNode(void)
 	zend_string *property_attributes_class_DOMNamedNodeMap = zend_string_init("DOMNamedNodeMap", sizeof("DOMNamedNodeMap")-1, 1);
 	zend_declare_typed_property(class_entry, property_attributes_name, &property_attributes_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_attributes_class_DOMNamedNodeMap, 0, MAY_BE_NULL));
 	zend_string_release(property_attributes_name);
+
+	zval property_isConnected_default_value;
+	ZVAL_UNDEF(&property_isConnected_default_value);
+	zend_string *property_isConnected_name = zend_string_init("isConnected", sizeof("isConnected") - 1, 1);
+	zend_declare_typed_property(class_entry, property_isConnected_name, &property_isConnected_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_isConnected_name);
 
 	zval property_ownerDocument_default_value;
 	ZVAL_UNDEF(&property_ownerDocument_default_value);
@@ -1190,6 +1262,12 @@ static zend_class_entry *register_class_DOMNameSpaceNode(void)
 	zend_declare_typed_property(class_entry, property_namespaceURI_name, &property_namespaceURI_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release(property_namespaceURI_name);
 
+	zval property_isConnected_default_value;
+	ZVAL_UNDEF(&property_isConnected_default_value);
+	zend_string *property_isConnected_name = zend_string_init("isConnected", sizeof("isConnected") - 1, 1);
+	zend_declare_typed_property(class_entry, property_isConnected_name, &property_isConnected_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_isConnected_name);
+
 	zval property_ownerDocument_default_value;
 	ZVAL_UNDEF(&property_ownerDocument_default_value);
 	zend_string *property_ownerDocument_name = zend_string_init("ownerDocument", sizeof("ownerDocument") - 1, 1);
@@ -1203,6 +1281,13 @@ static zend_class_entry *register_class_DOMNameSpaceNode(void)
 	zend_string *property_parentNode_class_DOMNode = zend_string_init("DOMNode", sizeof("DOMNode")-1, 1);
 	zend_declare_typed_property(class_entry, property_parentNode_name, &property_parentNode_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_parentNode_class_DOMNode, 0, MAY_BE_NULL));
 	zend_string_release(property_parentNode_name);
+
+	zval property_parentElement_default_value;
+	ZVAL_UNDEF(&property_parentElement_default_value);
+	zend_string *property_parentElement_name = zend_string_init("parentElement", sizeof("parentElement") - 1, 1);
+	zend_string *property_parentElement_class_DOMElement = zend_string_init("DOMElement", sizeof("DOMElement")-1, 1);
+	zend_declare_typed_property(class_entry, property_parentElement_name, &property_parentElement_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_parentElement_class_DOMElement, 0, MAY_BE_NULL));
+	zend_string_release(property_parentElement_name);
 
 	return class_entry;
 }
@@ -1356,6 +1441,18 @@ static zend_class_entry *register_class_DOMElement(zend_class_entry *class_entry
 	zend_string *property_tagName_name = zend_string_init("tagName", sizeof("tagName") - 1, 1);
 	zend_declare_typed_property(class_entry, property_tagName_name, &property_tagName_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_tagName_name);
+
+	zval property_className_default_value;
+	ZVAL_UNDEF(&property_className_default_value);
+	zend_string *property_className_name = zend_string_init("className", sizeof("className") - 1, 1);
+	zend_declare_typed_property(class_entry, property_className_name, &property_className_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_className_name);
+
+	zval property_id_default_value;
+	ZVAL_UNDEF(&property_id_default_value);
+	zend_string *property_id_name = zend_string_init("id", sizeof("id") - 1, 1);
+	zend_declare_typed_property(class_entry, property_id_name, &property_id_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_id_name);
 
 	zval property_schemaTypeInfo_default_value;
 	ZVAL_NULL(&property_schemaTypeInfo_default_value);
