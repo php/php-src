@@ -118,13 +118,13 @@ static inline double php_round_helper(double value, int mode) {
 			break;
 		case PHP_ROUND_HALF_EVEN:
 			tmp_value = floor(value + 0.5);
-			if (tmp_value == value + 0.5 && fmod(tmp_value, 2.0) != 0.0) {
+			if (tmp_value == value + 0.5 && value == (0.5 + 2 * floor(tmp_value/2.0))) {
 				tmp_value = tmp_value - 1.0;
 			}
 			break;
 		case PHP_ROUND_HALF_ODD:
 			tmp_value = floor(value + 0.5);
-			if (tmp_value == value + 0.5 && fmod(tmp_value, 2.0) == 0.0) {
+			if (tmp_value == value + 0.5 && value == (0.5 + 2 * floor(tmp_value/2.0) - 1.0)) {
 				tmp_value = tmp_value - 1.0;
 			}
 			break;
