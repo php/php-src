@@ -6,46 +6,39 @@
 class PdoSqlite extends PDO
 {
     /**
-     * @var int
-     * @cname SQLITE_DETERMINISTIC
+     * @cvalue SQLITE_DETERMINISTIC
      */
-    public const DETERMINISTIC = UNKNOWN;
+    public const int DETERMINISTIC = UNKNOWN;
 
     /**
-     * @var int
-     * @cname SQLITE_OPEN_READONLY
+     * @cvalue SQLITE_OPEN_READONLY
      */
-    public const OPEN_READONLY = UNKNOWN;
+    public const int OPEN_READONLY = UNKNOWN;
 
     /**
-     * @var int
-     * @cname SQLITE_OPEN_READWRITE
+     * @cvalue SQLITE_OPEN_READWRITE
      */
-    public const OPEN_READWRITE = UNKNOWN;
+    public const int OPEN_READWRITE = UNKNOWN;
 
     /**
-     * @var int
-     * @cname SQLITE_OPEN_CREATE
+     * @cvalue SQLITE_OPEN_CREATE
      */
-    public const OPEN_CREATE = UNKNOWN;
+    public const int OPEN_CREATE = UNKNOWN;
 
     /**
-     * @var int
-     * @cname PDO_SQLITE_ATTR_OPEN_FLAGS
+     * @cvalue PDO_SQLITE_ATTR_OPEN_FLAGS
      */
-    public const ATTR_OPEN_FLAGS = UNKNOWN;
+    public const int ATTR_OPEN_FLAGS = UNKNOWN;
 
     /**
-     * @var int
-     * @cname PDO_SQLITE_ATTR_READONLY_STATEMENT
+     * @cvalue PDO_SQLITE_ATTR_READONLY_STATEMENT
      */
-    public const ATTR_READONLY_STATEMENT = UNKNOWN;
+    public const int ATTR_READONLY_STATEMENT = UNKNOWN;
 
     /**
-     * @var int
-     * @cname PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES
+     * @cvalue PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES
      */
-    public const ATTR_EXTENDED_RESULT_CODES = UNKNOWN;
+    public const int ATTR_EXTENDED_RESULT_CODES = UNKNOWN;
 
     // Registers an aggregating User Defined Function for use in SQL statements
     public function createAggregate(

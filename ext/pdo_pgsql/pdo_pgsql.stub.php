@@ -6,40 +6,34 @@
 class PdoPgsql extends PDO
 {
     /**
-     * @var int
-     * @cname PDO_PGSQL_ATTR_DISABLE_PREPARES
+     * @cvalue PDO_PGSQL_ATTR_DISABLE_PREPARES
      */
-    public const ATTR_DISABLE_PREPARES = UNKNOWN;
+    public const int ATTR_DISABLE_PREPARES = UNKNOWN;
 
     /**
-     * @var int
-     * @cname PGSQL_TRANSACTION_IDLE
+     * @cvalue PGSQL_TRANSACTION_IDLE
      */
-    public const TRANSACTION_IDLE = UNKNOWN;
+    public const int TRANSACTION_IDLE = UNKNOWN;
 
     /**
-     * @var int
-     * @cname PGSQL_TRANSACTION_ACTIVE
+     * @cvalue PGSQL_TRANSACTION_ACTIVE
      */
-    public const TRANSACTION_ACTIVE = UNKNOWN;
+    public const int TRANSACTION_ACTIVE = UNKNOWN;
 
     /**
-     * @var int
-     * @cname PGSQL_TRANSACTION_INTRANS
+     * @cvalue PGSQL_TRANSACTION_INTRANS
      */
-    public const TRANSACTION_INTRANS = UNKNOWN;
+    public const int TRANSACTION_INTRANS = UNKNOWN;
 
     /**
-     * @var int
-     * @cname PGSQL_TRANSACTION_INERROR
+     * @cvalue PGSQL_TRANSACTION_INERROR
      */
-    public const TRANSACTION_INERROR = UNKNOWN;
+    public const int TRANSACTION_INERROR = UNKNOWN;
 
     /**
-     * @var int
-     * @cname PGSQL_TRANSACTION_UNKNOWN
+     * @cvalue PGSQL_TRANSACTION_UNKNOWN
      */
-    public const TRANSACTION_UNKNOWN = UNKNOWN;
+    public const int TRANSACTION_UNKNOWN = UNKNOWN;
 
     public function escapeIdentifier(string $input): string {}
 
