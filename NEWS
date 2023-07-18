@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.9
+?? ??? ????, PHP 8.2.10
+
+
+03 Aug 2023, PHP 8.2.9
 
 - Build:
   . Fixed bug GH-11522 (PHP version check fails with '-' separator).
