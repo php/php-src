@@ -27,6 +27,7 @@
 #include "../pdo/php_pdo_int.h"
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
+#include "zend_exceptions.h"
 
 /* {{{ Escape a identifier for insertion into a text field	*/
 PHP_METHOD(PdoPgsql, escapeIdentifier)
@@ -50,9 +51,12 @@ PHP_METHOD(PdoPgsql, escapeIdentifier)
 	tmp = PQescapeIdentifier(H->server, ZSTR_VAL(from), ZSTR_LEN(from));
 
 	if (!tmp) {
-		// TODO - exception
-		php_error_docref(NULL, E_WARNING,"Failed to escape identifier");
-		RETURN_FALSE;
+		// TODO - currently this has no test, as it is unclear on what strings PQescapeIdentifier
+		// can fail.
+		// Also, "On error, PQescapeIdentifier returns NULL and a suitable message
+		// is stored in the conn object." using the suitable message might be nice.
+		zend_throw_exception_ex(php_pdo_get_exception(), 0, "Failed to escape identifier");
+		RETURN_THROWS();
 	}
 
 	RETVAL_STRING(tmp);
