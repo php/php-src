@@ -35,7 +35,6 @@
 #include "pdo_dbh_arginfo.h"
 #include "zend_observer.h"
 #include "zend_extensions.h"
-#include "pdo_sqlite_arginfo.h"
 
 static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
 
