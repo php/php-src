@@ -39,5 +39,5 @@ echo "Fin.";
 Loading non-existent file.
 Unable to load extension '/this/does/not_exist'
 Loading invalid file.
-Unable to load extension '%s: cannot open shared object file: No such file or directory'
+Unable to load extension '%s: No such file or directory'
 Fin.
