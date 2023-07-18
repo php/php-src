@@ -220,7 +220,7 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
 
 
 #define MAX_PDO_SUB_CLASSES 64
-static int number_of_pdo_driver_class_entries = 0;
+static unsigned int number_of_pdo_driver_class_entries = 0;
 static pdo_driver_class_entry *pdo_driver_class_entries[MAX_PDO_SUB_CLASSES];
 
 // It would be possible remove this and roll it into the standard driver class entries
@@ -228,7 +228,7 @@ static pdo_driver_class_entry *pdo_driver_class_entries[MAX_PDO_SUB_CLASSES];
 void pdo_register_driver_specific_class(pdo_driver_class_entry *driver_class_entry)
 {
 	if (number_of_pdo_driver_class_entries >= MAX_PDO_SUB_CLASSES) {
-
+		// TODO - return false
 	}
 
 	pdo_driver_class_entries[number_of_pdo_driver_class_entries] = driver_class_entry;
@@ -1490,7 +1490,6 @@ void pdo_dbh_init(void)
 	memcpy(&pdosqlite_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdosqlite_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);
 	pdosqlite_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
-	pdosqlite_dbh_object_handlers.clone_obj = NULL;
 	pdosqlite_dbh_object_handlers.get_method = dbh_method_get;
 	pdosqlite_dbh_object_handlers.compare = zend_objects_not_comparable;
 	pdosqlite_dbh_object_handlers.get_gc = dbh_get_gc;
