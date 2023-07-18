@@ -12,7 +12,7 @@ f(2);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: f(): Argument #1 ($arg1) cannot be passed by reference in %s:%d
+Fatal error: Uncaught Error: f(): Argument #1 ($arg1) could not be passed by reference in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

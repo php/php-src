@@ -595,7 +595,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg
 	zend_string *func_name = get_function_or_method_name(EX(call)->func);
 	const char *param_name = get_function_arg_name(EX(call)->func, arg_num);
 
-	zend_throw_error(NULL, "%s(): Argument #%d%s%s%s cannot be passed by reference",
+	zend_throw_error(NULL, "%s(): Argument #%d%s%s%s could not be passed by reference",
 		ZSTR_VAL(func_name), arg_num, param_name ? " ($" : "", param_name ? param_name : "", param_name ? ")" : ""
 	);
 

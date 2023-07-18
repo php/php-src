@@ -12,7 +12,7 @@ change(list($val) = $array);
 var_dump($array);
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: change(): Argument #1 ($ref) cannot be passed by reference in %s:%d
+Fatal error: Uncaught Error: change(): Argument #1 ($ref) could not be passed by reference in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d
