@@ -223,7 +223,7 @@ typedef struct {
 	zend_class_entry *driver_ce;
 } pdo_driver_class_entry;
 
-ZEND_API zend_result pdo_register_driver_specific_class(pdo_driver_class_entry *driver_class_entry);
+extern ZEND_API zend_result pdo_register_driver_specific_class(pdo_driver_class_entry *driver_class_entry);
 
 /* {{{ methods for a database handle */
 
