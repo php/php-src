@@ -223,6 +223,11 @@ PHP_METHOD(PdoSqlite, createFunction)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (argc < -1) {
+		zend_argument_value_error(3	, "must be either -1 (for any number of parameters) or greater than equal to zero.");
+		RETURN_THROWS();
+	}
+
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 

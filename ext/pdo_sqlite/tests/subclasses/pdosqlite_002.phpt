@@ -32,6 +32,14 @@ foreach ($db->query('SELECT testing(name) FROM foobar') as $row) {
 
 $db->query('DROP TABLE foobar');
 
+try {
+    $db->createFunction('not_going_to_work', function($v) { return strtolower($v); }, -5, PdoSqlite::DETERMINISTIC);
+    echo "Failed to throw exception with invalid parameter.\n";
+}
+catch (ValueError $ve) {
+    echo $ve->getMessage() . "\n";
+}
+
 echo "Fin.";
 ?>
 --EXPECT--
@@ -48,4 +56,5 @@ array(2) {
   [0]=>
   string(4) "php6"
 }
+PdoSqlite::createFunction(): Argument #3 ($num_args) must be either -1 (for any number of parameters) or greater than equal to zero.
 Fin.
