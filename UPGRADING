@@ -128,14 +128,32 @@ PHP 8.3 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/saner-inc-dec-operators
   . Using the -- operator on empty or non-numeric strings is now deprecated.
     RFC: https://wiki.php.net/rfc/saner-inc-dec-operators
+  . Calling get_class() and get_parent_class() without arguments is now
+    deprecated.
+
+- DBA
+  . Calling dba_fetch() with $dba as the 3rd argument is now deprecated.
+
+- FFI
+  . Calling FFI::cast(), FFI::new(), and FFI::type() statically is now
+    deprecated.
 
 - Intl
   . The U_MULTIPLE_DECIMAL_SEP*E*RATORS constant had been deprecated, using
     the U_MULTIPLE_DECIMAL_SEP*A*RATORS instead is recommended.
+  . The NumberFormatter::TYPE_CURRENCY has been deprecated.
 
 - LDAP
   . Calling ldap_connect() with separate hostname and port is deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_3#deprecate_calling_ldap_connect_with_2_parameters
+
+- MBString
+  . Passing a negative $width to mb_strimwidth() is now deprecated.
+
+- Phar
+  . Calling Phar::setStub() with a resource and a length is now deprecated.
+    Such calls should be replaced by:
+    $phar->setStub(stream_get_contents($resource));
 
 - Random
   . The MT_RAND_PHP Mt19937 variant is deprecated.
@@ -199,9 +217,9 @@ PHP 8.3 UPGRADE NOTES
     Previously it returned null on success and false on failure.
 
 - Curl:
-  . curl_getinfo() now supports two new constants: CURLINFO_CAPATH and CURLINFO_CAINFO.
-    If option is null, the following two additional keys are present:
-    "capath" and "cainfo".
+  . curl_getinfo() now supports two new constants: CURLINFO_CAPATH and
+    CURLINFO_CAINFO. If option is null, the following two additional keys are
+    present: "capath" and "cainfo".
 
 - MBString:
   . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional
@@ -231,22 +249,32 @@ PHP 8.3 UPGRADE NOTES
     the closest matching encoding will be returned."
 
 - mysqli:
-  . mysqli_fetch_object now raises a ValueError instead of an Exception when the constructor_args
-    argument is non empty with the class not having constructor.
-  . mysqli_poll now raises a ValueError when the read nor error arguments are passed.
+  . mysqli_fetch_object now raises a ValueError instead of an Exception when
+    the constructor_args argument is non empty with the class not having
+    constructor.
+  . mysqli_poll now raises a ValueError when the read nor error arguments are
+    passed.
 
 - PGSQL:
-  . pg_fetch_object now raises a ValueError instead of an Exception when the constructor_args
-    argument is non empty with the class not having constructor.
-  . pg_insert now raises a ValueError instead of a WARNING when the table specified is invalid.
-  . pg_insert and pg_convert raises a ValueError or a TypeError instead of a WARNING when the
-    value/type of a field does not match properly with a PostGreSQL's type.
+  . pg_fetch_object now raises a ValueError instead of an Exception when the
+    constructor_args argument is non empty with the class not having
+    constructor.
+  . pg_insert now raises a ValueError instead of a WARNING when the table
+    specified is invalid.
+  . pg_insert and pg_convert raises a ValueError or a TypeError instead of a
+    WARNING when the value/type of a field does not match properly with a
+    PostGreSQL's type.
+  . The $row param of pg_fetch_result(), pg_field_prtlen() and
+    pg_field_is_null() is now nullable.
 
 - Random:
   . Changed mt_srand() and srand() to not check the number of arguments to
     determine whether a random seed should be used. Passing null will generate
     a random seed, 0 will use zero as the seed. The functions are now consistent
     with Mt19937::__construct().
+
+- Reflection:
+  . Return type of ReflectionClass::getStaticProperties() is no longer nullable.
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING.
@@ -274,6 +302,10 @@ PHP 8.3 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Date:
+  . Added DatePeriod::createFromISO8601String() as a replacement for the
+    overloaded constructor of DatePeriod.
+
 - DOM:
   . Added DOMNode::contains() and DOMNameSpaceNode::contains().
   . Added DOMElement::getAttributeNames().
@@ -291,10 +323,21 @@ PHP 8.3 UPGRADE NOTES
     DOMElement::insertAdjacentText().
   . Added DOMElement::toggleAttribute().
 
+- Intl:
+  . Added IntlCalendar::setDate() and IntlCalendar::setDateTime()
+    as partial replacements for the overloaded IntlCalendar::set() method.
+  . Added IntlGregorianCalendar::createFromDate() and
+    IntlGregorianCalendar::createFromDateTime()
+    as partial replacements for the overloaded IntlGregorianCalendar constructor.
+
 - JSON:
   . Added json_validate(), which returns whether the json is valid for
     the given $depth and $options.
     RFC: https://wiki.php.net/rfc/json_validate
+
+- LDAP:
+  . Added ldap_connect_wallet().
+  . Added ldap_exop_sync().
 
 - MBString:
   . Added mb_str_pad(), which is the mbstring equivalent of str_pad().
@@ -317,7 +360,7 @@ PHP 8.3 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/randomizer_additions
 
 - Reflection:
-  . Return type of ReflectionClass::getStaticProperties() is no longer nullable.
+  . Added ReflectionMethod::createFromMethodName().
 
 - Sockets:
   . Added socket_atmark to checks if the socket is OOB marked.
@@ -325,6 +368,8 @@ PHP 8.3 UPGRADE NOTES
 - Standard:
   . Added the str_increment() and str_decrement() functions.
     RFC: https://wiki.php.net/rfc/saner-inc-dec-operators
+  . Added stream_context_set_options() as a replacement for
+    stream_context_set_option() when passed an array of options.
 
 - Zip:
   . Added ZipArchive::setArchiveFlag and ZipArchive::getArchiveFlag methods.
