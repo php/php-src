@@ -28,6 +28,7 @@
 #include "zend_exceptions.h"
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
+#include "SAPI.h"
 
 #include "../pdo_sqlite/php_pdo_sqlite.h"
 #include "../pdo_sqlite/php_pdo_sqlite_int.h"
@@ -35,7 +36,7 @@
 typedef struct {
 	zval val;
 	zend_long row;
-} pdopgsql_aggregate_context;
+} pdosqlite3_aggregate_context;
 
 static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		int argc, sqlite3_value **argv, sqlite3_context *context,
@@ -46,7 +47,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	int i;
 	int ret;
 	int fake_argc;
-	pdopgsql_aggregate_context *agg_context = NULL;
+	pdosqlite3_aggregate_context *agg_context = NULL;
 
 	if (is_agg) {
 		is_agg = 2;
@@ -67,7 +68,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	}
 
 	if (is_agg) {
-		agg_context = sqlite3_aggregate_context(context, sizeof(pdopgsql_aggregate_context));
+		agg_context = sqlite3_aggregate_context(context, sizeof(pdosqlite3_aggregate_context));
 		if (!agg_context) {
 			efree(zargs);
 			return FAILURE;
@@ -195,11 +196,6 @@ static void php_pgsql_func_final_callback(sqlite3_context *context)
 
 	do_callback(&func->afini, &func->fini, 0, NULL, context, 1);
 }
-
-
-
-
-
 
 /* {{{ proto bool PdoSqlite::createFunction(string $function_name, callable $callback, int $num_args = -1, int $flags = 0)
     Creates a function that can be used in a query
@@ -525,7 +521,7 @@ PHP_METHOD(PdoSqlite, openBlob)
 }
 /* }}} */
 
-static int php_pgsql_collation_callback(void *context,
+static int php_pdosqlite_collation_callback(void *context,
 	int string1_len, const void *string1,
 	int string2_len, const void *string2)
 {
@@ -639,7 +635,7 @@ PHP_METHOD(PdoSqlite, createCollation)
 
 	collation = (struct pdo_sqlite_collation*)ecalloc(1, sizeof(*collation));
 
-	ret = sqlite3_create_collation(H->db, collation_name, SQLITE_UTF8, collation, php_pgsql_collation_callback);
+	ret = sqlite3_create_collation(H->db, collation_name, SQLITE_UTF8, collation, php_pdosqlite_collation_callback);
 	if (ret == SQLITE_OK) {
 		collation->name = estrdup(collation_name);
 

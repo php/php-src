@@ -235,7 +235,7 @@ zend_result pdo_register_driver_specific_class(pdo_driver_class_entry *driver_cl
 		return FAILURE;
 	}
 
-	for (int i=0; i<number_of_pdo_driver_class_entries; i+=1) {
+	for (unsigned int i=0; i<number_of_pdo_driver_class_entries; i+=1) {
 		if (strcmp(pdo_driver_class_entries[i]->driver_name, driver_class_entry->driver_name) == 0) {
 			php_error_docref(NULL, E_ERROR, "Cannot register duplicate PDO subclass name.");
 			return FAILURE;
@@ -249,10 +249,9 @@ zend_result pdo_register_driver_specific_class(pdo_driver_class_entry *driver_cl
 }
 
 
-static
-void create_specific_pdo_object(zval *new_object, const char *driver_name)
+static void create_specific_pdo_object(zval *new_object, const char *driver_name)
 {
-	for (int i=0; i < number_of_pdo_driver_class_entries; i += 1) {
+	for (unsigned int i=0; i < number_of_pdo_driver_class_entries; i += 1) {
 		pdo_driver_class_entry *driver_class_entry = pdo_driver_class_entries[i];
 		if (strcmp(driver_class_entry->driver_name, driver_name) == 0) {
 			object_init_ex(new_object, driver_class_entry->driver_ce);
