@@ -31,7 +31,8 @@
 #include "ext/spl/spl_exceptions.h"
 #include "pdo_arginfo.h"
 
-zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
+ZEND_API zend_class_entry *pdo_dbh_ce;
+zend_class_entry *pdo_dbstmt_ce, *pdo_row_ce;
 
 /* for exceptional circumstances */
 zend_class_entry *pdo_exception_ce;
