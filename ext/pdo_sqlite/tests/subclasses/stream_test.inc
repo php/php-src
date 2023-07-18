@@ -44,5 +44,3 @@ class PDOSQLite_Test_Stream
 }
 
 stream_wrapper_register('pdosqliteBlobTest', PDOSQLite_Test_Stream::class) or die("Unable to register pdosqliteBlobTest stream");
-
-?>
