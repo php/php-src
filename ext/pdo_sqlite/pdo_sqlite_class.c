@@ -32,14 +32,10 @@
 #include "../pdo_sqlite/php_pdo_sqlite.h"
 #include "../pdo_sqlite/php_pdo_sqlite_int.h"
 
-// TODO - define this in appropriate header, not here.
-
 typedef struct {
 	zval val;
 	zend_long row;
 } pdopgsql_aggregate_context;
-
-
 
 static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		int argc, sqlite3_value **argv, sqlite3_context *context,
