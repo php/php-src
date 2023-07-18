@@ -19,5 +19,5 @@ function by_ref2(&$ref) {}
 
 ?>
 --EXPECT--
-by_ref(): Argument #1 ($ref) must be passed by reference
-by_ref2(): Argument #1 ($ref) must be passed by reference
+by_ref(): Argument #1 ($ref) could not be passed by reference
+by_ref2(): Argument #1 ($ref) could not be passed by reference
