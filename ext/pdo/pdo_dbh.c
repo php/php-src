@@ -321,12 +321,7 @@ void internal_construct(INTERNAL_FUNCTION_PARAMETERS, zval *object, zval *new_zv
 	}
 
 	if (object == NULL) {
-		// could this ever happen?
-		if (driver->driver_name == NULL) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0, "Driver name is NULL");
-			RETURN_THROWS();
-		}
-
+		ZEND_ASSERT((driver->driver_name != NULL) && "PDO driver name is null");
 		create_specific_pdo_object(new_zval_object, driver->driver_name);
 
 		if (new_zval_object == NULL) {
