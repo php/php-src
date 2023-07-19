@@ -1157,15 +1157,11 @@ PHP_FUNCTION(number_format)
 		thousand_sep_len = 1;
 	}
 
-#if SIZEOF_ZEND_LONG > SIZEOF_INT
 	if (dec >= 0) {
-		dec_int = dec > INT_MAX ? INT_MAX : (int)dec;
+		dec_int = ZEND_LONG_INT_OVFL(dec) ? INT_MAX : (int)dec;
 	} else {
-		dec_int = dec <= INT_MIN ? INT_MIN : (int)dec;
+		dec_int = ZEND_LONG_INT_UDFL(dec) ? INT_MIN : (int)dec;
 	}
-#else
-	dec_int = dec;
-#endif
 
 	RETURN_STR(_php_math_number_format_ex(num, dec_int, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 }
