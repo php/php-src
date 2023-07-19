@@ -633,7 +633,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 		S->cols[colno].is_long = 0;
 
 		rc = SQLBindCol(S->stmt, colno+1,
-			(php_odbc_sqltype_is_binary(S->cols[colno].coltype) || S->cols[colno].is_unicode) ? SQL_C_BINARY : SQL_C_CHAR,
+			S->cols[colno].is_unicode ? SQL_C_BINARY : SQL_C_CHAR,
 			S->cols[colno].data,
 			S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
 
@@ -671,7 +671,10 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	pdo_odbc_column *C = &S->cols[colno];
 
-	SQLSMALLINT c_type = (php_odbc_sqltype_is_binary(C->coltype) || C->is_unicode) ? SQL_C_BINARY : SQL_C_CHAR;
+	SQLSMALLINT c_type = C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR;
+	if (type && (*type == PDO_PARAM_BINARY || *type == PDO_PARAM_LOB)) {
+		c_type = SQL_C_BINARY;
+	}
 	/* if it is a column containing "long" data, perform late binding now */
 	if (C->is_long) {
 		SQLLEN orig_fetched_len = SQL_NULL_DATA;
