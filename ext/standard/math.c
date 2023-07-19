@@ -282,15 +282,11 @@ PHP_FUNCTION(round)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() >= 2) {
-#if SIZEOF_ZEND_LONG > SIZEOF_INT
 		if (precision >= 0) {
-			places = precision > INT_MAX ? INT_MAX : (int)precision;
+			places = ZEND_LONG_INT_OVFL(precision) ? INT_MAX : (int)precision;
 		} else {
-			places = precision <= INT_MIN ? INT_MIN : (int)precision;
+			places = ZEND_LONG_INT_UDFL(precision) ? INT_MIN : (int)precision;
 		}
-#else
-		places = precision;
-#endif
 	}
 
 	switch (Z_TYPE_P(value)) {
@@ -1026,15 +1022,11 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, zend_long dec, const ch
 	int dec_round;
 
 	// prevent integer overflow
-#if SIZEOF_ZEND_LONG > SIZEOF_INT
 	if (dec >= 0) {
-		dec_round = dec > INT_MAX ? INT_MAX : (int)dec;
+		dec_round = ZEND_LONG_INT_OVFL(dec) ? INT_MAX : (int)dec;
 	} else {
-		dec_round = dec <= INT_MIN ? INT_MIN : (int)dec;
+		dec_round = ZEND_LONG_INT_UDFL(dec) ? INT_MIN : (int)dec;
 	}
-#else
-	dec_round = dec;
-#endif
 
 	if (d < 0) {
 		is_negative = 1;
