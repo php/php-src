@@ -164,21 +164,24 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					MAKE_NOP(src);
 					++(*opt_count);
 				} else {
-					zval c;
-					ZVAL_COPY(&c, &ZEND_OP1_LITERAL(src));
 					if (opline->opcode != ZEND_CASE
 					 && opline->opcode != ZEND_CASE_STRICT
 					 && opline->opcode != ZEND_FETCH_LIST_R
 					 && opline->opcode != ZEND_SWITCH_LONG
 					 && opline->opcode != ZEND_SWITCH_STRING
 					 && opline->opcode != ZEND_MATCH
-					 && zend_optimizer_update_op1_const(op_array, opline, &c)) {
-						VAR_SOURCE(op1) = NULL;
-						literal_dtor(&ZEND_OP1_LITERAL(src));
-						MAKE_NOP(src);
-						++(*opt_count);
-					} else {
-						zval_ptr_dtor_nogc(&c);
+					 && opline->opcode != ZEND_JMP_NULL
+					 && !zend_bitset_in(used_ext, VAR_NUM(op1.var))) {
+						zval c;
+						ZVAL_COPY(&c, &ZEND_OP1_LITERAL(src));
+						if (zend_optimizer_update_op1_const(op_array, opline, &c)) {
+							VAR_SOURCE(op1) = NULL;
+							literal_dtor(&ZEND_OP1_LITERAL(src));
+							MAKE_NOP(src);
+							++(*opt_count);
+						} else {
+							zval_ptr_dtor_nogc(&c);
+						}
 					}
 				}
 			}
