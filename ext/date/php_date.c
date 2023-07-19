@@ -4270,7 +4270,8 @@ static bool date_interval_initialize(timelib_rel_time **rt, /*const*/ char *form
 	return retval;
 } /* }}} */
 
-static int date_interval_compare_objects(zval *o1, zval *o2) {
+static int date_interval_compare_objects(zval *o1, zval *o2)
+{
 	ZEND_COMPARE_OBJECTS_FALLBACK(o1, o2);
 	/* There is no well defined way to compare intervals like P1M and P30D, which may compare
 	 * smaller, equal or greater depending on the point in time at which the interval starts. As
