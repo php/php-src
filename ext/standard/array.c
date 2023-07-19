@@ -4266,10 +4266,10 @@ PHP_FUNCTION(array_column)
 	HashTable *input;
 	zval *colval, *data, rv;
 	zend_string *column_str = NULL;
-	zend_long column_long;
+	zend_long column_long = 0;
 	bool column_is_null = 0;
 	zend_string *index_str = NULL;
-	zend_long index_long;
+	zend_long index_long = 0;
 	bool index_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
