@@ -39,7 +39,7 @@ static unsigned long getauxval(unsigned long key) {
 }
 # endif
 
-static inline int has_crc32_insn() {
+static inline int has_crc32_insn(void) {
 	/* Only go through the runtime detection once. */
 	static int res = -1;
 	if (res != -1)
