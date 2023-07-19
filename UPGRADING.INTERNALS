@@ -75,6 +75,9 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 2. Build system changes
 ========================
 
+* PHP_EXTRA_VERSION can be passed to configure script to control custom PHP
+  build versions: ./configure PHP_EXTRA_VERSION="-acme"
+
 * LDFLAGS are not unset anymore allowing them to be adjusted e.g.
   LDFLAGS="..." ./configure
 
