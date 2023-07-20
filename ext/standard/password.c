@@ -589,9 +589,9 @@ PHP_FUNCTION(password_needs_rehash)
 	const php_password_algo *old_algo, *new_algo;
 	zend_string *hash;
 	zend_string *new_algo_str;
-	zend_long new_algo_long;
+	zend_long new_algo_long = 0;
 	bool new_algo_is_null;
-	zend_array *options = 0;
+	zend_array *options = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(hash)
@@ -637,7 +637,7 @@ PHP_FUNCTION(password_hash)
 {
 	zend_string *password, *digest = NULL;
 	zend_string *algo_str;
-	zend_long algo_long;
+	zend_long algo_long = 0;
 	bool algo_is_null;
 	const php_password_algo *algo;
 	zend_array *options = NULL;
