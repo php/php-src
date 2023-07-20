@@ -321,7 +321,7 @@ slightly different steps. We'll call attention where the steps differ.
 15. Now the tarballs and signatures may be found at
     `https://downloads.php.net/~yourname/`, e.g. https://downloads.php.net/~derick/.
 
-16. Once the release is tagged, contact the release-managers@ distribution
+16. Once the release is tagged, contact the release-managers@php.net distribution
     list so that Windows binaries can be created. Once those are made, they may
     be found at https://windows.php.net/qa/.
 
@@ -615,7 +615,7 @@ slightly different steps. We'll call attention where the steps differ.
     > will be available from `https://www.php.net/distributions/php-X.Y.Z.tar.gz`,
     > etc.
 
-15. Once the release is tagged, contact the release-managers@ distribution
+15. Once the release is tagged, contact the release-managers@php.net distribution
     list so that Windows binaries can be created. Once those are made, they may
     be found at https://windows.php.net/qa/.
 
@@ -931,7 +931,7 @@ volunteers to begin the selection process for the next release managers.
 ## New release manager checklist
 
 1. Email systems@php.net to get setup for access to downloads.php.net and to be
-   added to the release-managers@ distribution list.
+   added to the release-managers@php.net distribution list.
 
 2. Request membership to the release managers group on GitHub.
 
