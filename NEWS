@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.23
 
-
+- FFI:
+  . Fix leaking definitions when using FFI::cdef()->new(...). (ilutov)
 
 03 Aug 2023, PHP 8.1.22
 
