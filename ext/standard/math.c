@@ -110,11 +110,25 @@ static inline double php_round_helper(double value, int mode) {
 				tmp_value = floor(value + 0.5);
 			}
 			break;
-		case PHP_ROUND_UP:
+		case PHP_ROUND_CEILING:
 			tmp_value = ceil(value);
 			break;
-		case PHP_ROUND_DOWN:
+		case PHP_ROUND_FLOOR:
 			tmp_value = floor(value);
+			break;
+		case PHP_ROUND_TOWARD_ZERO:
+			if(value >= 0.0) {
+				tmp_value = floor(value);
+			} else {
+				tmp_value = ceil(value);
+			}
+			break;
+		case PHP_ROUND_AWAY_FROM_ZERO:
+			if(value >= 0.0) {
+				tmp_value = ceil(value);
+			} else {
+				tmp_value = floor(value);
+			}
 			break;
 		case PHP_ROUND_HALF_EVEN:
 			tmp_value = floor(value + 0.5);

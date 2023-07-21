@@ -75,6 +75,7 @@ PHP                                                                        NEWS
     (Marc Bennewitz)
   . Added usage of posix_spawn for proc_open when supported by OS.
     (Cristian Rodriguez)
+  . Added 4 new rounding modes to the round(). (Jorg Sowa)
 
 - Streams:
   . Implemented GH-11242 (_php_stream_copy_to_mem: Allow specifying a maximum
