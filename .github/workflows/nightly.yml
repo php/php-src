@@ -360,7 +360,6 @@ jobs:
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
           echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
-
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
@@ -380,7 +379,6 @@ jobs:
             cd ..
           done
           exit $X
-
       - name: Test Laravel
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
@@ -395,7 +393,6 @@ jobs:
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
-
       - name: Test ReactPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
@@ -415,7 +412,6 @@ jobs:
             cd ..
           done
           exit $X
-
       - name: Test Revolt PHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
@@ -428,7 +424,6 @@ jobs:
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
-
       - name: Test Symfony
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
