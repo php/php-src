@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fix use-of-uninitialized-value in hash_pbkdf2(), fix missing $options
     parameter in signature. (ilutov)
 
+- Opcache:
+  . Fixed bug GH-11715 (opcache.interned_strings_buffer either has no effect or
+    opcache_get_status() / phpinfo() is wrong). (nielsdos)
+
 03 Aug 2023, PHP 8.2.9
 
 - Build:
