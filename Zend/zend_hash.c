@@ -888,6 +888,11 @@ add_to_hash:
 	ht->nNumOfElements++;
 	p = ht->arData + idx;
 	p->key = key = zend_string_init(str, len, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+#if ZEND_RC_DEBUG
+	if (GC_FLAGS(ht) & GC_PERSISTENT_LOCAL) {
+		GC_MAKE_PERSISTENT_LOCAL(key);
+	}
+#endif
 	p->h = ZSTR_H(key) = h;
 	HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
 	if (flag & HASH_LOOKUP) {
