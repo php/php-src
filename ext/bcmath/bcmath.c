@@ -416,16 +416,16 @@ PHP_FUNCTION(bcmod)
 /* {{{ Returns the value of an arbitrary precision number raised to the power of another reduced by a modulus */
 PHP_FUNCTION(bcpowmod)
 {
-	zend_string *base, *exponent, *modulus;
+	zend_string *base_str, *exponent_str, *modulus_str;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
 	bc_num bc_base, bc_expo, bc_modulus, result;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
-		Z_PARAM_STR(base)
-		Z_PARAM_STR(exponent)
-		Z_PARAM_STR(modulus)
+		Z_PARAM_STR(base_str)
+		Z_PARAM_STR(exponent_str)
+		Z_PARAM_STR(modulus_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(scale_param, scale_param_is_null)
 	ZEND_PARSE_PARAMETERS_END();
@@ -444,17 +444,17 @@ PHP_FUNCTION(bcpowmod)
 	bc_init_num(&bc_modulus);
 	bc_init_num(&result);
 
-	if (php_str2num(&bc_base, ZSTR_VAL(base)) == FAILURE) {
+	if (php_str2num(&bc_base, ZSTR_VAL(base_str)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (php_str2num(&bc_expo, ZSTR_VAL(exponent)) == FAILURE) {
+	if (php_str2num(&bc_expo, ZSTR_VAL(exponent_str)) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (php_str2num(&bc_modulus, ZSTR_VAL(modulus)) == FAILURE) {
+	if (php_str2num(&bc_modulus, ZSTR_VAL(modulus_str)) == FAILURE) {
 		zend_argument_value_error(3, "is not well-formed");
 		goto cleanup;
 	}
@@ -494,15 +494,15 @@ PHP_FUNCTION(bcpowmod)
 /* {{{ Returns the value of an arbitrary precision number raised to the power of another */
 PHP_FUNCTION(bcpow)
 {
-	zend_string *left, *right;
+	zend_string *base_str, *exponent_str;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
 	bc_num first, bc_exponent, result;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STR(left)
-		Z_PARAM_STR(right)
+		Z_PARAM_STR(base_str)
+		Z_PARAM_STR(exponent_str)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(scale_param, scale_param_is_null)
 	ZEND_PARSE_PARAMETERS_END();
@@ -520,12 +520,12 @@ PHP_FUNCTION(bcpow)
 	bc_init_num(&bc_exponent);
 	bc_init_num(&result);
 
-	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
+	if (php_str2num(&first, ZSTR_VAL(base_str)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (php_str2num(&bc_exponent, ZSTR_VAL(right)) == FAILURE) {
+	if (php_str2num(&bc_exponent, ZSTR_VAL(exponent_str)) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}

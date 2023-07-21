@@ -134,7 +134,7 @@ typedef enum {
 	MOD_IS_ZERO
 } raise_mod_status;
 
-raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *result, size_t scale);
+raise_mod_status bc_raisemod(bc_num base, bc_num exponent, bc_num mod, bc_num *result, size_t scale);
 
 void bc_raise(bc_num base, long exponent, bc_num *resul, size_t scale);
 
