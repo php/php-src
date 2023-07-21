@@ -4264,6 +4264,9 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, uint32_t op
 				|	mov FCARG1d, opline->op1.var
 				|	EXT_CALL zend_jit_undefined_op_helper, r0
 				|	SET_ZVAL_TYPE_INFO op1_addr, IS_NULL
+				|	// Check if undefined error was converted to exception and abort
+				|	test r0, r0
+				|	jz ->exception_handler_undef
 				op1_info |= MAY_BE_NULL;
 			}
 			|2:

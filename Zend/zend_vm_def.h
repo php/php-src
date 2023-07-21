@@ -1487,6 +1487,13 @@ ZEND_VM_HELPER(zend_pre_inc_helper, VAR|CV, ANY)
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
 		ZVAL_UNDEFINED_OP1();
+		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			HANDLE_EXCEPTION();
+		}
 		ZVAL_NULL(var_ptr);
 	}
 
@@ -1538,6 +1545,13 @@ ZEND_VM_HELPER(zend_pre_dec_helper, VAR|CV, ANY)
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
 		ZVAL_UNDEFINED_OP1();
+		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			HANDLE_EXCEPTION();
+		}
 		ZVAL_NULL(var_ptr);
 	}
 
@@ -1590,6 +1604,13 @@ ZEND_VM_HELPER(zend_post_inc_helper, VAR|CV, ANY)
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
 		ZVAL_UNDEFINED_OP1();
+		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			HANDLE_EXCEPTION();
+		}
 		ZVAL_NULL(var_ptr);
 	}
 
@@ -1641,6 +1662,13 @@ ZEND_VM_HELPER(zend_post_dec_helper, VAR|CV, ANY)
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
 		ZVAL_UNDEFINED_OP1();
+		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			HANDLE_EXCEPTION();
+		}
 		ZVAL_NULL(var_ptr);
 	}
 

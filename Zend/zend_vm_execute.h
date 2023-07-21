@@ -21611,6 +21611,13 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_inc_help
 	SAVE_OPLINE();
 	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
 		ZVAL_UNDEFINED_OP1();
+		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			HANDLE_EXCEPTION();
+		}
 		ZVAL_NULL(var_ptr);
 	}
 
@@ -21680,6 +21687,13 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_dec_help
 	SAVE_OPLINE();
 	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
 		ZVAL_UNDEFINED_OP1();
+		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			HANDLE_EXCEPTION();
+		}
 		ZVAL_NULL(var_ptr);
 	}
 
@@ -21750,6 +21764,13 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_inc_hel
 	SAVE_OPLINE();
 	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
 		ZVAL_UNDEFINED_OP1();
+		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			HANDLE_EXCEPTION();
+		}
 		ZVAL_NULL(var_ptr);
 	}
 
@@ -21801,6 +21822,13 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_dec_hel
 	SAVE_OPLINE();
 	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
 		ZVAL_UNDEFINED_OP1();
+		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			HANDLE_EXCEPTION();
+		}
 		ZVAL_NULL(var_ptr);
 	}
 
@@ -38980,6 +39008,13 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_inc_help
 	SAVE_OPLINE();
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
 		ZVAL_UNDEFINED_OP1();
+		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			HANDLE_EXCEPTION();
+		}
 		ZVAL_NULL(var_ptr);
 	}
 
@@ -39048,6 +39083,13 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_dec_help
 	SAVE_OPLINE();
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
 		ZVAL_UNDEFINED_OP1();
+		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			HANDLE_EXCEPTION();
+		}
 		ZVAL_NULL(var_ptr);
 	}
 
@@ -39117,6 +39159,13 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_inc_hel
 	SAVE_OPLINE();
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
 		ZVAL_UNDEFINED_OP1();
+		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			HANDLE_EXCEPTION();
+		}
 		ZVAL_NULL(var_ptr);
 	}
 
@@ -39167,6 +39216,13 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_dec_hel
 	SAVE_OPLINE();
 	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
 		ZVAL_UNDEFINED_OP1();
+		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			HANDLE_EXCEPTION();
+		}
 		ZVAL_NULL(var_ptr);
 	}
 
