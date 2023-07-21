@@ -2657,9 +2657,18 @@ try_again:
 			}
 			break;
 		case IS_FALSE:
-		case IS_TRUE:
+		case IS_TRUE: {
+			/* Error handler can undef/change type of op1, save it and reset it in case those cases */
+			zval copy;
+			ZVAL_COPY_VALUE(&copy, op1);
 			zend_error(E_WARNING, "Increment on type bool has no effect, this will change in the next major version of PHP");
+			zval_ptr_dtor(op1);
+			ZVAL_COPY_VALUE(op1, &copy);
+			if (EG(exception)) {
+				return FAILURE;
+			}
 			break;
+		}
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
 			goto try_again;
@@ -2735,19 +2744,31 @@ try_again:
 					}
 			}
 			break;
-		case IS_NULL:
+		case IS_NULL: {
+			/* Error handler can undef/change type of op1, save it and reset it in case those cases */
+			zval copy;
+			ZVAL_COPY_VALUE(&copy, op1);
 			zend_error(E_WARNING, "Decrement on type null has no effect, this will change in the next major version of PHP");
+			zval_ptr_dtor(op1);
+			ZVAL_COPY_VALUE(op1, &copy);
 			if (EG(exception)) {
 				return FAILURE;
 			}
 			break;
+		}
 		case IS_FALSE:
-		case IS_TRUE:
+		case IS_TRUE: {
+			/* Error handler can undef/change type of op1, save it and reset it in case those cases */
+			zval copy;
+			ZVAL_COPY_VALUE(&copy, op1);
 			zend_error(E_WARNING, "Decrement on type bool has no effect, this will change in the next major version of PHP");
+			zval_ptr_dtor(op1);
+			ZVAL_COPY_VALUE(op1, &copy);
 			if (EG(exception)) {
 				return FAILURE;
 			}
 			break;
+		}
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
 			goto try_again;
