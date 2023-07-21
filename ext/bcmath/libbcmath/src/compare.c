@@ -117,15 +117,15 @@ int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign, bool ignore_last)
 					}
 				}
 			}
-		}
-	} else {
-		for (count = n2->n_scale-n1->n_scale; count>0; count--) {
-			if (*n2ptr++ != 0) {
-				/* Magnitude of n1 < n2. */
-				if (!use_sign || n1->n_sign == PLUS) {
-					return (-1);
-				} else {
-					return (1);
+		} else {
+			for (count = n2->n_scale-n1->n_scale; count>0; count--) {
+				if (*n2ptr++ != 0) {
+					/* Magnitude of n1 < n2. */
+					if (!use_sign || n1->n_sign == PLUS) {
+						return (-1);
+					} else {
+						return (1);
+					}
 				}
 			}
 		}
