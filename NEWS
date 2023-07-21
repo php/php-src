@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.10
 
+- FFI:
+  . Fix leaking definitions when using FFI::cdef()->new(...). (ilutov)
+
 - Hash:
   . Fix use-of-uninitialized-value in hash_pbkdf2(), fix missing $options
     parameter in signature. (ilutov)
