@@ -1340,7 +1340,9 @@ static int php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 	req->query_string = NULL;
 	req->query_string_len = 0;
 	zend_hash_init(&req->headers, 0, NULL, char_ptr_dtor_p, 1);
+	GC_MAKE_PERSISTENT_LOCAL(&req->headers);
 	zend_hash_init(&req->headers_original_case, 0, NULL, NULL, 1);
+	GC_MAKE_PERSISTENT_LOCAL(&req->headers_original_case);
 	req->content = NULL;
 	req->content_len = 0;
 	req->ext = NULL;
@@ -2248,6 +2250,7 @@ static int php_cli_server_mime_type_ctor(php_cli_server *server, const php_cli_s
 	const php_cli_server_ext_mime_type_pair *pair;
 
 	zend_hash_init(&server->extension_mime_types, 0, NULL, NULL, 1);
+	GC_MAKE_PERSISTENT_LOCAL(&server->extension_mime_types);
 
 	for (pair = mime_type_map; pair->ext; pair++) {
 		size_t ext_len = strlen(pair->ext);
