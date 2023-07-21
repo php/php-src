@@ -22,17 +22,199 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-namespace Adoy\FastCGI;
+namespace FPM\FastCGI;
 
 class TimedOutException extends \Exception {}
 class ForbiddenException extends \Exception {}
 class ReadLimitExceeded extends \Exception {}
 
+class TransportException extends \Exception {}
+
+interface Transport
+{
+    /**
+     * Connect to the application.
+     *
+     * @param string $host Host address.
+     * @param int $port Port number.
+     * @throws TransportException
+     */
+    public function connect(string $host, int $port, ?int $connectionTimeout): void;
+
+    /**
+     * Set keep alive.
+     *
+     * @param bool $keepAlive Whether to enable keep alive.
+     */
+    public function setKeepAlive(bool $keepAlive): void;
+
+    /**
+     * Set data reading and writing timeout.
+     *
+     * @param int $timeoutMs
+     * @return bool
+     */
+    public function setDataTimeout(int $timeoutMs): bool;
+
+    /**
+     * Read data.
+     *
+     * @param int $numBytes Number of bytes to read.
+     * @throws TransportException
+     * @return string
+     */
+    public function read(int $numBytes): string;
+
+    /**
+     * Write data.
+     *
+     * @param string $bytes Bytes to write.
+     * @throws TransportException
+     * @return int Number of bytes written.
+     */
+    public function write(string $bytes): int;
+
+    public function getMetaData(): array;
+
+    /**
+     * Flush data.
+     *
+     * @return bool
+     */
+    public function flush(): bool;
+
+    /**
+     * Close connection.
+     *
+     * @return bool
+     */
+    public function close(): bool;
+}
+
+abstract class AbstractTransport implements Transport
+{
+    /**
+     * @inheritDoc
+     */
+    protected int $dataTimeoutMs;
+
+    /**
+     * @inheritDoc
+     */
+    public function setDataTimeout(int $timeoutMs): bool
+    {
+        $this->dataTimeoutMs = $timeoutMs;
+        return true;
+    }
+}
+
+class StreamTransport extends AbstractTransport
+{
+    /**
+     * @var resource|null|false
+     */
+    private $stream = null;
+
+    /**
+     * @inheritDoc
+     */
+    public function connect(string $host, int $port, ?int $connectionTimeout = 5000): void
+    {
+        if ($this->stream) {
+            return;
+        }
+        $this->stream = fsockopen(
+            $host,
+            $port,
+            $errno,
+            $errstr,
+            $connectionTimeout / 1000
+        );
+
+        if (!$this->stream) {
+            throw new TransportException('Unable to connect to FastCGI application: ' . $errstr);
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setDataTimeout(int $timeoutMs): bool
+    {
+        if (!$this->stream) {
+            return false;
+        }
+        return stream_set_timeout(
+            $this->stream,
+            floor($timeoutMs / 1000),
+            ($timeoutMs % 1000) * 1000
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setKeepAlive(bool $keepAlive): void
+    {
+        if (!$keepAlive && $this->stream) {
+            fclose($this->stream);
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function read(int $numBytes): string
+    {
+        $result = fread($this->stream, $numBytes);
+        if ($result === false) {
+            throw new TransportException('Reading from the stream failed');
+        }
+        return $result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function write(string $bytes): int
+    {
+        $result = fwrite($this->stream, $bytes);
+        if ($result === false) {
+            throw new TransportException('Writing to the stream failed');
+        }
+        return $result;
+    }
+
+    public function getMetaData(): array
+    {
+        return stream_get_meta_data($this->stream);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function flush(): bool
+    {
+        return fflush($this->stream);
+    }
+
+    public function close(): bool
+    {
+        if ($this->stream) {
+            $result = fclose($this->stream);
+            $this->stream = null;
+            return $result;
+        }
+
+        return false;
+    }
+}
+
 /**
  * Handles communication with a FastCGI application
  *
- * @author      Pierrick Charron <pierrick@adoy.net>
- * @version     1.0
+ * @author      Pierrick Charron <pierrick@adoy.net>, Jakub Zelenka <bukka@php.net>
+ * @version     2.0
  */
 class Client
 {
@@ -72,12 +254,6 @@ class Client
     const REQ_STATE_TIMED_OUT  = 4;
 
     /**
-     * Socket
-     * @var resource
-     */
-    private $_sock = null;
-
-    /**
      * Host
      * @var string
      */
@@ -110,12 +286,6 @@ class Client
     private $_requests = array();
 
     /**
-     * Use persistent sockets to connect to backend
-     * @var bool
-     */
-    private $_persistentSocket = false;
-
-    /**
      * Connect timeout in milliseconds
      * @var int
      */
@@ -127,16 +297,23 @@ class Client
      */
     private $_readWriteTimeout = 5000;
 
+    private Transport $transport;
+
     /**
      * Constructor
      *
      * @param string $host Host of the FastCGI application
      * @param int $port Port of the FastCGI application
+     * @param string $transport Transport
      */
-    public function __construct($host, $port)
+    public function __construct($host, $port, string $transport = 'stream')
     {
         $this->_host = $host;
         $this->_port = $port;
+
+        $this->transport = match ($transport) {
+            'stream' => new StreamTransport()
+        };
     }
 
     /**
@@ -157,10 +334,9 @@ class Client
      */
     public function setKeepAlive($b)
     {
-        $this->_keepAlive = (bool)$b;
-        if (!$this->_keepAlive && $this->_sock) {
-            fclose($this->_sock);
-        }
+        $value = (bool) $b;
+        $this->_keepAlive = $value;
+        $this->transport->setKeepAlive($value);
     }
 
     /**
@@ -172,32 +348,6 @@ class Client
     {
         return $this->_keepAlive;
     }
-
-    /**
-     * Define whether or not PHP should attempt to re-use sockets opened by previous
-     * request for efficiency
-     *
-     * @param bool $b true if persistent socket should be used, false otherwise
-     */
-    public function setPersistentSocket($b)
-    {
-        $was_persistent = ($this->_sock && $this->_persistentSocket);
-        $this->_persistentSocket = (bool)$b;
-        if (!$this->_persistentSocket && $was_persistent) {
-            fclose($this->_sock);
-        }
-    }
-
-    /**
-     * Get the pesistent socket status
-     *
-     * @return bool true if the socket should be persistent, false otherwise
-     */
-    public function getPersistentSocket()
-    {
-        return $this->_persistentSocket;
-    }
-
 
     /**
      * Set the connect timeout
@@ -227,7 +377,7 @@ class Client
     public function setReadWriteTimeout($timeoutMs)
     {
         $this->_readWriteTimeout = $timeoutMs;
-        $this->set_ms_timeout($this->_readWriteTimeout);
+        $this->transport->setDataTimeout($this->_readWriteTimeout);
     }
 
     /**
@@ -241,55 +391,12 @@ class Client
     }
 
     /**
-     * Helper to avoid duplicating milliseconds to secs/usecs in a few places
-     *
-     * @param int millisecond timeout
-     * @return bool
-     */
-    private function set_ms_timeout($timeoutMs) {
-        if (!$this->_sock) {
-            return false;
-        }
-        return stream_set_timeout(
-            $this->_sock,
-            floor($timeoutMs / 1000),
-            ($timeoutMs % 1000) * 1000
-        );
-    }
-
-
-    /**
      * Create a connection to the FastCGI application
      */
     private function connect()
     {
-        if (!$this->_sock) {
-            if ($this->_persistentSocket) {
-                $this->_sock = pfsockopen(
-                    $this->_host,
-                    $this->_port,
-                    $errno,
-                    $errstr,
-                    $this->_connectTimeout/1000
-                );
-            } else {
-                $this->_sock = fsockopen(
-                    $this->_host,
-                    $this->_port,
-                    $errno,
-                    $errstr,
-                    $this->_connectTimeout/1000
-                );
-            }
-
-            if (!$this->_sock) {
-                throw new \Exception('Unable to connect to FastCGI application: ' . $errstr);
-            }
-
-            if (!$this->set_ms_timeout($this->_readWriteTimeout)) {
-                throw new \Exception('Unable to set timeout on socket');
-            }
-        }
+        $this->transport->connect($this->_host, $this->_port, $this->_connectTimeout);
+        $this->transport->setDataTimeout($this->_readWriteTimeout);
     }
 
     /**
@@ -408,27 +515,27 @@ class Client
      * @param int $readLimit max content size
      * @return array
      * @throws ReadLimitExceeded
+     * @throws TransportException
      */
     private function readPacket($readLimit = -1)
     {
-        if ($packet = fread($this->_sock, self::HEADER_LEN)) {
+        if ($packet = $this->transport->read(self::HEADER_LEN)) {
             $resp = $this->decodePacketHeader($packet);
             $resp['content'] = '';
             if ($resp['contentLength']) {
                 $len = $resp['contentLength'];
                 if ($readLimit >= 0 && $len > $readLimit) {
                     // close connection so it can be re-set reset and throw an error
-                    fclose($this->_sock);
-                    $this->_sock = null;
+                    $this->transport->close();
                     throw new ReadLimitExceeded("Content has $len bytes but the limit is $readLimit bytes");
                 }
-                while ($len && $buf = fread($this->_sock, $len)) {
+                while ($len && $buf = $this->transport->read($len)) {
                     $len -= strlen($buf);
                     $resp['content'] .= $buf;
                 }
             }
             if ($resp['paddingLength']) {
-                $buf = fread($this->_sock, $resp['paddingLength']);
+                $this->transport->read($resp['paddingLength']);
             }
             return $resp;
         } else {
@@ -451,7 +558,7 @@ class Client
         foreach ($requestedInfo as $info) {
             $request .= $this->buildNvpair($info, '');
         }
-        fwrite($this->_sock, $this->buildPacket(self::GET_VALUES, $request, 0));
+        $this->transport->write($this->buildPacket(self::GET_VALUES, $request, 0));
 
         $resp = $this->readPacket();
         if ($resp['type'] == self::GET_VALUES_RESULT) {
@@ -483,15 +590,16 @@ class Client
      * @param array $params Array of parameters
      * @param string $stdin Content
      * @param int $readLimit [optional] the number of bytes to accept in a single packet or -1 if unlimited
+     * @param int $writeDelayMs Number of milliseconds to wait before write
      * @return array
      * @throws ForbiddenException
      * @throws TimedOutException
      * @throws \Exception
      */
-    public function request_data(array $params, $stdin, $readLimit = -1)
+    public function request_data(array $params, $stdin, int $readLimit = -1, int $timoutMs = 0, int $writeDelayMs = 0)
     {
-        $id = $this->async_request($params, $stdin);
-        return $this->wait_for_response_data($id, 0, $readLimit);
+        $id = $this->async_request($params, $stdin, $writeDelayMs);
+        return $this->wait_for_response_data($id, $timoutMs, $readLimit);
     }
 
     /**
@@ -507,11 +615,12 @@ class Client
      *
      * @param array $params Array of parameters
      * @param string $stdin Content
+     * @param int $writeDelayMs Number of milliseconds to wait before write
      * @return int
      * @throws TimedOutException
      * @throws \Exception
      */
-    public function async_request(array $params, $stdin)
+    public function async_request(array $params, $stdin, int $writeDelayMs = 0)
     {
         $this->connect();
 
@@ -519,7 +628,7 @@ class Client
         $id = mt_rand(1, (1 << 16) - 1);
 
         // Using persistent sockets implies you want them kept alive by server!
-        $keepAlive = intval($this->_keepAlive || $this->_persistentSocket);
+        $keepAlive = intval($this->_keepAlive);
 
         $request = $this->buildPacket(
             self::BEGIN_REQUEST,
@@ -542,16 +651,20 @@ class Client
         }
         $request .= $this->buildPacket(self::STDIN, '', $id);
 
-        if (fwrite($this->_sock, $request) === false || fflush($this->_sock) === false) {
+        if ($writeDelayMs > 0) {
+            usleep($writeDelayMs * 1000);
+        }
 
-            $info = stream_get_meta_data($this->_sock);
+        if ($this->transport->write($request) === false || $this->transport->flush() === false) {
 
-            if ($info['timed_out']) {
+            $info = $this->transport->getMetaData();
+
+            if (!empty($info) && $info['timed_out']) {
                 throw new TimedOutException('Write timed out');
             }
 
             // Broken pipe, tear down so future requests might succeed
-            fclose($this->_sock);
+            $this->transport->close();
             throw new \Exception('Failed to write request to socket');
         }
 
@@ -610,7 +723,7 @@ class Client
 
         if ($timeoutMs > 0) {
             // Reset timeout on socket for now
-            $this->set_ms_timeout($timeoutMs);
+            $this->transport->setDataTimeout($timeoutMs);
         } else {
             $timeoutMs = $this->_readWriteTimeout;
         }
@@ -636,32 +749,32 @@ class Client
             }
             if (microtime(true) - $startTime >= ($timeoutMs * 1000)) {
                 // Reset
-                $this->set_ms_timeout($this->_readWriteTimeout);
+                $this->transport->setDataTimeout($this->_readWriteTimeout);
                 throw new \Exception('Timed out');
             }
         }
 
         if (!is_array($resp)) {
-            $info = stream_get_meta_data($this->_sock);
+            $info = $this->transport->getMetaData();
 
             // We must reset timeout but it must be AFTER we get info
-            $this->set_ms_timeout($this->_readWriteTimeout);
+            $this->transport->setDataTimeout($this->_readWriteTimeout);
 
-            if ($info['timed_out']) {
-                throw new TimedOutException('Read timed out');
-            }
+            if (!empty($info)) {
+                if ($info['timed_out']) {
+                    throw new TimedOutException( 'Read timed out' );
+                }
 
-            if ($info['unread_bytes'] == 0
-                    && $info['blocked']
-                    && $info['eof']) {
-                throw new ForbiddenException('Not in white list. Check listen.allowed_clients.');
+                if ($info['unread_bytes'] == 0 && $info['blocked'] && $info['eof']) {
+                    throw new ForbiddenException( 'Not in white list. Check listen.allowed_clients.' );
+                }
             }
 
             throw new \Exception('Read failed');
         }
 
         // Reset timeout
-        $this->set_ms_timeout($this->_readWriteTimeout);
+        $this->transport->setDataTimeout($this->_readWriteTimeout);
 
         switch (ord($resp['content'][4])) {
             case self::CANT_MPX_CONN:
