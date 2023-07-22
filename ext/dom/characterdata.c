@@ -381,8 +381,7 @@ PHP_METHOD(DOMCharacterData, replaceWith)
 
 	DOM_GET_THIS_INTERN(intern);
 
-	dom_parent_node_after(intern, args, argc);
-	dom_child_node_remove(intern);
+	dom_child_replace_with(intern, args, argc);
 }
 
 #endif
