@@ -303,7 +303,6 @@ if (VS_TOOLSET && VCVERS >= 1914) {
 
 AC_DEFINE('HAVE_STRNLEN', 1);
 
-AC_DEFINE('ZEND_STACK_GROWS_DOWNWARDS', 1)
 AC_DEFINE('ZEND_CHECK_STACK_LIMIT', 1)
 
 ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
