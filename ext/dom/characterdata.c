@@ -364,12 +364,12 @@ PHP_METHOD(DOMCharacterData, remove)
 
 PHP_METHOD(DOMCharacterData, after)
 {
-	int argc;
+	int argc = 0;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -381,12 +381,12 @@ PHP_METHOD(DOMCharacterData, after)
 
 PHP_METHOD(DOMCharacterData, before)
 {
-	int argc;
+	int argc = 0;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -398,12 +398,12 @@ PHP_METHOD(DOMCharacterData, before)
 
 PHP_METHOD(DOMCharacterData, replaceWith)
 {
-	int argc;
+	int argc = 0;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 

@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   . Fix incorrect attribute existence check in DOMElement::setAttributeNodeNS.
     (nielsdos)
   . Fix DOMCharacterData::replaceWith() with itself. (nielsdos)
+  . Fix empty argument cases for DOMParentNode methods. (nielsdos)
 
 - FFI:
   . Fix leaking definitions when using FFI::cdef()->new(...). (ilutov)

@@ -2092,12 +2092,12 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMDocument, append)
 {
-	int argc;
+	int argc = 0;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2113,12 +2113,12 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMDocument, prepend)
 {
-	int argc;
+	int argc = 0;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
