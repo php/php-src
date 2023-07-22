@@ -91,24 +91,13 @@ interface Transport
     public function close(): bool;
 }
 
-abstract class AbstractTransport implements Transport
-{
-    /**
-     * @inheritDoc
-     */
-    protected int $dataTimeoutMs;
-
-    /**
-     * @inheritDoc
-     */
-    public function setDataTimeout(int $timeoutMs): bool
-    {
-        $this->dataTimeoutMs = $timeoutMs;
-        return true;
-    }
-}
-
-class StreamTransport extends AbstractTransport
+/**
+ * Stream transport.
+ *
+ * Iis based on PHP streams and should be more reliable as it automatically handles timeouts and
+ * other features.
+ */
+class StreamTransport implements Transport
 {
     /**
      * @var resource|null|false
@@ -156,8 +145,13 @@ class StreamTransport extends AbstractTransport
      */
     public function setKeepAlive(bool $keepAlive): void
     {
-        if (!$keepAlive && $this->stream) {
-            fclose($this->stream);
+        if ($keepAlive) {
+            $socket = socket_import_stream($this->stream);
+            if ($socket) {
+                socket_set_option($socket, SOL_SOCKET, SO_KEEPALIVE, 1);
+            }
+        } else {
+            $this->close();
         }
     }
 
@@ -204,6 +198,136 @@ class StreamTransport extends AbstractTransport
             $result = fclose($this->stream);
             $this->stream = null;
             return $result;
+        }
+
+        return false;
+    }
+}
+
+/**
+ * Socket transport.
+ *
+ * This transport is more low level than stream and supports some extra socket options like
+ * SO_KEEPALIVE. However, it is currently less robust and missing some stream features like
+ * connection timeout. It should be used only for specific use cases.
+ */
+class SocketTransport implements Transport
+{
+    /**
+     * @var \Socket
+     */
+    private ?\Socket $socket = null;
+
+    /**
+     * @inheritDoc
+     */
+    protected int $dataTimeoutMs;
+
+    /**
+     * @inheritDoc
+     */
+    public function connect(string $host, int $port, ?int $connectionTimeout = 5000): void
+    {
+        if ($this->socket) {
+            return;
+        }
+        $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        if (!$this->socket) {
+            throw new TransportException('Unable to create socket: ' . socket_strerror(socket_last_error()));
+        }
+
+        $ip = filter_var($host, FILTER_VALIDATE_IP) ? $host : gethostbyname($host);
+
+        if (!socket_connect($this->socket, $ip, $port)) {
+            $error = socket_strerror(socket_last_error($this->socket));
+            throw new TransportException('Unable to connect to FastCGI application: ' . $error);
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setDataTimeout(int $timeoutMs): bool
+    {
+        $this->dataTimeoutMs = $timeoutMs;
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setKeepAlive(bool $keepAlive): void
+    {
+        if (!$this->socket) {
+            return;
+        }
+        if ($keepAlive) {
+            socket_set_option($this->socket, SOL_SOCKET, SO_KEEPALIVE, 1);
+        } else {
+            $this->close();
+        }
+    }
+
+    private function select(array $read, array $write = [], array $except = []): bool
+    {
+        return socket_select(
+            $read,
+            $write,
+            $except,
+            floor($this->dataTimeoutMs / 1000),
+            ($this->dataTimeoutMs % 1000) * 1000
+        );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function read(int $numBytes): string
+    {
+        if ($this->select([$this->socket]) === false) {
+            throw new TimedOutException('Reading timeout');
+        }
+        $result = socket_read($this->socket, $numBytes);
+        if ($result === false) {
+            throw new TransportException('Reading from the stream failed');
+        }
+        return $result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function write(string $bytes): int
+    {
+        if ($this->select([], [$this->socket]) === false) {
+            throw new TimedOutException('Writing timeout');
+        }
+        $result = socket_write($this->socket, $bytes);
+        if ($result === false) {
+            throw new TransportException('Writing to the stream failed');
+        }
+        return $result;
+    }
+
+    public function getMetaData(): array
+    {
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function flush(): bool
+    {
+        return true;
+    }
+
+    public function close(): bool
+    {
+        if ($this->socket) {
+            socket_close($this->socket);
+            $this->socket = null;
+            return true;
         }
 
         return false;
@@ -312,7 +436,8 @@ class Client
         $this->_port = $port;
 
         $this->transport = match ($transport) {
-            'stream' => new StreamTransport()
+            'stream' => new StreamTransport(),
+            'socket' => new SocketTransport(),
         };
     }
 
