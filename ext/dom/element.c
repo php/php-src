@@ -167,11 +167,6 @@ static xmlAttrPtr dom_element_reflected_attribute_write(dom_object *obj, zval *n
 		return NULL;
 	}
 
-	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(obj->document));
-		return NULL;
-	}
-
 	/* Typed property, so it is a string already */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
 	return xmlSetNsProp(nodep, NULL, (const xmlChar *) name, (const xmlChar *) Z_STRVAL_P(newval));
@@ -395,11 +390,6 @@ PHP_METHOD(DOMElement, setAttribute)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
-		RETURN_FALSE;
-	}
-
 	attr = dom_get_dom1_attribute(nodep, (xmlChar *)name);
 	if (attr != NULL) {
 		switch (attr->type) {
@@ -466,11 +456,6 @@ PHP_METHOD(DOMElement, removeAttribute)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
-		RETURN_FALSE;
-	}
-
 	attrp = dom_get_dom1_attribute(nodep, (xmlChar *)name);
 	if (attrp == NULL) {
 		RETURN_FALSE;
@@ -533,11 +518,6 @@ PHP_METHOD(DOMElement, setAttributeNode)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
-		RETURN_FALSE;
-	}
-
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
 	if (attrp->type != XML_ATTRIBUTE_NODE) {
@@ -598,11 +578,6 @@ PHP_METHOD(DOMElement, removeAttributeNode)
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
-
-	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
-		RETURN_FALSE;
-	}
 
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
@@ -748,11 +723,6 @@ PHP_METHOD(DOMElement, setAttributeNS)
 
 	stricterror = dom_get_strict_error(intern->document);
 
-	if (dom_node_is_read_only(elemp) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
-		RETURN_NULL();
-	}
-
 	errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 
 	if (errorcode == 0) {
@@ -867,11 +837,6 @@ PHP_METHOD(DOMElement, removeAttributeNS)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
-		RETURN_NULL();
-	}
-
 	attrp = xmlHasNsProp(nodep, (xmlChar *)name, (xmlChar *)uri);
 
 	nsptr = dom_get_nsdecl(nodep, (xmlChar *)name);
@@ -965,12 +930,6 @@ PHP_METHOD(DOMElement, setAttributeNodeNS)
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
-
-	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
-		RETURN_FALSE;
-	}
-
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
 	/* ZPP Guarantees that a DOMAttr class is given, as it is converted to a xmlAttr
@@ -1145,11 +1104,6 @@ PHP_METHOD(DOMElement, setIdAttribute)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
-		RETURN_NULL();
-	}
-
 	attrp = xmlHasNsProp(nodep, (xmlChar *)name, NULL);
 	if (attrp == NULL || attrp->type == XML_ATTRIBUTE_DECL) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
@@ -1181,11 +1135,6 @@ PHP_METHOD(DOMElement, setIdAttributeNS)
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
-	if (dom_node_is_read_only(elemp) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
-		RETURN_NULL();
-	}
-
 	attrp = xmlHasNsProp(elemp, (xmlChar *)name, (xmlChar *)uri);
 	if (attrp == NULL || attrp->type == XML_ATTRIBUTE_DECL) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
@@ -1214,12 +1163,6 @@ PHP_METHOD(DOMElement, setIdAttributeNode)
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
-
-	if (dom_node_is_read_only(nodep) == SUCCESS) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(intern->document));
-		RETURN_NULL();
-	}
-
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
 	if (attrp->parent != nodep) {
