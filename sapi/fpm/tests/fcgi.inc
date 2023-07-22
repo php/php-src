@@ -105,6 +105,11 @@ class StreamTransport implements Transport
     private $stream = null;
 
     /**
+     * @var bool
+     */
+    private bool $keepAlive = false;
+
+    /**
      * @inheritDoc
      */
     public function connect(string $host, int $port, ?int $connectionTimeout = 5000): void
@@ -122,6 +127,10 @@ class StreamTransport implements Transport
 
         if (!$this->stream) {
             throw new TransportException('Unable to connect to FastCGI application: ' . $errstr);
+        }
+
+        if ($this->keepAlive) {
+            $this->setKeepAlive(true);
         }
     }
 
@@ -145,6 +154,10 @@ class StreamTransport implements Transport
      */
     public function setKeepAlive(bool $keepAlive): void
     {
+        $this->keepAlive = $keepAlive;
+        if (!$this->stream) {
+            return;
+        }
         if ($keepAlive) {
             $socket = socket_import_stream($this->stream);
             if ($socket) {
@@ -219,9 +232,14 @@ class SocketTransport implements Transport
     private ?\Socket $socket = null;
 
     /**
-     * @inheritDoc
+     * @var int
      */
-    protected int $dataTimeoutMs;
+    protected int $dataTimeoutMs = 5000;
+
+    /**
+     * @var bool
+     */
+    private bool $keepAlive = false;
 
     /**
      * @inheritDoc
@@ -242,6 +260,10 @@ class SocketTransport implements Transport
             $error = socket_strerror(socket_last_error($this->socket));
             throw new TransportException('Unable to connect to FastCGI application: ' . $error);
         }
+
+        if ($this->keepAlive) {
+            $this->setKeepAlive(true);
+        }
     }
 
     /**
@@ -258,6 +280,7 @@ class SocketTransport implements Transport
      */
     public function setKeepAlive(bool $keepAlive): void
     {
+        $this->keepAlive = $keepAlive;
         if (!$this->socket) {
             return;
         }

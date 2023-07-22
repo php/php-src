@@ -66,6 +66,11 @@ class Tester
     private array $clients = [];
 
     /**
+     * @var string
+     */
+    private string $clientTransport;
+
+    /**
      * @var LogReader
      */
     private LogReader $logReader;
@@ -368,15 +373,17 @@ class Tester
         string $code = '',
         array $options = [],
         string $fileName = null,
-        bool $debug = null
+        bool $debug = null,
+        string $clientTransport = 'stream'
     ) {
-        $this->configTemplate = $configTemplate;
-        $this->code           = $code;
-        $this->options        = $options;
-        $this->fileName       = $fileName ?: self::getCallerFileName();
-        $this->debug          = $debug !== null ? $debug : (bool)getenv('TEST_FPM_DEBUG');
-        $this->logReader      = new LogReader($this->debug);
-        $this->logTool        = new LogTool($this->logReader, $this->debug);
+        $this->configTemplate  = $configTemplate;
+        $this->code            = $code;
+        $this->options         = $options;
+        $this->fileName        = $fileName ?: self::getCallerFileName();
+        $this->debug           = $debug !== null ? $debug : (bool)getenv('TEST_FPM_DEBUG');
+        $this->logReader       = new LogReader($this->debug);
+        $this->logTool         = new LogTool($this->logReader, $this->debug);
+        $this->clientTransport = $clientTransport;
     }
 
     /**
@@ -907,7 +914,7 @@ class Tester
      *
      * @return Client
      */
-    private function getClient(string $address = null, $keepAlive = false): Client
+    private function getClient(string $address = null, bool $keepAlive = false): Client
     {
         $address = $address ? $this->processTemplate($address) : $this->getAddr();
         if ($address[0] === '/') { // uds
@@ -929,11 +936,11 @@ class Tester
         }
 
         if ( ! $keepAlive) {
-            return new Client($host, $port);
+            return new Client($host, $port, $this->clientTransport);
         }
 
         if ( ! isset($this->clients[$host][$port])) {
-            $client = new Client($host, $port);
+            $client = new Client($host, $port, $this->clientTransport);
             $client->setKeepAlive(true);
             $this->clients[$host][$port] = $client;
         }
