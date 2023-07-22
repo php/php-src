@@ -97,11 +97,16 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMDocumentFragment, append)
 {
+<<<<<<< HEAD
 	uint32_t argc;
 	zval *args;
+=======
+	int argc = 0;
+	zval *args, *id;
+>>>>>>> abb1d2e824 (Fix empty argument cases for DOMParentNode methods)
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -116,11 +121,16 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMDocumentFragment, prepend)
 {
+<<<<<<< HEAD
 	uint32_t argc;
 	zval *args;
+=======
+	int argc = 0;
+	zval *args, *id;
+>>>>>>> abb1d2e824 (Fix empty argument cases for DOMParentNode methods)
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 

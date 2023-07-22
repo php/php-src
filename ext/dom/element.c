@@ -1194,11 +1194,16 @@ PHP_METHOD(DOMElement, remove)
 
 PHP_METHOD(DOMElement, after)
 {
+<<<<<<< HEAD
 	uint32_t argc;
 	zval *args;
+=======
+	int argc = 0;
+	zval *args, *id;
+>>>>>>> abb1d2e824 (Fix empty argument cases for DOMParentNode methods)
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1209,11 +1214,16 @@ PHP_METHOD(DOMElement, after)
 
 PHP_METHOD(DOMElement, before)
 {
+<<<<<<< HEAD
 	uint32_t argc;
 	zval *args;
+=======
+	int argc = 0;
+	zval *args, *id;
+>>>>>>> abb1d2e824 (Fix empty argument cases for DOMParentNode methods)
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1227,11 +1237,16 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, append)
 {
+<<<<<<< HEAD
 	uint32_t argc;
 	zval *args;
+=======
+	int argc = 0;
+	zval *args, *id;
+>>>>>>> abb1d2e824 (Fix empty argument cases for DOMParentNode methods)
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1246,11 +1261,16 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, prepend)
 {
+<<<<<<< HEAD
 	uint32_t argc;
 	zval *args;
+=======
+	int argc = 0;
+	zval *args, *id;
+>>>>>>> abb1d2e824 (Fix empty argument cases for DOMParentNode methods)
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1265,11 +1285,16 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, replaceWith)
 {
+<<<<<<< HEAD
 	uint32_t argc;
 	zval *args;
+=======
+	int argc = 0;
+	zval *args, *id;
+>>>>>>> abb1d2e824 (Fix empty argument cases for DOMParentNode methods)
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 

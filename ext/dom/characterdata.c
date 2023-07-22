@@ -341,11 +341,16 @@ PHP_METHOD(DOMCharacterData, remove)
 
 PHP_METHOD(DOMCharacterData, after)
 {
+<<<<<<< HEAD
 	uint32_t argc;
 	zval *args;
+=======
+	int argc = 0;
+	zval *args, *id;
+>>>>>>> abb1d2e824 (Fix empty argument cases for DOMParentNode methods)
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -356,11 +361,16 @@ PHP_METHOD(DOMCharacterData, after)
 
 PHP_METHOD(DOMCharacterData, before)
 {
+<<<<<<< HEAD
 	uint32_t argc;
 	zval *args;
+=======
+	int argc = 0;
+	zval *args, *id;
+>>>>>>> abb1d2e824 (Fix empty argument cases for DOMParentNode methods)
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -371,11 +381,16 @@ PHP_METHOD(DOMCharacterData, before)
 
 PHP_METHOD(DOMCharacterData, replaceWith)
 {
+<<<<<<< HEAD
 	uint32_t argc;
 	zval *args;
+=======
+	int argc = 0;
+	zval *args, *id;
+>>>>>>> abb1d2e824 (Fix empty argument cases for DOMParentNode methods)
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
