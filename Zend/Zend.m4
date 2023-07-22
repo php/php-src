@@ -169,7 +169,6 @@ int main(void) {
     return f((uintptr_t)&local) ? 0 : 1;
 }
 ]])], [
-  AC_DEFINE([ZEND_STACK_GROWS_DOWNWARDS], 1, [Define if the stack grows downwards])
   AC_DEFINE([ZEND_CHECK_STACK_LIMIT], 1, [Define if checking the stack limit is supported])
   AC_MSG_RESULT(yes)
 ], [
