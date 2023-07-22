@@ -12,4 +12,4 @@ echo $dom->saveXML();
 ?>
 --EXPECT--
 <?xml version="1.0"?>
-<container/>
+<container><![CDATA[Hello]]></container>

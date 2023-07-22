@@ -410,8 +410,7 @@ PHP_METHOD(DOMCharacterData, replaceWith)
 	id = ZEND_THIS;
 	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
 
-	dom_parent_node_after(intern, args, argc);
-	dom_child_node_remove(intern);
+	dom_child_replace_with(intern, args, argc);
 }
 
 #endif
