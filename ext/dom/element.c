@@ -174,7 +174,7 @@ static xmlAttrPtr dom_element_reflected_attribute_write(dom_object *obj, zval *n
 
 	/* Typed property, so it is a string already */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
-	return xmlSetProp(nodep, (const xmlChar *) name, (const xmlChar *) Z_STRVAL_P(newval));
+	return xmlSetNsProp(nodep, NULL, (const xmlChar *) name, (const xmlChar *) Z_STRVAL_P(newval));
 }
 
 /* {{{ className	string
