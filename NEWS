@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.0beta2
 
+- DOM:
+  . Fix DOMEntity field getter bugs. (nielsdos)
+
 - FFI:
   . Fix leaking definitions when using FFI::cdef()->new(...). (ilutov)
 
