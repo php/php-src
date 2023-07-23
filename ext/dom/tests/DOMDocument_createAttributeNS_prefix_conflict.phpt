@@ -45,12 +45,38 @@ var_dump($doc->documentElement->setAttributeNodeNS($doc->createAttributeNS('http
 echo $doc->saveXML(), "\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 --- setAttributeNode variation (you shouldn't do this, but we test this anyway) ---
 NULL
+string(18) "http://php.net/ns1"
+string(18) "http://php.net/ns2"
+string(18) "http://php.net/ns3"
+<?xml version="1.0"?>
+<container xmlns="http://php.net/ns1" xmlns:default="http://php.net/ns2" xmlns:default1="http://php.net/ns3" xmlns:default2="http://php.net/ns4" default2:hello=""/>
 
-Fatal error: Uncaught DOMException: Namespace Error in %s:%d
-Stack trace:
-#0 %s(%d): DOMDocument->createAttributeNS('http://php.net/...', 'hello')
-#1 {main}
-  thrown in %s on line %d
+string(18) "http://php.net/ns4"
+string(18) "http://php.net/ns1"
+string(18) "http://php.net/ns2"
+string(18) "http://php.net/ns3"
+<?xml version="1.0"?>
+<container xmlns="http://php.net/ns1" xmlns:default="http://php.net/ns2" xmlns:default1="http://php.net/ns3" xmlns:default2="http://php.net/ns4" xmlns:foo="http://php.net/ns1" default2:hello=""/>
+
+NULL
+string(18) "http://php.net/ns1"
+<?xml version="1.0"?>
+<container xmlns:foo="http://php.net/ns1" foo:hello=""/>
+
+--- setAttributeNodeNS variation ---
+string(18) "http://php.net/ns1"
+NULL
+NULL
+NULL
+<?xml version="1.0"?>
+<container xmlns:foo="http://php.net/ns1" xmlns="http://php.net/ns2" xmlns:default="http://php.net/ns3" xmlns:default1="http://php.net/ns4" foo:hello="" hello="" default:hello="" default1:hello=""/>
+
+string(18) "http://php.net/ns1"
+string(18) "http://php.net/ns2"
+string(18) "http://php.net/ns3"
+string(18) "http://php.net/ns4"
+<?xml version="1.0"?>
+<container xmlns:foo="http://php.net/ns1" xmlns="http://php.net/ns2" xmlns:default="http://php.net/ns3" xmlns:default1="http://php.net/ns4" xmlns:default2="http://php.net/ns2" foo:hello="" default2:hello="" default:hello="" default1:hello=""/>

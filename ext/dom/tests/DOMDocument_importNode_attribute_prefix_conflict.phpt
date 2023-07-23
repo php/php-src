@@ -52,12 +52,12 @@ echo $dom2->saveXML();
 <?xml version="1.0"?>
 <container xmlns:foo="http://php.net" foo:bar="yes"/>
 <?xml version="1.0"?>
-<container xmlns:foo="http://php.net/2" bar="yes"/>
+<container xmlns:foo="http://php.net/2" xmlns:default="http://php.net" default:bar="yes"/>
 --- Non-default namespace test case with a default namespace in the destination ---
 <?xml version="1.0"?>
 <container xmlns:foo="http://php.net" foo:bar="yes"/>
 <?xml version="1.0"?>
-<container xmlns="http://php.net" xmlns:foo="http://php.net/2" bar="yes"/>
+<container xmlns="http://php.net" xmlns:foo="http://php.net/2" xmlns:default="http://php.net" default:bar="yes"/>
 --- Default namespace test case ---
 <?xml version="1.0"?>
 <container xmlns="http://php.net" bar="yes"/>
