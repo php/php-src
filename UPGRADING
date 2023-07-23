@@ -53,6 +53,12 @@ PHP 8.3 UPGRADE NOTES
   . Using the DOMParentNode and DOMChildNode methods without a document now works
     instead of throwing a HIERARCHY_REQUEST_ERR DOMException. This is in line with
     the behaviour spec demands.
+  . createAttributeNS() without specifying a prefix would incorrectly create a default
+    namespace, placing the element inside the namespace instead of the attribute.
+    This bug is now fixed.
+  . createAttributeNS() would previously incorrectly throw a NAMESPACE_ERR when the
+    prefix was already used for a different uri. It now correctly chooses a
+    different prefix when there's a prefix name conflict.
 
 - FFI:
   . C functions that have a return type of void now return null instead of

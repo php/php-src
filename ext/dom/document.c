@@ -805,7 +805,7 @@ PHP_METHOD(DOMDocument, importNode)
 			xmlNodePtr root = xmlDocGetRootElement(docp);
 
 			nsptr = xmlSearchNsByHref (nodep->doc, root, nodep->ns->href);
-			if (nsptr == NULL) {
+			if (nsptr == NULL || nsptr->prefix == NULL) {
 				int errorcode;
 				nsptr = dom_get_ns(root, (char *) nodep->ns->href, &errorcode, (char *) nodep->ns->prefix);
 			}
@@ -910,8 +910,8 @@ PHP_METHOD(DOMDocument, createAttributeNS)
 				nodep = (xmlNodePtr) xmlNewDocProp(docp, (xmlChar *) localname, NULL);
 				if (nodep != NULL && uri_len > 0) {
 					nsptr = xmlSearchNsByHref(nodep->doc, root, (xmlChar *) uri);
-					if (nsptr == NULL) {
-						nsptr = dom_get_ns(root, uri, &errorcode, prefix);
+					if (nsptr == NULL || nsptr->prefix == NULL) {
+						nsptr = dom_get_ns(root, uri, &errorcode, prefix ? prefix : "default");
 					}
 					xmlSetNs(nodep, nsptr);
 				}

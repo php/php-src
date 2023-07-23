@@ -20,6 +20,9 @@ PHP                                                                        NEWS
   . Align DOMChildNode parent checks with spec. (nielsdos)
   . Fixed bug #80927 (Removing documentElement after creating attribute node:
     possible use-after-free). (nielsdos)
+  . Fix various namespace prefix conflict resolution bugs. (nielsdos)
+  . Fix calling createAttributeNS() without prefix causing the default
+    namespace of the element to change. (nielsdos)
 
 - Opcache:
   . Avoid resetting JIT counter handlers from multiple processes/threads.

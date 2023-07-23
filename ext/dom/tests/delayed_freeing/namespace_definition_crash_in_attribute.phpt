@@ -39,9 +39,9 @@ echo $doc->saveXML($attr3->parentNode), "\n";
 ?>
 --EXPECT--
 <?xml version="1.0"?>
-<container xmlns="some:ns2"><child xmlns="some:ns" hello="hello content 2" hello2=""><childcontainer hello=""/></child></container>
+<container xmlns:default="some:ns2" xmlns:default1="some:ns"><child xmlns="some:ns" default:hello="hello content 2" hello2=""><childcontainer default1:hello=""/></child></container>
 <?xml version="1.0"?>
-<container xmlns="some:ns2"/>
+<container xmlns:default="some:ns2" xmlns:default1="some:ns"/>
 string(15) "hello content 2"
 string(0) ""
 string(8) "some:ns2"
@@ -49,5 +49,5 @@ NULL
 string(0) ""
 string(7) "some:ns"
 string(7) "some:ns"
- hello=""
+ default1:hello=""
 <?xml version="1.0"?>
