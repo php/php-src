@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fix DOMEntity field getter bugs. (nielsdos)
+  . Fix incorrect attribute existence check in DOMElement::setAttributeNodeNS.
+    (nielsdos)
 
 - FFI:
   . Fix leaking definitions when using FFI::cdef()->new(...). (ilutov)
