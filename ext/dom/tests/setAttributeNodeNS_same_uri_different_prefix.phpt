@@ -27,12 +27,12 @@ echo $doc->saveXML(), "\n";
 --EXPECT--
 NULL
 <?xml version="1.0"?>
-<container xmlns:foo="http://php.net/ns1" foo:hello=""/>
+<container xmlns:foo="http://php.net/ns1" foo:hello="1"/>
 
-NULL
+string(1) "1"
 <?xml version="1.0"?>
-<container xmlns:foo="http://php.net/ns1" foo:hello=""/>
+<container xmlns:foo="http://php.net/ns1" foo:hello="2"/>
 
-NULL
+string(1) "2"
 <?xml version="1.0"?>
-<container xmlns:foo="http://php.net/ns1" foo:hello=""/>
+<container xmlns:foo="http://php.net/ns1" foo:hello="3"/>

@@ -862,7 +862,7 @@ PHP_METHOD(DOMElement, setAttributeNodeNS)
 
 	nsp = attrp->ns;
 	if (nsp != NULL) {
-		existattrp = xmlHasNsProp(nodep, nsp->href, attrp->name);
+		existattrp = xmlHasNsProp(nodep, attrp->name, nsp->href);
 	} else {
 		existattrp = xmlHasProp(nodep, attrp->name);
 	}
