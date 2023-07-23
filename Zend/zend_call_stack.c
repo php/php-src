@@ -104,7 +104,7 @@ static bool zend_call_stack_is_main_thread(void) {
 # endif
 }
 
-# ifdef HAVE_PTHREAD_GETATTR_NP
+# if defined(HAVE_PTHREAD_GETATTR_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK)
 static bool zend_call_stack_get_linux_pthread(zend_call_stack *stack)
 {
 	pthread_attr_t attr;
@@ -145,12 +145,12 @@ static bool zend_call_stack_get_linux_pthread(zend_call_stack *stack)
 
 	return true;
 }
-# else /* HAVE_PTHREAD_GETATTR_NP */
+# else /* defined(HAVE_PTHREAD_GETATTR_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK) */
 static bool zend_call_stack_get_linux_pthread(zend_call_stack *stack)
 {
 	return false;
 }
-# endif /* HAVE_PTHREAD_GETATTR_NP */
+# endif /* defined(HAVE_PTHREAD_GETATTR_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK) */
 
 static bool zend_call_stack_get_linux_proc_maps(zend_call_stack *stack)
 {
@@ -251,14 +251,13 @@ static bool zend_call_stack_is_main_thread(void)
 	return is_main == -1 || is_main == 1;
 }
 
-# if defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GET_STACK)
+# if defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK)
 static bool zend_call_stack_get_freebsd_pthread(zend_call_stack *stack)
 {
 	pthread_attr_t attr;
 	int error;
 	void *addr;
 	size_t max_size;
-	size_t guard_size;
 
 	/* pthread will return bogus values for the main thread */
 	ZEND_ASSERT(!zend_call_stack_is_main_thread());
@@ -285,12 +284,12 @@ fail:
 	pthread_attr_destroy(&attr);
 	return false;
 }
-# else /* defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GET_STACK) */
+# else /* defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK) */
 static bool zend_call_stack_get_freebsd_pthread(zend_call_stack *stack)
 {
 	return false;
 }
-# endif /* defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GET_STACK) */
+# endif /* defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK) */
 
 static bool zend_call_stack_get_freebsd_sysctl(zend_call_stack *stack)
 {
