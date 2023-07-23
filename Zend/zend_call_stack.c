@@ -258,7 +258,6 @@ static bool zend_call_stack_get_freebsd_pthread(zend_call_stack *stack)
 	int error;
 	void *addr;
 	size_t max_size;
-	size_t guard_size;
 
 	/* pthread will return bogus values for the main thread */
 	ZEND_ASSERT(!zend_call_stack_is_main_thread());
@@ -274,14 +273,6 @@ static bool zend_call_stack_get_freebsd_pthread(zend_call_stack *stack)
 	if (error) {
 		goto fail;
 	}
-
-    error = pthread_attr_getguardsize(&attr, &guard_size);
-    if (error) {
-        return false;
-    }
-
-    addr = (char *)addr + guard_size;
-    max_size -= guard_size;
 
 	stack->base = (int8_t*)addr + max_size;
 	stack->max_size = max_size;
