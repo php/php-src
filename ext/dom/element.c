@@ -862,7 +862,7 @@ PHP_METHOD(DOMElement, setAttributeNodeNS)
 
 	nsp = attrp->ns;
 	if (nsp != NULL) {
-		existattrp = xmlHasNsProp(nodep, nsp->href, attrp->name);
+		existattrp = xmlHasNsProp(nodep, attrp->name, nsp->href);
 	} else {
 		existattrp = xmlHasProp(nodep, attrp->name);
 	}
@@ -1137,12 +1137,12 @@ PHP_METHOD(DOMElement, remove)
 
 PHP_METHOD(DOMElement, after)
 {
-	int argc;
+	int argc = 0;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1154,12 +1154,12 @@ PHP_METHOD(DOMElement, after)
 
 PHP_METHOD(DOMElement, before)
 {
-	int argc;
+	int argc = 0;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1174,12 +1174,12 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, append)
 {
-	int argc;
+	int argc = 0;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1195,12 +1195,12 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, prepend)
 {
-	int argc;
+	int argc = 0;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1216,12 +1216,12 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, replaceWith)
 {
-	int argc;
+	int argc = 0;
 	zval *args, *id;
 	dom_object *intern;
 	xmlNode *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
