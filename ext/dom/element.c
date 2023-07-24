@@ -944,7 +944,7 @@ PHP_METHOD(DOMElement, setAttributeNodeNS)
 
 	nsp = attrp->ns;
 	if (nsp != NULL) {
-		existattrp = xmlHasNsProp(nodep, nsp->href, attrp->name);
+		existattrp = xmlHasNsProp(nodep, attrp->name, nsp->href);
 	} else {
 		existattrp = xmlHasProp(nodep, attrp->name);
 	}
@@ -1194,11 +1194,11 @@ PHP_METHOD(DOMElement, remove)
 
 PHP_METHOD(DOMElement, after)
 {
-	uint32_t argc;
+	uint32_t argc = 0;
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1209,11 +1209,11 @@ PHP_METHOD(DOMElement, after)
 
 PHP_METHOD(DOMElement, before)
 {
-	uint32_t argc;
+	uint32_t argc = 0;
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1227,11 +1227,11 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, append)
 {
-	uint32_t argc;
+	uint32_t argc = 0;
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1246,11 +1246,11 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, prepend)
 {
-	uint32_t argc;
+	uint32_t argc = 0;
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1265,11 +1265,11 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMElement, replaceWith)
 {
-	uint32_t argc;
+	uint32_t argc = 0;
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 

@@ -341,11 +341,11 @@ PHP_METHOD(DOMCharacterData, remove)
 
 PHP_METHOD(DOMCharacterData, after)
 {
-	uint32_t argc;
+	uint32_t argc = 0;
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -356,11 +356,11 @@ PHP_METHOD(DOMCharacterData, after)
 
 PHP_METHOD(DOMCharacterData, before)
 {
-	uint32_t argc;
+	uint32_t argc = 0;
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -371,18 +371,17 @@ PHP_METHOD(DOMCharacterData, before)
 
 PHP_METHOD(DOMCharacterData, replaceWith)
 {
-	uint32_t argc;
+	uint32_t argc = 0;
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	DOM_GET_THIS_INTERN(intern);
 
-	dom_parent_node_after(intern, args, argc);
-	dom_child_node_remove(intern);
+	dom_child_replace_with(intern, args, argc);
 }
 
 #endif
