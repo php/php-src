@@ -354,6 +354,9 @@ if test "$ZEND_GCC_GLOBAL_REGS" != "no"; then
 #elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__aarch64__)
 # define ZEND_VM_FP_GLOBAL_REG "x27"
 # define ZEND_VM_IP_GLOBAL_REG "x28"
+#elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__riscv) && __riscv_xlen == 64
+# define ZEND_VM_FP_GLOBAL_REG "x18"
+# define ZEND_VM_IP_GLOBAL_REG "x19"
 #else
 # error "global register variables are not supported"
 #endif
