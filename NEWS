@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.0beta2
 
+- Core:
+  . Fixed oss-fuzz #60741 (Leak in open_basedir). (ilutov)
+
 - FFI:
   . Fix leaking definitions when using FFI::cdef()->new(...). (ilutov)
 

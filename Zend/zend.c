@@ -1271,28 +1271,10 @@ void zend_call_destructors(void) /* {{{ */
 }
 /* }}} */
 
-static void zend_release_open_basedir(void)
-{
-	/* Release custom open_basedir config, this needs to happen before ini shutdown */
-	if (PG(open_basedir)) {
-		zend_ini_entry *ini_entry = zend_hash_str_find_ptr(EG(ini_directives), "open_basedir", strlen("open_basedir"));
-		/* ini_entry->modified is unreliable, it might also be set when on_update has failed. */
-		if (ini_entry
-		 && ini_entry->modified
-		 && ini_entry->value != ini_entry->orig_value) {
-			efree(PG(open_basedir));
-			PG(open_basedir) = NULL;
-		}
-	}
-}
-
 ZEND_API void zend_deactivate(void) /* {{{ */
 {
 	/* we're no longer executing anything */
 	EG(current_execute_data) = NULL;
-
-	/* Needs to run before zend_ini_deactivate(). */
-	zend_release_open_basedir();
 
 	zend_try {
 		shutdown_scanner();
