@@ -145,7 +145,7 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
-	bool use_national_character_set = 0, is_binary = false;
+	bool use_national_character_set = 0;
 	size_t i;
 	char *q;
 	size_t quotedlen = 0;
@@ -166,15 +166,8 @@ static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 	 * binary literal instead.
 	 */
 	if (paramtype == PDO_PARAM_BINARY) {
-		is_binary = true;
-	}
-
-	if (is_binary) {
 		/* 1 char = 2 chars in hex, plus 0x */
-		quotedlen = ZSTR_LEN(unquoted) * 2; /* XXX: Overflow? */
-		quotedlen += 2;
-
-		quoted_str = zend_string_alloc(quotedlen, 0);
+		quoted_str = zend_string_safe_alloc(ZSTR_LEN(unquoted), 2, 2, false);
 		q = ZSTR_VAL(quoted_str);
 		*q++ = '0';
 		*q++ = 'x';
