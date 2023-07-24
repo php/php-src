@@ -269,18 +269,13 @@ Since: DOM Level 3
 */
 int dom_document_strict_error_checking_read(dom_object *obj, zval *retval)
 {
-	if (obj->document) {
-		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
-		ZVAL_BOOL(retval, doc_prop->stricterror);
-	} else {
-		ZVAL_FALSE(retval);
-	}
+	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
+	ZVAL_BOOL(retval, doc_prop->stricterror);
 	return SUCCESS;
 }
 
 int dom_document_strict_error_checking_write(dom_object *obj, zval *newval)
 {
-
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
 		doc_prop->stricterror = zend_is_true(newval);
@@ -296,12 +291,8 @@ readonly=no
 */
 int dom_document_format_output_read(dom_object *obj, zval *retval)
 {
-	if (obj->document) {
-		libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
-		ZVAL_BOOL(retval, doc_prop->formatoutput);
-	} else {
-		ZVAL_FALSE(retval);
-	}
+	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
+	ZVAL_BOOL(retval, doc_prop->formatoutput);
 	return SUCCESS;
 }
 
@@ -321,12 +312,8 @@ readonly=no
 */
 int	dom_document_validate_on_parse_read(dom_object *obj, zval *retval)
 {
-	if (obj->document) {
-		libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
-		ZVAL_BOOL(retval, doc_prop->validateonparse);
-	} else {
-		ZVAL_FALSE(retval);
-	}
+	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
+	ZVAL_BOOL(retval, doc_prop->validateonparse);
 	return SUCCESS;
 }
 
@@ -346,12 +333,8 @@ readonly=no
 */
 int dom_document_resolve_externals_read(dom_object *obj, zval *retval)
 {
-	if (obj->document) {
-		libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
-		ZVAL_BOOL(retval, doc_prop->resolveexternals);
-	} else {
-		ZVAL_FALSE(retval);
-	}
+	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
+	ZVAL_BOOL(retval, doc_prop->resolveexternals);
 	return SUCCESS;
 }
 
@@ -371,12 +354,8 @@ readonly=no
 */
 int dom_document_preserve_whitespace_read(dom_object *obj, zval *retval)
 {
-	if (obj->document) {
-		libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
-		ZVAL_BOOL(retval, doc_prop->preservewhitespace);
-	} else {
-		ZVAL_FALSE(retval);
-	}
+	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
+	ZVAL_BOOL(retval, doc_prop->preservewhitespace);
 	return SUCCESS;
 }
 
@@ -396,12 +375,8 @@ readonly=no
 */
 int dom_document_recover_read(dom_object *obj, zval *retval)
 {
-	if (obj->document) {
-		libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
-		ZVAL_BOOL(retval, doc_prop->recover);
-	} else {
-		ZVAL_FALSE(retval);
-	}
+	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
+	ZVAL_BOOL(retval, doc_prop->recover);
 	return SUCCESS;
 }
 
@@ -421,12 +396,8 @@ readonly=no
 */
 int dom_document_substitue_entities_read(dom_object *obj, zval *retval)
 {
-	if (obj->document) {
-		libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
-		ZVAL_BOOL(retval, doc_prop->substituteentities);
-	} else {
-		ZVAL_FALSE(retval);
-	}
+	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
+	ZVAL_BOOL(retval, doc_prop->substituteentities);
 	return SUCCESS;
 }
 
