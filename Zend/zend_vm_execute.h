@@ -21625,6 +21625,10 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_inc_help
 		}
 		increment_function(var_ptr);
 		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
 			HANDLE_EXCEPTION();
 		}
 	} while (0);
@@ -21698,6 +21702,10 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_dec_help
 		}
 		decrement_function(var_ptr);
 		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
 			HANDLE_EXCEPTION();
 		}
 	} while (0);
@@ -39000,6 +39008,10 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_inc_help
 		}
 		increment_function(var_ptr);
 		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
 			HANDLE_EXCEPTION();
 		}
 	} while (0);
@@ -39072,6 +39084,10 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_dec_help
 		}
 		decrement_function(var_ptr);
 		if (UNEXPECTED(EG(exception))) {
+			/* Smart branch expects result to be set with exceptions */
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
 			HANDLE_EXCEPTION();
 		}
 	} while (0);
