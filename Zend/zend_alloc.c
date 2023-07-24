@@ -50,6 +50,7 @@
  * with more specialized routines when the requested size is known.
  */
 
+#include "php.h"
 #include "zend.h"
 #include "zend_alloc.h"
 #include "zend_globals.h"
