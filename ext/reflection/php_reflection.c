@@ -2109,51 +2109,52 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
 {
     reflection_object *intern;
     zend_function *fptr;
+    zend_string *arg_name = NULL;
+    zend_long position;
     struct _zend_arg_info *arg_info;
     zval *parameter;
-    uint32_t i, num_args, position;
+    uint32_t num_args;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &parameter) == FAILURE) {
-        RETURN_THROWS();
-    }
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR_OR_LONG(arg_name, position)
+    ZEND_PARSE_PARAMETERS_END();
 
     GET_REFLECTION_OBJECT_PTR(fptr);
 
     num_args = fptr->common.num_args;
-    arg_info= fptr->common.arg_info;
+    arg_info = fptr->common.arg_info;
 
     if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
         num_args++;
     }
 
     if (!num_args) {
-        RETURN_THROWS();
+        RETURN_FALSE;
     }
 
-    switch(Z_TYPE_P(parameter)) {
-        case IS_LONG:
-            position = Z_LVAL_P(parameter);
+    if (arg_name != NULL) {
+        uint32_t i;
+        position = -1;
 
-            if (position < 0 || position > num_args) {
-                RETURN_FALSE;
+        for (i = 0; i < num_args; i++) {
+            if (zend_string_equals(arg_info->name, Z_STR_P(parameter))) {
+                RETURN_TRUE;
             }
 
-            RETURN_TRUE;
-            break;
-        case IS_STRING:
-            for (i = 0; i < num_args; i++) {
-                if (zend_string_equals(arg_info->name, Z_STR_P(parameter))) {
-                    RETURN_TRUE;
-                }
+            arg_info++;
+        }
 
-                arg_info++;
-            }
-
+        RETURN_FALSE;
+    } else {
+        if (position < 0) {
+            zend_argument_value_error(1, "must be greater than or equal to 0");
+            RETURN_THROWS()
+        }
+        if (position >= num_args) {
             RETURN_FALSE;
-            break;
-        default:
-            zend_argument_type_error(1, "must be of type %s, %s given", "int or string", zend_zval_type_name(parameter));
-        break;
+        }
+
+        RETURN_TRUE;
     }
 }
 /* }}} */
@@ -2163,18 +2164,20 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
 {
     reflection_object *intern;
     zend_function *fptr;
+    zend_string *arg_name = NULL;
+    zend_long position;
     struct _zend_arg_info *arg_info;
     zval *parameter;
-    uint32_t i, num_args, position;
+    uint32_t num_args;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &parameter) == FAILURE) {
-        RETURN_THROWS();
-    }
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR_OR_LONG(arg_name, position)
+    ZEND_PARSE_PARAMETERS_END();
 
     GET_REFLECTION_OBJECT_PTR(fptr);
 
     num_args = fptr->common.num_args;
-    arg_info= fptr->common.arg_info;
+    arg_info = fptr->common.arg_info;
 
     if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
         num_args++;
@@ -2184,53 +2187,51 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
         RETURN_THROWS();
     }
 
-    switch(Z_TYPE_P(parameter)) {
-        case IS_LONG:
-            position = Z_LVAL_P(parameter);
+    if (arg_name != NULL) {
+        uint32_t i;
 
-            if (position < 0 || position > num_args) {
-                RETURN_THROWS();
+        for (i = 0; i < num_args; i++) {
+            if (zend_string_equals(arg_info->name, Z_STR_P(parameter))) {
+                zval reflection;
+
+                reflection_parameter_factory(
+                    _copy_function(fptr),
+                    Z_ISUNDEF(intern->obj) ? NULL : &intern->obj,
+                    arg_info,
+                    i,
+                    i < fptr->common.required_num_args,
+                    &reflection
+                );
+
+                RETURN_OBJ(Z_OBJ(reflection));
             }
 
-            zval reflection;
+            arg_info++;
+        }
 
-            reflection_parameter_factory(
-                _copy_function(fptr),
-                Z_ISUNDEF(intern->obj) ? NULL : &intern->obj,
-                &arg_info[position],
-                position,
-                position < fptr->common.required_num_args,
-                &reflection
-            );
+        _DO_THROW("The parameter specified by its name could not be found");
+        RETURN_THROWS()
+    } else {
+        if (position < 0) {
+            zend_argument_value_error(1, "must be greater than or equal to 0");
+            RETURN_THROWS()
+        }
+        if (position >= num_args) {
+            _DO_THROW("The parameter specified by its offset could not be found");
+            RETURN_THROWS()
+        }
 
-            RETURN_OBJ(Z_OBJ(reflection));
-        break;
-        case IS_STRING:
-            for (i = 0; i < num_args; i++) {
-                if (zend_string_equals(arg_info->name, Z_STR_P(parameter))) {
-                    zval reflection;
+        reflection_parameter_factory(
+            _copy_function(fptr),
+            Z_ISUNDEF(intern->obj) ? NULL : &intern->obj,
+            &arg_info[position],
+            position,
+            position < fptr->common.required_num_args,
+            &reflection
+        );
 
-                    reflection_parameter_factory(
-                        _copy_function(fptr),
-                        Z_ISUNDEF(intern->obj) ? NULL : &intern->obj,
-                        arg_info,
-                        i,
-                        i < fptr->common.required_num_args,
-                        &reflection
-                    );
-
-                    RETURN_OBJ(Z_OBJ(reflection));
-                }
-
-                arg_info++;
-            }
-        break;
-        default:
-            zend_argument_type_error(1, "must be of type %s, %s given", "int or string", zend_zval_type_name(parameter));
-            break;
+        RETURN_OBJ(Z_OBJ(reflection));
     }
-
-    RETURN_THROWS();
 }
 /* }}} */
 
