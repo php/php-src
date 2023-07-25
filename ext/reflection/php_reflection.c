@@ -2137,7 +2137,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
         position = -1;
 
         for (i = 0; i < num_args; i++) {
-            if (zend_string_equals(arg_info->name, Z_STR_P(arg_name))) {
+            if (zend_string_equals(arg_name, arg_info[i].name)) {
                 RETURN_TRUE;
             }
 
@@ -2192,7 +2192,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
         uint32_t i;
 
         for (i = 0; i < num_args; i++) {
-            if (zend_string_equals(arg_info->name, Z_STR_P(arg_name))) {
+            if (zend_string_equals(arg_name, arg_info[i].name)) {
                 reflection_parameter_factory(
                     _copy_function(fptr),
                     Z_ISUNDEF(intern->obj) ? NULL : &intern->obj,
