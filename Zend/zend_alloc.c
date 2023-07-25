@@ -1060,7 +1060,12 @@ get_chunk:
 # if ZEND_DEBUG
 							__zend_filename, __zend_lineno,
 # endif
-							heap->real_size, ZEND_MM_CHUNK_SIZE, (ZEND_DEBUG ? size : ZEND_MM_PAGE_SIZE * pages_count)
+							heap->real_size, ZEND_MM_CHUNK_SIZE,
+# if ZEND_DEBUG
+							size
+# else
+							ZEND_MM_PAGE_SIZE * pages_count
+# endif
 						);
 
 						return NULL;
