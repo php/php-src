@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fix DOMCharacterData::replaceWith() with itself. (nielsdos)
   . Fix empty argument cases for DOMParentNode methods. (nielsdos)
+  . Fixed bug GH-11791 (Wrong default value of DOMDocument::xmlStandalone).
+    (nielsdos)
 
 - FFI:
   . Fix leaking definitions when using FFI::cdef()->new(...). (ilutov)
