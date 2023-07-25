@@ -2488,6 +2488,10 @@ ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 	zend_mm_chunk *p;
 	zend_mm_huge_list *list;
 
+	if (full == false) {
+		zend_mm_observers_shutdown(heap);
+	}
+
 #if ZEND_MM_CUSTOM
 	if (heap->use_custom_heap & ~ZEND_MM_CUSTOM_HEAP_OBSERVED) {
 		if (heap->custom_heap._malloc == tracked_malloc) {
