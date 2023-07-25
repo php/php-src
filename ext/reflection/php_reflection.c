@@ -2139,8 +2139,6 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
             if (zend_string_equals(arg_name, arg_info[i].name)) {
                 RETURN_TRUE;
             }
-
-            arg_info++;
         }
 
         RETURN_FALSE;
@@ -2194,7 +2192,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
                 reflection_parameter_factory(
                     _copy_function(fptr),
                     Z_ISUNDEF(intern->obj) ? NULL : &intern->obj,
-                    arg_info,
+                    &arg_info[i],
                     i,
                     i < fptr->common.required_num_args,
                     &reflection
@@ -2202,8 +2200,6 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
 
                 RETURN_OBJ(Z_OBJ(reflection));
             }
-
-            arg_info++;
         }
 
         _DO_THROW("The parameter specified by its name could not be found");
