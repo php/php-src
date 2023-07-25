@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed oss-fuzz #60741 (Leak in open_basedir). (ilutov)
 
+- DOM:
+  . Fixed bug GH-11792 (LIBXML_NOXMLDECL is not implemented or broken).
+    (nielsdos)
+
 - FFI:
   . Fix leaking definitions when using FFI::cdef()->new(...). (ilutov)
 

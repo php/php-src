@@ -23,6 +23,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include <libxml/SAX.h>
+#include <libxml/xmlsave.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
@@ -1462,9 +1463,9 @@ PHP_METHOD(DOMDocument, saveXML)
 	xmlDoc *docp;
 	xmlNode *node;
 	xmlBufferPtr buf;
-	xmlChar *mem;
+	const xmlChar *mem;
 	dom_object *intern, *nodeobj;
-	int size, format, saveempty = 0;
+	int size, format, old_xml_save_no_empty_tags;
 	zend_long options = 0;
 
 	id = ZEND_THIS;
@@ -1484,42 +1485,59 @@ PHP_METHOD(DOMDocument, saveXML)
 			php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));
 			RETURN_FALSE;
 		}
+
 		buf = xmlBufferCreate();
 		if (!buf) {
 			php_error_docref(NULL, E_WARNING, "Could not fetch buffer");
 			RETURN_FALSE;
 		}
-		if (options & LIBXML_SAVE_NOEMPTYTAG) {
-			saveempty = xmlSaveNoEmptyTags;
-			xmlSaveNoEmptyTags = 1;
-		}
+		/* Save libxml2 global, override its vaule, and restore after saving. */
+		old_xml_save_no_empty_tags = xmlSaveNoEmptyTags;
+		xmlSaveNoEmptyTags = (options & LIBXML_SAVE_NOEMPTYTAG) ? 1 : 0;
 		xmlNodeDump(buf, docp, node, 0, format);
-		if (options & LIBXML_SAVE_NOEMPTYTAG) {
-			xmlSaveNoEmptyTags = saveempty;
-		}
-		mem = (xmlChar*) xmlBufferContent(buf);
-		if (!mem) {
-			xmlBufferFree(buf);
-			RETURN_FALSE;
-		}
-		RETVAL_STRING((char *) mem);
-		xmlBufferFree(buf);
+		xmlSaveNoEmptyTags = old_xml_save_no_empty_tags;
 	} else {
-		if (options & LIBXML_SAVE_NOEMPTYTAG) {
-			saveempty = xmlSaveNoEmptyTags;
-			xmlSaveNoEmptyTags = 1;
-		}
-		/* Encoding is handled from the encoding property set on the document */
-		xmlDocDumpFormatMemory(docp, &mem, &size, format);
-		if (options & LIBXML_SAVE_NOEMPTYTAG) {
-			xmlSaveNoEmptyTags = saveempty;
-		}
-		if (!size || !mem) {
+		buf = xmlBufferCreate();
+		if (!buf) {
+			php_error_docref(NULL, E_WARNING, "Could not fetch buffer");
 			RETURN_FALSE;
 		}
-		RETVAL_STRINGL((char *) mem, size);
-		xmlFree(mem);
+
+		int converted_options = XML_SAVE_AS_XML;
+		if (options & XML_SAVE_NO_DECL) {
+			converted_options |= XML_SAVE_NO_DECL;
+		}
+		if (format) {
+			converted_options |= XML_SAVE_FORMAT;
+		}
+		/* Save libxml2 global, override its vaule, and restore after saving. */
+		old_xml_save_no_empty_tags = xmlSaveNoEmptyTags;
+		xmlSaveNoEmptyTags = (options & LIBXML_SAVE_NOEMPTYTAG) ? 1 : 0;
+		/* Encoding is handled from the encoding property set on the document */
+		xmlSaveCtxtPtr ctxt = xmlSaveToBuffer(buf, (const char *) docp->encoding, converted_options);
+		xmlSaveNoEmptyTags = old_xml_save_no_empty_tags;
+		if (UNEXPECTED(!ctxt)) {
+			xmlBufferFree(buf);
+			php_error_docref(NULL, E_WARNING, "Could not create save context");
+			RETURN_FALSE;
+		}
+		if (UNEXPECTED(xmlSaveDoc(ctxt, docp) < 0)) {
+			(void) xmlSaveClose(ctxt);
+			xmlBufferFree(buf);
+			php_error_docref(NULL, E_WARNING, "Could not save document");
+			RETURN_FALSE;
+		}
+		(void) xmlSaveFlush(ctxt);
+		(void) xmlSaveClose(ctxt);
 	}
+	mem = xmlBufferContent(buf);
+	if (!mem) {
+		xmlBufferFree(buf);
+		RETURN_FALSE;
+	}
+	size = xmlBufferLength(buf);
+	RETVAL_STRINGL((const char *) mem, size);
+	xmlBufferFree(buf);
 }
 /* }}} end dom_document_savexml */
 
