@@ -2137,7 +2137,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
         position = -1;
 
         for (i = 0; i < num_args; i++) {
-            if (zend_string_equals(arg_info->name, Z_STR_P(parameter))) {
+            if (zend_string_equals(arg_info->name, Z_STR_P(arg_name))) {
                 RETURN_TRUE;
             }
 
@@ -2148,7 +2148,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
     } else {
         if (position < 0) {
             zend_argument_value_error(1, "must be greater than or equal to 0");
-            RETURN_THROWS()
+            RETURN_THROWS();
         }
         if (position >= num_args) {
             RETURN_FALSE;
@@ -2169,6 +2169,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
     struct _zend_arg_info *arg_info;
     zval *parameter;
     uint32_t num_args;
+    zval reflection;
 
     ZEND_PARSE_PARAMETERS_START(1, 1)
         Z_PARAM_STR_OR_LONG(arg_name, position)
@@ -2191,9 +2192,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
         uint32_t i;
 
         for (i = 0; i < num_args; i++) {
-            if (zend_string_equals(arg_info->name, Z_STR_P(parameter))) {
-                zval reflection;
-
+            if (zend_string_equals(arg_info->name, Z_STR_P(arg_name))) {
                 reflection_parameter_factory(
                     _copy_function(fptr),
                     Z_ISUNDEF(intern->obj) ? NULL : &intern->obj,
@@ -2210,15 +2209,15 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
         }
 
         _DO_THROW("The parameter specified by its name could not be found");
-        RETURN_THROWS()
+        RETURN_THROWS();
     } else {
         if (position < 0) {
             zend_argument_value_error(1, "must be greater than or equal to 0");
-            RETURN_THROWS()
+            RETURN_THROWS();
         }
         if (position >= num_args) {
             _DO_THROW("The parameter specified by its offset could not be found");
-            RETURN_THROWS()
+            RETURN_THROWS();
         }
 
         reflection_parameter_factory(
