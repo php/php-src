@@ -28,8 +28,8 @@ DOMDocument Object
     [actualEncoding] => 
     [encoding] => 
     [xmlEncoding] => 
-    [standalone] => 1
-    [xmlStandalone] => 1
+    [standalone] => 
+    [xmlStandalone] => 
     [version] => 1.0
     [xmlVersion] => 1.0
     [strictErrorChecking] => 1
