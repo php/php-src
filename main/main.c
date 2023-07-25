@@ -2502,9 +2502,6 @@ void php_module_shutdown(void)
 		return;
 	}
 
-	// we need to shutdown ZendMM observers before modules are unloaded
-	zend_mm_observers_shutdown(NULL);
-
 	zend_interned_strings_switch_storage(0);
 
 #if ZEND_RC_DEBUG
