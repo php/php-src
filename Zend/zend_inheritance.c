@@ -1971,7 +1971,7 @@ static zend_type zend_resolve_name_type(zend_type type, const zend_class_entry *
 }
 
 /* We cannot modify the type in-place (e.g. via a pointer) as it is written to SHM */
-static zend_type zend_resolve_single_type(zend_type type, const zend_class_entry *const ce)
+static zend_type zend_resolve_type(zend_type type, const zend_class_entry *const ce)
 {
 	/* Only built-in types + static */
 	if (!ZEND_TYPE_IS_COMPLEX(type)) {
@@ -2047,7 +2047,7 @@ static void zend_resolve_trait_relative_class_types(zend_function *const fn, con
 
 	for (uint32_t i = 0; i < num_args + has_return_type; i++) {
 		zend_type type = new_arg_infos[i].type;
-		zend_type resolved_type = zend_resolve_single_type(type, ce);
+		zend_type resolved_type = zend_resolve_type(type, ce);
 		if (zend_was_type_resolved(type, resolved_type)) {
 			if (!has_resolved_type) {
 				new_arg_infos = zend_arena_alloc(&CG(arena), allocated_size);
