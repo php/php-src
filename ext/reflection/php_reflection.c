@@ -2136,18 +2136,26 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
         position = -1;
 
         for (i = 0; i < num_args; i++) {
-            if (zend_string_equals(arg_name, arg_info[i].name)) {
-                RETURN_TRUE;
+            for (i = 0; i < num_args; i++) {
+                if (has_internal_arg_info(fptr)) {
+                    if (arg_info[i].name) {
+                        if (strcmp(((zend_internal_arg_info*)arg_info)[i].name, ZSTR_VAL(arg_name)) == 0) {
+                            RETURN_TRUE;
+                        }
+                    }
+                } else {
+                    if (arg_info[i].name) {
+                        if (zend_string_equals(arg_name, arg_info[i].name)) {
+                            RETURN_TRUE;
+                        }
+                    }
+                }
             }
         }
 
         RETURN_FALSE;
     } else {
-        if (position < 0) {
-            zend_argument_value_error(1, "must be greater than or equal to 0");
-            RETURN_THROWS();
-        }
-        if (position >= num_args) {
+        if (position < 0 || position >= num_args) {
             RETURN_FALSE;
         }
 
@@ -2186,24 +2194,30 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
 
     if (arg_name != NULL) {
         uint32_t i;
+        position = -1;
 
         for (i = 0; i < num_args; i++) {
-            if (zend_string_equals(arg_name, arg_info[i].name)) {
-                reflection_parameter_factory(
-                    _copy_function(fptr),
-                    Z_ISUNDEF(intern->obj) ? NULL : &intern->obj,
-                    &arg_info[i],
-                    i,
-                    i < fptr->common.required_num_args,
-                    &reflection
-                );
-
-                RETURN_OBJ(Z_OBJ(reflection));
+            if (has_internal_arg_info(fptr)) {
+                if (arg_info[i].name) {
+                    if (strcmp(((zend_internal_arg_info*)arg_info)[i].name, ZSTR_VAL(arg_name)) == 0) {
+                        position = i;
+                        break;
+                    }
+                }
+            } else {
+                if (arg_info[i].name) {
+                    if (zend_string_equals(arg_name, arg_info[i].name)) {
+                        position = i;
+                        break;
+                    }
+                }
             }
         }
 
-        _DO_THROW("The parameter specified by its name could not be found");
-        RETURN_THROWS();
+        if (position == -1) {
+            _DO_THROW("The parameter specified by its name could not be found");
+            RETURN_THROWS();
+        }
     } else {
         if (position < 0) {
             zend_argument_value_error(1, "must be greater than or equal to 0");
@@ -2213,18 +2227,18 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
             _DO_THROW("The parameter specified by its offset could not be found");
             RETURN_THROWS();
         }
-
-        reflection_parameter_factory(
-            _copy_function(fptr),
-            Z_ISUNDEF(intern->obj) ? NULL : &intern->obj,
-            &arg_info[position],
-            position,
-            position < fptr->common.required_num_args,
-            &reflection
-        );
-
-        RETURN_OBJ(Z_OBJ(reflection));
     }
+
+    reflection_parameter_factory(
+        _copy_function(fptr),
+        Z_ISUNDEF(intern->obj) ? NULL : &intern->obj,
+        &arg_info[position],
+        position,
+        position < fptr->common.required_num_args,
+        &reflection
+    );
+
+    RETURN_OBJ(Z_OBJ(reflection));
 }
 /* }}} */
 
