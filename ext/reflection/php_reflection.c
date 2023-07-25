@@ -2112,7 +2112,6 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
     zend_string *arg_name = NULL;
     zend_long position;
     struct _zend_arg_info *arg_info;
-    zval *parameter;
     uint32_t num_args;
 
     ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -2167,7 +2166,6 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
     zend_string *arg_name = NULL;
     zend_long position;
     struct _zend_arg_info *arg_info;
-    zval *parameter;
     uint32_t num_args;
     zval reflection;
 
