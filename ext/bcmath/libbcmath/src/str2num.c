@@ -40,6 +40,7 @@ bool bc_str2num (bc_num *num, char *str, size_t scale)
 	size_t digits, strscale;
 	char *ptr, *nptr;
 	bool zero_int = false;
+	size_t trailing_zeros = 0;
 
 	/* Prepare num. */
 	bc_free_num (num);
@@ -68,8 +69,18 @@ bool bc_str2num (bc_num *num, char *str, size_t scale)
 	}
 	/* digits after the decimal point */
 	while (*ptr >= '0' && *ptr <= '9') {
+		if (*ptr == '0') {
+			trailing_zeros++;
+		} else {
+			trailing_zeros = 0;
+		}
 		ptr++;
 		strscale++;
+	}
+
+	if (trailing_zeros > 0) {
+		/* Trailining zeros should not take part in the computation of the overall scale, as it is pointless. */
+		strscale = strscale - trailing_zeros;
 	}
 	if ((*ptr != '\0') || (digits+strscale == 0)) {
 		*num = bc_copy_num (BCG(_zero_));
