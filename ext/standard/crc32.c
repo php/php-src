@@ -68,6 +68,8 @@ static inline int has_crc32_insn(void) {
 #  if!defined(__clang__)
 #   pragma GCC push_options
 #   pragma GCC target ("+nothing+crc")
+#  elif defined(__APPLE__)
+#   pragma clang attribute push(__attribute__((target("crc"))), apply_to=function)
 #  else
 #   pragma clang attribute push(__attribute__((target("+nothing+crc"))), apply_to=function)
 #  endif
