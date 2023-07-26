@@ -79,7 +79,7 @@ bool bc_str2num (bc_num *num, char *str, size_t scale)
 	}
 
 	if (trailing_zeros > 0) {
-		/* Skip trailing zeros. */
+		/* Trailining zeros should not take part in the computation of the overall scale, as it is pointless. */
 		strscale = strscale - trailing_zeros;
 	}
 	if ((*ptr != '\0') || (digits+strscale == 0)) {
