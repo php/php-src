@@ -187,7 +187,7 @@ int dom_document_standalone_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	ZVAL_BOOL(retval, docp->standalone);
+	ZVAL_BOOL(retval, docp->standalone > 0);
 	return SUCCESS;
 }
 
