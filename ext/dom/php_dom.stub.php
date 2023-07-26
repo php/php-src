@@ -774,11 +774,11 @@ class DOMDocument extends DOMNode implements DOMParentNode
     /** @return DOMNode|false */
     public function importNode(DOMNode $node, bool $deep = false) {}
 
-    /** @return DOMDocument|bool */
-    public function load(string $filename, int $options = 0) {} // TODO return type shouldn't depend on the call scope
+    /** @tentative-return-type */
+    public function load(string $filename, int $options = 0): bool {}
 
-    /** @return DOMDocument|bool */
-    public function loadXML(string $source, int $options = 0) {} // TODO return type shouldn't depend on the call scope
+    /** @tentative-return-type */
+    public function loadXML(string $source, int $options = 0): bool {}
 
     /** @tentative-return-type */
     public function normalizeDocument(): void {}
@@ -790,11 +790,11 @@ class DOMDocument extends DOMNode implements DOMParentNode
     public function save(string $filename, int $options = 0): int|false {}
 
 #ifdef LIBXML_HTML_ENABLED
-    /** @return DOMDocument|bool */
-    public function loadHTML(string $source, int $options = 0) {} // TODO return type shouldn't depend on the call scope
+    /** @tentative-return-type */
+    public function loadHTML(string $source, int $options = 0): bool {}
 
-    /** @return DOMDocument|bool */
-    public function loadHTMLFile(string $filename, int $options = 0) {} // TODO return type shouldn't depend on the call scope
+    /** @tentative-return-type */
+    public function loadHTMLFile(string $filename, int $options = 0): bool {}
 
     /** @tentative-return-type */
     public function saveHTML(?DOMNode $node = null): string|false {}
