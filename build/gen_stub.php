@@ -2735,27 +2735,15 @@ class ClassInfo {
     public function getClassSynopsisElement(DOMDocument $doc, array $classMap, iterable $allConstInfos): ?DOMElement {
 
         $classSynopsis = $doc->createElement("classsynopsis");
-        if ($this->type === "interface") {
-            $classSynopsis->setAttribute("class", "interface");
+        $classSynopsis->setAttribute("class", $this->type === "interface" ? "interface" : "class");
+
+        $exceptionOverride = $this->isException($classMap) ? "exception" : null;
+        $ooElement = self::createOoElement($doc, $this, $exceptionOverride, true, null, 4);
+        if (!$ooElement) {
+            return null;
         }
         $classSynopsis->appendChild(new DOMText("\n    "));
-
-        $ooElement = self::createOoElement($doc, $this, true, false, false, 4);
-        if (!$ooElement) {
-            return null;
-        }
         $classSynopsis->appendChild($ooElement);
-        $classSynopsis->appendChild(new DOMText("\n\n    "));
-
-        $classSynopsisInfo = $doc->createElement("classsynopsisinfo");
-        $classSynopsisInfo->appendChild(new DOMText("\n     "));
-        $ooElement = self::createOoElement($doc, $this, false, true, false, 5);
-        if (!$ooElement) {
-            return null;
-        }
-        $classSynopsisInfo->appendChild($ooElement);
-
-        $classSynopsis->appendChild($classSynopsisInfo);
 
         foreach ($this->extends as $k => $parent) {
             $parentInfo = $classMap[$parent->toString()] ?? null;
@@ -2766,33 +2754,32 @@ class ClassInfo {
             $ooElement = self::createOoElement(
                 $doc,
                 $parentInfo,
+                null,
                 false,
-                false,
-                $k === 0 && $this->type === "class",
-                5
+                $k === 0 ? "extends" : null,
+                4
             );
             if (!$ooElement) {
                 return null;
             }
 
-            $classSynopsisInfo->appendChild(new DOMText("\n\n     "));
-            $classSynopsisInfo->appendChild($ooElement);
+            $classSynopsis->appendChild(new DOMText("\n\n    "));
+            $classSynopsis->appendChild($ooElement);
         }
 
-        foreach ($this->implements as $interface) {
+        foreach ($this->implements as $k => $interface) {
             $interfaceInfo = $classMap[$interface->toString()] ?? null;
             if (!$interfaceInfo) {
                 throw new Exception("Missing implemented interface " . $interface->toString());
             }
 
-            $ooElement = self::createOoElement($doc, $interfaceInfo, false, false, false, 5);
+            $ooElement = self::createOoElement($doc, $interfaceInfo, null, false, $k === 0 ? "implements" : null, 4);
             if (!$ooElement) {
                 return null;
             }
-            $classSynopsisInfo->appendChild(new DOMText("\n\n     "));
-            $classSynopsisInfo->appendChild($ooElement);
+            $classSynopsis->appendChild(new DOMText("\n\n    "));
+            $classSynopsis->appendChild($ooElement);
         }
-        $classSynopsisInfo->appendChild(new DOMText("\n    "));
 
         /** @var array<string, Name> $parentsWithInheritedConstants */
         $parentsWithInheritedConstants = [];
@@ -2921,9 +2908,9 @@ class ClassInfo {
     private static function createOoElement(
         DOMDocument $doc,
         ClassInfo $classInfo,
-        bool $overrideToClass,
+        ?string $typeOverride,
         bool $withModifiers,
-        bool $isExtends,
+        ?string $modifierOverride,
         int $indentationLevel
     ): ?DOMElement {
         $indentation = str_repeat(" ", $indentationLevel);
@@ -2933,12 +2920,12 @@ class ClassInfo {
             return null;
         }
 
-        $type = $overrideToClass ? "class" : $classInfo->type;
+        $type = $typeOverride !== null ? $typeOverride : $classInfo->type;
 
         $ooElement = $doc->createElement("oo$type");
         $ooElement->appendChild(new DOMText("\n$indentation "));
-        if ($isExtends) {
-            $ooElement->appendChild($doc->createElement('modifier', 'extends'));
+        if ($modifierOverride !== null) {
+            $ooElement->appendChild($doc->createElement('modifier', $modifierOverride));
             $ooElement->appendChild(new DOMText("\n$indentation "));
         } elseif ($withModifiers) {
             if ($classInfo->flags & Class_::MODIFIER_FINAL) {
@@ -3044,6 +3031,40 @@ class ClassInfo {
                 $classMap
             );
         }
+    }
+
+    /** @param array<string, ClassInfo> $classMap */
+    private function isException(array $classMap): bool
+    {
+        if ($this->name->toString() === "Throwable") {
+            return true;
+        }
+
+        foreach ($this->extends as $parentName) {
+            $parent = $classMap[$parentName->toString()] ?? null;
+            if ($parent === null) {
+                throw new Exception("Missing parent class " . $parentName->toString());
+            }
+
+            if ($parent->isException($classMap)) {
+                return true;
+            }
+        }
+
+        if ($this->type === "class") {
+            foreach ($this->implements as $interfaceName) {
+                $interface = $classMap[$interfaceName->toString()] ?? null;
+                if ($interface === null) {
+                    throw new Exception("Missing implemented interface " . $interfaceName->toString());
+                }
+
+                if ($interface->isException($classMap)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private function hasConstructor(): bool
