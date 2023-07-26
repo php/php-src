@@ -202,6 +202,11 @@ PHP 8.3 UPGRADE NOTES
 
 - Dom:
   . Changed DOMCharacterData::appendData() tentative return type to true.
+  . DOMDocument::loadHTML(), DOMDocument::loadHTMLFile(), DOMDocument::loadXML(),
+    and DOMDocument::loadXMLFile() now have a tentative return type of bool.
+    Previously, this was documented as having a return type of DOMDocument|bool,
+    but DOMDocument cannot be returned since PHP 8.0 as it is no longer statically
+    callable.
 
 - Gd:
   . Changed imagerotate signature, removed the `ignore_transparent` argument
