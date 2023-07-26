@@ -1465,7 +1465,7 @@ PHP_METHOD(DOMDocument, saveXML)
 	xmlBufferPtr buf;
 	const xmlChar *mem;
 	dom_object *intern, *nodeobj;
-	int size, format, saveempty;
+	int size, format, old_xml_save_no_empty_tags;
 	zend_long options = 0;
 
 	id = ZEND_THIS;
@@ -1491,10 +1491,11 @@ PHP_METHOD(DOMDocument, saveXML)
 			php_error_docref(NULL, E_WARNING, "Could not fetch buffer");
 			RETURN_FALSE;
 		}
-		saveempty = xmlSaveNoEmptyTags;
-		xmlSaveNoEmptyTags = !!(options & LIBXML_SAVE_NOEMPTYTAG);
+		/* Save libxml2 global, override its vaule, and restore after saving. */
+		old_xml_save_no_empty_tags = xmlSaveNoEmptyTags;
+		xmlSaveNoEmptyTags = (options & LIBXML_SAVE_NOEMPTYTAG) ? 1 : 0;
 		xmlNodeDump(buf, docp, node, 0, format);
-		xmlSaveNoEmptyTags = saveempty;
+		xmlSaveNoEmptyTags = old_xml_save_no_empty_tags;
 	} else {
 		buf = xmlBufferCreate();
 		if (!buf) {
@@ -1509,11 +1510,12 @@ PHP_METHOD(DOMDocument, saveXML)
 		if (format) {
 			converted_options |= XML_SAVE_FORMAT;
 		}
+		/* Save libxml2 global, override its vaule, and restore after saving. */
+		old_xml_save_no_empty_tags = xmlSaveNoEmptyTags;
+		xmlSaveNoEmptyTags = (options & LIBXML_SAVE_NOEMPTYTAG) ? 1 : 0;
 		/* Encoding is handled from the encoding property set on the document */
-		saveempty = xmlSaveNoEmptyTags;
-		xmlSaveNoEmptyTags = !!(options & LIBXML_SAVE_NOEMPTYTAG);
 		xmlSaveCtxtPtr ctxt = xmlSaveToBuffer(buf, (const char *) docp->encoding, converted_options);
-		xmlSaveNoEmptyTags = saveempty;
+		xmlSaveNoEmptyTags = old_xml_save_no_empty_tags;
 		if (UNEXPECTED(!ctxt)) {
 			xmlBufferFree(buf);
 			php_error_docref(NULL, E_WARNING, "Could not create save context");
