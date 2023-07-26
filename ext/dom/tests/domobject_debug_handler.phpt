@@ -14,7 +14,7 @@ $d->dynamicProperty = new stdclass;
 $d->loadXML($xml);
 var_dump($d);
 ?>
---EXPECT--
+--EXPECTF--
 object(DOMDocument)#1 (39) {
   ["config"]=>
   NULL
@@ -44,7 +44,7 @@ object(DOMDocument)#1 (39) {
   ["strictErrorChecking"]=>
   bool(true)
   ["documentURI"]=>
-  string(46) "/run/media/niels/MoreData/php-src-FOR-MERGING/"
+  string(%d) %s
   ["formatOutput"]=>
   bool(false)
   ["validateOnParse"]=>
@@ -92,7 +92,7 @@ object(DOMDocument)#1 (39) {
   ["localName"]=>
   NULL
   ["baseURI"]=>
-  string(46) "/run/media/niels/MoreData/php-src-FOR-MERGING/"
+  string(%d) %s
   ["textContent"]=>
   string(12) "
     foobar
