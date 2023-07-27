@@ -52,18 +52,13 @@ $args = [
 
 $tester = new FPM\Tester($cfg, $code);
 $tester->start($args);
-var_dump($tester->getLogLines(1));
+$tester->expectLogPattern('#Fatal Error "opcache.preload" requires "opcache.preload_user" when running under uid 0#');
 $tester->terminate();
 $tester->close();
 
 ?>
 Done
 --EXPECTF--
-array(1) {
-  [0]=>
-  string(%d) "%sFatal Error "opcache.preload" requires "opcache.preload_user" when running under uid 0
-"
-}
 Done
 --CLEAN--
 <?php
