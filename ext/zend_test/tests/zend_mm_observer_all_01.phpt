@@ -12,5 +12,4 @@ opcache.enable=0
 .*
 ZendMM Observer enabled
 .*
-.*
 ZendMM Observer disabled
