@@ -1562,29 +1562,11 @@ OPTIONAL_WHITESPACE_OR_COMMENTS ({WHITESPACE}|{MULTI_LINE_COMMENT}|{SINGLE_LINE_
 	RETURN_TOKEN_WITH_IDENT(T_ENUM);
 }
 
-/*
- * The collection(Seq) keyword must be followed by whitespace and another identifier.
- * This avoids the BC break of using 'collection' in classes, namespaces, functions and constants.
- */
-<ST_IN_SCRIPTING>"collection(Seq)"{WHITESPACE_OR_COMMENTS}("extends"|"implements") {
-	yyless(15);
-	RETURN_TOKEN_WITH_STR(T_STRING, 0);
-}
-<ST_IN_SCRIPTING>"collection(Seq)"{WHITESPACE_OR_COMMENTS}[a-zA-Z_\x80-\xff] {
-	yyless(15);
+<ST_IN_SCRIPTING>"collection(Seq)" {
 	RETURN_TOKEN_WITH_IDENT(T_COLLECTION_SEQ);
 }
 
-/*
- * The collection(Dict) keyword must be followed by whitespace and another identifier.
- * This avoids the BC break of using 'collection' in classes, namespaces, functions and constants.
- */
-<ST_IN_SCRIPTING>"collection(Dict)"{WHITESPACE_OR_COMMENTS}("extends"|"implements") {
-	yyless(16);
-	RETURN_TOKEN_WITH_STR(T_STRING, 0);
-}
-<ST_IN_SCRIPTING>"collection(Dict)"{WHITESPACE_OR_COMMENTS}[a-zA-Z_\x80-\xff] {
-	yyless(16);
+<ST_IN_SCRIPTING>"collection(Dict)" {
 	RETURN_TOKEN_WITH_IDENT(T_COLLECTION_DICT);
 }
 
