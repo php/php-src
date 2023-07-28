@@ -25,26 +25,6 @@
     /* Development setting: test experimental features and/or feature requests that never worked before? */
     $TEST_EXPERIMENTAL = 1 == getenv("MYSQL_TEST_EXPERIMENTAL");
 
-    if (!function_exists('sys_get_temp_dir')) {
-        function sys_get_temp_dir() {
-
-            if (!empty($_ENV['TMP']))
-                return realpath( $_ENV['TMP'] );
-            if (!empty($_ENV['TMPDIR']))
-                return realpath( $_ENV['TMPDIR'] );
-            if (!empty($_ENV['TEMP']))
-                return realpath( $_ENV['TEMP'] );
-
-            $temp_file = tempnam(md5(uniqid(rand(), TRUE)), '');
-            if ($temp_file) {
-                $temp_dir = realpath(dirname($temp_file));
-                unlink($temp_file);
-                return $temp_dir;
-            }
-            return FALSE;
-        }
-    }
-
     if (!function_exists('my_mysqli_connect')) {
 
         /**
