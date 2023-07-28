@@ -1600,73 +1600,93 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 			src->writepos == src->readpos) {
 		/* both php_stream instances are backed by a file descriptor, are not filtered and the
 		 * read buffer is empty: we can use copy_file_range() */
-		int src_fd, dest_fd, dest_open_flags = 0;
+		int src_fd, dest_fd, dest_open_flags;
 
-		/* get dest open flags to check if the stream is open in append mode */
-		php_stream_parse_fopen_modes(dest->mode, &dest_open_flags);
+		/* Some filesystems will cause failures if the max length is greater than the file length.
+		 * We therefore use a stat call to get the actual file size. Since stat calls are cached
+		 * this shouldn't have much impact on performance.
+		 * In case the cached result is less than the actual size, the code will just copy more
+		 * in the next iteration. In case it is too large, it will at worst fall into the EIO error
+		 * case and therefore fall back to the mmap or regular copy. In case of races the reasoning
+		 * is the same as for a wrong cached result. Therefore, this won't cause problems. */
+		php_stream_statbuf statbuf;
 
 		/* copy_file_range does not work with O_APPEND */
 		if (php_stream_cast(src, PHP_STREAM_AS_FD, (void*)&src_fd, 0) == SUCCESS &&
 				php_stream_cast(dest, PHP_STREAM_AS_FD, (void*)&dest_fd, 0) == SUCCESS &&
+				/* get dest open flags to check if the stream is open in append mode */
 				php_stream_parse_fopen_modes(dest->mode, &dest_open_flags) == SUCCESS &&
-				!(dest_open_flags & O_APPEND)) {
-
-			/* clamp to INT_MAX to avoid EOVERFLOW */
-			const size_t cfr_max = MIN(maxlen, (size_t)SSIZE_MAX);
-
+				!(dest_open_flags & O_APPEND) &&
+				php_stream_stat(src, &statbuf) == SUCCESS &&
+				/* Some files (such as /proc files) report a size of zero, avoid problems */
+				statbuf.sb.st_size > 0) {
 			/* copy_file_range() is a Linux-specific system call which allows efficient copying
 			 * between two file descriptors, eliminating the need to transfer data from the kernel
 			 * to userspace and back. For networking file systems like NFS and Ceph, it even
 			 * eliminates copying data to the client, and local filesystems like Btrfs and XFS can
 			 * create shared extents. */
-			ssize_t result = copy_file_range(src_fd, NULL, dest_fd, NULL, cfr_max, 0);
-			if (result > 0) {
-				size_t nbytes = (size_t)result;
-				haveread += nbytes;
+			ssize_t result;
+			size_t must_read = MIN(maxlen, statbuf.sb.st_size);
+			do {
+				/* clamp to SSIZE_MAX to avoid EOVERFLOW */
+				const size_t cfr_max = MIN(must_read - haveread, (size_t)SSIZE_MAX);
 
-				src->position += nbytes;
-				dest->position += nbytes;
+				result = copy_file_range(src_fd, NULL, dest_fd, NULL, cfr_max, 0);
 
-				if ((maxlen != PHP_STREAM_COPY_ALL && nbytes == maxlen) || php_stream_eof(src)) {
-					/* the whole request was satisfied or end-of-file reached - done */
+				if (result > 0) {
+					size_t nbytes = (size_t)result;
+					haveread += nbytes;
+
+					src->position += nbytes;
+					dest->position += nbytes;
+
+					/* We must check maxlen here instead of must_read, because must_read may be
+					 * a stale value and must therefore only be used as a hint. */
+					if ((maxlen != PHP_STREAM_COPY_ALL && haveread == maxlen) || php_stream_eof(src)) {
+						/* the whole request was satisfied or end-of-file reached - done */
+						*len = haveread;
+						return SUCCESS;
+					}
+
+					/* copy_file_range may return early without copying all data.
+					 * There may be more data to copy; continue copying using file_copy_range, and
+					 * if a failure would occur, it will fall back to the code below. */
+				} else if (result == 0) {
+					/* end of file */
 					*len = haveread;
 					return SUCCESS;
 				}
+			} while (result >= 0);
 
-				/* there may be more data; continue copying using the fallback code below */
-			} else if (result == 0) {
-				/* end of file */
-				*len = haveread;
-				return SUCCESS;
-			} else if (result < 0) {
-				switch (errno) {
-					case EINVAL:
-						/* some formal error, e.g. overlapping file ranges */
-						break;
+			ZEND_ASSERT(result < 0);
 
-					case EXDEV:
-						/* pre Linux 5.3 error */
-						break;
+			switch (errno) {
+				case EINVAL:
+					/* some formal error, e.g. overlapping file ranges */
+					break;
 
-					case ENOSYS:
-						/* not implemented by this Linux kernel */
-						break;
+				case EXDEV:
+					/* pre Linux 5.3 error */
+					break;
 
-					case EIO:
-						/* Some filesystems will cause failures if the max length is greater than the file length
-						 * in certain circumstances and configuration. In those cases the errno is EIO and we will
-						 * fall back to other methods. We cannot use stat to determine the file length upfront because
-						 * that is prone to races and outdated caching. */
-						break;
+				case ENOSYS:
+					/* not implemented by this Linux kernel */
+					break;
 
-					default:
-						/* unexpected I/O error - give up, no fallback */
-						*len = haveread;
-						return FAILURE;
-				}
+				case EIO:
+					/* Some filesystems will cause failures if the max length is greater than the file length
+					 * in certain circumstances and configuration. In those cases the errno is EIO and we will
+					 * fall back to other methods. We cannot use stat to determine the file length upfront because
+					 * that is prone to races and outdated caching. */
+					break;
 
-				/* fall back to classic copying */
+				default:
+					/* unexpected I/O error - give up, no fallback */
+					*len = haveread;
+					return FAILURE;
 			}
+
+			/* fall back to classic copying */
 		}
 	}
 #endif // HAVE_COPY_FILE_RANGE

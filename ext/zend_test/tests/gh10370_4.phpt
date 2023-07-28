@@ -9,7 +9,7 @@ if (PHP_OS != 'Linux') {
 }
 ?>
 --INI--
-zend_test.limit_copy_file_range=4096
+zend_test.limit_copy_file_range_length=4096
 --FILE--
 <?php
 /* Note: the value 4096 is chosen so that the mmap in _php_stream_copy_to_stream_ex() will mmap
