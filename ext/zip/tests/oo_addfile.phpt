@@ -24,7 +24,7 @@ if (!$zip->addFile($dirname . 'utils.inc', 'mini.txt', 12, 34)) {
     echo "failed\n";
 }
 var_dump($zip->lastId);
-if (!$zip->addFile($dirname . 'utils.inc', 'other.txt', 0, 0, ZipArchive::FL_OPEN_FILE_NOW)) {
+if (!$zip->addFile($dirname . 'utils.inc', 'other.txt', 0, ZipArchive::LENGTH_TO_END, ZipArchive::FL_OPEN_FILE_NOW)) {
     echo "failed\n";
 }
 var_dump($zip->lastId);
