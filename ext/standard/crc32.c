@@ -98,6 +98,8 @@ static uint32_t crc32_aarch64(uint32_t crc, const char *p, size_t nr) {
 # if defined(__GNUC__)
 #  if !defined(__clang__)
 #   pragma GCC pop_options
+#  elif defined(__APPLE__)
+#   pragma clang attribute pop
 #  else
 #   pragma clang attribute pop
 #  endif
