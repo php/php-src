@@ -17,7 +17,6 @@
     $engine    = getenv("MYSQL_TEST_ENGINE")   ?: "InnoDB";
     $socket    = getenv("MYSQL_TEST_SOCKET")   ?: null;
     $skip_on_connect_failure  = getenv("MYSQL_TEST_SKIP_CONNECT_FAILURE") ?: true;
-    $connect_flags = (int)getenv("MYSQL_TEST_CONNECT_FLAGS") ?: 0;
     if ($socket) {
         ini_set('mysqli.default_socket', $socket);
     }
@@ -25,15 +24,21 @@
     /* Development setting: test experimental features and/or feature requests that never worked before? */
     $TEST_EXPERIMENTAL = 1 == getenv("MYSQL_TEST_EXPERIMENTAL");
 
+    function get_environment_connection_flags(): int {
+        static $connect_flags = null;
+        if ($connect_flags === null) {
+            $connect_flags = (int)getenv("MYSQL_TEST_CONNECT_FLAGS") ?: 0;
+        }
+        return $connect_flags;
+    }
+
     /**
     * Whenever possible, please use this wrapper to make testing of MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
     *
     * @param bool $enable_env_flags Enable setting of connection flags through 	env(MYSQL_TEST_CONNECT_FLAGS)?
     */
     function my_mysqli_connect($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
-        global $connect_flags;
-
-        $flags = $enable_env_flags? $connect_flags:0;
+        $flags = $enable_env_flags? get_environment_connection_flags():0;
         if ($flags !== 0) {
             $link = mysqli_init();
             if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags))
@@ -51,19 +56,16 @@
     * @param bool $enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)
     */
     function my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags = 0, $enable_env_flags = true) {
-        global $connect_flags;
-
-        if ($enable_env_flags)
-            $flags = $flags | $connect_flags;
+        if ($enable_env_flags) {
+            $flags = $flags | get_environment_connection_flags();
+        }
 
         return mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags);
     }
 
     class my_mysqli extends mysqli {
         public function __construct($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
-            global $connect_flags;
-
-            $flags = ($enable_env_flags) ? $connect_flags : 0;
+            $flags = ($enable_env_flags) ? get_environment_connection_flags() : 0;
 
             if ($flags !== 0) {
                 parent::__construct();
@@ -113,4 +115,3 @@
 
         return true;
     }
-?>
