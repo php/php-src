@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fb9b6fa0a8e3da62a85e13b455573ee876ea2d61 */
+ * Stub hash: ac1969b19efd54bb9a2b9e2f228e66f4d22000b1 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -76,7 +76,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_addFi
 	ZEND_ARG_TYPE_INFO(0, filepath, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, entryname, IS_STRING, 0, "\"\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, start, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "ZipArchive::LENGTH_TO_END")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "ZipArchive::FL_OVERWRITE")
 ZEND_END_ARG_INFO()
 
@@ -84,7 +84,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_repla
 	ZEND_ARG_TYPE_INFO(0, filepath, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, start, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "ZipArchive::LENGTH_TO_END")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -1230,6 +1230,20 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *const_LIBZIP_VERSION_name = zend_string_init_interned("LIBZIP_VERSION", sizeof("LIBZIP_VERSION") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_LIBZIP_VERSION_name, &const_LIBZIP_VERSION_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_LIBZIP_VERSION_name);
+
+	zval const_LENGTH_TO_END_value;
+	ZVAL_LONG(&const_LENGTH_TO_END_value, ZIP_LENGTH_TO_END);
+	zend_string *const_LENGTH_TO_END_name = zend_string_init_interned("LENGTH_TO_END", sizeof("LENGTH_TO_END") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_LENGTH_TO_END_name, &const_LENGTH_TO_END_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_LENGTH_TO_END_name);
+#if defined(ZIP_LENGTH_UNCHECKED)
+
+	zval const_LENGTH_UNCHECKED_value;
+	ZVAL_LONG(&const_LENGTH_UNCHECKED_value, ZIP_LENGTH_UNCHECKED);
+	zend_string *const_LENGTH_UNCHECKED_name = zend_string_init_interned("LENGTH_UNCHECKED", sizeof("LENGTH_UNCHECKED") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_LENGTH_UNCHECKED_name, &const_LENGTH_UNCHECKED_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_LENGTH_UNCHECKED_name);
+#endif
 
 	zval property_lastId_default_value;
 	ZVAL_UNDEF(&property_lastId_default_value);

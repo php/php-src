@@ -459,7 +459,6 @@ class ZipArchive implements Countable
     public const ER_WRONGPASSWD = UNKNOWN;
 
     /* since 1.0.0 */
-
 #ifdef ZIP_ER_OPNOTSUPP
     /**
      * N Operation not supported
@@ -721,6 +720,20 @@ class ZipArchive implements Countable
      */
     public const LIBZIP_VERSION = UNKNOWN;
 
+    /**
+     * @var int
+     * @cvalue ZIP_LENGTH_TO_END
+     */
+    public const LENGTH_TO_END = UNKNOWN;
+    /* since 1.10.1 */
+#ifdef ZIP_LENGTH_UNCHECKED
+    /**
+     * @var int
+     * @cvalue ZIP_LENGTH_UNCHECKED
+     */
+    public const LENGTH_UNCHECKED = UNKNOWN;
+#endif
+
     /** @readonly */
     public int $lastId;
     /** @readonly */
@@ -760,10 +773,10 @@ class ZipArchive implements Countable
     public function addFromString(string $name, string $content, int $flags = ZipArchive::FL_OVERWRITE): bool {}
 
     /** @tentative-return-type */
-    public function addFile(string $filepath, string $entryname = "", int $start = 0, int $length = 0, int $flags = ZipArchive::FL_OVERWRITE): bool {}
+    public function addFile(string $filepath, string $entryname = "", int $start = 0, int $length = ZipArchive::LENGTH_TO_END, int $flags = ZipArchive::FL_OVERWRITE): bool {}
 
     /** @tentative-return-type */
-    public function replaceFile(string $filepath, int $index, int $start = 0, int $length = 0, int $flags = 0): bool {}
+    public function replaceFile(string $filepath, int $index, int $start = 0, int $length = ZipArchive::LENGTH_TO_END, int $flags = 0): bool {}
 
     /** @tentative-return-type */
     public function addGlob(string $pattern, int $flags = 0, array $options = []): array|false {}
