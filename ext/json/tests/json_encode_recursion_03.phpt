@@ -25,10 +25,9 @@ var_dump(new SerializingTest());
 
 ?>
 --EXPECT--
-*RECURSION*
 object(SerializingTest)#1 (1) {
   ["result"]=>
-  string(7) "{"a":1}"
+  bool(false)
 }
 string(7) "{"a":1}"
 ---------

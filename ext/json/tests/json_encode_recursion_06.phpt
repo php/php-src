@@ -38,4 +38,4 @@ var_dump(serialize(new SerializeFirstTest()));
 ?>
 --EXPECT--
 string(68) "{"serialize":"O:19:\"JsonEncodeFirstTest\":1:{s:6:\"result\";i:1;}"}"
-string(194) "O:18:"SerializeFirstTest":1:{s:6:"result";s:142:"{"json":"O:18:\"SerializeFirstTest\":1:{s:6:\"result\";s:62:\"{\"json\":\"O:18:\\\"SerializeFirstTest\\\":1:{s:6:\\\"result\\\";b:0;}\"}\";}"}";}"
+string(113) "O:18:"SerializeFirstTest":1:{s:6:"result";s:62:"{"json":"O:18:\"SerializeFirstTest\":1:{s:6:\"result\";b:0;}"}";}"

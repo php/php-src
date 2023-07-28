@@ -24,4 +24,3 @@ var_dump(json_encode(new SerializingTest()));
 --EXPECT--
 bool(false)
 string(7) "{"a":1}"
-string(7) "{"a":1}"
