@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 46d06bea2d0c38bb9c17d0be0388b4833d7b4e06 */
+ * Stub hash: ac1969b19efd54bb9a2b9e2f228e66f4d22000b1 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -1230,22 +1230,12 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *const_LIBZIP_VERSION_name = zend_string_init_interned("LIBZIP_VERSION", sizeof("LIBZIP_VERSION") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_LIBZIP_VERSION_name, &const_LIBZIP_VERSION_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_LIBZIP_VERSION_name);
-#if defined(ZIP_LENGTH_TO_END)
 
 	zval const_LENGTH_TO_END_value;
 	ZVAL_LONG(&const_LENGTH_TO_END_value, ZIP_LENGTH_TO_END);
 	zend_string *const_LENGTH_TO_END_name = zend_string_init_interned("LENGTH_TO_END", sizeof("LENGTH_TO_END") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_LENGTH_TO_END_name, &const_LENGTH_TO_END_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_LENGTH_TO_END_name);
-#endif
-#if !(defined(ZIP_LENGTH_TO_END))
-
-	zval const_LENGTH_TO_END_value;
-	ZVAL_LONG(&const_LENGTH_TO_END_value, 0);
-	zend_string *const_LENGTH_TO_END_name = zend_string_init_interned("LENGTH_TO_END", sizeof("LENGTH_TO_END") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_LENGTH_TO_END_name, &const_LENGTH_TO_END_value, ZEND_ACC_PUBLIC, NULL);
-	zend_string_release(const_LENGTH_TO_END_name);
-#endif
 #if defined(ZIP_LENGTH_UNCHECKED)
 
 	zval const_LENGTH_UNCHECKED_value;

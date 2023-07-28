@@ -720,19 +720,12 @@ class ZipArchive implements Countable
      */
     public const LIBZIP_VERSION = UNKNOWN;
 
-    /* since 1.10.1 */
-#ifdef ZIP_LENGTH_TO_END
     /**
      * @var int
      * @cvalue ZIP_LENGTH_TO_END
      */
     public const LENGTH_TO_END = UNKNOWN;
-#else
-    /**
-     * @var int
-     */
-    public const LENGTH_TO_END = 0;
-#endif
+    /* since 1.10.1 */
 #ifdef ZIP_LENGTH_UNCHECKED
     /**
      * @var int
