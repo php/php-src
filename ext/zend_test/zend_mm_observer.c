@@ -39,24 +39,6 @@ void observer_realloc(void *ptr, size_t len, void *newptr ZEND_FILE_LINE_DC ZEND
 	printf("realloc %p of size %zu (block: %zu, former %p)\n", newptr, len, block_len, ptr);
 }
 
-PHP_FUNCTION(memprof_enable)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-	if (ZT_G(observer)) {
-		RETURN_FALSE;
-	}
-	ZT_G(observer) = zend_mm_observer_register(zend_mm_get_heap(), observer_malloc, observer_free, observer_realloc);
-	RETURN_TRUE;
-}
-
-PHP_FUNCTION(memprof_disable)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-	zend_mm_observer_unregister(zend_mm_get_heap(), ZT_G(observer));
-	ZT_G(observer) = NULL;
-	RETURN_TRUE;
-}
-
 static PHP_INI_MH(OnUpdate_zend_test_zend_mm_observer_enabled)
 {
 	int int_value;
