@@ -10,8 +10,6 @@ require_once('skipifconnectfailure.inc');
 <?php
     include_once("connect.inc");
 
-    set_error_handler('handle_catchable_fatal');
-
     require('table.inc');
     if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 5")) {
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -58,7 +56,7 @@ require_once('skipifconnectfailure.inc');
             var_dump($obj);
         }
     } catch (Throwable $e) {
-        echo "Exception: " . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     try {
@@ -68,7 +66,7 @@ require_once('skipifconnectfailure.inc');
             var_dump($obj);
         }
     } catch (Throwable $e) {
-        echo "Exception: " . $e->getMessage() . "\n";
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     $obj = mysqli_fetch_object($res, 'mysqli_fetch_object_construct', array('a', 'b'));
@@ -104,8 +102,8 @@ require_once('skipifconnectfailure.inc');
     try {
         if (false !== ($obj = @mysqli_fetch_object($res, 'mysqli_fetch_object_construct', 'a')))
             printf("[011] Should have failed\n");
-    } catch (Error $e) {
-        handle_catchable_fatal($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
     mysqli_free_result($res);
@@ -131,8 +129,8 @@ require_once('skipifconnectfailure.inc');
 
     try {
         var_dump(mysqli_fetch_object($res, 'this_class_does_not_exist'));
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
 
@@ -143,12 +141,12 @@ require_once('skipifconnectfailure.inc');
 <?php
     require_once("clean_table.inc");
 ?>
---EXPECTF--
-Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 0 passed and exactly 2 expected
-Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 1 passed and exactly 2 expected
+--EXPECT--
+ArgumentCountError: Too few arguments to function mysqli_fetch_object_construct::__construct(), 0 passed and exactly 2 expected
+ArgumentCountError: Too few arguments to function mysqli_fetch_object_construct::__construct(), 1 passed and exactly 2 expected
 NULL
 NULL
 mysqli_result object is already closed
-[0] mysqli_fetch_object(): Argument #3 ($constructor_args) must be of type array, string given in %s on line %d
-mysqli_fetch_object(): Argument #2 ($class) must be a valid class name, this_class_does_not_exist given
+TypeError: mysqli_fetch_object(): Argument #3 ($constructor_args) must be of type array, string given
+TypeError: mysqli_fetch_object(): Argument #2 ($class) must be a valid class name, this_class_does_not_exist given
 done!
