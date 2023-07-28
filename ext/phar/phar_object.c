@@ -1343,7 +1343,6 @@ PHP_METHOD(Phar, unlinkArchive)
 	phar_archive_delref(phar);
 	unlink(fname);
 	efree(fname);
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2623,7 +2622,7 @@ PHP_METHOD(Phar, delete)
 	if (NULL != (entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, fname, (uint32_t) fname_len))) {
 		if (entry->is_deleted) {
 			/* entry is deleted, but has not been flushed to disk yet */
-			RETURN_TRUE;
+			return;
 		} else {
 			entry->is_deleted = 1;
 			entry->is_modified = 1;
@@ -2640,8 +2639,6 @@ PHP_METHOD(Phar, delete)
 		efree(error);
 		RETURN_THROWS();
 	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2893,7 +2890,7 @@ PHP_METHOD(Phar, setStub)
 				zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 				efree(error);
 			}
-			RETURN_TRUE;
+			return;
 		} else {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0,
 				"Cannot change stub, unable to read from input stream");
@@ -2911,7 +2908,7 @@ PHP_METHOD(Phar, setStub)
 			RETURN_THROWS();
 		}
 
-		RETURN_TRUE;
+		return;
 	}
 
 	RETURN_THROWS();
@@ -3383,7 +3380,7 @@ PHP_METHOD(Phar, decompressFiles)
 	}
 
 	if (phar_obj->archive->is_tar) {
-		RETURN_TRUE;
+		return;
 	} else {
 		if (phar_obj->archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->archive))) {
 			zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
@@ -3399,8 +3396,6 @@ PHP_METHOD(Phar, decompressFiles)
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s", error);
 		efree(error);
 	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -3494,8 +3489,6 @@ PHP_METHOD(Phar, copy)
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 		efree(error);
 	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -4083,7 +4076,7 @@ PHP_METHOD(Phar, delMetadata)
 	}
 
 	if (!phar_metadata_tracker_has_data(&phar_obj->archive->metadata_tracker, phar_obj->archive->is_persistent)) {
-		RETURN_TRUE;
+		return;
 	}
 
 	phar_metadata_tracker_free(&phar_obj->archive->metadata_tracker, phar_obj->archive->is_persistent);
@@ -4094,8 +4087,6 @@ PHP_METHOD(Phar, delMetadata)
 		zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 		efree(error);
 		RETURN_THROWS();
-	} else {
-		RETURN_TRUE;
 	}
 }
 /* }}} */
@@ -4792,12 +4783,7 @@ PHP_METHOD(PharFileInfo, delMetadata)
 			zend_throw_exception_ex(phar_ce_PharException, 0, "%s", error);
 			efree(error);
 			RETURN_THROWS();
-		} else {
-			RETURN_TRUE;
 		}
-
-	} else {
-		RETURN_TRUE;
 	}
 }
 /* }}} */
@@ -4900,7 +4886,7 @@ PHP_METHOD(PharFileInfo, compress)
 	switch (method) {
 		case PHAR_ENT_COMPRESSED_GZ:
 			if (entry_obj->entry->flags & PHAR_ENT_COMPRESSED_GZ) {
-				RETURN_TRUE;
+				return;
 			}
 
 			if ((entry_obj->entry->flags & PHAR_ENT_COMPRESSED_BZ2) != 0) {
@@ -4931,7 +4917,7 @@ PHP_METHOD(PharFileInfo, compress)
 			break;
 		case PHAR_ENT_COMPRESSED_BZ2:
 			if (entry_obj->entry->flags & PHAR_ENT_COMPRESSED_BZ2) {
-				RETURN_TRUE;
+				return;
 			}
 
 			if ((entry_obj->entry->flags & PHAR_ENT_COMPRESSED_GZ) != 0) {
@@ -4973,8 +4959,6 @@ PHP_METHOD(PharFileInfo, compress)
 		efree(error);
 		RETURN_THROWS();
 	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -4997,7 +4981,7 @@ PHP_METHOD(PharFileInfo, decompress)
 	}
 
 	if ((entry_obj->entry->flags & PHAR_ENT_COMPRESSION_MASK) == 0) {
-		RETURN_TRUE;
+		return;
 	}
 
 	if (PHAR_G(readonly) && !entry_obj->entry->phar->is_data) {
@@ -5065,8 +5049,6 @@ PHP_METHOD(PharFileInfo, decompress)
 		efree(error);
 		RETURN_THROWS();
 	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 

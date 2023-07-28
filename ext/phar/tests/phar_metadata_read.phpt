@@ -53,19 +53,19 @@ string(1) "c"
 string(1) "d"
 bool(true)
 string(8) "hi there"
-bool(true)
 NULL
-bool(true)
+NULL
+NULL
 NULL
   meta a
 bool(false)
 NULL
-bool(true)
+NULL
 NULL
   meta b
 bool(false)
 NULL
-bool(true)
+NULL
 NULL
   meta c
 bool(true)
@@ -75,7 +75,7 @@ array(2) {
   [1]=>
   string(5) "there"
 }
-bool(true)
+NULL
 NULL
   meta d
 bool(true)
@@ -85,7 +85,7 @@ array(2) {
   ["foo"]=>
   string(3) "bar"
 }
-bool(true)
+NULL
 NULL
 string(1) "a"
 string(1) "b"

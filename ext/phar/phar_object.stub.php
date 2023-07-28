@@ -112,7 +112,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function compressFiles(int $compression): void {}
 
     /** @return bool */
-    public function decompressFiles() {} // TODO make return type void
+    public function decompressFiles(): void {}
 
     /** @tentative-return-type */
     public function compress(int $compression, ?string $extension = null): ?Phar {}
@@ -127,16 +127,16 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     public function convertToData(?int $format = null, ?int $compression = null, ?string $extension = null): ?PharData {}
 
     /** @return bool */
-    public function copy(string $from, string $to) {} // TODO make return type void
+    public function copy(string $from, string $to): void {}
 
     /** @tentative-return-type */
     public function count(int $mode = COUNT_NORMAL): int {}
 
     /** @return bool */
-    public function delete(string $localName) {} // TODO make return type void
+    public function delete(string $localName): void {}
 
     /** @return bool */
-    public function delMetadata() {} // TODO make return type void
+    public function delMetadata(): void {}
 
     /** @tentative-return-type */
     public function extractTo(string $directory, array|string|null $files = null, bool $overwrite = false): bool {}
@@ -218,7 +218,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
      * @param resource|string $stub
      * @return bool
      */
-    public function setStub($stub, int $length = UNKNOWN) {} // TODO make return type void
+    public function setStub($stub, int $length = UNKNOWN): void {}
 
     /** @tentative-return-type */
     public function startBuffering(): void {}
@@ -252,7 +252,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
 
     final public static function mungServer(array $variables): void {}
 
-    final public static function unlinkArchive(string $filename): bool {} // TODO make return type void
+    final public static function unlinkArchive(string $filename): void {}
 
     final public static function webPhar(
         ?string $alias = null, ?string $index = null, ?string $fileNotFoundScript = null,
@@ -310,7 +310,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return bool
      * @implementation-alias Phar::decompressFiles
      */
-    public function decompressFiles() {} // TODO make return type void
+    public function decompressFiles(): void {}
 
     /**
      * @tentative-return-type
@@ -342,7 +342,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return bool
      * @implementation-alias Phar::copy
      */
-    public function copy(string $from, string $to) {} // TODO make return type void
+    public function copy(string $from, string $to): void {}
 
     /**
      * @tentative-return-type
@@ -354,13 +354,13 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return bool
      * @implementation-alias Phar::delete
      */
-    public function delete(string $localName) {} // TODO make return type void
+    public function delete(string $localName): void {}
 
     /**
      * @return bool
      * @implementation-alias Phar::delMetadata
      */
-    public function delMetadata() {} // TODO make return type void
+    public function delMetadata(): void {}
 
     /**
      * @tentative-return-type
@@ -498,7 +498,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
      * @return bool
      * @implementation-alias Phar::setStub
      */
-    public function setStub($stub, int $length = UNKNOWN) {} // TODO make return type void
+    public function setStub($stub, int $length = UNKNOWN): void {}
 
     /**
      * @tentative-return-type
@@ -552,7 +552,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     final public static function mungServer(array $variables): void {}
 
     /** @implementation-alias Phar::unlinkArchive */
-    final public static function unlinkArchive(string $filename): bool {} // TODO make return type void
+    final public static function unlinkArchive(string $filename): void {}
 
     /** @implementation-alias Phar::webPhar */
     final public static function webPhar(
@@ -570,13 +570,13 @@ class PharFileInfo extends SplFileInfo
     public function chmod(int $perms): void {}
 
     /** @return bool */
-    public function compress(int $compression) {} // TODO make return type void
+    public function compress(int $compression): void {}
 
     /** @return bool */
-    public function decompress() {} // TODO make return type void
+    public function decompress(): void {}
 
     /** @return bool */
-    public function delMetadata() {} // TODO make return type void
+    public function delMetadata(): void {}
 
     /** @tentative-return-type */
     public function getCompressedSize(): int {}

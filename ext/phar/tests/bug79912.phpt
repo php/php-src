@@ -19,10 +19,10 @@ var_dump($phar->extractTo(__DIR__ . "/bug79912")); //true
 var_dump(file_get_contents(__DIR__ . "/bug79912/test.txt")); //the extracted file in the folder should be decompressed
 ?>
 --EXPECT--
-bool(true)
+NULL
 string(60) "This is a test file.This is a test file.This is a test file."
 bool(true)
-bool(true)
+NULL
 bool(false)
 bool(true)
 string(60) "This is a test file.This is a test file.This is a test file."

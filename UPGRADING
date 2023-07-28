@@ -276,6 +276,12 @@ PHP 8.3 UPGRADE NOTES
 - Reflection:
   . Return type of ReflectionClass::getStaticProperties() is no longer nullable.
 
+- Phar:
+  . Phar::delete, Phar::decompress, Phar::decompressFiles, Phar::copy,
+    Phar::delMetadata, Phar::setStub, Phar::unlinkArchive,
+    PharFileInfo::compress, PharFileInfo::decompress, PharFileInfo::delMetadata
+    no longer return true on success.
+
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING.
     RFC: https://wiki.php.net/rfc/improve_unserialize_error_handling
