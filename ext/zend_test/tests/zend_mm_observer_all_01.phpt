@@ -3,7 +3,7 @@ ZendMM Observer: Observe all
 --EXTENSIONS--
 zend_test
 --INI--
-zend_test.zendmm_observer.enabled=1
+zend_test.zend_mm_observer.enabled=1
 opcache.enable=0
 --FILE--
 <?php

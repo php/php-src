@@ -76,7 +76,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	// this is our heap that we install our custom handlers on and inject into
 	// ZendMM
 	zend_mm_heap* observed_heap;
-	int zendmm_observer_enabled;
+	int zend_mm_observer_enabled;
 	zend_mm_observer *observer;
 ZEND_END_MODULE_GLOBALS(zend_test)
 

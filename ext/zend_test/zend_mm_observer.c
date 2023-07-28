@@ -19,7 +19,7 @@
 #include "Zend/zend_alloc.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
-#include "zendmm_observer.h"
+#include "zend_mm_observer.h"
 
 void observer_malloc(size_t len, void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
@@ -57,7 +57,7 @@ PHP_FUNCTION(memprof_disable)
 	RETURN_TRUE;
 }
 
-static PHP_INI_MH(OnUpdate_zend_test_zendmm_observer_enabled)
+static PHP_INI_MH(OnUpdate_zend_test_zend_mm_observer_enabled)
 {
 	int int_value;
 	if (new_value == NULL) {
@@ -86,7 +86,7 @@ static PHP_INI_MH(OnUpdate_zend_test_zendmm_observer_enabled)
 }
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("zend_test.zendmm_observer.enabled", "0", PHP_INI_ALL, OnUpdate_zend_test_zendmm_observer_enabled, zendmm_observer_enabled, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.zend_mm_observer.enabled", "0", PHP_INI_ALL, OnUpdate_zend_test_zend_mm_observer_enabled, zend_mm_observer_enabled, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 void zend_test_mm_observer_minit(INIT_FUNC_ARGS)
@@ -100,7 +100,7 @@ void zend_test_mm_observer_minit(INIT_FUNC_ARGS)
 
 void zend_test_mm_observer_rinit(void)
 {
-	if (ZT_G(zendmm_observer_enabled)) {
+	if (ZT_G(zend_mm_observer_enabled)) {
 		printf("ZendMM Observer enabled\n");
 		ZT_G(observer) = zend_mm_observer_register(zend_mm_get_heap(), observer_malloc, observer_free, observer_realloc);
 	}
