@@ -108,6 +108,11 @@ PHP 8.3 UPGRADE NOTES
 - CLI
   . It is now possible to lint multiple files.
 
+- Opcache
+  . opcache_get_status()['scripts'][n]['revalidate'] now contains a Unix
+    timestamp of when the next revalidation of the scripts timestamp is due,
+    dictated by the opcache.revalidate_freq INI directive.
+
 - Posix
   . posix_getrlimit() now takes an optional $res parameter to allow fetching a
     single resource limit.
