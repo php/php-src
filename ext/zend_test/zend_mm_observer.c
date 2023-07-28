@@ -39,20 +39,13 @@ void observer_realloc(void *ptr, size_t len, void *newptr ZEND_FILE_LINE_DC ZEND
 	printf("realloc %p of size %zu (block: %zu, former %p)\n", newptr, len, block_len, ptr);
 }
 
-static PHP_INI_MH(OnUpdate_zend_test_zend_mm_observer_enabled)
+static PHP_INI_MH(OnUpdateZendTestMMObserverEnabled)
 {
-	int int_value;
 	if (new_value == NULL) {
 		return FAILURE;
 	}
 
-	if (zend_string_equals_literal_ci(new_value, "true")) {
-		int_value = 1;
-	} else if (zend_string_equals_literal_ci(new_value, "false")) {
-		int_value = 0;
-	} else {
-		int_value = (int) zend_ini_parse_quantity_warn(new_value, entry->name);
-	}
+	int int_value = zend_ini_parse_bool(new_value);
 
 	if (int_value == 1) {
 		if (ZT_G(observer) == NULL) {
@@ -68,7 +61,7 @@ static PHP_INI_MH(OnUpdate_zend_test_zend_mm_observer_enabled)
 }
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("zend_test.zend_mm_observer.enabled", "0", PHP_INI_ALL, OnUpdate_zend_test_zend_mm_observer_enabled, zend_mm_observer_enabled, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.zend_mm_observer.enabled", "0", PHP_INI_ALL, OnUpdateZendTestMMObserverEnabled, zend_mm_observer_enabled, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 void zend_test_mm_observer_minit(INIT_FUNC_ARGS)
