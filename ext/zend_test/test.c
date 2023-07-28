@@ -23,7 +23,7 @@
 #include "ext/standard/info.h"
 #include "php_test.h"
 #include "observer.h"
-#include "zendmm_observer.h"
+#include "zend_mm_observer.h"
 #include "fiber.h"
 #include "iterators.h"
 #include "object_handlers.h"
