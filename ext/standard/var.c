@@ -564,12 +564,12 @@ again:
 			 * if the result won't be used. (https://github.com/php/php-src/issues/8044) */
 			zend_object *zobj = Z_OBJ_P(struc);
 			uint32_t *guard = zend_get_recursion_guard(zobj);
-			if (ZEND_GUARD_OR_GC_IS_RECURSIVE(guard, DEBUG, zobj)) {
+			if (ZEND_GUARD_OR_GC_IS_RECURSIVE(guard, EXPORT, zobj)) {
 				smart_str_appendl(buf, "NULL", 4);
 				zend_error(E_WARNING, "var_export does not handle circular references");
 				return;
 			}
-			ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
+			ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, EXPORT, zobj);
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_VAR_EXPORT);
 			if (level > 1) {
 				smart_str_appendc(buf, '\n');
@@ -603,7 +603,7 @@ again:
 				}
 				zend_release_properties(myht);
 			}
-			ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, DEBUG, zobj);
+			ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, EXPORT, zobj);
 			if (level > 1 && !is_enum) {
 				buffer_append_spaces(buf, level - 1);
 			}
