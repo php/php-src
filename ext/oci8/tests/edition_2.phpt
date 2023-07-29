@@ -5,6 +5,7 @@ oci8
 --SKIPIF--
 <?php
 if (getenv('SKIP_REPEAT')) die('skip fails with repeat');
+require_once('skipifconnectfailure.inc');
 require(__DIR__."/connect.inc");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys"))
     die("skip needs to be run as a DBA user");

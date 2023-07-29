@@ -4,6 +4,7 @@ Bug #47281 ($php_errormsg is limited in size of characters)
 oci8
 --SKIPIF--
 <?php
+require_once('skipifconnectfailure.inc');
 $target_dbs = array('oracledb' => false, 'timesten' => true);  // test runs on these DBs: shorter message length in TimesTen
 require(__DIR__.'/skipif.inc');
 ?>

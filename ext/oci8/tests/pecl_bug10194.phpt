@@ -4,6 +4,7 @@ PECL Bug #10194 (segfault in Instant Client when memory_limit is reached inside 
 oci8
 --SKIPIF--
 <?php
+require_once('skipifconnectfailure.inc');
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');

@@ -2,6 +2,10 @@
 oci_field_*() family: error cases
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 

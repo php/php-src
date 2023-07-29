@@ -2,6 +2,10 @@
 Test oci_pconnect end-of-scope when statement returned
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 

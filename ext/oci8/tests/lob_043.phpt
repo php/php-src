@@ -4,6 +4,7 @@ Bug #49560 (LOB resource destructor and refcount test)
 oci8
 --SKIPIF--
 <?php
+require_once('skipifconnectfailure.inc');
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');

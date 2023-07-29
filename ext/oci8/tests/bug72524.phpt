@@ -4,6 +4,7 @@ Bug #72524 (Binding null values triggers ORA-24816 error)
 oci8
 --SKIPIF--
 <?php
+require_once('skipifconnectfailure.inc');
 $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 ?>

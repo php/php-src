@@ -4,6 +4,7 @@ Basic PL/SQL "BOOLEAN" (SQLT_BOL) bind test
 oci8
 --SKIPIF--
 <?php
+require_once('skipifconnectfailure.inc');
 require(__DIR__.'/connect.inc');
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
 if (!(isset($matches[0]) && $matches[1] >= 12)) {

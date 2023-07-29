@@ -2,6 +2,10 @@
 Exercise OCIPing functionality on reconnect (code coverage test)
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --INI--
 oci8.ping_interval=0
 --FILE--

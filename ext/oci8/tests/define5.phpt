@@ -2,6 +2,10 @@
 oci_define_by_name() for statement re-execution
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 

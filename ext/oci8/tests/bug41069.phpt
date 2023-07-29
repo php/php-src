@@ -4,6 +4,7 @@ Bug #41069 (Oracle crash with certain data over a DB-link when prefetch memory l
 oci8
 --SKIPIF--
 <?php
+require_once('skipifconnectfailure.inc');
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 if (empty($dbase)) die ("skip requires network connection alias for DB link loopback");

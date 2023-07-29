@@ -4,6 +4,7 @@ DRCP: Test setting connection class inline
 oci8
 --SKIPIF--
 <?php
+require_once('skipifconnectfailure.inc');
 require(__DIR__.'/connect.inc');
 if (!$test_drcp) die("skip testing DRCP connection class only works in DRCP mode");
 // Looked for :pooled in EZ connect string

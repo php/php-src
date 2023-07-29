@@ -2,6 +2,10 @@
 oci_field_*() family: basic column types
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 

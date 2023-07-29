@@ -2,6 +2,10 @@
 Bug #41917 (invalid scale and precision)
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 

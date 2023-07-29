@@ -4,6 +4,7 @@ Bug #47189 (Multiple oci_fetch_all calls)
 oci8
 --SKIPIF--
 <?php
+require_once('skipifconnectfailure.inc');
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs: different error handling for this undefined behavior
 require(__DIR__.'/skipif.inc');
 ?>
