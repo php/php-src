@@ -159,6 +159,14 @@ function tear_down_table_on_default_connection(string $table) {
     }
 }
 
+function setup_table_with_data_on_default_connection(string $table): mysqli {
+    $link = default_mysqli_connect();
+    mysqli_query($link, 'SET SESSION sql_mode=\'\'');
+    mysqli_query($link, 'CREATE TABLE '. $table .'(id INT DEFAULT 0, label CHAR(1), PRIMARY KEY(id)) ENGINE=' . get_default_db_engine());
+    mysqli_query($link, 'INSERT INTO '. $table .'(id, label) VALUES (1, "a"), (2, "b"), (3, "c"), (4, "d"), (5, "e"), (6, "f")');
+    return $link;
+}
+
 /* Development setting: test experimental features and/or feature requests that never worked before? */
 //$TEST_EXPERIMENTAL = 1 == getenv("MYSQL_TEST_EXPERIMENTAL");
 //$engine    = getenv("MYSQL_TEST_ENGINE")   ?: "InnoDB";

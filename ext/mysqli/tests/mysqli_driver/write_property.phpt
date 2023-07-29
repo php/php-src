@@ -1,22 +1,22 @@
 --TEST--
-Writing to mysqli properties (strict_types)
+Writing to mysqli_driver properties
 --EXTENSIONS--
 mysqli
 --FILE--
 <?php
 
-declare(strict_types=1);
-
 $driver = new mysqli_driver;
 try {
     /* Read-only property */
-    $driver->client_info = 42;
+    $driver->client_info = 'test';
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 
+$driver->report_mode = "1";
+var_dump($driver->report_mode);
 try {
-    $driver->report_mode = "1";
+    $driver->report_mode = [];
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
@@ -24,4 +24,5 @@ try {
 ?>
 --EXPECT--
 Cannot write read-only property mysqli_driver::$client_info
-Cannot assign string to property mysqli_driver::$report_mode of type int
+int(1)
+Cannot assign array to property mysqli_driver::$report_mode of type int
