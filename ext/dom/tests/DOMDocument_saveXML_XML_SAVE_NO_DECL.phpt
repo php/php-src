@@ -2,6 +2,10 @@
 DOMDocument::saveXML(): XML_SAVE_NO_DECL
 --EXTENSIONS--
 dom
+--SKIPIF--
+<?php
+if (getenv('SKIP_ASAN') && LIBXML_VERSION < 20911) die('xleak leaks under libxml2 versions older than 2.9.11');
+?>
 --FILE--
 <?php
 $doc = new DOMDocument();
