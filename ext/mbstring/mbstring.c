@@ -1159,8 +1159,7 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 
 	if (MBSTRG(all_encodings_list)) {
 		GC_DELREF(MBSTRG(all_encodings_list));
-		zend_hash_destroy(MBSTRG(all_encodings_list));
-		efree(MBSTRG(all_encodings_list));
+		zend_array_destroy(MBSTRG(all_encodings_list));
 		MBSTRG(all_encodings_list) = NULL;
 	}
 
