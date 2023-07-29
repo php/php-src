@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0d6ef9904082180bf9205d61c2f45c0752be8f7b */
+ * Stub hash: 9a986534dbdb29a9fc2ff5a2a4368cfb6d6d041f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -12,12 +12,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_connect_poll, 0, 1, IS_LONG, 
 	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_close, 0, 0, IS_TRUE, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, connection, PgSql\\Connection, 1, "null")
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_close, 0, 1, IS_TRUE, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_dbname, 0, 0, IS_STRING, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, connection, PgSql\\Connection, 1, "null")
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_dbname, 0, 1, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_pg_last_error arginfo_pg_dbname
@@ -32,39 +32,39 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_pg_host arginfo_pg_dbname
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_version, 0, 0, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, connection, PgSql\\Connection, 1, "null")
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_version, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_parameter_status, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_parameter_status, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_ping, 0, 0, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, connection, PgSql\\Connection, 1, "null")
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_ping, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_query, 0, 1, PgSql\\Result, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_query, 0, 2, PgSql\\Result, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_pg_exec arginfo_pg_query
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_query_params, 0, 2, PgSql\\Result, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_query_params, 0, 3, PgSql\\Result, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, query)
 	ZEND_ARG_TYPE_INFO(0, params, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_prepare, 0, 2, PgSql\\Result, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_prepare, 0, 3, PgSql\\Result, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_TYPE_INFO(0, statement_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_execute, 0, 2, PgSql\\Result, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_execute, 0, 3, PgSql\\Result, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, connection)
 	ZEND_ARG_INFO(0, statement_name)
 	ZEND_ARG_TYPE_INFO(0, params, IS_ARRAY, 0)
@@ -196,10 +196,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_pg_getlastoid arginfo_pg_last_oid
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_trace, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_trace, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_STRING, 0, "\"w\"")
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, connection, PgSql\\Connection, 1, "null")
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, trace_mode, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -352,13 +352,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_pg_transaction_status arginfo_pg_connect_poll
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_connection_reset, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_pg_connection_reset arginfo_pg_ping
 
-#define arginfo_pg_cancel_query arginfo_pg_connection_reset
+#define arginfo_pg_cancel_query arginfo_pg_ping
 
-#define arginfo_pg_connection_busy arginfo_pg_connection_reset
+#define arginfo_pg_connection_busy arginfo_pg_ping
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_send_query, 0, 2, MAY_BE_LONG|MAY_BE_BOOL)
 	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
@@ -403,7 +401,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_socket, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_pg_consume_input arginfo_pg_connection_reset
+#define arginfo_pg_consume_input arginfo_pg_ping
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_flush, 0, 1, MAY_BE_LONG|MAY_BE_BOOL)
 	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)

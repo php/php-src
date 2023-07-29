@@ -29,5 +29,4 @@ else {
 }
 ?>
 --EXPECTF--
-Deprecated: pg_escape_bytea(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 OK

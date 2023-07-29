@@ -52,13 +52,6 @@ pg_exec ($db, "begin");
 pg_lo_unlink($db, $oid) or print("pg_lo_unlink() error 1\n");
 pg_exec ($db, "commit");
 
-// more pg_lo_unlink() tests
-echo "Test without connection\n";
-pg_exec ($db, "begin");
-$oid = pg_lo_create ($db) or print("pg_lo_create() error\n");
-pg_lo_unlink($oid) or print("pg_lo_unlink() error 2\n");
-pg_exec ($db, "commit");
-
 echo "Test with string oid value\n";
 pg_exec ($db, "begin");
 $oid = pg_lo_create ($db) or print("pg_lo_create() error\n");
@@ -81,17 +74,7 @@ pg_query($db, 'commit');
 
 /* invalid OID values */
 try {
-    pg_lo_create(-15);
-} catch (\ValueError $e) {
-    echo $e->getMessage(), \PHP_EOL;
-}
-try {
     pg_lo_create($db, -15);
-} catch (\ValueError $e) {
-    echo $e->getMessage(), \PHP_EOL;
-}
-try {
-    pg_lo_create('giberrish');
 } catch (\ValueError $e) {
     echo $e->getMessage(), \PHP_EOL;
 }
@@ -107,29 +90,20 @@ echo "OK";
 create/write/close LO
 open/read/tell/seek/close LO
 string(5) "large"
-int(5)
+int(%d)
 bool(true)
 string(10) "bject data"
-int(17)
+int(%d)
 bool(true)
 string(17) "large object data"
 bool(true)
 string(4) "data"
 open/read_all/close LO
 large object data
-int(17)
+int(%d)
 unlink LO
-Test without connection
-
-Deprecated: pg_lo_unlink(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 Test with string oid value
 import/export LO
-
-Deprecated: pg_lo_create(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
-Invalid OID value passed
-Invalid OID value passed
-
-Deprecated: pg_lo_create(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 Invalid OID value passed
 Invalid OID value passed
 OK

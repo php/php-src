@@ -489,76 +489,76 @@ namespace {
 
     function pg_connect_poll(PgSql\Connection $connection): int {}
 
-    function pg_close(?PgSql\Connection $connection = null): true {}
+    function pg_close(PgSql\Connection $connection): true {}
 
     /** @refcount 1 */
-    function pg_dbname(?PgSql\Connection $connection = null): string {}
+    function pg_dbname(PgSql\Connection $connection): string {}
 
-    function pg_last_error(?PgSql\Connection $connection = null): string {}
+    function pg_last_error(PgSql\Connection $connection): string {}
 
     /**
      * @alias pg_last_error
      * @deprecated
      */
-    function pg_errormessage(?PgSql\Connection $connection = null): string {}
+    function pg_errormessage(PgSql\Connection $connection): string {}
 
     /** @refcount 1 */
-    function pg_options(?PgSql\Connection $connection = null): string {}
+    function pg_options(PgSql\Connection $connection): string {}
 
     /** @refcount 1 */
-    function pg_port(?PgSql\Connection $connection = null): string {}
+    function pg_port(PgSql\Connection $connection): string {}
 
     /** @refcount 1 */
-    function pg_tty(?PgSql\Connection $connection = null): string {}
+    function pg_tty(PgSql\Connection $connection): string {}
 
     /** @refcount 1 */
-    function pg_host(?PgSql\Connection $connection = null): string {}
+    function pg_host(PgSql\Connection $connection): string {}
 
     /**
      * @return array<string, int|string|null>
      * @refcount 1
      */
-    function pg_version(?PgSql\Connection $connection = null): array {}
+    function pg_version(PgSql\Connection $connection): array {}
 
     /**
      * @param PgSql\Connection|string $connection
      * @refcount 1
      */
-    function pg_parameter_status($connection, string $name = UNKNOWN): string|false {}
+    function pg_parameter_status($connection, string $name): string|false {}
 
-    function pg_ping(?PgSql\Connection $connection = null): bool {}
+    function pg_ping(PgSql\Connection $connection): bool {}
 
     /**
      * @param PgSql\Connection|string $connection
      * @refcount 1
      */
-    function pg_query($connection, string $query = UNKNOWN): PgSql\Result|false {}
+    function pg_query($connection, string $query): PgSql\Result|false {}
 
     /**
      * @param PgSql\Connection|string $connection
      * @alias pg_query
      */
-    function pg_exec($connection, string $query = UNKNOWN): PgSql\Result|false {}
+    function pg_exec($connection, string $query): PgSql\Result|false {}
 
     /**
      * @param PgSql\Connection|string $connection
      * @param string|array $query
      * @refcount 1
      */
-    function pg_query_params($connection, $query, array $params = UNKNOWN): PgSql\Result|false {}
+    function pg_query_params($connection, $query, array $params): PgSql\Result|false {}
 
     /**
      * @param PgSql\Connection|string $connection
      * @refcount 1
      */
-    function pg_prepare($connection, string $statement_name, string $query = UNKNOWN): PgSql\Result|false {}
+    function pg_prepare($connection, string $statement_name, string $query): PgSql\Result|false {}
 
     /**
      * @param PgSql\Connection|string $connection
      * @param string|array $statement_name
      * @refcount 1
      */
-    function pg_execute($connection, $statement_name, array $params = UNKNOWN): PgSql\Result|false {}
+    function pg_execute($connection, $statement_name, array $params): PgSql\Result|false {}
 
     function pg_num_rows(PgSql\Result $result): int {}
 
@@ -707,9 +707,9 @@ namespace {
      */
     function pg_getlastoid(PgSql\Result $result): string|int|false {}
 
-    function pg_trace(string $filename, string $mode = "w", ?PgSql\Connection $connection = null, int $trace_mode = 0): bool {}
+    function pg_trace(string $filename, string $mode = "w", PgSql\Connection $connection, int $trace_mode = 0): bool {}
 
-    function pg_untrace(?PgSql\Connection $connection = null): true {}
+    function pg_untrace(PgSql\Connection $connection): true {}
 
     /**
      * @param PgSql\Connection $connection
@@ -840,15 +840,15 @@ namespace {
      */
     function pg_setclientencoding($connection, string $encoding = UNKNOWN): int {}
 
-    function pg_client_encoding(?PgSql\Connection $connection = null): string {}
+    function pg_client_encoding(PgSql\Connection $connection): string {}
 
     /**
      * @alias pg_client_encoding
      * @deprecated
      */
-    function pg_clientencoding(?PgSql\Connection $connection = null): string {}
+    function pg_clientencoding(PgSql\Connection $connection): string {}
 
-    function pg_end_copy(?PgSql\Connection $connection = null): bool {}
+    function pg_end_copy(PgSql\Connection $connection): bool {}
 
     /** @param PgSql\Connection|string $connection */
     function pg_put_line($connection, string $query = UNKNOWN): bool {}

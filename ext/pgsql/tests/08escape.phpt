@@ -99,10 +99,7 @@ else {
 
 ?>
 --EXPECTF--
-Deprecated: pg_escape_string(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 pg_escape_string() is Ok
-
-Deprecated: pg_escape_bytea(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 pg_escape_bytea() is Ok
 pg_escape_bytea() actually works with database
 pg_escape_literal() is Ok
