@@ -16,7 +16,11 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
     $sinfo = mysqli_get_server_info($link);
 
     /* Version is in format: X.Y.Z */
-    var_dump(preg_match("#^\d+\.\d+\.\d+$#", $sinfo) === 1);
+    $status = preg_match("#^\d+\.\d+\.\d+$#", $sinfo) === 1;
+    var_dump($status);
+    if (!$status) {
+        var_dump($sinfo);
+    }
 
     mysqli_close($link);
     print "done!";
