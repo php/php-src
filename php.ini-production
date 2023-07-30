@@ -1203,9 +1203,6 @@ mysqli.default_user =
 ; https://php.net/mysqli.default-pw
 mysqli.default_pw =
 
-; Allow or prevent reconnect
-mysqli.reconnect = Off
-
 ; If this option is enabled, closing a persistent connection will rollback
 ; any pending transactions of this connection, before it is put back
 ; into the persistent connection pool.
