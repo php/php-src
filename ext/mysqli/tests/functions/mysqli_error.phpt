@@ -18,8 +18,6 @@ mysqli_report(MYSQLI_REPORT_OFF);
     $error = mysqli_error($link);
     var_dump($error);
 
-    mysqli_select_db($link, get_default_database());
-
     mysqli_query($link, "SELECT * FROM non_existing_table");
     $error = mysqli_error($link);
 

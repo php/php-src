@@ -13,7 +13,6 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
-    mysqli_select_db($link, get_default_database());
     mysqli_query($link, "SET sql_mode=''");
 
     mysqli_query($link,"CREATE TABLE insert_bind_tinyint(c1 tinyint,

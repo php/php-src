@@ -13,8 +13,6 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
-    mysqli_select_db($link, get_default_database());
-
     if (!mysqli_query($link,"CREATE TABLE test_bind_fetch_char(c1 char(10), c2 text) ENGINE=" . get_default_db_engine()))
         printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 

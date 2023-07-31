@@ -13,8 +13,6 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
-    mysqli_select_db($link, get_default_database());
-
     mysqli_query($link,"CREATE TABLE insert_bind_char_text(c1 char(10), c2 text)");
 
     $stmt = mysqli_prepare($link, "INSERT INTO insert_bind_char_text VALUES (?,?)");

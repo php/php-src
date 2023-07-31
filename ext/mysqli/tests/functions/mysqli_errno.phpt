@@ -14,12 +14,9 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 /* Disable exceptions */
 mysqli_report(MYSQLI_REPORT_OFF);
 
-
     $link = default_mysqli_connect();
     $errno = mysqli_errno($link);
     var_dump($errno);
-
-    mysqli_select_db($link, get_default_database());
 
     mysqli_query($link, "SELECT * FROM non_existing_table");
     $errno = mysqli_errno($link);

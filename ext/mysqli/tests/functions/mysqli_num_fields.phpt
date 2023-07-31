@@ -13,8 +13,6 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
-    mysqli_select_db($link, get_default_database());
-
     mysqli_query($link, "CREATE TABLE test_mysqli_num_fields (a int, b varchar(10)) ENGINE = " . get_default_db_engine());
 
     mysqli_query($link, "INSERT INTO test_mysqli_num_fields VALUES (1, 'foo')");

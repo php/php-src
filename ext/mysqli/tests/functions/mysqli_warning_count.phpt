@@ -13,8 +13,6 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
-    mysqli_select_db($link, get_default_database());
-
     mysqli_query($link, "DROP TABLE IF EXISTS test_mysqli_warning_count");
     mysqli_query($link, "DROP TABLE IF EXISTS test_mysqli_warning_count");
 
