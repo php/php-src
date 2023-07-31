@@ -13,6 +13,7 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
+    // To get consistent result without depending on the DB version/setup
     mysqli_query($link, "SET sql_mode=''");
 
     mysqli_query($link,"CREATE TABLE insert_bind_integers(c1 int unsigned,

@@ -13,18 +13,20 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
-    $rc = mysqli_query($link,"CREATE TABLE insert_bind_varied1(col1 tinyint, col2 smallint,
-                                                    col3 int, col4 bigint,
-                                                    col5 float, col6 double,
-                                                    col7 date, col8 time,
-                                                    col9 varbinary(10),
-                                                    col10 varchar(50),
-                                                    col11 char(20)) ENGINE=" . get_default_db_engine());
-    if (!$rc)
-        printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    mysqli_query(
+        $link,
+        "CREATE TABLE insert_bind_varied1(
+            col1 tinyint, col2 smallint,
+            col3 int, col4 bigint,
+            col5 float, col6 double,
+            col7 date, col8 time,
+            col9 varbinary(10),
+            col10 varchar(50),
+            col11 char(20)
+        ) ENGINE=" . get_default_db_engine()
+    );
 
-    if (!$stmt = mysqli_prepare($link, "INSERT INTO insert_bind_varied1(col1,col10, col11, col6) VALUES (?,?,?,?)"))
-        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    $stmt = mysqli_prepare($link, "INSERT INTO insert_bind_varied1(col1,col10, col11, col6) VALUES (?,?,?,?)");
 
     mysqli_stmt_bind_param($stmt, "issd", $c1, $c2, $c3, $c4);
 

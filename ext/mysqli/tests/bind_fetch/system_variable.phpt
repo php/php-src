@@ -13,11 +13,9 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
-    if (!mysqli_query($link, "SET AUTOCOMMIT=0"))
-        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    mysqli_query($link, "SET AUTOCOMMIT=0");
 
-    if (!$stmt = mysqli_prepare($link, "SELECT @@autocommit"))
-        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    $stmt = mysqli_prepare($link, "SELECT @@autocommit");
 
     mysqli_stmt_bind_result($stmt, $c0);
     mysqli_stmt_execute($stmt);

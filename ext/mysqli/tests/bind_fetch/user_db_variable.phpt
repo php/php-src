@@ -13,11 +13,9 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
-    if (!mysqli_query($link, "SET @dummy='foobar'"))
-        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    mysqli_query($link, "SET @dummy='foobar'");
 
-    if (!$stmt = mysqli_prepare($link, "SELECT @dummy"))
-        printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    $stmt = mysqli_prepare($link, "SELECT @dummy");
 
     mysqli_stmt_bind_result($stmt, $dummy);
     mysqli_stmt_execute($stmt);

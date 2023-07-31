@@ -15,19 +15,19 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
-    $rc = mysqli_query($link, "CREATE TABLE test_bind_fetch_varied2(c1 tinyint, c2 smallint,
-                                                        c3 int, c4 bigint,
-                                                        c5 float, c6 double,
-                                                        c7 varbinary(10),
-                                                        c8 varchar(50)) ENGINE=" . get_default_db_engine());
-    if (!$rc)
-        printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    mysqli_query(
+        $link,
+        "CREATE TABLE test_bind_fetch_varied2(
+            c1 tinyint, c2 smallint,
+            c3 int, c4 bigint,
+            c5 float, c6 double,
+            c7 varbinary(10),
+            c8 varchar(50)
+        ) ENGINE=" . get_default_db_engine()
+    );
 
-    $rc = mysqli_query($link,"INSERT INTO test_bind_fetch_varied2 VALUES(19,2999,3999,4999999,
-                                                              2345.6,5678.89563,
-                                                              'foobar','mysql rulez')");
-    if (!$rc)
-        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    mysqli_query($link,"INSERT INTO test_bind_fetch_varied2
+        VALUES(19,2999,3999,4999999,2345.6,5678.89563,'foobar','mysql rules')");
 
     $stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch_varied2");
     mysqli_stmt_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8);
@@ -64,6 +64,6 @@ array(8) {
   [6]=>
   string(6) "foobar"
   [7]=>
-  string(11) "mysql rulez"
+  string(11) "mysql rules"
 }
 done!

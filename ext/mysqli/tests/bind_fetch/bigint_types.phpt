@@ -17,29 +17,30 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
-    if (!mysqli_query($link, "SET sql_mode=''"))
-        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    // To get consistent result without depending on the DB version/setup
+    mysqli_query($link, "SET sql_mode=''");
 
-    $rc = mysqli_query($link,"CREATE TABLE test_bind_fetch_integers_big(c1 bigint default 5,
-                                                    c2 bigint,
-                                                    c3 bigint not NULL,
-                                                    c4 bigint unsigned,
-                                                    c5 bigint unsigned,
-                                                    c6 bigint unsigned,
-                                                    c7 bigint unsigned,
-                                                    c8 bigint unsigned) ENGINE=" . get_default_db_engine());
-    if (!$rc)
-        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    mysqli_query(
+        $link,
+        "CREATE TABLE test_bind_fetch_integers_big(
+            c1 bigint default 5,
+            c2 bigint,
+            c3 bigint not NULL,
+            c4 bigint unsigned,
+            c5 bigint unsigned,
+            c6 bigint unsigned,
+            c7 bigint unsigned,
+            c8 bigint unsigned
+        ) ENGINE=" . get_default_db_engine()
+    );
 
-    $rc = mysqli_query($link, "INSERT INTO test_bind_fetch_integers_big (c2,c3,c4,c5,c6,c7,c8) ".
-                              "VALUES (-23,4.0,33333333333333,0,-333333333333,99.9,1234)");
-    if (!$rc)
-        printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    mysqli_query($link, "INSERT INTO test_bind_fetch_integers_big (c2,c3,c4,c5,c6,c7,c8)
+        VALUES (-23,4.0,33333333333333,0,-333333333333,99.9,1234)");
 
     $stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch_integers_big");
     mysqli_stmt_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8);
     mysqli_stmt_execute($stmt);
-    $rc = mysqli_stmt_fetch($stmt);
+    mysqli_stmt_fetch($stmt);
 
     if (mysqli_get_server_version($link) < 50000) {
         // 4.1 is faulty and will return big number for $c6

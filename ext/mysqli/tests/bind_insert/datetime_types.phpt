@@ -13,27 +13,36 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
+    // To get consistent result without depending on the DB version/setup
     mysqli_query($link, "SET sql_mode=''");
 
 try {
-    $rc = mysqli_query($link,"CREATE TABLE insert_bind_datetime(
-        c1 date,
-        c2 time,
-        c3 timestamp(14),
-        c4 year,
-        c5 datetime,
-        c6 timestamp(4),
-        c7 timestamp(6))");
+    mysqli_query(
+        $link,
+        "CREATE TABLE insert_bind_datetime(
+            c1 date,
+            c2 time,
+            c3 timestamp(14),
+            c4 year,
+            c5 datetime,
+            c6 timestamp(4),
+            c7 timestamp(6)
+        )"
+    );
 } catch (\mysqli_sql_exception) {
     /* 14 Too big precision for timestamp */
-    $rc = mysqli_query($link,"CREATE TABLE insert_bind_datetime(
-        c1 date,
-        c2 time,
-        c3 timestamp,
-        c4 year,
-        c5 datetime,
-        c6 timestamp,
-        c7 timestamp)");
+    mysqli_query(
+        $link,
+        "CREATE TABLE insert_bind_datetime(
+            c1 date,
+            c2 time,
+            c3 timestamp,
+            c4 year,
+            c5 datetime,
+            c6 timestamp,
+            c7 timestamp
+        )"
+    );
 }
 
     $stmt = mysqli_prepare($link, "INSERT INTO insert_bind_datetime VALUES (?,?,?,?,?,?,?)");

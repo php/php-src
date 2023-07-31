@@ -13,21 +13,23 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
-    if (!mysqli_query($link, "SET sql_mode=''"))
-        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    // To get consistent result without depending on the DB version/setup
+    mysqli_query($link, "SET sql_mode=''");
 
-    $rc = mysqli_query($link, "CREATE TABLE test_bind_fetch_integers_tiny(c1 tinyint,
-                                                    c2 tinyint unsigned,
-                                                    c3 tinyint not NULL,
-                                                    c4 tinyint,
-                                                    c5 tinyint,
-                                                    c6 tinyint unsigned,
-                                                    c7 tinyint) ENGINE=" . get_default_db_engine());
-    if (!$rc)
-        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    mysqli_query(
+        $link,
+        "CREATE TABLE test_bind_fetch_integers_tiny(
+            c1 tinyint,
+            c2 tinyint unsigned,
+            c3 tinyint not NULL,
+            c4 tinyint,
+            c5 tinyint,
+            c6 tinyint unsigned,
+            c7 tinyint
+        ) ENGINE=" . get_default_db_engine()
+    );
 
-    if (!mysqli_query($link, "INSERT INTO test_bind_fetch_integers_tiny VALUES (-23,300,0,-100,-127,+30,0)"))
-        printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    mysqli_query($link, "INSERT INTO test_bind_fetch_integers_tiny VALUES (-23,300,0,-100,-127,+30,0)");
 
     $stmt = mysqli_prepare($link, "SELECT * FROM test_bind_fetch_integers_tiny");
     mysqli_stmt_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7);

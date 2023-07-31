@@ -13,18 +13,21 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
+    // To get consistent result without depending on the DB version/setup
     mysqli_query($link, "SET sql_mode=''");
 
 try {
-    $rc = mysqli_query($link,
+    mysqli_query(
+        $link,
         "CREATE TABLE test_bind_result_datetime(
-        c1 date,
-        c2 time,
-        c3 timestamp(14),
-        c4 year,
-        c5 datetime,
-        c6 timestamp(4),
-        c7 timestamp(6)) ENGINE=" . get_default_db_engine()
+            c1 date,
+            c2 time,
+            c3 timestamp(14),
+            c4 year,
+            c5 datetime,
+            c6 timestamp(4),
+            c7 timestamp(6)
+        ) ENGINE=" . get_default_db_engine()
     );
 } catch (\mysqli_sql_exception) {
     /* 14 Too big precision for timestamp */
@@ -38,27 +41,27 @@ try {
     the display width is ignored.
     [...]
     */
-    $rc = mysqli_query($link,
+    mysqli_query(
+        $link,
         "CREATE TABLE test_bind_result_datetime(
-        c1 date,
-        c2 time,
-        c3 timestamp,
-        c4 year,
-        c5 datetime,
-        c6 timestamp(4),
-        c7 timestamp(6)) ENGINE=" . get_default_db_engine()
+            c1 date,
+            c2 time,
+            c3 timestamp,
+            c4 year,
+            c5 datetime,
+            c6 timestamp(4),
+            c7 timestamp(6)
+        ) ENGINE=" . get_default_db_engine()
     );
 }
 
-    $rc = mysqli_query($link, "INSERT INTO test_bind_result_datetime VALUES(
+    mysqli_query($link, "INSERT INTO test_bind_result_datetime VALUES(
         '2002-01-02',
         '12:49:00',
         '2002-01-02 17:46:59',
         2010,
         '2010-07-10',
         '2020','1999-12-29')");
-    if (!$rc)
-        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     $stmt = mysqli_prepare($link, "SELECT c1, c2, c3, c4, c5, c6, c7 FROM test_bind_result_datetime");
     mysqli_stmt_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7);

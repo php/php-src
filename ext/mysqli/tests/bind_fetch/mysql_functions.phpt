@@ -13,8 +13,7 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $link = default_mysqli_connect();
 
-    if (!$stmt = mysqli_prepare($link, "SELECT md5('bar'), database(), 'foo'"))
-        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    $stmt = mysqli_prepare($link, "SELECT md5('bar'), database(), 'foo'");
 
     mysqli_stmt_bind_result($stmt, $c0, $c1, $c2);
     mysqli_stmt_execute($stmt);

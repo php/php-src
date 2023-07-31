@@ -205,7 +205,7 @@ func_mysqli_fetch_all($link, $engine, "SET('a', 'b')", NULL, NULL, 950);
 
 mysqli_close($link);
 
-// Split below into new test?
+// TODO Split below into new test?
 $link = default_mysqli_connect();
 mysqli_real_query($link, "SELECT 1 AS _one");
 $result = mysqli_use_result($link);
