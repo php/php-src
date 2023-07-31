@@ -11,7 +11,7 @@ if (!defined("MYSQLI_ASYNC")) {
 ?>
 --FILE--
 <?php
-    include ('connect.inc');
+    include 'connect.inc';
 
     $link1 = my_mysqli_connect($host, $user, $passwd, null, $port, $socket);
     mysqli_select_db($link1, $db);

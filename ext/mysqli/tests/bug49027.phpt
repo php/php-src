@@ -8,7 +8,7 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    include ('connect.inc');
+    include 'connect.inc';
 
     $link = mysqli_init();
     if (!mysqli_options($link, MYSQLI_INIT_COMMAND, "SELECT 1")) {

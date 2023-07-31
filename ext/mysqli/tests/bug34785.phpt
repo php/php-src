@@ -8,7 +8,7 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    include ('connect.inc');
+    include 'connect.inc';
 
     class my_stmt extends mysqli_stmt
     {

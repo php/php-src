@@ -12,7 +12,7 @@ mysqli.allow_persistent = Off
 mysqli.max_persistent = 0
 --FILE--
 <?php
-    include ('connect.inc');
+    include 'connect.inc';
 
     $link = mysqli_init();
     if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {

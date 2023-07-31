@@ -22,7 +22,7 @@ class MySQL_Ext extends mysqli{
     }
 }
 
-include ('connect.inc');
+include 'connect.inc';
 $MySQL_Ext = new MySQL_Ext($host, $user, $passwd, $db, $port, $socket);
 
 $isEmpty = $MySQL_Ext->isEmpty();
