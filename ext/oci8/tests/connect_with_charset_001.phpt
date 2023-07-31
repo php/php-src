@@ -4,7 +4,7 @@ oci_connect() with invalid character set
 oci8
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php

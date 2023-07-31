@@ -4,12 +4,12 @@ Check oci_set_{action,client_identifier,module_name,client_info} error handling
 oci8
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 error_reporting(E_ALL);
 ini_set('display_errors', 'Off');

@@ -4,7 +4,7 @@ DRCP: oci_pconnect() and oci_connect() with different character sets
 oci8
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php

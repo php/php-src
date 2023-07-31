@@ -1,6 +1,6 @@
 <?php
 
-require("details.inc");
+require "details.inc";
 
 // the oci_connect parameter corresponding to $dbase defaults to null
 if (!isset($dbase)) {

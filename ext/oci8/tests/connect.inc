@@ -1,6 +1,6 @@
 <?php
 
-require("details.inc");
+require 'details.inc';
 
 if (!empty($dbase)) {
     $c = @oci_connect($user, $password, $dbase);

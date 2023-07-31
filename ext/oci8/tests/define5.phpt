@@ -4,12 +4,12 @@ oci_define_by_name() for statement re-execution
 oci8
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
 
-require(__DIR__."/connect.inc");
+require __DIR__.'/connect.inc';
 
 // Initialize
 

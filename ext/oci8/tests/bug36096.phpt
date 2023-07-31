@@ -4,7 +4,7 @@ Bug #36096 (oci_result() returns garbage after oci_fetch() failed)
 oci8
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php

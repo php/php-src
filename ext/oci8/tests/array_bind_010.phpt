@@ -4,7 +4,7 @@ oci_bind_array_by_name() and invalid values 8
 oci8
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php

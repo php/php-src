@@ -4,12 +4,12 @@ Test some oci_bind_by_name error conditions
 oci8
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 $drop = "drop table bind_test";
 $statement = oci_parse($c, $drop);

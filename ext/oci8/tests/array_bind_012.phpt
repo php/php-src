@@ -4,7 +4,7 @@ oci_bind_array_by_name(), SQLT_CHR, default max_length and empty array
 oci8
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php

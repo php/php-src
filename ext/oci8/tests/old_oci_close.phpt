@@ -4,7 +4,7 @@ oci8.old_oci_close_semantics On
 oci8
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 oci8.old_oci_close_semantics=1
