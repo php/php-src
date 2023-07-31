@@ -104,7 +104,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_crash, 0, 0, IS_VOID, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, message, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
+<<<<<<< HEAD
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_namespaced_func, 0, 0, _IS_BOOL, 0)
+=======
+#if defined(HAVE_LIBXML)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_override_libxml_global_state, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0, 0, _IS_BOOL, 0)
+>>>>>>> PHP-8.1
 ZEND_END_ARG_INFO()
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -201,6 +210,10 @@ static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_deprecated_func);
+#if defined(HAVE_LIBXML)
+static ZEND_FUNCTION(zend_test_override_libxml_global_state);
+#endif
+static ZEND_FUNCTION(namespaced_func);
 static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
 static ZEND_METHOD(_ZendTestClass, returnsStatic);
@@ -258,6 +271,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_NS_DEP_FALIAS("ZendTestNS2\\ZendSubNS", namespaced_deprecated_func, ZendTestNS2_ZendSubNS_namespaced_deprecated_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_func)
 	ZEND_NS_FALIAS("ZendTestNS2\\ZendSubNS", namespaced_aliased_func, zend_test_void_return, arginfo_ZendTestNS2_ZendSubNS_namespaced_aliased_func)
 	ZEND_NS_DEP_FALIAS("ZendTestNS2\\ZendSubNS", namespaced_deprecated_aliased_func, zend_test_void_return, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func)
+	ZEND_NS_FE("ZendTestNS2\\ZendSubNS", namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func)
+#if defined(HAVE_LIBXML)
+	ZEND_FE(zend_test_override_libxml_global_state, arginfo_zend_test_override_libxml_global_state)
+#endif
 	ZEND_FE_END
 };
 
