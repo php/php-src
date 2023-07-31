@@ -4,9 +4,6 @@ mysqli_set_charset()
 mysqli
 --SKIPIF--
 <?php
-if (!function_exists('mysqli_set_charset'))
-    die("skip Function not available");
-
 require_once 'connect.inc';
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
     die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));

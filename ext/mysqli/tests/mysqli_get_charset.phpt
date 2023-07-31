@@ -5,8 +5,6 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-if (!function_exists('mysqli_get_charset'))
-    die("skip: function not available");
 ?>
 --FILE--
 <?php
