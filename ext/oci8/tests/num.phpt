@@ -2,6 +2,10 @@
 oci_num_*() family
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 

@@ -2,6 +2,10 @@
 Bind tests with SQLT_AFC
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 

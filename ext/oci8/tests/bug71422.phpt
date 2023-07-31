@@ -2,6 +2,10 @@
 Bug #71422 (Fix ORA-01438: value larger than specified precision allowed for this column)
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 

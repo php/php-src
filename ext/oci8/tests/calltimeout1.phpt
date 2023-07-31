@@ -5,6 +5,7 @@ oci8
 --SKIPIF--
 <?php
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
+require_once('skipifconnectfailure.inc');
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) {

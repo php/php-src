@@ -2,6 +2,10 @@
 oci_fetch_all() - all combinations of flags
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 

@@ -4,6 +4,7 @@ PECL Bug #10194 (segfault in Instant Client when memory_limit is reached inside 
 oci8
 --SKIPIF--
 <?php
+require_once('skipifconnectfailure.inc');
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platforms only");

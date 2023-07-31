@@ -2,6 +2,10 @@
 Test oci_fetch_all with 0 and -1 skip & maxrows
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 

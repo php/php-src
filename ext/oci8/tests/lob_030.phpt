@@ -4,6 +4,7 @@ Test piecewise fetch of CLOBs equal to, and larger than PHP_OCI_LOB_BUFFER_SIZE
 oci8
 --SKIPIF--
 <?php
+require_once('skipifconnectfailure.inc');
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 ?>

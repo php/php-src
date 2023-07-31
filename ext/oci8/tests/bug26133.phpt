@@ -2,6 +2,10 @@
 Bug #26133 (ocifreedesc() segfault)
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 

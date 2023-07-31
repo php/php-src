@@ -4,8 +4,8 @@ oci_password_change() for persistent connections
 oci8
 --SKIPIF--
 <?php
-require(__DIR__."/details.inc");
-if (empty($dbase)) die ("skip requires database connection string be set");
+require_once('skipifconnectfailure.inc');
+if (is_null($dbase)) die ("skip requires database connection string be set");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip password change not supported in DRCP Mode");
 ?>

@@ -2,6 +2,10 @@
 Test error handling when persistent connection is passed to oci_error()
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 

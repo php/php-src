@@ -4,6 +4,7 @@ PECL Bug #8816 (issue in php_oci_statement_fetch with more than one piecewise co
 oci8
 --SKIPIF--
 <?php
+require_once('skipifconnectfailure.inc');
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(__DIR__.'/skipif.inc');
 ?>

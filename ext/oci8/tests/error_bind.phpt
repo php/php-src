@@ -2,6 +2,10 @@
 Test some oci_bind_by_name error conditions
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --FILE--
 <?php
 

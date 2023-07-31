@@ -2,6 +2,10 @@
 oci8.default_prefetch ini option
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once('skipifconnectfailure.inc');
+?>
 --INI--
 oci8.default_prefetch=100
 --FILE--

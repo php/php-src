@@ -4,6 +4,7 @@ Basic test for setting Oracle 11gR2 "edition" attribute
 oci8
 --SKIPIF--
 <?php
+require_once('skipifconnectfailure.inc');
 require(__DIR__."/connect.inc");
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) {
     die("skip needs to be run as a DBA user");
