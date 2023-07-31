@@ -38,22 +38,6 @@
 # include <libxml/parser.h>
 #endif
 
-ZEND_BEGIN_MODULE_GLOBALS(zend_test)
-	int observer_enabled;
-	int observer_show_output;
-	int observer_observe_all;
-	int observer_observe_includes;
-	int observer_observe_functions;
-	zend_array *observer_observe_function_names;
-	int observer_show_return_type;
-	int observer_show_return_value;
-	int observer_show_init_backtrace;
-	int observer_show_opcode;
-	int observer_nesting_depth;
-	int replace_zend_execute_ex;
-	HashTable global_weakmap;
-ZEND_END_MODULE_GLOBALS(zend_test)
-
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 
 static zend_class_entry *zend_test_interface;
