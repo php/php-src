@@ -29,7 +29,7 @@
 #include "zend_smart_str.h"
 #include "zend_weakrefs.h"
 
-#ifdef HAVE_LIBXML
+#if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 # include <libxml/globals.h>
 # include <libxml/parser.h>
 #endif
@@ -275,6 +275,7 @@ static ZEND_FUNCTION(zend_get_current_func_name)
     RETURN_STR(function_name);
 }
 
+#if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 static ZEND_FUNCTION(zend_test_override_libxml_global_state)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -286,6 +287,7 @@ static ZEND_FUNCTION(zend_test_override_libxml_global_state)
 	(void) xmlLineNumbersDefault(1);
 	(void) xmlKeepBlanksDefault(0);
 }
+#endif
 
 /* TESTS Z_PARAM_ITERABLE and Z_PARAM_ITERABLE_OR_NULL */
 static ZEND_FUNCTION(zend_iterable)
