@@ -50,6 +50,15 @@ PHP 8.3 UPGRADE NOTES
   . C functions that have a return type of void now return null instead of
     returning the following object object(FFI\CData:void) { }
 
+- Opcache:
+  . The opcache.consistency_checks INI directive was removed. This feature was
+    broken with the tracing JIT, as well as with inheritance cache, and has been
+    disabled without a way to enable it since PHP 8.1.18 and PHP 8.2.5. Both the
+    tracing JIT and inheritance cache may modify shm after the script has been
+    persisted, invalidating its checksum. The attempted fix skipped over the
+    modifiable pointers but was rejected due to complexity. For this reason, it
+    was decided to remove the feature instead.
+
 - Standard:
   . The range() function has had various changes:
     * A TypeError is now thrown when passing objects, resources, or arrays

@@ -1936,7 +1936,6 @@ use_process_mem:
 
 	if (cache_it) {
 		ZCSG(map_ptr_last) = CG(map_ptr_last);
-		script->dynamic_members.checksum = zend_accel_script_checksum(script);
 		script->dynamic_members.last_used = ZCG(request_time);
 
 		zend_accel_hash_update(&ZCSG(hash), script->script.filename, 0, script);
