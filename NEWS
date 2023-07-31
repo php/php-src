@@ -25,6 +25,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-11715 (opcache.interned_strings_buffer either has no effect or
     opcache_get_status() / phpinfo() is wrong). (nielsdos)
+  . Avoid adding an unnecessary read-lock when loading script from shm if
+    restart is in progress. (mikhainin)
 
 - Standard:
   . Prevent int overflow on $decimals in number_format. (Marc Bennewitz)
