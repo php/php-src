@@ -28,6 +28,7 @@ static void zend_mm_test_observer_malloc(size_t len, void *ptr ZEND_FILE_LINE_DC
 		block_len = zend_mm_block_size(zend_mm_get_heap(), ptr);
 	}
 	printf("malloc %p of size %zu (block: %zu)\n", ptr, len, block_len);
+	fflush(stdout);
 }
 
 static void zend_mm_test_observer_free(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
@@ -37,6 +38,7 @@ static void zend_mm_test_observer_free(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LIN
 		block_len = zend_mm_block_size(zend_mm_get_heap(), ptr);
 	}
 	printf("freed %p of size %zu\n", ptr, block_len);
+	fflush(stdout);
 }
 
 static void zend_mm_test_observer_realloc(void *ptr, size_t len, void *newptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
@@ -46,6 +48,7 @@ static void zend_mm_test_observer_realloc(void *ptr, size_t len, void *newptr ZE
 		block_len = zend_mm_block_size(zend_mm_get_heap(), ptr);
 	}
 	printf("realloc %p of size %zu (block: %zu, former %p)\n", newptr, len, block_len, ptr);
+	fflush(stdout);
 }
 
 static PHP_INI_MH(OnUpdateZendTestMMObserverEnabled)
