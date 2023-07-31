@@ -4,15 +4,15 @@ mysqli_change_user() - GET_LOCK()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 die("skip - is the server still buggy?");
 ?>
 --INI--
 max_execution_time=240
 --FILE--
 <?php
-    require_once('connect.inc');
-    require_once('table.inc');
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     // We need this little hack to be able to re-run the test
     $lock = 'phptest_' . mt_rand(0, 100000);
@@ -95,7 +95,7 @@ sleep(5);
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+	require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 Testing GET_LOCK()...

@@ -4,7 +4,7 @@ Bug #80107 mysqli_query() fails for ~16 MB long query when compression is enable
 mysqli
 --SKIPIF--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 $link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 if (!$link) {
     die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
@@ -17,7 +17,7 @@ if ($result->fetch_assoc()['Value'] < 0xffffff) {
 --FILE--
 <?php
 
-require_once("connect.inc");
+require_once 'connect.inc';
 
 $data_size = 16777174;
 
@@ -48,7 +48,7 @@ $mysqli->close();
 ?>
 --CLEAN--
 <?php
-require_once("clean_table.inc");
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 array(0) {

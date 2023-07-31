@@ -22,7 +22,7 @@ mysqli.allow_local_infile=0
 mysqli.local_infile_directory={PWD}/foo/bar
 --FILE--
 <?php
-	require_once "connect.inc";
+	require_once 'connect.inc';
 
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());

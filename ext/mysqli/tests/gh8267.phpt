@@ -4,11 +4,11 @@ Bug GH-8267 (MySQLi uses unsupported format specifier on Windows)
 mysqli
 --SKIPIF--
 <?php
-require_once("skipifconnectfailure.inc");
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 
 $mysqli = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 $mysqli->query("DROP TABLE IF EXISTS foo");

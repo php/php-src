@@ -4,13 +4,13 @@ mysqli_thread_id()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
-    require('table.inc');
+    require 'table.inc';
 
     if (!is_int($tmp = mysqli_thread_id($link)) || (0 === $tmp))
         printf("[003] Expecting int/any but zero, got %s/%s. [%d] %s\n",
@@ -31,7 +31,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 mysqli object is already closed

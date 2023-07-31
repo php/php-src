@@ -4,7 +4,7 @@ Calling connect() on an open persistent connection to create a new persistent co
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 mysqli.allow_persistent=1
@@ -12,7 +12,7 @@ mysqli.max_persistent=-1
 mysqli.max_links=-1
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     $phost = 'p:' . $host;
 

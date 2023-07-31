@@ -4,7 +4,7 @@ mysqli_fetch_assoc() - utf8
 mysqli
 --SKIPIF--
 <?php
-    require_once "connect.inc";
+    require_once 'connect.inc';
 
     if (!$link = @mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
@@ -79,7 +79,7 @@ mysqli
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 [003]

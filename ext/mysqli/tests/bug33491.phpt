@@ -6,7 +6,7 @@ error_reporting=1
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
@@ -19,7 +19,7 @@ class DB extends mysqli
   }
 }
 
-require_once("connect.inc");
+require_once 'connect.inc';
 
 // Segfault when using the DB class which extends mysqli
 $DB = new DB($host, $user, $passwd, $db, $port, $socket);

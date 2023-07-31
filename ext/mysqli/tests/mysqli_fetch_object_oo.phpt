@@ -4,11 +4,11 @@ mysqli_fetch_object()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     $mysqli = new mysqli();
     try {
@@ -17,7 +17,7 @@ require_once('skipifconnectfailure.inc');
         echo $e::class, ': ', $e->getMessage(), "\n";
     }
 
-    require('table.inc');
+    require 'table.inc';
     if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
         printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
             $host, $user, $db, $port, $socket);
@@ -124,7 +124,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 Error: mysqli object is not fully initialized

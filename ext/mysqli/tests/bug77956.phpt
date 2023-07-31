@@ -21,7 +21,7 @@ mysqli_close($link);
 mysqli.allow_local_infile=0
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
         printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
     }
@@ -45,7 +45,7 @@ mysqli.allow_local_infile=0
 ?>
 --CLEAN--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 	printf("[clean] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 		$host, $user, $db, $port, $socket);

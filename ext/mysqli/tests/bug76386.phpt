@@ -4,7 +4,7 @@ Prepared Statement formatter truncates fractional seconds from date/time column 
 mysqli
 --SKIPIF--
 <?php
-require_once "connect.inc";
+require_once 'connect.inc';
 
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
@@ -45,7 +45,7 @@ if ($stmt) {
     var_dump($ts, $ts2, $ts2b, $ts4, $ts4b, $ts6, $ts6b);
     $stmt->free_result();
 } else {
-    echo('[FIRST][FAIL] mysqli::prepare returned false: ' . $link->error . PHP_EOL);
+    echo '[FIRST][FAIL] mysqli::prepare returned false: ' . $link->error . PHP_EOL;
 }
 $link->close();
 
@@ -74,7 +74,7 @@ if ($stmt) {
     }
     $stmt->free_result();
 } else {
-    echo('[SECOND][FAIL] mysqli::prepare returned false: ' . $link->error . PHP_EOL);
+    echo '[SECOND][FAIL] mysqli::prepare returned false: ' . $link->error . PHP_EOL;
 }
 $link->close();
 ?>

@@ -4,12 +4,12 @@ mysqli_options()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
     /* see mysqli.c for details */
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     if (!($link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
         printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -69,7 +69,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 Warning: mysqli_real_connect(): (%s/%d): %s in %s on line %d

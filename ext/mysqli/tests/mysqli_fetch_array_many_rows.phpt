@@ -4,11 +4,11 @@ mysqli_fetch_array()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require("table.inc");
+    require 'table.inc';
 
     // do as much as we can do in 5 seconds
     $start = microtime(true);
@@ -109,7 +109,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

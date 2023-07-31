@@ -4,7 +4,7 @@ mysqli_stmt_bind_param() - Binding with very high number of columns
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 memory_limit=256M
@@ -19,7 +19,7 @@ memory_limit=256M
     in this file and we test mysqli_stmt_bind_result() in the other
     test -- therefore the "duplicate" makes some sense to me.
     */
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
         printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -94,7 +94,7 @@ memory_limit=256M
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+	require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 int(%d)

@@ -4,13 +4,13 @@ mysqli_kill()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
-    require('table.inc');
+    require 'table.inc';
 
     try {
         mysqli_kill($link, 0);
@@ -71,7 +71,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0

@@ -20,7 +20,7 @@ $table_delete = "DELETE FROM `test`";
 $id = '1311200011005001566';
 
 
-require_once('connect.inc');
+require_once 'connect.inc';
 
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -93,7 +93,7 @@ $link->close();
 done
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 Using 'i':

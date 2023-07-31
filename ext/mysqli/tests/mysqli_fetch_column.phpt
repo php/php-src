@@ -9,7 +9,7 @@ require_once 'skipifconnectfailure.inc';
 --FILE--
 <?php
 
-require_once "connect.inc";
+require_once 'connect.inc';
 require 'table.inc';
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
@@ -112,7 +112,7 @@ mysqli_close($link);
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 [001]

@@ -4,11 +4,11 @@ mysqli_prepare() - no object on failure
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
 
     if (false !== ($tmp = mysqli_prepare($link, false)))
         printf("[001] Expecting boolean/false, got %s/%s\n", gettype($tmp), (is_object($tmp) ? var_dump($tmp, true) : $tmp));
@@ -36,7 +36,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-require_once("clean_table.inc");
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 a) [1065] Query was empty

@@ -4,11 +4,11 @@ Bug #79084 (mysqlnd may fetch wrong column indexes with MYSQLI_BOTH)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 $sql = "SELECT 0 as `2007`, 0 as `2008`, 0 as `2020`";
 
 // unbuffered

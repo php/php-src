@@ -4,11 +4,11 @@ mysqli_stmt_bind_param() - checking whether the parameters are modified (bug#443
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
     $link->set_charset('latin1');
 
     class foo {
@@ -28,7 +28,7 @@ require_once('skipifconnectfailure.inc');
     $stmt->execute();
     $stmt->fetch();
     $stmt->free_result();
-    echo("$one\n\n");
+    echo "$one\n\n";
 
     // it is getting worse. Binding the same var twice with different
     // types you can get unexpected results e.g. binary trash for the
@@ -47,7 +47,7 @@ require_once('skipifconnectfailure.inc');
     $stmt->bind_result($one, $two);
     $stmt->fetch();
     $stmt->free_result();
-    echo("$one - $two\n\n");
+    echo "$one - $two\n\n";
 
 
     echo "Test 3:\n";
@@ -59,12 +59,12 @@ require_once('skipifconnectfailure.inc');
     $stmt->execute();
     $stmt->fetch();
     $stmt->free_result();
-    echo("$one - $two\n\n");
+    echo "$one - $two\n\n";
     echo "done!";
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 Test 1:

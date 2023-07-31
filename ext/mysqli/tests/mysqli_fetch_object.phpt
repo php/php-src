@@ -4,13 +4,13 @@ mysqli_fetch_object()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    include_once("connect.inc");
+    include_once 'connect.inc';
 
-    require('table.inc');
+    require 'table.inc';
     if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 5")) {
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
@@ -139,7 +139,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 ArgumentCountError: Too few arguments to function mysqli_fetch_object_construct::__construct(), 0 passed and exactly 2 expected

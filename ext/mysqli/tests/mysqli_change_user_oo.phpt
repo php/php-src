@@ -13,7 +13,7 @@ if (mysqli_get_server_version($link) >= 50600)
 ?>
 --FILE--
 <?php
-    require_once "connect.inc";
+    require_once 'connect.inc';
 
     $link	= NULL;
     $tmp	= NULL;

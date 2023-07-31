@@ -15,7 +15,7 @@ mysqli_close($link);
 ?>
 --FILE--
 <?php
-    require_once "connect.inc";
+    require_once 'connect.inc';
 
 /* TODO: mysqli.c needs to export a few more constants - see all the defined() calls! */
 
@@ -218,7 +218,7 @@ mysqli_close($link);
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

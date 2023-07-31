@@ -4,7 +4,7 @@ Fetching results from tables of different charsets.
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 
 if (!function_exists('mysqli_set_charset')) {
     die('skip mysqli_set_charset() not available');
@@ -12,7 +12,7 @@ if (!function_exists('mysqli_set_charset')) {
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     $tmp	= NULL;
     $link	= NULL;
@@ -102,7 +102,7 @@ if (!function_exists('mysqli_set_charset')) {
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

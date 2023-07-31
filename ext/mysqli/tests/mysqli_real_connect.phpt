@@ -4,13 +4,13 @@ mysqli_real_connect()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 mysqli.allow_local_infile=1
 --FILE--
 <?php
-    include("connect.inc");
+    include 'connect.inc';
 
     //  ( mysqli link [, string hostname [, string username [, string passwd [, string dbname [, int port [, string socket [, int flags]]]]]]]
     if (!$link = mysqli_init())
@@ -148,7 +148,7 @@ mysqli.allow_local_infile=1
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+	require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 Warning: mysqli_real_connect(): (%s/%d): Access denied for user '%s'@'%s' %r(\(using password: \w+\) ){0,1}%rin %s on line %d

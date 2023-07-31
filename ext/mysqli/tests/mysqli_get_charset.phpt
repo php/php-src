@@ -4,15 +4,15 @@ mysqli_get_charset()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 if (!function_exists('mysqli_get_charset'))
     die("skip: function not available");
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
-    require('table.inc');
+    require 'table.inc';
 
     if (!$res = mysqli_query($link, 'SELECT version() AS server_version'))
         printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -99,7 +99,7 @@ if (!function_exists('mysqli_get_charset'))
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 mysqli object is already closed

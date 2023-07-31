@@ -4,16 +4,16 @@ mysqli iterators
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     $tmp    = NULL;
     $link   = NULL;
 
-    require('table.inc');
+    require 'table.inc';
 
     echo "--- Testing default ---\n";
     if (!is_object($res = mysqli_query($link, "SELECT id FROM test ORDER BY id")))
@@ -70,7 +70,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 --- Testing default ---

@@ -4,13 +4,13 @@ mysqli_get_host_info()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
-    require "table.inc";
+    require 'table.inc';
     if (!is_string($info = mysqli_get_host_info($link)) || ('' === $info))
         printf("[003] Expecting string/any_non_empty, got %s/%s\n", gettype($info), $info);
 
@@ -23,7 +23,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

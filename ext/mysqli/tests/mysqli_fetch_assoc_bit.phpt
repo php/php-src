@@ -107,7 +107,7 @@ if (mysqli_get_server_version($link) < 50003)
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

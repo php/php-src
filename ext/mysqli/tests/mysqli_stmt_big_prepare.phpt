@@ -4,11 +4,11 @@ mysqli_stmt_prepare()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     // Note: No SQL tests here! We can expand one of the *fetch()
     // tests to a generic SQL test, if we ever need that.
@@ -19,7 +19,7 @@ require_once('skipifconnectfailure.inc');
     $tmp    = NULL;
     $link   = NULL;
 
-    require('table.inc');
+    require 'table.inc';
 
     $cleanupIds = range(1000, 3007);
     $model = 50;
@@ -44,7 +44,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

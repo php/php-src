@@ -4,12 +4,12 @@ Fail gracefully on empty result set
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-    require('table.inc');
+    require_once 'connect.inc';
+    require 'table.inc';
 
     // Returns only one result set
     $link->multi_query("SELECT 1");
@@ -26,7 +26,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 bool(false)

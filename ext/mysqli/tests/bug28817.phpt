@@ -4,11 +4,11 @@ Bug #28817 (problems with properties declared in the class extending MySQLi)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     class my_mysql extends mysqli {
         public $p_test;
