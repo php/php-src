@@ -16,8 +16,6 @@ var_dump($d);
 ?>
 --EXPECTF--
 object(DOMDocument)#1 (39) {
-  ["config"]=>
-  NULL
   ["dynamicProperty"]=>
   object(stdClass)#2 (0) {
   }
@@ -45,6 +43,8 @@ object(DOMDocument)#1 (39) {
   bool(true)
   ["documentURI"]=>
   string(%d) %s
+  ["config"]=>
+  NULL
   ["formatOutput"]=>
   bool(false)
   ["validateOnParse"]=>
