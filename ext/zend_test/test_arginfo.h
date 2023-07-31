@@ -270,7 +270,6 @@ static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_deprecated_func);
 #if defined(HAVE_LIBXML)
 static ZEND_FUNCTION(zend_test_override_libxml_global_state);
 #endif
-static ZEND_FUNCTION(namespaced_func);
 static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
 static ZEND_METHOD(_ZendTestClass, returnsStatic);
@@ -344,7 +343,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_NS_DEP_FALIAS("ZendTestNS2\\ZendSubNS", namespaced_deprecated_func, ZendTestNS2_ZendSubNS_namespaced_deprecated_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_func)
 	ZEND_NS_FALIAS("ZendTestNS2\\ZendSubNS", namespaced_aliased_func, zend_test_void_return, arginfo_ZendTestNS2_ZendSubNS_namespaced_aliased_func)
 	ZEND_NS_DEP_FALIAS("ZendTestNS2\\ZendSubNS", namespaced_deprecated_aliased_func, zend_test_void_return, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func)
-	ZEND_NS_FE("ZendTestNS2\\ZendSubNS", namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func)
 #if defined(HAVE_LIBXML)
 	ZEND_FE(zend_test_override_libxml_global_state, arginfo_zend_test_override_libxml_global_state)
 #endif
