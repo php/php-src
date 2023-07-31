@@ -68,7 +68,7 @@ function zend_weakmap_dump(): array {}
 
 function zend_get_current_func_name(): string {}
 
-#ifdef HAVE_LIBXML
+#if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 function zend_test_override_libxml_global_state(): void {}
 #endif
 

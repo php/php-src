@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8cfd05fb9f7524837d23f92b185fcd30f964521f */
+ * Stub hash: eb79a01021e58731bfbefab320569fbb0997276a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -65,7 +65,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_get_current_func_name, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_LIBXML)
+#if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_override_libxml_global_state, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 #endif
@@ -106,7 +106,7 @@ static ZEND_FUNCTION(zend_weakmap_attach);
 static ZEND_FUNCTION(zend_weakmap_remove);
 static ZEND_FUNCTION(zend_weakmap_dump);
 static ZEND_FUNCTION(zend_get_current_func_name);
-#if defined(HAVE_LIBXML)
+#if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 static ZEND_FUNCTION(zend_test_override_libxml_global_state);
 #endif
 static ZEND_FUNCTION(namespaced_func);
@@ -136,7 +136,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_weakmap_remove, arginfo_zend_weakmap_remove)
 	ZEND_FE(zend_weakmap_dump, arginfo_zend_weakmap_dump)
 	ZEND_FE(zend_get_current_func_name, arginfo_zend_get_current_func_name)
-#if defined(HAVE_LIBXML)
+#if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 	ZEND_FE(zend_test_override_libxml_global_state, arginfo_zend_test_override_libxml_global_state)
 #endif
 	ZEND_NS_FE("ZendTestNS2\\ZendSubNS", namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func)
