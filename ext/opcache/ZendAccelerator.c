@@ -1538,8 +1538,6 @@ static zend_persistent_script *store_script_in_file_cache(zend_persistent_script
 			(size_t)ZCG(mem));
 	}
 
-	new_persistent_script->dynamic_members.checksum = zend_accel_script_checksum(new_persistent_script);
-
 	zend_file_cache_script_store(new_persistent_script, /* is_shm */ false);
 
 	return new_persistent_script;
@@ -1652,8 +1650,6 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 			(size_t)((char *)new_persistent_script->mem + new_persistent_script->size),
 			(size_t)ZCG(mem));
 	}
-
-	new_persistent_script->dynamic_members.checksum = zend_accel_script_checksum(new_persistent_script);
 
 	/* store script structure in the hash table */
 	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->script.filename, 0, new_persistent_script);
@@ -2126,20 +2122,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	/* If script is found then validate_timestamps if option is enabled */
 	if (persistent_script && ZCG(accel_directives).validate_timestamps) {
 		if (validate_timestamp_and_record(persistent_script, file_handle) == FAILURE) {
-			zend_accel_lock_discard_script(persistent_script);
-			persistent_script = NULL;
-		}
-	}
-
-	/* if turned on - check the compiled script ADLER32 checksum */
-	if (persistent_script && ZCG(accel_directives).consistency_checks
-		&& persistent_script->dynamic_members.hits % ZCG(accel_directives).consistency_checks == 0) {
-
-		unsigned int checksum = zend_accel_script_checksum(persistent_script);
-		if (checksum != persistent_script->dynamic_members.checksum ) {
-			/* The checksum is wrong */
-			zend_accel_error(ACCEL_LOG_INFO, "Checksum failed for '%s':  expected=0x%08x, found=0x%08x",
-							 ZSTR_VAL(persistent_script->script.filename), persistent_script->dynamic_members.checksum, checksum);
 			zend_accel_lock_discard_script(persistent_script);
 			persistent_script = NULL;
 		}
@@ -4279,8 +4261,6 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 			(size_t)((char *)new_persistent_script->mem + new_persistent_script->size),
 			(size_t)ZCG(mem));
 	}
-
-	new_persistent_script->dynamic_members.checksum = zend_accel_script_checksum(new_persistent_script);
 
 	/* store script structure in the hash table */
 	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->script.filename, 0, new_persistent_script);

@@ -1843,10 +1843,6 @@ ldap.max_links = -1
 ; are cached.
 ;opcache.max_file_size=0
 
-; Check the cache checksum each N requests.
-; The default value of "0" means that the checks are disabled.
-;opcache.consistency_checks=0
-
 ; How long to wait (in seconds) for a scheduled restart to begin if the cache
 ; is not being accessed.
 ;opcache.force_restart_timeout=180
