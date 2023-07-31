@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8dc686206ca76666ef58319de7e5a0504fc99231 */
+ * Stub hash: 1f93e07aa28af67d65deeb7c9b36e8536c09d7a8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SeqCollection_add, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
@@ -24,6 +24,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SeqCollection_set, 0, 2, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SeqCollection_concat, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, other, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SeqCollection_map, 0, 2, IS_OBJECT, 0)
@@ -67,6 +71,7 @@ static const zend_function_entry class_SeqCollection_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(SeqCollection, with, arginfo_class_SeqCollection_with, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(SeqCollection, without, arginfo_class_SeqCollection_without, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(SeqCollection, set, arginfo_class_SeqCollection_set, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(SeqCollection, concat, arginfo_class_SeqCollection_concat, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(SeqCollection, map, arginfo_class_SeqCollection_map, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };

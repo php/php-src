@@ -258,6 +258,31 @@ static ZEND_NAMED_FUNCTION(zend_collection_seq_set_func)
 	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
 }
 
+static ZEND_NAMED_FUNCTION(zend_collection_seq_concat_func)
+{
+	zval *other;
+	zend_object *clone;
+	zend_class_entry *ce = Z_OBJCE_P(ZEND_THIS);
+	zval *value_prop;
+	zval *element;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(other, zend_ce_seq_collection);
+	ZEND_PARSE_PARAMETERS_END();
+
+	clone = zend_objects_clone_obj(Z_OBJ_P(ZEND_THIS));
+
+	value_prop = zend_read_property_ex(ce, Z_OBJ_P(other), ZSTR_KNOWN(ZEND_STR_VALUE), true, NULL);
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value_prop), element) {
+		if (!zend_collection_add_item(clone, NULL, element)) {
+			return;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	RETURN_OBJ(clone);
+}
+
 static ZEND_NAMED_FUNCTION(zend_collection_seq_map_func)
 {
 	zend_object *object = Z_OBJ_P(ZEND_THIS);
@@ -563,6 +588,7 @@ void zend_collection_register_funcs(zend_class_entry *ce)
 			REGISTER_FUNCTION(ZEND_STR_WITH, zend_collection_seq_with_func, arginfo_class_SeqCollection_with, 1);
 			REGISTER_FUNCTION(ZEND_STR_WITHOUT, zend_collection_seq_without_func, arginfo_class_SeqCollection_without, 1);
 			REGISTER_FUNCTION(ZEND_STR_SET, zend_collection_seq_set_func, arginfo_class_SeqCollection_set, 2);
+			REGISTER_FUNCTION(ZEND_STR_CONCAT, zend_collection_seq_concat_func, arginfo_class_SeqCollection_concat, 1);
 			REGISTER_FUNCTION(ZEND_STR_MAP, zend_collection_seq_map_func, arginfo_class_SeqCollection_map, 2);
 			break;
 		case ZEND_COLLECTION_DICT:

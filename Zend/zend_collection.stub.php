@@ -22,11 +22,11 @@ interface SeqCollection
 
     // returns self.  Throws OutOfBoundsException if $index is not yet defined.
     public function set(int $index, mixed $value): static;
-/*
+
     // This should really be static $other, but the language doesn't allow that.
     // Equivalent of + static.
-    public function concat(SeqCollection $other): static;
-
+    public function concat(object $other): static;
+/*
     // True if both seqs have the same values in the same order.
     public function equals(SeqCollection $other): bool;
 */
