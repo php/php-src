@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - MBString:
   . Fix use-after-free of mb_list_encodings() return value. (ilutov)
 
+- Opcache:
+  . Avoid adding an unnecessary read-lock when loading script from shm if
+    restart is in progress. (mikhainin)
+
 - Streams:
   . Fixed bug GH-11735 (Use-after-free when unregistering user stream wrapper
     from itself). (ilutov)
