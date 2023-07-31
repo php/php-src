@@ -2,6 +2,13 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.0.30
 
+- Libxml:
+  . Fixed bug GHSA-3qrf-m4j2-pcrr (Security issue with external entity loading
+    in XML without enabling it). (CVE-2023-3823) (nielsdos, ilutov)
+
+- Phar:
+  . Fixed bug GHSA-jqcx-ccgc-xwhv (Buffer mismanagement in phar_dir_read()).
+    (CVE-2023-3824) (nielsdos)
 
 08 Jun 2023, PHP 8.0.29
 
