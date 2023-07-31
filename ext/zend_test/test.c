@@ -33,6 +33,27 @@
 #include "zend_call_stack.h"
 #include "zend_exceptions.h"
 
+#ifdef HAVE_LIBXML
+# include <libxml/globals.h>
+# include <libxml/parser.h>
+#endif
+
+ZEND_BEGIN_MODULE_GLOBALS(zend_test)
+	int observer_enabled;
+	int observer_show_output;
+	int observer_observe_all;
+	int observer_observe_includes;
+	int observer_observe_functions;
+	zend_array *observer_observe_function_names;
+	int observer_show_return_type;
+	int observer_show_return_value;
+	int observer_show_init_backtrace;
+	int observer_show_opcode;
+	int observer_nesting_depth;
+	int replace_zend_execute_ex;
+	HashTable global_weakmap;
+ZEND_END_MODULE_GLOBALS(zend_test)
+
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 
 static zend_class_entry *zend_test_interface;
@@ -351,6 +372,18 @@ static ZEND_FUNCTION(zend_get_current_func_name)
     zend_string *function_name = get_function_or_method_name(EG(current_execute_data)->prev_execute_data->func);
 
     RETURN_STR(function_name);
+}
+
+static ZEND_FUNCTION(zend_test_override_libxml_global_state)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	xmlLoadExtDtdDefaultValue = 1;
+	xmlDoValidityCheckingDefaultValue = 1;
+	(void) xmlPedanticParserDefault(1);
+	(void) xmlSubstituteEntitiesDefault(1);
+	(void) xmlLineNumbersDefault(1);
+	(void) xmlKeepBlanksDefault(0);
 }
 
 /* TESTS Z_PARAM_ITERABLE and Z_PARAM_ITERABLE_OR_NULL */

@@ -226,6 +226,10 @@ namespace {
     function zend_test_create_throwing_resource() {}
 
     function get_open_basedir(): ?string {}
+
+#ifdef HAVE_LIBXML
+	function zend_test_override_libxml_global_state(): void {}
+#endif
 }
 
 namespace ZendTestNS {
