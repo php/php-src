@@ -13,7 +13,7 @@ if ($c) {
     oci_close($c);
 }
 else {
-    $msg = "skip Failed to connect to Oracle instance ";
+    $msg = "skip Failed to connect to Oracle Database instance ";
     if (is_null($dbase)) {
         $msg .= "<default>";
     }
