@@ -1,86 +1,59 @@
 --TEST--
-mysqli autocommit/commit/rollback
+mysqli autocommit/commit/rollback with innodb with CACHE
 --EXTENSIONS--
 mysqli
---CONFLICTS--
-mysqli_transactions
 --SKIPIF--
 <?php
-require_once dirname(__DIR__) . "/connect.inc";
-if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
-}
-
-if (!have_innodb($link)) {
-    die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
-}
+require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
+mysqli_check_innodb_support_skip_test();
 ?>
 --FILE--
 <?php
-require_once dirname(__DIR__) . "/connect.inc";
-    $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
-    if (!mysqli_autocommit($link, TRUE))
-        printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    $link = default_mysqli_connect();
 
-    if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
-        printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    mysqli_autocommit($link, true);
+    mysqli_query($link,"CREATE TABLE test_transactions_14(a int, b varchar(10)) Engine=InnoDB");
+    mysqli_query($link, "INSERT INTO test_transactions_14 VALUES (1, 'foobar')");
+    mysqli_autocommit($link, false);
 
-    if (!mysqli_query($link, "CREATE TABLE test(a int, b varchar(10)) engine=InnoDB"))
-        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    /* Modify data in DB */
+    mysqli_query($link, "DELETE FROM test_transactions_14");
+    mysqli_query($link, "INSERT INTO test_transactions_14 VALUES (2, 'egon')");
 
-    if (!mysqli_query($link, "INSERT INTO test VALUES (1, 'foobar')"))
-        printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    /* Attempt to rollback */
+    mysqli_rollback($link);
 
-    if (!mysqli_autocommit($link, FALSE))
-        printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_query($link, "DELETE FROM test"))
-        printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_query($link, "INSERT INTO test VALUES (2, 'egon')"))
-        printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!mysqli_rollback($link))
-        printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!$result = mysqli_query($link, "SELECT * FROM test"))
-        printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
+    /* Check if rollback was successful */
+    $result = mysqli_query($link, "SELECT * FROM test_transactions_14");
     printf("Num_of_rows=%d\n", mysqli_num_rows($result));
-    if (!$row = mysqli_fetch_row($result))
-        printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
+    $row = mysqli_fetch_row($result);
     mysqli_free_result($result);
 
     var_dump($row);
 
-    if (!mysqli_query($link, "DELETE FROM test"))
-        printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    /* Modify data in DB */
+    mysqli_query($link, "DELETE FROM test_transactions_14");
+    mysqli_query($link, "INSERT INTO test_transactions_14 VALUES (2, 'egon')");
 
-    if (!mysqli_query($link, "INSERT INTO test VALUES (2, 'egon')"))
-        printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    /* Commit modifications */
+    mysqli_commit($link);
 
-    if (!mysqli_commit($link))
-        printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!$result = mysqli_query($link, "SELECT * FROM test"))
-        printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    if (!$row = mysqli_fetch_row($result))
-        printf("[014] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
+    /* Check if commit was successful */
+    $result = mysqli_query($link, "SELECT * FROM test_transactions_14");
+    $row = mysqli_fetch_row($result);
     mysqli_free_result($result);
 
     var_dump($row);
 
-    mysqli_query($link, "DROP TABLE IF EXISTS test");
     mysqli_close($link);
     print "done!";
 ?>
 --CLEAN--
 <?php
-require_once dirname(__DIR__) . "/clean_table.inc";
+require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
+tear_down_table_on_default_connection('test_transactions_14');
 ?>
 --EXPECT--
 Num_of_rows=1

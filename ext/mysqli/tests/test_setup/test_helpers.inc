@@ -145,11 +145,56 @@ function default_mysqli_real_connect(mysqli $link, int $flags = 0): bool {
 }
 
 function mysqli_check_skip_test(): void {
-    $link = @default_mysqli_connect_ex();
+    /* Disable exceptions */
+    mysqli_report(MYSQLI_REPORT_OFF);
+    $link = default_mysqli_connect_ex();
+    // Re-enable exceptions
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
     if (!is_object($link)) {
         die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
     }
     mysqli_close($link);
+}
+
+function have_innodb(mysqli $link): bool {
+    if (($res = $link->query("SHOW VARIABLES LIKE 'have_innodb'"))
+        && ($row = $res->fetch_row())
+        && !empty($row)
+    ) {
+        return !($row[1] == 'DISABLED' || $row[1] == 'NO');
+    }
+    // MySQL 5.6.1+
+    if ($res = $link->query('SHOW ENGINES')) {
+        while ($row = $res->fetch_assoc()) {
+            if (!isset($row['Engine']) || !isset($row['Support'])) {
+                return false;
+            }
+
+            if (($row['Engine'] == 'InnoDB')
+                && (($row['Support'] == 'YES') || ($row['Support'] == 'DEFAULT'))
+            ) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+function mysqli_check_innodb_support_skip_test(): void {
+    /* Disable exceptions */
+    mysqli_report(MYSQLI_REPORT_OFF);
+    $link = default_mysqli_connect_ex();
+    if (!is_object($link)) {
+        // Re-enable exceptions
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+    }
+    $status = have_innodb($link);
+    // Re-enable exceptions
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    mysqli_close($link);
+    if (!$status) {
+        die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
+    }
 }
 
 function tear_down_table_on_default_connection(string $table) {
