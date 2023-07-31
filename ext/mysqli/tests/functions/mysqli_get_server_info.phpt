@@ -15,8 +15,9 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
 
     $sinfo = mysqli_get_server_info($link);
 
-    /* Version is in format: X.Y.Z */
-    $status = preg_match("#^\d+\.\d+\.\d+$#", $sinfo) === 1;
+    /** Version is in format: X.Y.Z
+      * Some distrib will have a version suffix like "8.0.33-0ubuntu0.22.04.2" */
+    $status = preg_match("#^\d+\.\d+\.\d+(\-.*)?$#", $sinfo) === 1;
     var_dump($status);
     if (!$status) {
         var_dump($sinfo);
