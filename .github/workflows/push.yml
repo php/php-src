@@ -16,6 +16,14 @@ on:
       - PHP-8.2
       - master
   pull_request:
+    paths-ignore:
+      - docs/*
+      - NEWS
+      - UPGRADING
+      - UPGRADING.INTERNALS
+      - README.md
+      - CONTRIBUTING.md
+      - CODING_STANDARDS.md
     branches:
       - '**'
 permissions:
