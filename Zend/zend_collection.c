@@ -469,6 +469,41 @@ static ZEND_NAMED_FUNCTION(zend_collection_dict_set_func)
 	RETURN_OBJ_COPY(Z_OBJ_P(ZEND_THIS));
 }
 
+static ZEND_NAMED_FUNCTION(zend_collection_dict_concat_func)
+{
+	zval *other;
+	zend_object *clone;
+	zend_class_entry *ce = Z_OBJCE_P(ZEND_THIS);
+	zval *value_prop;
+	zval *element;
+	zend_ulong int_key;
+	zend_string *key;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(other, zend_ce_dict_collection);
+	ZEND_PARSE_PARAMETERS_END();
+
+	clone = zend_objects_clone_obj(Z_OBJ_P(ZEND_THIS));
+
+	value_prop = zend_read_property_ex(ce, Z_OBJ_P(other), ZSTR_KNOWN(ZEND_STR_VALUE), true, NULL);
+
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(value_prop), int_key, key, element) {
+		zval zkey;
+
+		if (key) {
+			ZVAL_STR(&zkey, key);
+		} else {
+			ZVAL_LONG(&zkey, int_key);
+		}
+
+		if (!zend_collection_add_item(clone, &zkey, element)) {
+			return;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	RETURN_OBJ(clone);
+}
+
 static ZEND_NAMED_FUNCTION(zend_collection_dict_map_func)
 {
 	zend_object *object = Z_OBJ_P(ZEND_THIS);
@@ -599,6 +634,7 @@ void zend_collection_register_funcs(zend_class_entry *ce)
 			REGISTER_FUNCTION(ZEND_STR_WITH, zend_collection_dict_with_func, arginfo_class_DictCollection_with, 2);
 			REGISTER_FUNCTION(ZEND_STR_WITHOUT, zend_collection_dict_without_func, arginfo_class_DictCollection_without, 1);
 			REGISTER_FUNCTION(ZEND_STR_SET, zend_collection_dict_set_func, arginfo_class_DictCollection_set, 2);
+			REGISTER_FUNCTION(ZEND_STR_CONCAT, zend_collection_dict_concat_func, arginfo_class_DictCollection_concat, 1);
 			REGISTER_FUNCTION(ZEND_STR_MAP, zend_collection_dict_map_func, arginfo_class_DictCollection_map, 2);
 			break;
 	}

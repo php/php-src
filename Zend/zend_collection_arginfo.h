@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1f93e07aa28af67d65deeb7c9b36e8536c09d7a8 */
+ * Stub hash: 54aa1ff8b5d7e051b63774a3f371211c28119c45 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SeqCollection_add, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
@@ -58,6 +58,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DictCollection_set arginfo_class_DictCollection_add
 
+#define arginfo_class_DictCollection_concat arginfo_class_SeqCollection_concat
+
 #define arginfo_class_DictCollection_map arginfo_class_SeqCollection_map
 
 
@@ -85,6 +87,7 @@ static const zend_function_entry class_DictCollection_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DictCollection, with, arginfo_class_DictCollection_with, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DictCollection, without, arginfo_class_DictCollection_without, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DictCollection, set, arginfo_class_DictCollection_set, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DictCollection, concat, arginfo_class_DictCollection_concat, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DictCollection, map, arginfo_class_DictCollection_map, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };

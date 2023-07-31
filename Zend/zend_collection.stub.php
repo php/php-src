@@ -53,11 +53,11 @@ interface DictCollection
 
     // returns self.  Overwrites existing value if already set.
     public function set(mixed $key, mixed $value): static;
-/*
+
     // This should really be static $other, but the language doesn't allow that.
     // Equivalent of + static.
-    public function concat(DictCollection $other): static;
-
+    public function concat(object $other): static;
+/*
     // True if both dicts have the same key/values in the same order.
     public function equals(DictCollection $other): bool;
 */

@@ -1,5 +1,5 @@
 --TEST--
-Collection: Sequence: Concat
+Collection: Sequence: Concat Errors
 --FILE--
 <?php
 
@@ -49,7 +49,6 @@ try {
 
 try {
 	$cr = $d1->concat($c1);
-	var_dump($cr);
 } catch (TypeError $e) {
 	echo get_class($e), ': ', $e->getMessage(), "\n";
 }
