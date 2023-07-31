@@ -1693,7 +1693,7 @@ PHP_FUNCTION(pg_fetch_result)
 {
 	zval *result;
 	zend_string *field_name;
-	zend_long row, field_offset;
+	zend_long row, field_offset = 0;
 	bool row_is_null = false;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
@@ -2004,7 +2004,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type, bo
 {
 	zval *result;
 	zend_string *field_name;
-	zend_long row, field_offset;
+	zend_long row, field_offset = 0;
 	bool row_is_null = false;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
