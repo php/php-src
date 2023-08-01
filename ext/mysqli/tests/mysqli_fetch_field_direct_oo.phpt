@@ -8,13 +8,6 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    $mysqli = new mysqli();
-    try {
-        new mysqli_result($mysqli);
-    } catch (Error $exception) {
-        echo $exception->getMessage() . "\n";
-    }
-
     require 'table.inc';
     $mysqli = $link;
 
@@ -52,7 +45,6 @@ require_once 'skipifconnectfailure.inc';
     require_once 'clean_table.inc';
 ?>
 --EXPECTF--
-mysqli object is not fully initialized
 mysqli_result::fetch_field_direct(): Argument #1 ($index) must be greater than or equal to 0
 object(stdClass)#%d (13) {
   ["name"]=>

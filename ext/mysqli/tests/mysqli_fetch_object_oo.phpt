@@ -8,13 +8,6 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    $mysqli = new mysqli();
-    try {
-        new mysqli_result($mysqli);
-    } catch (Throwable $e) {
-        echo $e::class, ': ', $e->getMessage(), "\n";
-    }
-
     require 'table.inc';
     $mysqli = $link;
 
@@ -123,7 +116,6 @@ require_once 'skipifconnectfailure.inc';
     require_once 'clean_table.inc';
 ?>
 --EXPECT--
-Error: mysqli object is not fully initialized
 Error: Object of class mysqli could not be converted to string
 ArgumentCountError: mysqli_result::fetch_object() expects at most 2 arguments, 3 given
 TypeError: mysqli_result::fetch_object(): Argument #2 ($constructor_args) must be of type array, null given

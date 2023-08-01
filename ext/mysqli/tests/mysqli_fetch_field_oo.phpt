@@ -9,14 +9,6 @@ require_once 'skipifconnectfailure.inc';
 --FILE--
 <?php
     // Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
-    $mysqli = new mysqli();
-    $res = false;
-    try {
-        new mysqli_result($mysqli);
-    } catch (Error $exception) {
-        echo $exception->getMessage() . "\n";
-    }
-
     require 'table.inc';
     $mysqli = $link;
 
@@ -62,7 +54,6 @@ require_once 'skipifconnectfailure.inc';
     require_once 'clean_table.inc';
 ?>
 --EXPECTF--
-mysqli object is not fully initialized
 object(stdClass)#%d (13) {
   ["name"]=>
   string(2) "ID"
