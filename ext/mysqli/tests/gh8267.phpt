@@ -17,6 +17,7 @@ $mysqli->query("INSERT INTO foo VALUES (9223372036854775807)");
 var_dump($mysqli->insert_id);
 $mysqli->query("INSERT INTO foo VALUES (0)");
 var_dump($mysqli->insert_id);
+$mysqli->query("DROP TABLE IF EXISTS foo");
 ?>
 --EXPECT--
 string(19) "9223372036854775807"
