@@ -122,7 +122,7 @@ namespace {
 
     function zend_test_crash(?string $message = null): void {}
 
-#ifdef HAVE_LIBXML
+#if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 function zend_test_override_libxml_global_state(): void {}
 #endif
 }
