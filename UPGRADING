@@ -160,8 +160,8 @@ PHP 8.3 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecations_php_8_3#mt_rand_php
 
 - Standard:
-  . The assert_option() function is now deprecated.
-  . The ASSERT_ACTIVE, ASSERT_BAIL,ASSERT_CALLBACK, ASSERT_EXCEPTION, and
+  . The assert_options() function is now deprecated.
+  . The ASSERT_ACTIVE, ASSERT_BAIL, ASSERT_CALLBACK, ASSERT_EXCEPTION, and
     ASSERT_WARNING constants have been deprecated.
     RFC: https://wiki.php.net/rfc/assert-string-eval-cleanup
 
