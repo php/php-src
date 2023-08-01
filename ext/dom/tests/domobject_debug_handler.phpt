@@ -17,8 +17,6 @@ var_dump($d);
 --EXPECTF--
 Deprecated: Creation of dynamic property DOMDocument::$dynamicProperty is deprecated in %s on line %d
 object(DOMDocument)#1 (41) {
-  ["config"]=>
-  NULL
   ["dynamicProperty"]=>
   object(stdClass)#2 (0) {
   }
@@ -46,6 +44,8 @@ object(DOMDocument)#1 (41) {
   bool(true)
   ["documentURI"]=>
   string(%d) %s
+  ["config"]=>
+  NULL
   ["formatOutput"]=>
   bool(false)
   ["validateOnParse"]=>

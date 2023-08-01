@@ -707,7 +707,7 @@ class DOMDocument extends DOMNode implements DOMParentNode
      * @readonly
      * @deprecated
      */
-    public mixed $config = null;
+    public mixed $config;
 
     public bool $formatOutput;
 
