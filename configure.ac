@@ -1043,6 +1043,9 @@ if test "$PHP_IPV6" != "no" && test "$ac_cv_ipv6_support" = yes; then
 fi
 
 dnl DTRACE checks. Note: this has to be done after SAPI configuration.
+AC_ARG_VAR([DTRACE_CPP],[Override default DTrace cpp preprocessor when using the --enable-dtrace option])dnl
+AS_IF([test -z "$DTRACE_CPP"],[],[DTRACE_CPP="CPP=\"$DTRACE_CPP\""])
+
 PHP_ARG_ENABLE([dtrace],
   [whether to enable DTrace support],
   [AS_HELP_STRING([--enable-dtrace],
