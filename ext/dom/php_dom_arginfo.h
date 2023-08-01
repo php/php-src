@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4570a3d2e6a74946b0f12353b1136922a2e77072 */
+ * Stub hash: 23aa0e35aff077f4a5fba1a6563bb806b3397d29 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1480,7 +1480,7 @@ static zend_class_entry *register_class_DOMDocument(zend_class_entry *class_entr
 	zend_string_release(property_documentURI_name);
 
 	zval property_config_default_value;
-	ZVAL_NULL(&property_config_default_value);
+	ZVAL_UNDEF(&property_config_default_value);
 	zend_string *property_config_name = zend_string_init("config", sizeof("config") - 1, 1);
 	zend_declare_typed_property(class_entry, property_config_name, &property_config_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
 	zend_string_release(property_config_name);
