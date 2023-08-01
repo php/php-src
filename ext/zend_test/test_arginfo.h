@@ -206,7 +206,7 @@ static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_deprecated_func);
-#if defined(HAVE_LIBXML)
+
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 static ZEND_FUNCTION(zend_test_override_libxml_global_state);
 #endif
@@ -267,7 +267,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_NS_DEP_FALIAS("ZendTestNS2\\ZendSubNS", namespaced_deprecated_func, ZendTestNS2_ZendSubNS_namespaced_deprecated_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_func)
 	ZEND_NS_FALIAS("ZendTestNS2\\ZendSubNS", namespaced_aliased_func, zend_test_void_return, arginfo_ZendTestNS2_ZendSubNS_namespaced_aliased_func)
 	ZEND_NS_DEP_FALIAS("ZendTestNS2\\ZendSubNS", namespaced_deprecated_aliased_func, zend_test_void_return, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func)
-#if defined(HAVE_LIBXML)
+
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 	ZEND_FE(zend_test_override_libxml_global_state, arginfo_zend_test_override_libxml_global_state)
 #endif
