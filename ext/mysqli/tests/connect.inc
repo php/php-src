@@ -67,12 +67,22 @@
         public function __construct($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
             $flags = ($enable_env_flags) ? get_environment_connection_flags() : 0;
 
+            // Because the tests are meant to test both error modes, they can set the report_mode to a different value,
+            // which we do not want to override. However, we want to make sure that if a connection cannot be made,
+            // the constuctor will throw an exception. We store current report_mode in variable and restore it later.
+            $driver = new mysqli_driver;
+            $report_mode = $driver->report_mode;
+            $driver->report_mode = MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT;
+
             if ($flags !== 0) {
                 parent::__construct();
                 $this->real_connect($host, $user, $passwd, $db, $port, $socket, $flags);
             } else {
                 parent::__construct($host, $user, $passwd, $db, $port, $socket);
             }
+
+            // Restore error mode
+            $driver->report_mode = $report_mode;
         }
     }
 

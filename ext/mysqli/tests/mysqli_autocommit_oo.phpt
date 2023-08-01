@@ -17,10 +17,7 @@ mysqli
 <?php
     require_once 'connect.inc';
 
-    if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket)) {
-        printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
-    }
+    $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
     if (!is_bool($tmp = $mysqli->autocommit(true)))
         printf("[002] Expecting boolean/any, got %s/%s\n", gettype($tmp), $tmp);

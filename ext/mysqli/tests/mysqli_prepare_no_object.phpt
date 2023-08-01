@@ -20,9 +20,7 @@ require_once 'skipifconnectfailure.inc';
 
     mysqli_close($link);
 
-    if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
-        printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
+    $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
     if (false !== ($tmp = $mysqli->prepare(false)))
         printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), (is_object($tmp) ? var_dump($tmp, true) : $tmp));

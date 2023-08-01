@@ -34,10 +34,7 @@ mysqli.max_links=-1
 
     mysqli_close($link);
 
-    if (!$link = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
-        printf("[007] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
-
+    $link = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
     if (true !== ($tmp = $link->real_connect($host, $user, $passwd, $db, $port, $socket)))
         printf("[009] Expecting boolean/true got %s/%s\n", gettype($tmp), $tmp);
