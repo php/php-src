@@ -1304,6 +1304,9 @@ static void zend_jit_gen_phi(zend_jit_ctx *jit, zend_ssa_phi *phi)
 	ir_type type = (jit->ssa->var_info[phi->ssa_var].type & MAY_BE_LONG) ? IR_LONG : IR_DOUBLE;
 	ir_ref merge = jit->bb_start_ref[phi->block];
 	ir_ref ref;
+	ir_ref old_insns_count = jit->ctx.insns_count;
+	ir_ref same_src_ref = IR_UNUSED;
+	bool phi_inputs_are_the_same = 1;
 
 	ZEND_ASSERT(phi->pi < 0);
 	ZEND_ASSERT(!(jit->ra[dst_var].flags & ZREG_LOAD));
@@ -1320,9 +1323,20 @@ static void zend_jit_gen_phi(zend_jit_ctx *jit, zend_ssa_phi *phi)
 		ZEND_ASSERT(jit->ra[src_var].ref);
 		if (jit->ra[src_var].ref == IR_NULL) {
 			jit->ra[src_var].flags |= ZREG_FORWARD;
+			phi_inputs_are_the_same = 0;
 		} else {
-			ir_set_op(&jit->ctx, ref, i + 2, zend_jit_use_reg(jit, ZEND_ADDR_REG(src_var)));
+			ir_ref src_ref = zend_jit_use_reg(jit, ZEND_ADDR_REG(src_var));
+			if (i == 0) {
+				same_src_ref = src_ref;
+			} else if (same_src_ref != src_ref) {
+				phi_inputs_are_the_same = 0;
+			}
+			ir_set_op(&jit->ctx, ref, i + 2, src_ref);
 		}
+	}
+	if (phi_inputs_are_the_same) {
+		ref = same_src_ref;
+		jit->ctx.insns_count = old_insns_count;
 	}
 
 	zend_jit_def_reg(jit, ZEND_ADDR_REG(dst_var), ref);
