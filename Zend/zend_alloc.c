@@ -2432,6 +2432,13 @@ ZEND_API bool is_zend_ptr(const void *ptr)
 {
 #if ZEND_MM_CUSTOM
 	if (AG(mm_heap)->use_custom_heap) {
+		if (AG(mm_heap)->custom_heap.std._malloc == tracked_malloc) {
+			zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
+			zval *size_zv = zend_hash_index_find(AG(mm_heap)->tracked_allocs, h);
+			if  (size_zv) {
+				return 1;
+			}
+		}
 		return 0;
 	}
 #endif
