@@ -21,4 +21,4 @@ $a[] = 'ZendMM Observer';
 ini_set('zend_test.zend_mm_observer.enabled', 'false');
 ?>
 --EXPECTREGEX--
-.*realloc 0x\S+ of size \d+ \(block: \d+, former 0x\S+\)
+.*realloc \S+ of size \d+ \(block: \d+, former \S+\)
