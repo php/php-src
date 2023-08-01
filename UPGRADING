@@ -24,8 +24,6 @@ PHP 8.3 UPGRADE NOTES
     Error when using more than
     `zend.max_allowed_stack_size-zend.reserved_stack_size` bytes of stack
     (`fiber.stack_size-zend.reserved_stack_size` for fibers).
-  . Class constants can now be accessed dynamically using the C::{$name} syntax.
-    RFC: https://wiki.php.net/rfc/dynamic_class_constant_fetch
   . Executing proc_get_status() multiple times will now always return the right
     value on posix systems. Previously, only the first call of the function
     returned the right value. Executing proc_close() after proc_get_status() will
@@ -41,8 +39,6 @@ PHP 8.3 UPGRADE NOTES
     property to the class directly without traits.
   . Assigning a negative index n to an empty array will now make sure that the
     next index is n+1 instead of 0.
-  . Static variable initializers can now contain arbitrary expressions.
-    RFC: https://wiki.php.net/rfc/arbitrary_static_variable_initializers
   . Class constant visibility variance is now correctly checked when inherited
     from interfaces.
   . WeakMaps entries whose key maps to itself (possibly transitively) may now be
@@ -95,6 +91,10 @@ PHP 8.3 UPGRADE NOTES
   . Added the #[\Override] attribute to check that a method exists
     in a parent class or implemented interface.
     RFC: https://wiki.php.net/rfc/marking_overriden_methods
+  . Class constants can now be accessed dynamically using the C::{$name} syntax.
+    RFC: https://wiki.php.net/rfc/dynamic_class_constant_fetch
+  . Static variable initializers can now contain arbitrary expressions.
+    RFC: https://wiki.php.net/rfc/arbitrary_static_variable_initializers
 
 - CLI
   . It is now possible to lint multiple files.
