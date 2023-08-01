@@ -146,10 +146,6 @@ mysqli.allow_local_infile=1
 
     print "done!";
 ?>
---CLEAN--
-<?php
-	require_once 'clean_table.inc';
-?>
 --EXPECTF--
 Warning: mysqli_real_connect(): (%s/%d): Access denied for user '%s'@'%s' %r(\(using password: \w+\) ){0,1}%rin %s on line %d
 object(mysqli)#%d (%d) {
