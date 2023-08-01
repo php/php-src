@@ -76,6 +76,10 @@ PHP                                                                        NEWS
 - Intl:
   . Fix memory leak in MessageFormatter::format() on failure. (Girgias)
 
+- Libxml:
+  . Fixed bug GHSA-3qrf-m4j2-pcrr (Security issue with external entity loading
+    in XML without enabling it). (CVE-2023-3823) (nielsdos, ilutov)
+
 - MBString:
   . Fix GH-11300 (license issue: restricted unicode license headers).
     (nielsdos)
@@ -101,6 +105,8 @@ PHP                                                                        NEWS
 
 - Phar:
   . Add missing check on EVP_VerifyUpdate() in phar util. (nielsdos)
+  . Fixed bug GHSA-jqcx-ccgc-xwhv (Buffer mismanagement in phar_dir_read()).
+    (CVE-2023-3824) (nielsdos)
 
 - PHPDBG:
   . Fixed bug GH-9669 (phpdbg -h options doesn't list the -z option). (adsr)

@@ -5,6 +5,7 @@ GHSA-3qrf-m4j2-pcrr (libxml global state entity loader bypass)
 if (!extension_loaded('libxml')) die('skip libxml extension not available');
 if (!extension_loaded('xmlreader')) die('skip xmlreader extension not available');
 if (!extension_loaded('zend-test')) die('skip zend-test extension not available');
+if (!function_exists('zend_test_override_libxml_global_state')) die('skip not for Windows');
 ?>
 --FILE--
 <?php
