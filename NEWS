@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.0beta2
+?? ??? ????, PHP 8.3.0beta3
+
+
+03 Aug 2023, PHP 8.3.0beta2
 
 - Bcmath
   . Fixed GH-11761 (removing trailing zeros from numbers) (jorgsowa)
