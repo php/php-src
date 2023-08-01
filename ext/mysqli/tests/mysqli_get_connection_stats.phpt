@@ -14,12 +14,9 @@ if (!function_exists('mysqli_get_connection_stats')) {
 ?>
 --FILE--
 <?php
-    require_once 'connect.inc';
-    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-        printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
-        exit(1);
-    }
+    // Use the operations performed in table.inc to create some traffic on the connection
+    // so that we can collect some statistics.
+    require 'table.inc';
 
     if (!is_array($info = mysqli_get_connection_stats($link)) || empty($info))
         printf("[003] Expecting array/any_non_empty, got %s/%s\n", gettype($info), $info);
@@ -60,11 +57,7 @@ if (!function_exists('mysqli_get_connection_stats')) {
     }
 
     mysqli_close($link);
-    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-        printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
-        exit(1);
-    }
+    require 'table.inc';
 
     if (!is_array($info = mysqli_get_connection_stats($link)) || empty($info))
         printf("[008] Expecting array/any_non_empty, got %s/%s\n", gettype($info), $info);
@@ -80,6 +73,10 @@ if (!function_exists('mysqli_get_connection_stats')) {
     }
 
     print "done!";
+?>
+--CLEAN--
+<?php
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!
