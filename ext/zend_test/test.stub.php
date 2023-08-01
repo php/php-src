@@ -227,8 +227,8 @@ namespace {
 
     function get_open_basedir(): ?string {}
 
-#ifdef HAVE_LIBXML
-	function zend_test_override_libxml_global_state(): void {}
+#if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
+function zend_test_override_libxml_global_state(): void {}
 #endif
 }
 
