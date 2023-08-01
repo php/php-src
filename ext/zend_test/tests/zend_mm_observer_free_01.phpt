@@ -13,4 +13,4 @@ unset($string);
 ini_set('zend_test.zend_mm_observer.enabled', 'false');
 ?>
 --EXPECTREGEX--
-.*freed 0x\S+ of size \d+.*
+.*freed \S+ of size \d+.*

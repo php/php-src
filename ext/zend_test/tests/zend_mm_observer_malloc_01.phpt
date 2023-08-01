@@ -12,4 +12,4 @@ $string = str_repeat("ZendMM Observer", 100);
 ini_set('zend_test.zend_mm_observer.enabled', 'false');
 ?>
 --EXPECTREGEX--
-.*malloc 0x\S+ of size \d+ \(block: \d+\).*
+.*malloc \S+ of size \d+ \(block: \d+\).*
