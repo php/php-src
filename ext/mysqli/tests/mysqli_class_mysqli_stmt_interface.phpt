@@ -8,7 +8,6 @@ mysqli
 ?>
 --FILE--
 <?php
-    require 'connect.inc';
     require 'table.inc';
 
     $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);

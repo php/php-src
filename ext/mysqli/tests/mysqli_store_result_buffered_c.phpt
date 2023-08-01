@@ -11,12 +11,6 @@ if (!defined('MYSQLI_STORE_RESULT_COPY_DATA')) {
 ?>
 --FILE--
 <?php
-    require_once 'connect.inc';
-
-    $tmp    = NULL;
-    $link   = NULL;
-
-
     require 'table.inc';
 
     if (!$res = mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id"))

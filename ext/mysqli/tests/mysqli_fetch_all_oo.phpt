@@ -8,18 +8,8 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once 'connect.inc';
-
-    $tmp    = NULL;
-    $link   = NULL;
-
-    $mysqli = new mysqli();
-
-    if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
-        printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
-
     require 'table.inc';
+    $mysqli = $link;
     if (!$res = $mysqli->query("SELECT * FROM test ORDER BY id LIMIT 2")) {
         printf("[004] [%d] %s\n", $mysqli->errno, $mysqli->error);
     }

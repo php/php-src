@@ -10,8 +10,6 @@ require_once 'skipifconnectfailure.inc';
 mysqli.allow_local_infile=1
 --FILE--
 <?php
-    require_once 'connect.inc';
-
     require 'table.inc';
     if (!$res = mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, 'a')"))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));

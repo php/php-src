@@ -8,7 +8,6 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once 'connect.inc';
     require_once 'table.inc';
 
     if (!mysqli_query($link, 'SET @@sql_mode="NO_BACKSLASH_ESCAPES"'))

@@ -16,8 +16,6 @@ if (!function_exists('mysqli_stmt_get_result'))
     mysqli_stmt_bind_result.phpt already. Restrict
     this test case to the basics.
     */
-    require_once 'connect.inc';
-
     require 'table.inc';
 
     if (!$stmt = mysqli_stmt_init($link))

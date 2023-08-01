@@ -8,8 +8,6 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once 'connect.inc';
-
     require 'table.inc';
 
     if (false !== ($tmp = mysqli_real_query($link, 'THIS IS NOT SQL')))

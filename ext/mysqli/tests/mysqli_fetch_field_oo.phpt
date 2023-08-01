@@ -8,8 +8,6 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once 'connect.inc';
-
     // Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
     $mysqli = new mysqli();
     $res = false;
@@ -20,9 +18,7 @@ require_once 'skipifconnectfailure.inc';
     }
 
     require 'table.inc';
-    if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
-        printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
+    $mysqli = $link;
 
     // Make sure that client, connection and result charsets are all the
     // same. Not sure whether this is strictly necessary.

@@ -8,11 +8,6 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once 'connect.inc';
-
-    $tmp    = NULL;
-    $link   = NULL;
-
     require 'table.inc';
 
     echo "--- Testing default ---\n";

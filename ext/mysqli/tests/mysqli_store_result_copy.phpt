@@ -13,11 +13,6 @@ mysqlnd.mempool_default_size=1
 mysqlnd.fetch_data_copy=0
 --FILE--
 <?php
-    require_once 'connect.inc';
-
-    $tmp    = NULL;
-    $link   = NULL;
-
     require 'table.inc';
 
     if (!$res = mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id"))

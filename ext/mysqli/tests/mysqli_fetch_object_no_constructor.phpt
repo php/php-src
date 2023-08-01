@@ -8,11 +8,6 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once 'connect.inc';
-
-    $tmp    = NULL;
-    $link   = NULL;
-
     require 'table.inc';
     if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 5")) {
         printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));

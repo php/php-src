@@ -8,11 +8,6 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once 'connect.inc';
-
-    $tmp    = NULL;
-    $link   = NULL;
-
     // Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
     $mysqli = new mysqli();
     try {
@@ -22,9 +17,7 @@ require_once 'skipifconnectfailure.inc';
     }
 
     require 'table.inc';
-    if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
-        printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
+    $mysqli = $link;
 
     if (!$res = $mysqli->query("SELECT id, label FROM test ORDER BY id LIMIT 1")) {
         printf("[004] [%d] %s\n", $mysqli->errno, $mysqli->error);

@@ -54,8 +54,6 @@ require_once 'skipifconnectfailure.inc';
         return $ret;
     }
 
-    require_once 'connect.inc';
-
     require 'table.inc';
 
     // Make sure that client, connection and result charsets are all the

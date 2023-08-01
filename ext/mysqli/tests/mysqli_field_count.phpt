@@ -8,8 +8,6 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once 'connect.inc';
-
     require 'table.inc';
 
     var_dump(mysqli_field_count($link));

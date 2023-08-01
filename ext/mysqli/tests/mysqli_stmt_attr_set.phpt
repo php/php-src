@@ -8,8 +8,6 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once 'connect.inc';
-
     require 'table.inc';
 
     $valid_attr = array(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);

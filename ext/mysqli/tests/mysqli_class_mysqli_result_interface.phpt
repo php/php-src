@@ -8,7 +8,6 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require 'connect.inc';
     require 'table.inc';
 
     $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);

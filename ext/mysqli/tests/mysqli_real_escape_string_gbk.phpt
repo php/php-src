@@ -5,7 +5,6 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-require_once 'connect.inc';
 
 if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     die(sprintf("skip Cannot connect to MySQL, [%d] %s\n",

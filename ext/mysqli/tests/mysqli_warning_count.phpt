@@ -8,8 +8,6 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once 'connect.inc';
-
     require 'table.inc';
 
     if (!$res = mysqli_query($link, "SELECT id, label FROM test"))

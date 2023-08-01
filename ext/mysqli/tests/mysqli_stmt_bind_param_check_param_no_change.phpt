@@ -8,7 +8,12 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require 'table.inc';
+    require_once 'connect.inc';
+    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+        printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+            $host, $user, $db, $port, $socket);
+        exit(1);
+    }
     $link->set_charset('latin1');
 
     class foo {
@@ -61,10 +66,6 @@ require_once 'skipifconnectfailure.inc';
     $stmt->free_result();
     echo "$one - $two\n\n";
     echo "done!";
-?>
---CLEAN--
-<?php
-    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 Test 1:
