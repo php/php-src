@@ -1500,13 +1500,6 @@ ZEND_VM_HELPER(zend_pre_inc_helper, VAR|CV, ANY)
 			}
 		}
 		increment_function(var_ptr);
-		if (UNEXPECTED(EG(exception))) {
-			/* Smart branch expects result to be set with exceptions */
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-			HANDLE_EXCEPTION();
-		}
 	} while (0);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -1559,13 +1552,6 @@ ZEND_VM_HELPER(zend_pre_dec_helper, VAR|CV, ANY)
 			}
 		}
 		decrement_function(var_ptr);
-		if (UNEXPECTED(EG(exception))) {
-			/* Smart branch expects result to be set with exceptions */
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-			HANDLE_EXCEPTION();
-		}
 	} while (0);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
