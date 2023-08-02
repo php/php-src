@@ -1317,43 +1317,16 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 }
 /* }}} */
 
-/* {{{ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) */
-static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
-	xmlDoc *docp = NULL, *newdoc;
-	dom_doc_propsptr doc_prop;
-	dom_object *intern;
-	char *source;
-	size_t source_len;
-	int refcount;
-	zend_long options = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &options) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (!source_len) {
-		zend_argument_value_error(1, "must not be empty");
-		RETURN_THROWS();
-	}
-	if (ZEND_SIZE_T_INT_OVFL(source_len)) {
-		php_error_docref(NULL, E_WARNING, "Input string is too long");
-		RETURN_FALSE;
-	}
-	if (ZEND_LONG_EXCEEDS_INT(options)) {
-		php_error_docref(NULL, E_WARNING, "Invalid options");
-		RETURN_FALSE;
-	}
-
-	newdoc = dom_document_parser(ZEND_THIS, mode, source, source_len, options);
-
+static void dom_finish_loading_document(zval *this, zval *return_value, xmlDocPtr newdoc)
+{
 	if (!newdoc)
 		RETURN_FALSE;
 
-	intern = Z_DOMOBJ_P(ZEND_THIS);
+	dom_object *intern = Z_DOMOBJ_P(this);
 	size_t old_modification_nr = 0;
 	if (intern != NULL) {
-		docp = (xmlDocPtr) dom_object_get_node(intern);
-		doc_prop = NULL;
+		xmlDocPtr docp = (xmlDocPtr) dom_object_get_node(intern);
+		dom_doc_propsptr doc_prop = NULL;
 		if (docp != NULL) {
 			const php_libxml_doc_ptr *doc_ptr = docp->_private;
 			ZEND_ASSERT(doc_ptr != NULL); /* Must exist, we have a document */
@@ -1361,7 +1334,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 			php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
 			doc_prop = intern->document->doc_props;
 			intern->document->doc_props = NULL;
-			refcount = php_libxml_decrement_doc_ref((php_libxml_node_object *)intern);
+			int refcount = php_libxml_decrement_doc_ref((php_libxml_node_object *)intern);
 			if (refcount != 0) {
 				docp->_private = NULL;
 			}
@@ -1382,6 +1355,34 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	}
 
 	RETURN_TRUE;
+}
+
+/* {{{ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) */
+static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
+	char *source;
+	size_t source_len;
+	zend_long options = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &options) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!source_len) {
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
+	}
+	if (ZEND_SIZE_T_INT_OVFL(source_len)) {
+		php_error_docref(NULL, E_WARNING, "Input string is too long");
+		RETURN_FALSE;
+	}
+	if (ZEND_LONG_EXCEEDS_INT(options)) {
+		php_error_docref(NULL, E_WARNING, "Invalid options");
+		RETURN_FALSE;
+	}
+
+	xmlDocPtr newdoc = dom_document_parser(ZEND_THIS, mode, source, source_len, options);
+
+	dom_finish_loading_document(ZEND_THIS, return_value, newdoc);
 }
 /* }}} end dom_parser_document */
 
@@ -1869,12 +1870,8 @@ PHP_METHOD(DOMDocument, relaxNGValidateSource)
 
 static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
-	xmlDoc *docp = NULL, *newdoc;
-	dom_object *intern;
-	dom_doc_propsptr doc_prop;
 	char *source;
 	size_t source_len;
-	int refcount;
 	zend_long options = 0;
 	htmlParserCtxtPtr ctxt;
 
@@ -1922,45 +1919,10 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		htmlCtxtUseOptions(ctxt, (int)options);
 	}
 	htmlParseDocument(ctxt);
-	newdoc = ctxt->myDoc;
+	xmlDocPtr newdoc = ctxt->myDoc;
 	htmlFreeParserCtxt(ctxt);
 
-	if (!newdoc)
-		RETURN_FALSE;
-
-	intern = Z_DOMOBJ_P(ZEND_THIS);
-	size_t old_modification_nr = 0;
-	if (intern != NULL) {
-		docp = (xmlDocPtr) dom_object_get_node(intern);
-		doc_prop = NULL;
-		if (docp != NULL) {
-			const php_libxml_doc_ptr *doc_ptr = docp->_private;
-			ZEND_ASSERT(doc_ptr != NULL); /* Must exist, we have a document */
-			old_modification_nr = doc_ptr->cache_tag.modification_nr;
-			php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
-			doc_prop = intern->document->doc_props;
-			intern->document->doc_props = NULL;
-			refcount = php_libxml_decrement_doc_ref((php_libxml_node_object *)intern);
-			if (refcount != 0) {
-				docp->_private = NULL;
-			}
-		}
-		intern->document = NULL;
-		if (php_libxml_increment_doc_ref((php_libxml_node_object *)intern, newdoc) == -1) {
-			RETURN_FALSE;
-		}
-		intern->document->doc_props = doc_prop;
-	}
-
-	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)newdoc, (void *)intern);
-	/* Since iterators should invalidate, we need to start the modification number from the old counter */
-	if (old_modification_nr != 0) {
-		php_libxml_doc_ptr* doc_ptr = (php_libxml_doc_ptr*) ((php_libxml_node_object*) intern)->node; /* downcast */
-		doc_ptr->cache_tag.modification_nr = old_modification_nr;
-		php_libxml_invalidate_node_list_cache(doc_ptr);
-	}
-
-	RETURN_TRUE;
+	dom_finish_loading_document(ZEND_THIS, return_value, newdoc);
 }
 /* }}} */
 
