@@ -24,7 +24,7 @@
 static void zend_mm_test_observer_malloc(size_t len, void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	size_t block_len = 0;
-	if (is_zend_ptr(ptr)) {
+	if (is_zend_mm() && is_zend_ptr(ptr)) {
 		block_len = zend_mm_block_size(zend_mm_get_heap(), ptr);
 	}
 	printf("malloc %p of size %zu (block: %zu)\n", ptr, len, block_len);
@@ -34,7 +34,7 @@ static void zend_mm_test_observer_malloc(size_t len, void *ptr ZEND_FILE_LINE_DC
 static void zend_mm_test_observer_free(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	size_t block_len = 0;
-	if (is_zend_ptr(ptr)) {
+	if (is_zend_mm() && is_zend_ptr(ptr)) {
 		block_len = zend_mm_block_size(zend_mm_get_heap(), ptr);
 	}
 	printf("freed %p of size %zu\n", ptr, block_len);
@@ -44,7 +44,7 @@ static void zend_mm_test_observer_free(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LIN
 static void zend_mm_test_observer_realloc(void *ptr, size_t len, void *newptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	size_t block_len = 0;
-	if (is_zend_ptr(ptr)) {
+	if (is_zend_mm() && is_zend_ptr(ptr)) {
 		block_len = zend_mm_block_size(zend_mm_get_heap(), ptr);
 	}
 	printf("realloc %p of size %zu (block: %zu, former %p)\n", newptr, len, block_len, ptr);
@@ -88,16 +88,18 @@ void zend_test_mm_observer_minit(INIT_FUNC_ARGS)
 void zend_test_mm_observer_rinit(void)
 {
 	if (ZT_G(zend_mm_observer_enabled)) {
-		printf("ZendMM Observer enabled\n");
 		ZT_G(observer) = zend_mm_observer_register(zend_mm_get_heap(), zend_mm_test_observer_malloc, zend_mm_test_observer_free, zend_mm_test_observer_realloc);
+		printf("ZendMM Observer enabled\n");
+		fflush(stdout);
 	}
 }
 
 void zend_test_mm_observer_rshutdown(void)
 {
 	if (ZT_G(observer)) {
-		printf("ZendMM Observer disabled\n");
 		zend_mm_observer_unregister(zend_mm_get_heap(), ZT_G(observer));
+		printf("ZendMM Observer disabled\n");
+		fflush(stdout);
 	}
 	ZT_G(observer) = NULL;
 }
