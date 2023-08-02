@@ -1118,9 +1118,6 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 
 	zend_string *const s = (zend_string*)ZCG(mem);
 
-	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
-	info.checksum = zend_adler32(info.checksum, (unsigned char*)ZSTR_VAL(s), info.str_size);
-
 #if __has_feature(memory_sanitizer)
 	/* The buffer may contain uninitialized regions. However, the uninitialized parts will not be
 	 * used when reading the cache. We should probably still try to get things fully initialized
@@ -1128,6 +1125,9 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	__msan_unpoison(&info, sizeof(info));
 	__msan_unpoison(buf, script->size);
 #endif
+
+	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
+	info.checksum = zend_adler32(info.checksum, (unsigned char*)ZSTR_VAL(s), info.str_size);
 
 	if (!zend_file_cache_script_write(fd, script, &info, buf, s)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s': %s\n", filename, strerror(errno));
