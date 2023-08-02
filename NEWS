@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fix use-of-uninitialized-value in hash_pbkdf2(), fix missing $options
     parameter in signature. (ilutov)
 
+- MySQLnd:
+  . Fixed bug GH-11440 (authentication to a sha256_password account fails over
+    SSL). (nielsdos)
+
 - Opcache:
   . Fixed bug GH-11715 (opcache.interned_strings_buffer either has no effect or
     opcache_get_status() / phpinfo() is wrong). (nielsdos)
