@@ -16,7 +16,6 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
-$db->query('DROP TABLE IF EXISTS test_copy_from CASCADE');
 $db->exec('CREATE TABLE test_copy_from (a integer not null primary key, b text, c integer)');
 
 echo "Preparing test file and array for CopyFrom tests\n";
@@ -126,6 +125,12 @@ $db->rollback();
 foreach (array($filename, $filenameWithDifferentNullValues, $filenameWithDifferentNullValuesAndSelectedFields) as $f) {
     @unlink($f);
 }
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->query('DROP TABLE IF EXISTS test_copy_from CASCADE');
 ?>
 --EXPECTF--
 Preparing test file and array for CopyFrom tests

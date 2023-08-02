@@ -21,7 +21,6 @@ try {
 } catch (Exception $e) {
 }
 
-$db->query('DROP TABLE IF EXISTS test_one_blob_46274_2 CASCADE');
 $db->query('CREATE TABLE test_one_blob_46274_2 (id SERIAL NOT NULL, blob1 BYTEA)');
 
 $stmt = $db->prepare("INSERT INTO test_one_blob_46274_2 (blob1) VALUES (:foo)");
@@ -65,9 +64,12 @@ var_dump(fread($x['blob1'], 10));
 
 // NULL
 var_dump($res->fetch());
-
-$db->query('DROP TABLE test_one_blob_46274_2');
-
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->query('DROP TABLE IF EXISTS test_one_blob_46274_2');
 ?>
 --EXPECTF--
 array(2) {

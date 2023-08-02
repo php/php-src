@@ -15,7 +15,6 @@ require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$db->query('DROP TABLE IF EXISTS b49985 CASCADE');
 $db->exec("CREATE TABLE b49985 (a int PRIMARY KEY)");
 
 for ($i = 0; $i < 3; $i++) {
@@ -30,6 +29,12 @@ for ($i = 0; $i < 3; $i++) {
     }
 }
 
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->query('DROP TABLE IF EXISTS b49985 CASCADE');
 ?>
 --EXPECTF--
 bool(true)

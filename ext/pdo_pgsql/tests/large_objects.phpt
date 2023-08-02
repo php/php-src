@@ -16,7 +16,6 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
-$db->query('DROP TABLE IF EXISTS test_large_objects CASCADE');
 $db->exec('CREATE TABLE test_large_objects (blobid integer not null primary key, bloboid OID)');
 
 $db->beginTransaction();
@@ -78,7 +77,12 @@ echo "Fetched!\n";
 /* Now to remove the large object from the database, so it doesn't
  * linger and clutter up the storage */
 $db->pgsqlLOBUnlink($oid);
-
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->exec('DROP TABLE test_large_objects');
 ?>
 --EXPECT--
 Fetching:

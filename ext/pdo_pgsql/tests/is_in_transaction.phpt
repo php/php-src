@@ -16,7 +16,6 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
-$db->query('DROP TABLE IF EXISTS test_is_in_transaction CASCADE');
 $db->exec('CREATE TABLE test_is_in_transaction (a integer not null primary key, b text)');
 
 $db->beginTransaction();
@@ -56,7 +55,12 @@ var_dump($db->inTransaction());
     echo "Exception! at line ", $e->getLine(), "\n";
     var_dump($e->getMessage());
 }
-
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->exec('DROP TABLE test_is_in_transaction');
 ?>
 --EXPECT--
 Test PDO::PGSQL_TRANSACTION_INTRANS
