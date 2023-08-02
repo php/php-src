@@ -21624,16 +21624,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_inc_help
 			}
 		}
 		increment_function(var_ptr);
-		if (UNEXPECTED(EG(exception))) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			/* opcodes are expected to set the result value */
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-			HANDLE_EXCEPTION();
-		}
 	} while (0);
 
+	/* opcodes are expected to set the result value */
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
@@ -21702,16 +21695,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_dec_help
 			}
 		}
 		decrement_function(var_ptr);
-		if (UNEXPECTED(EG(exception))) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			/* opcodes are expected to set the result value */
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-			HANDLE_EXCEPTION();
-		}
 	} while (0);
 
+	/* opcodes are expected to set the result value */
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
@@ -39009,16 +38995,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_inc_help
 			}
 		}
 		increment_function(var_ptr);
-		if (UNEXPECTED(EG(exception))) {
-
-			/* opcodes are expected to set the result value */
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-			HANDLE_EXCEPTION();
-		}
 	} while (0);
 
+	/* opcodes are expected to set the result value */
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
@@ -39086,16 +39065,9 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_dec_help
 			}
 		}
 		decrement_function(var_ptr);
-		if (UNEXPECTED(EG(exception))) {
-
-			/* opcodes are expected to set the result value */
-			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-			HANDLE_EXCEPTION();
-		}
 	} while (0);
 
+	/* opcodes are expected to set the result value */
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
