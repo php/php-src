@@ -12,37 +12,37 @@ try {
     $x++;
 } catch (\Exception $e) {
     echo $e->getMessage(), PHP_EOL;
-    if (!isset($x)) { echo("UNDEF\n"); } else { var_dump($x); }
+    if (!isset($x) && !@is_null($x)) { echo("UNDEF\n"); } else { var_dump($x); }
 }
 unset($x);
 try {
     $x--;
 } catch (\Exception $e) {
     echo $e->getMessage(), PHP_EOL;
-    if (!isset($x)) { echo("UNDEF\n"); } else { var_dump($x); }
+    if (!isset($x) && !@is_null($x)) { echo("UNDEF\n"); } else { var_dump($x); }
 }
 unset($x);
 try {
     ++$x;
 } catch (\Exception $e) {
     echo $e->getMessage(), PHP_EOL;
-    if (!isset($x)) { echo("UNDEF\n"); } else { var_dump($x); }
+    if (!isset($x) && !@is_null($x)) { echo("UNDEF\n"); } else { var_dump($x); }
 }
 unset($x);
 try {
     --$x;
 } catch (\Exception $e) {
     echo $e->getMessage(), PHP_EOL;
-    if (!isset($x)) { echo("UNDEF\n"); } else { var_dump($x); }
+    if (!isset($x) && !@is_null($x)) { echo("UNDEF\n"); } else { var_dump($x); }
 }
 unset($x);
 ?>
 --EXPECT--
 Undefined variable $x
-UNDEF
+NULL
 Undefined variable $x
-UNDEF
+NULL
 Undefined variable $x
-UNDEF
+NULL
 Undefined variable $x
-UNDEF
+NULL
