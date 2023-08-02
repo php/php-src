@@ -789,8 +789,8 @@ static bool php_pcntl_process_user_signal_infos(
 			return false;
 		}
 		/* Signals are positive integers */
-		if (tmp < 0 || tmp > INT_MAX) {
-			zend_argument_value_error(1, "signals must be between 0 and %d", INT_MAX);
+		if (tmp < 1 || tmp >= PCNTL_G(num_signals)) {
+			zend_argument_value_error(1, "signals must be between 1 and %d", PCNTL_G(num_signals));
 			return false;
 		}
 
@@ -831,8 +831,7 @@ PHP_FUNCTION(pcntl_sigwaitinfo)
 	if (signal_no == -1 && errno != EAGAIN) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
-		// TODO BC Break, as -1 used to be returned?
-		// RETURN_FALSE;
+		RETURN_FALSE;
 	}
 
 	/* sigwaitinfo can return 0 on success on some platforms, e.g. NetBSD */

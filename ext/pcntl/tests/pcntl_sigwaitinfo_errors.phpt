@@ -18,6 +18,12 @@ try {
 }
 
 try {
+    $signals = [0];
+    $signal_no = pcntl_sigwaitinfo($signals, $signal_infos);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+try {
     $signals = [-1];
     $signal_no = pcntl_sigwaitinfo($signals, $signal_infos);
 } catch (\Throwable $e) {
@@ -32,16 +38,16 @@ try {
 }
 
 /* Unlikely valid signal */
-$signals = [2**10];
-$signal_no = pcntl_sigwaitinfo($signals, $signal_infos);
-var_dump($signal_no);
-var_dump($signal_infos);
+try {
+    $signals = [2**10];
+    $signal_no = pcntl_sigwaitinfo($signals, $signal_infos);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 ?>
 --EXPECTF--
 ValueError: pcntl_sigwaitinfo(): Argument #1 ($signals) cannot be empty
-ValueError: pcntl_sigwaitinfo(): Argument #1 ($signals) signals must be between 0 and %d
+ValueError: pcntl_sigwaitinfo(): Argument #1 ($signals) signals must be between 1 and %d
+ValueError: pcntl_sigwaitinfo(): Argument #1 ($signals) signals must be between 1 and %d
 TypeError: pcntl_sigwaitinfo(): Argument #1 ($signals) signals must be of type int, string given
-
-Warning: pcntl_sigwaitinfo(): Invalid argument in %s on line %d
-bool(false)
-NULL
+ValueError: pcntl_sigwaitinfo(): Argument #1 ($signals) signals must be between 1 and %d
