@@ -2605,11 +2605,13 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 			/* Stack must be 16 byte aligned */
 			/* TODO: select stack size ??? */
 #if defined(IR_TARGET_AARCH64)
-			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 16;
+			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 16; /* 10 saved registers and 6 spill slots (8 bytes) */
 #elif defined(_WIN64)
-			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 15;
-#else
-			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 7;
+			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 11; /* 8 saved registers and 3 spill slots (8 bytes) */
+#elif defined(IR_TARGET_X86_64)
+			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 9;  /* 6 saved registers and 3 spill slots (8 bytes) */
+#else /* IR_TARGET_x86 */
+			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 11; /* 4 saved registers and 7 spill slots (4 bytes) */
 #endif
 			if (GCC_GLOBAL_REGS) {
 				jit->ctx.fixed_save_regset = IR_REGSET_PRESERVED & ~((1<<ZREG_FP) | (1<<ZREG_IP));
@@ -2619,6 +2621,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 //				jit->ctx.fixed_save_regset &= 0xffff; // TODO: don't save FP registers ???
 //#endif
 			}
+			jit->ctx.fixed_call_stack_size = 16;
 		} else {
 #ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
 			jit->ctx.fixed_stack_red_zone = ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE;
@@ -2629,7 +2632,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 			jit->ctx.flags |= IR_MERGE_EMPTY_ENTRIES;
 #else
 			jit->ctx.fixed_stack_red_zone = 0;
-			jit->ctx.fixed_stack_frame_size = 16;
+			jit->ctx.fixed_stack_frame_size = 32; /* 4 spill slots (8 bytes) or 8 spill slots (4 bytes) */
 			jit->ctx.fixed_call_stack_size = 16;
 #endif
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)

@@ -2339,7 +2339,7 @@ function gen_vm_opcodes_header(
     $str .= "\n";
     $str .= "#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) && !defined(__SANITIZE_ADDRESS__)\n";
     $str .= "# if ((defined(i386) && !defined(__PIC__)) || defined(__x86_64__) || defined(_M_X64))\n";
-    $str .= "#  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 32\n";
+    $str .= "#  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 48\n";
     $str .= "# endif\n";
     $str .= "#endif\n";
     $str .= "\n";
