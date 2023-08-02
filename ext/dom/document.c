@@ -1063,7 +1063,7 @@ PHP_METHOD(DOMDocument, adoptNode)
 		|| nodep->type == XML_DTD_NODE
 		|| nodep->type == XML_ENTITY_NODE
 		|| nodep->type == XML_NOTATION_NODE)) {
-		php_dom_throw_error(NOT_SUPPORTED_ERR, true);
+		php_dom_throw_error(NOT_SUPPORTED_ERR, dom_get_strict_error(dom_object_nodep->document));
 		RETURN_THROWS();
 	}
 
