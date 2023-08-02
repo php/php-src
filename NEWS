@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - CLI:
   . Fixed bug GH-11716 (cli server crashes on SIGINT when compiled with
     ZEND_RC_DEBUG=1). (nielsdos)
+  . Fixed bug GH-10964 (Improve man page about the built-in server).
+    (Alexandre Daubois)
 
 - DOM:
   . Fix DOMEntity field getter bugs. (nielsdos)
