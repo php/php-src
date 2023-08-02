@@ -661,20 +661,21 @@ static timelib_long timelib_get_month(const char **ptr)
 
 static void timelib_eat_spaces(const char **ptr)
 {
-	do {
+	/* Repetition is safe because it will fail as soon as a '\0' is encountered. */
+	again: {
 		if (**ptr == ' ' || **ptr == '\t') {
 			++*ptr;
-			continue;
+			goto again;
 		}
 		if ((*ptr)[0] == '\xe2' && (*ptr)[1] == '\x80' && (*ptr)[2] == '\xaf') { // NNBSP
 			*ptr += 3;
-			continue;
+			goto again;
 		}
 		if ((*ptr)[0] == '\xc2' && (*ptr)[1] == '\xa0') { // NBSP
 			*ptr += 2;
-			continue;
+			goto again;
 		}
-	} while (false);
+	}
 }
 
 static void timelib_eat_until_separator(const char **ptr)
