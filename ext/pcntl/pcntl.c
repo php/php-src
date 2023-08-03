@@ -790,7 +790,8 @@ static bool php_pcntl_process_user_signal_infos(
 		}
 		/* Signals are positive integers */
 		if (tmp < 1 || tmp >= PCNTL_G(num_signals)) {
-			zend_argument_value_error(1, "signals must be between 1 and %d", PCNTL_G(num_signals));
+			/* PCNTL_G(num_signals) stores +1 from the last valid signal */
+			zend_argument_value_error(1, "signals must be between 1 and %d", PCNTL_G(num_signals)-1);
 			return false;
 		}
 
@@ -828,7 +829,8 @@ PHP_FUNCTION(pcntl_sigwaitinfo)
 	errno = 0;
 	siginfo_t siginfo;
 	int signal_no = sigwaitinfo(&set, &siginfo);
-	if (signal_no == -1 && errno != EAGAIN) {
+	/* sigwaitinfo() never sets errno to EAGAIN according to POSIX */
+	if (signal_no == -1) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
@@ -853,7 +855,6 @@ PHP_FUNCTION(pcntl_sigtimedwait)
 	zval *user_siginfo = NULL;
 	zend_long tv_sec = 0;
 	zend_long tv_nsec = 0;
-	struct timespec timeout;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_ARRAY_HT(user_set)
@@ -869,17 +870,31 @@ PHP_FUNCTION(pcntl_sigtimedwait)
 	if (!status) {
 		RETURN_FALSE;
 	}
+	if (tv_sec < 0) {
+		zend_argument_value_error(3, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+	/* Nanosecond between 0 and 1e9 */
+	if (tv_nsec < 0 || tv_nsec > 1000000000) {
+		zend_argument_value_error(4, "must be between 0 and 1e9");
+		RETURN_THROWS();
+	}
+	if (UNEXPECTED(tv_sec == 0 && tv_nsec == 0)) {
+		zend_value_error("pcntl_sigtimedwait(): At least one of argument #3 ($seconds) or argument #4 ($nanoseconds) must be greater than 0");
+		RETURN_THROWS();
+	}
 
 	errno = 0;
 	siginfo_t siginfo;
+	struct timespec timeout;
 	timeout.tv_sec  = (time_t) tv_sec;
 	timeout.tv_nsec = tv_nsec;
 	int signal_no = sigtimedwait(&set, &siginfo, &timeout);
+	// TODO Drop check for EAGAIN as it will return -1?
 	if (signal_no == -1 && errno != EAGAIN) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
-		// TODO BC Break, as -1 used to be returned?
-		// RETURN_FALSE;
+		RETURN_FALSE;
 	}
 
 	/* sigtimedwait can return 0 on success on some platforms, e.g. NetBSD */

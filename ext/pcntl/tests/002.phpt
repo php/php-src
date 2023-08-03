@@ -64,12 +64,6 @@ if ($pid == -1) {
         echo "bool(false)\n";
     }
     var_dump(pcntl_sigprocmask(SIG_SETMASK, array(0)));
-
-    echo "sigwaitinfo with invalid arguments\n";
-    var_dump(pcntl_sigwaitinfo(array(0)));
-
-    echo "sigtimedwait with invalid arguments\n";
-    var_dump(pcntl_sigtimedwait(array(SIGTERM), $signo, PHP_INT_MAX, PHP_INT_MAX));
 } else {
     $siginfo = NULL;
     pcntl_sigtimedwait(array(SIGINT), $siginfo, 3600, 0);
@@ -99,9 +93,3 @@ Error triggered
 bool(false)
 Error triggered
 bool(false)
-sigwaitinfo with invalid arguments
-Error triggered
-bool(false)
-sigtimedwait with invalid arguments
-Error triggered
-int(-1)

@@ -13,6 +13,7 @@ try {
     /* This used to return -1 prior to PHP 8.3.0 */
     $signals = [];
     $signal_no = pcntl_sigwaitinfo($signals, $signal_infos);
+    var_dump($signal_no);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
@@ -20,12 +21,14 @@ try {
 try {
     $signals = [0];
     $signal_no = pcntl_sigwaitinfo($signals, $signal_infos);
+    var_dump($signal_no);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
     $signals = [-1];
     $signal_no = pcntl_sigwaitinfo($signals, $signal_infos);
+    var_dump($signal_no);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
@@ -33,6 +36,7 @@ try {
 try {
     $signals = ["not a signal"];
     $signal_no = pcntl_sigwaitinfo($signals, $signal_infos);
+    var_dump($signal_no);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
@@ -41,6 +45,7 @@ try {
 try {
     $signals = [2**10];
     $signal_no = pcntl_sigwaitinfo($signals, $signal_infos);
+    var_dump($signal_no);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
