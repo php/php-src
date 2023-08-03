@@ -4491,7 +4491,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPE
 			break;
 		}
 
-		retval_ptr = NULL;
+		retval_ptr = zend_get_bad_ptr();
 
 		if (IS_CONST == IS_VAR) {
 			ZEND_ASSERT(retval_ptr != &EG(uninitialized_zval));
@@ -5209,7 +5209,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_
 	SAVE_OPLINE();
 
 	if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
-		array_ref = array_ptr = NULL;
+		array_ref = array_ptr = zend_get_bad_ptr();
 		if (Z_ISREF_P(array_ref)) {
 			array_ptr = Z_REFVAL_P(array_ref);
 		}
@@ -7313,7 +7313,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_C
 	SAVE_OPLINE();
 	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) &&
 	    UNEXPECTED(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
-		expr_ptr = NULL;
+		expr_ptr = zend_get_bad_ptr();
 		if (Z_ISREF_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		} else {
@@ -7670,7 +7670,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CONST_HANDLER
 					}
 				}
 			} else {
-				zval *value_ptr = NULL;
+				zval *value_ptr = zend_get_bad_ptr();
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
@@ -9644,7 +9644,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_T
 	SAVE_OPLINE();
 	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) &&
 	    UNEXPECTED(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
-		expr_ptr = NULL;
+		expr_ptr = zend_get_bad_ptr();
 		if (Z_ISREF_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		} else {
@@ -9951,7 +9951,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_TMPVAR_HANDLE
 					}
 				}
 			} else {
-				zval *value_ptr = NULL;
+				zval *value_ptr = zend_get_bad_ptr();
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
@@ -10567,7 +10567,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_U
 	SAVE_OPLINE();
 	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) &&
 	    UNEXPECTED(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
-		expr_ptr = NULL;
+		expr_ptr = zend_get_bad_ptr();
 		if (Z_ISREF_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		} else {
@@ -10794,7 +10794,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_UNUSED_HANDLE
 					}
 				}
 			} else {
-				zval *value_ptr = NULL;
+				zval *value_ptr = zend_get_bad_ptr();
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
@@ -12021,7 +12021,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_C
 	SAVE_OPLINE();
 	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) &&
 	    UNEXPECTED(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
-		expr_ptr = NULL;
+		expr_ptr = zend_get_bad_ptr();
 		if (Z_ISREF_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		} else {
@@ -12327,7 +12327,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZE
 					}
 				}
 			} else {
-				zval *value_ptr = NULL;
+				zval *value_ptr = zend_get_bad_ptr();
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
@@ -19293,7 +19293,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPEC_TMP_HANDLER
 			break;
 		}
 
-		retval_ptr = NULL;
+		retval_ptr = zend_get_bad_ptr();
 
 		if (IS_TMP_VAR == IS_VAR) {
 			ZEND_ASSERT(retval_ptr != &EG(uninitialized_zval));
@@ -19560,7 +19560,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 	SAVE_OPLINE();
 
 	if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
-		array_ref = array_ptr = NULL;
+		array_ref = array_ptr = zend_get_bad_ptr();
 		if (Z_ISREF_P(array_ref)) {
 			array_ptr = Z_REFVAL_P(array_ref);
 		}
@@ -20042,7 +20042,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CON
 	SAVE_OPLINE();
 	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) &&
 	    UNEXPECTED(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
-		expr_ptr = NULL;
+		expr_ptr = zend_get_bad_ptr();
 		if (Z_ISREF_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		} else {
@@ -20186,7 +20186,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CONST_HANDLER(Z
 					}
 				}
 			} else {
-				zval *value_ptr = NULL;
+				zval *value_ptr = zend_get_bad_ptr();
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
@@ -20486,7 +20486,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP
 	SAVE_OPLINE();
 	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) &&
 	    UNEXPECTED(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
-		expr_ptr = NULL;
+		expr_ptr = zend_get_bad_ptr();
 		if (Z_ISREF_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		} else {
@@ -20630,7 +20630,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_TMPVAR_HANDLER(
 					}
 				}
 			} else {
-				zval *value_ptr = NULL;
+				zval *value_ptr = zend_get_bad_ptr();
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
@@ -20947,7 +20947,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNU
 	SAVE_OPLINE();
 	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) &&
 	    UNEXPECTED(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
-		expr_ptr = NULL;
+		expr_ptr = zend_get_bad_ptr();
 		if (Z_ISREF_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		} else {
@@ -21091,7 +21091,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(
 					}
 				}
 			} else {
-				zval *value_ptr = NULL;
+				zval *value_ptr = zend_get_bad_ptr();
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
@@ -21351,7 +21351,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_
 	SAVE_OPLINE();
 	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) &&
 	    UNEXPECTED(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
-		expr_ptr = NULL;
+		expr_ptr = zend_get_bad_ptr();
 		if (Z_ISREF_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		} else {
@@ -21495,7 +21495,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND
 					}
 				}
 			} else {
-				zval *value_ptr = NULL;
+				zval *value_ptr = zend_get_bad_ptr();
 
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
