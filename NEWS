@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.0.30
+?? ??? ????, PHP 8.0.31
+
+
+
+03 Aug 2023, PHP 8.0.30
 
 - Libxml:
   . Fixed bug GHSA-3qrf-m4j2-pcrr (Security issue with external entity loading
@@ -22,7 +26,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #81744 (Password_verify() always return true with some hash).
     (CVE-2023-0567). (Tim Düsterhus)
-  . Fixed bug #81746 (1-byte array overrun in common path resolve code). 
+  . Fixed bug #81746 (1-byte array overrun in common path resolve code).
     (CVE-2023-0568). (Niels Dossche)
 
 - SAPI:
@@ -32,7 +36,7 @@ PHP                                                                        NEWS
 05 Jan 2023, PHP 8.0.27
 
 - PDO/SQLite:
-  . Fixed bug #81740 (PDO::quote() may return unquoted string). (CVE-2022-31631) 
+  . Fixed bug #81740 (PDO::quote() may return unquoted string). (CVE-2022-31631)
     (cmb)
 
 24 Nov 2022, PHP 8.0.26
