@@ -674,7 +674,8 @@ static void timelib_eat_spaces(const char **ptr)
 			*ptr += 2;
 			continue;
 		}
-	} while (false);
+		break;
+	} while (true);
 }
 
 static void timelib_eat_until_separator(const char **ptr)

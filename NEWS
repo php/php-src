@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-11716 (cli server crashes on SIGINT when compiled with
     ZEND_RC_DEBUG=1). (nielsdos)
 
+- Date:
+  . Fixed bug GH-11854 (DateTime:createFromFormat stopped parsing datetime with
+    extra space). (nielsdos, Derick)
+
 - DOM:
   . Fix DOMEntity field getter bugs. (nielsdos)
   . Fix incorrect attribute existence check in DOMElement::setAttributeNodeNS.
