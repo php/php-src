@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - CLI:
   . Fixed bug GH-11716 (cli server crashes on SIGINT when compiled with
     ZEND_RC_DEBUG=1). (nielsdos)
+  . Fixed bug GH-10964 (Improve man page about the built-in server).
+    (Alexandre Daubois)
 
 - DOM:
   . Fix DOMEntity field getter bugs. (nielsdos)
@@ -26,6 +28,9 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed bug GH-11440 (authentication to a sha256_password account fails over
     SSL). (nielsdos)
+  . Fixed bug GH-11438 (mysqlnd fails to authenticate with sha256_password
+    accounts using passwords longer than 19 characters).
+    (nielsdos, Kamil Tekiela)
 
 - Opcache:
   . Fixed bug GH-11715 (opcache.interned_strings_buffer either has no effect or
