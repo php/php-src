@@ -1,5 +1,5 @@
 --TEST--
-GH-11498 (SIGCHLD is not always returned from proc_open)
+Waiting on SIGCHLD with a pcntl_wait() loop
 --EXTENSIONS--
 pcntl
 --SKIPIF--
@@ -14,8 +14,10 @@ $processes = [];
 
 pcntl_async_signals(true);
 pcntl_signal(SIGCHLD, function($sig, $info) use (&$processes) {
-    echo "SIGCHLD\n";
-    unset($processes[$info['pid']]);
+    while (($pid = pcntl_wait($status, WUNTRACED | WNOHANG)) > 0) {
+        echo "SIGCHLD\n";
+        unset($processes[$pid]);
+    }
 }, false);
 
 for ($i = 0; $i <= 5; $i++) {

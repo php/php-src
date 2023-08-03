@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Avoid adding an unnecessary read-lock when loading script from shm if
     restart is in progress. (mikhainin)
 
+- PCNTL:
+  . Revert behaviour of receiving SIGCHLD signals back to the behaviour
+    before 8.1.22. (nielsdos)
+
 - Standard:
   . Prevent int overflow on $decimals in number_format. (Marc Bennewitz)
 
