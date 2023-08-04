@@ -96,6 +96,16 @@ PHPAPI size_t core_globals_offset;
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
+PHPAPI const char *php_version(void)
+{
+	return PHP_VERSION;
+}
+
+PHPAPI unsigned int php_version_id(void)
+{
+	return PHP_VERSION_ID;
+}
+
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetFacility)
 {
