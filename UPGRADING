@@ -317,6 +317,10 @@ PHP 8.3 UPGRADE NOTES
     significant digits before the decimal point. Previously negative $decimals
     got silently ignored and the number got rounded to zero decimal places.
 
+- Calendar
+  . easter_date() now supports years from 1970 to 2,000,000,000 on 64-bit systems,
+    previously it only supported years in the range from 1970 to 2037.
+
 ========================================
 6. New Functions
 ========================================
