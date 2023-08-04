@@ -21,9 +21,10 @@ try {
 } catch (Exception $e) {
 }
 
-$db->query('CREATE TABLE test_one_blob (id SERIAL NOT NULL, blob1 BYTEA)');
+$db->query('DROP TABLE IF EXISTS test_one_blob_46274_1 CASCADE');
+$db->query('CREATE TABLE test_one_blob_46274_1 (id SERIAL NOT NULL, blob1 BYTEA)');
 
-$stmt = $db->prepare("INSERT INTO test_one_blob (blob1) VALUES (:foo)");
+$stmt = $db->prepare("INSERT INTO test_one_blob_46274_1 (blob1) VALUES (:foo)");
 
 $data = 'foo';
 $blob = fopen('php://memory', 'a');
@@ -49,7 +50,7 @@ $blob = NULL;
 $stmt->bindparam(':foo', $blob, PDO::PARAM_LOB);
 $stmt->execute();
 
-$res = $db->query("SELECT blob1 from test_one_blob");
+$res = $db->query("SELECT blob1 from test_one_blob_46274_1");
 // Resource
 var_dump($res->fetch());
 
@@ -62,7 +63,7 @@ var_dump($res->fetch());
 // NULL
 var_dump($res->fetch());
 
-$db->query('DROP TABLE test_one_blob');
+$db->query('DROP TABLE test_one_blob_46274_1');
 
 ?>
 --EXPECT--
