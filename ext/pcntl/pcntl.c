@@ -705,70 +705,15 @@ PHP_FUNCTION(pcntl_signal_dispatch)
 }
 /* }}} */
 
-#ifdef HAVE_SIGPROCMASK
-/* {{{ Examine and change blocked signals */
-PHP_FUNCTION(pcntl_sigprocmask)
-{
-	zend_long          how, signo;
-	zval         *user_set, *user_oldset = NULL, *user_signo;
-	sigset_t      set, oldset;
-
-	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_LONG(how)
-		Z_PARAM_ARRAY(user_set)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(user_oldset)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (sigemptyset(&set) != 0 || sigemptyset(&oldset) != 0) {
-		PCNTL_G(last_error) = errno;
-		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
-		RETURN_FALSE;
-	}
-
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(user_set), user_signo) {
-		signo = zval_get_long(user_signo);
-		if (sigaddset(&set, signo) != 0) {
-			PCNTL_G(last_error) = errno;
-			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
-			RETURN_FALSE;
-		}
-	} ZEND_HASH_FOREACH_END();
-
-	if (sigprocmask(how, &set, &oldset) != 0) {
-		PCNTL_G(last_error) = errno;
-		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
-		RETURN_FALSE;
-	}
-
-	if (user_oldset != NULL) {
-		user_oldset = zend_try_array_init(user_oldset);
-		if (!user_oldset) {
-			RETURN_THROWS();
-		}
-
-		for (signo = 1; signo < PCNTL_G(num_signals); ++signo) {
-			if (sigismember(&oldset, signo) != 1) {
-				continue;
-			}
-			add_next_index_long(user_oldset, signo);
-		}
-	}
-
-	RETURN_TRUE;
-}
-/* }}} */
-#endif
-
-#ifdef HAVE_STRUCT_SIGINFO_T
-# if defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT)
-
-static bool php_pcntl_process_user_signal_infos(
+/* Common helper function for these 3 wrapper functions */
+#if defined(HAVE_SIGWAITINFO) || defined(HAVE_SIGTIMEDWAIT) || defined(HAVE_SIGPROCMASK)
+static bool php_pcntl_set_user_signal_infos(
 	/* const */ HashTable *const user_signals,
-	sigset_t *const set
+	sigset_t *const set,
+	size_t arg_num
 ) {
 	if (zend_hash_num_elements(user_signals) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_value_error(arg_num, "cannot be empty");
 		return false;
 	}
 
@@ -785,13 +730,13 @@ static bool php_pcntl_process_user_signal_infos(
 		zend_long tmp = zval_try_get_long(user_signal_no, &failed);
 
 		if (failed) {
-			zend_argument_type_error(1, "signals must be of type int, %s given", zend_zval_value_name(user_signal_no));
+			zend_argument_type_error(arg_num, "signals must be of type int, %s given", zend_zval_value_name(user_signal_no));
 			return false;
 		}
 		/* Signals are positive integers */
 		if (tmp < 1 || tmp >= PCNTL_G(num_signals)) {
 			/* PCNTL_G(num_signals) stores +1 from the last valid signal */
-			zend_argument_value_error(1, "signals must be between 1 and %d", PCNTL_G(num_signals)-1);
+			zend_argument_value_error(arg_num, "signals must be between 1 and %d", PCNTL_G(num_signals)-1);
 			return false;
 		}
 
@@ -805,6 +750,81 @@ static bool php_pcntl_process_user_signal_infos(
 	} ZEND_HASH_FOREACH_END();
 	return true;
 }
+#endif
+
+#ifdef HAVE_SIGPROCMASK
+/* {{{ Examine and change blocked signals */
+PHP_FUNCTION(pcntl_sigprocmask)
+{
+	zend_long how;
+	HashTable *user_set;
+	/* Optional by-ref out-param array of old signals */
+	zval *user_old_set = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_LONG(how)
+		Z_PARAM_ARRAY_HT(user_set)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(user_old_set)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (how != SIG_BLOCK && how != SIG_UNBLOCK && how != SIG_SETMASK) {
+		zend_argument_value_error(1, "must be one of SIG_BLOCK, SIG_UNBLOCK, or SIG_SETMASK");
+		RETURN_THROWS();
+	}
+
+	errno = 0;
+	sigset_t old_set;
+	if (sigemptyset(&old_set) != 0) {
+		PCNTL_G(last_error) = errno;
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+		RETURN_FALSE;
+	}
+
+	sigset_t set;
+	/* Can set an empty array of signals for SIG_SETMASK */
+	if (how == SIG_SETMASK && zend_hash_num_elements(user_set) == 0) {
+		if (sigemptyset(&set) != 0) {
+			PCNTL_G(last_error) = errno;
+			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+			RETURN_FALSE;
+		}
+		goto skip_setting_user_signals;
+	}
+	bool status = php_pcntl_set_user_signal_infos(user_set, &set, 2);
+	/* Some error occurred */
+	if (!status) {
+		RETURN_FALSE;
+	}
+	skip_setting_user_signals:
+
+	if (sigprocmask(how, &set, &old_set) != 0) {
+		PCNTL_G(last_error) = errno;
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+		RETURN_FALSE;
+	}
+
+	if (user_old_set != NULL) {
+		user_old_set = zend_try_array_init(user_old_set);
+		if (!user_old_set) {
+			RETURN_THROWS();
+		}
+
+		for (int signal_no = 1; signal_no < PCNTL_G(num_signals); ++signal_no) {
+			if (sigismember(&old_set, signal_no) != 1) {
+				continue;
+			}
+			add_next_index_long(user_old_set, signal_no);
+		}
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
+
+#ifdef HAVE_STRUCT_SIGINFO_T
+# ifdef HAVE_SIGWAITINFO
 
 /* {{{ Synchronously wait for queued signals */
 PHP_FUNCTION(pcntl_sigwaitinfo)
@@ -820,7 +840,7 @@ PHP_FUNCTION(pcntl_sigwaitinfo)
 	ZEND_PARSE_PARAMETERS_END();
 
 	sigset_t set;
-	bool status = php_pcntl_process_user_signal_infos(user_set, &set);
+	bool status = php_pcntl_set_user_signal_infos(user_set, &set, 1);
 	/* Some error occurred */
 	if (!status) {
 		RETURN_FALSE;
@@ -846,7 +866,8 @@ PHP_FUNCTION(pcntl_sigwaitinfo)
 	RETURN_LONG(signal_no);
 }
 /* }}} */
-
+# endif
+# ifdef HAVE_SIGTIMEDWAIT
 /* {{{ Wait for queued signals */
 PHP_FUNCTION(pcntl_sigtimedwait)
 {
@@ -865,7 +886,7 @@ PHP_FUNCTION(pcntl_sigtimedwait)
 	ZEND_PARSE_PARAMETERS_END();
 
 	sigset_t set;
-	bool status = php_pcntl_process_user_signal_infos(user_set, &set);
+	bool status = php_pcntl_set_user_signal_infos(user_set, &set, 1);
 	/* Some error occurred */
 	if (!status) {
 		RETURN_FALSE;

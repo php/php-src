@@ -5,7 +5,7 @@ pcntl
 posix
 --SKIPIF--
 <?php
-if (!function_exists('pcntl_sigwaitinfo') or !function_exists('pcntl_sigtimedwait')) die('skip required functionality is not available');
+if (!function_exists("pcntl_sigprocmask")) die("skip pcntl_sigprocmask() not available");
 ?>
 --FILE--
 <?php
