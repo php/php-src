@@ -18,10 +18,9 @@ $db = MySQLPDOTest::factory();
         if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[002] Unable to switch to emulated prepared statements, test will fail\n");
 
-        $db->exec('DROP TABLE IF EXISTS test');
-        $db->exec(sprintf('CREATE TABLE test(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
+        $db->exec(sprintf('CREATE TABLE test_prepare_emulated_anonymous(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
 
-        $stmt = $db->prepare("INSERT INTO test(id, label) VALUES(1, '?')");
+        $stmt = $db->prepare("INSERT INTO test_prepare_emulated_anonymous(id, label) VALUES(1, '?')");
         // you can bind as many values as you want no matter if they can be replaced or not
         $stmt->execute(array('first row'));
         if ('00000' !== $stmt->errorCode())
@@ -29,7 +28,7 @@ $db = MySQLPDOTest::factory();
                 var_export($stmt->errorCode(), true),
                 var_export($stmt->errorInfo(), true));
 
-        $stmt = $db->prepare('SELECT id, label FROM test');
+        $stmt = $db->prepare('SELECT id, label FROM test_prepare_emulated_anonymous');
         $stmt->execute();
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
@@ -39,8 +38,8 @@ $db = MySQLPDOTest::factory();
         if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[004] Unable to switch off emulated prepared statements, test will fail\n");
 
-        $db->exec('DELETE FROM test');
-        $stmt = $db->prepare("INSERT INTO test(id, label) VALUES(1, '?')");
+        $db->exec('DELETE FROM test_prepare_emulated_anonymous');
+        $stmt = $db->prepare("INSERT INTO test_prepare_emulated_anonymous(id, label) VALUES(1, '?')");
         // you can bind as many values as you want no matter if they can be replaced or not
         $stmt->execute(array('first row'));
         if ('00000' !== $stmt->errorCode())
@@ -48,7 +47,7 @@ $db = MySQLPDOTest::factory();
                 var_export($stmt->errorCode(), true),
                 var_export($stmt->errorInfo(), true));
 
-        $stmt = $db->prepare('SELECT id, label FROM test');
+        $stmt = $db->prepare('SELECT id, label FROM test_prepare_emulated_anonymous');
         $stmt->execute();
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
@@ -63,7 +62,7 @@ $db = MySQLPDOTest::factory();
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS test_prepare_emulated_anonymous');
 ?>
 --EXPECTF--
 Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d

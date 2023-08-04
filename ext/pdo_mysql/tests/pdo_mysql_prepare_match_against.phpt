@@ -14,19 +14,18 @@ MySQLPDOTest::skip();
 
     try {
 
-        $db->exec('DROP TABLE IF EXISTS test');
-        $db->exec('CREATE TABLE test(id INT, label CHAR(255)) ENGINE=MyISAM');
-        $db->exec('CREATE FULLTEXT INDEX idx1 ON test(label)');
+        $db->exec('CREATE TABLE test_prepare_match_against(id INT, label CHAR(255)) ENGINE=MyISAM');
+        $db->exec('CREATE FULLTEXT INDEX idx1 ON test_prepare_match_against(label)');
 
-        $stmt = $db->prepare('SELECT id, label FROM test WHERE MATCH label AGAINST (:placeholder)');
+        $stmt = $db->prepare('SELECT id, label FROM test_prepare_match_against WHERE MATCH label AGAINST (:placeholder)');
         $stmt->execute(array(':placeholder' => 'row'));
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-        $stmt = $db->prepare('SELECT id, label FROM test WHERE MATCH label AGAINST (:placeholder)');
+        $stmt = $db->prepare('SELECT id, label FROM test_prepare_match_against WHERE MATCH label AGAINST (:placeholder)');
         $stmt->execute(array('placeholder' => 'row'));
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-        $stmt = $db->prepare('SELECT id, label FROM test WHERE MATCH label AGAINST (?)');
+        $stmt = $db->prepare('SELECT id, label FROM test_prepare_match_against WHERE MATCH label AGAINST (?)');
         $stmt->execute(array('row'));
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
@@ -43,7 +42,7 @@ MySQLPDOTest::skip();
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS test_prepare_match_against');
 ?>
 --EXPECT--
 array(0) {

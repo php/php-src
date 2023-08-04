@@ -15,15 +15,14 @@ $db = MySQLPDOTest::factory();
 
     try {
 
-        $db->exec('DROP TABLE IF EXISTS test');
-        $db->exec(sprintf('CREATE TABLE test(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
+        $db->exec(sprintf('CREATE TABLE test_prepare_native_named_placeholder(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
 
         $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
         if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn off emulated prepared statements\n");
 
         // INSERT a single row
-        $stmt = $db->prepare("INSERT INTO test(id, label) VALUES (100, ':placeholder')");
+        $stmt = $db->prepare("INSERT INTO test_prepare_native_named_placeholder(id, label) VALUES (100, ':placeholder')");
 
         // Yes, there is no placeholder to bind to and named placeholder
         // do not work with MySQL native PS, but lets see what happens!
@@ -36,7 +35,7 @@ $db = MySQLPDOTest::factory();
                 var_export($stmt->errorInfo(), true));
 
         // Ok, what has happened: anything inserted into the DB?
-        $stmt = $db->prepare('SELECT id, label FROM test');
+        $stmt = $db->prepare('SELECT id, label FROM test_prepare_native_named_placeholder');
         $stmt->execute();
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
@@ -46,7 +45,7 @@ $db = MySQLPDOTest::factory();
             printf("[004] Unable to turn on emulated prepared statements\n");
 
         // Note that the "named placeholder" is enclosed by double quotes.
-        $stmt = $db->prepare("INSERT INTO test(id, label) VALUES(101, ':placeholder')");
+        $stmt = $db->prepare("INSERT INTO test_prepare_native_named_placeholder(id, label) VALUES(101, ':placeholder')");
         // No replacement shall be made
         $stmt->execute(array(':placeholder' => 'row1'));
         // Again, I'd like to see an error message
@@ -56,7 +55,7 @@ $db = MySQLPDOTest::factory();
                 var_export($stmt->errorInfo(), true));
 
         // Now, what do we have in the DB?
-        $stmt = $db->prepare('SELECT id, label FROM test ORDER BY id');
+        $stmt = $db->prepare('SELECT id, label FROM test_prepare_native_named_placeholder ORDER BY id');
         $stmt->execute();
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
@@ -71,7 +70,7 @@ $db = MySQLPDOTest::factory();
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS test_prepare_native_named_placeholder');
 ?>
 --EXPECTF--
 Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number in %s on line %d

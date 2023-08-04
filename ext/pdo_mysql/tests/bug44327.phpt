@@ -24,15 +24,13 @@ $db = MySQLPDOTest::factory();
 
     print "----------------------------------\n";
 
-    @$db->exec("DROP TABLE test");
-    $db->exec("CREATE TABLE test (id INT)");
-    $db->exec("INSERT INTO test(id) VALUES (1)");
-    $stmt = $db->prepare("SELECT id FROM test");
+    $db->exec("CREATE TABLE test_44327 (id INT)");
+    $db->exec("INSERT INTO test_44327(id) VALUES (1)");
+    $stmt = $db->prepare("SELECT id FROM test_44327");
     $stmt->execute();
     $row = $stmt->fetch(PDO::FETCH_LAZY);
     var_dump($row);
     var_dump($row->queryString);
-    @$db->exec("DROP TABLE test");
 
     print "----------------------------------\n";
 
@@ -41,6 +39,12 @@ $db = MySQLPDOTest::factory();
     $row = $stmt->fetch();
     var_dump($row->queryString);
 
+?>
+--CLEAN--
+<?php
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+$db = MySQLPDOTest::factory();
+$db->exec("DROP TABLE test_44327");
 ?>
 --EXPECTF--
 object(PDORow)#%d (2) {
@@ -55,11 +59,11 @@ string(17) "SELECT 1 AS "one""
 ----------------------------------
 object(PDORow)#5 (2) {
   ["queryString"]=>
-  string(19) "SELECT id FROM test"
+  string(25) "SELECT id FROM test_44327"
   ["id"]=>
   string(1) "1"
 }
-string(19) "SELECT id FROM test"
+string(25) "SELECT id FROM test_44327"
 ----------------------------------
 
 Warning: Attempt to read property "queryString" on false in %s on line %d

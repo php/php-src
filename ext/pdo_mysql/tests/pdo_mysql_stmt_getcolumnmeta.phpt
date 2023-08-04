@@ -19,11 +19,13 @@ if ($version < 51)
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-MySQLPDOTest::createTestTable($db);
+
+$db->exec('CREATE TABLE test_stmt_getcolumnmeta(id INT, label CHAR(1), PRIMARY KEY(id)) ENGINE=InnoDB');
+$db->exec("INSERT INTO test_stmt_getcolumnmeta(id, label) VALUES (1, 'a'), (2, 'b'), (3, 'c'), (4, 'd'), (5, 'e'), (6, 'f')");
 
 try {
 
-    $stmt = $db->prepare('SELECT id FROM test ORDER BY id ASC');
+    $stmt = $db->prepare('SELECT id FROM test_stmt_getcolumnmeta ORDER BY id ASC');
 
     // execute() has not been called yet
     // NOTE: no warning
@@ -46,7 +48,7 @@ try {
         if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[007] Unable to turn off emulated prepared statements\n");
 
-    $stmt = $db->prepare('SELECT id FROM test ORDER BY id ASC');
+    $stmt = $db->prepare('SELECT id FROM test_stmt_getcolumnmeta ORDER BY id ASC');
     $stmt->execute();
     $native = $stmt->getColumnMeta(0);
     if (count($native) == 0) {
@@ -61,21 +63,21 @@ try {
 
     function test_meta(&$db, $offset, $sql_type, $value, $native_type, $pdo_type) {
 
-        $db->exec('DROP TABLE IF EXISTS test');
+        $db->exec('DROP TABLE IF EXISTS test_stmt_getcolumnmeta');
 
-        $sql = sprintf('CREATE TABLE test(id INT, label %s) ENGINE=%s', $sql_type, MySQLPDOTest::getTableEngine());
+        $sql = sprintf('CREATE TABLE test_stmt_getcolumnmeta(id INT, label %s) ENGINE=%s', $sql_type, MySQLPDOTest::getTableEngine());
         if (!($stmt = @$db->prepare($sql)) || (!@$stmt->execute())) {
             // Some engines and/or MySQL server versions might not support the data type
             return true;
         }
 
-        if (!$db->exec(sprintf("INSERT INTO test(id, label) VALUES (1, '%s')", $value))) {
+        if (!$db->exec(sprintf("INSERT INTO test_stmt_getcolumnmeta(id, label) VALUES (1, '%s')", $value))) {
             printf("[%03d] + 1] Insert failed, %d - %s\n", $offset,
                 $db->errorCode(), var_export($db->errorInfo(), true));
             return false;
         }
 
-        $stmt = $db->prepare('SELECT id, label FROM test');
+        $stmt = $db->prepare('SELECT id, label FROM test_stmt_getcolumnmeta');
         $stmt->execute();
         $meta = $stmt->getColumnMeta(1);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -94,7 +96,7 @@ try {
                 return false;
             }
 
-        if (($meta['table'] != 'test') || ($meta['name'] != 'label')) {
+        if (($meta['table'] != 'test_stmt_getcolumnmeta') || ($meta['name'] != 'label')) {
             printf("[%03d + 4] Table or field name is wrong, %s\n", $offset,
                 var_export($meta, true));
             return false;
@@ -225,11 +227,11 @@ try {
 */
 
     // unique key
-    $db->exec('DROP TABLE IF EXISTS test');
-    $sql = sprintf('CREATE TABLE test(id INT, label INT UNIQUE) ENGINE = %s', MySQLPDOTest::getTableEngine());
+    $db->exec('DROP TABLE IF EXISTS test_stmt_getcolumnmeta');
+    $sql = sprintf('CREATE TABLE test_stmt_getcolumnmeta(id INT, label INT UNIQUE) ENGINE = %s', MySQLPDOTest::getTableEngine());
     if (($stmt = @$db->prepare($sql)) && @$stmt->execute()) {
-        $db->exec('INSERT INTO test(id, label) VALUES (1, 2)');
-        $stmt = $db->query('SELECT id, label FROM test');
+        $db->exec('INSERT INTO test_stmt_getcolumnmeta(id, label) VALUES (1, 2)');
+        $stmt = $db->query('SELECT id, label FROM test_stmt_getcolumnmeta');
         $meta = $stmt->getColumnMeta(1);
         if (!isset($meta['flags'])) {
             printf("[1000] No flags contained in metadata %s\n", var_export($meta, true));
@@ -246,11 +248,11 @@ try {
     }
 
     // primary key
-    $db->exec('DROP TABLE IF EXISTS test');
-    $sql = sprintf('CREATE TABLE test(id INT PRIMARY KEY NOT NULL AUTO_INCREMENT) ENGINE = %s', MySQLPDOTest::getTableEngine());
+    $db->exec('DROP TABLE IF EXISTS test_stmt_getcolumnmeta');
+    $sql = sprintf('CREATE TABLE test_stmt_getcolumnmeta(id INT PRIMARY KEY NOT NULL AUTO_INCREMENT) ENGINE = %s', MySQLPDOTest::getTableEngine());
     if (($stmt = @$db->prepare($sql)) && @$stmt->execute()) {
-        $db->exec('INSERT INTO test(id) VALUES (1)');
-        $stmt = $db->query('SELECT id FROM test');
+        $db->exec('INSERT INTO test_stmt_getcolumnmeta(id) VALUES (1)');
+        $stmt = $db->query('SELECT id FROM test_stmt_getcolumnmeta');
         $meta = $stmt->getColumnMeta(0);
         if (!isset($meta['flags'])) {
             printf("[1002] No flags contained in metadata %s\n", var_export($meta, true));
@@ -267,11 +269,11 @@ try {
     }
 
     // multiple key
-    $db->exec('DROP TABLE IF EXISTS test');
-    $sql = sprintf('CREATE TABLE test(id INT, label1 INT, label2 INT, INDEX idx1(label1, label2)) ENGINE = %s', MySQLPDOTest::getTableEngine());
+    $db->exec('DROP TABLE IF EXISTS test_stmt_getcolumnmeta');
+    $sql = sprintf('CREATE TABLE test_stmt_getcolumnmeta(id INT, label1 INT, label2 INT, INDEX idx1(label1, label2)) ENGINE = %s', MySQLPDOTest::getTableEngine());
     if (($stmt = @$db->prepare($sql)) && @$stmt->execute()) {
-        $db->exec('INSERT INTO test(id, label1, label2) VALUES (1, 2, 3)');
-        $stmt = $db->query('SELECT id, label1, label2 FROM test');
+        $db->exec('INSERT INTO test_stmt_getcolumnmeta(id, label1, label2) VALUES (1, 2, 3)');
+        $stmt = $db->query('SELECT id, label1, label2 FROM test_stmt_getcolumnmeta');
         $meta = $stmt->getColumnMeta(1);
         if (!isset($meta['flags'])) {
             printf("[1004] No flags contained in metadata %s\n", var_export($meta, true));
@@ -298,8 +300,13 @@ try {
         $e->getMessage(), $db->errorInfo(), implode(' ', $db->errorInfo()));
 }
 
-$db->exec('DROP TABLE IF EXISTS test');
 print "done!";
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_stmt_getcolumnmeta');
 ?>
 --EXPECT--
 PDOStatement::getColumnMeta(): Argument #1 ($column) must be greater than or equal to 0

@@ -16,22 +16,21 @@ if (MySQLPDOTest::isPDOMySQLnd())
 
     function test_type(&$db, $offset, $sql_type, $value, $ret_value = NULL, $pattern = NULL) {
 
-        $db->exec('DROP TABLE IF EXISTS test');
-        $sql = sprintf('CREATE TABLE test(id INT, label %s) ENGINE=%s', $sql_type, MySQLPDOTest::getTableEngine());
+        $sql = sprintf('CREATE TABLE test_mysql_bit(id INT, label %s) ENGINE=%s', $sql_type, MySQLPDOTest::getTableEngine());
         @$db->exec($sql);
         if ($db->errorCode() != 0) {
             // not all MySQL Server versions and/or engines might support the type
             return true;
         }
 
-        $stmt = $db->prepare('INSERT INTO test(id, label) VALUES (?, ?)');
+        $stmt = $db->prepare('INSERT INTO test_mysql_bit(id, label) VALUES (?, ?)');
         $stmt->bindValue(1, $offset);
         $stmt->bindValue(2, $value);
         if (!$stmt->execute()) {
             printf("[%03d + 1] INSERT failed, %s\n", $offset, var_export($stmt->errorInfo(), true));
             return false;
         }
-        $stmt = $db->query('SELECT  id, label FROM test');
+        $stmt = $db->query('SELECT  id, label FROM test_mysql_bit');
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         var_dump($row);
         var_dump($value);
@@ -52,7 +51,7 @@ if (MySQLPDOTest::isPDOMySQLnd())
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS test_mysql_bit');
 ?>
 --EXPECT--
 array(2) {

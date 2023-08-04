@@ -20,14 +20,13 @@ function createDB(): PDO {
 }
 
 $db = createDB();
-$db->exec('DROP TABLE IF EXISTS test');
-$db->exec('CREATE TABLE test (`id` bigint(20) unsigned AUTO_INCREMENT, `name` varchar(5), primary key (`id`)) ENGINE = InnoDB AUTO_INCREMENT=10376293541461622799');
+$db->exec('CREATE TABLE test_80908 (`id` bigint(20) unsigned AUTO_INCREMENT, `name` varchar(5), primary key (`id`)) ENGINE = InnoDB AUTO_INCREMENT=10376293541461622799');
 
 function testLastInsertId(PDO $db) {
     echo "Running test lastInsertId\n";
     $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
     try {
-        $db->exec("insert into test (`name`) values ('bar')");
+        $db->exec("insert into test_80908 (`name`) values ('bar')");
         $id = $db->lastInsertId();
         echo "Last insert id is " . $id . "\n";
     } catch (PDOException $e) {
@@ -43,7 +42,8 @@ echo "\n";
 --CLEAN--
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_80908');
 ?>
 --EXPECT--
 Running test lastInsertId

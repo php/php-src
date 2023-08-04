@@ -16,8 +16,7 @@ $db = MySQLPDOTest::factory();
 
     try {
 
-        $db->exec('DROP TABLE IF EXISTS test');
-        $db->exec(sprintf('CREATE TABLE test(id INT, label1 CHAR(255), label2 CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
+        $db->exec(sprintf('CREATE TABLE test_prepare_native_dup_named(id INT, label1 CHAR(255), label2 CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
 
         $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
         if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
@@ -25,7 +24,7 @@ $db = MySQLPDOTest::factory();
         printf("Native...\n");
 
         // INSERT a single row
-        $stmt = $db->prepare('INSERT INTO test(id, label1, label2) VALUES (1, :placeholder, :placeholder)');
+        $stmt = $db->prepare('INSERT INTO test_prepare_native_dup_named(id, label1, label2) VALUES (1, :placeholder, :placeholder)');
 
         $stmt->execute(array(':placeholder' => 'row1'));
         if ('00000' !== $stmt->errorCode())
@@ -34,7 +33,7 @@ $db = MySQLPDOTest::factory();
                 var_export($stmt->errorInfo(), true));
 
         // Ok, what has happened: anything inserted into the DB?
-        $stmt = $db->prepare('SELECT id, label1, label2 FROM test WHERE id = 1');
+        $stmt = $db->prepare('SELECT id, label1, label2 FROM test_prepare_native_dup_named WHERE id = 1');
         $stmt->execute();
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
@@ -44,7 +43,7 @@ $db = MySQLPDOTest::factory();
             printf("[004] Unable to turn on emulated prepared statements\n");
         printf("Emulated...\n");
 
-        $stmt = $db->prepare('INSERT INTO test(id, label1, label2) VALUES(2, :placeholder, :placeholder)');
+        $stmt = $db->prepare('INSERT INTO test_prepare_native_dup_named(id, label1, label2) VALUES(2, :placeholder, :placeholder)');
         // No replacement shall be made
         $stmt->execute(array(':placeholder' => 'row2'));
         if ('00000' !== $stmt->errorCode())
@@ -53,7 +52,7 @@ $db = MySQLPDOTest::factory();
                 var_export($stmt->errorInfo(), true));
 
         // Now, what do we have in the DB?
-        $stmt = $db->prepare('SELECT id, label1, label2 FROM test WHERE id = 2');
+        $stmt = $db->prepare('SELECT id, label1, label2 FROM test_prepare_native_dup_named WHERE id = 2');
         $stmt->execute();
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
@@ -61,9 +60,9 @@ $db = MySQLPDOTest::factory();
         // Another variation of the theme
         //
 
-        $db->exec('DELETE FROM test');
-        $db->exec("INSERT INTO test (id, label1, label2) VALUES (1, 'row1', 'row2')");
-        $sql = "SELECT id, label1 FROM test WHERE id = :placeholder AND label1 = (SELECT label1 AS 'SELECT' FROM test WHERE id = :placeholder)";
+        $db->exec('DELETE FROM test_prepare_native_dup_named');
+        $db->exec("INSERT INTO test_prepare_native_dup_named (id, label1, label2) VALUES (1, 'row1', 'row2')");
+        $sql = "SELECT id, label1 FROM test_prepare_native_dup_named WHERE id = :placeholder AND label1 = (SELECT label1 AS 'SELECT' FROM test_prepare_native_dup_named WHERE id = :placeholder)";
 
         // emulated...
         $stmt = $db->prepare($sql);
@@ -100,7 +99,7 @@ $db = MySQLPDOTest::factory();
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS test_prepare_native_dup_named');
 ?>
 --EXPECTF--
 Native...

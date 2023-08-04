@@ -28,16 +28,16 @@ $db = MySQLPDOTest::factory();
 
 function bug_42499($db) {
 
-    $db->exec('DROP TABLE IF EXISTS test');
-    $db->exec("CREATE TABLE test(id CHAR(1)); INSERT INTO test(id) VALUES ('a')");
+    $db->exec("DROP TABLE IF EXISTS test_42499");
+    $db->exec("CREATE TABLE test_42499(id CHAR(1)); INSERT INTO test_42499(id) VALUES ('a')");
 
-    $stmt = $db->query('SELECT id AS _id FROM test');
+    $stmt = $db->query('SELECT id AS _id FROM test_42499');
     var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
     // You must not use exec() to run statements that create a result set!
-    $db->exec('SELECT id FROM test');
+    $db->exec('SELECT id FROM test_42499');
     // This will bail at you because you have not fetched the SELECT results: this is not a bug!
-    $db->exec("INSERT INTO test(id) VALUES ('b')");
+    $db->exec("INSERT INTO test_42499(id) VALUES ('b')");
 
 }
 
@@ -53,10 +53,13 @@ $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
 $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, 1);
 bug_42499($db);
 
-$db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
-
 print "done!";
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec("DROP TABLE IF EXISTS test_42499");
 ?>
 --EXPECTF--
 Emulated Prepared Statements...

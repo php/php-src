@@ -66,8 +66,7 @@ if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
 
     /* affected rows related */
 
-    exec_and_count(2, $db, 'DROP TABLE IF EXISTS test', 0);
-    exec_and_count(3, $db, sprintf('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
+    exec_and_count(3, $db, sprintf('CREATE TABLE test_mysql_exec_load_data(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
 
     $stmt = $db->query("SHOW VARIABLES LIKE 'secure_file_priv'");
     if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
@@ -81,11 +80,11 @@ if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
     fwrite($fp, "2;bar");
     fclose($fp);
 
-    $sql = sprintf("LOAD DATA LOCAL INFILE %s INTO TABLE test FIELDS TERMINATED BY ';' LINES TERMINATED  BY '\n'", $db->quote($filename));
+    $sql = sprintf("LOAD DATA LOCAL INFILE %s INTO TABLE test_mysql_exec_load_data FIELDS TERMINATED BY ';' LINES TERMINATED  BY '\n'", $db->quote($filename));
 
     if (exec_and_count(4, $db, $sql, 2)) {
 
-        $stmt = $db->query('SELECT id, col1 FROM test ORDER BY id ASC');
+        $stmt = $db->query('SELECT id, col1 FROM test_mysql_exec_load_data ORDER BY id ASC');
         $expected = array(array("id" => 1, "col1" => "foo"), array("id" => 2, "col1" => "bar"));
         $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
         foreach ($expected as $offset => $exp) {
@@ -107,8 +106,7 @@ if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
 --CLEAN--
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
-$db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+MySQLPDOTest::factory(NULL, 'test_mysql_exec_load_data');
 ?>
 --EXPECT--
 done!

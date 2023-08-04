@@ -19,11 +19,10 @@ $db = MySQLPDOTest::factory();
         if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[002] Unable to switch on emulated prepared statements, test will fail\n");
 
-        $db->exec('DROP TABLE IF EXISTS test');
-        $db->exec(sprintf('CREATE TABLE test(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
-        $db->exec("INSERT INTO test(id, label) VALUES (1, 'row1')");
+        $db->exec(sprintf('CREATE TABLE test_prepare_native_named_placeholder_everywhere(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
+        $db->exec("INSERT INTO test_prepare_native_named_placeholder_everywhere(id, label) VALUES (1, 'row1')");
 
-        $stmt = $db->prepare('SELECT ?, id, label FROM test WHERE ? = ? ORDER BY id ASC');
+        $stmt = $db->prepare('SELECT ?, id, label FROM test_prepare_native_named_placeholder_everywhere WHERE ? = ? ORDER BY id ASC');
         $stmt->execute(array('id', 'label', 'label'));
         if ('00000' !== $stmt->errorCode())
             printf("[003] Execute has failed, %s %s\n",
@@ -35,9 +34,9 @@ $db = MySQLPDOTest::factory();
         printf("now the same with native PS\n");
         $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
         if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
-            printf("[004] Unable to switch off emulated prepared statements, test will fail\n");
+            printf("[004] Unable to switch off emulated prepared statements, test_prepare_native_named_placeholder_everywhere will fail\n");
 
-        $stmt = $db->prepare('SELECT ?, id, label FROM test WHERE ? = ? ORDER BY id ASC');
+        $stmt = $db->prepare('SELECT ?, id, label FROM test_prepare_native_named_placeholder_everywhere WHERE ? = ? ORDER BY id ASC');
         $stmt->execute(array('id', 'label', 'label'));
         if ('00000' !== $stmt->errorCode())
             printf("[005] Execute has failed, %s %s\n",
@@ -57,7 +56,7 @@ $db = MySQLPDOTest::factory();
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS test_prepare_native_named_placeholder_everywhere');
 ?>
 --EXPECT--
 array(1) {
