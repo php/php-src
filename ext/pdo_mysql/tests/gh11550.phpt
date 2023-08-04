@@ -12,11 +12,9 @@ MySQLPDOTest::skip();
 <?php
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
 $pdo = MySQLPDOTest::factory();
+
 $pdo->exec(<<<'SQL'
-DROP TABLE IF EXISTS `test`
-SQL);
-$pdo->exec(<<<'SQL'
-CREATE TABLE `test`  (
+CREATE TABLE `test_gh11550`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`) USING BTREE,
@@ -24,18 +22,16 @@ CREATE TABLE `test`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 SQL);
 $pdo->exec(<<<'SQL'
-INSERT INTO `test` (`name`) VALUES ('test1');
+INSERT INTO `test_gh11550` (`name`) VALUES ('test1');
 SQL);
 
-$pdo2 = MySQLPDOTest::factory();
-$pdo2->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-$stmt = $pdo2->prepare('select * from test');
+$stmt = $pdo->prepare('select * from test_gh11550');
 var_dump('PDO-1:', $stmt->execute(), $stmt->fetchAll());
 
 $stmt->closeCursor(); // Optional. Segmentation fault (core dumped)
 
 $pdo->exec(<<<'SQL'
-ALTER TABLE `test`
+ALTER TABLE `test_gh11550`
 ADD COLUMN `a` varchar(255) NOT NULL DEFAULT '';
 SQL);
 
@@ -46,7 +42,7 @@ echo 'Done';
 <?php
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
 $pdo = MySQLPDOTest::factory();
-$pdo->query('DROP TABLE IF EXISTS test_11550');
+$pdo->query('DROP TABLE IF EXISTS test_gh11550');
 ?>
 --EXPECT--
 string(6) "PDO-1:"

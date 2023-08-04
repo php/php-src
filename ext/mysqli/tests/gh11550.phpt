@@ -11,11 +11,9 @@ require_once 'skipifconnectfailure.inc';
 require_once 'connect.inc';
 
 $link = new \mysqli($host, $user, $passwd, $db, $port, $socket);
+
 $link->query(<<<'SQL'
-DROP TABLE IF EXISTS `test`
-SQL);
-$link->query(<<<'SQL'
-CREATE TABLE `test`  (
+CREATE TABLE `test_gh11550`  (
     `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
     PRIMARY KEY (`id`) USING BTREE,
@@ -23,15 +21,14 @@ CREATE TABLE `test`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 SQL);
 $link->query(<<<'SQL'
-INSERT INTO `test` (`name`) VALUES ('test1');
+INSERT INTO `test_gh11550` (`name`) VALUES ('test1');
 SQL);
 
-$link2 = new \mysqli($host, $user, $passwd, $db, $port, $socket);
-$stmt = $link2->prepare('select * from test');
+$stmt = $link->prepare('select * from test_gh11550');
 var_dump('mysqli-1:', $stmt->execute(), $stmt->get_result()->fetch_all());
 
 $link->query(<<<'SQL'
-ALTER TABLE `test`
+ALTER TABLE `test_gh11550`
 ADD COLUMN `a` varchar(255) NOT NULL DEFAULT '';
 SQL);
 
@@ -43,7 +40,7 @@ echo 'Done';
 require_once 'connect.inc';
 
 $link = new \mysqli($host, $user, $passwd, $db, $port, $socket);
-$link->query('DROP TABLE IF EXISTS test_11550');
+$link->query('DROP TABLE IF EXISTS test_gh11550');
 ?>
 --EXPECT--
 string(9) "mysqli-1:"

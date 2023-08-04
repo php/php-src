@@ -290,8 +290,8 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 							stmt->result->m.free_result(stmt->result, TRUE);
 							stmt->result = conn->m->result_init(rset_header.field_count);
 						}
+						result = stmt->result;
 					}
-					result = stmt->result;
 				}
 				if (!result) {
 					SET_OOM_ERROR(conn->error_info);
