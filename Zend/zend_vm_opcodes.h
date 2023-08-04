@@ -286,7 +286,8 @@ END_EXTERN_C()
 #define ZEND_VERIFY_NEVER_TYPE          201
 #define ZEND_CALLABLE_CONVERT           202
 #define ZEND_BIND_INIT_STATIC_OR_JMP    203
+#define ZEND_MATCH_BLOCK_NO_VALUE_ERROR 204
 
-#define ZEND_VM_LAST_OPCODE             203
+#define ZEND_VM_LAST_OPCODE             204
 
 #endif
