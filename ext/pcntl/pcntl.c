@@ -911,10 +911,11 @@ PHP_FUNCTION(pcntl_sigtimedwait)
 	timeout.tv_sec  = (time_t) tv_sec;
 	timeout.tv_nsec = tv_nsec;
 	int signal_no = sigtimedwait(&set, &siginfo, &timeout);
-	// TODO Drop check for EAGAIN as it will return -1?
-	if (signal_no == -1 && errno != EAGAIN) {
-		PCNTL_G(last_error) = errno;
-		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+	if (signal_no == -1) {
+		if (errno != EAGAIN) {
+			PCNTL_G(last_error) = errno;
+			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+		}
 		RETURN_FALSE;
 	}
 
