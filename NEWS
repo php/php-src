@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-11438 (mysqlnd fails to authenticate with sha256_password
     accounts using passwords longer than 19 characters).
     (nielsdos, Kamil Tekiela)
+  . Fixed bug GH-11550 (MySQL Statement has a empty query result when
+    the response field has changed, also Segmentation fault).
+    (Yurunsoft)
 
 - Opcache:
   . Fixed bug GH-11715 (opcache.interned_strings_buffer either has no effect or
