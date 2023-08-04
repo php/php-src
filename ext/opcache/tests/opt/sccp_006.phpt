@@ -23,7 +23,7 @@ $_main:
 0000 RETURN int(1)
 
 foo:
-     ; (lines=8, args=1, vars=2, tmps=1)
+     ; (lines=8, args=1, vars=2, tmps=2)
      ; (after optimizer)
      ; %ssccp_006.php:2-5
 0000 CV0($x) = RECV 1
@@ -31,8 +31,8 @@ foo:
 0002 T2 = ADD_ARRAY_ELEMENT int(2) string("a")
 0003 T2 = ADD_ARRAY_ELEMENT CV0($x) string("a")
 0004 CV1($a) = QM_ASSIGN T2
-0005 T2 = FETCH_DIM_R CV1($a) string("a")
-0006 ECHO T2
+0005 T3 = FETCH_DIM_R CV1($a) string("a")
+0006 ECHO T3
 0007 RETURN null
 LIVE RANGES:
      2: 0002 - 0004 (tmp/var)

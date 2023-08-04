@@ -1027,7 +1027,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	 */
 	if ((ZEND_OPTIMIZER_PASS_9 & ctx->optimization_level) &&
 	    !(ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level)) {
-		zend_optimize_temporary_variables(op_array, ctx);
+		// zend_optimize_temporary_variables(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_9) {
 			zend_dump_op_array(op_array, 0, "after pass 9", NULL);
 		}
@@ -1536,7 +1536,7 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 
 		if (ZEND_OPTIMIZER_PASS_9 & optimization_level) {
 			for (i = 0; i < call_graph.op_arrays_count; i++) {
-				zend_optimize_temporary_variables(call_graph.op_arrays[i], &ctx);
+				// zend_optimize_temporary_variables(call_graph.op_arrays[i], &ctx);
 				if (debug_level & ZEND_DUMP_AFTER_PASS_9) {
 					zend_dump_op_array(call_graph.op_arrays[i], 0, "after pass 9", NULL);
 				}

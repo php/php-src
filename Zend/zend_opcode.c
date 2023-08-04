@@ -746,6 +746,9 @@ static void emit_live_range(
 		case ZEND_DECLARE_ANON_CLASS:
 		/* FAST_CALLs don't have to be destroyed. */
 		case ZEND_FAST_CALL:
+		/* JMP_NULL only define null, false and true. */
+		case ZEND_JMP_NULL:
+		case ZEND_JMP_SET:
 			return;
 		case ZEND_BEGIN_SILENCE:
 			kind = ZEND_LIVE_SILENCE;
@@ -912,6 +915,9 @@ static void swap_live_range(zend_live_range *a, zend_live_range *b) {
 	b->end = tmp;
 }
 
+#define LIVE_RANGE_VAR_UNUSED ((uint32_t) -1)
+#define LIVE_RANGE_VAR_DEFINED ((uint32_t) -2)
+
 static void zend_calc_live_ranges(
 		zend_op_array *op_array, zend_needs_live_range_cb needs_live_range) {
 	uint32_t opnum = op_array->last;
@@ -928,12 +934,35 @@ static void zend_calc_live_ranges(
 
 		if ((opline->result_type & (IS_TMP_VAR|IS_VAR)) && !is_fake_def(opline)) {
 			uint32_t var_num = EX_VAR_TO_NUM(opline->result.var) - var_offset;
+			// FIXME: Outdated comment
 			/* Defs without uses can occur for two reasons: Either because the result is
 			 * genuinely unused (e.g. omitted FREE opcode for an unused boolean result), or
 			 * because there are multiple defining opcodes (e.g. JMPZ_EX and QM_ASSIGN), in
 			 * which case the last one starts the live range. As such, we can simply ignore
 			 * missing uses here. */
-			if (EXPECTED(last_use[var_num] != (uint32_t) -1)) {
+			if (UNEXPECTED(last_use[var_num] == LIVE_RANGE_VAR_UNUSED)) {
+				// FIXME: Make sure not to insert unnecessary live-ranges. But I think this is already handled.
+				/* Find the innermost try/catch that we are inside of. */
+				uint32_t live_range_end = (uint32_t) -1;
+				for (uint32_t i = 0; i < op_array->last_try_catch; i++) {
+					zend_try_catch_element *try_catch = &op_array->try_catch_array[i];
+					if (opnum < try_catch->try_op) {
+						break;
+					}
+					if (opnum < try_catch->catch_op) {
+						live_range_end = try_catch->catch_op;
+					} else if (opnum < try_catch->finally_end) {
+						live_range_end = try_catch->finally_end;
+					}
+				}
+				if (live_range_end == (uint32_t) -1) {
+					live_range_end = op_array->last;
+				}
+				if (opnum + 1 != live_range_end) {
+					emit_live_range(op_array, var_num, opnum, live_range_end, needs_live_range);
+				}
+				last_use[var_num] = LIVE_RANGE_VAR_DEFINED;
+			} else if (last_use[var_num] != LIVE_RANGE_VAR_DEFINED) {
 				/* Skip trivial live-range */
 				if (opnum + 1 != last_use[var_num]) {
 					uint32_t num;
@@ -948,13 +977,13 @@ static void zend_calc_live_ranges(
 #endif
 					emit_live_range(op_array, var_num, num, last_use[var_num], needs_live_range);
 				}
-				last_use[var_num] = (uint32_t) -1;
+				last_use[var_num] = LIVE_RANGE_VAR_DEFINED;
 			}
 		}
 
 		if ((opline->op1_type & (IS_TMP_VAR|IS_VAR))) {
 			uint32_t var_num = EX_VAR_TO_NUM(opline->op1.var) - var_offset;
-			if (EXPECTED(last_use[var_num] == (uint32_t) -1)) {
+			if (EXPECTED(last_use[var_num] == LIVE_RANGE_VAR_UNUSED || last_use[var_num] == LIVE_RANGE_VAR_DEFINED)) {
 				if (EXPECTED(!keeps_op1_alive(opline))) {
 					/* OP_DATA is really part of the previous opcode. */
 					last_use[var_num] = opnum - (opline->opcode == ZEND_OP_DATA);
@@ -966,14 +995,14 @@ static void zend_calc_live_ranges(
 			if (UNEXPECTED(opline->opcode == ZEND_FE_FETCH_R
 					|| opline->opcode == ZEND_FE_FETCH_RW)) {
 				/* OP2 of FE_FETCH is actually a def, not a use. */
-				if (last_use[var_num] != (uint32_t) -1) {
+				if (last_use[var_num] != LIVE_RANGE_VAR_UNUSED && last_use[var_num] != LIVE_RANGE_VAR_DEFINED) {
 					if (opnum + 1 != last_use[var_num]) {
 						emit_live_range(
 							op_array, var_num, opnum, last_use[var_num], needs_live_range);
 					}
-					last_use[var_num] = (uint32_t) -1;
+					last_use[var_num] = LIVE_RANGE_VAR_DEFINED;
 				}
-			} else if (EXPECTED(last_use[var_num] == (uint32_t) -1)) {
+			} else if (EXPECTED(last_use[var_num] == LIVE_RANGE_VAR_UNUSED || last_use[var_num] == LIVE_RANGE_VAR_DEFINED)) {
 #if 1
 				/* OP_DATA uses only op1 operand */
 				ZEND_ASSERT(opline->opcode != ZEND_OP_DATA);

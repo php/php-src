@@ -138,19 +138,12 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 	}
 
 	for (b = blocks; b < blocks_end; b++) {
-		if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
+		if (b->flags & ZEND_BB_REACHABLE) {
 			if (b->len) {
 				uint32_t new_start, old_end;
 				while (i < b->start) {
 					shiftlist[i] = i - target;
 					i++;
-				}
-
-				if (b->flags & ZEND_BB_UNREACHABLE_FREE) {
-					/* Only keep the FREE for the loop var */
-					ZEND_ASSERT(op_array->opcodes[b->start].opcode == ZEND_FREE
-							|| op_array->opcodes[b->start].opcode == ZEND_FE_FREE);
-					b->len = 1;
 				}
 
 				new_start = target;
@@ -757,9 +750,6 @@ static int zend_dfa_optimize_jmps(zend_op_array *op_array, zend_ssa *ssa)
 
 		while (next_block_num < ssa->cfg.blocks_count
 			&& !(ssa->cfg.blocks[next_block_num].flags & ZEND_BB_REACHABLE)) {
-			if (ssa->cfg.blocks[next_block_num].flags & ZEND_BB_UNREACHABLE_FREE) {
-				can_follow = 0;
-			}
 			next_block_num++;
 		}
 

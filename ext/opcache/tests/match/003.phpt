@@ -28,26 +28,26 @@ foreach (range(0, 10) as $char) {
 ?>
 --EXPECTF--
 $_main:
-     ; (lines=15, args=0, vars=1, tmps=2)
+     ; (lines=15, args=0, vars=1, tmps=3)
      ; (after optimizer)
      ; %s
 0000 INIT_FCALL 2 %d string("range")
 0001 SEND_VAL int(0) 1
 0002 SEND_VAL int(10) 2
-0003 V2 = DO_ICALL
-0004 V1 = FE_RESET_R V2 0013
-0005 FE_FETCH_R V1 CV0($char) 0013
+0003 V1 = DO_ICALL
+0004 V2 = FE_RESET_R V1 0013
+0005 FE_FETCH_R V2 CV0($char) 0013
 0006 INIT_FCALL 1 %d string("var_dump")
 0007 INIT_FCALL 1 %d string("test")
 0008 SEND_VAR CV0($char) 1
-0009 V2 = DO_UCALL
-0010 SEND_VAR V2 1
+0009 V3 = DO_UCALL
+0010 SEND_VAR V3 1
 0011 DO_ICALL
 0012 JMP 0005
-0013 FE_FREE V1
+0013 FE_FREE V2
 0014 RETURN int(1)
 LIVE RANGES:
-     1: 0005 - 0013 (loop)
+     2: 0005 - 0013 (loop)
 
 test:
      ; (lines=9, args=1, vars=1, tmps=0)

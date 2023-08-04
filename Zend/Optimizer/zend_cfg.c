@@ -196,33 +196,6 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 			}
 		} while (changed);
 	}
-
-	if (cfg->flags & ZEND_FUNC_FREE_LOOP_VAR) {
-		zend_basic_block *b;
-		int j;
-		uint32_t *block_map = cfg->map;
-
-		/* Mark blocks that are unreachable, but free a loop var created in a reachable block. */
-		for (b = blocks; b < blocks + cfg->blocks_count; b++) {
-			if (b->flags & ZEND_BB_REACHABLE) {
-				continue;
-			}
-
-			for (j = b->start; j < b->start + b->len; j++) {
-				zend_op *opline = &op_array->opcodes[j];
-				if (zend_optimizer_is_loop_var_free(opline)) {
-					zend_op *def_opline = zend_optimizer_get_loop_var_def(op_array, opline);
-					if (def_opline) {
-						uint32_t def_block = block_map[def_opline - op_array->opcodes];
-						if (blocks[def_block].flags & ZEND_BB_REACHABLE) {
-							b->flags |= ZEND_BB_UNREACHABLE_FREE;
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
 }
 /* }}} */
 
@@ -305,9 +278,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_MATCH_ERROR:
 			case ZEND_EXIT:
 			case ZEND_THROW:
-				/* Don't treat THROW as terminator if it's used in expression context,
-				 * as we may lose live ranges when eliminating unreachable code. */
-				if (opline->extended_value != ZEND_THROW_IS_EXPR && i + 1 < op_array->last) {
+				if (i + 1 < op_array->last) {
 					BB_START(i + 1);
 				}
 				break;
@@ -430,8 +401,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_FREE:
 			case ZEND_FE_FREE:
 				if (zend_optimizer_is_loop_var_free(opline)
-				 && ((opline-1)->opcode != ZEND_MATCH_ERROR
-				  || (opline-1)->extended_value != ZEND_THROW_IS_EXPR)) {
+				 && ((opline-1)->opcode != ZEND_MATCH_ERROR)) {
 					BB_START(i);
 					flags |= ZEND_FUNC_FREE_LOOP_VAR;
 				}

@@ -7680,6 +7680,7 @@ ZEND_VM_COLD_CONST_HANDLER(169, ZEND_COALESCE, CONST|TMP|VAR|CV, JMP_ADDR)
 			efree_size(ref, sizeof(zend_reference));
 		}
 	}
+	ZVAL_UNDEF(EX_VAR(opline->result.var));
 	ZEND_VM_NEXT_OPCODE();
 }
 

@@ -945,7 +945,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 		if (b->len == 0) {
 			continue;
 		}
-		if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
+		if (b->flags & ZEND_BB_REACHABLE) {
 			opline = op_array->opcodes + b->start + b->len - 1;
 			if (opline->opcode == ZEND_JMP) {
 				zend_basic_block *next = b + 1;
@@ -983,7 +983,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 
 	/* Copy code of reachable blocks into a single buffer */
 	for (b = blocks; b < end; b++) {
-		if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
+		if (b->flags & ZEND_BB_REACHABLE) {
 			memcpy(opline, op_array->opcodes + b->start, b->len * sizeof(zend_op));
 			b->start = opline - new_opcodes;
 			opline += b->len;
@@ -1100,7 +1100,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 	/* rebuild map (just for printing) */
 	memset(cfg->map, -1, sizeof(int) * op_array->last);
 	for (int n = 0; n < cfg->blocks_count; n++) {
-		if (cfg->blocks[n].flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
+		if (cfg->blocks[n].flags & ZEND_BB_REACHABLE) {
 			cfg->map[cfg->blocks[n].start] = n;
 		}
 	}
@@ -1725,16 +1725,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 		/* Eliminate NOPs */
 		for (b = blocks; b < end; b++) {
-			if (b->flags & ZEND_BB_UNREACHABLE_FREE) {
-				/* In unreachable_free blocks only preserve loop var frees. */
-				for (uint32_t i = b->start; i < b->start + b->len; i++) {
-					zend_op *opline = &op_array->opcodes[i];
-					if (!zend_optimizer_is_loop_var_free(opline)) {
-						MAKE_NOP(opline);
-					}
-				}
-			}
-			if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
+			if (b->flags & ZEND_BB_REACHABLE) {
 				strip_nops(op_array, b);
 			}
 		}
