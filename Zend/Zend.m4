@@ -381,8 +381,6 @@ int emu(const opcode_handler_t *ip, void *fp) {
 fi
 if test "$ZEND_GCC_GLOBAL_REGS" = "yes"; then
   AC_DEFINE([HAVE_GCC_GLOBAL_REGS], 1, [Define if the target system has support for global register variables])
-else
-  HAVE_GCC_GLOBAL_REGS=no
 fi
 AC_MSG_RESULT($ZEND_GCC_GLOBAL_REGS)
 
