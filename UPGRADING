@@ -214,6 +214,15 @@ PHP 8.3 UPGRADE NOTES
     circumvented by prepending `./` to the path.
   . User exception handlers now catch exceptions during shutdown.
 
+- Calendar
+  . easter_date() now supports years from 1970 to 2,000,000,000 on 64-bit systems,
+    previously it only supported years in the range from 1970 to 2037.
+
+- Curl:
+  . curl_getinfo() now supports two new constants: CURLINFO_CAPATH and
+    CURLINFO_CAINFO. If option is null, the following two additional keys are
+    present: "capath" and "cainfo".
+
 - Dom:
   . Changed DOMCharacterData::appendData() tentative return type to true.
   . DOMDocument::loadHTML(), DOMDocument::loadHTMLFile(), DOMDocument::loadXML(),
@@ -234,11 +243,6 @@ PHP 8.3 UPGRADE NOTES
     now returns true on sucess, previously null was returned.
   . IntlChar::enumCharNames is now returning a boolean.
     Previously it returned null on success and false on failure.
-
-- Curl:
-  . curl_getinfo() now supports two new constants: CURLINFO_CAPATH and
-    CURLINFO_CAINFO. If option is null, the following two additional keys are
-    present: "capath" and "cainfo".
 
 - MBString:
   . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional
@@ -316,10 +320,6 @@ PHP 8.3 UPGRADE NOTES
     means that when $decimals is negative, $num is rounded to $decimals
     significant digits before the decimal point. Previously negative $decimals
     got silently ignored and the number got rounded to zero decimal places.
-
-- Calendar
-  . easter_date() now supports years from 1970 to 2,000,000,000 on 64-bit systems,
-    previously it only supported years in the range from 1970 to 2037.
 
 ========================================
 6. New Functions
