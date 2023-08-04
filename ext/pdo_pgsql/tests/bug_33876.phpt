@@ -16,11 +16,12 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
 $db->exec("SET LC_MESSAGES='C'");
-$db->exec('CREATE TABLE test (foo varchar(5) NOT NULL, bar bool NOT NULL)');
-$db->exec("INSERT INTO test VALUES('false','f')");
-$db->exec("INSERT INTO test VALUES('true', 't')");
+$db->query('DROP TABLE IF EXISTS b33876 CASCADE');
+$db->exec('CREATE TABLE b33876 (foo varchar(5) NOT NULL, bar bool NOT NULL)');
+$db->exec("INSERT INTO b33876 VALUES('false','f')");
+$db->exec("INSERT INTO b33876 VALUES('true', 't')");
 
-$res = $db->prepare('SELECT foo from test where bar = ?');
+$res = $db->prepare('SELECT foo from b33876 where bar = ?');
 
 # this is the portable approach to binding a bool
 $res->bindValue(1, false, PDO::PARAM_BOOL);
@@ -55,7 +56,7 @@ else
 echo "EMUL\n";
 
 
-$res = $db->prepare('SELECT foo from test where bar = ?', array(
+$res = $db->prepare('SELECT foo from b33876 where bar = ?', array(
     PDO::ATTR_EMULATE_PREPARES => true));
 
 # this is the portable approach to binding a bool
