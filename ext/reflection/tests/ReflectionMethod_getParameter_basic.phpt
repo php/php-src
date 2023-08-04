@@ -1,5 +1,5 @@
 --TEST--
-ReflectionFunction::getParameter()
+ReflectionMethod::getParameter()
 --FILE--
 <?php
 class C {

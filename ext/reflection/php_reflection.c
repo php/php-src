@@ -2155,11 +2155,11 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
 
         RETURN_FALSE;
     } else {
-        if (position < 0 || position >= num_args) {
-            RETURN_FALSE;
+        if (position < 0) {
+            zend_argument_value_error(1, "must be greater than or equal to 0");
         }
 
-        RETURN_TRUE;
+        RETURN_BOOL(position < num_args);
     }
 }
 /* }}} */
