@@ -49,6 +49,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Prevent int overflow on $decimals in number_format. (Marc Bennewitz)
+  . Fixed bug GH-11870 (Fix off-by-one bug when truncating tempnam prefix)
+    (athos-ribeiro)
 
 03 Aug 2023, PHP 8.1.22
 
