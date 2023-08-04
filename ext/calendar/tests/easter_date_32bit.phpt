@@ -1,5 +1,7 @@
 --TEST--
-easter_date()
+Test easter_date() on 32bit systems
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 4) die("skip 32-bit only"); ?>
 --INI--
 date.timezone=UTC
 --ENV--
