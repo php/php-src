@@ -911,7 +911,7 @@ PHP_METHOD(DOMDocument, createAttributeNS)
 				if (nodep != NULL && uri_len > 0) {
 					nsptr = xmlSearchNsByHref(nodep->doc, root, (xmlChar *) uri);
 					if (nsptr == NULL || nsptr->prefix == NULL) {
-						nsptr = dom_get_ns(root, uri, &errorcode, prefix);
+						nsptr = dom_get_ns(root, uri, &errorcode, prefix ? prefix : "default");
 					}
 					xmlSetNs(nodep, nsptr);
 				}
