@@ -18,7 +18,6 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
-$db->query('DROP TABLE IF EXISTS test_last_id_72633 CASCADE');
 $db->query('CREATE TABLE test_last_id_72633 (id SERIAL NOT NULL, field1 VARCHAR(10))');
 
 $stmt = $db->prepare("INSERT INTO test_last_id_72633 (field1) VALUES ('test')");
@@ -34,8 +33,12 @@ var_dump($db->lastInsertId());
  */
 var_dump($db->lastInsertId('test_last_id_72633_id_seq'));
 
-$db->query('DROP TABLE test_last_id_72633');
-
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->query('DROP TABLE IF EXISTS test_last_id_72633');
 ?>
 --EXPECTREGEX--
 string\([0-9]*\)\ \"[0-9]*\"

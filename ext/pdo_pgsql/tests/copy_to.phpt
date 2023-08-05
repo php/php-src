@@ -16,7 +16,6 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
-$db->query('DROP TABLE IF EXISTS test_copy_to CASCADE');
 $db->exec('CREATE TABLE test_copy_to (a integer not null primary key, b text, c integer)');
 
 $db->beginTransaction();
@@ -79,6 +78,12 @@ try {
 if(isset($filename)) {
     @unlink($filename);
 }
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->exec('DROP TABLE test_copy_to');
 ?>
 --EXPECTF--
 Preparing test table for CopyTo tests
