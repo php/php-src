@@ -118,8 +118,8 @@ ZEND_API void zend_type_release(zend_type type, bool persistent) {
 						zend_string_release(ZEND_TYPE_NAME(*sublist_type));
 					}
 				} ZEND_TYPE_LIST_FOREACH_END();
-				if (!ZEND_TYPE_USES_ARENA(*list_type)) {
-					pefree(ZEND_TYPE_LIST(*list_type), persistent);
+				if (!ZEND_TYPE_USES_ARENA(*list_type) && persistent) {
+					free(ZEND_TYPE_LIST(*list_type));
 				}
 			} else if (ZEND_TYPE_HAS_NAME(*list_type)) {
 				zend_string_release(ZEND_TYPE_NAME(*list_type));
