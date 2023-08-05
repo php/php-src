@@ -20,9 +20,9 @@ $test->replaceWith($child);
 echo $doc->saveXML();
 echo $doc->saveXML($test);
 ?>
---EXPECTF--
-Fatal error: Uncaught DOMException: Not Found Error in %s:%d
-Stack trace:
-#0 %s(%d): DOMElement->replaceWith(Object(DOMElement))
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+<?xml version="1.0"?>
+<container>
+    <child/>
+</container>
+<foo/>
