@@ -163,12 +163,12 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_put(zend_object *object)
 
 ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ */
 {
-	ZEND_ASSERT(GC_REFCOUNT(object) == 0);
-
 	/* GC might have released this object already. */
 	if (UNEXPECTED(GC_TYPE(object) == IS_NULL)) {
 		return;
 	}
+
+	ZEND_ASSERT(GC_REFCOUNT(object) == 0);
 
 	/*	Make sure we hold a reference count during the destructor call
 		otherwise, when the destructor ends the storage might be freed
