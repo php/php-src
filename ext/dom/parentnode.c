@@ -527,7 +527,6 @@ static zend_result dom_child_removal_preconditions(const xmlNodePtr child, int s
 void dom_child_node_remove(dom_object *context)
 {
 	xmlNode *child = dom_object_get_node(context);
-	xmlNodePtr children;
 	int stricterror;
 
 	stricterror = dom_get_strict_error(context->document);
@@ -536,19 +535,9 @@ void dom_child_node_remove(dom_object *context)
 		return;
 	}
 
-	children = child->parent->children;
-
 	php_libxml_invalidate_node_list_cache_from_doc(context->document->ptr);
 
-	while (children) {
-		if (children == child) {
-			xmlUnlinkNode(child);
-			return;
-		}
-		children = children->next;
-	}
-
-	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+	xmlUnlinkNode(child);
 }
 
 void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
