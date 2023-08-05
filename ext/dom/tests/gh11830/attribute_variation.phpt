@@ -44,11 +44,13 @@ try {
 
 echo $doc->saveXML();
 ?>
---EXPECTF--
+--EXPECT--
 Hierarchy Request Error
-
-Fatal error: Uncaught TypeError: DOMElement::append(): Argument #1 must be of type DOMNode|string, null given in %s:%d
-Stack trace:
-#0 %s(%d): DOMElement->append(NULL)
-#1 {main}
-  thrown in %s on line %d
+Hierarchy Request Error
+Hierarchy Request Error
+Hierarchy Request Error
+Hierarchy Request Error
+<?xml version="1.0"?>
+<container x="foo">
+    <test/>
+</container>

@@ -141,26 +141,24 @@ static bool dom_is_node_in_list(const zval *nodes, int nodesc, const xmlNodePtr 
 	return false;
 }
 
+static xmlDocPtr dom_doc_from_context_node(xmlNodePtr contextNode)
+{
+	if (contextNode->type == XML_DOCUMENT_NODE || contextNode->type == XML_HTML_DOCUMENT_NODE) {
+		return (xmlDocPtr) contextNode;
+	} else {
+		return contextNode->doc;
+	}
+}
+
 xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNode, zval *nodes, int nodesc)
 {
 	int i;
 	xmlDoc *documentNode;
 	xmlNode *fragment;
 	xmlNode *newNode;
-	zend_class_entry *ce;
 	dom_object *newNodeObj;
-	int stricterror;
 
-	if (document == NULL) {
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, 1);
-		return NULL;
-	}
-
-	if (contextNode->type == XML_DOCUMENT_NODE || contextNode->type == XML_HTML_DOCUMENT_NODE) {
-		documentNode = (xmlDoc *) contextNode;
-	} else {
-		documentNode = contextNode->doc;
-	}
+	documentNode = dom_doc_from_context_node(contextNode);
 
 	fragment = xmlNewDocFragment(documentNode);
 
@@ -168,80 +166,59 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 		return NULL;
 	}
 
-	stricterror = dom_get_strict_error(document);
-
 	for (i = 0; i < nodesc; i++) {
 		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
-			ce = Z_OBJCE(nodes[i]);
+			newNodeObj = Z_DOMOBJ_P(&nodes[i]);
+			newNode = dom_object_get_node(newNodeObj);
 
-			if (instanceof_function(ce, dom_node_class_entry)) {
-				newNodeObj = Z_DOMOBJ_P(&nodes[i]);
-				newNode = dom_object_get_node(newNodeObj);
+			if (newNode->parent != NULL) {
+				xmlUnlinkNode(newNode);
+			}
 
-				if (newNode->doc != documentNode) {
-					php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror);
-					goto err;
-				}
+			newNodeObj->document = document;
+			xmlSetTreeDoc(newNode, documentNode);
 
-				if (newNode->parent != NULL) {
+			/* Citing from the docs (https://gnome.pages.gitlab.gnome.org/libxml2/devhelp/libxml2-tree.html#xmlAddChild): 
+			 * "Add a new node to @parent, at the end of the child (or property) list merging adjacent TEXT nodes (in which case @cur is freed)".
+			 * So we must take a copy if this situation arises to prevent a use-after-free. */
+			bool will_free = newNode->type == XML_TEXT_NODE && fragment->last && fragment->last->type == XML_TEXT_NODE;
+			if (will_free) {
+				newNode = xmlCopyNode(newNode, 1);
+			}
+
+			if (newNode->type == XML_DOCUMENT_FRAG_NODE) {
+				/* Unpack document fragment nodes, the behaviour differs for different libxml2 versions. */
+				newNode = newNode->children;
+				while (newNode) {
+					xmlNodePtr next = newNode->next;
 					xmlUnlinkNode(newNode);
+					if (!xmlAddChild(fragment, newNode)) {
+						goto err;
+					}
+					newNode = next;
 				}
-
-				newNodeObj->document = document;
-				xmlSetTreeDoc(newNode, documentNode);
-
-				if (newNode->type == XML_ATTRIBUTE_NODE) {
-					goto hierarchy_request_err;
-				}
-
-				/* Citing from the docs (https://gnome.pages.gitlab.gnome.org/libxml2/devhelp/libxml2-tree.html#xmlAddChild): 
-				 * "Add a new node to @parent, at the end of the child (or property) list merging adjacent TEXT nodes (in which case @cur is freed)".
-				 * So we must take a copy if this situation arises to prevent a use-after-free. */
-				bool will_free = newNode->type == XML_TEXT_NODE && fragment->last && fragment->last->type == XML_TEXT_NODE;
+			} else if (!xmlAddChild(fragment, newNode)) {
 				if (will_free) {
-					newNode = xmlCopyNode(newNode, 1);
+					xmlFreeNode(newNode);
 				}
-
-				if (newNode->type == XML_DOCUMENT_FRAG_NODE) {
-					/* Unpack document fragment nodes, the behaviour differs for different libxml2 versions. */
-					newNode = newNode->children;
-					while (newNode) {
-						xmlNodePtr next = newNode->next;
-						xmlUnlinkNode(newNode);
-						if (!xmlAddChild(fragment, newNode)) {
-							goto hierarchy_request_err;
-						}
-						newNode = next;
-					}
-				} else if (!xmlAddChild(fragment, newNode)) {
-					if (will_free) {
-						xmlFreeNode(newNode);
-					}
-					goto hierarchy_request_err;
-				}
-			} else {
-				zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_type_name(&nodes[i]));
 				goto err;
 			}
-		} else if (Z_TYPE(nodes[i]) == IS_STRING) {
+		} else {
+			ZEND_ASSERT(Z_TYPE(nodes[i]) == IS_STRING);
+
 			newNode = xmlNewDocText(documentNode, (xmlChar *) Z_STRVAL(nodes[i]));
 
 			xmlSetTreeDoc(newNode, documentNode);
 
 			if (!xmlAddChild(fragment, newNode)) {
 				xmlFreeNode(newNode);
-				goto hierarchy_request_err;
+				goto err;
 			}
-		} else {
-			zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_type_name(&nodes[i]));
-			goto err;
 		}
 	}
 
 	return fragment;
 
-hierarchy_request_err:
-	php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
 err:
 	xmlFreeNode(fragment);
 	return NULL;
@@ -264,17 +241,39 @@ static void dom_fragment_assign_parent_node(xmlNodePtr parentNode, xmlNodePtr fr
 	fragment->last = NULL;
 }
 
-static zend_result dom_hierarchy_node_list(xmlNodePtr parentNode, zval *nodes, int nodesc)
+static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *document, xmlNodePtr parentNode, zval *nodes, int nodesc)
 {
+	if (document == NULL) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, 1);
+		return FAILURE;
+	}
+
+	xmlDocPtr documentNode = dom_doc_from_context_node(parentNode);
+
 	for (int i = 0; i < nodesc; i++) {
-		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
+		zend_uchar type = Z_TYPE(nodes[i]);
+		if (type == IS_OBJECT) {
 			const zend_class_entry *ce = Z_OBJCE(nodes[i]);
 
 			if (instanceof_function(ce, dom_node_class_entry)) {
-				if (dom_hierarchy(parentNode, dom_object_get_node(Z_DOMOBJ_P(nodes + i))) != SUCCESS) {
+				xmlNodePtr node = dom_object_get_node(Z_DOMOBJ_P(nodes + i));
+
+				if (node->doc != documentNode) {
+					php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(document));
 					return FAILURE;
 				}
+
+				if (node->type == XML_ATTRIBUTE_NODE || dom_hierarchy(parentNode, node) != SUCCESS) {
+					php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(document));
+					return FAILURE;
+				}
+			} else {
+				zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_type_name(&nodes[i]));
+				return FAILURE;
 			}
+		} else if (type != IS_STRING) {
+			zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_type_name(&nodes[i]));
+			return FAILURE;
 		}
 	}
 
@@ -286,8 +285,7 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 	xmlNode *parentNode = dom_object_get_node(context);
 	xmlNodePtr newchild, prevsib;
 
-	if (UNEXPECTED(dom_hierarchy_node_list(parentNode, nodes, nodesc) != SUCCESS)) {
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(context->document));
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
 		return;
 	}
 
@@ -329,8 +327,7 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 		return;
 	}
 
-	if (UNEXPECTED(dom_hierarchy_node_list(parentNode, nodes, nodesc) != SUCCESS)) {
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(context->document));
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
 		return;
 	}
 
@@ -414,6 +411,10 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 
 	doc = prevsib->doc;
 
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
+		return;
+	}
+
 	/* Spec step 4: convert nodes into fragment */
 	fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
 
@@ -464,6 +465,10 @@ void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 	}
 
 	doc = nextsib->doc;
+
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
+		return;
+	}
 
 	/* Spec step 4: convert nodes into fragment */
 	fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
@@ -554,6 +559,10 @@ void dom_child_replace_with(dom_object *context, zval *nodes, int nodesc)
 	}
 
 	xmlNodePtr insertion_point = child->next;
+
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
+		return;
+	}
 
 	xmlNodePtr fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
 	if (UNEXPECTED(fragment == NULL)) {
