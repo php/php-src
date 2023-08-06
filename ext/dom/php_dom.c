@@ -1436,35 +1436,6 @@ void dom_normalize (xmlNodePtr nodep)
 }
 /* }}} end dom_normalize */
 
-
-/* {{{ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) */
-void dom_set_old_ns(xmlDoc *doc, xmlNs *ns) {
-	if (doc == NULL)
-		return;
-
-	ZEND_ASSERT(ns->next == NULL);
-
-	/* Note: we'll use a prepend strategy instead of append to
-	 * make sure we don't lose performance when the list is long.
-	 * As libxml2 could assume the xml node is the first one, we'll place our
-	 * new entries after the first one. */
-
-	if (doc->oldNs == NULL) {
-		doc->oldNs = (xmlNsPtr) xmlMalloc(sizeof(xmlNs));
-		if (doc->oldNs == NULL) {
-			return;
-		}
-		memset(doc->oldNs, 0, sizeof(xmlNs));
-		doc->oldNs->type = XML_LOCAL_NAMESPACE;
-		doc->oldNs->href = xmlStrdup(XML_XML_NAMESPACE);
-		doc->oldNs->prefix = xmlStrdup((const xmlChar *)"xml");
-	} else {
-		ns->next = doc->oldNs->next;
-	}
-	doc->oldNs->next = ns;
-}
-/* }}} end dom_set_old_ns */
-
 static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr search_parent)
 {
 	xmlNsPtr nsptr, nsdftptr, curns, prevns = NULL;
@@ -1486,7 +1457,7 @@ static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePt
 					/* Note: we can't get here if the ns is already on the oldNs list.
 					 * This is because in that case the definition won't be on the node, and
 					 * therefore won't be in the nodep->nsDef list. */
-					dom_set_old_ns(doc, curns);
+					php_libxml_set_old_ns(doc, curns);
 					curns = prevns;
 				}
 			}

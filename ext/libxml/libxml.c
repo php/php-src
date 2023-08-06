@@ -103,6 +103,39 @@ zend_module_entry libxml_module_entry = {
 
 /* }}} */
 
+static void php_libxml_set_old_ns_list(xmlDocPtr doc, xmlNsPtr first, xmlNsPtr last)
+{
+	if (UNEXPECTED(doc == NULL)) {
+		return;
+	}
+
+	ZEND_ASSERT(last->next == NULL);
+
+	/* Note: we'll use a prepend strategy instead of append to
+	 * make sure we don't lose performance when the list is long.
+	 * As libxml2 could assume the xml node is the first one, we'll place our
+	 * new entries after the first one. */
+
+	if (UNEXPECTED(doc->oldNs == NULL)) {
+		doc->oldNs = (xmlNsPtr) xmlMalloc(sizeof(xmlNs));
+		if (doc->oldNs == NULL) {
+			return;
+		}
+		memset(doc->oldNs, 0, sizeof(xmlNs));
+		doc->oldNs->type = XML_LOCAL_NAMESPACE;
+		doc->oldNs->href = xmlStrdup(XML_XML_NAMESPACE);
+		doc->oldNs->prefix = xmlStrdup((const xmlChar *)"xml");
+	} else {
+		last->next = doc->oldNs->next;
+	}
+	doc->oldNs->next = first;
+}
+
+PHP_LIBXML_API void php_libxml_set_old_ns(xmlDocPtr doc, xmlNsPtr ns)
+{
+	php_libxml_set_old_ns_list(doc, ns, ns);
+}
+
 static void php_libxml_unlink_entity(void *data, void *table, const xmlChar *name)
 {
 	xmlEntityPtr entity = data;
@@ -211,8 +244,41 @@ static void php_libxml_node_free(xmlNodePtr node)
 					xmlHashScan(dtd->pentities, php_libxml_unlink_entity, dtd->pentities);
 					/* No unlinking of notations, see remark above at case XML_NOTATION_NODE. */
 				}
-				ZEND_FALLTHROUGH;
+				xmlFreeNode(node);
+				break;
 			}
+			case XML_ELEMENT_NODE:
+				if (node->nsDef && node->doc) {
+					/* Make the namespace declaration survive the destruction of the holding element.
+					 * This prevents a use-after-free on the namespace declaration.
+					 *
+					 * The main problem is that libxml2 doesn't have a reference count on the namespace declaration.
+					 * We don't actually need to save the namespace declaration if we know the subtree it belongs to
+					 * has no references from userland. However, we can't know that without traversing the whole subtree
+					 * (=> slow), or without adding some subtree metadata (=> also slow).
+					 * So we have to assume we need to save everything.
+					 *
+					 * However, namespace declarations are quite rare in comparison to other node types.
+					 * Most node types are either elements, text or attributes.
+					 * And you only need one namespace declaration per namespace (in principle).
+					 * So I expect the number of namespace declarations to be low for an average XML document.
+					 *
+					 * In the worst possible case we have to save all namespace declarations when we for example remove
+					 * the whole document. But given the above reasoning this likely won't be a lot of declarations even
+					 * in the worst case.
+					 * A single declaration only takes about 48 bytes of memory, and I don't expect the worst case to occur
+					 * very often (why would you remove the whole document?).
+					 */
+					xmlNsPtr ns = node->nsDef;
+					xmlNsPtr last = ns;
+					while (last->next) {
+						last = last->next;
+					}
+					php_libxml_set_old_ns_list(node->doc, ns, last);
+					node->nsDef = NULL;
+				}
+				xmlFreeNode(node);
+				break;
 			default:
 				xmlFreeNode(node);
 				break;

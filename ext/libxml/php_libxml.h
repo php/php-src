@@ -134,6 +134,7 @@ PHP_LIBXML_API int php_libxml_xmlCheckUTF8(const unsigned char *s);
 PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext);
 PHP_LIBXML_API void php_libxml_issue_error(int level, const char *msg);
 PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable);
+PHP_LIBXML_API void php_libxml_set_old_ns(xmlDocPtr doc, xmlNsPtr ns);
 
 /* Init/shutdown functions*/
 PHP_LIBXML_API void php_libxml_initialize(void);

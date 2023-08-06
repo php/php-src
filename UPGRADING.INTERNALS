@@ -148,6 +148,8 @@ PHP 8.3 INTERNALS UPGRADE NOTES
      dom_parent_node_before() now use an uint32_t argument for the number of nodes instead of int.
    - There is now a helper function php_dom_get_content_into_zval() to get the contents of a node.
      This avoids allocation if possible.
+   - The function dom_set_old_ns() has been moved into ext/libxml as php_libxml_set_old_ns() and
+     is now publicly exposed as an API.
 
  g. ext/libxml
    - Two new functions: php_libxml_invalidate_node_list_cache_from_doc() and

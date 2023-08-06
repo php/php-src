@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - DOM:
   . adoptNode now respects the strict error checking property. (nielsdos)
   . Align DOMChildNode parent checks with spec. (nielsdos)
+  . Fixed bug #80927 (Removing documentElement after creating attribute node:
+    possible use-after-free). (nielsdos)
 
 - Opcache:
   . Avoid resetting JIT counter handlers from multiple processes/threads.
