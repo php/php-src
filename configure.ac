@@ -375,6 +375,9 @@ case $host_alias in
       AC_MSG_ERROR([Problem with enabling atomic. Please check config.log for details.])
     ])
     ;;
+  *darwin*)
+    PHP_ADD_FRAMEWORK(Foundation)
+    ;;
 esac
 
 dnl Check for inet_aton in -lc, -lbind and -lresolv.
