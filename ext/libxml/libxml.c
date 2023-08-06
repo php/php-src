@@ -103,6 +103,39 @@ zend_module_entry libxml_module_entry = {
 
 /* }}} */
 
+static void php_libxml_set_old_ns_list(xmlDocPtr doc, xmlNsPtr first, xmlNsPtr last)
+{
+	if (UNEXPECTED(doc == NULL)) {
+		return;
+	}
+
+	ZEND_ASSERT(last->next == NULL);
+
+	/* Note: we'll use a prepend strategy instead of append to
+	 * make sure we don't lose performance when the list is long.
+	 * As libxml2 could assume the xml node is the first one, we'll place our
+	 * new entries after the first one. */
+
+	if (UNEXPECTED(doc->oldNs == NULL)) {
+		doc->oldNs = (xmlNsPtr) xmlMalloc(sizeof(xmlNs));
+		if (doc->oldNs == NULL) {
+			return;
+		}
+		memset(doc->oldNs, 0, sizeof(xmlNs));
+		doc->oldNs->type = XML_LOCAL_NAMESPACE;
+		doc->oldNs->href = xmlStrdup(XML_XML_NAMESPACE);
+		doc->oldNs->prefix = xmlStrdup((const xmlChar *)"xml");
+	} else {
+		last->next = doc->oldNs->next;
+	}
+	doc->oldNs->next = first;
+}
+
+PHP_LIBXML_API void php_libxml_set_old_ns(xmlDocPtr doc, xmlNsPtr ns)
+{
+	php_libxml_set_old_ns_list(doc, ns, ns);
+}
+
 static void php_libxml_unlink_entity(void *data, void *table, const xmlChar *name)
 {
 	xmlEntityPtr entity = data;
@@ -213,8 +246,25 @@ static void php_libxml_node_free(xmlNodePtr node)
 					xmlHashScan(dtd->pentities, php_libxml_unlink_entity, dtd->pentities);
 					/* No unlinking of notations, see remark above at case XML_NOTATION_NODE. */
 				}
-				ZEND_FALLTHROUGH;
+				xmlFreeNode(node);
+				break;
 			}
+			case XML_ELEMENT_NODE:
+				if (node->nsDef && node->doc) {
+					/* Make the namespace definition survive the destruction of the holding element.
+					 * Strictly speaking, this isn't necessary if we know the definition isn't used
+					 * or if the subtree does not contain userland references to it.
+					 * But almost all namespace definitions are used somewhere, because otherwise they
+					 * (usually) wouldn't exist in the first place. */
+					xmlNsPtr ns = node->nsDef;
+					xmlNsPtr last = ns;
+					while (last->next) {
+						last = last->next;
+					}
+					php_libxml_set_old_ns_list(node->doc, ns, last);
+					node->nsDef = NULL;
+				}
+				ZEND_FALLTHROUGH;
 			default:
 				xmlFreeNode(node);
 				break;
