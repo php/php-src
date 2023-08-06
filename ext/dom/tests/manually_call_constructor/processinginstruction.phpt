@@ -23,11 +23,12 @@ $doc->documentElement->appendChild($pi);
 echo $doc->saveXML();
 
 ?>
---EXPECTF--
+--EXPECT--
 string(5) "name1"
 string(6) "value1"
-
-Fatal error: Uncaught Error: Couldn't fetch DOMProcessingInstruction. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+string(5) "name2"
+string(6) "value2"
+<?xml version="1.0"?>
+<container><?name2 value2?></container>
+<?xml version="1.0"?>
+<container><?name2 value2?><?name3 value3?></container>

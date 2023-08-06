@@ -23,10 +23,10 @@ $doc->documentElement->appendChild($cdata);
 echo $doc->saveXML();
 
 ?>
---EXPECTF--
+--EXPECT--
 string(8) "my value"
-
-Fatal error: Uncaught Error: Couldn't fetch DOMCdataSection. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+string(12) "my new value"
+<?xml version="1.0"?>
+<container><![CDATA[my new value]]></container>
+<?xml version="1.0"?>
+<container><![CDATA[my new value]]><![CDATA[my even newer value]]></container>

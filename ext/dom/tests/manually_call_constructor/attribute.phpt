@@ -23,11 +23,12 @@ $doc->documentElement->setAttributeNode($attr);
 echo $doc->saveXML();
 
 ?>
---EXPECTF--
+--EXPECT--
 string(9) "attribute"
 string(8) "my value"
-
-Fatal error: Uncaught Error: Couldn't fetch DOMAttr. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+string(12) "newattribute"
+string(12) "my new value"
+<?xml version="1.0"?>
+<container newattribute="my new value"/>
+<?xml version="1.0"?>
+<container newattribute="my new value" newnewattribute="my even newer value"/>

@@ -23,11 +23,12 @@ $doc->documentElement->appendChild($entityRef);
 echo $doc->saveXML();
 
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "foo"
 string(0) ""
-
-Fatal error: Uncaught Error: Couldn't fetch DOMEntityReference. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+string(4) "foo2"
+string(0) ""
+<?xml version="1.0"?>
+<container>&foo2;</container>
+<?xml version="1.0"?>
+<container>&foo2;&foo3;</container>

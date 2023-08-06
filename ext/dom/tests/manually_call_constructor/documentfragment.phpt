@@ -23,10 +23,10 @@ $fragment->__construct();
 echo $doc->saveXML();
 
 ?>
---EXPECTF--
+--EXPECT--
 string(0) ""
-
-Fatal error: Uncaught Error: Couldn't fetch DOMDocumentFragment. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+string(0) ""
+<?xml version="1.0"?>
+<container/>
+<?xml version="1.0"?>
+<container/>

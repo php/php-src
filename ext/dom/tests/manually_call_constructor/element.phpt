@@ -23,11 +23,12 @@ $doc->documentElement->appendChild($element);
 echo $doc->saveXML();
 
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "foo"
 string(8) "my value"
-
-Fatal error: Uncaught Error: Couldn't fetch DOMElement. Node no longer exists in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+string(4) "foo2"
+string(12) "my new value"
+<?xml version="1.0"?>
+<container><foo2>my new value</foo2></container>
+<?xml version="1.0"?>
+<container><foo2>my new value</foo2><foo3>my new new value</foo3></container>
