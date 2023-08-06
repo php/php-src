@@ -1204,17 +1204,13 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 {
 	xmlDocPtr ret;
 	xmlParserCtxtPtr ctxt = NULL;
-	dom_object *intern;
-	php_libxml_ref_obj *document = NULL;
 	int validate, recover, resolve_externals, keep_blanks, substitute_ent;
 	int resolved_path_len;
 	int old_error_reporting = 0;
 	char *directory=NULL, resolved_path[MAXPATHLEN + 1];
 
-	if (id != NULL) {
-		intern = Z_DOMOBJ_P(id);
-		document = intern->document;
-	}
+	dom_object *intern = Z_DOMOBJ_P(id);
+	php_libxml_ref_obj *document = intern->document;
 
 	libxml_doc_props const* doc_props = dom_get_doc_props_read_only(document);
 	validate = doc_props->validateonparse;
