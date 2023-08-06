@@ -39,7 +39,7 @@ zend_string *bc_num2str_ex(bc_num num, size_t scale)
 	zend_string *str;
 	char *sptr;
 	char *nptr;
-	int  index, signch;
+	int index, signch;
 
 	/* Number of sign chars. */
 	signch = num->n_sign != PLUS && !bc_is_zero_for_scale(num, MIN(num->n_scale, scale));
@@ -56,23 +56,23 @@ zend_string *bc_num2str_ex(bc_num num, size_t scale)
 
 	/* Load the whole number. */
 	nptr = num->n_value;
-	for (index=num->n_len; index>0; index--) {
+	for (index = num->n_len; index > 0; index--) {
 		*sptr++ = BCD_CHAR(*nptr++);
 	}
 
 	/* Now the fraction. */
 	if (scale > 0) {
 		*sptr++ = '.';
-		for (index=0; index<scale && index<num->n_scale; index++) {
+		for (index = 0; index < scale && index < num->n_scale; index++) {
 			*sptr++ = BCD_CHAR(*nptr++);
 		}
-		for (index = num->n_scale; index<scale; index++) {
+		for (index = num->n_scale; index < scale; index++) {
 			*sptr++ = BCD_CHAR(0);
 		}
 	}
 
 	/* Terminate the string and return it! */
 	*sptr = '\0';
-	ZSTR_LEN(str) = sptr - (char *)ZSTR_VAL(str);
+	ZSTR_LEN(str) = sptr - (char *) ZSTR_VAL(str);
 	return str;
 }

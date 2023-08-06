@@ -30,7 +30,6 @@
 *************************************************************************/
 
 #include <stdbool.h>
-#include <stddef.h>
 #include "bcmath.h"
 
 /* In some places we need to check if the number NUM is almost zero.
@@ -53,9 +52,9 @@ bool bc_is_near_zero(bc_num num, size_t scale)
 		count--;
 	}
 
-	if (count != 0 && (count != 1 || *--nptr != 1)) {
-		return false;
-	} else {
+	if (count == 0 || (count == 1 && *--nptr == 1)) {
 		return true;
+	} else {
+		return false;
 	}
 }

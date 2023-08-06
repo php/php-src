@@ -30,12 +30,11 @@
 *************************************************************************/
 
 #include "bcmath.h"
-#include <stddef.h>
 #include <stdbool.h>
 
 /* In some places we need to check if the number NUM is zero. */
 
-bool bc_is_zero_for_scale (bc_num num, size_t scale)
+bool bc_is_zero_for_scale(bc_num num, size_t scale)
 {
 	size_t count;
 	char *nptr;

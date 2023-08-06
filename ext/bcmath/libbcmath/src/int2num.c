@@ -37,7 +37,7 @@ void bc_int2num(bc_num *num, int val)
 {
 	char buffer[30];
 	char *bptr, *vptr;
-	int  ix = 1;
+	int ix = 1;
 	char neg = 0;
 
 	/* Sign. */
@@ -55,7 +55,7 @@ void bc_int2num(bc_num *num, int val)
 	while (val != 0) {
 		*bptr++ = val % BASE;
 		val = val / BASE;
-		ix++; 		/* Count the digits. */
+		ix++;        /* Count the digits. */
 	}
 
 	/* Make the number. */

@@ -30,7 +30,6 @@
 *************************************************************************/
 
 #include "bcmath.h"
-#include <stddef.h>
 
 /* Convert a number NUM to a long.  The function returns only the integer
    part of the number.  For numbers that are too large to represent as
@@ -39,16 +38,13 @@
 
 long bc_num2long(bc_num num)
 {
-	long val;
-	char *nptr;
-
 	/* Extract the int value, ignore the fraction. */
-	val = 0;
-	nptr = num->n_value;
+	long val = 0;
+	char *nptr = num->n_value;
 	for (size_t index = num->n_len; index > 0; index--) {
 		char n = *nptr++;
 
-		if (val > LONG_MAX/BASE) {
+		if (val > LONG_MAX / BASE) {
 			return 0;
 		}
 		val *= BASE;
