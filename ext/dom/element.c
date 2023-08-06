@@ -97,7 +97,7 @@ PHP_METHOD(DOMElement, __construct)
 	intern = Z_DOMOBJ_P(ZEND_THIS);
 	oldnode = dom_object_get_node(intern);
 	if (oldnode != NULL) {
-		php_libxml_node_free_resource(oldnode );
+		php_libxml_node_decrement_resource((php_libxml_node_object *)intern);
 	}
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern);
 }
