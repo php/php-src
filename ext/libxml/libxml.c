@@ -107,9 +107,7 @@ static void php_libxml_unlink_entity(void *data, void *table, const xmlChar *nam
 {
 	xmlEntityPtr entity = data;
 	if (entity->_private != NULL) {
-		if (xmlHashLookup(table, name) == entity) {
-			xmlHashRemoveEntry(table, name, NULL);
-		}
+		xmlHashRemoveEntry(table, name, NULL);
 	}
 }
 
