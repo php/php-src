@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.0beta3
 
+- Core:
+  . Fixed strerror_r detection at configuration time. (Kévin Dunglas)
+
 - DOM:
   . adoptNode now respects the strict error checking property. (nielsdos)
 

@@ -648,8 +648,10 @@ asprintf \
 nanosleep \
 memmem \
 memrchr \
-strerror_r \
 )
+
+dnl Check for strerror_r, and if its a POSIX-compatible or a GNU specific version.
+AC_FUNC_STRERROR_R
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R
 
