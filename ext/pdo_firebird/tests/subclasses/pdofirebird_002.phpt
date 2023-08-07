@@ -19,7 +19,7 @@ echo "PdoFirebird class exists.\n";
 $db =  Pdo::connect($dsn, $user, $pass);
 
 if (!$db instanceof PdoFirebird) {
-    echo "Wrong class type. Should be PdoOdbc but is [" . get_class($db) . "\n";
+    echo "Wrong class type. Should be PdoFirebird but is [" . get_class($db) . "\n";
 }
 
 $db->query('RECREATE TABLE test (idx int NOT NULL PRIMARY KEY, name VARCHAR(20))');
