@@ -118,8 +118,6 @@ jobs:
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
         uses: ./.github/actions/install-linux-x32
-      - name: Test
-        uses: ./.github/actions/test-linux
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
@@ -149,10 +147,6 @@ jobs:
           make -j$(sysctl -n hw.logicalcpu) >/dev/null
       - name: make install
         run: sudo make install
-      - name: Test
-        uses: ./.github/actions/test-macos
-        with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-macos
         with:
