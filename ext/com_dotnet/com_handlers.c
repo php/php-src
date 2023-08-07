@@ -431,10 +431,6 @@ static int com_objects_compare(zval *object1, zval *object2)
 
 static zend_result com_object_cast(zend_object *readobj, zval *writeobj, int type)
 {
-	if (type == IS_ARRAY) {
-		return FAILURE;
-	}
-
 	php_com_dotnet_object *obj;
 	VARIANT v;
 	VARTYPE vt = VT_EMPTY;

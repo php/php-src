@@ -1819,7 +1819,6 @@ static zend_result cast_object(zval *object, int type, char *contents)
 			convert_scalar_to_number(object);
 			break;
 		default:
-			zval_ptr_dtor_nogc(object);
 			return FAILURE;
 	}
 	return SUCCESS;
