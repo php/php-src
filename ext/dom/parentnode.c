@@ -240,8 +240,8 @@ static void dom_fragment_assign_parent_node(xmlNodePtr parentNode, xmlNodePtr fr
 
 static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *document, xmlNodePtr parentNode, zval *nodes, int nodesc)
 {
-	if (document == NULL) {
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, 1);
+	if (UNEXPECTED(parentNode == NULL)) {
+		/* No error required, this must be a no-op per spec */
 		return FAILURE;
 	}
 
@@ -391,10 +391,9 @@ void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 
 	/* Spec step 1 */
 	parentNode = prevsib->parent;
-	/* Spec step 2 */
-	if (!parentNode) {
-		int stricterror = dom_get_strict_error(context->document);
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+
+	/* Sanity check for fragment, includes spec step 2 */
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
 		return;
 	}
 
@@ -408,10 +407,6 @@ void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 	}
 
 	doc = prevsib->doc;
-
-	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
-		return;
-	}
 
 	php_libxml_invalidate_node_list_cache_from_doc(doc);
 
@@ -448,10 +443,9 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 
 	/* Spec step 1 */
 	parentNode = nextsib->parent;
-	/* Spec step 2 */
-	if (!parentNode) {
-		int stricterror = dom_get_strict_error(context->document);
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+
+	/* Sanity check for fragment, includes spec step 2 */
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
 		return;
 	}
 
@@ -465,10 +459,6 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 	}
 
 	doc = nextsib->doc;
-
-	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
-		return;
-	}
 
 	php_libxml_invalidate_node_list_cache_from_doc(doc);
 
@@ -537,7 +527,7 @@ void dom_child_node_remove(dom_object *context)
 		return;
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(context->document->ptr);
+	php_libxml_invalidate_node_list_cache_from_doc(child->doc);
 
 	xmlUnlinkNode(child);
 }
@@ -550,10 +540,9 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 
 	/* Spec step 1 */
 	xmlNodePtr parentNode = child->parent;
-	/* Spec step 2 */
-	if (!parentNode) {
-		int stricterror = dom_get_strict_error(context->document);
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+
+	/* Sanity check for fragment, includes spec step 2 */
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
 		return;
 	}
 
@@ -571,11 +560,8 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 		viable_next_sibling = viable_next_sibling->next;
 	}
 
-	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
-		return;
-	}
-
-	php_libxml_invalidate_node_list_cache_from_doc(context->document->ptr);
+	xmlDocPtr doc = parentNode->doc;
+	php_libxml_invalidate_node_list_cache_from_doc(doc);
 
 	/* Spec step 4: convert nodes into fragment */
 	xmlNodePtr fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
@@ -586,7 +572,6 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 	/* Spec step 5: perform the replacement */
 
 	xmlNodePtr newchild = fragment->children;
-	xmlDocPtr doc = parentNode->doc;
 
 	/* Unlink it unless it became a part of the fragment.
 	 * Freeing will be taken care of by the lifetime of the returned dom object. */
@@ -621,7 +606,7 @@ void dom_parent_node_replace_children(dom_object *context, zval *nodes, uint32_t
 		return;
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(context->document->ptr);
+	php_libxml_invalidate_node_list_cache_from_doc(thisp->doc);
 
 	dom_remove_all_children(thisp);
 

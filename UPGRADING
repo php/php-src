@@ -46,6 +46,14 @@ PHP 8.3 UPGRADE NOTES
     iterating over the WeakMap (reachability via iteration is considered weak).
     Previously, such entries would never be automatically removed.
 
+- DOM:
+  . DOMChildNode::after(), DOMChildNode::before(), DOMChildNode::replaceWith()
+    on a node that has no parent is now a no-op instead of a hierarchy exception,
+    which is the behaviour spec demands.
+  . Using the DOMParentNode and DOMChildNode methods without a document now works
+    instead of throwing a HIERARCHY_REQUEST_ERR DOMException. This is in line with
+    the behaviour spec demands.
+
 - FFI:
   . C functions that have a return type of void now return null instead of
     returning the following object object(FFI\CData:void) { }
