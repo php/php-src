@@ -31,6 +31,8 @@ ZEND_API zend_class_entry *zend_ce_dict_collection;
 ZEND_API zend_object_handlers zend_seq_collection_object_handlers;
 ZEND_API zend_object_handlers zend_dict_collection_object_handlers;
 
+static int seq_objects_compare(zval *object1, zval *object2);
+
 static int zend_implement_collection(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (class_type->ce_flags & ZEND_ACC_COLLECTION) {
@@ -51,7 +53,7 @@ void zend_register_collection_ce(void)
 
 	memcpy(&zend_seq_collection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_seq_collection_object_handlers.clone_obj = NULL;
-	zend_seq_collection_object_handlers.compare = zend_objects_not_comparable;
+	zend_seq_collection_object_handlers.compare = seq_objects_compare;
 
 	zend_ce_dict_collection = register_class_DictCollection();
 	zend_ce_dict_collection->interface_gets_implemented = zend_implement_collection;
@@ -138,6 +140,35 @@ static int collection_is_equal_function(zval *z1, zval *z2)
 	is_equal_function(&result, z1, z2);
 
 	return Z_TYPE(result) == IS_TRUE ? 0 : 1;
+}
+
+static int seq_objects_compare(zval *object1, zval *object2)
+{
+	zval *value_prop_object1, *value_prop_object2;
+
+	if (!object1 || !object2) {
+		return ZEND_UNCOMPARABLE;
+	}
+
+	if (!instanceof_function(Z_OBJCE_P(object1), zend_ce_seq_collection)) {
+		return 1;
+	}
+	if (!instanceof_function(Z_OBJCE_P(object2), zend_ce_seq_collection)) {
+		return 1;
+	}
+
+	value_prop_object1 = zend_read_property_ex(Z_OBJCE_P(object1), Z_OBJ_P(object1), ZSTR_KNOWN(ZEND_STR_VALUE), true, NULL);
+	value_prop_object2 = zend_read_property_ex(Z_OBJCE_P(object2), Z_OBJ_P(object2), ZSTR_KNOWN(ZEND_STR_VALUE), true, NULL);
+
+	if (!value_prop_object1 || !value_prop_object2) {
+		return 1;
+	}
+
+	return (zend_hash_compare(
+		Z_ARRVAL_P(value_prop_object1),
+		Z_ARRVAL_P(value_prop_object2),
+		(compare_func_t) collection_is_equal_function, true
+	) != 0);
 }
 
 static ZEND_NAMED_FUNCTION(zend_collection_seq_add_func)
