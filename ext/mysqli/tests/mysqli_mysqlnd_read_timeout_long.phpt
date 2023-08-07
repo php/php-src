@@ -4,6 +4,7 @@ mysqlnd.net_read_timeout > default_socket_timeout
 mysqli
 --SKIPIF--
 <?php
+if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
 require_once 'connect.inc';
 
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {

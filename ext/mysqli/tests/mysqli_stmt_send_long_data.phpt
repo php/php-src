@@ -4,6 +4,7 @@ mysqli_stmt_send_long_data()
 mysqli
 --SKIPIF--
 <?php
+if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
 require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
