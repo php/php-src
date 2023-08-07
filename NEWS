@@ -17,6 +17,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-11791 (Wrong default value of DOMDocument::xmlStandalone).
     (nielsdos)
   . Fix json_encode result on DOMDocument. (nielsdos)
+  . Fix manually calling __construct() on DOM classes. (nielsdos)
+  . Fixed bug GH-11830 (ParentNode methods should perform their checks
+    upfront). (nielsdos)
 
 - FFI:
   . Fix leaking definitions when using FFI::cdef()->new(...). (ilutov)
