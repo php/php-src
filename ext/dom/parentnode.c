@@ -396,8 +396,6 @@ void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 	parentNode = prevsib->parent;
 	/* Spec step 2 */
 	if (!parentNode) {
-		int stricterror = dom_get_strict_error(context->document);
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
 		return;
 	}
 
@@ -453,8 +451,6 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 	parentNode = nextsib->parent;
 	/* Spec step 2 */
 	if (!parentNode) {
-		int stricterror = dom_get_strict_error(context->document);
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
 		return;
 	}
 
@@ -555,8 +551,6 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 	xmlNodePtr parentNode = child->parent;
 	/* Spec step 2 */
 	if (!parentNode) {
-		int stricterror = dom_get_strict_error(context->document);
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
 		return;
 	}
 
