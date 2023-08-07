@@ -47,11 +47,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - debug: true
-            zts: false
           - debug: false
+            zts: false
+            asan: false
+          - debug: true
             zts: true
-    name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+            asan: true
+    name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
@@ -70,7 +72,7 @@ jobs:
           # This duplicates the "job.name" expression above because
           # GitHub has no way to query the job name (github.job is the
           # job id, not the job name)
-          key: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}-${{hashFiles('main/php_version.h')}}"
+          key: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}-${{hashFiles('main/php_version.h')}}"
           append-timestamp: false
       - name: ./configure
         uses: ./.github/actions/configure-x64
@@ -78,24 +80,30 @@ jobs:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
+            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address" CC=clang CXX=clang++ --disable-opcache-jit' || '' }}
+          skipSlow: ${{ matrix.asan }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
         uses: ./.github/actions/install-linux
+        with:
+          withOci: ${{ !matrix.asan }}
       - name: Setup
         uses: ./.github/actions/setup-x64
       - name: Test
+        if: matrix.asan == false
         uses: ./.github/actions/test-linux
         with:
           testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
-      - name: Test Tracing JIT
+      - name: Test ${{ matrix.asan && 'OpCache' || 'Tracing JIT' }}
         uses: ./.github/actions/test-linux
         with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}_${{ matrix.asan && 'OpCache' || 'Tracing JIT' }}
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
+            ${{ !matrix.asan && '-d opcache.jit_buffer_size=16M' || '' }}
+            ${{ matrix.asan && '--asan -x' || '' }}
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   LINUX_X32:

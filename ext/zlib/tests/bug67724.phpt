@@ -2,6 +2,10 @@
 Bug #67724 (chained zlib filters silently fail with large amounts of data)
 --EXTENSIONS--
 zlib
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
+?>
 --FILE--
 <?php
 echo "Test\n";

@@ -4,6 +4,7 @@ mysqli_fetch_all()
 mysqli
 --SKIPIF--
 <?php
+if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
 require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
