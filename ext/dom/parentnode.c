@@ -280,6 +280,33 @@ static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *
 	return SUCCESS;
 }
 
+static void dom_pre_insert(xmlNodePtr insertion_point, xmlNodePtr parentNode, xmlNodePtr newchild, xmlNodePtr fragment)
+{
+	if (!insertion_point) {
+		/* Place it as last node */
+		if (parentNode->children) {
+			/* There are children */
+			newchild->prev = parentNode->last;
+			parentNode->last->next = newchild;
+		} else {
+			/* No children, because they moved out when they became a fragment */
+			parentNode->children = newchild;
+		}
+		parentNode->last = fragment->last;
+	} else {
+		/* Insert fragment before insertion_point */
+		fragment->last->next = insertion_point;
+		if (insertion_point->prev) {
+			insertion_point->prev->next = newchild;
+			newchild->prev = insertion_point->prev;
+		}
+		insertion_point->prev = fragment->last;
+		if (parentNode->children == insertion_point) {
+			parentNode->children = newchild;
+		}
+	}
+}
+
 void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 {
 	xmlNode *parentNode = dom_object_get_node(context);
@@ -357,33 +384,6 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 	}
 
 	xmlFree(fragment);
-}
-
-static void dom_pre_insert(xmlNodePtr insertion_point, xmlNodePtr parentNode, xmlNodePtr newchild, xmlNodePtr fragment)
-{
-	if (!insertion_point) {
-		/* Place it as last node */
-		if (parentNode->children) {
-			/* There are children */
-			newchild->prev = parentNode->last;
-			parentNode->last->next = newchild;
-		} else {
-			/* No children, because they moved out when they became a fragment */
-			parentNode->children = newchild;
-		}
-		parentNode->last = fragment->last;
-	} else {
-		/* Insert fragment before insertion_point */
-		fragment->last->next = insertion_point;
-		if (insertion_point->prev) {
-			insertion_point->prev->next = newchild;
-			newchild->prev = insertion_point->prev;
-		}
-		insertion_point->prev = fragment->last;
-		if (parentNode->children == insertion_point) {
-			parentNode->children = newchild;
-		}
-	}
 }
 
 void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
