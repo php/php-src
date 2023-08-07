@@ -547,26 +547,46 @@ void dom_child_node_remove(dom_object *context)
 
 void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 {
+	/* Spec link: https://dom.spec.whatwg.org/#dom-childnode-replacewith */
+
 	xmlNodePtr child = dom_object_get_node(context);
+
+	/* Spec step 1 */
 	xmlNodePtr parentNode = child->parent;
+	/* Spec step 2 */
+	if (!parentNode) {
+		int stricterror = dom_get_strict_error(context->document);
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+		return;
+	}
 
 	int stricterror = dom_get_strict_error(context->document);
 	if (UNEXPECTED(dom_child_removal_preconditions(child, stricterror) != SUCCESS)) {
 		return;
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(context->document->ptr);
-
-	xmlNodePtr insertion_point = child->next;
+	/* Spec step 3: find first following child not in nodes; otherwise null */
+	xmlNodePtr viable_next_sibling = child->next;
+	while (viable_next_sibling) {
+		if (!dom_is_node_in_list(nodes, nodesc, viable_next_sibling)) {
+			break;
+		}
+		viable_next_sibling = viable_next_sibling->next;
+	}
 
 	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
 		return;
 	}
 
+	php_libxml_invalidate_node_list_cache_from_doc(context->document->ptr);
+
+	/* Spec step 4: convert nodes into fragment */
 	xmlNodePtr fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
 	if (UNEXPECTED(fragment == NULL)) {
 		return;
 	}
+
+	/* Spec step 5: perform the replacement */
 
 	xmlNodePtr newchild = fragment->children;
 	xmlDocPtr doc = parentNode->doc;
@@ -580,7 +600,7 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 	if (newchild) {
 		xmlNodePtr last = fragment->last;
 
-		dom_pre_insert(insertion_point, parentNode, newchild, fragment);
+		dom_pre_insert(viable_next_sibling, parentNode, newchild, fragment);
 
 		dom_fragment_assign_parent_node(parentNode, fragment);
 		dom_reconcile_ns_list(doc, newchild, last);
