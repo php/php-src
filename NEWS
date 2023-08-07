@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   . Fix manually calling __construct() on DOM classes. (nielsdos)
   . Fixed bug GH-11830 (ParentNode methods should perform their checks
     upfront). (nielsdos)
+  . Fix segfault when DOMParentNode::prepend() is called when the child
+    disappears. (nielsdos)
 
 - FFI:
   . Fix leaking definitions when using FFI::cdef()->new(...). (ilutov)
