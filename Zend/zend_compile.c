@@ -9127,7 +9127,6 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 		zend_compile_collection_data_structure(ce, collection_data_structure_ast);
 
 		zend_collection_add_interfaces(ce);
-		zend_collection_register_handlers(ce);
 		zend_collection_register_props(ce);
 	}
 

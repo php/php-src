@@ -86,19 +86,6 @@ void zend_collection_add_interfaces(zend_class_entry *ce)
 
 }
 
-void zend_collection_register_handlers(zend_class_entry *ce)
-{
-	memcpy(&zend_seq_collection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	zend_seq_collection_object_handlers.clone_obj = NULL;
-	zend_seq_collection_object_handlers.compare = zend_objects_not_comparable;
-	ce->default_object_handlers = &zend_seq_collection_object_handlers;
-
-	memcpy(&zend_dict_collection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	zend_dict_collection_object_handlers.clone_obj = NULL;
-	zend_dict_collection_object_handlers.compare = zend_objects_not_comparable;
-	ce->default_object_handlers = &zend_dict_collection_object_handlers;
-}
-
 bool zend_collection_add_item(zend_object *object, zval *offset, zval *value);
 void zend_collection_set_item(zend_object *object, zval *offset, zval *value);
 int zend_collection_has_item(zend_object *object, zval *offset);
