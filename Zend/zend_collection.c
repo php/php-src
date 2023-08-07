@@ -132,6 +132,13 @@ static int key_type_allowed(zend_class_entry *ce, zval *offset)
 	return true;
 }
 
+static int collection_is_equal_function(zval *z1, zval *z2)
+{
+	zval result;
+	is_equal_function(&result, z1, z2);
+
+	return Z_TYPE(result) == IS_TRUE ? 0 : 1;
+}
 
 static ZEND_NAMED_FUNCTION(zend_collection_seq_add_func)
 {
@@ -268,6 +275,25 @@ static ZEND_NAMED_FUNCTION(zend_collection_seq_concat_func)
 	} ZEND_HASH_FOREACH_END();
 
 	RETURN_OBJ(clone);
+}
+
+static ZEND_NAMED_FUNCTION(zend_collection_seq_equals_func)
+{
+	zval *other;
+	zval *value_prop_us, *value_prop_other;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(other, zend_ce_seq_collection);
+	ZEND_PARSE_PARAMETERS_END();
+
+	value_prop_us = zend_read_property_ex(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_VALUE), true, NULL);
+	value_prop_other = zend_read_property_ex(Z_OBJCE_P(other), Z_OBJ_P(other), ZSTR_KNOWN(ZEND_STR_VALUE), true, NULL);
+
+	if (!value_prop_us || !value_prop_other) {
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(zend_hash_compare(Z_ARRVAL_P(value_prop_us), Z_ARRVAL_P(value_prop_other), (compare_func_t) collection_is_equal_function, true) == 0);
 }
 
 static ZEND_NAMED_FUNCTION(zend_collection_seq_map_func)
@@ -611,6 +637,7 @@ void zend_collection_register_funcs(zend_class_entry *ce)
 			REGISTER_FUNCTION(ZEND_STR_WITHOUT, zend_collection_seq_without_func, arginfo_class_SeqCollection_without, 1);
 			REGISTER_FUNCTION(ZEND_STR_SET, zend_collection_seq_set_func, arginfo_class_SeqCollection_set, 2);
 			REGISTER_FUNCTION(ZEND_STR_CONCAT, zend_collection_seq_concat_func, arginfo_class_SeqCollection_concat, 1);
+			REGISTER_FUNCTION(ZEND_STR_EQUALS, zend_collection_seq_equals_func, arginfo_class_SeqCollection_equals, 1);
 			REGISTER_FUNCTION(ZEND_STR_MAP, zend_collection_seq_map_func, arginfo_class_SeqCollection_map, 2);
 			break;
 		case ZEND_COLLECTION_DICT:

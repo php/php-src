@@ -26,10 +26,10 @@ interface SeqCollection
     // This should really be static $other, but the language doesn't allow that.
     // Equivalent of + static.
     public function concat(object $other): static;
-/*
+
     // True if both seqs have the same values in the same order.
-    public function equals(SeqCollection $other): bool;
-*/
+    public function equals(object $other): bool;
+
     // $fn is callable(mixed $val)
     // The return type is $targetType, but that can't be expressed statically.
     public function map(callable $fn, string $targetType): object;
