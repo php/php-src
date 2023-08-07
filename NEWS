@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-10964 (Improve man page about the built-in server).
     (Alexandre Daubois)
 
+- Core:
+  . Fixed strerror_r detection at configuration time. (Kévin Dunglas)
+
 - DOM:
   . Fix DOMEntity field getter bugs. (nielsdos)
   . Fix incorrect attribute existence check in DOMElement::setAttributeNodeNS.
