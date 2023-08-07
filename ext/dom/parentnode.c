@@ -358,25 +358,18 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 		return;
 	}
 
-	xmlNodePtr newchild, nextsib;
 	xmlNode *fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
 
 	if (fragment == NULL) {
 		return;
 	}
 
-	newchild = fragment->children;
-	nextsib = parentNode->children;
+	xmlNode *newchild = fragment->children;
 
 	if (newchild) {
 		xmlNodePtr last = fragment->last;
-		parentNode->children = newchild;
-		fragment->last->next = nextsib;
-		/* Note: the first child may be moved into the fragment by dom_zvals_to_fragment(),
-		 * hence the NULL check is needed even though we checked for the null at the start of the function. */
-		if (nextsib) {
-			nextsib->prev = last;
-		}
+
+		dom_pre_insert(parentNode->children, parentNode, newchild, fragment);
 
 		dom_fragment_assign_parent_node(parentNode, fragment);
 
