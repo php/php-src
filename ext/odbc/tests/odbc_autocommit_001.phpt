@@ -11,8 +11,8 @@ include 'config.inc';
 
 $conn = odbc_connect($dsn, $user, $pass);
 
-var_dump(odbc_autocommit($conn));
 var_dump(odbc_autocommit($conn, true));
+var_dump(odbc_autocommit($conn));
 var_dump(odbc_autocommit($conn, null));
 
 var_dump(odbc_autocommit($conn, false));
