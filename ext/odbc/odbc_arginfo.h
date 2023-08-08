@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 64fbf9feef2929640a5e8615df6a085c504b7914 */
+ * Stub hash: c7d91d30503ac09c8610ce86846c36123b87f62a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_close_all, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -29,7 +29,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_cursor, 0, 1, MAY_BE_STRING
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_SQLDATASOURCES)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_data_source, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_data_source, 0, 2, MAY_BE_ARRAY|MAY_BE_NULL|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, odbc)
 	ZEND_ARG_TYPE_INFO(0, fetch_type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
