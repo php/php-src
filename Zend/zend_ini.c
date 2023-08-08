@@ -547,6 +547,34 @@ typedef enum {
 	ZEND_INI_PARSE_QUANTITY_UNSIGNED,
 } zend_ini_parse_quantity_signed_result_t;
 
+static const char *zend_ini_consume_quantity_prefix(const char *const digits, const char *const str_end) {
+	const char *digits_consumed = digits;
+	/* Ignore leading whitespace. */
+	while (digits_consumed < str_end && zend_is_whitespace(*digits_consumed)) {++digits_consumed;}
+	if (digits_consumed[0] == '+' || digits_consumed[0] == '-') {
+		++digits_consumed;
+	}
+
+	if (digits_consumed[0] == '0' && !isdigit(digits_consumed[1])) {
+		/* Value is just 0 */
+		if ((digits_consumed+1) == str_end) {
+			return digits;
+		}
+
+		switch (digits_consumed[1]) {
+			case 'x':
+			case 'X':
+			case 'o':
+			case 'O':
+			case 'b':
+			case 'B':
+				digits_consumed += 2;
+				break;
+		}
+	}
+	return digits_consumed;
+}
+
 static zend_ulong zend_ini_parse_quantity_internal(zend_string *value, zend_ini_parse_quantity_signed_result_t signed_result, zend_string **errstr) /* {{{ */
 {
 	char *digits_end = NULL;
@@ -629,6 +657,18 @@ static zend_ulong zend_ini_parse_quantity_internal(zend_string *value, zend_ini_
         }
         digits += 2;
 		if (UNEXPECTED(digits == str_end)) {
+			/* Escape the string to avoid null bytes and to make non-printable chars
+			 * visible */
+			smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
+			smart_str_0(&invalid);
+
+			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no digits after base prefix, interpreting as \"0\" for backwards compatibility",
+							ZSTR_VAL(invalid.s));
+
+			smart_str_free(&invalid);
+			return 0;
+		}
+		if (UNEXPECTED(digits != zend_ini_consume_quantity_prefix(digits, str_end))) {
 			/* Escape the string to avoid null bytes and to make non-printable chars
 			 * visible */
 			smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
