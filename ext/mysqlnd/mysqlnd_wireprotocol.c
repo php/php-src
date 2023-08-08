@@ -2435,8 +2435,10 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command)(
 		case CONN_READY:
 			break;
 		case CONN_QUIT_SENT:
-			SET_CLIENT_ERROR(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
-			DBG_ERR("Server is gone");
+			if (command != COM_PING) {
+				SET_CLIENT_ERROR(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+				DBG_ERR("Server is gone");
+			}
 			DBG_RETURN(FAIL);
 		default:
 			SET_CLIENT_ERROR(error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, mysqlnd_out_of_sync);
@@ -2467,6 +2469,11 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command)(
 		DBG_ERR("Server is gone");
 		ret = FAIL;
 	}
+
+	if (command == COM_PING && error_info->error_no == CR_SERVER_GONE_ERROR) {
+		SET_EMPTY_ERROR(error_info);
+	}
+
 	PACKET_FREE(&cmd_packet);
 	DBG_RETURN(ret);
 }
@@ -2477,6 +2484,7 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command)(
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_OK)(
 						MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory,
+						const enum php_mysqlnd_server_command command,
 						MYSQLND_ERROR_INFO * const error_info,
 						MYSQLND_UPSERT_STATUS * const upsert_status,
 						const bool ignore_upsert_status,  /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
@@ -2487,9 +2495,14 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_OK)(
 
 	payload_decoder_factory->m.init_ok_packet(&ok_response);
 	DBG_ENTER("mysqlnd_protocol::send_command_handle_OK");
+
 	if (FAIL == (ret = PACKET_READ(payload_decoder_factory->conn, &ok_response))) {
-		DBG_INF("Error while reading OK packet");
-		SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
+		if (command == COM_PING && error_info->error_no == CR_SERVER_GONE_ERROR) {
+			SET_EMPTY_ERROR(error_info);
+		} else {
+			DBG_INF("Error while reading OK packet");
+			SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
+		}
 		goto end;
 	}
 	DBG_INF_FMT("OK from server");
@@ -2588,7 +2601,7 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_response)(
 
 	switch (ok_packet) {
 		case PROT_OK_PACKET:
-			ret = payload_decoder_factory->m.send_command_handle_OK(payload_decoder_factory, error_info, upsert_status, ignore_upsert_status, last_message);
+			ret = payload_decoder_factory->m.send_command_handle_OK(payload_decoder_factory, command, error_info, upsert_status, ignore_upsert_status, last_message);
 			break;
 		case PROT_EOF_PACKET:
 			ret = payload_decoder_factory->m.send_command_handle_EOF(payload_decoder_factory, error_info, upsert_status);

@@ -1017,6 +1017,7 @@ typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_c
 
 typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_OK)(
 			MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory,
+			const enum php_mysqlnd_server_command command,
 			MYSQLND_ERROR_INFO * const error_info,
 			MYSQLND_UPSERT_STATUS * const upsert_status,
 			const bool ignore_upsert_status,  /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
