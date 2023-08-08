@@ -128,12 +128,8 @@ static bool dom_is_node_in_list(const zval *nodes, uint32_t nodesc, const xmlNod
 {
 	for (uint32_t i = 0; i < nodesc; i++) {
 		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
-			const zend_class_entry *ce = Z_OBJCE(nodes[i]);
-
-			if (instanceof_function(ce, dom_node_class_entry)) {
-				if (dom_object_get_node(Z_DOMOBJ_P(nodes + i)) == node_to_find) {
-					return true;
-				}
+			if (dom_object_get_node(Z_DOMOBJ_P(nodes + i)) == node_to_find) {
+				return true;
 			}
 		}
 	}
@@ -398,6 +394,10 @@ void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 		return;
 	}
 
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
+		return;
+	}
+
 	/* Spec step 3: find first following child not in nodes; otherwise null */
 	xmlNodePtr viable_next_sibling = prevsib->next;
 	while (viable_next_sibling) {
@@ -408,10 +408,6 @@ void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 	}
 
 	doc = prevsib->doc;
-
-	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
-		return;
-	}
 
 	php_libxml_invalidate_node_list_cache_from_doc(doc);
 
@@ -455,6 +451,10 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 		return;
 	}
 
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
+		return;
+	}
+
 	/* Spec step 3: find first following child not in nodes; otherwise null */
 	xmlNodePtr viable_previous_sibling = nextsib->prev;
 	while (viable_previous_sibling) {
@@ -465,10 +465,6 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 	}
 
 	doc = nextsib->doc;
-
-	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
-		return;
-	}
 
 	php_libxml_invalidate_node_list_cache_from_doc(doc);
 
@@ -562,6 +558,10 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 		return;
 	}
 
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
+		return;
+	}
+
 	/* Spec step 3: find first following child not in nodes; otherwise null */
 	xmlNodePtr viable_next_sibling = child->next;
 	while (viable_next_sibling) {
@@ -569,10 +569,6 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 			break;
 		}
 		viable_next_sibling = viable_next_sibling->next;
-	}
-
-	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
-		return;
 	}
 
 	php_libxml_invalidate_node_list_cache_from_doc(context->document->ptr);
