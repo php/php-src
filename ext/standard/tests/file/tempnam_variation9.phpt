@@ -2,7 +2,7 @@
 Test tempnam() function: usage variations - test prefix maximum size
 --SKIPIF--
 <?php
-if (PHP_OS_FAMILY !== 'Windows') {
+if (PHP_OS_FAMILY === 'Windows') {
     die("skip Do not run on Windows");
 }
 ?>
