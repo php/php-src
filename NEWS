@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Avoid resetting JIT counter handlers from multiple processes/threads.
     (ilutov)
 
+- Standard:
+  . Fixed bug GH-11870 (Fix off-by-one bug when truncating tempnam prefix)
+    (athos-ribeiro)
+
 03 Aug 2023, PHP 8.3.0beta2
 
 - Bcmath
