@@ -251,11 +251,26 @@ static void php_libxml_node_free(xmlNodePtr node)
 			}
 			case XML_ELEMENT_NODE:
 				if (node->nsDef && node->doc) {
-					/* Make the namespace definition survive the destruction of the holding element.
-					 * Strictly speaking, this isn't necessary if we know the definition isn't used
-					 * or if the subtree does not contain userland references to it.
-					 * But almost all namespace definitions are used somewhere, because otherwise they
-					 * (usually) wouldn't exist in the first place. */
+					/* Make the namespace declaration survive the destruction of the holding element.
+					 * This prevents a use-after-free on the namespace declaration.
+					 *
+					 * The main problem is that libxml2 doesn't have a reference count on the namespace declaration.
+					 * We don't actually need to save the namespace declaration if we know the subtree it belongs to
+					 * has no references from userland. However, we can't know that without traversing the whole subtree
+					 * (=> slow), or without adding some subtree metadata (=> also slow).
+					 * So we have to assume we need to save everything.
+					 *
+					 * However, namespace declarations are quite rare in comparison to other node types.
+					 * Most node types are either elements, text or attributes.
+					 * And you only need one namespace declaration per namespace (in principle).
+					 * So I expect the number of namespace declarations to be low for an average XML document.
+					 *
+					 * In the worst possible case we have to save all namespace declarations when we for example remove
+					 * the whole document. But given the above reasoning this likely won't be a lot of declarations even
+					 * in the worst case.
+					 * A single declaration only takes about 48 bytes of memory, and I don't expect the worst case to occur
+					 * very often (why would you remove the whole document?).
+					 */
 					xmlNsPtr ns = node->nsDef;
 					xmlNsPtr last = ns;
 					while (last->next) {
