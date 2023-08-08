@@ -2569,7 +2569,7 @@ PHP_FUNCTION(odbc_autocommit)
 			odbc_sql_error(conn, SQL_NULL_HSTMT, "Set autocommit");
 			RETURN_FALSE;
 		}
-		RETVAL_TRUE;
+		RETURN_TRUE;
 	} else {
 		SQLINTEGER status;
 
@@ -2578,7 +2578,7 @@ PHP_FUNCTION(odbc_autocommit)
 			odbc_sql_error(conn, SQL_NULL_HSTMT, "Get commit status");
 			RETURN_FALSE;
 		}
-		RETVAL_LONG((zend_long)status);
+		RETURN_LONG((zend_long)status);
 	}
 }
 /* }}} */
