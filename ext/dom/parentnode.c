@@ -530,7 +530,7 @@ void dom_child_node_remove(dom_object *context)
 		return;
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(context->document->ptr);
+	php_libxml_invalidate_node_list_cache_from_doc(child->doc);
 
 	xmlUnlinkNode(child);
 }
@@ -563,7 +563,8 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 		viable_next_sibling = viable_next_sibling->next;
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(context->document->ptr);
+	xmlDocPtr doc = parentNode->doc;
+	php_libxml_invalidate_node_list_cache_from_doc(doc);
 
 	/* Spec step 4: convert nodes into fragment */
 	xmlNodePtr fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
@@ -574,7 +575,6 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 	/* Spec step 5: perform the replacement */
 
 	xmlNodePtr newchild = fragment->children;
-	xmlDocPtr doc = parentNode->doc;
 
 	/* Unlink it unless it became a part of the fragment.
 	 * Freeing will be taken care of by the lifetime of the returned dom object. */
@@ -609,7 +609,7 @@ void dom_parent_node_replace_children(dom_object *context, zval *nodes, uint32_t
 		return;
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(context->document->ptr);
+	php_libxml_invalidate_node_list_cache_from_doc(thisp->doc);
 
 	dom_remove_all_children(thisp);
 
