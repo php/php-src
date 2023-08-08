@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed strerror_r detection at configuration time. (Kévin Dunglas)
+  . Fixed segfault during freeing of some incompletely initialized objects due
+    to OOM error (PDO, SPL, XSL). (ilutov)
 
 - DOM:
   . adoptNode now respects the strict error checking property. (nielsdos)

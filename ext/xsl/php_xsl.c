@@ -59,11 +59,15 @@ void xsl_objects_free_storage(zend_object *object)
 
 	zend_object_std_dtor(&intern->std);
 
-	zend_hash_destroy(intern->parameter);
-	FREE_HASHTABLE(intern->parameter);
+	if (intern->parameter) {
+		zend_hash_destroy(intern->parameter);
+		FREE_HASHTABLE(intern->parameter);
+	}
 
-	zend_hash_destroy(intern->registered_phpfunctions);
-	FREE_HASHTABLE(intern->registered_phpfunctions);
+	if (intern->registered_phpfunctions) {
+		zend_hash_destroy(intern->registered_phpfunctions);
+		FREE_HASHTABLE(intern->registered_phpfunctions);
+	}
 
 	if (intern->node_list) {
 		zend_hash_destroy(intern->node_list);
