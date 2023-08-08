@@ -158,6 +158,10 @@ static int seq_collection_compare(zval *object1, zval *object2)
 		return 1;
 	}
 
+	if (Z_OBJ_P(object1) == Z_OBJ_P(object2)) {
+		return 0;
+	}
+
 	value_prop_object1 = zend_read_property_ex(Z_OBJCE_P(object1), Z_OBJ_P(object1), ZSTR_KNOWN(ZEND_STR_VALUE), true, NULL);
 	value_prop_object2 = zend_read_property_ex(Z_OBJCE_P(object2), Z_OBJ_P(object2), ZSTR_KNOWN(ZEND_STR_VALUE), true, NULL);
 
@@ -350,6 +354,10 @@ static ZEND_NAMED_FUNCTION(zend_collection_seq_equals_func)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJECT_OF_CLASS(other, zend_ce_seq_collection);
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_OBJ_P(ZEND_THIS) == Z_OBJ_P(other)) {
+		RETURN_TRUE;
+	}
 
 	value_prop_us = zend_read_property_ex(Z_OBJCE_P(ZEND_THIS), Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_VALUE), true, NULL);
 	value_prop_other = zend_read_property_ex(Z_OBJCE_P(other), Z_OBJ_P(other), ZSTR_KNOWN(ZEND_STR_VALUE), true, NULL);

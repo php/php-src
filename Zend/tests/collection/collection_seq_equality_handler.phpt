@@ -34,6 +34,7 @@ $c5->add(new Book('Title 1'));
 $c5->add(new Book('Title 2'));
 
 // True
+var_dump($c1 == $c1);
 var_dump($c1 == $c2);
 var_dump($c1 == $c5);
 
@@ -53,6 +54,7 @@ var_dump($c1 == $c3);
 var_dump($c1 == $c4);
 ?>
 --EXPECTF--
+bool(true)
 bool(true)
 bool(true)
 bool(false)
