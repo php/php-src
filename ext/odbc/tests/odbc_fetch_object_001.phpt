@@ -12,15 +12,13 @@ include 'config.inc';
 $conn = odbc_connect($dsn, $user, $pass);
 
 odbc_exec($conn, 'CREATE TABLE fetch_object (foo INT)');
-odbc_exec($conn, 'INSERT INTO fetch_object VALUES (1)');
-odbc_exec($conn, 'INSERT INTO fetch_object VALUES (2)');
-odbc_exec($conn, 'INSERT INTO fetch_object VALUES (3)');
+odbc_exec($conn, 'INSERT INTO fetch_object VALUES (1), (2)');
 
 $res = odbc_exec($conn, 'SELECT * FROM fetch_object');
 
-var_dump(odbc_fetch_object($res, 1));
 var_dump(odbc_fetch_object($res));
 var_dump(odbc_fetch_object($res, 0));
+var_dump(odbc_fetch_object($res, 2));
 var_dump(odbc_fetch_object($res, 4));
 
 ?>
@@ -41,6 +39,6 @@ object(stdClass)#%d (%d) {
 }
 object(stdClass)#%d (%d) {
   ["foo"]=>
-  string(1) "3"
+  string(1) "2"
 }
 bool(false)

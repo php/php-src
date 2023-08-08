@@ -12,7 +12,6 @@ include 'config.inc';
 $conn = odbc_connect($dsn, $user, $pass);
 
 odbc_exec($conn, 'CREATE TABLE field_type (foo INT, bar TEXT, baz VARBINARY(50))');
-odbc_exec($conn, "INSERT INTO field_type VALUES (1, 'bar', CONVERT(VARBINARY(50), 'baz'))");
 
 $res = odbc_exec($conn, 'SELECT * FROM field_type');
 try {

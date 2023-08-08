@@ -13,9 +13,7 @@ $conn = odbc_connect($dsn, $user, $pass);
 
 odbc_exec($conn, 'CREATE TABLE fetch_row (test INT)');
 
-odbc_exec($conn, 'INSERT INTO fetch_row VALUES (1)');
-odbc_exec($conn, 'INSERT INTO fetch_row VALUES (2)');
-odbc_exec($conn, 'INSERT INTO fetch_row VALUES (3)');
+odbc_exec($conn, 'INSERT INTO fetch_row VALUES (1), (2)');
 
 $res = odbc_exec($conn, 'SELECT * FROM fetch_row');
 
@@ -27,7 +25,7 @@ var_dump(odbc_result($res, 'test'));
 var_dump(odbc_fetch_row($res, null));
 var_dump(odbc_result($res, 'test'));
 
-var_dump(odbc_fetch_row($res, 3));
+var_dump(odbc_fetch_row($res, 2));
 var_dump(odbc_result($res, 'test'));
 
 var_dump(odbc_fetch_row($res, 4));
@@ -48,5 +46,5 @@ string(1) "1"
 bool(true)
 string(1) "2"
 bool(true)
-string(1) "3"
+string(1) "2"
 bool(false)

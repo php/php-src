@@ -1,5 +1,5 @@
 --TEST--
-odbc_num_rows(): Getting the number of fields
+odbc_num_fields(): Getting the number of fields
 --EXTENSIONS--
 odbc
 --SKIPIF--

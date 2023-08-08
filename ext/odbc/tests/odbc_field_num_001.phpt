@@ -12,7 +12,6 @@ include 'config.inc';
 $conn = odbc_connect($dsn, $user, $pass);
 
 odbc_exec($conn, 'CREATE TABLE field_num (foo INT, bar REAL, baz VARBINARY(50))');
-odbc_exec($conn, "INSERT INTO field_num VALUES (1, 3.14, CONVERT(VARBINARY(50), 'baz'))");
 
 $res = odbc_exec($conn, 'SELECT * FROM field_num');
 var_dump(odbc_field_num($res, "foo"));

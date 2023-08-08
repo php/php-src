@@ -6,6 +6,10 @@ pdo_odbc
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
+
+if (ODBC_TYPE === "unixODBC") {
+    die("skip Fails with unixODBC");
+}
 ?>
 --FILE--
 <?php

@@ -12,9 +12,7 @@ include 'config.inc';
 $conn = odbc_connect($dsn, $user, $pass);
 
 odbc_exec($conn, 'CREATE TABLE num_rows (test INT)');
-odbc_exec($conn, 'INSERT INTO num_rows VALUES (1)');
-odbc_exec($conn, 'INSERT INTO num_rows VALUES (2)');
-odbc_exec($conn, 'INSERT INTO num_rows VALUES (3)');
+odbc_exec($conn, 'INSERT INTO num_rows VALUES (1), (2), (3)');
 
 $res = odbc_exec($conn, 'SELECT * FROM num_rows');
 var_dump(odbc_num_rows($res));
