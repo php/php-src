@@ -57,10 +57,9 @@ interface DictCollection
     // This should really be static $other, but the language doesn't allow that.
     // Equivalent of + static.
     public function concat(object $other): static;
-/*
+
     // True if both dicts have the same key/values in the same order.
-    public function equals(DictCollection $other): bool;
-*/
+    public function equals(object $other): bool;
 
     // $fn is callable(mixed $val, mixed $key)
     // The return type is $targetType, but that can't be expressed statically.

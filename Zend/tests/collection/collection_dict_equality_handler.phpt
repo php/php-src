@@ -1,5 +1,5 @@
 --TEST--
-Collection: Dictionary: Equals
+Collection: Dictionary: Comparison Handler
 --FILE--
 <?php
 
@@ -51,34 +51,33 @@ $c9 = new Books();
 $c9->add('two', new Book('Title 2'));
 $c9->add('one', new Book('Title 1'));
 
-
 // True
-var_dump($c1->equals($c1));
-var_dump($c1->equals($c2));
-var_dump($c1->equals($c7));
-var_dump($c1->equals($c9));
+var_dump($c1 == $c1);
+var_dump($c1 == $c2);
+var_dump($c1 == $c7);
+var_dump($c1 == $c9);
 
 $c2['tri'] = new Book('Title 3');
 
-var_dump($c2->equals($c3));
+var_dump($c2 == $c3);
 
 // False
-var_dump($c1->equals($c2));
-var_dump($c1->equals($c8));
-var_dump($c3->equals($c4));
-var_dump($c3->equals($c5));
-var_dump($c3->equals($c6));
+var_dump($c1 == $c2);
+var_dump($c1 == $c8);
+var_dump($c3 == $c4);
+var_dump($c3 == $c5);
+var_dump($c3 == $c6);
 
 unset($c4['XXX']);
 
 // True
-var_dump($c1->equals($c4));
+var_dump($c1 == $c4);
 
 unset($c6['XXX']);
 $c6['two'] = new Book('Title 2');
 
 // True
-var_dump($c3->equals($c6));
+var_dump($c3 == $c6);
 ?>
 --EXPECTF--
 bool(true)
