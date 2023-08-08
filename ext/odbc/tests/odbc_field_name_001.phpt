@@ -12,7 +12,6 @@ include 'config.inc';
 $conn = odbc_connect($dsn, $user, $pass);
 
 odbc_exec($conn, 'CREATE TABLE field_name (foo INT, bar INT, baz INT)');
-odbc_exec($conn, 'INSERT INTO field_name VALUES (1, 2, 3)');
 
 $res = odbc_exec($conn, 'SELECT * FROM field_name');
 try {

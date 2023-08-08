@@ -12,15 +12,13 @@ include 'config.inc';
 $conn = odbc_connect($dsn, $user, $pass);
 
 odbc_exec($conn, 'CREATE TABLE fetch_array (foo INT)');
-odbc_exec($conn, 'INSERT INTO fetch_array VALUES (1)');
-odbc_exec($conn, 'INSERT INTO fetch_array VALUES (2)');
-odbc_exec($conn, 'INSERT INTO fetch_array VALUES (3)');
+odbc_exec($conn, 'INSERT INTO fetch_array VALUES (1), (2)');
 
 $res = odbc_exec($conn, 'SELECT * FROM fetch_array');
 
-var_dump(odbc_fetch_array($res, 1));
 var_dump(odbc_fetch_array($res));
-var_dump(odbc_fetch_array($res, 3));
+var_dump(odbc_fetch_array($res, 0));
+var_dump(odbc_fetch_array($res, 2));
 var_dump(odbc_fetch_array($res, 4));
 
 ?>
@@ -41,6 +39,6 @@ array(1) {
 }
 array(1) {
   ["foo"]=>
-  string(1) "3"
+  string(1) "2"
 }
 bool(false)

@@ -12,7 +12,6 @@ include 'config.inc';
 $conn = odbc_connect($dsn, $user, $pass);
 
 odbc_exec($conn, 'CREATE TABLE field_precision (foo INT, bar REAL, baz VARBINARY(50))');
-odbc_exec($conn, "INSERT INTO field_precision VALUES (1, 3.14, CONVERT(VARBINARY(50), 'baz'))");
 
 $res = odbc_exec($conn, 'SELECT * FROM field_precision');
 try {
