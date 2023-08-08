@@ -1008,9 +1008,22 @@ void zend_collection_unset_item(zend_object *object, zval *offset)
 	value_prop = zend_read_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), true, &rv);
 	SEPARATE_ARRAY(value_prop);
 
+	// TODO: Should unset throw when an item with key 'offset' does not exist?
+
 	if (Z_TYPE_P(offset) == IS_STRING) {
 		zend_hash_del(HASH_OF(value_prop), Z_STR_P(offset));
 	} else {
+		zend_array *new_array;
+		zval new_zval;
+
 		zend_hash_index_del(HASH_OF(value_prop), Z_LVAL_P(offset));
+
+		if (!HT_IS_WITHOUT_HOLES(HASH_OF(value_prop))) {
+			new_array = zend_array_to_list(HASH_OF(value_prop));
+			ZVAL_ARR(&new_zval, new_array);
+			Z_PROP_FLAG_P(value_prop) |= IS_PROP_REINITABLE;
+			zend_update_property_ex(ce, object, ZSTR_KNOWN(ZEND_STR_VALUE), &new_zval);
+			Z_PROP_FLAG_P(value_prop) &= IS_PROP_REINITABLE;
+		}
 	}
 }

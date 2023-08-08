@@ -29,6 +29,7 @@ var_dump($c[1]);
 
 unset($c[1]);
 var_dump(isset($c[1]));
+var_dump(isset($c[2]));
 
 try {
 	var_dump(isset($c["eleven"]));
@@ -64,5 +65,6 @@ object(Article)#%d (%d) {
   ["title"]=>
   string(11) "Second Test"
 }
+bool(true)
 bool(false)
 TypeError: Key type string of element does not match Articles sequence key type int

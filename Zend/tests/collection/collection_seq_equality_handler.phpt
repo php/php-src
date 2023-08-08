@@ -50,7 +50,7 @@ unset($c4[1]);
 // True
 var_dump($c1 == $c3);
 
-// False (indexes aren't both ordered without gaps)
+// True (indexes have been automatically renumbered)
 var_dump($c1 == $c4);
 ?>
 --EXPECTF--
@@ -60,4 +60,4 @@ bool(true)
 bool(false)
 bool(false)
 bool(true)
-bool(false)
+bool(true)
