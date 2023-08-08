@@ -128,12 +128,8 @@ static bool dom_is_node_in_list(const zval *nodes, uint32_t nodesc, const xmlNod
 {
 	for (uint32_t i = 0; i < nodesc; i++) {
 		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
-			const zend_class_entry *ce = Z_OBJCE(nodes[i]);
-
-			if (instanceof_function(ce, dom_node_class_entry)) {
-				if (dom_object_get_node(Z_DOMOBJ_P(nodes + i)) == node_to_find) {
-					return true;
-				}
+			if (dom_object_get_node(Z_DOMOBJ_P(nodes + i)) == node_to_find) {
+				return true;
 			}
 		}
 	}
