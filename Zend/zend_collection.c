@@ -150,10 +150,10 @@ static int seq_objects_compare(zval *object1, zval *object2)
 		return ZEND_UNCOMPARABLE;
 	}
 
-	if (!instanceof_function(Z_OBJCE_P(object1), zend_ce_seq_collection)) {
+	if (Z_TYPE_P(object1) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(object1), zend_ce_seq_collection)) {
 		return 1;
 	}
-	if (!instanceof_function(Z_OBJCE_P(object2), zend_ce_seq_collection)) {
+	if (Z_TYPE_P(object2) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(object2), zend_ce_seq_collection)) {
 		return 1;
 	}
 
