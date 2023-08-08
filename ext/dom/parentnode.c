@@ -240,11 +240,6 @@ static void dom_fragment_assign_parent_node(xmlNodePtr parentNode, xmlNodePtr fr
 
 static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *document, xmlNodePtr parentNode, zval *nodes, int nodesc)
 {
-	if (UNEXPECTED(document == NULL)) {
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, 1 /* no document, so be strict */);
-		return FAILURE;
-	}
-
 	if (UNEXPECTED(parentNode == NULL)) {
 		/* No error required, this must be a no-op per spec */
 		return FAILURE;
