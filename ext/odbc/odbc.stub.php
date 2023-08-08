@@ -425,7 +425,7 @@ function odbc_field_scale($statement, int $field): int|false {}
 function odbc_field_num($statement, string $field): int|false {}
 
 /** @param resource $odbc */
-function odbc_autocommit($odbc, bool $enable = false): int|bool {}
+function odbc_autocommit($odbc, ?bool $enable = null): int|bool {}
 
 /** @param resource $odbc */
 function odbc_commit($odbc): bool {}
