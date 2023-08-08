@@ -84,7 +84,7 @@
  * SUCH DAMAGE.
  */
 
-static int php_do_open_temporary_file(const char *path, const char *pfx, zend_string **opened_path_p)
+static int php_do_open_temporary_file(const char *path, const char *pfx, const char *sfx, zend_string **opened_path_p)
 {
 #ifdef PHP_WIN32
 	char *opened_path = NULL;
@@ -97,7 +97,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	char cwd[MAXPATHLEN];
 	cwd_state new_state;
 	int fd = -1;
-#ifndef HAVE_MKSTEMP
+#ifndef HAVE_MKSTEMPS
 	int open_flags = O_CREAT | O_TRUNC | O_RDWR
 #ifdef PHP_WIN32
 		| _O_BINARY
@@ -135,7 +135,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 		trailing_slash = "/";
 	}
 
-	if (snprintf(opened_path, MAXPATHLEN, "%s%s%sXXXXXX", new_state.cwd, trailing_slash, pfx) >= MAXPATHLEN) {
+	if (snprintf(opened_path, MAXPATHLEN, "%s%s%sXXXXXX%s", new_state.cwd, trailing_slash, pfx, sfx) >= MAXPATHLEN) {
 		efree(new_state.cwd);
 		return -1;
 	}
@@ -175,8 +175,8 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 
 	free(cwdw);
 	free(pfxw);
-#elif defined(HAVE_MKSTEMP)
-	fd = mkstemp(opened_path);
+#elif defined(HAVE_MKSTEMPS)
+	fd = mkstemps(opened_path, strlen(sfx));
 #else
 	if (mktemp(opened_path)) {
 		fd = VCWD_OPEN(opened_path, open_flags);
@@ -283,13 +283,16 @@ PHPAPI const char* php_get_temporary_directory(void)
  * This function should do its best to return a file pointer to a newly created
  * unique file, on every platform.
  */
-PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, zend_string **opened_path_p, uint32_t flags)
+PHPAPI int php_open_temporary_fd_ex2(const char *dir, const char *pfx, const char *sfx, zend_string **opened_path_p, uint32_t flags)
 {
 	int fd;
 	const char *temp_dir;
 
 	if (!pfx) {
 		pfx = "tmp.";
+	}
+	if (!sfx) {
+		sfx = "";
 	}
 	if (opened_path_p) {
 		*opened_path_p = NULL;
@@ -302,7 +305,7 @@ def_tmp:
 		if (temp_dir &&
 		    *temp_dir != '\0' &&
 		    (!(flags & PHP_TMP_FILE_OPEN_BASEDIR_CHECK_ON_FALLBACK) || !php_check_open_basedir(temp_dir))) {
-			return php_do_open_temporary_file(temp_dir, pfx, opened_path_p);
+			return php_do_open_temporary_file(temp_dir, pfx, sfx, opened_path_p);
 		} else {
 			return -1;
 		}
@@ -313,7 +316,7 @@ def_tmp:
 	}
 
 	/* Try the directory given as parameter. */
-	fd = php_do_open_temporary_file(dir, pfx, opened_path_p);
+	fd = php_do_open_temporary_file(dir, pfx, sfx, opened_path_p);
 	if (fd == -1) {
 		/* Use default temporary directory. */
 		if (!(flags & PHP_TMP_FILE_SILENT)) {
@@ -322,6 +325,11 @@ def_tmp:
 		goto def_tmp;
 	}
 	return fd;
+}
+
+PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, zend_string **opened_path_p, uint32_t flags)
+{
+	return php_open_temporary_fd_ex2(dir, pfx, NULL, opened_path_p, flags);
 }
 
 PHPAPI int php_open_temporary_fd(const char *dir, const char *pfx, zend_string **opened_path_p)
