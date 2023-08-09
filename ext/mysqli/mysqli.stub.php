@@ -1030,6 +1030,7 @@ class mysqli
     public function use_result(): mysqli_result|false {}
 
     /**
+     * @deprecated
      * @tentative-return-type
      * @alias mysqli_refresh
      */
@@ -1672,4 +1673,5 @@ function mysqli_use_result(mysqli $mysql): mysqli_result|false {}
 
 function mysqli_warning_count(mysqli $mysql): int {}
 
+/** @deprecated */
 function mysqli_refresh(mysqli $mysql, int $flags): bool {}
