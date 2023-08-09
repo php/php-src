@@ -1055,6 +1055,59 @@ PHP_FUNCTION(imagecopyresampled)
 }
 /* }}} */
 
+#if defined(HAVE_GD_COPY_ROTATED)
+PHP_FUNCTION(imagecopyrotated)
+{
+	zval *SIM, *DIM;
+	zend_long SX, SY, SW, SH, A;
+	gdImagePtr im_dst, im_src;
+	int srcH, srcW, srcY, srcX, angle;
+	double dstX, dstY;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OOddlllll", &DIM, gd_image_ce, &SIM, gd_image_ce, &dstX, &dstY, &SX, &SY, &SW, &SH, &A) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	im_dst = php_gd_libgdimageptr_from_zval_p(DIM);
+	im_src = php_gd_libgdimageptr_from_zval_p(SIM);
+
+	srcX = SX;
+	srcY = SY;
+	srcW = SW;
+	srcH = SH;
+	angle = A;
+
+	if (srcX < 0) {
+		zend_argument_value_error(5, "must be positive");
+		RETURN_THROWS();
+	}
+
+	if (srcY < 0) {
+		zend_argument_value_error(6, "must be positive");
+		RETURN_THROWS();
+	}
+
+	if (srcW <= 0) {
+		zend_argument_value_error(7, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (srcH <= 0) {
+		zend_argument_value_error(8, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (angle <= 0) {
+		zend_argument_value_error(9, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+
+	gdImageCopyRotated(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, angle);
+}
+#endif
+
+
 #ifdef PHP_WIN32
 /* {{{ Grab a window or its client area using a windows handle (HWND property in COM instance) */
 PHP_FUNCTION(imagegrabwindow)
