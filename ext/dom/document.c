@@ -842,7 +842,12 @@ PHP_METHOD(DOM_Document, createElementNS)
 	if (errorcode == 0) {
 		if (xmlValidateName((xmlChar *) localname, 0) == 0) {
 			nodep = xmlNewDocNode(docp, NULL, (xmlChar *) localname, (xmlChar *) value);
-			if (nodep != NULL && uri != NULL) {
+			if (UNEXPECTED(nodep == NULL)) {
+				php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+				RETURN_THROWS();
+			}
+
+			if (uri != NULL) {
 				xmlNsPtr nsptr = xmlSearchNsByHref(nodep->doc, nodep, (xmlChar *) uri);
 				if (nsptr == NULL) {
 					nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
@@ -860,14 +865,8 @@ PHP_METHOD(DOM_Document, createElementNS)
 	}
 
 	if (errorcode != 0) {
-		if (nodep != NULL) {
-			xmlFreeNode(nodep);
-		}
+		xmlFreeNode(nodep);
 		php_dom_throw_error(errorcode, dom_get_strict_error(intern->document));
-		RETURN_FALSE;
-	}
-
-	if (nodep == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -904,7 +903,12 @@ PHP_METHOD(DOM_Document, createAttributeNS)
 		if (errorcode == 0) {
 			if (xmlValidateName((xmlChar *) localname, 0) == 0) {
 				nodep = (xmlNodePtr) xmlNewDocProp(docp, (xmlChar *) localname, NULL);
-				if (nodep != NULL && uri_len > 0) {
+				if (UNEXPECTED(nodep == NULL)) {
+					php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+					RETURN_THROWS();
+				}
+
+				if (uri_len > 0) {
 					nsptr = xmlSearchNsByHref(nodep->doc, root, (xmlChar *) uri);
 					if (nsptr == NULL || nsptr->prefix == NULL) {
 						nsptr = dom_get_ns(root, uri, &errorcode, prefix ? prefix : "default");
@@ -926,14 +930,8 @@ PHP_METHOD(DOM_Document, createAttributeNS)
 	}
 
 	if (errorcode != 0) {
-		if (nodep != NULL) {
-			xmlFreeProp((xmlAttrPtr) nodep);
-		}
+		xmlFreeProp((xmlAttrPtr) nodep);
 		php_dom_throw_error(errorcode, dom_get_strict_error(intern->document));
-		RETURN_FALSE;
-	}
-
-	if (nodep == NULL) {
 		RETURN_FALSE;
 	}
 

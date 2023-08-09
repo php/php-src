@@ -172,7 +172,8 @@ PHP_METHOD(DOMImplementation, createDocument)
 		if (localname != NULL) {
 			xmlFree(localname);
 		}
-		RETURN_FALSE;
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		RETURN_THROWS();
 	}
 
 	if (doctype != NULL) {
@@ -195,8 +196,7 @@ PHP_METHOD(DOMImplementation, createDocument)
 			}
 			xmlFreeDoc(docp);
 			xmlFree(localname);
-			/* Need some better type of error here */
-			php_dom_throw_error(PHP_ERR, 1);
+			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 			RETURN_THROWS();
 		}
 

@@ -687,7 +687,8 @@ zend_result dom_node_prefix_write(dom_object *obj, zval *newval)
 					(nodep->type == XML_ATTRIBUTE_NODE && zend_string_equals_literal(prefix_str, "xmlns") &&
 					 strcmp(strURI, (char *) DOM_XMLNS_NAMESPACE)) ||
 					(nodep->type == XML_ATTRIBUTE_NODE && !strcmp((char *) nodep->name, "xmlns"))) {
-					ns = NULL;
+					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document));
+					return FAILURE;
 				} else {
 					curns = nsnode->nsDef;
 					while (curns != NULL) {
@@ -699,12 +700,11 @@ zend_result dom_node_prefix_write(dom_object *obj, zval *newval)
 					}
 					if (ns == NULL) {
 						ns = xmlNewNs(nsnode, nodep->ns->href, (xmlChar *)prefix);
+						if (UNEXPECTED(ns == NULL)) {
+							php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+							return FAILURE;
+						}
 					}
-				}
-
-				if (ns == NULL) {
-					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document));
-					return FAILURE;
 				}
 
 				xmlSetNs(nodep, ns);
