@@ -1026,6 +1026,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_refresh
      */
+    #[\Deprecated(since: '8.4', message: 'use FLUSH SQL statement instead')]
     public function refresh(int $flags): bool {}
 }
 
@@ -1664,4 +1665,5 @@ function mysqli_use_result(mysqli $mysql): mysqli_result|false {}
 
 function mysqli_warning_count(mysqli $mysql): int {}
 
+#[\Deprecated(since: '8.4', message: 'use FLUSH SQL statement instead')]
 function mysqli_refresh(mysqli $mysql, int $flags): bool {}
