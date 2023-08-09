@@ -57,7 +57,7 @@ require_once 'skipifconnectfailure.inc';
         printf("[013] Expecting boolean/true, got %s/%s, [%d] %s\n",
             gettype($tmp), $tmp, mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-    if (!mysqli_kill($link, mysqli_thread_id($link)))
+    if (!$link->query('KILL '.mysqli_thread_id($link)))
         printf("[014] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (true !== ($tmp = mysqli_stmt_fetch($stmt)))
