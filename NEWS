@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-10964 (Improve man page about the built-in server).
     (Alexandre Daubois)
 
+- Date:
+  . Fixed bug GH-11416 (Crash with DatePeriod when uninitialised objects are
+    passed in). (Derick)
+
 - Core:
   . Fixed strerror_r detection at configuration time. (Kévin Dunglas)
 
