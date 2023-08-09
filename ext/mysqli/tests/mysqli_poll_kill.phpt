@@ -27,7 +27,7 @@ require_once 'skipifconnectfailure.inc';
     // Sleep 0.1s - the asynchronous query should have been processed after the wait period
     usleep(100000);
     $thread_id = mysqli_thread_id($link);
-    mysqli_kill(get_connection(), $thread_id);
+    get_connection()->query('KILL '.$thread_id);
 
     $links = array($link);
     $errors = array($link);
@@ -82,7 +82,7 @@ require_once 'skipifconnectfailure.inc';
 
     usleep(100000);
     $thread_id = mysqli_thread_id($link);
-    mysqli_kill(get_connection(), $thread_id);
+    get_connection()->query('KILL '.$thread_id);
 
     // Yes, 1 - fetch OK packet of kill!
     $processed = 0;
@@ -140,7 +140,7 @@ require_once 'skipifconnectfailure.inc';
 
     $link = get_connection();
     $thread_id = mysqli_thread_id($link);
-    mysqli_kill(get_connection(), $thread_id);
+    get_connection()->query('KILL '.$thread_id);
     // Sleep 0.1s  to ensure the KILL gets recognized
     usleep(100000);
     if (false !== ($tmp = mysqli_query($link, "SELECT 1 AS 'processed before killed'", MYSQLI_ASYNC |  MYSQLI_USE_RESULT)))

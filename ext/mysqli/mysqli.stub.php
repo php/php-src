@@ -851,6 +851,7 @@ class mysqli
     public function init() {}
 
     /**
+     * @deprecated
      * @tentative-return-type
      * @alias mysqli_kill
      */
@@ -1505,6 +1506,7 @@ function mysqli_info(mysqli $mysql): ?string {}
 /** @refcount 1 */
 function mysqli_insert_id(mysqli $mysql): int|string {}
 
+/** @deprecated */
 function mysqli_kill(mysqli $mysql, int $process_id): bool {}
 
 function mysqli_more_results(mysqli $mysql): bool {}

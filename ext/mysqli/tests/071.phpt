@@ -38,9 +38,13 @@ require_once 'skipifconnectfailure.inc';
     $mysql->close();
     print "done!";
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
+
+Deprecated: Method mysqli::kill() is deprecated in %s
 bool(false)
 bool(true)
+
+Deprecated: Method mysqli::kill() is deprecated in %s
 bool(false)
 done!

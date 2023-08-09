@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 97775c6aba92e347f93a2d38cd41c4769eed738f */
+ * Stub hash: 0753cb7bb96af4893bb4f8ba52f16ff985c2fe53 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -867,7 +867,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_init, arginfo_mysqli_init)
 	ZEND_FE(mysqli_info, arginfo_mysqli_info)
 	ZEND_FE(mysqli_insert_id, arginfo_mysqli_insert_id)
-	ZEND_FE(mysqli_kill, arginfo_mysqli_kill)
+	ZEND_RAW_FENTRY("mysqli_kill", zif_mysqli_kill, arginfo_mysqli_kill, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(mysqli_more_results, arginfo_mysqli_more_results)
 	ZEND_FE(mysqli_multi_query, arginfo_mysqli_multi_query)
 	ZEND_FE(mysqli_next_result, arginfo_mysqli_next_result)
@@ -951,7 +951,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_RAW_FENTRY("get_server_info", zif_mysqli_get_server_info, arginfo_class_mysqli_get_server_info, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("get_warnings", zif_mysqli_get_warnings, arginfo_class_mysqli_get_warnings, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(mysqli, init, arginfo_class_mysqli_init, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
-	ZEND_RAW_FENTRY("kill", zif_mysqli_kill, arginfo_class_mysqli_kill, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("kill", zif_mysqli_kill, arginfo_class_mysqli_kill, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("multi_query", zif_mysqli_multi_query, arginfo_class_mysqli_multi_query, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("more_results", zif_mysqli_more_results, arginfo_class_mysqli_more_results, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("next_result", zif_mysqli_next_result, arginfo_class_mysqli_next_result, ZEND_ACC_PUBLIC, NULL, NULL)
