@@ -4957,9 +4957,9 @@ PHP_METHOD(DatePeriod, __construct)
 		}
 	} else {
 		/* check initialisation */
-		DATE_CHECK_INITIALIZED(Z_PHPDATE_P(start)->time, DateTimeInterface);
+		DATE_CHECK_INITIALIZED(Z_PHPDATE_P(start)->time, date_ce_interface);
 		if (end) {
-			DATE_CHECK_INITIALIZED(Z_PHPDATE_P(end)->time, DateTimeInterface);
+			DATE_CHECK_INITIALIZED(Z_PHPDATE_P(end)->time, date_ce_interface);
 		}
 
 		/* init */
