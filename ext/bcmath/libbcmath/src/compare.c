@@ -45,9 +45,11 @@ int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign, bool ignore_last)
 	/* First, compare signs. */
 	if (use_sign && n1->n_sign != n2->n_sign) {
 		if (n1->n_sign == PLUS) {
-			return (1);    /* Positive N1 > Negative N2 */
+			/* Positive N1 > Negative N2 */
+			return (1);
 		} else {
-			return (-1);    /* Negative N1 < Positive N1 */
+			/* Negative N1 < Positive N1 */
+			return (-1);
 		}
 	}
 
