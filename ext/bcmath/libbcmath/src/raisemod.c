@@ -30,6 +30,7 @@
 *************************************************************************/
 
 #include "bcmath.h"
+#include <stddef.h>
 
 /* Raise BASE to the EXPO power, reduced modulo MOD.  The result is placed in RESULT. */
 raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *result, size_t scale)

@@ -31,6 +31,7 @@
 
 #include "bcmath.h"
 #include <stdbool.h>
+#include <stddef.h>
 
 /* Take the square root NUM and return it in NUM with SCALE digits
    after the decimal place. */

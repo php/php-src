@@ -30,6 +30,7 @@
 *************************************************************************/
 
 #include "bcmath.h"
+#include <stddef.h>
 
 /* Convert a number NUM to a long.  The function returns only the integer
    part of the number.  For numbers that are too large to represent as

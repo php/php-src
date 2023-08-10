@@ -31,6 +31,7 @@
 
 #include "bcmath.h"
 #include <stdbool.h>
+#include <stddef.h>
 
 /* Convert strings to bc numbers.  Base 10 only.*/
 

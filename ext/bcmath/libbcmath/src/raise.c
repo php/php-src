@@ -32,6 +32,7 @@
 #include "bcmath.h"
 #include <assert.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 
 /* Raise NUM1 to the NUM2 power.  The result is placed in RESULT.

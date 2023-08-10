@@ -31,6 +31,7 @@
 
 #include "bcmath.h"
 #include <stdbool.h>
+#include <stddef.h>
 
 /* In some places we need to check if the number NUM is zero. */
 

@@ -31,6 +31,7 @@
 
 #include <stdbool.h>
 #include "bcmath.h"
+#include <stddef.h>
 
 /* In some places we need to check if the number NUM is almost zero.
    Specifically, all but the last digit is 0 and the last digit is 1.

@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include "bcmath.h"
 #include "private.h"
+#include <stddef.h>
 
 /* pn prints the number NUM in base 10. */
 
