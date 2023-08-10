@@ -38,8 +38,9 @@ zend_string *bc_num2str_ex(bc_num num, size_t scale)
 {
 	zend_string *str;
 	char *sptr;
-	char *nptr;
-	int index, signch;
+	const char *nptr = num->n_value;;
+	size_t index;
+	int signch;
 
 	/* Number of sign chars. */
 	signch = num->n_sign != PLUS && !bc_is_zero_for_scale(num, MIN(num->n_scale, scale));
@@ -55,7 +56,6 @@ zend_string *bc_num2str_ex(bc_num num, size_t scale)
 	if (signch) *sptr++ = '-';
 
 	/* Load the whole number. */
-	nptr = num->n_value;
 	for (index = num->n_len; index > 0; index--) {
 		*sptr++ = BCD_CHAR(*nptr++);
 	}
@@ -73,6 +73,6 @@ zend_string *bc_num2str_ex(bc_num num, size_t scale)
 
 	/* Terminate the string and return it! */
 	*sptr = '\0';
-	ZSTR_LEN(str) = sptr - (char *) ZSTR_VAL(str);
-	return str;
+	ZSTR_LEN(str) = sptr - ZSTR_VAL(str);
+	return (zend_string*)str;
 }
