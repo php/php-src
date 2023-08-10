@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed GH-11952 (Confusing warning when blocking entity loading via
     libxml_set_external_entity_loader). (nielsdos)
 
+- FFI:
+  . Implement GH-11934 (Allow to pass CData into struct and/or union fields).
+    (nielsdos, KapitanOczywisty)
+
 - FPM:
   . Fixed bug #76067 (system() function call leaks php-fpm listening sockets).
     (Mikhail Galanin, Jakub Zelenka)

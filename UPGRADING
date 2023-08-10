@@ -126,6 +126,10 @@ PHP 8.3 UPGRADE NOTES
 - CLI
   . It is now possible to lint multiple files.
 
+- FFI
+  . It is now possible to assign CData to other CData. This means you can
+    now assign CData to structs and fields.
+
 - Opcache
   . opcache_get_status()['scripts'][n]['revalidate'] now contains a Unix
     timestamp of when the next revalidation of the scripts timestamp is due,

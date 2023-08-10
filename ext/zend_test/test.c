@@ -1233,6 +1233,8 @@ PHP_ZEND_TEST_API void bug_gh9090_void_int_char_var(int i, char *fmt, ...) {
     va_end(args);
 }
 
+PHP_ZEND_TEST_API int gh11934b_ffi_var_test_cdata;
+
 #ifdef HAVE_COPY_FILE_RANGE
 /**
  * This function allows us to simulate early return of copy_file_range by setting the limit_copy_file_range ini setting.

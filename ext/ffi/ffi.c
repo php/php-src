@@ -739,6 +739,16 @@ static zend_always_inline zend_result zend_ffi_zval_to_cdata(void *ptr, zend_ffi
 	zend_string *str;
 	zend_ffi_type_kind kind = type->kind;
 
+	/* Pointer type has special handling of CData */
+	if (kind != ZEND_FFI_TYPE_POINTER && Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == zend_ffi_cdata_ce) {
+		zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(value);
+		if (zend_ffi_is_compatible_type(type, ZEND_FFI_TYPE(cdata->type)) &&
+			type->size == ZEND_FFI_TYPE(cdata->type)->size) {
+			memcpy(ptr, cdata->ptr, type->size);
+			return SUCCESS;
+		}
+	}
+
 again:
 	switch (kind) {
 		case ZEND_FFI_TYPE_FLOAT:
@@ -848,14 +858,7 @@ again:
 		case ZEND_FFI_TYPE_STRUCT:
 		case ZEND_FFI_TYPE_ARRAY:
 		default:
-			if (Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == zend_ffi_cdata_ce) {
-				zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(value);
-				if (zend_ffi_is_compatible_type(type, ZEND_FFI_TYPE(cdata->type)) &&
-				    type->size == ZEND_FFI_TYPE(cdata->type)->size) {
-					memcpy(ptr, cdata->ptr, type->size);
-					return SUCCESS;
-				}
-			}
+			/* Incompatible types, because otherwise the CData check at the entry point would've succeeded. */
 			zend_ffi_assign_incompatible(value, type);
 			return FAILURE;
 	}
