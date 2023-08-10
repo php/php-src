@@ -86,6 +86,7 @@ bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale)
 	unsigned int qdig, qguess, borrow, carry;
 	unsigned char *mval;
 	unsigned int norm;
+	bool zero;
 
 	/* Test for divide by zero. */
 	if (bc_is_zero(n2)) {
@@ -130,10 +131,17 @@ bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale)
 	}
 
 	/* Calculate the number of quotient digits. */
-	if (len2 > len1 + scale || len2 > len1) {
+	if (len2 > len1 + scale) {
 		qdigits = scale + 1;
+		zero = true;
 	} else {
-		qdigits = len1 - len2 + scale + 1;
+		zero = false;
+		if (len2 > len1) {
+			/* One for the zero integer part. */
+			qdigits = scale + 1;
+		} else {
+			qdigits = len1 - len2 + scale + 1;
+		}
 	}
 
 	/* Allocate and zero the storage for the quotient. */
@@ -144,7 +152,7 @@ bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale)
 	mval = (unsigned char *) safe_emalloc(1, len2, 1);
 
 	/* Now for the full divide algorithm. */
-	if (len2 <= len1 + scale) {
+	if (!zero) {
 		/* Normalize */
 		norm = 10 / ((int) *n2ptr + 1);
 		if (norm != 1) {
