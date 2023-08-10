@@ -55,7 +55,8 @@ void bc_int2num(bc_num *num, int val)
 	while (val != 0) {
 		*bptr++ = val % BASE;
 		val = val / BASE;
-		ix++;        /* Count the digits. */
+		/* Count the digits. */
+		ix++;
 	}
 
 	/* Make the number. */
