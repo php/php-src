@@ -53,9 +53,5 @@ bool bc_is_near_zero(bc_num num, size_t scale)
 		count--;
 	}
 
-	if (count == 0 || (count == 1 && *--nptr == 1)) {
-		return true;
-	} else {
-		return false;
-	}
+	return count == 0 || (count == 1 && *--nptr == 1);
 }
