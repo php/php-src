@@ -170,14 +170,10 @@ bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale)
 			}
 
 			/* Test qguess. */
-			if (
-					n2ptr[1] * qguess > (num1[qdig] * 10 + num1[qdig + 1] - *n2ptr * qguess) * 10 + num1[qdig + 2]
-					) {
+			if (n2ptr[1] * qguess > (num1[qdig] * 10 + num1[qdig + 1] - *n2ptr * qguess) * 10 + num1[qdig + 2]) {
 				qguess--;
 				/* And again. */
-				if (
-						n2ptr[1] * qguess > (num1[qdig] * 10 + num1[qdig + 1] - *n2ptr * qguess) * 10 + num1[qdig + 2]
-						) {
+				if (n2ptr[1] * qguess > (num1[qdig] * 10 + num1[qdig + 1] - *n2ptr * qguess) * 10 + num1[qdig + 2]) {
 					qguess--;
 				}
 			}
