@@ -159,17 +159,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   WINDOWS:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - x64: true
-            zts: false
-            opcache: true
-          - x64: false
-            zts: true
-            opcache: false
-    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    name: WINDOWS_X64_ZTS
     runs-on: windows-2019
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
@@ -177,27 +167,18 @@ jobs:
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
       PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0
       PHP_BUILD_CRT: vs16
-      PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
-      THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
-      INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
+      PLATFORM: x64
+      THREAD_SAFE: "1"
+      INTRINSICS: AVX2
       PARALLEL: -j2
-      OPCACHE: "${{ matrix.opcache && '1' || '0' }}"
+      OPCACHE: "1"
     steps:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
         uses: actions/checkout@v3
-      - name: Setup MySQL
-        run: |
-          choco install mysql -y --no-progress --params="/port:3306"
-          mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
-      - name: Setup MSSQL
-        run: |
-          choco install sql-server-express -y --no-progress --install-arguments="/SECURITYMODE=SQL /SAPWD=Password12!"
-      - name: Setup PostgreSQL
-        run: |
-          Set-Service -Name "postgresql-x64-14" -StartupType manual -Status Running
-          pwsh -Command { $env:PGPASSWORD="root"; & "$env:PGBIN\psql" -U postgres -c "ALTER USER postgres WITH PASSWORD 'Password12!';" }
+      - name: Setup
+        uses: ./.github/actions/setup-windows
       - name: Build
         run: .github/scripts/windows/build.bat
       - name: Test
