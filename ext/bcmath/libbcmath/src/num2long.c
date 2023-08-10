@@ -41,7 +41,7 @@ long bc_num2long(bc_num num)
 {
 	/* Extract the int value, ignore the fraction. */
 	long val = 0;
-	char *nptr = num->n_value;
+	const char *nptr = num->n_value;
 	for (size_t index = num->n_len; index > 0; index--) {
 		char n = *nptr++;
 
