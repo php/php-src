@@ -42,7 +42,9 @@
 void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 {
 	bc_num temp, power;
-	size_t rscale, pwrscale, calcscale;
+	size_t rscale;
+	size_t pwrscale;
+	size_t calcscale;
 	bool is_neg;
 
 	/* Special case if exponent is a zero. */
