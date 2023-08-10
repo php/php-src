@@ -47,6 +47,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-11550 (MySQL Statement has a empty query result when
     the response field has changed, also Segmentation fault).
     (Yurunsoft)
+  . Fixed invalid error message "Malformed packet" when connection is dropped.
+    (Kamil Tekiela)
 
 - Opcache:
   . Fixed bug GH-11715 (opcache.interned_strings_buffer either has no effect or

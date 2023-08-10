@@ -202,6 +202,7 @@ MYSQLND_METHOD(mysqlnd_pfc, send)(MYSQLND_PFC * const pfc, MYSQLND_VIO * const v
 	if (bytes_sent <= 0) {
 		DBG_ERR_FMT("Can't %zu send bytes", count);
 		SET_CLIENT_ERROR(error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+		bytes_sent = 0; // the return type is unsigned and 0 represents an error condition
 	}
 	DBG_RETURN(bytes_sent);
 }
