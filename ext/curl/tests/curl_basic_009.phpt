@@ -7,7 +7,7 @@ curl
 --FILE--
 <?php
 
-$url = substr(uniqid(),0,7)."://www.".uniqid().".".uniqid();
+$url = substr(uniqid(),0,7)."://www.example.com";
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 
