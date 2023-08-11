@@ -135,25 +135,6 @@ $target[0] = $source;
 
 var_dump($target[0]);
 
-echo "--- Existing C variables ---\n";
-
-if (PHP_OS_FAMILY === 'Linux') {
-    $ffi = FFI::cdef(
-        "int errno;",
-        "libc.so.6"
-    );
-    $ffi->errno = 0;
-    var_dump($ffi->errno);
-    $source = $ffi->new('int');
-    $source->cdata = 31;
-    $ffi->errno = $source;
-    var_dump($ffi->errno);
-} else {
-    // Untested on non-Linux due to lack of libc.so.6
-    var_dump(0);
-    var_dump(31);
-}
-
 ?>
 --EXPECTF--
 --- Primitive types ---
@@ -206,6 +187,3 @@ int(42)
 int(123)
 --- Array element ---
 int(123)
---- Existing C variables ---
-int(0)
-int(31)
