@@ -137,7 +137,7 @@ var_dump($target[0]);
 
 echo "--- Existing C variables ---\n";
 
-if (PHP_OS_FAMILY !== 'Windows') {
+if (PHP_OS_FAMILY === 'Linux') {
     $ffi = FFI::cdef(
         "int errno;",
         "libc.so.6"
@@ -149,7 +149,8 @@ if (PHP_OS_FAMILY !== 'Windows') {
     $ffi->errno = $source;
     var_dump($ffi->errno);
 } else {
-    // Untested on Windows due to lack of libc.so.6
+    // Untested on non-Linux due to lack of libc.so.6
+    var_dump(0);
     var_dump(31);
 }
 
