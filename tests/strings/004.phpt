@@ -13,5 +13,5 @@ $var = highlight_string("<br /><?php echo \"bar\"; ?><br />", TRUE);
 echo "\n[$var]\n";
 ?>
 --EXPECT--
-<pre style="color: #000000">&lt;br /&gt;<code style="color: #0000BB">&lt;?php </code><code style="color: #007700">echo </code><code style="color: #DD0000">"foo"</code><code style="color: #007700">; </code><code style="color: #0000BB">?&gt;</code>&lt;br /&gt;</pre>
-[<pre style="color: #000000">&lt;br /&gt;<code style="color: #0000BB">&lt;?php </code><code style="color: #007700">echo </code><code style="color: #DD0000">"bar"</code><code style="color: #007700">; </code><code style="color: #0000BB">?&gt;</code>&lt;br /&gt;</pre>]
+<pre><code style="color: #000000">&lt;br /&gt;<span style="color: #0000BB">&lt;?php </span><span style="color: #007700">echo </span><span style="color: #DD0000">"foo"</span><span style="color: #007700">; </span><span style="color: #0000BB">?&gt;</span>&lt;br /&gt;</code></pre>
+[<pre><code style="color: #000000">&lt;br /&gt;<span style="color: #0000BB">&lt;?php </span><span style="color: #007700">echo </span><span style="color: #DD0000">"bar"</span><span style="color: #007700">; </span><span style="color: #0000BB">?&gt;</span>&lt;br /&gt;</code></pre>]

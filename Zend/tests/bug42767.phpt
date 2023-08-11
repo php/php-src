@@ -11,4 +11,4 @@ highlight.html    = #000000
 highlight_string('<?php /*some comment..');
 ?>
 --EXPECT--
-<pre style="color: #000000"><code style="color: #0000BB">&lt;?php </code><code style="color: #FF8000">/*some comment..</code></pre>
+<pre><code style="color: #000000"><span style="color: #0000BB">&lt;?php </span><span style="color: #FF8000">/*some comment..</span></code></pre>

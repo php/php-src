@@ -22,19 +22,19 @@ echo $foo;
 --EXPECT--
 *** Test by calling method or function with its expected arguments and php output ***
 baz
-<pre style="color: #000000"><code style="color: #0000BB">&lt;?php
-</code><code style="color: #007700">echo </code><code style="color: #DD0000">"*** Test by calling method or function with its expected arguments and php output ***\n"</code><code style="color: #007700">;
-</code><code style="color: #0000BB">$foo </code><code style="color: #007700">= </code><code style="color: #DD0000">'bar'</code><code style="color: #007700">;
-</code><code style="color: #0000BB">$baz </code><code style="color: #007700">= </code><code style="color: #DD0000">"something "</code><code style="color: #007700">.</code><code style="color: #0000BB">$foo</code><code style="color: #007700">.</code><code style="color: #DD0000">"\n"</code><code style="color: #007700">;
+<pre><code style="color: #000000"><span style="color: #0000BB">&lt;?php
+</span><span style="color: #007700">echo </span><span style="color: #DD0000">"*** Test by calling method or function with its expected arguments and php output ***\n"</span><span style="color: #007700">;
+</span><span style="color: #0000BB">$foo </span><span style="color: #007700">= </span><span style="color: #DD0000">'bar'</span><span style="color: #007700">;
+</span><span style="color: #0000BB">$baz </span><span style="color: #007700">= </span><span style="color: #DD0000">"something "</span><span style="color: #007700">.</span><span style="color: #0000BB">$foo</span><span style="color: #007700">.</span><span style="color: #DD0000">"\n"</span><span style="color: #007700">;
 
-if ( </code><code style="color: #0000BB">$foo </code><code style="color: #007700">== </code><code style="color: #DD0000">'bar' </code><code style="color: #007700">)
+if ( </span><span style="color: #0000BB">$foo </span><span style="color: #007700">== </span><span style="color: #DD0000">'bar' </span><span style="color: #007700">)
 {
-  </code><code style="color: #0000BB">$baz </code><code style="color: #007700">= </code><code style="color: #DD0000">"baz\n"</code><code style="color: #007700">;
+  </span><span style="color: #0000BB">$baz </span><span style="color: #007700">= </span><span style="color: #DD0000">"baz\n"</span><span style="color: #007700">;
 }
 
- </code><code style="color: #FF8000">/* some code here */
-</code><code style="color: #007700">echo </code><code style="color: #0000BB">$baz</code><code style="color: #007700">;
-</code><code style="color: #0000BB">show_source</code><code style="color: #007700">(</code><code style="color: #0000BB">__FILE__</code><code style="color: #007700">);
-echo </code><code style="color: #0000BB">$foo</code><code style="color: #007700">;
-</code><code style="color: #0000BB">?&gt;
-</code></pre>bar
+ </span><span style="color: #FF8000">/* some code here */
+</span><span style="color: #007700">echo </span><span style="color: #0000BB">$baz</span><span style="color: #007700">;
+</span><span style="color: #0000BB">show_source</span><span style="color: #007700">(</span><span style="color: #0000BB">__FILE__</span><span style="color: #007700">);
+echo </span><span style="color: #0000BB">$foo</span><span style="color: #007700">;
+</span><span style="color: #0000BB">?&gt;
+</span></code></pre>bar

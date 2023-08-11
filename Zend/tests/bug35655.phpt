@@ -19,10 +19,10 @@ EOT
 highlight_string($code);
 ?>
 --EXPECT--
-<pre style="color: #000000">
-<code style="color: #0000BB">&lt;?php
-  $x </code><code style="color: #007700">= &lt;&lt;&lt;EOT
-</code><code style="color: #DD0000">some string    
-</code><code style="color: #007700">EOT
-  </code><code style="color: #0000BB">$y </code><code style="color: #007700">= </code><code style="color: #0000BB">2</code><code style="color: #007700">;
-</code><code style="color: #0000BB">?&gt;</code></pre>
+<pre><code style="color: #000000">
+<span style="color: #0000BB">&lt;?php
+  $x </span><span style="color: #007700">= &lt;&lt;&lt;EOT
+</span><span style="color: #DD0000">some string    
+</span><span style="color: #007700">EOT
+  </span><span style="color: #0000BB">$y </span><span style="color: #007700">= </span><span style="color: #0000BB">2</span><span style="color: #007700">;
+</span><span style="color: #0000BB">?&gt;</span></code></pre>

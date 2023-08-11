@@ -36,22 +36,22 @@ var_dump(`$php -n -s unknown`);
 echo "Done\n";
 ?>
 --EXPECT--
-string(1145) "<pre style="color: #000000">
-<code style="color: #0000BB">&lt;?php
-$test </code><code style="color: #007700">= </code><code style="color: #DD0000">"var"</code><code style="color: #007700">; </code><code style="color: #FF8000">//var
+string(1158) "<pre><code style="color: #000000">
+<span style="color: #0000BB">&lt;?php
+$test </span><span style="color: #007700">= </span><span style="color: #DD0000">"var"</span><span style="color: #007700">; </span><span style="color: #FF8000">//var
 /* test class */
-</code><code style="color: #007700">class </code><code style="color: #0000BB">test </code><code style="color: #007700">{
-    private </code><code style="color: #0000BB">$var </code><code style="color: #007700">= array();
+</span><span style="color: #007700">class </span><span style="color: #0000BB">test </span><span style="color: #007700">{
+    private </span><span style="color: #0000BB">$var </span><span style="color: #007700">= array();
 
-    public static function </code><code style="color: #0000BB">foo</code><code style="color: #007700">(</code><code style="color: #0000BB">Test $arg</code><code style="color: #007700">) {
-        echo </code><code style="color: #DD0000">"hello"</code><code style="color: #007700">;
-        </code><code style="color: #0000BB">var_dump</code><code style="color: #007700">(</code><code style="color: #0000BB">$this</code><code style="color: #007700">);
+    public static function </span><span style="color: #0000BB">foo</span><span style="color: #007700">(</span><span style="color: #0000BB">Test $arg</span><span style="color: #007700">) {
+        echo </span><span style="color: #DD0000">"hello"</span><span style="color: #007700">;
+        </span><span style="color: #0000BB">var_dump</span><span style="color: #007700">(</span><span style="color: #0000BB">$this</span><span style="color: #007700">);
     }
 }
 
-</code><code style="color: #0000BB">$o </code><code style="color: #007700">= new </code><code style="color: #0000BB">test</code><code style="color: #007700">;
-</code><code style="color: #0000BB">?&gt;
-</code></pre>"
+</span><span style="color: #0000BB">$o </span><span style="color: #007700">= new </span><span style="color: #0000BB">test</span><span style="color: #007700">;
+</span><span style="color: #0000BB">?&gt;
+</span></code></pre>"
 Could not open input file: unknown
 NULL
 Done

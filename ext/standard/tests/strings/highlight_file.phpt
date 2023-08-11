@@ -42,14 +42,14 @@ Warning: highlight_file(%shighlight_file.dat): Failed to open stream: No such fi
 
 Warning: highlight_file(): Failed opening '%shighlight_file.dat' for highlighting in %s on line %d
 bool(false)
-<pre style="color: #000000"><code style="color: #0000BB">&lt;?php </code><code style="color: #007700">echo </code><code style="color: #DD0000">"test"</code><code style="color: #007700">; </code><code style="color: #0000BB">?&gt;</code></pre>bool(true)
-<pre style="color: #000000"><code style="color: #0000BB">&lt;?php </code><code style="color: #007700">echo </code><code style="color: #DD0000">"test ?&gt;</code></pre>bool(true)
-<pre style="color: #000000">
-<code style="color: #0000BB">&lt;?php
-</code><code style="color: #007700">class </code><code style="color: #0000BB">test </code><code style="color: #007700">{
-    public </code><code style="color: #0000BB">$var </code><code style="color: #007700">= </code><code style="color: #0000BB">1</code><code style="color: #007700">;
-    private function </code><code style="color: #0000BB">foo</code><code style="color: #007700">() { echo </code><code style="color: #DD0000">"foo"</code><code style="color: #007700">; }
-    public function </code><code style="color: #0000BB">bar</code><code style="color: #007700">() { </code><code style="color: #0000BB">var_dump</code><code style="color: #007700">(</code><code style="color: #0000BB">test</code><code style="color: #007700">::</code><code style="color: #0000BB">foo</code><code style="color: #007700">()); }
+<pre><code style="color: #000000"><span style="color: #0000BB">&lt;?php </span><span style="color: #007700">echo </span><span style="color: #DD0000">"test"</span><span style="color: #007700">; </span><span style="color: #0000BB">?&gt;</span></code></pre>bool(true)
+<pre><code style="color: #000000"><span style="color: #0000BB">&lt;?php </span><span style="color: #007700">echo </span><span style="color: #DD0000">"test ?&gt;</span></code></pre>bool(true)
+<pre><code style="color: #000000">
+<span style="color: #0000BB">&lt;?php
+</span><span style="color: #007700">class </span><span style="color: #0000BB">test </span><span style="color: #007700">{
+    public </span><span style="color: #0000BB">$var </span><span style="color: #007700">= </span><span style="color: #0000BB">1</span><span style="color: #007700">;
+    private function </span><span style="color: #0000BB">foo</span><span style="color: #007700">() { echo </span><span style="color: #DD0000">"foo"</span><span style="color: #007700">; }
+    public function </span><span style="color: #0000BB">bar</span><span style="color: #007700">() { </span><span style="color: #0000BB">var_dump</span><span style="color: #007700">(</span><span style="color: #0000BB">test</span><span style="color: #007700">::</span><span style="color: #0000BB">foo</span><span style="color: #007700">()); }
 }
-</code><code style="color: #0000BB">?&gt;</code></pre>bool(true)
+</span><span style="color: #0000BB">?&gt;</span></code></pre>bool(true)
 Done

@@ -11,4 +11,4 @@ highlight.html=#000000
     highlight_string('<?php echo "foo[] $a \n"; ?>');
 ?>
 --EXPECT--
-<pre style="color: #000000"><code style="color: #0000BB">&lt;?php </code><code style="color: #007700">echo </code><code style="color: #DD0000">"foo[] </code><code style="color: #0000BB">$a</code><code style="color: #DD0000"> \n"</code><code style="color: #007700">; </code><code style="color: #0000BB">?&gt;</code></pre>
+<pre><code style="color: #000000"><span style="color: #0000BB">&lt;?php </span><span style="color: #007700">echo </span><span style="color: #DD0000">"foo[] </span><span style="color: #0000BB">$a</span><span style="color: #DD0000"> \n"</span><span style="color: #007700">; </span><span style="color: #0000BB">?&gt;</span></code></pre>

@@ -18,8 +18,8 @@ EOF;
 highlight_string($code);
 ?>
 --EXPECT--
-<pre style="color: #000000"><code style="color: #0000BB">&lt;?php
-  $x </code><code style="color: #007700">= &lt;&lt;&lt;'EOT'
+<pre><code style="color: #000000"><span style="color: #0000BB">&lt;?php
+  $x </span><span style="color: #007700">= &lt;&lt;&lt;'EOT'
 EOT
-  </code><code style="color: #0000BB">$y </code><code style="color: #007700">= </code><code style="color: #0000BB">2</code><code style="color: #007700">;
-</code><code style="color: #0000BB">?&gt;</code></pre>
+  </span><span style="color: #0000BB">$y </span><span style="color: #007700">= </span><span style="color: #0000BB">2</span><span style="color: #007700">;
+</span><span style="color: #0000BB">?&gt;</span></code></pre>
