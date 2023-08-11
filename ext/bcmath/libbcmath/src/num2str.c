@@ -74,5 +74,5 @@ zend_string *bc_num2str_ex(bc_num num, size_t scale)
 	/* Terminate the string and return it! */
 	*sptr = '\0';
 	ZSTR_LEN(str) = sptr - ZSTR_VAL(str);
-	return (zend_string*)str;
+	return str;
 }
