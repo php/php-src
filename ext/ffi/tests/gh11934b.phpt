@@ -20,6 +20,7 @@ if (PHP_OS_FAMILY !== 'Windows') {
     }
 }
 
+$ffi->gh11934b_ffi_var_test_cdata->cdata = 2;
 var_dump($ffi->gh11934b_ffi_var_test_cdata);
 $source = $ffi->new('int');
 $source->cdata = 31;
