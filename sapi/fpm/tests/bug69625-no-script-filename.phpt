@@ -24,13 +24,16 @@ $code = <<<EOT
 echo "Test\n";
 EOT;
 
+$host = gethostname();
+$path = str_replace('.php', '.src.php', basename(__FILE__));
+
 $tester = new FPM\Tester($cfg, $code);
 $tester->start();
 $tester->expectLogStartNotices();
 $tester
     ->request('', ['SCRIPT_FILENAME' => null])
     ->expectHeader('Status', '404 Not Found')
-    ->expectError('Primary script unknown');
+    ->expectError("Primary script unknown URI: $host/$path");
 $tester->terminate();
 $tester->close();
 
