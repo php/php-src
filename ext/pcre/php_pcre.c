@@ -630,17 +630,18 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	if (zv) {
 		pcre_cache_entry *pce = (pcre_cache_entry*)Z_PTR_P(zv);
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if ((bool)(pce->preg_options & PREG_JIT_ATTEMPTED) == jit_enabled) {
+		bool recompile = (bool)(pce->preg_options & PREG_JIT_ATTEMPTED) != jit_enabled;
+#else
+		bool recompile = false;
 #endif
+		if (recompile) {
+			zend_hash_del(&PCRE_G(pcre_cache), key);
+		} else {
 			if (key != regex) {
 				zend_string_release_ex(key, 0);
 			}
 			return pce;
-#ifdef HAVE_PCRE_JIT_SUPPORT
-		} else {
-			zend_hash_del(&PCRE_G(pcre_cache), key);
 		}
-#endif
 	}
 
 	p = ZSTR_VAL(regex);
