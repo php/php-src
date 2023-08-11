@@ -9,7 +9,7 @@ ffi.enable=1
 
 $cdef = FFI::cdef();
 
-echo "--- Primitive types test ---\n";
+echo "--- Primitive types ---\n";
 
 // Choose integer numbers off the maximum to test copy
 $types = [
@@ -54,7 +54,7 @@ echo "Positive test enum: ";
 var_dump($struct->field === $source->cdata);
 $struct->field = $dummy;
 
-echo "--- Complex types test ---\n";
+echo "--- Struct ---\n";
 
 // Nested structs
 $cdef = FFI::cdef("
@@ -77,9 +77,85 @@ $struct = $cdef->new("struct my_nesting_struct");
 $struct->field = $source;
 var_dump($struct->field->foo === 123 && $struct->field->bar === 456 && $struct->field->inner->data[0] === 789);
 
+echo "--- Callback return type ---\n";
+
+$ffi = FFI::cdef('
+typedef uint32_t (*test_callback)();
+typedef struct {
+	test_callback call_me;
+} my_struct;
+');
+
+$struct = $ffi->new('my_struct');
+$struct->call_me = function () use ($ffi) {
+	$int = $ffi->new('uint32_t');
+	$int->cdata = 42;
+	return $int;
+};
+
+var_dump(($struct->call_me)());
+
+echo "--- Callback return type ---\n";
+
+$ffi = FFI::cdef('
+typedef uint32_t (*test_callback)();
+typedef struct {
+	test_callback call_me;
+} my_struct;
+');
+
+$struct = $ffi->new('my_struct');
+$struct->call_me = function () use ($ffi) {
+	$int = $ffi->new('uint32_t');
+	$int->cdata = 42;
+	return $int;
+};
+
+var_dump(($struct->call_me)());
+
+echo "--- Other FFI\CData assignment ---\n";
+
+$ffi = FFI::cdef('');
+
+$source = $ffi->new('uint32_t');
+$source->cdata = 123;
+$target = $ffi->new('uint32_t');
+$target->cdata = $source;
+
+var_dump($target->cdata);
+
+echo "--- Array element ---\n";
+
+$ffi = FFI::cdef('');
+
+$source = $ffi->new('uint32_t');
+$source->cdata = 123;
+$target = $ffi->new('uint32_t[1]');
+$target[0] = $source;
+
+var_dump($target[0]);
+
+echo "--- Existing C variables ---\n";
+
+if (PHP_OS_FAMILY !== 'Windows') {
+    $ffi = FFI::cdef(
+        "int errno;",
+        "libc.so.6"
+    );
+    $ffi->errno = 0;
+    var_dump($ffi->errno);
+    $source = $ffi->new('int');
+    $source->cdata = 31;
+    $ffi->errno = $source;
+    var_dump($ffi->errno);
+} else {
+    // Untested on Windows due to lack of libc.so.6
+    var_dump(31);
+}
+
 ?>
 --EXPECTF--
---- Primitive types test ---
+--- Primitive types ---
 Positive test uint8_t: bool(true)
 Positive test uint16_t: bool(true)
 Positive test uint32_t: bool(true)
@@ -119,5 +195,16 @@ Warning: Object of class FFI\CData could not be converted to int in %s on line %
 Positive test enum: bool(true)
 
 Warning: Object of class FFI\CData could not be converted to int in %s on line %d
---- Complex types test ---
+--- Struct ---
 bool(true)
+--- Callback return type ---
+int(42)
+--- Callback return type ---
+int(42)
+--- Other FFI\CData assignment ---
+int(123)
+--- Array element ---
+int(123)
+--- Existing C variables ---
+int(0)
+int(31)
