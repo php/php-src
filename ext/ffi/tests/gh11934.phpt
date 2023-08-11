@@ -95,24 +95,6 @@ $struct->call_me = function () use ($ffi) {
 
 var_dump(($struct->call_me)());
 
-echo "--- Callback return type ---\n";
-
-$ffi = FFI::cdef('
-typedef uint32_t (*test_callback)();
-typedef struct {
-	test_callback call_me;
-} my_struct;
-');
-
-$struct = $ffi->new('my_struct');
-$struct->call_me = function () use ($ffi) {
-	$int = $ffi->new('uint32_t');
-	$int->cdata = 42;
-	return $int;
-};
-
-var_dump(($struct->call_me)());
-
 echo "--- Other FFI\CData assignment ---\n";
 
 $ffi = FFI::cdef('');
@@ -179,8 +161,6 @@ Positive test enum: bool(true)
 Warning: Object of class FFI\CData could not be converted to int in %s on line %d
 --- Struct ---
 bool(true)
---- Callback return type ---
-int(42)
 --- Callback return type ---
 int(42)
 --- Other FFI\CData assignment ---
