@@ -221,6 +221,10 @@ PHP 8.3 UPGRADE NOTES
     only paths starting with `..` were disallowed. This could easily be
     circumvented by prepending `./` to the path.
   . User exception handlers now catch exceptions during shutdown.
+  . The resultant HTML of highlight_string and highlight_file has changed.
+    Whitespace between outer HTML tags is removed. Newlines and spaces
+    are no longer converted to HTML entities. The whole HTML is now wrapped in
+    <pre> tag. The outer <span> has been merged with <code>.
 
 - Calendar
   . easter_date() now supports years from 1970 to 2,000,000,000 on 64-bit systems,
