@@ -8,7 +8,5 @@ var_dump($highlightedString);
 
 ?>
 --EXPECT--
-string(169) "<code><span style="color: #000000">
-<span style="color: #0000BB">&lt;?php&nbsp;<br />&nbsp;09&nbsp;09&nbsp;09</span><span style="color: #007700">;</span>
-</span>
-</code>"
+string(126) "<pre style="color: #000000"><code style="color: #0000BB">&lt;?php 
+ 09 09 09</code><code style="color: #007700">;</code></pre>"
