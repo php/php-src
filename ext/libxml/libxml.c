@@ -279,7 +279,8 @@ static void php_libxml_node_free(xmlNodePtr node)
 					php_libxml_set_old_ns_list(node->doc, ns, last);
 					node->nsDef = NULL;
 				}
-				ZEND_FALLTHROUGH;
+				xmlFreeNode(node);
+				break;
 			default:
 				xmlFreeNode(node);
 				break;

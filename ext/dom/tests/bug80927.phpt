@@ -17,7 +17,12 @@ function test1() {
     var_dump($a->prefix);
 }
 
-function test2($variation) {
+enum Test2Variation {
+    case REMOVE_DOCUMENT;
+    case REMOVE_CHILD;
+}
+
+function test2(Test2Variation $variation) {
     $dom = new DOMDocument();
     $dom->appendChild($dom->createElement("html"));
     $a = $dom->createAttributeNS("fake_ns", "test:test");
@@ -27,13 +32,10 @@ function test2($variation) {
 
     unset($foo);
 
-    if ($variation === 1) {
-        $dom->documentElement->remove();
-    } else if ($variation === 2) {
-        $dom->documentElement->firstElementChild->remove();
-    } else {
-        assert(false);
-    }
+    match ($variation) {
+        Test2Variation::REMOVE_DOCUMENT => $dom->documentElement->remove(),
+        Test2Variation::REMOVE_CHILD => $dom->documentElement->firstElementChild->remove(),
+    };
 
     echo $dom->saveXML();
 
@@ -59,9 +61,9 @@ function test3() {
 echo "--- Remove namespace declarator for attribute, root ---\n";
 test1();
 echo "--- Remove namespace declarator for attribute, moved root ---\n";
-test2(1);
+test2(Test2Variation::REMOVE_DOCUMENT);
 echo "--- Remove namespace declarator for attribute, moved root child ---\n";
-test2(2);
+test2(Test2Variation::REMOVE_CHILD);
 echo "--- Remove namespace declarator for element ---\n";
 test3();
 
