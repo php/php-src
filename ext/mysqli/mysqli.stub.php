@@ -878,6 +878,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_ping
      */
+    #[\Deprecated(since: '8.4', message: 'because the reconnect feature has been removed in PHP 8.2 and this method is now redundant')]
     public function ping(): bool {}
 
     /**
@@ -1526,6 +1527,7 @@ function mysqli_options(mysqli $mysql, int $option, $value): bool {}
  */
 function mysqli_set_opt(mysqli $mysql, int $option, $value): bool {}
 
+#[\Deprecated(since: '8.4', message: 'because the reconnect feature has been removed in PHP 8.2 and this function is now redundant')]
 function mysqli_ping(mysqli $mysql): bool {}
 
 function mysqli_poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0): int|false {}

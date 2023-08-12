@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c401ffa59fcdefc7e47cba88fd0a84495e39c6e7 */
+ * Stub hash: 97775c6aba92e347f93a2d38cd41c4769eed738f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -875,7 +875,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_num_rows, arginfo_mysqli_num_rows)
 	ZEND_FE(mysqli_options, arginfo_mysqli_options)
 	ZEND_RAW_FENTRY("mysqli_set_opt", zif_mysqli_options, arginfo_mysqli_set_opt, 0, NULL, NULL)
-	ZEND_FE(mysqli_ping, arginfo_mysqli_ping)
+	ZEND_RAW_FENTRY("mysqli_ping", zif_mysqli_ping, arginfo_mysqli_ping, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(mysqli_poll, arginfo_mysqli_poll)
 	ZEND_FE(mysqli_prepare, arginfo_mysqli_prepare)
 	ZEND_FE(mysqli_report, arginfo_mysqli_report)
@@ -955,7 +955,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_RAW_FENTRY("multi_query", zif_mysqli_multi_query, arginfo_class_mysqli_multi_query, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("more_results", zif_mysqli_more_results, arginfo_class_mysqli_more_results, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("next_result", zif_mysqli_next_result, arginfo_class_mysqli_next_result, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("ping", zif_mysqli_ping, arginfo_class_mysqli_ping, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("ping", zif_mysqli_ping, arginfo_class_mysqli_ping, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("poll", zif_mysqli_poll, arginfo_class_mysqli_poll, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("prepare", zif_mysqli_prepare, arginfo_class_mysqli_prepare, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("query", zif_mysqli_query, arginfo_class_mysqli_query, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -1171,6 +1171,18 @@ static void register_mysqli_symbols(int module_number)
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_connect", sizeof("mysqli_connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
+	zend_attribute *attribute_Deprecated_func_mysqli_ping_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_ping", sizeof("mysqli_ping") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_mysqli_ping_0_arg0;
+	zend_string *attribute_Deprecated_func_mysqli_ping_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_ping_0_arg0, attribute_Deprecated_func_mysqli_ping_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mysqli_ping_0->args[0].value, &attribute_Deprecated_func_mysqli_ping_0_arg0);
+	attribute_Deprecated_func_mysqli_ping_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_mysqli_ping_0_arg1;
+	zend_string *attribute_Deprecated_func_mysqli_ping_0_arg1_str = zend_string_init("because the reconnect feature has been removed in PHP 8.2 and this function is now redundant", strlen("because the reconnect feature has been removed in PHP 8.2 and this function is now redundant"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_ping_0_arg1, attribute_Deprecated_func_mysqli_ping_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mysqli_ping_0->args[1].value, &attribute_Deprecated_func_mysqli_ping_0_arg1);
+	attribute_Deprecated_func_mysqli_ping_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_real_connect", sizeof("mysqli_real_connect") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_attribute *attribute_Deprecated_func_mysqli_refresh_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_refresh", sizeof("mysqli_refresh") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
@@ -1366,6 +1378,18 @@ static zend_class_entry *register_class_mysqli(void)
 	ZVAL_STR(&attribute_Deprecated_func_init_0_arg1, attribute_Deprecated_func_init_0_arg1_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_init_0->args[1].value, &attribute_Deprecated_func_init_0_arg1);
 	attribute_Deprecated_func_init_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_ping_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "ping", sizeof("ping") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_ping_0_arg0;
+	zend_string *attribute_Deprecated_func_ping_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_ping_0_arg0, attribute_Deprecated_func_ping_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_ping_0->args[0].value, &attribute_Deprecated_func_ping_0_arg0);
+	attribute_Deprecated_func_ping_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_ping_0_arg1;
+	zend_string *attribute_Deprecated_func_ping_0_arg1_str = zend_string_init("because the reconnect feature has been removed in PHP 8.2 and this method is now redundant", strlen("because the reconnect feature has been removed in PHP 8.2 and this method is now redundant"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_ping_0_arg1, attribute_Deprecated_func_ping_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_ping_0->args[1].value, &attribute_Deprecated_func_ping_0_arg1);
+	attribute_Deprecated_func_ping_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "real_connect", sizeof("real_connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 

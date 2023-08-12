@@ -41,7 +41,6 @@ require_once 'skipifconnectfailure.inc';
         echo $e->getMessage() . \PHP_EOL;
     }
 
-    // mysqli_ping() cannot be tested, because one would need to cause an error inside the C function to test it
     mysqli_prepare($link, "FOO");
     mysqli_real_query($link, "FOO");
     if (@mysqli_select_db($link, "Oh lord, let this be an unknown database name"))
