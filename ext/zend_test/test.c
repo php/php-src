@@ -884,11 +884,42 @@ static void le_throwing_resource_dtor(zend_resource *rsrc)
 	zend_throw_exception(NULL, "Throwing resource destructor called", 0);
 }
 
+// We need to "manually" generate this property because gen_stubs.php
+// does not support codegen for DNF types.
+static void register_ZendTestClass_dnf_property(zend_class_entry *ce) {
+	zend_string *class_Iterator = zend_string_init_interned("Iterator", sizeof("Iterator") - 1, true);
+	zend_alloc_ce_cache(class_Iterator);
+	zend_string *class_Traversable = zend_string_init_interned("Traversable", sizeof("Traversable") - 1, true);
+	zend_alloc_ce_cache(class_Traversable);
+	zend_string *class_Countable = zend_string_init_interned("Countable", sizeof("Countable") - 1, true);
+	zend_alloc_ce_cache(class_Countable);
+	//
+	zend_type_list *intersection_type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	intersection_type_list->num_types = 2;
+	intersection_type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(class_Traversable, 0, 0);
+	intersection_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(class_Countable, 0, 0);
+	zend_type_list *union_type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	union_type_list->num_types = 2;
+	union_type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(class_Iterator, 0, 0);
+	union_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_INTERSECTION(intersection_type_list, 0);
+	zend_type prop_type = (zend_type) ZEND_TYPE_INIT_UNION(union_type_list, 0);
+	//
+	zend_string *prop_name = zend_string_init_interned("dnfProperty", sizeof("dnfProperty") - 1, true);
+	zval default_value;
+	ZVAL_UNDEF(&default_value);
+	// We need this hack because some debug assertions incorrectly reject valid DNF types.
+	// see https://github.com/php/php-src/issues/10120#issuecomment-1360682804
+	zend_type hack = {0};
+	zend_property_info *prop = zend_declare_typed_property(ce, prop_name, &default_value, ZEND_ACC_PUBLIC, NULL, hack);
+	prop->type = prop_type;
+}
+
 PHP_MINIT_FUNCTION(zend_test)
 {
 	zend_test_interface = register_class__ZendTestInterface();
 
 	zend_test_class = register_class__ZendTestClass(zend_test_interface);
+	register_ZendTestClass_dnf_property(zend_test_class);
 	zend_test_class->create_object = zend_test_class_new;
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
 
