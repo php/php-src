@@ -171,7 +171,8 @@ static void _bc_rec_mul(bc_num u, size_t ulen, bc_num v, size_t vlen, bc_num *pr
 	/* Base case? */
 	if ((ulen + vlen) < mul_base_digits
 		|| ulen < MUL_SMALL_DIGITS
-		|| vlen < MUL_SMALL_DIGITS) {
+		|| vlen < MUL_SMALL_DIGITS
+	) {
 		_bc_simp_mul(u, ulen, v, vlen, prod);
 		return;
 	}
