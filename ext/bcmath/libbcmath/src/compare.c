@@ -32,6 +32,7 @@
 #include <stdbool.h>
 #include "bcmath.h"
 #include "private.h"
+#include <stddef.h>
 
 
 /* Compare two bc numbers.  Return value is 0 if equal, -1 if N1 is less
