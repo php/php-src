@@ -1457,7 +1457,7 @@ function mysqli_fetch_column(mysqli_result $result, int $column = 0): null|int|f
 
 function mysqli_field_count(mysqli $mysql): int {}
 
-function mysqli_field_seek(mysqli_result $result, int $index): bool {}
+function mysqli_field_seek(mysqli_result $result, int $index): true {} // TODO make return type void
 
 function mysqli_field_tell(mysqli_result $result): int {}
 
