@@ -643,6 +643,7 @@ static int format_default_value(smart_str *str, zval *value) {
 		} ZEND_HASH_FOREACH_END();
 		smart_str_appendc(str, ']');
 	} else if (Z_TYPE_P(value) == IS_OBJECT) {
+		/* This branch may only be reached for default properties, which don't support arbitrary objects. */
 		zend_object *obj = Z_OBJ_P(value);
 		zend_class_entry *class = obj->ce;
 		ZEND_ASSERT(class->ce_flags & ZEND_ACC_ENUM);
