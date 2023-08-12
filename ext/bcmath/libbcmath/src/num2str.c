@@ -38,7 +38,6 @@ zend_string *bc_num2str_ex(bc_num num, size_t scale)
 {
 	zend_string *str;
 	char *sptr;
-	const char *nptr = num->n_value;;
 	size_t index;
 	bool signch;
 
@@ -56,6 +55,7 @@ zend_string *bc_num2str_ex(bc_num num, size_t scale)
 	if (signch) *sptr++ = '-';
 
 	/* Load the whole number. */
+	const char *nptr = num->n_value;
 	for (index = num->n_len; index > 0; index--) {
 		*sptr++ = BCD_CHAR(*nptr++);
 	}
