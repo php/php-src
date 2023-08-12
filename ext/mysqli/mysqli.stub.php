@@ -881,6 +881,7 @@ class mysqli
     public function next_result(): bool {}
 
     /**
+     * @deprecated
      * @tentative-return-type
      * @alias mysqli_ping
      */
@@ -1533,6 +1534,7 @@ function mysqli_options(mysqli $mysql, int $option, $value): bool {}
  */
 function mysqli_set_opt(mysqli $mysql, int $option, $value): bool {}
 
+/** @deprecated */
 function mysqli_ping(mysqli $mysql): bool {}
 
 function mysqli_poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0): int|false {}

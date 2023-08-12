@@ -36,8 +36,14 @@ require_once 'skipifconnectfailure.inc';
 
     print "done!";
 ?>
---EXPECT--
+--EXPECTF--
+
+Deprecated: Function mysqli_ping() is deprecated in %s
 bool(true)
+
+Deprecated: Function mysqli_ping() is deprecated in %s
 bool(true)
+
+Deprecated: Function mysqli_ping() is deprecated in %s
 mysqli object is already closed
 done!

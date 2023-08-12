@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 656fe3f3475bb2f43d89ebf34361940e2f746373 */
+ * Stub hash: a8e8b8bb5b44482d670e359a6aa89f90efddd8e7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -876,7 +876,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_num_rows, arginfo_mysqli_num_rows)
 	ZEND_FE(mysqli_options, arginfo_mysqli_options)
 	ZEND_FALIAS(mysqli_set_opt, mysqli_options, arginfo_mysqli_set_opt)
-	ZEND_FE(mysqli_ping, arginfo_mysqli_ping)
+	ZEND_DEP_FE(mysqli_ping, arginfo_mysqli_ping)
 	ZEND_FE(mysqli_poll, arginfo_mysqli_poll)
 	ZEND_FE(mysqli_prepare, arginfo_mysqli_prepare)
 	ZEND_FE(mysqli_report, arginfo_mysqli_report)
@@ -958,7 +958,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_ME_MAPPING(multi_query, mysqli_multi_query, arginfo_class_mysqli_multi_query, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(more_results, mysqli_more_results, arginfo_class_mysqli_more_results, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(next_result, mysqli_next_result, arginfo_class_mysqli_next_result, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(ping, mysqli_ping, arginfo_class_mysqli_ping, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(ping, mysqli_ping, arginfo_class_mysqli_ping, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_ME_MAPPING(poll, mysqli_poll, arginfo_class_mysqli_poll, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(prepare, mysqli_prepare, arginfo_class_mysqli_prepare, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(query, mysqli_query, arginfo_class_mysqli_query, ZEND_ACC_PUBLIC)

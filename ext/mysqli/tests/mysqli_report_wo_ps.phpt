@@ -54,7 +54,6 @@ if (mysqli_get_server_version($link) >= 50600)
         echo $e->getMessage() . \PHP_EOL;
     }
 
-    // mysqli_ping() cannot be tested, because one would need to cause an error inside the C function to test it
     mysqli_real_query($link, "FOO");
     if (@mysqli_select_db($link, "Oh lord, let this be an unknown database name"))
         printf("[009] select_db should have failed\n");
