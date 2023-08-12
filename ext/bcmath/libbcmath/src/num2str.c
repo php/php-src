@@ -40,7 +40,7 @@ zend_string *bc_num2str_ex(bc_num num, size_t scale)
 	char *sptr;
 	const char *nptr = num->n_value;;
 	size_t index;
-	int signch;
+	bool signch;
 
 	/* Number of sign chars. */
 	signch = num->n_sign != PLUS && !bc_is_zero_for_scale(num, MIN(num->n_scale, scale));
