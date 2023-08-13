@@ -118,9 +118,6 @@ ZEND_API void zend_type_release(zend_type type, bool persistent) {
 						zend_string_release(ZEND_TYPE_NAME(*sublist_type));
 					}
 				} ZEND_TYPE_LIST_FOREACH_END();
-				if (!ZEND_TYPE_USES_ARENA(*list_type) && persistent) {
-					free(ZEND_TYPE_LIST(*list_type));
-				}
 			} else if (ZEND_TYPE_HAS_NAME(*list_type)) {
 				zend_string_release(ZEND_TYPE_NAME(*list_type));
 			}
@@ -128,6 +125,28 @@ ZEND_API void zend_type_release(zend_type type, bool persistent) {
 		if (!ZEND_TYPE_USES_ARENA(type)) {
 			pefree(ZEND_TYPE_LIST(type), persistent);
 		}
+	} else if (ZEND_TYPE_HAS_NAME(type)) {
+		zend_string_release(ZEND_TYPE_NAME(type));
+	}
+}
+
+ZEND_API void zend_type_release_internal(zend_type type) {
+	ZEND_ASSERT(!ZEND_TYPE_USES_ARENA(type));
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		zend_type *list_type, *sublist_type;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
+			if (ZEND_TYPE_HAS_LIST(*list_type)) {
+				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*list_type), sublist_type) {
+					if (ZEND_TYPE_HAS_NAME(*sublist_type)) {
+						zend_string_release(ZEND_TYPE_NAME(*sublist_type));
+					}
+				} ZEND_TYPE_LIST_FOREACH_END();
+				free(ZEND_TYPE_LIST(*list_type));
+			} else if (ZEND_TYPE_HAS_NAME(*list_type)) {
+				zend_string_release(ZEND_TYPE_NAME(*list_type));
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+		free(ZEND_TYPE_LIST(type));
 	} else if (ZEND_TYPE_HAS_NAME(type)) {
 		zend_string_release(ZEND_TYPE_NAME(type));
 	}
@@ -145,7 +164,7 @@ void zend_free_internal_arg_info(zend_internal_function *function) {
 			num_args++;
 		}
 		for (i = 0 ; i < num_args; i++) {
-			zend_type_release(arg_info[i].type, /* persistent */ 1);
+			zend_type_release_internal(arg_info[i].type);
 		}
 		free(arg_info);
 	}
@@ -457,7 +476,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (prop_info->ce == ce) {
 					zend_string_release(prop_info->name);
-					zend_type_release(prop_info->type, /* persistent */ 1);
+					zend_type_release_internal(prop_info->type);
 					free(prop_info);
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -492,6 +511,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 						} else {
 							zval_internal_ptr_dtor(&c->value);
 						}
+						zend_type_release_internal(c->type);
 						if (c->doc_comment) {
 							zend_string_release_ex(c->doc_comment, 1);
 						}

@@ -3496,7 +3496,7 @@ ZEND_API zend_result zend_disable_class(const char *class_name, size_t class_nam
 	ZEND_HASH_MAP_FOREACH_PTR(&disabled_class->properties_info, prop) {
 		if (prop->ce == disabled_class) {
 			zend_string_release(prop->name);
-			zend_type_release(prop->type, /* persistent */ 1);
+			zend_type_release_internal(prop->type);
 			free(prop);
 		}
 	} ZEND_HASH_FOREACH_END();
