@@ -37,23 +37,14 @@ void zoi_with_current_dtor(zend_object_iterator *iter)
 	zoi_with_current *zoiwc = (zoi_with_current*)iter;
 
 	if (!Z_ISUNDEF(zoiwc->wrapping_obj)) {
-		/* we have to copy the pointer because zoiwc->wrapping_obj may be
-		 * changed midway the execution of zval_ptr_dtor() */
+		/* Destroy reference created in IntlIterator_from_StringEnumeration() */
 		zval *zwo = &zoiwc->wrapping_obj;
-
-		/* object is still here, we can rely on it to call this again and
-		 * destroy this object */
 		zval_ptr_dtor(zwo);
-	} else {
-		/* Object not here anymore (we've been called by the object free handler)
-		 * Note that the iterator wrapper objects (that also depend on this
-		 * structure) call this function earlier, in the destruction phase, which
-		 * precedes the object free phase. Therefore there's no risk on this
-		 * function being called by the iterator wrapper destructor function and
-		 * not finding the memory of this iterator allocated anymore. */
-		iter->funcs->invalidate_current(iter);
-		zoiwc->destroy_it(iter);
+		ZVAL_UNDEF(zwo); /* defensive programming */
 	}
+
+	iter->funcs->invalidate_current(iter);
+	zoiwc->destroy_it(iter);
 }
 
 U_CFUNC int zoi_with_current_valid(zend_object_iterator *iter)
@@ -124,6 +115,10 @@ static void string_enum_rewind(zend_object_iterator *iter)
 static void string_enum_destroy_it(zend_object_iterator *iter)
 {
 	delete (StringEnumeration*)Z_PTR(iter->data);
+
+	/* Destroy reference created in IntlIterator_get_iterator()
+	 * This isn't the last reference, the last one will be destroyed in IntlIterator_objects_free() */
+	zend_iterator_dtor(iter);
 }
 
 static const zend_object_iterator_funcs string_enum_object_iterator_funcs = {
@@ -148,7 +143,7 @@ U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *ob
 	ii->iterator->funcs = &string_enum_object_iterator_funcs;
 	ii->iterator->index = 0;
 	((zoi_with_current*)ii->iterator)->destroy_it = string_enum_destroy_it;
-	ZVAL_OBJ(&((zoi_with_current*)ii->iterator)->wrapping_obj, Z_OBJ_P(object));
+	ZVAL_OBJ_COPY(&((zoi_with_current*)ii->iterator)->wrapping_obj, Z_OBJ_P(object));
 	ZVAL_UNDEF(&((zoi_with_current*)ii->iterator)->current);
 }
 
@@ -157,8 +152,7 @@ static void IntlIterator_objects_free(zend_object *object)
 	IntlIterator_object	*ii = php_intl_iterator_fetch_object(object);
 
 	if (ii->iterator) {
-		zval *wrapping_objp = &((zoi_with_current*)ii->iterator)->wrapping_obj;
-		ZVAL_UNDEF(wrapping_objp);
+		/* Destroy reference created in IntlIterator_from_StringEnumeration() */
 		zend_iterator_dtor(ii->iterator);
 	}
 	intl_error_reset(INTLITERATOR_ERROR_P(ii));
