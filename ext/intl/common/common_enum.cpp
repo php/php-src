@@ -115,10 +115,6 @@ static void string_enum_rewind(zend_object_iterator *iter)
 static void string_enum_destroy_it(zend_object_iterator *iter)
 {
 	delete (StringEnumeration*)Z_PTR(iter->data);
-
-	/* Destroy reference created in IntlIterator_get_iterator()
-	 * This isn't the last reference, the last one will be destroyed in IntlIterator_objects_free() */
-	zend_iterator_dtor(iter);
 }
 
 static const zend_object_iterator_funcs string_enum_object_iterator_funcs = {
@@ -152,7 +148,6 @@ static void IntlIterator_objects_free(zend_object *object)
 	IntlIterator_object	*ii = php_intl_iterator_fetch_object(object);
 
 	if (ii->iterator) {
-		/* Destroy reference created in IntlIterator_from_StringEnumeration() */
 		zend_iterator_dtor(ii->iterator);
 	}
 	intl_error_reset(INTLITERATOR_ERROR_P(ii));
