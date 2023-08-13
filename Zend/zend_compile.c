@@ -6570,7 +6570,9 @@ static zend_type zend_compile_typename_ex(
 				ZEND_TYPE_SET_LIST(type, type_list);
 
 				single_type = zend_compile_typename(type_ast, false);
+				ZEND_ASSERT(ZEND_TYPE_HAS_LIST(single_type));
 				ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(single_type));
+				ZEND_ASSERT(ZEND_TYPE_USES_ARENA(single_type));
 
 				type_list->types[type_list->num_types++] = single_type;
 

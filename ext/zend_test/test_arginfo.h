@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: abd7a656256f9cf05466f09efcc78ef4c4c9f62b */
+ * Stub hash: c6bbc884f55c3ed8d73d7d7881ebbd71e096b87b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -590,6 +590,19 @@ static zend_class_entry *register_class__ZendTestTrait(void)
 	zend_string *property_testProp_name = zend_string_init("testProp", sizeof("testProp") - 1, 1);
 	zend_declare_property_ex(class_entry, property_testProp_name, &property_testProp_default_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(property_testProp_name);
+
+	zval property_testTypedProp_default_value;
+	ZVAL_UNDEF(&property_testTypedProp_default_value);
+	zend_string *property_testTypedProp_name = zend_string_init("testTypedProp", sizeof("testTypedProp") - 1, 1);
+	zend_string *property_testTypedProp_class_Traversable = zend_string_init("Traversable", sizeof("Traversable") - 1, 1);
+	zend_string *property_testTypedProp_class_Countable = zend_string_init("Countable", sizeof("Countable") - 1, 1);
+	zend_type_list *property_testTypedProp_type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	property_testTypedProp_type_list->num_types = 2;
+	property_testTypedProp_type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(property_testTypedProp_class_Traversable, 0, 0);
+	property_testTypedProp_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(property_testTypedProp_class_Countable, 0, 0);
+	zend_type property_testTypedProp_type = ZEND_TYPE_INIT_UNION(property_testTypedProp_type_list, 0);
+	zend_declare_typed_property(class_entry, property_testTypedProp_name, &property_testTypedProp_default_value, ZEND_ACC_PUBLIC, NULL, property_testTypedProp_type);
+	zend_string_release(property_testTypedProp_name);
 
 	return class_entry;
 }

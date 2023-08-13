@@ -2756,6 +2756,45 @@ ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, z
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arg_info_toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#ifdef ZEND_DEBUG
+static bool zend_verify_type_is_valid(zend_type type, int nesting_level, bool is_arena_alloc)
+{
+	bool status = false;
+
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		if (!ZEND_TYPE_IS_INTERSECTION(type) && !ZEND_TYPE_IS_UNION(type)) {
+			return false;
+		}
+		if (ZEND_TYPE_USES_ARENA(type) != is_arena_alloc) {
+			return false;
+		}
+		if (nesting_level >= 2) {
+			return false;
+		}
+
+		zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type);
+			status = zend_verify_type_is_valid(*list_type, nesting_level + 1, is_arena_alloc);
+			if (!status) {
+				return false;
+			}
+		ZEND_TYPE_LIST_FOREACH_END();
+		// status must be true
+	} else if (ZEND_TYPE_HAS_NAME(type)) {
+		zend_string *name = ZEND_TYPE_NAME(type);
+		if (zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_ITERABLE))) {
+			return false;
+		}
+		status = true;
+	} else if (!ZEND_TYPE_IS_COMPLEX(type)) {
+		return true;
+	}
+	return status;
+}
+#elif
+#define zend_verify_type_is_valid(type, nesting_level, is_arena_alloc) true
+#endif
+
 /* registers all functions in *library_functions in the function hash */
 ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, int type) /* {{{ */
 {
@@ -2935,6 +2974,15 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			reg_function->arg_info = new_arg_info + 1;
 			for (i = 0; i < num_args; i++) {
 				if (ZEND_TYPE_IS_COMPLEX(new_arg_info[i].type)) {
+					/* gen_stub cannot produce such a type due to memory allocation of the type list
+					 * As such union types currently abuse the literal type name by being written as T1|... |TN */
+					if (ZEND_TYPE_HAS_LIST(new_arg_info[i].type)) {
+						ZEND_ASSERT(
+							zend_verify_type_is_valid(new_arg_info[i].type, /* nesting_level */ 0, /* is_arena_alloca */ false)
+							&& "zend_type with list is invalid"
+						);
+						continue;
+					}
 					ZEND_ASSERT(ZEND_TYPE_HAS_NAME(new_arg_info[i].type)
 						&& "Should be stored as simple name");
 					const char *class_name = ZEND_TYPE_LITERAL_NAME(new_arg_info[i].type);
@@ -4270,6 +4318,11 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	if (ZEND_TYPE_IS_SET(type)) {
 		ce->ce_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 
+		ZEND_ASSERT(
+			zend_verify_type_is_valid(type, /* nesting_level */ 0, /* is_arena_alloca */ ce->type == ZEND_USER_CLASS)
+			&& "zend_type is invalid" && ce->type
+		);
+
 		if (access_type & ZEND_ACC_READONLY) {
 			ce->ce_flags |= ZEND_ACC_HAS_READONLY_PROPS;
 		}
@@ -4369,8 +4422,15 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	if (is_persistent_class(ce)) {
 		zend_type *single_type;
 		ZEND_TYPE_FOREACH(property_info->type, single_type) {
-			// TODO Add support and test cases when gen_stub support added
-			ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*single_type));
+			// TODO Add support and test cases when gen_stub supports DNF
+			// Currently just verify that an extension provided type is valid
+			if (ZEND_TYPE_HAS_LIST(*single_type)) {
+				ZEND_ASSERT(
+					zend_verify_type_is_valid(*single_type, /* nesting_level */ 0, /* is_arena_alloca */ false)
+					&& "zend_type_list is invalid"
+				);
+				continue;
+			}
 			if (ZEND_TYPE_HAS_NAME(*single_type)) {
 				zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*single_type));
 				ZEND_TYPE_SET_PTR(*single_type, name);
