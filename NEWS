@@ -55,6 +55,10 @@ PHP                                                                        NEWS
   . Revert behaviour of receiving SIGCHLD signals back to the behaviour
     before 8.1.22. (nielsdos)
 
+- SPL:
+  . Fixed bug #81992 (SplFixedArray::setSize() causes use-after-free).
+    (nielsdos)
+
 - Standard:
   . Prevent int overflow on $decimals in number_format. (Marc Bennewitz)
   . Fixed bug GH-11870 (Fix off-by-one bug when truncating tempnam prefix)
