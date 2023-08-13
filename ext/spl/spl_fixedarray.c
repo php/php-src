@@ -150,7 +150,13 @@ static void spl_fixedarray_dtor_range(spl_fixedarray *array, zend_long from, zen
 {
 	zval *begin = array->elements + from, *end = array->elements + to;
 	while (begin != end) {
-		zval_ptr_dtor(begin++);
+		if (Z_REFCOUNTED_P(begin)) {
+			/* Using inline variant to get rid of the redundant check */
+			i_zval_ptr_dtor(begin);
+			/* Get rid of the dangling zval, there might be a destructor or error handling accessing the array */
+			ZVAL_NULL(begin);
+		}
+		begin++;
 	}
 }
 
