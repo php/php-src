@@ -30,8 +30,8 @@
 *************************************************************************/
 
 #include <stdbool.h>
-#include <stddef.h>
 #include "bcmath.h"
+#include <stddef.h>
 
 /* In some places we need to check if the number NUM is almost zero.
    Specifically, all but the last digit is 0 and the last digit is 1.
@@ -53,9 +53,5 @@ bool bc_is_near_zero(bc_num num, size_t scale)
 		count--;
 	}
 
-	if (count != 0 && (count != 1 || *--nptr != 1)) {
-		return false;
-	} else {
-		return true;
-	}
+	return count == 0 || (count == 1 && *--nptr == 1);
 }

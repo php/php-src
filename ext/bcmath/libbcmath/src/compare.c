@@ -30,9 +30,9 @@
 *************************************************************************/
 
 #include <stdbool.h>
-#include <stddef.h>
 #include "bcmath.h"
 #include "private.h"
+#include <stddef.h>
 
 
 /* Compare two bc numbers.  Return value is 0 if equal, -1 if N1 is less
@@ -46,9 +46,11 @@ int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign, bool ignore_last)
 	/* First, compare signs. */
 	if (use_sign && n1->n_sign != n2->n_sign) {
 		if (n1->n_sign == PLUS) {
-			return (1);	/* Positive N1 > Negative N2 */
+			/* Positive N1 > Negative N2 */
+			return (1);
 		} else {
-			return (-1);	/* Negative N1 < Positive N1 */
+			/* Negative N1 < Positive N1 */
+			return (-1);
 		}
 	}
 
@@ -107,7 +109,7 @@ int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign, bool ignore_last)
 	/* They are equal up to the last part of the equal part of the fraction. */
 	if (n1->n_scale != n2->n_scale) {
 		if (n1->n_scale > n2->n_scale) {
-			for (count = n1->n_scale-n2->n_scale; count>0; count--) {
+			for (count = n1->n_scale - n2->n_scale; count > 0; count--) {
 				if (*n1ptr++ != 0) {
 					/* Magnitude of n1 > n2. */
 					if (!use_sign || n1->n_sign == PLUS) {
@@ -118,7 +120,7 @@ int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign, bool ignore_last)
 				}
 			}
 		} else {
-			for (count = n2->n_scale-n1->n_scale; count>0; count--) {
+			for (count = n2->n_scale - n1->n_scale; count > 0; count--) {
 				if (*n2ptr++ != 0) {
 					/* Magnitude of n1 < n2. */
 					if (!use_sign || n1->n_sign == PLUS) {

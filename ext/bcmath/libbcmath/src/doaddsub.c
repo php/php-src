@@ -69,12 +69,12 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 	/* Add the fraction part.  First copy the longer fraction.*/
 	if (n1bytes != n2bytes) {
 		if (n1bytes > n2bytes) {
-			while (n1bytes>n2bytes) {
+			while (n1bytes > n2bytes) {
 				*sumptr-- = *n1ptr--;
 				n1bytes--;
 			}
 		} else {
-			while (n2bytes>n1bytes) {
+			while (n2bytes > n1bytes) {
 				*sumptr-- = *n2ptr--;
 				n2bytes--;
 			}
@@ -87,7 +87,7 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 	carry = 0;
 	while ((n1bytes > 0) && (n2bytes > 0)) {
 		*sumptr = *n1ptr-- + *n2ptr-- + carry;
-		if (*sumptr > (BASE-1)) {
+		if (*sumptr > (BASE - 1)) {
 			carry = 1;
 			*sumptr -= BASE;
 		} else {
@@ -105,7 +105,7 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 	}
 	while (n1bytes-- > 0) {
 		*sumptr = *n1ptr-- + carry;
-		if (*sumptr > (BASE-1)) {
+		if (*sumptr > (BASE - 1)) {
 			carry = true;
 			*sumptr -= BASE;
 		} else {
@@ -120,7 +120,7 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 	}
 
 	/* Adjust sum and return. */
-	_bc_rm_leading_zeros (sum);
+	_bc_rm_leading_zeros(sum);
 	return sum;
 }
 
@@ -132,10 +132,11 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 {
 	bc_num diff;
-	int diff_scale, diff_len;
+	size_t diff_scale, diff_len;
 	size_t min_scale, min_len;
+	size_t borrow, count;
+	int val;
 	char *n1ptr, *n2ptr, *diffptr;
-	int borrow, count, val;
 
 	/* Allocate temporary storage. */
 	diff_len = MAX(n1->n_len, n2->n_len);
@@ -153,9 +154,9 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 	}
 
 	/* Initialize the subtract. */
-	n1ptr = (char *) (n1->n_value + n1->n_len + n1->n_scale -1);
-	n2ptr = (char *) (n2->n_value + n2->n_len + n2->n_scale -1);
-	diffptr = (char *) (diff->n_value + diff_len + diff_scale -1);
+	n1ptr = (char *) (n1->n_value + n1->n_len + n1->n_scale - 1);
+	n2ptr = (char *) (n2->n_value + n2->n_len + n2->n_scale - 1);
+	diffptr = (char *) (diff->n_value + diff_len + diff_scale - 1);
 
 	/* Subtract the numbers. */
 	borrow = 0;
@@ -169,7 +170,7 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 	} else {
 		/* n2 has the longer scale */
 		for (count = n2->n_scale - min_scale; count > 0; count--) {
-			val = - *n2ptr-- - borrow;
+			val = -*n2ptr-- - borrow;
 			if (val < 0) {
 				val += BASE;
 				borrow = 1;
@@ -192,7 +193,7 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 		*diffptr-- = val;
 	}
 
-	/* If n1 has more digits then n2, we now do that subtract. */
+	/* If n1 has more digits than n2, we now do that subtract. */
 	if (diff_len != min_len) {
 		for (count = diff_len - min_len; count > 0; count--) {
 			val = *n1ptr-- - borrow;
@@ -207,6 +208,6 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 	}
 
 	/* Clean up and return. */
-	_bc_rm_leading_zeros (diff);
+	_bc_rm_leading_zeros(diff);
 	return diff;
 }
