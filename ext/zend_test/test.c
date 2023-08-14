@@ -890,8 +890,7 @@ static void le_throwing_resource_dtor(zend_resource *rsrc)
 static zend_type create_test_dnf_type(void) {
 	zend_string *class_Iterator = zend_string_init_interned("Iterator", sizeof("Iterator") - 1, true);
 	zend_alloc_ce_cache(class_Iterator);
-	zend_string *class_Traversable = zend_string_init_interned("Traversable", sizeof("Traversable") - 1, true);
-	zend_alloc_ce_cache(class_Traversable);
+	zend_string *class_Traversable = ZSTR_KNOWN(ZEND_STR_TRAVERSABLE);
 	zend_string *class_Countable = zend_string_init_interned("Countable", sizeof("Countable") - 1, true);
 	zend_alloc_ce_cache(class_Countable);
 	//
@@ -917,7 +916,7 @@ static void register_ZendTestClass_dnf_property(zend_class_entry *ce) {
 // arg_info for `zend_test_internal_dnf_arguments`
 // The types are upgraded to DNF types in `register_dynamic_function_entries()`
 static zend_internal_arg_info arginfo_zend_test_internal_dnf_arguments[] = {
-	{(const char*)(uintptr_t)(1), {0}, NULL},
+	{(const char*)(uintptr_t)(1), {0}, NULL}, // return-type
 	{"arg", {0}, NULL}
 };
 
@@ -956,6 +955,7 @@ static const zend_function_entry dynamic_function_entries[] = {
 };
 
 static void register_dynamic_function_entries(void) {
+	// return-type is at index 0
 	arginfo_zend_test_internal_dnf_arguments[0].type = create_test_dnf_type();
 	arginfo_zend_test_internal_dnf_arguments[1].type = create_test_dnf_type();
 	//
