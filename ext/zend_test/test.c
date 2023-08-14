@@ -962,6 +962,47 @@ static void register_dynamic_function_entries(void) {
 	zend_register_functions(NULL, dynamic_function_entries, NULL, MODULE_PERSISTENT);
 }
 
+// workaround for https://github.com/php/php-src/issues/11883
+static void release_internal_zend_type(zend_type *type) {
+	if (ZEND_TYPE_HAS_LIST(*type)) {
+		zend_type *list_type, *sublist_type;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
+			if (ZEND_TYPE_HAS_LIST(*list_type)) {
+				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*list_type), sublist_type) {
+					if (ZEND_TYPE_HAS_NAME(*sublist_type)) {
+						zend_string_release(ZEND_TYPE_NAME(*sublist_type));
+					}
+				} ZEND_TYPE_LIST_FOREACH_END();
+				free(ZEND_TYPE_LIST(*list_type));
+			} else if (ZEND_TYPE_HAS_NAME(*list_type)) {
+				zend_string_release(ZEND_TYPE_NAME(*list_type));
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+		free(ZEND_TYPE_LIST(*type));
+	} else if (ZEND_TYPE_HAS_NAME(*type)) {
+		zend_string_release(ZEND_TYPE_NAME(*type));
+	}
+	// zero-out the type to avoid double-free on shutdown in zend_free_internal_arg_info
+	memset(type, 0, sizeof(zend_type));
+}
+
+// workaround for https://github.com/php/php-src/issues/11883
+static void release_dynamic_function_entries(void) {
+	const zend_function_entry *iter = dynamic_function_entries;
+	while (iter->fname) {
+		zend_function *func = zend_hash_str_find_ptr(CG(function_table), iter->fname, strlen(iter->fname));
+		// add 1 for the return type
+		uint32_t num_args = func->internal_function.num_args + 1;
+		// return type is at offset -1
+		zend_internal_arg_info *arg_info_start = func->internal_function.arg_info - 1;
+		for (int i = 0; i < num_args; i++) {
+			zend_internal_arg_info *arg_info = arg_info_start + i;
+			release_internal_zend_type(&arg_info->type);
+		}
+		iter++;
+	}
+}
+
 PHP_MINIT_FUNCTION(zend_test)
 {
 	register_dynamic_function_entries();
@@ -1038,6 +1079,8 @@ PHP_MINIT_FUNCTION(zend_test)
 
 PHP_MSHUTDOWN_FUNCTION(zend_test)
 {
+	release_dynamic_function_entries();
+
 	if (type != MODULE_TEMPORARY) {
 		UNREGISTER_INI_ENTRIES();
 	}
