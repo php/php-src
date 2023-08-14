@@ -884,6 +884,28 @@ static void le_throwing_resource_dtor(zend_resource *rsrc)
 	zend_throw_exception(NULL, "Throwing resource destructor called", 0);
 }
 
+static ZEND_METHOD(_ZendTestClass, takesUnionType)
+{
+	zend_object *obj;
+	ZEND_PARSE_PARAMETERS_START(1, 1);
+		Z_PARAM_OBJ(obj)
+	ZEND_PARSE_PARAMETERS_END();
+	// we have to perform type-checking to avoid arginfo/zpp mismatch error,
+	bool type_matches = (
+		instanceof_function(obj->ce, zend_standard_class_def)
+		||
+		instanceof_function(obj->ce, zend_ce_iterator)
+	);
+	if (!type_matches) {
+		zend_string *ty = zend_type_to_string(execute_data->func->internal_function.arg_info->type);
+		zend_argument_type_error(1, "must be of type %s, %s given", ty->val, obj->ce->name->val);
+		zend_string_release(ty);
+		RETURN_THROWS();
+	}
+
+	RETURN_NULL();
+}
+
 // Returns a newly allocated DNF type `Iterator|(Traversable&Countable)`.
 //
 // We need to generate it "manually" because gen_stubs.php does not support codegen for DNF types ATM.
@@ -938,6 +960,7 @@ static ZEND_NAMED_FUNCTION(zend_test_internal_dnf_arguments)
 		zend_string *ty = zend_type_to_string(arginfo_zend_test_internal_dnf_arguments[1].type);
 		zend_argument_type_error(1, "must be of type %s, %s given", ty->val, obj->ce->name->val);
 		zend_string_release(ty);
+		RETURN_THROWS();
 	}
 
 	RETURN_OBJ_COPY(obj);

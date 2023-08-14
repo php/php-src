@@ -53,6 +53,8 @@ namespace {
         public function returnsThrowable(): Throwable {}
 
         static public function variadicTest(string|Iterator ...$elements) : static {}
+
+        public function takesUnionType(stdclass|Iterator $arg): void {}
     }
 
     class _ZendTestChildClass extends _ZendTestClass
