@@ -2961,7 +2961,6 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 					// converting it to an union type if necessary.
 					const char *class_name = ZEND_TYPE_LITERAL_NAME(new_arg_info[i].type);
 					new_arg_info[i].type.type_mask &= ~_ZEND_TYPE_LITERAL_NAME_BIT;
-					new_arg_info[i].type.type_mask |= _ZEND_TYPE_NAME_BIT;
 
 					size_t num_types = 1;
 					const char *p = class_name;
@@ -2975,6 +2974,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 						zend_string *str = zend_string_init_interned(class_name, strlen(class_name), 1);
 						zend_alloc_ce_cache(str);
 						ZEND_TYPE_SET_PTR(new_arg_info[i].type, str);
+						new_arg_info[i].type.type_mask |= _ZEND_TYPE_NAME_BIT;
 					} else {
 						/* Union type */
 						zend_type_list *list = malloc(ZEND_TYPE_LIST_SIZE(num_types));
