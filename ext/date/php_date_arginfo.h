@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 30e6ffeefc0c0ecd66f3f40c9211277ce02d7187 */
+ * Stub hash: b967c9bbe6c73f56432473020a84919d7e953d4c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -1161,12 +1161,12 @@ static zend_class_entry *register_class_DateObjectError(zend_class_entry *class_
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DateRangeError(zend_class_entry *class_entry_DateRangeError)
+static zend_class_entry *register_class_DateRangeError(zend_class_entry *class_entry_DateError)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DateRangeError", class_DateRangeError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateRangeError);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateError);
 	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
 	return class_entry;

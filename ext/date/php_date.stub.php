@@ -766,7 +766,7 @@ class DateObjectError extends DateError
 /**
  * @strict-properties
  */
-class DateRangeError extends DateRangeError
+class DateRangeError extends DateError
 {
 }
 
