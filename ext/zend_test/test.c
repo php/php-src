@@ -1004,9 +1004,12 @@ static void release_dynamic_function_entries(void) {
 }
 
 // workaround for https://github.com/php/php-src/issues/11883
-static void release_ZendTestClass_dnf_property(void) {
-	zend_property_info *prop = zend_hash_str_find_ptr(&zend_test_class->properties_info, "dnfProperty", sizeof("dnfProperty") - 1);
-	release_internal_zend_type(&prop->type);
+static void release_ZendTestClass_dnf_property(int module_type) {
+	// zend_hash_str_find_bucket fails when the module is loaded with dl(), no idea why...
+	if (module_type == MODULE_PERSISTENT) {
+		zend_property_info *prop = zend_hash_str_find_ptr(&zend_test_class->properties_info, "dnfProperty", sizeof("dnfProperty") - 1);
+		release_internal_zend_type(&prop->type);
+	}
 }
 
 PHP_MINIT_FUNCTION(zend_test)
@@ -1086,7 +1089,7 @@ PHP_MINIT_FUNCTION(zend_test)
 PHP_MSHUTDOWN_FUNCTION(zend_test)
 {
 	release_dynamic_function_entries();
-	release_ZendTestClass_dnf_property();
+	release_ZendTestClass_dnf_property(type);
 
 	if (type != MODULE_TEMPORARY) {
 		UNREGISTER_INI_ENTRIES();
