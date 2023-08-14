@@ -982,7 +982,7 @@ static void release_internal_zend_type(zend_type *type) {
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
 		zend_string_release(ZEND_TYPE_NAME(*type));
 	}
-	// zero-out the type to avoid double-free on shutdown in zend_free_internal_arg_info
+	// zero-out the type to avoid double-free on shutdown
 	memset(type, 0, sizeof(zend_type));
 }
 
@@ -1001,6 +1001,12 @@ static void release_dynamic_function_entries(void) {
 		}
 		iter++;
 	}
+}
+
+// workaround for https://github.com/php/php-src/issues/11883
+static void release_ZendTestClass_dnf_property(void) {
+	zend_property_info *prop = zend_hash_str_find_ptr(&zend_test_class->properties_info, "dnfProperty", sizeof("dnfProperty") - 1);
+	release_internal_zend_type(&prop->type);
 }
 
 PHP_MINIT_FUNCTION(zend_test)
@@ -1080,6 +1086,7 @@ PHP_MINIT_FUNCTION(zend_test)
 PHP_MSHUTDOWN_FUNCTION(zend_test)
 {
 	release_dynamic_function_entries();
+	release_ZendTestClass_dnf_property();
 
 	if (type != MODULE_TEMPORARY) {
 		UNREGISTER_INI_ENTRIES();
