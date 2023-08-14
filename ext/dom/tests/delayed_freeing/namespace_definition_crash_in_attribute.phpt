@@ -28,6 +28,8 @@ var_dump($child_attr2->namespaceURI);
 var_dump($attr3->textContent);
 var_dump($attr3->namespaceURI);
 
+$doc->documentElement->remove();
+
 unset($child_attr1);
 unset($child_attr2);
 var_dump($attr3->namespaceURI);
@@ -49,4 +51,3 @@ string(7) "some:ns"
 string(7) "some:ns"
  default1:hello=""
 <?xml version="1.0"?>
-<container xmlns:default="some:ns2" xmlns:default1="some:ns"/>
