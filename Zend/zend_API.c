@@ -2960,6 +2960,9 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 					// As a temporary workaround, we split the type name on `|` characters,
 					// converting it to an union type if necessary.
 					const char *class_name = ZEND_TYPE_LITERAL_NAME(new_arg_info[i].type);
+					new_arg_info[i].type.type_mask &= ~_ZEND_TYPE_LITERAL_NAME_BIT;
+					new_arg_info[i].type.type_mask |= _ZEND_TYPE_NAME_BIT;
+
 					size_t num_types = 1;
 					const char *p = class_name;
 					while ((p = strchr(p, '|'))) {
@@ -2993,7 +2996,6 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 							j++;
 						}
 					}
-					new_arg_info[i].type.type_mask &= ~_ZEND_TYPE_LITERAL_NAME_BIT;
 				}
 				if (ZEND_TYPE_IS_ITERABLE_FALLBACK(new_arg_info[i].type)) {
 					/* Warning generated an extension load warning which is emitted for every test
