@@ -132,7 +132,7 @@ function snmp_set_enum_print(bool $enable): true {}
 function snmp_set_oid_output_format(int $format): true {}
 
 /** @alias snmp_set_oid_output_format */
-function snmp_set_oid_numeric_print(int $format): bool {}
+function snmp_set_oid_numeric_print(int $format): true {}
 
 function snmp2_get(string $hostname, string $community, array|string $object_id, int $timeout = -1, int $retries = -1): mixed {}
 
