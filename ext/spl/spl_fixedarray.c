@@ -50,6 +50,8 @@ typedef struct _spl_fixedarray {
 	zval *elements;
 	/* True if this was modified after the last call to get_properties or the hash table wasn't rebuilt. */
 	bool                 should_rebuild_properties;
+	/* If positive, it's a resize within a resize and the value gives the desired size. If -1, it's not. */
+	zend_long cached_resize;
 } spl_fixedarray;
 
 typedef struct _spl_fixedarray_object {
@@ -118,6 +120,7 @@ static void spl_fixedarray_init(spl_fixedarray *array, zend_long size)
 	} else {
 		spl_fixedarray_default_ctor(array);
 	}
+	array->cached_resize = -1;
 }
 
 /* Copies the range [begin, end) into the fixedarray, beginning at `offset`.
@@ -149,6 +152,7 @@ static void spl_fixedarray_copy_ctor(spl_fixedarray *to, spl_fixedarray *from)
  */
 static void spl_fixedarray_dtor_range(spl_fixedarray *array, zend_long from, zend_long to)
 {
+	array->size = from;
 	zval *begin = array->elements + from, *end = array->elements + to;
 	while (begin != end) {
 		zval_ptr_dtor(begin++);
@@ -185,19 +189,35 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size)
 		return;
 	}
 
+	if (UNEXPECTED(array->cached_resize >= 0)) {
+		/* We're already resizing, so just remember the desired size.
+		 * The resize will happen later. */
+		array->cached_resize = size;
+		return;
+	}
+	array->cached_resize = size;
+
 	/* clearing the array */
 	if (size == 0) {
 		spl_fixedarray_dtor(array);
 		array->elements = NULL;
+		array->size = 0;
 	} else if (size > array->size) {
 		array->elements = safe_erealloc(array->elements, size, sizeof(zval), 0);
 		spl_fixedarray_init_elems(array, array->size, size);
+		array->size = size;
 	} else { /* size < array->size */
+		/* Size set in spl_fixedarray_dtor_range() */
 		spl_fixedarray_dtor_range(array, size, array->size);
 		array->elements = erealloc(array->elements, sizeof(zval) * size);
 	}
 
-	array->size = size;
+	/* If resized within the destructor, take the last resize command and perform it */
+	zend_long cached_resize = array->cached_resize;
+	array->cached_resize = -1;
+	if (cached_resize != size) {
+		spl_fixedarray_resize(array, cached_resize);
+	}
 }
 
 static HashTable* spl_fixedarray_object_get_gc(zend_object *obj, zval **table, int *n)
