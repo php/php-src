@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b967c9bbe6c73f56432473020a84919d7e953d4c */
+ * Stub hash: 0f204ac6646be79b515189a384fce9bcea9a4f42 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -1183,12 +1183,12 @@ static zend_class_entry *register_class_DateException(zend_class_entry *class_en
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DateInvalidTimeZoneException(zend_class_entry *class_entry_Exception)
+static zend_class_entry *register_class_DateInvalidTimeZoneException(zend_class_entry *class_entry_DateException)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DateInvalidTimeZoneException", class_DateInvalidTimeZoneException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateException);
 	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
 	return class_entry;
