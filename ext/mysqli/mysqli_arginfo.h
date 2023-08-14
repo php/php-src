@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 656fe3f3475bb2f43d89ebf34361940e2f746373 */
+ * Stub hash: 6dfbac474b752c0c630c6ed53f74559148505af0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -926,7 +926,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_thread_safe, arginfo_mysqli_thread_safe)
 	ZEND_FE(mysqli_use_result, arginfo_mysqli_use_result)
 	ZEND_FE(mysqli_warning_count, arginfo_mysqli_warning_count)
-	ZEND_FE(mysqli_refresh, arginfo_mysqli_refresh)
+	ZEND_DEP_FE(mysqli_refresh, arginfo_mysqli_refresh)
 	ZEND_FE_END
 };
 
@@ -980,7 +980,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_ME_MAPPING(store_result, mysqli_store_result, arginfo_class_mysqli_store_result, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(thread_safe, mysqli_thread_safe, arginfo_class_mysqli_thread_safe, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(use_result, mysqli_use_result, arginfo_class_mysqli_use_result, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(refresh, mysqli_refresh, arginfo_class_mysqli_refresh, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(refresh, mysqli_refresh, arginfo_class_mysqli_refresh, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
 	ZEND_FE_END
 };
 
