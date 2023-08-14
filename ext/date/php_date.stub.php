@@ -780,7 +780,7 @@ class DateException extends Exception
 /**
  * @strict-properties
  */
-class DateInvalidTimeZoneException extends Exception
+class DateInvalidTimeZoneException extends DateException
 {
 }
 
