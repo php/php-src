@@ -115,6 +115,7 @@ typedef void (*copy_ctor_func_t)(zval *pElement);
  * ZEND_TYPE_IS_ONLY_MASK()  - checks if type-hint refer to standard type only
  * ZEND_TYPE_IS_COMPLEX()    - checks if type is a type_list, or contains a class either as a CE or as a name
  * ZEND_TYPE_HAS_NAME()      - checks if type-hint contains some class as zend_string *
+ * ZEND_TYPE_HAS_LITERAL_NAME()	- checks if type-hint contains some class as const char *
  * ZEND_TYPE_IS_INTERSECTION() - checks if the type_list represents an intersection type list
  * ZEND_TYPE_IS_UNION()      - checks if the type_list represents a union type list
  *
@@ -141,8 +142,11 @@ typedef struct {
 	zend_type types[1];
 } zend_type_list;
 
-#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
-#define _ZEND_TYPE_MASK ((1u << 25) - 1)
+#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 26
+#define _ZEND_TYPE_MASK ((1u << 26) - 1)
+// Used to signify that type.ptr is not a `zend_string*` but a `const char*`,
+// in which case _ZEND_TYPE_NAME_BIT must also be set.
+#define _ZEND_TYPE_LITERAL_NAME_BIT (1u << 25)
 /* Only one of these bits may be set. */
 #define _ZEND_TYPE_NAME_BIT (1u << 24)
 #define _ZEND_TYPE_LIST_BIT (1u << 22)
@@ -170,6 +174,9 @@ typedef struct {
 
 #define ZEND_TYPE_HAS_NAME(t) \
 	((((t).type_mask) & _ZEND_TYPE_NAME_BIT) != 0)
+
+#define ZEND_TYPE_HAS_LITERAL_NAME(t) \
+	((((t).type_mask) & (_ZEND_TYPE_NAME_BIT|_ZEND_TYPE_LITERAL_NAME_BIT)) == (_ZEND_TYPE_NAME_BIT|_ZEND_TYPE_LITERAL_NAME_BIT))
 
 #define ZEND_TYPE_HAS_LIST(t) \
 	((((t).type_mask) & _ZEND_TYPE_LIST_BIT) != 0)
@@ -289,11 +296,14 @@ typedef struct {
 #define ZEND_TYPE_INIT_CLASS(class_name, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_NAME_BIT, allow_null, extra_flags)
 
+#define ZEND_TYPE_INIT_CLASS_MASK(class_name, type_mask) \
+	ZEND_TYPE_INIT_PTR_MASK(class_name, _ZEND_TYPE_NAME_BIT | (type_mask))
+
 #define ZEND_TYPE_INIT_CLASS_CONST(class_name, allow_null, extra_flags) \
-	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_NAME_BIT, allow_null, extra_flags)
+	ZEND_TYPE_INIT_PTR(class_name, (_ZEND_TYPE_NAME_BIT|_ZEND_TYPE_LITERAL_NAME_BIT), allow_null, extra_flags)
 
 #define ZEND_TYPE_INIT_CLASS_CONST_MASK(class_name, type_mask) \
-	ZEND_TYPE_INIT_PTR_MASK(class_name, _ZEND_TYPE_NAME_BIT | (type_mask))
+	ZEND_TYPE_INIT_PTR_MASK(class_name, (_ZEND_TYPE_NAME_BIT|_ZEND_TYPE_LITERAL_NAME_BIT) | (type_mask))
 
 typedef union _zend_value {
 	zend_long         lval;				/* long value */
