@@ -11,6 +11,7 @@ jobs:
     outputs:
       branches: ${{ steps.set-matrix.outputs.branches }}
       matrix-include: ${{ steps.set-matrix.outputs.matrix-include }}
+      windows-matrix-include: ${{ steps.set-matrix.outputs.windows-matrix-include }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -655,17 +656,13 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   WINDOWS:
+    needs: GENERATE_MATRIX
+    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - x64: true
-            zts: true
-            opcache: true
-          - x64: false
-            zts: false
-            opcache: false
-    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+        include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.windows-matrix-include) }}
+    name: "${{ matrix.branch.name }}_WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: windows-2019
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
@@ -683,6 +680,8 @@ jobs:
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
         uses: actions/checkout@v3
+        with:
+          ref: ${{ matrix.branch.ref }}
       - name: Setup
         uses: ./.github/actions/setup-windows
       - name: Build
