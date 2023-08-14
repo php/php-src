@@ -34,6 +34,8 @@ ZEND_API zend_object_handlers zend_dict_collection_object_handlers;
 static int seq_collection_compare(zval *object1, zval *object2);
 static int dict_collection_compare(zval *object1, zval *object2);
 
+static zend_result seq_collection_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2);
+
 static int zend_implement_collection(zend_class_entry *interface, zend_class_entry *class_type)
 {
 	if (class_type->ce_flags & ZEND_ACC_COLLECTION) {
@@ -55,6 +57,7 @@ void zend_register_collection_ce(void)
 	memcpy(&zend_seq_collection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_seq_collection_object_handlers.clone_obj = NULL;
 	zend_seq_collection_object_handlers.compare = seq_collection_compare;
+	zend_seq_collection_object_handlers.do_operation = seq_collection_do_operation;
 
 	zend_ce_dict_collection = register_class_DictCollection();
 	zend_ce_dict_collection->interface_gets_implemented = zend_implement_collection;
@@ -174,6 +177,51 @@ static int seq_collection_compare(zval *object1, zval *object2)
 		Z_ARRVAL_P(value_prop_object2),
 		(compare_func_t) collection_is_equal_function, true
 	) != 0);
+}
+
+static void seq_copy_add_elements(zend_object *clone, zval *other)
+{
+	zend_class_entry *ce = clone->ce;
+	zval *value_prop;
+	zval *element;
+
+	value_prop = zend_read_property_ex(ce, Z_OBJ_P(other), ZSTR_KNOWN(ZEND_STR_VALUE), true, NULL);
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value_prop), element) {
+		if (!zend_collection_add_item(clone, NULL, element)) {
+			return;
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
+static zend_result seq_collection_do_operation_add_impl(uint8_t opcode, zval *result, zval *op1, zval *op2)
+{
+	zend_object *clone;
+
+	clone = zend_objects_clone_obj(Z_OBJ_P(op1));
+
+	seq_copy_add_elements(clone, op2);
+
+	ZVAL_OBJ(result, clone);
+
+	return SUCCESS;
+}
+
+static zend_result seq_collection_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
+{
+	if (Z_TYPE_P(op1) != IS_OBJECT || Z_TYPE_P(op2) != IS_OBJECT) {
+		return FAILURE;
+	}
+
+	if (!instanceof_function(Z_OBJCE_P(op1), zend_ce_seq_collection) || !instanceof_function(Z_OBJCE_P(op2), zend_ce_seq_collection)) {
+		return FAILURE;
+	}
+
+	switch (opcode) {
+		case ZEND_ADD:
+			return seq_collection_do_operation_add_impl(opcode, result, op1, op2);
+	}
+	return FAILURE;
 }
 
 static int dict_collection_compare(zval *object1, zval *object2)
@@ -325,9 +373,6 @@ static ZEND_NAMED_FUNCTION(zend_collection_seq_concat_func)
 {
 	zval *other;
 	zend_object *clone;
-	zend_class_entry *ce = Z_OBJCE_P(ZEND_THIS);
-	zval *value_prop;
-	zval *element;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJECT_OF_CLASS(other, zend_ce_seq_collection);
@@ -335,13 +380,7 @@ static ZEND_NAMED_FUNCTION(zend_collection_seq_concat_func)
 
 	clone = zend_objects_clone_obj(Z_OBJ_P(ZEND_THIS));
 
-	value_prop = zend_read_property_ex(ce, Z_OBJ_P(other), ZSTR_KNOWN(ZEND_STR_VALUE), true, NULL);
-
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value_prop), element) {
-		if (!zend_collection_add_item(clone, NULL, element)) {
-			return;
-		}
-	} ZEND_HASH_FOREACH_END();
+	seq_copy_add_elements(clone, other);
 
 	RETURN_OBJ(clone);
 }
