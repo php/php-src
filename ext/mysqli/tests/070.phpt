@@ -15,6 +15,8 @@ require_once 'skipifconnectfailure.inc';
     $mysql->close();
     print "done!";
 ?>
---EXPECT--
+--EXPECTF--
+
+Deprecated: Method mysqli::ping() is deprecated in %s
 bool(true)
 done!
