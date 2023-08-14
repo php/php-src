@@ -289,6 +289,8 @@ PHP 8.3 UPGRADE NOTES
     constructor.
   . mysqli_poll now raises a ValueError when the read nor error arguments are
     passed.
+  . mysqli_field_seek and mysqli_result::field_seek now specify return type
+    as true instead of bool.
 
 - ODBC
   . odbc_autocommit() now accepts null for the $enable parameter.

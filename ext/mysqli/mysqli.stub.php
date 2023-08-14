@@ -1144,7 +1144,7 @@ class mysqli_result implements IteratorAggregate
      * @tentative-return-type
      * @alias mysqli_field_seek
      */
-    public function field_seek(int $index): bool {}
+    public function field_seek(int $index): true {} // TODO make return type void
 
     /**
      * @tentative-return-type
