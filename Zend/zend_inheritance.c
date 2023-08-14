@@ -57,20 +57,33 @@ static void ZEND_COLD emit_incompatible_method_error(
 		const zend_function *parent, zend_class_entry *parent_scope,
 		inheritance_status status);
 
-static void zend_type_copy_ctor(zend_type *type, bool persistent) {
-	if (ZEND_TYPE_HAS_LIST(*type)) {
-		zend_type_list *old_list = ZEND_TYPE_LIST(*type);
-		size_t size = ZEND_TYPE_LIST_SIZE(old_list->num_types);
-		zend_type_list *new_list = ZEND_TYPE_USES_ARENA(*type)
-			? zend_arena_alloc(&CG(arena), size) : pemalloc(size, persistent);
-		memcpy(new_list, old_list, ZEND_TYPE_LIST_SIZE(old_list->num_types));
-		ZEND_TYPE_SET_PTR(*type, new_list);
+static void zend_type_copy_ctor(zend_type *const type, bool use_arena, bool persistent);
 
-		zend_type *list_type;
-		ZEND_TYPE_LIST_FOREACH(new_list, list_type) {
-			ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*list_type));
-			zend_string_addref(ZEND_TYPE_NAME(*list_type));
-		} ZEND_TYPE_LIST_FOREACH_END();
+static void zend_type_list_copy_ctor(
+	zend_type *const parent_type,
+	bool use_arena,
+	bool persistent
+) {
+	const zend_type_list *const old_list = ZEND_TYPE_LIST(*parent_type);
+	size_t size = ZEND_TYPE_LIST_SIZE(old_list->num_types);
+	zend_type_list *new_list = use_arena
+		? zend_arena_alloc(&CG(arena), size) : pemalloc(size, persistent);
+
+	memcpy(new_list, old_list, size);
+	ZEND_TYPE_SET_LIST(*parent_type, new_list);
+	if (use_arena) {
+		ZEND_TYPE_FULL_MASK(*parent_type) |= _ZEND_TYPE_ARENA_BIT;
+	}
+
+	zend_type *list_type;
+	ZEND_TYPE_LIST_FOREACH(new_list, list_type) {
+		zend_type_copy_ctor(list_type, use_arena, persistent);
+	} ZEND_TYPE_LIST_FOREACH_END();
+}
+
+static void zend_type_copy_ctor(zend_type *const type, bool use_arena, bool persistent) {
+	if (ZEND_TYPE_HAS_LIST(*type)) {
+		zend_type_list_copy_ctor(type, use_arena, persistent);
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
 		zend_string_addref(ZEND_TYPE_NAME(*type));
 	}
@@ -2401,7 +2414,8 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 			doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
 
 			zend_type type = property_info->type;
-			zend_type_copy_ctor(&type, /* persistent */ 0);
+			/* Assumption: only userland classes can use traits, as such the type must be arena allocated */
+			zend_type_copy_ctor(&type, /* use arena */ true, /* persistent */ false);
 			new_prop = zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, type);
 
 			if (property_info->attributes) {
@@ -2789,15 +2803,8 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			Z_PTR(p->val) = new_prop_info;
 			memcpy(new_prop_info, prop_info, sizeof(zend_property_info));
 			new_prop_info->ce = ce;
-			if (ZEND_TYPE_HAS_LIST(new_prop_info->type)) {
-				zend_type_list *new_list;
-				zend_type_list *list = ZEND_TYPE_LIST(new_prop_info->type);
-
-				new_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(list->num_types));
-				memcpy(new_list, list, ZEND_TYPE_LIST_SIZE(list->num_types));
-				ZEND_TYPE_SET_PTR(new_prop_info->type, list);
-				ZEND_TYPE_FULL_MASK(new_prop_info->type) |= _ZEND_TYPE_ARENA_BIT;
-			}
+			/* Deep copy the type information */
+			zend_type_copy_ctor(&new_prop_info->type, /* use_arena */ true, /* persistent */ false);
 		}
 	}
 

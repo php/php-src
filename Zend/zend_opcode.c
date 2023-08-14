@@ -110,17 +110,9 @@ ZEND_API void destroy_zend_function(zend_function *function)
 
 ZEND_API void zend_type_release(zend_type type, bool persistent) {
 	if (ZEND_TYPE_HAS_LIST(type)) {
-		zend_type *list_type, *sublist_type;
+		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
-			if (ZEND_TYPE_HAS_LIST(*list_type)) {
-				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*list_type), sublist_type) {
-					if (ZEND_TYPE_HAS_NAME(*sublist_type)) {
-						zend_string_release(ZEND_TYPE_NAME(*sublist_type));
-					}
-				} ZEND_TYPE_LIST_FOREACH_END();
-			} else if (ZEND_TYPE_HAS_NAME(*list_type)) {
-				zend_string_release(ZEND_TYPE_NAME(*list_type));
-			}
+			zend_type_release(*list_type, persistent);
 		} ZEND_TYPE_LIST_FOREACH_END();
 		if (!ZEND_TYPE_USES_ARENA(type)) {
 			pefree(ZEND_TYPE_LIST(type), persistent);

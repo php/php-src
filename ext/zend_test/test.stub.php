@@ -55,6 +55,7 @@ namespace {
     trait _ZendTestTrait {
         /** @var mixed */
         public $testProp;
+        public Traversable|Countable $classUnionProp;
 
         public function testMethod(): bool {}
     }

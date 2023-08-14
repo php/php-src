@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9a8087f2c6f7fef676f4c955a3c530b83605ac9a */
+ * Stub hash: fa6d8c58bdef20c6c9c8db75dbb6ede775324193 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -495,6 +495,19 @@ static zend_class_entry *register_class__ZendTestTrait(void)
 	zend_string *property_testProp_name = zend_string_init("testProp", sizeof("testProp") - 1, 1);
 	zend_declare_property_ex(class_entry, property_testProp_name, &property_testProp_default_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(property_testProp_name);
+
+	zend_string *property_classUnionProp_class_Traversable = zend_string_init("Traversable", sizeof("Traversable") - 1, 1);
+	zend_string *property_classUnionProp_class_Countable = zend_string_init("Countable", sizeof("Countable") - 1, 1);
+	zend_type_list *property_classUnionProp_type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	property_classUnionProp_type_list->num_types = 2;
+	property_classUnionProp_type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(property_classUnionProp_class_Traversable, 0, 0);
+	property_classUnionProp_type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(property_classUnionProp_class_Countable, 0, 0);
+	zend_type property_classUnionProp_type = ZEND_TYPE_INIT_UNION(property_classUnionProp_type_list, 0);
+	zval property_classUnionProp_default_value;
+	ZVAL_UNDEF(&property_classUnionProp_default_value);
+	zend_string *property_classUnionProp_name = zend_string_init("classUnionProp", sizeof("classUnionProp") - 1, 1);
+	zend_declare_typed_property(class_entry, property_classUnionProp_name, &property_classUnionProp_default_value, ZEND_ACC_PUBLIC, NULL, property_classUnionProp_type);
+	zend_string_release(property_classUnionProp_name);
 
 	return class_entry;
 }
