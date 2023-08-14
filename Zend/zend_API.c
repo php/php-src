@@ -2756,7 +2756,7 @@ ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, z
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arg_info_toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-static zend_always_inline void upgrade_internal_type(zend_type *type) {
+static zend_always_inline void normalize_internal_type(zend_type *type) {
 	ZEND_ASSERT(!ZEND_TYPE_HAS_LITERAL_NAME(*type));
 	zend_type *current;
 	ZEND_TYPE_FOREACH(*type, current) {
@@ -2767,6 +2767,7 @@ static zend_always_inline void upgrade_internal_type(zend_type *type) {
 		} else if (ZEND_TYPE_HAS_LIST(*current)) {
 			zend_type *inner;
 			ZEND_TYPE_FOREACH(*current, inner) {
+				ZEND_ASSERT(!ZEND_TYPE_HAS_LITERAL_NAME(*inner) && !ZEND_TYPE_HAS_LIST(*inner));
 				if (ZEND_TYPE_HAS_NAME(*inner)) {
 					zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*inner));
 					zend_alloc_ce_cache(name);
@@ -3009,7 +3010,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 					new_arg_info[i].type = legacy_iterable;
 				}
 
-				upgrade_internal_type(&new_arg_info[i].type);
+				normalize_internal_type(&new_arg_info[i].type);
 			}
 		}
 
@@ -4396,7 +4397,7 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	property_info->type = type;
 
 	if (is_persistent_class(ce)) {
-		upgrade_internal_type(&property_info->type);
+		normalize_internal_type(&property_info->type);
 	}
 
 	zend_hash_update_ptr(&ce->properties_info, name, property_info);
