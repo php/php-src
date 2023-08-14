@@ -384,6 +384,13 @@ ZEND_API void zend_check_magic_method_implementation(
 		const zend_class_entry *ce, const zend_function *fptr, zend_string *lcname, int error_type);
 ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, zend_string *lcname);
 
+/* Type debugging utility */
+#ifdef ZEND_DEBUG
+ZEND_API bool zend_verify_type_is_valid(zend_type type, int nesting_level, bool is_arena_alloc);
+#else
+#define zend_verify_type_is_valid(type, nesting_level, is_arena_alloc) true
+#endif
+
 ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_entry);
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce);
 ZEND_API zend_class_entry *zend_register_internal_interface(zend_class_entry *orig_class_entry);

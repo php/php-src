@@ -2522,9 +2522,8 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 			/* Assumption: only userland classes can use traits, as such the type must be arena allocated */
 			zend_type_copy_ctor(&type, /* use arena */ true, /* persistent */ false);
 			ZEND_ASSERT(
-				!ZEND_TYPE_IS_COMPLEX(type)
-				|| ZEND_TYPE_HAS_NAME(type)
-				|| (ZEND_TYPE_HAS_LIST(type) && ZEND_TYPE_USES_ARENA(type) && "Type list must be arena alloc")
+				zend_verify_type_is_valid(type, /* nesting_level */ 0, /* is_arena_alloca */ true)
+				&& "zend_type is invalid"
 			);
 			new_prop = zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, type);
 

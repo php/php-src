@@ -2757,18 +2757,32 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arg_info_toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #ifdef ZEND_DEBUG
-static bool zend_verify_type_is_valid(zend_type type, int nesting_level, bool is_arena_alloc)
+ZEND_API bool zend_verify_type_is_valid(zend_type type, int nesting_level, bool is_arena_alloc)
 {
 	bool status = false;
 
-	if (ZEND_TYPE_HAS_LIST(type)) {
+	if (!ZEND_TYPE_IS_SET(type)) {
+		return nesting_level == 0;
+	} else if (ZEND_TYPE_IS_ONLY_MASK(type)) {
+		return true;
+	} else if (ZEND_TYPE_HAS_NAME(type)) {
+		zend_string *name = ZEND_TYPE_NAME(type);
+		if (zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_ITERABLE))) {
+			printf("iterable type should not exist at level %d\n", nesting_level);
+			return false;
+		}
+		return true;
+	} else if (ZEND_TYPE_HAS_LIST(type)) {
 		if (!ZEND_TYPE_IS_INTERSECTION(type) && !ZEND_TYPE_IS_UNION(type)) {
+			printf("Missing type list variant at level %d\n", nesting_level);
 			return false;
 		}
 		if (ZEND_TYPE_USES_ARENA(type) != is_arena_alloc) {
+			printf("Unexpected allocation type at level %d\n", nesting_level);
 			return false;
 		}
 		if (nesting_level >= 2) {
+			printf("Nesting exceeded: %d\n", nesting_level);
 			return false;
 		}
 
@@ -2779,20 +2793,11 @@ static bool zend_verify_type_is_valid(zend_type type, int nesting_level, bool is
 				return false;
 			}
 		ZEND_TYPE_LIST_FOREACH_END();
-		// status must be true
-	} else if (ZEND_TYPE_HAS_NAME(type)) {
-		zend_string *name = ZEND_TYPE_NAME(type);
-		if (zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_ITERABLE))) {
-			return false;
-		}
-		status = true;
-	} else if (!ZEND_TYPE_IS_COMPLEX(type)) {
 		return true;
 	}
+	printf("Error at level %d\n", nesting_level);
 	return status;
 }
-#elif
-#define zend_verify_type_is_valid(type, nesting_level, is_arena_alloc) true
 #endif
 
 /* registers all functions in *library_functions in the function hash */
@@ -4320,7 +4325,7 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 
 		ZEND_ASSERT(
 			zend_verify_type_is_valid(type, /* nesting_level */ 0, /* is_arena_alloca */ ce->type == ZEND_USER_CLASS)
-			&& "zend_type is invalid" && ce->type
+			&& "zend_type is invalid"
 		);
 
 		if (access_type & ZEND_ACC_READONLY) {

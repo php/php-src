@@ -120,7 +120,7 @@ ZEND_API void zend_type_release(zend_type type, bool persistent) {
 				} ZEND_TYPE_LIST_FOREACH_END();
 				// TODO Figure out why DNF invalid_invariance1 test has a type not marked as arena allocated
 				if (!ZEND_TYPE_USES_ARENA(*list_type) && persistent) {
-				/* if (!ZEND_TYPE_USES_ARENA(*list_type)) { */
+				//if (!ZEND_TYPE_USES_ARENA(*list_type)) {
 					pefree(ZEND_TYPE_LIST(*list_type), persistent);
 				}
 			} else if (ZEND_TYPE_HAS_NAME(*list_type)) {
@@ -403,6 +403,17 @@ ZEND_API void destroy_zend_class(zval *zv)
 					if (prop_info->attributes) {
 						zend_hash_release(prop_info->attributes);
 					}
+					ZEND_ASSERT(
+						!ZEND_TYPE_IS_COMPLEX(prop_info->type)
+						|| ZEND_TYPE_HAS_NAME(prop_info->type)
+						|| (ZEND_TYPE_HAS_LIST(prop_info->type) && ZEND_TYPE_USES_ARENA(prop_info->type) && "Type list must be arena alloc")
+					);
+
+					//ZEND_ASSERT(
+						zend_verify_type_is_valid(prop_info->type, /* nesting_level */ 0, /* is_arena_alloca */ true)
+					//	&& "zend_type is invalid"
+					//);
+					;
 					zend_type_release(prop_info->type, /* persistent */ 0);
 				}
 			} ZEND_HASH_FOREACH_END();
