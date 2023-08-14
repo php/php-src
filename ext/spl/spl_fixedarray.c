@@ -148,15 +148,10 @@ static void spl_fixedarray_copy_ctor(spl_fixedarray *to, spl_fixedarray *from)
  */
 static void spl_fixedarray_dtor_range(spl_fixedarray *array, zend_long from, zend_long to)
 {
+	array->size = from;
 	zval *begin = array->elements + from, *end = array->elements + to;
 	while (begin != end) {
-		if (Z_REFCOUNTED_P(begin)) {
-			/* Using inline variant to get rid of the redundant check */
-			i_zval_ptr_dtor(begin);
-			/* Get rid of the dangling zval, there might be a destructor or error handling accessing the array */
-			ZVAL_NULL(begin);
-		}
-		begin++;
+		zval_ptr_dtor(begin++);
 	}
 }
 
@@ -194,15 +189,15 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size)
 	if (size == 0) {
 		spl_fixedarray_dtor(array);
 		array->elements = NULL;
+		array->size = 0;
 	} else if (size > array->size) {
 		array->elements = safe_erealloc(array->elements, size, sizeof(zval), 0);
 		spl_fixedarray_init_elems(array, array->size, size);
+		array->size = size;
 	} else { /* size < array->size */
 		spl_fixedarray_dtor_range(array, size, array->size);
 		array->elements = erealloc(array->elements, sizeof(zval) * size);
 	}
-
-	array->size = size;
 }
 
 static HashTable* spl_fixedarray_object_get_gc(zend_object *obj, zval **table, int *n)
