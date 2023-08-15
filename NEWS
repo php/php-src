@@ -6,6 +6,14 @@ PHP                                                                        NEWS
   . Fixed strerror_r detection at configuration time. (Kévin Dunglas)
   . Fixed segfault during freeing of some incompletely initialized objects due
     to OOM error (PDO, SPL, XSL). (ilutov)
+  . Fixed trait typed properties using a DNF type not being correctly bound.
+    (Girgias)
+  . Fixed trait property types not being arena allocated if copied from
+    an internal trait. (Girgias)
+  . Fixed deep copy of property DNF type during lazy class load.
+    (Girgias, ilutov)
+  . Fixed memory freeing of DNF types for non arena allocated types.
+    (Girgias, ju1ius)
 
 - DOM:
   . adoptNode now respects the strict error checking property. (nielsdos)
