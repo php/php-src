@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.0beta3
+?? ??? ????, PHP 8.3.0RC1
+
+
+17 Aug 2023, PHP 8.3.0beta3
 
 - Core:
   . Fixed strerror_r detection at configuration time. (Kévin Dunglas)
