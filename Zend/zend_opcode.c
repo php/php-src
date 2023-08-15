@@ -447,6 +447,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 				if (prop_info->ce == ce) {
 					zend_string_release(prop_info->name);
 					zend_type_release(prop_info->type, /* persistent */ 1);
+					if (prop_info->attributes) {
+						zend_hash_release(prop_info->attributes);
+					}
 					free(prop_info);
 				}
 			} ZEND_HASH_FOREACH_END();
