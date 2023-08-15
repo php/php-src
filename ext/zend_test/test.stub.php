@@ -107,6 +107,12 @@ namespace {
         ): int {}
     }
 
+    class ZendTestClassWithPropertyAttribute {
+        // this attribute must be added internally in MINIT
+        #[ZendTestAttribute]
+        public string $attributed;
+    }
+
     final class ZendTestForbidDynamicCall {
         public function call(): void {}
         public static function callStatic(): void {}
