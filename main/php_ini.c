@@ -119,11 +119,7 @@ PHPAPI ZEND_COLD void display_ini_entries(zend_module_entry *module)
 	zend_ini_entry *ini_entry;
 	bool first = 1;
 
-	if (module) {
-		module_number = module->module_number;
-	} else {
-		module_number = 0;
-	}
+	module_number = module ? module->module_number : 0;
 
 	ZEND_HASH_MAP_FOREACH_PTR(EG(ini_directives), ini_entry) {
 		if (ini_entry->module_number != module_number) {
@@ -186,11 +182,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 	HashTable *active_hash;
 	char *extension_name;
 
-	if (active_ini_hash) {
-		active_hash = active_ini_hash;
-	} else {
-		active_hash = target_hash;
-	}
+	active_hash = active_ini_hash ? active_ini_hash : target_hash;
 
 	switch (callback_type) {
 		case ZEND_INI_PARSER_ENTRY: {
@@ -235,11 +227,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 				}
 
 				/* arg3 is possible option offset name */
-				if (arg3 && Z_STRLEN_P(arg3) > 0) {
-					entry = zend_symtable_update(Z_ARRVAL_P(find_arr), Z_STR_P(arg3), arg2);
-				} else {
-					entry = zend_hash_next_index_insert(Z_ARRVAL_P(find_arr), arg2);
-				}
+			    entry = arg3 && Z_STRLEN_P(arg3) > 0 ? zend_symtable_update(Z_ARRVAL_P(find_arr), Z_STR_P(arg3), arg2) : zend_hash_next_index_insert(Z_ARRVAL_P(find_arr), arg2);
 				Z_STR_P(entry) = zend_string_dup(Z_STR_P(entry), 1);
 			}
 			break;
@@ -461,11 +449,7 @@ int php_init_config(void)
 					env_location = "";
 				} else {
 					size = GetEnvironmentVariableA("PHPRC", phprc_path, size);
-					if (size == 0) {
-						env_location = "";
-					} else {
-						env_location = phprc_path;
-					}
+					env_location = (size == 0) ? "" : phprc_path;
 				}
 			}
 		}
