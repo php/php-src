@@ -69,7 +69,7 @@ void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 	pwrscale = num1->n_scale;
 	while ((exponent & 1) == 0) {
 		pwrscale = 2 * pwrscale;
-		bc_multiply_ex(power, power, &power, pwrscale);
+		bc_square_ex(power, &power, pwrscale);
 		exponent = exponent >> 1;
 	}
 	temp = bc_copy_num(power);
@@ -79,7 +79,7 @@ void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 	/* Do the calculation. */
 	while (exponent > 0) {
 		pwrscale = 2 * pwrscale;
-		bc_multiply_ex(power, power, &power, pwrscale);
+		bc_square_ex(power, &power, pwrscale);
 		if ((exponent & 1) == 1) {
 			calcscale = pwrscale + calcscale;
 			bc_multiply_ex(temp, power, &temp, calcscale);
