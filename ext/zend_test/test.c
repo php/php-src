@@ -890,7 +890,7 @@ static ZEND_METHOD(_ZendTestClass, takesUnionType)
 	ZEND_PARSE_PARAMETERS_START(1, 1);
 		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
-	// we have to perform type-checking to avoid arginfo/zpp mismatch error,
+	// we have to perform type-checking to avoid arginfo/zpp mismatch error
 	bool type_matches = (
 		instanceof_function(obj->ce, zend_standard_class_def)
 		||
@@ -938,7 +938,8 @@ static void register_ZendTestClass_dnf_property(zend_class_entry *ce) {
 // arg_info for `zend_test_internal_dnf_arguments`
 // The types are upgraded to DNF types in `register_dynamic_function_entries()`
 static zend_internal_arg_info arginfo_zend_test_internal_dnf_arguments[] = {
-	{(const char*)(uintptr_t)(1), {0}, NULL}, // return-type
+	// first entry is a zend_internal_function_info (see zend_compile.h): {argument_count, return_type, unused}
+	{(const char*)(uintptr_t)(1), {0}, NULL},
 	{"arg", {0}, NULL}
 };
 
@@ -948,7 +949,7 @@ static ZEND_NAMED_FUNCTION(zend_test_internal_dnf_arguments)
 	ZEND_PARSE_PARAMETERS_START(1, 1);
 		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
-	// we have to perform type-checking to avoid arginfo/zpp mismatch error,
+	// we have to perform type-checking to avoid arginfo/zpp mismatch error
 	bool type_matches = (
 		instanceof_function(obj->ce, zend_ce_iterator)
 		|| (
@@ -977,17 +978,17 @@ static const zend_function_entry dynamic_function_entries[] = {
 	ZEND_FE_END,
 };
 
-static void register_dynamic_function_entries(void) {
+static void register_dynamic_function_entries(int module_type) {
 	// return-type is at index 0
 	arginfo_zend_test_internal_dnf_arguments[0].type = create_test_dnf_type();
 	arginfo_zend_test_internal_dnf_arguments[1].type = create_test_dnf_type();
 	//
-	zend_register_functions(NULL, dynamic_function_entries, NULL, MODULE_PERSISTENT);
+	zend_register_functions(NULL, dynamic_function_entries, NULL, module_type);
 }
 
 PHP_MINIT_FUNCTION(zend_test)
 {
-	register_dynamic_function_entries();
+	register_dynamic_function_entries(type);
 
 	zend_test_interface = register_class__ZendTestInterface();
 
