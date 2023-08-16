@@ -119,6 +119,8 @@ void bc_sub(bc_num n1, bc_num n2, bc_num *result, size_t scale_min);
 
 void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, size_t scale);
 
+void bc_square(bc_num num, bc_num *prod, size_t scale);
+
 bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale);
 
 bool bc_modulo(bc_num num1, bc_num num2, bc_num *resul, size_t scale);

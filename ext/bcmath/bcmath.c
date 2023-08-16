@@ -541,7 +541,11 @@ PHP_FUNCTION(bcpow)
 		goto cleanup;
 	}
 
-	bc_raise(first, exponent, &result, scale);
+	if(exponent == 2) {
+		bc_square(first, &result, scale);
+	} else {
+		bc_raise(first, exponent, &result, scale);
+	}
 
 	RETVAL_STR(bc_num2str_ex(result, scale));
 
