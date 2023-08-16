@@ -258,7 +258,7 @@ PHP 8.3 UPGRADE NOTES
     now returns true on success, previously null was returned.
   . IntlBreakiterator::setText() now returns false on failure, previously
     null was returned.
-    now returns true on sucess, previously null was returned.
+    now returns true on success, previously null was returned.
   . IntlChar::enumCharNames is now returning a boolean.
     Previously it returned null on success and false on failure.
 
@@ -449,7 +449,7 @@ PHP 8.3 UPGRADE NOTES
     A warning is emitted when trying to decrement values of type null, as
     this will change in the next major version.
     Internal objects that implement an _IS_NUMBER cast but not a do_operator
-    handler that overrides addition and substraction now can be incremented
+    handler that overrides addition and subtraction now can be incremented
     and decrement as if one would do $o += 1 or $o -= 1
 
 - DOM:

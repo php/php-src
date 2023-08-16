@@ -75,8 +75,8 @@ accompanied by [pull requests](#pull-requests). You can find the extremely large
 list of RFCs that have been previously considered on the
 [PHP Wiki](https://wiki.php.net/rfc).
 
-To create a RFC, discuss it with the extension maintainer, and discuss it on the
-development mailing list internals@lists.php.net. RFC Wiki accounts can be
+To create an RFC, discuss it with the extension maintainer, and discuss it on
+the development mailing list internals@lists.php.net. RFC Wiki accounts can be
 requested on https://wiki.php.net/start?do=register. PHP extension maintainers
 can be found in the [EXTENSIONS](/EXTENSIONS) file in the PHP source code
 repository. Mailing list subscription is explained on the
@@ -318,7 +318,7 @@ detailed [information on Git](https://git-scm.com/).
 
 PHP is developed through the efforts of a large number of people. Collaboration
 is a Good Thing(tm), and Git lets us do this. Thus, following some basic rules
-with regards to Git usage will:
+with regard to Git usage will:
 
 * Make everybody happier, especially those responsible for maintaining PHP
   itself.
@@ -348,7 +348,7 @@ Having said that, here are the organizational rules:
    `--enable-zts` switch to ensure your code handles TSRM correctly and doesn't
    break for those who need that.
 
-Currently we have the following branches in use:
+Currently, we have the following branches in use:
 
 | Branch    |           |
 | --------- | --------- |
