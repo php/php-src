@@ -289,7 +289,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 	mysqlnd_set_persistent_string(&conn->unix_socket, NULL, 0, pers);
 	DBG_INF_FMT("scheme=%s", conn->scheme.s);
 	mysqlnd_set_persistent_string(&conn->scheme, NULL, 0, pers);
-	
+
 	if (conn->server_version) {
 		mnd_pefree(conn->server_version, pers);
 		conn->server_version = NULL;
@@ -725,17 +725,18 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		DBG_RETURN(PASS);
 	}
 err:
+	DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", conn->error_info->error_no, conn->error_info->error, transport.s ? transport.s : conn->scheme.s);
+	if (!conn->error_info->error_no) {
+		/* There was an unknown error if the connection failed but we have no error number */
+		char * msg;
+		mnd_sprintf(&msg, 0, "Unknown error while trying to connect via %s", transport.s ? transport.s : conn->scheme.s);
+		SET_CLIENT_ERROR(conn->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, msg);
+		mnd_sprintf_free(msg);
+	}
+
 	if (transport.s) {
 		mnd_sprintf_free(transport.s);
 		transport.s = NULL;
-	}
-
-	DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", conn->error_info->error_no, conn->error_info->error, conn->scheme.s);
-	if (!conn->error_info->error_no) {
-		char * msg;
-		mnd_sprintf(&msg, 0, "%s (trying to connect via %s)",conn->error_info->error, conn->scheme.s);
-		SET_CLIENT_ERROR(conn->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, msg);
-		mnd_sprintf_free(msg);
 	}
 
 	conn->m->free_contents(conn);

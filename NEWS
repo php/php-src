@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.11
 
+- MySQLnd:
+  . Fixed bug GH-10270 (Invalid error message when connection via SSL fails:
+    "trying to connect via (null)"). (Kamil Tekiela)
+
 31 Aug 2023, PHP 8.2.10
 
 - CLI:
