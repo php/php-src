@@ -36,12 +36,13 @@ runs:
         export LSAN_OPTIONS=verbosity=1:log_threads=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           -j$(/usr/bin/nproc) \
-          -g FAIL,BORK,LEAK,XLEAK \
+          -g PASS,FAIL,BORK,LEAK,XLEAK \
           --no-progress \
           --offline \
           --show-diff \
           --show-slow 1000 \
-          --set-timeout 120
+          --set-timeout 120 \
+          sapi/cli/tests/ext_loading.phpt
     - uses: actions/upload-artifact@v3
       if: always() && inputs.testArtifacts != null
       with:
