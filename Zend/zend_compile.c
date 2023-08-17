@@ -1423,6 +1423,35 @@ ZEND_API zend_result zend_unmangle_property_name_ex(const zend_string *name, con
 }
 /* }}} */
 
+static bool array_is_const_ex(zend_array *array, uint32_t *max_checks)
+{
+	if (zend_hash_num_elements(array) > *max_checks) {
+		return false;
+	}
+	*max_checks -= zend_hash_num_elements(array);
+
+	zval *element;
+	ZEND_HASH_FOREACH_VAL(array, element) {
+		if (Z_TYPE_P(element) < IS_ARRAY) {
+			continue;
+		} else if (Z_TYPE_P(element) == IS_ARRAY) {
+			if (!array_is_const_ex(array, max_checks)) {
+				return false;
+			}
+		} else if (UNEXPECTED(Z_TYPE_P(element) >=IS_OBJECT)) {
+			return false;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return true;
+}
+
+static bool array_is_const(zend_array *array)
+{
+	uint32_t max_checks = 50;
+	return array_is_const_ex(array, &max_checks);
+}
+
 static bool can_ct_eval_const(zend_constant *c) {
 	if (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED) {
 		return 0;
@@ -1433,8 +1462,12 @@ static bool can_ct_eval_const(zend_constant *c) {
 				&& (CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE))) {
 		return 1;
 	}
-	if (Z_TYPE(c->value) < IS_OBJECT
+	if (Z_TYPE(c->value) < IS_ARRAY
 			&& !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)) {
+		return 1;
+	} else if (Z_TYPE(c->value) == IS_ARRAY
+			&& !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)
+			&& array_is_const(Z_ARR(c->value))) {
 		return 1;
 	}
 	return 0;
@@ -1660,7 +1693,10 @@ static bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name, zend
 	c = &cc->value;
 
 	/* Substitute case-sensitive (or lowercase) persistent class constants */
-	if (Z_TYPE_P(c) < IS_OBJECT) {
+	if (Z_TYPE_P(c) < IS_ARRAY) {
+		ZVAL_COPY_OR_DUP(zv, c);
+		return 1;
+	} else if (Z_TYPE_P(c) == IS_ARRAY && array_is_const(Z_ARR_P(c))) {
 		ZVAL_COPY_OR_DUP(zv, c);
 		return 1;
 	}
