@@ -2331,10 +2331,10 @@ function explode(string $separator, string $string, int $limit = PHP_INT_MAX): a
 /**
  * @compile-time-eval
  */
-function implode(string|array $separator, ?array $array = null): string {}
+function implode(string|array $separator, array $array = []): string {}
 
 /** @alias implode */
-function join(string|array $separator, ?array $array = null): string {}
+function join(string|array $separator, array $array = []): string {}
 
 /**
  * @compile-time-eval

@@ -267,11 +267,11 @@ string(%d) "Resource id #%d::Resource id #%d"
 
 *** Testing error conditions ***
 implode(): Argument #1 ($array) must be of type array, string given
-implode(): Argument #2 ($array) must be of type ?array, int given
-implode(): Argument #1 ($array) must be of type array, string given
+implode(): Argument #2 ($array) must be of type array, int given
+implode(): Argument #2 ($array) must be of type array, null given
 string(0) ""
-implode(): Argument #2 ($array) must be of type ?array, string given
+implode(): Argument #2 ($array) must be of type array, string given
 
 Deprecated: implode(): Passing null to parameter #1 ($separator) of type array|string is deprecated in %s on line %d
-implode(): Argument #2 ($array) must be of type ?array, string given
+implode(): Argument #2 ($array) must be of type array, string given
 Done
