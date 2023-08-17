@@ -1568,7 +1568,7 @@ static bool array_is_const_ex(zend_array *array, uint32_t *max_checks)
 			if (!array_is_const_ex(array, max_checks)) {
 				return false;
 			}
-		} else if (UNEXPECTED(Z_TYPE_P(element) >=IS_OBJECT)) {
+		} else {
 			return false;
 		}
 	} ZEND_HASH_FOREACH_END();
