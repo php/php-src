@@ -16,7 +16,7 @@ $mysql = mysqli_init();
 mysqli_ssl_set($mysql, 'x509.key', 'x509.pem', 'x509.ca', null, null);
 try {
     // There should be no warning here, only exception
-    mysqli_real_connect($mysql, '127.0.0.1:3306', 'username', 'password', null, null, null, MYSQLI_CLIENT_SSL);
+    mysqli_real_connect($mysql, $host, $user, $passwd, null, $port, null, MYSQLI_CLIENT_SSL);
 } catch (mysqli_sql_exception $e) {
     echo $e->getMessage()."\n";
 }
