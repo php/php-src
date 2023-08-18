@@ -6438,7 +6438,7 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 			/* Transform iterable into a type union alias */
 			if (type_code == IS_ITERABLE) {
 				/* Set iterable bit for BC compat during Reflection and string representation of type */
-				zend_type iterable = (zend_type) ZEND_TYPE_INIT_CLASS_CONST_MASK(ZSTR_KNOWN(ZEND_STR_TRAVERSABLE),
+				zend_type iterable = (zend_type) ZEND_TYPE_INIT_CLASS_MASK(ZSTR_KNOWN(ZEND_STR_TRAVERSABLE),
                 	(MAY_BE_ARRAY|_ZEND_TYPE_ITERABLE_BIT));
 				return iterable;
 			}

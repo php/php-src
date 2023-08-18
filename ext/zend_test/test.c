@@ -884,11 +884,116 @@ static void le_throwing_resource_dtor(zend_resource *rsrc)
 	zend_throw_exception(NULL, "Throwing resource destructor called", 0);
 }
 
+static ZEND_METHOD(_ZendTestClass, takesUnionType)
+{
+	zend_object *obj;
+	ZEND_PARSE_PARAMETERS_START(1, 1);
+		Z_PARAM_OBJ(obj)
+	ZEND_PARSE_PARAMETERS_END();
+	// we have to perform type-checking to avoid arginfo/zpp mismatch error
+	bool type_matches = (
+		instanceof_function(obj->ce, zend_standard_class_def)
+		||
+		instanceof_function(obj->ce, zend_ce_iterator)
+	);
+	if (!type_matches) {
+		zend_string *ty = zend_type_to_string(execute_data->func->internal_function.arg_info->type);
+		zend_argument_type_error(1, "must be of type %s, %s given", ty->val, obj->ce->name->val);
+		zend_string_release(ty);
+		RETURN_THROWS();
+	}
+
+	RETURN_NULL();
+}
+
+// Returns a newly allocated DNF type `Iterator|(Traversable&Countable)`.
+//
+// We need to generate it "manually" because gen_stubs.php does not support codegen for DNF types ATM.
+static zend_type create_test_dnf_type(void) {
+	zend_string *class_Iterator = zend_string_init_interned("Iterator", sizeof("Iterator") - 1, true);
+	zend_alloc_ce_cache(class_Iterator);
+	zend_string *class_Traversable = ZSTR_KNOWN(ZEND_STR_TRAVERSABLE);
+	zend_string *class_Countable = zend_string_init_interned("Countable", sizeof("Countable") - 1, true);
+	zend_alloc_ce_cache(class_Countable);
+	//
+	zend_type_list *intersection_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	intersection_list->num_types = 2;
+	intersection_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(class_Traversable, 0, 0);
+	intersection_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(class_Countable, 0, 0);
+	zend_type_list *union_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	union_list->num_types = 2;
+	union_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(class_Iterator, 0, 0);
+	union_list->types[1] = (zend_type) ZEND_TYPE_INIT_INTERSECTION(intersection_list, 0);
+	return (zend_type) ZEND_TYPE_INIT_UNION(union_list, 0);
+}
+
+static void register_ZendTestClass_dnf_property(zend_class_entry *ce) {
+	zend_string *prop_name = zend_string_init_interned("dnfProperty", sizeof("dnfProperty") - 1, true);
+	zval default_value;
+	ZVAL_UNDEF(&default_value);
+	zend_type type = create_test_dnf_type();
+	zend_declare_typed_property(ce, prop_name, &default_value, ZEND_ACC_PUBLIC, NULL, type);
+}
+
+// arg_info for `zend_test_internal_dnf_arguments`
+// The types are upgraded to DNF types in `register_dynamic_function_entries()`
+static zend_internal_arg_info arginfo_zend_test_internal_dnf_arguments[] = {
+	// first entry is a zend_internal_function_info (see zend_compile.h): {argument_count, return_type, unused}
+	{(const char*)(uintptr_t)(1), {0}, NULL},
+	{"arg", {0}, NULL}
+};
+
+static ZEND_NAMED_FUNCTION(zend_test_internal_dnf_arguments)
+{
+	zend_object *obj;
+	ZEND_PARSE_PARAMETERS_START(1, 1);
+		Z_PARAM_OBJ(obj)
+	ZEND_PARSE_PARAMETERS_END();
+	// we have to perform type-checking to avoid arginfo/zpp mismatch error
+	bool type_matches = (
+		instanceof_function(obj->ce, zend_ce_iterator)
+		|| (
+			instanceof_function(obj->ce, zend_ce_traversable)
+			&& instanceof_function(obj->ce, zend_ce_countable)
+		)
+	);
+	if (!type_matches) {
+		zend_string *ty = zend_type_to_string(arginfo_zend_test_internal_dnf_arguments[1].type);
+		zend_argument_type_error(1, "must be of type %s, %s given", ty->val, obj->ce->name->val);
+		zend_string_release(ty);
+		RETURN_THROWS();
+	}
+
+	RETURN_OBJ_COPY(obj);
+}
+
+static const zend_function_entry dynamic_function_entries[] = {
+	{
+		.fname = "zend_test_internal_dnf_arguments",
+		.handler = zend_test_internal_dnf_arguments,
+		.arg_info = arginfo_zend_test_internal_dnf_arguments,
+		.num_args = 1,
+		.flags = 0,
+	},
+	ZEND_FE_END,
+};
+
+static void register_dynamic_function_entries(int module_type) {
+	// return-type is at index 0
+	arginfo_zend_test_internal_dnf_arguments[0].type = create_test_dnf_type();
+	arginfo_zend_test_internal_dnf_arguments[1].type = create_test_dnf_type();
+	//
+	zend_register_functions(NULL, dynamic_function_entries, NULL, module_type);
+}
+
 PHP_MINIT_FUNCTION(zend_test)
 {
+	register_dynamic_function_entries(type);
+
 	zend_test_interface = register_class__ZendTestInterface();
 
 	zend_test_class = register_class__ZendTestClass(zend_test_interface);
+	register_ZendTestClass_dnf_property(zend_test_class);
 	zend_test_class->create_object = zend_test_class_new;
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
 

@@ -2756,6 +2756,28 @@ ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, z
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arg_info_toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+static zend_always_inline void zend_normalize_internal_type(zend_type *type) {
+	ZEND_ASSERT(!ZEND_TYPE_HAS_LITERAL_NAME(*type));
+	zend_type *current;
+	ZEND_TYPE_FOREACH(*type, current) {
+		if (ZEND_TYPE_HAS_NAME(*current)) {
+			zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*current));
+			zend_alloc_ce_cache(name);
+			ZEND_TYPE_SET_PTR(*current, name);
+		} else if (ZEND_TYPE_HAS_LIST(*current)) {
+			zend_type *inner;
+			ZEND_TYPE_FOREACH(*current, inner) {
+				ZEND_ASSERT(!ZEND_TYPE_HAS_LITERAL_NAME(*inner) && !ZEND_TYPE_HAS_LIST(*inner));
+				if (ZEND_TYPE_HAS_NAME(*inner)) {
+					zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*inner));
+					zend_alloc_ce_cache(name);
+					ZEND_TYPE_SET_PTR(*inner, name);
+				}
+			} ZEND_TYPE_FOREACH_END();
+		}
+	} ZEND_TYPE_FOREACH_END();
+}
+
 /* registers all functions in *library_functions in the function hash */
 ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, int type) /* {{{ */
 {
@@ -2934,10 +2956,12 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			memcpy(new_arg_info, arg_info, sizeof(zend_internal_arg_info) * num_args);
 			reg_function->arg_info = new_arg_info + 1;
 			for (i = 0; i < num_args; i++) {
-				if (ZEND_TYPE_IS_COMPLEX(new_arg_info[i].type)) {
-					ZEND_ASSERT(ZEND_TYPE_HAS_NAME(new_arg_info[i].type)
-						&& "Should be stored as simple name");
+				if (ZEND_TYPE_HAS_LITERAL_NAME(new_arg_info[i].type)) {
+					// gen_stubs.php does not support codegen for DNF types in arg infos.
+					// As a temporary workaround, we split the type name on `|` characters,
+					// converting it to an union type if necessary.
 					const char *class_name = ZEND_TYPE_LITERAL_NAME(new_arg_info[i].type);
+					new_arg_info[i].type.type_mask &= ~_ZEND_TYPE_LITERAL_NAME_BIT;
 
 					size_t num_types = 1;
 					const char *p = class_name;
@@ -2948,8 +2972,10 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 
 					if (num_types == 1) {
 						/* Simple class type */
-						ZEND_TYPE_SET_PTR(new_arg_info[i].type,
-							zend_string_init_interned(class_name, strlen(class_name), 1));
+						zend_string *str = zend_string_init_interned(class_name, strlen(class_name), 1);
+						zend_alloc_ce_cache(str);
+						ZEND_TYPE_SET_PTR(new_arg_info[i].type, str);
+						new_arg_info[i].type.type_mask |= _ZEND_TYPE_NAME_BIT;
 					} else {
 						/* Union type */
 						zend_type_list *list = malloc(ZEND_TYPE_LIST_SIZE(num_types));
@@ -2961,8 +2987,8 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 						uint32_t j = 0;
 						while (true) {
 							const char *end = strchr(start, '|');
-							zend_string *str = zend_string_init_interned(
-								start, end ? end - start : strlen(start), 1);
+							zend_string *str = zend_string_init_interned(start, end ? end - start : strlen(start), 1);
+							zend_alloc_ce_cache(str);
 							list->types[j] = (zend_type) ZEND_TYPE_INIT_CLASS(str, 0, 0);
 							if (!end) {
 								break;
@@ -2977,10 +3003,14 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 					zend_error(E_CORE_WARNING, "iterable type is now a compile time alias for array|Traversable,"
 						" regenerate the argument info via the php-src gen_stub build script");
 					*/
-					zend_type legacy_iterable = ZEND_TYPE_INIT_CLASS_CONST_MASK(ZSTR_KNOWN(ZEND_STR_TRAVERSABLE),
-						(new_arg_info[i].type.type_mask|MAY_BE_ARRAY));
+					zend_type legacy_iterable = ZEND_TYPE_INIT_CLASS_MASK(
+						ZSTR_KNOWN(ZEND_STR_TRAVERSABLE),
+						(new_arg_info[i].type.type_mask | MAY_BE_ARRAY)
+					);
 					new_arg_info[i].type = legacy_iterable;
 				}
+
+				zend_normalize_internal_type(&new_arg_info[i].type);
 			}
 		}
 
@@ -4367,16 +4397,7 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	property_info->type = type;
 
 	if (is_persistent_class(ce)) {
-		zend_type *single_type;
-		ZEND_TYPE_FOREACH(property_info->type, single_type) {
-			// TODO Add support and test cases when gen_stub support added
-			ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*single_type));
-			if (ZEND_TYPE_HAS_NAME(*single_type)) {
-				zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*single_type));
-				ZEND_TYPE_SET_PTR(*single_type, name);
-				zend_alloc_ce_cache(name);
-			}
-		} ZEND_TYPE_FOREACH_END();
+		zend_normalize_internal_type(&property_info->type);
 	}
 
 	zend_hash_update_ptr(&ce->properties_info, name, property_info);
