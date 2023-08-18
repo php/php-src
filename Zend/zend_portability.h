@@ -153,13 +153,31 @@
 #  define PHP_RTLD_MODE  RTLD_LAZY
 # endif
 
-# if defined(RTLD_GROUP) && defined(RTLD_WORLD) && defined(RTLD_PARENT)
-#  define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL | RTLD_GROUP | RTLD_WORLD | RTLD_PARENT)
-# elif defined(RTLD_DEEPBIND) && !defined(__SANITIZE_ADDRESS__) && !__has_feature(memory_sanitizer)
-#  define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL | RTLD_DEEPBIND)
-# else
-#  define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL)
+# ifdef __SANITIZE_ADDRESS__
+#  include "sanitizer/lsan_interface.h"
 # endif
+
+/* dl uses a thread local variable internally. Due to LSan crashing we're setting use_tls=0, which
+ * will report a leak inside dlopen() that we need to suppress. */
+static inline void *zend_dlopen(const char *file, int mode)
+{
+# ifdef __SANITIZE_ADDRESS__
+	__lsan_disable();
+# endif
+	void *ptr = dlopen(file, mode);
+# ifdef __SANITIZE_ADDRESS__
+	__lsan_enable();
+# endif
+	return ptr;
+}
+# if defined(RTLD_GROUP) && defined(RTLD_WORLD) && defined(RTLD_PARENT)
+#  define DL_LOAD(libname)			zend_dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL | RTLD_GROUP | RTLD_WORLD | RTLD_PARENT)
+# elif defined(RTLD_DEEPBIND) && !defined(__SANITIZE_ADDRESS__) && !__has_feature(memory_sanitizer)
+#  define DL_LOAD(libname)			zend_dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL | RTLD_DEEPBIND)
+# else
+#  define DL_LOAD(libname)			zend_dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL)
+# endif
+
 # define DL_UNLOAD					dlclose
 # if defined(DLSYM_NEEDS_UNDERSCORE)
 #  define DL_FETCH_SYMBOL(h,s)		dlsym((h), "_" s)
