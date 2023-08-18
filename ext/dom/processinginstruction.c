@@ -118,8 +118,6 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
 	zend_string *str = Z_STR_P(newval);
 
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
-
 	xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
 
 	return SUCCESS;
