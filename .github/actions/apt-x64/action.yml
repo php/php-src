@@ -6,6 +6,12 @@ runs:
       run: |
         set -x
 
+        echo "deb http://ddebs.ubuntu.com $(lsb_release -cs) main restricted universe multiverse
+        deb http://ddebs.ubuntu.com $(lsb_release -cs)-updates main restricted universe multiverse
+        deb http://ddebs.ubuntu.com $(lsb_release -cs)-proposed main restricted universe multiverse" | \
+        sudo tee -a /etc/apt/sources.list.d/ddebs.list
+        sudo apt-get install ubuntu-dbgsym-keyring
+
         sudo apt-get update
         sudo apt-get install \
           bison \
@@ -45,8 +51,6 @@ runs:
           snmp-mibs-downloader \
           freetds-dev \
           unixodbc-dev \
-          llvm \
-          clang \
           libc-client-dev \
           dovecot-core \
           dovecot-pop3d \

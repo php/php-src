@@ -754,7 +754,7 @@ this extension sharedto offer compatibility.
 	do { \
 		(cb) = NULL; \
 		cli_shell_callbacks_t *(*get_callbacks)(void); \
-		get_callbacks = dlsym(RTLD_DEFAULT, "php_cli_get_shell_callbacks"); \
+		get_callbacks = DL_FETCH_SYMBOL(RTLD_DEFAULT, "php_cli_get_shell_callbacks"); \
 		if (get_callbacks) { \
 			(cb) = get_callbacks(); \
 		} \

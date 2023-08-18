@@ -178,11 +178,22 @@ static inline void *zend_dlopen(const char *file, int mode)
 #  define DL_LOAD(libname)			zend_dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL)
 # endif
 
+static inline void *zend_dlsym(void *__restrict handle, const char *__restrict name)
+{
+# ifdef __SANITIZE_ADDRESS__
+	__lsan_disable();
+# endif
+	void *ptr = dlsym(handle, name);
+# ifdef __SANITIZE_ADDRESS__
+	__lsan_enable();
+# endif
+	return ptr;
+}
 # define DL_UNLOAD					dlclose
 # if defined(DLSYM_NEEDS_UNDERSCORE)
-#  define DL_FETCH_SYMBOL(h,s)		dlsym((h), "_" s)
+#  define DL_FETCH_SYMBOL(h,s)		zend_dlsym((h), "_" s)
 # else
-#  define DL_FETCH_SYMBOL			dlsym
+#  define DL_FETCH_SYMBOL			zend_dlsym
 # endif
 # define DL_ERROR					dlerror
 # define DL_HANDLE					void *
