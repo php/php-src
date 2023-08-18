@@ -1033,19 +1033,24 @@ PHP_FUNCTION(implode)
 		Z_PARAM_ARRAY_HT(pieces)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (pieces == NULL) {
-		if (arg1_array == NULL) {
-			zend_type_error("%s(): Argument #1 ($array) must be of type array, string given", get_active_function_name());
-			RETURN_THROWS();
-		}
-
-		arg1_str = ZSTR_EMPTY_ALLOC();
-		pieces = arg1_array;
-	} else {
-		if (arg1_str == NULL) {
-			zend_argument_type_error(1, "must be of type string, array given");
-			RETURN_THROWS();
-		}
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (arg1_array == NULL) {
+				zend_type_error("%s(): Argument #1 ($array) must be of type array, string given", get_active_function_name());
+				RETURN_THROWS();
+			}
+			arg1_str = ZSTR_EMPTY_ALLOC();
+			pieces = arg1_array;
+			break;
+		case 2:
+			if (arg1_str == NULL) {
+				zend_argument_type_error(1, "must be of type string, array given");
+				RETURN_THROWS();
+			}
+			break;
+		default:
+    		// already checked by ZPP
+    		ZEND_UNREACHABLE();
 	}
 
 	php_implode(arg1_str, pieces, return_value);
