@@ -44,6 +44,14 @@
 #undef iconv
 #endif
 
+#if defined(__NetBSD__)
+// unfortunately, netbsd has still the old non posix conformant signature
+// libiconv tends to match the eventual system's iconv too.
+#define ICONV_CONST const
+#else
+#define ICONV_CONST
+#endif
+
 #include "zend_smart_str.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/quot_print.h"
@@ -360,7 +368,7 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 
 			out_p = ZSTR_VAL((d)->s) + ZSTR_LEN((d)->s);
 
-			if (iconv(cd, (char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
+			if (iconv(cd, (ICONV_CONST char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 				switch (errno) {
 					case EINVAL:
 						return PHP_ICONV_ERR_ILLEGAL_CHAR;
@@ -456,7 +464,7 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	out_p = ZSTR_VAL(out_buf);
 
 	while (in_left > 0) {
-		result = iconv(cd, (char **) &in_p, &in_left, (char **) &out_p, &out_left);
+		result = iconv(cd, (ICONV_CONST char **) &in_p, &in_left, (char **) &out_p, &out_left);
 		out_size = bsz - out_left;
 		if (result == (size_t)(-1)) {
 			if (ignore_ilseq && errno == EILSEQ) {
@@ -576,7 +584,7 @@ static php_iconv_err_t _php_iconv_strlen(size_t *pretval, const char *str, size_
 
 		more = in_left > 0;
 
-		iconv(cd, more ? (char **)&in_p : NULL, more ? &in_left : NULL, (char **) &out_p, &out_left);
+		iconv(cd, more ? (ICONV_CONST char **)&in_p : NULL, more ? &in_left : NULL, (char **) &out_p, &out_left);
 		if (out_left == sizeof(buf)) {
 			break;
 		} else {
@@ -683,7 +691,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 
 		more = in_left > 0 && len > 0;
 
-		iconv(cd1, more ? (char **)&in_p : NULL, more ? &in_left : NULL, (char **) &out_p, &out_left);
+		iconv(cd1, more ? (ICONV_CONST char **)&in_p : NULL, more ? &in_left : NULL, (char **) &out_p, &out_left);
 		if (out_left == sizeof(buf)) {
 			break;
 		}
@@ -805,7 +813,7 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 
 		more = in_left > 0;
 
-		iconv_ret = iconv(cd, more ? (char **)&in_p : NULL, more ? &in_left : NULL, (char **) &out_p, &out_left);
+		iconv_ret = iconv(cd, more ? (ICONV_CONST char **)&in_p : NULL, more ? &in_left : NULL, (char **) &out_p, &out_left);
 		if (out_left == sizeof(buf)) {
 			break;
 		}
@@ -1012,7 +1020,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 
 					out_left = out_size - out_reserved;
 
-					if (iconv(cd, (char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
+					if (iconv(cd, (ICONV_CONST char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 						switch (errno) {
 							case EINVAL:
 								err = PHP_ICONV_ERR_ILLEGAL_CHAR;
@@ -1096,7 +1104,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 					out_p = buf;
 					out_left = out_size;
 
-					if (iconv(cd, (char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
+					if (iconv(cd, (ICONV_CONST char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 						switch (errno) {
 							case EINVAL:
 								err = PHP_ICONV_ERR_ILLEGAL_CHAR;
@@ -2365,7 +2373,7 @@ static int php_iconv_stream_filter_append_bucket(
 		tcnt = self->stub_len;
 
 		while (tcnt > 0) {
-			if (iconv(self->cd, &pt, &tcnt, &pd, &ocnt) == (size_t)-1) {
+			if (iconv(self->cd, (ICONV_CONST char **)&pt, &tcnt, &pd, &ocnt) == (size_t)-1) {
 				switch (errno) {
 					case EILSEQ:
 						php_error_docref(NULL, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): invalid multibyte sequence", self->from_charset, self->to_charset);
@@ -2431,7 +2439,7 @@ static int php_iconv_stream_filter_append_bucket(
 
 	while (icnt > 0) {
 		if ((ps == NULL ? iconv(self->cd, NULL, NULL, &pd, &ocnt):
-					iconv(self->cd, (char **)&ps, &icnt, &pd, &ocnt)) == (size_t)-1) {
+					iconv(self->cd, (ICONV_CONST char **)&ps, &icnt, &pd, &ocnt)) == (size_t)-1) {
 			switch (errno) {
 				case EILSEQ:
 					php_error_docref(NULL, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): invalid multibyte sequence", self->from_charset, self->to_charset);
