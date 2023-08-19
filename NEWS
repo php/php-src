@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-11937 (Constant ASTs containing objects). (ilutov)
 
+- Iconv:
+  . Fixed build for NetBSD which still uses the old iconv signature.
+    (David Carlier)
+
 - MySQLnd:
   . Fixed bug GH-10270 (Invalid error message when connection via SSL fails:
     "trying to connect via (null)"). (Kamil Tekiela)
