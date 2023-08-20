@@ -6,7 +6,7 @@ on:
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
-      - README.md
+      - '**/README.*'
       - CONTRIBUTING.md
       - CODING_STANDARDS.md
     branches:
@@ -21,7 +21,7 @@ on:
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
-      - README.md
+      - '**/README.*'
       - CONTRIBUTING.md
       - CODING_STANDARDS.md
     branches:
