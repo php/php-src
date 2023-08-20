@@ -140,7 +140,6 @@ int dom_document_encoding_read(dom_object *obj, zval *retval)
 zend_result dom_document_encoding_write(dom_object *obj, zval *newval)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	zend_string *str;
 	xmlCharEncodingHandlerPtr handler;
 
 	if (docp == NULL) {
@@ -148,10 +147,14 @@ zend_result dom_document_encoding_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	str = zval_try_get_string(newval);
-	if (UNEXPECTED(!str)) {
-		return FAILURE;
+	/* Typed property, can only be IS_STRING or IS_NULL. */
+	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING || Z_TYPE_P(newval) == IS_NULL);
+
+	if (Z_TYPE_P(newval) == IS_NULL) {
+		goto invalid_encoding;
 	}
+
+	zend_string *str = Z_STR_P(newval);
 
 	handler = xmlFindCharEncodingHandler(ZSTR_VAL(str));
 
@@ -162,12 +165,14 @@ zend_result dom_document_encoding_write(dom_object *obj, zval *newval)
 		}
 		docp->encoding = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 	} else {
-		zend_value_error("Invalid document encoding");
-		return FAILURE;
+		goto invalid_encoding;
 	}
 
-	zend_string_release_ex(str, 0);
 	return SUCCESS;
+
+invalid_encoding:
+	zend_value_error("Invalid document encoding");
+	return FAILURE;
 }
 
 /* }}} */
