@@ -6,8 +6,8 @@ PHP_ARG_ENABLE([mysqlnd],
   [no],
   [yes])
 
-PHP_ARG_ENABLE([mysqlnd_compression_support],
-  [whether to disable compressed protocol support in mysqlnd],
+PHP_ARG_ENABLE([mysqlnd-compression-support],
+  [whether to enable compressed protocol support in mysqlnd],
   [AS_HELP_STRING([--disable-mysqlnd-compression-support],
     [Disable support for the MySQL compressed protocol in mysqlnd])],
   [yes],
