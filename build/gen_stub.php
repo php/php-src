@@ -289,24 +289,16 @@ class SimpleType {
      */
     public static function fromValue($value): SimpleType
     {
-        switch (gettype($value)) {
-            case "NULL":
-                return SimpleType::null();
-            case "boolean":
-                return SimpleType::bool();
-            case "integer":
-                return SimpleType::int();
-            case "double":
-                return SimpleType::float();
-            case "string":
-                return SimpleType::string();
-            case "array":
-                return SimpleType::array();
-            case "object":
-                return SimpleType::object();
-            default:
-                throw new Exception("Type \"" . gettype($value) . "\" cannot be inferred based on value");
-        }
+        return match (gettype($value)) {
+            "NULL" => SimpleType::null(),
+            "boolean" => SimpleType::bool(),
+            "integer" => SimpleType::int(),
+            "double" => SimpleType::float(),
+            "string" => SimpleType::string(),
+            "array" => SimpleType::array(),
+            "object" => SimpleType::object(),
+            default => throw new Exception("Type \"" . gettype($value) . "\" cannot be inferred based on value"),
+        };
     }
 
     public static function null(): SimpleType
@@ -384,88 +376,55 @@ class SimpleType {
 
     public function toTypeCode(): string {
         assert($this->isBuiltin);
-        switch ($this->name) {
-            case "bool":
-                return "_IS_BOOL";
-            case "int":
-                return "IS_LONG";
-            case "float":
-                return "IS_DOUBLE";
-            case "string":
-                return "IS_STRING";
-            case "array":
-                return "IS_ARRAY";
-            case "object":
-                return "IS_OBJECT";
-            case "void":
-                return "IS_VOID";
-            case "callable":
-                return "IS_CALLABLE";
-            case "mixed":
-                return "IS_MIXED";
-            case "static":
-                return "IS_STATIC";
-            case "never":
-                return "IS_NEVER";
-            case "null":
-                return "IS_NULL";
-            case "false":
-                return "IS_FALSE";
-            case "true":
-                return "IS_TRUE";
-            default:
-                throw new Exception("Not implemented: $this->name");
-        }
+        return match ($this->name) {
+            "bool" => "_IS_BOOL",
+            "int" => "IS_LONG",
+            "float" => "IS_DOUBLE",
+            "string" => "IS_STRING",
+            "array" => "IS_ARRAY",
+            "object" => "IS_OBJECT",
+            "void" => "IS_VOID",
+            "callable" => "IS_CALLABLE",
+            "mixed" => "IS_MIXED",
+            "static" => "IS_STATIC",
+            "never" => "IS_NEVER",
+            "null" => "IS_NULL",
+            "false" => "IS_FALSE",
+            "true" => "IS_TRUE",
+            default => throw new Exception("Not implemented: $this->name"),
+        };
     }
 
     public function toTypeMask(): string {
         assert($this->isBuiltin);
 
-        switch ($this->name) {
-            case "null":
-                return "MAY_BE_NULL";
-            case "false":
-                return "MAY_BE_FALSE";
-            case "true":
-                return "MAY_BE_TRUE";
-            case "bool":
-                return "MAY_BE_BOOL";
-            case "int":
-                return "MAY_BE_LONG";
-            case "float":
-                return "MAY_BE_DOUBLE";
-            case "string":
-                return "MAY_BE_STRING";
-            case "array":
-                return "MAY_BE_ARRAY";
-            case "object":
-                return "MAY_BE_OBJECT";
-            case "callable":
-                return "MAY_BE_CALLABLE";
-            case "mixed":
-                return "MAY_BE_ANY";
-            case "void":
-                return "MAY_BE_VOID";
-            case "static":
-                return "MAY_BE_STATIC";
-            case "never":
-                return "MAY_BE_NEVER";
-            default:
-                throw new Exception("Not implemented: $this->name");
-        }
+        return match ($this->name) {
+            "null" => "MAY_BE_NULL",
+            "false" => "MAY_BE_FALSE",
+            "true" => "MAY_BE_TRUE",
+            "bool" => "MAY_BE_BOOL",
+            "int" => "MAY_BE_LONG",
+            "float" => "MAY_BE_DOUBLE",
+            "string" => "MAY_BE_STRING",
+            "array" => "MAY_BE_ARRAY",
+            "object" => "MAY_BE_OBJECT",
+            "callable" => "MAY_BE_CALLABLE",
+            "mixed" => "MAY_BE_ANY",
+            "void" => "MAY_BE_VOID",
+            "static" => "MAY_BE_STATIC",
+            "never" => "MAY_BE_NEVER",
+            default => throw new Exception("Not implemented: $this->name"),
+        };
     }
 
     public function toOptimizerTypeMaskForArrayKey(): string {
         assert($this->isBuiltin);
 
-        switch ($this->name) {
-            case "int":
-                return "MAY_BE_ARRAY_KEY_LONG";
-            case "string":
-                return "MAY_BE_ARRAY_KEY_STRING";
-            default:
-                throw new Exception("Type $this->name cannot be an array key");
-        }
+        return match ($this->name) {
+            "int" => "MAY_BE_ARRAY_KEY_LONG",
+            "string" => "MAY_BE_ARRAY_KEY_STRING",
+            default => throw new Exception("Type $this->name cannot be an array key"),
+        };
     }
 
     public function toOptimizerTypeMaskForArrayValue(): string {
@@ -473,34 +432,21 @@ class SimpleType {
             return "MAY_BE_ARRAY_OF_OBJECT";
         }
 
-        switch ($this->name) {
-            case "null":
-                return "MAY_BE_ARRAY_OF_NULL";
-            case "false":
-                return "MAY_BE_ARRAY_OF_FALSE";
-            case "true":
-                return "MAY_BE_ARRAY_OF_TRUE";
-            case "bool":
-                return "MAY_BE_ARRAY_OF_FALSE|MAY_BE_ARRAY_OF_TRUE";
-            case "int":
-                return "MAY_BE_ARRAY_OF_LONG";
-            case "float":
-                return "MAY_BE_ARRAY_OF_DOUBLE";
-            case "string":
-                return "MAY_BE_ARRAY_OF_STRING";
-            case "array":
-                return "MAY_BE_ARRAY_OF_ARRAY";
-            case "object":
-                return "MAY_BE_ARRAY_OF_OBJECT";
-            case "resource":
-                return "MAY_BE_ARRAY_OF_RESOURCE";
-            case "mixed":
-                return "MAY_BE_ARRAY_OF_ANY";
-            case "ref":
-                return "MAY_BE_ARRAY_OF_REF";
-            default:
-                throw new Exception("Type $this->name cannot be an array value");
-        }
+        return match ($this->name) {
+            "null" => "MAY_BE_ARRAY_OF_NULL",
+            "false" => "MAY_BE_ARRAY_OF_FALSE",
+            "true" => "MAY_BE_ARRAY_OF_TRUE",
+            "bool" => "MAY_BE_ARRAY_OF_FALSE|MAY_BE_ARRAY_OF_TRUE",
+            "int" => "MAY_BE_ARRAY_OF_LONG",
+            "float" => "MAY_BE_ARRAY_OF_DOUBLE",
+            "string" => "MAY_BE_ARRAY_OF_STRING",
+            "array" => "MAY_BE_ARRAY_OF_ARRAY",
+            "object" => "MAY_BE_ARRAY_OF_OBJECT",
+            "resource" => "MAY_BE_ARRAY_OF_RESOURCE",
+            "mixed" => "MAY_BE_ARRAY_OF_ANY",
+            "ref" => "MAY_BE_ARRAY_OF_REF",
+            default => throw new Exception("Type $this->name cannot be an array value"),
+        };
     }
 
     public function toOptimizerTypeMask(): string {
@@ -508,18 +454,13 @@ class SimpleType {
             return "MAY_BE_OBJECT";
         }
 
-        switch ($this->name) {
-            case "resource":
-                return "MAY_BE_RESOURCE";
-            case "callable":
-                return "MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_OBJECT";
-            case "iterable":
-                return "MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_OBJECT";
-            case "mixed":
-                return "MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY";
-        }
-
-        return $this->toTypeMask();
+        return match ($this->name) {
+            "resource" => "MAY_BE_RESOURCE",
+            "callable" => "MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_OBJECT",
+            "iterable" => "MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_OBJECT",
+            "mixed" => "MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY",
+            default => $this->toTypeMask(),
+        };
     }
 
     public function toEscapedName(): string {
@@ -883,16 +824,11 @@ class ArgInfo {
             return null;
         }
 
-        switch ($this->defaultValue) {
-            case 'UNKNOWN':
-                return null;
-            case 'false':
-            case 'true':
-            case 'null':
-                return "&{$this->defaultValue};";
-        }
-
-        return $this->defaultValue;
+        return match ($this->defaultValue) {
+            'UNKNOWN' => null,
+            'false', 'true', 'null' => "&{$this->defaultValue};",
+            default => $this->defaultValue,
+        };
     }
 
     private function setTypes(?Type $type, ?Type $phpDocType): void
@@ -1379,16 +1315,11 @@ class FuncInfo {
                 );
             }
 
-            switch (true) {
-                case $this->isDeprecated:
-                    $macro = 'ZEND_DEP_FE';
-                    break;
-                case $this->supportsCompileTimeEval:
-                    $macro = 'ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE';
-                    break;
-                default:
-                    $macro = 'ZEND_FE';
-            }
+            $macro = match (true) {
+                $this->isDeprecated => 'ZEND_DEP_FE',
+                $this->supportsCompileTimeEval => 'ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE',
+                default => 'ZEND_FE',
+            };
 
             return sprintf("\t%s(%s, %s)\n", $macro, $functionName, $this->getArgInfoName());
         } else {
