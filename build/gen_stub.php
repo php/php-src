@@ -1328,32 +1328,36 @@ class FuncInfo {
                         $this->alias->getDeclarationClassName(), $this->name->methodName,
                         $this->alias->methodName, $this->getArgInfoName(), $this->getFlagsAsArginfoString()
                     );
-                } else if ($this->alias instanceof FunctionName) {
+                }
+
+                if ($this->alias instanceof FunctionName) {
                     return sprintf(
                         "\tZEND_ME_MAPPING(%s, %s, %s, %s)\n",
                         $this->name->methodName, $this->alias->getNonNamespacedName(),
                         $this->getArgInfoName(), $this->getFlagsAsArginfoString()
                     );
-                } else {
-                    throw new Error("Cannot happen");
-                }
-            } else {
-                $declarationClassName = $this->name->getDeclarationClassName();
-                if ($this->flags & Class_::MODIFIER_ABSTRACT) {
-                    return sprintf(
-                        "\tZEND_ABSTRACT_ME_WITH_FLAGS(%s, %s, %s, %s)\n",
-                        $declarationClassName, $this->name->methodName, $this->getArgInfoName(),
-                        $this->getFlagsAsArginfoString()
-                    );
                 }
 
+                throw new Error("Cannot happen");
+            }
+
+            $declarationClassName = $this->name->getDeclarationClassName();
+            if ($this->flags & Class_::MODIFIER_ABSTRACT) {
                 return sprintf(
-                    "\tZEND_ME(%s, %s, %s, %s)\n",
+                    "\tZEND_ABSTRACT_ME_WITH_FLAGS(%s, %s, %s, %s)\n",
                     $declarationClassName, $this->name->methodName, $this->getArgInfoName(),
                     $this->getFlagsAsArginfoString()
                 );
             }
-        } else if ($this->name instanceof FunctionName) {
+
+            return sprintf(
+                "\tZEND_ME(%s, %s, %s, %s)\n",
+                $declarationClassName, $this->name->methodName, $this->getArgInfoName(),
+                $this->getFlagsAsArginfoString()
+            );
+        }
+
+        if ($this->name instanceof FunctionName) {
             $namespace = $this->name->getNamespace();
             $functionName = $this->name->getFunctionName();
             $declarationName = $this->alias ? $this->alias->getNonNamespacedName() : $this->name->getDeclarationName();
@@ -1391,9 +1395,9 @@ class FuncInfo {
             }
 
             return sprintf("\t%s(%s, %s)\n", $macro, $functionName, $this->getArgInfoName());
-        } else {
-            throw new Error("Cannot happen");
         }
+
+        throw new Error("Cannot happen");
     }
 
     public function getOptimizerInfo(): ?string {
@@ -1650,13 +1654,21 @@ class EvaluatedValue
                     if ($constType) {
                         if ($constType->isBool()) {
                             return true;
-                        } elseif ($constType->isInt()) {
+                        }
+
+                        if ($constType->isInt()) {
                             return 1;
-                        } elseif ($constType->isFloat()) {
+                        }
+
+                        if ($constType->isFloat()) {
                             return M_PI;
-                        } elseif ($constType->isString()) {
+                        }
+
+                        if ($constType->isString()) {
                             return $const->name;
-                        } elseif ($constType->isArray()) {
+                        }
+
+                        if ($constType->isArray()) {
                             return [];
                         }
                     }
