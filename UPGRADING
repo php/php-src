@@ -73,6 +73,9 @@ PHP 8.3 UPGRADE NOTES
     modifiable pointers but was rejected due to complexity. For this reason, it
     was decided to remove the feature instead.
 
+- Phar:
+  . The type of Phar class constants are now declared.
+
 - Standard:
   . The range() function has had various changes:
     * A TypeError is now thrown when passing objects, resources, or arrays
