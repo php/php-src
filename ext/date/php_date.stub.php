@@ -714,6 +714,8 @@ class DatePeriod implements IteratorAggregate
     /** @readonly */
     public bool $include_end_date;
 
+    public static function createFromISO8601String(string $specification, int $options = 0): static {}
+
     /**
      * @param DateTimeInterface|string $start
      * @param DateInterval|int $interval
@@ -764,7 +766,7 @@ class DateObjectError extends DateError
 /**
  * @strict-properties
  */
-class DateRangeError extends DateRangeError
+class DateRangeError extends DateError
 {
 }
 
@@ -778,7 +780,7 @@ class DateException extends Exception
 /**
  * @strict-properties
  */
-class DateInvalidTimeZoneException extends Exception
+class DateInvalidTimeZoneException extends DateException
 {
 }
 

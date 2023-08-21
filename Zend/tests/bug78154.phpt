@@ -22,5 +22,5 @@ namespace Foo {
 
 ?>
 --EXPECT--
-Exception: similar_text(): Argument #3 ($percent) cannot be passed by reference
-Exception: similar_text(): Argument #3 ($percent) cannot be passed by reference
+Exception: similar_text(): Argument #3 ($percent) could not be passed by reference
+Exception: similar_text(): Argument #3 ($percent) could not be passed by reference

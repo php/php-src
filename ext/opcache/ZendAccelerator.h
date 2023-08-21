@@ -132,14 +132,10 @@ typedef struct _zend_persistent_script {
 	void          *mem;                    /* shared memory area used by script structures */
 	size_t         size;                   /* size of used shared memory */
 
-	/* All entries that shouldn't be counted in the ADLER32
-	 * checksum must be declared in this struct
-	 */
 	struct zend_persistent_script_dynamic_members {
 		time_t       last_used;
 		zend_ulong   hits;
 		unsigned int memory_consumption;
-		unsigned int checksum;
 		time_t       revalidate;
 	} dynamic_members;
 } zend_persistent_script;
@@ -149,7 +145,6 @@ typedef struct _zend_accel_directives {
 	zend_long           max_accelerated_files;
 	double         max_wasted_percentage;
 	char          *user_blacklist_filename;
-	zend_long           consistency_checks;
 	zend_long           force_restart_timeout;
 	bool      use_cwd;
 	bool      ignore_dups;
@@ -266,6 +261,7 @@ typedef struct _zend_accel_shared_globals {
 	LONGLONG   restart_in;
 #endif
 	bool       restart_in_progress;
+	bool       jit_counters_stopped;
 
 	/* Preloading */
 	zend_persistent_script *preload_script;

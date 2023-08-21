@@ -2,10 +2,14 @@
 Bug #36403 (oci_execute no longer supports OCI_DESCRIBE_ONLY)
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --FILE--
 <?php
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 // Initialization
 

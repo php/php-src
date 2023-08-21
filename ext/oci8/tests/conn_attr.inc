@@ -1,6 +1,6 @@
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require dirname(__FILE__)."/connect.inc";
 
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
 if ((isset($matches[1]) && $matches[1] >= 11)) {

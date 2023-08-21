@@ -315,6 +315,8 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 
 	us = emalloc(sizeof(*us));
 	us->wrapper = uwrap;
+	/* call_method_if_exists() may unregister the stream wrapper. Hold on to it. */
+	GC_ADDREF(us->wrapper->resource);
 
 	user_stream_create_object(uwrap, context, &us->object);
 	if (Z_TYPE(us->object) == IS_UNDEF) {
@@ -350,8 +352,6 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 
 		/* set wrapper data to be a reference to our object */
 		ZVAL_COPY(&stream->wrapperdata, &us->object);
-
-		GC_ADDREF(us->wrapper->resource);
 	} else {
 		php_stream_wrapper_log_error(wrapper, options, "\"%s::" USERSTREAM_OPEN "\" call failed",
 			ZSTR_VAL(us->wrapper->ce->name));
@@ -361,6 +361,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	if (stream == NULL) {
 		zval_ptr_dtor(&us->object);
 		ZVAL_UNDEF(&us->object);
+		zend_list_delete(us->wrapper->resource);
 		efree(us);
 	}
 	zval_ptr_dtor(&zretval);
@@ -403,6 +404,8 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 
 	us = emalloc(sizeof(*us));
 	us->wrapper = uwrap;
+	/* call_method_if_exists() may unregister the stream wrapper. Hold on to it. */
+	GC_ADDREF(us->wrapper->resource);
 
 	user_stream_create_object(uwrap, context, &us->object);
 	if (Z_TYPE(us->object) == IS_UNDEF) {
@@ -425,8 +428,6 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 
 		/* set wrapper data to be a reference to our object */
 		ZVAL_COPY(&stream->wrapperdata, &us->object);
-
-		GC_ADDREF(us->wrapper->resource);
 	} else {
 		php_stream_wrapper_log_error(wrapper, options, "\"%s::" USERSTREAM_DIR_OPEN "\" call failed",
 			ZSTR_VAL(us->wrapper->ce->name));
@@ -436,6 +437,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 	if (stream == NULL) {
 		zval_ptr_dtor(&us->object);
 		ZVAL_UNDEF(&us->object);
+		zend_list_delete(us->wrapper->resource);
 		efree(us);
 	}
 	zval_ptr_dtor(&zretval);
@@ -1320,6 +1322,7 @@ static ssize_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t co
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_FALSE && Z_TYPE(retval) != IS_TRUE) {
 		convert_to_string(&retval);
 		PHP_STRLCPY(ent->d_name, Z_STRVAL(retval), sizeof(ent->d_name), Z_STRLEN(retval));
+		ent->d_type = DT_UNKNOWN;
 
 		didread = sizeof(php_stream_dirent);
 	} else if (call_result == FAILURE) {

@@ -63,6 +63,7 @@ static int zend_jit_trace_startup(bool reattached)
 		ZEND_JIT_EXIT_COUNTERS = 0;
 		ZCSG(jit_traces) = zend_jit_traces;
 		ZCSG(jit_exit_groups) = zend_jit_exit_groups;
+		ZCSG(jit_counters_stopped) = false;
 	} else {
 		zend_jit_traces = ZCSG(jit_traces);
 		if (!zend_jit_traces) {
@@ -6591,7 +6592,8 @@ done:
 			op_array_ssa = &jit_extension->func_info.ssa;
 			top = frame;
 			if (frame->prev) {
-				checked_stack -= frame->used_stack;
+				checked_stack = frame->old_checked_stack;
+				peek_checked_stack = frame->old_peek_checked_stack;
 				frame = frame->prev;
 				stack = frame->stack;
 				ZEND_ASSERT(&frame->func->op_array == op_array);
@@ -6764,24 +6766,40 @@ done:
 					}
 				}
 			}
+			call->old_checked_stack = checked_stack;
+			call->old_peek_checked_stack = peek_checked_stack;
 			if (p->info & ZEND_JIT_TRACE_FAKE_INIT_CALL) {
 				frame->call_level++;
-				call->used_stack = 0;
+				call->used_stack = checked_stack = peek_checked_stack = 0;
 			} else {
 				if (p->func) {
 					call->used_stack = zend_vm_calc_used_stack(init_opline->extended_value, (zend_function*)p->func);
 				} else {
 					call->used_stack = (ZEND_CALL_FRAME_SLOT + init_opline->extended_value) * sizeof(zval);
 				}
-				checked_stack += call->used_stack;
-				if (checked_stack > peek_checked_stack) {
-					peek_checked_stack = checked_stack;
+				switch (init_opline->opcode) {
+					case ZEND_INIT_FCALL:
+					case ZEND_INIT_FCALL_BY_NAME:
+					case ZEND_INIT_NS_FCALL_BY_NAME:
+					case ZEND_INIT_METHOD_CALL:
+					case ZEND_INIT_DYNAMIC_CALL:
+					//case ZEND_INIT_STATIC_METHOD_CALL:
+					//case ZEND_INIT_USER_CALL:
+					//case ZEND_NEW:
+						checked_stack += call->used_stack;
+						if (checked_stack > peek_checked_stack) {
+							peek_checked_stack = checked_stack;
+						}
+						break;
+					default:
+						checked_stack = peek_checked_stack = 0;
 				}
 			}
 		} else if (p->op == ZEND_JIT_TRACE_DO_ICALL) {
 			call = frame->call;
 			if (call) {
-				checked_stack -= call->used_stack;
+				checked_stack = call->old_checked_stack;
+				peek_checked_stack = call->old_peek_checked_stack;
 				top = call;
 				frame->call = call->prev;
 			}
@@ -7238,16 +7256,23 @@ static void zend_jit_stop_persistent_script(zend_persistent_script *script)
 /* Get all scripts which are accelerated by JIT */
 static void zend_jit_stop_counter_handlers(void)
 {
+	if (ZCSG(jit_counters_stopped)) {
+		return;
+	}
+
 	zend_shared_alloc_lock();
 	/* mprotect has an extreme overhead, avoid calls to it for every function. */
 	SHM_UNPROTECT();
-	for (uint32_t i = 0; i < ZCSG(hash).max_num_entries; i++) {
-		zend_accel_hash_entry *cache_entry;
-		for (cache_entry = ZCSG(hash).hash_table[i]; cache_entry; cache_entry = cache_entry->next) {
-			zend_persistent_script *script;
-			if (cache_entry->indirect) continue;
-			script = (zend_persistent_script *)cache_entry->data;
-			zend_jit_stop_persistent_script(script);
+	if (!ZCSG(jit_counters_stopped)) {
+		ZCSG(jit_counters_stopped) = true;
+		for (uint32_t i = 0; i < ZCSG(hash).max_num_entries; i++) {
+			zend_accel_hash_entry *cache_entry;
+			for (cache_entry = ZCSG(hash).hash_table[i]; cache_entry; cache_entry = cache_entry->next) {
+				zend_persistent_script *script;
+				if (cache_entry->indirect) continue;
+				script = (zend_persistent_script *)cache_entry->data;
+				zend_jit_stop_persistent_script(script);
+			}
 		}
 	}
 	SHM_PROTECT();
@@ -8421,6 +8446,7 @@ static void zend_jit_trace_restart(void)
 	ZEND_JIT_COUNTER_NUM = 0;
 	ZEND_JIT_EXIT_NUM = 0;
 	ZEND_JIT_EXIT_COUNTERS = 0;
+	ZCSG(jit_counters_stopped) = false;
 
 	zend_jit_trace_init_caches();
 }

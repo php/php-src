@@ -313,7 +313,7 @@ typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr, void *context);
 ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn, void *context);
 
 static zend_always_inline size_t zend_ast_size(uint32_t children) {
-	return sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children;
+	return XtOffsetOf(zend_ast, child) + (sizeof(zend_ast *) * children);
 }
 
 static zend_always_inline bool zend_ast_is_special(zend_ast *ast) {

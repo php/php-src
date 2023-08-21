@@ -1489,7 +1489,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 {
 	ssize_t ret = 0;
 	char *ptr;
-	size_t len = 0, max_len;
+	size_t len = 0, buflen;
 	int step = CHUNK_SIZE;
 	int min_room = CHUNK_SIZE / 4;
 	php_stream_statbuf ssbuf;
@@ -1503,7 +1503,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 		maxlen = 0;
 	}
 
-	if (maxlen > 0) {
+	if (maxlen > 0 && maxlen < 4 * CHUNK_SIZE) {
 		result = zend_string_alloc(maxlen, persistent);
 		ptr = ZSTR_VAL(result);
 		while ((len < maxlen) && !php_stream_eof(src)) {
@@ -1537,20 +1537,30 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 	 * by a downsize of the buffer, overestimate by the step size (which is
 	 * 8K).  */
 	if (php_stream_stat(src, &ssbuf) == 0 && ssbuf.sb.st_size > 0) {
-		max_len = MAX(ssbuf.sb.st_size - src->position, 0) + step;
+		buflen = MAX(ssbuf.sb.st_size - src->position, 0) + step;
+		if (maxlen > 0 && buflen > maxlen) {
+			buflen = maxlen;
+		}
 	} else {
-		max_len = step;
+		buflen = step;
 	}
 
-	result = zend_string_alloc(max_len, persistent);
+	result = zend_string_alloc(buflen, persistent);
 	ptr = ZSTR_VAL(result);
 
 	// TODO: Propagate error?
-	while ((ret = php_stream_read(src, ptr, max_len - len)) > 0){
+	while ((ret = php_stream_read(src, ptr, buflen - len)) > 0) {
 		len += ret;
-		if (len + min_room >= max_len) {
-			result = zend_string_extend(result, max_len + step, persistent);
-			max_len += step;
+		if (len + min_room >= buflen) {
+			if (maxlen == len) {
+				break;
+			}
+			if (maxlen > 0 && buflen + step > maxlen) {
+				buflen = maxlen;
+			} else {
+				buflen += step;
+			}
+			result = zend_string_extend(result, buflen, persistent);
 			ptr = ZSTR_VAL(result) + len;
 		} else {
 			ptr += ret;

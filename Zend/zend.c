@@ -37,7 +37,13 @@
 #include "zend_fibers.h"
 #include "zend_call_stack.h"
 #include "zend_max_execution_timer.h"
+#include "zend_hrtime.h"
 #include "Optimizer/zend_optimizer.h"
+#include "php.h"
+#include "php_globals.h"
+
+// FIXME: Breaks the declaration of the function below
+#undef zenderror
 
 static size_t global_map_ptr_last = 0;
 static bool startup_done = false;
@@ -899,6 +905,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	fpsetmask(0);
 #endif
 
+	zend_startup_hrtime();
 	zend_startup_strtod();
 	zend_startup_extensions_mechanism();
 
@@ -1639,9 +1646,15 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *
 
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn, const char *message)
 {
-#ifdef HAVE_STR_ERROR_R
-	char buf[1024];
-	strerror_r(errn, buf, sizeof(buf));
+#ifdef HAVE_STRERROR_R
+	char b[1024];
+
+# ifdef STRERROR_R_CHAR_P
+	char *buf = strerror_r(errn, b, sizeof(b));
+# else
+	strerror_r(errn, b, sizeof(b));
+	char *buf = b;
+# endif
 #else
 	char *buf = strerror(errn);
 #endif
@@ -1819,6 +1832,7 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 	EG(exception) = NULL;
 	ZVAL_OBJ(&params[0], old_exception);
 	ZVAL_COPY_VALUE(&orig_user_exception_handler, &EG(user_exception_handler));
+	ZVAL_UNDEF(&EG(user_exception_handler));
 
 	if (call_user_function(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params) == SUCCESS) {
 		zval_ptr_dtor(&retval2);
@@ -1830,6 +1844,8 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 	} else {
 		EG(exception) = old_exception;
 	}
+
+	zval_ptr_dtor(&orig_user_exception_handler);
 } /* }}} */
 
 ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...) /* {{{ */

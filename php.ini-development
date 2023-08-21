@@ -1211,9 +1211,6 @@ mysqli.default_user =
 ; https://php.net/mysqli.default-pw
 mysqli.default_pw =
 
-; Allow or prevent reconnect
-mysqli.reconnect = Off
-
 ; If this option is enabled, closing a persistent connection will rollback
 ; any pending transactions of this connection, before it is put back
 ; into the persistent connection pool.
@@ -1601,32 +1598,13 @@ session.sid_bits_per_character = 5
 ; -1: Do not compile at all
 ;  0: Jump over assertion at run-time
 ;  1: Execute assertions
-; Changing from or to a negative value is only possible in php.ini! (For turning assertions on and off at run-time, see assert.active, when zend.assertions = 1)
+; Changing from or to a negative value is only possible in php.ini!
+; (For turning assertions on and off at run-time, toggle zend.assertions between the values 1 and 0)
 ; Default Value: 1
 ; Development Value: 1
 ; Production Value: -1
 ; https://php.net/zend.assertions
 zend.assertions = 1
-
-; Assert(expr); active by default.
-; https://php.net/assert.active
-;assert.active = On
-
-; Throw an AssertionError on failed assertions
-; https://php.net/assert.exception
-;assert.exception = On
-
-; Issue a PHP warning for each failed assertion. (Overridden by assert.exception if active)
-; https://php.net/assert.warning
-;assert.warning = On
-
-; Don't bail out by default.
-; https://php.net/assert.bail
-;assert.bail = Off
-
-; User-function to be called if an assertion fails.
-; https://php.net/assert.callback
-;assert.callback = 0
 
 [COM]
 ; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
@@ -1859,10 +1837,6 @@ ldap.max_links = -1
 ; Allows exclusion of large files from being cached. By default all files
 ; are cached.
 ;opcache.max_file_size=0
-
-; Check the cache checksum each N requests.
-; The default value of "0" means that the checks are disabled.
-;opcache.consistency_checks=0
 
 ; How long to wait (in seconds) for a scheduled restart to begin if the cache
 ; is not being accessed.

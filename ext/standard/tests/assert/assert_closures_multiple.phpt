@@ -31,5 +31,8 @@ try {
 } catch (Throwable) {}
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 DONE

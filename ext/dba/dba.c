@@ -966,6 +966,11 @@ PHP_FUNCTION(dba_fetch)
 			Z_PARAM_LONG(skip)
 			Z_PARAM_RESOURCE(id);
 		ZEND_PARSE_PARAMETERS_END_EX(goto standard;);
+
+		zend_error(E_DEPRECATED, "Calling dba_fetch() with $dba at the 3rd parameter is deprecated");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 	} else {
 		standard:
 		ZEND_PARSE_PARAMETERS_START(2, 3)

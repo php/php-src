@@ -5,10 +5,10 @@ pdo_sqlite
 --FILE--
 <?php
 $db = new PDO('sqlite::memory:');
-$db->exec('CREATE TABLE test (id int)');
-$db->exec('INSERT INTO test VALUES (23)');
+$db->exec('CREATE TABLE test_pdo_035 (id int)');
+$db->exec('INSERT INTO test_pdo_035 VALUES (23)');
 
-$stmt = $db->prepare('SELECT id FROM test');
+$stmt = $db->prepare('SELECT id FROM test_pdo_035');
 $stmt->execute();
 $result = $stmt->fetch(PDO::FETCH_LAZY);
 

@@ -71,6 +71,10 @@ int dom_documenttype_internal_subset_read(dom_object *obj, zval *retval);
 
 /* element properties */
 int dom_element_tag_name_read(dom_object *obj, zval *retval);
+int dom_element_class_name_read(dom_object *obj, zval *retval);
+int dom_element_class_name_write(dom_object *obj, zval *newval);
+int dom_element_id_read(dom_object *obj, zval *retval);
+int dom_element_id_write(dom_object *obj, zval *newval);
 int dom_element_schema_type_info_read(dom_object *obj, zval *retval);
 
 /* entity properties */
@@ -95,6 +99,7 @@ int dom_node_node_value_read(dom_object *obj, zval *retval);
 int dom_node_node_value_write(dom_object *obj, zval *newval);
 int dom_node_node_type_read(dom_object *obj, zval *retval);
 int dom_node_parent_node_read(dom_object *obj, zval *retval);
+int dom_node_parent_element_read(dom_object *obj, zval *retval);
 int dom_node_child_nodes_read(dom_object *obj, zval *retval);
 int dom_node_first_child_read(dom_object *obj, zval *retval);
 int dom_node_last_child_read(dom_object *obj, zval *retval);
@@ -103,6 +108,7 @@ int dom_node_next_sibling_read(dom_object *obj, zval *retval);
 int dom_node_previous_element_sibling_read(dom_object *obj, zval *retval);
 int dom_node_next_element_sibling_read(dom_object *obj, zval *retval);
 int dom_node_attributes_read(dom_object *obj, zval *retval);
+int dom_node_is_connected_read(dom_object *obj, zval *retval);
 int dom_node_owner_document_read(dom_object *obj, zval *retval);
 int dom_node_namespace_uri_read(dom_object *obj, zval *retval);
 int dom_node_prefix_read(dom_object *obj, zval *retval);

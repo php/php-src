@@ -408,6 +408,58 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 	RETURN_TRUE;
 }
 
+U_CFUNC PHP_METHOD(IntlCalendar, setDate)
+{
+	zend_long year, month, day;
+
+	CALENDAR_METHOD_INIT_VARS;
+
+	object = getThis();
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), object, "Olll",
+		&object, Calendar_ce_ptr, &year, &month, &day) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(year, 1);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 2);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(day, 3);
+
+	CALENDAR_METHOD_FETCH_OBJECT;
+
+	co->ucal->set((int32_t) year, (int32_t) month, (int32_t) day);
+}
+
+U_CFUNC PHP_METHOD(IntlCalendar, setDateTime)
+{
+	zend_long year, month, day, hour, minute, second = 0;
+	bool second_is_null = true;
+
+	CALENDAR_METHOD_INIT_VARS;
+
+	object = getThis();
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), object, "Olllll|l!",
+		&object, Calendar_ce_ptr, &year, &month, &day, &hour, &minute, &second, &second_is_null) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(year, 1);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(month, 2);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(day, 3);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(hour, 4);
+	ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(minute, 5);
+
+	CALENDAR_METHOD_FETCH_OBJECT;
+
+	if (second_is_null) {
+		co->ucal->set((int32_t) year, (int32_t) month, (int32_t) day, (int32_t) hour, (int32_t) minute);
+	} else {
+		ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(second, 6);
+		co->ucal->set((int32_t) year, (int32_t) month, (int32_t) day, (int32_t) hour, (int32_t) minute, (int32_t) second);
+	}
+}
+
 U_CFUNC PHP_FUNCTION(intlcal_roll)
 {
 	zval *zvalue;

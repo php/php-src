@@ -24,6 +24,7 @@
 #include "php_test.h"
 #include "observer.h"
 #include "fiber.h"
+#include "object_handlers.h"
 #include "zend_attributes.h"
 #include "zend_enum.h"
 #include "zend_interfaces.h"
@@ -31,6 +32,12 @@
 #include "Zend/Optimizer/zend_optimizer.h"
 #include "test_arginfo.h"
 #include "zend_call_stack.h"
+#include "zend_exceptions.h"
+
+#if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
+# include <libxml/globals.h>
+# include <libxml/parser.h>
+#endif
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 
@@ -52,6 +59,8 @@ static zend_class_entry *zend_test_unit_enum;
 static zend_class_entry *zend_test_string_enum;
 static zend_class_entry *zend_test_int_enum;
 static zend_object_handlers zend_test_class_handlers;
+
+static int le_throwing_resource;
 
 static ZEND_FUNCTION(zend_test_func)
 {
@@ -263,6 +272,50 @@ static ZEND_FUNCTION(zend_string_or_stdclass_or_null)
 	}
 }
 
+/* Tests Z_PARAM_NUMBER_OR_STR */
+static ZEND_FUNCTION(zend_number_or_string)
+{
+	zval *input;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_NUMBER_OR_STR(input)
+	ZEND_PARSE_PARAMETERS_END();
+
+	switch (Z_TYPE_P(input)) {
+		case IS_LONG:
+			RETURN_LONG(Z_LVAL_P(input));
+		case IS_DOUBLE:
+			RETURN_DOUBLE(Z_DVAL_P(input));
+		case IS_STRING:
+			RETURN_STR_COPY(Z_STR_P(input));
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
+/* Tests Z_PARAM_NUMBER_OR_STR_OR_NULL */
+static ZEND_FUNCTION(zend_number_or_string_or_null)
+{
+	zval *input;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_NUMBER_OR_STR_OR_NULL(input)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!input) {
+		RETURN_NULL();
+	}
+
+	switch (Z_TYPE_P(input)) {
+		case IS_LONG:
+			RETURN_LONG(Z_LVAL_P(input));
+		case IS_DOUBLE:
+			RETURN_DOUBLE(Z_DVAL_P(input));
+		case IS_STRING:
+			RETURN_STR_COPY(Z_STR_P(input));
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
 static ZEND_FUNCTION(zend_weakmap_attach)
 {
 	zval *value;
@@ -305,6 +358,20 @@ static ZEND_FUNCTION(zend_get_current_func_name)
 
     RETURN_STR(function_name);
 }
+
+#if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
+static ZEND_FUNCTION(zend_test_override_libxml_global_state)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	xmlLoadExtDtdDefaultValue = 1;
+	xmlDoValidityCheckingDefaultValue = 1;
+	(void) xmlPedanticParserDefault(1);
+	(void) xmlSubstituteEntitiesDefault(1);
+	(void) xmlLineNumbersDefault(1);
+	(void) xmlKeepBlanksDefault(0);
+}
+#endif
 
 /* TESTS Z_PARAM_ITERABLE and Z_PARAM_ITERABLE_OR_NULL */
 static ZEND_FUNCTION(zend_iterable)
@@ -573,6 +640,12 @@ static ZEND_FUNCTION(zend_test_fill_packed_array)
 	} ZEND_HASH_FILL_END();
 }
 
+static ZEND_FUNCTION(get_open_basedir)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	RETURN_STRING(PG(open_basedir));
+}
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
 	zend_object *obj = zend_objects_new(class_type);
@@ -788,110 +861,6 @@ static ZEND_METHOD(ZendTestForbidDynamicCall, callStatic)
 	zend_forbid_dynamic_call();
 }
 
-/* donc refers to DoOperationNoCast */
-static zend_class_entry *donc_ce;
-static zend_object_handlers donc_object_handlers;
-
-static zend_object* donc_object_create_ex(zend_class_entry* ce, zend_long l) {
-	zend_object *obj = zend_objects_new(ce);
-	object_properties_init(obj, ce);
-	obj->handlers = &donc_object_handlers;
-	ZVAL_LONG(OBJ_PROP_NUM(obj, 0), l);
-	return obj;
-}
-static zend_object *donc_object_create(zend_class_entry *ce) /* {{{ */
-{
-	return donc_object_create_ex(ce, 0);
-}
-/* }}} */
-
-static inline void donc_create(zval *target, zend_long l) /* {{{ */
-{
-	ZVAL_OBJ(target, donc_object_create_ex(donc_ce, l));
-}
-
-#define IS_DONC(zval) \
-	(Z_TYPE_P(zval) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zval), donc_ce))
-
-static void donc_add(zval *result, zval *op1, zval *op2)
-{
-	zend_long val_1;
-	zend_long val_2;
-	if (IS_DONC(op1)) {
-		val_1 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op1), 0));
-	} else {
-		val_1 = zval_get_long(op1);
-	}
-	if (IS_DONC(op2)) {
-		val_2 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op2), 0));
-	} else {
-		val_2 = zval_get_long(op2);
-	}
-
-	donc_create(result, val_1 + val_2);
-}
-static void donc_mul(zval *result, zval *op1, zval *op2)
-{
-	zend_long val_1;
-	zend_long val_2;
-	if (IS_DONC(op1)) {
-		val_1 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op1), 0));
-	} else {
-		val_1 = zval_get_long(op1);
-	}
-	if (IS_DONC(op2)) {
-		val_2 = Z_LVAL_P(OBJ_PROP_NUM(Z_OBJ_P(op2), 0));
-	} else {
-		val_2 = zval_get_long(op2);
-	}
-
-	donc_create(result, val_1 * val_2);
-}
-
-static zend_result donc_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op2)
-{
-	zval op1_copy;
-	zend_result status;
-
-	if (result == op1) {
-		ZVAL_COPY_VALUE(&op1_copy, op1);
-		op1 = &op1_copy;
-	}
-
-	switch (opcode) {
-		case ZEND_ADD:
-			donc_add(result, op1, op2);
-			if (UNEXPECTED(EG(exception))) { status = FAILURE; }
-			status = SUCCESS;
-			break;
-		case ZEND_MUL:
-			donc_mul(result, op1, op2);
-			if (UNEXPECTED(EG(exception))) { status = FAILURE; }
-			status = SUCCESS;
-			break;
-		default:
-			status = FAILURE;
-			break;
-	}
-
-	if (status == SUCCESS && op1 == &op1_copy) {
-		zval_ptr_dtor(op1);
-	}
-
-	return status;
-}
-
-PHP_METHOD(DoOperationNoCast, __construct)
-{
-	zend_long l;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(l)
-	ZEND_PARSE_PARAMETERS_END();
-
-	ZVAL_LONG(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), l);
-}
-
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
@@ -910,11 +879,121 @@ static void custom_zend_execute_ex(zend_execute_data *execute_data)
 	old_zend_execute_ex(execute_data);
 }
 
+static void le_throwing_resource_dtor(zend_resource *rsrc)
+{
+	zend_throw_exception(NULL, "Throwing resource destructor called", 0);
+}
+
+static ZEND_METHOD(_ZendTestClass, takesUnionType)
+{
+	zend_object *obj;
+	ZEND_PARSE_PARAMETERS_START(1, 1);
+		Z_PARAM_OBJ(obj)
+	ZEND_PARSE_PARAMETERS_END();
+	// we have to perform type-checking to avoid arginfo/zpp mismatch error
+	bool type_matches = (
+		instanceof_function(obj->ce, zend_standard_class_def)
+		||
+		instanceof_function(obj->ce, zend_ce_iterator)
+	);
+	if (!type_matches) {
+		zend_string *ty = zend_type_to_string(execute_data->func->internal_function.arg_info->type);
+		zend_argument_type_error(1, "must be of type %s, %s given", ty->val, obj->ce->name->val);
+		zend_string_release(ty);
+		RETURN_THROWS();
+	}
+
+	RETURN_NULL();
+}
+
+// Returns a newly allocated DNF type `Iterator|(Traversable&Countable)`.
+//
+// We need to generate it "manually" because gen_stubs.php does not support codegen for DNF types ATM.
+static zend_type create_test_dnf_type(void) {
+	zend_string *class_Iterator = zend_string_init_interned("Iterator", sizeof("Iterator") - 1, true);
+	zend_alloc_ce_cache(class_Iterator);
+	zend_string *class_Traversable = ZSTR_KNOWN(ZEND_STR_TRAVERSABLE);
+	zend_string *class_Countable = zend_string_init_interned("Countable", sizeof("Countable") - 1, true);
+	zend_alloc_ce_cache(class_Countable);
+	//
+	zend_type_list *intersection_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	intersection_list->num_types = 2;
+	intersection_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(class_Traversable, 0, 0);
+	intersection_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(class_Countable, 0, 0);
+	zend_type_list *union_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+	union_list->num_types = 2;
+	union_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(class_Iterator, 0, 0);
+	union_list->types[1] = (zend_type) ZEND_TYPE_INIT_INTERSECTION(intersection_list, 0);
+	return (zend_type) ZEND_TYPE_INIT_UNION(union_list, 0);
+}
+
+static void register_ZendTestClass_dnf_property(zend_class_entry *ce) {
+	zend_string *prop_name = zend_string_init_interned("dnfProperty", sizeof("dnfProperty") - 1, true);
+	zval default_value;
+	ZVAL_UNDEF(&default_value);
+	zend_type type = create_test_dnf_type();
+	zend_declare_typed_property(ce, prop_name, &default_value, ZEND_ACC_PUBLIC, NULL, type);
+}
+
+// arg_info for `zend_test_internal_dnf_arguments`
+// The types are upgraded to DNF types in `register_dynamic_function_entries()`
+static zend_internal_arg_info arginfo_zend_test_internal_dnf_arguments[] = {
+	// first entry is a zend_internal_function_info (see zend_compile.h): {argument_count, return_type, unused}
+	{(const char*)(uintptr_t)(1), {0}, NULL},
+	{"arg", {0}, NULL}
+};
+
+static ZEND_NAMED_FUNCTION(zend_test_internal_dnf_arguments)
+{
+	zend_object *obj;
+	ZEND_PARSE_PARAMETERS_START(1, 1);
+		Z_PARAM_OBJ(obj)
+	ZEND_PARSE_PARAMETERS_END();
+	// we have to perform type-checking to avoid arginfo/zpp mismatch error
+	bool type_matches = (
+		instanceof_function(obj->ce, zend_ce_iterator)
+		|| (
+			instanceof_function(obj->ce, zend_ce_traversable)
+			&& instanceof_function(obj->ce, zend_ce_countable)
+		)
+	);
+	if (!type_matches) {
+		zend_string *ty = zend_type_to_string(arginfo_zend_test_internal_dnf_arguments[1].type);
+		zend_argument_type_error(1, "must be of type %s, %s given", ty->val, obj->ce->name->val);
+		zend_string_release(ty);
+		RETURN_THROWS();
+	}
+
+	RETURN_OBJ_COPY(obj);
+}
+
+static const zend_function_entry dynamic_function_entries[] = {
+	{
+		.fname = "zend_test_internal_dnf_arguments",
+		.handler = zend_test_internal_dnf_arguments,
+		.arg_info = arginfo_zend_test_internal_dnf_arguments,
+		.num_args = 1,
+		.flags = 0,
+	},
+	ZEND_FE_END,
+};
+
+static void register_dynamic_function_entries(int module_type) {
+	// return-type is at index 0
+	arginfo_zend_test_internal_dnf_arguments[0].type = create_test_dnf_type();
+	arginfo_zend_test_internal_dnf_arguments[1].type = create_test_dnf_type();
+	//
+	zend_register_functions(NULL, dynamic_function_entries, NULL, module_type);
+}
+
 PHP_MINIT_FUNCTION(zend_test)
 {
+	register_dynamic_function_entries(type);
+
 	zend_test_interface = register_class__ZendTestInterface();
 
 	zend_test_class = register_class__ZendTestClass(zend_test_interface);
+	register_ZendTestClass_dnf_property(zend_test_class);
 	zend_test_class->create_object = zend_test_class_new;
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
 
@@ -953,12 +1032,6 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_string_enum = register_class_ZendTestStringEnum();
 	zend_test_int_enum = register_class_ZendTestIntEnum();
 
-	/* DoOperationNoCast class */
-	donc_ce = register_class_DoOperationNoCast();
-	donc_ce->create_object = donc_object_create;
-	memcpy(&donc_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	donc_object_handlers.do_operation = donc_do_operation;
-
 	zend_register_functions(NULL, ext_function_legacy, NULL, EG(current_module)->type);
 
 	// Loading via dl() not supported with the observer API
@@ -980,6 +1053,9 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	zend_test_observer_init(INIT_FUNC_ARGS_PASSTHRU);
 	zend_test_fiber_init();
+	zend_test_object_handlers_init();
+
+	le_throwing_resource = zend_register_list_destructors_ex(le_throwing_resource_dtor, NULL, "throwing resource", module_number);
 
 	return SUCCESS;
 }
@@ -1150,3 +1226,11 @@ PHP_ZEND_TEST_API ssize_t copy_file_range(int fd_in, off64_t *off_in, int fd_out
 	return original_copy_file_range(fd_in, off_in, fd_out, off_out, len, flags);
 }
 #endif
+
+
+static PHP_FUNCTION(zend_test_create_throwing_resource)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	zend_resource *res = zend_register_resource(NULL, le_throwing_resource);
+	ZVAL_RES(return_value, res);
+}

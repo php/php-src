@@ -1504,7 +1504,7 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 {
 	zval *ppid;
 	zval *data;
-	char *p, *value;
+	char *value;
 	size_t lensess;
 
 	switch (PS(session_status)) {
@@ -1578,21 +1578,6 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 				ZVAL_DEREF(data);
 				if (Z_TYPE_P(data) == IS_ARRAY && (ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))) {
 					ppid2sid(ppid);
-				}
-			}
-			/* Check the REQUEST_URI symbol for a string of the form
-			 * '<session-name>=<session-id>' to allow URLs of the form
-			 * http://yoursite/<session-name>=<session-id>/script.php */
-			if (!PS(id) && zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER)) == SUCCESS &&
-				(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI") - 1)) &&
-				Z_TYPE_P(data) == IS_STRING &&
-				(p = strstr(Z_STRVAL_P(data), PS(session_name))) &&
-				p[lensess] == '='
-				) {
-				char *q;
-				p += lensess + 1;
-				if ((q = strpbrk(p, "/?\\"))) {
-					PS(id) = zend_string_init(p, q - p, 0);
 				}
 			}
 			/* Check whether the current request was referred to by
@@ -2858,6 +2843,8 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	ps_globals->mod_user_is_open = 0;
 	ps_globals->session_vars = NULL;
 	ps_globals->set_handler = 0;
+	ps_globals->session_started_filename = NULL;
+	ps_globals->session_started_lineno = 0;
 	/* Unset user defined handlers */
 	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_open);
 	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_close);
@@ -2880,8 +2867,6 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	PS(module_number) = module_number;
 
 	PS(session_status) = php_session_none;
-	PS(session_started_filename) = NULL;
-	PS(session_started_lineno) = 0;
 	REGISTER_INI_ENTRIES();
 
 #ifdef HAVE_LIBMM

@@ -219,8 +219,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 					if (php_dom_is_cache_tag_stale_from_node(&iterator->cache_tag, basenode)) {
 						php_dom_mark_cache_tag_up_to_date_from_node(&iterator->cache_tag, basenode);
 						previndex = 0;
-						if (basenode && (basenode->type == XML_DOCUMENT_NODE ||
-										 basenode->type == XML_HTML_DOCUMENT_NODE)) {
+						if (basenode->type == XML_DOCUMENT_NODE || basenode->type == XML_HTML_DOCUMENT_NODE) {
 							curnode = xmlDocGetRootElement((xmlDoc *) basenode);
 						} else {
 							curnode = basenode->children;

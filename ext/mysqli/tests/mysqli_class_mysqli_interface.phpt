@@ -4,11 +4,11 @@ Interface of the class mysqli
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('connect.inc');
+    require 'connect.inc';
 
     $mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket);
     $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);

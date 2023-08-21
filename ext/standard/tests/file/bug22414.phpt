@@ -1,5 +1,9 @@
 --TEST--
 Bug #22414 (passthru() does not read data correctly)
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
+?>
 --INI--
 output_handler=
 --FILE--

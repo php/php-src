@@ -29,40 +29,33 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
-#include "private.h"
+#include <stdbool.h>
+#include <stddef.h>
 
 /* In some places we need to check if the number NUM is zero. */
 
-char
-bc_is_zero_for_scale (bc_num num, int scale)
+bool bc_is_zero_for_scale(bc_num num, size_t scale)
 {
-  int  count;
-  char *nptr;
+	size_t count;
+	char *nptr;
 
-  /* Quick check. */
-  if (num == BCG(_zero_)) return TRUE;
+	/* Quick check. */
+	if (num == BCG(_zero_)) {
+		return true;
+	}
 
-  /* Initialize */
-  count = num->n_len + scale;
-  nptr = num->n_value;
+	/* Initialize */
+	count = num->n_len + scale;
+	nptr = num->n_value;
 
-  /* The check */
-  while ((count > 0) && (*nptr++ == 0)) count--;
+	/* The check */
+	while ((count > 0) && (*nptr++ == 0)) count--;
 
-  if (count != 0)
-    return FALSE;
-  else
-    return TRUE;
+	return count == 0;
 }
 
-char
-bc_is_zero (bc_num num)
+bool bc_is_zero(bc_num num)
 {
-  return bc_is_zero_for_scale(num, num->n_scale);
+	return bc_is_zero_for_scale(num, num->n_scale);
 }

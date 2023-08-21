@@ -4,13 +4,11 @@ mysqli_multi_query()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    require('table.inc');
+    require 'table.inc';
 
     if (false !== ($tmp = mysqli_multi_query($link, "")))
         printf("[003] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
@@ -112,7 +110,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 [006] 3

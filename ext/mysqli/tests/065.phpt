@@ -4,18 +4,13 @@ set character set
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-
-if (!function_exists('mysqli_set_charset')) {
-    die('skip mysqli_set_charset() not available');
-}
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
-    if (!$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
-        printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+    $mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
     if (!mysqli_query($mysql, "SET sql_mode=''"))
         printf("[002] Cannot set SQL-Mode, [%d] %s\n", mysqli_errno($mysql), mysqli_error($mysql));

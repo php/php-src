@@ -3,7 +3,8 @@ privileged connect tests
 --EXTENSIONS--
 oci8
 --SKIPIF--
-<?php 
+<?php
+require_once 'skipifconnectfailure.inc';
 if (getenv('SKIP_ASAN')) die('xleak leaks memory under asan');
 ?>
 --INI--

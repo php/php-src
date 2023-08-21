@@ -263,7 +263,7 @@ PHP_CLI_API ssize_t sapi_cli_single_write(const char *str, size_t str_length) /*
 #ifdef PHP_WRITE_STDOUT
 	do {
 		ret = write(STDOUT_FILENO, str, str_length);
-	} while (ret <= 0 && errno == EAGAIN && sapi_cli_select(STDOUT_FILENO));
+	} while (ret <= 0 && (errno == EINTR || (errno == EAGAIN && sapi_cli_select(STDOUT_FILENO))));
 #else
 	ret = fwrite(str, 1, MIN(str_length, 16384), stdout);
 	if (ret == 0 && ferror(stdout)) {
@@ -558,13 +558,16 @@ static void cli_register_file_handles(void)
 	php_stream_to_zval(s_err, &ec.value);
 
 	Z_CONSTANT_FLAGS(ic.value) = 0;
-	zend_register_internal_constant("STDIN", sizeof("STDIN")-1, &ic);
+	ic.name = zend_string_init_interned("STDIN", sizeof("STDIN")-1, 0);
+	zend_register_constant(&ic);
 
 	Z_CONSTANT_FLAGS(oc.value) = 0;
-	zend_register_internal_constant("STDOUT", sizeof("STDOUT")-1, &oc);
+	oc.name = zend_string_init_interned("STDOUT", sizeof("STDOUT")-1, 0);
+	zend_register_constant(&oc);
 
 	Z_CONSTANT_FLAGS(ec.value) = 0;
-	zend_register_internal_constant("STDERR", sizeof("STDERR")-1, &ec);
+	ec.name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
+	zend_register_constant(&ec);
 }
 
 static const char *param_mode_conflict = "Either execute direct code, process stdin or use a file.\n";
@@ -734,6 +737,10 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					break;
 				}
 				behavior=PHP_MODE_LINT;
+				/* We want to set the error exit status if at least one lint failed.
+				 * If all were successful we set the exit status to 0.
+				 * We already set EG(exit_status) here such that only failures set the exit status. */
+				EG(exit_status) = 0;
 				break;
 
 			case 'q': /* do not generate HTTP headers */
@@ -962,7 +969,6 @@ do_repeat:
 		case PHP_MODE_LINT:
 			if (php_lint_script(&file_handle) == SUCCESS) {
 				zend_printf("No syntax errors detected in %s\n", php_self);
-				EG(exit_status) = 0;
 			} else {
 				zend_printf("Errors parsing %s\n", php_self);
 				EG(exit_status) = 255;
@@ -1128,9 +1134,15 @@ out:
 	}
 	if (request_started) {
 		php_request_shutdown((void *) 0);
+		request_started = 0;
 	}
 	if (translated_path) {
 		free(translated_path);
+		translated_path = NULL;
+	}
+	if (behavior == PHP_MODE_LINT && argc > php_optind && strcmp(argv[php_optind],"--")) {
+		script_file = NULL;
+		goto do_repeat;
 	}
 	/* Don't repeat fork()ed processes. */
 	if (--num_repeats && pid == getpid()) {

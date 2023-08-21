@@ -11,6 +11,7 @@
 *.stub.php @kocsismate
 /.github @iluuu1994 @TimWolla
 /build/gen_stub.php @kocsismate
+/ext/bcmath @Girgias
 /ext/curl @adoy
 /ext/date @derickr
 /ext/dba @Girgias

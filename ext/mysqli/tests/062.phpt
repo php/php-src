@@ -1,31 +1,46 @@
 --TEST--
-resultset constructor
+mysqli_result constructor
 --EXTENSIONS--
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+require_once 'connect.inc';
 
-    $mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
+$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
-    $mysql->real_query("SELECT 'foo' FROM DUAL");
+$mysqli->real_query("SELECT 'foo' FROM DUAL");
 
-    $myresult = new mysqli_result($mysql);
+$myresult = new mysqli_result($mysqli);
 
-    $row = $myresult->fetch_row();
-    $myresult->close();
-    $mysql->close();
+$row = $myresult->fetch_row();
+$myresult->close();
+$mysqli->close();
 
-    var_dump($row);
-    print "done!";
+var_dump($row);
+
+try {
+    new mysqli_result($mysqli);
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+$mysqli = new mysqli();
+try {
+    new mysqli_result($mysqli);
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+print "done!";
 ?>
 --EXPECT--
 array(1) {
   [0]=>
   string(3) "foo"
 }
+my_mysqli object is already closed
+mysqli object is not fully initialized
 done!

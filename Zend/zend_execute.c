@@ -64,6 +64,9 @@
 # elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__aarch64__)
 #  define ZEND_VM_FP_GLOBAL_REG "x27"
 #  define ZEND_VM_IP_GLOBAL_REG "x28"
+#elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__riscv) && __riscv_xlen == 64
+#  define ZEND_VM_FP_GLOBAL_REG "x18"
+#  define ZEND_VM_IP_GLOBAL_REG "x19"
 # endif
 #endif
 
@@ -595,7 +598,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_pass_by_reference(uint32_t arg
 	zend_string *func_name = get_function_or_method_name(EX(call)->func);
 	const char *param_name = get_function_arg_name(EX(call)->func, arg_num);
 
-	zend_throw_error(NULL, "%s(): Argument #%d%s%s%s cannot be passed by reference",
+	zend_throw_error(NULL, "%s(): Argument #%d%s%s%s could not be passed by reference",
 		ZSTR_VAL(func_name), arg_num, param_name ? " ($" : "", param_name ? param_name : "", param_name ? ")" : ""
 	);
 
@@ -5008,7 +5011,7 @@ static zend_always_inline zend_result _zend_quick_get_constant(
 	if (!check_defined_only) {
 		ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), &c->value);
 		if (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED) {
-			zend_error(E_DEPRECATED, "Constant %s is deprecated", ZSTR_VAL(Z_STR_P(key)));
+			zend_error(E_DEPRECATED, "Constant %s is deprecated", ZSTR_VAL(c->name));
 			return SUCCESS;
 		}
 	}

@@ -523,6 +523,12 @@ ZEND_COLD void zend_magic_get_property_type_inconsistency_error(const zend_prope
 
 ZEND_COLD void zend_match_unhandled_error(const zval *value);
 
+static zend_always_inline void *zend_get_bad_ptr(void)
+{
+	ZEND_UNREACHABLE();
+	return NULL;
+}
+
 END_EXTERN_C()
 
 #endif /* ZEND_EXECUTE_H */

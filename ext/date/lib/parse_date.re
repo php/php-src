@@ -661,9 +661,21 @@ static timelib_long timelib_get_month(const char **ptr)
 
 static void timelib_eat_spaces(const char **ptr)
 {
-	while (**ptr == ' ' || **ptr == '\t') {
-		++*ptr;
-	}
+	do {
+		if (**ptr == ' ' || **ptr == '\t') {
+			++*ptr;
+			continue;
+		}
+		if ((*ptr)[0] == '\xe2' && (*ptr)[1] == '\x80' && (*ptr)[2] == '\xaf') { // NNBSP
+			*ptr += 3;
+			continue;
+		}
+		if ((*ptr)[0] == '\xc2' && (*ptr)[1] == '\xa0') { // NBSP
+			*ptr += 2;
+			continue;
+		}
+		break;
+	} while (true);
 }
 
 static void timelib_eat_until_separator(const char **ptr)
@@ -992,7 +1004,9 @@ std:
 /*!re2c
 any = [\000-\377];
 
-space = [ \t]+;
+nbsp = [\302][\240];
+nnbsp = [\342][\200][\257];
+space = [ \t]+ | nbsp+ | nnbsp+;
 frac = "."[0-9]+;
 
 ago = 'ago';
@@ -1318,6 +1332,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfulls|dayfull|dayabbr) 
 				s->time->s = timelib_get_nr(&ptr, 2);
 			}
 		}
+		timelib_eat_spaces(&ptr);
 		s->time->h += timelib_meridian(&ptr, s->time->h);
 		TIMELIB_DEINIT;
 		return TIMELIB_TIME12;
@@ -1745,6 +1760,9 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfulls|dayfull|dayabbr) 
 		s->time->h = timelib_get_nr(&ptr, 2);
 		s->time->i = timelib_get_nr(&ptr, 2);
 		s->time->s = timelib_get_nr(&ptr, 2);
+
+		timelib_eat_spaces(&ptr);
+
 		s->time->z = timelib_parse_zone(&ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
 		if (tz_not_found) {
 			add_error(s, TIMELIB_ERR_TZID_NOT_FOUND, "The timezone could not be found in the database");
@@ -1858,6 +1876,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfulls|dayfull|dayabbr) 
 		DEBUG_OUTPUT("tzcorrection | tz");
 		TIMELIB_INIT;
 		TIMELIB_HAVE_TZ();
+		timelib_eat_spaces(&ptr);
 		s->time->z = timelib_parse_zone(&ptr, &s->time->dst, s->time, &tz_not_found, s->tzdb, tz_get_wrapper);
 		if (tz_not_found) {
 			add_error(s, TIMELIB_ERR_TZID_NOT_FOUND, "The timezone could not be found in the database");
@@ -1936,7 +1955,12 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfulls|dayfull|dayabbr) 
 		return TIMELIB_RELATIVE;
 	}
 
-	[ .,\t]
+	[.,]
+	{
+		goto std;
+	}
+
+	space
 	{
 		goto std;
 	}

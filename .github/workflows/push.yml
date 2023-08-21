@@ -6,7 +6,7 @@ on:
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
-      - README.md
+      - '**/README.*'
       - CONTRIBUTING.md
       - CODING_STANDARDS.md
     branches:
@@ -16,6 +16,14 @@ on:
       - PHP-8.2
       - master
   pull_request:
+    paths-ignore:
+      - docs/*
+      - NEWS
+      - UPGRADING
+      - UPGRADING.INTERNALS
+      - '**/README.*'
+      - CONTRIBUTING.md
+      - CODING_STANDARDS.md
     branches:
       - '**'
 permissions:
@@ -39,11 +47,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - debug: true
-            zts: false
           - debug: false
+            zts: false
+            asan: false
+          - debug: true
             zts: true
-    name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+            asan: true
+    name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
@@ -52,6 +62,8 @@ jobs:
         uses: ./.github/actions/setup-mssql
       - name: Create Oracle container
         uses: ./.github/actions/setup-oracle
+      - name: Setup Caddy server
+        uses: ./.github/actions/setup-caddy
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: ccache
@@ -60,7 +72,7 @@ jobs:
           # This duplicates the "job.name" expression above because
           # GitHub has no way to query the job name (github.job is the
           # job id, not the job name)
-          key: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}-${{hashFiles('main/php_version.h')}}"
+          key: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}-${{hashFiles('main/php_version.h')}}"
           append-timestamp: false
       - name: ./configure
         uses: ./.github/actions/configure-x64
@@ -68,72 +80,32 @@ jobs:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
+            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address" CC=clang CXX=clang++ --disable-opcache-jit' || '' }}
+          skipSlow: ${{ matrix.asan }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
         uses: ./.github/actions/install-linux
+        with:
+          withOci: ${{ !matrix.asan }}
       - name: Setup
         uses: ./.github/actions/setup-x64
       - name: Test
+        if: matrix.asan == false
         uses: ./.github/actions/test-linux
         with:
           testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
-      - name: Test Tracing JIT
+      - name: Test ${{ matrix.asan && 'OpCache' || 'Tracing JIT' }}
         uses: ./.github/actions/test-linux
         with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}_${{ matrix.asan && 'OpCache' || 'Tracing JIT' }}
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
+            ${{ !matrix.asan && '-d opcache.jit_buffer_size=16M' || '' }}
+            ${{ matrix.asan && '--asan -x' || '' }}
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
-  LINUX_X32:
-    name: LINUX_X32_DEBUG_ZTS
-    runs-on: ubuntu-latest
-    container:
-      image: ubuntu:22.04
-    env:
-      MYSQL_TEST_HOST: mysql
-      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
-      PDO_MYSQL_TEST_HOST: mysql
-    services:
-      mysql:
-        image: mysql:8
-        ports:
-          - 3306:3306
-        env:
-          MYSQL_DATABASE: test
-          MYSQL_ROOT_PASSWORD: root
-    steps:
-      - name: git checkout
-        uses: actions/checkout@v3
-      - name: apt
-        uses: ./.github/actions/apt-x32
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-      - name: ./configure
-        uses: ./.github/actions/configure-x32
-        with:
-          configurationParameters: >-
-            --enable-debug
-            --enable-zts
-      - name: make
-        run: make -j$(/usr/bin/nproc) >/dev/null
-      - name: make install
-        uses: ./.github/actions/install-linux-x32
-      - name: Test
-        uses: ./.github/actions/test-linux
-      - name: Test Tracing JIT
-        uses: ./.github/actions/test-linux
-        with:
-          runTestsParameters: >-
-            -d zend_extension=opcache.so
-            -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
   MACOS_DEBUG_NTS:
     runs-on: macos-11
     steps:
@@ -156,10 +128,6 @@ jobs:
           make -j$(sysctl -n hw.logicalcpu) >/dev/null
       - name: make install
         run: sudo make install
-      - name: Test
-        uses: ./.github/actions/test-macos
-        with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-macos
         with:
@@ -172,17 +140,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   WINDOWS:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - x64: true
-            zts: false
-            opcache: true
-          - x64: false
-            zts: true
-            opcache: false
-    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    name: WINDOWS_X64_ZTS
     runs-on: windows-2019
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
@@ -190,27 +148,18 @@ jobs:
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
       PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0
       PHP_BUILD_CRT: vs16
-      PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
-      THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
-      INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
+      PLATFORM: x64
+      THREAD_SAFE: "1"
+      INTRINSICS: AVX2
       PARALLEL: -j2
-      OPCACHE: "${{ matrix.opcache && '1' || '0' }}"
+      OPCACHE: "1"
     steps:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
         uses: actions/checkout@v3
-      - name: Setup MySQL
-        run: |
-          choco install mysql -y --no-progress --params="/port:3306"
-          mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
-      - name: Setup MSSQL
-        run: |
-          choco install sql-server-express -y --no-progress --install-arguments="/SECURITYMODE=SQL /SAPWD=Password12!"
-      - name: Setup PostgreSQL
-        run: |
-          Set-Service -Name "postgresql-x64-14" -StartupType manual -Status Running
-          pwsh -Command { $env:PGPASSWORD="root"; & "$env:PGBIN\psql" -U postgres -c "ALTER USER postgres WITH PASSWORD 'Password12!';" }
+      - name: Setup
+        uses: ./.github/actions/setup-windows
       - name: Build
         run: .github/scripts/windows/build.bat
       - name: Test

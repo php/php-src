@@ -72,6 +72,8 @@ static zend_always_inline bool instanceof_function(
 	return instance_ce == ce || instanceof_function_slow(instance_ce, ce);
 }
 
+ZEND_API bool zend_string_only_has_ascii_alphanumeric(const zend_string *str);
+
 /**
  * Checks whether the string "str" with length "length" is numeric. The value
  * of allow_errors determines whether it's required to be entirely numeric, or
@@ -275,6 +277,7 @@ ZEND_API void ZEND_FASTCALL convert_to_array(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_object(zval *op);
 
 ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(const zval *op, bool is_strict);
+ZEND_API zend_long    ZEND_FASTCALL zval_try_get_long(const zval *op, bool *failed);
 ZEND_API double       ZEND_FASTCALL zval_get_double_func(const zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op);

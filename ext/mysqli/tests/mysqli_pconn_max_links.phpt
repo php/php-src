@@ -4,8 +4,8 @@ Persistent connections and mysqli.max_links
 mysqli
 --SKIPIF--
 <?php
-    require_once('skipifconnectfailure.inc');
-    require_once('table.inc');
+    require_once 'skipifconnectfailure.inc';
+    require_once 'table.inc';
 
     mysqli_query($link, 'DROP USER pcontest');
     mysqli_query($link, 'DROP USER pcontest@localhost');
@@ -45,8 +45,8 @@ mysqli.max_persistent=2
 mysqli.rollback_on_cached_plink=1
 --FILE--
 <?php
-    require_once("connect.inc");
-    require_once('table.inc');
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
 
     if (!mysqli_query($link, 'DROP USER pcontest') ||
@@ -193,7 +193,7 @@ mysqli.rollback_on_cached_plink=1
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

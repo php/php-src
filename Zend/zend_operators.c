@@ -375,7 +375,7 @@ static zend_always_inline zend_result zendi_try_convert_scalar_to_number(zval *o
 }
 /* }}} */
 
-static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bool *failed) /* {{{ */
+static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(const zval *op, bool *failed) /* {{{ */
 {
 	*failed = 0;
 	switch (Z_TYPE_P(op)) {
@@ -452,6 +452,15 @@ static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, bo
 	}
 }
 /* }}} */
+
+ZEND_API zend_long ZEND_FASTCALL zval_try_get_long(const zval *op, bool *failed)
+{
+	if (EXPECTED(Z_TYPE_P(op) == IS_LONG)) {
+		*failed = false;
+		return Z_LVAL_P(op);
+	}
+	return zendi_try_get_long(op, failed);
+}
 
 #define ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(opcode) \
 	if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT) \
@@ -2048,16 +2057,17 @@ has_op2_string:;
 		}
 
 		if (result == op1) {
-			/* special case, perform operations on result */
-			result_str = zend_string_extend(op1_string, result_len, 0);
-			/* Free result after zend_string_extend(), as it may throw an out-of-memory error. If we
-			 * free it before we would leave the released variable on the stack with shutdown trying
-			 * to free it again. */
+			/* Destroy the old result first to drop the refcount, such that $x .= ...; may happen in-place. */
 			if (free_op1_string) {
 				/* op1_string will be used as the result, so we should not free it */
 				i_zval_ptr_dtor(result);
+				/* Set it to NULL in case that the extension will throw an out-of-memory error.
+				 * Otherwise the shutdown sequence will try to free this again. */
+				ZVAL_NULL(result);
 				free_op1_string = false;
 			}
+			/* special case, perform operations on result */
+			result_str = zend_string_extend(op1_string, result_len, 0);
 			/* account for the case where result_str == op1_string == op2_string and the realloc is done */
 			if (op1_string == op2_string) {
 				if (free_op2_string) {
@@ -2483,7 +2493,20 @@ ZEND_API bool ZEND_FASTCALL instanceof_function_slow(const zend_class_entry *ins
 #define UPPER_CASE 2
 #define NUMERIC 3
 
-static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
+ZEND_API bool zend_string_only_has_ascii_alphanumeric(const zend_string *str)
+{
+	const char *p = ZSTR_VAL(str);
+	const char *e = ZSTR_VAL(str) + ZSTR_LEN(str);
+	while (p < e) {
+		char c = *p++;
+		if (UNEXPECTED( c < '0' || c > 'z' || (c < 'a' && c > 'Z') || (c < 'A' && c > '9') ) ) {
+			return false;
+		}
+	}
+	return true;
+}
+
+static bool ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 {
 	int carry=0;
 	size_t pos=Z_STRLEN_P(str)-1;
@@ -2492,10 +2515,30 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 	int last=0; /* Shut up the compiler warning */
 	int ch;
 
-	if (Z_STRLEN_P(str) == 0) {
-		zval_ptr_dtor_str(str);
+	if (UNEXPECTED(Z_STRLEN_P(str) == 0)) {
+		zend_error(E_DEPRECATED, "Increment on non-alphanumeric string is deprecated");
+		if (EG(exception)) {
+			return false;
+		}
+		/* A userland error handler can change the type from string to something else */
+		zval_ptr_dtor(str);
 		ZVAL_CHAR(str, '1');
-		return;
+		return true;
+	}
+
+	if (UNEXPECTED(!zend_string_only_has_ascii_alphanumeric(Z_STR_P(str)))) {
+		zend_string *zstr = Z_STR_P(str);
+		GC_TRY_ADDREF(zstr);
+		zend_error(E_DEPRECATED, "Increment on non-alphanumeric string is deprecated");
+		if (EG(exception)) {
+			GC_TRY_DELREF(zstr);
+			if (!GC_REFCOUNT(zstr)) {
+				efree(zstr);
+			}
+			return false;
+		}
+		zval_ptr_dtor(str);
+		ZVAL_STR(str, zstr);
 	}
 
 	if (!Z_REFCOUNTED_P(str)) {
@@ -2567,6 +2610,7 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 		zend_string_free(Z_STR_P(str));
 		ZVAL_NEW_STR(str, t);
 	}
+	return true;
 }
 /* }}} */
 
@@ -2605,18 +2649,30 @@ try_again:
 					default:
 						/* Perl style string increment */
 						increment_string(op1);
+						if (EG(exception)) {
+							return FAILURE;
+						}
 						break;
 				}
 			}
 			break;
 		case IS_FALSE:
-		case IS_TRUE:
-			/* Do nothing. */
+		case IS_TRUE: {
+			/* Error handler can undef/change type of op1, save it and reset it in case those cases */
+			zval copy;
+			ZVAL_COPY_VALUE(&copy, op1);
+			zend_error(E_WARNING, "Increment on type bool has no effect, this will change in the next major version of PHP");
+			zval_ptr_dtor(op1);
+			ZVAL_COPY_VALUE(op1, &copy);
+			if (EG(exception)) {
+				return FAILURE;
+			}
 			break;
+		}
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
 			goto try_again;
-		case IS_OBJECT:
+		case IS_OBJECT: {
 			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				ZVAL_LONG(&op2, 1);
@@ -2624,7 +2680,15 @@ try_again:
 					return SUCCESS;
 				}
 			}
+			zval tmp;
+			if (Z_OBJ_HT_P(op1)->cast_object(Z_OBJ_P(op1), &tmp, _IS_NUMBER) == SUCCESS) {
+				ZEND_ASSERT(Z_TYPE(tmp) == IS_LONG || Z_TYPE(tmp) == IS_DOUBLE);
+				zval_ptr_dtor(op1);
+				ZVAL_COPY_VALUE(op1, &tmp);
+				goto try_again;
+			}
 			ZEND_FALLTHROUGH;
+		}
 		case IS_RESOURCE:
 		case IS_ARRAY:
 			zend_type_error("Cannot increment %s", zend_zval_value_name(op1));
@@ -2650,7 +2714,12 @@ try_again:
 			break;
 		case IS_STRING:		/* Like perl we only support string increment */
 			if (Z_STRLEN_P(op1) == 0) { /* consider as 0 */
-				zval_ptr_dtor_str(op1);
+				zend_error(E_DEPRECATED, "Decrement on empty string is deprecated as non-numeric");
+				if (EG(exception)) {
+					return FAILURE;
+				}
+				/* A userland error handler can change the type from string to something else */
+				zval_ptr_dtor(op1);
 				ZVAL_LONG(op1, -1);
 				break;
 			}
@@ -2668,17 +2737,42 @@ try_again:
 					zval_ptr_dtor_str(op1);
 					ZVAL_DOUBLE(op1, dval - 1);
 					break;
+				default:
+					zend_error(E_DEPRECATED, "Decrement on non-numeric string has no effect and is deprecated");
+					if (EG(exception)) {
+						return FAILURE;
+					}
 			}
 			break;
-		case IS_NULL:
-		case IS_FALSE:
-		case IS_TRUE:
-			/* Do nothing. */
+		case IS_NULL: {
+			/* Error handler can undef/change type of op1, save it and reset it in case those cases */
+			zval copy;
+			ZVAL_COPY_VALUE(&copy, op1);
+			zend_error(E_WARNING, "Decrement on type null has no effect, this will change in the next major version of PHP");
+			zval_ptr_dtor(op1);
+			ZVAL_COPY_VALUE(op1, &copy);
+			if (EG(exception)) {
+				return FAILURE;
+			}
 			break;
+		}
+		case IS_FALSE:
+		case IS_TRUE: {
+			/* Error handler can undef/change type of op1, save it and reset it in case those cases */
+			zval copy;
+			ZVAL_COPY_VALUE(&copy, op1);
+			zend_error(E_WARNING, "Decrement on type bool has no effect, this will change in the next major version of PHP");
+			zval_ptr_dtor(op1);
+			ZVAL_COPY_VALUE(op1, &copy);
+			if (EG(exception)) {
+				return FAILURE;
+			}
+			break;
+		}
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
 			goto try_again;
-		case IS_OBJECT:
+		case IS_OBJECT: {
 			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				ZVAL_LONG(&op2, 1);
@@ -2686,7 +2780,15 @@ try_again:
 					return SUCCESS;
 				}
 			}
+			zval tmp;
+			if (Z_OBJ_HT_P(op1)->cast_object(Z_OBJ_P(op1), &tmp, _IS_NUMBER) == SUCCESS) {
+				ZEND_ASSERT(Z_TYPE(tmp) == IS_LONG || Z_TYPE(tmp) == IS_DOUBLE);
+				zval_ptr_dtor(op1);
+				ZVAL_COPY_VALUE(op1, &tmp);
+				goto try_again;
+			}
 			ZEND_FALLTHROUGH;
+		}
 		case IS_RESOURCE:
 		case IS_ARRAY:
 			zend_type_error("Cannot decrement %s", zend_zval_value_name(op1));

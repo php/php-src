@@ -4,7 +4,8 @@ Basic test for setting Oracle 11gR2 "edition" attribute
 oci8
 --SKIPIF--
 <?php
-require(__DIR__."/connect.inc");
+require_once 'skipifconnectfailure.inc';
+require __DIR__.'/connect.inc';
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) {
     die("skip needs to be run as a DBA user");
 }
@@ -37,7 +38,7 @@ if (!(isset($matches[0]) &&
 $testuser     = 'testuser_attr_1';  // Used in conn_attr.inc
 $testpassword = 'testuser';
 
-require(__DIR__."/conn_attr.inc");
+require __DIR__."/conn_attr.inc";
 
 function select_fn($conn) {
     $s = oci_parse($conn,"select * from view_ed");

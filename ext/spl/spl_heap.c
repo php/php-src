@@ -372,6 +372,11 @@ static spl_ptr_heap *spl_ptr_heap_clone(spl_ptr_heap *from) { /* {{{ */
 /* }}} */
 
 static void spl_ptr_heap_destroy(spl_ptr_heap *heap) { /* {{{ */
+	/* Heap might be null if we OOMed during object initialization. */
+	if (!heap) {
+		return;
+	}
+
 	int i;
 
 	for (i = 0; i < heap->count; ++i) {

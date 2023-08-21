@@ -29,84 +29,105 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
-#include "private.h"
+#include <stdbool.h>
+#include <stddef.h>
 
 /* Convert strings to bc numbers.  Base 10 only.*/
 
-int
-bc_str2num (bc_num *num, char *str, int scale)
+bool bc_str2num(bc_num *num, char *str, size_t scale)
 {
-  int digits, strscale;
-  char *ptr, *nptr;
-  char zero_int;
+	size_t digits = 0;
+	size_t strscale = 0;
+	char *ptr, *nptr;
+	size_t trailing_zeros = 0;
+	bool zero_int = false;
 
-  /* Prepare num. */
-  bc_free_num (num);
+	/* Prepare num. */
+	bc_free_num (num);
 
-  /* Check for valid number and count digits. */
-  ptr = str;
-  digits = 0;
-  strscale = 0;
-  zero_int = FALSE;
-  if ( (*ptr == '+') || (*ptr == '-'))  ptr++;  /* Sign */
-  while (*ptr == '0') ptr++;			/* Skip leading zeros. */
-  while (*ptr >= '0' && *ptr <= '9') ptr++, digits++;	/* digits */
-  if (*ptr == '.') ptr++;			/* decimal point */
-  while (*ptr >= '0' && *ptr <= '9') ptr++, strscale++;	/* digits */
-  if ((*ptr != '\0') || (digits+strscale == 0))
-    {
-      *num = bc_copy_num (BCG(_zero_));
-      return *ptr == '\0';
-    }
+	/* Check for valid number and count digits. */
+	ptr = str;
 
-  /* Adjust numbers and allocate storage and initialize fields. */
-  strscale = MIN(strscale, scale);
-  if (digits == 0)
-    {
-      zero_int = TRUE;
-      digits = 1;
-    }
-  *num = bc_new_num (digits, strscale);
+	if ((*ptr == '+') || (*ptr == '-')) {
+		/* Skip Sign */
+		ptr++;
+	}
+	/* Skip leading zeros. */
+	while (*ptr == '0') {
+		ptr++;
+	}
+	/* digits before the decimal point */
+	while (*ptr >= '0' && *ptr <= '9') {
+		ptr++;
+		digits++;
+	}
+	/* decimal point */
+	if (*ptr == '.') {
+		ptr++;
+	}
+	/* digits after the decimal point */
+	while (*ptr >= '0' && *ptr <= '9') {
+		if (*ptr == '0') {
+			trailing_zeros++;
+		} else {
+			trailing_zeros = 0;
+		}
+		ptr++;
+		strscale++;
+	}
 
-  /* Build the whole number. */
-  ptr = str;
-  if (*ptr == '-')
-    {
-      (*num)->n_sign = MINUS;
-      ptr++;
-    }
-  else
-    {
-      (*num)->n_sign = PLUS;
-      if (*ptr == '+') ptr++;
-    }
-  while (*ptr == '0') ptr++;			/* Skip leading zeros. */
-  nptr = (*num)->n_value;
-  if (zero_int)
-    {
-      *nptr++ = 0;
-      digits = 0;
-    }
-  for (;digits > 0; digits--)
-    *nptr++ = CH_VAL(*ptr++);
+	if (trailing_zeros > 0) {
+		/* Trailing zeros should not take part in the computation of the overall scale, as it is pointless. */
+		strscale = strscale - trailing_zeros;
+	}
+	if ((*ptr != '\0') || (digits + strscale == 0)) {
+		*num = bc_copy_num(BCG(_zero_));
+		return *ptr == '\0';
+	}
 
+	/* Adjust numbers and allocate storage and initialize fields. */
+	strscale = MIN(strscale, scale);
+	if (digits == 0) {
+		zero_int = true;
+		digits = 1;
+	}
+	*num = bc_new_num (digits, strscale);
 
-  /* Build the fractional part. */
-  if (strscale > 0)
-    {
-      ptr++;  /* skip the decimal point! */
-      for (;strscale > 0; strscale--)
-	*nptr++ = CH_VAL(*ptr++);
-    }
+	/* Build the whole number. */
+	ptr = str;
+	if (*ptr == '-') {
+		(*num)->n_sign = MINUS;
+		ptr++;
+	} else {
+		(*num)->n_sign = PLUS;
+		if (*ptr == '+') ptr++;
+	}
+	/* Skip leading zeros. */
+	while (*ptr == '0') {
+		ptr++;
+	}
+	nptr = (*num)->n_value;
+	if (zero_int) {
+		*nptr++ = 0;
+		digits = 0;
+	}
+	for (; digits > 0; digits--) {
+		*nptr++ = CH_VAL(*ptr++);
+	}
 
-  if (bc_is_zero (*num))
-    (*num)->n_sign = PLUS;
+	/* Build the fractional part. */
+	if (strscale > 0) {
+		/* skip the decimal point! */
+		ptr++;
+		for (; strscale > 0; strscale--) {
+			*nptr++ = CH_VAL(*ptr++);
+		}
+	}
 
-  return 1;
+	if (bc_is_zero(*num)) {
+		(*num)->n_sign = PLUS;
+	}
+
+	return true;
 }

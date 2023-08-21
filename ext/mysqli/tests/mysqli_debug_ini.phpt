@@ -45,7 +45,7 @@ mysqlnd.debug="t:O,/tmp/mysqli_debug_phpt.trace"
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 string(32) "t:O,/tmp/mysqli_debug_phpt.trace"

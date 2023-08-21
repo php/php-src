@@ -4,8 +4,9 @@ Bug #40078 (ORA-01405 when fetching NULL values using oci_bind_array_by_name())
 oci8
 --SKIPIF--
 <?php
+require_once 'skipifconnectfailure.inc';
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(__DIR__.'/skipif.inc');
+require __DIR__.'/skipif.inc';
 ?>
 --FILE--
 <?php

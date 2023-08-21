@@ -3,7 +3,9 @@ Prefetch with REF cursor. Test No 2
 --EXTENSIONS--
 oci8
 --SKIPIF--
-<?php require(__DIR__."/connect.inc");
+<?php
+require_once 'skipifconnectfailure.inc';
+require __DIR__.'/connect.inc';
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
 if (!(isset($matches[0]) &&
       ($matches[1] >= 10))) {

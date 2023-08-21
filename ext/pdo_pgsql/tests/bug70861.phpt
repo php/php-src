@@ -21,8 +21,7 @@ try {
 } catch (Exception $e) {
 }
 
-$db->query('DROP TABLE IF EXISTS test_blob_crash CASCADE');
-$db->query('CREATE TABLE test_blob_crash (id SERIAL NOT NULL, blob1 BYTEA)');
+$db->query('CREATE TABLE test_blob_crash_70861 (id SERIAL NOT NULL, blob1 BYTEA)');
 
 class HelloWrapper {
     public function stream_open() { return true; }
@@ -41,8 +40,16 @@ $stmt->execute();
 
 fclose($f);
 
+$db->exec('DROP TABLE test_blob_crash');
+
 ?>
 +++DONE+++
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->query('DROP TABLE IF EXISTS test_blob_crash_70861 CASCADE');
+?>
 --EXPECTF--
 %a
 +++DONE+++

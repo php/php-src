@@ -3,7 +3,9 @@ Prefetch with REF cursor. Test different values for prefetch with oci_set_prefet
 --EXTENSIONS--
 oci8
 --SKIPIF--
-<?php require(__DIR__."/connect.inc");
+<?php
+require_once 'skipifconnectfailure.inc';
+require __DIR__.'/connect.inc';
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
 if (!(isset($matches[0]) &&
       ($matches[1] >= 10))) {
@@ -19,7 +21,7 @@ if (!(isset($matches[0]) &&
 ?>
 --FILE--
 <?php
-require(__DIR__."/connect.inc");
+require __DIR__.'/connect.inc';
 
 // Creates the necessary package and tables.
 $stmtarray = array(

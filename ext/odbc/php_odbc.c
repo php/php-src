@@ -2553,8 +2553,9 @@ PHP_FUNCTION(odbc_autocommit)
 	RETCODE rc;
 	zval *pv_conn;
 	bool pv_onoff = 0;
+	bool pv_onoff_is_null = true;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &pv_conn, &pv_onoff) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b!", &pv_conn, &pv_onoff, &pv_onoff_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2562,13 +2563,13 @@ PHP_FUNCTION(odbc_autocommit)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_NUM_ARGS() > 1) {
+	if (!pv_onoff_is_null) {
 		rc = SQLSetConnectOption(conn->hdbc, SQL_AUTOCOMMIT, pv_onoff ? SQL_AUTOCOMMIT_ON : SQL_AUTOCOMMIT_OFF);
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 			odbc_sql_error(conn, SQL_NULL_HSTMT, "Set autocommit");
 			RETURN_FALSE;
 		}
-		RETVAL_TRUE;
+		RETURN_TRUE;
 	} else {
 		SQLINTEGER status;
 
@@ -2577,7 +2578,7 @@ PHP_FUNCTION(odbc_autocommit)
 			odbc_sql_error(conn, SQL_NULL_HSTMT, "Get commit status");
 			RETURN_FALSE;
 		}
-		RETVAL_LONG((zend_long)status);
+		RETURN_LONG((zend_long)status);
 	}
 }
 /* }}} */

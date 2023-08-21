@@ -17,9 +17,12 @@ pg_fieldname($result, 0);
 pg_fieldsize($result, 0);
 pg_fieldtype($result, 0);
 pg_fieldprtlen($result, 0);
+pg_fieldprtlen($result, null, 0);
 pg_fieldisnull($result, 0);
-
+pg_fieldisnull($result, null, 0);
 pg_result($result,0,0);
+pg_result($result,null,0);
+
 $result = pg_exec($db, "INSERT INTO ".$table_name." VALUES (7777, 'KKK')");
 $oid = pg_getlastoid($result);
 pg_freeresult($result);
@@ -44,9 +47,21 @@ Deprecated: Function pg_fieldtype() is deprecated in %s on line %d
 
 Deprecated: Function pg_fieldprtlen() is deprecated in %s on line %d
 
+Deprecated: Function pg_fieldprtlen() is deprecated in %s on line %d
+
+Deprecated: pg_fieldprtlen(): Passing null to parameter #2 ($row) of type int is deprecated in %s on line %d
+
 Deprecated: Function pg_fieldisnull() is deprecated in %s on line %d
 
+Deprecated: Function pg_fieldisnull() is deprecated in %s on line %d
+
+Deprecated: pg_fieldisnull(): Passing null to parameter #2 ($row) of type int is deprecated in %s on line %d
+
 Deprecated: Function pg_result() is deprecated in %s on line %d
+
+Deprecated: Function pg_result() is deprecated in %s on line %d
+
+Deprecated: pg_result(): Passing null to parameter #2 ($row) of type int is deprecated in %s on line %d
 
 Deprecated: Function pg_getlastoid() is deprecated in %s on line %d
 

@@ -45,8 +45,8 @@ for ($j = 0; $j < 10; $j++) {
 
 var_dump(gc_status());
 ?>
---EXPECT--
-array(8) {
+--EXPECTF--
+array(12) {
   ["running"]=>
   bool(false)
   ["protected"]=>
@@ -63,4 +63,12 @@ array(8) {
   int(16384)
   ["roots"]=>
   int(10000)
+  ["application_time"]=>
+  float(%f)
+  ["collector_time"]=>
+  float(%f)
+  ["destructor_time"]=>
+  float(%f)
+  ["free_time"]=>
+  float(%f)
 }

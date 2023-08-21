@@ -56,7 +56,6 @@ releases.
 3. Ensure that the relevant tests on CI are green.
 
    - https://travis-ci.com/github/php/php-src
-   - https://ci.appveyor.com/project/php/php-src
    - https://cirrus-ci.com/github/php/php-src
    - https://github.com/php/php-src/actions
 
@@ -322,7 +321,7 @@ slightly different steps. We'll call attention where the steps differ.
 15. Now the tarballs and signatures may be found at
     `https://downloads.php.net/~yourname/`, e.g. https://downloads.php.net/~derick/.
 
-16. Once the release is tagged, contact the release-managers@ distribution
+16. Once the release is tagged, contact the release-managers@php.net distribution
     list so that Windows binaries can be created. Once those are made, they may
     be found at https://windows.php.net/qa/.
 
@@ -426,7 +425,6 @@ slightly different steps. We'll call attention where the steps differ.
    * `internals@lists.php.net`
    * `php-general@lists.php.net`
    * `php-qa@lists.php.net`
-   * `primary-qa-tester@lists.php.net`
 
    In the announcement message, point out the location of the release and the
    possible release date of either the next RC or the final release. Also
@@ -617,7 +615,7 @@ slightly different steps. We'll call attention where the steps differ.
     > will be available from `https://www.php.net/distributions/php-X.Y.Z.tar.gz`,
     > etc.
 
-15. Once the release is tagged, contact the release-managers@ distribution
+15. Once the release is tagged, contact the release-managers@php.net distribution
     list so that Windows binaries can be created. Once those are made, they may
     be found at https://windows.php.net/qa/.
 
@@ -933,7 +931,7 @@ volunteers to begin the selection process for the next release managers.
 ## New release manager checklist
 
 1. Email systems@php.net to get setup for access to downloads.php.net and to be
-   added to the release-managers@ distribution list.
+   added to the release-managers@php.net distribution list.
 
 2. Request membership to the release managers group on GitHub.
 
@@ -1002,25 +1000,14 @@ volunteers to begin the selection process for the next release managers.
    git push
    ```
 
-4. Request moderation access to php-announce@lists.php.net and
-   primary-qa-tester@lists.php.net lists, so you are able to moderate your
-   release announcements. All the announcements should be sent from your
-   @php.net address.
+4. Request moderation access to php-announce@lists.php.net
+   so you are able to moderate your release announcements. All the announcements
+   should be sent from your @php.net address.
 
    > 💬 **Hint** \
    > To send email from your @php.net address, you will need to use a custom
    > SMTP server. If you use Gmail, you may
    > "[Send emails from a different address or alias][]."
-
-   > 💡 **Tip** \
-   > Make sure that you are set as a moderator for
-   > `primary-qa-tester@lists.php.net` by having someone (Hannes, Dan, Derick)
-   > run the following commands for you:
-   >
-   > ```shell
-   > ssh lists.php.net
-   > sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester mod moderator-email-address
-   > ```
 
 5. Make sure you have the following repositories cloned locally:
 

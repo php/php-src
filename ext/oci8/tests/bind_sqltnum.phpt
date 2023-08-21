@@ -4,6 +4,7 @@ Bind with SQLT_NUM
 oci8
 --SKIPIF--
 <?php
+require_once 'skipifconnectfailure.inc';
 preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
 if (!(isset($matches[0]) && $matches[0] >= 12)) {
     die("skip works only with Oracle 12c or greater version of Oracle client libraries");
@@ -12,7 +13,7 @@ if (!(isset($matches[0]) && $matches[0] >= 12)) {
 --FILE--
 <?php
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 // Initialization
 

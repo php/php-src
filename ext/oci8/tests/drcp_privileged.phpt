@@ -4,7 +4,8 @@ DRCP: privileged connect
 oci8
 --SKIPIF--
 <?php
-require(__DIR__."/connect.inc");
+require_once 'skipifconnectfailure.inc';
+require __DIR__.'/connect.inc';
 if (!$test_drcp) die("skip requires DRCP connection");
 // Looked for :pooled in EZ connect string
 if (strpos($dbase, "/") !== false && stripos($dbase, ":pooled") === false)

@@ -2,9 +2,13 @@
 Bug #74625 (Integer overflow in oci_bind_array_by_name)
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --FILE--
 <?php
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 // Initialization
 

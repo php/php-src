@@ -35,5 +35,5 @@
 /* In some places we need to check if the number is negative. */
 bool bc_is_neg(bc_num num)
 {
-  return num->n_sign == MINUS;
+	return num->n_sign == MINUS;
 }

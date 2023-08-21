@@ -64,7 +64,9 @@ IFS=$ac_IFS
 PHP_MAJOR_VERSION=[$]1
 PHP_MINOR_VERSION=[$]2
 PHP_RELEASE_VERSION=[$]3
-PHP_EXTRA_VERSION=[$]4
+dnl Allow overriding PHP_EXTRA_VERSION through the homonymous env var
+AC_ARG_VAR([PHP_EXTRA_VERSION],[Extra PHP version label suffix, e.g. '-dev', 'rc1', '-acme'])dnl
+AS_IF([test -z "$PHP_EXTRA_VERSION"],[PHP_EXTRA_VERSION=[$]4])
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
 PHP_VERSION_ID=`expr [$]PHP_MAJOR_VERSION \* 10000 + [$]PHP_MINOR_VERSION \* 100 + [$]PHP_RELEASE_VERSION`
 
@@ -646,8 +648,10 @@ asprintf \
 nanosleep \
 memmem \
 memrchr \
-strerror_r \
 )
+
+dnl Check for strerror_r, and if its a POSIX-compatible or a GNU specific version.
+AC_FUNC_STRERROR_R
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R
 
@@ -1198,7 +1202,7 @@ if test "$ac_cv_lib_crypt_crypt" = "yes"; then
   EXTRA_LIBS="-lcrypt $EXTRA_LIBS -lcrypt"
 fi
 
-unset LIBS LDFLAGS
+unset LIBS
 
 dnl PEAR
 dnl ----------------------------------------------------------------------------
@@ -1253,13 +1257,13 @@ fi
 dnl Configuring Zend and TSRM.
 dnl ----------------------------------------------------------------------------
 
+PHP_HELP_SEPARATOR([Zend:])
+PHP_CONFIGURE_PART(Configuring Zend)
+
 AC_ARG_ENABLE([fiber-asm],
   [AS_HELP_STRING([--disable-fiber-asm],
     [Disable the use of boost fiber assembly files])],
   [fiber_asm=$enableval], [fiber_asm='yes'])
-
-PHP_HELP_SEPARATOR([Zend:])
-PHP_CONFIGURE_PART(Configuring Zend)
 
 AS_CASE([$host_cpu],
   [x86_64*|amd64*], [fiber_cpu="x86_64"],
@@ -1371,9 +1375,8 @@ if test "$abs_srcdir" != "$abs_builddir"; then
 fi
 
 ZEND_EXTRA_LIBS="$LIBS"
-unset LIBS LDFLAGS
+unset LIBS
 
-PHP_HELP_SEPARATOR([TSRM:])
 PHP_CONFIGURE_PART(Configuring TSRM)
 if test "$PHP_THREAD_SAFETY" = "yes"; then
   TSRM_CHECK_PTHREADS
@@ -1734,6 +1737,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c \
     zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c zend_atomic.c \
     zend_max_execution_timer.c \
+    zend_hrtime.c \
 	Optimizer/zend_optimizer.c \
 	Optimizer/pass1.c \
 	Optimizer/pass3.c \

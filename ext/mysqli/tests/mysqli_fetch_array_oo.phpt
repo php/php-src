@@ -4,19 +4,12 @@ mysqli->fetch_array()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    $tmp    = NULL;
-    $link   = NULL;
-
-    require('table.inc');
-    if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
-        printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
+    require 'table.inc';
+    $mysqli = $link;
 
     if (!$res = $mysqli->query("SELECT * FROM test ORDER BY id LIMIT 5")) {
         printf("[004] [%d] %s\n", $mysqli->errno, $mysqli->error);
@@ -279,7 +272,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 [005]

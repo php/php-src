@@ -4,7 +4,8 @@ Bug #27303 (OCIBindByName binds numeric PHP values as characters)
 oci8
 --SKIPIF--
 <?php
-require(__DIR__."/connect.inc");
+require_once 'skipifconnectfailure.inc';
+require __DIR__.'/connect.inc';
 // The bind buffer size edge cases seem to change each DB version.
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
 if (!(isset($matches[0]) && $matches[1] >= 12)) {

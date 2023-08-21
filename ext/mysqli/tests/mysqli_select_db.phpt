@@ -4,12 +4,12 @@ mysqli_select_db()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-    require_once("table.inc");
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -97,7 +97,7 @@ require_once('skipifconnectfailure.inc');
     print "done!\n";
 ?>
 --CLEAN--
-<?php require_once("clean_table.inc"); ?>
+<?php require_once 'clean_table.inc'; ?>
 --EXPECT--
 mysqli object is already closed
 done!

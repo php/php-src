@@ -5,8 +5,7 @@ mysqli
 --SKIPIF--
 <?php
 
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
+require_once 'skipifconnectfailure.inc';
 
 if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     die(sprintf("skip Cannot connect to MySQL, [%d] %s\n",
@@ -19,7 +18,7 @@ mysqli_close($link);
 --FILE--
 <?php
 
-    require_once("connect.inc");
+    require_once 'connect.inc';
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 {
         printf("[001] Cannot connect to the server using host=%s, user=%s,
@@ -65,7 +64,7 @@ mysqli_error($link));
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 bool(true)

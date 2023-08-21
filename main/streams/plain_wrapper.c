@@ -1032,6 +1032,11 @@ static ssize_t php_plain_files_dirstream_read(php_stream *stream, char *buf, siz
 	result = readdir(dir);
 	if (result) {
 		PHP_STRLCPY(ent->d_name, result->d_name, sizeof(ent->d_name), strlen(result->d_name));
+#ifdef _DIRENT_HAVE_D_TYPE
+		ent->d_type = result->d_type;
+#else
+		ent->d_type = DT_UNKNOWN;
+#endif
 		return sizeof(php_stream_dirent);
 	}
 	return 0;

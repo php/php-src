@@ -174,8 +174,11 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					 && opline->opcode != ZEND_MATCH
 					 && zend_optimizer_update_op1_const(op_array, opline, &c)) {
 						VAR_SOURCE(op1) = NULL;
-						literal_dtor(&ZEND_OP1_LITERAL(src));
-						MAKE_NOP(src);
+						if (opline->opcode != ZEND_JMP_NULL
+						 && !zend_bitset_in(used_ext, VAR_NUM(src->result.var))) {
+							literal_dtor(&ZEND_OP1_LITERAL(src));
+							MAKE_NOP(src);
+						}
 						++(*opt_count);
 					} else {
 						zval_ptr_dtor_nogc(&c);
@@ -197,8 +200,10 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				ZVAL_COPY(&c, &ZEND_OP1_LITERAL(src));
 				if (zend_optimizer_update_op2_const(op_array, opline, &c)) {
 					VAR_SOURCE(op2) = NULL;
-					literal_dtor(&ZEND_OP1_LITERAL(src));
-					MAKE_NOP(src);
+					if (!zend_bitset_in(used_ext, VAR_NUM(src->result.var))) {
+						literal_dtor(&ZEND_OP1_LITERAL(src));
+						MAKE_NOP(src);
+					}
 					++(*opt_count);
 				} else {
 					zval_ptr_dtor_nogc(&c);

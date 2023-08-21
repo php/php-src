@@ -4,16 +4,11 @@ mysqli_fetch_object() - calling constructor on class wo constructor
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    $tmp    = NULL;
-    $link   = NULL;
-
-    require('table.inc');
+    require 'table.inc';
     if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 5")) {
         printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
@@ -47,7 +42,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 No exception with PHP:

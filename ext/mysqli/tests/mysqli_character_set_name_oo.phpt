@@ -4,19 +4,14 @@ mysqli_character_set_name(), mysql_client_encoding() [alias]
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
     /* NOTE: http://bugs.mysql.com/bug.php?id=7923 makes this test fail very likely on all 4.1.x - 5.0.x! */
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
-    $tmp	= NULL;
-    $link	= NULL;
-
-    if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
-        printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
+    $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
     if (!$res = $mysqli->query('SELECT version() AS server_version'))
         printf("[003] [%d] %s\n", $mysqli->errno, $mysqli->error);

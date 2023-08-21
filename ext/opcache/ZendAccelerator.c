@@ -735,6 +735,9 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			p->key = new_interned_string(p->key);
 		}
 		c = (zend_constant*)Z_PTR(p->val);
+		if (c->name) {
+			c->name = new_interned_string(c->name);
+		}
 		if (Z_TYPE(c->value) == IS_STRING) {
 			ZVAL_STR(&c->value, new_interned_string(Z_STR(c->value)));
 		}
@@ -1535,8 +1538,6 @@ static zend_persistent_script *store_script_in_file_cache(zend_persistent_script
 			(size_t)ZCG(mem));
 	}
 
-	new_persistent_script->dynamic_members.checksum = zend_accel_script_checksum(new_persistent_script);
-
 	zend_file_cache_script_store(new_persistent_script, /* is_shm */ false);
 
 	return new_persistent_script;
@@ -1649,8 +1650,6 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 			(size_t)((char *)new_persistent_script->mem + new_persistent_script->size),
 			(size_t)ZCG(mem));
 	}
-
-	new_persistent_script->dynamic_members.checksum = zend_accel_script_checksum(new_persistent_script);
 
 	/* store script structure in the hash table */
 	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->script.filename, 0, new_persistent_script);
@@ -2123,20 +2122,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	/* If script is found then validate_timestamps if option is enabled */
 	if (persistent_script && ZCG(accel_directives).validate_timestamps) {
 		if (validate_timestamp_and_record(persistent_script, file_handle) == FAILURE) {
-			zend_accel_lock_discard_script(persistent_script);
-			persistent_script = NULL;
-		}
-	}
-
-	/* if turned on - check the compiled script ADLER32 checksum */
-	if (persistent_script && ZCG(accel_directives).consistency_checks
-		&& persistent_script->dynamic_members.hits % ZCG(accel_directives).consistency_checks == 0) {
-
-		unsigned int checksum = zend_accel_script_checksum(persistent_script);
-		if (checksum != persistent_script->dynamic_members.checksum ) {
-			/* The checksum is wrong */
-			zend_accel_error(ACCEL_LOG_INFO, "Checksum failed for '%s':  expected=0x%08x, found=0x%08x",
-							 ZSTR_VAL(persistent_script->script.filename), persistent_script->dynamic_members.checksum, checksum);
 			zend_accel_lock_discard_script(persistent_script);
 			persistent_script = NULL;
 		}
@@ -2861,7 +2846,7 @@ static zend_result zend_accel_init_shm(void)
 	zend_shared_alloc_lock();
 
 	if (ZCG(accel_directives).interned_strings_buffer) {
-		accel_shared_globals_size = ZCG(accel_directives).interned_strings_buffer * 1024 * 1024;
+		accel_shared_globals_size = sizeof(zend_accel_shared_globals) + ZCG(accel_directives).interned_strings_buffer * 1024 * 1024;
 	} else {
 		/* Make sure there is always at least one interned string hash slot,
 		 * so the table can be queried unconditionally. */
@@ -2870,10 +2855,10 @@ static zend_result zend_accel_init_shm(void)
 
 	accel_shared_globals = zend_shared_alloc(accel_shared_globals_size);
 	if (!accel_shared_globals) {
+		zend_shared_alloc_unlock();
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL,
 				"Insufficient shared memory for interned strings buffer! (tried to allocate %zu bytes)",
 				accel_shared_globals_size);
-		zend_shared_alloc_unlock();
 		return FAILURE;
 	}
 	memset(accel_shared_globals, 0, sizeof(zend_accel_shared_globals));
@@ -2902,7 +2887,7 @@ static zend_result zend_accel_init_shm(void)
 		ZCSG(interned_strings).top =
 			ZCSG(interned_strings).start;
 		ZCSG(interned_strings).end =
-			(zend_string*)((char*)accel_shared_globals +
+			(zend_string*)((char*)(accel_shared_globals + 1) + /* table data is stored after accel_shared_globals */
 				ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
 		ZCSG(interned_strings).saved_top = NULL;
 
@@ -4276,8 +4261,6 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 			(size_t)((char *)new_persistent_script->mem + new_persistent_script->size),
 			(size_t)ZCG(mem));
 	}
-
-	new_persistent_script->dynamic_members.checksum = zend_accel_script_checksum(new_persistent_script);
 
 	/* store script structure in the hash table */
 	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->script.filename, 0, new_persistent_script);

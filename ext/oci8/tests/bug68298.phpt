@@ -5,11 +5,12 @@ oci8
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 $stmtarray = array(
     "DROP TABLE BUG68298",

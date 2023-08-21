@@ -643,6 +643,7 @@ static int format_default_value(smart_str *str, zval *value) {
 		} ZEND_HASH_FOREACH_END();
 		smart_str_appendc(str, ']');
 	} else if (Z_TYPE_P(value) == IS_OBJECT) {
+		/* This branch may only be reached for default properties, which don't support arbitrary objects. */
 		zend_object *obj = Z_OBJ_P(value);
 		zend_class_entry *class = obj->ce;
 		ZEND_ASSERT(class->ce_flags & ZEND_ACC_ENUM);
@@ -1045,13 +1046,11 @@ static void _extension_string(smart_str *str, zend_module_entry *module, char *i
 	{
 		smart_str str_constants = {0};
 		zend_constant *constant;
-		zend_string *name;
 		int num_constants = 0;
 
-		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(zend_constants), name, constant) {
-
+		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), constant) {
 			if (ZEND_CONSTANT_MODULE_NUMBER(constant) == module->module_number) {
-				_const_string(&str_constants, ZSTR_VAL(name), &constant->value, indent);
+				_const_string(&str_constants, ZSTR_VAL(constant->name), &constant->value, indent);
 				num_constants++;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -3187,9 +3186,9 @@ ZEND_METHOD(ReflectionIntersectionType, getTypes)
 /* }}} */
 
 /* {{{ Constructor. Throws an Exception in case the given method does not exist */
-ZEND_METHOD(ReflectionMethod, __construct)
+static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_constructor)
 {
-	zend_object *arg1_obj;
+	zend_object *arg1_obj = NULL;
 	zend_string *arg1_str;
 	zend_string *arg2_str = NULL;
 
@@ -3204,11 +3203,17 @@ ZEND_METHOD(ReflectionMethod, __construct)
 	reflection_object *intern;
 	zend_function *mptr;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_OBJ_OR_STR(arg1_obj, arg1_str)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_NULL(arg2_str)
-	ZEND_PARSE_PARAMETERS_END();
+	if (is_constructor) {
+		ZEND_PARSE_PARAMETERS_START(1, 2)
+			Z_PARAM_OBJ_OR_STR(arg1_obj, arg1_str)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_STR_OR_NULL(arg2_str)
+		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_STR(arg1_str)
+		ZEND_PARSE_PARAMETERS_END();
+	}
 
 	if (arg1_obj) {
 		if (!arg2_str) {
@@ -3252,7 +3257,12 @@ ZEND_METHOD(ReflectionMethod, __construct)
 		zend_string_release(class_name);
 	}
 
-	object = ZEND_THIS;
+	if (is_constructor) {
+		object = ZEND_THIS;
+	} else {
+		object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : reflection_method_ptr);
+		object = return_value;
+	}
 	intern = Z_REFLECTION_P(object);
 
 	lcname = zend_str_tolower_dup(method_name, method_name_len);
@@ -3278,7 +3288,16 @@ ZEND_METHOD(ReflectionMethod, __construct)
 	intern->ref_type = REF_TYPE_FUNCTION;
 	intern->ce = ce;
 }
+
+/* {{{ Constructor. Throws an Exception in case the given method does not exist */
+ZEND_METHOD(ReflectionMethod, __construct) {
+	instantiate_reflection_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
 /* }}} */
+
+ZEND_METHOD(ReflectionMethod, createFromMethodName) {
+	instantiate_reflection_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
 
 /* {{{ Returns a string representation */
 ZEND_METHOD(ReflectionMethod, __toString)
@@ -5702,6 +5721,22 @@ ZEND_METHOD(ReflectionProperty, setValue)
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &tmp, &value) == FAILURE) {
 				RETURN_THROWS();
 			}
+
+			if (Z_TYPE_P(tmp) != IS_NULL && Z_TYPE_P(tmp) != IS_OBJECT) {
+				zend_string *method_name = get_active_function_or_method_name();
+				zend_error(E_DEPRECATED, "Calling %s() with a 1st argument which is not null or an object is deprecated", ZSTR_VAL(method_name));
+				zend_string_release(method_name);
+				if (UNEXPECTED(EG(exception))) {
+					RETURN_THROWS();
+				}
+			}
+		} else {
+			zend_string *method_name = get_active_function_or_method_name();
+			zend_error(E_DEPRECATED, "Calling %s() with a single argument is deprecated", ZSTR_VAL(method_name));
+			zend_string_release(method_name);
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
 		}
 
 		zend_update_static_property_ex(intern->ce, ref->unmangled_name, value);
@@ -6037,7 +6072,6 @@ ZEND_METHOD(ReflectionExtension, getConstants)
 	reflection_object *intern;
 	zend_module_entry *module;
 	zend_constant *constant;
-	zend_string *name;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -6045,11 +6079,11 @@ ZEND_METHOD(ReflectionExtension, getConstants)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(zend_constants), name, constant) {
+	ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), constant) {
 		if (module->module_number == ZEND_CONSTANT_MODULE_NUMBER(constant)) {
 			zval const_val;
 			ZVAL_COPY_OR_DUP(&const_val, &constant->value);
-			zend_hash_update(Z_ARRVAL_P(return_value), name, &const_val);
+			zend_hash_update(Z_ARRVAL_P(return_value), constant->name, &const_val);
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -6865,7 +6899,7 @@ ZEND_METHOD(ReflectionEnum, getCase)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	zend_class_constant *constant = zend_hash_find_ptr(&ce->constants_table, name);
+	zend_class_constant *constant = zend_hash_find_ptr(CE_CONSTANTS_TABLE(ce), name);
 	if (constant == NULL) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Case %s::%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		RETURN_THROWS();
@@ -6892,7 +6926,7 @@ ZEND_METHOD(ReflectionEnum, getCases)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	array_init(return_value);
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->constants_table, name, constant) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(CE_CONSTANTS_TABLE(ce), name, constant) {
 		if (ZEND_CLASS_CONST_FLAGS(constant) & ZEND_CLASS_CONST_IS_CASE) {
 			zval class_const;
 			reflection_enum_case_factory(ce, name, constant, &class_const);

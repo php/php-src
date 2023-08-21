@@ -146,7 +146,7 @@ _LT_AC_TRY_DLOPEN_SELF([
 ])
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(getpid kill sigsetjmp pthread_getattr_np pthread_attr_get_np pthread_get_stackaddr_np pthread_attr_getstack gettid)
+AC_CHECK_FUNCS(getpid kill sigsetjmp pthread_getattr_np pthread_attr_get_np pthread_get_stackaddr_np pthread_attr_getstack pthread_stackseg_np gettid)
 
 dnl Test whether the stack grows downwards
 dnl Assumes contiguous stack
@@ -169,7 +169,6 @@ int main(void) {
     return f((uintptr_t)&local) ? 0 : 1;
 }
 ]])], [
-  AC_DEFINE([ZEND_STACK_GROWS_DOWNWARDS], 1, [Define if the stack grows downwards])
   AC_DEFINE([ZEND_CHECK_STACK_LIMIT], 1, [Define if checking the stack limit is supported])
   AC_MSG_RESULT(yes)
 ], [
@@ -355,6 +354,9 @@ if test "$ZEND_GCC_GLOBAL_REGS" != "no"; then
 #elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__aarch64__)
 # define ZEND_VM_FP_GLOBAL_REG "x27"
 # define ZEND_VM_IP_GLOBAL_REG "x28"
+#elif defined(__GNUC__) && ZEND_GCC_VERSION >= 4008 && defined(__riscv) && __riscv_xlen == 64
+# define ZEND_VM_FP_GLOBAL_REG "x18"
+# define ZEND_VM_IP_GLOBAL_REG "x19"
 #else
 # error "global register variables are not supported"
 #endif
@@ -379,8 +381,6 @@ int emu(const opcode_handler_t *ip, void *fp) {
 fi
 if test "$ZEND_GCC_GLOBAL_REGS" = "yes"; then
   AC_DEFINE([HAVE_GCC_GLOBAL_REGS], 1, [Define if the target system has support for global register variables])
-else
-  HAVE_GCC_GLOBAL_REGS=no
 fi
 AC_MSG_RESULT($ZEND_GCC_GLOBAL_REGS)
 

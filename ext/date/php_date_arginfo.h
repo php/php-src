@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ce0bc9fd067a6598f66a65a9159674392e6cac4d */
+ * Stub hash: 0f204ac6646be79b515189a384fce9bcea9a4f42 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -461,6 +461,11 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateInterval___se
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DatePeriod_createFromISO8601String, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, specification, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DatePeriod___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, start)
 	ZEND_ARG_INFO(0, interval)
@@ -577,6 +582,7 @@ ZEND_METHOD(DateInterval, __serialize);
 ZEND_METHOD(DateInterval, __unserialize);
 ZEND_METHOD(DateInterval, __wakeup);
 ZEND_METHOD(DateInterval, __set_state);
+ZEND_METHOD(DatePeriod, createFromISO8601String);
 ZEND_METHOD(DatePeriod, __construct);
 ZEND_METHOD(DatePeriod, getStartDate);
 ZEND_METHOD(DatePeriod, getEndDate);
@@ -738,6 +744,7 @@ static const zend_function_entry class_DateInterval_methods[] = {
 
 
 static const zend_function_entry class_DatePeriod_methods[] = {
+	ZEND_ME(DatePeriod, createFromISO8601String, arginfo_class_DatePeriod_createFromISO8601String, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(DatePeriod, __construct, arginfo_class_DatePeriod___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, getStartDate, arginfo_class_DatePeriod_getStartDate, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, getEndDate, arginfo_class_DatePeriod_getEndDate, ZEND_ACC_PUBLIC)
@@ -1083,31 +1090,31 @@ static zend_class_entry *register_class_DatePeriod(zend_class_entry *class_entry
 	zend_declare_class_constant_ex(class_entry, const_INCLUDE_END_DATE_name, &const_INCLUDE_END_DATE_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_INCLUDE_END_DATE_name);
 
-	zend_string *property_start_class_DateTimeInterface = zend_string_init("DateTimeInterface", sizeof("DateTimeInterface")-1, 1);
 	zval property_start_default_value;
 	ZVAL_UNDEF(&property_start_default_value);
 	zend_string *property_start_name = zend_string_init("start", sizeof("start") - 1, 1);
+	zend_string *property_start_class_DateTimeInterface = zend_string_init("DateTimeInterface", sizeof("DateTimeInterface")-1, 1);
 	zend_declare_typed_property(class_entry, property_start_name, &property_start_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_start_class_DateTimeInterface, 0, MAY_BE_NULL));
 	zend_string_release(property_start_name);
 
-	zend_string *property_current_class_DateTimeInterface = zend_string_init("DateTimeInterface", sizeof("DateTimeInterface")-1, 1);
 	zval property_current_default_value;
 	ZVAL_UNDEF(&property_current_default_value);
 	zend_string *property_current_name = zend_string_init("current", sizeof("current") - 1, 1);
+	zend_string *property_current_class_DateTimeInterface = zend_string_init("DateTimeInterface", sizeof("DateTimeInterface")-1, 1);
 	zend_declare_typed_property(class_entry, property_current_name, &property_current_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_current_class_DateTimeInterface, 0, MAY_BE_NULL));
 	zend_string_release(property_current_name);
 
-	zend_string *property_end_class_DateTimeInterface = zend_string_init("DateTimeInterface", sizeof("DateTimeInterface")-1, 1);
 	zval property_end_default_value;
 	ZVAL_UNDEF(&property_end_default_value);
 	zend_string *property_end_name = zend_string_init("end", sizeof("end") - 1, 1);
+	zend_string *property_end_class_DateTimeInterface = zend_string_init("DateTimeInterface", sizeof("DateTimeInterface")-1, 1);
 	zend_declare_typed_property(class_entry, property_end_name, &property_end_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_end_class_DateTimeInterface, 0, MAY_BE_NULL));
 	zend_string_release(property_end_name);
 
-	zend_string *property_interval_class_DateInterval = zend_string_init("DateInterval", sizeof("DateInterval")-1, 1);
 	zval property_interval_default_value;
 	ZVAL_UNDEF(&property_interval_default_value);
 	zend_string *property_interval_name = zend_string_init("interval", sizeof("interval") - 1, 1);
+	zend_string *property_interval_class_DateInterval = zend_string_init("DateInterval", sizeof("DateInterval")-1, 1);
 	zend_declare_typed_property(class_entry, property_interval_name, &property_interval_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_interval_class_DateInterval, 0, MAY_BE_NULL));
 	zend_string_release(property_interval_name);
 
@@ -1154,12 +1161,12 @@ static zend_class_entry *register_class_DateObjectError(zend_class_entry *class_
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DateRangeError(zend_class_entry *class_entry_DateRangeError)
+static zend_class_entry *register_class_DateRangeError(zend_class_entry *class_entry_DateError)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DateRangeError", class_DateRangeError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateRangeError);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateError);
 	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
 	return class_entry;
@@ -1176,12 +1183,12 @@ static zend_class_entry *register_class_DateException(zend_class_entry *class_en
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DateInvalidTimeZoneException(zend_class_entry *class_entry_Exception)
+static zend_class_entry *register_class_DateInvalidTimeZoneException(zend_class_entry *class_entry_DateException)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DateInvalidTimeZoneException", class_DateInvalidTimeZoneException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateException);
 	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
 	return class_entry;

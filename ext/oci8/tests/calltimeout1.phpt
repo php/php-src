@@ -5,8 +5,9 @@ oci8
 --SKIPIF--
 <?php
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
+require_once 'skipifconnectfailure.inc';
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(__DIR__.'/skipif.inc');
+require __DIR__.'/skipif.inc';
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) {
     die("skip needs to be run as a user with access to DBMS_LOCK");
 }
@@ -19,7 +20,7 @@ if (!(isset($matches[0]) && $matches[0] >= 18)) {
 --FILE--
 <?php
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 function mysleep($c, $t)
 {

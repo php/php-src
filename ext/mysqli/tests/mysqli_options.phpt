@@ -9,7 +9,7 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once "connect.inc";
+require_once 'connect.inc';
 
 $link = mysqli_init();
 

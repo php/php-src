@@ -1,35 +1,26 @@
+# BIG5.TXT
+# Date: 2015-12-02 23:52:00 GMT [KW]
+# © 2015 Unicode®, Inc.
+# For terms of use, see http://www.unicode.org/terms_of_use.html
 #
 #	Name:             BIG5 to Unicode table (complete)
 #	Unicode version:  1.1
-#	Table version:    0.0d3
+#	Table version:    2.0
 #	Table format:     Format A
-#	Date:             11 February 1994
-#	Authors:          Glenn Adams <glenn@metis.com>
-#                     John H. Jenkins <John_Jenkins@taligent.com>
-#
-#	Copyright (c) 1991-1994 Unicode, Inc.  All Rights reserved.
-#
-#	This file is provided as-is by Unicode, Inc. (The Unicode Consortium).
-#	No claims are made as to fitness for any particular purpose.  No
-#	warranties of any kind are expressed or implied.  The recipient
-#	agrees to determine applicability of information provided.  If this
-#	file has been provided on magnetic media by Unicode, Inc., the sole
-#	remedy for any claim will be exchange of defective media within 90
-#	days of receipt.
-#
-#	Recipient is granted the right to make copies in any form for
-#	internal distribution and to freely use the information supplied
-#	in the creation of products supporting Unicode.  Unicode, Inc.
-#	specifically excludes the right to re-distribute this file directly
-#	to third parties or other organizations whether for profit or not.
+#	Date:             2011 October 14 (header updated: 2015 December 02)
 #
 #	General notes:
 #
-#	This table contains the data Metis and Taligent currently have on how
-#       BIG5 characters map into Unicode.
+#
+# This table contains one set of mappings from BIG5 into Unicode.
+# Note that these data are *possible* mappings only and may not be the
+# same as those used by actual products, nor may they be the best suited
+# for all uses.  For more information on the mappings between various code
+# pages incorporating the repertoire of BIG5 and Unicode, consult the
+# VENDORS mapping data.
 #
 #	WARNING!  It is currently impossible to provide round-trip compatibility
-#		between BIG5 and Unicode.
+#		between BIG5 and Unicode.  
 #
 #	A number of characters are not currently mapped because
 #		of conflicts with other mappings.  They are as follows:
@@ -46,45 +37,58 @@
 #
 #	We currently map all of these characters to U+FFFD REPLACEMENT CHARACTER.
 #		It is also possible to map these characters to their duplicates, or to
-#		the user zone.
-#
+#		the user zone.  
+#	
 #	Notes:
 #
 #	1. In addition to the above, there is some uncertainty about the
 #       mappings in the range C6A1 - C8FE, and F9DD - F9FE.  The ETEN
-#		version of BIG5 organizes the former range differently, and adds
-#		additional characters in the latter range.  The correct mappings
-#		these ranges need to be determined.
+#	version of BIG5 organizes the former range differently, and adds
+#	additional characters in the latter range.  The correct mappings
+#	these ranges need to be determined.
 #
 #	2.  There is an uncertainty in the mapping of the Big Five character
-#		0xA3BC.  This character occurs within the Big Five block of tone marks
-#		for bopomofo and is intended to be the tone mark for the first tone in
-#		Mandarin Chinese.  We have selected the mapping U+02C9 MODIFIER LETTER
-#		MACRON (Mandarin Chinese first tone) to reflect this semantic.
-#		However, because bopomofo uses the absense of a tone mark to indicate
-#		the first Mandarin tone, most implementations of Big Five represent
-#		this character with a blank space, and so a mapping such as U+2003 EM SPACE
-#		might be preferred.
-#
-#
+#	0xA3BC.  This character occurs within the Big Five block of tone marks
+#	for bopomofo and is intended to be the tone mark for the first tone in
+#	Mandarin Chinese.  We have selected the mapping U+02C9 MODIFIER LETTER
+#	MACRON (Mandarin Chinese first tone) to reflect this semantic.  
+#	However, because bopomofo uses the absense of a tone mark to indicate
+#	the first Mandarin tone, most implementations of Big Five represent
+#	this character with a blank space, and so a mapping such as U+2003 EM
+#	SPACE might be preferred.  
 #
 #	Format:  Three tab-separated columns
 #		 Column #1 is the BIG5 code (in hex as 0xXXXX)
 #		 Column #2 is the Unicode (in hex as 0xXXXX)
 #		 Column #3  is the Unicode name (follows a comment sign, '#')
-#					The official names for Unicode characters U+4E00
-#					to U+9FA5, inclusive, is "CJK UNIFIED IDEOGRAPH-XXXX",
-#					where XXXX is the code point.  Including all these
-#					names in this file increases its size substantially
-#					and needlessly.  The token "<CJK>" is used for the
-#					name of these characters.  If necessary, it can be
-#					expanded algorithmically by a parser or editor.
+#			The official names for Unicode characters U+4E00
+#			to U+9FA5, inclusive, is "CJK UNIFIED IDEOGRAPH-XXXX",
+#			where XXXX is the code point.  Including all these
+#			names in this file increases its size substantially
+#			and needlessly.  The token "<CJK>" is used for the
+#			name of these characters.  If necessary, it can be
+#			expanded algorithmically by a parser or editor.
 #
 #	The entries are in BIG5 order
 #
-#	Any comments or problems, contact <John_Jenkins@taligent.com>
+#  Revision History:
 #
+#    [v2.0, 2015 December 02]
+#    updates to copyright notice and terms of use
+#    no changes to character mappings
 #
+#    [v1.0, 2011 October 14]
+#    Updated terms of use to current wording.
+#    Updated contact information.
+#    No changes to the mapping data.
+#
+#    [v0.0d3, 11 February 1994]
+#    First release.
+#
+#  Use the Unicode reporting form <http://www.unicode.org/reporting.html>
+#    for any questions or comments or to report errors in the data.
+#
+# Manually added mapping of lower ASCII characters
 0x0	0x0
 0x1	0x1
 0x2	0x2
@@ -239,6 +243,7 @@
 0xA157	0xFE31	# PRESENTATION FORM FOR VERTICAL EM DASH
 0xA158	0x2014	# EM DASH
 0xA159	0xFE33	# PRESENTATION FORM FOR VERTICAL LOW LINE
+0xA15A	0xFFFD	# *** NO MAPPING ***
 0xA15B	0xFE34	# PRESENTATION FORM FOR VERTICAL WAVY LOW LINE
 0xA15C	0xFE4F	# WAVY LOW LINE
 0xA15D	0xFF08	# FULLWIDTH LEFT PARENTHESIS
@@ -309,7 +314,9 @@
 0xA1C0	0x32A3	# CIRCLED IDEOGRAPH CORRECT
 0xA1C1	0x2105	# CARE OF
 0xA1C2	0x203E	# OVERLINE
+0xA1C3	0xFFFD	# *** NO MAPPING ***
 0xA1C4	0xFF3F	# FULLWIDTH LOW LINE
+0xA1C5	0xFFFD	# *** NO MAPPING ***
 0xA1C6	0xFE49	# DASHED OVERLINE
 0xA1C7	0xFE4A	# CENTRELINE OVERLINE
 0xA1C8	0xFE4D	# DASHED LOW LINE
@@ -366,6 +373,8 @@
 0xA1FB	0x2198	# SOUTH EAST ARROW
 0xA1FC	0x2225	# PARALLEL TO
 0xA1FD	0x2223	# DIVIDES
+0xA1FE	0xFFFD	# *** NO MAPPING ***
+0xA240	0xFFFD	# *** NO MAPPING ***
 0xA241	0xFF0F	# FULLWIDTH SOLIDUS
 0xA242	0xFF3C	# FULLWIDTH REVERSE SOLIDUS
 0xA243	0xFF04	# FULLWIDTH DOLLAR SIGN
@@ -471,7 +480,9 @@
 0xA2C9	0x3027	# HANGZHOU NUMERAL SEVEN
 0xA2CA	0x3028	# HANGZHOU NUMERAL EIGHT
 0xA2CB	0x3029	# HANGZHOU NUMERAL NINE
+0xA2CC	0xFFFD	# *** NO MAPPING ***
 0xA2CD	0x5344	# <CJK>
+0xA2CE	0xFFFD	# *** NO MAPPING ***
 0xA2CF	0xFF21	# FULLWIDTH LATIN CAPITAL LETTER A
 0xA2D0	0xFF22	# FULLWIDTH LATIN CAPITAL LETTER B
 0xA2D1	0xFF23	# FULLWIDTH LATIN CAPITAL LETTER C
@@ -13916,7 +13927,7 @@
 0xF9D3	0x9F7E	# <CJK>
 0xF9D4	0x9F49	# <CJK>
 0xF9D5	0x9F98	# <CJK>
-# The following ETEN extensions are copied from CP950.txt:
+# The following ETEN extensions are copied from CP950.txt (https://unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP950.TXT):
 0xF9D6	0x7881	#CJK UNIFIED IDEOGRAPH
 0xF9D7	0x92B9	#CJK UNIFIED IDEOGRAPH
 0xF9D8	0x88CF	#CJK UNIFIED IDEOGRAPH

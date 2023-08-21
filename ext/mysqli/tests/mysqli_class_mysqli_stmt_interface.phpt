@@ -4,12 +4,11 @@ Interface of the class mysqli_stmt
 mysqli
 --SKIPIF--
 <?php
-    require_once('skipifconnectfailure.inc');
+    require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('connect.inc');
-    require('table.inc');
+    require 'table.inc';
 
     $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
     $stmt = new mysqli_stmt($link);

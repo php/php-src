@@ -294,6 +294,9 @@ ZEND_API void zend_shutdown_executor_values(bool fast_shutdown)
 					break;
 				}
 				zval_ptr_dtor_nogc(&c->value);
+				if (c->name) {
+					zend_string_release_ex(c->name, 0);
+				}
 				efree(c);
 				zend_string_release_ex(key, 0);
 			} ZEND_HASH_MAP_FOREACH_END_DEL();
@@ -920,6 +923,8 @@ cleanup_args:
 	}
 
 	if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_MAY_HAVE_UNDEF)) {
+		/* zend_handle_undef_args assumes prev_execute_data is initialized. */
+		call->prev_execute_data = NULL;
 		if (zend_handle_undef_args(call) == FAILURE) {
 			zend_vm_stack_free_args(call);
 			zend_vm_stack_free_call_frame(call);

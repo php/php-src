@@ -29,34 +29,32 @@
 
 *************************************************************************/
 
-#include <config.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
 #include "private.h"
+#include <stddef.h>
 
 /* pn prints the number NUM in base 10. */
 
-static void out_char (char c)
+static void out_char(char c)
 {
-  putchar(c);
+	putchar(c);
 }
 
 
-void pn (bc_num num)
+void pn(bc_num num)
 {
-  bc_out_num(num, 10, out_char, 0);
-  out_char ('\n');
+	bc_out_num(num, 10, out_char, 0);
+	out_char('\n');
 }
 
 
 /* pv prints a character array as if it was a string of bcd digits. */
-void pv (char *name, unsigned char *num, int len)
+void pv(char *name, unsigned char *num, size_t len)
 {
-  int i;
-  printf ("%s=", name);
-  for (i=0; i<len; i++) printf ("%c",BCD_CHAR(num[i]));
-  printf ("\n");
+	printf("%s=", name);
+	for (size_t i = 0; i < len; i++) {
+		printf("%c", BCD_CHAR(num[i]));
+	}
+	printf("\n");
 }

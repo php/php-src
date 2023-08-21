@@ -103,6 +103,47 @@ zend_module_entry libxml_module_entry = {
 
 /* }}} */
 
+static void php_libxml_set_old_ns_list(xmlDocPtr doc, xmlNsPtr first, xmlNsPtr last)
+{
+	if (UNEXPECTED(doc == NULL)) {
+		return;
+	}
+
+	ZEND_ASSERT(last->next == NULL);
+
+	/* Note: we'll use a prepend strategy instead of append to
+	 * make sure we don't lose performance when the list is long.
+	 * As libxml2 could assume the xml node is the first one, we'll place our
+	 * new entries after the first one. */
+
+	if (UNEXPECTED(doc->oldNs == NULL)) {
+		doc->oldNs = (xmlNsPtr) xmlMalloc(sizeof(xmlNs));
+		if (doc->oldNs == NULL) {
+			return;
+		}
+		memset(doc->oldNs, 0, sizeof(xmlNs));
+		doc->oldNs->type = XML_LOCAL_NAMESPACE;
+		doc->oldNs->href = xmlStrdup(XML_XML_NAMESPACE);
+		doc->oldNs->prefix = xmlStrdup((const xmlChar *)"xml");
+	} else {
+		last->next = doc->oldNs->next;
+	}
+	doc->oldNs->next = first;
+}
+
+PHP_LIBXML_API void php_libxml_set_old_ns(xmlDocPtr doc, xmlNsPtr ns)
+{
+	php_libxml_set_old_ns_list(doc, ns, ns);
+}
+
+static void php_libxml_unlink_entity(void *data, void *table, const xmlChar *name)
+{
+	xmlEntityPtr entity = data;
+	if (entity->_private != NULL) {
+		xmlHashRemoveEntry(table, name, NULL);
+	}
+}
+
 /* {{{ internal functions for interoperability */
 static int php_libxml_clear_object(php_libxml_node_object *object)
 {
@@ -132,6 +173,20 @@ static void php_libxml_unregister_node(xmlNodePtr nodep)
 	}
 }
 
+/* Workaround for libxml2 peculiarity */
+static void php_libxml_unlink_entity_decl(xmlEntityPtr entity)
+{
+	xmlDtdPtr dtd = entity->parent;
+	if (dtd != NULL) {
+		if (xmlHashLookup(dtd->entities, entity->name) == entity) {
+			xmlHashRemoveEntry(dtd->entities, entity->name, NULL);
+		}
+		if (xmlHashLookup(dtd->pentities, entity->name) == entity) {
+			xmlHashRemoveEntry(dtd->pentities, entity->name, NULL);
+		}
+	}
+}
+
 static void php_libxml_node_free(xmlNodePtr node)
 {
 	if(node) {
@@ -142,22 +197,35 @@ static void php_libxml_node_free(xmlNodePtr node)
 			case XML_ATTRIBUTE_NODE:
 				xmlFreeProp((xmlAttrPtr) node);
 				break;
-			case XML_ENTITY_DECL:
-			case XML_ELEMENT_DECL:
-			case XML_ATTRIBUTE_DECL:
+			/* libxml2 has a peculiarity where if you unlink an entity it'll only unlink it from the dtd if the
+			 * dtd is attached to the document. This works around the issue by inspecting the parent directly. */
+			case XML_ENTITY_DECL: {
+				xmlEntityPtr entity = (xmlEntityPtr) node;
+				php_libxml_unlink_entity_decl(entity);
+				if (entity->orig != NULL) {
+					xmlFree((char *) entity->orig);
+					entity->orig = NULL;
+				}
+				xmlFreeNode(node);
 				break;
-			case XML_NOTATION_NODE:
-				/* These require special handling */
+			}
+			case XML_NOTATION_NODE: {
+				/* See create_notation(), these aren't regular XML_NOTATION_NODE, but entities in disguise... */
+				xmlEntityPtr entity = (xmlEntityPtr) node;
 				if (node->name != NULL) {
 					xmlFree((char *) node->name);
 				}
-				if (((xmlEntityPtr) node)->ExternalID != NULL) {
-					xmlFree((char *) ((xmlEntityPtr) node)->ExternalID);
+				if (entity->ExternalID != NULL) {
+					xmlFree((char *) entity->ExternalID);
 				}
-				if (((xmlEntityPtr) node)->SystemID != NULL) {
-					xmlFree((char *) ((xmlEntityPtr) node)->SystemID);
+				if (entity->SystemID != NULL) {
+					xmlFree((char *) entity->SystemID);
 				}
 				xmlFree(node);
+				break;
+			}
+			case XML_ELEMENT_DECL:
+			case XML_ATTRIBUTE_DECL:
 				break;
 			case XML_NAMESPACE_DECL:
 				if (node->ns) {
@@ -165,9 +233,55 @@ static void php_libxml_node_free(xmlNodePtr node)
 					node->ns = NULL;
 				}
 				node->type = XML_ELEMENT_NODE;
-				ZEND_FALLTHROUGH;
+				xmlFreeNode(node);
+				break;
+			case XML_DTD_NODE: {
+				xmlDtdPtr dtd = (xmlDtdPtr) node;
+				if (dtd->_private == NULL) {
+					/* There's no userland reference to the dtd,
+					 * but there might be entities referenced from userland. Unlink those. */
+					xmlHashScan(dtd->entities, php_libxml_unlink_entity, dtd->entities);
+					xmlHashScan(dtd->pentities, php_libxml_unlink_entity, dtd->pentities);
+					/* No unlinking of notations, see remark above at case XML_NOTATION_NODE. */
+				}
+				xmlFreeNode(node);
+				break;
+			}
+			case XML_ELEMENT_NODE:
+				if (node->nsDef && node->doc) {
+					/* Make the namespace declaration survive the destruction of the holding element.
+					 * This prevents a use-after-free on the namespace declaration.
+					 *
+					 * The main problem is that libxml2 doesn't have a reference count on the namespace declaration.
+					 * We don't actually need to save the namespace declaration if we know the subtree it belongs to
+					 * has no references from userland. However, we can't know that without traversing the whole subtree
+					 * (=> slow), or without adding some subtree metadata (=> also slow).
+					 * So we have to assume we need to save everything.
+					 *
+					 * However, namespace declarations are quite rare in comparison to other node types.
+					 * Most node types are either elements, text or attributes.
+					 * And you only need one namespace declaration per namespace (in principle).
+					 * So I expect the number of namespace declarations to be low for an average XML document.
+					 *
+					 * In the worst possible case we have to save all namespace declarations when we for example remove
+					 * the whole document. But given the above reasoning this likely won't be a lot of declarations even
+					 * in the worst case.
+					 * A single declaration only takes about 48 bytes of memory, and I don't expect the worst case to occur
+					 * very often (why would you remove the whole document?).
+					 */
+					xmlNsPtr ns = node->nsDef;
+					xmlNsPtr last = ns;
+					while (last->next) {
+						last = last->next;
+					}
+					php_libxml_set_old_ns_list(node->doc, ns, last);
+					node->nsDef = NULL;
+				}
+				xmlFreeNode(node);
+				break;
 			default:
 				xmlFreeNode(node);
+				break;
 		}
 	}
 }
@@ -179,11 +293,29 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 	if (node != NULL) {
 		curnode = node;
 		while (curnode != NULL) {
+			/* If the _private field is set, there's still a userland reference somewhere. We'll delay freeing in this case. */
+			if (curnode->_private) {
+				xmlNodePtr next = curnode->next;
+				/* Must unlink such that freeing of the parent doesn't free this child. */
+				xmlUnlinkNode(curnode);
+				if (curnode->type == XML_ELEMENT_NODE) {
+					/* This ensures that namespace references in this subtree are defined within this subtree,
+					 * otherwise a use-after-free would be possible when the original namespace holder gets freed. */
+					xmlDOMWrapCtxt dummy_ctxt = {0};
+					xmlDOMWrapReconcileNamespaces(&dummy_ctxt, curnode, /* options */ 0);
+				}
+				/* Skip freeing */
+				curnode = next;
+				continue;
+			}
+
 			node = curnode;
 			switch (node->type) {
 				/* Skip property freeing for the following types */
 				case XML_NOTATION_NODE:
+					break;
 				case XML_ENTITY_DECL:
+					php_libxml_unlink_entity_decl((xmlEntityPtr) node);
 					break;
 				case XML_ENTITY_REF_NODE:
 					php_libxml_node_free_list((xmlNodePtr) node->properties);
@@ -1276,18 +1408,14 @@ PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node)
 
 PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *object)
 {
-	int ret_refcount = -1;
-	xmlNodePtr nodep;
-	php_libxml_node_ptr *obj_node;
-
 	if (object != NULL && object->node != NULL) {
-		obj_node = (php_libxml_node_ptr *) object->node;
-		nodep = object->node->node;
-		ret_refcount = php_libxml_decrement_node_ptr(object);
+		php_libxml_node_ptr *obj_node = (php_libxml_node_ptr *) object->node;
+		xmlNodePtr nodep = obj_node->node;
+		int ret_refcount = php_libxml_decrement_node_ptr(object);
 		if (ret_refcount == 0) {
 			php_libxml_node_free_resource(nodep);
 		} else {
-			if (obj_node && object == obj_node->_private) {
+			if (object == obj_node->_private) {
 				obj_node->_private = NULL;
 			}
 		}

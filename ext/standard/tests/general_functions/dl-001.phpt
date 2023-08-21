@@ -1,7 +1,10 @@
 --TEST--
 dl(): Loaded extensions properly unregister their ini settings
 --SKIPIF--
-<?php include dirname(__DIR__, 3) . "/dl_test/tests/skip.inc"; ?>
+<?php
+include dirname(__DIR__, 3) . "/dl_test/tests/skip.inc";
+if (getenv('SKIP_ASAN')) die('skip fails intermittently on ASAN');
+?>
 --FILE--
 <?php
 

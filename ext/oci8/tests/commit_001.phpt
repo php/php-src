@@ -4,14 +4,15 @@ Test OCI_NO_AUTO_COMMIT constant
 oci8
 --SKIPIF--
 <?php
+require_once 'skipifconnectfailure.inc';
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(__DIR__.'/skipif.inc');
+require __DIR__.'/skipif.inc';
 ?>
 --FILE--
 <?php
 
-require(__DIR__."/connect.inc");
-require(__DIR__.'/create_table.inc');
+require __DIR__.'/connect.inc';
+require __DIR__.'/create_table.inc';
 
 $insert_sql = "insert into ".$schema.$table_name." (id, value) values (1,1)";
 
@@ -75,7 +76,7 @@ var_dump(oci_fetch_all($select, $all));
 var_dump($all);
 
 
-require(__DIR__.'/drop_table.inc');
+require __DIR__.'/drop_table.inc';
 
 echo "Done\n";
 ?>

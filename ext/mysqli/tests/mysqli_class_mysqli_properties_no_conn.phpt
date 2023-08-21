@@ -4,11 +4,11 @@ Interface of the class mysqli
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
 
     function dump_properties($mysqli) {
 
@@ -233,7 +233,7 @@ require_once('skipifconnectfailure.inc');
     print "done!";
 ?>
 --CLEAN--
-<?php require_once("clean_table.inc"); ?>
+<?php require_once 'clean_table.inc'; ?>
 --EXPECTF--
 Without RS
 

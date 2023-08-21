@@ -4,7 +4,7 @@ Bug #62885 (mysqli_poll - Segmentation fault)
 mysqli
 --SKIPIF--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 ?>
 --FILE--
 <?php

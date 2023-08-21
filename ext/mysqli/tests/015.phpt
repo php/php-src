@@ -4,7 +4,7 @@ mysqli autocommit/commit/rollback with innodb
 mysqli
 --SKIPIF--
 <?php
-require_once "connect.inc";
+require_once 'connect.inc';
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 }
@@ -15,7 +15,7 @@ if (!have_innodb($link)) {
 ?>
 --FILE--
 <?php
-    require_once "connect.inc";
+    require_once 'connect.inc';
 
     $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
     if (!$link)
@@ -77,7 +77,7 @@ if (!have_innodb($link)) {
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 array(2) {

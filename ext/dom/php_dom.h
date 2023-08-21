@@ -128,7 +128,6 @@ void php_dom_throw_error_with_message(int error_code, char *error_message, int s
 void node_list_unlink(xmlNodePtr node);
 int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len);
 xmlNsPtr dom_get_ns(xmlNodePtr node, char *uri, int *errorcode, char *prefix);
-void dom_set_old_ns(xmlDoc *doc, xmlNs *ns);
 void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep);
 void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);
@@ -147,22 +146,46 @@ xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 void dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce);
 xmlNodePtr php_dom_create_fake_namespace_decl(xmlNodePtr nodep, xmlNsPtr original, zval *return_value, dom_object *parent_intern);
+void php_dom_get_content_into_zval(const xmlNode *nodep, zval *target, bool default_is_null);
+zend_string *dom_node_concatenated_name_helper(size_t name_len, const char *name, size_t prefix_len, const char *prefix);
+zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep);
+bool php_dom_is_node_connected(const xmlNode *node);
+bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, xmlDocPtr new_document);
+xmlNsPtr dom_get_ns_resolve_prefix_conflict(xmlNodePtr tree, const char *uri);
 
+/* parentnode */
 void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_parent_node_append(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc);
+void dom_parent_node_replace_children(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_child_node_remove(dom_object *context);
 void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc);
 
 void dom_remove_all_children(xmlNodePtr nodep);
 
-#define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
+/* nodemap and nodelist APIs */
+xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, const char *named, bool may_transform);
+void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const char *named, zval *return_value);
+xmlNodePtr php_dom_named_node_map_get_item(dom_nnodemap_object *objmap, zend_long index);
+void php_dom_named_node_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value);
+void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value);
+int php_dom_get_namednodemap_length(dom_object *obj);
+int php_dom_get_nodelist_length(dom_object *obj);
+
+#define DOM_GET_INTERN(__id, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
-	if (__intern->ptr == NULL || !(__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node)) { \
+	if (UNEXPECTED(__intern->ptr == NULL)) { \
 		zend_throw_error(NULL, "Couldn't fetch %s", ZSTR_VAL(__intern->std.ce->name));\
 		RETURN_THROWS();\
   	} \
+}
+
+#define DOM_GET_THIS_INTERN(__intern) DOM_GET_INTERN(ZEND_THIS, __intern)
+
+#define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
+	DOM_GET_INTERN(__id, __intern); \
+	__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node; \
 }
 
 #define DOM_NO_ARGS() \

@@ -8,7 +8,7 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once "connect.inc";
+require_once 'connect.inc';
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $mysqli = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 $res = $mysqli->query('SELECT 42');

@@ -4,11 +4,11 @@ Calling connect() on an open connection to create a new connection
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -35,9 +35,7 @@ require_once('skipifconnectfailure.inc');
 
     mysqli_close($link);
 
-    if (!$link = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
-        printf("[007] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-            $host, $user, $db, $port, $socket);
+    $link = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
     if (!$thread_id = $link->thread_id)
         printf("[008] Cannot determine thread id, test will fail, [%d] %s\n", mysqli_errno($link), mysqli_error($link));

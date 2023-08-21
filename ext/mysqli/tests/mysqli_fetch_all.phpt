@@ -4,13 +4,12 @@ mysqli_fetch_all()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    require('table.inc');
+    require 'table.inc';
     if (!$res = mysqli_query($link, "SELECT * FROM test ORDER BY id LIMIT 2")) {
             printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
@@ -311,7 +310,7 @@ require_once('skipifconnectfailure.inc');
 ?>
 --CLEAN--
 <?php
-    // require_once("clean_table.inc");
+    // require_once 'clean_table.inc';
 ?>
 --EXPECT--
 [005]

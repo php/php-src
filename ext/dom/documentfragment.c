@@ -50,48 +50,11 @@ PHP_METHOD(DOMDocumentFragment, __construct)
 	intern = Z_DOMOBJ_P(ZEND_THIS);
 	oldnode = dom_object_get_node(intern);
 	if (oldnode != NULL) {
-		php_libxml_node_free_resource(oldnode );
+		php_libxml_node_decrement_resource((php_libxml_node_object *)intern);
 	}
-	/* php_dom_set_object(intern, nodep); */
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern);
 }
 /* }}} end DOMDocumentFragment::__construct */
-
-#if LIBXML_VERSION <= 20614
-/* php_dom_xmlSetTreeDoc is a custom implementation of xmlSetTreeDoc
- needed for hack in appendXML due to libxml bug - no need to share this function */
-static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc) /* {{{ */
-{
-	xmlAttrPtr prop;
-	xmlNodePtr cur;
-
-	if (tree) {
-		if(tree->type == XML_ELEMENT_NODE) {
-			prop = tree->properties;
-			while (prop != NULL) {
-				prop->doc = doc;
-				if (prop->children) {
-					cur = prop->children;
-					while (cur != NULL) {
-						php_dom_xmlSetTreeDoc(cur, doc);
-						cur = cur->next;
-					}
-				}
-				prop = prop->next;
-			}
-		}
-		if (tree->children != NULL) {
-			cur = tree->children;
-			while (cur != NULL) {
-				php_dom_xmlSetTreeDoc(cur, doc);
-				cur = cur->next;
-			}
-		}
-		tree->doc = doc;
-	}
-}
-/* }}} */
-#endif
 
 /* {{{ */
 PHP_METHOD(DOMDocumentFragment, appendXML) {
@@ -116,15 +79,12 @@ PHP_METHOD(DOMDocumentFragment, appendXML) {
 	}
 
 	if (data) {
+		PHP_LIBXML_SANITIZE_GLOBALS(parse);
 		err = xmlParseBalancedChunkMemory(nodep->doc, NULL, NULL, 0, (xmlChar *) data, &lst);
+		PHP_LIBXML_RESTORE_GLOBALS(parse);
 		if (err != 0) {
 			RETURN_FALSE;
 		}
-#if LIBXML_VERSION <= 20614
-		/* Following needed due to bug in libxml2 <= 2.6.14 */
-		php_dom_xmlSetTreeDoc(lst, nodep->doc);
-		/* End stupid hack */
-#endif
 
 		xmlAddChildList(nodep,lst);
 	}
@@ -138,17 +98,15 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMDocumentFragment, append)
 {
-	uint32_t argc;
-	zval *args, *id;
+	uint32_t argc = 0;
+	zval *args;
 	dom_object *intern;
-	xmlNode *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	id = ZEND_THIS;
-	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+	DOM_GET_THIS_INTERN(intern);
 
 	dom_parent_node_append(intern, args, argc);
 }
@@ -159,19 +117,36 @@ Since: DOM Living Standard (DOM4)
 */
 PHP_METHOD(DOMDocumentFragment, prepend)
 {
-	uint32_t argc;
-	zval *args, *id;
+	uint32_t argc = 0;
+	zval *args;
 	dom_object *intern;
-	xmlNode *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	id = ZEND_THIS;
-	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+	DOM_GET_THIS_INTERN(intern);
 
 	dom_parent_node_prepend(intern, args, argc);
+}
+/* }}} */
+
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
+Since:
+*/
+PHP_METHOD(DOMDocumentFragment, replaceChildren)
+{
+	uint32_t argc = 0;
+	zval *args;
+	dom_object *intern;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_INTERN(intern);
+
+	dom_parent_node_replace_children(intern, args, argc);
 }
 /* }}} */
 

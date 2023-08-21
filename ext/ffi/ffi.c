@@ -3736,6 +3736,7 @@ ZEND_METHOD(FFI, new) /* {{{ */
 	bool owned = 1;
 	bool persistent = 0;
 	bool is_const = 0;
+	bool is_static_call = Z_TYPE(EX(This)) != IS_OBJECT;
 	zend_ffi_flags flags = ZEND_FFI_FLAG_OWNED;
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
@@ -3745,6 +3746,13 @@ ZEND_METHOD(FFI, new) /* {{{ */
 		Z_PARAM_BOOL(owned)
 		Z_PARAM_BOOL(persistent)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (is_static_call) {
+		zend_error(E_DEPRECATED, "Calling FFI::new() statically is deprecated");
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+	}
 
 	if (!owned) {
 		flags &= ~ZEND_FFI_FLAG_OWNED;
@@ -3757,7 +3765,7 @@ ZEND_METHOD(FFI, new) /* {{{ */
 	if (type_def) {
 		zend_ffi_dcl dcl = ZEND_FFI_ATTR_INIT;
 
-		if (Z_TYPE(EX(This)) == IS_OBJECT) {
+		if (!is_static_call) {
 			zend_ffi *ffi = (zend_ffi*)Z_OBJ(EX(This));
 			FFI_G(symbols) = ffi->symbols;
 			FFI_G(tags) = ffi->tags;
@@ -3765,22 +3773,22 @@ ZEND_METHOD(FFI, new) /* {{{ */
 			FFI_G(symbols) = NULL;
 			FFI_G(tags) = NULL;
 		}
+		bool clean_symbols = FFI_G(symbols) == NULL;
+		bool clean_tags = FFI_G(tags) == NULL;
 
 		FFI_G(default_type_attr) = 0;
 
 		if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 			zend_ffi_type_dtor(dcl.type);
-			if (Z_TYPE(EX(This)) != IS_OBJECT) {
-				if (FFI_G(tags)) {
-					zend_hash_destroy(FFI_G(tags));
-					efree(FFI_G(tags));
-					FFI_G(tags) = NULL;
-				}
-				if (FFI_G(symbols)) {
-					zend_hash_destroy(FFI_G(symbols));
-					efree(FFI_G(symbols));
-					FFI_G(symbols) = NULL;
-				}
+			if (clean_tags && FFI_G(tags)) {
+				zend_hash_destroy(FFI_G(tags));
+				efree(FFI_G(tags));
+				FFI_G(tags) = NULL;
+			}
+			if (clean_symbols && FFI_G(symbols)) {
+				zend_hash_destroy(FFI_G(symbols));
+				efree(FFI_G(symbols));
+				FFI_G(symbols) = NULL;
 			}
 			return;
 		}
@@ -3790,15 +3798,13 @@ ZEND_METHOD(FFI, new) /* {{{ */
 			is_const = 1;
 		}
 
-		if (Z_TYPE(EX(This)) != IS_OBJECT) {
-			if (FFI_G(tags)) {
-				zend_ffi_tags_cleanup(&dcl);
-			}
-			if (FFI_G(symbols)) {
-				zend_hash_destroy(FFI_G(symbols));
-				efree(FFI_G(symbols));
-				FFI_G(symbols) = NULL;
-			}
+		if (clean_tags && FFI_G(tags)) {
+			zend_ffi_tags_cleanup(&dcl);
+		}
+		if (clean_symbols && FFI_G(symbols)) {
+			zend_hash_destroy(FFI_G(symbols));
+			efree(FFI_G(symbols));
+			FFI_G(symbols) = NULL;
 		}
 		FFI_G(symbols) = NULL;
 		FFI_G(tags) = NULL;
@@ -3886,6 +3892,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 	zend_ffi_type *old_type, *type, *type_ptr;
 	zend_ffi_cdata *old_cdata, *cdata;
 	bool is_const = 0;
+	bool is_static_call = Z_TYPE(EX(This)) != IS_OBJECT;
 	zval *zv, *arg;
 	void *ptr;
 
@@ -3895,13 +3902,20 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 		Z_PARAM_ZVAL(zv)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (is_static_call) {
+		zend_error(E_DEPRECATED, "Calling FFI::cast() statically is deprecated");
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+	}
+
 	arg = zv;
 	ZVAL_DEREF(zv);
 
 	if (type_def) {
 		zend_ffi_dcl dcl = ZEND_FFI_ATTR_INIT;
 
-		if (Z_TYPE(EX(This)) == IS_OBJECT) {
+		if (!is_static_call) {
 			zend_ffi *ffi = (zend_ffi*)Z_OBJ(EX(This));
 			FFI_G(symbols) = ffi->symbols;
 			FFI_G(tags) = ffi->tags;
@@ -3909,22 +3923,22 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 			FFI_G(symbols) = NULL;
 			FFI_G(tags) = NULL;
 		}
+		bool clean_symbols = FFI_G(symbols) == NULL;
+		bool clean_tags = FFI_G(tags) == NULL;
 
 		FFI_G(default_type_attr) = 0;
 
 		if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 			zend_ffi_type_dtor(dcl.type);
-			if (Z_TYPE(EX(This)) != IS_OBJECT) {
-				if (FFI_G(tags)) {
-					zend_hash_destroy(FFI_G(tags));
-					efree(FFI_G(tags));
-					FFI_G(tags) = NULL;
-				}
-				if (FFI_G(symbols)) {
-					zend_hash_destroy(FFI_G(symbols));
-					efree(FFI_G(symbols));
-					FFI_G(symbols) = NULL;
-				}
+			if (clean_tags && FFI_G(tags)) {
+				zend_hash_destroy(FFI_G(tags));
+				efree(FFI_G(tags));
+				FFI_G(tags) = NULL;
+			}
+			if (clean_symbols && FFI_G(symbols)) {
+				zend_hash_destroy(FFI_G(symbols));
+				efree(FFI_G(symbols));
+				FFI_G(symbols) = NULL;
 			}
 			return;
 		}
@@ -3934,15 +3948,13 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 			is_const = 1;
 		}
 
-		if (Z_TYPE(EX(This)) != IS_OBJECT) {
-			if (FFI_G(tags)) {
-				zend_ffi_tags_cleanup(&dcl);
-			}
-			if (FFI_G(symbols)) {
-				zend_hash_destroy(FFI_G(symbols));
-				efree(FFI_G(symbols));
-				FFI_G(symbols) = NULL;
-			}
+		if (clean_tags && FFI_G(tags)) {
+			zend_ffi_tags_cleanup(&dcl);
+		}
+		if (clean_symbols && FFI_G(symbols)) {
+			zend_hash_destroy(FFI_G(symbols));
+			efree(FFI_G(symbols));
+			FFI_G(symbols) = NULL;
 		}
 		FFI_G(symbols) = NULL;
 		FFI_G(tags) = NULL;
@@ -4061,13 +4073,21 @@ ZEND_METHOD(FFI, type) /* {{{ */
 	zend_ffi_ctype *ctype;
 	zend_ffi_dcl dcl = ZEND_FFI_ATTR_INIT;
 	zend_string *type_def;
+	bool is_static_call = Z_TYPE(EX(This)) != IS_OBJECT;
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(type_def);
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE(EX(This)) == IS_OBJECT) {
+	if (is_static_call) {
+		zend_error(E_DEPRECATED, "Calling FFI::type() statically is deprecated");
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+	}
+
+	if (!is_static_call) {
 		zend_ffi *ffi = (zend_ffi*)Z_OBJ(EX(This));
 		FFI_G(symbols) = ffi->symbols;
 		FFI_G(tags) = ffi->tags;
@@ -4075,35 +4095,33 @@ ZEND_METHOD(FFI, type) /* {{{ */
 		FFI_G(symbols) = NULL;
 		FFI_G(tags) = NULL;
 	}
+	bool clean_symbols = FFI_G(symbols) == NULL;
+	bool clean_tags = FFI_G(tags) == NULL;
 
 	FFI_G(default_type_attr) = 0;
 
 	if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 		zend_ffi_type_dtor(dcl.type);
-		if (Z_TYPE(EX(This)) != IS_OBJECT) {
-			if (FFI_G(tags)) {
-				zend_hash_destroy(FFI_G(tags));
-				efree(FFI_G(tags));
-				FFI_G(tags) = NULL;
-			}
-			if (FFI_G(symbols)) {
-				zend_hash_destroy(FFI_G(symbols));
-				efree(FFI_G(symbols));
-				FFI_G(symbols) = NULL;
-			}
+		if (clean_tags && FFI_G(tags)) {
+			zend_hash_destroy(FFI_G(tags));
+			efree(FFI_G(tags));
+			FFI_G(tags) = NULL;
 		}
-		return;
-	}
-
-	if (Z_TYPE(EX(This)) != IS_OBJECT) {
-		if (FFI_G(tags)) {
-			zend_ffi_tags_cleanup(&dcl);
-		}
-		if (FFI_G(symbols)) {
+		if (clean_symbols && FFI_G(symbols)) {
 			zend_hash_destroy(FFI_G(symbols));
 			efree(FFI_G(symbols));
 			FFI_G(symbols) = NULL;
 		}
+		return;
+	}
+
+	if (clean_tags && FFI_G(tags)) {
+		zend_ffi_tags_cleanup(&dcl);
+	}
+	if (clean_symbols && FFI_G(symbols)) {
+		zend_hash_destroy(FFI_G(symbols));
+		efree(FFI_G(symbols));
+		FFI_G(symbols) = NULL;
 	}
 	FFI_G(symbols) = NULL;
 	FFI_G(tags) = NULL;
