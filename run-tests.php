@@ -585,8 +585,11 @@ function main(): void
 
                     $lsanSuppressions = __DIR__ . '/.github/lsan-suppressions.txt';
                     if (file_exists($lsanSuppressions)) {
-                        $environment['LSAN_OPTIONS'] = 'suppressions=' . $lsanSuppressions
-                            . ':print_suppressions=0';
+                        $suppressionOption = 'suppressions=' . $lsanSuppressions . ':print_suppressions=0';
+                        if (array_key_exists('LSAN_OPTIONS', $environment)) {
+                            $environment['LSAN_OPTIONS'] = $environment['LSAN_OPTIONS'] . ':' . $suppressionOption;
+                        }
+                        $environment['LSAN_OPTIONS'] = $suppressionOption;
                     }
                     break;
                 case '--repeat':
