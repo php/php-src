@@ -264,6 +264,16 @@ zend_memnrstr(const char *haystack, const char *needle, size_t needle_len, const
 	}
 }
 
+static zend_always_inline size_t zend_strnlen(const char* s, size_t maxlen)
+{
+#if defined(HAVE_STRNLEN)
+	return strnlen(s, maxlen);
+#else
+	const char *p = memchr(s, '\0', maxlen);
+	return p ? p-s : maxlen;
+#endif
+}
+
 ZEND_API zend_result ZEND_FASTCALL increment_function(zval *op1);
 ZEND_API zend_result ZEND_FASTCALL decrement_function(zval *op2);
 
