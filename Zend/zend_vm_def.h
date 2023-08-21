@@ -1328,6 +1328,11 @@ ZEND_VM_C_LABEL(pre_incdec_object):
 					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
 			} else {
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the propery is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				if (OP2_TYPE == IS_CONST) {
 					prop_info = (zend_property_info *) CACHED_PTR_EX(cache_slot + 2);
 				} else {
