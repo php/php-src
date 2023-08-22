@@ -49,10 +49,8 @@ var_dump(count($arrayObj));
 --EXPECT--
 Initiate Obj
 Assign values
-Collection::offsetSet(NULL,foo)
 Collection::offsetGet(0)
 string(3) "foo"
-Collection::offsetSet(NULL,bar)
 Collection::offsetGet(0)
 string(3) "foo"
 Collection::offsetGet(1)

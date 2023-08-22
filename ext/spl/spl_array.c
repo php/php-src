@@ -465,10 +465,29 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	spl_array_object *intern = spl_array_from_obj(object);
 	HashTable *ht;
 	spl_hash_key key;
+	uint32_t refcount = 0;
 
-	/* Cannot append if backing value is an object */
-	if (offset == NULL && spl_array_is_object(intern)) {
-		zend_throw_error(NULL, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(object->ce->name));
+	if (intern->nApplyCount > 0) {
+		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
+		return;
+	}
+
+	/* We are appending */
+	if (!offset) {
+		/* Cannot append if backing value is an object */
+		if (spl_array_is_object(intern)) {
+			zend_throw_error(NULL, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(object->ce->name));
+			return;
+		}
+
+		Z_TRY_ADDREF_P(value);
+		ht = spl_array_get_hash_table(intern);
+		refcount = spl_array_set_refcount(intern->is_child, ht, 1);
+		zend_hash_next_index_insert(ht, value);
+
+		if (refcount) {
+			spl_array_set_refcount(intern->is_child, ht, refcount);
+		}
 		return;
 	}
 
@@ -483,24 +502,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 		return;
 	}
 
-	if (intern->nApplyCount > 0) {
-		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
-		return;
-	}
-
 	Z_TRY_ADDREF_P(value);
-
-	uint32_t refcount = 0;
-	if (!offset || Z_TYPE_P(offset) == IS_NULL) {
-		ht = spl_array_get_hash_table(intern);
-		refcount = spl_array_set_refcount(intern->is_child, ht, 1);
-		zend_hash_next_index_insert(ht, value);
-
-		if (refcount) {
-			spl_array_set_refcount(intern->is_child, ht, refcount);
-		}
-		return;
-	}
 
 	if (get_hash_key(&key, intern, offset) == FAILURE) {
 		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_W);
@@ -514,6 +516,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 		zend_hash_update_ind(ht, key.key, value);
 		spl_hash_key_release(&key);
 	} else {
+		ZEND_ASSERT(!spl_array_is_object(intern));
 		zend_hash_index_update(ht, key.h, value);
 	}
 
