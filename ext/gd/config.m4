@@ -138,14 +138,55 @@ AC_DEFUN([PHP_GD_JISX0208],[
   fi
 ])
 
+
+dnl Build and run a program to determine if GD has support for the given
+dnl format. The sole argument is the proper-noun-capitalized name of the
+dnl format -- basically the word Foo in gdImageCreateFromFoo -- such as
+dnl Png. If support for format Foo exists, HAVE_GD_FOO will be defined
+dnl to 1. The reason for this charade is that gd defines "junk" versions
+dnl of each gdImageCreateFromFoo function even when it does not support
+dnl the Foo format. Those junk functions display a warning but eventually
+dnl return normally, making a simple link or run test insufficient.
+AC_DEFUN([PHP_GD_CHECK_FORMAT],[
+  old_LIBS="${LIBS}"
+  LIBS="${LIBS} ${GD_SHARED_LIBADD}"
+  AC_MSG_CHECKING([for working gdImageCreateFrom$1 in libgd])
+  AC_LANG_PUSH([C])
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <stdio.h>
+#include <unistd.h>
+#include <gd.h>
+
+/* A custom gdErrorMethod */
+void exit1(int priority, const char *format, va_list args) {
+  _exit(1);
+}
+
+/* Override the default gd_error_method with one that
+   actually causes the program to return an error. */
+int main(int argc, char** argv) {
+  FILE* f = NULL;
+  gdSetErrorMethod(exit1);
+  gdImagePtr p = gdImageCreateFrom$1(f);
+  return 0;
+} ]])],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_GD_[]m4_toupper($1), 1, [ ])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
+  AC_LANG_POP([C])
+  LIBS="${old_LIBS}"
+])
+
 AC_DEFUN([PHP_GD_CHECK_VERSION],[
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromPng,          [AC_DEFINE(HAVE_GD_PNG,               1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromAvif,         [AC_DEFINE(HAVE_GD_AVIF,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromWebp,         [AC_DEFINE(HAVE_GD_WEBP,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpeg,         [AC_DEFINE(HAVE_GD_JPG,               1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromXpm,          [AC_DEFINE(HAVE_GD_XPM,               1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromBmp,          [AC_DEFINE(HAVE_GD_BMP,               1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromTga,          [AC_DEFINE(HAVE_GD_TGA,               1, [ ])], [], [ $GD_SHARED_LIBADD ])
+  PHP_GD_CHECK_FORMAT([Png])
+  PHP_GD_CHECK_FORMAT([Avif])
+  PHP_GD_CHECK_FORMAT([Webp])
+  PHP_GD_CHECK_FORMAT([Jpeg])
+  PHP_GD_CHECK_FORMAT([Xpm])
+  PHP_GD_CHECK_FORMAT([Bmp])
+  PHP_GD_CHECK_FORMAT([Tga])
   PHP_CHECK_LIBRARY(gd, gdFontCacheShutdown,           [AC_DEFINE(HAVE_GD_FREETYPE,          1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdVersionString,               [AC_DEFINE(HAVE_GD_LIBVERSION,        1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageGetInterpolationMethod, [AC_DEFINE(HAVE_GD_GET_INTERPOLATION, 1, [ ])], [], [ $GD_SHARED_LIBADD ])
