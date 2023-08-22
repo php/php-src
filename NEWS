@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Introduced Zend guard recursion protection to fix __debugInfo issue.
     (Jakub Zelenka)
 
+- DOM:
+  . Fixed GH-11952 (Confusing warning when blocking entity loading via
+    libxml_set_external_entity_loader). (nielsdos)
+
 - Standard:
   . Added $before_needle argument to strrchr(). (HypeMC)
 

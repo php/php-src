@@ -784,10 +784,12 @@ is_string:
 	if (ret == NULL) {
 		if (resource == NULL) {
 			if (ID == NULL) {
-				ID = "NULL";
+				php_libxml_ctx_error(context,
+						"Failed to load external entity because the resolver function returned null\n");
+			} else {
+				php_libxml_ctx_error(context,
+						"Failed to load external entity \"%s\"\n", ID);
 			}
-			php_libxml_ctx_error(context,
-					"Failed to load external entity \"%s\"\n", ID);
 		} else {
 			/* we got the resource in the form of a string; open it */
 			ret = xmlNewInputFromFile(context, resource);
