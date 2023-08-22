@@ -35,6 +35,16 @@ jobs:
             zts: true
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-20.04
+    env:
+      MYSQL_TEST_HOST: mysql
+      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
+      PDO_MYSQL_TEST_HOST: mysql
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
     steps:
       - name: git checkout
         uses: actions/checkout@v3

@@ -52,6 +52,16 @@ jobs:
         include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.matrix-include) }}
     name: "${{ matrix.branch.name }}_LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-20.04
+    env:
+      MYSQL_TEST_HOST: mysql
+      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
+      PDO_MYSQL_TEST_HOST: mysql
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -135,8 +145,6 @@ jobs:
     services:
       mysql:
         image: mysql:8
-        ports:
-          - 3306:3306
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: root
@@ -257,6 +265,16 @@ jobs:
   COVERAGE_DEBUG_NTS:
     if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-20.04
+    env:
+      MYSQL_TEST_HOST: mysql
+      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
+      PDO_MYSQL_TEST_HOST: mysql
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -306,6 +324,12 @@ jobs:
       UBSAN_OPTIONS: print_stacktrace=1
       USE_ZEND_ALLOC: 0
       USE_TRACKED_ALLOC: 1
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -401,6 +425,7 @@ jobs:
           export ASAN_OPTIONS=exitcode=139
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           cp wp-tests-config-sample.php wp-tests-config.php
+          sed -i 's/localhost/mysql/g' wp-tests-config.php
           sed -i 's/youremptytestdbnamehere/test/g' wp-tests-config.php
           sed -i 's/yourusernamehere/root/g' wp-tests-config.php
           sed -i 's/yourpasswordhere/root/g' wp-tests-config.php
@@ -422,6 +447,16 @@ jobs:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     name: "${{ matrix.branch.name }}_OPCACHE_VARIATION"
     runs-on: ubuntu-20.04
+    env:
+      MYSQL_TEST_HOST: mysql
+      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
+      PDO_MYSQL_TEST_HOST: mysql
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -498,6 +533,16 @@ jobs:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     name: "${{ matrix.branch.name }}_MSAN"
     runs-on: ubuntu-22.04
+    env:
+      MYSQL_TEST_HOST: mysql
+      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
+      PDO_MYSQL_TEST_HOST: mysql
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -597,6 +642,12 @@ jobs:
           - branch: { name: 'PHP-80', ref: 'PHP-8.0' }
     name: "${{ matrix.branch.name }}_LIBMYSQLCLIENT"
     runs-on: ubuntu-20.04
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
     steps:
       - name: git checkout
         uses: actions/checkout@v3
