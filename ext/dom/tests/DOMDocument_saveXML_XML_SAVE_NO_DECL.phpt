@@ -13,7 +13,8 @@ $doc->loadXML('<root>é</root>');
 
 echo $doc->saveXML(options: 0);
 echo $doc->saveXML(options: LIBXML_NOXMLDECL);
-$doc->encoding = "BIG5";
+// Explicit encoding test, to ensure no encoding declaration.
+$doc->encoding = "UTF-8";
 echo $doc->saveXML(options: LIBXML_NOXMLDECL);
 
 // Edge case
@@ -24,5 +25,5 @@ var_dump($doc->saveXML(options: LIBXML_NOXMLDECL));
 <?xml version="1.0"?>
 <root>&#xE9;</root>
 <root>&#xE9;</root>
-<root>&#233;</root>
+<root>é</root>
 string(0) ""
