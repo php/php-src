@@ -24,7 +24,7 @@ if test "$PHP_PSPELL" != "no"; then
 
 	PSPELL_LIBDIR=$PSPELL_DIR/$PHP_LIBDIR
 
-	PHP_ADD_LIBRARY_WITH_PATH(pspell, $PSPELL_LIBDIR, PSPELL_SHARED_LIBADD)
+	PHP_ADD_LIBRARY_WITH_PATH(aspell, $PSPELL_LIBDIR, PSPELL_SHARED_LIBADD)
 
 	dnl Add -laspell to LIBS if it exists
 	PHP_CHECK_LIBRARY(aspell,new_aspell_config,
