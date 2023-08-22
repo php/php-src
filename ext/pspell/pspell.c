@@ -420,7 +420,7 @@ PHP_FUNCTION(pspell_suggest)
 
 	array_init(return_value);
 
-	wl = aspell_speller_suggest(manager, ZSTR_VAL(word), -1);
+	wl = aspell_speller_suggest(manager, ZSTR_VAL(word), ZSTR_LEN(word));
 	if (wl) {
 		AspellStringEnumeration *els = aspell_word_list_elements(wl);
 		while ((sug = aspell_string_enumeration_next(els)) != 0) {
