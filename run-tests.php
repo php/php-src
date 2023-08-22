@@ -683,8 +683,8 @@ function main(): void
     $environment['TEST_PHP_EXECUTABLE_ESCAPED'] = escapeshellarg($php);
     putenv("TEST_PHP_CGI_EXECUTABLE=$php_cgi");
     $environment['TEST_PHP_CGI_EXECUTABLE'] = $php_cgi;
-    putenv("TEST_PHP_CGI_EXECUTABLE_ESCAPED=" . escapeshellarg($php_cgi));
-    $environment['TEST_PHP_CGI_EXECUTABLE_ESCAPED'] = escapeshellarg($php_cgi);
+    putenv("TEST_PHP_CGI_EXECUTABLE_ESCAPED=" . escapeshellarg($php_cgi ?? ''));
+    $environment['TEST_PHP_CGI_EXECUTABLE_ESCAPED'] = escapeshellarg($php_cgi ?? '');
     putenv("TEST_PHPDBG_EXECUTABLE=$phpdbg");
     $environment['TEST_PHPDBG_EXECUTABLE'] = $phpdbg;
     putenv("TEST_PHPDBG_EXECUTABLE_ESCAPED=" . escapeshellarg($phpdbg ?? ''));
