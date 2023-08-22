@@ -466,6 +466,12 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	HashTable *ht;
 	spl_hash_key key;
 
+	/* Cannot append if backing value is an object */
+	if (offset == NULL && spl_array_is_object(intern)) {
+		zend_throw_error(NULL, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(object->ce->name));
+		return;
+	}
+
 	if (check_inherited && intern->fptr_offset_set) {
 		zval tmp;
 
@@ -684,13 +690,6 @@ PHP_METHOD(ArrayObject, offsetSet)
 
 void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(object);
-
-	if (spl_array_is_object(intern)) {
-		zend_throw_error(NULL, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(Z_OBJCE_P(object)->name));
-		return;
-	}
-
 	spl_array_write_dimension(Z_OBJ_P(object), NULL, append_value);
 } /* }}} */
 
