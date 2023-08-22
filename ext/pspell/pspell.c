@@ -446,7 +446,7 @@ PHP_FUNCTION(pspell_store_replacement)
 	}
 	manager = php_pspell_object_from_zend_object(Z_OBJ_P(zmgr))->mgr;
 
-	aspell_speller_store_replacement(manager, ZSTR_VAL(miss), -1, ZSTR_VAL(corr), -1);
+	aspell_speller_store_replacement(manager, ZSTR_VAL(miss), ZSTR_LEN(miss), ZSTR_VAL(corr), ZSTR_LEN(corr));
 	if (aspell_speller_error_number(manager) == 0) {
 		RETURN_TRUE;
 	} else {
