@@ -1499,14 +1499,6 @@ ZEND_API zend_string *zend_mangle_property_name(const char *src1, size_t src1_le
 }
 /* }}} */
 
-static zend_always_inline size_t zend_strnlen(const char* s, size_t maxlen) /* {{{ */
-{
-	size_t len = 0;
-	while (*s++ && maxlen--) len++;
-	return len;
-}
-/* }}} */
-
 ZEND_API zend_result zend_unmangle_property_name_ex(const zend_string *name, const char **class_name, const char **prop_name, size_t *prop_len) /* {{{ */
 {
 	size_t class_name_len;
