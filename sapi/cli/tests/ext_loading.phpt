@@ -62,6 +62,7 @@ Done.
 ######OUTPUT_END#####
 Unknown extension name (unknown):
 #####OUTPUT_BEGIN####
+
 Warning: Failed loading Zend extension 'unknown_ext' (tried: %s) in Unknown on line 0
 Done.
 ######OUTPUT_END#####
