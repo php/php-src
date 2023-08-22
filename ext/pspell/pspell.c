@@ -500,7 +500,7 @@ PHP_FUNCTION(pspell_add_to_session)
 		RETURN_FALSE;
 	}
 
-	aspell_speller_add_to_session(manager, ZSTR_VAL(word), -1);
+	aspell_speller_add_to_session(manager, ZSTR_VAL(word), ZSTR_LEN(word));
 	if (aspell_speller_error_number(manager) == 0) {
 		RETURN_TRUE;
 	} else {
