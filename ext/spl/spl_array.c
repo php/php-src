@@ -513,7 +513,13 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	ht = spl_array_get_hash_table(intern);
 	refcount = spl_array_set_refcount(intern->is_child, ht, 1);
 	if (key.key) {
-		zend_hash_update_ind(ht, key.key, value);
+		if (spl_array_is_object(intern)) {
+			ZEND_ASSERT(Z_TYPE(intern->array) == IS_OBJECT);
+			zend_object *obj = Z_OBJ(intern->array);
+			obj->handlers->write_property(obj, key.key, value, NULL);
+		} else {
+			zend_hash_update_ind(ht, key.key, value);
+		}
 		spl_hash_key_release(&key);
 	} else {
 		ZEND_ASSERT(!spl_array_is_object(intern));
