@@ -396,7 +396,7 @@ PHP_FUNCTION(pspell_check)
 	}
 	manager = php_pspell_object_from_zend_object(Z_OBJ_P(zmgr))->mgr;
 
-	if (aspell_speller_check(manager, ZSTR_VAL(word), -1)) {
+	if (aspell_speller_check(manager, ZSTR_VAL(word), ZSTR_LEN(word))) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
