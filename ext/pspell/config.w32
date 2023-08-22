@@ -1,10 +1,10 @@
 // vim:ft=javascript
 
-ARG_WITH("pspell", "pspell/aspell (whatever it's called this month) support", "no");
+ARG_WITH("pspell", "Aspell support", "no");
 
 if (PHP_PSPELL != "no") {
 
-	if (CHECK_HEADER_ADD_INCLUDE("pspell.h", "CFLAGS_PSPELL", PHP_PHP_BUILD + "\\include\\pspell;" + PHP_PSPELL) &&
+	if (CHECK_HEADER_ADD_INCLUDE("aspell.h", "CFLAGS_PSPELL", PHP_PHP_BUILD + "\\include;" + PHP_PSPELL) &&
 			CHECK_LIB("aspell*.lib", "pspell", PHP_PSPELL)) {
 		EXTENSION('pspell', 'pspell.c');
 		AC_DEFINE('HAVE_PSPELL', 1);

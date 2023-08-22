@@ -1,7 +1,7 @@
 PHP_ARG_WITH([pspell],
-  [for PSPELL support],
+  [for spell checker support],
   [AS_HELP_STRING([[--with-pspell[=DIR]]],
-    [Include PSPELL support. GNU Aspell version 0.50.0 or higher required])])
+    [Include Aspell support. GNU Aspell version 0.50.0 or higher required])])
 
 if test "$PHP_PSPELL" != "no"; then
 	dnl Add -Wno-strict-prototypes as depends on user libs
@@ -12,17 +12,14 @@ if test "$PHP_PSPELL" != "no"; then
 	    PSPELL_SEARCH_DIRS="/usr/local /usr"
 	fi
 	for i in $PSPELL_SEARCH_DIRS; do
-		if test -f $i/include/pspell/pspell.h; then
-			PSPELL_DIR=$i
-			PSPELL_INCDIR=$i/include/pspell
-		elif test -f $i/include/pspell.h; then
+		if test -f $i/include/aspell.h; then
 			PSPELL_DIR=$i
 			PSPELL_INCDIR=$i/include
 		fi
 	done
 
 	if test -z "$PSPELL_DIR"; then
-		AC_MSG_ERROR(Cannot find pspell)
+		AC_MSG_ERROR(Cannot find aspell library)
 	fi
 
 	PSPELL_LIBDIR=$PSPELL_DIR/$PHP_LIBDIR

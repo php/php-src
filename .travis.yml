@@ -24,7 +24,6 @@ addons:
       - libonig-dev
       - libpng-dev
       - libpq-dev
-      - libpspell-dev
       - libsasl2-dev
       - libsqlite3-dev
       - libsodium-dev
