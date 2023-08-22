@@ -1,7 +1,7 @@
 PHP_ARG_ENABLE([phpdbg],
   [for phpdbg support],
-  [AS_HELP_STRING([--enable-phpdbg],
-    [Build phpdbg])],
+  [AS_HELP_STRING([--disable-phpdbg],
+    [Disable building of phpdbg])],
   [yes],
   [yes])
 
