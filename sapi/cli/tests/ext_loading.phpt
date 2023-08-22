@@ -3,7 +3,7 @@ Extension loading
 --SKIPIF--
 <?php
 if (getenv('SKIP_ASAN')) {
-    die('xfail LSAN bug on Clang 14 crashes this test');
+    die('xleak LSAN bug on Clang 14 crashes this test');
 }
 $extDir = ini_get('extension_dir');
 if (!file_exists($extDir . '/opcache.so') && !file_exists($extDir . '/php_opcache.dll')) {
