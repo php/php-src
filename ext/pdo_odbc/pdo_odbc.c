@@ -25,6 +25,7 @@
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
+#include "pdo_odbc_arginfo.h"
 
 /* {{{ pdo_odbc_deps[] */
 static const zend_module_dep pdo_odbc_deps[] = {
@@ -95,6 +96,8 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 		SQLSetEnvAttr(SQL_NULL_HANDLE, SQL_ATTR_CONNECTION_POOLING, (void*)pdo_odbc_pool_on, 0);
 	}
 #endif
+
+	register_pdo_odbc_symbols(module_number);
 
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_ATTR_USE_CURSOR_LIBRARY", PDO_ODBC_ATTR_USE_CURSOR_LIBRARY);
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_ATTR_ASSUME_UTF8", PDO_ODBC_ATTR_ASSUME_UTF8);

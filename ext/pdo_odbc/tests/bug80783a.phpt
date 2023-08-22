@@ -4,10 +4,11 @@ Bug #80783 (PDO ODBC truncates BLOB records at every 256th byte)
 pdo_odbc
 --SKIPIF--
 <?php
+
 require 'ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 
-if (ODBC_TYPE === "unixODBC") {
+if (PDO_ODBC_TYPE === "unixODBC") {
     die("skip Fails with unixODBC");
 }
 ?>
