@@ -22885,6 +22885,11 @@ assign_op_object:
 				zval *orig_zptr = zptr;
 				zend_reference *ref;
 
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				do {
 					if (UNEXPECTED(Z_ISREF_P(zptr))) {
 						ref = Z_REF_P(zptr);
@@ -23176,6 +23181,11 @@ post_incdec_object:
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				if (IS_CONST == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 				} else {
@@ -25811,6 +25821,11 @@ assign_op_object:
 				zval *orig_zptr = zptr;
 				zend_reference *ref;
 
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				do {
 					if (UNEXPECTED(Z_ISREF_P(zptr))) {
 						ref = Z_REF_P(zptr);
@@ -26105,6 +26120,11 @@ post_incdec_object:
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 				} else {
@@ -30113,6 +30133,11 @@ assign_op_object:
 				zval *orig_zptr = zptr;
 				zend_reference *ref;
 
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				do {
 					if (UNEXPECTED(Z_ISREF_P(zptr))) {
 						ref = Z_REF_P(zptr);
@@ -30404,6 +30429,11 @@ post_incdec_object:
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				if (IS_CV == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 				} else {
@@ -32722,6 +32752,11 @@ assign_op_object:
 				zval *orig_zptr = zptr;
 				zend_reference *ref;
 
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				do {
 					if (UNEXPECTED(Z_ISREF_P(zptr))) {
 						ref = Z_REF_P(zptr);
@@ -32883,6 +32918,11 @@ post_incdec_object:
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				if (IS_CONST == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 				} else {
@@ -34784,6 +34824,11 @@ assign_op_object:
 				zval *orig_zptr = zptr;
 				zend_reference *ref;
 
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				do {
 					if (UNEXPECTED(Z_ISREF_P(zptr))) {
 						ref = Z_REF_P(zptr);
@@ -34946,6 +34991,11 @@ post_incdec_object:
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 				} else {
@@ -37285,6 +37335,11 @@ assign_op_object:
 				zval *orig_zptr = zptr;
 				zend_reference *ref;
 
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				do {
 					if (UNEXPECTED(Z_ISREF_P(zptr))) {
 						ref = Z_REF_P(zptr);
@@ -37446,6 +37501,11 @@ post_incdec_object:
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				if (IS_CV == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 				} else {
@@ -41323,6 +41383,11 @@ assign_op_object:
 				zval *orig_zptr = zptr;
 				zend_reference *ref;
 
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				do {
 					if (UNEXPECTED(Z_ISREF_P(zptr))) {
 						ref = Z_REF_P(zptr);
@@ -41614,6 +41679,11 @@ post_incdec_object:
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				if (IS_CONST == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 				} else {
@@ -45168,6 +45238,11 @@ assign_op_object:
 				zval *orig_zptr = zptr;
 				zend_reference *ref;
 
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				do {
 					if (UNEXPECTED(Z_ISREF_P(zptr))) {
 						ref = Z_REF_P(zptr);
@@ -45462,6 +45537,11 @@ post_incdec_object:
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 				} else {
@@ -50561,6 +50641,11 @@ assign_op_object:
 				zval *orig_zptr = zptr;
 				zend_reference *ref;
 
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				do {
 					if (UNEXPECTED(Z_ISREF_P(zptr))) {
 						ref = Z_REF_P(zptr);
@@ -50852,6 +50937,11 @@ post_incdec_object:
 			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			} else {
+				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
+				 * (e.g. undefined property warning) and the property is unset in the error handler */
+				if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
+					ZVAL_NULL(zptr);
+				}
 				if (IS_CV == IS_CONST) {
 					prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
 				} else {

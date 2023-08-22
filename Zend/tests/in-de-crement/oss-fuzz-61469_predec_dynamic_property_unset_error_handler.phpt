@@ -9,21 +9,8 @@ class C {
 }
 $c = new C;
 set_error_handler([$c,'errorHandle']);
-
-($c->a++);
-var_dump($c->a);
-
-($c->a--);
-var_dump($c->a);
-
-(++$c->a);
-var_dump($c->a);
-
 (--$c->a);
 var_dump($c->a);
 ?>
 --EXPECT--
-NULL
-NULL
-NULL
 NULL
