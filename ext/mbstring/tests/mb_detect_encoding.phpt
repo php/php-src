@@ -85,6 +85,18 @@ $css = 'input[type="radio"]:checked + img {
 }';
 echo mb_detect_encoding($css, mb_list_encodings(), true), "\n";
 
+// Test cases courtesy of Kirill Roskolii and Chris Burgess
+echo "-- Māori text --\n";
+
+echo mb_detect_encoding("Total Māori,31.5,33.3,31.8,33,36.4,33.2,33.2", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+// Names of native birds from Aotearoa:
+echo mb_detect_encoding("Kākā", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Whēkau", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Tīwaiwaka", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Kōtuku", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Kererū", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Tūī", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+
 echo "== DETECT ORDER ==\n";
 
 mb_detect_order('auto');
@@ -407,6 +419,14 @@ UTF-8
 UTF-8
 UTF-8
 SJIS
+UTF-8
+-- Māori text --
+UTF-8
+UTF-8
+UTF-8
+UTF-8
+UTF-8
+UTF-8
 UTF-8
 == DETECT ORDER ==
 JIS: JIS
