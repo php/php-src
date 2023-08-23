@@ -6,8 +6,21 @@ runs:
       run: |
         set -x
 
-        sudo apt-get update
-        sudo apt-get install \
+        export DEBIAN_FRONTEND=noninteractive
+
+        # Install sudo in Docker for consistent actions
+        if ! type "sudo" > /dev/null; then
+          apt-get update -y | true
+          apt-get install -y sudo
+        fi
+
+        sudo apt-get update -y | true
+        sudo apt-get install -y \
+          autoconf \
+          gcc \
+          make \
+          curl \
+          unzip \
           bison \
           re2c \
           locales \
@@ -20,6 +33,7 @@ runs:
           libtidy-dev \
           libenchant-2-dev \
           libaspell-dev \
+          libbz2-dev \
           libpspell-dev \
           libsasl2-dev \
           libxpm-dev \
