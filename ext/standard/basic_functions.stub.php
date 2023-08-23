@@ -2803,7 +2803,7 @@ function rename(string $from, string $to, $context = null): bool {}
 function copy(string $from, string $to, $context = null): bool {}
 
 /** @refcount 1 */
-function tempnam(string $directory, string $prefix): string|false {}
+function tempnam(string $directory, string $prefix, string $suffix = ""): string|false {}
 
 /**
  * @return resource|false

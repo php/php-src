@@ -620,6 +620,7 @@ lchown \
 memcntl \
 memmove \
 mkstemp \
+mkstemps \
 mmap \
 nice \
 nl_langinfo \

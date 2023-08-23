@@ -692,29 +692,36 @@ parse_eol:
 /* {{{ Create a unique filename in a directory */
 PHP_FUNCTION(tempnam)
 {
-	char *dir, *prefix;
-	size_t dir_len, prefix_len;
+	char *dir, *prefix, *suffix = "";
+	size_t dir_len, prefix_len, suffix_len = 0;
 	zend_string *opened_path;
 	int fd;
-	zend_string *p;
+	zend_string *p, *s;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_PATH(dir, dir_len)
 		Z_PARAM_PATH(prefix, prefix_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_PATH(suffix, suffix_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	p = php_basename(prefix, prefix_len, NULL, 0);
+	s = php_basename(suffix, suffix_len, NULL, 0);
 	if (ZSTR_LEN(p) >= 64) {
 		ZSTR_VAL(p)[63] = '\0';
+	}
+	if (ZSTR_LEN(s) >= 64) {
+		ZSTR_VAL(s)[63] = '\0';
 	}
 
 	RETVAL_FALSE;
 
-	if ((fd = php_open_temporary_fd_ex(dir, ZSTR_VAL(p), &opened_path, PHP_TMP_FILE_OPEN_BASEDIR_CHECK_ALWAYS)) >= 0) {
+	if ((fd = php_open_temporary_fd_ex2(dir, ZSTR_VAL(p), ZSTR_VAL(s), &opened_path, PHP_TMP_FILE_OPEN_BASEDIR_CHECK_ALWAYS)) >= 0) {
 		close(fd);
 		RETVAL_STR(opened_path);
 	}
 	zend_string_release_ex(p, 0);
+	zend_string_release_ex(s, 0);
 }
 /* }}} */
 

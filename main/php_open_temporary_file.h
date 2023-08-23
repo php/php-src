@@ -31,6 +31,7 @@
 BEGIN_EXTERN_C()
 PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, zend_string **opened_path_p);
 PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, zend_string **opened_path_p, uint32_t flags);
+PHPAPI int php_open_temporary_fd_ex2(const char *dir, const char *pfx, const char *sfx, zend_string **opened_path_p, uint32_t flags);
 PHPAPI int php_open_temporary_fd(const char *dir, const char *pfx, zend_string **opened_path_p);
 PHPAPI const char *php_get_temporary_directory(void);
 END_EXTERN_C()
