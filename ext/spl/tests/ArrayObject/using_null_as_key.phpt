@@ -14,7 +14,8 @@ var_dump($c);
 var_dump($c->{""});
 var_dump($ao[null]);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property MyClass::$ is deprecated in %s on line %d
 object(MyClass)#1 (1) {
   [""]=>
   string(8) "null key"

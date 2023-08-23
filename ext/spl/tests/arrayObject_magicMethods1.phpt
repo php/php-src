@@ -10,20 +10,16 @@ class UsesMagic {
     private $priv = 'secret';
 
     function __get($name) {
-        $args = func_get_args();
-        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+        echo "In " . __METHOD__ . "($name)\n";
     }
     function __set($name, $value) {
-        $args = func_get_args();
-        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+        echo "In " . __METHOD__ . "($name, $value)\n";
     }
     function __isset($name) {
-        $args = func_get_args();
-        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+        echo "In " . __METHOD__ . "($name)\n";
     }
     function __unset($name) {
-        $args = func_get_args();
-        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+        echo "In " . __METHOD__ . "($name)\n";
     }
 
 }
@@ -69,6 +65,10 @@ var_dump($ao);
 ?>
 --EXPECTF--
 --> Write existent, non-existent and dynamic:
+
+Deprecated: Creation of dynamic property UsesMagic::$dynamic is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property UsesMagic::$dynamic is deprecated in %s on line %d
   Original wrapped object:
 object(UsesMagic)#1 (5) {
   ["a"]=>

@@ -15,7 +15,8 @@ var_dump($ao->offsetGet(null));
 var_dump($c);
 var_dump($c->{""});
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property MyClass::$ is deprecated in %s on line %d
 bool(true)
 string(8) "null key"
 object(MyClass)#1 (1) {

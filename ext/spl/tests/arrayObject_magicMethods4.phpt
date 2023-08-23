@@ -72,6 +72,10 @@ var_dump($ao);
 ?>
 --EXPECTF--
 --> Write existent, non-existent and dynamic:
+
+Deprecated: Creation of dynamic property C::$dynamic is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property C::$dynamic is deprecated in %s on line %d
   Original wrapped object:
 object(C)#1 (5) {
   ["a"]=>

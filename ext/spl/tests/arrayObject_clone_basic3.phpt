@@ -23,7 +23,8 @@ $clonedOuterArrayObject['new.coAO'] = 'new element added to $clonedOuterArrayObj
 
 var_dump($wrappedObject, $innerArrayObject, $outerArrayObject, $clonedOuterArrayObject);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property ArrayObject::$new.oAO is deprecated in %s on line %d
 object(C)#1 (5) {
   ["p"]=>
   string(9) "C::p.orig"
