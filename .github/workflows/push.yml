@@ -61,6 +61,7 @@ jobs:
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
       - name: Create Oracle container
+        if: ${{ !matrix.asan }}
         uses: ./.github/actions/setup-oracle
       - name: Setup Caddy server
         uses: ./.github/actions/setup-caddy
@@ -86,8 +87,6 @@ jobs:
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
         uses: ./.github/actions/install-linux
-        with:
-          withOci: ${{ !matrix.asan }}
       - name: Setup
         uses: ./.github/actions/setup-x64
       - name: Test
