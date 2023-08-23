@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
-for I in 16 32 64 128 256;
+magick convert -size 512x512 php.svg php.bmp
+
+for I in 16 24 32 48 64 128 256;
 do
-    convert -size ${I}x${I} php.svg php-ico-${I}.png;
+    magick convert -scale ${I}x${I} php.bmp php-ico-${I}.png;
 done
 
-convert -adjoin php-ico-* php.ico
+magick convert -adjoin php-ico-* php.ico
 
-rm -f php-ico-*.png
+rm -f php-ico-*.png php.bmp
