@@ -5,6 +5,9 @@ gd
 --SKIPIF--
 <?php
     if (!function_exists("imagerotate")) die("skip requires imagerotate function");
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
+    }
 ?>
 --FILE--
 <?php

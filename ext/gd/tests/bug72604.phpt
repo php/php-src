@@ -2,6 +2,12 @@
 Bug #72604 (imagearc() ignores thickness for full arcs)
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
+?>
 --FILE--
 <?php
 $im = imagecreatetruecolor(100, 100);
