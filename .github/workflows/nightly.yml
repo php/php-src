@@ -72,6 +72,14 @@ jobs:
         uses: ./.github/actions/setup-oracle
       - name: apt
         uses: ./.github/actions/apt-x64
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          dpkg -l
+          echo "::endgroup::"
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
@@ -160,6 +168,14 @@ jobs:
           ref: ${{ matrix.branch.ref }}
       - name: apt
         uses: ./.github/actions/apt-x32
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          dpkg -l
+          echo "::endgroup::"
       - name: ./configure
         uses: ./.github/actions/configure-x32
         with:
