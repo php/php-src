@@ -2,6 +2,12 @@
 Bug #52070 (imagedashedline() - dashed line sometimes is not visible)
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
+?>
 --FILE--
 <?php
 $im = imagecreate(1200, 800);
