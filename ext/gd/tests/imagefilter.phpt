@@ -4,7 +4,7 @@ imagefilter() function test
 gd
 --SKIPIF--
 <?php
-    if (!function_exists("imagefilter")) die("skip requires bundled GD library\n");
+    if (!function_exists("imagefilter")) die("skip requires imagefilter function");
 ?>
 --FILE--
 <?php
