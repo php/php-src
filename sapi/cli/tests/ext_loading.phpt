@@ -2,6 +2,9 @@
 Extension loading
 --SKIPIF--
 <?php
+if (getenv('SKIP_ASAN')) {
+    die('xleak LSAN bug on Clang 14 crashes this test');
+}
 $extDir = ini_get('extension_dir');
 if (!file_exists($extDir . '/opcache.so') && !file_exists($extDir . '/php_opcache.dll')) {
     die('skip Opcache shared object not found in extension_dir');
@@ -9,7 +12,6 @@ if (!file_exists($extDir . '/opcache.so') && !file_exists($extDir . '/php_opcach
 ?>
 --FILE--
 <?php
-
 
 function loadZendExt($extension) {
     $cmd = [
@@ -19,7 +21,7 @@ function loadZendExt($extension) {
         '-r', 'echo "Done.";'
     ];
     $proc = proc_open($cmd, [['null'], ['pipe', 'w'], ['redirect', 1]], $pipes);
-    echo "Output: ", stream_get_contents($pipes[1]), "\n";
+    echo "#####OUTPUT_BEGIN####\n", stream_get_contents($pipes[1]), "\n######OUTPUT_END#####\n";
 }
 
 echo "Only extension name:\n";
@@ -47,19 +49,31 @@ loadZendExt($path);
 ?>
 --EXPECTF--
 Only extension name:
-Output: Done.
+#####OUTPUT_BEGIN####
+Done.
+######OUTPUT_END#####
 Name with file extension:
-Output: Done.
+#####OUTPUT_BEGIN####
+Done.
+######OUTPUT_END#####
 Absolute path:
-Output: Done.
+#####OUTPUT_BEGIN####
+Done.
+######OUTPUT_END#####
 Unknown extension name (unknown):
-Output: 
+#####OUTPUT_BEGIN####
+
 Warning: Failed loading Zend extension 'unknown_ext' (tried: %s) in Unknown on line 0
 Done.
+######OUTPUT_END#####
 Name with file extension (unknown):
-Output: 
+#####OUTPUT_BEGIN####
+
 Warning: Failed loading Zend extension '%Sunknown_ext%S' (tried: %s) in Unknown on line 0
 Done.
+######OUTPUT_END#####
 Absolute path (unknown):
-Output: Failed loading %s
+#####OUTPUT_BEGIN####
+Failed loading %s
 Done.
+######OUTPUT_END#####
