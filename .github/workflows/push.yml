@@ -66,6 +66,14 @@ jobs:
         uses: ./.github/actions/setup-caddy
       - name: apt
         uses: ./.github/actions/apt-x64
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          dpkg -l
+          echo "::endgroup::"
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
