@@ -4,7 +4,7 @@ Bug #39366 (imagerotate does not respect alpha with angles>45)
 gd
 --SKIPIF--
 <?php
-    if (!function_exists("imagerotate")) die("skip requires bundled GD library\n");
+    if (!function_exists("imagerotate")) die("skip requires imagerotate function");
 ?>
 --FILE--
 <?php
