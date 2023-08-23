@@ -793,7 +793,10 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 			}
 			dbh->stringify = bval;
 			if (dbh->methods->set_attribute) {
+				zend_long error_mode = dbh->error_mode;
+				dbh->error_mode = PDO_ERRMODE_SILENT;
 				dbh->methods->set_attribute(dbh, attr, value);
+				dbh->error_mode = error_mode;
 			}
 			return true;
 
