@@ -2,6 +2,12 @@
 Bug #73272 (imagescale() is not affected by, but affects imagesetinterpolation())
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
+?>
 --FILE--
 <?php
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'func.inc';
