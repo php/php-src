@@ -4,7 +4,7 @@ Bug #24155 (gdImageRotate270 rotation problem).
 gd
 --SKIPIF--
 <?php
-    if (!function_exists("imagerotate")) die("skip requires bundled GD library\n");
+    if (!function_exists("imagerotate")) die("skip requires imagerotate function");
 ?>
 --FILE--
 <?php
