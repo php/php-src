@@ -345,7 +345,7 @@ struct _zval_struct {
 		uint32_t     num_args;             /* arguments number for EX(This) */
 		uint32_t     fe_pos;               /* foreach position */
 		uint32_t     fe_iter_idx;          /* foreach iterator index */
-		uint32_t     property_guard;       /* single property guard */
+		uint32_t     guard;                /* recursion and single property guard */
 		uint32_t     constant_flags;       /* constant flags */
 		uint32_t     extra;                /* not further specified */
 	} u2;
@@ -619,6 +619,22 @@ struct _zend_ast_ref {
 #define _IS_BOOL					18
 #define _IS_NUMBER					19
 
+/* guard flags */
+#define ZEND_GUARD_PROPERTY_GET		(1<<0)
+#define ZEND_GUARD_PROPERTY_SET		(1<<1)
+#define ZEND_GUARD_PROPERTY_UNSET	(1<<2)
+#define ZEND_GUARD_PROPERTY_ISSET	(1<<3)
+#define ZEND_GUARD_PROPERTY_MASK	15
+#define ZEND_GUARD_RECURSION_DEBUG	(1<<4)
+#define ZEND_GUARD_RECURSION_EXPORT	(1<<5)
+#define ZEND_GUARD_RECURSION_JSON	(1<<6)
+
+#define ZEND_GUARD_RECURSION_TYPE(t) ZEND_GUARD_RECURSION_ ## t
+
+#define ZEND_GUARD_IS_RECURSIVE(pg, t)			((*pg & ZEND_GUARD_RECURSION_TYPE(t)) != 0)
+#define ZEND_GUARD_PROTECT_RECURSION(pg, t)		*pg |= ZEND_GUARD_RECURSION_TYPE(t)
+#define ZEND_GUARD_UNPROTECT_RECURSION(pg, t)	*pg &= ~ZEND_GUARD_RECURSION_TYPE(t)
+
 static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
 }
@@ -659,8 +675,8 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 #define Z_FE_ITER(zval)				(zval).u2.fe_iter_idx
 #define Z_FE_ITER_P(zval_p)			Z_FE_ITER(*(zval_p))
 
-#define Z_PROPERTY_GUARD(zval)		(zval).u2.property_guard
-#define Z_PROPERTY_GUARD_P(zval_p)	Z_PROPERTY_GUARD(*(zval_p))
+#define Z_GUARD(zval)				(zval).u2.guard
+#define Z_GUARD_P(zval_p)			Z_GUARD(*(zval_p))
 
 #define Z_CONSTANT_FLAGS(zval)		(zval).u2.constant_flags
 #define Z_CONSTANT_FLAGS_P(zval_p)	Z_CONSTANT_FLAGS(*(zval_p))
@@ -858,6 +874,25 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_IS_RECURSIVE_P(zv)        Z_IS_RECURSIVE(*(zv))
 #define Z_PROTECT_RECURSION_P(zv)   Z_PROTECT_RECURSION(*(zv))
 #define Z_UNPROTECT_RECURSION_P(zv) Z_UNPROTECT_RECURSION(*(zv))
+
+#define ZEND_GUARD_OR_GC_IS_RECURSIVE(pg, t, zobj) \
+	(pg ? ZEND_GUARD_IS_RECURSIVE(pg, t) : GC_IS_RECURSIVE(zobj))
+
+#define ZEND_GUARD_OR_GC_PROTECT_RECURSION(pg, t, zobj) do { \
+		if (pg) { \
+			ZEND_GUARD_PROTECT_RECURSION(pg, t); \
+		} else { \
+			GC_PROTECT_RECURSION(zobj); \
+		} \
+	} while(0)
+
+#define ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(pg, t, zobj) do { \
+		if (pg) { \
+			ZEND_GUARD_UNPROTECT_RECURSION(pg, t); \
+		} else { \
+			GC_UNPROTECT_RECURSION(zobj); \
+		} \
+	} while(0)
 
 /* All data types < IS_STRING have their constructor/destructors skipped */
 #define Z_CONSTANT(zval)			(Z_TYPE(zval) == IS_CONSTANT_AST)

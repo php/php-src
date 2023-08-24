@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug GH-11937 (Constant ASTs containing objects). (ilutov)
+  . Introduced Zend guard recursion protection to fix __debugInfo issue.
+    (Jakub Zelenka)
 
 17 Aug 2023, PHP 8.3.0beta3
 

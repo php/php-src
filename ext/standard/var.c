@@ -153,12 +153,13 @@ again:
 				php_printf("%senum(%s::%s)\n", COMMON, ZSTR_VAL(ce->name), Z_STRVAL_P(case_name_zval));
 				return;
 			}
-
-			if (Z_IS_RECURSIVE_P(struc)) {
+			zend_object *zobj = Z_OBJ_P(struc);
+			uint32_t *guard = zend_get_recursion_guard(zobj);
+			if (ZEND_GUARD_OR_GC_IS_RECURSIVE(guard, DEBUG, zobj)) {
 				PUTS("*RECURSION*\n");
 				return;
 			}
-			Z_PROTECT_RECURSION_P(struc);
+			ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
 
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
 			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
@@ -190,7 +191,7 @@ again:
 				php_printf("%*c", level-1, ' ');
 			}
 			PUTS("}\n");
-			Z_UNPROTECT_RECURSION_P(struc);
+			ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, DEBUG, zobj);
 			break;
 		}
 		case IS_RESOURCE: {
@@ -342,16 +343,18 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		}
 		PUTS("}\n");
 		break;
-	case IS_OBJECT:
+	case IS_OBJECT: {
 		/* Check if this is already recursing on the object before calling zend_get_properties_for,
 		 * to allow infinite recursion detection to work even if classes return temporary arrays,
 		 * and to avoid the need to update the properties table in place to reflect the state
 		 * if the result won't be used. (https://github.com/php/php-src/issues/8044) */
-		if (Z_IS_RECURSIVE_P(struc)) {
+		zend_object *zobj = Z_OBJ_P(struc);
+		uint32_t *guard = zend_get_recursion_guard(zobj);
+		if (ZEND_GUARD_OR_GC_IS_RECURSIVE(guard, DEBUG, zobj)) {
 			PUTS("*RECURSION*\n");
 			return;
 		}
-		Z_PROTECT_RECURSION_P(struc);
+		ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
 
 		myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
 		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
@@ -378,8 +381,9 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 			php_printf("%*c", level - 1, ' ');
 		}
 		PUTS("}\n");
-		Z_UNPROTECT_RECURSION_P(struc);
+		ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, DEBUG, zobj);
 		break;
+	}
 	case IS_RESOURCE: {
 		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc));
 		php_printf("resource(" ZEND_LONG_FMT ") of type (%s) refcount(%u)\n", Z_RES_P(struc)->handle, type_name ? type_name : "Unknown", Z_REFCOUNT_P(struc));
@@ -553,17 +557,19 @@ again:
 
 			break;
 
-		case IS_OBJECT:
+		case IS_OBJECT: {
 			/* Check if this is already recursing on the object before calling zend_get_properties_for,
 			 * to allow infinite recursion detection to work even if classes return temporary arrays,
 			 * and to avoid the need to update the properties table in place to reflect the state
 			 * if the result won't be used. (https://github.com/php/php-src/issues/8044) */
-			if (Z_IS_RECURSIVE_P(struc)) {
+			zend_object *zobj = Z_OBJ_P(struc);
+			uint32_t *guard = zend_get_recursion_guard(zobj);
+			if (ZEND_GUARD_OR_GC_IS_RECURSIVE(guard, EXPORT, zobj)) {
 				smart_str_appendl(buf, "NULL", 4);
 				zend_error(E_WARNING, "var_export does not handle circular references");
 				return;
 			}
-			Z_PROTECT_RECURSION_P(struc);
+			ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, EXPORT, zobj);
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_VAR_EXPORT);
 			if (level > 1) {
 				smart_str_appendc(buf, '\n');
@@ -597,7 +603,7 @@ again:
 				}
 				zend_release_properties(myht);
 			}
-			Z_UNPROTECT_RECURSION_P(struc);
+			ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, EXPORT, zobj);
 			if (level > 1 && !is_enum) {
 				buffer_append_spaces(buf, level - 1);
 			}
@@ -608,6 +614,7 @@ again:
 			}
 
 			break;
+		}
 		case IS_REFERENCE:
 			struc = Z_REFVAL_P(struc);
 			goto again;
