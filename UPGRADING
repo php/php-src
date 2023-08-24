@@ -530,6 +530,8 @@ PHP 8.3 UPGRADE NOTES
 
 - Sockets:
   . SO_ATTACH_REUSEPORT_CBPF (Linux only).
+  . SO_DETACH_BPF (Linux only).
+  . SO_DETACH_FILTER (Linux only).
   . TCP_QUICKACK (Linux only).
   . IP_DONTFRAG (FreeBSD only).
   . IP_MTU_DISCOVER (Linux only).
