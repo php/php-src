@@ -138,13 +138,13 @@ join(): Argument #2 ($array) must be of type ?array, string given
 -- Iteration 18 --
 join(): Argument #2 ($array) must be of type ?array, string given
 -- Iteration 19 --
-join(): Argument #1 ($pieces) must be of type array, string given
+join(): Argument #1 ($array) must be of type array, string given
 -- Iteration 20 --
-join(): Argument #1 ($pieces) must be of type array, string given
+join(): Argument #1 ($array) must be of type array, string given
 -- Iteration 21 --
 join(): Argument #2 ($array) must be of type ?array, resource given
 -- Iteration 22 --
-join(): Argument #1 ($pieces) must be of type array, string given
+join(): Argument #1 ($array) must be of type array, string given
 -- Iteration 23 --
-join(): Argument #1 ($pieces) must be of type array, string given
+join(): Argument #1 ($array) must be of type array, string given
 Done
