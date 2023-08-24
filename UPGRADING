@@ -326,6 +326,8 @@ PHP 8.3 UPGRADE NOTES
 
 - Reflection:
   . Return type of ReflectionClass::getStaticProperties() is no longer nullable.
+  . Calling ReflectionProperty::setValue() with only one parameter is deprecated.
+    To set static properties, pass null as the first parameter.
 
 - Standard:
   . E_NOTICEs emitted by unserialize() have been promoted to E_WARNING.
