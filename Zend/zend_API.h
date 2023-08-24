@@ -405,7 +405,6 @@ static zend_always_inline zend_result zend_register_class_alias(const char *name
 	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce, 1)
 
 ZEND_API void zend_disable_functions(const char *function_list);
-ZEND_API zend_result zend_disable_class(const char *class_name, size_t class_name_length);
 
 ZEND_API ZEND_COLD void zend_wrong_param_count(void);
 ZEND_API ZEND_COLD void zend_wrong_property_read(zval *object, zval *property);

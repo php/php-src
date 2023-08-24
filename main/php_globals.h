@@ -143,7 +143,6 @@ struct _php_core_globals {
 
 	char *php_sys_temp_dir;
 
-	char *disable_classes;
 	zend_long max_input_nesting_level;
 	zend_long max_input_vars;
 
