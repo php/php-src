@@ -50,6 +50,7 @@ static zend_class_entry *zend_test_parameter_attribute;
 static zend_class_entry *zend_test_property_attribute;
 static zend_class_entry *zend_test_class_with_method_with_parameter_attribute;
 static zend_class_entry *zend_test_child_class_with_method_with_parameter_attribute;
+static zend_class_entry *zend_test_class_with_property_attribute;
 static zend_class_entry *zend_test_forbid_dynamic_call;
 static zend_class_entry *zend_test_ns_foo_class;
 static zend_class_entry *zend_test_ns_unlikely_compile_error_class;
@@ -1020,6 +1021,12 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	zend_test_class_with_method_with_parameter_attribute = register_class_ZendTestClassWithMethodWithParameterAttribute();
 	zend_test_child_class_with_method_with_parameter_attribute = register_class_ZendTestChildClassWithMethodWithParameterAttribute(zend_test_class_with_method_with_parameter_attribute);
+
+	zend_test_class_with_property_attribute = register_class_ZendTestClassWithPropertyAttribute();
+	{
+		zend_property_info *prop_info = zend_hash_str_find_ptr(&zend_test_class_with_property_attribute->properties_info, "attributed", sizeof("attributed") - 1);
+		zend_add_property_attribute(zend_test_class_with_property_attribute, prop_info, zend_test_attribute->name, 0);
+	}
 
 	zend_test_forbid_dynamic_call = register_class_ZendTestForbidDynamicCall();
 

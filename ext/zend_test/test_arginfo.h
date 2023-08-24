@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b458993ee586284b1e33848313d9ddf61273604e */
+ * Stub hash: f2d1e5675f75661048645bedc2e73b7d4894f8dc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -392,6 +392,11 @@ static const zend_function_entry class_ZendTestChildClassWithMethodWithParameter
 };
 
 
+static const zend_function_entry class_ZendTestClassWithPropertyAttribute_methods[] = {
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class_ZendTestForbidDynamicCall_methods[] = {
 	ZEND_ME(ZendTestForbidDynamicCall, call, arginfo_class_ZendTestForbidDynamicCall_call, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZendTestForbidDynamicCall, callStatic, arginfo_class_ZendTestForbidDynamicCall_callStatic, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -721,6 +726,22 @@ static zend_class_entry *register_class_ZendTestChildClassWithMethodWithParamete
 	zend_string *attribute_ZendTestParameterAttribute_ZendTestChildClassWithMethodWithParameterAttribute_override_arg0_arg0_str = zend_string_init("value4", strlen("value4"), 1);
 	ZVAL_STR(&attribute_ZendTestParameterAttribute_ZendTestChildClassWithMethodWithParameterAttribute_override_arg0_arg0, attribute_ZendTestParameterAttribute_ZendTestChildClassWithMethodWithParameterAttribute_override_arg0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_ZendTestParameterAttribute_ZendTestChildClassWithMethodWithParameterAttribute_override_arg0->args[0].value, &attribute_ZendTestParameterAttribute_ZendTestChildClassWithMethodWithParameterAttribute_override_arg0_arg0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestClassWithPropertyAttribute(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestClassWithPropertyAttribute", class_ZendTestClassWithPropertyAttribute_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval property_attributed_default_value;
+	ZVAL_UNDEF(&property_attributed_default_value);
+	zend_string *property_attributed_name = zend_string_init("attributed", sizeof("attributed") - 1, 1);
+	zend_declare_typed_property(class_entry, property_attributed_name, &property_attributed_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_attributed_name);
 
 	return class_entry;
 }
