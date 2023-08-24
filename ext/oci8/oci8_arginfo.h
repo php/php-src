@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 850d4e63296c95a27cdfc1244d63b1ed496acd54 */
+ * Stub hash: 99e690256bdafbdcda848cbef1c43264f9977151 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_oci_define_by_name, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, statement)
@@ -899,11 +899,12 @@ static zend_class_entry *register_class_OCILob(void)
 
 	INIT_CLASS_ENTRY(ce, "OCILob", class_OCILob_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 
-	zend_string *attribute_name_AllowDynamicProperties_class_OCILob = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
-	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_OCILob, 0);
-	zend_string_release(attribute_name_AllowDynamicProperties_class_OCILob);
+	zval property_descriptor_default_value;
+	ZVAL_NULL(&property_descriptor_default_value);
+	zend_string *property_descriptor_name = zend_string_init("descriptor", sizeof("descriptor") - 1, 1);
+	zend_declare_typed_property(class_entry, property_descriptor_name, &property_descriptor_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
+	zend_string_release(property_descriptor_name);
 
 	return class_entry;
 }
@@ -914,11 +915,12 @@ static zend_class_entry *register_class_OCICollection(void)
 
 	INIT_CLASS_ENTRY(ce, "OCICollection", class_OCICollection_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 
-	zend_string *attribute_name_AllowDynamicProperties_class_OCICollection = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
-	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_OCICollection, 0);
-	zend_string_release(attribute_name_AllowDynamicProperties_class_OCICollection);
+	zval property_collection_default_value;
+	ZVAL_NULL(&property_collection_default_value);
+	zend_string *property_collection_name = zend_string_init("collection", sizeof("collection") - 1, 1);
+	zend_declare_typed_property(class_entry, property_collection_name, &property_collection_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
+	zend_string_release(property_collection_name);
 
 	return class_entry;
 }
