@@ -106,7 +106,9 @@ Standard:
     (nielsdos)
   . Removed the deprecated inet_ntoa call support. (David Carlier)
   . Cast large floats that are within int range to int in number_format so
-    the precision is not lost. (Marc Bennewitz) 
+    the precision is not lost. (Marc Bennewitz)
+  . Added 4 new rounding modes to the round(). (Jorg Sowa)
+
 
 XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)

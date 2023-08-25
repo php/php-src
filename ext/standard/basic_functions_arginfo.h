@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c9edbe45bb7a2b00b413fb3c56683bb8377a725f */
+ * Stub hash: 487cee0751d47b18bf0a8fbdb050313783f1b369 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -720,7 +720,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_syslog, 0, 2, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#define arginfo_inet_ntop arginfo_gethostbyaddr
+#if defined(HAVE_INET_NTOP)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_inet_ntop, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, ip, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
 
 #if defined(HAVE_INET_PTON)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_inet_pton, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
@@ -1826,7 +1830,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_create, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_params, 0, 2, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_params, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_TYPE_INFO(0, params, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -1835,14 +1839,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_get_params, 0, 1,
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_option, 0, 2, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_option, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_TYPE_MASK(0, wrapper_or_options, MAY_BE_ARRAY|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, option_name, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_options, 0, 2, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_options, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -2411,7 +2415,9 @@ ZEND_FUNCTION(closelog);
 #if defined(HAVE_SYSLOG_H)
 ZEND_FUNCTION(syslog);
 #endif
+#if defined(HAVE_INET_NTOP)
 ZEND_FUNCTION(inet_ntop);
+#endif
 #if defined(HAVE_INET_PTON)
 ZEND_FUNCTION(inet_pton);
 #endif
@@ -3044,7 +3050,9 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_SYSLOG_H)
 	ZEND_FE(syslog, arginfo_syslog)
 #endif
+#if defined(HAVE_INET_NTOP)
 	ZEND_FE(inet_ntop, arginfo_inet_ntop)
+#endif
 #if defined(HAVE_INET_PTON)
 	ZEND_FE(inet_pton, arginfo_inet_pton)
 #endif
