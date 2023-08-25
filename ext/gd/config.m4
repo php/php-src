@@ -174,6 +174,8 @@ int main(int argc, char** argv) {
     AC_DEFINE(HAVE_GD_[]m4_toupper($1), 1, [ ])
   ],[
     AC_MSG_RESULT([no])
+  ],[
+    AC_MSG_RESULT([no])
   ])
   AC_LANG_POP([C])
   LIBS="${old_LIBS}"
