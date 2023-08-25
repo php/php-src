@@ -1819,4 +1819,14 @@ static int dom_nodemap_has_dimension(zend_object *object, zval *member, int chec
 	return offset >= 0 && offset < php_dom_get_namednodemap_length(php_dom_obj_from_obj(object));
 } /* }}} end dom_nodemap_has_dimension */
 
+xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, bool recursive)
+{
+	/* See http://www.xmlsoft.org/html/libxml-tree.html#xmlDocCopyNode for meaning of values */
+	int extended_recursive = recursive;
+	if (!recursive && node->type == XML_ELEMENT_NODE) {
+		extended_recursive = 2;
+	}
+	return xmlDocCopyNode(node, doc, extended_recursive);
+}
+
 #endif /* HAVE_DOM */

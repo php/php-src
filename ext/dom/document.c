@@ -776,8 +776,6 @@ PHP_METHOD(DOMDocument, importNode)
 	dom_object *intern, *nodeobj;
 	int ret;
 	bool recursive = 0;
-	/* See http://www.xmlsoft.org/html/libxml-tree.html#xmlDocCopyNode for meaning of values */
-	int extended_recursive;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &node, dom_node_class_entry, &recursive) == FAILURE) {
 		RETURN_THROWS();
@@ -796,11 +794,7 @@ PHP_METHOD(DOMDocument, importNode)
 	if (nodep->doc == docp) {
 		retnodep = nodep;
 	} else {
-		extended_recursive = recursive;
-		if ((recursive == 0) && (nodep->type == XML_ELEMENT_NODE)) {
-			extended_recursive = 2;
-		}
-		retnodep = xmlDocCopyNode(nodep, docp, extended_recursive);
+		retnodep = dom_clone_node(nodep, docp, recursive);
 		if (!retnodep) {
 			RETURN_FALSE;
 		}
