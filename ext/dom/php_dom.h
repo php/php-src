@@ -114,6 +114,8 @@ static inline dom_object_namespace_node *php_dom_namespace_node_obj_from_obj(zen
 
 #include "domexception.h"
 
+#define DOM_HTML_NO_DEFAULT_NS (1U << 31)
+
 dom_object *dom_object_get_data(xmlNodePtr obj);
 dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document);
 libxml_doc_props const* dom_get_doc_props_read_only(const php_libxml_ref_obj *document);
@@ -154,6 +156,13 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 xmlNsPtr dom_get_ns_resolve_prefix_conflict(xmlNodePtr tree, const char *uri);
 void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp);
 
+void php_dom_document_constructor(INTERNAL_FUNCTION_PARAMETERS);
+
+#define DOM_LOAD_STRING 0
+#define DOM_LOAD_FILE 1
+
+void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode, xmlDocPtr *doc_out);
+
 /* parentnode */
 void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_parent_node_append(dom_object *context, zval *nodes, uint32_t nodesc);
@@ -174,7 +183,8 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 int php_dom_get_namednodemap_length(dom_object *obj);
 int php_dom_get_nodelist_length(dom_object *obj);
 
-xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, bool recursive);
+xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, const dom_object *intern, bool recursive);
+void dom_mark_namespaces_for_copy_based_on_copy(xmlNodePtr copy, const xmlNode *original);
 
 #define DOM_GET_INTERN(__id, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \

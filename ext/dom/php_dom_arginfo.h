@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 134f9c3e73943f3f6815fa0e3a6784fdc9e70600 */
+ * Stub hash: 4d2c0e49b4a7a9d6f99669a2d8f8bf8b646b80c9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -29,11 +29,6 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOMChildNode_after arginfo_class_DOMParentNode_append
 
 #define arginfo_class_DOMChildNode_replaceWith arginfo_class_DOMParentNode_append
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode___sleep, 0, 0, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_DOMNode___wakeup arginfo_class_DOMChildNode_remove
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_appendChild, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
@@ -122,6 +117,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode_compareDocumentPosition, 0, 1, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, other, DOMNode, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMNode___sleep, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_DOMNode___wakeup arginfo_class_DOMChildNode_remove
 
 #define arginfo_class_DOMNameSpaceNode___sleep arginfo_class_DOMNode___sleep
 
@@ -541,12 +541,37 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMXPath_registe
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOM_HTML5Document___construct, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, xmlVersion, IS_STRING, 0, "\"1.0\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 0, "\"\"")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOM_HTML5Document_load, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOM_HTML5Document_loadXML, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_DOM_HTML5Document_loadHTML arginfo_class_DOM_HTML5Document_loadXML
+
+#define arginfo_class_DOM_HTML5Document_loadHTMLFile arginfo_class_DOM_HTML5Document_load
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_DOM_HTML5Document_saveHTML, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOMNode, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_DOM_HTML5Document_saveHTMLFile, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_FUNCTION(dom_import_simplexml);
 ZEND_METHOD(DOMCdataSection, __construct);
 ZEND_METHOD(DOMComment, __construct);
-ZEND_METHOD(DOMNode, __sleep);
-ZEND_METHOD(DOMNode, __wakeup);
 ZEND_METHOD(DOMNode, appendChild);
 ZEND_METHOD(DOMNode, C14N);
 ZEND_METHOD(DOMNode, C14NFile);
@@ -568,6 +593,8 @@ ZEND_METHOD(DOMNode, replaceChild);
 ZEND_METHOD(DOMNode, contains);
 ZEND_METHOD(DOMNode, getRootNode);
 ZEND_METHOD(DOMNode, compareDocumentPosition);
+ZEND_METHOD(DOMNode, __sleep);
+ZEND_METHOD(DOMNode, __wakeup);
 ZEND_METHOD(DOMImplementation, getFeature);
 ZEND_METHOD(DOMImplementation, hasFeature);
 ZEND_METHOD(DOMImplementation, createDocumentType);
@@ -688,6 +715,13 @@ ZEND_METHOD(DOMXPath, registerNamespace);
 #if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(DOMXPath, registerPhpFunctions);
 #endif
+ZEND_METHOD(DOM_HTML5Document, __construct);
+ZEND_METHOD(DOM_HTML5Document, load);
+ZEND_METHOD(DOM_HTML5Document, loadXML);
+ZEND_METHOD(DOM_HTML5Document, loadHTML);
+ZEND_METHOD(DOM_HTML5Document, loadHTMLFile);
+ZEND_METHOD(DOM_HTML5Document, saveHTML);
+ZEND_METHOD(DOM_HTML5Document, saveHTMLFile);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -731,8 +765,6 @@ static const zend_function_entry class_DOMChildNode_methods[] = {
 
 
 static const zend_function_entry class_DOMNode_methods[] = {
-	ZEND_ME(DOMNode, __sleep, arginfo_class_DOMNode___sleep, ZEND_ACC_PUBLIC)
-	ZEND_ME(DOMNode, __wakeup, arginfo_class_DOMNode___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, appendChild, arginfo_class_DOMNode_appendChild, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, C14N, arginfo_class_DOMNode_C14N, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, C14NFile, arginfo_class_DOMNode_C14NFile, ZEND_ACC_PUBLIC)
@@ -754,6 +786,8 @@ static const zend_function_entry class_DOMNode_methods[] = {
 	ZEND_ME(DOMNode, contains, arginfo_class_DOMNode_contains, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, getRootNode, arginfo_class_DOMNode_getRootNode, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNode, compareDocumentPosition, arginfo_class_DOMNode_compareDocumentPosition, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNode, __sleep, arginfo_class_DOMNode___sleep, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNode, __wakeup, arginfo_class_DOMNode___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -961,6 +995,18 @@ static const zend_function_entry class_DOMXPath_methods[] = {
 };
 #endif
 
+
+static const zend_function_entry class_DOM_HTML5Document_methods[] = {
+	ZEND_ME(DOM_HTML5Document, __construct, arginfo_class_DOM_HTML5Document___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOM_HTML5Document, load, arginfo_class_DOM_HTML5Document_load, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOM_HTML5Document, loadXML, arginfo_class_DOM_HTML5Document_loadXML, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOM_HTML5Document, loadHTML, arginfo_class_DOM_HTML5Document_loadHTML, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOM_HTML5Document, loadHTMLFile, arginfo_class_DOM_HTML5Document_loadHTMLFile, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOM_HTML5Document, saveHTML, arginfo_class_DOM_HTML5Document_saveHTML, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOM_HTML5Document, saveHTMLFile, arginfo_class_DOM_HTML5Document_saveHTMLFile, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
 static void register_php_dom_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("XML_ELEMENT_NODE", XML_ELEMENT_NODE, CONST_PERSISTENT);
@@ -1011,6 +1057,7 @@ static void register_php_dom_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("DOM_NAMESPACE_ERR", NAMESPACE_ERR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DOM_INVALID_ACCESS_ERR", INVALID_ACCESS_ERR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DOM_VALIDATION_ERR", VALIDATION_ERR, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOM\\HTML_NO_DEFAULT_NS", DOM_HTML_NO_DEFAULT_NS, CONST_PERSISTENT);
 }
 
 static zend_class_entry *register_class_DOMDocumentType(zend_class_entry *class_entry_DOMNode)
@@ -1865,3 +1912,13 @@ static zend_class_entry *register_class_DOMXPath(void)
 	return class_entry;
 }
 #endif
+
+static zend_class_entry *register_class_DOM_HTML5Document(zend_class_entry *class_entry_DOMDocument)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "DOM", "HTML5Document", class_DOM_HTML5Document_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMDocument);
+
+	return class_entry;
+}

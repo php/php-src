@@ -27,6 +27,8 @@
 #include "php_dom_arginfo.h"
 #include "dom_properties.h"
 #include "zend_interfaces.h"
+#include "lexbor/lexbor/core/types.h"
+#include "lexbor/lexbor/core/lexbor.h"
 
 #include "ext/standard/info.h"
 #define PHP_XPATH 1
@@ -40,6 +42,7 @@ PHP_DOM_EXPORT zend_class_entry *dom_childnode_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domimplementation_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_documentfragment_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_document_class_entry;
+PHP_DOM_EXPORT zend_class_entry *dom_html5_document_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_nodelist_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_namednodemap_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_characterdata_class_entry;
@@ -70,6 +73,7 @@ zend_object_handlers dom_xpath_object_handlers;
 static HashTable classes;
 /* {{{ prop handler tables */
 static HashTable dom_document_prop_handlers;
+static HashTable dom_html5_document_prop_handlers;
 static HashTable dom_documentfragment_prop_handlers;
 static HashTable dom_node_prop_handlers;
 static HashTable dom_nodelist_prop_handlers;
@@ -206,6 +210,7 @@ static void dom_copy_doc_props(php_libxml_ref_obj *source_doc, php_libxml_ref_ob
 			zend_hash_copy(dest->classmap, source->classmap, NULL);
 		}
 
+		dest_doc->is_html5_class = source_doc->is_html5_class;
 	}
 }
 
@@ -586,6 +591,22 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject);
 void dom_xpath_objects_free_storage(zend_object *object);
 #endif
 
+static void *dom_malloc(size_t size) {
+	return emalloc(size);
+}
+
+static void *dom_realloc(void *dst, size_t size) {
+	return erealloc(dst, size);
+}
+
+static void *dom_calloc(size_t num, size_t size) {
+	return ecalloc(num, size);
+}
+
+static void dom_free(void *ptr) {
+	efree(ptr);
+}
+
 /* {{{ PHP_MINIT_FUNCTION(dom) */
 PHP_MINIT_FUNCTION(dom)
 {
@@ -704,6 +725,13 @@ PHP_MINIT_FUNCTION(dom)
 
 	zend_hash_merge(&dom_document_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
 	zend_hash_add_ptr(&classes, dom_document_class_entry->name, &dom_document_prop_handlers);
+
+	dom_html5_document_class_entry = register_class_DOM_HTML5Document(dom_document_class_entry);
+	dom_document_class_entry->create_object = dom_objects_new;
+	zend_hash_init(&dom_html5_document_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
+	dom_register_prop_handler(&dom_html5_document_prop_handlers, "encoding", sizeof("encoding")-1, dom_document_encoding_read, dom_html5_document_encoding_write);
+	zend_hash_merge(&dom_html5_document_prop_handlers, &dom_document_prop_handlers, dom_copy_prop_handler, 0);
+	zend_hash_add_ptr(&classes, dom_html5_document_class_entry->name, &dom_html5_document_prop_handlers);
 
 	dom_nodelist_class_entry = register_class_DOMNodeList(zend_ce_aggregate, zend_ce_countable);
 	dom_nodelist_class_entry->create_object = dom_nnodemap_objects_new;
@@ -845,6 +873,8 @@ PHP_MINIT_FUNCTION(dom)
 
 	php_libxml_register_export(dom_node_class_entry, php_dom_export_node);
 
+	lexbor_memory_setup(dom_malloc, dom_realloc, dom_calloc, dom_free);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -876,6 +906,7 @@ PHP_MINFO_FUNCTION(dom)
 PHP_MSHUTDOWN_FUNCTION(dom) /* {{{ */
 {
 	zend_hash_destroy(&dom_document_prop_handlers);
+	zend_hash_destroy(&dom_html5_document_prop_handlers);
 	zend_hash_destroy(&dom_documentfragment_prop_handlers);
 	zend_hash_destroy(&dom_node_prop_handlers);
 	zend_hash_destroy(&dom_namespace_node_prop_handlers);
@@ -1174,7 +1205,11 @@ PHP_DOM_EXPORT bool php_dom_create_object(xmlNodePtr obj, zval *return_value, do
 		case XML_DOCUMENT_NODE:
 		case XML_HTML_DOCUMENT_NODE:
 		{
-			ce = dom_document_class_entry;
+			if (domobj && domobj->document->is_html5_class) {
+				ce = dom_html5_document_class_entry;
+			} else {
+				ce = dom_document_class_entry;
+			}
 			break;
 		}
 		case XML_DTD_NODE:
@@ -1819,14 +1854,23 @@ static int dom_nodemap_has_dimension(zend_object *object, zval *member, int chec
 	return offset >= 0 && offset < php_dom_get_namednodemap_length(php_dom_obj_from_obj(object));
 } /* }}} end dom_nodemap_has_dimension */
 
-xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, bool recursive)
+xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, const dom_object *intern, bool recursive)
 {
 	/* See http://www.xmlsoft.org/html/libxml-tree.html#xmlDocCopyNode for meaning of values */
 	int extended_recursive = recursive;
 	if (!recursive && node->type == XML_ELEMENT_NODE) {
 		extended_recursive = 2;
 	}
-	return xmlDocCopyNode(node, doc, extended_recursive);
+	xmlNodePtr copy = xmlDocCopyNode(node, doc, extended_recursive);
+	if (UNEXPECTED(!copy)) {
+		return NULL;
+	}
+
+	if (intern->document && intern->document->is_html5_class) {
+		dom_mark_namespaces_for_copy_based_on_copy(copy, node);
+	}
+
+	return copy;
 }
 
 #endif /* HAVE_DOM */

@@ -35,9 +35,6 @@ struct _idsIterator {
 	xmlNode *element;
 };
 
-#define DOM_LOAD_STRING 0
-#define DOM_LOAD_FILE 1
-
 /*
 * class DOMDocument extends DOMNode
 *
@@ -794,7 +791,7 @@ PHP_METHOD(DOMDocument, importNode)
 	if (nodep->doc == docp) {
 		retnodep = nodep;
 	} else {
-		retnodep = dom_clone_node(nodep, docp, recursive);
+		retnodep = dom_clone_node(nodep, docp, intern, recursive);
 		if (!retnodep) {
 			RETURN_FALSE;
 		}
@@ -1101,8 +1098,7 @@ PHP_METHOD(DOMDocument, normalizeDocument)
 }
 /* }}} end dom_document_normalize_document */
 
-/* {{{ */
-PHP_METHOD(DOMDocument, __construct)
+void php_dom_document_constructor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	xmlDoc *docp = NULL, *olddoc;
 	dom_object *intern;
@@ -1140,6 +1136,12 @@ PHP_METHOD(DOMDocument, __construct)
 		ZEND_UNREACHABLE();
 	}
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)docp, (void *)intern);
+}
+
+/* {{{ */
+PHP_METHOD(DOMDocument, __construct)
+{
+	php_dom_document_constructor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} end DOMDocument::__construct */
 
@@ -1313,7 +1315,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 }
 /* }}} */
 
-static void dom_finish_loading_document(zval *this, zval *return_value, xmlDocPtr newdoc)
+void php_dom_finish_loading_document(zval *this, zval *return_value, xmlDocPtr newdoc)
 {
 	if (!newdoc)
 		RETURN_FALSE;
@@ -1321,6 +1323,7 @@ static void dom_finish_loading_document(zval *this, zval *return_value, xmlDocPt
 	dom_object *intern = Z_DOMOBJ_P(this);
 	size_t old_modification_nr = 0;
 	if (intern != NULL) {
+		bool is_html5_class = intern->document->is_html5_class;
 		xmlDocPtr docp = (xmlDocPtr) dom_object_get_node(intern);
 		dom_doc_propsptr doc_prop = NULL;
 		if (docp != NULL) {
@@ -1340,6 +1343,7 @@ static void dom_finish_loading_document(zval *this, zval *return_value, xmlDocPt
 			RETURN_FALSE;
 		}
 		intern->document->doc_props = doc_prop;
+		intern->document->is_html5_class = is_html5_class;
 	}
 
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)newdoc, (void *)intern);
@@ -1352,8 +1356,7 @@ static void dom_finish_loading_document(zval *this, zval *return_value, xmlDocPt
 	RETURN_TRUE;
 }
 
-/* {{{ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) */
-static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
+void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode, xmlDocPtr *doc_out) {
 	char *source;
 	size_t source_len;
 	zend_long options = 0;
@@ -1376,17 +1379,18 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	}
 
 	xmlDocPtr newdoc = dom_document_parser(ZEND_THIS, mode, source, source_len, options);
+	*doc_out = newdoc;
 
-	dom_finish_loading_document(ZEND_THIS, return_value, newdoc);
+	php_dom_finish_loading_document(ZEND_THIS, return_value, newdoc);
 }
-/* }}} end dom_parser_document */
 
 /* {{{ URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-load
 Since: DOM Level 3
 */
 PHP_METHOD(DOMDocument, load)
 {
-	dom_parse_document(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
+	xmlDocPtr unused;
+	dom_parse_document(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE, &unused);
 }
 /* }}} end dom_document_load */
 
@@ -1395,7 +1399,8 @@ Since: DOM Level 3
 */
 PHP_METHOD(DOMDocument, loadXML)
 {
-	dom_parse_document(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
+	xmlDocPtr unused;
+	dom_parse_document(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING, &unused);
 }
 /* }}} end dom_document_loadxml */
 
@@ -1917,7 +1922,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	xmlDocPtr newdoc = ctxt->myDoc;
 	htmlFreeParserCtxt(ctxt);
 
-	dom_finish_loading_document(ZEND_THIS, return_value, newdoc);
+	php_dom_finish_loading_document(ZEND_THIS, return_value, newdoc);
 }
 /* }}} */
 
