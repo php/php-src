@@ -20,6 +20,9 @@ PHP                                                                        NEWS
 - LibXML:
   . Fixed bug GH-12702 (libxml2 2.12.0 issue building from src). (nono303)
 
+- MySQLnd:
+  . Avoid using uninitialised struct. (mikhainin)
+
 - OpenSSL:
   . Fixed bug #50713 (openssl_pkcs7_verify() may ignore untrusted CAs).
     (Jakub Zelenka)
