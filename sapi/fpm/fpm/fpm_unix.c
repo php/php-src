@@ -587,5 +587,9 @@ int fpm_unix_init_main(void)
 		}
 	}
 
+#ifdef __APPLE__
+	setenv("OBJC_DISABLE_INITIALIZE_FORK_SAFETY", "YES", 0);
+#endif
+
 	return 0;
 }
