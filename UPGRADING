@@ -352,6 +352,9 @@ PHP 8.3 UPGRADE NOTES
     got silently ignored and the number got rounded to zero decimal places.
   . The $before_needle argument added to strrchr() which works in the same way
     like its counterpart in strstr() or stristr().
+  . str_getcsv() and fgetcsv() return empty string instead of a string with
+    a single zero byte for the last field which contains only unterminated
+    enclosure.
 
 ========================================
 6. New Functions

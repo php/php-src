@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Added $before_needle argument to strrchr(). (HypeMC)
+  . Fixed GH-11982 (str_getcsv returns null byte for unterminated enclosure).
+    (Jakub Zelenka)
 
 17 Aug 2023, PHP 8.3.0beta3
 
