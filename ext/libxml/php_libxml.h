@@ -63,9 +63,10 @@ typedef struct {
 
 typedef struct _php_libxml_ref_obj {
 	void *ptr;
-	int   refcount;
 	libxml_doc_props *doc_props;
 	php_libxml_cache_tag cache_tag;
+	int refcount;
+	bool is_html5_class;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {

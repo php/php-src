@@ -1356,6 +1356,7 @@ PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, 
 		object->document->refcount = ret_refcount;
 		object->document->doc_props = NULL;
 		object->document->cache_tag.modification_nr = 1; /* iterators start at 0, such that they will start in an uninitialised state */
+		object->document->is_html5_class = false;
 	}
 
 	return ret_refcount;
