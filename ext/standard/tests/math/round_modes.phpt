@@ -31,7 +31,7 @@ foreach ($modes as $modeKey => $mode) {
     foreach ($precisions as $precision) {
         echo "\tprecision: $precision\n";
         foreach ($numbers as $number) {
-            $result = round($number, $precision);
+            $result = round($number, $precision, $mode);
             echo "\t\t" .
                 str_pad($number, 7, " ", STR_PAD_LEFT) .
                 " => $result\n";
@@ -105,10 +105,10 @@ mode: PHP_ROUND_HALF_UP
 
 mode: PHP_ROUND_HALF_DOWN
 	precision: 0
-		    2.5 => 3
-		   -2.5 => -3
-		    3.5 => 4
-		   -3.5 => -4
+		    2.5 => 2
+		   -2.5 => -2
+		    3.5 => 3
+		   -3.5 => -3
 		      7 => 7
 		     -7 => -7
 		   0.61 => 1
@@ -166,8 +166,8 @@ mode: PHP_ROUND_HALF_DOWN
 
 mode: PHP_ROUND_HALF_EVEN
 	precision: 0
-		    2.5 => 3
-		   -2.5 => -3
+		    2.5 => 2
+		   -2.5 => -2
 		    3.5 => 4
 		   -3.5 => -4
 		      7 => 7
@@ -229,8 +229,8 @@ mode: PHP_ROUND_HALF_ODD
 	precision: 0
 		    2.5 => 3
 		   -2.5 => -3
-		    3.5 => 4
-		   -3.5 => -4
+		    3.5 => 3
+		   -3.5 => -3
 		      7 => 7
 		     -7 => -7
 		   0.61 => 1
