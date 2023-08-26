@@ -444,6 +444,10 @@ class Client
      */
     private $_readWriteTimeout = 5000;
 
+    /**
+     * Data transport instance
+     * @var Transport
+     */
     private Transport $transport;
 
     /**
@@ -451,17 +455,14 @@ class Client
      *
      * @param string $host Host of the FastCGI application
      * @param int $port Port of the FastCGI application
-     * @param string $transport Transport
+     * @param Transport $transport Transport
      */
-    public function __construct($host, $port, string $transport = 'stream')
+    public function __construct($host, $port, Transport $transport)
     {
         $this->_host = $host;
         $this->_port = $port;
 
-        $this->transport = match ($transport) {
-            'stream' => new StreamTransport(),
-            'socket' => new SocketTransport(),
-        };
+        $this->transport = $transport;
     }
 
     /**

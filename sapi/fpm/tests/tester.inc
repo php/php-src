@@ -3,6 +3,9 @@
 namespace FPM;
 
 use FPM\FastCGI\Client;
+use FPM\FastCGI\SocketTransport;
+use FPM\FastCGI\StreamTransport;
+use FPM\FastCGI\Transport;
 
 require_once 'fcgi.inc';
 require_once 'logreader.inc';
@@ -384,6 +387,19 @@ class Tester
         $this->logReader       = new LogReader($this->debug);
         $this->logTool         = new LogTool($this->logReader, $this->debug);
         $this->clientTransport = $clientTransport;
+    }
+
+    /**
+     * Creates new client transport.
+     *
+     * @return Transport
+     */
+    private function createTransport()
+    {
+        return match ($this->clientTransport) {
+            'stream' => new StreamTransport(),
+            'socket' => new SocketTransport(),
+        };
     }
 
     /**
@@ -936,11 +952,11 @@ class Tester
         }
 
         if ( ! $keepAlive) {
-            return new Client($host, $port, $this->clientTransport);
+            return new Client($host, $port, $this->createTransport());
         }
 
         if ( ! isset($this->clients[$host][$port])) {
-            $client = new Client($host, $port, $this->clientTransport);
+            $client = new Client($host, $port, $this->createTransport());
             $client->setKeepAlive(true);
             $this->clients[$host][$port] = $client;
         }
