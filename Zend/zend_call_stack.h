@@ -73,8 +73,11 @@ static inline size_t zend_call_stack_default_size(void)
 #ifdef __linux__
 	return 8 * 1024 * 1024;
 #endif
-#ifdef __FreeBSD__
-	return 8 * 1024 * 1024;
+#if defined(__FreeBSD__) || defined(__NetBSD__)
+	return 4 * 1024 * 1024;
+#endif
+#ifdef __OpenBSD__
+	return 512 * 1024;
 #endif
 #ifdef __APPLE__
 	// https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/CreatingThreads/CreatingThreads.html
