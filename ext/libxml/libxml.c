@@ -609,19 +609,9 @@ static void _php_list_set_error_structure(xmlErrorPtr error, const char *msg)
 	if (error) {
 		ret = xmlCopyError(error, &error_copy);
 	} else {
-		error_copy.domain = 0;
 		error_copy.code = XML_ERR_INTERNAL_ERROR;
 		error_copy.level = XML_ERR_ERROR;
-		error_copy.line = 0;
-		error_copy.node = NULL;
-		error_copy.int1 = 0;
-		error_copy.int2 = 0;
-		error_copy.ctxt = NULL;
-		error_copy.message = (char*)xmlStrdup((xmlChar*)msg);
-		error_copy.file = NULL;
-		error_copy.str1 = NULL;
-		error_copy.str2 = NULL;
-		error_copy.str3 = NULL;
+		error_copy.message = (char*)xmlStrdup((const xmlChar*)msg);
 		ret = 0;
 	}
 
