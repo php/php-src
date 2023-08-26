@@ -2,7 +2,10 @@
 
 namespace FPM;
 
-use Adoy\FastCGI\Client;
+use FPM\FastCGI\Client;
+use FPM\FastCGI\SocketTransport;
+use FPM\FastCGI\StreamTransport;
+use FPM\FastCGI\Transport;
 
 require_once 'fcgi.inc';
 require_once 'logreader.inc';
@@ -64,6 +67,11 @@ class Tester
      * @var array
      */
     private array $clients = [];
+
+    /**
+     * @var string
+     */
+    private string $clientTransport;
 
     /**
      * @var LogReader
@@ -368,15 +376,30 @@ class Tester
         string $code = '',
         array $options = [],
         string $fileName = null,
-        bool $debug = null
+        bool $debug = null,
+        string $clientTransport = 'stream'
     ) {
-        $this->configTemplate = $configTemplate;
-        $this->code           = $code;
-        $this->options        = $options;
-        $this->fileName       = $fileName ?: self::getCallerFileName();
-        $this->debug          = $debug !== null ? $debug : (bool)getenv('TEST_FPM_DEBUG');
-        $this->logReader      = new LogReader($this->debug);
-        $this->logTool        = new LogTool($this->logReader, $this->debug);
+        $this->configTemplate  = $configTemplate;
+        $this->code            = $code;
+        $this->options         = $options;
+        $this->fileName        = $fileName ?: self::getCallerFileName();
+        $this->debug           = $debug !== null ? $debug : (bool)getenv('TEST_FPM_DEBUG');
+        $this->logReader       = new LogReader($this->debug);
+        $this->logTool         = new LogTool($this->logReader, $this->debug);
+        $this->clientTransport = $clientTransport;
+    }
+
+    /**
+     * Creates new client transport.
+     *
+     * @return Transport
+     */
+    private function createTransport()
+    {
+        return match ($this->clientTransport) {
+            'stream' => new StreamTransport(),
+            'socket' => new SocketTransport(),
+        };
     }
 
     /**
@@ -770,6 +793,7 @@ class Tester
      * @param string|array|null $stdin          = null
      * @param bool              $expectError
      * @param int               $readLimit
+     * @param int               $writeDelay
      *
      * @return Response
      * @throws \Exception
@@ -787,6 +811,7 @@ class Tester
         string|array $stdin = null,
         bool $expectError = false,
         int $readLimit = -1,
+        int $writeDelay = 0,
     ): Response {
         if ($this->hasError()) {
             return new Response(null, true);
@@ -801,7 +826,7 @@ class Tester
 
         try {
             $this->response = new Response(
-                $this->getClient($address, $connKeepAlive)->request_data($params, $stdin, $readLimit)
+                $this->getClient($address, $connKeepAlive)->request_data($params, $stdin, $readLimit, $writeDelay)
             );
             if ($expectError) {
                 $this->error('Expected request error but the request was successful');
@@ -834,6 +859,7 @@ class Tester
      * @param string|null $errorMessage
      * @param bool        $connKeepAlive
      * @param int         $readTimeout
+     * @param int         $writeDelay
      *
      * @return Response[]
      * @throws \Exception
@@ -844,7 +870,8 @@ class Tester
         string $successMessage = null,
         string $errorMessage = null,
         bool $connKeepAlive = false,
-        int $readTimeout = 0
+        int $readTimeout = 0,
+        int $writeDelay = 0,
     ) {
         if (is_numeric($requests)) {
             $requests = array_fill(0, $requests, []);
@@ -855,7 +882,7 @@ class Tester
         }
 
         try {
-            $connections = array_map(function ($requestData) use ($address, $connKeepAlive) {
+            $connections = array_map(function ($requestData) use ($address, $connKeepAlive, $writeDelay) {
                 $client = $this->getClient($address, $connKeepAlive);
                 $params = $this->getRequestParams(
                     $requestData['query'] ?? '',
@@ -869,7 +896,7 @@ class Tester
 
                 return [
                     'client'    => $client,
-                    'requestId' => $client->async_request($params, false),
+                    'requestId' => $client->async_request($params, false, $writeDelay),
                 ];
             }, $requests);
 
@@ -903,7 +930,7 @@ class Tester
      *
      * @return Client
      */
-    private function getClient(string $address = null, $keepAlive = false): Client
+    private function getClient(string $address = null, bool $keepAlive = false): Client
     {
         $address = $address ? $this->processTemplate($address) : $this->getAddr();
         if ($address[0] === '/') { // uds
@@ -925,11 +952,11 @@ class Tester
         }
 
         if ( ! $keepAlive) {
-            return new Client($host, $port);
+            return new Client($host, $port, $this->createTransport());
         }
 
         if ( ! isset($this->clients[$host][$port])) {
-            $client = new Client($host, $port);
+            $client = new Client($host, $port, $this->createTransport());
             $client->setKeepAlive(true);
             $this->clients[$host][$port] = $client;
         }
