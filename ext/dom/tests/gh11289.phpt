@@ -1,5 +1,7 @@
 --TEST--
 GH-11289 (DOMException: Not Found Error introduced in 8.2.6, 8.1.19)
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
