@@ -1,5 +1,7 @@
 --TEST--
 Bug #80602 (Segfault when using DOMChildNode::before()) - after text merge variation
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

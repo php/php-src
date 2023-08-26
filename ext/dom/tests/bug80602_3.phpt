@@ -1,5 +1,7 @@
 --TEST--
 Bug #80602 (Segfault when using DOMChildNode::before()) - use-after-free variation
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 

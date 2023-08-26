@@ -1,5 +1,7 @@
 --TEST--
 GH-11288 (Error: Couldn't fetch DOMElement introduced in 8.2.6, 8.1.19)
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $html = <<<HTML

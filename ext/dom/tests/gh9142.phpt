@@ -1,5 +1,7 @@
 --TEST--
 GH-9142 (DOMChildNode replaceWith() double-free error when replacing elements not separated by any whitespace)
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 
