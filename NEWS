@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed GH-11982 (str_getcsv returns null byte for unterminated enclosure).
     (Jakub Zelenka)
 
+- Streams:
+  . Fixed bug #52335 (fseek() on memory stream behavior different than file).
+    (Jakub Zelenka)
+
 17 Aug 2023, PHP 8.3.0beta3
 
 - Core:

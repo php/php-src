@@ -648,6 +648,9 @@ PHP 8.3 UPGRADE NOTES
 - Streams:
   . Blocking fread() on socket connection returns immediately if there are
     any buffered data instead of waiting for more data.
+  . Memory stream no longer fails if seek offset is past the end. Instead
+    the memory is increase on the next write and date between the old end and
+    offset is filled with zero bytes in the same way how it works for files.
 
 ========================================
 14. Performance Improvements
