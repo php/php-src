@@ -3,6 +3,6 @@
 ARG_ENABLE("zend-test", "enable zend_test extension", "no");
 
 if (PHP_ZEND_TEST != "no") {
-	EXTENSION("zend_test", "test.c observer.c fiber.c", PHP_ZEND_TEST_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+	EXTENSION("zend_test", "test.c observer.c fiber.c iterators.c", PHP_ZEND_TEST_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 	ADD_FLAG("CFLAGS_ZEND_TEST", "/D PHP_ZEND_TEST_EXPORTS ");
 }
