@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     (Jakub Zelenka)
   . Fixed bug GH-11790 (On riscv64 require libatomic if actually needed).
     (Jeremie Courreges-Anglas)
+  . Fixed oss-fuzz #61712 (assertion failure with error handler during binary
+    op). (nielsdos)
 
 - DOM:
   . Fixed GH-11952 (Confusing warning when blocking entity loading via
