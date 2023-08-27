@@ -585,6 +585,7 @@ ZEND_METHOD(InternalIterator, rewind) {
 		RETURN_THROWS();
 	}
 
+	intern->rewind_called = 1;
 	if (!intern->iter->funcs->rewind) {
 		/* Allow calling rewind() if no iteration has happened yet,
 		 * even if the iterator does not support rewinding. */
