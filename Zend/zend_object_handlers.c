@@ -1069,12 +1069,10 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 			if (UNEXPECTED(!zobj->properties)) {
 				rebuild_object_properties(zobj);
 			}
-			retval = zend_hash_update(zobj->properties, name, &EG(uninitialized_zval));
-			/* Notice is thrown after creation of the property, to avoid EG(std_property_info)
-			 * being overwritten in an error handler. */
 			if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
 				zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 			}
+			retval = zend_hash_update(zobj->properties, name, &EG(uninitialized_zval));
 		}
 	} else if (zobj->ce->__get == NULL) {
 		retval = &EG(error_zval);
