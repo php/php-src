@@ -1768,6 +1768,10 @@ class EvaluatedValue
         // $this->expr has all its PHP constants replaced by C constants
         $prettyPrinter = new Standard;
         $expr = $prettyPrinter->prettyPrintExpr($this->expr);
+        // PHP single-quote to C double-quote string
+        if ($this->type->isString()) {
+            $expr = preg_replace("/(^'|'$)/", '"', $expr);
+        }
         return $expr[0] == '"' ? $expr : preg_replace('(\bnull\b)', 'NULL', str_replace('\\', '', $expr));
     }
 }
