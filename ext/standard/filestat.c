@@ -721,14 +721,15 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 		}
 
 		if ((wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(filename), &local, 0)) == &php_plain_files_wrapper
-		 && php_check_open_basedir(local)) {
+				&& php_check_open_basedir(local)) {
 			RETURN_FALSE;
 		}
 
 		if (wrapper == &php_plain_files_wrapper) {
 			char realpath[MAXPATHLEN];
 			const char *file_path_to_check;
-			if (strstr(local, "://") == NULL || expand_filepath(local, realpath) == NULL) {
+			/* if the wrapper is not found, we need to expand path to match open behavior */
+			if (EXPECTED(strstr(local, "://") == NULL || expand_filepath(local, realpath) == NULL)) {
 				file_path_to_check = local;
 			} else {
 				file_path_to_check = realpath;
