@@ -2207,12 +2207,12 @@ try_and_get_another_connection:
 		/* the link is not in the persistent list */
 		if ((le = zend_hash_str_find_ptr(&EG(persistent_list), hashed_details, hashed_len)) == NULL) {
 			if (ODBCG(max_links) != -1 && ODBCG(num_links) >= ODBCG(max_links)) {
-				php_error_docref(NULL, E_WARNING, "Too many open links (%ld)", ODBCG(num_links));
+				php_error_docref(NULL, E_WARNING, "Too many open links (" ZEND_LONG_FMT ")", ODBCG(num_links));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			if (ODBCG(max_persistent) != -1 && ODBCG(num_persistent) >= ODBCG(max_persistent)) {
-				php_error_docref(NULL, E_WARNING,"Too many open persistent links (%ld)", ODBCG(num_persistent));
+				php_error_docref(NULL, E_WARNING,"Too many open persistent links (" ZEND_LONG_FMT ")", ODBCG(num_persistent));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -2282,7 +2282,7 @@ try_and_get_another_connection:
 		RETVAL_RES(db_conn->res);
 	} else { /* non persistent */
 		if (ODBCG(max_links) != -1 && ODBCG(num_links) >= ODBCG(max_links)) {
-			php_error_docref(NULL, E_WARNING,"Too many open connections (%ld)",ODBCG(num_links));
+			php_error_docref(NULL, E_WARNING,"Too many open connections (" ZEND_LONG_FMT ")",ODBCG(num_links));
 			RETURN_FALSE;
 		}
 
