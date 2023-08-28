@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-11937 (Constant ASTs containing objects). (ilutov)
   . Introduced Zend guard recursion protection to fix __debugInfo issue.
     (Jakub Zelenka)
+  . Fixed bug GH-11790 (On riscv64 require libatomic if actually needed).
+    (Jeremie Courreges-Anglas)
 
 - DOM:
   . Fixed GH-11952 (Confusing warning when blocking entity loading via
