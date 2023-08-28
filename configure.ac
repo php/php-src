@@ -375,11 +375,7 @@ AC_CHECK_LIB(m, sin)
 
 case $host_alias in
   riscv64*)
-    AC_CHECK_LIB(atomic, __atomic_exchange_1, [
-      PHP_ADD_LIBRARY(atomic)
-    ], [
-      AC_MSG_ERROR([Problem with enabling atomic. Please check config.log for details.])
-    ])
+    PHP_CHECK_FUNC(__atomic_exchange_1, atomic)
     ;;
 esac
 
