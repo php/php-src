@@ -572,10 +572,10 @@ PHP_FUNCTION(file_put_contents)
 			numbytes = -1;
 			break;
 	}
-	php_stream_close(stream);
+	int close_result = php_stream_close(stream);
 	php_stream_error_operation_end(context);
 
-	if (numbytes < 0) {
+	if (numbytes < 0 || close_result) {
 		RETURN_FALSE;
 	}
 
@@ -777,12 +777,12 @@ PHPAPI PHP_FUNCTION(fclose)
 	}
 
 	php_stream_error_operation_begin();
-	php_stream_free(stream,
+	int free_result = php_stream_free(stream,
 		PHP_STREAM_FREE_KEEP_RSRC |
 		(stream->is_persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE));
 	php_stream_error_operation_end_for_stream(stream);
 
-	RETURN_TRUE;
+	RETURN_BOOL(!free_result);
 }
 /* }}} */
 
@@ -1595,8 +1595,8 @@ safe_to_copy:
 		ret = php_stream_copy_to_stream_ex(srcstream, deststream, PHP_STREAM_COPY_ALL, NULL);
 	}
 	php_stream_close(srcstream);
-	if (deststream) {
-		php_stream_close(deststream);
+	if (deststream && php_stream_close(deststream)) {
+		ret = FAILURE;
 	}
 	return ret;
 }
