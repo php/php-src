@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug GH-11937 (Constant ASTs containing objects). (ilutov)
+  . Fixed bug GH-11790 (On riscv64 require libatomic if actually needed).
+    (Jeremie Courreges-Anglas)
 
 - DOM:
   . Fix memory leak when setting an invalid DOMDocument encoding. (nielsdos)
