@@ -651,8 +651,8 @@ PHP 8.3 UPGRADE NOTES
   . Memory stream no longer fails if seek offset is past the end. Instead
     the memory is increase on the next write and date between the old end and
     offset is filled with zero bytes in the same way how it works for files.
-  . stat() access operartions like file_exists() and similar will now use real
-    path instead of the actual stream path. This is consitent with stream
+  . stat() access operations like file_exists() and similar will now use real
+    path instead of the actual stream path. This is consistent with stream
     opening.
 
 ========================================
