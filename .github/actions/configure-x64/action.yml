@@ -77,8 +77,8 @@ runs:
           ${{ inputs.skipSlow == 'false' && '--with-imap' || '' }} \
           ${{ inputs.skipSlow == 'false' && '--with-imap-ssl' || '' }} \
           ${{ inputs.skipSlow == 'false' && '--with-pdo-odbc=unixODBC,/usr' || '' }} \
-          ${{ inputs.skipSlow == 'false' && '--with-pdo-oci=shared,instantclient,/opt/oracle/instantclient' || '' }} \
-          ${{ inputs.skipSlow == 'false' && '--with-oci8=shared,instantclient,/opt/oracle/instantclient' || '' }} \
+          $([ -d "/opt/oracle/instantclient" ] && echo '--with-pdo-oci=shared,instantclient,/opt/oracle/instantclient') \
+          $([ -d "/opt/oracle/instantclient" ] && echo '--with-oci8=shared,instantclient,/opt/oracle/instantclient') \
           --with-config-file-path=/etc \
           --with-config-file-scan-dir=/etc/php.d \
           ${{ inputs.skipSlow == 'false' && '--with-pdo-firebird' || '' }} \
