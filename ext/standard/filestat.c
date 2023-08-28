@@ -726,26 +726,29 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 		}
 
 		if (wrapper == &php_plain_files_wrapper) {
-
+			char realpath[MAXPATHLEN];
+			if (expand_filepath(local, realpath) == NULL) {
+				strlcpy(realpath, local, sizeof(realpath));
+			}
 			switch (type) {
 #ifdef F_OK
 				case FS_EXISTS:
-					RETURN_BOOL(VCWD_ACCESS(local, F_OK) == 0);
+					RETURN_BOOL(VCWD_ACCESS(realpath, F_OK) == 0);
 					break;
 #endif
 #ifdef W_OK
 				case FS_IS_W:
-					RETURN_BOOL(VCWD_ACCESS(local, W_OK) == 0);
+					RETURN_BOOL(VCWD_ACCESS(realpath, W_OK) == 0);
 					break;
 #endif
 #ifdef R_OK
 				case FS_IS_R:
-					RETURN_BOOL(VCWD_ACCESS(local, R_OK) == 0);
+					RETURN_BOOL(VCWD_ACCESS(realpath, R_OK) == 0);
 					break;
 #endif
 #ifdef X_OK
 				case FS_IS_X:
-					RETURN_BOOL(VCWD_ACCESS(local, X_OK) == 0);
+					RETURN_BOOL(VCWD_ACCESS(realpath, X_OK) == 0);
 					break;
 #endif
 			}

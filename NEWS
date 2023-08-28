@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug #52335 (fseek() on memory stream behavior different than file).
     (Jakub Zelenka)
+  . Fixed bug #76857 (Can read "non-existant" files). (Jakub Zelenka)
 
 17 Aug 2023, PHP 8.3.0beta3
 
