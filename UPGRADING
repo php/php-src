@@ -26,39 +26,39 @@ PHP 8.3 UPGRADE NOTES
     (`fiber.stack_size-zend.reserved_stack_size` for fibers).
   . Executing proc_get_status() multiple times will now always return the right
     value on posix systems. Previously, only the first call of the function
-    returned the right value. Executing proc_close() after proc_get_status() will
-    now also return the right exit code. Previously this would return -1.
+    returned the right value. Executing proc_close() after proc_get_status()
+    will now also return the right exit code. Previously this would return -1.
     Internally, this works by caching the result on posix systems. If you want
     the old behaviour, you can check the "cached" key in the array returned by
     proc_get_status() to check whether the result was cached.
   . Zend Max Execution Timers is now enabled by default for ZTS builds on
     Linux.
   . Uses of traits with static properties will now redeclare static properties
-    inherited from the parent class. This will create a separate static property
-    storage for the current class. This is analogous to adding the static
-    property to the class directly without traits.
+    inherited from the parent class. This will create a separate static
+    property storage for the current class. This is analogous to adding the
+    static property to the class directly without traits.
   . Assigning a negative index n to an empty array will now make sure that the
     next index is n+1 instead of 0.
   . Class constant visibility variance is now correctly checked when inherited
     from interfaces.
-  . WeakMaps entries whose key maps to itself (possibly transitively) may now be
-    removed during cycle collection if the key is not reachable except by
+  . WeakMaps entries whose key maps to itself (possibly transitively) may now
+    be removed during cycle collection if the key is not reachable except by
     iterating over the WeakMap (reachability via iteration is considered weak).
     Previously, such entries would never be automatically removed.
 
 - DOM:
   . DOMChildNode::after(), DOMChildNode::before(), DOMChildNode::replaceWith()
-    on a node that has no parent is now a no-op instead of a hierarchy exception,
-    which is the behaviour spec demands.
-  . Using the DOMParentNode and DOMChildNode methods without a document now works
-    instead of throwing a HIERARCHY_REQUEST_ERR DOMException. This is in line with
-    the behaviour spec demands.
-  . createAttributeNS() without specifying a prefix would incorrectly create a default
-    namespace, placing the element inside the namespace instead of the attribute.
-    This bug is now fixed.
-  . createAttributeNS() would previously incorrectly throw a NAMESPACE_ERR when the
-    prefix was already used for a different uri. It now correctly chooses a
-    different prefix when there's a prefix name conflict.
+    on a node that has no parent is now a no-op instead of a hierarchy
+    exception, which is the behaviour spec demands.
+  . Using the DOMParentNode and DOMChildNode methods without a document now
+    works instead of throwing a HIERARCHY_REQUEST_ERR DOMException. This is in
+    line with the behaviour spec demands.
+  . createAttributeNS() without specifying a prefix would incorrectly create
+    a default namespace, placing the element inside the namespace instead of
+    the attribute. This bug is now fixed.
+  . createAttributeNS() would previously incorrectly throw a NAMESPACE_ERR
+    when the prefix was already used for a different uri. It now correctly
+    chooses a different prefix when there's a prefix name conflict.
 
 - FFI:
   . C functions that have a return type of void now return null instead of
@@ -66,12 +66,12 @@ PHP 8.3 UPGRADE NOTES
 
 - Opcache:
   . The opcache.consistency_checks INI directive was removed. This feature was
-    broken with the tracing JIT, as well as with inheritance cache, and has been
-    disabled without a way to enable it since PHP 8.1.18 and PHP 8.2.5. Both the
-    tracing JIT and inheritance cache may modify shm after the script has been
-    persisted, invalidating its checksum. The attempted fix skipped over the
-    modifiable pointers but was rejected due to complexity. For this reason, it
-    was decided to remove the feature instead.
+    broken with the tracing JIT, as well as with inheritance cache, and has
+    been disabled without a way to enable it since PHP 8.1.18 and PHP 8.2.5.
+    Both the tracing JIT and inheritance cache may modify shm after the script
+    has been persisted by invalidating its checksum. The attempted fix skipped
+    over the modifiable pointers but was rejected due to complexity. For this
+    reason, it was decided to remove the feature instead.
 
 - Phar:
   . The type of Phar class constants are now declared.
@@ -117,7 +117,8 @@ PHP 8.3 UPGRADE NOTES
   . Added the #[\Override] attribute to check that a method exists
     in a parent class or implemented interface.
     RFC: https://wiki.php.net/rfc/marking_overriden_methods
-  . Class constants can now be accessed dynamically using the C::{$name} syntax.
+  . Class constants can now be accessed dynamically using the C::{$name}
+    syntax.
     RFC: https://wiki.php.net/rfc/dynamic_class_constant_fetch
   . Static variable initializers can now contain arbitrary expressions.
     RFC: https://wiki.php.net/rfc/arbitrary_static_variable_initializers
@@ -133,20 +134,21 @@ PHP 8.3 UPGRADE NOTES
 - Posix
   . posix_getrlimit() now takes an optional $res parameter to allow fetching a
     single resource limit.
-  . posix_isatty() now raises type warnings for integers following the usual ZPP semantics
-  . posix_ttyname() now raises type warnings for integers following the usual ZPP semantics
-    and value warnings for invalid file descriptor integers.
+  . posix_isatty() now raises type warnings for integers following the usual
+    ZPP semantics.
+  . posix_ttyname() now raises type warnings for integers following the usual
+    ZPP semantics and value warnings for invalid file descriptor integers.
 
 - Streams
-  . Streams can now emit the STREAM_NOTIFY_COMPLETED notification. This was previously
-    not implemented.
+  . Streams can now emit the STREAM_NOTIFY_COMPLETED notification. This was
+    previously not implemented.
 
 ========================================
 3. Changes in SAPI modules
 ========================================
 
-- $_SERVER['SERVER_SOFTWARE'] value from the built-in CLI server changed
-  to make it compliant with RFC3875.
+- $_SERVER['SERVER_SOFTWARE'] value from the built-in CLI server changed to
+  make it compliant with RFC3875.
 
 ========================================
 4. Deprecated Functionality
@@ -198,8 +200,8 @@ PHP 8.3 UPGRADE NOTES
 
 - SQLite3
   . Using exceptions is now preferred, warnings will be removed in the future.
-    Calling SQLite3::enableExceptions(false) will trigger a depreciation warning
-    in this version.
+    Calling SQLite3::enableExceptions(false) will trigger a depreciation
+    warning in this version.
 
 - Zip:
   . The ZipArchive::FL_RECOMPRESS constant is deprecated and will be removed
@@ -236,8 +238,8 @@ PHP 8.3 UPGRADE NOTES
     <pre> tag. The outer <span> has been merged with <code>.
 
 - Calendar
-  . easter_date() now supports years from 1970 to 2,000,000,000 on 64-bit systems,
-    previously it only supported years in the range from 1970 to 2037.
+  . easter_date() now supports years from 1970 to 2,000,000,000 on 64-bit
+    systems, previously it only supported years in the range from 1970 to 2037.
 
 - Curl:
   . curl_getinfo() now supports two new constants: CURLINFO_CAPATH and
@@ -246,11 +248,11 @@ PHP 8.3 UPGRADE NOTES
 
 - Dom:
   . Changed DOMCharacterData::appendData() tentative return type to true.
-  . DOMDocument::loadHTML(), DOMDocument::loadHTMLFile(), DOMDocument::loadXML(),
-    and DOMDocument::loadXMLFile() now have a tentative return type of bool.
-    Previously, this was documented as having a return type of DOMDocument|bool,
-    but DOMDocument cannot be returned since PHP 8.0 as it is no longer statically
-    callable.
+  . DOMDocument::loadHTML(), DOMDocument::loadHTMLFile(),
+    DOMDocument::loadXML() and DOMDocument::loadXMLFile() now have a tentative
+    return type of bool. Previously, this was documented as having a return
+    type of DOMDocument|bool, but DOMDocument cannot be returned since PHP 8.0
+    as it is no longer statically callable.
 
 - Gd:
   . Changed imagerotate signature, removed the `ignore_transparent` argument
@@ -321,8 +323,8 @@ PHP 8.3 UPGRADE NOTES
 - Random:
   . Changed mt_srand() and srand() to not check the number of arguments to
     determine whether a random seed should be used. Passing null will generate
-    a random seed, 0 will use zero as the seed. The functions are now consistent
-    with Mt19937::__construct().
+    a random seed, 0 will use zero as the seed. The functions are now
+    consistent with Mt19937::__construct().
 
 - Reflection:
   . Return type of ReflectionClass::getStaticProperties() is no longer nullable.
@@ -338,13 +340,15 @@ PHP 8.3 UPGRADE NOTES
   . array_pad() is now only limited by the maximum number of elements an array
     can have. Before, it was only possible to add at most 1048576 elements at a
     time.
-  . strtok() raises a warning in the case token is not provided when starting tokenization.
+  . strtok() raises a warning in the case token is not provided when starting
+    tokenization.
   . password_hash() will now chain the underlying Random\RandomException
     as the ValueError’s $previous Exception when salt generation fails.
   . proc_open() $command array must now have at least one non empty element.
-  . array_sum() and array_product() now warn when values in the array cannot be converted to int/float.
-    Previously arrays and objects where ignored whilst every other value was cast to int.
-    Moreover, objects that define a numeric cast (e.g. GMP) are now casted instead of ignored.
+  . array_sum() and array_product() now warn when values in the array cannot
+    be converted to int/float. Previously arrays and objects where ignored
+    whilst every other value was cast to int. Moreover, objects that define
+    a numeric cast (e.g. GMP) are now casted instead of ignored.
     RFC: https://wiki.php.net/rfc/saner-array-sum-product
   . number_format() $decimal parameter handles rounding to negative places. It
     means that when $decimals is negative, $num is rounded to $decimals
@@ -386,7 +390,8 @@ PHP 8.3 UPGRADE NOTES
     as partial replacements for the overloaded IntlCalendar::set() method.
   . Added IntlGregorianCalendar::createFromDate() and
     IntlGregorianCalendar::createFromDateTime()
-    as partial replacements for the overloaded IntlGregorianCalendar constructor.
+    as partial replacements for the overloaded IntlGregorianCalendar
+    constructor.
 
 - JSON:
   . Added json_validate(), which returns whether the json is valid for
@@ -404,8 +409,10 @@ PHP 8.3 UPGRADE NOTES
 - Posix:
   . Added posix_sysconf call to get runtime informations.
   . Added posix_pathconf call to get configuration value from a directory/file.
-  . Added posix_fpathconf call to get configuration value from a file descriptor.
-  . Added posix_eaccess call to check the effective user id's permission for a path.
+  . Added posix_fpathconf call to get configuration value from a file
+    descriptor.
+  . Added posix_eaccess call to check the effective user id's permission for
+    a path.
 
 - PGSQL:
   . Added pg_set_error_context_visibility to set the visibility of the context
@@ -450,8 +457,8 @@ PHP 8.3 UPGRADE NOTES
 
 - Core:
   . WeakMaps now have ephemeron-like behavior: Entries whose key maps to itself
-    (possibly transitively) may be removed during cycle collection if the key is
-    not reachable except by iterating over the WeakMap (reachability via
+    (possibly transitively) may be removed during cycle collection if the key
+    is not reachable except by iterating over the WeakMap (reachability via
     iteration is considered weak). Previously, such entries would never be
     automatically removed. (See GH-10932.)
   . The ++ and -- operators now emit warnings when attempting to increment
@@ -469,8 +476,8 @@ PHP 8.3 UPGRADE NOTES
 - SQLite3
   . The SQLite3 class now throws \SQLite3Exception (extends \Exception) instead
     of \Exception.
-  . The SQLite error code is now passed in the exception error code instead of being
-    included in the error message.
+  . The SQLite error code is now passed in the exception error code instead of
+    being included in the error message.
 
 ========================================
 10. New Global Constants
@@ -621,13 +628,13 @@ PHP 8.3 UPGRADE NOTES
   . An Error is now thrown when the process call stack exceeds a certain size,
     to prevent stack-overflow-induced segmentation faults, with the goal of
     making debugging easier. The maximum allowed stack size is controlled
-    by the INI directives zend.max_allowed_stack_size, zend.reserved_stack_size,
-    and fiber.stack_size.
+    by the INI directives zend.max_allowed_stack_size,
+    zend.reserved_stack_size and fiber.stack_size.
 
 - FFI:
-  . FFI::load() is now allowed during preloading when opcache.preload_user is the
-    current system user. Previously, calling FFI::load() was not possible during
-    preloading if the opcache.preload_user directive was set.
+  . FFI::load() is now allowed during preloading when opcache.preload_user is
+    the current system user. Previously, calling FFI::load() was not possible
+    during preloading if the opcache.preload_user directive was set.
 
 - FPM:
   . FPM CLI test now fails if the socket path is longer than supported by OS.
