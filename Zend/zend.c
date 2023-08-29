@@ -1718,7 +1718,8 @@ ZEND_API void zend_free_recorded_errors(void)
 	EG(num_errors) = 0;
 }
 
-ZEND_API ZEND_COLD void zend_error_delayed(int type, const char *format, ...) {
+ZEND_API ZEND_COLD void zend_error_delayed(int type, const char *format, ...)
+{
 	ZEND_ASSERT(!(type & E_FATAL_ERRORS) && "Cannot delay fatal error");
 	zend_error_info *info = emalloc(sizeof(zend_error_info));
 	info->type = type;
@@ -1735,6 +1736,8 @@ ZEND_API ZEND_COLD void zend_error_delayed(int type, const char *format, ...) {
 	if (EG(current_execute_data)->opline != EG(delayed_error_op)) {
 		EG(opline_before_exception) = EG(current_execute_data)->opline;
 		EG(current_execute_data)->opline = EG(delayed_error_op);
+		/* Reset to ZEND_HANDLE_DELAYED_ERROR */
+		EG(delayed_error_op)[1] = EG(delayed_error_op)[2];
 	}
 }
 

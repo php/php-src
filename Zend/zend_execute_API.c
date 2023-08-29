@@ -172,6 +172,7 @@ void init_executor(void) /* {{{ */
 	zend_objects_store_init(&EG(objects_store), 1024);
 
 	EG(full_tables_cleanup) = 0;
+	EG(delayed_handlers) = 0;
 	ZEND_ATOMIC_BOOL_INIT(&EG(vm_interrupt), false);
 	ZEND_ATOMIC_BOOL_INIT(&EG(timed_out), false);
 

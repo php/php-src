@@ -317,6 +317,7 @@ static uint8_t zend_user_opcodes[256] = {0,
 #define SPEC_RULE_COMMUTATIVE  0x00800000
 #define SPEC_RULE_ISSET        0x01000000
 #define SPEC_RULE_OBSERVER     0x02000000
+#define SPEC_RULE_DELAYED      0x04000000
 
 static const uint32_t *zend_spec_handlers;
 static const void * const *zend_opcode_handlers;
@@ -3208,6 +3209,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 {
 	const zend_op *throw_op = EG(opline_before_exception);
 
+	if (zend_hash_num_elements(&EG(delayed_errors))) {
+		zend_handle_delayed_errors();
+	}
+
 	/* Exception was thrown before executing any op */
 	if (UNEXPECTED(!throw_op)) {
 		ZEND_VM_TAIL_CALL(zend_dispatch_try_catch_finally_helper_SPEC(-1, 0 ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -3279,26 +3284,60 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_HANDLE_DELAYED_ERROR_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	const zend_op *next_op = EG(opline_before_exception) + 1;
+	const zend_op *prev_op = EG(opline_before_exception);
+	bool delay = false;
+	switch (prev_op->opcode) {
+		case ZEND_FETCH_W:
+		case ZEND_FETCH_RW:
+		case ZEND_FETCH_FUNC_ARG:
+		case ZEND_FETCH_UNSET:
+		case ZEND_FETCH_DIM_W:
+		case ZEND_FETCH_DIM_RW:
+		case ZEND_FETCH_DIM_UNSET:
+		case ZEND_FETCH_LIST_W:
+		case ZEND_FETCH_OBJ_W:
+		case ZEND_FETCH_OBJ_RW:
+		case ZEND_FETCH_OBJ_UNSET:
+			delay = true;
+			break;
+	}
+
+	// FIXME: Is this guaranteed to be there?
+	const zend_op *next_op = prev_op + 1;
 	if (next_op->opcode == ZEND_OP_DATA) {
 		next_op++;
 	}
 
-	/* Clear EG(delayed_errors), as more errors may be delayed while we are handling these. */
-	HashTable ht;
-	memcpy(&ht, &EG(delayed_errors), sizeof(HashTable));
-	zend_hash_init(&EG(delayed_errors), 0, NULL, NULL, 0);
+	if (delay) {
+		EG(delayed_error_op)[0] = *next_op;
+		EG(delayed_handlers) = true;
+		ZEND_VM_SET_OPCODE_HANDLER(&EG(delayed_error_op)[0]);
+		EG(delayed_handlers) = false;
+		// FIXME: Is this guaranteed to be there?
+		if (next_op[1].opcode == ZEND_OP_DATA) {
+			EG(delayed_error_op)[1] = next_op[1];
+		} else {
+			/* Reset to ZEND_HANDLE_DELAYED_ERROR */
+			EG(delayed_error_op)[1] = EG(delayed_error_op)[2];
+		}
+		EG(opline_before_exception) = next_op;
 
-	zend_error_info *info;
-	ZEND_HASH_FOREACH_PTR(&ht, info) {
-		zend_error_zstr_at(info->type, info->filename, info->lineno, info->message);
-		zend_string_release(info->filename);
-		zend_string_release(info->message);
-		efree(info);
-	} ZEND_HASH_FOREACH_END();
-	zend_hash_destroy(&ht);
+		ZEND_VM_SET_NEXT_OPCODE(&EG(delayed_error_op)[0]);
+	} else {
+		zend_handle_delayed_errors();
 
-	ZEND_VM_SET_NEXT_OPCODE(next_op);
+		if (EG(exception)) {
+			/* EG(opline_before_exception) is set to &EG(delayed_error_op)[0] by the throwing opline.
+			 * Reset it to the original opline. */
+			EG(opline_before_exception) = prev_op;
+			HANDLE_EXCEPTION();
+		}
+
+		EG(opline_before_exception) = next_op;
+
+		ZEND_VM_SET_NEXT_OPCODE(next_op);
+	}
+
 	ZEND_VM_CONTINUE();
 }
 
@@ -4546,7 +4585,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPE
 	ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
-static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPEC_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zval *retval_ptr;
@@ -4563,7 +4602,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPE
 			/* Not supposed to happen, but we'll allow it */
 			zend_error(E_NOTICE, "Only variable references should be returned by reference");
 
-			retval_ptr = get_zval_ptr(opline->op1_type, opline->op1, BP_VAR_R);
+			retval_ptr = get_zval_ptr_delayed(opline->op1_type, opline->op1, BP_VAR_R);
 			if (!return_value) {
 				FREE_OP(opline->op1_type, opline->op1.var);
 			} else {
@@ -6398,6 +6437,25 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_AR
 	}
 }
 
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+#if 1
+	USE_OPLINE
+#endif
+
+	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
+		if ((opline->op1_type & (IS_CONST|IS_TMP_VAR))) {
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+		}
+		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		if (opline->op2_type == IS_UNUSED) {
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+		}
+		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+}
+
 static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -6483,6 +6541,7 @@ fetch_obj_r_fast_copy:
 				}
 			}
 			name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -6555,7 +6614,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC
 	/* here we are sure we are dealing with an object */
 	do {
 		zend_object *zobj = Z_OBJ_P(container);
-		zend_string *name, *tmp_name;
+		zend_string *name, *tmp_name = NULL;
 		zval *retval;
 
 		if (IS_CONST == IS_CONST) {
@@ -6652,6 +6711,23 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_AR
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_R_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+}
+
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+#if 1
+	USE_OPLINE
+#endif
+
+	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
+		/* Behave like FETCH_OBJ_W */
+		if ((opline->op1_type & (IS_CONST|IS_TMP_VAR))) {
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+		}
+		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 }
 
@@ -7427,6 +7503,102 @@ num_index:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *expr_ptr, new_expr;
+
+	SAVE_OPLINE();
+	if ((opline->op1_type == IS_VAR || opline->op1_type == IS_CV) &&
+	    UNEXPECTED(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
+		expr_ptr = get_zval_ptr_ptr(opline->op1_type, opline->op1, BP_VAR_W);
+		if (Z_ISREF_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		} else {
+			ZVAL_MAKE_REF_EX(expr_ptr, 2);
+		}
+		FREE_OP(opline->op1_type, opline->op1.var);
+	} else {
+		expr_ptr = get_zval_ptr_delayed(opline->op1_type, opline->op1, BP_VAR_R);
+		if (opline->op1_type == IS_TMP_VAR) {
+			/* pass */
+		} else if (opline->op1_type == IS_CONST) {
+			Z_TRY_ADDREF_P(expr_ptr);
+		} else if (opline->op1_type == IS_CV) {
+			ZVAL_DEREF(expr_ptr);
+			Z_TRY_ADDREF_P(expr_ptr);
+		} else /* if (opline->op1_type == IS_VAR) */ {
+			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
+				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
+
+				expr_ptr = Z_REFVAL_P(expr_ptr);
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
+					expr_ptr = &new_expr;
+					efree_size(ref, sizeof(zend_reference));
+				} else if (Z_OPT_REFCOUNTED_P(expr_ptr)) {
+					Z_ADDREF_P(expr_ptr);
+				}
+			}
+		}
+	}
+
+	if (opline->op2_type != IS_UNUSED) {
+		zval *offset = get_zval_ptr_undef_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+		zend_string *str;
+		zend_ulong hval;
+
+add_again:
+		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+			str = Z_STR_P(offset);
+			if (opline->op2_type != IS_CONST) {
+				if (ZEND_HANDLE_NUMERIC(str, hval)) {
+					goto num_index;
+				}
+			}
+str_index:
+			zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+		} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			hval = Z_LVAL_P(offset);
+num_index:
+			zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
+		} else if ((opline->op2_type & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
+			offset = Z_REFVAL_P(offset);
+			goto add_again;
+		} else if (Z_TYPE_P(offset) == IS_NULL) {
+			str = ZSTR_EMPTY_ALLOC();
+			goto str_index;
+		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+			hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_FALSE) {
+			hval = 0;
+			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_TRUE) {
+			hval = 1;
+			goto num_index;
+		} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+			zend_use_resource_as_offset(offset);
+			hval = Z_RES_HANDLE_P(offset);
+			goto num_index;
+		} else if (opline->op2_type == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
+			ZVAL_UNDEFINED_OP2();
+			str = ZSTR_EMPTY_ALLOC();
+			goto str_index;
+		} else {
+			zend_illegal_array_offset_access(offset);
+			zval_ptr_dtor_nogc(expr_ptr);
+		}
+		FREE_OP(opline->op2_type, opline->op2.var);
+	} else {
+		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
+			zend_cannot_add_element();
+			zval_ptr_dtor_nogc(expr_ptr);
+		}
+	}
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *array;
@@ -7555,6 +7727,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PRO
 
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(offset);
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(offset, &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -9003,6 +9176,7 @@ fetch_obj_r_fast_copy:
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -9075,7 +9249,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC
 	/* here we are sure we are dealing with an object */
 	do {
 		zend_object *zobj = Z_OBJ_P(container);
-		zend_string *name, *tmp_name;
+		zend_string *name, *tmp_name = NULL;
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
@@ -9886,6 +10060,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PRO
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(offset);
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(offset, &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -10077,9 +10252,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_ad
 	SAVE_OPLINE();
 	varname = RT_CONSTANT(opline, opline->op1);
 
-	if (IS_CONST == IS_CONST) {
-		name = Z_STR_P(varname);
-	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
+	if (IS_CONST == IS_CONST || EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
 		tmp_name = NULL;
 	} else {
@@ -10160,6 +10333,98 @@ fetch_this:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_DELAYED(int type ZEND_OPCODE_HANDLER_ARGS_DC)
+{
+	USE_OPLINE
+	zval *varname;
+	zval *retval;
+	zend_string *name, *tmp_name;
+	HashTable *target_symbol_table;
+
+	SAVE_OPLINE();
+	varname = get_zval_ptr_undef_delayed(opline->op1_type, opline->op1, BP_VAR_R);
+
+	if (opline->op1_type == IS_CONST || EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
+		name = Z_STR_P(varname);
+		tmp_name = NULL;
+	} else {
+		if (opline->op1_type == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
+			ZVAL_UNDEFINED_OP1();
+		}
+		name = zval_try_get_tmp_string(varname, &tmp_name);
+		if (UNEXPECTED(!name)) {
+			if (!(opline->extended_value & ZEND_FETCH_GLOBAL_LOCK)) {
+				FREE_OP(opline->op1_type, opline->op1.var);
+			}
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			HANDLE_EXCEPTION();
+		}
+	}
+
+	target_symbol_table = zend_get_target_symbol_table(opline->extended_value EXECUTE_DATA_CC);
+	retval = zend_hash_find_ex(target_symbol_table, name, opline->op1_type == IS_CONST);
+	if (retval == NULL) {
+		if (UNEXPECTED(zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_THIS)))) {
+fetch_this:
+			zend_fetch_this_var(type OPLINE_CC EXECUTE_DATA_CC);
+			if (opline->op1_type != IS_CONST) {
+				zend_tmp_string_release(tmp_name);
+			}
+			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+		}
+		if (type == BP_VAR_W) {
+			retval = zend_hash_add_new(target_symbol_table, name, &EG(uninitialized_zval));
+		} else if (type == BP_VAR_IS || type == BP_VAR_UNSET) {
+			retval = &EG(uninitialized_zval);
+		} else {
+			zend_error(E_WARNING, "Undefined %svariable $%s",
+				(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), ZSTR_VAL(name));
+			if (type == BP_VAR_RW && !EG(exception)) {
+				retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
+			} else {
+				retval = &EG(uninitialized_zval);
+			}
+		}
+	/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
+	} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
+		retval = Z_INDIRECT_P(retval);
+		if (Z_TYPE_P(retval) == IS_UNDEF) {
+			if (UNEXPECTED(zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_THIS)))) {
+				goto fetch_this;
+			}
+			if (type == BP_VAR_W) {
+				ZVAL_NULL(retval);
+			} else if (type == BP_VAR_IS || type == BP_VAR_UNSET) {
+				retval = &EG(uninitialized_zval);
+			} else {
+				zend_error(E_WARNING, "Undefined %svariable $%s",
+					(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), ZSTR_VAL(name));
+				if (type == BP_VAR_RW && !EG(exception)) {
+					ZVAL_NULL(retval);
+				} else {
+					retval = &EG(uninitialized_zval);
+				}
+			}
+		}
+	}
+
+	if (!(opline->extended_value & ZEND_FETCH_GLOBAL_LOCK)) {
+		FREE_OP(opline->op1_type, opline->op1.var);
+	}
+
+	if (opline->op1_type != IS_CONST) {
+		zend_tmp_string_release(tmp_name);
+	}
+
+	ZEND_ASSERT(retval != NULL);
+	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		ZVAL_COPY_DEREF(EX_VAR(opline->result.var), retval);
+	} else {
+		ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+	}
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_R_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_CONST_UNUSED(BP_VAR_R ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -10170,9 +10435,19 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_W_SPEC_CONST_UNUSED_HAND
 	ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_CONST_UNUSED(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_W_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_DELAYED(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_RW_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_CONST_UNUSED(BP_VAR_RW ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_RW_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_DELAYED(BP_VAR_RW ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_FUNC_ARG_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -10183,9 +10458,22 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_FUNC_ARG_SPEC_CONST_UNUS
 	ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_CONST_UNUSED(fetch_type ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_FUNC_ARG_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	int fetch_type =
+		(UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) ?
+			BP_VAR_W : BP_VAR_R;
+	ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_DELAYED(fetch_type ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_UNSET_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_CONST_UNUSED(BP_VAR_UNSET ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_UNSET_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_DELAYED(BP_VAR_UNSET ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_IS_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -10713,9 +11001,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HA
 
 	varname = RT_CONSTANT(opline, opline->op1);
 
-	if (IS_CONST == IS_CONST) {
-		name = Z_STR_P(varname);
-	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
+	if (IS_CONST == IS_CONST || EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
 		tmp_name = NULL;
 	} else {
@@ -10740,6 +11026,42 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HA
 }
 
 /* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CLASS_FETCH|CONST|VAR) */
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *varname;
+	zend_string *name, *tmp_name;
+	HashTable *target_symbol_table;
+
+	SAVE_OPLINE();
+
+	varname = get_zval_ptr_undef_delayed(opline->op1_type, opline->op1, BP_VAR_R);
+
+	if (opline->op1_type == IS_CONST || EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
+		name = Z_STR_P(varname);
+		tmp_name = NULL;
+	} else {
+		if (opline->op1_type == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
+			varname = ZVAL_UNDEFINED_OP1();
+		}
+		name = zval_try_get_tmp_string(varname, &tmp_name);
+		if (UNEXPECTED(!name)) {
+			FREE_OP(opline->op1_type, opline->op1.var);
+			HANDLE_EXCEPTION();
+		}
+	}
+
+	target_symbol_table = zend_get_target_symbol_table(opline->extended_value EXECUTE_DATA_CC);
+	zend_hash_del_ind(target_symbol_table, name);
+
+	if (opline->op1_type != IS_CONST) {
+		zend_tmp_string_release(tmp_name);
+	}
+	FREE_OP(opline->op1_type, opline->op1.var);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+/* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CLASS_FETCH|CONST|VAR) */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -10754,6 +11076,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_U
 	varname = RT_CONSTANT(opline, opline->op1);
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(varname);
+		tmp_name = NULL;
 	} else {
 		name = zval_get_tmp_string(varname, &tmp_name);
 	}
@@ -11381,6 +11704,7 @@ fetch_obj_r_fast_copy:
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -11453,7 +11777,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC
 	/* here we are sure we are dealing with an object */
 	do {
 		zend_object *zobj = Z_OBJ_P(container);
-		zend_string *name, *tmp_name;
+		zend_string *name, *tmp_name = NULL;
 		zval *retval;
 
 		if (IS_CV == IS_CONST) {
@@ -12263,6 +12587,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PRO
 
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(offset);
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(offset, &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -15763,6 +16088,7 @@ fetch_obj_r_fast_copy:
 				}
 			}
 			name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -15835,7 +16161,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_CONST
 	/* here we are sure we are dealing with an object */
 	do {
 		zend_object *zobj = Z_OBJ_P(container);
-		zend_string *name, *tmp_name;
+		zend_string *name, *tmp_name = NULL;
 		zval *retval;
 
 		if (IS_CONST == IS_CONST) {
@@ -16384,6 +16710,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_TM
 
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(offset);
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(offset, &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -17208,6 +17535,7 @@ fetch_obj_r_fast_copy:
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -17280,7 +17608,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_TMPVA
 	/* here we are sure we are dealing with an object */
 	do {
 		zend_object *zobj = Z_OBJ_P(container);
-		zend_string *name, *tmp_name;
+		zend_string *name, *tmp_name = NULL;
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
@@ -17801,6 +18129,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_TM
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(offset);
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(offset, &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -17913,9 +18242,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_ad
 	SAVE_OPLINE();
 	varname = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
-	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-		name = Z_STR_P(varname);
-	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST || EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
 		tmp_name = NULL;
 	} else {
@@ -18069,9 +18396,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_TMPVAR_UNUSED_H
 
 	varname = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
-	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-		name = Z_STR_P(varname);
-	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST || EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
 		tmp_name = NULL;
 	} else {
@@ -18110,6 +18435,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_
 	varname = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(varname);
+		tmp_name = NULL;
 	} else {
 		name = zval_get_tmp_string(varname, &tmp_name);
 	}
@@ -18561,6 +18887,7 @@ fetch_obj_r_fast_copy:
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -18633,7 +18960,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_CV_HA
 	/* here we are sure we are dealing with an object */
 	do {
 		zend_object *zobj = Z_OBJ_P(container);
-		zend_string *name, *tmp_name;
+		zend_string *name, *tmp_name = NULL;
 		zval *retval;
 
 		if (IS_CV == IS_CONST) {
@@ -19154,6 +19481,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_TM
 
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(offset);
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(offset, &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -21675,6 +22003,39 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_inc_help
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_inc_helper_SPEC_DELAYED(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+
+	var_ptr = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_RW);
+
+	SAVE_OPLINE();
+	if (opline->op1_type == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
+	}
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_incdec_typed_ref(ref, NULL OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		increment_function(var_ptr);
+	} while (0);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+	FREE_OP(opline->op1_type, opline->op1.var);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_VAR_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -21691,6 +22052,24 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_VAR_R
 	}
 
 	ZEND_VM_TAIL_CALL(zend_pre_inc_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+}
+
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+
+	var_ptr = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_RW);
+
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+		fast_long_increment_function(var_ptr);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+		}
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	ZEND_VM_TAIL_CALL(zend_pre_inc_helper_SPEC_DELAYED(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_VAR_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -21745,6 +22124,40 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_dec_help
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_dec_helper_SPEC_DELAYED(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+
+	var_ptr = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_RW);
+
+	SAVE_OPLINE();
+	if (opline->op1_type == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
+	}
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_incdec_typed_ref(ref, NULL OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		decrement_function(var_ptr);
+	} while (0);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+	FREE_OP(opline->op1_type, opline->op1.var);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_DEC_SPEC_VAR_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -21761,6 +22174,24 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_DEC_SPEC_VAR_R
 	}
 
 	ZEND_VM_TAIL_CALL(zend_pre_dec_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+}
+
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_DEC_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+
+	var_ptr = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_RW);
+
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+		fast_long_decrement_function(var_ptr);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+		}
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	ZEND_VM_TAIL_CALL(zend_pre_dec_helper_SPEC_DELAYED(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_DEC_SPEC_VAR_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -21816,6 +22247,41 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_inc_hel
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_inc_helper_SPEC_DELAYED(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+
+	var_ptr = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_RW);
+
+	SAVE_OPLINE();
+	if (opline->op1_type == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
+	}
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_incdec_typed_ref(ref, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+
+		increment_function(var_ptr);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
+		}
+	} while (0);
+
+	FREE_OP(opline->op1_type, opline->op1.var);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -21830,6 +22296,22 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_VAR_
 	}
 
 	ZEND_VM_TAIL_CALL(zend_post_inc_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+}
+
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+
+	var_ptr = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_RW);
+
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+		ZVAL_LONG(EX_VAR(opline->result.var), Z_LVAL_P(var_ptr));
+		fast_long_increment_function(var_ptr);
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	ZEND_VM_TAIL_CALL(zend_post_inc_helper_SPEC_DELAYED(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_dec_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS)
@@ -21867,6 +22349,41 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_dec_hel
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_dec_helper_SPEC_DELAYED(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+
+	var_ptr = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_RW);
+
+	SAVE_OPLINE();
+	if (opline->op1_type == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
+		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(var_ptr);
+	}
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_incdec_typed_ref(ref, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+
+		decrement_function(var_ptr);
+		if (UNEXPECTED(EG(exception))) {
+			HANDLE_EXCEPTION();
+		}
+	} while (0);
+
+	FREE_OP(opline->op1_type, opline->op1.var);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_DEC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -21881,6 +22398,22 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_DEC_SPEC_VAR_
 	}
 
 	ZEND_VM_TAIL_CALL(zend_post_dec_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+}
+
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_DEC_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+
+	var_ptr = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_RW);
+
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+		ZVAL_LONG(EX_VAR(opline->result.var), Z_LVAL_P(var_ptr));
+		fast_long_decrement_function(var_ptr);
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	ZEND_VM_TAIL_CALL(zend_post_dec_helper_SPEC_DELAYED(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -22894,6 +23427,7 @@ assign_op_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -22954,6 +23488,104 @@ assign_op_object:
 }
 
 /* No specialization for op_types (CONST|TMP|VAR|CV, UNUSED|CONST|TMPVAR) */
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *object;
+	zval *property;
+	zval *value;
+	zval *zptr;
+	void **cache_slot;
+	zend_property_info *prop_info;
+	zend_object *zobj;
+	zend_string *name, *tmp_name;
+
+	SAVE_OPLINE();
+	object = get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, BP_VAR_RW);
+	property = get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+
+	do {
+		value = get_op_data_zval_ptr_r_delayed((opline+1)->op1_type, (opline+1)->op1);
+
+		if (opline->op1_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (Z_ISREF_P(object) && Z_TYPE_P(Z_REFVAL_P(object)) == IS_OBJECT) {
+				object = Z_REFVAL_P(object);
+				goto assign_op_object;
+			}
+			if (opline->op1_type == IS_CV
+			 && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
+				ZVAL_UNDEFINED_OP1();
+			}
+			zend_throw_non_object_error(object, property OPLINE_CC EXECUTE_DATA_CC);
+			break;
+		}
+
+assign_op_object:
+		/* here we are sure we are dealing with an object */
+		zobj = Z_OBJ_P(object);
+		if (opline->op2_type == IS_CONST) {
+			name = Z_STR_P(property);
+			tmp_name = NULL;
+		} else {
+			name = zval_try_get_tmp_string(property, &tmp_name);
+			if (UNEXPECTED(!name)) {
+				UNDEF_RESULT();
+				break;
+			}
+		}
+		cache_slot = (opline->op2_type == IS_CONST) ? CACHE_ADDR((opline+1)->extended_value) : NULL;
+		if (EXPECTED((zptr = zobj->handlers->get_property_ptr_ptr(zobj, name, BP_VAR_RW, cache_slot)) != NULL)) {
+			if (UNEXPECTED(Z_ISERROR_P(zptr))) {
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
+			} else {
+				zval *orig_zptr = zptr;
+				zend_reference *ref;
+
+				do {
+					if (UNEXPECTED(Z_ISREF_P(zptr))) {
+						ref = Z_REF_P(zptr);
+						zptr = Z_REFVAL_P(zptr);
+						if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+							zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+							break;
+						}
+					}
+
+					if (opline->op2_type == IS_CONST) {
+						prop_info = (zend_property_info*)CACHED_PTR_EX(cache_slot + 2);
+					} else {
+						prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(object), orig_zptr);
+					}
+					if (UNEXPECTED(prop_info)) {
+						/* special case for typed properties */
+						zend_binary_assign_op_typed_prop(prop_info, zptr, value OPLINE_CC EXECUTE_DATA_CC);
+					} else {
+						zend_binary_op(zptr, zptr, value OPLINE_CC);
+					}
+				} while (0);
+
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
+				}
+			}
+		} else {
+			zend_assign_op_overloaded_property(zobj, name, cache_slot, value OPLINE_CC EXECUTE_DATA_CC);
+		}
+		if (opline->op2_type != IS_CONST) {
+			zend_tmp_string_release(tmp_name);
+		}
+	} while (0);
+
+	FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+	FREE_OP(opline->op2_type, opline->op2.var);
+	FREE_OP(opline->op1_type, opline->op1.var);
+	/* assign_obj has two opcodes! */
+	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+}
+
+/* No specialization for op_types (CONST|TMP|VAR|CV, UNUSED|CONST|TMPVAR) */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_OP_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -22987,7 +23619,7 @@ assign_dim_op_new_array:
 			}
 		}
 
-		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
+		value = get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1);
 
 		do {
 			if (IS_CONST != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
@@ -23054,6 +23686,107 @@ assign_dim_op_ret_null:
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	zval *value, *container, *dim;
+	HashTable *ht;
+
+	SAVE_OPLINE();
+	container = get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, BP_VAR_RW);
+
+	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+assign_dim_op_array:
+		SEPARATE_ARRAY(container);
+		ht = Z_ARRVAL_P(container);
+assign_dim_op_new_array:
+		dim = get_zval_ptr_undef_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+		if (opline->op2_type == IS_UNUSED) {
+			var_ptr = zend_hash_next_index_insert(ht, &EG(uninitialized_zval));
+			if (UNEXPECTED(!var_ptr)) {
+				zend_cannot_add_element();
+				goto assign_dim_op_ret_null;
+			}
+		} else {
+			if (opline->op2_type == IS_CONST) {
+				var_ptr = zend_fetch_dimension_address_inner_RW_CONST(ht, dim EXECUTE_DATA_CC);
+			} else {
+				var_ptr = zend_fetch_dimension_address_inner_RW(ht, dim EXECUTE_DATA_CC);
+			}
+			if (UNEXPECTED(!var_ptr)) {
+				goto assign_dim_op_ret_null;
+			}
+		}
+
+		value = get_op_data_zval_ptr_deref_r_delayed((opline+1)->op1_type, (opline+1)->op1);
+
+		do {
+			if (opline->op2_type != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
+				zend_reference *ref = Z_REF_P(var_ptr);
+				var_ptr = Z_REFVAL_P(var_ptr);
+				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+					zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+					break;
+				}
+			}
+			zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+		} while (0);
+
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+		}
+		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+	} else {
+		if (EXPECTED(Z_ISREF_P(container))) {
+			container = Z_REFVAL_P(container);
+			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+				goto assign_dim_op_array;
+			}
+		}
+
+		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(container);
+
+			dim = get_zval_ptr_undef_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+			if (opline->op2_type == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
+				dim++;
+			}
+			zend_binary_assign_op_obj_dim(obj, dim OPLINE_CC EXECUTE_DATA_CC);
+		} else if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
+			uint8_t old_type;
+
+			if (opline->op1_type == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
+				ZVAL_UNDEFINED_OP1();
+			}
+			ht = zend_new_array(8);
+			old_type = Z_TYPE_P(container);
+			ZVAL_ARR(container, ht);
+			if (UNEXPECTED(old_type == IS_FALSE)) {
+				GC_ADDREF(ht);
+				zend_false_to_array_deprecated();
+				if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+					zend_array_destroy(ht);
+					goto assign_dim_op_ret_null;
+				}
+			}
+			goto assign_dim_op_new_array;
+		} else {
+			dim = get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+			zend_binary_assign_op_dim_slow(container, dim OPLINE_CC EXECUTE_DATA_CC);
+assign_dim_op_ret_null:
+			FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+		}
+	}
+
+	FREE_OP(opline->op2_type, opline->op2.var);
+	FREE_OP(opline->op1_type, opline->op1.var);
+	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OP_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -23081,6 +23814,37 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OP_SPEC_VAR_CONST_HANDL
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OP_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+	var_ptr = get_zval_ptr_ptr(opline->op1_type, opline->op1, BP_VAR_RW);
+
+	do {
+		if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_REFERENCE)) {
+			zend_reference *ref = Z_REF_P(var_ptr);
+			var_ptr = Z_REFVAL_P(var_ptr);
+			if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+				zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+				break;
+			}
+		}
+		zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+	} while (0);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+	FREE_OP(opline->op2_type, opline->op2.var);
+	FREE_OP(opline->op1_type, opline->op1.var);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -23118,6 +23882,7 @@ pre_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -23185,6 +23950,7 @@ post_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -23232,6 +23998,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HAN
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_W_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+
+	SAVE_OPLINE();
+	container = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_W);
+	zend_fetch_dimension_address_W(container, get_zval_ptr_undef_delayed(opline->op2_type, opline->op2, BP_VAR_R), opline->op2_type OPLINE_CC EXECUTE_DATA_CC);
+	FREE_OP(opline->op2_type, opline->op2.var);
+	if (opline->op1_type == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(opline->op1.var);
+	}
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_RW_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -23242,6 +24023,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_RW_SPEC_VAR_CONST_HA
 	zend_fetch_dimension_address_RW(container, RT_CONSTANT(opline, opline->op2), IS_CONST OPLINE_CC EXECUTE_DATA_CC);
 
 	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(opline->op1.var);
+	}
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_RW_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+
+	SAVE_OPLINE();
+	container = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_RW);
+	zend_fetch_dimension_address_RW(container, get_zval_ptr_undef_delayed(opline->op2_type, opline->op2, BP_VAR_R), opline->op2_type OPLINE_CC EXECUTE_DATA_CC);
+	FREE_OP(opline->op2_type, opline->op2.var);
+	if (opline->op1_type == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(opline->op1.var);
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -23281,6 +24077,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_UNSET_SPEC_VAR_CONST
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+
+	SAVE_OPLINE();
+	container = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_UNSET);
+	zend_fetch_dimension_address_UNSET(container, get_zval_ptr_undef_delayed(opline->op2_type, opline->op2, BP_VAR_R), opline->op2_type OPLINE_CC EXECUTE_DATA_CC);
+	FREE_OP(opline->op2_type, opline->op2.var);
+	if (opline->op1_type == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(opline->op1.var);
+	}
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -23302,6 +24113,27 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *property, *container, *result;
+
+	SAVE_OPLINE();
+
+	container = get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, BP_VAR_W);
+	property = get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(
+		result, container, opline->op1_type, property, opline->op2_type,
+		((opline->op2_type == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) : NULL),
+		BP_VAR_W, opline->extended_value OPLINE_CC EXECUTE_DATA_CC);
+	FREE_OP(opline->op2_type, opline->op2.var);
+	if (opline->op1_type == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(opline->op1.var);
+	}
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -23314,6 +24146,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST_HA
 	zend_fetch_property_address(result, container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_RW, 0 OPLINE_CC EXECUTE_DATA_CC);
 
 	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(opline->op1.var);
+	}
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *property, *container, *result;
+
+	SAVE_OPLINE();
+	container = get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, BP_VAR_RW);
+	property = get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, opline->op1_type, property, opline->op2_type, ((opline->op2_type == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_RW, 0 OPLINE_CC EXECUTE_DATA_CC);
+	FREE_OP(opline->op2_type, opline->op2.var);
+	if (opline->op1_type == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(opline->op1.var);
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -23353,6 +24202,23 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container, *property, *result;
+
+	SAVE_OPLINE();
+	container = get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, BP_VAR_UNSET);
+	property = get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, opline->op1_type, property, opline->op2_type, ((opline->op2_type == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_UNSET, 0 OPLINE_CC EXECUTE_DATA_CC);
+	FREE_OP(opline->op2_type, opline->op2.var);
+	if (opline->op1_type == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(opline->op1.var);
+	}
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -23372,6 +24238,29 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_W_SPEC_VAR_CONST_HA
 		zend_fetch_dimension_address_W(container, dim, IS_CONST OPLINE_CC EXECUTE_DATA_CC);
 	}
 
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_W_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container, *dim;
+
+	SAVE_OPLINE();
+	container = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_W);
+	dim = get_zval_ptr_undef_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+
+	if (opline->op1_type == IS_VAR
+		&& Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT
+		&& UNEXPECTED(!Z_ISREF_P(container))
+	) {
+		zend_error(E_NOTICE, "Attempting to set reference to non referenceable value");
+		zend_fetch_dimension_address_LIST_r(container, dim, opline->op2_type OPLINE_CC EXECUTE_DATA_CC);
+	} else {
+		zend_fetch_dimension_address_W(container, dim, opline->op2_type OPLINE_CC EXECUTE_DATA_CC);
+	}
+
+	FREE_OP(opline->op2_type, opline->op2.var);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -23474,6 +24363,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -23504,6 +24394,141 @@ exit_assign_obj:
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	/* assign_obj has two opcodes! */
+	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+}
+
+/* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CONST|VAR) */
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *object, *value, tmp;
+	zend_object *zobj;
+	zend_string *name, *tmp_name;
+	zend_refcounted *garbage = NULL;
+
+	SAVE_OPLINE();
+	object = get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, BP_VAR_W);
+	value = get_op_data_zval_ptr_r_delayed((opline+1)->op1_type, (opline+1)->op1);
+
+	if (opline->op1_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		if (Z_ISREF_P(object) && Z_TYPE_P(Z_REFVAL_P(object)) == IS_OBJECT) {
+			object = Z_REFVAL_P(object);
+			goto assign_object;
+		}
+		zend_throw_non_object_error(object, get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R) OPLINE_CC EXECUTE_DATA_CC);
+		value = &EG(uninitialized_zval);
+		goto free_and_exit_assign_obj;
+	}
+
+assign_object:
+	zobj = Z_OBJ_P(object);
+	if (opline->op2_type == IS_CONST) {
+		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
+			void **cache_slot = CACHE_ADDR(opline->extended_value);
+			uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
+			zval *property_val;
+
+			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+				property_val = OBJ_PROP(zobj, prop_offset);
+				if (Z_TYPE_P(property_val) != IS_UNDEF) {
+					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+					if (UNEXPECTED(prop_info != NULL)) {
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						goto free_and_exit_assign_obj;
+					} else {
+fast_assign_obj:
+						value = zend_assign_to_variable_ex(property_val, value, (opline+1)->op1_type, EX_USES_STRICT_TYPES(), &garbage);
+						if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+							ZVAL_COPY(EX_VAR(opline->result.var), value);
+						}
+						goto exit_assign_obj;
+					}
+				}
+			} else {
+				name = Z_STR_P(get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R));
+				if (EXPECTED(zobj->properties != NULL)) {
+					if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
+						if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+							GC_DELREF(zobj->properties);
+						}
+						zobj->properties = zend_array_dup(zobj->properties);
+					}
+					property_val = zend_hash_find_known_hash(zobj->properties, name);
+					if (property_val) {
+						goto fast_assign_obj;
+					}
+				}
+
+				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
+					if (EXPECTED(zobj->properties == NULL)) {
+						rebuild_object_properties(zobj);
+					}
+					if ((opline+1)->op1_type == IS_CONST) {
+						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+							Z_ADDREF_P(value);
+						}
+					} else if ((opline+1)->op1_type != IS_TMP_VAR) {
+						if (Z_ISREF_P(value)) {
+							if ((opline+1)->op1_type == IS_VAR) {
+								zend_reference *ref = Z_REF_P(value);
+								if (GC_DELREF(ref) == 0) {
+									ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
+									efree_size(ref, sizeof(zend_reference));
+									value = &tmp;
+								} else {
+									value = Z_REFVAL_P(value);
+									Z_TRY_ADDREF_P(value);
+								}
+							} else {
+								value = Z_REFVAL_P(value);
+								Z_TRY_ADDREF_P(value);
+							}
+						} else if ((opline+1)->op1_type == IS_CV) {
+							Z_TRY_ADDREF_P(value);
+						}
+						}
+					zend_hash_add_new(zobj->properties, name, value);
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
+				}
+			}
+		}
+		name = Z_STR_P(get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R));
+		tmp_name = NULL;
+	} else {
+		name = zval_try_get_tmp_string(get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R), &tmp_name);
+		if (UNEXPECTED(!name)) {
+			FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+			UNDEF_RESULT();
+			goto exit_assign_obj;
+		}
+	}
+
+	if ((opline+1)->op1_type == IS_CV || (opline+1)->op1_type == IS_VAR) {
+		ZVAL_DEREF(value);
+	}
+
+	value = zobj->handlers->write_property(zobj, name, value, (opline->op2_type == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+
+	if (opline->op2_type != IS_CONST) {
+		zend_tmp_string_release(tmp_name);
+	}
+
+free_and_exit_assign_obj:
+	if (UNEXPECTED(RETURN_VALUE_USED(opline)) && value) {
+		ZVAL_COPY_DEREF(EX_VAR(opline->result.var), value);
+	}
+	FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+exit_assign_obj:
+	if (garbage) {
+		GC_DTOR_NO_REF(garbage);
+	}
+	FREE_OP(opline->op2_type, opline->op2.var);
+	FREE_OP(opline->op1_type, opline->op1.var);
 	/* assign_obj has two opcodes! */
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
@@ -23608,6 +24633,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -23742,6 +24768,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -23876,6 +24903,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -24059,6 +25087,159 @@ assign_dim_error:
 
 	}
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	/* assign_dim has two opcodes! */
+	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *object_ptr, *orig_object_ptr;
+	zval *value;
+	zval *variable_ptr;
+	zval *dim;
+	zend_refcounted *garbage = NULL;
+
+	SAVE_OPLINE();
+	orig_object_ptr = object_ptr = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_W);
+
+	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
+try_assign_dim_array:
+		SEPARATE_ARRAY(object_ptr);
+		if (opline->op2_type == IS_UNUSED) {
+			value = get_zval_ptr_undef_delayed((opline+1)->op1_type, (opline+1)->op1, BP_VAR_R);
+			if ((opline+1)->op1_type == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				HashTable *ht = Z_ARRVAL_P(object_ptr);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+					GC_ADDREF(ht);
+				}
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+				if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+					zend_array_destroy(ht);
+					goto assign_dim_error;
+				}
+			}
+			if ((opline+1)->op1_type == IS_CV || (opline+1)->op1_type == IS_VAR) {
+				ZVAL_DEREF(value);
+			}
+			value = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), value);
+			if (UNEXPECTED(value == NULL)) {
+				zend_cannot_add_element();
+				goto assign_dim_error;
+			} else if ((opline+1)->op1_type == IS_CV) {
+				if (Z_REFCOUNTED_P(value)) {
+					Z_ADDREF_P(value);
+				}
+			} else if ((opline+1)->op1_type == IS_VAR) {
+				zval *free_op_data = EX_VAR((opline+1)->op1.var);
+				if (Z_ISREF_P(free_op_data)) {
+					if (Z_REFCOUNTED_P(value)) {
+						Z_ADDREF_P(value);
+					}
+					zval_ptr_dtor_nogc(free_op_data);
+				}
+			} else if ((opline+1)->op1_type == IS_CONST) {
+				if (UNEXPECTED(Z_REFCOUNTED_P(value))) {
+					Z_ADDREF_P(value);
+				}
+			}
+		} else {
+			dim = get_zval_ptr_undef_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+			if (opline->op2_type == IS_CONST) {
+				variable_ptr = zend_fetch_dimension_address_inner_W_CONST(Z_ARRVAL_P(object_ptr), dim EXECUTE_DATA_CC);
+			} else {
+				variable_ptr = zend_fetch_dimension_address_inner_W(Z_ARRVAL_P(object_ptr), dim EXECUTE_DATA_CC);
+			}
+			if (UNEXPECTED(variable_ptr == NULL)) {
+				goto assign_dim_error;
+			}
+			value = get_op_data_zval_ptr_r_delayed((opline+1)->op1_type, (opline+1)->op1);
+			value = zend_assign_to_variable_ex(variable_ptr, value, (opline+1)->op1_type, EX_USES_STRICT_TYPES(), &garbage);
+		}
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_COPY(EX_VAR(opline->result.var), value);
+		}
+		if (garbage) {
+			GC_DTOR_NO_REF(garbage);
+		}
+	} else {
+		if (EXPECTED(Z_ISREF_P(object_ptr))) {
+			object_ptr = Z_REFVAL_P(object_ptr);
+			if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
+				goto try_assign_dim_array;
+			}
+		}
+		if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
+			zend_object *obj = Z_OBJ_P(object_ptr);
+
+			GC_ADDREF(obj);
+			dim = get_zval_ptr_undef_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+			if (opline->op2_type == IS_CV && UNEXPECTED(Z_ISUNDEF_P(dim))) {
+				dim = ZVAL_UNDEFINED_OP2();
+			} else if (opline->op2_type == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
+				dim++;
+			}
+
+			value = get_zval_ptr_undef_delayed((opline+1)->op1_type, (opline+1)->op1, BP_VAR_R);
+			if ((opline+1)->op1_type == IS_CV && UNEXPECTED(Z_ISUNDEF_P(value))) {
+				value = zval_undefined_cv((opline+1)->op1.var EXECUTE_DATA_CC);
+			} else if ((opline+1)->op1_type & (IS_CV|IS_VAR)) {
+				ZVAL_DEREF(value);
+			}
+
+			zend_assign_to_object_dim(obj, dim, value OPLINE_CC EXECUTE_DATA_CC);
+
+			FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+			if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+				zend_objects_store_del(obj);
+			}
+		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+			if (opline->op2_type == IS_UNUSED) {
+				zend_use_new_element_for_string();
+				FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+				UNDEF_RESULT();
+			} else {
+				dim = get_zval_ptr_undef_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+				value = get_zval_ptr_undef_delayed((opline+1)->op1_type, (opline+1)->op1, BP_VAR_R);
+				zend_assign_to_string_offset(object_ptr, dim, value OPLINE_CC EXECUTE_DATA_CC);
+				FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+			}
+		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+			if (Z_ISREF_P(orig_object_ptr)
+			 && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(orig_object_ptr))
+			 && !zend_verify_ref_array_assignable(Z_REF_P(orig_object_ptr))) {
+				dim = get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+				FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+				UNDEF_RESULT();
+			} else {
+				HashTable *ht = zend_new_array(8);
+				uint8_t old_type = Z_TYPE_P(object_ptr);
+
+				ZVAL_ARR(object_ptr, ht);
+				if (UNEXPECTED(old_type == IS_FALSE)) {
+					GC_ADDREF(ht);
+					zend_false_to_array_deprecated();
+					if (UNEXPECTED(GC_DELREF(ht) == 0)) {
+						zend_array_destroy(ht);
+						goto assign_dim_error;
+					}
+				}
+				goto try_assign_dim_array;
+			}
+		} else {
+			zend_use_scalar_as_array();
+			dim = get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+assign_dim_error:
+			FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+		}
+	}
+	if (opline->op2_type != IS_UNUSED) {
+		FREE_OP(opline->op2_type, opline->op2.var);
+	}
+	FREE_OP(opline->op1_type, opline->op1.var);
 	/* assign_dim has two opcodes! */
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
@@ -24550,6 +25731,35 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_U
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value;
+	zval *variable_ptr;
+
+	SAVE_OPLINE();
+	value = get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+	variable_ptr = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_W);
+
+	if (1 || UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		zend_refcounted *garbage = NULL;
+
+		value = zend_assign_to_variable_ex(variable_ptr, value, opline->op2_type, EX_USES_STRICT_TYPES(), &garbage);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_COPY(EX_VAR(opline->result.var), value);
+		}
+		if (garbage) {
+			GC_DTOR_NO_REF(garbage);
+		}
+	} else {
+		value = zend_assign_to_variable(variable_ptr, value, opline->op2_type, EX_USES_STRICT_TYPES());
+	}
+	FREE_OP(opline->op1_type, opline->op1.var);
+	/* zend_assign_to_variable() always takes care of op2, never free it! */
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -24612,6 +25822,43 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 
 	zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
+	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+}
+
+/* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CONST|VAR) */
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *property, *container, *value_ptr;
+
+	SAVE_OPLINE();
+
+	container = get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, BP_VAR_W);
+	property = get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+
+	value_ptr = get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, BP_VAR_W);
+
+	if (0) {
+		if (opline->op1_type == IS_UNUSED) {
+			if (opline->op2_type == IS_CONST) {
+				zend_assign_to_property_reference_this_const(container, property, value_ptr OPLINE_CC EXECUTE_DATA_CC);
+			} else {
+				zend_assign_to_property_reference_this_var(container, property, value_ptr OPLINE_CC EXECUTE_DATA_CC);
+			}
+		} else {
+			if (opline->op2_type == IS_CONST) {
+				zend_assign_to_property_reference_var_const(container, property, value_ptr OPLINE_CC EXECUTE_DATA_CC);
+			} else {
+				zend_assign_to_property_reference_var_var(container, property, value_ptr OPLINE_CC EXECUTE_DATA_CC);
+			}
+		}
+	} else {
+		zend_assign_to_property_reference(container, opline->op1_type, property, opline->op2_type, value_ptr OPLINE_CC EXECUTE_DATA_CC);
+	}
+
+	FREE_OP(opline->op1_type, opline->op1.var);
+	FREE_OP(opline->op2_type, opline->op2.var);
+	FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
 
@@ -24962,6 +26209,36 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_REF_SPEC_VAR_CONST_HANDLE
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_REF_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *varptr, *arg;
+
+	SAVE_OPLINE();
+	if (opline->op2_type == IS_CONST) {
+		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		uint32_t arg_num;
+		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
+		if (UNEXPECTED(!arg)) {
+			FREE_OP(opline->op1_type, opline->op1.var);
+			HANDLE_EXCEPTION();
+		}
+	} else {
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+	}
+
+	varptr = get_zval_ptr_ptr(opline->op1_type, opline->op1, BP_VAR_W);
+	if (Z_ISREF_P(varptr)) {
+		Z_ADDREF_P(varptr);
+	} else {
+		ZVAL_MAKE_REF_EX(varptr, 2);
+	}
+	ZVAL_REF(arg, Z_REF_P(varptr));
+
+	FREE_OP(opline->op1_type, opline->op1.var);
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -25028,6 +26305,72 @@ send_var_by_ref:
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *varptr, *arg;
+	uint32_t arg_num;
+
+	if (opline->op2_type == IS_CONST) {
+		SAVE_OPLINE();
+		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
+		if (UNEXPECTED(!arg)) {
+			FREE_OP(opline->op1_type, opline->op1.var);
+			HANDLE_EXCEPTION();
+		}
+	} else {
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+		arg_num = opline->op2.num;
+	}
+
+	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
+		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+			goto send_var_by_ref;
+		}
+	} else if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+send_var_by_ref:
+		varptr = get_zval_ptr_ptr(opline->op1_type, opline->op1, BP_VAR_W);
+		if (Z_ISREF_P(varptr)) {
+			Z_ADDREF_P(varptr);
+		} else {
+			ZVAL_MAKE_REF_EX(varptr, 2);
+		}
+		ZVAL_REF(arg, Z_REF_P(varptr));
+
+		FREE_OP(opline->op1_type, opline->op1.var);
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	varptr = get_zval_ptr_undef_delayed(opline->op1_type, opline->op1, BP_VAR_R);
+	if (opline->op1_type == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(varptr) == IS_UNDEF)) {
+		SAVE_OPLINE();
+		ZVAL_UNDEFINED_OP1();
+		ZVAL_NULL(arg);
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
+
+	if (opline->op1_type == IS_CV) {
+		ZVAL_COPY_DEREF(arg, varptr);
+	} else /* if (opline->op1_type == IS_VAR) */ {
+		if (UNEXPECTED(Z_ISREF_P(varptr))) {
+			zend_refcounted *ref = Z_COUNTED_P(varptr);
+
+			varptr = Z_REFVAL_P(varptr);
+			ZVAL_COPY_VALUE(arg, varptr);
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+				efree_size(ref, sizeof(zend_reference));
+			} else if (Z_OPT_REFCOUNTED_P(arg)) {
+				Z_ADDREF_P(arg);
+			}
+		} else {
+			ZVAL_COPY_VALUE(arg, varptr);
+		}
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_FUNC_ARG_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -25061,6 +26404,57 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_FUNC_ARG_SPEC
 	}
 
 	varptr = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
+
+	if (UNEXPECTED(Z_ISREF_P(varptr))) {
+		zend_refcounted *ref = Z_COUNTED_P(varptr);
+
+		varptr = Z_REFVAL_P(varptr);
+		ZVAL_COPY_VALUE(arg, varptr);
+		if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+			efree_size(ref, sizeof(zend_reference));
+		} else if (Z_OPT_REFCOUNTED_P(arg)) {
+			Z_ADDREF_P(arg);
+		}
+	} else {
+		ZVAL_COPY_VALUE(arg, varptr);
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_FUNC_ARG_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *varptr, *arg;
+
+	if (opline->op2_type == IS_CONST) {
+		// TODO: Would it make sense to share the cache slot with CHECK_FUNC_ARG?
+		SAVE_OPLINE();
+		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		uint32_t arg_num;
+		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
+		if (UNEXPECTED(!arg)) {
+			FREE_OP(opline->op1_type, opline->op1.var);
+			HANDLE_EXCEPTION();
+		}
+	} else {
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+	}
+
+	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
+		varptr = get_zval_ptr_ptr(opline->op1_type, opline->op1, BP_VAR_W);
+		if (Z_ISREF_P(varptr)) {
+			Z_ADDREF_P(varptr);
+		} else {
+			ZVAL_MAKE_REF_EX(varptr, 2);
+		}
+		ZVAL_REF(arg, Z_REF_P(varptr));
+
+		FREE_OP(opline->op1_type, opline->op1.var);
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+	varptr = get_zval_ptr_undef_delayed(opline->op1_type, opline->op1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_ISREF_P(varptr))) {
 		zend_refcounted *ref = Z_COUNTED_P(varptr);
@@ -25412,6 +26806,98 @@ num_index_dim:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+	zval *offset;
+	zend_ulong hval;
+	zend_string *key;
+
+	SAVE_OPLINE();
+	container = get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, BP_VAR_UNSET);
+	offset = get_zval_ptr_undef_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+
+	do {
+		if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+			HashTable *ht;
+
+unset_dim_array:
+			SEPARATE_ARRAY(container);
+			ht = Z_ARRVAL_P(container);
+offset_again:
+			if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
+				key = Z_STR_P(offset);
+				if (opline->op2_type != IS_CONST) {
+					if (ZEND_HANDLE_NUMERIC(key, hval)) {
+						goto num_index_dim;
+					}
+				}
+str_index_dim:
+				ZEND_ASSERT(ht != &EG(symbol_table));
+				zend_hash_del(ht, key);
+			} else if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+				hval = Z_LVAL_P(offset);
+num_index_dim:
+				zend_hash_index_del(ht, hval);
+			} else if ((opline->op2_type & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
+				offset = Z_REFVAL_P(offset);
+				goto offset_again;
+			} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+				hval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+				goto num_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_NULL) {
+				key = ZSTR_EMPTY_ALLOC();
+				goto str_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_FALSE) {
+				hval = 0;
+				goto num_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_TRUE) {
+				hval = 1;
+				goto num_index_dim;
+			} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+				zend_use_resource_as_offset(offset);
+				hval = Z_RES_HANDLE_P(offset);
+				goto num_index_dim;
+			} else if (opline->op2_type == IS_CV && Z_TYPE_P(offset) == IS_UNDEF) {
+				ZVAL_UNDEFINED_OP2();
+				key = ZSTR_EMPTY_ALLOC();
+				goto str_index_dim;
+			} else {
+				zend_illegal_array_offset_unset(offset);
+			}
+			break;
+		} else if (Z_ISREF_P(container)) {
+			container = Z_REFVAL_P(container);
+			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+				goto unset_dim_array;
+			}
+		}
+		if (opline->op1_type == IS_CV && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+			container = ZVAL_UNDEFINED_OP1();
+		}
+		if (opline->op2_type == IS_CV && UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {
+			offset = ZVAL_UNDEFINED_OP2();
+		}
+		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+			if (opline->op2_type == IS_CONST && Z_EXTRA_P(offset) == ZEND_EXTRA_VALUE) {
+				offset++;
+			}
+			Z_OBJ_HT_P(container)->unset_dimension(Z_OBJ_P(container), offset);
+		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+			zend_throw_error(NULL, "Cannot unset string offsets");
+		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {
+			zend_throw_error(NULL, "Cannot unset offset in a non-array variable");
+		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_FALSE)) {
+			zend_false_to_array_deprecated();
+		}
+	} while (0);
+
+	FREE_OP(opline->op2_type, opline->op2.var);
+	FREE_OP(opline->op1_type, opline->op1.var);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -25440,6 +26926,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDL
 		}
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(offset);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(offset, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -25453,6 +26940,52 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDL
 	} while (0);
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *container;
+	zval *offset;
+	zend_string *name, *tmp_name;
+
+	SAVE_OPLINE();
+	container = get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, BP_VAR_UNSET);
+	offset = get_zval_ptr_delayed(opline->op2_type, opline->op2, BP_VAR_R);
+
+	do {
+		if (opline->op1_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
+			if (Z_ISREF_P(container)) {
+				container = Z_REFVAL_P(container);
+				if (Z_TYPE_P(container) != IS_OBJECT) {
+					if (opline->op1_type == IS_CV
+					 && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+						ZVAL_UNDEFINED_OP1();
+					}
+					break;
+				}
+			} else {
+				break;
+			}
+		}
+		if (opline->op2_type == IS_CONST) {
+			name = Z_STR_P(offset);
+			tmp_name = NULL;
+		} else {
+			name = zval_try_get_tmp_string(offset, &tmp_name);
+			if (UNEXPECTED(!name)) {
+				break;
+			}
+		}
+		Z_OBJ_HT_P(container)->unset_property(Z_OBJ_P(container), name, ((opline->op2_type == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL));
+		if (opline->op2_type != IS_CONST) {
+			zend_tmp_string_release(tmp_name);
+		}
+	} while (0);
+
+	FREE_OP(opline->op2_type, opline->op2.var);
+	FREE_OP(opline->op1_type, opline->op1.var);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -25815,6 +27348,7 @@ assign_op_object:
 		zobj = Z_OBJ_P(object);
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -25908,7 +27442,7 @@ assign_dim_op_new_array:
 			}
 		}
 
-		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
+		value = get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1);
 
 		do {
 			if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
@@ -26041,6 +27575,7 @@ pre_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -26109,6 +27644,7 @@ post_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -26400,6 +27936,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -26534,6 +28071,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -26668,6 +28206,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -26802,6 +28341,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -27891,6 +29431,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_TMPVAR_HAND
 		}
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(offset);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(offset, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -28276,6 +29817,45 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLE
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *variable_ptr;
+	zval *value_ptr;
+	zend_refcounted *garbage = NULL;
+
+	SAVE_OPLINE();
+	value_ptr = get_zval_ptr_ptr(opline->op2_type, opline->op2, BP_VAR_W);
+	variable_ptr = get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, BP_VAR_W);
+
+	if (opline->op1_type == IS_VAR &&
+	           UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+
+		zend_throw_error(NULL, "Cannot assign by reference to an array dimension of an object");
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (opline->op2_type == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		variable_ptr = zend_wrong_assign_to_variable_reference(
+			variable_ptr, value_ptr, &garbage OPLINE_CC EXECUTE_DATA_CC);
+	} else {
+		zend_assign_to_variable_reference(variable_ptr, value_ptr, &garbage);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
+	}
+
+	if (garbage) {
+		GC_DTOR(garbage);
+	}
+
+	FREE_OP(opline->op2_type, opline->op2.var);
+	FREE_OP(opline->op1_type, opline->op1.var);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_OP_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -28309,7 +29889,7 @@ assign_dim_op_new_array:
 			}
 		}
 
-		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
+		value = get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1);
 
 		do {
 			if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
@@ -29499,73 +31079,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_VAR_UNUSED_HA
 		arg_num = opline->op2.num;
 	}
 
-	if (EXPECTED(0)) {
-		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-			goto send_var_by_ref;
-		}
-	} else if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-send_var_by_ref:
-		varptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-		if (Z_ISREF_P(varptr)) {
-			Z_ADDREF_P(varptr);
-		} else {
-			ZVAL_MAKE_REF_EX(varptr, 2);
-		}
-		ZVAL_REF(arg, Z_REF_P(varptr));
-
-		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	varptr = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-	if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(varptr) == IS_UNDEF)) {
-		SAVE_OPLINE();
-		ZVAL_UNDEFINED_OP1();
-		ZVAL_NULL(arg);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-
-	if (IS_VAR == IS_CV) {
-		ZVAL_COPY_DEREF(arg, varptr);
-	} else /* if (IS_VAR == IS_VAR) */ {
-		if (UNEXPECTED(Z_ISREF_P(varptr))) {
-			zend_refcounted *ref = Z_COUNTED_P(varptr);
-
-			varptr = Z_REFVAL_P(varptr);
-			ZVAL_COPY_VALUE(arg, varptr);
-			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-				efree_size(ref, sizeof(zend_reference));
-			} else if (Z_OPT_REFCOUNTED_P(arg)) {
-				Z_ADDREF_P(arg);
-			}
-		} else {
-			ZVAL_COPY_VALUE(arg, varptr);
-		}
-	}
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_VAR_UNUSED_QUICK_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *varptr, *arg;
-	uint32_t arg_num;
-
-	if (IS_UNUSED == IS_CONST) {
-		SAVE_OPLINE();
-		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
-		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
-		if (UNEXPECTED(!arg)) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
-		arg_num = opline->op2.num;
-	}
-
-	if (EXPECTED(1)) {
+	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
 		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 			goto send_var_by_ref;
 		}
@@ -30021,6 +31535,39 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_VAR_UNUSED_HANDL
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *op1 = EX_VAR(opline->op1.var);
+
+	if (opline->op1_type == IS_CV) {
+		if (UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+			ZVAL_NEW_EMPTY_REF(op1);
+			Z_SET_REFCOUNT_P(op1, 2);
+			ZVAL_NULL(Z_REFVAL_P(op1));
+			ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
+		} else {
+			if (Z_ISREF_P(op1)) {
+				Z_ADDREF_P(op1);
+			} else {
+				ZVAL_MAKE_REF_EX(op1, 2);
+			}
+			ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_INDIRECT)) {
+		op1 = Z_INDIRECT_P(op1);
+		if (EXPECTED(!Z_ISREF_P(op1))) {
+			ZVAL_MAKE_REF_EX(op1, 2);
+		} else {
+			GC_ADDREF(Z_REF_P(op1));
+		}
+		ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
+	} else {
+		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
+	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_TYPE_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -30112,6 +31659,7 @@ assign_op_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -30205,7 +31753,7 @@ assign_dim_op_new_array:
 			}
 		}
 
-		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
+		value = get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1);
 
 		do {
 			if (IS_CV != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
@@ -30336,6 +31884,7 @@ pre_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -30403,6 +31952,7 @@ post_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -30692,6 +32242,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -30826,6 +32377,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -30960,6 +32512,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -31094,6 +32647,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -32278,6 +33832,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_CV_HANDLER(
 		}
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(offset);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(offset, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -32716,6 +34271,7 @@ assign_op_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -32810,6 +34366,7 @@ pre_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -32877,6 +34434,7 @@ post_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -32994,6 +34552,7 @@ fetch_obj_r_fast_copy:
 				}
 			}
 			name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -33109,7 +34668,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CONST
 	/* here we are sure we are dealing with an object */
 	do {
 		zend_object *zobj = Z_OBJ_P(container);
-		zend_string *name, *tmp_name;
+		zend_string *name, *tmp_name = NULL;
 		zval *retval;
 
 		if (IS_CONST == IS_CONST) {
@@ -33325,6 +34884,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -33459,6 +35019,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -33593,6 +35154,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -33727,6 +35289,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -34421,6 +35984,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_CONST_HA
 		}
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(offset);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(offset, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -34465,6 +36029,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UN
 
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(offset);
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(offset, &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -34773,6 +36338,7 @@ assign_op_object:
 		zobj = Z_OBJ_P(object);
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -34867,6 +36433,7 @@ pre_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -34935,6 +36502,7 @@ post_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -35053,6 +36621,7 @@ fetch_obj_r_fast_copy:
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -35163,7 +36732,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_UNUSED_TMPVA
 	/* here we are sure we are dealing with an object */
 	do {
 		zend_object *zobj = Z_OBJ_P(container);
-		zend_string *name, *tmp_name;
+		zend_string *name, *tmp_name = NULL;
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
@@ -35379,6 +36948,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -35513,6 +37083,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -35647,6 +37218,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -35781,6 +37353,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -36303,6 +37876,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_TMPVAR_H
 		}
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(offset);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(offset, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -36348,6 +37922,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UN
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(offset);
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(offset, &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -37269,6 +38844,7 @@ assign_op_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -37363,6 +38939,7 @@ pre_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -37430,6 +39007,7 @@ post_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -37547,6 +39125,7 @@ fetch_obj_r_fast_copy:
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -37657,7 +39236,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CV_HA
 	/* here we are sure we are dealing with an object */
 	do {
 		zend_object *zobj = Z_OBJ_P(container);
-		zend_string *name, *tmp_name;
+		zend_string *name, *tmp_name = NULL;
 		zval *retval;
 
 		if (IS_CV == IS_CONST) {
@@ -37873,6 +39452,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -38007,6 +39587,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -38141,6 +39722,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -38275,6 +39857,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -38796,6 +40379,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_UNUSED_CV_HANDL
 		}
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(offset);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(offset, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -38840,6 +40424,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UN
 
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(offset);
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(offset, &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -41302,6 +42887,7 @@ assign_op_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -41395,7 +42981,7 @@ assign_dim_op_new_array:
 			}
 		}
 
-		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
+		value = get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1);
 
 		do {
 			if (IS_CONST != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
@@ -41526,6 +43112,7 @@ pre_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -41593,6 +43180,7 @@ post_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -41822,6 +43410,7 @@ fetch_obj_r_fast_copy:
 				}
 			}
 			name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -41937,7 +43526,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CV_CONST_HAN
 	/* here we are sure we are dealing with an object */
 	do {
 		zend_object *zobj = Z_OBJ_P(container);
-		zend_string *name, *tmp_name;
+		zend_string *name, *tmp_name = NULL;
 		zval *retval;
 
 		if (IS_CONST == IS_CONST) {
@@ -42153,6 +43742,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -42287,6 +43877,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -42421,6 +44012,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -42555,6 +44147,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(RT_CONSTANT(opline, opline->op2), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -43987,6 +45580,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_CONST_HANDLE
 		}
 		if (IS_CONST == IS_CONST) {
 			name = Z_STR_P(offset);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(offset, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -44110,6 +45704,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV
 
 	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(offset);
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(offset, &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -45142,6 +46737,7 @@ assign_op_object:
 		zobj = Z_OBJ_P(object);
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -45235,7 +46831,7 @@ assign_dim_op_new_array:
 			}
 		}
 
-		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
+		value = get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1);
 
 		do {
 			if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
@@ -45368,6 +46964,7 @@ pre_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -45436,6 +47033,7 @@ post_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -45666,6 +47264,7 @@ fetch_obj_r_fast_copy:
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -45776,7 +47375,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CV_TMPVAR_HA
 	/* here we are sure we are dealing with an object */
 	do {
 		zend_object *zobj = Z_OBJ_P(container);
-		zend_string *name, *tmp_name;
+		zend_string *name, *tmp_name = NULL;
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
@@ -45992,6 +47591,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -46126,6 +47726,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -46260,6 +47861,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -46394,6 +47996,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -47628,6 +49231,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_TMPVAR_HANDL
 		}
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 			name = Z_STR_P(offset);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(offset, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -47752,6 +49356,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV
 
 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(offset);
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(offset, &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -48225,7 +49830,7 @@ assign_dim_op_new_array:
 			}
 		}
 
-		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
+		value = get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1);
 
 		do {
 			if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
@@ -48303,9 +49908,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_ad
 	SAVE_OPLINE();
 	varname = EX_VAR(opline->op1.var);
 
-	if (IS_CV == IS_CONST) {
-		name = Z_STR_P(varname);
-	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
+	if (IS_CV == IS_CONST || EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
 		tmp_name = NULL;
 	} else {
@@ -49242,72 +50845,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_CV_UNUSED_HAN
 		arg_num = opline->op2.num;
 	}
 
-	if (EXPECTED(0)) {
-		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-			goto send_var_by_ref;
-		}
-	} else if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-send_var_by_ref:
-		varptr = _get_zval_ptr_cv_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
-		if (Z_ISREF_P(varptr)) {
-			Z_ADDREF_P(varptr);
-		} else {
-			ZVAL_MAKE_REF_EX(varptr, 2);
-		}
-		ZVAL_REF(arg, Z_REF_P(varptr));
-
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	varptr = EX_VAR(opline->op1.var);
-	if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(varptr) == IS_UNDEF)) {
-		SAVE_OPLINE();
-		ZVAL_UNDEFINED_OP1();
-		ZVAL_NULL(arg);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-
-	if (IS_CV == IS_CV) {
-		ZVAL_COPY_DEREF(arg, varptr);
-	} else /* if (IS_CV == IS_VAR) */ {
-		if (UNEXPECTED(Z_ISREF_P(varptr))) {
-			zend_refcounted *ref = Z_COUNTED_P(varptr);
-
-			varptr = Z_REFVAL_P(varptr);
-			ZVAL_COPY_VALUE(arg, varptr);
-			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
-				efree_size(ref, sizeof(zend_reference));
-			} else if (Z_OPT_REFCOUNTED_P(arg)) {
-				Z_ADDREF_P(arg);
-			}
-		} else {
-			ZVAL_COPY_VALUE(arg, varptr);
-		}
-	}
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_EX_SPEC_CV_UNUSED_QUICK_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *varptr, *arg;
-	uint32_t arg_num;
-
-	if (IS_UNUSED == IS_CONST) {
-		SAVE_OPLINE();
-		zend_string *arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
-		arg = zend_handle_named_arg(&EX(call), arg_name, &arg_num, CACHE_ADDR(opline->result.num));
-		if (UNEXPECTED(!arg)) {
-
-			HANDLE_EXCEPTION();
-		}
-	} else {
-		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
-		arg_num = opline->op2.num;
-	}
-
-	if (EXPECTED(1)) {
+	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
 		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 			goto send_var_by_ref;
 		}
@@ -49499,9 +51037,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDL
 
 	varname = EX_VAR(opline->op1.var);
 
-	if (IS_CV == IS_CONST) {
-		name = Z_STR_P(varname);
-	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
+	if (IS_CV == IS_CONST || EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
 		tmp_name = NULL;
 	} else {
@@ -49584,6 +51120,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUS
 	varname = _get_zval_ptr_cv_BP_VAR_IS(opline->op1.var EXECUTE_DATA_CC);
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(varname);
+		tmp_name = NULL;
 	} else {
 		name = zval_get_tmp_string(varname, &tmp_name);
 	}
@@ -50530,6 +52067,7 @@ assign_op_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -50623,7 +52161,7 @@ assign_dim_op_new_array:
 			}
 		}
 
-		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
+		value = get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1);
 
 		do {
 			if (IS_CV != IS_UNUSED && UNEXPECTED(Z_ISREF_P(var_ptr))) {
@@ -50754,6 +52292,7 @@ pre_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -50821,6 +52360,7 @@ post_incdec_object:
 		zobj = Z_OBJ_P(object);
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(property);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(property, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -51050,6 +52590,7 @@ fetch_obj_r_fast_copy:
 				}
 			}
 			name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -51160,7 +52701,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CV_CV_HANDLE
 	/* here we are sure we are dealing with an object */
 	do {
 		zend_object *zobj = Z_OBJ_P(container);
-		zend_string *name, *tmp_name;
+		zend_string *name, *tmp_name = NULL;
 		zval *retval;
 
 		if (IS_CV == IS_CONST) {
@@ -51376,6 +52917,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -51510,6 +53052,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -51644,6 +53187,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -51778,6 +53322,7 @@ fast_assign_obj:
 			}
 		}
 		name = Z_STR_P(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC));
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(_get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC), &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -53107,6 +54652,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_CV_CV_HANDLER(Z
 		}
 		if (IS_CV == IS_CONST) {
 			name = Z_STR_P(offset);
+			tmp_name = NULL;
 		} else {
 			name = zval_try_get_tmp_string(offset, &tmp_name);
 			if (UNEXPECTED(!name)) {
@@ -53230,6 +54776,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV
 
 	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(offset);
+		tmp_name = NULL;
 	} else {
 		name = zval_try_get_tmp_string(offset, &tmp_name);
 		if (UNEXPECTED(!name)) {
@@ -54199,16 +55746,56 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_UNUSED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_USED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_UNUSED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_USED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_VAR_VAR_RETVAL_UNUSED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_VAR_VAR_RETVAL_USED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_VAR_CV_RETVAL_UNUSED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_VAR_CV_RETVAL_USED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54220,15 +55807,75 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_CV_CONST_RETVAL_UNUSED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_CV_CONST_RETVAL_USED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_UNUSED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_USED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_CV_VAR_RETVAL_UNUSED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_CV_VAR_RETVAL_USED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_CV_CV_RETVAL_UNUSED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_SPEC_CV_CV_RETVAL_USED_LABEL,
+			(void*)&&ZEND_ASSIGN_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54280,30 +55927,80 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_CV_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_CV_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_CV_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_VAR_CV_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54330,30 +56027,105 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_CONST_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_CONST_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_CONST_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_CONST_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_CV_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_CV_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_CV_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_SPEC_CV_CV_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54405,80 +56177,155 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_TMP_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_STATIC_PROP_SPEC_OP_DATA_CONST_LABEL,
 			(void*)&&ZEND_ASSIGN_STATIC_PROP_SPEC_OP_DATA_TMP_LABEL,
 			(void*)&&ZEND_ASSIGN_STATIC_PROP_SPEC_OP_DATA_VAR_LABEL,
@@ -54494,21 +56341,56 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OP_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OP_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OP_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OP_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OP_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OP_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OP_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OP_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OP_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OP_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OP_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OP_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54520,20 +56402,45 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_VAR_UNUSED_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54545,20 +56452,35 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_UNUSED_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_UNUSED_TMPVAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_UNUSED_TMPVAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_UNUSED_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_STATIC_PROP_OP_SPEC_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54572,9 +56494,31 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_REF_SPEC_VAR_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_REF_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_REF_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_REF_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54583,8 +56527,11 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_REF_SPEC_CV_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_REF_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_REF_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_REF_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_QM_ASSIGN_SPEC_CONST_LABEL,
 			(void*)&&ZEND_QM_ASSIGN_SPEC_TMP_LABEL,
 			(void*)&&ZEND_QM_ASSIGN_SPEC_VAR_LABEL,
@@ -54642,19 +56589,91 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54663,23 +56682,48 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CONST_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CONST_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54688,23 +56732,48 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54713,39 +56782,72 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_DATA_VAR_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_DATA_CV_LABEL,
+			(void*)&&ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_LABEL,
 			(void*)&&ZEND_ASSIGN_STATIC_PROP_REF_SPEC_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_PRE_INC_SPEC_VAR_RETVAL_UNUSED_LABEL,
+			(void*)&&ZEND_PRE_INC_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_PRE_INC_SPEC_VAR_RETVAL_USED_LABEL,
+			(void*)&&ZEND_PRE_INC_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_PRE_INC_SPEC_CV_RETVAL_UNUSED_LABEL,
+			(void*)&&ZEND_PRE_INC_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_PRE_INC_SPEC_CV_RETVAL_USED_LABEL,
+			(void*)&&ZEND_PRE_INC_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_PRE_DEC_SPEC_VAR_RETVAL_UNUSED_LABEL,
+			(void*)&&ZEND_PRE_DEC_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_PRE_DEC_SPEC_VAR_RETVAL_USED_LABEL,
+			(void*)&&ZEND_PRE_DEC_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_PRE_DEC_SPEC_CV_RETVAL_UNUSED_LABEL,
+			(void*)&&ZEND_PRE_DEC_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_PRE_DEC_SPEC_CV_RETVAL_USED_LABEL,
+			(void*)&&ZEND_PRE_DEC_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_POST_INC_SPEC_VAR_LABEL,
+			(void*)&&ZEND_POST_INC_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_POST_INC_SPEC_CV_LABEL,
+			(void*)&&ZEND_POST_INC_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_POST_DEC_SPEC_VAR_LABEL,
+			(void*)&&ZEND_POST_DEC_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_POST_DEC_SPEC_CV_LABEL,
+			(void*)&&ZEND_POST_DEC_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_PRE_INC_STATIC_PROP_SPEC_LABEL,
 			(void*)&&ZEND_POST_INC_STATIC_PROP_SPEC_LABEL,
 			(void*)&&ZEND_JMP_SPEC_LABEL,
@@ -54901,13 +57003,13 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_SEND_VAR_EX_SPEC_VAR_CONST_LABEL,
-			(void*)&&ZEND_SEND_VAR_EX_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_SEND_VAR_EX_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_SEND_VAR_EX_SPEC_VAR_UNUSED_LABEL,
-			(void*)&&ZEND_SEND_VAR_EX_SPEC_VAR_UNUSED_QUICK_LABEL,
+			(void*)&&ZEND_SEND_VAR_EX_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54921,13 +57023,23 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_SEND_VAR_EX_SPEC_CV_CONST_LABEL,
-			(void*)&&ZEND_SEND_VAR_EX_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_SEND_VAR_EX_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_SEND_VAR_EX_SPEC_CV_UNUSED_LABEL,
-			(void*)&&ZEND_SEND_VAR_EX_SPEC_CV_UNUSED_QUICK_LABEL,
+			(void*)&&ZEND_SEND_VAR_EX_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54941,9 +57053,19 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_SEND_REF_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_SEND_REF_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_SEND_REF_SPEC_VAR_UNUSED_LABEL,
+			(void*)&&ZEND_SEND_REF_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54951,9 +57073,14 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_SEND_REF_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_SEND_REF_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_SEND_REF_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_SEND_REF_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NEW_SPEC_CONST_UNUSED_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -54988,30 +57115,55 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_INIT_ARRAY_SPEC_CV_UNUSED_LABEL,
 			(void*)&&ZEND_INIT_ARRAY_SPEC_CV_CV_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMPVAR_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMPVAR_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMPVAR_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMPVAR_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_INCLUDE_OR_EVAL_SPEC_CONST_LABEL,
 			(void*)&&ZEND_INCLUDE_OR_EVAL_SPEC_OBSERVER_LABEL,
 			(void*)&&ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_LABEL,
@@ -55023,10 +57175,25 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_INCLUDE_OR_EVAL_SPEC_CV_LABEL,
 			(void*)&&ZEND_INCLUDE_OR_EVAL_SPEC_OBSERVER_LABEL,
 			(void*)&&ZEND_UNSET_VAR_SPEC_CONST_UNUSED_LABEL,
+			(void*)&&ZEND_UNSET_VAR_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_UNSET_VAR_SPEC_TMPVAR_UNUSED_LABEL,
+			(void*)&&ZEND_UNSET_VAR_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_UNSET_VAR_SPEC_TMPVAR_UNUSED_LABEL,
+			(void*)&&ZEND_UNSET_VAR_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_UNSET_VAR_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_UNSET_VAR_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -55038,20 +57205,45 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_UNSET_DIM_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_UNSET_DIM_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_UNSET_DIM_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_UNSET_DIM_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_UNSET_DIM_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_UNSET_DIM_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_UNSET_DIM_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_UNSET_DIM_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_UNSET_DIM_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_UNSET_DIM_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_UNSET_DIM_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_UNSET_DIM_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_UNSET_DIM_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_UNSET_DIM_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_UNSET_DIM_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_UNSET_DIM_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -55063,20 +57255,35 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_UNSET_OBJ_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_UNSET_OBJ_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_UNSET_OBJ_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_UNSET_OBJ_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_UNSET_OBJ_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_UNSET_OBJ_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_UNSET_OBJ_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_UNSET_OBJ_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_UNSET_OBJ_SPEC_UNUSED_CONST_LABEL,
+			(void*)&&ZEND_UNSET_OBJ_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_UNSET_OBJ_SPEC_UNUSED_TMPVAR_LABEL,
+			(void*)&&ZEND_UNSET_OBJ_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_UNSET_OBJ_SPEC_UNUSED_TMPVAR_LABEL,
+			(void*)&&ZEND_UNSET_OBJ_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_UNSET_OBJ_SPEC_UNUSED_CV_LABEL,
+			(void*)&&ZEND_UNSET_OBJ_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_UNSET_OBJ_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_UNSET_OBJ_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_UNSET_OBJ_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_UNSET_OBJ_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_UNSET_OBJ_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_UNSET_OBJ_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_UNSET_OBJ_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_UNSET_OBJ_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FE_RESET_R_SPEC_CONST_LABEL,
 			(void*)&&ZEND_FE_RESET_R_SPEC_TMP_LABEL,
 			(void*)&&ZEND_FE_RESET_R_SPEC_VAR_LABEL,
@@ -55140,10 +57347,25 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_R_SPEC_CV_CV_LABEL,
 			(void*)&&ZEND_FETCH_W_SPEC_CONST_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_W_SPEC_TMPVAR_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_W_SPEC_TMPVAR_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_W_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_W_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_W_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -55155,20 +57377,45 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_DIM_W_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_FETCH_DIM_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_W_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_W_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_W_SPEC_VAR_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_DIM_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_W_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_FETCH_DIM_W_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_DIM_W_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_FETCH_DIM_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_W_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_W_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_W_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_DIM_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_W_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_FETCH_DIM_W_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -55180,25 +57427,55 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_W_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_W_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_W_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_W_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_W_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_W_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_RW_SPEC_CONST_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_RW_SPEC_TMPVAR_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_RW_SPEC_TMPVAR_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_RW_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_RW_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_RW_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -55210,20 +57487,45 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_DIM_RW_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_FETCH_DIM_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_RW_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_RW_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_RW_SPEC_VAR_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_DIM_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_RW_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_FETCH_DIM_RW_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_DIM_RW_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_FETCH_DIM_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_RW_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_RW_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_RW_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_DIM_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_RW_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_FETCH_DIM_RW_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -55235,20 +57537,35 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CONST_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_UNUSED_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_UNUSED_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CV_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_RW_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_IS_SPEC_CONST_UNUSED_LABEL,
 			(void*)&&ZEND_FETCH_IS_SPEC_TMPVAR_UNUSED_LABEL,
 			(void*)&&ZEND_FETCH_IS_SPEC_TMPVAR_UNUSED_LABEL,
@@ -55305,65 +57622,135 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_IS_SPEC_CV_CV_LABEL,
 			(void*)&&ZEND_FETCH_FUNC_ARG_SPEC_CONST_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_FUNC_ARG_SPEC_TMPVAR_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_FUNC_ARG_SPEC_TMPVAR_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_FUNC_ARG_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_FUNC_ARG_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_CONST_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_CV_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_CONST_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_CV_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_CONST_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_CV_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CONST_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_CONST_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_CV_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_UNSET_SPEC_CONST_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_UNSET_SPEC_TMPVAR_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_UNSET_SPEC_TMPVAR_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_UNSET_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_UNSET_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_FETCH_UNSET_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -55375,20 +57762,45 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -55400,20 +57812,35 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CONST_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CV_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_CV_CONST_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_LABEL,
+			(void*)&&ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_LIST_R_SPEC_CONST_CONST_LABEL,
 			(void*)&&ZEND_FETCH_LIST_R_SPEC_CONST_TMPVAR_LABEL,
 			(void*)&&ZEND_FETCH_LIST_R_SPEC_CONST_TMPVAR_LABEL,
@@ -55477,15 +57904,25 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_CLONE_SPEC_UNUSED_LABEL,
 			(void*)&&ZEND_CLONE_SPEC_CV_LABEL,
 			(void*)&&ZEND_RETURN_BY_REF_SPEC_CONST_LABEL,
-			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_LABEL,
+			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_LABEL,
+			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_LABEL,
+			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_LABEL,
 			(void*)&&ZEND_RETURN_BY_REF_SPEC_TMP_LABEL,
-			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_LABEL,
+			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_LABEL,
+			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_LABEL,
+			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_LABEL,
 			(void*)&&ZEND_RETURN_BY_REF_SPEC_VAR_LABEL,
-			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_LABEL,
+			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_LABEL,
+			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_LABEL,
+			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_RETURN_BY_REF_SPEC_CV_LABEL,
-			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_LABEL,
+			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_LABEL,
+			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_LABEL,
+			(void*)&&ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_LABEL,
 			(void*)&&ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_LABEL,
@@ -55776,9 +58213,14 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_GENERATOR_CREATE_SPEC_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_MAKE_REF_SPEC_VAR_UNUSED_LABEL,
+			(void*)&&ZEND_MAKE_REF_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_MAKE_REF_SPEC_CV_UNUSED_LABEL,
+			(void*)&&ZEND_MAKE_REF_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_DECLARE_FUNCTION_SPEC_LABEL,
 			(void*)&&ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_LABEL,
 			(void*)&&ZEND_DECLARE_CONST_SPEC_CONST_CONST_LABEL,
@@ -55823,10 +58265,15 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_ISSET_ISEMPTY_CV_SPEC_CV_UNUSED_SET_LABEL,
 			(void*)&&ZEND_ISSET_ISEMPTY_CV_SPEC_CV_UNUSED_EMPTY_LABEL,
 			(void*)&&ZEND_FETCH_LIST_W_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_FETCH_LIST_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_LIST_W_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_LIST_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_FETCH_LIST_W_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_LIST_W_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_LIST_W_SPEC_VAR_CV_LABEL,
+			(void*)&&ZEND_FETCH_LIST_W_SPEC_DELAYED_LABEL,
 			(void*)&&ZEND_SEPARATE_SPEC_VAR_UNUSED_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FETCH_CLASS_NAME_SPEC_TMPVAR_LABEL,
@@ -55955,9 +58402,14 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_BIND_STATIC_SPEC_CV_LABEL,
 			(void*)&&ZEND_FETCH_THIS_SPEC_UNUSED_UNUSED_LABEL,
 			(void*)&&ZEND_SEND_FUNC_ARG_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_SEND_FUNC_ARG_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_SEND_FUNC_ARG_SPEC_VAR_UNUSED_LABEL,
+			(void*)&&ZEND_SEND_FUNC_ARG_SPEC_DELAYED_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_ISSET_ISEMPTY_THIS_SPEC_UNUSED_UNUSED_LABEL,
 			(void*)&&ZEND_SWITCH_LONG_SPEC_CONST_CONST_LABEL,
@@ -57594,9 +60046,9 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_RETURN_BY_REF_SPEC_CONST)
 				ZEND_RETURN_BY_REF_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_RETURN_BY_REF_SPEC_OBSERVER):
-				VM_TRACE(ZEND_RETURN_BY_REF_SPEC_OBSERVER)
-				ZEND_RETURN_BY_REF_SPEC_OBSERVER_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			HYBRID_CASE(ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED):
+				VM_TRACE(ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED)
+				ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_GENERATOR_RETURN_SPEC_CONST):
 				VM_TRACE(ZEND_GENERATOR_RETURN_SPEC_CONST)
@@ -57794,6 +60246,10 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_CONST)
 				ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED):
+				VM_TRACE(ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED)
+				ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_OBJ_R_SPEC_CONST_CONST):
 				VM_TRACE(ZEND_FETCH_OBJ_R_SPEC_CONST_CONST)
 				ZEND_FETCH_OBJ_R_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -57805,6 +60261,10 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_CONST):
 				VM_TRACE(ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_CONST)
 				ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED):
+				VM_TRACE(ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED)
+				ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_LIST_R_SPEC_CONST_CONST):
 				VM_TRACE(ZEND_FETCH_LIST_R_SPEC_CONST_CONST)
@@ -57841,6 +60301,10 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST):
 				VM_TRACE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST)
 				ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED):
+				VM_TRACE(ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED)
+				ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_ARRAY_SPEC_CONST_CONST):
 				VM_TRACE(ZEND_INIT_ARRAY_SPEC_CONST_CONST)
@@ -58090,17 +60554,33 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_FETCH_W_SPEC_CONST_UNUSED)
 				ZEND_FETCH_W_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_W_SPEC_DELAYED):
+				VM_TRACE(ZEND_FETCH_W_SPEC_DELAYED)
+				ZEND_FETCH_W_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_RW_SPEC_CONST_UNUSED):
 				VM_TRACE(ZEND_FETCH_RW_SPEC_CONST_UNUSED)
 				ZEND_FETCH_RW_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_RW_SPEC_DELAYED):
+				VM_TRACE(ZEND_FETCH_RW_SPEC_DELAYED)
+				ZEND_FETCH_RW_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_FUNC_ARG_SPEC_CONST_UNUSED):
 				VM_TRACE(ZEND_FETCH_FUNC_ARG_SPEC_CONST_UNUSED)
 				ZEND_FETCH_FUNC_ARG_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_FUNC_ARG_SPEC_DELAYED):
+				VM_TRACE(ZEND_FETCH_FUNC_ARG_SPEC_DELAYED)
+				ZEND_FETCH_FUNC_ARG_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_UNSET_SPEC_CONST_UNUSED):
 				VM_TRACE(ZEND_FETCH_UNSET_SPEC_CONST_UNUSED)
 				ZEND_FETCH_UNSET_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_UNSET_SPEC_DELAYED):
+				VM_TRACE(ZEND_FETCH_UNSET_SPEC_DELAYED)
+				ZEND_FETCH_UNSET_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_IS_SPEC_CONST_UNUSED):
 				VM_TRACE(ZEND_FETCH_IS_SPEC_CONST_UNUSED)
@@ -58145,6 +60625,10 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_UNSET_VAR_SPEC_CONST_UNUSED):
 				VM_TRACE(ZEND_UNSET_VAR_SPEC_CONST_UNUSED)
 				ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_UNSET_VAR_SPEC_DELAYED):
+				VM_TRACE(ZEND_UNSET_VAR_SPEC_DELAYED)
+				ZEND_UNSET_VAR_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED):
 				VM_TRACE(ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED)
@@ -59336,6 +61820,10 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_PRE_INC_SPEC_VAR_RETVAL_UNUSED)
 				ZEND_PRE_INC_SPEC_VAR_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_PRE_INC_SPEC_DELAYED):
+				VM_TRACE(ZEND_PRE_INC_SPEC_DELAYED)
+				ZEND_PRE_INC_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_PRE_INC_SPEC_VAR_RETVAL_USED):
 				VM_TRACE(ZEND_PRE_INC_SPEC_VAR_RETVAL_USED)
 				ZEND_PRE_INC_SPEC_VAR_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -59343,6 +61831,10 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_PRE_DEC_SPEC_VAR_RETVAL_UNUSED):
 				VM_TRACE(ZEND_PRE_DEC_SPEC_VAR_RETVAL_UNUSED)
 				ZEND_PRE_DEC_SPEC_VAR_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_PRE_DEC_SPEC_DELAYED):
+				VM_TRACE(ZEND_PRE_DEC_SPEC_DELAYED)
+				ZEND_PRE_DEC_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_PRE_DEC_SPEC_VAR_RETVAL_USED):
 				VM_TRACE(ZEND_PRE_DEC_SPEC_VAR_RETVAL_USED)
@@ -59352,9 +61844,17 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_POST_INC_SPEC_VAR)
 				ZEND_POST_INC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_POST_INC_SPEC_DELAYED):
+				VM_TRACE(ZEND_POST_INC_SPEC_DELAYED)
+				ZEND_POST_INC_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_POST_DEC_SPEC_VAR):
 				VM_TRACE(ZEND_POST_DEC_SPEC_VAR)
 				ZEND_POST_DEC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_POST_DEC_SPEC_DELAYED):
+				VM_TRACE(ZEND_POST_DEC_SPEC_DELAYED)
+				ZEND_POST_DEC_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_RETURN_SPEC_VAR):
 				VM_TRACE(ZEND_RETURN_SPEC_VAR)
@@ -59502,13 +62002,25 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_ASSIGN_OBJ_OP_SPEC_VAR_CONST)
 				ZEND_ASSIGN_OBJ_OP_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED):
+				VM_TRACE(ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED)
+				ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_DIM_OP_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_ASSIGN_DIM_OP_SPEC_VAR_CONST)
 				ZEND_ASSIGN_DIM_OP_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ASSIGN_DIM_OP_SPEC_DELAYED):
+				VM_TRACE(ZEND_ASSIGN_DIM_OP_SPEC_DELAYED)
+				ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_OP_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_ASSIGN_OP_SPEC_VAR_CONST)
 				ZEND_ASSIGN_OP_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ASSIGN_OP_SPEC_DELAYED):
+				VM_TRACE(ZEND_ASSIGN_OP_SPEC_DELAYED)
+				ZEND_ASSIGN_OP_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_PRE_INC_OBJ_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_PRE_INC_OBJ_SPEC_VAR_CONST)
@@ -59522,9 +62034,17 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_FETCH_DIM_W_SPEC_VAR_CONST)
 				ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_DIM_W_SPEC_DELAYED):
+				VM_TRACE(ZEND_FETCH_DIM_W_SPEC_DELAYED)
+				ZEND_FETCH_DIM_W_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_DIM_RW_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_FETCH_DIM_RW_SPEC_VAR_CONST)
 				ZEND_FETCH_DIM_RW_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_DIM_RW_SPEC_DELAYED):
+				VM_TRACE(ZEND_FETCH_DIM_RW_SPEC_DELAYED)
+				ZEND_FETCH_DIM_RW_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CONST)
@@ -59534,13 +62054,25 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_FETCH_DIM_UNSET_SPEC_VAR_CONST)
 				ZEND_FETCH_DIM_UNSET_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_DIM_UNSET_SPEC_DELAYED):
+				VM_TRACE(ZEND_FETCH_DIM_UNSET_SPEC_DELAYED)
+				ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_OBJ_W_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_FETCH_OBJ_W_SPEC_VAR_CONST)
 				ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_OBJ_W_SPEC_DELAYED):
+				VM_TRACE(ZEND_FETCH_OBJ_W_SPEC_DELAYED)
+				ZEND_FETCH_OBJ_W_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST)
 				ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_OBJ_RW_SPEC_DELAYED):
+				VM_TRACE(ZEND_FETCH_OBJ_RW_SPEC_DELAYED)
+				ZEND_FETCH_OBJ_RW_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CONST)
@@ -59550,13 +62082,25 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST)
 				ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED):
+				VM_TRACE(ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED)
+				ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_LIST_W_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_FETCH_LIST_W_SPEC_VAR_CONST)
 				ZEND_FETCH_LIST_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_LIST_W_SPEC_DELAYED):
+				VM_TRACE(ZEND_FETCH_LIST_W_SPEC_DELAYED)
+				ZEND_FETCH_LIST_W_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_CONST):
 				VM_TRACE(ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_CONST)
 				ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED):
+				VM_TRACE(ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED)
+				ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_TMP):
 				VM_TRACE(ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_TMP)
@@ -59574,6 +62118,10 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_DATA_CONST)
 				ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_DATA_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED):
+				VM_TRACE(ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED)
+				ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_DATA_TMP):
 				VM_TRACE(ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_DATA_TMP)
 				ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_DATA_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -59590,6 +62138,10 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_UNUSED)
 				ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ASSIGN_SPEC_DELAYED):
+				VM_TRACE(ZEND_ASSIGN_SPEC_DELAYED)
+				ZEND_ASSIGN_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_USED):
 				VM_TRACE(ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_USED)
 				ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -59597,6 +62149,10 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_OP_DATA_VAR):
 				VM_TRACE(ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_OP_DATA_VAR)
 				ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_OP_DATA_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED):
+				VM_TRACE(ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED)
+				ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_OP_DATA_CV):
 				VM_TRACE(ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_OP_DATA_CV)
@@ -59622,13 +62178,25 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_SEND_REF_SPEC_VAR_CONST)
 				ZEND_SEND_REF_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_SEND_REF_SPEC_DELAYED):
+				VM_TRACE(ZEND_SEND_REF_SPEC_DELAYED)
+				ZEND_SEND_REF_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SEND_VAR_EX_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_SEND_VAR_EX_SPEC_VAR_CONST)
 				ZEND_SEND_VAR_EX_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_SEND_VAR_EX_SPEC_DELAYED):
+				VM_TRACE(ZEND_SEND_VAR_EX_SPEC_DELAYED)
+				ZEND_SEND_VAR_EX_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SEND_FUNC_ARG_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_SEND_FUNC_ARG_SPEC_VAR_CONST)
 				ZEND_SEND_FUNC_ARG_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_SEND_FUNC_ARG_SPEC_DELAYED):
+				VM_TRACE(ZEND_SEND_FUNC_ARG_SPEC_DELAYED)
+				ZEND_SEND_FUNC_ARG_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_CONST)
@@ -59646,9 +62214,17 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_UNSET_DIM_SPEC_VAR_CONST)
 				ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_UNSET_DIM_SPEC_DELAYED):
+				VM_TRACE(ZEND_UNSET_DIM_SPEC_DELAYED)
+				ZEND_UNSET_DIM_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_UNSET_OBJ_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_UNSET_OBJ_SPEC_VAR_CONST)
 				ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_UNSET_OBJ_SPEC_DELAYED):
+				VM_TRACE(ZEND_UNSET_OBJ_SPEC_DELAYED)
+				ZEND_UNSET_OBJ_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_YIELD_SPEC_VAR_CONST):
 				VM_TRACE(ZEND_YIELD_SPEC_VAR_CONST)
@@ -59826,6 +62402,10 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_ASSIGN_REF_SPEC_VAR_VAR)
 				ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_ASSIGN_REF_SPEC_DELAYED):
+				VM_TRACE(ZEND_ASSIGN_REF_SPEC_DELAYED)
+				ZEND_ASSIGN_REF_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_DIM_OP_SPEC_VAR_UNUSED):
 				VM_TRACE(ZEND_ASSIGN_DIM_OP_SPEC_VAR_UNUSED)
 				ZEND_ASSIGN_DIM_OP_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -59890,10 +62470,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_SEND_VAR_EX_SPEC_VAR_UNUSED)
 				ZEND_SEND_VAR_EX_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_SEND_VAR_EX_SPEC_VAR_UNUSED_QUICK):
-				VM_TRACE(ZEND_SEND_VAR_EX_SPEC_VAR_UNUSED_QUICK)
-				ZEND_SEND_VAR_EX_SPEC_VAR_UNUSED_QUICK_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SEND_FUNC_ARG_SPEC_VAR_UNUSED):
 				VM_TRACE(ZEND_SEND_FUNC_ARG_SPEC_VAR_UNUSED)
 				ZEND_SEND_FUNC_ARG_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -59921,6 +62497,10 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_MAKE_REF_SPEC_VAR_UNUSED):
 				VM_TRACE(ZEND_MAKE_REF_SPEC_VAR_UNUSED)
 				ZEND_MAKE_REF_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_MAKE_REF_SPEC_DELAYED):
+				VM_TRACE(ZEND_MAKE_REF_SPEC_DELAYED)
+				ZEND_MAKE_REF_SPEC_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_GET_TYPE_SPEC_VAR_UNUSED):
 				VM_TRACE(ZEND_GET_TYPE_SPEC_VAR_UNUSED)
@@ -61256,10 +63836,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_SEND_VAR_EX_SPEC_CV_UNUSED)
 				ZEND_SEND_VAR_EX_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_SEND_VAR_EX_SPEC_CV_UNUSED_QUICK):
-				VM_TRACE(ZEND_SEND_VAR_EX_SPEC_CV_UNUSED_QUICK)
-				ZEND_SEND_VAR_EX_SPEC_CV_UNUSED_QUICK_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED):
 				VM_TRACE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED)
 				ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -62326,16 +64902,56 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_UNUSED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_SPEC_VAR_CONST_RETVAL_USED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_UNUSED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_USED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_SPEC_VAR_VAR_RETVAL_UNUSED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_SPEC_VAR_VAR_RETVAL_USED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_SPEC_VAR_CV_RETVAL_UNUSED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_SPEC_VAR_CV_RETVAL_USED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -62347,15 +64963,75 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_SPEC_CV_CONST_RETVAL_UNUSED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_SPEC_CV_CONST_RETVAL_USED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_UNUSED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_USED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_SPEC_CV_VAR_RETVAL_UNUSED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_SPEC_CV_VAR_RETVAL_USED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_SPEC_CV_CV_RETVAL_UNUSED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_SPEC_CV_CV_RETVAL_USED_HANDLER,
+		ZEND_ASSIGN_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -62407,30 +65083,80 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_CONST_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_CV_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_CV_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_CV_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_VAR_CV_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -62457,30 +65183,105 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_CONST_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_CONST_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_CONST_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_CONST_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_CV_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_CV_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_CV_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_DIM_SPEC_CV_CV_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_DIM_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -62532,80 +65333,155 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_TMP_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_STATIC_PROP_SPEC_OP_DATA_CONST_HANDLER,
 		ZEND_ASSIGN_STATIC_PROP_SPEC_OP_DATA_TMP_HANDLER,
 		ZEND_ASSIGN_STATIC_PROP_SPEC_OP_DATA_VAR_HANDLER,
@@ -62621,21 +65497,56 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OP_SPEC_VAR_CONST_HANDLER,
+		ZEND_ASSIGN_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_OP_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_ASSIGN_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_OP_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_ASSIGN_OP_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OP_SPEC_VAR_CV_HANDLER,
+		ZEND_ASSIGN_OP_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OP_SPEC_CV_CONST_HANDLER,
+		ZEND_ASSIGN_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_OP_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_ASSIGN_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_OP_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_ASSIGN_OP_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OP_SPEC_CV_CV_HANDLER,
+		ZEND_ASSIGN_OP_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -62647,20 +65558,45 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_DIM_OP_SPEC_VAR_CONST_HANDLER,
+		ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_OP_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_OP_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_OP_SPEC_VAR_UNUSED_HANDLER,
+		ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_OP_SPEC_VAR_CV_HANDLER,
+		ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_DIM_OP_SPEC_CV_CONST_HANDLER,
+		ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_OP_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_OP_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_OP_SPEC_CV_UNUSED_HANDLER,
+		ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_DIM_OP_SPEC_CV_CV_HANDLER,
+		ZEND_ASSIGN_DIM_OP_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -62672,20 +65608,35 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_OP_SPEC_VAR_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_OP_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_OP_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_OP_SPEC_VAR_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_OP_SPEC_UNUSED_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_OP_SPEC_UNUSED_TMPVAR_HANDLER,
+		ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_OP_SPEC_UNUSED_TMPVAR_HANDLER,
+		ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_OP_SPEC_UNUSED_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_OP_SPEC_CV_CONST_HANDLER,
+		ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_OP_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_OBJ_OP_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_OP_SPEC_CV_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_OP_SPEC_DELAYED_HANDLER,
 		ZEND_ASSIGN_STATIC_PROP_OP_SPEC_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -62699,9 +65650,31 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER,
+		ZEND_ASSIGN_REF_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER,
+		ZEND_ASSIGN_REF_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -62710,8 +65683,11 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER,
+		ZEND_ASSIGN_REF_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER,
+		ZEND_ASSIGN_REF_SPEC_DELAYED_HANDLER,
 		ZEND_QM_ASSIGN_SPEC_CONST_HANDLER,
 		ZEND_QM_ASSIGN_SPEC_TMP_HANDLER,
 		ZEND_QM_ASSIGN_SPEC_VAR_HANDLER,
@@ -62769,19 +65745,91 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -62790,23 +65838,48 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CONST_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CONST_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -62815,23 +65888,48 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -62840,39 +65938,72 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_DATA_VAR_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_DATA_CV_HANDLER,
+		ZEND_ASSIGN_OBJ_REF_SPEC_OP_DATA_DELAYED_HANDLER,
 		ZEND_ASSIGN_STATIC_PROP_REF_SPEC_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_PRE_INC_SPEC_VAR_RETVAL_UNUSED_HANDLER,
+		ZEND_PRE_INC_SPEC_DELAYED_HANDLER,
 		ZEND_PRE_INC_SPEC_VAR_RETVAL_USED_HANDLER,
+		ZEND_PRE_INC_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_PRE_INC_SPEC_CV_RETVAL_UNUSED_HANDLER,
+		ZEND_PRE_INC_SPEC_DELAYED_HANDLER,
 		ZEND_PRE_INC_SPEC_CV_RETVAL_USED_HANDLER,
+		ZEND_PRE_INC_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_PRE_DEC_SPEC_VAR_RETVAL_UNUSED_HANDLER,
+		ZEND_PRE_DEC_SPEC_DELAYED_HANDLER,
 		ZEND_PRE_DEC_SPEC_VAR_RETVAL_USED_HANDLER,
+		ZEND_PRE_DEC_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_PRE_DEC_SPEC_CV_RETVAL_UNUSED_HANDLER,
+		ZEND_PRE_DEC_SPEC_DELAYED_HANDLER,
 		ZEND_PRE_DEC_SPEC_CV_RETVAL_USED_HANDLER,
+		ZEND_PRE_DEC_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_POST_INC_SPEC_VAR_HANDLER,
+		ZEND_POST_INC_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_POST_INC_SPEC_CV_HANDLER,
+		ZEND_POST_INC_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_POST_DEC_SPEC_VAR_HANDLER,
+		ZEND_POST_DEC_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_POST_DEC_SPEC_CV_HANDLER,
+		ZEND_POST_DEC_SPEC_DELAYED_HANDLER,
 		ZEND_PRE_INC_STATIC_PROP_SPEC_HANDLER,
 		ZEND_POST_INC_STATIC_PROP_SPEC_HANDLER,
 		ZEND_JMP_SPEC_HANDLER,
@@ -63028,13 +66159,13 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_VAR_EX_SPEC_VAR_CONST_HANDLER,
-		ZEND_SEND_VAR_EX_SPEC_VAR_CONST_HANDLER,
+		ZEND_SEND_VAR_EX_SPEC_DELAYED_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_VAR_EX_SPEC_VAR_UNUSED_HANDLER,
-		ZEND_SEND_VAR_EX_SPEC_VAR_UNUSED_QUICK_HANDLER,
+		ZEND_SEND_VAR_EX_SPEC_DELAYED_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -63048,13 +66179,23 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_VAR_EX_SPEC_CV_CONST_HANDLER,
-		ZEND_SEND_VAR_EX_SPEC_CV_CONST_HANDLER,
+		ZEND_SEND_VAR_EX_SPEC_DELAYED_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_VAR_EX_SPEC_CV_UNUSED_HANDLER,
-		ZEND_SEND_VAR_EX_SPEC_CV_UNUSED_QUICK_HANDLER,
+		ZEND_SEND_VAR_EX_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -63068,9 +66209,19 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_REF_SPEC_VAR_CONST_HANDLER,
+		ZEND_SEND_REF_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_REF_SPEC_VAR_UNUSED_HANDLER,
+		ZEND_SEND_REF_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -63078,9 +66229,14 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_REF_SPEC_CV_CONST_HANDLER,
+		ZEND_SEND_REF_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_REF_SPEC_CV_UNUSED_HANDLER,
+		ZEND_SEND_REF_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NEW_SPEC_CONST_UNUSED_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -63115,30 +66271,55 @@ void zend_vm_init(void)
 		ZEND_INIT_ARRAY_SPEC_CV_UNUSED_HANDLER,
 		ZEND_INIT_ARRAY_SPEC_CV_CV_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMPVAR_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMPVAR_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMPVAR_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMPVAR_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER,
+		ZEND_ADD_ARRAY_ELEMENT_SPEC_DELAYED_HANDLER,
 		ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER,
 		ZEND_INCLUDE_OR_EVAL_SPEC_OBSERVER_HANDLER,
 		ZEND_INCLUDE_OR_EVAL_SPEC_TMPVAR_HANDLER,
@@ -63150,10 +66331,25 @@ void zend_vm_init(void)
 		ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER,
 		ZEND_INCLUDE_OR_EVAL_SPEC_OBSERVER_HANDLER,
 		ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HANDLER,
+		ZEND_UNSET_VAR_SPEC_DELAYED_HANDLER,
 		ZEND_UNSET_VAR_SPEC_TMPVAR_UNUSED_HANDLER,
+		ZEND_UNSET_VAR_SPEC_DELAYED_HANDLER,
 		ZEND_UNSET_VAR_SPEC_TMPVAR_UNUSED_HANDLER,
+		ZEND_UNSET_VAR_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDLER,
+		ZEND_UNSET_VAR_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -63165,20 +66361,45 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER,
+		ZEND_UNSET_DIM_SPEC_DELAYED_HANDLER,
 		ZEND_UNSET_DIM_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_UNSET_DIM_SPEC_DELAYED_HANDLER,
 		ZEND_UNSET_DIM_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_UNSET_DIM_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER,
+		ZEND_UNSET_DIM_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER,
+		ZEND_UNSET_DIM_SPEC_DELAYED_HANDLER,
 		ZEND_UNSET_DIM_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_UNSET_DIM_SPEC_DELAYED_HANDLER,
 		ZEND_UNSET_DIM_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_UNSET_DIM_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER,
+		ZEND_UNSET_DIM_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -63190,20 +66411,35 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDLER,
+		ZEND_UNSET_OBJ_SPEC_DELAYED_HANDLER,
 		ZEND_UNSET_OBJ_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_UNSET_OBJ_SPEC_DELAYED_HANDLER,
 		ZEND_UNSET_OBJ_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_UNSET_OBJ_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_UNSET_OBJ_SPEC_VAR_CV_HANDLER,
+		ZEND_UNSET_OBJ_SPEC_DELAYED_HANDLER,
 		ZEND_UNSET_OBJ_SPEC_UNUSED_CONST_HANDLER,
+		ZEND_UNSET_OBJ_SPEC_DELAYED_HANDLER,
 		ZEND_UNSET_OBJ_SPEC_UNUSED_TMPVAR_HANDLER,
+		ZEND_UNSET_OBJ_SPEC_DELAYED_HANDLER,
 		ZEND_UNSET_OBJ_SPEC_UNUSED_TMPVAR_HANDLER,
+		ZEND_UNSET_OBJ_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_UNSET_OBJ_SPEC_UNUSED_CV_HANDLER,
+		ZEND_UNSET_OBJ_SPEC_DELAYED_HANDLER,
 		ZEND_UNSET_OBJ_SPEC_CV_CONST_HANDLER,
+		ZEND_UNSET_OBJ_SPEC_DELAYED_HANDLER,
 		ZEND_UNSET_OBJ_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_UNSET_OBJ_SPEC_DELAYED_HANDLER,
 		ZEND_UNSET_OBJ_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_UNSET_OBJ_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_UNSET_OBJ_SPEC_CV_CV_HANDLER,
+		ZEND_UNSET_OBJ_SPEC_DELAYED_HANDLER,
 		ZEND_FE_RESET_R_SPEC_CONST_HANDLER,
 		ZEND_FE_RESET_R_SPEC_TMP_HANDLER,
 		ZEND_FE_RESET_R_SPEC_VAR_HANDLER,
@@ -63267,10 +66503,25 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_R_SPEC_CV_CV_HANDLER,
 		ZEND_FETCH_W_SPEC_CONST_UNUSED_HANDLER,
+		ZEND_FETCH_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_W_SPEC_TMPVAR_UNUSED_HANDLER,
+		ZEND_FETCH_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_W_SPEC_TMPVAR_UNUSED_HANDLER,
+		ZEND_FETCH_W_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_W_SPEC_CV_UNUSED_HANDLER,
+		ZEND_FETCH_W_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -63282,20 +66533,45 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HANDLER,
+		ZEND_FETCH_DIM_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_W_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_W_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_W_SPEC_VAR_UNUSED_HANDLER,
+		ZEND_FETCH_DIM_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_W_SPEC_VAR_CV_HANDLER,
+		ZEND_FETCH_DIM_W_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_DIM_W_SPEC_CV_CONST_HANDLER,
+		ZEND_FETCH_DIM_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_W_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_W_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_W_SPEC_CV_UNUSED_HANDLER,
+		ZEND_FETCH_DIM_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_W_SPEC_CV_CV_HANDLER,
+		ZEND_FETCH_DIM_W_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -63307,25 +66583,55 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HANDLER,
+		ZEND_FETCH_OBJ_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_W_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLER,
+		ZEND_FETCH_OBJ_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_HANDLER,
+		ZEND_FETCH_OBJ_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_W_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HANDLER,
+		ZEND_FETCH_OBJ_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HANDLER,
+		ZEND_FETCH_OBJ_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_W_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER,
+		ZEND_FETCH_OBJ_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_RW_SPEC_CONST_UNUSED_HANDLER,
+		ZEND_FETCH_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_RW_SPEC_TMPVAR_UNUSED_HANDLER,
+		ZEND_FETCH_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_RW_SPEC_TMPVAR_UNUSED_HANDLER,
+		ZEND_FETCH_RW_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_RW_SPEC_CV_UNUSED_HANDLER,
+		ZEND_FETCH_RW_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -63337,20 +66643,45 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_DIM_RW_SPEC_VAR_CONST_HANDLER,
+		ZEND_FETCH_DIM_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_RW_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_RW_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_RW_SPEC_VAR_UNUSED_HANDLER,
+		ZEND_FETCH_DIM_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_RW_SPEC_VAR_CV_HANDLER,
+		ZEND_FETCH_DIM_RW_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_DIM_RW_SPEC_CV_CONST_HANDLER,
+		ZEND_FETCH_DIM_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_RW_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_RW_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_RW_SPEC_CV_UNUSED_HANDLER,
+		ZEND_FETCH_DIM_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_RW_SPEC_CV_CV_HANDLER,
+		ZEND_FETCH_DIM_RW_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -63362,20 +66693,35 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST_HANDLER,
+		ZEND_FETCH_OBJ_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_RW_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_RW_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_RW_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_RW_SPEC_VAR_CV_HANDLER,
+		ZEND_FETCH_OBJ_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CONST_HANDLER,
+		ZEND_FETCH_OBJ_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_RW_SPEC_UNUSED_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_RW_SPEC_UNUSED_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_RW_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CV_HANDLER,
+		ZEND_FETCH_OBJ_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_RW_SPEC_CV_CONST_HANDLER,
+		ZEND_FETCH_OBJ_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_RW_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_RW_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_RW_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_RW_SPEC_CV_CV_HANDLER,
+		ZEND_FETCH_OBJ_RW_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_IS_SPEC_CONST_UNUSED_HANDLER,
 		ZEND_FETCH_IS_SPEC_TMPVAR_UNUSED_HANDLER,
 		ZEND_FETCH_IS_SPEC_TMPVAR_UNUSED_HANDLER,
@@ -63432,65 +66778,135 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_IS_SPEC_CV_CV_HANDLER,
 		ZEND_FETCH_FUNC_ARG_SPEC_CONST_UNUSED_HANDLER,
+		ZEND_FETCH_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_FUNC_ARG_SPEC_TMPVAR_UNUSED_HANDLER,
+		ZEND_FETCH_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_FUNC_ARG_SPEC_TMPVAR_UNUSED_HANDLER,
+		ZEND_FETCH_FUNC_ARG_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_FUNC_ARG_SPEC_CV_UNUSED_HANDLER,
+		ZEND_FETCH_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_CONST_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_UNUSED_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_CV_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_CONST_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_UNUSED_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_CV_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CONST_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_UNUSED_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CV_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CONST_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_UNUSED_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CV_HANDLER,
+		ZEND_FETCH_DIM_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_CONST_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_CV_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CONST_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CONST_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CV_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_CONST_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_CV_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CONST_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_HANDLER,
+		ZEND_FETCH_OBJ_FUNC_ARG_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_UNSET_SPEC_CONST_UNUSED_HANDLER,
+		ZEND_FETCH_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_UNSET_SPEC_TMPVAR_UNUSED_HANDLER,
+		ZEND_FETCH_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_UNSET_SPEC_TMPVAR_UNUSED_HANDLER,
+		ZEND_FETCH_UNSET_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_UNSET_SPEC_CV_UNUSED_HANDLER,
+		ZEND_FETCH_UNSET_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -63502,20 +66918,45 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_DIM_UNSET_SPEC_VAR_CONST_HANDLER,
+		ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_UNSET_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_UNSET_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_DIM_UNSET_SPEC_VAR_CV_HANDLER,
+		ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_DIM_UNSET_SPEC_CV_CONST_HANDLER,
+		ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_UNSET_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_DIM_UNSET_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_DIM_UNSET_SPEC_CV_CV_HANDLER,
+		ZEND_FETCH_DIM_UNSET_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
@@ -63527,20 +66968,35 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST_HANDLER,
+		ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CV_HANDLER,
+		ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CONST_HANDLER,
+		ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CV_HANDLER,
+		ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_UNSET_SPEC_CV_CONST_HANDLER,
+		ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HANDLER,
+		ZEND_FETCH_OBJ_UNSET_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_LIST_R_SPEC_CONST_CONST_HANDLER,
 		ZEND_FETCH_LIST_R_SPEC_CONST_TMPVAR_HANDLER,
 		ZEND_FETCH_LIST_R_SPEC_CONST_TMPVAR_HANDLER,
@@ -63604,15 +67060,25 @@ void zend_vm_init(void)
 		ZEND_CLONE_SPEC_UNUSED_HANDLER,
 		ZEND_CLONE_SPEC_CV_HANDLER,
 		ZEND_RETURN_BY_REF_SPEC_CONST_HANDLER,
-		ZEND_RETURN_BY_REF_SPEC_OBSERVER_HANDLER,
+		ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_HANDLER,
+		ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_HANDLER,
+		ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_HANDLER,
 		ZEND_RETURN_BY_REF_SPEC_TMP_HANDLER,
-		ZEND_RETURN_BY_REF_SPEC_OBSERVER_HANDLER,
+		ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_HANDLER,
+		ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_HANDLER,
+		ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_HANDLER,
 		ZEND_RETURN_BY_REF_SPEC_VAR_HANDLER,
-		ZEND_RETURN_BY_REF_SPEC_OBSERVER_HANDLER,
+		ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_HANDLER,
+		ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_HANDLER,
+		ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_RETURN_BY_REF_SPEC_CV_HANDLER,
-		ZEND_RETURN_BY_REF_SPEC_OBSERVER_HANDLER,
+		ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_HANDLER,
+		ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_HANDLER,
+		ZEND_RETURN_BY_REF_SPEC_OBSERVER_DELAYED_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER,
 		ZEND_INIT_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER,
@@ -63903,9 +67369,14 @@ void zend_vm_init(void)
 		ZEND_GENERATOR_CREATE_SPEC_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_MAKE_REF_SPEC_VAR_UNUSED_HANDLER,
+		ZEND_MAKE_REF_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_MAKE_REF_SPEC_CV_UNUSED_HANDLER,
+		ZEND_MAKE_REF_SPEC_DELAYED_HANDLER,
 		ZEND_DECLARE_FUNCTION_SPEC_HANDLER,
 		ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_HANDLER,
 		ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER,
@@ -63950,10 +67421,15 @@ void zend_vm_init(void)
 		ZEND_ISSET_ISEMPTY_CV_SPEC_CV_UNUSED_SET_HANDLER,
 		ZEND_ISSET_ISEMPTY_CV_SPEC_CV_UNUSED_EMPTY_HANDLER,
 		ZEND_FETCH_LIST_W_SPEC_VAR_CONST_HANDLER,
+		ZEND_FETCH_LIST_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_LIST_W_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_LIST_W_SPEC_DELAYED_HANDLER,
 		ZEND_FETCH_LIST_W_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_LIST_W_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_LIST_W_SPEC_VAR_CV_HANDLER,
+		ZEND_FETCH_LIST_W_SPEC_DELAYED_HANDLER,
 		ZEND_SEPARATE_SPEC_VAR_UNUSED_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_FETCH_CLASS_NAME_SPEC_TMPVAR_HANDLER,
@@ -64082,9 +67558,14 @@ void zend_vm_init(void)
 		ZEND_BIND_STATIC_SPEC_CV_HANDLER,
 		ZEND_FETCH_THIS_SPEC_UNUSED_UNUSED_HANDLER,
 		ZEND_SEND_FUNC_ARG_SPEC_VAR_CONST_HANDLER,
+		ZEND_SEND_FUNC_ARG_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SEND_FUNC_ARG_SPEC_VAR_UNUSED_HANDLER,
+		ZEND_SEND_FUNC_ARG_SPEC_DELAYED_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_ISSET_ISEMPTY_THIS_SPEC_UNUSED_UNUSED_HANDLER,
 		ZEND_SWITCH_LONG_SPEC_CONST_CONST_HANDLER,
@@ -65122,240 +68603,240 @@ void zend_vm_init(void)
 		461 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE,
 		536 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH,
 		611 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH,
-		686 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_RETVAL,
-		736 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
-		861 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
-		986 | SPEC_RULE_OP_DATA,
-		991 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1016 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1041 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1066,
-		1067 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1092 | SPEC_RULE_OP1,
-		1097 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA,
-		1222,
-		1223 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL,
-		1233 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL,
-		1243 | SPEC_RULE_OP1,
-		1248 | SPEC_RULE_OP1,
-		1253,
-		1253,
-		1254,
-		1254,
-		1255,
-		1256 | SPEC_RULE_OP1,
-		1261 | SPEC_RULE_OP1,
-		3477,
-		1266 | SPEC_RULE_OP1,
-		1271 | SPEC_RULE_OP1,
-		1276 | SPEC_RULE_OP2,
-		1281,
-		1282 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
-		1292 | SPEC_RULE_OP1,
-		1297 | SPEC_RULE_OP1,
-		1302 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1327 | SPEC_RULE_OP2,
-		1332 | SPEC_RULE_OP2,
-		1337 | SPEC_RULE_OP2,
-		1342,
-		1343,
-		1344,
-		1345 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
-		1349,
-		1350 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
-		1360,
-		1361,
-		1362 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1387 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
-		1437 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1462 | SPEC_RULE_OP1,
-		1467,
-		1468,
-		1469 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1494 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1519 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
-		1529 | SPEC_RULE_OP1,
-		1534 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1559 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1584 | SPEC_RULE_OP1,
-		1589,
-		1590,
-		1591 | SPEC_RULE_OP1,
-		1596 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1621 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1646 | SPEC_RULE_OP1,
-		1651 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1676 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1701 | SPEC_RULE_OP1,
-		1706 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1731 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1756 | SPEC_RULE_OP1,
-		1761 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1786 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		686 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_RETVAL | SPEC_RULE_DELAYED,
+		786 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA | SPEC_RULE_DELAYED,
+		1036 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA | SPEC_RULE_DELAYED,
+		1286 | SPEC_RULE_OP_DATA,
+		1291 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		1341 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		1391 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		1441,
+		1442 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		1492 | SPEC_RULE_OP1,
+		1497 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_OP_DATA | SPEC_RULE_DELAYED,
+		1747,
+		1748 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL | SPEC_RULE_DELAYED,
+		1768 | SPEC_RULE_OP1 | SPEC_RULE_RETVAL | SPEC_RULE_DELAYED,
+		1788 | SPEC_RULE_OP1 | SPEC_RULE_DELAYED,
+		1798 | SPEC_RULE_OP1 | SPEC_RULE_DELAYED,
+		1808,
+		1808,
+		1809,
+		1809,
+		1810,
 		1811 | SPEC_RULE_OP1,
-		1816 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1841 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1866 | SPEC_RULE_OP1,
-		1871 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1896 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1921 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1946,
-		1947 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
-		1957,
-		1958,
-		1959,
-		1960,
-		1961,
-		1962 | SPEC_RULE_OP2,
-		1967,
-		1968 | SPEC_RULE_OP1,
-		1973 | SPEC_RULE_OP2,
-		1978 | SPEC_RULE_OP1,
-		1983 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
-		1993 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2018 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2043 | SPEC_RULE_OP1,
-		2048 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2073 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
-		2123 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2148 | SPEC_RULE_OP2,
-		2153,
-		2154 | SPEC_RULE_OP1,
-		2159 | SPEC_RULE_OP1,
-		2164,
-		2165 | SPEC_RULE_OP1,
-		2170 | SPEC_RULE_OP1,
-		2175 | SPEC_RULE_OP1,
-		2180,
-		2181,
-		2182 | SPEC_RULE_OP2,
-		2187 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
-		2191 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
-		2195 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
-		2199 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2199 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2224 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2224 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2249 | SPEC_RULE_OP1,
-		2254,
-		2255 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2280,
-		2281 | SPEC_RULE_OP1,
-		2286,
-		2287,
-		2288,
-		2289,
-		2290,
-		2291,
-		2292,
-		2293 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2318,
-		2319,
-		2320,
-		2321 | SPEC_RULE_OP1,
-		2326,
-		2327 | SPEC_RULE_ISSET,
-		2329 | SPEC_RULE_OP2,
-		2334,
-		2335 | SPEC_RULE_OP1,
-		2340 | SPEC_RULE_OBSERVER,
-		2342,
-		2343 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2368 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
-		2378,
-		2379,
-		2380,
-		2381,
-		2382 | SPEC_RULE_OP1,
-		2387,
-		2388,
-		2389 | SPEC_RULE_OP1,
-		2394 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2419,
-		2420 | SPEC_RULE_OP1,
-		2425,
-		2426,
-		2427,
-		2428,
-		2429,
-		2430,
-		2431,
-		2432,
-		2433 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2458,
-		2459,
-		2460,
-		2461 | SPEC_RULE_OP2,
-		2466,
-		2467 | SPEC_RULE_OP1,
-		2472 | SPEC_RULE_OP1,
-		2477 | SPEC_RULE_OP1,
-		2482 | SPEC_RULE_OP1,
-		2487 | SPEC_RULE_OP1,
-		2492,
-		2493 | SPEC_RULE_OP1,
-		2498 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2523 | SPEC_RULE_OP1,
-		2528 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2553 | SPEC_RULE_OP1,
-		2558 | SPEC_RULE_OP1,
-		2563,
-		2564,
-		2565,
-		2566,
-		2567,
-		2568,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
-		3477,
+		1816 | SPEC_RULE_OP1,
+		4382,
+		1821 | SPEC_RULE_OP1,
+		1826 | SPEC_RULE_OP1,
+		1831 | SPEC_RULE_OP2,
+		1836,
+		1837 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
+		1847 | SPEC_RULE_OP1,
+		1852 | SPEC_RULE_OP1,
+		1857 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1882 | SPEC_RULE_OP2,
+		1887 | SPEC_RULE_OP2,
+		1892 | SPEC_RULE_OP2,
+		1897,
+		1898,
+		1899,
+		1900 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
+		1904,
+		1905 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
+		1915,
+		1916,
+		1917 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1942 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		1992 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		2042 | SPEC_RULE_OP1,
+		2047,
+		2048,
+		2049 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2074 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		2124 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
+		2134 | SPEC_RULE_OP1 | SPEC_RULE_DELAYED,
+		2144 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		2194 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		2244 | SPEC_RULE_OP1,
+		2249,
+		2250,
+		2251 | SPEC_RULE_OP1,
+		2256 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2281 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2306 | SPEC_RULE_OP1 | SPEC_RULE_DELAYED,
+		2316 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		2366 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		2416 | SPEC_RULE_OP1 | SPEC_RULE_DELAYED,
+		2426 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		2476 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		2526 | SPEC_RULE_OP1,
+		2531 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2556 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2581 | SPEC_RULE_OP1 | SPEC_RULE_DELAYED,
+		2591 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		2641 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		2691 | SPEC_RULE_OP1 | SPEC_RULE_DELAYED,
+		2701 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		2751 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		2801 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2826,
+		2827 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
+		2837,
+		2838,
+		2839,
+		2840,
+		2841,
+		2842 | SPEC_RULE_OP2,
+		2847,
+		2848 | SPEC_RULE_OP1,
+		2853 | SPEC_RULE_OP2,
+		2858 | SPEC_RULE_OP1,
+		2863 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER | SPEC_RULE_DELAYED,
+		2883 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2908 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2933 | SPEC_RULE_OP1,
+		2938 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2963 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
+		3013 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3038 | SPEC_RULE_OP2,
+		3043,
+		3044 | SPEC_RULE_OP1,
+		3049 | SPEC_RULE_OP1,
+		3054,
+		3055 | SPEC_RULE_OP1,
+		3060 | SPEC_RULE_OP1,
+		3065 | SPEC_RULE_OP1,
+		3070,
+		3071,
+		3072 | SPEC_RULE_OP2,
+		3077 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
+		3081 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
+		3085 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
+		3089 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3089 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3114 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3114 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3139 | SPEC_RULE_OP1,
+		3144,
+		3145 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3170,
+		3171 | SPEC_RULE_OP1 | SPEC_RULE_DELAYED,
+		3181,
+		3182,
+		3183,
+		3184,
+		3185,
+		3186,
+		3187,
+		3188 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3213,
+		3214,
+		3215,
+		3216 | SPEC_RULE_OP1,
+		3221,
+		3222 | SPEC_RULE_ISSET,
+		3224 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		3234,
+		3235 | SPEC_RULE_OP1,
+		3240 | SPEC_RULE_OBSERVER,
+		3242,
+		3243 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3268 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
+		3278,
+		3279,
+		3280,
+		3281,
+		3282 | SPEC_RULE_OP1,
+		3287,
+		3288,
+		3289 | SPEC_RULE_OP1,
+		3294 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3319,
+		3320 | SPEC_RULE_OP1,
+		3325,
+		3326,
+		3327,
+		3328,
+		3329,
+		3330,
+		3331,
+		3332,
+		3333 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3358,
+		3359,
+		3360,
+		3361 | SPEC_RULE_OP2 | SPEC_RULE_DELAYED,
+		3371,
+		3372 | SPEC_RULE_OP1,
+		3377 | SPEC_RULE_OP1,
+		3382 | SPEC_RULE_OP1,
+		3387 | SPEC_RULE_OP1,
+		3392 | SPEC_RULE_OP1,
+		3397,
+		3398 | SPEC_RULE_OP1,
+		3403 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3428 | SPEC_RULE_OP1,
+		3433 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		3458 | SPEC_RULE_OP1,
+		3463 | SPEC_RULE_OP1,
+		3468,
+		3469,
+		3470,
+		3471,
+		3472,
+		3473,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
+		4382,
 	};
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
 	zend_opcode_handler_funcs = labels;
@@ -65486,6 +68967,12 @@ static uint32_t ZEND_FASTCALL zend_vm_get_opcode_handler_idx(uint32_t spec, cons
 				offset += 1;
 			}
 		}
+		if (spec & SPEC_RULE_DELAYED) {
+			offset = offset * 2;
+			if (EG(delayed_handlers)) {
+				offset += 1;
+			}
+		}
 	}
 	return (spec & SPEC_START_MASK) + offset;
 }
@@ -65528,7 +69015,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2576 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3481 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -65536,7 +69023,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2601 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3506 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -65544,7 +69031,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2626 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3531 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -65555,17 +69042,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2651 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3556 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2676 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3581 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2701 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3606 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_MUL:
@@ -65576,17 +69063,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2726 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3631 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2751 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3656 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2776 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3681 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_IDENTICAL:
@@ -65597,14 +69084,14 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2801 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3706 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2876 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3781 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF))) {
-				spec = 3101 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 4006 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_NOT_IDENTICAL:
@@ -65615,14 +69102,14 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2951 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3856 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3026 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3931 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF))) {
-				spec = 3106 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 4011 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_EQUAL:
@@ -65633,12 +69120,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2801 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3706 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2876 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3781 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_NOT_EQUAL:
@@ -65649,12 +69136,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2951 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3856 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3026 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3931 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_SMALLER:
@@ -65662,12 +69149,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3111 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 4016 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3186 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 4091 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_IS_SMALLER_OR_EQUAL:
@@ -65675,74 +69162,74 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3261 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 4166 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3336 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 4241 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_QM_ASSIGN:
 			if (op1_info == MAY_BE_LONG) {
-				spec = 3423 | SPEC_RULE_OP1;
+				spec = 4328 | SPEC_RULE_OP1;
 			} else if (op1_info == MAY_BE_DOUBLE) {
-				spec = 3428 | SPEC_RULE_OP1;
+				spec = 4333 | SPEC_RULE_OP1;
 			} else if ((op->op1_type == IS_CONST) ? !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1)) : (!(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE))))) {
-				spec = 3433 | SPEC_RULE_OP1;
+				spec = 4338 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_PRE_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3411 | SPEC_RULE_RETVAL;
+				spec = 4316 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3413 | SPEC_RULE_RETVAL;
+				spec = 4318 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_PRE_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3415 | SPEC_RULE_RETVAL;
+				spec = 4320 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3417 | SPEC_RULE_RETVAL;
+				spec = 4322 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_POST_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3419;
+				spec = 4324;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3420;
+				spec = 4325;
 			}
 			break;
 		case ZEND_POST_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3421;
+				spec = 4326;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3422;
+				spec = 4327;
 			}
 			break;
 		case ZEND_JMP:
 			if (OP_JMP_ADDR(op, op->op1) > op) {
-				spec = 2575;
+				spec = 3480;
 			}
 			break;
 		case ZEND_RECV:
 			if (op->op2.num == MAY_BE_ANY) {
-				spec = 2569;
+				spec = 3474;
 			}
 			break;
 		case ZEND_SEND_VAL:
 			if (op->op1_type == IS_CONST && op->op2_type == IS_UNUSED && !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1))) {
-				spec = 3473;
+				spec = 4378;
 			}
 			break;
 		case ZEND_SEND_VAR_EX:
 			if (op->op2_type == IS_UNUSED && op->op2.num <= MAX_ARG_FLAG_NUM && (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 3468 | SPEC_RULE_OP1;
+				spec = 4373 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_FE_FETCH_R:
 			if (op->op2_type == IS_CV && (op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_ARRAY) {
-				spec = 3475 | SPEC_RULE_RETVAL;
+				spec = 4380 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_FETCH_DIM_R:
@@ -65750,22 +69237,22 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3438 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 4343 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_SEND_VAL_EX:
 			if (op->op2_type == IS_UNUSED && op->op2.num <= MAX_ARG_FLAG_NUM && op->op1_type == IS_CONST && !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1))) {
-				spec = 3474;
+				spec = 4379;
 			}
 			break;
 		case ZEND_SEND_VAR:
 			if (op->op2_type == IS_UNUSED && (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 3463 | SPEC_RULE_OP1;
+				spec = 4368 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_COUNT:
 			if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == MAY_BE_ARRAY) {
-				spec = 2570 | SPEC_RULE_OP1;
+				spec = 3475 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_BW_OR:

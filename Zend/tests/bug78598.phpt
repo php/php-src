@@ -1,5 +1,7 @@
 --TEST--
 Bug #78598: Changing array during undef index RW error segfaults
+--INI--
+opcache.jit=0
 --FILE--
 <?php
 

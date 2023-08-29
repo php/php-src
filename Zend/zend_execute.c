@@ -118,14 +118,21 @@
 typedef int (ZEND_FASTCALL *incdec_t)(zval *);
 
 #define get_zval_ptr(op_type, node, type) _get_zval_ptr(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
+#define get_zval_ptr_delayed(op_type, node, type) _get_zval_ptr_delayed(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
 #define get_zval_ptr_deref(op_type, node, type) _get_zval_ptr_deref(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
+#define get_zval_ptr_deref_delayed(op_type, node, type) _get_zval_ptr_deref_delayed(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
 #define get_zval_ptr_undef(op_type, node, type) _get_zval_ptr_undef(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
+#define get_zval_ptr_undef_delayed(op_type, node, type) _get_zval_ptr_undef_delayed(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
 #define get_op_data_zval_ptr_r(op_type, node) _get_op_data_zval_ptr_r(op_type, node EXECUTE_DATA_CC OPLINE_CC)
+#define get_op_data_zval_ptr_r_delayed(op_type, node) _get_op_data_zval_ptr_r_delayed(op_type, node EXECUTE_DATA_CC OPLINE_CC)
 #define get_op_data_zval_ptr_deref_r(op_type, node) _get_op_data_zval_ptr_deref_r(op_type, node EXECUTE_DATA_CC OPLINE_CC)
+#define get_op_data_zval_ptr_deref_r_delayed(op_type, node) _get_op_data_zval_ptr_deref_r_delayed(op_type, node EXECUTE_DATA_CC OPLINE_CC)
 #define get_zval_ptr_ptr(op_type, node, type) _get_zval_ptr_ptr(op_type, node, type EXECUTE_DATA_CC)
 #define get_zval_ptr_ptr_undef(op_type, node, type) _get_zval_ptr_ptr(op_type, node, type EXECUTE_DATA_CC)
 #define get_obj_zval_ptr(op_type, node, type) _get_obj_zval_ptr(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
+#define get_obj_zval_ptr_delayed(op_type, node, type) _get_obj_zval_ptr_delayed(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
 #define get_obj_zval_ptr_undef(op_type, node, type) _get_obj_zval_ptr_undef(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
+#define get_obj_zval_ptr_undef_delayed(op_type, node, type) _get_obj_zval_ptr_undef_delayed(op_type, node, type EXECUTE_DATA_CC OPLINE_CC)
 #define get_obj_zval_ptr_ptr(op_type, node, type) _get_obj_zval_ptr_ptr(op_type, node, type EXECUTE_DATA_CC)
 
 #define RETURN_VALUE_USED(opline) ((opline)->result_type != IS_UNUSED)
@@ -425,6 +432,14 @@ static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, int ty
 	}
 }
 
+static zend_always_inline zval *_get_zval_ptr_delayed(int op_type, znode_op node, int type EXECUTE_DATA_DC OPLINE_DC)
+{
+	if (op_type == IS_CONST) {
+		return RT_CONSTANT_DELAYED(opline, node);
+	}
+	return get_zval_ptr(op_type, node, type);
+}
+
 static zend_always_inline zval *_get_op_data_zval_ptr_r(int op_type, znode_op node EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
@@ -443,6 +458,14 @@ static zend_always_inline zval *_get_op_data_zval_ptr_r(int op_type, znode_op no
 			return NULL;
 		}
 	}
+}
+
+static zend_always_inline zval *_get_op_data_zval_ptr_r_delayed(int op_type, znode_op node EXECUTE_DATA_DC OPLINE_DC)
+{
+	if (op_type == IS_CONST) {
+		return RT_CONSTANT(RT_CONSTANT_DELAYED_OPLINE(opline)+1, (opline+1)->op1);
+	}
+	return get_op_data_zval_ptr_r(op_type, node);
 }
 
 static zend_always_inline ZEND_ATTRIBUTE_UNUSED zval *_get_zval_ptr_deref(int op_type, znode_op node, int type EXECUTE_DATA_DC OPLINE_DC)
@@ -465,6 +488,14 @@ static zend_always_inline ZEND_ATTRIBUTE_UNUSED zval *_get_zval_ptr_deref(int op
 	}
 }
 
+static zend_always_inline ZEND_ATTRIBUTE_UNUSED zval *_get_zval_ptr_deref_delayed(int op_type, znode_op node, int type EXECUTE_DATA_DC OPLINE_DC)
+{
+	if (op_type == IS_CONST) {
+		return RT_CONSTANT_DELAYED(opline, node);
+	}
+	return get_zval_ptr_deref(op_type, node, type);
+}
+
 static zend_always_inline ZEND_ATTRIBUTE_UNUSED zval *_get_op_data_zval_ptr_deref_r(int op_type, znode_op node EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
@@ -485,6 +516,14 @@ static zend_always_inline ZEND_ATTRIBUTE_UNUSED zval *_get_op_data_zval_ptr_dere
 	}
 }
 
+static zend_always_inline ZEND_ATTRIBUTE_UNUSED zval *_get_op_data_zval_ptr_deref_r_delayed(int op_type, znode_op node EXECUTE_DATA_DC OPLINE_DC)
+{
+	if (op_type == IS_CONST) {
+		return RT_CONSTANT(RT_CONSTANT_DELAYED_OPLINE(opline)+1, (opline+1)->op1);
+	}
+	return get_op_data_zval_ptr_deref_r(op_type, node);
+}
+
 static zend_always_inline zval *_get_zval_ptr_undef(int op_type, znode_op node, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
@@ -503,6 +542,14 @@ static zend_always_inline zval *_get_zval_ptr_undef(int op_type, znode_op node, 
 			return NULL;
 		}
 	}
+}
+
+static zend_always_inline zval *_get_zval_ptr_undef_delayed(int op_type, znode_op node, int type EXECUTE_DATA_DC OPLINE_DC)
+{
+	if (op_type == IS_CONST) {
+		return RT_CONSTANT_DELAYED(opline, node);
+	}
+	return get_zval_ptr_undef(op_type, node, type);
 }
 
 static zend_always_inline zval *_get_zval_ptr_ptr_var(uint32_t var EXECUTE_DATA_DC)
@@ -533,12 +580,28 @@ static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr(int op_type, znode_o
 	return get_zval_ptr(op_type, op, type);
 }
 
+static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_delayed(int op_type, znode_op op, int type EXECUTE_DATA_DC OPLINE_DC)
+{
+	if (op_type == IS_CONST) {
+		return RT_CONSTANT(opline, opline->op1);
+	}
+	return get_obj_zval_ptr(op_type, op, type);
+}
+
 static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_undef(int op_type, znode_op op, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type == IS_UNUSED) {
 		return &EX(This);
 	}
 	return get_zval_ptr_undef(op_type, op, type);
+}
+
+static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_undef_delayed(int op_type, znode_op op, int type EXECUTE_DATA_DC OPLINE_DC)
+{
+	if (op_type == IS_CONST) {
+		return RT_CONSTANT(opline, opline->op1);
+	}
+	return get_obj_zval_ptr_undef(op_type, op, type);
 }
 
 static inline ZEND_ATTRIBUTE_UNUSED zval *_get_obj_zval_ptr_ptr(int op_type, znode_op node, int type EXECUTE_DATA_DC)
@@ -2231,6 +2294,23 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_undefined_offset_delayed(zend_long lv
 	zend_error_delayed(E_WARNING, "Undefined array key " ZEND_LONG_FMT, lval);
 }
 
+ZEND_API void ZEND_FASTCALL zend_handle_delayed_errors(void)
+{
+	/* Clear EG(delayed_errors), as more errors may be delayed while we are handling these. */
+	HashTable ht;
+	memcpy(&ht, &EG(delayed_errors), sizeof(HashTable));
+	zend_hash_init(&EG(delayed_errors), 0, NULL, NULL, 0);
+
+	zend_error_info *info;
+	ZEND_HASH_FOREACH_PTR(&ht, info) {
+		zend_error_zstr_at(info->type, info->filename, info->lineno, info->message);
+		zend_string_release(info->filename);
+		zend_string_release(info->message);
+		efree(info);
+	} ZEND_HASH_FOREACH_END();
+	zend_hash_destroy(&ht);
+}
+
 ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_index_write(HashTable *ht, zend_string *offset)
 {
 	zval *retval;
@@ -3242,6 +3322,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 
 	if (prop_op_type == IS_CONST) {
 		name = Z_STR_P(prop_ptr);
+		tmp_name = NULL;
 	} else {
 		name = zval_get_tmp_string(prop_ptr, &tmp_name);
 	}

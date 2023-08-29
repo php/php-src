@@ -206,6 +206,8 @@ struct _zend_executor_globals {
 
 	bool full_tables_cleanup;
 
+	bool delayed_handlers;
+
 	zend_atomic_bool vm_interrupt;
 	zend_atomic_bool timed_out;
 
@@ -246,6 +248,7 @@ struct _zend_executor_globals {
 	zend_object *exception, *prev_exception;
 	const zend_op *opline_before_exception;
 	zend_op exception_op[3];
+	/* FIXME: Is this safe for VM reentry? We may have to save/restore this value. */
 	zend_op delayed_error_op[3];
 
 	struct _zend_module_entry *current_module;

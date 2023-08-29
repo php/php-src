@@ -738,6 +738,13 @@ ZEND_STATIC_ASSERT(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
 # define RT_CONSTANT(opline, node) \
 	((zval*)(((char*)(opline)) + (int32_t)(node).constant))
 
+/*  */
+# define RT_CONSTANT_DELAYED(opline, node) \
+	((zval*)(((char*)RT_CONSTANT_DELAYED_OPLINE(opline)) + (int32_t)(node).constant))
+
+# define RT_CONSTANT_DELAYED_OPLINE(opline) \
+	((zend_op*)(opline) != &EG(delayed_error_op)[0] ? (zend_op*)(opline) : EG(opline_before_exception))
+
 /* convert constant from compile-time to run-time */
 # define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, node) do { \
 		(node).constant = \

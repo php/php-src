@@ -2,6 +2,8 @@
 Type inference for $ary[$idx]->prop +=
 --EXTENSIONS--
 opcache
+--INI--
+opcache.jit=0
 --FILE--
 <?php
 

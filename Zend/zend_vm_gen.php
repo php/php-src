@@ -219,6 +219,10 @@ $op1_get_zval_ptr = array(
     "TMPVARCV" => "???",
 );
 
+$op1_get_zval_ptr_delayed = $op1_get_zval_ptr;
+$op1_get_zval_ptr_delayed["ANY"] = "get_zval_ptr_delayed(opline->op1_type, opline->op1, \\1)";
+$op1_get_zval_ptr_delayed["CONST"] = "RT_CONSTANT_DELAYED(opline, opline->op1)";
+
 $op2_get_zval_ptr = array(
     "ANY"      => "get_zval_ptr(opline->op2_type, opline->op2, \\1)",
     "TMP"      => "_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC)",
@@ -229,6 +233,10 @@ $op2_get_zval_ptr = array(
     "TMPVAR"   => "_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC)",
     "TMPVARCV" => "???",
 );
+
+$op2_get_zval_ptr_delayed = $op2_get_zval_ptr;
+$op2_get_zval_ptr_delayed["ANY"] = "get_zval_ptr_delayed(opline->op2_type, opline->op2, \\1)";
+$op2_get_zval_ptr_delayed["CONST"] = "RT_CONSTANT_DELAYED(opline, opline->op2)";
 
 $op1_get_zval_ptr_ptr = array(
     "ANY"      => "get_zval_ptr_ptr(opline->op1_type, opline->op1, \\1)",
@@ -263,6 +271,10 @@ $op1_get_zval_ptr_deref = array(
     "TMPVARCV" => "_get_zval_ptr_tmpvarcv(opline->op1_type, opline->op1, \\1 EXECUTE_DATA_CC)",
 );
 
+$op1_get_zval_ptr_deref_delayed = $op1_get_zval_ptr_deref;
+$op1_get_zval_ptr_deref_delayed["ANY"] = "get_zval_ptr_deref_delayed(opline->op1_type, opline->op1, \\1)";
+$op1_get_zval_ptr_deref_delayed["CONST"] = "RT_CONSTANT_DELAYED(opline, opline->op1)";
+
 $op2_get_zval_ptr_deref = array(
     "ANY"      => "get_zval_ptr_deref(opline->op2_type, opline->op2, \\1)",
     "TMP"      => "_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC)",
@@ -273,6 +285,10 @@ $op2_get_zval_ptr_deref = array(
     "TMPVAR"   => "???",
     "TMPVARCV" => "_get_zval_ptr_tmpvarcv(opline->op2_type, opline->op2, \\1 EXECUTE_DATA_CC)",
 );
+
+$op2_get_zval_ptr_deref_delayed = $op2_get_zval_ptr_deref;
+$op2_get_zval_ptr_deref_delayed["ANY"] = "get_zval_ptr_deref_delayed(opline->op2_type, opline->op2, \\1)";
+$op2_get_zval_ptr_deref_delayed["CONST"] = "RT_CONSTANT_DELAYED(opline, opline->op2)";
 
 $op1_get_zval_ptr_undef = array(
     "ANY"      => "get_zval_ptr_undef(opline->op1_type, opline->op1, \\1)",
@@ -285,6 +301,10 @@ $op1_get_zval_ptr_undef = array(
     "TMPVARCV" => "EX_VAR(opline->op1.var)",
 );
 
+$op1_get_zval_ptr_undef_delayed = $op1_get_zval_ptr_undef;
+$op1_get_zval_ptr_undef_delayed["ANY"] = "get_zval_ptr_undef_delayed(opline->op1_type, opline->op1, \\1)";
+$op1_get_zval_ptr_undef_delayed["CONST"] = "RT_CONSTANT_DELAYED(opline, opline->op1)";
+
 $op2_get_zval_ptr_undef = array(
     "ANY"      => "get_zval_ptr_undef(opline->op2_type, opline->op2, \\1)",
     "TMP"      => "_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC)",
@@ -295,6 +315,10 @@ $op2_get_zval_ptr_undef = array(
     "TMPVAR"   => "_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC)",
     "TMPVARCV" => "EX_VAR(opline->op2.var)",
 );
+
+$op2_get_zval_ptr_undef_delayed = $op2_get_zval_ptr_undef;
+$op2_get_zval_ptr_undef_delayed["ANY"] = "get_zval_ptr_undef_delayed(opline->op2_type, opline->op2, \\1)";
+$op2_get_zval_ptr_undef_delayed["CONST"] = "RT_CONSTANT_DELAYED(opline, opline->op2)";
 
 $op1_get_zval_ptr_ptr_undef = array(
     "ANY"      => "get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, \\1)",
@@ -329,6 +353,10 @@ $op1_get_obj_zval_ptr = array(
     "TMPVARCV" => "???",
 );
 
+$op1_get_obj_zval_ptr_delayed = $op1_get_obj_zval_ptr;
+$op1_get_obj_zval_ptr_delayed["ANY"] = "get_obj_zval_ptr_delayed(opline->op1_type, opline->op1, \\1)";
+$op1_get_obj_zval_ptr_delayed["CONST"] = "RT_CONSTANT_DELAYED(opline, opline->op1)";
+
 $op2_get_obj_zval_ptr = array(
     "ANY"      => "get_obj_zval_ptr(opline->op2_type, opline->op2, \\1)",
     "TMP"      => "_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC)",
@@ -339,6 +367,10 @@ $op2_get_obj_zval_ptr = array(
     "TMPVAR"   => "_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC)",
     "TMPVARCV" => "???",
 );
+
+$op2_get_obj_zval_ptr_delayed = $op2_get_obj_zval_ptr;
+$op2_get_obj_zval_ptr_delayed["ANY"] = "get_obj_zval_ptr_delayed(opline->op2_type, opline->op2, \\1)";
+$op2_get_obj_zval_ptr_delayed["CONST"] = "RT_CONSTANT_DELAYED(opline, opline->op2)";
 
 $op1_get_obj_zval_ptr_undef = array(
     "ANY"      => "get_obj_zval_ptr_undef(opline->op1_type, opline->op1, \\1)",
@@ -351,6 +383,10 @@ $op1_get_obj_zval_ptr_undef = array(
     "TMPVARCV" => "EX_VAR(opline->op1.var)",
 );
 
+$op1_get_obj_zval_ptr_undef_delayed = $op1_get_obj_zval_ptr_undef;
+$op1_get_obj_zval_ptr_undef_delayed["ANY"] = "get_obj_zval_ptr_undef_delayed(opline->op1_type, opline->op1, \\1)";
+$op1_get_obj_zval_ptr_undef_delayed["CONST"] = "RT_CONSTANT_DELAYED(opline, opline->op1)";
+
 $op2_get_obj_zval_ptr_undef = array(
     "ANY"      => "get_obj_zval_ptr_undef(opline->op2_type, opline->op2, \\1)",
     "TMP"      => "_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC)",
@@ -361,6 +397,10 @@ $op2_get_obj_zval_ptr_undef = array(
     "TMPVAR"   => "_get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC)",
     "TMPVARCV" => "EX_VAR(opline->op2.var)",
 );
+
+$op2_get_obj_zval_ptr_undef_delayed = $op2_get_obj_zval_ptr_undef;
+$op2_get_obj_zval_ptr_undef_delayed["ANY"] = "get_obj_zval_ptr_undef_delayed(opline->op2_type, opline->op2, \\1)";
+$op2_get_obj_zval_ptr_undef_delayed["CONST"] = "RT_CONSTANT_DELAYED(opline, opline->op2)";
 
 $op1_get_obj_zval_ptr_deref = array(
     "ANY"      => "get_obj_zval_ptr(opline->op1_type, opline->op1, \\1)",
@@ -373,6 +413,10 @@ $op1_get_obj_zval_ptr_deref = array(
     "TMPVARCV" => "???",
 );
 
+$op1_get_obj_zval_ptr_deref_delayed = $op1_get_obj_zval_ptr_deref;
+$op1_get_obj_zval_ptr_deref_delayed["ANY"] = "get_obj_zval_ptr_delayed(opline->op1_type, opline->op1, \\1)";
+$op1_get_obj_zval_ptr_deref_delayed["CONST"] = "RT_CONSTANT_DELAYED(opline, opline->op1)";
+
 $op2_get_obj_zval_ptr_deref = array(
     "ANY"      => "get_obj_zval_ptr(opline->op2_type, opline->op2, \\1)",
     "TMP"      => "_get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC)",
@@ -383,6 +427,10 @@ $op2_get_obj_zval_ptr_deref = array(
     "TMPVAR"   => "???",
     "TMPVARCV" => "???",
 );
+
+$op2_get_obj_zval_ptr_deref_delayed = $op2_get_obj_zval_ptr_deref;
+$op2_get_obj_zval_ptr_deref_delayed["ANY"] = "get_obj_zval_ptr_delayed(opline->op2_type, opline->op2, \\1)";
+$op2_get_obj_zval_ptr_deref_delayed["CONST"] = "RT_CONSTANT_DELAYED(opline, opline->op2)";
 
 $op1_get_obj_zval_ptr_ptr = array(
     "ANY"      => "get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, \\1)",
@@ -494,8 +542,12 @@ $op_data_get_zval_ptr = array(
     "TMPVARCV" => "???",
 );
 
+$op_data_get_zval_ptr_delayed = $op_data_get_zval_ptr;
+$op_data_get_zval_ptr_delayed["ANY"] = "get_op_data_zval_ptr_r_delayed((opline+1)->op1_type, (opline+1)->op1)";
+$op_data_get_zval_ptr_delayed["CONST"] = "RT_CONSTANT(RT_CONSTANT_DELAYED_OPLINE(opline)+1, (opline+1)->op1)";
+
 $op_data_get_zval_ptr_undef = array(
-    "ANY"      => "get_op_data_zval_ptr_undef((opline+1)->op1_type, (opline+1)->op1)",
+    "ANY"      => "get_zval_ptr_undef((opline+1)->op1_type, (opline+1)->op1, \\1)",
     "TMP"      => "_get_zval_ptr_tmp((opline+1)->op1.var EXECUTE_DATA_CC)",
     "VAR"      => "_get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC)",
     "CONST"    => "RT_CONSTANT((opline+1), (opline+1)->op1)",
@@ -504,6 +556,10 @@ $op_data_get_zval_ptr_undef = array(
     "TMPVAR"   => "_get_zval_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC)",
     "TMPVARCV" => "EX_VAR((opline+1)->op1.var)",
 );
+
+$op_data_get_zval_ptr_undef_delayed = $op_data_get_zval_ptr_undef;
+$op_data_get_zval_ptr_undef_delayed["ANY"] = "get_zval_ptr_undef_delayed((opline+1)->op1_type, (opline+1)->op1, \\1)";
+$op_data_get_zval_ptr_undef_delayed["CONST"] = "RT_CONSTANT(RT_CONSTANT_DELAYED_OPLINE(opline)+1, (opline+1)->op1)";
 
 $op_data_get_zval_ptr_deref = array(
     "ANY"      => "get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1)",
@@ -515,6 +571,10 @@ $op_data_get_zval_ptr_deref = array(
     "TMPVAR"   => "???",
     "TMPVARCV" => "???",
 );
+
+$op_data_get_zval_ptr_deref_delayed = $op_data_get_zval_ptr_deref;
+$op_data_get_zval_ptr_deref_delayed["ANY"] = "get_op_data_zval_ptr_deref_r_delayed((opline+1)->op1_type, (opline+1)->op1)";
+$op_data_get_zval_ptr_deref_delayed["CONST"] = "RT_CONSTANT(RT_CONSTANT_DELAYED_OPLINE(opline)+1, (opline+1)->op1)";
 
 $op_data_get_zval_ptr_ptr = array(
     "ANY"      => "get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, \\1)",
@@ -700,28 +760,37 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         $prefix,
         $op_data_type, $op_data_get_zval_ptr, $op_data_get_zval_ptr_undef,
         $op_data_get_zval_ptr_deref, $op_data_get_zval_ptr_ptr,
-        $op_data_free_op;
+        $op_data_free_op,
+        $op1_get_zval_ptr_delayed, $op2_get_zval_ptr_delayed,
+        $op1_get_zval_ptr_deref_delayed, $op2_get_zval_ptr_deref_delayed,
+        $op1_get_zval_ptr_undef_delayed, $op2_get_zval_ptr_undef_delayed,
+        $op1_get_obj_zval_ptr_delayed, $op2_get_obj_zval_ptr_delayed,
+        $op1_get_obj_zval_ptr_undef_delayed, $op2_get_obj_zval_ptr_undef_delayed,
+        $op1_get_obj_zval_ptr_deref_delayed, $op2_get_obj_zval_ptr_deref_delayed,
+        $op_data_get_zval_ptr_delayed, $op_data_get_zval_ptr_undef_delayed, $op_data_get_zval_ptr_deref_delayed;
+    
+    $delayed = isset($extra_spec["DELAYED"]) && $extra_spec["DELAYED"] == 1;
 
     // Specializing
     $specialized_replacements = array(
         "/OP1_TYPE/" => $op1_type[$op1],
         "/OP2_TYPE/" => $op2_type[$op2],
-        "/GET_OP1_ZVAL_PTR\(([^)]*)\)/" => $op1_get_zval_ptr[$op1],
-        "/GET_OP2_ZVAL_PTR\(([^)]*)\)/" => $op2_get_zval_ptr[$op2],
-        "/GET_OP1_ZVAL_PTR_DEREF\(([^)]*)\)/" => $op1_get_zval_ptr_deref[$op1],
-        "/GET_OP2_ZVAL_PTR_DEREF\(([^)]*)\)/" => $op2_get_zval_ptr_deref[$op2],
-        "/GET_OP1_ZVAL_PTR_UNDEF\(([^)]*)\)/" => $op1_get_zval_ptr_undef[$op1],
-        "/GET_OP2_ZVAL_PTR_UNDEF\(([^)]*)\)/" => $op2_get_zval_ptr_undef[$op2],
+        "/GET_OP1_ZVAL_PTR\(([^)]*)\)/" => !$delayed ? $op1_get_zval_ptr[$op1] : $op1_get_zval_ptr_delayed[$op1],
+        "/GET_OP2_ZVAL_PTR\(([^)]*)\)/" => !$delayed ? $op2_get_zval_ptr[$op2] : $op2_get_zval_ptr_delayed[$op2],
+        "/GET_OP1_ZVAL_PTR_DEREF\(([^)]*)\)/" => !$delayed ? $op1_get_zval_ptr_deref[$op1] : $op1_get_zval_ptr_deref_delayed[$op1],
+        "/GET_OP2_ZVAL_PTR_DEREF\(([^)]*)\)/" => !$delayed ? $op2_get_zval_ptr_deref[$op2] : $op2_get_zval_ptr_deref_delayed[$op2],
+        "/GET_OP1_ZVAL_PTR_UNDEF\(([^)]*)\)/" => !$delayed ? $op1_get_zval_ptr_undef[$op1] : $op1_get_zval_ptr_undef_delayed[$op1],
+        "/GET_OP2_ZVAL_PTR_UNDEF\(([^)]*)\)/" => !$delayed ? $op2_get_zval_ptr_undef[$op2] : $op2_get_zval_ptr_undef_delayed[$op2],
         "/GET_OP1_ZVAL_PTR_PTR\(([^)]*)\)/" => $op1_get_zval_ptr_ptr[$op1],
         "/GET_OP2_ZVAL_PTR_PTR\(([^)]*)\)/" => $op2_get_zval_ptr_ptr[$op2],
         "/GET_OP1_ZVAL_PTR_PTR_UNDEF\(([^)]*)\)/" => $op1_get_zval_ptr_ptr_undef[$op1],
         "/GET_OP2_ZVAL_PTR_PTR_UNDEF\(([^)]*)\)/" => $op2_get_zval_ptr_ptr_undef[$op2],
-        "/GET_OP1_OBJ_ZVAL_PTR\(([^)]*)\)/" => $op1_get_obj_zval_ptr[$op1],
-        "/GET_OP2_OBJ_ZVAL_PTR\(([^)]*)\)/" => $op2_get_obj_zval_ptr[$op2],
-        "/GET_OP1_OBJ_ZVAL_PTR_UNDEF\(([^)]*)\)/" => $op1_get_obj_zval_ptr_undef[$op1],
-        "/GET_OP2_OBJ_ZVAL_PTR_UNDEF\(([^)]*)\)/" => $op2_get_obj_zval_ptr_undef[$op2],
-        "/GET_OP1_OBJ_ZVAL_PTR_DEREF\(([^)]*)\)/" => $op1_get_obj_zval_ptr_deref[$op1],
-        "/GET_OP2_OBJ_ZVAL_PTR_DEREF\(([^)]*)\)/" => $op2_get_obj_zval_ptr_deref[$op2],
+        "/GET_OP1_OBJ_ZVAL_PTR\(([^)]*)\)/" => !$delayed ? $op1_get_obj_zval_ptr[$op1] : $op1_get_obj_zval_ptr_delayed[$op1],
+        "/GET_OP2_OBJ_ZVAL_PTR\(([^)]*)\)/" => !$delayed ? $op2_get_obj_zval_ptr[$op2] : $op2_get_obj_zval_ptr_delayed[$op2],
+        "/GET_OP1_OBJ_ZVAL_PTR_UNDEF\(([^)]*)\)/" => !$delayed ? $op1_get_obj_zval_ptr_undef[$op1] : $op1_get_obj_zval_ptr_undef_delayed[$op1],
+        "/GET_OP2_OBJ_ZVAL_PTR_UNDEF\(([^)]*)\)/" => !$delayed ? $op2_get_obj_zval_ptr_undef[$op2] : $op2_get_obj_zval_ptr_undef_delayed[$op2],
+        "/GET_OP1_OBJ_ZVAL_PTR_DEREF\(([^)]*)\)/" => !$delayed ? $op1_get_obj_zval_ptr_deref[$op1] : $op1_get_obj_zval_ptr_deref_delayed[$op1],
+        "/GET_OP2_OBJ_ZVAL_PTR_DEREF\(([^)]*)\)/" => !$delayed ? $op2_get_obj_zval_ptr_deref[$op2] : $op2_get_obj_zval_ptr_deref_delayed[$op2],
         "/GET_OP1_OBJ_ZVAL_PTR_PTR\(([^)]*)\)/" => $op1_get_obj_zval_ptr_ptr[$op1],
         "/GET_OP2_OBJ_ZVAL_PTR_PTR\(([^)]*)\)/" => $op2_get_obj_zval_ptr_ptr[$op2],
         "/GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF\(([^)]*)\)/" => $op1_get_obj_zval_ptr_ptr_undef[$op1],
@@ -739,9 +808,15 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/^#(\s*)elif\s+1\s*\\|\\|.*[^\\\\]$/m" => "#\\1elif 1",
         "/^#(\s*)elif\s+0\s*&&.*[^\\\\]$/m" => "#\\1elif 0",
         "/OP_DATA_TYPE/" => $op_data_type[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
-        "/GET_OP_DATA_ZVAL_PTR\(([^)]*)\)/" => $op_data_get_zval_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
-        "/GET_OP_DATA_ZVAL_PTR_UNDEF\(([^)]*)\)/" => $op_data_get_zval_ptr_undef[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
-        "/GET_OP_DATA_ZVAL_PTR_DEREF\(([^)]*)\)/" => $op_data_get_zval_ptr_deref[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
+        "/GET_OP_DATA_ZVAL_PTR\(([^)]*)\)/" => !$delayed
+            ? ($op_data_get_zval_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"])
+            : ($op_data_get_zval_ptr_delayed[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"]),
+        "/GET_OP_DATA_ZVAL_PTR_UNDEF\(([^)]*)\)/" => !$delayed
+            ? ($op_data_get_zval_ptr_undef[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"])
+            : ($op_data_get_zval_ptr_undef_delayed[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"]),
+        "/GET_OP_DATA_ZVAL_PTR_DEREF\(([^)]*)\)/" => !$delayed
+            ? ($op_data_get_zval_ptr_deref[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"])
+            : ($op_data_get_zval_ptr_deref_delayed[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"]),
         "/GET_OP_DATA_ZVAL_PTR_PTR\(([^)]*)\)/" => $op_data_get_zval_ptr_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/FREE_OP_DATA\(\)/" => $op_data_free_op[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/RETURN_VALUE_USED\(opline\)/" => isset($extra_spec['RETVAL']) ? $extra_spec['RETVAL'] : "RETURN_VALUE_USED(opline)",
@@ -781,6 +856,7 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/ZEND_OBSERVER_FCALL_END\(\s*([^,]*)\s*,\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
             ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_fcall_end(\\1, \\2)")
             : "",
+        "/ZEND_DELAYED/" => isset($extra_spec["DELAYED"]) && $extra_spec["DELAYED"] == 1 ? "1" : "0",
     );
     $code = preg_replace(array_keys($specialized_replacements), array_values($specialized_replacements), $code);
 
@@ -943,6 +1019,9 @@ function is_hot_handler($hot, $op1, $op2, $extra_spec) {
     if (isset($extra_spec["OBSERVER"]) && $extra_spec["OBSERVER"] == 1) {
         return false;
     }
+    if (isset($extra_spec["DELAYED"]) && $extra_spec["DELAYED"] == 1) {
+        return false;
+    }
     if ($hot === 'HOT_' || $hot === 'INLINE_') {
         return true;
     } else if ($hot === 'HOT_NOCONST_') {
@@ -962,6 +1041,8 @@ function is_cold_handler($hot, $op1, $op2, $extra_spec) {
     if ($hot === 'COLD_') {
         return true;
     } else if (isset($extra_spec["OBSERVER"]) && $extra_spec["OBSERVER"] == 1) {
+        return true;
+    } else if (isset($extra_spec["DELAYED"]) && $extra_spec["DELAYED"] == 1) {
         return true;
     } else if ($hot === 'COLD_CONST_') {
         return ($op1 === 'CONST');
@@ -987,6 +1068,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
     global $definition_file, $prefix, $opnames, $gen_order;
 
     static $used_observer_handlers = array();
+    static $used_delayed_handlers = array();
 
     if (isset($opcode['alias']) && ($spec || $kind != ZEND_VM_KIND_SWITCH)) {
         return;
@@ -1030,11 +1112,45 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
                 return;
             }
         }
+        /* Combine OBSERVER and DELAYED specs. */
+        if (isset($extra_spec["DELAYED"]) && $extra_spec["DELAYED"] == 0) {
+            return;
+        }
         if ($op1 != "ANY" || $op2 != "ANY") {
             if (!isset($used_observer_handlers[$kind][$opcode["op"]])) {
                 $used_observer_handlers[$kind][$opcode["op"]] = true;
                 $op1 = "ANY";
                 $op2 = "ANY";
+            } else {
+                return;
+            }
+        }
+    }
+
+    /* Skip all specialization for DELAYED handlers */
+    if (isset($extra_spec["DELAYED"]) && $extra_spec["DELAYED"] == 1) {
+        if (isset($extra_spec["RETVAL"])) {
+            if ($extra_spec["RETVAL"] == 0) {
+                unset($extra_spec["RETVAL"]);
+            } else {
+                return;
+            }
+        }
+        /* Combine OBSERVER and DELAYED specs. */
+        if (isset($extra_spec["OBSERVER"]) && $extra_spec["OBSERVER"] == 0) {
+            return;
+        }
+        if ($op1 != "ANY"
+         || $op2 != "ANY"
+         || isset($extra_spec["OP_DATA"])) {
+            if (!isset($used_delayed_handlers[$kind][$opcode["op"]])) {
+                $used_delayed_handlers[$kind][$opcode["op"]] = true;
+                // FIXME: These could stay specialized if there's only a single type
+                $op1 = "ANY";
+                $op2 = "ANY";
+                if (isset($extra_spec["OP_DATA"])) {
+                    $extra_spec["OP_DATA"] = "ANY";
+                }
             } else {
                 return;
             }
@@ -1123,7 +1239,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 }
 
 // Generates helper
-function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno, $inline, $cold = false, $hot = false, $extra_spec = null) {
+function gen_helper($opcode, $f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno, $inline, $cold = false, $hot = false, $extra_spec = null) {
     global $definition_file, $prefix;
 
     if ($kind == ZEND_VM_KIND_HYBRID && !$hot) {
@@ -1132,6 +1248,26 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
 
     if ($spec && skip_extra_spec_function($op1, $op2, $extra_spec)) {
         return;
+    }
+
+    /* Skip all specialization for DELAYED handlers */
+    static $used_delayed_helpers = array();
+    if (isset($extra_spec["DELAYED"]) && $extra_spec["DELAYED"] == 1) {
+        if ($op1 != "ANY"
+         || $op2 != "ANY"
+         || isset($extra_spec["OP_DATA"])) {
+            if (!isset($used_delayed_helpers[$kind][$name])) {
+                $used_delayed_helpers[$kind][$name] = true;
+                // FIXME: These could stay specialized if there's only a single type
+                $op1 = "ANY";
+                $op2 = "ANY";
+                if (isset($extra_spec["OP_DATA"])) {
+                    $extra_spec["OP_DATA"] = "ANY";
+                }
+            } else {
+                return;
+            }
+        }
     }
 
     if (ZEND_VM_LINES) {
@@ -1368,14 +1504,24 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
                         }
                     }
 
-                    /* Skip all specialization for OBSERVER handlers */
-                    if (isset($extra_spec["OBSERVER"]) && $extra_spec["OBSERVER"] == 1) {
+                    /* Skip all specialization for OBSERVER/DELAYED handlers */
+                    if ((isset($extra_spec["OBSERVER"]) && $extra_spec["OBSERVER"] == 1)
+                     || (isset($extra_spec["DELAYED"]) && $extra_spec["DELAYED"] == 1)) {
                         if (isset($extra_spec["RETVAL"])) {
                             unset($extra_spec["RETVAL"]);
                         }
                         if ($op1 != "ANY" || $op2 != "ANY") {
                             $op1 = "ANY";
                             $op2 = "ANY";
+                        }
+                        if (isset($extra_spec['OP_DATA']) && $extra_spec['OP_DATA'] != 'ANY') {
+                            $extra_spec['OP_DATA'] = 'ANY';
+                        }
+                        if (isset($extra_spec["OBSERVER"]) && $extra_spec["OBSERVER"] == 0) {
+                            $extra_spec["OBSERVER"] = 1;
+                        }
+                        if (isset($extra_spec["DELAYED"]) && $extra_spec["DELAYED"] == 0) {
+                            $extra_spec["DELAYED"] = 1;
                         }
                     }
 
@@ -1583,6 +1729,11 @@ function extra_spec_name($extra_spec) {
             $s .= "_OBSERVER";
         }
     }
+    if (isset($extra_spec["DELAYED"])) {
+        if ($extra_spec["DELAYED"]) {
+            $s .= "_DELAYED";
+        }
+    }
     return $s;
 }
 
@@ -1608,6 +1759,9 @@ function extra_spec_flags($extra_spec) {
     }
     if (isset($extra_spec["OBSERVER"])) {
         $s[] = "SPEC_RULE_OBSERVER";
+    }
+    if (isset($extra_spec["DELAYED"])) {
+        $s[] = "SPEC_RULE_DELAYED";
     }
     return $s;
 }
@@ -1696,7 +1850,7 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
                             if (isset($helpers[$num]["op1"][$op1]) &&
                                 isset($helpers[$num]["op2"][$op2])) {
                               // Generate helper code
-                                gen_helper($f, 1, $kind, $num, $op1, $op2, $helpers[$num]["param"], $helpers[$num]["code"], $lineno, $helpers[$num]["inline"], $helpers[$num]["cold"], $helpers[$num]["hot"], $extra_spec);
+                                gen_helper($helpers[$num], $f, 1, $kind, $num, $op1, $op2, $helpers[$num]["param"], $helpers[$num]["code"], $lineno, $helpers[$num]["inline"], $helpers[$num]["cold"], $helpers[$num]["hot"], $extra_spec);
                             }
                         }
                     } else {
@@ -1808,6 +1962,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                     out($f,"#define SPEC_RULE_COMMUTATIVE  0x00800000\n");
                     out($f,"#define SPEC_RULE_ISSET        0x01000000\n");
                     out($f,"#define SPEC_RULE_OBSERVER     0x02000000\n");
+                    out($f,"#define SPEC_RULE_DELAYED      0x04000000\n");
                     out($f,"\n");
                     out($f,"static const uint32_t *zend_spec_handlers;\n");
                     out($f,"static const void * const *zend_opcode_handlers;\n");
@@ -2306,6 +2461,9 @@ function parse_spec_rules($def, $lineno, $str) {
                 case "OBSERVER":
                     $ret["OBSERVER"] = array(0, 1);
                     break;
+                case "DELAYED":
+                    $ret["DELAYED"] = array(0, 1);
+                    break;
                 default:
                     die("ERROR ($def:$lineno): Wrong specialization rules '$str'\n");
             }
@@ -2513,7 +2671,13 @@ function gen_vm($def, $skel) {
                    strpos($line,"ZEND_VM_HOT_HELPER(") === 0) {
           // Parsing helper's definition
             if (preg_match(
-                    "/^ZEND_VM(_INLINE|_COLD|_HOT)?_HELPER\(\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(?:,\s*SPEC\(([A-Z_|=,]+)\)\s*)?(?:,\s*([^)]*)\s*)?\)/",
+                    "/^ZEND_VM(_INLINE|_COLD|_HOT)?_HELPER\(
+                        \s*([A-Za-z_]+)\s*,
+                        \s*([A-Z_|]+)\s*,
+                        \s*([A-Z_|]+)\s*
+                        (?:,\s*SPEC\(([A-Z_|=,]+)\)\s*)?
+                        (?:,\s*([^)]*)\s*)?
+                    \)/x",
                     $line,
                     $m) == 0) {
                 die("ERROR ($def:$lineno): Invalid ZEND_VM_HELPER definition.\n");
@@ -2736,7 +2900,8 @@ function gen_vm($def, $skel) {
             isset($used_extra_spec["QUICK_ARG"]) ||
             isset($used_extra_spec["SMART_BRANCH"]) ||
             isset($used_extra_spec["ISSET"]) ||
-            isset($used_extra_spec["OBSERVER"])) {
+            isset($used_extra_spec["OBSERVER"]) ||
+            isset($used_extra_spec["DELAYED"])) {
 
             $else = "";
             out($f, "\tif (spec & SPEC_EXTRA_MASK) {\n");
@@ -2783,6 +2948,14 @@ function gen_vm($def, $skel) {
                 $else = "} else ";
             }
             if ($else !== "") {
+                out($f, "\t\t}\n");
+            }
+            if (isset($used_extra_spec["DELAYED"])) {
+                out($f, "\t\tif (spec & SPEC_RULE_DELAYED) {\n");
+                out($f,	"\t\t\toffset = offset * 2;\n");
+                out($f, "\t\t\tif (EG(delayed_handlers)) {\n");
+                out($f,	"\t\t\t\toffset += 1;\n");
+                out($f, "\t\t\t}\n");
                 out($f, "\t\t}\n");
             }
             out($f, "\t}\n");
