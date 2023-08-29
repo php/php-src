@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-11937 (Constant ASTs containing objects). (ilutov)
   . Fixed bug GH-11790 (On riscv64 require libatomic if actually needed).
     (Jeremie Courreges-Anglas)
+  . Fixed bug GH-12073 (Segfault when freeing incompletely initialized
+    closures). (ilutov)
 
 - DOM:
   . Fix memory leak when setting an invalid DOMDocument encoding. (nielsdos)
