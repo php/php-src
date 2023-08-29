@@ -303,8 +303,6 @@ jobs:
         uses: actions/checkout@v3
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
-      - name: Create Oracle container
-        uses: ./.github/actions/setup-oracle
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: Install gcovr
