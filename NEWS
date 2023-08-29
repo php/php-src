@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.10
+31 Aug 2023, PHP 8.2.10
 
 - CLI:
   . Fixed bug GH-11716 (cli server crashes on SIGINT when compiled with
