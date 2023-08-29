@@ -343,9 +343,6 @@ extern ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
 extern ZEND_API zend_result (*zend_post_startup_cb)(void);
 extern ZEND_API void (*zend_post_shutdown_cb)(void);
 
-/* Callback for loading of not preloaded part of the script */
-extern ZEND_API zend_result (*zend_preload_autoload)(zend_string *filename);
-
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 /* For custom format specifiers like H */

@@ -247,6 +247,7 @@ struct _zend_executor_globals {
 	const zend_op *opline_before_exception;
 	zend_op exception_op[3];
 	zend_op delayed_error_op[3];
+	zval delayed_error_consts[3];
 
 	struct _zend_module_entry *current_module;
 
