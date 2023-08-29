@@ -1854,7 +1854,6 @@ function run_test(string $php, $file, array $env): string
     $orig_php = $php;
     $php = escapeshellarg($php);
 
-    $retriable = true;
     $retried = false;
 retry:
 
@@ -1897,7 +1896,6 @@ TEST $file
     $tested = $test->getName();
 
     if ($test->hasSection('FILE_EXTERNAL')) {
-        $retriable = false;
         if ($num_repeats > 1) {
             return skip_test($tested, $tested_file, $shortname, 'Test with FILE_EXTERNAL might not be repeatable');
         }
@@ -1926,7 +1924,6 @@ TEST $file
         }
         $php = escapeshellarg($php_cgi) . ' -C ';
         $uses_cgi = true;
-        $retriable = false;
         if ($num_repeats > 1) {
             return skip_test($tested, $tested_file, $shortname, 'CGI does not support --repeat');
         }
@@ -1944,7 +1941,6 @@ TEST $file
         } else {
             return skip_test($tested, $tested_file, $shortname, 'phpdbg not available');
         }
-        $retriable = false;
         if ($num_repeats > 1) {
             return skip_test($tested, $tested_file, $shortname, 'phpdbg does not support --repeat');
         }
@@ -1952,7 +1948,6 @@ TEST $file
 
     foreach (['CLEAN', 'STDIN', 'CAPTURE_STDIO'] as $section) {
         if ($test->hasSection($section)) {
-            $retriable = false;
             if ($num_repeats > 1) {
                 return skip_test($tested, $tested_file, $shortname, "Test with $section might not be repeatable");
             }
@@ -2148,7 +2143,6 @@ TEST $file
         settings2array(preg_split("/[\n\r]+/", $ini), $ini_settings);
 
         if (isset($ini_settings['opcache.opt_debug_level'])) {
-            $retriable = false;
             if ($num_repeats > 1) {
                 return skip_test($tested, $tested_file, $shortname, 'opt_debug_level tests are not repeatable');
             }
@@ -2653,7 +2647,7 @@ COMMAND $cmd
 
         $wanted_re = null;
     }
-    if (!$passed && !$retried && $retriable && error_may_be_retried($test, $output)) {
+    if (!$passed && !$retried && error_may_be_retried($test, $output)) {
         $retried = true;
         goto retry;
     }
