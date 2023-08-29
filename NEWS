@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.0RC1
+?? ??? ????, PHP 8.3.0RC2
+
+
+31 Aug 2023, PHP 8.3.0RC1
 
 - Core:
   . Fixed bug GH-11937 (Constant ASTs containing objects). (ilutov)
