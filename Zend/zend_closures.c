@@ -689,6 +689,11 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 		closure->func.common.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 
+		zend_string_addref(closure->func.op_array.function_name);
+		if (closure->func.op_array.refcount) {
+			(*closure->func.op_array.refcount)++;
+		}
+
 		/* For fake closures, we want to reuse the static variables of the original function. */
 		if (!is_fake) {
 			if (closure->func.op_array.static_variables) {
@@ -722,23 +727,19 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 				if (func->common.scope != scope) {
 					func->common.scope = scope;
 				}
-				closure->func.op_array.fn_flags &= ~ZEND_ACC_HEAP_RT_CACHE;
 				ptr = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
 				ZEND_MAP_PTR_SET(func->op_array.run_time_cache, ptr);
 				ZEND_MAP_PTR_SET(closure->func.op_array.run_time_cache, ptr);
+				closure->func.op_array.fn_flags &= ~ZEND_ACC_HEAP_RT_CACHE;
 			} else {
 				/* Otherwise, we use a non-shared runtime cache */
-				closure->func.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
 				ptr = emalloc(sizeof(void*) + func->op_array.cache_size);
 				ZEND_MAP_PTR_INIT(closure->func.op_array.run_time_cache, ptr);
 				ptr = (char*)ptr + sizeof(void*);
 				ZEND_MAP_PTR_SET(closure->func.op_array.run_time_cache, ptr);
+				closure->func.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
 			}
 			memset(ptr, 0, func->op_array.cache_size);
-		}
-		zend_string_addref(closure->func.op_array.function_name);
-		if (closure->func.op_array.refcount) {
-			(*closure->func.op_array.refcount)++;
 		}
 	} else {
 		memcpy(&closure->func, func, sizeof(zend_internal_function));
