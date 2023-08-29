@@ -5,7 +5,7 @@ if (PHP_OPCACHE != "no") {
 
 	ARG_ENABLE("opcache-jit", "whether to enable JIT", "yes");
 
-	ARG_ENABLE("opcache-jit-ir", "whether to enable JIT based on IR framework", "no");
+	ARG_ENABLE("opcache-jit-ir", "whether to enable JIT based on IR framework", "yes");
 
 	ZEND_EXTENSION('opcache', "\
 		ZendAccelerator.c \

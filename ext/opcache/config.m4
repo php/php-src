@@ -26,10 +26,10 @@ PHP_ARG_WITH([capstone],,
 
 PHP_ARG_ENABLE([opcache-jit-ir],
   [whether to enable JIT based on IR framework],
-  [AS_HELP_STRING([--enable-opcache-jit-ir],
-    [Enable JIT based on IR framework])],
-  [no],
-  [yes])
+  [AS_HELP_STRING([--disable-opcache-jit-ir],
+    [Disable JIT based on IR framework (use old JIT)])],
+  [yes],
+  [no])
 
 if test "$PHP_OPCACHE" != "no"; then
 
