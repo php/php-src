@@ -10,7 +10,7 @@ require_once "tester.inc";
 
 $socketFilePrefix = __DIR__ . '/socket-file';
 $socketFile = sprintf(
-    "/socket-file-fpm-unix-socket-too-long-filename-but-starts-anyway%s.sock",
+    "/this-socket-very-very-very-long-file-fpm-unix-socket-is-too-long-filename-but-starts-anyway%s.sock",
     __DIR__,
     str_repeat('-0000', 11)
 );
