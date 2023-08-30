@@ -2815,7 +2815,7 @@ class ClassInfo {
         $classSynopsis = $doc->createElement("classsynopsis");
         $classSynopsis->setAttribute("class", $this->type === "interface" ? "interface" : "class");
 
-        $exceptionOverride = $this->isException($classMap) ? "exception" : null;
+        $exceptionOverride = $this->type === "class" && $this->isException($classMap) ? "exception" : null;
         $ooElement = self::createOoElement($doc, $this, $exceptionOverride, true, null, 4);
         if (!$ooElement) {
             return null;
