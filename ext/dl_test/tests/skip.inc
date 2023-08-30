@@ -12,3 +12,7 @@ if (PHP_OS_FAMILY === 'Windows') {
 if (!file_exists($path)) {
     die(sprintf('skip dl_test extension is not built (tried %s)', $path));
 }
+
+if (getenv('SKIP_ASAN')) {
+    die('xleak dl() crashes LSan');
+}
