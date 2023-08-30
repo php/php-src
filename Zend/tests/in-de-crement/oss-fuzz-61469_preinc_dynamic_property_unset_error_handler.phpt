@@ -13,4 +13,4 @@ set_error_handler([$c,'errorHandle']);
 var_dump($c->a);
 ?>
 --EXPECT--
-NULL
+int(1)

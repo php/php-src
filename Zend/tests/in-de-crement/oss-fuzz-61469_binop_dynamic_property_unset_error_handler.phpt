@@ -13,4 +13,4 @@ $c->a += 5;
 var_dump($c->a);
 ?>
 --EXPECT--
-NULL
+int(5)
