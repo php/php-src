@@ -1128,13 +1128,12 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			ZVAL_ARR(&intern->array, zend_array_dup(Z_ARR_P(array)));
 
 			if (intern->is_child) {
-				Z_TRY_DELREF_P(&intern->bucket->val);
+				Z_TRY_DELREF(intern->bucket->val);
 				/*
 				 * replace bucket->val with copied array, so the changes between
 				 * parent and child object can affect each other.
 				 */
-				intern->bucket->val = intern->array;
-				Z_TRY_ADDREF_P(&intern->array);
+				ZVAL_COPY(&intern->bucket->val, &intern->array);
 			}
 		}
 	} else {
