@@ -2663,11 +2663,6 @@ static void ZEND_FASTCALL zend_jit_assign_obj_op_helper(zend_object *zobj, zend_
 					/* special case for typed properties */
 					zend_jit_assign_op_to_typed_prop(zptr, prop_info, value, binary_op);
 				} else {
-					/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
-					 * (e.g. undefined property warning) and the property is unset in the error handler */
-					if (UNEXPECTED(Z_TYPE_P(zptr) == IS_UNDEF)) {
-						ZVAL_NULL(zptr);
-					}
 					binary_op(zptr, zptr, value);
 				}
 			} while (0);
@@ -2882,11 +2877,6 @@ static void ZEND_FASTCALL zend_jit_pre_inc_obj_helper(zend_object *zobj, zend_st
 							break;
 						}
 					}
-					/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
-					 * (e.g. undefined property warning) and the property is unset in the error handler */
-					if (UNEXPECTED(Z_TYPE_P(prop) == IS_UNDEF)) {
-						ZVAL_NULL(prop);
-					}
 
 					if (UNEXPECTED(prop_info)) {
 						zend_jit_inc_typed_prop(prop, prop_info);
@@ -2957,11 +2947,6 @@ static void ZEND_FASTCALL zend_jit_pre_dec_obj_helper(zend_object *zobj, zend_st
 							break;
 						}
 					}
-					/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
-					 * (e.g. undefined property warning) and the property is unset in the error handler */
-					if (UNEXPECTED(Z_TYPE_P(prop) == IS_UNDEF)) {
-						ZVAL_NULL(prop);
-					}
 
 					if (UNEXPECTED(prop_info)) {
 						zend_jit_dec_typed_prop(prop, prop_info);
@@ -3030,11 +3015,6 @@ static void ZEND_FASTCALL zend_jit_post_inc_obj_helper(zend_object *zobj, zend_s
 						return;
 					}
 				}
-				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
-				 * (e.g. undefined property warning) and the property is unset in the error handler */
-				if (UNEXPECTED(Z_TYPE_P(prop) == IS_UNDEF)) {
-					ZVAL_NULL(prop);
-				}
 
 				if (UNEXPECTED(prop_info)) {
 					zend_jit_post_inc_typed_prop(prop, prop_info, result);
@@ -3095,11 +3075,6 @@ static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_s
 						zend_jit_post_dec_typed_ref(ref, result);
 						return;
 					}
-				}
-				/* This case can ***ONLY*** happen if get_property_ptr_ptr emits a diagnostic
-				 * (e.g. undefined property warning) and the property is unset in the error handler */
-				if (UNEXPECTED(Z_TYPE_P(prop) == IS_UNDEF)) {
-					ZVAL_NULL(prop);
 				}
 
 				if (UNEXPECTED(prop_info)) {
