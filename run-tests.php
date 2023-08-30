@@ -1204,6 +1204,10 @@ function system_with_timeout(
     }
 
     $timeout = $valgrind ? 300 : ($env['TEST_TIMEOUT'] ?? 60);
+    /* ASAN can cause a ~2-3x slowdown. */
+    if (isset($env['SKIP_ASAN'])) {
+        $timeout *= 3;
+    }
 
     while (true) {
         /* hide errors from interrupted syscalls */
