@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed GH-11847 (DTrace enabled build is broken). (Filip Zrůst)
 
+- FPM:
+  . Fixed GH-12077 (PHP 8.3.0RC1 borked socket-close-on-exec.phpt).
+    (Jakub Zelenka)
+
 31 Aug 2023, PHP 8.3.0RC1
 
 - Core:

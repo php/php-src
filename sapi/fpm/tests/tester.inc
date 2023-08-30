@@ -342,12 +342,24 @@ class Tester
      * Skip test if supplied shell command fails.
      *
      * @param string $command
+     * @param string|null $expectedPartOfOutput
      */
-    static public function skipIfShellCommandFails($command)
+    static public function skipIfShellCommandFails(string $command, string $expectedPartOfOutput = null)
     {
-        $output = system($command, $code);
-        if ($code) {
-            die("skip command '$command' faield with code $code and output: $output");
+        $result = exec("$command 2>&1", $output, $code);
+        if ($result === false || $code) {
+            die("skip command '$command' faieled with code $code");
+        }
+        if (!is_null($expectedPartOfOutput)) {
+            if (is_array($output)) {
+                foreach ($output as $line) {
+                    if (str_contains($line, $expectedPartOfOutput)) {
+                        // string found so no need to skip
+                        return;
+                    }
+                }
+            }
+            die("skip command '$command' did not contain output '$expectedPartOfOutput'");
         }
     }
 

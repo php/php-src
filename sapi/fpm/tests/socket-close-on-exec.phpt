@@ -3,7 +3,7 @@ FPM: Set CLOEXEC on the listen and connection socket
 --SKIPIF--
 <?php
 require_once "skipif.inc";
-FPM\Tester::skipIfShellCommandFails('lsof -v 2> /dev/null');
+FPM\Tester::skipIfShellCommandFails('lsof -v', 'lsof-org/lsof');
 ?>
 --FILE--
 <?php
