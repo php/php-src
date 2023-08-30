@@ -3,6 +3,7 @@ get_object_vars() no-declared/declared discrepancies
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class Test {
     public $prop;
 }

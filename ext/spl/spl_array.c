@@ -460,130 +460,6 @@ static uint32_t spl_array_set_refcount(bool is_child, HashTable *ht, uint32_t re
 	return old_refcount;
 } /* }}} */
 
-/* For reasons ArrayObject must not go through the overloaded __set()/__get()/etc.
- * magic methods, so to emit a warning for dynamic props (or Error on classes
- * that do not support them, such as readonly classes) or an error for incompatible
- * typed properties, we need to reimplement the logic of zend_std_write_property()
- * somewhat. Thanks SPL. */
-static zval *zend_ignore_set_magic_method_write_property(
-	HashTable *derived_properties_table,
-	zend_object *zobj,
-	zend_string *property_name,
-	zval *value
-) {
-	ZEND_ASSERT(!Z_ISREF_P(value));
-
-	zend_class_entry *ce = zobj->ce;
-	zval *zv;
-	if (UNEXPECTED(zend_hash_num_elements(&ce->properties_info) == 0)
-	 || UNEXPECTED((zv = zend_hash_find(&ce->properties_info, property_name)) == NULL)) {
-	 	/* Dynamic prop handling */
-	 	dynamic_prop:
-		/* TODO Modifying private/protected props?
-		if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0') && ZSTR_LEN(member) != 0) {
-			zend_bad_property_name();
-			return NULL;
-		}
-		*/
-		// Dynamic props are not allowed on this class
-		if (ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES) {
-			zend_throw_error(NULL, "Cannot create dynamic property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
-			return NULL;
-		}
-		if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES))) {
-			GC_ADDREF(zobj);
-			zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
-			if (UNEXPECTED(GC_DELREF(zobj) == 0)) {
-				zend_objects_store_del(zobj);
-				if (!EG(exception)) {
-					/* We cannot continue execution and have to throw an exception */
-					zend_throw_error(NULL, "Cannot create dynamic property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
-				}
-				return NULL;
-			}
-		}
-		/* Create/Update dynamic prop */
-		zend_hash_update_ind(derived_properties_table, property_name, value);
-		return value;
-	}
-
-	const zend_property_info *property_info = (zend_property_info*)Z_PTR_P(zv);
-	uint32_t prop_flags = property_info->flags;
-
-	if (prop_flags & (ZEND_ACC_CHANGED|ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE)) {
-		zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(prop_flags), ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
-		return NULL;
-	}
-	if (UNEXPECTED(prop_flags & ZEND_ACC_STATIC)) {
-		zend_error(E_NOTICE, "Accessing static property %s::$%s as non static", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
-		/* Handle like dynamic prop */
-		goto dynamic_prop;
-	}
-
-	uintptr_t property_offset = property_info->offset;
-	zval *variable_ptr = OBJ_PROP(zobj, property_offset);
-
-	// Property is already set, check readonly violation
-	if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
-		if (UNEXPECTED((prop_flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE))) {
-			Z_TRY_DELREF_P(value);
-			zend_readonly_property_modification_error(property_info);
-			return NULL;
-		}
-	}
-
-	/* Remove fact that property can be reinitialized */
-	Z_PROP_FLAG_P(variable_ptr) &= ~IS_PROP_REINITABLE;
-	Z_TRY_ADDREF_P(value);
-	/* Check value is of valid type if property has type */
-	if (UNEXPECTED(ZEND_TYPE_IS_SET(property_info->type))) {
-		zval tmp;
-		ZVAL_COPY_VALUE(&tmp, value);
-		// Increase refcount to prevent object from being released in __toString()
-		GC_ADDREF(zobj);
-		/* Engine never uses strict types */
-		bool type_matched = zend_verify_property_type(property_info, &tmp, /* strict_types */ false);
-		if (UNEXPECTED(GC_DELREF(zobj) == 0)) {
-			zend_object_released_while_assigning_to_property_error(property_info);
-			zend_objects_store_del(zobj);
-			zval_ptr_dtor(&tmp);
-			variable_ptr = &EG(error_zval);
-			return NULL;
-		}
-		if (UNEXPECTED(!type_matched)) {
-			zval_ptr_dtor(value);
-			return NULL;
-		}
-		value = &tmp;
-		Z_PROP_FLAG_P(variable_ptr) = 0;
-	}
-
-	zend_refcounted *garbage = NULL;
-	/* Engine never uses strict types */
-	variable_ptr = zend_assign_to_variable_ex(variable_ptr, value, IS_TMP_VAR, /* strict_types */ false, &garbage);
-	if (garbage) {
-		if (GC_DELREF(garbage) == 0) {
-			zend_execute_data *execute_data = EG(current_execute_data);
-			// Assign to result variable before calling the destructor as it may release the object
-			if (execute_data
-				&& EX(func)
-				&& ZEND_USER_CODE(EX(func)->common.type)
-				&& EX(opline)
-				&& EX(opline)->opcode == ZEND_ASSIGN_OBJ
-				&& EX(opline)->result_type
-			) {
-				ZVAL_COPY_DEREF(EX_VAR(EX(opline)->result.var), variable_ptr);
-				variable_ptr = NULL;
-			}
-			rc_dtor_func(garbage);
-		} else {
-			gc_check_possible_root_no_ref(garbage);
-		}
-	}
-	//ZVAL_COPY_VALUE(variable_ptr, value);
-	return variable_ptr;
-}
-
 static void spl_array_write_dimension_ex(int check_inherited, zend_object *object, zval *offset, zval *value) /* {{{ */
 {
 	spl_array_object *intern = spl_array_from_obj(object);
@@ -620,11 +496,8 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 		return;
 	}
 
-	Z_TRY_ADDREF_P(value);
-
 	if (get_hash_key(&key, intern, offset) == FAILURE) {
 		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_W);
-		zval_ptr_dtor(value);
 		return;
 	}
 
@@ -637,14 +510,27 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 			/* For reasons ArrayObject must not go through the overloaded __set()/__get()/etc.
 			 * magic methods, so to emit a warning for dynamic props (or Error on classes
 			 * that do not support them, such as readonly classes) or an error for incompatible
-			 * typed properties, we need to reimplement the logic of zend_std_write_property()
-			 * somewhat. Thanks SPL. */
-			zend_ignore_set_magic_method_write_property(ht, obj, key.key, value);
+			 * typed properties, we set a property guard so that when calling the write_property
+			 * handler it does not call the magic __set() method. Thanks SPL. */
+			if (obj->ce->ce_flags & ZEND_ACC_USE_GUARDS) {
+				uint32_t *guard = zend_get_property_guard(obj, key.key);
+				uint32_t backup = *guard;
+				(*guard) |= ZEND_GUARD_PROPERTY_SET;
+				obj->handlers->write_property(obj, key.key, value, /* cache_slot */ NULL);
+				*guard = backup;
+			} else {
+				/* No overload method is defined on the object */
+				obj->handlers->write_property(obj, key.key, value, /* cache_slot */ NULL);
+			}
 		} else {
+			/* Increase refcount for value before adding to the Hashtable */
+			Z_TRY_ADDREF_P(value);
 			zend_hash_update_ind(ht, key.key, value);
 		}
 		spl_hash_key_release(&key);
 	} else {
+		/* Increase refcount for value before adding to the Hashtable */
+		Z_TRY_ADDREF_P(value);
 		ZEND_ASSERT(!spl_array_is_object(intern));
 		zend_hash_index_update(ht, key.h, value);
 	}

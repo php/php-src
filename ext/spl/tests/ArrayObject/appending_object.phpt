@@ -17,7 +17,7 @@ try {
 }
 
 try {
-    $ao->append('no-key');
+    $ao[] = 'no-key';
     var_dump($c);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;

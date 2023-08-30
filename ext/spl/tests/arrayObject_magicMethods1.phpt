@@ -67,8 +67,6 @@ var_dump($ao);
 --> Write existent, non-existent and dynamic:
 
 Deprecated: Creation of dynamic property UsesMagic::$dynamic is deprecated in %s on line %d
-
-Deprecated: Creation of dynamic property UsesMagic::$dynamic is deprecated in %s on line %d
   Original wrapped object:
 object(UsesMagic)#1 (5) {
   ["a"]=>
