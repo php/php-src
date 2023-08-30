@@ -213,7 +213,7 @@ static php_stream *_php_stream_fopen_from_file_int(FILE *file, const char *mode 
 	return php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
 }
 
-PHPAPI php_stream *_php_stream_fopen_temporary_file_ex(bool emit_errors, const char *dir, const char *pfx, zend_string **opened_path_ptr STREAMS_DC)
+PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char *pfx, zend_string **opened_path_ptr STREAMS_DC)
 {
 	zend_string *opened_path = NULL;
 	int fd;
@@ -239,23 +239,11 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file_ex(bool emit_errors, const c
 		}
 		close(fd);
 
-		if (emit_errors) {
-			php_error_docref(NULL, E_WARNING, "Unable to allocate stream");
-		}
+		php_error_docref(NULL, E_WARNING, "Unable to allocate stream");
 
 		return NULL;
 	}
 	return NULL;
-}
-
-PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char *pfx, zend_string **opened_path_ptr STREAMS_DC)
-{
-	return php_stream_fopen_temporary_file_ex(/* emit_errors */ true, dir, pfx, opened_path_ptr);
-}
-
-PHPAPI php_stream *_php_stream_fopen_tmpfile_ex(bool emit_errors, int dummy STREAMS_DC)
-{
-	return php_stream_fopen_temporary_file_ex(emit_errors, NULL, "php", NULL);
 }
 
 PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC)
