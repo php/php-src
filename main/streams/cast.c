@@ -299,10 +299,8 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			php_error_docref(NULL, E_WARNING, "Cannot cast a filtered stream on this system");
 		}
 		return FAILURE;
-	} else if (stream->ops->cast) {
-		if (stream->ops->cast(stream, castas, ret) == SUCCESS) {
-			goto exit_success;
-		}
+	} else if (stream->ops->cast && stream->ops->cast(stream, castas, ret) == SUCCESS) {
+		goto exit_success;
 	}
 
 	if (show_err) {
