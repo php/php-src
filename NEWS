@@ -2,7 +2,4 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0alpha1
 
-- Core:
-  . Fixed GH-11847 (DTrace enabled build is broken). (Filip Zrůst)
-
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
