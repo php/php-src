@@ -23,7 +23,8 @@ fclose($pipes[0]);
 proc_close($proc);
 ?>
 --EXPECTF--
-resource(%d) of type (process)
+object(Process)#1 (0) {
+}
 Interactive shell
 
 bar

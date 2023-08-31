@@ -12,7 +12,7 @@ $descriptorspec = array(
 );
 
 $process=proc_open("echo testtext",$descriptorspec,$pipes);
-if(is_resource($process))
+if($process)
 {
     stream_set_blocking($pipes[0],false);
     stream_set_blocking($pipes[1],false);

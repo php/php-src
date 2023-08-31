@@ -42,7 +42,7 @@ if (!$r) {
 
 $process = proc_open($cmd, $descriptors, $pipes);
 
-if (is_resource($process))
+if ($process)
 {
         fclose($pipes[0]);
 

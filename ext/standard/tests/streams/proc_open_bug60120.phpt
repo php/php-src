@@ -37,7 +37,7 @@ $process = proc_open(
     ]
 );
 
-if (!is_resource($process)) {
+if (!$process) {
     die(sprintf(
         "could not open process \"%s\"",
         $command));

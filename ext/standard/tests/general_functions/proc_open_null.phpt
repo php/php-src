@@ -25,6 +25,6 @@ array(1) {
 string(5) "Error"
 array(1) {
   [1]=>
-  resource(6) of type (stream)
+  resource(5) of type (stream)
 }
 string(4) "Test"

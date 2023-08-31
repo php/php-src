@@ -1503,6 +1503,16 @@ class AssertionError extends Error
 {
 }
 
+#ifdef PHP_CAN_SUPPORT_PROC_OPEN
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class Process
+{
+}
+#endif
+
 /* main/main.c */
 
 function set_time_limit(int $seconds): bool {}
@@ -3273,23 +3283,19 @@ function password_algos(): array {}
 #ifdef PHP_CAN_SUPPORT_PROC_OPEN
 /**
  * @param array $pipes
- * @return resource|false
  * @refcount 1
  */
-function proc_open(array|string $command, array $descriptor_spec, &$pipes, ?string $cwd = null, ?array $env_vars = null, ?array $options = null) {}
+function proc_open(array|string $command, array $descriptor_spec, &$pipes, ?string $cwd = null, ?array $env_vars = null, ?array $options = null): Process|false {}
 
-/** @param resource $process */
-function proc_close($process): int {}
+function proc_close(Process $process): int {}
 
-/** @param resource $process */
-function proc_terminate($process, int $signal = 15): bool {}
+function proc_terminate(Process $process, int $signal = 15): bool {}
 
 /**
- * @param resource $process
  * @return array<string, bool|int|string>
  * @refcount 1
  */
-function proc_get_status($process): array {}
+function proc_get_status(Process $process): array {}
 #endif
 
 /* quot_print.c */
