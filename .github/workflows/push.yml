@@ -239,7 +239,17 @@ jobs:
         uses: ./.github/actions/verify-generated-files
   WINDOWS:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
-    name: WINDOWS_X64_ZTS
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - x64: true
+            zts: false
+            opcache: true
+          - x64: false
+            zts: true
+            opcache: false
+    name: "WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: windows-2019
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
@@ -247,11 +257,11 @@ jobs:
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
       PHP_BUILD_SDK_BRANCH: php_downloads_server_migration_v1
       PHP_BUILD_CRT: vs16
-      PLATFORM: x64
-      THREAD_SAFE: "1"
-      INTRINSICS: AVX2
+      PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
+      THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
+      INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"
       PARALLEL: -j2
-      OPCACHE: "1"
+      OPCACHE: "${{ matrix.opcache && '1' || '0' }}"
     steps:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
