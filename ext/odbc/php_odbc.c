@@ -753,12 +753,14 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 /* }}} */
 
 /* {{{ _close_pconn_with_res */
-static int _close_pconn_with_res(zend_resource *le, zend_resource *res)
+static int _close_pconn_with_res(zval *zv, void *p)
 {
-	if (le->type == le_pconn && (((odbc_connection *)(le->ptr))->res == res)){
-		return 1;
-	}else{
-		return 0;
+	zend_resource *le = Z_RES_P(zv);
+	zend_resource *res = (zend_resource*)p;
+	if (le->type == le_pconn && (((odbc_connection *)(le->ptr))->res == res)) {
+		return ZEND_HASH_APPLY_REMOVE;
+	} else {
+		return ZEND_HASH_APPLY_KEEP;
 	}
 }
 /* }}} */
@@ -837,7 +839,7 @@ PHP_FUNCTION(odbc_close_all)
 				zend_list_close(p);
 				/* Delete the persistent connection */
 				zend_hash_apply_with_argument(&EG(persistent_list),
-					(apply_func_arg_t) _close_pconn_with_res, (void *)p);
+					_close_pconn_with_res, (void *)p);
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -2365,7 +2367,7 @@ PHP_FUNCTION(odbc_close)
 	zend_list_close(Z_RES_P(pv_conn));
 
 	if(is_pconn){
-		zend_hash_apply_with_argument(&EG(persistent_list),	(apply_func_arg_t) _close_pconn_with_res, (void *) Z_RES_P(pv_conn));
+		zend_hash_apply_with_argument(&EG(persistent_list), _close_pconn_with_res, (void *) Z_RES_P(pv_conn));
 	}
 }
 /* }}} */
