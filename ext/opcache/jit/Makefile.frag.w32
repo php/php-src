@@ -11,7 +11,7 @@ ext\opcache\jit\ir\ir_emit_x86.h: ext\opcache\jit\ir\ir_x86.dasc $(BUILD_DIR)\\m
 
 $(BUILD_DIR)\\gen_ir_fold_hash.exe: ext\opcache\jit\ir\gen_ir_fold_hash.c ext\opcache\jit\ir\ir_strtab.c
 	@if exist $(BUILD_DIR)\\gen_ir_fold_hash.exe del $(BUILD_DIR)\\gen_ir_fold_hash.exe
-	$(PHP_CL) /D $(IR_TARGET) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /Fe$(BUILD_DIR)\\gen_ir_fold_hash.exe $**
+	$(PHP_CL) /D $(IR_TARGET) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /Fe$(BUILD_DIR)\\gen_ir_fold_hash.exe ext\opcache\jit\ir\gen_ir_fold_hash.c
 
 ext\opcache\jit\ir\ir_fold_hash.h: $(BUILD_DIR)\\gen_ir_fold_hash.exe ext\opcache\jit\ir\ir_fold.h ext\opcache\jit\ir\ir.h
 	@if exist ext\opcache\jit\ir\ir_fold_hash.h del ext\opcache\jit\ir\ir_fold_hash.h
