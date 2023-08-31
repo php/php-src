@@ -4383,18 +4383,18 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 		old_op1_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var));
 		SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), IS_DOUBLE, 0);
 		if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-			SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->op1.var), ir_CONST_DOUBLE(ZEND_LONG_MAX + 1.0));
+			SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->op1.var), ir_CONST_DOUBLE((double)ZEND_LONG_MAX + 1.0));
 		} else {
-			SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->op1.var), ir_CONST_DOUBLE(ZEND_LONG_MIN - 1.0));
+			SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->op1.var), ir_CONST_DOUBLE((double)ZEND_LONG_MIN - 1.0));
 		}
 		if (opline->result_type != IS_UNUSED) {
 			old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
 			if (opline->opcode == ZEND_PRE_INC) {
 				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE, 0);
-				SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->result.var), ir_CONST_DOUBLE(ZEND_LONG_MAX + 1.0));
+				SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->result.var), ir_CONST_DOUBLE((double)ZEND_LONG_MAX + 1.0));
 			} else if (opline->opcode == ZEND_PRE_DEC) {
 				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE, 0);
-				SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->result.var), ir_CONST_DOUBLE(ZEND_LONG_MIN - 1.0));
+				SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->result.var), ir_CONST_DOUBLE((double)ZEND_LONG_MIN - 1.0));
 			} else if (opline->opcode == ZEND_POST_INC) {
 				SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_LONG, 0);
 				SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->result.var), ir_CONST_LONG(ZEND_LONG_MAX));
@@ -4697,14 +4697,14 @@ static int zend_jit_math_long_long(zend_jit_ctx   *jit,
 				 && Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 1) {
 					old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE, 0);
-					SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->result.var), ir_CONST_DOUBLE(ZEND_LONG_MAX + 1.0));
+					SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->result.var), ir_CONST_DOUBLE((double)ZEND_LONG_MAX + 1.0));
 					exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
 					SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_res_info);
 				} else if (opline->opcode == ZEND_SUB
 				 && Z_MODE(op2_addr) == IS_CONST_ZVAL && Z_LVAL_P(Z_ZV(op2_addr)) == 1) {
 					old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_DOUBLE, 0);
-					SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->result.var), ir_CONST_DOUBLE(ZEND_LONG_MIN - 1.0));
+					SET_STACK_REF(stack, EX_VAR_TO_NUM(opline->result.var), ir_CONST_DOUBLE((double)ZEND_LONG_MIN - 1.0));
 					exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
 					SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var), old_res_info);
 				} else {
@@ -4963,6 +4963,18 @@ static int zend_jit_math_helper(zend_jit_ctx   *jit,
 
 	ir_refs_init(end_inputs, 6);
 	ir_refs_init(res_inputs, 6);
+
+	if (Z_MODE(op1_addr) == IS_REG) {
+		if (!has_concrete_type(op2_info & MAY_BE_ANY) && jit->ra[Z_SSA_VAR(op1_addr)].ref == IR_NULL) {
+			/* Force load */
+			zend_jit_use_reg(jit, op1_addr);
+		}
+	} else if (Z_MODE(op2_addr) == IS_REG) {
+		if (!has_concrete_type(op1_info & MAY_BE_ANY) && jit->ra[Z_SSA_VAR(op2_addr)].ref == IR_NULL) {
+			/* Force load */
+			zend_jit_use_reg(jit, op2_addr);
+		}
+	}
 
 	if (Z_MODE(res_addr) == IS_REG) {
 		jit->delay_var = Z_SSA_VAR(res_addr);
@@ -6564,6 +6576,18 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 	ir_refs *end_inputs;
 
 	ir_refs_init(end_inputs, 8);
+
+	if (Z_MODE(op1_addr) == IS_REG) {
+		if (!has_concrete_type(op2_info & MAY_BE_ANY) && jit->ra[Z_SSA_VAR(op1_addr)].ref == IR_NULL) {
+			/* Force load */
+			zend_jit_use_reg(jit, op1_addr);
+		}
+	} else if (Z_MODE(op2_addr) == IS_REG) {
+		if (!has_concrete_type(op1_info & MAY_BE_ANY) && jit->ra[Z_SSA_VAR(op2_addr)].ref == IR_NULL) {
+			/* Force load */
+			zend_jit_use_reg(jit, op2_addr);
+		}
+	}
 
 	if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG)) {
 		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG)) {
