@@ -10,7 +10,7 @@ $(builddir)/jit/ir/ir_emit.lo: \
 	$(srcdir)/jit/ir/ir_emit.c $(builddir)/jit/ir/ir_emit_$(DASM_ARCH).h
 
 $(builddir)/jit/ir/gen_ir_fold_hash: $(srcdir)/jit/ir/gen_ir_fold_hash.c $(srcdir)/jit/ir/ir_strtab.c
-	$(BUILD_CC) -D${IR_TARGET} -DIR_PHP -DIR_PHP_MM=0 -o $@ $^
+	$(BUILD_CC) -D${IR_TARGET} -DIR_PHP -DIR_PHP_MM=0 -o $@ $<
 
 $(builddir)/jit/ir/ir_fold_hash.h: $(builddir)/jit/ir/gen_ir_fold_hash $(srcdir)/jit/ir/ir_fold.h $(srcdir)/jit/ir/ir.h
 	$(builddir)/jit/ir/gen_ir_fold_hash < $(srcdir)/jit/ir/ir_fold.h > $(builddir)/jit/ir/ir_fold_hash.h
