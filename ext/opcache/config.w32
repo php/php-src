@@ -39,7 +39,7 @@ if (PHP_OPCACHE != "no") {
 		} else {
 			WARNING("JIT not enabled, headers not found");
 		}
-	} else if (PHP_OPCACHE_JIT_IR == "yes") {
+	} else if (PHP_OPCACHE_JIT == "yes" && PHP_OPCACHE_JIT_IR == "yes") {
 		if (CHECK_HEADER_ADD_INCLUDE("ir/ir.h", "CFLAGS_OPCACHE", PHP_OPCACHE + ";ext\\opcache\\jit")) {
 			var dasm_flags = (X64 ? "-D X64=1" : "") + (X64 ? " -D X64WIN=1" : "") + " -D WIN=1";
 			var ir_target = (X64 ? "IR_TARGET_X64" : "IR_TARGET_X86");

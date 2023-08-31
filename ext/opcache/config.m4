@@ -96,7 +96,7 @@ if test "$PHP_OPCACHE" != "no"; then
 
     JIT_CFLAGS=
 
-  elif test "$PHP_OPCACHE_JIT_IR" = "yes"; then
+  elif test "$PHP_OPCACHE_JIT" = "yes" -a "$PHP_OPCACHE_JIT_IR" = "yes"; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
     AC_DEFINE(ZEND_JIT_IR, 1, [Use JIT IR framework])
     ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c jit/ir/ir.c jit/ir/ir_strtab.c \
