@@ -759,7 +759,7 @@ static int _close_pconn_with_res(zval *zv, void *p)
 	zend_resource *res = (zend_resource*)p;
 	if (le->type == le_pconn && (((odbc_connection *)(le->ptr))->res == res)) {
 		return ZEND_HASH_APPLY_REMOVE;
-	} else{
+	} else {
 		return ZEND_HASH_APPLY_KEEP;
 	}
 }
