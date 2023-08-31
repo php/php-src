@@ -5504,6 +5504,11 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 #endif
 		*dasm_ptr = (void*)ZEND_MM_ALIGNED_SIZE_EX(((size_t)(*dasm_ptr)), 16);
 		zend_jit_protect();
+	} else {
+#if (defined(_WIN32) || defined(IR_TARGET_AARCH64)) && defined(ZEND_JIT_IR)
+		zend_jit_stub_handlers = dasm_buf;
+		zend_jit_init_handlers();
+#endif
 	}
 
 #ifndef ZEND_JIT_IR
@@ -5553,12 +5558,9 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 			return FAILURE;
 		}
 	} else {
-#if defined(_WIN32) && !defined(ZEND_JIT_IR)
+#if defined(_WIN32)
 		/* restore global labels */
 		memcpy(dasm_labels, dasm_buf, sizeof(void*) * zend_lb_MAX);
-		zend_jit_init_handlers();
-#elif (defined(_WIN32) || defined(IR_TARGET_AARCH64)) && defined(ZEND_JIT_IR)
-		zend_jit_stub_handlers = dasm_buf;
 		zend_jit_init_handlers();
 #endif
 	}
