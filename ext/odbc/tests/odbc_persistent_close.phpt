@@ -27,7 +27,7 @@ include 'config.inc';
 // set a session specific variable via CONTEXT_INFO, if we get the same connection again, it should be identical
 function set_context_info($conn, $string) {
 	$hexstring = bin2hex($string);
-	return odbc_exec($conn, "SET CONTEXT_INFO 0x$hexstring"); /* '*' */
+	return odbc_exec($conn, "SET CONTEXT_INFO 0x$hexstring");
 }
 
 function fetch_context_info($conn) {
@@ -59,7 +59,7 @@ $conn = odbc_pconnect($dsn, $user, $pass);
 var_dump(fetch_context_info($conn));
 
 ?>
---EXPECTF--
+--EXPECT--
 string(22) "PHP odbc_pconnect test"
 string(22) "PHP odbc_pconnect test"
 NULL
