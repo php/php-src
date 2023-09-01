@@ -10,7 +10,7 @@ disable_functions=dl
 opcache
 --SKIPIF--
 <?php
-if (getenv('SKIP_ASAN')) die('xleak dl() crashes LSan');
+if (getenv('SKIP_ASAN')) die('skip dl() crashes LSan');
 ?>
 --FILE--
 <?php
