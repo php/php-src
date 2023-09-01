@@ -66,6 +66,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
+          submodules: 'recursive'
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
       - name: Create Oracle container
@@ -157,10 +158,18 @@ jobs:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: root
     steps:
+      - name: apt git
+        run: |
+          set -x
+          export DEBIAN_FRONTEND=noninteractive
+          dpkg --add-architecture i386
+          apt-get update -y | true
+          apt-get install -y git
       - name: git checkout
         uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
+          submodules: 'recursive'
       - name: apt
         uses: ./.github/actions/apt-x32
       - name: System info
@@ -230,6 +239,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
+          submodules: 'recursive'
       - name: brew
         uses: ./.github/actions/brew
       - name: ./configure
@@ -291,6 +301,8 @@ jobs:
     steps:
       - name: git checkout
         uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
       - name: apt
@@ -341,6 +353,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
+          submodules: 'recursive'
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: ./configure
@@ -523,6 +536,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
+          submodules: 'recursive'
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
       - name: Create Oracle container
@@ -599,6 +613,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
+          submodules: 'recursive'
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: ./configure
@@ -699,6 +714,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
+          submodules: 'recursive'
       - name: apt
         run: |
           sudo apt-get update -y | true
@@ -754,6 +770,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: php
+          submodules: 'recursive'
       - name: git checkout apcu
         uses: actions/checkout@v4
         with:
@@ -881,6 +898,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
+          submodules: 'recursive'
       - name: Setup
         uses: ./.github/actions/setup-windows
       - name: Build
