@@ -13,6 +13,9 @@ function main() {
     global $storeResult;
 
     $data = [];
+    if (false !== $branch = getenv('GITHUB_REF_NAME')) {
+        $data['branch'] = $branch;
+    }
     $data['Zend/bench.php'] = runBench(false);
     $data['Zend/bench.php JIT'] = runBench(true);
     $data['Symfony Demo 2.2.3'] = runSymfonyDemo(false);
@@ -66,7 +69,7 @@ function runWordpress(bool $jit): array {
      * easily alter the phar file */
     runPhpCommand([
         '-d error_reporting=0',
-        'wp-cli.phar', 
+        'wp-cli.phar',
         'core',
         'install',
         '--url=wordpress.local',
