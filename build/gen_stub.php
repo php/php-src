@@ -4555,15 +4555,15 @@ function replaceClassSynopses(string $targetDirectory, array $classMap, iterable
                 continue;
             }
 
-            $firstChild = $classSynopsis->firstElementChild;
-            if ($firstChild === null) {
+            $child = $classSynopsis->firstElementChild;
+            if ($child === null) {
                 continue;
             }
-            $firstChild = $firstChild->firstElementChild;
-            if ($firstChild === null) {
+            $child = $child->lastElementChild;
+            if ($child === null) {
                 continue;
             }
-            $className = $firstChild->textContent;
+            $className = $child->textContent;
             if (!isset($classMap[$className])) {
                 continue;
             }
