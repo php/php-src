@@ -11286,19 +11286,19 @@ if (exact > 1)
     }
   }
 else if (exact == 1)
-  {
   compile_char1_matchingpath(common, type, cc, &backtrack->topbacktracks, TRUE);
 
-  if (early_fail_type == type_fail_range)
-    {
-    OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), early_fail_ptr);
-    OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), early_fail_ptr + (int)sizeof(sljit_sw));
-    OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, TMP2, 0);
-    OP2(SLJIT_SUB, TMP2, 0, STR_PTR, 0, TMP2, 0);
-    add_jump(compiler, &backtrack->topbacktracks, CMP(SLJIT_LESS_EQUAL, TMP2, 0, TMP1, 0));
+if (early_fail_type == type_fail_range)
+  {
+  /* Range end first, followed by range start. */
+  OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(SLJIT_SP), early_fail_ptr);
+  OP1(SLJIT_MOV, TMP2, 0, SLJIT_MEM1(SLJIT_SP), early_fail_ptr + (int)sizeof(sljit_sw));
+  OP2(SLJIT_SUB, TMP1, 0, TMP1, 0, TMP2, 0);
+  OP2(SLJIT_SUB, TMP2, 0, STR_PTR, 0, TMP2, 0);
+  add_jump(compiler, &backtrack->topbacktracks, CMP(SLJIT_LESS_EQUAL, TMP2, 0, TMP1, 0));
 
-    OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), early_fail_ptr + (int)sizeof(sljit_sw), STR_PTR, 0);
-    }
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), early_fail_ptr, STR_PTR, 0);
+  OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), early_fail_ptr + (int)sizeof(sljit_sw), STR_PTR, 0);
   }
 
 switch(opcode)
