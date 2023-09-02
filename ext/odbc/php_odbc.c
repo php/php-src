@@ -845,6 +845,7 @@ PHP_FUNCTION(odbc_prepare)
 			break;
 		default:
 			odbc_sql_error(conn, result->stmt, "SQLPrepare");
+			efree(result);
 			RETURN_FALSE;
 	}
 
