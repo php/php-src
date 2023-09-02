@@ -98,7 +98,7 @@ PHP_FUNCTION( msgfmt_format_message )
 		intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(mfo));
 		if( U_FAILURE(INTL_DATA_ERROR_CODE((mfo))) )
 		{
-			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			intl_error_set(/* intl_error* */ NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"msgfmt_format_message: error converting pattern to UTF-16", 0 );
 			RETURN_FALSE;
 		}
@@ -113,7 +113,7 @@ PHP_FUNCTION( msgfmt_format_message )
 
 #ifdef MSG_FORMAT_QUOTE_APOS
 	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
-		intl_error_set( NULL, U_INVALID_FORMAT_ERROR,
+		intl_error_set(/* intl_error* */ NULL, U_INVALID_FORMAT_ERROR,
 			"msgfmt_format_message: error converting pattern to quote-friendly format", 0 );
 		RETURN_FALSE;
 	}
@@ -134,15 +134,14 @@ PHP_FUNCTION( msgfmt_format_message )
 			spprintf( &msg, 0, "pattern syntax error (%s)", parse_error_str.s? ZSTR_VAL(parse_error_str.s) : "unknown parser error" );
 			smart_str_free( &parse_error_str );
 
-			intl_error_set_code( NULL, INTL_DATA_ERROR_CODE( mfo ) );
-			intl_errors_set_custom_msg( INTL_DATA_ERROR_P( mfo ), msg, 1 );
+			/* Pass NULL to intl_error* parameter to store message in global Intl error msg stack */
+			intl_error_set_code(/* intl_error* */ NULL, INTL_DATA_ERROR_CODE( mfo ) );
+			intl_errors_set_custom_msg(/* intl_error* */ NULL, msg, 1 );
 
 			efree( msg );
 		} else {
-			intl_errors_set_custom_msg( INTL_DATA_ERROR_P(mfo), "Creating message formatter failed", 0 );
+			intl_errors_set_custom_msg(/* intl_error* */ NULL, "Creating message formatter failed", 0 );
 		}
-		/* Reset custom error message as this is a static method that has no object  */
-		intl_errors_reset(INTL_DATA_ERROR_P(mfo));
 		umsg_close(MSG_FORMAT_OBJECT(mfo));
 		RETURN_FALSE;
     }
