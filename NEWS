@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     closures). (ilutov)
   . Fixed bug GH-12060 (Internal iterator rewind handler is called twice).
     (ju1ius)
+  . Fixed OSS Fuzz #61865 (Undef variable in ++/-- for declared property
+    that is unset in error handler). (Girgias)
 
 
 - FPM:
