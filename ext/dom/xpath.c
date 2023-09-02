@@ -246,7 +246,7 @@ PHP_METHOD(DOMXPath, __construct)
 /* }}} end DOMXPath::__construct */
 
 /* {{{ document DOMDocument*/
-int dom_xpath_document_read(dom_object *obj, zval *retval)
+zend_result dom_xpath_document_read(dom_object *obj, zval *retval)
 {
 	xmlDoc *docp = NULL;
 	xmlXPathContextPtr ctx = (xmlXPathContextPtr) obj->ptr;
@@ -265,14 +265,14 @@ static inline dom_xpath_object *php_xpath_obj_from_dom_obj(dom_object *obj) {
 	return (dom_xpath_object*)((char*)(obj) - XtOffsetOf(dom_xpath_object, dom));
 }
 
-int dom_xpath_register_node_ns_read(dom_object *obj, zval *retval)
+zend_result dom_xpath_register_node_ns_read(dom_object *obj, zval *retval)
 {
 	ZVAL_BOOL(retval, php_xpath_obj_from_dom_obj(obj)->register_node_ns);
 
 	return SUCCESS;
 }
 
-int dom_xpath_register_node_ns_write(dom_object *obj, zval *newval)
+zend_result dom_xpath_register_node_ns_write(dom_object *obj, zval *newval)
 {
 	php_xpath_obj_from_dom_obj(obj)->register_node_ns = zend_is_true(newval);
 

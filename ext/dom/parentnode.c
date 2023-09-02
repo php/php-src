@@ -28,7 +28,7 @@
 readonly=yes
 URL: https://www.w3.org/TR/dom/#dom-parentnode-firstelementchild
 */
-int dom_parent_node_first_element_child_read(dom_object *obj, zval *retval)
+zend_result dom_parent_node_first_element_child_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *first = NULL;
 
@@ -61,7 +61,7 @@ int dom_parent_node_first_element_child_read(dom_object *obj, zval *retval)
 readonly=yes
 URL: https://www.w3.org/TR/dom/#dom-parentnode-lastelementchild
 */
-int dom_parent_node_last_element_child_read(dom_object *obj, zval *retval)
+zend_result dom_parent_node_last_element_child_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *last = NULL;
 
@@ -94,7 +94,7 @@ int dom_parent_node_last_element_child_read(dom_object *obj, zval *retval)
 readonly=yes
 https://www.w3.org/TR/dom/#dom-parentnode-childelementcount
 */
-int dom_parent_node_child_element_count(dom_object *obj, zval *retval)
+zend_result dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *first = NULL;
 	zend_long count = 0;

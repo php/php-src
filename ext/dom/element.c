@@ -108,7 +108,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-104682815
 Since:
 */
-int dom_element_tag_name_read(dom_object *obj, zval *retval)
+zend_result dom_element_tag_name_read(dom_object *obj, zval *retval)
 {
 	xmlNodePtr nodep;
 	xmlNsPtr ns;
@@ -137,7 +137,7 @@ int dom_element_tag_name_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-static int dom_element_reflected_attribute_read(dom_object *obj, zval *retval, const char *name)
+static zend_result dom_element_reflected_attribute_read(dom_object *obj, zval *retval, const char *name)
 {
 	xmlNodePtr nodep = dom_object_get_node(obj);
 
@@ -176,12 +176,12 @@ static xmlAttrPtr dom_element_reflected_attribute_write(dom_object *obj, zval *n
 URL: https://dom.spec.whatwg.org/#dom-element-classname
 Since:
 */
-int dom_element_class_name_read(dom_object *obj, zval *retval)
+zend_result dom_element_class_name_read(dom_object *obj, zval *retval)
 {
 	return dom_element_reflected_attribute_read(obj, retval, "class");
 }
 
-int dom_element_class_name_write(dom_object *obj, zval *newval)
+zend_result dom_element_class_name_write(dom_object *obj, zval *newval)
 {
 	if (dom_element_reflected_attribute_write(obj, newval, "class")) {
 		return SUCCESS;
@@ -194,14 +194,14 @@ int dom_element_class_name_write(dom_object *obj, zval *newval)
 URL: https://dom.spec.whatwg.org/#dom-element-id
 Since:
 */
-int dom_element_id_read(dom_object *obj, zval *retval)
+zend_result dom_element_id_read(dom_object *obj, zval *retval)
 {
 	return dom_element_reflected_attribute_read(obj, retval, "id");
 }
 
 static void php_set_attribute_id(xmlAttrPtr attrp, bool is_id);
 
-int dom_element_id_write(dom_object *obj, zval *newval)
+zend_result dom_element_id_write(dom_object *obj, zval *newval)
 {
 	xmlAttrPtr attr = dom_element_reflected_attribute_write(obj, newval, "id");
 	if (!attr) {
@@ -217,7 +217,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Element-schemaTypeInfo
 Since: DOM Level 3
 */
-int dom_element_schema_type_info_read(dom_object *obj, zval *retval)
+zend_result dom_element_schema_type_info_read(dom_object *obj, zval *retval)
 {
 	ZVAL_NULL(retval);
 	return SUCCESS;

@@ -69,7 +69,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D095
 Since:
 */
-int dom_node_node_name_read(dom_object *obj, zval *retval)
+zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 
@@ -133,7 +133,7 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D080
 Since:
 */
-int dom_node_node_value_read(dom_object *obj, zval *retval)
+zend_result dom_node_node_value_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 
@@ -170,7 +170,7 @@ int dom_node_node_value_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-int dom_node_node_value_write(dom_object *obj, zval *newval)
+zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	zend_string *str;
@@ -214,7 +214,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-111237558
 Since:
 */
-int dom_node_node_type_read(dom_object *obj, zval *retval)
+zend_result dom_node_node_type_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep;
 
@@ -261,7 +261,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1060184317
 Since:
 */
-int dom_node_parent_node_read(dom_object *obj, zval *retval)
+zend_result dom_node_parent_node_read(dom_object *obj, zval *retval)
 {
 	return dom_node_parent_get(obj, retval, false);
 }
@@ -273,7 +273,7 @@ readonly=yes
 URL: https://dom.spec.whatwg.org/#parent-element
 Since:
 */
-int dom_node_parent_element_read(dom_object *obj, zval *retval)
+zend_result dom_node_parent_element_read(dom_object *obj, zval *retval)
 {
 	return dom_node_parent_get(obj, retval, true);
 }
@@ -285,7 +285,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1451460987
 Since:
 */
-int dom_node_child_nodes_read(dom_object *obj, zval *retval)
+zend_result dom_node_child_nodes_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	dom_object *intern;
@@ -308,7 +308,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-169727388
 Since:
 */
-int dom_node_first_child_read(dom_object *obj, zval *retval)
+zend_result dom_node_first_child_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *first = NULL;
 
@@ -339,7 +339,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-61AD09FB
 Since:
 */
-int dom_node_last_child_read(dom_object *obj, zval *retval)
+zend_result dom_node_last_child_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *last = NULL;
 
@@ -370,7 +370,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-640FB3C8
 Since:
 */
-int dom_node_previous_sibling_read(dom_object *obj, zval *retval)
+zend_result dom_node_previous_sibling_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *prevsib;
 
@@ -398,7 +398,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6AC54C2F
 Since:
 */
-int dom_node_next_sibling_read(dom_object *obj, zval *retval)
+zend_result dom_node_next_sibling_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *nextsib;
 
@@ -426,7 +426,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-640FB3C8
 Since:
 */
-int dom_node_previous_element_sibling_read(dom_object *obj, zval *retval)
+zend_result dom_node_previous_element_sibling_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *prevsib;
 
@@ -459,7 +459,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6AC54C2F
 Since:
 */
-int dom_node_next_element_sibling_read(dom_object *obj, zval *retval)
+zend_result dom_node_next_element_sibling_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *nextsib;
 
@@ -492,7 +492,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-84CF096
 Since:
 */
-int dom_node_attributes_read(dom_object *obj, zval *retval)
+zend_result dom_node_attributes_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	dom_object *intern;
@@ -520,7 +520,7 @@ readonly=yes
 URL: https://dom.spec.whatwg.org/#dom-node-isconnected
 Since:
 */
-int dom_node_is_connected_read(dom_object *obj, zval *retval)
+zend_result dom_node_is_connected_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 
@@ -539,7 +539,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-node-ownerDoc
 Since:
 */
-int dom_node_owner_document_read(dom_object *obj, zval *retval)
+zend_result dom_node_owner_document_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	xmlDocPtr docp;
@@ -570,7 +570,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSname
 Since: DOM Level 2
 */
-int dom_node_namespace_uri_read(dom_object *obj, zval *retval)
+zend_result dom_node_namespace_uri_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	char *str = NULL;
@@ -609,7 +609,7 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSPrefix
 Since: DOM Level 2
 */
-int dom_node_prefix_read(dom_object *obj, zval *retval)
+zend_result dom_node_prefix_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	xmlNsPtr ns;
@@ -643,7 +643,7 @@ int dom_node_prefix_read(dom_object *obj, zval *retval)
 
 }
 
-int dom_node_prefix_write(dom_object *obj, zval *newval)
+zend_result dom_node_prefix_write(dom_object *obj, zval *newval)
 {
 	zend_string *prefix_str;
 	xmlNode *nodep, *nsnode = NULL;
@@ -718,7 +718,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSLocalN
 Since: DOM Level 2
 */
-int dom_node_local_name_read(dom_object *obj, zval *retval)
+zend_result dom_node_local_name_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 
@@ -743,7 +743,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-baseURI
 Since: DOM Level 3
 */
-int dom_node_base_uri_read(dom_object *obj, zval *retval)
+zend_result dom_node_base_uri_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	xmlChar *baseuri;
@@ -771,7 +771,7 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-textContent
 Since: DOM Level 3
 */
-int dom_node_text_content_read(dom_object *obj, zval *retval)
+zend_result dom_node_text_content_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 
@@ -785,7 +785,7 @@ int dom_node_text_content_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-int dom_node_text_content_write(dom_object *obj, zval *newval)
+zend_result dom_node_text_content_write(dom_object *obj, zval *newval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 

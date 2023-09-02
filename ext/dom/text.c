@@ -64,7 +64,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-wholeText
 Since: DOM Level 3
 */
-int dom_text_whole_text_read(dom_object *obj, zval *retval)
+zend_result dom_text_whole_text_read(dom_object *obj, zval *retval)
 {
 	xmlNodePtr node;
 	xmlChar *wholetext = NULL;

@@ -22,6 +22,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 3. Module changes
 ========================
 
+ a. ext/dom
+   - dom_read_t and dom_write_t now expect the function to return zend_result
+     instead of int.
+
 ========================
 4. OpCode changes
 ========================
