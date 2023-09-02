@@ -50,7 +50,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-B63ED1A31
 Since:
 */
-int dom_document_doctype_read(dom_object *obj, zval *retval)
+zend_result dom_document_doctype_read(dom_object *obj, zval *retval)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	xmlDtdPtr dtdptr;
@@ -77,7 +77,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1B793EBA
 Since:
 */
-int dom_document_implementation_read(dom_object *obj, zval *retval)
+zend_result dom_document_implementation_read(dom_object *obj, zval *retval)
 {
 	php_dom_create_implementation(retval);
 	return SUCCESS;
@@ -90,7 +90,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-87CD092
 Since:
 */
-int dom_document_document_element_read(dom_object *obj, zval *retval)
+zend_result dom_document_document_element_read(dom_object *obj, zval *retval)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	xmlNode *root;
@@ -116,7 +116,7 @@ int dom_document_document_element_read(dom_object *obj, zval *retval)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-encoding
 Since: DOM Level 3
 */
-int dom_document_encoding_read(dom_object *obj, zval *retval)
+zend_result dom_document_encoding_read(dom_object *obj, zval *retval)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	char *encoding;
@@ -182,7 +182,7 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-standalone
 Since: DOM Level 3
 */
-int dom_document_standalone_read(dom_object *obj, zval *retval)
+zend_result dom_document_standalone_read(dom_object *obj, zval *retval)
 {
 	xmlDoc *docp;
 
@@ -197,7 +197,7 @@ int dom_document_standalone_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-int dom_document_standalone_write(dom_object *obj, zval *newval)
+zend_result dom_document_standalone_write(dom_object *obj, zval *newval)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	zend_long standalone;
@@ -220,7 +220,7 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-version
 Since: DOM Level 3
 */
-int dom_document_version_read(dom_object *obj, zval *retval)
+zend_result dom_document_version_read(dom_object *obj, zval *retval)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	char *version;
@@ -241,7 +241,7 @@ int dom_document_version_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-int dom_document_version_write(dom_object *obj, zval *newval)
+zend_result dom_document_version_write(dom_object *obj, zval *newval)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	zend_string *str;
@@ -273,14 +273,14 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-strictErrorChecking
 Since: DOM Level 3
 */
-int dom_document_strict_error_checking_read(dom_object *obj, zval *retval)
+zend_result dom_document_strict_error_checking_read(dom_object *obj, zval *retval)
 {
 	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 	ZVAL_BOOL(retval, doc_prop->stricterror);
 	return SUCCESS;
 }
 
-int dom_document_strict_error_checking_write(dom_object *obj, zval *newval)
+zend_result dom_document_strict_error_checking_write(dom_object *obj, zval *newval)
 {
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
@@ -295,14 +295,14 @@ int dom_document_strict_error_checking_write(dom_object *obj, zval *newval)
 /* {{{ formatOutput	boolean
 readonly=no
 */
-int dom_document_format_output_read(dom_object *obj, zval *retval)
+zend_result dom_document_format_output_read(dom_object *obj, zval *retval)
 {
 	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 	ZVAL_BOOL(retval, doc_prop->formatoutput);
 	return SUCCESS;
 }
 
-int dom_document_format_output_write(dom_object *obj, zval *newval)
+zend_result dom_document_format_output_write(dom_object *obj, zval *newval)
 {
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
@@ -316,14 +316,14 @@ int dom_document_format_output_write(dom_object *obj, zval *newval)
 /* {{{ validateOnParse	boolean
 readonly=no
 */
-int	dom_document_validate_on_parse_read(dom_object *obj, zval *retval)
+zend_result	dom_document_validate_on_parse_read(dom_object *obj, zval *retval)
 {
 	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 	ZVAL_BOOL(retval, doc_prop->validateonparse);
 	return SUCCESS;
 }
 
-int dom_document_validate_on_parse_write(dom_object *obj, zval *newval)
+zend_result dom_document_validate_on_parse_write(dom_object *obj, zval *newval)
 {
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
@@ -337,14 +337,14 @@ int dom_document_validate_on_parse_write(dom_object *obj, zval *newval)
 /* {{{ resolveExternals	boolean
 readonly=no
 */
-int dom_document_resolve_externals_read(dom_object *obj, zval *retval)
+zend_result dom_document_resolve_externals_read(dom_object *obj, zval *retval)
 {
 	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 	ZVAL_BOOL(retval, doc_prop->resolveexternals);
 	return SUCCESS;
 }
 
-int dom_document_resolve_externals_write(dom_object *obj, zval *newval)
+zend_result dom_document_resolve_externals_write(dom_object *obj, zval *newval)
 {
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
@@ -358,14 +358,14 @@ int dom_document_resolve_externals_write(dom_object *obj, zval *newval)
 /* {{{ preserveWhiteSpace	boolean
 readonly=no
 */
-int dom_document_preserve_whitespace_read(dom_object *obj, zval *retval)
+zend_result dom_document_preserve_whitespace_read(dom_object *obj, zval *retval)
 {
 	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 	ZVAL_BOOL(retval, doc_prop->preservewhitespace);
 	return SUCCESS;
 }
 
-int dom_document_preserve_whitespace_write(dom_object *obj, zval *newval)
+zend_result dom_document_preserve_whitespace_write(dom_object *obj, zval *newval)
 {
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
@@ -379,14 +379,14 @@ int dom_document_preserve_whitespace_write(dom_object *obj, zval *newval)
 /* {{{ recover	boolean
 readonly=no
 */
-int dom_document_recover_read(dom_object *obj, zval *retval)
+zend_result dom_document_recover_read(dom_object *obj, zval *retval)
 {
 	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 	ZVAL_BOOL(retval, doc_prop->recover);
 	return SUCCESS;
 }
 
-int dom_document_recover_write(dom_object *obj, zval *newval)
+zend_result dom_document_recover_write(dom_object *obj, zval *newval)
 {
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
@@ -400,14 +400,14 @@ int dom_document_recover_write(dom_object *obj, zval *newval)
 /* {{{ substituteEntities	boolean
 readonly=no
 */
-int dom_document_substitue_entities_read(dom_object *obj, zval *retval)
+zend_result dom_document_substitue_entities_read(dom_object *obj, zval *retval)
 {
 	libxml_doc_props const* doc_prop = dom_get_doc_props_read_only(obj->document);
 	ZVAL_BOOL(retval, doc_prop->substituteentities);
 	return SUCCESS;
 }
 
-int dom_document_substitue_entities_write(dom_object *obj, zval *newval)
+zend_result dom_document_substitue_entities_write(dom_object *obj, zval *newval)
 {
 	if (obj->document) {
 		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
@@ -423,7 +423,7 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-documentURI
 Since: DOM Level 3
 */
-int dom_document_document_uri_read(dom_object *obj, zval *retval)
+zend_result dom_document_document_uri_read(dom_object *obj, zval *retval)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	char *url;
@@ -443,7 +443,7 @@ int dom_document_document_uri_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-int dom_document_document_uri_write(dom_object *obj, zval *newval)
+zend_result dom_document_document_uri_write(dom_object *obj, zval *newval)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	zend_string *str;
@@ -475,7 +475,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-config
 Since: DOM Level 3
 */
-int dom_document_config_read(dom_object *obj, zval *retval)
+zend_result dom_document_config_read(dom_object *obj, zval *retval)
 {
 	ZVAL_NULL(retval);
 	return SUCCESS;

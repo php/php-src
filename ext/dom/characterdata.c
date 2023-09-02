@@ -35,7 +35,7 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-72AB8359
 Since:
 */
-int dom_characterdata_data_read(dom_object *obj, zval *retval)
+zend_result dom_characterdata_data_read(dom_object *obj, zval *retval)
 {
 	xmlNodePtr nodep = dom_object_get_node(obj);
 
@@ -49,7 +49,7 @@ int dom_characterdata_data_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-int dom_characterdata_data_write(dom_object *obj, zval *newval)
+zend_result dom_characterdata_data_write(dom_object *obj, zval *newval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 
@@ -74,7 +74,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7D61178C
 Since:
 */
-int dom_characterdata_length_read(dom_object *obj, zval *retval)
+zend_result dom_characterdata_length_read(dom_object *obj, zval *retval)
 {
 	xmlNodePtr nodep = dom_object_get_node(obj);
 	long length = 0;

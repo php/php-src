@@ -74,7 +74,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1112119403
 Since:
 */
-int dom_attr_name_read(dom_object *obj, zval *retval)
+zend_result dom_attr_name_read(dom_object *obj, zval *retval)
 {
 	xmlAttrPtr attrp;
 
@@ -97,7 +97,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-862529273
 Since:
 */
-int dom_attr_specified_read(dom_object *obj, zval *retval)
+zend_result dom_attr_specified_read(dom_object *obj, zval *retval)
 {
 	/* TODO */
 	ZVAL_TRUE(retval);
@@ -111,7 +111,7 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-221662474
 Since:
 */
-int dom_attr_value_read(dom_object *obj, zval *retval)
+zend_result dom_attr_value_read(dom_object *obj, zval *retval)
 {
 	xmlAttrPtr attrp = (xmlAttrPtr) dom_object_get_node(obj);
 	xmlChar *content;
@@ -133,7 +133,7 @@ int dom_attr_value_read(dom_object *obj, zval *retval)
 
 }
 
-int dom_attr_value_write(dom_object *obj, zval *newval)
+zend_result dom_attr_value_write(dom_object *obj, zval *newval)
 {
 	xmlAttrPtr attrp = (xmlAttrPtr) dom_object_get_node(obj);
 
@@ -159,7 +159,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-ownerElement
 Since: DOM Level 2
 */
-int dom_attr_owner_element_read(dom_object *obj, zval *retval)
+zend_result dom_attr_owner_element_read(dom_object *obj, zval *retval)
 {
 	xmlNodePtr nodep, nodeparent;
 
@@ -188,7 +188,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-schemaTypeInfo
 Since: DOM Level 3
 */
-int dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
+zend_result dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
 {
 	/* TODO */
 	ZVAL_NULL(retval);
