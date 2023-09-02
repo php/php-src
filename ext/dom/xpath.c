@@ -95,7 +95,8 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 				} else if (type == 2) {
 					int j;
 					if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
-						array_init(&fci.params[i]);
+						array_init_size(&fci.params[i], obj->nodesetval->nodeNr);
+						zend_hash_real_init_packed(Z_ARRVAL_P(&fci.params[i]));
 						for (j = 0; j < obj->nodesetval->nodeNr; j++) {
 							xmlNodePtr node = obj->nodesetval->nodeTab[j];
 							zval child;
@@ -408,8 +409,8 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			xmlNodeSetPtr nodesetp;
 
 			if (xpathobjp->type == XPATH_NODESET && NULL != (nodesetp = xpathobjp->nodesetval) && nodesetp->nodeNr) {
-
-				array_init(&retval);
+				array_init_size(&retval, nodesetp->nodeNr);
+				zend_hash_real_init_packed(Z_ARRVAL_P(&retval));
 				for (i = 0; i < nodesetp->nodeNr; i++) {
 					xmlNodePtr node = nodesetp->nodeTab[i];
 					zval child;
