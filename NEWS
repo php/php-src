@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed GH-12077 (PHP 8.3.0RC1 borked socket-close-on-exec.phpt).
     (Jakub Zelenka)
 
+- Intl:
+  . Fixed bug GH-12020 (intl_get_error_message() broken after
+    MessageFormatter::formatMessage() fails). (Girgias)
+
 - ODBC:
   . Fixed memory leak with failed SQLPrepare. (NattyNarwhal)
 
