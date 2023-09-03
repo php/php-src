@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed build for NetBSD which still uses the old iconv signature.
     (David Carlier)
 
+- Intl:
+  . Fixed bug GH-12020 (intl_get_error_message() broken after
+    MessageFormatter::formatMessage() fails). (Girgias)
+
 - MySQLnd:
   . Fixed bug GH-10270 (Invalid error message when connection via SSL fails:
     "trying to connect via (null)"). (Kamil Tekiela)
