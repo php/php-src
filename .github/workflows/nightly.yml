@@ -60,7 +60,7 @@ jobs:
         zts: [true, false]
         include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.matrix-include) }}
     name: "${{ matrix.branch.name }}_LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: ubuntu-${{ (matrix.branch.ref == 'master' && !matrix.asan) && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ ((matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && !matrix.asan) && '22.04' || '20.04' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -148,7 +148,7 @@ jobs:
     name: "${{ matrix.branch.name }}_LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
+      image: ubuntu:${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
     env:
       MYSQL_TEST_HOST: mysql
       PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
@@ -340,7 +340,7 @@ jobs:
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     name: "${{ matrix.branch.name }}_COMMUNITY"
-    runs-on: ubuntu-${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
     env:
       UBSAN_OPTIONS: print_stacktrace=1
       USE_ZEND_ALLOC: 0
@@ -517,7 +517,7 @@ jobs:
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     name: "${{ matrix.branch.name }}_OPCACHE_VARIATION"
-    runs-on: ubuntu-${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -593,7 +593,7 @@ jobs:
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     name: "${{ matrix.branch.name }}_MSAN"
-    runs-on: ubuntu-${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v3
@@ -693,7 +693,7 @@ jobs:
         exclude:
           - branch: { name: 'PHP-80', ref: 'PHP-8.0' }
     name: "${{ matrix.branch.name }}_LIBMYSQLCLIENT"
-    runs-on: ubuntu-${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v3
