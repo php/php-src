@@ -1163,7 +1163,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 			if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
 				zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 			}
-			retval = zend_hash_update(zobj->properties, name, &EG(uninitialized_zval));
+			retval = zend_hash_add(zobj->properties, name, &EG(uninitialized_zval));
 		}
 	} else if (zobj->ce->__get == NULL) {
 		retval = &EG(error_zval);
