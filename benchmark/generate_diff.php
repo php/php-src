@@ -26,6 +26,9 @@ function main(?string $headCommitHash, ?string $baseCommitHash) {
     $output = "| Benchmark | Base ($baseCommitHashShort) | Head ($headCommitHashShort) | Diff |\n";
     $output .= "|---|---|---|---|\n";
     foreach ($headSummary as $name => $headBenchmark) {
+        if ($name === 'branch') {
+            continue;
+        }
         $baseInstructions = $baseSummary[$name]['instructions'] ?? null;
         $headInstructions = $headSummary[$name]['instructions'];
         $output .= "| $name | "
