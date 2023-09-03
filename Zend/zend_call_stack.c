@@ -63,7 +63,6 @@ typedef int boolean_t;
 
 /* Called once per process or thread */
 ZEND_API void zend_call_stack_init(void) {
-	EG(call_stack).buf = NULL;
 	if (!zend_call_stack_get(&EG(call_stack))) {
 		EG(call_stack) = (zend_call_stack){0};
 	}
@@ -97,10 +96,6 @@ ZEND_API void zend_call_stack_init(void) {
 			EG(stack_limit) = zend_call_stack_limit(base, EG(max_allowed_stack_size), EG(reserved_stack_size));
 			break;
 		}
-	}
-
-	if (EG(call_stack).buf) {
-		free(EG(call_stack).buf);
 	}
 }
 
@@ -551,7 +546,7 @@ static bool zend_call_stack_get_netbsd_pthread(zend_call_stack *stack)
 	return false;
 }
 # endif /* HAVE_PTHREAD_GETATTR_NP */
-static bool zend_call_stack_get_netbsd_vm(zend_call_stack *stack)
+static bool zend_call_stack_get_netbsd_vm(zend_call_stack *stack, void **ptr)
 {
 	/**
 	 * NetBSD supports procfs in a similar fashion as Linux
@@ -572,13 +567,13 @@ static bool zend_call_stack_get_netbsd_vm(zend_call_stack *stack)
 
 	// kinfo_getvmmap uses the same formula, only we do not want to rely on libkvm
 	len = len * 4 / 3 ;
-	stack->buf = malloc(len);
+	*ptr = malloc(len);
 
-	if (sysctl(mib, 5, stack->buf, &len, NULL, 0) != 0) {
+	if (sysctl(mib, 5, *ptr, &len, NULL, 0) != 0) {
 		return false;
 	}
 
-	start = (char *)stack->buf;
+	start = (char *)*ptr;
 	end = start + len;
 
 	while (start < end) {
@@ -611,7 +606,10 @@ static bool zend_call_stack_get_netbsd_vm(zend_call_stack *stack)
 static bool zend_call_stack_get_netbsd(zend_call_stack *stack)
 {
 	if (syscall(SYS__lwp_self) == 1) {
-		return zend_call_stack_get_netbsd_vm(stack);
+		void *ptr = NULL;
+		bool r = zend_call_stack_get_netbsd_vm(stack, &ptr);
+		free(ptr);
+		return r;
 	}
 
 	return zend_call_stack_get_netbsd_pthread(stack);
