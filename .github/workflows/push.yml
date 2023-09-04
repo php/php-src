@@ -28,6 +28,9 @@ on:
       - '**/README.*'
       - CONTRIBUTING.md
       - CODING_STANDARDS.md
+      - .cirrus.yml
+      - .travis.yml
+      - travis/*
     branches:
       - '**'
 permissions:
