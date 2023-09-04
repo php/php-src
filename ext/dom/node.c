@@ -1518,6 +1518,15 @@ static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other
 PHP_DOM_DEFINE_LIST_EQUALITY_HELPER(xmlNode)
 PHP_DOM_DEFINE_LIST_EQUALITY_HELPER(xmlNs)
 
+static bool php_dom_is_equal_attr(const xmlAttr *this_attr, const xmlAttr *other_attr)
+{
+	ZEND_ASSERT(this_attr != NULL);
+	ZEND_ASSERT(other_attr != NULL);
+	return xmlStrEqual(this_attr->name, other_attr->name)
+		&& php_dom_node_is_ns_uri_equal((const xmlNode *) this_attr, (const xmlNode *) other_attr)
+		&& php_dom_node_is_content_equal((const xmlNode *) this_attr, (const xmlNode *) other_attr);
+}
+
 static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other)
 {
 	ZEND_ASSERT(this != NULL);
@@ -1552,9 +1561,7 @@ static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other
 	} else if (this->type == XML_ATTRIBUTE_NODE) {
 		const xmlAttr *this_attr = (const xmlAttr *) this;
 		const xmlAttr *other_attr = (const xmlAttr *) other;
-		return xmlStrEqual(this_attr->name, other_attr->name)
-			&& php_dom_node_is_ns_uri_equal(this, other)
-			&& php_dom_node_is_content_equal(this, other);
+		return php_dom_is_equal_attr(this_attr, other_attr);
 	} else if (this->type == XML_ENTITY_REF_NODE) {
 		return xmlStrEqual(this->name, other->name);
 	} else if (this->type == XML_ENTITY_DECL || this->type == XML_NOTATION_NODE || this->type == XML_ENTITY_NODE) {
@@ -2027,6 +2034,172 @@ PHP_METHOD(DOMNode, getRootNode)
 
 	int ret;
 	DOM_RET_OBJ(thisp, &ret, intern);
+}
+/* }}} */
+
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-node-comparedocumentposition (last check date 2023-07-24)
+Since:
+*/
+
+#define DOCUMENT_POSITION_DISCONNECTED 0x01
+#define DOCUMENT_POSITION_PRECEDING 0x02
+#define DOCUMENT_POSITION_FOLLOWING 0x04
+#define DOCUMENT_POSITION_CONTAINS 0x08
+#define DOCUMENT_POSITION_CONTAINED_BY 0x10
+#define DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC 0x20
+
+PHP_METHOD(DOMNode, compareDocumentPosition)
+{
+	zval *id, *node_zval;
+	xmlNodePtr other, this;
+	dom_object *this_intern, *other_intern;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node_zval, dom_node_class_entry) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_OBJ(this, id, xmlNodePtr, this_intern);
+	DOM_GET_OBJ(other, node_zval, xmlNodePtr, other_intern);
+
+	/* Step 1 */
+	if (this == other) {
+		RETURN_LONG(0);
+	}
+
+	/* Step 2 */
+	xmlNodePtr node1 = other;
+	xmlNodePtr node2 = this;
+
+	/* Step 3 */
+	xmlNodePtr attr1 = NULL;
+	xmlNodePtr attr2 = NULL;
+
+	/* Step 4 */
+	if (node1->type == XML_ATTRIBUTE_NODE) {
+		attr1 = node1;
+		node1 = attr1->parent;
+	}
+
+	/* Step 5 */
+	if (node2->type == XML_ATTRIBUTE_NODE) {
+		/* 5.1 */
+		attr2 = node2;
+		node2 = attr2->parent;
+
+		/* 5.2 */
+		if (attr1 != NULL && node1 != NULL && node2 == node1) {
+			for (const xmlAttr *attr = node2->properties; attr != NULL; attr = attr->next) {
+				if (php_dom_is_equal_attr(attr, (const xmlAttr *) attr1)) {
+					RETURN_LONG(DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | DOCUMENT_POSITION_PRECEDING);
+				} else if (php_dom_is_equal_attr(attr, (const xmlAttr *) attr2)) {
+					RETURN_LONG(DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | DOCUMENT_POSITION_FOLLOWING);
+				}
+			}
+		}
+	}
+
+	/* Step 6 */
+	/* We first check the first condition,
+	 * and as we need the root later anyway we'll cache the root and perform the root check after this if. */
+	if (node1 == NULL || node2 == NULL) {
+		goto disconnected;
+	}
+	bool node2_is_ancestor_of_node1 = false;
+	size_t node1_depth = 0;
+	xmlNodePtr node1_root = node1;
+	while (node1_root->parent) {
+		node1_root = node1_root->parent;
+		if (node1_root == node2) {
+			node2_is_ancestor_of_node1 = true;
+		}
+		node1_depth++;
+	}
+	bool node1_is_ancestor_of_node2 = false;
+	size_t node2_depth = 0;
+	xmlNodePtr node2_root = node2;
+	while (node2_root->parent) {
+		node2_root = node2_root->parent;
+		if (node2_root == node1) {
+			node1_is_ancestor_of_node2 = true;
+		}
+		node2_depth++;
+	}
+	/* Second condition from step 6 */
+	if (node1_root != node2_root) {
+		goto disconnected;
+	}
+
+	/* Step 7 */
+	if ((node1_is_ancestor_of_node2 && attr1 == NULL) || (node1 == node2 && attr2 != NULL)) {
+		RETURN_LONG(DOCUMENT_POSITION_CONTAINS | DOCUMENT_POSITION_PRECEDING);
+	}
+
+	/* Step 8 */
+	if ((node2_is_ancestor_of_node1 && attr2 == NULL) || (node1 == node2 && attr1 != NULL)) {
+		RETURN_LONG(DOCUMENT_POSITION_CONTAINED_BY | DOCUMENT_POSITION_FOLLOWING);
+	}
+
+	/* Special case: comparing children and attributes.
+	 * They belong to a different tree and are therefore hard to compare, but spec demands attributes to precede children
+	 * according to the pre-order DFS numbering.
+	 * Because their tree is different, the node parents only meet at the common element instead of earlier.
+	 * Therefore, it seems that one is the ancestor of the other. */
+	if (node1_is_ancestor_of_node2) {
+		ZEND_ASSERT(attr1 != NULL); /* Would've been handled in step 7 otherwise */
+		RETURN_LONG(DOCUMENT_POSITION_PRECEDING);
+	} else if (node2_is_ancestor_of_node1) {
+		ZEND_ASSERT(attr2 != NULL); /* Would've been handled in step 8 otherwise */
+		RETURN_LONG(DOCUMENT_POSITION_FOLLOWING);
+	}
+
+	/* Step 9 */
+
+	/* We'll use the following strategy (which was already prepared during step 6) to implement this efficiently:
+	 * 1. Move nodes upwards such that they are at the same depth.
+	 * 2. Then we move both nodes upwards simultaneously until their parents are equal.
+	 * 3. If we then move node1 to the next entry repeatedly and we encounter node2,
+	 *    then we know node1 precedes node2. Otherwise, node2 must precede node1. */
+	/* 1. */
+	if (node1_depth > node2_depth) {
+		do {
+			node1 = node1->parent;
+			node1_depth--;
+		} while (node1_depth > node2_depth);
+	} else if (node2_depth > node1_depth) {
+		do {
+			node2 = node2->parent;
+			node2_depth--;
+		} while (node2_depth > node1_depth);
+	}
+	/* 2. */
+	while (node1->parent != node2->parent) {
+		node1 = node1->parent;
+		node2 = node2->parent;
+	}
+	/* 3. */
+	ZEND_ASSERT(node1 != node2);
+	ZEND_ASSERT(node1 != NULL);
+	ZEND_ASSERT(node2 != NULL);
+	do {
+		node1 = node1->next;
+		if (node1 == node2) {
+			RETURN_LONG(DOCUMENT_POSITION_PRECEDING);
+		}
+	} while (node1 != NULL);
+
+	/* Step 10 */
+	RETURN_LONG(DOCUMENT_POSITION_FOLLOWING);
+
+disconnected:;
+	zend_long ordering;
+	if (UNEXPECTED(node1 == node2)) {
+		/* Degenerate case, they're both NULL, but the ordering must be consistent... */
+		ZEND_ASSERT(node1 == NULL);
+		ordering = other_intern < this_intern ? DOCUMENT_POSITION_PRECEDING : DOCUMENT_POSITION_FOLLOWING;
+	} else {
+		ordering = node1 < node2 ? DOCUMENT_POSITION_PRECEDING : DOCUMENT_POSITION_FOLLOWING;
+	}
+	RETURN_LONG(DOCUMENT_POSITION_DISCONNECTED | DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | ordering);
 }
 /* }}} */
 

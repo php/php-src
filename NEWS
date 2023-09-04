@@ -6,4 +6,7 @@ Core:
   . Fixed bug GH-12073 (Segfault when freeing incompletely initialized
     closures). (ilutov)
 
+DOM:
+  . Added DOMNode::compareDocumentPosition(). (nielsdos)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
