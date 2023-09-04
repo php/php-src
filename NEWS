@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed GH-11847 (DTrace enabled build is broken). (Filip Zrůst)
   . Fixed bug GH-11876: ini_parse_quantity() accepts invalid quantities.
     (Girgias)
+  . Fixed bug GH-12073 (Segfault when freeing incompletely initialized
+    closures). (ilutov)
 
 - FPM:
   . Fixed GH-12077 (PHP 8.3.0RC1 borked socket-close-on-exec.phpt).
