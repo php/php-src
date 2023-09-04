@@ -1117,10 +1117,9 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 							ZSTR_VAL(name));
 						retval = &EG(error_zval);
 					} else {
-						ZVAL_NULL(retval);
 						zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
-						/* If an error handler unsets the property again just consider it to be NULL again */
-						 if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+						/* An error handler may set the property */
+						 if (EXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
 							ZVAL_NULL(retval);
 						 }
 					}
