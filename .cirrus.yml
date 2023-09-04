@@ -48,10 +48,6 @@ arm_task:
           POSTGRES_PASSWORD: "postgres"
           POSTGRES_DB: "test"
   install_script:
-    - whoami
-    - ls -lah /tmp
-    - chmod -R 1777 /tmp
-    - ls -lah /tmp
     - export DEBIAN_FRONTEND=noninteractive
     - apt-get update -y
     - >-
