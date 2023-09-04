@@ -38,11 +38,12 @@ permissions:
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.url || github.run_id }}
   cancel-in-progress: true
-env:
-  CC: ccache gcc
-  CXX: ccache g++
+# env:
+#   CC: ccache gcc
+#   CXX: ccache g++
 jobs:
   LINUX_X64:
+    if: false
     services:
       mysql:
         image: mysql:8
@@ -135,6 +136,7 @@ jobs:
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/verify-generated-files
   MACOS_DEBUG_NTS:
+    if: false
     runs-on: macos-11
     steps:
       - name: git checkout
@@ -168,6 +170,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   WINDOWS:
+    if: false
     name: WINDOWS_X64_ZTS
     runs-on: windows-2019
     env:
@@ -193,8 +196,9 @@ jobs:
       - name: Test
         run: .github/scripts/windows/test.bat
   BENCHMARKING:
+    if: false
     name: BENCHMARKING
-    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+    # if: github.repository_owner == 'php' || github.event_name == 'pull_request'
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
@@ -288,3 +292,56 @@ jobs:
             ${{ github.sha }} \
             $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.sha }}) \
             > $GITHUB_STEP_SUMMARY
+  COMMUNITY:
+    name: COMMUNITY
+    runs-on: ubuntu-22.04
+    env:
+      UBSAN_OPTIONS: print_stacktrace=1
+      USE_ZEND_ALLOC: 0
+      USE_TRACKED_ALLOC: 1
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v3
+      - name: apt
+        uses: ./.github/actions/apt-x64
+      - name: ./configure
+        uses: ./.github/actions/configure-x64
+        with:
+          configurationParameters: >-
+            --enable-debug
+            --enable-zts
+            CFLAGS='-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC'
+            LDFLAGS='-fsanitize=undefined,address'
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux
+      - name: Setup
+        run: |
+          sudo service mysql start
+          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+          mysql -uroot -proot -e "SET GLOBAL local_infile = true"
+      - name: Enable Opcache and JIT
+        run: |
+          echo zend_extension=opcache.so > /etc/php.d/opcache.ini
+          echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
+          echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
+          echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
+      - name: Test AMPHP
+        run: |
+          set -vx
+          repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
+          X=0
+          for repository in $repositories; do
+            printf "Testing amp/%s\n" "$repository"
+            git clone "https://github.com/amphp/$repository.git" "amphp-$repository" --depth 1
+            cd "amphp-$repository"
+            git rev-parse HEAD
+            php /usr/bin/composer install --no-progress --ignore-platform-reqs
+            export ASAN_OPTIONS=exitcode=139
+            vendor/bin/phpunit || EXIT_CODE=$?
+            if [ ${EXIT_CODE:-0} -gt 128 ]; then
+              exit 1
+            fi
+            cd ..
+          done

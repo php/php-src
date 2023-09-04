@@ -85,3 +85,4 @@ runs:
           ${{ inputs.skipSlow == 'false' && '--with-pdo-dblib' || '' }} \
           --enable-werror \
           ${{ inputs.configurationParameters }}
+

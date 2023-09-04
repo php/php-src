@@ -378,6 +378,7 @@ jobs:
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
+          set -vx
           repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
           X=0
           for repository in $repositories; do
@@ -389,11 +390,10 @@ jobs:
             export ASAN_OPTIONS=exitcode=139
             vendor/bin/phpunit || EXIT_CODE=$?
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
-              X=1;
+              exit 1
             fi
             cd ..
           done
-          exit $X
       - name: Test Laravel
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
