@@ -457,7 +457,7 @@ static ir_ref jit_TLS(zend_jit_ctx *jit)
 	}
 	jit->tls = ir_TLS(
 		tsrm_ls_cache_tcb_offset ? tsrm_ls_cache_tcb_offset : tsrm_tls_index,
-		tsrm_ls_cache_tcb_offset ? 0 : tsrm_tls_offset);
+		tsrm_ls_cache_tcb_offset ? IR_NULL : tsrm_tls_offset);
 	return jit->tls;
 }
 #endif
