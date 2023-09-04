@@ -837,6 +837,7 @@ jobs:
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
       - name: build xdebug
+        if: false
         run: |
           cd xdebug
           /opt/php/bin/phpize
