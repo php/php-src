@@ -6,7 +6,7 @@ on:
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
-      - README.md
+      - '**/README.*'
       - CONTRIBUTING.md
       - CODING_STANDARDS.md
       - .cirrus.yml
@@ -19,6 +19,17 @@ on:
       - PHP-8.2
       - master
   pull_request:
+    paths-ignore:
+      - docs/*
+      - NEWS
+      - UPGRADING
+      - UPGRADING.INTERNALS
+      - '**/README.*'
+      - CONTRIBUTING.md
+      - CODING_STANDARDS.md
+      - .cirrus.yml
+      - .travis.yml
+      - travis/*
     branches:
       - '**'
 concurrency:
