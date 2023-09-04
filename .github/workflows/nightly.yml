@@ -775,6 +775,8 @@ jobs:
           repository: phpredis/phpredis
           path: redis
       - name: git checkout xdebug
+        # Currently breaks due to a PHP <=8.3 version check
+        if: false
         uses: actions/checkout@v3
         with:
           repository: xdebug/xdebug
