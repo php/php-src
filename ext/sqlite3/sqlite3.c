@@ -31,6 +31,10 @@
 #include "SAPI.h"
 #include "sqlite3_arginfo.h"
 
+#ifdef HAVE_VALGRIND
+# include "valgrind/callgrind.h"
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(sqlite3)
 
 static PHP_GINIT_FUNCTION(sqlite3);
@@ -595,7 +599,14 @@ PHP_METHOD(SQLite3, query)
 	result->column_count = -1;
 	ZVAL_OBJ(&result->stmt_obj_zval, Z_OBJ(stmt));
 
+
+#ifdef HAVE_VALGRIND
+	CALLGRIND_TOGGLE_COLLECT;
+#endif
 	return_code = sqlite3_step(result->stmt_obj->stmt);
+#ifdef HAVE_VALGRIND
+	CALLGRIND_TOGGLE_COLLECT;
+#endif
 
 	switch (return_code) {
 		case SQLITE_ROW: /* Valid Row */
@@ -697,7 +708,13 @@ PHP_METHOD(SQLite3, querySingle)
 		RETURN_FALSE;
 	}
 
+#ifdef HAVE_VALGRIND
+	CALLGRIND_TOGGLE_COLLECT;
+#endif
 	return_code = sqlite3_step(stmt);
+#ifdef HAVE_VALGRIND
+	CALLGRIND_TOGGLE_COLLECT;
+#endif
 
 	switch (return_code) {
 		case SQLITE_ROW: /* Valid Row */
@@ -1796,7 +1813,13 @@ PHP_METHOD(SQLite3Stmt, execute)
 		RETURN_FALSE;
 	}
 
+#ifdef HAVE_VALGRIND
+	CALLGRIND_TOGGLE_COLLECT;
+#endif
 	return_code = sqlite3_step(stmt_obj->stmt);
+#ifdef HAVE_VALGRIND
+	CALLGRIND_TOGGLE_COLLECT;
+#endif
 
 	switch (return_code) {
 		case SQLITE_ROW: /* Valid Row */
@@ -1953,7 +1976,13 @@ PHP_METHOD(SQLite3Result, fetchArray)
 
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
+#ifdef HAVE_VALGRIND
+	CALLGRIND_TOGGLE_COLLECT;
+#endif
 	ret = sqlite3_step(result_obj->stmt_obj->stmt);
+#ifdef HAVE_VALGRIND
+	CALLGRIND_TOGGLE_COLLECT;
+#endif
 	switch (ret) {
 		case SQLITE_ROW:
 			/* If there was no return value then just skip fetching */
