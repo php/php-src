@@ -5440,6 +5440,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_C
 		called_scope = Z_CE(EX(This));
 		object = NULL;
 	}
+	SAVE_OPLINE();
 	zend_create_closure(EX_VAR(opline->result.var), func,
 		EX(func)->op_array.scope, called_scope, object);
 

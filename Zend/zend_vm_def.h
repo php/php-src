@@ -8064,6 +8064,7 @@ ZEND_VM_HANDLER(142, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, NUM)
 		called_scope = Z_CE(EX(This));
 		object = NULL;
 	}
+	SAVE_OPLINE();
 	zend_create_closure(EX_VAR(opline->result.var), func,
 		EX(func)->op_array.scope, called_scope, object);
 
