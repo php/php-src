@@ -2058,7 +2058,6 @@ class ConstInfo extends VariableLike
         $constantElement->textContent = $this->name->__toString();
 
         $typeElement = ($this->phpDocType ?? $this->type)->getTypeForDoc($doc);
-        $stubConstantType = $constantElement->textContent;
 
         $termElement->appendChild(new DOMText("\n$indentation "));
         $termElement->appendChild($constantElement);
@@ -2067,6 +2066,24 @@ class ConstInfo extends VariableLike
         $termElement->appendChild(new DOMText(")\n$indentation"));
 
         return $termElement;
+    }
+
+     public function getPredefinedConstantEntry(DOMDocument $doc, int $indentationLevel): DOMElement {
+        $indentation = str_repeat(" ", $indentationLevel);
+
+        $entryElement = $doc->createElement("entry");
+
+        $constantElement = $doc->createElement("constant");
+        $constantElement->textContent = $this->name->__toString();
+        $typeElement = ($this->phpDocType ?? $this->type)->getTypeForDoc($doc);
+
+        $entryElement->appendChild(new DOMText("\n$indentation "));
+        $entryElement->appendChild($constantElement);
+        $entryElement->appendChild(new DOMText("\n$indentation ("));
+        $entryElement->appendChild($typeElement);
+        $entryElement->appendChild(new DOMText(")\n$indentation"));
+
+        return $entryElement;
     }
 
     public function discardInfoForOldPhpVersions(): void {
@@ -4510,7 +4527,7 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
 
     foreach ($it as $file) {
         $pathName = $file->getPathName();
-        if (!preg_match('/constants\.xml$/i', $pathName)) {
+         if (!preg_match('/(?:[\w\.]*constants[\w\.]*|tokens|filters).xml$/i', basename($pathName))) {
             continue;
         }
 
@@ -4519,7 +4536,7 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
             continue;
         }
 
-        if (stripos($xml, "<appendix") === false) {
+        if (stripos($xml, "<appendix") === false && stripos($xml, "<sect2") === false && stripos($xml, "<chapter") === false) {
             continue;
         }
 
@@ -4542,39 +4559,74 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
                 continue;
             }
 
-            $list = $entry->getElementsByTagName("term");
-            $manualTermElement = $list->item(0);
-            if (!$manualTermElement instanceof DOMElement) {
+            foreach ($entry->getElementsByTagName("term") as $manualTermElement) {
+                $manualConstantElement = $manualTermElement->getElementsByTagName("constant")->item(0);
+                if (!$manualConstantElement instanceof DOMElement) {
+                    continue;
+                }
+
+                $manualConstantName = $manualConstantElement->textContent;
+
+                $stubConstant = $constMap[$manualConstantName] ?? null;
+                if ($stubConstant === null) {
+                    continue;
+                }
+
+                $documentedConstMap[$manualConstantName] = $manualConstantName;
+
+                if ($entry->firstChild instanceof DOMText) {
+                    $indentationLevel = strlen(str_replace("\n", "", $entry->firstChild->textContent));
+                } else {
+                    $indentationLevel = 3;
+                }
+                $newTermElement = $stubConstant->getPredefinedConstantTerm($doc, $indentationLevel);
+
+                if ($manualTermElement->textContent === $newTermElement->textContent) {
+                    continue;
+                }
+
+                $manualTermElement->parentNode->replaceChild($newTermElement, $manualTermElement);
+            }
+        }
+
+        foreach ($doc->getElementsByTagName("row") as $row) {
+            if (!$row instanceof DOMElement) {
                 continue;
             }
 
-            $list = $manualTermElement->getElementsByTagName("constant");
-            $manualConstantElement = $list->item(0);
-            if (!$manualConstantElement instanceof DOMElement) {
-                continue;
-            }
-            $manualConstantName = $manualConstantElement->textContent;
-
-            $stubConstant = $constMap[$manualConstantName] ?? null;
-            if ($stubConstant === null) {
+            $entry = $row->getElementsByTagName("entry")->item(0);
+            if (!$entry instanceof DOMElement) {
                 continue;
             }
 
-            $documentedConstMap[$manualConstantName] = $manualConstantName;
+            foreach ($entry->getElementsByTagName("constant") as $manualConstantElement) {
+                if (!$manualConstantElement instanceof DOMElement) {
+                    continue;
+                }
 
-            if ($entry->firstChild instanceof DOMText) {
-                $indentationLevel = strlen(str_replace("\n", "", $entry->firstChild->textContent));
-            } else {
-                $indentationLevel = 3;
+                $manualConstantName = $manualConstantElement->textContent;
+
+                $stubConstant = $constMap[$manualConstantName] ?? null;
+                if ($stubConstant === null) {
+                    continue;
+                }
+
+                $documentedConstMap[$manualConstantName] = $manualConstantName;
+
+                if ($row->firstChild instanceof DOMText) {
+                    $indentationLevel = strlen(str_replace("\n", "", $row->firstChild->textContent));
+                } else {
+                    $indentationLevel = 3;
+                }
+                $newEntryElement = $stubConstant->getPredefinedConstantEntry($doc, $indentationLevel);
+
+                if ($entry->textContent === $newEntryElement->textContent) {
+                    continue;
+                }
+
+                $entry->parentNode->replaceChild($newEntryElement, $entry);
+                $updated = true;
             }
-            $newTermElement = $stubConstant->getPredefinedConstantTerm($doc, $indentationLevel);
-
-            if ($manualTermElement->textContent === $newTermElement->textContent) {
-                continue;
-            }
-
-            $manualTermElement->parentNode->replaceChild($newTermElement, $manualTermElement);
-            $updated = true;
         }
 
         if ($updated) {
@@ -4871,8 +4923,7 @@ function replaceMethodSynopses(
                 continue;
             }
 
-            $list = $methodSynopsis->getElementsByTagName("methodname");
-            $item = $list->item(0);
+            $item = $methodSynopsis->getElementsByTagName("methodname")->item(0);
             if (!$item instanceof DOMElement) {
                 continue;
             }
