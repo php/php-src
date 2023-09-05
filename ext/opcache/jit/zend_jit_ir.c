@@ -16011,6 +16011,12 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 						SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var), IS_UNKNOWN, 1);
 					}
 					break;
+				case ZEND_BIND_INIT_STATIC_OR_JMP:
+					if (opline->op1_type == IS_CV) {
+						old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var));
+						SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), IS_UNKNOWN, 1);
+					}
+					break;
 			}
 			if (opline->result_type == IS_VAR || opline->result_type == IS_TMP_VAR) {
 				old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
@@ -16027,6 +16033,11 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 				case ZEND_FE_FETCH_RW:
 					if (opline->op2_type != IS_UNUSED) {
 						SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->op2.var), old_info);
+					}
+					break;
+				case ZEND_BIND_INIT_STATIC_OR_JMP:
+					if (opline->op1_type == IS_CV) {
+						SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var), old_info);
 					}
 					break;
 			}
