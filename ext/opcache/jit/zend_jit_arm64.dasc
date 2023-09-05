@@ -3357,6 +3357,12 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 						SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var), IS_UNKNOWN, 1);
 					}
 					break;
+				case ZEND_BIND_INIT_STATIC_OR_JMP:
+					if (opline->op1_type == IS_CV) {
+						old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var));
+						SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), IS_UNKNOWN, 1);
+					}
+					break;					
 			}
 
 			if (opline->result_type == IS_VAR || opline->result_type == IS_TMP_VAR) {
@@ -3376,6 +3382,11 @@ static int zend_jit_trace_handler(dasm_State **Dst, const zend_op_array *op_arra
 						SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->op2.var), old_info);
 					}
 					break;
+				case ZEND_BIND_INIT_STATIC_OR_JMP:
+					if (opline->op1_type == IS_CV) {
+						SET_STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var), old_info);
+					}
+					break;					
 			}
 
 			if (!exit_addr) {
