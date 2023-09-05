@@ -24,6 +24,7 @@
 #include "php_test.h"
 #include "observer.h"
 #include "fiber.h"
+#include "iterators.h"
 #include "object_handlers.h"
 #include "zend_attributes.h"
 #include "zend_enum.h"
@@ -1073,6 +1074,7 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	zend_test_observer_init(INIT_FUNC_ARGS_PASSTHRU);
 	zend_test_fiber_init();
+	zend_test_iterators_init();
 	zend_test_object_handlers_init();
 
 	le_throwing_resource = zend_register_list_destructors_ex(le_throwing_resource_dtor, NULL, "throwing resource", module_number);
