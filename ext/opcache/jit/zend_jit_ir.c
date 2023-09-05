@@ -12548,7 +12548,7 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 	}
 #endif
 
-	if (op1_info & (MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_OBJECT)) {
+	if (true_inputs->count) {
 		ir_MERGE_N(true_inputs->count, true_inputs->refs);
 
 		jit_FREE_OP(jit, opline->op2_type, opline->op2, op2_info, opline);
