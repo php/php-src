@@ -3272,9 +3272,7 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 		&& (mptr = zend_get_closure_invoke_method(orig_obj)) != NULL)
 	{
 		/* do nothing, mptr already set */
-	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, method_name_len)) == NULL
-		|| ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) && mptr->common.scope != ce))
-	{
+	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, method_name_len)) == NULL) {
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Method %s::%s() does not exist", ZSTR_VAL(ce->name), method_name);
