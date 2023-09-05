@@ -157,7 +157,7 @@ const PHP_INT_SIZE = UNKNOWN;
  */
 const PHP_FD_SETSIZE = UNKNOWN;
 /**
- * @var float
+ * @var int
  * @cvalue DBL_DIG
  */
 const PHP_FLOAT_DIG = UNKNOWN;
