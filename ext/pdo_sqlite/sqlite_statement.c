@@ -26,6 +26,9 @@
 #include "php_pdo_sqlite.h"
 #include "php_pdo_sqlite_int.h"
 
+#ifdef HAVE_VALGRIND
+# include "valgrind/callgrind.h"
+#endif
 
 static int pdo_sqlite_stmt_dtor(pdo_stmt_t *stmt)
 {
@@ -48,7 +51,14 @@ static int pdo_sqlite_stmt_execute(pdo_stmt_t *stmt)
 	}
 
 	S->done = 0;
-	switch (sqlite3_step(S->stmt)) {
+#ifdef HAVE_VALGRIND
+	CALLGRIND_TOGGLE_COLLECT;
+#endif
+	int result = sqlite3_step(S->stmt);
+#ifdef HAVE_VALGRIND
+	CALLGRIND_TOGGLE_COLLECT;
+#endif
+	switch (result) {
 		case SQLITE_ROW:
 			S->pre_fetched = 1;
 			php_pdo_stmt_set_column_count(stmt, sqlite3_data_count(S->stmt));
@@ -214,7 +224,13 @@ static int pdo_sqlite_stmt_fetch(pdo_stmt_t *stmt,
 	if (S->done) {
 		return 0;
 	}
+#ifdef HAVE_VALGRIND
+	CALLGRIND_TOGGLE_COLLECT;
+#endif
 	i = sqlite3_step(S->stmt);
+#ifdef HAVE_VALGRIND
+	CALLGRIND_TOGGLE_COLLECT;
+#endif
 	switch (i) {
 		case SQLITE_ROW:
 			return 1;
