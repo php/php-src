@@ -15,4 +15,4 @@ class C {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of C::neededByTheTrait(array $a, object $b) must be compatible with T::neededByTheTrait(int $a, string $b) in %s on line %d
+Fatal error: Declaration of C::neededByTheTrait(array $a, object $b) (from T) must be compatible with T::neededByTheTrait(int $a, string $b) in %s on line %d
