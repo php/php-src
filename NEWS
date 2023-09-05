@@ -8,6 +8,9 @@ PHP                                                                        NEWS
     (Girgias)
   . Fixed bug GH-12073 (Segfault when freeing incompletely initialized
     closures). (ilutov)
+  . Fixed bug GH-12060 (Internal iterator rewind handler is called twice).
+    (ju1ius)
+
 
 - FPM:
   . Fixed GH-12077 (PHP 8.3.0RC1 borked socket-close-on-exec.phpt).
