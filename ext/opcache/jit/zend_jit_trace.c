@@ -3173,6 +3173,12 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 					idx++;
 					while (opline->opcode == ZEND_RECV_INIT) {
 						/* RECV_INIT doesn't support registers */
+#ifdef ZEND_JIT_IR
+						if (ssa_op->result_use >= 0 && RA_HAS_IVAL(ssa_op->result_use)) {
+							RA_IVAL_DEL(ssa_op->result_use);
+							count--;
+						}
+#endif
 						if (ssa_op->result_def >= 0) {
 							RA_IVAL_CLOSE(EX_VAR_TO_NUM(opline->result.var), idx);
 							SET_STACK_VAR(stack, EX_VAR_TO_NUM(opline->result.var), ssa_op->result_def);
