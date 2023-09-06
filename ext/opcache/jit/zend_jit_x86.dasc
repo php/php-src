@@ -10218,6 +10218,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 							|	SAVE_IP
 							|	mov FCARG1a, FP
 							|	EXT_CALL zend_observer_fcall_begin, r0
+							/* check for interrupt to ensure execution in inlined functions can be observed via interrupt and possibly deoptimized */
+							|	MEM_CMP_ZTS byte, executor_globals, vm_interrupt, 0, r0
+							|	jne ->interrupt_handler
 						}
 #ifdef CONTEXT_THREADED_JIT
 						|	call >1
@@ -10328,6 +10331,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	SAVE_IP
 			|	mov FCARG1a, FP
 			|	EXT_CALL zend_observer_fcall_begin, r0
+			/* check for interrupt to ensure execution in inlined functions can be observed via interrupt and possibly deoptimized */
+			|	MEM_CMP_ZTS byte, executor_globals, vm_interrupt, 0, r0
+			|	jne ->interrupt_handler
 		}
 
 		if (trace) {
