@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     closures). (ilutov)
   . Fixed bug GH-12060 (Internal iterator rewind handler is called twice).
     (ju1ius)
+  . Fixed bug GH-12102 (Incorrect compile error when using array access on TMP
+    value in function call). (ilutov)
 
 - DOM:
   . Fix memory leak when setting an invalid DOMDocument encoding. (nielsdos)
