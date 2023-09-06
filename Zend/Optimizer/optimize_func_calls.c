@@ -38,6 +38,7 @@
 typedef struct _optimizer_call_info {
 	zend_function *func;
 	zend_op       *opline;
+	zend_op       *check_func_arg_opline;
 	bool      is_prototype;
 	bool      try_inline;
 	uint32_t       func_arg_num;
@@ -252,6 +253,13 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				if (call_stack[call - 1].func_arg_num != (uint32_t)-1
 						&& has_known_send_mode(&call_stack[call - 1], call_stack[call - 1].func_arg_num)) {
 					if (ARG_SHOULD_BE_SENT_BY_REF(call_stack[call - 1].func, call_stack[call - 1].func_arg_num)) {
+						/* There's no TMP specialization for FETCH_OBJ_W/FETCH_DIM_W. Avoid
+						 * converting it and error at runtime in the FUNC_ARG variant. */
+						if ((opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG || opline->opcode == ZEND_FETCH_DIM_FUNC_ARG) && opline->op1_type == IS_TMP_VAR) {
+							/* Don't remove the associated CHECK_FUNC_ARG opcode. */
+							call_stack[call - 1].check_func_arg_opline = NULL;
+							break;
+						}
 						if (opline->opcode != ZEND_FETCH_STATIC_PROP_FUNC_ARG) {
 							opline->opcode -= 9;
 						} else {
@@ -272,6 +280,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							opline->opcode = ZEND_FETCH_STATIC_PROP_R;
 						}
 					}
+					MAKE_NOP(call_stack[call - 1].check_func_arg_opline);
 				}
 				break;
 			case ZEND_SEND_VAL_EX:
@@ -298,7 +307,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 				if (has_known_send_mode(&call_stack[call - 1], opline->op2.num)) {
 					call_stack[call - 1].func_arg_num = opline->op2.num;
-					MAKE_NOP(opline);
+					call_stack[call - 1].check_func_arg_opline = opline;
 				}
 				break;
 			case ZEND_SEND_VAR_EX:
