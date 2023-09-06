@@ -188,15 +188,6 @@ int php_dom_get_nodelist_length(dom_object *obj);
 	__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node; \
 }
 
-#define DOM_NO_ARGS() \
-	if (zend_parse_parameters_none() == FAILURE) { \
-		RETURN_THROWS(); \
-	}
-
-#define DOM_NOT_IMPLEMENTED() \
-	zend_throw_error(NULL, "Not yet implemented"); \
-	RETURN_THROWS();
-
 #define DOM_NODELIST 0
 #define DOM_NAMEDNODEMAP 1
 

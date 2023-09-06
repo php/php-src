@@ -25,6 +25,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
  a. ext/dom
    - dom_read_t and dom_write_t now expect the function to return zend_result
      instead of int.
+   - The macros DOM_NO_ARGS() and DOM_NOT_IMPLEMENTED() have been removed.
 
 ========================
 4. OpCode changes
