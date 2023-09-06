@@ -59,6 +59,11 @@ PHP 8.3 UPGRADE NOTES
   . createAttributeNS() would previously incorrectly throw a NAMESPACE_ERR
     when the prefix was already used for a different uri. It now correctly
     chooses a different prefix when there's a prefix name conflict.
+  . New methods and properties were added to some DOM classes. If you inherit
+    from these and you happen to have a method or property with the same name,
+    you might encounter errors if the declaration is incompatible.
+    Consult sections 2. New Features and 6. New Functions for a list of
+    newly implemented methods and properties.
 
 - FFI:
   . C functions that have a return type of void now return null instead of
@@ -125,6 +130,11 @@ PHP 8.3 UPGRADE NOTES
 
 - CLI
   . It is now possible to lint multiple files.
+
+- DOM
+  . Added properties DOMElement::className and DOMElement::id.
+    These are not binary-safe at the moment because of underlying limitations of
+    libxml2. This means that the property values will be cut off at a NUL byte.
 
 - FFI
   . It is now possible to assign CData to other CData. This means you can
@@ -378,9 +388,6 @@ PHP 8.3 UPGRADE NOTES
   . Added DOMNode::getRootNode(). The $options argument does nothing at the
     moment because it only influences the shadow DOM, which we do not support
     yet.
-  . Added DOMElement::className and DOMElement::id.
-    This is not binary-safe at the moment because of underlying limitations of
-    libxml2.
   . Added DOMParentNode::replaceChildren().
   . Added DOMNode::isConnected and DOMNameSpaceNode::isConnected.
   . Added DOMNode::parentElement and DOMNameSpaceNode::parentElement.
