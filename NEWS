@@ -15,6 +15,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-12102 (Incorrect compile error when using array access on TMP
     value in function call). (ilutov)
   . Fixed warning emitted when checking if a user stream is castable. (Girgias)
+  . Fixed bug GH-12123 (Compile error on MacOS with C++ extension when using
+    ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX). (kocsismate)
 
 - FPM:
   . Fixed GH-12077 (PHP 8.3.0RC1 borked socket-close-on-exec.phpt).

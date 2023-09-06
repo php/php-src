@@ -269,7 +269,7 @@ typedef struct {
 #define ZEND_TYPE_ALLOW_NULL(t) \
 	(((t).type_mask & _ZEND_TYPE_NULLABLE_BIT) != 0)
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && defined(_MSC_VER)
 # define _ZEND_TYPE_PREFIX zend_type
 #else
 /* FIXME: We could add (zend_type) here at some point but this breaks in MSVC because
