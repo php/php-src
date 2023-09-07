@@ -281,7 +281,6 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							opline->opcode = ZEND_FETCH_STATIC_PROP_R;
 						}
 					}
-					MAKE_NOP(call_stack[call - 1].last_check_func_arg_opline);
 				}
 				break;
 			case ZEND_SEND_VAL_EX:
@@ -319,6 +318,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					}
 					break;
 				}
+				MAKE_NOP(call_stack[call - 1].last_check_func_arg_opline);
 				call_stack[call - 1].last_check_func_arg_opline = NULL;
 				ZEND_FALLTHROUGH;
 			case ZEND_SEND_VAR_EX:
