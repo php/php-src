@@ -2023,6 +2023,9 @@ PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure
 									if (bptr > limit) {
 										/* if the line ends with enclosure, we need to go back by
 										 * one character so the \0 character is not copied. */
+										if (hunk_begin == bptr) {
+											--hunk_begin;
+										}
 										--bptr;
 									}
 									goto quit_loop_2;
@@ -2038,6 +2041,9 @@ PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure
 									if (bptr > limit) {
 										/* if the line ends with enclosure, we need to go back by
 										 * one character so the \0 character is not copied. */
+										if (hunk_begin == bptr) {
+											--hunk_begin;
+										}
 										--bptr;
 									}
 									goto quit_loop_2;
