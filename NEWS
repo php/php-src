@@ -12,7 +12,8 @@ PHP                                                                        NEWS
     (ju1ius)
   . Fixed OSS Fuzz #61865 (Undef variable in ++/-- for declared property
     that is unset in error handler). (Girgias)
-
+  . Fixed bug GH-12102 (Incorrect compile error when using array access on TMP
+    value in function call). (ilutov)
 
 - FPM:
   . Fixed GH-12077 (PHP 8.3.0RC1 borked socket-close-on-exec.phpt).
