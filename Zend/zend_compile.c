@@ -2807,7 +2807,11 @@ static zend_op *zend_compile_simple_var(znode *result, zend_ast *ast, uint32_t t
 
 static void zend_separate_if_call_and_write(znode *node, zend_ast *ast, uint32_t type) /* {{{ */
 {
-	if (type != BP_VAR_R && type != BP_VAR_IS && zend_is_call(ast)) {
+	if (type != BP_VAR_R
+	 && type != BP_VAR_IS
+	 /* Whether a FUNC_ARG is R may only be determined at runtime. */
+	 && type != BP_VAR_FUNC_ARG
+	 && zend_is_call(ast)) {
 		if (node->op_type == IS_VAR) {
 			zend_op *opline = zend_emit_op(NULL, ZEND_SEPARATE, node, NULL);
 			opline->result_type = IS_VAR;
