@@ -487,7 +487,7 @@ struct _pdo_dbh_t {
 
 	zend_class_entry *def_stmt_ce;
 
-	zval def_stmt_ctor_args;
+	HashTable *def_stmt_ctor_args;
 
 	/* when calling PDO::query(), we need to keep the error
 	 * context from the statement around until we next clear it.

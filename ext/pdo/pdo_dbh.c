@@ -434,11 +434,9 @@ options:
 }
 /* }}} */
 
-static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args) /* {{{ */
+static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry *dbstmt_ce, const HashTable *ctor_args) /* {{{ */
 {
-	if (!Z_ISUNDEF_P(ctor_args)) {
-		/* This implies an error within PDO if this does not hold */
-		ZEND_ASSERT(Z_TYPE_P(ctor_args) == IS_ARRAY);
+	if (ctor_args) {
 		if (!dbstmt_ce->constructor) {
 			zend_throw_error(NULL, "User-supplied statement does not accept constructor arguments");
 			return NULL;
@@ -475,8 +473,9 @@ PHP_METHOD(PDO, prepare)
 {
 	pdo_stmt_t *stmt;
 	zend_string *statement;
-	zval *options = NULL, *value, *item, ctor_args;
+	zval *options = NULL, *value, *item;
 	zend_class_entry *dbstmt_ce, *pce;
+	/* const */ HashTable *ctor_args = NULL;
 	pdo_dbh_object_t *dbh_obj = Z_PDO_OBJECT_P(ZEND_THIS);
 	pdo_dbh_t *dbh = dbh_obj->inner;
 
@@ -525,16 +524,14 @@ PHP_METHOD(PDO, prepare)
 					zend_zval_value_name(value));
 				RETURN_THROWS();
 			}
-			ZVAL_COPY_VALUE(&ctor_args, item);
-		} else {
-			ZVAL_UNDEF(&ctor_args);
+			ctor_args = Z_ARRVAL_P(item);
 		}
 	} else {
 		dbstmt_ce = dbh->def_stmt_ce;
-		ZVAL_COPY_VALUE(&ctor_args, &dbh->def_stmt_ctor_args);
+		ctor_args = dbh->def_stmt_ctor_args;
 	}
 
-	if (!pdo_stmt_instantiate(dbh, return_value, dbstmt_ce, &ctor_args)) {
+	if (!pdo_stmt_instantiate(dbh, return_value, dbstmt_ce, ctor_args)) {
 		RETURN_THROWS();
 	}
 	stmt = Z_PDO_STMT_P(return_value);
@@ -549,11 +546,7 @@ PHP_METHOD(PDO, prepare)
 	ZVAL_UNDEF(&stmt->lazy_object_ref);
 
 	if (dbh->methods->preparer(dbh, statement, stmt, options)) {
-		if (Z_TYPE(ctor_args) == IS_ARRAY) {
-			pdo_stmt_construct(stmt, return_value, dbstmt_ce, Z_ARRVAL(ctor_args));
-		} else {
-			pdo_stmt_construct(stmt, return_value, dbstmt_ce, /* ctor_args */ NULL);
-		}
+		pdo_stmt_construct(stmt, return_value, dbstmt_ce, ctor_args);
 		return;
 	}
 
@@ -817,9 +810,9 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 				return false;
 			}
 			dbh->def_stmt_ce = pce;
-			if (!Z_ISUNDEF(dbh->def_stmt_ctor_args)) {
-				zval_ptr_dtor(&dbh->def_stmt_ctor_args);
-				ZVAL_UNDEF(&dbh->def_stmt_ctor_args);
+			if (dbh->def_stmt_ctor_args) {
+				zend_array_release(dbh->def_stmt_ctor_args);
+				dbh->def_stmt_ctor_args = NULL;
 			}
 			if ((item = zend_hash_index_find(Z_ARRVAL_P(value), 1)) != NULL) {
 				if (Z_TYPE_P(item) != IS_ARRAY) {
@@ -827,7 +820,9 @@ static bool pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /
 						zend_zval_value_name(value));
 					return false;
 				}
-				ZVAL_COPY(&dbh->def_stmt_ctor_args, item);
+				dbh->def_stmt_ctor_args = Z_ARRVAL_P(item);
+				/* Increase refcount */
+				GC_TRY_ADDREF(dbh->def_stmt_ctor_args);
 			}
 			return true;
 		}
@@ -906,9 +901,10 @@ PHP_METHOD(PDO, getAttribute)
 		case PDO_ATTR_STATEMENT_CLASS:
 			array_init(return_value);
 			add_next_index_str(return_value, zend_string_copy(dbh->def_stmt_ce->name));
-			if (!Z_ISUNDEF(dbh->def_stmt_ctor_args)) {
-				Z_TRY_ADDREF(dbh->def_stmt_ctor_args);
-				add_next_index_zval(return_value, &dbh->def_stmt_ctor_args);
+			if (dbh->def_stmt_ctor_args) {
+				/* Increment refcount of constructor arguments */
+				GC_TRY_ADDREF(dbh->def_stmt_ctor_args);
+				add_next_index_array(return_value, dbh->def_stmt_ctor_args);
 			}
 			return;
 		case PDO_ATTR_DEFAULT_FETCH_MODE:
@@ -1093,7 +1089,7 @@ PHP_METHOD(PDO, query)
 
 	PDO_DBH_CLEAR_ERR();
 
-	if (!pdo_stmt_instantiate(dbh, return_value, dbh->def_stmt_ce, &dbh->def_stmt_ctor_args)) {
+	if (!pdo_stmt_instantiate(dbh, return_value, dbh->def_stmt_ce, dbh->def_stmt_ctor_args)) {
 		RETURN_THROWS();
 	}
 	stmt = Z_PDO_STMT_P(return_value);
@@ -1122,11 +1118,7 @@ PHP_METHOD(PDO, query)
 					stmt->executed = 1;
 				}
 				if (ret) {
-					if (Z_TYPE(dbh->def_stmt_ctor_args) == IS_ARRAY) {
-						pdo_stmt_construct(stmt, return_value, dbh->def_stmt_ce, Z_ARRVAL(dbh->def_stmt_ctor_args));
-					} else {
-						pdo_stmt_construct(stmt, return_value, dbh->def_stmt_ce, /* ctor_args */ NULL);
-					}
+					pdo_stmt_construct(stmt, return_value, dbh->def_stmt_ce, dbh->def_stmt_ctor_args);
 					return;
 				}
 			}
@@ -1320,7 +1312,9 @@ static HashTable *dbh_get_gc(zend_object *object, zval **gc_data, int *gc_count)
 {
 	pdo_dbh_t *dbh = php_pdo_dbh_fetch_inner(object);
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
-	zend_get_gc_buffer_add_zval(gc_buffer, &dbh->def_stmt_ctor_args);
+	if (dbh->def_stmt_ctor_args) {
+		zend_get_gc_buffer_add_ht(gc_buffer, dbh->def_stmt_ctor_args);
+	}
 	if (dbh->methods && dbh->methods->get_gc) {
 		dbh->methods->get_gc(dbh, gc_buffer);
 	}
@@ -1382,8 +1376,8 @@ static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)
 		pefree((char *)dbh->persistent_id, dbh->is_persistent);
 	}
 
-	if (!Z_ISUNDEF(dbh->def_stmt_ctor_args)) {
-		zval_ptr_dtor(&dbh->def_stmt_ctor_args);
+	if (dbh->def_stmt_ctor_args) {
+		GC_DTOR_NOGC(dbh->def_stmt_ctor_args);
 	}
 
 	for (i = 0; i < PDO_DBH_DRIVER_METHOD_KIND__MAX; i++) {
@@ -1427,6 +1421,7 @@ zend_object *pdo_dbh_new(zend_class_entry *ce)
 	rebuild_object_properties(&dbh->std);
 	dbh->inner = ecalloc(1, sizeof(pdo_dbh_t));
 	dbh->inner->def_stmt_ce = pdo_dbstmt_ce;
+	dbh->inner->def_stmt_ctor_args = NULL;
 
 	return &dbh->std;
 }
