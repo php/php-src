@@ -746,7 +746,7 @@ static size_t mb_utf16be_to_wchar_avx2(unsigned char **in, size_t *in_len, uint3
 						*out++ = (((n & 0x3FF) << 10) | (n2 & 0x3FF)) + 0x10000;
 						bufsize--;
 						len -= 4;
-#ifdef PHP_HAVE_BUILTIN_USUB_OVERFLOW
+#if defined(PHP_HAVE_BUILTIN_USUB_OVERFLOW) && PHP_HAVE_BUILTIN_USUB_OVERFLOW
 						/* Subtracting 2 from `n_chars` will automatically set the CPU's flags;
 						 * branch directly off the appropriate flag (CF on x86) rather than using
 						 * another instruction (CMP on x86) to check for underflow */
@@ -932,7 +932,7 @@ static size_t mb_utf16le_to_wchar_avx2(unsigned char **in, size_t *in_len, uint3
 						*out++ = (((n & 0x3FF) << 10) | (n2 & 0x3FF)) + 0x10000;
 						bufsize--;
 						len -= 4;
-#ifdef PHP_HAVE_BUILTIN_USUB_OVERFLOW
+#if defined(PHP_HAVE_BUILTIN_USUB_OVERFLOW) && PHP_HAVE_BUILTIN_USUB_OVERFLOW
 						if (__builtin_usub_overflow(n_chars, 2, &n_chars)) {
 							break;
 						}
