@@ -520,10 +520,7 @@ PHP_METHOD(DOMElement, setAttributeNode)
 
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
-	if (attrp->type != XML_ATTRIBUTE_NODE) {
-		zend_argument_value_error(1, "must have the node attribute");
-		RETURN_THROWS();
-	}
+	ZEND_ASSERT(attrp->type == XML_ATTRIBUTE_NODE);
 
 	if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
 		php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));
@@ -581,7 +578,9 @@ PHP_METHOD(DOMElement, removeAttributeNode)
 
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
-	if (attrp->type != XML_ATTRIBUTE_NODE || attrp->parent != nodep) {
+	ZEND_ASSERT(attrp->type == XML_ATTRIBUTE_NODE);
+
+	if (attrp->parent != nodep) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
