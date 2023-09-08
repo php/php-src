@@ -8,4 +8,7 @@ Core:
   . Fixed bug GH-12102 (Incorrect compile error when using array access on TMP
     value in function call). (ilutov)
 
+DOM:
+  . Added DOMNode::compareDocumentPosition(). (nielsdos)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

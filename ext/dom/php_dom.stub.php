@@ -297,6 +297,13 @@ interface DOMChildNode
 /** @not-serializable */
 class DOMNode
 {
+    public const int DOCUMENT_POSITION_DISCONNECTED = 0x01;
+    public const int DOCUMENT_POSITION_PRECEDING = 0x02;
+    public const int DOCUMENT_POSITION_FOLLOWING = 0x04;
+    public const int DOCUMENT_POSITION_CONTAINS = 0x08;
+    public const int DOCUMENT_POSITION_CONTAINED_BY = 0x10;
+    public const int DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 0x20;
+
     /** @readonly */
     public string $nodeName;
 
@@ -404,6 +411,8 @@ class DOMNode
     public function contains(DOMNode|DOMNameSpaceNode|null $other): bool {}
 
     public function getRootNode(?array $options = null): DOMNode {}
+
+    public function compareDocumentPosition(DOMNode $other): int {}
 }
 
 /** @not-serializable */

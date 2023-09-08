@@ -19,9 +19,24 @@ PHP 8.4 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- DOM:
+  . New methods and constants were added to some DOM classes. If you inherit
+    from these and you happen to have a method or property with the same name,
+    you might encounter errors if the declaration is incompatible.
+    Consult sections 2. New Features and 6. New Functions for a list of
+    newly implemented methods and constants.
+
 ========================================
 2. New Features
 ========================================
+
+- DOM:
+  . Added constant DOMNode::DOCUMENT_POSITION_DISCONNECTED.
+  . Added constant DOMNode::DOCUMENT_POSITION_PRECEDING.
+  . Added constant DOMNode::DOCUMENT_POSITION_FOLLOWING.
+  . Added constant DOMNode::DOCUMENT_POSITION_CONTAINS.
+  . Added constant DOMNode::DOCUMENT_POSITION_CONTAINED_BY.
+  . Added constant DOMNode::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC.
 
 ========================================
 3. Changes in SAPI modules
@@ -38,6 +53,9 @@ PHP 8.4 UPGRADE NOTES
 ========================================
 6. New Functions
 ========================================
+
+- DOM:
+  . Added DOMNode::compareDocumentPosition().
 
 ========================================
 7. New Classes and Interfaces
