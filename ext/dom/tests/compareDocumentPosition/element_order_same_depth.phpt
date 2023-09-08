@@ -37,6 +37,10 @@ echo "--- strong & bar ---\n";
 var_dump($bar->nextElementSibling->compareDocumentPosition($bar) === DOMNode::DOCUMENT_POSITION_PRECEDING);
 var_dump($bar->compareDocumentPosition($bar->nextElementSibling) === DOMNode::DOCUMENT_POSITION_FOLLOWING);
 
+echo "--- strong & strong ---\n";
+var_dump($foo->previousElementSibling->compareDocumentPosition($bar->nextElementSibling) === DOMNode::DOCUMENT_POSITION_FOLLOWING);
+var_dump($bar->nextElementSibling->compareDocumentPosition($foo->previousElementSibling) === DOMNode::DOCUMENT_POSITION_PRECEDING);
+
 for ($i = 0; $i < 3; $i++) {
     echo "--- Check on depth $i ---\n";
     var_dump($foo->compareDocumentPosition($bar) === DOMNode::DOCUMENT_POSITION_FOLLOWING);
@@ -51,6 +55,9 @@ for ($i = 0; $i < 3; $i++) {
 bool(true)
 bool(true)
 --- strong & bar ---
+bool(true)
+bool(true)
+--- strong & strong ---
 bool(true)
 bool(true)
 --- Check on depth 0 ---

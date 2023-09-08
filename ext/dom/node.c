@@ -2141,7 +2141,7 @@ PHP_METHOD(DOMNode, compareDocumentPosition)
 
 	/* Special case: comparing children and attributes.
 	 * They belong to a different tree and are therefore hard to compare, but spec demands attributes to precede children
-	 * according to the pre-order DFS numbering.
+	 * according to the pre-order depth-first search ordering.
 	 * Because their tree is different, the node parents only meet at the common element instead of earlier.
 	 * Therefore, it seems that one is the ancestor of the other. */
 	if (node1_is_ancestor_of_node2) {
