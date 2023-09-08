@@ -2082,44 +2082,6 @@ PHP_METHOD(DOMDocument, registerNodeClass)
 }
 /* }}} */
 
-/* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-append
-Since: DOM Living Standard (DOM4)
-*/
-PHP_METHOD(DOMDocument, append)
-{
-	uint32_t argc = 0;
-	zval *args;
-	dom_object *intern;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	DOM_GET_THIS_INTERN(intern);
-
-	dom_parent_node_append(intern, args, argc);
-}
-/* }}} */
-
-/* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
-Since: DOM Living Standard (DOM4)
-*/
-PHP_METHOD(DOMDocument, prepend)
-{
-	uint32_t argc = 0;
-	zval *args;
-	dom_object *intern;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	DOM_GET_THIS_INTERN(intern);
-
-	dom_parent_node_prepend(intern, args, argc);
-}
-/* }}} */
-
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
 Since:
 */

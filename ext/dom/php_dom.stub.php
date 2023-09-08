@@ -480,13 +480,22 @@ class DOMDocumentFragment extends DOMNode implements DOMParentNode
     /** @tentative-return-type */
     public function appendXML(string $data): bool {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::append
+     */
     public function append(...$nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::prepend
+     */
     public function prepend(...$nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMDocument::replaceChildren
+     */
     public function replaceChildren(...$nodes): void {}
 }
 
@@ -532,15 +541,25 @@ class DOMCharacterData extends DOMNode implements DOMChildNode
     /** @tentative-return-type */
     public function replaceData(int $offset, int $count, string $data): bool {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::replaceWith
+     */
     public function replaceWith(...$nodes): void {}
 
+    /** @implementation-alias DOMElement::remove */
     public function remove(): void {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::before
+     */
     public function before(... $nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::after
+     */
     public function after(...$nodes): void {}
 }
 
@@ -838,10 +857,16 @@ class DOMDocument extends DOMNode implements DOMParentNode
     /** @tentative-return-type */
     public function adoptNode(DOMNode $node): DOMNode|false {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::append
+     */
     public function append(...$nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::prepend
+     */
     public function prepend(...$nodes): void {}
 
     /** @param DOMNode|string $nodes */
