@@ -1432,13 +1432,8 @@ PHP_METHOD(SimpleXMLElement, asXML)
 
 		xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
 		xmlOutputBufferFlush(outbuf);
-#ifdef LIBXML2_NEW_BUFFER
 		return_content = (char *)xmlOutputBufferGetContent(outbuf);
 		return_len = xmlOutputBufferGetSize(outbuf);
-#else
-		return_content = (char *)outbuf->buffer->content;
-		return_len = outbuf->buffer->use;
-#endif
 		if (!return_content) {
 			RETVAL_FALSE;
 		} else {

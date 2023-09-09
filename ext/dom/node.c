@@ -1891,17 +1891,9 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		RETVAL_FALSE;
 	} else {
 		if (mode == 0) {
-#ifdef LIBXML2_NEW_BUFFER
 			ret = xmlOutputBufferGetSize(buf);
-#else
-			ret = buf->buffer->use;
-#endif
 			if (ret > 0) {
-#ifdef LIBXML2_NEW_BUFFER
 				RETVAL_STRINGL((char *) xmlOutputBufferGetContent(buf), ret);
-#else
-				RETVAL_STRINGL((char *) buf->buffer->content, ret);
-#endif
 			} else {
 				RETVAL_EMPTY_STRING();
 			}
