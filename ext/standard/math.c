@@ -194,9 +194,9 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		} else {
 			tmp_value = value / f2;
 		}
-		/* preround the result (tmp_value will always be something * 1e14,
+		/* adjust result digits (tmp_value will always be something * 1e14,
 		   thus never larger than 1e15 here) */
-		tmp_value = php_round_helper(tmp_value, mode);
+		tmp_value = (tmp_value >= 0.0) ? floor(tmp_value) : ceil(tmp_value);
 
 		use_precision = places - precision_places;
 		use_precision = use_precision < INT_MIN+1 ? INT_MIN+1 : use_precision;
