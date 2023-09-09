@@ -63,6 +63,43 @@ typedef struct _zend_op zend_op;
 # define ZEND_USE_ABS_CONST_ADDR    0
 #endif
 
+typedef union _znode_op {
+	uint32_t      constant;
+	uint32_t      var;
+	uint32_t      num;
+	uint32_t      opline_num; /*  Needs to be signed */
+#if ZEND_USE_ABS_JMP_ADDR
+	zend_op       *jmp_addr;
+#else
+	uint32_t      jmp_offset;
+#endif
+#if ZEND_USE_ABS_CONST_ADDR
+	zval          *zv;
+#endif
+} znode_op;
+
+typedef struct _znode { /* used only during compilation */
+	uint8_t op_type;
+	uint8_t flag;
+	union {
+		znode_op op;
+		zval constant; /* replaced by literal/zv */
+	} u;
+} znode;
+
+typedef struct _zend_ast_znode {
+	zend_ast_kind kind;
+	zend_ast_attr attr;
+	uint32_t lineno;
+	znode node;
+} zend_ast_znode;
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(znode *node);
+
+static zend_always_inline znode *zend_ast_get_znode(zend_ast *ast) {
+	return &((zend_ast_znode *) ast)->node;
+}
+
 typedef struct _zend_declarables {
 	zend_long ticks;
 } zend_declarables;
