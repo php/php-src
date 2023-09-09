@@ -2202,6 +2202,7 @@ static HashTable *php_sqlite3_get_gc(zend_object *object, zval **table, int *n)
 		/* Fast path without allocations */
 		*table = NULL;
 		*n = 0;
+		return zend_std_get_gc(object, table, n);
 	} else {
 		zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 
@@ -2220,9 +2221,13 @@ static HashTable *php_sqlite3_get_gc(zend_object *object, zval **table, int *n)
 		}
 
 		zend_get_gc_buffer_use(gc_buffer, table, n);
-	}
 
-	return zend_std_get_properties(object);
+		if (object->properties == NULL && object->ce->default_properties_count == 0) {
+			return NULL;
+		} else {
+			return zend_std_get_properties(object);
+		}
+	}
 }
 
 static void php_sqlite3_stmt_object_free_storage(zend_object *object) /* {{{ */
