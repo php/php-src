@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed persistent procedural ODBC connections not getting closed.
     (NattyNarwhal)
 
+- SimpleXML:
+  . Fixed bug #52751 (XPath processing-instruction() function is not
+    supported). (nielsdos)
+
 - SPL:
   . Fixed bug GH-11972 (RecursiveCallbackFilterIterator regression in 8.1.18).
     (nielsdos)
