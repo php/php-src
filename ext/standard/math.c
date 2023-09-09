@@ -141,7 +141,7 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	/* If the decimal precision guaranteed by FP arithmetic is higher than
 	   the requested places BUT is small enough to make sure a non-zero value
 	   is returned, pre-round the result to the precision */
-	if (precision_places - 1 > places && precision_places - 15 < places) {
+	if (precision_places > places && precision_places - 15 < places) {
 		int64_t use_precision = precision_places < INT_MIN + 1 ? INT_MIN + 1 : precision_places;
 
 		f2 = php_intpow10(abs((int)use_precision));
