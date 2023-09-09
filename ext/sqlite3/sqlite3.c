@@ -2248,12 +2248,7 @@ static void php_sqlite3_object_free_storage(zend_object *object) /* {{{ */
 static void php_sqlite3_gc_buffer_add_fcc(zend_get_gc_buffer *gc_buffer, zend_fcall_info_cache *fcc)
 {
 	if (ZEND_FCC_INITIALIZED(*fcc)) {
-		if (fcc->object) {
-			zend_get_gc_buffer_add_obj(gc_buffer, fcc->object);
-		}
-		if (fcc->closure) {
-			zend_get_gc_buffer_add_obj(gc_buffer, fcc->closure);
-		}
+		zend_get_gc_buffer_add_fcc(gc_buffer, fcc);
 	}
 }
 
