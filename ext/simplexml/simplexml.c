@@ -1309,7 +1309,8 @@ PHP_METHOD(SimpleXMLElement, xpath)
 	result = retval->nodesetval;
 
 	if (result != NULL) {
-		array_init(return_value);
+		array_init_size(return_value, result->nodeNr);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 
 		for (i = 0; i < result->nodeNr; ++i) {
 			nodeptr = result->nodeTab[i];
