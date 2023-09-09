@@ -53,6 +53,11 @@ static void php_sxe_iterator_move_forward(zend_object_iterator *iter);
 static void php_sxe_iterator_rewind(zend_object_iterator *iter);
 static zend_result sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type);
 
+static zend_always_inline bool php_sxe_is_inclusive_text_node(const xmlNode *node)
+{
+	return node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE;
+}
+
 /* {{{ _node_as_zval() */
 static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE_ITER itertype, char *name, const xmlChar *nsprefix, int isprefix)
 {
@@ -746,7 +751,7 @@ static int sxe_prop_dim_exists(zend_object *object, zval *member, int check_empt
 			if (node) {
 				exists = 1;
 				if (check_empty == 1 &&
-					(!node->children || (node->children->type == XML_TEXT_NODE && !node->children->next &&
+					(!node->children || (php_sxe_is_inclusive_text_node(node->children) && !node->children->next &&
 					 (!node->children->content || !node->children->content[0] || xmlStrEqual(node->children->content, (const xmlChar *) "0")))) ) {
 					exists = 0;
 				}
@@ -928,7 +933,7 @@ static void _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval 
 	php_sxe_object *subnode;
 	xmlChar        *contents;
 
-	if (node->children && node->children->type == XML_TEXT_NODE && !xmlIsBlankNode(node->children)) {
+	if (node->children && php_sxe_is_inclusive_text_node(node->children) && !xmlIsBlankNode(node->children)) {
 		contents = xmlNodeListGetString(node->doc, node->children, 1);
 		if (contents) {
 			ZVAL_STRING(value, (char *)contents);
@@ -1026,7 +1031,7 @@ static int sxe_prop_is_empty(zend_object *object) /* {{{ */
 			if (node->children != NULL || node->prev != NULL || node->next != NULL) {
 				SKIP_TEXT(node);
 			} else {
-				if (node->type == XML_TEXT_NODE) {
+				if (php_sxe_is_inclusive_text_node(node)) {
 					const xmlChar *cur = node->content;
 					if (*cur != 0) {
 						is_empty = 0;
@@ -1147,7 +1152,7 @@ static HashTable *sxe_get_prop_hash(zend_object *object, int is_debug) /* {{{ */
 			if (node->children != NULL || node->prev != NULL || node->next != NULL || xmlIsBlankNode(node)) {
 				SKIP_TEXT(node);
 			} else {
-				if (node->type == XML_TEXT_NODE) {
+				if (php_sxe_is_inclusive_text_node(node)) {
 					const xmlChar *cur = node->content;
 
 					if (*cur != 0) {
@@ -1313,13 +1318,13 @@ PHP_METHOD(SimpleXMLElement, xpath)
 
 		for (i = 0; i < result->nodeNr; ++i) {
 			nodeptr = result->nodeTab[i];
-			if (nodeptr->type == XML_TEXT_NODE || nodeptr->type == XML_ELEMENT_NODE || nodeptr->type == XML_ATTRIBUTE_NODE) {
+			if (php_sxe_is_inclusive_text_node(nodeptr) || nodeptr->type == XML_ELEMENT_NODE || nodeptr->type == XML_ATTRIBUTE_NODE) {
 				/**
 				 * Detect the case where the last selector is text(), simplexml
 				 * always accesses the text() child by default, therefore we assign
 				 * to the parent node.
 				 */
-				if (nodeptr->type == XML_TEXT_NODE) {
+				if (php_sxe_is_inclusive_text_node(nodeptr)) {
 					_node_as_zval(sxe, nodeptr->parent, &value, SXE_ITER_NONE, NULL, NULL, 0);
 				} else if (nodeptr->type == XML_ATTRIBUTE_NODE) {
 					_node_as_zval(sxe, nodeptr->parent, &value, SXE_ITER_ATTRLIST, (char*)nodeptr->name, nodeptr->ns ? (xmlChar *)nodeptr->ns->href : NULL, 0);
