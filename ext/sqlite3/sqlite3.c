@@ -2245,6 +2245,18 @@ static void php_sqlite3_object_free_storage(zend_object *object) /* {{{ */
 }
 /* }}} */
 
+static void php_sqlite3_gc_buffer_add_fcc(zend_get_gc_buffer *gc_buffer, zend_fcall_info_cache *fcc)
+{
+	if (ZEND_FCC_INITIALIZED(*fcc)) {
+		if (fcc->object) {
+			zend_get_gc_buffer_add_obj(gc_buffer, fcc->object);
+		}
+		if (fcc->closure) {
+			zend_get_gc_buffer_add_obj(gc_buffer, fcc->closure);
+		}
+	}
+}
+
 static HashTable *php_sqlite3_get_gc(zend_object *object, zval **table, int *n)
 {
 	php_sqlite3_db_object *intern = php_sqlite3_db_from_obj(object);
@@ -2259,15 +2271,15 @@ static HashTable *php_sqlite3_get_gc(zend_object *object, zval **table, int *n)
 
 		php_sqlite3_func *func = intern->funcs;
 		while (func != NULL) {
-			zend_get_gc_buffer_add_zval(gc_buffer, &func->func);
-			zend_get_gc_buffer_add_zval(gc_buffer, &func->step);
-			zend_get_gc_buffer_add_zval(gc_buffer, &func->fini);
+			php_sqlite3_gc_buffer_add_fcc(gc_buffer, &func->func);
+			php_sqlite3_gc_buffer_add_fcc(gc_buffer, &func->step);
+			php_sqlite3_gc_buffer_add_fcc(gc_buffer, &func->fini);
 			func = func->next;
 		}
 
 		php_sqlite3_collation *collation = intern->collations;
 		while (collation != NULL) {
-			zend_get_gc_buffer_add_zval(gc_buffer, &collation->cmp_func);
+			php_sqlite3_gc_buffer_add_fcc(gc_buffer, &collation->cmp_func);
 			collation = collation->next;
 		}
 
