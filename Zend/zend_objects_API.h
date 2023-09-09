@@ -20,8 +20,10 @@
 #ifndef ZEND_OBJECTS_API_H
 #define ZEND_OBJECTS_API_H
 
-#include "zend.h"
-#include "zend_compile.h"
+#include "zend_types.h"
+#include "zend_gc.h"
+#include "zend_alloc.h"
+#include "zend_compile.h" /* For zend_property_info */
 
 #define OBJ_BUCKET_INVALID			(1<<0)
 

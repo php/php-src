@@ -21,7 +21,7 @@
 #ifndef ZEND_AST_H
 #define ZEND_AST_H
 
-#include "zend.h"
+#include "zend_types.h"
 
 #ifndef ZEND_AST_SPEC
 # define ZEND_AST_SPEC 1
@@ -213,6 +213,37 @@ typedef struct _zend_ast_decl {
 	zend_ast *child[5];
 } zend_ast_decl;
 
+typedef union _znode_op {
+	uint32_t      constant;
+	uint32_t      var;
+	uint32_t      num;
+	uint32_t      opline_num; /*  Needs to be signed */
+#if ZEND_USE_ABS_JMP_ADDR
+	zend_op       *jmp_addr;
+#else
+	uint32_t      jmp_offset;
+#endif
+#if ZEND_USE_ABS_CONST_ADDR
+	zval          *zv;
+#endif
+} znode_op;
+
+typedef struct _znode { /* used only during compilation */
+	uint8_t op_type;
+	uint8_t flag;
+	union {
+		znode_op op;
+		zval constant; /* replaced by literal/zv */
+	} u;
+} znode;
+
+typedef struct _zend_ast_znode {
+	zend_ast_kind kind;
+	zend_ast_attr attr;
+	uint32_t lineno;
+	znode node;
+} zend_ast_znode;
+
 typedef void (*zend_ast_process_t)(zend_ast *ast);
 extern ZEND_API zend_ast_process_t zend_ast_process;
 
@@ -224,6 +255,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_long(zend_long lval)
 
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_string *name, zend_ast_attr attr);
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_class_const_or_name(zend_ast *class_name, zend_ast *name);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(znode *node);
 
 #if ZEND_AST_SPEC
 # define ZEND_AST_SPEC_CALL(name, ...) \
@@ -358,6 +390,10 @@ static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 	} else {
 		return ast->lineno;
 	}
+}
+
+static zend_always_inline znode *zend_ast_get_znode(zend_ast *ast) {
+	return &((zend_ast_znode *) ast)->node;
 }
 
 static zend_always_inline zend_ast *zend_ast_create_binary_op(uint32_t opcode, zend_ast *op0, zend_ast *op1) {

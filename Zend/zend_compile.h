@@ -20,8 +20,10 @@
 #ifndef ZEND_COMPILE_H
 #define ZEND_COMPILE_H
 
-#include "zend.h"
 #include "zend_ast.h"
+#include "zend_types.h"
+#include "zend_map_ptr.h"
+#include "zend_alloc.h"
 
 #include <stdarg.h>
 #include <stdint.h>
@@ -60,44 +62,6 @@ typedef struct _zend_op zend_op;
 # define ZEND_USE_ABS_JMP_ADDR      0
 # define ZEND_USE_ABS_CONST_ADDR    0
 #endif
-
-typedef union _znode_op {
-	uint32_t      constant;
-	uint32_t      var;
-	uint32_t      num;
-	uint32_t      opline_num; /*  Needs to be signed */
-#if ZEND_USE_ABS_JMP_ADDR
-	zend_op       *jmp_addr;
-#else
-	uint32_t      jmp_offset;
-#endif
-#if ZEND_USE_ABS_CONST_ADDR
-	zval          *zv;
-#endif
-} znode_op;
-
-typedef struct _znode { /* used only during compilation */
-	uint8_t op_type;
-	uint8_t flag;
-	union {
-		znode_op op;
-		zval constant; /* replaced by literal/zv */
-	} u;
-} znode;
-
-/* Temporarily defined here, to avoid header ordering issues */
-typedef struct _zend_ast_znode {
-	zend_ast_kind kind;
-	zend_ast_attr attr;
-	uint32_t lineno;
-	znode node;
-} zend_ast_znode;
-
-ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(znode *node);
-
-static zend_always_inline znode *zend_ast_get_znode(zend_ast *ast) {
-	return &((zend_ast_znode *) ast)->node;
-}
 
 typedef struct _zend_declarables {
 	zend_long ticks;
@@ -491,6 +455,9 @@ struct _zend_op_array {
 
 #define ZEND_RETURN_VALUE				0
 #define ZEND_RETURN_REFERENCE			1
+
+#define INTERNAL_FUNCTION_PARAMETERS zend_execute_data *execute_data, zval *return_value
+#define INTERNAL_FUNCTION_PARAM_PASSTHRU execute_data, return_value
 
 /* zend_internal_function_handler */
 typedef void (ZEND_FASTCALL *zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
