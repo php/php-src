@@ -14,6 +14,14 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+* The following FCI APIs have been removed as they were confusing:
+  - zend_fcall_info_call()
+  - zend_fcall_info_args_save()
+  - zend_fcall_info_args_restore()
+  - zend_fcall_info_argn()
+  - zend_fcall_info_argv()
+  - zend_fcall_info_argp()
+
 ========================
 2. Build system changes
 ========================
