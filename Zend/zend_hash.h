@@ -21,7 +21,9 @@
 #ifndef ZEND_HASH_H
 #define ZEND_HASH_H
 
-#include "zend.h"
+#include "zend_types.h"
+#include "zend_gc.h"
+#include "zend_string.h"
 #include "zend_sort.h"
 
 #define HASH_KEY_IS_STRING 1

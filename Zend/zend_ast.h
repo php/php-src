@@ -21,7 +21,7 @@
 #ifndef ZEND_AST_H
 #define ZEND_AST_H
 
-#include "zend.h"
+#include "zend_types.h"
 
 #ifndef ZEND_AST_SPEC
 # define ZEND_AST_SPEC 1

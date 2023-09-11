@@ -20,8 +20,10 @@
 #ifndef ZEND_COMPILE_H
 #define ZEND_COMPILE_H
 
-#include "zend.h"
 #include "zend_ast.h"
+#include "zend_types.h"
+#include "zend_map_ptr.h"
+#include "zend_alloc.h"
 
 #include <stdarg.h>
 #include <stdint.h>
@@ -85,7 +87,6 @@ typedef struct _znode { /* used only during compilation */
 	} u;
 } znode;
 
-/* Temporarily defined here, to avoid header ordering issues */
 typedef struct _zend_ast_znode {
 	zend_ast_kind kind;
 	zend_ast_attr attr;
@@ -491,6 +492,9 @@ struct _zend_op_array {
 
 #define ZEND_RETURN_VALUE				0
 #define ZEND_RETURN_REFERENCE			1
+
+#define INTERNAL_FUNCTION_PARAMETERS zend_execute_data *execute_data, zval *return_value
+#define INTERNAL_FUNCTION_PARAM_PASSTHRU execute_data, return_value
 
 /* zend_internal_function_handler */
 typedef void (ZEND_FASTCALL *zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
