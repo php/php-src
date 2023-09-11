@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Filter:
   . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
 
+- SimpleXML:
+  . Fixed bug GH-12170 (Can't use xpath with comments in SimpleXML). (nielsdos)
+
 28 Sep 2023, PHP 8.1.24
 
 - Core:
