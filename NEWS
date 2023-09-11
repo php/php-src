@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0alpha1
 
-Core:
-  . Added zend_call_stack_get implementation for NetBSD. (David Carlier)
-
 DOM:
   . Added DOMNode::compareDocumentPosition(). (nielsdos)
 
