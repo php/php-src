@@ -869,7 +869,7 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 	} else if (target == ZEND_MODIFIER_TARGET_CONSTANT) {
 		member = "class constant";
 	} else if (target == ZEND_MODIFIER_TARGET_CPP) {
-		member = "promoted property";
+		member = "parameter";
 	} else {
 		ZEND_UNREACHABLE();
 	}
