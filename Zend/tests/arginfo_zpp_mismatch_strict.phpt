@@ -2,6 +2,7 @@
 Test that there is no arginfo/zpp mismatch in strict mode
 --SKIPIF--
 <?php
+if (getenv('SKIP_ASAN')) die("skip Intermittently crashes lsan");
 if (getenv('SKIP_MSAN')) die("skip msan misses interceptors for some functions");
 ?>
 --FILE--
