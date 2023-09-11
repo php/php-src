@@ -7916,9 +7916,6 @@ static int zend_jit_isset_isempty_cv(zend_jit_ctx *jit, const zend_op *opline, u
 			} else {
 				ir_GUARD(ref, ir_CONST_ADDR(exit_addr));
 			}
-			if (end_inputs) {
-				ir_END_list(end_inputs);
-			}
 		} else if (smart_branch_opcode) {
 			ir_ref if_val = ir_IF(ref);
 			ir_IF_TRUE(if_val);
@@ -11508,7 +11505,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 						ir_IF_FALSE(if_packed);
 						if_packed = IR_UNUSED;
 						ir_END_list(idx_not_found_inputs);
-					} if (!packed_loaded) {
+					} else if (!packed_loaded) {
 						ir_END_list(idx_not_found_inputs);
 					}
 
@@ -11524,11 +11521,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 						ref = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_hash_index_lookup_rw), ht_ref, h);
 					}
 					if (not_found_exit_addr) {
-						if (packed_loaded) {
-							ir_GUARD(ref, ir_CONST_ADDR(not_found_exit_addr));
-						} else {
-							ir_GUARD(ref, ir_CONST_ADDR(not_found_exit_addr));
-						}
+						ir_GUARD(ref, ir_CONST_ADDR(not_found_exit_addr));
 					} else {
 						if_found = ir_IF(ref);
 						ir_IF_FALSE(if_found);
@@ -14453,7 +14446,6 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 			case ZEND_BW_OR:
 			case ZEND_BW_AND:
 			case ZEND_BW_XOR:
-				may_throw = 1;
 				if ((var_info & (MAY_BE_STRING|MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
 				    (val_info & (MAY_BE_STRING|MAY_BE_DOUBLE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 					if ((var_info & MAY_BE_ANY) != MAY_BE_STRING ||
