@@ -9,4 +9,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use the static modifier on a promoted property in %s on line %d
+Fatal error: Cannot use the static modifier on a parameter in %s on line %d
