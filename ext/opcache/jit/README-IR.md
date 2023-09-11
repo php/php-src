@@ -14,9 +14,9 @@ Key benefits of the new JIT implementation:
   allocation (the resulting native code is more efficient)
 - PHP doesn't have to care about most low-level details (different CPUs,
   calling conventions, TLS details, etc)
-- it's mach easier to implement support for new targets (e.g. RISCV)
+- it's much easier to implement support for new targets (e.g. RISCV)
 - IR framework is going to be developed separately from PHP and may accept
-  contibutions from other projects (new optimizations, improvemets, bug fixes)
+  contributions from other projects (new optimizations, improvements, bug fixes)
 
 Disadvantages:
 - JIT compilation becomes slower (this is almost invisible for tracing
@@ -26,7 +26,7 @@ IR Framework is included into PHP as a GIT submodule. It should be fetched by
 
 ``git submodule update --init --recursive``
 
-The new JIT implementation sucessfully passes all CI workflows, but it's still
+The new JIT implementation successfully passes all CI workflows, but it's still
 not mature and may cause failures. To reduce risks, this patch doesn't remove
 the old JIT implementation (that is the same as PHP-8.3 JIT). It's possible
 to build PHP with the old JIT by configuring with **--disable-opcache-jit-ir**.
