@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Filter:
   . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
 
+- Hash:
+  . Fixed bug GH-12186 (segfault copying/cloning a finalized HashContext).
+    (MaxSem)
+
 - SimpleXML:
   . Fixed bug GH-12170 (Can't use xpath with comments in SimpleXML). (nielsdos)
 
