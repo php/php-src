@@ -7,7 +7,7 @@ set NO_INTERACTION=1
 set REPORT_EXIT_STATUS=1
 set SKIP_IO_CAPTURE_TESTS=1
 
-call %PHP_SRC_DIR%/find-target-branch.bat
+call %WIN_SCRIPTS_DIR%/find-target-branch.bat
 if "%BRANCH%" neq "master" (
 	set STABILITY=stable
 ) else (
@@ -55,7 +55,7 @@ set PDOTEST_DSN=odbc:%ODBC_TEST_DSN%
 
 rem setup Firebird related exts
 curl -sLo Firebird.zip https://github.com/FirebirdSQL/firebird/releases/download/v3.0.9/Firebird-3.0.9.33560-0_x64.zip
-7z x -yoC:\Firebird Firebird.zip
+7z x -y -oC:\Firebird Firebird.zip
 set PDO_FIREBIRD_TEST_DATABASE=C:\test.fdb
 set PDO_FIREBIRD_TEST_DSN=firebird:dbname=%PDO_FIREBIRD_TEST_DATABASE%
 set PDO_FIREBIRD_TEST_USER=SYSDBA
@@ -92,14 +92,14 @@ rem work-around for failing to dl(mysqli) with OPcache (https://github.com/php/p
 if "%OPCACHE%" equ "1" set OPCACHE_OPTS=%OPCACHE_OPTS% -d extension=mysqli
 
 rem prepare for enchant
-if NOT EXIST C:\usr\local\lib\enchant-2 mkdir C:\usr\local\lib\enchant-2
+if NOT EXIST %SCRIPT_DRIVE%\usr\local\lib\enchant-2 mkdir %SCRIPT_DRIVE%\usr\local\lib\enchant-2
 if %errorlevel% neq 0 exit /b 3
-copy %DEPS_DIR%\bin\libenchant2_hunspell.dll C:\usr\local\lib\enchant-2
+copy %DEPS_DIR%\bin\libenchant2_hunspell.dll %SCRIPT_DRIVE%\usr\local\lib\enchant-2
 if %errorlevel% neq 0 exit /b 3
-if NOT EXIST C:\usr\local\share\enchant\hunspell mkdir C:\usr\local\share\enchant\hunspell
+if NOT EXIST %SCRIPT_DRIVE%\usr\local\share\enchant\hunspell mkdir %SCRIPT_DRIVE%\usr\local\share\enchant\hunspell
 if %errorlevel% neq 0 exit /b 3
 echo Fetching enchant dicts
-pushd C:\usr\local\share\enchant\hunspell
+pushd %SCRIPT_DRIVE%\usr\local\share\enchant\hunspell
 powershell -Command wget http://windows.php.net/downloads/qa/appveyor/ext/enchant/dict.zip -OutFile dict.zip
 unzip -o dict.zip
 del /q dict.zip
@@ -118,6 +118,7 @@ hMailServer.exe /verysilent
 cd %APPVEYOR_BUILD_FOLDER%
 %PHP_BUILD_DIR%\php.exe -dextension_dir=%PHP_BUILD_DIR% -dextension=com_dotnet appveyor\setup_hmailserver.php
 
+if EXIST %PHP_BUILD_DIR%\test_file_cache rmdir /s /q %PHP_BUILD_DIR%\test_file_cache
 mkdir %PHP_BUILD_DIR%\test_file_cache
 rem generate php.ini
 echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\php.ini
@@ -133,6 +134,7 @@ for %%i in (ldap oci8_12c pdo_oci) do (
 
 set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
 
+if EXIST C:\tests_tmp rmdir /s /q C:\tests_tmp
 mkdir c:\tests_tmp
 
 set TEST_PHP_JUNIT=c:\junit.out.xml
