@@ -4527,7 +4527,7 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
 
     foreach ($it as $file) {
         $pathName = $file->getPathName();
-         if (!preg_match('/(?:[\w\.]*constants[\w\.]*|tokens|filters).xml$/i', basename($pathName))) {
+        if (!preg_match('/(?:[\w\.]*constants[\w\.]*|tokens).xml$/i', basename($pathName))) {
             continue;
         }
 
@@ -4586,6 +4586,7 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
                 }
 
                 $manualTermElement->parentNode->replaceChild($newTermElement, $manualTermElement);
+                $updated = true;
             }
         }
 
@@ -4637,11 +4638,19 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
                     "/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/",
                     '/<appendix\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
                     '/<appendix\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<sect2\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<sect2\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<chapter\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<chapter\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
                 ],
                 [
                     "&$1",
                     "<appendix xml:id=\"$2\" xmlns=\"$1\">",
                     "<appendix xml:id=\"$3\" xmlns=\"$1\" xmlns:xlink=\"$2\">",
+                    "<sect2 xml:id=\"$2\" xmlns=\"$1\">",
+                    "<sect2 xml:id=\"$3\" xmlns=\"$1\" xmlns:xlink=\"$2\">",
+                    "<chapter xml:id=\"$2\" xmlns=\"$1\">",
+                    "<chapter xml:id=\"$3\" xmlns=\"$1\" xmlns:xlink=\"$2\">",
                 ],
                 $replacedXml
             );
