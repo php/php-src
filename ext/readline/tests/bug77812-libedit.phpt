@@ -23,7 +23,7 @@ fclose($pipes[0]);
 proc_close($proc);
 ?>
 --EXPECTF--
-object(Process)#1 (0) {
+object(Standard\Process)#1 (0) {
 }
 Interactive shell
 

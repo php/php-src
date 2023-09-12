@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 32a49230c44c313acaafe8fe67a919e5d4f09e02 */
+ * Stub hash: 9d21ade883ac2e766a6a59a3ea1493c40c13a674 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1782,7 +1782,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_password_algos arginfo_ob_list_handlers
 
 #if defined(PHP_CAN_SUPPORT_PROC_OPEN)
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_proc_open, 0, 3, Process, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_proc_open, 0, 3, Standard\\Process, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_MASK(0, command, MAY_BE_ARRAY|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, descriptor_spec, IS_ARRAY, 0)
 	ZEND_ARG_INFO(1, pipes)
@@ -1794,20 +1794,20 @@ ZEND_END_ARG_INFO()
 
 #if defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_proc_close, 0, 1, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, process, Process, 0)
+	ZEND_ARG_OBJ_INFO(0, process, Standard\\Process, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_proc_terminate, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, process, Process, 0)
+	ZEND_ARG_OBJ_INFO(0, process, Standard\\Process, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, signal, IS_LONG, 0, "15")
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_proc_get_status, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_OBJ_INFO(0, process, Process, 0)
+	ZEND_ARG_OBJ_INFO(0, process, Standard\\Process, 0)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -3490,7 +3490,7 @@ static const zend_function_entry class_AssertionError_methods[] = {
 
 
 #if defined(PHP_CAN_SUPPORT_PROC_OPEN)
-static const zend_function_entry class_Process_methods[] = {
+static const zend_function_entry class_Standard_Process_methods[] = {
 	ZEND_FE_END
 };
 #endif
@@ -4030,11 +4030,11 @@ static zend_class_entry *register_class_AssertionError(zend_class_entry *class_e
 }
 
 #if defined(PHP_CAN_SUPPORT_PROC_OPEN)
-static zend_class_entry *register_class_Process(void)
+static zend_class_entry *register_class_Standard_Process(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "Process", class_Process_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Standard", "Process", class_Standard_Process_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 

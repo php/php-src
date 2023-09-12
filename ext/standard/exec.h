@@ -17,7 +17,6 @@
 #ifndef EXEC_H
 #define EXEC_H
 
-PHP_MINIT_FUNCTION(proc_open);
 PHP_MINIT_FUNCTION(exec);
 
 PHPAPI zend_string *php_escape_shell_cmd(const char *str);

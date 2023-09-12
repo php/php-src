@@ -138,6 +138,92 @@ fail:
 zend_class_entry *process_ce;
 static zend_object_handlers process_object_handlers;
 
+/* {{{ _php_array_to_envp
+ * Process the `environment` argument to `proc_open`
+ * Convert into data structures which can be passed to underlying OS APIs like `exec` on POSIX or
+ * `CreateProcessW` on Win32 */
+static php_process_env _php_array_to_envp(zval *environment)
+{
+	zval *element;
+	php_process_env env;
+	zend_string *key, *str;
+#ifndef PHP_WIN32
+	char **ep;
+#endif
+	char *p;
+	size_t sizeenv = 0;
+	HashTable *env_hash; /* temporary PHP array used as helper */
+
+	memset(&env, 0, sizeof(env));
+
+	if (!environment) {
+		return env;
+	}
+
+	uint32_t cnt = zend_hash_num_elements(Z_ARRVAL_P(environment));
+
+	if (cnt < 1) {
+#ifndef PHP_WIN32
+		env.envarray = (char **) ecalloc(1, sizeof(char *));
+#endif
+		env.envp = (char *) ecalloc(4, 1);
+		return env;
+	}
+
+	ALLOC_HASHTABLE(env_hash);
+	zend_hash_init(env_hash, cnt, NULL, NULL, 0);
+
+	/* first, we have to get the size of all the elements in the hash */
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(environment), key, element) {
+		str = zval_get_string(element);
+
+		if (ZSTR_LEN(str) == 0) {
+			zend_string_release_ex(str, 0);
+			continue;
+		}
+
+		sizeenv += ZSTR_LEN(str) + 1;
+
+		if (key && ZSTR_LEN(key)) {
+			sizeenv += ZSTR_LEN(key) + 1;
+			zend_hash_add_ptr(env_hash, key, str);
+		} else {
+			zend_hash_next_index_insert_ptr(env_hash, str);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+#ifndef PHP_WIN32
+	ep = env.envarray = (char **) ecalloc(cnt + 1, sizeof(char *));
+#endif
+	p = env.envp = (char *) ecalloc(sizeenv + 4, 1);
+
+	ZEND_HASH_FOREACH_STR_KEY_PTR(env_hash, key, str) {
+#ifndef PHP_WIN32
+		*ep = p;
+		++ep;
+#endif
+
+		if (key) {
+			memcpy(p, ZSTR_VAL(key), ZSTR_LEN(key));
+			p += ZSTR_LEN(key);
+			*p++ = '=';
+		}
+
+		memcpy(p, ZSTR_VAL(str), ZSTR_LEN(str));
+		p += ZSTR_LEN(str);
+		*p++ = '\0';
+		zend_string_release_ex(str, 0);
+	} ZEND_HASH_FOREACH_END();
+
+	assert((uint32_t)(p - env.envp) <= sizeenv);
+
+	zend_hash_destroy(env_hash);
+	FREE_HASHTABLE(env_hash);
+
+	return env;
+}
+/* }}} */
+
 static inline php_process_handle *php_process_from_obj(zend_object *obj) {
 	return (php_process_handle *)((char *)(obj) - XtOffsetOf(php_process_handle, std));
 }
@@ -268,7 +354,7 @@ static void php_process_free_obj(zend_object *object)
 }
 
 static zend_function *php_process_get_constructor(zend_object *object) {
-	zend_throw_error(NULL, "Cannot directly construct Process, use proc_open() instead");
+	zend_throw_error(NULL, "Cannot directly construct Standard\\Process, use proc_open() instead");
 	return NULL;
 }
 
@@ -284,99 +370,6 @@ void php_register_process_class_handlers(void)
 	process_object_handlers.clone_obj = NULL;
 	process_object_handlers.compare = zend_objects_not_comparable;
 }
-
-/* {{{ _php_array_to_envp
- * Process the `environment` argument to `proc_open`
- * Convert into data structures which can be passed to underlying OS APIs like `exec` on POSIX or
- * `CreateProcessW` on Win32 */
-static php_process_env _php_array_to_envp(zval *environment)
-{
-	zval *element;
-	php_process_env env;
-	zend_string *key, *str;
-#ifndef PHP_WIN32
-	char **ep;
-#endif
-	char *p;
-	size_t sizeenv = 0;
-	HashTable *env_hash; /* temporary PHP array used as helper */
-
-	memset(&env, 0, sizeof(env));
-
-	if (!environment) {
-		return env;
-	}
-
-	uint32_t cnt = zend_hash_num_elements(Z_ARRVAL_P(environment));
-
-	if (cnt < 1) {
-#ifndef PHP_WIN32
-		env.envarray = (char **) ecalloc(1, sizeof(char *));
-#endif
-		env.envp = (char *) ecalloc(4, 1);
-		return env;
-	}
-
-	ALLOC_HASHTABLE(env_hash);
-	zend_hash_init(env_hash, cnt, NULL, NULL, 0);
-
-	/* first, we have to get the size of all the elements in the hash */
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(environment), key, element) {
-		str = zval_get_string(element);
-
-		if (ZSTR_LEN(str) == 0) {
-			zend_string_release_ex(str, 0);
-			continue;
-		}
-
-		sizeenv += ZSTR_LEN(str) + 1;
-
-		if (key && ZSTR_LEN(key)) {
-			sizeenv += ZSTR_LEN(key) + 1;
-			zend_hash_add_ptr(env_hash, key, str);
-		} else {
-			zend_hash_next_index_insert_ptr(env_hash, str);
-		}
-	} ZEND_HASH_FOREACH_END();
-
-#ifndef PHP_WIN32
-	ep = env.envarray = (char **) ecalloc(cnt + 1, sizeof(char *));
-#endif
-	p = env.envp = (char *) ecalloc(sizeenv + 4, 1);
-
-	ZEND_HASH_FOREACH_STR_KEY_PTR(env_hash, key, str) {
-#ifndef PHP_WIN32
-		*ep = p;
-		++ep;
-#endif
-
-		if (key) {
-			memcpy(p, ZSTR_VAL(key), ZSTR_LEN(key));
-			p += ZSTR_LEN(key);
-			*p++ = '=';
-		}
-
-		memcpy(p, ZSTR_VAL(str), ZSTR_LEN(str));
-		p += ZSTR_LEN(str);
-		*p++ = '\0';
-		zend_string_release_ex(str, 0);
-	} ZEND_HASH_FOREACH_END();
-
-	assert((uint32_t)(p - env.envp) <= sizeenv);
-
-	zend_hash_destroy(env_hash);
-	FREE_HASHTABLE(env_hash);
-
-	return env;
-}
-/* }}} */
-
-/* {{{ PHP_MINIT_FUNCTION(proc_open) */
-PHP_MINIT_FUNCTION(proc_open)
-{
-	return SUCCESS;
-}
-/* }}} */
 
 /* {{{ Kill a process opened by `proc_open` */
 PHP_FUNCTION(proc_terminate)
@@ -1463,7 +1456,6 @@ PHP_FUNCTION(proc_open)
 	} else {
 exit_fail:
 		_php_free_envp(env);
-		zval_ptr_dtor(return_value);
 		RETVAL_FALSE;
 	}
 

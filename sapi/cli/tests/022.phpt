@@ -41,7 +41,7 @@ unlink($socket_file);
 ?>
 --EXPECTF--
 resource(%d) of type (stream)
-object(Process)#1 (0) {
+object(Standard\Process)#1 (0) {
 }
 resource(%d) of type (stream)
 resource(%d) of type (stream)
