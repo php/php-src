@@ -78,16 +78,8 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE
 
 static xmlNodePtr php_sxe_get_first_node(php_sxe_object *sxe, xmlNodePtr node) /* {{{ */
 {
-	php_sxe_object *intern;
-	xmlNodePtr retnode = NULL;
-
 	if (sxe && sxe->iter.type != SXE_ITER_NONE) {
-		php_sxe_reset_iterator(sxe, 1);
-		if (!Z_ISUNDEF(sxe->iter.data)) {
-			intern = Z_SXEOBJ_P(&sxe->iter.data);
-			GET_NODE(intern, retnode)
-		}
-		return retnode;
+		return php_sxe_reset_iterator(sxe, 1);
 	} else {
 		return node;
 	}
