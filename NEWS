@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.0RC2
+14 Sep 2023, PHP 8.3.0RC2
 
 - Core:
   . Fixed GH-11847 (DTrace enabled build is broken). (Filip Zrůst)
