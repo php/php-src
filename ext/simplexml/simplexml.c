@@ -77,6 +77,7 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE
 }
 /* }}} */
 
+/* Important: this overwrites the iterator data, if you wish to keep it use php_sxe_get_first_node_non_destructive() instead! */
 static xmlNodePtr php_sxe_get_first_node(php_sxe_object *sxe, xmlNodePtr node) /* {{{ */
 {
 	php_sxe_object *intern;
@@ -94,6 +95,15 @@ static xmlNodePtr php_sxe_get_first_node(php_sxe_object *sxe, xmlNodePtr node) /
 	}
 }
 /* }}} */
+
+static xmlNodePtr php_sxe_get_first_node_non_destructive(php_sxe_object *sxe, xmlNodePtr node)
+{
+	if (sxe && sxe->iter.type != SXE_ITER_NONE) {
+		return php_sxe_reset_iterator(sxe, false);
+	} else {
+		return node;
+	}
+}
 
 static inline int match_ns(php_sxe_object *sxe, xmlNodePtr node, xmlChar *name, int prefix) /* {{{ */
 {
@@ -1625,7 +1635,7 @@ PHP_METHOD(SimpleXMLElement, getName)
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	GET_NODE(sxe, node);
-	node = php_sxe_get_first_node(sxe, node);
+	node = php_sxe_get_first_node_non_destructive(sxe, node);
 	if (node) {
 		namelen = xmlStrlen(node->name);
 		RETURN_STRINGL((char*)node->name, namelen);
