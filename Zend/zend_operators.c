@@ -2528,13 +2528,10 @@ static bool ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 
 	if (UNEXPECTED(!zend_string_only_has_ascii_alphanumeric(Z_STR_P(str)))) {
 		zend_string *zstr = Z_STR_P(str);
-		GC_TRY_ADDREF(zstr);
+		zend_string_addref(zstr);
 		zend_error(E_DEPRECATED, "Increment on non-alphanumeric string is deprecated");
 		if (EG(exception)) {
-			GC_TRY_DELREF(zstr);
-			if (!GC_REFCOUNT(zstr)) {
-				efree(zstr);
-			}
+			zend_string_release(zstr);
 			return false;
 		}
 		zval_ptr_dtor(str);
@@ -2737,11 +2734,18 @@ try_again:
 					zval_ptr_dtor_str(op1);
 					ZVAL_DOUBLE(op1, dval - 1);
 					break;
-				default:
+				default: {
+					/* Error handler can unset the variable */
+					zend_string *zstr = Z_STR_P(op1);
+					zend_string_addref(zstr);
 					zend_error(E_DEPRECATED, "Decrement on non-numeric string has no effect and is deprecated");
 					if (EG(exception)) {
+						zend_string_release(zstr);
 						return FAILURE;
 					}
+					zval_ptr_dtor(op1);
+					ZVAL_STR(op1, zstr);
+				}
 			}
 			break;
 		case IS_NULL: {

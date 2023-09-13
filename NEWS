@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-12189 (#[Override] attribute in trait does not check for
     parent class implementations). (timwolla)
+  . Fixed OSS Fuzz #62294 (Unsetting variable after ++/-- on string variable
+    warning). (Girgias)
 
 - Filter:
   . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
