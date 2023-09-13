@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
       - name: Create Oracle container
@@ -95,7 +95,7 @@ jobs:
     runs-on: macos-11
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: brew
         uses: ./.github/actions/brew
       - name: ccache
@@ -141,7 +141,7 @@ jobs:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup
         uses: ./.github/actions/setup-windows
       - name: Build
