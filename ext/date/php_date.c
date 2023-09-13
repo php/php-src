@@ -1723,7 +1723,7 @@ static int implement_date_interface_handler(zend_class_entry *interface, zend_cl
 		!instanceof_function(implementor, date_ce_date) &&
 		!instanceof_function(implementor, date_ce_immutable)
 	) {
-		zend_error(E_ERROR, "DateTimeInterface can't be implemented by user classes");
+		zend_error_noreturn(E_ERROR, "DateTimeInterface can't be implemented by user classes");
 	}
 
 	return SUCCESS;
