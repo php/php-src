@@ -158,7 +158,7 @@ static void sodium_separate_string(zval *zv) {
 PHP_MINIT_FUNCTION(sodium)
 {
 	if (sodium_init() < 0) {
-		zend_error(E_ERROR, "sodium_init()");
+		zend_error_noreturn(E_ERROR, "sodium_init()");
 	}
 
 	sodium_exception_ce = register_class_SodiumException(zend_ce_exception);
