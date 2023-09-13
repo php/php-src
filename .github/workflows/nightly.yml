@@ -13,7 +13,7 @@ jobs:
       matrix-include: ${{ steps.set-matrix.outputs.matrix-include }}
       windows-matrix-include: ${{ steps.set-matrix.outputs.windows-matrix-include }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # Set fetch-depth to 0 to clone the full repository
           # including all branches. This is required to find
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: Create MSSQL container
@@ -146,7 +146,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: apt
@@ -208,7 +208,7 @@ jobs:
     runs-on: macos-11
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: brew
@@ -268,7 +268,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
       - name: Create Oracle container
@@ -317,7 +317,7 @@ jobs:
       USE_TRACKED_ALLOC: 1
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: apt
@@ -433,7 +433,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: Create MSSQL container
@@ -509,7 +509,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: apt
@@ -608,7 +608,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: apt
@@ -679,7 +679,7 @@ jobs:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: Setup
