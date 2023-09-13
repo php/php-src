@@ -45,6 +45,7 @@ PHP_SXE_API zend_class_entry *sxe_get_element_class_entry(void) /* {{{ */
 
 static php_sxe_object* php_sxe_object_new(zend_class_entry *ce, zend_function *fptr_count);
 static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data);
+static xmlNodePtr php_sxe_reset_iterator_no_clear_iter_data(php_sxe_object *sxe, int use_data);
 static xmlNodePtr php_sxe_iterator_fetch(php_sxe_object *sxe, xmlNodePtr node, int use_data);
 static void php_sxe_iterator_dtor(zend_object_iterator *iter);
 static int php_sxe_iterator_valid(zend_object_iterator *iter);
@@ -99,7 +100,7 @@ static xmlNodePtr php_sxe_get_first_node(php_sxe_object *sxe, xmlNodePtr node) /
 static xmlNodePtr php_sxe_get_first_node_non_destructive(php_sxe_object *sxe, xmlNodePtr node)
 {
 	if (sxe && sxe->iter.type != SXE_ITER_NONE) {
-		return php_sxe_reset_iterator(sxe, false);
+		return php_sxe_reset_iterator_no_clear_iter_data(sxe, false);
 	} else {
 		return node;
 	}
@@ -2460,15 +2461,9 @@ static xmlNodePtr php_sxe_iterator_fetch(php_sxe_object *sxe, xmlNodePtr node, i
 }
 /* }}} */
 
-static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data) /* {{{ */
+static xmlNodePtr php_sxe_reset_iterator_no_clear_iter_data(php_sxe_object *sxe, int use_data)
 {
 	xmlNodePtr node;
-
-	if (!Z_ISUNDEF(sxe->iter.data)) {
-		zval_ptr_dtor(&sxe->iter.data);
-		ZVAL_UNDEF(&sxe->iter.data);
-	}
-
 	GET_NODE(sxe, node)
 
 	if (node) {
@@ -2481,9 +2476,22 @@ static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data) /* {
 			case SXE_ITER_ATTRLIST:
 				node = (xmlNodePtr) node->properties;
 		}
+		if (use_data) {
+			ZEND_ASSERT(Z_ISUNDEF(sxe->iter.data));
+		}
 		return php_sxe_iterator_fetch(sxe, node, use_data);
 	}
 	return NULL;
+}
+
+static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data) /* {{{ */
+{
+	if (!Z_ISUNDEF(sxe->iter.data)) {
+		zval_ptr_dtor(&sxe->iter.data);
+		ZVAL_UNDEF(&sxe->iter.data);
+	}
+
+	return php_sxe_reset_iterator_no_clear_iter_data(sxe, use_data);
 }
 /* }}} */
 
