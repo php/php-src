@@ -551,14 +551,6 @@ static void php_filter_call(
 			filter = zval_get_long(option);
 		}
 
-		if ((option = zend_hash_str_find(filter_args_ht, "flags", sizeof("flags") - 1)) != NULL) {
-			filter_flags = zval_get_long(option);
-
-			if (!(filter_flags & FILTER_REQUIRE_ARRAY ||  filter_flags & FILTER_FORCE_ARRAY)) {
-				filter_flags |= FILTER_REQUIRE_SCALAR;
-			}
-		}
-
 		if ((option = zend_hash_str_find_deref(filter_args_ht, "options", sizeof("options") - 1)) != NULL) {
 			if (filter != FILTER_CALLBACK) {
 				if (Z_TYPE_P(option) == IS_ARRAY) {
@@ -567,6 +559,14 @@ static void php_filter_call(
 			} else {
 				options = option;
 				filter_flags = 0;
+			}
+		}
+
+		if ((option = zend_hash_str_find(filter_args_ht, "flags", sizeof("flags") - 1)) != NULL) {
+			filter_flags = zval_get_long(option);
+
+			if (!(filter_flags & FILTER_REQUIRE_ARRAY ||  filter_flags & FILTER_FORCE_ARRAY)) {
+				filter_flags |= FILTER_REQUIRE_SCALAR;
 			}
 		}
 	}
