@@ -751,36 +751,36 @@ jobs:
       CXX: ccache g++
     steps:
       - name: git checkout PHP
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: php
       - name: git checkout apcu
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: krakjoe/apcu
           path: apcu
       - name: git checkout imagick
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: Imagick/imagick
           path: imagick
       - name: git checkout memcached
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: php-memcached-dev/php-memcached
           path: memcached
       - name: git checkout redis
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: phpredis/phpredis
           path: redis
       - name: git checkout xdebug
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: xdebug/xdebug
           path: xdebug
       - name: git checkout yaml
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: php/pecl-file_formats-yaml
           path: yaml

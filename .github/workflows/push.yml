@@ -198,7 +198,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: apt
@@ -257,7 +257,7 @@ jobs:
           mysql -uroot -proot -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY 'wordpress'; FLUSH PRIVILEGES;"
           mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'wordpress'@'localhost' WITH GRANT OPTION;"
       - name: git checkout benchmarking-data
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: php/benchmarking-data
           ssh-key: ${{ secrets.BENCHMARKING_DATA_DEPLOY_KEY }}
