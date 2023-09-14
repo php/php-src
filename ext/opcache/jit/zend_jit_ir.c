@@ -642,20 +642,53 @@ static int32_t _add_trace_const(zend_jit_trace_info *t, int64_t val)
 	return i;
 }
 
+uint32_t zend_jit_duplicate_exit_point(ir_ctx *ctx, zend_jit_trace_info *t, uint32_t exit_point, ir_ref snapshot_ref)
+{
+	uint32_t stack_size, stack_offset;
+	uint32_t new_exit_point = t->exit_count;
+
+	if (new_exit_point >= ZEND_JIT_TRACE_MAX_EXITS) {
+		ZEND_ASSERT(0 && "ZEND_JIT_TRACE_MAX_EXITS");
+	}
+
+	t->exit_count++;
+	memcpy(&t->exit_info[new_exit_point], &t->exit_info[exit_point], sizeof(zend_jit_trace_exit_info));
+	stack_size = t->exit_info[new_exit_point].stack_size;
+	if (stack_size != 0) {
+		stack_offset = t->stack_map_size;
+		t->stack_map_size += stack_size;
+		// TODO: reduce number of reallocations ???
+		t->stack_map = erealloc(t->stack_map, t->stack_map_size * sizeof(zend_jit_trace_stack));
+		memcpy(t->stack_map + stack_offset, t->stack_map + t->exit_info[new_exit_point].stack_offset, stack_size * sizeof(zend_jit_trace_stack));
+		t->exit_info[new_exit_point].stack_offset = stack_offset;
+	}
+	t->exit_info[new_exit_point].flags &= ~ZEND_JIT_EXIT_FIXED;
+
+	return new_exit_point;
+}
+
 void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snapshot, void *addr)
 {
 	zend_jit_trace_info *t = ((zend_jit_ctx*)ctx)->trace;
-	uint32_t exit_point;
+	uint32_t exit_point, exit_flags;
 	ir_ref n = snapshot->inputs_count;
 	ir_ref i;
 
 	exit_point = zend_jit_exit_point_by_addr(addr);
 	ZEND_ASSERT(exit_point < t->exit_count);
+	exit_flags = t->exit_info[exit_point].flags;
 
-	if (t->exit_info[exit_point].flags & ZEND_JIT_EXIT_METHOD_CALL) {
+	if (exit_flags & ZEND_JIT_EXIT_METHOD_CALL) {
 		int8_t *reg_ops = ctx->regs[snapshot_ref];
 
 		ZEND_ASSERT(reg_ops[n - 1] != -1 && reg_ops[n] != -1);
+		if ((exit_flags & ZEND_JIT_EXIT_FIXED)
+		 && (t->exit_info[exit_point].poly_func_reg != reg_ops[n - 1]
+		  || t->exit_info[exit_point].poly_this_reg != reg_ops[n])) {
+			exit_point = zend_jit_duplicate_exit_point(ctx, t, exit_point, snapshot_ref);
+			addr = (void*)zend_jit_trace_get_exit_addr(exit_point);
+			exit_flags &= ~ZEND_JIT_EXIT_FIXED;
+		}
 		t->exit_info[exit_point].poly_func_reg = reg_ops[n - 1];
 		t->exit_info[exit_point].poly_this_reg = reg_ops[n];
 		n -= 2;
@@ -672,6 +705,12 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 			ZEND_ASSERT(var < t->exit_info[exit_point].stack_size);
 			if (t->stack_map[t->exit_info[exit_point].stack_offset + var].flags == ZREG_ZVAL_COPY) {
 				ZEND_ASSERT(reg != ZREG_NONE);
+				if ((exit_flags & ZEND_JIT_EXIT_FIXED)
+				 && t->stack_map[t->exit_info[exit_point].stack_offset + var].reg != IR_REG_NUM(reg)) {
+					exit_point = zend_jit_duplicate_exit_point(ctx, t, exit_point, snapshot_ref);
+					addr = (void*)zend_jit_trace_get_exit_addr(exit_point);
+					exit_flags &= ~ZEND_JIT_EXIT_FIXED;
+				}
 				t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = IR_REG_NUM(reg);
 			} else if (t->stack_map[t->exit_info[exit_point].stack_offset + var].flags != ZREG_CONST) {
 				ZEND_ASSERT(t->stack_map[t->exit_info[exit_point].stack_offset + var].type == IS_LONG ||
@@ -682,19 +721,48 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 						if (reg & IR_REG_SPILL_LOAD) {
 							ZEND_ASSERT(!(reg & IR_REG_SPILL_SPECIAL));
 							/* spill slot on a CPU stack */
+							if ((exit_flags & ZEND_JIT_EXIT_FIXED)
+							 && (t->stack_map[t->exit_info[exit_point].stack_offset + var].ref != ref
+							  || t->stack_map[t->exit_info[exit_point].stack_offset + var].reg != ZREG_NONE
+							  || !(t->stack_map[t->exit_info[exit_point].stack_offset + var].flags & ZREG_SPILL_SLOT))) {
+								exit_point = zend_jit_duplicate_exit_point(ctx, t, exit_point, snapshot_ref);
+								addr = (void*)zend_jit_trace_get_exit_addr(exit_point);
+								exit_flags &= ~ZEND_JIT_EXIT_FIXED;
+							}
 							t->stack_map[t->exit_info[exit_point].stack_offset + var].ref = ref;
 							t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = ZREG_NONE;
 							t->stack_map[t->exit_info[exit_point].stack_offset + var].flags |= ZREG_SPILL_SLOT;
 						} else if (reg & IR_REG_SPILL_SPECIAL) {
 							/* spill slot on a VM stack */
+							if ((exit_flags & ZEND_JIT_EXIT_FIXED)
+							 && (t->stack_map[t->exit_info[exit_point].stack_offset + var].reg != ZREG_NONE
+							 || t->stack_map[t->exit_info[exit_point].stack_offset + var].flags != ZREG_TYPE_ONLY)) {
+								exit_point = zend_jit_duplicate_exit_point(ctx, t, exit_point, snapshot_ref);
+								addr = (void*)zend_jit_trace_get_exit_addr(exit_point);
+								exit_flags &= ~ZEND_JIT_EXIT_FIXED;
+							}
+							t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = ZREG_NONE;
 							t->stack_map[t->exit_info[exit_point].stack_offset + var].flags = ZREG_TYPE_ONLY;
 						} else {
+							if ((exit_flags & ZEND_JIT_EXIT_FIXED)
+							 && t->stack_map[t->exit_info[exit_point].stack_offset + var].reg != IR_REG_NUM(reg)) {
+								exit_point = zend_jit_duplicate_exit_point(ctx, t, exit_point, snapshot_ref);
+								addr = (void*)zend_jit_trace_get_exit_addr(exit_point);
+								exit_flags &= ~ZEND_JIT_EXIT_FIXED;
+							}
 							t->stack_map[t->exit_info[exit_point].stack_offset + var].reg = IR_REG_NUM(reg);
 						}
 					} else {
+						if ((exit_flags & ZEND_JIT_EXIT_FIXED)
+						 && (t->stack_map[t->exit_info[exit_point].stack_offset + var].reg != ZREG_NONE
+						 || t->stack_map[t->exit_info[exit_point].stack_offset + var].flags != ZREG_TYPE_ONLY)) {
+							exit_point = zend_jit_duplicate_exit_point(ctx, t, exit_point, snapshot_ref);
+							addr = (void*)zend_jit_trace_get_exit_addr(exit_point);
+							exit_flags &= ~ZEND_JIT_EXIT_FIXED;
+						}
 						t->stack_map[t->exit_info[exit_point].stack_offset + var].flags = ZREG_TYPE_ONLY;
 					}
-				} else {
+				} else if (!(exit_flags & ZEND_JIT_EXIT_FIXED)) {
 					int32_t idx = _add_trace_const(t, ctx->ir_base[ref].val.i64);
 					t->stack_map[t->exit_info[exit_point].stack_offset + var].flags = ZREG_CONST;
 					t->stack_map[t->exit_info[exit_point].stack_offset + var].ref = idx;
@@ -702,6 +770,7 @@ void *zend_jit_snapshot_handler(ir_ctx *ctx, ir_ref snapshot_ref, ir_insn *snaps
 			}
 		}
 	}
+	t->exit_info[exit_point].flags |= ZEND_JIT_EXIT_FIXED;
 	return addr;
 }
 

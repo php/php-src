@@ -237,7 +237,9 @@ static uint32_t zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t
 			if (stack_size == 0
 			 || (t->exit_info[i].stack_size >= stack_size
 			  && memcmp(t->stack_map + t->exit_info[i].stack_offset, stack, stack_size * sizeof(zend_jit_trace_stack)) == 0)) {
+#ifndef ZEND_JIT_IR
 				stack_offset = t->exit_info[i].stack_offset;
+#endif
 				if (t->exit_info[i].opline == to_opline
 				 && t->exit_info[i].flags == flags
 				 && t->exit_info[i].stack_size == stack_size) {

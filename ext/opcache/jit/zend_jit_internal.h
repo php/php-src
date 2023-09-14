@@ -466,6 +466,8 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_EXIT_METHOD_CALL   (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
 #define ZEND_JIT_EXIT_INVALIDATE    (1<<10) /* invalidate current trace */
 
+#define ZEND_JIT_EXIT_FIXED         (1U<<31) /* the exit_info can't be changed by zend_jit_snapshot_handler() */
+
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */
 	struct {
