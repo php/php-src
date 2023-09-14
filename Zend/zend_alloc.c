@@ -710,7 +710,7 @@ static zend_always_inline void zend_mm_hugepage(void* ptr, size_t size)
 	struct memcntl_mha m = {.mha_cmd = MHA_MAPSIZE_VA, .mha_pagesize = ZEND_MM_CHUNK_SIZE, .mha_flags = 0};
 	(void)memcntl(ptr, size, MC_HAT_ADVISE, (char *)&m, 0, 0);
 #elif !defined(VM_FLAGS_SUPERPAGE_SIZE_2MB) && !defined(MAP_ALIGNED_SUPER)
-	zend_error_noreturn(E_WARNING, "huge_pages: thp unsupported on this platform");
+	zend_error_noreturn(E_ERROR, "huge_pages: thp unsupported on this platform");
 #endif
 }
 
