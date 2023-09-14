@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.0RC3
 
+- Filter:
+  . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
 
 14 Sep 2023, PHP 8.3.0RC2
 
@@ -20,9 +22,6 @@ PHP                                                                        NEWS
   . Fixed warning emitted when checking if a user stream is castable. (Girgias)
   . Fixed bug GH-12123 (Compile error on MacOS with C++ extension when using
     ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX). (kocsismate)
-
-- Filter:
-  . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
 
 - FPM:
   . Fixed GH-12077 (PHP 8.3.0RC1 borked socket-close-on-exec.phpt).
