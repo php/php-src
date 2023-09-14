@@ -1,3 +1,0 @@
-[submodule "ext/opcache/jit/ir"]
-	path = ext/opcache/jit/ir
-	url = https://github.com/dstogov/ir.git
