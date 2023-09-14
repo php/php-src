@@ -288,3 +288,8 @@ jobs:
             ${{ github.sha }} \
             $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.sha }}) \
             > $GITHUB_STEP_SUMMARY
+      - uses: actions/upload-artifact@v3
+        with:
+          name: profiles
+          path: ${{ github.workspace }}/benchmark/profiles
+          retention-days: 30
