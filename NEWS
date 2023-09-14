@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.12
 
+- Filter:
+  . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
 
 28 Sep 2023, PHP 8.2.11
 
@@ -20,9 +22,6 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fix memory leak when setting an invalid DOMDocument encoding. (nielsdos)
-
-- Filter:
-  . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
 
 - Iconv:
   . Fixed build for NetBSD which still uses the old iconv signature.
