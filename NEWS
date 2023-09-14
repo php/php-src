@@ -21,6 +21,9 @@ PHP                                                                        NEWS
 - DOM:
   . Fix memory leak when setting an invalid DOMDocument encoding. (nielsdos)
 
+- Filter:
+  . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
+
 - Iconv:
   . Fixed build for NetBSD which still uses the old iconv signature.
     (David Carlier)
