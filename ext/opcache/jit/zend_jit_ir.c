@@ -1231,10 +1231,10 @@ static ir_ref jit_Z_DVAL_ref(zend_jit_ctx *jit, ir_ref ref)
 
 static bool zend_jit_spilling_may_cause_conflict(zend_jit_ctx *jit, int var, ir_ref val)
 {
-//	if (jit->ctx.ir_base[val].op == IR_RLOAD) {
-//		/* Deoptimization */
-//		return 0;
-//	}
+	if (jit->ctx.ir_base[val].op == IR_RLOAD) {
+		/* Deoptimization */
+		return 0;
+	}
 //	if (jit->ctx.ir_base[val].op == IR_LOAD
 //	 && jit->ctx.ir_base[jit->ctx.ir_base[val].op2].op == IR_ADD
 //	 && jit->ctx.ir_base[jit->ctx.ir_base[jit->ctx.ir_base[val].op2].op1].op == IR_RLOAD
@@ -1245,10 +1245,10 @@ static bool zend_jit_spilling_may_cause_conflict(zend_jit_ctx *jit, int var, ir_
 //		// TODO: should be anti-dependent with the following stores ???
 //		return 0;
 //	}
-//	if (jit->ssa->vars[var].var < jit->current_op_array->last_var) {
-//		/* IS_CV */
-//		return 0;
-//	}
+	if (jit->ssa->vars[var].var < jit->current_op_array->last_var) {
+		/* IS_CV */
+		return 0;
+	}
 	return 1;
 }
 
