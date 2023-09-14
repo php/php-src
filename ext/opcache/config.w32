@@ -55,7 +55,7 @@ if (PHP_OPCACHE != "no") {
 
 			ADD_FLAG("CFLAGS_OPCACHE", "/I \"ext\\opcache\\jit\\ir\" /D "+ir_target+" /D IR_PHP");
 			if (PHP_DEBUG == "yes") {
-				ADD_FLAG("CFLAGS_OPCACHE", "/D IR_DEBUG /D IR_DEBUG_MESSAGES");
+				ADD_FLAG("CFLAGS_OPCACHE", "/D IR_DEBUG");
 			}
 
 			if (CHECK_HEADER_ADD_INCLUDE("capstone\\capstone.h", "CFLAGS_OPCACHE", PHP_OPCACHE+ ";" + PHP_PHP_BUILD + "\\include") &&

@@ -648,7 +648,8 @@ uint32_t zend_jit_duplicate_exit_point(ir_ctx *ctx, zend_jit_trace_info *t, uint
 	uint32_t new_exit_point = t->exit_count;
 
 	if (new_exit_point >= ZEND_JIT_TRACE_MAX_EXITS) {
-		ZEND_ASSERT(0 && "ZEND_JIT_TRACE_MAX_EXITS");
+		ctx->status = -ZEND_JIT_TRACE_STOP_TOO_MANY_EXITS;
+		return exit_point;
 	}
 
 	t->exit_count++;
