@@ -29,7 +29,7 @@ if ($is_child) {
 
     $proc = proc_open($cmd, $spec, $pipes, NULL, NULL, ["bypass_shell" => true, "create_process_group" => true]);
 
-    if (!is_resource($proc)) {
+    if (!$proc) {
         die("Failed to start child. ");
     }
 

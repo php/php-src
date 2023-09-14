@@ -4,7 +4,7 @@ Test that proc_close() does not accept a closed Process
 <?php
 
 $pipe = null;
-$process = proc_open('echo "foo";', [], $pipe);
+$process = proc_open('echo foo', [], $pipe);
 proc_close($process);
 
 try {

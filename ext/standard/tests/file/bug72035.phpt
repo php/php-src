@@ -22,7 +22,7 @@ $cmd = "$cgi -n -C $fl";
 /* Need to run CGI with the env reset. */
 $desc = array(0 => array("pipe", "r"));
 $proc = proc_open($cmd, $desc, $pipes, getcwd(), array());
-if (is_resource($proc)) {
+if ($proc) {
     echo stream_get_contents($pipes[0]);
 
     proc_close($proc);

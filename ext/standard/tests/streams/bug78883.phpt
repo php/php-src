@@ -15,7 +15,7 @@ $descriptorspec = array(
 $pipes = [];
 $cmd = 'cmd.exe "/c START ^"^" /WAIT ' . getenv('TEST_PHP_EXECUTABLE_ESCAPED') . ' -r ^"var_dump(fgets(STDIN));"';
 $proc = proc_open($cmd, $descriptorspec, $pipes);
-var_dump($proc instanceof Process);
+var_dump($proc);
 $pid = proc_get_status($proc)['pid'];
 sleep(3);
 $bug_is_present = !proc_get_status($proc)['running'];
@@ -30,5 +30,6 @@ proc_close($proc);
 var_dump($bug_is_present);
 ?>
 --EXPECT--
-bool(true)
+object(Standard\Process)#1 (0) {
+}
 bool(false)

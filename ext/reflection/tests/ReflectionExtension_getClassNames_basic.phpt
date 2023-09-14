@@ -14,7 +14,7 @@ array(5) {
   [1]=>
   string(14) "AssertionError"
   [2]=>
-  string(7) "Process"
+  string(16) "Standard\Process"
   [3]=>
   string(15) "php_user_filter"
   [4]=>

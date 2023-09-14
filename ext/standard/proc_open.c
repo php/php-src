@@ -1452,8 +1452,7 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
-	if (1) {
-	} else {
+	if (0) {
 exit_fail:
 		_php_free_envp(env);
 		RETVAL_FALSE;
