@@ -8,4 +8,7 @@ Core:
 DOM:
   . Added DOMNode::compareDocumentPosition(). (nielsdos)
 
+Standard:
+  . Implement GH-12188 (Indication for the int size in phpinfo()). (timwolla)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
