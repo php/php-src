@@ -116,6 +116,7 @@ typedef struct _zend_jit_globals {
 	zend_long   max_recursive_returns; /* max number of recursive inlined return unrolls */
 	zend_long   max_polymorphic_calls; /* max number of inlined polymorphic calls */
 	zend_long   max_trace_length; 	   /* max length of a single trace */
+	zend_long   jit_trace_inline_func_limit; /* max length of inlined function in a trace */
 
 	zend_sym_node *symbols;            /* symbols for disassembler */
 

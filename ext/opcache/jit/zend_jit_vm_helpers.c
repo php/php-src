@@ -562,10 +562,15 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 	uint8_t  trace_flags, op1_type, op2_type, op3_type;
 	zend_class_entry *ce1, *ce2;
 	const zend_op *link_to_enter_opline = NULL;
+	/* Remember the first opline of inline function*/
+	const zend_op *link_to_inline_func_opline = NULL;
 	int backtrack_link_to_enter = -1;
 	int backtrack_recursion = -1;
 	int backtrack_ret_recursion = -1;
 	int backtrack_ret_recursion_level = 0;
+	/* Remember the index of inline function opline in the trace buffer */
+	int backtrack_link_to_inline_func = -1;
+	int backtrack_link_to_inline_func_next = -1;
 	int loop_unroll_limit = 0;
 	int last_loop = -1;
 	int last_loop_level = -1;
@@ -922,6 +927,25 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				} else if (count >= JIT_G(max_recursive_calls)) {
 					stop = ZEND_JIT_TRACE_STOP_DEEP_RECURSION;
 					break;
+				} else if (backtrack_link_to_inline_func < 0 && backtrack_link_to_inline_func_next < 0 && ZEND_OP_TRACE_INFO(opline, offset)->trace_flags & ZEND_JIT_TRACE_JITED) {
+					/* enter a compiled inline function, remember the idx to backtrack */
+					backtrack_link_to_inline_func = idx;
+					link_to_inline_func_opline = opline;
+				} else if (backtrack_link_to_inline_func > 0 && backtrack_link_to_inline_func_next < 0) {
+					/* enter a function the second time */
+					backtrack_link_to_inline_func_next = idx;
+					if (idx - backtrack_link_to_inline_func > JIT_G(jit_trace_inline_func_limit)) {
+						break;
+					} else if (ZEND_OP_TRACE_INFO(opline, offset)->trace_flags & ZEND_JIT_TRACE_JITED) {
+						/* the second function is a compiled inline function too */
+						backtrack_link_to_inline_func = backtrack_link_to_inline_func_next;
+						link_to_inline_func_opline = opline;
+						backtrack_link_to_inline_func_next = -1;
+					} else {
+						/* the compiled inline function is not too long */
+						backtrack_link_to_inline_func = -1;
+						link_to_inline_func_opline = NULL;
+					}
 				}
 
 				unrolled_calls[ret_level + level] = &EX(func)->op_array;
@@ -1156,6 +1180,11 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			ret_level = backtrack_ret_recursion_level;
 			stop = ZEND_JIT_TRACE_STOP_RECURSIVE_RET;
 			end_opline = orig_opline;
+		} else if (backtrack_link_to_inline_func > 0) {
+			/* Reset the index and stop flag to link to the compiled inline function. */
+			idx = backtrack_link_to_inline_func;
+			stop = ZEND_JIT_TRACE_STOP_LINK;
+			end_opline = link_to_inline_func_opline;
 		} else if (backtrack_link_to_enter > 0) {
 			if (stop == ZEND_JIT_TRACE_STOP_DEEP_RECURSION
 			 && zend_jit_trace_bad_stop_event(orig_opline, JIT_G(blacklist_root_trace) / 2) ==
