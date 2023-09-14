@@ -12,6 +12,11 @@ if (!file_exists($phpCgi)) {
 function main() {
     global $storeResult;
 
+    $profilesDir = __DIR__ . '/profiles';
+    if (!is_dir($profilesDir)) {
+        mkdir($profilesDir, 0755, true);
+    }
+
     $data = [];
     if (false !== $branch = getenv('GITHUB_REF_NAME')) {
         $data['branch'] = $branch;
@@ -50,7 +55,7 @@ function getPhpSrcCommitHash(): string {
 }
 
 function runBench(bool $jit): array {
-    return runValgrindPhpCgiCommand([dirname(__DIR__) . '/Zend/bench.php'], jit: $jit);
+    return runValgrindPhpCgiCommand('bench', [dirname(__DIR__) . '/Zend/bench.php'], jit: $jit);
 }
 
 function runSymfonyDemo(bool $jit): array {
@@ -58,7 +63,7 @@ function runSymfonyDemo(bool $jit): array {
     cloneRepo($dir, 'https://github.com/php/benchmarking-symfony-demo-2.2.3.git');
     runPhpCommand([$dir . '/bin/console', 'cache:clear']);
     runPhpCommand([$dir . '/bin/console', 'cache:warmup']);
-    return runValgrindPhpCgiCommand([$dir . '/public/index.php'], cwd: $dir, jit: $jit, warmup: 50, repeat: 50);
+    return runValgrindPhpCgiCommand('symfony-demo', [$dir . '/public/index.php'], cwd: $dir, jit: $jit, warmup: 50, repeat: 50);
 }
 
 function runWordpress(bool $jit): array {
@@ -81,7 +86,7 @@ function runWordpress(bool $jit): array {
 
     // Warmup
     runPhpCommand([$dir . '/index.php'], $dir);
-    return runValgrindPhpCgiCommand([$dir . '/index.php'], cwd: $dir, jit: $jit, warmup: 50, repeat: 50);
+    return runValgrindPhpCgiCommand('wordpress', [$dir . '/index.php'], cwd: $dir, jit: $jit, warmup: 50, repeat: 50);
 }
 
 function runPhpCommand(array $args, ?string $cwd = null): ProcessResult {
@@ -89,6 +94,7 @@ function runPhpCommand(array $args, ?string $cwd = null): ProcessResult {
 }
 
 function runValgrindPhpCgiCommand(
+    string $name,
     array $args,
     ?string $cwd = null,
     bool $jit = false,
@@ -96,11 +102,17 @@ function runValgrindPhpCgiCommand(
     int $repeat = 1,
 ): array {
     global $phpCgi;
+
+    $profileOut = __DIR__ . "/profiles/callgrind.out.$name";
+    if ($jit) {
+        $profileOut .= '.jit';
+    }
+
     $process = runCommand([
         'valgrind',
         '--tool=callgrind',
         '--dump-instr=yes',
-        '--callgrind-out-file=/dev/null',
+        "--callgrind-out-file=$profileOut",
         '--',
         $phpCgi,
         '-T' . ($warmup ? $warmup . ',' : '') . $repeat,
