@@ -18,6 +18,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 2. Build system changes
 ========================
 
+ a. Unix build system changes
+   - The configure option --with-zlib-dir has been removed.
+
 ========================
 3. Module changes
 ========================
