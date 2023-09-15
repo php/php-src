@@ -1081,12 +1081,13 @@ static void perform_delayable_implementation_check(
 /**
  * @param check_only Set to false to throw compile errors on incompatible methods, or true to return INHERITANCE_ERROR.
  * @param checked Whether the compatibility check has already succeeded in zend_can_early_bind().
+ * @param force_mutable Whether we know that child may be modified, i.e. doesn't live in shm.
  */
 static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		zend_function *child, zend_class_entry *child_scope,
 		zend_function *parent, zend_class_entry *parent_scope,
 		zend_class_entry *ce, zval *child_zv,
-		bool check_visibility, bool check_only, bool checked) /* {{{ */
+		bool check_visibility, bool check_only, bool checked, bool force_mutable) /* {{{ */
 {
 	uint32_t child_flags;
 	uint32_t parent_flags = parent->common.fn_flags;
@@ -1188,7 +1189,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		perform_delayable_implementation_check(ce, child, child_scope, parent, parent_scope);
 	}
 
-	if (!check_only && child->common.scope == ce) {
+	if (!check_only && (child->common.scope == ce || force_mutable)) {
 		child->common.fn_flags &= ~ZEND_ACC_OVERRIDE;
 	}
 
@@ -1201,7 +1202,7 @@ static zend_never_inline void do_inheritance_check_on_method(
 		zend_function *parent, zend_class_entry *parent_scope,
 		zend_class_entry *ce, zval *child_zv, bool check_visibility)
 {
-	do_inheritance_check_on_method_ex(child, child_scope, parent, parent_scope, ce, child_zv, check_visibility, 0, 0);
+	do_inheritance_check_on_method_ex(child, child_scope, parent, parent_scope, ce, child_zv, check_visibility, 0, 0, /* force_mutable */ false);
 }
 
 static zend_always_inline void do_inherit_method(zend_string *key, zend_function *parent, zend_class_entry *ce, bool is_interface, bool checked) /* {{{ */
@@ -1219,7 +1220,7 @@ static zend_always_inline void do_inherit_method(zend_string *key, zend_function
 		if (checked) {
 			do_inheritance_check_on_method_ex(
 				func, func->common.scope, parent, parent->common.scope, ce, child,
-				/* check_visibility */ 1, 0, checked);
+				/* check_visibility */ 1, 0, checked, /* force_mutable */ false);
 		} else {
 			do_inheritance_check_on_method(
 				func, func->common.scope, parent, parent->common.scope, ce, child,
@@ -1946,6 +1947,7 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 {
 	zend_function *existing_fn = NULL;
 	zend_function *new_fn;
+	bool check_inheritance = false;
 
 	if ((existing_fn = zend_hash_find_ptr(&ce->function_table, key)) != NULL) {
 		/* if it is the same function with the same visibility and has not been assigned a class scope yet, regardless
@@ -1980,11 +1982,7 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 				ZSTR_VAL(ce->name), ZSTR_VAL(name),
 				ZSTR_VAL(existing_fn->common.scope->name), ZSTR_VAL(existing_fn->common.function_name));
 		} else {
-			/* Inherited members are overridden by members inserted by traits.
-			 * Check whether the trait method fulfills the inheritance requirements. */
-			do_inheritance_check_on_method(
-				fn, fixup_trait_scope(fn, ce), existing_fn, fixup_trait_scope(existing_fn, ce),
-				ce, NULL, /* check_visibility */ 1);
+			check_inheritance = true;
 		}
 	}
 
@@ -2004,6 +2002,14 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 	function_add_ref(new_fn);
 	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
 	zend_add_magic_method(ce, fn, key);
+
+	if (check_inheritance) {
+		/* Inherited members are overridden by members inserted by traits.
+		 * Check whether the trait method fulfills the inheritance requirements. */
+		do_inheritance_check_on_method_ex(
+			fn, fixup_trait_scope(fn, ce), existing_fn, fixup_trait_scope(existing_fn, ce),
+			ce, NULL, /* check_visibility */ 1, false, false, /* force_mutable */ true);
+	}
 }
 /* }}} */
 
@@ -3239,7 +3245,7 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 				do_inheritance_check_on_method_ex(
 					child_func, child_func->common.scope,
 					parent_func, parent_func->common.scope,
-					ce, NULL, /* check_visibility */ 1, 1, 0);
+					ce, NULL, /* check_visibility */ 1, 1, 0, /* force_mutable */ false);
 			if (UNEXPECTED(status == INHERITANCE_WARNING)) {
 				overall_status = INHERITANCE_WARNING;
 			} else if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
