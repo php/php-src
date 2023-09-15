@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.0RC3
 
+- Core:
+  . Fixed bug GH-12189 (#[Override] attribute in trait does not check for
+    parent class implementations). (timwolla)
+
 - Filter:
   . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
 
