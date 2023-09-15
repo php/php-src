@@ -17,12 +17,12 @@ try {
 }
 
 try {
-    var_dump(randomizer()->getBytesFromString("abc", 0));
+    var_dump(randomizer()->getBytesFromString("abc", -1));
 } catch (ValueError $e) {
     echo $e->getMessage(), PHP_EOL;
 }
 
 ?>
---EXPECTF--
-Random\Randomizer::getBytesFromString(): Argument #1 ($string) cannot be empty
-Random\Randomizer::getBytesFromString(): Argument #2 ($length) must be greater than 0
+--EXPECT--
+Random\Randomizer::getBytesFromString(): Argument #1 ($string) cannot be empty when argument #2 ($length) is greater than 0
+Random\Randomizer::getBytesFromString(): Argument #2 ($length) must be greater than or equal to 0

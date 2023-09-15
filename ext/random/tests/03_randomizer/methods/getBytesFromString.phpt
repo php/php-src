@@ -27,6 +27,7 @@ foreach ($engines as $engine) {
     $randomizer = new Randomizer($engine);
     var_dump($randomizer->getBytesFromString('a', 10));
     var_dump($randomizer->getBytesFromString(str_repeat('a', 256), 5));
+    var_dump($randomizer->getBytesFromString('', 0));
 
     for ($i = 1; $i < 250; $i++) {
         $output = $randomizer->getBytesFromString(str_repeat('ab', $i), 500);
@@ -48,19 +49,25 @@ Deprecated: The MT_RAND_PHP variant of Mt19937 is deprecated in %s on line %d
 Random\Engine\Mt19937
 string(10) "aaaaaaaaaa"
 string(5) "aaaaa"
+string(0) ""
 Random\Engine\Mt19937
 string(10) "aaaaaaaaaa"
 string(5) "aaaaa"
+string(0) ""
 Random\Engine\PcgOneseq128XslRr64
 string(10) "aaaaaaaaaa"
 string(5) "aaaaa"
+string(0) ""
 Random\Engine\Xoshiro256StarStar
 string(10) "aaaaaaaaaa"
 string(5) "aaaaa"
+string(0) ""
 Random\Engine\Secure
 string(10) "aaaaaaaaaa"
 string(5) "aaaaa"
+string(0) ""
 Random\Engine\Test\TestShaEngine
 string(10) "aaaaaaaaaa"
 string(5) "aaaaa"
+string(0) ""
 success
