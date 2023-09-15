@@ -15,7 +15,7 @@ jobs:
       matrix-include: ${{ steps.set-matrix.outputs.matrix-include }}
       windows-matrix-include: ${{ steps.set-matrix.outputs.windows-matrix-include }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # Set fetch-depth to 0 to clone the full repository
           # including all branches. This is required to find
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-${{ ((matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && !matrix.asan) && '22.04' || '20.04' }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: Create MSSQL container
@@ -163,7 +163,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: apt
@@ -230,10 +230,10 @@ jobs:
         debug: [true, false]
         zts: [true, false]
     name: "${{ matrix.branch.name }}_MACOS_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: macos-11
+    runs-on: macos-12
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: brew
@@ -300,7 +300,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
       - name: apt
@@ -347,7 +347,7 @@ jobs:
       USE_TRACKED_ALLOC: 1
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: apt
@@ -520,7 +520,7 @@ jobs:
     runs-on: ubuntu-${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: Create MSSQL container
@@ -596,7 +596,7 @@ jobs:
     runs-on: ubuntu-${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: apt
@@ -696,7 +696,7 @@ jobs:
     runs-on: ubuntu-${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: apt
@@ -751,36 +751,36 @@ jobs:
       CXX: ccache g++
     steps:
       - name: git checkout PHP
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: php
       - name: git checkout apcu
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: krakjoe/apcu
           path: apcu
       - name: git checkout imagick
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: Imagick/imagick
           path: imagick
       - name: git checkout memcached
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: php-memcached-dev/php-memcached
           path: memcached
       - name: git checkout redis
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: phpredis/phpredis
           path: redis
       - name: git checkout xdebug
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: xdebug/xdebug
           path: xdebug
       - name: git checkout yaml
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: php/pecl-file_formats-yaml
           path: yaml
@@ -875,7 +875,7 @@ jobs:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: Setup
