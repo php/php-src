@@ -135,7 +135,7 @@ jobs:
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/verify-generated-files
   MACOS_DEBUG_NTS:
-    runs-on: macos-11
+    runs-on: macos-12
     steps:
       - name: git checkout
         uses: actions/checkout@v4
