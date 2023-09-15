@@ -574,8 +574,8 @@ PHP_FUNCTION(random_bytes)
 		Z_PARAM_LONG(size)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (size < 1) {
-		zend_argument_value_error(1, "must be greater than 0");
+	if (size < 0) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
