@@ -7,7 +7,7 @@ set NO_INTERACTION=1
 set REPORT_EXIT_STATUS=1
 set SKIP_IO_CAPTURE_TESTS=1
 
-call %WIN_SCRIPTS_DIR%/find-target-branch.bat
+call %WIN_SCRIPTS_DIR%\find-target-branch.bat
 if "%BRANCH%" neq "master" (
 	set STABILITY=stable
 ) else (
