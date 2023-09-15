@@ -93,27 +93,42 @@ static inline double php_intpow10(int power) {
 /* {{{ php_round_helper
        Actually performs the rounding of a value to integer in a certain mode */
 static inline double php_round_helper(double value, int mode) {
-	double tmp_value;
+	double integral, fractional;
 
-	if (value >= 0.0) {
-		tmp_value = floor(value + 0.5);
-		if ((mode == PHP_ROUND_HALF_DOWN && value == (-0.5 + tmp_value)) ||
-			(mode == PHP_ROUND_HALF_EVEN && value == (0.5 + 2 * floor(tmp_value/2.0))) ||
-			(mode == PHP_ROUND_HALF_ODD  && value == (0.5 + 2 * floor(tmp_value/2.0) - 1.0)))
-		{
-			tmp_value = tmp_value - 1.0;
-		}
-	} else {
-		tmp_value = ceil(value - 0.5);
-		if ((mode == PHP_ROUND_HALF_DOWN && value == (0.5 + tmp_value)) ||
-			(mode == PHP_ROUND_HALF_EVEN && value == (-0.5 + 2 * ceil(tmp_value/2.0))) ||
-			(mode == PHP_ROUND_HALF_ODD  && value == (-0.5 + 2 * ceil(tmp_value/2.0) + 1.0)))
-		{
-			tmp_value = tmp_value + 1.0;
+	fractional = fabs(modf(value, &integral));
+
+	switch (mode) {
+		case PHP_ROUND_HALF_UP:
+			if (fractional >= 0.5) {
+				return integral + copysign(1.0, integral);
+			}
+
+			return integral;
+
+		case PHP_ROUND_HALF_DOWN:
+			if (fractional > 0.5) {
+				return integral + copysign(1.0, integral);
+			}
+
+			return integral;
+
+		case PHP_ROUND_HALF_EVEN:
+		case PHP_ROUND_HALF_ODD: {
+			if (fractional == 0.5) {
+				bool even = !fmod(integral, 2.0);
+
+				if ((mode == PHP_ROUND_HALF_EVEN && !even) || (mode == PHP_ROUND_HALF_ODD && even)) {
+					return integral + copysign(1.0, integral);
+				}
+			} else if (fractional > 0.5) {
+				return integral + copysign(1.0, integral);
+			}
+
+			return integral;
 		}
 	}
 
-	return tmp_value;
+	ZEND_ASSERT(0 && "Unknown rounding mode");
 }
 /* }}} */
 
