@@ -5,8 +5,16 @@ PHP                                                                        NEWS
 - Filter:
   . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
 
+- Hash:
+  . Fixed bug GH-12186 (segfault copying/cloning a finalized HashContext).
+    (MaxSem)
+
 - SimpleXML:
   . Fixed bug GH-12170 (Can't use xpath with comments in SimpleXML). (nielsdos)
+  . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
+    within foreach). (nielsdos)
+  . Fixed bug GH-12223 (Entity reference produces infinite loop in
+    var_dump/print_r). (nielsdos)
 
 28 Sep 2023, PHP 8.2.11
 
