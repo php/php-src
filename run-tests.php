@@ -4178,7 +4178,7 @@ class DiffOutputBuilder
                 }
                 $next++;
             }
-            // Found no more differenciating rows, we're done
+            // Found no more differentiating rows, we're done
             if ($next === count($diffs)) {
                 if (($i - 1) < count($diffs)) {
                     fwrite($buffer, "--\n");
