@@ -979,8 +979,8 @@ static int sxe_prop_is_empty(zend_object *object) /* {{{ */
 	if (sxe->iter.type == SXE_ITER_ELEMENT) {
 		node = php_sxe_get_first_node(sxe, node);
 	}
-	if (!node || node->type != XML_ENTITY_DECL) {
-		attr = node ? (xmlAttrPtr)node->properties : NULL;
+	if (node && node->type != XML_ENTITY_DECL) {
+		attr = node->properties;
 		test = sxe->iter.name && sxe->iter.type == SXE_ITER_ATTRLIST;
 		while (attr) {
 			if ((!test || xmlStrEqual(attr->name, sxe->iter.name)) && match_ns(sxe, (xmlNodePtr)attr, sxe->iter.nsprefix, sxe->iter.isprefix)) {
@@ -1088,8 +1088,8 @@ static HashTable *sxe_get_prop_hash(zend_object *object, int is_debug) /* {{{ */
 		if (sxe->iter.type == SXE_ITER_ELEMENT) {
 			node = php_sxe_get_first_node(sxe, node);
 		}
-		if (!node || node->type != XML_ENTITY_DECL) {
-			attr = node ? (xmlAttrPtr)node->properties : NULL;
+		if (node && node->type != XML_ENTITY_DECL) {
+			attr = node->properties;
 			ZVAL_UNDEF(&zattr);
 			test = sxe->iter.name && sxe->iter.type == SXE_ITER_ATTRLIST;
 			while (attr) {
