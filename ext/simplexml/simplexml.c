@@ -1186,6 +1186,12 @@ static HashTable *sxe_get_prop_hash(zend_object *object, int is_debug) /* {{{ */
 				sxe_properties_add(rv, name, namelen, &value);
 			}
 next_iter:
+			if (UNEXPECTED(node->type == XML_ENTITY_DECL)) {
+				/* Entity decls are linked together via the next pointer.
+				 * The only way to get to an entity decl is via an entity reference in the document.
+				 * If we then continue iterating, we'll end up in the DTD. Even worse, if the entities reference each other we'll infinite loop. */
+				break;
+			}
 			if (use_iter) {
 				node = php_sxe_iterator_fetch(sxe, node->next, 0);
 			} else {
