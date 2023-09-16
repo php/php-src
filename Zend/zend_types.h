@@ -721,6 +721,14 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 		} \
 	} while (0)
 
+#define GC_DTOR_NOGC(p) \
+	do { \
+		zend_refcounted_h *_p = &(p)->gc; \
+		if (zend_gc_delref(_p) == 0) { \
+			rc_dtor_func((zend_refcounted *)_p); \
+		} \
+	} while (0)
+
 #define GC_DTOR_NO_REF(p) \
 	do { \
 		zend_refcounted_h *_p = &(p)->gc; \
