@@ -975,10 +975,9 @@ static int sxe_prop_is_empty(zend_object *object) /* {{{ */
 	php_sxe_object  *sxe;
 	xmlNodePtr       node;
 	xmlAttrPtr       attr;
-	zval             iter_data;
 	int              test;
 	int              is_empty;
-	int              use_iter = 0;
+	bool             use_iter = false;
 
 	sxe = php_sxe_fetch_object(object);
 
@@ -1004,7 +1003,6 @@ static int sxe_prop_is_empty(zend_object *object) /* {{{ */
 	GET_NODE(sxe, node);
 	node = php_sxe_get_first_node(sxe, node);
 	is_empty = 1;
-	ZVAL_UNDEF(&iter_data);
 	if (node && sxe->iter.type != SXE_ITER_ATTRLIST) {
 		if (node->type == XML_ATTRIBUTE_NODE) {
 			return 0;
@@ -1012,10 +1010,8 @@ static int sxe_prop_is_empty(zend_object *object) /* {{{ */
 			if (sxe->iter.type == SXE_ITER_NONE || !node->children || !node->parent || node->children->next || node->children->children || node->parent->children == node->parent->last) {
 				node = node->children;
 			} else {
-				ZVAL_COPY_VALUE(&iter_data, &sxe->iter.data);
-				ZVAL_UNDEF(&sxe->iter.data);
-				node = php_sxe_reset_iterator(sxe, 0);
-				use_iter = 1;
+				node = php_sxe_reset_iterator_no_clear_iter_data(sxe, 0);
+				use_iter = true;
 			}
 		}
 
@@ -1052,13 +1048,6 @@ next_iter:
 		}
 	}
 
-	if (use_iter) {
-		if (!Z_ISUNDEF(sxe->iter.data)) {
-			zval_ptr_dtor(&sxe->iter.data);
-		}
-		ZVAL_COPY_VALUE(&sxe->iter.data, &iter_data);
-	}
-
 	return is_empty;
 }
 /* }}} */
@@ -1074,10 +1063,7 @@ static HashTable *sxe_get_prop_hash(zend_object *object, int is_debug) /* {{{ */
 	xmlAttrPtr       attr;
 	int              namelen;
 	int              test;
-	char 		 	 use_iter;
-	zval             iter_data;
-
-	use_iter = 0;
+	bool 		 	 use_iter = false;
 
 	sxe = php_sxe_fetch_object(object);
 
@@ -1127,16 +1113,11 @@ static HashTable *sxe_get_prop_hash(zend_object *object, int is_debug) /* {{{ */
 			zend_hash_next_index_insert(rv, &value);
 			node = NULL;
 		} else if (sxe->iter.type != SXE_ITER_CHILD) {
-
 			if ( sxe->iter.type == SXE_ITER_NONE || !node->children || !node->parent || !node->next || node->children->next || node->children->children || node->parent->children == node->parent->last ) {
 				node = node->children;
 			} else {
-				ZVAL_COPY_VALUE(&iter_data, &sxe->iter.data);
-				ZVAL_UNDEF(&sxe->iter.data);
-
-				node = php_sxe_reset_iterator(sxe, 0);
-
-				use_iter = 1;
+				node = php_sxe_reset_iterator_no_clear_iter_data(sxe, 0);
+				use_iter = true;
 			}
 		}
 
@@ -1186,13 +1167,6 @@ next_iter:
 				node = node->next;
 			}
 		}
-	}
-
-	if (use_iter) {
-		if (!Z_ISUNDEF(sxe->iter.data)) {
-			zval_ptr_dtor(&sxe->iter.data);
-		}
-		ZVAL_COPY_VALUE(&sxe->iter.data, &iter_data);
 	}
 
 	return rv;
