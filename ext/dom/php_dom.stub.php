@@ -1018,6 +1018,92 @@ namespace DOM
 {
     /**
      * @var int
+     * @cvalue PHP_ERR
+     */
+    const PHP_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue INDEX_SIZE_ERR
+     */
+    const INDEX_SIZE_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue DOMSTRING_SIZE_ERR
+     */
+    const STRING_SIZE_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue HIERARCHY_REQUEST_ERR
+     */
+    const HIERARCHY_REQUEST_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue WRONG_DOCUMENT_ERR
+     */
+    const WRONG_DOCUMENT_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue INVALID_CHARACTER_ERR
+     */
+    const INVALID_CHARACTER_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue NO_DATA_ALLOWED_ERR
+     */
+    const NO_DATA_ALLOWED_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue NO_MODIFICATION_ALLOWED_ERR
+     */
+    const NO_MODIFICATION_ALLOWED_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue NOT_FOUND_ERR
+     */
+    const NOT_FOUND_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue NOT_SUPPORTED_ERR
+     */
+    const NOT_SUPPORTED_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue INUSE_ATTRIBUTE_ERR
+     */
+    const INUSE_ATTRIBUTE_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue INVALID_STATE_ERR
+     */
+    const INVALID_STATE_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SYNTAX_ERR
+     */
+    const SYNTAX_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue INVALID_MODIFICATION_ERR
+     */
+    const INVALID_MODIFICATION_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue NAMESPACE_ERR
+     */
+    const NAMESPACE_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue INVALID_ACCESS_ERR
+     */
+    const INVALID_ACCESS_ERR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue VALIDATION_ERR
+     */
+    const VALIDATION_ERR = UNKNOWN;
+
+    /**
+     * @var int
      * @cvalue DOM_HTML_NO_DEFAULT_NS
      */
     const HTML_NO_DEFAULT_NS = UNKNOWN;
