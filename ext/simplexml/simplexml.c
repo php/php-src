@@ -1876,26 +1876,15 @@ PHP_METHOD(SimpleXMLElement, __toString)
 
 static zend_result php_sxe_count_elements_helper(php_sxe_object *sxe, zend_long *count) /* {{{ */
 {
-	xmlNodePtr      node;
-	zval            data;
-
 	*count = 0;
 
-	ZVAL_COPY_VALUE(&data, &sxe->iter.data);
-	ZVAL_UNDEF(&sxe->iter.data);
-
-	node = php_sxe_reset_iterator(sxe, 0);
+	xmlNodePtr node = php_sxe_reset_iterator_no_clear_iter_data(sxe, 0);
 
 	while (node)
 	{
 		(*count)++;
 		node = php_sxe_iterator_fetch(sxe, node->next, 0);
 	}
-
-	if (!Z_ISUNDEF(sxe->iter.data)) {
-		zval_ptr_dtor(&sxe->iter.data);
-	}
-	ZVAL_COPY_VALUE(&sxe->iter.data, &data);
 
 	return SUCCESS;
 }
