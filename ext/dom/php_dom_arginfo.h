@@ -1,5 +1,9 @@
 /* This is a generated file, edit the .stub.php file instead.
+<<<<<<< HEAD
  * Stub hash: ffe5e718fe6449a3c93c62feb12bc9e3c57e340d */
+=======
+ * Stub hash: a099cfd8989a44593d352c5d4ace393f12e10c95 */
+>>>>>>> 6cdbadbf86 (Create class aliases)
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1088,6 +1092,7 @@ static zend_class_entry *register_class_DOMDocumentType(zend_class_entry *class_
 
 	INIT_CLASS_ENTRY(ce, "DOMDocumentType", class_DOMDocumentType_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+	zend_register_class_alias("DOM\\DocumentType", class_entry);
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
@@ -1136,6 +1141,7 @@ static zend_class_entry *register_class_DOMCdataSection(zend_class_entry *class_
 
 	INIT_CLASS_ENTRY(ce, "DOMCdataSection", class_DOMCdataSection_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMText);
+	zend_register_class_alias("DOM\\CDATASection", class_entry);
 
 	return class_entry;
 }
@@ -1146,6 +1152,7 @@ static zend_class_entry *register_class_DOMComment(zend_class_entry *class_entry
 
 	INIT_CLASS_ENTRY(ce, "DOMComment", class_DOMComment_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMCharacterData);
+	zend_register_class_alias("DOM\\Comment", class_entry);
 
 	return class_entry;
 }
@@ -1156,6 +1163,7 @@ static zend_class_entry *register_class_DOMParentNode(void)
 
 	INIT_CLASS_ENTRY(ce, "DOMParentNode", class_DOMParentNode_methods);
 	class_entry = zend_register_internal_interface(&ce);
+	zend_register_class_alias("DOM\\ParentNode", class_entry);
 
 	return class_entry;
 }
@@ -1166,6 +1174,7 @@ static zend_class_entry *register_class_DOMChildNode(void)
 
 	INIT_CLASS_ENTRY(ce, "DOMChildNode", class_DOMChildNode_methods);
 	class_entry = zend_register_internal_interface(&ce);
+	zend_register_class_alias("DOM\\ChildNode", class_entry);
 
 	return class_entry;
 }
@@ -1176,6 +1185,11 @@ static zend_class_entry *register_class_DOMNode(void)
 
 	INIT_CLASS_ENTRY(ce, "DOMNode", class_DOMNode_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+<<<<<<< HEAD
+=======
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	zend_register_class_alias("DOM\\Node", class_entry);
+>>>>>>> 6cdbadbf86 (Create class aliases)
 
 	zval const_DOCUMENT_POSITION_DISCONNECTED_value;
 	ZVAL_LONG(&const_DOCUMENT_POSITION_DISCONNECTED_value, 0x1);
@@ -1339,6 +1353,11 @@ static zend_class_entry *register_class_DOMNameSpaceNode(void)
 
 	INIT_CLASS_ENTRY(ce, "DOMNameSpaceNode", class_DOMNameSpaceNode_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+<<<<<<< HEAD
+=======
+	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	zend_register_class_alias("DOM\\NameSpaceNode", class_entry);
+>>>>>>> 6cdbadbf86 (Create class aliases)
 
 	zval property_nodeName_default_value;
 	ZVAL_UNDEF(&property_nodeName_default_value);
@@ -1412,6 +1431,7 @@ static zend_class_entry *register_class_DOMImplementation(void)
 
 	INIT_CLASS_ENTRY(ce, "DOMImplementation", class_DOMImplementation_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_register_class_alias("DOM\\Implementation", class_entry);
 
 	return class_entry;
 }
@@ -1423,6 +1443,7 @@ static zend_class_entry *register_class_DOMDocumentFragment(zend_class_entry *cl
 	INIT_CLASS_ENTRY(ce, "DOMDocumentFragment", class_DOMDocumentFragment_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
 	zend_class_implements(class_entry, 1, class_entry_DOMParentNode);
+	zend_register_class_alias("DOM\\DocumentFragment", class_entry);
 
 	zval property_firstElementChild_default_value;
 	ZVAL_UNDEF(&property_firstElementChild_default_value);
@@ -1454,6 +1475,7 @@ static zend_class_entry *register_class_DOMNodeList(zend_class_entry *class_entr
 	INIT_CLASS_ENTRY(ce, "DOMNodeList", class_DOMNodeList_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
+	zend_register_class_alias("DOM\\NodeList", class_entry);
 
 	zval property_length_default_value;
 	ZVAL_UNDEF(&property_length_default_value);
@@ -1471,6 +1493,7 @@ static zend_class_entry *register_class_DOMCharacterData(zend_class_entry *class
 	INIT_CLASS_ENTRY(ce, "DOMCharacterData", class_DOMCharacterData_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
 	zend_class_implements(class_entry, 1, class_entry_DOMChildNode);
+	zend_register_class_alias("DOM\\CharacterData", class_entry);
 
 	zval property_data_default_value;
 	ZVAL_UNDEF(&property_data_default_value);
@@ -1507,6 +1530,7 @@ static zend_class_entry *register_class_DOMAttr(zend_class_entry *class_entry_DO
 
 	INIT_CLASS_ENTRY(ce, "DOMAttr", class_DOMAttr_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+	zend_register_class_alias("DOM\\Attr", class_entry);
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);
@@ -1549,6 +1573,7 @@ static zend_class_entry *register_class_DOMElement(zend_class_entry *class_entry
 	INIT_CLASS_ENTRY(ce, "DOMElement", class_DOMElement_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
 	zend_class_implements(class_entry, 2, class_entry_DOMParentNode, class_entry_DOMChildNode);
+	zend_register_class_alias("DOM\\Element", class_entry);
 
 	zval property_tagName_default_value;
 	ZVAL_UNDEF(&property_tagName_default_value);
@@ -1766,6 +1791,7 @@ static zend_class_entry *register_class_DOMException(zend_class_entry *class_ent
 	INIT_CLASS_ENTRY(ce, "DOMException", class_DOMException_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	zend_register_class_alias("DOM\\Exception", class_entry);
 
 	zval property_code_default_value;
 	ZVAL_LONG(&property_code_default_value, 0);
@@ -1782,6 +1808,7 @@ static zend_class_entry *register_class_DOMText(zend_class_entry *class_entry_DO
 
 	INIT_CLASS_ENTRY(ce, "DOMText", class_DOMText_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMCharacterData);
+	zend_register_class_alias("DOM\\Text", class_entry);
 
 	zval property_wholeText_default_value;
 	ZVAL_UNDEF(&property_wholeText_default_value);
@@ -1799,6 +1826,7 @@ static zend_class_entry *register_class_DOMNamedNodeMap(zend_class_entry *class_
 	INIT_CLASS_ENTRY(ce, "DOMNamedNodeMap", class_DOMNamedNodeMap_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
+	zend_register_class_alias("DOM\\NamedNodeMap", class_entry);
 
 	zval property_length_default_value;
 	ZVAL_UNDEF(&property_length_default_value);
@@ -1815,6 +1843,7 @@ static zend_class_entry *register_class_DOMEntity(zend_class_entry *class_entry_
 
 	INIT_CLASS_ENTRY(ce, "DOMEntity", class_DOMEntity_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+	zend_register_class_alias("DOM\\Entity", class_entry);
 
 	zval property_publicId_default_value;
 	ZVAL_UNDEF(&property_publicId_default_value);
@@ -1861,6 +1890,7 @@ static zend_class_entry *register_class_DOMEntityReference(zend_class_entry *cla
 
 	INIT_CLASS_ENTRY(ce, "DOMEntityReference", class_DOMEntityReference_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+	zend_register_class_alias("DOM\\EntityReference", class_entry);
 
 	return class_entry;
 }
@@ -1871,6 +1901,7 @@ static zend_class_entry *register_class_DOMNotation(zend_class_entry *class_entr
 
 	INIT_CLASS_ENTRY(ce, "DOMNotation", class_DOMNotation_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+	zend_register_class_alias("DOM\\Notation", class_entry);
 
 	zval property_publicId_default_value;
 	ZVAL_UNDEF(&property_publicId_default_value);
@@ -1893,6 +1924,7 @@ static zend_class_entry *register_class_DOMProcessingInstruction(zend_class_entr
 
 	INIT_CLASS_ENTRY(ce, "DOMProcessingInstruction", class_DOMProcessingInstruction_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
+	zend_register_class_alias("DOM\\ProcessingInstruction", class_entry);
 
 	zval property_target_default_value;
 	ZVAL_UNDEF(&property_target_default_value);
@@ -1917,6 +1949,7 @@ static zend_class_entry *register_class_DOMXPath(void)
 	INIT_CLASS_ENTRY(ce, "DOMXPath", class_DOMXPath_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	zend_register_class_alias("DOM\\XPath", class_entry);
 
 	zval property_document_default_value;
 	ZVAL_UNDEF(&property_document_default_value);

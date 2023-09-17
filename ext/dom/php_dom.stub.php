@@ -239,6 +239,7 @@ namespace
      */
     const DOM_VALIDATION_ERR = UNKNOWN;
 
+    /** @alias DOM\DocumentType */
     class DOMDocumentType extends DOMNode
     {
         /** @readonly */
@@ -260,16 +261,19 @@ namespace
         public ?string $internalSubset;
     }
 
+    /** @alias DOM\CDATASection */
     class DOMCdataSection extends DOMText
     {
         public function __construct(string $data) {}
     }
 
+    /** @alias DOM\Comment */
     class DOMComment extends DOMCharacterData
     {
         public function __construct(string $data = "") {}
     }
 
+    /** @alias DOM\ParentNode */
     interface DOMParentNode
     {
         /** @param DOMNode|string $nodes */
@@ -282,6 +286,7 @@ namespace
         public function replaceChildren(...$nodes): void;
     }
 
+    /** @alias DOM\ChildNode */
     interface DOMChildNode
     {
         public function remove(): void;
@@ -296,6 +301,7 @@ namespace
         public function replaceWith(...$nodes): void;
     }
 
+    /** @alias DOM\Node */
     class DOMNode
     {
         public const int DOCUMENT_POSITION_DISCONNECTED = 0x01;
@@ -420,6 +426,7 @@ namespace
         public function __wakeup(): void {}
     }
 
+    /** @alias DOM\NameSpaceNode */
     class DOMNameSpaceNode
     {
         /** @readonly */
@@ -459,6 +466,7 @@ namespace
         public function __wakeup(): void {}
     }
 
+    /** @alias DOM\Implementation */
     class DOMImplementation
     {
         /** @tentative-return-type */
@@ -474,6 +482,7 @@ namespace
         public function createDocument(?string $namespace = null, string $qualifiedName = "", ?DOMDocumentType $doctype = null) {}
     }
 
+    /** @alias DOM\DocumentFragment */
     class DOMDocumentFragment extends DOMNode implements DOMParentNode
     {
         /** @readonly */
@@ -509,6 +518,7 @@ namespace
         public function replaceChildren(...$nodes): void {}
     }
 
+    /** @alias DOM\NodeList */
     class DOMNodeList implements IteratorAggregate, Countable
     {
         /** @readonly */
@@ -523,6 +533,7 @@ namespace
         public function item(int $index) {}
     }
 
+    /** @alias DOM\CharacterData */
     class DOMCharacterData extends DOMNode implements DOMChildNode
     {
         public string $data;
@@ -573,6 +584,7 @@ namespace
         public function after(...$nodes): void {}
     }
 
+    /** @alias DOM\Attr */
     class DOMAttr extends DOMNode
     {
         /** @readonly */
@@ -595,6 +607,7 @@ namespace
         public function isId(): bool {}
     }
 
+    /** @alias DOM\Element */
     class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
     {
         /** @readonly */
@@ -883,6 +896,7 @@ namespace
         public function replaceChildren(...$nodes): void {}
     }
 
+    /** @alias DOM\Exception */
     final class DOMException extends Exception
     {
         /**
@@ -892,6 +906,7 @@ namespace
         public $code = 0; // TODO add proper type (i.e. int|string)
     }
 
+    /** @alias DOM\Text */
     class DOMText extends DOMCharacterData
     {
         /** @readonly */
@@ -912,6 +927,7 @@ namespace
         public function splitText(int $offset) {}
     }
 
+    /** @alias DOM\NamedNodeMap */
     class DOMNamedNodeMap implements IteratorAggregate, Countable
     {
         /** @readonly */
@@ -932,6 +948,7 @@ namespace
         public function getIterator(): Iterator {}
     }
 
+    /** @alias DOM\Entity */
     class DOMEntity extends DOMNode
     {
         /** @readonly */
@@ -962,11 +979,13 @@ namespace
         public ?string $version = null;
     }
 
+    /** @alias DOM\EntityReference */
     class DOMEntityReference extends DOMNode
     {
         public function __construct(string $name) {}
     }
 
+    /** @alias DOM\Notation */
     class DOMNotation extends DOMNode
     {
         /** @readonly */
@@ -976,6 +995,7 @@ namespace
         public string $systemId;
     }
 
+    /** @alias DOM\ProcessingInstruction */
     class DOMProcessingInstruction extends DOMNode
     {
         /** @readonly */
@@ -987,7 +1007,10 @@ namespace
     }
 
 #ifdef LIBXML_XPATH_ENABLED
-    /** @not-serializable */
+    /**
+     * @not-serializable
+     * @alias DOM\XPath
+     */
     class DOMXPath
     {
         /** @readonly */
