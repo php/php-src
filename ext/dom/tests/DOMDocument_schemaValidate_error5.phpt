@@ -17,9 +17,9 @@ var_dump($result);
 
 ?>
 --EXPECTF--
-Warning: DOMDocument::schemaValidate(): I/O warning : failed to load external entity "%snon-existent-file" in %s.php on line %d
+Warning: DOM\Document::schemaValidate(): I/O warning : failed to load external entity "/home/niels/php-src/ext/dom/tests/non-existent-file" in %s on line %d
 
-Warning: DOMDocument::schemaValidate(): Failed to locate the main schema resource at '%s/non-existent-file'. in %s.php on line %d
+Warning: DOM\Document::schemaValidate(): Failed to locate the main schema resource at '/home/niels/php-src/ext/dom/tests/non-existent-file'. in %s on line %d
 
-Warning: DOMDocument::schemaValidate(): Invalid Schema in %s.php on line %d
+Warning: DOM\Document::schemaValidate(): Invalid Schema in %s on line %d
 bool(false)

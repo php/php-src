@@ -37,6 +37,7 @@ extern PHP_DOM_EXPORT zend_class_entry *dom_notation_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_entity_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_entityreference_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_processinginstruction_class_entry;
+extern PHP_DOM_EXPORT zend_class_entry *dom_abstract_base_document_class_entry;
 #ifdef LIBXML_XPATH_ENABLED
 extern PHP_DOM_EXPORT zend_class_entry *dom_xpath_class_entry;
 #endif

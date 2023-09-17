@@ -483,7 +483,7 @@ zend_result dom_document_config_read(dom_object *obj, zval *retval)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-2141741547
 Since:
 */
-PHP_METHOD(DOMDocument, createElement)
+PHP_METHOD(DOM_Document, createElement)
 {
 	zval *id;
 	xmlNode *node;
@@ -518,7 +518,7 @@ PHP_METHOD(DOMDocument, createElement)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-35CB04B5
 Since:
 */
-PHP_METHOD(DOMDocument, createDocumentFragment)
+PHP_METHOD(DOM_Document, createDocumentFragment)
 {
 	zval *id;
 	xmlNode *node;
@@ -546,7 +546,7 @@ PHP_METHOD(DOMDocument, createDocumentFragment)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1975348127
 Since:
 */
-PHP_METHOD(DOMDocument, createTextNode)
+PHP_METHOD(DOM_Document, createTextNode)
 {
 	zval *id;
 	xmlNode *node;
@@ -576,7 +576,7 @@ PHP_METHOD(DOMDocument, createTextNode)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1334481328
 Since:
 */
-PHP_METHOD(DOMDocument, createComment)
+PHP_METHOD(DOM_Document, createComment)
 {
 	zval *id;
 	xmlNode *node;
@@ -606,7 +606,7 @@ PHP_METHOD(DOMDocument, createComment)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D26C0AF8
 Since:
 */
-PHP_METHOD(DOMDocument, createCDATASection)
+PHP_METHOD(DOM_Document, createCDATASection)
 {
 	zval *id;
 	xmlNode *node;
@@ -636,7 +636,7 @@ PHP_METHOD(DOMDocument, createCDATASection)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-135944439
 Since:
 */
-PHP_METHOD(DOMDocument, createProcessingInstruction)
+PHP_METHOD(DOM_Document, createProcessingInstruction)
 {
 	zval *id;
 	xmlNode *node;
@@ -673,7 +673,7 @@ PHP_METHOD(DOMDocument, createProcessingInstruction)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1084891198
 Since:
 */
-PHP_METHOD(DOMDocument, createAttribute)
+PHP_METHOD(DOM_Document, createAttribute)
 {
 	zval *id;
 	xmlAttrPtr node;
@@ -744,7 +744,7 @@ PHP_METHOD(DOMDocument, createEntityReference)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-A6C9094
 Since:
 */
-PHP_METHOD(DOMDocument, getElementsByTagName)
+PHP_METHOD(DOM_Document, getElementsByTagName)
 {
 	size_t name_len;
 	dom_object *intern, *namednode;
@@ -765,7 +765,7 @@ PHP_METHOD(DOMDocument, getElementsByTagName)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Core-Document-importNode
 Since: DOM Level 2
 */
-PHP_METHOD(DOMDocument, importNode)
+PHP_METHOD(DOM_Document, importNode)
 {
 	zval *node;
 	xmlDocPtr docp;
@@ -818,7 +818,7 @@ PHP_METHOD(DOMDocument, importNode)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrElNS
 Since: DOM Level 2
 */
-PHP_METHOD(DOMDocument, createElementNS)
+PHP_METHOD(DOM_Document, createElementNS)
 {
 	zval *id;
 	xmlDocPtr docp;
@@ -878,7 +878,7 @@ PHP_METHOD(DOMDocument, createElementNS)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrAttrNS
 Since: DOM Level 2
 */
-PHP_METHOD(DOMDocument, createAttributeNS)
+PHP_METHOD(DOM_Document, createAttributeNS)
 {
 	zval *id;
 	xmlDocPtr docp;
@@ -944,7 +944,7 @@ PHP_METHOD(DOMDocument, createAttributeNS)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getElBTNNS
 Since: DOM Level 2
 */
-PHP_METHOD(DOMDocument, getElementsByTagNameNS)
+PHP_METHOD(DOM_Document, getElementsByTagNameNS)
 {
 	size_t uri_len, name_len;
 	dom_object *intern, *namednode;
@@ -965,7 +965,7 @@ PHP_METHOD(DOMDocument, getElementsByTagNameNS)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getElBId
 Since: DOM Level 2
 */
-PHP_METHOD(DOMDocument, getElementById)
+PHP_METHOD(DOM_Document, getElementById)
 {
 	zval *id;
 	xmlDocPtr docp;
@@ -1042,7 +1042,7 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 Since: DOM Level 3
 Modern spec URL: https://dom.spec.whatwg.org/#dom-document-adoptnode
 */
-PHP_METHOD(DOMDocument, adoptNode)
+PHP_METHOD(DOM_Document, adoptNode)
 {
 	zval *node_zval;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node_zval, dom_node_class_entry) == FAILURE) {
@@ -1079,7 +1079,7 @@ PHP_METHOD(DOMDocument, adoptNode)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-normalizeDocument
 Since: DOM Level 3
 */
-PHP_METHOD(DOMDocument, normalizeDocument)
+PHP_METHOD(DOM_Document, normalizeDocument)
 {
 	zval *id;
 	xmlDocPtr docp;
@@ -1755,14 +1755,14 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(DOMDocument, schemaValidate)
+PHP_METHOD(DOM_Document, schemaValidate)
 {
 	_dom_document_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }
 /* }}} end dom_document_schema_validate_file */
 
 /* {{{ */
-PHP_METHOD(DOMDocument, schemaValidateSource)
+PHP_METHOD(DOM_Document, schemaValidateSource)
 {
 	_dom_document_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
 }
@@ -1851,14 +1851,14 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(DOMDocument, relaxNGValidate)
+PHP_METHOD(DOM_Document, relaxNGValidate)
 {
 	_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }
 /* }}} end dom_document_relaxNG_validate_file */
 
 /* {{{ */
-PHP_METHOD(DOMDocument, relaxNGValidateSource)
+PHP_METHOD(DOM_Document, relaxNGValidateSource)
 {
 	_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
 }
@@ -2064,7 +2064,7 @@ PHP_METHOD(DOMDocument, saveHTML)
 #endif  /* defined(LIBXML_HTML_ENABLED) */
 
 /* {{{ Register extended class used to create base node type */
-PHP_METHOD(DOMDocument, registerNodeClass)
+PHP_METHOD(DOM_Document, registerNodeClass)
 {
 	zend_class_entry *basece = dom_node_class_entry, *ce = NULL;
 	dom_object *intern;
@@ -2090,7 +2090,7 @@ PHP_METHOD(DOMDocument, registerNodeClass)
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
 Since:
 */
-PHP_METHOD(DOMDocument, replaceChildren)
+PHP_METHOD(DOM_Document, replaceChildren)
 {
 	uint32_t argc = 0;
 	zval *args;

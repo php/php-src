@@ -513,7 +513,7 @@ namespace
 
         /**
          * @param DOMNode|string $nodes
-         * @implementation-alias DOMDocument::replaceChildren
+         * @implementation-alias DOM\Document::replaceChildren
          */
         public function replaceChildren(...$nodes): void {}
     }
@@ -720,24 +720,13 @@ namespace
         public function insertAdjacentText(string $where, string $data): void {}
     }
 
-    class DOMDocument extends DOMNode implements DOMParentNode
+    class DOMDocument extends DOM\Document
     {
-        /** @readonly */
-        public ?DOMDocumentType $doctype;
-
-        /** @readonly */
-        public DOMImplementation $implementation;
-
-        /** @readonly */
-        public ?DOMElement $documentElement;
-
         /**
          * @readonly
          * @deprecated
          */
         public ?string $actualEncoding;
-
-        public ?string $encoding;
 
         /** @readonly */
         public ?string $xmlEncoding;
@@ -749,10 +738,6 @@ namespace
         public ?string $version;
 
         public ?string $xmlVersion;
-
-        public bool $strictErrorChecking;
-
-        public ?string $documentURI;
 
         /**
          * @readonly
@@ -772,70 +757,16 @@ namespace
 
         public bool $substituteEntities;
 
-        /** @readonly */
-        public ?DOMElement $firstElementChild;
-
-        /** @readonly */
-        public ?DOMElement $lastElementChild;
-
-        /** @readonly */
-        public int $childElementCount;
-
         public function __construct(string $version = "1.0", string $encoding = "") {}
-
-        /** @return DOMAttr|false */
-        public function createAttribute(string $localName) {}
-
-        /** @return DOMAttr|false */
-        public function createAttributeNS(?string $namespace, string $qualifiedName) {}
-
-        /** @return DOMCdataSection|false */
-        public function createCDATASection(string $data) {}
-
-        /** @tentative-return-type */
-        public function createComment(string $data): DOMComment {}
-
-        /** @tentative-return-type */
-        public function createDocumentFragment(): DOMDocumentFragment {}
-
-        /** @return DOMElement|false */
-        public function createElement(string $localName, string $value = "")  {}
-
-        /** @return DOMElement|false */
-        public function createElementNS(?string $namespace, string $qualifiedName, string $value = "") {}
 
         /** @return DOMEntityReference|false */
         public function createEntityReference(string $name) {}
-
-        /** @return DOMProcessingInstruction|false */
-        public function createProcessingInstruction(string $target, string $data = "") {}
-
-        /** @tentative-return-type */
-        public function createTextNode(string $data): DOMText {}
-
-        /** @tentative-return-type */
-        public function getElementById(string $elementId): ?DOMElement {}
-
-        /** @tentative-return-type */
-        public function getElementsByTagName(string $qualifiedName): DOMNodeList {}
-
-        /** @tentative-return-type */
-        public function getElementsByTagNameNS(?string $namespace, string $localName): DOMNodeList {}
-
-        /** @return DOMNode|false */
-        public function importNode(DOMNode $node, bool $deep = false) {}
 
         /** @tentative-return-type */
         public function load(string $filename, int $options = 0): bool {}
 
         /** @tentative-return-type */
         public function loadXML(string $source, int $options = 0): bool {}
-
-        /** @tentative-return-type */
-        public function normalizeDocument(): void {}
-
-        /** @tentative-return-type */
-        public function registerNodeClass(string $baseClass, ?string $extendedClass): bool {}
 
         /** @tentative-return-type */
         public function save(string $filename, int $options = 0): int|false {}
@@ -857,43 +788,11 @@ namespace
         /** @tentative-return-type */
         public function saveXML(?DOMNode $node = null, int $options = 0): string|false {}
 
-    #ifdef LIBXML_SCHEMAS_ENABLED
-        /** @tentative-return-type */
-        public function schemaValidate(string $filename, int $flags = 0): bool {}
-
-        /** @tentative-return-type */
-        public function schemaValidateSource(string $source, int $flags = 0): bool {}
-
-        /** @tentative-return-type */
-        public function relaxNGValidate(string $filename): bool {}
-
-        /** @tentative-return-type */
-        public function relaxNGValidateSource(string $source): bool {}
-    #endif
-
         /** @tentative-return-type */
         public function validate(): bool {}
 
         /** @tentative-return-type */
         public function xinclude(int $options = 0): int|false {}
-
-        /** @tentative-return-type */
-        public function adoptNode(DOMNode $node): DOMNode|false {}
-
-        /**
-         * @param DOMNode|string $nodes
-         * @implementation-alias DOMElement::append
-         */
-        public function append(...$nodes): void {}
-
-        /**
-         * @param DOMNode|string $nodes
-         * @implementation-alias DOMElement::prepend
-         */
-        public function prepend(...$nodes): void {}
-
-        /** @param DOMNode|string $nodes */
-        public function replaceChildren(...$nodes): void {}
     }
 
     /** @alias DOM\Exception */
@@ -1130,6 +1029,110 @@ namespace DOM
      * @cvalue DOM_HTML_NO_DEFAULT_NS
      */
     const HTML_NO_DEFAULT_NS = UNKNOWN;
+
+    abstract class Document extends DOMNode implements DOMParentNode
+    {
+        /** @readonly */
+        public ?DocumentType $doctype;
+
+        /** @readonly */
+        public Implementation $implementation;
+
+        /** @readonly */
+        public ?Element $documentElement;
+
+        public ?string $encoding;
+
+        public bool $strictErrorChecking;
+
+        public ?string $documentURI;
+
+        /** @readonly */
+        public ?Element $firstElementChild;
+
+        /** @readonly */
+        public ?Element $lastElementChild;
+
+        /** @readonly */
+        public int $childElementCount;
+
+        /** @return Attr|false */
+        public function createAttribute(string $localName) {}
+
+        /** @return Attr|false */
+        public function createAttributeNS(?string $namespace, string $qualifiedName) {}
+
+        /** @return CDataSection|false */
+        public function createCDATASection(string $data) {}
+
+        /** @tentative-return-type */
+        public function createComment(string $data): Comment {}
+
+        /** @tentative-return-type */
+        public function createDocumentFragment(): DocumentFragment {}
+
+        /** @return Element|false */
+        public function createElement(string $localName, string $value = "")  {}
+
+        /** @return Element|false */
+        public function createElementNS(?string $namespace, string $qualifiedName, string $value = "") {}
+
+        /** @return ProcessingInstruction|false */
+        public function createProcessingInstruction(string $target, string $data = "") {}
+
+        /** @tentative-return-type */
+        public function createTextNode(string $data): Text {}
+
+        /** @tentative-return-type */
+        public function getElementById(string $elementId): ?Element {}
+
+        /** @tentative-return-type */
+        public function getElementsByTagName(string $qualifiedName): NodeList {}
+
+        /** @tentative-return-type */
+        public function getElementsByTagNameNS(?string $namespace, string $localName): NodeList {}
+
+        /** @return Node|false */
+        public function importNode(Node $node, bool $deep = false) {}
+
+        /** @tentative-return-type */
+        public function normalizeDocument(): void {}
+
+        /** @tentative-return-type */
+        public function registerNodeClass(string $baseClass, ?string $extendedClass): bool {}
+
+    #ifdef LIBXML_SCHEMAS_ENABLED
+        /** @tentative-return-type */
+        public function schemaValidate(string $filename, int $flags = 0): bool {}
+
+        /** @tentative-return-type */
+        public function schemaValidateSource(string $source, int $flags = 0): bool {}
+
+        /** @tentative-return-type */
+        public function relaxNGValidate(string $filename): bool {}
+
+        /** @tentative-return-type */
+        public function relaxNGValidateSource(string $source): bool {}
+    #endif
+
+        /** @tentative-return-type */
+        public function adoptNode(Node $node): Node|false {}
+
+        /**
+         * @param Node|string $nodes
+         * @implementation-alias DOMElement::append
+         */
+        public function append(...$nodes): void {}
+
+        /**
+         * @param Node|string $nodes
+         * @implementation-alias DOMElement::prepend
+         */
+        public function prepend(...$nodes): void {}
+
+        /** @param Node|string $nodes */
+        public function replaceChildren(...$nodes): void {}
+    }
 
     class HTML5Document extends \DOMDocument
     {
