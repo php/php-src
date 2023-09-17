@@ -19,6 +19,8 @@ PHP                                                                        NEWS
     within foreach). (nielsdos)
   . Fixed bug GH-12223 (Entity reference produces infinite loop in
     var_dump/print_r). (nielsdos)
+  . Fixed bug GH-12208 (SimpleXML infinite loop when a cast is used inside a
+    foreach). (nielsdos)
 
 14 Sep 2023, PHP 8.3.0RC2
 
