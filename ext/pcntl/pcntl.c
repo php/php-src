@@ -710,9 +710,10 @@ PHP_FUNCTION(pcntl_signal_dispatch)
 static bool php_pcntl_set_user_signal_infos(
 	/* const */ HashTable *const user_signals,
 	sigset_t *const set,
-	size_t arg_num
+	size_t arg_num,
+	bool allow_empty_signal_array
 ) {
-	if (zend_hash_num_elements(user_signals) == 0) {
+	if (!allow_empty_signal_array && zend_hash_num_elements(user_signals) == 0) {
 		zend_argument_value_error(arg_num, "cannot be empty");
 		return false;
 	}
@@ -782,21 +783,11 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	}
 
 	sigset_t set;
-	/* Can set an empty array of signals for SIG_SETMASK */
-	if (how == SIG_SETMASK && zend_hash_num_elements(user_set) == 0) {
-		if (sigemptyset(&set) != 0) {
-			PCNTL_G(last_error) = errno;
-			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
-			RETURN_FALSE;
-		}
-		goto skip_setting_user_signals;
-	}
-	bool status = php_pcntl_set_user_signal_infos(user_set, &set, 2);
+	bool status = php_pcntl_set_user_signal_infos(user_set, &set, 2, /* allow_empty_signal_array */ how == SIG_SETMASK);
 	/* Some error occurred */
 	if (!status) {
 		RETURN_FALSE;
 	}
-	skip_setting_user_signals:
 
 	if (sigprocmask(how, &set, &old_set) != 0) {
 		PCNTL_G(last_error) = errno;
@@ -840,7 +831,7 @@ PHP_FUNCTION(pcntl_sigwaitinfo)
 	ZEND_PARSE_PARAMETERS_END();
 
 	sigset_t set;
-	bool status = php_pcntl_set_user_signal_infos(user_set, &set, 1);
+	bool status = php_pcntl_set_user_signal_infos(user_set, &set, 1, /* allow_empty_signal_array */ false);
 	/* Some error occurred */
 	if (!status) {
 		RETURN_FALSE;
@@ -886,7 +877,7 @@ PHP_FUNCTION(pcntl_sigtimedwait)
 	ZEND_PARSE_PARAMETERS_END();
 
 	sigset_t set;
-	bool status = php_pcntl_set_user_signal_infos(user_set, &set, 1);
+	bool status = php_pcntl_set_user_signal_infos(user_set, &set, 1, /* allow_empty_signal_array */ false);
 	/* Some error occurred */
 	if (!status) {
 		RETURN_FALSE;
