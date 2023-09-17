@@ -128,7 +128,7 @@ static inline double php_round_helper(double value, int mode) {
 		}
 	}
 
-	ZEND_ASSERT(0 && "Unknown rounding mode");
+	ZEND_UNREACHABLE();
 }
 /* }}} */
 
