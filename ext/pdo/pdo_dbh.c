@@ -1377,7 +1377,7 @@ static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)
 	}
 
 	if (dbh->def_stmt_ctor_args) {
-		GC_DTOR_NOGC(dbh->def_stmt_ctor_args);
+		GC_DTOR_NO_REF(dbh->def_stmt_ctor_args);
 	}
 
 	for (i = 0; i < PDO_DBH_DRIVER_METHOD_KIND__MAX; i++) {
