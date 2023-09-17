@@ -1860,7 +1860,7 @@ static int sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type)
 	sxe = php_sxe_fetch_object(readobj);
 
 	if (type == _IS_BOOL) {
-		node = php_sxe_get_first_node(sxe, NULL);
+		node = php_sxe_get_first_node_non_destructive(sxe, NULL);
 		if (node) {
 			ZVAL_TRUE(writeobj);
 		} else {
@@ -1870,7 +1870,7 @@ static int sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type)
 	}
 
 	if (sxe->iter.type != SXE_ITER_NONE) {
-		node = php_sxe_get_first_node(sxe, NULL);
+		node = php_sxe_get_first_node_non_destructive(sxe, NULL);
 		if (node) {
 			contents = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, node->children, 1);
 		}
