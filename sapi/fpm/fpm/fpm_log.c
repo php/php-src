@@ -225,8 +225,8 @@ int fpm_log_write(char *log_format) /* {{{ */
 
 					/* milliseconds */
 					} else if (!strcasecmp(format, "milliseconds") || !strcasecmp(format, "milli") ||
-						   /* mili/milliseconds are supported for backwards compatibility */
-						   !strcasecmp(format, "milliseconds") || !strcasecmp(format, "mili")
+						   /* mili/miliseconds are supported for backwards compatibility */
+						   !strcasecmp(format, "miliseconds") || !strcasecmp(format, "mili")
 					) {
 						if (!test) {
 							len2 = snprintf(b, FPM_LOG_BUFFER - len, "%.3f", proc.duration.tv_sec * 1000. + proc.duration.tv_usec / 1000.);
