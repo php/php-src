@@ -1,7 +1,11 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 73e3e87a39619d70aa94ac3d0f8a1dcf35613b70 */
+ * Stub hash: ffe5e718fe6449a3c93c62feb12bc9e3c57e340d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
+	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_DOM_import_simplexml, 0, 1, DOM\\DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
@@ -726,6 +730,7 @@ ZEND_METHOD(DOM_HTML5Document, saveHTMLFile);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(dom_import_simplexml, arginfo_dom_import_simplexml)
+	ZEND_NS_FALIAS("DOM", import_simplexml, dom_import_simplexml, arginfo_DOM_import_simplexml)
 	ZEND_FE_END
 };
 

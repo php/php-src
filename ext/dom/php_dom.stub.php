@@ -1124,4 +1124,7 @@ namespace DOM
 
         public function saveHTMLFile(string $filename): int|false {}
     }
+
+    /** @implementation-alias dom_import_simplexml */
+    function import_simplexml(object $node): DOMElement {}
 }
