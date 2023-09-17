@@ -1805,9 +1805,6 @@ static zend_result cast_object(zval *object, int type, char *contents)
 		case IS_STRING:
 			convert_to_string(object);
 			break;
-		case _IS_BOOL:
-			convert_to_boolean(object);
-			break;
 		case IS_LONG:
 			convert_to_long(object);
 			break;
