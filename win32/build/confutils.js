@@ -3348,7 +3348,7 @@ function toolset_setup_intrinsic_cflags()
 		if (TARGET_ARCH == 'arm64') {
 			/* arm64 supports neon */
 			configure_subst.Add("PHP_SIMD_SCALE", 'NEON');
-			/* all offically supported arm64 cpu supports crc32 (TODO: to be confirmed) */
+			/* all officially supported arm64 cpu supports crc32 (TODO: to be confirmed) */
 			AC_DEFINE('HAVE_ARCH64_CRC32', 1);
 			return;
 		}

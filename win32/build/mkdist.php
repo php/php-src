@@ -271,7 +271,7 @@ foreach ($general_files as $src => $dest) {
 }
 
 /* include a snapshot identifier */
-$branch = "HEAD"; // TODO - determine this from SVN branche name
+$branch = "HEAD"; // TODO - determine this from SVN branch name
 $fp = fopen("$dist_dir/snapshot.txt", "w");
 $now = date("r");
 fwrite($fp, <<<EOT

@@ -19,7 +19,7 @@ class MySession extends SessionHandler {
         ++$this->i;
         echo 'Open:', session_id(), "\n";
         // This test was written for broken return value handling
-        // Mimmick what was actually being tested by returning true here
+        // Mimic what was actually being tested by returning true here
         return (null === parent::open());
     }
     public function read($key): string|false {

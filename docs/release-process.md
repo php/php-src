@@ -992,7 +992,7 @@ volunteers to begin the selection process for the next release managers.
    ```shell
    cd /path/to/repos/php/web-php
    git submodule update
-   cd distributions           # This is the submodule refering to web-php-distributions
+   cd distributions           # This is the submodule referring to web-php-distributions
    git pull origin master
    cd ..
    git add distributions
