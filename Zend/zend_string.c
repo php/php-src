@@ -231,6 +231,9 @@ static zend_string* ZEND_FASTCALL zend_new_interned_string_request(zend_string *
 		return ret;
 	}
 
+	if (!CG(interned_strings_initialized)) {
+		zend_interned_strings_activate();
+	}
 	ret = zend_interned_string_ht_lookup(str, &CG(interned_strings));
 	if (ret) {
 		zend_string_release(str);
@@ -339,6 +342,7 @@ static zend_string* ZEND_FASTCALL zend_string_init_existing_interned_request(con
 ZEND_API void zend_interned_strings_activate(void)
 {
 	zend_init_interned_strings_ht(&CG(interned_strings), 0);
+	CG(interned_strings_initialized) = true;
 }
 
 ZEND_API void zend_interned_strings_deactivate(void)
