@@ -25,12 +25,6 @@ var_dump($dom->strictErrorChecking);
 object(DOM\HTML5Document)#1 (40) {
   ["encoding"]=>
   string(5) "UTF-8"
-  ["doctype"]=>
-  NULL
-  ["implementation"]=>
-  string(22) "(object value omitted)"
-  ["documentElement"]=>
-  string(22) "(object value omitted)"
   ["actualEncoding"]=>
   string(5) "UTF-8"
   ["xmlEncoding"]=>
@@ -42,10 +36,6 @@ object(DOM\HTML5Document)#1 (40) {
   ["version"]=>
   NULL
   ["xmlVersion"]=>
-  NULL
-  ["strictErrorChecking"]=>
-  bool(false)
-  ["documentURI"]=>
   NULL
   ["config"]=>
   NULL
@@ -61,6 +51,16 @@ object(DOM\HTML5Document)#1 (40) {
   bool(false)
   ["substituteEntities"]=>
   bool(false)
+  ["doctype"]=>
+  NULL
+  ["implementation"]=>
+  string(22) "(object value omitted)"
+  ["documentElement"]=>
+  string(22) "(object value omitted)"
+  ["strictErrorChecking"]=>
+  bool(false)
+  ["documentURI"]=>
+  NULL
   ["firstElementChild"]=>
   string(22) "(object value omitted)"
   ["lastElementChild"]=>
