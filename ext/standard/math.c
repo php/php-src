@@ -113,6 +113,19 @@ static inline double php_round_helper(double value, int mode) {
 			return integral;
 
 		case PHP_ROUND_HALF_EVEN:
+			if (fractional > 0.5) {
+				return integral + copysign(1.0, integral);
+			}
+
+			if (fractional == 0.5) {
+				bool even = !fmod(integral, 2.0);
+
+				if (!even) {
+					return integral + copysign(1.0, integral);
+				}
+			}
+
+			return integral;
 		case PHP_ROUND_HALF_ODD:
 			if (fractional > 0.5) {
 				return integral + copysign(1.0, integral);
@@ -121,7 +134,7 @@ static inline double php_round_helper(double value, int mode) {
 			if (fractional == 0.5) {
 				bool even = !fmod(integral, 2.0);
 
-				if ((mode == PHP_ROUND_HALF_EVEN && !even) || (mode == PHP_ROUND_HALF_ODD && even)) {
+				if (even) {
 					return integral + copysign(1.0, integral);
 				}
 			}
