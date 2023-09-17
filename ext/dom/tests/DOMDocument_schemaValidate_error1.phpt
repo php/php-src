@@ -17,13 +17,13 @@ var_dump($result);
 
 ?>
 --EXPECTF--
-Warning: DOM\Document::schemaValidate(): /home/niels/php-src/ext/dom/tests/book-not-a-schema.xsd:1: parser error : Start tag expected, '<' not found in %s on line %d
+Warning: DOM\Document::schemaValidate(): %s/book-not-a-schema.xsd:1: parser error : Start tag expected, '<' not found in %s on line %d
 
 Warning: DOM\Document::schemaValidate(): Let's see what happens upon parsing a file that doesn't contain a schema. in %s on line %d
 
 Warning: DOM\Document::schemaValidate(): ^ in %s on line %d
 
-Warning: DOM\Document::schemaValidate(): Failed to parse the XML resource '/home/niels/php-src/ext/dom/tests/book-not-a-schema.xsd'. in %s on line %d
+Warning: DOM\Document::schemaValidate(): Failed to parse the XML resource '%s/book-not-a-schema.xsd'. in %s on line %d
 
 Warning: DOM\Document::schemaValidate(): Invalid Schema in %s on line %d
 bool(false)

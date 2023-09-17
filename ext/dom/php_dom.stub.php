@@ -347,7 +347,7 @@ namespace
         public bool $isConnected;
 
         /** @readonly */
-        public ?DOMDocument $ownerDocument;
+        public ?DOM\Document $ownerDocument;
 
         /** @readonly */
         public ?string $namespaceURI;
@@ -466,7 +466,6 @@ namespace
         public function __wakeup(): void {}
     }
 
-    /** @alias DOM\Implementation */
     class DOMImplementation
     {
         /** @tentative-return-type */
@@ -722,6 +721,9 @@ namespace
 
     class DOMDocument extends DOM\Document
     {
+        /** @readonly */
+        public DOMImplementation $implementation;
+
         /**
          * @readonly
          * @deprecated
@@ -913,11 +915,11 @@ namespace
     class DOMXPath
     {
         /** @readonly */
-        public DOMDocument $document;
+        public DOM\Document $document;
 
         public bool $registerNodeNamespaces;
 
-        public function __construct(DOMDocument $document, bool $registerNodeNS = true) {}
+        public function __construct(DOM\Document $document, bool $registerNodeNS = true) {}
 
         /** @tentative-return-type */
         public function evaluate(string $expression, ?DOMNode $contextNode = null, bool $registerNodeNS = true): mixed {}
@@ -1036,9 +1038,6 @@ namespace DOM
         public ?DocumentType $doctype;
 
         /** @readonly */
-        public Implementation $implementation;
-
-        /** @readonly */
         public ?Element $documentElement;
 
         public ?string $encoding;
@@ -1087,13 +1086,13 @@ namespace DOM
         public function getElementById(string $elementId): ?Element {}
 
         /** @tentative-return-type */
-        public function getElementsByTagName(string $qualifiedName): NodeList {}
+        public function getElementsByTagName(string $qualifiedName): \DOMNodeList {}
 
         /** @tentative-return-type */
-        public function getElementsByTagNameNS(?string $namespace, string $localName): NodeList {}
+        public function getElementsByTagNameNS(?string $namespace, string $localName): \DOMNodeList {}
 
         /** @return Node|false */
-        public function importNode(Node $node, bool $deep = false) {}
+        public function importNode(\DOMNode $node, bool $deep = false) {}
 
         /** @tentative-return-type */
         public function normalizeDocument(): void {}
@@ -1101,7 +1100,7 @@ namespace DOM
         /** @tentative-return-type */
         public function registerNodeClass(string $baseClass, ?string $extendedClass): bool {}
 
-    #ifdef LIBXML_SCHEMAS_ENABLED
+#ifdef LIBXML_SCHEMAS_ENABLED
         /** @tentative-return-type */
         public function schemaValidate(string $filename, int $flags = 0): bool {}
 
@@ -1113,10 +1112,10 @@ namespace DOM
 
         /** @tentative-return-type */
         public function relaxNGValidateSource(string $source): bool {}
-    #endif
+#endif
 
         /** @tentative-return-type */
-        public function adoptNode(Node $node): Node|false {}
+        public function adoptNode(\DOMNode $node): \DOMNode|false {}
 
         /**
          * @param Node|string $nodes
@@ -1134,21 +1133,90 @@ namespace DOM
         public function replaceChildren(...$nodes): void {}
     }
 
-    class HTML5Document extends \DOMDocument
+    final class HTMLDocument extends DOM\Document
     {
-        public function __construct(string $xmlVersion = "1.0", string $encoding = "") {}
+        private function __construct() {}
 
-        public function load(string $filename, int $options = 0): bool {}
+        public static function createEmpty(string $encoding = "UTF-8"): HTMLDocument {}
 
-        public function loadXML(string $source, int $options = 0): bool {}
+        public static function createFromFile(string $path, int $options = 0): HTMLDocument {}
 
-        public function loadHTML(string $source, int $options = 0): bool {}
+        public static function createFromString(string $source, int $options = 0): HTMLDocument {}
 
-        public function loadHTMLFile(string $filename, int $options = 0): bool {}
+        /** @implementation-alias DOMDocument::saveXML */
+        public function saveXML(?\DOMNode $node = null, int $options = 0): string|false {}
+
+        /** @implementation-alias DOMDocument::save */
+        public function saveXMLFile(string $filename, int $options = 0): int|false {}
 
         public function saveHTML(?\DOMNode $node = null): string|false {}
 
         public function saveHTMLFile(string $filename): int|false {}
+    }
+
+    final class XMLDocument extends DOM\Document
+    {
+        /** @implementation-alias DOM\HTMLDocument::__construct */
+        private function __construct() {}
+
+        public static function createEmpty(string $version = "1.0", string $encoding = "UTF-8"): XMLDocument {}
+
+        public static function createFromFile(string $path, int $options = 0): XMLDocument {}
+
+        public static function createFromString(string $source, int $options = 0): XMLDocument {}
+
+        /** @readonly */
+        public ?string $xmlEncoding;
+
+        public bool $standalone;
+
+        public bool $xmlStandalone;
+
+        public ?string $version;
+
+        public ?string $xmlVersion;
+
+        public bool $formatOutput;
+
+        public bool $validateOnParse;
+
+        public bool $resolveExternals;
+
+        public bool $preserveWhiteSpace;
+
+        public bool $recover;
+
+        public bool $substituteEntities;
+
+        /**
+         * @implementation-alias DOMDocument::createEntityReference
+         * @return DOMEntityReference|false
+         */
+        public function createEntityReference(string $name) {}
+
+        /**
+         * @tentative-return-type
+         * @implementation-alias DOMDocument::validate
+         */
+        public function validate(): bool {}
+
+        /**
+         * @tentative-return-type
+         * @implementation-alias DOMDocument::xinclude
+         */
+        public function xinclude(int $options = 0): int|false {}
+
+        /**
+         * @tentative-return-type
+         * @implementation-alias DOMDocument::saveXML
+         */
+        public function saveXML(?\DOMNode $node = null, int $options = 0): string|false {}
+
+        /**
+         * @tentative-return-type
+         * @implementation-alias DOMDocument::save
+         */
+        public function saveXMLFile(string $filename, int $options = 0): int|false {}
     }
 
     /** @implementation-alias dom_import_simplexml */

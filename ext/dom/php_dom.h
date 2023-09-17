@@ -158,10 +158,12 @@ void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp);
 
 void php_dom_document_constructor(INTERNAL_FUNCTION_PARAMETERS);
 
+dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_entry *ce, xmlNodePtr obj, dom_object *parent);
+
 #define DOM_LOAD_STRING 0
 #define DOM_LOAD_FILE 1
 
-void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode, xmlDocPtr *doc_out);
+xmlDocPtr dom_document_parser(zval *id, int mode, const char *source, size_t source_len, size_t options);
 
 /* parentnode */
 void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc);

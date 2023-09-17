@@ -62,7 +62,7 @@ zend_result dom_document_substitue_entities_read(dom_object *obj, zval *retval);
 zend_result dom_document_substitue_entities_write(dom_object *obj, zval *newval);
 
 /* html5 document properties */
-zend_result dom_html5_document_encoding_write(dom_object *obj, zval *retval);
+zend_result dom_html_document_encoding_write(dom_object *obj, zval *retval);
 
 /* documenttype properties */
 zend_result dom_documenttype_name_read(dom_object *obj, zval *retval);
