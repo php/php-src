@@ -887,7 +887,7 @@ PHP_FUNCTION(pcntl_sigtimedwait)
 		RETURN_THROWS();
 	}
 	/* Nanosecond between 0 and 1e9 */
-	if (tv_nsec < 0 || tv_nsec > 1000000000) {
+	if (tv_nsec < 0 || tv_nsec >= 1000000000) {
 		zend_argument_value_error(4, "must be between 0 and 1e9");
 		RETURN_THROWS();
 	}

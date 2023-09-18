@@ -10,7 +10,7 @@ max_execution_time=0
 <?php
 
 try {
-    /* This used to return -1 prior to PHP 8.3.0 */
+    /* This used to return -1 prior to PHP 8.4.0 */
     $signals = [];
     $signal_no = pcntl_sigtimedwait($signals, $signal_infos, 2);
     var_dump($signal_no);
@@ -76,6 +76,14 @@ try {
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
+/* 1_000_000_000ns = 1s so must throw */
+try {
+    $signal_no = var_dump(pcntl_sigtimedwait([SIGTERM], $signal_infos, 0, 1_000_000_000));
+    var_dump($signal_no);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
 ?>
 --EXPECTF--
 ValueError: pcntl_sigtimedwait(): Argument #1 ($signals) cannot be empty
@@ -87,3 +95,4 @@ ValueError: pcntl_sigtimedwait(): Argument #3 ($seconds) must be greater than or
 ValueError: pcntl_sigtimedwait(): Argument #4 ($nanoseconds) must be between 0 and 1e9
 ValueError: pcntl_sigtimedwait(): Argument #4 ($nanoseconds) must be between 0 and 1e9
 ValueError: pcntl_sigtimedwait(): At least one of argument #3 ($seconds) or argument #4 ($nanoseconds) must be greater than 0
+ValueError: pcntl_sigtimedwait(): Argument #4 ($nanoseconds) must be between 0 and 1e9

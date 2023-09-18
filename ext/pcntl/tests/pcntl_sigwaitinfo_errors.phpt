@@ -10,7 +10,7 @@ max_execution_time=0
 <?php
 
 try {
-    /* This used to return -1 prior to PHP 8.3.0 */
+    /* This used to return -1 prior to PHP 8.4.0 */
     $signals = [];
     $signal_no = pcntl_sigwaitinfo($signals, $signal_infos);
     var_dump($signal_no);

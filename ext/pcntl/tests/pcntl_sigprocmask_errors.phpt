@@ -18,7 +18,7 @@ try {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
-    /* This used to return -1 prior to PHP 8.3.0 */
+    /* This used to return -1 prior to PHP 8.4.0 */
     $signals = [];
     $signal_no = pcntl_sigprocmask(SIG_BLOCK, $signals);
     var_dump($signal_no);
