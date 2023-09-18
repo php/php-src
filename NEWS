@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12186 (segfault copying/cloning a finalized HashContext).
     (MaxSem)
 
+- PCRE:
+  . Fixed bug GH-11956 (Backport upstream fix, PCRE regular expressions with
+    JIT enabled gives different result). (nielsdos)
+
 - SimpleXML:
   . Fixed bug GH-12170 (Can't use xpath with comments in SimpleXML). (nielsdos)
   . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
