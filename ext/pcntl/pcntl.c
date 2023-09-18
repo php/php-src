@@ -655,11 +655,9 @@ PHP_FUNCTION(pcntl_signal)
 	}
 
 	if (!zend_is_callable_ex(handle, NULL, 0, NULL, NULL, &error)) {
-		zend_string *func_name = zend_get_callable_name(handle);
 		PCNTL_G(last_error) = EINVAL;
 
 		zend_argument_type_error(2, "must be of type callable|int, %s given", zend_zval_value_name(handle));
-		zend_string_release_ex(func_name, 0);
 		efree(error);
 		RETURN_THROWS();
 	}
