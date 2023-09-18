@@ -229,8 +229,8 @@ pm.max_spare_servers = 3
 ;                          it's always 0 if the process is not in Idle state
 ;                          because memory calculation is done when the request
 ;                          processing has terminated;
-; If the process is in Idle state, then informations are related to the
-; last request the process has served. Otherwise informations are related to
+; If the process is in Idle state, then information is related to the
+; last request the process has served. Otherwise information is related to
 ; the current request being served.
 ; Example output:
 ;   ************************
@@ -355,7 +355,7 @@ pm.max_spare_servers = 3
 
 ; A list of request_uri values which should be filtered from the access log.
 ;
-; As a security precuation, this setting will be ignored if:
+; As a security precaution, this setting will be ignored if:
 ;     - the request method is not GET or HEAD; or
 ;     - there is a request body; or
 ;     - there are query parameters; or

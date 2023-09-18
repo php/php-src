@@ -173,7 +173,7 @@ static ssize_t php_sockop_read(php_stream *stream, char *buf, size_t count)
 		bool dont_wait = has_buffered_data ||
 				(sock->timeout.tv_sec == 0 && sock->timeout.tv_usec == 0);
 		/* Set MSG_DONTWAIT if no wait is needed or there is unlimited timeout which was
-		 * added by fix for #41984 commited in 9343c5404. */
+		 * added by fix for #41984 committed in 9343c5404. */
 		if (dont_wait || sock->timeout.tv_sec != -1) {
 			recv_flags = MSG_DONTWAIT;
 		}
