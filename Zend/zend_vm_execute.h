@@ -56960,15 +56960,16 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 	}
 #endif
 
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
 	/* Force C compiler to store preserved registers to allow JIT using them */
-#if defined(__GNUC__) && defined(__i386__)
+# if defined(__GNUC__) && defined(__i386__)
 	__asm__ __volatile__ (""::: "ebx");
-#elif defined(__GNUC__) && defined(__x86_64__)
+# elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__ __volatile__ (""::: "rbx","r12","r13");
-#elif defined(__GNUC__) && defined(__aarch64__)
+# elif defined(__GNUC__) && defined(__aarch64__)
 	__asm__ __volatile__ (""::: "x19","x20","x21","x22","x23","x24","x25","x26");
+# endif
 #endif
-
 	LOAD_OPLINE();
 	ZEND_VM_LOOP_INTERRUPT_CHECK();
 
