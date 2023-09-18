@@ -29,6 +29,7 @@ static uint32_t ir_str_hash(const char *str, size_t len)
 
 static uint32_t ir_strtab_hash_size(uint32_t size)
 {
+	/* Use big enough power of 2 */
 	size -= 1;
 	size |= (size >> 1);
 	size |= (size >> 2);
@@ -48,7 +49,7 @@ static void ir_strtab_resize(ir_strtab *strtab)
 	ir_strtab_bucket *p;
 	uint32_t pos, i;
 
-	memset(data, -1, hash_size * sizeof(uint32_t));
+	memset(data, IR_INVALID_IDX, hash_size * sizeof(uint32_t));
 	strtab->data = data + (hash_size * sizeof(uint32_t));
 	strtab->mask = (uint32_t)(-(int32_t)hash_size);
 	strtab->size = size;
@@ -94,7 +95,7 @@ void ir_strtab_init(ir_strtab *strtab, uint32_t size, uint32_t buf_size)
 	IR_ASSERT(size > 0);
 	uint32_t hash_size = ir_strtab_hash_size(size);
 	char *data = ir_mem_malloc(hash_size * sizeof(uint32_t) + size * sizeof(ir_strtab_bucket));
-	memset(data, -1, hash_size * sizeof(uint32_t));
+	memset(data, IR_INVALID_IDX, hash_size * sizeof(uint32_t));
 	strtab->data = (data + (hash_size * sizeof(uint32_t)));
 	strtab->mask = (uint32_t)(-(int32_t)hash_size);
 	strtab->size = size;

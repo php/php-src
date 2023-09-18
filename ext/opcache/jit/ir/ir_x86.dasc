@@ -3328,7 +3328,7 @@ static void ir_emit_mul_div_mod(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 
 				|	mov byte [Ra(fp)+offset], ah
 			}
-		} else if (def_reg != IR_REG_RDX) {
+		} else {
 			if (def_reg != IR_REG_NONE) {
 				if (def_reg != IR_REG_RDX) {
 					ir_emit_mov(ctx, type, def_reg, IR_REG_RDX);

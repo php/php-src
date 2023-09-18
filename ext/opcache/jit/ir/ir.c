@@ -778,7 +778,7 @@ static ir_ref _ir_fold_cse(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir
 #define IR_FOLD_KEY(x)  ((x) & 0x1fffff)
 
 /*
- * key = insn->op | (insn->op1->op << 7) | (insn->op1->op << 14)
+ * key = insn->op | (insn->op1->op << 7) | (insn->op2->op << 14)
  *
  * ANY and UNUSED ops are represented by 0
  */
