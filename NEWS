@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed OSS Fuzz #62294 (Unsetting variable after ++/-- on string variable
     warning). (Girgias)
 
+- Core:
+  . Fixed bug GH-12207 (memory leak when class using trait with doc block).
+    (rioderelfte)
+
 - Filter:
   . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
 
