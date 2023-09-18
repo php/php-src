@@ -106,8 +106,17 @@ jobs:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
+            -d opcache.jit_prof_threshold=0.000000001
+            -d opcache.jit_max_root_traces=10000000
+            -d opcache.jit_max_side_traces=10000000
+            -d opcache.jit_max_exit_counters=1000000
+            -d opcache.jit_hot_loop=1
+            -d opcache.jit_hot_func=1
+            -d opcache.jit_hot_return=1
+            -d opcache.jit_hot_side_exit=1
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
@@ -115,6 +124,7 @@ jobs:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
       - name: Test Function JIT
         # ASAN frequently timeouts. Each test run takes ~90 minutes, we can
@@ -126,6 +136,7 @@ jobs:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
             -d opcache.jit=1205
@@ -197,14 +208,24 @@ jobs:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
+            -d opcache.jit_prof_threshold=0.000000001
+            -d opcache.jit_max_root_traces=10000000
+            -d opcache.jit_max_side_traces=10000000
+            -d opcache.jit_max_exit_counters=1000000
+            -d opcache.jit_hot_loop=1
+            -d opcache.jit_hot_func=1
+            -d opcache.jit_hot_return=1
+            -d opcache.jit_hot_side_exit=1
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
       - name: Test Function JIT
         uses: ./.github/actions/test-linux
@@ -212,6 +233,7 @@ jobs:
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
             -d opcache.jit_buffer_size=16M
             -d opcache.jit=1205
@@ -260,15 +282,25 @@ jobs:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
             -d opcache.protect_memory=1
             -d opcache.jit_buffer_size=16M
+            -d opcache.jit_prof_threshold=0.000000001
+            -d opcache.jit_max_root_traces=10000000
+            -d opcache.jit_max_side_traces=10000000
+            -d opcache.jit_max_exit_counters=1000000
+            -d opcache.jit_hot_loop=1
+            -d opcache.jit_hot_func=1
+            -d opcache.jit_hot_return=1
+            -d opcache.jit_hot_side_exit=1
       - name: Test OpCache
         uses: ./.github/actions/test-macos
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} OpCache
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
             -d opcache.protect_memory=1
       - name: Test Function JIT
@@ -277,6 +309,7 @@ jobs:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
             -d opcache.protect_memory=1
             -d opcache.jit_buffer_size=16M
@@ -323,6 +356,7 @@ jobs:
         with:
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
       - name: Upload Test Coverage to Codecov.io
         if: always()
@@ -372,9 +406,18 @@ jobs:
       - name: Enable Opcache and JIT
         run: |
           echo zend_extension=opcache.so > /etc/php.d/opcache.ini
+          echo opcache.enable=1 >> /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
           echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
+          echo opcache.jit_prof_threshold=0.000000001 >> /etc/php.d/opcache.ini
+          echo opcache.jit_max_root_traces=10000000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_max_side_traces=10000000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_max_exit_counters=1000000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_hot_loop=1 >> /etc/php.d/opcache.ini
+          echo opcache.jit_hot_func=1 >> /etc/php.d/opcache.ini
+          echo opcache.jit_hot_return=1 >> /etc/php.d/opcache.ini
+          echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
@@ -545,6 +588,7 @@ jobs:
         with:
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
             --file-cache-prime
       - name: Test File Cache (prime shm, use shm)
@@ -552,6 +596,7 @@ jobs:
         with:
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
             --file-cache-use
       - name: Test File Cache (prime shm, use file)
@@ -559,6 +604,7 @@ jobs:
         with:
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
             --file-cache-use
             -d opcache.file_cache_only=1
@@ -567,6 +613,7 @@ jobs:
         with:
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
             --file-cache-prime
             -d opcache.file_cache_only=1
@@ -575,6 +622,7 @@ jobs:
         with:
           runTestsParameters: >-
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
             --file-cache-use
             -d opcache.file_cache_only=1
@@ -675,6 +723,7 @@ jobs:
           runTestsParameters: >-
             --msan
             -d zend_extension=opcache.so
+            -d opcache.enable=1
             -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
