@@ -16,13 +16,18 @@ require_once dirname(__DIR__) . "/test_setup/test_helpers.inc";
     // To get consistent result without depending on the DB version/setup
     mysqli_query($link, "SET sql_mode=''");
 
-    mysqli_query($link,"CREATE TABLE insert_bind_integers(c1 int unsigned,
-        c2 int unsigned,
-        c3 int,
-        c4 int,
-        c5 int,
-        c6 int unsigned,
-        c7 int)");
+    mysqli_query(
+        $link,
+        "CREATE TABLE insert_bind_integers(
+            c1 int unsigned,
+            c2 int unsigned,
+            c3 int,
+            c4 int,
+            c5 int,
+            c6 int unsigned,
+            c7 int
+        )"
+    );
 
     $stmt = mysqli_prepare($link, "INSERT INTO insert_bind_integers VALUES (?,?,?,?,?,?,?)");
     mysqli_stmt_bind_param($stmt, "iiiiiii", $c1,$c2,$c3,$c4,$c5,$c6,$c7);
