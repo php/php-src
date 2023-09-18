@@ -9674,7 +9674,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				 && trace->stop == ZEND_JIT_TRACE_STOP_INTERPRETER)) {
 					ir_ref ip;
 
-					if (func && zend_accel_in_shm(func->op_array.opcodes)) {
+					if (zend_accel_in_shm(func->op_array.opcodes)) {
 						ip = ir_CONST_ADDR(func->op_array.opcodes);
 					} else {
 						if (!func_ref) {
@@ -11605,11 +11605,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 			case BP_VAR_W:
 				if (packed_loaded) {
 					ir_ref if_def = ir_IF(jit_Z_TYPE_ref(jit, ref));
-					if (!(op1_info & MAY_BE_ARRAY_KEY_LONG) || (op1_info & MAY_BE_ARRAY_NUMERIC_HASH) || packed_loaded || bad_packed_key || dim_type == IS_UNDEF) {
-						ir_IF_TRUE_cold(if_def);
-					} else {
-						ir_IF_TRUE(if_def);
-					}
+					ir_IF_TRUE_cold(if_def);
 					ir_refs_add(found_inputs, ir_END());
 					ir_refs_add(found_vals, ref);
 					ir_IF_FALSE(if_def);
@@ -13699,9 +13695,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 
 			if (flags == ZEND_FETCH_DIM_WRITE) {
 				ir_IF_FALSE_cold(if_readonly);
-				if (flags) {
-					ir_MERGE_WITH(reinit_path);
-				}
+				ir_MERGE_WITH(reinit_path);
 				jit_SET_EX_OPLINE(jit, opline);
 				ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_check_array_promotion),
 					prop_ref, prop_info_ref);
@@ -13709,9 +13703,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				ir_IF_FALSE(if_has_prop_info);
 			} else if (flags == ZEND_FETCH_REF) {
 				ir_IF_FALSE_cold(if_readonly);
-				if (flags) {
-					ir_MERGE_WITH(reinit_path);
-				}
+				ir_MERGE_WITH(reinit_path);
 				ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_create_typed_ref),
 					prop_ref,
 					prop_info_ref,
@@ -14539,11 +14531,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 			case ZEND_MOD:
 				if ((var_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
 				    (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-					if (opline->extended_value != ZEND_ADD ||
-					    (var_info & MAY_BE_ANY) != MAY_BE_ARRAY ||
-					    (val_info & MAY_BE_ANY) == MAY_BE_ARRAY) {
-						may_throw = 1;
-					}
+					may_throw = 1;
 				}
 				if (val_op_type != IS_CONST ||
 				    Z_TYPE_P(RT_CONSTANT((opline+1), (opline+1)->op1)) != IS_LONG ||
