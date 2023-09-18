@@ -17,4 +17,5 @@ class MyClass {
      */
     static $property;
 }
+?>
 --EXPECT--
