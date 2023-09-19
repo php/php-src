@@ -591,7 +591,7 @@ if test "$PHP_FPM" != "no"; then
         return 0;
       }
     ]])], [
-      AC_CHECK_LIB(acl, acl_free, 
+      AC_CHECK_LIB(acl, acl_free,
         [PHP_ADD_LIBRARY(acl)
           have_fpm_acl=yes
           AC_MSG_RESULT([yes])
@@ -615,12 +615,12 @@ if test "$PHP_FPM" != "no"; then
           ], [
             have_fpm_acl=no
             AC_MSG_RESULT([no])
-          ], [AC_MSG_RESULT([skipped])])
+          ], [AC_MSG_RESULT([skipped (cross-compiling)])])
         ])
     ], [
       have_fpm_acl=no
       AC_MSG_RESULT([no])
-    ], [AC_MSG_RESULT([skipped (cross-compiling)])])
+    ])
 
     if test "$have_fpm_acl" = "yes"; then
       AC_DEFINE([HAVE_FPM_ACL], 1, [do we have acl support?])
