@@ -4328,8 +4328,8 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		access_type |= ZEND_ACC_PUBLIC;
 	}
 	if (access_type & ZEND_ACC_STATIC) {
-		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&
-		    (property_info_ptr->flags & ZEND_ACC_STATIC) != 0) {
+		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL) {
+			ZEND_ASSERT(property_info_ptr->flags & ZEND_ACC_STATIC);
 			property_info->offset = property_info_ptr->offset;
 			zval_ptr_dtor(&ce->default_static_members_table[property_info->offset]);
 			if (property_info_ptr->doc_comment) {
@@ -4349,8 +4349,8 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		}
 	} else {
 		zval *property_default_ptr;
-		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&
-		    (property_info_ptr->flags & ZEND_ACC_STATIC) == 0) {
+		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL) {
+			ZEND_ASSERT(!(property_info_ptr->flags & ZEND_ACC_STATIC));
 			property_info->offset = property_info_ptr->offset;
 			zval_ptr_dtor(&ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
 			if (property_info_ptr->doc_comment) {
