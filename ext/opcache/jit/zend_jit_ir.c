@@ -1042,7 +1042,7 @@ static ir_ref jit_ZVAL_ADDR(zend_jit_ctx *jit, zend_jit_addr addr)
 		} else if (Z_REG(addr) == ZREG_RX) {
 			reg = jit_IP(jit);
 		} else {
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 		}
 		return ir_ADD_OFFSET(reg, Z_OFFSET(addr));
 	} else if (Z_MODE(addr) == IS_REF_ZVAL) {
@@ -1071,7 +1071,7 @@ static ir_ref jit_Z_TYPE(zend_jit_ctx *jit, zend_jit_addr addr)
 		} else if (Z_REG(addr) == ZREG_RX) {
 			reg = jit_IP(jit);
 		} else {
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 		}
 		return ir_LOAD_U8(ir_ADD_OFFSET(reg, Z_OFFSET(addr) + offsetof(zval, u1.v.type)));
 	} else {
@@ -1097,7 +1097,7 @@ static ir_ref jit_Z_TYPE_FLAGS(zend_jit_ctx *jit, zend_jit_addr addr)
 		} else if (Z_REG(addr) == ZREG_RX) {
 			reg = jit_IP(jit);
 		} else {
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 		}
 		return ir_LOAD_U8(ir_ADD_OFFSET(reg, Z_OFFSET(addr) + offsetof(zval, u1.v.type_flags)));
 	} else {
@@ -1123,7 +1123,7 @@ static ir_ref jit_Z_TYPE_INFO(zend_jit_ctx *jit, zend_jit_addr addr)
 		} else if (Z_REG(addr) == ZREG_RX) {
 			reg = jit_IP(jit);
 		} else {
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 		}
 		return ir_LOAD_U32(ir_ADD_OFFSET(reg, Z_OFFSET(addr) + offsetof(zval, u1.type_info)));
 	} else {
@@ -1147,7 +1147,7 @@ static void jit_set_Z_TYPE_INFO_ex(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref
 		} else if (Z_REG(addr) == ZREG_RX) {
 			reg = jit_IP(jit);
 		} else {
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 		}
 		ir_STORE(ir_ADD_OFFSET(reg, Z_OFFSET(addr) + offsetof(zval, u1.type_info)), type_info);
 	} else {
@@ -1330,7 +1330,7 @@ static ir_ref zend_jit_use_reg(zend_jit_ctx *jit, zend_jit_addr addr)
 		} else if ((jit->ssa->var_info[var].type & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 			ref = jit_Z_DVAL_ref(jit, jit_ZVAL_ADDR(jit, mem_addr));
 		} else {
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 		}
 		zend_jit_def_reg(jit, addr, ref);
 		return ref;
@@ -3419,7 +3419,7 @@ static void _zend_jit_add_predecessor_ref(zend_jit_ctx *jit, int b, int pred, ir
 					ir_BEGIN(ref);
 					ref = ir_LOOP_END();
 				} else {
-					ZEND_ASSERT(0);
+					ZEND_UNREACHABLE();
 				}
 				ir_MERGE_SET_OP(header, i + 1, ref);
 			}
@@ -3427,7 +3427,7 @@ static void _zend_jit_add_predecessor_ref(zend_jit_ctx *jit, int b, int pred, ir
 			return;
 		}
 	}
-	ZEND_ASSERT(0);
+	ZEND_UNREACHABLE();
 }
 
 static void _zend_jit_merge_smart_branch_inputs(zend_jit_ctx *jit,
@@ -3601,7 +3601,7 @@ static void zend_jit_case_start(zend_jit_ctx *jit, int switch_b, int case_b, ir_
 			ir_MERGE_list(list);
 		}
 	} else {
-		ZEND_ASSERT(0);
+		ZEND_UNREACHABLE();
 	}
 }
 
@@ -4749,7 +4749,7 @@ static int zend_jit_math_long_long(zend_jit_ctx   *jit,
 	} else if (opcode == ZEND_MUL) {
 		op = may_overflow ? IR_MUL_OV : IR_MUL;
 	} else {
-		ZEND_ASSERT(0);
+		ZEND_UNREACHABLE();
 	}
 	op1 = jit_Z_LVAL(jit, op1_addr);
 	op2 = (same_ops) ? op1 : jit_Z_LVAL(jit, op2_addr);
@@ -4864,7 +4864,7 @@ static int zend_jit_math_long_long(zend_jit_ctx   *jit,
 		} else if (opcode == ZEND_MUL) {
 			op = IR_MUL;
 		} else {
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 		}
 #if 1
 		/* reload */
@@ -4913,7 +4913,7 @@ static int zend_jit_math_long_double(zend_jit_ctx   *jit,
 	} else if (opcode == ZEND_DIV) {
 		op = IR_DIV;
 	} else {
-		ZEND_ASSERT(0);
+		ZEND_UNREACHABLE();
 	}
 	op1 = jit_Z_LVAL(jit, op1_addr);
 	op2 = jit_Z_DVAL(jit, op2_addr);
@@ -4947,7 +4947,7 @@ static int zend_jit_math_double_long(zend_jit_ctx   *jit,
 	} else if (opcode == ZEND_DIV) {
 		op = IR_DIV;
 	} else {
-		ZEND_ASSERT(0);
+		ZEND_UNREACHABLE();
 	}
 	op1 = jit_Z_DVAL(jit, op1_addr);
 	op2 = jit_Z_LVAL(jit, op2_addr);
@@ -4984,7 +4984,7 @@ static int zend_jit_math_double_double(zend_jit_ctx   *jit,
 	} else if (opcode == ZEND_DIV) {
 		op = IR_DIV;
 	} else {
-		ZEND_ASSERT(0);
+		ZEND_UNREACHABLE();
 	}
 	op1 = jit_Z_DVAL(jit, op1_addr);
 	op2 = (same_ops) ? op1 : jit_Z_DVAL(jit, op2_addr);
@@ -5514,7 +5514,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 		} else if (opcode == ZEND_BW_XOR) {
 			op = IR_XOR;
 		} else {
-			ZEND_ASSERT(0);
+			ZEND_UNREACHABLE();
 		}
 		op1 = jit_Z_LVAL(jit, op1_addr);
 		op2 = (same_ops) ? op1 : jit_Z_LVAL(jit, op2_addr);
@@ -6397,7 +6397,7 @@ static int zend_jit_assign(zend_jit_ctx  *jit,
 			} else if ((op1_def_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 				jit_set_Z_TYPE_INFO(jit, op1_use_addr, IS_DOUBLE);
 			} else {
-				ZEND_ASSERT(0);
+				ZEND_UNREACHABLE();
 			}
 		}
 	}
@@ -12637,7 +12637,7 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 				ir_END_list(end_inputs);
 			}
 		} else {
-			ZEND_ASSERT(0); // TODO: support for empty()
+			ZEND_UNREACHABLE(); // TODO: support for empty()
 		}
 	}
 
@@ -12669,7 +12669,7 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 			ir_END_list(end_inputs);
 		}
 	} else {
-		ZEND_ASSERT(0); // TODO: support for empty()
+		ZEND_UNREACHABLE(); // TODO: support for empty()
 	}
 
     if (!exit_addr && smart_branch_opcode) {
@@ -13357,7 +13357,7 @@ static int zend_jit_fe_fetch(zend_jit_ctx *jit, const zend_op *opline, uint32_t 
 				pos_ref = packed_pos_ref;
 				p_ref = packed_p_ref;
 			} else {
-				ZEND_ASSERT(0);
+				ZEND_UNREACHABLE();
 			}
 
 			// JIT: Z_FE_POS_P(array) = pos + 1;
@@ -16172,7 +16172,7 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 				} else if (STACK_TYPE(parent_stack, i) == IS_DOUBLE) {
 					type = IR_DOUBLE;
 				} else {
-					ZEND_ASSERT(0);
+					ZEND_UNREACHABLE();
 				}
 				if (ssa && ssa->vars[i].no_val) {
 					/* pass */

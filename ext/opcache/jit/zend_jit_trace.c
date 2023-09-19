@@ -3978,7 +3978,7 @@ static int zend_jit_trace_deoptimization(
 					return 0;
 				}
 			} else {
-				ZEND_ASSERT(0);
+				ZEND_UNREACHABLE();
 			}
 			if (stack) {
 				SET_STACK_TYPE(stack, i, type, 1);
@@ -8500,7 +8500,7 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 					} else if (type == IS_DOUBLE) {
 						fprintf(stderr, "(%g)", t->constants[STACK_REF(stack, j)].d);
 					} else {
-						ZEND_ASSERT(0);
+						ZEND_UNREACHABLE();
 					}
 				} else if (STACK_FLAGS(stack, j) == ZREG_TYPE_ONLY) {
 					fprintf(stderr, "(type_only)");
