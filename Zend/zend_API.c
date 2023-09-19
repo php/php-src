@@ -2446,7 +2446,7 @@ ZEND_API void zend_destroy_modules(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /* {{{ */
+ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module, int module_type) /* {{{ */
 {
 	size_t name_len;
 	zend_string *lcname;
@@ -2483,8 +2483,10 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /
 	}
 
 	name_len = strlen(module->name);
-	lcname = zend_string_alloc(name_len, module->type == MODULE_PERSISTENT);
+	lcname = zend_string_alloc(name_len, module_type == MODULE_PERSISTENT);
 	zend_str_tolower_copy(ZSTR_VAL(lcname), module->name, name_len);
+
+	int module_number = zend_next_free_module();
 
 	lcname = zend_new_interned_string(lcname);
 	if ((module_ptr = zend_hash_add_ptr(&module_registry, lcname, module)) == NULL) {
@@ -2495,7 +2497,10 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /
 	module = module_ptr;
 	EG(current_module) = module;
 
-	if (module->functions && zend_register_functions(NULL, module->functions, NULL, module->type)==FAILURE) {
+	module->module_number = module_number;
+	module->type = module_type;
+
+	if (module->functions && zend_register_functions(NULL, module->functions, NULL, module_type)==FAILURE) {
 		zend_hash_del(&module_registry, lcname);
 		zend_string_release(lcname);
 		EG(current_module) = NULL;
@@ -2511,9 +2516,7 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /
 
 ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *module) /* {{{ */
 {
-	module->module_number = zend_next_free_module();
-	module->type = MODULE_PERSISTENT;
-	return zend_register_module_ex(module);
+	return zend_register_module_ex(module, MODULE_PERSISTENT);
 }
 /* }}} */
 

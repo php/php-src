@@ -375,7 +375,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 ZEND_API void zend_unregister_functions(const zend_function_entry *functions, int count, HashTable *function_table);
 ZEND_API zend_result zend_startup_module(zend_module_entry *module_entry);
 ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *module_entry);
-ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module);
+ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module, int module_type);
 ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module);
 ZEND_API void zend_startup_modules(void);
 ZEND_API void zend_collect_module_handlers(void);
