@@ -414,8 +414,8 @@ extern "C" {
 #define ir_COPY_I16(_op1)                 ir_UNARY_OP_I16(IR_COPY, (_op1))
 #define ir_COPY_I32(_op1)                 ir_UNARY_OP_I32(IR_COPY, (_op1))
 #define ir_COPY_I64(_op1)                 ir_UNARY_OP_I64(IR_COPY, (_op1))
-#define ir_COPY_D(_op1)                   ir_UNARY_OP_I64(IR_COPY, (_op1))
-#define ir_COPY_F(_op1)                   ir_UNARY_OP_I64(IR_COPY, (_op1))
+#define ir_COPY_D(_op1)                   ir_UNARY_OP_D(IR_COPY, (_op1))
+#define ir_COPY_F(_op1)                   ir_UNARY_OP_F(IR_COPY, (_op1))
 
 /* Helper to add address with a constant offset */
 #define ir_ADD_OFFSET(_addr, _offset)     _ir_ADD_OFFSET(_ir_CTX, (_addr), (_offset))
@@ -432,8 +432,8 @@ extern "C" {
 #define ir_HARD_COPY_I16(_op1)            ir_BINARY_OP_I16(IR_COPY, (_op1), 1)
 #define ir_HARD_COPY_I32(_op1)            ir_BINARY_OP_I32(IR_COPY, (_op1), 1)
 #define ir_HARD_COPY_I64(_op1)            ir_BINARY_OP_I64(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_D(_op1)              ir_BINARY_OP_I64(IR_COPY, (_op1), 1)
-#define ir_HARD_COPY_F(_op1)              ir_BINARY_OP_I64(IR_COPY, (_op1), 1)
+#define ir_HARD_COPY_D(_op1)              ir_BINARY_OP_D(IR_COPY, (_op1), 1)
+#define ir_HARD_COPY_F(_op1)              ir_BINARY_OP_F(IR_COPY, (_op1), 1)
 
 #define ir_PARAM(_type, _name, _num)      _ir_PARAM(_ir_CTX, (_type), (_name), (_num))
 #define ir_VAR(_type, _name)              _ir_VAR(_ir_CTX, (_type), (_name))

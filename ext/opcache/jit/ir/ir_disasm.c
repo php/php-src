@@ -488,6 +488,12 @@ int ir_disasm(const char    *name,
 			fprintf(f, "    %" PRIx64 ":", insn->address);
 		}
 		p = insn->op_str;
+#if defined(IR_TARGET_X64) && (CS_API_MAJOR < 5)
+		/* Fix capstone MOVD/MOVQ disassemble mismatch */
+		if (insn->id == X86_INS_MOVQ && strcmp(insn->mnemonic, "movd") == 0) {
+			insn->mnemonic[3] = 'q';
+		}
+#endif
 		if (strlen(p) == 0) {
 			fprintf(f, "\t%s\n", insn->mnemonic);
 			continue;
