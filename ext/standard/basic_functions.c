@@ -1594,36 +1594,45 @@ PHP_FUNCTION(forward_static_call_array)
 }
 /* }}} */
 
-static void fci_addref(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache)
+static void php_user_callable_addref_with_params(zend_fcall_info *fci, zend_fcall_info_cache *fcc, const zval *params)
 {
 	Z_TRY_ADDREF(fci->function_name);
-	if (fci_cache->object) {
-		GC_ADDREF(fci_cache->object);
+	fci->params = NULL;
+	if (params) {
+		ZEND_ASSERT(fci->param_count > 0);
+		fci->params = (zval *) safe_erealloc(fci->params, sizeof(zval), fci->param_count, 0);
+		for (uint32_t i = 0; i < fci->param_count; ++i) {
+			ZVAL_COPY(&fci->params[i], &params[i]);
+		}
 	}
+	zend_fcc_addref(fcc);
 }
 
-static void fci_release(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache)
+static void php_user_callable_dtor_with_params(zend_fcall_info *fci, zend_fcall_info_cache *fcc)
 {
 	zval_ptr_dtor(&fci->function_name);
-	if (fci_cache->object) {
-		zend_object_release(fci_cache->object);
+	if (fci->params) {
+		ZEND_ASSERT(fci->param_count > 0);
+		for (uint32_t i = 0; i < fci->param_count; ++i) {
+			zval_ptr_dtor(&fci->params[i]);
+		}
+		efree(fci->params);
 	}
+	zend_fcc_dtor(fcc);
 }
 
 void user_shutdown_function_dtor(zval *zv) /* {{{ */
 {
 	php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
 
-	zend_fcall_info_args_clear(&shutdown_function_entry->fci, true);
-	fci_release(&shutdown_function_entry->fci, &shutdown_function_entry->fci_cache);
+	php_user_callable_dtor_with_params(&shutdown_function_entry->fci, &shutdown_function_entry->fci_cache);
 	efree(shutdown_function_entry);
 }
 /* }}} */
 
 void user_tick_function_dtor(user_tick_function_entry *tick_function_entry) /* {{{ */
 {
-	zend_fcall_info_args_clear(&tick_function_entry->fci, true);
-	fci_release(&tick_function_entry->fci, &tick_function_entry->fci_cache);
+	php_user_callable_dtor_with_params(&tick_function_entry->fci, &tick_function_entry->fci_cache);
 }
 /* }}} */
 
@@ -1721,16 +1730,14 @@ PHPAPI void php_free_shutdown_functions(void) /* {{{ */
 PHP_FUNCTION(register_shutdown_function)
 {
 	php_shutdown_function_entry entry;
-	zval *params = NULL;
-	uint32_t param_count = 0;
 	bool status;
+	zval *params = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &entry.fci, &entry.fci_cache, &params, &param_count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &entry.fci, &entry.fci_cache, &params, &entry.fci.param_count) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	fci_addref(&entry.fci, &entry.fci_cache);
-	zend_fcall_info_argp(&entry.fci, param_count, params);
+	php_user_callable_addref_with_params(&entry.fci, &entry.fci_cache, params);
 
 	status = append_user_shutdown_function(&entry);
 	ZEND_ASSERT(status);
@@ -2310,15 +2317,13 @@ PHP_FUNCTION(register_tick_function)
 {
 	user_tick_function_entry tick_fe;
 	zval *params = NULL;
-	uint32_t param_count = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &tick_fe.fci, &tick_fe.fci_cache, &params, &param_count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f*", &tick_fe.fci, &tick_fe.fci_cache, &params, &tick_fe.fci.param_count) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	tick_fe.calling = false;
-	fci_addref(&tick_fe.fci, &tick_fe.fci_cache);
-	zend_fcall_info_argp(&tick_fe.fci, param_count, params);
+	php_user_callable_addref_with_params(&tick_fe.fci, &tick_fe.fci_cache, params);
 
 	if (!BG(user_tick_functions)) {
 		BG(user_tick_functions) = (zend_llist *) emalloc(sizeof(zend_llist));
