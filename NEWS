@@ -25,6 +25,7 @@ PHP                                                                        NEWS
     var_dump/print_r). (nielsdos)
   . Fixed bug GH-12208 (SimpleXML infinite loop when a cast is used inside a
     foreach). (nielsdos)
+  . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
 
 28 Sep 2023, PHP 8.1.24
 
