@@ -29,20 +29,6 @@ if (!$link2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
         $host, $user, $db, $port, $socket);
 }
 
-if (!$res = mysqli_query($link2, 'SELECT version() AS server_version')) {
-    printf("[007] [%d] %s\n", mysqli_errno($link2), mysqli_error($link2));
-}
-$tmp = mysqli_fetch_assoc($res);
-mysqli_free_result($res);
-$version = explode('.', $tmp['server_version']);
-if (empty($version)) {
-    printf("[008] Cannot determine server version, need MySQL Server 4.1+ for the test!\n");
-}
-
-if ($version[0] <= 4 && $version[1] < 1) {
-    printf("[009] Need MySQL Server 4.1+ for the test!\n");
-}
-
 if (!$res = mysqli_query($link2, "SHOW CHARACTER SET")) {
     printf("[010] Cannot get list of available character sets, [%d] %s\n",
         mysqli_errno($link2), mysqli_error($link2));

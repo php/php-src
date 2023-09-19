@@ -15,17 +15,6 @@ require_once 'skipifconnectfailure.inc';
         exit(1);
     }
 
-    if (!$res = mysqli_query($link, 'SELECT version() AS server_version'))
-        printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-    $tmp = mysqli_fetch_assoc($res);
-    mysqli_free_result($res);
-    $version = explode('.', $tmp['server_version']);
-    if (empty($version))
-        printf("[005] Cannot determine server version, need MySQL Server 4.1+ for the test!\n");
-
-    if ($version[0] <= 4 && $version[1] < 1)
-        printf("[006] Need MySQL Server 4.1+ for the test!\n");
-
     if (!$res = mysqli_query($link, 'SELECT @@character_set_connection AS charset, @@collation_connection AS collation'))
         printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     $tmp = mysqli_fetch_assoc($res);
