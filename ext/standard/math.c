@@ -95,11 +95,25 @@ static inline double php_intpow10(int power) {
 static inline double php_round_helper(double value, int mode) {
 	double integral, fractional;
 
+	/* Split the input value into the integral and fractional part.
+	 *
+	 * Both parts will have the same sign as the input value. We take
+	 * the absolute value of the fractional part (which will not result
+	 * in branches in the assembly) to make the following cases simpler.
+	 */
 	fractional = fabs(modf(value, &integral));
 
 	switch (mode) {
 		case PHP_ROUND_HALF_UP:
 			if (fractional >= 0.5) {
+				/* We must increase the magnitude of the integral part
+				 * (rounding up / towards infinity). copysign(1.0, integral)
+				 * will either result in 1.0 or -1.0 depending on the sign
+				 * of the input, thus increasing the magnitude, but without
+				 * generating branches in the assembly.
+				 *
+				 * This pattern is equally used for all the other modes.
+				 */
 				return integral + copysign(1.0, integral);
 			}
 
@@ -120,6 +134,9 @@ static inline double php_round_helper(double value, int mode) {
 			if (fractional == 0.5) {
 				bool even = !fmod(integral, 2.0);
 
+				/* If the integral part is not even we can make it even
+				 * by adding one in the direction of the existing sign.
+				 */
 				if (!even) {
 					return integral + copysign(1.0, integral);
 				}
