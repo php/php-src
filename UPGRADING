@@ -50,6 +50,15 @@ PHP 8.4 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Standard:
+  . The internal implementation for rounding to integers has been rewritten
+    to be easier to verify for correctness and to be easier to maintain.
+    Some rounding bugs have been fixed as a result of the rewrite. For
+    example previously rounding 0.49999999999999994 to the nearest integer
+    would have resulted in 1.0 instead of the correct result 0.0. Additional
+    inputs might also be affected and result in different outputs compared to
+    earlier PHP versions.
+
 ========================================
 6. New Functions
 ========================================
