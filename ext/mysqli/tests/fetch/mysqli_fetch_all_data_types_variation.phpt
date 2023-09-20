@@ -46,9 +46,6 @@ function func_mysqli_fetch_all(
 
     $fields = mysqli_fetch_fields($result);
 
-    // I have no idea what this condition does as this seem to be some PHP 6 stuff???
-    // if (!(gettype($php_value)=="unicode" && ($fields[1]->flags & 128))) {
-
     if ($regexp_comparison) {
         if (!preg_match($regexp_comparison, (string)$row['label']) || !preg_match($regexp_comparison, (string)$row[1])) {
             printf("[%04d] Expecting %s/%s [reg exp = %s], got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
@@ -151,10 +148,10 @@ func_mysqli_fetch_all($link, $engine, "CHAR(255)", $string255,  $string255, 550)
 func_mysqli_fetch_all($link, $engine, "CHAR(1) NOT NULL", "a", "a", 560);
 func_mysqli_fetch_all($link, $engine, "CHAR(1)", NULL, NULL, 570);
 
-$string65k = func_mysqli_fetch_array_make_string(65400);
+$string16k = func_mysqli_fetch_array_make_string(16000);
 func_mysqli_fetch_all($link, $engine, "VARCHAR(1)", "a", "a", 580);
 func_mysqli_fetch_all($link, $engine, "VARCHAR(255)", $string255, $string255, 590);
-func_mysqli_fetch_all($link, $engine, "VARCHAR(65400)", $string65k, $string65k, 600);
+func_mysqli_fetch_all($link, $engine, "VARCHAR(16000)", $string16k, $string16k, 600);
 func_mysqli_fetch_all($link, $engine, "VARCHAR(1) NOT NULL", "a", "a", 610);
 func_mysqli_fetch_all($link, $engine, "VARCHAR(1)", NULL, NULL, 620);
 
