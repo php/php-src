@@ -398,6 +398,7 @@ jobs:
           git rev-parse HEAD
           export ASAN_OPTIONS=exitcode=139
           export PHPSECLIB_ALLOW_JIT=1
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
           php vendor/bin/phpunit --configuration=tests/phpunit.xml || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
@@ -421,6 +422,7 @@ jobs:
           cd psalm
           git checkout master
           git rev-parse HEAD
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
           export ASAN_OPTIONS=exitcode=139
           export PSALM_ALLOW_XDEBUG=1
           php ./psalm --no-cache --threads=1 || EXIT_CODE=$?
@@ -434,6 +436,7 @@ jobs:
           cd phpstan-src
           git rev-parse HEAD
           export ASAN_OPTIONS=exitcode=139
+          sed 's/80299/89999/g' -i conf/config.neon
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           php bin/phpstan clear-result-cache
           php bin/phpstan --debug || EXIT_CODE=$?
@@ -444,7 +447,10 @@ jobs:
         if: always()
         run: |
           cd phpstan-src
+          git reset --hard
           git checkout 1f608dc6a560f4a5accc854add8e005da0e7ceea
+          sed 's/80299/89999/g' -i conf/config.neon
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
           export ASAN_OPTIONS=exitcode=139
           php bin/phpstan clear-result-cache
           php bin/phpstan --debug || exit $?
