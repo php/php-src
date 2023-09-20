@@ -86,7 +86,7 @@ set OPENSSL_CONF=
 rem set SSLEAY_CONF=
 
 rem prepare for OPcache
-if "%OPCACHE%" equ "1" set OPCACHE_OPTS=-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=64M -d opcache.jit_max_root_traces=10000000 -d opcache.jit_max_side_traces=10000000 -d opcache.jit_max_exit_counters=1000000 -d opcache.jit_hot_loop=1 -d opcache.jit_hot_func=1 -d opcache.jit_hot_return=1 -d opcache.jit_hot_side_exit=1
+if "%OPCACHE%" equ "1" set OPCACHE_OPTS=-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.protect_memory=1 -d opcache.jit_buffer_size=64M -d opcache.jit_max_root_traces=10000000 -d opcache.jit_max_side_traces=10000000 -d opcache.jit_max_exit_counters=1000000 -d opcache.jit_hot_loop=1 -d opcache.jit_hot_func=1 -d opcache.jit_hot_return=1 -d opcache.jit_hot_side_exit=1 -d opcache.jit=tracing
 rem work-around for failing to dl(mysqli) with OPcache (https://github.com/php/php-src/issues/8508)
 if "%OPCACHE%" equ "1" set OPCACHE_OPTS=%OPCACHE_OPTS% -d extension=mysqli
 
