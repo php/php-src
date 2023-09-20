@@ -2607,8 +2607,7 @@ dont_restart_conversion:
 append_trim_marker:
 	if (ZSTR_LEN(marker) > 0) {
 		MB_CONVERT_BUF_ENSURE((&buf), buf.out, buf.limit, ZSTR_LEN(marker));
-		memcpy(buf.out, ZSTR_VAL(marker), ZSTR_LEN(marker));
-		buf.out += ZSTR_LEN(marker);
+		buf.out = zend_mempcpy(buf.out, ZSTR_VAL(marker), ZSTR_LEN(marker));
 	}
 
 	/* Even if `enc` is UTF-8, don't mark the output string as valid UTF-8, because

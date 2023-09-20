@@ -274,6 +274,15 @@ static zend_always_inline size_t zend_strnlen(const char* s, size_t maxlen)
 #endif
 }
 
+static zend_always_inline void *zend_mempcpy(void *dest, const void *src, size_t n)
+{
+#if defined(HAVE_MEMPCPY)
+	return mempcpy(dest, src, n);
+#else
+	return (char *)memcpy(dest, src, n) + n;
+#endif
+}
+
 ZEND_API zend_result ZEND_FASTCALL increment_function(zval *op1);
 ZEND_API zend_result ZEND_FASTCALL decrement_function(zval *op2);
 

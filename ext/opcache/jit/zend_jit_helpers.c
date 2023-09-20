@@ -3150,8 +3150,7 @@ static zend_string* ZEND_FASTCALL zend_jit_rope_end(zend_string **rope, uint32_t
 
 	char *target = ZSTR_VAL(ret);
 	for (i = 0; i <= count; i++) {
-		memcpy(target, ZSTR_VAL(rope[i]), ZSTR_LEN(rope[i]));
-		target += ZSTR_LEN(rope[i]);
+		target = zend_mempcpy(target, ZSTR_VAL(rope[i]), ZSTR_LEN(rope[i]));
 		zend_string_release_ex(rope[i], 0);
 	}
 	*target = '\0';

@@ -1995,27 +1995,23 @@ PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure
 					case 0:
 						switch (state) {
 							case 2:
-								memcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
-								tptr += (bptr - hunk_begin - 1);
+								tptr = zend_mempcpy(tptr, hunk_begin, (bptr - hunk_begin - 1));
 								hunk_begin = bptr;
 								goto quit_loop_2;
 
 							case 1:
-								memcpy(tptr, hunk_begin, bptr - hunk_begin);
-								tptr += (bptr - hunk_begin);
+								tptr = zend_mempcpy(tptr, hunk_begin, (bptr - hunk_begin));
 								hunk_begin = bptr;
 								ZEND_FALLTHROUGH;
 
 							case 0: {
 								if (hunk_begin != line_end) {
-									memcpy(tptr, hunk_begin, bptr - hunk_begin);
-									tptr += (bptr - hunk_begin);
+									tptr = zend_mempcpy(tptr, hunk_begin, (bptr - hunk_begin));
 									hunk_begin = bptr;
 								}
 
 								/* add the embedded line end to the field */
-								memcpy(tptr, line_end, line_end_len);
-								tptr += line_end_len;
+								tptr = zend_mempcpy(tptr, line_end, line_end_len);
 
 								/* nothing can be fetched if stream is NULL (e.g. str_getcsv()) */
 								if (stream == NULL) {
@@ -2082,13 +2078,11 @@ PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure
 							case 2: /* embedded enclosure ? let's check it */
 								if (*bptr != enclosure) {
 									/* real enclosure */
-									memcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
-									tptr += (bptr - hunk_begin - 1);
+									tptr = zend_mempcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
 									hunk_begin = bptr;
 									goto quit_loop_2;
 								}
-								memcpy(tptr, hunk_begin, bptr - hunk_begin);
-								tptr += (bptr - hunk_begin);
+								tptr = zend_mempcpy(tptr, hunk_begin, bptr - hunk_begin);
 								bptr++;
 								hunk_begin = bptr;
 								state = 0;
@@ -2108,14 +2102,12 @@ PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure
 						switch (state) {
 							case 2:
 								/* real enclosure */
-								memcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
-								tptr += (bptr - hunk_begin - 1);
+								tptr = zend_mempcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
 								hunk_begin = bptr;
 								goto quit_loop_2;
 							case 1:
 								bptr += inc_len;
-								memcpy(tptr, hunk_begin, bptr - hunk_begin);
-								tptr += (bptr - hunk_begin);
+								tptr = zend_mempcpy(tptr, hunk_begin, bptr - hunk_begin);
 								hunk_begin = bptr;
 								state = 0;
 								break;
@@ -2153,8 +2145,7 @@ PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure
 			}
 
 		quit_loop_3:
-			memcpy(tptr, hunk_begin, bptr - hunk_begin);
-			tptr += (bptr - hunk_begin);
+			tptr = zend_mempcpy(tptr, hunk_begin, bptr - hunk_begin);
 			bptr += inc_len;
 			comp_end = tptr;
 		} else {
@@ -2183,8 +2174,7 @@ PHPAPI HashTable *php_fgetcsv(php_stream *stream, char delimiter, char enclosure
 				inc_len = (bptr < limit ? (*bptr == '\0' ? 1 : php_mblen(bptr, limit - bptr)): 0);
 			}
 		quit_loop_4:
-			memcpy(tptr, hunk_begin, bptr - hunk_begin);
-			tptr += (bptr - hunk_begin);
+			tptr = zend_mempcpy(tptr, hunk_begin, bptr - hunk_begin);
 
 			comp_end = (char *)php_fgetcsv_lookup_trailing_spaces(temp, tptr - temp);
 			if (*bptr == delimiter) {

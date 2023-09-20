@@ -322,10 +322,8 @@ static inline char *get_default_content_type(uint32_t prefix_len, uint32_t *len)
 		*len = prefix_len + mimetype_len + sizeof("; charset=") - 1 + charset_len;
 		content_type = (char*)emalloc(*len + 1);
 		p = content_type + prefix_len;
-		memcpy(p, mimetype, mimetype_len);
-		p += mimetype_len;
-		memcpy(p, "; charset=", sizeof("; charset=") - 1);
-		p += sizeof("; charset=") - 1;
+		p = zend_mempcpy(p, mimetype, mimetype_len);
+		p = zend_mempcpy(p, "; charset=", sizeof("; charset=") - 1);
 		memcpy(p, charset, charset_len + 1);
 	} else {
 		*len = prefix_len + mimetype_len;
