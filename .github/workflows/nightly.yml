@@ -374,8 +374,8 @@ jobs:
           echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
           echo opcache.jit_prof_threshold=0.000000001 >> /etc/php.d/opcache.ini
-          echo opcache.jit_max_root_traces=10000000 >> /etc/php.d/opcache.ini
-          echo opcache.jit_max_side_traces=10000000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_max_root_traces=1000000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_max_side_traces=1000000 >> /etc/php.d/opcache.ini
           echo opcache.jit_max_exit_counters=1000000 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_loop=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_func=1 >> /etc/php.d/opcache.ini
