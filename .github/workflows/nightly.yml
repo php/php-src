@@ -381,6 +381,78 @@ jobs:
           echo opcache.jit_hot_func=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_return=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
+      - name: Test PHPSeclib (fixed commit for JIT)
+        if: always()
+        run: |
+          git clone https://github.com/phpseclib/phpseclib --branch=master
+          cd phpseclib
+          git checkout e840f7a6018172c48601316aa111546132ec653e
+          export ASAN_OPTIONS=exitcode=139
+          export PHPSECLIB_ALLOW_JIT=1
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php vendor/bin/phpunit --configuration=tests/phpunit.xml || exit $?
+      - name: Test PHPSeclib (latest commit for ASAN)
+        if: always()
+        run: |
+          git clone https://github.com/phpseclib/phpseclib --branch=master --depth 1
+          cd phpseclib
+          git rev-parse HEAD
+          export ASAN_OPTIONS=exitcode=139
+          export PHPSECLIB_ALLOW_JIT=1
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php vendor/bin/phpunit --configuration=tests/phpunit.xml || EXIT_CODE=$?
+          if [ ${EXIT_CODE:-0} -gt 128 ]; then
+            exit 1
+          fi
+      - name: Test Psalm (fixed commit for JIT)
+        if: always()
+        run: |
+          git clone https://github.com/vimeo/psalm --branch=master
+          cd psalm
+          git checkout 7428e49b115a2a837aa29cf0fafd0ca902fe2457
+          export ASAN_OPTIONS=exitcode=139
+          export PSALM_ALLOW_XDEBUG=1
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php ./psalm --no-cache --threads=1 || EXIT_CODE=$?
+          if [ ${EXIT_CODE:-0} -gt 128 ]; then
+            exit 1
+          fi
+      - name: Test Psalm (latest commit for ASAN)
+        if: always()
+        run: |
+          git clone https://github.com/vimeo/psalm --branch=master --depth=1
+          cd psalm
+          git rev-parse HEAD
+          export ASAN_OPTIONS=exitcode=139
+          export PSALM_ALLOW_XDEBUG=1
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php ./psalm --no-cache --threads=1 || EXIT_CODE=$?
+          if [ ${EXIT_CODE:-0} -gt 128 ]; then
+            exit 1
+          fi
+      - name: Test PHPStan (fixed commit for JIT)
+        if: always()
+        run: |
+          git clone https://github.com/phpstan/phpstan-src
+          cd phpstan-src
+          git checkout 1f608dc6a560f4a5accc854add8e005da0e7ceea
+          export ASAN_OPTIONS=exitcode=139
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php bin/phpstan clear-result-cache
+          php bin/phpstan --debug || exit $?
+      - name: Test PHPStan (latest commit for ASAN)
+        if: always()
+        run: |
+          git clone https://github.com/phpstan/phpstan-src --depth=1
+          cd phpstan-src
+          git rev-parse HEAD
+          export ASAN_OPTIONS=exitcode=139
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php bin/phpstan clear-result-cache
+          php bin/phpstan --debug || EXIT_CODE=$?
+          if [ ${EXIT_CODE:-0} -gt 128 ]; then
+            exit 1
+          fi
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
