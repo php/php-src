@@ -34,6 +34,9 @@ PHP                                                                        NEWS
     foreach). (nielsdos)
   . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
 
+- XML:
+  . Fix return type of stub of xml_parse_into_struct(). (nielsdos)
+
 28 Sep 2023, PHP 8.1.24
 
 - Core:
