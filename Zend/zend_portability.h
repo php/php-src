@@ -106,10 +106,19 @@
 # define ZEND_ASSERT(c) ZEND_ASSUME(c)
 #endif
 
+#ifdef __has_builtin
+# if __has_builtin(__builtin_unreachable)
+#  define _ZEND_UNREACHABLE() __builtin_unreachable()
+# endif
+#endif
+#ifndef _ZEND_UNREACHABLE
+# define _ZEND_UNREACHABLE() ZEND_ASSUME(0)
+#endif
+
 #if ZEND_DEBUG
-# define ZEND_UNREACHABLE() do {ZEND_ASSERT(0); ZEND_ASSUME(0);} while (0)
+# define ZEND_UNREACHABLE() do {ZEND_ASSERT(0); _ZEND_UNREACHABLE();} while (0)
 #else
-# define ZEND_UNREACHABLE() ZEND_ASSUME(0)
+# define ZEND_UNREACHABLE() _ZEND_UNREACHABLE()
 #endif
 
 /* pseudo fallthrough keyword; */
