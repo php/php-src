@@ -26,11 +26,6 @@ mysqli_report(MYSQLI_REPORT_OFF);
     mysqli_close($link);
     print "done!";
 ?>
---CLEAN--
-<?php
-// Re-enable exceptions
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-?>
 --EXPECT--
 int(0)
 int(1146)

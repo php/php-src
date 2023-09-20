@@ -42,12 +42,6 @@ mysqli_stmt_bind_result($stmt, $c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8);
 mysqli_stmt_execute($stmt);
 mysqli_stmt_fetch($stmt);
 
-if (mysqli_get_server_version($link) < 50000) {
-    // 4.1 is faulty and will return big number for $c6
-    if ($c6 == "18446743740376218283") {
-        $c6 = 0;
-    }
-}
 $c8 = 4567;// change this to test how mysqli/mysqlnd handles is_ref changing
 $test = array($c1,$c2,$c3,$c4,$c5,$c6,$c7,$c8);
 
