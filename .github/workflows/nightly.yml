@@ -393,12 +393,11 @@ jobs:
       - name: Test PHPSeclib (latest commit for ASAN)
         if: always()
         run: |
-          git clone https://github.com/phpseclib/phpseclib --branch=master --depth 1
           cd phpseclib
+          git checkout master
           git rev-parse HEAD
           export ASAN_OPTIONS=exitcode=139
           export PHPSECLIB_ALLOW_JIT=1
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
           php vendor/bin/phpunit --configuration=tests/phpunit.xml || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
@@ -419,30 +418,19 @@ jobs:
       - name: Test Psalm (latest commit for ASAN)
         if: always()
         run: |
-          git clone https://github.com/vimeo/psalm --branch=master --depth=1
           cd psalm
+          git checkout master
           git rev-parse HEAD
           export ASAN_OPTIONS=exitcode=139
           export PSALM_ALLOW_XDEBUG=1
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
           php ./psalm --no-cache --threads=1 || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
-      - name: Test PHPStan (fixed commit for JIT)
-        if: always()
-        run: |
-          git clone https://github.com/phpstan/phpstan-src
-          cd phpstan-src
-          git checkout 1f608dc6a560f4a5accc854add8e005da0e7ceea
-          export ASAN_OPTIONS=exitcode=139
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php bin/phpstan clear-result-cache
-          php bin/phpstan --debug || exit $?
       - name: Test PHPStan (latest commit for ASAN)
         if: always()
         run: |
-          git clone https://github.com/phpstan/phpstan-src --depth=1
+          git clone https://github.com/phpstan/phpstan-src
           cd phpstan-src
           git rev-parse HEAD
           export ASAN_OPTIONS=exitcode=139
@@ -452,6 +440,14 @@ jobs:
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
+      - name: Test PHPStan (fixed commit for JIT)
+        if: always()
+        run: |
+          cd phpstan-src
+          git checkout 1f608dc6a560f4a5accc854add8e005da0e7ceea
+          export ASAN_OPTIONS=exitcode=139
+          php bin/phpstan clear-result-cache
+          php bin/phpstan --debug || exit $?
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
