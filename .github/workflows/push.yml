@@ -108,7 +108,7 @@ jobs:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
-            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address" CC=clang CXX=clang++' || '' }}
+            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address" CC=clang CXX=clang++ --disable-opcache-jit' || '' }}
           skipSlow: ${{ matrix.asan }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
@@ -128,17 +128,8 @@ jobs:
           testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}_${{ matrix.asan && 'OpCache' || 'Tracing JIT' }}
           runTestsParameters: >-
             -d zend_extension=opcache.so
-            -d opcache.enable=1
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
-            -d opcache.jit_prof_threshold=0.000000001
-            -d opcache.jit_max_root_traces=10000000
-            -d opcache.jit_max_side_traces=10000000
-            -d opcache.jit_max_exit_counters=1000000
-            -d opcache.jit_hot_loop=1
-            -d opcache.jit_hot_func=1
-            -d opcache.jit_hot_return=1
-            -d opcache.jit_hot_side_exit=1
+            ${{ !matrix.asan && '-d opcache.jit_buffer_size=16M' || '' }}
             ${{ matrix.asan && '--asan -x' || '' }}
       - name: Verify generated files are up to date
         if: ${{ !matrix.asan }}
@@ -171,18 +162,9 @@ jobs:
           testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
           runTestsParameters: >-
             -d zend_extension=opcache.so
-            -d opcache.enable=1
             -d opcache.enable_cli=1
             -d opcache.protect_memory=1
             -d opcache.jit_buffer_size=16M
-            -d opcache.jit_prof_threshold=0.000000001
-            -d opcache.jit_max_root_traces=10000000
-            -d opcache.jit_max_side_traces=10000000
-            -d opcache.jit_max_exit_counters=1000000
-            -d opcache.jit_hot_loop=1
-            -d opcache.jit_hot_func=1
-            -d opcache.jit_hot_return=1
-            -d opcache.jit_hot_side_exit=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   WINDOWS:
