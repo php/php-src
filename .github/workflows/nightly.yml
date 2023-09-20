@@ -380,6 +380,7 @@ jobs:
           echo opcache.jit_hot_func=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_return=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
+          php -v
       - name: Test PHPSeclib (fixed commit for JIT)
         if: always()
         run: |
@@ -390,6 +391,7 @@ jobs:
           export PHPSECLIB_ALLOW_JIT=1
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           php vendor/bin/phpunit --configuration=tests/phpunit.xml || exit $?
+          git clean -ffdx
       - name: Test PHPSeclib (latest commit for ASAN)
         if: always()
         run: |
@@ -416,6 +418,7 @@ jobs:
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
+          git clean -ffdx
       - name: Test Psalm (latest commit for ASAN)
         if: always()
         run: |
@@ -443,11 +446,11 @@ jobs:
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
+          git clean -ffdx
       - name: Test PHPStan (fixed commit for JIT)
         if: always()
         run: |
           cd phpstan-src
-          git reset --hard
           git checkout 1f608dc6a560f4a5accc854add8e005da0e7ceea
           sed 's/80299/89999/g' -i conf/config.neon
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
@@ -457,6 +460,11 @@ jobs:
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
+          git clone https://github.com/amphp/ext-uv --depth 1
+          cd ext-uv
+          phpize && ./configure --enable-debug && make -j$(nproc) && make install
+          cd ..
+          echo extension=uv >> /etc/php.d/uv.ini
           repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
           X=0
           for repository in $repositories; do
