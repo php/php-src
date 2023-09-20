@@ -1,5 +1,20 @@
 --TEST--
 Bug #11917 (primitives seem to be passed via reference instead of by value under some conditions when JIT is enabled on windows)
+--INI--
+opcache.enable=1
+opcache.enable_cli=1
+opcache.protect_memory=1
+opcache.jit_buffer_size=64M
+opcache.jit=1255
+opcache.jit_max_root_traces=10000000
+opcache.jit_max_side_traces=10000000
+opcache.jit_max_exit_counters=1000000
+opcache.jit_hot_loop=1
+opcache.jit_hot_func=1
+opcache.jit_hot_return=1
+opcache.jit_hot_side_exit=1
+--EXTENSIONS--
+opcache
 --FILE--
 <?php
 $a = [2147483647,2147483647,2147483647,3,0,0,32,2147483584,127];
