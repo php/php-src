@@ -76,45 +76,25 @@ function my_mysqli_connect(
     int $port,
     ?string $socket = null,
     bool $enable_env_flags = true
-): \mysqli|false {
-
-    $flags = $enable_env_flags? get_environment_connection_flags():0;
+): \mysqli {
+    // Because the tests are meant to test both error modes, they can set the report_mode to a different value,
+    // which we do not want to override. However, we want to make sure that if a connection cannot be made,
+    // the constuctor will throw an exception. We store current report_mode in variable and restore it later.
+    $driver = new mysqli_driver;
+    $report_mode = $driver->report_mode;
+    $driver->report_mode = MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT;
+    $flags = $enable_env_flags ? get_environment_connection_flags() : 0;
     if ($flags !== 0) {
         $link = mysqli_init();
-        if (!mysqli_real_connect($link, $host, $user, $password, $db, $port, $socket, $flags)) {
-            $link = false;
-        }
+        mysqli_real_connect($link, $host, $user, $password, $db, $port, $socket, $flags);
     } else {
         $link = mysqli_connect($host, $user, $password, $db, $port, $socket);
     }
-
+    // Restore error mode
+    $driver->report_mode = $report_mode;
     return $link;
 }
-
-/**
- * Whenever possible, please use this wrapper to make testing of MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
- *
- * @param bool $enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)
- */
-function my_mysqli_real_connect(
-    mysqli $link,
-    string $host,
-    string $user,
-    string $password,
-    string $db,
-    int $port,
-    ?string $socket = null,
-    int $flags = 0,
-    bool $enable_env_flags = true
-): \mysqli|false {
-    if ($enable_env_flags) {
-        $flags = $flags | get_environment_connection_flags();
-    }
-
-    return mysqli_real_connect($link, $host, $user, $password, $db, $port, $socket, $flags);
-}
-
-function default_mysqli_connect_ex(): \mysqli|false {
+function default_mysqli_connect(): \mysqli{
     return my_mysqli_connect(
         get_default_host(),
         get_default_user(),
@@ -124,84 +104,31 @@ function default_mysqli_connect_ex(): \mysqli|false {
         null,
     );
 }
-function default_mysqli_connect(): \mysqli{
-    $link = default_mysqli_connect_ex();
-    if (!$link) {
-        throw new Error("Cannot connect to default connection");
-    }
-    return $link;
-}
-function default_mysqli_real_connect(mysqli $link, int $flags = 0): bool {
-    return my_mysqli_real_connect(
-        $link,
-        get_default_host(),
-        get_default_user(),
-        get_default_password(),
-        get_default_database(),
-        get_default_port(),
-        null,
-        $flags,
-    );
-}
-
 function mysqli_check_skip_test(): void {
-    /* Disable exceptions */
-    mysqli_report(MYSQLI_REPORT_OFF);
-    $link = default_mysqli_connect_ex();
-    // Re-enable exceptions
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-    if (!is_object($link)) {
+    try {
+        $link = default_mysqli_connect();
+    } catch (\mysqli_sql_exception) {
         die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
     }
-    mysqli_close($link);
 }
-
 function have_innodb(mysqli $link): bool {
-    if (($res = $link->query("SHOW VARIABLES LIKE 'have_innodb'"))
-        && ($row = $res->fetch_row())
-        && !empty($row)
-    ) {
-        return !($row[1] == 'DISABLED' || $row[1] == 'NO');
-    }
-    // MySQL 5.6.1+
-    if ($res = $link->query('SHOW ENGINES')) {
-        while ($row = $res->fetch_assoc()) {
-            if (!isset($row['Engine']) || !isset($row['Support'])) {
-                return false;
-            }
-
-            if (($row['Engine'] == 'InnoDB')
-                && (($row['Support'] == 'YES') || ($row['Support'] == 'DEFAULT'))
-            ) {
-                return true;
-            }
-        }
-    }
-    return false;
+    $res = $link->query("SELECT SUPPORT FROM INFORMATION_SCHEMA.ENGINES WHERE ENGINE = 'InnoDB'");
+    $supported = $res->fetch_column();
+    return $supported === 'YES' || $supported === 'DEFAULT';
 }
 function mysqli_check_innodb_support_skip_test(): void {
-    /* Disable exceptions */
-    mysqli_report(MYSQLI_REPORT_OFF);
-    $link = default_mysqli_connect_ex();
-    if (!is_object($link)) {
-        // Re-enable exceptions
-        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+    try {
+        $link = default_mysqli_connect();
+    } catch (\mysqli_sql_exception) {
         die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
     }
-    $status = have_innodb($link);
-    // Re-enable exceptions
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-    mysqli_close($link);
-    if (!$status) {
-        die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
+    if (! have_innodb($link)) {
+        die(sprintf("skip Needs InnoDB support"));
     }
 }
-
 function tear_down_table_on_default_connection(string $table) {
     $link = default_mysqli_connect();
-    if (!mysqli_query($link, 'DROP TABLE IF EXISTS ' . $table)) {
-        printf("[clean] Failed to drop \"$table\" table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-    }
+    mysqli_query($link, 'DROP TABLE IF EXISTS ' . $table);
 }
 
 function setup_table_with_data_on_default_connection(string $table): mysqli {
