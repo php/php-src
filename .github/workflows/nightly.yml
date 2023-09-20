@@ -107,7 +107,7 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
+            -d opcache.jit_buffer_size=64M
             -d opcache.jit_prof_threshold=0.000000001
             -d opcache.jit_max_root_traces=10000000
             -d opcache.jit_max_side_traces=10000000
@@ -135,7 +135,7 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
+            -d opcache.jit_buffer_size=64M
             -d opcache.jit=1205
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
@@ -206,7 +206,7 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
+            -d opcache.jit_buffer_size=64M
             -d opcache.jit_prof_threshold=0.000000001
             -d opcache.jit_max_root_traces=10000000
             -d opcache.jit_max_side_traces=10000000
@@ -229,7 +229,7 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
+            -d opcache.jit_buffer_size=64M
             -d opcache.jit=1205
       - name: Notify Slack
         if: failure()
@@ -278,7 +278,7 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             -d opcache.protect_memory=1
-            -d opcache.jit_buffer_size=16M
+            -d opcache.jit_buffer_size=64M
             -d opcache.jit_prof_threshold=0.000000001
             -d opcache.jit_max_root_traces=10000000
             -d opcache.jit_max_side_traces=10000000
@@ -303,7 +303,7 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             -d opcache.protect_memory=1
-            -d opcache.jit_buffer_size=16M
+            -d opcache.jit_buffer_size=64M
             -d opcache.jit=1205
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
