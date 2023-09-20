@@ -88,7 +88,10 @@ function my_mysqli_connect(
         $link = mysqli_init();
         mysqli_real_connect($link, $host, $user, $password, $db, $port, $socket, $flags);
     } else {
-        $link = mysqli_connect($host, $user, $password, $db, $port, $socket);
+        /* TODO Investigate why on LINUX_X64_RELEASE_NTS CI pipeline
+         * Warning: mysqli_connect(): php_network_getaddresses: getaddrinfo for mysql failed:
+         * Temporary failure in name resolution in test_helpers.inc on line 91 */
+        $link = @mysqli_connect($host, $user, $password, $db, $port, $socket);
     }
     // Restore error mode
     $driver->report_mode = $report_mode;
