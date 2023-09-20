@@ -133,6 +133,11 @@ const XML_OPTION_SKIP_TAGSTART = UNKNOWN;
  * @cvalue PHP_XML_OPTION_SKIP_WHITE
  */
 const XML_OPTION_SKIP_WHITE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_XML_OPTION_PARSE_HUGE
+ */
+const XML_OPTION_PARSE_HUGE = UNKNOWN;
 
 /**
  * @var string
