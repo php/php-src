@@ -129,7 +129,7 @@ jobs:
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            ${{ !matrix.asan && '-d opcache.jit_buffer_size=16M' || '' }}
+            ${{ !matrix.asan && '-d opcache.jit=tracing' || '' }}
             ${{ matrix.asan && '--asan -x' || '' }}
       - name: Verify generated files are up to date
         if: ${{ !matrix.asan }}
