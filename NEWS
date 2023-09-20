@@ -36,6 +36,7 @@ PHP                                                                        NEWS
 
 - XML:
   . Fix return type of stub of xml_parse_into_struct(). (nielsdos)
+  . Fix memory leak when calling xml_parse_into_struct() twice. (nielsdos)
 
 28 Sep 2023, PHP 8.1.24
 
