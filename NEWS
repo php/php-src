@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     parent class implementations). (timwolla)
   . Fixed OSS Fuzz #62294 (Unsetting variable after ++/-- on string variable
     warning). (Girgias)
+  . Fixed bug GH-12215 (Module entry being overwritten causes type errors in
+    ext/dom). (nielsdos)
 
 - Core:
   . Fixed bug GH-12207 (memory leak when class using trait with doc block).
@@ -27,6 +29,7 @@ PHP                                                                        NEWS
     var_dump/print_r). (nielsdos)
   . Fixed bug GH-12208 (SimpleXML infinite loop when a cast is used inside a
     foreach). (nielsdos)
+  . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
 
 14 Sep 2023, PHP 8.3.0RC2
 

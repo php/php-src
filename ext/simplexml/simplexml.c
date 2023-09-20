@@ -77,25 +77,6 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE
 }
 /* }}} */
 
-/* Important: this overwrites the iterator data, if you wish to keep it use php_sxe_get_first_node_non_destructive() instead! */
-static xmlNodePtr php_sxe_get_first_node(php_sxe_object *sxe, xmlNodePtr node) /* {{{ */
-{
-	php_sxe_object *intern;
-	xmlNodePtr retnode = NULL;
-
-	if (sxe && sxe->iter.type != SXE_ITER_NONE) {
-		php_sxe_reset_iterator(sxe, 1);
-		if (!Z_ISUNDEF(sxe->iter.data)) {
-			intern = Z_SXEOBJ_P(&sxe->iter.data);
-			GET_NODE(intern, retnode)
-		}
-		return retnode;
-	} else {
-		return node;
-	}
-}
-/* }}} */
-
 static xmlNodePtr php_sxe_get_first_node_non_destructive(php_sxe_object *sxe, xmlNodePtr node)
 {
 	if (sxe && sxe->iter.type != SXE_ITER_NONE) {
@@ -182,7 +163,7 @@ static xmlNodePtr sxe_get_element_by_name(php_sxe_object *sxe, xmlNodePtr node, 
 		if (sxe->iter.type == SXE_ITER_NONE) {
 			sxe->iter.type = SXE_ITER_CHILD;
 		}
-		node = php_sxe_get_first_node(sxe, node);
+		node = php_sxe_get_first_node_non_destructive(sxe, node);
 		sxe->iter.type = orgtype;
 	}
 
@@ -257,11 +238,11 @@ long_dim:
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		attribs = 1;
 		elements = 0;
-		node = php_sxe_get_first_node(sxe, node);
+		node = php_sxe_get_first_node_non_destructive(sxe, node);
 		attr = (xmlAttrPtr)node;
 		test = sxe->iter.name != NULL;
 	} else if (sxe->iter.type != SXE_ITER_CHILD) {
-		node = php_sxe_get_first_node(sxe, node);
+		node = php_sxe_get_first_node_non_destructive(sxe, node);
 		attr = node ? node->properties : NULL;
 		test = 0;
 		if (!member && node && node->parent &&
@@ -309,7 +290,7 @@ long_dim:
 				xmlNodePtr mynode = node;
 
 				if (sxe->iter.type == SXE_ITER_CHILD) {
-					node = php_sxe_get_first_node(sxe, node);
+					node = php_sxe_get_first_node_non_destructive(sxe, node);
 				}
 				if (sxe->iter.type == SXE_ITER_NONE) {
 					if (member && Z_LVAL_P(member) > 0) {
@@ -445,12 +426,12 @@ long_dim:
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		attribs = 1;
 		elements = 0;
-		node = php_sxe_get_first_node(sxe, node);
+		node = php_sxe_get_first_node_non_destructive(sxe, node);
 		attr = (xmlAttrPtr)node;
 		test = sxe->iter.name != NULL;
 	} else if (sxe->iter.type != SXE_ITER_CHILD) {
 		mynode = node;
-		node = php_sxe_get_first_node(sxe, node);
+		node = php_sxe_get_first_node_non_destructive(sxe, node);
 		attr = node ? node->properties : NULL;
 		test = 0;
 		if (!member && node && node->parent &&
@@ -696,7 +677,7 @@ static int sxe_prop_dim_exists(zend_object *object, zval *member, int check_empt
 			attribs = 0;
 			elements = 1;
 			if (sxe->iter.type == SXE_ITER_CHILD) {
-				node = php_sxe_get_first_node(sxe, node);
+				node = php_sxe_get_first_node_non_destructive(sxe, node);
 			}
 		}
 	}
@@ -704,11 +685,11 @@ static int sxe_prop_dim_exists(zend_object *object, zval *member, int check_empt
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		attribs = 1;
 		elements = 0;
-		node = php_sxe_get_first_node(sxe, node);
+		node = php_sxe_get_first_node_non_destructive(sxe, node);
 		attr = (xmlAttrPtr)node;
 		test = sxe->iter.name != NULL;
 	} else if (sxe->iter.type != SXE_ITER_CHILD) {
-		node = php_sxe_get_first_node(sxe, node);
+		node = php_sxe_get_first_node_non_destructive(sxe, node);
 		attr = node ? node->properties : NULL;
 		test = 0;
 	}
@@ -748,7 +729,7 @@ static int sxe_prop_dim_exists(zend_object *object, zval *member, int check_empt
 		if (elements) {
 			if (Z_TYPE_P(member) == IS_LONG) {
 				if (sxe->iter.type == SXE_ITER_CHILD) {
-					node = php_sxe_get_first_node(sxe, node);
+					node = php_sxe_get_first_node_non_destructive(sxe, node);
 				}
 				node = sxe_get_element_by_offset(sxe, Z_LVAL_P(member), node, NULL);
 			} else {
@@ -820,7 +801,7 @@ static void sxe_prop_dim_delete(zend_object *object, zval *member, bool elements
 			attribs = 0;
 			elements = 1;
 			if (sxe->iter.type == SXE_ITER_CHILD) {
-				node = php_sxe_get_first_node(sxe, node);
+				node = php_sxe_get_first_node_non_destructive(sxe, node);
 			}
 		}
 	}
@@ -828,11 +809,11 @@ static void sxe_prop_dim_delete(zend_object *object, zval *member, bool elements
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		attribs = 1;
 		elements = 0;
-		node = php_sxe_get_first_node(sxe, node);
+		node = php_sxe_get_first_node_non_destructive(sxe, node);
 		attr = (xmlAttrPtr)node;
 		test = sxe->iter.name != NULL;
 	} else if (sxe->iter.type != SXE_ITER_CHILD) {
-		node = php_sxe_get_first_node(sxe, node);
+		node = php_sxe_get_first_node_non_destructive(sxe, node);
 		attr = node ? node->properties : NULL;
 		test = 0;
 	}
@@ -869,7 +850,7 @@ static void sxe_prop_dim_delete(zend_object *object, zval *member, bool elements
 		if (elements) {
 			if (Z_TYPE_P(member) == IS_LONG) {
 				if (sxe->iter.type == SXE_ITER_CHILD) {
-					node = php_sxe_get_first_node(sxe, node);
+					node = php_sxe_get_first_node_non_destructive(sxe, node);
 				}
 				node = sxe_get_element_by_offset(sxe, Z_LVAL_P(member), node, NULL);
 				if (node) {
@@ -1002,7 +983,7 @@ static int sxe_prop_is_empty(zend_object *object) /* {{{ */
 	}
 
 	if (sxe->iter.type == SXE_ITER_ELEMENT) {
-		node = php_sxe_get_first_node(sxe, node);
+		node = php_sxe_get_first_node_non_destructive(sxe, node);
 	}
 	if (!node || node->type != XML_ENTITY_DECL) {
 		attr = node ? (xmlAttrPtr)node->properties : NULL;
@@ -1016,7 +997,7 @@ static int sxe_prop_is_empty(zend_object *object) /* {{{ */
 	}
 
 	GET_NODE(sxe, node);
-	node = php_sxe_get_first_node(sxe, node);
+	node = php_sxe_get_first_node_non_destructive(sxe, node);
 	is_empty = 1;
 	ZVAL_UNDEF(&iter_data);
 	if (node && sxe->iter.type != SXE_ITER_ATTRLIST) {
@@ -1111,7 +1092,7 @@ static HashTable *sxe_get_prop_hash(zend_object *object, int is_debug) /* {{{ */
 	}
 	if (is_debug || sxe->iter.type != SXE_ITER_CHILD) {
 		if (sxe->iter.type == SXE_ITER_ELEMENT) {
-			node = php_sxe_get_first_node(sxe, node);
+			node = php_sxe_get_first_node_non_destructive(sxe, node);
 		}
 		if (!node || node->type != XML_ENTITY_DECL) {
 			attr = node ? (xmlAttrPtr)node->properties : NULL;
@@ -1133,7 +1114,7 @@ static HashTable *sxe_get_prop_hash(zend_object *object, int is_debug) /* {{{ */
 	}
 
 	GET_NODE(sxe, node);
-	node = php_sxe_get_first_node(sxe, node);
+	node = php_sxe_get_first_node_non_destructive(sxe, node);
 
 	if (node && sxe->iter.type != SXE_ITER_ATTRLIST) {
 		if (node->type == XML_ATTRIBUTE_NODE) {
@@ -1292,7 +1273,7 @@ PHP_METHOD(SimpleXMLElement, xpath)
 	}
 
 	GET_NODE(sxe, nodeptr);
-	nodeptr = php_sxe_get_first_node(sxe, nodeptr);
+	nodeptr = php_sxe_get_first_node_non_destructive(sxe, nodeptr);
 	if (!nodeptr) {
 		return;
 	}
@@ -1401,7 +1382,7 @@ PHP_METHOD(SimpleXMLElement, asXML)
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
-	node = php_sxe_get_first_node(sxe, node);
+	node = php_sxe_get_first_node_non_destructive(sxe, node);
 
 	if (!node) {
 		RETURN_FALSE;
@@ -1524,7 +1505,7 @@ PHP_METHOD(SimpleXMLElement, getNamespaces)
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
-	node = php_sxe_get_first_node(sxe, node);
+	node = php_sxe_get_first_node_non_destructive(sxe, node);
 
 	if (node) {
 		if (node->type == XML_ELEMENT_NODE) {
@@ -1609,7 +1590,7 @@ PHP_METHOD(SimpleXMLElement, children)
 	}
 
 	GET_NODE(sxe, node);
-	node = php_sxe_get_first_node(sxe, node);
+	node = php_sxe_get_first_node_non_destructive(sxe, node);
 	if (!node) {
 		return;
 	}
@@ -1658,7 +1639,7 @@ PHP_METHOD(SimpleXMLElement, attributes)
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
-	node = php_sxe_get_first_node(sxe, node);
+	node = php_sxe_get_first_node_non_destructive(sxe, node);
 	if (!node) {
 		return;
 	}
@@ -1701,7 +1682,7 @@ PHP_METHOD(SimpleXMLElement, addChild)
 		return;
 	}
 
-	node = php_sxe_get_first_node(sxe, node);
+	node = php_sxe_get_first_node_non_destructive(sxe, node);
 
 	if (node == NULL) {
 		php_error_docref(NULL, E_WARNING, "Cannot add child. Parent is not a permanent member of the XML tree");
@@ -1761,7 +1742,7 @@ PHP_METHOD(SimpleXMLElement, addAttribute)
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
 
-	node = php_sxe_get_first_node(sxe, node);
+	node = php_sxe_get_first_node_non_destructive(sxe, node);
 
 	if (node && node->type != XML_ELEMENT_NODE) {
 		node = node->parent;
@@ -2608,7 +2589,7 @@ void *simplexml_export_node(zval *object) /* {{{ */
 
 	sxe = Z_SXEOBJ_P(object);
 	GET_NODE(sxe, node);
-	return php_sxe_get_first_node(sxe, node);
+	return php_sxe_get_first_node_non_destructive(sxe, node);
 }
 /* }}} */
 
