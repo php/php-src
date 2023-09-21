@@ -389,7 +389,7 @@ jobs:
           export ASAN_OPTIONS=exitcode=139
           export PHPSECLIB_ALLOW_JIT=1
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php vendor/bin/phpunit --configuration=tests/phpunit.xml || exit $?
+          php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
           git clean -ffdx
       - name: Test Psalm
         if: matrix.branch.ref != 'PHP-8.0'
@@ -400,7 +400,6 @@ jobs:
           export ASAN_OPTIONS=exitcode=139
           export PSALM_ALLOW_XDEBUG=1
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php ./psalm --no-cache --threads=1 || exit $?
           php ./psalm --no-cache || exit $?
       - name: Test PHPStan
         if: matrix.branch.ref != 'PHP-8.0'
@@ -411,8 +410,6 @@ jobs:
           sed 's/80299/89999/g' -i conf/config.neon
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           export ASAN_OPTIONS=exitcode=139
-          php bin/phpstan clear-result-cache
-          php bin/phpstan --debug || exit $?
           php bin/phpstan clear-result-cache
           php bin/phpstan || exit $?
       - name: Test AMPHP
