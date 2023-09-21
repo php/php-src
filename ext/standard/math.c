@@ -181,6 +181,11 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	value_places = -php_intlog10abs(value);
 
 	f1 = php_intpow10(abs(places));
+	/*
+	 * In order to minimize the influence of errors specific to floating point numbers,
+	 * digits are adjusted to ensure accuracy. Digits adjustment is performed only if
+	 * the location specifies a range that can be represented by floating point numbers.
+	*/
 	if (value_places + 16 > places && value_places <= places) {
 		int precision_places = value_places + 14;
 		double f2 = php_intpow10(abs(precision_places));
