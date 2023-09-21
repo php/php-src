@@ -388,7 +388,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y libuv1-dev
           git clone https://github.com/amphp/ext-uv --depth 1
           cd ext-uv
-          phpize && ./configure --enable-debug && make -j$(nproc) && make install
+          phpize && ./configure --enable-debug && make -j$(nproc) && sudo make install
           cd ..
           echo extension=uv >> /etc/php.d/uv.ini
           repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
