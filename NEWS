@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12186 (segfault copying/cloning a finalized HashContext).
     (MaxSem)
 
+- Intl:
+  . Fixed bug GH-12243 (segfault on IntlDateFormatter::construct).
+    (David Carlier)
+
 - SimpleXML:
   . Fixed bug GH-12170 (Can't use xpath with comments in SimpleXML). (nielsdos)
   . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
