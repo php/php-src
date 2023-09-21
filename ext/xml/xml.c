@@ -312,6 +312,16 @@ static zend_object *xml_parser_create_object(zend_class_entry *class_type) {
 	return &intern->std;
 }
 
+static void xml_parser_free_ltags(xml_parser *parser)
+{
+	if (parser->ltags) {
+		int inx;
+		for (inx = 0; ((inx < parser->level) && (inx < XML_MAXLEVEL)); inx++)
+			efree(parser->ltags[ inx ]);
+		efree(parser->ltags);
+	}
+}
+
 static void xml_parser_free_obj(zend_object *object)
 {
 	xml_parser *parser = xml_parser_from_obj(object);
@@ -319,12 +329,7 @@ static void xml_parser_free_obj(zend_object *object)
 	if (parser->parser) {
 		XML_ParserFree(parser->parser);
 	}
-	if (parser->ltags) {
-		int inx;
-		for (inx = 0; ((inx < parser->level) && (inx < XML_MAXLEVEL)); inx++)
-			efree(parser->ltags[ inx ]);
-		efree(parser->ltags);
-	}
+	xml_parser_free_ltags(parser);
 	if (!Z_ISUNDEF(parser->startElementHandler)) {
 		zval_ptr_dtor(&parser->startElementHandler);
 	}
@@ -1255,6 +1260,11 @@ PHP_FUNCTION(xml_parse_into_struct)
 
 	parser = Z_XMLPARSER_P(pind);
 
+	if (parser->isparsing) {
+		php_error_docref(NULL, E_WARNING, "Parser must not be called recursively");
+		RETURN_FALSE;
+	}
+
 	if (info) {
 		info = zend_try_array_init(info);
 		if (!info) {
@@ -1274,15 +1284,12 @@ PHP_FUNCTION(xml_parse_into_struct)
 	}
 
 	parser->level = 0;
+	xml_parser_free_ltags(parser);
 	parser->ltags = safe_emalloc(XML_MAXLEVEL, sizeof(char *), 0);
 
 	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
 	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
 
-	if (parser->isparsing) {
-		php_error_docref(NULL, E_WARNING, "Parser must not be called recursively");
-		RETURN_FALSE;
-	}
 	parser->isparsing = 1;
 	ret = XML_Parse(parser->parser, (XML_Char*)data, data_len, 1);
 	parser->isparsing = 0;
