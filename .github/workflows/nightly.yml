@@ -385,6 +385,7 @@ jobs:
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
+          sudo apt-get update && sudo apt-get install -y libuv1-dev
           git clone https://github.com/amphp/ext-uv --depth 1
           cd ext-uv
           phpize && ./configure --enable-debug && make -j$(nproc) && make install
