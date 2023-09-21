@@ -82,6 +82,10 @@ PHP 8.4 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- Intl:
+  . The IntlDateFormatter class exposes now the new PATTERN constant
+    reflecting udat api's UDAT_PATTERN.
+
 ========================================
 11. Changes to INI File Handling
 ========================================

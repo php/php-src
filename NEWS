@@ -8,6 +8,9 @@ Core:
 DOM:
   . Added DOMNode::compareDocumentPosition(). (nielsdos)
 
+Intl:
+  . Added IntlDateFormatter::PATTERN constant. (David Carlier)
+
 Standard:
   . Implement GH-12188 (Indication for the int size in phpinfo()). (timwolla)
   . Partly fix GH-12143 (Incorrect round() result for 0.49999999999999994).

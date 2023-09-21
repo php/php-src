@@ -7,12 +7,11 @@ intl
 <?php
 
 $datetime = new \DateTime('2017-05-12 23:11:00 GMT+2');
-static $UDAT_PATTERN = -2;
 
 try {
     new IntlDateFormatter(
 	    locale: 'en',
-	    dateType: $UDAT_PATTERN,
+	    dateType: IntlDateFormatter::PATTERN,
 	    timeType: 0,
 	    timezone: $datetime->getTimezone(),
     );
