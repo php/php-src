@@ -50,6 +50,11 @@ class IntlDateFormatter
      * @cvalue UDAT_SHORT_RELATIVE
      */
     public const RELATIVE_SHORT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue UDAT_PATTERN
+     */
+    public const PATTERN = UNKNOWN;
 
     /**
      * @var int
