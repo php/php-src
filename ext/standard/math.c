@@ -169,41 +169,37 @@ static inline double php_round_helper(double value, int mode) {
  * mode. For the specifics of the algorithm, see http://wiki.php.net/rfc/rounding
  */
 PHPAPI double _php_math_round(double value, int places, int mode) {
-	double f1, f2;
+	double f1;
 	double tmp_value;
-	int precision_places;
+	int value_places;
 
 	if (!zend_finite(value) || value == 0.0) {
 		return value;
 	}
 
 	places = places < INT_MIN+1 ? INT_MIN+1 : places;
-	precision_places = 14 - php_intlog10abs(value);
+	value_places = -php_intlog10abs(value);
 
 	f1 = php_intpow10(abs(places));
+	if (value_places + 16 > places && value_places <= places) {
+		int precision_places = value_places + 14;
+		double f2 = php_intpow10(abs(precision_places));
 
-	/* If the decimal precision guaranteed by FP arithmetic is higher than
-	   the requested places BUT is small enough to make sure a non-zero value
-	   is returned, pre-round the result to the precision */
-	if (precision_places > places && precision_places - 15 < places) {
-		int64_t use_precision = precision_places < INT_MIN+1 ? INT_MIN+1 : precision_places;
-
-		f2 = php_intpow10(abs((int)use_precision));
-		if (use_precision >= 0) {
+		if (precision_places >= 0) {
 			tmp_value = value * f2;
 		} else {
 			tmp_value = value / f2;
 		}
-		/* preround the result (tmp_value will always be something * 1e14,
-		   thus never larger than 1e15 here) */
-		tmp_value = php_round_helper(tmp_value, mode);
 
-		use_precision = places - precision_places;
+		int use_precision = places - precision_places;
 		use_precision = use_precision < INT_MIN+1 ? INT_MIN+1 : use_precision;
-		/* now correctly move the decimal point */
-		f2 = php_intpow10(abs((int)use_precision));
-		/* because places < precision_places */
-		tmp_value = tmp_value / f2;
+		f2 = php_intpow10(abs(use_precision));
+
+		if (use_precision >= 0) {
+			tmp_value = tmp_value * f2;
+		} else {
+			tmp_value = tmp_value / f2;
+		}
 	} else {
 		/* adjust the value */
 		if (places >= 0) {
