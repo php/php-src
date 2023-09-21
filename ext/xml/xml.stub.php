@@ -182,7 +182,7 @@ function xml_parse(XMLParser $parser, string $data, bool $is_final = false): int
  * @param array $values
  * @param array $index
  */
-function xml_parse_into_struct(XMLParser $parser, string $data, &$values, &$index = null): int {}
+function xml_parse_into_struct(XMLParser $parser, string $data, &$values, &$index = null): int|false {}
 
 function xml_get_error_code(XMLParser $parser): int {}
 
