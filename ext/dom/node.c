@@ -1796,8 +1796,6 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		RETURN_THROWS();
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(docp);
-
 	bool simple_node_parent_lookup_callback = false;
 	if (xpath_array == NULL) {
 		if (nodep->type != XML_DOCUMENT_NODE) {
