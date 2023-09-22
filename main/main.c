@@ -59,6 +59,7 @@
 #include "ext/standard/flock_compat.h"
 #endif
 #include "php_syslog.h"
+#include "Zend/zend_builtin_functions.h"
 #include "Zend/zend_exceptions.h"
 
 #if PHP_SIGCHILD
@@ -985,6 +986,26 @@ static zend_string *escape_html(const char *buffer, size_t buffer_len) {
 	return result;
 }
 
+static zend_string *build_dynamic_parameters(void) {
+	zend_string *dynamic_params = NULL;
+	/* get a backtrace to snarf function args */
+	zval backtrace, *first_frame;
+	zend_fetch_debug_backtrace(&backtrace, /* skip_last */ 0, /* options */ 0, /* limit */ 1);
+	/* can fail esp if low memory condition */
+	if (Z_TYPE(backtrace) != IS_ARRAY) {
+		return NULL; /* don't need to free */
+	}
+	first_frame = zend_hash_index_find(Z_ARRVAL(backtrace), 0);
+	if (!first_frame) {
+		goto free_backtrace;
+	}
+	dynamic_params = zend_trace_function_args_to_string(Z_ARRVAL_P(first_frame));
+free_backtrace:
+	zval_ptr_dtor(&backtrace);
+	/* free the string after we use it */
+	return dynamic_params;
+}
+
 /* {{{ php_verror */
 /* php_verror is called from php_error_docref<n> functions.
  * Its purpose is to unify error messages and automatically generate clickable
@@ -1067,7 +1088,12 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 
 	/* if we still have memory then format the origin */
 	if (is_function) {
-		origin_len = (int)spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);
+		zend_string *dynamic_params = NULL;
+		dynamic_params = build_dynamic_parameters();
+		origin_len = (int)spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, dynamic_params ? ZSTR_VAL(dynamic_params) : params);
+		if (dynamic_params) {
+			zend_string_release(dynamic_params);
+		}
 	} else {
 		origin_len = (int)spprintf(&origin, 0, "%s", function);
 	}

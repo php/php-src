@@ -590,6 +590,39 @@ static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t nu
 }
 /* }}} */
 
+ZEND_API zend_string *zend_trace_function_args_to_string(HashTable *frame) {
+	zval *tmp;
+	smart_str str = {0};
+	/* init because ASan will complain */
+	smart_str_appends(&str, "");
+
+	tmp = zend_hash_find_known_hash(frame, ZSTR_KNOWN(ZEND_STR_ARGS));
+	if (tmp) {
+		if (Z_TYPE_P(tmp) == IS_ARRAY) {
+			size_t last_len = ZSTR_LEN(str.s);
+			zend_string *name;
+			zval *arg;
+
+			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), name, arg) {
+				if (name) {
+					smart_str_append(&str, name);
+					smart_str_appends(&str, ": ");
+				}
+				_build_trace_args(arg, &str);
+			} ZEND_HASH_FOREACH_END();
+
+			if (last_len != ZSTR_LEN(str.s)) {
+				ZSTR_LEN(str.s) -= 2; /* remove last ', ' */
+			}
+		} else {
+			smart_str_appends(&str, "<<invalid argument array>>");
+		}
+	}
+
+	smart_str_0(&str);
+	return str.s ? str.s : ZSTR_EMPTY_ALLOC();
+}
+
 ZEND_API zend_string *zend_trace_to_string(const HashTable *trace, bool include_main) {
 	zend_ulong index;
 	zval *frame;
