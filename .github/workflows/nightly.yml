@@ -103,11 +103,11 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+          jitType: tracing
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=tracing
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
@@ -116,7 +116,6 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=disable
       - name: Test Function JIT
         # ASAN frequently timeouts. Each test run takes ~90 minutes, we can
         # avoid running into the 6 hour timeout by skipping the function JIT.
@@ -124,11 +123,11 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
+          jitType: function
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=function
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
@@ -194,11 +193,11 @@ jobs:
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
+          jitType: tracing
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=tracing
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
@@ -206,15 +205,14 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=disable
       - name: Test Function JIT
         uses: ./.github/actions/test-linux
         with:
+          jitType: function
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=function
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
@@ -258,10 +256,10 @@ jobs:
         uses: ./.github/actions/test-macos
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+          jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=tracing
       - name: Test OpCache
         uses: ./.github/actions/test-macos
         with:
@@ -269,15 +267,14 @@ jobs:
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=disable
       - name: Test Function JIT
         uses: ./.github/actions/test-macos
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
+          jitType: function
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=function
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
@@ -318,10 +315,10 @@ jobs:
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
+          jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=tracing
       - name: Upload Test Coverage to Codecov.io
         if: always()
         run: bash <(curl -s https://codecov.io/bash)
@@ -591,7 +588,6 @@ jobs:
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=disable
             --file-cache-prime
       - name: Test File Cache (prime shm, use shm)
         uses: ./.github/actions/test-linux
@@ -599,7 +595,6 @@ jobs:
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=disable
             --file-cache-use
       - name: Test File Cache (prime shm, use file)
         uses: ./.github/actions/test-linux
@@ -607,7 +602,6 @@ jobs:
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=disable
             --file-cache-use
             -d opcache.file_cache_only=1
       - name: Test File Cache Only (prime)
@@ -616,7 +610,6 @@ jobs:
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=disable
             --file-cache-prime
             -d opcache.file_cache_only=1
       - name: Test File Cache Only (use)
@@ -625,7 +618,6 @@ jobs:
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=disable
             --file-cache-use
             -d opcache.file_cache_only=1
       - name: Verify generated files are up to date
@@ -726,7 +718,6 @@ jobs:
             --msan
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit=disable
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
