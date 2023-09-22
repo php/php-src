@@ -107,3 +107,6 @@ PHP 8.4 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
+* The performance of DOMNode::C14N() is greatly improved for the case without
+  an xpath query. This can give a time improvement of easily two order of
+  magnitude for documents with tens of thousands of nodes.
