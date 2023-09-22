@@ -49,16 +49,10 @@ static inline double php_intpow10(int power) {
 /* {{{ php_round_helper
        Actually performs the rounding of a value to integer in a certain mode */
 static inline double php_round_helper(double adjusted_value, double value, double coefficient, int mode) {
-	double integral, fractional, edge_case;
+	double integral = adjusted_value >= 0.0 ? floor(adjusted_value) : ceil(adjusted_value);
 	double value_abs = fabs(value);
+	double edge_case;
 
-	/* Split the input value into the integral and fractional part.
-	 *
-	 * Both parts will have the same sign as the input value. We take
-	 * the absolute value of the fractional part (which will not result
-	 * in branches in the assembly) to make the following cases simpler.
-	 */
-	fractional = fabs(modf(adjusted_value, &integral));
 	if (fabs(adjusted_value) >= value_abs) {
 		edge_case = fabs((integral + copysign(0.5, integral)) / coefficient);
 	} else {
