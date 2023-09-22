@@ -26,6 +26,11 @@ PHP 8.4 UPGRADE NOTES
     Consult sections 2. New Features and 6. New Functions for a list of
     newly implemented methods and constants.
 
+- Standard:
+  . round() now validates the value of the $mode parameter and throws a ValueError
+    for invalid modes. Previously invalid modes would have been interpreted as
+    PHP_ROUND_HALF_UP.
+
 ========================================
 2. New Features
 ========================================
@@ -58,9 +63,6 @@ PHP 8.4 UPGRADE NOTES
     would have resulted in 1.0 instead of the correct result 0.0. Additional
     inputs might also be affected and result in different outputs compared to
     earlier PHP versions.
-  . round() now validates the value of the $mode parameter and throws a ValueError
-    for invalid modes. Previously invalid modes would have been interpreted as
-    PHP_ROUND_HALF_UP.
 
 ========================================
 6. New Functions
