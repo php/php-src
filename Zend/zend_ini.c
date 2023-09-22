@@ -211,7 +211,6 @@ ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_
 	 * lead to death.
 	 */
 	if (directives != EG(ini_directives)) {
-		ZEND_ASSERT(module_type == MODULE_TEMPORARY);
 		directives = EG(ini_directives);
 	} else {
 		ZEND_ASSERT(module_type == MODULE_PERSISTENT);

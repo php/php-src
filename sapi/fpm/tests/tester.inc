@@ -320,6 +320,17 @@ class Tester
     }
 
     /**
+     * Skip if shared extension is not available in extension directory.
+     */
+    static public function skipIfSharedExtensionNotFound($extensionName)
+    {
+        $soPath = ini_get('extension_dir') . '/' . $extensionName . '.so';
+        if ( ! file_exists($soPath)) {
+            die("skip $extensionName extension not present in extension_dir");
+        }
+    }
+
+    /**
      * Tester constructor.
      *
      * @param string|array $configTemplate
