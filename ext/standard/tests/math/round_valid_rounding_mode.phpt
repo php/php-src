@@ -2,11 +2,11 @@
 round() rejects invalid rounding modes.
 --FILE--
 <?php
-var_dump(round(1.5, mode: 1234));
+try {
+    var_dump(round(1.5, mode: 1234));
+} catch (ValueError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
 ?>
---EXPECTF--
-Fatal error: Uncaught ValueError: round(): Argument #3 ($mode) must be a valid rounding mode (PHP_ROUND_*) in %s:%d
-Stack trace:
-#0 %s(%d): round(1.5, 0, 1234)
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+round(): Argument #3 ($mode) must be a valid rounding mode (PHP_ROUND_*)
