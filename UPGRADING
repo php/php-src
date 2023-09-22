@@ -135,6 +135,8 @@ PHP 8.3 UPGRADE NOTES
   . Added properties DOMElement::className and DOMElement::id.
     These are not binary-safe at the moment because of underlying limitations of
     libxml2. This means that the property values will be cut off at a NUL byte.
+  . Added properties DOMNode::isConnected and DOMNameSpaceNode::isConnected.
+  . Added properties DOMNode::parentElement and DOMNameSpaceNode::parentElement.
 
 - FFI
   . It is now possible to assign CData to other CData. This means you can
@@ -389,8 +391,6 @@ PHP 8.3 UPGRADE NOTES
     moment because it only influences the shadow DOM, which we do not support
     yet.
   . Added DOMParentNode::replaceChildren().
-  . Added DOMNode::isConnected and DOMNameSpaceNode::isConnected.
-  . Added DOMNode::parentElement and DOMNameSpaceNode::parentElement.
   . Added DOMNode::isEqualNode().
   . Added DOMElement::insertAdjacentElement() and
     DOMElement::insertAdjacentText().
