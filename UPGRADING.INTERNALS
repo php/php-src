@@ -25,6 +25,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 
  a. Unix build system changes
    - The configure option --with-zlib-dir has been removed.
+   - Symbol COOKIE_IO_FUNCTIONS_T has been removed (use cookie_io_functions_t).
 
 ========================
 3. Module changes
