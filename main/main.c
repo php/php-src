@@ -62,6 +62,7 @@
 #include "win32/php_registry.h"
 #include "ext/standard/flock_compat.h"
 #endif
+#include "Zend/zend_builtin_functions.h"
 #include "Zend/zend_exceptions.h"
 
 #if PHP_SIGCHILD
@@ -1132,7 +1133,12 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 
 	/* if we still have memory then format the origin */
 	if (is_function) {
-		origin_len = spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);
+		zend_string *dynamic_params = NULL;
+		dynamic_params = zend_trace_current_function_args_string();
+		origin_len = spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, dynamic_params ? ZSTR_VAL(dynamic_params) : params);
+		if (dynamic_params) {
+			zend_string_release(dynamic_params);
+		}
 	} else {
 		origin_len = strlen(function);
 		origin = estrndup(function, origin_len);
