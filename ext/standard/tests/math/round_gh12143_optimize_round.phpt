@@ -1,5 +1,5 @@
 --TEST--
-Fix GH-12143: Remove pre round
+Fix GH-12143: Optimize round
 --FILE--
 <?php
 echo "HALF_UP\n";
