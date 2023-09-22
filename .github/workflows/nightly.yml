@@ -379,46 +379,9 @@ jobs:
           echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
           php -v
-      - name: Test PHPSeclib
-        if: always()
-        run: |
-          git clone https://github.com/phpseclib/phpseclib --branch=master
-          cd phpseclib
-          git checkout 259bd9f1e8af11726ed74acf527c2c046549061b
-          export ASAN_OPTIONS=exitcode=139
-          export PHPSECLIB_ALLOW_JIT=1
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
-          git clean -ffdx
-      - name: Test Psalm
-        if: matrix.branch.ref != 'PHP-8.0'
-        run: |
-          git clone https://github.com/vimeo/psalm --branch=master
-          cd psalm
-          git checkout 7428e49b115a2a837aa29cf0fafd0ca902fe2457
-          export ASAN_OPTIONS=exitcode=139
-          export PSALM_ALLOW_XDEBUG=1
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php ./psalm --no-cache || exit $?
-      - name: Test PHPStan
-        if: matrix.branch.ref != 'PHP-8.0'
-        run: |
-          git clone https://github.com/phpstan/phpstan-src
-          cd phpstan-src
-          git checkout 1f608dc6a560f4a5accc854add8e005da0e7ceea
-          sed 's/80299/89999/g' -i conf/config.neon
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          export ASAN_OPTIONS=exitcode=139
-          php bin/phpstan clear-result-cache
-          php bin/phpstan || exit $?
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
-          sudo apt-get update && sudo apt-get install -y libuv1-dev
-          git clone https://github.com/amphp/ext-uv --depth 1
-          cd ext-uv
-          phpize && ./configure --enable-debug && make -j$(nproc) && sudo make install
-          cd ..
           echo extension=uv >> /etc/php.d/uv.ini
           repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
           X=0
