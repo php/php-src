@@ -2465,6 +2465,25 @@ AC_DEFUN([PHP_CHECK_BUILTIN_EXPECT], [
 ])
 
 dnl
+dnl PHP_CHECK_BUILTIN_UNREACHABLE
+dnl
+AC_DEFUN([PHP_CHECK_BUILTIN_UNREACHABLE], [
+  AC_MSG_CHECKING([for __builtin_unreachable])
+
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
+    __builtin_unreachable();
+  ]])], [
+    have_builtin_unreachable=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_unreachable=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_UNREACHABLE], [$have_builtin_unreachable], [Whether the compiler supports __builtin_unreachable])
+])
+
+dnl
 dnl PHP_CHECK_BUILTIN_CLZ
 dnl
 AC_DEFUN([PHP_CHECK_BUILTIN_CLZ], [
