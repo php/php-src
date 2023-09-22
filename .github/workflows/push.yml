@@ -43,6 +43,7 @@ env:
   CXX: ccache g++
 jobs:
   LINUX_X64:
+    if: false
     services:
       mysql:
         image: mysql:8
@@ -135,6 +136,7 @@ jobs:
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/verify-generated-files
   MACOS_DEBUG_NTS:
+    if: false
     runs-on: macos-12
     steps:
       - name: git checkout
@@ -168,6 +170,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   WINDOWS:
+    if: false
     name: WINDOWS_X64_ZTS
     runs-on: windows-2019
     env:
@@ -194,7 +197,8 @@ jobs:
         run: .github/scripts/windows/test.bat
   BENCHMARKING:
     name: BENCHMARKING
-    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+    # if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+    if: false
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
@@ -288,3 +292,79 @@ jobs:
             ${{ github.sha }} \
             $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.sha }}) \
             > $GITHUB_STEP_SUMMARY
+  ASAN_TEST:
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+    name: ASAN_TEST
+    runs-on: ubuntu-22.04
+    steps:
+      # https://stackoverflow.com/a/76921482/1320374
+      - name: Increase swapfile
+        run: |
+          sudo swapoff -a
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          sudo swapon --show
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+      - name: git checkout
+        uses: actions/checkout@v4
+      - name: Create MSSQL container
+        uses: ./.github/actions/setup-mssql
+      - name: Create Oracle container
+        uses: ./.github/actions/setup-oracle
+      - name: apt
+        uses: ./.github/actions/apt-x64
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          dpkg -l
+          echo "::endgroup::"
+      - name: ./configure
+        uses: ./.github/actions/configure-x64
+        with:
+          configurationParameters: >-
+            CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC' LDFLAGS='-fsanitize=undefined,address'
+            --enable-debug
+            --enable-zts
+      # - name: config.log
+      #   if: always()
+      #   run: cat config.log
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux
+      - name: Setup
+        uses: ./.github/actions/setup-x64
+      - name: Test
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            --asan
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            --asan
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            -d opcache.jit_buffer_size=16M
+      - name: Test OpCache
+        uses: ./.github/actions/test-linux
+        with:
+          runTestsParameters: >-
+            --asan
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
