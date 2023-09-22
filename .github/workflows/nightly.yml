@@ -385,8 +385,9 @@ jobs:
       - name: Test PHPSeclib
         if: always()
         run: |
-          git clone https://github.com/danog/phpseclib --branch=php-nightly --depth 1
+          git clone https://github.com/phpseclib/phpseclib --branch=master
           cd phpseclib
+          git checkout 259bd9f1e8af11726ed74acf527c2c046549061b
           export ASAN_OPTIONS=exitcode=139
           export PHPSECLIB_ALLOW_JIT=1
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
