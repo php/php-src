@@ -27,7 +27,7 @@ foreach ($engines as $engine) {
     $randomizer = new Randomizer($engine);
     var_dump($randomizer->getBytesFromString('a', 10));
     var_dump($randomizer->getBytesFromString(str_repeat('a', 256), 5));
-    var_dump($randomizer->getBytesFromString('', 0));
+    var_dump($randomizer->getBytesFromString('a', 0));
 
     for ($i = 1; $i < 250; $i++) {
         $output = $randomizer->getBytesFromString(str_repeat('ab', $i), 500);

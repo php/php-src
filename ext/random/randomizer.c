@@ -390,8 +390,8 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 	const size_t source_length = ZSTR_LEN(source);
 	const size_t max_offset = source_length - 1;
 
-	if (source_length < 1 && length > 0) {
-		zend_argument_value_error(1, "cannot be empty when argument #2 ($length) is greater than 0");
+	if (source_length < 1) {
+		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
 
