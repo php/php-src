@@ -92,7 +92,7 @@
 #elif defined(__clang__) && __has_builtin(__builtin_assume)
 # pragma clang diagnostic ignored "-Wassume"
 # define ZEND_ASSUME(c)	__builtin_assume(c)
-#elif ((defined(__GNUC__) && ZEND_GCC_VERSION >= 4005) || __has_builtin(__builtin_unreachable)) && PHP_HAVE_BUILTIN_EXPECT
+#elif PHP_HAVE_BUILTIN_UNREACHABLE && PHP_HAVE_BUILTIN_EXPECT
 # define ZEND_ASSUME(c)	do { \
 		if (__builtin_expect(!(c), 0)) __builtin_unreachable(); \
 	} while (0)
@@ -106,12 +106,9 @@
 # define ZEND_ASSERT(c) ZEND_ASSUME(c)
 #endif
 
-#ifdef __has_builtin
-# if __has_builtin(__builtin_unreachable)
-#  define _ZEND_UNREACHABLE() __builtin_unreachable()
-# endif
-#endif
-#ifndef _ZEND_UNREACHABLE
+#ifdef PHP_HAVE_BUILTIN_UNREACHABLE
+# define _ZEND_UNREACHABLE() __builtin_unreachable()
+#else
 # define _ZEND_UNREACHABLE() ZEND_ASSUME(0)
 #endif
 
