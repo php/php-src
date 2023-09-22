@@ -498,6 +498,12 @@ static void dom_update_refcount_after_clone(dom_object *original, xmlNodePtr ori
 	php_libxml_increment_node_ptr((php_libxml_node_object *)clone, cloned_node, (void *)clone);
 	if (original->document != clone->document) {
 		dom_copy_doc_props(original->document, clone->document);
+		/* Workaround libxml2 bug, see https://gitlab.gnome.org/GNOME/libxml2/-/commit/07920b4381873187c02df53fa9b5d44aff3a7041 */
+#if LIBXML_VERSION < 20911
+		if (original_node->type == XML_HTML_DOCUMENT_NODE) {
+			cloned_node->type = XML_HTML_DOCUMENT_NODE;
+		}
+#endif
 	}
 }
 
