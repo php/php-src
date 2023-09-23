@@ -7,7 +7,7 @@ set NO_INTERACTION=1
 set REPORT_EXIT_STATUS=1
 set SKIP_IO_CAPTURE_TESTS=1
 
-call %~dp0find-target-branch.bat
+call %WIN_SCRIPTS_DIR%\find-target-branch.bat
 if "%BRANCH%" neq "master" (
 	set STABILITY=stable
 ) else (
@@ -30,18 +30,21 @@ set PDO_MYSQL_TEST_PASS=%MYSQL_PWD%
 set PDO_MYSQL_TEST_HOST=%MYSQL_TEST_HOST%
 set PDO_MYSQL_TEST_PORT=%MYSQL_TEST_PORT%
 set PDO_MYSQL_TEST_DSN=mysql:host=%PDO_MYSQL_TEST_HOST%;port=%PDO_MYSQL_TEST_PORT%;dbname=test
-set TMP_MYSQL_BIN=C:\mysql\bin
-"%TMP_MYSQL_BIN%\mysql.exe" --host=%PDO_MYSQL_TEST_HOST% --port=%MYSQL_TEST_PORT% --user=%MYSQL_TEST_USER% --password=%MYSQL_TEST_PASSWD% -e "CREATE DATABASE IF NOT EXISTS test"
+set PATH=%PATH%;C:\mysql\bin
+mysql.exe --host=%PDO_MYSQL_TEST_HOST% --port=%MYSQL_TEST_PORT% --user=%MYSQL_TEST_USER% --password=%MYSQL_TEST_PASSWD% -e "CREATE DATABASE IF NOT EXISTS test"
 if %errorlevel% neq 0 exit /b 3
 
 rem setup PostgreSQL related exts
 set PGUSER=postgres
 set PGPASSWORD=Password12!
 rem set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=postgres password=Password12!
+git checkout "./ext/pgsql/tests/config.inc"
 echo ^<?php $conn_str = "host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%"; ?^> >> "./ext/pgsql/tests/config.inc"
 set PDO_PGSQL_TEST_DSN=pgsql:host=127.0.0.1 port=5432 dbname=test user=%PGUSER% password=%PGPASSWORD%
-set TMP_POSTGRESQL_BIN=%PGBIN%
-"%TMP_POSTGRESQL_BIN%\createdb.exe" test
+set PATH=%PATH%;%PGBIN%
+psql -U postgres -c "DROP SCHEMA IF EXISTS test"
+psql -U postgres -c "CREATE SCHEMA IF NOT EXISTS test"
+rem psql -U postgres -W -c "\dn"
 if %errorlevel% neq 0 exit /b 3
 
 rem setup ODBC related exts
@@ -52,7 +55,7 @@ set PDOTEST_DSN=odbc:%ODBC_TEST_DSN%
 
 rem setup Firebird related exts
 curl -sLo Firebird.zip https://github.com/FirebirdSQL/firebird/releases/download/v3.0.9/Firebird-3.0.9.33560-0_x64.zip
-7z x -oC:\Firebird Firebird.zip
+7z x -y -oC:\Firebird Firebird.zip
 set PDO_FIREBIRD_TEST_DATABASE=C:\test.fdb
 set PDO_FIREBIRD_TEST_DSN=firebird:dbname=%PDO_FIREBIRD_TEST_DATABASE%
 set PDO_FIREBIRD_TEST_USER=SYSDBA
@@ -75,7 +78,7 @@ if "%PLATFORM%" == "x64" (
 if /i "%GITHUB_ACTIONS%" equ "True" (
     rmdir /s /q %OPENSSLDIR% >nul 2>&1
 )
-mkdir %OPENSSLDIR%
+if NOT exist %OPENSSLDIR% mkdir %OPENSSLDIR%
 if %errorlevel% neq 0 exit /b 3
 copy %DEPS_DIR%\template\ssl\openssl.cnf %OPENSSLDIR%
 if %errorlevel% neq 0 exit /b 3
@@ -89,16 +92,16 @@ rem work-around for failing to dl(mysqli) with OPcache (https://github.com/php/p
 if "%OPCACHE%" equ "1" set OPCACHE_OPTS=%OPCACHE_OPTS% -d extension=mysqli
 
 rem prepare for enchant
-mkdir %~d0\usr\local\lib\enchant-2
+if NOT EXIST %SCRIPT_DRIVE%\usr\local\lib\enchant-2 mkdir %SCRIPT_DRIVE%\usr\local\lib\enchant-2
 if %errorlevel% neq 0 exit /b 3
-copy %DEPS_DIR%\bin\libenchant2_hunspell.dll %~d0\usr\local\lib\enchant-2
+copy %DEPS_DIR%\bin\libenchant2_hunspell.dll %SCRIPT_DRIVE%\usr\local\lib\enchant-2
 if %errorlevel% neq 0 exit /b 3
-mkdir %~d0\usr\local\share\enchant\hunspell
+if NOT EXIST %SCRIPT_DRIVE%\usr\local\share\enchant\hunspell mkdir %SCRIPT_DRIVE%\usr\local\share\enchant\hunspell
 if %errorlevel% neq 0 exit /b 3
 echo Fetching enchant dicts
-pushd %~d0\usr\local\share\enchant\hunspell
+pushd %SCRIPT_DRIVE%\usr\local\share\enchant\hunspell
 powershell -Command wget http://windows.php.net/downloads/qa/appveyor/ext/enchant/dict.zip -OutFile dict.zip
-unzip dict.zip
+unzip -o dict.zip
 del /q dict.zip
 popd
 
@@ -115,6 +118,7 @@ hMailServer.exe /verysilent
 cd %APPVEYOR_BUILD_FOLDER%
 %PHP_BUILD_DIR%\php.exe -dextension_dir=%PHP_BUILD_DIR% -dextension=com_dotnet appveyor\setup_hmailserver.php
 
+if EXIST %PHP_BUILD_DIR%\test_file_cache rmdir /s /q %PHP_BUILD_DIR%\test_file_cache
 mkdir %PHP_BUILD_DIR%\test_file_cache
 rem generate php.ini
 echo extension_dir=%PHP_BUILD_DIR% > %PHP_BUILD_DIR%\php.ini
@@ -130,6 +134,7 @@ for %%i in (ldap oci8_12c pdo_oci) do (
 
 set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
 
+if EXIST C:\tests_tmp rmdir /s /q C:\tests_tmp
 mkdir c:\tests_tmp
 
 set TEST_PHP_JUNIT=c:\junit.out.xml
