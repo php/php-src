@@ -24,6 +24,8 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug GH-12243 (segfault on IntlDateFormatter::construct).
     (David Carlier)
+  . Fixed bug GH-12282 (IntlDateFormatter::construct should throw an exception
+    on an invalid locale). (David Carlier)
 
 - SimpleXML:
   . Fixed bug GH-12170 (Can't use xpath with comments in SimpleXML). (nielsdos)
