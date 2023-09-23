@@ -1,4 +1,4 @@
-if /i "%GITHUB_ACTIONS%" neq "True" (
+if /i "%CI%" neq "True" (
     echo for CI only
     exit /b 3
 )
@@ -69,7 +69,7 @@ if "%PLATFORM%" == "x64" (
 ) else (
 	set OPENSSLDIR="C:\Program Files (x86)\Common Files\SSL"
 )
-if /i "%GITHUB_ACTIONS%" equ "True" (
+if /i "%CI%" equ "True" (
     rmdir /s /q %OPENSSLDIR% >nul 2>&1
 )
 if NOT exist %OPENSSLDIR% mkdir %OPENSSLDIR%

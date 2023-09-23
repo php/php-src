@@ -20,7 +20,7 @@ $expectedMaxSize = match(php_uname('s')) {
         'amd64' => 512*1024*1024 - 4096,
         'i386' => 64*1024*1024 - 4096,
     },
-    'Linux' => match (getenv('GITHUB_ACTIONS')) {
+    'Linux' => match (getenv('CI')) {
         'true' => 16*1024*1024, // https://github.com/actions/runner-images/pull/3328
         default => 8*1024*1024,
     },

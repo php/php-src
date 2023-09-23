@@ -1,6 +1,6 @@
 @echo off
 
-if /i "%GITHUB_ACTIONS%" neq "True" (
+if /i "%CI%" neq "True" (
     echo for CI only
     exit /b 3
 )
