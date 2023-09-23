@@ -27,7 +27,8 @@ foreach ($engines as $engine) {
     $randomizer = new Randomizer($engine);
 
     // Using 10_000 is very slow.
-    for ($i = 1; $i < 1_000; $i++) {
+    $imax = getenv("SKIP_SLOW_TESTS") ? 10 : 1_000;
+    for ($i = 1; $i < $imax; ++$i) {
         if (\strlen($randomizer->getBytes($i)) !== $i) {
             die("failure: incorrect string length at {$i}");
         }
