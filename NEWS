@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 Core:
   . Added zend_call_stack_get implementation for NetBSD, DragonFlyBSD,
     Solaris and Haiku. (David Carlier)
+  . Enabled ifunc checks on FreeBSD from the 12.x releases. (Freaky)
 
 Date:
   . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
