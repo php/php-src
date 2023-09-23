@@ -18,6 +18,5 @@ runs:
       run: |
         Set-Service -Name "postgresql-x64-14" -StartupType manual -Status Running
         pwsh -Command { $env:PGPASSWORD="root"; & "$env:PGBIN\psql" -U postgres -c "ALTER USER postgres WITH PASSWORD 'Password12!';" }
-        pwsh -Command { $env:PGPASSWORD="root"; & "$env:PGBIN\psql" -U postgres -c "DROP SCHEMA IF EXISTS test;" }
-        pwsh -Command { $env:PGPASSWORD="root"; & "$env:PGBIN\psql" -U postgres -c "CREATE SCHEMA IF NOT EXISTS test;" }
-    - name: Setup 
+        pwsh -Command { $env:PGPASSWORD="Password12!"; & "$env:PGBIN\psql" -U postgres -c "DROP SCHEMA IF EXISTS test;" }
+        pwsh -Command { $env:PGPASSWORD="Password12!"; & "$env:PGBIN\psql" -U postgres -c "CREATE SCHEMA IF NOT EXISTS test;" }

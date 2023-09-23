@@ -3,8 +3,8 @@ if /i "%CI%" neq "True" (
     exit /b 3
 )
 
-set WIN_SCRIPTS_DIR=%~dp0
-set SCRIPT_DRIVE=%~d0
+echo WIN_SCRIPTS_DIR=%WIN_SCRIPTS_DIR%
+echo SCRIPT_DRIVE=%SCRIPT_DRIVE%
 
 set SDK_RUNNER=%PHP_BUILD_CACHE_SDK_DIR%\phpsdk-%PHP_BUILD_CRT%-%PLATFORM%.bat
 rem SDK_RUNNER=%PHP_BUILD_CACHE_SDK_DIR%\phpsdk-%PHP_BUILD_CRT%-%PLATFORM%.bat
@@ -13,7 +13,7 @@ if not exist "%SDK_RUNNER%" (
 	exit /b 3
 )
 
-cmd /c %SDK_RUNNER% -t .github\scripts\windows\test_task.bat
+cmd /c %SDK_RUNNER% -t %WIN_SCRIPTS_DIR%\test_task.bat
 if %errorlevel% neq 0 exit /b 3
 
 exit /b 0

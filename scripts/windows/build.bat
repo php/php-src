@@ -3,6 +3,9 @@ if /i "%CI%" neq "True" (
     exit /b 3
 )
 
+echo WIN_SCRIPTS_DIR=%WIN_SCRIPTS_DIR%
+echo SCRIPT_DRIVE=%SCRIPT_DRIVE%
+
 set SDK_REMOTE=https://github.com/php/php-sdk-binary-tools.git
 set SDK_BRANCH=%PHP_BUILD_SDK_BRANCH%
 set SDK_RUNNER=%PHP_BUILD_CACHE_SDK_DIR%\phpsdk-%PHP_BUILD_CRT%-%PLATFORM%.bat
@@ -41,7 +44,7 @@ if not exist "%SDK_RUNNER%" (
 	exit /b 3
 )
 
-cmd /c %SDK_RUNNER% -t .github\scripts\windows\build_task.bat
+cmd /c %SDK_RUNNER% -t %WIN_SCRIPTS_DIR%\build_task.bat
 if %errorlevel% neq 0 exit /b 3
 
 exit /b 0

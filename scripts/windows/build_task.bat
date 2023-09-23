@@ -5,12 +5,15 @@ if /i "%CI%" neq "True" (
     exit /b 3
 )
 
+echo WIN_SCRIPTS_DIR=%WIN_SCRIPTS_DIR%
+echo SCRIPT_DRIVE=%SCRIPT_DRIVE%
+
 del /f /q C:\Windows\System32\libcrypto-1_1-x64.dll >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
 del /f /q C:\Windows\System32\libssl-1_1-x64.dll >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
 
-call %~dp0find-target-branch.bat
+call %WIN_SCRIPTS_DIR%\find-target-branch.bat
 set STABILITY=staging
 set DEPS_DIR=%PHP_BUILD_CACHE_BASE_DIR%\deps-%BRANCH%-%PHP_SDK_VS%-%PHP_SDK_ARCH%
 rem SDK is cached, deps info is cached as well

@@ -884,6 +884,12 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup-windows
       - name: Build
-        run: ./scripts/windows/build.bat
+        run: |
+          call ./scripts/windows/env.bat
+          call ./scripts/windows/build.bat
+        shell: cmd
       - name: Test
-        run: ./scripts/windows/test.bat
+        run: |
+          call ./scripts/windows/env.bat
+          call ./scripts/windows/test.bat
+        shell: cmd

@@ -3,6 +3,9 @@ if /i "%CI%" neq "True" (
     exit /b 3
 )
 
+echo WIN_SCRIPTS_DIR=%WIN_SCRIPTS_DIR%
+echo SCRIPT_DRIVE=%SCRIPT_DRIVE%
+
 set NO_INTERACTION=1
 set REPORT_EXIT_STATUS=1
 set SKIP_IO_CAPTURE_TESTS=1
