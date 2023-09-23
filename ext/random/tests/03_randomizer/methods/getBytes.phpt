@@ -21,7 +21,7 @@ $engines[] = new Xoshiro256StarStar();
 $engines[] = new Secure();
 $engines[] = new TestShaEngine();
 // Using 10_000 is very slow.
-$iterations = getenv("SKIP_SLOW_TESTS") ? 10 : 1_000;
+$iterations = getenv("SKIP_SLOW_TESTS") ? 100 : 1_000;
 
 foreach ($engines as $engine) {
     echo $engine::class, PHP_EOL;
