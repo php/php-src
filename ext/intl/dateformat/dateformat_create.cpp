@@ -111,6 +111,11 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handlin
 		locale_str = (char *) intl_locale_get_default();
 	}
 	locale = Locale::createFromName(locale_str);
+	/* get*Name accessors being set does not preclude being bogus */
+	if (locale.isBogus() || strlen(locale.getISO3Language()) == 0) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: invalid locale", 0);
+		return FAILURE;
+	}
 
 	/* process calendar */
 	if (datefmt_process_calendar_arg(calendar_obj, calendar_long, calendar_is_null, locale, "datefmt_create",
