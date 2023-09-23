@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug GH-12243 (segfault on IntlDateFormatter::construct).
     (David Carlier)
+  . Fixed bug GH-12282 (IntlDateFormatter::construct should throw an exception
+    on an invalid locale). (David Carlier)
 
 - PCRE:
   . Fixed bug GH-11956 (Backport upstream fix, PCRE regular expressions with
