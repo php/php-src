@@ -30,8 +30,6 @@ set PDO_MYSQL_TEST_PASS=%MYSQL_PWD%
 set PDO_MYSQL_TEST_HOST=%MYSQL_TEST_HOST%
 set PDO_MYSQL_TEST_PORT=%MYSQL_TEST_PORT%
 set PDO_MYSQL_TEST_DSN=mysql:host=%PDO_MYSQL_TEST_HOST%;port=%PDO_MYSQL_TEST_PORT%;dbname=test
-set PATH=%PATH%;C:\mysql\bin
-mysql.exe --host=%PDO_MYSQL_TEST_HOST% --port=%MYSQL_TEST_PORT% --user=%MYSQL_TEST_USER% --password=%MYSQL_TEST_PASSWD% -e "CREATE DATABASE IF NOT EXISTS test"
 if %errorlevel% neq 0 exit /b 3
 
 rem setup PostgreSQL related exts
@@ -41,10 +39,6 @@ rem set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=postgres pa
 git checkout "./ext/pgsql/tests/config.inc"
 echo ^<?php $conn_str = "host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%"; ?^> >> "./ext/pgsql/tests/config.inc"
 set PDO_PGSQL_TEST_DSN=pgsql:host=127.0.0.1 port=5432 dbname=test user=%PGUSER% password=%PGPASSWORD%
-set PATH=%PATH%;%PGBIN%
-psql -U postgres -c "DROP SCHEMA IF EXISTS test"
-psql -U postgres -c "CREATE SCHEMA IF NOT EXISTS test"
-rem psql -U postgres -W -c "\dn"
 if %errorlevel% neq 0 exit /b 3
 
 rem setup ODBC related exts

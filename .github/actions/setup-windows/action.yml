@@ -7,6 +7,8 @@ runs:
       run: |
         choco install mysql -y --no-progress --params="/port:3306"
         mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
+        mysql.exe --port=3306 --user=root --password="Password12!" -e "DROP DATABASE IF EXISTS test;"
+        mysql.exe --port=3306 --user=root --password="Password12!" -e "CREATE DATABASE IF NOT EXISTS test;"
     - name: Setup MSSQL
       shell: pwsh
       run: |
@@ -16,3 +18,6 @@ runs:
       run: |
         Set-Service -Name "postgresql-x64-14" -StartupType manual -Status Running
         pwsh -Command { $env:PGPASSWORD="root"; & "$env:PGBIN\psql" -U postgres -c "ALTER USER postgres WITH PASSWORD 'Password12!';" }
+        pwsh -Command { $env:PGPASSWORD="root"; & "$env:PGBIN\psql" -U postgres -c "DROP SCHEMA IF EXISTS test;" }
+        pwsh -Command { $env:PGPASSWORD="root"; & "$env:PGBIN\psql" -U postgres -c "CREATE SCHEMA IF NOT EXISTS test;" }
+    - name: Setup 

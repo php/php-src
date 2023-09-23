@@ -884,6 +884,6 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup-windows
       - name: Build
-        run: .github/scripts/windows/build.bat
+        run: ./scripts/windows/build.bat
       - name: Test
-        run: .github/scripts/windows/test.bat
+        run: ./scripts/windows/test.bat
