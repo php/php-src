@@ -177,6 +177,10 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		return value;
 	}
 
+	if (places == 0) {
+		return php_round_helper(value, mode);
+	}
+
 	places = places < INT_MIN+1 ? INT_MIN+1 : places;
 	precision_places = 14 - php_intlog10abs(value);
 
