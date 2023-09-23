@@ -45,6 +45,7 @@ typedef struct {
 	size_t current_input_length;
 	size_t current_total_offset;
 	dom_line_column_cache cache_tokenizer;
+	bool html_no_implied;
 } dom_lexbor_libxml2_bridge_application_data;
 
 typedef struct {
@@ -252,6 +253,12 @@ static void dom_lexbor_libxml2_bridge_tokenizer_error_reporter(void *application
 static void dom_lexbor_libxml2_bridge_tree_error_reporter(void *application_data_voidptr, lxb_html_tree_error_t *error, size_t line, size_t column, size_t len)
 {
 	dom_lexbor_libxml2_bridge_application_data *application_data = application_data_voidptr;
+
+	if (line == 1 && application_data->html_no_implied && error->id == LXB_HTML_RULES_ERROR_UNTOININMO) {
+		/* For no implied mode, we want to mimick libxml's behaviour of not reporting an error for a lacking doctype. */
+		return;
+	}
+
 	if (UNEXPECTED(len <= 1)) {
 		/* Possible with EOF, or single-character tokens, don't use a range in the error display in this case */
 		php_libxml_pretend_ctx_error_ex(line, column, "tree error %s in %s, line: %zu, column: %zu\n", dom_lexbor_tree_error_code_to_string(error->id), application_data->input_name, line, column);
@@ -549,6 +556,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 	dom_lexbor_libxml2_bridge_application_data application_data;
 	application_data.input_name = "Entity";
 	application_data.current_total_offset = 0;
+	application_data.html_no_implied = options & HTML_PARSE_NOIMPLIED;
 	dom_reset_line_column_cache(&application_data.cache_tokenizer);
 	lexbor_libxml2_bridge_parse_context ctx;
 	lexbor_libxml2_bridge_parse_context_init(&ctx);
@@ -660,6 +668,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	dom_lexbor_libxml2_bridge_application_data application_data;
 	application_data.input_name = filename;
 	application_data.current_total_offset = 0;
+	application_data.html_no_implied = options & HTML_PARSE_NOIMPLIED;
 	dom_reset_line_column_cache(&application_data.cache_tokenizer);
 	lexbor_libxml2_bridge_parse_context ctx;
 	lexbor_libxml2_bridge_parse_context_init(&ctx);
