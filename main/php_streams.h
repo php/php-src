@@ -619,6 +619,20 @@ PHPAPI HashTable *_php_get_stream_filters_hash(void);
 #define php_get_stream_filters_hash()	_php_get_stream_filters_hash()
 PHPAPI HashTable *php_get_stream_filters_hash_global(void);
 extern const php_stream_wrapper_ops *php_stream_user_wrapper_ops;
+
+static inline bool php_is_stream_path(const char *filename)
+{
+	const char *p;
+
+	for (p = filename;
+	     (*p >= 'a' && *p <= 'z') ||
+	     (*p >= 'A' && *p <= 'Z') ||
+	     (*p >= '0' && *p <= '9') ||
+	     *p == '+' || *p == '-' || *p == '.';
+	     p++);
+	return ((p != filename) && (p[0] == ':') && (p[1] == '/') && (p[2] == '/'));
+}
+
 END_EXTERN_C()
 #endif
 
