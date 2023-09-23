@@ -28,7 +28,7 @@ foreach ($engines as $engine) {
 
     $randomizer = new Randomizer($engine);
 
-    for ($i = 1; $i < $iterations; ++$i) {
+    for ($i = 1; $i < $iterations; $i++) {
         if (\strlen($randomizer->getBytes($i)) !== $i) {
             die("failure: incorrect string length at {$i}");
         }

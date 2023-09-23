@@ -18,6 +18,7 @@ $engines[] = new Mt19937(1234, MT_RAND_PHP);
 $engines[] = new PcgOneseq128XslRr64(1234);
 $engines[] = new Xoshiro256StarStar(1234);
 $engines[] = new TestShaEngine("1234");
+$iterations = getenv("SKIP_SLOW_TESTS") ? 3_000 : 10_000;
 
 foreach ($engines as $engine) {
     echo $engine::class, PHP_EOL;
@@ -30,7 +31,7 @@ foreach ($engines as $engine) {
 
     $randomizer2 = unserialize(serialize($randomizer));
 
-    for ($i = 0; $i < 10_000; $i++) {
+    for ($i = 0; $i < $iterations; $i++) {
         if ($randomizer->getInt(0, $i) !== $randomizer2->getInt(0, $i)) {
             $className = $engine::class;
 

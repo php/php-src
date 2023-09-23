@@ -20,6 +20,7 @@ $engines[] = new PcgOneseq128XslRr64();
 $engines[] = new Xoshiro256StarStar();
 $engines[] = new Secure();
 $engines[] = new TestShaEngine();
+$iterations = getenv("SKIP_SLOW_TESTS") ? 10 : 100;
 
 $array1 = []; // list
 $array2 = []; // associative array with only strings
@@ -38,7 +39,7 @@ foreach ($engines as $engine) {
 
     $randomizer = new Randomizer($engine);
 
-    for ($i = 1; $i < 100; $i++) {
+    for ($i = 1; $i < $iterations; $i++) {
         $result = $randomizer->pickArrayKeys($array1, $i);
 
         if (array_unique($result) !== $result) {
