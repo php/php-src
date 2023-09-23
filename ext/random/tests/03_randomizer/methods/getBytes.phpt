@@ -20,15 +20,15 @@ $engines[] = new PcgOneseq128XslRr64();
 $engines[] = new Xoshiro256StarStar();
 $engines[] = new Secure();
 $engines[] = new TestShaEngine();
+// Using 10_000 is very slow.
+$iterations = getenv("SKIP_SLOW_TESTS") ? 10 : 1_000;
 
 foreach ($engines as $engine) {
     echo $engine::class, PHP_EOL;
 
     $randomizer = new Randomizer($engine);
 
-    // Using 10_000 is very slow.
-    $imax = getenv("SKIP_SLOW_TESTS") ? 10 : 1_000;
-    for ($i = 1; $i < $imax; ++$i) {
+    for ($i = 1; $i < $iterations; ++$i) {
         if (\strlen($randomizer->getBytes($i)) !== $i) {
             die("failure: incorrect string length at {$i}");
         }
