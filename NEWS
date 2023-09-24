@@ -36,6 +36,10 @@ PHP                                                                        NEWS
     foreach). (nielsdos)
   . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
 
+- Streams:
+  . Fixed bug GH-12190 (binding ipv4 address with both address and port at 0).
+    (David Carlier)
+
 - XML:
   . Fix return type of stub of xml_parse_into_struct(). (nielsdos)
   . Fix memory leak when calling xml_parse_into_struct() twice. (nielsdos)
