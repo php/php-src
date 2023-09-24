@@ -40,4 +40,4 @@ string(6) "EUC-KR"
 string(12) "windows-1251"
 Invalid document encoding
 string(12) "windows-1251"
-DOM\HTMLDocument::createEmpty(): Argument #1 ($encoding) is not a valid document encoding
+DOM\HTMLDocument::createEmpty(): Argument #1 ($encoding) must be a valid document encoding

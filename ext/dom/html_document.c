@@ -512,7 +512,7 @@ PHP_METHOD(DOM_HTMLDocument, createEmpty)
 	const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name((const lxb_char_t *) encoding, encoding_len);
 
 	if (encoding_data == NULL) {
-		zend_argument_value_error(1, "is not a valid document encoding");
+		zend_argument_value_error(1, "must be a valid document encoding");
 		RETURN_THROWS();
 	}
 	
