@@ -167,7 +167,6 @@ static inline double php_round_helper(double value, int mode) {
 /*
  * Rounds a number to a certain number of decimal places in a certain rounding mode.
  * If you "HALF UP" a value like 0.258 (0.28499999999999998), it will be rounded to 28.
- *
  */
 PHPAPI double _php_math_round(double value, int places, int mode) {
 	double f1;
