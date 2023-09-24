@@ -7,8 +7,16 @@ Core:
 
 DOM:
   . Added DOMNode::compareDocumentPosition(). (nielsdos)
+  . Implement #53655 (Improve speed of DOMNode::C14N() on large XML documents).
+    (nielsdos)
+
+Intl:
+  . Added IntlDateFormatter::PATTERN constant. (David Carlier)
 
 Standard:
   . Implement GH-12188 (Indication for the int size in phpinfo()). (timwolla)
+  . Partly fix GH-12143 (Incorrect round() result for 0.49999999999999994).
+    (timwolla)
+  . Fix GH-12252 (round(): Validate the rounding mode). (timwolla)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

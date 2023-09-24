@@ -1736,6 +1736,25 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 }
 /* }}} end dom_node_lookup_namespace_uri */
 
+static int dom_canonicalize_node_parent_lookup_cb(void *user_data, xmlNodePtr node, xmlNodePtr parent)
+{
+	xmlNodePtr root = user_data;
+	/* We have to unroll the first iteration because node->parent
+	 * is not necessarily equal to parent due to libxml2 tree rules (ns decls out of the tree for example). */
+	if (node == root) {
+		return 1;
+	}
+	node = parent;
+	while (node != NULL) {
+		if (node == root) {
+			return 1;
+		}
+		node = node->parent;
+	}
+
+	return 0;
+}
+
 static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	zval *id;
@@ -1777,24 +1796,10 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		RETURN_THROWS();
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(docp);
-
+	bool simple_node_parent_lookup_callback = false;
 	if (xpath_array == NULL) {
 		if (nodep->type != XML_DOCUMENT_NODE) {
-			ctxp = xmlXPathNewContext(docp);
-			ctxp->node = nodep;
-			xpathobjp = xmlXPathEvalExpression((xmlChar *) "(.//. | .//@* | .//namespace::*)", ctxp);
-			ctxp->node = NULL;
-			if (xpathobjp && xpathobjp->type == XPATH_NODESET) {
-				nodeset = xpathobjp->nodesetval;
-			} else {
-				if (xpathobjp) {
-					xmlXPathFreeObject(xpathobjp);
-				}
-				xmlXPathFreeContext(ctxp);
-				zend_throw_error(NULL, "XPath query did not return a nodeset");
-				RETURN_THROWS();
-			}
+			simple_node_parent_lookup_callback = true;
 		}
 	} else {
 		/*xpath query from xpath_array */
@@ -1873,8 +1878,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 	}
 
 	if (buf != NULL) {
-		ret = xmlC14NDocSaveTo(docp, nodeset, exclusive, inclusive_ns_prefixes,
-			with_comments, buf);
+		if (simple_node_parent_lookup_callback) {
+			ret = xmlC14NExecute(docp, dom_canonicalize_node_parent_lookup_cb, nodep, exclusive, inclusive_ns_prefixes, with_comments, buf);
+		} else {
+			ret = xmlC14NDocSaveTo(docp, nodeset, exclusive, inclusive_ns_prefixes, with_comments, buf);
+		}
 	}
 
 	if (inclusive_ns_prefixes != NULL) {

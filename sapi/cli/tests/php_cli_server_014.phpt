@@ -1,5 +1,5 @@
 --TEST--
-Bug #60477: Segfault after two multipart/form-data POST requestes
+Bug #60477: Segfault after two multipart/form-data POST requests
 --SKIPIF--
 <?php
 include "skipif.inc";

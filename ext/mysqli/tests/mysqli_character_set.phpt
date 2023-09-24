@@ -16,17 +16,6 @@ require_once 'skipifconnectfailure.inc';
         printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
             $host, $user, $db, $port, $socket);
 
-    if (!$res = mysqli_query($link, 'SELECT version() AS server_version'))
-        printf("[002] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-    $tmp = mysqli_fetch_assoc($res);
-    mysqli_free_result($res);
-    $version = explode('.', $tmp['server_version']);
-    if (empty($version))
-        printf("[003] Cannot determine server version, need MySQL Server 4.1+ for the test!\n");
-
-    if ($version[0] <= 4 && $version[1] < 1)
-        printf("[004] Need MySQL Server 4.1+ for the test!\n");
-
     if (!$res = mysqli_query($link, "SHOW CHARACTER SET"))
         printf("[005] Cannot get list of available character sets, [%d] %s\n",
             mysqli_errno($link), mysqli_error($link));

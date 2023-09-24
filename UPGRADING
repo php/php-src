@@ -26,6 +26,11 @@ PHP 8.4 UPGRADE NOTES
     Consult sections 2. New Features and 6. New Functions for a list of
     newly implemented methods and constants.
 
+- Standard:
+  . round() now validates the value of the $mode parameter and throws a ValueError
+    for invalid modes. Previously invalid modes would have been interpreted as
+    PHP_ROUND_HALF_UP.
+
 ========================================
 2. New Features
 ========================================
@@ -50,6 +55,15 @@ PHP 8.4 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Standard:
+  . The internal implementation for rounding to integers has been rewritten
+    to be easier to verify for correctness and to be easier to maintain.
+    Some rounding bugs have been fixed as a result of the rewrite. For
+    example previously rounding 0.49999999999999994 to the nearest integer
+    would have resulted in 1.0 instead of the correct result 0.0. Additional
+    inputs might also be affected and result in different outputs compared to
+    earlier PHP versions.
+
 ========================================
 6. New Functions
 ========================================
@@ -73,6 +87,10 @@ PHP 8.4 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- Intl:
+  . The IntlDateFormatter class exposes now the new PATTERN constant
+    reflecting udat api's UDAT_PATTERN.
+
 ========================================
 11. Changes to INI File Handling
 ========================================
@@ -89,3 +107,6 @@ PHP 8.4 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
+* The performance of DOMNode::C14N() is greatly improved for the case without
+  an xpath query. This can give a time improvement of easily two order of
+  magnitude for documents with tens of thousands of nodes.

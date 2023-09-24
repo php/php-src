@@ -494,6 +494,8 @@ PHP_CHECK_STDINT_TYPES
 
 dnl Check __builtin_expect
 PHP_CHECK_BUILTIN_EXPECT
+dnl Check __builtin_unreachable
+PHP_CHECK_BUILTIN_UNREACHABLE
 dnl Check __builtin_clz
 PHP_CHECK_BUILTIN_CLZ
 dnl Check __builtin_clzl

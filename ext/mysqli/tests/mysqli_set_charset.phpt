@@ -8,25 +8,6 @@ require_once 'connect.inc';
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
     die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
-if (!($res = mysqli_query($link, 'SELECT version() AS server_version')) ||
-        !($tmp = mysqli_fetch_assoc($res))) {
-    mysqli_close($link);
-    die(sprintf("skip Cannot check server version, [%d] %s\n",
-    mysqli_errno($link), mysqli_error($link)));
-}
-mysqli_free_result($res);
-$version = explode('.', $tmp['server_version']);
-if (empty($version)) {
-    mysqli_close($link);
-    die(sprintf("skip Cannot check server version, based on '%s'",
-        $tmp['server_version']));
-}
-
-if ($version[0] <= 4 && $version[1] < 1) {
-    mysqli_close($link);
-    die(sprintf("skip Requires MySQL Server 4.1+\n"));
-}
-
 if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STORE_RESULT)) &&
         (mysqli_num_rows($res) == 1)) ||
         (($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin2"', MYSQLI_STORE_RESULT)) &&

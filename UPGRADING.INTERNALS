@@ -14,12 +14,18 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+* zend_register_module_ex() now takes an additional int module_type argument.
+  This function will also assign the module number and type, there is no need
+  to do this at the call site anymore. Writing the handle should happen after
+  successful registration.
+
 ========================
 2. Build system changes
 ========================
 
  a. Unix build system changes
    - The configure option --with-zlib-dir has been removed.
+   - Symbol COOKIE_IO_FUNCTIONS_T has been removed (use cookie_io_functions_t).
 
 ========================
 3. Module changes

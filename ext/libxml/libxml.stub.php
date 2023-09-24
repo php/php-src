@@ -93,13 +93,11 @@ const LIBXML_NOXMLDECL = UNKNOWN;
  * @cvalue XML_PARSE_HUGE
  */
 const LIBXML_PARSEHUGE = UNKNOWN;
-#if LIBXML_VERSION >= 20900
 /**
  * @var int
  * @cvalue XML_PARSE_BIG_LINES
  */
 const LIBXML_BIGLINES = UNKNOWN;
-#endif
 /**
  * @var int
  * @cvalue LIBXML_SAVE_NOEMPTYTAG
@@ -114,21 +112,17 @@ const LIBXML_NOEMPTYTAG = UNKNOWN;
 const LIBXML_SCHEMA_CREATE = UNKNOWN;
 #endif
 
-#if LIBXML_VERSION >= 20707
 /**
  * @var int
  * @cvalue HTML_PARSE_NOIMPLIED
  */
 const LIBXML_HTML_NOIMPLIED = UNKNOWN;
-#endif
 
-#if LIBXML_VERSION >= 20708
 /**
  * @var int
  * @cvalue HTML_PARSE_NODEFDTD
  */
 const LIBXML_HTML_NODEFDTD = UNKNOWN;
-#endif
 
 /**
  * @var int

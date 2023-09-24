@@ -1,5 +1,5 @@
 --TEST--
-oss-fuzz #60709: Test
+oss-fuzz #60709: Unsetting variable after undefined variable warning in ++/--
 --FILE--
 <?php
 set_error_handler(function($_, $m) {

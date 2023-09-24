@@ -59,9 +59,7 @@ zend_module_entry zend_builtin_module = { /* {{{ */
 
 zend_result zend_startup_builtin_functions(void) /* {{{ */
 {
-	zend_builtin_module.module_number = 0;
-	zend_builtin_module.type = MODULE_PERSISTENT;
-	return (EG(current_module) = zend_register_module_ex(&zend_builtin_module)) == NULL ? FAILURE : SUCCESS;
+	return (EG(current_module) = zend_register_module_ex(&zend_builtin_module, MODULE_PERSISTENT)) == NULL ? FAILURE : SUCCESS;
 }
 /* }}} */
 
