@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     (rioderelfte)
   . Fixed bug GH-12215 (Module entry being overwritten causes type errors in
     ext/dom). (nielsdos)
+  . Fixed bug GH-12273 (__builtin_cpu_init check). (Freaky)
 
 - Filter:
   . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
