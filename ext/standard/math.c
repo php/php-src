@@ -131,7 +131,7 @@ static inline double php_round_helper(double value, int mode) {
 				return integral + copysign(1.0, integral);
 			}
 
-			if (fractional == 0.5) {
+			if (UNEXPECTED(fractional == 0.5)) {
 				bool even = !fmod(integral, 2.0);
 
 				/* If the integral part is not even we can make it even
@@ -148,7 +148,7 @@ static inline double php_round_helper(double value, int mode) {
 				return integral + copysign(1.0, integral);
 			}
 
-			if (fractional == 0.5) {
+			if (UNEXPECTED(fractional == 0.5)) {
 				bool even = !fmod(integral, 2.0);
 
 				if (even) {
