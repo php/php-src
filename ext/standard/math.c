@@ -260,7 +260,7 @@ PHP_FUNCTION(abs)
 
 	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
-			if (Z_LVAL_P(value) == ZEND_LONG_MIN) {
+			if (UNEXPECTED(Z_LVAL_P(value) == ZEND_LONG_MIN)) {
 				RETURN_DOUBLE(-(double)ZEND_LONG_MIN);
 			} else {
 				RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
