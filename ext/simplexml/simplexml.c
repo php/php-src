@@ -1835,6 +1835,7 @@ static zend_result sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int 
 {
 	php_sxe_object *sxe;
 	xmlChar        *contents = NULL;
+	bool            free_contents = true;
 	xmlNodePtr	    node;
 	zend_result rv;
 
@@ -1865,13 +1866,16 @@ static zend_result sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int 
 		if (sxe->node && sxe->node->node) {
 			if (sxe->node->node->children) {
 				contents = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, sxe->node->node->children, 1);
+			} else if (sxe->node->node->type == XML_COMMENT_NODE || sxe->node->node->type == XML_PI_NODE) {
+				contents = sxe->node->node->content;
+				free_contents = false;
 			}
 		}
 	}
 
 	rv = cast_object(writeobj, type, (char *)contents);
 
-	if (contents) {
+	if (contents && free_contents) {
 		xmlFree(contents);
 	}
 
