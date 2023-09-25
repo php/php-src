@@ -58,9 +58,14 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	/* destruct the function also, then - we have allocated it in get_method */
 	zend_string_release_ex(func->internal_function.function_name, 0);
 	efree(func);
-#if ZEND_DEBUG
+
+	/* Set the func pointer to NULL. Prior to PHP 8.3, this was only done for debug builds,
+	 * because debug builds check certain properties after the call and needed to know this
+	 * had been freed.
+	 * However, extensions can proxy zend_execute_internal, and it's a bit surprising to have
+	 * an invalid func pointer sitting on there, so this was changed in PHP 8.3.
+	 */
 	execute_data->func = NULL;
-#endif
 }
 /* }}} */
 
