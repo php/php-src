@@ -2120,7 +2120,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 				} else {
 					pwd_quoted = pwd;
 				}
-				spprintf(&ldb, 0, "%s;UID=%s;PWD=%s", db, uid_quoted, pwd_quoted);
+				spprintf(&ldb, 0, "%s;UID=%s;PWD=%s;", db, uid_quoted, pwd_quoted);
 				if (uid_quoted && should_quote_uid) {
 					efree(uid_quoted);
 				}
