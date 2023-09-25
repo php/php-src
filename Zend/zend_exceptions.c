@@ -529,6 +529,31 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 }
 /* }}} */
 
+static void _build_trace_args_list(zval *tmp, smart_str *str) /* {{{ */
+{
+	if (EXPECTED(Z_TYPE_P(tmp) == IS_ARRAY)) {
+		size_t last_len = ZSTR_LEN(str->s);
+		zend_string *name;
+		zval *arg;
+
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), name, arg) {
+			if (name) {
+				smart_str_append(str, name);
+				smart_str_appends(str, ": ");
+			}
+			_build_trace_args(arg, str);
+		} ZEND_HASH_FOREACH_END();
+
+		if (last_len != ZSTR_LEN(str->s)) {
+			ZSTR_LEN(str->s) -= 2; /* remove last ', ' */
+		}
+	} else {
+		/* only happens w/ reflection abuse (Zend/tests/bug63762.phpt) */
+		zend_error(E_WARNING, "args element is not an array");
+	}
+}
+/* }}} */
+
 static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t num) /* {{{ */
 {
 	zval *file, *tmp;
@@ -566,25 +591,7 @@ static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t nu
 	smart_str_appendc(str, '(');
 	tmp = zend_hash_find_known_hash(ht, ZSTR_KNOWN(ZEND_STR_ARGS));
 	if (tmp) {
-		if (EXPECTED(Z_TYPE_P(tmp) == IS_ARRAY)) {
-			size_t last_len = ZSTR_LEN(str->s);
-			zend_string *name;
-			zval *arg;
-
-			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), name, arg) {
-				if (name) {
-					smart_str_append(str, name);
-					smart_str_appends(str, ": ");
-				}
-				_build_trace_args(arg, str);
-			} ZEND_HASH_FOREACH_END();
-
-			if (last_len != ZSTR_LEN(str->s)) {
-				ZSTR_LEN(str->s) -= 2; /* remove last ', ' */
-			}
-		} else {
-			zend_error(E_WARNING, "args element is not an array");
-		}
+		_build_trace_args_list(tmp, str);
 	}
 	smart_str_appends(str, ")\n");
 }
@@ -598,25 +605,7 @@ ZEND_API zend_string *zend_trace_function_args_to_string(HashTable *frame) {
 
 	tmp = zend_hash_find_known_hash(frame, ZSTR_KNOWN(ZEND_STR_ARGS));
 	if (tmp) {
-		if (Z_TYPE_P(tmp) == IS_ARRAY) {
-			size_t last_len = ZSTR_LEN(str.s);
-			zend_string *name;
-			zval *arg;
-
-			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), name, arg) {
-				if (name) {
-					smart_str_append(&str, name);
-					smart_str_appends(&str, ": ");
-				}
-				_build_trace_args(arg, &str);
-			} ZEND_HASH_FOREACH_END();
-
-			if (last_len != ZSTR_LEN(str.s)) {
-				ZSTR_LEN(str.s) -= 2; /* remove last ', ' */
-			}
-		} else {
-			smart_str_appends(&str, "<<invalid argument array>>");
-		}
+		_build_trace_args_list(tmp, &str);
 	}
 
 	smart_str_0(&str);
