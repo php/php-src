@@ -1,5 +1,5 @@
 --TEST--
-GH-12265 (Cloning an object breaks serialization recursion) - __serialize variation
+GH-12265 (Cloning an object breaks serialization recursion) - __sleep variation
 --FILE--
 <?php
 
@@ -11,9 +11,10 @@ class A {
 class B {
     public A $a;
 
-    public function __serialize()
+    public function __sleep()
     {
-        return ['a' => new A($this)];
+        $this->a = new A($this);
+        return ['a'];
     }
 }
 
