@@ -597,6 +597,7 @@ static void _build_trace_string(smart_str *str, const HashTable *ht, uint32_t nu
 }
 /* }}} */
 
+/* {{{ Gets the function arguments printed as a string from a backtrace frame. */
 ZEND_API zend_string *zend_trace_function_args_to_string(HashTable *frame) {
 	zval *tmp;
 	smart_str str = {0};
@@ -611,6 +612,29 @@ ZEND_API zend_string *zend_trace_function_args_to_string(HashTable *frame) {
 	smart_str_0(&str);
 	return str.s ? str.s : ZSTR_EMPTY_ALLOC();
 }
+/* }}} */
+
+/* {{{ Gets the currently executing function's arguments as a string. Used by php_verror. */
+ZEND_API zend_string *zend_trace_current_function_args_string(void) {
+	zend_string *dynamic_params = NULL;
+	/* get a backtrace to snarf function args */
+	zval backtrace, *first_frame;
+	zend_fetch_debug_backtrace(&backtrace, /* skip_last */ 0, /* options */ 0, /* limit */ 1);
+	/* can fail esp if low memory condition */
+	if (Z_TYPE(backtrace) != IS_ARRAY) {
+		return NULL; /* don't need to free */
+	}
+	first_frame = zend_hash_index_find(Z_ARRVAL(backtrace), 0);
+	if (!first_frame) {
+		goto free_backtrace;
+	}
+	dynamic_params = zend_trace_function_args_to_string(Z_ARRVAL_P(first_frame));
+free_backtrace:
+	zval_ptr_dtor(&backtrace);
+	/* free the string after we use it */
+	return dynamic_params;
+}
+/* }}} */
 
 ZEND_API zend_string *zend_trace_to_string(const HashTable *trace, bool include_main) {
 	zend_ulong index;
