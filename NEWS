@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12282 (IntlDateFormatter::construct should throw an exception
     on an invalid locale). (David Carlier)
 
+- MySQLnd:
+  . Fixed bug GH-12297 (PHP Startup: Invalid library (maybe not a PHP library)
+    'mysqlnd.so' in Unknown on line). (nielsdos)
+
 - PCRE:
   . Fixed bug GH-11956 (Backport upstream fix, PCRE regular expressions with
     JIT enabled gives different result). (nielsdos)
