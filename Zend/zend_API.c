@@ -3271,7 +3271,7 @@ ZEND_API void zend_post_deactivate_modules(void) /* {{{ */
 /* return the next free module number */
 ZEND_API int zend_next_free_module(void) /* {{{ */
 {
-	return zend_hash_num_elements(&module_registry) + 1;
+	return zend_hash_num_elements(&module_registry);
 }
 /* }}} */
 
