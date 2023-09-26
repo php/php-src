@@ -4983,9 +4983,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						CHECK_OP1_TRACE_TYPE();
 						op2_info = OP2_INFO();
 						CHECK_OP2_TRACE_TYPE();
+#ifndef ZEND_JIT_IR
 						if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
 							break;
 						}
+#endif
 						if (!(op1_info & MAY_BE_LONG)
 						 || !(op2_info & MAY_BE_LONG)) {
 							break;
