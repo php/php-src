@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.0RC3
+28 Sep 2023, PHP 8.3.0RC3
 
 - Core:
   . Fixed bug GH-12189 (#[Override] attribute in trait does not check for
