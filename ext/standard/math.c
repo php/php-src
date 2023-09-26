@@ -280,7 +280,7 @@ PHPAPI zend_result _php_math_round_long(zend_long value, int places, int mode, z
 		return SUCCESS;
 	}
 
-	if (-places > sizeof(powers) / sizeof(powers[0]) - 1) {
+	if (UNEXPECTED(-places > sizeof(powers) / sizeof(powers[0]) - 1)) {
 		// Special case for rounding to the same number of places as max length possible
 		// as this would overflow the power of 10
 		if (places == -MAX_LENGTH_OF_LONG + 1) {
@@ -289,7 +289,7 @@ PHPAPI zend_result _php_math_round_long(zend_long value, int places, int mode, z
 			tmp_value = 0;
 			power_half = powers[-places - 1] * 5;
 		} else {
-			// Rounding more places will allways be zero
+			// Rounding more places will always be zero
 			*result = 0;
 			return SUCCESS;
 		}
@@ -306,17 +306,17 @@ PHPAPI zend_result _php_math_round_long(zend_long value, int places, int mode, z
 			|| (mode == PHP_ROUND_HALF_EVEN && (rest > power_half || (rest == power_half && tmp_value % 2 == 1)))
 			|| (mode == PHP_ROUND_HALF_ODD && (rest > power_half || (rest == power_half && tmp_value % 2 == 0)))
 		) {
-			if (max_places) {
+			if (UNEXPECTED(max_places)) {
 				return FAILURE; // would overflow
 			}
 
 			tmp_value = tmp_value * power;
 
-			if (tmp_value > ZEND_LONG_MAX - power) {
+			if (UNEXPECTED(tmp_value > ZEND_LONG_MAX - power)) {
 				return FAILURE; // would overflow
 			}
 			tmp_value = tmp_value + power;
-		} else if (max_places) {
+		} else if (UNEXPECTED(max_places)) {
 			tmp_value = 0;
 		} else {
 			tmp_value = tmp_value * power;
@@ -327,18 +327,18 @@ PHPAPI zend_result _php_math_round_long(zend_long value, int places, int mode, z
 			|| (mode == PHP_ROUND_HALF_EVEN && (rest < -power_half || (rest == -power_half && tmp_value % 2 == -1)))
 			|| (mode == PHP_ROUND_HALF_ODD && (rest < -power_half || (rest == -power_half && tmp_value % 2 == 0)))
 		) {
-			if (max_places) {
+			if (UNEXPECTED(max_places)) {
 				return FAILURE; // would underflow
 			}
 
 			tmp_value = tmp_value * power;
 
-			if (tmp_value < ZEND_LONG_MIN + power) {
+			if (UNEXPECTED(tmp_value < ZEND_LONG_MIN + power)) {
 				return FAILURE; // would underflow
 			}
 
 			tmp_value = tmp_value - power;
-		} else if (max_places) {
+		} else if (UNEXPECTED(max_places)) {
 			tmp_value = 0;
 		} else {
 			tmp_value = tmp_value * power;
