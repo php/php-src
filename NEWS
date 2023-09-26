@@ -9,6 +9,10 @@ PHP                                                                        NEWS
     ext/dom). (nielsdos)
   . Fixed bug GH-12273 (__builtin_cpu_init check). (Freaky)
 
+- CType:
+  . Fixed bug GH-11997 (ctype_alnum 5 times slower in PHP 8.1 or greater).
+    (nielsdos)
+
 - Filter:
   . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
 
@@ -21,6 +25,10 @@ PHP                                                                        NEWS
     (David Carlier)
   . Fixed bug GH-12282 (IntlDateFormatter::construct should throw an exception
     on an invalid locale). (David Carlier)
+
+- MySQLnd:
+  . Fixed bug GH-12297 (PHP Startup: Invalid library (maybe not a PHP library)
+    'mysqlnd.so' in Unknown on line). (nielsdos)
 
 - PCRE:
   . Fixed bug GH-11956 (Backport upstream fix, PCRE regular expressions with
