@@ -1926,6 +1926,21 @@ ZEND_API uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int w
 	return tmp;
 }
 
+static zend_always_inline uint32_t array_type_to_kind(uint32_t arr_type)
+{
+	/* Rules:
+	 * HASH_ONLY      -> MAY_BE_ARRAY_NUMERIC_HASH
+	 * PACKED_ONLY    -> MAY_BE_ARRAY_NUMERIC_HASH | MAY_BE_ARRAY_PACKED (== MAY_BE_ARRAY_KEY_LONG)
+	 * HASH || PACKED -> MAY_BE_ARRAY_NUMERIC_HASH | MAY_BE_ARRAY_PACKED (== MAY_BE_ARRAY_KEY_LONG)
+	 * 0              -> MAY_BE_ARRAY_NUMERIC_HASH
+	 */
+	if (MAY_BE_PACKED(arr_type)) {
+		return MAY_BE_ARRAY_KEY_LONG;
+	} else {
+		return MAY_BE_ARRAY_NUMERIC_HASH;
+	}
+}
+
 static uint32_t assign_dim_array_result_type(
 		uint32_t arr_type, uint32_t dim_type, uint32_t value_type, zend_uchar dim_op_type) {
 	uint32_t tmp = 0;
@@ -1939,13 +1954,13 @@ static uint32_t assign_dim_array_result_type(
 			if (arr_type & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 				tmp |= MAY_BE_ARRAY_PACKED;
 			}
-			tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
+			tmp |= array_type_to_kind(arr_type);
 		} else {
 			if (dim_type & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
 				if (arr_type & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 					tmp |= MAY_BE_ARRAY_PACKED;
 				}
-				tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
+				tmp |= array_type_to_kind(arr_type);
 			}
 			if (dim_type & MAY_BE_STRING) {
 				tmp |= MAY_BE_ARRAY_KEY_STRING;
@@ -1954,7 +1969,7 @@ static uint32_t assign_dim_array_result_type(
 					if (arr_type & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 						tmp |= MAY_BE_ARRAY_PACKED;
 					}
-					tmp |= MAY_BE_HASH_ONLY(arr_type) ? MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
+					tmp |= array_type_to_kind(arr_type);
 				}
 			}
 			if (dim_type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
@@ -3254,8 +3269,7 @@ static zend_always_inline int _zend_update_type_info(
 							key_type |= MAY_BE_ARRAY_PACKED;
 						}
 						if (t1 & MAY_BE_ARRAY) {
-							key_type |= MAY_BE_HASH_ONLY(t1) ?
-								MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
+							key_type |= array_type_to_kind(t1);
 						}
 					} else {
 						if (t2 & (MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_RESOURCE|MAY_BE_DOUBLE)) {
@@ -3263,8 +3277,7 @@ static zend_always_inline int _zend_update_type_info(
 								key_type |= MAY_BE_ARRAY_PACKED;
 							}
 							if (t1 & MAY_BE_ARRAY) {
-								key_type |= MAY_BE_HASH_ONLY(t1) ?
-									MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
+								key_type |= array_type_to_kind(t1);
 						    }
 						}
 						if (t2 & MAY_BE_STRING) {
@@ -3275,8 +3288,7 @@ static zend_always_inline int _zend_update_type_info(
 									key_type |= MAY_BE_ARRAY_PACKED;
 								}
 								if (t1 & MAY_BE_ARRAY) {
-									key_type |= MAY_BE_HASH_ONLY(t1) ?
-										MAY_BE_ARRAY_NUMERIC_HASH : MAY_BE_ARRAY_KEY_LONG;
+									key_type |= array_type_to_kind(t1);
 							    }
 							}
 						}
