@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: afcf0dfba2c9d3ae0334f129f5852229bdde8d5f */
+ * Stub hash: 8493d85f8aa611f9739be2d59568d98ea4506522 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1781,7 +1781,7 @@ static zend_class_entry *register_class_DOMException(zend_class_entry *class_ent
 	INIT_CLASS_ENTRY(ce, "DOMException", class_DOMException_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
-	zend_register_class_alias("DOM\\Exception", class_entry);
+	zend_register_class_alias("DOM\\DOMException", class_entry);
 
 	zval property_code_default_value;
 	ZVAL_LONG(&property_code_default_value, 0);

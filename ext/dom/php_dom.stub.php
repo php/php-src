@@ -797,7 +797,7 @@ namespace
         public function xinclude(int $options = 0): int|false {}
     }
 
-    /** @alias DOM\Exception */
+    /** @alias DOM\DOMException */
     final class DOMException extends Exception
     {
         /**
