@@ -3,6 +3,6 @@
 #define PHP_MAJOR_VERSION 8
 #define PHP_MINOR_VERSION 1
 #define PHP_RELEASE_VERSION 24
-#define PHP_EXTRA_VERSION "-dev"
-#define PHP_VERSION "8.1.24-dev"
+#define PHP_EXTRA_VERSION ""
+#define PHP_VERSION "8.1.24"
 #define PHP_VERSION_ID 80124
