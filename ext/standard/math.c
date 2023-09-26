@@ -252,7 +252,7 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 /* {{{ _php_math_round_long */
 /*
  * Rounds a zend_long to a certain number of decimal places in a certain rounding
- * mode. For the specifics of the algorithm, see TODO: http://wiki.php.net/rfc/int_rounding
+ * mode. For the specifics of the algorithm, see https://wiki.php.net/rfc/integer-rounding
  */
 PHPAPI zend_result _php_math_round_long(zend_long value, int places, int mode, zend_long *result) {
 	static const zend_long powers[] = {
