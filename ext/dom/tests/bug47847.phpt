@@ -2,6 +2,8 @@
 Bug #47847 (importNode loses the namespace of an XML element)
 --EXTENSIONS--
 dom
+--XFAIL--
+See https://github.com/php/php-src/pull/12308
 --FILE--
 <?php
 $fromdom = new DOMDocument();

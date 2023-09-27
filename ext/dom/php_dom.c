@@ -1440,11 +1440,16 @@ static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePt
 
 static void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep)
 {
+	/* Ideally we'd use the DOM-wrapped version, but we cannot: https://github.com/php/php-src/pull/12308. */
+#if 0
 	/* Put on stack to avoid allocation.
 	 * Although libxml2 currently does not use this for the reconciliation, it still
 	 * makes sense to do this just in case libxml2's internal change in the future. */
 	xmlDOMWrapCtxt dummy_ctxt = {0};
 	xmlDOMWrapReconcileNamespaces(&dummy_ctxt, nodep, /* options */ 0);
+#else
+	xmlReconciliateNs(nodep->doc, nodep);
+#endif
 }
 
 void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
