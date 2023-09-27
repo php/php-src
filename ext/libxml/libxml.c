@@ -301,8 +301,13 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 				if (curnode->type == XML_ELEMENT_NODE) {
 					/* This ensures that namespace references in this subtree are defined within this subtree,
 					 * otherwise a use-after-free would be possible when the original namespace holder gets freed. */
+#if 0
 					xmlDOMWrapCtxt dummy_ctxt = {0};
 					xmlDOMWrapReconcileNamespaces(&dummy_ctxt, curnode, /* options */ 0);
+#else
+					/* See php_dom.c */
+					xmlReconciliateNs(curnode->doc, curnode);
+#endif
 				}
 				/* Skip freeing */
 				curnode = next;
