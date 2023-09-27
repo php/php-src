@@ -2099,9 +2099,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 			bool is_uid_set = uid && *uid
 				&& !strstr(db, "uid=")
 				&& !strstr(db, "UID=");
-			bool is_pwd_set = pwd && *pwd
-				&& !strstr(db, "pwd=")
-				&& !strstr(db, "PWD=");
+			bool is_pwd_set = !strstr(db, "pwd=") && !strstr(db, "PWD=");
 			if (is_uid_set && is_pwd_set) {
 				char *uid_quoted = NULL, *pwd_quoted = NULL;
 				bool should_quote_uid = !php_odbc_connstr_is_quoted(uid) && php_odbc_connstr_should_quote(uid);
