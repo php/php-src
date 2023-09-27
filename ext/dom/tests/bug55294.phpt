@@ -2,6 +2,8 @@
 Bug #55294 (DOMDocument::importNode shifts namespaces when "default" namespace exists)
 --EXTENSIONS--
 dom
+--XFAIL--
+See https://github.com/php/php-src/pull/12308
 --FILE--
 <?php
 

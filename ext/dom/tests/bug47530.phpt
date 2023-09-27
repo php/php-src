@@ -118,18 +118,18 @@ test_appendChild_with_shadowing();
 --EXPECT--
 -- Test document fragment with import --
 <?xml version="1.0"?>
-<html xmlns="https://php.net/something" xmlns:ns="https://php.net/whatever"><element ns:foo="https://php.net/bar"/></html>
+<html xmlns="https://php.net/something" xmlns:ns="https://php.net/whatever"><default:element xmlns:default="https://php.net/something" ns:foo="https://php.net/bar"/></html>
 -- Test document fragment without import --
 <?xml version="1.0"?>
-<html xmlns=""><element xmlns:foo="https://php.net/bar"><foo:bar/><bar xmlns=""/></element></html>
+<html xmlns=""><element xmlns:foo="https://php.net/bar"><foo:bar/><bar/></element></html>
 string(7) "foo:bar"
 string(19) "https://php.net/bar"
 -- Test document import --
 <?xml version="1.0"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-<div xmlns="http://www.w3.org/1999/xhtml">
-    <p>Test-Text</p>
-</div>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:default="http://www.w3.org/1999/xhtml">
+<default:div xmlns="http://www.w3.org/1999/xhtml">
+    <default:p>Test-Text</default:p>
+</default:div>
 </feed>
 -- Test partial document import --
 <?xml version="1.0"?>
