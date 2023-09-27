@@ -59,6 +59,9 @@ PHP                                                                        NEWS
   . Fix return type of stub of xml_parse_into_struct(). (nielsdos)
   . Fix memory leak when calling xml_parse_into_struct() twice. (nielsdos)
 
+- Sockets:
+  . Fix socket_export_stream() with wrong protocol (twosee)
+
 28 Sep 2023, PHP 8.1.24
 
 - Core:
