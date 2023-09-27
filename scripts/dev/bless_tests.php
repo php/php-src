@@ -77,6 +77,7 @@ function normalizeOutput(string $out): string {
     // Inside of strings, replace absolute paths that have been truncated with
     // any string. These tend to contain homedirs with usernames, not good.
     $out = preg_replace("/'\\/.*\.\\.\\.'/", "'%s'", $out);
+    $out = preg_replace("/'file:\/\\/.*\.\\.\\.'/", "'%s'", $out);
     $out = str_replace("\0", '%0', $out);
     return $out;
 }
