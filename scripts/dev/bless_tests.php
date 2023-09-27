@@ -74,6 +74,9 @@ function normalizeOutput(string $out): string {
         'Resource ID#%d used as offset, casting to integer (%d)',
         $out);
     $out = preg_replace('/string\(\d+\) "([^"]*%d)/', 'string(%d) "$1', $out);
+    // Inside of strings, replace absolute paths that have been truncated with
+    // any string. These tend to contain homedirs with usernames, not good.
+    $out = preg_replace("/'\\/.*\.\\.\\.'/", "'%s'", $out);
     $out = str_replace("\0", '%0', $out);
     return $out;
 }
