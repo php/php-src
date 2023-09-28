@@ -731,9 +731,6 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		}
 	}
 
-	php_stream_close(stream);
-	stream = NULL;
-
 	if (!dom_parse_decode_encode_finish(&ctx, document, parser, &decoding_encoding_ctx, &tokenizer_error_offset, &tree_error_offset)) {
 		goto fail_oom;
 	}
@@ -749,6 +746,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	if (UNEXPECTED(bridge_status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
 		php_libxml_ctx_error(NULL, "%s in %s", dom_lexbor_libxml2_bridge_status_code_to_string(bridge_status), filename);
 		lxb_html_document_destroy(document);
+		php_stream_close(stream);
 		RETURN_FALSE;
 	}
 	lxb_html_document_destroy(document);
@@ -760,6 +758,36 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	} else {
 		lxml_doc->encoding = xmlStrdup((const xmlChar *) "UTF-8");
 	}
+
+	if (stream->wrapper == &php_plain_files_wrapper) {
+		// TODO: do the same for XMLDocument?
+		xmlChar *converted = xmlPathToURI((const xmlChar *) filename);
+		if (UNEXPECTED(!converted)) {
+			goto fail_oom;
+		}
+		/* Check for "file:/"" instead of "file://" because of libxml2 quirk */
+		if (strncmp((const char *) converted, "file:/", sizeof("file:/") - 1) != 0) {
+			xmlChar *buffer = xmlStrdup((const xmlChar *) "file://");
+			if (UNEXPECTED(!buffer)) {
+				xmlFree(converted);
+				goto fail_oom;
+			}
+			xmlChar *new_buffer = xmlStrcat(buffer, converted);
+			if (UNEXPECTED(!new_buffer)) {
+				xmlFree(buffer);
+				xmlFree(converted);
+				goto fail_oom;
+			}
+			xmlFree(converted);
+			lxml_doc->URL = new_buffer;
+		} else {
+			lxml_doc->URL = converted;
+		}
+	} else {
+		lxml_doc->URL = xmlStrdup((const xmlChar *) filename);
+	}
+
+	php_stream_close(stream);
 
 	dom_object *intern = php_dom_instantiate_object_helper(return_value, dom_html_document_class_entry, (xmlNodePtr) lxml_doc, NULL);
 	intern->document->is_modern_api_class = true;
