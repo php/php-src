@@ -59,6 +59,10 @@ PHP                                                                        NEWS
   . Fix return type of stub of xml_parse_into_struct(). (nielsdos)
   . Fix memory leak when calling xml_parse_into_struct() twice. (nielsdos)
 
+- XSL:
+  . Fix type error on XSLTProcessor::transformToDoc return value with
+    SimpleXML. (nielsdos)
+
 - Sockets:
   . Fix socket_export_stream() with wrong protocol (twosee)
 
