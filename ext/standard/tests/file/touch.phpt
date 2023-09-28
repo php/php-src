@@ -55,7 +55,7 @@ int(100)
 bool(true)
 int(100)
 
-Warning: touch(): Unable to create file /no/such/file/or/directory because %s in %s on line %d
+Warning: touch('%s'): Unable to create file /no/such/file/or/directory because No such file or directory in %s on line %d
 bool(false)
 touch(): Argument #2 ($mtime) cannot be null when argument #3 ($atime) is an integer
 Done

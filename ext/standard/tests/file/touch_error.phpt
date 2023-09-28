@@ -9,5 +9,5 @@ var_dump(touch("/no/such/file/or/directory"));
 
 ?>
 --EXPECTF--
-Warning: touch(): Unable to create file /no/such/file/or/directory because No such file or directory in %s on line %d
+Warning: touch('%s'): Unable to create file /no/such/file/or/directory because No such file or directory in %s on line %d
 bool(false)

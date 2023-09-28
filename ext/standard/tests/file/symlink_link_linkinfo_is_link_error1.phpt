@@ -40,23 +40,23 @@ unlink(__DIR__."/symlink_link_linkinfo_is_link_error1.tmp");
 --EXPECTF--
 *** Testing symlink() for error conditions ***
 
-Warning: symlink(): %s in %s on line %d
+Warning: symlink('', '%s'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: symlink(): %s in %s on line %d
+Warning: symlink('', '%s'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: symlink(): %s in %s on line %d
+Warning: symlink('%s', ''): No such file or directory in %s on line %d
 bool(false)
 
-Warning: symlink(): %s in %s on line %d
+Warning: symlink('%s', ''): No such file or directory in %s on line %d
 bool(false)
 
 *** Testing linkinfo() for error conditions ***
 
-Warning: linkinfo(): %s in %s on line %d
+Warning: linkinfo(''): Invalid argument in %s on line %d
 int(-1)
 
-Warning: linkinfo(): %s in %s on line %d
+Warning: linkinfo(''): Invalid argument in %s on line %d
 int(-1)
 Done

@@ -98,9 +98,9 @@ include "test2://hello";
 --EXPECTF--
 Deprecated: Directive 'allow_url_include' is deprecated in Unknown on line 0
 
-Warning: file_get_contents(): test1:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %s on line %d
+Warning: file_get_contents('test1://hello'): test1:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %s on line %d
 
-Warning: file_get_contents(test1://hello): Failed to open stream: no suitable wrapper could be found in %s on line %d
+Warning: file_get_contents('test1://hello'): Failed to open stream: no suitable wrapper could be found in %s on line %d
 
 
 Warning: include(): test1:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %s on line %d
@@ -109,16 +109,16 @@ Warning: include(test1://hello): Failed to open stream: no suitable wrapper coul
 
 Warning: include(): Failed opening 'test1://hello' for inclusion (include_path='%s') in %s on line %d
 
-Warning: fopen(): test1:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %s on line %d
+Warning: fopen('test1://hello', 'rb'): test1:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %s on line %d
 
-Warning: fopen(test1://hello): Failed to open stream: no suitable wrapper could be found in %s on line %d
+Warning: fopen('test1://hello', 'rb'): Failed to open stream: no suitable wrapper could be found in %s on line %d
 
-Warning: file_get_contents(test2://hello): Failed to open stream: "test::stream_open" call failed in %s on line %d
+Warning: file_get_contents('test2://hello'): Failed to open stream: "test::stream_open" call failed in %s on line %d
 
 
-Warning: fopen(): test1:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %s on line %d
+Warning: fopen('test1://hello', 'rb'): test1:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %s on line %d
 
-Warning: fopen(test1://hello): Failed to open stream: no suitable wrapper could be found in %s on line %d
+Warning: fopen('test1://hello', 'rb'): Failed to open stream: no suitable wrapper could be found in %s on line %d
 
 Warning: include(test2://hello): Failed to open stream: "test::stream_open" call failed in %s on line %d
 

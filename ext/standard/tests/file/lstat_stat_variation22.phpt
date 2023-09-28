@@ -29,17 +29,17 @@ var_dump(lstat('|'));
 bool(false)
 bool(false)
 
-Warning: stat(): stat failed for   in %s on line %d
+Warning: stat(' '): stat failed for   in %s on line %d
 bool(false)
 
-Warning: stat(): stat failed for | in %s on line %d
+Warning: stat('|'): stat failed for | in %s on line %d
 bool(false)
 *** testing lstat ***
 bool(false)
 bool(false)
 
-Warning: lstat(): Lstat failed for   in %s on line %d
+Warning: lstat(' '): Lstat failed for   in %s on line %d
 bool(false)
 
-Warning: lstat(): Lstat failed for | in %s on line %d
+Warning: lstat('|'): Lstat failed for | in %s on line %d
 bool(false)

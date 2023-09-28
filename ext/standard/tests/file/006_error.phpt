@@ -32,18 +32,18 @@ echo "\n*** Done ***\n";
 --EXPECTF--
 *** Testing error conditions for fileperms(), chmod() ***
 
-Warning: chmod(): %s in %s on line %d
+Warning: chmod('/etc/passwd', 511): Operation not permitted in %s on line %d
 bool(false)
 100%d44
 
-Warning: chmod(): %s in %s on line %d
+Warning: chmod('/etc', 511): Operation not permitted in %s on line %d
 bool(false)
 40755
 
-Warning: chmod(): No such file or directory in %s on line %d
+Warning: chmod('%s', 511): No such file or directory in %s on line %d
 bool(false)
 
-Warning: fileperms(): stat failed for /no/such/file/dir in %s on line %d
+Warning: fileperms('%s'): stat failed for /no/such/file/dir in %s on line %d
 bool(false)
 
 

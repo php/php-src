@@ -11,6 +11,6 @@ echo "*** Done ***\n";
 --EXPECTF--
 *** Testing copy() function: error conditions --
 
-Warning: copy(/no/file): Failed to open stream: No such file or directory in %s on line %d
+Warning: copy('/no/file', 'file'): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 *** Done ***

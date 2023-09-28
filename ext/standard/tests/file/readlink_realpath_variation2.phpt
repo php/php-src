@@ -70,28 +70,28 @@ bool(true)
 string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2.tmp"
 string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2.tmp"
 
-Warning: symlink(): No such file or directory in %s on line %d
+Warning: symlink('%s'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink('%s'): No such file or directory in %s on line %d
 bool(false)
 bool(false)
 
-Warning: unlink(%s/./readlink_realpath_variation2/home/../home//tests//..//..//..//home//readlink_realpath_variation2_link.tmp/): No such file or directory in %s on line %d
+Warning: unlink('%s'): No such file or directory in %s on line %d
 
 -- Testing readlink() and realpath() with hardlink, linkname stored inside an array --
 bool(true)
 
-Warning: readlink(): Invalid argument in %s on line %d
+Warning: readlink('%s'): Invalid argument in %s on line %d
 bool(false)
 string(%d) "%s/readlink_realpath_variation2/home/tests/link/readlink_realpath_variation2_link.tmp"
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link('%s'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink('%s'): No such file or directory in %s on line %d
 bool(false)
 bool(false)
 
-Warning: unlink(%s/./readlink_realpath_variation2/home/../home//tests//..//..//..//home//readlink_realpath_variation2_link.tmp/): No such file or directory in %s on line %d
+Warning: unlink('%s'): No such file or directory in %s on line %d
 Done

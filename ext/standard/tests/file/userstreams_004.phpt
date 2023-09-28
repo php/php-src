@@ -43,7 +43,7 @@ bool(true)
 bool(true)
 ------ stream_lock not implemented: -------
 
-Warning: flock(): test_wrapper_base::stream_lock is not implemented! in %s
+Warning: flock(Resource id #%d, 2): test_wrapper_base::stream_lock is not implemented! in %s on line %d
 bool(false)
 ------ fclock(LOCK_SH): -------
 bool(true)

@@ -67,10 +67,10 @@ Directory created
 Directory created
 -- creating mkdirVar5.tmp/../BADDIR/aSubDir --
 
-Warning: mkdir(): No such file or directory in %s on line %d
+Warning: mkdir('mkdirVar5.tmp/....'): No such file or directory in %s on line %d
 -- creating BADDIR/aSubDir --
 
-Warning: mkdir(): No such file or directory in %s on line %d
+Warning: mkdir('BADDIR/aSubDir'): No such file or directory in %s on line %d
 -- creating %s/mkdirVar5.tmp/aSubDir --
 Directory created
 -- creating %s/./mkdirVar5.tmp/aSubDir --
@@ -79,7 +79,7 @@ Directory created
 Directory created
 -- creating %s/BADDIR/aSubDir --
 
-Warning: mkdir(): No such file or directory in %s on line %d
+Warning: mkdir('%s'): No such file or directory in %s on line %d
 -- creating mkdirVar5.tmp/aSubDir/ --
 Directory created
 -- creating %s/mkdirVar5.tmp/aSubDir/ --

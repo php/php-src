@@ -74,10 +74,10 @@ bool(true)
 
 -- Testing on hard links --
 
-Warning: link(): %s in %s on line %d
+Warning: link('%s'): Operation not permitted in %s on line %d
 bool(false)
 
-Warning: linkinfo(): No such file or directory in %s on line %d
+Warning: linkinfo('%s'): No such file or directory in %s on line %d
 int(-1)
 bool(false)
 Done

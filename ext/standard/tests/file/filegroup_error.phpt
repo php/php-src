@@ -17,13 +17,13 @@ echo "\n*** Done ***\n";
 --EXPECTF--
 *** Testing filegroup(): error conditions ***
 
-Warning: filegroup(): stat failed for /no/such/file/dir in %s on line %d
+Warning: filegroup('%s'): stat failed for /no/such/file/dir in %s on line %d
 bool(false)
 
-Warning: filegroup(): stat failed for string in %s on line %d
+Warning: filegroup('string'): stat failed for string in %s on line %d
 bool(false)
 
-Warning: filegroup(): stat failed for 100 in %s on line %d
+Warning: filegroup('100'): stat failed for 100 in %s on line %d
 bool(false)
 
 *** Done ***

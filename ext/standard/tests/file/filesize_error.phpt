@@ -12,9 +12,9 @@ echo "*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing filesize(): error conditions ***
-Warning: filesize(): stat failed for /no/such/file in %s on line %d
+Warning: filesize('/no/such/file'): stat failed for /no/such/file in %s on line %d
 bool(false)
 
-Warning: filesize(): stat failed for /no/such/dir in %s on line %d
+Warning: filesize('/no/such/dir'): stat failed for /no/such/dir in %s on line %d
 bool(false)
 *** Done ***

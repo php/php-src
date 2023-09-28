@@ -42,19 +42,19 @@ unlink(__DIR__."/symlink_link_linkinfo_is_link_error2.tmp");
 --EXPECTF--
 *** Testing link() for error conditions ***
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link('', '%s'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link(' ', '%s'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link('', '%s'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link('%s', ''): No such file or directory in %s on line %d
 bool(false)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link('%s', ''): No such file or directory in %s on line %d
 bool(false)
 
 *** Testing is_link() for error conditions ***

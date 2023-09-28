@@ -92,38 +92,38 @@ function runtest($fileURIs) {
 *** Testing fopen() : variation ***
 --- READ: file://fopen15.tmpDir/fopen_variation15.tmp ---
 
-Warning: fopen(): Remote host file access not supported, file://fopen15.tmpDir/fopen_variation15.tmp in %s on line %d
+Warning: fopen('file://fopen15....', 'r', true): Remote host file access not supported, file://fopen15.tmpDir/fopen_variation15.tmp in %s on line %d
 
-Warning: fopen(file://fopen15.tmpDir/fopen_variation15.tmp): Failed to open stream: no suitable wrapper could be found in %s on line %d
+Warning: fopen('file://fopen15....', 'r', true): Failed to open stream: no suitable wrapper could be found in %s on line %d
 --- WRITE: file://fopen15.tmpDir/fopen_variation15.tmp ---
 
-Warning: fopen(): Remote host file access not supported, file://fopen15.tmpDir/fopen_variation15.tmp in %s on line %d
+Warning: fopen('file://fopen15....', 'w', true): Remote host file access not supported, file://fopen15.tmpDir/fopen_variation15.tmp in %s on line %d
 
-Warning: fopen(file://fopen15.tmpDir/fopen_variation15.tmp): Failed to open stream: no suitable wrapper could be found in %s on line %d
+Warning: fopen('file://fopen15....', 'w', true): Failed to open stream: no suitable wrapper could be found in %s on line %d
 --- READ: file://./fopen15.tmpDir/fopen_variation15.tmp ---
 
-Warning: fopen(): Remote host file access not supported, file://./fopen15.tmpDir/fopen_variation15.tmp in %s on line %d
+Warning: fopen('file://./fopen1...', 'r', true): Remote host file access not supported, file://./fopen15.tmpDir/fopen_variation15.tmp in %s on line %d
 
-Warning: fopen(file://./fopen15.tmpDir/fopen_variation15.tmp): Failed to open stream: no suitable wrapper could be found in %s on line %d
+Warning: fopen('file://./fopen1...', 'r', true): Failed to open stream: no suitable wrapper could be found in %s on line %d
 --- WRITE: file://./fopen15.tmpDir/fopen_variation15.tmp ---
 
-Warning: fopen(): Remote host file access not supported, file://./fopen15.tmpDir/fopen_variation15.tmp in %s on line %d
+Warning: fopen('file://./fopen1...', 'w', true): Remote host file access not supported, file://./fopen15.tmpDir/fopen_variation15.tmp in %s on line %d
 
-Warning: fopen(file://./fopen15.tmpDir/fopen_variation15.tmp): Failed to open stream: no suitable wrapper could be found in %s on line %d
+Warning: fopen('file://./fopen1...', 'w', true): Failed to open stream: no suitable wrapper could be found in %s on line %d
 --- READ: file:///%s/fopen15.tmpDir/fopen_variation15.tmp ---
 test passed
 --- WRITE: file:///%s/fopen15.tmpDir/fopen_variation15.tmp ---
 test passed
 --- READ: file://../fopen15.tmpDir/fopen_variation15.tmp ---
 
-Warning: fopen(): Remote host file access not supported, file://../fopen15.tmpDir/fopen_variation15.tmp in %s on line %d
+Warning: fopen('file://../fopen...', 'r', true): Remote host file access not supported, file://../fopen15.tmpDir/fopen_variation15.tmp in %s on line %d
 
-Warning: fopen(file://../fopen15.tmpDir/fopen_variation15.tmp): Failed to open stream: no suitable wrapper could be found in %s on line %d
+Warning: fopen('file://../fopen...', 'r', true): Failed to open stream: no suitable wrapper could be found in %s on line %d
 --- WRITE: file://../fopen15.tmpDir/fopen_variation15.tmp ---
 
-Warning: fopen(): Remote host file access not supported, file://../fopen15.tmpDir/fopen_variation15.tmp in %s on line %d
+Warning: fopen('file://../fopen...', 'w', true): Remote host file access not supported, file://../fopen15.tmpDir/fopen_variation15.tmp in %s on line %d
 
-Warning: fopen(file://../fopen15.tmpDir/fopen_variation15.tmp): Failed to open stream: no suitable wrapper could be found in %s on line %d
+Warning: fopen('file://../fopen...', 'w', true): Failed to open stream: no suitable wrapper could be found in %s on line %d
 --- READ: file:///%s/fopen15.tmpDir/fopen_variation15.tmp ---
 test passed
 --- WRITE: file:///%s/fopen15.tmpDir/fopen_variation15.tmp ---

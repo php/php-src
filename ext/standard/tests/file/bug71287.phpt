@@ -18,4 +18,4 @@ stream_wrapper_register('test', Stream::class);
 file_put_contents('test://file.txt', 'foobarbaz');
 ?>
 --EXPECTF--
-Warning: file_put_contents(): Only 7 of 9 bytes written, possibly out of free disk space in %sbug71287.php on line %d
+Warning: file_put_contents('test://file.txt', 'foobarbaz'): Only 7 of 9 bytes written, possibly out of free disk space in %s on line %d

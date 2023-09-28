@@ -14,10 +14,10 @@ echo "\n*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing error conditions ***
-Warning: filetype(): Lstat failed for /no/such/file/dir in %s on line %d
+Warning: filetype('%s'): Lstat failed for /no/such/file/dir in %s on line %d
 
-Warning: filetype(): Lstat failed for string in %s on line %d
+Warning: filetype('string'): Lstat failed for string in %s on line %d
 
-Warning: filetype(): Lstat failed for 100 in %s on line %d
+Warning: filetype('100'): Lstat failed for 100 in %s on line %d
 
 *** Done ***

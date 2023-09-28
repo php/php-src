@@ -32,20 +32,20 @@ foreach( $filenames as $filename ) {
 --EXPECTF--
 *** Testing Invalid file types ***
 
-Warning: readlink(): %s in %s on line %d
+Warning: readlink('-2.34555'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: readlink(): %s in %s on line %d
+Warning: readlink(''): No such file or directory in %s on line %d
 bool(false)
 
-Warning: readlink(): %s in %s on line %d
+Warning: readlink('1'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: readlink(): %s in %s on line %d
+Warning: readlink(''): No such file or directory in %s on line %d
 bool(false)
 
-Warning: readlink(): %s in %s on line %d
+Warning: readlink('1234'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: readlink(): %s in %s on line %d
+Warning: readlink('0'): No such file or directory in %s on line %d
 bool(false)

@@ -45,11 +45,11 @@ echo "\n*** Done ***\n";
 *** Testing file_get_contents() : variation ***
 -- Iteration 0 --
 
-Warning: file_get_contents(-1): Failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents('-1'): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 1 --
 
-Warning: file_get_contents(1): Failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents('1'): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 2 --
 ValueError: Path cannot be empty
@@ -57,7 +57,7 @@ ValueError: Path cannot be empty
 ValueError: Path cannot be empty
 -- Iteration 4 --
 
-Warning: file_get_contents( ): Failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(' '): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 5 --
 ValueError: file_get_contents(): Argument #1 ($filename) must not contain any null bytes
@@ -65,11 +65,11 @@ ValueError: file_get_contents(): Argument #1 ($filename) must not contain any nu
 TypeError: file_get_contents(): Argument #1 ($filename) must be of type string, array given
 -- Iteration 7 --
 
-Warning: file_get_contents(/no/such/file/dir): Failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents('%s'): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 8 --
 
-Warning: file_get_contents(php/php): Failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents('php/php'): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 *** Done ***

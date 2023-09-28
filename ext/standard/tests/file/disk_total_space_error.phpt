@@ -29,7 +29,7 @@ unlink($file_path."/disk_total_space.tmp");
 --EXPECTF--
 *** Testing error conditions ***
 
-Warning: disk_total_space(): No such file or directory in %s on line %d
+Warning: disk_total_space('%s'): No such file or directory in %s on line %d
 bool(false)
 float(%f)
 

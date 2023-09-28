@@ -15,13 +15,13 @@ echo "\n*** Done ***";
 ?>
 --EXPECTF--
 *** Testing error conditions of fileinode() ***
-Warning: fileinode(): stat failed for /no/such/file/dir in %s on line %d
+Warning: fileinode('%s'): stat failed for /no/such/file/dir in %s on line %d
 bool(false)
 
-Warning: fileinode(): stat failed for string in %s on line %d
+Warning: fileinode('string'): stat failed for string in %s on line %d
 bool(false)
 
-Warning: fileinode(): stat failed for 100 in %s on line %d
+Warning: fileinode('100'): stat failed for 100 in %s on line %d
 bool(false)
 
 *** Done ***

@@ -46,18 +46,18 @@ int(%d)
 int(%d)
 int(%d)
 
-Warning: fileinode(): stat failed for /no/such/file/or/dir in %s on line %d
+Warning: fileinode('%s'): stat failed for /no/such/file/or/dir in %s on line %d
 bool(false)
 
-Warning: fileowner(): stat failed for /no/such/file/or/dir in %s on line %d
+Warning: fileowner('%s'): stat failed for /no/such/file/or/dir in %s on line %d
 bool(false)
 
-Warning: filegroup(): stat failed for /no/such/file/or/dir in %s on line %d
+Warning: filegroup('%s'): stat failed for /no/such/file/or/dir in %s on line %d
 bool(false)
 
-Warning: fileatime(): stat failed for /no/such/file/or/dir in %s on line %d
+Warning: fileatime('%s'): stat failed for /no/such/file/or/dir in %s on line %d
 bool(false)
 
-Warning: filectime(): stat failed for /no/such/file/or/dir in %s on line %d
+Warning: filectime('%s'): stat failed for /no/such/file/or/dir in %s on line %d
 bool(false)
 Done

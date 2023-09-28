@@ -32,8 +32,8 @@ unlink($filename);
 --EXPECTF--
 *** Testing lchown() : error functionality ***
 
-Warning: lchown(): No such file or directory in %s on line %d
+Warning: lchown('foobar_lchown.t...', 501): No such file or directory in %s on line %d
 bool(false)
 
-Warning: lchown(): %r(Operation not permitted|Invalid argument)%r in %s on line %d
+Warning: lchown('%s', -5): Operation not permitted in %s on line %d
 bool(false)

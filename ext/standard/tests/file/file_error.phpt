@@ -32,7 +32,7 @@ unlink($file_path."/file.tmp");
 ValueError: file(): Argument #2 ($flags) must be a valid flag value
 ValueError: file(): Argument #2 ($flags) must be a valid flag value
 
-Warning: file(temp.tmp): Failed to open stream: No such file or directory in %s on line %d
+Warning: file('temp.tmp'): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 --- Done ---

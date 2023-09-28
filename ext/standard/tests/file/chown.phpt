@@ -11,5 +11,5 @@ chown("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", 0);
 echo "ALIVE\n";
 ?>
 --EXPECTF--
-Warning: chown(): No such file or directory in %s on line %d
+Warning: chown('sjhgfskhagkfdgs...', 0): No such file or directory in %s on line %d
 ALIVE

@@ -51,21 +51,21 @@ rmdir(__DIR__."/unlink_error");
 
 -- Testing unlink() on invalid arguments --
 
-Warning: unlink(): %s in %s on line %d
+Warning: unlink(''): Invalid argument in %s on line %d
 bool(false)
 bool(false)
 
-Warning: unlink(): %s in %s on line %d
+Warning: unlink(''): Invalid argument in %s on line %d
 bool(false)
 bool(false)
 
 -- Testing unlink() on non-existent file --
 
-Warning: unlink(%s/non_existent_file.tmp): No such file or directory in %s on line %d
+Warning: unlink('%s'): No such file or directory in %s on line %d
 bool(false)
 
 -- Testing unlink() on directory --
 
-Warning: unlink(%s/unlink_error): %s in %s on line %d
+Warning: unlink('%s'): Operation not permitted in %s on line %d
 bool(false)
 Done

@@ -67,7 +67,7 @@ bool(false)
 
 *** Testing fdatasync(): for non-file stream ***
 
-Warning: fdatasync(): Can't fsync this stream! in %s on line %d
+Warning: fdatasync(Resource id #%d): Can't fsync this stream! in %s on line %d
 bool(false)
 
 *** Done ***

@@ -51,7 +51,7 @@ array(7) {
 }
 NULL
 
-Warning: fopen(data://): Failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
+Warning: fopen('data://', 'r'): Failed to open stream: rfc2397: no comma in URL in %s on line %d
 array(7) {
   ["base64"]=>
   bool(true)
@@ -70,11 +70,11 @@ array(7) {
 }
 NULL
 
-Warning: fopen(data://;base64): Failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
+Warning: fopen('data://;base64', 'r'): Failed to open stream: rfc2397: no comma in URL in %s on line %d
 
-Warning: fopen(data://foo,): Failed to open stream: rfc2397: illegal media type in %sstream_rfc2397_002.php on line %d
+Warning: fopen('data://foo,', 'r'): Failed to open stream: rfc2397: illegal media type in %s on line %d
 
-Warning: fopen(data://foo=bar,): Failed to open stream: rfc2397: illegal media type in %sstream_rfc2397_002.php on line %d
+Warning: fopen('data://foo=bar,', 'r'): Failed to open stream: rfc2397: illegal media type in %s on line %d
 array(8) {
   ["mediatype"]=>
   string(10) "text/plain"
@@ -95,7 +95,7 @@ array(8) {
 }
 NULL
 
-Warning: fopen(data://text/plain;foo,): Failed to open stream: rfc2397: illegal parameter in %sstream_rfc2397_002.php on line %d
+Warning: fopen('data://text/pla...', 'r'): Failed to open stream: rfc2397: illegal parameter in %s on line %d
 array(9) {
   ["mediatype"]=>
   string(10) "text/plain"
@@ -118,7 +118,7 @@ array(9) {
 }
 string(3) "bar"
 
-Warning: fopen(data://text/plain;foo=bar;bla,): Failed to open stream: rfc2397: illegal parameter in %sstream_rfc2397_002.php on line %d
+Warning: fopen('data://text/pla...', 'r'): Failed to open stream: rfc2397: illegal parameter in %s on line %d
 array(9) {
   ["mediatype"]=>
   string(10) "text/plain"
@@ -141,7 +141,7 @@ array(9) {
 }
 string(3) "bar"
 
-Warning: fopen(data://text/plain;foo=bar;bar=baz): Failed to open stream: rfc2397: no comma in URL in %sstream_rfc2397_002.php on line %d
+Warning: fopen('data://text/pla...', 'r'): Failed to open stream: rfc2397: no comma in URL in %s on line %d
 array(10) {
   ["mediatype"]=>
   string(10) "text/plain"

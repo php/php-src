@@ -18,20 +18,20 @@ echo "Done\n";
 --EXPECTF--
 *** Testing lstat() for error conditions ***
 
-Warning: lstat(): Lstat failed for %s in %s on line %d
+Warning: lstat('%s'): Lstat failed for %s/temp.tmp in %s on line %d
 bool(false)
 
-Warning: lstat(): Lstat failed for 22 in %s on line %d
+Warning: lstat('22'): Lstat failed for 22 in %s on line %d
 bool(false)
 
 *** Testing stat() for error conditions ***
 
-Warning: stat(): stat failed for %s in %s on line %d
+Warning: stat('%s'): stat failed for %s/temp.tmp in %s on line %d
 bool(false)
 
-Warning: stat(): stat failed for %s in %s on line %d
+Warning: stat('%s'): stat failed for %s/temp/ in %s on line %d
 bool(false)
 
-Warning: stat(): stat failed for 22 in %s on line %d
+Warning: stat('22'): stat failed for 22 in %s on line %d
 bool(false)
 Done

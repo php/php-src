@@ -59,7 +59,7 @@ rmdir($dir_name);
 int(%i)
 - Iteration 2 -
 
-Warning: fileinode(): stat failed for %s//fileinode_variation3/fileinode_variation3.tmp/ in %s on line %d
+Warning: fileinode('%s'): stat failed for %s//fileinode_variation3/fileinode_variation3.tmp/ in %s on line %d
 bool(false)
 - Iteration 3 -
 int(%i)
@@ -67,19 +67,19 @@ int(%i)
 int(%i)
 - Iteration 5 -
 
-Warning: fileinode(): stat failed for %s//fileinode_variation3/*.tmp in %s on line %d
+Warning: fileinode('%s'): stat failed for %s//fileinode_variation3/*.tmp in %s on line %d
 bool(false)
 - Iteration 6 -
 
-Warning: fileinode(): stat failed for %s/fileinode_variation3/fileinode*.tmp in %s on line %d
+Warning: fileinode('%s'): stat failed for %s/fileinode_variation3/fileinode*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
 
-Warning: fileinode(): Filename contains null byte in %s on line %d
+Warning: fileinode('%s'): Filename contains null byte in %s on line %d
 bool(false)
 - Iteration 8 -
 
-Warning: fileinode(): Filename contains null byte in %s on line %d
+Warning: fileinode('%s'): Filename contains null byte in %s on line %d
 bool(false)
 
 *** Done ***
