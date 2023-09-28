@@ -315,7 +315,13 @@ static void dom_post_process_html5_loading(xmlDocPtr lxml_doc, zend_long options
 			}
 			dom_place_remove_element_and_hoist_children((xmlNodePtr) lxml_doc, "html");
 			if (!(options & DOM_HTML_NO_DEFAULT_NS) && EXPECTED(lxml_doc->children != NULL)) {
-				dom_reconcile_ns_list(lxml_doc, lxml_doc->children, lxml_doc->last);
+				xmlNodePtr node = lxml_doc->children;
+				while (node) {
+					/* Fine to use the DOM wrap reconciliation here because it's the "modern" world of DOM, and no user manipulation happened yet. */
+					xmlDOMWrapCtxt dummy_ctxt = {0};
+					xmlDOMWrapReconcileNamespaces(&dummy_ctxt, node, /* options */ 0);
+					node = node->next;
+				}
 			}
 		}
 	}
