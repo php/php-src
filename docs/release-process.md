@@ -920,8 +920,8 @@ feature development that cannot go into the new version.
    times, as needed, but we will always advance the `Expires` timestamp on a
    yearly cadence, coinciding with our X.Y.0 releases.
 
-   Please see the instructions in the comments within the `security.txt` file
-   for information on how to update it.
+   Please see the instructions for
+   [making changes to security.txt](security-policies.md#making-changes-to-securitytxt).
 
 
 ## Prime the selection of release managers for the next version
