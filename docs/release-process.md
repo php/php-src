@@ -905,7 +905,7 @@ feature development that cannot go into the new version.
    sections for each pre-release.
 
 4. On the announcement day for the initial stable version (or shortly before),
-   update the `Expires` field in the <https://www.php.net/.well-known/security.txt>.
+   update the `Expires` field in the <https://www.php.net/.well-known/security.txt>
    file. The `Expires` field should be set to the expected date of the next X.Y.0
    release (following the one currently being prepared), which is usually the
    fourth Thursday of November in the next year.
