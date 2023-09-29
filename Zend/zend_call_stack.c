@@ -35,10 +35,10 @@
 #  include <sys/types.h>
 # endif
 #endif /* ZEND_WIN32 */
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
 # include <pthread.h>
 #endif
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__DragonFly__)
 # include <pthread_np.h>
 # include <sys/mman.h>
 # include <sys/sysctl.h>
@@ -251,7 +251,7 @@ static bool zend_call_stack_get_linux(zend_call_stack *stack)
 }
 #endif /* __linux__ */
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__DragonFly__)
 static bool zend_call_stack_is_main_thread(void)
 {
 	int is_main = pthread_main_np();
