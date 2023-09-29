@@ -7344,7 +7344,7 @@ PHP_FUNCTION(openssl_digest)
 	md_ctx = EVP_MD_CTX_create();
 
 	// add check against NULL
-	if(!md_ctx){
+	if (md_ctx == NULL) {
 		RETURN_FALSE;
 	}
 
