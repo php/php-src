@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.0RC4
 
+- Core:
+  . Fixed bug GH-10008 (Narrowing occurred during type inference of
+    ZEND_ADD_ARRAY_ELEMENT). (nielsdos, arnaud-lb)
+
 - CType:
   . Fixed bug GH-11997 (ctype_alnum 5 times slower in PHP 8.1 or greater).
     (nielsdos)
@@ -12,6 +16,10 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed bug GH-12297 (PHP Startup: Invalid library (maybe not a PHP library)
     'mysqlnd.so' in Unknown on line). (nielsdos)
+
+- XSL:
+  . Fix type error on XSLTProcessor::transformToDoc return value with
+    SimpleXML. (nielsdos)
 
 28 Sep 2023, PHP 8.3.0RC3
 
