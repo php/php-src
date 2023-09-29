@@ -55,6 +55,9 @@ typedef int boolean_t;
 # include <sys/sysctl.h>
 # include <sys/syscall.h>
 #endif
+#ifdef __HAIKU__
+# include <kernel/OS.h>
+#endif
 #ifdef __linux__
 #include <sys/syscall.h>
 #endif
@@ -507,6 +510,32 @@ static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
 	return false;
 }
 #endif /* defined(__OpenBSD__) */
+#if defined(__HAIKU__)
+static bool zend_call_stack_get_haiku(zend_call_stack *stack)
+{
+	thread_id id;
+	thread_info ti;
+	size_t guard_size;
+
+	// unlikely, main thread ought to be always available but we never know
+	if ((id = find_thread(NULL)) == B_NAME_NOT_FOUND || get_thread_info(id, &ti) != B_OK) {
+		return false;
+	}
+
+	// USER_STACK_GUARD_SIZE
+	guard_size = sysconf(_SC_PAGESIZE) * 4;
+
+	stack->base = ti.stack_end;
+	stack->max_size = ((size_t)ti.stack_end - (size_t)ti.stack_base) - guard_size;
+
+	return true;
+}
+#else
+static bool zend_call_stack_get_haiku(zend_call_stack *stack)
+{
+	return false;
+}
+#endif /* defined(__HAIKU__) */
 
 #if defined(__NetBSD__)
 # ifdef HAVE_PTHREAD_GETATTR_NP
@@ -645,6 +674,10 @@ ZEND_API bool zend_call_stack_get(zend_call_stack *stack)
 	}
 
 	if (zend_call_stack_get_netbsd(stack)) {
+		return true;
+	}
+
+	if (zend_call_stack_get_haiku(stack)) {
 		return true;
 	}
 
