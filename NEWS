@@ -13,6 +13,10 @@ PHP                                                                        NEWS
 - DOM:
   . Restore old namespace reconciliation behaviour. (nielsdos)
 
+- LibXML:
+  . Fix compile error with -Werror=incompatible-function-pointer-types and
+    old libxml2. (nielsdos)
+
 - MySQLnd:
   . Fixed bug GH-12297 (PHP Startup: Invalid library (maybe not a PHP library)
     'mysqlnd.so' in Unknown on line). (nielsdos)
