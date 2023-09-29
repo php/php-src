@@ -2202,7 +2202,7 @@ PHP_FUNCTION(socket_export_stream)
 	php_socket *socket;
 	php_stream *stream = NULL;
 	php_netstream_data_t *stream_data;
-	char *protocol = NULL;
+	const char *protocol = NULL;
 	size_t protocollen = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &zsocket, socket_ce) == FAILURE) {
@@ -2238,12 +2238,12 @@ PHP_FUNCTION(socket_export_stream)
 			if (protoid == IPPROTO_TCP)
 #endif
 			{
-				protocol = "tcp";
-				protocollen = 3;
+				protocol = "tcp://";
+				protocollen = sizeof("tcp://") - 1;
 			}
 		} else if (protoid == SOCK_DGRAM) {
-			protocol = "udp";
-			protocollen = 3;
+			protocol = "udp://";
+			protocollen = sizeof("udp://") - 1;
 		}
 #ifdef PF_UNIX
 	} else if (socket->type == PF_UNIX) {
@@ -2253,11 +2253,11 @@ PHP_FUNCTION(socket_export_stream)
 		getsockopt(socket->bsd_socket, SOL_SOCKET, SO_TYPE, (char *) &type, &typelen);
 
 		if (type == SOCK_STREAM) {
-			protocol = "unix";
-			protocollen = 4;
+			protocol = "unix://";
+			protocollen = sizeof("unix://") - 1;
 		} else if (type == SOCK_DGRAM) {
-			protocol = "udg";
-			protocollen = 3;
+			protocol = "udg://";
+			protocollen = sizeof("udg://") - 1;
 		}
 #endif
 	}
