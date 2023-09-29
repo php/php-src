@@ -8,8 +8,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-12215 (Module entry being overwritten causes type errors in
     ext/dom). (nielsdos)
   . Fixed bug GH-12273 (__builtin_cpu_init check). (Freaky)
-  . Fixed bug GH-10008 (Narrowing occurred during type inference of
-    ZEND_ADD_ARRAY_ELEMENT). (nielsdos, arnaud-lb)
 
 - CType:
   . Fixed bug GH-11997 (ctype_alnum 5 times slower in PHP 8.1 or greater).
