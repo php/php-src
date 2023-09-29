@@ -136,7 +136,12 @@ PHP_LIBXML_API void php_libxml_set_old_ns(xmlDocPtr doc, xmlNsPtr ns)
 	php_libxml_set_old_ns_list(doc, ns, ns);
 }
 
+/* Function pointer typedef changed in 2.9.8, see https://github.com/GNOME/libxml2/commit/e03f0a199a67017b2f8052354cf732b2b4cae787 */
+#if LIBXML_VERSION >= 20908
 static void php_libxml_unlink_entity(void *data, void *table, const xmlChar *name)
+#else
+static void php_libxml_unlink_entity(void *data, void *table, xmlChar *name)
+#endif
 {
 	xmlEntityPtr entity = data;
 	if (entity->_private != NULL) {
