@@ -2403,19 +2403,20 @@ PHP_FUNCTION(mb_strcut)
 		Z_PARAM_STR_OR_NULL(encoding)
 	ZEND_PARSE_PARAMETERS_END();
 
-	string.val = (unsigned char*)string_val;
-	string.encoding = php_mb_get_encoding(encoding, 4);
-	if (!string.encoding) {
+	const mbfl_encoding *enc = php_mb_get_encoding(encoding, 4);
+	if (!enc) {
 		RETURN_THROWS();
 	}
+
+	string.val = (unsigned char*)string_val;
+	string.encoding = enc;
 
 	if (len_is_null) {
 		len = string.len;
 	}
 
 	/* if "from" position is negative, count start position from the end
-	 * of the string
-	 */
+	 * of the string */
 	if (from < 0) {
 		from = string.len + from;
 		if (from < 0) {
@@ -2424,8 +2425,7 @@ PHP_FUNCTION(mb_strcut)
 	}
 
 	/* if "length" position is negative, set it to the length
-	 * needed to stop that many chars from the end of the string
-	 */
+	 * needed to stop that many chars from the end of the string */
 	if (len < 0) {
 		len = (string.len - from) + len;
 		if (len < 0) {
@@ -2437,12 +2437,14 @@ PHP_FUNCTION(mb_strcut)
 		RETURN_EMPTY_STRING();
 	}
 
-	ret = mbfl_strcut(&string, &result, from, len);
-	ZEND_ASSERT(ret != NULL);
-
-	// TODO: avoid reallocation ???
-	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
-	efree(ret->val);
+	if (enc->cut) {
+		RETURN_STR(enc->cut(string.val, from, len, string.val + string.len));
+	} else {
+		ret = mbfl_strcut(&string, &result, from, len);
+		ZEND_ASSERT(ret != NULL);
+		RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
+		efree(ret->val);
+	}
 }
 /* }}} */
 

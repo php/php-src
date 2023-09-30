@@ -55,6 +55,16 @@ PHP 8.4 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- MBString:
+  . After performance optimization, mb_strcut sometimes returns slightly different
+    output for invalid UTF-8 strings. The previous implementation would sometimes
+    remove invalid UTF-8 bytes just after the cut points, but in other cases, it
+    would pass them through to the output unchanged. The new implementation
+    always backs up to the preceding non-continuation byte (a byte which starts
+    a UTF-8 character) before the starting and ending cut points, if the byte
+    immediately after the cut point is a continuation byte. (For valid UTF-8
+    strings, the output of mb_strcut is unchanged.)
+
 - Standard:
   . The internal implementation for rounding to integers has been rewritten
     to be easier to verify for correctness and to be easier to maintain.

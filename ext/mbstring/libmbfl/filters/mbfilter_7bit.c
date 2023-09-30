@@ -65,6 +65,7 @@ const mbfl_encoding mbfl_encoding_7bit = {
 	&vtbl_wchar_7bit,
 	mb_7bit_to_wchar,
 	mb_wchar_to_7bit,
+	NULL,
 	NULL
 };
 

@@ -45,6 +45,7 @@ const mbfl_encoding mbfl_encoding_pass = {
 	NULL,
 	NULL,
 	NULL,
+	NULL,
 	NULL
 };
 

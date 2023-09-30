@@ -62,7 +62,8 @@ const mbfl_encoding mbfl_encoding_utf7 = {
 	&vtbl_wchar_utf7,
 	mb_utf7_to_wchar,
 	mb_wchar_to_utf7,
-	mb_check_utf7
+	mb_check_utf7,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_utf7_wchar = {

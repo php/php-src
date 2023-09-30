@@ -46,6 +46,7 @@ const mbfl_encoding mbfl_encoding_qprint = {
 	NULL,
 	mb_qprint_to_wchar,
 	mb_wchar_to_qprint,
+	NULL,
 	NULL
 };
 
