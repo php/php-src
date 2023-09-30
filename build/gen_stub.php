@@ -1060,7 +1060,7 @@ class FunctionName implements FunctionOrMethodName {
     }
 
     public function getMethodSynopsisFilename(): string {
-        return implode('_', $this->name->getParts());
+        return 'functions/' . implode('/', str_replace('_', '-', $this->name->getParts()));
     }
 
     public function getNameForAttributes(): string {
@@ -1105,8 +1105,11 @@ class MethodName implements FunctionOrMethodName {
         return "arginfo_class_{$this->getDeclarationClassName()}_{$this->methodName}";
     }
 
-    public function getMethodSynopsisFilename(): string {
-        return $this->getDeclarationClassName() . "_{$this->methodName}";
+    public function getMethodSynopsisFilename(): string
+    {
+        $parts = [...$this->className->getParts(), ltrim($this->methodName, '_')];
+        /* File paths are in lowercase */
+        return implode('/', array_map('strtolower', $parts));
     }
 
     public function getNameForAttributes(): string {
@@ -1486,17 +1489,300 @@ class FuncInfo {
      * @throws Exception
      */
     public function getMethodSynopsisDocument(array $funcMap, array $aliasMap): ?string {
-
-        $doc = new DOMDocument();
+        $doc = new DOMDocument("1.0", "utf-8");
         $doc->formatOutput = true;
+
+        $refentry = $doc->createElement('refentry');
+        $doc->appendChild($refentry);
+
+        if ($this->isMethod()) {
+            assert($this->name instanceof MethodName);
+            $id = $doc->createAttribute("xml:id");
+            $id->value = addslashes(strtolower($this->name->className->__toString())) . '.' . strtolower($this->name->methodName);
+            $refentry->appendChild($id);
+        } else {
+            // TODO Functions
+        }
+        $refentry->setAttribute("xmlns", "http://docbook.org/ns/docbook");
+        $refentry->appendChild(new DOMText("\n "));
+
+        /* Creation of <refnamediv> */
+        $refnamediv = $doc->createElement('refnamediv');
+        $refnamediv->appendChild(new DOMText("\n  "));
+        if ($this->isMethod()) {
+            assert($this->name instanceof MethodName);
+            $refname = $doc->createElement('refname', $this->name->className->__toString() . '::' . $this->name->methodName);
+            $refnamediv->appendChild($refname);
+        } else {
+            // TODO Functions
+        }
+        $refnamediv->appendChild(new DOMText("\n  "));
+        $refpurpose = $doc->createElement('refpurpose', 'Description');
+        $refnamediv->appendChild($refpurpose);
+
+        $refnamediv->appendChild(new DOMText("\n "));
+        $refentry->appendChild($refnamediv);
+        $refentry->appendChild(new DOMText("\n\n "));
+
+        /* Creation of <refsect1 role="description"> */
+        $descriptionRefSec = $doc->createElement('refsect1');
+        $descriptionRefSec->setAttribute('role', 'description');
+        $descriptionRefSec->appendChild(new DOMText("\n  "));
+        $refTitleDescription = $doc->createEntityReference('reftitle.description');
+        $descriptionRefSec->appendChild($refTitleDescription);
+        $descriptionRefSec->appendChild(new DOMText("\n  "));
+
         $methodSynopsis = $this->getMethodSynopsisElement($funcMap, $aliasMap, $doc);
         if (!$methodSynopsis) {
             return null;
         }
+        $descriptionRefSec->appendChild($methodSynopsis);
+        $descriptionRefSec->appendChild(new DOMText("\n  "));
+        $undocumentedEntity = $doc->createEntityReference('warn.undocumented.func');
+        $descriptionRefSec->appendChild($undocumentedEntity);
+        $descriptionRefSec->appendChild(new DOMText("\n  "));
+        $returnDescriptionPara = $doc->createElement('para');
+        $returnDescriptionPara->appendChild(new DOMText("\n   Description\n  "));
+        $descriptionRefSec->appendChild($returnDescriptionPara);
 
-        $doc->appendChild($methodSynopsis);
+        $descriptionRefSec->appendChild(new DOMText("\n "));
+        $refentry->appendChild($descriptionRefSec);
+        $refentry->appendChild(new DOMText("\n\n "));
 
+        /* Creation of <refsect1 role="parameters"> */
+        $parametersRefSec = $this->getParameterSection($doc);
+        $refentry->appendChild($parametersRefSec);
+        $refentry->appendChild(new DOMText("\n\n "));
+
+        /* Creation of <refsect1 role="returnvalues"> */
+        $returnRefSec = $this->getReturnValueSection($doc);
+        $refentry->appendChild($returnRefSec);
+        $refentry->appendChild(new DOMText("\n\n "));
+
+        /* Creation of <refsect1 role="errors"> */
+        $errorsRefSec = $doc->createElement('refsect1');
+        $errorsRefSec->setAttribute('role', 'errors');
+        $errorsRefSec->appendChild(new DOMText("\n  "));
+        $refTitleErrors = $doc->createEntityReference('reftitle.errors');
+        $errorsRefSec->appendChild($refTitleErrors);
+        $errorsRefSec->appendChild(new DOMText("\n  "));
+        $errorsDescriptionPara = $doc->createElement('para');
+        $errorsDescriptionPara->appendChild(new DOMText("\n   When does this function issue E_* level errors, and/or throw exceptions.\n  "));
+        $errorsRefSec->appendChild($errorsDescriptionPara);
+        $errorsRefSec->appendChild(new DOMText("\n "));
+
+        $refentry->appendChild($errorsRefSec);
+        $refentry->appendChild(new DOMText("\n\n "));
+
+        /* Creation of <refsect1 role="changelog"> */
+        $changelogRefSec = $this->getChangelogSection($doc);
+        $refentry->appendChild($changelogRefSec);
+
+        // TODO Examples, Notes, and See Also sections
+
+        $refentry->appendChild(new DOMText("\n\n"));
+
+        $doc->appendChild(new DOMComment(
+            <<<ENDCOMMENT
+Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+
+ENDCOMMENT
+        ));
         return $doc->saveXML();
+    }
+
+    private function getParameterSection(DOMDocument $doc): DOMElement {
+        $parametersRefSec = $doc->createElement('refsect1');
+        $parametersRefSec->setAttribute('role', 'parameters');
+        $parametersRefSec->appendChild(new DOMText("\n  "));
+        $refTitle = $doc->createEntityReference('reftitle.parameters');
+        $parametersRefSec->appendChild($refTitle);
+        $parametersRefSec->appendChild(new DOMText("\n  "));
+        if (empty($this->args)) {
+            $noParamEntity = $doc->createEntityReference('no.function.parameters');
+            $parametersRefSec->appendChild($noParamEntity);
+            return $parametersRefSec;
+        } else {
+            $parametersPara = $doc->createElement('para');
+            $parametersRefSec->appendChild($parametersPara);
+
+            $parametersPara->appendChild(new DOMText("\n   "));
+            $parametersList = $doc->createElement('variablelist');
+            $parametersPara->appendChild($parametersList);
+
+            /*
+            <varlistentry>
+             <term><parameter>name</parameter></term>
+             <listitem>
+              <para>
+               Description.
+              </para>
+             </listitem>
+            </varlistentry>
+            */
+            foreach ($this->args as $arg) {
+                $parameter = $doc->createElement('parameter', $arg->name);
+                $parameterTerm = $doc->createElement('term');
+                $parameterTerm->appendChild($parameter);
+
+                $parameterEntry = $doc->createElement('varlistentry');
+                $parameterEntry->appendChild(new DOMText("\n     "));
+                $parameterEntry->appendChild($parameterTerm);
+                $parameterEntry->appendChild(new DOMText("\n     "));
+
+                $listItemPara = $doc->createElement('para');
+                $listItemPara->appendChild(new DOMText("\n       "));
+                $listItemPara->appendChild(new DOMText("Description."));
+                $listItemPara->appendChild(new DOMText("\n      "));
+
+                $parameterEntryListItem = $doc->createElement('listitem');
+                $parameterEntryListItem->appendChild(new DOMText("\n      "));
+                $parameterEntryListItem->appendChild($listItemPara);
+                $parameterEntryListItem->appendChild(new DOMText("\n     "));
+
+                $parameterEntry->appendChild($parameterEntryListItem);
+                $parameterEntry->appendChild(new DOMText("\n    "));
+
+                $parametersList->appendChild($parameterEntry);
+                $parametersList->appendChild(new DOMText("\n   "));
+            }
+        }
+        $parametersPara->appendChild(new DOMText("\n  "));
+        $parametersRefSec->appendChild(new DOMText("\n "));
+        return $parametersRefSec;
+    }
+
+    private function getReturnValueSection(DOMDocument $doc): DOMElement {
+        $returnRefSec = $doc->createElement('refsect1');
+        $returnRefSec->setAttribute('role', 'returnvalues');
+        $returnRefSec->appendChild(new DOMText("\n  "));
+        $refTitle = $doc->createEntityReference('reftitle.returnvalues');
+        $returnRefSec->appendChild($refTitle);
+        $returnRefSec->appendChild(new DOMText("\n  "));
+        $returnDescriptionPara = $doc->createElement('para');
+        $returnDescriptionPara->appendChild(new DOMText("\n   "));
+
+        $returnType = $this->return->type;
+        if ($returnType === null) {
+            $returnDescriptionPara->appendChild(new DOMText("Description"));
+        } else if (count($returnType->types) === 1) {
+            $type = $returnType->types[0];
+            $name = $type->name;
+            $descriptionNode = match ($name) {
+                'void' => $doc->createEntityReference('return.void'),
+                'true' => $doc->createEntityReference('return.true.always'),
+                'bool' => $doc->createEntityReference('return.success'),
+                default => new DOMText("Description"),
+            };
+            $returnDescriptionPara->appendChild($descriptionNode);
+        } else {
+            $returnDescriptionPara->appendChild(new DOMText("Description"));
+        }
+        $returnDescriptionPara->appendChild(new DOMText("\n  "));
+        $returnRefSec->appendChild($returnDescriptionPara);
+        $returnRefSec->appendChild(new DOMText("\n "));
+        return $returnRefSec;
+    }
+
+    /**
+     * @param array<DOMNode> $headers [count($headers) === $columns]
+     * @param array<array<DOMNode>> $rows [count($rows[$i]) === $columns]
+     */
+    private function generateDocbookInformalTable(
+        DOMDocument $doc,
+        int $indent,
+        int $columns,
+        array $headers,
+        array $rows
+    ): DOMElement {
+        $strIndent = str_repeat(' ', $indent);
+
+        $headerRow = $doc->createElement('row');
+        foreach ($headers as $header) {
+            $headerEntry = $doc->createElement('entry');
+            $headerEntry->appendChild($header);
+
+            $headerRow->appendChild(new DOMText("\n$strIndent    "));
+            $headerRow->appendChild($headerEntry);
+        }
+        $headerRow->appendChild(new DOMText("\n$strIndent   "));
+
+        $thead = $doc->createElement('thead');
+        $thead->appendChild(new DOMText("\n$strIndent   "));
+        $thead->appendChild($headerRow);
+        $thead->appendChild(new DOMText("\n$strIndent  "));
+
+        $tbody = $doc->createElement('tbody');
+        foreach ($rows as $row) {
+            $bodyRow = $doc->createElement('row');
+            foreach ($row as $cell) {
+                $entry = $doc->createElement('entry');
+                $entry->appendChild($cell);
+
+                $bodyRow->appendChild(new DOMText("\n$strIndent    "));
+                $bodyRow->appendChild($entry);
+            }
+            $bodyRow->appendChild(new DOMText("\n$strIndent   "));
+
+            $tbody->appendChild(new DOMText("\n$strIndent   "));
+            $tbody->appendChild($bodyRow);
+            $tbody->appendChild(new DOMText("\n$strIndent  "));
+        }
+
+        $tgroup = $doc->createElement('tgroup');
+        $tgroup->setAttribute('cols', (string) $columns);
+        $tgroup->appendChild(new DOMText("\n$strIndent  "));
+        $tgroup->appendChild($thead);
+        $tgroup->appendChild(new DOMText("\n$strIndent  "));
+        $tgroup->appendChild($tbody);
+        $tgroup->appendChild(new DOMText("\n$strIndent "));
+
+        $table = $doc->createElement('informaltable');
+        $table->appendChild(new DOMText("\n$strIndent "));
+        $table->appendChild($tgroup);
+        $table->appendChild(new DOMText("\n$strIndent"));
+
+        return $table;
+    }
+
+    private function getChangelogSection(DOMDocument $doc): DOMElement {
+        $refSec = $doc->createElement('refsect1');
+        $refSec->setAttribute('role', 'changelog');
+        $refSec->appendChild(new DOMText("\n  "));
+        $refTitle = $doc->createEntityReference('reftitle.changelog');
+        $refSec->appendChild($refTitle);
+        $refSec->appendChild(new DOMText("\n  "));
+        $headers = [
+            $doc->createEntityReference('Version'),
+            $doc->createEntityReference('Description'),
+        ];
+        $rows = [[
+            new DOMText('8.X.0'),
+            new DOMText("\n       Description\n      "),
+        ]];
+        $table = $this->generateDocbookInformalTable($doc, indent: 2, columns: 2, headers: $headers, rows: $rows);
+        $refSec->appendChild($table);
+
+        $refSec->appendChild(new DOMText("\n "));
+        return $refSec;
     }
 
     /**
@@ -5361,7 +5647,12 @@ if ($replaceClassSynopses || $verifyManual) {
 }
 
 if ($generateMethodSynopses) {
-    $methodSynopsesDirectory = getcwd() . "/methodsynopses";
+    // Use the manual as target if we are targeting a specific extension
+    if (str_contains($manualTarget, 'reference')) {
+        $methodSynopsesDirectory = $manualTarget;
+    } else {
+        $methodSynopsesDirectory = getcwd() . "/methodsynopses";
+    }
 
     $methodSynopses = generateMethodSynopses($funcMap, $aliasMap);
     if (!empty($methodSynopses)) {
@@ -5370,8 +5661,10 @@ if ($generateMethodSynopses) {
         }
 
         foreach ($methodSynopses as $filename => $content) {
-            if (file_put_contents("$methodSynopsesDirectory/$filename", $content)) {
-                echo "Saved $filename\n";
+            if (!file_exists("$methodSynopsesDirectory/$filename")) {
+                if (file_put_contents("$methodSynopsesDirectory/$filename", $content)) {
+                    echo "Saved $filename\n";
+                }
             }
         }
     }
