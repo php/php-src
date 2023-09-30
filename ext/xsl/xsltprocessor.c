@@ -630,7 +630,7 @@ PHP_METHOD(XSLTProcessor, setParameter)
 		Z_PARAM_STRING(namespace, namespace_len)
 		Z_PARAM_ARRAY_HT_OR_STR(array_value, name)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_NULL(value)
+		Z_PARAM_PATH_STR_OR_NULL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
 	intern = Z_XSL_P(id);
@@ -649,10 +649,23 @@ PHP_METHOD(XSLTProcessor, setParameter)
 				zend_argument_type_error(2, "must contain only string keys");
 				RETURN_THROWS();
 			}
+
+			if (UNEXPECTED(CHECK_NULL_PATH(ZSTR_VAL(string_key), ZSTR_LEN(string_key)))) {
+				zend_argument_value_error(3, "must not contain keys with any null bytes");
+				RETURN_THROWS();
+			}
+
 			str = zval_try_get_string(entry);
 			if (UNEXPECTED(!str)) {
 				RETURN_THROWS();
 			}
+
+			if (UNEXPECTED(CHECK_NULL_PATH(ZSTR_VAL(str), ZSTR_LEN(str)))) {
+				zend_string_release(str);
+				zend_argument_value_error(3, "must not contain values with any null bytes");
+				RETURN_THROWS();
+			}
+
 			ZVAL_STR(&tmp, str);
 			zend_hash_update(intern->parameter, string_key, &tmp);
 		} ZEND_HASH_FOREACH_END();
@@ -660,6 +673,11 @@ PHP_METHOD(XSLTProcessor, setParameter)
 	} else {
 		if (!value) {
 			zend_argument_value_error(3, "cannot be null when argument #2 ($name) is a string");
+			RETURN_THROWS();
+		}
+
+		if (UNEXPECTED(CHECK_NULL_PATH(ZSTR_VAL(name), ZSTR_LEN(name)))) {
+			zend_argument_value_error(2, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
 
