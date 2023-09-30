@@ -17,6 +17,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-12297 (PHP Startup: Invalid library (maybe not a PHP library)
     'mysqlnd.so' in Unknown on line). (nielsdos)
 
+- SimpleXML:
+  . Apply iterator fixes only on master. (nielsdos)
+
 - XSL:
   . Fix type error on XSLTProcessor::transformToDoc return value with
     SimpleXML. (nielsdos)

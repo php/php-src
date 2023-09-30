@@ -41,7 +41,7 @@ foreach ($a2->b->c->children() as $key => $value) {
     var_dump($value);
 }?>
 --EXPECT--
-object(A)#4 (2) {
+object(A)#2 (2) {
   ["@attributes"]=>
   array(1) {
     ["attr"]=>
@@ -50,7 +50,7 @@ object(A)#4 (2) {
   [0]=>
   string(10) "Some Value"
 }
-object(A)#6 (2) {
+object(A)#3 (2) {
   ["@attributes"]=>
   array(1) {
     ["attr"]=>
