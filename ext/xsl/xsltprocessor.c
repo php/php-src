@@ -686,7 +686,7 @@ PHP_METHOD(XSLTProcessor, getParameter)
 	}
 	intern = Z_XSL_P(id);
 	if ((value = zend_hash_find(intern->parameter, name)) != NULL) {
-		RETURN_STR(zval_get_string(value));
+		RETURN_STR_COPY(Z_STR_P(value));
 	} else {
 		RETURN_FALSE;
 	}
