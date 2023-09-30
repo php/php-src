@@ -1511,7 +1511,7 @@ class FuncInfo {
         $refnamediv->appendChild(new DOMText("\n  "));
         if ($this->isMethod()) {
             assert($this->name instanceof MethodName);
-            $refname = $doc->createElement('refname', $this->name->className->__toString() . '::' . $this->name->methodName);
+            $refname = $doc->createElement('refname', $this->name->__toString());
             $refnamediv->appendChild($refname);
         } else {
             // TODO Functions
