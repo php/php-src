@@ -1580,8 +1580,37 @@ class FuncInfo {
         /* Creation of <refsect1 role="changelog"> */
         $changelogRefSec = $this->getChangelogSection($doc);
         $refentry->appendChild($changelogRefSec);
+        $refentry->appendChild(new DOMText("\n\n "));
 
-        // TODO Examples, Notes, and See Also sections
+        // TODO Examples, and Notes sections
+
+        /* Creation of <refsect1 role="seealso"> */
+        $seeAlsoRefSec = $doc->createElement('refsect1');
+        $seeAlsoRefSec->setAttribute('role', 'seealso');
+        $seeAlsoRefSec->appendChild(new DOMText("\n  "));
+        $refTitleSeeAlso = $doc->createEntityReference('reftitle.seealso');
+        $seeAlsoRefSec->appendChild($refTitleSeeAlso);
+        $seeAlsoRefSec->appendChild(new DOMText("\n  "));
+
+        /* TODO Actually generate a markup for class names, functions and links?
+  <simplelist>
+   <member><methodname>ClassName::otherMethodName</methodname></member>
+   <member><function>some_function</function></member>
+   <member>The <link linkend="something">something appendix</link></member>
+  </simplelist>
+         */
+        $seeAlsoMember = $doc->createElement('member');
+        $seeAlsoMember->appendChild(new DOMText("Method name, function, or link to reference"));
+
+        $seeAlsoList = $doc->createElement('simplelist');
+        $seeAlsoList->appendChild(new DOMText("\n   "));
+        $seeAlsoList->appendChild($seeAlsoMember);
+        $seeAlsoList->appendChild(new DOMText("\n  "));
+
+        $seeAlsoRefSec->appendChild($seeAlsoList);
+        $seeAlsoRefSec->appendChild(new DOMText("\n "));
+
+        $refentry->appendChild($seeAlsoRefSec);
 
         $refentry->appendChild(new DOMText("\n\n"));
 
