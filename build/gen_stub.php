@@ -1109,7 +1109,7 @@ class MethodName implements FunctionOrMethodName {
     {
         $parts = [...$this->className->getParts(), ltrim($this->methodName, '_')];
         /* File paths are in lowercase */
-        return implode('/', array_map('strtolower', $parts));
+        return strtolower(implode('/', $parts));
     }
 
     public function getNameForAttributes(): string {
