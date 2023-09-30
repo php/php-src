@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - DOM:
   . Restore old namespace reconciliation behaviour. (nielsdos)
 
+- Fileinfo:
+  . Fixed bug GH-11891 (fileinfo returns text/xml for some svg files). (usarise)
+
 - LibXML:
   . Fix compile error with -Werror=incompatible-function-pointer-types and
     old libxml2. (nielsdos)
