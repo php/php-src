@@ -1693,9 +1693,10 @@ ENDCOMMENT
                 $parameterEntry->appendChild($parameterEntryListItem);
                 $parameterEntry->appendChild(new DOMText("\n    "));
 
+                $parametersList->appendChild(new DOMText("\n    "));
                 $parametersList->appendChild($parameterEntry);
-                $parametersList->appendChild(new DOMText("\n   "));
             }
+            $parametersList->appendChild(new DOMText("\n   "));
         }
         $parametersPara->appendChild(new DOMText("\n  "));
         $parametersRefSec->appendChild(new DOMText("\n "));
