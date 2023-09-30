@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - DOM:
   . Restore old namespace reconciliation behaviour. (nielsdos)
 
+- Fileinfo:
+  . Fixed bug GH-11891 (fileinfo returns text/xml for some svg files). (usarise)
+
 - Filter:
   . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
 
