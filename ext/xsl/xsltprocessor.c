@@ -21,75 +21,29 @@
 
 #include "php.h"
 #include "php_xsl.h"
+#include <libxslt/variables.h>
 #include "ext/libxml/php_libxml.h"
 
-/* {{{ php_xsl_xslt_string_to_xpathexpr()
-   Translates a string to a XPath Expression */
-static char *php_xsl_xslt_string_to_xpathexpr(const char *str)
+
+static zend_result php_xsl_xslt_apply_params(xsltTransformContextPtr ctxt, HashTable *params)
 {
-	const xmlChar *string = (const xmlChar *)str;
-
-	xmlChar *value;
-	int str_len;
-
-	str_len = xmlStrlen(string) + 3;
-
-	if (xmlStrchr(string, '"')) {
-		if (xmlStrchr(string, '\'')) {
-			php_error_docref(NULL, E_WARNING, "Cannot create XPath expression (string contains both quote and double-quotes)");
-			return NULL;
-		}
-		value = (xmlChar*) safe_emalloc (str_len, sizeof(xmlChar), 0);
-		snprintf((char*)value, str_len, "'%s'", string);
-	} else {
-		value = (xmlChar*) safe_emalloc (str_len, sizeof(xmlChar), 0);
-		snprintf((char *)value, str_len, "\"%s\"", string);
-	}
-	return (char *) value;
-}
-/* }}} */
-
-/* {{{ php_xsl_xslt_make_params()
-   Translates a PHP array to a libxslt parameters array */
-static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
-{
-
-	int parsize;
-	zval *value;
-	char *xpath_expr;
 	zend_string *string_key;
-	char **params = NULL;
-	int i = 0;
+	zval *value;
 
-	parsize = (2 * zend_hash_num_elements(parht) + 1) * sizeof(char *);
-	params = (char **)safe_emalloc((2 * zend_hash_num_elements(parht) + 1), sizeof(char *), 0);
-	memset((char *)params, 0, parsize);
-
-	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(parht, string_key, value) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(params, string_key, value) {
 		ZEND_ASSERT(string_key != NULL);
-		if (Z_TYPE_P(value) != IS_STRING) {
-			if (!try_convert_to_string(value)) {
-				efree(params);
-				return NULL;
-			}
-		}
+		/* Already a string because of setParameter() */
+		ZEND_ASSERT(Z_TYPE_P(value) == IS_STRING);
 
-		if (!xpath_params) {
-			xpath_expr = php_xsl_xslt_string_to_xpathexpr(Z_STRVAL_P(value));
-		} else {
-			xpath_expr = estrndup(Z_STRVAL_P(value), Z_STRLEN_P(value));
-		}
-		if (xpath_expr) {
-			params[i++] = estrndup(ZSTR_VAL(string_key), ZSTR_LEN(string_key));
-			params[i++] = xpath_expr;
+		int result = xsltQuoteOneUserParam(ctxt, (const xmlChar *) ZSTR_VAL(string_key), (const xmlChar *) Z_STRVAL_P(value));
+		if (result < 0) {
+			php_error_docref(NULL, E_WARNING, "Could not apply parameter '%s'", ZSTR_VAL(string_key));
+			return FAILURE;
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	params[i++] = NULL;
-
-	return params;
+	return SUCCESS;
 }
-/* }}} */
 
 static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type) /* {{{ */
 {
@@ -402,8 +356,6 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	xmlNodePtr node = NULL;
 	xsltTransformContextPtr ctxt;
 	php_libxml_node_object *object;
-	char **params = NULL;
-	int clone;
 	zval *doXInclude, rv;
 	zend_string *member;
 	FILE *f;
@@ -440,10 +392,6 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 		f = NULL;
 	}
 
-	if (intern->parameter) {
-		params = php_xsl_xslt_make_params(intern->parameter, 0);
-	}
-
 	intern->doc = emalloc(sizeof(php_libxml_node_object));
 	memset(intern->doc, 0, sizeof(php_libxml_node_object));
 
@@ -458,6 +406,13 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 
 	ctxt = xsltNewTransformContext(style, doc);
 	ctxt->_private = (void *) intern;
+
+	if (intern->parameter) {
+		zend_result status = php_xsl_xslt_apply_params(ctxt, intern->parameter);
+		if (UNEXPECTED(status != SUCCESS) && EG(exception)) {
+			goto out;
+		}
+	}
 
 	member = ZSTR_INIT_LITERAL("doXInclude", 0);
 	doXInclude = zend_std_read_property(Z_OBJ_P(id), member, BP_VAR_IS, NULL, &rv);
@@ -506,8 +461,10 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	if (secPrefsError == 1) {
 		php_error_docref(NULL, E_WARNING, "Can't set libxslt security properties, not doing transformation for security reasons");
 	} else {
-		newdocp = xsltApplyStylesheetUser(style, doc, (const char**) params,  NULL, f, ctxt);
+		newdocp = xsltApplyStylesheetUser(style, doc, /* params (handled manually) */ NULL, /* output */ NULL, f, ctxt);
 	}
+
+out:
 	if (f) {
 		fclose(f);
 	}
@@ -526,14 +483,6 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	php_libxml_decrement_doc_ref(intern->doc);
 	efree(intern->doc);
 	intern->doc = NULL;
-
-	if (params) {
-		clone = 0;
-		while(params[clone]) {
-			efree(params[clone++]);
-		}
-		efree(params);
-	}
 
 	return newdocp;
 
