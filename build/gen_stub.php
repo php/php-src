@@ -1483,6 +1483,17 @@ class FuncInfo {
         return $flags;
     }
 
+    private function generateRefSect1(DOMDocument $doc, string $role): DOMElement {
+        $refSec = $doc->createElement('refsect1');
+        $refSec->setAttribute('role', $role);
+        $refSec->append(
+            "\n  ",
+            $doc->createEntityReference('reftitle.' . $role),
+            "\n  "
+        );
+        return $refSec;
+    }
+
     /**
      * @param array<string, FuncInfo> $funcMap
      * @param array<string, FuncInfo> $aliasMap
@@ -1531,12 +1542,7 @@ class FuncInfo {
         $refentry->append($refnamediv, $REFSEC1_SEPERATOR);
 
         /* Creation of <refsect1 role="description"> */
-        $descriptionRefSec = $doc->createElement('refsect1');
-        $descriptionRefSec->setAttribute('role', 'description');
-        $descriptionRefSec->appendChild(new DOMText("\n  "));
-        $refTitleDescription = $doc->createEntityReference('reftitle.description');
-        $descriptionRefSec->appendChild($refTitleDescription);
-        $descriptionRefSec->appendChild(new DOMText("\n  "));
+        $descriptionRefSec = $this->generateRefSect1($doc, 'description');
 
         $methodSynopsis = $this->getMethodSynopsisElement($funcMap, $aliasMap, $doc);
         if (!$methodSynopsis) {
@@ -1565,12 +1571,7 @@ class FuncInfo {
         }
 
         /* Creation of <refsect1 role="errors"> */
-        $errorsRefSec = $doc->createElement('refsect1');
-        $errorsRefSec->setAttribute('role', 'errors');
-        $errorsRefSec->appendChild(new DOMText("\n  "));
-        $refTitleErrors = $doc->createEntityReference('reftitle.errors');
-        $errorsRefSec->appendChild($refTitleErrors);
-        $errorsRefSec->appendChild(new DOMText("\n  "));
+        $errorsRefSec = $this->generateRefSect1($doc, 'errors');
         $errorsDescriptionPara = $doc->createElement('para');
         $errorsDescriptionPara->appendChild(new DOMText("\n   When does this function issue E_* level errors, and/or throw exceptions.\n  "));
         $errorsRefSec->appendChild($errorsDescriptionPara);
@@ -1582,17 +1583,13 @@ class FuncInfo {
         $changelogRefSec = $this->getChangelogSection($doc);
         $refentry->append($changelogRefSec, $REFSEC1_SEPERATOR);
 
-        // TODO Examples, and Notes sections
         $exampleRefSec = $this->getExampleSection($doc);
         $refentry->append($exampleRefSec, $REFSEC1_SEPERATOR);
 
+        // TODO Notes section?
+
         /* Creation of <refsect1 role="seealso"> */
-        $seeAlsoRefSec = $doc->createElement('refsect1');
-        $seeAlsoRefSec->setAttribute('role', 'seealso');
-        $seeAlsoRefSec->appendChild(new DOMText("\n  "));
-        $refTitleSeeAlso = $doc->createEntityReference('reftitle.seealso');
-        $seeAlsoRefSec->appendChild($refTitleSeeAlso);
-        $seeAlsoRefSec->appendChild(new DOMText("\n  "));
+        $seeAlsoRefSec = $this->generateRefSect1($doc, 'seealso');
 
         /* TODO Actually generate a markup for class names, functions and links?
   <simplelist>
@@ -1644,12 +1641,7 @@ ENDCOMMENT
     }
 
     private function getParameterSection(DOMDocument $doc): DOMElement {
-        $parametersRefSec = $doc->createElement('refsect1');
-        $parametersRefSec->setAttribute('role', 'parameters');
-        $parametersRefSec->appendChild(new DOMText("\n  "));
-        $refTitle = $doc->createEntityReference('reftitle.parameters');
-        $parametersRefSec->appendChild($refTitle);
-        $parametersRefSec->appendChild(new DOMText("\n  "));
+        $parametersRefSec = $this->generateRefSect1($doc, 'parameters');
         if (empty($this->args)) {
             $noParamEntity = $doc->createEntityReference('no.function.parameters');
             $parametersRefSec->appendChild($noParamEntity);
@@ -1706,12 +1698,8 @@ ENDCOMMENT
     }
 
     private function getReturnValueSection(DOMDocument $doc): DOMElement {
-        $returnRefSec = $doc->createElement('refsect1');
-        $returnRefSec->setAttribute('role', 'returnvalues');
-        $returnRefSec->appendChild(new DOMText("\n  "));
-        $refTitle = $doc->createEntityReference('reftitle.returnvalues');
-        $returnRefSec->appendChild($refTitle);
-        $returnRefSec->appendChild(new DOMText("\n  "));
+        $returnRefSec = $this->generateRefSect1($doc, 'returnvalues');
+
         $returnDescriptionPara = $doc->createElement('para');
         $returnDescriptionPara->appendChild(new DOMText("\n   "));
 
@@ -1799,12 +1787,7 @@ ENDCOMMENT
     }
 
     private function getChangelogSection(DOMDocument $doc): DOMElement {
-        $refSec = $doc->createElement('refsect1');
-        $refSec->setAttribute('role', 'changelog');
-        $refSec->appendChild(new DOMText("\n  "));
-        $refTitle = $doc->createEntityReference('reftitle.changelog');
-        $refSec->appendChild($refTitle);
-        $refSec->appendChild(new DOMText("\n  "));
+        $refSec = $this->generateRefSect1($doc, 'changelog');
         $headers = [
             $doc->createEntityReference('Version'),
             $doc->createEntityReference('Description'),
@@ -1821,10 +1804,7 @@ ENDCOMMENT
     }
 
     private function getExampleSection(DOMDocument $doc): DOMElement {
-        $refSec = $doc->createElement('refsect1');
-        $refSec->setAttribute('role', 'examples');
-        $refTitle = $doc->createEntityReference('reftitle.examples');
-        $refSec->append("\n  ", $refTitle);
+        $refSec = $this->generateRefSect1($doc, 'examples');
 
         $example = $doc->createElement('example');
         $example->setAttribute('xml:id', 'func-or-method-name.example.basic');
@@ -1873,7 +1853,7 @@ OUPUT_EXAMPLE
         $example->append("\n   ", $screen);
         $example->append("\n  ");
 
-        $refSec->append("\n  ", $example);
+        $refSec->append($example);
 
         $refSec->appendChild(new DOMText("\n "));
         return $refSec;
