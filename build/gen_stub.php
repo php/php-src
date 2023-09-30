@@ -1495,21 +1495,25 @@ class FuncInfo {
         $refentry = $doc->createElement('refentry');
         $doc->appendChild($refentry);
 
-        $id = $doc->createAttribute("xml:id");
         if ($this->isMethod()) {
             assert($this->name instanceof MethodName);
             /* Namespaces are seperated by '-', '_' must be converted to '-' too.
              * Trim away the __ for magic methods */
-            $id->value = strtolower(
+            $id = strtolower(
                 str_replace('\\', '-', $this->name->className->__toString())
                 . '.'
                 . str_replace('_', '-', ltrim($this->name->methodName, '_'))
             );
         } else {
-            $id->value = 'function.' . strtolower(str_replace('_', '-', $this->name->__toString()));
+            $id = 'function.' . strtolower(str_replace('_', '-', $this->name->__toString()));
         }
-        $refentry->appendChild($id);
-        $refentry->setAttribute("xmlns", "http://docbook.org/ns/docbook");
+        $refentry->setAttribute("xml:id", $id);
+        /* We create an attribute for xmlns, as libxml otherwise force it to be the first one */
+        //$refentry->setAttribute("xmlns", "http://docbook.org/ns/docbook");
+        $namespace = $doc->createAttribute('xmlns');
+        $namespace->value = "http://docbook.org/ns/docbook";
+        $refentry->setAttributeNode($namespace);
+        $refentry->setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
         $refentry->appendChild(new DOMText("\n "));
 
         /* Creation of <refnamediv> */
