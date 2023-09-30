@@ -4392,7 +4392,8 @@ const mbfl_encoding mbfl_encoding_jis = {
 	&vtbl_wchar_jis,
 	mb_iso2022jp_to_wchar,
 	mb_wchar_to_jis,
-	mb_check_jis
+	mb_check_jis,
+	NULL,
 };
 
 static const struct mbfl_convert_vtbl vtbl_2022jp_wchar = {
@@ -4426,7 +4427,8 @@ const mbfl_encoding mbfl_encoding_2022jp = {
 	&vtbl_wchar_2022jp,
 	mb_iso2022jp_to_wchar,
 	mb_wchar_to_iso2022jp,
-	mb_check_iso2022jp
+	mb_check_iso2022jp,
+	NULL,
 };
 
 static const char *mbfl_encoding_2022jp_kddi_aliases[] = {"ISO-2022-JP-KDDI", NULL};
@@ -4462,7 +4464,8 @@ const mbfl_encoding mbfl_encoding_2022jp_kddi = {
 	&vtbl_wchar_2022jp_kddi,
 	mb_iso2022jp_kddi_to_wchar,
 	mb_wchar_to_iso2022jp_kddi,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const struct mbfl_convert_vtbl vtbl_2022jp_2004_wchar = {
@@ -4496,7 +4499,8 @@ const mbfl_encoding mbfl_encoding_2022jp_2004 = {
 	&vtbl_wchar_2022jp_2004,
 	mb_iso2022jp2004_to_wchar,
 	mb_wchar_to_iso2022jp2004,
-	NULL
+	NULL,
+	NULL,
 };
 
 /* Previously, a dubious 'encoding' called 'cp50220raw' was supported
@@ -4581,7 +4585,8 @@ const mbfl_encoding mbfl_encoding_cp50220 = {
 	&vtbl_wchar_cp50220,
 	mb_cp5022x_to_wchar,
 	mb_wchar_to_cp50220,
-	NULL
+	NULL,
+	NULL,
 };
 
 const mbfl_encoding mbfl_encoding_cp50221 = {
@@ -4595,7 +4600,8 @@ const mbfl_encoding mbfl_encoding_cp50221 = {
 	&vtbl_wchar_cp50221,
 	mb_cp5022x_to_wchar,
 	mb_wchar_to_cp50221,
-	NULL
+	NULL,
+	NULL,
 };
 
 const mbfl_encoding mbfl_encoding_cp50222 = {
@@ -4609,7 +4615,8 @@ const mbfl_encoding mbfl_encoding_cp50222 = {
 	&vtbl_wchar_cp50222,
 	mb_cp5022x_to_wchar,
 	mb_wchar_to_cp50222,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const char *mbfl_encoding_2022jpms_aliases[] = {"ISO2022JPMS", NULL};
@@ -4645,7 +4652,8 @@ const mbfl_encoding mbfl_encoding_2022jpms = {
 	&vtbl_wchar_2022jpms,
 	mb_iso2022jpms_to_wchar,
 	mb_wchar_to_iso2022jpms,
-	NULL
+	NULL,
+	NULL,
 };
 
 /* ISO-2022-KR is defined in RFC 1557
@@ -4687,7 +4695,8 @@ const mbfl_encoding mbfl_encoding_2022kr = {
 	&vtbl_wchar_2022kr,
 	mb_iso2022kr_to_wchar,
 	mb_wchar_to_iso2022kr,
-	NULL
+	NULL,
+	NULL,
 };
 
 /*
@@ -7832,7 +7841,8 @@ const mbfl_encoding mbfl_encoding_sjis = {
 	&vtbl_wchar_sjis,
 	mb_sjis_to_wchar,
 	mb_wchar_to_sjis,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const char *mbfl_encoding_sjis_mac_aliases[] = {"MacJapanese", "x-Mac-Japanese", NULL};
@@ -7868,7 +7878,8 @@ const mbfl_encoding mbfl_encoding_sjis_mac = {
 	&vtbl_wchar_sjis_mac,
 	mb_sjismac_to_wchar,
 	mb_wchar_to_sjismac,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const char *mbfl_encoding_sjis_docomo_aliases[] = {"SJIS-DOCOMO", "shift_jis-imode", "x-sjis-emoji-docomo", NULL};
@@ -7906,7 +7917,8 @@ const mbfl_encoding mbfl_encoding_sjis_docomo = {
 	&vtbl_wchar_sjis_docomo,
 	mb_sjis_docomo_to_wchar,
 	mb_wchar_to_sjis_docomo,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const struct mbfl_convert_vtbl vtbl_sjis_kddi_wchar = {
@@ -7940,7 +7952,8 @@ const mbfl_encoding mbfl_encoding_sjis_kddi = {
 	&vtbl_wchar_sjis_kddi,
 	mb_sjis_kddi_to_wchar,
 	mb_wchar_to_sjis_kddi,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const struct mbfl_convert_vtbl vtbl_sjis_sb_wchar = {
@@ -7974,7 +7987,8 @@ const mbfl_encoding mbfl_encoding_sjis_sb = {
 	&vtbl_wchar_sjis_sb,
 	mb_sjis_sb_to_wchar,
 	mb_wchar_to_sjis_sb,
-	NULL
+	NULL,
+	NULL,
 };
 
 /* Although the specification for Shift-JIS-2004 indicates that 0x5C and
@@ -8017,7 +8031,8 @@ const mbfl_encoding mbfl_encoding_sjis2004 = {
 	&vtbl_wchar_sjis2004,
 	mb_sjis2004_to_wchar,
 	mb_wchar_to_sjis2004,
-	NULL
+	NULL,
+	NULL,
 };
 
 /* CP932 is Microsoft's version of Shift-JIS.
@@ -8103,7 +8118,8 @@ const mbfl_encoding mbfl_encoding_cp932 = {
 	&vtbl_wchar_cp932,
 	mb_cp932_to_wchar,
 	mb_wchar_to_cp932,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const struct mbfl_convert_vtbl vtbl_sjiswin_wchar = {
@@ -8137,7 +8153,8 @@ const mbfl_encoding mbfl_encoding_sjiswin = {
 	&vtbl_wchar_sjiswin,
 	mb_cp932_to_wchar,
 	mb_wchar_to_sjiswin,
-	NULL
+	NULL,
+	NULL,
 };
 
 /*
@@ -10346,7 +10363,8 @@ const mbfl_encoding mbfl_encoding_euc_jp = {
 	&vtbl_wchar_eucjp,
 	mb_eucjp_to_wchar,
 	mb_wchar_to_eucjp,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const char *mbfl_encoding_eucjp2004_aliases[] = {"EUC_JP-2004", NULL};
@@ -10382,7 +10400,8 @@ const mbfl_encoding mbfl_encoding_eucjp2004 = {
 	&vtbl_wchar_eucjp2004,
 	mb_eucjp2004_to_wchar,
 	mb_wchar_to_eucjp2004,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const char *mbfl_encoding_eucjp_win_aliases[] = {"eucJP-open", "eucJP-ms", NULL};
@@ -10418,7 +10437,8 @@ const mbfl_encoding mbfl_encoding_eucjp_win = {
 	&vtbl_wchar_eucjpwin,
 	mb_eucjpwin_to_wchar,
 	mb_wchar_to_eucjpwin,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const char *mbfl_encoding_cp51932_aliases[] = {"cp51932", NULL};
@@ -10454,7 +10474,8 @@ const mbfl_encoding mbfl_encoding_cp51932 = {
 	&vtbl_wchar_cp51932,
 	mb_cp51932_to_wchar,
 	mb_wchar_to_cp51932,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const unsigned char mblen_table_euccn[] = { /* 0xA1-0xFE */
@@ -10509,7 +10530,8 @@ const mbfl_encoding mbfl_encoding_euc_cn = {
 	&vtbl_wchar_euccn,
 	mb_euccn_to_wchar,
 	mb_wchar_to_euccn,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const char *mbfl_encoding_euc_tw_aliases[] = {"EUC_TW", "eucTW", "x-euc-tw", NULL};
@@ -10545,7 +10567,8 @@ const mbfl_encoding mbfl_encoding_euc_tw = {
 	&vtbl_wchar_euctw,
 	mb_euctw_to_wchar,
 	mb_wchar_to_euctw,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const char *mbfl_encoding_euc_kr_aliases[] = {"EUC_KR", "eucKR", "x-euc-kr", NULL};
@@ -10581,7 +10604,8 @@ const mbfl_encoding mbfl_encoding_euc_kr = {
 	&vtbl_wchar_euckr,
 	mb_euckr_to_wchar,
 	mb_wchar_to_euckr,
-	NULL
+	NULL,
+	NULL,
 };
 
 /* UHC was introduced by MicroSoft in Windows 95, and is also known as CP949.
@@ -10640,7 +10664,8 @@ const mbfl_encoding mbfl_encoding_uhc = {
 	&vtbl_wchar_uhc,
 	mb_uhc_to_wchar,
 	mb_wchar_to_uhc,
-	NULL
+	NULL,
+	NULL,
 };
 
 /*
@@ -11555,7 +11580,8 @@ const mbfl_encoding mbfl_encoding_gb18030 = {
 	&vtbl_wchar_gb18030,
 	mb_gb18030_to_wchar,
 	mb_wchar_to_gb18030,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const char *mbfl_encoding_cp936_aliases[] = {"CP-936", "GBK", NULL};
@@ -11591,7 +11617,8 @@ const mbfl_encoding mbfl_encoding_cp936 = {
 	&vtbl_wchar_cp936,
 	mb_cp936_to_wchar,
 	mb_wchar_to_cp936,
-	NULL
+	NULL,
+	NULL,
 };
 
 /*
@@ -12160,7 +12187,8 @@ const mbfl_encoding mbfl_encoding_big5 = {
 	&vtbl_wchar_big5,
 	mb_big5_to_wchar,
 	mb_wchar_to_big5,
-	NULL
+	NULL,
+	NULL,
 };
 
 static const struct mbfl_convert_vtbl vtbl_cp950_wchar = {
@@ -12194,7 +12222,8 @@ const mbfl_encoding mbfl_encoding_cp950 = {
 	&vtbl_wchar_cp950,
 	mb_cp950_to_wchar,
 	mb_wchar_to_cp950,
-	NULL
+	NULL,
+	NULL,
 };
 
 /*
@@ -12567,5 +12596,6 @@ const mbfl_encoding mbfl_encoding_hz = {
 	&vtbl_wchar_hz,
 	mb_hz_to_wchar,
 	mb_wchar_to_hz,
-	NULL
+	NULL,
+	NULL,
 };
