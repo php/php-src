@@ -74,6 +74,9 @@ class XSLTProcessor
     /** @var bool */
     public $doXInclude;
 
+    /** @var bool */
+    public $cloneDocument;
+
     /**
      * @param DOMDocument|SimpleXMLElement $stylesheet
      * @tentative-return-type
