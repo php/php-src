@@ -574,12 +574,15 @@ PHP_METHOD(XSLTProcessor, transformToDoc)
 			}
 
 			ce = zend_lookup_class(ret_class);
-			if (ce == NULL || !instanceof_function(ce, curce)) {
-				xmlFreeDoc(newdocp);
+			if (ce == NULL) {
+				zend_argument_type_error(2, "must be a valid class");
+				goto fail;
+			}
+			if (!instanceof_function(ce, curce)) {
 				zend_argument_type_error(2, "must be a class name compatible with %s, \"%s\" given",
 					ZSTR_VAL(curclass_name), ZSTR_VAL(ret_class)
 				);
-				RETURN_THROWS();
+				goto fail;
 			}
 
 			object_init_ex(return_value, ce);
@@ -587,13 +590,18 @@ PHP_METHOD(XSLTProcessor, transformToDoc)
 			interndoc = Z_LIBXML_NODE_P(return_value);
 			php_libxml_increment_doc_ref(interndoc, newdocp);
 			php_libxml_increment_node_ptr(interndoc, (xmlNodePtr)newdocp, (void *)interndoc);
+			return;
 		} else {
 			php_dom_create_object((xmlNodePtr) newdocp, return_value, NULL);
+			return;
 		}
 	} else {
 		RETURN_FALSE;
 	}
 
+fail:
+	xmlFreeDoc(newdocp);
+	RETURN_THROWS();
 }
 /* }}} end XSLTProcessor::transformToDoc */
 
