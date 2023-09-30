@@ -1489,6 +1489,8 @@ class FuncInfo {
      * @throws Exception
      */
     public function getMethodSynopsisDocument(array $funcMap, array $aliasMap): ?string {
+        $REFSEC1_SEPERATOR = "\n\n ";
+
         $doc = new DOMDocument("1.0", "utf-8");
         $doc->formatOutput = true;
 
@@ -1526,8 +1528,7 @@ class FuncInfo {
         $refnamediv->appendChild($refpurpose);
 
         $refnamediv->appendChild(new DOMText("\n "));
-        $refentry->appendChild($refnamediv);
-        $refentry->appendChild(new DOMText("\n\n "));
+        $refentry->append($refnamediv, $REFSEC1_SEPERATOR);
 
         /* Creation of <refsect1 role="description"> */
         $descriptionRefSec = $doc->createElement('refsect1');
@@ -1551,19 +1552,16 @@ class FuncInfo {
         $descriptionRefSec->appendChild($returnDescriptionPara);
 
         $descriptionRefSec->appendChild(new DOMText("\n "));
-        $refentry->appendChild($descriptionRefSec);
-        $refentry->appendChild(new DOMText("\n\n "));
+        $refentry->append($descriptionRefSec, $REFSEC1_SEPERATOR);
 
         /* Creation of <refsect1 role="parameters"> */
         $parametersRefSec = $this->getParameterSection($doc);
-        $refentry->appendChild($parametersRefSec);
-        $refentry->appendChild(new DOMText("\n\n "));
+        $refentry->append($parametersRefSec, $REFSEC1_SEPERATOR);
 
         /* Creation of <refsect1 role="returnvalues"> */
         if (!$this->name->isConstructor() && !$this->name->isDestructor()) {
             $returnRefSec = $this->getReturnValueSection($doc);
-            $refentry->appendChild($returnRefSec);
-            $refentry->appendChild(new DOMText("\n\n "));
+            $refentry->append($returnRefSec, $REFSEC1_SEPERATOR);
         }
 
         /* Creation of <refsect1 role="errors"> */
@@ -1578,15 +1576,15 @@ class FuncInfo {
         $errorsRefSec->appendChild($errorsDescriptionPara);
         $errorsRefSec->appendChild(new DOMText("\n "));
 
-        $refentry->appendChild($errorsRefSec);
-        $refentry->appendChild(new DOMText("\n\n "));
+        $refentry->append($errorsRefSec, $REFSEC1_SEPERATOR);
 
         /* Creation of <refsect1 role="changelog"> */
         $changelogRefSec = $this->getChangelogSection($doc);
-        $refentry->appendChild($changelogRefSec);
-        $refentry->appendChild(new DOMText("\n\n "));
+        $refentry->append($changelogRefSec, $REFSEC1_SEPERATOR);
 
         // TODO Examples, and Notes sections
+        $exampleRefSec = $this->getExampleSection($doc);
+        $refentry->append($exampleRefSec, $REFSEC1_SEPERATOR);
 
         /* Creation of <refsect1 role="seealso"> */
         $seeAlsoRefSec = $doc->createElement('refsect1');
@@ -1817,6 +1815,65 @@ ENDCOMMENT
         ]];
         $table = $this->generateDocbookInformalTable($doc, indent: 2, columns: 2, headers: $headers, rows: $rows);
         $refSec->appendChild($table);
+
+        $refSec->appendChild(new DOMText("\n "));
+        return $refSec;
+    }
+
+    private function getExampleSection(DOMDocument $doc): DOMElement {
+        $refSec = $doc->createElement('refsect1');
+        $refSec->setAttribute('role', 'examples');
+        $refTitle = $doc->createEntityReference('reftitle.examples');
+        $refSec->append("\n  ", $refTitle);
+
+        $example = $doc->createElement('example');
+        $example->setAttribute('xml:id', 'func-or-method-name.example.basic');
+
+        $title = $doc->createElement('title');
+        $fn = $doc->createElement($this->isMethod() ? 'methodname' : 'function');
+        $fn->append($this->name->__toString());
+        $title->append($fn, ' example');
+
+        $example->append("\n   ", $title);
+
+        $para = $doc->createElement('para');
+        $para->append("\n    ", "Description.", "\n   ");
+        $example->append("\n   ", $para);
+
+        $prog = $doc->createElement('programlisting');
+        $prog->setAttribute('role', 'php');
+        $code = new DOMCdataSection(
+            <<<CODE_EXAMPLE
+
+<?php
+echo "Code example";
+?>
+
+CODE_EXAMPLE
+        );
+        $prog->append("\n");
+        $prog->appendChild($code);
+        $prog->append("\n   ");
+
+        $example->append("\n   ", $prog);
+        $example->append("\n   ", $doc->createEntityReference('example.outputs'));
+
+        $output = new DOMCdataSection(
+            <<<OUPUT_EXAMPLE
+
+Code example
+
+OUPUT_EXAMPLE
+        );
+        $screen = $doc->createElement('screen');
+        $screen->append("\n");
+        $screen->appendChild($output);
+        $screen->append("\n   ");
+
+        $example->append("\n   ", $screen);
+        $example->append("\n  ");
+
+        $refSec->append("\n  ", $example);
 
         $refSec->appendChild(new DOMText("\n "));
         return $refSec;
