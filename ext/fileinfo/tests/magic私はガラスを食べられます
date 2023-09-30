@@ -30298,13 +30298,14 @@
 # $File: sgml,v 1.42 2020/12/12 20:01:47 christos Exp $
 # Type:	SVG Vectorial Graphics
 # From:	Noel Torres <tecnico@ejerciciosresueltos.com>
-0	string		\<?xml\ version=
+0	string/bt		\<?xml\ version=
 >14	regex		['"\ \t]*[0-9.]+['"\ \t]*
 >>19	search/4096	\<svg			SVG Scalable Vector Graphics image
+!:strength +50
 !:mime	image/svg+xml
 >>19	search/4096	\<gnc-v2		GnuCash file
 !:mime	application/x-gnucash
-0	string		\<svg			SVG Scalable Vector Graphics image
+0	string/bt		\<svg			SVG Scalable Vector Graphics image
 !:mime	image/svg+xml
 
 # Sitemap file
