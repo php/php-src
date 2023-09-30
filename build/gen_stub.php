@@ -1495,27 +1495,28 @@ class FuncInfo {
         $refentry = $doc->createElement('refentry');
         $doc->appendChild($refentry);
 
+        $id = $doc->createAttribute("xml:id");
         if ($this->isMethod()) {
             assert($this->name instanceof MethodName);
-            $id = $doc->createAttribute("xml:id");
-            $id->value = addslashes(strtolower($this->name->className->__toString())) . '.' . strtolower($this->name->methodName);
-            $refentry->appendChild($id);
+            /* Namespaces are seperated by '-', '_' must be converted to '-' too.
+             * Trim away the __ for magic methods */
+            $id->value = strtolower(
+                str_replace('\\', '-', $this->name->className->__toString())
+                . '.'
+                . str_replace('_', '-', ltrim($this->name->methodName, '_'))
+            );
         } else {
-            // TODO Functions
+            $id->value = 'function.' . strtolower(str_replace('_', '-', $this->name->__toString()));
         }
+        $refentry->appendChild($id);
         $refentry->setAttribute("xmlns", "http://docbook.org/ns/docbook");
         $refentry->appendChild(new DOMText("\n "));
 
         /* Creation of <refnamediv> */
         $refnamediv = $doc->createElement('refnamediv');
         $refnamediv->appendChild(new DOMText("\n  "));
-        if ($this->isMethod()) {
-            assert($this->name instanceof MethodName);
-            $refname = $doc->createElement('refname', $this->name->__toString());
-            $refnamediv->appendChild($refname);
-        } else {
-            // TODO Functions
-        }
+        $refname = $doc->createElement('refname', $this->name->__toString());
+        $refnamediv->appendChild($refname);
         $refnamediv->appendChild(new DOMText("\n  "));
         $refpurpose = $doc->createElement('refpurpose', 'Description');
         $refnamediv->appendChild($refpurpose);
@@ -1555,9 +1556,11 @@ class FuncInfo {
         $refentry->appendChild(new DOMText("\n\n "));
 
         /* Creation of <refsect1 role="returnvalues"> */
-        $returnRefSec = $this->getReturnValueSection($doc);
-        $refentry->appendChild($returnRefSec);
-        $refentry->appendChild(new DOMText("\n\n "));
+        if (!$this->name->isConstructor() && !$this->name->isDestructor()) {
+            $returnRefSec = $this->getReturnValueSection($doc);
+            $refentry->appendChild($returnRefSec);
+            $refentry->appendChild(new DOMText("\n\n "));
+        }
 
         /* Creation of <refsect1 role="errors"> */
         $errorsRefSec = $doc->createElement('refsect1');
