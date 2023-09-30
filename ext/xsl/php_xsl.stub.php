@@ -71,11 +71,9 @@ const LIBEXSLT_DOTTED_VERSION = UNKNOWN;
 
 class XSLTProcessor
 {
-    /** @var bool */
-    public $doXInclude;
+    public bool $doXInclude = false;
 
-    /** @var bool */
-    public $cloneDocument;
+    public bool $cloneDocument = false;
 
     /**
      * @param DOMDocument|SimpleXMLElement $stylesheet

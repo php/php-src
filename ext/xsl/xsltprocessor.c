@@ -313,11 +313,8 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	intern = Z_XSL_P(id);
 
 	member = ZSTR_INIT_LITERAL("cloneDocument", 0);
-	cloneDocu = zend_std_read_property(Z_OBJ_P(id), member, BP_VAR_IS, NULL, &rv);
-	if (Z_TYPE_P(cloneDocu) != IS_NULL) {
-		convert_to_long(cloneDocu);
-		clone_docu = Z_LVAL_P(cloneDocu);
-	}
+	cloneDocu = zend_std_read_property(Z_OBJ_P(id), member, BP_VAR_R, NULL, &rv);
+	clone_docu = zend_is_true(cloneDocu);
 	zend_string_release_ex(member, 0);
 	if (clone_docu == 0) {
 		/* check if the stylesheet is using xsl:key, if yes, we have to clone the document _always_ before a transformation */
@@ -415,11 +412,8 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	}
 
 	member = ZSTR_INIT_LITERAL("doXInclude", 0);
-	doXInclude = zend_std_read_property(Z_OBJ_P(id), member, BP_VAR_IS, NULL, &rv);
-	if (Z_TYPE_P(doXInclude) != IS_NULL) {
-		convert_to_long(doXInclude);
-		ctxt->xinclude = Z_LVAL_P(doXInclude);
-	}
+	doXInclude = zend_std_read_property(Z_OBJ_P(id), member, BP_VAR_R, NULL, &rv);
+	ctxt->xinclude = zend_is_true(doXInclude);
 	zend_string_release_ex(member, 0);
 
 	secPrefsValue = intern->securityPrefs;
