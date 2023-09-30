@@ -39,13 +39,8 @@ PHP                                                                        NEWS
 
 - SimpleXML:
   . Fixed bug GH-12170 (Can't use xpath with comments in SimpleXML). (nielsdos)
-  . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
-    within foreach). (nielsdos)
   . Fixed bug GH-12223 (Entity reference produces infinite loop in
     var_dump/print_r). (nielsdos)
-  . Fixed bug GH-12208 (SimpleXML infinite loop when a cast is used inside a
-    foreach). (nielsdos)
-  . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
   . Fixed bug GH-12167 (Unable to get processing instruction contents in
     SimpleXML). (nielsdos)
   . Fixed bug GH-12169 (Unable to get comment contents in SimpleXML).
