@@ -2945,6 +2945,145 @@ PHP_FUNCTION(mb_strtolower)
 	RETURN_STR(mbstring_convert_case(PHP_UNICODE_CASE_LOWER, ZSTR_VAL(str), ZSTR_LEN(str), enc));
 }
 
+typedef enum {
+	MB_LTRIM = 1,
+	MB_RTRIM = 2,
+	MB_BOTH_TRIM = 3
+} mb_trim_mode;
+
+static zend_always_inline bool is_trim_wchar(uint32_t w, const HashTable *ht)
+{
+	return zend_hash_index_exists(ht, w);
+}
+
+static zend_string* trim_each_wchar(zend_string *str, const HashTable *what_ht, mb_trim_mode mode, const mbfl_encoding *enc)
+{
+	unsigned char *in = (unsigned char*)ZSTR_VAL(str);
+	uint32_t wchar_buf[128];
+	size_t in_len = ZSTR_LEN(str);
+	size_t out_len = 0;
+	unsigned int state = 0;
+	size_t left = 0;
+	size_t right = 0;
+	size_t total_len = 0;
+
+	while (in_len) {
+		out_len = enc->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
+		total_len += out_len;
+
+		for (size_t i = 0; i < out_len; i++) {
+			uint32_t w = wchar_buf[i];
+			if (is_trim_wchar(w, what_ht)) {
+				if (mode & MB_LTRIM) {
+					left += 1;
+				}
+				if (mode & MB_RTRIM) {
+					right += 1;
+				}
+			} else {
+				mode &= ~MB_LTRIM;
+				if (mode & MB_RTRIM) {
+					right = 0;
+				}
+			}
+		}
+	}
+
+	return mb_get_substr(str, left, total_len - (right + left), enc);
+}
+
+static zend_string* mb_trim_default_chars(zend_string *str, mb_trim_mode mode, const mbfl_encoding *enc)
+{
+	const uint32_t trim_default_chars[] = {
+		0x20, 0x0C, 0x0A, 0x0D, 0x09, 0x0B, 0x00, 0xA0, 0x1680,
+		0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007,
+		0x2008, 0x2009, 0x200A, 0x2028, 0x2029, 0x202F, 0x205F, 0x3000,
+		0x85, 0x180E
+	};
+	size_t trim_default_chars_length = sizeof(trim_default_chars) / sizeof(uint32_t);
+
+	HashTable what_ht;
+	zval val;
+	ZVAL_TRUE(&val);
+
+	zend_hash_init(&what_ht, trim_default_chars_length, NULL, NULL, false);
+
+	for (size_t i = 0; i < trim_default_chars_length; i++) {
+		zend_hash_index_add_new(&what_ht, trim_default_chars[i], &val);
+	}
+	zend_string* retval = trim_each_wchar(str, &what_ht, mode, enc);
+	zend_hash_destroy(&what_ht);
+
+	return retval;
+}
+
+static zend_string* mb_trim_what_chars(zend_string *str, zend_string *what, mb_trim_mode mode, const mbfl_encoding *enc)
+{
+	unsigned char *what_in = (unsigned char*)ZSTR_VAL(what);
+	uint32_t what_wchar_buf[128];
+	size_t what_out_len = 0;
+	unsigned int state = 0;
+	size_t what_len = ZSTR_LEN(what);
+	HashTable what_ht;
+	zval val;
+	ZVAL_TRUE(&val);
+	zend_hash_init(&what_ht, what_len, NULL, NULL, false);
+
+	while (what_len) {
+		what_out_len = enc->to_wchar(&what_in, &what_len, what_wchar_buf, 128, &state);
+		ZEND_ASSERT(what_out_len <= 128);
+		for (size_t i = 0; i < what_out_len; i++) {
+			zend_hash_index_add(&what_ht, what_wchar_buf[i], &val);
+		}
+	}
+
+	zend_string *retval = trim_each_wchar(str, &what_ht, mode, enc);
+	zend_hash_destroy(&what_ht);
+
+	return retval;
+}
+
+static void php_do_mb_trim(INTERNAL_FUNCTION_PARAMETERS, mb_trim_mode mode)
+{
+	zend_string *str;
+	zend_string *what = NULL;
+	zend_string *encoding = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(what)
+		Z_PARAM_STR_OR_NULL(encoding)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const mbfl_encoding *enc = php_mb_get_encoding(encoding, 3);
+	if (!enc) {
+		RETURN_THROWS();
+	}
+
+	if (what) {
+		RETURN_STR(mb_trim_what_chars(str, what, mode, enc));
+	} else {
+		RETURN_STR(mb_trim_default_chars(str, mode, enc));
+	}
+}
+
+PHP_FUNCTION(mb_trim)
+{
+	php_do_mb_trim(INTERNAL_FUNCTION_PARAM_PASSTHRU, MB_BOTH_TRIM);
+}
+
+PHP_FUNCTION(mb_ltrim)
+{
+	php_do_mb_trim(INTERNAL_FUNCTION_PARAM_PASSTHRU, MB_LTRIM);
+}
+
+PHP_FUNCTION(mb_rtrim)
+{
+	php_do_mb_trim(INTERNAL_FUNCTION_PARAM_PASSTHRU, MB_RTRIM);
+}
+
 static const mbfl_encoding **duplicate_elist(const mbfl_encoding **elist, size_t size)
 {
 	const mbfl_encoding **new_elist = safe_emalloc(size, sizeof(mbfl_encoding*), 0);
