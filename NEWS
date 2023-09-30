@@ -19,4 +19,7 @@ Standard:
     (timwolla)
   . Fix GH-12252 (round(): Validate the rounding mode). (timwolla)
 
+MBString:
+  . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

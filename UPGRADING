@@ -64,6 +64,9 @@ PHP 8.4 UPGRADE NOTES
     inputs might also be affected and result in different outputs compared to
     earlier PHP versions.
 
+- MBString:
+  . Added mb_trim, mb_ltrim and mb_rtrim functions.
+
 ========================================
 6. New Functions
 ========================================
