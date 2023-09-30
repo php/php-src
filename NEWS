@@ -26,4 +26,8 @@ Standard:
     (timwolla)
   . Fix GH-12252 (round(): Validate the rounding mode). (timwolla)
 
+XSL:
+  . Implement request #64137 (XSLTProcessor::setParameter() should allow both
+    quotes to be used). (nielsdos)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

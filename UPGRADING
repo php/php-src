@@ -39,6 +39,11 @@ PHP 8.4 UPGRADE NOTES
     for invalid modes. Previously invalid modes would have been interpreted as
     PHP_ROUND_HALF_UP.
 
+- XSL:
+  . XSLTProcessor::setParameter() will now throw a ValueError when its arguments
+    contain null bytes. This never actually worked correctly in the first place,
+    which is why it throws an exception nowadays.
+
 ========================================
 2. New Features
 ========================================
@@ -50,6 +55,10 @@ PHP 8.4 UPGRADE NOTES
   . Added constant DOMNode::DOCUMENT_POSITION_CONTAINS.
   . Added constant DOMNode::DOCUMENT_POSITION_CONTAINED_BY.
   . Added constant DOMNode::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC.
+
+- XSL:
+  . It is now possible to use parameters that contain both single and double
+    quotes.
 
 ========================================
 3. Changes in SAPI modules
