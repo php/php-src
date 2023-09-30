@@ -1328,6 +1328,16 @@ PHP_FUNCTION(number_format)
 			break;
 
 		case IS_DOUBLE:
+			// On 64bit a given float within range of int but greater than 2^53 can be cast to int
+			// to not loose precision
+			if (UNEXPECTED(
+				(Z_DVAL_P(num) > 9007199254740992.0 || Z_DVAL_P(num) < -9007199254740992.0)
+				&& Z_DVAL_P(num) < ZEND_LONG_MAX && Z_DVAL_P(num) > ZEND_LONG_MIN
+			)) {
+				RETURN_STR(_php_math_number_format_long((zend_long)Z_DVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+                break;
+			}
+
 			if (dec >= 0) {
 				dec_int = ZEND_LONG_INT_OVFL(dec) ? INT_MAX : (int)dec;
 			} else {
