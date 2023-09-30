@@ -1330,6 +1330,16 @@ PHP_FUNCTION(number_format)
 			break;
 
 		case IS_DOUBLE:
+			// double values of >= 2^52 can not have fractional digits anymore
+			// Casting to long on 64bit will not loose precision on rounding
+			if (UNEXPECTED(
+				(Z_DVAL_P(num) >= 4503599627370496.0 || Z_DVAL_P(num) <= -4503599627370496.0)
+				&& ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(num))
+			)) {
+				RETURN_STR(_php_math_number_format_long((zend_long)Z_DVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+                break;
+			}
+
 			if (dec >= 0) {
 				dec_int = ZEND_LONG_INT_OVFL(dec) ? INT_MAX : (int)dec;
 			} else {

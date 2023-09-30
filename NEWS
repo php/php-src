@@ -104,6 +104,8 @@ Standard:
   . Fixed bug GH-12592 (strcspn() odd behaviour with NUL bytes and empty mask).
     (nielsdos)
   . Removed the deprecated inet_ntoa call support. (David Carlier)
+  . Cast large floats that are within int range to int in number_format so
+    the precision is not lost. (Marc Bennewitz) 
 
 XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)
