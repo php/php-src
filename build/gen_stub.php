@@ -1807,11 +1807,14 @@ ENDCOMMENT
         $refSec = $this->generateRefSect1($doc, 'examples');
 
         $example = $doc->createElement('example');
-        $example->setAttribute('xml:id', 'func-or-method-name.example.basic');
+        $fnName = $this->name->__toString();
+        $fnNameForId = strtolower($fnName);
+        $fnNameForId = str_replace(['_', '\\', '::'], ['-', '-', '.'], $fnNameForId);
+        $example->setAttribute('xml:id', $fnNameForId . '.example.basic');
 
         $title = $doc->createElement('title');
         $fn = $doc->createElement($this->isMethod() ? 'methodname' : 'function');
-        $fn->append($this->name->__toString());
+        $fn->append($fnName);
         $title->append($fn, ' example');
 
         $example->append("\n   ", $title);
