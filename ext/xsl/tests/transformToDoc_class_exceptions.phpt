@@ -28,5 +28,5 @@ try {
 
 ?>
 --EXPECT--
-XSLTProcessor::transformToDoc(): Argument #2 ($returnClass) must be a valid class
-XSLTProcessor::transformToDoc(): Argument #2 ($returnClass) must be a class name compatible with SimpleXMLElement, "DOMDocument" given
+XSLTProcessor::transformToDoc(): Argument #2 ($returnClass) must be a valid class name or null, NonExistent given
+XSLTProcessor::transformToDoc(): Argument #2 ($returnClass) must be a class name compatible with SimpleXMLElement, DOMDocument given

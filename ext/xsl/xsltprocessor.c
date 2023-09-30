@@ -548,14 +548,14 @@ PHP_METHOD(XSLTProcessor, transformToDoc)
 	zval *id, *docp = NULL;
 	xmlDoc *newdocp;
 	xsltStylesheetPtr sheetp;
-	zend_string *ret_class = NULL;
+	zend_class_entry *ret_class = NULL;
 	xsl_object *intern;
 
 	id = ZEND_THIS;
 	intern = Z_XSL_P(id);
 	sheetp = (xsltStylesheetPtr) intern->ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|S!", &docp, &ret_class) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|C!", &docp, &ret_class) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -564,7 +564,7 @@ PHP_METHOD(XSLTProcessor, transformToDoc)
 	if (newdocp) {
 		if (ret_class) {
 			zend_string *curclass_name;
-			zend_class_entry *curce, *ce;
+			zend_class_entry *curce;
 			php_libxml_node_object *interndoc;
 
 			curce = Z_OBJCE_P(docp);
@@ -573,35 +573,25 @@ PHP_METHOD(XSLTProcessor, transformToDoc)
 				curce = curce->parent;
 			}
 
-			ce = zend_lookup_class(ret_class);
-			if (ce == NULL) {
-				zend_argument_type_error(2, "must be a valid class");
-				goto fail;
-			}
-			if (!instanceof_function(ce, curce)) {
-				zend_argument_type_error(2, "must be a class name compatible with %s, \"%s\" given",
-					ZSTR_VAL(curclass_name), ZSTR_VAL(ret_class)
+			if (!instanceof_function(ret_class, curce)) {
+				xmlFreeDoc(newdocp);
+				zend_argument_type_error(2, "must be a class name compatible with %s, %s given",
+					ZSTR_VAL(curclass_name), ZSTR_VAL(ret_class->name)
 				);
-				goto fail;
+				RETURN_THROWS();
 			}
 
-			object_init_ex(return_value, ce);
+			object_init_ex(return_value, ret_class);
 
 			interndoc = Z_LIBXML_NODE_P(return_value);
 			php_libxml_increment_doc_ref(interndoc, newdocp);
 			php_libxml_increment_node_ptr(interndoc, (xmlNodePtr)newdocp, (void *)interndoc);
-			return;
 		} else {
 			php_dom_create_object((xmlNodePtr) newdocp, return_value, NULL);
-			return;
 		}
 	} else {
 		RETURN_FALSE;
 	}
-
-fail:
-	xmlFreeDoc(newdocp);
-	RETURN_THROWS();
 }
 /* }}} end XSLTProcessor::transformToDoc */
 
