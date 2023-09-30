@@ -37,7 +37,7 @@ static zend_result php_xsl_xslt_apply_params(xsltTransformContextPtr ctxt, HashT
 
 		int result = xsltQuoteOneUserParam(ctxt, (const xmlChar *) ZSTR_VAL(string_key), (const xmlChar *) Z_STRVAL_P(value));
 		if (result < 0) {
-			php_error_docref(NULL, E_WARNING, "Could not apply parameter '%s'", ZSTR_VAL(string_key));
+			php_error_docref(NULL, E_WARNING, "Could not apply parameter \"%s\"", ZSTR_VAL(string_key));
 			return FAILURE;
 		}
 	} ZEND_HASH_FOREACH_END();
