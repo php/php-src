@@ -201,8 +201,8 @@ foreach ($numbers as $longVal) {
 --- testing: float(-9.223372036854776E+18)
 ... with precision 5: string(32) "-9,223,372,036,854,775,808.00000"
 ... with precision 0: string(26) "-9,223,372,036,854,775,808"
-... with precision -1: string(26) "-9,223,372,036,854,775,808"
-... with precision -5: string(26) "-9,223,372,036,854,800,384"
+... with precision -1: string(26) "-9,223,372,036,854,775,810"
+... with precision -5: string(26) "-9,223,372,036,854,800,000"
 ... with precision -10: string(26) "-9,223,372,040,000,000,000"
 ... with precision -11: string(26) "-9,223,372,000,000,000,000"
 ... with precision -17: string(26) "-9,200,000,000,000,000,000"

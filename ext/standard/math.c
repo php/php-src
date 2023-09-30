@@ -1332,7 +1332,7 @@ PHP_FUNCTION(number_format)
 			// to not loose precision
 			if (UNEXPECTED(
 				(Z_DVAL_P(num) > 9007199254740992.0 || Z_DVAL_P(num) < -9007199254740992.0)
-				&& Z_DVAL_P(num) < ZEND_LONG_MAX && Z_DVAL_P(num) > ZEND_LONG_MIN
+				&& ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(num))
 			)) {
 				RETURN_STR(_php_math_number_format_long((zend_long)Z_DVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
                 break;
