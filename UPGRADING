@@ -26,6 +26,14 @@ PHP 8.4 UPGRADE NOTES
     Consult sections 2. New Features and 6. New Functions for a list of
     newly implemented methods and constants.
 
+- SimpleXML:
+  . Get methods called, or casting to a string on a SimpleXMLElement will no
+    longer implicitly reset the iterator data, unless explicitly rewound.
+    For example, casting an element to a string within a foreach loop would
+    cause an infinite loop because it destroyed the current iterator data.
+    This is no longer the case as a consequence of the bugfixes for GH-12192,
+    GH-12208, #55098.
+
 - Standard:
   . round() now validates the value of the $mode parameter and throws a ValueError
     for invalid modes. Previously invalid modes would have been interpreted as
