@@ -1075,15 +1075,14 @@ static bool php_xml_check_string_method_arg(
 	zend_string *method_name,
 	zend_fcall_info_cache *const parser_handler_fcc
 ) {
-
-	if (Z_ISUNDEF(parser->object)) {
-		// TODO Error
-		return false;
-	}
-
 	if (ZSTR_LEN(method_name) == 0) {
 		/* Unset handler */
 		return true;
+	}
+
+	if (Z_ISUNDEF(parser->object)) {
+		zend_argument_value_error(arg_num, "an object must be set via xml_set_object() to be able to lookup method");
+		return false;
 	}
 
 	zend_class_entry *ce = Z_OBJCE(parser->object);
@@ -1091,7 +1090,7 @@ static bool php_xml_check_string_method_arg(
 	zend_function *method_ptr = zend_hash_find_ptr(&ce->function_table, lc_name);
 	zend_string_release_ex(lc_name, 0);
 	if (!method_ptr) {
-		// TODO Error
+		zend_argument_value_error(arg_num, "method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(method_name));
 		return false;
 	}
 
@@ -1169,13 +1168,33 @@ PHP_FUNCTION(xml_set_element_handler)
 			RETURN_FALSE;
 		}
 	} else {
-		zval *dummy;
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ozz", &pind, xml_parser_ce, &dummy) == FAILURE) {
+		zval *dummy_start;
+		zval *dummy_end;
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ozz", &pind, xml_parser_ce, &dummy_start, &dummy_end) == FAILURE) {
 			RETURN_THROWS();
 		} else {
-			// TODO Deal with types
-			zend_argument_type_error(2, "must be of type callable|string|null|false");
-			RETURN_THROWS();
+			switch (Z_TYPE_P(dummy_start)) {
+				case IS_FALSE:
+				case IS_NULL:
+					break;
+				case IS_STRING:
+					// TODO ... how to deal with callable on one arg and false on another?
+				default:
+					zend_argument_type_error(2, "must be of type callable|string|null|false");
+					RETURN_THROWS();
+			}
+			switch (Z_TYPE_P(dummy_end)) {
+				case IS_FALSE:
+				case IS_NULL:
+					break;
+				case IS_STRING:
+					// TODO ... how to deal with callable on one arg and false on another?
+				default:
+					zend_argument_type_error(3, "must be of type callable|string|null|false");
+					RETURN_THROWS();
+			}
+
+			parser = Z_XMLPARSER_P(pind);
 		}
 	}
 
@@ -1227,11 +1246,16 @@ static void php_xml_set_handler_parse_callable(
 		zval *dummy;
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz", &pind, xml_parser_ce, &dummy) == FAILURE) {
 			RETURN_THROWS();
-		} else {
-			// TODO Deal with types
-			zend_argument_type_error(2, "must be of type callable|string|null|false");
-			RETURN_THROWS();
 		}
+		switch (Z_TYPE_P(dummy)) {
+			case IS_FALSE:
+				break;
+			default:
+				zend_argument_type_error(2, "must be of type callable|string|null|false");
+				RETURN_THROWS();
+		}
+
+		*parser = Z_XMLPARSER_P(pind);
 	}
 }
 
@@ -1241,6 +1265,7 @@ static void php_xml_set_handler_parse_callable(
 		xml_parser *parser = NULL; \
 		zend_fcall_info_cache handler_fcc = {0}; \
 		php_xml_set_handler_parse_callable(INTERNAL_FUNCTION_PARAM_PASSTHRU, &parser, &handler_fcc); \
+		if (EG(exception)) { return; } \
 		ZEND_ASSERT(parser); \
 		xml_set_handler(&parser->parser_handler_name, &handler_fcc); \
 		parse_function(parser->parser, c_function); \
