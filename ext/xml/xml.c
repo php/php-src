@@ -422,6 +422,7 @@ static void xml_set_handler(zend_fcall_info_cache *const parser_handler, const z
 	/* If we have already a handler, release it */
 	if (ZEND_FCC_INITIALIZED(*parser_handler)) {
 		zend_fcc_dtor(parser_handler);
+		parser_handler->function_handler = NULL;
 	}
 
 	if (ZEND_FCC_INITIALIZED(*fn)) {
