@@ -28,4 +28,4 @@ var_dump($ps->length);
 --EXPECT--
 string(1) "2"
 int(3)
-int(3)
+int(4)

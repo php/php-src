@@ -200,7 +200,7 @@ int php_dom_get_nodelist_length(dom_object *obj);
 #define DOM_NODELIST 0
 #define DOM_NAMEDNODEMAP 1
 
-static zend_always_inline bool php_dom_is_cache_tag_stale_from_doc_ptr(const php_libxml_cache_tag *cache_tag, const php_libxml_doc_ptr *doc_ptr)
+static zend_always_inline bool php_dom_is_cache_tag_stale_from_doc_ptr(const php_libxml_cache_tag *cache_tag, const php_libxml_ref_obj *doc_ptr)
 {
 	ZEND_ASSERT(cache_tag != NULL);
 	ZEND_ASSERT(doc_ptr != NULL);
@@ -215,15 +215,26 @@ static zend_always_inline bool php_dom_is_cache_tag_stale_from_doc_ptr(const php
 static zend_always_inline bool php_dom_is_cache_tag_stale_from_node(const php_libxml_cache_tag *cache_tag, const xmlNodePtr node)
 {
 	ZEND_ASSERT(node != NULL);
-	return !node->doc || !node->doc->_private || php_dom_is_cache_tag_stale_from_doc_ptr(cache_tag, node->doc->_private);
+	php_libxml_node_ptr *private = node->_private;
+	if (!private) {
+		return true;
+	}
+	php_libxml_node_object *object_private = private->_private;
+	if (!object_private || !object_private->document) {
+		return true;
+	}
+	return php_dom_is_cache_tag_stale_from_doc_ptr(cache_tag, object_private->document);
 }
 
 static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_node(php_libxml_cache_tag *cache_tag, const xmlNodePtr node)
 {
 	ZEND_ASSERT(cache_tag != NULL);
-	if (node->doc && node->doc->_private) {
-		const php_libxml_doc_ptr* doc_ptr = node->doc->_private;
-		cache_tag->modification_nr = doc_ptr->cache_tag.modification_nr;
+	php_libxml_node_ptr *private = node->_private;
+	if (private) {
+		php_libxml_node_object *object_private = private->_private;
+		if (object_private->document) {
+			cache_tag->modification_nr = object_private->document->cache_tag.modification_nr;
+		}
 	}
 }
 
