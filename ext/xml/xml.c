@@ -69,10 +69,6 @@ typedef struct {
 	 * It is not owned, do not release it. */
 	zval index;
 
-	/* We return a pointer to these zvals in get_gc(), so it's
-	 * important that a) they are adjacent b) object is the first
-	 * and c) the number of zvals is kept up to date. */
-#define XML_PARSER_NUM_ZVALS 1
 	zval object;
 	zend_fcall_info_cache startElementHandler;
 	zend_fcall_info_cache endElementHandler;
@@ -373,10 +369,9 @@ static void xml_parser_free_obj(zend_object *object)
 static HashTable *xml_parser_get_gc(zend_object *object, zval **table, int *n)
 {
 	xml_parser *parser = xml_parser_from_obj(object);
-	*table = &parser->object;
-	*n = XML_PARSER_NUM_ZVALS;
 
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+	zend_get_gc_buffer_add_zval(gc_buffer, &parser->object);
 	if (ZEND_FCC_INITIALIZED(parser->startElementHandler)) {
 		zend_get_gc_buffer_add_fcc(gc_buffer, &parser->startElementHandler);
 	}
