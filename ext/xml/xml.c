@@ -1114,6 +1114,7 @@ PHP_FUNCTION(xml_set_element_handler)
 	zend_string *method_name = NULL;
 	zend_string *method_name2 = NULL;
 
+	// TODO: cover trampolines with tests, as the !ZEND_FCC_INITIALIZED branches are never executed right now
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "Of!f!", &pind, xml_parser_ce, &start_fci, &start_fcc, &end_fci, &end_fcc) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
 		if (ZEND_FCI_INITIALIZED(start_fci) && !ZEND_FCC_INITIALIZED(start_fcc)) {
