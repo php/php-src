@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 
 - DOM:
   . Restore old namespace reconciliation behaviour. (nielsdos)
+  . Fix broken cache invalidation with deallocated and reallocated document
+    node. (nielsdos)
 
 - Fileinfo:
   . Fixed bug GH-11891 (fileinfo returns text/xml for some svg files). (usarise)
