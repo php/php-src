@@ -1235,7 +1235,7 @@ static void php_xml_set_handler_parse_callable(
 	}
 }
 
-#define XML_SET_HANDLER_PHP_FUNCTION(function_name, parser_handler_name, libxml_function, c_function) \
+#define XML_SET_HANDLER_PHP_FUNCTION(function_name, parser_handler_name, parse_function, c_function) \
 	PHP_FUNCTION(function_name) \
 	{ \
 		xml_parser *parser = NULL; \
@@ -1243,7 +1243,7 @@ static void php_xml_set_handler_parse_callable(
 		php_xml_set_handler_parse_callable(INTERNAL_FUNCTION_PARAM_PASSTHRU, &parser, &handler_fcc); \
 		ZEND_ASSERT(parser); \
 		xml_set_handler(&parser->parser_handler_name, &handler_fcc); \
-		libxml_function(parser->parser, c_function); \
+		parse_function(parser->parser, c_function); \
 		if (ZEND_FCC_INITIALIZED(handler_fcc)) { \
 			zend_fcc_dtor(&handler_fcc); \
 		} \
