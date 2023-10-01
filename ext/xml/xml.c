@@ -1164,7 +1164,7 @@ PHP_FUNCTION(xml_set_element_handler)
 		if (status == false) {
 			RETURN_FALSE;
 		}
-		bool status2 = php_xml_check_string_method_arg(3, parser, method_name2, &start_fcc);
+		bool status2 = php_xml_check_string_method_arg(3, parser, method_name2, &end_fcc);
 		if (status2 == false) {
 			RETURN_FALSE;
 		}
@@ -1244,9 +1244,6 @@ static void php_xml_set_handler_parse_callable(
 		ZEND_ASSERT(parser); \
 		xml_set_handler(&parser->parser_handler_name, &handler_fcc); \
 		parse_function(parser->parser, c_function); \
-		if (ZEND_FCC_INITIALIZED(handler_fcc)) { \
-			zend_fcc_dtor(&handler_fcc); \
-		} \
 		RETURN_TRUE; \
 	}
 
