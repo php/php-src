@@ -28,6 +28,7 @@ $strictlyAlphaNumeric = [
     "d",
     "D",
     "4",
+    "1",
 ];
 
 foreach ($strictlyAlphaNumeric as $s) {
@@ -77,3 +78,5 @@ string(1) "C"
 string(1) "D"
 string(1) "3"
 string(1) "4"
+string(1) "0"
+string(1) "1"
