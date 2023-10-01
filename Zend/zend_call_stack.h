@@ -76,6 +76,9 @@ static inline size_t zend_call_stack_default_size(void)
 #if defined(__FreeBSD__) || defined(__NetBSD__)
 	return 4 * 1024 * 1024;
 #endif
+#if defined(__DragonFly__)
+	return 2 * 1024 * 1024;
+#endif
 #ifdef __OpenBSD__
 	return 512 * 1024;
 #endif
