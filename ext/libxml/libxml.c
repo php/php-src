@@ -1293,13 +1293,7 @@ PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object,
 				object->node->_private = private_data;
 			}
 		} else {
-			if (UNEXPECTED(node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE)) {
-				php_libxml_doc_ptr *doc_ptr = emalloc(sizeof(php_libxml_doc_ptr));
-				doc_ptr->cache_tag.modification_nr = 1; /* iterators start at 0, such that they will start in an uninitialised state */
-				object->node = (php_libxml_node_ptr *) doc_ptr; /* downcast */
-			} else {
-				object->node = emalloc(sizeof(php_libxml_node_ptr));
-			}
+			object->node = emalloc(sizeof(php_libxml_node_ptr));
 			ret_refcount = 1;
 			object->node->node = node;
 			object->node->refcount = 1;
@@ -1344,6 +1338,7 @@ PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, 
 		object->document->ptr = docp;
 		object->document->refcount = ret_refcount;
 		object->document->doc_props = NULL;
+		object->document->cache_tag.modification_nr = 1; /* iterators start at 0, such that they will start in an uninitialised state */
 	}
 
 	return ret_refcount;

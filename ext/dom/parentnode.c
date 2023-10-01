@@ -309,7 +309,7 @@ void dom_parent_node_append(dom_object *context, zval *nodes, uint32_t nodesc)
 		return;
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(parentNode->doc);
+	php_libxml_invalidate_node_list_cache(context->document);
 
 	xmlNode *fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
 
@@ -353,7 +353,7 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc)
 		return;
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(parentNode->doc);
+	php_libxml_invalidate_node_list_cache(context->document);
 
 	xmlNode *fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
 
@@ -404,7 +404,7 @@ void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 
 	doc = prevsib->doc;
 
-	php_libxml_invalidate_node_list_cache_from_doc(doc);
+	php_libxml_invalidate_node_list_cache(context->document);
 
 	/* Spec step 4: convert nodes into fragment */
 	fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
@@ -456,7 +456,7 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 
 	doc = nextsib->doc;
 
-	php_libxml_invalidate_node_list_cache_from_doc(doc);
+	php_libxml_invalidate_node_list_cache(context->document);
 
 	/* Spec step 4: convert nodes into fragment */
 	fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
@@ -523,7 +523,7 @@ void dom_child_node_remove(dom_object *context)
 		return;
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(child->doc);
+	php_libxml_invalidate_node_list_cache(context->document);
 
 	xmlUnlinkNode(child);
 }
@@ -557,7 +557,7 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 	}
 
 	xmlDocPtr doc = parentNode->doc;
-	php_libxml_invalidate_node_list_cache_from_doc(doc);
+	php_libxml_invalidate_node_list_cache(context->document);
 
 	/* Spec step 4: convert nodes into fragment */
 	xmlNodePtr fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
@@ -602,7 +602,7 @@ void dom_parent_node_replace_children(dom_object *context, zval *nodes, uint32_t
 		return;
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(thisp->doc);
+	php_libxml_invalidate_node_list_cache(context->document);
 
 	dom_remove_all_children(thisp);
 
