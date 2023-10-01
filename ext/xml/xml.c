@@ -1209,7 +1209,7 @@ static void php_xml_set_handler_parse_callable(
 			 * with it ourselves. It is important that it is not refetched on every call,
 			 * because calls may occur from different scopes. */
 		}
-		zend_fcc_dup(parser_handler_fcc, &handler_fcc);
+		memcpy(parser_handler_fcc, &handler_fcc, sizeof(zend_fcall_info_cache));
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OS", &pind, xml_parser_ce, &method_name) == SUCCESS) {
 		xml_parser *local_parser;
 		*parser = local_parser = Z_XMLPARSER_P(pind);
