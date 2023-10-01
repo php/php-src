@@ -1203,7 +1203,7 @@ static void php_xml_set_handler_parse_callable(
 			/* Free handler, so just return and a uninitialized FCC communicates this */
 			return;
 		}
-		if (!ZEND_FCC_INITIALIZED(handler_fcc)) {
+		if (!ZEND_FCC_INITIALIZED(handler_fcc)) { // TODO: cover this with a test, this is never executed right now
 			zend_is_callable_ex(&handler_fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &handler_fcc, NULL);
 			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
 			 * with it ourselves. It is important that it is not refetched on every call,
