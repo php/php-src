@@ -25,6 +25,9 @@ PHP                                                                        NEWS
 - SimpleXML:
   . Apply iterator fixes only on master. (nielsdos)
 
+- Standard:
+  . Fixed str_decrement() on "1". (ilutov)
+
 - XSL:
   . Fix type error on XSLTProcessor::transformToDoc return value with
     SimpleXML. (nielsdos)
