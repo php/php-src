@@ -25,11 +25,21 @@ $cmd = [
 ];
 
 $proc = proc_open($cmd, [['null'], ['pipe', 'w'], ['redirect', 1]], $pipes);
-echo stream_get_contents($pipes[1]);
+$output = stream_get_contents($pipes[1]);
+
+// Ignore warnings if opcache loads twice or duplicate modules are loaded by searching for the preloaded marker
+$flag = false;
+foreach (explode("\n", $output) as $line) {
+	if ($line === "preloaded") {
+		$flag = true;
+	}
+	if ($flag) {
+		echo $line, "\n";
+	}
+}
 
 ?>
 --EXPECTF--
-%A
 preloaded
 PHP %s
 Copyright (c) The PHP Group
