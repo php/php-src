@@ -4744,6 +4744,8 @@ static int accel_finish_startup(void)
 			SIGG(check) = false;
 #endif
 			php_request_shutdown(NULL); /* calls zend_shared_alloc_unlock(); */
+			EG(class_table) = NULL;
+			EG(function_table) = NULL;
 			PG(report_memleaks) = orig_report_memleaks;
 		} else {
 			zend_shared_alloc_unlock();
