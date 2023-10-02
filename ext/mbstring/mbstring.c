@@ -4202,8 +4202,8 @@ PHP_FUNCTION(mb_send_mail)
 	size_t i;
 	char *to_r = NULL;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
-	bool uses_content_type = false;
-	bool uses_content_transfer_encoding = false;
+	bool suppress_content_type = false;
+	bool suppress_content_transfer_encoding = false;
 
 	char *p;
 	enum mbfl_no_encoding;
@@ -4286,7 +4286,7 @@ PHP_FUNCTION(mb_send_mail)
 				}
 			}
 		}
-		uses_content_type = true;
+		suppress_content_type = true;
 	}
 
 	if ((s = zend_hash_str_find(&ht_headers, "content-transfer-encoding", sizeof("content-transfer-encoding") - 1))) {
@@ -4306,7 +4306,7 @@ PHP_FUNCTION(mb_send_mail)
 				body_enc =	&mbfl_encoding_8bit;
 				break;
 		}
-		uses_content_transfer_encoding = true;
+		suppress_content_transfer_encoding = true;
 	}
 
 	/* To: */
@@ -4391,7 +4391,7 @@ PHP_FUNCTION(mb_send_mail)
 		empty = false;
 	}
 
-	if (!uses_content_type) {
+	if (!suppress_content_type) {
 		if (!empty) {
 			smart_str_appendl(&str, line_sep, line_sep_len);
 		}
@@ -4405,7 +4405,7 @@ PHP_FUNCTION(mb_send_mail)
 		empty = false;
 	}
 
-	if (!uses_content_transfer_encoding) {
+	if (!suppress_content_transfer_encoding) {
 		if (!empty) {
 			smart_str_appendl(&str, line_sep, line_sep_len);
 		}
