@@ -1571,11 +1571,8 @@ PHP_SET_LIBTOOL_VARIABLE([--silent])
 dnl libtool 1.4.3 needs this.
 PHP_SET_LIBTOOL_VARIABLE([--preserve-dup-deps])
 
-dnl This needs to be passed explicitly to allow scan-build compiler overrides.
-PHP_SET_LIBTOOL_VARIABLE([--tag CC])
-
-test -z "$PHP_COMPILE" && PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
-test -z "$CXX_PHP_COMPILE" && CXX_PHP_COMPILE='$(LIBTOOL) --mode=compile $(CXX_COMPILE) -c $<'
+test -z "$PHP_COMPILE" && PHP_COMPILE='$(LIBTOOL) --tag=CC --mode=compile $(COMPILE) -c $<'
+test -z "$CXX_PHP_COMPILE" && CXX_PHP_COMPILE='$(LIBTOOL) --tag=CXX --mode=compile $(CXX_COMPILE) -c $<'
 SHARED_LIBTOOL='$(LIBTOOL)'
 
 CC=$old_CC
