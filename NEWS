@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.0RC4
 
+- Core:
+  . Fixed bug #80092 (ZTS + preload = segfault on shutdown). (nielsdos)
+
 - CType:
   . Fixed bug GH-11997 (ctype_alnum 5 times slower in PHP 8.1 or greater).
     (nielsdos)
