@@ -1328,10 +1328,10 @@ PHP_FUNCTION(number_format)
 			break;
 
 		case IS_DOUBLE:
-			// On 64bit a given float within range of int but greater than 2^53 can be cast to int
-			// to not loose precision
+			// double values of >= 2^52 can not have fractional digits anymore
+			// Casting to long on 64bit will not loose precision on rounding
 			if (UNEXPECTED(
-				(Z_DVAL_P(num) > 9007199254740992.0 || Z_DVAL_P(num) < -9007199254740992.0)
+				(Z_DVAL_P(num) >= 4503599627370496.0 || Z_DVAL_P(num) <= -4503599627370496.0)
 				&& ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(num))
 			)) {
 				RETURN_STR(_php_math_number_format_long((zend_long)Z_DVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));

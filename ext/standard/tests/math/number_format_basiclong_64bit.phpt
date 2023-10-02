@@ -17,7 +17,7 @@ $numbers = array(
     MAX_32Bit + 1, MIN_32Bit - 1, MAX_32Bit * 2, (MAX_32Bit * 2) + 1, (MAX_32Bit * 2) - 1,
     MAX_64Bit - 1, MAX_64Bit + 1, MIN_64Bit + 1, MIN_64Bit - 1,
     // floats rounded as int
-    9223372036854774784.0, -9223372036854774784.0
+    MAX_64Bit - 1024.0, MIN_64Bit + 1024.0
 );
 
 $precisions = array(
@@ -33,12 +33,12 @@ $precisions = array(
     PHP_INT_MIN,
 );
 
-foreach ($numbers as $longVal) {
+foreach ($numbers as $number) {
     echo "--- testing: ";
-    var_dump($longVal);
+    var_dump($number);
     foreach ($precisions as $precision) {
         echo "... with precision " . $precision . ": ";
-        var_dump(number_format($longVal, $precision));
+        var_dump(number_format($number, $precision));
     }
 }
 
