@@ -15,7 +15,7 @@ if (!file_exists($extDir . '/opcache.so')) {
 <?php
 
 $cmd = [
-    PHP_BINARY, '-n',
+    PHP_BINARY,
     '-dextension_dir=' . ini_get('extension_dir'),
     '-dzend_extension=opcache.so',
     '-dopcache.enable=1',
@@ -29,6 +29,7 @@ echo stream_get_contents($pipes[1]);
 
 ?>
 --EXPECTF--
+%A
 preloaded
 PHP %s
 Copyright (c) The PHP Group
