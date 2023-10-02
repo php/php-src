@@ -25,7 +25,7 @@ freebsd_task:
   tests_script:
     - export SKIP_IO_CAPTURE_TESTS=1
     - export CI_NO_IPV6=1
-    - sapi/cli/php run-tests.php -P -q -j2 -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP --offline --show-diff --show-slow 1000 --set-timeout 120 -d zend_extension=opcache.so
+    - sapi/cli/php run-tests.php -P -q -j2 -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP --offline --show-diff --show-slow 1000 --set-timeout 120 -d zend_extension=opcache.so sapi/cli
 
 arm_task:
   name: ARM_DEBUG_NTS
@@ -224,4 +224,4 @@ arm_task:
         --show-diff
         --show-slow 1000
         --set-timeout 120
-        --repeat 2
+        --repeat 2  sapi/cli
