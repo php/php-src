@@ -32,8 +32,8 @@ runs:
         export PDO_PGSQL_TEST_DSN="host=postgres dbname=test port=5432 user=postgres password=postgres"
         export ODBC_TEST_USER="odbc_test"
         export ODBC_TEST_PASS="password"
-        export ODBC_TEST_DSN="Driver={ODBC Driver 17 for SQL Server};Server=127.0.0.1;Database=master;uid=$ODBC_TEST_USER;pwd=$ODBC_TEST_PASS"
-        export PDO_ODBC_TEST_DSN="odbc:$ODBC_TEST_DSN"
+        export ODBC_TEST_DSN="Driver={ODBC Driver 17 for SQL Server};Server=127.0.0.1;Database=odbc;uid=$ODBC_TEST_USER;pwd=$ODBC_TEST_PASS"
+        export PDO_ODBC_TEST_DSN="odbc:Driver={ODBC Driver 17 for SQL Server};Server=127.0.0.1;Database=pdo_odbc;uid=$ODBC_TEST_USER;pwd=$ODBC_TEST_PASS"
         export SKIP_IO_CAPTURE_TESTS=1
         export TEST_PHP_JUNIT=junit.out.xml
         export STACK_LIMIT_DEFAULTS_CHECK=1
