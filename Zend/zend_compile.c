@@ -10616,7 +10616,8 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 			case ZEND_AST_NULLSAFE_METHOD_CALL:
 			case ZEND_AST_STATIC_CALL:
 				zend_compile_memoized_expr(result, ast);
-				return &CG(active_op_array)->opcodes[CG(active_op_array)->last - 1];
+				/* This might not actually produce an opcode, e.g. for expressions evaluated at comptime. */
+				return NULL;
 		}
 	}
 
