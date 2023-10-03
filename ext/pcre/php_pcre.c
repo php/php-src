@@ -34,8 +34,6 @@
 #define PREG_SPLIT_DELIM_CAPTURE	(1<<1)
 #define PREG_SPLIT_OFFSET_CAPTURE	(1<<2)
 
-#define PREG_REPLACE_EVAL			(1<<0)
-
 #define PREG_GREP_INVERT			(1<<0)
 
 #define PREG_JIT                    (1<<3)
@@ -737,14 +735,12 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 				break;
 			case 'J':	coptions |= PCRE2_DUPNAMES;		break;
 
-			/* Custom preg options */
-			case 'e':	poptions |= PREG_REPLACE_EVAL;	break;
-
 			case ' ':
 			case '\n':
 			case '\r':
 				break;
 
+			case 'e': /* legacy eval */
 			default:
 				if (pp[-1]) {
 					php_error_docref(NULL, E_WARNING, "Unknown modifier '%c'", pp[-1]);
@@ -758,16 +754,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 				}
 				return NULL;
 		}
-	}
-
-	if (poptions & PREG_REPLACE_EVAL) {
-		php_error_docref(NULL, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
-		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
-		efree(pattern);
-		if (key != regex) {
-			zend_string_release_ex(key, 0);
-		}
-		return NULL;
 	}
 
 	if (key != regex) {
