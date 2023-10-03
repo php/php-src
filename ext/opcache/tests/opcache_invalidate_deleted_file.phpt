@@ -16,11 +16,12 @@ PHP);
 var_dump(include $file);
 unlink($file);
 var_dump(include $file);
-opcache_invalidate($file);
+var_dump(opcache_invalidate($file));
 var_dump(@(include $file));
 
 ?>
 --EXPECT--
 int(42)
 int(42)
+bool(true)
 bool(false)
