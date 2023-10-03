@@ -382,7 +382,6 @@ jobs:
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
-          echo extension=uv >> /etc/php.d/uv.ini
           repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
           X=0
           for repository in $repositories; do
