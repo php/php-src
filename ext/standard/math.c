@@ -137,14 +137,14 @@ static inline double php_round_helper(double value, int mode) {
 			if (value >= 0.0) {
 				return floor(value);
 			} else {
-				return = ceil(value);
+				return ceil(value);
 			}
 
 		case PHP_ROUND_AWAY_FROM_ZERO:
 			if (value >= 0.0) {
-				return = ceil(value);
+				return ceil(value);
 			} else {
-				return = floor(value);
+				return floor(value);
 			}
 
 		case PHP_ROUND_HALF_EVEN:
