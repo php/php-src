@@ -52,9 +52,9 @@ try {
 Invalid $parser:
 TypeError: xml_set_processing_instruction_handler(): Argument #1 ($parser) must be of type XMLParser, stdClass given
 Invalid callable type true:
-TypeError: xml_set_processing_instruction_handler(): Argument #2 ($handler) must be of type callable|string|null|false
+TypeError: xml_set_processing_instruction_handler(): Argument #2 ($handler) must be of type callable|string|null
 Invalid callable type int:
-TypeError: xml_set_processing_instruction_handler(): Argument #2 ($handler) must be of type callable|string|null|false
+TypeError: xml_set_processing_instruction_handler(): Argument #2 ($handler) must be of type callable|string|null
 String not callable and no object set:
 ValueError: xml_set_processing_instruction_handler(): Argument #2 ($handler) an object must be set via xml_set_object() to be able to lookup method
 String non existent method on set object:

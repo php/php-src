@@ -1175,27 +1175,15 @@ PHP_FUNCTION(xml_set_element_handler)
 			RETURN_THROWS();
 		} else {
 			switch (Z_TYPE_P(dummy_start)) {
-				case IS_FALSE:
 				case IS_NULL:
-					break;
 				case IS_STRING:
-					// TODO ... how to deal with callable on one arg and false on another?
+					break;
 				default:
-					zend_argument_type_error(2, "must be of type callable|string|null|false");
+					zend_argument_type_error(2, "must be of type callable|string|null");
 					RETURN_THROWS();
 			}
-			switch (Z_TYPE_P(dummy_end)) {
-				case IS_FALSE:
-				case IS_NULL:
-					break;
-				case IS_STRING:
-					// TODO ... how to deal with callable on one arg and false on another?
-				default:
-					zend_argument_type_error(3, "must be of type callable|string|null|false");
-					RETURN_THROWS();
-			}
-
-			parser = Z_XMLPARSER_P(pind);
+			zend_argument_type_error(3, "must be of type callable|string|null");
+			RETURN_THROWS();
 		}
 	}
 
@@ -1234,11 +1222,6 @@ static void php_xml_set_handler_parse_callable(
 		xml_parser *local_parser;
 		*parser = local_parser = Z_XMLPARSER_P(pind);
 
-		if (ZSTR_LEN(method_name) == 0) {
-			/* Free handler, so just return and a uninitialized FCC communicates this */
-			return;
-		}
-
 		bool status = php_xml_check_string_method_arg(2, local_parser, method_name, parser_handler_fcc);
 		if (status == false) {
 			RETURN_FALSE;
@@ -1248,15 +1231,8 @@ static void php_xml_set_handler_parse_callable(
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz", &pind, xml_parser_ce, &dummy) == FAILURE) {
 			RETURN_THROWS();
 		}
-		switch (Z_TYPE_P(dummy)) {
-			case IS_FALSE:
-				break;
-			default:
-				zend_argument_type_error(2, "must be of type callable|string|null|false");
-				RETURN_THROWS();
-		}
-
-		*parser = Z_XMLPARSER_P(pind);
+		zend_argument_type_error(2, "must be of type callable|string|null");
+		RETURN_THROWS();
 	}
 }
 

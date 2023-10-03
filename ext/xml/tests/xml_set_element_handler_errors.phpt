@@ -78,13 +78,13 @@ try {
 Invalid $parser:
 TypeError: xml_set_element_handler(): Argument #1 ($parser) must be of type XMLParser, stdClass given
 Invalid start callable type true:
-TypeError: xml_set_element_handler(): Argument #2 ($start_handler) must be of type callable|string|null|false
+TypeError: xml_set_element_handler(): Argument #2 ($start_handler) must be of type callable|string|null
 Invalid end callable type true:
-TypeError: xml_set_element_handler(): Argument #3 ($end_handler) must be of type callable|string|null|false
+TypeError: xml_set_element_handler(): Argument #3 ($end_handler) must be of type callable|string|null
 Invalid start callable type int:
-TypeError: xml_set_element_handler(): Argument #2 ($start_handler) must be of type callable|string|null|false
+TypeError: xml_set_element_handler(): Argument #2 ($start_handler) must be of type callable|string|null
 Invalid end callable type int:
-TypeError: xml_set_element_handler(): Argument #3 ($end_handler) must be of type callable|string|null|false
+TypeError: xml_set_element_handler(): Argument #3 ($end_handler) must be of type callable|string|null
 Invalid start callable, no object set and string not callable:
 ValueError: xml_set_element_handler(): Argument #2 ($start_handler) an object must be set via xml_set_object() to be able to lookup method
 Invalid end callable, no object set and string not callable:
