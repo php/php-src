@@ -7,7 +7,7 @@ sysvshm
 
 if (4 < PHP_INT_SIZE) { print "skip 32-bit only"; }
 if (substr(PHP_OS, 0, 3) != "WIN") { print "skip windows only"; }
-if (getenv('CI')) die('skip on GitHub actions');
+if (getenv('GITHUB_ACTIONS')) die('skip on GitHub actions');
 ?>
 --FILE--
 <?php
