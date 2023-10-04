@@ -285,16 +285,16 @@ PHP_FUNCTION(abs)
 		Z_PARAM_NUMBER(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE_P(value) == IS_DOUBLE) {
-		RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
-	} else if (Z_TYPE_P(value) == IS_LONG) {
-		if (Z_LVAL_P(value) == ZEND_LONG_MIN) {
-			RETURN_DOUBLE(-(double)ZEND_LONG_MIN);
-		} else {
-			RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
-		}
-	} else {
-		ZEND_ASSERT(0 && "Unexpected type");
+	switch (Z_TYPE_P(value)) {
+		case IS_LONG:
+			if (UNEXPECTED(Z_LVAL_P(value) == ZEND_LONG_MIN)) {
+				RETURN_DOUBLE(-(double)ZEND_LONG_MIN);
+			} else {
+				RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
+			}
+		case IS_DOUBLE:
+			RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 }
 /* }}} */
@@ -308,12 +308,12 @@ PHP_FUNCTION(ceil)
 		Z_PARAM_NUMBER(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE_P(value) == IS_DOUBLE) {
-		RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
-	} else if (Z_TYPE_P(value) == IS_LONG) {
-		RETURN_DOUBLE(zval_get_double(value));
-	} else {
-		ZEND_ASSERT(0 && "Unexpected type");
+	switch (Z_TYPE_P(value)) {
+		case IS_LONG:
+			RETURN_DOUBLE(zval_get_double(value));
+		case IS_DOUBLE:
+			RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 }
 /* }}} */
@@ -327,12 +327,12 @@ PHP_FUNCTION(floor)
 		Z_PARAM_NUMBER(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE_P(value) == IS_DOUBLE) {
-		RETURN_DOUBLE(floor(Z_DVAL_P(value)));
-	} else if (Z_TYPE_P(value) == IS_LONG) {
-		RETURN_DOUBLE(zval_get_double(value));
-	} else {
-		ZEND_ASSERT(0 && "Unexpected type");
+	switch (Z_TYPE_P(value)) {
+		case IS_LONG:
+			RETURN_DOUBLE(zval_get_double(value));
+		case IS_DOUBLE:
+			RETURN_DOUBLE(floor(Z_DVAL_P(value)));
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 }
 /* }}} */
@@ -344,7 +344,6 @@ PHP_FUNCTION(round)
 	int places = 0;
 	zend_long precision = 0;
 	zend_long mode = PHP_ROUND_HALF_UP;
-	double return_val;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_NUMBER(value)
@@ -361,21 +360,33 @@ PHP_FUNCTION(round)
 		}
 	}
 
+	switch (mode) {
+		case PHP_ROUND_HALF_UP:
+		case PHP_ROUND_HALF_DOWN:
+		case PHP_ROUND_HALF_EVEN:
+		case PHP_ROUND_HALF_ODD:
+		case PHP_ROUND_AWAY_FROM_ZERO:
+		case PHP_ROUND_TOWARD_ZERO:
+		case PHP_ROUND_CEILING:
+		case PHP_ROUND_FLOOR:
+			break;
+		default:
+			zend_argument_value_error(3, "must be a valid rounding mode (PHP_ROUND_*)");
+			RETURN_THROWS();
+	}
+
 	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
 			/* Simple case - long that doesn't need to be rounded. */
 			if (places >= 0) {
-				RETURN_DOUBLE((double) Z_LVAL_P(value));
+				RETURN_DOUBLE(zval_get_double(value));
 			}
 			ZEND_FALLTHROUGH;
 
 		case IS_DOUBLE:
-			return_val = (Z_TYPE_P(value) == IS_LONG) ? (double)Z_LVAL_P(value) : Z_DVAL_P(value);
-			return_val = _php_math_round(return_val, (int)places, (int)mode);
-			RETURN_DOUBLE(return_val);
-			break;
+			RETURN_DOUBLE(_php_math_round(zval_get_double(value), (int)places, (int)mode));
 
-		EMPTY_SWITCH_DEFAULT_CASE()
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 }
 /* }}} */
