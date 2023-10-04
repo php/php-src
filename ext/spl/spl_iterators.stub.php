@@ -54,25 +54,21 @@ interface RecursiveIterator extends Iterator
 class RecursiveIteratorIterator implements OuterIterator
 {
     /**
-     * @var int
      * @cvalue RIT_LEAVES_ONLY
      */
-    public const LEAVES_ONLY = UNKNOWN;
+    public const int LEAVES_ONLY = UNKNOWN;
     /**
-     * @var int
      * @cvalue RIT_SELF_FIRST
      */
-    public const SELF_FIRST = UNKNOWN;
+    public const int SELF_FIRST = UNKNOWN;
     /**
-     * @var int
      * @cvalue RIT_CHILD_FIRST
      */
-    public const CHILD_FIRST = UNKNOWN;
+    public const int CHILD_FIRST = UNKNOWN;
     /**
-     * @var int
      * @cvalue RIT_CATCH_GET_CHILD
      */
-    public const CATCH_GET_CHILD = UNKNOWN;
+    public const int CATCH_GET_CHILD = UNKNOWN;
 
     public function __construct(Traversable $iterator, int $mode = RecursiveIteratorIterator::LEAVES_ONLY, int $flags = 0) {}
 
@@ -222,35 +218,29 @@ class LimitIterator extends IteratorIterator
 class CachingIterator extends IteratorIterator implements ArrayAccess, Countable, Stringable
 {
     /**
-     * @var int
      * @cvalue CIT_CALL_TOSTRING
      */
-    public const CALL_TOSTRING = UNKNOWN;
+    public const int CALL_TOSTRING = UNKNOWN;
     /**
-     * @var int
      * @cvalue CIT_CATCH_GET_CHILD
      */
-    public const CATCH_GET_CHILD = UNKNOWN;
+    public const int CATCH_GET_CHILD = UNKNOWN;
     /**
-     * @var int
      * @cvalue CIT_TOSTRING_USE_KEY
      */
-    public const TOSTRING_USE_KEY = UNKNOWN;
+    public const int TOSTRING_USE_KEY = UNKNOWN;
     /**
-     * @var int
      * @cvalue CIT_TOSTRING_USE_CURRENT
      */
-    public const TOSTRING_USE_CURRENT = UNKNOWN;
+    public const int TOSTRING_USE_CURRENT = UNKNOWN;
     /**
-     * @var int
      * @cvalue CIT_TOSTRING_USE_INNER
      */
-    public const TOSTRING_USE_INNER = UNKNOWN;
+    public const int TOSTRING_USE_INNER = UNKNOWN;
     /**
-     * @var int
      * @cvalue CIT_FULL_CACHE
      */
-    public const FULL_CACHE = UNKNOWN;
+    public const int FULL_CACHE = UNKNOWN;
 
     public function __construct(Iterator $iterator, int $flags = CachingIterator::CALL_TOSTRING) {}
 
@@ -373,40 +363,33 @@ class InfiniteIterator extends IteratorIterator
 class RegexIterator extends FilterIterator
 {
     /**
-     * @var int
      * @cvalue REGIT_USE_KEY
      */
-    public const USE_KEY = UNKNOWN;
+    public const int USE_KEY = UNKNOWN;
     /**
-     * @var int
      * @cvalue REGIT_INVERTED
      */
-    public const INVERT_MATCH = UNKNOWN;
+    public const int INVERT_MATCH = UNKNOWN;
     /**
-     * @var int
      * @cvalue REGIT_MODE_MATCH
      */
-    public const MATCH = UNKNOWN;
+    public const int MATCH = UNKNOWN;
     /**
-     * @var int
      * @cvalue REGIT_MODE_GET_MATCH
      */
-    public const GET_MATCH = UNKNOWN;
+    public const int GET_MATCH = UNKNOWN;
     /**
-     * @var int
      * @cvalue REGIT_MODE_ALL_MATCHES
      */
-    public const ALL_MATCHES = UNKNOWN;
+    public const int ALL_MATCHES = UNKNOWN;
     /**
-     * @var int
      * @cvalue REGIT_MODE_SPLIT
      */
-    public const SPLIT = UNKNOWN;
+    public const int SPLIT = UNKNOWN;
     /**
-     * @var int
      * @cvalue REGIT_MODE_REPLACE
      */
-    public const REPLACE = UNKNOWN;
+    public const int REPLACE = UNKNOWN;
 
     public ?string $replacement = null;
 
@@ -457,27 +440,25 @@ class RecursiveRegexIterator extends RegexIterator implements RecursiveIterator
 class RecursiveTreeIterator extends RecursiveIteratorIterator
 {
     /**
-     * @var int
      * @cvalue RTIT_BYPASS_CURRENT
      */
-    public const BYPASS_CURRENT = UNKNOWN;
+    public const int BYPASS_CURRENT = UNKNOWN;
     /**
-     * @var int
      * @cvalue RTIT_BYPASS_KEY
      */
-    public const BYPASS_KEY = UNKNOWN;
-    /** @var int */
-    public const PREFIX_LEFT = 0;
-    /** @var int */
-    public const PREFIX_MID_HAS_NEXT = 1;
-    /** @var int */
-    public const PREFIX_MID_LAST = 2;
-    /** @var int */
-    public const PREFIX_END_HAS_NEXT = 3;
-    /** @var int */
-    public const PREFIX_END_LAST = 4;
-    /** @var int */
-    public const PREFIX_RIGHT = 5;
+    public const int BYPASS_KEY = UNKNOWN;
+
+    public const int PREFIX_LEFT = 0;
+
+    public const int PREFIX_MID_HAS_NEXT = 1;
+
+    public const int PREFIX_MID_LAST = 2;
+
+    public const int PREFIX_END_HAS_NEXT = 3;
+
+    public const int PREFIX_END_LAST = 4;
+
+    public const int PREFIX_RIGHT = 5;
 
     /** @param RecursiveIterator|IteratorAggregate $iterator */
     public function __construct(

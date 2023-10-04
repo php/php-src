@@ -151,65 +151,53 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
 class FilesystemIterator extends DirectoryIterator
 {
     /**
-     * @var int
      * @cvalue SPL_FILE_DIR_CURRENT_MODE_MASK
      */
-    public const CURRENT_MODE_MASK = UNKNOWN;
+    public const int CURRENT_MODE_MASK = UNKNOWN;
     /**
-     * @var int
      * @cvalue SPL_FILE_DIR_CURRENT_AS_PATHNAME
      */
-    public const CURRENT_AS_PATHNAME = UNKNOWN;
+    public const int CURRENT_AS_PATHNAME = UNKNOWN;
     /**
-     * @var int
      * @cvalue SPL_FILE_DIR_CURRENT_AS_FILEINFO
      */
-    public const CURRENT_AS_FILEINFO = UNKNOWN;
+    public const int CURRENT_AS_FILEINFO = UNKNOWN;
     /**
-     * @var int
      * @cvalue SPL_FILE_DIR_CURRENT_AS_SELF
      */
-    public const CURRENT_AS_SELF = UNKNOWN;
+    public const int CURRENT_AS_SELF = UNKNOWN;
     /**
-     * @var int
      * @cvalue SPL_FILE_DIR_KEY_MODE_MASK
      */
-    public const KEY_MODE_MASK = UNKNOWN;
+    public const int KEY_MODE_MASK = UNKNOWN;
     /**
-     * @var int
      * @cvalue SPL_FILE_DIR_KEY_AS_PATHNAME
      */
-    public const KEY_AS_PATHNAME = UNKNOWN;
+    public const int KEY_AS_PATHNAME = UNKNOWN;
     /**
-     * @var int
      * @cvalue SPL_FILE_DIR_FOLLOW_SYMLINKS
      */
-    public const FOLLOW_SYMLINKS = UNKNOWN;
+    public const int FOLLOW_SYMLINKS = UNKNOWN;
     /**
-     * @var int
      * @cvalue SPL_FILE_DIR_KEY_AS_FILENAME
      */
-    public const KEY_AS_FILENAME = UNKNOWN;
+    public const int KEY_AS_FILENAME = UNKNOWN;
     /**
-     * @var int
      * @cvalue SPL_FILE_NEW_CURRENT_AND_KEY
      */
-    public const NEW_CURRENT_AND_KEY = UNKNOWN;
+    public const int NEW_CURRENT_AND_KEY = UNKNOWN;
     /**
-     * @var int
      * @cvalue SPL_FILE_DIR_OTHERS_MASK
      */
-    public const OTHER_MODE_MASK = UNKNOWN;
+    public const int OTHER_MODE_MASK = UNKNOWN;
     /**
-     * @var int
      * @cvalue SPL_FILE_DIR_SKIPDOTS
      */
-    public const SKIP_DOTS = UNKNOWN;
+    public const int SKIP_DOTS = UNKNOWN;
     /**
-     * @var int
      * @cvalue SPL_FILE_DIR_UNIXPATHS
      */
-    public const UNIX_PATHS = UNKNOWN;
+    public const int UNIX_PATHS = UNKNOWN;
 
     public function __construct(string $directory, int $flags = FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS) {}
 
@@ -259,25 +247,21 @@ class GlobIterator extends FilesystemIterator implements Countable
 class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIterator
 {
     /**
-     * @var int
      * @cvalue SPL_FILE_OBJECT_DROP_NEW_LINE
      */
-    public const DROP_NEW_LINE = UNKNOWN;
+    public const int DROP_NEW_LINE = UNKNOWN;
     /**
-     * @var int
      * @cvalue SPL_FILE_OBJECT_READ_AHEAD
      */
-    public const READ_AHEAD = UNKNOWN;
+    public const int READ_AHEAD = UNKNOWN;
     /**
-     * @var int
      * @cvalue SPL_FILE_OBJECT_SKIP_EMPTY
      */
-    public const SKIP_EMPTY = UNKNOWN;
+    public const int SKIP_EMPTY = UNKNOWN;
     /**
-     * @var int
      * @cvalue SPL_FILE_OBJECT_READ_CSV
      */
-    public const READ_CSV = UNKNOWN;
+    public const int READ_CSV = UNKNOWN;
 
     /** @param resource|null $context */
     public function __construct(string $filename, string $mode = "r", bool $useIncludePath = false, $context = null) {}
