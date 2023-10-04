@@ -138,10 +138,10 @@ oom:
 
 static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	const char *source;
-	size_t source_len;
+	const char *source, *override_encoding = NULL;
+	size_t source_len, override_encoding_len;
 	zend_long options = 0;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lp!", &source, &source_len, &options, &override_encoding, &override_encoding_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -165,7 +165,17 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_THROWS();
 	}
 
-	xmlDocPtr lxml_doc = dom_document_parser(NULL, mode, source, source_len, options);
+	xmlCharEncodingHandlerPtr encoding = NULL;
+	if (override_encoding != NULL) {
+		encoding = xmlFindCharEncodingHandler(override_encoding);
+		if (!encoding) {
+			zend_argument_value_error(3, "must be a valid document encoding");
+			RETURN_THROWS();
+		}
+		options |= XML_PARSE_IGNORE_ENC;
+	}
+
+	xmlDocPtr lxml_doc = dom_document_parser(NULL, mode, source, source_len, options, encoding);
 	if (UNEXPECTED(lxml_doc == NULL)) {
 		if (!EG(exception)) {
 			if (mode == DOM_LOAD_FILE) {

@@ -353,7 +353,7 @@ static dom_character_encoding_data dom_determine_encoding(const char *source, si
 	lxb_html_encoding_t encoding;
 	lxb_status_t status = lxb_html_encoding_init(&encoding);
 	if (status != LXB_STATUS_OK) {
-		goto fallback;
+		goto fallback_uninit;
 	}
 	/* This is the "wait either for 1024 bytes or 500ms" part */
 	if (source_len > 1024) {
@@ -368,32 +368,47 @@ static dom_character_encoding_data dom_determine_encoding(const char *source, si
 		goto fallback;
 	}
 	result.encoding_data = lxb_encoding_data_by_pre_name(entry->name, entry->end - entry->name);
+	if (!result.encoding_data) {
+		goto fallback;
+	}
 	result.bom_shift = 0;
 	lxb_html_encoding_destroy(&encoding, false);
 	return result;
 
 fallback:
+	lxb_html_encoding_destroy(&encoding, false);
+fallback_uninit:
 	result.encoding_data = lxb_encoding_data(DOM_FALLBACK_ENCODING_ID);
 	result.bom_shift = 0;
-	lxb_html_encoding_destroy(&encoding, false);
 	return result;
 }
 
-static void dom_setup_parser_encoding(const lxb_char_t **buf_ref, size_t *read, dom_decoding_encoding_ctx *decoding_encoding_ctx)
+static void dom_setup_parser_encoding_manually(const lxb_char_t *buf_start, const lxb_encoding_data_t *encoding_data, dom_decoding_encoding_ctx *decoding_encoding_ctx, dom_lexbor_libxml2_bridge_application_data *application_data)
 {
 	static const lxb_codepoint_t replacement_codepoint = LXB_ENCODING_REPLACEMENT_CODEPOINT;
-	dom_character_encoding_data dom_encoding_data = dom_determine_encoding((const char *) *buf_ref, *read);
-	*buf_ref += dom_encoding_data.bom_shift;
-	*read -= dom_encoding_data.bom_shift;
 
-	decoding_encoding_ctx->decode_data = dom_encoding_data.encoding_data;
-	if (decoding_encoding_ctx->decode_data == NULL) {
-		decoding_encoding_ctx->decode_data = lxb_encoding_data(DOM_FALLBACK_ENCODING_ID);
-		ZEND_ASSERT(decoding_encoding_ctx->decode_data != NULL);
-	}
+	decoding_encoding_ctx->decode_data = encoding_data;
+
 	(void) lxb_encoding_decode_init(&decoding_encoding_ctx->decode, decoding_encoding_ctx->decode_data, decoding_encoding_ctx->codepoints, sizeof(decoding_encoding_ctx->codepoints) / sizeof(lxb_codepoint_t));
 	(void) lxb_encoding_decode_replace_set(&decoding_encoding_ctx->decode, &replacement_codepoint, LXB_ENCODING_REPLACEMENT_BUFFER_LEN);
 	decoding_encoding_ctx->fast_path = decoding_encoding_ctx->decode_data == decoding_encoding_ctx->encode_data; /* Note: encode_data is for UTF-8 */
+
+	if (decoding_encoding_ctx->fast_path) {
+		application_data->current_input_codepoints = NULL;
+		application_data->current_input_characters = (const char *) buf_start;
+	} else {
+		application_data->current_input_codepoints = decoding_encoding_ctx->codepoints;
+		application_data->current_input_characters = NULL;
+	}
+}
+
+static void dom_setup_parser_encoding_implicitly(const lxb_char_t **buf_ref, size_t *read, dom_decoding_encoding_ctx *decoding_encoding_ctx, dom_lexbor_libxml2_bridge_application_data *application_data)
+{
+	const char *buf_start = (const char *) *buf_ref;
+	dom_character_encoding_data dom_encoding_data = dom_determine_encoding(buf_start, *read);
+	*buf_ref += dom_encoding_data.bom_shift;
+	*read -= dom_encoding_data.bom_shift;
+	dom_setup_parser_encoding_manually((const lxb_char_t *) buf_start, dom_encoding_data.encoding_data, decoding_encoding_ctx, application_data);
 }
 
 static bool dom_process_parse_chunk(lexbor_libxml2_bridge_parse_context *ctx, lxb_html_document_t *document, lxb_html_parser_t *parser, size_t encoded_length, const lxb_char_t *encoding_output, size_t input_buffer_length, size_t *tokenizer_error_offset, size_t *tree_error_offset)
@@ -548,10 +563,10 @@ oom:
 
 PHP_METHOD(DOM_HTMLDocument, createFromString)
 {
-	const char *source;
-	size_t source_len;
+	const char *source, *override_encoding = NULL;
+	size_t source_len, override_encoding_len;
 	zend_long options = 0;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lp!", &source, &source_len, &options, &override_encoding, &override_encoding_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -571,6 +586,24 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 	}
 	ctx.application_data = &application_data;
 
+	size_t tokenizer_error_offset = 0;
+	size_t tree_error_offset = 0;
+
+	/* Setup everything encoding & decoding related */
+	const lxb_char_t *buf_ref = (const lxb_char_t *) source;
+	dom_decoding_encoding_ctx decoding_encoding_ctx;
+	dom_decoding_encoding_ctx_init(&decoding_encoding_ctx);
+	if (override_encoding != NULL) {
+		const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name((const lxb_char_t *) override_encoding, override_encoding_len);
+		if (!encoding_data) {
+			zend_argument_value_error(3, "must be a valid document encoding");
+			RETURN_THROWS();
+		}
+		dom_setup_parser_encoding_manually(buf_ref, encoding_data, &decoding_encoding_ctx, &application_data);
+	} else {
+		dom_setup_parser_encoding_implicitly(&buf_ref, &source_len, &decoding_encoding_ctx, &application_data);
+	}
+
 	lxb_html_document_t *document = lxb_html_document_create();
 	if (UNEXPECTED(document == NULL)) {
 		goto fail_oom;
@@ -581,24 +614,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 		goto fail_oom;
 	}
 
-	/* Setup everything encoding & decoding related */
-	dom_decoding_encoding_ctx decoding_encoding_ctx;
-	dom_decoding_encoding_ctx_init(&decoding_encoding_ctx);
-
 	lxb_html_parser_t *parser = document->dom_document.parser;
-	size_t tokenizer_error_offset = 0;
-	size_t tree_error_offset = 0;
-
-	const lxb_char_t *buf_ref = (const lxb_char_t *) source;
-	dom_setup_parser_encoding(&buf_ref, &source_len, &decoding_encoding_ctx);
-
-	if (decoding_encoding_ctx.fast_path) {
-		application_data.current_input_codepoints = NULL;
-		application_data.current_input_characters = source;
-	} else {
-		application_data.current_input_codepoints = decoding_encoding_ctx.codepoints;
-		application_data.current_input_characters = NULL;
-	}
 
 	while (source_len > 0) {
 		size_t chunk_size = source_len;
@@ -653,11 +669,11 @@ fail_oom:
 
 PHP_METHOD(DOM_HTMLDocument, createFromFile)
 {
-	const char *filename;
-	size_t filename_len;
+	const char *filename, *override_encoding = NULL;
+	size_t filename_len, override_encoding_len;
 	zend_long options = 0;
 	php_stream *stream = NULL;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &filename, &filename_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|ls!", &filename, &filename_len, &options, &override_encoding, &override_encoding_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -683,6 +699,22 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	}
 	ctx.application_data = &application_data;
 
+	char buf[4096];
+
+	/* Setup everything encoding & decoding related */
+	dom_decoding_encoding_ctx decoding_encoding_ctx;
+	dom_decoding_encoding_ctx_init(&decoding_encoding_ctx);
+	bool should_determine_encoding_implicitly = true; /* First read => determine encoding implicitly */
+	if (override_encoding != NULL) {
+		const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name((const lxb_char_t *) override_encoding, override_encoding_len);
+		if (!encoding_data) {
+			zend_argument_value_error(3, "must be a valid document encoding");
+			RETURN_THROWS();
+		}
+		should_determine_encoding_implicitly = false;
+		dom_setup_parser_encoding_manually((const lxb_char_t *) buf, encoding_data, &decoding_encoding_ctx, &application_data);
+	}
+
 	// TODO: context from LIBXML(stream_context) ???
 	// TODO: https://mimesniff.spec.whatwg.org/#parsing-a-mime-type
 	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, /* opened_path */ NULL, /* context */ NULL);
@@ -703,31 +735,17 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		goto fail_oom;
 	}
 
-	/* Setup everything encoding & decoding related */
-	bool first_read = true;
-	dom_decoding_encoding_ctx decoding_encoding_ctx;
-	dom_decoding_encoding_ctx_init(&decoding_encoding_ctx);
-
 	size_t tokenizer_error_offset = 0;
 	size_t tree_error_offset = 0;
 	ssize_t read;
-	char buf[4096];
 	lxb_html_parser_t *parser = document->dom_document.parser;
 
 	while ((read = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 		const lxb_char_t *buf_ref = (const lxb_char_t *) buf;
 
-		/* First read => determine encoding */
-		if (first_read) {
-			first_read = false;
-			dom_setup_parser_encoding(&buf_ref, (size_t *) &read, &decoding_encoding_ctx);
-			if (decoding_encoding_ctx.fast_path) {
-				application_data.current_input_codepoints = NULL;
-				application_data.current_input_characters = buf;
-			} else {
-				application_data.current_input_codepoints = decoding_encoding_ctx.codepoints;
-				application_data.current_input_characters = NULL;
-			}
+		if (should_determine_encoding_implicitly) {
+			should_determine_encoding_implicitly = false;
+			dom_setup_parser_encoding_implicitly(&buf_ref, (size_t *) &read, &decoding_encoding_ctx, &application_data);
 		}
 
 		const lxb_char_t *buf_end = buf_ref + read;
@@ -771,7 +789,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		if (UNEXPECTED(!converted)) {
 			goto fail_oom;
 		}
-		/* Check for "file:/"" instead of "file://" because of libxml2 quirk */
+		/* Check for "file:/" instead of "file://" because of libxml2 quirk */
 		if (strncmp((const char *) converted, "file:/", sizeof("file:/") - 1) != 0) {
 			xmlChar *buffer = xmlStrdup((const xmlChar *) "file://");
 			if (UNEXPECTED(!buffer)) {

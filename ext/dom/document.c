@@ -1197,7 +1197,7 @@ const char *_dom_get_valid_file_path(const char *source, char *resolved_path, in
 }
 /* }}} */
 
-xmlDocPtr dom_document_parser(zval *id, int mode, const char *source, size_t source_len, size_t options) /* {{{ */
+xmlDocPtr dom_document_parser(zval *id, int mode, const char *source, size_t source_len, size_t options, xmlCharEncodingHandlerPtr encoding) /* {{{ */
 {
 	xmlDocPtr ret;
 	xmlParserCtxtPtr ctxt = NULL;
@@ -1239,6 +1239,8 @@ xmlDocPtr dom_document_parser(zval *id, int mode, const char *source, size_t sou
 	if (ctxt == NULL) {
 		return(NULL);
 	}
+
+	(void) xmlSwitchToEncoding(ctxt, encoding);
 
 	/* If loading from memory, we need to set the base directory for the document */
 	if (mode != DOM_LOAD_FILE) {
@@ -1377,7 +1379,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_FALSE;
 	}
 
-	xmlDocPtr newdoc = dom_document_parser(ZEND_THIS, mode, source, source_len, options);
+	xmlDocPtr newdoc = dom_document_parser(ZEND_THIS, mode, source, source_len, options, NULL);
 	php_dom_finish_loading_document(ZEND_THIS, return_value, newdoc);
 }
 
