@@ -9,7 +9,7 @@ zend_test.replace_zend_execute_ex=1
 opcache
 zend_test
 --SKIPIF--
-<?php if (!isset(opcache_get_status()["jit"])) die('skip: JIT is not available'); ?>
+<?php if ((opcache_get_status()['jit']['on'] ?? false) === false) die('skip: JIT is not available'); ?>
 --FILE--
 <?php
 
