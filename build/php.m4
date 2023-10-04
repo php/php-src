@@ -539,6 +539,18 @@ ifelse($3,,[
 ])
 
 dnl
+dnl PHP_ADD_STATIC_LIBRARY(static_library_path)
+dnl
+dnl Add a static library to the link line.
+dnl
+AC_DEFUN([PHP_ADD_STATIC_LIBRARY],[
+  if ! ar t "$1"; then
+    AC_MSG_ERROR([$1 does not appear to be a static library])
+  fi
+  LDFLAGS="$LDFLAGS $1"
+])
+
+dnl
 dnl PHP_ADD_LIBRARY_DEFER_WITH_PATH(library, path[, shared-libadd])
 dnl
 dnl Add a library to the link line (deferred) and path to linkpath/runpath (not
