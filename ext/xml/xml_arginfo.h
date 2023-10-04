@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f87e295b35cd43db72a936ee5745297a45730090 */
+ * Stub hash: eb168a134e8acf6f19f0cc2c9ddeae95da61045d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_xml_parser_create, 0, 0, XMLParser, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
@@ -17,13 +17,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_set_element_handler, 0, 3, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, parser, XMLParser, 0)
-	ZEND_ARG_INFO(0, start_handler)
-	ZEND_ARG_INFO(0, end_handler)
+	ZEND_ARG_TYPE_MASK(0, start_handler, MAY_BE_CALLABLE|MAY_BE_STRING|MAY_BE_NULL, NULL)
+	ZEND_ARG_TYPE_MASK(0, end_handler, MAY_BE_CALLABLE|MAY_BE_STRING|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_set_character_data_handler, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, parser, XMLParser, 0)
-	ZEND_ARG_INFO(0, handler)
+	ZEND_ARG_TYPE_MASK(0, handler, MAY_BE_CALLABLE|MAY_BE_STRING|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_xml_set_processing_instruction_handler arginfo_xml_set_character_data_handler

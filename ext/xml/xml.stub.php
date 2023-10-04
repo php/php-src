@@ -146,35 +146,23 @@ function xml_parser_create_ns(?string $encoding = null, string $separator = ":")
 
 function xml_set_object(XMLParser $parser, object $object): true {}
 
-/**
- * @param callable $start_handler
- * @param callable $end_handler
- */
-function xml_set_element_handler(XMLParser $parser, $start_handler, $end_handler): true {}
+function xml_set_element_handler(XMLParser $parser, callable|string|null $start_handler, callable|string|null $end_handler): true {}
 
-/** @param callable $handler */
-function xml_set_character_data_handler(XMLParser $parser, $handler): true {}
+function xml_set_character_data_handler(XMLParser $parser, callable|string|null $handler): true {}
 
-/** @param callable $handler */
-function xml_set_processing_instruction_handler(XMLParser $parser, $handler): true {}
+function xml_set_processing_instruction_handler(XMLParser $parser, callable|string|null $handler): true {}
 
-/** @param callable $handler */
-function xml_set_default_handler(XMLParser $parser, $handler): true {}
+function xml_set_default_handler(XMLParser $parser, callable|string|null $handler): true {}
 
-/** @param callable $handler */
-function xml_set_unparsed_entity_decl_handler(XMLParser $parser, $handler): true {}
+function xml_set_unparsed_entity_decl_handler(XMLParser $parser, callable|string|null $handler): true {}
 
-/** @param callable $handler */
-function xml_set_notation_decl_handler(XMLParser $parser, $handler): true {}
+function xml_set_notation_decl_handler(XMLParser $parser, callable|string|null $handler): true {}
 
-/** @param callable $handler */
-function xml_set_external_entity_ref_handler(XMLParser $parser, $handler): true {}
+function xml_set_external_entity_ref_handler(XMLParser $parser, callable|string|null $handler): true {}
 
-/** @param callable $handler */
-function xml_set_start_namespace_decl_handler(XMLParser $parser, $handler): true {}
+function xml_set_start_namespace_decl_handler(XMLParser $parser, callable|string|null $handler): true {}
 
-/** @param callable $handler */
-function xml_set_end_namespace_decl_handler(XMLParser $parser, $handler): true {}
+function xml_set_end_namespace_decl_handler(XMLParser $parser, callable|string|null $handler): true {}
 
 function xml_parse(XMLParser $parser, string $data, bool $is_final = false): int {}
 
