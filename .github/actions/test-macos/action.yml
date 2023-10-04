@@ -3,6 +3,9 @@ inputs:
   runTestsParameters:
     default: ''
     required: false
+  jitType:
+    default: 'disable'
+    required: false
 runs:
   using: composite
   steps:
@@ -12,6 +15,7 @@ runs:
         export SKIP_IO_CAPTURE_TESTS=1
         export CI_NO_IPV6=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
+          -d opcache.jit=${{ inputs.jitType }} \
           -j$(sysctl -n hw.ncpu) \
           -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
           --offline \

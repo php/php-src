@@ -3,6 +3,9 @@ inputs:
   runTestsParameters:
     default: ''
     required: false
+  jitType:
+    default: 'disable'
+    required: false
 runs:
   using: composite
   steps:
@@ -27,6 +30,7 @@ runs:
         export PDO_OCI_TEST_DSN="oci:dbname=localhost/XEPDB1;charset=AL32UTF8"
         export SKIP_IO_CAPTURE_TESTS=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
+          -d opcache.jit=${{ inputs.jitType }} \
           -j$(/usr/bin/nproc) \
           -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
           --offline \
