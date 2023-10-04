@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dc2edb1b4d2c4fde746a2f29613ffba447cb5ee6 */
+ * Stub hash: b0ec673de0f141d63769f3322d6fddfb29b960c8 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Transliterator___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -66,13 +66,13 @@ static zend_class_entry *register_class_Transliterator(void)
 	zval const_FORWARD_value;
 	ZVAL_LONG(&const_FORWARD_value, TRANSLITERATOR_FORWARD);
 	zend_string *const_FORWARD_name = zend_string_init_interned("FORWARD", sizeof("FORWARD") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_FORWARD_name, &const_FORWARD_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_FORWARD_name, &const_FORWARD_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_FORWARD_name);
 
 	zval const_REVERSE_value;
 	ZVAL_LONG(&const_REVERSE_value, TRANSLITERATOR_REVERSE);
 	zend_string *const_REVERSE_name = zend_string_init_interned("REVERSE", sizeof("REVERSE") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_REVERSE_name, &const_REVERSE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_REVERSE_name, &const_REVERSE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_REVERSE_name);
 
 	zval property_id_default_value;

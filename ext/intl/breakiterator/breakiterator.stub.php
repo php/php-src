@@ -6,103 +6,84 @@
 class IntlBreakIterator implements IteratorAggregate
 {
     /**
-     * @var int
      * @cvalue BreakIterator::DONE
      */
-    public const DONE = UNKNOWN;
+    public const int DONE = UNKNOWN;
 
     /**
-     * @var int
      * @cvalue UBRK_WORD_NONE
      */
-    public const WORD_NONE = UNKNOWN;
+    public const int WORD_NONE = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_WORD_NONE_LIMIT
      */
-    public const WORD_NONE_LIMIT = UNKNOWN;
+    public const int WORD_NONE_LIMIT = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_WORD_NUMBER
      */
-    public const WORD_NUMBER = UNKNOWN;
+    public const int WORD_NUMBER = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_WORD_NUMBER_LIMIT
      */
-    public const WORD_NUMBER_LIMIT = UNKNOWN;
+    public const int WORD_NUMBER_LIMIT = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_WORD_LETTER
      */
-    public const WORD_LETTER = UNKNOWN;
+    public const int WORD_LETTER = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_WORD_LETTER_LIMIT
      */
-    public const WORD_LETTER_LIMIT = UNKNOWN;
+    public const int WORD_LETTER_LIMIT = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_WORD_KANA
      */
-    public const WORD_KANA = UNKNOWN;
+    public const int WORD_KANA = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_WORD_KANA_LIMIT
      */
-    public const WORD_KANA_LIMIT = UNKNOWN;
+    public const int WORD_KANA_LIMIT = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_WORD_IDEO
      */
-    public const WORD_IDEO = UNKNOWN;
+    public const int WORD_IDEO = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_WORD_IDEO_LIMIT
      */
-    public const WORD_IDEO_LIMIT = UNKNOWN;
+    public const int WORD_IDEO_LIMIT = UNKNOWN;
 
     /**
-     * @var int
      * @cvalue UBRK_LINE_SOFT
      */
-    public const LINE_SOFT = UNKNOWN;
+    public const int LINE_SOFT = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_LINE_SOFT_LIMIT
      */
-    public const LINE_SOFT_LIMIT = UNKNOWN;
+    public const int LINE_SOFT_LIMIT = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_LINE_HARD
      */
-    public const LINE_HARD = UNKNOWN;
+    public const int LINE_HARD = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_LINE_HARD_LIMIT
      */
-    public const LINE_HARD_LIMIT = UNKNOWN;
+    public const int LINE_HARD_LIMIT = UNKNOWN;
 
     /**
-     * @var int
      * @cvalue UBRK_SENTENCE_TERM
      */
-    public const SENTENCE_TERM = UNKNOWN;
+    public const int SENTENCE_TERM = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_SENTENCE_TERM_LIMIT
      */
-    public const SENTENCE_TERM_LIMIT = UNKNOWN;
+    public const int SENTENCE_TERM_LIMIT = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_SENTENCE_SEP
      */
-    public const SENTENCE_SEP = UNKNOWN;
+    public const int SENTENCE_SEP = UNKNOWN;
     /**
-     * @var int
      * @cvalue UBRK_SENTENCE_SEP_LIMIT
      */
-    public const SENTENCE_SEP_LIMIT = UNKNOWN;
+    public const int SENTENCE_SEP_LIMIT = UNKNOWN;
 
     /** @tentative-return-type */
     public static function createCharacterInstance(?string $locale = null): ?IntlBreakIterator {}

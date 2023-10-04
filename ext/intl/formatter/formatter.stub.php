@@ -8,394 +8,320 @@ class NumberFormatter
     /* UNumberFormatStyle constants */
 
     /**
-     * @var int
      * @cvalue UNUM_PATTERN_DECIMAL
      */
-    public const PATTERN_DECIMAL = UNKNOWN;
+    public const int PATTERN_DECIMAL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_DECIMAL
      */
-    public const DECIMAL = UNKNOWN;
+    public const int DECIMAL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_CURRENCY
      */
-    public const CURRENCY = UNKNOWN;
+    public const int CURRENCY = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_PERCENT
      */
-    public const PERCENT = UNKNOWN;
+    public const int PERCENT = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_SCIENTIFIC
      */
-    public const SCIENTIFIC = UNKNOWN;
+    public const int SCIENTIFIC = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_SPELLOUT
      */
-    public const SPELLOUT = UNKNOWN;
+    public const int SPELLOUT = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_ORDINAL
      */
-    public const ORDINAL = UNKNOWN;
+    public const int ORDINAL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_DURATION
      */
-    public const DURATION = UNKNOWN;
+    public const int DURATION = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_PATTERN_RULEBASED
      */
-    public const PATTERN_RULEBASED = UNKNOWN;
+    public const int PATTERN_RULEBASED = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_IGNORE
      */
-    public const IGNORE = UNKNOWN;
+    public const int IGNORE = UNKNOWN;
 #if U_ICU_VERSION_MAJOR_NUM >= 53
     /**
-     * @var int
      * @cvalue UNUM_CURRENCY_ACCOUNTING
      */
-    public const CURRENCY_ACCOUNTING = UNKNOWN;
+    public const int CURRENCY_ACCOUNTING = UNKNOWN;
 #endif
     /**
-     * @var int
      * @cvalue UNUM_DEFAULT
      */
-    public const DEFAULT_STYLE = UNKNOWN;
+    public const int DEFAULT_STYLE = UNKNOWN;
 
     /* UNumberFormatRoundingMode */
 
     /**
-     * @var int
      * @cvalue UNUM_ROUND_CEILING
      */
-    public const ROUND_CEILING = UNKNOWN;
+    public const int ROUND_CEILING = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_ROUND_FLOOR
      */
-    public const ROUND_FLOOR = UNKNOWN;
+    public const int ROUND_FLOOR = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_ROUND_DOWN
      */
-    public const ROUND_DOWN = UNKNOWN;
+    public const int ROUND_DOWN = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_ROUND_UP
      */
-    public const ROUND_UP = UNKNOWN;
+    public const int ROUND_UP = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_ROUND_HALFEVEN
      */
-    public const ROUND_HALFEVEN = UNKNOWN;
+    public const int ROUND_HALFEVEN = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_ROUND_HALFDOWN
      */
-    public const ROUND_HALFDOWN = UNKNOWN;
+    public const int ROUND_HALFDOWN = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_ROUND_HALFUP
      */
-    public const ROUND_HALFUP = UNKNOWN;
+    public const int ROUND_HALFUP = UNKNOWN;
 
     /* UNumberFormatPadPosition */
 
     /**
-     * @var int
      * @cvalue UNUM_PAD_BEFORE_PREFIX
      */
-    public const PAD_BEFORE_PREFIX = UNKNOWN;
+    public const int PAD_BEFORE_PREFIX = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_PAD_AFTER_PREFIX
      */
-    public const PAD_AFTER_PREFIX = UNKNOWN;
+    public const int PAD_AFTER_PREFIX = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_PAD_BEFORE_SUFFIX
      */
-    public const PAD_BEFORE_SUFFIX = UNKNOWN;
+    public const int PAD_BEFORE_SUFFIX = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_PAD_AFTER_SUFFIX
      */
-    public const PAD_AFTER_SUFFIX = UNKNOWN;
+    public const int PAD_AFTER_SUFFIX = UNKNOWN;
 
     /* UNumberFormatAttribute */
 
     /**
-     * @var int
      * @cvalue UNUM_PARSE_INT_ONLY
      */
-    public const PARSE_INT_ONLY = UNKNOWN;
+    public const int PARSE_INT_ONLY = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_GROUPING_USED
      */
-    public const GROUPING_USED = UNKNOWN;
+    public const int GROUPING_USED = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_DECIMAL_ALWAYS_SHOWN
      */
-    public const DECIMAL_ALWAYS_SHOWN = UNKNOWN;
+    public const int DECIMAL_ALWAYS_SHOWN = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_MAX_INTEGER_DIGITS
      */
-    public const MAX_INTEGER_DIGITS = UNKNOWN;
+    public const int MAX_INTEGER_DIGITS = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_MIN_INTEGER_DIGITS
      */
-    public const MIN_INTEGER_DIGITS = UNKNOWN;
+    public const int MIN_INTEGER_DIGITS = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_INTEGER_DIGITS
      */
-    public const INTEGER_DIGITS = UNKNOWN;
+    public const int INTEGER_DIGITS = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_MAX_FRACTION_DIGITS
      */
-    public const MAX_FRACTION_DIGITS = UNKNOWN;
+    public const int MAX_FRACTION_DIGITS = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_MIN_FRACTION_DIGITS
      */
-    public const MIN_FRACTION_DIGITS = UNKNOWN;
+    public const int MIN_FRACTION_DIGITS = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_FRACTION_DIGITS
      */
-    public const FRACTION_DIGITS = UNKNOWN;
+    public const int FRACTION_DIGITS = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_MULTIPLIER
      */
-    public const MULTIPLIER = UNKNOWN;
+    public const int MULTIPLIER = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_GROUPING_SIZE
      */
-    public const GROUPING_SIZE = UNKNOWN;
+    public const int GROUPING_SIZE = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_ROUNDING_MODE
      */
-    public const ROUNDING_MODE = UNKNOWN;
+    public const int ROUNDING_MODE = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_ROUNDING_INCREMENT
      */
-    public const ROUNDING_INCREMENT = UNKNOWN;
+    public const int ROUNDING_INCREMENT = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_FORMAT_WIDTH
      */
-    public const FORMAT_WIDTH = UNKNOWN;
+    public const int FORMAT_WIDTH = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_PADDING_POSITION
      */
-    public const PADDING_POSITION = UNKNOWN;
+    public const int PADDING_POSITION = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_SECONDARY_GROUPING_SIZE
      */
-    public const SECONDARY_GROUPING_SIZE = UNKNOWN;
+    public const int SECONDARY_GROUPING_SIZE = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_SIGNIFICANT_DIGITS_USED
      */
-    public const SIGNIFICANT_DIGITS_USED = UNKNOWN;
+    public const int SIGNIFICANT_DIGITS_USED = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_MIN_SIGNIFICANT_DIGITS
      */
-    public const MIN_SIGNIFICANT_DIGITS = UNKNOWN;
+    public const int MIN_SIGNIFICANT_DIGITS = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_MAX_SIGNIFICANT_DIGITS
      */
-    public const MAX_SIGNIFICANT_DIGITS = UNKNOWN;
+    public const int MAX_SIGNIFICANT_DIGITS = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_LENIENT_PARSE
      */
-    public const LENIENT_PARSE = UNKNOWN;
+    public const int LENIENT_PARSE = UNKNOWN;
 
     /* UNumberFormatTextAttribute */
 
     /**
-     * @var int
      * @cvalue UNUM_POSITIVE_PREFIX
      */
-    public const POSITIVE_PREFIX = UNKNOWN;
+    public const int POSITIVE_PREFIX = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_POSITIVE_SUFFIX
      */
-    public const POSITIVE_SUFFIX = UNKNOWN;
+    public const int POSITIVE_SUFFIX = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_NEGATIVE_PREFIX
      */
-    public const NEGATIVE_PREFIX = UNKNOWN;
+    public const int NEGATIVE_PREFIX = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_NEGATIVE_SUFFIX
      */
-    public const NEGATIVE_SUFFIX = UNKNOWN;
+    public const int NEGATIVE_SUFFIX = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_PADDING_CHARACTER
      */
-    public const PADDING_CHARACTER = UNKNOWN;
+    public const int PADDING_CHARACTER = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_CURRENCY_CODE
      */
-    public const CURRENCY_CODE = UNKNOWN;
+    public const int CURRENCY_CODE = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_DEFAULT_RULESET
      */
-    public const DEFAULT_RULESET = UNKNOWN;
+    public const int DEFAULT_RULESET = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_PUBLIC_RULESETS
      */
-    public const PUBLIC_RULESETS = UNKNOWN;
+    public const int PUBLIC_RULESETS = UNKNOWN;
 
     /* UNumberFormatSymbol */
 
     /**
-     * @var int
      * @cvalue UNUM_DECIMAL_SEPARATOR_SYMBOL
      */
-    public const DECIMAL_SEPARATOR_SYMBOL = UNKNOWN;
+    public const int DECIMAL_SEPARATOR_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_GROUPING_SEPARATOR_SYMBOL
      */
-    public const GROUPING_SEPARATOR_SYMBOL = UNKNOWN;
+    public const int GROUPING_SEPARATOR_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_PATTERN_SEPARATOR_SYMBOL
      */
-    public const PATTERN_SEPARATOR_SYMBOL = UNKNOWN;
+    public const int PATTERN_SEPARATOR_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_PERCENT_SYMBOL
      */
-    public const PERCENT_SYMBOL = UNKNOWN;
+    public const int PERCENT_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_ZERO_DIGIT_SYMBOL
      */
-    public const ZERO_DIGIT_SYMBOL = UNKNOWN;
+    public const int ZERO_DIGIT_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_DIGIT_SYMBOL
      */
-    public const DIGIT_SYMBOL = UNKNOWN;
+    public const int DIGIT_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_MINUS_SIGN_SYMBOL
      */
-    public const MINUS_SIGN_SYMBOL = UNKNOWN;
+    public const int MINUS_SIGN_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_PLUS_SIGN_SYMBOL
      */
-    public const PLUS_SIGN_SYMBOL = UNKNOWN;
+    public const int PLUS_SIGN_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_CURRENCY_SYMBOL
      */
-    public const CURRENCY_SYMBOL = UNKNOWN;
+    public const int CURRENCY_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_INTL_CURRENCY_SYMBOL
      */
-    public const INTL_CURRENCY_SYMBOL = UNKNOWN;
+    public const int INTL_CURRENCY_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_MONETARY_SEPARATOR_SYMBOL
      */
-    public const MONETARY_SEPARATOR_SYMBOL = UNKNOWN;
+    public const int MONETARY_SEPARATOR_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_EXPONENTIAL_SYMBOL
      */
-    public const EXPONENTIAL_SYMBOL = UNKNOWN;
+    public const int EXPONENTIAL_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_PERMILL_SYMBOL
      */
-    public const PERMILL_SYMBOL = UNKNOWN;
+    public const int PERMILL_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_PAD_ESCAPE_SYMBOL
      */
-    public const PAD_ESCAPE_SYMBOL = UNKNOWN;
+    public const int PAD_ESCAPE_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_INFINITY_SYMBOL
      */
-    public const INFINITY_SYMBOL = UNKNOWN;
+    public const int INFINITY_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_NAN_SYMBOL
      */
-    public const NAN_SYMBOL = UNKNOWN;
+    public const int NAN_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_SIGNIFICANT_DIGIT_SYMBOL
      */
-    public const SIGNIFICANT_DIGIT_SYMBOL = UNKNOWN;
+    public const int SIGNIFICANT_DIGIT_SYMBOL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UNUM_MONETARY_GROUPING_SEPARATOR_SYMBOL
      */
-    public const MONETARY_GROUPING_SEPARATOR_SYMBOL = UNKNOWN;
+    public const int MONETARY_GROUPING_SEPARATOR_SYMBOL = UNKNOWN;
 
     /**
-     * @var int
      * @cvalue FORMAT_TYPE_DEFAULT
      */
-    public const TYPE_DEFAULT = UNKNOWN;
+    public const int TYPE_DEFAULT = UNKNOWN;
     /**
-     * @var int
      * @cvalue FORMAT_TYPE_INT32
      */
-    public const TYPE_INT32 = UNKNOWN;
+    public const int TYPE_INT32 = UNKNOWN;
     /**
-     * @var int
      * @cvalue FORMAT_TYPE_INT64
      */
-    public const TYPE_INT64 = UNKNOWN;
+    public const int TYPE_INT64 = UNKNOWN;
     /**
-     * @var int
      * @cvalue FORMAT_TYPE_DOUBLE
      */
-    public const TYPE_DOUBLE = UNKNOWN;
+    public const int TYPE_DOUBLE = UNKNOWN;
     /**
-     * @var int
      * @deprecated
      * @cvalue FORMAT_TYPE_CURRENCY
      */
-    public const TYPE_CURRENCY = UNKNOWN;
+    public const int TYPE_CURRENCY = UNKNOWN;
 
     public function __construct(string $locale, int $style, ?string $pattern = null) {}
 

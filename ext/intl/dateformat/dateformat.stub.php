@@ -6,66 +6,54 @@
 class IntlDateFormatter
 {
     /**
-     * @var int
      * @cvalue UDAT_FULL
      */
-    public const FULL = UNKNOWN;
+    public const int FULL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UDAT_LONG
      */
-    public const LONG = UNKNOWN;
+    public const int LONG = UNKNOWN;
     /**
-     * @var int
      * @cvalue UDAT_MEDIUM
      */
-    public const MEDIUM = UNKNOWN;
+    public const int MEDIUM = UNKNOWN;
     /**
-     * @var int
      * @cvalue UDAT_SHORT
      */
-    public const SHORT = UNKNOWN;
+    public const int SHORT = UNKNOWN;
     /**
-     * @var int
      * @cvalue UDAT_NONE
      */
-    public const NONE = UNKNOWN;
+    public const int NONE = UNKNOWN;
     /**
-     * @var int
      * @cvalue UDAT_FULL_RELATIVE
      */
-    public const RELATIVE_FULL = UNKNOWN;
+    public const int RELATIVE_FULL = UNKNOWN;
     /**
-     * @var int
      * @cvalue UDAT_LONG_RELATIVE
      */
-    public const RELATIVE_LONG = UNKNOWN;
+    public const int RELATIVE_LONG = UNKNOWN;
     /**
-     * @var int
      * @cvalue UDAT_MEDIUM_RELATIVE
      */
-    public const RELATIVE_MEDIUM = UNKNOWN;
+    public const int RELATIVE_MEDIUM = UNKNOWN;
     /**
-     * @var int
      * @cvalue UDAT_SHORT_RELATIVE
      */
-    public const RELATIVE_SHORT = UNKNOWN;
+    public const int RELATIVE_SHORT = UNKNOWN;
     /**
-     * @var int
      * @cvalue UDAT_PATTERN
      */
-    public const PATTERN = UNKNOWN;
+    public const int PATTERN = UNKNOWN;
 
     /**
-     * @var int
      * @cvalue UCAL_GREGORIAN
      */
-    public const GREGORIAN = UNKNOWN;
+    public const int GREGORIAN = UNKNOWN;
     /**
-     * @var int
      * @cvalue UCAL_TRADITIONAL
      */
-    public const TRADITIONAL = UNKNOWN;
+    public const int TRADITIONAL = UNKNOWN;
 
     /**
      * @param IntlTimeZone|DateTimeZone|string|null $timezone
