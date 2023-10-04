@@ -715,9 +715,8 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		dom_setup_parser_encoding_manually((const lxb_char_t *) buf, encoding_data, &decoding_encoding_ctx, &application_data);
 	}
 
-	// TODO: context from LIBXML(stream_context) ???
 	// TODO: https://mimesniff.spec.whatwg.org/#parsing-a-mime-type
-	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, /* opened_path */ NULL, /* context */ NULL);
+	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, /* opened_path */ NULL, /* context */ php_libxml_get_stream_context());
 	if (!stream) {
 		if (!EG(exception)) {
 			zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", filename);

@@ -369,6 +369,11 @@ static PHP_GINIT_FUNCTION(libxml)
 	libxml_globals->entity_loader_callback = empty_fcall_info_cache;
 }
 
+PHP_LIBXML_API php_stream_context *php_libxml_get_stream_context(void)
+{
+	return php_stream_context_from_zval(Z_ISUNDEF(LIBXML(stream_context)) ? NULL : &LIBXML(stream_context), false);
+}
+
 /* Channel libxml file io layer through the PHP streams subsystem.
  * This allows use of ftps:// and https:// urls */
 
@@ -436,7 +441,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 		}
 	}
 
-	context = php_stream_context_from_zval(Z_ISUNDEF(LIBXML(stream_context))? NULL : &LIBXML(stream_context), 0);
+	context = php_libxml_get_stream_context();
 
 	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, REPORT_ERRORS, NULL, context);
 	if (ret_val) {
