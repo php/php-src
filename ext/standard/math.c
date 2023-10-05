@@ -93,7 +93,6 @@ static inline double php_intpow10(int power) {
 /* {{{ php_round_helper
        Actually performs the rounding of a value to integer in a certain mode */
 static inline double php_round_helper(double value, int mode) {
-	double integral, fractional;
 
 	/* Split the input value into the integral and fractional part.
 	 *
@@ -101,11 +100,12 @@ static inline double php_round_helper(double value, int mode) {
 	 * the absolute value of the fractional part (which will not result
 	 * in branches in the assembly) to make the following cases simpler.
 	 */
+	double integral;
+	double fractional = modf(value, &integral);
 
 	switch (mode) {
 		case PHP_ROUND_HALF_UP:
-			fractional = fabs(modf(value, &integral));
-			if (fractional >= 0.5) {
+			if (fractional >= 0.5 || fractional <= -0.5) {
 				/* We must increase the magnitude of the integral part
 				 * (rounding up / towards infinity). copysign(1.0, integral)
 				 * will either result in 1.0 or -1.0 depending on the sign
@@ -120,40 +120,36 @@ static inline double php_round_helper(double value, int mode) {
 			return integral;
 
 		case PHP_ROUND_HALF_DOWN:
-			fractional = fabs(modf(value, &integral));
-			if (fractional > 0.5) {
+			if (fractional > 0.5 || fractional < -0.5) {
 				return integral + copysign(1.0, integral);
 			}
 
 			return integral;
 
 		case PHP_ROUND_CEILING:
-			return ceil(value);
+			if (value > 0.0) {
+				return fractional == 0 ? integral : integral + 1.0;
+			}
+			return integral;
 
 		case PHP_ROUND_FLOOR:
-			return floor(value);
+			if (value < 0.0) {
+				return fractional == 0 ? integral : integral - 1.0;
+			}
+			return integral;
 
 		case PHP_ROUND_TOWARD_ZERO:
-			if (value >= 0.0) {
-				return floor(value);
-			} else {
-				return ceil(value);
-			}
+			return integral;
 
 		case PHP_ROUND_AWAY_FROM_ZERO:
-			if (value >= 0.0) {
-				return ceil(value);
-			} else {
-				return floor(value);
-			}
+			return fractional == 0 ? integral : integral + copysign(1.0, integral);
 
 		case PHP_ROUND_HALF_EVEN:
-			fractional = fabs(modf(value, &integral));
-			if (fractional > 0.5) {
+			if (fractional > 0.5 || fractional < -0.5) {
 				return integral + copysign(1.0, integral);
 			}
 
-			if (UNEXPECTED(fractional == 0.5)) {
+			if (UNEXPECTED(fractional == 0.5 || fractional == -0.5)) {
 				bool even = !fmod(integral, 2.0);
 
 				/* If the integral part is not even we can make it even
@@ -167,12 +163,11 @@ static inline double php_round_helper(double value, int mode) {
 			return integral;
 
 		case PHP_ROUND_HALF_ODD:
-			fractional = fabs(modf(value, &integral));
-			if (fractional > 0.5) {
+			if (fractional > 0.5 || fractional < -0.5) {
 				return integral + copysign(1.0, integral);
 			}
 
-			if (UNEXPECTED(fractional == 0.5)) {
+			if (UNEXPECTED(fractional == 0.5 || fractional == -0.5)) {
 				bool even = !fmod(integral, 2.0);
 
 				if (even) {
