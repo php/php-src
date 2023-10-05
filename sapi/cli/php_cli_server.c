@@ -352,16 +352,15 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 {
 	char *val;
 	struct timeval tv = {0};
-	sapi_header_struct *h;
-	zend_llist_position pos;
-	bool append_date_header = 1;
+	bool append_date_header = true;
 
 	if (sapi_headers != NULL) {
-		h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
+		zend_llist_position pos;
+		sapi_header_struct *h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 		while (h) {
-			if (h->header_len) {
-				if (strncmp(h->header, "Date:", strlen("Date:")) == 0) {
-					append_date_header = 0;
+			if (h->header_len > strlen("Date:")-1) {
+				if (strncasecmp(h->header, "Date:", strlen("Date:")-1) == 0) {
+					append_date_header = false;
 					break;
 				}
 			}
