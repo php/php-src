@@ -729,7 +729,7 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 			char realpath[MAXPATHLEN];
 			const char *file_path_to_check;
 			/* if the wrapper is not found, we need to expand path to match open behavior */
-			if (EXPECTED(strstr(local, "://") == NULL || expand_filepath(local, realpath) == NULL)) {
+			if (EXPECTED(!php_is_stream_path(local) || expand_filepath(local, realpath) == NULL)) {
 				file_path_to_check = local;
 			} else {
 				file_path_to_check = realpath;

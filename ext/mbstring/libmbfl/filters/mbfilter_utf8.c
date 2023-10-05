@@ -51,6 +51,7 @@ const unsigned char mblen_table_utf8[] = {
 
 static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
 static void mb_wchar_to_utf8(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+static zend_string* mb_cut_utf8(unsigned char *str, size_t from, size_t len, unsigned char *end);
 
 static const char *mbfl_encoding_utf8_aliases[] = {"utf8", NULL};
 
@@ -65,7 +66,8 @@ const mbfl_encoding mbfl_encoding_utf8 = {
 	&vtbl_wchar_utf8,
 	mb_utf8_to_wchar,
 	mb_wchar_to_utf8,
-	NULL
+	NULL,
+	mb_cut_utf8
 };
 
 const struct mbfl_convert_vtbl vtbl_utf8_wchar = {
@@ -334,4 +336,22 @@ static void mb_wchar_to_utf8(uint32_t *in, size_t len, mb_convert_buf *buf, bool
 	}
 
 	MB_CONVERT_BUF_STORE(buf, out, limit);
+}
+
+static zend_string* mb_cut_utf8(unsigned char *str, size_t from, size_t len, unsigned char *end)
+{
+	unsigned char *start = str + from;
+	/* Byte values less than -64 are UTF-8 continuation bytes, that is,
+	 * the 2nd, 3rd, or 4th byte of a multi-byte character */
+	while (start > str && ((signed char)*start) < -64) {
+		start--;
+	}
+	unsigned char *_end = start + len;
+	if (_end >= end) {
+		return zend_string_init_fast((char*)start, end - start);
+	}
+	while (_end > start && ((signed char)*_end) < -64) {
+		_end--;
+	}
+	return zend_string_init_fast((char*)start, _end - start);
 }

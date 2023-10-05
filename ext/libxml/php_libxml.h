@@ -57,10 +57,15 @@ typedef struct _libxml_doc_props {
 	bool recover;
 } libxml_doc_props;
 
+typedef struct {
+	size_t modification_nr;
+} php_libxml_cache_tag;
+
 typedef struct _php_libxml_ref_obj {
 	void *ptr;
 	int   refcount;
 	libxml_doc_props *doc_props;
+	php_libxml_cache_tag cache_tag;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {
@@ -68,16 +73,6 @@ typedef struct _php_libxml_node_ptr {
 	int	refcount;
 	void *_private;
 } php_libxml_node_ptr;
-
-typedef struct {
-	size_t modification_nr;
-} php_libxml_cache_tag;
-
-/* extends php_libxml_node_ptr */
-typedef struct {
-	php_libxml_node_ptr node_ptr;
-	php_libxml_cache_tag cache_tag;
-} php_libxml_doc_ptr;
 
 typedef struct _php_libxml_node_object {
 	php_libxml_node_ptr *node;
@@ -91,8 +86,11 @@ static inline php_libxml_node_object *php_libxml_node_fetch_object(zend_object *
 	return (php_libxml_node_object *)((char*)(obj) - obj->handlers->offset);
 }
 
-static zend_always_inline void php_libxml_invalidate_node_list_cache(php_libxml_doc_ptr *doc_ptr)
+static zend_always_inline void php_libxml_invalidate_node_list_cache(php_libxml_ref_obj *doc_ptr)
 {
+	if (!doc_ptr) {
+		return;
+	}
 #if SIZEOF_SIZE_T == 8
 	/* If one operation happens every nanosecond, then it would still require 584 years to overflow
 	 * the counter. So we'll just assume this never happens. */
@@ -108,7 +106,11 @@ static zend_always_inline void php_libxml_invalidate_node_list_cache(php_libxml_
 static zend_always_inline void php_libxml_invalidate_node_list_cache_from_doc(xmlDocPtr docp)
 {
 	if (docp && docp->_private) { /* docp is NULL for detached nodes */
-		php_libxml_invalidate_node_list_cache((php_libxml_doc_ptr *)docp->_private);
+		php_libxml_node_ptr *private = docp->_private;
+		php_libxml_node_object *object_private = private->_private;
+		if (object_private) {
+			php_libxml_invalidate_node_list_cache(object_private->document);
+		}
 	}
 }
 

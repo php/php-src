@@ -20,6 +20,7 @@ $engines[] = new PcgOneseq128XslRr64();
 $engines[] = new Xoshiro256StarStar();
 $engines[] = new Secure();
 $engines[] = new TestShaEngine();
+$iterations = getenv("SKIP_SLOW_TESTS") ? 3_000 : 10_000;
 
 foreach ($engines as $engine) {
     echo $engine::class, PHP_EOL;
@@ -27,7 +28,7 @@ foreach ($engines as $engine) {
     $randomizer = new Randomizer($engine);
 
     // Basic range test.
-    for ($i = 0; $i < 10_000; $i++) {
+    for ($i = 0; $i < $iterations; $i++) {
         $result = $randomizer->getInt(-$i, $i);
 
         if ($result > $i || $result < -$i) {
@@ -36,7 +37,7 @@ foreach ($engines as $engine) {
     }
 
     // Test that extreme ranges do not throw.
-    for ($i = 0; $i < 10_000; $i++) {
+    for ($i = 0; $i < $iterations; $i++) {
         $randomizer->getInt(PHP_INT_MIN, PHP_INT_MAX);
     }
 }

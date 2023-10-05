@@ -1289,7 +1289,7 @@ PHP_FUNCTION(str_decrement)
 		}
 	} while (carry && position-- > 0);
 
-	if (UNEXPECTED(carry || ZSTR_VAL(decremented)[0] == '0')) {
+	if (UNEXPECTED(carry || (ZSTR_VAL(decremented)[0] == '0' && ZSTR_LEN(decremented) > 1))) {
 		if (ZSTR_LEN(decremented) == 1) {
 			zend_string_release_ex(decremented, /* persistent */ false);
 			zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));

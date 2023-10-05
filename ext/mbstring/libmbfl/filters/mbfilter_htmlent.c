@@ -67,7 +67,8 @@ const mbfl_encoding mbfl_encoding_html_ent = {
 	&vtbl_wchar_html,
 	mb_htmlent_to_wchar,
 	mb_wchar_to_htmlent,
-	NULL
+	NULL,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_html = {

@@ -201,7 +201,7 @@ zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 			break;
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+	php_libxml_invalidate_node_list_cache(obj->document);
 
 	zend_string_release_ex(str, 0);
 	return SUCCESS;
@@ -794,7 +794,7 @@ zend_result dom_node_text_content_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+	php_libxml_invalidate_node_list_cache(obj->document);
 
 	/* Typed property, this is already a string */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
@@ -919,7 +919,7 @@ PHP_METHOD(DOMNode, insertBefore)
 		php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL);
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(parentp->doc);
+	php_libxml_invalidate_node_list_cache(intern->document);
 
 	if (ref != NULL) {
 		DOM_GET_OBJ(refp, ref, xmlNodePtr, refpobj);
@@ -1124,7 +1124,7 @@ PHP_METHOD(DOMNode, replaceChild)
 			nodep->doc->intSubset = (xmlDtd *) newchild;
 		}
 	}
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+	php_libxml_invalidate_node_list_cache(intern->document);
 	DOM_RET_OBJ(oldchild, &ret, intern);
 }
 /* }}} end dom_node_replace_child */
@@ -1166,7 +1166,7 @@ PHP_METHOD(DOMNode, removeChild)
 	}
 
 	xmlUnlinkNode(child);
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+	php_libxml_invalidate_node_list_cache(intern->document);
 	DOM_RET_OBJ(child, &ret, intern);
 }
 /* }}} end dom_node_remove_child */
@@ -1271,7 +1271,7 @@ PHP_METHOD(DOMNode, appendChild)
 		dom_reconcile_ns(nodep->doc, new_child);
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+	php_libxml_invalidate_node_list_cache(intern->document);
 
 	DOM_RET_OBJ(new_child, &ret, intern);
 	return;
@@ -1387,7 +1387,7 @@ PHP_METHOD(DOMNode, normalize)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+	php_libxml_invalidate_node_list_cache(intern->document);
 
 	dom_normalize(nodep);
 
@@ -1736,6 +1736,25 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 }
 /* }}} end dom_node_lookup_namespace_uri */
 
+static int dom_canonicalize_node_parent_lookup_cb(void *user_data, xmlNodePtr node, xmlNodePtr parent)
+{
+	xmlNodePtr root = user_data;
+	/* We have to unroll the first iteration because node->parent
+	 * is not necessarily equal to parent due to libxml2 tree rules (ns decls out of the tree for example). */
+	if (node == root) {
+		return 1;
+	}
+	node = parent;
+	while (node != NULL) {
+		if (node == root) {
+			return 1;
+		}
+		node = node->parent;
+	}
+
+	return 0;
+}
+
 static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	zval *id;
@@ -1777,24 +1796,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		RETURN_THROWS();
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(docp);
-
+	bool simple_node_parent_lookup_callback = false;
 	if (xpath_array == NULL) {
-		if (nodep->type != XML_DOCUMENT_NODE) {
-			ctxp = xmlXPathNewContext(docp);
-			ctxp->node = nodep;
-			xpathobjp = xmlXPathEvalExpression((xmlChar *) "(.//. | .//@* | .//namespace::*)", ctxp);
-			ctxp->node = NULL;
-			if (xpathobjp && xpathobjp->type == XPATH_NODESET) {
-				nodeset = xpathobjp->nodesetval;
-			} else {
-				if (xpathobjp) {
-					xmlXPathFreeObject(xpathobjp);
-				}
-				xmlXPathFreeContext(ctxp);
-				zend_throw_error(NULL, "XPath query did not return a nodeset");
-				RETURN_THROWS();
-			}
+		/* Optimization: if the node is a document, all nodes may be included, no extra filtering or nodeset necessary. */
+		if (nodep->type != XML_DOCUMENT_NODE && nodep->type != XML_HTML_DOCUMENT_NODE) {
+			simple_node_parent_lookup_callback = true;
 		}
 	} else {
 		/*xpath query from xpath_array */
@@ -1873,8 +1879,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 	}
 
 	if (buf != NULL) {
-		ret = xmlC14NDocSaveTo(docp, nodeset, exclusive, inclusive_ns_prefixes,
-			with_comments, buf);
+		if (simple_node_parent_lookup_callback) {
+			ret = xmlC14NExecute(docp, dom_canonicalize_node_parent_lookup_cb, nodep, exclusive, inclusive_ns_prefixes, with_comments, buf);
+		} else {
+			ret = xmlC14NDocSaveTo(docp, nodeset, exclusive, inclusive_ns_prefixes, with_comments, buf);
+		}
 	}
 
 	if (inclusive_ns_prefixes != NULL) {

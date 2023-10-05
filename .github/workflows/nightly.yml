@@ -60,8 +60,18 @@ jobs:
         zts: [true, false]
         include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.matrix-include) }}
     name: "${{ matrix.branch.name }}_LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: ubuntu-${{ ((matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && !matrix.asan) && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
     steps:
+      # https://stackoverflow.com/a/76921482/1320374
+      - name: Increase swapfile
+        if: matrix.asan
+        run: |
+          sudo swapoff -a
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          sudo swapon --show
       - name: git checkout
         uses: actions/checkout@v4
         with:

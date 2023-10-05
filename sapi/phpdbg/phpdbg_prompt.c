@@ -1314,15 +1314,13 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, const char *
 			goto quit;
 		}
 
-		module_entry->type = MODULE_PERSISTENT;
-		module_entry->module_number = zend_next_free_module();
-		module_entry->handle = handle;
-
-		if ((module_entry = zend_register_module_ex(module_entry)) == NULL) {
+		if ((module_entry = zend_register_module_ex(module_entry, MODULE_PERSISTENT)) == NULL) {
 			phpdbg_error("Unable to register module %s", *name);
 
 			goto quit;
 		}
+
+		module_entry->handle = handle;
 
 		if (zend_startup_module_ex(module_entry) == FAILURE) {
 			phpdbg_error("Unable to startup module %s", module_entry->name);

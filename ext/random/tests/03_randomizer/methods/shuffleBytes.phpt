@@ -20,6 +20,7 @@ $engines[] = new PcgOneseq128XslRr64();
 $engines[] = new Xoshiro256StarStar();
 $engines[] = new Secure();
 $engines[] = new TestShaEngine();
+$length = getenv("SKIP_SLOW_TESTS") ? 1_000 : 5_000;
 
 function sort_bytes(string $bytes): string
 {
@@ -34,7 +35,7 @@ foreach ($engines as $engine) {
     $randomizer = new Randomizer($engine);
 
     // This test is slow, test all numbers smaller than 50 and then in steps of 677 (which is prime).
-    for ($i = 1; $i < 5_000; $i += ($i < 50 ? 1 : 677)) {
+    for ($i = 1; $i < $length; $i += ($i < 50 ? 1 : 677)) {
         $bytes = sort_bytes(random_bytes($i));
 
         $result = $randomizer->shuffleBytes($bytes);
