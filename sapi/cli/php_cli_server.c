@@ -358,8 +358,8 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 		zend_llist_position pos;
 		sapi_header_struct *h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 		while (h) {
-			if (h->header_len > strlen("Date:")-1) {
-				if (strncasecmp(h->header, "Date:", strlen("Date:")-1) == 0) {
+			if (h->header_len > strlen("Date:")) {
+				if (strncasecmp(h->header, "Date:", strlen("Date:")) == 0) {
 					append_date_header = false;
 					break;
 				}
