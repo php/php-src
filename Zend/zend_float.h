@@ -74,7 +74,7 @@ END_EXTERN_C()
 #  define HAVE__CONTROLFP_S
 #endif /* _MSC_VER */
 
-#if defined(HAVE__CONTROLFP_S) && !defined(__x86_64__)
+#if defined(HAVE__CONTROLFP_S) && !defined(__i386__) && !defined(__x86_64__)
 
 /* float.h defines _controlfp_s */
 # include <float.h>
@@ -138,7 +138,7 @@ END_EXTERN_C()
                 return _xpfpa_result; \
             } while (0)
 
-#elif defined(HAVE__CONTROLFP) && !defined(__x86_64__)
+#elif defined(HAVE__CONTROLFP) && !defined(__i386__) && !defined(__x86_64__)
 
 /* float.h defines _controlfp */
 # include <float.h>
@@ -197,7 +197,7 @@ END_EXTERN_C()
                 return _xpfpa_result; \
             } while (0)
 
-#elif defined(HAVE__FPU_SETCW)  && !defined(__x86_64__) /* glibc systems */
+#elif defined(HAVE__FPU_SETCW)  && !defined(__i386__)  && !defined(__x86_64__) /* glibc systems */
 
 /* fpu_control.h defines _FPU_[GS]ETCW */
 # include <fpu_control.h>
@@ -256,7 +256,7 @@ END_EXTERN_C()
                 return _xpfpa_result; \
             } while (0)
 
-#elif defined(HAVE_FPSETPREC)  && !defined(__x86_64__) /* FreeBSD */
+#elif defined(HAVE_FPSETPREC)  && !defined(__i386__)  && !defined(__x86_64__) /* FreeBSD */
 
 /* fpu_control.h defines _FPU_[GS]ETCW */
 # include <machine/ieeefp.h>
@@ -312,7 +312,7 @@ END_EXTERN_C()
                 return _xpfpa_result; \
             } while (0)
 
-#elif defined(HAVE_FPU_INLINE_ASM_X86) && !defined(__x86_64__)
+#elif defined(HAVE_FPU_INLINE_ASM_X86) && !defined(__i386__) && !defined(__x86_64__)
 
 /*
   Custom x86 inline assembler implementation.
