@@ -30,9 +30,8 @@ Intl:
   . Added IntlDateFormatter::PATTERN constant. (David Carlier)
   . Fixed Numberformatter::__construct when the locale is invalid, now
     throws an exception. (David Carlier)
-  . Deprecated constants ROUND_DOWN and ROUND_UP for the consistency with new
-    rounding modes. Added instead aliases ROUND_TOWARD_ZERO and
-    ROUND_AWAY_FROM_ZERO. (Jorg Sowa)
+  . Created aliases ROUND_TOWARD_ZERO and ROUND_AWAY_FROM_ZERO for constants
+    ROUND_DOWN and ROUND_UP. (Jorg Sowa)
 
 MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)

@@ -1,5 +1,5 @@
 --TEST--
-IntlBreakIterator: clone handler
+NumberFormatter: rounding modes
 --EXTENSIONS--
 intl
 --FILE--
@@ -22,20 +22,12 @@ var_dump(NumberFormatter::ROUND_UP === NumberFormatter::ROUND_AWAY_FROM_ZERO);
 --EXPECTF--
 int(0)
 int(1)
-
-Deprecated: Constant NumberFormatter::ROUND_DOWN is deprecated in %s
 int(2)
 int(2)
-
-Deprecated: Constant NumberFormatter::ROUND_UP is deprecated in %s
 int(3)
 int(3)
 int(4)
 int(5)
 int(6)
-
-Deprecated: Constant NumberFormatter::ROUND_DOWN is deprecated in %s
 bool(true)
-
-Deprecated: Constant NumberFormatter::ROUND_UP is deprecated in %s
 bool(true)
