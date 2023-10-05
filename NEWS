@@ -25,6 +25,7 @@ Standard:
   . Partly fix GH-12143 (Incorrect round() result for 0.49999999999999994).
     (timwolla)
   . Fix GH-12252 (round(): Validate the rounding mode). (timwolla)
+  . Increase the default BCrypt cost to 12. (timwolla)
 
 XSL:
   . Implement request #64137 (XSLTProcessor::setParameter() should allow both

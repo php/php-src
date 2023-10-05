@@ -80,6 +80,10 @@ PHP 8.4 UPGRADE NOTES
     would have resulted in 1.0 instead of the correct result 0.0. Additional
     inputs might also be affected and result in different outputs compared to
     earlier PHP versions.
+  . The default value of the 'cost' option for PASSWORD_BCRYPT for password_hash()
+    has been increased from '10' to '12'.
+
+    RFC: https://wiki.php.net/rfc/bcrypt_cost_2023
 
 ========================================
 6. New Functions
