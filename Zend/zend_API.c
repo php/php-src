@@ -981,6 +981,7 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 			}
 			break;
 
+		case 'F':
 		case 'f':
 			{
 				zend_fcall_info *fci = va_arg(*va, zend_fcall_info *);
@@ -995,10 +996,12 @@ static const char *zend_parse_arg_impl(zval *arg, va_list *va, const char **spec
 
 				if (zend_fcall_info_init(arg, 0, fci, fcc, NULL, &is_callable_error) == SUCCESS) {
 					ZEND_ASSERT(!is_callable_error);
-					/* Release call trampolines: The function may not get called, in which case
-					 * the trampoline will leak. Force it to be refetched during
-					 * zend_call_function instead. */
-					zend_release_fcall_info_cache(fcc);
+					if (c == 'f') {
+						/* Release call trampolines: The function may not get called, in which case
+						 * the trampoline will leak. Force it to be refetched during
+						 * zend_call_function instead. */
+						zend_release_fcall_info_cache(fcc);
+					}
 					break;
 				}
 
@@ -1109,7 +1112,7 @@ static zend_result zend_parse_va_args(uint32_t num_args, const char *type_spec, 
 			case 'o': case 'O':
 			case 'z': case 'Z':
 			case 'C': case 'h':
-			case 'f': case 'A':
+			case 'f': case 'F': case 'A':
 			case 'H': case 'p':
 			case 'S': case 'P':
 			case 'L': case 'n':

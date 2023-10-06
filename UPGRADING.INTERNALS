@@ -19,6 +19,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   to do this at the call site anymore. Writing the handle should happen after
   successful registration.
 
+* ZPP now accepts a F or Z_PARAM_FUNC_NO_TRAMPOLINE_FREE type check.
+  This is identical to the 'f' or Z_PARAM_FUNC type check, except the FCC is
+  always initialized because it doesn't free trampolines.
+  Trampolines MUST be freed using zend_release_fcall_info_cache() or consumed.
+
 ========================
 2. Build system changes
 ========================
