@@ -8,8 +8,8 @@ class Locale
     public const int ACTUAL_LOCALE = UNKNOWN;
     /** @cvalue ULOC_VALID_LOCALE */
     public const int VALID_LOCALE = UNKNOWN;
-    /** @var null */
-    public const DEFAULT_LOCALE = null;
+
+    public const null DEFAULT_LOCALE = null;
     /** @cvalue LOC_LANG_TAG */
     public const string LANG_TAG = UNKNOWN;
     /** @cvalue LOC_EXTLANG_TAG */
