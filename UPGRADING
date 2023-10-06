@@ -484,6 +484,9 @@ PHP 8.4 UPGRADE NOTES
 - Curl:
   . The Curl extension now requires at least libcurl 7.61.0.
 
+- Date:
+  . The class constants are typed now.
+
 - Intl:
   . The class constants are typed now.
 
