@@ -4,17 +4,11 @@
 
 class SplPriorityQueue implements Iterator, Countable
 {
-    /**
-     * @cvalue SPL_PQUEUE_EXTR_BOTH
-     */
+    /** @cvalue SPL_PQUEUE_EXTR_BOTH */
     public const int EXTR_BOTH = UNKNOWN;
-    /**
-     * @cvalue SPL_PQUEUE_EXTR_PRIORITY
-     */
+    /** @cvalue SPL_PQUEUE_EXTR_PRIORITY */
     public const int EXTR_PRIORITY = UNKNOWN;
-    /**
-     * @cvalue SPL_PQUEUE_EXTR_DATA
-     */
+    /** @cvalue SPL_PQUEUE_EXTR_DATA */
     public const int EXTR_DATA = UNKNOWN;
 
     /** @tentative-return-type */

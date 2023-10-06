@@ -4,21 +4,13 @@
 
 class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializable
 {
-    /**
-     * @cvalue SPL_DLLIST_IT_LIFO
-     */
+    /** @cvalue SPL_DLLIST_IT_LIFO */
     public const int IT_MODE_LIFO = UNKNOWN;
-    /**
-     * @cvalue SPL_DLLIST_IT_FIFO
-     */
+    /** @cvalue SPL_DLLIST_IT_FIFO */
     public const int IT_MODE_FIFO = UNKNOWN;
-    /**
-     * @cvalue SPL_DLLIST_IT_DELETE
-     */
+    /** @cvalue SPL_DLLIST_IT_DELETE */
     public const int IT_MODE_DELETE = UNKNOWN;
-    /**
-     * @cvalue SPL_DLLIST_IT_KEEP
-     */
+    /** @cvalue SPL_DLLIST_IT_KEEP */
     public const int IT_MODE_KEEP = UNKNOWN;
 
     /** @tentative-return-type */

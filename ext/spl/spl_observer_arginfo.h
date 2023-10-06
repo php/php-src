@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 74cd0360e3f306b76eec0abacef6f9a4d6ff795a */
+ * Stub hash: 3e17e99dffb3150685ae7c4724d6b8aad2f5db6e */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObserver_update, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 92e2832ff549af1b36bd8747a89db2fef3778083 */
+ * Stub hash: 627bf1f09cfb444f90e0dba6d2b7341312d723cf */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplPriorityQueue_compare, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, priority1, IS_MIXED, 0)
