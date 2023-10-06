@@ -1111,8 +1111,8 @@ PHP_FUNCTION(xml_set_element_handler)
 	zend_fcall_info_cache start_fcc = {0};
 	zend_fcall_info end_fci = {0};
 	zend_fcall_info_cache end_fcc = {0};
-	zend_string *method_name = NULL;
-	zend_string *method_name2 = NULL;
+	zend_string *start_method_name = NULL;
+	zend_string *end_method_name = NULL;
 
 	// TODO: cover trampolines with tests, as the !ZEND_FCC_INITIALIZED branches are never executed right now
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "Of!f!", &pind, xml_parser_ce, &start_fci, &start_fcc, &end_fci, &end_fcc) == SUCCESS) {
@@ -1129,10 +1129,10 @@ PHP_FUNCTION(xml_set_element_handler)
 			 * with it ourselves. It is important that it is not refetched on every call,
 			 * because calls may occur from different scopes. */
 		}
-	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "Of!S", &pind, xml_parser_ce, &start_fci, &start_fcc, &method_name) == SUCCESS) {
+	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "Of!S", &pind, xml_parser_ce, &start_fci, &start_fcc, &end_method_name) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
 
-		bool status = php_xml_check_string_method_arg(3, parser, method_name, &start_fcc);
+		bool status = php_xml_check_string_method_arg(3, parser, end_method_name, &start_fcc);
 		if (status == false) {
 			RETURN_FALSE;
 		}
@@ -1143,10 +1143,10 @@ PHP_FUNCTION(xml_set_element_handler)
 			 * with it ourselves. It is important that it is not refetched on every call,
 			 * because calls may occur from different scopes. */
 		}
-	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OSf!", &pind, xml_parser_ce, &method_name, &end_fci, &end_fcc) == SUCCESS) {
+	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OSf!", &pind, xml_parser_ce, &start_method_name, &end_fci, &end_fcc) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
 
-		bool status = php_xml_check_string_method_arg(2, parser, method_name, &start_fcc);
+		bool status = php_xml_check_string_method_arg(2, parser, start_method_name, &start_fcc);
 		if (status == false) {
 			RETURN_FALSE;
 		}
@@ -1157,15 +1157,15 @@ PHP_FUNCTION(xml_set_element_handler)
 			 * with it ourselves. It is important that it is not refetched on every call,
 			 * because calls may occur from different scopes. */
 		}
-	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OSS", &pind, xml_parser_ce, &method_name, &method_name2) == SUCCESS) {
+	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OSS", &pind, xml_parser_ce, &start_method_name, &end_method_name) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
 
-		bool status = php_xml_check_string_method_arg(2, parser, method_name, &start_fcc);
+		bool status = php_xml_check_string_method_arg(2, parser, start_method_name, &start_fcc);
 		if (status == false) {
 			RETURN_FALSE;
 		}
-		bool status2 = php_xml_check_string_method_arg(3, parser, method_name2, &end_fcc);
-		if (status2 == false) {
+		status = php_xml_check_string_method_arg(3, parser, end_method_name, &end_fcc);
+		if (status == false) {
 			RETURN_FALSE;
 		}
 	} else {
@@ -1219,10 +1219,9 @@ static void php_xml_set_handler_parse_callable(
 		}
 		memcpy(parser_handler_fcc, &handler_fcc, sizeof(zend_fcall_info_cache));
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OS", &pind, xml_parser_ce, &method_name) == SUCCESS) {
-		xml_parser *local_parser;
-		*parser = local_parser = Z_XMLPARSER_P(pind);
+		*parser = Z_XMLPARSER_P(pind);
 
-		bool status = php_xml_check_string_method_arg(2, local_parser, method_name, parser_handler_fcc);
+		bool status = php_xml_check_string_method_arg(2, *parser, method_name, parser_handler_fcc);
 		if (status == false) {
 			RETURN_FALSE;
 		}
