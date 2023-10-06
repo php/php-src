@@ -1181,7 +1181,7 @@ PHP_FUNCTION(libxml_set_external_entity_loader)
 	zend_fcall_info_cache	fcc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC_OR_NULL(fci, fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Unset old callback if it's defined */
@@ -1189,12 +1189,6 @@ PHP_FUNCTION(libxml_set_external_entity_loader)
 		zend_fcc_dtor(&LIBXML(entity_loader_callback));
 	}
 	if (ZEND_FCI_INITIALIZED(fci)) { /* argument not null */
-		if (!ZEND_FCC_INITIALIZED(fcc)) {
-			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-		}
 		zend_fcc_dup(&LIBXML(entity_loader_callback), &fcc);
 	}
 	RETURN_TRUE;
