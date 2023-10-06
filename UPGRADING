@@ -43,6 +43,8 @@ PHP 8.4 UPGRADE NOTES
   . XSLTProcessor::setParameter() will now throw a ValueError when its arguments
     contain null bytes. This never actually worked correctly in the first place,
     which is why it throws an exception nowadays.
+  . The typed properties XSLTProcessor::$cloneDocument and
+    XSLTProcessor::$doXInclude are now declared.
 
 ========================================
 2. New Features
