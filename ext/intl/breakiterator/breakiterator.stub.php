@@ -5,84 +5,46 @@
 /** @not-serializable */
 class IntlBreakIterator implements IteratorAggregate
 {
-    /**
-     * @cvalue BreakIterator::DONE
-     */
+    /** @cvalue BreakIterator::DONE */
     public const int DONE = UNKNOWN;
 
-    /**
-     * @cvalue UBRK_WORD_NONE
-     */
+    /** @cvalue UBRK_WORD_NONE */
     public const int WORD_NONE = UNKNOWN;
-    /**
-     * @cvalue UBRK_WORD_NONE_LIMIT
-     */
+    /** @cvalue UBRK_WORD_NONE_LIMIT */
     public const int WORD_NONE_LIMIT = UNKNOWN;
-    /**
-     * @cvalue UBRK_WORD_NUMBER
-     */
+    /** @cvalue UBRK_WORD_NUMBER */
     public const int WORD_NUMBER = UNKNOWN;
-    /**
-     * @cvalue UBRK_WORD_NUMBER_LIMIT
-     */
+    /** @cvalue UBRK_WORD_NUMBER_LIMIT */
     public const int WORD_NUMBER_LIMIT = UNKNOWN;
-    /**
-     * @cvalue UBRK_WORD_LETTER
-     */
+    /** @cvalue UBRK_WORD_LETTER */
     public const int WORD_LETTER = UNKNOWN;
-    /**
-     * @cvalue UBRK_WORD_LETTER_LIMIT
-     */
+    /** @cvalue UBRK_WORD_LETTER_LIMIT */
     public const int WORD_LETTER_LIMIT = UNKNOWN;
-    /**
-     * @cvalue UBRK_WORD_KANA
-     */
+    /** @cvalue UBRK_WORD_KANA */
     public const int WORD_KANA = UNKNOWN;
-    /**
-     * @cvalue UBRK_WORD_KANA_LIMIT
-     */
+    /** @cvalue UBRK_WORD_KANA_LIMIT */
     public const int WORD_KANA_LIMIT = UNKNOWN;
-    /**
-     * @cvalue UBRK_WORD_IDEO
-     */
+    /** @cvalue UBRK_WORD_IDEO */
     public const int WORD_IDEO = UNKNOWN;
-    /**
-     * @cvalue UBRK_WORD_IDEO_LIMIT
-     */
+    /** @cvalue UBRK_WORD_IDEO_LIMIT */
     public const int WORD_IDEO_LIMIT = UNKNOWN;
 
-    /**
-     * @cvalue UBRK_LINE_SOFT
-     */
+    /** @cvalue UBRK_LINE_SOFT */
     public const int LINE_SOFT = UNKNOWN;
-    /**
-     * @cvalue UBRK_LINE_SOFT_LIMIT
-     */
+    /** @cvalue UBRK_LINE_SOFT_LIMIT */
     public const int LINE_SOFT_LIMIT = UNKNOWN;
-    /**
-     * @cvalue UBRK_LINE_HARD
-     */
+    /** @cvalue UBRK_LINE_HARD */
     public const int LINE_HARD = UNKNOWN;
-    /**
-     * @cvalue UBRK_LINE_HARD_LIMIT
-     */
+    /** @cvalue UBRK_LINE_HARD_LIMIT */
     public const int LINE_HARD_LIMIT = UNKNOWN;
 
-    /**
-     * @cvalue UBRK_SENTENCE_TERM
-     */
+    /** @cvalue UBRK_SENTENCE_TERM */
     public const int SENTENCE_TERM = UNKNOWN;
-    /**
-     * @cvalue UBRK_SENTENCE_TERM_LIMIT
-     */
+    /** @cvalue UBRK_SENTENCE_TERM_LIMIT */
     public const int SENTENCE_TERM_LIMIT = UNKNOWN;
-    /**
-     * @cvalue UBRK_SENTENCE_SEP
-     */
+    /** @cvalue UBRK_SENTENCE_SEP */
     public const int SENTENCE_SEP = UNKNOWN;
-    /**
-     * @cvalue UBRK_SENTENCE_SEP_LIMIT
-     */
+    /** @cvalue UBRK_SENTENCE_SEP_LIMIT */
     public const int SENTENCE_SEP_LIMIT = UNKNOWN;
 
     /** @tentative-return-type */

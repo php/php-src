@@ -5,13 +5,9 @@
 /** @not-serializable */
 class Transliterator
 {
-    /**
-     * @cvalue TRANSLITERATOR_FORWARD
-     */
+    /** @cvalue TRANSLITERATOR_FORWARD */
     public const int FORWARD = UNKNOWN;
-    /**
-     * @cvalue TRANSLITERATOR_REVERSE
-     */
+    /** @cvalue TRANSLITERATOR_REVERSE */
     public const int REVERSE = UNKNOWN;
 
     public readonly string $id;

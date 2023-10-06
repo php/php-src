@@ -5,54 +5,30 @@
 /** @not-serializable */
 class IntlDateFormatter
 {
-    /**
-     * @cvalue UDAT_FULL
-     */
+    /** @cvalue UDAT_FULL */
     public const int FULL = UNKNOWN;
-    /**
-     * @cvalue UDAT_LONG
-     */
+    /** @cvalue UDAT_LONG */
     public const int LONG = UNKNOWN;
-    /**
-     * @cvalue UDAT_MEDIUM
-     */
+    /** @cvalue UDAT_MEDIUM */
     public const int MEDIUM = UNKNOWN;
-    /**
-     * @cvalue UDAT_SHORT
-     */
+    /** @cvalue UDAT_SHORT */
     public const int SHORT = UNKNOWN;
-    /**
-     * @cvalue UDAT_NONE
-     */
+    /** @cvalue UDAT_NONE */
     public const int NONE = UNKNOWN;
-    /**
-     * @cvalue UDAT_FULL_RELATIVE
-     */
+    /** @cvalue UDAT_FULL_RELATIVE */
     public const int RELATIVE_FULL = UNKNOWN;
-    /**
-     * @cvalue UDAT_LONG_RELATIVE
-     */
+    /** @cvalue UDAT_LONG_RELATIVE */
     public const int RELATIVE_LONG = UNKNOWN;
-    /**
-     * @cvalue UDAT_MEDIUM_RELATIVE
-     */
+    /** @cvalue UDAT_MEDIUM_RELATIVE */
     public const int RELATIVE_MEDIUM = UNKNOWN;
-    /**
-     * @cvalue UDAT_SHORT_RELATIVE
-     */
+    /** @cvalue UDAT_SHORT_RELATIVE */
     public const int RELATIVE_SHORT = UNKNOWN;
-    /**
-     * @cvalue UDAT_PATTERN
-     */
+    /** @cvalue UDAT_PATTERN */
     public const int PATTERN = UNKNOWN;
 
-    /**
-     * @cvalue UCAL_GREGORIAN
-     */
+    /** @cvalue UCAL_GREGORIAN */
     public const int GREGORIAN = UNKNOWN;
-    /**
-     * @cvalue UCAL_TRADITIONAL
-     */
+    /** @cvalue UCAL_TRADITIONAL */
     public const int TRADITIONAL = UNKNOWN;
 
     /**
