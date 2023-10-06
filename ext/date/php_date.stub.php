@@ -555,61 +555,33 @@ class DateTimeImmutable implements DateTimeInterface
 
 class DateTimeZone
 {
-    /**
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_AFRICA
-     */
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_AFRICA */
     public const int AFRICA = UNKNOWN;
-    /**
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_AMERICA
-     */
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_AMERICA */
     public const int AMERICA = UNKNOWN;
-    /**
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_ANTARCTICA
-     */
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_ANTARCTICA */
     public const int ANTARCTICA = UNKNOWN;
-    /**
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_ARCTIC
-     */
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_ARCTIC */
     public const int ARCTIC = UNKNOWN;
-    /**
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_ASIA
-     */
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_ASIA */
     public const int ASIA = UNKNOWN;
-    /**
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_ATLANTIC
-     */
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_ATLANTIC */
     public const int ATLANTIC = UNKNOWN;
-    /**
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_AUSTRALIA
-     */
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_AUSTRALIA */
     public const int AUSTRALIA = UNKNOWN;
-    /**
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_EUROPE
-     */
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_EUROPE */
     public const int EUROPE = UNKNOWN;
-    /**
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_INDIAN
-     */
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_INDIAN */
     public const int INDIAN = UNKNOWN;
-    /**
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_PACIFIC
-     */
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_PACIFIC */
     public const int PACIFIC = UNKNOWN;
-    /**
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_UTC
-     */
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_UTC */
     public const int UTC = UNKNOWN;
-    /**
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_ALL
-     */
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_ALL */
     public const int ALL = UNKNOWN;
-    /**
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_ALL_W_BC
-     */
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_ALL_W_BC */
     public const int ALL_WITH_BC = UNKNOWN;
-    /**
-     * @cvalue PHP_DATE_TIMEZONE_PER_COUNTRY
-     */
+    /** @cvalue PHP_DATE_TIMEZONE_PER_COUNTRY */
     public const int PER_COUNTRY = UNKNOWN;
 
     public function __construct(string $timezone) {}
@@ -693,13 +665,9 @@ class DateInterval
 
 class DatePeriod implements IteratorAggregate
 {
-    /**
-     * @cvalue PHP_DATE_PERIOD_EXCLUDE_START_DATE
-     */
+    /** @cvalue PHP_DATE_PERIOD_EXCLUDE_START_DATE */
     public const int EXCLUDE_START_DATE = UNKNOWN;
-    /**
-     * @cvalue PHP_DATE_PERIOD_INCLUDE_END_DATE
-     */
+    /** @cvalue PHP_DATE_PERIOD_INCLUDE_END_DATE */
     public const int INCLUDE_END_DATE = UNKNOWN;
 
     /** @readonly */
