@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #80092 (ZTS + preload = segfault on shutdown). (nielsdos)
   . Fixed buffer underflow when compiling memoized expression. (ilutov)
 
+- CLI:
+  . Ensure a single Date header is present. (coppolafab)
+
 - CType:
   . Fixed bug GH-11997 (ctype_alnum 5 times slower in PHP 8.1 or greater).
     (nielsdos)
