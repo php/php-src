@@ -70,8 +70,14 @@ A  - array or object (zval*)
 b  - boolean (bool)
 C  - class (zend_class_entry*)
 d  - double (double)
-f  - function or array containing php method call info (returned as
-     zend_fcall_info and zend_fcall_info_cache)
+f  - PHP callable containing php function/method call info (returned as
+     zend_fcall_info and zend_fcall_info_cache).
+     The FCC may be uninitialized if the callable is a trampoline.
+F  - PHP callable containing php function/method call info (returned as
+     zend_fcall_info and zend_fcall_info_cache).
+     The FCC will *always* be initialized, even if the callable is a trampoline.
+     A trampoline *must* be consumed or released with
+     zend_release_fcall_info_cache().
 h  - array (returned as HashTable*)
 H  - array or HASH_OF(object) (returned as HashTable*)
 l  - long (zend_long)
