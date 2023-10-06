@@ -36,6 +36,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      instead of int.
    - The macros DOM_NO_ARGS() and DOM_NOT_IMPLEMENTED() have been removed.
 
+ b. ext/random
+   - The macro RAND_RANGE_BADSCALING() has been removed. The implementation
+     should either be inlined and undefined behavior fixed or it should be
+     replaced by a non-biased scaler.
+
 ========================
 4. OpCode changes
 ========================
