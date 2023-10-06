@@ -4894,6 +4894,10 @@ ZEND_API zend_result zend_get_default_from_internal_arg_info(
 {
 	const char *default_value = arg_info->default_value;
 	if (!default_value) {
+		if (ZEND_ARG_IS_VARIADIC(arg_info)) {
+			ZVAL_EMPTY_ARRAY(default_value_zval);
+			return SUCCESS;
+		}
 		return FAILURE;
 	}
 
