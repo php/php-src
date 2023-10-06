@@ -5,311 +5,163 @@
 /** @not-serializable */
 class PDO
 {
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_NULL)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_NULL) */
     public const int PARAM_NULL = 0;
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_BOOL)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_BOOL) */
     public const int PARAM_BOOL = 5;
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_INT)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_INT) */
     public const int PARAM_INT = 1;
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_STR)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_STR) */
     public const int PARAM_STR = 2;
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_LOB)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_LOB) */
     public const int PARAM_LOB = 3;
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_STMT)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_STMT) */
     public const int PARAM_STMT = 4;
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_INPUT_OUTPUT)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_INPUT_OUTPUT) */
     public const int PARAM_INPUT_OUTPUT = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_STR_NATL)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_STR_NATL) */
     public const int PARAM_STR_NATL = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_STR_CHAR)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_STR_CHAR) */
     public const int PARAM_STR_CHAR = UNKNOWN;
 
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_EVT_ALLOC)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_EVT_ALLOC) */
     public const int PARAM_EVT_ALLOC = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_EVT_FREE)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_EVT_FREE) */
     public const int PARAM_EVT_FREE = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_EVT_EXEC_PRE)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_EVT_EXEC_PRE) */
     public const int PARAM_EVT_EXEC_PRE = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_EVT_EXEC_POST)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_EVT_EXEC_POST) */
     public const int PARAM_EVT_EXEC_POST = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_EVT_FETCH_PRE)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_EVT_FETCH_PRE) */
     public const int PARAM_EVT_FETCH_PRE = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_EVT_FETCH_POST)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_EVT_FETCH_POST) */
     public const int PARAM_EVT_FETCH_POST = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_PARAM_EVT_NORMALIZE)
-     */
+    /** @cvalue LONG_CONST(PDO_PARAM_EVT_NORMALIZE) */
     public const int PARAM_EVT_NORMALIZE = UNKNOWN;
 
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_USE_DEFAULT)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_USE_DEFAULT) */
     public const int FETCH_DEFAULT = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_LAZY)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_LAZY) */
     public const int FETCH_LAZY = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_ASSOC)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_ASSOC) */
     public const int FETCH_ASSOC = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_NUM)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_NUM) */
     public const int FETCH_NUM = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_BOTH)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_BOTH) */
     public const int FETCH_BOTH = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_OBJ)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_OBJ) */
     public const int FETCH_OBJ = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_BOUND)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_BOUND) */
     public const int FETCH_BOUND = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_COLUMN)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_COLUMN) */
     public const int FETCH_COLUMN = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_CLASS)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_CLASS) */
     public const int FETCH_CLASS = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_INTO)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_INTO) */
     public const int FETCH_INTO = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_FUNC)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_FUNC) */
     public const int FETCH_FUNC = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_GROUP)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_GROUP) */
     public const int FETCH_GROUP = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_UNIQUE)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_UNIQUE) */
     public const int FETCH_UNIQUE = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_KEY_PAIR)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_KEY_PAIR) */
     public const int FETCH_KEY_PAIR = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_CLASSTYPE)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_CLASSTYPE) */
     public const int FETCH_CLASSTYPE = UNKNOWN;
 
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_SERIALIZE)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_SERIALIZE) */
     public const int FETCH_SERIALIZE = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_PROPS_LATE)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_PROPS_LATE) */
     public const int FETCH_PROPS_LATE = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_NAMED)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_NAMED) */
     public const int FETCH_NAMED = UNKNOWN;
 
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_AUTOCOMMIT)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_AUTOCOMMIT) */
     public const int ATTR_AUTOCOMMIT = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_PREFETCH)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_PREFETCH) */
     public const int ATTR_PREFETCH = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_TIMEOUT)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_TIMEOUT) */
     public const int ATTR_TIMEOUT = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_ERRMODE)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_ERRMODE) */
     public const int ATTR_ERRMODE = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_SERVER_VERSION)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_SERVER_VERSION) */
     public const int ATTR_SERVER_VERSION = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_CLIENT_VERSION)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_CLIENT_VERSION) */
     public const int ATTR_CLIENT_VERSION = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_SERVER_INFO)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_SERVER_INFO) */
     public const int ATTR_SERVER_INFO = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_CONNECTION_STATUS)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_CONNECTION_STATUS) */
     public const int ATTR_CONNECTION_STATUS = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_CASE)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_CASE) */
     public const int ATTR_CASE = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_CURSOR_NAME)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_CURSOR_NAME) */
     public const int ATTR_CURSOR_NAME = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_CURSOR)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_CURSOR) */
     public const int ATTR_CURSOR = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_ORACLE_NULLS)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_ORACLE_NULLS) */
     public const int ATTR_ORACLE_NULLS = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_PERSISTENT)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_PERSISTENT) */
     public const int ATTR_PERSISTENT = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_STATEMENT_CLASS)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_STATEMENT_CLASS) */
     public const int ATTR_STATEMENT_CLASS = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_FETCH_TABLE_NAMES)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_FETCH_TABLE_NAMES) */
     public const int ATTR_FETCH_TABLE_NAMES = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_FETCH_CATALOG_NAMES)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_FETCH_CATALOG_NAMES) */
     public const int ATTR_FETCH_CATALOG_NAMES = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_DRIVER_NAME)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_DRIVER_NAME) */
     public const int ATTR_DRIVER_NAME = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_STRINGIFY_FETCHES)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_STRINGIFY_FETCHES) */
     public const int ATTR_STRINGIFY_FETCHES = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_MAX_COLUMN_LEN)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_MAX_COLUMN_LEN) */
     public const int ATTR_MAX_COLUMN_LEN = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_EMULATE_PREPARES)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_EMULATE_PREPARES) */
     public const int ATTR_EMULATE_PREPARES = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_DEFAULT_FETCH_MODE)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_DEFAULT_FETCH_MODE) */
     public const int ATTR_DEFAULT_FETCH_MODE = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ATTR_DEFAULT_STR_PARAM)
-     */
+    /** @cvalue LONG_CONST(PDO_ATTR_DEFAULT_STR_PARAM) */
     public const int ATTR_DEFAULT_STR_PARAM = UNKNOWN;
 
-    /**
-     * @cvalue LONG_CONST(PDO_ERRMODE_SILENT)
-     */
+    /** @cvalue LONG_CONST(PDO_ERRMODE_SILENT) */
     public const int ERRMODE_SILENT = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ERRMODE_WARNING)
-     */
+    /** @cvalue LONG_CONST(PDO_ERRMODE_WARNING) */
     public const int ERRMODE_WARNING = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_ERRMODE_EXCEPTION)
-     */
+    /** @cvalue LONG_CONST(PDO_ERRMODE_EXCEPTION) */
     public const int ERRMODE_EXCEPTION = UNKNOWN;
 
-    /**
-     * @cvalue LONG_CONST(PDO_CASE_NATURAL)
-     */
+    /** @cvalue LONG_CONST(PDO_CASE_NATURAL) */
     public const int CASE_NATURAL = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_CASE_LOWER)
-     */
+    /** @cvalue LONG_CONST(PDO_CASE_LOWER) */
     public const int CASE_LOWER = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_CASE_UPPER)
-     */
+    /** @cvalue LONG_CONST(PDO_CASE_UPPER) */
     public const int CASE_UPPER = UNKNOWN;
 
-    /**
-     * @cvalue LONG_CONST(PDO_NULL_NATURAL)
-     */
+    /** @cvalue LONG_CONST(PDO_NULL_NATURAL) */
     public const int NULL_NATURAL = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_NULL_EMPTY_STRING)
-     */
+    /** @cvalue LONG_CONST(PDO_NULL_EMPTY_STRING) */
     public const int NULL_EMPTY_STRING = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_NULL_TO_STRING)
-     */
+    /** @cvalue LONG_CONST(PDO_NULL_TO_STRING) */
     public const int NULL_TO_STRING = UNKNOWN;
 
-    /**
-     * @cvalue PDO_ERR_NONE
-     */
+    /** @cvalue PDO_ERR_NONE */
     public const string ERR_NONE = UNKNOWN;
 
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_ORI_NEXT)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_ORI_NEXT) */
     public const int FETCH_ORI_NEXT = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_ORI_PRIOR)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_ORI_PRIOR) */
     public const int FETCH_ORI_PRIOR = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_ORI_FIRST)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_ORI_FIRST) */
     public const int FETCH_ORI_FIRST = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_ORI_LAST)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_ORI_LAST) */
     public const int FETCH_ORI_LAST = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_ORI_ABS)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_ORI_ABS) */
     public const int FETCH_ORI_ABS = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_FETCH_ORI_REL)
-     */
+    /** @cvalue LONG_CONST(PDO_FETCH_ORI_REL) */
     public const int FETCH_ORI_REL = UNKNOWN;
 
-    /**
-     * @cvalue LONG_CONST(PDO_CURSOR_FWDONLY)
-     */
+    /** @cvalue LONG_CONST(PDO_CURSOR_FWDONLY) */
     public const int CURSOR_FWDONLY = UNKNOWN;
-    /**
-     * @cvalue LONG_CONST(PDO_CURSOR_SCROLL)
-     */
+    /** @cvalue LONG_CONST(PDO_CURSOR_SCROLL) */
     public const int CURSOR_SCROLL = UNKNOWN;
 
     public function __construct(string $dsn, ?string $username = null, #[\SensitiveParameter] ?string $password = null, ?array $options = null) {}

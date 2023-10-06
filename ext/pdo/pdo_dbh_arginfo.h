@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 98dfe635699876a6f017a46b49b1b56e12bb144c */
+ * Stub hash: acd95f74c8b95515d3177f55682f9ee50dd779e9 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
