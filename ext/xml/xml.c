@@ -1114,7 +1114,6 @@ PHP_FUNCTION(xml_set_element_handler)
 	zend_string *start_method_name = NULL;
 	zend_string *end_method_name = NULL;
 
-	// TODO: cover trampolines with tests, as the !ZEND_FCC_INITIALIZED branches are never executed right now
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "Of!f!", &pind, xml_parser_ce, &start_fci, &start_fcc, &end_fci, &end_fcc) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
 		if (ZEND_FCI_INITIALIZED(start_fci) && !ZEND_FCC_INITIALIZED(start_fcc)) {
@@ -1132,9 +1131,9 @@ PHP_FUNCTION(xml_set_element_handler)
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "Of!S", &pind, xml_parser_ce, &start_fci, &start_fcc, &end_method_name) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
 
-		bool status = php_xml_check_string_method_arg(3, parser, end_method_name, &start_fcc);
+		bool status = php_xml_check_string_method_arg(3, parser, end_method_name, &end_fcc);
 		if (status == false) {
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 
 		if (ZEND_FCI_INITIALIZED(start_fci) && !ZEND_FCC_INITIALIZED(start_fcc)) {
@@ -1148,7 +1147,7 @@ PHP_FUNCTION(xml_set_element_handler)
 
 		bool status = php_xml_check_string_method_arg(2, parser, start_method_name, &start_fcc);
 		if (status == false) {
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 
 		if (ZEND_FCI_INITIALIZED(end_fci) && !ZEND_FCC_INITIALIZED(end_fcc)) {
@@ -1162,11 +1161,11 @@ PHP_FUNCTION(xml_set_element_handler)
 
 		bool status = php_xml_check_string_method_arg(2, parser, start_method_name, &start_fcc);
 		if (status == false) {
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 		status = php_xml_check_string_method_arg(3, parser, end_method_name, &end_fcc);
 		if (status == false) {
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 	} else {
 		zval *dummy_start;
@@ -1223,7 +1222,7 @@ static void php_xml_set_handler_parse_callable(
 
 		bool status = php_xml_check_string_method_arg(2, *parser, method_name, parser_handler_fcc);
 		if (status == false) {
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 	} else {
 		zval *dummy;
