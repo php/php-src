@@ -44,6 +44,13 @@ static int php_sqlite3_compare_stmt_zval_free(php_sqlite3_free_list **free_list,
 		RETURN_THROWS(); \
 	}
 
+#define SQLITE3_CHECK_INITIALIZED_FREE_TRAMPOLINE(db_obj, member, class_name, trampoline_fcc) \
+	if (!(db_obj) || !(member)) { \
+		zend_release_fcall_info_cache((trampoline_fcc)); \
+		zend_throw_error(NULL, "The " #class_name " object has not been correctly initialised or is already closed"); \
+		RETURN_THROWS(); \
+	}
+
 #define SQLITE3_CHECK_INITIALIZED_STMT(member, class_name) \
 	if (!(member)) { \
 		zend_throw_error(NULL, "The " #class_name " object has not been correctly initialised or is already closed"); \
@@ -942,13 +949,16 @@ PHP_METHOD(SQLite3, createFunction)
 	zend_long flags = 0;
 	db_obj = Z_SQLITE3_DB_P(object);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sf|ll", &sql_func, &sql_func_len, &fci, &fcc, &sql_func_num_args, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sF|ll", &sql_func, &sql_func_len, &fci, &fcc, &sql_func_num_args, &flags) == FAILURE) {
+		zend_release_fcall_info_cache(&fcc);
 		RETURN_THROWS();
 	}
 
-	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
+	SQLITE3_CHECK_INITIALIZED_FREE_TRAMPOLINE(db_obj, db_obj->initialised, SQLite3, &fcc);
 
 	if (!sql_func_len) {
+		/* TODO Add warning/ValueError that name cannot be empty? */
+		zend_release_fcall_info_cache(&fcc);
 		RETURN_FALSE;
 	}
 
@@ -956,13 +966,6 @@ PHP_METHOD(SQLite3, createFunction)
 
 	if (sqlite3_create_function(db_obj->db, sql_func, sql_func_num_args, flags | SQLITE_UTF8, func, php_sqlite3_callback_func, NULL, NULL) == SQLITE_OK) {
 		func->func_name = estrdup(sql_func);
-
-		if (!ZEND_FCC_INITIALIZED(fcc)) {
-			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-		}
 		zend_fcc_dup(&func->func, &fcc);
 
 		func->argc = sql_func_num_args;
@@ -972,6 +975,7 @@ PHP_METHOD(SQLite3, createFunction)
 		RETURN_TRUE;
 	}
 	efree(func);
+	zend_release_fcall_info_cache(&fcc);
 
 	RETURN_FALSE;
 }
@@ -990,14 +994,19 @@ PHP_METHOD(SQLite3, createAggregate)
 	zend_long sql_func_num_args = -1;
 	db_obj = Z_SQLITE3_DB_P(object);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sff|l", &sql_func, &sql_func_len, &step_fci, &step_fcc, &fini_fci, &fini_fcc, &sql_func_num_args) == FAILURE) {
-		RETURN_THROWS();
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sFF|l", &sql_func, &sql_func_len, &step_fci, &step_fcc, &fini_fci, &fini_fcc, &sql_func_num_args) == FAILURE) {
+		goto error;
 	}
 
-	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
+	/* Cannot use SQLITE3_CHECK_INITIALIZED_FREE_TRAMPOLINE() as we have 2 FCCs */
+	if (!db_obj || !db_obj->initialised) {
+		zend_throw_error(NULL, "The SQLite3 object has not been correctly initialised or is already closed");
+		goto error;
+	}
 
 	if (!sql_func_len) {
-		RETURN_FALSE;
+		/* TODO Add warning/ValueError that name cannot be empty? */
+		goto error;
 	}
 
 	func = (php_sqlite3_func *)ecalloc(1, sizeof(*func));
@@ -1005,19 +1014,7 @@ PHP_METHOD(SQLite3, createAggregate)
 	if (sqlite3_create_function(db_obj->db, sql_func, sql_func_num_args, SQLITE_UTF8, func, NULL, php_sqlite3_callback_step, php_sqlite3_callback_final) == SQLITE_OK) {
 		func->func_name = estrdup(sql_func);
 
-		if (!ZEND_FCC_INITIALIZED(step_fcc)) {
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-			zend_is_callable_ex(&step_fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &step_fcc, NULL);
-		}
 		zend_fcc_dup(&func->step, &step_fcc);
-		if (!ZEND_FCC_INITIALIZED(fini_fcc)) {
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-			zend_is_callable_ex(&fini_fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fini_fcc, NULL);
-		}
 		zend_fcc_dup(&func->fini, &fini_fcc);
 
 		func->argc = sql_func_num_args;
@@ -1027,6 +1024,14 @@ PHP_METHOD(SQLite3, createAggregate)
 		RETURN_TRUE;
 	}
 	efree(func);
+
+	error:
+	if (ZEND_FCC_INITIALIZED(step_fcc)) {
+		zend_release_fcall_info_cache(&step_fcc);
+	}
+	if (ZEND_FCC_INITIALIZED(fini_fcc)) {
+		zend_release_fcall_info_cache(&fini_fcc);
+	}
 
 	RETURN_FALSE;
 }
@@ -1044,13 +1049,15 @@ PHP_METHOD(SQLite3, createCollation)
 	zend_fcall_info_cache fcc;
 	db_obj = Z_SQLITE3_DB_P(object);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sf", &collation_name, &collation_name_len, &fci, &fcc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sF", &collation_name, &collation_name_len, &fci, &fcc) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
+	SQLITE3_CHECK_INITIALIZED_FREE_TRAMPOLINE(db_obj, db_obj->initialised, SQLite3, &fcc);
 
 	if (!collation_name_len) {
+		/* TODO Add warning/ValueError that name cannot be empty? */
+		zend_release_fcall_info_cache(&fcc);
 		RETURN_FALSE;
 	}
 
@@ -1058,12 +1065,6 @@ PHP_METHOD(SQLite3, createCollation)
 	if (sqlite3_create_collation(db_obj->db, collation_name, SQLITE_UTF8, collation, php_sqlite3_callback_compare) == SQLITE_OK) {
 		collation->collation_name = estrdup(collation_name);
 
-		if (!ZEND_FCC_INITIALIZED(fcc)) {
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
-		}
 		zend_fcc_dup(&collation->cmp_func, &fcc);
 
 		collation->next = db_obj->collations;
@@ -1072,6 +1073,7 @@ PHP_METHOD(SQLite3, createCollation)
 		RETURN_TRUE;
 	}
 	efree(collation);
+	zend_release_fcall_info_cache(&fcc);
 
 	RETURN_FALSE;
 }
@@ -1317,10 +1319,10 @@ PHP_METHOD(SQLite3, setAuthorizer)
 	zend_fcall_info_cache	fcc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC_OR_NULL(fci, fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
+	SQLITE3_CHECK_INITIALIZED_FREE_TRAMPOLINE(db_obj, db_obj->initialised, SQLite3, &fcc);
 
 	/* Clear previously set callback */
 	if (ZEND_FCC_INITIALIZED(db_obj->authorizer_fcc)) {
@@ -1329,14 +1331,7 @@ PHP_METHOD(SQLite3, setAuthorizer)
 
 	/* Only enable userland authorizer if argument is not NULL */
 	if (ZEND_FCI_INITIALIZED(fci)) {
-		if (!ZEND_FCC_INITIALIZED(fcc)) {
-			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-		}
-		db_obj->authorizer_fcc = fcc;
-		zend_fcc_addref(&db_obj->authorizer_fcc);
+		zend_fcc_dup(&db_obj->authorizer_fcc, &fcc);
 	}
 
 	RETURN_TRUE;
