@@ -501,47 +501,13 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 	/* Check if there's been an external transport protocol with an encoding information */
 	if (enc == XML_CHAR_ENCODING_NONE) {
 		php_stream *s  = (php_stream *) context;
-
-		if (Z_TYPE(s->wrapperdata) == IS_ARRAY) {
-			zval *header;
-
-			ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(s->wrapperdata), header) {
-				const char buf[] = "Content-Type:";
-				if (Z_TYPE_P(header) == IS_STRING &&
-						!zend_binary_strncasecmp(Z_STRVAL_P(header), Z_STRLEN_P(header), buf, sizeof(buf)-1, sizeof(buf)-1)) {
-					char needle[] = "charset=";
-					char *haystack = estrndup(Z_STRVAL_P(header), Z_STRLEN_P(header));
-					char *encoding = php_stristr(haystack, needle, Z_STRLEN_P(header), strlen(needle));
-
-					if (encoding) {
-						char *end;
-
-						encoding += sizeof("charset=")-1;
-						if (*encoding == '"') {
-							encoding++;
-						}
-						end = strchr(encoding, ';');
-						if (end == NULL) {
-							end = encoding + strlen(encoding);
-						}
-						end--; /* end == encoding-1 isn't a buffer underrun */
-						while (*end == ' ' || *end == '\t') {
-							end--;
-						}
-						if (*end == '"') {
-							end--;
-						}
-						if (encoding >= end) continue;
-						*(end+1) = '\0';
-						enc = xmlParseCharEncoding(encoding);
-						if (enc <= XML_CHAR_ENCODING_NONE) {
-							enc = XML_CHAR_ENCODING_NONE;
-						}
-					}
-					efree(haystack);
-					break; /* found content-type */
-				}
-			} ZEND_HASH_FOREACH_END();
+		zend_string *charset = php_libxml_sniff_charset_from_stream(s);
+		if (charset != NULL) {
+			enc = xmlParseCharEncoding(ZSTR_VAL(charset));
+			if (enc <= XML_CHAR_ENCODING_NONE) {
+				enc = XML_CHAR_ENCODING_NONE;
+			}
+			zend_string_release_ex(charset, false);
 		}
 	}
 

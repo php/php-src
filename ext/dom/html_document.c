@@ -715,13 +715,25 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		dom_setup_parser_encoding_manually((const lxb_char_t *) buf, encoding_data, &decoding_encoding_ctx, &application_data);
 	}
 
-	// TODO: https://mimesniff.spec.whatwg.org/#parsing-a-mime-type
 	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, /* opened_path */ NULL, /* context */ php_libxml_get_stream_context());
 	if (!stream) {
 		if (!EG(exception)) {
 			zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", filename);
 		}
 		RETURN_THROWS();
+	}
+
+	/* MIME sniff */
+	if (should_determine_encoding_implicitly) {
+		zend_string *charset = php_libxml_sniff_charset_from_stream(stream);
+		if (charset != NULL) {
+			const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name((const lxb_char_t *) ZSTR_VAL(charset), ZSTR_LEN(charset));
+			if (encoding_data != NULL) {
+				should_determine_encoding_implicitly = false;
+				dom_setup_parser_encoding_manually((const lxb_char_t *) buf, encoding_data, &decoding_encoding_ctx, &application_data);
+			}
+			zend_string_release_ex(charset, false);
+		}
 	}
 
 	lxb_html_document_t *document = lxb_html_document_create();
