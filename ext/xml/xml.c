@@ -371,7 +371,9 @@ static HashTable *xml_parser_get_gc(zend_object *object, zval **table, int *n)
 	xml_parser *parser = xml_parser_from_obj(object);
 
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
-	zend_get_gc_buffer_add_obj(gc_buffer, parser->object);
+	if (parser->object) {
+		zend_get_gc_buffer_add_obj(gc_buffer, parser->object);
+	}
 	if (ZEND_FCC_INITIALIZED(parser->startElementHandler)) {
 		zend_get_gc_buffer_add_fcc(gc_buffer, &parser->startElementHandler);
 	}
@@ -1050,33 +1052,9 @@ PHP_FUNCTION(xml_parser_create_ns)
 }
 /* }}} */
 
-/* {{{ Set up object which should be used for callbacks */
-PHP_FUNCTION(xml_set_object)
-{
-	xml_parser *parser;
-	zval *pind, *mythis;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oo", &pind, xml_parser_ce, &mythis) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	parser = Z_XMLPARSER_P(pind);
-
-	if (parser->object) {
-		// TODO Check methods exist in set FCCs
-		OBJ_RELEASE(parser->object);
-	}
-
-	parser->object = Z_OBJ_P(mythis);
-	GC_ADDREF(parser->object);
-
-	RETURN_TRUE;
-}
-/* }}} */
-
 static bool php_xml_check_string_method_arg(
 	unsigned int arg_num,
-	const xml_parser *parser,
+	zend_object *object,
 	zend_string *method_name,
 	zend_fcall_info_cache *const parser_handler_fcc
 ) {
@@ -1085,12 +1063,12 @@ static bool php_xml_check_string_method_arg(
 		return true;
 	}
 
-	if (!parser->object) {
+	if (!object) {
 		zend_argument_value_error(arg_num, "an object must be set via xml_set_object() to be able to lookup method");
 		return false;
 	}
 
-	zend_class_entry *ce = parser->object->ce;
+	zend_class_entry *ce = object->ce;
 	zend_string *lc_name = zend_string_tolower(method_name);
 	zend_function *method_ptr = zend_hash_find_ptr(&ce->function_table, lc_name);
 	zend_string_release_ex(lc_name, 0);
@@ -1102,10 +1080,58 @@ static bool php_xml_check_string_method_arg(
 	parser_handler_fcc->function_handler = method_ptr;
 	parser_handler_fcc->calling_scope = ce;
 	parser_handler_fcc->called_scope = ce;
-	parser_handler_fcc->object = parser->object;
+	parser_handler_fcc->object = object;
 
 	return true;
 }
+
+#define PHP_XML_CHECK_NEW_THIS_METHODS(parser_to_check, new_this_obj, fcc_field) \
+	if (ZEND_FCC_INITIALIZED(parser_to_check->fcc_field) && parser_to_check->fcc_field.object == parser_to_check->object) { \
+		zend_string *method_name = zend_string_copy(parser_to_check->fcc_field.function_handler->common.function_name); \
+		zend_fcc_dtor(&parser_to_check->fcc_field); \
+		bool status = php_xml_check_string_method_arg(2, new_this_obj, method_name, &parser_to_check->fcc_field); \
+		if (status == false) { \
+			/* TODO Better error message */ RETURN_THROWS(); \
+		} \
+	}
+
+
+/* {{{ Set up object which should be used for callbacks */
+PHP_FUNCTION(xml_set_object)
+{
+	xml_parser *parser;
+	zval *pind, *mythis;
+	zend_object *new_this;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oo", &pind, xml_parser_ce, &mythis) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	parser = Z_XMLPARSER_P(pind);
+	new_this = Z_OBJ_P(mythis);
+
+	if (parser->object) {
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, startElementHandler);
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, endElementHandler);
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, characterDataHandler);
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, processingInstructionHandler);
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, defaultHandler);
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, unparsedEntityDeclHandler);
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, notationDeclHandler);
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, externalEntityRefHandler);
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, unknownEncodingHandler);
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, startNamespaceDeclHandler);
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, endNamespaceDeclHandler);
+
+		OBJ_RELEASE(parser->object);
+	}
+
+	parser->object = new_this;
+	GC_ADDREF(parser->object);
+
+	RETURN_TRUE;
+}
+/* }}} */
 
 /* {{{ Set up start and end element handlers */
 PHP_FUNCTION(xml_set_element_handler)
@@ -1136,7 +1162,7 @@ PHP_FUNCTION(xml_set_element_handler)
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "Of!S", &pind, xml_parser_ce, &start_fci, &start_fcc, &end_method_name) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
 
-		bool status = php_xml_check_string_method_arg(3, parser, end_method_name, &end_fcc);
+		bool status = php_xml_check_string_method_arg(3, parser->object, end_method_name, &end_fcc);
 		if (status == false) {
 			RETURN_THROWS();
 		}
@@ -1150,7 +1176,7 @@ PHP_FUNCTION(xml_set_element_handler)
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OSf!", &pind, xml_parser_ce, &start_method_name, &end_fci, &end_fcc) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
 
-		bool status = php_xml_check_string_method_arg(2, parser, start_method_name, &start_fcc);
+		bool status = php_xml_check_string_method_arg(2, parser->object, start_method_name, &start_fcc);
 		if (status == false) {
 			RETURN_THROWS();
 		}
@@ -1164,11 +1190,11 @@ PHP_FUNCTION(xml_set_element_handler)
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OSS", &pind, xml_parser_ce, &start_method_name, &end_method_name) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
 
-		bool status = php_xml_check_string_method_arg(2, parser, start_method_name, &start_fcc);
+		bool status = php_xml_check_string_method_arg(2, parser->object, start_method_name, &start_fcc);
 		if (status == false) {
 			RETURN_THROWS();
 		}
-		status = php_xml_check_string_method_arg(3, parser, end_method_name, &end_fcc);
+		status = php_xml_check_string_method_arg(3, parser->object, end_method_name, &end_fcc);
 		if (status == false) {
 			RETURN_THROWS();
 		}
@@ -1225,7 +1251,7 @@ static void php_xml_set_handler_parse_callable(
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OS", &pind, xml_parser_ce, &method_name) == SUCCESS) {
 		*parser = Z_XMLPARSER_P(pind);
 
-		bool status = php_xml_check_string_method_arg(2, *parser, method_name, parser_handler_fcc);
+		bool status = php_xml_check_string_method_arg(2, (*parser)->object, method_name, parser_handler_fcc);
 		if (status == false) {
 			RETURN_THROWS();
 		}
