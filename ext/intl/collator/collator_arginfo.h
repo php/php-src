@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 36276db4b4f75fc43c8db2f882d06eb2e87a89f2 */
+ * Stub hash: e021fa414fee84d971ace20b7f9c903d1adc5560 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0ef3fc87deea171c1c750ca45268c51eb1e180d3 */
+ * Stub hash: e446ff14fc14d08a6ac225af78cde931e381ee5b */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_getDefault, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -127,7 +127,7 @@ static zend_class_entry *register_class_Locale(void)
 	zval const_DEFAULT_LOCALE_value;
 	ZVAL_NULL(&const_DEFAULT_LOCALE_value);
 	zend_string *const_DEFAULT_LOCALE_name = zend_string_init_interned("DEFAULT_LOCALE", sizeof("DEFAULT_LOCALE") - 1, 1);
-	zend_declare_typed_class_constant(class_entry, const_DEFAULT_LOCALE_name, &const_DEFAULT_LOCALE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_declare_typed_class_constant(class_entry, const_DEFAULT_LOCALE_name, &const_DEFAULT_LOCALE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_NULL));
 	zend_string_release(const_DEFAULT_LOCALE_name);
 
 	zval const_LANG_TAG_value;

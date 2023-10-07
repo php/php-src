@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 648abaf2286d173e798ffedc9a65faae255debf0 */
+ * Stub hash: 6178ab530b85aca5c90fb7369c5019bb5cbfe8a7 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
