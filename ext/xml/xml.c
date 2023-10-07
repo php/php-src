@@ -1093,6 +1093,7 @@ static bool php_xml_check_string_method_arg(
 		if (status == false) { \
 			/* TODO Better error message */ RETURN_THROWS(); \
 		} \
+		zend_fcc_addref(&parser_to_check->fcc_field); \
 	}
 
 
