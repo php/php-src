@@ -783,7 +783,6 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	}
 
 	if (stream->wrapper == &php_plain_files_wrapper) {
-		// TODO: do the same for XMLDocument?
 		xmlChar *converted = xmlPathToURI((const xmlChar *) filename);
 		if (UNEXPECTED(!converted)) {
 			goto fail_oom;
