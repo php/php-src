@@ -2326,10 +2326,15 @@ ZEND_API void zend_startup_modules(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_destroy_modules(void) /* {{{ */
+ZEND_API void zend_destroy_module_handlers(void)
 {
 	free(class_cleanup_handlers);
 	free(module_request_startup_handlers);
+}
+
+ZEND_API void zend_destroy_modules(void) /* {{{ */
+{
+	zend_destroy_module_handlers();
 	zend_hash_graceful_reverse_destroy(&module_registry);
 }
 /* }}} */

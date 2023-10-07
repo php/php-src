@@ -90,7 +90,7 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 		zend_interned_strings_switch_storage(0);
 		php_dl(value, MODULE_PERSISTENT, &zv, 1);
 		zend_interned_strings_switch_storage(1);
-		return Z_TYPE(zv) == IS_TRUE;
+		return Z_TYPE(zv) == IS_TRUE ? 2 : 0;
 	}
 
 	if (fpm_php_zend_ini_alter_master(name, name_len, value, value_len, mode, PHP_INI_STAGE_ACTIVATE) == FAILURE) {
@@ -116,17 +116,30 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 static int fpm_php_apply_defines(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct key_value_s *kv;
+	int apply_result;
+	bool extension_loaded = false;
 
 	for (kv = wp->config->php_values; kv; kv = kv->next) {
-		if (fpm_php_apply_defines_ex(kv, ZEND_INI_USER) == -1) {
+		apply_result = fpm_php_apply_defines_ex(kv, ZEND_INI_USER);
+		if (apply_result == -1) {
 			zlog(ZLOG_ERROR, "Unable to set php_value '%s'", kv->key);
+		} else if (apply_result == 2) {
+			extension_loaded = true;
 		}
 	}
 
 	for (kv = wp->config->php_admin_values; kv; kv = kv->next) {
-		if (fpm_php_apply_defines_ex(kv, ZEND_INI_SYSTEM) == -1) {
+		apply_result = fpm_php_apply_defines_ex(kv, ZEND_INI_SYSTEM);
+		if (apply_result == -1) {
 			zlog(ZLOG_ERROR, "Unable to set php_admin_value '%s'", kv->key);
+		} else if (apply_result == 2) {
+			extension_loaded = true;
 		}
+	}
+
+	if (extension_loaded) {
+		zend_destroy_module_handlers();
+		zend_collect_module_handlers();
 	}
 
 	return 0;
