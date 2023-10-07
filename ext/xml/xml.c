@@ -69,7 +69,7 @@ typedef struct {
 	 * It is not owned, do not release it. */
 	zval index;
 
-	zval object;
+	zend_object *object;
 	zend_fcall_info_cache startElementHandler;
 	zend_fcall_info_cache endElementHandler;
 	zend_fcall_info_cache characterDataHandler;
@@ -359,8 +359,8 @@ static void xml_parser_free_obj(zend_object *object)
 	if (parser->baseURI) {
 		efree(parser->baseURI);
 	}
-	if (!Z_ISUNDEF(parser->object)) {
-		zval_ptr_dtor(&parser->object);
+	if (parser->object) {
+		OBJ_RELEASE(parser->object);
 	}
 
 	zend_object_std_dtor(&parser->std);
@@ -371,7 +371,7 @@ static HashTable *xml_parser_get_gc(zend_object *object, zval **table, int *n)
 	xml_parser *parser = xml_parser_from_obj(object);
 
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
-	zend_get_gc_buffer_add_zval(gc_buffer, &parser->object);
+	zend_get_gc_buffer_add_obj(gc_buffer, parser->object);
 	if (ZEND_FCC_INITIALIZED(parser->startElementHandler)) {
 		zend_get_gc_buffer_add_fcc(gc_buffer, &parser->startElementHandler);
 	}
@@ -1062,8 +1062,13 @@ PHP_FUNCTION(xml_set_object)
 
 	parser = Z_XMLPARSER_P(pind);
 
-	zval_ptr_dtor(&parser->object);
-	ZVAL_OBJ_COPY(&parser->object, Z_OBJ_P(mythis));
+	if (parser->object) {
+		// TODO Check methods exist in set FCCs
+		OBJ_RELEASE(parser->object);
+	}
+
+	parser->object = Z_OBJ_P(mythis);
+	GC_ADDREF(parser->object);
 
 	RETURN_TRUE;
 }
@@ -1080,12 +1085,12 @@ static bool php_xml_check_string_method_arg(
 		return true;
 	}
 
-	if (Z_ISUNDEF(parser->object)) {
+	if (!parser->object) {
 		zend_argument_value_error(arg_num, "an object must be set via xml_set_object() to be able to lookup method");
 		return false;
 	}
 
-	zend_class_entry *ce = Z_OBJCE(parser->object);
+	zend_class_entry *ce = parser->object->ce;
 	zend_string *lc_name = zend_string_tolower(method_name);
 	zend_function *method_ptr = zend_hash_find_ptr(&ce->function_table, lc_name);
 	zend_string_release_ex(lc_name, 0);
@@ -1097,7 +1102,7 @@ static bool php_xml_check_string_method_arg(
 	parser_handler_fcc->function_handler = method_ptr;
 	parser_handler_fcc->calling_scope = ce;
 	parser_handler_fcc->called_scope = ce;
-	parser_handler_fcc->object = Z_OBJ(parser->object);
+	parser_handler_fcc->object = parser->object;
 
 	return true;
 }
