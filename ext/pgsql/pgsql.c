@@ -5777,29 +5777,34 @@ PHP_PGSQL_API zend_result php_pgsql_select(PGconn *pg_link, const zend_string *t
 
 	ZEND_ASSERT(pg_link != NULL);
 	ZEND_ASSERT(table != NULL);
-	ZEND_ASSERT(Z_TYPE_P(ids_array) == IS_ARRAY);
+	if (ids_array) {
+		ZEND_ASSERT(Z_TYPE_P(ids_array) == IS_ARRAY);
+	}
 	ZEND_ASSERT(Z_TYPE_P(ret_array) == IS_ARRAY);
 	ZEND_ASSERT(!(opt & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)));
 
-	if (zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
-		return FAILURE;
-	}
+	zend_bool is_valid_ids_array = ids_array && zend_hash_num_elements(Z_ARRVAL_P(ids_array)) != 0;
 
-	ZVAL_UNDEF(&ids_converted);
-	if (!(opt & (PGSQL_DML_NO_CONV|PGSQL_DML_ESCAPE))) {
-		array_init(&ids_converted);
-		if (php_pgsql_convert(pg_link, table, ids_array, &ids_converted, (opt & PGSQL_CONV_OPTS)) == FAILURE) {
-			goto cleanup;
+	if (is_valid_ids_array) {
+		ZVAL_UNDEF(&ids_converted);
+		if (!(opt & (PGSQL_DML_NO_CONV|PGSQL_DML_ESCAPE))) {
+			array_init(&ids_converted);
+			if (php_pgsql_convert(pg_link, table, ids_array, &ids_converted, (opt & PGSQL_CONV_OPTS)) == FAILURE) {
+				goto cleanup;
+			}
+			ids_array = &ids_converted;
 		}
-		ids_array = &ids_converted;
 	}
 
 	smart_str_appends(&querystr, "SELECT * FROM ");
 	build_tablename(&querystr, pg_link, table);
-	smart_str_appends(&querystr, " WHERE ");
 
-	if (build_assignment_string(pg_link, &querystr, Z_ARRVAL_P(ids_array), 1, " AND ", sizeof(" AND ")-1, opt))
-		goto cleanup;
+	if (is_valid_ids_array) {
+		smart_str_appends(&querystr, " WHERE ");
+		if (build_assignment_string(pg_link, &querystr, Z_ARRVAL_P(ids_array), 1, " AND ", sizeof(" AND ")-1, opt)) {
+			goto cleanup;
+		}
+	}
 
 	smart_str_appendc(&querystr, ';');
 	smart_str_0(&querystr);
@@ -5814,7 +5819,9 @@ PHP_PGSQL_API zend_result php_pgsql_select(PGconn *pg_link, const zend_string *t
 	PQclear(pg_result);
 
 cleanup:
-	zval_ptr_dtor(&ids_converted);
+	if (is_valid_ids_array) {
+		zval_ptr_dtor(&ids_converted);
+	}
 	if (ret == SUCCESS && (opt & PGSQL_DML_STRING)) {
 		*sql = querystr.s;
 	}
@@ -5828,7 +5835,8 @@ cleanup:
 /* {{{ Select records that has ids (id=>value) */
 PHP_FUNCTION(pg_select)
 {
-	zval *pgsql_link, *ids;
+	zval *pgsql_link;
+	zval *ids = NULL;
 	pgsql_link_handle *link;
 	zend_string *table;
 	zend_ulong option = PGSQL_DML_EXEC;
@@ -5837,7 +5845,7 @@ PHP_FUNCTION(pg_select)
 	zend_string *sql = NULL;
 
 	/* TODO Document result_type param on php.net (apparently it was added in PHP 7.1) */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OPa|ll",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|all",
 		&pgsql_link, pgsql_link_ce, &table, &ids, &option, &result_type
 	) == FAILURE) {
 		RETURN_THROWS();
