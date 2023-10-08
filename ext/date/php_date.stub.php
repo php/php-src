@@ -380,9 +380,7 @@ class DateTime implements DateTimeInterface
      */
     public function format(string $format): string {}
 
-    /**
-     * @tentative-return-type
-     */
+    /** @tentative-return-type */
     public function modify(string $modifier): DateTime|false {}
 
     /**
@@ -391,9 +389,7 @@ class DateTime implements DateTimeInterface
      */
     public function add(DateInterval $interval): DateTime {}
 
-    /**
-     * @tentative-return-type
-     */
+    /** @tentative-return-type */
     public function sub(DateInterval $interval): DateTime {}
 
     /**
@@ -641,9 +637,7 @@ class DateInterval
 {
     public function __construct(string $duration) {}
 
-    /**
-     * @tentative-return-type
-     */
+    /** @tentative-return-type */
     public static function createFromDateString(string $datetime): DateInterval|false {}
 
     /**
@@ -720,65 +714,47 @@ class DatePeriod implements IteratorAggregate
     public function getIterator(): Iterator {}
 }
 
-/**
- * @strict-properties
- */
+/** @strict-properties */
 class DateError extends Error
 {
 }
 
-/**
- * @strict-properties
- */
+/** @strict-properties */
 class DateObjectError extends DateError
 {
 }
 
-/**
- * @strict-properties
- */
+/** @strict-properties */
 class DateRangeError extends DateError
 {
 }
 
-/**
- * @strict-properties
- */
+/** @strict-properties */
 class DateException extends Exception
 {
 }
 
-/**
- * @strict-properties
- */
+/** @strict-properties */
 class DateInvalidTimeZoneException extends DateException
 {
 }
 
-/**
- * @strict-properties
- */
+/** @strict-properties */
 class DateInvalidOperationException extends DateException
 {
 }
 
-/**
- * @strict-properties
- */
+/** @strict-properties */
 class DateMalformedStringException extends DateException
 {
 }
 
-/**
- * @strict-properties
- */
+/** @strict-properties */
 class DateMalformedIntervalStringException extends DateException
 {
 }
 
-/**
- * @strict-properties
- */
+/** @strict-properties */
 class DateMalformedPeriodStringException extends DateException
 {
 }
