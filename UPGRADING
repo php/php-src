@@ -34,6 +34,12 @@ PHP 8.4 UPGRADE NOTES
     This is no longer the case as a consequence of the bugfixes for GH-12192,
     GH-12208, #55098.
 
+- SPL:
+  . Out of bounds accesses in SplFixedArray now throw an exception of type
+    OutOfBoundsException instead of RuntimeException. As OutOfBoundsException
+    is a child class of RuntimeException, code that uses RuntimeException
+    continues to function.
+
 - Standard:
   . round() now validates the value of the $mode parameter and throws a ValueError
     for invalid modes. Previously invalid modes would have been interpreted as
