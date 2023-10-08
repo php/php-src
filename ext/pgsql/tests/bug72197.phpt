@@ -12,7 +12,7 @@ $var2="12";
 try {
     pg_lo_create($var1, $var2);
 } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+    echo $e->getMessage() . PHP_EOL;
 }
 
 /* This should work correctly. */
@@ -24,17 +24,17 @@ pg_query($conn, "BEGIN");
 $oid = pg_lo_create($conn);
 var_dump($oid);
 
-/* Check with default link */
-$oid = pg_lo_create();
-var_dump($oid);
+try {
+    pg_lo_create();
+} catch (ArgumentCountError $e) {
+    echo $e->getMessage() . PHP_EOL;
+}
 
 /* don't commit */
 pg_query($conn, "ROLLBACK");
 pg_close($conn);
 ?>
 --EXPECTF--
-pg_lo_create(): Argument #1 ($connection) must be of type PgSql\Connection when the connection is provided%w
+pg_lo_create(): Argument #1 ($connection) must be of type PgSql\Connection when the connection is provided
 int(%d)
-
-Deprecated: pg_lo_create(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
-int(%d)
+pg_lo_create() expects at least 1 argument, 0 given

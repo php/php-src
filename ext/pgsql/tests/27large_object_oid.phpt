@@ -32,26 +32,9 @@ if ($oid != 21001) echo ("pg_lo_create() wrong id\n");
 pg_lo_unlink ($db, $oid);
 pg_exec ($db, "commit");
 
-echo "create LO using default connection\n";
-pg_exec ("begin");
-$oid = pg_lo_create (21002);
-if (!$oid) echo ("pg_lo_create() error\n");
-if ($oid != 21002) echo ("pg_lo_create() wrong id\n");
-pg_lo_unlink ($oid);
-pg_exec ("commit");
-
 echo "OK";
 ?>
 --EXPECTF--
 create LO from int
 create LO from string
-create LO using default connection
-
-Deprecated: pg_exec(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
-
-Deprecated: pg_lo_create(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
-
-Deprecated: pg_lo_unlink(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
-
-Deprecated: pg_exec(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 OK

@@ -7,11 +7,10 @@ pgsql
 
 try {
     pg_dbname();
-} catch (Error $e) {
+} catch (ArgumentCountError $e) {
     echo $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECTF--
-Deprecated: pg_dbname(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
-No PostgreSQL connection opened yet
+pg_dbname() expects exactly 1 argument, 0 given
