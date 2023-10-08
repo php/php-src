@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: is_csv.c,v 1.6 2020/08/09 16:43:36 christos Exp $")
+FILE_RCSID("@(#)$File: is_csv.c,v 1.7 2022/05/28 00:44:22 christos Exp $")
 #endif
 
 #include <string.h>
@@ -184,7 +184,7 @@ main(int argc, char *argv[])
 	if (fstat(fd, &st) == -1)
 		err(EXIT_FAILURE, "Can't stat `%s'", argv[1]);
 
-	if ((p = malloc(st.st_size)) == NULL)
+	if ((p = CAST(char *, malloc(st.st_size))) == NULL)
 		err(EXIT_FAILURE, "Can't allocate %jd bytes",
 		    (intmax_t)st.st_size);
 	if (read(fd, p, st.st_size) != st.st_size)

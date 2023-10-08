@@ -41,7 +41,6 @@ $S390X_CONFIG \
 --enable-exif \
 --with-zip \
 --with-zlib \
---with-zlib-dir=/usr \
 --enable-soap \
 --enable-xmlreader \
 --with-xsl \

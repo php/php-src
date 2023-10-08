@@ -54,7 +54,7 @@ void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* 
 	}
 }
 
-zend_result zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval *op1, zval *op2) /* {{{ */
+zend_result zend_optimizer_eval_binary_op(zval *result, uint8_t opcode, zval *op1, zval *op2) /* {{{ */
 {
 	if (zend_binary_op_produces_error(opcode, op1, op2)) {
 		return FAILURE;
@@ -65,7 +65,7 @@ zend_result zend_optimizer_eval_binary_op(zval *result, zend_uchar opcode, zval 
 }
 /* }}} */
 
-zend_result zend_optimizer_eval_unary_op(zval *result, zend_uchar opcode, zval *op1) /* {{{ */
+zend_result zend_optimizer_eval_unary_op(zval *result, uint8_t opcode, zval *op1) /* {{{ */
 {
 	unary_op_type unary_op = get_unary_op(opcode);
 
@@ -113,7 +113,7 @@ zend_result zend_optimizer_eval_cast(zval *result, uint32_t type, zval *op1) /* 
 }
 /* }}} */
 
-zend_result zend_optimizer_eval_strlen(zval *result, zval *op1) /* {{{ */
+zend_result zend_optimizer_eval_strlen(zval *result, const zval *op1) /* {{{ */
 {
 	if (Z_TYPE_P(op1) != IS_STRING) {
 		return FAILURE;
@@ -231,7 +231,7 @@ void zend_optimizer_convert_to_free_op1(zend_op_array *op_array, zend_op *opline
 	}
 }
 
-int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv)
+int zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv)
 {
 	int i = op_array->last_literal;
 	op_array->last_literal++;
@@ -620,7 +620,7 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 
 bool zend_optimizer_replace_by_const(zend_op_array *op_array,
                                     zend_op       *opline,
-                                    zend_uchar     type,
+                                    uint8_t        type,
                                     uint32_t       var,
                                     zval          *val)
 {
@@ -720,6 +720,7 @@ void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, z
 		case ZEND_COALESCE:
 		case ZEND_ASSERT_CHECK:
 		case ZEND_JMP_NULL:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
 			ZEND_SET_OP_JMP_ADDR(new_opline, new_opline->op2, ZEND_OP2_JMP_ADDR(opline));
 			break;
 		case ZEND_FE_FETCH_R:
@@ -763,6 +764,7 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 		case ZEND_COALESCE:
 		case ZEND_ASSERT_CHECK:
 		case ZEND_JMP_NULL:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
 			ZEND_SET_OP_JMP_ADDR(opline, opline->op2, ZEND_OP2_JMP_ADDR(opline) - shiftlist[ZEND_OP2_JMP_ADDR(opline) - op_array->opcodes]);
 			break;
 		case ZEND_CATCH:
@@ -891,16 +893,19 @@ zend_function *zend_optimizer_get_called_func(
 					&op_array->scope->function_table, method_name);
 				if (fbc) {
 					bool is_private = (fbc->common.fn_flags & ZEND_ACC_PRIVATE) != 0;
-					bool is_final = (fbc->common.fn_flags & ZEND_ACC_FINAL) != 0;
-					bool same_scope = fbc->common.scope == op_array->scope;
 					if (is_private) {
 						/* Only use private method if in the same scope. We can't even use it
 						 * as a prototype, as it may be overridden with changed signature. */
+						bool same_scope = fbc->common.scope == op_array->scope;
 						return same_scope ? fbc : NULL;
 					}
-					/* If the method is non-final, it may be overridden,
-					 * but only with a compatible method signature. */
-					*is_prototype = !is_final;
+					/* Prototype methods are potentially overridden. fbc still contains useful type information.
+					 * Some optimizations may not be applied, like inlining or inferring the send-mode of superfluous args.
+					 * A method cannot be overridden if the class or method is final. */
+					if ((fbc->common.fn_flags & ZEND_ACC_FINAL) == 0 &&
+						(fbc->common.scope->ce_flags & ZEND_ACC_FINAL) == 0) {
+						*is_prototype = true;
+					}
 					return fbc;
 				}
 			}
@@ -1154,6 +1159,7 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 			case ZEND_FE_RESET_RW:
 			case ZEND_ASSERT_CHECK:
 			case ZEND_JMP_NULL:
+			case ZEND_BIND_INIT_STATIC_OR_JMP:
 				opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
 				break;
 			case ZEND_CATCH:
@@ -1274,6 +1280,7 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 			case ZEND_FE_RESET_RW:
 			case ZEND_ASSERT_CHECK:
 			case ZEND_JMP_NULL:
+			case ZEND_BIND_INIT_STATIC_OR_JMP:
 				opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
 				break;
 			case ZEND_CATCH:
@@ -1416,8 +1423,7 @@ static void zend_foreach_op_array_helper(
 
 void zend_foreach_op_array(zend_script *script, zend_op_array_func_t func, void *context)
 {
-	zend_class_entry *ce;
-	zend_string *key;
+	zval *zv;
 	zend_op_array *op_array;
 
 	zend_foreach_op_array_helper(&script->main_op_array, func, context);
@@ -1426,10 +1432,11 @@ void zend_foreach_op_array(zend_script *script, zend_op_array_func_t func, void 
 		zend_foreach_op_array_helper(op_array, func, context);
 	} ZEND_HASH_FOREACH_END();
 
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&script->class_table, key, ce) {
-		if (ce->refcount > 1 && !zend_string_equals_ci(key, ce->name)) {
+	ZEND_HASH_MAP_FOREACH_VAL(&script->class_table, zv) {
+		if (Z_TYPE_P(zv) == IS_ALIAS_PTR) {
 			continue;
 		}
+		zend_class_entry *ce = Z_CE_P(zv);
 		ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, op_array) {
 			if (op_array->scope == ce
 					&& op_array->type == ZEND_USER_FUNCTION
@@ -1465,11 +1472,10 @@ static void zend_optimizer_call_registered_passes(zend_script *script, void *ctx
 
 ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level)
 {
-	zend_class_entry *ce;
-	zend_string *key;
 	zend_op_array *op_array;
 	zend_string *name;
 	zend_optimizer_ctx ctx;
+	zval *zv;
 
 	ctx.arena = zend_arena_create(64 * 1024);
 	ctx.script = script;
@@ -1596,10 +1602,11 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 		}
 	}
 
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&script->class_table, key, ce) {
-		if (ce->refcount > 1 && !zend_string_equals_ci(key, ce->name)) {
+	ZEND_HASH_MAP_FOREACH_VAL(&script->class_table, zv) {
+		if (Z_TYPE_P(zv) == IS_ALIAS_PTR) {
 			continue;
 		}
+		zend_class_entry *ce = Z_CE_P(zv);
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->function_table, name, op_array) {
 			if (op_array->scope != ce && op_array->type == ZEND_USER_FUNCTION) {
 				zend_op_array *orig_op_array =

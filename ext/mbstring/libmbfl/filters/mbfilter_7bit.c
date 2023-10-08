@@ -64,7 +64,9 @@ const mbfl_encoding mbfl_encoding_7bit = {
 	&vtbl_7bit_wchar,
 	&vtbl_wchar_7bit,
 	mb_7bit_to_wchar,
-	mb_wchar_to_7bit
+	mb_wchar_to_7bit,
+	NULL,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
@@ -79,7 +81,7 @@ int mbfl_filt_conv_any_7bit(int c, mbfl_convert_filter *filter)
 	if (c >= 0 && c < 0x80) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
-		mbfl_filt_conv_illegal_output(c, filter);
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 	return 0;
 }

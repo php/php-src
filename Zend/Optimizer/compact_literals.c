@@ -63,7 +63,23 @@ static size_t type_num_classes(const zend_op_array *op_array, uint32_t arg_num)
 
 	if (ZEND_TYPE_IS_COMPLEX(arg_info->type)) {
 		if (ZEND_TYPE_HAS_LIST(arg_info->type)) {
-			return ZEND_TYPE_LIST(arg_info->type)->num_types;
+			/* Intersection types cannot have nested list types */
+			if (ZEND_TYPE_IS_INTERSECTION(arg_info->type)) {
+				return ZEND_TYPE_LIST(arg_info->type)->num_types;
+			}
+			ZEND_ASSERT(ZEND_TYPE_IS_UNION(arg_info->type));
+			size_t count = 0;
+			zend_type *list_type;
+
+			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
+				if (ZEND_TYPE_IS_INTERSECTION(*list_type)) {
+					count += ZEND_TYPE_LIST(*list_type)->num_types;
+				} else {
+					ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*list_type));
+					count += 1;
+				}
+			} ZEND_TYPE_LIST_FOREACH_END();
+			return count;
 		}
 		return 1;
 	}
@@ -195,7 +211,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					if (opline->op1_type == IS_CONST) {
 						LITERAL_INFO(opline->op1.constant, 2);
 					}
-					LITERAL_INFO(opline->op2.constant, 1);
+					if (opline->op2_type == IS_CONST) {
+						LITERAL_INFO(opline->op2.constant, 1);
+					}
 					break;
 				case ZEND_ASSIGN_STATIC_PROP:
 				case ZEND_ASSIGN_STATIC_PROP_REF:
@@ -652,7 +670,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_FETCH_CLASS_CONSTANT:
-					if (opline->op1_type == IS_CONST) {
+					if (opline->op1_type == IS_CONST
+						&& opline->op2_type == IS_CONST
+						&& Z_TYPE(op_array->literals[opline->op2.constant]) == IS_STRING) {
 						// op1/op2 class_const
 						opline->extended_value = add_static_slot(&hash, op_array,
 							opline->op1.constant,

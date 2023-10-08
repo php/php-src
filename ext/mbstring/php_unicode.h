@@ -77,19 +77,21 @@
 MBSTRING_API bool php_unicode_is_prop(unsigned long code, ...);
 MBSTRING_API bool php_unicode_is_prop1(unsigned long code, int prop);
 
-MBSTRING_API char *php_unicode_convert_case(
-		int case_mode, const char *srcstr, size_t srclen, size_t *ret_len,
-		const mbfl_encoding *src_encoding, int illegal_mode, int illegal_substchar);
+typedef enum {
+	PHP_UNICODE_CASE_UPPER = 0,
+	PHP_UNICODE_CASE_LOWER,
+	PHP_UNICODE_CASE_TITLE,
+	PHP_UNICODE_CASE_FOLD,
+	PHP_UNICODE_CASE_UPPER_SIMPLE,
+	PHP_UNICODE_CASE_LOWER_SIMPLE,
+	PHP_UNICODE_CASE_TITLE_SIMPLE,
+	PHP_UNICODE_CASE_FOLD_SIMPLE,
+	PHP_UNICODE_CASE_MODE_MAX
+} php_case_mode;
 
-#define PHP_UNICODE_CASE_UPPER        0
-#define PHP_UNICODE_CASE_LOWER        1
-#define PHP_UNICODE_CASE_TITLE        2
-#define PHP_UNICODE_CASE_FOLD         3
-#define PHP_UNICODE_CASE_UPPER_SIMPLE 4
-#define PHP_UNICODE_CASE_LOWER_SIMPLE 5
-#define PHP_UNICODE_CASE_TITLE_SIMPLE 6
-#define PHP_UNICODE_CASE_FOLD_SIMPLE  7
-#define PHP_UNICODE_CASE_MODE_MAX     7
+MBSTRING_API zend_string *php_unicode_convert_case(
+		php_case_mode case_mode, const char *srcstr, size_t srclen,
+		const mbfl_encoding *src_encoding, const mbfl_encoding *dst_encoding, int illegal_mode, uint32_t illegal_substchar);
 
 /* Optimize the common ASCII case for lower/upper */
 

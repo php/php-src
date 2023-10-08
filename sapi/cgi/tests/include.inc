@@ -3,12 +3,13 @@
 function get_cgi_path() /* {{{ */
 {
     $php = getenv("TEST_PHP_EXECUTABLE");
+    $php_escaped = getenv("TEST_PHP_EXECUTABLE_ESCAPED");
 
     $cli = false;
     $cgi = false;
 
     if (file_exists($php) && is_executable($php)) {
-        $version = `$php -n -v`;
+        $version = `$php_escaped -n -v`;
         if (strstr($version, "(cli)")) {
             /* that's cli */
             $cli = true;

@@ -34,8 +34,6 @@
 #define PREG_SPLIT_DELIM_CAPTURE	(1<<1)
 #define PREG_SPLIT_OFFSET_CAPTURE	(1<<2)
 
-#define PREG_REPLACE_EVAL			(1<<0)
-
 #define PREG_GREP_INVERT			(1<<0)
 
 #define PREG_JIT                    (1<<3)
@@ -737,14 +735,12 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 				break;
 			case 'J':	coptions |= PCRE2_DUPNAMES;		break;
 
-			/* Custom preg options */
-			case 'e':	poptions |= PREG_REPLACE_EVAL;	break;
-
 			case ' ':
 			case '\n':
 			case '\r':
 				break;
 
+			case 'e': /* legacy eval */
 			default:
 				if (pp[-1]) {
 					php_error_docref(NULL, E_WARNING, "Unknown modifier '%c'", pp[-1]);
@@ -758,16 +754,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 				}
 				return NULL;
 		}
-	}
-
-	if (poptions & PREG_REPLACE_EVAL) {
-		php_error_docref(NULL, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
-		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
-		efree(pattern);
-		if (key != regex) {
-			zend_string_release_ex(key, 0);
-		}
-		return NULL;
 	}
 
 	if (key != regex) {
@@ -902,25 +888,6 @@ PHPAPI pcre2_code *pcre_get_compiled_regex(zend_string *regex, uint32_t *capture
 {
 	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex);
 
-	if (capture_count) {
-		*capture_count = pce ? pce->capture_count : 0;
-	}
-
-	return pce ? pce->re : NULL;
-}
-/* }}} */
-
-/* {{{ pcre_get_compiled_regex_ex */
-PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *capture_count, uint32_t *preg_options, uint32_t *compile_options)
-{
-	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex);
-
-	if (preg_options) {
-		*preg_options = pce ? pce->preg_options : 0;
-	}
-	if (compile_options) {
-		*compile_options = pce ? pce->compile_options : 0;
-	}
 	if (capture_count) {
 		*capture_count = pce ? pce->capture_count : 0;
 	}
@@ -2425,6 +2392,10 @@ PHP_FUNCTION(preg_replace_callback_array)
 			zend_argument_type_error(1, "must contain only valid callbacks");
 			goto error;
 		}
+		if (!str_idx_regex) {
+			zend_argument_type_error(1, "must contain only string patterns as keys");
+			goto error;
+		}
 
 		ZVAL_COPY_VALUE(&fci.function_name, replace);
 
@@ -2457,7 +2428,12 @@ PHP_FUNCTION(preg_replace_callback_array)
 	}
 
 	if (subject_ht) {
-		RETURN_ARR(subject_ht);
+		RETVAL_ARR(subject_ht);
+		// Unset the type_flags of immutable arrays to prevent the VM from performing refcounting
+		if (GC_FLAGS(subject_ht) & IS_ARRAY_IMMUTABLE) {
+			Z_TYPE_FLAGS_P(return_value) = 0;
+		}
+		return;
 	} else {
 		RETURN_STR(subject_str);
 	}

@@ -22,17 +22,19 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter.c
+ * The source code included in this file was separated from mbfilter.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
  *
  */
 
 #include "mbfilter.h"
 #include "mbfilter_utf7.h"
+#include "utf7_helper.h"
 
 static int mbfl_filt_conv_utf7_wchar_flush(mbfl_convert_filter *filter);
 static size_t mb_utf7_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
 static void mb_wchar_to_utf7(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+static bool mb_check_utf7(unsigned char *in, size_t in_len);
 
 static const unsigned char mbfl_base64_table[] = {
  /* 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', */
@@ -59,7 +61,9 @@ const mbfl_encoding mbfl_encoding_utf7 = {
 	&vtbl_utf7_wchar,
 	&vtbl_wchar_utf7,
 	mb_utf7_to_wchar,
-	mb_wchar_to_utf7
+	mb_wchar_to_utf7,
+	mb_check_utf7,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_utf7_wchar = {
@@ -408,14 +412,22 @@ int mbfl_filt_conv_wchar_utf7_flush(mbfl_convert_filter *filter)
 	return 0;
 }
 
-/* Ways which a Base64-encoded section can end: */
-#define DASH 0xFD
-#define ASCII 0xFE
-#define ILLEGAL 0xFF
-
 static inline bool is_base64_end(unsigned char c)
 {
 	return c >= DASH;
+}
+
+static bool is_optional_direct(unsigned char c)
+{
+	/* Characters that are allowed to be encoded by Base64 or directly encoded */
+	return c == '!' || c == '"' || c == '#' || c == '$' || c == '%' || c == '&' || c == '*' || c == ';' || c == '<' ||
+		   c == '=' || c == '>' || c == '@' || c == '[' || c == ']' || c == '^' || c == '_' || c == '`' || c == '{' ||
+		   c == '|' || c == '}';
+}
+
+static bool can_end_base64(uint32_t c)
+{
+	return c == ' ' || c == '\t' || c == '\r' || c == '\n' || c == '\'' || c == '(' || c == ')' || c == ',' || c == '.' || c == ':' || c == '?';
 }
 
 static unsigned char decode_base64(unsigned char c)
@@ -432,6 +444,8 @@ static unsigned char decode_base64(unsigned char c)
 		return 63;
 	} else if (c == '-') {
 		return DASH;
+	} else if (can_end_base64(c) || is_optional_direct(c) || c == '\0') {
+		return DIRECT;
 	} else if (c <= 0x7F) {
 		return ASCII;
 	}
@@ -470,7 +484,7 @@ static uint32_t* handle_base64_end(unsigned char n, unsigned char **p, uint32_t 
 
 	if (n == ILLEGAL) {
 		*out++ = MBFL_BAD_INPUT;
-	} else if (n == ASCII) {
+	} else if (n == DIRECT || n == ASCII) {
 		(*p)--; /* Unconsume byte */
 	}
 
@@ -524,14 +538,19 @@ static size_t mb_utf7_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 			if (p == e) {
 				/* It is an error if trailing padding bits are not zeroes or if we were
 				 * expecting the 2nd part of a surrogate pair when Base64 section ends */
-				if ((n3 & 0x3) || surrogate1)
+				if ((n3 & 0x3) || surrogate1) {
 					*out++ = MBFL_BAD_INPUT;
+					surrogate1 = 0;
+				}
 				break;
 			}
 
 			unsigned char n4 = decode_base64(*p++);
-			if (is_base64_end(n4) || p == e) {
+			if (is_base64_end(n4)) {
 				out = handle_base64_end(n4, &p, out, &base64, n3 & 0x3, &surrogate1);
+				continue;
+			} else if (p == e) {
+				out = handle_base64_end(n4, &p, out, &base64, true, &surrogate1);
 				continue;
 			}
 			unsigned char n5 = decode_base64(*p++);
@@ -546,14 +565,19 @@ static size_t mb_utf7_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 			}
 			out = handle_utf16_cp((n3 << 14) | (n4 << 8) | (n5 << 2) | ((n6 & 0x30) >> 4), out, &surrogate1);
 			if (p == e) {
-				if ((n6 & 0xF) || surrogate1)
+				if ((n6 & 0xF) || surrogate1) {
 					*out++ = MBFL_BAD_INPUT;
+					surrogate1 = 0;
+				}
 				break;
 			}
 
 			unsigned char n7 = decode_base64(*p++);
-			if (is_base64_end(n7) || p == e) {
+			if (is_base64_end(n7)) {
 				out = handle_base64_end(n7, &p, out, &base64, n6 & 0xF, &surrogate1);
+				continue;
+			} else if (p == e) {
+				out = handle_base64_end(n7, &p, out, &base64, true, &surrogate1);
 				continue;
 			}
 			unsigned char n8 = decode_base64(*p++);
@@ -584,15 +608,15 @@ static size_t mb_utf7_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 		}
 	}
 
+	if (p == e && surrogate1) {
+		ZEND_ASSERT(out < limit);
+		*out++ = MBFL_BAD_INPUT;
+	}
+
 	*state = (surrogate1 << 1) | base64;
 	*in_len = e - p;
 	*in = p;
 	return out - buf;
-}
-
-static bool can_end_base64(uint32_t c)
-{
-	return c == ' ' || c == '\t' || c == '\r' || c == '\n' || c == '\'' || c == '(' || c == ')' || c == ',' || c == '.' || c == ':' || c == '?';
 }
 
 static bool should_direct_encode(uint32_t c)
@@ -693,4 +717,130 @@ static void mb_wchar_to_utf7(uint32_t *in, size_t len, mb_convert_buf *buf, bool
 	}
 
 	MB_CONVERT_BUF_STORE(buf, out, limit);
+}
+
+static bool is_utf16_cp_valid(uint16_t cp, bool is_surrogate)
+{
+	if (is_surrogate) {
+		return cp >= 0xDC00 && cp <= 0xDFFF;
+	} else {
+		/* 2nd part of surrogate pair came unexpectedly */
+		return !(cp >= 0xDC00 && cp <= 0xDFFF);
+	}
+}
+
+static bool can_encode_directly(unsigned char c)
+{
+	return should_direct_encode(c) || is_optional_direct(c) || c == '\0';
+}
+
+static bool mb_check_utf7(unsigned char *in, size_t in_len)
+{
+	unsigned char *p = in, *e = p + in_len;
+	bool base64 = false;
+	bool is_surrogate = false;
+
+	while (p < e) {
+		if (base64) {
+			unsigned char n1 = decode_base64(*p++);
+			if (is_base64_end(n1)) {
+				if (!is_base64_end_valid(n1, false, is_surrogate)) {
+					return false;
+				}
+				base64 = false;
+				continue;
+			} else if (p == e) {
+				return false;
+			}
+			unsigned char n2 = decode_base64(*p++);
+			if (is_base64_end(n2) || p == e) {
+				return false;
+			}
+			unsigned char n3 = decode_base64(*p++);
+			if (is_base64_end(n3)) {
+				return false;
+			}
+			uint16_t cp1 = (n1 << 10) | (n2 << 4) | ((n3 & 0x3C) >> 2);
+			if (!is_utf16_cp_valid(cp1, is_surrogate)) {
+				return false;
+			}
+			is_surrogate = has_surrogate(cp1, is_surrogate);
+			if (p == e) {
+				/* It is an error if trailing padding bits are not zeroes or if we were
+				 * expecting the 2nd part of a surrogate pair when Base64 section ends */
+				return !((n3 & 0x3) || is_surrogate);
+			}
+
+			unsigned char n4 = decode_base64(*p++);
+			if (is_base64_end(n4)) {
+				if (!is_base64_end_valid(n4, n3 & 0x3, is_surrogate)) {
+					return false;
+				}
+				base64 = false;
+				continue;
+			} else if (p == e) {
+				return false;
+			}
+			unsigned char n5 = decode_base64(*p++);
+			if (is_base64_end(n5) || p == e) {
+				return false;
+			}
+			unsigned char n6 = decode_base64(*p++);
+			if (is_base64_end(n6)) {
+				return false;
+			}
+			uint16_t cp2 = (n3 << 14) | (n4 << 8) | (n5 << 2) | ((n6 & 0x30) >> 4);
+			if (!is_utf16_cp_valid(cp2, is_surrogate)) {
+				return false;
+			}
+			is_surrogate = has_surrogate(cp2, is_surrogate);
+			if (p == e) {
+				return !((n6 & 0xF) || is_surrogate);
+			}
+
+			unsigned char n7 = decode_base64(*p++);
+			if (is_base64_end(n7)) {
+				if (!is_base64_end_valid(n7, n6 & 0xF, is_surrogate)) {
+					return false;
+				}
+				base64 = false;
+				continue;
+			} else if (p == e) {
+				return false;
+			}
+			unsigned char n8 = decode_base64(*p++);
+			if (is_base64_end(n8)) {
+				return false;
+			}
+			uint16_t cp3 = (n6 << 12) | (n7 << 6) | n8;
+			if (!is_utf16_cp_valid(cp3, is_surrogate)) {
+				return false;
+			}
+			is_surrogate = has_surrogate(cp3, is_surrogate);
+		} else {
+			/* ASCII text section */
+			unsigned char c = *p++;
+
+			if (c == '+') {
+				if (p == e) {
+					base64 = true;
+					return !is_surrogate;
+				}
+				unsigned char n = decode_base64(*p);
+				if (n == DASH) {
+					p++;
+				} else if (n > DASH) {
+					/* If a "+" character followed immediately by any character other than base64 or "-" */
+					return false;
+				} else {
+					base64 = true;
+				}
+			} else if (can_encode_directly(c)) {
+				continue;
+			} else {
+				return false;
+			}
+		}
+	}
+	return !is_surrogate;
 }

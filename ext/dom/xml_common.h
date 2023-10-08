@@ -61,20 +61,18 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 
 #define NODE_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_LIBXML_NODE_P(__id); \
-	if (__intern->node == NULL || !(__ptr = (__prtype)__intern->node->node)) { \
-  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", \
+	if (UNEXPECTED(__intern->node == NULL)) { \
+		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", \
 			ZSTR_VAL(__intern->std.ce->name));\
-  		RETURN_NULL();\
-  	} \
+		RETURN_NULL();\
+	} \
+	__ptr = (__prtype)__intern->node->node; \
 }
 
 #define DOC_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_LIBXML_NODE_P(__id); \
-	if (__intern->document != NULL) { \
-		if (!(__ptr = (__prtype)__intern->document->ptr)) { \
-  			php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
-  			RETURN_NULL();\
-  		} \
+	if (EXPECTED(__intern->document != NULL)) { \
+		__ptr = (__prtype)__intern->document->ptr); \
 	} \
 }
 

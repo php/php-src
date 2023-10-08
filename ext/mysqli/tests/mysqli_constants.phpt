@@ -7,7 +7,6 @@ mysqli.allow_local_infile=1
 --FILE--
 <?php
 
-$IS_MYSQLND = stristr(mysqli_get_client_info(), "mysqlnd");
 $constants = get_defined_constants(true);
 sort($constants);
 
@@ -103,48 +102,27 @@ $expected_constants = array(
     "MYSQLI_TRANS_COR_NO_RELEASE"		=> true,
 );
 
-/* depends on the build - experimental */
-if ($IS_MYSQLND) {
-    $expected_constants['MYSQLI_OPT_INT_AND_FLOAT_NATIVE'] = true;
-}
+$expected_constants['MYSQLI_OPT_INT_AND_FLOAT_NATIVE'] = true;
 
-if ($IS_MYSQLND) {
-    $expected_constants['MYSQLI_STORE_RESULT_COPY_DATA'] = true;
-}
+$expected_constants['MYSQLI_STORE_RESULT_COPY_DATA'] = true;
 
-if ($IS_MYSQLND) {
-    $expected_constants['MYSQLI_REFRESH_BACKUP_LOG'] = true;
-}
+$expected_constants['MYSQLI_REFRESH_BACKUP_LOG'] = true;
 
-if ($IS_MYSQLND) {
-    $version = 50007 + 1;
-    $expected_constants['MYSQLI_OPT_NET_CMD_BUFFER_SIZE'] = true;
-    $expected_constants['MYSQLI_OPT_NET_READ_BUFFER_SIZE'] = true;
-    $expected_constants['MYSQLI_ASYNC'] = true;
+$version = 50007 + 1;
+$expected_constants['MYSQLI_OPT_NET_CMD_BUFFER_SIZE'] = true;
+$expected_constants['MYSQLI_OPT_NET_READ_BUFFER_SIZE'] = true;
+$expected_constants['MYSQLI_ASYNC'] = true;
 
-    $expected_constants['MYSQLI_SERVER_PS_OUT_PARAMS'] = true;
-} else {
-    $version = mysqli_get_client_version();
-}
+$expected_constants['MYSQLI_SERVER_PS_OUT_PARAMS'] = true;
 
-if (($version > 51122 && $version < 60000) || ($version > 60003) || $IS_MYSQLND) {
-    $expected_constants['MYSQLI_ON_UPDATE_NOW_FLAG'] = true;
-}
+$expected_constants['MYSQLI_ON_UPDATE_NOW_FLAG'] = true;
 
-/* First introduced in MySQL 6.0, backported to MySQL 5.5 */
-if ($version >= 50500 || $IS_MYSQLND) {
-    $expected_constants['MYSQLI_SERVER_QUERY_WAS_SLOW'] = true;
-}
+$expected_constants['MYSQLI_SERVER_QUERY_WAS_SLOW'] = true;
 
 $expected_constants['MYSQLI_CLIENT_SSL_VERIFY_SERVER_CERT'] = true;
-if ($IS_MYSQLND) {
-    $expected_constants['MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT'] = true;
-}
+$expected_constants['MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT'] = true;
 
-/* First introduced in MySQL 6.0, backported to MySQL 5.5 */
-if ($version >= 50606 || $IS_MYSQLND) {
-    $expected_constants['MYSQLI_SERVER_PUBLIC_KEY'] = true;
-}
+$expected_constants['MYSQLI_SERVER_PUBLIC_KEY'] = true;
 
 $expected_constants = array_merge($expected_constants, array(
     "MYSQLI_TYPE_NEWDECIMAL"	=> true,
@@ -165,22 +143,15 @@ $expected_constants = array_merge($expected_constants, array(
     "MYSQLI_STMT_ATTR_PREFETCH_ROWS"	=> true,
 ));
 
-if ($version < 80000 || $version >= 100000 || $IS_MYSQLND) {
-    $expected_constants['MYSQLI_OPT_SSL_VERIFY_SERVER_CERT'] = true;
-}
+$expected_constants['MYSQLI_OPT_SSL_VERIFY_SERVER_CERT'] = true;
 
 /* pretty dump test, but that is the best way to mimic mysql.c */
 $expected_constants["MYSQLI_DATA_TRUNCATED"] = true;
 
-if ($IS_MYSQLND || (!$IS_MYSQLND && ($version > 50610))) {
-    /* could be that MySQL/libmysql 5.6.9 had the flag already but it was no stable release */
-    $expected_constants["MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
-    $expected_constants["MYSQLI_CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
-}
+$expected_constants["MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
+$expected_constants["MYSQLI_CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
 
-if ($IS_MYSQLND) {
-    $expected_constants["MYSQLI_TYPE_JSON"]	= true;
-}
+$expected_constants["MYSQLI_TYPE_JSON"]	= true;
 
 $unexpected_constants = array();
 

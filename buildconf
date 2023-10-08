@@ -81,7 +81,7 @@ echo "buildconf: Checking installation"
 min_version=$(sed -n 's/AC_PREREQ(\[\(.*\)\])/\1/p' configure.ac)
 
 # Check if autoconf exists.
-ac_version=$($PHP_AUTOCONF --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//')
+ac_version=$($PHP_AUTOCONF --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[^0-9.]*$//')
 
 if test -z "$ac_version"; then
   echo "buildconf: autoconf not found." >&2

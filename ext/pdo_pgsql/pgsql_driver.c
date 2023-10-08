@@ -463,33 +463,53 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 		case PDO_ATTR_CONNECTION_STATUS:
 			switch (PQstatus(H->server)) {
 				case CONNECTION_STARTED:
-					ZVAL_STRINGL(return_value, "Waiting for connection to be made.", sizeof("Waiting for connection to be made.")-1);
+					ZVAL_STRINGL(return_value, "Waiting for connection to be made.", strlen("Waiting for connection to be made."));
 					break;
 
 				case CONNECTION_MADE:
 				case CONNECTION_OK:
-					ZVAL_STRINGL(return_value, "Connection OK; waiting to send.", sizeof("Connection OK; waiting to send.")-1);
+					ZVAL_STRINGL(return_value, "Connection OK; waiting to send.", strlen("Connection OK; waiting to send."));
 					break;
 
 				case CONNECTION_AWAITING_RESPONSE:
-					ZVAL_STRINGL(return_value, "Waiting for a response from the server.", sizeof("Waiting for a response from the server.")-1);
+					ZVAL_STRINGL(return_value, "Waiting for a response from the server.", strlen("Waiting for a response from the server."));
 					break;
 
 				case CONNECTION_AUTH_OK:
-					ZVAL_STRINGL(return_value, "Received authentication; waiting for backend start-up to finish.", sizeof("Received authentication; waiting for backend start-up to finish.")-1);
+					ZVAL_STRINGL(return_value, "Received authentication; waiting for backend start-up to finish.", strlen("Received authentication; waiting for backend start-up to finish."));
 					break;
 #ifdef CONNECTION_SSL_STARTUP
 				case CONNECTION_SSL_STARTUP:
-					ZVAL_STRINGL(return_value, "Negotiating SSL encryption.", sizeof("Negotiating SSL encryption.")-1);
+					ZVAL_STRINGL(return_value, "Negotiating SSL encryption.", strlen("Negotiating SSL encryption."));
 					break;
 #endif
 				case CONNECTION_SETENV:
-					ZVAL_STRINGL(return_value, "Negotiating environment-driven parameter settings.", sizeof("Negotiating environment-driven parameter settings.")-1);
+					ZVAL_STRINGL(return_value, "Negotiating environment-driven parameter settings.", strlen("Negotiating environment-driven parameter settings."));
 					break;
 
+#ifdef CONNECTION_CONSUME
+				case CONNECTION_CONSUME:
+					ZVAL_STRINGL(return_value, "Flushing send queue/consuming extra data.", strlen("Flushing send queue/consuming extra data."));
+					break;
+#endif
+#ifdef CONNECTION_GSS_STARTUP
+				case CONNECTION_SSL_STARTUP:
+					ZVAL_STRINGL(return_value, "Negotiating GSSAPI.", strlen("Negotiating GSSAPI."));
+					break;
+#endif
+#ifdef CONNECTION_CHECK_TARGET
+				case CONNECTION_CHECK_TARGET:
+					ZVAL_STRINGL(return_value, "Connection OK; checking target server properties.", strlen("Connection OK; checking target server properties."));
+					break;
+#endif
+#ifdef CONNECTION_CHECK_STANDBY
+				case CONNECTION_CHECK_STANDBY:
+					ZVAL_STRINGL(return_value, "Connection OK; checking if server in standby.", strlen("Connection OK; checking if server in standby."));
+					break;
+#endif
 				case CONNECTION_BAD:
 				default:
-					ZVAL_STRINGL(return_value, "Bad connection.", sizeof("Bad connection.")-1);
+					ZVAL_STRINGL(return_value, "Bad connection.", strlen("Bad connection."));
 					break;
 			}
 			break;

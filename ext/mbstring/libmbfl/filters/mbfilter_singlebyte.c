@@ -86,7 +86,9 @@ static int mbfl_conv_reverselookup_table(int c, mbfl_convert_filter *filter, int
 		&vtbl_##id##_wchar, \
 		&vtbl_wchar_##id, \
 		mb_##id##_to_wchar, \
-		mb_wchar_to_##id \
+		mb_wchar_to_##id, \
+		NULL, \
+		NULL \
 	}
 
 /* For single-byte encodings which use a conversion table */
@@ -485,10 +487,10 @@ DEF_SB_TBL(cp1251, "Windows-1251", "Windows-1251", cp1251_aliases, 0x80, cp1251_
 
 static const char *cp1252_aliases[] = {"cp1252", NULL};
 static const unsigned short cp1252_ucs_table[] = {
-	0x20AC, 0x0000, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021,
-	0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0x0000, 0x017D, 0x0000,
-	0x0000, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014,
-	0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0x0000, 0x017E, 0x0178
+	0x20AC, 0x0081, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021,
+	0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0x008D, 0x017D, 0x008F,
+	0x0090, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014,
+	0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0x009D, 0x017E, 0x0178
 };
 DEF_SB(cp1252, "Windows-1252", "Windows-1252", cp1252_aliases);
 
@@ -504,7 +506,7 @@ static int mbfl_filt_conv_wchar_cp1252(int c, mbfl_convert_filter *filter)
 			}
 		}
 		CK(mbfl_filt_conv_illegal_output(c, filter));
-	} else if (c <= 0x7F || c >= 0xA0) {
+	} else if (c <= 0x7F || c >= 0xA0 || c == 0x81 || c == 0x8D || c == 0x8F || c == 0x90 || c == 0x9D) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
 		CK(mbfl_filt_conv_illegal_output(c, filter));
@@ -562,7 +564,7 @@ static void mb_wchar_to_cp1252(uint32_t *in, size_t len, mb_convert_buf *buf, bo
 			}
 			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_cp1252);
 			MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
-		} else if (w <= 0x7F || w >= 0xA0) {
+		} else if (w <= 0x7F || w >= 0xA0 || w == 0x81 || w == 0x8D || w == 0x8F || w == 0x90 || w == 0x9D) {
 			out = mb_convert_buf_add(out, w);
 		} else {
 			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_cp1252);

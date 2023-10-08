@@ -22,10 +22,23 @@ var_dump($r2=assert(0 == 0));
 var_dump($rao=assert_options(ASSERT_WARNING, 0));
 ?>
 --EXPECTF--
+Deprecated: PHP Startup: assert.warning INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: assert.callback INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: assert.exception INI setting is deprecated in Unknown on line 0
+
+Deprecated: Constant ASSERT_WARNING is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 int(0)
 f1 called
 
 Warning: assert(): assert(0 != 0) failed in %s on line %d
 bool(false)
 bool(true)
+
+Deprecated: Constant ASSERT_WARNING is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 int(1)

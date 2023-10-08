@@ -50,11 +50,6 @@ function testValid($from, $to, $encoding, $bothWays = true) {
 		/* ESC ( B at the beginning is redundant, since ASCII mode is the default */
 		if (substr($from, 0, 3) == "\x1B(B")
 			$from = substr($from, 3, strlen($from) - 3);
-		/* If the string switches to a different charset, it should switch back to
-		 * ASCII at the end */
-		if (strpos($from, "\x1B\$B") !== false || strpos($from, "\x1B(J") !== false)
-			$from .= "\x1B(B";
-
 		convertValidString($to, $from, 'UTF-16BE', $encoding, false);
 	}
 }
@@ -66,11 +61,11 @@ function testInvalid($from, $to, $encoding) {
 for ($i = 0; $i < 0x80; $i++) {
 	if ($i == 0xE || $i == 0xF || $i == 0x1B)
 		continue;
-	testValid(chr($i),            "\x00" . chr($i), 'JIS');
-	testValid("\x0F" . chr($i),   "\x00" . chr($i), 'JIS'); /* 0xF is 'Shift Out' code */
-	testValid("\x1B(B" . chr($i), "\x00" . chr($i), 'JIS');
-	testValid(chr($i),            "\x00" . chr($i), 'ISO-2022-JP');
-	testValid("\x1B(B" . chr($i), "\x00" . chr($i), 'ISO-2022-JP');
+	testValid(chr($i),                   "\x00" . chr($i), 'JIS');
+	convertValidString("\x0F" . chr($i), "\x00" . chr($i), 'JIS', 'UTF-16BE', false); /* 0xF is 'Shift In' code */
+	testValid("\x1B(B" . chr($i),        "\x00" . chr($i), 'JIS');
+	testValid(chr($i),                   "\x00" . chr($i), 'ISO-2022-JP');
+	testValid("\x1B(B" . chr($i),        "\x00" . chr($i), 'ISO-2022-JP');
 }
 
 for ($i = 0x80; $i < 256; $i++) {
@@ -92,27 +87,27 @@ echo "ASCII support OK\n";
 foreach ($jisx0201Chars as $jisx0201 => $utf16BE) {
 	if (ord($jisx0201) >= 128) {
 		$kana = chr(ord($jisx0201) - 128);
-		testValid("\x1B(I" . $kana, $utf16BE, 'JIS', false);
-		testValid("\x0E" . $kana, $utf16BE, 'JIS', false); /* 0xE is 'Shift In' code */
+		testValid("\x1B(I" . $kana . "\x1B(B", $utf16BE, 'JIS', false);
+		testValid("\x0E" . $kana . "\x0F", $utf16BE, 'JIS', false); /* 0xE is 'Shift Out' code */
 		testValid($jisx0201, $utf16BE, 'JIS', false);
 	} else {
-		testValid("\x1B(J" . $jisx0201, $utf16BE, 'JIS', $utf16BE > "\x00\x80");
+		testValid("\x1B(J" . $jisx0201 . "\x1B(B", $utf16BE, 'JIS', $utf16BE > "\x00\x80");
 	}
 }
 
 for ($i = 0x80; $i < 256; $i++) {
 	if ($i >= 0xA1 && $i <= 0xDF)
 		continue;
-	testInvalid("\x1B(I" . chr($i), "\x00%", 'JIS');
-	testInvalid("\x1B(J" . chr($i), "\x00%", 'JIS');
+	testInvalid("\x1B(I" . chr($i)  . "\x1B(B", "\x00%", 'JIS');
+	testInvalid("\x1B(J" . chr($i)  . "\x1B(B", "\x00%", 'JIS');
 }
 
 echo "JIS X 0201 support OK\n";
 
 /* All valid JISX0208 characters */
 foreach ($jisx0208Chars as $jisx0208 => $utf16BE) {
-	testValid("\x1B\$B" . $jisx0208, $utf16BE, 'JIS');
-	testValid("\x1B\$B" . $jisx0208, $utf16BE, 'ISO-2022-JP');
+	testValid("\x1B\$B" . $jisx0208 . "\x1B(B", $utf16BE, 'JIS');
+	testValid("\x1B\$B" . $jisx0208 . "\x1B(B", $utf16BE, 'ISO-2022-JP');
 }
 
 /* All invalid 2-byte JISX0208 characters */
@@ -120,8 +115,8 @@ for ($i = 0x21; $i <= 0x7E; $i++) {
 	for ($j = 0; $j < 256; $j++) {
 		$testString = chr($i) . chr($j);
 		if (!isset($jisx0208Chars[$testString])) {
-			testInvalid("\x1B\$B" . $testString, "\x00%", 'JIS');
-			testInvalid("\x1B\$B" . $testString, "\x00%", 'ISO-2022-JP');
+			testInvalid("\x1B\$B" . $testString . "\x1B(B", "\x00%", 'JIS');
+			testInvalid("\x1B\$B" . $testString . "\x1B(B", "\x00%", 'ISO-2022-JP');
 		}
 	}
 }
@@ -142,7 +137,7 @@ echo "JIS X 0208 support OK\n";
 
 /* All valid JISX0212 characters */
 foreach ($jisx0212Chars as $jisx0212 => $utf16BE) {
-	testValid("\x1B\$(D" . $jisx0212, $utf16BE, 'JIS', false);
+	testValid("\x1B\$(D" . $jisx0212 . "\x1B(B", $utf16BE, 'JIS', false);
 }
 
 /* All invalid 2-byte JISX0212 characters */
@@ -150,14 +145,14 @@ for ($i = 0x21; $i <= 0x7E; $i++) {
 	for ($j = 0; $j < 256; $j++) {
 		$testString = chr($i) . chr($j);
 		if (!isset($jisx0212Chars[$testString])) {
-			testInvalid("\x1B\$(D" . $testString, "\x00%", 'JIS');
+			testInvalid("\x1B\$(D" . $testString . "\x1B(B", "\x00%", 'JIS');
 		}
 	}
 }
 
 /* Try truncated JISX0212 characters */
 for ($i = 0x21; $i <= 0x7E; $i++) {
-	testInvalid("\x1B\$(D" . chr($i), "\x00%", 'JIS');
+	testInvalid("\x1B\$(D" . chr($i) . "\x1B(B", "\x00%\x00%", 'JIS');
 }
 
 testValidString("\x00\xA1", "\x1B\$(D\x22\x42\x1B(B", "UTF-16BE", "JIS", false);
@@ -167,29 +162,36 @@ convertInvalidString("\x00\xA1", "%", "UTF-16BE", "ISO-2022-JP", false);
 echo "JIS X 0212 support OK\n";
 
 /* All possible escape sequences */
-$validEscapes = ["\x1B\$@" => true, "\x1B\$B" => true, "\x1B\$(@" => true, "\x1B\$(B" => true, "\x1B\$(D" => true, "\x1B(B" => true, "\x1B(H" => true, "\x1B(J" => true, "\x1B(I" => true];
+$validJisEscapes = ["\x1B\$@" => true, "\x1B\$B" => true, "\x1B\$(@" => true, "\x1B\$(B" => true, "\x1B\$(D" => true, "\x1B(B" => true, "\x1B(H" => true, "\x1B(J" => true, "\x1B(I" => true];
+$validIso2022jpEscapes = ["\x1B\$@" => true, "\x1B\$B" => true, "\x1B(B" => true, "\x1B(J" => true];
 for ($i = 0; $i <= 0xFF; $i++) {
 	for ($j = 0; $j <= 0xFF; $j++) {
 		$escapeSequence = "\x1B" . chr($i) . chr($j);
 		if ($escapeSequence === "\x1B\$(")
 			continue;
-		if (isset($validEscapes[$escapeSequence])) {
-			testValid($escapeSequence, "", 'JIS', false);
-			testValid($escapeSequence, "", 'ISO-2022-JP', false);
+		if (isset($validJisEscapes[$escapeSequence])) {
+			testValid($escapeSequence . "\x1B(B", "", 'JIS', false);
 		} else {
-			identifyInvalidString($escapeSequence, 'JIS');
-			identifyInvalidString($escapeSequence, 'ISO-2022-JP');
+			identifyInvalidString($escapeSequence . "\x1B(B", 'JIS');
+		}
+		if (isset($validIso2022jpEscapes[$escapeSequence])) {
+			testValid($escapeSequence . "\x1B(B", "", 'ISO-2022-JP', false);
+		} else {
+			identifyInvalidString($escapeSequence . "\x1B(B", 'ISO-2022-JP');
 		}
 	}
 }
 for ($i = 0; $i <= 0xFF; $i++) {
 	$escapeSequence = "\x1B\$(" . chr($i);
-	if (isset($validEscapes[$escapeSequence])) {
-		testValid($escapeSequence, "", 'JIS', false);
-		testValid($escapeSequence, "", 'ISO-2022-JP', false);
+	if (isset($validJisEscapes[$escapeSequence])) {
+		testValid($escapeSequence . "\x1B(B", "", 'JIS', false);
 	} else {
-		identifyInvalidString($escapeSequence, 'JIS');
-		identifyInvalidString($escapeSequence, 'ISO-2022-JP');
+		identifyInvalidString($escapeSequence . "\x1B(B", 'JIS');
+	}
+	if (isset($validIso2022jpEscapes[$escapeSequence])) {
+		testValid($escapeSequence . "\x1B(B", "", 'ISO-2022-JP', false);
+	} else {
+		identifyInvalidString($escapeSequence . "\x1B(B", 'ISO-2022-JP');
 	}
 }
 /* Also try a bare ESC */
@@ -218,6 +220,23 @@ testValidString("\x20\x3E", "\x1B\$B!1\x1B(B", 'UTF-16BE', 'ISO-2022-JP', false)
 
 echo "Other mappings from Unicode -> ISO-2022-JP are OK\n";
 
+// Single bytes from 0xA3-0xDF can be used to encode kana in JIS8
+$grInvoked = [
+	"\xA3" => "\x1B(I\x23\x1B(B",
+	"\xB1" => "\x1B(I\x31\x1B(B",
+	"\xC2" => "\x1B(I\x42\x1B(B",
+	"\xDF" => "\x1B(I\x5F\x1B(B"
+];
+foreach ($grInvoked as $gr => $jisx) {
+	// JISX 0201 is used as the canonical form for outputting kana
+	testValidString($gr, $jisx, 'JIS', 'JIS', false);
+	if (mb_convert_encoding($gr, 'UTF-16BE', 'JIS') !== mb_convert_encoding($jisx, 'UTF-16BE', 'JIS'))
+		die("Equivalent GR byte and JISX 0201 sequence do not decode to the same codepoint");
+}
+
+echo "GR-invoked kana support OK\n";
+
+// Check handling of BOM
 convertInvalidString("\xFF\xFE", "%", "UTF-16BE", "JIS", false);
 convertInvalidString("\xFF\xFE", "%", "UTF-16BE", "ISO-2022-JP", false);
 
@@ -239,4 +258,5 @@ JIS X 0208 support OK
 JIS X 0212 support OK
 All escape sequences work as expected
 Other mappings from Unicode -> ISO-2022-JP are OK
+GR-invoked kana support OK
 Done!

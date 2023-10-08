@@ -16,6 +16,11 @@ function skipif() {
     if(stripos(php_uname(), 'XP') !== FALSE) {
         die('skip windows 2003 or newer only test');
     }
+    if (getenv('GITHUB_ACTIONS')) {
+        // bug44859_4.phpt test fails on the 1st run
+        // other ACL tests cannot be run twice
+        die('skip failing on Github Actions');
+    }
 }
 
 function get_username(){

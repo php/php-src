@@ -4,7 +4,7 @@ mysqli_get_client_stats()
 mysqli
 --SKIPIF--
 <?PHP
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 if (!function_exists('mysqli_get_client_stats')) {
     die("skip only available with mysqlnd");
 }
@@ -81,7 +81,7 @@ mysqli.allow_local_infile=1
     }
 
 
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     if (!is_array($info = mysqli_get_client_stats()) || empty($info))
         printf("[002] Expecting array/any_non_empty, got %s/%s\n", gettype($info), $info);
@@ -136,7 +136,7 @@ mysqli.allow_local_infile=1
     mysqli_get_client_stats_assert_eq('bytes_received_real_data_normal', $new_info, "0", $test_counter);
     mysqli_get_client_stats_assert_eq('bytes_received_real_data_ps', $new_info, "0", $test_counter);
 
-    require('table.inc');
+    require 'table.inc';
     if (!is_array($info = mysqli_get_client_stats()) || empty($info))
         printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
             ++$test_counter, gettype($info), $info);
@@ -917,7 +917,7 @@ mysqli.allow_local_infile=1
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

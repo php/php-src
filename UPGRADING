@@ -1,4 +1,4 @@
-PHP 8.3 UPGRADE NOTES
+PHP 8.4 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -19,9 +19,48 @@ PHP 8.3 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- DOM:
+  . New methods and constants were added to some DOM classes. If you inherit
+    from these and you happen to have a method or property with the same name,
+    you might encounter errors if the declaration is incompatible.
+    Consult sections 2. New Features and 6. New Functions for a list of
+    newly implemented methods and constants.
+
+- SimpleXML:
+  . Get methods called, or casting to a string on a SimpleXMLElement will no
+    longer implicitly reset the iterator data, unless explicitly rewound.
+    For example, casting an element to a string within a foreach loop would
+    cause an infinite loop because it destroyed the current iterator data.
+    This is no longer the case as a consequence of the bugfixes for GH-12192,
+    GH-12208, #55098.
+
+- Standard:
+  . round() now validates the value of the $mode parameter and throws a ValueError
+    for invalid modes. Previously invalid modes would have been interpreted as
+    PHP_ROUND_HALF_UP.
+
+- XSL:
+  . XSLTProcessor::setParameter() will now throw a ValueError when its arguments
+    contain null bytes. This never actually worked correctly in the first place,
+    which is why it throws an exception nowadays.
+  . The typed properties XSLTProcessor::$cloneDocument and
+    XSLTProcessor::$doXInclude are now declared.
+
 ========================================
 2. New Features
 ========================================
+
+- DOM:
+  . Added constant DOMNode::DOCUMENT_POSITION_DISCONNECTED.
+  . Added constant DOMNode::DOCUMENT_POSITION_PRECEDING.
+  . Added constant DOMNode::DOCUMENT_POSITION_FOLLOWING.
+  . Added constant DOMNode::DOCUMENT_POSITION_CONTAINS.
+  . Added constant DOMNode::DOCUMENT_POSITION_CONTAINED_BY.
+  . Added constant DOMNode::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC.
+
+- XSL:
+  . It is now possible to use parameters that contain both single and double
+    quotes.
 
 ========================================
 3. Changes in SAPI modules
@@ -35,12 +74,25 @@ PHP 8.3 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- Standard:
+  . The internal implementation for rounding to integers has been rewritten
+    to be easier to verify for correctness and to be easier to maintain.
+    Some rounding bugs have been fixed as a result of the rewrite. For
+    example previously rounding 0.49999999999999994 to the nearest integer
+    would have resulted in 1.0 instead of the correct result 0.0. Additional
+    inputs might also be affected and result in different outputs compared to
+    earlier PHP versions.
+  . The default value of the 'cost' option for PASSWORD_BCRYPT for password_hash()
+    has been increased from '10' to '12'.
+
+    RFC: https://wiki.php.net/rfc/bcrypt_cost_2023
+
 ========================================
 6. New Functions
 ========================================
 
-- Posix:
-  . Added posix_sysconf call to get runtime informations.
+- DOM:
+  . Added DOMNode::compareDocumentPosition().
 
 ========================================
 7. New Classes and Interfaces
@@ -54,15 +106,16 @@ PHP 8.3 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Spl:
+  . The class constants are typed now.
+
 ========================================
 10. New Global Constants
 ========================================
 
-- Posix:
-  . POSIX_SC_ARG_MAX
-  . POSIX_SC_PAGESIZE
-  . POSIX_SC_NPROCESSORS_CONF
-  . POSIX_SC_NPROCESSORS_ONLN
+- Intl:
+  . The IntlDateFormatter class exposes now the new PATTERN constant
+    reflecting udat api's UDAT_PATTERN.
 
 ========================================
 11. Changes to INI File Handling
@@ -79,3 +132,7 @@ PHP 8.3 UPGRADE NOTES
 ========================================
 14. Performance Improvements
 ========================================
+
+* The performance of DOMNode::C14N() is greatly improved for the case without
+  an xpath query. This can give a time improvement of easily two order of
+  magnitude for documents with tens of thousands of nodes.

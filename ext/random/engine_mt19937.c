@@ -162,23 +162,7 @@ static uint64_t generate(php_random_status *status)
 
 static zend_long range(php_random_status *status, zend_long min, zend_long max)
 {
-	php_random_status_state_mt19937 *s = status->state;
-
-	if (s->mode == MT_RAND_MT19937) {
-		return php_random_range(&php_random_algo_mt19937, status, min, max);
-	}
-
-	/* Legacy mode deliberately not inside php_mt_rand_range()
-	 * to prevent other functions being affected */
-
-	uint64_t r = php_random_algo_mt19937.generate(status) >> 1;
-
-	/* This is an inlined version of the RAND_RANGE_BADSCALING macro that does not invoke UB when encountering
-	 * (max - min) > ZEND_LONG_MAX.
-	 */
-	zend_ulong offset = (double) ( (double) max - min + 1.0) * (r / (PHP_MT_RAND_MAX + 1.0));
-
-	return (zend_long) (offset + min);
+	return php_random_range(&php_random_algo_mt19937, status, min, max);
 }
 
 static bool serialize(php_random_status *status, HashTable *data)
@@ -280,6 +264,7 @@ PHP_METHOD(Random_Engine_Mt19937, __construct)
 			state->mode = MT_RAND_MT19937;
 			break;
 		case MT_RAND_PHP:
+			zend_error(E_DEPRECATED, "The MT_RAND_PHP variant of Mt19937 is deprecated");
 			state->mode = MT_RAND_PHP;
 			break;
 		default:

@@ -45,8 +45,8 @@ if ($version['protocol'] >= 3) {
     pg_field_num($result, $field_name);
     pg_field_size($result, 0);
     pg_field_type($result, 0);
-    pg_field_prtlen($result, 0);
-    pg_field_is_null($result, 0);
+    pg_field_prtlen($result, null, 0);
+    pg_field_is_null($result, null, 0);
 
     $result = pg_query_params($db, "INSERT INTO ".$table_name." VALUES (\$1, \$2);", array(9999, "A'BC"));
     pg_last_oid($result);

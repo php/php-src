@@ -13,7 +13,7 @@ require_once('skipifbindfailure.inc');
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 ldap_set_option($link, LDAP_OPT_DEREF, LDAP_DEREF_SEARCHING);
 ldap_set_option($link, LDAP_OPT_SIZELIMIT, 123);
 ldap_set_option($link, LDAP_OPT_TIMELIMIT, 33);
@@ -39,7 +39,7 @@ var_dump(
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 remove_dummy_data($link, $base);
 ?>
 --EXPECTF--

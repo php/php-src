@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cefec46af242e6372a923dea0e1d2cf22da7ef3e */
+ * Stub hash: c7bec57da82aab1f4470df0f2b725523885a58c2 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
@@ -39,7 +39,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_IntlDateFormatter_getTimeZone, 0, 0, IntlTimeZone, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlDateFormatter_setTimeZone, 0, 1, _IS_BOOL, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlDateFormatter_setTimeZone, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, timezone)
 ZEND_END_ARG_INFO()
 
@@ -196,6 +196,12 @@ static zend_class_entry *register_class_IntlDateFormatter(void)
 	zend_string *const_RELATIVE_SHORT_name = zend_string_init_interned("RELATIVE_SHORT", sizeof("RELATIVE_SHORT") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_RELATIVE_SHORT_name, &const_RELATIVE_SHORT_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_RELATIVE_SHORT_name);
+
+	zval const_PATTERN_value;
+	ZVAL_LONG(&const_PATTERN_value, UDAT_PATTERN);
+	zend_string *const_PATTERN_name = zend_string_init_interned("PATTERN", sizeof("PATTERN") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_PATTERN_name, &const_PATTERN_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_PATTERN_name);
 
 	zval const_GREGORIAN_value;
 	ZVAL_LONG(&const_GREGORIAN_value, UCAL_GREGORIAN);

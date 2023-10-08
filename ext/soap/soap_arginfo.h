@@ -485,10 +485,10 @@ static zend_class_entry *register_class_SoapServer(void)
 	INIT_CLASS_ENTRY(ce, "SoapServer", class_SoapServer_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 
-	zend_string *property___soap_fault_class_SoapFault = zend_string_init("SoapFault", sizeof("SoapFault")-1, 1);
 	zval property___soap_fault_default_value;
 	ZVAL_NULL(&property___soap_fault_default_value);
 	zend_string *property___soap_fault_name = zend_string_init("__soap_fault", sizeof("__soap_fault") - 1, 1);
+	zend_string *property___soap_fault_class_SoapFault = zend_string_init("SoapFault", sizeof("SoapFault")-1, 1);
 	zend_declare_typed_property(class_entry, property___soap_fault_name, &property___soap_fault_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property___soap_fault_class_SoapFault, 0, MAY_BE_NULL));
 	zend_string_release(property___soap_fault_name);
 
@@ -541,25 +541,25 @@ static zend_class_entry *register_class_SoapClient(void)
 	zval property_sdl_default_value;
 	ZVAL_NULL(&property_sdl_default_value);
 	zend_string *property_sdl_name = zend_string_init("sdl", sizeof("sdl") - 1, 1);
-	zend_declare_property_ex(class_entry, property_sdl_name, &property_sdl_default_value, ZEND_ACC_PRIVATE, NULL);
+	zend_declare_typed_property(class_entry, property_sdl_name, &property_sdl_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	zend_string_release(property_sdl_name);
 
 	zval property_typemap_default_value;
 	ZVAL_NULL(&property_typemap_default_value);
 	zend_string *property_typemap_name = zend_string_init("typemap", sizeof("typemap") - 1, 1);
-	zend_declare_property_ex(class_entry, property_typemap_name, &property_typemap_default_value, ZEND_ACC_PRIVATE, NULL);
+	zend_declare_typed_property(class_entry, property_typemap_name, &property_typemap_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	zend_string_release(property_typemap_name);
 
 	zval property_httpsocket_default_value;
 	ZVAL_NULL(&property_httpsocket_default_value);
 	zend_string *property_httpsocket_name = zend_string_init("httpsocket", sizeof("httpsocket") - 1, 1);
-	zend_declare_property_ex(class_entry, property_httpsocket_name, &property_httpsocket_default_value, ZEND_ACC_PRIVATE, NULL);
+	zend_declare_typed_property(class_entry, property_httpsocket_name, &property_httpsocket_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	zend_string_release(property_httpsocket_name);
 
 	zval property_httpurl_default_value;
 	ZVAL_NULL(&property_httpurl_default_value);
 	zend_string *property_httpurl_name = zend_string_init("httpurl", sizeof("httpurl") - 1, 1);
-	zend_declare_property_ex(class_entry, property_httpurl_name, &property_httpurl_default_value, ZEND_ACC_PRIVATE, NULL);
+	zend_declare_typed_property(class_entry, property_httpurl_name, &property_httpurl_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	zend_string_release(property_httpurl_name);
 
 	zval property__login_default_value;
@@ -643,7 +643,7 @@ static zend_class_entry *register_class_SoapClient(void)
 	zval property__stream_context_default_value;
 	ZVAL_NULL(&property__stream_context_default_value);
 	zend_string *property__stream_context_name = zend_string_init("_stream_context", sizeof("_stream_context") - 1, 1);
-	zend_declare_property_ex(class_entry, property__stream_context_name, &property__stream_context_default_value, ZEND_ACC_PRIVATE, NULL);
+	zend_declare_typed_property(class_entry, property__stream_context_name, &property__stream_context_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	zend_string_release(property__stream_context_name);
 
 	zval property__user_agent_default_value;
@@ -688,10 +688,10 @@ static zend_class_entry *register_class_SoapClient(void)
 	zend_declare_typed_property(class_entry, property___default_headers_name, &property___default_headers_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
 	zend_string_release(property___default_headers_name);
 
-	zend_string *property___soap_fault_class_SoapFault = zend_string_init("SoapFault", sizeof("SoapFault")-1, 1);
 	zval property___soap_fault_default_value;
 	ZVAL_NULL(&property___soap_fault_default_value);
 	zend_string *property___soap_fault_name = zend_string_init("__soap_fault", sizeof("__soap_fault") - 1, 1);
+	zend_string *property___soap_fault_class_SoapFault = zend_string_init("SoapFault", sizeof("SoapFault")-1, 1);
 	zend_declare_typed_property(class_entry, property___soap_fault_name, &property___soap_fault_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property___soap_fault_class_SoapFault, 0, MAY_BE_NULL));
 	zend_string_release(property___soap_fault_name);
 

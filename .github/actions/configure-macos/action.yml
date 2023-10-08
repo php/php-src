@@ -11,6 +11,7 @@ runs:
         set -x
         export PATH="/usr/local/opt/bison/bin:$PATH"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl@1.1/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/curl/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/krb5/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libffi/lib/pkgconfig"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libxml2/lib/pkgconfig"

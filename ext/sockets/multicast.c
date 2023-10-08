@@ -59,7 +59,7 @@ static const char *_php_source_op_to_string(enum source_op sop);
 static int _php_source_op_to_ipv4_op(enum source_op sop);
 #endif
 
-int php_string_to_if_index(const char *val, unsigned *out)
+zend_result php_string_to_if_index(const char *val, unsigned *out)
 {
 #if HAVE_IF_NAMETOINDEX
 	unsigned int ind;
@@ -81,7 +81,7 @@ int php_string_to_if_index(const char *val, unsigned *out)
 #endif
 }
 
-static int php_get_if_index_from_zval(zval *val, unsigned *out)
+static zend_result php_get_if_index_from_zval(zval *val, unsigned *out)
 {
 	int ret;
 
@@ -104,7 +104,7 @@ static int php_get_if_index_from_zval(zval *val, unsigned *out)
 
 
 
-static int php_get_if_index_from_array(const HashTable *ht, const char *key,
+static zend_result php_get_if_index_from_array(const HashTable *ht, const char *key,
 	php_socket *sock, unsigned int *if_index)
 {
 	zval *val;
@@ -117,7 +117,7 @@ static int php_get_if_index_from_array(const HashTable *ht, const char *key,
 	return php_get_if_index_from_zval(val, if_index);
 }
 
-static int php_get_address_from_array(const HashTable *ht, const char *key,
+static zend_result php_get_address_from_array(const HashTable *ht, const char *key,
 	php_socket *sock, php_sockaddr_storage *ss, socklen_t *ss_len)
 {
 	zval *val;
@@ -136,7 +136,7 @@ static int php_get_address_from_array(const HashTable *ht, const char *key,
 	return SUCCESS;
 }
 
-static int php_do_mcast_opt(php_socket *php_sock, int level, int optname, zval *arg4)
+static zend_result php_do_mcast_opt(php_socket *php_sock, int level, int optname, zval *arg4)
 {
 	HashTable		 		*opt_ht;
 	unsigned int			if_index;
@@ -616,7 +616,7 @@ static int _php_source_op_to_ipv4_op(enum source_op sop)
 #endif /* HAS_MCAST_EXT */
 
 #ifdef PHP_WIN32
-int php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_addr *out_addr)
+zend_result php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_addr *out_addr)
 {
 	MIB_IPADDRTABLE *addr_table;
     ULONG size;
@@ -659,7 +659,7 @@ retry:
 	return FAILURE;
 }
 
-int php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *if_index)
+zend_result php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *if_index)
 {
 	MIB_IPADDRTABLE *addr_table;
     ULONG size;
@@ -709,7 +709,7 @@ retry:
 
 #else
 
-int php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_addr *out_addr)
+zend_result php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_addr *out_addr)
 {
 	struct ifreq if_req;
 
@@ -746,7 +746,7 @@ int php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_add
 	return SUCCESS;
 }
 
-int php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *if_index)
+zend_result php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *if_index)
 {
 	struct ifconf	if_conf = {0};
 	char			*buf = NULL,

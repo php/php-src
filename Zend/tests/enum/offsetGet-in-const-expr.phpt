@@ -25,5 +25,6 @@ var_dump(X::FOO_BAR);
 --EXPECTF--
 Fatal error: Uncaught Error: Cannot use [] on objects in constant expression in %s:%d
 Stack trace:
-#0 {main}
+#0 %s(%d): [constant expression]()
+#1 {main}
   thrown in %s on line %d

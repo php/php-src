@@ -4,11 +4,11 @@ Interface of the class mysqli
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('connect.inc');
+    require 'connect.inc';
 
     $mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket);
     $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
@@ -61,13 +61,10 @@ require_once('skipifconnectfailure.inc');
         'use_result'			=> true,
     );
 
-    if ($IS_MYSQLND) {
-        // mysqlnd only
-        /* $expected_methods['get_client_stats']	= true; */
-        $expected_methods['get_connection_stats']	= true;
-        $expected_methods['reap_async_query']	= true;
-        $expected_methods['poll'] = true;
-    }
+    /* $expected_methods['get_client_stats']	= true; */
+    $expected_methods['get_connection_stats']	= true;
+    $expected_methods['reap_async_query']	= true;
+    $expected_methods['poll'] = true;
 
     /* we should add ruled when to expect them */
     if (function_exists('mysqli_debug'))

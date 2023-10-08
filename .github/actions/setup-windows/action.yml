@@ -1,0 +1,18 @@
+name: Setup
+runs:
+  using: composite
+  steps:
+    - name: Setup MySQL
+      shell: pwsh
+      run: |
+        choco install mysql -y --no-progress --params="/port:3306"
+        mysql.exe --port=3306 --user=root --password="" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Password12!'; FLUSH PRIVILEGES;"
+    - name: Setup MSSQL
+      shell: pwsh
+      run: |
+        choco install sql-server-express -y --no-progress --install-arguments="/SECURITYMODE=SQL /SAPWD=Password12!"
+    - name: Setup PostgreSQL
+      shell: pwsh
+      run: |
+        Set-Service -Name "postgresql-x64-14" -StartupType manual -Status Running
+        pwsh -Command { $env:PGPASSWORD="root"; & "$env:PGBIN\psql" -U postgres -c "ALTER USER postgres WITH PASSWORD 'Password12!';" }

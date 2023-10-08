@@ -425,9 +425,10 @@ const U_MULTIPLE_DECIMAL_SEPARATORS = UNKNOWN;
 /**
  * Typo: kept for backward compatibility. Use U_MULTIPLE_DECIMAL_SEPARATORS
  * @var int
+ * @deprecated
  * @cvalue U_MULTIPLE_DECIMAL_SEPERATORS
  */
-const U_MULTIPLE_DECIMAL_SEPERATORS = UNKNOWN; // TODO Deprecate
+const U_MULTIPLE_DECIMAL_SEPERATORS = UNKNOWN;
 /**
  * @var int
  * @cvalue U_MULTIPLE_EXPONENTIAL_SYMBOLS

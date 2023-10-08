@@ -4,14 +4,14 @@ mysqli_stmt_get_result() - seeking
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 
 if (!function_exists('mysqli_stmt_get_result'))
     die('skip mysqli_stmt_get_result not available');
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
 
     if (!$stmt = mysqli_stmt_init($link))
         printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -129,7 +129,7 @@ if (!function_exists('mysqli_stmt_get_result'))
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 mysqli_result::data_seek(): Argument #1 ($offset) must be greater than or equal to 0

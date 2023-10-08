@@ -11,4 +11,4 @@ try {
 
 ?>
 --EXPECT--
-Illegal offset type
+Cannot access offset of type Closure on array

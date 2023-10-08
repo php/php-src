@@ -45,7 +45,7 @@ static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend
 	}
 }
 
-void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size)
+void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size)
 {
 	op_array->type = type;
 	op_array->arg_flags[0] = 0;
@@ -112,9 +112,7 @@ ZEND_API void zend_type_release(zend_type type, bool persistent) {
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
-			if (ZEND_TYPE_HAS_NAME(*list_type)) {
-				zend_string_release(ZEND_TYPE_NAME(*list_type));
-			}
+			zend_type_release(*list_type, persistent);
 		} ZEND_TYPE_LIST_FOREACH_END();
 		if (!ZEND_TYPE_USES_ARENA(type)) {
 			pefree(ZEND_TYPE_LIST(type), persistent);
@@ -295,6 +293,12 @@ ZEND_API void destroy_zend_class(zval *zv)
 		return;
 	}
 
+	/* We don't increase the refcount for class aliases,
+	 * skip the destruction of aliases entirely. */
+	if (UNEXPECTED(Z_TYPE_INFO_P(zv) == IS_ALIAS_PTR)) {
+		return;
+	}
+
 	if (ce->ce_flags & ZEND_ACC_FILE_CACHED) {
 		zend_class_constant *c;
 		zval *p, *end;
@@ -305,15 +309,19 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		p = ce->default_properties_table;
-		end = p + ce->default_properties_count;
+		if (ce->default_properties_table) {
+			p = ce->default_properties_table;
+			end = p + ce->default_properties_count;
 
-		while (p < end) {
-			zval_ptr_dtor_nogc(p);
-			p++;
+			while (p < end) {
+				zval_ptr_dtor_nogc(p);
+				p++;
+			}
 		}
 		return;
 	}
+
+	ZEND_ASSERT(ce->refcount > 0);
 
 	if (--ce->refcount > 0) {
 		return;
@@ -439,6 +447,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 				if (prop_info->ce == ce) {
 					zend_string_release(prop_info->name);
 					zend_type_release(prop_info->type, /* persistent */ 1);
+					if (prop_info->attributes) {
+						zend_hash_release(prop_info->attributes);
+					}
 					free(prop_info);
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -508,7 +519,7 @@ void zend_class_add_ref(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
 
-	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+	if (Z_TYPE_P(zv) != IS_ALIAS_PTR && !(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 		ce->refcount++;
 	}
 }
@@ -1106,6 +1117,7 @@ ZEND_API void pass_two(zend_op_array *op_array)
 			case ZEND_FE_RESET_R:
 			case ZEND_FE_RESET_RW:
 			case ZEND_JMP_NULL:
+			case ZEND_BIND_INIT_STATIC_OR_JMP:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_ASSERT_CHECK:

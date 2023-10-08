@@ -11,6 +11,7 @@
 
 #include "fpm_env.h"
 #include "fpm.h"
+#include "fpm_cleanup.h"
 
 #ifndef HAVE_SETPROCTITLE
 #if defined(__linux__) || defined(__APPLE__)
@@ -194,6 +195,26 @@ static int fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
+
+#ifndef HAVE_SETPROCTITLE
+#if defined(__linux__) || defined(__APPLE__)
+/* Frees our copied environment variables. */
+static void fpm_env_cleanup(int which, void *arg) /* {{{ */
+{
+	char** allocated_environ = environ;
+	if (allocated_environ) {
+		environ = NULL;
+		unsigned int i = 0;
+		while (allocated_environ[i]) {
+			free(allocated_environ[i]);
+			i++;
+		}
+		free(allocated_environ);
+	}
+}
+#endif
+#endif
+
 int fpm_env_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
@@ -252,6 +273,10 @@ int fpm_env_init_main(void)
 
 		while (environ[env_nb]) {
 			env_nb++;
+		}
+
+		if (0 > fpm_cleanup_add(FPM_CLEANUP_PARENT_EXIT_MAIN, fpm_env_cleanup, 0)) {
+			return -1;
 		}
 
 		if ((new_environ = malloc((1U + env_nb) * sizeof (char *))) == NULL) {

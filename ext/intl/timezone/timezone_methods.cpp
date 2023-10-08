@@ -148,8 +148,8 @@ U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
 		se = TimeZone::createEnumeration();
 	} else if (Z_TYPE_P(arg) == IS_LONG) {
 int_offset:
-		if (Z_LVAL_P(arg) < (zend_long)INT32_MIN ||
-				Z_LVAL_P(arg) > (zend_long)INT32_MAX) {
+		if (UNEXPECTED(Z_LVAL_P(arg) < (zend_long)INT32_MIN ||
+				Z_LVAL_P(arg) > (zend_long)INT32_MAX)) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intltz_create_enumeration: value is out of range", 0);
 			RETURN_FALSE;
@@ -241,7 +241,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 	}
 
 	if (!arg3isnull) {
-		if (offset_arg < (zend_long)INT32_MIN || offset_arg > (zend_long)INT32_MAX) {
+		if (UNEXPECTED(offset_arg < (zend_long)INT32_MIN || offset_arg > (zend_long)INT32_MAX)) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intltz_create_time_zone_id_enumeration: offset out of bounds", 0);
 			RETURN_FALSE;
@@ -350,7 +350,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 		RETURN_THROWS();
 	}
 
-	if (index < (zend_long)INT32_MIN || index > (zend_long)INT32_MAX) {
+	if (UNEXPECTED(index < (zend_long)INT32_MIN || index > (zend_long)INT32_MAX)) {
 		RETURN_FALSE;
 	}
 
@@ -475,7 +475,7 @@ U_CFUNC PHP_FUNCTION(intltz_has_same_rules)
 	RETURN_BOOL(to->utimezone->hasSameRules(*other_to->utimezone));
 }
 
-static const TimeZone::EDisplayType display_types[] = {
+static constexpr TimeZone::EDisplayType display_types[] = {
 	TimeZone::SHORT,				TimeZone::LONG,
 	TimeZone::SHORT_GENERIC,		TimeZone::LONG_GENERIC,
 	TimeZone::SHORT_GMT,			TimeZone::LONG_GMT,

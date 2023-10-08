@@ -57,7 +57,7 @@ Testing native PS...
 
 Warning: PDO::prepare(): SQLSTATE[42S02]: Base table or view not found: 1146 Table '%s.ihopeitdoesnotexist' doesn't exist in %s on line %d
 
-Fatal error: Uncaught Error: Call to a member function execute() on bool in %s:%d
+Fatal error: Uncaught Error: Call to a member function execute() on false in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

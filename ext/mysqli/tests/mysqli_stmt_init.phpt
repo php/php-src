@@ -4,7 +4,7 @@ mysqli_stmt_init()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
@@ -13,9 +13,12 @@ require_once('skipifconnectfailure.inc');
     mysqli_stmt_bind_result.phpt already. Restrict
     this test case to the basics.
     */
-    require_once("connect.inc");
-
-    require('table.inc');
+    require_once 'connect.inc';
+    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+        printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+            $host, $user, $db, $port, $socket);
+        exit(1);
+    }
 
     if (!is_object($stmt = mysqli_stmt_init($link)))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -38,10 +41,6 @@ require_once('skipifconnectfailure.inc');
     }
 
     print "done!";
-?>
---CLEAN--
-<?php
-    require_once("clean_table.inc");
 ?>
 --EXPECT--
 mysqli_stmt object is not fully initialized

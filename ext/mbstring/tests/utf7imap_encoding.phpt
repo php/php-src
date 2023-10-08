@@ -147,9 +147,17 @@ identifyInvalidString("&" . mBase64($doubleChar . $testString) . "-", 'UTF7-IMAP
 
 /* 3. The first half of a surrogate pair could come at the end of the string, */
 $testString = mb_convert_encoding("\x00\x01\x04\x00", 'UTF-16BE', 'UTF-32BE');
-identifyInvalidString("&" . mBase64(substr($testString, 0, 2)) . "-", 'UTF7-IMAP');
-identifyInvalidString("&" . mBase64($singleChar . substr($testString, 0, 2)) . "-", 'UTF7-IMAP');
-identifyInvalidString("&" . mBase64($singleChar . $singleChar . substr($testString, 0, 2)) . "-", 'UTF7-IMAP');
+testInvalid("&" . mBase64(substr($testString, 0, 2)) . "-", "%");
+testInvalid("&" . mBase64($singleChar . substr($testString, 0, 2)) . "-", "\x01%");
+testInvalid("&" . mBase64($singleChar . $singleChar . substr($testString, 0, 2)) . "-", "\x01\x01%");
+/* ...and the string could even be improperly terminated... */
+testInvalid("&" . mBase64(substr($testString, 0, 2)), "%%");
+testInvalid("&" . mBase64($singleChar . substr($testString, 0, 2)), "\x01%%");
+/* NOTE: We currently don't check for trailing first half of surrogate pair when the string
+ * abruptly ends after a group of 3 Base64-encoded codepoints... that's why we only emit one
+ * error marker here for the incorrect termination of Base64 section and no error marker
+ * for the trailing first half of surrogate pair */
+testInvalid("&" . mBase64($singleChar . $singleChar . substr($testString, 0, 2)), "\x01\x01%");
 
 /* 4. Or, it could have an odd number of bytes in it! */
 $testString = utf16BE("ドーナツ");
@@ -220,6 +228,14 @@ convertInvalidString("\x10", "%", "UTF7-IMAP", "UTF-8");
 convertInvalidString("\x80", "%", "UTF7-IMAP", "UTF-8");
 convertInvalidString("abc&", "abc%", "UTF7-IMAP", "UTF-8"); // The & starts a Base-64 coded section, which is OK... but there's no data in it
 convertInvalidString("&**-", "%*-", "UTF7-IMAP", "UTF-8"); // When we hit the first bad byte in a Base-64 coded section, it drops us back into the default mode, so the following characters are literal
+
+// Try strings where Base64 has an extra trailing byte which is not needed
+convertInvalidString('&RR8I', "\xE4\x94\x9F%", 'UTF7-IMAP', 'UTF-8');
+convertInvalidString('&RR8IAAA', "\xE4\x94\x9F\xE0\xA0\x80%", 'UTF7-IMAP', 'UTF-8');
+
+// It is useless for a Base64 section to only contain a single 'A'
+// (which decodes to only zero bits)
+convertInvalidString("&A", "\x00\x00\x00%", 'UTF7-IMAP', 'UTF-32BE');
 
 echo "Done!\n";
 ?>

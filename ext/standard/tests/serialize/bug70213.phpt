@@ -15,7 +15,7 @@ var_dump(unserialize('a:2:{i:0;i:42;i:1;O:4:"evil":0:{}}'));
 
 ?>
 --EXPECTF--
-Notice: unserialize(): Error at offset 4 of 4 bytes in %s on line %d
+Warning: unserialize(): Error at offset 4 of 4 bytes in %s on line %d
 bool(false)
 
 Warning: unserialize(): Function evil() hasn't defined the class it was called for in %s on line %d

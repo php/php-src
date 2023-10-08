@@ -2,6 +2,10 @@
 Bug #73711: Segfault in openssl_pkey_new when generating DSA or DH key
 --EXTENSIONS--
 openssl
+--SKIPIF--
+<?php
+if (!defined("OPENSSL_KEYTYPE_DSA")) die("skip DSA disabled");
+?>
 --FILE--
 <?php
 $config = __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';

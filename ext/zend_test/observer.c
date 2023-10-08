@@ -39,7 +39,7 @@ static void observer_set_user_opcode_handler(const char *opcode_names, user_opco
 	while (1) {
 		if (*e == ' ' || *e == ',' || *e == '\0') {
 			if (s) {
-				zend_uchar opcode = zend_get_opcode_id(s, e - s);
+				uint8_t opcode = zend_get_opcode_id(s, e - s);
 				if (opcode <= ZEND_VM_LAST_OPCODE) {
 					zend_set_user_opcode_handler(opcode, handler);
 				} else {
@@ -268,6 +268,27 @@ void declared_class_observer(zend_class_entry *ce, zend_string *name) {
 	}
 }
 
+static void (*zend_test_prev_execute_internal)(zend_execute_data *execute_data, zval *return_value);
+static void zend_test_execute_internal(zend_execute_data *execute_data, zval *return_value) {
+	zend_function *fbc = execute_data->func;
+
+	if (fbc->common.function_name) {
+		if (fbc->common.scope) {
+			php_printf("%*s<!-- internal enter %s::%s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+		} else {
+			php_printf("%*s<!-- internal enter %s() -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->common.function_name));
+		}
+	} else {
+		php_printf("%*s<!-- internal enter '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(fbc->op_array.filename));
+	}
+
+	if (zend_test_prev_execute_internal) {
+		zend_test_prev_execute_internal(execute_data, return_value);
+	} else {
+		fbc->internal_function.handler(execute_data, return_value);
+	}
+}
+
 static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 {
 	zend_array **p = (zend_array **) ZEND_INI_GET_ADDR();
@@ -323,6 +344,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.fiber_init", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_fiber_init, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.fiber_switch", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_fiber_switch, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.fiber_destroy", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_fiber_destroy, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.observer.execute_internal", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_execute_internal, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 void zend_test_observer_init(INIT_FUNC_ARGS)
@@ -350,6 +372,11 @@ void zend_test_observer_init(INIT_FUNC_ARGS)
 
 		zend_observer_function_declared_register(declared_function_observer);
 		zend_observer_class_linked_register(declared_class_observer);
+	}
+
+	if (ZT_G(observer_execute_internal)) {
+		zend_test_prev_execute_internal = zend_execute_internal;
+		zend_execute_internal = zend_test_execute_internal;
 	}
 }
 

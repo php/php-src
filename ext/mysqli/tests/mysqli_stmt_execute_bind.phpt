@@ -5,14 +5,9 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-if (!$IS_MYSQLND) {
-    die("skip only available in mysqlnd");
-}
 ?>
 --FILE--
 <?php
-require_once "connect.inc";
-
 require 'table.inc';
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -134,7 +129,7 @@ mysqli_close($link);
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 [001] mysqli_stmt::execute(): Argument #1 ($params) must consist of exactly 3 elements, 2 present

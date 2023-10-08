@@ -6,6 +6,9 @@ inputs:
   runTestsParameters:
     default: ''
     required: false
+  jitType:
+    default: 'disable'
+    required: false
 runs:
   using: composite
   steps:
@@ -14,7 +17,9 @@ runs:
         set -x
         export MYSQL_TEST_USER=root
         export MYSQL_TEST_PASSWD=root
-        export PDO_MYSQL_TEST_DSN="mysql:host=localhost;dbname=test"
+        if [[ -z "$PDO_MYSQL_TEST_DSN" ]]; then
+          export PDO_MYSQL_TEST_DSN="mysql:host=localhost;dbname=test"
+        fi
         export PDO_MYSQL_TEST_USER=root
         export PDO_MYSQL_TEST_PASS=root
         export PDO_DBLIB_TEST_DSN="dblib:host=127.0.0.1;dbname=master;version=7.0"
@@ -26,9 +31,26 @@ runs:
         export PDO_OCI_TEST_USER="system"
         export PDO_OCI_TEST_PASS="pass"
         export PDO_OCI_TEST_DSN="oci:dbname=localhost/XEPDB1;charset=AL32UTF8"
+        export PGSQL_TEST_CONNSTR="host=postgres dbname=test port=5432 user=postgres password=postgres"
+        export PDO_PGSQL_TEST_DSN="host=postgres dbname=test port=5432 user=postgres password=postgres"
+        export ODBC_TEST_USER="odbc_test"
+        export ODBC_TEST_PASS="password"
+        export ODBC_TEST_DSN="Driver={ODBC Driver 17 for SQL Server};Server=127.0.0.1;Database=odbc;uid=$ODBC_TEST_USER;pwd=$ODBC_TEST_PASS"
+        export PDO_ODBC_TEST_DSN="odbc:Driver={ODBC Driver 17 for SQL Server};Server=127.0.0.1;Database=pdo_odbc;uid=$ODBC_TEST_USER;pwd=$ODBC_TEST_PASS"
         export SKIP_IO_CAPTURE_TESTS=1
         export TEST_PHP_JUNIT=junit.out.xml
+        export STACK_LIMIT_DEFAULTS_CHECK=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
+          -d opcache.jit=${{ inputs.jitType }} \
+          -d opcache.protect_memory=1 \
+          -d opcache.jit_buffer_size=64M \
+          -d opcache.jit_max_root_traces=1000000 \
+          -d opcache.jit_max_side_traces=1000000 \
+          -d opcache.jit_max_exit_counters=1000000 \
+          -d opcache.jit_hot_loop=1 \
+          -d opcache.jit_hot_func=1 \
+          -d opcache.jit_hot_return=1 \
+          -d opcache.jit_hot_side_exit=1 \
           -j$(/usr/bin/nproc) \
           -g FAIL,BORK,LEAK,XLEAK \
           --no-progress \

@@ -2,6 +2,8 @@
 Phar::buildFromIterator() RegexIterator(RecursiveIteratorIterator), SplFileInfo as current
 --EXTENSIONS--
 phar
+--CONFLICTS--
+all
 --INI--
 phar.require_hash=0
 phar.readonly=0

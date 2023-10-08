@@ -17,7 +17,7 @@ $attrs = array(
     // Extensive test: default value and set+get values
     PDO::ATTR_EMULATE_PREPARES		=> array(null, 1, 0),
     PDO::MYSQL_ATTR_DIRECT_QUERY	=> array(null, 0, 1),
-    PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => array(null, 0, 1),
+    PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => array(null, false, true),
 
     // Just test the default
     PDO::ATTR_AUTOCOMMIT			=> array(null),
@@ -73,7 +73,7 @@ OK
 int(0)
 OK
 OK
-int(1)
+bool(true)
 OK
 OK
 int(1)

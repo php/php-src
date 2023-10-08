@@ -91,7 +91,7 @@ ZEND_DECLARE_MODULE_GLOBALS(snmp)
 static PHP_GINIT_FUNCTION(snmp);
 
 /* constant - can be shared among threads */
-static oid objid_mib[] = {1, 3, 6, 1, 2, 1};
+static const oid objid_mib[] = {1, 3, 6, 1, 2, 1};
 
 /* Handlers */
 static zend_object_handlers php_snmp_object_handlers;
@@ -397,7 +397,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 	php_snmp_error(getThis(), PHP_SNMP_ERRNO_NOERROR, "");
 
 	if (st & SNMP_CMD_WALK) { /* remember root OID */
-		memmove((char *)root, (char *)(objid_query->vars[0].name), (objid_query->vars[0].name_length) * sizeof(oid));
+		memcpy((char *)root, (char *)(objid_query->vars[0].name), (objid_query->vars[0].name_length) * sizeof(oid));
 		rootlen = objid_query->vars[0].name_length;
 		objid_query->offset = objid_query->count;
 	}
@@ -551,7 +551,7 @@ retry:
 							php_snmp_error(getThis(), PHP_SNMP_ERRNO_OID_NOT_INCREASING, "Error: OID not increasing: %s", buf2);
 							keepwalking = false;
 						} else {
-							memmove((char *)(objid_query->vars[0].name), (char *)vars->name, vars->name_length * sizeof(oid));
+							memcpy((char *)(objid_query->vars[0].name), (char *)vars->name, vars->name_length * sizeof(oid));
 							objid_query->vars[0].name_length = vars->name_length;
 							keepwalking = true;
 						}
@@ -765,7 +765,7 @@ static bool php_snmp_parse_oid(
 				return false;
 			}
 		} else {
-			memmove((char *)objid_query->vars[0].name, (char *)objid_mib, sizeof(objid_mib));
+			memmove((char *)objid_query->vars[0].name, (const char *)objid_mib, sizeof(objid_mib));
 			objid_query->vars[0].name_length = sizeof(objid_mib) / sizeof(oid);
 		}
 	} else {

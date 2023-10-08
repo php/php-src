@@ -2105,4 +2105,5 @@ Cannot decrement stdClass
 Cannot increment resource
 Cannot decrement resource
 No error for fop++
+Warning: Decrement on non-numeric string has no effect and is deprecated
 No error for foo--

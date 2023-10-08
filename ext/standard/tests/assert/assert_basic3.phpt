@@ -19,6 +19,13 @@ var_dump($r2=assert(0 != 0));
 echo "If this is printed BAIL hasn't worked";
 ?>
 --EXPECTF--
+Deprecated: PHP Startup: assert.callback INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: assert.exception INI setting is deprecated in Unknown on line 0
+
+Deprecated: Constant ASSERT_BAIL is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 int(0)
 f1 called
 

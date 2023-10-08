@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0102030bdd0ca8806bbd881ed3f6788d4b18c462 */
+ * Stub hash: 4751b68b857ffbf53cab6d1aa88fe8f6120d4fc6 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XMLReader_close, 0, 0, 0)
 ZEND_END_ARG_INFO()

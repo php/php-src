@@ -355,7 +355,9 @@ static bool opline_supports_assign_contraction(
 
 	if ((opline->opcode == ZEND_ASSIGN_OP
 	  || opline->opcode == ZEND_ASSIGN_OBJ
-	  || opline->opcode == ZEND_ASSIGN_DIM)
+	  || opline->opcode == ZEND_ASSIGN_DIM
+	  || opline->opcode == ZEND_ASSIGN_OBJ_OP
+	  || opline->opcode == ZEND_ASSIGN_DIM_OP)
 	 && opline->op1_type == IS_CV
 	 && opline->op1.var == cv_var
 	 && zend_may_throw(opline, &ssa->ops[ssa->vars[src_var].definition], op_array, ssa)) {
@@ -650,6 +652,7 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
 			case ZEND_JMP_NULL:
+			case ZEND_BIND_INIT_STATIC_OR_JMP:
 				if (ZEND_OP2_JMP_ADDR(opline) == op_array->opcodes + old->start) {
 					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, op_array->opcodes + dst->start);
 				}
@@ -845,7 +848,7 @@ optimize_jmpnz:
 						goto optimize_jmpz;
 					} else if (opline->op1_type == IS_CONST) {
 						if (zend_is_true(CT_CONSTANT_EX(op_array, opline->op1.constant))) {
-							opline->opcode = ZEND_QM_ASSIGN;
+							opline->opcode = ZEND_BOOL;
 							take_successor_1(ssa, block_num, block);
 						}
 					}
@@ -859,7 +862,7 @@ optimize_jmpnz:
 						goto optimize_jmpnz;
 					} else if (opline->op1_type == IS_CONST) {
 						if (!zend_is_true(CT_CONSTANT_EX(op_array, opline->op1.constant))) {
-							opline->opcode = ZEND_QM_ASSIGN;
+							opline->opcode = ZEND_BOOL;
 							take_successor_1(ssa, block_num, block);
 						}
 					}
@@ -930,38 +933,47 @@ optimize_jmpnz:
 				case ZEND_MATCH:
 					if (opline->op1_type == IS_CONST) {
 						zval *zv = CT_CONSTANT_EX(op_array, opline->op1.constant);
-						zend_uchar type = Z_TYPE_P(zv);
+						uint8_t type = Z_TYPE_P(zv);
 						bool correct_type =
 							(opline->opcode == ZEND_SWITCH_LONG && type == IS_LONG)
 							|| (opline->opcode == ZEND_SWITCH_STRING && type == IS_STRING)
 							|| (opline->opcode == ZEND_MATCH && (type == IS_LONG || type == IS_STRING));
 
-						if (!correct_type) {
+						/* Switch statements have a fallback chain for loose comparison. In those
+						 * cases the SWITCH_* instruction is a NOP. Match does strict comparison and
+						 * thus jumps to the default branch on mismatched types, so we need to
+						 * convert MATCH to a jmp. */
+						if (!correct_type && opline->opcode != ZEND_MATCH) {
 							removed_ops++;
 							MAKE_NOP(opline);
 							opline->extended_value = 0;
 							take_successor_ex(ssa, block_num, block, block->successors[block->successors_count - 1]);
 							goto optimize_nop;
-						} else {
+						}
+
+						uint32_t target;
+						if (correct_type) {
 							HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
 							zval *jmp_zv = type == IS_LONG
 								? zend_hash_index_find(jmptable, Z_LVAL_P(zv))
 								: zend_hash_find(jmptable, Z_STR_P(zv));
 
-							uint32_t target;
 							if (jmp_zv) {
 								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(jmp_zv));
 							} else {
 								target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
 							}
-							opline->opcode = ZEND_JMP;
-							opline->extended_value = 0;
-							SET_UNUSED(opline->op1);
-							ZEND_SET_OP_JMP_ADDR(opline, opline->op1, op_array->opcodes + target);
-							SET_UNUSED(opline->op2);
-							take_successor_ex(ssa, block_num, block, ssa->cfg.map[target]);
-							goto optimize_jmp;
+						} else {
+							ZEND_ASSERT(opline->opcode == ZEND_MATCH);
+							target = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
 						}
+						opline->opcode = ZEND_JMP;
+						opline->extended_value = 0;
+						SET_UNUSED(opline->op1);
+						ZEND_SET_OP_JMP_ADDR(opline, opline->op1, op_array->opcodes + target);
+						SET_UNUSED(opline->op2);
+						take_successor_ex(ssa, block_num, block, ssa->cfg.map[target]);
+						goto optimize_jmp;
 					}
 					break;
 				case ZEND_NOP:
@@ -1645,7 +1657,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			 && Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op2.constant)) == IS_LONG
 			 && Z_LVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant)) == 1
 			 && ssa->ops[op_1].op1_use >= 0
-			 && !(ssa->var_info[ssa->ops[op_1].op1_use].type & (MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+			 && !(ssa->var_info[ssa->ops[op_1].op1_use].type & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 
 // op_1: ASSIGN_SUB #?.CV [undef,null,int,foat] -> #v.CV, int(1) => PRE_DEC #?.CV ->#v.CV
 

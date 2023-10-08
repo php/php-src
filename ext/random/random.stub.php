@@ -10,16 +10,17 @@ namespace {
     const MT_RAND_MT19937 = UNKNOWN;
     /**
      * @var int
+     * @deprecated
      * @cvalue MT_RAND_PHP
      */
     const MT_RAND_PHP = UNKNOWN;
 
     function lcg_value(): float {}
 
-    function mt_srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
+    function mt_srand(?int $seed = null, int $mode = MT_RAND_MT19937): void {}
 
     /** @alias mt_srand */
-    function srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
+    function srand(?int $seed = null, int $mode = MT_RAND_MT19937): void {}
 
     function rand(int $min = UNKNOWN, int $max = UNKNOWN): int {}
 
@@ -133,9 +134,15 @@ namespace Random
 
         public function nextInt(): int {}
 
+        public function nextFloat(): float {}
+
+        public function getFloat(float $min, float $max, IntervalBoundary $boundary = IntervalBoundary::ClosedOpen): float {}
+
         public function getInt(int $min, int $max): int {}
 
         public function getBytes(int $length): string {}
+
+        public function getBytesFromString(string $string, int $length): string {}
 
         public function shuffleArray(array $array): array {}
 
@@ -146,6 +153,13 @@ namespace Random
         public function __serialize(): array {}
 
         public function __unserialize(array $data): void {}
+    }
+
+    enum IntervalBoundary {
+        case ClosedOpen;
+        case ClosedClosed;
+        case OpenClosed;
+        case OpenOpen;
     }
 
     /**

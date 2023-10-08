@@ -9,85 +9,69 @@ class PharException extends Exception
 class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
 {
     /**
-     * @var int
      * @cvalue PHAR_ENT_COMPRESSED_BZ2
      */
-    const BZ2 = UNKNOWN;
+    const int BZ2 = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_ENT_COMPRESSED_GZ
      */
-    const GZ = UNKNOWN;
+    const int GZ = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_ENT_COMPRESSED_NONE
      */
-    const NONE = UNKNOWN;
+    const int NONE = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_FORMAT_PHAR
      */
-    const PHAR = UNKNOWN;
+    const int PHAR = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_FORMAT_TAR
      */
-    const TAR = UNKNOWN;
+    const int TAR = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_FORMAT_ZIP
      */
-    const ZIP = UNKNOWN;
+    const int ZIP = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_ENT_COMPRESSION_MASK
      */
-    const COMPRESSED = UNKNOWN;
+    const int COMPRESSED = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_MIME_PHP
      */
-    const PHP = UNKNOWN;
+    const int PHP = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_MIME_PHPS
      */
-    const PHPS = UNKNOWN;
+    const int PHPS = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_SIG_MD5
      */
-    const MD5 = UNKNOWN;
+    const int MD5 = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_SIG_OPENSSL
      */
-    const OPENSSL = UNKNOWN;
+    const int OPENSSL = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_SIG_OPENSSL_SHA256
      */
-    const OPENSSL_SHA256 = UNKNOWN;
+    const int OPENSSL_SHA256 = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_SIG_OPENSSL_SHA512
      */
-    const OPENSSL_SHA512 = UNKNOWN;
+    const int OPENSSL_SHA512 = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_SIG_SHA1
      */
-    const SHA1 = UNKNOWN;
+    const int SHA1 = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_SIG_SHA256
      */
-    const SHA256 = UNKNOWN;
+    const int SHA256 = UNKNOWN;
     /**
-     * @var int
      * @cvalue PHAR_SIG_SHA512
      */
-    const SHA512 = UNKNOWN;
+    const int SHA512 = UNKNOWN;
 
     public function __construct(string $filename, int $flags = FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS, ?string $alias = null) {}
 

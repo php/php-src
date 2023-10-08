@@ -4,11 +4,11 @@ Bug #46109 (MySQLi::init - Memory leaks)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 
 $mysqli = new mysqli();
 $mysqli->init();

@@ -27,8 +27,6 @@ var_dump(preg_match("[abc\0def]", "abc"));
 var_dump(preg_match("[abc\0def]", "abc\0def"));
 var_dump(preg_match("[abc\0def]", "abc\0fed"));
 
-preg_replace("/foo/e\0/i", "echo('Eek');", "");
-
 ?>
 --EXPECTF--
 Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL in %snull_bytes.php on line 3
@@ -62,5 +60,3 @@ int(0)
 int(0)
 int(1)
 int(0)
-
-Warning: preg_replace(): NUL is not a valid modifier in %snull_bytes.php on line 27

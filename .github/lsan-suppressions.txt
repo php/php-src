@@ -1,0 +1,3 @@
+leak:acommon::DictInfoList::elements
+leak:timer_create
+leak:netsnmp_init_mib_internals

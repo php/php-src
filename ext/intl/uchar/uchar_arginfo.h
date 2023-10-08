@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e8d6cf16660b6389922160f8a2c9c07ca2d58404 */
+ * Stub hash: 59e9bd9f059c27835f78c5b95372731d265a228a */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_hasBinaryProperty, 0, 2, _IS_BOOL, 1)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -41,7 +41,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlChar_digit, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, base, IS_LONG, 0, "10")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_enumCharNames, 0, 3, _IS_BOOL, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_enumCharNames, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_MASK(0, start, MAY_BE_LONG|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_MASK(0, end, MAY_BE_LONG|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
@@ -319,7 +319,7 @@ static zend_class_entry *register_class_IntlChar(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 
 	zval const_UNICODE_VERSION_value;
-	zend_string *const_UNICODE_VERSION_value_str = zend_string_init(U_UNICODE_VERSION, sizeof(U_UNICODE_VERSION) - 1, 1);
+	zend_string *const_UNICODE_VERSION_value_str = zend_string_init(U_UNICODE_VERSION, strlen(U_UNICODE_VERSION), 1);
 	ZVAL_STR(&const_UNICODE_VERSION_value, const_UNICODE_VERSION_value_str);
 	zend_string *const_UNICODE_VERSION_name = zend_string_init_interned("UNICODE_VERSION", sizeof("UNICODE_VERSION") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_UNICODE_VERSION_name, &const_UNICODE_VERSION_value, ZEND_ACC_PUBLIC, NULL);

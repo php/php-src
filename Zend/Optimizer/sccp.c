@@ -83,10 +83,10 @@ typedef struct _sccp_ctx {
 	zval bot;
 } sccp_ctx;
 
-#define TOP ((zend_uchar)-1)
-#define BOT ((zend_uchar)-2)
-#define PARTIAL_ARRAY ((zend_uchar)-3)
-#define PARTIAL_OBJECT ((zend_uchar)-4)
+#define TOP ((uint8_t)-1)
+#define BOT ((uint8_t)-2)
+#define PARTIAL_ARRAY ((uint8_t)-3)
+#define PARTIAL_OBJECT ((uint8_t)-4)
 #define IS_TOP(zv) (Z_TYPE_P(zv) == TOP)
 #define IS_BOT(zv) (Z_TYPE_P(zv) == BOT)
 #define IS_PARTIAL_ARRAY(zv) (Z_TYPE_P(zv) == PARTIAL_ARRAY)
@@ -122,7 +122,7 @@ static void empty_partial_array(zval *zv)
 	Z_ARR_P(zv) = zend_new_array(8);
 }
 
-static void dup_partial_array(zval *dst, zval *src)
+static void dup_partial_array(zval *dst, const zval *src)
 {
 	MAKE_PARTIAL_ARRAY(dst);
 	Z_ARR_P(dst) = zend_array_dup(Z_ARR_P(src));
@@ -134,7 +134,7 @@ static void empty_partial_object(zval *zv)
 	Z_ARR_P(zv) = zend_new_array(8);
 }
 
-static void dup_partial_object(zval *dst, zval *src)
+static void dup_partial_object(zval *dst, const zval *src)
 {
 	MAKE_PARTIAL_OBJECT(dst);
 	Z_ARR_P(dst) = zend_array_dup(Z_ARR_P(src));
@@ -146,7 +146,7 @@ static inline bool value_known(zval *zv) {
 
 /* Sets new value for variable and ensures that it is lower or equal
  * the previous one in the constant propagation lattice. */
-static void set_value(scdf_ctx *scdf, sccp_ctx *ctx, int var, zval *new) {
+static void set_value(scdf_ctx *scdf, sccp_ctx *ctx, int var, const zval *new) {
 	zval *value = &ctx->values[var];
 	if (IS_BOT(value) || IS_TOP(new)) {
 		return;
@@ -186,7 +186,7 @@ static void set_value(scdf_ctx *scdf, sccp_ctx *ctx, int var, zval *new) {
 #endif
 }
 
-static zval *get_op1_value(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
+static zval *get_op1_value(sccp_ctx *ctx, zend_op *opline, const zend_ssa_op *ssa_op) {
 	if (opline->op1_type == IS_CONST) {
 		return CT_CONSTANT_EX(ctx->scdf.op_array, opline->op1.constant);
 	} else if (ssa_op->op1_use != -1) {
@@ -196,7 +196,7 @@ static zval *get_op1_value(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op) 
 	}
 }
 
-static zval *get_op2_value(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
+static zval *get_op2_value(sccp_ctx *ctx, const zend_op *opline, const zend_ssa_op *ssa_op) {
 	if (opline->op2_type == IS_CONST) {
 		return CT_CONSTANT_EX(ctx->scdf.op_array, opline->op2.constant);
 	} else if (ssa_op->op2_use != -1) {
@@ -207,7 +207,7 @@ static zval *get_op2_value(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op) 
 }
 
 static bool can_replace_op1(
-		const zend_op_array *op_array, zend_op *opline, zend_ssa_op *ssa_op) {
+		const zend_op_array *op_array, const zend_op *opline, const zend_ssa_op *ssa_op) {
 	switch (opline->opcode) {
 		case ZEND_PRE_INC:
 		case ZEND_PRE_DEC:
@@ -249,6 +249,7 @@ static bool can_replace_op1(
 		case ZEND_ROPE_ADD:
 		case ZEND_ROPE_END:
 		case ZEND_BIND_STATIC:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
 		case ZEND_BIND_GLOBAL:
 		case ZEND_MAKE_REF:
 		case ZEND_UNSET_CV:
@@ -314,7 +315,7 @@ static bool try_replace_op2(
 	return 0;
 }
 
-static inline zend_result ct_eval_binary_op(zval *result, zend_uchar binop, zval *op1, zval *op2) {
+static inline zend_result ct_eval_binary_op(zval *result, uint8_t binop, zval *op1, zval *op2) {
 	/* TODO: We could implement support for evaluation of + on partial arrays. */
 	if (IS_PARTIAL_ARRAY(op1) || IS_PARTIAL_ARRAY(op2)) {
 		return FAILURE;
@@ -441,7 +442,7 @@ static inline zend_result ct_eval_isset_dim(zval *result, uint32_t extended_valu
 	}
 }
 
-static inline zend_result ct_eval_del_array_elem(zval *result, zval *key) {
+static inline zend_result ct_eval_del_array_elem(zval *result, const zval *key) {
 	ZEND_ASSERT(IS_PARTIAL_ARRAY(result));
 
 	switch (Z_TYPE_P(key)) {
@@ -475,7 +476,7 @@ static inline zend_result ct_eval_del_array_elem(zval *result, zval *key) {
 	return SUCCESS;
 }
 
-static inline zend_result ct_eval_add_array_elem(zval *result, zval *value, zval *key) {
+static inline zend_result ct_eval_add_array_elem(zval *result, zval *value, const zval *key) {
 	if (!key) {
 		SEPARATE_ARRAY(result);
 		if ((value = zend_hash_next_index_insert(Z_ARR_P(result), value))) {
@@ -546,7 +547,7 @@ static inline zend_result ct_eval_add_array_unpack(zval *result, zval *array) {
 	return SUCCESS;
 }
 
-static inline zend_result ct_eval_assign_dim(zval *result, zval *value, zval *key) {
+static inline zend_result ct_eval_assign_dim(zval *result, zval *value, const zval *key) {
 	switch (Z_TYPE_P(result)) {
 		case IS_NULL:
 		case IS_FALSE:
@@ -622,7 +623,7 @@ static inline zend_result ct_eval_isset_obj(zval *result, uint32_t extended_valu
 	}
 }
 
-static inline zend_result ct_eval_del_obj_prop(zval *result, zval *key) {
+static inline zend_result ct_eval_del_obj_prop(zval *result, const zval *key) {
 	ZEND_ASSERT(IS_PARTIAL_OBJECT(result));
 
 	switch (Z_TYPE_P(key)) {
@@ -636,7 +637,7 @@ static inline zend_result ct_eval_del_obj_prop(zval *result, zval *key) {
 	return SUCCESS;
 }
 
-static inline zend_result ct_eval_add_obj_prop(zval *result, zval *value, zval *key) {
+static inline zend_result ct_eval_add_obj_prop(zval *result, zval *value, const zval *key) {
 	switch (Z_TYPE_P(key)) {
 		case IS_STRING:
 			value = zend_symtable_update(Z_ARR_P(result), Z_STR_P(key), value);
@@ -649,7 +650,7 @@ static inline zend_result ct_eval_add_obj_prop(zval *result, zval *value, zval *
 	return SUCCESS;
 }
 
-static inline zend_result ct_eval_assign_obj(zval *result, zval *value, zval *key) {
+static inline zend_result ct_eval_assign_obj(zval *result, zval *value, const zval *key) {
 	switch (Z_TYPE_P(result)) {
 		case IS_NULL:
 		case IS_FALSE:
@@ -662,8 +663,13 @@ static inline zend_result ct_eval_assign_obj(zval *result, zval *value, zval *ke
 	}
 }
 
-static inline zend_result ct_eval_incdec(zval *result, zend_uchar opcode, zval *op1) {
+static inline zend_result ct_eval_incdec(zval *result, uint8_t opcode, zval *op1) {
+	/* As of PHP 8.3 with the warning/deprecation notices any type other than int/double/null will emit a diagnostic
 	if (Z_TYPE_P(op1) == IS_ARRAY || IS_PARTIAL_ARRAY(op1)) {
+		return FAILURE;
+	}
+	*/
+	if (Z_TYPE_P(op1) != IS_LONG && Z_TYPE_P(op1) != IS_DOUBLE && Z_TYPE_P(op1) != IS_NULL) {
 		return FAILURE;
 	}
 
@@ -674,6 +680,11 @@ static inline zend_result ct_eval_incdec(zval *result, zend_uchar opcode, zval *
 			|| opcode == ZEND_POST_INC_OBJ) {
 		increment_function(result);
 	} else {
+		/* Decrement on null emits a deprecation notice */
+		if (Z_TYPE_P(op1) == IS_NULL) {
+			zval_ptr_dtor(result);
+			return FAILURE;
+		}
 		decrement_function(result);
 	}
 	return SUCCESS;
@@ -1374,21 +1385,22 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 						&& ctx->scdf.ssa->vars[ssa_op->op1_def].escape_state == ESCAPE_STATE_NO_ESCAPE) {
 					zval tmp1, tmp2;
 
-					if (ct_eval_fetch_obj(&tmp1, op1, op2) == SUCCESS
-							&& ct_eval_incdec(&tmp2, opline->opcode, &tmp1) == SUCCESS) {
-
-						dup_partial_object(&zv, op1);
-						ct_eval_assign_obj(&zv, &tmp2, op2);
-						if (opline->opcode == ZEND_PRE_INC_OBJ || opline->opcode == ZEND_PRE_DEC_OBJ) {
-							SET_RESULT(result, &tmp2);
-						} else {
-							SET_RESULT(result, &tmp1);
+					if (ct_eval_fetch_obj(&tmp1, op1, op2) == SUCCESS) {
+						if (ct_eval_incdec(&tmp2, opline->opcode, &tmp1) == SUCCESS) {
+							dup_partial_object(&zv, op1);
+							ct_eval_assign_obj(&zv, &tmp2, op2);
+							if (opline->opcode == ZEND_PRE_INC_OBJ || opline->opcode == ZEND_PRE_DEC_OBJ) {
+								SET_RESULT(result, &tmp2);
+							} else {
+								SET_RESULT(result, &tmp1);
+							}
+							zval_ptr_dtor_nogc(&tmp1);
+							zval_ptr_dtor_nogc(&tmp2);
+							SET_RESULT(op1, &zv);
+							zval_ptr_dtor_nogc(&zv);
+							break;
 						}
 						zval_ptr_dtor_nogc(&tmp1);
-						zval_ptr_dtor_nogc(&tmp2);
-						SET_RESULT(op1, &zv);
-						zval_ptr_dtor_nogc(&zv);
-						break;
 					}
 				}
 			}
@@ -1646,8 +1658,9 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				break;
 			}
 
-			/* We're only interested in functions with up to three arguments right now */
-			if (call->num_args > 3 || call->send_unpack || call->is_prototype) {
+			/* We're only interested in functions with up to three arguments right now.
+			 * Note that named arguments with the argument in declaration order will still work. */
+			if (call->num_args > 3 || call->send_unpack || call->is_prototype || call->named_args) {
 				SET_RESULT_BOT(result);
 				break;
 			}
@@ -1772,6 +1785,7 @@ static void sccp_mark_feasible_successors(
 		case ZEND_CATCH:
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
 			scdf_mark_edge_feasible(scdf, block_num, block->successors[0]);
 			scdf_mark_edge_feasible(scdf, block_num, block->successors[1]);
 			return;
@@ -1843,7 +1857,7 @@ static void sccp_mark_feasible_successors(
 		case ZEND_MATCH:
 		{
 			bool strict_comparison = opline->opcode == ZEND_MATCH;
-			zend_uchar type = Z_TYPE_P(op1);
+			uint8_t type = Z_TYPE_P(op1);
 			bool correct_type =
 				(opline->opcode == ZEND_SWITCH_LONG && type == IS_LONG)
 				|| (opline->opcode == ZEND_SWITCH_STRING && type == IS_STRING)
@@ -2106,7 +2120,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 							break;
 						default:
 							break;
-					}	
+					}
 				}
 				/* we cannot remove instruction that defines other variables */
 				return 0;
@@ -2134,7 +2148,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 						&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT
 						&& opline->opcode != ZEND_ADD_ARRAY_UNPACK) {
 					/* Replace with QM_ASSIGN */
-					zend_uchar old_type = opline->result_type;
+					uint8_t old_type = opline->result_type;
 					uint32_t old_var = opline->result.var;
 
 					ssa_op->result_def = -1;

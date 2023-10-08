@@ -4,13 +4,13 @@ mysqli_stmt_result_metadata() - non SELECT statements
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 
 die("skip Check again when the Klingons visit earth - http://bugs.mysql.com/bug.php?id=42490");
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
 
     function testStatement($offset, $link, $sql, $expected_lib, $expected_mysqlnd, $check_mysqlnd, $compare) {
 
@@ -226,7 +226,7 @@ die("skip Check again when the Klingons visit earth - http://bugs.mysql.com/bug.
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

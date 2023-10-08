@@ -38,7 +38,7 @@ typedef struct dba_lock {
 typedef struct dba_info {
 	/* public */
 	void *dbf;               /* ptr to private data or whatever */
-	char *path;
+	zend_string *path;
 	dba_mode_t mode;
 	php_stream *fp;  /* this is the database stream for builtin handlers */
 	int fd;
@@ -48,7 +48,7 @@ typedef struct dba_info {
 	zend_long driver_flags;
 	/* private */
 	int flags; /* whether and how dba did locking and other flags*/
-	struct dba_handler *hnd;
+	const struct dba_handler *hnd;
 	dba_lock lock;
 } dba_info;
 
@@ -73,9 +73,9 @@ extern zend_module_entry dba_module_entry;
 #define dba_module_ptr &dba_module_entry
 
 typedef struct dba_handler {
-	char *name; /* handler name */
+	const char *name; /* handler name */
 	int flags; /* whether and how dba does locking and other flags*/
-	zend_result (*open)(dba_info *, char **error);
+	zend_result (*open)(dba_info *, const char **error);
 	void (*close)(dba_info *);
 	zend_string* (*fetch)(dba_info *, zend_string *, int);
 	zend_result (*update)(dba_info *, zend_string *, zend_string *, int);
@@ -85,14 +85,14 @@ typedef struct dba_handler {
 	zend_string* (*nextkey)(dba_info *);
 	zend_result (*optimize)(dba_info *);
 	zend_result (*sync)(dba_info *);
-	char* (*info)(struct dba_handler *hnd, dba_info *);
+	char* (*info)(const struct dba_handler *hnd, dba_info *);
 		/* dba_info==NULL: Handler info, dba_info!=NULL: Database info */
 } dba_handler;
 
 /* common prototypes which must be supplied by modules */
 
 #define DBA_OPEN_FUNC(x) \
-	zend_result dba_open_##x(dba_info *info, char **error)
+	zend_result dba_open_##x(dba_info *info, const char **error)
 #define DBA_CLOSE_FUNC(x) \
 	void dba_close_##x(dba_info *info)
 #define DBA_FETCH_FUNC(x) \
@@ -112,7 +112,7 @@ typedef struct dba_handler {
 #define DBA_SYNC_FUNC(x) \
 	zend_result dba_sync_##x(dba_info *info)
 #define DBA_INFO_FUNC(x) \
-	char *dba_info_##x(dba_handler *hnd, dba_info *info)
+	char *dba_info_##x(const dba_handler *hnd, dba_info *info)
 
 #define DBA_FUNCS(x) \
 	DBA_OPEN_FUNC(x); \

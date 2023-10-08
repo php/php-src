@@ -4,13 +4,16 @@ mysqli_ping()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    require('table.inc');
+    require_once 'connect.inc';
+    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+        printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+            $host, $user, $db, $port, $socket);
+        exit(1);
+    }
 
     var_dump(mysqli_ping($link));
 

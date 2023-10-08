@@ -24,5 +24,5 @@ string(12) "a${1b${1c${1"
 Warning: preg_replace(): Compilation failed: missing terminating ] for character class at offset 8 in %s002.php on line %d
 NULL
 
-Warning: preg_replace(): The /e modifier is no longer supported, use preg_replace_callback instead in %s on line %d
+Warning: preg_replace(): Unknown modifier 'e' in %s on line %d
 NULL

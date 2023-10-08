@@ -1,5 +1,7 @@
 --TEST--
 Bug #79919 (Stack use-after-scope in define())
+--INI--
+error_log=
 --EXTENSIONS--
 simplexml
 --FILE--

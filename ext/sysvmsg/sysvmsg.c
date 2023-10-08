@@ -398,7 +398,7 @@ PHP_FUNCTION(msg_send)
 				break;
 
 			default:
-				zend_argument_type_error(3, "must be of type string|int|float|bool, %s given", zend_zval_type_name(message));
+				zend_argument_type_error(3, "must be of type string|int|float|bool, %s given", zend_zval_value_name(message));
 				RETURN_THROWS();
 		}
 

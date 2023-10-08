@@ -4,15 +4,13 @@ mysqli_driver class
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 
-if (!is_object($driver = new mysqli_driver())) {
-    printf("[001] Failed to create mysqli_driver object\n");
-}
+$driver = new mysqli_driver();
 
 $client_info = mysqli_get_client_info();
 if (($tmp = $driver->client_info) !== $client_info) {

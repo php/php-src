@@ -21,6 +21,7 @@ final class CountingEngine32 implements Engine
 $engines = [];
 $engines[] = new CountingEngine32();
 $engines[] = new TestShaEngine();
+$iterations = getenv("SKIP_SLOW_TESTS") ? 3_000 : 10_000;
 
 foreach ($engines as $engine) {
     echo $engine::class, PHP_EOL;
@@ -31,7 +32,7 @@ foreach ($engines as $engine) {
 
     $engine2 = unserialize(serialize($engine));
 
-    for ($i = 0; $i < 10_000; $i++) {
+    for ($i = 0; $i < $iterations; $i++) {
         if ($engine->generate() !== $engine2->generate()) {
             die("failure: state differs at {$i}");
         }

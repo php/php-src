@@ -183,6 +183,7 @@ if ($pid) {
             fputs($s, "200 OK\r\n");
 
         } elseif ($buf === "QUIT\r\n") {
+            fputs($s, "221 Bye\r\n");
             break;
 
         } elseif (preg_match("~^PORT (\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\r\n$~", $buf, $m)) {
@@ -385,6 +386,10 @@ if ($pid) {
                     break;
                 case "/bug73457":
                     fputs($s, "150 File status okay; about to open data connection.\r\n");
+                    break;
+                case "gh10521":
+                    // Just a side channel for getting the received file size.
+                    fputs($s, "425 Can't open data connection (".$GLOBALS['rest_pos'].").\r\n");
                     break;
 
                 default:

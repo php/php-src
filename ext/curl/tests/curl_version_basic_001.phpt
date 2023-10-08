@@ -22,6 +22,6 @@ int(%i)
 int(%i)
 string(%i) "%s"
 string(%i) "%s"
-string(%i) "%s"
-string(%i) "%s"
+string(%i) "%S"
+string(%i) "%S"
 bool(true)

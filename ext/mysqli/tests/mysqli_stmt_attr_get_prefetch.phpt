@@ -4,12 +4,12 @@ mysqli_stmt_attr_get() - prefetch
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 die("SKIP: prefetch isn't supported at the moment");
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
 
     $stmt = mysqli_stmt_init($link);
     mysqli_stmt_prepare($stmt, 'SELECT * FROM test');
@@ -23,7 +23,7 @@ die("SKIP: prefetch isn't supported at the moment");
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

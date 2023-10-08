@@ -429,14 +429,14 @@ PHP_FUNCTION(phpdbg_start_oplog)
 	PHPDBG_G(oplog_cur)->next = NULL;
 }
 
-static zend_always_inline bool phpdbg_is_ignored_opcode(zend_uchar opcode) {
+static zend_always_inline bool phpdbg_is_ignored_opcode(uint8_t opcode) {
 	return
 	    opcode == ZEND_NOP || opcode == ZEND_OP_DATA || opcode == ZEND_FE_FREE || opcode == ZEND_FREE || opcode == ZEND_ASSERT_CHECK || opcode == ZEND_VERIFY_RETURN_TYPE
 	 || opcode == ZEND_DECLARE_CONST || opcode == ZEND_DECLARE_CLASS || opcode == ZEND_DECLARE_FUNCTION
 	 || opcode == ZEND_DECLARE_CLASS_DELAYED
 	 || opcode == ZEND_DECLARE_ANON_CLASS || opcode == ZEND_FAST_RET || opcode == ZEND_TICKS
 	 || opcode == ZEND_EXT_STMT || opcode == ZEND_EXT_FCALL_BEGIN || opcode == ZEND_EXT_FCALL_END
-	 || opcode == ZEND_BIND_GLOBAL
+	 || opcode == ZEND_BIND_GLOBAL || opcode == ZEND_BIND_INIT_STATIC_OR_JMP
 	;
 }
 
@@ -457,7 +457,7 @@ static void phpdbg_oplog_fill_executable(zend_op_array *op_array, HashTable *ins
 	}
 
 	for (; cur < end; cur++) {
-		zend_uchar opcode = cur->opcode;
+		uint8_t opcode = cur->opcode;
 		if (phpdbg_is_ignored_opcode(opcode)) {
 			continue;
 		}
@@ -911,19 +911,19 @@ void phpdbg_register_file_handles(void) /* {{{ */
 	php_stream_to_zval(s_err, &zerr);
 
 	ic.value = zin;
-	ZEND_CONSTANT_SET_FLAGS(&ic, CONST_CS, 0);
+	Z_CONSTANT_FLAGS(ic.value) = 0;
 	ic.name = zend_string_init(ZEND_STRL("STDIN"), 0);
 	zend_hash_del(EG(zend_constants), ic.name);
 	zend_register_constant(&ic);
 
 	oc.value = zout;
-	ZEND_CONSTANT_SET_FLAGS(&oc, CONST_CS, 0);
+	Z_CONSTANT_FLAGS(oc.value) = 0;
 	oc.name = zend_string_init(ZEND_STRL("STDOUT"), 0);
 	zend_hash_del(EG(zend_constants), oc.name);
 	zend_register_constant(&oc);
 
 	ec.value = zerr;
-	ZEND_CONSTANT_SET_FLAGS(&ec, CONST_CS, 0);
+	Z_CONSTANT_FLAGS(ec.value) = 0;
 	ec.name = zend_string_init(ZEND_STRL("STDERR"), 0);
 	zend_hash_del(EG(zend_constants), ec.name);
 	zend_register_constant(&ec);
@@ -963,7 +963,7 @@ static sapi_module_struct phpdbg_sapi_module = {
 };
 /* }}} */
 
-const opt_struct OPTIONS[] = { /* {{{ */
+static const opt_struct OPTIONS[] = { /* {{{ */
 	{'c', 1, "ini path override"},
 	{'d', 1, "define ini entry on command line"},
 	{'n', 0, "no php.ini"},
@@ -1378,6 +1378,8 @@ phpdbg_main:
 					get_zend_version()
 				);
 			}
+			PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+			php_module_shutdown();
 			sapi_deactivate();
 			sapi_shutdown();
 			php_ini_builder_deinit(&ini_builder);

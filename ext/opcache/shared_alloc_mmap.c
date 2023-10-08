@@ -34,6 +34,9 @@
 #endif
 
 #include "zend_execute.h"
+#ifdef HAVE_SYS_PROCCTL_H
+#include <sys/procctl.h>
+#endif
 
 #if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
 # define MAP_ANONYMOUS MAP_ANON
@@ -64,8 +67,13 @@ static void *find_prefered_mmap_base(size_t requested_size)
 	while (fgets(buffer, MAXPATHLEN, f) && sscanf(buffer, "%lx-%lx", &start, &end) == 2) {
 		if ((uintptr_t)execute_ex >= start) {
 			/* the current segment lays before PHP .text segment or PHP .text segment itself */
+			/*Search for candidates at the end of the free segment near the .text segment
+			  to prevent candidates from being missed due to large hole*/
 			if (last_free_addr + requested_size <= start) {
-				last_candidate = last_free_addr;
+				last_candidate = ZEND_MM_ALIGNED_SIZE_EX(start - requested_size, huge_page_size);
+				if (last_candidate + requested_size > start) {
+					last_candidate -= huge_page_size;
+				}
 			}
 			if ((uintptr_t)execute_ex < end) {
 				/* the current segment is PHP .text segment itself */
@@ -114,7 +122,10 @@ static void *find_prefered_mmap_base(size_t requested_size)
 					if ((uintptr_t)execute_ex >= e_start) {
 						/* the current segment lays before PHP .text segment or PHP .text segment itself */
 						if (last_free_addr + requested_size <= e_start) {
-							last_candidate = last_free_addr;
+							last_candidate = ZEND_MM_ALIGNED_SIZE_EX(e_start - requested_size, huge_page_size);
+							if (last_candidate + requested_size > e_start) {
+								last_candidate -= huge_page_size;
+							}
 						}
 						if ((uintptr_t)execute_ex < e_end) {
 							/* the current segment is PHP .text segment itself */
@@ -151,11 +162,17 @@ static void *find_prefered_mmap_base(size_t requested_size)
 }
 #endif
 
-static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
+static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, const char **error_in)
 {
 	zend_shared_segment *shared_segment;
 	int flags = PROT_READ | PROT_WRITE, fd = -1;
 	void *p;
+#if defined(HAVE_PROCCTL) && defined(PROC_WXMAP_CTL)
+	int enable_wxmap = PROC_WX_MAPPINGS_PERMIT;
+	if (procctl(P_PID, getpid(), PROC_WXMAP_CTL, &enable_wxmap) == -1) {
+		return ALLOC_FAILURE;
+	}
+#endif
 #ifdef PROT_MPROTECT
 	flags |= PROT_MPROTECT(PROT_EXEC);
 #endif
@@ -267,7 +284,7 @@ static size_t segment_type_size(void)
 	return sizeof(zend_shared_segment);
 }
 
-zend_shared_memory_handlers zend_alloc_mmap_handlers = {
+const zend_shared_memory_handlers zend_alloc_mmap_handlers = {
 	create_segments,
 	detach_segment,
 	segment_type_size

@@ -21,6 +21,11 @@ mb_internal_encoding("EUC-JP");
 var_dump(FROM_EUC_JP(mb_strstr(EUC_JP("あいうえおかきくけこ"), EUC_JP("おかき"))));
 var_dump(FROM_EUC_JP(mb_strstr(EUC_JP("あいうえおかきくけこ"), EUC_JP("おかき"), false)));
 var_dump(FROM_EUC_JP(mb_strstr(EUC_JP("あいうえおかきくけこ"), EUC_JP("おかき"), true)));
+
+// Regression test from when mb_strstr was being reimplemented
+var_dump(bin2hex(mb_strstr("\xdd\x00", "", false, 'UTF-8')));
+var_dump(bin2hex(mb_strstr("M\xff\xff\xff\x00", "\x00", false, "SJIS")));
+
 ?>
 --EXPECT--
 string(18) "おかきくけこ"
@@ -31,3 +36,5 @@ string(12) "あいうえ"
 string(18) "おかきくけこ"
 string(18) "おかきくけこ"
 string(12) "あいうえ"
+string(4) "dd00"
+string(2) "00"

@@ -38,12 +38,8 @@ while ($line = fgets($fp, 256)) {
 	}
 }
 
-/* U+007E is TILDE, Shift-JIS 0x8160 is WAVE DASH */
-$fromUnicode["\x00\x7E"] = "\x81\x60";
-
-/* U+005C is backslash, Shift-JIS 0x815F is REVERSE SOLIDUS
- * (ie. a fancy way to say "backslash") */
-$fromUnicode["\x00\x5C"] = "\x81\x5F";
+$fromUnicode["\x00\x7E"] = "\x7E";
+$fromUnicode["\x00\x5C"] = "\x5C";
 
 testAllValidChars($validChars, 'SJIS-2004', 'UTF-32BE');
 echo "SJIS-2004 verification and conversion works for all valid characters\n";

@@ -20,6 +20,34 @@
 #include "fuzzer-sapi.h"
 #include "ext/mbstring/mbstring.h"
 
+zend_string* convert_encoding(const uint8_t *Data, size_t Size, const mbfl_encoding *FromEncoding, const mbfl_encoding *ToEncoding, size_t BufSize, unsigned int *NumErrors)
+{
+	uint32_t *wchar_buf = ecalloc(BufSize, sizeof(uint32_t));
+	unsigned int state = 0;
+
+	mb_convert_buf buf;
+	mb_convert_buf_init(&buf, Size, '?', MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR);
+
+	while (Size) {
+		size_t out_len = FromEncoding->to_wchar((unsigned char**)&Data, &Size, wchar_buf, BufSize, &state);
+		ZEND_ASSERT(out_len <= BufSize);
+		ToEncoding->from_wchar(wchar_buf, out_len, &buf, !Size);
+	}
+
+	*NumErrors = buf.errors;
+	zend_string *result = mb_convert_buf_result(&buf, ToEncoding);
+	efree(wchar_buf);
+	return result;
+}
+
+void assert_zend_string_eql(zend_string *str1, zend_string *str2)
+{
+	ZEND_ASSERT(ZSTR_LEN(str1) == ZSTR_LEN(str2));
+	for (int i = 0; i < ZSTR_LEN(str1); i++) {
+		ZEND_ASSERT(ZSTR_VAL(str1)[i] == ZSTR_VAL(str2)[i]);
+	}
+}
+
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	const uint8_t *Comma1 = memchr(Data, ',', Size);
 	if (!Comma1) {
@@ -45,14 +73,50 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	const mbfl_encoding *ToEncoding = mbfl_name2encoding(ToEncodingName);
 	const mbfl_encoding *FromEncoding = mbfl_name2encoding(FromEncodingName);
 
-	if (!ToEncoding || !FromEncoding || fuzzer_request_startup() == FAILURE) {
+	if (!ToEncoding || !FromEncoding || Size < 2 || fuzzer_request_startup() == FAILURE) {
 		efree(ToEncodingName);
 		efree(FromEncodingName);
 		return 0;
 	}
 
-	zend_string *Result = php_mb_convert_encoding_ex((char *) Data, Size, ToEncoding, FromEncoding);
-	zend_string_release(Result);
+	/* Rather than converting an entire (possibly very long) string at once, mbstring converts
+	 * strings 'chunk by chunk'; the decoder will run until it fills up its output buffer with
+	 * wchars, then the encoder will process those wchars, then the decoder runs again until it
+	 * again fills up its output buffer, and so on
+	 *
+	 * The most error-prone part of the decoder/encoder code is where we exit a decoder/encoder
+	 * function and save its state to allow later resumption
+	 * To stress-test that aspect of the decoders/encoders, try performing an encoding conversion
+	 * operation with different, random buffer sizes
+	 * If the code is correct, the result should always be the same either way */
+	size_t bufsize1 = *Data++;
+	size_t bufsize2 = *Data++;
+	bufsize1 = MAX(bufsize1, MBSTRING_MIN_WCHAR_BUFSIZE);
+	bufsize2 = MAX(bufsize2, MBSTRING_MIN_WCHAR_BUFSIZE);
+	Size -= 2;
+
+	unsigned int errors1 = 0, errors2 = 0;
+
+	zend_string *Result1 = convert_encoding(Data, Size, FromEncoding, ToEncoding, bufsize1, &errors1);
+	zend_string *Result2 = convert_encoding(Data, Size, FromEncoding, ToEncoding, bufsize2, &errors2);
+
+	assert_zend_string_eql(Result1, Result2);
+	ZEND_ASSERT(errors1 == errors2);
+
+	/* For some text encodings, we have specialized validation functions. These should always be
+	 * stricter than the conversion functions; if the conversion function receives invalid input
+	 * and emits an error marker (MBFL_BAD_INPUT), then the validation function should always
+	 * return false. However, if the conversion function does not emit any error marker, it may
+	 * still happen in some cases that the validation function returns false. */
+	if (FromEncoding->check != NULL) {
+		bool good = FromEncoding->check((unsigned char*)Data, Size);
+		if (errors1 > 0) {
+			ZEND_ASSERT(!good);
+		}
+	}
+
+	zend_string_release(Result1);
+	zend_string_release(Result2);
 	efree(ToEncodingName);
 	efree(FromEncodingName);
 

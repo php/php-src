@@ -317,7 +317,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				break;
 
 			default:
-				zend_argument_type_error(1, "must be of type resource|string, %s given", zend_zval_type_name(what));
+				zend_argument_type_error(1, "must be of type resource|string, %s given", zend_zval_value_name(what));
 				RETURN_THROWS();
 		}
 

@@ -41,7 +41,7 @@ DBA_OPEN_FUNC(db2)
 	int gmode = 0;
 	int filemode = info->file_permission;
 	struct stat check_stat;
-	int s = VCWD_STAT(info->path, &check_stat);
+	int s = VCWD_STAT(ZSTR_VAL(info->path), &check_stat);
 
 	if (!s && !check_stat.st_size) {
 		info->mode = DBA_TRUNC; /* force truncate */
@@ -61,7 +61,7 @@ DBA_OPEN_FUNC(db2)
 		return FAILURE;/* not possible */
 	}
 
-	if (db_open(info->path, type, gmode, filemode, NULL, NULL, &dbp)) {
+	if (db_open(ZSTR_VAL(info->path), type, gmode, filemode, NULL, NULL, &dbp)) {
 		return FAILURE;
 	}
 

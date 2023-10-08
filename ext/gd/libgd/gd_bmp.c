@@ -152,7 +152,7 @@ void gdImageBmpCtx(gdImagePtr im, gdIOCtxPtr out, int compression)
 	gdBMPPutInt(out, im->colorsTotal); /* colours used */
 	gdBMPPutInt(out, 0); /* important colours */
 
-	/* The line must be divisible by 4, else its padded with NULLs */
+	/* The line must be divisible by 4, else it's padded with NULLs */
 	padding = ((int)(im->trueColor ? 3 : 1) * im->sx) % 4;
 	if (padding) {
 		padding = 4 - padding;
@@ -646,7 +646,7 @@ static int bmp_read_os2_v2_info(gdIOCtxPtr infile, bmp_info_t *info)
 		return 1;
 	}
 
-	/* Lets seek the next 24 pointless bytes, we don't care too much about it */
+	/* Let's seek the next 24 pointless bytes, we don't care too much about it */
 	if (!gdGetBuf(useless_bytes, 24, infile)) {
 		return 1;
 	}
@@ -716,7 +716,7 @@ static int bmp_read_direct(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, b
 		}
 	}
 
-	/* The line must be divisible by 4, else its padded with NULLs */
+	/* The line must be divisible by 4, else it's padded with NULLs */
 	padding = ((int)(info->depth / 8) * info->width) % 4;
 	if (padding) {
 		padding = 4 - padding;
@@ -883,7 +883,7 @@ static int bmp_read_4bit(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, bmp
 		}
 	}
 
-	/* The line must be divisible by 4, else its padded with NULLs */
+	/* The line must be divisible by 4, else it's padded with NULLs */
 	padding = ((int)ceil(0.5 * info->width)) % 4;
 	if (padding) {
 		padding = 4 - padding;
@@ -970,7 +970,7 @@ static int bmp_read_8bit(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, bmp
 		}
 	}
 
-	/* The line must be divisible by 4, else its padded with NULLs */
+	/* The line must be divisible by 4, else it's padded with NULLs */
 	padding = (1 * info->width) % 4;
 	if (padding) {
 		padding = 4 - padding;

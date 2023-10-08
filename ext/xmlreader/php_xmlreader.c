@@ -22,6 +22,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "zend_observer.h"
 #include "php_xmlreader.h"
 #ifdef HAVE_DOM
 #include "ext/dom/xml_common.h"
@@ -282,6 +283,7 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, size_t source_len, siz
 		return NULL;
 	}
 
+	PHP_LIBXML_SANITIZE_GLOBALS(parse);
 	if (error_func || warn_func) {
 		xmlRelaxNGSetParserErrors(parser,
 			(xmlRelaxNGValidityErrorFunc) error_func,
@@ -290,6 +292,7 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, size_t source_len, siz
 	}
 	sptr = xmlRelaxNGParse(parser);
 	xmlRelaxNGFreeParserCtxt(parser);
+	PHP_LIBXML_RESTORE_GLOBALS(parse);
 
 	return sptr;
 }
@@ -864,7 +867,9 @@ PHP_METHOD(XMLReader, open)
 	valid_file = _xmlreader_get_valid_file_path(source, resolved_path, MAXPATHLEN );
 
 	if (valid_file) {
+		PHP_LIBXML_SANITIZE_GLOBALS(reader_for_file);
 		reader = xmlReaderForFile(valid_file, encoding, options);
+		PHP_LIBXML_RESTORE_GLOBALS(reader_for_file);
 	}
 
 	if (reader == NULL) {
@@ -936,8 +941,10 @@ PHP_METHOD(XMLReader, setSchema)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern->ptr) {
+	if (intern && intern->ptr) {
+		PHP_LIBXML_SANITIZE_GLOBALS(schema);
 		retval = xmlTextReaderSchemaValidate(intern->ptr, source);
+		PHP_LIBXML_RESTORE_GLOBALS(schema);
 
 		if (retval == 0) {
 			RETURN_TRUE;
@@ -1016,7 +1023,7 @@ PHP_METHOD(XMLReader, XML)
 	xmlreader_object *intern = NULL;
 	char *source, *uri = NULL, *encoding = NULL;
 	int resolved_path_len, ret = 0;
-	char *directory=NULL, resolved_path[MAXPATHLEN];
+	char *directory=NULL, resolved_path[MAXPATHLEN + 1];
 	xmlParserInputBufferPtr inputbfr;
 	xmlTextReaderPtr reader;
 
@@ -1058,6 +1065,7 @@ PHP_METHOD(XMLReader, XML)
 			}
 			uri = (char *) xmlCanonicPath((const xmlChar *) resolved_path);
 		}
+		PHP_LIBXML_SANITIZE_GLOBALS(text_reader);
 		reader = xmlNewTextReader(inputbfr, uri);
 
 		if (reader != NULL) {
@@ -1076,9 +1084,11 @@ PHP_METHOD(XMLReader, XML)
 					xmlFree(uri);
 				}
 
+				PHP_LIBXML_RESTORE_GLOBALS(text_reader);
 				return;
 			}
 		}
+		PHP_LIBXML_RESTORE_GLOBALS(text_reader);
 	}
 
 	if (uri) {
@@ -1147,6 +1157,18 @@ PHP_METHOD(XMLReader, expand)
 }
 /* }}} */
 
+static zend_result (*prev_zend_post_startup_cb)(void);
+static zend_result xmlreader_fixup_temporaries(void) {
+	if (ZEND_OBSERVER_ENABLED) {
+		++xmlreader_open_fn.T;
+		++xmlreader_xml_fn.T;
+	}
+	if (prev_zend_post_startup_cb) {
+		return prev_zend_post_startup_cb();
+	}
+	return SUCCESS;
+}
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(xmlreader)
 {
@@ -1168,6 +1190,9 @@ PHP_MINIT_FUNCTION(xmlreader)
 	xmlreader_open_fn.fn_flags &= ~ZEND_ACC_STATIC;
 	memcpy(&xmlreader_xml_fn, zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "xml", sizeof("xml")-1), sizeof(zend_internal_function));
 	xmlreader_xml_fn.fn_flags &= ~ZEND_ACC_STATIC;
+
+	prev_zend_post_startup_cb = zend_post_startup_cb;
+	zend_post_startup_cb = xmlreader_fixup_temporaries;
 
 	zend_hash_init(&xmlreader_prop_handlers, 0, NULL, php_xmlreader_free_prop_handler, 1);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "attributeCount", xmlTextReaderAttributeCount, NULL, IS_LONG);

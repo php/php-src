@@ -95,32 +95,12 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
     libmbfl/filters/html_entities.c
     libmbfl/filters/mbfilter_7bit.c
     libmbfl/filters/mbfilter_base64.c
-    libmbfl/filters/mbfilter_big5.c
-    libmbfl/filters/mbfilter_cp5022x.c
-    libmbfl/filters/mbfilter_cp51932.c
-    libmbfl/filters/mbfilter_cp932.c
-    libmbfl/filters/mbfilter_cp936.c
-    libmbfl/filters/mbfilter_gb18030.c
-    libmbfl/filters/mbfilter_euc_cn.c
-    libmbfl/filters/mbfilter_euc_jp.c
-    libmbfl/filters/mbfilter_euc_jp_win.c
-    libmbfl/filters/mbfilter_euc_kr.c
-    libmbfl/filters/mbfilter_euc_tw.c
+    libmbfl/filters/mbfilter_cjk.c
     libmbfl/filters/mbfilter_htmlent.c
-    libmbfl/filters/mbfilter_hz.c
-    libmbfl/filters/mbfilter_iso2022_jp_ms.c
-    libmbfl/filters/mbfilter_iso2022jp_mobile.c
-    libmbfl/filters/mbfilter_iso2022_kr.c
-    libmbfl/filters/mbfilter_jis.c
     libmbfl/filters/mbfilter_qprint.c
     libmbfl/filters/mbfilter_singlebyte.c
-    libmbfl/filters/mbfilter_sjis.c
-    libmbfl/filters/mbfilter_sjis_mobile.c
-    libmbfl/filters/mbfilter_sjis_mac.c
-    libmbfl/filters/mbfilter_sjis_2004.c
     libmbfl/filters/mbfilter_ucs2.c
     libmbfl/filters/mbfilter_ucs4.c
-    libmbfl/filters/mbfilter_uhc.c
     libmbfl/filters/mbfilter_utf16.c
     libmbfl/filters/mbfilter_utf32.c
     libmbfl/filters/mbfilter_utf7.c

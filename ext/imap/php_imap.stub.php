@@ -409,7 +409,9 @@ namespace {
 
     function imap_reopen(IMAP\Connection $imap, string $mailbox, int $flags = 0, int $retries = 0): bool {}
 
-    function imap_close(IMAP\Connection $imap, int $flags = 0): bool {}
+    function imap_close(IMAP\Connection $imap, int $flags = 0): true {}
+
+    function imap_is_open(IMAP\Connection $imap): bool {}
 
     function imap_num_msg(IMAP\Connection $imap): int|false {}
 
@@ -443,13 +445,13 @@ namespace {
 
     function imap_fetchstructure(IMAP\Connection $imap, int $message_num, int $flags = 0): \stdClass|false {}
 
-    function imap_gc(IMAP\Connection $imap, int $flags): bool {}
+    function imap_gc(IMAP\Connection $imap, int $flags): true {}
 
-    function imap_expunge(IMAP\Connection $imap): bool {}
+    function imap_expunge(IMAP\Connection $imap): true {}
 
-    function imap_delete(IMAP\Connection $imap, string $message_nums, int $flags = 0): bool {}
+    function imap_delete(IMAP\Connection $imap, string $message_nums, int $flags = 0): true {}
 
-    function imap_undelete(IMAP\Connection $imap, string $message_nums, int $flags = 0): bool {}
+    function imap_undelete(IMAP\Connection $imap, string $message_nums, int $flags = 0): true {}
 
     function imap_check(IMAP\Connection $imap): \stdClass|false {}
 
@@ -501,9 +503,9 @@ namespace {
 
     function imap_mailboxmsginfo(IMAP\Connection $imap): \stdClass {}
 
-    function imap_setflag_full(IMAP\Connection $imap, string $sequence, string $flag, int $options = 0): bool {}
+    function imap_setflag_full(IMAP\Connection $imap, string $sequence, string $flag, int $options = 0): true {}
 
-    function imap_clearflag_full(IMAP\Connection $imap, string $sequence, string $flag, int $options = 0): bool {}
+    function imap_clearflag_full(IMAP\Connection $imap, string $sequence, string $flag, int $options = 0): true {}
 
     function imap_sort(IMAP\Connection $imap, int $criteria, bool $reverse, int $flags = 0, ?string $search_criteria = null, ?string $charset = null): array|false {}
 

@@ -37,7 +37,7 @@ function ut_main()
 
         $res_str .= "-----------";
         $res_str .= "\nTrying to set timezone_id= $timezone_id_entry";
-        ut_datefmt_set_timezone_id( $fmt , $timezone_id_entry );
+        if (ut_datefmt_set_timezone_id( $fmt , $timezone_id_entry ) !== true) die("ut_datefmt_set_timezone_id failed");
         $timezone_id = ut_datefmt_get_timezone_id( $fmt );
         $res_str .= "\nAfter call to set_timezone_id :  timezone_id= $timezone_id";
         $formatted = ut_datefmt_format( $fmt, 0);

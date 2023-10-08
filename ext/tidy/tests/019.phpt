@@ -28,13 +28,13 @@ tidy_repair_file($l, $l, $l ,$l); // This doesn't emit any warning, TODO look in
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: tidy_repair_string(): Could not load configuration file "1" in %s on line %d
+Warning: tidy_repair_string(): Could not load the Tidy configuration file "1" in %s on line %d
 
 Warning: tidy_repair_string(): Could not set encoding "1" in %s on line %d
 
-Warning: tidy_repair_string(): Could not load configuration file "" in %s on line %d
+Warning: tidy_repair_string(): Could not load the Tidy configuration file "" in %s on line %d
 
-Warning: tidy_repair_string(): Could not load configuration file "1" in %s on line %d
+Warning: tidy_repair_string(): Could not load the Tidy configuration file "1" in %s on line %d
 
 Warning: tidy_repair_string(): Could not set encoding "1" in %s on line %d
 Path cannot be empty

@@ -2,6 +2,10 @@
 openssl_csr_export_to_file() tests
 --EXTENSIONS--
 openssl
+--SKIPIF--
+<?php
+if (!defined("OPENSSL_KEYTYPE_DSA")) die("skip DSA disabled");
+?>
 --FILE--
 <?php
 $csrfile = __DIR__ . "/openssl_csr_export_to_file_csr.tmp";

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 68be83247e5e142879ce1bc4340c1c5b8a8f670a */
+ * Stub hash: 0f8a22bff1d123313f37da400500e573baace837 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -122,7 +122,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagerotate, 0, 3, GdImage, 
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, angle, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, background_color, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, ignore_transparent, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesettile, 0, 2, _IS_BOOL, 0)
@@ -265,8 +264,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagegd2, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, file, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO(0, chunk_size, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, chunk_size, IS_LONG, 0, "128")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "IMG_GD2_RAW")
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_GD_BMP)
@@ -747,7 +746,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagesettile, arginfo_imagesettile)
 	ZEND_FE(imagesetbrush, arginfo_imagesetbrush)
 	ZEND_FE(imagecreate, arginfo_imagecreate)
-	ZEND_FE(imagetypes, arginfo_imagetypes)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(imagetypes, arginfo_imagetypes)
 	ZEND_FE(imagecreatefromstring, arginfo_imagecreatefromstring)
 #if defined(HAVE_GD_AVIF)
 	ZEND_FE(imagecreatefromavif, arginfo_imagecreatefromavif)
@@ -974,25 +973,25 @@ static void register_gd_symbols(int module_number)
 	REGISTER_STRING_CONSTANT("GD_EXTRA_VERSION", GD_EXTRA_VERSION, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_GD_PNG)
-	REGISTER_LONG_CONSTANT("PNG_NO_FILTER", 0, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PNG_NO_FILTER", 0x0, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_GD_PNG)
-	REGISTER_LONG_CONSTANT("PNG_FILTER_NONE", 8, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PNG_FILTER_NONE", 0x8, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_GD_PNG)
-	REGISTER_LONG_CONSTANT("PNG_FILTER_SUB", 16, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PNG_FILTER_SUB", 0x10, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_GD_PNG)
-	REGISTER_LONG_CONSTANT("PNG_FILTER_UP", 32, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PNG_FILTER_UP", 0x20, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_GD_PNG)
-	REGISTER_LONG_CONSTANT("PNG_FILTER_AVG", 64, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PNG_FILTER_AVG", 0x40, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_GD_PNG)
-	REGISTER_LONG_CONSTANT("PNG_FILTER_PAETH", 128, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PNG_FILTER_PAETH", 0x80, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_GD_PNG)
-	REGISTER_LONG_CONSTANT("PNG_ALL_FILTERS", 248, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PNG_ALL_FILTERS", 0x8 | 0x10 | 0x20 | 0x40 | 0x80, CONST_PERSISTENT);
 #endif
 }
 

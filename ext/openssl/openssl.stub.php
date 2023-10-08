@@ -64,12 +64,14 @@ const OPENSSL_ALGO_SHA1 = UNKNOWN;
  * @cvalue OPENSSL_ALGO_MD5
  */
 const OPENSSL_ALGO_MD5 = UNKNOWN;
+#ifndef OPENSSL_NO_MD4
 /**
  * @var int
  * @cvalue OPENSSL_ALGO_MD4
  */
 const OPENSSL_ALGO_MD4 = UNKNOWN;
-#ifdef HAVE_OPENSSL_MD2_H
+#endif
+#ifndef OPENSSL_NO_MD2
 /**
  * @var int
  * @cvalue OPENSSL_ALGO_MD2
@@ -104,11 +106,13 @@ const OPENSSL_ALGO_SHA384 = UNKNOWN;
  * @cvalue OPENSSL_ALGO_SHA512
  */
 const OPENSSL_ALGO_SHA512 = UNKNOWN;
+#ifndef OPENSSL_NO_RMD160
 /**
  * @var int
  * @cvalue OPENSSL_ALGO_RMD160
  */
 const OPENSSL_ALGO_RMD160 = UNKNOWN;
+#endif
 
 /* flags for S/MIME */
 
@@ -157,6 +161,11 @@ const PKCS7_BINARY = UNKNOWN;
  * @cvalue PKCS7_NOSIGS
  */
 const PKCS7_NOSIGS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PKCS7_NOOLDMIMETYPE
+ */
+const PKCS7_NOOLDMIMETYPE = UNKNOWN;
 
 /**
  * @var int
@@ -198,6 +207,11 @@ const OPENSSL_CMS_BINARY = UNKNOWN;
  * @cvalue CMS_NOSIGS
  */
 const OPENSSL_CMS_NOSIGS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CMS_NOOLDMIMETYPE
+ */
+const OPENSSL_CMS_OLDMIMETYPE = UNKNOWN;
 
 /**
  * @var int
@@ -289,7 +303,7 @@ const OPENSSL_CIPHER_AES_256_CBC = UNKNOWN;
  * @cvalue OPENSSL_KEYTYPE_RSA
  */
 const OPENSSL_KEYTYPE_RSA = UNKNOWN;
-#ifndef NO_DSA
+#ifndef OPENSSL_NO_DSA
 /**
  * @var int
  * @cvalue OPENSSL_KEYTYPE_DSA

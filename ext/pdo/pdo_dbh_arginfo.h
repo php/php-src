@@ -500,7 +500,7 @@ static zend_class_entry *register_class_PDO(void)
 	zend_string_release(const_NULL_TO_STRING_name);
 
 	zval const_ERR_NONE_value;
-	zend_string *const_ERR_NONE_value_str = zend_string_init(PDO_ERR_NONE, sizeof(PDO_ERR_NONE) - 1, 1);
+	zend_string *const_ERR_NONE_value_str = zend_string_init(PDO_ERR_NONE, strlen(PDO_ERR_NONE), 1);
 	ZVAL_STR(&const_ERR_NONE_value, const_ERR_NONE_value_str);
 	zend_string *const_ERR_NONE_name = zend_string_init_interned("ERR_NONE", sizeof("ERR_NONE") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_ERR_NONE_name, &const_ERR_NONE_value, ZEND_ACC_PUBLIC, NULL);

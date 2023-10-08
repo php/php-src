@@ -3,7 +3,9 @@ openssl_*() with OPENSSL_KEYTYPE_EC
 --EXTENSIONS--
 openssl
 --SKIPIF--
-<?php if (!defined("OPENSSL_KEYTYPE_EC")) print "skip"; ?>
+<?php
+if (!defined("OPENSSL_KEYTYPE_EC")) die("skip EC disabled");
+?>
 --FILE--
 <?php
 $config =  __DIR__ . DIRECTORY_SEPARATOR . 'openssl.cnf';
@@ -72,7 +74,8 @@ var_dump($csr);
 $pubkey1 = openssl_pkey_get_details(openssl_csr_get_public_key($csr));
 var_dump(isset($pubkey1["ec"]["priv_key"]));
 unset($d1["ec"]["priv_key"]);
-var_dump(array_diff($d1["ec"], $pubkey1["ec"]));
+$diff = array_diff($d1["ec"], $pubkey1["ec"]);
+var_dump(isset($diff["d"]) && is_string($diff["d"]) && strlen($diff["d"]) > 0);
 
 $x509 = openssl_csr_sign($csr, null, $key1, 365, $args);
 var_dump($x509);
@@ -119,10 +122,7 @@ Testing openssl_csr_new with existing ecc key
 object(OpenSSLCertificateSigningRequest)#%d (0) {
 }
 bool(false)
-array(1) {
-  ["d"]=>
-  string(%d) "%a"
-}
+bool(true)
 object(OpenSSLCertificate)#%d (0) {
 }
 Testing openssl_x509_check_private_key

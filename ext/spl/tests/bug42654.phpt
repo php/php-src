@@ -110,11 +110,11 @@ object(RecursiveArrayIterator)#%d (1) {
     [2]=>
     array(2) {
       [2]=>
-      string(4) "val2"
+      string(5) "alter"
       [3]=>
       array(1) {
         [3]=>
-        string(4) "val3"
+        string(5) "alter"
       }
     }
     [4]=>
@@ -129,11 +129,11 @@ object(RecursiveArrayIterator)#%d (1) {
     [2]=>
     array(2) {
       [2]=>
-      string(4) "val2"
+      string(5) "alter"
       [3]=>
       array(1) {
         [3]=>
-        string(4) "val3"
+        string(5) "alter"
       }
     }
     [4]=>
@@ -146,11 +146,11 @@ array(3) {
   [2]=>
   array(2) {
     [2]=>
-    string(4) "val2"
+    string(5) "alter"
     [3]=>
     array(1) {
       [3]=>
-      string(4) "val3"
+      string(5) "alter"
     }
   }
   [4]=>

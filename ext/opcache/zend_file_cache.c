@@ -23,6 +23,7 @@
 #include "zend_interfaces.h"
 #include "zend_attributes.h"
 #include "zend_system_id.h"
+#include "zend_enum.h"
 
 #include "php.h"
 #ifdef ZEND_WIN32
@@ -555,6 +556,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
 				case ZEND_JMP_NULL:
+				case ZEND_BIND_INIT_STATIC_OR_JMP:
 					SERIALIZE_PTR(opline->op2.jmp_addr);
 					break;
 				case ZEND_CATCH:
@@ -691,12 +693,12 @@ static void zend_file_cache_serialize_class_constant(zval                     *z
 			SERIALIZE_PTR(c->ce);
 
 			zend_file_cache_serialize_zval(&c->value, script, info, buf);
-
 			if (c->doc_comment) {
 				SERIALIZE_STR(c->doc_comment);
 			}
 
 			SERIALIZE_ATTRIBUTES(c->attributes);
+			zend_file_cache_serialize_type(&c->type, script, info, buf);
 		}
 	}
 }
@@ -1097,7 +1099,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 #if defined(__AVX__) || defined(__SSE2__)
 	/* Align to 64-byte boundary */
 	mem = emalloc(script->size + 64);
-	buf = (void*)(((zend_uintptr_t)mem + 63L) & ~63L);
+	buf = (void*)(((uintptr_t)mem + 63L) & ~63L);
 #else
 	mem = buf = emalloc(script->size);
 #endif
@@ -1116,9 +1118,6 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 
 	zend_string *const s = (zend_string*)ZCG(mem);
 
-	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
-	info.checksum = zend_adler32(info.checksum, (unsigned char*)ZSTR_VAL(s), info.str_size);
-
 #if __has_feature(memory_sanitizer)
 	/* The buffer may contain uninitialized regions. However, the uninitialized parts will not be
 	 * used when reading the cache. We should probably still try to get things fully initialized
@@ -1126,6 +1125,9 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	__msan_unpoison(&info, sizeof(info));
 	__msan_unpoison(buf, script->size);
 #endif
+
+	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
+	info.checksum = zend_adler32(info.checksum, (unsigned char*)ZSTR_VAL(s), info.str_size);
 
 	if (!zend_file_cache_script_write(fd, script, &info, buf, s)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s': %s\n", filename, strerror(errno));
@@ -1403,6 +1405,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
 				case ZEND_JMP_NULL:
+				case ZEND_BIND_INIT_STATIC_OR_JMP:
 					UNSERIALIZE_PTR(opline->op2.jmp_addr);
 					break;
 				case ZEND_CATCH:
@@ -1530,6 +1533,7 @@ static void zend_file_cache_unserialize_class_constant(zval                    *
 				UNSERIALIZE_STR(c->doc_comment);
 			}
 			UNSERIALIZE_ATTRIBUTES(c->attributes);
+			zend_file_cache_unserialize_type(&c->type, c->ce, script, buf);
 		}
 	}
 }
@@ -1714,6 +1718,10 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
 		ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	}
+
+	// Memory addresses of object handlers are not stable. They can change due to ASLR or order of linking dynamic. To
+	// avoid pointing to invalid memory we relink default_object_handlers here.
+	ce->default_object_handlers = ce->ce_flags & ZEND_ACC_ENUM ? &zend_enum_object_handlers : &std_object_handlers;
 }
 
 static void zend_file_cache_unserialize_warnings(zend_persistent_script *script, void *buf)
@@ -1829,7 +1837,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 #if defined(__AVX__) || defined(__SSE2__)
 	/* Align to 64-byte boundary */
 	mem = zend_arena_alloc(&CG(arena), info.mem_size + info.str_size + 64);
-	mem = (void*)(((zend_uintptr_t)mem + 63L) & ~63L);
+	mem = (void*)(((uintptr_t)mem + 63L) & ~63L);
 #else
 	mem = zend_arena_alloc(&CG(arena), info.mem_size + info.str_size);
 #endif
@@ -1860,6 +1868,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 
 	if (!file_cache_only &&
 	    !ZCSG(restart_in_progress) &&
+	    !ZCSG(restart_pending) &&
 		!ZSMMG(memory_exhausted) &&
 	    accelerator_shm_read_lock() == SUCCESS) {
 		/* exclusive lock */
@@ -1927,7 +1936,6 @@ use_process_mem:
 
 	if (cache_it) {
 		ZCSG(map_ptr_last) = CG(map_ptr_last);
-		script->dynamic_members.checksum = zend_accel_script_checksum(script);
 		script->dynamic_members.last_used = ZCG(request_time);
 
 		zend_accel_hash_update(&ZCSG(hash), script->script.filename, 0, script);

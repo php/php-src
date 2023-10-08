@@ -20,14 +20,15 @@ $engines[] = new PcgOneseq128XslRr64();
 $engines[] = new Xoshiro256StarStar();
 $engines[] = new Secure();
 $engines[] = new TestShaEngine();
+// Using 10_000 is very slow.
+$iterations = getenv("SKIP_SLOW_TESTS") ? 100 : 1_000;
 
 foreach ($engines as $engine) {
     echo $engine::class, PHP_EOL;
 
     $randomizer = new Randomizer($engine);
 
-    // Using 10_000 is very slow.
-    for ($i = 1; $i < 1_000; $i++) {
+    for ($i = 1; $i < $iterations; $i++) {
         if (\strlen($randomizer->getBytes($i)) !== $i) {
             die("failure: incorrect string length at {$i}");
         }
@@ -37,7 +38,10 @@ foreach ($engines as $engine) {
 die('success');
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Constant MT_RAND_PHP is deprecated in %s on line %d
+
+Deprecated: The MT_RAND_PHP variant of Mt19937 is deprecated in %s on line %d
 Random\Engine\Mt19937
 Random\Engine\Mt19937
 Random\Engine\PcgOneseq128XslRr64

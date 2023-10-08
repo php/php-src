@@ -17,7 +17,7 @@
 
 #include "zend_portability.h"
 
-#ifdef __linux__
+#ifdef HAVE_PRCTL
 # include <sys/prctl.h>
 
 /* fallback definitions if our libc is older than the kernel */
@@ -27,7 +27,7 @@
 # ifndef PR_SET_VMA_ANON_NAME
 #  define PR_SET_VMA_ANON_NAME 0
 # endif
-#endif // __linux__
+#endif // HAVE_PRCTL
 
 /**
  * Set a name for the specified memory area.
@@ -36,7 +36,7 @@
  */
 static zend_always_inline void zend_mmap_set_name(const void *start, size_t len, const char *name)
 {
-#ifdef __linux__
+#ifdef HAVE_PRCTL
 	prctl(PR_SET_VMA, PR_SET_VMA_ANON_NAME, (unsigned long)start, len, (unsigned long)name);
 #endif
 }

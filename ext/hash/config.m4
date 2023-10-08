@@ -4,10 +4,6 @@ PHP_ARG_WITH([mhash],
     [Include mhash support])])
 
 if test "$PHP_MHASH" != "no"; then
-  if test "$PHP_HASH" = "no"; then
-    PHP_HASH="yes"
-  fi
-
   AC_DEFINE(PHP_MHASH_BC, 1, [ ])
 fi
 

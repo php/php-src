@@ -1,13 +1,34 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.0alpha1
+?? ??? ????, PHP 8.4.0alpha1
 
-- Opcache:
-  . Added start, restart and force restart time to opcache's
-  phpinfo section. (Mikhail Galanin)
-  
-- Posix:
-  . Added posix_sysconf. (David Carlier)
+Core:
+  . Added zend_call_stack_get implementation for NetBSD. (David Carlier)
 
+DOM:
+  . Added DOMNode::compareDocumentPosition(). (nielsdos)
+  . Implement #53655 (Improve speed of DOMNode::C14N() on large XML documents).
+    (nielsdos)
+
+Intl:
+  . Added IntlDateFormatter::PATTERN constant. (David Carlier)
+
+SimpleXML:
+  . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
+    within foreach). (nielsdos)
+  . Fixed bug GH-12208 (SimpleXML infinite loop when a cast is used inside a
+    foreach). (nielsdos)
+  . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
+
+Standard:
+  . Implement GH-12188 (Indication for the int size in phpinfo()). (timwolla)
+  . Partly fix GH-12143 (Incorrect round() result for 0.49999999999999994).
+    (timwolla)
+  . Fix GH-12252 (round(): Validate the rounding mode). (timwolla)
+  . Increase the default BCrypt cost to 12. (timwolla)
+
+XSL:
+  . Implement request #64137 (XSLTProcessor::setParameter() should allow both
+    quotes to be used). (nielsdos)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

@@ -20,7 +20,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "4.3.0-dev"
+#define ZEND_VERSION "4.4.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -39,6 +39,7 @@
 #include "zend_smart_str_public.h"
 #include "zend_smart_string_public.h"
 #include "zend_signal.h"
+#include "zend_max_execution_timer.h"
 
 #define zend_sprintf sprintf
 
@@ -356,8 +357,13 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 ZEND_API ZEND_COLD void zend_type_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
 ZEND_API ZEND_COLD void zend_argument_count_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
 ZEND_API ZEND_COLD void zend_value_error(const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 1, 2);
+/* type should be one of the BP_VAR_* constants, only special messages happen for isset/empty and unset */
+ZEND_API ZEND_COLD void zend_illegal_container_offset(const zend_string *container, const zval *offset, int type);
 
 ZEND_COLD void zenderror(const char *error);
+
+/* For internal C errors */
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn, const char *message);
 
 /* The following #define is used for code duality in PHP for Engine 1 & 2 */
 #define ZEND_STANDARD_CLASS_DEF_PTR zend_standard_class_def

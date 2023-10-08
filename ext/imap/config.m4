@@ -17,6 +17,18 @@ AC_DEFUN([IMAP_LIB_CHK],[
 ])
 
 dnl PHP_IMAP_TEST_BUILD(function, action-if-ok, action-if-not-ok, extra-libs, extra-source)
+dnl
+dnl The UW-IMAP c-client library was not originally designed to be a
+dnl shared library. The mm_foo functions are callbacks, and are required
+dnl to be implemented by the program that is linking to c-client. This
+dnl macro does the work of defining them all to no-ops for you. Note
+dnl that PHP_TEST_BUILD is a link test; the undefined symbols will only
+dnl cause problems if you actually try to link with c-client. For
+dnl example, if your test is trivial enough to be optimized out, and if
+dnl you link with --as-needed, the test/library may be omitted entirely
+dnl from the final executable. In that case linking will of course
+dnl succeed, but your luck won't necessarily apply at lower optimization
+dnl levels or systems where --as-needed is not used.
 AC_DEFUN([PHP_IMAP_TEST_BUILD], [
   PHP_TEST_BUILD([$1], [$2], [$3], [$4], [$5]
   [
@@ -229,15 +241,23 @@ if test "$PHP_IMAP" != "no"; then
       AC_DEFINE(HAVE_IMAP_AUTH_GSS, 1, [ ])
     ], [], $TST_LIBS)
 
-    dnl Check if utf8_to_mutf7 exists. We need to do some gymnastics because
-    dnl utf8_to_mutf7 takes an argument and will segfault without it. We
-    dnl therefore test another function utf8_to_mutf7_php() which calls
-    dnl the utf8_to_mutf7() function with the empty string as an argument.
-    PHP_IMAP_TEST_BUILD(utf8_to_mutf7_php, [
-      AC_DEFINE(HAVE_IMAP_MUTF7, 1, [ ])
-    ], [], $TST_LIBS, [
-      char utf8_to_mutf7_php(){ return utf8_to_mutf7(""); }
-    ])
+    dnl Check if utf8_to_mutf7 exists.
+    old_CPPFLAGS="${CPPFLAGS}"
+    CPPFLAGS="${CPPFLAGS} -I${IMAP_INC_DIR}"
+    AC_LANG_PUSH(C)
+    AC_CACHE_CHECK(for utf8_to_mutf7, ac_cv_utf8_to_mutf7,
+      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <c-client.h>]],[[
+        unsigned char c = '\0';
+        utf8_to_mutf7(&c);
+      ]])],[
+        AC_DEFINE(HAVE_IMAP_MUTF7, 1, [ ])
+        ac_cv_utf8_to_mutf7=yes
+      ],[
+        ac_cv_utf8_to_mutf7=no
+      ])
+    )
+    AC_LANG_POP
+
 
     AC_MSG_CHECKING(whether rfc822_output_address_list function present)
     PHP_TEST_BUILD(foobar, [

@@ -50,11 +50,11 @@ try {
 ?>
 --EXPECT--
 ---> Pass constant assignment by reference:
-Exception: f(): Argument #1 ($a) cannot be passed by reference
+Exception: f(): Argument #1 ($a) could not be passed by reference
 
 
 ---> Pass variable assignment by reference:
-Exception: f(): Argument #1 ($a) cannot be passed by reference
+Exception: f(): Argument #1 ($a) could not be passed by reference
 
 
 ---> Pass reference assignment by reference:
@@ -63,4 +63,4 @@ string(9) "a.changed"
 
 
 ---> Pass concat assignment by reference:
-Exception: f(): Argument #1 ($a) cannot be passed by reference
+Exception: f(): Argument #1 ($a) could not be passed by reference

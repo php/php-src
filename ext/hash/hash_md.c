@@ -238,7 +238,7 @@ PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX * context, const unsigned char *inpu
 /* }}} */
 
 /* {{{ PHP_MD4Final
-   MD4 finalization. Ends an MD4 message-digest operation, writing the
+   MD4 finalization. Ends an MD4 message-digest operation, writing
    the message digest and zeroizing the context.
  */
 PHP_HASH_API void PHP_MD4Final(unsigned char digest[16], PHP_MD4_CTX * context)

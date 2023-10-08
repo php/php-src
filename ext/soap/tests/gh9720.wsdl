@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions name="soapService" targetNamespace="urn:soapService" xmlns:typens="urn:soapService" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <message name="openSession">
+    <part name="user" type="xsd:string" />
+  </message>
+  <message name="openSessionResponse">
+    <part name="status" type="xsd:string" />
+    <part name="error_code" type="xsd:string" />
+  </message>
+  <portType name="soapServicePortType">
+    <operation name="openSession">
+      <documentation>Service Call: openSession</documentation>
+      <input message="typens:openSession" />
+      <output message="typens:openSessionResponse" />
+    </operation>
+  </portType>
+  <binding name="soapServiceBinding" type="typens:soapServicePortType">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="openSession">
+      <soap:operation soapAction="urn:openSession" />
+      <input>
+        <soap:body namespace="urn:soapService" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output>
+        <soap:body namespace="urn:soapService" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+    </operation>
+  </binding>
+  <service name="soapServiceService">
+    <port name="soapServicePort" binding="typens:soapServiceBinding">
+      <soap:address location="###PHP_SELF###" />
+    </port>
+  </service>
+</definitions>

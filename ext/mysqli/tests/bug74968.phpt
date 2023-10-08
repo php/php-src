@@ -4,11 +4,11 @@ Bug #74968 PHP crashes when calling mysqli_result::fetch_object with an abstract
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
     abstract class test {

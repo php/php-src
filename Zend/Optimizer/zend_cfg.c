@@ -41,7 +41,7 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 			zend_basic_block *succ = blocks + b->successors[i];
 
 			if (b->len != 0) {
-				zend_uchar opcode = opcodes[b->start + b->len - 1].opcode;
+				uint8_t opcode = opcodes[b->start + b->len - 1].opcode;
 				if (opcode == ZEND_MATCH) {
 					succ->flags |= ZEND_BB_TARGET;
 				} else if (opcode == ZEND_SWITCH_LONG || opcode == ZEND_SWITCH_STRING) {
@@ -297,12 +297,12 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
 			case ZEND_GENERATOR_RETURN:
-			case ZEND_MATCH_ERROR:
 			case ZEND_VERIFY_NEVER_TYPE:
 				if (i + 1 < op_array->last) {
 					BB_START(i + 1);
 				}
 				break;
+			case ZEND_MATCH_ERROR:
 			case ZEND_EXIT:
 			case ZEND_THROW:
 				/* Don't treat THROW as terminator if it's used in expression context,
@@ -369,6 +369,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
 			case ZEND_JMP_NULL:
+			case ZEND_BIND_INIT_STATIC_OR_JMP:
 				BB_START(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes);
 				BB_START(i + 1);
 				break;
@@ -428,7 +429,9 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 				break;
 			case ZEND_FREE:
 			case ZEND_FE_FREE:
-				if (zend_optimizer_is_loop_var_free(opline)) {
+				if (zend_optimizer_is_loop_var_free(opline)
+				 && ((opline-1)->opcode != ZEND_MATCH_ERROR
+				  || (opline-1)->extended_value != ZEND_THROW_IS_EXPR)) {
 					BB_START(i);
 					flags |= ZEND_FUNC_FREE_LOOP_VAR;
 				}
@@ -520,6 +523,7 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
 			case ZEND_JMP_NULL:
+			case ZEND_BIND_INIT_STATIC_OR_JMP:
 				block->successors_count = 2;
 				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes];
 				block->successors[1] = j + 1;

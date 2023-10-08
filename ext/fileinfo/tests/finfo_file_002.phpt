@@ -24,7 +24,7 @@ array(%d) {
   ["%s/resources/test.awk"]=>
   string(10) "text/plain"
   ["%s/resources/test.bmp"]=>
-  string(14) "image/x-ms-bmp"
+  string(9) "image/bmp"
   ["%s/resources/test.gif"]=>
   string(9) "image/gif"
   ["%s/resources/test.jpg"]=>
@@ -43,4 +43,8 @@ array(%d) {
   string(11) "image/x-tga"
   ["%s/resources/test.webm"]=>
   string(10) "video/webm"
+  ["%s/resources/test.woff"]=>
+  string(9) "font/woff"
+  ["%s/resources/test.xz"]=>
+  string(16) "application/x-xz"
 }

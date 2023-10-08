@@ -61,6 +61,11 @@ typedef enum _zend_cpu_feature {
 
 	/* EBX */
 	ZEND_CPU_FEATURE_AVX2			= (1<<5 | ZEND_CPU_EBX_MASK),
+	ZEND_CPU_FEATURE_AVX512F		= (1<<16 | ZEND_CPU_EBX_MASK),
+	ZEND_CPU_FEATURE_AVX512DQ		= (1<<17 | ZEND_CPU_EBX_MASK),
+	ZEND_CPU_FEATURE_AVX512CD		= (1<<28 | ZEND_CPU_EBX_MASK),
+	/* intentionally don't support		= (1<<30 | ZEND_CPU_EBX_MASK) */
+	/* intentionally don't support		= (1<<31 | ZEND_CPU_EBX_MASK) */
 
 	/* EDX */
 	ZEND_CPU_FEATURE_FPU			= (1<<0 | ZEND_CPU_EDX_MASK),
@@ -174,6 +179,29 @@ static inline int zend_cpu_supports_avx2(void) {
 #endif
 	return __builtin_cpu_supports("avx2");
 }
+
+#if PHP_HAVE_AVX512_SUPPORTS
+ZEND_NO_SANITIZE_ADDRESS
+static inline int zend_cpu_supports_avx512(void) {
+#if PHP_HAVE_BUILTIN_CPU_INIT
+	__builtin_cpu_init();
+#endif
+	return __builtin_cpu_supports("avx512f") && __builtin_cpu_supports("avx512dq")
+		&& __builtin_cpu_supports("avx512cd") && __builtin_cpu_supports("avx512bw")
+		&& __builtin_cpu_supports("avx512vl");
+}
+#endif
+
+#if PHP_HAVE_AVX512_VBMI_SUPPORTS
+ZEND_NO_SANITIZE_ADDRESS
+static inline int zend_cpu_supports_avx512_vbmi(void) {
+#if PHP_HAVE_BUILTIN_CPU_INIT
+	__builtin_cpu_init();
+#endif
+	return zend_cpu_supports_avx512() && __builtin_cpu_supports("avx512vbmi");
+}
+#endif
+
 #else
 
 static inline int zend_cpu_supports_sse2(void) {
@@ -203,6 +231,16 @@ static inline int zend_cpu_supports_avx(void) {
 static inline int zend_cpu_supports_avx2(void) {
 	return zend_cpu_supports(ZEND_CPU_FEATURE_AVX2);
 }
+
+static inline int zend_cpu_supports_avx512(void) {
+	/* TODO: avx512_bw/avx512_vl use bit 30/31 which are reserved for mask */
+	return 0;
+}
+
+static zend_always_inline int zend_cpu_supports_avx512_vbmi(void) {
+	/* TODO: avx512_vbmi use ECX of cpuid 7 */
+	return 0;
+}
 #endif
 
 /* __builtin_cpu_supports has pclmul from gcc9 */
@@ -217,6 +255,17 @@ static inline int zend_cpu_supports_pclmul(void) {
 #else
 static inline int zend_cpu_supports_pclmul(void) {
 	return zend_cpu_supports(ZEND_CPU_FEATURE_PCLMULQDQ);
+}
+#endif
+
+/* __builtin_cpu_supports has cldemote from gcc11 */
+#if PHP_HAVE_BUILTIN_CPU_SUPPORTS && defined(__GNUC__) && (ZEND_GCC_VERSION >= 11000)
+ZEND_NO_SANITIZE_ADDRESS
+static inline int zend_cpu_supports_cldemote(void) {
+#if PHP_HAVE_BUILTIN_CPU_INIT
+	__builtin_cpu_init();
+#endif
+	return __builtin_cpu_supports("cldemote");
 }
 #endif
 

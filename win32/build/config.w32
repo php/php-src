@@ -228,8 +228,8 @@ STDOUT.WriteLine("Build dir: " + get_define('BUILD_DIR'));
 STDOUT.WriteLine("PHP Core:  " + get_define('PHPDLL') + " and " + get_define('PHPLIB'));
 
 ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
-	zend_ini_parser.c zend_ini_scanner.c zend_alloc.c zend_compile.c \
-	zend_constants.c zend_exceptions.c \
+	zend_ini_parser.c zend_ini_scanner.c zend_alloc.c zend_call_stack.c \
+	zend_compile.c zend_constants.c zend_exceptions.c \
 	zend_execute_API.c zend_highlight.c \
 	zend_llist.c zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c \
 	zend_stack.c zend_variables.c zend.c zend_API.c zend_extensions.c \
@@ -240,7 +240,7 @@ ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_default_classes.c zend_execute.c zend_strtod.c zend_gc.c zend_closures.c zend_weakrefs.c \
 	zend_float.c zend_string.c zend_generators.c zend_virtual_cwd.c zend_ast.c \
 	zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_observer.c zend_system_id.c \
-	zend_enum.c zend_fibers.c zend_atomic.c");
+	zend_enum.c zend_fibers.c zend_atomic.c zend_hrtime.c");
 ADD_SOURCES("Zend\\Optimizer", "zend_optimizer.c pass1.c pass3.c optimize_func_calls.c block_pass.c optimize_temp_vars_5.c nop_removal.c compact_literals.c zend_cfg.c zend_dfg.c dfa_pass.c zend_ssa.c zend_inference.c zend_func_info.c zend_call_graph.c zend_dump.c escape_analysis.c compact_vars.c dce.c sccp.c scdf.c");
 
 var PHP_ASSEMBLER = PATH_PROG({
@@ -302,6 +302,8 @@ if (VS_TOOLSET && VCVERS >= 1914) {
 }
 
 AC_DEFINE('HAVE_STRNLEN', 1);
+
+AC_DEFINE('ZEND_CHECK_STACK_LIMIT', 1)
 
 ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
 	userspace.c transports.c xp_socket.c mmap.c glob_wrapper.c");

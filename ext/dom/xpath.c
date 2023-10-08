@@ -95,30 +95,25 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 				} else if (type == 2) {
 					int j;
 					if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
-						array_init(&fci.params[i]);
+						array_init_size(&fci.params[i], obj->nodesetval->nodeNr);
+						zend_hash_real_init_packed(Z_ARRVAL_P(&fci.params[i]));
 						for (j = 0; j < obj->nodesetval->nodeNr; j++) {
 							xmlNodePtr node = obj->nodesetval->nodeTab[j];
 							zval child;
 							/* not sure, if we need this... it's copied from xpath.c */
 							if (node->type == XML_NAMESPACE_DECL) {
-								xmlNsPtr curns;
-								xmlNodePtr nsparent;
+								xmlNodePtr nsparent = node->_private;
+								xmlNsPtr original = (xmlNsPtr) node;
 
-								nsparent = node->_private;
-								curns = xmlNewNs(NULL, node->name, NULL);
-								if (node->children) {
-									curns->prefix = xmlStrdup((xmlChar *) node->children);
-								}
-								if (node->children) {
-									node = xmlNewDocNode(node->doc, NULL, (xmlChar *) node->children, node->name);
-								} else {
-									node = xmlNewDocNode(node->doc, NULL, (xmlChar *) "xmlns", node->name);
-								}
-								node->type = XML_NAMESPACE_DECL;
-								node->parent = nsparent;
-								node->ns = curns;
+								/* Make sure parent dom object exists, so we can take an extra reference. */
+								zval parent_zval; /* don't destroy me, my lifetime is transfered to the fake namespace decl */
+								php_dom_create_object(nsparent, &parent_zval, &intern->dom);
+								dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
+
+								node = php_dom_create_fake_namespace_decl(nsparent, original, &child, parent_intern);
+							} else {
+								php_dom_create_object(node, &child, &intern->dom);
 							}
-							php_dom_create_object(node, &child, &intern->dom);
 							add_next_index_zval(&fci.params[i], &child);
 						}
 					} else {
@@ -182,7 +177,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 	}
 cleanup:
 	zend_string_release_ex(callable, 0);
-	zval_ptr_dtor_str(&fci.function_name);
+	zval_ptr_dtor_nogc(&fci.function_name);
 	if (fci.param_count > 0) {
 		for (i = 0; i < nargs - 1; i++) {
 			zval_ptr_dtor(&fci.params[i]);
@@ -251,7 +246,7 @@ PHP_METHOD(DOMXPath, __construct)
 /* }}} end DOMXPath::__construct */
 
 /* {{{ document DOMDocument*/
-int dom_xpath_document_read(dom_object *obj, zval *retval)
+zend_result dom_xpath_document_read(dom_object *obj, zval *retval)
 {
 	xmlDoc *docp = NULL;
 	xmlXPathContextPtr ctx = (xmlXPathContextPtr) obj->ptr;
@@ -270,14 +265,14 @@ static inline dom_xpath_object *php_xpath_obj_from_dom_obj(dom_object *obj) {
 	return (dom_xpath_object*)((char*)(obj) - XtOffsetOf(dom_xpath_object, dom));
 }
 
-int dom_xpath_register_node_ns_read(dom_object *obj, zval *retval)
+zend_result dom_xpath_register_node_ns_read(dom_object *obj, zval *retval)
 {
 	ZVAL_BOOL(retval, php_xpath_obj_from_dom_obj(obj)->register_node_ns);
 
 	return SUCCESS;
 }
 
-int dom_xpath_register_node_ns_write(dom_object *obj, zval *newval)
+zend_result dom_xpath_register_node_ns_write(dom_object *obj, zval *newval)
 {
 	php_xpath_obj_from_dom_obj(obj)->register_node_ns = zend_is_true(newval);
 
@@ -414,31 +409,25 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			xmlNodeSetPtr nodesetp;
 
 			if (xpathobjp->type == XPATH_NODESET && NULL != (nodesetp = xpathobjp->nodesetval) && nodesetp->nodeNr) {
-
-				array_init(&retval);
+				array_init_size(&retval, nodesetp->nodeNr);
+				zend_hash_real_init_packed(Z_ARRVAL_P(&retval));
 				for (i = 0; i < nodesetp->nodeNr; i++) {
 					xmlNodePtr node = nodesetp->nodeTab[i];
 					zval child;
 
 					if (node->type == XML_NAMESPACE_DECL) {
-						xmlNsPtr curns;
-						xmlNodePtr nsparent;
+						xmlNodePtr nsparent = node->_private;
+						xmlNsPtr original = (xmlNsPtr) node;
 
-						nsparent = node->_private;
-						curns = xmlNewNs(NULL, node->name, NULL);
-						if (node->children) {
-							curns->prefix = xmlStrdup((xmlChar *) node->children);
-						}
-						if (node->children) {
-							node = xmlNewDocNode(docp, NULL, (xmlChar *) node->children, node->name);
-						} else {
-							node = xmlNewDocNode(docp, NULL, (xmlChar *) "xmlns", node->name);
-						}
-						node->type = XML_NAMESPACE_DECL;
-						node->parent = nsparent;
-						node->ns = curns;
+						/* Make sure parent dom object exists, so we can take an extra reference. */
+						zval parent_zval; /* don't destroy me, my lifetime is transfered to the fake namespace decl */
+						php_dom_create_object(nsparent, &parent_zval, &intern->dom);
+						dom_object *parent_intern = Z_DOMOBJ_P(&parent_zval);
+
+						node = php_dom_create_fake_namespace_decl(nsparent, original, &child, parent_intern);
+					} else {
+						php_dom_create_object(node, &child, &intern->dom);
 					}
-					php_dom_create_object(node, &child, &intern->dom);
 					add_next_index_zval(&retval, &child);
 				}
 			} else {

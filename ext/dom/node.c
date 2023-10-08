@@ -30,19 +30,48 @@
 * Since:
 */
 
+zend_string *dom_node_concatenated_name_helper(size_t name_len, const char *name, size_t prefix_len, const char *prefix)
+{
+	if (UNEXPECTED(prefix_len > ZSTR_MAX_LEN / 2 - 1 || name_len > ZSTR_MAX_LEN / 2 - 1)) {
+		return zend_empty_string;
+	}
+	zend_string *str = zend_string_alloc(prefix_len + 1 + name_len, false);
+	memcpy(ZSTR_VAL(str), prefix, prefix_len);
+	ZSTR_VAL(str)[prefix_len] = ':';
+	memcpy(ZSTR_VAL(str) + prefix_len + 1, name, name_len + 1 /* include \0 */);
+	return str;
+}
+
+zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep)
+{
+	size_t name_len = strlen((const char *) nodep->name);
+	if (nodep->ns != NULL && nodep->ns->prefix != NULL) {
+		return dom_node_concatenated_name_helper(name_len, (const char *) nodep->name, strlen((const char *) nodep->ns->prefix), (const char *) nodep->ns->prefix);
+	} else {
+		return zend_string_init((const char *) nodep->name, name_len, false);
+	}
+}
+
+bool php_dom_is_node_connected(const xmlNode *node)
+{
+	ZEND_ASSERT(node != NULL);
+	do {
+		if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE) {
+			return true;
+		}
+		node = node->parent;
+	} while (node != NULL);
+	return false;
+}
+
 /* {{{ nodeName	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D095
 Since:
 */
-int dom_node_node_name_read(dom_object *obj, zval *retval)
+zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep;
-	xmlNsPtr ns;
-	char *str = NULL;
-	xmlChar *qname = NULL;
-
-	nodep = dom_object_get_node(obj);
+	xmlNode *nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
@@ -52,66 +81,49 @@ int dom_node_node_name_read(dom_object *obj, zval *retval)
 	switch (nodep->type) {
 		case XML_ATTRIBUTE_NODE:
 		case XML_ELEMENT_NODE:
-			ns = nodep->ns;
+			ZVAL_STR(retval, dom_node_get_node_name_attribute_or_element(nodep));
+			break;
+		case XML_NAMESPACE_DECL: {
+			xmlNsPtr ns = nodep->ns;
 			if (ns != NULL && ns->prefix) {
-				qname = xmlStrdup(ns->prefix);
+				xmlChar *qname = xmlStrdup((xmlChar *) "xmlns");
 				qname = xmlStrcat(qname, (xmlChar *) ":");
 				qname = xmlStrcat(qname, nodep->name);
-				str = (char *) qname;
+				ZVAL_STRING(retval, (const char *) qname);
+				xmlFree(qname);
 			} else {
-				str = (char *) nodep->name;
+				ZVAL_STRING(retval, (const char *) nodep->name);
 			}
 			break;
-		case XML_NAMESPACE_DECL:
-			ns = nodep->ns;
-			if (ns != NULL && ns->prefix) {
-				qname = xmlStrdup((xmlChar *) "xmlns");
-				qname = xmlStrcat(qname, (xmlChar *) ":");
-				qname = xmlStrcat(qname, nodep->name);
-				str = (char *) qname;
-			} else {
-				str = (char *) nodep->name;
-			}
-			break;
+		}
 		case XML_DOCUMENT_TYPE_NODE:
 		case XML_DTD_NODE:
 		case XML_PI_NODE:
 		case XML_ENTITY_DECL:
 		case XML_ENTITY_REF_NODE:
 		case XML_NOTATION_NODE:
-			str = (char *) nodep->name;
+			ZVAL_STRING(retval, (char *) nodep->name);
 			break;
 		case XML_CDATA_SECTION_NODE:
-			str = "#cdata-section";
+			ZVAL_STRING(retval, "#cdata-section");
 			break;
 		case XML_COMMENT_NODE:
-			str = "#comment";
+			ZVAL_STRING(retval, "#comment");
 			break;
 		case XML_HTML_DOCUMENT_NODE:
 		case XML_DOCUMENT_NODE:
-			str = "#document";
+			ZVAL_STRING(retval, "#document");
 			break;
 		case XML_DOCUMENT_FRAG_NODE:
-			str = "#document-fragment";
+			ZVAL_STRING(retval, "#document-fragment");
 			break;
 		case XML_TEXT_NODE:
-			str = "#text";
+			ZVAL_STRING(retval, "#text");
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
-	if (str != NULL) {
-		ZVAL_STRING(retval, str);
-	} else {
-		ZVAL_EMPTY_STRING(retval);
-	}
-
-	if (qname != NULL) {
-		xmlFree(qname);
-	}
-
 	return SUCCESS;
-
 }
 
 /* }}} */
@@ -121,10 +133,9 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D080
 Since:
 */
-int dom_node_node_value_read(dom_object *obj, zval *retval)
+zend_result dom_node_node_value_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
-	char *str = NULL;
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
@@ -139,28 +150,27 @@ int dom_node_node_value_read(dom_object *obj, zval *retval)
 		case XML_COMMENT_NODE:
 		case XML_CDATA_SECTION_NODE:
 		case XML_PI_NODE:
-			str = (char *) xmlNodeGetContent(nodep);
+			php_dom_get_content_into_zval(nodep, retval, true);
 			break;
-		case XML_NAMESPACE_DECL:
-			str = (char *) xmlNodeGetContent(nodep->children);
+		case XML_NAMESPACE_DECL: {
+			char *str = (char *) xmlNodeGetContent(nodep->children);
+			if (str != NULL) {
+				ZVAL_STRING(retval, str);
+				xmlFree(str);
+			} else {
+				ZVAL_NULL(retval);
+			}
 			break;
+		}
 		default:
-			str = NULL;
+			ZVAL_NULL(retval);
 			break;
-	}
-
-	if(str != NULL) {
-		ZVAL_STRING(retval, str);
-		xmlFree(str);
-	} else {
-		ZVAL_NULL(retval);
 	}
 
 	return SUCCESS;
-
 }
 
-int dom_node_node_value_write(dom_object *obj, zval *newval)
+zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	zend_string *str;
@@ -177,23 +187,21 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 
 	/* Access to Element node is implemented as a convenience method */
 	switch (nodep->type) {
-		case XML_ELEMENT_NODE:
 		case XML_ATTRIBUTE_NODE:
-			if (nodep->children) {
-				node_list_unlink(nodep->children);
-				php_libxml_node_free_list((xmlNodePtr) nodep->children);
-				nodep->children = NULL;
-			}
+		case XML_ELEMENT_NODE:
+			dom_remove_all_children(nodep);
 			ZEND_FALLTHROUGH;
 		case XML_TEXT_NODE:
 		case XML_COMMENT_NODE:
 		case XML_CDATA_SECTION_NODE:
 		case XML_PI_NODE:
-			xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
+			xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
 			break;
 		default:
 			break;
 	}
+
+	php_libxml_invalidate_node_list_cache(obj->document);
 
 	zend_string_release_ex(str, 0);
 	return SUCCESS;
@@ -206,7 +214,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-111237558
 Since:
 */
-int dom_node_node_type_read(dom_object *obj, zval *retval)
+zend_result dom_node_node_type_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep;
 
@@ -229,30 +237,45 @@ int dom_node_node_type_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ parentNode	DomNode
-readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1060184317
-Since:
-*/
-int dom_node_parent_node_read(dom_object *obj, zval *retval)
+static zend_result dom_node_parent_get(dom_object *obj, zval *retval, bool only_element)
 {
-	xmlNode *nodep, *nodeparent;
-
-	nodep = dom_object_get_node(obj);
+	xmlNodePtr nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
-	nodeparent = nodep->parent;
-	if (!nodeparent) {
+	xmlNodePtr nodeparent = nodep->parent;
+	if (!nodeparent || (only_element && nodeparent->type != XML_ELEMENT_NODE)) {
 		ZVAL_NULL(retval);
 		return SUCCESS;
 	}
 
 	php_dom_create_object(nodeparent, retval, obj);
 	return SUCCESS;
+}
+
+/* {{{ parentNode	?DomNode
+readonly=yes
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1060184317
+Since:
+*/
+zend_result dom_node_parent_node_read(dom_object *obj, zval *retval)
+{
+	return dom_node_parent_get(obj, retval, false);
+}
+
+/* }}} */
+
+/* {{{ parentElement	?DomElement
+readonly=yes
+URL: https://dom.spec.whatwg.org/#parent-element
+Since:
+*/
+zend_result dom_node_parent_element_read(dom_object *obj, zval *retval)
+{
+	return dom_node_parent_get(obj, retval, true);
 }
 
 /* }}} */
@@ -262,7 +285,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1451460987
 Since:
 */
-int dom_node_child_nodes_read(dom_object *obj, zval *retval)
+zend_result dom_node_child_nodes_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	dom_object *intern;
@@ -274,7 +297,7 @@ int dom_node_child_nodes_read(dom_object *obj, zval *retval)
 
 	php_dom_create_iterator(retval, DOM_NODELIST);
 	intern = Z_DOMOBJ_P(retval);
-	dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, NULL);
+	dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, 0, NULL, 0);
 
 	return SUCCESS;
 }
@@ -285,7 +308,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-169727388
 Since:
 */
-int dom_node_first_child_read(dom_object *obj, zval *retval)
+zend_result dom_node_first_child_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *first = NULL;
 
@@ -316,7 +339,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-61AD09FB
 Since:
 */
-int dom_node_last_child_read(dom_object *obj, zval *retval)
+zend_result dom_node_last_child_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *last = NULL;
 
@@ -347,7 +370,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-640FB3C8
 Since:
 */
-int dom_node_previous_sibling_read(dom_object *obj, zval *retval)
+zend_result dom_node_previous_sibling_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *prevsib;
 
@@ -375,7 +398,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6AC54C2F
 Since:
 */
-int dom_node_next_sibling_read(dom_object *obj, zval *retval)
+zend_result dom_node_next_sibling_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *nextsib;
 
@@ -403,7 +426,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-640FB3C8
 Since:
 */
-int dom_node_previous_element_sibling_read(dom_object *obj, zval *retval)
+zend_result dom_node_previous_element_sibling_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *prevsib;
 
@@ -436,7 +459,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6AC54C2F
 Since:
 */
-int dom_node_next_element_sibling_read(dom_object *obj, zval *retval)
+zend_result dom_node_next_element_sibling_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep, *nextsib;
 
@@ -469,7 +492,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-84CF096
 Since:
 */
-int dom_node_attributes_read(dom_object *obj, zval *retval)
+zend_result dom_node_attributes_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	dom_object *intern;
@@ -482,7 +505,7 @@ int dom_node_attributes_read(dom_object *obj, zval *retval)
 	if (nodep->type == XML_ELEMENT_NODE) {
 		php_dom_create_iterator(retval, DOM_NAMEDNODEMAP);
 		intern = Z_DOMOBJ_P(retval);
-		dom_namednode_iter(obj, XML_ATTRIBUTE_NODE, intern, NULL, NULL, NULL);
+		dom_namednode_iter(obj, XML_ATTRIBUTE_NODE, intern, NULL, NULL, 0, NULL, 0);
 	} else {
 		ZVAL_NULL(retval);
 	}
@@ -492,12 +515,31 @@ int dom_node_attributes_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
+/* {{{ isConnected	boolean
+readonly=yes
+URL: https://dom.spec.whatwg.org/#dom-node-isconnected
+Since:
+*/
+zend_result dom_node_is_connected_read(dom_object *obj, zval *retval)
+{
+	xmlNode *nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		return FAILURE;
+	}
+
+	ZVAL_BOOL(retval, php_dom_is_node_connected(nodep));
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ ownerDocument	DomDocument
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-node-ownerDoc
 Since:
 */
-int dom_node_owner_document_read(dom_object *obj, zval *retval)
+zend_result dom_node_owner_document_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	xmlDocPtr docp;
@@ -528,7 +570,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSname
 Since: DOM Level 2
 */
-int dom_node_namespace_uri_read(dom_object *obj, zval *retval)
+zend_result dom_node_namespace_uri_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	char *str = NULL;
@@ -567,7 +609,7 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSPrefix
 Since: DOM Level 2
 */
-int dom_node_prefix_read(dom_object *obj, zval *retval)
+zend_result dom_node_prefix_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	xmlNsPtr ns;
@@ -601,7 +643,7 @@ int dom_node_prefix_read(dom_object *obj, zval *retval)
 
 }
 
-int dom_node_prefix_write(dom_object *obj, zval *newval)
+zend_result dom_node_prefix_write(dom_object *obj, zval *newval)
 {
 	zend_string *prefix_str;
 	xmlNode *nodep, *nsnode = NULL;
@@ -627,10 +669,9 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 					nsnode = xmlDocGetRootElement(nodep->doc);
 				}
 			}
-			prefix_str = zval_try_get_string(newval);
-			if (UNEXPECTED(!prefix_str)) {
-				return FAILURE;
-			}
+			/* Typed property, this is already a string */
+			ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
+			prefix_str = Z_STR_P(newval);
 
 			prefix = ZSTR_VAL(prefix_str);
 			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
@@ -656,14 +697,12 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 				}
 
 				if (ns == NULL) {
-					zend_string_release_ex(prefix_str, 0);
 					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document));
 					return FAILURE;
 				}
 
 				xmlSetNs(nodep, ns);
 			}
-			zend_string_release_ex(prefix_str, 0);
 			break;
 		default:
 			break;
@@ -679,7 +718,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSLocalN
 Since: DOM Level 2
 */
-int dom_node_local_name_read(dom_object *obj, zval *retval)
+zend_result dom_node_local_name_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 
@@ -704,7 +743,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-baseURI
 Since: DOM Level 3
 */
-int dom_node_base_uri_read(dom_object *obj, zval *retval)
+zend_result dom_node_base_uri_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 	xmlChar *baseuri;
@@ -732,55 +771,49 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-textContent
 Since: DOM Level 3
 */
-int dom_node_text_content_read(dom_object *obj, zval *retval)
+zend_result dom_node_text_content_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
-	char *str = NULL;
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
-	str = (char *) xmlNodeGetContent(nodep);
-
-	if (str != NULL) {
-		ZVAL_STRING(retval, str);
-		xmlFree(str);
-	} else {
-		ZVAL_EMPTY_STRING(retval);
-	}
+	php_dom_get_content_into_zval(nodep, retval, false);
 
 	return SUCCESS;
 }
 
-int dom_node_text_content_write(dom_object *obj, zval *newval)
+zend_result dom_node_text_content_write(dom_object *obj, zval *newval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
-	zend_string *str;
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
-	str = zval_try_get_string(newval);
-	if (UNEXPECTED(!str)) {
-		return FAILURE;
-	}
+	php_libxml_invalidate_node_list_cache(obj->document);
 
-	if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE) {
-		if (nodep->children) {
-			node_list_unlink(nodep->children);
-			php_libxml_node_free_list((xmlNodePtr) nodep->children);
-			nodep->children = NULL;
-		}
-	}
+	/* Typed property, this is already a string */
+	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
+	const xmlChar *xmlChars = (const xmlChar *) Z_STRVAL_P(newval);
+	int type = nodep->type;
 
-	/* we have to use xmlNodeAddContent() to get the same behavior as with xmlNewText() */
-	xmlNodeSetContent(nodep, (xmlChar *) "");
-	xmlNodeAddContent(nodep, (xmlChar *) ZSTR_VAL(str));
-	zend_string_release_ex(str, 0);
+	/* We can't directly call xmlNodeSetContent, because it might encode the string through
+	 * xmlStringLenGetNodeList for types XML_DOCUMENT_FRAG_NODE, XML_ELEMENT_NODE, XML_ATTRIBUTE_NODE.
+	 * See tree.c:xmlNodeSetContent in libxml.
+	 * In these cases we need to use a text node to avoid the encoding.
+	 * For the other cases, we *can* rely on xmlNodeSetContent because it is either a no-op, or handles
+	 * the content without encoding. */
+	if (type == XML_DOCUMENT_FRAG_NODE || type == XML_ELEMENT_NODE || type == XML_ATTRIBUTE_NODE) {
+		dom_remove_all_children(nodep);
+		xmlNode *textNode = xmlNewText(xmlChars);
+		xmlAddChild(nodep, textNode);
+	} else {
+		xmlNodeSetContent(nodep, xmlChars);
+	}
 
 	return SUCCESS;
 }
@@ -886,6 +919,8 @@ PHP_METHOD(DOMNode, insertBefore)
 		php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL);
 	}
 
+	php_libxml_invalidate_node_list_cache(intern->document);
+
 	if (ref != NULL) {
 		DOM_GET_OBJ(refp, ref, xmlNodePtr, refpobj);
 		if (refp->parent != parentp) {
@@ -932,12 +967,20 @@ PHP_METHOD(DOMNode, insertBefore)
 					return;
 				}
 			}
-		} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
-			new_child = _php_dom_insert_fragment(parentp, refp->prev, refp, child, intern, childobj);
-		}
-
-		if (new_child == NULL) {
 			new_child = xmlAddPrevSibling(refp, child);
+			if (UNEXPECTED(NULL == new_child)) {
+				goto cannot_add;
+			}
+		} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
+			xmlNodePtr last = child->last;
+			new_child = _php_dom_insert_fragment(parentp, refp->prev, refp, child, intern, childobj);
+			dom_reconcile_ns_list(parentp->doc, new_child, last);
+		} else {
+			new_child = xmlAddPrevSibling(refp, child);
+			if (UNEXPECTED(NULL == new_child)) {
+				goto cannot_add;
+			}
+			dom_reconcile_ns(parentp->doc, new_child);
 		}
 	} else {
 		if (child->parent != NULL){
@@ -974,23 +1017,28 @@ PHP_METHOD(DOMNode, insertBefore)
 					return;
 				}
 			}
-		} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
-			new_child = _php_dom_insert_fragment(parentp, parentp->last, NULL, child, intern, childobj);
-		}
-		if (new_child == NULL) {
 			new_child = xmlAddChild(parentp, child);
+			if (UNEXPECTED(NULL == new_child)) {
+				goto cannot_add;
+			}
+		} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
+			xmlNodePtr last = child->last;
+			new_child = _php_dom_insert_fragment(parentp, parentp->last, NULL, child, intern, childobj);
+			dom_reconcile_ns_list(parentp->doc, new_child, last);
+		} else {
+			new_child = xmlAddChild(parentp, child);
+			if (UNEXPECTED(NULL == new_child)) {
+				goto cannot_add;
+			}
+			dom_reconcile_ns(parentp->doc, new_child);
 		}
 	}
-
-	if (NULL == new_child) {
-		zend_throw_error(NULL, "Cannot add newnode as the previous sibling of refnode");
-		RETURN_THROWS();
-	}
-
-	dom_reconcile_ns(parentp->doc, new_child);
 
 	DOM_RET_OBJ(new_child, &ret, intern);
-
+	return;
+cannot_add:
+	zend_throw_error(NULL, "Cannot add newnode as the previous sibling of refnode");
+	RETURN_THROWS();
 }
 /* }}} end dom_node_insert_before */
 
@@ -1055,9 +1103,10 @@ PHP_METHOD(DOMNode, replaceChild)
 
 		xmlUnlinkNode(oldchild);
 
+		xmlNodePtr last = newchild->last;
 		newchild = _php_dom_insert_fragment(nodep, prevsib, nextsib, newchild, intern, newchildobj);
 		if (newchild) {
-			dom_reconcile_ns(nodep->doc, newchild);
+			dom_reconcile_ns_list(nodep->doc, newchild, last);
 		}
 	} else if (oldchild != newchild) {
 		xmlDtdPtr intSubset = xmlGetIntSubset(nodep->doc);
@@ -1075,6 +1124,7 @@ PHP_METHOD(DOMNode, replaceChild)
 			nodep->doc->intSubset = (xmlDtd *) newchild;
 		}
 	}
+	php_libxml_invalidate_node_list_cache(intern->document);
 	DOM_RET_OBJ(oldchild, &ret, intern);
 }
 /* }}} end dom_node_replace_child */
@@ -1116,6 +1166,7 @@ PHP_METHOD(DOMNode, removeChild)
 	}
 
 	xmlUnlinkNode(child);
+	php_libxml_invalidate_node_list_cache(intern->document);
 	DOM_RET_OBJ(child, &ret, intern);
 }
 /* }}} end dom_node_remove_child */
@@ -1204,22 +1255,30 @@ PHP_METHOD(DOMNode, appendChild)
 				php_libxml_node_free_resource((xmlNodePtr) lastattr);
 			}
 		}
-	} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
-		new_child = _php_dom_insert_fragment(nodep, nodep->last, NULL, child, intern, childobj);
-	}
-
-	if (new_child == NULL) {
 		new_child = xmlAddChild(nodep, child);
-		if (new_child == NULL) {
-			// TODO Convert to Error?
-			php_error_docref(NULL, E_WARNING, "Couldn't append node");
-			RETURN_FALSE;
+		if (UNEXPECTED(new_child == NULL)) {
+			goto cannot_add;
 		}
+	} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
+		xmlNodePtr last = child->last;
+		new_child = _php_dom_insert_fragment(nodep, nodep->last, NULL, child, intern, childobj);
+		dom_reconcile_ns_list(nodep->doc, new_child, last);
+	} else {
+		new_child = xmlAddChild(nodep, child);
+		if (UNEXPECTED(new_child == NULL)) {
+			goto cannot_add;
+		}
+		dom_reconcile_ns(nodep->doc, new_child);
 	}
 
-	dom_reconcile_ns(nodep->doc, new_child);
+	php_libxml_invalidate_node_list_cache(intern->document);
 
 	DOM_RET_OBJ(new_child, &ret, intern);
+	return;
+cannot_add:
+	// TODO Convert to Error?
+	php_error_docref(NULL, E_WARNING, "Couldn't append node");
+	RETURN_FALSE;
 }
 /* }}} end dom_node_append_child */
 
@@ -1328,6 +1387,8 @@ PHP_METHOD(DOMNode, normalize)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
+	php_libxml_invalidate_node_list_cache(intern->document);
+
 	dom_normalize(nodep);
 
 }
@@ -1400,6 +1461,162 @@ PHP_METHOD(DOMNode, isSameNode)
 	}
 }
 /* }}} end dom_node_is_same_node */
+
+static bool php_dom_node_is_content_equal(const xmlNode *this, const xmlNode *other)
+{
+	xmlChar *this_content = xmlNodeGetContent(this);
+	xmlChar *other_content = xmlNodeGetContent(other);
+	bool result = xmlStrEqual(this_content, other_content);
+	xmlFree(this_content);
+	xmlFree(other_content);
+	return result;
+}
+
+static bool php_dom_node_is_ns_uri_equal(const xmlNode *this, const xmlNode *other)
+{
+	const xmlChar *this_ns = this->ns ? this->ns->href : NULL;
+	const xmlChar *other_ns = other->ns ? other->ns->href : NULL;
+	return xmlStrEqual(this_ns, other_ns);
+}
+
+static bool php_dom_node_is_ns_prefix_equal(const xmlNode *this, const xmlNode *other)
+{
+	const xmlChar *this_ns = this->ns ? this->ns->prefix : NULL;
+	const xmlChar *other_ns = other->ns ? other->ns->prefix : NULL;
+	return xmlStrEqual(this_ns, other_ns);
+}
+
+static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other);
+
+#define PHP_DOM_FUNC_CAT(prefix, suffix) prefix##_##suffix
+/* xmlNode and xmlNs have incompatible struct layouts, i.e. the next field is in a different offset */
+#define PHP_DOM_DEFINE_LIST_EQUALITY_HELPER(type)																\
+	static size_t PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(const type *node)						\
+	{																											\
+		size_t counter = 0;																						\
+		while (node) {																							\
+			counter++;																							\
+			node = node->next;																					\
+		}																										\
+		return counter;																							\
+	}																											\
+	static bool PHP_DOM_FUNC_CAT(php_dom_node_list_equality_check, type)(const type *list1, const type *list2)	\
+	{																											\
+		size_t count = PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list1);								\
+		if (count != PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list2)) {								\
+			return false;																						\
+		}																										\
+		for (size_t i = 0; i < count; i++) {																	\
+			if (!php_dom_node_is_equal_node((const xmlNode *) list1, (const xmlNode *) list2)) {				\
+				return false;																					\
+			}																									\
+			list1 = list1->next;																				\
+			list2 = list2->next;																				\
+		}																										\
+		return true;																							\
+	}
+PHP_DOM_DEFINE_LIST_EQUALITY_HELPER(xmlNode)
+PHP_DOM_DEFINE_LIST_EQUALITY_HELPER(xmlNs)
+
+static bool php_dom_is_equal_attr(const xmlAttr *this_attr, const xmlAttr *other_attr)
+{
+	ZEND_ASSERT(this_attr != NULL);
+	ZEND_ASSERT(other_attr != NULL);
+	return xmlStrEqual(this_attr->name, other_attr->name)
+		&& php_dom_node_is_ns_uri_equal((const xmlNode *) this_attr, (const xmlNode *) other_attr)
+		&& php_dom_node_is_content_equal((const xmlNode *) this_attr, (const xmlNode *) other_attr);
+}
+
+static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other)
+{
+	ZEND_ASSERT(this != NULL);
+	ZEND_ASSERT(other != NULL);
+
+	if (this->type != other->type) {
+		return false;
+	}
+
+	/* Notes:
+	 *   - XML_DOCUMENT_TYPE_NODE is no longer created by libxml2, we only have to support XML_DTD_NODE.
+	 *   - element and attribute declarations are not exposed as nodes in DOM, so no comparison is needed for those. */
+	if (this->type == XML_ELEMENT_NODE) {
+		return xmlStrEqual(this->name, other->name)
+			&& php_dom_node_is_ns_prefix_equal(this, other)
+			&& php_dom_node_is_ns_uri_equal(this, other)
+			/* Check attributes first, then namespace declarations, then children */
+			&& php_dom_node_list_equality_check_xmlNode((const xmlNode *) this->properties, (const xmlNode *) other->properties)
+			&& php_dom_node_list_equality_check_xmlNs(this->nsDef, other->nsDef)
+			&& php_dom_node_list_equality_check_xmlNode(this->children, other->children);
+	} else if (this->type == XML_DTD_NODE) {
+		/* Note: in the living spec entity declarations and notations are no longer compared because they're considered obsolete. */
+		const xmlDtd *this_dtd = (const xmlDtd *) this;
+		const xmlDtd *other_dtd = (const xmlDtd *) other;
+		return xmlStrEqual(this_dtd->name, other_dtd->name)
+			&& xmlStrEqual(this_dtd->ExternalID, other_dtd->ExternalID)
+			&& xmlStrEqual(this_dtd->SystemID, other_dtd->SystemID);
+	} else if (this->type == XML_PI_NODE) {
+		return xmlStrEqual(this->name, other->name) && xmlStrEqual(this->content, other->content);
+	} else if (this->type == XML_TEXT_NODE || this->type == XML_COMMENT_NODE || this->type == XML_CDATA_SECTION_NODE) {
+		return xmlStrEqual(this->content, other->content);
+	} else if (this->type == XML_ATTRIBUTE_NODE) {
+		const xmlAttr *this_attr = (const xmlAttr *) this;
+		const xmlAttr *other_attr = (const xmlAttr *) other;
+		return php_dom_is_equal_attr(this_attr, other_attr);
+	} else if (this->type == XML_ENTITY_REF_NODE) {
+		return xmlStrEqual(this->name, other->name);
+	} else if (this->type == XML_ENTITY_DECL || this->type == XML_NOTATION_NODE || this->type == XML_ENTITY_NODE) {
+		const xmlEntity *this_entity = (const xmlEntity *) this;
+		const xmlEntity *other_entity = (const xmlEntity *) other;
+		return this_entity->etype == other_entity->etype
+			&& xmlStrEqual(this_entity->name, other_entity->name)
+			&& xmlStrEqual(this_entity->ExternalID, other_entity->ExternalID)
+			&& xmlStrEqual(this_entity->SystemID, other_entity->SystemID)
+			&& php_dom_node_is_content_equal(this, other);
+	} else if (this->type == XML_NAMESPACE_DECL) {
+		const xmlNs *this_ns = (const xmlNs *) this;
+		const xmlNs *other_ns = (const xmlNs *) other;
+		return xmlStrEqual(this_ns->prefix, other_ns->prefix) && xmlStrEqual(this_ns->href, other_ns->href);
+	} else if (this->type == XML_DOCUMENT_FRAG_NODE || this->type == XML_HTML_DOCUMENT_NODE || this->type == XML_DOCUMENT_NODE) {
+		return php_dom_node_list_equality_check_xmlNode(this->children, other->children);
+	}
+
+	return false;
+}
+
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-node-isequalnode (for everything still in the living spec)
+*      URL: https://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/DOM3-Core.html#core-Node3-isEqualNode (for old nodes removed from the living spec)
+Since: DOM Level 3
+*/
+PHP_METHOD(DOMNode, isEqualNode)
+{
+	zval *id, *node;
+	xmlNodePtr otherp, nodep;
+	dom_object *unused_intern;
+
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O!", &node, dom_node_class_entry) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (node == NULL) {
+		RETURN_FALSE;
+	}
+
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, unused_intern);
+	DOM_GET_OBJ(otherp, node, xmlNodePtr, unused_intern);
+
+	if (nodep == otherp) {
+		RETURN_TRUE;
+	}
+
+	/* Empty fragments/documents only match if they're both empty */
+	if (UNEXPECTED(nodep == NULL || otherp == NULL)) {
+		RETURN_BOOL(nodep == NULL && otherp == NULL);
+	}
+
+	RETURN_BOOL(php_dom_node_is_equal_node(nodep, otherp));
+}
+/* }}} end DOMNode::isEqualNode */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-lookupNamespacePrefix
 Since: DOM Level 3
@@ -1519,6 +1736,25 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 }
 /* }}} end dom_node_lookup_namespace_uri */
 
+static int dom_canonicalize_node_parent_lookup_cb(void *user_data, xmlNodePtr node, xmlNodePtr parent)
+{
+	xmlNodePtr root = user_data;
+	/* We have to unroll the first iteration because node->parent
+	 * is not necessarily equal to parent due to libxml2 tree rules (ns decls out of the tree for example). */
+	if (node == root) {
+		return 1;
+	}
+	node = parent;
+	while (node != NULL) {
+		if (node == root) {
+			return 1;
+		}
+		node = node->parent;
+	}
+
+	return 0;
+}
+
 static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	zval *id;
@@ -1560,22 +1796,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		RETURN_THROWS();
 	}
 
+	bool simple_node_parent_lookup_callback = false;
 	if (xpath_array == NULL) {
-		if (nodep->type != XML_DOCUMENT_NODE) {
-			ctxp = xmlXPathNewContext(docp);
-			ctxp->node = nodep;
-			xpathobjp = xmlXPathEvalExpression((xmlChar *) "(.//. | .//@* | .//namespace::*)", ctxp);
-			ctxp->node = NULL;
-			if (xpathobjp && xpathobjp->type == XPATH_NODESET) {
-				nodeset = xpathobjp->nodesetval;
-			} else {
-				if (xpathobjp) {
-					xmlXPathFreeObject(xpathobjp);
-				}
-				xmlXPathFreeContext(ctxp);
-				zend_throw_error(NULL, "XPath query did not return a nodeset");
-				RETURN_THROWS();
-			}
+		/* Optimization: if the node is a document, all nodes may be included, no extra filtering or nodeset necessary. */
+		if (nodep->type != XML_DOCUMENT_NODE && nodep->type != XML_HTML_DOCUMENT_NODE) {
+			simple_node_parent_lookup_callback = true;
 		}
 	} else {
 		/*xpath query from xpath_array */
@@ -1583,7 +1808,8 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		zval *tmp;
 		char *xquery;
 
-		tmp = zend_hash_str_find(ht, "query", sizeof("query")-1);
+		/* Find "query" key */
+		tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_QUERY));
 		if (!tmp) {
 			/* if mode == 0 then $xpath arg is 3, if mode == 1 then $xpath is 4 */
 			zend_argument_value_error(3 + mode, "must have a \"query\" key");
@@ -1591,7 +1817,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		}
 		if (Z_TYPE_P(tmp) != IS_STRING) {
 			/* if mode == 0 then $xpath arg is 3, if mode == 1 then $xpath is 4 */
-			zend_argument_type_error(3 + mode, "\"query\" option must be a string, %s given", zend_zval_type_name(tmp));
+			zend_argument_type_error(3 + mode, "\"query\" option must be a string, %s given", zend_zval_value_name(tmp));
 			RETURN_THROWS();
 		}
 		xquery = Z_STRVAL_P(tmp);
@@ -1653,8 +1879,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 	}
 
 	if (buf != NULL) {
-		ret = xmlC14NDocSaveTo(docp, nodeset, exclusive, inclusive_ns_prefixes,
-			with_comments, buf);
+		if (simple_node_parent_lookup_callback) {
+			ret = xmlC14NExecute(docp, dom_canonicalize_node_parent_lookup_cb, nodep, exclusive, inclusive_ns_prefixes, with_comments, buf);
+		} else {
+			ret = xmlC14NDocSaveTo(docp, nodeset, exclusive, inclusive_ns_prefixes, with_comments, buf);
+		}
 	}
 
 	if (inclusive_ns_prefixes != NULL) {
@@ -1671,17 +1900,9 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		RETVAL_FALSE;
 	} else {
 		if (mode == 0) {
-#ifdef LIBXML2_NEW_BUFFER
 			ret = xmlOutputBufferGetSize(buf);
-#else
-			ret = buf->buffer->use;
-#endif
 			if (ret > 0) {
-#ifdef LIBXML2_NEW_BUFFER
 				RETVAL_STRINGL((char *) xmlOutputBufferGetContent(buf), ret);
-#else
-				RETVAL_STRINGL((char *) buf->buffer->content, ret);
-#endif
 			} else {
 				RETVAL_EMPTY_STRING();
 			}
@@ -1752,6 +1973,234 @@ PHP_METHOD(DOMNode, getLineNo)
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
 	RETURN_LONG(xmlGetLineNo(nodep));
+}
+/* }}} */
+
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-node-contains
+Since:
+*/
+PHP_METHOD(DOMNode, contains)
+{
+	zval *other, *id;
+	xmlNodePtr otherp, thisp;
+	dom_object *unused_intern;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OR_NULL(other)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (other == NULL) {
+		RETURN_FALSE;
+	}
+
+	if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(other), dom_node_class_entry) && !instanceof_function(Z_OBJCE_P(other), dom_namespace_node_class_entry))) {
+		zend_argument_type_error(1, "must be of type DOMNode|DOMNameSpaceNode|null, %s given", zend_zval_value_name(other));
+		RETURN_THROWS();
+	}
+
+	DOM_GET_OBJ(otherp, other, xmlNodePtr, unused_intern);
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, unused_intern);
+
+	do {
+		if (otherp == thisp) {
+			RETURN_TRUE;
+		}
+		otherp = otherp->parent;
+	} while (otherp);
+
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-node-getrootnode
+Since:
+*/
+PHP_METHOD(DOMNode, getRootNode)
+{
+	zval *id;
+	xmlNodePtr thisp;
+	dom_object *intern;
+	/* Unused now because we don't support the shadow DOM nodes. Options only influence shadow DOM nodes. */
+	zval *options = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a!", &options) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
+
+	while (thisp->parent) {
+		thisp = thisp->parent;
+	}
+
+	int ret;
+	DOM_RET_OBJ(thisp, &ret, intern);
+}
+/* }}} */
+
+/* {{{ URL: https://dom.spec.whatwg.org/#dom-node-comparedocumentposition (last check date 2023-07-24)
+Since:
+*/
+
+#define DOCUMENT_POSITION_DISCONNECTED 0x01
+#define DOCUMENT_POSITION_PRECEDING 0x02
+#define DOCUMENT_POSITION_FOLLOWING 0x04
+#define DOCUMENT_POSITION_CONTAINS 0x08
+#define DOCUMENT_POSITION_CONTAINED_BY 0x10
+#define DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC 0x20
+
+PHP_METHOD(DOMNode, compareDocumentPosition)
+{
+	zval *id, *node_zval;
+	xmlNodePtr other, this;
+	dom_object *this_intern, *other_intern;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node_zval, dom_node_class_entry) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_THIS_OBJ(this, id, xmlNodePtr, this_intern);
+	DOM_GET_OBJ(other, node_zval, xmlNodePtr, other_intern);
+
+	/* Step 1 */
+	if (this == other) {
+		RETURN_LONG(0);
+	}
+
+	/* Step 2 */
+	xmlNodePtr node1 = other;
+	xmlNodePtr node2 = this;
+
+	/* Step 3 */
+	xmlNodePtr attr1 = NULL;
+	xmlNodePtr attr2 = NULL;
+
+	/* Step 4 */
+	if (node1->type == XML_ATTRIBUTE_NODE) {
+		attr1 = node1;
+		node1 = attr1->parent;
+	}
+
+	/* Step 5 */
+	if (node2->type == XML_ATTRIBUTE_NODE) {
+		/* 5.1 */
+		attr2 = node2;
+		node2 = attr2->parent;
+
+		/* 5.2 */
+		if (attr1 != NULL && node1 != NULL && node2 == node1) {
+			for (const xmlAttr *attr = node2->properties; attr != NULL; attr = attr->next) {
+				if (php_dom_is_equal_attr(attr, (const xmlAttr *) attr1)) {
+					RETURN_LONG(DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | DOCUMENT_POSITION_PRECEDING);
+				} else if (php_dom_is_equal_attr(attr, (const xmlAttr *) attr2)) {
+					RETURN_LONG(DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | DOCUMENT_POSITION_FOLLOWING);
+				}
+			}
+		}
+	}
+
+	/* Step 6 */
+	/* We first check the first condition,
+	 * and as we need the root later anyway we'll cache the root and perform the root check after this if. */
+	if (node1 == NULL || node2 == NULL) {
+		goto disconnected;
+	}
+	bool node2_is_ancestor_of_node1 = false;
+	size_t node1_depth = 0;
+	xmlNodePtr node1_root = node1;
+	while (node1_root->parent) {
+		node1_root = node1_root->parent;
+		if (node1_root == node2) {
+			node2_is_ancestor_of_node1 = true;
+		}
+		node1_depth++;
+	}
+	bool node1_is_ancestor_of_node2 = false;
+	size_t node2_depth = 0;
+	xmlNodePtr node2_root = node2;
+	while (node2_root->parent) {
+		node2_root = node2_root->parent;
+		if (node2_root == node1) {
+			node1_is_ancestor_of_node2 = true;
+		}
+		node2_depth++;
+	}
+	/* Second condition from step 6 */
+	if (node1_root != node2_root) {
+		goto disconnected;
+	}
+
+	/* Step 7 */
+	if ((node1_is_ancestor_of_node2 && attr1 == NULL) || (node1 == node2 && attr2 != NULL)) {
+		RETURN_LONG(DOCUMENT_POSITION_CONTAINS | DOCUMENT_POSITION_PRECEDING);
+	}
+
+	/* Step 8 */
+	if ((node2_is_ancestor_of_node1 && attr2 == NULL) || (node1 == node2 && attr1 != NULL)) {
+		RETURN_LONG(DOCUMENT_POSITION_CONTAINED_BY | DOCUMENT_POSITION_FOLLOWING);
+	}
+
+	/* Special case: comparing children and attributes.
+	 * They belong to a different tree and are therefore hard to compare, but spec demands attributes to precede children
+	 * according to the pre-order depth-first search ordering.
+	 * Because their tree is different, the node parents only meet at the common element instead of earlier.
+	 * Therefore, it seems that one is the ancestor of the other. */
+	if (node1_is_ancestor_of_node2) {
+		ZEND_ASSERT(attr1 != NULL); /* Would've been handled in step 7 otherwise */
+		RETURN_LONG(DOCUMENT_POSITION_PRECEDING);
+	} else if (node2_is_ancestor_of_node1) {
+		ZEND_ASSERT(attr2 != NULL); /* Would've been handled in step 8 otherwise */
+		RETURN_LONG(DOCUMENT_POSITION_FOLLOWING);
+	}
+
+	/* Step 9 */
+
+	/* We'll use the following strategy (which was already prepared during step 6) to implement this efficiently:
+	 * 1. Move nodes upwards such that they are at the same depth.
+	 * 2. Then we move both nodes upwards simultaneously until their parents are equal.
+	 * 3. If we then move node1 to the next entry repeatedly and we encounter node2,
+	 *    then we know node1 precedes node2. Otherwise, node2 must precede node1. */
+	/* 1. */
+	if (node1_depth > node2_depth) {
+		do {
+			node1 = node1->parent;
+			node1_depth--;
+		} while (node1_depth > node2_depth);
+	} else if (node2_depth > node1_depth) {
+		do {
+			node2 = node2->parent;
+			node2_depth--;
+		} while (node2_depth > node1_depth);
+	}
+	/* 2. */
+	while (node1->parent != node2->parent) {
+		node1 = node1->parent;
+		node2 = node2->parent;
+	}
+	/* 3. */
+	ZEND_ASSERT(node1 != node2);
+	ZEND_ASSERT(node1 != NULL);
+	ZEND_ASSERT(node2 != NULL);
+	do {
+		node1 = node1->next;
+		if (node1 == node2) {
+			RETURN_LONG(DOCUMENT_POSITION_PRECEDING);
+		}
+	} while (node1 != NULL);
+
+	/* Step 10 */
+	RETURN_LONG(DOCUMENT_POSITION_FOLLOWING);
+
+disconnected:;
+	zend_long ordering;
+	if (UNEXPECTED(node1 == node2)) {
+		/* Degenerate case, they're both NULL, but the ordering must be consistent... */
+		ZEND_ASSERT(node1 == NULL);
+		ordering = other_intern < this_intern ? DOCUMENT_POSITION_PRECEDING : DOCUMENT_POSITION_FOLLOWING;
+	} else {
+		ordering = node1 < node2 ? DOCUMENT_POSITION_PRECEDING : DOCUMENT_POSITION_FOLLOWING;
+	}
+	RETURN_LONG(DOCUMENT_POSITION_DISCONNECTED | DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | ordering);
 }
 /* }}} */
 

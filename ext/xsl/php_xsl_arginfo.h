@@ -1,11 +1,11 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a0615bef7b2211570d9da95a31857832a06360dd */
+ * Stub hash: 5518a63a4adec49c81e650d620ce2dbce41d8d65 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_importStylesheet, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, stylesheet, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_XSLTProcessor_transformToDoc, 0, 1, DOMDocument, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_XSLTProcessor_transformToDoc, 0, 1, MAY_BE_OBJECT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, document, IS_OBJECT, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, returnClass, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
@@ -112,6 +112,18 @@ static zend_class_entry *register_class_XSLTProcessor(void)
 
 	INIT_CLASS_ENTRY(ce, "XSLTProcessor", class_XSLTProcessor_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval property_doXInclude_default_value;
+	ZVAL_FALSE(&property_doXInclude_default_value);
+	zend_string *property_doXInclude_name = zend_string_init("doXInclude", sizeof("doXInclude") - 1, 1);
+	zend_declare_typed_property(class_entry, property_doXInclude_name, &property_doXInclude_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_doXInclude_name);
+
+	zval property_cloneDocument_default_value;
+	ZVAL_FALSE(&property_cloneDocument_default_value);
+	zend_string *property_cloneDocument_name = zend_string_init("cloneDocument", sizeof("cloneDocument") - 1, 1);
+	zend_declare_typed_property(class_entry, property_cloneDocument_name, &property_cloneDocument_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_cloneDocument_name);
 
 	return class_entry;
 }

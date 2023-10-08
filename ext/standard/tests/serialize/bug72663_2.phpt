@@ -21,9 +21,9 @@ var_dump(unserialize($exploit));
 --EXPECTF--
 Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d
 
-Notice: unserialize(): Unexpected end of serialized data in %s on line %d
+Warning: unserialize(): Unexpected end of serialized data in %s on line %d
 
-Notice: unserialize(): Error at offset 49 of 50 bytes in %s on line %d
+Warning: unserialize(): Error at offset 49 of 50 bytes in %s on line %d
 
-Notice: unserialize(): Error at offset 82 of 83 bytes in %s on line %d
+Warning: unserialize(): Error at offset 82 of 83 bytes in %s on line %d
 bool(false)

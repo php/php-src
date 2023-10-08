@@ -35,6 +35,7 @@ $tester = new FPM\Tester($cfg);
 $tester->start();
 $tester->expectLogStartNotices();
 $tester->request()->expectEmptyBody();
+usleep(100000);
 $tester->status($expectedStatusData, '{{ADDR[status]}}');
 $tester->terminate();
 $tester->expectLogTerminatingNotices();

@@ -59,8 +59,12 @@ function get_data($max)
 }
 
 $router = "bug73037_server.php";
-$args = substr(PHP_OS, 0, 3) == 'WIN'
-    ? ["-d", "extension_dir=" . ini_get("extension_dir"), "-d", "extension=php_soap.dll"] : [];
+$args = ["-d", "extension_dir=" . ini_get("extension_dir"), "-d", "extension=" . (substr(PHP_OS, 0, 3) == "WIN" ? "php_" : "") . "soap." . PHP_SHLIB_SUFFIX];
+if (php_ini_loaded_file()) {
+    // Necessary such that it works from a development directory in which case extension_dir might not be the real extension dir
+    $args[] = "-c";
+    $args[] = php_ini_loaded_file();
+}
 $code = <<<'PHP'
 $s = new SoapServer(NULL, array('uri' => 'http://here'));
 $s->setObject(new stdclass());

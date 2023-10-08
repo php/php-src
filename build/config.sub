@@ -1,14 +1,14 @@
 #! /bin/sh
 # Configuration validation subroutine script.
-#   Copyright 1992-2021 Free Software Foundation, Inc.
+#   Copyright 1992-2023 Free Software Foundation, Inc.
 
 # shellcheck disable=SC2006,SC2268 # see below for rationale
 
-timestamp='2021-08-14'
+timestamp='2023-06-26'
 
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
+# the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful, but
@@ -76,13 +76,13 @@ Report bugs and patches to <config-patches@gnu.org>."
 version="\
 GNU config.sub ($timestamp)
 
-Copyright 1992-2021 Free Software Foundation, Inc.
+Copyright 1992-2023 Free Software Foundation, Inc.
 
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 
 help="
-Try \`$me --help' for more information."
+Try '$me --help' for more information."
 
 # Parse command line
 while test $# -gt 0 ; do
@@ -130,7 +130,7 @@ IFS=$saved_IFS
 # Separate into logical components for further validation
 case $1 in
 	*-*-*-*-*)
-		echo Invalid configuration \`"$1"\': more than four components >&2
+		echo "Invalid configuration '$1': more than four components" >&2
 		exit 1
 		;;
 	*-*-*-*)
@@ -145,7 +145,8 @@ case $1 in
 			nto-qnx* | linux-* | uclinux-uclibc* \
 			| uclinux-gnu* | kfreebsd*-gnu* | knetbsd*-gnu* | netbsd*-gnu* \
 			| netbsd*-eabi* | kopensolaris*-gnu* | cloudabi*-eabi* \
-			| storm-chaos* | os2-emx* | rtmk-nova*)
+			| storm-chaos* | os2-emx* | rtmk-nova* | managarm-* \
+			| windows-* )
 				basic_machine=$field1
 				basic_os=$maybe_os
 				;;
@@ -943,7 +944,7 @@ $basic_machine
 EOF
 		IFS=$saved_IFS
 		;;
-	# We use `pc' rather than `unknown'
+	# We use 'pc' rather than 'unknown'
 	# because (1) that's what they normally are, and
 	# (2) the word "unknown" tends to confuse beginning users.
 	i*86 | x86_64)
@@ -1020,6 +1021,11 @@ case $cpu-$vendor in
 		;;
 
 	# Here we normalize CPU types with a missing or matching vendor
+	armh-unknown | armh-alt)
+		cpu=armv7l
+		vendor=alt
+		basic_os=${basic_os:-linux-gnueabihf}
+		;;
 	dpx20-unknown | dpx20-bull)
 		cpu=rs6000
 		vendor=bull
@@ -1070,7 +1076,7 @@ case $cpu-$vendor in
 	pentium-* | p5-* | k5-* | k6-* | nexgen-* | viac3-*)
 		cpu=i586
 		;;
-	pentiumpro-* | p6-* | 6x86-* | athlon-* | athalon_*-*)
+	pentiumpro-* | p6-* | 6x86-* | athlon-* | athlon_*-*)
 		cpu=i686
 		;;
 	pentiumii-* | pentium2-* | pentiumiii-* | pentium3-*)
@@ -1121,7 +1127,7 @@ case $cpu-$vendor in
 	xscale-* | xscalee[bl]-*)
 		cpu=`echo "$cpu" | sed 's/^xscale/arm/'`
 		;;
-	arm64-*)
+	arm64-* | aarch64le-*)
 		cpu=aarch64
 		;;
 
@@ -1202,7 +1208,7 @@ case $cpu-$vendor in
 			| k1om \
 			| le32 | le64 \
 			| lm32 \
-			| loongarch32 | loongarch64 | loongarchx32 \
+			| loongarch32 | loongarch64 \
 			| m32c | m32r | m32rle \
 			| m5200 | m68000 | m680[012346]0 | m68360 | m683?2 | m68k \
 			| m6811 | m68hc11 | m6812 | m68hc12 | m68hcs12x \
@@ -1280,7 +1286,7 @@ case $cpu-$vendor in
 				;;
 
 			*)
-				echo Invalid configuration \`"$1"\': machine \`"$cpu-$vendor"\' not recognized 1>&2
+				echo "Invalid configuration '$1': machine '$cpu-$vendor' not recognized" 1>&2
 				exit 1
 				;;
 		esac
@@ -1304,7 +1310,7 @@ esac
 if test x$basic_os != x
 then
 
-# First recognize some ad-hoc caes, or perhaps split kernel-os, or else just
+# First recognize some ad-hoc cases, or perhaps split kernel-os, or else just
 # set os.
 case $basic_os in
 	gnu/linux*)
@@ -1335,6 +1341,10 @@ EOF
 	linux*)
 		kernel=linux
 		os=`echo "$basic_os" | sed -e 's|linux|gnu|'`
+		;;
+	managarm*)
+		kernel=managarm
+		os=`echo "$basic_os" | sed -e 's|managarm|mlibc|'`
 		;;
 	*)
 		kernel=
@@ -1748,7 +1758,8 @@ case $os in
 	     | skyos* | haiku* | rdos* | toppers* | drops* | es* \
 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
 	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
-	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx* | zephyr*)
+	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx* | zephyr* \
+	     | fiwix* | mlibc* )
 		;;
 	# This one is extra strict with allowed versions
 	sco3.2v2 | sco3.2v[4-9]* | sco5v6*)
@@ -1756,8 +1767,11 @@ case $os in
 		;;
 	none)
 		;;
+	kernel* | msvc* )
+		# Restricted further below
+		;;
 	*)
-		echo Invalid configuration \`"$1"\': OS \`"$os"\' not recognized 1>&2
+		echo "Invalid configuration '$1': OS '$os' not recognized" 1>&2
 		exit 1
 		;;
 esac
@@ -1766,14 +1780,30 @@ esac
 # (given a valid OS), if there is a kernel.
 case $kernel-$os in
 	linux-gnu* | linux-dietlibc* | linux-android* | linux-newlib* \
-		   | linux-musl* | linux-relibc* | linux-uclibc* )
+		   | linux-musl* | linux-relibc* | linux-uclibc* | linux-mlibc* )
 		;;
 	uclinux-uclibc* )
 		;;
-	-dietlibc* | -newlib* | -musl* | -relibc* | -uclibc* )
+	managarm-mlibc* | managarm-kernel* )
+		;;
+	windows*-gnu* | windows*-msvc*)
+		;;
+	-dietlibc* | -newlib* | -musl* | -relibc* | -uclibc* | -mlibc* )
 		# These are just libc implementations, not actual OSes, and thus
 		# require a kernel.
-		echo "Invalid configuration \`$1': libc \`$os' needs explicit kernel." 1>&2
+		echo "Invalid configuration '$1': libc '$os' needs explicit kernel." 1>&2
+		exit 1
+		;;
+	-kernel* )
+		echo "Invalid configuration '$1': '$os' needs explicit kernel." 1>&2
+		exit 1
+		;;
+	*-kernel* )
+		echo "Invalid configuration '$1': '$kernel' does not support '$os'." 1>&2
+		exit 1
+		;;
+	*-msvc* )
+		echo "Invalid configuration '$1': '$os' needs 'windows'." 1>&2
 		exit 1
 		;;
 	kfreebsd*-gnu* | kopensolaris*-gnu*)
@@ -1790,7 +1820,7 @@ case $kernel-$os in
 		# Blank kernel with real OS is always fine.
 		;;
 	*-*)
-		echo "Invalid configuration \`$1': Kernel \`$kernel' not known to work with OS \`$os'." 1>&2
+		echo "Invalid configuration '$1': Kernel '$kernel' not known to work with OS '$os'." 1>&2
 		exit 1
 		;;
 esac

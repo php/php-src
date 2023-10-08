@@ -12,4 +12,4 @@ class Test {
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected token "static", expecting variable in %s on line %d
+Fatal error: Cannot use the static modifier on a parameter in %s on line %d

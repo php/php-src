@@ -2,6 +2,10 @@
 #41033, enable signing with DSA keys
 --EXTENSIONS--
 openssl
+--SKIPIF--
+<?php
+if (!defined("OPENSSL_KEYTYPE_DSA")) die("skip DSA disabled");
+?>
 --FILE--
 <?php
 $prv = 'file://' . __DIR__ . '/' . 'bug41033.pem';

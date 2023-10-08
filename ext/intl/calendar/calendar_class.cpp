@@ -94,7 +94,7 @@ static zend_object *Calendar_clone_obj(zend_object *object)
 		Calendar	*newCalendar;
 
 		newCalendar = co_orig->ucal->clone();
-		if (!newCalendar) {
+		if (UNEXPECTED(!newCalendar)) {
 			zend_string *err_msg;
 			intl_errors_set_code(CALENDAR_ERROR_P(co_orig),
 				U_MEMORY_ALLOCATION_ERROR);

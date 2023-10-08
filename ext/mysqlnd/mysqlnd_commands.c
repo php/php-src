@@ -250,35 +250,6 @@ MYSQLND_METHOD(mysqlnd_command, refresh)(MYSQLND_CONN_DATA * const conn, const u
 /* }}} */
 
 
-/* {{{ mysqlnd_command::shutdown */
-static enum_func_status
-MYSQLND_METHOD(mysqlnd_command, shutdown)(MYSQLND_CONN_DATA * const conn, const uint8_t level)
-{
-	const func_mysqlnd_protocol_payload_decoder_factory__send_command send_command = conn->payload_decoder_factory->m.send_command;
-	const func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response = conn->payload_decoder_factory->m.send_command_handle_response;
-	zend_uchar bits[1];
-	enum_func_status ret = FAIL;
-
-	DBG_ENTER("mysqlnd_command::shutdown");
-	int1store(bits, level);
-
-	ret = send_command(conn->payload_decoder_factory, COM_SHUTDOWN, bits, 1, FALSE,
-					   &conn->state,
-					   conn->error_info,
-					   conn->upsert_status,
-					   conn->stats,
-					   conn->m->send_close,
-					   conn);
-	if (PASS == ret) {
-		ret = send_command_handle_response(conn->payload_decoder_factory, PROT_OK_PACKET, FALSE, COM_SHUTDOWN, TRUE,
-										   conn->error_info, conn->upsert_status, &conn->last_message);
-	}
-
-	DBG_RETURN(ret);
-}
-/* }}} */
-
-
 /* {{{ mysqlnd_command::quit */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_command, quit)(MYSQLND_CONN_DATA * const conn)
@@ -571,6 +542,8 @@ MYSQLND_METHOD(mysqlnd_command, enable_ssl)(MYSQLND_CONN_DATA * const conn, cons
 			conn->vio->data->m.set_client_option(conn->vio, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify);
 
 			if (FAIL == conn->vio->data->m.enable_ssl(conn->vio)) {
+				SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
+				SET_CLIENT_ERROR(conn->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Cannot connect to MySQL using SSL");
 				goto end;
 			}
 		}
@@ -680,7 +653,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_command)
 	MYSQLND_METHOD(mysqlnd_command, statistics),
 	MYSQLND_METHOD(mysqlnd_command, process_kill),
 	MYSQLND_METHOD(mysqlnd_command, refresh),
-	MYSQLND_METHOD(mysqlnd_command, shutdown),
 	MYSQLND_METHOD(mysqlnd_command, quit),
 	MYSQLND_METHOD(mysqlnd_command, query),
 	MYSQLND_METHOD(mysqlnd_command, change_user),

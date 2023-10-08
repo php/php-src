@@ -31,40 +31,14 @@
 #ifndef PHP_RANDOM_H
 # define PHP_RANDOM_H
 
+# include "php.h"
+
 PHPAPI double php_combined_lcg(void);
 
-/*
- * A bit of tricky math here.  We want to avoid using a modulus because
- * that simply tosses the high-order bits and might skew the distribution
- * of random values over the range.  Instead we map the range directly.
- *
- * We need to map the range from 0...M evenly to the range a...b
- * Let n = the random number and n' = the mapped random number
- *
- * Then we have: n' = a + n(b-a)/M
- *
- * We have a problem here in that only n==M will get mapped to b which
- * means the chances of getting b is much much less than getting any of
- * the other values in the range.  We can fix this by increasing our range
- * artificially and using:
- *
- *               n' = a + n(b-a+1)/M
- *
- * Now we only have a problem if n==M which would cause us to produce a
- * number of b+1 which would be bad.  So we bump M up by one to make sure
- * this will never happen, and the final algorithm looks like this:
- *
- *               n' = a + n(b-a+1)/(M+1)
- *
- * -RL
- */
-# define RAND_RANGE_BADSCALING(__n, __min, __max, __tmax) \
-	(__n) = (__min) + (zend_long) ((double) ( (double) (__max) - (__min) + 1.0) * ((__n) / ((__tmax) + 1.0)))
-
 # ifdef PHP_WIN32
-#  define GENERATE_SEED() (((zend_long) (time(0) * GetCurrentProcessId())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
+#  define GENERATE_SEED() (((zend_long) ((zend_ulong) time(NULL) * (zend_ulong) GetCurrentProcessId())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
 # else
-#  define GENERATE_SEED() (((zend_long) (time(0) * getpid())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
+#  define GENERATE_SEED() (((zend_long) ((zend_ulong) time(NULL) * (zend_ulong) getpid())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
 # endif
 
 # define PHP_MT_RAND_MAX ((zend_long) (0x7FFFFFFF)) /* (1<<31) - 1 */
@@ -73,6 +47,8 @@ PHPAPI double php_combined_lcg(void);
 # define MT_RAND_PHP 1
 
 # define MT_N (624)
+
+#define PHP_RANDOM_RANGE_ATTEMPTS (50)
 
 PHPAPI void php_mt_srand(uint32_t seed);
 PHPAPI uint32_t php_mt_rand(void);
@@ -107,7 +83,7 @@ static inline uint64_t php_random_uint128_lo(php_random_uint128_t num)
 static inline php_random_uint128_t php_random_uint128_constant(uint64_t hi, uint64_t lo)
 {
 	php_random_uint128_t r;
-	
+
 	r.hi = hi;
 	r.lo = lo;
 
@@ -117,7 +93,7 @@ static inline php_random_uint128_t php_random_uint128_constant(uint64_t hi, uint
 static inline php_random_uint128_t php_random_uint128_add(php_random_uint128_t num1, php_random_uint128_t num2)
 {
 	php_random_uint128_t r;
-	
+
 	r.lo = (num1.lo + num2.lo);
 	r.hi = (num1.hi + num2.hi + (r.lo < num1.lo));
 
@@ -133,7 +109,7 @@ static inline php_random_uint128_t php_random_uint128_multiply(php_random_uint12
 		y0 = num2.lo & 0xffffffffULL,
 		y1 = num2.lo >> 32,
 		z0 = (((x1 * y0) + (x0 * y0 >> 32)) & 0xffffffffULL) + x0 * y1;
-	
+
 	r.hi = num1.hi * num2.lo + num1.lo * num2.hi;
 	r.lo = num1.lo * num2.lo;
 	r.hi += x1 * y1 + ((x1 * y0 + (x0 * y0 >> 32)) >> 32) + (z0 >> 32);
@@ -191,13 +167,28 @@ static inline uint64_t php_random_pcgoneseq128xslrr64_rotr64(php_random_uint128_
 }
 # endif
 
-# define php_random_bytes_throw(b, s) php_random_bytes((b), (s), 1)
-# define php_random_bytes_silent(b, s) php_random_bytes((b), (s), 0)
-# define php_random_int_throw(min, max, result) php_random_int((min), (max), (result), 1)
-# define php_random_int_silent(min, max, result) php_random_int((min), (max), (result), 0)
+PHPAPI zend_result php_random_bytes(void *bytes, size_t size, bool should_throw);
+PHPAPI zend_result php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw);
 
-PHPAPI int php_random_bytes(void *bytes, size_t size, bool should_throw);
-PHPAPI int php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw);
+static inline zend_result php_random_bytes_throw(void *bytes, size_t size)
+{
+	return php_random_bytes(bytes, size, true);
+}
+
+static inline zend_result php_random_bytes_silent(void *bytes, size_t size)
+{
+	return php_random_bytes(bytes, size, false);
+}
+
+static inline zend_result php_random_int_throw(zend_long min, zend_long max, zend_long *result)
+{
+	return php_random_int(min, max, result, true);
+}
+
+static inline zend_result php_random_int_silent(zend_long min, zend_long max, zend_long *result)
+{
+	return php_random_int(min, max, result, false);
+}
 
 typedef struct _php_random_status_ {
 	size_t last_generated_size;
@@ -268,7 +259,10 @@ extern PHPAPI zend_class_entry *random_ce_Random_Engine_PcgOneseq128XslRr64;
 extern PHPAPI zend_class_entry *random_ce_Random_Engine_Mt19937;
 extern PHPAPI zend_class_entry *random_ce_Random_Engine_Xoshiro256StarStar;
 extern PHPAPI zend_class_entry *random_ce_Random_Engine_Secure;
+
 extern PHPAPI zend_class_entry *random_ce_Random_Randomizer;
+
+extern PHPAPI zend_class_entry *random_ce_Random_IntervalBoundary;
 
 static inline php_random_engine *php_random_engine_from_obj(zend_object *object) {
 	return (php_random_engine *)((char *)(object) - XtOffsetOf(php_random_engine, std));
@@ -288,6 +282,8 @@ PHPAPI void php_random_status_free(php_random_status *status, const bool persist
 PHPAPI php_random_engine *php_random_engine_common_init(zend_class_entry *ce, zend_object_handlers *handlers, const php_random_algo *algo);
 PHPAPI void php_random_engine_common_free_object(zend_object *object);
 PHPAPI zend_object *php_random_engine_common_clone_object(zend_object *object);
+PHPAPI uint32_t php_random_range32(const php_random_algo *algo, php_random_status *status, uint32_t umax);
+PHPAPI uint64_t php_random_range64(const php_random_algo *algo, php_random_status *status, uint64_t umax);
 PHPAPI zend_long php_random_range(const php_random_algo *algo, php_random_status *status, zend_long min, zend_long max);
 PHPAPI const php_random_algo *php_random_default_algo(void);
 PHPAPI php_random_status *php_random_default_status(void);
@@ -304,6 +300,11 @@ PHPAPI void php_random_pcgoneseq128xslrr64_advance(php_random_status_state_pcgon
 PHPAPI void php_random_xoshiro256starstar_jump(php_random_status_state_xoshiro256starstar *state);
 PHPAPI void php_random_xoshiro256starstar_jump_long(php_random_status_state_xoshiro256starstar *state);
 
+PHPAPI double php_random_gammasection_closed_open(const php_random_algo *algo, php_random_status *status, double min, double max);
+PHPAPI double php_random_gammasection_closed_closed(const php_random_algo *algo, php_random_status *status, double min, double max);
+PHPAPI double php_random_gammasection_open_closed(const php_random_algo *algo, php_random_status *status, double min, double max);
+PHPAPI double php_random_gammasection_open_open(const php_random_algo *algo, php_random_status *status, double min, double max);
+
 extern zend_module_entry random_module_entry;
 # define phpext_random_ptr &random_module_entry
 
@@ -318,6 +319,8 @@ ZEND_BEGIN_MODULE_GLOBALS(random)
 	bool mt19937_seeded;
 	int random_fd;
 ZEND_END_MODULE_GLOBALS(random)
+
+PHPAPI ZEND_EXTERN_MODULE_GLOBALS(random)
 
 # define RANDOM_G(v)	ZEND_MODULE_GLOBALS_ACCESSOR(random, v)
 

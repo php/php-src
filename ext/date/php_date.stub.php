@@ -377,7 +377,6 @@ class DateTime implements DateTimeInterface
 
     /**
      * @tentative-return-type
-     * @alias date_modify
      */
     public function modify(string $modifier): DateTime|false {}
 
@@ -389,7 +388,6 @@ class DateTime implements DateTimeInterface
 
     /**
      * @tentative-return-type
-     * @alias date_sub
      */
     public function sub(DateInterval $interval): DateTime {}
 
@@ -668,7 +666,6 @@ class DateInterval
 
     /**
      * @tentative-return-type
-     * @alias date_interval_create_from_date_string
      */
     public static function createFromDateString(string $datetime): DateInterval|false {}
 
@@ -717,6 +714,8 @@ class DatePeriod implements IteratorAggregate
     /** @readonly */
     public bool $include_end_date;
 
+    public static function createFromISO8601String(string $specification, int $options = 0): static {}
+
     /**
      * @param DateTimeInterface|string $start
      * @param DateInterval|int $interval
@@ -748,4 +747,67 @@ class DatePeriod implements IteratorAggregate
     public static function __set_state(array $array): DatePeriod {}
 
     public function getIterator(): Iterator {}
+}
+
+/**
+ * @strict-properties
+ */
+class DateError extends Error
+{
+}
+
+/**
+ * @strict-properties
+ */
+class DateObjectError extends DateError
+{
+}
+
+/**
+ * @strict-properties
+ */
+class DateRangeError extends DateError
+{
+}
+
+/**
+ * @strict-properties
+ */
+class DateException extends Exception
+{
+}
+
+/**
+ * @strict-properties
+ */
+class DateInvalidTimeZoneException extends DateException
+{
+}
+
+/**
+ * @strict-properties
+ */
+class DateInvalidOperationException extends DateException
+{
+}
+
+/**
+ * @strict-properties
+ */
+class DateMalformedStringException extends DateException
+{
+}
+
+/**
+ * @strict-properties
+ */
+class DateMalformedIntervalStringException extends DateException
+{
+}
+
+/**
+ * @strict-properties
+ */
+class DateMalformedPeriodStringException extends DateException
+{
 }

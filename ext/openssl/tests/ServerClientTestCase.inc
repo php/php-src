@@ -72,8 +72,9 @@ class ServerClientTestCase
             );
         } else {
             $cmd = sprintf(
-                '%s "%s" %s %s',
+                '%s %s "%s" %s %s',
                 PHP_BINARY,
+                getenv('TEST_PHP_EXTRA_ARGS'),
                 __FILE__,
                 WORKER_ARGV_VALUE,
                 $worker

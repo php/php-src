@@ -3,6 +3,7 @@ Test disk_free_space and its alias diskfreespace() functions : basic functionali
 --SKIPIF--
 <?php
 if (getenv("TRAVIS") === "true") die("skip inaccurate on TravisCI");
+if (getenv('CIRRUS_CI')) die('skip Inaccurate on Cirrus');
 ?>
 --INI--
 memory_limit=32M
@@ -17,7 +18,7 @@ var_dump( diskfreespace($file_path) );
 echo "*** Testing with newly created directory ***\n";
 $dir = "/disk_free_space";
 mkdir($file_path.$dir);
-echo" \n Free Space before writing to a file\n";
+echo "\n Free Space before writing to a file\n";
 $space1 =  disk_free_space($file_path.$dir);
 var_dump( $space1 );
 
@@ -30,7 +31,8 @@ echo "\n Free Space after writing to a file\n";
 $space2 =  disk_free_space($file_path.$dir);
 var_dump( $space2 );
 
-if($space1 > $space2 )
+// Some file systems (like BTRFS) have a fuzzy notion of "free space" and will thus claim the same amount of free space
+if ($space1 >= $space2)
   echo "\n Free Space Value Is Correct\n";
 else {
   echo "\n Free Space Value Is Incorrect\n";
@@ -53,7 +55,7 @@ rmdir($file_path."/disk_free_space");
 float(%f)
 float(%f)
 *** Testing with newly created directory ***
- 
+
  Free Space before writing to a file
 float(%f)
 

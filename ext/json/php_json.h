@@ -72,8 +72,10 @@ typedef enum {
 #define PHP_JSON_PRESERVE_ZERO_FRACTION     (1<<10)
 #define PHP_JSON_UNESCAPED_LINE_TERMINATORS (1<<11)
 
-/* json_decode() and json_encode() common options */
+/* json_validate(), json_decode() and json_encode() common options */
 #define PHP_JSON_INVALID_UTF8_IGNORE        (1<<20)
+
+/* json_decode() and json_encode() common options */
 #define PHP_JSON_INVALID_UTF8_SUBSTITUTE    (1<<21)
 #define PHP_JSON_THROW_ON_ERROR             (1<<22)
 
@@ -97,9 +99,12 @@ PHP_JSON_API ZEND_EXTERN_MODULE_GLOBALS(json)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
+PHP_JSON_API zend_string *php_json_encode_string(const char *s, size_t len, int options);
+
 PHP_JSON_API zend_result php_json_encode_ex(smart_str *buf, zval *val, int options, zend_long depth);
 PHP_JSON_API zend_result php_json_encode(smart_str *buf, zval *val, int options);
 PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str, size_t str_len, zend_long options, zend_long depth);
+PHP_JSON_API bool php_json_validate_ex(const char *str, size_t str_len, zend_long options, zend_long depth);
 
 static inline zend_result php_json_decode(zval *return_value, const char *str, size_t str_len, bool assoc, zend_long depth)
 {

@@ -18,5 +18,7 @@ function test() {
 test();
 ?>
 DONE
---EXPECT--
+--EXPECTF--
+
+Warning: Decrement on type null has no effect, this will change in the next major version of PHP in %sinference_019.php on line %d
 DONE

@@ -21,7 +21,9 @@
 #ifndef ZEND_HASH_H
 #define ZEND_HASH_H
 
-#include "zend.h"
+#include "zend_types.h"
+#include "zend_gc.h"
+#include "zend_string.h"
 #include "zend_sort.h"
 
 #define HASH_KEY_IS_STRING 1
@@ -192,7 +194,7 @@ static zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_stri
 }
 
 #define ZEND_HASH_INDEX_FIND(_ht, _h, _ret, _not_found) do { \
-		if (EXPECTED(HT_FLAGS(_ht) & HASH_FLAG_PACKED)) { \
+		if (EXPECTED(HT_IS_PACKED(_ht))) { \
 			if (EXPECTED((zend_ulong)(_h) < (zend_ulong)(_ht)->nNumUsed)) { \
 				_ret = &_ht->arPacked[_h]; \
 				if (UNEXPECTED(Z_TYPE_P(_ret) == IS_UNDEF)) { \
@@ -215,7 +217,7 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_lookup(HashTable *ht, zend_string *key);
 ZEND_API zval* ZEND_FASTCALL zend_hash_index_lookup(HashTable *ht, zend_ulong h);
 
 #define ZEND_HASH_INDEX_LOOKUP(_ht, _h, _ret) do { \
-		if (EXPECTED(HT_FLAGS(_ht) & HASH_FLAG_PACKED)) { \
+		if (EXPECTED(HT_IS_PACKED(_ht))) { \
 			if (EXPECTED((zend_ulong)(_h) < (zend_ulong)(_ht)->nNumUsed)) { \
 				_ret = &_ht->arPacked[_h]; \
 				if (EXPECTED(Z_TYPE_P(_ret) != IS_UNDEF)) { \
@@ -298,7 +300,7 @@ ZEND_API int   zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t 
 ZEND_API void  ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, bool renumber);
 ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint32_t flag);
 
-static zend_always_inline void ZEND_FASTCALL zend_hash_sort(HashTable *ht, bucket_compare_func_t compare_func, zend_bool renumber) {
+static zend_always_inline void ZEND_FASTCALL zend_hash_sort(HashTable *ht, bucket_compare_func_t compare_func, bool renumber) {
 	zend_hash_sort_ex(ht, zend_sort, compare_func, renumber);
 }
 
@@ -1513,12 +1515,12 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		HashTable *__fill_ht = (ht); \
 		zval *__fill_val = __fill_ht->arPacked + __fill_ht->nNumUsed; \
 		uint32_t __fill_idx = __fill_ht->nNumUsed; \
-		ZEND_ASSERT(HT_FLAGS(__fill_ht) & HASH_FLAG_PACKED);
+		ZEND_ASSERT(HT_IS_PACKED(__fill_ht));
 
 #define ZEND_HASH_FILL_GROW() do { \
 		if (UNEXPECTED(__fill_idx >= __fill_ht->nTableSize)) { \
+			__fill_ht->nNumOfElements += __fill_idx - __fill_ht->nNumUsed; \
 			__fill_ht->nNumUsed = __fill_idx; \
-			__fill_ht->nNumOfElements = __fill_idx; \
 			__fill_ht->nNextFreeElement = __fill_idx; \
 			zend_hash_packed_grow(__fill_ht); \
 			__fill_val = __fill_ht->arPacked + __fill_idx; \
@@ -1557,8 +1559,8 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	} while (0)
 
 #define ZEND_HASH_FILL_FINISH() do { \
+		__fill_ht->nNumOfElements += __fill_idx - __fill_ht->nNumUsed; \
 		__fill_ht->nNumUsed = __fill_idx; \
-		__fill_ht->nNumOfElements = __fill_idx; \
 		__fill_ht->nNextFreeElement = __fill_idx; \
 		__fill_ht->nInternalPointer = 0; \
 	} while (0)

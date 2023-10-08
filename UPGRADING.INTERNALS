@@ -1,4 +1,4 @@
-PHP 8.3 INTERNALS UPGRADE NOTES
+PHP 8.4 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
 
@@ -14,13 +14,32 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
+* zend_register_module_ex() now takes an additional int module_type argument.
+  This function will also assign the module number and type, there is no need
+  to do this at the call site anymore. Writing the handle should happen after
+  successful registration.
+
 ========================
 2. Build system changes
 ========================
 
+ a. Unix build system changes
+   - The configure option --with-zlib-dir has been removed.
+   - Symbol COOKIE_IO_FUNCTIONS_T has been removed (use cookie_io_functions_t).
+
 ========================
 3. Module changes
 ========================
+
+ a. ext/dom
+   - dom_read_t and dom_write_t now expect the function to return zend_result
+     instead of int.
+   - The macros DOM_NO_ARGS() and DOM_NOT_IMPLEMENTED() have been removed.
+
+ b. ext/random
+   - The macro RAND_RANGE_BADSCALING() has been removed. The implementation
+     should either be inlined and undefined behavior fixed or it should be
+     replaced by a non-biased scaler.
 
 ========================
 4. OpCode changes

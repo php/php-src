@@ -161,7 +161,8 @@ void zend_exception_restore(void) /* {{{ */
 
 static zend_always_inline bool is_handle_exception_set(void) {
 	zend_execute_data *execute_data = EG(current_execute_data);
-	return !execute_data->func
+	return !execute_data
+		|| !execute_data->func
 		|| !ZEND_USER_CODE(execute_data->func->common.type)
 		|| execute_data->opline->opcode == ZEND_HANDLE_EXCEPTION;
 }
@@ -198,7 +199,17 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zend_object *exception) /*
 			return;
 		}
 		if (EG(exception)) {
-			zend_exception_error(EG(exception), E_ERROR);
+			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF
+			 && !zend_is_unwind_exit(EG(exception))
+			 && !zend_is_graceful_exit(EG(exception))) {
+				zend_user_exception_handler();
+				if (EG(exception)) {
+					zend_exception_error(EG(exception), E_ERROR);
+				}
+				return;
+			} else {
+				zend_exception_error(EG(exception), E_ERROR);
+			}
 			zend_bailout();
 		}
 		zend_error_noreturn(E_CORE_ERROR, "Exception thrown without a stack frame");
@@ -646,7 +657,7 @@ ZEND_METHOD(Exception, __toString)
 	str = ZSTR_EMPTY_ALLOC();
 
 	exception = ZEND_THIS;
-	fname = zend_string_init("gettraceasstring", sizeof("gettraceasstring")-1, 0);
+	fname = ZSTR_INIT_LITERAL("gettraceasstring", 0);
 
 	while (exception && Z_TYPE_P(exception) == IS_OBJECT && instanceof_function(Z_OBJCE_P(exception), zend_ce_throwable)) {
 		zend_string *prev_str = str;
@@ -670,24 +681,36 @@ ZEND_METHOD(Exception, __toString)
 		}
 
 		if ((Z_OBJCE_P(exception) == zend_ce_type_error || Z_OBJCE_P(exception) == zend_ce_argument_count_error) && strstr(ZSTR_VAL(message), ", called in ")) {
-			zend_string *real_message = zend_strpprintf(0, "%s and defined", ZSTR_VAL(message));
+			zval message_zv;
+			ZVAL_STR(&message_zv, message);
+			zend_string *real_message = zend_strpprintf_unchecked(0, "%Z and defined", &message_zv);
 			zend_string_release_ex(message, 0);
 			message = real_message;
 		}
 
+		zend_string *tmp_trace = (Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace))
+			? zend_string_copy(Z_STR(trace))
+			: ZSTR_INIT_LITERAL("#0 {main}\n", false);
+
+		zval name_zv, trace_zv, file_zv, prev_str_zv;
+		ZVAL_STR(&name_zv, Z_OBJCE_P(exception)->name);
+		ZVAL_STR(&trace_zv, tmp_trace);
+		ZVAL_STR(&file_zv, file);
+		ZVAL_STR(&prev_str_zv, prev_str);
+
 		if (ZSTR_LEN(message) > 0) {
-			str = zend_strpprintf(0, "%s: %s in %s:" ZEND_LONG_FMT
-					"\nStack trace:\n%s%s%s",
-					ZSTR_VAL(Z_OBJCE_P(exception)->name), ZSTR_VAL(message), ZSTR_VAL(file), line,
-					(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
-					ZSTR_LEN(prev_str) ? "\n\nNext " : "", ZSTR_VAL(prev_str));
+			zval message_zv;
+			ZVAL_STR(&message_zv, message);
+
+			str = zend_strpprintf_unchecked(0, "%Z: %Z in %Z:" ZEND_LONG_FMT "\nStack trace:\n%Z%s%Z",
+				&name_zv, &message_zv, &file_zv, line,
+				&trace_zv, ZSTR_LEN(prev_str) ? "\n\nNext " : "", &prev_str_zv);
 		} else {
-			str = zend_strpprintf(0, "%s in %s:" ZEND_LONG_FMT
-					"\nStack trace:\n%s%s%s",
-					ZSTR_VAL(Z_OBJCE_P(exception)->name), ZSTR_VAL(file), line,
-					(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
-					ZSTR_LEN(prev_str) ? "\n\nNext " : "", ZSTR_VAL(prev_str));
+			str = zend_strpprintf_unchecked(0, "%Z in %Z:" ZEND_LONG_FMT "\nStack trace:\n%Z%s%Z",
+				&name_zv, &file_zv, line,
+				&trace_zv, ZSTR_LEN(prev_str) ? "\n\nNext " : "", &prev_str_zv);
 		}
+		zend_string_release_ex(tmp_trace, false);
 
 		zend_string_release_ex(prev_str, 0);
 		zend_string_release_ex(message, 0);

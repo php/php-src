@@ -20,19 +20,21 @@
 #ifndef ZEND_OBJECTS_API_H
 #define ZEND_OBJECTS_API_H
 
-#include "zend.h"
-#include "zend_compile.h"
+#include "zend_types.h"
+#include "zend_gc.h"
+#include "zend_alloc.h"
+#include "zend_compile.h" /* For zend_property_info */
 
 #define OBJ_BUCKET_INVALID			(1<<0)
 
-#define IS_OBJ_VALID(o)				(!(((zend_uintptr_t)(o)) & OBJ_BUCKET_INVALID))
+#define IS_OBJ_VALID(o)				(!(((uintptr_t)(o)) & OBJ_BUCKET_INVALID))
 
-#define SET_OBJ_INVALID(o)			((zend_object*)((((zend_uintptr_t)(o)) | OBJ_BUCKET_INVALID)))
+#define SET_OBJ_INVALID(o)			((zend_object*)((((uintptr_t)(o)) | OBJ_BUCKET_INVALID)))
 
-#define GET_OBJ_BUCKET_NUMBER(o)	(((zend_intptr_t)(o)) >> 1)
+#define GET_OBJ_BUCKET_NUMBER(o)	(((intptr_t)(o)) >> 1)
 
 #define SET_OBJ_BUCKET_NUMBER(o, n)	do { \
-		(o) = (zend_object*)((((zend_uintptr_t)(n)) << 1) | OBJ_BUCKET_INVALID); \
+		(o) = (zend_object*)((((uintptr_t)(n)) << 1) | OBJ_BUCKET_INVALID); \
 	} while (0)
 
 #define ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(h) do { \

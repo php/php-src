@@ -125,12 +125,12 @@ ZEND_GET_MODULE(sodium)
 /* Remove argument information from backtrace to prevent information leaks */
 static void sodium_remove_param_values_from_backtrace(zend_object *obj) {
 	zval rv;
-	zval *trace = zend_read_property(zend_get_exception_base(obj), obj, "trace", sizeof("trace")-1, 0, &rv);
+	zval *trace = zend_read_property_ex(zend_get_exception_base(obj), obj, ZSTR_KNOWN(ZEND_STR_TRACE), /* silent */ false, &rv);
 	if (trace && Z_TYPE_P(trace) == IS_ARRAY) {
 		zval *frame;
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(trace), frame) {
 			if (Z_TYPE_P(frame) == IS_ARRAY) {
-				zval *args = zend_hash_str_find(Z_ARRVAL_P(frame), "args", sizeof("args")-1);
+				zval *args = zend_hash_find(Z_ARRVAL_P(frame), ZSTR_KNOWN(ZEND_STR_ARGS));
 				if (args) {
 					zval_ptr_dtor(args);
 					ZVAL_EMPTY_ARRAY(args);
@@ -158,7 +158,7 @@ static void sodium_separate_string(zval *zv) {
 PHP_MINIT_FUNCTION(sodium)
 {
 	if (sodium_init() < 0) {
-		zend_error(E_ERROR, "sodium_init()");
+		zend_error_noreturn(E_ERROR, "sodium_init()");
 	}
 
 	sodium_exception_ce = register_class_SodiumException(zend_ce_exception);

@@ -183,7 +183,7 @@ static void sapi_read_post_data(void)
 	 * - Make the content type lowercase
 	 * - Trim descriptive data, stay with the content-type only
 	 */
-	for (p=content_type; p<content_type+content_type_length; p++) {
+	for (p = content_type; p < content_type + content_type_length; p++) {
 		switch (*p) {
 			case ';':
 			case ',':
@@ -207,10 +207,11 @@ static void sapi_read_post_data(void)
 	} else {
 		/* fallback */
 		SG(request_info).post_entry = NULL;
-		if (!sapi_module.default_post_reader) {
-			/* no default reader? */
+		if (UNEXPECTED(!sapi_module.default_post_reader)) {
+			/* this should not happen as there should always be a default_post_reader */
 			SG(request_info).content_type_dup = NULL;
 			sapi_module.sapi_error(E_WARNING, "Unsupported content type:  '%s'", content_type);
+			efree(content_type);
 			return;
 		}
 	}
@@ -218,6 +219,7 @@ static void sapi_read_post_data(void)
 		*(p-1) = oldchar;
 	}
 
+	/* the content_type_dup is not set at this stage so no need to try to free it first */
 	SG(request_info).content_type_dup = content_type;
 
 	if(post_reader_func) {
@@ -681,7 +683,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 
 	switch (op) {
 		case SAPI_HEADER_SET_STATUS:
-			sapi_update_response_code((int)(zend_intptr_t) arg);
+			sapi_update_response_code((int)(intptr_t) arg);
 			return SUCCESS;
 
 		case SAPI_HEADER_ADD:
@@ -799,7 +801,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 				 * to disable compression altogether. This contributes to making scripts
 				 * portable between setups that have and don't have zlib compression
 				 * enabled globally. See req #44164 */
-				zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
+				zend_string *key = ZSTR_INIT_LITERAL("zlib.output_compression", 0);
 				zend_alter_ini_entry_chars(key,
 					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 				zend_string_release_ex(key, 0);

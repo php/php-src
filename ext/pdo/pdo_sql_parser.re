@@ -242,6 +242,13 @@ safe:
 						if (buf) {
 							zend_string_release_ex(buf, 0);
 						}
+						if (plc->quoted == NULL) {
+							/* bork */
+							ret = -1;
+							strncpy(stmt->error_code, stmt->dbh->error_code, 6);
+							goto clean_up;
+						}
+
 					} else {
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource");
 						ret = -1;

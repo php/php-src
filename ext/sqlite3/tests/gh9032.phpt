@@ -17,10 +17,10 @@ try {
     $st->bindValue("a", ":memory:");
     $st->execute();
     var_dump($db->exec('create table db2.r (id int)'));
-} catch (Exception $ex) {
+} catch (SQLite3Exception $ex) {
     echo $ex->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
 bool(true)
-Unable to prepare statement: 23, not authorized
+Unable to prepare statement: not authorized

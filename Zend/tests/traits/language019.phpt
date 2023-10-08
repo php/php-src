@@ -10,6 +10,9 @@ class C1 {
         T1::foo as final;
     }
 }
+class C2 extends C1 {
+    public function foo() {}
+}
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'final' as method modifier in %s on line %d
+Fatal error: Cannot override final method C1::foo() in %s on line %d

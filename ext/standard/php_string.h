@@ -24,9 +24,6 @@
 PHP_MINIT_FUNCTION(localeconv);
 PHP_MSHUTDOWN_FUNCTION(localeconv);
 #endif
-#ifdef HAVE_NL_LANGINFO
-PHP_MINIT_FUNCTION(nl_langinfo);
-#endif
 #ifdef ZEND_INTRIN_SSE4_2_FUNC_PTR
 PHP_MINIT_FUNCTION(string_intrin);
 #endif
@@ -78,6 +75,16 @@ PHPAPI bool php_binary_string_shuffle(const php_random_algo *algo, php_random_st
 # define php_mb_reset() php_ignore_value(mblen(NULL, 0))
 #endif
 
-void register_string_constants(INIT_FUNC_ARGS);
+#define PHP_STR_PAD_LEFT		0
+#define PHP_STR_PAD_RIGHT		1
+#define PHP_STR_PAD_BOTH		2
+#define PHP_PATHINFO_DIRNAME 	1
+#define PHP_PATHINFO_BASENAME 	2
+#define PHP_PATHINFO_EXTENSION 	4
+#define PHP_PATHINFO_FILENAME 	8
+#define PHP_PATHINFO_ALL	(PHP_PATHINFO_DIRNAME | PHP_PATHINFO_BASENAME | PHP_PATHINFO_EXTENSION | PHP_PATHINFO_FILENAME)
+
+#define PHP_STR_STRSPN			0
+#define PHP_STR_STRCSPN			1
 
 #endif /* PHP_STRING_H */

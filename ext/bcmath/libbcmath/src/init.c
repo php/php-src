@@ -29,82 +29,70 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
-#include "private.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <string.h>
+#include "zend_alloc.h"
 
 /* new_num allocates a number and sets fields to known values. */
-
-bc_num
-_bc_new_num_ex (length, scale, persistent)
-     int length, scale, persistent;
+bc_num _bc_new_num_ex(size_t length, size_t scale, bool persistent)
 {
-  bc_num temp;
-  /* PHP Change:  malloc() -> pemalloc(), removed free_list code */
-  temp = (bc_num) safe_pemalloc (1, sizeof(bc_struct)+length, scale, persistent);
-  temp->n_sign = PLUS;
-  temp->n_len = length;
-  temp->n_scale = scale;
-  temp->n_refs = 1;
-  /* PHP Change:  malloc() -> pemalloc() */
-  temp->n_ptr = (char *) safe_pemalloc (1, length, scale, persistent);
-  temp->n_value = temp->n_ptr;
-  memset (temp->n_ptr, 0, length+scale);
-  return temp;
+	/* PHP Change: malloc() -> pemalloc(), removed free_list code */
+	bc_num temp = (bc_num) safe_pemalloc(1, sizeof(bc_struct) + length, scale, persistent);
+	temp->n_sign = PLUS;
+	temp->n_len = length;
+	temp->n_scale = scale;
+	temp->n_refs = 1;
+	/* PHP Change: malloc() -> pemalloc() */
+	temp->n_ptr = (char *) safe_pemalloc(1, length, scale, persistent);
+	temp->n_value = temp->n_ptr;
+	memset(temp->n_ptr, 0, length + scale);
+	return temp;
 }
 
 
 /* "Frees" a bc_num NUM.  Actually decreases reference count and only
    frees the storage if reference count is zero. */
-
-void
-_bc_free_num_ex (num, persistent)
-    bc_num *num;
-    int persistent;
+void _bc_free_num_ex(bc_num *num, bool persistent)
 {
-  if (*num == NULL) return;
-  (*num)->n_refs--;
-  if ((*num)->n_refs == 0) {
-    if ((*num)->n_ptr)
-		/* PHP Change:  free() -> pefree(), removed free_list code */
-      pefree ((*num)->n_ptr, persistent);
-	pefree(*num, persistent);
-  }
-  *num = NULL;
+	if (*num == NULL) {
+		return;
+	}
+	(*num)->n_refs--;
+	if ((*num)->n_refs == 0) {
+		if ((*num)->n_ptr) {
+			/* PHP Change: free() -> pefree(), removed free_list code */
+			pefree((*num)->n_ptr, persistent);
+		}
+		pefree(*num, persistent);
+	}
+	*num = NULL;
 }
 
 
 /* Initialize the number package! */
 
-void
-bc_init_numbers (void)
+void bc_init_numbers(void)
 {
-  BCG(_zero_) = _bc_new_num_ex (1,0,1);
-  BCG(_one_)  = _bc_new_num_ex (1,0,1);
-  BCG(_one_)->n_value[0] = 1;
-  BCG(_two_)  = _bc_new_num_ex (1,0,1);
-  BCG(_two_)->n_value[0] = 2;
+	BCG(_zero_) = _bc_new_num_ex(1, 0, 1);
+	BCG(_one_) = _bc_new_num_ex(1, 0, 1);
+	BCG(_one_)->n_value[0] = 1;
+	BCG(_two_) = _bc_new_num_ex(1, 0, 1);
+	BCG(_two_)->n_value[0] = 2;
 }
 
 
-/* Make a copy of a number!  Just increments the reference count! */
-
-bc_num
-bc_copy_num (bc_num num)
+/* Make a copy of a number! Just increments the reference count! */
+bc_num bc_copy_num(bc_num num)
 {
-  num->n_refs++;
-  return num;
+	num->n_refs++;
+	return num;
 }
 
 
 /* Initialize a number NUM by making it a copy of zero. */
-
-void
-bc_init_num (bc_num *num)
+void bc_init_num(bc_num *num)
 {
-  *num = bc_copy_num (BCG(_zero_));
+	*num = bc_copy_num(BCG(_zero_));
 }

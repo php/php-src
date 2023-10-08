@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 38c6088c48d8f582ede1363855a867dc4aade34b */
+ * Stub hash: e9a566d5ef96f781074027b1b3ff1824d0208b47 */
 
 
 
@@ -60,94 +60,68 @@ static void register_file_symbols(int module_number)
 #if defined(PF_INET)
 	REGISTER_LONG_CONSTANT("STREAM_PF_INET", PF_INET, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && (!defined(PF_INET) && defined(AF_INET))
+#if (!defined(PF_INET) && defined(AF_INET))
 	REGISTER_LONG_CONSTANT("STREAM_PF_INET", AF_INET, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_INET6)
+#if defined(HAVE_IPV6) && defined(PF_INET6)
 	REGISTER_LONG_CONSTANT("STREAM_PF_INET6", PF_INET6, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_INET6) && (!defined(PF_INET6) && defined(AF_INET6))
+#if defined(HAVE_IPV6) && (!defined(PF_INET6) && defined(AF_INET6))
 	REGISTER_LONG_CONSTANT("STREAM_PF_INET6", AF_INET6, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)
+#if defined(PF_UNIX)
 	REGISTER_LONG_CONSTANT("STREAM_PF_UNIX", PF_UNIX, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && (!defined(PF_UNIX) && defined(AF_UNIX))
+#if (!defined(PF_UNIX) && defined(AF_UNIX))
 	REGISTER_LONG_CONSTANT("STREAM_PF_UNIX", AF_UNIX, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && defined(IPPROTO_IP)
+#if defined(IPPROTO_IP)
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_IP", IPPROTO_IP, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && (defined(IPPROTO_TCP) || defined(PHP_WIN32))
+#if (defined(IPPROTO_TCP) || defined(PHP_WIN32))
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_TCP", IPPROTO_TCP, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && (defined(IPPROTO_UDP) || defined(PHP_WIN32))
+#if (defined(IPPROTO_UDP) || defined(PHP_WIN32))
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_UDP", IPPROTO_UDP, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && (defined(IPPROTO_ICMP) || defined(PHP_WIN32))
+#if (defined(IPPROTO_ICMP) || defined(PHP_WIN32))
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_ICMP", IPPROTO_ICMP, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && (defined(IPPROTO_RAW) || defined(PHP_WIN32))
+#if (defined(IPPROTO_RAW) || defined(PHP_WIN32))
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_RAW", IPPROTO_RAW, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)
 	REGISTER_LONG_CONSTANT("STREAM_SOCK_STREAM", SOCK_STREAM, CONST_PERSISTENT);
-#endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)
 	REGISTER_LONG_CONSTANT("STREAM_SOCK_DGRAM", SOCK_DGRAM, CONST_PERSISTENT);
-#endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && defined(SOCK_RAW)
+#if defined(SOCK_RAW)
 	REGISTER_LONG_CONSTANT("STREAM_SOCK_RAW", SOCK_RAW, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && defined(SOCK_SEQPACKET)
+#if defined(SOCK_SEQPACKET)
 	REGISTER_LONG_CONSTANT("STREAM_SOCK_SEQPACKET", SOCK_SEQPACKET, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && defined(SOCK_RDM)
+#if defined(SOCK_RDM)
 	REGISTER_LONG_CONSTANT("STREAM_SOCK_RDM", SOCK_RDM, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)
 	REGISTER_LONG_CONSTANT("STREAM_PEEK", STREAM_PEEK, CONST_PERSISTENT);
-#endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)
 	REGISTER_LONG_CONSTANT("STREAM_OOB", STREAM_OOB, CONST_PERSISTENT);
-#endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)
 	REGISTER_LONG_CONSTANT("STREAM_SERVER_BIND", STREAM_XPORT_BIND, CONST_PERSISTENT);
-#endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)
 	REGISTER_LONG_CONSTANT("STREAM_SERVER_LISTEN", STREAM_XPORT_LISTEN, CONST_PERSISTENT);
-#endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)
 	REGISTER_LONG_CONSTANT("FILE_USE_INCLUDE_PATH", PHP_FILE_USE_INCLUDE_PATH, CONST_PERSISTENT);
-#endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)
 	REGISTER_LONG_CONSTANT("FILE_IGNORE_NEW_LINES", PHP_FILE_IGNORE_NEW_LINES, CONST_PERSISTENT);
-#endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)
 	REGISTER_LONG_CONSTANT("FILE_SKIP_EMPTY_LINES", PHP_FILE_SKIP_EMPTY_LINES, CONST_PERSISTENT);
-#endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)
 	REGISTER_LONG_CONSTANT("FILE_APPEND", PHP_FILE_APPEND, CONST_PERSISTENT);
-#endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)
 	REGISTER_LONG_CONSTANT("FILE_NO_DEFAULT_CONTEXT", PHP_FILE_NO_DEFAULT_CONTEXT, CONST_PERSISTENT);
-#endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)
 	REGISTER_LONG_CONSTANT("FILE_TEXT", 0, CONST_PERSISTENT | CONST_DEPRECATED);
-#endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX)
 	REGISTER_LONG_CONSTANT("FILE_BINARY", 0, CONST_PERSISTENT | CONST_DEPRECATED);
-#endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && defined(HAVE_FNMATCH)
+#if defined(HAVE_FNMATCH)
 	REGISTER_LONG_CONSTANT("FNM_NOESCAPE", FNM_NOESCAPE, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && defined(HAVE_FNMATCH)
+#if defined(HAVE_FNMATCH)
 	REGISTER_LONG_CONSTANT("FNM_PATHNAME", FNM_PATHNAME, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && defined(HAVE_FNMATCH)
+#if defined(HAVE_FNMATCH)
 	REGISTER_LONG_CONSTANT("FNM_PERIOD", FNM_PERIOD, CONST_PERSISTENT);
 #endif
-#if defined(PF_INET) && defined(HAVE_IPV6) && defined(PF_UNIX) && defined(HAVE_FNMATCH) && defined(FNM_CASEFOLD)
+#if defined(HAVE_FNMATCH) && defined(FNM_CASEFOLD)
 	REGISTER_LONG_CONSTANT("FNM_CASEFOLD", FNM_CASEFOLD, CONST_PERSISTENT);
 #endif
 }

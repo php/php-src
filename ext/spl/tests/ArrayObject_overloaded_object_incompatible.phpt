@@ -5,7 +5,7 @@ Objects with overloaded get_properties are incompatible with ArrayObject
 
 $ao = new ArrayObject([1, 2, 3]);
 try {
-    $ao->exchangeArray(new SplFixedArray);
+    $ao->exchangeArray(new DateInterval('P1D'));
 } catch (Exception $e) {
     echo $e->getMessage(), "\n";
 }
@@ -13,7 +13,7 @@ var_dump($ao);
 
 ?>
 --EXPECT--
-Overloaded object of type SplFixedArray is not compatible with ArrayObject
+Overloaded object of type DateInterval is not compatible with ArrayObject
 object(ArrayObject)#1 (1) {
   ["storage":"ArrayObject":private]=>
   array(3) {

@@ -19,7 +19,7 @@
 #define BASE64_H
 
 /*
- * NEON implementation is based on https://github.com/WojciechMula/base64simd
+ * NEON and AVX512 implementation are based on https://github.com/WojciechMula/base64simd
  * which is copyrighted to:
  * Copyright (c) 2015-2018, Wojciech Mula
  * All rights reserved.
@@ -57,7 +57,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if (ZEND_INTRIN_AVX2_FUNC_PTR || ZEND_INTRIN_SSSE3_FUNC_PTR) && !ZEND_INTRIN_AVX2_NATIVE
+#if (ZEND_INTRIN_AVX2_FUNC_PTR || ZEND_INTRIN_SSSE3_FUNC_PTR || ZEND_INTRIN_AVX512_FUNC_PTR || ZEND_INTRIN_AVX512_VBMI_FUNC_PTR) && !ZEND_INTRIN_AVX2_NATIVE
 PHP_MINIT_FUNCTION(base64_intrin);
 #endif
 

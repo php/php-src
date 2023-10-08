@@ -4,15 +4,12 @@ Bug #67983: mysqlnd with MYSQLI_OPT_INT_AND_FLOAT_NATIVE fails to interpret bit 
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-if (!$IS_MYSQLND) {
-    die("skip mysqlnd only test");
-}
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
 
-require_once("connect.inc");
+require_once 'connect.inc';
 
 $connection = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 

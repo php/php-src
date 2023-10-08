@@ -16,7 +16,7 @@ var_dump($methodInfo->isConstructor());
 class ExtendsNewCtor extends NewCtor {
 }
 echo "\nInherited new-style constructor\n";
-$methodInfo = new ReflectionMethod("ExtendsNewCtor::__construct");
+$methodInfo = ReflectionMethod::createFromMethodName("ExtendsNewCtor::__construct");
 var_dump($methodInfo->isConstructor());
 
 class X {
@@ -25,13 +25,13 @@ class X {
     }
 }
 echo "\nNot a constructor:\n";
-$methodInfo = new ReflectionMethod("X::Y");
+$methodInfo = ReflectionMethod::createFromMethodName("X::Y");
 var_dump($methodInfo->isConstructor());
 
 class Y extends X {
 }
 echo "\nInherited method of the same name as the class:\n";
-$methodInfo = new ReflectionMethod("Y::Y");
+$methodInfo = ReflectionMethod::createFromMethodName("Y::Y");
 var_dump($methodInfo->isConstructor());
 
 ?>

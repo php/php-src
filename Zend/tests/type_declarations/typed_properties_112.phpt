@@ -16,4 +16,4 @@ try {
 
 ?>
 --EXPECT--
-Cannot assign bool to property Foo::$value of type true
+Cannot assign false to property Foo::$value of type true

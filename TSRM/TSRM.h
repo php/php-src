@@ -137,6 +137,7 @@ TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void);
 TSRM_API bool tsrm_is_main_thread(void);
 TSRM_API bool tsrm_is_shutdown(void);
 TSRM_API const char *tsrm_api_name(void);
+TSRM_API bool tsrm_is_managed_thread(void);
 
 #ifdef TSRM_WIN32
 # define TSRM_TLS __declspec(thread)

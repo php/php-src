@@ -6,10 +6,10 @@ repository available according to the release schedule.
 The release schedule for each version is published on the
 [PHP wiki](https://wiki.php.net):
 
+- [PHP 8.3](https://wiki.php.net/todo/php83)
 - [PHP 8.2](https://wiki.php.net/todo/php82)
 - [PHP 8.1](https://wiki.php.net/todo/php81)
 - [PHP 8.0](https://wiki.php.net/todo/php80)
-- [PHP 7.4](https://wiki.php.net/todo/php74)
 
 The PHP project publishes builds every two weeks.
 
@@ -56,9 +56,8 @@ releases.
 3. Ensure that the relevant tests on CI are green.
 
    - https://travis-ci.com/github/php/php-src
-   - https://ci.appveyor.com/project/php/php-src
-   - https://dev.azure.com/phpazuredevops/PHP/
    - https://cirrus-ci.com/github/php/php-src
+   - https://github.com/php/php-src/actions
 
    > 💡 **Tip** \
    > We recommend checking the build status a couple of days before packaging day
@@ -322,7 +321,7 @@ slightly different steps. We'll call attention where the steps differ.
 15. Now the tarballs and signatures may be found at
     `https://downloads.php.net/~yourname/`, e.g. https://downloads.php.net/~derick/.
 
-16. Once the release is tagged, contact the release-managers@ distribution
+16. Once the release is tagged, contact the release-managers@php.net distribution
     list so that Windows binaries can be created. Once those are made, they may
     be found at https://windows.php.net/qa/.
 
@@ -426,7 +425,6 @@ slightly different steps. We'll call attention where the steps differ.
    * `internals@lists.php.net`
    * `php-general@lists.php.net`
    * `php-qa@lists.php.net`
-   * `primary-qa-tester@lists.php.net`
 
    In the announcement message, point out the location of the release and the
    possible release date of either the next RC or the final release. Also
@@ -605,7 +603,7 @@ slightly different steps. We'll call attention where the steps differ.
     git fetch --all
     git pull --rebase upstream master
     cd ..
-    git commit distributions
+    git commit distributions -m "X.Y.Z tarballs"
     git push upstream master
     ```
 
@@ -617,7 +615,7 @@ slightly different steps. We'll call attention where the steps differ.
     > will be available from `https://www.php.net/distributions/php-X.Y.Z.tar.gz`,
     > etc.
 
-15. Once the release is tagged, contact the release-managers@ distribution
+15. Once the release is tagged, contact the release-managers@php.net distribution
     list so that Windows binaries can be created. Once those are made, they may
     be found at https://windows.php.net/qa/.
 
@@ -906,6 +904,25 @@ feature development that cannot go into the new version.
    there is only a single section about PHP X.Y.0, instead of individual
    sections for each pre-release.
 
+4. On the announcement day for the initial stable version (or shortly before),
+   update the `Expires` field in the <https://www.php.net/.well-known/security.txt>
+   file. The `Expires` field should be set to the expected date of the next X.Y.0
+   release (following the one currently being prepared), which is usually the
+   fourth Thursday of November in the next year.
+
+   Following the recommendation of [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116),
+   we maintain an `Expires` time of about a year for our security policies. This
+   provides security researchers with confidence they are using our most
+   up-to-date reporting policies.
+
+   The `security.txt` file is located in the [web-php repository](https://github.com/php/web-php)
+   under the `.well-known/` directory. We may make changes to this file at other
+   times, as needed, but we will always advance the `Expires` timestamp on a
+   yearly cadence, coinciding with our X.Y.0 releases.
+
+   Please see the instructions for
+   [making changes to security.txt](security-policies.md#making-changes-to-securitytxt).
+
 
 ## Prime the selection of release managers for the next version
 
@@ -933,7 +950,7 @@ volunteers to begin the selection process for the next release managers.
 ## New release manager checklist
 
 1. Email systems@php.net to get setup for access to downloads.php.net and to be
-   added to the release-managers@ distribution list.
+   added to the release-managers@php.net distribution list.
 
 2. Request membership to the release managers group on GitHub.
 
@@ -961,7 +978,7 @@ volunteers to begin the selection process for the next release managers.
    public key to a keyserver:
 
    ```shell
-   gpg --keyserver pgp.mit.edu --send-keys YOURKEYID
+   gpg --keyserver keys.openpgp.org --send-keys YOURKEYID
    gpg --keyserver keyserver.ubuntu.com --send-keys YOURKEYID
    ```
 
@@ -988,25 +1005,28 @@ volunteers to begin the selection process for the next release managers.
    git push
    ```
 
-4. Request moderation access to php-announce@lists.php.net and
-   primary-qa-tester@lists.php.net lists, so you are able to moderate your
-   release announcements. All the announcements should be sent from your
-   @php.net address.
+   `web-php-distributions` is a submodule of `web-php`. You'll now have to update
+   the commit reference to reflect the change made in web-php-distributions.
+
+   ```shell
+   cd /path/to/repos/php/web-php
+   git submodule update
+   cd distributions           # This is the submodule referring to web-php-distributions
+   git pull origin master
+   cd ..
+   git add distributions
+   git commit --gpg-sign=YOURKEYID -m "Update php-keyring.gpg in distributions"
+   git push
+   ```
+
+4. Request moderation access to php-announce@lists.php.net
+   so you are able to moderate your release announcements. All the announcements
+   should be sent from your @php.net address.
 
    > 💬 **Hint** \
    > To send email from your @php.net address, you will need to use a custom
    > SMTP server. If you use Gmail, you may
    > "[Send emails from a different address or alias][]."
-
-   > 💡 **Tip** \
-   > Make sure that you are set as a moderator for
-   > `primary-qa-tester@lists.php.net` by having someone (Hannes, Dan, Derick)
-   > run the following commands for you:
-   >
-   > ```shell
-   > ssh lists.php.net
-   > sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester mod moderator-email-address
-   > ```
 
 5. Make sure you have the following repositories cloned locally:
 

@@ -50,13 +50,11 @@ PHP_METHOD(DOMComment, __construct)
 	}
 
 	intern = Z_DOMOBJ_P(ZEND_THIS);
-	if (intern != NULL) {
-		oldnode = dom_object_get_node(intern);
-		if (oldnode != NULL) {
-			php_libxml_node_free_resource(oldnode );
-		}
-		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)nodep, (void *)intern);
+	oldnode = dom_object_get_node(intern);
+	if (oldnode != NULL) {
+		php_libxml_node_decrement_resource((php_libxml_node_object *)intern);
 	}
+	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)nodep, (void *)intern);
 }
 /* }}} end DOMComment::__construct */
 

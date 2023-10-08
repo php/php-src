@@ -67,8 +67,7 @@ struct _zend_ssa_phi {
 	int                    var;           /* Original CV, VAR or TMP variable index */
 	int                    ssa_var;       /* SSA variable index */
 	int                    block;         /* current BB index */
-	int                    visited : 1;   /* flag to avoid recursive processing */
-	int                    has_range_constraint : 1;
+	bool                   has_range_constraint : 1;
 	zend_ssa_phi         **use_chains;
 	zend_ssa_phi          *sym_use_chain;
 	int                   *sources;       /* Array of SSA IDs that produce this var.
@@ -109,8 +108,8 @@ typedef struct _zend_ssa_var {
 	int                    var;            /* original var number; op.var for CVs and following numbers for VARs and TMP_VARs */
 	int                    scc;            /* strongly connected component */
 	int                    definition;     /* opcode that defines this value */
-	zend_ssa_phi          *definition_phi; /* phi that defines this value */
 	int                    use_chain;      /* uses of this value, linked through opN_use_chain */
+	zend_ssa_phi          *definition_phi; /* phi that defines this value */
 	zend_ssa_phi          *phi_use_chain;  /* uses of this value in Phi, linked through use_chain */
 	zend_ssa_phi          *sym_use_chain;  /* uses of this value in Pi constraints */
 	unsigned int           no_val : 1;     /* value doesn't matter (used as op1 in ZEND_ASSIGN) */
@@ -121,16 +120,16 @@ typedef struct _zend_ssa_var {
 
 typedef struct _zend_ssa_var_info {
 	uint32_t               type; /* inferred type (see zend_inference.h) */
+	bool                   has_range : 1;
+	bool                   is_instanceof : 1; /* 0 - class == "ce", 1 - may be child of "ce" */
+	bool                   recursive : 1;
+	bool                   use_as_double : 1;
+	bool                   delayed_fetch_this : 1;
+	bool                   avoid_refcounting : 1;
+	bool                   guarded_reference : 1;
+	bool                   indirect_reference : 1; /* IS_INDIRECT returned by FETCH_DIM_W/FETCH_OBJ_W */
 	zend_ssa_range         range;
 	zend_class_entry      *ce;
-	unsigned int           has_range : 1;
-	unsigned int           is_instanceof : 1; /* 0 - class == "ce", 1 - may be child of "ce" */
-	unsigned int           recursive : 1;
-	unsigned int           use_as_double : 1;
-	unsigned int           delayed_fetch_this : 1;
-	unsigned int           avoid_refcounting : 1;
-	unsigned int           guarded_reference : 1;
-	unsigned int           indirect_reference : 1; /* IS_INDIRECT returned by FETCH_DIM_W/FETCH_OBJ_W */
 } zend_ssa_var_info;
 
 typedef struct _zend_ssa {

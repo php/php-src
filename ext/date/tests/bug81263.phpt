@@ -32,7 +32,7 @@ DateInterval Object
     [i] => 0
     [s] => 0
     [f] => 0
-    [invert] => 1
+    [invert] => 0
     [days] => 0
     [from_string] => 
 )

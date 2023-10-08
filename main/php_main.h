@@ -23,6 +23,19 @@
 #include "SAPI.h"
 
 BEGIN_EXTERN_C()
+
+/* Returns the PHP version the engine was built with. This is useful for
+ * extensions which want to know the version of PHP at run-time, rather than
+ * the version they were built with at compile-time.
+ */
+PHPAPI const char *php_version(void);
+
+/* Returns the PHP version id the engine was built with. This is useful for
+ * extensions which want to know the version of PHP at run-time, rather than
+ * the version they were built with at compile-time.
+ */
+PHPAPI unsigned int php_version_id(void);
+
 PHPAPI zend_result php_request_startup(void);
 PHPAPI void php_request_shutdown(void *dummy);
 PHPAPI zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module);
@@ -47,7 +60,18 @@ extern int php_shutdown_environ(void);
 
 #ifdef ZTS
 PHPAPI void php_reserve_tsrm_memory(void);
+PHPAPI bool php_tsrm_startup_ex(int expected_threads);
 PHPAPI bool php_tsrm_startup(void);
+
+#define PHP_ZTS 1
+#else
+#define PHP_ZTS 0
+#endif
+
+#ifdef PHP_WIN32
+#define PHP_OS_STR "WINNT"
+#else
+#define PHP_OS_STR PHP_OS
 #endif
 
 END_EXTERN_C()

@@ -58,7 +58,6 @@
 
 #define ZEND_JIT_DEBUG_PERF      (1<<4)
 #define ZEND_JIT_DEBUG_PERF_DUMP (1<<5)
-#define ZEND_JIT_DEBUG_OPROFILE  (1<<6)
 #define ZEND_JIT_DEBUG_VTUNE     (1<<7)
 
 #define ZEND_JIT_DEBUG_GDB       (1<<8)
@@ -116,6 +115,7 @@ typedef struct _zend_jit_globals {
 	zend_long   max_recursive_calls;   /* max number of recursive inlined call unrolls */
 	zend_long   max_recursive_returns; /* max number of recursive inlined return unrolls */
 	zend_long   max_polymorphic_calls; /* max number of inlined polymorphic calls */
+	zend_long   max_trace_length; 	   /* max length of a single trace */
 
 	zend_sym_node *symbols;            /* symbols for disassembler */
 

@@ -2,10 +2,14 @@
 Bug #45458 (OCI8: Numeric keys for associative arrays are not handled properly)
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --FILE--
 <?php
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 // Run Test
 

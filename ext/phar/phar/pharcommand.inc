@@ -1298,7 +1298,7 @@ class PharCommand extends CLICommand
      */
     public function cli_cmd_inf_meta_get()
     {
-        return "Get meta information of a PHAR entry or a PHAR package in serialized from. " .
+        return "Get meta information of a PHAR entry or a PHAR package in serialized form. " .
                "If no output file is specified for meta data then stdout is being used.\n" .
                "You can also specify a particular index using -k. In that case the metadata is " .
                "expected to be an array and the value of the given index is returned using echo " .

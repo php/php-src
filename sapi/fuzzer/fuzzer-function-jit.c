@@ -23,7 +23,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		return 0;
 	}
 
-	zend_string *jit_option = zend_string_init("opcache.jit", sizeof("opcache.jit") - 1, 1);
+	zend_string *jit_option = ZSTR_INIT_LITERAL("opcache.jit", 1);
 
 	/* First run without JIT to determine whether we bail out. We should not run JITed code if
 	 * we bail out here, as the JIT code may loop infinitely. */

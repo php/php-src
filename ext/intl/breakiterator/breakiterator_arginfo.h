@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 14c5fdc760bfed136f4fc5fd398e76b873d8a919 */
+ * Stub hash: cbf308f532d4a28da8a9cde94b726faba9d8c7a4 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlBreakIterator_createCharacterInstance, 0, 0, IntlBreakIterator, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
@@ -58,7 +58,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlBreakIterator_previous arginfo_class_IntlBreakIterator_current
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlBreakIterator_setText, 0, 1, _IS_BOOL, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlBreakIterator_setText, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 

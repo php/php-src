@@ -75,7 +75,9 @@ int fpm_stdio_init_final(void)
 
 int fpm_stdio_save_original_stderr(void)
 {
-	/* php-fpm loses STDERR fd after call of the fpm_stdio_init_final(). Check #8555. */
+	/* STDERR fd gets lost after calling fpm_stdio_init_final() (check GH-8555) so it can be saved.
+	 * It should be used only when PHP-FPM is not daemonized otherwise it might break some
+	 * applications (e.g. GH-9754). */
 	zlog(ZLOG_DEBUG, "saving original STDERR fd: dup()");
 	fd_stderr_original = dup(STDERR_FILENO);
 	if (0 > fd_stderr_original) {
@@ -88,7 +90,7 @@ int fpm_stdio_save_original_stderr(void)
 
 int fpm_stdio_restore_original_stderr(int close_after_restore)
 {
-	/* php-fpm loses STDERR fd after call of the fpm_stdio_init_final(). Check #8555. */
+	/* Restore original STDERR fd if it was previously saved. */
 	if (-1 != fd_stderr_original) {
 		zlog(ZLOG_DEBUG, "restoring original STDERR fd: dup2()");
 		if (0 > dup2(fd_stderr_original, STDERR_FILENO)) {
@@ -99,9 +101,6 @@ int fpm_stdio_restore_original_stderr(int close_after_restore)
 				close(fd_stderr_original);
 			}
 		}
-	} else {
-		zlog(ZLOG_DEBUG, "original STDERR fd is not restored, maybe function is called from a child: dup2()");
-		return -1;
 	}
 
 	return 0;
@@ -169,9 +168,8 @@ int fpm_stdio_flush_child(void)
 
 static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
 {
-	static const int max_buf_size = 1024;
 	int fd = ev->fd;
-	char buf[max_buf_size];
+	char buf[1024];
 	struct fpm_child_s *child;
 	int is_stdout;
 	struct fpm_event_s *event;
@@ -182,7 +180,7 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 	if (!arg) {
 		return;
 	}
-	child = (struct fpm_child_s *)arg;
+	child = (struct fpm_child_s *) arg;
 
 	is_stdout = (fd == child->fd_stdout);
 	if (is_stdout) {
@@ -217,7 +215,7 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 
 	while (1) {
 stdio_read:
-		in_buf = read(fd, buf, max_buf_size - 1);
+		in_buf = read(fd, buf, sizeof(buf) - 1);
 		if (in_buf <= 0) { /* no data */
 			if (in_buf == 0 || !PHP_IS_TRANSIENT_ERROR(errno)) {
 				/* pipe is closed or error */
@@ -275,6 +273,7 @@ stdio_read:
 
 		fpm_event_del(event);
 
+		child->postponed_free = true;
 		if (is_stdout) {
 			close(child->fd_stdout);
 			child->fd_stdout = -1;

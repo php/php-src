@@ -69,7 +69,7 @@ function check_params($r)
 
 check_params(new ReflectionFunction('test'));
 
-check_params(new ReflectionMethod('test::method'));
+check_params(ReflectionMethod::createFromMethodName('test::method'));
 
 ?>
 --EXPECTF--

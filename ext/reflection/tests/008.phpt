@@ -11,6 +11,12 @@ foreach ($a as $val) {
     } catch (Exception $e) {
         var_dump($e->getMessage());
     }
+
+    try {
+        ReflectionMethod::createFromMethodName($val);
+    } catch (Exception $e) {
+        var_dump($e->getMessage());
+    }
 }
 
 $a = array("", 1, "");
@@ -28,10 +34,16 @@ echo "Done\n";
 ?>
 --EXPECT--
 string(90) "ReflectionMethod::__construct(): Argument #1 ($objectOrMethod) must be a valid method name"
+string(91) "ReflectionMethod::createFromMethodName(): Argument #1 ($method) must be a valid method name"
 string(90) "ReflectionMethod::__construct(): Argument #1 ($objectOrMethod) must be a valid method name"
+string(91) "ReflectionMethod::createFromMethodName(): Argument #1 ($method) must be a valid method name"
+string(23) "Class "" does not exist"
 string(23) "Class "" does not exist"
 string(24) "Class "a" does not exist"
+string(24) "Class "a" does not exist"
 string(23) "Class "" does not exist"
+string(23) "Class "" does not exist"
+string(24) "Class "a" does not exist"
 string(24) "Class "a" does not exist"
 string(23) "Class "" does not exist"
 string(24) "Class "1" does not exist"

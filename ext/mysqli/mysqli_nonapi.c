@@ -620,8 +620,7 @@ PHP_FUNCTION(mysqli_query)
 			break;
 	}
 	if (!result) {
-		php_mysqli_throw_sql_exception((char *)mysql_sqlstate(mysql->mysql), mysql_errno(mysql->mysql),
-										"%s", mysql_error(mysql->mysql));
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
 
@@ -651,7 +650,7 @@ static int mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND ***out_ar
 		i++;
 		if (Z_TYPE_P(elem) != IS_OBJECT ||
 			!instanceof_function(Z_OBJCE_P(elem), mysqli_link_class_entry)) {
-			zend_argument_type_error(i, "must be an instance of mysqli, %s given", zend_zval_type_name(elem));
+			zend_argument_type_error(i, "must be an instance of mysqli, %s given", zend_zval_value_name(elem));
 			return FAILURE;
 		} else {
 			MY_MYSQL *mysql;
@@ -674,12 +673,11 @@ static int mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND ***out_ar
 /* }}} */
 
 /* {{{ mysqlnd_zval_array_from_mysqlnd_array */
-static int mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_array)
+static zend_result mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_array)
 {
 	MYSQLND **p = in_array;
 	zval dest_array;
 	zval *elem, *dest_elem;
-	int ret = 0;
 
 	array_init_size(&dest_array, zend_hash_num_elements(Z_ARRVAL_P(out_array)));
 
@@ -702,7 +700,6 @@ static int mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_a
 				if (dest_elem) {
 					zval_add_ref(dest_elem);
 				}
-				ret++;
 				p++;
 			}
 		}
@@ -712,16 +709,15 @@ static int mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_a
 	zval_ptr_dtor(out_array);
 	ZVAL_COPY_VALUE(out_array, &dest_array);
 
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ mysqlnd_dont_poll_zval_array_from_mysqlnd_array */
-static int mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *in_zval_array, zval *out_array)
+static void mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *in_zval_array, zval *out_array)
 {
 	MYSQLND **p = in_array;
 	zval proxy, *elem, *dest_elem;
-	int ret = 0;
 
 	array_init(&proxy);
 	if (in_array) {
@@ -734,7 +730,6 @@ static int mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, z
 				if (dest_elem) {
 					zval_add_ref(dest_elem);
 				}
-				ret++;
 				p++;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -743,8 +738,6 @@ static int mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, z
 	/* destroy old array and add new one */
 	zval_ptr_dtor(out_array);
 	ZVAL_COPY_VALUE(out_array, &proxy);
-
-	return 0;
 }
 /* }}} */
 
@@ -769,10 +762,9 @@ PHP_FUNCTION(mysqli_poll)
 		RETURN_THROWS();
 	}
 
-	// TODO Error promotion
 	if (!r_array && !e_array) {
-		php_error_docref(NULL, E_WARNING, "No stream arrays were passed");
-		RETURN_FALSE;
+		zend_value_error("No stream arrays were passed");
+		RETURN_THROWS();
 	}
 
 	if (r_array != NULL) {

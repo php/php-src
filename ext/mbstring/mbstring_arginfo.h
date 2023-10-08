@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0c9ac8888b8332557f7098cfb9d259757af8b3c6 */
+ * Stub hash: 141073d610f862b525406fb7f48ac58b6691080e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_language, 0, 0, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, language, IS_STRING, 1, "null")
@@ -198,6 +198,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_chr, 0, 1, MAY_BE_STRING|MAY_
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_str_pad, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pad_string, IS_STRING, 0, "\" \"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pad_type, IS_LONG, 0, "STR_PAD_RIGHT")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
 #if defined(HAVE_MBREGEX)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_regex_encoding, 0, 0, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
@@ -346,6 +354,7 @@ ZEND_FUNCTION(mb_check_encoding);
 ZEND_FUNCTION(mb_scrub);
 ZEND_FUNCTION(mb_ord);
 ZEND_FUNCTION(mb_chr);
+ZEND_FUNCTION(mb_str_pad);
 #if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_regex_encoding);
 #endif
@@ -440,6 +449,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mb_scrub, arginfo_mb_scrub)
 	ZEND_FE(mb_ord, arginfo_mb_ord)
 	ZEND_FE(mb_chr, arginfo_mb_chr)
+	ZEND_FE(mb_str_pad, arginfo_mb_str_pad)
 #if defined(HAVE_MBREGEX)
 	ZEND_FE(mb_regex_encoding, arginfo_mb_regex_encoding)
 #endif

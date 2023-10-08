@@ -4,10 +4,7 @@ mysqli_store_result()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-if (!$IS_MYSQLND) {
-    die("SKIP mysqlnd only test");
-}
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 mysqlnd.debug="d:t:O,{TMP}/mysqlnd.trace"
@@ -16,12 +13,7 @@ mysqlnd.mempool_default_size=1
 mysqlnd.fetch_data_copy=0
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    $tmp    = NULL;
-    $link   = NULL;
-
-    require('table.inc');
+    require 'table.inc';
 
     if (!$res = mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id"))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -200,7 +192,7 @@ END;')) {
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+	require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 array(2) {

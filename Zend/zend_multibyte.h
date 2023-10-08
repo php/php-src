@@ -66,12 +66,12 @@ ZEND_API const char *zend_multibyte_get_encoding_name(const zend_encoding *encod
 ZEND_API int zend_multibyte_check_lexer_compatibility(const zend_encoding *encoding);
 ZEND_API const zend_encoding *zend_multibyte_encoding_detector(const unsigned char *string, size_t length, const zend_encoding **list, size_t list_size);
 ZEND_API size_t zend_multibyte_encoding_converter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const zend_encoding *encoding_to, const zend_encoding *encoding_from);
-ZEND_API int zend_multibyte_parse_encoding_list(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, bool persistent);
+ZEND_API zend_result zend_multibyte_parse_encoding_list(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, bool persistent);
 
 ZEND_API const zend_encoding *zend_multibyte_get_internal_encoding(void);
 ZEND_API const zend_encoding *zend_multibyte_get_script_encoding(void);
 ZEND_API int zend_multibyte_set_script_encoding(const zend_encoding **encoding_list, size_t encoding_list_size);
-ZEND_API int zend_multibyte_set_internal_encoding(const zend_encoding *encoding);
+ZEND_API zend_result zend_multibyte_set_internal_encoding(const zend_encoding *encoding);
 ZEND_API zend_result zend_multibyte_set_script_encoding_by_string(const char *new_value, size_t new_value_length);
 
 END_EXTERN_C()

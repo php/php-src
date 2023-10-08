@@ -4,8 +4,6 @@ Test DOMDocument::loadHTMLFile when a not-well formed document is loaded
 Verifies the behavior if a not-well formed document is loaded
 --CREDITS--
 Antonio Diaz Ruiz <dejalatele@gmail.com>
---INI--
-assert.bail=true
 --EXTENSIONS--
 dom
 --FILE--

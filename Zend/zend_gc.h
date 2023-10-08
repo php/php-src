@@ -20,13 +20,27 @@
 #ifndef ZEND_GC_H
 #define ZEND_GC_H
 
+#include "zend_hrtime.h"
+
+#ifndef GC_BENCH
+# define GC_BENCH 0
+#endif
+
 BEGIN_EXTERN_C()
 
 typedef struct _zend_gc_status {
+	bool active;
+	bool gc_protected;
+	bool full;
 	uint32_t runs;
 	uint32_t collected;
 	uint32_t threshold;
+	uint32_t buf_size;
 	uint32_t num_roots;
+	zend_hrtime_t application_time;
+	zend_hrtime_t collector_time;
+	zend_hrtime_t dtor_time;
+	zend_hrtime_t free_time;
 } zend_gc_status;
 
 ZEND_API extern int (*gc_collect_cycles)(void);
@@ -41,6 +55,10 @@ ZEND_API bool gc_enabled(void);
 /* enable/disable possible root additions */
 ZEND_API bool gc_protect(bool protect);
 ZEND_API bool gc_protected(void);
+
+#if GC_BENCH
+void gc_bench_print(void);
+#endif
 
 /* The default implementation of the gc_collect_cycles callback. */
 ZEND_API int  zend_gc_collect_cycles(void);
@@ -81,6 +99,14 @@ static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 	}
 }
 
+static zend_always_inline void gc_check_possible_root_no_ref(zend_refcounted *ref)
+{
+	ZEND_ASSERT(GC_TYPE_INFO(ref) != GC_REFERENCE);
+	if (UNEXPECTED(GC_MAY_LEAK(ref))) {
+		gc_possible_root(ref);
+	}
+}
+
 /* These APIs can be used to simplify object get_gc implementations
  * over heterogeneous structures. See zend_generator_get_gc() for
  * a usage example. */
@@ -111,6 +137,15 @@ static zend_always_inline void zend_get_gc_buffer_add_obj(
 		zend_get_gc_buffer_grow(gc_buffer);
 	}
 	ZVAL_OBJ(gc_buffer->cur, obj);
+	gc_buffer->cur++;
+}
+
+static zend_always_inline void zend_get_gc_buffer_add_ptr(
+		zend_get_gc_buffer *gc_buffer, void *ptr) {
+	if (UNEXPECTED(gc_buffer->cur == gc_buffer->end)) {
+		zend_get_gc_buffer_grow(gc_buffer);
+	}
+	ZVAL_PTR(gc_buffer->cur, ptr);
 	gc_buffer->cur++;
 }
 

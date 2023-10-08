@@ -132,14 +132,10 @@ typedef struct _zend_persistent_script {
 	void          *mem;                    /* shared memory area used by script structures */
 	size_t         size;                   /* size of used shared memory */
 
-	/* All entries that shouldn't be counted in the ADLER32
-	 * checksum must be declared in this struct
-	 */
 	struct zend_persistent_script_dynamic_members {
 		time_t       last_used;
 		zend_ulong   hits;
 		unsigned int memory_consumption;
-		unsigned int checksum;
 		time_t       revalidate;
 	} dynamic_members;
 } zend_persistent_script;
@@ -149,7 +145,6 @@ typedef struct _zend_accel_directives {
 	zend_long           max_accelerated_files;
 	double         max_wasted_percentage;
 	char          *user_blacklist_filename;
-	zend_long           consistency_checks;
 	zend_long           force_restart_timeout;
 	bool      use_cwd;
 	bool      ignore_dups;
@@ -266,6 +261,7 @@ typedef struct _zend_accel_shared_globals {
 	LONGLONG   restart_in;
 #endif
 	bool       restart_in_progress;
+	bool       jit_counters_stopped;
 
 	/* Preloading */
 	zend_persistent_script *preload_script;
@@ -305,7 +301,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 extern zend_accel_globals accel_globals;
 #endif
 
-extern char *zps_api_failure_reason;
+extern const char *zps_api_failure_reason;
 
 BEGIN_EXTERN_C()
 
@@ -315,10 +311,10 @@ zend_result accel_post_deactivate(void);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);
 accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size);
-int  validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle);
-int  validate_timestamp_and_record_ex(zend_persistent_script *persistent_script, zend_file_handle *file_handle);
-int  zend_accel_invalidate(zend_string *filename, bool force);
-int  accelerator_shm_read_lock(void);
+zend_result validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle);
+zend_result validate_timestamp_and_record_ex(zend_persistent_script *persistent_script, zend_file_handle *file_handle);
+zend_result zend_accel_invalidate(zend_string *filename, bool force);
+zend_result accelerator_shm_read_lock(void);
 void accelerator_shm_read_unlock(void);
 
 zend_string *accel_make_persistent_key(zend_string *path);
@@ -337,14 +333,14 @@ END_EXTERN_C()
 #define SHM_PROTECT() \
 	do { \
 		if (ZCG(accel_directives).protect_memory) { \
-			zend_accel_shared_protect(1); \
+			zend_accel_shared_protect(true); \
 		} \
 	} while (0)
 
 #define SHM_UNPROTECT() \
 	do { \
 		if (ZCG(accel_directives).protect_memory) { \
-			zend_accel_shared_protect(0); \
+			zend_accel_shared_protect(false); \
 		} \
 	} while (0)
 

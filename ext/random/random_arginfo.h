@@ -1,11 +1,11 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6cc9022516ce23c2e95af30606db43e9fc28e38a */
+ * Stub hash: 35cb16abb3392bd257a43cc675cad4f5af5549c1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mt_srand, 0, 0, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, seed, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, seed, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "MT_RAND_MT19937")
 ZEND_END_ARG_INFO()
 
@@ -90,9 +90,22 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Random_Randomizer_nextInt arginfo_mt_getrandmax
 
+#define arginfo_class_Random_Randomizer_nextFloat arginfo_lcg_value
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_Randomizer_getFloat, 0, 2, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, min, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, max, IS_DOUBLE, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, boundary, Random\\IntervalBoundary, 0, "Random\\IntervalBoundary::ClosedOpen")
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_Random_Randomizer_getInt arginfo_random_int
 
 #define arginfo_class_Random_Randomizer_getBytes arginfo_random_bytes
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_Randomizer_getBytesFromString, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Random_Randomizer_shuffleArray, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
@@ -131,8 +144,11 @@ ZEND_METHOD(Random_Engine_Xoshiro256StarStar, jump);
 ZEND_METHOD(Random_Engine_Xoshiro256StarStar, jumpLong);
 ZEND_METHOD(Random_Randomizer, __construct);
 ZEND_METHOD(Random_Randomizer, nextInt);
+ZEND_METHOD(Random_Randomizer, nextFloat);
+ZEND_METHOD(Random_Randomizer, getFloat);
 ZEND_METHOD(Random_Randomizer, getInt);
 ZEND_METHOD(Random_Randomizer, getBytes);
+ZEND_METHOD(Random_Randomizer, getBytesFromString);
 ZEND_METHOD(Random_Randomizer, shuffleArray);
 ZEND_METHOD(Random_Randomizer, shuffleBytes);
 ZEND_METHOD(Random_Randomizer, pickArrayKeys);
@@ -207,13 +223,21 @@ static const zend_function_entry class_Random_CryptoSafeEngine_methods[] = {
 static const zend_function_entry class_Random_Randomizer_methods[] = {
 	ZEND_ME(Random_Randomizer, __construct, arginfo_class_Random_Randomizer___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, nextInt, arginfo_class_Random_Randomizer_nextInt, ZEND_ACC_PUBLIC)
+	ZEND_ME(Random_Randomizer, nextFloat, arginfo_class_Random_Randomizer_nextFloat, ZEND_ACC_PUBLIC)
+	ZEND_ME(Random_Randomizer, getFloat, arginfo_class_Random_Randomizer_getFloat, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, getInt, arginfo_class_Random_Randomizer_getInt, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, getBytes, arginfo_class_Random_Randomizer_getBytes, ZEND_ACC_PUBLIC)
+	ZEND_ME(Random_Randomizer, getBytesFromString, arginfo_class_Random_Randomizer_getBytesFromString, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, shuffleArray, arginfo_class_Random_Randomizer_shuffleArray, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, shuffleBytes, arginfo_class_Random_Randomizer_shuffleBytes, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, pickArrayKeys, arginfo_class_Random_Randomizer_pickArrayKeys, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, __serialize, arginfo_class_Random_Randomizer___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, __unserialize, arginfo_class_Random_Randomizer___unserialize, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_Random_IntervalBoundary_methods[] = {
 	ZEND_FE_END
 };
 
@@ -235,7 +259,7 @@ static const zend_function_entry class_Random_RandomException_methods[] = {
 static void register_random_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("MT_RAND_MT19937", MT_RAND_MT19937, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MT_RAND_PHP", MT_RAND_PHP, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MT_RAND_PHP", MT_RAND_PHP, CONST_PERSISTENT | CONST_DEPRECATED);
 }
 
 static zend_class_entry *register_class_Random_Engine_Mt19937(zend_class_entry *class_entry_Random_Engine)
@@ -315,12 +339,27 @@ static zend_class_entry *register_class_Random_Randomizer(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
-	zend_string *property_engine_class_Random_Engine = zend_string_init("Random\\Engine", sizeof("Random\\Engine")-1, 1);
 	zval property_engine_default_value;
 	ZVAL_UNDEF(&property_engine_default_value);
 	zend_string *property_engine_name = zend_string_init("engine", sizeof("engine") - 1, 1);
+	zend_string *property_engine_class_Random_Engine = zend_string_init("Random\\Engine", sizeof("Random\\Engine")-1, 1);
 	zend_declare_typed_property(class_entry, property_engine_name, &property_engine_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_engine_class_Random_Engine, 0, 0));
 	zend_string_release(property_engine_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Random_IntervalBoundary(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("Random\\IntervalBoundary", IS_UNDEF, class_Random_IntervalBoundary_methods);
+
+	zend_enum_add_case_cstr(class_entry, "ClosedOpen", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "ClosedClosed", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "OpenClosed", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "OpenOpen", NULL);
 
 	return class_entry;
 }

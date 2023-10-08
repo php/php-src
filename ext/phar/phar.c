@@ -1622,11 +1622,12 @@ static inline char *phar_strnstr(const char *buf, int buf_len, const char *searc
  */
 static int phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, int is_data, char **error) /* {{{ */
 {
-	const char token[] = "__HALT_COMPILER();";
-	const char zip_magic[] = "PK\x03\x04";
-	const char gz_magic[] = "\x1f\x8b\x08";
-	const char bz_magic[] = "BZh";
+	static const char token[] = "__HALT_COMPILER();";
+	static const char zip_magic[] = "PK\x03\x04";
+	static const char gz_magic[] = "\x1f\x8b\x08";
+	static const char bz_magic[] = "BZh";
 	char *pos, test = '\0';
+	int recursion_count = 3; // arbitrary limit to avoid too deep or even infinite recursion
 	const int window_size = 1024;
 	char buffer[1024 + sizeof(token)]; /* a 1024 byte window + the size of the halt_compiler token (moving window) */
 	const zend_long readsize = sizeof(buffer) - sizeof(token);
@@ -1654,7 +1655,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char
 			MAPPHAR_ALLOC_FAIL("internal corruption of phar \"%s\" (truncated entry)")
 		}
 
-		if (!test) {
+		if (!test && recursion_count) {
 			test = '\1';
 			pos = buffer+tokenlen;
 			if (!memcmp(pos, gz_magic, 3)) {
@@ -1716,6 +1717,10 @@ static int phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char
 
 				/* now, start over */
 				test = '\0';
+				if (!--recursion_count) {
+					MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\"");
+					break;
+				}
 				continue;
 			} else if (!memcmp(pos, bz_magic, 3)) {
 				php_stream_filter *filter;
@@ -1754,6 +1759,10 @@ static int phar_open_from_fp(php_stream* fp, char *fname, size_t fname_len, char
 
 				/* now, start over */
 				test = '\0';
+				if (!--recursion_count) {
+					MAPPHAR_ALLOC_FAIL("unable to decompress bzipped phar archive \"%s\"");
+					break;
+				}
 				continue;
 			}
 
@@ -1956,7 +1965,7 @@ int phar_detect_phar_fname_ext(const char *filename, size_t filename_len, const 
 	*ext_str = NULL;
 	*ext_len = 0;
 
-	if (!filename_len || filename_len == 1) {
+	if (filename_len <= 1) {
 		return FAILURE;
 	}
 
@@ -2309,28 +2318,21 @@ int phar_split_fname(const char *filename, size_t filename_len, char **arch, siz
  */
 int phar_open_executed_filename(char *alias, size_t alias_len, char **error) /* {{{ */
 {
-	char *fname;
-	php_stream *fp;
-	size_t fname_len;
-	zend_string *actual = NULL;
-	int ret;
-
 	if (error) {
 		*error = NULL;
 	}
 
-	fname = (char*)zend_get_executed_filename();
-	fname_len = strlen(fname);
+	zend_string *fname = zend_get_executed_filename_ex();
 
-	if (phar_open_parsed_phar(fname, fname_len, alias, alias_len, 0, REPORT_ERRORS, NULL, 0) == SUCCESS) {
-		return SUCCESS;
-	}
-
-	if (!strcmp(fname, "[no active file]")) {
+	if (!fname) {
 		if (error) {
 			spprintf(error, 0, "cannot initialize a phar outside of PHP execution");
 		}
 		return FAILURE;
+	}
+
+	if (phar_open_parsed_phar(ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, 0, REPORT_ERRORS, NULL, 0) == SUCCESS) {
+		return SUCCESS;
 	}
 
 	if (0 == zend_get_constant_str("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1)) {
@@ -2340,15 +2342,17 @@ int phar_open_executed_filename(char *alias, size_t alias_len, char **error) /* 
 		return FAILURE;
 	}
 
-	if (php_check_open_basedir(fname)) {
+	if (php_check_open_basedir(ZSTR_VAL(fname))) {
 		return FAILURE;
 	}
 
-	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, &actual);
+	zend_string *actual = NULL;
+	php_stream *fp;
+	fp = php_stream_open_wrapper(ZSTR_VAL(fname), "rb", IGNORE_URL|STREAM_MUST_SEEK|REPORT_ERRORS, &actual);
 
 	if (!fp) {
 		if (error) {
-			spprintf(error, 0, "unable to open phar for reading \"%s\"", fname);
+			spprintf(error, 0, "unable to open phar for reading \"%s\"", ZSTR_VAL(fname));
 		}
 		if (actual) {
 			zend_string_release_ex(actual, 0);
@@ -2357,11 +2361,10 @@ int phar_open_executed_filename(char *alias, size_t alias_len, char **error) /* 
 	}
 
 	if (actual) {
-		fname = ZSTR_VAL(actual);
-		fname_len = ZSTR_LEN(actual);
+		fname = actual;
 	}
 
-	ret = phar_open_from_fp(fp, fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, 0, error);
+	int ret = phar_open_from_fp(fp, ZSTR_VAL(fname), ZSTR_LEN(fname), alias, alias_len, REPORT_ERRORS, NULL, 0, error);
 
 	if (actual) {
 		zend_string_release_ex(actual, 0);
@@ -3279,7 +3282,7 @@ zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type
 
 static zend_string *phar_resolve_path(zend_string *filename)
 {
-	zend_string *ret = phar_find_in_include_path(ZSTR_VAL(filename), ZSTR_LEN(filename), NULL);
+	zend_string *ret = phar_find_in_include_path(filename, NULL);
 	if (!ret) {
 		ret = phar_save_resolve_path(filename);
 	}

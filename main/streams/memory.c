@@ -49,11 +49,17 @@ static ssize_t php_stream_memory_write(php_stream *stream, const char *buf, size
 
 	if (ms->mode & TEMP_STREAM_READONLY) {
 		return (ssize_t) -1;
-	} else if (ms->mode & TEMP_STREAM_APPEND) {
-		ms->fpos = ZSTR_LEN(ms->data);
 	}
-	if (ms->fpos + count > ZSTR_LEN(ms->data)) {
+	size_t data_len = ZSTR_LEN(ms->data);
+	if (ms->mode & TEMP_STREAM_APPEND) {
+		ms->fpos = data_len;
+	}
+	if (ms->fpos + count > data_len) {
 		ms->data = zend_string_realloc(ms->data, ms->fpos + count, 0);
+		if (ms->fpos > data_len) {
+			/* zero the bytes added due to seek past end position */
+			memset(ZSTR_VAL(ms->data) + data_len, 0, ms->fpos - data_len);
+		}
 	} else {
 		ms->data = zend_string_separate(ms->data, 0);
 	}
@@ -73,7 +79,7 @@ static ssize_t php_stream_memory_read(php_stream *stream, char *buf, size_t coun
 	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
 	assert(ms != NULL);
 
-	if (ms->fpos == ZSTR_LEN(ms->data)) {
+	if (ms->fpos >= ZSTR_LEN(ms->data)) {
 		stream->eof = 1;
 		count = 0;
 	} else {
@@ -132,20 +138,14 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 					return 0;
 				}
 			} else {
-				if (ms->fpos + (size_t)(offset) > ZSTR_LEN(ms->data)) {
-					ms->fpos = ZSTR_LEN(ms->data);
-					*newoffs = -1;
-					return -1;
-				} else {
-					ms->fpos = ms->fpos + offset;
-					*newoffs = ms->fpos;
-					stream->eof = 0;
-					return 0;
-				}
+				stream->eof = 0;
+				ms->fpos = ms->fpos + offset;
+				*newoffs = ms->fpos;
+				return 0;
 			}
 		case SEEK_SET:
-			if (ZSTR_LEN(ms->data) < (size_t)(offset)) {
-				ms->fpos = ZSTR_LEN(ms->data);
+			if (offset < 0) {
+				ms->fpos = 0;
 				*newoffs = -1;
 				return -1;
 			} else {
@@ -156,9 +156,10 @@ static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whe
 			}
 		case SEEK_END:
 			if (offset > 0) {
-				ms->fpos = ZSTR_LEN(ms->data);
-				*newoffs = -1;
-				return -1;
+				ms->fpos = ZSTR_LEN(ms->data) + offset;
+				*newoffs = ms->fpos;
+				stream->eof = 0;
+				return 0;
 			} else if (ZSTR_LEN(ms->data) < (size_t)(-offset)) {
 				ms->fpos = 0;
 				*newoffs = -1;
@@ -349,7 +350,7 @@ static ssize_t php_stream_temp_write(php_stream *stream, const char *buf, size_t
 	}
 	if (php_stream_is(ts->innerstream, PHP_STREAM_IS_MEMORY)) {
 		zend_off_t pos = php_stream_tell(ts->innerstream);
-		
+
 		if (pos + count >= ts->smax) {
 			zend_string *membuf = php_stream_memory_get_buffer(ts->innerstream);
 			php_stream *file = php_stream_fopen_temporary_file(ts->tmpdir, "php", NULL);
@@ -614,6 +615,8 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 	int base64 = 0;
 	zend_string *base64_comma = NULL;
 
+	ZEND_ASSERT(mode);
+
 	ZVAL_NULL(&meta);
 	if (memcmp(path, "data:", 5)) {
 		return NULL;
@@ -729,7 +732,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 		stream->ops = &php_stream_rfc2397_ops;
 		ts = (php_stream_temp_data*)stream->abstract;
 		assert(ts != NULL);
-		ts->mode = mode && mode[0] == 'r' && mode[1] != '+' ? TEMP_STREAM_READONLY : 0;
+		ts->mode = mode[0] == 'r' && mode[1] != '+' ? TEMP_STREAM_READONLY : 0;
 		ZVAL_COPY_VALUE(&ts->meta, &meta);
 	}
 	if (base64_comma) {

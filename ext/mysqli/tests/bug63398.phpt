@@ -4,10 +4,7 @@ Bug #63398 (Segfault when polling closed link)
 mysqli
 --SKIPIF--
 <?php
-require_once "skipifconnectfailure.inc";
-if (!$IS_MYSQLND) {
-    die("skip mysqlnd only test");
-}
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php

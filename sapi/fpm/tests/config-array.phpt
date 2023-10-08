@@ -40,7 +40,6 @@ $tester->expectLogConfigOptions([
 ?>
 Done
 --EXPECT--
-
 Done
 --CLEAN--
 <?php

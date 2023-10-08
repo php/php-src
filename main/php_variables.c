@@ -137,6 +137,20 @@ PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *trac
 	}
 	var_len = p - var;
 
+	/* Discard variable if mangling made it start with __Host-, where pre-mangling it did not start with __Host- */
+	if (strncmp(var, "__Host-", sizeof("__Host-")-1) == 0 && strncmp(var_name, "__Host-", sizeof("__Host-")-1) != 0) {
+		zval_ptr_dtor_nogc(val);
+		free_alloca(var_orig, use_heap);
+		return;
+	}
+
+	/* Discard variable if mangling made it start with __Secure-, where pre-mangling it did not start with __Secure- */
+	if (strncmp(var, "__Secure-", sizeof("__Secure-")-1) == 0 && strncmp(var_name, "__Secure-", sizeof("__Secure-")-1) != 0) {
+		zval_ptr_dtor_nogc(val);
+		free_alloca(var_orig, use_heap);
+		return;
+	}
+
 	if (var_len==0) { /* empty variable name, or variable name with a space in it */
 		zval_ptr_dtor_nogc(val);
 		free_alloca(var_orig, use_heap);
@@ -193,7 +207,7 @@ PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *trac
 				zval_ptr_dtor_nogc(val);
 
 				/* do not output the error message to the screen,
-				 this helps us to to avoid "information disclosure" */
+				 this helps us to avoid "information disclosure" */
 				if (!PG(display_errors)) {
 					php_error_docref(NULL, E_WARNING, "Input variable nesting level exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_nesting_level in php.ini.", PG(max_input_nesting_level));
 				}

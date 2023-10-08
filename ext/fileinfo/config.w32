@@ -10,6 +10,6 @@ if (PHP_FILEINFO != 'no') {
 			readcdf.c softmagic.c der.c \
 			strcasestr.c buffer.c is_csv.c";
 
-	EXTENSION('fileinfo', 'fileinfo.c', true, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
+	EXTENSION('fileinfo', 'fileinfo.c php_libmagic.c', true, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
 	ADD_SOURCES(configure_module_dirname + '\\libmagic', LIBMAGIC_SOURCES, "fileinfo");
 }

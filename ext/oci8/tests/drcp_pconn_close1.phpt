@@ -2,6 +2,10 @@
 DRCP: oci_pconnect() with oci_close() and oci8.old_oci_close_semantics ON
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --INI--
 oci8.old_oci_close_semantics=1
 oci8.connection_class=test

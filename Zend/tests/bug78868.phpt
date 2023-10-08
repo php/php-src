@@ -25,7 +25,7 @@ spl_autoload_register('main_autoload');
 
 $classA = new ReflectionClass("A");
 $props = $classA->getProperties();
-$props[0]->setValue(2); //causes constant resolving, which runs autoload, all with EG(fake_scope) == "A"
+$props[0]->setValue(null, 2); //causes constant resolving, which runs autoload, all with EG(fake_scope) == "A"
 
 echo "OK\n";
 ?>

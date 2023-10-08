@@ -34,13 +34,17 @@ fclose($fp);
 
 echo "== Index, changed\n";
 $fp = $zip->getStreamIndex(1);
-var_dump($zip->status);
+if (version_compare(ZipArchive::LIBZIP_VERSION, "1.10.0", "<")) {
+	/* not supported in old version */
+	var_dump($zip->status === ZipArchive::ER_CHANGED);
+} else {
+	var_dump($zip->status === 0 && stream_get_contents($fp) === "baz");
+}
 $zip->clearError();
 
 echo "== Index, unchanged\n";
 $fp = $zip->getStreamIndex(1, ZipArchive::FL_UNCHANGED);
-var_dump($zip->status);
-var_dump(stream_get_contents($fp));
+var_dump($zip->status === 0 && stream_get_contents($fp) === "bar");
 $zip->clearError();
 fclose($fp);
 
@@ -60,8 +64,7 @@ string(3) "foo"
 int(0)
 string(3) "foo"
 == Index, changed
-int(15)
+bool(true)
 == Index, unchanged
-int(0)
-string(3) "bar"
+bool(true)
 == Done

@@ -289,7 +289,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 	mysqlnd_set_persistent_string(&conn->unix_socket, NULL, 0, pers);
 	DBG_INF_FMT("scheme=%s", conn->scheme.s);
 	mysqlnd_set_persistent_string(&conn->scheme, NULL, 0, pers);
-	
+
 	if (conn->server_version) {
 		mnd_pefree(conn->server_version, pers);
 		conn->server_version = NULL;
@@ -725,17 +725,18 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		DBG_RETURN(PASS);
 	}
 err:
+	DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", conn->error_info->error_no, conn->error_info->error, transport.s ? transport.s : conn->scheme.s);
+	if (!conn->error_info->error_no) {
+		/* There was an unknown error if the connection failed but we have no error number */
+		char * msg;
+		mnd_sprintf(&msg, 0, "Unknown error while trying to connect via %s", transport.s ? transport.s : conn->scheme.s);
+		SET_CLIENT_ERROR(conn->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, msg);
+		mnd_sprintf_free(msg);
+	}
+
 	if (transport.s) {
 		mnd_sprintf_free(transport.s);
 		transport.s = NULL;
-	}
-
-	DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", conn->error_info->error_no, conn->error_info->error, conn->scheme.s);
-	if (!conn->error_info->error_no) {
-		char * msg;
-		mnd_sprintf(&msg, 0, "%s (trying to connect via %s)",conn->error_info->error, conn->scheme.s);
-		SET_CLIENT_ERROR(conn->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, msg);
-		mnd_sprintf_free(msg);
 	}
 
 	conn->m->free_contents(conn);
@@ -1041,17 +1042,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, refresh)(MYSQLND_CONN_DATA * const conn, uint8
 	DBG_ENTER("mysqlnd_conn_data::refresh");
 	DBG_INF_FMT("conn=%" PRIu64 " options=%u", conn->thread_id, options);
 	DBG_RETURN(conn->command->refresh(conn, options));
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_conn_data::shutdown */
-static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, shutdown)(MYSQLND_CONN_DATA * const conn, uint8_t level)
-{
-	DBG_ENTER("mysqlnd_conn_data::shutdown");
-	DBG_INF_FMT("conn=%" PRIu64 " level=%u", conn->thread_id, level);
-	DBG_RETURN(conn->command->shutdown(conn, level));
 }
 /* }}} */
 
@@ -1954,7 +1944,6 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 
 	MYSQLND_METHOD(mysqlnd_conn_data, stmt_init),
 
-	MYSQLND_METHOD(mysqlnd_conn_data, shutdown),
 	MYSQLND_METHOD(mysqlnd_conn_data, refresh),
 
 	MYSQLND_METHOD(mysqlnd_conn_data, ping),
@@ -2256,7 +2245,9 @@ mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long se
 		DBG_RETURN(FAIL);
 	}
 
-	PHP_SAFE_MAX_FD(max_fd, max_set_count);
+	if (!PHP_SAFE_MAX_FD(max_fd, max_set_count)) {
+		DBG_RETURN(FAIL);
+	}
 
 	/* Solaris + BSD do not like microsecond values which are >= 1 sec */
 	if (usec > 999999) {

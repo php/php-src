@@ -14,5 +14,5 @@ new class(true[""]) {
 ?>
 DONE
 --EXPECTF--
-Warning: Trying to access array offset on value of type bool in %sfetch_dim_func_arg_002.php on line 2
+Warning: Trying to access array offset on true in %sfetch_dim_func_arg_002.php on line 2
 DONE

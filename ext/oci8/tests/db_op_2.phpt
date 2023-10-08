@@ -4,8 +4,9 @@ oci_set_db_operation: test DBOP for end-to-end tracing
 oci8
 --SKIPIF--
 <?php
+require_once 'skipifconnectfailure.inc';
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(__DIR__.'/skipif.inc');
+require __DIR__.'/skipif.inc';
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) {
     die("skip needs to be run as a DBA user");
 }
@@ -25,7 +26,7 @@ if (!function_exists('oci_set_db_operation'))
 --FILE--
 <?php
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 function dq($c, $q)
 {

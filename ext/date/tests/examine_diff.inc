@@ -68,7 +68,6 @@ function examine_diff($end_date, $start_date, $expect_spec, $expect_days, $absol
         $start->add($expect_interval);
         $result_end_date = $start->format('Y-m-d H:i:s T');
         echo "ADD: $start_date + $expect_spec = **$result_end_date**\n";
-        // echo "ADD: $start_date + $expect_spec = **$end_date**\n";
     }
     if (PHPT_DATETIME_SHOW == PHPT_DATETIME_SHOW_SUB) {
         $end->sub($expect_interval);

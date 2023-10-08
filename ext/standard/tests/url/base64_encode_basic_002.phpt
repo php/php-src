@@ -13,7 +13,11 @@ $values = array(
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!%^&*(){}[]",
     "\n\t Line with control characters\r\n",
     "\xC1\xC2\xC3\xC4\xC5\xC6",
-    "\75\76\77\78\79\80"
+    "\75\76\77\78\79\80",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!\75\76\77\78\79\80",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!",
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%!\75\76\77\78\79\80"
 );
 
 echo "\n--- Testing base64_encode() with binary string input ---\n";
@@ -48,4 +52,12 @@ TEST PASSED
 -- Iteration 4 --
 TEST PASSED
 -- Iteration 5 --
+TEST PASSED
+-- Iteration 6 --
+TEST PASSED
+-- Iteration 7 --
+TEST PASSED
+-- Iteration 8 --
+TEST PASSED
+-- Iteration 9 --
 TEST PASSED

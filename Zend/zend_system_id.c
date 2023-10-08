@@ -63,7 +63,7 @@ void zend_startup_system_id(void)
 void zend_finalize_system_id(void)
 {
 	unsigned char digest[16];
-	zend_uchar hooks = 0;
+	uint8_t hooks = 0;
 
 	if (zend_ast_process) {
 		hooks |= ZEND_HOOK_AST_PROCESS;
@@ -80,7 +80,7 @@ void zend_finalize_system_id(void)
 	PHP_MD5Update(&context, &hooks, sizeof hooks);
 
 	for (int16_t i = 0; i < 256; i++) {
-		if (zend_get_user_opcode_handler((zend_uchar) i) != NULL) {
+		if (zend_get_user_opcode_handler((uint8_t) i) != NULL) {
 			PHP_MD5Update(&context, &i, sizeof i);
 		}
 	}

@@ -363,7 +363,7 @@ static zend_string* oci_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquote
 	zend_string *quoted_str;
 
 	if (ZSTR_LEN(unquoted) == 0) {
-		return zend_string_init("''", 2, 0);
+		return ZSTR_INIT_LITERAL("''", 0);
 	}
 
 	/* count single quotes */

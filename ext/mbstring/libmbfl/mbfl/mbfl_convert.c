@@ -36,30 +36,8 @@
 #include "mbfilter_8bit.h"
 #include "mbfilter_wchar.h"
 
-#include "filters/mbfilter_euc_cn.h"
-#include "filters/mbfilter_hz.h"
-#include "filters/mbfilter_euc_tw.h"
-#include "filters/mbfilter_big5.h"
-#include "filters/mbfilter_uhc.h"
-#include "filters/mbfilter_euc_kr.h"
-#include "filters/mbfilter_iso2022_kr.h"
-#include "filters/mbfilter_sjis.h"
-#include "filters/mbfilter_sjis_2004.h"
-#include "filters/mbfilter_sjis_mobile.h"
-#include "filters/mbfilter_sjis_mac.h"
-#include "filters/mbfilter_cp51932.h"
-#include "filters/mbfilter_jis.h"
-#include "filters/mbfilter_iso2022_jp_ms.h"
-#include "filters/mbfilter_iso2022jp_2004.h"
-#include "filters/mbfilter_iso2022jp_mobile.h"
-#include "filters/mbfilter_euc_jp.h"
-#include "filters/mbfilter_euc_jp_2004.h"
-#include "filters/mbfilter_euc_jp_win.h"
-#include "filters/mbfilter_gb18030.h"
-#include "filters/mbfilter_cp932.h"
-#include "filters/mbfilter_cp936.h"
-#include "filters/mbfilter_cp5022x.h"
 #include "filters/mbfilter_base64.h"
+#include "filters/mbfilter_cjk.h"
 #include "filters/mbfilter_qprint.h"
 #include "filters/mbfilter_uuencode.h"
 #include "filters/mbfilter_7bit.h"
@@ -243,7 +221,7 @@ int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 	unsigned int w = c;
 	int ret = 0;
 	int mode_backup = filter->illegal_mode;
-	int substchar_backup = filter->illegal_substchar;
+	uint32_t substchar_backup = filter->illegal_substchar;
 
 	/* The used substitution character may not be supported by the target character encoding.
 	 * If that happens, first try to use "?" instead and if that also fails, silently drop the
@@ -365,7 +343,7 @@ zend_string* mb_fast_convert(unsigned char *in, size_t in_len, const mbfl_encodi
 	}
 
 	*num_errors = buf.errors;
-	return mb_convert_buf_result(&buf);
+	return mb_convert_buf_result(&buf, to);
 }
 
 static uint32_t* convert_cp_to_hex(uint32_t cp, uint32_t *out)
@@ -394,9 +372,15 @@ static size_t mb_illegal_marker(uint32_t bad_cp, uint32_t *out, unsigned int err
 {
 	uint32_t *start = out;
 
-	if (bad_cp == MBFL_BAD_INPUT && err_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-		*out++ = replacement_char;
+	if (bad_cp == MBFL_BAD_INPUT) {
+		/* Input string contained a byte sequence which was invalid in the 'from' encoding
+		 * Unless the error handling mode is set to NONE, insert the replacement character */
+		if (err_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
+			*out++ = replacement_char;
+		}
 	} else {
+		/* Input string contained a byte sequence which was valid in the 'from' encoding,
+		 * but decoded to a Unicode codepoint which cannot be represented in the 'to' encoding */
 		switch (err_mode) {
 		case MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR:
 			*out++ = replacement_char;
@@ -426,6 +410,17 @@ void mb_illegal_output(uint32_t bad_cp, mb_from_wchar_fn fn, mb_convert_buf* buf
 	uint32_t temp[12];
 	uint32_t repl_char = buf->replacement_char;
 	unsigned int err_mode = buf->error_mode;
+
+	if (err_mode == MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8) {
+		/* This mode is for internal use only, when converting a string to
+		 * UTF-8 before searching it; it uses a byte which is illegal in
+		 * UTF-8 as an error marker. This ensures that error markers will
+		 * never 'accidentally' match valid text, as could happen when a
+		 * character like '?' is used as an error marker. */
+		MB_CONVERT_BUF_ENSURE(buf, buf->out, buf->limit, 1);
+		buf->out = mb_convert_buf_add(buf->out, 0xFF);
+		return;
+	}
 
 	size_t len = mb_illegal_marker(bad_cp, temp, err_mode, repl_char);
 

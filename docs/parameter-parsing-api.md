@@ -67,7 +67,7 @@ on input and is used to verify the PHP parameter is an instance of that class.
 ```txt
 a  - array (zval*)
 A  - array or object (zval*)
-b  - boolean (zend_bool)
+b  - boolean (bool)
 C  - class (zend_class_entry*)
 d  - double (double)
 f  - function or array containing php method call info (returned as
@@ -97,9 +97,9 @@ The following characters also have a meaning in the specifier string:
 * `!` - the parameter it follows can be of specified type or NULL. If NULL is
   passed, and the output for such type is a pointer, then the output pointer is
   set to a native NULL pointer. For 'b', 'l' and 'd', an extra argument of type
-  zend_bool* must be passed after the corresponding bool*, zend_long* or
+  bool* must be passed after the corresponding bool*, zend_long* or
   double* arguments, respectively. A non-zero value will be written to the
-  zend_bool if a PHP NULL is passed.
+  bool if a PHP NULL is passed.
   For `f` use the ``ZEND_FCI_INITIALIZED(fci)`` macro to check if a callable
   has been provided and ``!ZEND_FCI_INITIALIZED(fci)`` to check if a PHP NULL
   is passed.

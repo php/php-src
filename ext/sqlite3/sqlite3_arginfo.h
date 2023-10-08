@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bdee592c8babbc221080c6ea2d73f94b2b79274a */
+ * Stub hash: feabdc10872ef97add839505b6893bad0bb82879 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -211,6 +211,11 @@ ZEND_METHOD(SQLite3Result, reset);
 ZEND_METHOD(SQLite3Result, finalize);
 
 
+static const zend_function_entry class_SQLite3Exception_methods[] = {
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class_SQLite3_methods[] = {
 	ZEND_MALIAS(SQLite3, __construct, open, arginfo_class_SQLite3___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3, open, arginfo_class_SQLite3_open, ZEND_ACC_PUBLIC)
@@ -286,6 +291,17 @@ static void register_sqlite3_symbols(int module_number)
 #if defined(SQLITE_DETERMINISTIC)
 	REGISTER_LONG_CONSTANT("SQLITE3_DETERMINISTIC", SQLITE_DETERMINISTIC, CONST_PERSISTENT);
 #endif
+}
+
+static zend_class_entry *register_class_SQLite3Exception(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "SQLite3Exception", class_SQLite3Exception_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
 }
 
 static zend_class_entry *register_class_SQLite3(void)

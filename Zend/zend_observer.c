@@ -158,9 +158,8 @@ static bool zend_observer_remove_handler(void **first_handler, void *old_handler
 			} else {
 				if (cur_handler != last_handler) {
 					memmove(cur_handler, cur_handler + 1, sizeof(cur_handler) * (last_handler - cur_handler));
-				} else {
-					*last_handler = NULL;
 				}
+				*last_handler = NULL;
 			}
 			return true;
 		}
@@ -196,7 +195,7 @@ ZEND_API void zend_observer_add_end_handler(zend_function *function, zend_observ
 	if (*end_handler != ZEND_OBSERVER_NOT_OBSERVED) {
 		// there's no space for new handlers, then it's forbidden to call this function
 		ZEND_ASSERT(end_handler[registered_observers - 1] == NULL);
-		memmove(end_handler + 1, end_handler, registered_observers - 1);
+		memmove(end_handler + 1, end_handler, sizeof(end_handler) * (registered_observers - 1));
 	}
 	*end_handler = end;
 }
@@ -208,6 +207,7 @@ ZEND_API bool zend_observer_remove_end_handler(zend_function *function, zend_obs
 
 static inline zend_execute_data **prev_observed_frame(zend_execute_data *execute_data) {
 	zend_function *func = EX(func);
+	ZEND_ASSERT(func);
 	return (zend_execute_data **)&Z_PTR_P(EX_VAR_NUM((ZEND_USER_CODE(func->type) ? func->op_array.last_var : ZEND_CALL_NUM_ARGS(execute_data)) + func->common.T - 1));
 }
 
@@ -260,6 +260,7 @@ ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin(zend_execute_data *execute
 
 static inline void call_end_observers(zend_execute_data *execute_data, zval *return_value) {
 	zend_function *func = execute_data->func;
+	ZEND_ASSERT(func);
 
 	zend_observer_fcall_end_handler *handler = (zend_observer_fcall_end_handler *)&ZEND_OBSERVER_DATA(func) + zend_observers_fcall_list.count;
 	// TODO: Fix exceptions from generators

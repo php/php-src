@@ -33,7 +33,7 @@ do { \
 		} \
 		php_mail_build_headers_elems(&s, key, val); \
 	} else { \
-		zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_type_name(val)); \
+		zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val)); \
 	} \
 } while(0)
 
@@ -45,7 +45,7 @@ do { \
 	} else if (Z_TYPE_P(val) == IS_ARRAY) { \
 		php_mail_build_headers_elems(&s, key, val); \
 	} else { \
-		zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_type_name(val)); \
+		zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val)); \
 	} \
 } while(0)
 

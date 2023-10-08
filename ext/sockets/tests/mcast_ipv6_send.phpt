@@ -9,7 +9,10 @@ if (getenv('CI_NO_IPV6') || !defined('IPPROTO_IPV6')) {
     die('skip IPv6 not available.');
 }
 $level = IPPROTO_IPV6;
-$s = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP) or die("skip Cannot create socket");
+
+// hide the output from socket_create() because it can raise
+// a warning if (for example) the linux kernel is lacking ipv6
+$s = @socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP) or die("skip Cannot create socket");
 if (socket_set_option($s, $level, IPV6_MULTICAST_IF, 1) === false) {
     die("skip interface 1 either doesn't exist or has no ipv6 address");
 }

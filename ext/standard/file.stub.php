@@ -278,6 +278,7 @@ const STREAM_SHUT_RDWR = UNKNOWN;
  * @cvalue PF_INET
  */
 const STREAM_PF_INET = UNKNOWN;
+#endif
 #if (!defined(PF_INET) && defined(AF_INET))
 /**
  * @var int
@@ -286,6 +287,7 @@ const STREAM_PF_INET = UNKNOWN;
 const STREAM_PF_INET = UNKNOWN;
 #endif
 
+
 #ifdef HAVE_IPV6
 #ifdef PF_INET6
 /**
@@ -293,6 +295,7 @@ const STREAM_PF_INET = UNKNOWN;
  * @cvalue PF_INET6
  */
 const STREAM_PF_INET6 = UNKNOWN;
+#endif
 #if (!defined(PF_INET6) && defined(AF_INET6))
 /**
  * @var int
@@ -308,6 +311,7 @@ const STREAM_PF_INET6 = UNKNOWN;
  * @cvalue PF_UNIX
  */
 const STREAM_PF_UNIX = UNKNOWN;
+#endif
 #if (!defined(PF_UNIX) && defined(AF_UNIX))
 /**
  * @var int

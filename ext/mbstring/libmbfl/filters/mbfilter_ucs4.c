@@ -22,7 +22,7 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter.c
+ * The source code included in this file was separated from mbfilter.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
  *
  */
@@ -56,7 +56,9 @@ const mbfl_encoding mbfl_encoding_ucs4 = {
 	&vtbl_ucs4_wchar,
 	&vtbl_wchar_ucs4,
 	mb_ucs4_to_wchar,
-	mb_wchar_to_ucs4be
+	mb_wchar_to_ucs4be,
+	NULL,
+	NULL,
 };
 
 const mbfl_encoding mbfl_encoding_ucs4be = {
@@ -69,7 +71,9 @@ const mbfl_encoding mbfl_encoding_ucs4be = {
 	&vtbl_ucs4be_wchar,
 	&vtbl_wchar_ucs4be,
 	mb_ucs4be_to_wchar,
-	mb_wchar_to_ucs4be
+	mb_wchar_to_ucs4be,
+	NULL,
+	NULL,
 };
 
 const mbfl_encoding mbfl_encoding_ucs4le = {
@@ -82,7 +86,9 @@ const mbfl_encoding mbfl_encoding_ucs4le = {
 	&vtbl_ucs4le_wchar,
 	&vtbl_wchar_ucs4le,
 	mb_ucs4le_to_wchar,
-	mb_wchar_to_ucs4le
+	mb_wchar_to_ucs4le,
+	NULL,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_ucs4_wchar = {

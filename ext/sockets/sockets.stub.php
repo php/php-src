@@ -19,6 +19,13 @@ const AF_INET = UNKNOWN;
  */
 const AF_INET6 = UNKNOWN;
 #endif
+#ifdef AF_DIVERT
+/**
+ * @var int
+ * @cvalue AF_DIVERT
+ */
+const AF_DIVERT = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SOCK_STREAM
@@ -166,6 +173,13 @@ const SO_REUSEADDR = UNKNOWN;
  */
 const SO_REUSEPORT = UNKNOWN;
 #endif
+#ifdef SO_REUSEPORT_LB
+/**
+ * @var int
+ * @cvalue SO_REUSEPORT_LB
+ */
+const SO_REUSEPORT_LB = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SO_KEEPALIVE
@@ -285,6 +299,27 @@ const SO_SETFIB = UNKNOWN;
  * @cvalue SO_ACCEPTFILTER
  */
 const SO_ACCEPTFILTER = UNKNOWN;
+#endif
+#ifdef SO_RERROR
+/**
+ * @var int
+ * @cvalue SO_RERROR
+ */
+const SO_RERROR = UNKNOWN;
+#endif
+#ifdef SO_SOPLICE
+/**
+ * @var int
+ * @cvalue SO_SPLICE
+ */
+const SO_SPLICE = UNKNOWN;
+#endif
+#ifdef SO_ZEROIZE
+/**
+ * @var int
+ * @cvalue SO_ZEROIZE
+ */
+const SO_ZEROIZE = UNKNOWN;
 #endif
 #ifdef SOL_FILTER
 /**
@@ -607,6 +642,13 @@ const IP_MULTICAST_TTL = UNKNOWN;
  * @cvalue IP_MULTICAST_LOOP
  */
 const IP_MULTICAST_LOOP = UNKNOWN;
+#ifdef IP_BIND_ADDRESS_NO_PORT
+/**
+ * @var int
+ * @cvalue IP_BIND_ADDRESS_NO_PORT
+ */
+const IP_BIND_ADDRESS_NO_PORT = UNKNOWN;
+#endif
 #if HAVE_IPV6
 /**
  * @var int
@@ -1105,11 +1147,11 @@ const SOCKET_ESRMNT = UNKNOWN;
  */
 const SOCKET_ECOMM = UNKNOWN;
 #endif
-#ifdef PHP_SOCKET_EPROTO
+#ifdef EPROTO
 /**
  * Protocol error
  * @var int
- * @cvalue PHP_SOCKET_EPROTO
+ * @cvalue EPROTO
  */
 const SOCKET_EPROTO = UNKNOWN;
 #endif
@@ -1518,6 +1560,13 @@ const SOL_TCP = UNKNOWN;
  * @cvalue IPPROTO_UDP
  */
 const SOL_UDP = UNKNOWN;
+#ifdef IPPROTO_UDPLITE
+/**
+ * @var int
+ * @cvalue IPPROTO_UDPLITE
+ */
+const SOL_UDPLITE = UNKNOWN;
+#endif
 
 #if HAVE_IPV6
 /**
@@ -1678,6 +1727,111 @@ const SCM_CREDS = UNKNOWN;
  */
 const LOCAL_CREDS = UNKNOWN;
 #endif
+#if defined(SO_ATTACH_REUSEPORT_CBPF)
+/**
+ * @var int
+ * @cvalue SO_ATTACH_REUSEPORT_CBPF
+ */
+const SO_ATTACH_REUSEPORT_CBPF = UNKNOWN;
+#endif
+#if defined(SO_DETACH_FILTER)
+/**
+ * @var int
+ * @cvalue SO_DETACH_FILTER
+ */
+const SO_DETACH_FILTER = UNKNOWN;
+#endif
+#if defined(SO_DETACH_BPF)
+/**
+ * @var int
+ * @cvalue SO_DETACH_BPF
+ */
+const SO_DETACH_BPF = UNKNOWN;
+#endif
+#if defined(TCP_QUICKACK)
+/**
+ * @var int
+ * @cvalue TCP_QUICKACK
+ */
+const TCP_QUICKACK = UNKNOWN;
+#endif
+#if defined(TCP_REPAIR)
+/**
+ * @var int
+ * @cvalue TCP_REPAIR
+ */
+const TCP_REPAIR = UNKNOWN;
+#endif
+#if defined(IP_DONTFRAG)
+/**
+ * @var int
+ * @cvalue IP_DONTFRAG
+ */
+const IP_DONTFRAG = UNKNOWN;
+#endif
+#if defined(IP_MTU_DISCOVER)
+/**
+ * @var int
+ * @cvalue IP_MTU_DISCOVER
+ */
+const IP_MTU_DISCOVER = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_DO)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_DO
+ */
+const IP_PMTUDISC_DO = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_DONT)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_DONT
+ */
+const IP_PMTUDISC_DONT = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_WANT)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_WANT
+ */
+const IP_PMTUDISC_WANT = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_PROBE)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_PROBE
+ */
+const IP_PMTUDISC_PROBE = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_INTERFACE)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_INTERFACE
+ */
+const IP_PMTUDISC_INTERFACE = UNKNOWN;
+#endif
+#if defined(IP_PMTUDISC_OMIT)
+/**
+ * @var int
+ * @cvalue IP_PMTUDISC_OMIT
+ */
+const IP_PMTUDISC_OMIT = UNKNOWN;
+#endif
+#if defined(UDPLITE_SEND_CSCOV)
+/**
+ * @var int
+ * @cvalue UDPLITE_SEND_CSCOV
+ */
+const UDPLITE_SEND_CSCOV = UNKNOWN;
+#endif
+#if defined(UDPLITE_RECV_CSCOV)
+/**
+ * @var int
+ * @cvalue UDPLITE_RECV_CSCOV
+ */
+const UDPLITE_RECV_CSCOV = UNKNOWN;
+#endif
 
 /**
  * @strict-properties
@@ -1775,6 +1929,10 @@ function socket_create_pair(int $domain, int $type, int $protocol, &$pair): bool
 
 #ifdef HAVE_SHUTDOWN
 function socket_shutdown(Socket $socket, int $mode = 2): bool {}
+#endif
+
+#ifdef HAVE_SOCKATMARK
+function socket_atmark(Socket $socket): bool {}
 #endif
 
 function socket_last_error(?Socket $socket = null): int {}

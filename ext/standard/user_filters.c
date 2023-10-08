@@ -86,13 +86,7 @@ PHP_MINIT_FUNCTION(user_filters)
 		return FAILURE;
 	}
 
-	REGISTER_LONG_CONSTANT("PSFS_PASS_ON",			PSFS_PASS_ON,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PSFS_FEED_ME",			PSFS_FEED_ME,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PSFS_ERR_FATAL",		PSFS_ERR_FATAL,			CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("PSFS_FLAG_NORMAL",		PSFS_FLAG_NORMAL,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PSFS_FLAG_FLUSH_INC",	PSFS_FLAG_FLUSH_INC,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PSFS_FLAG_FLUSH_CLOSE",	PSFS_FLAG_FLUSH_CLOSE,	CONST_CS | CONST_PERSISTENT);
+	register_user_filters_symbols(module_number);
 
 	return SUCCESS;
 }
@@ -118,7 +112,7 @@ static void userfilter_dtor(php_stream_filter *thisfilter)
 		return;
 	}
 
-	zend_string *func_name = zend_string_init("onclose", sizeof("onclose")-1, 0);
+	zend_string *func_name = ZSTR_INIT_LITERAL("onclose", 0);
 	zend_call_method_if_exists(Z_OBJ_P(obj), func_name, &retval, 0, NULL);
 	zend_string_release(func_name);
 
@@ -319,7 +313,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	}
 
 	/* invoke the constructor */
-	zend_string *func_name = zend_string_init("oncreate", sizeof("oncreate")-1, 0);
+	zend_string *func_name = ZSTR_INIT_LITERAL("oncreate", 0);
 	zend_call_method_if_exists(Z_OBJ(obj), func_name, &retval, 0, NULL);
 	zend_string_release(func_name);
 

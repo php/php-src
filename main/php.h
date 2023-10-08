@@ -22,7 +22,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20220830
+#define PHP_API_VERSION 20230901
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
@@ -177,14 +177,6 @@ PHPAPI void php_explicit_bzero(void *dst, size_t siz);
 END_EXTERN_C()
 #undef explicit_bzero
 #define explicit_bzero php_explicit_bzero
-#endif
-
-#ifndef HAVE_REALLOCARRAY
-BEGIN_EXTERN_C()
-PHPAPI void* php_reallocarray(void *p, size_t nmb, size_t siz);
-END_EXTERN_C()
-#undef reallocarray
-#define reallocarray php_reallocarray
 #endif
 
 BEGIN_EXTERN_C()
@@ -441,5 +433,11 @@ END_EXTERN_C()
 #define PHP_CONNECTION_TIMEOUT 2
 
 #include "php_reentrancy.h"
+
+/* the following typedefs are deprecated and will be removed in PHP
+ * 9.0; use the standard C99 types instead */
+typedef bool zend_bool;
+typedef intptr_t zend_intptr_t;
+typedef uintptr_t zend_uintptr_t;
 
 #endif

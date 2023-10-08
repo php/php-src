@@ -1,0 +1,68 @@
+name: ./configure
+inputs:
+  configurationParameters:
+    default: ''
+    required: false
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+
+        ./buildconf --force
+        export CFLAGS="-m32 -msse2"
+        export CXXFLAGS="-m32 -msse2"
+        export LDFLAGS=-L/usr/lib/i386-linux-gnu
+        ./configure ${{ inputs.configurationParameters }} \
+            --enable-option-checking=fatal \
+            --build=i686-pc-linux-gnu \
+            --prefix=/usr \
+            --enable-phpdbg \
+            --enable-fpm \
+            --enable-intl \
+            --with-pdo-mysql=mysqlnd \
+            --with-mysqli=mysqlnd \
+            --with-pgsql \
+            --with-pdo-pgsql \
+            --with-pdo-sqlite \
+            --without-pear \
+            --enable-gd \
+            --with-jpeg \
+            --with-webp \
+            --with-freetype \
+            --with-xpm \
+            --enable-exif \
+            --with-zip \
+            --with-zlib \
+            --enable-soap \
+            --enable-xmlreader \
+            --with-xsl \
+            --with-tidy \
+            --enable-sysvsem \
+            --enable-sysvshm \
+            --enable-shmop \
+            --enable-pcntl \
+            --with-readline \
+            --enable-mbstring \
+            --with-curl \
+            --with-gettext \
+            --enable-sockets \
+            --with-bz2 \
+            --with-openssl \
+            --with-gmp \
+            --enable-bcmath \
+            --enable-calendar \
+            --enable-ftp \
+            --with-pspell=/usr \
+            --with-kerberos \
+            --enable-sysvmsg \
+            --with-ffi \
+            --enable-zend-test \
+            --enable-dl-test=shared \
+            --with-mhash \
+            --with-sodium \
+            --enable-dba \
+            --enable-werror \
+            --with-config-file-path=/etc \
+            --with-config-file-scan-dir=/etc/php.d

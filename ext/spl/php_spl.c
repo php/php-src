@@ -74,12 +74,13 @@ PHP_FUNCTION(class_parents)
 	zend_class_entry *parent_class, *ce;
 	bool autoload = 1;
 
+	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(obj));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(obj));
 		RETURN_THROWS();
 	}
 
@@ -107,11 +108,12 @@ PHP_FUNCTION(class_implements)
 	bool autoload = 1;
 	zend_class_entry *ce;
 
+	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
 		RETURN_THROWS();
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(obj));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(obj));
 		RETURN_THROWS();
 	}
 
@@ -135,11 +137,12 @@ PHP_FUNCTION(class_uses)
 	bool autoload = 1;
 	zend_class_entry *ce;
 
+	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
 		RETURN_THROWS();
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(obj));
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_value_name(obj));
 		RETURN_THROWS();
 	}
 
@@ -268,8 +271,11 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 		}
 		zend_string_release_ex(opened_path, 0);
 		if (new_op_array) {
+			uint32_t orig_jit_trace_num = EG(jit_trace_num);
+
 			ZVAL_UNDEF(&result);
 			zend_execute(new_op_array, &result);
+			EG(jit_trace_num) = orig_jit_trace_num;
 
 			destroy_op_array(new_op_array);
 			efree(new_op_array);
@@ -398,6 +404,16 @@ static autoload_func_info *autoload_func_info_from_fci(
 
 static bool autoload_func_info_equals(
 		const autoload_func_info *alfi1, const autoload_func_info *alfi2) {
+	if (UNEXPECTED(
+		(alfi1->func_ptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) &&
+		(alfi2->func_ptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)
+	)) {
+		return alfi1->obj == alfi2->obj
+			&& alfi1->ce == alfi2->ce
+			&& alfi1->closure == alfi2->closure
+			&& zend_string_equals(alfi1->func_ptr->common.function_name, alfi2->func_ptr->common.function_name)
+		;
+	}
 	return alfi1->func_ptr == alfi2->func_ptr
 		&& alfi1->obj == alfi2->obj
 		&& alfi1->ce == alfi2->ce
@@ -575,6 +591,13 @@ PHP_FUNCTION(spl_autoload_unregister)
 		/* Don't destroy the hash table, as we might be iterating over it right now. */
 		zend_hash_clean(spl_autoload_functions);
 		RETURN_TRUE;
+	}
+
+	if (!fcc.function_handler) {
+		/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
+		 * with it outselves. It is important that it is not refetched on every call,
+		 * because calls may occur from different scopes. */
+		zend_is_callable_ex(&fci.function_name, NULL, 0, NULL, &fcc, NULL);
 	}
 
 	autoload_func_info *alfi = autoload_func_info_from_fci(&fci, &fcc);

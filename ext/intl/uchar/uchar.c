@@ -86,7 +86,7 @@ IC_METHOD(hasBinaryProperty) {
 	UChar32 cp;
 	zend_long prop;
 	zend_string *string_codepoint;
-	zend_long int_codepoint;
+	zend_long int_codepoint = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR_OR_LONG(string_codepoint, int_codepoint)
@@ -106,7 +106,7 @@ IC_METHOD(getIntPropertyValue) {
 	UChar32 cp;
 	zend_long prop;
 	zend_string *string_codepoint;
-	zend_long int_codepoint;
+	zend_long int_codepoint = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR_OR_LONG(string_codepoint, int_codepoint)
@@ -214,7 +214,7 @@ IC_METHOD(getBlockCode) {
 IC_METHOD(charName) {
 	UChar32 cp;
 	zend_string *string_codepoint;
-	zend_long int_codepoint;
+	zend_long int_codepoint = 0;
 	UErrorCode error = U_ZERO_ERROR;
 	zend_long nameChoice = U_UNICODE_CHAR_NAME;
 	zend_string *buffer = NULL;
@@ -294,7 +294,7 @@ static UBool enumCharNames_callback(enumCharNames_data *context,
 IC_METHOD(enumCharNames) {
 	UChar32 start, limit;
 	zend_string *string_start, *string_limit;
-	zend_long int_start, int_limit;
+	zend_long int_start = 0, int_limit = 0;
 	enumCharNames_data context;
 	zend_long nameChoice = U_UNICODE_CHAR_NAME;
 	UErrorCode error = U_ZERO_ERROR;
@@ -309,11 +309,12 @@ IC_METHOD(enumCharNames) {
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (convert_cp(&start, string_start, int_start) == FAILURE || convert_cp(&limit, string_limit, int_limit) == FAILURE) {
-		RETURN_NULL();
+		RETURN_FALSE;
 	}
 
 	u_enumCharNames(start, limit, (UEnumCharNamesFn*)enumCharNames_callback, &context, nameChoice, &error);
 	INTL_CHECK_STATUS(error, NULL);
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -390,7 +391,7 @@ IC_METHOD(foldCase) {
 	UChar32 cp, ret;
 	zend_long options = U_FOLD_CASE_DEFAULT;
 	zend_string *string_codepoint;
-	zend_long int_codepoint;
+	zend_long int_codepoint = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR_OR_LONG(string_codepoint, int_codepoint)
@@ -420,7 +421,7 @@ IC_METHOD(digit) {
 	zend_long radix = 10;
 	int ret;
 	zend_string *string_codepoint;
-	zend_long int_codepoint;
+	zend_long int_codepoint = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR_OR_LONG(string_codepoint, int_codepoint)

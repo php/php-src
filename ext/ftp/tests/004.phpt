@@ -28,4 +28,4 @@ bool(true)
 
 Warning: ftp_login(): Not logged in. in %s on line %d
 bool(false)
-bool(true)
+bool(false)

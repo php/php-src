@@ -173,7 +173,7 @@ static spl_SplObjectStorageElement *spl_object_storage_attach_handle(spl_SplObje
 	return pelement;
 } /* }}} */
 
-spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *intern, zend_object *obj, zval *inf) /* {{{ */
+static spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *intern, zend_object *obj, zval *inf) /* {{{ */
 {
 	if (EXPECTED(!(intern->flags & SOS_OVERRIDDEN_WRITE_DIMENSION))) {
 		return spl_object_storage_attach_handle(intern, obj, inf);
@@ -238,7 +238,7 @@ static zend_result spl_object_storage_detach(spl_SplObjectStorage *intern, zend_
 	return ret;
 } /* }}}*/
 
-void spl_object_storage_addall(spl_SplObjectStorage *intern, spl_SplObjectStorage *other) { /* {{{ */
+static void spl_object_storage_addall(spl_SplObjectStorage *intern, spl_SplObjectStorage *other) { /* {{{ */
 	spl_SplObjectStorageElement *element;
 
 	ZEND_HASH_FOREACH_PTR(&other->storage, element) {
@@ -406,7 +406,7 @@ static zend_object *spl_SplObjectStorage_new(zend_class_entry *class_type)
 /* }}} */
 
 /* Returns true if the SplObjectStorage contains an entry for getHash(obj), even if the corresponding value is null. */
-bool spl_object_storage_contains(spl_SplObjectStorage *intern, zend_object *obj) /* {{{ */
+static bool spl_object_storage_contains(spl_SplObjectStorage *intern, zend_object *obj) /* {{{ */
 {
 	if (EXPECTED(!intern->fptr_get_hash)) {
 		return zend_hash_index_find(&intern->storage, obj->handle) != NULL;

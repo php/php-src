@@ -275,6 +275,9 @@ interface DOMParentNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void;
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void;
 }
 
 interface DOMChildNode
@@ -294,6 +297,13 @@ interface DOMChildNode
 /** @not-serializable */
 class DOMNode
 {
+    public const int DOCUMENT_POSITION_DISCONNECTED = 0x01;
+    public const int DOCUMENT_POSITION_PRECEDING = 0x02;
+    public const int DOCUMENT_POSITION_FOLLOWING = 0x04;
+    public const int DOCUMENT_POSITION_CONTAINS = 0x08;
+    public const int DOCUMENT_POSITION_CONTAINED_BY = 0x10;
+    public const int DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 0x20;
+
     /** @readonly */
     public string $nodeName;
 
@@ -304,6 +314,9 @@ class DOMNode
 
     /** @readonly */
     public ?DOMNode $parentNode;
+
+    /** @readonly */
+    public ?DOMElement $parentElement;
 
     /** @readonly */
     public DOMNodeList $childNodes;
@@ -322,6 +335,9 @@ class DOMNode
 
     /** @readonly */
     public ?DOMNamedNodeMap $attributes;
+
+    /** @readonly */
+    public bool $isConnected;
 
     /** @readonly */
     public ?DOMDocument $ownerDocument;
@@ -372,6 +388,8 @@ class DOMNode
     /** @tentative-return-type */
     public function isSameNode(DOMNode $otherNode): bool {}
 
+    public function isEqualNode(?DOMNode $otherNode): bool {}
+
     /** @tentative-return-type */
     public function isSupported(string $feature, string $version): bool {}
 
@@ -389,6 +407,12 @@ class DOMNode
 
     /** @return DOMNode|false */
     public function replaceChild(DOMNode $node, DOMNode $child) {}
+
+    public function contains(DOMNode|DOMNameSpaceNode|null $other): bool {}
+
+    public function getRootNode(?array $options = null): DOMNode {}
+
+    public function compareDocumentPosition(DOMNode $other): int {}
 }
 
 /** @not-serializable */
@@ -413,10 +437,16 @@ class DOMNameSpaceNode
     public ?string $namespaceURI;
 
     /** @readonly */
+    public bool $isConnected;
+
+    /** @readonly */
     public ?DOMDocument $ownerDocument;
 
     /** @readonly */
     public ?DOMNode $parentNode;
+
+    /** @readonly */
+    public ?DOMElement $parentElement;
 }
 
 class DOMImplementation
@@ -450,11 +480,23 @@ class DOMDocumentFragment extends DOMNode implements DOMParentNode
     /** @tentative-return-type */
     public function appendXML(string $data): bool {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::append
+     */
     public function append(...$nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::prepend
+     */
     public function prepend(...$nodes): void {}
+
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMDocument::replaceChildren
+     */
+    public function replaceChildren(...$nodes): void {}
 }
 
 class DOMNodeList implements IteratorAggregate, Countable
@@ -467,7 +509,7 @@ class DOMNodeList implements IteratorAggregate, Countable
 
     public function getIterator(): Iterator {}
 
-    /** @return DOMNode|DOMNameSpaceNode|null */
+    /** @return DOMElement|DOMNode|DOMNameSpaceNode|null */
     public function item(int $index) {}
 }
 
@@ -485,7 +527,7 @@ class DOMCharacterData extends DOMNode implements DOMChildNode
     public ?DOMElement $nextElementSibling;
 
     /** @tentative-return-type */
-    public function appendData(string $data): bool {}
+    public function appendData(string $data): true {}
 
     /** @return string|false */
     public function substringData(int $offset, int $count) {}
@@ -499,15 +541,25 @@ class DOMCharacterData extends DOMNode implements DOMChildNode
     /** @tentative-return-type */
     public function replaceData(int $offset, int $count, string $data): bool {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::replaceWith
+     */
     public function replaceWith(...$nodes): void {}
 
+    /** @implementation-alias DOMElement::remove */
     public function remove(): void {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::before
+     */
     public function before(... $nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::after
+     */
     public function after(...$nodes): void {}
 }
 
@@ -538,6 +590,10 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
     /** @readonly */
     public string $tagName;
 
+    public string $className;
+
+    public string $id;
+
     /** @readonly */
     public mixed $schemaTypeInfo = null;
 
@@ -560,6 +616,8 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
 
     /** @tentative-return-type */
     public function getAttribute(string $qualifiedName): string {}
+
+    public function getAttributeNames(): array {}
 
     /** @tentative-return-type */
     public function getAttributeNS(?string $namespace, string $localName): string {}
@@ -612,6 +670,8 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
     /** @tentative-return-type */
     public function setIdAttributeNode(DOMAttr $attr, bool $isId): void {}
 
+    public function toggleAttribute(string $qualifiedName, ?bool $force = null): bool {}
+
     public function remove(): void {}
 
     /** @param DOMNode|string $nodes */
@@ -628,6 +688,13 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void {}
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void {}
+
+    public function insertAdjacentElement(string $where, DOMElement $element): ?DOMElement {}
+
+    public function insertAdjacentText(string $where, string $data): void {}
 }
 
 class DOMDocument extends DOMNode implements DOMParentNode
@@ -668,7 +735,7 @@ class DOMDocument extends DOMNode implements DOMParentNode
      * @readonly
      * @deprecated
      */
-    public mixed $config = null;
+    public mixed $config;
 
     public bool $formatOutput;
 
@@ -735,11 +802,11 @@ class DOMDocument extends DOMNode implements DOMParentNode
     /** @return DOMNode|false */
     public function importNode(DOMNode $node, bool $deep = false) {}
 
-    /** @return DOMDocument|bool */
-    public function load(string $filename, int $options = 0) {} // TODO return type shouldn't depend on the call scope
+    /** @tentative-return-type */
+    public function load(string $filename, int $options = 0): bool {}
 
-    /** @return DOMDocument|bool */
-    public function loadXML(string $source, int $options = 0) {} // TODO return type shouldn't depend on the call scope
+    /** @tentative-return-type */
+    public function loadXML(string $source, int $options = 0): bool {}
 
     /** @tentative-return-type */
     public function normalizeDocument(): void {}
@@ -751,11 +818,11 @@ class DOMDocument extends DOMNode implements DOMParentNode
     public function save(string $filename, int $options = 0): int|false {}
 
 #ifdef LIBXML_HTML_ENABLED
-    /** @return DOMDocument|bool */
-    public function loadHTML(string $source, int $options = 0) {} // TODO return type shouldn't depend on the call scope
+    /** @tentative-return-type */
+    public function loadHTML(string $source, int $options = 0): bool {}
 
-    /** @return DOMDocument|bool */
-    public function loadHTMLFile(string $filename, int $options = 0) {} // TODO return type shouldn't depend on the call scope
+    /** @tentative-return-type */
+    public function loadHTMLFile(string $filename, int $options = 0): bool {}
 
     /** @tentative-return-type */
     public function saveHTML(?DOMNode $node = null): string|false {}
@@ -787,14 +854,23 @@ class DOMDocument extends DOMNode implements DOMParentNode
     /** @tentative-return-type */
     public function xinclude(int $options = 0): int|false {}
 
-    /** @return DOMNode|false */
-    public function adoptNode(DOMNode $node) {}
+    /** @tentative-return-type */
+    public function adoptNode(DOMNode $node): DOMNode|false {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::append
+     */
     public function append(...$nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::prepend
+     */
     public function prepend(...$nodes): void {}
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void {}
 }
 
 final class DOMException extends Exception

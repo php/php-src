@@ -51,13 +51,11 @@ PHP_METHOD(DOMText, __construct)
 	}
 
 	intern = Z_DOMOBJ_P(ZEND_THIS);
-	if (intern != NULL) {
-		oldnode = dom_object_get_node(intern);
-		if (oldnode != NULL) {
-			php_libxml_node_free_resource(oldnode );
-		}
-		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern);
+	oldnode = dom_object_get_node(intern);
+	if (oldnode != NULL) {
+		php_libxml_node_decrement_resource((php_libxml_node_object *)intern);
 	}
+	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern);
 }
 /* }}} end DOMText::__construct */
 
@@ -66,7 +64,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-wholeText
 Since: DOM Level 3
 */
-int dom_text_whole_text_read(dom_object *obj, zval *retval)
+zend_result dom_text_whole_text_read(dom_object *obj, zval *retval)
 {
 	xmlNodePtr node;
 	xmlChar *wholetext = NULL;
@@ -132,7 +130,7 @@ PHP_METHOD(DOMText, splitText)
 		RETURN_FALSE;
 	}
 
-	cur = xmlNodeGetContent(node);
+	cur = node->content;
 	if (cur == NULL) {
 		/* TODO Add warning? */
 		RETURN_FALSE;
@@ -141,14 +139,11 @@ PHP_METHOD(DOMText, splitText)
 
 	if (ZEND_LONG_INT_OVFL(offset) || (int)offset > length) {
 		/* TODO Add warning? */
-		xmlFree(cur);
 		RETURN_FALSE;
 	}
 
 	first = xmlUTF8Strndup(cur, (int)offset);
 	second = xmlUTF8Strsub(cur, (int)offset, (int)(length - offset));
-
-	xmlFree(cur);
 
 	xmlNodeSetContent(node, first);
 	nnode = xmlNewDocText(node->doc, second);

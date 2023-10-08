@@ -29,100 +29,91 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
-#include "private.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 
 /* Raise NUM1 to the NUM2 power.  The result is placed in RESULT.
    Maximum exponent is LONG_MAX.  If a NUM2 is not an integer,
    only the integer part is used.  */
 
-void
-bc_raise (bc_num num1, bc_num num2, bc_num *result, int scale)
+void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 {
-   bc_num temp, power;
-   long exponent;
-   int rscale;
-   int pwrscale;
-   int calcscale;
-   char neg;
+	bc_num temp, power;
+	size_t rscale;
+	size_t pwrscale;
+	size_t calcscale;
+	bool is_neg;
 
-	/* Check the exponent for scale digits and convert to a long. */
-	if (num2->n_scale != 0) {
-		/* 2nd argument from PHP_FUNCTION(bcpow) */
-		zend_argument_value_error(2, "cannot have a fractional part");
-		return;
-	}
-	exponent = bc_num2long (num2);
-	if (exponent == 0 && (num2->n_len > 1 || num2->n_value[0] != 0)) {
-		/* 2nd argument from PHP_FUNCTION(bcpow) */
-		zend_argument_value_error(2, "is too large");
+	/* Special case if exponent is a zero. */
+	if (exponent == 0) {
+		bc_free_num (result);
+		*result = bc_copy_num(BCG(_one_));
 		return;
 	}
 
-   /* Special case if exponent is a zero. */
-   if (exponent == 0)
-     {
-       bc_free_num (result);
-       *result = bc_copy_num (BCG(_one_));
-       return;
-     }
+	/* Other initializations. */
+	if (exponent < 0) {
+		is_neg = true;
+		exponent = -exponent;
+		rscale = scale;
+	} else {
+		is_neg = false;
+		rscale = MIN (num1->n_scale * exponent, MAX(scale, num1->n_scale));
+	}
 
-   /* Other initializations. */
-   if (exponent < 0)
-     {
-       neg = TRUE;
-       exponent = -exponent;
-       rscale = scale;
-     }
-   else
-     {
-       neg = FALSE;
-       rscale = MIN (num1->n_scale*exponent, MAX(scale, num1->n_scale));
-     }
+	/* Set initial value of temp. */
+	power = bc_copy_num(num1);
+	pwrscale = num1->n_scale;
+	while ((exponent & 1) == 0) {
+		pwrscale = 2 * pwrscale;
+		bc_multiply(power, power, &power, pwrscale);
+		exponent = exponent >> 1;
+	}
+	temp = bc_copy_num(power);
+	calcscale = pwrscale;
+	exponent = exponent >> 1;
 
-   /* Set initial value of temp.  */
-   power = bc_copy_num (num1);
-   pwrscale = num1->n_scale;
-   while ((exponent & 1) == 0)
-     {
-       pwrscale = 2*pwrscale;
-       bc_multiply (power, power, &power, pwrscale);
-       exponent = exponent >> 1;
-     }
-   temp = bc_copy_num (power);
-   calcscale = pwrscale;
-   exponent = exponent >> 1;
+	/* Do the calculation. */
+	while (exponent > 0) {
+		pwrscale = 2 * pwrscale;
+		bc_multiply(power, power, &power, pwrscale);
+		if ((exponent & 1) == 1) {
+			calcscale = pwrscale + calcscale;
+			bc_multiply(temp, power, &temp, calcscale);
+		}
+		exponent = exponent >> 1;
+	}
 
-   /* Do the calculation. */
-   while (exponent > 0)
-     {
-       pwrscale = 2*pwrscale;
-       bc_multiply (power, power, &power, pwrscale);
-       if ((exponent & 1) == 1) {
-	 calcscale = pwrscale + calcscale;
-	 bc_multiply (temp, power, &temp, calcscale);
-       }
-       exponent = exponent >> 1;
-     }
-
-   /* Assign the value. */
-   if (neg)
-     {
-       bc_divide (BCG(_one_), temp, result, rscale);
-       bc_free_num (&temp);
-     }
-   else
-     {
-       bc_free_num (result);
-       *result = temp;
-       if ((*result)->n_scale > rscale)
-	 (*result)->n_scale = rscale;
-     }
-   bc_free_num (&power);
+	/* Assign the value. */
+	if (is_neg) {
+		bc_divide(BCG(_one_), temp, result, rscale);
+		bc_free_num (&temp);
+	} else {
+		bc_free_num (result);
+		*result = temp;
+		if ((*result)->n_scale > rscale) {
+			(*result)->n_scale = rscale;
+		}
+	}
+	bc_free_num (&power);
 }
+
+/* This is used internally by BCMath */
+void bc_raise_bc_exponent(bc_num base, bc_num expo, bc_num *result, size_t scale)
+{
+	/* Exponent must not have fractional part */
+	assert(expo->n_scale == 0);
+
+	long exponent = bc_num2long(expo);
+	/* Exponent must be properly convertable to long */
+	if (exponent == 0 && (expo->n_len > 1 || expo->n_value[0] != 0)) {
+		assert(false && "Exponent is not well formed in internal call");
+		//assert(exponent != 0 || (expo->n_len == 0 && expo->n_value[0] == 0));
+	}
+	//assert(exponent != 0 || (expo->n_len == 0 && expo->n_value[0] == 0));
+	bc_raise(base, exponent, result, scale);
+}
+

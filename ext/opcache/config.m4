@@ -18,6 +18,12 @@ PHP_ARG_ENABLE([opcache-jit],
   [yes],
   [no])
 
+PHP_ARG_WITH([capstone],,
+  [AS_HELP_STRING([--with-capstone],
+    [support opcache JIT disassembly through capstone])],
+  [no],
+  [no])
+
 if test "$PHP_OPCACHE" != "no"; then
 
   dnl Always build as shared extension
@@ -68,44 +74,21 @@ if test "$PHP_OPCACHE" != "no"; then
       DASM_FLAGS="$DASM_FLAGS -D ZTS=1"
     fi
 
-    PKG_CHECK_MODULES([CAPSTONE], [capstone >= 3.0.0],
-        [have_capstone="yes"], [have_capstone="no"])
-    if test "$have_capstone" = "yes"; then
-        AC_DEFINE(HAVE_CAPSTONE, 1, [ ])
+    AS_IF([test x"$with_capstone" = "xyes"],[
+      PKG_CHECK_MODULES([CAPSTONE],[capstone >= 3.0.0],[
+        AC_DEFINE([HAVE_CAPSTONE], [1], [Capstone is available])
         PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
         PHP_EVAL_INCLINE($CAPSTONE_CFLAGS)
-    fi
+      ],[
+        AC_MSG_ERROR([capstone >= 3.0 required but not found])
+      ])
+    ])
 
     PHP_SUBST(DASM_FLAGS)
     PHP_SUBST(DASM_ARCH)
-
-    AC_MSG_CHECKING(for opagent in default path)
-    for i in /usr/local /usr; do
-      if test -r $i/include/opagent.h; then
-        OPAGENT_DIR=$i
-        AC_MSG_RESULT(found in $i)
-        break
-      fi
-    done
-    if test -z "$OPAGENT_DIR"; then
-      AC_MSG_RESULT(not found)
-    else
-      PHP_CHECK_LIBRARY(opagent, op_write_native_code,
-      [
-        AC_DEFINE(HAVE_OPROFILE,1,[ ])
-        PHP_ADD_INCLUDE($OPAGENT_DIR/include)
-        PHP_ADD_LIBRARY_WITH_PATH(opagent, $OPAGENT_DIR/$PHP_LIBDIR/oprofile, OPCACHE_SHARED_LIBADD)
-        PHP_SUBST(OPCACHE_SHARED_LIBADD)
-      ],[
-        AC_MSG_RESULT(not found)
-      ],[
-        -L$OPAGENT_DIR/$PHP_LIBDIR/oprofile
-      ])
-    fi
-
   fi
 
-  AC_CHECK_FUNCS([mprotect])
+  AC_CHECK_FUNCS([mprotect memfd_create])
 
   AC_MSG_CHECKING(for sysvipc shared memory support)
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
@@ -116,7 +99,7 @@ if test "$PHP_OPCACHE" != "no"; then
 #include <unistd.h>
 #include <string.h>
 
-int main() {
+int main(void) {
   pid_t pid;
   int status;
   int ipc_id;
@@ -195,7 +178,7 @@ int main() {
 # define MAP_FAILED ((void*)-1)
 #endif
 
-int main() {
+int main(void) {
   pid_t pid;
   int status;
   char *shm;
@@ -257,7 +240,7 @@ int main() {
 # define MAP_FAILED ((void*)-1)
 #endif
 
-int main() {
+int main(void) {
   pid_t pid;
   int status;
   int fd;

@@ -537,9 +537,9 @@ static void log_message (const char *fmt, ...)
 #define DEBUG_MESSAGE(fmt, ...)
 #endif
 
-static int lsapi_activate_user_ini();
+static int lsapi_activate_user_ini(void);
 
-static int sapi_lsapi_activate()
+static int sapi_lsapi_activate(void)
 {
     char *path, *server_name;
     size_t path_len, server_name_len;
@@ -677,10 +677,9 @@ static int do_clean_shutdown = 1;
 static int clean_onexit = 1;
 
 
-static void lsapi_clean_shutdown()
+static void lsapi_clean_shutdown(void)
 {
     struct sigaction act;
-    int sa_rc;
     struct itimerval tmv;
 #if PHP_MAJOR_VERSION >= 7
     zend_string * key;
@@ -689,22 +688,21 @@ static void lsapi_clean_shutdown()
     sigemptyset(&act.sa_mask);
     act.sa_flags = 0;
     act.sa_handler = lsapi_sigsegv;
-    sa_rc = sigaction(SIGINT,  &act, NULL);
-    sa_rc = sigaction(SIGQUIT, &act, NULL);
-    sa_rc = sigaction(SIGILL,  &act, NULL);
-    sa_rc = sigaction(SIGABRT, &act, NULL);
-    sa_rc = sigaction(SIGBUS,  &act, NULL);
-    sa_rc = sigaction(SIGSEGV, &act, NULL);
-    sa_rc = sigaction(SIGTERM, &act, NULL);
-
-    sa_rc = sigaction(SIGPROF, &act, NULL);
+    (void)sigaction(SIGINT,  &act, NULL);
+    (void)sigaction(SIGQUIT, &act, NULL);
+    (void)sigaction(SIGILL,  &act, NULL);
+    (void)sigaction(SIGABRT, &act, NULL);
+    (void)sigaction(SIGBUS,  &act, NULL);
+    (void)sigaction(SIGSEGV, &act, NULL);
+    (void)sigaction(SIGTERM, &act, NULL);
+    (void)sigaction(SIGPROF, &act, NULL);
     memset(&tmv, 0, sizeof(struct itimerval));
     tmv.it_value.tv_sec = 0;
     tmv.it_value.tv_usec = 100000;
     setitimer(ITIMER_PROF, &tmv, NULL);
 
 #if PHP_MAJOR_VERSION >= 7
-    key = zend_string_init("error_reporting", 15, 1);
+    key = ZSTR_INIT_LITERAL("error_reporting", 1);
     zend_alter_ini_entry_chars_ex(key, "0", 1,
                         PHP_INI_SYSTEM, PHP_INI_STAGE_SHUTDOWN, 1);
     zend_string_release(key);
@@ -738,11 +736,9 @@ static void lsapi_atexit(void)
     }
 }
 
-
 static int lsapi_module_main(int show_source)
 {
     struct sigaction act;
-    int sa_rc;
     if (php_request_startup() == FAILURE ) {
         return -1;
     }
@@ -751,13 +747,13 @@ static int lsapi_module_main(int show_source)
         sigemptyset(&act.sa_mask);
         act.sa_flags = SA_NODEFER;
         act.sa_handler = lsapi_sigterm;
-        sa_rc = sigaction( SIGINT, &act, NULL);
-        sa_rc = sigaction( SIGQUIT, &act, NULL);
-        sa_rc = sigaction( SIGILL, &act, NULL);
-        sa_rc = sigaction( SIGABRT, &act, NULL);
-        sa_rc = sigaction( SIGBUS, &act, NULL);
-        sa_rc = sigaction( SIGSEGV, &act, NULL);
-        sa_rc = sigaction( SIGTERM, &act, NULL);
+        (void)sigaction( SIGINT, &act, NULL);
+        (void)sigaction( SIGQUIT, &act, NULL);
+        (void)sigaction( SIGILL, &act, NULL);
+        (void)sigaction( SIGABRT, &act, NULL);
+        (void)sigaction( SIGBUS, &act, NULL);
+        (void)sigaction( SIGSEGV, &act, NULL);
+        (void)sigaction( SIGTERM, &act, NULL);
 
         clean_onexit = 0;
     }
@@ -834,7 +830,7 @@ static void user_config_cache_entry_dtor(zval *el)
     free(entry);
 }
 
-static void user_config_cache_init()
+static void user_config_cache_init(void)
 {
     zend_hash_init(&user_config_cache, 0, NULL, user_config_cache_entry_dtor, 1);
 }
@@ -1101,7 +1097,7 @@ static int lsapi_activate_user_ini( void )
 }
 
 
-static void override_ini()
+static void override_ini(void)
 {
 
     LSAPI_ForeachSpecialEnv( alter_ini, NULL );
@@ -1351,7 +1347,7 @@ static int cli_main( int argc, char * argv[] )
                         php_request_shutdown( NULL );
                     }
                 } else {
-                    php_printf("Could not open input file: %s.\n", *p);
+                    fprintf(stderr, "Could not open input file: %s.\n", *p);
                 }
             } else {
                 cli_usage();

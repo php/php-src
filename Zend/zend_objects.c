@@ -35,7 +35,9 @@ static zend_always_inline void _zend_object_std_init(zend_object *object, zend_c
 	object->properties = NULL;
 	zend_objects_store_put(object);
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
-		ZVAL_UNDEF(object->properties_table + object->ce->default_properties_count);
+		zval *guard_value = object->properties_table + object->ce->default_properties_count;
+		ZVAL_UNDEF(guard_value);
+		Z_GUARD_P(guard_value) = 0;
 	}
 }
 
@@ -192,6 +194,8 @@ ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce)
 
 ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
 {
+	bool has_clone_method = old_object->ce->clone != NULL;
+
 	if (old_object->ce->default_properties_count) {
 		zval *src = old_object->properties_table;
 		zval *dst = new_object->properties_table;
@@ -201,6 +205,11 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 			i_zval_ptr_dtor(dst);
 			ZVAL_COPY_VALUE_PROP(dst, src);
 			zval_add_ref(dst);
+			if (has_clone_method) {
+				/* Unconditionally add the IS_PROP_REINITABLE flag to avoid a potential cache miss of property_info */
+				Z_PROP_FLAG_P(dst) |= IS_PROP_REINITABLE;
+			}
+
 			if (UNEXPECTED(Z_ISREF_P(dst)) &&
 					(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(dst)))) {
 				zend_property_info *prop_info = zend_get_property_info_for_slot(new_object, dst);
@@ -211,7 +220,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 			src++;
 			dst++;
 		} while (src != end);
-	} else if (old_object->properties && !old_object->ce->clone) {
+	} else if (old_object->properties && !has_clone_method) {
 		/* fast copy */
 		if (EXPECTED(old_object->handlers == &std_object_handlers)) {
 			if (EXPECTED(!(GC_FLAGS(old_object->properties) & IS_ARRAY_IMMUTABLE))) {
@@ -245,6 +254,10 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 				ZVAL_COPY_VALUE(&new_prop, prop);
 				zval_add_ref(&new_prop);
 			}
+			if (has_clone_method) {
+				/* Unconditionally add the IS_PROP_REINITABLE flag to avoid a potential cache miss of property_info */
+				Z_PROP_FLAG_P(&new_prop) |= IS_PROP_REINITABLE;
+			}
 			if (EXPECTED(key)) {
 				_zend_hash_append(new_object->properties, key, &new_prop);
 			} else {
@@ -253,9 +266,18 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	if (old_object->ce->clone) {
+	if (has_clone_method) {
 		GC_ADDREF(new_object);
 		zend_call_known_instance_method_with_0_params(new_object->ce->clone, new_object, NULL);
+
+		if (ZEND_CLASS_HAS_READONLY_PROPS(new_object->ce)) {
+			for (uint32_t i = 0; i < new_object->ce->default_properties_count; i++) {
+				zval* prop = OBJ_PROP_NUM(new_object, i);
+				/* Unconditionally remove the IS_PROP_REINITABLE flag to avoid a potential cache miss of property_info */
+				Z_PROP_FLAG_P(prop) &= ~IS_PROP_REINITABLE;
+			}
+		}
+
 		OBJ_RELEASE(new_object);
 	}
 }

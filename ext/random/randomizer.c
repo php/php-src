@@ -24,6 +24,7 @@
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_string.h"
 
+#include "Zend/zend_enum.h"
 #include "Zend/zend_exceptions.h"
 
 static inline void randomizer_common_init(php_random_randomizer *randomizer, zend_object *engine_object) {
@@ -41,7 +42,7 @@ static inline void randomizer_common_init(php_random_randomizer *randomizer, zen
 		zend_string *mname;
 		zend_function *generate_method;
 
-		mname = zend_string_init("generate", strlen("generate"), 0);
+		mname = ZSTR_INIT_LITERAL("generate", 0);
 		generate_method = zend_hash_find_ptr(&engine_object->ce->function_table, mname);
 		zend_string_release(mname);
 
@@ -88,6 +89,121 @@ PHP_METHOD(Random_Randomizer, __construct)
 }
 /* }}} */
 
+/* {{{ Generate a float in [0, 1) */
+PHP_METHOD(Random_Randomizer, nextFloat)
+{
+	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	uint64_t result;
+	size_t total_size;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	result = 0;
+	total_size = 0;
+	do {
+		uint64_t r = randomizer->algo->generate(randomizer->status);
+		result = result | (r << (total_size * 8));
+		total_size += randomizer->status->last_generated_size;
+		if (EG(exception)) {
+			RETURN_THROWS();
+		}
+	} while (total_size < sizeof(uint64_t));
+
+	/* A double has 53 bits of precision, thus we must not
+	 * use the full 64 bits of the uint64_t, because we would
+	 * introduce a bias / rounding error.
+	 */
+#if DBL_MANT_DIG != 53
+# error "Random_Randomizer::nextFloat(): Requires DBL_MANT_DIG == 53 to work."
+#endif
+	const double step_size = 1.0 / (1ULL << 53);
+
+	/* Use the upper 53 bits, because some engine's lower bits
+	 * are of lower quality.
+	 */
+	result = (result >> 11);
+
+	RETURN_DOUBLE(step_size * result);
+}
+/* }}} */
+
+/* {{{ Generates a random float within a configurable interval.
+ *
+ * This method uses the γ-section algorithm by Frédéric Goualard.
+ */
+PHP_METHOD(Random_Randomizer, getFloat)
+{
+	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	double min, max;
+	zend_object *bounds = NULL;
+	int bounds_type = 'C' + sizeof("ClosedOpen") - 1;
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_DOUBLE(min)
+		Z_PARAM_DOUBLE(max)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_OBJ_OF_CLASS(bounds, random_ce_Random_IntervalBoundary);
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!zend_finite(min)) {
+		zend_argument_value_error(1, "must be finite");
+		RETURN_THROWS();
+	}
+
+	if (!zend_finite(max)) {
+		zend_argument_value_error(2, "must be finite");
+		RETURN_THROWS();
+	}
+
+	if (bounds) {
+		zval *case_name = zend_enum_fetch_case_name(bounds);
+		zend_string *bounds_name = Z_STR_P(case_name);
+
+		bounds_type = ZSTR_VAL(bounds_name)[0] + ZSTR_LEN(bounds_name);
+	}
+
+	switch (bounds_type) {
+	case 'C' + sizeof("ClosedOpen") - 1:
+		if (UNEXPECTED(max <= min)) {
+			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
+			RETURN_THROWS();
+		}
+
+		RETURN_DOUBLE(php_random_gammasection_closed_open(randomizer->algo, randomizer->status, min, max));
+	case 'C' + sizeof("ClosedClosed") - 1:
+		if (UNEXPECTED(max < min)) {
+			zend_argument_value_error(2, "must be greater than or equal to argument #1 ($min)");
+			RETURN_THROWS();
+		}
+
+		RETURN_DOUBLE(php_random_gammasection_closed_closed(randomizer->algo, randomizer->status, min, max));
+	case 'O' + sizeof("OpenClosed") - 1:
+		if (UNEXPECTED(max <= min)) {
+			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
+			RETURN_THROWS();
+		}
+
+		RETURN_DOUBLE(php_random_gammasection_open_closed(randomizer->algo, randomizer->status, min, max));
+	case 'O' + sizeof("OpenOpen") - 1:
+		if (UNEXPECTED(max <= min)) {
+			zend_argument_value_error(2, "must be greater than argument #1 ($min)");
+			RETURN_THROWS();
+		}
+
+		RETVAL_DOUBLE(php_random_gammasection_open_open(randomizer->algo, randomizer->status, min, max));
+
+		if (UNEXPECTED(isnan(Z_DVAL_P(return_value)))) {
+			zend_value_error("The given interval is empty, there are no floats between argument #1 ($min) and argument #2 ($max).");
+			RETURN_THROWS();
+		}
+
+		return;
+	default:
+		ZEND_UNREACHABLE();
+	}
+}
+/* }}} */
+
 /* {{{ Generate positive random number */
 PHP_METHOD(Random_Randomizer, nextInt)
 {
@@ -126,7 +242,22 @@ PHP_METHOD(Random_Randomizer, getInt)
 		RETURN_THROWS();
 	}
 
-	result = randomizer->algo->range(randomizer->status, min, max);
+	if (UNEXPECTED(
+		randomizer->algo->range == php_random_algo_mt19937.range
+		&& ((php_random_status_state_mt19937 *) randomizer->status->state)->mode != MT_RAND_MT19937
+	)) {
+		uint64_t r = php_random_algo_mt19937.generate(randomizer->status) >> 1;
+
+		/* This is an inlined version of the RAND_RANGE_BADSCALING macro that does not invoke UB when encountering
+		 * (max - min) > ZEND_LONG_MAX.
+		 */
+		zend_ulong offset = (double) ( (double) max - min + 1.0) * (r / (PHP_MT_RAND_MAX + 1.0));
+
+		result = (zend_long) (offset + min);
+	} else {
+		result = randomizer->algo->range(randomizer->status, min, max);
+	}
+
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
@@ -141,8 +272,7 @@ PHP_METHOD(Random_Randomizer, getBytes)
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	zend_string *retval;
 	zend_long length;
-	uint64_t result;
-	size_t total_size = 0, required_size;
+	size_t total_size = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(length)
@@ -154,17 +284,16 @@ PHP_METHOD(Random_Randomizer, getBytes)
 	}
 
 	retval = zend_string_alloc(length, 0);
-	required_size = length;
 
-	while (total_size < required_size) {
-		result = randomizer->algo->generate(randomizer->status);
+	while (total_size < length) {
+		uint64_t result = randomizer->algo->generate(randomizer->status);
 		if (EG(exception)) {
 			zend_string_free(retval);
 			RETURN_THROWS();
 		}
 		for (size_t i = 0; i < randomizer->status->last_generated_size; i++) {
 			ZSTR_VAL(retval)[total_size++] = (result >> (i * 8)) & 0xff;
-			if (total_size >= required_size) {
+			if (total_size >= length) {
 				break;
 			}
 		}
@@ -242,6 +371,91 @@ PHP_METHOD(Random_Randomizer, pickArrayKeys)
 		array_init(return_value);
 		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &t);
 	}
+}
+/* }}} */
+
+/* {{{ Get Random Bytes for String */
+PHP_METHOD(Random_Randomizer, getBytesFromString)
+{
+	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
+	zend_long length;
+	zend_string *source, *retval;
+	size_t total_size = 0;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2);
+		Z_PARAM_STR(source)
+		Z_PARAM_LONG(length)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const size_t source_length = ZSTR_LEN(source);
+	const size_t max_offset = source_length - 1;
+
+	if (source_length < 1) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	if (length < 1) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	retval = zend_string_alloc(length, 0);
+
+	if (max_offset > 0xff) {
+		while (total_size < length) {
+			uint64_t offset = randomizer->algo->range(randomizer->status, 0, max_offset);
+
+			if (EG(exception)) {
+				zend_string_free(retval);
+				RETURN_THROWS();
+			}
+
+			ZSTR_VAL(retval)[total_size++] = ZSTR_VAL(source)[offset];
+		}
+	} else {
+		uint64_t mask = max_offset;
+		// Copy the top-most bit into all lower bits.
+		// Shifting by 4 is sufficient, because max_offset
+		// is guaranteed to fit in an 8-bit integer at this
+		// point.
+		mask |= mask >> 1;
+		mask |= mask >> 2;
+		mask |= mask >> 4;
+
+		int failures = 0;
+		while (total_size < length) {
+			uint64_t result = randomizer->algo->generate(randomizer->status);
+			if (EG(exception)) {
+				zend_string_free(retval);
+				RETURN_THROWS();
+			}
+
+			for (size_t i = 0; i < randomizer->status->last_generated_size; i++) {
+				uint64_t offset = (result >> (i * 8)) & mask;
+
+				if (offset > max_offset) {
+					if (++failures > PHP_RANDOM_RANGE_ATTEMPTS) {
+						zend_string_free(retval);
+						zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", PHP_RANDOM_RANGE_ATTEMPTS);
+						RETURN_THROWS();
+					}
+
+					continue;
+				}
+
+				failures = 0;
+
+				ZSTR_VAL(retval)[total_size++] = ZSTR_VAL(source)[offset];
+				if (total_size >= length) {
+					break;
+				}
+			}
+		}
+	}
+
+	ZSTR_VAL(retval)[length] = '\0';
+	RETURN_STR(retval);
 }
 /* }}} */
 

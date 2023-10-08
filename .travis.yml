@@ -1,7 +1,7 @@
 git:
   quiet: true
 
-dist: bionic
+dist: focal
 language: c
 os: linux
 addons:
@@ -68,8 +68,6 @@ env:
 
 jobs:
     include:
-        - env: ENABLE_ZTS=1 ENABLE_DEBUG=1 ARM64=1
-          arch: arm64
         - env: ENABLE_ZTS=1 ENABLE_DEBUG=1 S390X=1
           arch: s390x
 
@@ -87,9 +85,7 @@ before_script:
 
 # Run PHPs run-tests.php
 script:
-    - ./travis/test.sh -d opcache.jit_buffer_size=16M -d opcache.jit=tracing
-    - if [[ "$ARM64" == 1 ]]; then ./travis/test.sh -d opcache.jit_buffer_size=16M -d opcache.jit=function; fi
-    - if [[ "$ARM64" == 1 ]]; then ./travis/test.sh -d opcache.jit_buffer_size=16M -d opcache.jit=tracing --repeat 2; fi
+    - travis_wait 60 ./travis/test.sh -d opcache.jit=tracing -d opcache.jit_buffer_size=64M -d opcache.jit_max_root_traces=1000000 -d opcache.jit_max_side_traces=1000000 -d opcache.jit_max_exit_counters=1000000 -d opcache.jit_hot_loop=1 -d opcache.jit_hot_func=1 -d opcache.jit_hot_return=1 -d opcache.jit_hot_side_exit=1
     - sapi/cli/php -d extension_dir=`pwd`/modules -r 'dl("zend_test");'
 
 after_success:

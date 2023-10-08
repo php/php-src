@@ -69,7 +69,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone)
 
 	const TimeZone& tz = fetch_datefmt(dfo)->getTimeZone();
 	TimeZone *tz_clone = tz.clone();
-	if (tz_clone == NULL) {
+	if (UNEXPECTED(tz_clone == NULL)) {
 		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_MEMORY_ALLOCATION_ERROR,
 				"datefmt_get_timezone: Out of memory when cloning time zone",
 				0);
@@ -101,6 +101,8 @@ U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 	}
 
 	fetch_datefmt(dfo)->adoptTimeZone(timezone);
+
+	RETURN_TRUE;
 }
 
 /* {{{ Get formatter calendar type. */
@@ -142,7 +144,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar_object)
 	}
 
 	Calendar *cal_clone = cal->clone();
-	if (cal_clone == NULL) {
+	if (UNEXPECTED(cal_clone == NULL)) {
 		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_MEMORY_ALLOCATION_ERROR,
 				"datefmt_get_calendar_object: Out of memory when cloning "
 				"calendar", 0);
@@ -193,7 +195,7 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 	if (cal_owned) {
 		/* a non IntlCalendar was specified, we want to keep the timezone */
 		TimeZone *old_timezone = fetch_datefmt(dfo)->getTimeZone().clone();
-		if (old_timezone == NULL) {
+		if (UNEXPECTED(old_timezone == NULL)) {
 			intl_errors_set(INTL_DATA_ERROR_P(dfo), U_MEMORY_ALLOCATION_ERROR,
 					"datefmt_set_calendar: Out of memory when cloning calendar",
 					0);
@@ -203,7 +205,7 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 		cal->adoptTimeZone(old_timezone);
 	} else {
 		cal = cal->clone();
-		if (cal == NULL) {
+		if (UNEXPECTED(cal == NULL)) {
 			intl_errors_set(INTL_DATA_ERROR_P(dfo), U_MEMORY_ALLOCATION_ERROR,
 					"datefmt_set_calendar: Out of memory when cloning calendar",
 					0);

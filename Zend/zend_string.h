@@ -19,7 +19,9 @@
 #ifndef ZEND_STRING_H
 #define ZEND_STRING_H
 
-#include "zend.h"
+#include "zend_types.h"
+#include "zend_gc.h"
+#include "zend_alloc.h"
 
 BEGIN_EXTERN_C()
 
@@ -80,6 +82,28 @@ END_EXTERN_C()
 /*---*/
 
 #define ZSTR_IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
+#define ZSTR_IS_VALID_UTF8(s)				(GC_FLAGS(s) & IS_STR_VALID_UTF8)
+
+/* These are properties, encoded as flags, that will hold on the resulting string
+ * after concatenating two strings that have these property.
+ * Example: concatenating two UTF-8 strings yields another UTF-8 string. */
+#define ZSTR_COPYABLE_CONCAT_PROPERTIES		(IS_STR_VALID_UTF8)
+
+#define ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(s) 				(GC_FLAGS(s) & ZSTR_COPYABLE_CONCAT_PROPERTIES)
+/* This macro returns the copyable concat properties which hold on both strings. */
+#define ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH(s1, s2)	(GC_FLAGS(s1) & GC_FLAGS(s2) & ZSTR_COPYABLE_CONCAT_PROPERTIES)
+
+#define ZSTR_COPY_CONCAT_PROPERTIES(out, in) do { \
+	zend_string *_out = (out); \
+	uint32_t properties = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES((in)); \
+	GC_ADD_FLAGS(_out, properties); \
+} while (0)
+
+#define ZSTR_COPY_CONCAT_PROPERTIES_BOTH(out, in1, in2) do { \
+	zend_string *_out = (out); \
+	uint32_t properties = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES_BOTH((in1), (in2)); \
+	GC_ADD_FLAGS(_out, properties); \
+} while (0)
 
 #define ZSTR_EMPTY_ALLOC() zend_empty_string
 #define ZSTR_CHAR(c) zend_one_char_string[c]
@@ -107,6 +131,8 @@ END_EXTERN_C()
 } while (0)
 
 #define ZSTR_ALLOCA_FREE(str, use_heap) free_alloca(str, use_heap)
+
+#define ZSTR_INIT_LITERAL(s, persistent) (zend_string_init((s), strlen(s), (persistent)))
 
 /*---*/
 
@@ -369,10 +395,10 @@ static zend_always_inline bool zend_string_equals(const zend_string *s1, const z
 	(ZSTR_LEN(s1) == ZSTR_LEN(s2) && !zend_binary_strcasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2)))
 
 #define zend_string_equals_literal_ci(str, c) \
-	(ZSTR_LEN(str) == sizeof(c) - 1 && !zend_binary_strcasecmp(ZSTR_VAL(str), ZSTR_LEN(str), (c), sizeof(c) - 1))
+	(ZSTR_LEN(str) == sizeof("" c) - 1 && !zend_binary_strcasecmp(ZSTR_VAL(str), ZSTR_LEN(str), (c), sizeof(c) - 1))
 
 #define zend_string_equals_literal(str, literal) \
-	zend_string_equals_cstr(str, literal, strlen(literal))
+	zend_string_equals_cstr(str, "" literal, sizeof(literal) - 1)
 
 static zend_always_inline bool zend_string_starts_with_cstr(const zend_string *str, const char *prefix, size_t prefix_length)
 {
@@ -385,6 +411,19 @@ static zend_always_inline bool zend_string_starts_with(const zend_string *str, c
 }
 
 #define zend_string_starts_with_literal(str, prefix) \
+	zend_string_starts_with_cstr(str, prefix, strlen(prefix))
+
+static zend_always_inline bool zend_string_starts_with_cstr_ci(const zend_string *str, const char *prefix, size_t prefix_length)
+{
+	return ZSTR_LEN(str) >= prefix_length && !strncasecmp(ZSTR_VAL(str), prefix, prefix_length);
+}
+
+static zend_always_inline bool zend_string_starts_with_ci(const zend_string *str, const zend_string *prefix)
+{
+	return zend_string_starts_with_cstr_ci(str, ZSTR_VAL(prefix), ZSTR_LEN(prefix));
+}
+
+#define zend_string_starts_with_literal_ci(str, prefix) \
 	zend_string_starts_with_cstr(str, prefix, strlen(prefix))
 
 /*
@@ -593,6 +632,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_AUTOGLOBAL_REQUEST,     "_REQUEST") \
 	_(ZEND_STR_COUNT,                  "count") \
 	_(ZEND_STR_SENSITIVEPARAMETER,     "SensitiveParameter") \
+	_(ZEND_STR_CONST_EXPR_PLACEHOLDER, "[constant expression]") \
 
 
 typedef enum _zend_known_string_id {

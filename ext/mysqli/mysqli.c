@@ -749,11 +749,11 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	MYSQL_RES		*result;
 	zval			*mysql_result;
 	zend_long			fetchtype;
-	zval			*ctor_params = NULL;
+	HashTable			*ctor_params = NULL;
 	zend_class_entry *ce = NULL;
 
 	if (into_object) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Ca", &mysql_result, mysqli_result_class_entry, &ce, &ctor_params) == FAILURE) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Ch", &mysql_result, mysqli_result_class_entry, &ce, &ctor_params) == FAILURE) {
 			RETURN_THROWS();
 		}
 		if (ce == NULL) {
@@ -787,9 +787,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	php_mysqli_fetch_into_hash_aux(return_value, result, fetchtype);
 
 	if (into_object && Z_TYPE_P(return_value) == IS_ARRAY) {
-		zval dataset, retval;
-		zend_fcall_info fci;
-		zend_fcall_info_cache fcc;
+		zval dataset;
 
 		ZVAL_COPY_VALUE(&dataset, return_value);
 
@@ -804,32 +802,10 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		}
 
 		if (ce->constructor) {
-			fci.size = sizeof(fci);
-			ZVAL_UNDEF(&fci.function_name);
-			fci.object = Z_OBJ_P(return_value);
-			fci.retval = &retval;
-			fci.params = NULL;
-			fci.param_count = 0;
-			fci.named_params = NULL;
-
-			if (ctor_params) {
-				if (zend_fcall_info_args(&fci, ctor_params) == FAILURE) {
-					ZEND_UNREACHABLE();
-				}
-			}
-
-			fcc.function_handler = ce->constructor;
-			fcc.called_scope = Z_OBJCE_P(return_value);
-			fcc.object = Z_OBJ_P(return_value);
-
-			if (zend_call_function(&fci, &fcc) == FAILURE) {
-				zend_throw_exception_ex(zend_ce_exception, 0, "Could not execute %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(ce->constructor->common.function_name));
-			} else {
-				zval_ptr_dtor(&retval);
-			}
-			zend_fcall_info_args_clear(&fci, 1);
-		} else if (ctor_params && zend_hash_num_elements(Z_ARRVAL_P(ctor_params)) > 0) {
-			zend_argument_error(zend_ce_exception, ERROR_ARG_POS(3),
+			zend_call_known_function(ce->constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value),
+				/* retval */ NULL, /* argc */ 0, /* params */ NULL, ctor_params);
+		} else if (ctor_params && zend_hash_num_elements(ctor_params) > 0) {
+			zend_argument_value_error(ERROR_ARG_POS(3),
 				"must be empty when the specified class (%s) does not have a constructor",
 				ZSTR_VAL(ce->name)
 			);

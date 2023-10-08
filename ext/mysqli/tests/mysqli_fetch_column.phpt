@@ -5,14 +5,9 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-if (!$IS_MYSQLND) {
-    die("skip mysqlnd only test");
-}
 ?>
 --FILE--
 <?php
-
-require_once "connect.inc";
 require 'table.inc';
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
@@ -115,7 +110,7 @@ mysqli_close($link);
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 [001]

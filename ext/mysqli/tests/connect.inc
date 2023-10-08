@@ -17,7 +17,6 @@
     $engine    = getenv("MYSQL_TEST_ENGINE")   ?: "InnoDB";
     $socket    = getenv("MYSQL_TEST_SOCKET")   ?: null;
     $skip_on_connect_failure  = getenv("MYSQL_TEST_SKIP_CONNECT_FAILURE") ?: true;
-    $connect_flags = (int)getenv("MYSQL_TEST_CONNECT_FLAGS") ?: 0;
     if ($socket) {
         ini_set('mysqli.default_socket', $socket);
     }
@@ -25,120 +24,88 @@
     /* Development setting: test experimental features and/or feature requests that never worked before? */
     $TEST_EXPERIMENTAL = 1 == getenv("MYSQL_TEST_EXPERIMENTAL");
 
-    $IS_MYSQLND = stristr(mysqli_get_client_info(), "mysqlnd");
-
-    if (!function_exists('sys_get_temp_dir')) {
-        function sys_get_temp_dir() {
-
-            if (!empty($_ENV['TMP']))
-                return realpath( $_ENV['TMP'] );
-            if (!empty($_ENV['TMPDIR']))
-                return realpath( $_ENV['TMPDIR'] );
-            if (!empty($_ENV['TEMP']))
-                return realpath( $_ENV['TEMP'] );
-
-            $temp_file = tempnam(md5(uniqid(rand(), TRUE)), '');
-            if ($temp_file) {
-                $temp_dir = realpath(dirname($temp_file));
-                unlink($temp_file);
-                return $temp_dir;
-            }
-            return FALSE;
+    function get_environment_connection_flags(): int {
+        static $connect_flags = null;
+        if ($connect_flags === null) {
+            $connect_flags = (int)getenv("MYSQL_TEST_CONNECT_FLAGS") ?: 0;
         }
+        return $connect_flags;
     }
 
-    if (!function_exists('my_mysqli_connect')) {
+    /**
+    * Whenever possible, please use this wrapper to make testing of MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
+    *
+    * @param bool $enable_env_flags Enable setting of connection flags through 	env(MYSQL_TEST_CONNECT_FLAGS)?
+    */
+    function my_mysqli_connect($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
+        $flags = $enable_env_flags? get_environment_connection_flags():0;
+        if ($flags !== 0) {
+            $link = mysqli_init();
+            if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags))
+                $link = false;
+        } else {
+            $link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+        }
 
-        /**
-        * Whenever possible, please use this wrapper to make testing of MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
-        *
-        * @param bool $enable_env_flags Enable setting of connection flags through 	env(MYSQL_TEST_CONNECT_FLAGS)?
-        */
-        function my_mysqli_connect($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
-            global $connect_flags;
+        return $link;
+    }
 
-            $flags = $enable_env_flags? $connect_flags:0;
+    /**
+    * Whenever possible, please use this wrapper to make testing of MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
+    *
+    * @param bool $enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)
+    */
+    function my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags = 0, $enable_env_flags = true) {
+        if ($enable_env_flags) {
+            $flags = $flags | get_environment_connection_flags();
+        }
+
+        return mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags);
+    }
+
+    class my_mysqli extends mysqli {
+        public function __construct($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
+            $flags = ($enable_env_flags) ? get_environment_connection_flags() : 0;
+
+            // Because the tests are meant to test both error modes, they can set the report_mode to a different value,
+            // which we do not want to override. However, we want to make sure that if a connection cannot be made,
+            // the constuctor will throw an exception. We store current report_mode in variable and restore it later.
+            $driver = new mysqli_driver;
+            $report_mode = $driver->report_mode;
+            $driver->report_mode = MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT;
+
             if ($flags !== 0) {
-                $link = mysqli_init();
-                if (!mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags))
-                    $link = false;
+                parent::__construct();
+                $this->real_connect($host, $user, $passwd, $db, $port, $socket, $flags);
             } else {
-                $link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
+                parent::__construct($host, $user, $passwd, $db, $port, $socket);
             }
 
-            return $link;
+            // Restore error mode
+            $driver->report_mode = $report_mode;
         }
+    }
 
-        /**
-        * Whenever possible, please use this wrapper to make testing of MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
-        *
-        * @param bool $enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)
-        */
-        function my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags = 0, $enable_env_flags = true) {
-            global $connect_flags;
-
-            if ($enable_env_flags)
-                $flags = $flags | $connect_flags;
-
-            return mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags);
+    function have_innodb($link) {
+        if (($res = $link->query("SHOW VARIABLES LIKE 'have_innodb'"))
+            && ($row = $res->fetch_row())
+            && !empty($row)
+        ) {
+            return !($row[1] == 'DISABLED' || $row[1] == 'NO');
         }
+        // MySQL 5.6.1+
+        if ($res = $link->query('SHOW ENGINES')) {
+            while ($row = $res->fetch_assoc()) {
+                if (!isset($row['Engine']) || !isset($row['Support'])) {
+                    return false;
+                }
 
-        class my_mysqli extends mysqli {
-            public function __construct($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
-                global $connect_flags;
-
-                $flags = ($enable_env_flags) ? $connect_flags : 0;
-
-                if ($flags !== 0) {
-                    parent::__construct();
-                    $this->real_connect($host, $user, $passwd, $db, $port, $socket, $flags);
-                } else {
-                    parent::__construct($host, $user, $passwd, $db, $port, $socket);
+                if (($row['Engine'] == 'InnoDB')
+                    && (($row['Support'] == 'YES') || ($row['Support'] == 'DEFAULT'))
+                ) {
+                    return true;
                 }
             }
         }
-
-        function have_innodb($link) {
-            if (($res = $link->query("SHOW VARIABLES LIKE 'have_innodb'"))
-                && ($row = $res->fetch_row())
-                && !empty($row)
-            ) {
-                return !($row[1] == 'DISABLED' || $row[1] == 'NO');
-            }
-            // MySQL 5.6.1+
-            if ($res = $link->query('SHOW ENGINES')) {
-                while ($row = $res->fetch_assoc()) {
-                    if (!isset($row['Engine']) || !isset($row['Support'])) {
-                        return false;
-                    }
-
-                    if (($row['Engine'] == 'InnoDB')
-                        && (($row['Support'] == 'YES') || ($row['Support'] == 'DEFAULT'))
-                    ) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-    } else {
-        printf("skip Eeeek/BUG/FIXME - connect.inc included twice! skipif bug?\n");
+        return false;
     }
-
-    function handle_catchable_fatal($errno, $error, $file, $line) {
-        static $errcodes = array();
-        if (empty($errcodes)) {
-            $constants = get_defined_constants();
-            foreach ($constants as $name => $value) {
-                if (substr($name, 0, 2) == "E_")
-                    $errcodes[$value] = $name;
-            }
-        }
-        printf("[%s] %s in %s on line %s\n",
-            (isset($errcodes[$errno])) ? $errcodes[$errno] : $errno,
-             $error, $file, $line);
-
-        return true;
-    }
-?>

@@ -28,9 +28,9 @@ foreach ($dataNodes AS $node) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 int(3)
-object(DOMText)#%d (21) {
+object(DOMText)#7 (23) {
   ["wholeText"]=>
   string(3) "
   "
@@ -52,6 +52,8 @@ object(DOMText)#%d (21) {
   int(3)
   ["parentNode"]=>
   NULL
+  ["parentElement"]=>
+  NULL
   ["childNodes"]=>
   string(22) "(object value omitted)"
   ["firstChild"]=>
@@ -64,6 +66,8 @@ object(DOMText)#%d (21) {
   NULL
   ["attributes"]=>
   NULL
+  ["isConnected"]=>
+  bool(false)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["namespaceURI"]=>
@@ -78,11 +82,15 @@ object(DOMText)#%d (21) {
   string(3) "
   "
 }
-object(DOMElement)#7 (23) {
+object(DOMElement)#7 (27) {
   ["schemaTypeInfo"]=>
   NULL
   ["tagName"]=>
   string(5) "form1"
+  ["className"]=>
+  string(0) ""
+  ["id"]=>
+  string(0) ""
   ["firstElementChild"]=>
   string(22) "(object value omitted)"
   ["lastElementChild"]=>
@@ -105,6 +113,8 @@ object(DOMElement)#7 (23) {
   int(1)
   ["parentNode"]=>
   NULL
+  ["parentElement"]=>
+  NULL
   ["childNodes"]=>
   string(22) "(object value omitted)"
   ["firstChild"]=>
@@ -117,6 +127,8 @@ object(DOMElement)#7 (23) {
   NULL
   ["attributes"]=>
   string(22) "(object value omitted)"
+  ["isConnected"]=>
+  bool(false)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["namespaceURI"]=>
@@ -134,7 +146,7 @@ object(DOMElement)#7 (23) {
     Value C
   "
 }
-object(DOMText)#%d (21) {
+object(DOMText)#7 (23) {
   ["wholeText"]=>
   string(1) "
 "
@@ -156,6 +168,8 @@ object(DOMText)#%d (21) {
   int(3)
   ["parentNode"]=>
   NULL
+  ["parentElement"]=>
+  NULL
   ["childNodes"]=>
   string(22) "(object value omitted)"
   ["firstChild"]=>
@@ -168,6 +182,8 @@ object(DOMText)#%d (21) {
   NULL
   ["attributes"]=>
   NULL
+  ["isConnected"]=>
+  bool(false)
   ["ownerDocument"]=>
   string(22) "(object value omitted)"
   ["namespaceURI"]=>

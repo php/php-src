@@ -4,14 +4,14 @@ Bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 if (PHP_INT_SIZE != 8) die('skip requires 64-bit');
 if (!defined('MYSQLI_OPT_INT_AND_FLOAT_NATIVE')) die('skip requires mysqlnd');
 ?>
 --FILE--
 <?php
 
-require_once("connect.inc");
+require_once 'connect.inc';
 $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 $link->query('SET @@global.max_allowed_packet = 67108864');

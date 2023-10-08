@@ -222,7 +222,7 @@ static zend_long odbc_handle_doer(pdo_dbh_t *dbh, const zend_string *sql)
 	PDO_ODBC_HSTMT	stmt;
 
 	rc = SQLAllocHandle(SQL_HANDLE_STMT, H->dbc, &stmt);
-	if (rc != SQL_SUCCESS) {
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		pdo_odbc_drv_error("SQLAllocHandle: STMT");
 		return -1;
 	}
@@ -449,7 +449,12 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 
 	dbh->driver_data = H;
 
-	SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &H->env);
+	rc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &H->env);
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		pdo_odbc_drv_error("SQLAllocHandle: ENV");
+		goto fail;
+	}
+
 	rc = SQLSetEnvAttr(H->env, SQL_ATTR_ODBC_VERSION, (void*)SQL_OV_ODBC3, 0);
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
@@ -469,7 +474,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 
 	rc = SQLAllocHandle(SQL_HANDLE_DBC, H->env, &H->dbc);
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		pdo_odbc_drv_error("SQLAllocHandle (DBC)");
+		pdo_odbc_drv_error("SQLAllocHandle: DBC");
 		goto fail;
 	}
 

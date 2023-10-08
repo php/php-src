@@ -91,7 +91,7 @@ echo "nocache";
 mysqlnd.sha256_server_public_key="test_sha256_ini"
 --FILE--
 <?php
-    require_once "connect.inc";
+    require_once 'connect.inc';
 
 
     $link = new mysqli($host, 'shatest', 'shatest', $db, $port, $socket);
@@ -113,7 +113,7 @@ mysqlnd.sha256_server_public_key="test_sha256_ini"
 ?>
 --CLEAN--
 <?php
-	require_once "clean_table.inc";
+	require_once 'clean_table.inc';
 	$link->query('DROP USER shatest');
 	$link->query('DROP USER shatest@localhost');
 	$file = "test_sha256_ini";

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ef1b6e5e8ff6890ccb176c08c22499048afdfdb5 */
+ * Stub hash: 1eb2511da8ecb00132a00d1f3c95e03f9463db55 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -131,6 +131,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_set, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, second, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_setDate, 0, 3, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, month, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, dayOfMonth, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_setDateTime, 0, 5, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, month, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, dayOfMonth, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, hour, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, minute, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, second, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_setFirstDayOfWeek, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, dayOfWeek, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -154,6 +169,21 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlCalendar_set
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_IntlCalendar_toDateTime, 0, 0, DateTime, MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_IntlGregorianCalendar_createFromDate, 0, 3, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, month, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, dayOfMonth, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_IntlGregorianCalendar_createFromDateTime, 0, 5, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, month, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, dayOfMonth, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, hour, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, minute, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, second, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlGregorianCalendar___construct, 0, 0, 0)
@@ -213,6 +243,8 @@ ZEND_FUNCTION(intlcal_is_weekend);
 ZEND_FUNCTION(intlcal_roll);
 ZEND_FUNCTION(intlcal_is_set);
 ZEND_FUNCTION(intlcal_set);
+ZEND_METHOD(IntlCalendar, setDate);
+ZEND_METHOD(IntlCalendar, setDateTime);
 ZEND_FUNCTION(intlcal_set_first_day_of_week);
 ZEND_FUNCTION(intlcal_set_lenient);
 ZEND_FUNCTION(intlcal_set_repeated_wall_time_option);
@@ -220,6 +252,8 @@ ZEND_FUNCTION(intlcal_set_skipped_wall_time_option);
 ZEND_FUNCTION(intlcal_set_time);
 ZEND_FUNCTION(intlcal_set_time_zone);
 ZEND_FUNCTION(intlcal_to_date_time);
+ZEND_METHOD(IntlGregorianCalendar, createFromDate);
+ZEND_METHOD(IntlGregorianCalendar, createFromDateTime);
 ZEND_METHOD(IntlGregorianCalendar, __construct);
 ZEND_FUNCTION(intlgregcal_set_gregorian_change);
 ZEND_FUNCTION(intlgregcal_get_gregorian_change);
@@ -266,6 +300,8 @@ static const zend_function_entry class_IntlCalendar_methods[] = {
 	ZEND_ME_MAPPING(roll, intlcal_roll, arginfo_class_IntlCalendar_roll, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(isSet, intlcal_is_set, arginfo_class_IntlCalendar_isSet, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(set, intlcal_set, arginfo_class_IntlCalendar_set, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlCalendar, setDate, arginfo_class_IntlCalendar_setDate, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlCalendar, setDateTime, arginfo_class_IntlCalendar_setDateTime, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(setFirstDayOfWeek, intlcal_set_first_day_of_week, arginfo_class_IntlCalendar_setFirstDayOfWeek, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(setLenient, intlcal_set_lenient, arginfo_class_IntlCalendar_setLenient, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(setRepeatedWallTimeOption, intlcal_set_repeated_wall_time_option, arginfo_class_IntlCalendar_setRepeatedWallTimeOption, ZEND_ACC_PUBLIC)
@@ -278,6 +314,8 @@ static const zend_function_entry class_IntlCalendar_methods[] = {
 
 
 static const zend_function_entry class_IntlGregorianCalendar_methods[] = {
+	ZEND_ME(IntlGregorianCalendar, createFromDate, arginfo_class_IntlGregorianCalendar_createFromDate, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(IntlGregorianCalendar, createFromDateTime, arginfo_class_IntlGregorianCalendar_createFromDateTime, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(IntlGregorianCalendar, __construct, arginfo_class_IntlGregorianCalendar___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(setGregorianChange, intlgregcal_set_gregorian_change, arginfo_class_IntlGregorianCalendar_setGregorianChange, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getGregorianChange, intlgregcal_get_gregorian_change, arginfo_class_IntlGregorianCalendar_getGregorianChange, ZEND_ACC_PUBLIC)

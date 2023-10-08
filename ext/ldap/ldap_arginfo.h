@@ -1,10 +1,19 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 893c86a23c81c32d2c8a4b2ca14a785cd8a99a37 */
+ * Stub hash: fec87d81c21ac5d56e62a5e0b4bbe673ea76edd5 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, uri, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, port, IS_LONG, 0, "389")
+	ZEND_ARG_TYPE_INFO(0, wallet, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, auth_mode, IS_LONG, 0, "GSLC_SSL_NO_AUTH")
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect_wallet, 0, 3, LDAP\\Connection, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, uri, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO(0, wallet, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, auth_mode, IS_LONG, 0, "GSLC_SSL_NO_AUTH")
@@ -307,6 +316,17 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_exop, 0, 2, LDAP\\Resul
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_exop_sync, 0, 2, LDAP\\Result, MAY_BE_BOOL)
+	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
+	ZEND_ARG_TYPE_INFO(0, request_oid, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, request_data, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "NULL")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, response_data, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, response_oid, "null")
+ZEND_END_ARG_INFO()
+#endif
+
 #if defined(HAVE_LDAP_PASSWD)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_exop_passwd, 0, 1, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
@@ -343,6 +363,9 @@ ZEND_END_ARG_INFO()
 
 #if defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_connect);
+#endif
+#if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
+ZEND_FUNCTION(ldap_connect_wallet);
 #endif
 #if !(defined(HAVE_ORALDAP))
 ZEND_FUNCTION(ldap_connect);
@@ -426,6 +449,9 @@ ZEND_FUNCTION(ldap_8859_to_t61);
 #if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 ZEND_FUNCTION(ldap_exop);
 #endif
+#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
+ZEND_FUNCTION(ldap_exop_sync);
+#endif
 #if defined(HAVE_LDAP_PASSWD)
 ZEND_FUNCTION(ldap_exop_passwd);
 #endif
@@ -443,6 +469,9 @@ ZEND_FUNCTION(ldap_parse_exop);
 static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_connect, arginfo_ldap_connect)
+#endif
+#if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
+	ZEND_FE(ldap_connect_wallet, arginfo_ldap_connect_wallet)
 #endif
 #if !(defined(HAVE_ORALDAP))
 	ZEND_FE(ldap_connect, arginfo_ldap_connect)
@@ -528,6 +557,9 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
 	ZEND_FE(ldap_exop, arginfo_ldap_exop)
+#endif
+#if defined(HAVE_LDAP_EXTENDED_OPERATION_S)
+	ZEND_FE(ldap_exop_sync, arginfo_ldap_exop_sync)
 #endif
 #if defined(HAVE_LDAP_PASSWD)
 	ZEND_FE(ldap_exop_passwd, arginfo_ldap_exop_passwd)
@@ -833,6 +865,10 @@ static void register_ldap_symbols(int module_number)
 #if defined(HAVE_ORALDAP)
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect", sizeof("ldap_connect") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#endif
+#if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect_wallet", sizeof("ldap_connect_wallet") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_bind", sizeof("ldap_bind") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);

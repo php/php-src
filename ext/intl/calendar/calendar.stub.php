@@ -244,7 +244,7 @@ class IntlCalendar
     public function before(IntlCalendar $other): bool {}
 
     /**
-     * @return bool
+     * @return true
      * @alias intlcal_clear
      */
     public function clear(?int $field = null) {} // TODO make return type void
@@ -341,7 +341,7 @@ class IntlCalendar
     public function getMinimalDaysInFirstWeek(): int|false {}
 
     /**
-     * @return bool
+     * @return true
      * @alias intlcal_set_minimal_days_in_first_week
      */
     public function setMinimalDaysInFirstWeek(int $days) {} // TODO make return void
@@ -432,31 +432,35 @@ class IntlCalendar
     public function isSet(int $field): bool {}
 
     /**
-     * @return bool
+     * @return true
      * @alias intlcal_set
      */
     public function set(int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN) {} // TODO make return type void
 
+    public function setDate(int $year, int $month, int $dayOfMonth): void {}
+
+    public function setDateTime(int $year, int $month, int $dayOfMonth, int $hour, int $minute, ?int $second = null): void {}
+
     /**
-     * @return bool
+     * @return true
      * @alias intlcal_set_first_day_of_week
      */
     public function setFirstDayOfWeek(int $dayOfWeek) {} // TODO make return type void
 
     /**
-     * @return bool
+     * @return true
      * @alias intlcal_set_lenient
      */
     public function setLenient(bool $lenient) {} // TODO make return type void
 
     /**
-     * @return bool
+     * @return true
      * @alias intlcal_set_repeated_wall_time_option
      */
     public function setRepeatedWallTimeOption(int $option) {} // TODO make return type void
 
     /**
-     * @return bool
+     * @return true
      * @alias intlcal_set_skipped_wall_time_option
      */
     public function setSkippedWallTimeOption(int $option) {} // TODO make return type void
@@ -484,6 +488,10 @@ class IntlCalendar
 /** @not-serializable */
 class IntlGregorianCalendar extends IntlCalendar
 {
+    public static function createFromDate(int $year, int $month, int $dayOfMonth): static {}
+
+    public static function createFromDateTime(int $year, int $month, int $dayOfMonth, int $hour, int $minute, ?int $second = null): static {}
+
     /**
      * @param DateTimeZone|IntlTimeZone|string|int|null $timezoneOrYear
      * @param string|int|null $localeOrMonth

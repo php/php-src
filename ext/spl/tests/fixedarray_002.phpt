@@ -71,7 +71,7 @@ var_dump(count($a), $a->getSize(), count($a) == $a->getSize());
 A::offsetSet
 RuntimeException: Index invalid or out of range
 A::offsetGet
-TypeError: Illegal offset type
+TypeError: Cannot access offset of type string on SplFixedArray
 A::offsetUnset
 RuntimeException: Index invalid or out of range
 A::offsetSet

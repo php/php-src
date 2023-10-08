@@ -17,6 +17,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && (defined(HAVE_XML) || defined(HAVE_XMLRPC)) && !defined(HAVE_LIBEXPAT)
 #include "expat_compat.h"
+#include "ext/libxml/php_libxml.h"
 
 typedef struct _php_xml_ns {
 	xmlNsPtr nsptr;
@@ -469,6 +470,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 		return NULL;
 	}
 
+	php_libxml_sanitize_parse_ctxt_options(parser->parser);
 	xmlCtxtUseOptions(parser->parser, XML_PARSE_OLDSAX);
 
 	parser->parser->replaceEntities = 1;

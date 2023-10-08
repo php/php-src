@@ -4,13 +4,13 @@ Bug #42378 (bind_result memory exhaustion, SELECT column, FORMAT(...) AS _format
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 memory_limit=83886080
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     function create_table($link, $column, $min, $max, $engine, $offset) {
 
@@ -182,7 +182,7 @@ memory_limit=83886080
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+	require_once 'clean_table.inc';
 ?>
 --EXPECT--
 FLOAT

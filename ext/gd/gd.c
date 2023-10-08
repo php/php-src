@@ -593,6 +593,12 @@ PHP_FUNCTION(imageloadfont)
 		font->w = FLIPWORD(font->w);
 		font->h = FLIPWORD(font->h);
 		font->nchars = FLIPWORD(font->nchars);
+		if (overflow2(font->nchars, font->h) || overflow2(font->nchars * font->h, font->w )) {
+			php_error_docref(NULL, E_WARNING, "Error reading font, invalid font header");
+			efree(font);
+			php_stream_close(stream);
+			RETURN_FALSE;
+		}
 		body_size = font->w * font->h * font->nchars;
 	}
 
@@ -603,6 +609,7 @@ PHP_FUNCTION(imageloadfont)
 		RETURN_FALSE;
 	}
 
+	ZEND_ASSERT(body_size > 0);
 	font->data = emalloc(body_size);
 	b = 0;
 	while (b < body_size && (n = php_stream_read(stream, &font->data[b], body_size - b)) > 0) {
@@ -1182,9 +1189,8 @@ PHP_FUNCTION(imagerotate)
 	gdImagePtr im_dst, im_src;
 	double degrees;
 	zend_long color;
-	bool ignoretransparent = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Odl|b", &SIM, gd_image_ce,  &degrees, &color, &ignoretransparent) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Odl", &SIM, gd_image_ce,  &degrees, &color) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1713,37 +1719,34 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 {
 	zval *imgind;
 	char *file = NULL;
-	zend_long quality = 0, type = 0;
+	zend_long quality = 128, type = 1;
 	gdImagePtr im;
 	FILE *fp;
 	size_t file_len = 0;
-	int argc = ZEND_NUM_ARGS();
-	int q = -1, t = 1;
 
 	/* The quality parameter for gd2 stands for chunk size */
 
 	switch (image_type) {
 		case PHP_GDIMG_TYPE_GD:
-			if (zend_parse_parameters(argc, "O|p!", &imgind, gd_image_ce, &file, &file_len) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|p!", &imgind, gd_image_ce, &file, &file_len) == FAILURE) {
 				RETURN_THROWS();
 			}
 			break;
 		case PHP_GDIMG_TYPE_GD2:
-			if (zend_parse_parameters(argc, "O|p!ll", &imgind, gd_image_ce, &file, &file_len, &quality, &type) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|p!ll", &imgind, gd_image_ce, &file, &file_len, &quality, &type) == FAILURE) {
 				RETURN_THROWS();
 			}
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
-	im = php_gd_libgdimageptr_from_zval_p(imgind);
-
-	if (argc >= 3) {
-		q = quality;
-		if (argc == 4) {
-			t = type;
-		}
+	/* quality must fit in an int */
+	if (quality < INT_MIN || quality > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Argument #3 ($chunk_size) must be between %d and %d", INT_MIN, INT_MAX);
+		RETURN_FALSE;
 	}
+
+	im = php_gd_libgdimageptr_from_zval_p(imgind);
 
 	if (file_len) {
 		PHP_GD_CHECK_OPEN_BASEDIR(file, "Invalid filename");
@@ -1759,10 +1762,10 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				gdImageGd(im, fp);
 				break;
 			case PHP_GDIMG_TYPE_GD2:
-				if (q == -1) {
-					q = 128;
+				if (quality == -1) {
+					quality = 128;
 				}
-				gdImageGd2(im, fp, q, t);
+				gdImageGd2(im, fp, quality, type);
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
@@ -1785,10 +1788,10 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				gdImageGd(im, tmp);
 				break;
 			case PHP_GDIMG_TYPE_GD2:
-				if (q == -1) {
-					q = 128;
+				if (quality == -1) {
+					quality = 128;
 				}
-				gdImageGd2(im, tmp, q, t);
+				gdImageGd2(im, tmp, quality, type);
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
@@ -3980,9 +3983,7 @@ static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf, int l)
 
 static void _php_image_output_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 {
-	if(ctx) {
-		efree(ctx);
-	}
+	efree(ctx);
 } /* }}} */
 
 static void _php_image_stream_putc(struct gdIOCtx *ctx, int c) /* {{{ */ {
@@ -4002,21 +4003,16 @@ static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 	if(ctx->data) {
 		ctx->data = NULL;
 	}
-	if(ctx) {
-		efree(ctx);
-	}
+	efree(ctx);
 } /* }}} */
 
 static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
 {
-
 	if(ctx->data) {
 		php_stream_close((php_stream *) ctx->data);
 		ctx->data = NULL;
 	}
-	if(ctx) {
-		efree(ctx);
-	}
+	efree(ctx);
 } /* }}} */
 
 static gdIOCtx *create_stream_context_from_zval(zval *to_zval) {
@@ -4040,7 +4036,7 @@ static gdIOCtx *create_stream_context_from_zval(zval *to_zval) {
 			return NULL;
 		}
 	} else {
-		zend_argument_type_error(2, "must be a file name or a stream resource, %s given", zend_zval_type_name(to_zval));
+		zend_argument_type_error(2, "must be a file name or a stream resource, %s given", zend_zval_value_name(to_zval));
 		return NULL;
 	}
 

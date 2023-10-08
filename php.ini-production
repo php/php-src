@@ -75,7 +75,7 @@
 
 ; php.ini-production contains settings which hold security, performance and
 ; best practices at its core. But please be aware, these settings may break
-; compatibility with older or less security conscience applications. We
+; compatibility with older or less security-conscious applications. We
 ; recommending using the production ini in production and testing environments.
 
 ; php.ini-development is very similar to its production variant, except it is
@@ -144,6 +144,11 @@
 ;   Development Value: 5
 ;   Production Value: 5
 
+; session.sid_length
+;   Default Value: 32
+;   Development Value: 26
+;   Production Value: 26
+
 ; short_open_tag
 ;   Default Value: On
 ;   Development Value: Off
@@ -153,6 +158,11 @@
 ;   Default Value: "EGPCS"
 ;   Development Value: "GPCS"
 ;   Production Value: "GPCS"
+
+; zend.assertions
+;   Default Value: 1
+;   Development Value: 1
+;   Production Value: -1
 
 ; zend.exception_ignore_args
 ;   Default Value: Off
@@ -424,6 +434,11 @@ max_input_time = 60
 
 ; How many GET/POST/COOKIE input variables may be accepted
 ;max_input_vars = 1000
+
+; How many multipart body parts (combined input variable and file uploads) may
+; be accepted.
+; Default Value: -1 (Sum of max_input_vars and max_file_uploads)
+;max_multipart_body_parts = 1500
 
 ; Maximum amount of memory a script may consume
 ; https://php.net/memory-limit
@@ -915,6 +930,12 @@ default_socket_timeout = 60
 ;   Be sure to appropriately set the extension_dir directive.
 ;
 ;extension=bz2
+
+; The ldap extension must be before curl if OpenSSL 1.0.2 and OpenLDAP is used
+; otherwise it results in segfault when unloading after using SASL.
+; See https://github.com/php/php-src/issues/8620 for more info.
+;extension=ldap
+
 ;extension=curl
 ;extension=ffi
 ;extension=ftp
@@ -924,7 +945,6 @@ default_socket_timeout = 60
 ;extension=gmp
 ;extension=intl
 ;extension=imap
-;extension=ldap
 ;extension=mbstring
 ;extension=exif      ; Must be after mbstring as it depends on it
 ;extension=mysqli
@@ -1092,6 +1112,10 @@ smtp_port = 25
 ; Add X-PHP-Originating-Script: that will include uid of the script followed by the filename
 mail.add_x_header = Off
 
+; Use mixed LF and CRLF line separators to keep compatibility with some
+; RFC 2822 non conformant MTA.
+mail.mixed_lf_and_crlf = Off
+
 ; The path to a log file that will log all mail() calls. Log entries include
 ; the full path of the script, line number, To address and headers.
 ;mail.log =
@@ -1188,9 +1212,6 @@ mysqli.default_user =
 ; file will be able to reveal the password as well.
 ; https://php.net/mysqli.default-pw
 mysqli.default_pw =
-
-; Allow or prevent reconnect
-mysqli.reconnect = Off
 
 ; If this option is enabled, closing a persistent connection will rollback
 ; any pending transactions of this connection, before it is put back
@@ -1579,32 +1600,13 @@ session.sid_bits_per_character = 5
 ; -1: Do not compile at all
 ;  0: Jump over assertion at run-time
 ;  1: Execute assertions
-; Changing from or to a negative value is only possible in php.ini! (For turning assertions on and off at run-time, see assert.active, when zend.assertions = 1)
+; Changing from or to a negative value is only possible in php.ini!
+; (For turning assertions on and off at run-time, toggle zend.assertions between the values 1 and 0)
 ; Default Value: 1
 ; Development Value: 1
 ; Production Value: -1
 ; https://php.net/zend.assertions
 zend.assertions = -1
-
-; Assert(expr); active by default.
-; https://php.net/assert.active
-;assert.active = On
-
-; Throw an AssertionError on failed assertions
-; https://php.net/assert.exception
-;assert.exception = On
-
-; Issue a PHP warning for each failed assertion. (Overridden by assert.exception if active)
-; https://php.net/assert.warning
-;assert.warning = On
-
-; Don't bail out by default.
-; https://php.net/assert.bail
-;assert.bail = Off
-
-; User-function to be called if an assertion fails.
-; https://php.net/assert.callback
-;assert.callback = 0
 
 [COM]
 ; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
@@ -1838,10 +1840,6 @@ ldap.max_links = -1
 ; are cached.
 ;opcache.max_file_size=0
 
-; Check the cache checksum each N requests.
-; The default value of "0" means that the checks are disabled.
-;opcache.consistency_checks=0
-
 ; How long to wait (in seconds) for a scheduled restart to begin if the cache
 ; is not being accessed.
 ;opcache.force_restart_timeout=180
@@ -1893,8 +1891,13 @@ ldap.max_links = -1
 ;opcache.file_cache_fallback=1
 
 ; Enables or disables copying of PHP code (text segment) into HUGE PAGES.
-; This should improve performance, but requires appropriate OS configuration.
-;opcache.huge_code_pages=1
+; Under certain circumstances (if only a single global PHP process is
+; started from which all others fork), this can increase performance
+; by a tiny amount because TLB misses are reduced.  On the other hand, this
+; delays PHP startup, increases memory usage and degrades performance
+; under memory pressure - use with care.
+; Requires appropriate OS configuration.
+;opcache.huge_code_pages=0
 
 ; Validate cached file permissions.
 ;opcache.validate_permission=0

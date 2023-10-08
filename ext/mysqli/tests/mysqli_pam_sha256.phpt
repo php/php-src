@@ -77,7 +77,7 @@ echo "nocache";
 ?>
 --FILE--
 <?php
-    require_once "connect.inc";
+    require_once 'connect.inc';
 
     if (!$link = my_mysqli_connect($host, 'shatest', 'shatest', $db, $port, $socket)) {
         printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -103,7 +103,7 @@ echo "nocache";
 ?>
 --CLEAN--
 <?php
-    require_once "clean_table.inc";
+    require_once 'clean_table.inc';
     $link->query('DROP USER shatest');
     $link->query('DROP USER shatest@localhost');
 ?>

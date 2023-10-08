@@ -750,7 +750,16 @@ PHP_FUNCTION(unpack)
 			c = *format;
 
 			if (c >= '0' && c <= '9') {
-				repetitions = atoi(format);
+				errno = 0;
+				long tmp = strtol(format, NULL, 10);
+				/* There is not strtoi. We have to check the range ourselves.
+				 * With 32-bit long the INT_{MIN,MAX} are useless because long == int, but with 64-bit they do limit us to 32-bit. */
+				if (errno || tmp < INT_MIN || tmp > INT_MAX) {
+					php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
+					zend_array_destroy(Z_ARR_P(return_value));
+					RETURN_FALSE;
+				}
+				repetitions = tmp;
 
 				while (formatlen > 0 && *format >= '0' && *format <= '9') {
 					format++;
@@ -800,7 +809,7 @@ PHP_FUNCTION(unpack)
 
 			case 'h':
 			case 'H':
-				size = (repetitions > 0) ? (repetitions + (repetitions % 2)) / 2 : repetitions;
+				size = (repetitions > 0) ? ((unsigned int) repetitions + 1) / 2 : repetitions;
 				repetitions = 1;
 				break;
 
@@ -863,12 +872,6 @@ PHP_FUNCTION(unpack)
 			default:
 				zend_value_error("Invalid format type %c", type);
 				RETURN_THROWS();
-		}
-
-		if (size != 0 && size != -1 && size < 0) {
-			php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
-			zend_array_destroy(Z_ARR_P(return_value));
-			RETURN_FALSE;
 		}
 
 
@@ -1178,7 +1181,7 @@ PHP_FUNCTION(unpack)
 				/* Reached end of input for '*' repeater */
 				break;
 			} else {
-				php_error_docref(NULL, E_WARNING, "Type %c: not enough input, need %d, have " ZEND_LONG_FMT, type, size, inputlen - inputpos);
+				php_error_docref(NULL, E_WARNING, "Type %c: not enough input values, need %d values but only " ZEND_LONG_FMT " %s provided", type, size, inputlen - inputpos, inputlen - inputpos == 1 ? "was" : "were");
 				zend_array_destroy(Z_ARR_P(return_value));
 				RETURN_FALSE;
 			}

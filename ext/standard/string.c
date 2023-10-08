@@ -48,46 +48,8 @@
 
 #ifdef __SSE2__
 #include <emmintrin.h>
+#include "Zend/zend_bitset.h"
 #endif
-
-#define STR_PAD_LEFT			0
-#define STR_PAD_RIGHT			1
-#define STR_PAD_BOTH			2
-#define PHP_PATHINFO_DIRNAME 	1
-#define PHP_PATHINFO_BASENAME 	2
-#define PHP_PATHINFO_EXTENSION 	4
-#define PHP_PATHINFO_FILENAME 	8
-#define PHP_PATHINFO_ALL	(PHP_PATHINFO_DIRNAME | PHP_PATHINFO_BASENAME | PHP_PATHINFO_EXTENSION | PHP_PATHINFO_FILENAME)
-
-#define STR_STRSPN				0
-#define STR_STRCSPN				1
-
-/* {{{ register_string_constants */
-void register_string_constants(INIT_FUNC_ARGS)
-{
-	REGISTER_LONG_CONSTANT("STR_PAD_LEFT", STR_PAD_LEFT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STR_PAD_RIGHT", STR_PAD_RIGHT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STR_PAD_BOTH", STR_PAD_BOTH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PATHINFO_DIRNAME", PHP_PATHINFO_DIRNAME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PATHINFO_BASENAME", PHP_PATHINFO_BASENAME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PATHINFO_EXTENSION", PHP_PATHINFO_EXTENSION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PATHINFO_FILENAME", PHP_PATHINFO_FILENAME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PATHINFO_ALL", PHP_PATHINFO_ALL, CONST_CS | CONST_PERSISTENT);
-
-	/* If last members of struct lconv equal CHAR_MAX, no grouping is done */
-	REGISTER_LONG_CONSTANT("CHAR_MAX", CHAR_MAX, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LC_CTYPE", LC_CTYPE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LC_NUMERIC", LC_NUMERIC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LC_TIME", LC_TIME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LC_COLLATE", LC_COLLATE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LC_MONETARY", LC_MONETARY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("LC_ALL", LC_ALL, CONST_CS | CONST_PERSISTENT);
-# ifdef LC_MESSAGES
-	REGISTER_LONG_CONSTANT("LC_MESSAGES", LC_MESSAGES, CONST_CS | CONST_PERSISTENT);
-# endif
-
-}
-/* }}} */
 
 /* this is read-only, so it's ok */
 ZEND_SET_ALIGNED(16, static const char hexconvtab[]) = "0123456789abcdef";
@@ -288,13 +250,13 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 		RETURN_LONG(0);
 	}
 
-	if (behavior == STR_STRSPN) {
+	if (behavior == PHP_STR_STRSPN) {
 		RETURN_LONG(php_strspn(ZSTR_VAL(s11) + start /*str1_start*/,
 						ZSTR_VAL(s22) /*str2_start*/,
 						ZSTR_VAL(s11) + start + len /*str1_end*/,
 						ZSTR_VAL(s22) + ZSTR_LEN(s22) /*str2_end*/));
 	} else {
-		ZEND_ASSERT(behavior == STR_STRCSPN);
+		ZEND_ASSERT(behavior == PHP_STR_STRCSPN);
 		RETURN_LONG(php_strcspn(ZSTR_VAL(s11) + start /*str1_start*/,
 						ZSTR_VAL(s22) /*str2_start*/,
 						ZSTR_VAL(s11) + start + len /*str1_end*/,
@@ -306,187 +268,18 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 /* {{{ Finds length of initial segment consisting entirely of characters found in mask. If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) */
 PHP_FUNCTION(strspn)
 {
-	php_spn_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, STR_STRSPN);
+	php_spn_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_STR_STRSPN);
 }
 /* }}} */
 
 /* {{{ Finds length of initial segment consisting entirely of characters not found in mask. If start or/and length is provide works like strcspn(substr($s,$start,$len),$bad_chars) */
 PHP_FUNCTION(strcspn)
 {
-	php_spn_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, STR_STRCSPN);
+	php_spn_common_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_STR_STRCSPN);
 }
 /* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION(nl_langinfo) */
 #ifdef HAVE_NL_LANGINFO
-PHP_MINIT_FUNCTION(nl_langinfo)
-{
-#define REGISTER_NL_LANGINFO_CONSTANT(x)	REGISTER_LONG_CONSTANT(#x, x, CONST_CS | CONST_PERSISTENT)
-#ifdef ABDAY_1
-	REGISTER_NL_LANGINFO_CONSTANT(ABDAY_1);
-	REGISTER_NL_LANGINFO_CONSTANT(ABDAY_2);
-	REGISTER_NL_LANGINFO_CONSTANT(ABDAY_3);
-	REGISTER_NL_LANGINFO_CONSTANT(ABDAY_4);
-	REGISTER_NL_LANGINFO_CONSTANT(ABDAY_5);
-	REGISTER_NL_LANGINFO_CONSTANT(ABDAY_6);
-	REGISTER_NL_LANGINFO_CONSTANT(ABDAY_7);
-#endif
-#ifdef DAY_1
-	REGISTER_NL_LANGINFO_CONSTANT(DAY_1);
-	REGISTER_NL_LANGINFO_CONSTANT(DAY_2);
-	REGISTER_NL_LANGINFO_CONSTANT(DAY_3);
-	REGISTER_NL_LANGINFO_CONSTANT(DAY_4);
-	REGISTER_NL_LANGINFO_CONSTANT(DAY_5);
-	REGISTER_NL_LANGINFO_CONSTANT(DAY_6);
-	REGISTER_NL_LANGINFO_CONSTANT(DAY_7);
-#endif
-#ifdef ABMON_1
-	REGISTER_NL_LANGINFO_CONSTANT(ABMON_1);
-	REGISTER_NL_LANGINFO_CONSTANT(ABMON_2);
-	REGISTER_NL_LANGINFO_CONSTANT(ABMON_3);
-	REGISTER_NL_LANGINFO_CONSTANT(ABMON_4);
-	REGISTER_NL_LANGINFO_CONSTANT(ABMON_5);
-	REGISTER_NL_LANGINFO_CONSTANT(ABMON_6);
-	REGISTER_NL_LANGINFO_CONSTANT(ABMON_7);
-	REGISTER_NL_LANGINFO_CONSTANT(ABMON_8);
-	REGISTER_NL_LANGINFO_CONSTANT(ABMON_9);
-	REGISTER_NL_LANGINFO_CONSTANT(ABMON_10);
-	REGISTER_NL_LANGINFO_CONSTANT(ABMON_11);
-	REGISTER_NL_LANGINFO_CONSTANT(ABMON_12);
-#endif
-#ifdef MON_1
-	REGISTER_NL_LANGINFO_CONSTANT(MON_1);
-	REGISTER_NL_LANGINFO_CONSTANT(MON_2);
-	REGISTER_NL_LANGINFO_CONSTANT(MON_3);
-	REGISTER_NL_LANGINFO_CONSTANT(MON_4);
-	REGISTER_NL_LANGINFO_CONSTANT(MON_5);
-	REGISTER_NL_LANGINFO_CONSTANT(MON_6);
-	REGISTER_NL_LANGINFO_CONSTANT(MON_7);
-	REGISTER_NL_LANGINFO_CONSTANT(MON_8);
-	REGISTER_NL_LANGINFO_CONSTANT(MON_9);
-	REGISTER_NL_LANGINFO_CONSTANT(MON_10);
-	REGISTER_NL_LANGINFO_CONSTANT(MON_11);
-	REGISTER_NL_LANGINFO_CONSTANT(MON_12);
-#endif
-#ifdef AM_STR
-	REGISTER_NL_LANGINFO_CONSTANT(AM_STR);
-#endif
-#ifdef PM_STR
-	REGISTER_NL_LANGINFO_CONSTANT(PM_STR);
-#endif
-#ifdef D_T_FMT
-	REGISTER_NL_LANGINFO_CONSTANT(D_T_FMT);
-#endif
-#ifdef D_FMT
-	REGISTER_NL_LANGINFO_CONSTANT(D_FMT);
-#endif
-#ifdef T_FMT
-	REGISTER_NL_LANGINFO_CONSTANT(T_FMT);
-#endif
-#ifdef T_FMT_AMPM
-	REGISTER_NL_LANGINFO_CONSTANT(T_FMT_AMPM);
-#endif
-#ifdef ERA
-	REGISTER_NL_LANGINFO_CONSTANT(ERA);
-#endif
-#ifdef ERA_YEAR
-	REGISTER_NL_LANGINFO_CONSTANT(ERA_YEAR);
-#endif
-#ifdef ERA_D_T_FMT
-	REGISTER_NL_LANGINFO_CONSTANT(ERA_D_T_FMT);
-#endif
-#ifdef ERA_D_FMT
-	REGISTER_NL_LANGINFO_CONSTANT(ERA_D_FMT);
-#endif
-#ifdef ERA_T_FMT
-	REGISTER_NL_LANGINFO_CONSTANT(ERA_T_FMT);
-#endif
-#ifdef ALT_DIGITS
-	REGISTER_NL_LANGINFO_CONSTANT(ALT_DIGITS);
-#endif
-#ifdef INT_CURR_SYMBOL
-	REGISTER_NL_LANGINFO_CONSTANT(INT_CURR_SYMBOL);
-#endif
-#ifdef CURRENCY_SYMBOL
-	REGISTER_NL_LANGINFO_CONSTANT(CURRENCY_SYMBOL);
-#endif
-#ifdef CRNCYSTR
-	REGISTER_NL_LANGINFO_CONSTANT(CRNCYSTR);
-#endif
-#ifdef MON_DECIMAL_POINT
-	REGISTER_NL_LANGINFO_CONSTANT(MON_DECIMAL_POINT);
-#endif
-#ifdef MON_THOUSANDS_SEP
-	REGISTER_NL_LANGINFO_CONSTANT(MON_THOUSANDS_SEP);
-#endif
-#ifdef MON_GROUPING
-	REGISTER_NL_LANGINFO_CONSTANT(MON_GROUPING);
-#endif
-#ifdef POSITIVE_SIGN
-	REGISTER_NL_LANGINFO_CONSTANT(POSITIVE_SIGN);
-#endif
-#ifdef NEGATIVE_SIGN
-	REGISTER_NL_LANGINFO_CONSTANT(NEGATIVE_SIGN);
-#endif
-#ifdef INT_FRAC_DIGITS
-	REGISTER_NL_LANGINFO_CONSTANT(INT_FRAC_DIGITS);
-#endif
-#ifdef FRAC_DIGITS
-	REGISTER_NL_LANGINFO_CONSTANT(FRAC_DIGITS);
-#endif
-#ifdef P_CS_PRECEDES
-	REGISTER_NL_LANGINFO_CONSTANT(P_CS_PRECEDES);
-#endif
-#ifdef P_SEP_BY_SPACE
-	REGISTER_NL_LANGINFO_CONSTANT(P_SEP_BY_SPACE);
-#endif
-#ifdef N_CS_PRECEDES
-	REGISTER_NL_LANGINFO_CONSTANT(N_CS_PRECEDES);
-#endif
-#ifdef N_SEP_BY_SPACE
-	REGISTER_NL_LANGINFO_CONSTANT(N_SEP_BY_SPACE);
-#endif
-#ifdef P_SIGN_POSN
-	REGISTER_NL_LANGINFO_CONSTANT(P_SIGN_POSN);
-#endif
-#ifdef N_SIGN_POSN
-	REGISTER_NL_LANGINFO_CONSTANT(N_SIGN_POSN);
-#endif
-#ifdef DECIMAL_POINT
-	REGISTER_NL_LANGINFO_CONSTANT(DECIMAL_POINT);
-#endif
-#ifdef RADIXCHAR
-	REGISTER_NL_LANGINFO_CONSTANT(RADIXCHAR);
-#endif
-#ifdef THOUSANDS_SEP
-	REGISTER_NL_LANGINFO_CONSTANT(THOUSANDS_SEP);
-#endif
-#ifdef THOUSEP
-	REGISTER_NL_LANGINFO_CONSTANT(THOUSEP);
-#endif
-#ifdef GROUPING
-	REGISTER_NL_LANGINFO_CONSTANT(GROUPING);
-#endif
-#ifdef YESEXPR
-	REGISTER_NL_LANGINFO_CONSTANT(YESEXPR);
-#endif
-#ifdef NOEXPR
-	REGISTER_NL_LANGINFO_CONSTANT(NOEXPR);
-#endif
-#ifdef YESSTR
-	REGISTER_NL_LANGINFO_CONSTANT(YESSTR);
-#endif
-#ifdef NOSTR
-	REGISTER_NL_LANGINFO_CONSTANT(NOSTR);
-#endif
-#ifdef CODESET
-	REGISTER_NL_LANGINFO_CONSTANT(CODESET);
-#endif
-#undef REGISTER_NL_LANGINFO_CONSTANT
-	return SUCCESS;
-}
-/* }}} */
-
 /* {{{ Query language and locale information */
 PHP_FUNCTION(nl_langinfo)
 {
@@ -1135,9 +928,6 @@ PHP_FUNCTION(explode)
 }
 /* }}} */
 
-/* {{{ An alias for implode */
-/* }}} */
-
 /* {{{ php_implode */
 PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return_value)
 {
@@ -1165,11 +955,14 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 
 	ptr = strings = do_alloca((sizeof(*strings)) * numelems, use_heap);
 
+	uint32_t flags = ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(glue);
+
 	ZEND_HASH_FOREACH_VAL(pieces, tmp) {
 		if (EXPECTED(Z_TYPE_P(tmp) == IS_STRING)) {
 			ptr->str = Z_STR_P(tmp);
 			len += ZSTR_LEN(ptr->str);
 			ptr->lval = 0;
+			flags &= ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(ptr->str);
 			ptr++;
 		} else if (UNEXPECTED(Z_TYPE_P(tmp) == IS_LONG)) {
 			zend_long val = Z_LVAL_P(tmp);
@@ -1188,12 +981,14 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 			ptr->str = zval_get_string_func(tmp);
 			len += ZSTR_LEN(ptr->str);
 			ptr->lval = 1;
+			flags &= ZSTR_GET_COPYABLE_CONCAT_PROPERTIES(ptr->str);
 			ptr++;
 		}
 	} ZEND_HASH_FOREACH_END();
 
 	/* numelems cannot be 0, we checked above */
 	str = zend_string_safe_alloc(numelems - 1, ZSTR_LEN(glue), len, 0);
+	GC_ADD_FLAGS(str, flags);
 	cptr = ZSTR_VAL(str) + ZSTR_LEN(str);
 	*cptr = 0;
 
@@ -1240,7 +1035,7 @@ PHP_FUNCTION(implode)
 
 	if (pieces == NULL) {
 		if (arg1_array == NULL) {
-			zend_type_error("%s(): Argument #1 ($pieces) must be of type array, string given", get_active_function_name());
+			zend_type_error("%s(): Argument #1 ($array) must be of type array, string given", get_active_function_name());
 			RETURN_THROWS();
 		}
 
@@ -1288,7 +1083,7 @@ PHP_FUNCTION(strtok)
 
 	if (!BG(strtok_string)) {
 		/* String to tokenize not set. */
-		// TODO: Should this warn?
+		php_error_docref(NULL, E_WARNING, "Both arguments must be provided when starting tokenization");
 		RETURN_FALSE;
 	}
 
@@ -1396,6 +1191,118 @@ PHP_FUNCTION(strtolower)
 	RETURN_STR(zend_string_tolower(str));
 }
 /* }}} */
+
+PHP_FUNCTION(str_increment)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(str) == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+	if (!zend_string_only_has_ascii_alphanumeric(str)) {
+		zend_argument_value_error(1, "must be composed only of alphanumeric ASCII characters");
+		RETURN_THROWS();
+	}
+
+	zend_string *incremented = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), /* persistent */ false);
+	size_t position = ZSTR_LEN(str)-1;
+	bool carry = false;
+
+	do {
+		char c = ZSTR_VAL(incremented)[position];
+		/* We know c is in ['a', 'z'], ['A', 'Z'], or ['0', '9'] range from zend_string_only_has_ascii_alphanumeric() */
+		if (EXPECTED( c != 'z' && c != 'Z' && c != '9' )) {
+			carry = false;
+			ZSTR_VAL(incremented)[position]++;
+		} else { /* if 'z', 'Z', or '9' */
+			carry = true;
+			if (c == '9') {
+				ZSTR_VAL(incremented)[position] = '0';
+			} else {
+				ZSTR_VAL(incremented)[position] -= 25;
+			}
+		}
+	} while (carry && position-- > 0);
+
+	if (UNEXPECTED(carry)) {
+		zend_string *tmp = zend_string_alloc(ZSTR_LEN(incremented)+1, 0);
+		memcpy(ZSTR_VAL(tmp) + 1, ZSTR_VAL(incremented), ZSTR_LEN(incremented));
+		ZSTR_VAL(tmp)[ZSTR_LEN(incremented)+1] = '\0';
+		switch (ZSTR_VAL(incremented)[0]) {
+			case '0':
+				ZSTR_VAL(tmp)[0] = '1';
+				break;
+			default:
+				ZSTR_VAL(tmp)[0] = ZSTR_VAL(incremented)[0];
+				break;
+		}
+		zend_string_release_ex(incremented, /* persistent */ false);
+		RETURN_STR(tmp);
+	}
+	RETURN_STR(incremented);
+}
+
+
+PHP_FUNCTION(str_decrement)
+{
+	zend_string *str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(str) == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+	if (!zend_string_only_has_ascii_alphanumeric(str)) {
+		zend_argument_value_error(1, "must be composed only of alphanumeric ASCII characters");
+		RETURN_THROWS();
+	}
+	if (ZSTR_LEN(str) >= 1 && ZSTR_VAL(str)[0] == '0') {
+		zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
+		RETURN_THROWS();
+	}
+
+	zend_string *decremented = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), /* persistent */ false);
+	size_t position = ZSTR_LEN(str)-1;
+	bool carry = false;
+
+	do {
+		char c = ZSTR_VAL(decremented)[position];
+		/* We know c is in ['a', 'z'], ['A', 'Z'], or ['0', '9'] range from zend_string_only_has_ascii_alphanumeric() */
+		if (EXPECTED( c != 'a' && c != 'A' && c != '0' )) {
+			carry = false;
+			ZSTR_VAL(decremented)[position]--;
+		} else { /* if 'a', 'A', or '0' */
+			carry = true;
+			if (c == '0') {
+				ZSTR_VAL(decremented)[position] = '9';
+			} else {
+				ZSTR_VAL(decremented)[position] += 25;
+			}
+		}
+	} while (carry && position-- > 0);
+
+	if (UNEXPECTED(carry || (ZSTR_VAL(decremented)[0] == '0' && ZSTR_LEN(decremented) > 1))) {
+		if (ZSTR_LEN(decremented) == 1) {
+			zend_string_release_ex(decremented, /* persistent */ false);
+			zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
+			RETURN_THROWS();
+		}
+		zend_string *tmp = zend_string_alloc(ZSTR_LEN(decremented) - 1, 0);
+		memcpy(ZSTR_VAL(tmp), ZSTR_VAL(decremented) + 1, ZSTR_LEN(decremented) - 1);
+		ZSTR_VAL(tmp)[ZSTR_LEN(decremented) - 1] = '\0';
+		zend_string_release_ex(decremented, /* persistent */ false);
+		RETURN_STR(tmp);
+	}
+	RETURN_STR(decremented);
+}
 
 #if defined(PHP_WIN32)
 static bool _is_basename_start(const char *start, const char *pos)
@@ -1749,7 +1656,7 @@ PHP_FUNCTION(stristr)
 	if (part) {
 		RETURN_STRINGL(ZSTR_VAL(haystack), found_offset);
 	}
-	RETURN_STRINGL(ZSTR_VAL(haystack) + found_offset, ZSTR_LEN(haystack) - found_offset);
+	RETURN_STRINGL(found, ZSTR_LEN(haystack) - found_offset);
 }
 /* }}} */
 
@@ -1777,7 +1684,7 @@ PHP_FUNCTION(strstr)
 	if (part) {
 		RETURN_STRINGL(ZSTR_VAL(haystack), found_offset);
 	}
-	RETURN_STRINGL(ZSTR_VAL(haystack) + found_offset, ZSTR_LEN(haystack) - found_offset);
+	RETURN_STRINGL(found, ZSTR_LEN(haystack) - found_offset);
 }
 /* }}} */
 
@@ -1827,9 +1734,6 @@ PHP_FUNCTION(str_ends_with)
 		ZSTR_VAL(haystack) + ZSTR_LEN(haystack) - ZSTR_LEN(needle),
 		ZSTR_VAL(needle), ZSTR_LEN(needle)) == 0);
 }
-/* }}} */
-
-/* {{{ An alias for strstr */
 /* }}} */
 
 /* {{{ Finds position of first occurrence of a string within another */
@@ -2030,10 +1934,13 @@ PHP_FUNCTION(strrchr)
 	zend_string *haystack, *needle;
 	const char *found = NULL;
 	zend_long found_offset;
+	bool part = 0;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(haystack)
 		Z_PARAM_STR(needle)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(part)
 	ZEND_PARSE_PARAMETERS_END();
 
 	found = zend_memrchr(ZSTR_VAL(haystack), *ZSTR_VAL(needle), ZSTR_LEN(haystack));
@@ -2041,6 +1948,9 @@ PHP_FUNCTION(strrchr)
 		RETURN_FALSE;
 	}
 	found_offset = found - ZSTR_VAL(haystack);
+	if (part) {
+		RETURN_STRINGL(ZSTR_VAL(haystack), found_offset);
+	}
 	RETURN_STRINGL(found, ZSTR_LEN(haystack) - found_offset);
 }
 /* }}} */
@@ -2404,7 +2314,7 @@ PHP_FUNCTION(substr_replace)
 				if (HT_IS_PACKED(repl_ht)) {
 					while (repl_idx < repl_ht->nNumUsed) {
 						tmp_repl = &repl_ht->arPacked[repl_idx];
-						if (repl_ht != IS_UNDEF) {
+						if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
 							break;
 						}
 						repl_idx++;
@@ -2412,7 +2322,7 @@ PHP_FUNCTION(substr_replace)
 				} else {
 					while (repl_idx < repl_ht->nNumUsed) {
 						tmp_repl = &repl_ht->arData[repl_idx].val;
-						if (repl_ht != IS_UNDEF) {
+						if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
 							break;
 						}
 						repl_idx++;
@@ -3680,15 +3590,10 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, const char *what, size_t w
 ZEND_INTRIN_SSE4_2_FUNC_DECL(zend_string *php_addslashes_sse42(zend_string *str));
 zend_string *php_addslashes_default(zend_string *str);
 
-ZEND_INTRIN_SSE4_2_FUNC_DECL(void php_stripslashes_sse42(zend_string *str));
-void php_stripslashes_default(zend_string *str);
-
 # ifdef ZEND_INTRIN_SSE4_2_FUNC_PROTO
 PHPAPI zend_string *php_addslashes(zend_string *str) __attribute__((ifunc("resolve_addslashes")));
-PHPAPI void php_stripslashes(zend_string *str) __attribute__((ifunc("resolve_stripslashes")));
 
 typedef zend_string *(*php_addslashes_func_t)(zend_string *);
-typedef void (*php_stripslashes_func_t)(zend_string *);
 
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
@@ -3698,25 +3603,12 @@ static php_addslashes_func_t resolve_addslashes(void) {
 	}
 	return php_addslashes_default;
 }
-
-ZEND_NO_SANITIZE_ADDRESS
-ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
-static php_stripslashes_func_t resolve_stripslashes(void) {
-	if (zend_cpu_supports_sse42()) {
-		return php_stripslashes_sse42;
-	}
-	return php_stripslashes_default;
-}
 # else /* ZEND_INTRIN_SSE4_2_FUNC_PTR */
 
 static zend_string *(*php_addslashes_ptr)(zend_string *str) = NULL;
-static void (*php_stripslashes_ptr)(zend_string *str) = NULL;
 
 PHPAPI zend_string *php_addslashes(zend_string *str) {
 	return php_addslashes_ptr(str);
-}
-PHPAPI void php_stripslashes(zend_string *str) {
-	php_stripslashes_ptr(str);
 }
 
 /* {{{ PHP_MINIT_FUNCTION */
@@ -3724,10 +3616,8 @@ PHP_MINIT_FUNCTION(string_intrin)
 {
 	if (zend_cpu_supports_sse42()) {
 		php_addslashes_ptr = php_addslashes_sse42;
-		php_stripslashes_ptr = php_stripslashes_sse42;
 	} else {
 		php_addslashes_ptr = php_addslashes_default;
-		php_stripslashes_ptr = php_stripslashes_default;
 	}
 	return SUCCESS;
 }
@@ -4029,19 +3919,23 @@ static zend_always_inline char *php_stripslashes_impl(const char *str, char *out
 		quad_word q;
 		vst1q_u8(q.mem, vceqq_u8(x, vdupq_n_u8('\\')));
 		if (q.dw[0] | q.dw[1]) {
-			int i = 0;
-			for (; i < 16; i++) {
+			unsigned int i = 0;
+			while (i < 16) {
 				if (q.mem[i] == 0) {
 					*out++ = str[i];
+					i++;
 					continue;
 				}
 
 				i++;			/* skip the slash */
-				char s = str[i];
-				if (s == '0')
-					*out++ = '\0';
-				else
-					*out++ = s;	/* preserve the next character */
+				if (i < len) {
+					char s = str[i];
+					if (s == '0')
+						*out++ = '\0';
+					else
+						*out++ = s;	/* preserve the next character */
+					i++;
+				}
 			}
 			str += i;
 			len -= i;
@@ -4076,12 +3970,8 @@ static zend_always_inline char *php_stripslashes_impl(const char *str, char *out
 	return out;
 }
 
-#if defined(ZEND_INTRIN_SSE4_2_NATIVE) || defined(ZEND_INTRIN_SSE4_2_RESOLVER)
-# ifdef ZEND_INTRIN_SSE4_2_NATIVE
+#ifdef __SSE2__
 PHPAPI void php_stripslashes(zend_string *str)
-# elif defined(ZEND_INTRIN_SSE4_2_RESOLVER)
-void php_stripslashes_sse42(zend_string *str)
-# endif
 {
 	const char *s = ZSTR_VAL(str);
 	char *t = ZSTR_VAL(str);
@@ -4132,14 +4022,8 @@ void php_stripslashes_sse42(zend_string *str)
 		ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 	}
 }
-#endif
-
-#ifndef ZEND_INTRIN_SSE4_2_NATIVE
-# ifdef ZEND_INTRIN_SSE4_2_RESOLVER
-void php_stripslashes_default(zend_string *str) /* {{{ */
-# else
+#else
 PHPAPI void php_stripslashes(zend_string *str)
-# endif
 {
 	const char *t = php_stripslashes_impl(ZSTR_VAL(str), ZSTR_VAL(str), ZSTR_LEN(str));
 	if (t != (ZSTR_VAL(str) + ZSTR_LEN(str))) {
@@ -4147,7 +4031,6 @@ PHPAPI void php_stripslashes(zend_string *str)
 		ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 	}
 }
-/* }}} */
 #endif
 /* }}} */
 
@@ -4345,9 +4228,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, bool case_sensi
 
 	/* Make sure we're dealing with strings and do the replacement. */
 	if (search_str && replace_ht) {
-		zend_argument_type_error(2, "must be of type %s when argument #1 ($search) is %s",
-			search_str ? "string" : "array", search_str ? "a string" : "an array"
-		);
+		zend_argument_type_error(2, "must be of type string when argument #1 ($search) is a string");
 		RETURN_THROWS();
 	}
 
@@ -5295,6 +5176,7 @@ PHP_FUNCTION(str_repeat)
 	/* Initialize the result string */
 	result = zend_string_safe_alloc(ZSTR_LEN(input_str), mult, 0, 0);
 	result_len = ZSTR_LEN(input_str) * mult;
+	ZSTR_COPY_CONCAT_PROPERTIES(result, input_str);
 
 	/* Heavy optimization for situations where input string is 1 byte long */
 	if (ZSTR_LEN(input_str) == 1) {
@@ -5340,7 +5222,7 @@ PHP_FUNCTION(count_chars)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mymode < 0 || mymode > 4) {
-		zend_argument_value_error(2, "must be between 1 and 4 (inclusive)");
+		zend_argument_value_error(2, "must be between 0 and 4 (inclusive)");
 		RETURN_THROWS();
 	}
 
@@ -5550,7 +5432,7 @@ PHP_FUNCTION(str_pad)
 	size_t num_pad_chars;		/* Number of padding characters (total - input size) */
 	char *pad_str = " "; /* Pointer to padding string */
 	size_t pad_str_len = 1;
-	zend_long   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
+	zend_long   pad_type_val = PHP_STR_PAD_RIGHT; /* The padding type value */
 	size_t	   i, left_pad=0, right_pad=0;
 	zend_string *result = NULL;	/* Resulting string */
 
@@ -5573,7 +5455,7 @@ PHP_FUNCTION(str_pad)
 		RETURN_THROWS();
 	}
 
-	if (pad_type_val < STR_PAD_LEFT || pad_type_val > STR_PAD_BOTH) {
+	if (pad_type_val < PHP_STR_PAD_LEFT || pad_type_val > PHP_STR_PAD_BOTH) {
 		zend_argument_value_error(4, "must be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH");
 		RETURN_THROWS();
 	}
@@ -5584,17 +5466,17 @@ PHP_FUNCTION(str_pad)
 
 	/* We need to figure out the left/right padding lengths. */
 	switch (pad_type_val) {
-		case STR_PAD_RIGHT:
+		case PHP_STR_PAD_RIGHT:
 			left_pad = 0;
 			right_pad = num_pad_chars;
 			break;
 
-		case STR_PAD_LEFT:
+		case PHP_STR_PAD_LEFT:
 			left_pad = num_pad_chars;
 			right_pad = 0;
 			break;
 
-		case STR_PAD_BOTH:
+		case PHP_STR_PAD_BOTH:
 			left_pad = num_pad_chars / 2;
 			right_pad = num_pad_chars - left_pad;
 			break;
@@ -5993,7 +5875,7 @@ PHP_FUNCTION(substr_compare)
 	}
 
 	if ((size_t)offset > ZSTR_LEN(s1)) {
-		zend_argument_value_error(3, "must be contained in argument #1 ($main_str)");
+		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
 

@@ -941,6 +941,18 @@ const CURLINFO_TOTAL_TIME = UNKNOWN;
  */
 const CURLINFO_EFFECTIVE_METHOD = UNKNOWN;
 #endif
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+/**
+ * @var int
+ * @cvalue CURLINFO_CAPATH
+ */
+const CURLINFO_CAPATH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLINFO_CAINFO
+ */
+const CURLINFO_CAINFO = UNKNOWN;
+#endif
 
 /* Other */
 /**
@@ -1979,6 +1991,26 @@ const CURL_VERSION_CURLDEBUG = UNKNOWN;
  * @cvalue CURLOPT_SSH_KNOWNHOSTS
  */
 const CURLOPT_SSH_KNOWNHOSTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLKHMATCH_OK
+ */
+const CURLKHMATCH_OK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLKHMATCH_MISMATCH
+ */
+const CURLKHMATCH_MISMATCH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLKHMATCH_MISSING
+ */
+const CURLKHMATCH_MISSING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLKHMATCH_LAST
+ */
+const CURLKHMATCH_LAST = UNKNOWN;
 
 /* Available since 7.20.0 */
 /**
@@ -3520,6 +3552,66 @@ const CURLOPT_MAXLIFETIME_CONN = UNKNOWN;
  * @cvalue CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256
  */
 const CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256 = UNKNOWN;
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x075100 /* Available since 7.81.0 */
+/**
+ * @var int
+ * @cvalue CURLOPT_MIME_OPTIONS
+ */
+const CURLOPT_MIME_OPTIONS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLMIMEOPT_FORMESCAPE
+ */
+const CURLMIMEOPT_FORMESCAPE = UNKNOWN;
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+/**
+ * @var int
+ * @cvalue CURLOPT_SSH_HOSTKEYFUNCTION
+ */
+const CURLOPT_SSH_HOSTKEYFUNCTION = UNKNOWN;
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x075500 /* Available since 7.85.0 */
+/**
+ * @var int
+ * @cvalue CURLOPT_PROTOCOLS_STR
+ */
+const CURLOPT_PROTOCOLS_STR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLOPT_REDIR_PROTOCOLS_STR
+ */
+const CURLOPT_REDIR_PROTOCOLS_STR = UNKNOWN;
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x075600 /* Available since 7.86.0 */
+/**
+ * @var int
+ * @cvalue CURLOPT_WS_OPTIONS
+ */
+const CURLOPT_WS_OPTIONS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLWS_RAW_MODE
+ */
+const CURLWS_RAW_MODE = UNKNOWN;
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x075700 /* Available since 7.87.0 */
+/**
+ * @var int
+ * @cvalue CURLOPT_CA_CACHE_TIMEOUT
+ */
+const CURLOPT_CA_CACHE_TIMEOUT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLOPT_QUICK_EXIT
+ */
+const CURLOPT_QUICK_EXIT = UNKNOWN;
 #endif
 
 /**

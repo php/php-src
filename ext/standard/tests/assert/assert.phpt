@@ -36,7 +36,30 @@ $obj = new a();
 assert_options(ASSERT_CALLBACK,array(&$obj,"assert"));
 assert($a != 0);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: PHP Startup: assert.active INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: assert.exception INI setting is deprecated in Unknown on line 0
+
+Deprecated: Constant ASSERT_ACTIVE is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
+
+Deprecated: Constant ASSERT_WARNING is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 assertion failed 21,"assert($a != 0)"
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 class assertion failed 24,"assert($a != 0)"
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 class assertion failed 28,"assert($a != 0)"

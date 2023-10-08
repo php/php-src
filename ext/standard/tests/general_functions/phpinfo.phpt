@@ -29,11 +29,13 @@ PHP Extension => %d
 Zend Extension => %d
 Zend Extension Build => API%s
 PHP Extension Build => API%s
+PHP Integer Size => %d bits
 Debug Build => %s
 Thread Safety => %s%A
 Zend Signal Handling => %s
 Zend Memory Manager => %s
 Zend Multibyte Support => %s
+Zend Max Execution Timers => %s
 IPv6 Support => %s
 DTrace Support => %s
 

@@ -2,7 +2,7 @@
 
 /** @generate-class-entries */
 
-namespace FTP {
+namespace {
     /**
      * @var int
      * @cvalue FTPTYPE_ASCII
@@ -59,16 +59,6 @@ namespace FTP {
      */
     const FTP_MOREDATA = UNKNOWN;
 
-    /**
-     * @strict-properties
-     * @not-serializable
-     */
-    final class Connection
-    {
-    }
-}
-
-namespace {
     function ftp_connect(string $hostname, int $port = 21, int $timeout = 90): FTP\Connection|false {}
 
     #ifdef HAVE_FTP_SSL
@@ -120,7 +110,7 @@ namespace {
     function ftp_nb_fget(FTP\Connection $ftp, $stream, string $remote_filename, int $mode = FTP_BINARY, int $offset = 0): int {}
     function ftp_pasv(FTP\Connection $ftp, bool $enable): bool {}
     function ftp_get(FTP\Connection $ftp, string $local_filename, string $remote_filename, int $mode = FTP_BINARY, int $offset = 0): bool {}
-    function ftp_nb_get(FTP\Connection $ftp, string $local_filename, string $remote_filename, int $mode = FTP_BINARY, int $offset = 0): int {}
+    function ftp_nb_get(FTP\Connection $ftp, string $local_filename, string $remote_filename, int $mode = FTP_BINARY, int $offset = 0): int|false {}
     function ftp_nb_continue(FTP\Connection $ftp): int {}
 
     /** @param resource $stream */
@@ -144,4 +134,14 @@ namespace {
     /** @param int|bool $value */
     function ftp_set_option(FTP\Connection $ftp, int $option, $value): bool {}
     function ftp_get_option(FTP\Connection $ftp, int $option): int|bool {}
+}
+
+namespace FTP {
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Connection
+    {
+    }
 }

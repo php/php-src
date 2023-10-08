@@ -18,6 +18,7 @@ internal_encoding=utf-8
 $item = "bug74589_新建文件夹"; // utf-8 string
 $dir = __DIR__ . DIRECTORY_SEPARATOR . $item;
 $test_file = $dir . DIRECTORY_SEPARATOR . "test.php";
+$test_file_escaped = escapeshellarg($test_file);
 
 mkdir($dir);
 
@@ -27,9 +28,9 @@ file_put_contents($test_file,
     var_dump(__FILE__);
     var_dump(__DIR__ === __DIR__);");
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
-echo shell_exec("$php -n $test_file");
+echo shell_exec("$php -n $test_file_escaped");
 
 ?>
 --EXPECTF--
