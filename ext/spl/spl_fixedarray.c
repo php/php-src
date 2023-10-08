@@ -376,8 +376,7 @@ static zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *
 	}
 
 	if (index < 0 || index >= intern->array.size) {
-		// TODO Change error message and use OutOfBound SPL Exception?
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_throw_exception(spl_ce_OutOfBoundsException, "Index invalid or out of range", 0);
 		return NULL;
 	} else {
 		return &intern->array.elements[index];
@@ -425,8 +424,7 @@ static void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *
 	}
 
 	if (index < 0 || index >= intern->array.size) {
-		// TODO Change error message and use OutOfBound SPL Exception?
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_throw_exception(spl_ce_OutOfBoundsException, "Index invalid or out of range", 0);
 		return;
 	} else {
 		/* Fix #81429 */
@@ -465,8 +463,7 @@ static void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *
 	}
 
 	if (index < 0 || index >= intern->array.size) {
-		// TODO Change error message and use OutOfBound SPL Exception?
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_throw_exception(spl_ce_OutOfBoundsException, "Index invalid or out of range", 0);
 		return;
 	} else {
 		zval_ptr_dtor(&(intern->array.elements[index]));
