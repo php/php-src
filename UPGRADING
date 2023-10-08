@@ -80,6 +80,9 @@ PHP 8.4 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- PGSQL:
+  . pg_select, the conditions arguments accepts an empty array and is optional.
+
 - Standard:
   . The internal implementation for rounding to integers has been rewritten
     to be easier to verify for correctness and to be easier to maintain.
