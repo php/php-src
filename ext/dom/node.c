@@ -2030,4 +2030,25 @@ PHP_METHOD(DOMNode, getRootNode)
 }
 /* }}} */
 
+/**
+ * We want to block the serialization and unserialization of DOM classes.
+ * However, using @not-serializable makes the child classes also not serializable, even if the user implements the methods.
+ * So instead, we implement the methods wherein we throw exceptions.
+ * The reason we choose these methods is because:
+ *   - If the user implements __serialize / __unserialize, the respective throwing methods are not called.
+ *   - If the user implements __sleep / __wakeup, then it's also not a problem because they will not enter the throwing methods.
+ */
+
+PHP_METHOD(DOMNode, __sleep)
+{
+	zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed, unless serialization methods are implemented in a subclass", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+	RETURN_THROWS();
+}
+
+PHP_METHOD(DOMNode, __wakeup)
+{
+	zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed, unless unserialization methods are implemented in a subclass", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+	RETURN_THROWS();
+}
+
 #endif

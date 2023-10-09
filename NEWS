@@ -17,6 +17,7 @@ PHP                                                                        NEWS
   . Restore old namespace reconciliation behaviour. (nielsdos)
   . Fix broken cache invalidation with deallocated and reallocated document
     node. (nielsdos)
+  . Fixed bug GH-8996 (DOMNode serialization on PHP ^8.1). (nielsdos)
 
 - Fileinfo:
   . Fixed bug GH-11891 (fileinfo returns text/xml for some svg files). (usarise)
@@ -31,6 +32,8 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed opcache_invalidate() on deleted file. (mikhainin)
+  . Fixed bug GH-12380 (JIT+private array property access inside closure
+    accesses private property in child class). (nielsdos)
 
 - SimpleXML:
   . Apply iterator fixes only on master. (nielsdos)
