@@ -291,7 +291,6 @@ interface DOMChildNode
     public function replaceWith(...$nodes): void;
 }
 
-/** @not-serializable */
 class DOMNode
 {
     /** @readonly */
@@ -338,6 +337,10 @@ class DOMNode
     public ?string $baseURI;
 
     public string $textContent;
+
+    public function __sleep(): array {}
+
+    public function __wakeup(): void {}
 
     /** @return DOMNode|false */
     public function appendChild(DOMNode $node) {}
@@ -391,7 +394,6 @@ class DOMNode
     public function replaceChild(DOMNode $node, DOMNode $child) {}
 }
 
-/** @not-serializable */
 class DOMNameSpaceNode
 {
     /** @readonly */
@@ -417,6 +419,12 @@ class DOMNameSpaceNode
 
     /** @readonly */
     public ?DOMNode $parentNode;
+
+    /** @implementation-alias DOMNode::__sleep */
+    public function __sleep(): array {}
+
+    /** @implementation-alias DOMNode::__wakeup */
+    public function __wakeup(): void {}
 }
 
 class DOMImplementation

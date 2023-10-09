@@ -655,7 +655,11 @@ static zend_property_info* zend_get_known_property_info(const zend_op_array *op_
 		return info;
 	} else if (on_this) {
 		if (ce == info->ce) {
-			return info;
+			if (ce == op_array->scope) {
+				return info;
+			} else {
+				return NULL;
+			}
 		} else if ((info->flags & ZEND_ACC_PROTECTED)
 				&& instanceof_function_slow(ce, info->ce)) {
 			return info;
