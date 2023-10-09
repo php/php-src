@@ -206,6 +206,7 @@ arm_task:
         -d opcache.enable_cli=1
         -d opcache.jit_buffer_size=64M
         -d opcache.jit=function
+        -d opcache.file_update_protection=0
         -P -q -x -j2
         -g FAIL,BORK,LEAK,XLEAK
         --no-progress
@@ -226,6 +227,8 @@ arm_task:
         -d opcache.jit_hot_return=1
         -d opcache.jit_hot_side_exit=1
         -d opcache.file_update_protection=0
+        -d opcache.jit_blacklist_root_trace=255
+        -d opcache.jit_blacklist_side_trace=255
         -d opcache.jit=tracing
         -P -q -x -j2
         -g FAIL,BORK,LEAK,XLEAK

@@ -387,6 +387,8 @@ jobs:
           echo opcache.jit_hot_func=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_return=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
+          echo opcache.jit_blacklist_root_trace=255 >> /etc/php.d/opcache.ini
+          echo opcache.jit_blacklist_side_trace=255 >> /etc/php.d/opcache.ini
           echo opcache.file_update_protection=0 >> /etc/php.d/opcache.ini
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
           php -v
