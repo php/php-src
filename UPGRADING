@@ -45,6 +45,17 @@ PHP 8.4 UPGRADE NOTES
     for invalid modes. Previously invalid modes would have been interpreted as
     PHP_ROUND_HALF_UP.
 
+- XML:
+  . The xml_set_*_handler() functions now declare and check for an effective
+    signature of callable|string|null for the $handler parameters.
+    Moreover, values of type string that correspond to method names,
+    of object set with xml_set_object() are now checked to see if the method
+    exists on the class of the previously passed object.
+    This means that xml_set_object() must now always be called prior to setting
+    method names as callables.
+    Passing an empty string to disable the handler is still allowed,
+    but not recommended.
+
 - XSL:
   . XSLTProcessor::setParameter() will now throw a ValueError when its arguments
     contain null bytes. This never actually worked correctly in the first place,
