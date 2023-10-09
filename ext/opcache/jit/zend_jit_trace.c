@@ -6303,7 +6303,7 @@ done:
 					}
 				}
 				if (ssa_op->op1_def >= 0
-				 && (opline->opcode != ZEND_QM_ASSIGN
+				 && ((opline->opcode != ZEND_QM_ASSIGN && opline->opcode != ZEND_CAST)
 				  || opline->result_type != IS_CV
 				  || opline->result.var != opline->op1.var)) {
 					uint8_t type = IS_UNKNOWN;
