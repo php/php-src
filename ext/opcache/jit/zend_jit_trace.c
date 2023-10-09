@@ -2728,15 +2728,15 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 	ZEND_ASSERT(ssa->var_info != NULL);
 
 	start = do_alloca(sizeof(int) * ssa->vars_count * 2 +
-		ZEND_MM_ALIGNED_SIZE(sizeof(uint8_t) * ssa->vars_count) +
-		ZEND_MM_ALIGNED_SIZE(sizeof(zend_op_array*) * ssa->vars_count),
+		ZEND_MM_ALIGNED_SIZE(sizeof(uint8_t) * ssa->vars_count),
 		use_heap);
 	if (!start) {
 		return NULL;
 	}
 	end = start + ssa->vars_count;
 	flags = (uint8_t*)(end + ssa->vars_count);
-	vars_op_array = (const zend_op_array**)(flags + ZEND_MM_ALIGNED_SIZE(sizeof(uint8_t) * ssa->vars_count));
+	checkpoint = zend_arena_checkpoint(CG(arena));
+	vars_op_array = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_op_array*));
 
 	memset(start, -1, sizeof(int) * ssa->vars_count * 2);
 	memset(flags, 0, sizeof(uint8_t) * ssa->vars_count);
@@ -3131,10 +3131,10 @@ static zend_lifetime_interval** zend_jit_trace_allocate_registers(zend_jit_trace
 
 	if (!count) {
 		free_alloca(start, use_heap);
+		zend_arena_release(&CG(arena), checkpoint);
 		return NULL;
 	}
 
-	checkpoint = zend_arena_checkpoint(CG(arena));
 	intervals = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_lifetime_interval));
 	memset(intervals, 0, sizeof(zend_lifetime_interval*) * ssa->vars_count);
 	list = zend_arena_alloc(&CG(arena), sizeof(zend_lifetime_interval) * count);
