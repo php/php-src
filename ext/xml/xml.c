@@ -1059,11 +1059,13 @@ static bool php_xml_check_string_method_arg(
 	zend_fcall_info_cache *const parser_handler_fcc
 ) {
 	if (ZSTR_LEN(method_name) == 0) {
+		ZEND_ASSERT(arg_num != 0);
 		/* Unset handler */
 		return true;
 	}
 
 	if (!object) {
+		ZEND_ASSERT(arg_num != 0);
 		zend_argument_value_error(arg_num, "an object must be set via xml_set_object() to be able to lookup method");
 		return false;
 	}
@@ -1073,7 +1075,9 @@ static bool php_xml_check_string_method_arg(
 	zend_function *method_ptr = zend_hash_find_ptr(&ce->function_table, lc_name);
 	zend_string_release_ex(lc_name, 0);
 	if (!method_ptr) {
-		zend_argument_value_error(arg_num, "method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(method_name));
+		if (arg_num) {
+			zend_argument_value_error(arg_num, "method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(method_name));
+		}
 		return false;
 	}
 
@@ -1086,7 +1090,7 @@ static bool php_xml_check_string_method_arg(
 	return true;
 }
 
-#define PHP_XML_CHECK_NEW_THIS_METHODS(parser_to_check, new_this_obj, fcc_field) \
+#define PHP_XML_CHECK_NEW_THIS_METHODS(parser_to_check, new_this_obj, fcc_field, handler_set_method) \
 	if ( \
 		ZEND_FCC_INITIALIZED(parser_to_check->fcc_field) \
 		&& parser_to_check->fcc_field.object == parser_to_check->object \
@@ -1094,9 +1098,11 @@ static bool php_xml_check_string_method_arg(
 	) { \
 		zend_string *method_name = zend_string_copy(parser_to_check->fcc_field.function_handler->common.function_name); \
 		zend_fcc_dtor(&parser_to_check->fcc_field); \
-		bool status = php_xml_check_string_method_arg(2, new_this_obj, method_name, &parser_to_check->fcc_field); \
+		bool status = php_xml_check_string_method_arg(0, new_this_obj, method_name, &parser_to_check->fcc_field); \
 		if (status == false) { \
-			/* TODO Better error message */ RETURN_THROWS(); \
+			zend_argument_value_error(2, "cannot safely swap to object of class %s as method \"%s\" does not exist which was set via " handler_set_method, \
+			ZSTR_VAL(new_this_obj->ce->name), ZSTR_VAL(method_name)); \
+			RETURN_THROWS(); \
 		} \
 		zend_fcc_addref(&parser_to_check->fcc_field); \
 	}
@@ -1117,17 +1123,17 @@ PHP_FUNCTION(xml_set_object)
 	new_this = Z_OBJ_P(mythis);
 
 	if (parser->object) {
-		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, startElementHandler);
-		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, endElementHandler);
-		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, characterDataHandler);
-		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, processingInstructionHandler);
-		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, defaultHandler);
-		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, unparsedEntityDeclHandler);
-		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, notationDeclHandler);
-		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, externalEntityRefHandler);
-		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, unknownEncodingHandler);
-		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, startNamespaceDeclHandler);
-		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, endNamespaceDeclHandler);
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, startElementHandler, "xml_set_element_handler()");
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, endElementHandler, "xml_set_element_handler()");
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, characterDataHandler, "xml_set_character_data_handler()");
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, processingInstructionHandler, "xml_set_processing_instruction_handler()");
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, defaultHandler, "xml_set_default_handler()");
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, unparsedEntityDeclHandler, "xml_set_unparsed_entity_decl_handler()");
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, notationDeclHandler, "xml_set_notation_decl_handler()");
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, externalEntityRefHandler, "xml_set_external_entity_ref_handler()");
+		//PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, unknownEncodingHandler, "we_dont_have_a_function_for_this_loool()");
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, startNamespaceDeclHandler, "xml_set_start_namespace_decl_handler()");
+		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, endNamespaceDeclHandler, "xml_set_end_namespace_decl_handler()");
 
 		OBJ_RELEASE(parser->object);
 	}
