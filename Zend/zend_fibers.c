@@ -388,6 +388,10 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 
 	zend_observer_fiber_switch_notify(from, to);
 
+	if (from->kind == zend_ce_fiber) {
+		zend_fiber_from_context(from)->execute_data = EG(current_execute_data);
+	}
+
 	zend_fiber_capture_vm_state(&state);
 
 	to->status = ZEND_FIBER_STATUS_RUNNING;
