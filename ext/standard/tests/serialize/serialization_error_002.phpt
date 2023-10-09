@@ -32,7 +32,7 @@ echo "Done";
 *** Testing unserialize() error/boolean distinction ***
 string(4) "b:0;"
 
-Notice: unserialize(): Error at offset 0 of 27 bytes in %s on line %d
+Warning: unserialize(): Error at offset 0 of 27 bytes in %s on line %d
 bool(false)
 bool(false)
 unserialize error and deserialized false are identical? 1

@@ -4,13 +4,14 @@ Bind with various bind types not supported by TimesTen
 oci8
 --SKIPIF--
 <?php
+require_once 'skipifconnectfailure.inc';
 $target_dbs = array('oracledb' => false, 'timesten' => true);  // test runs on these DBs
-require(__DIR__.'/skipif.inc');
+require __DIR__.'/skipif.inc';
 ?>
 --FILE--
 <?php
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 $types = array(
     "SQLT_CLOB" => SQLT_CLOB,

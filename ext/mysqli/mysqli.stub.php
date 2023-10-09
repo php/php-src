@@ -2,6 +2,620 @@
 
 /** @generate-class-entries */
 
+/* mysqli_options */
+/**
+ * @var int
+ * @cvalue MYSQL_READ_DEFAULT_GROUP
+ */
+const MYSQLI_READ_DEFAULT_GROUP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_READ_DEFAULT_FILE
+ */
+const MYSQLI_READ_DEFAULT_FILE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_CONNECT_TIMEOUT
+ */
+const MYSQLI_OPT_CONNECT_TIMEOUT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_LOCAL_INFILE
+ */
+const MYSQLI_OPT_LOCAL_INFILE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_LOAD_DATA_LOCAL_DIR
+ */
+const MYSQLI_OPT_LOAD_DATA_LOCAL_DIR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_INIT_COMMAND
+ */
+const MYSQLI_INIT_COMMAND = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_READ_TIMEOUT
+ */
+const MYSQLI_OPT_READ_TIMEOUT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLND_OPT_NET_CMD_BUFFER_SIZE
+ */
+const MYSQLI_OPT_NET_CMD_BUFFER_SIZE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLND_OPT_NET_READ_BUFFER_SIZE
+ */
+const MYSQLI_OPT_NET_READ_BUFFER_SIZE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLND_OPT_INT_AND_FLOAT_NATIVE
+ */
+const MYSQLI_OPT_INT_AND_FLOAT_NATIVE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_SSL_VERIFY_SERVER_CERT
+ */
+const MYSQLI_OPT_SSL_VERIFY_SERVER_CERT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue MYSQL_SERVER_PUBLIC_KEY
+ */
+const MYSQLI_SERVER_PUBLIC_KEY = UNKNOWN;
+
+/* mysqli_real_connect flags */
+/**
+ * @var int
+ * @cvalue CLIENT_SSL
+ */
+const MYSQLI_CLIENT_SSL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CLIENT_COMPRESS
+ */
+const MYSQLI_CLIENT_COMPRESS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CLIENT_INTERACTIVE
+ */
+const MYSQLI_CLIENT_INTERACTIVE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CLIENT_IGNORE_SPACE
+ */
+const MYSQLI_CLIENT_IGNORE_SPACE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CLIENT_NO_SCHEMA
+ */
+const MYSQLI_CLIENT_NO_SCHEMA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CLIENT_FOUND_ROWS
+ */
+const MYSQLI_CLIENT_FOUND_ROWS = UNKNOWN;
+#ifdef CLIENT_SSL_VERIFY_SERVER_CERT
+/**
+ * @var int
+ * @cvalue CLIENT_SSL_VERIFY_SERVER_CERT
+ */
+const MYSQLI_CLIENT_SSL_VERIFY_SERVER_CERT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CLIENT_SSL_DONT_VERIFY_SERVER_CERT
+ */
+const MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT = UNKNOWN;
+#endif
+/**
+ * @var int
+ * @cvalue CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS
+ */
+const MYSQLI_CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS
+ */
+const MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS = UNKNOWN;
+
+/* for mysqli_query */
+/**
+ * @var int
+ * @cvalue MYSQLI_STORE_RESULT
+ */
+const MYSQLI_STORE_RESULT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_USE_RESULT
+ */
+const MYSQLI_USE_RESULT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_ASYNC
+ */
+const MYSQLI_ASYNC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_STORE_RESULT_COPY_DATA
+ */
+const MYSQLI_STORE_RESULT_COPY_DATA = UNKNOWN;
+
+/* for mysqli_fetch_assoc */
+/**
+ * @var int
+ * @cvalue MYSQLI_ASSOC
+ */
+const MYSQLI_ASSOC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_NUM
+ */
+const MYSQLI_NUM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_BOTH
+ */
+const MYSQLI_BOTH = UNKNOWN;
+
+/* for mysqli_stmt_set_attr */
+/**
+ * @var int
+ * @cvalue STMT_ATTR_UPDATE_MAX_LENGTH
+ */
+const MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue STMT_ATTR_CURSOR_TYPE
+ */
+const MYSQLI_STMT_ATTR_CURSOR_TYPE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURSOR_TYPE_NO_CURSOR
+ */
+const MYSQLI_CURSOR_TYPE_NO_CURSOR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURSOR_TYPE_READ_ONLY
+ */
+const MYSQLI_CURSOR_TYPE_READ_ONLY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURSOR_TYPE_FOR_UPDATE
+ */
+const MYSQLI_CURSOR_TYPE_FOR_UPDATE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURSOR_TYPE_SCROLLABLE
+ */
+const MYSQLI_CURSOR_TYPE_SCROLLABLE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue STMT_ATTR_PREFETCH_ROWS
+ */
+const MYSQLI_STMT_ATTR_PREFETCH_ROWS = UNKNOWN;
+
+/* column information */
+/**
+ * @var int
+ * @cvalue NOT_NULL_FLAG
+ */
+const MYSQLI_NOT_NULL_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PRI_KEY_FLAG
+ */
+const MYSQLI_PRI_KEY_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UNIQUE_KEY_FLAG
+ */
+const MYSQLI_UNIQUE_KEY_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MULTIPLE_KEY_FLAG
+ */
+const MYSQLI_MULTIPLE_KEY_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue BLOB_FLAG
+ */
+const MYSQLI_BLOB_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UNSIGNED_FLAG
+ */
+const MYSQLI_UNSIGNED_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEROFILL_FLAG
+ */
+const MYSQLI_ZEROFILL_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue AUTO_INCREMENT_FLAG
+ */
+const MYSQLI_AUTO_INCREMENT_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TIMESTAMP_FLAG
+ */
+const MYSQLI_TIMESTAMP_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SET_FLAG
+ */
+const MYSQLI_SET_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NUM_FLAG
+ */
+const MYSQLI_NUM_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PART_KEY_FLAG
+ */
+const MYSQLI_PART_KEY_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GROUP_FLAG
+ */
+const MYSQLI_GROUP_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ENUM_FLAG
+ */
+const MYSQLI_ENUM_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue BINARY_FLAG
+ */
+const MYSQLI_BINARY_FLAG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NO_DEFAULT_VALUE_FLAG
+ */
+const MYSQLI_NO_DEFAULT_VALUE_FLAG = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue ON_UPDATE_NOW_FLAG
+ */
+const MYSQLI_ON_UPDATE_NOW_FLAG = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_DECIMAL
+ */
+const MYSQLI_TYPE_DECIMAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_TINY
+ */
+const MYSQLI_TYPE_TINY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_SHORT
+ */
+const MYSQLI_TYPE_SHORT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_LONG
+ */
+const MYSQLI_TYPE_LONG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_FLOAT
+ */
+const MYSQLI_TYPE_FLOAT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_DOUBLE
+ */
+const MYSQLI_TYPE_DOUBLE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_NULL
+ */
+const MYSQLI_TYPE_NULL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_TIMESTAMP
+ */
+const MYSQLI_TYPE_TIMESTAMP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_LONGLONG
+ */
+const MYSQLI_TYPE_LONGLONG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_INT24
+ */
+const MYSQLI_TYPE_INT24 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_DATE
+ */
+const MYSQLI_TYPE_DATE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_TIME
+ */
+const MYSQLI_TYPE_TIME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_DATETIME
+ */
+const MYSQLI_TYPE_DATETIME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_YEAR
+ */
+const MYSQLI_TYPE_YEAR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_NEWDATE
+ */
+const MYSQLI_TYPE_NEWDATE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_ENUM
+ */
+const MYSQLI_TYPE_ENUM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_SET
+ */
+const MYSQLI_TYPE_SET = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_TINY_BLOB
+ */
+const MYSQLI_TYPE_TINY_BLOB = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_MEDIUM_BLOB
+ */
+const MYSQLI_TYPE_MEDIUM_BLOB = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_LONG_BLOB
+ */
+const MYSQLI_TYPE_LONG_BLOB = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_BLOB
+ */
+const MYSQLI_TYPE_BLOB = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_VAR_STRING
+ */
+const MYSQLI_TYPE_VAR_STRING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_STRING
+ */
+const MYSQLI_TYPE_STRING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_CHAR
+ */
+const MYSQLI_TYPE_CHAR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_INTERVAL
+ */
+const MYSQLI_TYPE_INTERVAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_GEOMETRY
+ */
+const MYSQLI_TYPE_GEOMETRY = UNKNOWN;
+#ifdef FIELD_TYPE_JSON
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_JSON
+ */
+const MYSQLI_TYPE_JSON = UNKNOWN;
+#endif
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_NEWDECIMAL
+ */
+const MYSQLI_TYPE_NEWDECIMAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_BIT
+ */
+const MYSQLI_TYPE_BIT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_SET_CHARSET_NAME
+ */
+const MYSQLI_SET_CHARSET_NAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQL_SET_CHARSET_DIR
+ */
+const MYSQLI_SET_CHARSET_DIR = UNKNOWN;
+
+/* bind support */
+/**
+ * @var int
+ * @cvalue MYSQL_NO_DATA
+ * @deprecated
+ */
+const MYSQLI_NO_DATA = UNKNOWN;
+#ifdef MYSQL_DATA_TRUNCATED
+/**
+ * @var int
+ * @cvalue MYSQL_DATA_TRUNCATED
+ * @deprecated
+ */
+const MYSQLI_DATA_TRUNCATED = UNKNOWN;
+#endif
+
+/* reporting */
+/**
+ * @var int
+ * @cvalue MYSQLI_REPORT_INDEX
+ */
+const MYSQLI_REPORT_INDEX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_REPORT_ERROR
+ */
+const MYSQLI_REPORT_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_REPORT_STRICT
+ */
+const MYSQLI_REPORT_STRICT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_REPORT_ALL
+ */
+const MYSQLI_REPORT_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MYSQLI_REPORT_OFF
+ */
+const MYSQLI_REPORT_OFF = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue MYSQLND_DBG_ENABLED
+ */
+const MYSQLI_DEBUG_TRACE_ENABLED = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue SERVER_QUERY_NO_GOOD_INDEX_USED
+ * @deprecated
+ */
+const MYSQLI_SERVER_QUERY_NO_GOOD_INDEX_USED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SERVER_QUERY_NO_INDEX_USED
+ * @deprecated
+ */
+const MYSQLI_SERVER_QUERY_NO_INDEX_USED = UNKNOWN;
+#ifdef SERVER_QUERY_WAS_SLOW
+/**
+ * @var int
+ * @cvalue SERVER_QUERY_WAS_SLOW
+ * @deprecated
+ */
+const MYSQLI_SERVER_QUERY_WAS_SLOW = UNKNOWN;
+#endif
+#ifdef SERVER_PS_OUT_PARAMS
+/**
+ * @var int
+ * @cvalue SERVER_PS_OUT_PARAMS
+ * @deprecated
+ */
+const MYSQLI_SERVER_PS_OUT_PARAMS = UNKNOWN;
+#endif
+
+/**
+ * @var int
+ * @cvalue REFRESH_GRANT
+ */
+const MYSQLI_REFRESH_GRANT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_LOG
+ */
+const MYSQLI_REFRESH_LOG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_TABLES
+ */
+const MYSQLI_REFRESH_TABLES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_HOSTS
+ */
+const MYSQLI_REFRESH_HOSTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_STATUS
+ */
+const MYSQLI_REFRESH_STATUS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_THREADS
+ */
+const MYSQLI_REFRESH_THREADS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_SLAVE
+ */
+const MYSQLI_REFRESH_REPLICA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_SLAVE
+ */
+const MYSQLI_REFRESH_SLAVE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue REFRESH_MASTER
+ */
+const MYSQLI_REFRESH_MASTER = UNKNOWN;
+#ifdef REFRESH_BACKUP_LOG
+/**
+ * @var int
+ * @cvalue REFRESH_BACKUP_LOG
+ */
+const MYSQLI_REFRESH_BACKUP_LOG = UNKNOWN;
+#endif
+
+/**
+ * @var int
+ * @cvalue TRANS_START_WITH_CONSISTENT_SNAPSHOT
+ */
+const MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TRANS_START_READ_WRITE
+ */
+const MYSQLI_TRANS_START_READ_WRITE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TRANS_START_READ_ONLY
+ */
+const MYSQLI_TRANS_START_READ_ONLY = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue TRANS_COR_AND_CHAIN
+ */
+const MYSQLI_TRANS_COR_AND_CHAIN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TRANS_COR_AND_NO_CHAIN
+ */
+const MYSQLI_TRANS_COR_AND_NO_CHAIN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TRANS_COR_RELEASE
+ */
+const MYSQLI_TRANS_COR_RELEASE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue TRANS_COR_NO_RELEASE
+ */
+const MYSQLI_TRANS_COR_NO_RELEASE = UNKNOWN;
+
+/**
+ * @var bool
+ * @deprecated
+ */
+const MYSQLI_IS_MARIADB = false;
+
 final class mysqli_driver
 {
     /** @readonly */
@@ -530,7 +1144,7 @@ class mysqli_result implements IteratorAggregate
      * @tentative-return-type
      * @alias mysqli_field_seek
      */
-    public function field_seek(int $index): bool {}
+    public function field_seek(int $index): true {} // TODO make return type void
 
     /**
      * @tentative-return-type
@@ -843,7 +1457,7 @@ function mysqli_fetch_column(mysqli_result $result, int $column = 0): null|int|f
 
 function mysqli_field_count(mysqli $mysql): int {}
 
-function mysqli_field_seek(mysqli_result $result, int $index): bool {}
+function mysqli_field_seek(mysqli_result $result, int $index): true {} // TODO make return type void
 
 function mysqli_field_tell(mysqli_result $result): int {}
 

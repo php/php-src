@@ -236,7 +236,7 @@ string(35) "2000-639010PHP000 0string%0with%0...%0"
 string(43) "2\00\0-639\01\0PHP\0\0\0 \0string%0with%0...%0"
 
 *** Testing implode() on empty string ***
-implode(): Argument #1 ($pieces) must be of type array, string given
+implode(): Argument #1 ($array) must be of type array, string given
 
 *** Testing implode() on sub-arrays ***
 
@@ -266,9 +266,9 @@ array(2) {
 string(%d) "Resource id #%d::Resource id #%d"
 
 *** Testing error conditions ***
-implode(): Argument #1 ($pieces) must be of type array, string given
+implode(): Argument #1 ($array) must be of type array, string given
 implode(): Argument #2 ($array) must be of type ?array, int given
-implode(): Argument #1 ($pieces) must be of type array, string given
+implode(): Argument #1 ($array) must be of type array, string given
 string(0) ""
 implode(): Argument #2 ($array) must be of type ?array, string given
 

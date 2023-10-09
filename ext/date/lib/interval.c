@@ -26,25 +26,59 @@
 #include "timelib_private.h"
 #include <math.h>
 
-timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
+static void swap_times(timelib_time **one, timelib_time **two, timelib_rel_time *rt)
+{
+	timelib_time *swp;
+
+	swp = *two;
+	*two = *one;
+	*one = swp;
+	rt->invert = 1;
+}
+
+static void sort_old_to_new(timelib_time **one, timelib_time **two, timelib_rel_time *rt)
+{
+	/* Check whether date/times need to be inverted. If both times are
+	 * TIMELIB_ZONETYPE_ID times with the same TZID, we use the y-s + us fields. */
+	if (
+		(*one)->zone_type == TIMELIB_ZONETYPE_ID &&
+		(*two)->zone_type == TIMELIB_ZONETYPE_ID &&
+		(strcmp((*one)->tz_info->name, (*two)->tz_info->name) == 0)
+	) {
+		if (
+			((*one)->y > (*two)->y) ||
+			((*one)->y == (*two)->y && (*one)->m > (*two)->m) ||
+			((*one)->y == (*two)->y && (*one)->m == (*two)->m && (*one)->d > (*two)->d) ||
+			((*one)->y == (*two)->y && (*one)->m == (*two)->m && (*one)->d == (*two)->d && (*one)->h > (*two)->h) ||
+			((*one)->y == (*two)->y && (*one)->m == (*two)->m && (*one)->d == (*two)->d && (*one)->h == (*two)->h && (*one)->i > (*two)->i) ||
+			((*one)->y == (*two)->y && (*one)->m == (*two)->m && (*one)->d == (*two)->d && (*one)->h == (*two)->h && (*one)->i == (*two)->i && (*one)->s > (*two)->s) ||
+			((*one)->y == (*two)->y && (*one)->m == (*two)->m && (*one)->d == (*two)->d && (*one)->h == (*two)->h && (*one)->i == (*two)->i && (*one)->s == (*two)->s && (*one)->us > (*two)->us)
+		) {
+			swap_times(one, two, rt);
+		}
+		return;
+	}
+
+	/* Fall back to using the SSE instead to rearrange */
+	if (
+		((*one)->sse > (*two)->sse) ||
+		((*one)->sse == (*two)->sse && (*one)->us > (*two)->us)
+	) {
+		swap_times(one, two, rt);
+	}
+}
+
+static timelib_rel_time *timelib_diff_with_tzid(timelib_time *one, timelib_time *two)
 {
 	timelib_rel_time *rt;
-	timelib_time *swp;
-	timelib_sll dst_corr = 0, dst_h_corr = 0, dst_m_corr = 0;
-	timelib_time_offset *trans = NULL;
-
+	timelib_sll       dst_corr = 0, dst_h_corr = 0, dst_m_corr = 0;
+	int32_t           trans_offset;
+	timelib_sll       trans_transition_time;
 
 	rt = timelib_rel_time_ctor();
 	rt->invert = 0;
-	if (
-		(one->sse > two->sse) ||
-		(one->sse == two->sse && one->us > two->us)
-	) {
-		swp = two;
-		two = one;
-		one = swp;
-		rt->invert = 1;
-	}
+
+	sort_old_to_new(&one, &two, rt);
 
 	/* Calculate correction for UTC offset changes between first and second SSE */
 	dst_corr = two->z - one->z;
@@ -62,87 +96,83 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	rt->days = timelib_diff_days(one, two);
 
 	/* Fall Back: Cater for transition period, where rt->invert is 0, but there are negative numbers */
-	if (one->dst == 1 && two->dst == 0) {
-		/* First for two "Type 3" times */
-		if (one->zone_type == 3 && two->zone_type == 3) {
-			trans = timelib_get_time_zone_info(two->sse, two->tz_info);
-			if (trans) {
-				if (one->sse >= trans->transition_time + dst_corr && one->sse < trans->transition_time) {
-					timelib_sll flipped = SECS_PER_HOUR + (rt->i * 60) + (rt->s);
-					rt->h = flipped / SECS_PER_HOUR;
-					rt->i = (flipped - rt->h * SECS_PER_HOUR) / 60;
-					rt->s = flipped % 60;
-				}
-				timelib_time_offset_dtor(trans);
-				trans = NULL;
-			}
-		} else if (rt->h == 0 && (rt->i < 0 || rt->s < 0)) {
-			/* Then for all the others */
-			timelib_sll flipped = SECS_PER_HOUR + (rt->i * 60) + (rt->s);
-			rt->h = flipped / SECS_PER_HOUR;
-			rt->i = (flipped - rt->h * SECS_PER_HOUR) / 60;
-			rt->s = flipped % 60;
-			dst_corr += SECS_PER_HOUR;
-			dst_h_corr++;
-		}
+	if (two->sse < one->sse) {
+		timelib_sll flipped = llabs((rt->i * 60) + (rt->s) - dst_corr);
+		rt->h = flipped / SECS_PER_HOUR;
+		rt->i = (flipped - rt->h * SECS_PER_HOUR) / 60;
+		rt->s = flipped % 60;
+
+		rt->invert = 1 - rt->invert;
 	}
 
 	timelib_do_rel_normalize(rt->invert ? one : two, rt);
 
-	/* Do corrections for "Type 3" times */
-	if (one->zone_type == 3 && two->zone_type == 3 && strcmp(one->tz_info->name, two->tz_info->name) == 0) {
-		if (one->dst == 1 && two->dst == 0) { /* Fall Back */
-			if (two->tz_info) {
-				trans = timelib_get_time_zone_info(two->sse, two->tz_info);
-
-				if (
-					trans &&
-					two->sse >= trans->transition_time &&
-					((two->sse - one->sse + dst_corr) % SECS_PER_DAY) > (two->sse - trans->transition_time)
-				) {
-					rt->h -= dst_h_corr;
-					rt->i -= dst_m_corr;
-				}
+	if (one->dst == 1 && two->dst == 0) { /* Fall Back */
+		if (two->tz_info) {
+			if ((two->sse - one->sse + dst_corr) < SECS_PER_DAY) {
+				rt->h -= dst_h_corr;
+				rt->i -= dst_m_corr;
 			}
-		} else if (one->dst == 0 && two->dst == 1) { /* Spring Forward */
-			if (two->tz_info) {
-				trans = timelib_get_time_zone_info(two->sse, two->tz_info);
+		}
+	} else if (one->dst == 0 && two->dst == 1) { /* Spring Forward */
+		if (two->tz_info) {
+			int success = timelib_get_time_zone_offset_info(two->sse, two->tz_info, &trans_offset, &trans_transition_time, NULL);
 
-				if (
-					trans &&
-					!((one->sse + SECS_PER_DAY > trans->transition_time) && (one->sse + SECS_PER_DAY <= (trans->transition_time + dst_corr))) &&
-					two->sse >= trans->transition_time &&
-					((two->sse - one->sse + dst_corr) % SECS_PER_DAY) > (two->sse - trans->transition_time)
-				) {
-					rt->h -= dst_h_corr;
-					rt->i -= dst_m_corr;
-				}
+			if (
+				success &&
+				!((one->sse + SECS_PER_DAY > trans_transition_time) && (one->sse + SECS_PER_DAY <= (trans_transition_time + dst_corr))) &&
+				two->sse >= trans_transition_time &&
+				((two->sse - one->sse + dst_corr) % SECS_PER_DAY) > (two->sse - trans_transition_time)
+			) {
+				rt->h -= dst_h_corr;
+				rt->i -= dst_m_corr;
 			}
-		} else if (two->sse - one->sse >= SECS_PER_DAY) {
-			/* Check whether we're in the period to the next transition time */
-			trans = timelib_get_time_zone_info(two->sse - two->z, two->tz_info);
-			dst_corr = one->z - trans->offset;
+		}
+	} else if (two->sse - one->sse >= SECS_PER_DAY) {
+		/* Check whether we're in the period to the next transition time */
+		if (timelib_get_time_zone_offset_info(two->sse - two->z, two->tz_info, &trans_offset, &trans_transition_time, NULL)) {
+			dst_corr = one->z - trans_offset;
 
-			if (two->sse >= trans->transition_time - dst_corr && two->sse < trans->transition_time) {
+			if (two->sse >= trans_transition_time - dst_corr && two->sse < trans_transition_time) {
 				rt->d--;
 				rt->h = 24;
 			}
 		}
-	} else {
-		/* Then for all the others */
-		if (one->zone_type == 3 && two->zone_type == 3) {
-			rt->h -= dst_h_corr;
-		} else {
-			rt->h -= dst_h_corr + (two->dst - one->dst);
-		}
-		rt->i -= dst_m_corr;
-
-		timelib_do_rel_normalize(rt->invert ? one : two, rt);
 	}
 
-	if (trans) {
-		timelib_time_offset_dtor(trans);
+	return rt;
+}
+
+timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
+{
+	timelib_rel_time *rt;
+
+	if (one->zone_type == TIMELIB_ZONETYPE_ID && two->zone_type == TIMELIB_ZONETYPE_ID && strcmp(one->tz_info->name, two->tz_info->name) == 0) {
+		return timelib_diff_with_tzid(one, two);
 	}
+
+	rt = timelib_rel_time_ctor();
+	rt->invert = 0;
+
+	sort_old_to_new(&one, &two, rt);
+
+	rt->y = two->y - one->y;
+	rt->m = two->m - one->m;
+	rt->d = two->d - one->d;
+	rt->h = two->h - one->h;
+	if (one->zone_type != TIMELIB_ZONETYPE_ID) {
+		rt->h = rt->h + one->dst;
+	}
+	if (two->zone_type != TIMELIB_ZONETYPE_ID) {
+		rt->h = rt->h - two->dst;
+	}
+	rt->i = two->i - one->i;
+	rt->s = two->s - one->s - two->z + one->z;
+	rt->us = two->us - one->us;
+
+	rt->days = timelib_diff_days(one, two);
+
+	timelib_do_rel_normalize(rt->invert ? one : two, rt);
 
 	return rt;
 }
@@ -278,12 +308,21 @@ timelib_time *timelib_add_wall(timelib_time *old_time, timelib_rel_time *interva
 			timelib_update_ts(t, NULL);
 		}
 
-		do_range_limit(0, 1000000, 1000000, &interval->us, &interval->s);
-		t->sse += bias * timelib_hms_to_seconds(interval->h, interval->i, interval->s);
-		timelib_update_from_sse(t);
-		t->us += interval->us * bias;
-		if (bias == -1 && interval->us > 0) {
-			t->sse--;
+		if (interval->us == 0) {
+			t->sse += bias * timelib_hms_to_seconds(interval->h, interval->i, interval->s);
+			timelib_update_from_sse(t);
+		} else {
+			timelib_rel_time *temp_interval = timelib_rel_time_clone(interval);
+
+			do_range_limit(0, 1000000, 1000000, &temp_interval->us, &temp_interval->s);
+			t->sse += bias * timelib_hms_to_seconds(temp_interval->h, temp_interval->i, temp_interval->s);
+			timelib_update_from_sse(t);
+			t->us += temp_interval->us * bias;
+
+			timelib_do_normalize(t);
+			timelib_update_ts(t, NULL);
+
+			timelib_rel_time_dtor(temp_interval);
 		}
 		timelib_do_normalize(t);
 	}
@@ -322,12 +361,21 @@ timelib_time *timelib_sub_wall(timelib_time *old_time, timelib_rel_time *interva
 			timelib_update_ts(t, NULL);
 		}
 
-		do_range_limit(0, 1000000, 1000000, &interval->us, &interval->s);
-		t->sse -= bias * timelib_hms_to_seconds(interval->h, interval->i, interval->s);
-		timelib_update_from_sse(t);
-		t->us -= interval->us * bias;
-		if (bias == -1 && interval->us > 0) {
-			t->sse++;
+		if (interval->us == 0) {
+			t->sse -= bias * timelib_hms_to_seconds(interval->h, interval->i, interval->s);
+			timelib_update_from_sse(t);
+		} else {
+			timelib_rel_time *temp_interval = timelib_rel_time_clone(interval);
+
+			do_range_limit(0, 1000000, 1000000, &temp_interval->us, &temp_interval->s);
+			t->sse -= bias * timelib_hms_to_seconds(temp_interval->h, temp_interval->i, temp_interval->s);
+			timelib_update_from_sse(t);
+			t->us -= temp_interval->us * bias;
+
+			timelib_do_normalize(t);
+			timelib_update_ts(t, NULL);
+
+			timelib_rel_time_dtor(temp_interval);
 		}
 		timelib_do_normalize(t);
 	}

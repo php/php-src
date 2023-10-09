@@ -7,12 +7,13 @@ include "skipif.inc";
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 $argv_fl = __DIR__ . DIRECTORY_SEPARATOR . "argv_test.php";
+$argv_fl_escaped = escapeshellarg($argv_fl);
 file_put_contents($argv_fl, "<?php var_dump(\$argv); ?>");
 
-var_dump(`$php -n $argv_fl 多字节字符串 マルチバイト文字列 многобайтоваястрока flerbytesträng`);
+var_dump(`$php -n $argv_fl_escaped 多字节字符串 マルチバイト文字列 многобайтоваястрока flerbytesträng`);
 
 @unlink($argv_fl);
 

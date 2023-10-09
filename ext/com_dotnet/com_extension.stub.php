@@ -4,286 +4,286 @@
 
 /**
  * @var int
- * @cname CLSCTX_INPROC_SERVER
+ * @cvalue CLSCTX_INPROC_SERVER
  */
 const CLSCTX_INPROC_SERVER = UNKNOWN;
 /**
  * @var int
- * @cname CLSCTX_INPROC_HANDLER
+ * @cvalue CLSCTX_INPROC_HANDLER
  */
 const CLSCTX_INPROC_HANDLER = UNKNOWN;
 /**
  * @var int
- * @cname CLSCTX_LOCAL_SERVER
+ * @cvalue CLSCTX_LOCAL_SERVER
  */
 const CLSCTX_LOCAL_SERVER = UNKNOWN;
 /**
  * @var int
- * @cname CLSCTX_REMOTE_SERVER
+ * @cvalue CLSCTX_REMOTE_SERVER
  */
 const CLSCTX_REMOTE_SERVER = UNKNOWN;
 /**
  * @var int
- * @cname CLSCTX_SERVER
+ * @cvalue CLSCTX_SERVER
  */
 const CLSCTX_SERVER = UNKNOWN;
 /**
  * @var int
- * @cname CLSCTX_ALL
+ * @cvalue CLSCTX_ALL
  */
 const CLSCTX_ALL = UNKNOWN;
 
 /**
  * @var int
- * @cname VT_NULL
+ * @cvalue VT_NULL
  */
 const VT_NULL = UNKNOWN;
 /**
  * @var int
- * @cname VT_EMPTY
+ * @cvalue VT_EMPTY
  */
 const VT_EMPTY = UNKNOWN;
 /**
  * @var int
- * @cname VT_UI1
+ * @cvalue VT_UI1
  */
 const VT_UI1 = UNKNOWN;
 /**
  * @var int
- * @cname VT_I1
+ * @cvalue VT_I1
  */
 const VT_I1 = UNKNOWN;
 /**
  * @var int
- * @cname VT_UI2
+ * @cvalue VT_UI2
  */
 const VT_UI2 = UNKNOWN;
 /**
  * @var int
- * @cname VT_I2
+ * @cvalue VT_I2
  */
 const VT_I2 = UNKNOWN;
 /**
  * @var int
- * @cname VT_UI4
+ * @cvalue VT_UI4
  */
 const VT_UI4 = UNKNOWN;
 /**
  * @var int
- * @cname VT_I4
+ * @cvalue VT_I4
  */
 const VT_I4 = UNKNOWN;
 /**
  * @var int
- * @cname VT_R4
+ * @cvalue VT_R4
  */
 const VT_R4 = UNKNOWN;
 /**
  * @var int
- * @cname VT_R8
+ * @cvalue VT_R8
  */
 const VT_R8 = UNKNOWN;
 /**
  * @var int
- * @cname VT_BOOL
+ * @cvalue VT_BOOL
  */
 const VT_BOOL = UNKNOWN;
 /**
  * @var int
- * @cname VT_ERROR
+ * @cvalue VT_ERROR
  */
 const VT_ERROR = UNKNOWN;
 /**
  * @var int
- * @cname VT_CY
+ * @cvalue VT_CY
  */
 const VT_CY = UNKNOWN;
 /**
  * @var int
- * @cname VT_DATE
+ * @cvalue VT_DATE
  */
 const VT_DATE = UNKNOWN;
 /**
  * @var int
- * @cname VT_BSTR
+ * @cvalue VT_BSTR
  */
 const VT_BSTR = UNKNOWN;
 /**
  * @var int
- * @cname VT_DECIMAL
+ * @cvalue VT_DECIMAL
  */
 const VT_DECIMAL = UNKNOWN;
 /**
  * @var int
- * @cname VT_UNKNOWN
+ * @cvalue VT_UNKNOWN
  */
 const VT_UNKNOWN = UNKNOWN;
 /**
  * @var int
- * @cname VT_DISPATCH
+ * @cvalue VT_DISPATCH
  */
 const VT_DISPATCH = UNKNOWN;
 /**
  * @var int
- * @cname VT_VARIANT
+ * @cvalue VT_VARIANT
  */
 const VT_VARIANT = UNKNOWN;
 /**
  * @var int
- * @cname VT_INT
+ * @cvalue VT_INT
  */
 const VT_INT = UNKNOWN;
 /**
  * @var int
- * @cname VT_UINT
+ * @cvalue VT_UINT
  */
 const VT_UINT = UNKNOWN;
 /**
  * @var int
- * @cname VT_ARRAY
+ * @cvalue VT_ARRAY
  */
 const VT_ARRAY = UNKNOWN;
 /**
  * @var int
- * @cname VT_BYREF
+ * @cvalue VT_BYREF
  */
 const VT_BYREF = UNKNOWN;
 
 /**
  * @var int
- * @cname CP_ACP
+ * @cvalue CP_ACP
  */
 const CP_ACP = UNKNOWN;
 /**
  * @var int
- * @cname CP_MACCP
+ * @cvalue CP_MACCP
  */
 const CP_MACCP = UNKNOWN;
 /**
  * @var int
- * @cname CP_OEMCP
+ * @cvalue CP_OEMCP
  */
 const CP_OEMCP = UNKNOWN;
 /**
  * @var int
- * @cname CP_UTF7
+ * @cvalue CP_UTF7
  */
 const CP_UTF7 = UNKNOWN;
 /**
  * @var int
- * @cname CP_UTF8
+ * @cvalue CP_UTF8
  */
 const CP_UTF8 = UNKNOWN;
 /**
  * @var int
- * @cname CP_SYMBOL
+ * @cvalue CP_SYMBOL
  */
 const CP_SYMBOL = UNKNOWN;
 /**
  * @var int
- * @cname CP_THREAD_ACP
+ * @cvalue CP_THREAD_ACP
  */
 const CP_THREAD_ACP = UNKNOWN;
 
 /**
  * @var int
- * @cname VARCMP_LT
+ * @cvalue VARCMP_LT
  */
 const VARCMP_LT = UNKNOWN;
 /**
  * @var int
- * @cname VARCMP_EQ
+ * @cvalue VARCMP_EQ
  */
 const VARCMP_EQ = UNKNOWN;
 /**
  * @var int
- * @cname VARCMP_GT
+ * @cvalue VARCMP_GT
  */
 const VARCMP_GT = UNKNOWN;
 /**
  * @var int
- * @cname VARCMP_NULL
+ * @cvalue VARCMP_NULL
  */
 const VARCMP_NULL = UNKNOWN;
 /**
  * @var int
- * @cname LOCALE_SYSTEM_DEFAULT
+ * @cvalue LOCALE_SYSTEM_DEFAULT
  */
 const LOCALE_SYSTEM_DEFAULT = UNKNOWN;
 /**
  * @var int
- * @cname LOCALE_NEUTRAL
+ * @cvalue LOCALE_NEUTRAL
  */
 const LOCALE_NEUTRAL = UNKNOWN;
 
 /**
  * @var int
- * @cname NORM_IGNORECASE
+ * @cvalue NORM_IGNORECASE
  */
 const NORM_IGNORECASE = UNKNOWN;
 /**
  * @var int
- * @cname NORM_IGNORENONSPACE
+ * @cvalue NORM_IGNORENONSPACE
  */
 const NORM_IGNORENONSPACE = UNKNOWN;
 /**
  * @var int
- * @cname NORM_IGNORESYMBOLS
+ * @cvalue NORM_IGNORESYMBOLS
  */
 const NORM_IGNORESYMBOLS = UNKNOWN;
 /**
  * @var int
- * @cname NORM_IGNOREWIDTH
+ * @cvalue NORM_IGNOREWIDTH
  */
 const NORM_IGNOREWIDTH = UNKNOWN;
 /**
  * @var int
- * @cname NORM_IGNOREKANATYPE
+ * @cvalue NORM_IGNOREKANATYPE
  */
 const NORM_IGNOREKANATYPE = UNKNOWN;
 #ifdef NORM_IGNOREKASHIDA
 /**
  * @var int
- * @cname NORM_IGNOREKASHIDA
+ * @cvalue NORM_IGNOREKASHIDA
  */
 const NORM_IGNOREKASHIDA = UNKNOWN;
 #endif
 
 /**
  * @var int
- * @cname PHP_DISP_E_DIVBYZERO
+ * @cvalue PHP_DISP_E_DIVBYZERO
  */
 const DISP_E_DIVBYZERO = UNKNOWN;
 /**
  * @var int
- * @cname PHP_DISP_E_OVERFLOW
+ * @cvalue PHP_DISP_E_OVERFLOW
  */
 const DISP_E_OVERFLOW = UNKNOWN;
 /**
  * @var int
- * @cname PHP_DISP_E_BADINDEX
+ * @cvalue PHP_DISP_E_BADINDEX
  */
 const DISP_E_BADINDEX = UNKNOWN;
 /**
  * @var int
- * @cname PHP_DISP_E_PARAMNOTFOUND
+ * @cvalue PHP_DISP_E_PARAMNOTFOUND
  */
 const DISP_E_PARAMNOTFOUND = UNKNOWN;
 /**
  * @var int
- * @cname PHP_MK_E_UNAVAILABLE
+ * @cvalue PHP_MK_E_UNAVAILABLE
  */
 const MK_E_UNAVAILABLE = UNKNOWN;
 
 #if SIZEOF_ZEND_LONG == 8
 /**
  * @var int
- * @cname VT_UI8
+ * @cvalue VT_UI8
  */
 const VT_UI8 = UNKNOWN;
 /**
  * @var int
- * @cname VT_I8
+ * @cvalue VT_I8
  */
 const VT_I8 = UNKNOWN;
 #endif

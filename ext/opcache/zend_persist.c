@@ -37,11 +37,13 @@
 
 #define zend_set_str_gc_flags(str) do { \
 	GC_SET_REFCOUNT(str, 2); \
+	uint32_t flags = GC_STRING | (ZSTR_IS_VALID_UTF8(str) ? IS_STR_VALID_UTF8 : 0); \
 	if (file_cache_only) { \
-		GC_TYPE_INFO(str) = GC_STRING | (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
+		flags |= (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
 	} else { \
-		GC_TYPE_INFO(str) = GC_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT); \
+		flags |= ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT); \
 	} \
+	GC_TYPE_INFO(str) = flags; \
 } while (0)
 
 #define zend_accel_store_string(str) do { \
@@ -134,7 +136,7 @@ static void zend_hash_persist(HashTable *ht)
 			hash_size >>= 1;
 		}
 		ht->nTableMask = (uint32_t)(-(int32_t)hash_size);
-		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
+		ZEND_ASSERT(((uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 		HT_SET_DATA_ADDR(ht, ZCG(mem));
 		ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE((hash_size * sizeof(uint32_t)) + (ht->nNumUsed * sizeof(Bucket))));
 		HT_HASH_RESET(ht);
@@ -155,7 +157,7 @@ static void zend_hash_persist(HashTable *ht)
 		void *data = ZCG(mem);
 		void *old_data = HT_GET_DATA_ADDR(ht);
 
-		ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
+		ZEND_ASSERT(((uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 		ZCG(mem) = (void*)((char*)data + ZEND_ALIGNED_SIZE(HT_USED_SIZE(ht)));
 		memcpy(data, old_data, HT_USED_SIZE(ht));
 		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
@@ -186,7 +188,7 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 		node = (zend_ast *) copy;
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
-		node = zend_shared_memdup(ast, sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children);
+		node = zend_shared_memdup(ast, zend_ast_size(children));
 		for (i = 0; i < children; i++) {
 			if (node->child[i]) {
 				node->child[i] = zend_persist_ast(node->child[i]);
@@ -259,6 +261,7 @@ static void zend_persist_zval(zval *z)
 				zend_persist_ast(GC_AST(old_ref));
 				Z_TYPE_FLAGS_P(z) = 0;
 				GC_SET_REFCOUNT(Z_COUNTED_P(z), 1);
+				GC_ADD_FLAGS(Z_COUNTED_P(z), GC_IMMUTABLE);
 				efree(old_ref);
 			}
 			break;
@@ -339,7 +342,7 @@ uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name)
 static void zend_persist_type(zend_type *type) {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type_list *list = ZEND_TYPE_LIST(*type);
-		if (ZEND_TYPE_USES_ARENA(*type)) {
+		if (ZEND_TYPE_USES_ARENA(*type) || zend_accel_in_shm(list)) {
 			list = zend_shared_memdup_put(list, ZEND_TYPE_LIST_SIZE(list->num_types));
 			ZEND_TYPE_FULL_MASK(*type) &= ~_ZEND_TYPE_ARENA_BIT;
 		} else {
@@ -575,6 +578,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_FE_RESET_RW:
 					case ZEND_ASSERT_CHECK:
 					case ZEND_JMP_NULL:
+					case ZEND_BIND_INIT_STATIC_OR_JMP:
 						opline->op2.jmp_addr = &new_opcodes[opline->op2.jmp_addr - op_array->opcodes];
 						break;
 					case ZEND_CATCH:
@@ -723,6 +727,11 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 						}
 					}
 				}
+				// Real dynamically created internal functions like enum methods must have their own run_time_cache pointer. They're always on the same scope as their defining class.
+				// However, copies - as caused by inheritance of internal methods - must retain the original run_time_cache pointer, shared with the source function.
+				if (!op_array->scope || op_array->scope == ce) {
+					ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+				}
 			}
 		}
 		return;
@@ -832,6 +841,7 @@ static void zend_persist_class_constant(zval *zv)
 	if (c->attributes) {
 		c->attributes = zend_persist_attributes(c->attributes);
 	}
+	zend_persist_type(&c->type);
 }
 
 zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
@@ -1074,7 +1084,15 @@ void zend_update_parent_ce(zend_class_entry *ce)
 				end = parent->parent ? parent->parent->default_static_members_count : 0;
 				for (; i >= end; i--) {
 					zval *p = &ce->default_static_members_table[i];
-					ZVAL_INDIRECT(p, &parent->default_static_members_table[i]);
+					/* The static property may have been overridden by a trait
+					 * during inheritance. In that case, the property default
+					 * value is replaced by zend_declare_typed_property() at the
+					 * property index of the parent property. Make sure we only
+					 * point to the parent property value if the child value was
+					 * already indirect. */
+					if (Z_TYPE_P(p) == IS_INDIRECT) {
+						ZVAL_INDIRECT(p, &parent->default_static_members_table[i]);
+					}
 				}
 
 				parent = parent->parent;
@@ -1103,7 +1121,7 @@ void zend_update_parent_ce(zend_class_entry *ce)
 			if (zend_class_implements_interface(ce, zend_ce_iterator)) {
 				ce->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&ce->function_table, "rewind", sizeof("rewind") - 1);
 				ce->iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&ce->function_table, "valid", sizeof("valid") - 1);
-				ce->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&ce->function_table, "key", sizeof("key") - 1);
+				ce->iterator_funcs_ptr->zf_key = zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_KEY));
 				ce->iterator_funcs_ptr->zf_current = zend_hash_str_find_ptr(&ce->function_table, "current", sizeof("current") - 1);
 				ce->iterator_funcs_ptr->zf_next = zend_hash_str_find_ptr(&ce->function_table, "next", sizeof("next") - 1);
 			}
@@ -1301,7 +1319,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 
 	script->mem = ZCG(mem);
 
-	ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
+	ZEND_ASSERT(((uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 
 	script = zend_shared_memdup_free(script, sizeof(zend_persistent_script));
 	script->corrupted = false;
@@ -1316,9 +1334,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 
 #if defined(__AVX__) || defined(__SSE2__)
 	/* Align to 64-byte boundary */
-	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
+	ZCG(mem) = (void*)(((uintptr_t)ZCG(mem) + 63L) & ~63L);
 #else
-	ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
+	ZEND_ASSERT(((uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 #endif
 
 #ifdef HAVE_JIT

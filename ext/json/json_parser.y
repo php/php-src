@@ -80,6 +80,7 @@ start:
 			{
 				ZVAL_COPY_VALUE(&$$, &$1);
 				ZVAL_COPY_VALUE(parser->return_value, &$1);
+				(void) php_json_yynerrs;
 				YYACCEPT;
 			}
 ;
@@ -254,10 +255,44 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 	return SUCCESS;
 }
 
+static int php_json_parser_array_create_validate(php_json_parser *parser, zval *array)
+{
+	ZVAL_NULL(array);
+	return SUCCESS;
+}
+
+static int php_json_parser_array_append_validate(php_json_parser *parser, zval *array, zval *zvalue)
+{
+	return SUCCESS;
+}
+
+static int php_json_parser_object_create_validate(php_json_parser *parser, zval *object)
+{
+	ZVAL_NULL(object);
+	return SUCCESS;
+}
+
+static int php_json_parser_object_update_validate(php_json_parser *parser, zval *object, zend_string *key, zval *zvalue)
+{
+	return SUCCESS;
+}
+
 static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser)
 {
 	int token = php_json_scan(&parser->scanner);
-	value->value = parser->scanner.value;
+
+	bool validate = parser->methods.array_create == php_json_parser_array_create_validate
+		&& parser->methods.array_append == php_json_parser_array_append_validate
+		&& parser->methods.object_create == php_json_parser_object_create_validate
+		&& parser->methods.object_update == php_json_parser_object_update_validate;
+
+	if (validate) {
+		zval_ptr_dtor_str(&(parser->scanner.value));
+		ZVAL_UNDEF(&value->value);
+	} else {
+		value->value = parser->scanner.value;
+	}
+
 	return token;
 }
 
@@ -281,6 +316,18 @@ static const php_json_parser_methods default_parser_methods =
 	NULL,
 	php_json_parser_object_create,
 	php_json_parser_object_update,
+	NULL,
+	NULL,
+};
+
+static const php_json_parser_methods validate_parser_methods =
+{
+	php_json_parser_array_create_validate,
+	php_json_parser_array_append_validate,
+	NULL,
+	NULL,
+	php_json_parser_object_create_validate,
+	php_json_parser_object_update_validate,
 	NULL,
 	NULL,
 };
@@ -321,4 +368,9 @@ PHP_JSON_API void php_json_parser_init(php_json_parser *parser,
 PHP_JSON_API int php_json_parse(php_json_parser *parser)
 {
 	return php_json_yyparse(parser);
+}
+
+const php_json_parser_methods* php_json_get_validate_methods(void)
+{
+	return &validate_parser_methods;
 }

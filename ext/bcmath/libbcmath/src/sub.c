@@ -29,60 +29,48 @@
 
 *************************************************************************/
 
-#include <config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
 #include "bcmath.h"
 #include "private.h"
-
+#include <stddef.h>
+#include <stdbool.h>
+#include <string.h>
 
 /* Here is the full subtract routine that takes care of negative numbers.
    N2 is subtracted from N1 and the result placed in RESULT.  SCALE_MIN
    is the minimum scale for the result. */
 
-void
-bc_sub (n1, n2, result, scale_min)
-     bc_num n1, n2, *result;
-     int scale_min;
+void bc_sub(bc_num n1, bc_num n2, bc_num *result, size_t scale_min)
 {
-  bc_num diff = NULL;
-  int cmp_res;
-  int res_scale;
+	bc_num diff = NULL;
 
-  if (n1->n_sign != n2->n_sign)
-    {
-      diff = _bc_do_add (n1, n2, scale_min);
-      diff->n_sign = n1->n_sign;
-    }
-  else
-    {
-      /* subtraction must be done. */
-      /* Compare magnitudes. */
-      cmp_res = _bc_do_compare (n1, n2, FALSE, FALSE);
-      switch (cmp_res)
-	{
-	case -1:
-	  /* n1 is less than n2, subtract n1 from n2. */
-	  diff = _bc_do_sub (n2, n1, scale_min);
-	  diff->n_sign = (n2->n_sign == PLUS ? MINUS : PLUS);
-	  break;
-	case  0:
-	  /* They are equal! return zero! */
-	  res_scale = MAX (scale_min, MAX(n1->n_scale, n2->n_scale));
-	  diff = bc_new_num (1, res_scale);
-	  memset (diff->n_value, 0, res_scale+1);
-	  break;
-	case  1:
-	  /* n2 is less than n1, subtract n2 from n1. */
-	  diff = _bc_do_sub (n1, n2, scale_min);
-	  diff->n_sign = n1->n_sign;
-	  break;
+	if (n1->n_sign != n2->n_sign) {
+		diff = _bc_do_add(n1, n2, scale_min);
+		diff->n_sign = n1->n_sign;
+	} else {
+		/* subtraction must be done. */
+		/* Compare magnitudes. */
+		switch (_bc_do_compare(n1, n2, false, false)) {
+			case -1:
+				/* n1 is less than n2, subtract n1 from n2. */
+				diff = _bc_do_sub(n2, n1, scale_min);
+				diff->n_sign = (n2->n_sign == PLUS ? MINUS : PLUS);
+				break;
+			case 0: {
+				/* They are equal! return zero! */
+				size_t res_scale = MAX (scale_min, MAX(n1->n_scale, n2->n_scale));
+				diff = bc_new_num (1, res_scale);
+				memset(diff->n_value, 0, res_scale + 1);
+				break;
+			}
+			case 1:
+				/* n2 is less than n1, subtract n2 from n1. */
+				diff = _bc_do_sub(n1, n2, scale_min);
+				diff->n_sign = n1->n_sign;
+				break;
+		}
 	}
-    }
 
-  /* Clean up and return. */
-  bc_free_num (result);
-  *result = diff;
+	/* Clean up and return. */
+	bc_free_num (result);
+	*result = diff;
 }

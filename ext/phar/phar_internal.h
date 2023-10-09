@@ -547,7 +547,7 @@ char *phar_compress_filter(phar_entry_info * entry, int return_unknown);
 /* void phar_remove_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len); */
 void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len);
 int phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_len, char *path, size_t path_len);
-zend_string *phar_find_in_include_path(char *file, size_t file_len, phar_archive_data **pphar);
+zend_string *phar_find_in_include_path(zend_string *file, phar_archive_data **pphar);
 char *phar_fix_filepath(char *path, size_t *new_len, int use_cwd);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error);
 void phar_parse_metadata_lazy(const char *buffer, phar_metadata_tracker *tracker, uint32_t zip_metadata_len, int persistent);

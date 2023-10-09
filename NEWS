@@ -1,208 +1,37 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.0beta1
+?? ??? ????, PHP 8.4.0alpha1
 
-- CLI:
-  . Updated the mime-type table for the builtin-server. (Ayesh Karunaratne)
-  . Fixed potential overflow for the builtin server via the PHP_CLI_SERVER_WORKERS
-    environment variable. (yiyuaner)
+Core:
+  . Added zend_call_stack_get implementation for NetBSD. (David Carlier)
 
-- Core:
-  . Reduced the memory footprint of strings returned by var_export(),
-    json_encode(), serialize(), iconv_*(), mb_ereg*(), session_create_id(),
-    http_build_query(), strstr(), Reflection*::__toString(). (Arnaud)
-  . Fixed bug GH-8995 (WeakMap object reference offset causing TypeError).
-    (Tobias Bachert)
+DOM:
+  . Added DOMNode::compareDocumentPosition(). (nielsdos)
+  . Implement #53655 (Improve speed of DOMNode::C14N() on large XML documents).
+    (nielsdos)
 
-- COM:
-  . Fixed bug GH-8750 (Can not create VT_ERROR variant type). (cmb)
+Intl:
+  . Added IntlDateFormatter::PATTERN constant. (David Carlier)
 
-- FPM:
-  . Added listen.setfib pool option to set route FIB on FreeBSD. (David Carlier)
-  . Added access.suppress_path pool option to filter access log entries.
-    (Mark Gallagher)
+PGSQL:
+  . Added the possibility to have no conditions for pg_select. (OmarEmaraDev)
 
-- Opcache:
-  . Added initial support for JIT performance profiling generation
-    for macOs Instrument. (David Carlier)
+SimpleXML:
+  . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
+    within foreach). (nielsdos)
+  . Fixed bug GH-12208 (SimpleXML infinite loop when a cast is used inside a
+    foreach). (nielsdos)
+  . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
 
-- PCRE:
-  . Updated bundled libpcre to 10.40. (cmb)
+Standard:
+  . Implement GH-12188 (Indication for the int size in phpinfo()). (timwolla)
+  . Partly fix GH-12143 (Incorrect round() result for 0.49999999999999994).
+    (timwolla)
+  . Fix GH-12252 (round(): Validate the rounding mode). (timwolla)
+  . Increase the default BCrypt cost to 12. (timwolla)
 
-- PDO_Firebird:
-  . Fixed bug GH-8576 (Bad interpretation of length when char is UTF-8). (cmb)
-
-- Standard:
-  . Fixed empty array returned by str_split on empty input. (Michael Vorisek)
-  . Added ini_parse_quantity function to convert ini quantities shorthand
-    notation to int. (Dennis Snell)
-  . Enable arc4random_buf for Linux glibc 2.36 and onwards
-    for the random_bytes. (Cristian Rodriguez)
-  . Uses CCRandomGenerateBytes instead of arc4random_buf on macOs. (David Carlier).
-
-07 Jul 2022, PHP 8.2.0alpha3
-
-- Core:
-  . Uses safe_perealloc instead of perealloc for the
-    ZEND_PTR_STACK_RESIZE_IF_NEEDED to avoid possible overflows. (David Carlier)
-
-- DBA:
-  . Fixed LMDB driver hanging when attempting to delete a non-existing key
-    (Girgias)
-
-- Intl:
-  . Fixed build for ICU 69.x and onwards. (David Carlier)
-
-- Opcache:
-  . Allocate JIT buffer close to PHP .text segemnt to allow using direct
-    IP-relative calls and jumps.
-    (Su Tao, Wang Xue, Chen Hu, Lizhen Lizhen, Dmitry)
-
-- Sockets:
-  . Added TCP_CONGESTION socket option. (David Carlier)
-  . Added SO_ZEROCOPY/MSG_ZEROCOPY options. (David Carlier)
-
-- SPL:
-  . Uses safe_erealloc instead of erealloc to handle heap growth
-    for the SplHeap::insert method to avoid possible overflows. (David Carlier)
-
-- Standard:
-  . Fixed the crypt_sha256/512 api build with clang > 12. (David Carlier)
-  . Uses safe_erealloc instead of erealloc to handle options in getopt
-    to avoid possible overflows. (David Carlier)
-
-- Zip:
-
-  . Implement fseek for zip stream when possible with libzip 1.9.1. (Remi)
-
-23 Jun 2022, PHP 8.2.0alpha2
-
-- Core:
-  . Fixed bug GH-8655 (Casting an object to array does not unwrap refcount=1
-    references). (Nicolas Grekas)
-  . Fixed bug GH-8661 (Nullsafe in coalesce triggers undefined variable
-    warning). (ilutov)
-  . Fixed bug GH-7821 and GH-8418 (Allow arbitrary const expressions in backed
-    enums). (ilutov)
-  . Fixed bug GH-8810 (Incorrect lineno in backtrace of multi-line function
-    calls). (ilutov)
-  . Optimised code path for newly created file with the stream plain wrapper. (Max Kellermann)
-
-- Curl:
-  . Added new constants from cURL 7.62 to 7.80. (Pierrick)
-  . New function curl_upkeep(). (Pierrick)
-
-- OpenSSL:
-  . Discard poll calls on socket when no timeout/non blocking/MSG_DONTWAIT. (Max Kellermann)
-
-- PCRE:
-  . Implemented FR #77726 (Allow null character in regex patterns). (cmb)
-
-- Standard:
-  . Deprecated utf8_encode() and utf8_decode(). (Rowan Tommins)
-
-- Streams:
-  . Discard poll calls on socket when no timeout/non blocking/MSG_DONTWAIT. (Max Kellermann)
-
-09 Jun 2022, PHP 8.2.0alpha1
-
-- CLI:
-  . Fixed bug #81496 (Server logs incorrect request method). (lauri)
-
-- Core:
-  . Fixed bug #81380 (Observer may not be initialized properly). (krakjoe)
-  . Fixed bug GH-7771 (Fix filename/lineno of constant expressions). (ilutov)
-  . Fixed bug GH-7792 (Improve class type in error messages). (ilutov)
-  . Support huge pages on MacOS. (David CARLIER)
-
-- Curl:
-  . Added support for CURLOPT_XFERINFOFUNCTION. (David Carlier)
-  . Added support for CURLOPT_MAXFILESIZE_LARGE. (David Carlier)
-
-- Date:
-  . Fixed GH-8458 (DateInterval::createFromDateString does not throw if
-    non-relative items are present). (Derick)
-  . Fixed bug #52015 (Allow including end date in DatePeriod iterations)
-    (Daniel Egeberg, Derick)
-  . idate() now accepts format specifiers "N" (ISO Day-of-Week) and "o" (ISO
-    Year). (Pavel Djundik)
-
-- FPM:
-  . Emit error for invalid port setting. (David Carlier)
-  . Added extra check for FPM proc dumpable on SELinux based systems.
-    (David Carlier)
-  . Added support for listening queue on macOS. (David Carlier)
-  . Changed default for listen.backlog on Linux to -1. (Cristian Rodríguez)
-
-- FTP:
-  . Fix datetime format string to follow POSIX spec in ftp_mdtm(). (Jihwan Kim)
-
-- Intl:
-  . Update all grandfathered language tags with preferred values
-  . Fixed GH-7939 (Cannot unserialize IntlTimeZone objects). (cmb)
-
-- OCI8:
-  . Added oci8.prefetch_lob_size directive to tune LOB query performance
-  . Support for building against Oracle Client libraries 10.1 and 10.2 has been
-    dropped. Oracle Client libraries 11.2 or newer are now required.
-
-- ODBC:
-  . Fixed bug GH-8300 (User input not escaped when building connection string).
-    (Calvin Buckley)
-
-- PDO_ODBC:
-  . Fixed bug #80909 (crash with persistent connections in PDO_ODBC). (Calvin
-    Buckley)
-  . Fixed bug GH-8300 (User input not escaped when building connection string).
-    (Calvin Buckley)
-
-- Reflection:
-  . Added ReflectionFunction::isAnonymous(). (Nicolas Grekas)
-  . Added ReflectionMethod::hasPrototype(). (Ollie Read)
-  . Narrow ReflectionEnum::getBackingType() return type to ReflectionNamedType.
-    (SamMousa)
-
-- Session:
-  . Fixed bug GH-7787 (Improve session write failure message for user error
-    handlers). (ilutov)
-
-- Sockets:
-  . Added TCP_NOTSENT_LOWAT socket option. (David Carlier)
-  . Added SO_MEMINFO socket option. (David Carlier)
-  . Added SO_RTABLE socket option (OpenBSD), equivalent of SO_MARK (Linux).
-    (David Carlier)
-  . Added TCP_KEEPALIVE, TCP_KEEPIDLE, TCP_KEEPINTVL, TCP_KEEPCNT socket
-    options. (David Carlier)
-  . Added ancillary data support for FreeBSD. (David Carlier)
-  . Added ancillary data support for NetBSD. (David Carlier)
-  . Added SO_BPF_EXTENSIONS socket option. (David Carlier)
-  . Added SO_SETFIB socket option. (David Carlier)
-
-- Sodium:
-  . Added sodium_crypto_stream_xchacha20_xor_ic(). (Scott)
-
-- SQLite3:
-  . Changed sqlite3.defensive from PHP_INI_SYSTEM to PHP_INI_USER. (bohwaz)
-
-- Standard:
-  . net_get_interfaces() also reports wireless network interfaces on Windows.
-    (Yurun)
-  . Finished AVIF support in getimagesize(). (Yannis Guyon)
-  . Fixed bug GH-7847 (stripos with large haystack has bad performance).
-    (ilutov)
-  . New function memory_reset_peak_usage(). (Patrick Allaert)
-  . Fixed parse_url(): can not recognize port without scheme. (pandaLIU)
-
-- Streams:
-  . Set IP_BIND_ADDRESS_NO_PORT if available when connecting to remote host.
-    (Cristian Rodríguez)
-  . Fixed bug GH-8548 (stream_wrapper_unregister() leaks memory). (ilutov)
-
-- Zip:
-  . add ZipArchive::clearError() method
-  . add ZipArchive::getStreamName() method
-  . add ZipArchive::getStreamIndex() method
-  . On Windows, the Zip extension is now built as shared library (DLL) by
-    default. (cmb)
+XSL:
+  . Implement request #64137 (XSLTProcessor::setParameter() should allow both
+    quotes to be used). (nielsdos)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

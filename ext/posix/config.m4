@@ -10,7 +10,7 @@ if test "$PHP_POSIX" = "yes"; then
 
   AC_CHECK_HEADERS([sys/mkdev.h sys/sysmacros.h])
 
-  AC_CHECK_FUNCS(seteuid setegid setsid getsid getpgid ctermid mkfifo mknod setrlimit getrlimit getgroups makedev initgroups getgrgid_r)
+  AC_CHECK_FUNCS(seteuid setegid setsid getsid getpgid ctermid mkfifo mknod setrlimit getrlimit getgroups makedev initgroups getgrgid_r posix_pathconf eaccess)
 
   AC_MSG_CHECKING([for working ttyname_r() implementation])
   AC_RUN_IFELSE([AC_LANG_SOURCE([[

@@ -7,4 +7,4 @@ class A {
 }
 ?>
 --EXPECTF--
-Fatal error: Cannot use 'static' as constant modifier in %s on line 3
+Fatal error: Cannot use the static modifier on a class constant in %s on line %d

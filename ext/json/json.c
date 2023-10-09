@@ -37,10 +37,17 @@ PHP_JSON_API zend_class_entry *php_json_exception_ce;
 
 PHP_JSON_API ZEND_DECLARE_MODULE_GLOBALS(json)
 
+static int php_json_implement_json_serializable(zend_class_entry *interface, zend_class_entry *class_type)
+{
+	class_type->ce_flags |= ZEND_ACC_USE_GUARDS;
+	return SUCCESS;
+}
+
 /* {{{ MINIT */
 static PHP_MINIT_FUNCTION(json)
 {
 	php_json_serializable_ce = register_class_JsonSerializable();
+	php_json_serializable_ce->interface_gets_implemented = php_json_implement_json_serializable;
 
 	php_json_exception_ce = register_class_JsonException(zend_ce_exception);
 
@@ -102,6 +109,21 @@ static PHP_MINFO_FUNCTION(json)
 	php_info_print_table_end();
 }
 /* }}} */
+
+PHP_JSON_API zend_string *php_json_encode_string(const char *s, size_t len, int options)
+{
+	smart_str buf = {0};
+	php_json_encoder encoder;
+
+	php_json_encode_init(&encoder);
+
+	if (php_json_escape_string(&buf, s, len, options, &encoder) == FAILURE) {
+		smart_str_free(&buf);
+		return NULL;
+	}
+
+	return smart_str_extract(&buf);
+}
 
 PHP_JSON_API zend_result php_json_encode_ex(smart_str *buf, zval *val, int options, zend_long depth) /* {{{ */
 {
@@ -175,6 +197,24 @@ PHP_JSON_API zend_result php_json_decode_ex(zval *return_value, const char *str,
 	}
 
 	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ */
+PHP_JSON_API bool php_json_validate_ex(const char *str, size_t str_len, zend_long options, zend_long depth)
+{
+	php_json_parser parser;
+	zval tmp;
+	const php_json_parser_methods* parser_validate_methods = php_json_get_validate_methods();
+	php_json_parser_init_ex(&parser, &tmp, str, str_len, (int)options, (int)depth, parser_validate_methods);
+
+	if (php_json_yyparse(&parser)) {
+		php_json_error_code error_code = php_json_parser_error_code(&parser);
+		JSON_G(error_code) = error_code;
+		return false;
+	}
+
+	return true;
 }
 /* }}} */
 
@@ -267,6 +307,48 @@ PHP_FUNCTION(json_decode)
 	}
 
 	php_json_decode_ex(return_value, str, str_len, options, depth);
+}
+/* }}} */
+
+/* {{{ Validates if a string contains a valid json */
+PHP_FUNCTION(json_validate)
+{
+	char *str;
+	size_t str_len;
+	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
+	zend_long options = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(depth)
+		Z_PARAM_LONG(options)
+	ZEND_PARSE_PARAMETERS_END();
+
+
+	if ((options != 0) && (options != PHP_JSON_INVALID_UTF8_IGNORE)) {
+		zend_argument_value_error(3, "must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE)");
+		RETURN_THROWS();
+	}
+
+	if (!str_len) {
+		JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
+		RETURN_FALSE;
+	}
+
+	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
+	
+	if (depth <= 0) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (depth > INT_MAX) {
+		zend_argument_value_error(2, "must be less than %d", INT_MAX);
+		RETURN_THROWS();
+	}
+
+	RETURN_BOOL(php_json_validate_ex(str, str_len, options, depth));
 }
 /* }}} */
 

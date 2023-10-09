@@ -6,10 +6,10 @@ oci8
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') die("skip this test is for Windows platforms only");
 ?>
+--INI--
+oci8.privileged_connect=1
 --FILE--
 <?php
-
-// Run Test
 
 echo "Test 1\n";
 

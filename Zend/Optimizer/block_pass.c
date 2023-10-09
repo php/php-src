@@ -174,8 +174,11 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					 && opline->opcode != ZEND_MATCH
 					 && zend_optimizer_update_op1_const(op_array, opline, &c)) {
 						VAR_SOURCE(op1) = NULL;
-						literal_dtor(&ZEND_OP1_LITERAL(src));
-						MAKE_NOP(src);
+						if (opline->opcode != ZEND_JMP_NULL
+						 && !zend_bitset_in(used_ext, VAR_NUM(src->result.var))) {
+							literal_dtor(&ZEND_OP1_LITERAL(src));
+							MAKE_NOP(src);
+						}
 						++(*opt_count);
 					} else {
 						zval_ptr_dtor_nogc(&c);
@@ -197,8 +200,10 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				ZVAL_COPY(&c, &ZEND_OP1_LITERAL(src));
 				if (zend_optimizer_update_op2_const(op_array, opline, &c)) {
 					VAR_SOURCE(op2) = NULL;
-					literal_dtor(&ZEND_OP1_LITERAL(src));
-					MAKE_NOP(src);
+					if (!zend_bitset_in(used_ext, VAR_NUM(src->result.var))) {
+						literal_dtor(&ZEND_OP1_LITERAL(src));
+						MAKE_NOP(src);
+					}
 					++(*opt_count);
 				} else {
 					zval_ptr_dtor_nogc(&c);
@@ -256,7 +261,18 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				}
 				break;
 
+			case ZEND_MATCH_ERROR:
+				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+					src = VAR_SOURCE(opline->op1);
+					VAR_SOURCE(opline->op1) = NULL;
+				}
+				break;
+
 			case ZEND_FREE:
+				/* Note: Only remove the source if the source is local to this block.
+				 * If it's not local, then the other blocks successors must also eventually either FREE or consume the temporary,
+				 * hence removing the temporary is not safe in the general case, especially when other consumers are not FREE.
+				 * A FREE may not be removed without also removing the source's result, because otherwise that would cause a memory leak. */
 				if (opline->op1_type == IS_TMP_VAR) {
 					src = VAR_SOURCE(opline->op1);
 					if (src) {
@@ -265,6 +281,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 							case ZEND_BOOL_NOT:
 								/* T = BOOL(X), FREE(T) => T = BOOL(X) */
 								/* The remaining BOOL is removed by a separate optimization */
+								/* The source is a bool, no source removals take place, so this may be done non-locally. */
 								VAR_SOURCE(opline->op1) = NULL;
 								MAKE_NOP(opline);
 								++(*opt_count);
@@ -283,6 +300,9 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 							case ZEND_PRE_DEC_OBJ:
 							case ZEND_PRE_INC_STATIC_PROP:
 							case ZEND_PRE_DEC_STATIC_PROP:
+								if (src < op_array->opcodes + block->start) {
+									break;
+								}
 								src->result_type = IS_UNUSED;
 								VAR_SOURCE(opline->op1) = NULL;
 								MAKE_NOP(opline);
@@ -295,7 +315,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				} else if (opline->op1_type == IS_VAR) {
 					src = VAR_SOURCE(opline->op1);
 					/* V = OP, FREE(V) => OP. NOP */
-					if (src &&
+					if (src >= op_array->opcodes + block->start &&
 					    src->opcode != ZEND_FETCH_R &&
 					    src->opcode != ZEND_FETCH_STATIC_PROP_R &&
 					    src->opcode != ZEND_FETCH_DIM_R &&
@@ -512,7 +532,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								break;
 							case ZEND_IS_SMALLER:
 								if (opline->opcode == ZEND_BOOL_NOT) {
-									zend_uchar tmp_type;
+									uint8_t tmp_type;
 									uint32_t tmp;
 
 									src->opcode = ZEND_IS_SMALLER_OR_EQUAL;
@@ -530,7 +550,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 								break;
 							case ZEND_IS_SMALLER_OR_EQUAL:
 								if (opline->opcode == ZEND_BOOL_NOT) {
-									zend_uchar tmp_type;
+									uint8_t tmp_type;
 									uint32_t tmp;
 
 									src->opcode = ZEND_IS_SMALLER;
@@ -624,13 +644,13 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			case ZEND_JMPNZ_EX:
 				while (1) {
 					if (opline->op1_type == IS_CONST) {
-						if (zend_is_true(&ZEND_OP1_LITERAL(opline)) ==
-						    (opline->opcode == ZEND_JMPZ_EX)) {
+						bool is_jmpz_ex = opline->opcode == ZEND_JMPZ_EX;
+						if (zend_is_true(&ZEND_OP1_LITERAL(opline)) == is_jmpz_ex) {
 
 							++(*opt_count);
 							opline->opcode = ZEND_QM_ASSIGN;
 							zval_ptr_dtor_nogc(&ZEND_OP1_LITERAL(opline));
-							ZVAL_BOOL(&ZEND_OP1_LITERAL(opline), opline->opcode == ZEND_JMPZ_EX);
+							ZVAL_BOOL(&ZEND_OP1_LITERAL(opline), is_jmpz_ex);
 							opline->op2.num = 0;
 							block->successors_count = 1;
 							block->successors[0] = block->successors[1];
@@ -995,6 +1015,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
 			case ZEND_JMP_NULL:
+			case ZEND_BIND_INIT_STATIC_OR_JMP:
 				ZEND_SET_OP_JMP_ADDR(opline, opline->op2, new_opcodes + blocks[b->successors[0]].start);
 				break;
 			case ZEND_CATCH:

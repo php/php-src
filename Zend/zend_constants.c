@@ -111,16 +111,6 @@ void zend_register_standard_constants(void)
 {
 	register_zend_constants_symbols(0);
 
-	REGISTER_MAIN_LONG_CONSTANT("DEBUG_BACKTRACE_PROVIDE_OBJECT", DEBUG_BACKTRACE_PROVIDE_OBJECT, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("DEBUG_BACKTRACE_IGNORE_ARGS", DEBUG_BACKTRACE_IGNORE_ARGS, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_BOOL_CONSTANT("ZEND_THREAD_SAFE", ZTS_V, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_BOOL_CONSTANT("ZEND_DEBUG_BUILD", ZEND_DEBUG, CONST_PERSISTENT | CONST_CS);
-
-	/* Special constants true/false/null.  */
-	REGISTER_MAIN_BOOL_CONSTANT("TRUE", 1, CONST_PERSISTENT);
-	REGISTER_MAIN_BOOL_CONSTANT("FALSE", 0, CONST_PERSISTENT);
-	REGISTER_MAIN_NULL_CONSTANT("NULL", CONST_PERSISTENT);
-
 	true_const = zend_hash_str_find_ptr(EG(zend_constants), "TRUE", sizeof("TRUE")-1);
 	false_const = zend_hash_str_find_ptr(EG(zend_constants), "FALSE", sizeof("FALSE")-1);
 	null_const = zend_hash_str_find_ptr(EG(zend_constants), "NULL", sizeof("NULL")-1);
@@ -336,7 +326,7 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 		} else {
 			ce = scope->parent;
 		}
-	} else if (zend_string_equals_literal_ci(class_name, "static")) {
+	} else if (zend_string_equals_ci(class_name, ZSTR_KNOWN(ZEND_STR_STATIC))) {
 		ce = zend_get_called_scope(EG(current_execute_data));
 		if (UNEXPECTED(!ce)) {
 			zend_throw_error(NULL, "Cannot access \"static\" when no class scope is active");
@@ -360,6 +350,23 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 				}
 				goto failure;
 			}
+
+			if (UNEXPECTED(ce->ce_flags & ZEND_ACC_TRAIT)) {
+				/** Prevent accessing trait constants directly on cases like \defined() or \constant(), etc. */
+				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
+					zend_throw_error(NULL, "Cannot access trait constant %s::%s directly", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+				}
+				goto failure;
+			}
+
+			if (UNEXPECTED(ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED)) {
+				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
+					zend_error(E_DEPRECATED, "Constant %s::%s is deprecated", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					if (EG(exception)) {
+						goto failure;
+					}
+				}
+			}
 			ret_constant = &c->value;
 		}
 	}
@@ -374,7 +381,7 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 		}
 
 		MARK_CONSTANT_VISITED(ret_constant);
-		ret = zval_update_constant_ex(ret_constant, c->ce);
+		ret = zend_update_class_constant(c, constant_name, c->ce);
 		RESET_CONSTANT_VISITED(ret_constant);
 
 		if (UNEXPECTED(ret != SUCCESS)) {
@@ -432,7 +439,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			} else {
 				ce = scope->parent;
 			}
-		} else if (zend_string_equals_literal_ci(class_name, "static")) {
+		} else if (zend_string_equals_ci(class_name, ZSTR_KNOWN(ZEND_STR_STATIC))) {
 			ce = zend_get_called_scope(EG(current_execute_data));
 			if (UNEXPECTED(!ce)) {
 				zend_throw_error(NULL, "Cannot access \"static\" when no class scope is active");

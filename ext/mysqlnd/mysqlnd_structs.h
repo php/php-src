@@ -311,7 +311,6 @@ typedef enum_func_status (*func_mysqlnd_execute_com_ping)(MYSQLND_CONN_DATA * co
 typedef enum_func_status (*func_mysqlnd_execute_com_statistics)(MYSQLND_CONN_DATA * const conn, zend_string ** message);
 typedef enum_func_status (*func_mysqlnd_execute_com_process_kill)(MYSQLND_CONN_DATA * const conn, const unsigned int process_id, const bool read_response);
 typedef enum_func_status (*func_mysqlnd_execute_com_refresh)(MYSQLND_CONN_DATA * const conn, const uint8_t options);
-typedef enum_func_status (*func_mysqlnd_execute_com_shutdown)(MYSQLND_CONN_DATA * const conn, const uint8_t level);
 typedef enum_func_status (*func_mysqlnd_execute_com_quit)(MYSQLND_CONN_DATA * const conn);
 typedef enum_func_status (*func_mysqlnd_execute_com_query)(MYSQLND_CONN_DATA * const conn, MYSQLND_CSTRING query);
 typedef enum_func_status (*func_mysqlnd_execute_com_change_user)(MYSQLND_CONN_DATA * const conn, const MYSQLND_CSTRING payload, const bool silent);
@@ -335,7 +334,6 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_command)
 	func_mysqlnd_execute_com_statistics statistics;
 	func_mysqlnd_execute_com_process_kill process_kill;
 	func_mysqlnd_execute_com_refresh refresh;
-	func_mysqlnd_execute_com_shutdown shutdown;
 	func_mysqlnd_execute_com_quit quit;
 	func_mysqlnd_execute_com_query query;
 	func_mysqlnd_execute_com_change_user change_user;
@@ -533,7 +531,6 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data)
 
 	func_mysqlnd_conn_data__stmt_init stmt_init;
 
-	func_mysqlnd_conn_data__shutdown_server shutdown_server;
 	func_mysqlnd_conn_data__refresh_server refresh_server;
 
 	func_mysqlnd_conn_data__ping ping;

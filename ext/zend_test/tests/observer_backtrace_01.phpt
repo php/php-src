@@ -48,38 +48,32 @@ var_dump(foo());
       {main} %s%eobserver_backtrace_%d.php
   -->
   <foo>
-    <!-- init gen() -->
+    <!-- init Generator::current() -->
     <!--
-        gen()
         Generator::current()
         foo()
         {main} %s%eobserver_backtrace_%d.php
     -->
-    <gen>
-      <!-- init TestClass::foo() -->
+    <Generator::current>
+      <!-- init gen() -->
       <!--
-          TestClass::foo()
           gen()
           Generator::current()
           foo()
           {main} %s%eobserver_backtrace_%d.php
       -->
-      <TestClass::foo>
-        <!-- init TestClass::{closure}() -->
+      <gen>
+        <!-- init TestClass::foo() -->
         <!--
-            TestClass::{closure}()
-            array_map()
             TestClass::foo()
             gen()
             Generator::current()
             foo()
             {main} %s%eobserver_backtrace_%d.php
         -->
-        <TestClass::{closure}>
-          <!-- init TestClass::bar() -->
+        <TestClass::foo>
+          <!-- init array_map() -->
           <!--
-              TestClass::bar()
-              TestClass::{closure}()
               array_map()
               TestClass::foo()
               gen()
@@ -87,20 +81,52 @@ var_dump(foo());
               foo()
               {main} %s%eobserver_backtrace_%d.php
           -->
-          <TestClass::bar>
-          </TestClass::bar>
-        </TestClass::{closure}>
-        <TestClass::{closure}>
-          <TestClass::bar>
-          </TestClass::bar>
-        </TestClass::{closure}>
-      </TestClass::foo>
-    </gen>
+          <array_map>
+            <!-- init TestClass::{closure}() -->
+            <!--
+                TestClass::{closure}()
+                array_map()
+                TestClass::foo()
+                gen()
+                Generator::current()
+                foo()
+                {main} %s%eobserver_backtrace_%d.php
+            -->
+            <TestClass::{closure}>
+              <!-- init TestClass::bar() -->
+              <!--
+                  TestClass::bar()
+                  TestClass::{closure}()
+                  array_map()
+                  TestClass::foo()
+                  gen()
+                  Generator::current()
+                  foo()
+                  {main} %s%eobserver_backtrace_%d.php
+              -->
+              <TestClass::bar>
+              </TestClass::bar>
+            </TestClass::{closure}>
+            <TestClass::{closure}>
+              <TestClass::bar>
+              </TestClass::bar>
+            </TestClass::{closure}>
+          </array_map>
+        </TestClass::foo>
+      </gen>
+    </Generator::current>
   </foo>
+  <!-- init var_dump() -->
+  <!--
+      var_dump()
+      {main} %s%eobserver_backtrace_%d.php
+  -->
+  <var_dump>
 array(2) {
   [0]=>
   int(42)
   [1]=>
   int(1337)
 }
+  </var_dump>
 </file '%s%eobserver_backtrace_%d.php'>

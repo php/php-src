@@ -17,5 +17,6 @@ var_dump($a);
 echo "Done\n";
 ?>
 --EXPECT--
-bool(false)
+array(0) {
+}
 Done

@@ -20,6 +20,8 @@
 #ifndef ZEND_OBJECT_HANDLERS_H
 #define ZEND_OBJECT_HANDLERS_H
 
+#include <stdint.h>
+
 struct _zend_property_info;
 
 #define ZEND_WRONG_PROPERTY_INFO \
@@ -154,7 +156,7 @@ typedef zend_result (*zend_object_get_closure_t)(zend_object *obj, zend_class_en
 
 typedef HashTable *(*zend_object_get_gc_t)(zend_object *object, zval **table, int *n);
 
-typedef zend_result (*zend_object_do_operation_t)(zend_uchar opcode, zval *result, zval *op1, zval *op2);
+typedef zend_result (*zend_object_do_operation_t)(uint8_t opcode, zval *result, zval *op1, zval *op2);
 
 struct _zend_object_handlers {
 	/* offset of real object header (usually zero) */
@@ -205,7 +207,7 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, int type);
 ZEND_API ZEND_COLD bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name);
 ZEND_API zend_function *zend_std_get_constructor(zend_object *object);
-ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_string *member, int silent);
+ZEND_API struct _zend_property_info *zend_get_property_info(const zend_class_entry *ce, zend_string *member, int silent);
 ZEND_API HashTable *zend_std_get_properties(zend_object *object);
 ZEND_API HashTable *zend_std_get_gc(zend_object *object, zval **table, int *n);
 ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp);
@@ -231,13 +233,17 @@ ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj);
  * Only objects with the same identity will be considered equal. */
 ZEND_API int zend_objects_not_comparable(zval *o1, zval *o2);
 
-ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope);
+ZEND_API bool zend_check_protected(const zend_class_entry *ce, const zend_class_entry *scope);
 
-ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name, bool is_dynamic);
+ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_string *prop_info_name, bool is_dynamic);
 
-ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static);
+ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce, zend_string *method_name, bool is_static);
 
 ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member);
+
+ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member);
+
+ZEND_API uint32_t *zend_get_recursion_guard(zend_object *zobj);
 
 /* Default behavior for get_properties_for. For use as a fallback in custom
  * get_properties_for implementations. */

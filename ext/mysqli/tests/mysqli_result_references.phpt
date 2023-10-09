@@ -4,14 +4,14 @@ References to result sets
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 opcache.enable=0
 --FILE--
 <?php
-    require_once('connect.inc');
-    require_once('table.inc');
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     $references = array();
 
@@ -81,7 +81,7 @@ opcache.enable=0
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 array(7) refcount(2){

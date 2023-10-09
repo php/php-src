@@ -84,10 +84,10 @@ int(9223372036854775807)
 *** Caught {closure}(): Argument #1 ($i) must be of type int, float given, called in %s on line %d
 
 *** Trying bool(true)
-*** Caught {closure}(): Argument #1 ($i) must be of type int, bool given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, true given, called in %s on line %d
 
 *** Trying bool(false)
-*** Caught {closure}(): Argument #1 ($i) must be of type int, bool given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, false given, called in %s on line %d
 
 *** Trying NULL
 *** Caught {closure}(): Argument #1 ($i) must be of type int, null given, called in %s on line %d
@@ -137,10 +137,10 @@ float(9.223372036854776E+18)
 float(NAN)
 
 *** Trying bool(true)
-*** Caught {closure}(): Argument #1 ($f) must be of type float, bool given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, true given, called in %s on line %d
 
 *** Trying bool(false)
-*** Caught {closure}(): Argument #1 ($f) must be of type float, bool given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, false given, called in %s on line %d
 
 *** Trying NULL
 *** Caught {closure}(): Argument #1 ($f) must be of type float, null given, called in %s on line %d
@@ -190,10 +190,10 @@ string(0) ""
 *** Caught {closure}(): Argument #1 ($s) must be of type string, float given, called in %s on line %d
 
 *** Trying bool(true)
-*** Caught {closure}(): Argument #1 ($s) must be of type string, bool given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, true given, called in %s on line %d
 
 *** Trying bool(false)
-*** Caught {closure}(): Argument #1 ($s) must be of type string, bool given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, false given, called in %s on line %d
 
 *** Trying NULL
 *** Caught {closure}(): Argument #1 ($s) must be of type string, null given, called in %s on line %d

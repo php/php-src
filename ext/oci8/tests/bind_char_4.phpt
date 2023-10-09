@@ -4,7 +4,8 @@ PL/SQL oci_bind_by_name with SQLT_AFC aka CHAR to VARCHAR2 parameter
 oci8
 --SKIPIF--
 <?php
-require(__DIR__."/connect.inc");
+require_once 'skipifconnectfailure.inc';
+require __DIR__.'/connect.inc';
 // The bind buffer size edge cases seem to change each DB version.
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
 if (!(isset($matches[0]) && $matches[1] >= 12)) {
@@ -18,7 +19,7 @@ NLS_LANG=.AL32UTF8
 
 // Same test as bind_char_3 but the PL/SQL function uses VARCHAR2 instead of CHAR
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 // Initialization
 

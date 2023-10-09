@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1957dd08c4efcfa765bd15c8d9ae9e69edec5db5 */
+ * Stub hash: 1a02eaf9da45edb40720620e3beef43fd19dd520 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_popen, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
@@ -7,6 +7,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_popen, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, handler, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, permission, IS_LONG, 0, "0644")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, map_size, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_dba_open arginfo_dba_popen
@@ -95,3 +96,13 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(dba_list, arginfo_dba_list)
 	ZEND_FE_END
 };
+
+static void register_dba_symbols(int module_number)
+{
+#if defined(DBA_LMDB)
+	REGISTER_LONG_CONSTANT("DBA_LMDB_USE_SUB_DIR", 0, CONST_PERSISTENT);
+#endif
+#if defined(DBA_LMDB)
+	REGISTER_LONG_CONSTANT("DBA_LMDB_NO_SUB_DIR", MDB_NOSUBDIR, CONST_PERSISTENT);
+#endif
+}

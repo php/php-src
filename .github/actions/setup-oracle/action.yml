@@ -1,0 +1,30 @@
+name: Create Oracle container
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        docker run \
+          -e "ORACLE_PASSWORD=pass" \
+          -p 1521:1521 \
+          --name oracle \
+          -h oracle \
+          -d gvenzl/oracle-xe:slim
+
+        mkdir /opt/oracle
+        wget -nv https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip
+        unzip instantclient-basiclite-linuxx64.zip && rm instantclient-basiclite-linuxx64.zip
+        wget -nv https://download.oracle.com/otn_software/linux/instantclient/instantclient-sdk-linuxx64.zip
+        unzip instantclient-sdk-linuxx64.zip && rm instantclient-sdk-linuxx64.zip
+        mv instantclient_*_* /opt/oracle/instantclient
+        # interferes with libldap2 headers
+        rm /opt/oracle/instantclient/sdk/include/ldap.h
+        # fix debug build warning: zend_signal: handler was replaced for signal (2) after startup
+        echo DISABLE_INTERRUPT=on > /opt/oracle/instantclient/network/admin/sqlnet.ora
+        sudo sh -c 'echo /opt/oracle/instantclient >/etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig'
+
+        sudo mkdir -p /etc/php.d
+        sudo chmod 777 /etc/php.d
+        echo extension=oci8.so > /etc/php.d/oci8.ini
+        echo extension=pdo_oci.so > /etc/php.d/pdo_oci.ini

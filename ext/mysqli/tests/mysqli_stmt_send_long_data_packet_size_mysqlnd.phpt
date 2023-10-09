@@ -4,14 +4,11 @@ mysqli_stmt_send_long_data() - exceed packet size, mysqlnd
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-
-if (!$IS_MYSQLND)
-    die("skip: warnings only available in mysqlnd");
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
 
     if (!$stmt = mysqli_stmt_init($link))
         printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -97,7 +94,7 @@ Warning: mysqli_stmt_send_long_data(): There was an error while sending long dat
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

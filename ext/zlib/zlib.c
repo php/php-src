@@ -60,7 +60,6 @@ static zend_object *inflate_context_create_object(zend_class_entry *class_type) 
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &inflate_context_object_handlers;
 
 	return &intern->std;
 }
@@ -99,7 +98,6 @@ static zend_object *deflate_context_create_object(zend_class_entry *class_type) 
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &deflate_context_object_handlers;
 
 	return &intern->std;
 }
@@ -855,7 +853,7 @@ static bool zlib_create_dictionary_string(HashTable *options, char **dict, size_
 			} break;
 
 			default:
-				zend_argument_type_error(2, "must be of type zero-terminated string or array, %s given", zend_zval_type_name(option_buffer));
+				zend_argument_type_error(2, "must be of type zero-terminated string or array, %s given", zend_zval_value_name(option_buffer));
 				return 0;
 		}
 	}
@@ -1279,7 +1277,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 	} else {
 		int_value = (int) zend_ini_parse_quantity_warn(new_value, entry->name);
 	}
-	ini_value = zend_ini_string("output_handler", sizeof("output_handler"), 0);
+	ini_value = zend_ini_string("output_handler", sizeof("output_handler") - 1, 0);
 
 	if (ini_value && *ini_value && int_value) {
 		php_error_docref("ref.outcontrol", E_CORE_ERROR, "Cannot use both zlib.output_compression and output_handler together!!");
@@ -1340,6 +1338,7 @@ static PHP_MINIT_FUNCTION(zlib)
 
 	inflate_context_ce = register_class_InflateContext();
 	inflate_context_ce->create_object = inflate_context_create_object;
+	inflate_context_ce->default_object_handlers = &inflate_context_object_handlers;
 
 	memcpy(&inflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	inflate_context_object_handlers.offset = XtOffsetOf(php_zlib_context, std);
@@ -1350,6 +1349,7 @@ static PHP_MINIT_FUNCTION(zlib)
 
 	deflate_context_ce = register_class_DeflateContext();
 	deflate_context_ce->create_object = deflate_context_create_object;
+	deflate_context_ce->default_object_handlers = &deflate_context_object_handlers;
 
 	memcpy(&deflate_context_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	deflate_context_object_handlers.offset = XtOffsetOf(php_zlib_context, std);
@@ -1358,38 +1358,7 @@ static PHP_MINIT_FUNCTION(zlib)
 	deflate_context_object_handlers.clone_obj = NULL;
 	deflate_context_object_handlers.compare = zend_objects_not_comparable;
 
-	REGISTER_LONG_CONSTANT("FORCE_GZIP", PHP_ZLIB_ENCODING_GZIP, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("FORCE_DEFLATE", PHP_ZLIB_ENCODING_DEFLATE, CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("ZLIB_ENCODING_RAW", PHP_ZLIB_ENCODING_RAW, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_ENCODING_GZIP", PHP_ZLIB_ENCODING_GZIP, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_ENCODING_DEFLATE", PHP_ZLIB_ENCODING_DEFLATE, CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("ZLIB_NO_FLUSH", Z_NO_FLUSH, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_PARTIAL_FLUSH", Z_PARTIAL_FLUSH, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_SYNC_FLUSH", Z_SYNC_FLUSH, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_FULL_FLUSH", Z_FULL_FLUSH, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_BLOCK", Z_BLOCK, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_FINISH", Z_FINISH, CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("ZLIB_FILTERED", Z_FILTERED, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_HUFFMAN_ONLY", Z_HUFFMAN_ONLY, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_RLE", Z_RLE, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_FIXED", Z_FIXED, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_DEFAULT_STRATEGY", Z_DEFAULT_STRATEGY, CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_STRING_CONSTANT("ZLIB_VERSION", ZLIB_VERSION, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_VERNUM", ZLIB_VERNUM, CONST_CS|CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("ZLIB_OK", Z_OK, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_STREAM_END", Z_STREAM_END, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_NEED_DICT", Z_NEED_DICT, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_ERRNO", Z_ERRNO, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_STREAM_ERROR", Z_STREAM_ERROR, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_DATA_ERROR", Z_DATA_ERROR, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_MEM_ERROR", Z_MEM_ERROR, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_BUF_ERROR", Z_BUF_ERROR, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ZLIB_VERSION_ERROR", Z_VERSION_ERROR, CONST_CS|CONST_PERSISTENT);
+	register_zlib_symbols(module_number);
 
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
@@ -1435,7 +1404,7 @@ static PHP_RSHUTDOWN_FUNCTION(zlib)
 static PHP_MINFO_FUNCTION(zlib)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "ZLib Support", "enabled");
+	php_info_print_table_row(2, "ZLib Support", "enabled");
 	php_info_print_table_row(2, "Stream Wrapper", "compress.zlib://");
 	php_info_print_table_row(2, "Stream Filter", "zlib.inflate, zlib.deflate");
 	php_info_print_table_row(2, "Compiled Version", ZLIB_VERSION);

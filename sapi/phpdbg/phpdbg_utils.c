@@ -199,7 +199,7 @@ PHPDBG_API char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{
 	const char *p = str;
 	char *new = NULL;
 
-	while (p && isspace(*p)) {
+	while (isspace(*p)) {
 		++p;
 		--len;
 	}
@@ -466,6 +466,9 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 				case ']':
 					break;
 				case '>':
+					if (!last_index) {
+						goto error;
+					}
 					if (last_index[index_len - 1] == '-') {
 						new_index = 1;
 						index_len--;
@@ -611,7 +614,7 @@ PHPDBG_API bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zend_obj
 	uint32_t op_num, i;
 	zend_op_array *op_array = &execute_data->func->op_array;
 
-	if (execute_data->opline >= EG(exception_op) && execute_data->opline < EG(exception_op) + 3) {
+	if (execute_data->opline >= EG(exception_op) && execute_data->opline < EG(exception_op) + 3 && EG(opline_before_exception)) {
 		op = EG(opline_before_exception);
 	} else {
 		op = execute_data->opline;

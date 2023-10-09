@@ -2,6 +2,10 @@
 Test incremental inflate_add() functionality
 --EXTENSIONS--
 zlib
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
+?>
 --FILE--
 <?php
 function inflateStream($mode, $flushSize) {

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4631669bb268bb2c9e005fa7ee385245604c1d71 */
+ * Stub hash: 45e42d3a0589031651daee5653900d5a4fb61c3d */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplDoublyLinkedList_add, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
@@ -161,6 +161,30 @@ static zend_class_entry *register_class_SplDoublyLinkedList(zend_class_entry *cl
 	INIT_CLASS_ENTRY(ce, "SplDoublyLinkedList", class_SplDoublyLinkedList_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	zend_class_implements(class_entry, 4, class_entry_Iterator, class_entry_Countable, class_entry_ArrayAccess, class_entry_Serializable);
+
+	zval const_IT_MODE_LIFO_value;
+	ZVAL_LONG(&const_IT_MODE_LIFO_value, SPL_DLLIST_IT_LIFO);
+	zend_string *const_IT_MODE_LIFO_name = zend_string_init_interned("IT_MODE_LIFO", sizeof("IT_MODE_LIFO") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_IT_MODE_LIFO_name, &const_IT_MODE_LIFO_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_IT_MODE_LIFO_name);
+
+	zval const_IT_MODE_FIFO_value;
+	ZVAL_LONG(&const_IT_MODE_FIFO_value, SPL_DLLIST_IT_FIFO);
+	zend_string *const_IT_MODE_FIFO_name = zend_string_init_interned("IT_MODE_FIFO", sizeof("IT_MODE_FIFO") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_IT_MODE_FIFO_name, &const_IT_MODE_FIFO_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_IT_MODE_FIFO_name);
+
+	zval const_IT_MODE_DELETE_value;
+	ZVAL_LONG(&const_IT_MODE_DELETE_value, SPL_DLLIST_IT_DELETE);
+	zend_string *const_IT_MODE_DELETE_name = zend_string_init_interned("IT_MODE_DELETE", sizeof("IT_MODE_DELETE") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_IT_MODE_DELETE_name, &const_IT_MODE_DELETE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_IT_MODE_DELETE_name);
+
+	zval const_IT_MODE_KEEP_value;
+	ZVAL_LONG(&const_IT_MODE_KEEP_value, SPL_DLLIST_IT_KEEP);
+	zend_string *const_IT_MODE_KEEP_name = zend_string_init_interned("IT_MODE_KEEP", sizeof("IT_MODE_KEEP") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_IT_MODE_KEEP_name, &const_IT_MODE_KEEP_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_IT_MODE_KEEP_name);
 
 	return class_entry;
 }

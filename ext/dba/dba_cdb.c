@@ -73,7 +73,7 @@ DBA_OPEN_FUNC(cdb)
 			make = 0;
 			file = info->fp;
 #else
-			file = VCWD_OPEN(info->path, O_RDONLY);
+			file = VCWD_OPEN(ZSTR_VAL(info->path), O_RDONLY);
 			if (file < 0) {
 				*error = "Unable to open file";
 				return FAILURE;

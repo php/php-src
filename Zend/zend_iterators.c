@@ -57,6 +57,7 @@ static const zend_object_handlers iterator_object_handlers = {
 ZEND_API void zend_register_iterator_wrapper(void)
 {
 	INIT_CLASS_ENTRY(zend_iterator_class_entry, "__iterator_wrapper", NULL);
+	zend_iterator_class_entry.default_object_handlers = &iterator_object_handlers;
 }
 
 static void iter_wrapper_free(zend_object *object)
@@ -83,7 +84,6 @@ static HashTable *iter_wrapper_get_gc(zend_object *object, zval **table, int *n)
 ZEND_API void zend_iterator_init(zend_object_iterator *iter)
 {
 	zend_object_std_init(&iter->std, &zend_iterator_class_entry);
-	iter->std.handlers = &iterator_object_handlers;
 }
 
 ZEND_API void zend_iterator_dtor(zend_object_iterator *iter)

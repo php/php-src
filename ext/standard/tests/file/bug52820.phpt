@@ -12,6 +12,10 @@ curl_setopt($handle, CURLOPT_VERBOSE, true);
 curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 if (!@curl_setopt($handle, CURLOPT_STDERR, fopen("php://memory", "w+")))
     die("skip fopencookie not supported on this platform");
+if (getenv('CIRRUS_CI') && strpos(php_uname('m'), 'aarch64') !== false) {
+    die('xfail Broken on Cirrus+ARM');
+}
+?>
 --FILE--
 <?php
 function do_stuff($url) {
@@ -40,25 +44,25 @@ zend_leak_variable(do_stuff("php://memory"));
 
 echo "\nDone.\n";
 ?>
---EXPECTF--
-temp stream (close after):
+--EXPECTREGEX--
+temp stream \(close after\):
 About to rewind!
-* Couldn't open file /i_dont_exist/
-* Closing connection%A%d
+(\* processing: file:\/\/\/i_dont_exist\/\n)?\* Couldn't open file \/i_dont_exist\/
+\* Closing connection( -?\d+)?
 
-memory stream (close after):
+memory stream \(close after\):
 About to rewind!
-* Couldn't open file /i_dont_exist/
-* Closing connection%A%d
+(\* processing: file:\/\/\/i_dont_exist\/\n)?\* Couldn't open file \/i_dont_exist\/
+\* Closing connection( -?\d+)?
 
-temp stream (leak):
+temp stream \(leak\):
 About to rewind!
-* Couldn't open file /i_dont_exist/
-* Closing connection%A%d
+(\* processing: file:\/\/\/i_dont_exist\/\n)?\* Couldn't open file \/i_dont_exist\/
+\* Closing connection( -?\d+)?
 
-memory stream (leak):
+memory stream \(leak\):
 About to rewind!
-* Couldn't open file /i_dont_exist/
-* Closing connection%A%d
+(\* processing: file:\/\/\/i_dont_exist\/\n)?\* Couldn't open file \/i_dont_exist\/
+\* Closing connection( -?\d+)?
 
-Done.
+Done\.

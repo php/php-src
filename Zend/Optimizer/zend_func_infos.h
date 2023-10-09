@@ -18,7 +18,7 @@ static const func_info_t func_infos[] = {
 	F1("get_defined_constants", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY),
 	F1("debug_backtrace", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY),
 	F1("get_extension_funcs", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-	F1("gc_status", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG),
+	F1("gc_status", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_DOUBLE|MAY_BE_ARRAY_OF_FALSE|MAY_BE_ARRAY_OF_TRUE),
 	F1("bcadd", MAY_BE_STRING),
 	F1("bcsub", MAY_BE_STRING),
 	F1("bcmul", MAY_BE_STRING),
@@ -222,13 +222,12 @@ static const func_info_t func_infos[] = {
 	F1("mb_strrichr", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("mb_substr", MAY_BE_STRING),
 	F1("mb_strcut", MAY_BE_STRING),
-	F1("mb_strimwidth", MAY_BE_STRING),
 	F1("mb_convert_encoding", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_STRING|MAY_BE_FALSE),
 	F1("mb_convert_case", MAY_BE_STRING),
 	F1("mb_strtoupper", MAY_BE_STRING),
 	F1("mb_strtolower", MAY_BE_STRING),
 	F1("mb_detect_encoding", MAY_BE_STRING|MAY_BE_FALSE),
-	F1("mb_list_encodings", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
+	FN("mb_list_encodings", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("mb_encoding_aliases", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("mb_encode_mimeheader", MAY_BE_STRING),
 	F1("mb_decode_mimeheader", MAY_BE_STRING),
@@ -413,9 +412,10 @@ static const func_info_t func_infos[] = {
 	F1("posix_getpwnam", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 	F1("posix_getpwuid", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 #if defined(HAVE_GETRLIMIT)
-	F1("posix_getrlimit", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
+	F1("posix_getrlimit", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 #endif
 	F1("pspell_suggest", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
+	F1("random_bytes", MAY_BE_STRING),
 #if defined(HAVE_HISTORY_LIST)
 	F1("readline_list_history", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 #endif
@@ -443,7 +443,6 @@ static const func_info_t func_infos[] = {
 	F1("class_uses", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 	F1("spl_classes", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING),
 	F1("spl_object_hash", MAY_BE_STRING),
-	F1("iterator_to_array", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF),
 	F1("ob_get_flush", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("ob_get_clean", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("ob_list_handlers", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
@@ -519,7 +518,7 @@ static const func_info_t func_infos[] = {
 	F1("gethostbyaddr", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("gethostbyname", MAY_BE_STRING),
 	F1("gethostbynamel", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
+#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 	F1("dns_get_record", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
 #endif
 	F1("md5", MAY_BE_STRING),
@@ -622,7 +621,7 @@ static const func_info_t func_infos[] = {
 	F1("php_ini_loaded_file", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("iptcembed", MAY_BE_STRING|MAY_BE_BOOL),
 	F1("iptcparse", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_FALSE),
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if (defined(HAVE_SYMLINK) || defined(PHP_WIN32))
 	F1("readlink", MAY_BE_STRING|MAY_BE_FALSE),
 #endif
 	F1("decbin", MAY_BE_STRING),
@@ -651,7 +650,6 @@ static const func_info_t func_infos[] = {
 #endif
 	F1("quoted_printable_decode", MAY_BE_STRING),
 	F1("quoted_printable_encode", MAY_BE_STRING),
-	F1("random_bytes", MAY_BE_STRING),
 	F1("soundex", MAY_BE_STRING),
 	F1("stream_context_create", MAY_BE_RESOURCE),
 	F1("stream_context_get_params", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_ANY),
@@ -690,7 +688,8 @@ static const func_info_t func_infos[] = {
 	F1("var_export", MAY_BE_STRING|MAY_BE_NULL),
 	F1("serialize", MAY_BE_STRING),
 	F1("xml_error_string", MAY_BE_STRING|MAY_BE_NULL),
-	F1("xml_parser_get_option", MAY_BE_STRING|MAY_BE_LONG),
+	F1("xml_parser_get_option", MAY_BE_STRING|MAY_BE_LONG|MAY_BE_BOOL),
+	FN("zend_test_create_throwing_resource", MAY_BE_RESOURCE),
 	FN("zip_open", MAY_BE_RESOURCE|MAY_BE_LONG|MAY_BE_FALSE),
 	FN("zip_read", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	F1("ob_gzhandler", MAY_BE_STRING|MAY_BE_FALSE),

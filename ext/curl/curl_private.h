@@ -77,6 +77,9 @@ typedef struct {
 	php_curl_callback  *xferinfo;
 #endif
 	php_curl_callback  *fnmatch;
+#if LIBCURL_VERSION_NUM >= 0x075400
+	php_curl_callback  *sshhostkey;
+#endif
 } php_curl_handlers;
 
 struct _php_curl_error  {

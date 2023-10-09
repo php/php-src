@@ -18,7 +18,6 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "php_pcre.h"
-#include "php_pcre_arginfo.h"
 #include "ext/standard/info.h"
 #include "ext/standard/basic_functions.h"
 #include "zend_smart_str.h"
@@ -35,13 +34,21 @@
 #define PREG_SPLIT_DELIM_CAPTURE	(1<<1)
 #define PREG_SPLIT_OFFSET_CAPTURE	(1<<2)
 
-#define PREG_REPLACE_EVAL			(1<<0)
-
 #define PREG_GREP_INVERT			(1<<0)
 
 #define PREG_JIT                    (1<<3)
 
 #define PCRE_CACHE_SIZE 4096
+
+#ifdef HAVE_PCRE_JIT_SUPPORT
+#define PHP_PCRE_JIT_SUPPORT 1
+#else
+#define PHP_PCRE_JIT_SUPPORT 0
+#endif
+
+char *php_pcre_version;
+
+#include "php_pcre_arginfo.h"
 
 struct _pcre_cache_entry {
 	pcre2_code *re;
@@ -360,7 +367,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("pcre.backtrack_limit", "1000000", PHP_INI_ALL, OnUpdateBacktrackLimit, backtrack_limit, zend_pcre_globals, pcre_globals)
 	STD_PHP_INI_ENTRY("pcre.recursion_limit", "100000",  PHP_INI_ALL, OnUpdateRecursionLimit, recursion_limit, zend_pcre_globals, pcre_globals)
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	STD_PHP_INI_ENTRY("pcre.jit",             "1",       PHP_INI_ALL, OnUpdateJit, jit,             zend_pcre_globals, pcre_globals)
+	STD_PHP_INI_BOOLEAN("pcre.jit",           "1",       PHP_INI_ALL, OnUpdateJit,            jit,             zend_pcre_globals, pcre_globals)
 #endif
 PHP_INI_END()
 
@@ -422,8 +429,6 @@ static PHP_MINFO_FUNCTION(pcre)
 /* {{{ PHP_MINIT_FUNCTION(pcre) */
 static PHP_MINIT_FUNCTION(pcre)
 {
-	char *version;
-
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if (UNEXPECTED(!pcre2_init_ok)) {
 		/* Retry. */
@@ -436,33 +441,9 @@ static PHP_MINIT_FUNCTION(pcre)
 
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_OFFSET_CAPTURE", PREG_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_UNMATCHED_AS_NULL", PREG_UNMATCHED_AS_NULL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_SPLIT_NO_EMPTY", PREG_SPLIT_NO_EMPTY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_SPLIT_OFFSET_CAPTURE", PREG_SPLIT_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_GREP_INVERT", PREG_GREP_INVERT, CONST_CS | CONST_PERSISTENT);
+	php_pcre_version = _pcre2_config_str(PCRE2_CONFIG_VERSION);
 
-	REGISTER_LONG_CONSTANT("PREG_NO_ERROR", PHP_PCRE_NO_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_INTERNAL_ERROR", PHP_PCRE_INTERNAL_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_BACKTRACK_LIMIT_ERROR", PHP_PCRE_BACKTRACK_LIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_RECURSION_LIMIT_ERROR", PHP_PCRE_RECURSION_LIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_ERROR", PHP_PCRE_BAD_UTF8_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_OFFSET_ERROR", PHP_PCRE_BAD_UTF8_OFFSET_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_JIT_STACKLIMIT_ERROR", PHP_PCRE_JIT_STACKLIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
-	version = _pcre2_config_str(PCRE2_CONFIG_VERSION);
-	REGISTER_STRING_CONSTANT("PCRE_VERSION", version, CONST_CS | CONST_PERSISTENT);
-	free(version);
-	REGISTER_LONG_CONSTANT("PCRE_VERSION_MAJOR", PCRE2_MAJOR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PCRE_VERSION_MINOR", PCRE2_MINOR, CONST_CS | CONST_PERSISTENT);
-
-#ifdef HAVE_PCRE_JIT_SUPPORT
-	REGISTER_BOOL_CONSTANT("PCRE_JIT_SUPPORT", 1, CONST_CS | CONST_PERSISTENT);
-#else
-	REGISTER_BOOL_CONSTANT("PCRE_JIT_SUPPORT", 0, CONST_CS | CONST_PERSISTENT);
-#endif
+	register_php_pcre_symbols(module_number);
 
 	return SUCCESS;
 }
@@ -472,6 +453,8 @@ static PHP_MINIT_FUNCTION(pcre)
 static PHP_MSHUTDOWN_FUNCTION(pcre)
 {
 	UNREGISTER_INI_ENTRIES();
+
+	free(php_pcre_version);
 
 	return SUCCESS;
 }
@@ -752,14 +735,12 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 				break;
 			case 'J':	coptions |= PCRE2_DUPNAMES;		break;
 
-			/* Custom preg options */
-			case 'e':	poptions |= PREG_REPLACE_EVAL;	break;
-
 			case ' ':
 			case '\n':
 			case '\r':
 				break;
 
+			case 'e': /* legacy eval */
 			default:
 				if (pp[-1]) {
 					php_error_docref(NULL, E_WARNING, "Unknown modifier '%c'", pp[-1]);
@@ -773,16 +754,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 				}
 				return NULL;
 		}
-	}
-
-	if (poptions & PREG_REPLACE_EVAL) {
-		php_error_docref(NULL, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
-		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
-		efree(pattern);
-		if (key != regex) {
-			zend_string_release_ex(key, 0);
-		}
-		return NULL;
 	}
 
 	if (key != regex) {
@@ -917,25 +888,6 @@ PHPAPI pcre2_code *pcre_get_compiled_regex(zend_string *regex, uint32_t *capture
 {
 	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex);
 
-	if (capture_count) {
-		*capture_count = pce ? pce->capture_count : 0;
-	}
-
-	return pce ? pce->re : NULL;
-}
-/* }}} */
-
-/* {{{ pcre_get_compiled_regex_ex */
-PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *capture_count, uint32_t *preg_options, uint32_t *compile_options)
-{
-	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex);
-
-	if (preg_options) {
-		*preg_options = pce ? pce->preg_options : 0;
-	}
-	if (compile_options) {
-		*compile_options = pce ? pce->compile_options : 0;
-	}
 	if (capture_count) {
 		*capture_count = pce ? pce->capture_count : 0;
 	}
@@ -2440,6 +2392,10 @@ PHP_FUNCTION(preg_replace_callback_array)
 			zend_argument_type_error(1, "must contain only valid callbacks");
 			goto error;
 		}
+		if (!str_idx_regex) {
+			zend_argument_type_error(1, "must contain only string patterns as keys");
+			goto error;
+		}
 
 		ZVAL_COPY_VALUE(&fci.function_name, replace);
 
@@ -2472,7 +2428,12 @@ PHP_FUNCTION(preg_replace_callback_array)
 	}
 
 	if (subject_ht) {
-		RETURN_ARR(subject_ht);
+		RETVAL_ARR(subject_ht);
+		// Unset the type_flags of immutable arrays to prevent the VM from performing refcounting
+		if (GC_FLAGS(subject_ht) & IS_ARRAY_IMMUTABLE) {
+			Z_TYPE_FLAGS_P(return_value) = 0;
+		}
+		return;
 	} else {
 		RETURN_STR(subject_str);
 	}

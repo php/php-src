@@ -17,9 +17,14 @@
 ; Default Value: none
 ;prefix = /path/to/pools/$pool
 
-; Unix user/group of processes
-; Note: The user is mandatory. If the group is not set, the default user's group
-;       will be used.
+; Unix user/group of the child processes. This can be used only if the master
+; process running user is root. It is set after the child process is created.
+; The user and group can be specified either by their name or by their numeric
+; IDs.
+; Note: If the user is root, the executable needs to be started with
+;       --allow-to-run-as-root option to work.
+; Default Values: The user is set to master process running user by default.
+;                 If the group is not set, the user's group is used.
 user = @php_fpm_user@
 group = @php_fpm_group@
 
@@ -43,11 +48,12 @@ listen = 127.0.0.1:9000
 ; permissions must be set in order to allow connections from a web server. Many
 ; BSD-derived systems allow connections regardless of permissions. The owner
 ; and group can be specified either by name or by their numeric IDs.
-; Default Values: user and group are set as the running user
-;                 mode is set to 0660
+; Default Values: Owner is set to the master process running user. If the group
+;                 is not set, the owner's group is used. Mode is set to 0660.
 ;listen.owner = @php_fpm_user@
 ;listen.group = @php_fpm_group@
 ;listen.mode = 0660
+
 ; When POSIX Access Control Lists are supported you can set them using
 ; these options, value is a comma separated list of user/group names.
 ; When set, listen.owner and listen.group are ignored
@@ -223,8 +229,8 @@ pm.max_spare_servers = 3
 ;                          it's always 0 if the process is not in Idle state
 ;                          because memory calculation is done when the request
 ;                          processing has terminated;
-; If the process is in Idle state, then informations are related to the
-; last request the process has served. Otherwise informations are related to
+; If the process is in Idle state, then information is related to the
+; last request the process has served. Otherwise information is related to
 ; the current request being served.
 ; Example output:
 ;   ************************
@@ -349,7 +355,7 @@ pm.max_spare_servers = 3
 
 ; A list of request_uri values which should be filtered from the access log.
 ;
-; As a security precuation, this setting will be ignored if:
+; As a security precaution, this setting will be ignored if:
 ;     - the request method is not GET or HEAD; or
 ;     - there is a request body; or
 ;     - there are query parameters; or

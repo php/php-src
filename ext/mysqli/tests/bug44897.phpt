@@ -6,10 +6,6 @@ mysqli
 <?php
 require_once 'connect.inc';
 
-if (!$IS_MYSQLND) {
-    die("skip: only available in mysqlnd");
-}
-
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 }
@@ -19,7 +15,7 @@ if (mysqli_get_server_version($link) <= 50000) {
 ?>
 --FILE--
 <?php
-    require_once("table.inc");
+    require_once 'table.inc';
 
     if (!$link->query('DROP PROCEDURE IF EXISTS p'))
         printf("[001] [%d] %s\n", $link->errno, $link->error);
@@ -73,7 +69,7 @@ if (mysqli_get_server_version($link) <= 50000) {
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

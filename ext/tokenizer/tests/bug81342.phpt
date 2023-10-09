@@ -1,5 +1,7 @@
 --TEST--
 Bug #81342: New ampersand token parsing depends on new line after it
+--EXTENSIONS--
+tokenizer
 --FILE--
 <?php
 

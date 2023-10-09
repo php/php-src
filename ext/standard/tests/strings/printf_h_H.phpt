@@ -2,6 +2,7 @@
 sprintf() %h and %H specifiers
 --SKIPIF--
 <?php
+if (setlocale(LC_ALL, 'invalid') === 'invalid') { die('skip setlocale() is broken /w musl'); }
 if (!setlocale(LC_ALL, "de_DE.utf8")) die("skip de_DE.utf8 locale not available");
 ?>
 --FILE--

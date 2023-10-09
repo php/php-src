@@ -11,6 +11,7 @@
 
 #include "fpm_env.h"
 #include "fpm.h"
+#include "fpm_cleanup.h"
 
 #ifndef HAVE_SETPROCTITLE
 #if defined(__linux__) || defined(__APPLE__)
@@ -60,7 +61,7 @@ int setenv(char *name, char *value, int overwrite) /* {{{ */
 #endif
 
 #ifndef HAVE_CLEARENV
-void clearenv() /* {{{ */
+void clearenv(void)
 {
 	char **envp;
 	char *s;
@@ -79,7 +80,6 @@ void clearenv() /* {{{ */
 	}
 
 }
-/* }}} */
 #endif
 
 #ifndef HAVE_UNSETENV
@@ -195,7 +195,27 @@ static int fpm_env_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-int fpm_env_init_main() /* {{{ */
+
+#ifndef HAVE_SETPROCTITLE
+#if defined(__linux__) || defined(__APPLE__)
+/* Frees our copied environment variables. */
+static void fpm_env_cleanup(int which, void *arg) /* {{{ */
+{
+	char** allocated_environ = environ;
+	if (allocated_environ) {
+		environ = NULL;
+		unsigned int i = 0;
+		while (allocated_environ[i]) {
+			free(allocated_environ[i]);
+			i++;
+		}
+		free(allocated_environ);
+	}
+}
+#endif
+#endif
+
+int fpm_env_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
 	char *title;
@@ -255,6 +275,10 @@ int fpm_env_init_main() /* {{{ */
 			env_nb++;
 		}
 
+		if (0 > fpm_cleanup_add(FPM_CLEANUP_PARENT_EXIT_MAIN, fpm_env_cleanup, 0)) {
+			return -1;
+		}
+
 		if ((new_environ = malloc((1U + env_nb) * sizeof (char *))) == NULL) {
 			return -1;
 		}
@@ -273,4 +297,3 @@ int fpm_env_init_main() /* {{{ */
 	efree(title);
 	return 0;
 }
-/* }}} */

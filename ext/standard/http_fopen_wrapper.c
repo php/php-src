@@ -79,6 +79,7 @@
 
 #define HTTP_WRAPPER_HEADER_INIT    1
 #define HTTP_WRAPPER_REDIRECTED     2
+#define HTTP_WRAPPER_KEEP_METHOD    4
 
 static inline void strip_header(char *header_bag, char *lc_header_bag,
 		const char *lc_header_name)
@@ -140,6 +141,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	char *user_headers = NULL;
 	int header_init = ((flags & HTTP_WRAPPER_HEADER_INIT) != 0);
 	int redirected = ((flags & HTTP_WRAPPER_REDIRECTED) != 0);
+	int redirect_keep_method = ((flags & HTTP_WRAPPER_KEEP_METHOD) != 0);
 	bool follow_location = 1;
 	php_stream_filter *transfer_encoding = NULL;
 	int response_code;
@@ -158,6 +160,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		return NULL;
 	}
 
+	ZEND_ASSERT(resource->scheme);
 	if (!zend_string_equals_literal_ci(resource->scheme, "http") &&
 		!zend_string_equals_literal_ci(resource->scheme, "https")) {
 		if (!context ||
@@ -181,7 +184,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			return NULL;
 		}
 
-		use_ssl = resource->scheme && (ZSTR_LEN(resource->scheme) > 4) && ZSTR_VAL(resource->scheme)[4] == 's';
+		use_ssl = (ZSTR_LEN(resource->scheme) > 4) && ZSTR_VAL(resource->scheme)[4] == 's';
 		/* choose default ports */
 		if (use_ssl && resource->port == 0)
 			resource->port = 443;
@@ -363,8 +366,8 @@ finish:
 	if (context && (tmpzval = php_stream_context_get_option(context, "http", "method")) != NULL) {
 		if (Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0) {
 			/* As per the RFC, automatically redirected requests MUST NOT use other methods than
-			 * GET and HEAD unless it can be confirmed by the user */
-			if (!redirected
+			 * GET and HEAD unless it can be confirmed by the user. */
+			if (!redirected || redirect_keep_method
 				|| zend_string_equals_literal(Z_STR_P(tmpzval), "GET")
 				|| zend_string_equals_literal(Z_STR_P(tmpzval), "HEAD")
 			) {
@@ -458,7 +461,7 @@ finish:
 			zend_str_tolower(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
 			t = ZSTR_VAL(tmp);
 
-			if (!header_init) {
+			if (!header_init && !redirect_keep_method) {
 				/* strip POST headers on redirect */
 				strip_header(user_headers, t, "content-length:");
 				strip_header(user_headers, t, "content-type:");
@@ -567,7 +570,7 @@ finish:
 	 * interprets the RFC literally and establishes a keep-alive connection,
 	 * unless the user specifically requests something else by specifying a
 	 * Connection header in the context options. Send that header even for
-	 * HTTP/1.0 to avoid issues when the server respond with a HTTP/1.1
+	 * HTTP/1.0 to avoid issues when the server respond with an HTTP/1.1
 	 * keep-alive response, which is the preferred response type. */
 	if ((have_header & HTTP_HEADER_CONNECTION) == 0) {
 		smart_str_appends(&req_buf, "Connection: close\r\n");
@@ -606,7 +609,7 @@ finish:
 		 * see bug #44603 for details. Since Content-Type maybe part of user's headers we need to do this check first.
 		 */
 		if (
-				header_init &&
+				(header_init || redirect_keep_method) &&
 				context &&
 				!(have_header & HTTP_HEADER_CONTENT_LENGTH) &&
 				(tmpzval = php_stream_context_get_option(context, "http", "content")) != NULL &&
@@ -624,7 +627,7 @@ finish:
 	}
 
 	/* Request content, such as for POST requests */
-	if (header_init && context &&
+	if ((header_init || redirect_keep_method) && context &&
 		(tmpzval = php_stream_context_get_option(context, "http", "content")) != NULL &&
 		Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval) > 0) {
 		if (!(have_header & HTTP_HEADER_CONTENT_LENGTH)) {
@@ -713,6 +716,10 @@ finish:
 				if (tmp_line_len >= 1 &&tmp_line[tmp_line_len - 1] == '\r') {
 					--tmp_line_len;
 				}
+			} else {
+				// read and discard rest of status line
+				char *line = php_stream_get_line(stream, NULL, 0, NULL);
+				efree(line);
 			}
 			ZVAL_STRINGL(&http_response, tmp_line, tmp_line_len);
 			zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_response);
@@ -853,7 +860,7 @@ finish:
 							s = ZSTR_VAL(resource->path);
 							if (!ZSTR_LEN(resource->path)) {
 								zend_string_release_ex(resource->path, 0);
-								resource->path = zend_string_init("/", 1, 0);
+								resource->path = ZSTR_INIT_LITERAL("/", 0);
 								s = ZSTR_VAL(resource->path);
 							} else {
 								*s = '/';
@@ -909,9 +916,16 @@ finish:
 				CHECK_FOR_CNTRL_CHARS(resource->pass);
 				CHECK_FOR_CNTRL_CHARS(resource->path);
 			}
+			int new_flags = HTTP_WRAPPER_REDIRECTED;
+			if (response_code == 307 || response_code == 308) {
+				/* RFC 7538 specifies that status code 308 does not allow changing the request method from POST to GET.
+				 * RFC 7231 does the same for status code 307.
+				 * To keep consistency between POST and PATCH requests, we'll also not change the request method from PATCH to GET, even though it's allowed it's not mandated by the RFC. */
+				new_flags |= HTTP_WRAPPER_KEEP_METHOD;
+			}
 			stream = php_stream_url_wrap_http_ex(
 				wrapper, new_path, mode, options, opened_path, context,
-				--redirect_max, HTTP_WRAPPER_REDIRECTED, response_header STREAMS_CC);
+				--redirect_max, new_flags, response_header STREAMS_CC);
 		} else {
 			php_stream_wrapper_log_error(wrapper, options, "HTTP request failed! %s", tmp_line);
 		}
@@ -950,6 +964,13 @@ out:
 
 		if (transfer_encoding) {
 			php_stream_filter_append(&stream->readfilters, transfer_encoding);
+		}
+
+		/* It's possible that the server already sent in more data than just the headers.
+		 * We account for this by adjusting the progress counter by the difference of
+		 * already read header data and the body. */
+		if (stream->writepos > stream->readpos) {
+			php_stream_notify_progress_increment(context, stream->writepos - stream->readpos, 0);
 		}
 	}
 

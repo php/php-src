@@ -2,6 +2,171 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var int
+ * @cvalue INTL_MAX_LOCALE_LEN
+ */
+const INTL_MAX_LOCALE_LEN = UNKNOWN;
+/**
+ * @var string
+ * @cvalue U_ICU_VERSION
+ */
+const INTL_ICU_VERSION = UNKNOWN;
+#ifdef U_ICU_DATA_VERSION
+/**
+ * @var string
+ * @cvalue U_ICU_DATA_VERSION
+ */
+const INTL_ICU_DATA_VERSION = UNKNOWN;
+#endif
+
+/**
+ * @var int
+ * @cvalue GRAPHEME_EXTRACT_TYPE_COUNT
+ */
+const GRAPHEME_EXTR_COUNT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GRAPHEME_EXTRACT_TYPE_MAXBYTES
+ */
+const GRAPHEME_EXTR_MAXBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GRAPHEME_EXTRACT_TYPE_MAXCHARS
+ */
+const GRAPHEME_EXTR_MAXCHARS = UNKNOWN;
+
+/**
+ * Option to prohibit processing of unassigned codepoints in the input and
+ * do not check if the input conforms to STD-3 ASCII rules.
+ * @var int
+ * @cvalue UIDNA_DEFAULT
+ */
+const IDNA_DEFAULT = UNKNOWN;
+
+/**
+ * Option to allow processing of unassigned codepoints in the input
+ * @var int
+ * @cvalue UIDNA_ALLOW_UNASSIGNED
+ */
+const IDNA_ALLOW_UNASSIGNED = UNKNOWN;
+
+/**
+ * Option to check if input conforms to STD-3 ASCII rules
+ * @var int
+ * @cvalue UIDNA_USE_STD3_RULES
+ */
+const IDNA_USE_STD3_RULES = UNKNOWN;
+
+/**
+ * Option to check for whether the input conforms to the BiDi rules.
+ * Ignored by the IDNA2003 implementation. (IDNA2003 always performs a BiDi check.)
+ * @var int
+ * @cvalue UIDNA_CHECK_BIDI
+ */
+const IDNA_CHECK_BIDI = UNKNOWN;
+
+/**
+ * Option to check for whether the input conforms to the CONTEXTJ rules.
+ * Ignored by the IDNA2003 implementation. (The CONTEXTJ check is new in IDNA2008.)
+ * @var int
+ * @cvalue UIDNA_CHECK_CONTEXTJ
+ */
+const IDNA_CHECK_CONTEXTJ = UNKNOWN;
+
+/**
+ * Option for nontransitional processing in ToASCII().
+ * By default, ToASCII() uses transitional processing.
+ * Ignored by the IDNA2003 implementation.
+ * @var int
+ * @cvalue UIDNA_NONTRANSITIONAL_TO_ASCII
+ */
+const IDNA_NONTRANSITIONAL_TO_ASCII = UNKNOWN;
+
+/**
+ * Option for nontransitional processing in ToUnicode().
+ * By default, ToUnicode() uses transitional processing.
+ * Ignored by the IDNA2003 implementation.
+ * @var int
+ * @cvalue UIDNA_NONTRANSITIONAL_TO_UNICODE
+ */
+const IDNA_NONTRANSITIONAL_TO_UNICODE = UNKNOWN;
+
+/* VARIANTS */
+
+/**
+ * @var int
+ * @cvalue INTL_IDN_VARIANT_UTS46
+ */
+const INTL_IDNA_VARIANT_UTS46 = UNKNOWN;
+
+/* PINFO ERROR CODES */
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_EMPTY_LABEL
+ */
+const IDNA_ERROR_EMPTY_LABEL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_LABEL_TOO_LONG
+ */
+const IDNA_ERROR_LABEL_TOO_LONG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_DOMAIN_NAME_TOO_LONG
+ */
+const IDNA_ERROR_DOMAIN_NAME_TOO_LONG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_LEADING_HYPHEN
+ */
+const IDNA_ERROR_LEADING_HYPHEN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_TRAILING_HYPHEN
+ */
+const IDNA_ERROR_TRAILING_HYPHEN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_HYPHEN_3_4
+ */
+const IDNA_ERROR_HYPHEN_3_4 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_LEADING_COMBINING_MARK
+ */
+const IDNA_ERROR_LEADING_COMBINING_MARK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_DISALLOWED
+ */
+const IDNA_ERROR_DISALLOWED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_PUNYCODE
+ */
+const IDNA_ERROR_PUNYCODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_LABEL_HAS_DOT
+ */
+const IDNA_ERROR_LABEL_HAS_DOT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_INVALID_ACE_LABEL
+ */
+const IDNA_ERROR_INVALID_ACE_LABEL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_BIDI
+ */
+const IDNA_ERROR_BIDI = UNKNOWN;
+/**
+ * @var int
+ * @cvalue UIDNA_ERROR_CONTEXTJ
+ */
+const IDNA_ERROR_CONTEXTJ = UNKNOWN;
+
 class IntlException extends Exception
 {
 }
@@ -36,12 +201,12 @@ function intlcal_after(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
 function intlcal_before(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
-function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): bool {}
+function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): true {}
 
 /** @param int|bool $value */
 function intlcal_roll(IntlCalendar $calendar, int $field, $value): bool {}
 
-function intlcal_clear(IntlCalendar $calendar, ?int $field = null): bool {}
+function intlcal_clear(IntlCalendar $calendar, ?int $field = null): true {}
 
 function intlcal_field_difference(IntlCalendar $calendar, float $timestamp, int $field): int|false {}
 
@@ -63,7 +228,7 @@ function intlcal_get_maximum(IntlCalendar $calendar, int $field): int|false {}
 
 function intlcal_get_minimal_days_in_first_week(IntlCalendar $calendar): int|false {}
 
-function intlcal_set_minimal_days_in_first_week(IntlCalendar $calendar, int $days): bool {}
+function intlcal_set_minimal_days_in_first_week(IntlCalendar $calendar, int $days): true {}
 
 function intlcal_get_minimum(IntlCalendar $calendar, int $field): int|false {}
 
@@ -83,9 +248,9 @@ function intlcal_is_equivalent_to(IntlCalendar $calendar, IntlCalendar $other): 
 
 function intlcal_is_weekend(IntlCalendar $calendar, ?float $timestamp = null): bool {}
 
-function intlcal_set_first_day_of_week(IntlCalendar $calendar, int $dayOfWeek): bool {}
+function intlcal_set_first_day_of_week(IntlCalendar $calendar, int $dayOfWeek): true {}
 
-function intlcal_set_lenient(IntlCalendar $calendar, bool $lenient): bool {}
+function intlcal_set_lenient(IntlCalendar $calendar, bool $lenient): true {}
 
 function intlcal_get_repeated_wall_time_option(IntlCalendar $calendar): int {}
 
@@ -93,9 +258,9 @@ function intlcal_equals(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
 function intlcal_get_skipped_wall_time_option(IntlCalendar $calendar): int {}
 
-function intlcal_set_repeated_wall_time_option(IntlCalendar $calendar, int $option): bool {}
+function intlcal_set_repeated_wall_time_option(IntlCalendar $calendar, int $option): true {}
 
-function intlcal_set_skipped_wall_time_option(IntlCalendar $calendar, int $option): bool {}
+function intlcal_set_skipped_wall_time_option(IntlCalendar $calendar, int $option): true {}
 
 function intlcal_from_date_time(DateTime|string $datetime, ?string $locale = null): ?IntlCalendar {}
 
@@ -186,7 +351,7 @@ function datefmt_get_calendar_object(IntlDateFormatter $formatter): IntlCalendar
 function datefmt_get_timezone(IntlDateFormatter $formatter): IntlTimeZone|false {}
 
 /** @param IntlTimeZone|DateTimeZone|string|null $timezone */
-function datefmt_set_timezone(IntlDateFormatter $formatter, $timezone): ?bool {}
+function datefmt_set_timezone(IntlDateFormatter $formatter, $timezone): bool {}
 
 function datefmt_set_pattern(IntlDateFormatter $formatter, string $pattern): bool {}
 

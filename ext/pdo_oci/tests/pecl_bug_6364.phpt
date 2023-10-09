@@ -5,6 +5,7 @@ pdo
 pdo_oci
 --SKIPIF--
 <?php
+if (getenv('SKIP_ASAN')) die('xleak leaks memory under asan');
 require(__DIR__.'/../../pdo/tests/pdo_test.inc');
 PDOTest::skip();
 ?>

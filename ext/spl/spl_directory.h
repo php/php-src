@@ -64,7 +64,6 @@ struct _spl_filesystem_object {
 			php_stream         *dirp;
 			zend_string        *sub_path;
 			int                index;
-			int                is_recursive;
 			zend_function      *func_rewind;
 			zend_function      *func_next;
 			zend_function      *func_valid;
@@ -105,6 +104,7 @@ struct _spl_filesystem_object {
 #define SPL_FILE_DIR_KEY_AS_PATHNAME       0x00000000 /* make RecursiveDirectoryTree::key() return getPathname() */
 #define SPL_FILE_DIR_KEY_AS_FILENAME       0x00000100 /* make RecursiveDirectoryTree::key() return getFilename() */
 #define SPL_FILE_DIR_KEY_MODE_MASK         0x00000F00 /* mask RecursiveDirectoryTree::key() */
+#define SPL_FILE_NEW_CURRENT_AND_KEY       SPL_FILE_DIR_KEY_AS_FILENAME|SPL_FILE_DIR_CURRENT_AS_FILEINFO
 #define SPL_FILE_DIR_KEY(intern,mode)      ((intern->flags&SPL_FILE_DIR_KEY_MODE_MASK)==mode)
 
 #define SPL_FILE_DIR_SKIPDOTS              0x00001000 /* Tells whether it should skip dots or not */

@@ -103,28 +103,6 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int);
    pointless warnings */
 int overflow2(int a, int b);
 
-/* Section Filters Declarations */
-/* IMPORTANT NOTE FOR NEW FILTER
- * Do not forget to update:
- * IMAGE_FILTER_MAX: define the last filter index
- * IMAGE_FILTER_MAX_ARGS: define the biggest amount of arguments
- * image_filter array in PHP_FUNCTION(imagefilter)
- * */
-#define IMAGE_FILTER_NEGATE         0
-#define IMAGE_FILTER_GRAYSCALE      1
-#define IMAGE_FILTER_BRIGHTNESS     2
-#define IMAGE_FILTER_CONTRAST       3
-#define IMAGE_FILTER_COLORIZE       4
-#define IMAGE_FILTER_EDGEDETECT     5
-#define IMAGE_FILTER_EMBOSS         6
-#define IMAGE_FILTER_GAUSSIAN_BLUR  7
-#define IMAGE_FILTER_SELECTIVE_BLUR 8
-#define IMAGE_FILTER_MEAN_REMOVAL   9
-#define IMAGE_FILTER_SMOOTH         10
-#define IMAGE_FILTER_PIXELATE       11
-#define IMAGE_FILTER_SCATTER		12
-#define IMAGE_FILTER_MAX            12
-#define IMAGE_FILTER_MAX_ARGS       6
 static void php_image_filter_negate(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_grayscale(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_brightness(INTERNAL_FUNCTION_PARAMETERS);
@@ -199,7 +177,6 @@ zend_object *php_gd_image_object_create(zend_class_entry *class_type)
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &php_gd_image_object_handlers;
 
 	return &intern->std;
 }
@@ -229,6 +206,7 @@ static void php_gd_object_minit_helper(void)
 {
 	gd_image_ce = register_class_GdImage();
 	gd_image_ce->create_object = php_gd_image_object_create;
+	gd_image_ce->default_object_handlers = &php_gd_image_object_handlers;
 
 	/* setting up the object handlers for the GdImage class */
 	memcpy(&php_gd_image_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
@@ -329,7 +307,7 @@ ZEND_GET_MODULE(gd)
 
 /* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY("gd.jpeg_ignore_warning", "1", PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY_EX("gd.jpeg_ignore_warning", "1", PHP_INI_ALL, NULL, zend_ini_boolean_displayer_cb)
 PHP_INI_END()
 /* }}} */
 
@@ -367,135 +345,7 @@ PHP_MINIT_FUNCTION(gd)
 
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_LONG_CONSTANT("IMG_AVIF", PHP_IMG_AVIF, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_GIF", PHP_IMG_GIF, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_JPG", PHP_IMG_JPG, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_JPEG", PHP_IMG_JPEG, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_PNG", PHP_IMG_PNG, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_WBMP", PHP_IMG_WBMP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_XPM", PHP_IMG_XPM, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_WEBP", PHP_IMG_WEBP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BMP", PHP_IMG_BMP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_TGA", PHP_IMG_TGA, CONST_CS | CONST_PERSISTENT);
-
-#ifdef gdWebpLossless
-	/* constant for webp encoding */
-	REGISTER_LONG_CONSTANT("IMG_WEBP_LOSSLESS", gdWebpLossless, CONST_CS | CONST_PERSISTENT);
-#endif
-
-	/* special colours for gd */
-	REGISTER_LONG_CONSTANT("IMG_COLOR_TILED", gdTiled, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_COLOR_STYLED", gdStyled, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_COLOR_BRUSHED", gdBrushed, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_COLOR_STYLEDBRUSHED", gdStyledBrushed, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_COLOR_TRANSPARENT", gdTransparent, CONST_CS | CONST_PERSISTENT);
-
-	/* for imagefilledarc */
-	REGISTER_LONG_CONSTANT("IMG_ARC_ROUNDED", gdArc, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_ARC_PIE", gdPie, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_ARC_CHORD", gdChord, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_ARC_NOFILL", gdNoFill, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_ARC_EDGED", gdEdged, CONST_CS | CONST_PERSISTENT);
-
-	/* GD2 image format types */
-	REGISTER_LONG_CONSTANT("IMG_GD2_RAW", GD2_FMT_RAW, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_GD2_COMPRESSED", GD2_FMT_COMPRESSED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FLIP_HORIZONTAL", PHP_GD_FLIP_HORIZONTAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FLIP_VERTICAL", PHP_GD_FLIP_VERTICAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FLIP_BOTH", PHP_GD_FLIP_BOTH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_EFFECT_REPLACE", gdEffectReplace, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_EFFECT_ALPHABLEND", gdEffectAlphaBlend, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_EFFECT_NORMAL", gdEffectNormal, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_EFFECT_OVERLAY", gdEffectOverlay, CONST_CS | CONST_PERSISTENT);
-#ifdef gdEffectMultiply
-	REGISTER_LONG_CONSTANT("IMG_EFFECT_MULTIPLY", gdEffectMultiply, CONST_CS | CONST_PERSISTENT);
-#endif
-
-	REGISTER_LONG_CONSTANT("IMG_CROP_DEFAULT", GD_CROP_DEFAULT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_CROP_TRANSPARENT", GD_CROP_TRANSPARENT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_CROP_BLACK", GD_CROP_BLACK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_CROP_WHITE", GD_CROP_WHITE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_CROP_SIDES", GD_CROP_SIDES, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_CROP_THRESHOLD", GD_CROP_THRESHOLD, CONST_CS | CONST_PERSISTENT);
-
-
-	REGISTER_LONG_CONSTANT("IMG_BELL", GD_BELL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BESSEL", GD_BESSEL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BILINEAR_FIXED", GD_BILINEAR_FIXED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BICUBIC", GD_BICUBIC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BICUBIC_FIXED", GD_BICUBIC_FIXED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BLACKMAN", GD_BLACKMAN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BOX", GD_BOX, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BSPLINE", GD_BSPLINE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_CATMULLROM", GD_CATMULLROM, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_GAUSSIAN", GD_GAUSSIAN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_GENERALIZED_CUBIC", GD_GENERALIZED_CUBIC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_HERMITE", GD_HERMITE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_HAMMING", GD_HAMMING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_HANNING", GD_HANNING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_MITCHELL", GD_MITCHELL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_POWER", GD_POWER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_QUADRATIC", GD_QUADRATIC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_SINC", GD_SINC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_NEAREST_NEIGHBOUR", GD_NEAREST_NEIGHBOUR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_WEIGHTED4", GD_WEIGHTED4, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_TRIANGLE", GD_TRIANGLE, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("IMG_AFFINE_TRANSLATE", GD_AFFINE_TRANSLATE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_AFFINE_SCALE", GD_AFFINE_SCALE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_AFFINE_ROTATE", GD_AFFINE_ROTATE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_AFFINE_SHEAR_HORIZONTAL", GD_AFFINE_SHEAR_HORIZONTAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_AFFINE_SHEAR_VERTICAL", GD_AFFINE_SHEAR_VERTICAL, CONST_CS | CONST_PERSISTENT);
-
-#ifdef HAVE_GD_BUNDLED
-	REGISTER_LONG_CONSTANT("GD_BUNDLED", 1, CONST_CS | CONST_PERSISTENT);
-#else
-	REGISTER_LONG_CONSTANT("GD_BUNDLED", 0, CONST_CS | CONST_PERSISTENT);
-#endif
-
-	/* Section Filters */
-	REGISTER_LONG_CONSTANT("IMG_FILTER_NEGATE", IMAGE_FILTER_NEGATE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_GRAYSCALE", IMAGE_FILTER_GRAYSCALE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_BRIGHTNESS", IMAGE_FILTER_BRIGHTNESS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_CONTRAST", IMAGE_FILTER_CONTRAST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_COLORIZE", IMAGE_FILTER_COLORIZE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_EDGEDETECT", IMAGE_FILTER_EDGEDETECT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_GAUSSIAN_BLUR", IMAGE_FILTER_GAUSSIAN_BLUR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_SELECTIVE_BLUR", IMAGE_FILTER_SELECTIVE_BLUR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_EMBOSS", IMAGE_FILTER_EMBOSS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_MEAN_REMOVAL", IMAGE_FILTER_MEAN_REMOVAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_SMOOTH", IMAGE_FILTER_SMOOTH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_PIXELATE", IMAGE_FILTER_PIXELATE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FILTER_SCATTER", IMAGE_FILTER_SCATTER, CONST_CS | CONST_PERSISTENT);
-	/* End Section Filters */
-
-#ifdef GD_VERSION_STRING
-	REGISTER_STRING_CONSTANT("GD_VERSION", GD_VERSION_STRING, CONST_CS | CONST_PERSISTENT);
-#endif
-
-#if defined(GD_MAJOR_VERSION) && defined(GD_MINOR_VERSION) && defined(GD_RELEASE_VERSION) && defined(GD_EXTRA_VERSION)
-	REGISTER_LONG_CONSTANT("GD_MAJOR_VERSION", GD_MAJOR_VERSION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GD_MINOR_VERSION", GD_MINOR_VERSION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GD_RELEASE_VERSION", GD_RELEASE_VERSION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_STRING_CONSTANT("GD_EXTRA_VERSION", GD_EXTRA_VERSION, CONST_CS | CONST_PERSISTENT);
-#endif
-
-
-#ifdef HAVE_GD_PNG
-
-	/*
-	 * cannot include #include "png.h"
-	 * /usr/include/pngconf.h:310:2: error: #error png.h already includes setjmp.h with some additional fixup.
-	 * as error, use the values for now...
-	 */
-	REGISTER_LONG_CONSTANT("PNG_NO_FILTER",	    0x00, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_NONE",   0x08, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_SUB",    0x10, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_UP",     0x20, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_AVG",    0x40, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_FILTER_PAETH",  0x80, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PNG_ALL_FILTERS",   0x08 | 0x10 | 0x20 | 0x40 | 0x80, CONST_CS | CONST_PERSISTENT);
-#endif
+	register_gd_symbols(module_number);
 
 	return SUCCESS;
 }
@@ -743,6 +593,12 @@ PHP_FUNCTION(imageloadfont)
 		font->w = FLIPWORD(font->w);
 		font->h = FLIPWORD(font->h);
 		font->nchars = FLIPWORD(font->nchars);
+		if (overflow2(font->nchars, font->h) || overflow2(font->nchars * font->h, font->w )) {
+			php_error_docref(NULL, E_WARNING, "Error reading font, invalid font header");
+			efree(font);
+			php_stream_close(stream);
+			RETURN_FALSE;
+		}
 		body_size = font->w * font->h * font->nchars;
 	}
 
@@ -753,6 +609,7 @@ PHP_FUNCTION(imageloadfont)
 		RETURN_FALSE;
 	}
 
+	ZEND_ASSERT(body_size > 0);
 	font->data = emalloc(body_size);
 	b = 0;
 	while (b < body_size && (n = php_stream_read(stream, &font->data[b], body_size - b)) > 0) {
@@ -1332,9 +1189,8 @@ PHP_FUNCTION(imagerotate)
 	gdImagePtr im_dst, im_src;
 	double degrees;
 	zend_long color;
-	bool ignoretransparent = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Odl|b", &SIM, gd_image_ce,  &degrees, &color, &ignoretransparent) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Odl", &SIM, gd_image_ce,  &degrees, &color) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1863,37 +1719,34 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 {
 	zval *imgind;
 	char *file = NULL;
-	zend_long quality = 0, type = 0;
+	zend_long quality = 128, type = 1;
 	gdImagePtr im;
 	FILE *fp;
 	size_t file_len = 0;
-	int argc = ZEND_NUM_ARGS();
-	int q = -1, t = 1;
 
 	/* The quality parameter for gd2 stands for chunk size */
 
 	switch (image_type) {
 		case PHP_GDIMG_TYPE_GD:
-			if (zend_parse_parameters(argc, "O|p!", &imgind, gd_image_ce, &file, &file_len) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|p!", &imgind, gd_image_ce, &file, &file_len) == FAILURE) {
 				RETURN_THROWS();
 			}
 			break;
 		case PHP_GDIMG_TYPE_GD2:
-			if (zend_parse_parameters(argc, "O|p!ll", &imgind, gd_image_ce, &file, &file_len, &quality, &type) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|p!ll", &imgind, gd_image_ce, &file, &file_len, &quality, &type) == FAILURE) {
 				RETURN_THROWS();
 			}
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
-	im = php_gd_libgdimageptr_from_zval_p(imgind);
-
-	if (argc >= 3) {
-		q = quality;
-		if (argc == 4) {
-			t = type;
-		}
+	/* quality must fit in an int */
+	if (quality < INT_MIN || quality > INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Argument #3 ($chunk_size) must be between %d and %d", INT_MIN, INT_MAX);
+		RETURN_FALSE;
 	}
+
+	im = php_gd_libgdimageptr_from_zval_p(imgind);
 
 	if (file_len) {
 		PHP_GD_CHECK_OPEN_BASEDIR(file, "Invalid filename");
@@ -1909,10 +1762,10 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				gdImageGd(im, fp);
 				break;
 			case PHP_GDIMG_TYPE_GD2:
-				if (q == -1) {
-					q = 128;
+				if (quality == -1) {
+					quality = 128;
 				}
-				gdImageGd2(im, fp, q, t);
+				gdImageGd2(im, fp, quality, type);
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
@@ -1935,10 +1788,10 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				gdImageGd(im, tmp);
 				break;
 			case PHP_GDIMG_TYPE_GD2:
-				if (q == -1) {
-					q = 128;
+				if (quality == -1) {
+					quality = 128;
 				}
-				gdImageGd2(im, tmp, q, t);
+				gdImageGd2(im, tmp, quality, type);
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
@@ -4130,9 +3983,7 @@ static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf, int l)
 
 static void _php_image_output_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 {
-	if(ctx) {
-		efree(ctx);
-	}
+	efree(ctx);
 } /* }}} */
 
 static void _php_image_stream_putc(struct gdIOCtx *ctx, int c) /* {{{ */ {
@@ -4152,21 +4003,16 @@ static void _php_image_stream_ctxfree(struct gdIOCtx *ctx) /* {{{ */
 	if(ctx->data) {
 		ctx->data = NULL;
 	}
-	if(ctx) {
-		efree(ctx);
-	}
+	efree(ctx);
 } /* }}} */
 
 static void _php_image_stream_ctxfreeandclose(struct gdIOCtx *ctx) /* {{{ */
 {
-
 	if(ctx->data) {
 		php_stream_close((php_stream *) ctx->data);
 		ctx->data = NULL;
 	}
-	if(ctx) {
-		efree(ctx);
-	}
+	efree(ctx);
 } /* }}} */
 
 static gdIOCtx *create_stream_context_from_zval(zval *to_zval) {
@@ -4190,7 +4036,7 @@ static gdIOCtx *create_stream_context_from_zval(zval *to_zval) {
 			return NULL;
 		}
 	} else {
-		zend_argument_type_error(2, "must be a file name or a stream resource, %s given", zend_zval_type_name(to_zval));
+		zend_argument_type_error(2, "must be a file name or a stream resource, %s given", zend_zval_value_name(to_zval));
 		return NULL;
 	}
 

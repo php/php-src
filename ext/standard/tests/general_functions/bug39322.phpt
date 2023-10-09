@@ -24,11 +24,13 @@ echo "Done!\n";
 
 ?>
 --EXPECTF--
-array(8) {
+array(9) {
   ["command"]=>
   string(14) "/bin/sleep 120"
   ["pid"]=>
   int(%d)
+  ["cached"]=>
+  bool(false)
   ["running"]=>
   bool(false)
   ["signaled"]=>

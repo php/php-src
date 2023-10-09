@@ -71,6 +71,7 @@ typedef struct _zend_fiber_transfer {
 /* Coroutine functions must populate the given transfer with a new context
  * and (optional) data before they return. */
 typedef void (*zend_fiber_coroutine)(zend_fiber_transfer *transfer);
+typedef void (*zend_fiber_clean)(zend_fiber_context *context);
 
 struct _zend_fiber_context {
 	/* Pointer to boost.context or ucontext_t data. */
@@ -82,11 +83,17 @@ struct _zend_fiber_context {
 	/* Entrypoint function of the fiber. */
 	zend_fiber_coroutine function;
 
+	/* Cleanup function for fiber. */
+	zend_fiber_clean cleanup;
+
 	/* Assigned C stack. */
 	zend_fiber_stack *stack;
 
 	/* Fiber status. */
 	zend_fiber_status status;
+
+	/* Observer state */
+	zend_execute_data *top_observed_frame;
 
 	/* Reserved for extensions */
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
@@ -118,14 +125,21 @@ struct _zend_fiber {
 	/* Frame on the bottom of the fiber vm stack. */
 	zend_execute_data *stack_bottom;
 
+	/* Active fiber vm stack. */
+	zend_vm_stack vm_stack;
+
 	/* Storage for fiber return value. */
 	zval result;
 };
 
 /* These functions may be used to create custom fiber objects using the bundled fiber switching context. */
-ZEND_API bool zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size);
+ZEND_API zend_result zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size);
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
 ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer);
+#ifdef ZEND_CHECK_STACK_LIMIT
+ZEND_API void* zend_fiber_stack_limit(zend_fiber_stack *stack);
+ZEND_API void* zend_fiber_stack_base(zend_fiber_stack *stack);
+#endif /* ZEND_CHECK_STACK_LIMIT */
 
 ZEND_API void zend_fiber_switch_block(void);
 ZEND_API void zend_fiber_switch_unblock(void);

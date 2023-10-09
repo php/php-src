@@ -16,16 +16,20 @@
  */
 
 #include "php.h"
+#include "php_assert.h"
+#include "php_crypt.h"
 #include "php_streams.h"
 #include "php_main.h"
 #include "php_globals.h"
 #include "php_variables.h"
 #include "php_ini.h"
+#include "php_image.h"
 #include "php_standard.h"
 #include "php_math.h"
 #include "php_http.h"
 #include "php_incomplete_class.h"
 #include "php_getopt.h"
+#include "php_ext_syslog.h"
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
 #include "zend_exceptions.h"
@@ -34,7 +38,6 @@
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
-#include "ext/standard/php_mt_rand.h"
 #include "ext/standard/crc32_x86.h"
 
 #ifdef PHP_WIN32
@@ -79,6 +82,9 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 #include <string.h>
 #include <locale.h>
+#ifdef HAVE_LANGINFO_H
+# include <langinfo.h>
+#endif
 
 #ifdef HAVE_SYS_MMAN_H
 # include <sys/mman.h>
@@ -205,11 +211,7 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 
 static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 {
-	BG(mt_rand_is_seeded) = 0;
-	BG(mt_rand_mode) = MT_RAND_MT19937;
 	BG(umask) = -1;
-	BG(next) = NULL;
-	BG(left) = -1;
 	BG(user_tick_functions) = NULL;
 	BG(user_filter_map) = NULL;
 	BG(serialize_lock) = 0;
@@ -301,63 +303,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 	assertion_error_ce = register_class_AssertionError(zend_ce_error);
 
-	REGISTER_LONG_CONSTANT("CONNECTION_ABORTED", PHP_CONNECTION_ABORTED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("CONNECTION_NORMAL",  PHP_CONNECTION_NORMAL,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("CONNECTION_TIMEOUT", PHP_CONNECTION_TIMEOUT, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("INI_USER",   ZEND_INI_USER,   CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INI_PERDIR", ZEND_INI_PERDIR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INI_SYSTEM", ZEND_INI_SYSTEM, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INI_ALL",    ZEND_INI_ALL,    CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("INI_SCANNER_NORMAL", ZEND_INI_SCANNER_NORMAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INI_SCANNER_RAW",    ZEND_INI_SCANNER_RAW,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("INI_SCANNER_TYPED",  ZEND_INI_SCANNER_TYPED,  CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("PHP_URL_SCHEME", PHP_URL_SCHEME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_URL_HOST", PHP_URL_HOST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_URL_PORT", PHP_URL_PORT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_URL_USER", PHP_URL_USER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_URL_PASS", PHP_URL_PASS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_URL_PATH", PHP_URL_PATH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_URL_QUERY", PHP_URL_QUERY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_URL_FRAGMENT", PHP_URL_FRAGMENT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_QUERY_RFC1738", PHP_QUERY_RFC1738, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_QUERY_RFC3986", PHP_QUERY_RFC3986, CONST_CS | CONST_PERSISTENT);
-
-#define REGISTER_MATH_CONSTANT(x)  REGISTER_DOUBLE_CONSTANT(#x, x, CONST_CS | CONST_PERSISTENT)
-	REGISTER_MATH_CONSTANT(M_LOG2E);
-	REGISTER_MATH_CONSTANT(M_LOG10E);
-	REGISTER_MATH_CONSTANT(M_LN2);
-	REGISTER_MATH_CONSTANT(M_LN10);
-	REGISTER_MATH_CONSTANT(M_PI);
-	REGISTER_MATH_CONSTANT(M_PI_2);
-	REGISTER_MATH_CONSTANT(M_PI_4);
-	REGISTER_MATH_CONSTANT(M_1_PI);
-	REGISTER_MATH_CONSTANT(M_2_PI);
-	REGISTER_MATH_CONSTANT(M_SQRTPI);
-	REGISTER_MATH_CONSTANT(M_2_SQRTPI);
-	REGISTER_MATH_CONSTANT(M_LNPI);
-	REGISTER_MATH_CONSTANT(M_EULER);
-	REGISTER_MATH_CONSTANT(M_SQRT2);
-	REGISTER_MATH_CONSTANT(M_SQRT1_2);
-	REGISTER_MATH_CONSTANT(M_SQRT3);
-	REGISTER_DOUBLE_CONSTANT("INF", ZEND_INFINITY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_DOUBLE_CONSTANT("NAN", ZEND_NAN, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_UP", PHP_ROUND_HALF_UP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_DOWN", PHP_ROUND_HALF_DOWN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_EVEN", PHP_ROUND_HALF_EVEN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_ODD", PHP_ROUND_HALF_ODD, CONST_CS | CONST_PERSISTENT);
-
-#ifdef ENABLE_TEST_CLASS
-	test_class_startup();
-#endif
-
-	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
-	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
-	register_string_constants(INIT_FUNC_ARGS_PASSTHRU);
-
 	BASIC_MINIT_SUBMODULE(var)
 	BASIC_MINIT_SUBMODULE(file)
 	BASIC_MINIT_SUBMODULE(pack)
@@ -365,14 +310,9 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(standard_filters)
 	BASIC_MINIT_SUBMODULE(user_filters)
 	BASIC_MINIT_SUBMODULE(password)
-	BASIC_MINIT_SUBMODULE(mt_rand)
 
 #ifdef ZTS
 	BASIC_MINIT_SUBMODULE(localeconv)
-#endif
-
-#ifdef HAVE_NL_LANGINFO
-	BASIC_MINIT_SUBMODULE(nl_langinfo)
 #endif
 
 #ifdef ZEND_INTRIN_SSE4_2_FUNC_PTR
@@ -388,7 +328,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #endif
 
 	BASIC_MINIT_SUBMODULE(crypt)
-	BASIC_MINIT_SUBMODULE(lcg)
 
 	BASIC_MINIT_SUBMODULE(dir)
 #ifdef HAVE_SYSLOG_H
@@ -403,7 +342,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(exec)
 
 	BASIC_MINIT_SUBMODULE(user_streams)
-	BASIC_MINIT_SUBMODULE(imagetypes)
 
 	php_register_url_stream_wrapper("php", &php_stream_php_wrapper);
 	php_register_url_stream_wrapper("file", &php_plain_files_wrapper);
@@ -413,16 +351,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_url_stream_wrapper("data", &php_stream_rfc2397_wrapper);
 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
-
-#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
-# if defined(PHP_WIN32) || defined(HAVE_FULL_DNS_FUNCS)
-	BASIC_MINIT_SUBMODULE(dns)
-# endif
-#endif
-
-	BASIC_MINIT_SUBMODULE(random)
-
-	BASIC_MINIT_SUBMODULE(hrtime)
 
 	return SUCCESS;
 }
@@ -459,7 +387,6 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 	BASIC_MSHUTDOWN_SUBMODULE(localeconv)
 #endif
 	BASIC_MSHUTDOWN_SUBMODULE(crypt)
-	BASIC_MSHUTDOWN_SUBMODULE(random)
 	BASIC_MSHUTDOWN_SUBMODULE(password)
 
 	return SUCCESS;
@@ -520,8 +447,6 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	zend_hash_destroy(&BG(putenv_ht));
 	tsrm_env_unlock();
 #endif
-
-	BG(mt_rand_is_seeded) = 0;
 
 	if (BG(umask) != -1) {
 		umask(BG(umask));
@@ -592,7 +517,7 @@ PHP_FUNCTION(constant)
 	ZEND_PARSE_PARAMETERS_END();
 
 	scope = zend_get_executed_scope();
-	c = zend_get_constant_ex(const_name, scope, 0);
+	c = zend_get_constant_ex(const_name, scope, ZEND_FETCH_CLASS_EXCEPTION);
 	if (!c) {
 		RETURN_THROWS();
 	}
@@ -1639,18 +1564,20 @@ PHP_FUNCTION(forward_static_call)
 /* {{{ Call a static method which is the first parameter with the arguments contained in array */
 PHP_FUNCTION(forward_static_call_array)
 {
-	zval *params, retval;
+	zval retval;
+	HashTable *params;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 	zend_class_entry *called_scope;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_FUNC(fci, fci_cache)
-		Z_PARAM_ARRAY(params)
+		Z_PARAM_ARRAY_HT(params)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_fcall_info_args(&fci, params);
 	fci.retval = &retval;
+	/* Add positional arguments */
+	fci.named_params = params;
 
 	called_scope = zend_get_called_scope(execute_data);
 	if (called_scope && fci_cache.calling_scope &&
@@ -1664,8 +1591,6 @@ PHP_FUNCTION(forward_static_call_array)
 		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
-
-	zend_fcall_info_args_clear(&fci, 1);
 }
 /* }}} */
 
@@ -2177,7 +2102,7 @@ PHP_FUNCTION(set_include_path)
 		RETVAL_FALSE;
 	}
 
-	key = zend_string_init("include_path", sizeof("include_path") - 1, 0);
+	key = ZSTR_INIT_LITERAL("include_path", 0);
 	if (zend_alter_ini_entry_ex(key, new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == FAILURE) {
 		zend_string_release_ex(key, 0);
 		zval_ptr_dtor_str(return_value);
@@ -2258,7 +2183,7 @@ PHP_FUNCTION(ignore_user_abort)
 	old_setting = (unsigned short)PG(ignore_user_abort);
 
 	if (!arg_is_null) {
-		zend_string *key = zend_string_init("ignore_user_abort", sizeof("ignore_user_abort") - 1, 0);
+		zend_string *key = ZSTR_INIT_LITERAL("ignore_user_abort", 0);
 		zend_alter_ini_entry_chars(key, arg ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 		zend_string_release_ex(key, 0);
 	}

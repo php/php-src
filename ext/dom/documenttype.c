@@ -28,7 +28,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1844763134
 Since:
 */
-int dom_documenttype_name_read(dom_object *obj, zval *retval)
+zend_result dom_documenttype_name_read(dom_object *obj, zval *retval)
 {
 	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
 
@@ -49,7 +49,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1788794630
 Since:
 */
-int dom_documenttype_entities_read(dom_object *obj, zval *retval)
+zend_result dom_documenttype_entities_read(dom_object *obj, zval *retval)
 {
 	xmlDtdPtr doctypep = (xmlDtdPtr) dom_object_get_node(obj);
 	xmlHashTable *entityht;
@@ -65,7 +65,7 @@ int dom_documenttype_entities_read(dom_object *obj, zval *retval)
 	entityht = (xmlHashTable *) doctypep->entities;
 
 	intern = Z_DOMOBJ_P(retval);
-	dom_namednode_iter(obj, XML_ENTITY_NODE, intern, entityht, NULL, NULL);
+	dom_namednode_iter(obj, XML_ENTITY_NODE, intern, entityht, NULL, 0, NULL, 0);
 
 	return SUCCESS;
 }
@@ -77,7 +77,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D46829EF
 Since:
 */
-int dom_documenttype_notations_read(dom_object *obj, zval *retval)
+zend_result dom_documenttype_notations_read(dom_object *obj, zval *retval)
 {
 	xmlDtdPtr doctypep = (xmlDtdPtr) dom_object_get_node(obj);
 	xmlHashTable *notationht;
@@ -93,7 +93,7 @@ int dom_documenttype_notations_read(dom_object *obj, zval *retval)
 	notationht = (xmlHashTable *) doctypep->notations;
 
 	intern = Z_DOMOBJ_P(retval);
-	dom_namednode_iter(obj, XML_NOTATION_NODE, intern, notationht, NULL, NULL);
+	dom_namednode_iter(obj, XML_NOTATION_NODE, intern, notationht, NULL, 0, NULL, 0);
 
 	return SUCCESS;
 }
@@ -105,7 +105,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-publicId
 Since: DOM Level 2
 */
-int dom_documenttype_public_id_read(dom_object *obj, zval *retval)
+zend_result dom_documenttype_public_id_read(dom_object *obj, zval *retval)
 {
 	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
 
@@ -130,7 +130,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-systemId
 Since: DOM Level 2
 */
-int dom_documenttype_system_id_read(dom_object *obj, zval *retval)
+zend_result dom_documenttype_system_id_read(dom_object *obj, zval *retval)
 {
 	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
 
@@ -154,7 +154,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-internalSubset
 Since: DOM Level 2
 */
-int dom_documenttype_internal_subset_read(dom_object *obj, zval *retval)
+zend_result dom_documenttype_internal_subset_read(dom_object *obj, zval *retval)
 {
 	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
 	xmlDtdPtr intsubset;
@@ -175,11 +175,7 @@ int dom_documenttype_internal_subset_read(dom_object *obj, zval *retval)
 				xmlNodeDumpOutput (buff, NULL, cur, 0, 0, NULL);
 				xmlOutputBufferFlush(buff);
 
-#ifdef LIBXML2_NEW_BUFFER
 				smart_str_appendl(&ret_buf, (const char *) xmlOutputBufferGetContent(buff), xmlOutputBufferGetSize(buff));
-#else
-				smart_str_appendl(&ret_buf, (char *) buff->buffer->content, buff->buffer->use);
-#endif
 
 				(void)xmlOutputBufferClose(buff);
 			}

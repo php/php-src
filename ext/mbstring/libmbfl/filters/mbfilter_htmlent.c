@@ -66,7 +66,9 @@ const mbfl_encoding mbfl_encoding_html_ent = {
 	&vtbl_html_wchar,
 	&vtbl_wchar_html,
 	mb_htmlent_to_wchar,
-	mb_wchar_to_htmlent
+	mb_wchar_to_htmlent,
+	NULL,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_html = {
@@ -177,9 +179,10 @@ void mbfl_filt_conv_html_dec_dtor(mbfl_convert_filter *filter)
 
 int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 {
-	int  pos, ent = 0;
+	int pos;
+	unsigned int ent = 0;
 	mbfl_html_entity_entry *entity;
-	char *buffer = (char*)filter->opaque;
+	unsigned char *buffer = (unsigned char*)filter->opaque;
 
 	if (!filter->status) {
 		if (c == '&' ) {
@@ -195,7 +198,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					if (filter->status > 3) {
 						/* numeric entity */
 						for (pos=3; pos<filter->status; pos++) {
-							int v =  buffer[pos];
+							int v = buffer[pos];
 							if (v >= '0' && v <= '9') {
 								v = v - '0';
 							} else if (v >= 'A' && v <= 'F') {
@@ -215,6 +218,10 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					/* numeric entity */
 					if (filter->status > 2) {
 						for (pos=2; pos<filter->status; pos++) {
+							if (ent > 0x19999999) {
+								ent = -1;
+								break;
+							}
 							int v = buffer[pos];
 							if (v >= '0' && v <= '9') {
 								v = v - '0';
@@ -228,7 +235,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 						ent = -1;
 					}
 				}
-				if (ent >= 0 && ent < 0x110000) {
+				if (ent < 0x110000) {
 					CK((*filter->output_function)(ent, filter->data));
 				} else {
 					for (pos = 0; pos < filter->status; pos++) {
@@ -237,13 +244,12 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					CK((*filter->output_function)(c, filter->data));
 				}
 				filter->status = 0;
-				/*php_error_docref("ref.mbstring", E_NOTICE, "mbstring decoded '%s'=%d", buffer, ent);*/
 			} else {
 				/* named entity */
 				buffer[filter->status] = 0;
 				entity = (mbfl_html_entity_entry *)mbfl_html_entity_list;
 				while (entity->name) {
-					if (!strcmp(buffer+1, entity->name))	{
+					if (!strcmp((const char*)buffer+1, entity->name)) {
 						ent = entity->code;
 						break;
 					}
@@ -253,13 +259,20 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					/* decoded */
 					CK((*filter->output_function)(ent, filter->data));
 					filter->status = 0;
-					/*php_error_docref("ref.mbstring", E_NOTICE,"mbstring decoded '%s'=%d", buffer, ent);*/
+
 				} else {
 					/* failure */
 					buffer[filter->status++] = ';';
 					buffer[filter->status] = 0;
-					/* php_error_docref("ref.mbstring", E_WARNING, "mbstring cannot decode '%s'", buffer); */
-					mbfl_filt_conv_html_dec_flush(filter);
+
+					/* flush fragments */
+					pos = 0;
+					while (filter->status--) {
+						int e = (*filter->output_function)(buffer[pos++], filter->data);
+						if (e != 0)
+							return e;
+					}
+					filter->status = 0;
 				}
 			}
 		} else {
@@ -272,8 +285,15 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 				if (c=='&')
 					filter->status--;
 				buffer[filter->status] = 0;
-				/* php_error_docref("ref.mbstring", E_WARNING, "mbstring cannot decode '%s'", buffer)l */
-				mbfl_filt_conv_html_dec_flush(filter);
+
+				pos = 0;
+				while (filter->status--) {
+					int e = (*filter->output_function)(buffer[pos++], filter->data);
+					if (e != 0)
+						return e;
+				}
+				filter->status = 0;
+
 				if (c=='&')
 				{
 					buffer[filter->status++] = '&';
@@ -315,6 +335,11 @@ void mbfl_filt_conv_html_dec_copy(mbfl_convert_filter *src, mbfl_convert_filter 
 	memcpy(dest->opaque, src->opaque, html_enc_buffer_size+1);
 }
 
+static bool is_html_entity_char(unsigned char c)
+{
+	return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '#';
+}
+
 static size_t mb_htmlent_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
 {
 	unsigned char *p = *in, *e = p + *in_len;
@@ -326,9 +351,9 @@ static size_t mb_htmlent_to_wchar(unsigned char **in, size_t *in_len, uint32_t *
 		if (c == '&') {
 			/* Find terminating ; for HTML entity */
 			unsigned char *terminator = p;
-			while (terminator < e && *terminator != ';')
+			while (terminator < e && is_html_entity_char(*terminator))
 				terminator++;
-			if (terminator < e) {
+			if (terminator < e && *terminator == ';') {
 				if (*p == '#' && (e - p) >= 2) {
 					/* Numeric entity */
 					unsigned int value = 0;
@@ -371,11 +396,11 @@ static size_t mb_htmlent_to_wchar(unsigned char **in, size_t *in_len, uint32_t *
 					*out++ = value;
 					p = terminator + 1;
 					goto next_iteration;
-				}	else {
+				} else if (terminator > p && terminator < e) {
 					/* Named entity */
 					mbfl_html_entity_entry *entity = (mbfl_html_entity_entry*)mbfl_html_entity_list;
 					while (entity->name) {
-						if (!strncmp((char*)p, entity->name, terminator - p)) {
+						if (!strncmp((char*)p, entity->name, terminator - p) && strlen(entity->name) == terminator - p) {
 							*out++ = entity->code;
 							p = terminator + 1;
 							goto next_iteration;
@@ -390,7 +415,7 @@ bad_entity:
 			while (p < terminator && out < limit) {
 				*out++ = *p++;
 			}
-			if (terminator < e && out < limit) {
+			if (terminator < e && *terminator == ';' && out < limit) {
 				*out++ = *p++;
 			}
 		} else {

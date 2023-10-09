@@ -6,6 +6,7 @@ date.timezone=Atlantic/Azores
 intl
 --SKIPIF--
 <?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0) die('skip for ICU >= 51.2'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '72.1') >= 0) die('skip for ICU < 72.1'); ?>
 --FILE--
 <?php
 
@@ -19,10 +20,10 @@ ini_set("intl.error_level", E_WARNING);
 function ut_main()
 {
     $timezone_id_arr = array (
-        'America/New_York',
-        'America/Los_Angeles',
-        'America/Chicago',
-        'CN'
+        'America/New_York' => true,
+        'America/Los_Angeles' => true,
+        'America/Chicago' => true,
+        'CN' => false
     );
     $timestamp_entry = 0;
 
@@ -32,12 +33,12 @@ function ut_main()
     $timezone_id = ut_datefmt_get_timezone_id( $fmt );
     $res_str .= "\nAfter creation of the dateformatter :  timezone_id= $timezone_id\n";
 
-    foreach( $timezone_id_arr as $timezone_id_entry )
+    foreach( $timezone_id_arr as $timezone_id_entry => $result )
     {
 
         $res_str .= "-----------";
         $res_str .= "\nTrying to set timezone_id= $timezone_id_entry";
-        ut_datefmt_set_timezone_id( $fmt , $timezone_id_entry );
+        if (ut_datefmt_set_timezone_id( $fmt , $timezone_id_entry ) !== $result) die("ut_datefmt_set_timezone_id failed");
         $timezone_id = ut_datefmt_get_timezone_id( $fmt );
         $res_str .= "\nAfter call to set_timezone_id :  timezone_id= $timezone_id";
         $formatted = ut_datefmt_format( $fmt, 0);

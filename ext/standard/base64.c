@@ -51,7 +51,7 @@ static const short base64_reverse_table[256] = {
 };
 /* }}} */
 
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
 #include <arm_neon.h>
 
 static zend_always_inline uint8x16_t encode_toascii(const uint8x16_t input, const uint8x16x2_t shift_LUT)
@@ -118,11 +118,11 @@ static zend_always_inline unsigned char *neon_base64_encode(const unsigned char 
 	*left = inl;
 	return out;
 }
-#endif /* __aarch64__ */
+#endif /* defined(__aarch64__) || defined(_M_ARM64) */
 
 static zend_always_inline unsigned char *php_base64_encode_impl(const unsigned char *in, size_t inl, unsigned char *out) /* {{{ */
 {
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
 	if (inl >= 16 * 3) {
 		size_t left = 0;
 		out = neon_base64_encode(in, inl, out, &left);
@@ -161,7 +161,7 @@ static zend_always_inline unsigned char *php_base64_encode_impl(const unsigned c
 }
 /* }}} */
 
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
 static zend_always_inline uint8x16_t decode_fromascii(const uint8x16_t input, uint8x16_t *error, const uint8x16x2_t shiftLUT, const uint8x16x2_t maskLUT, const uint8x16x2_t bitposLUT) {
 	const uint8x16_t higher_nibble = vshrq_n_u8(input, 4);
 	const uint8x16_t lower_nibble = vandq_u8(input, vdupq_n_u8(0x0f));
@@ -241,14 +241,14 @@ static zend_always_inline size_t neon_base64_decode(const unsigned char *in, siz
 	*left = inl;
 	return out - out_orig;
 }
-#endif /* __aarch64__ */
+#endif /* defined(__aarch64__) || defined(_M_ARM64) */
 
 static zend_always_inline int php_base64_decode_impl(const unsigned char *in, size_t inl, unsigned char *out, size_t *outl, bool strict) /* {{{ */
 {
 	int ch;
 	size_t i = 0, padding = 0, j = *outl;
 
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
 	if (inl >= 16 * 4) {
 		size_t left = 0;
 		j += neon_base64_decode(in, inl, out, &left);
@@ -354,6 +354,20 @@ fail:
 # endif
 #endif
 
+/* Only enable avx512 resolver if avx2 use resolver also */
+#if ZEND_INTRIN_AVX2_FUNC_PROTO && ZEND_INTRIN_AVX512_FUNC_PROTO
+#define BASE64_INTRIN_AVX512_FUNC_PROTO 1
+#endif
+#if ZEND_INTRIN_AVX2_FUNC_PTR && ZEND_INTRIN_AVX512_FUNC_PTR
+#define BASE64_INTRIN_AVX512_FUNC_PTR 1
+#endif
+#if ZEND_INTRIN_AVX2_FUNC_PROTO && ZEND_INTRIN_AVX512_VBMI_FUNC_PROTO
+#define BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO 1
+#endif
+#if ZEND_INTRIN_AVX2_FUNC_PTR && ZEND_INTRIN_AVX512_VBMI_FUNC_PTR
+#define BASE64_INTRIN_AVX512_VBMI_FUNC_PTR 1
+#endif
+
 #if ZEND_INTRIN_AVX2_NATIVE
 # include <immintrin.h>
 #elif ZEND_INTRIN_SSSE3_NATIVE
@@ -365,6 +379,15 @@ fail:
 #  include <tmmintrin.h>
 # endif /* (ZEND_INTRIN_SSSE3_RESOLVER || ZEND_INTRIN_AVX2_RESOLVER) */
 # include "Zend/zend_cpuinfo.h"
+
+# if BASE64_INTRIN_AVX512_FUNC_PROTO || BASE64_INTRIN_AVX512_FUNC_PTR
+ZEND_INTRIN_AVX512_FUNC_DECL(zend_string *php_base64_encode_avx512(const unsigned char *str, size_t length));
+ZEND_INTRIN_AVX512_FUNC_DECL(zend_string *php_base64_decode_ex_avx512(const unsigned char *str, size_t length, bool strict));
+# endif
+# if BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO || BASE64_INTRIN_AVX512_VBMI_FUNC_PTR
+ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t length));
+ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(zend_string *php_base64_decode_ex_avx512_vbmi(const unsigned char *str, size_t length, bool strict));
+# endif
 
 # if ZEND_INTRIN_AVX2_RESOLVER
 ZEND_INTRIN_AVX2_FUNC_DECL(zend_string *php_base64_encode_avx2(const unsigned char *str, size_t length));
@@ -379,7 +402,7 @@ ZEND_INTRIN_SSSE3_FUNC_DECL(zend_string *php_base64_decode_ex_ssse3(const unsign
 zend_string *php_base64_encode_default(const unsigned char *str, size_t length);
 zend_string *php_base64_decode_ex_default(const unsigned char *str, size_t length, bool strict);
 
-# if (ZEND_INTRIN_AVX2_FUNC_PROTO || ZEND_INTRIN_SSSE3_FUNC_PROTO)
+# if (ZEND_INTRIN_AVX2_FUNC_PROTO || ZEND_INTRIN_SSSE3_FUNC_PROTO || BASE64_INTRIN_AVX512_FUNC_PROTO || BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO)
 PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length) __attribute__((ifunc("resolve_base64_encode")));
 PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length, bool strict) __attribute__((ifunc("resolve_base64_decode")));
 
@@ -389,6 +412,16 @@ typedef zend_string *(*base64_decode_func_t)(const unsigned char *, size_t, bool
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
 static base64_encode_func_t resolve_base64_encode(void) {
+# if BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO
+	if (zend_cpu_supports_avx512_vbmi()) {
+		return php_base64_encode_avx512_vbmi;
+	} else
+# endif
+# if BASE64_INTRIN_AVX512_FUNC_PROTO
+	if (zend_cpu_supports_avx512()) {
+		return php_base64_encode_avx512;
+	} else
+# endif
 # if ZEND_INTRIN_AVX2_FUNC_PROTO
 	if (zend_cpu_supports_avx2()) {
 		return php_base64_encode_avx2;
@@ -405,6 +438,16 @@ static base64_encode_func_t resolve_base64_encode(void) {
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
 static base64_decode_func_t resolve_base64_decode(void) {
+# if BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO
+	if (zend_cpu_supports_avx512_vbmi()) {
+		return php_base64_decode_ex_avx512_vbmi;
+	} else
+# endif
+# if BASE64_INTRIN_AVX512_FUNC_PROTO
+	if (zend_cpu_supports_avx512()) {
+		return php_base64_decode_ex_avx512;
+	} else
+# endif
 # if ZEND_INTRIN_AVX2_FUNC_PROTO
 	if (zend_cpu_supports_avx2()) {
 		return php_base64_decode_ex_avx2;
@@ -431,6 +474,18 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 
 PHP_MINIT_FUNCTION(base64_intrin)
 {
+# if BASE64_INTRIN_AVX512_VBMI_FUNC_PTR
+	if (zend_cpu_supports_avx512_vbmi()) {
+		php_base64_encode_ptr = php_base64_encode_avx512_vbmi;
+		php_base64_decode_ex_ptr = php_base64_decode_ex_avx512_vbmi;
+	} else
+# endif
+# if BASE64_INTRIN_AVX512_FUNC_PTR
+	if (zend_cpu_supports_avx512()) {
+		php_base64_encode_ptr = php_base64_encode_avx512;
+		php_base64_decode_ex_ptr = php_base64_decode_ex_avx512;
+	} else
+# endif
 # if ZEND_INTRIN_AVX2_FUNC_PTR
 	if (zend_cpu_supports_avx2()) {
 		php_base64_encode_ptr = php_base64_encode_avx2;
@@ -451,6 +506,249 @@ PHP_MINIT_FUNCTION(base64_intrin)
 }
 # endif /* (ZEND_INTRIN_AVX2_FUNC_PROTO || ZEND_INTRIN_SSSE3_FUNC_PROTO) */
 #endif /* ZEND_INTRIN_AVX2_NATIVE */
+
+#if BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO || BASE64_INTRIN_AVX512_VBMI_FUNC_PTR
+zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t length)
+{
+	const unsigned char *c = str;
+	unsigned char *o;
+	zend_string *result;
+
+	result = zend_string_safe_alloc(((length + 2) / 3), 4 * sizeof(char), 0, 0);
+	o = (unsigned char *)ZSTR_VAL(result);
+
+	const __m512i shuffle_splitting = _mm512_setr_epi32(
+		0x01020001, 0x04050304, 0x07080607, 0x0a0b090a, 0x0d0e0c0d, 0x10110f10,
+		0x13141213, 0x16171516, 0x191a1819, 0x1c1d1b1c, 0x1f201e1f, 0x22232122,
+		0x25262425, 0x28292728, 0x2b2c2a2b, 0x2e2f2d2e);
+	const __m512i multi_shifts = _mm512_set1_epi64(0x3036242a1016040a);
+	const char *ascii_lookup_tbl = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	const __m512i ascii_lookup = _mm512_loadu_si512((__m512i *)ascii_lookup_tbl);
+
+	while (length > 63) {
+		/* Step 1: load input data */
+		__m512i str = _mm512_loadu_si512((const __m512i *)c);
+
+		/* Step 2: splitting 24-bit words into 32-bit lanes */
+		str = _mm512_permutexvar_epi8(shuffle_splitting, str);
+
+		/* Step 3: moving 6-bit word to sperate bytes */
+		str = _mm512_multishift_epi64_epi8(multi_shifts, str);
+
+		/* Step 4: conversion to ASCII */
+		str = _mm512_permutexvar_epi8(str, ascii_lookup);
+
+		/* Step 5: store the final result */
+		_mm512_storeu_si512((__m512i *)o, str);
+		c += 48;
+		o += 64;
+		length -= 48;
+	}
+
+	o = php_base64_encode_impl(c, length, o);
+
+	ZSTR_LEN(result) = (o - (unsigned char *)ZSTR_VAL(result));
+
+	return result;
+}
+
+zend_string *php_base64_decode_ex_avx512_vbmi(const unsigned char *str, size_t length, bool strict)
+{
+	const unsigned char *c = str;
+	unsigned char *o;
+	size_t outl = 0;
+	zend_string *result;
+
+	result = zend_string_alloc(length, 0);
+	o = (unsigned char *)ZSTR_VAL(result);
+
+	const __m512i lookup_0 = _mm512_setr_epi32(
+		0x80808080, 0x80808080, 0x80808080, 0x80808080, 0x80808080, 0x80808080,
+		0x80808080, 0x80808080, 0x80808080, 0x80808080, 0x3e808080, 0x3f808080,
+		0x37363534, 0x3b3a3938, 0x80803d3c, 0x80808080);
+	const __m512i lookup_1 = _mm512_setr_epi32(
+		0x02010080, 0x06050403, 0x0a090807, 0x0e0d0c0b, 0x1211100f, 0x16151413,
+		0x80191817, 0x80808080, 0x1c1b1a80, 0x201f1e1d, 0x24232221, 0x28272625,
+		0x2c2b2a29, 0x302f2e2d, 0x80333231, 0x80808080);
+
+	const __m512i merge_mask1 = _mm512_set1_epi32(0x01400140);
+	const __m512i merge_mask2 = _mm512_set1_epi32(0x00011000);
+
+	const __m512i continuous_mask = _mm512_setr_epi32(
+		0x06000102, 0x090a0405, 0x0c0d0e08, 0x16101112, 0x191a1415, 0x1c1d1e18,
+		0x26202122, 0x292a2425, 0x2c2d2e28, 0x36303132, 0x393a3435, 0x3c3d3e38,
+		0x00000000, 0x00000000, 0x00000000, 0x00000000);
+
+	while (length > 64) {
+		/* Step 1: load input data */
+		const __m512i input = _mm512_loadu_si512((__m512i *)c);
+
+		/* Step 2: translation into 6-bit values(saved on bytes) from ASCII and error detection */
+		__m512i str = _mm512_permutex2var_epi8(lookup_0, input, lookup_1);
+		const uint64_t mask = _mm512_movepi8_mask(_mm512_or_epi64(str, input)); /* convert MSBs to the mask */
+		if (mask) {
+			break;
+		}
+
+		/* Step 3: pack four fields within 32-bit words into 24-bit words. */
+		const __m512i merge_ab_and_bc = _mm512_maddubs_epi16(str, merge_mask1);
+		str = _mm512_madd_epi16(merge_ab_and_bc, merge_mask2);
+
+		/* Step 4: move 3-byte words into the continuous array. */
+		str = _mm512_permutexvar_epi8(continuous_mask, str);
+
+		/* Step 5: store the final result */
+		_mm512_storeu_si512((__m512i *)o, str);
+
+		c += 64;
+		o += 48;
+		outl += 48;
+		length -= 64;
+	}
+
+	if (!php_base64_decode_impl(c, length, (unsigned char*)ZSTR_VAL(result), &outl, strict)) {
+		zend_string_efree(result);
+		return NULL;
+	}
+
+	ZSTR_LEN(result) = outl;
+
+	return result;
+}
+#endif
+
+#if BASE64_INTRIN_AVX512_FUNC_PROTO || BASE64_INTRIN_AVX512_FUNC_PTR
+zend_string *php_base64_encode_avx512(const unsigned char *str, size_t length)
+{
+	const unsigned char *c = str;
+	unsigned char *o;
+	zend_string *result;
+
+	result = zend_string_safe_alloc(((length + 2) / 3), 4 * sizeof(char), 0, 0);
+	o = (unsigned char *)ZSTR_VAL(result);
+
+	while (length > 63) {
+		/* Step 1: load input data */
+		/* [????|????|????|????|PPPO|OONN|NMMM|LLLK|KKJJ|JIII|HHHG|GGFF|FEEE|DDDC|CCBB|BAAA] */
+		__m512i str = _mm512_loadu_si512((const __m512i *)c);
+
+		/* Step 2: splitting 24-bit words into 32-bit lanes */
+		/* [0000|PPPO|OONN|NMMM|0000|LLLK|KKJJ|JIII|0000|HHHG|GGFF|FEEE|0000|DDDC|CCBB|BAAA] */
+		str = _mm512_permutexvar_epi32(
+			_mm512_set_epi32(-1, 11, 10, 9, -1, 8, 7, 6, -1, 5, 4, 3, -1, 2, 1, 0), str);
+		/* [D1 D2 D0 D1|C1 C2 C0 C1|B1 B2 B0 B1|A1 A2 A0 A1] x 4 */
+		str = _mm512_shuffle_epi8(str, _mm512_set4_epi32(0x0a0b090a, 0x07080607, 0x04050304, 0x01020001));
+
+		/* Step 3: moving 6-bit word to sperate bytes */
+		/* in:  [bbbbcccc|ccdddddd|aaaaaabb|bbbbcccc] */
+		/* t0:  [0000cccc|cc000000|aaaaaa00|00000000] */
+		const __m512i t0 = _mm512_and_si512(str, _mm512_set1_epi32(0x0fc0fc00));
+		/* t1:  [00000000|00cccccc|00000000|00aaaaaa] */
+		const __m512i t1 = _mm512_srlv_epi16(t0, _mm512_set1_epi32(0x0006000a));
+		/* t2:  [ccdddddd|00000000|aabbbbbb|cccc0000] */
+		const __m512i t2 = _mm512_sllv_epi16(str, _mm512_set1_epi32(0x00080004));
+		/* str: [00dddddd|00cccccc|00bbbbbb|00aaaaaa] */
+		str = _mm512_ternarylogic_epi32(_mm512_set1_epi32(0x3f003f00), t2, t1, 0xca);
+
+		/* Step 4: conversion to ASCII */
+		__m512i result = _mm512_subs_epu8(str, _mm512_set1_epi8(51));
+		const __mmask64 less = _mm512_cmpgt_epi8_mask(_mm512_set1_epi8(26), str);
+		result = _mm512_mask_mov_epi8(result, less, _mm512_set1_epi8(13));
+		const __m512i lut = _mm512_set4_epi32(0x000041f0, 0xedfcfcfc, 0xfcfcfcfc, 0xfcfcfc47);
+		result = _mm512_shuffle_epi8(lut, result);
+		result = _mm512_add_epi8(result, str);
+
+		/* Step 5: store the final result */
+		_mm512_storeu_si512((__m512i *)o, result);
+		c += 48;
+		o += 64;
+		length -= 48;
+	}
+
+	o = php_base64_encode_impl(c, length, o);
+
+	ZSTR_LEN(result) = (o - (unsigned char *)ZSTR_VAL(result));
+
+	return result;
+}
+
+#define build_dword(b0, b1, b2, b3)					\
+	((uint32_t)(uint8_t)b0 << 0) | ((uint32_t)(uint8_t)b1 << 8) |	\
+	((uint32_t)(uint8_t)b2 << 16) | ((uint32_t)(uint8_t)b3 << 24)
+
+#define _mm512_set4lanes_epi8(b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14, b15)	\
+	_mm512_setr4_epi32(build_dword(b0, b1, b2, b3), build_dword(b4, b5, b6, b7),			\
+			   build_dword(b8, b9, b10, b11), build_dword(b12, b13, b14, b15))
+
+zend_string *php_base64_decode_ex_avx512(const unsigned char *str, size_t length, bool strict)
+{
+	const unsigned char *c = str;
+	unsigned char *o;
+	size_t outl = 0;
+	zend_string *result;
+
+	result = zend_string_alloc(length, 0);
+	o = (unsigned char *)ZSTR_VAL(result);
+
+	while (length > 64) {
+		/* Step 1: load input data */
+		__m512i str = _mm512_loadu_si512((__m512i *)c);
+
+		/* Step 2: translation into 6-bit values(saved on bytes) from ASCII and error detection */
+		const __m512i higher_nibble = _mm512_and_si512(_mm512_srli_epi32(str, 4), _mm512_set1_epi8(0x0f));
+		const __m512i lower_nibble = _mm512_and_si512(str, _mm512_set1_epi8(0x0f));
+		const __m512i shiftLUT = _mm512_set4lanes_epi8(
+				0, 0, 19, 4, -65, -65, -71, -71, 0, 0, 0, 0, 0, 0, 0, 0);
+		const __m512i maskLUT = _mm512_set4lanes_epi8(
+				/* 0        : 0b1010_1000*/ 0xa8,
+				/* 1 .. 9   : 0b1111_1000*/ 0xf8, 0xf8, 0xf8, 0xf8, 0xf8, 0xf8, 0xf8, 0xf8, 0xf8,
+				/* 10       : 0b1111_0000*/ 0xf0,
+				/* 11       : 0b0101_0100*/ 0x54,
+				/* 12 .. 14 : 0b0101_0000*/ 0x50, 0x50, 0x50,
+				/* 15       : 0b0101_0100*/ 0x54);
+		const __m512i bitposLUT = _mm512_set4lanes_epi8(
+				0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
+				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+		const __m512i M = _mm512_shuffle_epi8(maskLUT, lower_nibble);
+		const __m512i bit = _mm512_shuffle_epi8(bitposLUT, higher_nibble);
+		const uint64_t match = _mm512_test_epi8_mask(M, bit);
+		if (match != (uint64_t)-1) {
+			break;
+		}
+		const __m512i sh = _mm512_shuffle_epi8(shiftLUT, higher_nibble);
+		const __mmask64 eq_2f = _mm512_cmpeq_epi8_mask(str, _mm512_set1_epi8(0x2f));
+		const __m512i shift = _mm512_mask_mov_epi8(sh, eq_2f, _mm512_set1_epi8(16));
+		str = _mm512_add_epi8(str, shift);
+
+		/* Step 3: pack four fields within 32-bit words into 24-bit words. */
+		const __m512i merge_ab_and_bc = _mm512_maddubs_epi16(str, _mm512_set1_epi32(0x01400140));
+		str = _mm512_madd_epi16(merge_ab_and_bc, _mm512_set1_epi32(0x00011000));
+
+		/* Step 4: move 3-byte words into the continuous array. */
+		const __m512i t1 = _mm512_shuffle_epi8(str,
+			_mm512_set4lanes_epi8(2, 1, 0, 6, 5, 4, 10, 9, 8, 14, 13, 12, -1, -1, -1, -1));
+		const __m512i s6 = _mm512_setr_epi32(0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14, 0, 0, 0, 0);
+		const __m512i t2 = _mm512_permutexvar_epi32(s6, t1);
+
+		/* Step 5: store the final result */
+		_mm512_storeu_si512((__m512i *)o, t2);
+
+		c += 64;
+		o += 48;
+		outl += 48;
+		length -= 64;
+	}
+
+	if (!php_base64_decode_impl(c, length, (unsigned char*)ZSTR_VAL(result), &outl, strict)) {
+		zend_string_efree(result);
+		return NULL;
+	}
+
+	ZSTR_LEN(result) = outl;
+
+	return result;
+}
+#endif
 
 #if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER
 # if ZEND_INTRIN_AVX2_RESOLVER && defined(HAVE_FUNC_ATTRIBUTE_TARGET)

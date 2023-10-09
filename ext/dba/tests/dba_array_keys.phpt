@@ -4,34 +4,35 @@ DBA check behaviour of array keys
 dba
 --SKIPIF--
 <?php
-    require_once(__DIR__ .'/skipif.inc');
-    die("info $HND handler used");
+require_once __DIR__ . '/setup/setup_dba_tests.inc';
+check_skip_any();
 ?>
 --FILE--
 <?php
-require_once(__DIR__ .'/test.inc');
-$db_file = dba_open($db_file, "n", $handler);
+require_once __DIR__ . '/setup/setup_dba_tests.inc';
+$name = 'array_keys_basic.db';
 
-if ($db_file === false) {
-    die('Error creating database');
-}
+$db = get_any_db($name);
 
-var_dump(dba_insert(['group', 'name'], 'Normal group', $db_file));
-var_dump(dba_insert(['group', ''], 'Empty name', $db_file));
-var_dump(dba_insert(['', 'name'], 'Empty group', $db_file));
-var_dump(dba_insert(['', ''], 'Empty keys', $db_file));
-var_dump(dba_fetch(['group', 'name'], $db_file));
-var_dump(dba_fetch(['group', ''], $db_file));
-var_dump(dba_fetch(['', 'name'], $db_file));
-var_dump(dba_fetch(['', ''], $db_file));
-dba_close($db_file);
+var_dump(dba_insert(['group', 'name'], 'Normal group', $db));
+var_dump(dba_insert(['group', ''], 'Empty name', $db));
+var_dump(dba_insert(['', 'name'], 'Empty group', $db));
+var_dump(dba_insert(['', ''], 'Empty keys', $db));
+var_dump(dba_fetch(['group', 'name'], $db));
+var_dump(dba_fetch(['group', ''], $db));
+var_dump(dba_fetch(['', 'name'], $db));
+var_dump(dba_fetch(['', ''], $db));
+dba_close($db);
 
 ?>
 --CLEAN--
 <?php
-    require(__DIR__ .'/clean.inc');
+require_once __DIR__ . '/setup/setup_dba_tests.inc';
+$db_name = 'array_keys_basic.db';
+cleanup_standard_db($db_name);
 ?>
---EXPECT--
+--EXPECTF--
+Using handler: "%s"
 bool(true)
 bool(true)
 bool(true)

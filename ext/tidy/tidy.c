@@ -79,19 +79,8 @@
 		_php_tidy_apply_config_array(_doc, _val_ht); \
 	} else if (_val_str) { \
 		TIDY_OPEN_BASE_DIR_CHECK(ZSTR_VAL(_val_str)); \
-		switch (tidyLoadConfig(_doc, ZSTR_VAL(_val_str))) { \
-			case -1: \
-				php_error_docref(NULL, E_WARNING, "Could not load configuration file \"%s\"", ZSTR_VAL(_val_str)); \
-				break; \
-			case 1: \
-				php_error_docref(NULL, E_NOTICE, "There were errors while parsing the configuration file \"%s\"", ZSTR_VAL(_val_str)); \
-				break; \
-		} \
+		php_tidy_load_config(_doc, ZSTR_VAL(_val_str)); \
 	}
-
-
-#define TIDY_TAG_CONST(tag) REGISTER_LONG_CONSTANT("TIDY_TAG_" #tag, TidyTag_##tag, CONST_CS | CONST_PERSISTENT)
-#define TIDY_NODE_CONST(name, type) REGISTER_LONG_CONSTANT("TIDY_NODETYPE_" #name, TidyNode_##type, CONST_CS | CONST_PERSISTENT)
 
 #define TIDY_OPEN_BASE_DIR_CHECK(filename) \
 if (php_check_open_basedir(filename)) { \
@@ -100,9 +89,7 @@ if (php_check_open_basedir(filename)) { \
 
 #define TIDY_SET_DEFAULT_CONFIG(_doc) \
 	if (TG(default_config) && TG(default_config)[0]) { \
-		if (tidyLoadConfig(_doc, TG(default_config)) < 0) { \
-			php_error_docref(NULL, E_WARNING, "Unable to load Tidy configuration file at \"%s\"", TG(default_config)); \
-		} \
+		php_tidy_load_config(_doc, TG(default_config)); \
 	}
 /* }}} */
 
@@ -157,8 +144,6 @@ static void *php_tidy_get_opt_val(PHPTidyDoc *, TidyOption, TidyOptionType *);
 static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetypes);
 static int _php_tidy_set_tidy_opt(TidyDoc, char *, zval *);
 static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options);
-static void _php_tidy_register_nodetypes(INIT_FUNC_ARGS);
-static void _php_tidy_register_tags(INIT_FUNC_ARGS);
 static PHP_INI_MH(php_tidy_set_clean_output);
 static void php_tidy_clean_output_start(const char *name, size_t name_len);
 static php_output_handler *php_tidy_output_handler_init(const char *handler_name, size_t handler_name_len, size_t chunk_size, int flags);
@@ -174,7 +159,7 @@ ZEND_DECLARE_MODULE_GLOBALS(tidy)
 
 PHP_INI_BEGIN()
 STD_PHP_INI_ENTRY("tidy.default_config",	"",		PHP_INI_SYSTEM,		OnUpdateString,				default_config,		zend_tidy_globals,	tidy_globals)
-STD_PHP_INI_ENTRY("tidy.clean_output",		"0",	PHP_INI_USER,		php_tidy_set_clean_output,	clean_output,		zend_tidy_globals,	tidy_globals)
+STD_PHP_INI_BOOLEAN("tidy.clean_output",	"0",	PHP_INI_USER,		php_tidy_set_clean_output,	clean_output,		zend_tidy_globals,	tidy_globals)
 PHP_INI_END()
 
 static zend_class_entry *tidy_ce_doc, *tidy_ce_node;
@@ -224,6 +209,16 @@ static void TIDY_CALL php_tidy_free(void *buf)
 static void TIDY_CALL php_tidy_panic(ctmbstr msg)
 {
 	php_error_docref(NULL, E_ERROR, "Could not allocate memory for tidy! (Reason: %s)", (char *)msg);
+}
+
+static void php_tidy_load_config(TidyDoc doc, const char *path)
+{
+	int ret = tidyLoadConfig(doc, path);
+	if (ret < 0) {
+		php_error_docref(NULL, E_WARNING, "Could not load the Tidy configuration file \"%s\"", path);
+	} else if (ret > 0) {
+		php_error_docref(NULL, E_NOTICE, "There were errors while parsing the Tidy configuration file \"%s\"", path);
+	}
 }
 
 static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value)
@@ -850,8 +845,7 @@ static PHP_MINIT_FUNCTION(tidy)
 	tidy_object_handlers_node.offset = tidy_object_handlers_doc.offset = XtOffsetOf(PHPTidyObj, std);
 	tidy_object_handlers_node.free_obj = tidy_object_handlers_doc.free_obj = tidy_object_free_storage;
 
-	_php_tidy_register_tags(INIT_FUNC_ARGS_PASSTHRU);
-	_php_tidy_register_nodetypes(INIT_FUNC_ARGS_PASSTHRU);
+	register_tidy_symbols(module_number);
 
 	php_output_handler_alias_register(ZEND_STRL("ob_tidyhandler"), php_tidy_output_handler_init);
 
@@ -1076,18 +1070,19 @@ PHP_FUNCTION(tidy_parse_file)
 		Z_PARAM_BOOL(use_include_path)
 	ZEND_PARSE_PARAMETERS_END();
 
-	tidy_instantiate(tidy_ce_doc, return_value);
-	obj = Z_TIDY_P(return_value);
-
 	if (!(contents = php_tidy_file_to_mem(ZSTR_VAL(inputfile), use_include_path))) {
 		php_error_docref(NULL, E_WARNING, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
 		RETURN_FALSE;
 	}
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
+		zend_string_release_ex(contents, 0);
 		zend_value_error("Input string is too long");
 		RETURN_THROWS();
 	}
+
+	tidy_instantiate(tidy_ce_doc, return_value);
+	obj = Z_TIDY_P(return_value);
 
 	TIDY_APPLY_CONFIG(obj->ptdoc->doc, options_str, options_ht);
 
@@ -1379,6 +1374,7 @@ PHP_METHOD(tidy, __construct)
 		}
 
 		if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
+			zend_string_release_ex(contents, 0);
 			zend_value_error("Input string is too long");
 			RETURN_THROWS();
 		}
@@ -1417,6 +1413,7 @@ PHP_METHOD(tidy, parseFile)
 	}
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
+		zend_string_release_ex(contents, 0);
 		zend_value_error("Input string is too long");
 		RETURN_THROWS();
 	}
@@ -1629,176 +1626,5 @@ PHP_METHOD(tidyNode, __construct)
 	zend_throw_error(NULL, "You should not create a tidyNode manually");
 }
 /* }}} */
-
-static void _php_tidy_register_nodetypes(INIT_FUNC_ARGS)
-{
-	TIDY_NODE_CONST(ROOT, Root);
-	TIDY_NODE_CONST(DOCTYPE, DocType);
-	TIDY_NODE_CONST(COMMENT, Comment);
-	TIDY_NODE_CONST(PROCINS, ProcIns);
-	TIDY_NODE_CONST(TEXT, Text);
-	TIDY_NODE_CONST(START, Start);
-	TIDY_NODE_CONST(END, End);
-	TIDY_NODE_CONST(STARTEND, StartEnd);
-	TIDY_NODE_CONST(CDATA, CDATA);
-	TIDY_NODE_CONST(SECTION, Section);
-	TIDY_NODE_CONST(ASP, Asp);
-	TIDY_NODE_CONST(JSTE, Jste);
-	TIDY_NODE_CONST(PHP, Php);
-	TIDY_NODE_CONST(XMLDECL, XmlDecl);
-}
-
-static void _php_tidy_register_tags(INIT_FUNC_ARGS)
-{
-	TIDY_TAG_CONST(UNKNOWN);
-	TIDY_TAG_CONST(A);
-	TIDY_TAG_CONST(ABBR);
-	TIDY_TAG_CONST(ACRONYM);
-	TIDY_TAG_CONST(ADDRESS);
-	TIDY_TAG_CONST(ALIGN);
-	TIDY_TAG_CONST(APPLET);
-	TIDY_TAG_CONST(AREA);
-	TIDY_TAG_CONST(B);
-	TIDY_TAG_CONST(BASE);
-	TIDY_TAG_CONST(BASEFONT);
-	TIDY_TAG_CONST(BDO);
-	TIDY_TAG_CONST(BGSOUND);
-	TIDY_TAG_CONST(BIG);
-	TIDY_TAG_CONST(BLINK);
-	TIDY_TAG_CONST(BLOCKQUOTE);
-	TIDY_TAG_CONST(BODY);
-	TIDY_TAG_CONST(BR);
-	TIDY_TAG_CONST(BUTTON);
-	TIDY_TAG_CONST(CAPTION);
-	TIDY_TAG_CONST(CENTER);
-	TIDY_TAG_CONST(CITE);
-	TIDY_TAG_CONST(CODE);
-	TIDY_TAG_CONST(COL);
-	TIDY_TAG_CONST(COLGROUP);
-	TIDY_TAG_CONST(COMMENT);
-	TIDY_TAG_CONST(DD);
-	TIDY_TAG_CONST(DEL);
-	TIDY_TAG_CONST(DFN);
-	TIDY_TAG_CONST(DIR);
-	TIDY_TAG_CONST(DIV);
-	TIDY_TAG_CONST(DL);
-	TIDY_TAG_CONST(DT);
-	TIDY_TAG_CONST(EM);
-	TIDY_TAG_CONST(EMBED);
-	TIDY_TAG_CONST(FIELDSET);
-	TIDY_TAG_CONST(FONT);
-	TIDY_TAG_CONST(FORM);
-	TIDY_TAG_CONST(FRAME);
-	TIDY_TAG_CONST(FRAMESET);
-	TIDY_TAG_CONST(H1);
-	TIDY_TAG_CONST(H2);
-	TIDY_TAG_CONST(H3);
-	TIDY_TAG_CONST(H4);
-	TIDY_TAG_CONST(H5);
-	TIDY_TAG_CONST(H6);
-	TIDY_TAG_CONST(HEAD);
-	TIDY_TAG_CONST(HR);
-	TIDY_TAG_CONST(HTML);
-	TIDY_TAG_CONST(I);
-	TIDY_TAG_CONST(IFRAME);
-	TIDY_TAG_CONST(ILAYER);
-	TIDY_TAG_CONST(IMG);
-	TIDY_TAG_CONST(INPUT);
-	TIDY_TAG_CONST(INS);
-	TIDY_TAG_CONST(ISINDEX);
-	TIDY_TAG_CONST(KBD);
-	TIDY_TAG_CONST(KEYGEN);
-	TIDY_TAG_CONST(LABEL);
-	TIDY_TAG_CONST(LAYER);
-	TIDY_TAG_CONST(LEGEND);
-	TIDY_TAG_CONST(LI);
-	TIDY_TAG_CONST(LINK);
-	TIDY_TAG_CONST(LISTING);
-	TIDY_TAG_CONST(MAP);
-	TIDY_TAG_CONST(MARQUEE);
-	TIDY_TAG_CONST(MENU);
-	TIDY_TAG_CONST(META);
-	TIDY_TAG_CONST(MULTICOL);
-	TIDY_TAG_CONST(NOBR);
-	TIDY_TAG_CONST(NOEMBED);
-	TIDY_TAG_CONST(NOFRAMES);
-	TIDY_TAG_CONST(NOLAYER);
-	TIDY_TAG_CONST(NOSAVE);
-	TIDY_TAG_CONST(NOSCRIPT);
-	TIDY_TAG_CONST(OBJECT);
-	TIDY_TAG_CONST(OL);
-	TIDY_TAG_CONST(OPTGROUP);
-	TIDY_TAG_CONST(OPTION);
-	TIDY_TAG_CONST(P);
-	TIDY_TAG_CONST(PARAM);
-	TIDY_TAG_CONST(PLAINTEXT);
-	TIDY_TAG_CONST(PRE);
-	TIDY_TAG_CONST(Q);
-	TIDY_TAG_CONST(RB);
-	TIDY_TAG_CONST(RBC);
-	TIDY_TAG_CONST(RP);
-	TIDY_TAG_CONST(RT);
-	TIDY_TAG_CONST(RTC);
-	TIDY_TAG_CONST(RUBY);
-	TIDY_TAG_CONST(S);
-	TIDY_TAG_CONST(SAMP);
-	TIDY_TAG_CONST(SCRIPT);
-	TIDY_TAG_CONST(SELECT);
-	TIDY_TAG_CONST(SERVER);
-	TIDY_TAG_CONST(SERVLET);
-	TIDY_TAG_CONST(SMALL);
-	TIDY_TAG_CONST(SPACER);
-	TIDY_TAG_CONST(SPAN);
-	TIDY_TAG_CONST(STRIKE);
-	TIDY_TAG_CONST(STRONG);
-	TIDY_TAG_CONST(STYLE);
-	TIDY_TAG_CONST(SUB);
-	TIDY_TAG_CONST(SUP);
-	TIDY_TAG_CONST(TABLE);
-	TIDY_TAG_CONST(TBODY);
-	TIDY_TAG_CONST(TD);
-	TIDY_TAG_CONST(TEXTAREA);
-	TIDY_TAG_CONST(TFOOT);
-	TIDY_TAG_CONST(TH);
-	TIDY_TAG_CONST(THEAD);
-	TIDY_TAG_CONST(TITLE);
-	TIDY_TAG_CONST(TR);
-	TIDY_TAG_CONST(TT);
-	TIDY_TAG_CONST(U);
-	TIDY_TAG_CONST(UL);
-	TIDY_TAG_CONST(VAR);
-	TIDY_TAG_CONST(WBR);
-	TIDY_TAG_CONST(XMP);
-# ifdef HAVE_TIDYBUFFIO_H
-	TIDY_TAG_CONST(ARTICLE);
-	TIDY_TAG_CONST(ASIDE);
-	TIDY_TAG_CONST(AUDIO);
-	TIDY_TAG_CONST(BDI);
-	TIDY_TAG_CONST(CANVAS);
-	TIDY_TAG_CONST(COMMAND);
-	TIDY_TAG_CONST(DATALIST);
-	TIDY_TAG_CONST(DETAILS);
-	TIDY_TAG_CONST(DIALOG);
-	TIDY_TAG_CONST(FIGCAPTION);
-	TIDY_TAG_CONST(FIGURE);
-	TIDY_TAG_CONST(FOOTER);
-	TIDY_TAG_CONST(HEADER);
-	TIDY_TAG_CONST(HGROUP);
-	TIDY_TAG_CONST(MAIN);
-	TIDY_TAG_CONST(MARK);
-	TIDY_TAG_CONST(MENUITEM);
-	TIDY_TAG_CONST(METER);
-	TIDY_TAG_CONST(NAV);
-	TIDY_TAG_CONST(OUTPUT);
-	TIDY_TAG_CONST(PROGRESS);
-	TIDY_TAG_CONST(SECTION);
-	TIDY_TAG_CONST(SOURCE);
-	TIDY_TAG_CONST(SUMMARY);
-	TIDY_TAG_CONST(TEMPLATE);
-	TIDY_TAG_CONST(TIME);
-	TIDY_TAG_CONST(TRACK);
-	TIDY_TAG_CONST(VIDEO);
-# endif
-}
 
 #endif

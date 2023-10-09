@@ -1,7 +1,10 @@
 --TEST--
 sprintf %f #3
 --SKIPIF--
-<?php if(false == setlocale(LC_NUMERIC, "is_IS", "is_IS.UTF-8")) print "skip icelandic locale not supported"; ?>
+<?php
+if (setlocale(LC_ALL, 'invalid') === 'invalid') { die('skip setlocale() is broken /w musl'); }
+if(false == setlocale(LC_NUMERIC, "is_IS", "is_IS.UTF-8")) print "skip icelandic locale not supported";
+?>
 --FILE--
 <?php
 setlocale(LC_NUMERIC, "is_IS", "is_IS.UTF-8");

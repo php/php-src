@@ -1,0 +1,2 @@
+# OCI tests are network intensive and may cause timeouts in other tests
+all

@@ -1423,6 +1423,16 @@ int fcgi_accept_request(fcgi_request *req)
 					return -1;
 				}
 
+#if defined(F_SETFD) && defined(FD_CLOEXEC)
+				int fd_attrs = fcntl(req->fd, F_GETFD);
+				if (0 > fd_attrs) {
+					fcgi_log(FCGI_WARNING, "failed to get attributes of the connection socket");
+				}
+				if (0 > fcntl(req->fd, F_SETFD, fd_attrs | FD_CLOEXEC)) {
+					fcgi_log(FCGI_WARNING, "failed to change attribute of the connection socket");
+				}
+#endif
+
 #ifdef _WIN32
 				break;
 #else

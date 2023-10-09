@@ -2,12 +2,1499 @@
 
 /** @generate-class-entries */
 
+/* array.c */
+
+/**
+ * @var int
+ * @cvalue PHP_EXTR_OVERWRITE
+ */
+const EXTR_OVERWRITE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_SKIP
+ */
+const EXTR_SKIP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_PREFIX_SAME
+ */
+const EXTR_PREFIX_SAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_PREFIX_ALL
+ */
+const EXTR_PREFIX_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_PREFIX_INVALID
+ */
+const EXTR_PREFIX_INVALID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_PREFIX_IF_EXISTS
+ */
+const EXTR_PREFIX_IF_EXISTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_IF_EXISTS
+ */
+const EXTR_IF_EXISTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_EXTR_REFS
+ */
+const EXTR_REFS = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_SORT_ASC
+ */
+const SORT_ASC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_DESC
+ */
+const SORT_DESC = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_SORT_REGULAR
+ */
+const SORT_REGULAR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_NUMERIC
+ */
+const SORT_NUMERIC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_STRING
+ */
+const SORT_STRING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_LOCALE_STRING
+ */
+const SORT_LOCALE_STRING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_NATURAL
+ */
+const SORT_NATURAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_SORT_FLAG_CASE
+ */
+const SORT_FLAG_CASE = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_CASE_LOWER
+ */
+const CASE_LOWER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_CASE_UPPER
+ */
+const CASE_UPPER = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_COUNT_NORMAL
+ */
+const COUNT_NORMAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_COUNT_RECURSIVE
+ */
+const COUNT_RECURSIVE = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue ARRAY_FILTER_USE_BOTH
+ */
+const ARRAY_FILTER_USE_BOTH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ARRAY_FILTER_USE_KEY
+ */
+const ARRAY_FILTER_USE_KEY = UNKNOWN;
+
+/* assert.c */
+
+/**
+ * @var int
+ * @deprecated
+ * @cvalue PHP_ASSERT_ACTIVE
+ */
+const ASSERT_ACTIVE = UNKNOWN;
+/**
+ * @var int
+ * @deprecated
+ * @cvalue PHP_ASSERT_CALLBACK
+ */
+const ASSERT_CALLBACK = UNKNOWN;
+/**
+ * @var int
+ * @deprecated
+ * @cvalue PHP_ASSERT_BAIL
+ */
+const ASSERT_BAIL = UNKNOWN;
+/**
+ * @var int
+ * @deprecated
+ * @cvalue PHP_ASSERT_WARNING
+ */
+const ASSERT_WARNING = UNKNOWN;
+/**
+ * @var int
+ * @deprecated
+ * @cvalue PHP_ASSERT_EXCEPTION
+ */
+const ASSERT_EXCEPTION = UNKNOWN;
+
+/* basic_functions.h */
+
+/**
+ * @var int
+ * @cvalue PHP_CONNECTION_ABORTED
+ */
+const CONNECTION_ABORTED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_CONNECTION_NORMAL
+ */
+const CONNECTION_NORMAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_CONNECTION_TIMEOUT
+ */
+const CONNECTION_TIMEOUT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue ZEND_INI_USER
+ */
+const INI_USER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_PERDIR
+ */
+const INI_PERDIR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_SYSTEM
+ */
+const INI_SYSTEM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_ALL
+ */
+const INI_ALL = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue ZEND_INI_SCANNER_NORMAL
+ */
+const INI_SCANNER_NORMAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_SCANNER_RAW
+ */
+const INI_SCANNER_RAW = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ZEND_INI_SCANNER_TYPED
+ */
+const INI_SCANNER_TYPED = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_URL_SCHEME
+ */
+const PHP_URL_SCHEME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_HOST
+ */
+const PHP_URL_HOST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_PORT
+ */
+const PHP_URL_PORT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_USER
+ */
+const PHP_URL_USER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_PASS
+ */
+const PHP_URL_PASS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_PATH
+ */
+const PHP_URL_PATH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_QUERY
+ */
+const PHP_URL_QUERY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_URL_FRAGMENT
+ */
+const PHP_URL_FRAGMENT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_QUERY_RFC1738
+ */
+const PHP_QUERY_RFC1738 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_QUERY_RFC3986
+ */
+const PHP_QUERY_RFC3986 = UNKNOWN;
+
 /**
  * @var float
- * @cname M_E
+ * @cvalue M_E
  */
-const M_E = 2.7182818284590452354;
+const M_E = 2.718281828459045;
+/**
+ * @var float
+ * @cvalue M_LOG2E
+ */
+const M_LOG2E = 1.4426950408889634074;
+/**
+ * @var float
+ * @cvalue M_LOG10E
+ */
+const M_LOG10E = 0.43429448190325182765;
+/**
+ * @var float
+ * @cvalue M_LN2
+ */
+const M_LN2 = 0.69314718055994530942;
+/**
+ * @var float
+ * @cvalue M_LN10
+ */
+const M_LN10 = 2.30258509299404568402;
+/**
+ * @var float
+ * @cvalue M_PI
+ */
+const M_PI = 3.14159265358979323846;
+/**
+ * @var float
+ * @cvalue M_PI_2
+ */
+const M_PI_2 = 1.57079632679489661923;
+/**
+ * @var float
+ * @cvalue M_PI_4
+ */
+const M_PI_4 = 0.78539816339744830962;
+/**
+ * @var float
+ * @cvalue M_1_PI
+ */
+const M_1_PI = 0.31830988618379067154;
+/**
+ * @var float
+ * @cvalue M_2_PI
+ */
+const M_2_PI = 0.63661977236758134308;
+/**
+ * @var float
+ * @cvalue M_SQRTPI
+ */
+const M_SQRTPI = 1.77245385090551602729;
+/**
+ * @var float
+ * @cvalue M_2_SQRTPI
+ */
+const M_2_SQRTPI = 1.12837916709551257390;
+/**
+ * @var float
+ * @cvalue M_LNPI
+ */
+const M_LNPI = 1.14472988584940017414;
+/**
+ * @var float
+ * @cvalue M_EULER
+ */
+const M_EULER = 0.57721566490153286061;
+/**
+ * @var float
+ * @cvalue M_SQRT2
+ */
+const M_SQRT2 = 1.41421356237309504880;
+/**
+ * @var float
+ * @cvalue M_SQRT1_2
+ */
+const M_SQRT1_2 = 0.70710678118654752440;
+/**
+ * @var float
+ * @cvalue M_SQRT3
+ */
+const M_SQRT3 = 1.73205080756887729352;
+/**
+ * @var float
+ * @cvalue ZEND_INFINITY
+ */
+const INF = UNKNOWN;
+/**
+ * @var float
+ * @cvalue ZEND_NAN
+ */
+const NAN = UNKNOWN;
 
+/**
+ * @var int
+ * @cvalue PHP_ROUND_HALF_UP
+ */
+const PHP_ROUND_HALF_UP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_HALF_DOWN
+ */
+const PHP_ROUND_HALF_DOWN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_HALF_EVEN
+ */
+const PHP_ROUND_HALF_EVEN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_HALF_ODD
+ */
+const PHP_ROUND_HALF_ODD = UNKNOWN;
+
+/* crypt.c */
+
+/**
+ * @var int
+ * @cvalue PHP_MAX_SALT_LEN
+ */
+const CRYPT_SALT_LENGTH = UNKNOWN;
+/** @var int */
+const CRYPT_STD_DES = 1;
+/** @var int */
+const CRYPT_EXT_DES = 1;
+/** @var int */
+const CRYPT_MD5 = 1;
+/** @var int */
+const CRYPT_BLOWFISH = 1;
+/** @var int */
+const CRYPT_SHA256 = 1;
+/** @var int */
+const CRYPT_SHA512 = 1;
+
+/* dns.c */
+
+#if (defined(PHP_WIN32) || (defined(HAVE_DNS_SEARCH_FUNC) && defined(HAVE_FULL_DNS_FUNCS)))
+/**
+ * @var int
+ * @cvalue PHP_DNS_A
+ */
+const DNS_A = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_NS
+ */
+const DNS_NS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_CNAME
+ */
+const DNS_CNAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_SOA
+ */
+const DNS_SOA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_PTR
+ */
+const DNS_PTR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_HINFO
+ */
+const DNS_HINFO = UNKNOWN;
+#if (!defined(PHP_WIN32))
+/**
+ * @var int
+ * @cvalue PHP_DNS_CAA
+ */
+const DNS_CAA = UNKNOWN;
+#endif
+/**
+ * @var int
+ * @cvalue PHP_DNS_MX
+ */
+const DNS_MX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_TXT
+ */
+const DNS_TXT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_SRV
+ */
+const DNS_SRV = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_NAPTR
+ */
+const DNS_NAPTR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_AAAA
+ */
+const DNS_AAAA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_A6
+ */
+const DNS_A6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_ANY
+ */
+const DNS_ANY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_DNS_ALL
+ */
+const DNS_ALL = UNKNOWN;
+#endif
+
+/* html.c */
+
+/**
+* @var int
+* @cvalue PHP_HTML_SPECIALCHARS
+*/
+const HTML_SPECIALCHARS = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_HTML_ENTITIES
+*/
+const HTML_ENTITIES = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_COMPAT
+*/
+const ENT_COMPAT = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_QUOTES
+*/
+const ENT_QUOTES = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_NOQUOTES
+*/
+const ENT_NOQUOTES = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_IGNORE
+*/
+const ENT_IGNORE = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_SUBSTITUTE
+*/
+const ENT_SUBSTITUTE = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_DISALLOWED
+*/
+const ENT_DISALLOWED = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_HTML401
+*/
+const ENT_HTML401 = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_XML1
+*/
+const ENT_XML1 = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_XHTML
+*/
+const ENT_XHTML = UNKNOWN;
+/**
+* @var int
+* @cvalue ENT_HTML5
+*/
+const ENT_HTML5 = UNKNOWN;
+
+/* image.c */
+
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_GIF
+ */
+const IMAGETYPE_GIF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPEG
+ */
+const IMAGETYPE_JPEG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_PNG
+ */
+const IMAGETYPE_PNG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_SWF
+ */
+const IMAGETYPE_SWF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_PSD
+ */
+const IMAGETYPE_PSD = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_BMP
+ */
+const IMAGETYPE_BMP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_TIFF_II
+ */
+const IMAGETYPE_TIFF_II = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_TIFF_MM
+ */
+const IMAGETYPE_TIFF_MM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPC
+ */
+const IMAGETYPE_JPC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JP2
+ */
+const IMAGETYPE_JP2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPX
+ */
+const IMAGETYPE_JPX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JB2
+ */
+const IMAGETYPE_JB2 = UNKNOWN;
+#if (defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB))
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_SWC
+ */
+const IMAGETYPE_SWC = UNKNOWN;
+#endif
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_IFF
+ */
+const IMAGETYPE_IFF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_WBMP
+ */
+const IMAGETYPE_WBMP = UNKNOWN;
+/* keep alias */
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_JPC
+ */
+const IMAGETYPE_JPEG2000 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_XBM
+ */
+const IMAGETYPE_XBM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_ICO
+ */
+const IMAGETYPE_ICO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_WEBP
+ */
+const IMAGETYPE_WEBP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_AVIF
+ */
+const IMAGETYPE_AVIF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_UNKNOWN
+ */
+const IMAGETYPE_UNKNOWN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IMAGE_FILETYPE_COUNT
+ */
+const IMAGETYPE_COUNT = UNKNOWN;
+
+/* info.c */
+
+/**
+ * @var int
+ * @cvalue PHP_INFO_GENERAL
+ */
+const INFO_GENERAL = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_INFO_CREDITS
+*/
+const INFO_CREDITS = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_INFO_CONFIGURATION
+*/
+const INFO_CONFIGURATION = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_INFO_MODULES
+*/
+const INFO_MODULES = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_INFO_ENVIRONMENT
+*/
+const INFO_ENVIRONMENT = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_INFO_VARIABLES
+*/
+const INFO_VARIABLES = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_INFO_LICENSE
+*/
+const INFO_LICENSE = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_INFO_ALL
+*/
+const INFO_ALL = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_GROUP
+*/
+const CREDITS_GROUP = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_GENERAL
+*/
+const CREDITS_GENERAL = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_SAPI
+*/
+const CREDITS_SAPI = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_MODULES
+*/
+const CREDITS_MODULES = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_DOCS
+*/
+const CREDITS_DOCS = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_FULLPAGE
+*/
+const CREDITS_FULLPAGE = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_QA
+*/
+const CREDITS_QA = UNKNOWN;
+/**
+* @var int
+* @cvalue PHP_CREDITS_ALL
+*/
+const CREDITS_ALL = UNKNOWN;
+
+/* syslog.c */
+
+/* error levels */
+
+/**
+ * system unusable
+ * @var int
+ * @cvalue LOG_EMERG
+ */
+const LOG_EMERG = UNKNOWN;
+/**
+ * immediate action required
+ * @var int
+ * @cvalue LOG_ALERT
+ */
+const LOG_ALERT = UNKNOWN;
+/**
+ * critical conditions
+ * @var int
+ * @cvalue LOG_CRIT
+ */
+const LOG_CRIT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_ERR
+ */
+const LOG_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_WARNING
+ */
+const LOG_WARNING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_NOTICE
+ */
+const LOG_NOTICE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_INFO
+ */
+const LOG_INFO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_DEBUG
+ */
+const LOG_DEBUG = UNKNOWN;
+/* facility: type of program logging the message */
+/**
+ * @var int
+ * @cvalue LOG_KERN
+ */
+const LOG_KERN = UNKNOWN;
+/**
+ * generic user level
+ * @var int
+ * @cvalue LOG_USER
+ */
+const LOG_USER = UNKNOWN;
+/**
+ * log to email
+ * @var int
+ * @cvalue LOG_MAIL
+ */
+const LOG_MAIL = UNKNOWN;
+/**
+ * other system daemons
+ * @var int
+ * @cvalue LOG_DAEMON
+ */
+const LOG_DAEMON = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_AUTH
+ */
+const LOG_AUTH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_SYSLOG
+ */
+const LOG_SYSLOG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LPR
+ */
+const LOG_LPR = UNKNOWN;
+#ifdef LOG_NEWS
+/* No LOG_NEWS on HP-UX */
+/**
+ * usenet new
+ * @var int
+ * @cvalue LOG_NEWS
+ */
+const LOG_NEWS = UNKNOWN;
+#endif
+#ifdef LOG_UUCP
+/* No LOG_UUCP on HP-UX */
+/**
+ * @var int
+ * @cvalue LOG_UUCP
+ */
+const LOG_UUCP = UNKNOWN;
+#endif
+#ifdef LOG_CRON
+/* apparently some systems don't have this one */
+/**
+ * @var int
+ * @cvalue LOG_CRON
+ */
+const LOG_CRON = UNKNOWN;
+#endif
+#ifdef LOG_AUTHPRIV
+/* AIX doesn't have LOG_AUTHPRIV */
+/**
+ * @var int
+ * @cvalue LOG_AUTHPRIV
+ */
+const LOG_AUTHPRIV = UNKNOWN;
+#endif
+#ifndef PHP_WIN32
+/**
+ * @var int
+ * @cvalue LOG_LOCAL0
+ */
+const LOG_LOCAL0 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL1
+ */
+const LOG_LOCAL1 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL2
+ */
+const LOG_LOCAL2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL3
+ */
+const LOG_LOCAL3 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL4
+ */
+const LOG_LOCAL4 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL5
+ */
+const LOG_LOCAL5 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL6
+ */
+const LOG_LOCAL6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_LOCAL7
+ */
+const LOG_LOCAL7 = UNKNOWN;
+#endif
+/* options */
+/**
+ * @var int
+ * @cvalue LOG_PID
+ */
+const LOG_PID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_CONS
+ */
+const LOG_CONS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_ODELAY
+ */
+const LOG_ODELAY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LOG_NDELAY
+ */
+const LOG_NDELAY = UNKNOWN;
+#ifdef LOG_NOWAIT
+/**
+ * @var int
+ * @cvalue LOG_NOWAIT
+ */
+const LOG_NOWAIT = UNKNOWN;
+#endif
+#ifdef LOG_PERROR
+/* AIX doesn't have LOG_PERROR */
+/**
+ * log to stderr
+ * @var int
+ * @cvalue LOG_PERROR
+ */
+const LOG_PERROR = UNKNOWN;
+#endif
+
+/* string.c */
+
+/**
+ * @var int
+ * @cvalue PHP_STR_PAD_LEFT
+ */
+const STR_PAD_LEFT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_STR_PAD_RIGHT
+ */
+const STR_PAD_RIGHT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_STR_PAD_BOTH
+ */
+const STR_PAD_BOTH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_PATHINFO_DIRNAME
+ */
+const PATHINFO_DIRNAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_PATHINFO_BASENAME
+ */
+const PATHINFO_BASENAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_PATHINFO_EXTENSION
+ */
+const PATHINFO_EXTENSION = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_PATHINFO_FILENAME
+ */
+const PATHINFO_FILENAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_PATHINFO_ALL
+ */
+const PATHINFO_ALL = UNKNOWN;
+
+/**
+ * If last members of struct lconv equal CHAR_MAX, no grouping is done
+ * @var int
+ * @cvalue CHAR_MAX
+ */
+const CHAR_MAX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LC_CTYPE
+ */
+const LC_CTYPE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LC_NUMERIC
+ */
+const LC_NUMERIC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LC_TIME
+ */
+const LC_TIME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LC_COLLATE
+ */
+const LC_COLLATE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LC_MONETARY
+ */
+const LC_MONETARY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LC_ALL
+ */
+const LC_ALL = UNKNOWN;
+#ifdef LC_MESSAGES
+/**
+ * @var int
+ * @cvalue LC_MESSAGES
+ */
+const LC_MESSAGES = UNKNOWN;
+#endif
+
+#ifdef HAVE_NL_LANGINFO
+#ifdef ABDAY_1
+/**
+ * @var int
+ * @cvalue ABDAY_1
+ */
+const ABDAY_1 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABDAY_2
+ */
+const ABDAY_2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABDAY_3
+ */
+const ABDAY_3 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABDAY_4
+ */
+const ABDAY_4 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABDAY_5
+ */
+const ABDAY_5 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABDAY_6
+ */
+const ABDAY_6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABDAY_7
+ */
+const ABDAY_7 = UNKNOWN;
+#endif
+#ifdef DAY_1
+/**
+ * @var int
+ * @cvalue DAY_1
+ */
+const DAY_1 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue DAY_2
+ */
+const DAY_2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue DAY_3
+ */
+const DAY_3 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue DAY_4
+ */
+const DAY_4 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue DAY_5
+ */
+const DAY_5 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue DAY_6
+ */
+const DAY_6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue DAY_7
+ */
+const DAY_7 = UNKNOWN;
+#endif
+#ifdef ABMON_1
+/**
+ * @var int
+ * @cvalue ABMON_1
+ */
+const ABMON_1 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_2
+ */
+const ABMON_2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_3
+ */
+const ABMON_3 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_4
+ */
+const ABMON_4 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_5
+ */
+const ABMON_5 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_6
+ */
+const ABMON_6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_7
+ */
+const ABMON_7 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_8
+ */
+const ABMON_8 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_9
+ */
+const ABMON_9 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_10
+ */
+const ABMON_10 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_11
+ */
+const ABMON_11 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue ABMON_12
+ */
+const ABMON_12 = UNKNOWN;
+#endif
+#ifdef MON_1
+/**
+ * @var int
+ * @cvalue MON_1
+ */
+const MON_1 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_2
+ */
+const MON_2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_3
+ */
+const MON_3 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_4
+ */
+const MON_4 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_5
+ */
+const MON_5 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_6
+ */
+const MON_6 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_7
+ */
+const MON_7 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_8
+ */
+const MON_8 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_9
+ */
+const MON_9 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_10
+ */
+const MON_10 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_11
+ */
+const MON_11 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue MON_12
+ */
+const MON_12 = UNKNOWN;
+#endif
+#ifdef AM_STR
+/**
+ * @var int
+ * @cvalue AM_STR
+ */
+const AM_STR = UNKNOWN;
+#endif
+#ifdef PM_STR
+/**
+ * @var int
+ * @cvalue PM_STR
+ */
+const PM_STR = UNKNOWN;
+#endif
+#ifdef D_T_FMT
+/**
+ * @var int
+ * @cvalue D_T_FMT
+ */
+const D_T_FMT = UNKNOWN;
+#endif
+#ifdef D_FMT
+/**
+ * @var int
+ * @cvalue D_FMT
+ */
+const D_FMT = UNKNOWN;
+#endif
+#ifdef T_FMT
+/**
+ * @var int
+ * @cvalue T_FMT
+ */
+const T_FMT = UNKNOWN;
+#endif
+#ifdef T_FMT_AMPM
+/**
+ * @var int
+ * @cvalue T_FMT_AMPM
+ */
+const T_FMT_AMPM = UNKNOWN;
+#endif
+#ifdef ERA
+/**
+ * @var int
+ * @cvalue ERA
+ */
+const ERA = UNKNOWN;
+#endif
+#ifdef ERA_YEAR
+/**
+ * @var int
+ * @cvalue ERA_YEAR
+ */
+const ERA_YEAR = UNKNOWN;
+#endif
+#ifdef ERA_D_T_FMT
+/**
+ * @var int
+ * @cvalue ERA_D_T_FMT
+ */
+const ERA_D_T_FMT = UNKNOWN;
+#endif
+#ifdef ERA_D_FMT
+/**
+ * @var int
+ * @cvalue ERA_D_FMT
+ */
+const ERA_D_FMT = UNKNOWN;
+#endif
+#ifdef ERA_T_FMT
+/**
+ * @var int
+ * @cvalue ERA_T_FMT
+ */
+const ERA_T_FMT = UNKNOWN;
+#endif
+#ifdef ALT_DIGITS
+/**
+ * @var int
+ * @cvalue ALT_DIGITS
+ */
+const ALT_DIGITS = UNKNOWN;
+#endif
+#ifdef INT_CURR_SYMBOL
+/**
+ * @var int
+ * @cvalue INT_CURR_SYMBOL
+ */
+const INT_CURR_SYMBOL = UNKNOWN;
+#endif
+#ifdef CURRENCY_SYMBOL
+/**
+ * @var int
+ * @cvalue CURRENCY_SYMBOL
+ */
+const CURRENCY_SYMBOL = UNKNOWN;
+#endif
+#ifdef CRNCYSTR
+/**
+ * @var int
+ * @cvalue CRNCYSTR
+ */
+const CRNCYSTR = UNKNOWN;
+#endif
+#ifdef MON_DECIMAL_POINT
+/**
+ * @var int
+ * @cvalue MON_DECIMAL_POINT
+ */
+const MON_DECIMAL_POINT = UNKNOWN;
+#endif
+#ifdef MON_THOUSANDS_SEP
+/**
+ * @var int
+ * @cvalue MON_THOUSANDS_SEP
+ */
+const MON_THOUSANDS_SEP = UNKNOWN;
+#endif
+#ifdef MON_GROUPING
+/**
+ * @var int
+ * @cvalue MON_GROUPING
+ */
+const MON_GROUPING = UNKNOWN;
+#endif
+#ifdef POSITIVE_SIGN
+/**
+ * @var int
+ * @cvalue POSITIVE_SIGN
+ */
+const POSITIVE_SIGN = UNKNOWN;
+#endif
+#ifdef NEGATIVE_SIGN
+/**
+ * @var int
+ * @cvalue NEGATIVE_SIGN
+ */
+const NEGATIVE_SIGN = UNKNOWN;
+#endif
+#ifdef INT_FRAC_DIGITS
+/**
+ * @var int
+ * @cvalue INT_FRAC_DIGITS
+ */
+const INT_FRAC_DIGITS = UNKNOWN;
+#endif
+#ifdef FRAC_DIGITS
+/**
+ * @var int
+ * @cvalue FRAC_DIGITS
+ */
+const FRAC_DIGITS = UNKNOWN;
+#endif
+#ifdef P_CS_PRECEDES
+/**
+ * @var int
+ * @cvalue P_CS_PRECEDES
+ */
+const P_CS_PRECEDES = UNKNOWN;
+#endif
+#ifdef P_SEP_BY_SPACE
+/**
+ * @var int
+ * @cvalue P_SEP_BY_SPACE
+ */
+const P_SEP_BY_SPACE = UNKNOWN;
+#endif
+#ifdef N_CS_PRECEDES
+/**
+ * @var int
+ * @cvalue N_CS_PRECEDES
+ */
+const N_CS_PRECEDES = UNKNOWN;
+#endif
+#ifdef N_SEP_BY_SPACE
+/**
+ * @var int
+ * @cvalue N_SEP_BY_SPACE
+ */
+const N_SEP_BY_SPACE = UNKNOWN;
+#endif
+#ifdef P_SIGN_POSN
+/**
+ * @var int
+ * @cvalue P_SIGN_POSN
+ */
+const P_SIGN_POSN = UNKNOWN;
+#endif
+#ifdef N_SIGN_POSN
+/**
+ * @var int
+ * @cvalue N_SIGN_POSN
+ */
+const N_SIGN_POSN = UNKNOWN;
+#endif
+#ifdef DECIMAL_POINT
+/**
+ * @var int
+ * @cvalue DECIMAL_POINT
+ */
+const DECIMAL_POINT = UNKNOWN;
+#endif
+#ifdef RADIXCHAR
+/**
+ * @var int
+ * @cvalue RADIXCHAR
+ */
+const RADIXCHAR = UNKNOWN;
+#endif
+#ifdef THOUSANDS_SEP
+/**
+ * @var int
+ * @cvalue THOUSANDS_SEP
+ */
+const THOUSANDS_SEP = UNKNOWN;
+#endif
+#ifdef THOUSEP
+/**
+ * @var int
+ * @cvalue THOUSEP
+ */
+const THOUSEP = UNKNOWN;
+#endif
+#ifdef GROUPING
+/**
+ * @var int
+ * @cvalue GROUPING
+ */
+const GROUPING = UNKNOWN;
+#endif
+#ifdef YESEXPR
+/**
+ * @var int
+ * @cvalue YESEXPR
+ */
+const YESEXPR = UNKNOWN;
+#endif
+#ifdef NOEXPR
+/**
+ * @var int
+ * @cvalue NOEXPR
+ */
+const NOEXPR = UNKNOWN;
+#endif
+#ifdef YESSTR
+/**
+ * @var int
+ * @cvalue YESSTR
+ */
+const YESSTR = UNKNOWN;
+#endif
+#ifdef NOSTR
+/**
+ * @var int
+ * @cvalue NOSTR
+ */
+const NOSTR = UNKNOWN;
+#endif
+#ifdef CODESET
+/**
+ * @var int
+ * @cvalue CODESET
+ */
+const CODESET = UNKNOWN;
+#endif
+#endif
+
+/** @undocumentable */
+#[AllowDynamicProperties]
 final class __PHP_Incomplete_Class
 {
 }
@@ -92,9 +1579,9 @@ function count(Countable|array $value, int $mode = COUNT_NORMAL): int {}
 /** @alias count */
 function sizeof(Countable|array $value, int $mode = COUNT_NORMAL): int {}
 
-function natsort(array &$array): bool {}
+function natsort(array &$array): true {}
 
-function natcasesort(array &$array): bool {}
+function natcasesort(array &$array): true {}
 
 function asort(array &$array, int $flags = SORT_REGULAR): true {}
 
@@ -102,7 +1589,7 @@ function arsort(array &$array, int $flags = SORT_REGULAR): true {}
 
 function sort(array &$array, int $flags = SORT_REGULAR): true {}
 
-function rsort(array &$array, int $flags = SORT_REGULAR): bool {}
+function rsort(array &$array, int $flags = SORT_REGULAR): true {}
 
 function usort(array &$array, callable $callback): true {}
 
@@ -162,11 +1649,7 @@ function array_fill(int $start_index, int $count, mixed $value): array {}
 /** @refcount 1 */
 function array_fill_keys(array $keys, mixed $value): array {}
 
-/**
- * @param string|int|float $start
- * @param string|int|float $end
- */
-function range($start, $end, int|float $step = 1): array {}
+function range(string|int|float $start, string|int|float $end, int|float $step = 1): array {}
 
 function shuffle(array &$array): true {}
 
@@ -178,6 +1661,9 @@ function array_unshift(array &$array, mixed ...$values): int {}
 
 function array_splice(array &$array, int $offset, ?int $length = null, mixed $replacement = []): array {}
 
+/**
+ * @compile-time-eval
+ */
 function array_slice(array $array, int $offset, ?int $length = null, bool $preserve_keys = false): array {}
 
 /**
@@ -226,28 +1712,35 @@ function array_values(array $array): array {}
 
 /**
  * @return array<int|string, int>
+ * @compile-time-eval
  * @refcount 1
  */
 function array_count_values(array $array): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function array_column(array $array, int|string|null $column_key, int|string|null $index_key = null): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function array_reverse(array $array, bool $preserve_keys = false): array {}
 
 function array_pad(array $array, int $length, mixed $value): array {}
 
 /**
  * @return array<int|string, int|string>
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_flip(array $array): array {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_change_key_case(array $array, int $case = CASE_LOWER): array {}
 
@@ -256,7 +1749,10 @@ function array_change_key_case(array $array, int $case = CASE_LOWER): array {}
  */
 function array_unique(array $array, int $flags = SORT_STRING): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function array_intersect_key(array $array, array ...$arrays): array {}
 
 /**
@@ -265,7 +1761,10 @@ function array_intersect_key(array $array, array ...$arrays): array {}
  */
 function array_intersect_ukey(array $array, ...$rest): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function array_intersect(array $array, array ...$arrays): array {}
 
 /**
@@ -274,7 +1773,10 @@ function array_intersect(array $array, array ...$arrays): array {}
  */
 function array_uintersect(array $array, ...$rest): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function array_intersect_assoc(array $array, array ...$arrays): array {}
 
 /**
@@ -296,15 +1798,14 @@ function array_intersect_uassoc(array $array, ...$rest): array {}
 function array_uintersect_uassoc(array $array, ...$rest): array {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_diff_key(array $array, array ...$arrays): array {}
 
 /**
  * @param array|callable $rest
  * @refcount 1
- * @compile-time-eval
  */
 function array_diff_ukey(array $array, ...$rest): array {}
 
@@ -320,8 +1821,8 @@ function array_diff(array $array, array ...$arrays): array {}
 function array_udiff(array $array, ...$rest): array {}
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function array_diff_assoc(array $array, array ...$arrays): array {}
 
@@ -354,8 +1855,14 @@ function array_multisort(&$array, &...$rest): bool {}
 /** @return int|string|array<int, int|string> */
 function array_rand(array $array, int $num = 1): int|string|array {}
 
+/**
+ * @compile-time-eval
+ */
 function array_sum(array $array): int|float {}
 
+/**
+ * @compile-time-eval
+ */
 function array_product(array $array): int|float {}
 
 function array_reduce(array $array, callable $callback, mixed $initial = null): mixed {}
@@ -364,7 +1871,10 @@ function array_filter(array $array, ?callable $callback = null, int $mode = 0): 
 
 function array_map(?callable $callback, array $array, array ...$arrays): array {}
 
-/** @param string|int $key */
+/**
+ * @param string|int $key
+ * @compile-time-eval
+ */
 function array_key_exists($key, array $array): bool {}
 
 /**
@@ -373,17 +1883,24 @@ function array_key_exists($key, array $array): bool {}
  */
 function key_exists($key, array $array): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function array_chunk(array $array, int $length, bool $preserve_keys = false): array {}
 
+/**
+ * @compile-time-eval
+ */
 function array_combine(array $keys, array $values): array {}
 
+/** @compile-time-eval */
 function array_is_list(array $array): bool {}
 
 /* base64.c */
 
 /**
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function base64_encode(string $string): string {}
 
@@ -539,6 +2056,7 @@ function parse_ini_file(string $filename, bool $process_sections = false, int $s
 
 /**
  * @return array<int|string, bool|int|float|string|array|null>|false
+ * @compile-time-eval
  * @refcount 1
  */
 function parse_ini_string(string $ini_string, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array|false {}
@@ -575,7 +2093,7 @@ function crc32(string $string): int {}
 /* crypt.c */
 
 /** @refcount 1 */
-function crypt(string $string, string $salt): string {}
+function crypt(#[\SensitiveParameter] string $string, string $salt): string {}
 
 /* datetime.c */
 
@@ -607,7 +2125,7 @@ function gethostbyname(string $hostname): string {}
  */
 function gethostbynamel(string $hostname): array|false {}
 
-#if defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC)
+#if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 function dns_check_record(string $hostname, string $type = "MX"): bool {}
 
 /** @alias dns_check_record */
@@ -637,7 +2155,7 @@ function getmxrr(string $hostname, &$hosts, &$weights = null): bool {}
 
 /* net.c */
 
-#if defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__)
+#if (defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__))
 function net_get_interfaces(): array|false {}
 #endif
 
@@ -650,10 +2168,6 @@ function ftok(string $filename, string $project_id): int {}
 /* hrtime.c */
 
 function hrtime(bool $as_number = false): array|int|float|false {}
-
-/* lcg.c */
-
-function lcg_value(): float {}
 
 /* md5.c */
 
@@ -686,7 +2200,7 @@ function sha1_file(string $filename, bool $binary = false): string|false {}
 /* syslog.c */
 
 #ifdef HAVE_SYSLOG_H
-function openlog(string $prefix, int $flags, int $facility): bool {}
+function openlog(string $prefix, int $flags, int $facility): true {}
 
 function closelog(): true {}
 
@@ -755,6 +2269,7 @@ function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags =
 
 function assert(mixed $assertion, Throwable|string|null $description = null): bool {}
 
+/** @deprecated */
 function assert_options(int $option, mixed $value = UNKNOWN): mixed {}
 
 /* string.c */
@@ -771,8 +2286,14 @@ function bin2hex(string $string): string {}
  */
 function hex2bin(string $string): string|false {}
 
+/**
+ * @compile-time-eval
+ */
 function strspn(string $string, string $characters, int $offset = 0, ?int $length = null): int {}
 
+/**
+ * @compile-time-eval
+ */
 function strcspn(string $string, string $characters, int $offset = 0, ?int $length = null): int {}
 
 #ifdef HAVE_NL_LANGINFO
@@ -794,13 +2315,16 @@ function chop(string $string, string $characters = " \n\r\t\v\0"): string {}
 /** @compile-time-eval */
 function ltrim(string $string, string $characters = " \n\r\t\v\0"): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function wordwrap(string $string, int $width = 75, string $break = "\n", bool $cut_long_words = false): string {}
 
 /**
  * @return array<int, string>
- * @refcount 1
  * @compile-time-eval
+ * @refcount 1
  */
 function explode(string $separator, string $string, int $limit = PHP_INT_MAX): array {}
 
@@ -812,7 +2336,10 @@ function implode(string|array $separator, ?array $array = null): string {}
 /** @alias implode */
 function join(string|array $separator, ?array $array = null): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function strtok(string $string, ?string $token = null): string|false {}
 
 /** @compile-time-eval */
@@ -820,6 +2347,10 @@ function strtoupper(string $string): string {}
 
 /** @compile-time-eval */
 function strtolower(string $string): string {}
+
+function str_increment(string $string): string {}
+
+function str_decrement(string $string): string {}
 
 /** @refcount 1 */
 function basename(string $path, string $suffix = ""): string {}
@@ -833,10 +2364,16 @@ function dirname(string $path, int $levels = 1): string {}
  */
 function pathinfo(string $path, int $flags = PATHINFO_ALL): array|string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function stristr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function strstr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
 /** @alias strstr */
@@ -854,8 +2391,11 @@ function strrpos(string $haystack, string $needle, int $offset = 0): int|false {
 /** @compile-time-eval */
 function strripos(string $haystack, string $needle, int $offset = 0): int|false {}
 
-/** @refcount 1 */
-function strrchr(string $haystack, string $needle): string|false {}
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
+function strrchr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
 /** @compile-time-eval */
 function str_contains(string $haystack, string $needle): bool {}
@@ -866,16 +2406,25 @@ function str_starts_with(string $haystack, string $needle): bool {}
 /** @compile-time-eval */
 function str_ends_with(string $haystack, string $needle): bool {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function chunk_split(string $string, int $length = 76, string $separator = "\r\n"): string {}
 
 /** @compile-time-eval */
 function substr(string $string, int $offset, ?int $length = null): string {}
 
-/** @return string|array<int|string, string> */
+/**
+ * @return string|array<int|string, string>
+ * @compile-time-eval
+ */
 function substr_replace(array|string $string, array|string $replace, array|int $offset, array|int|null $length = null): string|array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function quotemeta(string $string): string {}
 
 /** @compile-time-eval */
@@ -899,6 +2448,9 @@ function lcfirst(string $string): string {}
  */
 function ucwords(string $string, string $separators = " \t\r\n\f\v"): string {}
 
+/**
+ * @compile-time-eval
+ */
 function strtr(string $string, string|array $from, ?string $to = null): string {}
 
 /**
@@ -910,14 +2462,26 @@ function strrev(string $string): string {}
 /** @param float $percent */
 function similar_text(string $string1, string $string2, &$percent = null): int {}
 
+/**
+ * @compile-time-eval
+ */
 function addcslashes(string $string, string $characters): string {}
 
+/**
+ * @compile-time-eval
+ */
 function addslashes(string $string): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function stripcslashes(string $string): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function stripslashes(string $string): string {}
 
 /**
@@ -937,9 +2501,15 @@ function str_ireplace(array|string $search, array|string $replace, string|array 
 /** @refcount 1 */
 function hebrev(string $string, int $max_chars_per_line = 0): string {}
 
+/**
+ * @compile-time-eval
+ */
 function nl2br(string $string, bool $use_xhtml = true): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function strip_tags(string $string, array|string|null $allowed_tags = null): string {}
 
 /**
@@ -962,6 +2532,7 @@ function str_repeat(string $string, int $times): string {}
 
 /**
  * @return array<int, int>|string
+ * @compile-time-eval
  * @refcount 1
  */
 function count_chars(string $string, int $mode = 0): array|string {}
@@ -976,6 +2547,9 @@ function localeconv(): array {}
 
 function strnatcasecmp(string $string1, string $string2): int {}
 
+/**
+ * @compile-time-eval
+ */
 function substr_count(string $haystack, string $needle, int $offset = 0, ?int $length = null): int {}
 
 function str_pad(string $string, int $length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT): string {}
@@ -986,7 +2560,10 @@ function str_pad(string $string, int $length, string $pad_string = " ", int $pad
  */
 function sscanf(string $string, string $format, mixed &...$vars): array|int|null {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function str_rot13(string $string): string {}
 
 /** @refcount 1 */
@@ -1004,18 +2581,26 @@ function str_word_count(string $string, int $format = 0, ?string $characters = n
  */
 function str_split(string $string, int $length = 1): array {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function strpbrk(string $string, string $characters): string|false {}
 
+/**
+ * @compile-time-eval
+ */
 function substr_compare(string $haystack, string $needle, int $offset, ?int $length = null, bool $case_insensitive = false): int {}
 
 /**
+ * @compile-time-eval
  * @refcount 1
  * @deprecated
  */
 function utf8_encode(string $string): string {}
 
 /**
+ * @compile-time-eval
  * @refcount 1
  * @deprecated
  */
@@ -1040,7 +2625,7 @@ function closedir($dir_handle = null): void {}
 
 function chdir(string $directory): bool {}
 
-#if defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC)
+#if (defined(HAVE_CHROOT) && !defined(ZTS) && defined(ENABLE_CHROOT_FUNC))
 function chroot(string $directory): bool {}
 #endif
 
@@ -1390,10 +2975,16 @@ function http_build_query(array|object $data, string $numeric_prefix = "", ?stri
 
 /* image.c */
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function image_type_to_mime_type(int $image_type): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function image_type_to_extension(int $image_type, bool $include_dot = true): string|false {}
 
 /**
@@ -1457,7 +3048,7 @@ function levenshtein(string $string1, string $string2, int $insertion_cost = 1, 
 
 /* link.c */
 
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if (defined(HAVE_SYMLINK) || defined(PHP_WIN32))
 /** @refcount 1 */
 function readlink(string $path): string|false {}
 
@@ -1474,42 +3065,61 @@ function mail(string $to, string $subject, string $message, array|string $additi
 
 /* math.c */
 
+/** @compile-time-eval */
 function abs(int|float $num): int|float {}
 
+/** @compile-time-eval */
 function ceil(int|float $num): float {}
 
+/** @compile-time-eval */
 function floor(int|float $num): float {}
 
+/** @compile-time-eval */
 function round(int|float $num, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): float {}
 
+/** @compile-time-eval */
 function sin(float $num): float {}
 
+/** @compile-time-eval */
 function cos(float $num): float {}
 
+/** @compile-time-eval */
 function tan(float $num): float {}
 
+/** @compile-time-eval */
 function asin(float $num): float {}
 
+/** @compile-time-eval */
 function acos(float $num): float {}
 
+/** @compile-time-eval */
 function atan(float $num): float {}
 
+/** @compile-time-eval */
 function atanh(float $num): float {}
 
+/** @compile-time-eval */
 function atan2(float $y, float $x): float {}
 
+/** @compile-time-eval */
 function sinh(float $num): float {}
 
+/** @compile-time-eval */
 function cosh(float $num): float {}
 
+/** @compile-time-eval */
 function tanh(float $num): float {}
 
+/** @compile-time-eval */
 function asinh(float $num): float {}
 
+/** @compile-time-eval */
 function acosh(float $num): float {}
 
+/** @compile-time-eval */
 function expm1(float $num): float {}
 
+/** @compile-time-eval */
 function log1p(float $num): float {}
 
 /** @compile-time-eval */
@@ -1530,18 +3140,25 @@ function is_infinite(float $num): bool {}
 /** @compile-time-eval */
 function pow(mixed $num, mixed $exponent): int|float|object {}
 
+/** @compile-time-eval */
 function exp(float $num): float {}
 
+/** @compile-time-eval */
 function log(float $num, float $base = M_E): float {}
 
+/** @compile-time-eval */
 function log10(float $num): float {}
 
+/** @compile-time-eval */
 function sqrt(float $num): float {}
 
+/** @compile-time-eval */
 function hypot(float $x, float $y): float {}
 
+/** @compile-time-eval */
 function deg2rad(float $num): float {}
 
+/** @compile-time-eval */
 function rad2deg(float $num): float {}
 
 /** @compile-time-eval */
@@ -1571,14 +3188,26 @@ function decoct(int $num): string {}
  */
 function dechex(int $num): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function base_convert(string $num, int $from_base, int $to_base): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function number_format(float $num, int $decimals = 0, ?string $decimal_separator = ".", ?string $thousands_separator = ","): string {}
 
+/**
+ * @compile-time-eval
+ */
 function fmod(float $num1, float $num2): float {}
 
+/**
+ * @compile-time-eval
+ */
 function fdiv(float $num1, float $num2): float {}
 
 /* microtime.c */
@@ -1604,11 +3233,15 @@ function getrusage(int $mode = 0): array|false {}
 
 /* pack.c */
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function pack(string $format, mixed ...$values): string {}
 
 /**
  * @return array<int|string, mixed>|false
+ * @compile-time-eval
  * @refcount 1
  */
 function unpack(string $format, string $string, int $offset = 0): array|false {}
@@ -1630,6 +3263,9 @@ function password_needs_rehash(string $hash, string|int|null $algo, array $optio
 
 function password_verify(#[\SensitiveParameter] string $password, string $hash): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function password_algos(): array {}
 
 /* proc_open.c */
@@ -1658,34 +3294,17 @@ function proc_get_status($process): array {}
 
 /* quot_print.c */
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function quoted_printable_decode(string $string): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function quoted_printable_encode(string $string): string {}
-
-/* mt_rand.c */
-
-function mt_srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
-
-/** @alias mt_srand */
-function srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
-
-function rand(int $min = UNKNOWN, int $max = UNKNOWN): int {}
-
-function mt_rand(int $min = UNKNOWN, int $max = UNKNOWN): int {}
-
-function mt_getrandmax(): int {}
-
-/** @alias mt_getrandmax */
-function getrandmax(): int {}
-
-/* random.c */
-
-/** @refcount 1 */
-function random_bytes(int $length): string {}
-
-function random_int(int $min, int $max): int {}
 
 /* soundex.c */
 
@@ -1714,6 +3333,9 @@ function stream_context_get_params($context): array {}
 
 /** @param resource $context */
 function stream_context_set_option($context, array|string $wrapper_or_options, ?string $option_name = null, mixed $value = UNKNOWN): bool {}
+
+/** @param resource $context */
+function stream_context_set_options($context, array $options): bool {}
 
 /**
  * @param resource $stream_or_context
@@ -1884,7 +3506,7 @@ function sapi_windows_vt100_support($stream, ?bool $enable = null): bool {}
 /** @param resource $stream */
 function stream_set_chunk_size($stream, int $size): int {}
 
-#if defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32)
+#if (defined(HAVE_SYS_TIME_H) || defined(PHP_WIN32))
 /** @param resource $stream */
 function stream_set_timeout($stream, int $seconds, int $microseconds = 0): bool {}
 
@@ -1897,29 +3519,59 @@ function socket_set_timeout($stream, int $seconds, int $microseconds = 0): bool 
 
 /* type.c */
 
+/**
+ * @compile-time-eval
+ */
 function gettype(mixed $value): string {}
 
+/**
+ * @compile-time-eval
+ */
 function get_debug_type(mixed $value): string {}
 
 function settype(mixed &$var, string $type): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function intval(mixed $value, int $base = 10): int {}
 
+/**
+ * @compile-time-eval
+ */
 function floatval(mixed $value): float {}
 
 /** @alias floatval */
 function doubleval(mixed $value): float {}
 
+/**
+ * @compile-time-eval
+ */
 function boolval(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function strval(mixed $value): string {}
 
+/**
+ * @compile-time-eval
+ */
 function is_null(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_resource(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_bool(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_int(mixed $value): bool {}
 
 /** @alias is_int */
@@ -1928,26 +3580,50 @@ function is_integer(mixed $value): bool {}
 /** @alias is_int */
 function is_long(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_float(mixed $value): bool {}
 
 /** @alias is_float */
 function is_double(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_numeric(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_string(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_array(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_object(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_scalar(mixed $value): bool {}
 
 /** @param string $callable_name */
 function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_iterable(mixed $value): bool {}
 
+/**
+ * @compile-time-eval
+ */
 function is_countable(mixed $value): bool {}
 
 /* uniqid.c */
@@ -1961,6 +3637,7 @@ function uniqid(string $prefix = "", bool $more_entropy = false): string {}
 
 /**
  * @return int|string|array<string, int|string>|null|false
+ * @compile-time-eval
  * @refcount 1
  */
 function parse_url(string $url, int $component = -1): int|string|array|null|false {}
@@ -2026,10 +3703,16 @@ function stream_filter_register(string $filter_name, string $class): bool {}
 
 /* uuencode.c */
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function convert_uuencode(string $string): string {}
 
-/** @refcount 1 */
+/**
+ * @compile-time-eval
+ * @refcount 1
+ */
 function convert_uudecode(string $string): string|false {}
 
 /* var.c */

@@ -26,7 +26,6 @@
 #define PHP_SESSION_VERSION PHP_VERSION
 
 /* save handler macros */
-#define PS_NUM_APIS      9
 #define PS_OPEN_ARGS     void **mod_data, const char *save_path, const char *session_name
 #define PS_CLOSE_ARGS    void **mod_data
 #define PS_READ_ARGS     void **mod_data, zend_string *key, zend_string **val, zend_long maxlifetime
@@ -155,27 +154,26 @@ typedef struct _php_ps_globals {
 	const ps_module *default_mod;
 	void *mod_data;
 	php_session_status session_status;
+	zend_string *session_started_filename;
+	uint32_t session_started_lineno;
 	zend_long gc_probability;
 	zend_long gc_divisor;
 	zend_long gc_maxlifetime;
 	int module_number;
 	zend_long cache_expire;
-	union {
-		zval names[PS_NUM_APIS];
-		struct {
-			zval ps_open;
-			zval ps_close;
-			zval ps_read;
-			zval ps_write;
-			zval ps_destroy;
-			zval ps_gc;
-			zval ps_create_sid;
-			zval ps_validate_sid;
-			zval ps_update_timestamp;
-		} name;
+	struct {
+		zval ps_open;
+		zval ps_close;
+		zval ps_read;
+		zval ps_write;
+		zval ps_destroy;
+		zval ps_gc;
+		zval ps_create_sid;
+		zval ps_validate_sid;
+		zval ps_update_timestamp;
 	} mod_user_names;
-	int mod_user_implemented;
-	int mod_user_is_open;
+	bool mod_user_implemented;
+	bool mod_user_is_open;
 	zend_string *mod_user_class_name;
 	const struct ps_serializer_struct *serializer;
 	zval http_session_vars;
@@ -186,8 +184,8 @@ typedef struct _php_ps_globals {
 
 	zend_long sid_length;
 	zend_long sid_bits_per_character;
-	int send_cookie;
-	int define_sid;
+	bool send_cookie;
+	bool define_sid;
 
 	php_session_rfc1867_progress *rfc1867_progress;
 	bool rfc1867_enabled; /* session.upload_progress.enabled */

@@ -21,10 +21,31 @@ echo "Initial values: ini.get(\"assert.warning\") => [".ini_get("assert.warning"
 echo "Initial values: ini.get(\"assert.bail\") => [".ini_get("assert.bail")."]\n";
 echo "Initial values: ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n\n";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: PHP Startup: assert.active INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: assert.warning INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: assert.callback INI setting is deprecated in Unknown on line 0
+
+Deprecated: Constant ASSERT_ACTIVE is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 Initial values: assert_options(ASSERT_ACTIVE) => [0]
+
+Deprecated: Constant ASSERT_WARNING is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 Initial values: assert_options(ASSERT_WARNING) => [0]
+
+Deprecated: Constant ASSERT_BAIL is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 Initial values: assert_options(ASSERT_BAIL) => [0]
+
+Deprecated: Constant ASSERT_CALLBACK is deprecated in %s on line %d
+
+Deprecated: Function assert_options() is deprecated in %s on line %d
 Initial values: assert_options(ASSERT_CALLBACK) => [f1]
 Initial values: ini.get("assert.active") => [0]
 Initial values: ini.get("assert.warning") => [0]

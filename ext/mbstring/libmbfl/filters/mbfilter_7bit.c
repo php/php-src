@@ -34,21 +34,18 @@
 static size_t mb_7bit_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
 static void mb_wchar_to_7bit(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 
-const mbfl_encoding mbfl_encoding_7bit = {
+const struct mbfl_convert_vtbl vtbl_7bit_wchar = {
 	mbfl_no_encoding_7bit,
-	"7bit",
-	"7bit",
+	mbfl_no_encoding_wchar,
+	mbfl_filt_conv_common_ctor,
 	NULL,
+	mbfl_filt_conv_7bit_any,
+	mbfl_filt_conv_common_flush,
 	NULL,
-	MBFL_ENCTYPE_SBCS,
-	NULL,
-	NULL,
-	mb_7bit_to_wchar,
-	mb_wchar_to_7bit
 };
 
-const struct mbfl_convert_vtbl vtbl_8bit_7bit = {
-	mbfl_no_encoding_8bit,
+const struct mbfl_convert_vtbl vtbl_wchar_7bit = {
+	mbfl_no_encoding_wchar,
 	mbfl_no_encoding_7bit,
 	mbfl_filt_conv_common_ctor,
 	NULL,
@@ -57,16 +54,20 @@ const struct mbfl_convert_vtbl vtbl_8bit_7bit = {
 	NULL,
 };
 
-const struct mbfl_convert_vtbl vtbl_7bit_8bit = {
+const mbfl_encoding mbfl_encoding_7bit = {
 	mbfl_no_encoding_7bit,
-	mbfl_no_encoding_8bit,
-	mbfl_filt_conv_common_ctor,
+	"7bit",
+	"7bit",
 	NULL,
-	mbfl_filt_conv_7bit_any,
-	mbfl_filt_conv_common_flush,
+	NULL,
+	MBFL_ENCTYPE_SBCS,
+	&vtbl_7bit_wchar,
+	&vtbl_wchar_7bit,
+	mb_7bit_to_wchar,
+	mb_wchar_to_7bit,
+	NULL,
 	NULL,
 };
-
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
@@ -75,13 +76,12 @@ int mbfl_filt_conv_7bit_any(int c, mbfl_convert_filter *filter)
 	return (*filter->output_function)(c < 0x80 ? c : MBFL_BAD_INPUT, filter->data);
 }
 
-
 int mbfl_filt_conv_any_7bit(int c, mbfl_convert_filter *filter)
 {
 	if (c >= 0 && c < 0x80) {
 		CK((*filter->output_function)(c, filter->data));
 	} else {
-		mbfl_filt_conv_illegal_output(c, filter);
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 	return 0;
 }

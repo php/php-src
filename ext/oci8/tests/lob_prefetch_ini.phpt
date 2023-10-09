@@ -4,8 +4,9 @@ LOB prefetching with oci8.
 oci8
 --SKIPIF--
 <?php
+require_once 'skipifconnectfailure.inc';
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(__DIR__.'/skipif.inc');
+require __DIR__.'/skipif.inc';
 ?>
 --INI--
 oci8.prefetch_lob_size=100000
@@ -134,7 +135,7 @@ print(count($locarr) . "\n");
 print(count($inlinearr) . "\n");
 check_clobs($locarr, $inlinearr);
 
-print("Test 5 - BLOB with current ocig8.prefetch_lob_size \n");
+print("Test 5 - BLOB with current ocig8.prefetch_lob_size\n");
 
 $sql = "select blob from {$schema}{$table_name}" . " order by id";
 $locarr = get_blob_loc($c, $sql, -1);

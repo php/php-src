@@ -2,7 +2,8 @@
 <?php
 
 $infile = __DIR__ . '/../../Zend/zend_language_parser.y';
-$outfile = __DIR__ . '/tokenizer_data.c';
+$outfile_stub = __DIR__ . '/tokenizer_data.stub.php';
+$outfile_c = __DIR__ . '/tokenizer_data.c';
 
 if (!file_exists($infile)) {
     fwrite(STDERR, <<<ERROR
@@ -15,9 +16,27 @@ ERROR
     exit(1);
 }
 
-$result = '';
+$result = "<?php\n\n/** @generate-class-entries */\n\n";
 
-$result .= <<<CODE
+$incontent = file_get_contents($infile);
+preg_match_all('(^%token.*\b(?<token_name>T_.*?)\b)m', $incontent, $matches);
+
+foreach ($matches['token_name'] as $tokenName) {
+    if ($tokenName === 'T_NOELSE' || $tokenName === 'T_ERROR') {
+        continue;
+    }
+    $result .= "/**\n * @var int\n * @cvalue $tokenName\n */\n";
+    $result .= "const $tokenName = UNKNOWN;\n";
+}
+
+$result .= "/**\n * @var int\n * @cvalue T_PAAMAYIM_NEKUDOTAYIM\n */\n";
+$result .= "const T_DOUBLE_COLON = UNKNOWN;\n";
+
+file_put_contents($outfile_stub, $result);
+
+echo "Wrote $outfile_stub\n";
+
+$result = <<<CODE
 /*
    +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
@@ -42,25 +61,6 @@ $result .= <<<CODE
 #include "php.h"
 #include "zend.h"
 #include <zend_language_parser.h>
-
-
-void tokenizer_register_constants(INIT_FUNC_ARGS) {
-
-CODE;
-
-$incontent = file_get_contents($infile);
-preg_match_all('(^%token.*\b(?<token_name>T_.*?)\b)m', $incontent, $matches);
-
-foreach ($matches['token_name'] as $tokenName) {
-    if ($tokenName === 'T_NOELSE' || $tokenName === 'T_ERROR') {
-        continue;
-    }
-    $result .= "\tREGISTER_LONG_CONSTANT(\"$tokenName\", $tokenName, CONST_CS | CONST_PERSISTENT);\n";
-}
-$result .= "\tREGISTER_LONG_CONSTANT(\"T_DOUBLE_COLON\", T_PAAMAYIM_NEKUDOTAYIM, CONST_CS | CONST_PERSISTENT);\n";
-
-$result .= <<<CODE
-}
 
 char *get_token_type_name(int token_type)
 {
@@ -89,6 +89,6 @@ $result .= <<<CODE
 
 CODE;
 
-file_put_contents($outfile, $result);
+file_put_contents($outfile_c, $result);
 
-echo "Wrote $outfile\n";
+echo "Wrote $outfile_c\n";

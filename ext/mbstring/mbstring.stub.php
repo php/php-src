@@ -5,49 +5,49 @@
 #ifdef HAVE_MBREGEX
 /**
  * @var string
- * @cname php_mb_oniguruma_version
+ * @cvalue php_mb_oniguruma_version
  */
 const MB_ONIGURUMA_VERSION = UNKNOWN;
 #endif
 
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_UPPER
+ * @cvalue PHP_UNICODE_CASE_UPPER
  */
 const MB_CASE_UPPER = UNKNOWN;
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_LOWER
+ * @cvalue PHP_UNICODE_CASE_LOWER
  */
 const MB_CASE_LOWER = UNKNOWN;
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_TITLE
+ * @cvalue PHP_UNICODE_CASE_TITLE
  */
 const MB_CASE_TITLE = UNKNOWN;
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_FOLD
+ * @cvalue PHP_UNICODE_CASE_FOLD
  */
 const MB_CASE_FOLD = UNKNOWN;
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_UPPER_SIMPLE
+ * @cvalue PHP_UNICODE_CASE_UPPER_SIMPLE
  */
 const MB_CASE_UPPER_SIMPLE = UNKNOWN;
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_LOWER_SIMPLE
+ * @cvalue PHP_UNICODE_CASE_LOWER_SIMPLE
  */
 const MB_CASE_LOWER_SIMPLE = UNKNOWN;
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_TITLE_SIMPLE
+ * @cvalue PHP_UNICODE_CASE_TITLE_SIMPLE
  */
 const MB_CASE_TITLE_SIMPLE = UNKNOWN;
 /**
  * @var int
- * @cname PHP_UNICODE_CASE_FOLD_SIMPLE
+ * @cvalue PHP_UNICODE_CASE_FOLD_SIMPLE
  */
 const MB_CASE_FOLD_SIMPLE = UNKNOWN;
 
@@ -118,7 +118,6 @@ function mb_strcut(string $string, int $start, ?int $length = null, ?string $enc
 
 function mb_strwidth(string $string, ?string $encoding = null): int {}
 
-/** @refcount 1 */
 function mb_strimwidth(string $string, int $start, int $width, string $trim_marker = "", ?string $encoding = null): string {}
 
 /**
@@ -141,7 +140,6 @@ function mb_detect_encoding(string $string, array|string|null $encodings = null,
 
 /**
  * @return array<int, string>
- * @refcount 1
  */
 function mb_list_encodings(): array {}
 
@@ -184,6 +182,8 @@ function mb_scrub(string $string, ?string $encoding = null): string {}
 function mb_ord(string $string, ?string $encoding = null): int|false {}
 
 function mb_chr(int $codepoint, ?string $encoding = null): string|false {}
+
+function mb_str_pad(string $string, int $length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT, ?string $encoding = null): string {}
 
 #ifdef HAVE_MBREGEX
 /** @refcount 1 */

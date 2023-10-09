@@ -5,154 +5,154 @@
 namespace {
     /**
      * @var int
-     * @cname LDAP_DEREF_NEVER
+     * @cvalue LDAP_DEREF_NEVER
      */
     const LDAP_DEREF_NEVER = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_DEREF_SEARCHING
+     * @cvalue LDAP_DEREF_SEARCHING
      */
     const LDAP_DEREF_SEARCHING = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_DEREF_FINDING
+     * @cvalue LDAP_DEREF_FINDING
      */
     const LDAP_DEREF_FINDING = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_DEREF_ALWAYS
+     * @cvalue LDAP_DEREF_ALWAYS
      */
     const LDAP_DEREF_ALWAYS = UNKNOWN;
 
     /**
      * @var int
-     * @cname LDAP_MODIFY_BATCH_ADD
+     * @cvalue LDAP_MODIFY_BATCH_ADD
      */
     const LDAP_MODIFY_BATCH_ADD = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_MODIFY_BATCH_REMOVE
+     * @cvalue LDAP_MODIFY_BATCH_REMOVE
      */
     const LDAP_MODIFY_BATCH_REMOVE = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_MODIFY_BATCH_REMOVE_ALL
+     * @cvalue LDAP_MODIFY_BATCH_REMOVE_ALL
      */
     const LDAP_MODIFY_BATCH_REMOVE_ALL = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_MODIFY_BATCH_REPLACE
+     * @cvalue LDAP_MODIFY_BATCH_REPLACE
      */
     const LDAP_MODIFY_BATCH_REPLACE = UNKNOWN;
     /**
      * @var string
-     * @cname LDAP_MODIFY_BATCH_ATTRIB
+     * @cvalue LDAP_MODIFY_BATCH_ATTRIB
      */
     const LDAP_MODIFY_BATCH_ATTRIB = UNKNOWN;
     /**
      * @var string
-     * @cname LDAP_MODIFY_BATCH_MODTYPE
+     * @cvalue LDAP_MODIFY_BATCH_MODTYPE
      */
     const LDAP_MODIFY_BATCH_MODTYPE = UNKNOWN;
     /**
      * @var string
-     * @cname LDAP_MODIFY_BATCH_VALUES
+     * @cvalue LDAP_MODIFY_BATCH_VALUES
      */
     const LDAP_MODIFY_BATCH_VALUES = UNKNOWN;
 
 #if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
     /**
      * @var int
-     * @cname LDAP_OPT_DEREF
+     * @cvalue LDAP_OPT_DEREF
      */
     const LDAP_OPT_DEREF = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_SIZELIMIT
+     * @cvalue LDAP_OPT_SIZELIMIT
      */
     const LDAP_OPT_SIZELIMIT = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_TIMELIMIT
+     * @cvalue LDAP_OPT_TIMELIMIT
      */
     const LDAP_OPT_TIMELIMIT = UNKNOWN;
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
     /**
      * @var int
-     * @cname LDAP_OPT_NETWORK_TIMEOUT
+     * @cvalue LDAP_OPT_NETWORK_TIMEOUT
      */
     const LDAP_OPT_NETWORK_TIMEOUT = UNKNOWN;
 #endif
 #if (!defined(LDAP_OPT_NETWORK_TIMEOUT) && defined(LDAP_X_OPT_CONNECT_TIMEOUT))
     /**
      * @var int
-     * @cname LDAP_X_OPT_CONNECT_TIMEOUT
+     * @cvalue LDAP_X_OPT_CONNECT_TIMEOUT
      */
     const LDAP_OPT_NETWORK_TIMEOUT = UNKNOWN;
 #endif
 #ifdef LDAP_OPT_TIMEOUT
     /**
      * @var int
-     * @cname LDAP_OPT_TIMEOUT
+     * @cvalue LDAP_OPT_TIMEOUT
      */
     const LDAP_OPT_TIMEOUT = UNKNOWN;
 #endif
     /**
      * @var int
-     * @cname LDAP_OPT_PROTOCOL_VERSION
+     * @cvalue LDAP_OPT_PROTOCOL_VERSION
      */
     const LDAP_OPT_PROTOCOL_VERSION = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_ERROR_NUMBER
+     * @cvalue LDAP_OPT_ERROR_NUMBER
      */
     const LDAP_OPT_ERROR_NUMBER = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_REFERRALS
+     * @cvalue LDAP_OPT_REFERRALS
      */
     const LDAP_OPT_REFERRALS = UNKNOWN;
 #ifdef LDAP_OPT_RESTART
     /**
      * @var int
-     * @cname LDAP_OPT_RESTART
+     * @cvalue LDAP_OPT_RESTART
      */
     const LDAP_OPT_RESTART = UNKNOWN;
 #endif
 #ifdef LDAP_OPT_HOST_NAME
     /**
      * @var int
-     * @cname LDAP_OPT_HOST_NAME
+     * @cvalue LDAP_OPT_HOST_NAME
      */
     const LDAP_OPT_HOST_NAME = UNKNOWN;
 #endif
     /**
      * @var int
-     * @cname LDAP_OPT_ERROR_STRING
+     * @cvalue LDAP_OPT_ERROR_STRING
      */
     const LDAP_OPT_ERROR_STRING = UNKNOWN;
 #ifdef LDAP_OPT_MATCHED_DN
     /**
      * @var int
-     * @cname LDAP_OPT_MATCHED_DN
+     * @cvalue LDAP_OPT_MATCHED_DN
      */
     const LDAP_OPT_MATCHED_DN = UNKNOWN;
 #endif
     /**
      * @var int
-     * @cname LDAP_OPT_SERVER_CONTROLS
+     * @cvalue LDAP_OPT_SERVER_CONTROLS
      */
     const LDAP_OPT_SERVER_CONTROLS = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_CLIENT_CONTROLS
+     * @cvalue LDAP_OPT_CLIENT_CONTROLS
      */
     const LDAP_OPT_CLIENT_CONTROLS = UNKNOWN;
 #endif
 #ifdef LDAP_OPT_DEBUG_LEVEL
     /**
      * @var int
-     * @cname LDAP_OPT_DEBUG_LEVEL
+     * @cvalue LDAP_OPT_DEBUG_LEVEL
      */
     const LDAP_OPT_DEBUG_LEVEL = UNKNOWN;
 #endif
@@ -160,7 +160,7 @@ namespace {
 #ifdef LDAP_OPT_DIAGNOSTIC_MESSAGE
     /**
      * @var int
-     * @cname LDAP_OPT_DIAGNOSTIC_MESSAGE
+     * @cvalue LDAP_OPT_DIAGNOSTIC_MESSAGE
      */
     const LDAP_OPT_DIAGNOSTIC_MESSAGE = UNKNOWN;
 #endif
@@ -168,22 +168,22 @@ namespace {
 #ifdef HAVE_LDAP_SASL
     /**
      * @var int
-     * @cname LDAP_OPT_X_SASL_MECH
+     * @cvalue LDAP_OPT_X_SASL_MECH
      */
     const LDAP_OPT_X_SASL_MECH = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_SASL_REALM
+     * @cvalue LDAP_OPT_X_SASL_REALM
      */
     const LDAP_OPT_X_SASL_REALM = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_SASL_AUTHCID
+     * @cvalue LDAP_OPT_X_SASL_AUTHCID
      */
     const LDAP_OPT_X_SASL_AUTHCID = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_SASL_AUTHZID
+     * @cvalue LDAP_OPT_X_SASL_AUTHZID
      */
     const LDAP_OPT_X_SASL_AUTHZID = UNKNOWN;
 #endif
@@ -191,14 +191,14 @@ namespace {
 #ifdef LDAP_OPT_X_SASL_NOCANON
     /**
      * @var int
-     * @cname LDAP_OPT_X_SASL_NOCANON
+     * @cvalue LDAP_OPT_X_SASL_NOCANON
      */
     const LDAP_OPT_X_SASL_NOCANON = UNKNOWN;
 #endif
 #ifdef LDAP_OPT_X_SASL_USERNAME
     /**
      * @var int
-     * @cname LDAP_OPT_X_SASL_USERNAME
+     * @cvalue LDAP_OPT_X_SASL_USERNAME
      */
     const LDAP_OPT_X_SASL_USERNAME = UNKNOWN;
 #endif
@@ -206,17 +206,17 @@ namespace {
 #ifdef ORALDAP
     /**
      * @var int
-     * @cname GSLC_SSL_NO_AUTH
+     * @cvalue GSLC_SSL_NO_AUTH
      */
     const GSLC_SSL_NO_AUTH = UNKNOWN;
     /**
      * @var int
-     * @cname GSLC_SSL_ONEWAY_AUTH
+     * @cvalue GSLC_SSL_ONEWAY_AUTH
      */
     const GSLC_SSL_ONEWAY_AUTH = UNKNOWN;
     /**
      * @var int
-     * @cname GSLC_SSL_TWOWAY_AUTH
+     * @cvalue GSLC_SSL_TWOWAY_AUTH
      */
     const GSLC_SSL_TWOWAY_AUTH = UNKNOWN;
 #endif
@@ -224,64 +224,64 @@ namespace {
 #if (LDAP_API_VERSION > 2000)
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_REQUIRE_CERT
+     * @cvalue LDAP_OPT_X_TLS_REQUIRE_CERT
      */
     const LDAP_OPT_X_TLS_REQUIRE_CERT = UNKNOWN;
 
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_NEVER
+     * @cvalue LDAP_OPT_X_TLS_NEVER
      */
     const LDAP_OPT_X_TLS_NEVER = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_HARD
+     * @cvalue LDAP_OPT_X_TLS_HARD
      */
     const LDAP_OPT_X_TLS_HARD = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_DEMAND
+     * @cvalue LDAP_OPT_X_TLS_DEMAND
      */
     const LDAP_OPT_X_TLS_DEMAND = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_ALLOW
+     * @cvalue LDAP_OPT_X_TLS_ALLOW
      */
     const LDAP_OPT_X_TLS_ALLOW = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_TRY
+     * @cvalue LDAP_OPT_X_TLS_TRY
      */
     const LDAP_OPT_X_TLS_TRY = UNKNOWN;
 
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_CACERTDIR
+     * @cvalue LDAP_OPT_X_TLS_CACERTDIR
      */
     const LDAP_OPT_X_TLS_CACERTDIR = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_CACERTFILE
+     * @cvalue LDAP_OPT_X_TLS_CACERTFILE
      */
     const LDAP_OPT_X_TLS_CACERTFILE = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_CERTFILE
+     * @cvalue LDAP_OPT_X_TLS_CERTFILE
      */
     const LDAP_OPT_X_TLS_CERTFILE = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_CIPHER_SUITE
+     * @cvalue LDAP_OPT_X_TLS_CIPHER_SUITE
      */
     const LDAP_OPT_X_TLS_CIPHER_SUITE = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_KEYFILE
+     * @cvalue LDAP_OPT_X_TLS_KEYFILE
      */
     const LDAP_OPT_X_TLS_KEYFILE = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_RANDOM_FILE
+     * @cvalue LDAP_OPT_X_TLS_RANDOM_FILE
      */
     const LDAP_OPT_X_TLS_RANDOM_FILE = UNKNOWN;
 #endif
@@ -289,22 +289,22 @@ namespace {
 #ifdef LDAP_OPT_X_TLS_CRLCHECK
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_CRLCHECK
+     * @cvalue LDAP_OPT_X_TLS_CRLCHECK
      */
     const LDAP_OPT_X_TLS_CRLCHECK = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_CRL_NONE
+     * @cvalue LDAP_OPT_X_TLS_CRL_NONE
      */
     const LDAP_OPT_X_TLS_CRL_NONE = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_CRL_PEER
+     * @cvalue LDAP_OPT_X_TLS_CRL_PEER
      */
     const LDAP_OPT_X_TLS_CRL_PEER = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_CRL_ALL
+     * @cvalue LDAP_OPT_X_TLS_CRL_ALL
      */
     const LDAP_OPT_X_TLS_CRL_ALL = UNKNOWN;
 #endif
@@ -312,7 +312,7 @@ namespace {
 #ifdef LDAP_OPT_X_TLS_DHFILE
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_DHFILE
+     * @cvalue LDAP_OPT_X_TLS_DHFILE
      */
     const LDAP_OPT_X_TLS_DHFILE = UNKNOWN;
 #endif
@@ -320,7 +320,7 @@ namespace {
 #ifdef LDAP_OPT_X_TLS_CRLFILE
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_CRLFILE
+     * @cvalue LDAP_OPT_X_TLS_CRLFILE
      */
     const LDAP_OPT_X_TLS_CRLFILE = UNKNOWN;
 #endif
@@ -328,33 +328,33 @@ namespace {
 #ifdef LDAP_OPT_X_TLS_PROTOCOL_MIN
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_PROTOCOL_MIN
+     * @cvalue LDAP_OPT_X_TLS_PROTOCOL_MIN
      */
     const LDAP_OPT_X_TLS_PROTOCOL_MIN = UNKNOWN;
 
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_PROTOCOL_SSL2
+     * @cvalue LDAP_OPT_X_TLS_PROTOCOL_SSL2
      */
     const LDAP_OPT_X_TLS_PROTOCOL_SSL2 = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_PROTOCOL_SSL3
+     * @cvalue LDAP_OPT_X_TLS_PROTOCOL_SSL3
      */
     const LDAP_OPT_X_TLS_PROTOCOL_SSL3 = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_PROTOCOL_TLS1_0
+     * @cvalue LDAP_OPT_X_TLS_PROTOCOL_TLS1_0
      */
     const LDAP_OPT_X_TLS_PROTOCOL_TLS1_0 = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_PROTOCOL_TLS1_1
+     * @cvalue LDAP_OPT_X_TLS_PROTOCOL_TLS1_1
      */
     const LDAP_OPT_X_TLS_PROTOCOL_TLS1_1 = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_PROTOCOL_TLS1_2
+     * @cvalue LDAP_OPT_X_TLS_PROTOCOL_TLS1_2
      */
     const LDAP_OPT_X_TLS_PROTOCOL_TLS1_2 = UNKNOWN;
 #endif
@@ -362,7 +362,7 @@ namespace {
 #ifdef LDAP_OPT_X_TLS_PACKAGE
     /**
      * @var int
-     * @cname LDAP_OPT_X_TLS_PACKAGE
+     * @cvalue LDAP_OPT_X_TLS_PACKAGE
      */
     const LDAP_OPT_X_TLS_PACKAGE = UNKNOWN;
 #endif
@@ -370,56 +370,56 @@ namespace {
 #ifdef LDAP_OPT_X_KEEPALIVE_IDLE
     /**
      * @var int
-     * @cname LDAP_OPT_X_KEEPALIVE_IDLE
+     * @cvalue LDAP_OPT_X_KEEPALIVE_IDLE
      */
     const LDAP_OPT_X_KEEPALIVE_IDLE = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_KEEPALIVE_PROBES
+     * @cvalue LDAP_OPT_X_KEEPALIVE_PROBES
      */
     const LDAP_OPT_X_KEEPALIVE_PROBES = UNKNOWN;
     /**
      * @var int
-     * @cname LDAP_OPT_X_KEEPALIVE_INTERVAL
+     * @cvalue LDAP_OPT_X_KEEPALIVE_INTERVAL
      */
     const LDAP_OPT_X_KEEPALIVE_INTERVAL = UNKNOWN;
 #endif
 
     /**
      * @var int
-     * @cname PHP_LDAP_ESCAPE_FILTER
+     * @cvalue PHP_LDAP_ESCAPE_FILTER
      */
     const LDAP_ESCAPE_FILTER = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_LDAP_ESCAPE_DN
+     * @cvalue PHP_LDAP_ESCAPE_DN
      */
     const LDAP_ESCAPE_DN = UNKNOWN;
 
 #ifdef HAVE_LDAP_EXTENDED_OPERATION_S
     /**
      * @var string
-     * @cname LDAP_EXOP_START_TLS
+     * @cvalue LDAP_EXOP_START_TLS
      */
     const LDAP_EXOP_START_TLS = UNKNOWN;
     /**
      * @var string
-     * @cname LDAP_EXOP_MODIFY_PASSWD
+     * @cvalue LDAP_EXOP_MODIFY_PASSWD
      */
     const LDAP_EXOP_MODIFY_PASSWD = UNKNOWN;
     /**
      * @var string
-     * @cname LDAP_EXOP_REFRESH
+     * @cvalue LDAP_EXOP_REFRESH
      */
     const LDAP_EXOP_REFRESH = UNKNOWN;
     /**
      * @var string
-     * @cname LDAP_EXOP_WHO_AM_I
+     * @cvalue LDAP_EXOP_WHO_AM_I
      */
     const LDAP_EXOP_WHO_AM_I = UNKNOWN;
     /**
      * @var string
-     * @cname LDAP_EXOP_TURN
+     * @cvalue LDAP_EXOP_TURN
      */
     const LDAP_EXOP_TURN = UNKNOWN;
 #endif
@@ -428,7 +428,7 @@ namespace {
     /**
      * RFC 3296
      * @var string
-     * @cname LDAP_CONTROL_MANAGEDSAIT
+     * @cvalue LDAP_CONTROL_MANAGEDSAIT
      */
     const LDAP_CONTROL_MANAGEDSAIT = UNKNOWN;
 #endif
@@ -436,7 +436,7 @@ namespace {
     /**
      * RFC 4370
      * @var string
-     * @cname LDAP_CONTROL_PROXY_AUTHZ
+     * @cvalue LDAP_CONTROL_PROXY_AUTHZ
      */
     const LDAP_CONTROL_PROXY_AUTHZ = UNKNOWN;
 #endif
@@ -444,7 +444,7 @@ namespace {
     /**
      * RFC 3672
      * @var string
-     * @cname LDAP_CONTROL_SUBENTRIES
+     * @cvalue LDAP_CONTROL_SUBENTRIES
      */
     const LDAP_CONTROL_SUBENTRIES = UNKNOWN;
 #endif
@@ -452,7 +452,7 @@ namespace {
     /**
      * RFC 3876
      * @var string
-     * @cname LDAP_CONTROL_VALUESRETURNFILTER
+     * @cvalue LDAP_CONTROL_VALUESRETURNFILTER
      */
     const LDAP_CONTROL_VALUESRETURNFILTER = UNKNOWN;
 #endif
@@ -460,19 +460,19 @@ namespace {
     /**
      * RFC 4528
      * @var string
-     * @cname LDAP_CONTROL_ASSERT
+     * @cvalue LDAP_CONTROL_ASSERT
      */
     const LDAP_CONTROL_ASSERT = UNKNOWN;
     /**
      * RFC 4527
      * @var string
-     * @cname LDAP_CONTROL_PRE_READ
+     * @cvalue LDAP_CONTROL_PRE_READ
      */
     const LDAP_CONTROL_PRE_READ = UNKNOWN;
     /**
      * RFC 4527
      * @var string
-     * @cname LDAP_CONTROL_POST_READ
+     * @cvalue LDAP_CONTROL_POST_READ
      */
     const LDAP_CONTROL_POST_READ = UNKNOWN;
 #endif
@@ -480,13 +480,13 @@ namespace {
     /**
      * RFC 2891
      * @var string
-     * @cname LDAP_CONTROL_SORTREQUEST
+     * @cvalue LDAP_CONTROL_SORTREQUEST
      */
     const LDAP_CONTROL_SORTREQUEST = UNKNOWN;
     /**
      * RFC 2891
      * @var string
-     * @cname LDAP_CONTROL_SORTRESPONSE
+     * @cvalue LDAP_CONTROL_SORTRESPONSE
      */
     const LDAP_CONTROL_SORTRESPONSE = UNKNOWN;
 #endif
@@ -494,7 +494,7 @@ namespace {
     /**
      * RFC 2696
      * @var string
-     * @cname LDAP_CONTROL_PAGEDRESULTS
+     * @cvalue LDAP_CONTROL_PAGEDRESULTS
      */
     const LDAP_CONTROL_PAGEDRESULTS = UNKNOWN;
 #endif
@@ -502,13 +502,13 @@ namespace {
     /**
      * RFC 3829
      * @var string
-     * @cname LDAP_CONTROL_AUTHZID_REQUEST
+     * @cvalue LDAP_CONTROL_AUTHZID_REQUEST
      */
     const LDAP_CONTROL_AUTHZID_REQUEST = UNKNOWN;
     /**
      * RFC 3829
      * @var string
-     * @cname LDAP_CONTROL_AUTHZID_RESPONSE
+     * @cvalue LDAP_CONTROL_AUTHZID_RESPONSE
      */
     const LDAP_CONTROL_AUTHZID_RESPONSE = UNKNOWN;
 #endif
@@ -516,19 +516,19 @@ namespace {
     /**
      * LDAP Content Synchronization Operation -- RFC 4533
      * @var string
-     * @cname LDAP_CONTROL_SYNC
+     * @cvalue LDAP_CONTROL_SYNC
      */
     const LDAP_CONTROL_SYNC = UNKNOWN;
     /**
      * RLDAP Content Synchronization Operation -- RFC 4533
      * @var string
-     * @cname LDAP_CONTROL_SYNC_STATE
+     * @cvalue LDAP_CONTROL_SYNC_STATE
      */
     const LDAP_CONTROL_SYNC_STATE = UNKNOWN;
     /**
      * RLDAP Content Synchronization Operation -- RFC 4533
      * @var string
-     * @cname LDAP_CONTROL_SYNC_DONE
+     * @cvalue LDAP_CONTROL_SYNC_DONE
      */
     const LDAP_CONTROL_SYNC_DONE = UNKNOWN;
 #endif
@@ -537,7 +537,7 @@ namespace {
     /**
      * LDAP Don't Use Copy Control (RFC 6171)
      * @var string
-     * @cname LDAP_CONTROL_DONTUSECOPY
+     * @cvalue LDAP_CONTROL_DONTUSECOPY
      */
     const LDAP_CONTROL_DONTUSECOPY = UNKNOWN;
 #endif
@@ -545,13 +545,13 @@ namespace {
     /**
      * Password policy Controls
      * @var string
-     * @cname LDAP_CONTROL_PASSWORDPOLICYREQUEST
+     * @cvalue LDAP_CONTROL_PASSWORDPOLICYREQUEST
      */
     const LDAP_CONTROL_PASSWORDPOLICYREQUEST = UNKNOWN;
     /**
      * Password policy Controls
      * @var string
-     * @cname LDAP_CONTROL_PASSWORDPOLICYRESPONSE
+     * @cvalue LDAP_CONTROL_PASSWORDPOLICYRESPONSE
      */
     const LDAP_CONTROL_PASSWORDPOLICYRESPONSE = UNKNOWN;
 #endif
@@ -559,37 +559,37 @@ namespace {
     /**
      * MS Active Directory controls
      * @var string
-     * @cname LDAP_CONTROL_X_INCREMENTAL_VALUES
+     * @cvalue LDAP_CONTROL_X_INCREMENTAL_VALUES
      */
     const LDAP_CONTROL_X_INCREMENTAL_VALUES = UNKNOWN;
     /**
      * MS Active Directory controls
      * @var string
-     * @cname LDAP_CONTROL_X_DOMAIN_SCOPE
+     * @cvalue LDAP_CONTROL_X_DOMAIN_SCOPE
      */
     const LDAP_CONTROL_X_DOMAIN_SCOPE = UNKNOWN;
     /**
      * MS Active Directory controls
      * @var string
-     * @cname LDAP_CONTROL_X_PERMISSIVE_MODIFY
+     * @cvalue LDAP_CONTROL_X_PERMISSIVE_MODIFY
      */
     const LDAP_CONTROL_X_PERMISSIVE_MODIFY = UNKNOWN;
     /**
      * MS Active Directory controls
      * @var string
-     * @cname LDAP_CONTROL_X_SEARCH_OPTIONS
+     * @cvalue LDAP_CONTROL_X_SEARCH_OPTIONS
      */
     const LDAP_CONTROL_X_SEARCH_OPTIONS = UNKNOWN;
     /**
      * MS Active Directory controls
      * @var string
-     * @cname LDAP_CONTROL_X_TREE_DELETE
+     * @cvalue LDAP_CONTROL_X_TREE_DELETE
      */
     const LDAP_CONTROL_X_TREE_DELETE = UNKNOWN;
     /**
      * MS Active Directory controls
      * @var string
-     * @cname LDAP_CONTROL_X_EXTENDED_DN
+     * @cvalue LDAP_CONTROL_X_EXTENDED_DN
      */
     const LDAP_CONTROL_X_EXTENDED_DN = UNKNOWN;
 #endif
@@ -598,22 +598,25 @@ namespace {
     /**
      * LDAP VLV
      * @var string
-     * @cname LDAP_CONTROL_VLVREQUEST
+     * @cvalue LDAP_CONTROL_VLVREQUEST
      */
     const LDAP_CONTROL_VLVREQUEST = UNKNOWN;
     /**
      * LDAP VLV
      * @var string
-     * @cname LDAP_CONTROL_VLVRESPONSE
+     * @cvalue LDAP_CONTROL_VLVRESPONSE
      */
     const LDAP_CONTROL_VLVRESPONSE = UNKNOWN;
 #endif
 
-    #ifdef HAVE_ORALDAP
+#ifdef HAVE_ORALDAP
     function ldap_connect(?string $uri = null, int $port = 389, string $wallet = UNKNOWN, #[\SensitiveParameter] string $password = UNKNOWN, int $auth_mode = GSLC_SSL_NO_AUTH): LDAP\Connection|false {}
-    #else
+#ifdef LDAP_API_FEATURE_X_OPENLDAP
+    function ldap_connect_wallet(?string $uri = null, string $wallet, #[\SensitiveParameter] string $password, int $auth_mode = GSLC_SSL_NO_AUTH): LDAP\Connection|false {}
+#endif
+#else
     function ldap_connect(?string $uri = null, int $port = 389): LDAP\Connection|false {}
-    #endif
+#endif
 
     function ldap_unbind(LDAP\Connection $ldap): bool {}
 
@@ -751,7 +754,7 @@ namespace {
     #endif
     #endif
 
-    #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
+    #if (defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC))
     function ldap_set_rebind_proc(LDAP\Connection $ldap, ?callable $callback): bool {}
     #endif
 
@@ -774,6 +777,11 @@ namespace {
      * @param string $response_oid
      */
     function ldap_exop(LDAP\Connection $ldap, string $request_oid, ?string $request_data = null, ?array $controls = NULL, &$response_data = UNKNOWN, &$response_oid = null): LDAP\Result|bool {}
+    /**
+     * @param string $response_data
+     * @param string $response_oid
+     */
+    function ldap_exop_sync(LDAP\Connection $ldap, string $request_oid, ?string $request_data = null, ?array $controls = NULL, &$response_data = null, &$response_oid = null): LDAP\Result|bool {}
     #endif
 
     #ifdef HAVE_LDAP_PASSWD

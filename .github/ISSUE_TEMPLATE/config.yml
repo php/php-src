@@ -3,6 +3,3 @@ contact_links:
   - name: Documentation issue
     url: https://github.com/php/doc-en/issues
     about: Please report documentation issues on the doc-en repository.
-  - name: Security issue
-    url: https://bugs.php.net/report.php?security_bug
-    about: Please report security issues in this private bug tracker.

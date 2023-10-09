@@ -5,8 +5,22 @@ runs:
     - shell: bash
       run: |
         set -x
-        sudo apt-get update
-        sudo apt-get install \
+
+        export DEBIAN_FRONTEND=noninteractive
+
+        # Install sudo in Docker for consistent actions
+        if ! type "sudo" > /dev/null; then
+          apt-get update -y | true
+          apt-get install -y sudo
+        fi
+
+        sudo apt-get update -y | true
+        sudo apt-get install -y \
+          autoconf \
+          gcc \
+          make \
+          curl \
+          unzip \
           bison \
           re2c \
           locales \
@@ -17,8 +31,9 @@ runs:
           libgmp-dev \
           libicu-dev \
           libtidy-dev \
-          libenchant-dev \
+          libenchant-2-dev \
           libaspell-dev \
+          libbz2-dev \
           libpspell-dev \
           libsasl2-dev \
           libxpm-dev \
@@ -45,6 +60,7 @@ runs:
           freetds-dev \
           unixodbc-dev \
           llvm \
+          clang \
           libc-client-dev \
           dovecot-core \
           dovecot-pop3d \
@@ -58,11 +74,3 @@ runs:
           libjpeg-dev \
           libpng-dev \
           libfreetype6-dev
-        mkdir /opt/oracle
-        wget -nv https://download.oracle.com/otn_software/linux/instantclient/instantclient-basiclite-linuxx64.zip
-        unzip instantclient-basiclite-linuxx64.zip && rm instantclient-basiclite-linuxx64.zip
-        wget -nv https://download.oracle.com/otn_software/linux/instantclient/instantclient-sdk-linuxx64.zip
-        unzip instantclient-sdk-linuxx64.zip && rm instantclient-sdk-linuxx64.zip
-        mv instantclient_*_* /opt/oracle/instantclient
-        # Interferes with libldap2 headers.
-        rm /opt/oracle/instantclient/sdk/include/ldap.h

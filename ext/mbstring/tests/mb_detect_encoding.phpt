@@ -19,12 +19,21 @@ $hungarian = "Árvíztűrő tükörfúrógép";
 
 echo "== BASIC TEST ==\n";
 
-print("SJIS: " . mb_detect_encoding($sjis, 'SJIS') . "\n");
-print("JIS: " . mb_detect_encoding($jis, 'JIS') . "\n");
-print("EUC-JP: " . mb_detect_encoding($euc_jp, 'UTF-8,EUC-JP,JIS') . "\n");
-print("EUC-JP: " . mb_detect_encoding($euc_jp, 'JIS,EUC-JP') . "\n");
-print("UTF-8: " . mb_detect_encoding($polish1, 'UTF-8,UTF-16,ISO-8859-1') . "\n");
-print("UTF-8: " . mb_detect_encoding($polish2, 'UTF-8,UTF-16,ISO-8859-1') . "\n");
+print("Empty String: " . mb_detect_encoding('') . "\n");
+print("Bad ASCII (non-strict): " . mb_detect_encoding("\xDD\x92", ['ASCII', 'UTF-8'], false) . "\n");
+print("Bad ASCII (strict): " . mb_detect_encoding("\xDD\x92", ['ASCII', 'UTF-8'], true) . "\n");
+print("Bad ASCII/UTF-8, with more errors for ASCII (non-strict): " . mb_detect_encoding("\xD6\x8A\x8A", ['ASCII', 'UTF-8'], false) . "\n");
+print("Bad ASCII/UTF-8, with more errors for ASCII (strict): " . var_export(mb_detect_encoding("\xD6\x8A\x8A", ['ASCII', 'UTF-8'], true), true) . "\n");
+
+print("SJIS: " . mb_detect_encoding($sjis, 'SJIS', true) . "\n");
+print("JIS: " . mb_detect_encoding($jis, 'JIS', true) . "\n");
+print("EUC-JP (strict): " . mb_detect_encoding($euc_jp, 'UTF-8,EUC-JP,JIS', true) . "\n");
+print("EUC-JP (non-strict): " . mb_detect_encoding($euc_jp, 'UTF-8,EUC-JP,JIS', false) . "\n");
+print("EUC-JP (fewer choices): " . mb_detect_encoding($euc_jp, 'JIS,EUC-JP') . "\n");
+print("UTF-8, polish string 1 (strict): " . mb_detect_encoding($polish1, 'UTF-8,UTF-16,ISO-8859-1', true) . "\n");
+print("UTF-8, polish string 1 (non-strict): " . mb_detect_encoding($polish1, 'UTF-8,UTF-16,ISO-8859-1', false) . "\n");
+print("UTF-8, polish string 2 (strict): " . mb_detect_encoding($polish2, 'UTF-8,UTF-16,ISO-8859-1', true) . "\n");
+print("UTF-8, polish string 2 (non-strict): " . mb_detect_encoding($polish2, 'UTF-8,UTF-16,ISO-8859-1', false) . "\n");
 
 echo "== ARRAY ENCODING LIST ==\n";
 
@@ -69,6 +78,25 @@ echo mb_detect_encoding($test, ['UTF-8', 'ISO-8859-1']), "\n"; // Should be UTF-
 echo mb_detect_encoding('abc', ['UUENCODE', 'UTF-8']), "\n";
 echo mb_detect_encoding('abc', ['UUENCODE', 'QPrint', 'HTML-ENTITIES', 'Base64', '7bit', '8bit', 'SJIS']), "\n";
 
+// This test case courtesy of Adrien Foulon
+// It depends on the below use of '+' being recognized as invalid UTF-7
+$css = 'input[type="radio"]:checked + img {
+    border: 5px solid #0083ca;
+}';
+echo mb_detect_encoding($css, mb_list_encodings(), true), "\n";
+
+// Test cases courtesy of Kirill Roskolii and Chris Burgess
+echo "-- Māori text --\n";
+
+echo mb_detect_encoding("Total Māori,31.5,33.3,31.8,33,36.4,33.2,33.2", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+// Names of native birds from Aotearoa:
+echo mb_detect_encoding("Kākā", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Whēkau", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Tīwaiwaka", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Kōtuku", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Kererū", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Tūī", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+
 echo "== DETECT ORDER ==\n";
 
 mb_detect_order('auto');
@@ -78,6 +106,17 @@ print("JIS: " . mb_detect_encoding($jis) . "\n");
 print("EUC-JP: " . mb_detect_encoding($euc_jp) . "\n");
 
 print("SJIS: " . mb_detect_encoding($sjis) . "\n");
+
+// Thanks to Ulrik Nielsen for the following tests; the hex strings are the same file, but in two
+// different text encodings
+// We do not have any strong hints showing that the second one is actually UTF-8...
+// but mb_detect_encoding still guesses UTF-8 because it is the first one in the list
+
+$win1252text = hex2bin("2320546869732066696c6520636f6e7461696e732057696e646f77732d3132353220656e636f646564206461746120616e642048544d4c20656e7469746965730a61626364650ae6f8e50af00a3c703e476f646461673c6272202f3e0a7b726561646f626a206f626a65637469643d24726573756c745b305d2e706172656e7469642061737369676e3d22646f63227d3c6272202f3e0a23205468697320697320746f20656e73757265207468617420646966666572656e74206b696e6473206f662048544d4c20656e74697469657320617265206265696e6720636f6e76657274656420636f72726563746c790af00ad00a2623383739313b0a262331373238373b0a262333383937393b0a2623353437333b0a616263646520e6f8e520f020d0203c703e476f646461673c6272202f3e207b726561646f626a206f626a65637469643d24726573756c745b305d2e706172656e7469642061737369676e3d22646f63227d3c6272202f3e202623383739313b20262331373238373b20262333383937393b202623353437333b0a232054686520666f6c6c6f77696e67206368617261637465727320617265207370656369616c206368617261637465727320746861742068617320646966666572656e7420636f646520706f696e747320696e2049534f2d383835392d3120616e642057696e646f77732d31323532202d207468617420776520646966666572656e746961746520636f72726563746c79206265747765656e2049534f2d383835392d3120616e642057696e646f77732d313235320a8c0a890a2320506f6c69736820737472696e670a50727a656a6426233337383b20646f2070727a65676c26233236313b64750a");
+echo mb_detect_encoding($win1252text, ['UTF-8', 'CP1252', 'ISO-8859-1'], true), "\n";
+
+$utf8text = hex2bin("2320546869732066696c6520636f6e7461696e73205554462d3820656e636f64656420646174610a61626364650ac3a6c3b8c3a50ac3b00a3c703e476f646461673c6272202f3e0a7b726561646f626a206f626a65637469643d24726573756c745b305d2e706172656e7469642061737369676e3d22646f63227d3c6272202f3e0a23205468697320697320746f20656e73757265207468617420646966666572656e74206b696e6473206f662048544d4c20656e74697469657320617265206265696e6720636f6e76657274656420636f72726563746c790ac3b00ac3900ae289970ae48e870ae9a1830ae195a10a616263646520c3a6c3b8c3a520c3b020c390203c703e476f646461673c6272202f3e207b726561646f626a206f626a65637469643d24726573756c745b305d2e706172656e7469642061737369676e3d22646f63227d3c6272202f3e20e2899720e48e8720e9a18320e195a10a232054686520666f6c6c6f77696e67206368617261637465727320617265207370656369616c206368617261637465727320746861742068617320646966666572656e7420636f646520706f696e747320696e2049534f2d383835392d3120616e642057696e646f77732d31323532202d207468617420776520646966666572656e746961746520636f72726563746c79206265747765656e2049534f2d383835392d3120616e642057696e646f77732d313235320ac5920ae280b00a2320506f6c69736820737472696e670a50727a656a64c5ba20646f2070727a65676cc48564750a");
+echo mb_detect_encoding($utf8text, ['UTF-8', 'CP1252', 'ISO-8859-1'], true), "\n";
 
 echo "== INVALID PARAMETER ==\n";
 
@@ -90,6 +129,30 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
+
+echo "== BOM TEST ==\n";
+
+$str = chr(239).chr(187).chr(191).chr(195).chr(180); // UTF-8 BOM followed by ô
+var_dump(mb_detect_encoding($str, ['UTF-8', 'ISO-8859-1'], true));
+// U+4E4E is the Chinese character 乎; normally it would be impossible to distinguish UTF-16LE from UTF-16BE
+// But the BOM can tell us which one it is
+var_dump(mb_detect_encoding("\xFE\xFF\x4E\x4E", ['UTF-8', 'ISO-8859-1', 'UTF-16LE', 'UTF-16BE'], true));
+var_dump(mb_detect_encoding("\xFF\xFE\x4E\x4E", ['UTF-8', 'ISO-8859-1', 'UTF-16LE', 'UTF-16BE'], true));
+// However, a BOM should only appear at the beginning of the string
+$detected = mb_detect_encoding("\x4E\x4E\xFE\xFF\x4E\x4E", ['UTF-8', 'ISO-8859-1', 'UTF-16LE', 'UTF-16BE'], true);
+if ($detected === 'UTF-16BE' || $detected === 'UTF-16LE')
+    die("Don't accept a BOM in the middle of a string");
+
+echo "== CHECK FUNCTION TEST ==\n";
+
+function testCheckFn($str, $encoding, $encodings) {
+    if (mb_check_encoding($str, $encoding))
+        die("Input string " . bin2hex($str) . " should not be valid in " . $encoding);
+    if (mb_detect_encoding($str, $encodings, true) === $encoding)
+        die("mb_detect_encoding should never return " . $encoding . " for invalid input string " . bin2hex($str));
+}
+
+testCheckFn("abc + abc", "UTF-7", "UTF-7,UTF-8");
 
 echo "== TORTURE TEST ==\n";
 
@@ -149,6 +212,7 @@ $jpEncodings = [
 test($jpStrings, $jpEncodings);
 
 $cnStrings = [
+    // Headline randomly picked from Chinese news
     "日本宫内厅宣布，真子公主和小室圭将在10月26日完婚。",
     // The Dream of Red Mansions
     "此开卷第一回也。作者自云曾历过一番梦幻之后，故将真事隐去，而借“通灵”说此《石头记》一书也",
@@ -312,17 +376,38 @@ test($czechStrings, $czechEncodings);
 
 test([$hungarian], ['UTF-8', 'UTF-16', 'Windows-1252']);
 
+$turkishStrings = [
+    // Random junk indiscriminately copied from randomly picked Wikipedia articles
+    "Samsun 19 Mayıs Stadyumu, Samsun'un Tekkeköy ilçesinde bulunan akıllı çok amaçlı stadyumdur. 33.919 koltuk kapasitesiyle Samsunspor'un iç saha maçlarına ev sahipliği yapmaktadır. Toplu Konut İdaresi tarafından yaptırılan ve 2017'de tamamlanan stadyum adını Mustafa Kemal'in Samsun'a çıktığı gün olan 19 Mayıs'tan almaktadır. İlk olarak Nisan 2011'de duyurulan proje 3 Aralık 2012'de Toplu Konut İdaresince yapılan ve Ali Acar İnşaat'ın kazandığı ihale ile resmiyete dökülmüş, 4 Ağustos 2013 tarihindeki temel atma töreni ile de inşa aşamasına geçilmiştir. İnşaatın başlangıç tarihinden itibaren en geç 800 gün içerisinde tamamlanması taahhüt edilse de UEFA'nın standartlarına uyum sağlamak için projede yenileme yapılması, çatının inşasıyla sorumlu şirketin iflas etmesi gibi sebeplerle tamamlanma süresi birkaç kez sarkmıştır. Bu bağlamda, ilk etapta 2014-15 sezonunda hazır hâle geleceği açıklanan stadyumun açılışı önce 2015-16, daha sonra 2016-17 sezonu başına ertelense de bu hedefler de yakalanamamıştır.",
+    "Lütf-i Celil (Osmanlı Türkçesi: ﻟﻄﻒ ﺟﻠﻴﻞ Anlamı: \"İlahi Lütuf\"), Osmanlı Donanması'nın Lütf-i Celil sınıfının öncü gemisi olan zırhlı savaş gemisidir. Başlangıçta Osmanlı İmparatorluğu'na bağlı özerk bir devlet olan Mısır Hidivliği tarafından sipariş edilen Lütf-i Celil, Osmanlı hükûmetinin Mısır'ı gemiyi teslim etmeye zorlaması ile Fransa'daki Forges et Chantiers de la Gironde tersanesinde yapım aşamasındayken Osmanlılara devredildi. Lütf-i Celil, 1877'de 93 Harbi sırasında aktif görevde bulundu ve Rus güçlerinin Tuna'yı geçmesini önlemek için operasyonlarda bulundu. 11 Mayıs'ta devriye gezerken bir Rus topçu bataryasıyla çatışmaya girdi.",
+    "Çoğu tarihçinin kanısına göre, ABD'nin üçüncü başkanı Jefferson, karısının ölümünün ardından kölesi Sally Hemings ile 38 yıl süren ilişkisi sırasında onun altı çocuğunun babası olmuştur.",
+    "2011 İran drama filmi Bir Ayrılık, 61. Berlin Film Festivali'nde Altın Ayı kazanarak, bu ödülü alan ilk İran filmi oldu.",
+    "Josef Bringas, isyan eden general Nikiforos Fokas'a karşı Konstantinopolis'e birlikler getirdi; asilerin Boğaziçi'ni geçmelerini engellemek için tüm gemileri tuttu; Nikiforos'un babası Bardas'ı rehin aldı ama başarılı olamadı."
+];
+// ISO-8859-9 and Windows-1254 are very similar and we can't really distinguish them from each other
+// But both of them should be distinguishable from UTF-8
+test($turkishStrings, ['UTF-8', 'UTF-16', 'ISO-8859-9']);
+test($turkishStrings, ['UTF-8', 'Windows-1254']);
+
 echo "Done!\n";
 
 ?>
 --EXPECT--
 == BASIC TEST ==
+Empty String: ASCII
+Bad ASCII (non-strict): UTF-8
+Bad ASCII (strict): UTF-8
+Bad ASCII/UTF-8, with more errors for ASCII (non-strict): UTF-8
+Bad ASCII/UTF-8, with more errors for ASCII (strict): false
 SJIS: SJIS
 JIS: JIS
-EUC-JP: EUC-JP
-EUC-JP: EUC-JP
-UTF-8: UTF-8
-UTF-8: UTF-8
+EUC-JP (strict): EUC-JP
+EUC-JP (non-strict): EUC-JP
+EUC-JP (fewer choices): EUC-JP
+UTF-8, polish string 1 (strict): UTF-8
+UTF-8, polish string 1 (non-strict): UTF-8
+UTF-8, polish string 2 (strict): UTF-8
+UTF-8, polish string 2 (non-strict): UTF-8
 == ARRAY ENCODING LIST ==
 JIS: JIS
 EUC-JP: EUC-JP
@@ -334,13 +419,29 @@ UTF-8
 UTF-8
 UTF-8
 SJIS
+UTF-8
+-- Māori text --
+UTF-8
+UTF-8
+UTF-8
+UTF-8
+UTF-8
+UTF-8
+UTF-8
 == DETECT ORDER ==
 JIS: JIS
 EUC-JP: EUC-JP
 SJIS: SJIS
+Windows-1252
+UTF-8
 == INVALID PARAMETER ==
 INT: EUC-JP
 EUC-JP: EUC-JP
 mb_detect_encoding(): Argument #2 ($encodings) contains invalid encoding "BAD"
+== BOM TEST ==
+string(5) "UTF-8"
+string(8) "UTF-16BE"
+string(8) "UTF-16LE"
+== CHECK FUNCTION TEST ==
 == TORTURE TEST ==
 Done!

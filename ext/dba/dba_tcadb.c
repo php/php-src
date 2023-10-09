@@ -39,16 +39,16 @@ DBA_OPEN_FUNC(tcadb)
 	if (tcadb) {
 		switch(info->mode) {
 			case DBA_READER:
-				spprintf(&path_string, 0, "%s#mode=r", info->path);
+				spprintf(&path_string, 0, "%s#mode=r", ZSTR_VAL(info->path));
 				break;
 			case DBA_WRITER:
-				spprintf(&path_string, 0, "%s#mode=w", info->path);
+				spprintf(&path_string, 0, "%s#mode=w", ZSTR_VAL(info->path));
 				break;
 			case DBA_CREAT:
-				spprintf(&path_string, 0, "%s#mode=wc", info->path);
+				spprintf(&path_string, 0, "%s#mode=wc", ZSTR_VAL(info->path));
 				break;
 			case DBA_TRUNC:
-				spprintf(&path_string, 0, "%s#mode=wct", info->path);
+				spprintf(&path_string, 0, "%s#mode=wct", ZSTR_VAL(info->path));
 				break;
 			default:
 				tcadbdel(tcadb);

@@ -4,61 +4,63 @@
 
 /**
  * @var int
- * @cname GMP_ROUND_ZERO
+ * @cvalue GMP_ROUND_ZERO
  */
 const GMP_ROUND_ZERO = UNKNOWN;
 /**
  * @var int
- * @cname GMP_ROUND_PLUSINF
+ * @cvalue GMP_ROUND_PLUSINF
  */
 const GMP_ROUND_PLUSINF = UNKNOWN;
 /**
  * @var int
- * @cname GMP_ROUND_MINUSINF
+ * @cvalue GMP_ROUND_MINUSINF
  */
 const GMP_ROUND_MINUSINF = UNKNOWN;
 
 #ifdef mpir_version
 /**
  * @var string
- * @cname GMP_MPIR_VERSION_STRING
+ * @cvalue GMP_MPIR_VERSION_STRING
  */
 const GMP_MPIR_VERSION = UNKNOWN;
 #endif
 /**
  * @var string
- * @cname GMP_VERSION_STRING
+ * @cvalue GMP_VERSION_STRING
  */
 const GMP_VERSION = UNKNOWN;
 
 /**
  * @var int
- * @cname GMP_MSW_FIRST
+ * @cvalue GMP_MSW_FIRST
  */
 const GMP_MSW_FIRST = UNKNOWN;
 /**
  * @var int
- * @cname GMP_LSW_FIRST
+ * @cvalue GMP_LSW_FIRST
  */
 const GMP_LSW_FIRST = UNKNOWN;
 /**
  * @var int
- * @cname GMP_LITTLE_ENDIAN
+ * @cvalue GMP_LITTLE_ENDIAN
  */
 const GMP_LITTLE_ENDIAN = UNKNOWN;
 /**
  * @var int
- * @cname GMP_BIG_ENDIAN
+ * @cvalue GMP_BIG_ENDIAN
  */
 const GMP_BIG_ENDIAN = UNKNOWN;
 /**
  * @var int
- * @cname GMP_NATIVE_ENDIAN
+ * @cvalue GMP_NATIVE_ENDIAN
  */
 const GMP_NATIVE_ENDIAN = UNKNOWN;
 
 class GMP
 {
+    public function __construct(int|string $num = 0, int $base = 0) {}
+
     public function __serialize(): array {}
 
     public function __unserialize(array $data): void {}

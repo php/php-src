@@ -1,5 +1,7 @@
 --TEST--
 Bug #39542 (Behaviour of require_once/include_once different to < 5.2.0)
+--INI--
+error_log=
 --FILE--
 <?php
 $oldcwd = getcwd();

@@ -65,7 +65,4 @@ if test "$PHP_ZIP" != "no"; then
   PHP_NEW_EXTENSION(zip, $PHP_ZIP_SOURCES, $ext_shared)
 
   PHP_SUBST(ZIP_SHARED_LIBADD)
-
-  dnl so we always include the known-good working hack.
-  PHP_ADD_MAKEFILE_FRAGMENT
 fi

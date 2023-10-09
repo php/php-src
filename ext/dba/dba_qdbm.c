@@ -37,16 +37,16 @@ DBA_OPEN_FUNC(qdbm)
 
 	switch(info->mode) {
 		case DBA_READER:
-			dbf = dpopen(info->path, DP_OREADER, 0);
+			dbf = dpopen(ZSTR_VAL(info->path), DP_OREADER, 0);
 			break;
 		case DBA_WRITER:
-			dbf = dpopen(info->path, DP_OWRITER, 0);
+			dbf = dpopen(ZSTR_VAL(info->path), DP_OWRITER, 0);
 			break;
 		case DBA_CREAT:
-			dbf = dpopen(info->path, DP_OWRITER | DP_OCREAT, 0);
+			dbf = dpopen(ZSTR_VAL(info->path), DP_OWRITER | DP_OCREAT, 0);
 			break;
 		case DBA_TRUNC:
-			dbf = dpopen(info->path, DP_OWRITER | DP_OCREAT | DP_OTRUNC, 0);
+			dbf = dpopen(ZSTR_VAL(info->path), DP_OWRITER | DP_OCREAT | DP_OTRUNC, 0);
 			break;
 		default:
 			return FAILURE;

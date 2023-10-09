@@ -161,6 +161,23 @@ TSRM_API bool tsrm_startup(int expected_threads, int expected_resources, int deb
 	return 1;
 }/*}}}*/
 
+static void ts_free_resources(tsrm_tls_entry *thread_resources)
+{
+	/* Need to destroy in reverse order to respect dependencies. */
+	for (int i = thread_resources->count - 1; i >= 0; i--) {
+		if (!resource_types_table[i].done) {
+			if (resource_types_table[i].dtor) {
+				resource_types_table[i].dtor(thread_resources->storage[i]);
+			}
+
+			if (!resource_types_table[i].fast_offset) {
+				free(thread_resources->storage[i]);
+			}
+		}
+	}
+
+	free(thread_resources->storage);
+}
 
 /* Shutdown TSRM (call once for the entire process) */
 TSRM_API void tsrm_shutdown(void)
@@ -182,22 +199,12 @@ TSRM_API void tsrm_shutdown(void)
 
 		while (p) {
 			next_p = p->next;
-			for (int j=0; j<p->count; j++) {
-				if (p->storage[j]) {
-					if (resource_types_table) {
-						if (!resource_types_table[j].done) {
-							if (resource_types_table[j].dtor) {
-								resource_types_table[j].dtor(p->storage[j]);
-							}
-
-							if (!resource_types_table[j].fast_offset) {
-								free(p->storage[j]);
-							}
-						}
-					}
-				}
+			if (resource_types_table) {
+				/* This call will already free p->storage for us */
+				ts_free_resources(p);
+			} else {
+				free(p->storage);
 			}
-			free(p->storage);
 			free(p);
 			p = next_p;
 		}
@@ -361,7 +368,13 @@ TSRM_API ts_rsrc_id ts_allocate_fast_id(ts_rsrc_id *rsrc_id, size_t *offset, siz
 	return *rsrc_id;
 }/*}}}*/
 
+static void set_thread_local_storage_resource_to(tsrm_tls_entry *thread_resource)
+{
+	tsrm_tls_set(thread_resource);
+	TSRMLS_CACHE = thread_resource;
+}
 
+/* Must be called with tsmm_mutex held */
 static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_T thread_id)
 {/*{{{*/
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Creating data structures for thread %x", thread_id));
@@ -375,8 +388,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 	(*thread_resources_ptr)->next = NULL;
 
 	/* Set thread local storage to this new thread resources structure */
-	tsrm_tls_set(*thread_resources_ptr);
-	TSRMLS_CACHE = *thread_resources_ptr;
+	set_thread_local_storage_resource_to(*thread_resources_ptr);
 
 	if (tsrm_new_thread_begin_handler) {
 		tsrm_new_thread_begin_handler(thread_id);
@@ -399,17 +411,14 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 	if (tsrm_new_thread_end_handler) {
 		tsrm_new_thread_end_handler(thread_id);
 	}
-
-	tsrm_mutex_unlock(tsmm_mutex);
 }/*}}}*/
-
 
 /* fetches the requested resource for the current thread */
 TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 {/*{{{*/
 	THREAD_T thread_id;
 	int hash_value;
-	tsrm_tls_entry *thread_resources;
+	tsrm_tls_entry *thread_resources, **last_thread_resources;
 
 	if (!th_id) {
 		/* Fast path for looking up the resources for the current
@@ -440,25 +449,55 @@ TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 
 	if (!thread_resources) {
 		allocate_new_resource(&tsrm_tls_table[hash_value], thread_id);
+		tsrm_mutex_unlock(tsmm_mutex);
 		return ts_resource_ex(id, &thread_id);
 	} else {
-		 do {
-			if (thread_resources->thread_id == thread_id) {
-				break;
-			}
+		 last_thread_resources = &tsrm_tls_table[hash_value];
+		 while (thread_resources->thread_id != thread_id) {
+			last_thread_resources = &thread_resources->next;
 			if (thread_resources->next) {
 				thread_resources = thread_resources->next;
 			} else {
 				allocate_new_resource(&thread_resources->next, thread_id);
+				tsrm_mutex_unlock(tsmm_mutex);
 				return ts_resource_ex(id, &thread_id);
-				/*
-				 * thread_resources = thread_resources->next;
-				 * break;
-				 */
 			}
-		 } while (thread_resources);
+		 }
 	}
+
+	/* It's possible that the current thread resources are requested, and that we get here.
+	 * This means that the TSRM key pointer and cached pointer are NULL, but there is still
+	 * a thread resource associated with this ID in the hashtable. This can occur if a thread
+	 * goes away, but its resources are never cleaned up, and then that thread ID is reused.
+	 * Since we don't always have a way to know when a thread goes away, we can't clean up
+	 * the thread's resources before the new thread spawns.
+	 * To solve this issue, we'll free up the old thread resources gracefully (gracefully
+	 * because there might still be resources open like database connection which need to
+	 * be shut down cleanly). After freeing up, we'll create the new resources for this thread
+	 * as if the stale resources never existed in the first place. From that point forward,
+	 * it is as if that situation never occurred.
+	 * The fact that this situation happens isn't that bad because a child process containing
+	 * threads will eventually be respawned anyway by the SAPI, so the stale threads won't last
+	 * forever. */
+	TSRM_ASSERT(thread_resources->thread_id == thread_id);
+	if (thread_id == tsrm_thread_id() && !tsrm_tls_get()) {
+		tsrm_tls_entry *next = thread_resources->next;
+		/* In case that extensions don't use the pointer passed from the dtor, but incorrectly
+		 * use the global pointer, we need to setup the global pointer temporarily here. */
+		set_thread_local_storage_resource_to(thread_resources);
+		/* Free up the old resource from the old thread instance */
+		ts_free_resources(thread_resources);
+		free(thread_resources);
+		/* Allocate a new resource at the same point in the linked list, and relink the next pointer */
+		allocate_new_resource(last_thread_resources, thread_id);
+		thread_resources = *last_thread_resources;
+		thread_resources->next = next;
+		/* We don't have to tail-call ts_resource_ex, we can take the fast path to the return
+		 * because we already have the correct pointer. */
+	}
+
 	tsrm_mutex_unlock(tsmm_mutex);
+
 	/* Read a specific resource from the thread's resources.
 	 * This is called outside of a mutex, so have to be aware about external
 	 * changes to the structure as we read it.
@@ -483,17 +522,7 @@ void ts_free_thread(void)
 
 	while (thread_resources) {
 		if (thread_resources->thread_id == thread_id) {
-			for (int i=0; i<thread_resources->count; i++) {
-				if (resource_types_table[i].dtor) {
-					resource_types_table[i].dtor(thread_resources->storage[i]);
-				}
-			}
-			for (int i=0; i<thread_resources->count; i++) {
-				if (!resource_types_table[i].fast_offset) {
-					free(thread_resources->storage[i]);
-				}
-			}
-			free(thread_resources->storage);
+			ts_free_resources(thread_resources);
 			if (last) {
 				last->next = thread_resources->next;
 			} else {
@@ -777,6 +806,11 @@ TSRM_API const char *tsrm_api_name(void)
 #else
 	return "POSIX Threads";
 #endif
+}/*}}}*/
+
+TSRM_API bool tsrm_is_managed_thread(void)
+{/*{{{*/
+	return tsrm_tls_get() ? true : false;
 }/*}}}*/
 
 #endif /* ZTS */

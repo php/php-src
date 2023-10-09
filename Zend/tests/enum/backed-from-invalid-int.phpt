@@ -16,4 +16,4 @@ try {
 
 ?>
 --EXPECT--
-2 is not a valid backing value for enum "Foo"
+2 is not a valid backing value for enum Foo

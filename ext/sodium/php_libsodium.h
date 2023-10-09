@@ -26,6 +26,14 @@ extern zend_module_entry sodium_module_entry;
 # include "TSRM.h"
 #endif
 
+#define SODIUM_LIBRARY_VERSION() (char *) (void *) sodium_version_string()
+
+#define SODIUM_CRYPTO_BOX_KEYPAIRBYTES() crypto_box_SECRETKEYBYTES + crypto_box_PUBLICKEYBYTES
+
+#define SODIUM_CRYPTO_KX_KEYPAIRBYTES() crypto_kx_SECRETKEYBYTES + crypto_kx_PUBLICKEYBYTES
+
+#define SODIUM_CRYPTO_SIGN_KEYPAIRBYTES() crypto_sign_SECRETKEYBYTES + crypto_sign_PUBLICKEYBYTES
+
 PHP_MINIT_FUNCTION(sodium);
 PHP_MINIT_FUNCTION(sodium_password_hash);
 PHP_MSHUTDOWN_FUNCTION(sodium);

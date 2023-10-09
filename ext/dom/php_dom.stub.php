@@ -4,236 +4,236 @@
 
 /**
  * @var int
- * @cname XML_ELEMENT_NODE
+ * @cvalue XML_ELEMENT_NODE
  */
 const XML_ELEMENT_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_ATTRIBUTE_NODE
+ * @cvalue XML_ATTRIBUTE_NODE
  */
 const XML_ATTRIBUTE_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_TEXT_NODE
+ * @cvalue XML_TEXT_NODE
  */
 const XML_TEXT_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_CDATA_SECTION_NODE
+ * @cvalue XML_CDATA_SECTION_NODE
  */
 const XML_CDATA_SECTION_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_ENTITY_REF_NODE
+ * @cvalue XML_ENTITY_REF_NODE
  */
 const XML_ENTITY_REF_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_ENTITY_NODE
+ * @cvalue XML_ENTITY_NODE
  */
 const XML_ENTITY_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_PI_NODE
+ * @cvalue XML_PI_NODE
  */
 const XML_PI_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_COMMENT_NODE
+ * @cvalue XML_COMMENT_NODE
  */
 const XML_COMMENT_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_DOCUMENT_NODE
+ * @cvalue XML_DOCUMENT_NODE
  */
 const XML_DOCUMENT_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_DOCUMENT_TYPE_NODE
+ * @cvalue XML_DOCUMENT_TYPE_NODE
  */
 const XML_DOCUMENT_TYPE_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_DOCUMENT_FRAG_NODE
+ * @cvalue XML_DOCUMENT_FRAG_NODE
  */
 const XML_DOCUMENT_FRAG_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_NOTATION_NODE
+ * @cvalue XML_NOTATION_NODE
  */
 const XML_NOTATION_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_HTML_DOCUMENT_NODE
+ * @cvalue XML_HTML_DOCUMENT_NODE
  */
 const XML_HTML_DOCUMENT_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_DTD_NODE
+ * @cvalue XML_DTD_NODE
  */
 const XML_DTD_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_ELEMENT_DECL
+ * @cvalue XML_ELEMENT_DECL
  */
 const XML_ELEMENT_DECL_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_ATTRIBUTE_DECL
+ * @cvalue XML_ATTRIBUTE_DECL
  */
 const XML_ATTRIBUTE_DECL_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_ENTITY_DECL
+ * @cvalue XML_ENTITY_DECL
  */
 const XML_ENTITY_DECL_NODE = UNKNOWN;
 /**
  * @var int
- * @cname XML_NAMESPACE_DECL
+ * @cvalue XML_NAMESPACE_DECL
  */
 const XML_NAMESPACE_DECL_NODE = UNKNOWN;
 #ifdef XML_GLOBAL_NAMESPACE
 /**
  * @var int
- * @cname XML_GLOBAL_NAMESPACE
+ * @cvalue XML_GLOBAL_NAMESPACE
  */
 const XML_GLOBAL_NAMESPACE = UNKNOWN;
 #endif
 
 /**
  * @var int
- * @cname XML_LOCAL_NAMESPACE
+ * @cvalue XML_LOCAL_NAMESPACE
  */
 const XML_LOCAL_NAMESPACE = UNKNOWN;
 /**
  * @var int
- * @cname XML_ATTRIBUTE_CDATA
+ * @cvalue XML_ATTRIBUTE_CDATA
  */
 const XML_ATTRIBUTE_CDATA = UNKNOWN;
 /**
  * @var int
- * @cname XML_ATTRIBUTE_ID
+ * @cvalue XML_ATTRIBUTE_ID
  */
 const XML_ATTRIBUTE_ID = UNKNOWN;
 /**
  * @var int
- * @cname XML_ATTRIBUTE_IDREF
+ * @cvalue XML_ATTRIBUTE_IDREF
  */
 const XML_ATTRIBUTE_IDREF = UNKNOWN;
 /**
  * @var int
- * @cname XML_ATTRIBUTE_IDREFS
+ * @cvalue XML_ATTRIBUTE_IDREFS
  */
 const XML_ATTRIBUTE_IDREFS = UNKNOWN;
 /**
  * @var int
- * @cname XML_ATTRIBUTE_ENTITIES
+ * @cvalue XML_ATTRIBUTE_ENTITIES
  */
 const XML_ATTRIBUTE_ENTITY = UNKNOWN;
 /**
  * @var int
- * @cname XML_ATTRIBUTE_NMTOKEN
+ * @cvalue XML_ATTRIBUTE_NMTOKEN
  */
 const XML_ATTRIBUTE_NMTOKEN = UNKNOWN;
 /**
  * @var int
- * @cname XML_ATTRIBUTE_NMTOKENS
+ * @cvalue XML_ATTRIBUTE_NMTOKENS
  */
 const XML_ATTRIBUTE_NMTOKENS = UNKNOWN;
 /**
  * @var int
- * @cname XML_ATTRIBUTE_ENUMERATION
+ * @cvalue XML_ATTRIBUTE_ENUMERATION
  */
 const XML_ATTRIBUTE_ENUMERATION = UNKNOWN;
 /**
  * @var int
- * @cname XML_ATTRIBUTE_NOTATION
+ * @cvalue XML_ATTRIBUTE_NOTATION
  */
 const XML_ATTRIBUTE_NOTATION = UNKNOWN;
 
 /**
  * @var int
- * @cname PHP_ERR
+ * @cvalue PHP_ERR
  */
 const DOM_PHP_ERR = UNKNOWN;
 /**
  * @var int
- * @cname INDEX_SIZE_ERR
+ * @cvalue INDEX_SIZE_ERR
  */
 const DOM_INDEX_SIZE_ERR = UNKNOWN;
 /**
  * @var int
- * @cname DOMSTRING_SIZE_ERR
+ * @cvalue DOMSTRING_SIZE_ERR
  */
 const DOMSTRING_SIZE_ERR = UNKNOWN;
 /**
  * @var int
- * @cname HIERARCHY_REQUEST_ERR
+ * @cvalue HIERARCHY_REQUEST_ERR
  */
 const DOM_HIERARCHY_REQUEST_ERR = UNKNOWN;
 /**
  * @var int
- * @cname WRONG_DOCUMENT_ERR
+ * @cvalue WRONG_DOCUMENT_ERR
  */
 const DOM_WRONG_DOCUMENT_ERR = UNKNOWN;
 /**
  * @var int
- * @cname INVALID_CHARACTER_ERR
+ * @cvalue INVALID_CHARACTER_ERR
  */
 const DOM_INVALID_CHARACTER_ERR = UNKNOWN;
 /**
  * @var int
- * @cname NO_DATA_ALLOWED_ERR
+ * @cvalue NO_DATA_ALLOWED_ERR
  */
 const DOM_NO_DATA_ALLOWED_ERR = UNKNOWN;
 /**
  * @var int
- * @cname NO_MODIFICATION_ALLOWED_ERR
+ * @cvalue NO_MODIFICATION_ALLOWED_ERR
  */
 const DOM_NO_MODIFICATION_ALLOWED_ERR = UNKNOWN;
 /**
  * @var int
- * @cname NOT_FOUND_ERR
+ * @cvalue NOT_FOUND_ERR
  */
 const DOM_NOT_FOUND_ERR = UNKNOWN;
 /**
  * @var int
- * @cname NOT_SUPPORTED_ERR
+ * @cvalue NOT_SUPPORTED_ERR
  */
 const DOM_NOT_SUPPORTED_ERR = UNKNOWN;
 /**
  * @var int
- * @cname INUSE_ATTRIBUTE_ERR
+ * @cvalue INUSE_ATTRIBUTE_ERR
  */
 const DOM_INUSE_ATTRIBUTE_ERR = UNKNOWN;
 /**
  * @var int
- * @cname INVALID_STATE_ERR
+ * @cvalue INVALID_STATE_ERR
  */
 const DOM_INVALID_STATE_ERR = UNKNOWN;
 /**
  * @var int
- * @cname SYNTAX_ERR
+ * @cvalue SYNTAX_ERR
  */
 const DOM_SYNTAX_ERR = UNKNOWN;
 /**
  * @var int
- * @cname INVALID_MODIFICATION_ERR
+ * @cvalue INVALID_MODIFICATION_ERR
  */
 const DOM_INVALID_MODIFICATION_ERR = UNKNOWN;
 /**
  * @var int
- * @cname NAMESPACE_ERR
+ * @cvalue NAMESPACE_ERR
  */
 const DOM_NAMESPACE_ERR = UNKNOWN;
 /**
  * @var int
- * @cname INVALID_ACCESS_ERR
+ * @cvalue INVALID_ACCESS_ERR
  */
 const DOM_INVALID_ACCESS_ERR = UNKNOWN;
 /**
  * @var int
- * @cname VALIDATION_ERR
+ * @cvalue VALIDATION_ERR
  */
 const DOM_VALIDATION_ERR = UNKNOWN;
 
@@ -275,6 +275,9 @@ interface DOMParentNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void;
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void;
 }
 
 interface DOMChildNode
@@ -294,6 +297,13 @@ interface DOMChildNode
 /** @not-serializable */
 class DOMNode
 {
+    public const int DOCUMENT_POSITION_DISCONNECTED = 0x01;
+    public const int DOCUMENT_POSITION_PRECEDING = 0x02;
+    public const int DOCUMENT_POSITION_FOLLOWING = 0x04;
+    public const int DOCUMENT_POSITION_CONTAINS = 0x08;
+    public const int DOCUMENT_POSITION_CONTAINED_BY = 0x10;
+    public const int DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 0x20;
+
     /** @readonly */
     public string $nodeName;
 
@@ -304,6 +314,9 @@ class DOMNode
 
     /** @readonly */
     public ?DOMNode $parentNode;
+
+    /** @readonly */
+    public ?DOMElement $parentElement;
 
     /** @readonly */
     public DOMNodeList $childNodes;
@@ -322,6 +335,9 @@ class DOMNode
 
     /** @readonly */
     public ?DOMNamedNodeMap $attributes;
+
+    /** @readonly */
+    public bool $isConnected;
 
     /** @readonly */
     public ?DOMDocument $ownerDocument;
@@ -372,6 +388,8 @@ class DOMNode
     /** @tentative-return-type */
     public function isSameNode(DOMNode $otherNode): bool {}
 
+    public function isEqualNode(?DOMNode $otherNode): bool {}
+
     /** @tentative-return-type */
     public function isSupported(string $feature, string $version): bool {}
 
@@ -389,6 +407,12 @@ class DOMNode
 
     /** @return DOMNode|false */
     public function replaceChild(DOMNode $node, DOMNode $child) {}
+
+    public function contains(DOMNode|DOMNameSpaceNode|null $other): bool {}
+
+    public function getRootNode(?array $options = null): DOMNode {}
+
+    public function compareDocumentPosition(DOMNode $other): int {}
 }
 
 /** @not-serializable */
@@ -413,10 +437,16 @@ class DOMNameSpaceNode
     public ?string $namespaceURI;
 
     /** @readonly */
+    public bool $isConnected;
+
+    /** @readonly */
     public ?DOMDocument $ownerDocument;
 
     /** @readonly */
     public ?DOMNode $parentNode;
+
+    /** @readonly */
+    public ?DOMElement $parentElement;
 }
 
 class DOMImplementation
@@ -450,11 +480,23 @@ class DOMDocumentFragment extends DOMNode implements DOMParentNode
     /** @tentative-return-type */
     public function appendXML(string $data): bool {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::append
+     */
     public function append(...$nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::prepend
+     */
     public function prepend(...$nodes): void {}
+
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMDocument::replaceChildren
+     */
+    public function replaceChildren(...$nodes): void {}
 }
 
 class DOMNodeList implements IteratorAggregate, Countable
@@ -467,7 +509,7 @@ class DOMNodeList implements IteratorAggregate, Countable
 
     public function getIterator(): Iterator {}
 
-    /** @return DOMNode|DOMNameSpaceNode|null */
+    /** @return DOMElement|DOMNode|DOMNameSpaceNode|null */
     public function item(int $index) {}
 }
 
@@ -485,7 +527,7 @@ class DOMCharacterData extends DOMNode implements DOMChildNode
     public ?DOMElement $nextElementSibling;
 
     /** @tentative-return-type */
-    public function appendData(string $data): bool {}
+    public function appendData(string $data): true {}
 
     /** @return string|false */
     public function substringData(int $offset, int $count) {}
@@ -499,15 +541,25 @@ class DOMCharacterData extends DOMNode implements DOMChildNode
     /** @tentative-return-type */
     public function replaceData(int $offset, int $count, string $data): bool {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::replaceWith
+     */
     public function replaceWith(...$nodes): void {}
 
+    /** @implementation-alias DOMElement::remove */
     public function remove(): void {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::before
+     */
     public function before(... $nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::after
+     */
     public function after(...$nodes): void {}
 }
 
@@ -538,6 +590,10 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
     /** @readonly */
     public string $tagName;
 
+    public string $className;
+
+    public string $id;
+
     /** @readonly */
     public mixed $schemaTypeInfo = null;
 
@@ -560,6 +616,8 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
 
     /** @tentative-return-type */
     public function getAttribute(string $qualifiedName): string {}
+
+    public function getAttributeNames(): array {}
 
     /** @tentative-return-type */
     public function getAttributeNS(?string $namespace, string $localName): string {}
@@ -612,6 +670,8 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
     /** @tentative-return-type */
     public function setIdAttributeNode(DOMAttr $attr, bool $isId): void {}
 
+    public function toggleAttribute(string $qualifiedName, ?bool $force = null): bool {}
+
     public function remove(): void {}
 
     /** @param DOMNode|string $nodes */
@@ -628,6 +688,13 @@ class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
 
     /** @param DOMNode|string $nodes */
     public function prepend(...$nodes): void {}
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void {}
+
+    public function insertAdjacentElement(string $where, DOMElement $element): ?DOMElement {}
+
+    public function insertAdjacentText(string $where, string $data): void {}
 }
 
 class DOMDocument extends DOMNode implements DOMParentNode
@@ -668,7 +735,7 @@ class DOMDocument extends DOMNode implements DOMParentNode
      * @readonly
      * @deprecated
      */
-    public mixed $config = null;
+    public mixed $config;
 
     public bool $formatOutput;
 
@@ -735,11 +802,11 @@ class DOMDocument extends DOMNode implements DOMParentNode
     /** @return DOMNode|false */
     public function importNode(DOMNode $node, bool $deep = false) {}
 
-    /** @return DOMDocument|bool */
-    public function load(string $filename, int $options = 0) {} // TODO return type shouldn't depend on the call scope
+    /** @tentative-return-type */
+    public function load(string $filename, int $options = 0): bool {}
 
-    /** @return DOMDocument|bool */
-    public function loadXML(string $source, int $options = 0) {} // TODO return type shouldn't depend on the call scope
+    /** @tentative-return-type */
+    public function loadXML(string $source, int $options = 0): bool {}
 
     /** @tentative-return-type */
     public function normalizeDocument(): void {}
@@ -751,11 +818,11 @@ class DOMDocument extends DOMNode implements DOMParentNode
     public function save(string $filename, int $options = 0): int|false {}
 
 #ifdef LIBXML_HTML_ENABLED
-    /** @return DOMDocument|bool */
-    public function loadHTML(string $source, int $options = 0) {} // TODO return type shouldn't depend on the call scope
+    /** @tentative-return-type */
+    public function loadHTML(string $source, int $options = 0): bool {}
 
-    /** @return DOMDocument|bool */
-    public function loadHTMLFile(string $filename, int $options = 0) {} // TODO return type shouldn't depend on the call scope
+    /** @tentative-return-type */
+    public function loadHTMLFile(string $filename, int $options = 0): bool {}
 
     /** @tentative-return-type */
     public function saveHTML(?DOMNode $node = null): string|false {}
@@ -787,14 +854,23 @@ class DOMDocument extends DOMNode implements DOMParentNode
     /** @tentative-return-type */
     public function xinclude(int $options = 0): int|false {}
 
-    /** @return DOMNode|false */
-    public function adoptNode(DOMNode $node) {}
+    /** @tentative-return-type */
+    public function adoptNode(DOMNode $node): DOMNode|false {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::append
+     */
     public function append(...$nodes): void {}
 
-    /** @param DOMNode|string $nodes */
+    /**
+     * @param DOMNode|string $nodes
+     * @implementation-alias DOMElement::prepend
+     */
     public function prepend(...$nodes): void {}
+
+    /** @param DOMNode|string $nodes */
+    public function replaceChildren(...$nodes): void {}
 }
 
 final class DOMException extends Exception

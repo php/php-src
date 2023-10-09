@@ -85,7 +85,7 @@ PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
 	isc_get_client_version(version);
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "PDO Driver for Firebird", "enabled");
+	php_info_print_table_row(2, "PDO Driver for Firebird", "enabled");
 	php_info_print_table_row(2, "Client Library Version", version);
 	php_info_print_table_end();
 }

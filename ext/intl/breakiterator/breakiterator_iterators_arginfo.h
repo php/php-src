@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f72f108e37541ac042bb25249ef226211c344189 */
+ * Stub hash: 2b201b4c2f4fb706484085c9fff483d66a7285ea */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IntlPartsIterator_getBreakIterator, 0, 0, IntlBreakIterator, 0)
 ZEND_END_ARG_INFO()
@@ -25,6 +25,24 @@ static zend_class_entry *register_class_IntlPartsIterator(zend_class_entry *clas
 	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", class_IntlPartsIterator_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_IntlIterator);
 	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+
+	zval const_KEY_SEQUENTIAL_value;
+	ZVAL_LONG(&const_KEY_SEQUENTIAL_value, PARTS_ITERATOR_KEY_SEQUENTIAL);
+	zend_string *const_KEY_SEQUENTIAL_name = zend_string_init_interned("KEY_SEQUENTIAL", sizeof("KEY_SEQUENTIAL") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_KEY_SEQUENTIAL_name, &const_KEY_SEQUENTIAL_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_KEY_SEQUENTIAL_name);
+
+	zval const_KEY_LEFT_value;
+	ZVAL_LONG(&const_KEY_LEFT_value, PARTS_ITERATOR_KEY_LEFT);
+	zend_string *const_KEY_LEFT_name = zend_string_init_interned("KEY_LEFT", sizeof("KEY_LEFT") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_KEY_LEFT_name, &const_KEY_LEFT_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_KEY_LEFT_name);
+
+	zval const_KEY_RIGHT_value;
+	ZVAL_LONG(&const_KEY_RIGHT_value, PARTS_ITERATOR_KEY_RIGHT);
+	zend_string *const_KEY_RIGHT_name = zend_string_init_interned("KEY_RIGHT", sizeof("KEY_RIGHT") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_KEY_RIGHT_name, &const_KEY_RIGHT_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_KEY_RIGHT_name);
 
 	return class_entry;
 }

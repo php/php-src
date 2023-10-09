@@ -31,6 +31,7 @@ PHPAPI ZEND_COLD void php_info_print_css(void) /* {{{ */
 	PUTS("th {position: sticky; top: 0; background: inherit;}\n");
 	PUTS("h1 {font-size: 150%;}\n");
 	PUTS("h2 {font-size: 125%;}\n");
+	PUTS("h2 a:link, h2 a:visited{color: inherit; background: inherit;}\n");
 	PUTS(".p {text-align: left;}\n");
 	PUTS(".e {background-color: #ccf; width: 300px; font-weight: bold;}\n");
 	PUTS(".h {background-color: #99c; font-weight: bold;}\n");

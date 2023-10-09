@@ -21,7 +21,6 @@
 
 
 #include "php_intl.h"
-#include "php_intl_arginfo.h"
 #include "intl_error.h"
 #include "collator/collator_class.h"
 #include "collator/collator.h"
@@ -30,7 +29,6 @@
 
 #include "converter/converter.h"
 
-#include "formatter/formatter.h"
 #include "formatter/formatter_class.h"
 #include "formatter/formatter_format.h"
 
@@ -38,7 +36,6 @@
 
 #include "msgformat/msgformat_class.h"
 
-#include "normalizer/normalizer.h"
 #include "normalizer/normalizer_class.h"
 
 #include "locale/locale.h"
@@ -61,13 +58,12 @@
 #include "breakiterator/breakiterator_class.h"
 #include "breakiterator/breakiterator_iterators.h"
 
+#include <unicode/uidna.h>
 #include "idn/idn.h"
 #include "uchar/uchar.h"
 
 # include "spoofchecker/spoofchecker_class.h"
-# include "spoofchecker/spoofchecker.h"
 
-#include "common/common_error.h"
 #include "common/common_enum.h"
 
 #include <unicode/uloc.h>
@@ -75,6 +71,8 @@
 #include <ext/standard/info.h>
 
 #include "php_ini.h"
+
+#include "php_intl_arginfo.h"
 
 /*
  * locale_get_default has a conflict since ICU also has
@@ -148,45 +146,24 @@ PHP_MINIT_FUNCTION( intl )
 	/* For the default locale php.ini setting */
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_LONG_CONSTANT("INTL_MAX_LOCALE_LEN", INTL_MAX_LOCALE_LEN, CONST_PERSISTENT | CONST_CS);
-	REGISTER_STRING_CONSTANT("INTL_ICU_VERSION", U_ICU_VERSION, CONST_PERSISTENT | CONST_CS);
-#ifdef U_ICU_DATA_VERSION
-	REGISTER_STRING_CONSTANT("INTL_ICU_DATA_VERSION", U_ICU_DATA_VERSION, CONST_PERSISTENT | CONST_CS);
-#endif
+	register_php_intl_symbols(module_number);
 
-	/* Register 'Collator' PHP class */
-	collator_register_Collator_class(  );
-
-	/* Expose Collator constants to PHP scripts */
-	collator_register_constants( INIT_FUNC_ARGS_PASSTHRU );
+	/* Register collator symbols and classes */
+	collator_register_Collator_symbols(module_number);
 
 	/* Register 'NumberFormatter' PHP class */
 	formatter_register_class(  );
 
-	/* Expose NumberFormatter constants to PHP scripts */
-	formatter_register_constants( INIT_FUNC_ARGS_PASSTHRU );
-
 	/* Register 'Normalizer' PHP class */
 	normalizer_register_Normalizer_class(  );
-
-	/* Expose Normalizer constants to PHP scripts */
-	normalizer_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
 	/* Register 'Locale' PHP class */
 	locale_register_Locale_class(  );
 
-	/* Expose Locale constants to PHP scripts */
-	locale_register_constants( INIT_FUNC_ARGS_PASSTHRU );
-
 	msgformat_register_class();
-
-	grapheme_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
 	/* Register 'DateFormat' PHP class */
 	dateformat_register_IntlDateFormatter_class(  );
-
-	/* Expose DateFormat constants to PHP scripts */
-	dateformat_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
 	/* Register 'IntlDateTimeFormatter' PHP class */
 	dateformat_register_IntlDatePatternGenerator_class(  );
@@ -197,33 +174,21 @@ PHP_MINIT_FUNCTION( intl )
 	/* Register 'Transliterator' PHP class */
 	transliterator_register_Transliterator_class(  );
 
-	/* Register Transliterator constants */
-	transliterator_register_constants( INIT_FUNC_ARGS_PASSTHRU );
-
 	/* Register 'IntlTimeZone' PHP class */
 	timezone_register_IntlTimeZone_class(  );
 
 	/* Register 'IntlCalendar' PHP class */
 	calendar_register_IntlCalendar_class(  );
 
-	/* Expose ICU error codes to PHP scripts. */
-	intl_expose_icu_error_codes( INIT_FUNC_ARGS_PASSTHRU );
-
-	/* Expose IDN constants to PHP scripts. */
-	idn_register_constants(INIT_FUNC_ARGS_PASSTHRU);
-
 	/* Register 'Spoofchecker' PHP class */
 	spoofchecker_register_Spoofchecker_class(  );
-
-	/* Expose Spoofchecker constants to PHP scripts */
-	spoofchecker_register_constants( INIT_FUNC_ARGS_PASSTHRU );
 
 	/* Register 'IntlException' PHP class */
 	IntlException_ce_ptr = register_class_IntlException(zend_ce_exception);
 	IntlException_ce_ptr->create_object = zend_ce_exception->create_object;
 
-	/* Register 'IntlIterator' PHP class */
-	intl_register_IntlIterator_class(  );
+	/* Register common symbols and classes */
+	intl_register_common_symbols(module_number);
 
 	/* Register 'BreakIterator' class */
 	breakiterator_register_BreakIterator_class(  );
@@ -286,18 +251,18 @@ PHP_RSHUTDOWN_FUNCTION( intl )
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION( intl )
 {
-#ifndef UCONFIG_NO_FORMATTING
+#if !UCONFIG_NO_FORMATTING
 	UErrorCode status = U_ZERO_ERROR;
 	const char *tzdata_ver = NULL;
 #endif
 
 	php_info_print_table_start();
-	php_info_print_table_header( 2, "Internationalization support", "enabled" );
+	php_info_print_table_row( 2, "Internationalization support", "enabled" );
 	php_info_print_table_row( 2, "ICU version", U_ICU_VERSION );
 #ifdef U_ICU_DATA_VERSION
 	php_info_print_table_row( 2, "ICU Data version", U_ICU_DATA_VERSION );
 #endif
-#ifndef UCONFIG_NO_FORMATTING
+#if !UCONFIG_NO_FORMATTING
 	tzdata_ver = ucal_getTZDataVersion(&status);
 	if (U_ZERO_ERROR == status) {
 		php_info_print_table_row( 2, "ICU TZData version", tzdata_ver);

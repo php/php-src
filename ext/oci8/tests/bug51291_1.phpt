@@ -2,10 +2,14 @@
 Bug #51291 (oci_error() doesn't report last error when called two times)
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --FILE--
 <?php
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 echo "Test 1 - Parse\n";
 

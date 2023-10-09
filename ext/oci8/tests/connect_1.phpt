@@ -2,6 +2,10 @@
 oci_pconnect() & oci_new_connect()
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --FILE--
 <?php
 

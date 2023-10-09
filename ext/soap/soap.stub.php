@@ -2,6 +2,429 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var int
+ * @cvalue SOAP_1_1
+ */
+const SOAP_1_1 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_1_2
+ */
+const SOAP_1_2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_PERSISTENCE_SESSION
+ */
+const SOAP_PERSISTENCE_SESSION = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_PERSISTENCE_REQUEST
+ */
+const SOAP_PERSISTENCE_REQUEST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_FUNCTIONS_ALL
+ */
+const SOAP_FUNCTIONS_ALL = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue SOAP_ENCODED
+ */
+const SOAP_ENCODED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_LITERAL
+ */
+const SOAP_LITERAL = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue SOAP_RPC
+ */
+const SOAP_RPC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_DOCUMENT
+ */
+const SOAP_DOCUMENT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue SOAP_ACTOR_NEXT
+ */
+const SOAP_ACTOR_NEXT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_ACTOR_NONE
+ */
+const SOAP_ACTOR_NONE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_ACTOR_UNLIMATERECEIVER
+ */
+const SOAP_ACTOR_UNLIMATERECEIVER = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue SOAP_COMPRESSION_ACCEPT
+ */
+const SOAP_COMPRESSION_ACCEPT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_COMPRESSION_GZIP
+ */
+const SOAP_COMPRESSION_GZIP = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_COMPRESSION_DEFLATE
+ */
+const SOAP_COMPRESSION_DEFLATE = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue SOAP_AUTHENTICATION_BASIC
+ */
+const SOAP_AUTHENTICATION_BASIC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_AUTHENTICATION_DIGEST
+ */
+const SOAP_AUTHENTICATION_DIGEST = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue UNKNOWN_TYPE
+ */
+const UNKNOWN_TYPE = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue XSD_STRING
+ */
+const XSD_STRING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_BOOLEAN
+ */
+const XSD_BOOLEAN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_DECIMAL
+ */
+const XSD_DECIMAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_FLOAT
+ */
+const XSD_FLOAT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_DOUBLE
+ */
+const XSD_DOUBLE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_DURATION
+ */
+const XSD_DURATION = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_DATETIME
+ */
+const XSD_DATETIME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_TIME
+ */
+const XSD_TIME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_DATE
+ */
+const XSD_DATE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_GYEARMONTH
+ */
+const XSD_GYEARMONTH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_GYEAR
+ */
+const XSD_GYEAR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_GMONTHDAY
+ */
+const XSD_GMONTHDAY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_GDAY
+ */
+const XSD_GDAY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_GMONTH
+ */
+const XSD_GMONTH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_HEXBINARY
+ */
+const XSD_HEXBINARY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_BASE64BINARY
+ */
+const XSD_BASE64BINARY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_ANYURI
+ */
+const XSD_ANYURI = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_QNAME
+ */
+const XSD_QNAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_NOTATION
+ */
+const XSD_NOTATION = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue XSD_NORMALIZEDSTRING
+ */
+const XSD_NORMALIZEDSTRING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_TOKEN
+ */
+const XSD_TOKEN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_LANGUAGE
+ */
+const XSD_LANGUAGE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_NMTOKEN
+ */
+const XSD_NMTOKEN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_NAME
+ */
+const XSD_NAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_NCNAME
+ */
+const XSD_NCNAME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_ID
+ */
+const XSD_ID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_IDREF
+ */
+const XSD_IDREF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_IDREFS
+ */
+const XSD_IDREFS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_ENTITY
+ */
+const XSD_ENTITY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_ENTITIES
+ */
+const XSD_ENTITIES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_INTEGER
+ */
+const XSD_INTEGER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_NONPOSITIVEINTEGER
+ */
+const XSD_NONPOSITIVEINTEGER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_NEGATIVEINTEGER
+ */
+const XSD_NEGATIVEINTEGER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_LONG
+ */
+const XSD_LONG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_INT
+ */
+const XSD_INT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_SHORT
+ */
+const XSD_SHORT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_BYTE
+ */
+const XSD_BYTE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_NONNEGATIVEINTEGER
+ */
+const XSD_NONNEGATIVEINTEGER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_UNSIGNEDLONG
+ */
+const XSD_UNSIGNEDLONG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_UNSIGNEDINT
+ */
+const XSD_UNSIGNEDINT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_UNSIGNEDSHORT
+ */
+const XSD_UNSIGNEDSHORT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_UNSIGNEDBYTE
+ */
+const XSD_UNSIGNEDBYTE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_POSITIVEINTEGER
+ */
+const XSD_POSITIVEINTEGER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_NMTOKENS
+ */
+const XSD_NMTOKENS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_ANYTYPE
+ */
+const XSD_ANYTYPE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XSD_ANYXML
+ */
+const XSD_ANYXML = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue APACHE_MAP
+ */
+const APACHE_MAP = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue SOAP_ENC_OBJECT
+ */
+const SOAP_ENC_OBJECT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_ENC_ARRAY
+ */
+const SOAP_ENC_ARRAY = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue XSD_1999_TIMEINSTANT
+ */
+const XSD_1999_TIMEINSTANT = UNKNOWN;
+
+/**
+ * @var string
+ * @cvalue XSD_NAMESPACE
+ */
+const XSD_NAMESPACE = UNKNOWN;
+/**
+ * @var string
+ * @cvalue XSD_1999_NAMESPACE
+ */
+const XSD_1999_NAMESPACE = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue SOAP_SINGLE_ELEMENT_ARRAYS
+ */
+const SOAP_SINGLE_ELEMENT_ARRAYS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_WAIT_ONE_WAY_CALLS
+ */
+const SOAP_WAIT_ONE_WAY_CALLS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_USE_XSI_ARRAY_TYPE
+ */
+const SOAP_USE_XSI_ARRAY_TYPE = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue WSDL_CACHE_NONE
+ */
+const WSDL_CACHE_NONE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue WSDL_CACHE_DISK
+ */
+const WSDL_CACHE_DISK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue WSDL_CACHE_MEMORY
+ */
+const WSDL_CACHE_MEMORY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue WSDL_CACHE_BOTH
+ */
+const WSDL_CACHE_BOTH = UNKNOWN;
+
+/* New SOAP SSL Method Constants */
+
+/**
+ * @var int
+ * @cvalue SOAP_SSL_METHOD_TLS
+ */
+const SOAP_SSL_METHOD_TLS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_SSL_METHOD_SSLv2
+ */
+const SOAP_SSL_METHOD_SSLv2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_SSL_METHOD_SSLv3
+ */
+const SOAP_SSL_METHOD_SSLv3 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SOAP_SSL_METHOD_SSLv23
+ */
+const SOAP_SSL_METHOD_SSLv23 = UNKNOWN;
+
 function use_soap_error_handler(bool $enable = true): bool {}
 
 function is_soap_fault(mixed $object): bool {}

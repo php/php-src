@@ -59,14 +59,17 @@ all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
 build_dirs: $(BUILD_DIR) $(BUILD_DIRS_SUB) $(BUILD_DIR_DEV)
 
 !if $(RE2C) == ""
-generated_files: build_dirs Zend\zend_ini_parser.c \
+generated_files: build_dirs \
+	Zend\zend_ini_parser.c Zend\zend_ini_parser.h \
 	Zend\zend_language_parser.c \
 	sapi\phpdbg\phpdbg_parser.c \
 	$(PHPDEF) $(MCFILE)
 !else
-generated_files: build_dirs Zend\zend_ini_parser.c \
-	Zend\zend_language_parser.c Zend\zend_ini_scanner.c \
-	Zend\zend_language_scanner.c \
+generated_files: build_dirs \
+	Zend\zend_ini_parser.c Zend\zend_ini_parser.h \
+	Zend\zend_language_parser.c \
+	Zend\zend_ini_scanner.c Zend\zend_ini_scanner_defs.h \
+	Zend\zend_language_scanner.c Zend\zend_language_scanner_defs.h \
 	sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_lexer.c \
 	$(PHPDEF) $(MCFILE)
 !endif
@@ -81,16 +84,15 @@ Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_pars
 	$(BISON) --output=Zend/zend_language_parser.c -v -d Zend/zend_language_parser.y
 	@if "$(SED)" neq "" $(SED) -i "s,^int zendparse\(.*\),ZEND_API int zendparse\1,g" Zend/zend_language_parser.c
 	@if "$(SED)" neq "" $(SED) -i "s,^int zendparse\(.*\),ZEND_API int zendparse\1,g" Zend/zend_language_parser.h
-	@if "$(SED)" neq "" $(SED) -i "s,^#ifndef YYTOKENTYPE,#include \"zend.h\"\n#ifndef YYTOKENTYPE,g" Zend/zend_language_parser.h
 
 sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_parser.h: sapi\phpdbg\phpdbg_parser.y
 	$(BISON) --output=sapi/phpdbg/phpdbg_parser.c -v -d sapi/phpdbg/phpdbg_parser.y
 
 !if $(RE2C) != ""
-Zend\zend_ini_scanner.c: Zend\zend_ini_scanner.l
+Zend\zend_ini_scanner.c Zend\zend_ini_scanner_defs.h: Zend\zend_ini_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l
 
-Zend\zend_language_scanner.c: Zend\zend_language_scanner.l
+Zend\zend_language_scanner.c Zend\zend_language_scanner_defs.h: Zend\zend_language_scanner.l
 	$(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_language_scanner_defs.h -oZend/zend_language_scanner.c Zend/zend_language_scanner.l
 
 sapi\phpdbg\phpdbg_lexer.c: sapi\phpdbg\phpdbg_lexer.l
@@ -130,10 +132,10 @@ $(PHPDLL_RES): win32\build\template.rc
 		/I$(BUILD_DIR) /d MC_INCLUDE="\"$(MCFILE)\"" \
 		win32\build\template.rc
 
-$(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES) $(MCFILE)
+$(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES) $(ASM_OBJS) $(MCFILE)
 	@copy win32\build\default.manifest $(BUILD_DIR)\$(PHPDLL).manifest >nul
 #	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP8_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
-	@"$(LINK)" $(PHP_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /out:$(BUILD_DIR)\$(PHPDLL) $(PHP8_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
+	@"$(LINK)" $(PHP_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(LIBS) $(ASM_OBJS) $(PHPDLL_RES) /out:$(BUILD_DIR)\$(PHPDLL) $(PHP8_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
 	-@$(_VC_MANIFEST_EMBED_DLL)
 
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)

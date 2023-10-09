@@ -47,14 +47,14 @@
 MUTEX_T php_crypt_extended_init_lock;
 #endif
 
-void php_init_crypt_r()
+void php_init_crypt_r(void)
 {
 #ifdef ZTS
 	php_crypt_extended_init_lock = tsrm_mutex_alloc();
 #endif
 }
 
-void php_shutdown_crypt_r()
+void php_shutdown_crypt_r(void)
 {
 #ifdef ZTS
 	tsrm_mutex_free(php_crypt_extended_init_lock);

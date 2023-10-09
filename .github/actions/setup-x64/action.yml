@@ -7,14 +7,15 @@ runs:
         set -x
 
         sudo service mysql start
-        sudo service postgresql start
         sudo service slapd start
         mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
         # Ensure local_infile tests can run.
         mysql -uroot -proot -e "SET GLOBAL local_infile = true"
-        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
-        sudo -u postgres psql -c "CREATE DATABASE test;"
         docker exec sql1 /opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U SA -P "<YourStrong@Passw0rd>" -Q "create login pdo_test with password='password', check_policy=off; create user pdo_test for login pdo_test; grant alter, control to pdo_test;"
+        docker exec sql1 /opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U SA -P "<YourStrong@Passw0rd>" -Q "create login odbc_test with password='password', check_policy=off; create user odbc_test for login odbc_test; grant alter, control, delete to odbc_test;"
+        docker exec sql1 /opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U SA -P "<YourStrong@Passw0rd>" -Q "ALTER SERVER ROLE sysadmin ADD MEMBER odbc_test;"
+        docker exec sql1 /opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U SA -P "<YourStrong@Passw0rd>" -Q "CREATE DATABASE odbc;"
+        docker exec sql1 /opt/mssql-tools/bin/sqlcmd -S 127.0.0.1 -U SA -P "<YourStrong@Passw0rd>" -Q "CREATE DATABASE pdo_odbc;"
         sudo locale-gen de_DE
 
         ./.github/scripts/setup-slapd.sh

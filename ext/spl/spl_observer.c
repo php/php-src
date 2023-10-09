@@ -173,7 +173,7 @@ static spl_SplObjectStorageElement *spl_object_storage_attach_handle(spl_SplObje
 	return pelement;
 } /* }}} */
 
-spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *intern, zend_object *obj, zval *inf) /* {{{ */
+static spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *intern, zend_object *obj, zval *inf) /* {{{ */
 {
 	if (EXPECTED(!(intern->flags & SOS_OVERRIDDEN_WRITE_DIMENSION))) {
 		return spl_object_storage_attach_handle(intern, obj, inf);
@@ -238,7 +238,7 @@ static zend_result spl_object_storage_detach(spl_SplObjectStorage *intern, zend_
 	return ret;
 } /* }}}*/
 
-void spl_object_storage_addall(spl_SplObjectStorage *intern, spl_SplObjectStorage *other) { /* {{{ */
+static void spl_object_storage_addall(spl_SplObjectStorage *intern, spl_SplObjectStorage *other) { /* {{{ */
 	spl_SplObjectStorageElement *element;
 
 	ZEND_HASH_FOREACH_PTR(&other->storage, element) {
@@ -264,8 +264,6 @@ static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zend
 	object_properties_init(&intern->std, class_type);
 
 	zend_hash_init(&intern->storage, 0, NULL, spl_object_storage_dtor, 0);
-
-	intern->std.handlers = &spl_handler_SplObjectStorage;
 
 	while (parent) {
 		if (parent == spl_ce_SplObjectStorage) {
@@ -408,7 +406,7 @@ static zend_object *spl_SplObjectStorage_new(zend_class_entry *class_type)
 /* }}} */
 
 /* Returns true if the SplObjectStorage contains an entry for getHash(obj), even if the corresponding value is null. */
-bool spl_object_storage_contains(spl_SplObjectStorage *intern, zend_object *obj) /* {{{ */
+static bool spl_object_storage_contains(spl_SplObjectStorage *intern, zend_object *obj) /* {{{ */
 {
 	if (EXPECTED(!intern->fptr_get_hash)) {
 		return zend_hash_index_find(&intern->storage, obj->handle) != NULL;
@@ -645,13 +643,13 @@ PHP_METHOD(SplObjectStorage, contains)
 PHP_METHOD(SplObjectStorage, count)
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
-	zend_long mode = COUNT_NORMAL;
+	zend_long mode = PHP_COUNT_NORMAL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &mode) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	if (mode == COUNT_RECURSIVE) {
+	if (mode == PHP_COUNT_RECURSIVE) {
 		RETURN_LONG(php_count_recursive(&intern->storage));
 	}
 
@@ -1015,13 +1013,6 @@ PHP_METHOD(SplObjectStorage, __debugInfo)
 }
 /* }}} */
 
-typedef enum {
-	MIT_NEED_ANY     = 0,
-	MIT_NEED_ALL     = 1,
-	MIT_KEYS_NUMERIC = 0,
-	MIT_KEYS_ASSOC   = 2
-} MultipleIteratorFlags;
-
 #define SPL_MULTIPLE_ITERATOR_GET_ALL_CURRENT   1
 #define SPL_MULTIPLE_ITERATOR_GET_ALL_KEY       2
 
@@ -1336,6 +1327,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 
 	spl_ce_SplObjectStorage = register_class_SplObjectStorage(zend_ce_countable, zend_ce_iterator, zend_ce_serializable, zend_ce_arrayaccess);
 	spl_ce_SplObjectStorage->create_object = spl_SplObjectStorage_new;
+	spl_ce_SplObjectStorage->default_object_handlers = &spl_handler_SplObjectStorage;
 
 	memcpy(&spl_handler_SplObjectStorage, &std_object_handlers, sizeof(zend_object_handlers));
 
@@ -1351,11 +1343,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 
 	spl_ce_MultipleIterator = register_class_MultipleIterator(zend_ce_iterator);
 	spl_ce_MultipleIterator->create_object = spl_SplObjectStorage_new;
-
-	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_NEED_ANY",     MIT_NEED_ANY);
-	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_NEED_ALL",     MIT_NEED_ALL);
-	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_KEYS_NUMERIC", MIT_KEYS_NUMERIC);
-	REGISTER_SPL_CLASS_CONST_LONG(MultipleIterator, "MIT_KEYS_ASSOC",   MIT_KEYS_ASSOC);
+	spl_ce_MultipleIterator->default_object_handlers = &spl_handler_SplObjectStorage;
 
 	return SUCCESS;
 }

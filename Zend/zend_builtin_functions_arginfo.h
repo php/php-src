@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 80355bb52d643177e3a661a515d9ea915bd1e2fc */
+ * Stub hash: 12899073f3791c5da31aa555c0e612ee1faadf55 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -355,9 +355,9 @@ static zend_class_entry *register_class_stdClass(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 
-	zend_string *attribute_name_AllowDynamicProperties_class_stdClass = zend_string_init("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
-	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_stdClass, 0);
-	zend_string_release(attribute_name_AllowDynamicProperties_class_stdClass);
+	zend_string *attribute_name_AllowDynamicProperties_class_stdClass_0 = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
+	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_stdClass_0, 0);
+	zend_string_release(attribute_name_AllowDynamicProperties_class_stdClass_0);
 
 	return class_entry;
 }

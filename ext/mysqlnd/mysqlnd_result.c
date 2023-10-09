@@ -152,8 +152,6 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_
 		result->meta = NULL;
 		DBG_RETURN(FAIL);
 	}
-	/* COM_FIELD_LIST is broken and has premature EOF, thus we need to hack here and in mysqlnd_res_meta.c */
-	result->field_count = result->meta->field_count;
 
 	/*
 	  2. Follows an EOF packet, which the client of mysqlnd_read_result_metadata()
@@ -286,8 +284,12 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 						  COM_STMT_EXECUTE (even if it is not necessary), so either this or
 						  previous branch always works.
 						*/
+						if (rset_header.field_count != stmt->result->field_count) {
+							stmt->result->m.free_result(stmt->result, TRUE);
+							stmt->result = conn->m->result_init(rset_header.field_count);
+						}
+						result = stmt->result;
 					}
-					result = stmt->result;
 				}
 				if (!result) {
 					SET_OOM_ERROR(conn->error_info);
@@ -328,7 +330,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 					/*
 					  If SERVER_MORE_RESULTS_EXISTS is set then this is either MULTI_QUERY or a CALL()
 					  The first packet after sending the query/com_execute has the bit set only
-					  in this cases. Not sure why it's a needed but it marks that the whole stream
+					  in these cases. Not sure why it's a needed but it marks that the whole stream
 					  will include many result sets. What actually matters are the bits set at the end
 					  of every result set (the EOF packet).
 					*/

@@ -4,8 +4,6 @@ Test DOMDocument::loadHTMLFile when an empty document is loaded
 Verifies that an warning message is showed if an empty document is loaded
 --CREDITS--
 Antonio Diaz Ruiz <dejalatele@gmail.com>
---INI--
-assert.bail=true
 --EXTENSIONS--
 dom
 --FILE--

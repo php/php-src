@@ -25,4 +25,4 @@ try {
 string(8) "stdClass"
 string(8) "stdClass"
 string(8) "stdClass"
-Cannot use "::class" on value of type null
+Cannot use "::class" on null

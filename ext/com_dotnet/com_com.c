@@ -39,7 +39,6 @@ PHP_METHOD(com, __construct)
 	CLSID clsid;
 	CLSCTX ctx = CLSCTX_SERVER;
 	HRESULT res = E_FAIL;
-	int mode = COMG(autoreg_case_sensitive) ? CONST_CS : 0;
 	ITypeLib *TL = NULL;
 	COSERVERINFO	info;
 	COAUTHIDENTITY	authid = {0};
@@ -235,7 +234,7 @@ PHP_METHOD(com, __construct)
 
 		if (TL) {
 			if (COMG(autoreg_on)) {
-				php_com_import_typelib(TL, mode, obj->code_page);
+				php_com_import_typelib(TL, 0, obj->code_page);
 			}
 
 			/* cross your fingers... there is no guarantee that this ITypeInfo
@@ -254,7 +253,7 @@ PHP_METHOD(com, __construct)
 				zend_string *typelib_str = php_com_olestring_to_string(name, obj->code_page);
 
 				if (NULL != php_com_cache_typelib(TL, ZSTR_VAL(typelib_str), ZSTR_LEN(typelib_str))) {
-					php_com_import_typelib(TL, mode, obj->code_page);
+					php_com_import_typelib(TL, 0, obj->code_page);
 
 					/* add a reference for the hash */
 					ITypeLib_AddRef(TL);
@@ -262,7 +261,7 @@ PHP_METHOD(com, __construct)
 				zend_string_release_ex(typelib_str, /* persistent */ false);
 			} else {
 				/* try it anyway */
-				php_com_import_typelib(TL, mode, obj->code_page);
+				php_com_import_typelib(TL, 0, obj->code_page);
 			}
 
 			ITypeLib_Release(TL);
@@ -817,7 +816,7 @@ PHP_FUNCTION(com_load_typelib)
 	php_com_initialize();
 	pTL = php_com_load_typelib_via_cache(name, codepage);
 	if (pTL) {
-		if (php_com_import_typelib(pTL, cs ? CONST_CS : 0, codepage) == SUCCESS) {
+		if (php_com_import_typelib(pTL, 0, codepage) == SUCCESS) {
 			RETVAL_TRUE;
 		}
 

@@ -175,13 +175,6 @@
 
 /* }}} */
 
-#if !HAVE_STRNLEN
-static size_t strnlen(const char *s, size_t maxlen) {
-	char *r = memchr(s, '\0', maxlen);
-	return r ? r-s : maxlen;
-}
-#endif
-
 /*
  * Do format conversion placing the output in buffer
  */
@@ -552,7 +545,7 @@ static void xbuf_format_converter(void *xbuf, bool is_char, const char *fmt, va_
 						if (!adjust_precision) {
 							s_len = strlen(s);
 						} else {
-							s_len = strnlen(s, precision);
+							s_len = zend_strnlen(s, precision);
 						}
 					} else {
 						s = S_NULL;

@@ -8,6 +8,13 @@
 # include <sys/socket.h>
 # if defined(__FreeBSD__) || defined(__NetBSD__)
 #  include <sys/un.h>
+#  if defined(__FreeBSD__)
+     // we can't fully implement the ancillary data feature with
+     // the legacy sockcred/LOCAL_CREDS pair (due to lack of process
+     // id handling), so we disable it since only the
+     // sockcred2/LOCAL_CREDS_PERSISTENT pair can address it.
+#    undef LOCAL_CREDS
+#  endif
 # endif
 #else
 # include <Ws2tcpip.h>

@@ -25,6 +25,7 @@
 #include "zend_strtod.h"
 #include "zend_modules.h"
 #include "zend_smart_str.h"
+#include <ctype.h>
 
 static HashTable *registered_zend_ini_directives;
 
@@ -62,7 +63,7 @@ static zend_result zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stag
 		}
 		if (stage == ZEND_INI_STAGE_RUNTIME && result == FAILURE) {
 			/* runtime failure is OK */
-			return 1;
+			return FAILURE;
 		}
 		if (ini_entry->value != ini_entry->orig_value) {
 			zend_string_release(ini_entry->value);
@@ -73,7 +74,7 @@ static zend_result zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stag
 		ini_entry->orig_value = NULL;
 		ini_entry->orig_modifiable = 0;
 	}
-	return 0;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -516,6 +517,46 @@ ZEND_API char *zend_ini_string(const char *name, size_t name_length, int orig) /
 }
 /* }}} */
 
+
+ZEND_API zend_string *zend_ini_str_ex(const char *name, size_t name_length, bool orig, bool *exists) /* {{{ */
+{
+	zend_ini_entry *ini_entry;
+
+	ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length);
+	if (ini_entry) {
+		if (exists) {
+			*exists = 1;
+		}
+
+		if (orig && ini_entry->modified) {
+			return ini_entry->orig_value ? ini_entry->orig_value : NULL;
+		} else {
+			return ini_entry->value ? ini_entry->value : NULL;
+		}
+	} else {
+		if (exists) {
+			*exists = 0;
+		}
+		return NULL;
+	}
+}
+/* }}} */
+
+ZEND_API zend_string *zend_ini_str(const char *name, size_t name_length, bool orig) /* {{{ */
+{
+	bool exists = 1;
+	zend_string *return_value;
+
+	return_value = zend_ini_str_ex(name, name_length, orig, &exists);
+	if (!exists) {
+		return NULL;
+	} else if (!return_value) {
+		return_value = ZSTR_EMPTY_ALLOC();
+	}
+	return return_value;
+}
+/* }}} */
+
 ZEND_API zend_string *zend_ini_get_value(zend_string *name) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
@@ -546,6 +587,34 @@ typedef enum {
 	ZEND_INI_PARSE_QUANTITY_UNSIGNED,
 } zend_ini_parse_quantity_signed_result_t;
 
+static const char *zend_ini_consume_quantity_prefix(const char *const digits, const char *const str_end) {
+	const char *digits_consumed = digits;
+	/* Ignore leading whitespace. */
+	while (digits_consumed < str_end && zend_is_whitespace(*digits_consumed)) {++digits_consumed;}
+	if (digits_consumed[0] == '+' || digits_consumed[0] == '-') {
+		++digits_consumed;
+	}
+
+	if (digits_consumed[0] == '0' && !isdigit(digits_consumed[1])) {
+		/* Value is just 0 */
+		if ((digits_consumed+1) == str_end) {
+			return digits;
+		}
+
+		switch (digits_consumed[1]) {
+			case 'x':
+			case 'X':
+			case 'o':
+			case 'O':
+			case 'b':
+			case 'B':
+				digits_consumed += 2;
+				break;
+		}
+	}
+	return digits_consumed;
+}
+
 static zend_ulong zend_ini_parse_quantity_internal(zend_string *value, zend_ini_parse_quantity_signed_result_t signed_result, zend_string **errstr) /* {{{ */
 {
 	char *digits_end = NULL;
@@ -560,33 +629,122 @@ static zend_ulong zend_ini_parse_quantity_internal(zend_string *value, zend_ini_
 
 	/* Ignore leading whitespace. ZEND_STRTOL() also skips leading whitespaces,
 	 * but we need the position of the first non-whitespace later. */
-	while (digits < str_end && zend_is_whitespace(*digits)) ++digits;
+	while (digits < str_end && zend_is_whitespace(*digits)) {++digits;}
 
 	/* Ignore trailing whitespace */
-	while (digits < str_end && zend_is_whitespace(*(str_end-1))) --str_end;
+	while (digits < str_end && zend_is_whitespace(*(str_end-1))) {--str_end;}
 
 	if (digits == str_end) {
 		*errstr = NULL;
 		return 0;
 	}
 
-	zend_ulong retval;
-	errno = 0;
-
-	if (signed_result == ZEND_INI_PARSE_QUANTITY_SIGNED) {
-		retval = (zend_ulong) ZEND_STRTOL(digits, &digits_end, 0);
-	} else {
-		retval = ZEND_STRTOUL(digits, &digits_end, 0);
+	bool is_negative = false;
+	if (digits[0] == '+') {
+		++digits;
+	} else if (digits[0] == '-') {
+		is_negative = true;
+		++digits;
 	}
+
+	/* if there is no digit after +/- */
+	if (!isdigit(digits[0])) {
+		/* Escape the string to avoid null bytes and to make non-printable chars
+		 * visible */
+		smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
+		smart_str_0(&invalid);
+
+		*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no valid leading digits, interpreting as \"0\" for backwards compatibility",
+						ZSTR_VAL(invalid.s));
+
+		smart_str_free(&invalid);
+		return 0;
+	}
+
+	int base = 0;
+	if (digits[0] == '0' && !isdigit(digits[1])) {
+		/* Value is just 0 */
+		if ((digits+1) == str_end) {
+			*errstr = NULL;
+			return 0;
+		}
+
+		switch (digits[1]) {
+			/* Multiplier suffixes */
+			case 'g':
+			case 'G':
+			case 'm':
+			case 'M':
+			case 'k':
+			case 'K':
+				goto evaluation;
+			case 'x':
+			case 'X':
+				base = 16;
+				break;
+			case 'o':
+			case 'O':
+				base = 8;
+				break;
+			case 'b':
+			case 'B':
+				base = 2;
+				break;
+			default:
+				*errstr = zend_strpprintf(0, "Invalid prefix \"0%c\", interpreting as \"0\" for backwards compatibility",
+					digits[1]);
+				return 0;
+        }
+        digits += 2;
+		if (UNEXPECTED(digits == str_end)) {
+			/* Escape the string to avoid null bytes and to make non-printable chars
+			 * visible */
+			smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
+			smart_str_0(&invalid);
+
+			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no digits after base prefix, interpreting as \"0\" for backwards compatibility",
+							ZSTR_VAL(invalid.s));
+
+			smart_str_free(&invalid);
+			return 0;
+		}
+		if (UNEXPECTED(digits != zend_ini_consume_quantity_prefix(digits, str_end))) {
+			/* Escape the string to avoid null bytes and to make non-printable chars
+			 * visible */
+			smart_str_append_escaped(&invalid, ZSTR_VAL(value), ZSTR_LEN(value));
+			smart_str_0(&invalid);
+
+			*errstr = zend_strpprintf(0, "Invalid quantity \"%s\": no digits after base prefix, interpreting as \"0\" for backwards compatibility",
+							ZSTR_VAL(invalid.s));
+
+			smart_str_free(&invalid);
+			return 0;
+		}
+	}
+	evaluation:
+
+	errno = 0;
+	zend_ulong retval = ZEND_STRTOUL(digits, &digits_end, base);
 
 	if (errno == ERANGE) {
 		overflow = true;
 	} else if (signed_result == ZEND_INI_PARSE_QUANTITY_UNSIGNED) {
-		/* ZEND_STRTOUL() does not report a range error when the subject starts
-		 * with a minus sign, so we check this here. Ignore "-1" as it is
-		 * commonly used as max value, for instance in memory_limit=-1. */
-		if (digits[0] == '-' && !(digits_end - digits == 2 && digits_end == str_end && digits[1] == '1')) {
+		if (is_negative) {
+			/* Ignore "-1" as it is commonly used as max value, for instance in memory_limit=-1. */
+			if (retval == 1 && digits_end == str_end) {
+				retval = -1;
+			} else {
+				overflow = true;
+			}
+		}
+	} else if (signed_result == ZEND_INI_PARSE_QUANTITY_SIGNED) {
+		/* Handle PHP_INT_MIN case */
+		if (is_negative && retval == ((zend_ulong)ZEND_LONG_MAX +1)) {
+			retval = 0u - retval;
+		} else if ((zend_long) retval < 0) {
 			overflow = true;
+		} else if (is_negative) {
+			retval = 0u - retval;
 		}
 	}
 
@@ -873,6 +1031,26 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty) /* {{{ */
 
 	char **p = (char **) ZEND_INI_GET_ADDR();
 	*p = new_value ? ZSTR_VAL(new_value) : NULL;
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API ZEND_INI_MH(OnUpdateStr) /* {{{ */
+{
+	zend_string **p = (zend_string **) ZEND_INI_GET_ADDR();
+	*p = new_value;
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API ZEND_INI_MH(OnUpdateStrNotEmpty) /* {{{ */
+{
+	if (new_value && ZSTR_LEN(new_value) == 0) {
+		return FAILURE;
+	}
+
+	zend_string **p = (zend_string **) ZEND_INI_GET_ADDR();
+	*p = new_value;
 	return SUCCESS;
 }
 /* }}} */

@@ -17,5 +17,6 @@ function foo() {
 }
 var_dump(foo());
 ?>
---EXPECT--
+--EXPECTF--
+Warning: Increment on type bool has no effect, this will change in the next major version of PHP in %sinc_017.php on line 4
 bool(true)

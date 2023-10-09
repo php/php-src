@@ -28,22 +28,18 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: magic.c,v 1.114 2021/02/05 21:33:49 christos Exp $")
+FILE_RCSID("@(#)$File: magic.c,v 1.117 2021/12/06 15:33:00 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
 
 #include <stdlib.h>
-#ifdef PHP_WIN32
-#include "win32/unistd.h"
-#else
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <string.h>
-#include "config.h"
-
-#ifdef PHP_WIN32
-#include <shlwapi.h>
+#ifdef QUICK
+#include <sys/mman.h>
 #endif
 #include <limits.h>	/* for PIPE_BUF */
 
@@ -96,9 +92,22 @@ unreadable_info(struct magic_set *ms, mode_t md, const char *file)
 		if (access(file, W_OK) == 0)
 			if (file_printf(ms, "writable, ") == -1)
 				return -1;
+#ifndef WIN32
 		if (access(file, X_OK) == 0)
 			if (file_printf(ms, "executable, ") == -1)
 				return -1;
+#else
+		/* X_OK doesn't work well on MS-Windows */
+		{
+			const char *p = strrchr(file, '.');
+			if (p && (stricmp(p, ".exe")
+				  || stricmp(p, ".dll")
+				  || stricmp(p, ".bat")
+				  || stricmp(p, ".cmd")))
+				if (file_printf(ms, "writable, ") == -1)
+					return -1;
+		}
+#endif
 	}
 	if (S_ISREG(md))
 		if (file_printf(ms, "regular file, ") == -1)

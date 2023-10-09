@@ -34,7 +34,7 @@ const char *fpm_request_get_stage_name(int stage) {
 	return requests_stages[stage];
 }
 
-void fpm_request_accepting() /* {{{ */
+void fpm_request_accepting(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
 	struct timeval now;
@@ -56,9 +56,8 @@ void fpm_request_accepting() /* {{{ */
 	/* idle++, active-- */
 	fpm_scoreboard_update_commit(1, -1, 0, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
 }
-/* }}} */
 
-void fpm_request_reading_headers() /* {{{ */
+void fpm_request_reading_headers(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
 
@@ -101,9 +100,8 @@ void fpm_request_reading_headers() /* {{{ */
 	/* idle--, active++, request++ */
 	fpm_scoreboard_update_commit(-1, 1, 0, 0, 1, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
 }
-/* }}} */
 
-void fpm_request_info() /* {{{ */
+void fpm_request_info(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
 	char *request_uri = fpm_php_request_uri();
@@ -151,9 +149,8 @@ void fpm_request_info() /* {{{ */
 
 	fpm_scoreboard_proc_release(proc);
 }
-/* }}} */
 
-void fpm_request_executing() /* {{{ */
+void fpm_request_executing(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
 	struct timeval now;
@@ -170,9 +167,8 @@ void fpm_request_executing() /* {{{ */
 	proc->tv = now;
 	fpm_scoreboard_proc_release(proc);
 }
-/* }}} */
 
-void fpm_request_end(void) /* {{{ */
+void fpm_request_end(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
 	struct timeval now;
@@ -204,9 +200,8 @@ void fpm_request_end(void) /* {{{ */
 	proc->memory = memory;
 	fpm_scoreboard_proc_release(proc);
 }
-/* }}} */
 
-void fpm_request_finished() /* {{{ */
+void fpm_request_finished(void)
 {
 	struct fpm_scoreboard_proc_s *proc;
 	struct timeval now;
@@ -223,7 +218,6 @@ void fpm_request_finished() /* {{{ */
 	proc->tv = now;
 	fpm_scoreboard_proc_release(proc);
 }
-/* }}} */
 
 void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now, int terminate_timeout, int slowlog_timeout, int track_finished) /* {{{ */
 {
@@ -231,7 +225,7 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 
 	proc_p = fpm_scoreboard_proc_acquire(child->wp->scoreboard, child->scoreboard_i, 1);
 	if (!proc_p) {
-		zlog(ZLOG_WARNING, "failed to acquire scoreboard");
+		zlog(ZLOG_NOTICE, "failed to acquire scoreboard");
 		return;
 	}
 

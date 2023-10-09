@@ -21,9 +21,6 @@
 
 typedef zend_object* (*create_object_func_t)(zend_class_entry *class_type);
 
-#define REGISTER_SPL_CLASS_CONST_LONG(class_name, const_name, value) \
-	zend_declare_class_constant_long(spl_ce_ ## class_name, const_name, sizeof(const_name)-1, (zend_long)value);
-
 /* sub: whether to allow subclasses/interfaces
    allow = 0: allow all classes and interfaces
    allow > 0: allow all that match and mask ce_flags

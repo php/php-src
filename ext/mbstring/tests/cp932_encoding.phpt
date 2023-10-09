@@ -1,5 +1,5 @@
 --TEST--
-Exhaustive test of CP932 encoding verification and conversion
+Exhaustive test of CP932 encoding verification and conversion (including 'SJIS-win' variant)
 --EXTENSIONS--
 mbstring
 --SKIPIF--
@@ -34,8 +34,10 @@ for ($i = 0xF0; $i <= 0xF9; $i++) {
 $fromUnicode["\x00\xA2"] = "\x81\x91";
 /* U+00A3 is POUND SIGN; convert to FULLWIDTH POUND SIGN */
 $fromUnicode["\x00\xA3"] = "\x81\x92";
-/* U+00A5 is YEN SIGN; convert to FULLWIDTH YEN SIGN */
-$fromUnicode["\x00\xA5"] = "\x81\x8F";
+/* U+00A5 is YEN SIGN; convert to 0x5C, which has conflicting uses
+ * (either as backslash or as Yen sign) */
+$fromUnicode["\x00\xA5"] = "\x5C";
+
 
 /* We map the JIS X 0208 FULLWIDTH TILDE to U+FF5E (FULLWIDTH TILDE)
  * But when converting Unicode to CP932, we also accept U+301C (WAVE DASH) */
@@ -51,11 +53,12 @@ $fromUnicode["\x20\x16"] = "\x81\x61";
  * but when converting Unicode to CP932, we also accept U+00AC (NOT SIGN) */
 $fromUnicode["\x00\xAC"] = "\x81\xCA";
 
-/* U+203E is OVERLINE; convert to JIS X 0208 FULLWIDTH MACRON */
-$fromUnicode["\x20\x3E"] = "\x81\x50";
-
-/* U+00AF is MACRON; it can also go to FULLWIDTH MACRON */
+/* U+00AF is MACRON; convert to FULLWIDTH MACRON */
 $fromUnicode["\x00\xAF"] = "\x81\x50";
+
+/* U+203E is OVERLINE; convert to 0x7E, which has conflicting uses
+ * (either as tilde or as overline) */
+$fromUnicode["\x20\x3E"] = "\x7E";
 
 findInvalidChars($validChars, $invalidChars, $truncated, array_fill_keys(range(0x81, 0x9F), 2) + array_fill_keys(range(0xE0, 0xFC), 2));
 
@@ -106,12 +109,40 @@ echo "CP932 verification and conversion works on all invalid characters\n";
 convertAllInvalidChars($invalidCodepoints, $fromUnicode, 'UTF-16BE', 'CP932', '%');
 echo "Unicode -> CP932 conversion works on all invalid codepoints\n";
 
+/* Now test 'SJIS-win' variant of CP932, which is really CP932 but with
+ * two different mappings
+ * Instead of mapping U+00A5 and U+203E to the single bytes 0x5C and 07E
+ * (which have conflicting uses), 'SJIS-win' maps them to appropriate
+ * JIS X 0208 characters */
+
+/* U+00A5 is YEN SIGN; convert to FULLWIDTH YEN SIGN */
+$fromUnicode["\x00\xA5"] = "\x81\x8F";
+/* U+203E is OVERLINE; convert to JIS X 0208 FULLWIDTH MACRON */
+$fromUnicode["\x20\x3E"] = "\x81\x50";
+
+testAllValidChars($validChars, 'SJIS-win', 'UTF-16BE');
+foreach ($nonInvertible as $cp932 => $unicode)
+	testValidString($cp932, $unicode, 'SJIS-win', 'UTF-16BE', false);
+echo "SJIS-win verification and conversion works on all valid characters\n";
+
+testAllInvalidChars($invalidChars, $validChars, 'SJIS-win', 'UTF-16BE', "\x00%");
+echo "SJIS-win verification and conversion works on all invalid characters\n";
+
+convertAllInvalidChars($invalidCodepoints, $fromUnicode, 'UTF-16BE', 'SJIS-win', '%');
+echo "Unicode -> SJIS-win conversion works on all invalid codepoints\n";
+
 // Test "long" illegal character markers
 mb_substitute_character("long");
 convertInvalidString("\x80", "%", "CP932", "UTF-8");
 convertInvalidString("\xEA", "%", "CP932", "UTF-8");
 convertInvalidString("\x81\x20", "%", "CP932", "UTF-8");
 convertInvalidString("\xEA\xA9", "%", "CP932", "UTF-8");
+convertInvalidString("\x80", "%", "SJIS-win", "UTF-8");
+convertInvalidString("\xEA", "%", "SJIS-win", "UTF-8");
+convertInvalidString("\x81\x20", "%", "SJIS-win", "UTF-8");
+convertInvalidString("\xEA\xA9", "%", "SJIS-win", "UTF-8");
+
+echo 'mb_strlen("\x80\x81", "CP932") == ' . mb_strlen("\x80\x81", "CP932") . PHP_EOL;
 
 echo "Done!\n";
 ?>
@@ -119,4 +150,8 @@ echo "Done!\n";
 CP932 verification and conversion works on all valid characters
 CP932 verification and conversion works on all invalid characters
 Unicode -> CP932 conversion works on all invalid codepoints
+SJIS-win verification and conversion works on all valid characters
+SJIS-win verification and conversion works on all invalid characters
+Unicode -> SJIS-win conversion works on all invalid codepoints
+mb_strlen("\x80\x81", "CP932") == 2
 Done!

@@ -39,11 +39,11 @@
  * and alignment purposes.
  */
 
-#if ZEND_WIN32 || HAVE_SYNC_ATOMICS
+#if defined(ZEND_WIN32) || defined(HAVE_SYNC_ATOMICS)
 typedef struct zend_atomic_bool_s {
 	volatile char value;
 } zend_atomic_bool;
-#elif HAVE_C11_ATOMICS
+#elif defined(HAVE_C11_ATOMICS)
 typedef struct zend_atomic_bool_s {
 	_Atomic(bool) value;
 } zend_atomic_bool;
@@ -55,7 +55,14 @@ typedef struct zend_atomic_bool_s {
 
 BEGIN_EXTERN_C()
 
-#if ZEND_WIN32
+#ifdef ZEND_WIN32
+
+#ifndef InterlockedExchange8
+#define InterlockedExchange8 _InterlockedExchange8
+#endif
+#ifndef InterlockedOr8
+#define InterlockedOr8 _InterlockedOr8
+#endif
 
 #define ZEND_ATOMIC_BOOL_INIT(obj, desired) ((obj)->value = (desired))
 
@@ -73,7 +80,7 @@ static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, 
 	(void)InterlockedExchange8(&obj->value, desired);
 }
 
-#elif HAVE_C11_ATOMICS
+#elif defined(HAVE_C11_ATOMICS)
 
 #define ZEND_ATOMIC_BOOL_INIT(obj, desired) __c11_atomic_init(&(obj)->value, (desired))
 
@@ -89,7 +96,7 @@ static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, 
 	__c11_atomic_store(&obj->value, desired, __ATOMIC_SEQ_CST);
 }
 
-#elif HAVE_GNUC_ATOMICS
+#elif defined(HAVE_GNUC_ATOMICS)
 
 #define ZEND_ATOMIC_BOOL_INIT(obj, desired) ((obj)->value = (desired))
 
@@ -109,7 +116,7 @@ static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, 
 	__atomic_store(&obj->value, &desired, __ATOMIC_SEQ_CST);
 }
 
-#elif HAVE_SYNC_ATOMICS
+#elif defined(HAVE_SYNC_ATOMICS)
 
 #define ZEND_ATOMIC_BOOL_INIT(obj, desired) ((obj)->value = (desired))
 
@@ -134,7 +141,7 @@ static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, 
 	__sync_synchronize();
 }
 
-#elif HAVE_NO_ATOMICS
+#elif defined(HAVE_NO_ATOMICS)
 
 #warning No atomics support detected. Please open an issue with platform details.
 
@@ -160,7 +167,7 @@ ZEND_API void zend_atomic_bool_init(zend_atomic_bool *obj, bool desired);
 ZEND_API bool zend_atomic_bool_exchange(zend_atomic_bool *obj, bool desired);
 ZEND_API void zend_atomic_bool_store(zend_atomic_bool *obj, bool desired);
 
-#if ZEND_WIN32 || HAVE_SYNC_ATOMICS
+#if defined(ZEND_WIN32) || defined(HAVE_SYNC_ATOMICS)
 /* On these platforms it is non-const due to underlying APIs. */
 ZEND_API bool zend_atomic_bool_load(zend_atomic_bool *obj);
 #else

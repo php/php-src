@@ -4,8 +4,7 @@ mysqli_real_escape_string() - sjis
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
+require_once 'skipifconnectfailure.inc';
 
 if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     die(sprintf("skip Cannot connect to MySQL, [%d] %s\n",
@@ -17,9 +16,7 @@ mysqli_close($link);
 ?>
 --FILE--
 <?php
-
-    require_once("connect.inc");
-    require_once('table.inc');
+    require_once 'table.inc';
 
     var_dump(mysqli_set_charset($link, "sjis"));
 

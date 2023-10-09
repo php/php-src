@@ -4,6 +4,8 @@ IntlDateFormatter::create() with default date and time types
 intl
 --INI--
 date.timezone=UTC
+--SKIPIF--
+<?php if (version_compare(INTL_ICU_VERSION, '72.1') >= 0) die('skip for ICU < 72.1'); ?>
 --FILE--
 <?php
 

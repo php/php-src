@@ -61,7 +61,6 @@ PHP_COM_DOTNET_API void php_com_wrap_dispatch(zval *z, IDispatch *disp,
 	IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &obj->typeinfo);
 
 	zend_object_std_init(&obj->zo, php_com_variant_class_entry);
-	obj->zo.handlers = &php_com_object_handlers;
 	ZVAL_OBJ(z, &obj->zo);
 }
 
@@ -85,7 +84,6 @@ PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 	}
 
 	zend_object_std_init(&obj->zo, php_com_variant_class_entry);
-	obj->zo.handlers = &php_com_object_handlers;
 	ZVAL_OBJ(z, &obj->zo);
 }
 

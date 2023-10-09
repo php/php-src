@@ -30,6 +30,12 @@ try {
 }
 
 ?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$pdo = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$pdo->query("DROP TABLE IF EXISTS b67462");
+?>
 --EXPECT--
 bool(true)
 bool(false)

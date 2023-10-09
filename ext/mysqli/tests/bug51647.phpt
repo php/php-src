@@ -4,12 +4,12 @@ Bug #51647 (Certificate file without private key (pk in another file) doesn't wo
 mysqli
 --SKIPIF--
 <?php
-require_once "connect.inc";
+require_once 'connect.inc';
 
 if (!defined('MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT'))
     die("skip Requires MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT");
 
-if ($IS_MYSQLND && !extension_loaded("openssl"))
+if (!extension_loaded("openssl"))
     die("skip PHP streams lack support for SSL. mysqli is compiled to use mysqlnd which uses PHP streams in turn.");
 
 if (!($link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
@@ -42,7 +42,7 @@ $link->close();
 ?>
 --FILE--
 <?php
-    include "connect.inc";
+    include 'connect.inc';
 
     if (!is_object($link = mysqli_init()))
         printf("[001] Cannot create link\n");

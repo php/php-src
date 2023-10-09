@@ -3,7 +3,7 @@ Using 'static' and 'global' in global scope
 --FILE--
 <?php
 
-static $var, $var, $var = -1;
+static $var = -1;
 var_dump($var);
 
 global $var, $var, $var;

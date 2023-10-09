@@ -65,7 +65,7 @@ PHP_FUNCTION(curl_file_create)
 }
 /* }}} */
 
-static void curlfile_get_property(char *name, size_t name_len, INTERNAL_FUNCTION_PARAMETERS)
+static void curlfile_get_property(const char *name, size_t name_len, INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval *res, rv;
 
@@ -74,7 +74,7 @@ static void curlfile_get_property(char *name, size_t name_len, INTERNAL_FUNCTION
 	RETURN_COPY_DEREF(res);
 }
 
-static void curlfile_set_property(char *name, size_t name_len, INTERNAL_FUNCTION_PARAMETERS)
+static void curlfile_set_property(const char *name, size_t name_len, INTERNAL_FUNCTION_PARAMETERS)
 {
 	zend_string *arg;
 

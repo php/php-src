@@ -22,7 +22,7 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter.c
+ * The source code included in this file was separated from mbfilter.c
  * by Moriyoshi Koizumi <moriyoshi@php.net> on 4 Dec 2002. The file
  * mbfilter.c is included in this package .
  *
@@ -44,7 +44,9 @@ const mbfl_encoding mbfl_encoding_base64 = {
 	NULL,
 	NULL,
 	mb_base64_to_wchar,
-	mb_wchar_to_base64
+	mb_wchar_to_base64,
+	NULL,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_8bit_b64 = {
@@ -99,15 +101,13 @@ int mbfl_filt_conv_base64enc(int c, mbfl_convert_filter *filter)
 		filter->cache |= (c & 0xff) << 8;
 	} else {
 		filter->status &= ~0xff;
-		if ((filter->status & MBFL_BASE64_STS_MIME_HEADER) == 0) {
-			n = (filter->status & 0xff00) >> 8;
-			if (n > 72) {
-				CK((*filter->output_function)(0x0d, filter->data));		/* CR */
-				CK((*filter->output_function)(0x0a, filter->data));		/* LF */
-				filter->status &= ~0xff00;
-			}
-			filter->status += 0x400;
+		n = (filter->status & 0xff00) >> 8;
+		if (n > 72) {
+			CK((*filter->output_function)(0x0d, filter->data));		/* CR */
+			CK((*filter->output_function)(0x0a, filter->data));		/* LF */
+			filter->status &= ~0xff00;
 		}
+		filter->status += 0x400;
 		n = filter->cache | (c & 0xff);
 		CK((*filter->output_function)(mbfl_base64_table[(n >> 18) & 0x3f], filter->data));
 		CK((*filter->output_function)(mbfl_base64_table[(n >> 12) & 0x3f], filter->data));
@@ -129,11 +129,9 @@ int mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter)
 	filter->cache = 0;
 	/* flush fragments */
 	if (status >= 1) {
-		if ((filter->status & MBFL_BASE64_STS_MIME_HEADER) == 0) {
-			if (len > 72){
-				CK((*filter->output_function)(0x0d, filter->data));		/* CR */
-				CK((*filter->output_function)(0x0a, filter->data));		/* LF */
-			}
+		if (len > 72){
+			CK((*filter->output_function)(0x0d, filter->data));		/* CR */
+			CK((*filter->output_function)(0x0a, filter->data));		/* LF */
 		}
 		CK((*filter->output_function)(mbfl_base64_table[(cache >> 18) & 0x3f], filter->data));
 		CK((*filter->output_function)(mbfl_base64_table[(cache >> 12) & 0x3f], filter->data));
@@ -145,6 +143,11 @@ int mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter)
 			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
 		}
 	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 
@@ -170,6 +173,9 @@ int mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter)
 		n = 62;
 	} else if (c == 0x2f) {			/* '/' */
 		n = 63;
+	} else {
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
+		return 0;
 	}
 	n &= 0x3f;
 
@@ -213,6 +219,11 @@ int mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter)
 			CK((*filter->output_function)((cache >> 8) & 0xff, filter->data));
 		}
 	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 
@@ -324,6 +335,10 @@ static void mb_wchar_to_base64(uint32_t *in, size_t len, mb_convert_buf *buf, bo
 	}
 
 	if (end && bits) {
+		if (chars_output > 72) {
+			out = mb_convert_buf_add2(out, '\r', '\n');
+			chars_output = 0;
+		}
 		if (bits == 8) {
 			out = mb_convert_buf_add4(out, mbfl_base64_table[(cache >> 2) & 0x3F], mbfl_base64_table[(cache & 0x3) << 4], '=', '=');
 		} else {

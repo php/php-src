@@ -22,14 +22,15 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "zend_observer.h"
 #include "php_xmlreader.h"
-#include "php_xmlreader_arginfo.h"
 #ifdef HAVE_DOM
 #include "ext/dom/xml_common.h"
 #include "ext/dom/dom_ce.h"
 #endif
 #include <libxml/xmlreader.h>
 #include <libxml/uri.h>
+#include "php_xmlreader_arginfo.h"
 
 zend_class_entry *xmlreader_class_entry;
 
@@ -282,6 +283,7 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, size_t source_len, siz
 		return NULL;
 	}
 
+	PHP_LIBXML_SANITIZE_GLOBALS(parse);
 	if (error_func || warn_func) {
 		xmlRelaxNGSetParserErrors(parser,
 			(xmlRelaxNGValidityErrorFunc) error_func,
@@ -290,6 +292,7 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, size_t source_len, siz
 	}
 	sptr = xmlRelaxNGParse(parser);
 	xmlRelaxNGFreeParserCtxt(parser);
+	PHP_LIBXML_RESTORE_GLOBALS(parse);
 
 	return sptr;
 }
@@ -368,7 +371,6 @@ zend_object *xmlreader_objects_new(zend_class_entry *class_type)
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
 	intern->prop_handler = &xmlreader_prop_handlers;
-	intern->std.handlers = &xmlreader_object_handlers;
 
 	return &intern->std;
 }
@@ -865,7 +867,9 @@ PHP_METHOD(XMLReader, open)
 	valid_file = _xmlreader_get_valid_file_path(source, resolved_path, MAXPATHLEN );
 
 	if (valid_file) {
+		PHP_LIBXML_SANITIZE_GLOBALS(reader_for_file);
 		reader = xmlReaderForFile(valid_file, encoding, options);
+		PHP_LIBXML_RESTORE_GLOBALS(reader_for_file);
 	}
 
 	if (reader == NULL) {
@@ -937,8 +941,10 @@ PHP_METHOD(XMLReader, setSchema)
 	id = ZEND_THIS;
 
 	intern = Z_XMLREADER_P(id);
-	if (intern->ptr) {
+	if (intern && intern->ptr) {
+		PHP_LIBXML_SANITIZE_GLOBALS(schema);
 		retval = xmlTextReaderSchemaValidate(intern->ptr, source);
+		PHP_LIBXML_RESTORE_GLOBALS(schema);
 
 		if (retval == 0) {
 			RETURN_TRUE;
@@ -1017,7 +1023,7 @@ PHP_METHOD(XMLReader, XML)
 	xmlreader_object *intern = NULL;
 	char *source, *uri = NULL, *encoding = NULL;
 	int resolved_path_len, ret = 0;
-	char *directory=NULL, resolved_path[MAXPATHLEN];
+	char *directory=NULL, resolved_path[MAXPATHLEN + 1];
 	xmlParserInputBufferPtr inputbfr;
 	xmlTextReaderPtr reader;
 
@@ -1059,6 +1065,7 @@ PHP_METHOD(XMLReader, XML)
 			}
 			uri = (char *) xmlCanonicPath((const xmlChar *) resolved_path);
 		}
+		PHP_LIBXML_SANITIZE_GLOBALS(text_reader);
 		reader = xmlNewTextReader(inputbfr, uri);
 
 		if (reader != NULL) {
@@ -1077,9 +1084,11 @@ PHP_METHOD(XMLReader, XML)
 					xmlFree(uri);
 				}
 
+				PHP_LIBXML_RESTORE_GLOBALS(text_reader);
 				return;
 			}
 		}
+		PHP_LIBXML_RESTORE_GLOBALS(text_reader);
 	}
 
 	if (uri) {
@@ -1148,6 +1157,18 @@ PHP_METHOD(XMLReader, expand)
 }
 /* }}} */
 
+static zend_result (*prev_zend_post_startup_cb)(void);
+static zend_result xmlreader_fixup_temporaries(void) {
+	if (ZEND_OBSERVER_ENABLED) {
+		++xmlreader_open_fn.T;
+		++xmlreader_xml_fn.T;
+	}
+	if (prev_zend_post_startup_cb) {
+		return prev_zend_post_startup_cb();
+	}
+	return SUCCESS;
+}
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(xmlreader)
 {
@@ -1163,11 +1184,15 @@ PHP_MINIT_FUNCTION(xmlreader)
 
 	xmlreader_class_entry = register_class_XMLReader();
 	xmlreader_class_entry->create_object = xmlreader_objects_new;
+	xmlreader_class_entry->default_object_handlers = &xmlreader_object_handlers;
 
 	memcpy(&xmlreader_open_fn, zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "open", sizeof("open")-1), sizeof(zend_internal_function));
 	xmlreader_open_fn.fn_flags &= ~ZEND_ACC_STATIC;
 	memcpy(&xmlreader_xml_fn, zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "xml", sizeof("xml")-1), sizeof(zend_internal_function));
 	xmlreader_xml_fn.fn_flags &= ~ZEND_ACC_STATIC;
+
+	prev_zend_post_startup_cb = zend_post_startup_cb;
+	zend_post_startup_cb = xmlreader_fixup_temporaries;
 
 	zend_hash_init(&xmlreader_prop_handlers, 0, NULL, php_xmlreader_free_prop_handler, 1);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "attributeCount", xmlTextReaderAttributeCount, NULL, IS_LONG);
@@ -1184,40 +1209,6 @@ PHP_MINIT_FUNCTION(xmlreader)
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "prefix", NULL, xmlTextReaderConstPrefix, IS_STRING);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "value", NULL, xmlTextReaderConstValue, IS_STRING);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "xmlLang", NULL, xmlTextReaderConstXmlLang, IS_STRING);
-
-	/* Constants for NodeType - cannot define common types to share with dom as there are differences in these types */
-
-	REGISTER_XMLREADER_CLASS_CONST_LONG("NONE",	XML_READER_TYPE_NONE);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("ELEMENT",	XML_READER_TYPE_ELEMENT);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("ATTRIBUTE",	XML_READER_TYPE_ATTRIBUTE);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("TEXT",	XML_READER_TYPE_TEXT);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("CDATA",	XML_READER_TYPE_CDATA);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("ENTITY_REF",	XML_READER_TYPE_ENTITY_REFERENCE);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("ENTITY",	XML_READER_TYPE_ENTITY);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("PI",	XML_READER_TYPE_PROCESSING_INSTRUCTION);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("COMMENT",	XML_READER_TYPE_COMMENT);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("DOC",	XML_READER_TYPE_DOCUMENT);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("DOC_TYPE",	XML_READER_TYPE_DOCUMENT_TYPE);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("DOC_FRAGMENT",	XML_READER_TYPE_DOCUMENT_FRAGMENT);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("NOTATION",	XML_READER_TYPE_NOTATION);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("WHITESPACE",	XML_READER_TYPE_WHITESPACE);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("SIGNIFICANT_WHITESPACE",	XML_READER_TYPE_SIGNIFICANT_WHITESPACE);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("END_ELEMENT",	XML_READER_TYPE_END_ELEMENT);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("END_ENTITY",	XML_READER_TYPE_END_ENTITY);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("XML_DECLARATION",	XML_READER_TYPE_XML_DECLARATION);
-
-	/* Constants for Parser options */
-	REGISTER_XMLREADER_CLASS_CONST_LONG("LOADDTD",	XML_PARSER_LOADDTD);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("DEFAULTATTRS",	XML_PARSER_DEFAULTATTRS);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("VALIDATE",	XML_PARSER_VALIDATE);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("SUBST_ENTITIES",	XML_PARSER_SUBST_ENTITIES);
-
-	/* Constants for Errors when loading - not yet used until we implement custom error handling
-	REGISTER_XMLREADER_CLASS_CONST_LONG("VALIDITY_WARNING",		XML_PARSER_SEVERITY_VALIDITY_WARNING,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("VALIDITY_ERROR",		XML_PARSER_SEVERITY_VALIDITY_ERROR,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("WARNING",				XML_PARSER_SEVERITY_WARNING,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_XMLREADER_CLASS_CONST_LONG("ERROR",				XML_PARSER_SEVERITY_ERROR,				CONST_CS | CONST_PERSISTENT);
-	*/
 
 	return SUCCESS;
 }

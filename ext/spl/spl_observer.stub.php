@@ -115,6 +115,15 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
 
 class MultipleIterator implements Iterator
 {
+    /** @cvalue MIT_NEED_ANY */
+    public const int MIT_NEED_ANY = UNKNOWN;
+    /** @cvalue MIT_NEED_ALL */
+    public const int MIT_NEED_ALL = UNKNOWN;
+    /** @cvalue MIT_KEYS_NUMERIC */
+    public const int MIT_KEYS_NUMERIC = UNKNOWN;
+    /** @cvalue MIT_KEYS_ASSOC */
+    public const int MIT_KEYS_ASSOC = UNKNOWN;
+
     public function __construct(int $flags = MultipleIterator::MIT_NEED_ALL|MultipleIterator::MIT_KEYS_NUMERIC) {}
 
     /** @tentative-return-type */

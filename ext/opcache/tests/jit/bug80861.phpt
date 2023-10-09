@@ -1,6 +1,7 @@
 --TEST--
 Bug #80839: PHP problem with JIT
 --INI--
+error_log=
 opcache.enable=1
 opcache.enable_cli=1
 opcache.jit_buffer_size=1M

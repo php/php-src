@@ -80,7 +80,7 @@ typedef struct _zend_shared_segment {
     void   *p;
 } zend_shared_segment;
 
-typedef int (*create_segments_t)(size_t requested_size, zend_shared_segment ***shared_segments, int *shared_segment_count, char **error_in);
+typedef int (*create_segments_t)(size_t requested_size, zend_shared_segment ***shared_segments, int *shared_segment_count, const char **error_in);
 typedef int (*detach_segment_t)(zend_shared_segment *shared_segment);
 
 typedef struct {
@@ -91,7 +91,7 @@ typedef struct {
 
 typedef struct _handler_entry {
 	const char                  *name;
-	zend_shared_memory_handlers *handler;
+	const zend_shared_memory_handlers *handler;
 } zend_shared_memory_handler_entry;
 
 typedef struct _zend_shared_memory_state {
@@ -141,7 +141,7 @@ static inline void *zend_shared_alloc_aligned(size_t size) {
 #if defined(__AVX__) || defined(__SSE2__)
 	/* Align to 64-byte boundary */
 	void *p = zend_shared_alloc(size + 64);
-	return (void *)(((zend_uintptr_t)p + 63L) & ~63L);
+	return (void *)(((uintptr_t)p + 63L) & ~63L);
 #else
 	return zend_shared_alloc(size);
 #endif
@@ -157,7 +157,7 @@ void *zend_shared_memdup(void *source, size_t size);
 
 int  zend_shared_memdup_size(void *p, size_t size);
 
-int zend_accel_in_shm(void *ptr);
+bool zend_accel_in_shm(void *ptr);
 
 typedef union _align_test {
 	void   *ptr;
@@ -185,31 +185,36 @@ void zend_shared_alloc_destroy_xlat_table(void);
 void zend_shared_alloc_clear_xlat_table(void);
 uint32_t zend_shared_alloc_checkpoint_xlat_table(void);
 void zend_shared_alloc_restore_xlat_table(uint32_t checkpoint);
-void zend_shared_alloc_register_xlat_entry(const void *old, const void *new);
-void *zend_shared_alloc_get_xlat_entry(const void *old);
+void zend_shared_alloc_register_xlat_entry(const void *key, const void *value);
+void *zend_shared_alloc_get_xlat_entry(const void *key);
 
 size_t zend_shared_alloc_get_free_memory(void);
 void zend_shared_alloc_save_state(void);
 void zend_shared_alloc_restore_state(void);
 const char *zend_accel_get_shared_model(void);
 
-/* memory write protection */
-void zend_accel_shared_protect(int mode);
+/**
+ * Memory write protection
+ *
+ * @param protected true to protect shared memory (read-only), false
+ * to unprotect shared memory (writable)
+ */
+void zend_accel_shared_protect(bool protected);
 
 #ifdef USE_MMAP
-extern zend_shared_memory_handlers zend_alloc_mmap_handlers;
+extern const zend_shared_memory_handlers zend_alloc_mmap_handlers;
 #endif
 
 #ifdef USE_SHM
-extern zend_shared_memory_handlers zend_alloc_shm_handlers;
+extern const zend_shared_memory_handlers zend_alloc_shm_handlers;
 #endif
 
 #ifdef USE_SHM_OPEN
-extern zend_shared_memory_handlers zend_alloc_posix_handlers;
+extern const zend_shared_memory_handlers zend_alloc_posix_handlers;
 #endif
 
 #ifdef ZEND_WIN32
-extern zend_shared_memory_handlers zend_alloc_win32_handlers;
+extern const zend_shared_memory_handlers zend_alloc_win32_handlers;
 void zend_shared_alloc_create_lock(void);
 void zend_shared_alloc_lock_win32(void);
 void zend_shared_alloc_unlock_win32(void);

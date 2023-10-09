@@ -1,10 +1,13 @@
 --TEST--
-Argument unpacking in new arguments in const expr (not yet supported)
+Argument unpacking in new arguments in static variable
 --FILE--
 <?php
 
 static $x = new stdClass(...[0]);
 
+var_dump($x);
+
 ?>
---EXPECTF--
-Fatal error: Argument unpacking in constant expressions is not supported in %s on line %d
+--EXPECT--
+object(stdClass)#1 (0) {
+}

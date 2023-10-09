@@ -81,7 +81,7 @@ if test "$PHP_EXTERNAL_LIBCRYPT" != "no"; then
 #include <stdlib.h>
 #include <string.h>
 
-int main() {
+int main(void) {
 #if HAVE_CRYPT
 	char *encrypted = crypt("rasmuslerdorf","rl");
 	return !encrypted || strcmp(encrypted,"rl.3StKT.4T8M");
@@ -111,7 +111,7 @@ int main() {
 #include <stdlib.h>
 #include <string.h>
 
-int main() {
+int main(void) {
 #if HAVE_CRYPT
 	char *encrypted = crypt("rasmuslerdorf","_J9..rasm");
 	return !encrypted || strcmp(encrypted,"_J9..rasmBYk8r9AiWNc");
@@ -141,7 +141,7 @@ int main() {
 #include <stdlib.h>
 #include <string.h>
 
-int main() {
+int main(void) {
 #if HAVE_CRYPT
 	char salt[15], answer[40];
 	char *encrypted;
@@ -181,7 +181,7 @@ int main() {
 #include <stdlib.h>
 #include <string.h>
 
-int main() {
+int main(void) {
 #if HAVE_CRYPT
 	char salt[30], answer[70];
 	char *encrypted;
@@ -218,7 +218,7 @@ int main() {
 #include <stdlib.h>
 #include <string.h>
 
-int main() {
+int main(void) {
 #if HAVE_CRYPT
 	char salt[21], answer[21+86];
 	char *encrypted;
@@ -254,7 +254,7 @@ int main() {
 #include <stdlib.h>
 #include <string.h>
 
-int main() {
+int main(void) {
 #if HAVE_CRYPT
 	char salt[21], answer[21+43];
 	char *encrypted;
@@ -376,6 +376,8 @@ dnl
 
 PHP_CHECK_FUNC(res_search, resolv, bind, socket)
 
+PHP_CHECK_FUNC(posix_spawn_file_actions_addchdir_np)
+
 dnl
 dnl Check for strptime()
 dnl
@@ -397,17 +399,6 @@ int strptime(const char *s, const char *format, struct tm *tm);
 if test "$ac_cv_strptime_decl_fails" = "yes"; then
   AC_DEFINE([HAVE_STRPTIME_DECL_FAILS], 1, [whether strptime() declaration fails])
 fi
-
-dnl
-dnl Check for arc4random on BSD systems
-dnl
-AC_CHECK_DECLS([arc4random_buf])
-
-dnl
-dnl Check for CCRandomGenerateBytes
-dnl header absent in previous macOs releases
-dnl
-AC_CHECK_HEADERS([CommonCrypto/CommonRandom.h])
 
 dnl
 dnl Check for argon2
@@ -458,15 +449,15 @@ dnl
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
                             datetime.c dir.c dl.c dns.c exec.c file.c filestat.c \
                             flock_compat.c formatted_print.c fsock.c head.c html.c image.c \
-                            info.c iptc.c lcg.c link.c mail.c math.c md5.c metaphone.c \
-                            microtime.c pack.c pageinfo.c quot_print.c rand.c mt_rand.c \
+                            info.c iptc.c link.c mail.c math.c md5.c metaphone.c \
+                            microtime.c pack.c pageinfo.c quot_print.c \
                             soundex.c string.c scanf.c syslog.c type.c uniqid.c url.c \
                             var.c versioning.c assert.c strnatcmp.c levenshtein.c \
                             incomplete_class.c url_scanner_ex.c ftp_fopen_wrapper.c \
                             http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
                             var_unserializer.c ftok.c sha1.c user_filters.c uuencode.c \
                             filters.c proc_open.c streamsfuncs.c http.c password.c \
-                            random.c net.c hrtime.c crc32_x86.c libavifinfo/avifinfo.c,,,
+                            net.c hrtime.c crc32_x86.c libavifinfo/avifinfo.c,,,
 			    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_BUILD_DIR($ext_builddir/libavifinfo)

@@ -22,14 +22,13 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter.c
+ * The source code included in this file was separated from mbfilter.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
  *
  */
 
 #include "mbfilter.h"
 #include "mbfilter_qprint.h"
-#include "unicode_prop.h"
 
 static size_t mb_qprint_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
 static void mb_wchar_to_qprint(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
@@ -46,7 +45,9 @@ const mbfl_encoding mbfl_encoding_qprint = {
 	NULL,
 	NULL,
 	mb_qprint_to_wchar,
-	mb_wchar_to_qprint
+	mb_wchar_to_qprint,
+	NULL,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_8bit_qprint = {
@@ -96,28 +97,25 @@ int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
 			break;
 		}
 
-		if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0) {
-			if (s == 0x0a || (s == 0x0d && c != 0x0a)) {	/* line feed */
-				CK((*filter->output_function)(0x0d, filter->data));		/* CR */
-				CK((*filter->output_function)(0x0a, filter->data));		/* LF */
-				filter->status &= ~0xff00;
-				break;
-			} else if (s == 0x0d) {
-				break;
-			}
+		if (s == '\n' || (s == '\r' && c != '\n')) {	/* line feed */
+			CK((*filter->output_function)('\r', filter->data));
+			CK((*filter->output_function)('\n', filter->data));
+			filter->status &= ~0xff00;
+			break;
+		} else if (s == 0x0d) {
+			break;
 		}
 
-		if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0  && n >= 72) {	/* soft line feed */
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
-			CK((*filter->output_function)(0x0d, filter->data));		/* CR */
-			CK((*filter->output_function)(0x0a, filter->data));		/* LF */
+		if (n >= 72) {	/* soft line feed */
+			CK((*filter->output_function)('=', filter->data));
+			CK((*filter->output_function)('\r', filter->data));
+			CK((*filter->output_function)('\n', filter->data));
 			filter->status &= ~0xff00;
 		}
 
-		if (s <= 0 || s >= 0x80 || s == 0x3d		/* not ASCII or '=' */
-		   || ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) && mime_char_needs_qencode[s])) {
+		if (s <= 0 || s >= 0x80 || s == '=') { /* not ASCII or '=' */
 			/* hex-octet */
-			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
+			CK((*filter->output_function)('=', filter->data));
 			n = (s >> 4) & 0xf;
 			if (n < 10) {
 				n += 48;		/* '0' */
@@ -132,14 +130,10 @@ int mbfl_filt_conv_qprintenc(int c, mbfl_convert_filter *filter)
 				n += 55;
 			}
 			CK((*filter->output_function)(n, filter->data));
-			if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0) {
-				filter->status += 0x300;
-			}
+			filter->status += 0x300;
 		} else {
 			CK((*filter->output_function)(s, filter->data));
-			if ((filter->status & MBFL_QPRINT_STS_MIME_HEADER) == 0) {
-				filter->status += 0x100;
-			}
+			filter->status += 0x100;
 		}
 		break;
 	}
@@ -153,6 +147,11 @@ int mbfl_filt_conv_qprintenc_flush(mbfl_convert_filter *filter)
 	(*filter->filter_function)('\0', filter);
 	filter->status &= ~0xffff;
 	filter->cache = 0;
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 
@@ -243,6 +242,10 @@ int mbfl_filt_conv_qprintdec_flush(mbfl_convert_filter *filter)
 		CK((*filter->output_function)(cache, filter->data));
 	}
 
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 
@@ -309,6 +312,20 @@ static void mb_wchar_to_qprint(uint32_t *in, size_t len, mb_convert_buf *buf, bo
 		 * but raw bytes from 0x00-0xFF */
 		uint32_t w = *in++;
 
+		if (!w) {
+			out = mb_convert_buf_add(out, '\0');
+			chars_output = 0;
+			continue;
+		} else if (w == '\n') {
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 2);
+			out = mb_convert_buf_add2(out, '\r', '\n');
+			chars_output = 0;
+			continue;
+		} else if (w == '\r') {
+			/* No output */
+			continue;
+		}
+
 		/* QPrint actually mandates that line length should not be more than 76 characters,
 		 * but mbstring stops slightly short of that */
 		if (chars_output >= 72) {
@@ -317,16 +334,7 @@ static void mb_wchar_to_qprint(uint32_t *in, size_t len, mb_convert_buf *buf, bo
 			chars_output = 0;
 		}
 
-		if (!w) {
-			out = mb_convert_buf_add(out, '\0');
-			chars_output = 0;
-		} else if (w == '\n') {
-			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 2);
-			out = mb_convert_buf_add2(out, '\r', '\n');
-			chars_output = 0;
-		} else if (w == '\r') {
-			/* No output */
-		} else if (w >= 0x80 || w == '=') {
+		if (w >= 0x80 || w == '=') {
 			/* Not ASCII */
 			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 3);
 			out = mb_convert_buf_add3(out, '=', qprint_enc_nibble((w >> 4) & 0xF), qprint_enc_nibble(w & 0xF));

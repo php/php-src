@@ -2,12 +2,16 @@
 Bind with NUMBER column variants
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --INI--
 precision = 14
 --FILE--
 <?php
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 // Initialization
 

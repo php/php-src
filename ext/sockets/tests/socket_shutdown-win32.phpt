@@ -10,6 +10,13 @@ sockets
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
     die('skip windows only test');
 }
+if (getenv("SKIP_SLOW_TESTS")) {
+    die("skip slow test");
+}
+if (getenv("SKIP_ONLINE_TESTS")) {
+    die("skip online test");
+}
+
 ?>
 --FILE--
 <?php

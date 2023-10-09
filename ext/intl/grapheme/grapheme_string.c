@@ -29,24 +29,6 @@
 
 /* }}} */
 
-#define GRAPHEME_EXTRACT_TYPE_COUNT		0
-#define GRAPHEME_EXTRACT_TYPE_MAXBYTES	1
-#define GRAPHEME_EXTRACT_TYPE_MAXCHARS	2
-#define GRAPHEME_EXTRACT_TYPE_MIN	GRAPHEME_EXTRACT_TYPE_COUNT
-#define GRAPHEME_EXTRACT_TYPE_MAX	GRAPHEME_EXTRACT_TYPE_MAXCHARS
-
-
-/* {{{ grapheme_register_constants
- * Register API constants
- */
-void grapheme_register_constants( INIT_FUNC_ARGS )
-{
-	REGISTER_LONG_CONSTANT("GRAPHEME_EXTR_COUNT", GRAPHEME_EXTRACT_TYPE_COUNT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GRAPHEME_EXTR_MAXBYTES", GRAPHEME_EXTRACT_TYPE_MAXBYTES, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GRAPHEME_EXTR_MAXCHARS", GRAPHEME_EXTRACT_TYPE_MAXCHARS, CONST_CS | CONST_PERSISTENT);
-}
-/* }}} */
-
 /* {{{ Get number of graphemes in a string */
 PHP_FUNCTION(grapheme_strlen)
 {
@@ -697,7 +679,7 @@ grapheme_extract_count_iter(UBreakIterator *bi, int32_t size, unsigned char *pst
 /* {{{ grapheme extract iter function pointer array */
 typedef int32_t (*grapheme_extract_iter)(UBreakIterator * /*bi*/, int32_t /*size*/, unsigned char * /*pstr*/, int32_t /*str_len*/);
 
-static grapheme_extract_iter grapheme_extract_iters[] = {
+static const grapheme_extract_iter grapheme_extract_iters[] = {
 	&grapheme_extract_count_iter,
 	&grapheme_extract_bytecount_iter,
 	&grapheme_extract_charcount_iter,

@@ -8,6 +8,71 @@ class PharException extends Exception
 
 class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
 {
+    /**
+     * @cvalue PHAR_ENT_COMPRESSED_BZ2
+     */
+    const int BZ2 = UNKNOWN;
+    /**
+     * @cvalue PHAR_ENT_COMPRESSED_GZ
+     */
+    const int GZ = UNKNOWN;
+    /**
+     * @cvalue PHAR_ENT_COMPRESSED_NONE
+     */
+    const int NONE = UNKNOWN;
+    /**
+     * @cvalue PHAR_FORMAT_PHAR
+     */
+    const int PHAR = UNKNOWN;
+    /**
+     * @cvalue PHAR_FORMAT_TAR
+     */
+    const int TAR = UNKNOWN;
+    /**
+     * @cvalue PHAR_FORMAT_ZIP
+     */
+    const int ZIP = UNKNOWN;
+    /**
+     * @cvalue PHAR_ENT_COMPRESSION_MASK
+     */
+    const int COMPRESSED = UNKNOWN;
+    /**
+     * @cvalue PHAR_MIME_PHP
+     */
+    const int PHP = UNKNOWN;
+    /**
+     * @cvalue PHAR_MIME_PHPS
+     */
+    const int PHPS = UNKNOWN;
+    /**
+     * @cvalue PHAR_SIG_MD5
+     */
+    const int MD5 = UNKNOWN;
+    /**
+     * @cvalue PHAR_SIG_OPENSSL
+     */
+    const int OPENSSL = UNKNOWN;
+    /**
+     * @cvalue PHAR_SIG_OPENSSL_SHA256
+     */
+    const int OPENSSL_SHA256 = UNKNOWN;
+    /**
+     * @cvalue PHAR_SIG_OPENSSL_SHA512
+     */
+    const int OPENSSL_SHA512 = UNKNOWN;
+    /**
+     * @cvalue PHAR_SIG_SHA1
+     */
+    const int SHA1 = UNKNOWN;
+    /**
+     * @cvalue PHAR_SIG_SHA256
+     */
+    const int SHA256 = UNKNOWN;
+    /**
+     * @cvalue PHAR_SIG_SHA512
+     */
+    const int SHA512 = UNKNOWN;
+
     public function __construct(string $filename, int $flags = FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS, ?string $alias = null) {}
 
     public function __destruct() {}

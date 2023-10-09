@@ -162,6 +162,13 @@
 #include <sqlext.h>
 #endif
 
+#ifdef PHP_WIN32
+#include <winsock2.h>
+
+#define ODBC_TYPE "Win32"
+#define PHP_ODBC_TYPE ODBC_TYPE
+
+#endif
 
 /* Common defines */
 
@@ -221,8 +228,8 @@ ZEND_BEGIN_MODULE_GLOBALS(odbc)
 	char *defDB;
 	char *defUser;
 	char *defPW;
-	zend_long allow_persistent;
-	zend_long check_persistent;
+	bool allow_persistent;
+	bool check_persistent;
 	zend_long max_persistent;
 	zend_long max_links;
 	zend_long num_persistent;

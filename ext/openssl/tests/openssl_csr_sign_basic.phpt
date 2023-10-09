@@ -2,6 +2,10 @@
 openssl_csr_sign() tests
 --EXTENSIONS--
 openssl
+--SKIPIF--
+<?php
+if (!defined("OPENSSL_KEYTYPE_DSA")) die("skip DSA disabled");
+?>
 --FILE--
 <?php
 $cert = "file://" . __DIR__ . "/cert.crt";

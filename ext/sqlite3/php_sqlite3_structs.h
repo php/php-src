@@ -40,11 +40,6 @@ struct php_sqlite3_bound_param  {
 	zval parameter;
 };
 
-struct php_sqlite3_fci {
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-};
-
 /* Structure for SQLite function. */
 typedef struct _php_sqlite3_func {
 	struct _php_sqlite3_func *next;
@@ -52,8 +47,9 @@ typedef struct _php_sqlite3_func {
 	const char *func_name;
 	int argc;
 
-	zval func, step, fini;
-	struct php_sqlite3_fci afunc, astep, afini;
+	zend_fcall_info_cache func;
+	zend_fcall_info_cache step;
+	zend_fcall_info_cache fini;
 } php_sqlite3_func;
 
 /* Structure for SQLite collation function */
@@ -61,8 +57,7 @@ typedef struct _php_sqlite3_collation {
 	struct _php_sqlite3_collation *next;
 
 	const char *collation_name;
-	zval cmp_func;
-	struct php_sqlite3_fci fci;
+	zend_fcall_info_cache cmp_func;
 } php_sqlite3_collation;
 
 /* Structure for SQLite Database object. */
@@ -71,7 +66,6 @@ typedef struct _php_sqlite3_db_object  {
 	sqlite3 *db;
 	php_sqlite3_func *funcs;
 	php_sqlite3_collation *collations;
-	zend_fcall_info authorizer_fci;
 	zend_fcall_info_cache authorizer_fcc;
 
 	bool exception;

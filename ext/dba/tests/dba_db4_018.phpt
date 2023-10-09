@@ -2,6 +2,8 @@
 DBA DB4 with persistent connections
 --EXTENSIONS--
 dba
+--CONFLICTS--
+dba
 --SKIPIF--
 <?php
 $handler = "db4";

@@ -263,7 +263,7 @@ PHP_CLI_API ssize_t sapi_cli_single_write(const char *str, size_t str_length) /*
 #ifdef PHP_WRITE_STDOUT
 	do {
 		ret = write(STDOUT_FILENO, str, str_length);
-	} while (ret <= 0 && errno == EAGAIN && sapi_cli_select(STDOUT_FILENO));
+	} while (ret <= 0 && (errno == EINTR || (errno == EAGAIN && sapi_cli_select(STDOUT_FILENO))));
 #else
 	ret = fwrite(str, 1, MIN(str_length, 16384), stdout);
 	if (ret == 0 && ferror(stdout)) {
@@ -526,7 +526,7 @@ static void php_cli_usage(char *argv0)
 
 static php_stream *s_in_process = NULL;
 
-static void cli_register_file_handles(bool no_close) /* {{{ */
+static void cli_register_file_handles(void)
 {
 	php_stream *s_in, *s_out, *s_err;
 	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
@@ -536,17 +536,19 @@ static void cli_register_file_handles(bool no_close) /* {{{ */
 	s_out = php_stream_open_wrapper_ex("php://stdout", "wb", 0, NULL, sc_out);
 	s_err = php_stream_open_wrapper_ex("php://stderr", "wb", 0, NULL, sc_err);
 
+	/* Release stream resources, but don't free the underlying handles. Otherwise,
+	 * extensions which write to stderr or company during mshutdown/gshutdown
+	 * won't have the expected functionality.
+	 */
+	if (s_in) s_in->flags |= PHP_STREAM_FLAG_NO_RSCR_DTOR_CLOSE;
+	if (s_out) s_out->flags |= PHP_STREAM_FLAG_NO_RSCR_DTOR_CLOSE;
+	if (s_err) s_err->flags |= PHP_STREAM_FLAG_NO_RSCR_DTOR_CLOSE;
+
 	if (s_in==NULL || s_out==NULL || s_err==NULL) {
 		if (s_in) php_stream_close(s_in);
 		if (s_out) php_stream_close(s_out);
 		if (s_err) php_stream_close(s_err);
 		return;
-	}
-
-	if (no_close) {
-		s_in->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-		s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-		s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
 	}
 
 	s_in_process = s_in;
@@ -555,19 +557,18 @@ static void cli_register_file_handles(bool no_close) /* {{{ */
 	php_stream_to_zval(s_out, &oc.value);
 	php_stream_to_zval(s_err, &ec.value);
 
-	ZEND_CONSTANT_SET_FLAGS(&ic, CONST_CS, 0);
+	Z_CONSTANT_FLAGS(ic.value) = 0;
 	ic.name = zend_string_init_interned("STDIN", sizeof("STDIN")-1, 0);
 	zend_register_constant(&ic);
 
-	ZEND_CONSTANT_SET_FLAGS(&oc, CONST_CS, 0);
+	Z_CONSTANT_FLAGS(oc.value) = 0;
 	oc.name = zend_string_init_interned("STDOUT", sizeof("STDOUT")-1, 0);
 	zend_register_constant(&oc);
 
-	ZEND_CONSTANT_SET_FLAGS(&ec, CONST_CS, 0);
+	Z_CONSTANT_FLAGS(ec.value) = 0;
 	ec.name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
 	zend_register_constant(&ec);
 }
-/* }}} */
 
 static const char *param_mode_conflict = "Either execute direct code, process stdin or use a file.\n";
 
@@ -576,7 +577,7 @@ static zend_result cli_seek_file_begin(zend_file_handle *file_handle, char *scri
 {
 	FILE *fp = VCWD_FOPEN(script_file, "rb");
 	if (!fp) {
-		php_printf("Could not open input file: %s\n", script_file);
+		fprintf(stderr, "Could not open input file: %s\n", script_file);
 		return FAILURE;
 	}
 
@@ -631,7 +632,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				request_started = 1;
 				php_print_info(PHP_INFO_ALL & ~PHP_INFO_CREDITS);
 				php_output_end_all();
-				EG(exit_status) = (c == '?' && argc > 1 && !strchr(argv[1],  c));
+				EG(exit_status) = 0;
 				goto out;
 
 			case 'v': /* show php version & quit */
@@ -736,6 +737,10 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					break;
 				}
 				behavior=PHP_MODE_LINT;
+				/* We want to set the error exit status if at least one lint failed.
+				 * If all were successful we set the exit status to 0.
+				 * We already set EG(exit_status) here such that only failures set the exit status. */
+				EG(exit_status) = 0;
 				break;
 
 			case 'q': /* do not generate HTTP headers */
@@ -937,7 +942,7 @@ do_repeat:
 		zend_register_bool_constant(
 			ZEND_STRL("PHP_CLI_PROCESS_TITLE"),
 			is_ps_title_available() == PS_TITLE_SUCCESS,
-			CONST_CS, 0);
+			0, 0);
 
 		*arg_excp = arg_free; /* reconstruct argv */
 
@@ -953,9 +958,7 @@ do_repeat:
 		PG(during_request_startup) = 0;
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
-			if (script_file) {
-				cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
-			}
+			cli_register_file_handles();
 
 			if (interactive) {
 				EG(exit_status) = cli_shell_callbacks.cli_shell_run();
@@ -966,7 +969,6 @@ do_repeat:
 		case PHP_MODE_LINT:
 			if (php_lint_script(&file_handle) == SUCCESS) {
 				zend_printf("No syntax errors detected in %s\n", php_self);
-				EG(exit_status) = 0;
 			} else {
 				zend_printf("Errors parsing %s\n", php_self);
 				EG(exit_status) = 255;
@@ -990,7 +992,7 @@ do_repeat:
 			}
 			break;
 		case PHP_MODE_CLI_DIRECT:
-			cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
+			cli_register_file_handles();
 			zend_eval_string_ex(exec_direct, NULL, "Command line code", 1);
 			break;
 
@@ -1005,7 +1007,7 @@ do_repeat:
 					file_handle.filename = NULL;
 				}
 
-				cli_register_file_handles(/* no_close */ PHP_DEBUG || num_repeats > 1);
+				cli_register_file_handles();
 
 				if (exec_begin) {
 					zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1);
@@ -1080,7 +1082,7 @@ do_repeat:
 
 					if (EG(exception)) {
 						zval rv;
-						zval *msg = zend_read_property(zend_ce_exception, EG(exception), "message", sizeof("message")-1, 0, &rv);
+						zval *msg = zend_read_property_ex(zend_ce_exception, EG(exception), ZSTR_KNOWN(ZEND_STR_MESSAGE), /* silent */ false, &rv);
 						zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
 						zend_object_release(EG(exception));
 						EG(exception) = NULL;
@@ -1132,9 +1134,15 @@ out:
 	}
 	if (request_started) {
 		php_request_shutdown((void *) 0);
+		request_started = 0;
 	}
 	if (translated_path) {
 		free(translated_path);
+		translated_path = NULL;
+	}
+	if (behavior == PHP_MODE_LINT && argc > php_optind && strcmp(argv[php_optind],"--")) {
+		script_file = NULL;
+		goto do_repeat;
 	}
 	/* Don't repeat fork()ed processes. */
 	if (--num_repeats && pid == getpid()) {

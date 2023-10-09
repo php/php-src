@@ -4,8 +4,9 @@ Maximum Oracle error length
 oci8
 --SKIPIF--
 <?php
+require_once 'skipifconnectfailure.inc';
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(__DIR__.'/skipif.inc');
+require __DIR__.'/skipif.inc';
 // Assume runtime client version is >= compile time client version
 $cv = explode('.', oci_client_version());
 if ($cv[0] < 11 || ($cv[0] == 11 && $cv[1] < 2) || ($cv[0] == 11 && $cv[1] == 2 && $cv[3] < 3)) {
@@ -15,7 +16,7 @@ if ($cv[0] < 11 || ($cv[0] == 11 && $cv[1] < 2) || ($cv[0] == 11 && $cv[1] == 2 
 --FILE--
 <?php
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 echo "Test 1\n";
 

@@ -45,6 +45,4 @@
 #define NORMALIZER_DEFAULT NORMALIZER_FORM_C
 #endif
 
-void normalizer_register_constants( INIT_FUNC_ARGS );
-
 #endif // NORMALIZER_NORMALIZER_H

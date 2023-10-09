@@ -3,7 +3,10 @@ dl(): Extensions compiled against zend_register_ini_entries() are supported
 --ENV--
 PHP_DL_TEST_USE_OLD_REGISTER_INI_ENTRIES=1
 --SKIPIF--
-<?php include dirname(__DIR__, 3) . "/dl_test/tests/skip.inc"; ?>
+<?php
+include dirname(__DIR__, 3) . "/dl_test/tests/skip.inc";
+if (getenv('SKIP_ASAN')) die('skip fails intermittently on ASAN');
+?>
 --FILE--
 <?php
 

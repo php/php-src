@@ -1,6 +1,6 @@
 <?php
 
-const BRANCHES = ['master', 'PHP-8.1', 'PHP-8.0'];
+const BRANCHES = ['master', 'PHP-8.3', 'PHP-8.2', 'PHP-8.1', 'PHP-8.0'];
 
 function get_branch_commit_cache_file_path(): string {
     return dirname(__DIR__) . '/branch-commit-cache.json';
@@ -42,7 +42,7 @@ function get_branches() {
     return get_branch_matrix($changed_branches);
 }
 
-function get_asan_matrix(array $branches) {
+function get_matrix_include(array $branches) {
     $jobs = [];
     foreach ($branches as $branch) {
         $jobs[] = [
@@ -52,6 +52,49 @@ function get_asan_matrix(array $branches) {
             'zts' => true,
             'configuration_parameters' => "CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC' LDFLAGS='-fsanitize=undefined,address'",
             'run_tests_parameters' => '--asan',
+            'test_function_jit' => false,
+            'asan' => true,
+        ];
+        if ($branch['ref'] !== 'PHP-8.0') {
+            $jobs[] = [
+                'name' => '_REPEAT',
+                'branch' => $branch,
+                'debug' => true,
+                'zts' => false,
+                'run_tests_parameters' => '--repeat 2',
+                'timeout_minutes' => 360,
+                'test_function_jit' => true,
+                'asan' => false,
+            ];
+            $jobs[] = [
+                'name' => '_VARIATION',
+                'branch' => $branch,
+                'debug' => true,
+                'zts' => true,
+                'configuration_parameters' => "CFLAGS='-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1'",
+                'timeout_minutes' => 360,
+                'test_function_jit' => true,
+                'asan' => false,
+            ];
+        }
+    }
+    return $jobs;
+}
+
+function get_windows_matrix_include(array $branches) {
+    $jobs = [];
+    foreach ($branches as $branch) {
+        $jobs[] = [
+            'branch' => $branch,
+            'x64' => true,
+            'zts' => true,
+            'opcache' => true,
+        ];
+        $jobs[] = [
+            'branch' => $branch,
+            'x64' => false,
+            'zts' => false,
+            'opcache' => false,
         ];
     }
     return $jobs;
@@ -65,7 +108,11 @@ if ($discard_cache) {
 }
 
 $branches = get_branches();
-$asan_matrix = get_asan_matrix($branches);
+$matrix_include = get_matrix_include($branches);
+$windows_matrix_include = get_windows_matrix_include($branches);
 
-echo '::set-output name=branches::' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n";
-echo '::set-output name=asan-matrix::' . json_encode($asan_matrix, JSON_UNESCAPED_SLASHES) . "\n";
+$f = fopen(getenv('GITHUB_OUTPUT'), 'a');
+fwrite($f, 'branches=' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n");
+fwrite($f, 'matrix-include=' . json_encode($matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
+fwrite($f, 'windows-matrix-include=' . json_encode($windows_matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
+fclose($f);

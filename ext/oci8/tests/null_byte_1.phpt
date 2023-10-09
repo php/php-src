@@ -4,6 +4,7 @@ Protect against null bytes in LOB filenames
 oci8
 --SKIPIF--
 <?php
+require_once 'skipifconnectfailure.inc';
 if (PHP_MAJOR_VERSION < 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4))
     die ("skip Test only valid for PHP 5.4 onwards");
 ?>
@@ -15,7 +16,7 @@ display_errors = On
 // See http://news.php.net/php.internals/50202
 //     http://svn.php.net/viewvc?view=revision&revision=311870
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 // Run Test
 

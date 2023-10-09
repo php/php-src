@@ -36,7 +36,7 @@
 #include <fcntl.h>
 
 #define TRUNC_IT(extension, mode) \
-	snprintf(buf, MAXPATHLEN, "%s" extension, info->path); \
+	snprintf(buf, MAXPATHLEN, "%s" extension, ZSTR_VAL(info->path)); \
 	buf[MAXPATHLEN-1] = '\0'; \
 	if((fd = VCWD_OPEN_MODE(buf, O_CREAT | mode | O_WRONLY, filemode)) == -1) \
 		return FAILURE; \
@@ -67,7 +67,7 @@ DBA_OPEN_FUNC(dbm)
 		TRUNC_IT(".dir", 0);
 	}
 
-	if(dbminit((char *) info->path) == -1) {
+	if(dbminit((char *) ZSTR_VAL(info->path)) == -1) {
 		return FAILURE;
 	}
 

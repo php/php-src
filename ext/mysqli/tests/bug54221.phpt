@@ -4,7 +4,7 @@ Bug #54221 mysqli::get_warnings segfault when used in multi queries
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 mysqli.max_links = 1
@@ -12,7 +12,7 @@ mysqli.allow_persistent = Off
 mysqli.max_persistent = 0
 --FILE--
 <?php
-    include ("connect.inc");
+    include 'connect.inc';
 
     $link = mysqli_init();
     if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {

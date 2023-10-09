@@ -4,14 +4,14 @@ Testing mysqli.max_links
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 mysqli.max_links=1
 --FILE--
 <?php
-    require_once("connect.inc");
-    require_once("table.inc");
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     // to make sure we have at least one working connection...
     var_dump(mysqli_ping($link));
@@ -30,7 +30,7 @@ mysqli.max_links=1
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+	require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 bool(true)

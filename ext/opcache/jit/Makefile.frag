@@ -11,7 +11,6 @@ $(builddir)/jit/zend_jit.lo: \
 	$(srcdir)/jit/zend_jit_disasm.c \
 	$(srcdir)/jit/zend_jit_gdb.c \
 	$(srcdir)/jit/zend_jit_perf_dump.c \
-	$(srcdir)/jit/zend_jit_oprofile.c \
 	$(srcdir)/jit/zend_jit_vtune.c \
 	$(srcdir)/jit/zend_jit_trace.c \
 	$(srcdir)/jit/zend_elf.c

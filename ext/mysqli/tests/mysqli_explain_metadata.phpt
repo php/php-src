@@ -5,8 +5,6 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-if (!$IS_MYSQLND)
-  die("skip Open libmysql/MySQL issue http://bugs.mysql.com/?id=62350");
 ?>
 --FILE--
 <?php
@@ -155,7 +153,7 @@ if (!$IS_MYSQLND)
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

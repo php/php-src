@@ -14,7 +14,7 @@ foreach($lst as $p) {
 	$tp = dirname($p) . DIRECTORY_SEPARATOR . basename($p, ".testfile") . ".result";
 	$finfo = finfo_open(FILEINFO_NONE, file_exists($mp) ? $mp : NULL);
 	$i = finfo_file( $finfo, $p);
-	$exp = file_get_contents($tp);
+	$exp = trim(file_get_contents($tp));
 	if ($i !== $exp) {
 		echo "'$p' failed\nexp: '$exp'\ngot: '$i'\n";
 	} 

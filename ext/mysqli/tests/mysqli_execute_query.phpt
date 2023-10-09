@@ -86,10 +86,10 @@ print "done!";
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECTF--
-[005] [1064] You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'some random gibberish' at line 1
+[005] [1064] You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'some random gibberish' at line 1
 [006] [1062] Duplicate entry '1' for key '%s'
 [009] mysqli::execute_query(): Argument #2 ($params) must consist of exactly 3 elements, 2 present
 [010] mysqli::execute_query(): Argument #2 ($params) must be a list array

@@ -25,6 +25,12 @@
 #include "zend_accelerator_util_funcs.h"
 #include "zend_persist.h"
 #include "zend_shared_alloc.h"
+#include "zend_observer.h"
+
+#ifdef __SSE2__
+/* For SSE2 adler32 */
+#include <immintrin.h>
+#endif
 
 typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
@@ -139,7 +145,7 @@ void zend_accel_move_user_classes(HashTable *src, uint32_t count, zend_script *s
 	src->pDestructor = orig_dtor;
 }
 
-static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
+static zend_always_inline void _zend_accel_function_hash_copy(HashTable *target, HashTable *source, bool call_observers)
 {
 	zend_function *function1, *function2;
 	Bucket *p, *end;
@@ -156,8 +162,12 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 			goto failure;
 		}
 		_zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
+		if (UNEXPECTED(call_observers) && *ZSTR_VAL(p->key)) { // if not rtd key
+			_zend_observer_function_declared_notify(Z_PTR(p->val), p->key);
+		}
 	}
 	target->nInternalPointer = 0;
+
 	return;
 
 failure:
@@ -168,16 +178,26 @@ failure:
 	CG(zend_lineno) = function1->op_array.opcodes[0].lineno;
 	if (function2->type == ZEND_USER_FUNCTION
 		&& function2->op_array.last > 0) {
-		zend_error(E_ERROR, "Cannot redeclare %s() (previously declared in %s:%d)",
+		zend_error_noreturn(E_ERROR, "Cannot redeclare %s() (previously declared in %s:%d)",
 				   ZSTR_VAL(function1->common.function_name),
 				   ZSTR_VAL(function2->op_array.filename),
 				   (int)function2->op_array.opcodes[0].lineno);
 	} else {
-		zend_error(E_ERROR, "Cannot redeclare %s()", ZSTR_VAL(function1->common.function_name));
+		zend_error_noreturn(E_ERROR, "Cannot redeclare %s()", ZSTR_VAL(function1->common.function_name));
 	}
 }
 
-static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
+static zend_always_inline void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
+{
+	_zend_accel_function_hash_copy(target, source, 0);
+}
+
+static zend_never_inline void zend_accel_function_hash_copy_notify(HashTable *target, HashTable *source)
+{
+	_zend_accel_function_hash_copy(target, source, 1);
+}
+
+static zend_always_inline void _zend_accel_class_hash_copy(HashTable *target, HashTable *source, bool call_observers)
 {
 	Bucket *p, *end;
 	zval *t;
@@ -207,7 +227,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 					CG(in_compilation) = 1;
 					zend_set_compiled_filename(ce1->info.user.filename);
 					CG(zend_lineno) = ce1->info.user.line_start;
-					zend_error(E_ERROR,
+					zend_error_noreturn(E_ERROR,
 							"Cannot declare %s %s, because the name is already in use",
 							zend_get_object_type(ce1), ZSTR_VAL(ce1->name));
 					return;
@@ -216,16 +236,28 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 			}
 		} else {
 			zend_class_entry *ce = Z_PTR(p->val);
-			t = _zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
-			if ((ce->ce_flags & ZEND_ACC_LINKED)
-			 && ZSTR_HAS_CE_CACHE(ce->name)
-			 && ZSTR_VAL(p->key)[0]) {
-				ZSTR_SET_CE_CACHE_EX(ce->name, ce, 0);
+			_zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
+			if ((ce->ce_flags & ZEND_ACC_LINKED) && ZSTR_VAL(p->key)[0]) {
+				if (ZSTR_HAS_CE_CACHE(ce->name)) {
+					ZSTR_SET_CE_CACHE_EX(ce->name, ce, 0);
+				}
+				if (UNEXPECTED(call_observers)) {
+					_zend_observer_class_linked_notify(ce, p->key);
+				}
 			}
 		}
 	}
 	target->nInternalPointer = 0;
-	return;
+}
+
+static zend_always_inline void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
+{
+	_zend_accel_class_hash_copy(target, source, 0);
+}
+
+static zend_never_inline void zend_accel_class_hash_copy_notify(HashTable *target, HashTable *source)
+{
+	_zend_accel_class_hash_copy(target, source, 1);
 }
 
 void zend_accel_build_delayed_early_binding_list(zend_persistent_script *persistent_script)
@@ -325,15 +357,16 @@ static void zend_accel_do_delayed_early_binding(
 			zval *zv = zend_hash_find_known_hash(EG(class_table), early_binding->rtd_key);
 			if (zv) {
 				zend_class_entry *orig_ce = Z_CE_P(zv);
-				zend_class_entry *parent_ce =
-					zend_hash_find_ex_ptr(EG(class_table), early_binding->lc_parent_name, 1);
-				if (parent_ce) {
+				zend_class_entry *parent_ce = !(orig_ce->ce_flags & ZEND_ACC_LINKED)
+					? zend_hash_find_ex_ptr(EG(class_table), early_binding->lc_parent_name, 1)
+					: NULL;
+				if (parent_ce || (orig_ce->ce_flags & ZEND_ACC_LINKED)) {
 					ce = zend_try_early_bind(orig_ce, parent_ce, early_binding->lcname, zv);
 				}
 			}
-		}
-		if (ce && early_binding->cache_slot != (uint32_t) -1) {
-			*(void**)((char*)run_time_cache + early_binding->cache_slot) = ce;
+			if (ce && early_binding->cache_slot != (uint32_t) -1) {
+				*(void**)((char*)run_time_cache + early_binding->cache_slot) = ce;
+			}
 		}
 	}
 	CG(compiled_filename) = orig_compiled_filename;
@@ -347,15 +380,11 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 	op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
 	*op_array = persistent_script->script.main_op_array;
 
-	if (zend_hash_num_elements(&persistent_script->script.function_table) > 0) {
-		zend_accel_function_hash_copy(CG(function_table), &persistent_script->script.function_table);
-	}
-
-	if (zend_hash_num_elements(&persistent_script->script.class_table) > 0) {
-		zend_accel_class_hash_copy(CG(class_table), &persistent_script->script.class_table);
-	}
-
 	if (EXPECTED(from_shared_memory)) {
+		if (ZCSG(map_ptr_last) > CG(map_ptr_last)) {
+			zend_map_ptr_extend(ZCSG(map_ptr_last));
+		}
+
 		/* Register __COMPILER_HALT_OFFSET__ constant */
 		if (persistent_script->compiler_halt_offset != 0 &&
 		    persistent_script->script.filename) {
@@ -364,13 +393,25 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 
 			name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, ZSTR_VAL(persistent_script->script.filename), ZSTR_LEN(persistent_script->script.filename), 0);
 			if (!zend_hash_exists(EG(zend_constants), name)) {
-				zend_register_long_constant(ZSTR_VAL(name), ZSTR_LEN(name), persistent_script->compiler_halt_offset, CONST_CS, 0);
+				zend_register_long_constant(ZSTR_VAL(name), ZSTR_LEN(name), persistent_script->compiler_halt_offset, 0, 0);
 			}
 			zend_string_release_ex(name, 0);
 		}
+	}
 
-		if (ZCSG(map_ptr_last) > CG(map_ptr_last)) {
-			zend_map_ptr_extend(ZCSG(map_ptr_last));
+	if (zend_hash_num_elements(&persistent_script->script.function_table) > 0) {
+		if (EXPECTED(!zend_observer_function_declared_observed)) {
+			zend_accel_function_hash_copy(CG(function_table), &persistent_script->script.function_table);
+		} else {
+			zend_accel_function_hash_copy_notify(CG(function_table), &persistent_script->script.function_table);
+		}
+	}
+
+	if (zend_hash_num_elements(&persistent_script->script.class_table) > 0) {
+		if (EXPECTED(!zend_observer_class_linked_observed)) {
+			zend_accel_class_hash_copy(CG(class_table), &persistent_script->script.class_table);
+		} else {
+			zend_accel_class_hash_copy_notify(CG(class_table), &persistent_script->script.class_table);
 		}
 	}
 
@@ -416,11 +457,62 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 #define ADLER32_NMAX 5552
 /* NMAX is the largest n such that 255n(n+1)/2 + (n+1)(BASE-1) <= 2^32-1 */
 
-#define ADLER32_DO1(buf)        {s1 += *(buf); s2 += s1;}
-#define ADLER32_DO2(buf, i)     ADLER32_DO1(buf + i); ADLER32_DO1(buf + i + 1);
-#define ADLER32_DO4(buf, i)     ADLER32_DO2(buf, i); ADLER32_DO2(buf, i + 2);
-#define ADLER32_DO8(buf, i)     ADLER32_DO4(buf, i); ADLER32_DO4(buf, i + 4);
-#define ADLER32_DO16(buf)       ADLER32_DO8(buf, 0); ADLER32_DO8(buf, 8);
+#define ADLER32_SCALAR_DO1(buf)        {s1 += *(buf); s2 += s1;}
+#define ADLER32_SCALAR_DO2(buf, i)     ADLER32_SCALAR_DO1(buf + i); ADLER32_SCALAR_DO1(buf + i + 1);
+#define ADLER32_SCALAR_DO4(buf, i)     ADLER32_SCALAR_DO2(buf, i); ADLER32_SCALAR_DO2(buf, i + 2);
+#define ADLER32_SCALAR_DO8(buf, i)     ADLER32_SCALAR_DO4(buf, i); ADLER32_SCALAR_DO4(buf, i + 4);
+#define ADLER32_SCALAR_DO16(buf)       ADLER32_SCALAR_DO8(buf, 0); ADLER32_SCALAR_DO8(buf, 8);
+
+static zend_always_inline void adler32_do16_loop(unsigned char *buf, unsigned char *end, unsigned int *s1_out, unsigned int *s2_out)
+{
+	unsigned int s1 = *s1_out;
+	unsigned int s2 = *s2_out;
+
+#ifdef __SSE2__
+	const __m128i zero = _mm_setzero_si128();
+
+	__m128i accumulate_s2 = zero;
+	unsigned int accumulate_s1 = 0;
+
+	do {
+		__m128i read = _mm_loadu_si128((__m128i *) buf); /* [A:P] */
+
+		/* Split the 8-bit-element vector into two 16-bit-element vectors where each element gets zero-extended from 8-bits to 16-bits */
+		__m128i lower = _mm_unpacklo_epi8(read, zero);									/* [A:H] zero-extended to 16-bits */
+		__m128i higher = _mm_unpackhi_epi8(read, zero);									/* [I:P] zero-extended to 16-bits */
+		lower = _mm_madd_epi16(lower, _mm_set_epi16(9, 10, 11, 12, 13, 14, 15, 16));	/* [A * 16:H * 9] */
+		higher = _mm_madd_epi16(higher, _mm_set_epi16(1, 2, 3, 4, 5, 6, 7, 8)); 		/* [I * 8:P * 1] */
+
+		/* We'll cheat here: it's difficult to add 16-bit elementwise, but we can do 32-bit additions.
+			* The highest value the sum of two elements of the vectors can take is 0xff * 16 + 0xff * 8 < 0xffff.
+			* That means there is no carry possible from 16->17 bits so the 32-bit addition is safe. */
+		__m128i sum = _mm_add_epi32(lower, higher); /* [A * 16 + I * 8:H * 9 + P * 1] */
+		accumulate_s2 = _mm_add_epi32(accumulate_s2, sum);
+		accumulate_s1 += s1;
+
+		/* Computes 8-bit element-wise abs(buf - zero) and then sums the elements into two 16 bit parts */
+		sum = _mm_sad_epu8(read, zero);
+		s1 += _mm_cvtsi128_si32(sum) + _mm_extract_epi16(sum, 4);
+
+		buf += 16;
+	} while (buf != end);
+
+	/* For convenience, let's do a rename of variables and let accumulate_s2 = [X, Y, Z, W] */
+	__m128i shuffled = _mm_shuffle_epi32(accumulate_s2, _MM_SHUFFLE(1, 0, 0, 2));	/* [Y, X, X, Z] */
+	accumulate_s2 = _mm_add_epi32(accumulate_s2, shuffled);							/* [X + Y, Y + X, Z + X, W + Z] */
+	shuffled = _mm_shuffle_epi32(accumulate_s2, _MM_SHUFFLE(3, 3, 3, 3));			/* [X + Y, X + Y, X + Y, X + Y] */
+	accumulate_s2 = _mm_add_epi32(accumulate_s2, shuffled);							/* [/, /, /, W + Z + X + Y] */
+	s2 += accumulate_s1 * 16 + _mm_cvtsi128_si32(accumulate_s2);
+#else
+	do {
+		ADLER32_SCALAR_DO16(buf);
+		buf += 16;
+	} while (buf != end);
+#endif
+
+	*s1_out = s1;
+	*s2_out = s2;
+}
 
 unsigned int zend_adler32(unsigned int checksum, unsigned char *buf, uint32_t len)
 {
@@ -431,10 +523,8 @@ unsigned int zend_adler32(unsigned int checksum, unsigned char *buf, uint32_t le
 	while (len >= ADLER32_NMAX) {
 		len -= ADLER32_NMAX;
 		end = buf + ADLER32_NMAX;
-		do {
-			ADLER32_DO16(buf);
-			buf += 16;
-		} while (buf != end);
+		adler32_do16_loop(buf, end, &s1, &s2);
+		buf = end;
 		s1 %= ADLER32_BASE;
 		s2 %= ADLER32_BASE;
 	}
@@ -443,15 +533,13 @@ unsigned int zend_adler32(unsigned int checksum, unsigned char *buf, uint32_t le
 		if (len >= 16) {
 			end = buf + (len & 0xfff0);
 			len &= 0xf;
-			do {
-				ADLER32_DO16(buf);
-				buf += 16;
-			} while (buf != end);
+			adler32_do16_loop(buf, end, &s1, &s2);
+			buf = end;
 		}
 		if (len) {
 			end = buf + len;
 			do {
-				ADLER32_DO1(buf);
+				ADLER32_SCALAR_DO1(buf);
 				buf++;
 			} while (buf != end);
 		}

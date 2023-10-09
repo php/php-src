@@ -9,9 +9,9 @@ intl
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "nl");
 
-$intlcal1 = new IntlGregorianCalendar(2012, 1, 29, 16, 59, 59);
+$intlcal1 = IntlGregorianCalendar::createFromDateTime(2012, 1, 29, 16, 59, 59);
 $intlcal2 = IntlCalendar::createInstance(null, '@calendar=japanese');
-$intlcal3 = new IntlGregorianCalendar(2012, 1, 29, 17, 00, 00);
+$intlcal3 = IntlGregorianCalendar::createFromDateTime(2012, 1, 29, 17, 00, 00);
 $intlcal2->setTime($intlcal1->getTime());
 
 var_dump($intlcal2->getType());
@@ -52,4 +52,4 @@ bool(false)
 string(10) "3 before 2"
 bool(false)
 string(9) "3 after 2"
-bool(true)
+bool(true)

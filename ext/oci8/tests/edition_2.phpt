@@ -4,7 +4,9 @@ Set and check Oracle 11gR2 "edition" attribute
 oci8
 --SKIPIF--
 <?php
-require(__DIR__."/connect.inc");
+if (getenv('SKIP_REPEAT')) die('skip fails with repeat');
+require_once 'skipifconnectfailure.inc';
+require __DIR__.'/connect.inc';
 if (strcasecmp($user, "system") && strcasecmp($user, "sys"))
     die("skip needs to be run as a DBA user");
 if ($test_drcp)
@@ -38,7 +40,7 @@ error_reporting(E_ALL ^ E_DEPRECATED);
 $testuser     = 'testuser_ed_2';  // Used in conn_attr.inc
 $testpassword = 'testuser';
 
-require(__DIR__."/conn_attr.inc");
+require __DIR__."/conn_attr.inc";
 
 echo"**Test 1.1 - Default value for  the attribute **************\n";
 get_edit_attr($c);

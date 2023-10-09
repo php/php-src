@@ -49,7 +49,7 @@ int main(void)
     libmagic_sources="$libmagic_sources libmagic/strcasestr.c"
   ],[AC_MSG_RESULT([skipped, cross-compiling])])
 
-  PHP_NEW_EXTENSION(fileinfo, fileinfo.c $libmagic_sources, $ext_shared,,-I@ext_srcdir@/libmagic)
+  PHP_NEW_EXTENSION(fileinfo, fileinfo.c php_libmagic.c $libmagic_sources, $ext_shared,,-I@ext_srcdir@/libmagic)
   PHP_ADD_BUILD_DIR($ext_builddir/libmagic)
 
   AC_CHECK_FUNCS([utimes strndup])

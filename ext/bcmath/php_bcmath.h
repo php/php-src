@@ -18,16 +18,13 @@
 #define PHP_BCMATH_H
 
 #include "libbcmath/src/bcmath.h"
+#include "zend_API.h"
 
 extern zend_module_entry bcmath_module_entry;
 #define phpext_bcmath_ptr &bcmath_module_entry
 
 #include "php_version.h"
 #define PHP_BCMATH_VERSION PHP_VERSION
-
-PHP_MINIT_FUNCTION(bcmath);
-PHP_MSHUTDOWN_FUNCTION(bcmath);
-PHP_MINFO_FUNCTION(bcmath);
 
 ZEND_BEGIN_MODULE_GLOBALS(bcmath)
 	bc_num _zero_;

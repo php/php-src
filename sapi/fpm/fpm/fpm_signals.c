@@ -182,7 +182,7 @@ static void sig_handler(int signo) /* {{{ */
 }
 /* }}} */
 
-int fpm_signals_init_main() /* {{{ */
+int fpm_signals_init_main(void)
 {
 	struct sigaction act;
 
@@ -222,9 +222,8 @@ int fpm_signals_init_main() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_signals_init_child() /* {{{ */
+int fpm_signals_init_child(void)
 {
 	struct sigaction act, act_dfl;
 
@@ -257,20 +256,18 @@ int fpm_signals_init_child() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_signals_get_fd() /* {{{ */
+int fpm_signals_get_fd(void)
 {
 	return sp[0];
 }
-/* }}} */
 
-int fpm_signals_init_mask() /* {{{ */
+int fpm_signals_init_mask(void)
 {
 	/* Subset of signals from fpm_signals_init_main() and fpm_got_signal()
 		blocked to avoid unexpected death during early init
 		or during reload just after execvp() or fork */
-	int init_signal_array[] = { SIGUSR1, SIGUSR2, SIGCHLD };
+	static const int init_signal_array[] = { SIGUSR1, SIGUSR2, SIGCHLD };
 	size_t size = sizeof(init_signal_array)/sizeof(init_signal_array[0]);
 	size_t i = 0;
 	if (0 > sigemptyset(&block_sigset) ||
@@ -298,9 +295,8 @@ int fpm_signals_init_mask() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_signals_block() /* {{{ */
+int fpm_signals_block(void)
 {
 	if (0 > sigprocmask(SIG_BLOCK, &block_sigset, NULL)) {
 		zlog(ZLOG_SYSERROR, "failed to block signals");
@@ -308,9 +304,8 @@ int fpm_signals_block() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_signals_child_block() /* {{{ */
+int fpm_signals_child_block(void)
 {
 	if (0 > sigprocmask(SIG_BLOCK, &child_block_sigset, NULL)) {
 		zlog(ZLOG_SYSERROR, "failed to block child signals");
@@ -318,9 +313,8 @@ int fpm_signals_child_block() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
-int fpm_signals_unblock() /* {{{ */
+int fpm_signals_unblock(void)
 {
 	/* Ensure that during reload after upgrade all signals are unblocked.
 		block_sigset could have different value before execve() */
@@ -332,4 +326,3 @@ int fpm_signals_unblock() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */

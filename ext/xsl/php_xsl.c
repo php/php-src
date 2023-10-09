@@ -59,11 +59,15 @@ void xsl_objects_free_storage(zend_object *object)
 
 	zend_object_std_dtor(&intern->std);
 
-	zend_hash_destroy(intern->parameter);
-	FREE_HASHTABLE(intern->parameter);
+	if (intern->parameter) {
+		zend_hash_destroy(intern->parameter);
+		FREE_HASHTABLE(intern->parameter);
+	}
 
-	zend_hash_destroy(intern->registered_phpfunctions);
-	FREE_HASHTABLE(intern->registered_phpfunctions);
+	if (intern->registered_phpfunctions) {
+		zend_hash_destroy(intern->registered_phpfunctions);
+		FREE_HASHTABLE(intern->registered_phpfunctions);
+	}
 
 	if (intern->node_list) {
 		zend_hash_destroy(intern->node_list);
@@ -103,7 +107,6 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 	intern->parameter = zend_new_array(0);
 	intern->registered_phpfunctions = zend_new_array(0);
 
-	intern->std.handlers = &xsl_object_handlers;
 	return &intern->std;
 }
 /* }}} */
@@ -118,6 +121,7 @@ PHP_MINIT_FUNCTION(xsl)
 
 	xsl_xsltprocessor_class_entry = register_class_XSLTProcessor();
 	xsl_xsltprocessor_class_entry->create_object = xsl_objects_new;
+	xsl_xsltprocessor_class_entry->default_object_handlers = &xsl_object_handlers;
 
 #ifdef HAVE_XSL_EXSLT
 	exsltRegisterAll();
@@ -131,25 +135,7 @@ PHP_MINIT_FUNCTION(xsl)
 				   xsl_ext_function_object_php);
 	xsltSetGenericErrorFunc(NULL, php_libxml_error_handler);
 
-	REGISTER_LONG_CONSTANT("XSL_CLONE_AUTO",      0,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XSL_CLONE_NEVER",    -1,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XSL_CLONE_ALWAYS",    1,     CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("XSL_SECPREF_NONE",             XSL_SECPREF_NONE,             CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XSL_SECPREF_READ_FILE",        XSL_SECPREF_READ_FILE,        CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XSL_SECPREF_WRITE_FILE",       XSL_SECPREF_WRITE_FILE,       CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XSL_SECPREF_CREATE_DIRECTORY", XSL_SECPREF_CREATE_DIRECTORY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XSL_SECPREF_READ_NETWORK",     XSL_SECPREF_READ_NETWORK,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XSL_SECPREF_WRITE_NETWORK",    XSL_SECPREF_WRITE_NETWORK,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XSL_SECPREF_DEFAULT",          XSL_SECPREF_DEFAULT,          CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("LIBXSLT_VERSION",           LIBXSLT_VERSION,            CONST_CS | CONST_PERSISTENT);
-	REGISTER_STRING_CONSTANT("LIBXSLT_DOTTED_VERSION",  LIBXSLT_DOTTED_VERSION,     CONST_CS | CONST_PERSISTENT);
-
-#ifdef HAVE_XSL_EXSLT
-	REGISTER_LONG_CONSTANT("LIBEXSLT_VERSION",           LIBEXSLT_VERSION,            CONST_CS | CONST_PERSISTENT);
-	REGISTER_STRING_CONSTANT("LIBEXSLT_DOTTED_VERSION",  LIBEXSLT_DOTTED_VERSION,     CONST_CS | CONST_PERSISTENT);
-#endif
+	register_php_xsl_symbols(module_number);
 
 	return SUCCESS;
 }

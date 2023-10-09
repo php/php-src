@@ -4,24 +4,29 @@ Bug #62885 (mysqli_poll - Segmentation fault)
 mysqli
 --SKIPIF--
 <?php
-require_once("connect.inc");
-if (!$IS_MYSQLND) {
-    die("skip mysqlnd only test");
-}
+require_once 'connect.inc';
 ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
 $tablica = array();
-$test1 = mysqli_poll($test2, $test3, $tablica, 0);
+try {
+    $test1 = mysqli_poll($test2, $test3, $tablica, 0);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $test2 = array();
 $test2 = array();
-$test1 = mysqli_poll($test2, $test3, $tablica, 0);
+try {
+    $test1 = mysqli_poll($test2, $test3, $tablica, 0);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 echo "okey";
 ?>
 --EXPECTF--
-Warning: mysqli_poll(): No stream arrays were passed in %sbug62885.php on line %d
+No stream arrays were passed
 
-Warning: mysqli_poll(): No stream arrays were passed in %sbug62885.php on line %d
+Warning: mysqli_poll(): No stream arrays were passed in %s on line %d
 okey

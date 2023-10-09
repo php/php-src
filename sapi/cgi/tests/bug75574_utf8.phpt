@@ -13,7 +13,7 @@ include "skipif.inc";
 
 include "include.inc";
 
-$php = get_cgi_path();
+$php = escapeshellarg(get_cgi_path());
 reset_env_vars();
 
 $fn = __DIR__ . DIRECTORY_SEPARATOR . md5(uniqid());

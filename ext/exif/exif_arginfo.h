@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 123192d967d2a1787c340a43238797323e878a1b */
+ * Stub hash: 633b2db018fa1453845a854a6361f11f107f4653 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_exif_tagname, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
@@ -40,5 +40,5 @@ static const zend_function_entry ext_functions[] = {
 
 static void register_exif_symbols(int module_number)
 {
-	REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", USE_MBSTRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", USE_MBSTRING, CONST_PERSISTENT);
 }

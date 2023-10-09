@@ -194,7 +194,7 @@ function gc_enable(): void {}
 function gc_disable(): void {}
 
 /**
- * @return array<string, int>
+ * @return array<string, int|float|bool>
  * @refcount 1
  */
 function gc_status(): array {}

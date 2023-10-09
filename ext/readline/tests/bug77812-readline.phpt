@@ -13,7 +13,6 @@ $php = getenv('TEST_PHP_EXECUTABLE');
 $ini = getenv('TEST_PHP_EXTRA_ARGS');
 $descriptorspec = [['pipe', 'r'], STDOUT, STDERR];
 $proc = proc_open("$php $ini -a", $descriptorspec, $pipes);
-var_dump($proc);
 fwrite($pipes[0], "echo <<<FOO\n    bar\n    FOO;\n");
 fwrite($pipes[0], "print(<<<FOO\nxx\nFOO);\n");
 fwrite($pipes[0], "echo <<<FOO\n    xxx\n    FOO;\nFOO\n;\n");
@@ -23,7 +22,6 @@ fclose($pipes[0]);
 proc_close($proc);
 ?>
 --EXPECTF--
-resource(%d) of type (process)
 Interactive shell
 
 php > echo <<<FOO

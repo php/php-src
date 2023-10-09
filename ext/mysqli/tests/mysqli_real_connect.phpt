@@ -4,13 +4,13 @@ mysqli_real_connect()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 mysqli.allow_local_infile=1
 --FILE--
 <?php
-    include("connect.inc");
+    include 'connect.inc';
 
     //  ( mysqli link [, string hostname [, string username [, string passwd [, string dbname [, int port [, string socket [, int flags]]]]]]]
     if (!$link = mysqli_init())
@@ -113,32 +113,30 @@ mysqli.allow_local_infile=1
     mysqli_close($link);
     var_dump($link);
 
-    if ($IS_MYSQLND) {
-        ini_set('mysqli.default_host', 'p:' . $host);
-        $link = mysqli_init();
-        if (!@mysqli_real_connect($link)) {
-            printf("[022] Usage of mysqli.default_host=p:%s (persistent) failed\n", $host) ;
-        } else {
-            if (!$res = mysqli_query($link, "SELECT 'mysqli.default_host (persistent)' AS 'testing'"))
-                printf("[023] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-            $tmp = mysqli_fetch_assoc($res);
-            if ($tmp['testing'] !== 'mysqli.default_host (persistent)') {
-                printf("[024] Result looks strange - check manually, [%d] %s\n",
-                    mysqli_errno($link), mysqli_error($link));
-                var_dump($tmp);
-            }
-            mysqli_free_result($res);
-            mysqli_close($link);
+    ini_set('mysqli.default_host', 'p:' . $host);
+    $link = mysqli_init();
+    if (!@mysqli_real_connect($link)) {
+        printf("[022] Usage of mysqli.default_host=p:%s (persistent) failed\n", $host) ;
+    } else {
+        if (!$res = mysqli_query($link, "SELECT 'mysqli.default_host (persistent)' AS 'testing'"))
+            printf("[023] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+        $tmp = mysqli_fetch_assoc($res);
+        if ($tmp['testing'] !== 'mysqli.default_host (persistent)') {
+            printf("[024] Result looks strange - check manually, [%d] %s\n",
+                mysqli_errno($link), mysqli_error($link));
+            var_dump($tmp);
         }
-
-        ini_set('mysqli.default_host', 'p:');
-        $link = mysqli_init();
-        if (@mysqli_real_connect($link)) {
-            printf("[025] Usage of mysqli.default_host=p: did not fail\n") ;
-            mysqli_close($link);
-        }
-        @mysqli_close($link);
+        mysqli_free_result($res);
+        mysqli_close($link);
     }
+
+    ini_set('mysqli.default_host', 'p:');
+    $link = mysqli_init();
+    if (@mysqli_real_connect($link)) {
+        printf("[025] Usage of mysqli.default_host=p: did not fail\n") ;
+        mysqli_close($link);
+    }
+    @mysqli_close($link);
 
     try {
         mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket);
@@ -148,12 +146,8 @@ mysqli.allow_local_infile=1
 
     print "done!";
 ?>
---CLEAN--
-<?php
-	require_once("clean_table.inc");
-?>
 --EXPECTF--
-Warning: mysqli_real_connect(): (%s/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
+Warning: mysqli_real_connect(): (%s/%d): Access denied for user '%s'@'%s' %r(\(using password: \w+\) ){0,1}%rin %s on line %d
 object(mysqli)#%d (%d) {
   ["client_info"]=>
   string(%d) "%s"

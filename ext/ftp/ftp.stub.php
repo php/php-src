@@ -2,73 +2,63 @@
 
 /** @generate-class-entries */
 
-namespace FTP {
+namespace {
     /**
      * @var int
-     * @cname FTPTYPE_ASCII
+     * @cvalue FTPTYPE_ASCII
      */
     const FTP_ASCII = UNKNOWN;
     /**
      * @var int
-     * @cname FTPTYPE_ASCII
+     * @cvalue FTPTYPE_ASCII
      */
     const FTP_TEXT = UNKNOWN;
     /**
      * @var int
-     * @cname FTPTYPE_IMAGE
+     * @cvalue FTPTYPE_IMAGE
      */
     const FTP_BINARY = UNKNOWN;
     /**
      * @var int
-     * @cname FTPTYPE_IMAGE
+     * @cvalue FTPTYPE_IMAGE
      */
     const FTP_IMAGE = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_FTP_AUTORESUME
+     * @cvalue PHP_FTP_AUTORESUME
      */
     const FTP_AUTORESUME = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_FTP_OPT_TIMEOUT_SEC
+     * @cvalue PHP_FTP_OPT_TIMEOUT_SEC
      */
     const FTP_TIMEOUT_SEC = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_FTP_OPT_AUTOSEEK
+     * @cvalue PHP_FTP_OPT_AUTOSEEK
      */
     const FTP_AUTOSEEK = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_FTP_OPT_USEPASVADDRESS
+     * @cvalue PHP_FTP_OPT_USEPASVADDRESS
      */
     const FTP_USEPASVADDRESS = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_FTP_FAILED
+     * @cvalue PHP_FTP_FAILED
      */
     const FTP_FAILED = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_FTP_FINISHED
+     * @cvalue PHP_FTP_FINISHED
      */
     const FTP_FINISHED = UNKNOWN;
     /**
      * @var int
-     * @cname PHP_FTP_MOREDATA
+     * @cvalue PHP_FTP_MOREDATA
      */
     const FTP_MOREDATA = UNKNOWN;
 
-    /**
-     * @strict-properties
-     * @not-serializable
-     */
-    final class Connection
-    {
-    }
-}
-
-namespace {
     function ftp_connect(string $hostname, int $port = 21, int $timeout = 90): FTP\Connection|false {}
 
     #ifdef HAVE_FTP_SSL
@@ -120,7 +110,7 @@ namespace {
     function ftp_nb_fget(FTP\Connection $ftp, $stream, string $remote_filename, int $mode = FTP_BINARY, int $offset = 0): int {}
     function ftp_pasv(FTP\Connection $ftp, bool $enable): bool {}
     function ftp_get(FTP\Connection $ftp, string $local_filename, string $remote_filename, int $mode = FTP_BINARY, int $offset = 0): bool {}
-    function ftp_nb_get(FTP\Connection $ftp, string $local_filename, string $remote_filename, int $mode = FTP_BINARY, int $offset = 0): int {}
+    function ftp_nb_get(FTP\Connection $ftp, string $local_filename, string $remote_filename, int $mode = FTP_BINARY, int $offset = 0): int|false {}
     function ftp_nb_continue(FTP\Connection $ftp): int {}
 
     /** @param resource $stream */
@@ -144,4 +134,14 @@ namespace {
     /** @param int|bool $value */
     function ftp_set_option(FTP\Connection $ftp, int $option, $value): bool {}
     function ftp_get_option(FTP\Connection $ftp, int $option): int|bool {}
+}
+
+namespace FTP {
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Connection
+    {
+    }
 }

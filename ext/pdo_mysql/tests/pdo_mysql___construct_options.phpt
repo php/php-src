@@ -61,7 +61,7 @@ MySQLPDOTest::skip();
             /* TODO - why is this a valid option if getAttribute() does not support it?! */
             PDO::ATTR_TIMEOUT 										=> false,
             PDO::ATTR_EMULATE_PREPARES						=> 1,
-            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY		=> 1,
+            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY		=> true,
             /* TODO getAttribute() does not handle it */
             PDO::MYSQL_ATTR_LOCAL_INFILE					=> false,
             /* TODO getAttribute() does not handle it */
@@ -144,8 +144,8 @@ MySQLPDOTest::skip();
         if ($db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[018] PDO::MYSQL_ATTR_DIRECT_QUERY should be off\n");
 
-        set_option_and_check(19, PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, 1, 'PDO::MYSQL_ATTR_USE_BUFFERED_QUERY');
-        set_option_and_check(20, PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, 0, 'PDO::MYSQL_ATTR_USE_BUFFERED_QUERY');
+        set_option_and_check(19, PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true, 'PDO::MYSQL_ATTR_USE_BUFFERED_QUERY');
+        set_option_and_check(20, PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false, 'PDO::MYSQL_ATTR_USE_BUFFERED_QUERY');
 
         set_option_and_check(21, PDO::MYSQL_ATTR_LOCAL_INFILE, true, 'PDO::MYSQL_ATTR_LOCAL_INFILE');
         set_option_and_check(22, PDO::MYSQL_ATTR_LOCAL_INFILE, false, 'PDO::MYSQL_ATTR_LOCAL_INFILE');

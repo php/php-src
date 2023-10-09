@@ -31,7 +31,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_method(zend_op_array*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t);
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar);
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(uint8_t);
 static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execute_data *execute_data); /* }}} */
 
 /*
@@ -315,7 +315,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, size_t path_len, ze
 			ZEND_HASH_MAP_FOREACH_STR_KEY(&PHPDBG_G(file_sources), file) {
 				HashTable *fileht;
 
-				phpdbg_debug("Compare against loaded %s\n", file);
+				phpdbg_debug("Compare against loaded %s\n", ZSTR_VAL(file));
 
 				if (!(pending = ((fileht = phpdbg_resolve_pending_file_break_ex(ZSTR_VAL(file), ZSTR_LEN(file), path_str, broken)) == NULL))) {
 					new_break = *(phpdbg_breakfile_t *) zend_hash_index_find_ptr(fileht, line_num);
@@ -378,7 +378,7 @@ PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uin
 			PHPDBG_G(flags) &= ~PHPDBG_HAS_PENDING_FILE_BP;
 		}
 
-		phpdbg_debug("compiled file: %s, cur bp file: %s\n", file, cur);
+		phpdbg_debug("compiled file: %s, cur bp file: %s\n", file, ZSTR_VAL(cur));
 
 		return master;
 	}
@@ -395,7 +395,7 @@ PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file) /* {{{ */
 	phpdbg_debug("was compiled: %s\n", file);
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], cur, fileht) {
-		phpdbg_debug("check bp: %s\n", cur);
+		phpdbg_debug("check bp: %s\n", ZSTR_VAL(cur));
 
 		phpdbg_resolve_pending_file_break_ex(file, filelen, cur, fileht);
 	} ZEND_HASH_FOREACH_END();
@@ -829,19 +829,21 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 	uint32_t cops = CG(compiler_options);
 	zend_string *bp_code;
 
-	switch (param->type) {
-	    case STR_PARAM:
-		case NUMERIC_FUNCTION_PARAM:
-		case METHOD_PARAM:
-		case NUMERIC_METHOD_PARAM:
-		case FILE_PARAM:
-		case ADDR_PARAM:
-		    /* do nothing */
-		break;
+	if (param) {
+		switch (param->type) {
+			case STR_PARAM:
+			case NUMERIC_FUNCTION_PARAM:
+			case METHOD_PARAM:
+			case NUMERIC_METHOD_PARAM:
+			case FILE_PARAM:
+			case ADDR_PARAM:
+				/* do nothing */
+			break;
 
-		default:
-			phpdbg_error("Invalid parameter type for conditional breakpoint");
-			return;
+			default:
+				phpdbg_error("Invalid parameter type for conditional breakpoint");
+				return;
+		}
 	}
 
 	PHPDBG_BREAK_INIT(new_break, PHPDBG_BREAK_COND);
@@ -1007,7 +1009,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_pt
 	return (phpdbg_breakbase_t *) brake;
 } /* }}} */
 
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar opcode) /* {{{ */
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(uint8_t opcode) /* {{{ */
 {
 	const char *opname = zend_get_opcode_name(opcode);
 

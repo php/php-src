@@ -616,7 +616,7 @@ declared_property:
 						if ((*var_hash)->ref_props) {
 							/* Remove old entry from ref_props table, if it exists. */
 							zend_hash_index_del(
-								(*var_hash)->ref_props, (zend_uintptr_t) data);
+								(*var_hash)->ref_props, (uintptr_t) data);
 						}
 					}
 					/* We may override default property value, but they are usually immutable */
@@ -641,6 +641,20 @@ declared_property:
 				int ret = is_property_visibility_changed(obj->ce, &key);
 
 				if (EXPECTED(!ret)) {
+					if (UNEXPECTED(obj->ce->ce_flags & ZEND_ACC_NO_DYNAMIC_PROPERTIES)) {
+						zend_throw_error(NULL, "Cannot create dynamic property %s::$%s",
+							ZSTR_VAL(obj->ce->name), zend_get_unmangled_property_name(Z_STR_P(&key)));
+						zval_ptr_dtor_str(&key);
+						goto failure;
+					} else if (!(obj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
+						zend_error(E_DEPRECATED, "Creation of dynamic property %s::$%s is deprecated",
+							ZSTR_VAL(obj->ce->name), zend_get_unmangled_property_name(Z_STR_P(&key)));
+						if (EG(exception)) {
+							zval_ptr_dtor_str(&key);
+							goto failure;
+						}
+					}
+
 					data = zend_hash_add_new(ht, Z_STR(key), &EG(uninitialized_zval));
 				} else if (ret < 0) {
 					goto failure;
@@ -691,7 +705,7 @@ second_try:
 					zend_hash_init((*var_hash)->ref_props, 8, NULL, NULL, 0);
 				}
 				zend_hash_index_update_ptr(
-					(*var_hash)->ref_props, (zend_uintptr_t) data, info);
+					(*var_hash)->ref_props, (uintptr_t) data, info);
 			}
 		}
 
@@ -729,6 +743,19 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 
 	datalen = parse_iv2((*p) + 2, p);
 
+	if (max - (*p) < 2) {
+		return 0;
+	}
+
+	if ((*p)[0] != ':') {
+		return 0;
+	}
+
+	if ((*p)[1] != '{') {
+		(*p) += 1;
+		return 0;
+	}
+
 	(*p) += 2;
 
 	if (datalen < 0 || (max - (*p)) <= datalen) {
@@ -740,6 +767,7 @@ static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	 * with unserialize reading past the end of the passed buffer if the string is not
 	 * appropriately terminated (usually NUL terminated, but '}' is also sufficient.) */
 	if ((*p)[datalen] != '}') {
+		(*p) += datalen;
 		return 0;
 	}
 
@@ -799,7 +827,7 @@ static inline int object_common(UNSERIALIZE_PARAMETER, zend_long elements, bool 
 		return 0;
 	}
 
-	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, HT_FLAGS(ht) & HASH_FLAG_PACKED);
+	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, HT_IS_PACKED(ht));
 	if (!process_nested_object_data(UNSERIALIZE_PASSTHRU, ht, elements, Z_OBJ_P(rval))) {
 		if (has_wakeup) {
 			ZVAL_DEREF(rval);
@@ -887,7 +915,7 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 	if (!Z_ISREF_P(rval_ref)) {
 		zend_property_info *info = NULL;
 		if ((*var_hash)->ref_props) {
-			info = zend_hash_index_find_ptr((*var_hash)->ref_props, (zend_uintptr_t) rval_ref);
+			info = zend_hash_index_find_ptr((*var_hash)->ref_props, (uintptr_t) rval_ref);
 		}
 		ZVAL_NEW_REF(rval_ref, rval_ref);
 		if (info) {
@@ -1279,6 +1307,16 @@ object ":" uiv ":" ["]	{
 		return 0;
 	}
 
+	YYCURSOR = *p;
+
+	if (*(YYCURSOR) != ':') {
+		return 0;
+	}
+	if (*(YYCURSOR+1) != '{') {
+		*p = YYCURSOR+1;
+		return 0;
+	}
+
 	*p += 2;
 
 	has_unserialize = !incomplete_class && ce->__unserialize;
@@ -1388,7 +1426,7 @@ fail:
 
 "}" {
 	/* this is the case where we have less data than planned */
-	php_error_docref(NULL, E_NOTICE, "Unexpected end of serialized data");
+	php_error_docref(NULL, E_WARNING, "Unexpected end of serialized data");
 	return 0; /* not sure if it should be 0 or 1 here? */
 }
 

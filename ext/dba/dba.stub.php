@@ -2,11 +2,21 @@
 
 /** @generate-class-entries */
 
-/** @return resource|false */
-function dba_popen(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0) {}
+#ifdef DBA_LMDB
+/** @var int */
+const DBA_LMDB_USE_SUB_DIR = 0;
+/**
+ * @var int
+ * @cvalue MDB_NOSUBDIR
+ */
+const DBA_LMDB_NO_SUB_DIR = UNKNOWN;
+#endif
 
 /** @return resource|false */
-function dba_open(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0) {}
+function dba_popen(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0, ?int $flags = null) {}
+
+/** @return resource|false */
+function dba_open(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0, ?int $flags = null) {}
 
 /** @param resource $dba */
 function dba_close($dba): void {}

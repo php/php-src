@@ -155,41 +155,35 @@ static int fpm_php_set_fcgi_mgmt_vars(struct fpm_worker_pool_s *wp) /* {{{ */
 /* }}} */
 #endif
 
-char *fpm_php_script_filename(void) /* {{{ */
+char *fpm_php_script_filename(void)
 {
 	return SG(request_info).path_translated;
 }
-/* }}} */
 
-char *fpm_php_request_uri(void) /* {{{ */
+char *fpm_php_request_uri(void)
 {
 	return (char *) SG(request_info).request_uri;
 }
-/* }}} */
 
-char *fpm_php_request_method(void) /* {{{ */
+char *fpm_php_request_method(void)
 {
 	return (char *) SG(request_info).request_method;
 }
-/* }}} */
 
-char *fpm_php_query_string(void) /* {{{ */
+char *fpm_php_query_string(void)
 {
 	return SG(request_info).query_string;
 }
-/* }}} */
 
-char *fpm_php_auth_user(void) /* {{{ */
+char *fpm_php_auth_user(void)
 {
 	return SG(request_info).auth_user;
 }
-/* }}} */
 
-size_t fpm_php_content_length(void) /* {{{ */
+size_t fpm_php_content_length(void)
 {
 	return SG(request_info).content_length;
 }
-/* }}} */
 
 static void fpm_php_cleanup(int which, void *arg) /* {{{ */
 {
@@ -201,20 +195,18 @@ static void fpm_php_cleanup(int which, void *arg) /* {{{ */
 }
 /* }}} */
 
-void fpm_php_soft_quit() /* {{{ */
+void fpm_php_soft_quit(void)
 {
 	fcgi_terminate();
 }
-/* }}} */
 
-int fpm_php_init_main() /* {{{ */
+int fpm_php_init_main(void)
 {
 	if (0 > fpm_cleanup_add(FPM_CLEANUP_PARENT, fpm_php_cleanup, 0)) {
 		return -1;
 	}
 	return 0;
 }
-/* }}} */
 
 int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 {
@@ -260,13 +252,13 @@ int fpm_php_limit_extensions(char *path) /* {{{ */
 }
 /* }}} */
 
-char* fpm_php_get_string_from_table(zend_string *table, char *key) /* {{{ */
+bool fpm_php_is_key_in_table(zend_string *table, const char *key, size_t key_len) /* {{{ */
 {
-	zval *data, *tmp;
+	zval *data;
 	zend_string *str;
-	if (!table || !key) {
-		return NULL;
-	}
+
+	ZEND_ASSERT(table);
+	ZEND_ASSERT(key);
 
 	/* inspired from ext/standard/info.c */
 
@@ -278,12 +270,12 @@ char* fpm_php_get_string_from_table(zend_string *table, char *key) /* {{{ */
 		return NULL;
 	}
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(data), str, tmp) {
-		if (str && !strncmp(ZSTR_VAL(str), key, ZSTR_LEN(str))) {
-			return Z_STRVAL_P(tmp);
+	ZEND_HASH_FOREACH_STR_KEY(Z_ARRVAL_P(data), str) {
+		if (str && zend_string_equals_cstr(str, key, key_len)) {
+			return true;
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	return NULL;
+	return false;
 }
 /* }}} */

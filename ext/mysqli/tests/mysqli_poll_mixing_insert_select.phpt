@@ -5,13 +5,10 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-
-if (!$IS_MYSQLND)
-    die("skip mysqlnd only feature, compile PHP using --with-mysqli=mysqlnd");
 ?>
 --FILE--
 <?php
-    require_once('table.inc');
+    require_once 'table.inc';
 
     function get_connection() {
         global $host, $user, $passwd, $db, $port, $socket;
@@ -160,7 +157,7 @@ if (!$IS_MYSQLND)
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

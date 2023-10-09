@@ -7,15 +7,15 @@ mysqlnd.collect_memory_statistics="1"
 mysqli
 --SKIPIF--
 <?PHP
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 if (!function_exists('mysqli_get_client_stats')) {
     die("skip only available with mysqlnd");
 }
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
-    require_once('table.inc');
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     if (!$res = mysqli_query($link, 'SELECT id FROM test', MYSQLI_STORE_RESULT))
         printf("[001] [%d] %s\n", mysqli_errno($link), mysqli_error($link));

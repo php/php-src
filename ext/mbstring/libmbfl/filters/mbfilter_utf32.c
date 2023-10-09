@@ -22,7 +22,7 @@
  *
  */
 /*
- * The source code included in this files was separated from mbfilter.c
+ * The source code included in this file was separated from mbfilter.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 20 dec 2002.
  *
  */
@@ -49,7 +49,9 @@ const mbfl_encoding mbfl_encoding_utf32 = {
 	&vtbl_utf32_wchar,
 	&vtbl_wchar_utf32,
 	mb_utf32_to_wchar,
-	mb_wchar_to_utf32be
+	mb_wchar_to_utf32be,
+	NULL,
+	NULL,
 };
 
 const mbfl_encoding mbfl_encoding_utf32be = {
@@ -62,7 +64,9 @@ const mbfl_encoding mbfl_encoding_utf32be = {
 	&vtbl_utf32be_wchar,
 	&vtbl_wchar_utf32be,
 	mb_utf32be_to_wchar,
-	mb_wchar_to_utf32be
+	mb_wchar_to_utf32be,
+	NULL,
+	NULL,
 };
 
 const mbfl_encoding mbfl_encoding_utf32le = {
@@ -75,7 +79,9 @@ const mbfl_encoding mbfl_encoding_utf32le = {
 	&vtbl_utf32le_wchar,
 	&vtbl_wchar_utf32le,
 	mb_utf32le_to_wchar,
-	mb_wchar_to_utf32le
+	mb_wchar_to_utf32le,
+	NULL,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_utf32_wchar = {
@@ -233,6 +239,7 @@ static int mbfl_filt_conv_utf32_wchar_flush(mbfl_convert_filter *filter)
 		/* Input string was truncated */
 		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 	}
+	filter->cache = filter->status = 0;
 
 	if (filter->flush_function) {
 		(*filter->flush_function)(filter->data);

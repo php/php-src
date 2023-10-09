@@ -183,7 +183,7 @@ bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
 		zend_execute_data *execute_data = EG(current_execute_data);
 #endif
 		const zend_op *opline = EG(opline_before_exception);
-		if (RETURN_VALUE_USED(opline)) {
+		if (opline && RETURN_VALUE_USED(opline)) {
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 		}
 
@@ -360,7 +360,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HAN
 	trace_buffer[idx].info = _op | (_info); \
 	trace_buffer[idx].ptr = _ptr; \
 	idx++; \
-	if (idx >= ZEND_JIT_TRACE_MAX_LENGTH - 2) { \
+	if (idx >= JIT_G(max_trace_length) - 2) { \
 		stop = ZEND_JIT_TRACE_STOP_TOO_LONG; \
 		break; \
 	}
@@ -372,7 +372,7 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HAN
 	trace_buffer[idx].op3_type = _op3_type; \
 	trace_buffer[idx].ptr = _ptr; \
 	idx++; \
-	if (idx >= ZEND_JIT_TRACE_MAX_LENGTH - 2) { \
+	if (idx >= JIT_G(max_trace_length) - 2) { \
 		stop = ZEND_JIT_TRACE_STOP_TOO_LONG; \
 		break; \
 	}
@@ -654,6 +654,20 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 		if (opline->op2_type & (IS_TMP_VAR|IS_VAR|IS_CV)
 		 && opline->opcode != ZEND_INSTANCEOF
 		 && opline->opcode != ZEND_UNSET_STATIC_PROP
+		 && opline->opcode != ZEND_ISSET_ISEMPTY_STATIC_PROP
+		 && opline->opcode != ZEND_ASSIGN_STATIC_PROP
+		 && opline->opcode != ZEND_ASSIGN_STATIC_PROP_REF
+		 && opline->opcode != ZEND_ASSIGN_STATIC_PROP_OP
+		 && opline->opcode != ZEND_PRE_INC_STATIC_PROP
+		 && opline->opcode != ZEND_POST_INC_STATIC_PROP
+		 && opline->opcode != ZEND_PRE_DEC_STATIC_PROP
+		 && opline->opcode != ZEND_POST_DEC_STATIC_PROP
+		 && opline->opcode != ZEND_FETCH_STATIC_PROP_R
+		 && opline->opcode != ZEND_FETCH_STATIC_PROP_W
+		 && opline->opcode != ZEND_FETCH_STATIC_PROP_RW
+		 && opline->opcode != ZEND_FETCH_STATIC_PROP_IS
+		 && opline->opcode != ZEND_FETCH_STATIC_PROP_FUNC_ARG
+		 && opline->opcode != ZEND_FETCH_STATIC_PROP_UNSET
 		 && (opline->op2_type == IS_CV
 		  || (opline->opcode != ZEND_FE_FETCH_R
 		   && opline->opcode != ZEND_FE_FETCH_RW))) {

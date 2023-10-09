@@ -7,7 +7,7 @@ ldap
 --SKIPIF--
 <?php require_once('skipifbindfailure.inc'); ?>
 <?php
-    $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+    $link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
     $r = ldap_read($link, '', 'objectClass=*', array('dynamicsubtrees'));
     $info = ldap_get_entries($link, $r)[0];
     if (!isset($info['dynamicsubtrees'])) {
@@ -18,7 +18,7 @@ ldap
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 insert_dummy_data($link, $base);
 ldap_add($link, "cn=tmp,$base", array(
@@ -34,7 +34,7 @@ var_dump(
 <?php
 include "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 ldap_delete($link, "cn=tmp,$base");
 remove_dummy_data($link, $base);
 ?>

@@ -118,7 +118,7 @@ static void zend_user_it_dtor(zend_object_iterator *_iter)
 /* }}} */
 
 /* {{{ zend_user_it_valid */
-ZEND_API int zend_user_it_valid(zend_object_iterator *_iter)
+ZEND_API zend_result zend_user_it_valid(zend_object_iterator *_iter)
 {
 	if (_iter) {
 		zend_user_iterator *iter = (zend_user_iterator*)_iter;
@@ -184,14 +184,22 @@ ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter)
 ZEND_API HashTable *zend_user_it_get_gc(zend_object_iterator *_iter, zval **table, int *n)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
-	*table = &iter->it.data;
-	*n = 1;
+	if (Z_ISUNDEF(iter->value)) {
+		*table = &iter->it.data;
+		*n = 1;
+	} else {
+		zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+		zend_get_gc_buffer_add_zval(gc_buffer, &iter->it.data);
+		zend_get_gc_buffer_add_zval(gc_buffer, &iter->value);
+		zend_get_gc_buffer_use(gc_buffer, table, n);
+	}
 	return NULL;
 }
 
 static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 	zend_user_it_dtor,
-	zend_user_it_valid,
+	// FIXME: Adjust the actual function prototype in zend_object_iterator_funcs
+	(int (*)(zend_object_iterator *)) zend_user_it_valid,
 	zend_user_it_get_current_data,
 	zend_user_it_get_current_key,
 	zend_user_it_move_forward,
@@ -336,8 +344,8 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 		&class_type->function_table, "rewind", sizeof("rewind") - 1);
 	funcs_ptr->zf_valid = zend_hash_str_find_ptr(
 		&class_type->function_table, "valid", sizeof("valid") - 1);
-	funcs_ptr->zf_key = zend_hash_str_find_ptr(
-		&class_type->function_table, "key", sizeof("key") - 1);
+	funcs_ptr->zf_key = zend_hash_find_ptr(
+		&class_type->function_table, ZSTR_KNOWN(ZEND_STR_KEY));
 	funcs_ptr->zf_current = zend_hash_str_find_ptr(
 		&class_type->function_table, "current", sizeof("current") - 1);
 	funcs_ptr->zf_next = zend_hash_str_find_ptr(
@@ -480,7 +488,6 @@ typedef struct {
 static zend_object *zend_internal_iterator_create(zend_class_entry *ce) {
 	zend_internal_iterator *intern = emalloc(sizeof(zend_internal_iterator));
 	zend_object_std_init(&intern->std, ce);
-	intern->std.handlers = &zend_internal_iterator_handlers;
 	intern->iter = NULL;
 	intern->rewind_called = 0;
 	return &intern->std;
@@ -616,6 +623,7 @@ ZEND_METHOD(InternalIterator, rewind) {
 		RETURN_THROWS();
 	}
 
+	intern->rewind_called = 1;
 	if (!intern->iter->funcs->rewind) {
 		/* Allow calling rewind() if no iteration has happened yet,
 		 * even if the iterator does not support rewinding. */
@@ -655,6 +663,7 @@ ZEND_API void zend_register_interfaces(void)
 
 	zend_ce_internal_iterator = register_class_InternalIterator(zend_ce_iterator);
 	zend_ce_internal_iterator->create_object = zend_internal_iterator_create;
+	zend_ce_internal_iterator->default_object_handlers = &zend_internal_iterator_handlers;
 
 	memcpy(&zend_internal_iterator_handlers, zend_get_std_object_handlers(),
 		sizeof(zend_object_handlers));

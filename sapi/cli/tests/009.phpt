@@ -7,7 +7,7 @@ readline
 --FILE--
 <?php
 
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 
 var_dump(`$php -n -a -r "echo hello;"`);
 var_dump(`$php -n -r "echo hello;" -a`);

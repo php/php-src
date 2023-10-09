@@ -31,7 +31,7 @@
 * Since:
 */
 
-static int get_namednodemap_length(dom_object *obj)
+int php_dom_get_namednodemap_length(dom_object *obj)
 {
 	dom_nnodemap_object *objmap = (dom_nnodemap_object *) obj->ptr;
 	if (!objmap) {
@@ -63,97 +63,76 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D0FB19E
 Since:
 */
-int dom_namednodemap_length_read(dom_object *obj, zval *retval)
+zend_result dom_namednodemap_length_read(dom_object *obj, zval *retval)
 {
-	ZVAL_LONG(retval, get_namednodemap_length(obj));
+	ZVAL_LONG(retval, php_dom_get_namednodemap_length(obj));
 	return SUCCESS;
 }
 
 /* }}} */
+
+xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, const char *named, bool may_transform)
+{
+	xmlNodePtr itemnode = NULL;
+	if (objmap != NULL) {
+		if ((objmap->nodetype == XML_NOTATION_NODE) ||
+			objmap->nodetype == XML_ENTITY_NODE) {
+			if (objmap->ht) {
+				if (objmap->nodetype == XML_ENTITY_NODE) {
+					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, (const xmlChar *) named);
+				} else {
+					xmlNotationPtr notep = xmlHashLookup(objmap->ht, (const xmlChar *) named);
+					if (notep) {
+						if (may_transform) {
+							itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
+						} else {
+							itemnode = (xmlNodePtr) notep;
+						}
+					}
+				}
+			}
+		} else {
+			xmlNodePtr nodep = dom_object_get_node(objmap->baseobj);
+			if (nodep) {
+				itemnode = (xmlNodePtr)xmlHasProp(nodep, (const xmlChar *) named);
+			}
+		}
+	}
+	return itemnode;
+}
+
+void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const char *named, zval *return_value)
+{
+	int ret;
+	xmlNodePtr itemnode = php_dom_named_node_map_get_named_item(objmap, named, true);
+	if (itemnode) {
+		DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
+	} else {
+		RETURN_NULL();
+	}
+}
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1074577549
 Since:
 */
 PHP_METHOD(DOMNamedNodeMap, getNamedItem)
 {
-	zval *id;
-	int ret;
-	size_t namedlen=0;
-	dom_object *intern;
-	xmlNodePtr itemnode = NULL;
+	size_t namedlen;
 	char *named;
 
-	dom_nnodemap_object *objmap;
-	xmlNodePtr nodep;
-	xmlNotation *notep = NULL;
-
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &named, &namedlen) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	intern = Z_DOMOBJ_P(id);
-
-	objmap = (dom_nnodemap_object *)intern->ptr;
-
-	if (objmap != NULL) {
-		if ((objmap->nodetype == XML_NOTATION_NODE) ||
-			objmap->nodetype == XML_ENTITY_NODE) {
-			if (objmap->ht) {
-				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, (xmlChar *) named);
-				} else {
-					notep = (xmlNotation *)xmlHashLookup(objmap->ht, (xmlChar *) named);
-					if (notep) {
-						itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
-					}
-				}
-			}
-		} else {
-			nodep = dom_object_get_node(objmap->baseobj);
-			if (nodep) {
-				itemnode = (xmlNodePtr)xmlHasProp(nodep, (xmlChar *) named);
-			}
-		}
-	}
-
-	if (itemnode) {
-		DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
-		return;
-	} else {
-		RETVAL_NULL();
-	}
+	zval *id = ZEND_THIS;
+	dom_nnodemap_object *objmap = Z_DOMOBJ_P(id)->ptr;
+	php_dom_named_node_map_get_named_item_into_zval(objmap, named, return_value);
 }
 /* }}} end dom_namednodemap_get_named_item */
 
-/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-349467F9
-Since:
-*/
-PHP_METHOD(DOMNamedNodeMap, item)
+xmlNodePtr php_dom_named_node_map_get_item(dom_nnodemap_object *objmap, zend_long index)
 {
-	zval *id;
-	zend_long index;
-	int ret;
-	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
-
-	dom_nnodemap_object *objmap;
-	xmlNodePtr nodep, curnode;
-	int count;
-
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
-		RETURN_THROWS();
-	}
-	if (index < 0 || ZEND_LONG_INT_OVFL(index)) {
-		zend_argument_value_error(1, "must be between 0 and %d", INT_MAX);
-		RETURN_THROWS();
-	}
-
-	intern = Z_DOMOBJ_P(id);
-
-	objmap = (dom_nnodemap_object *)intern->ptr;
-
 	if (objmap != NULL) {
 		if ((objmap->nodetype == XML_NOTATION_NODE) ||
 			objmap->nodetype == XML_ENTITY_NODE) {
@@ -165,10 +144,10 @@ PHP_METHOD(DOMNamedNodeMap, item)
 				}
 			}
 		} else {
-			nodep = dom_object_get_node(objmap->baseobj);
+			xmlNodePtr nodep = dom_object_get_node(objmap->baseobj);
 			if (nodep) {
-				curnode = (xmlNodePtr)nodep->properties;
-				count = 0;
+				xmlNodePtr curnode = (xmlNodePtr)nodep->properties;
+				zend_long count = 0;
 				while (count < index && curnode != NULL) {
 					count++;
 					curnode = (xmlNodePtr)curnode->next;
@@ -177,13 +156,38 @@ PHP_METHOD(DOMNamedNodeMap, item)
 			}
 		}
 	}
+	return itemnode;
+}
 
+void php_dom_named_node_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value)
+{
+	int ret;
+	xmlNodePtr itemnode = php_dom_named_node_map_get_item(objmap, index);
 	if (itemnode) {
 		DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
-		return;
+	} else {
+		RETURN_NULL();
+	}
+}
+
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-349467F9
+Since:
+*/
+PHP_METHOD(DOMNamedNodeMap, item)
+{
+	zend_long index;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
+	if (index < 0 || ZEND_LONG_INT_OVFL(index)) {
+		zend_argument_value_error(1, "must be between 0 and %d", INT_MAX);
+		RETURN_THROWS();
 	}
 
-	RETVAL_NULL();
+	zval *id = ZEND_THIS;
+	dom_object *intern = Z_DOMOBJ_P(id);
+	dom_nnodemap_object *objmap = intern->ptr;
+	php_dom_named_node_map_get_item_into_zval(objmap, index, return_value);
 }
 /* }}} end dom_namednodemap_item */
 
@@ -254,7 +258,7 @@ PHP_METHOD(DOMNamedNodeMap, count)
 	}
 
 	intern = Z_DOMOBJ_P(id);
-	RETURN_LONG(get_namednodemap_length(intern));
+	RETURN_LONG(php_dom_get_namednodemap_length(intern));
 }
 /* }}} end dom_namednodemap_count */
 

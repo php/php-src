@@ -66,7 +66,7 @@ Class [ <user> class B extends A ] {
   }
 
   - Methods [1] {
-    Method [ <user, overwrites A> private method f ] {
+    Method [ <user> private method f ] {
       @@ %s 6 - 6
     }
   }
@@ -111,7 +111,7 @@ Class [ <user> class D extends C ] {
   }
 
   - Methods [1] {
-    Method [ <user, overwrites B> private method f ] {
+    Method [ <user> private method f ] {
       @@ %s 12 - 12
     }
   }

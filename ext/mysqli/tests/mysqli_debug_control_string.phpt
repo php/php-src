@@ -4,7 +4,7 @@ mysqli_debug() - invalid debug control strings
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 
 if (!function_exists('mysqli_debug'))
     die("skip: mysqli_debug() not available");
@@ -14,14 +14,11 @@ if (!defined('MYSQLI_DEBUG_TRACE_ENABLED'))
 
 if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
     die("skip: debug functionality not enabled");
-
-if (!$IS_MYSQLND)
-    die("SKIP Libmysql feature not sufficiently spec'd in MySQL C API documentation");
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
-    require_once('table.inc');
+    require_once 'connect.inc';
+    require_once 'table.inc';
 
     function try_control_string($link, $control_string, $trace_file, $offset) {
 
@@ -69,8 +66,7 @@ if (!$IS_MYSQLND)
 
     mysqli_close($link);
     print "done";
-    if ($IS_MYSQLND)
-        print "libmysql/DBUG package prints some debug info here."
+    print "libmysql/DBUG package prints some debug info here."
 ?>
 --EXPECTF--
 Warning: mysqli_debug(): Unrecognized format ',' in %s on line %d

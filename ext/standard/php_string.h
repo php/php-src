@@ -18,12 +18,11 @@
 #ifndef PHP_STRING_H
 #define PHP_STRING_H
 
+# include "ext/random/php_random.h"
+
 #ifdef ZTS
 PHP_MINIT_FUNCTION(localeconv);
 PHP_MSHUTDOWN_FUNCTION(localeconv);
-#endif
-#ifdef HAVE_NL_LANGINFO
-PHP_MINIT_FUNCTION(nl_langinfo);
 #endif
 #ifdef ZEND_INTRIN_SSE4_2_FUNC_PTR
 PHP_MINIT_FUNCTION(string_intrin);
@@ -59,6 +58,12 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 PHPAPI size_t php_strspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end);
 PHPAPI size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end);
 
+PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, bool case_insensitive);
+PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2);
+PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2);
+
+PHPAPI bool php_binary_string_shuffle(const php_random_algo *algo, php_random_status *status, char *str, zend_long len);
+
 #ifdef _REENTRANT
 # ifdef PHP_WIN32
 #  include <wchar.h>
@@ -70,6 +75,16 @@ PHPAPI size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, co
 # define php_mb_reset() php_ignore_value(mblen(NULL, 0))
 #endif
 
-void register_string_constants(INIT_FUNC_ARGS);
+#define PHP_STR_PAD_LEFT		0
+#define PHP_STR_PAD_RIGHT		1
+#define PHP_STR_PAD_BOTH		2
+#define PHP_PATHINFO_DIRNAME 	1
+#define PHP_PATHINFO_BASENAME 	2
+#define PHP_PATHINFO_EXTENSION 	4
+#define PHP_PATHINFO_FILENAME 	8
+#define PHP_PATHINFO_ALL	(PHP_PATHINFO_DIRNAME | PHP_PATHINFO_BASENAME | PHP_PATHINFO_EXTENSION | PHP_PATHINFO_FILENAME)
+
+#define PHP_STR_STRSPN			0
+#define PHP_STR_STRCSPN			1
 
 #endif /* PHP_STRING_H */

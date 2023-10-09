@@ -271,7 +271,7 @@ foreach ($general_files as $src => $dest) {
 }
 
 /* include a snapshot identifier */
-$branch = "HEAD"; // TODO - determine this from SVN branche name
+$branch = "HEAD"; // TODO - determine this from GitHub branch name
 $fp = fopen("$dist_dir/snapshot.txt", "w");
 $now = date("r");
 fwrite($fp, <<<EOT
@@ -354,6 +354,22 @@ foreach ($ENCHANT_DLLS as $dll) {
 
     if (!copy($php_build_dir . '/bin/' . $filename, "$dest/" . basename($filename))) {
             echo "WARNING: couldn't copy $filename into the dist dir";
+    }
+}
+
+$OPENSSL_DLLS = $php_build_dir . "/lib/ossl-modules/*.dll";
+$fls = glob($OPENSSL_DLLS);
+if (!empty($fls)) {
+    $openssl_dest_dir = "$dist_dir/extras/ssl";
+    if (!file_exists($openssl_dest_dir) || !is_dir($openssl_dest_dir)) {
+        if (!mkdir($openssl_dest_dir, 0777, true)) {
+            echo "WARNING: couldn't create '$openssl_dest_dir' for OpenSSL providers ";
+        }
+    }
+    foreach ($fls as $fl) {
+        if (!copy($fl, "$openssl_dest_dir/" . basename($fl))) {
+            echo "WARNING: couldn't copy $fl into the $openssl_dest_dir";
+        }
     }
 }
 

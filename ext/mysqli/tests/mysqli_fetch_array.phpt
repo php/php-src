@@ -4,13 +4,11 @@ mysqli_fetch_array() - all datatypes but BIT
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    require('table.inc');
+    require 'table.inc';
     if (!$res = mysqli_query($link, "SELECT * FROM test ORDER BY id LIMIT 5")) {
         printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
@@ -176,12 +174,10 @@ require_once('skipifconnectfailure.inc');
     func_mysqli_fetch_array($link, $engine, "INTEGER UNSIGNED", "4294967295", "4294967295", 230);
     func_mysqli_fetch_array($link, $engine, "INTEGER UNSIGNED", NULL, NULL, 240);
 
-    if ($IS_MYSQLND || mysqli_get_server_version($link) >= 51000) {
-        func_mysqli_fetch_array($link, $engine, "BIGINT", "-9223372036854775808", "-9223372036854775808", 250);
-        func_mysqli_fetch_array($link, $engine, "BIGINT", NULL, NULL, 260);
-        func_mysqli_fetch_array($link, $engine, "BIGINT UNSIGNED", "18446744073709551615", "18446744073709551615", 260);
-        func_mysqli_fetch_array($link, $engine, "BIGINT UNSIGNED", NULL, NULL, 280);
-    }
+    func_mysqli_fetch_array($link, $engine, "BIGINT", "-9223372036854775808", "-9223372036854775808", 250);
+    func_mysqli_fetch_array($link, $engine, "BIGINT", NULL, NULL, 260);
+    func_mysqli_fetch_array($link, $engine, "BIGINT UNSIGNED", "18446744073709551615", "18446744073709551615", 260);
+    func_mysqli_fetch_array($link, $engine, "BIGINT UNSIGNED", NULL, NULL, 280);
 
     func_mysqli_fetch_array($link, $engine, "FLOAT", (string)(-9223372036854775808 - 1.1), "-9.22337e+18", 290, "/-9\.22337e\+?[0]?18/iu");
     func_mysqli_fetch_array($link, $engine, "FLOAT", NULL, NULL, 300);

@@ -11,4 +11,4 @@ setcookie("name", "value", $date);
 ?>
 --EXPECT--
 --EXPECTHEADERS--
-Set-Cookie: name=value; expires=Sat, 01-Apr-2017 12:25:39 GMT; Max-Age=0
+Set-Cookie: name=value; expires=Sat, 01 Apr 2017 12:25:39 GMT; Max-Age=0

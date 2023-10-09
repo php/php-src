@@ -13,6 +13,6 @@ a=1&b=2&c=3&d=4&e=5
 var_dump($_POST);
 ?>
 --EXPECT--
-Warning: Unknown: Input variables exceeded 4. To increase the limit change max_input_vars in php.ini. in Unknown on line 0
+Warning: PHP Request Startup: Input variables exceeded 4. To increase the limit change max_input_vars in php.ini. in Unknown on line 0
 array(0) {
 }

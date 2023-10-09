@@ -42,6 +42,12 @@ echo "sha512: " . hash_file('sha512', $file). "\n";
 echo "snefru: " . hash_file('snefru', $file). "\n";
 echo "tiger192,3: " . hash_file('tiger192,3', $file). "\n";
 echo "whirlpool: " . hash_file('whirlpool', $file). "\n";
+echo "murmur3a: " . hash_file('murmur3a', $file). "\n";
+echo "murmur3a: " . hash_file('murmur3a', $file, false, ['seed' => 1234]). "\n";
+echo "murmur3c: " . hash_file('murmur3c', $file). "\n";
+echo "murmur3c: " . hash_file('murmur3c', $file, false, ['seed' => 1234]). "\n";
+echo "murmur3f: " . hash_file('murmur3f', $file). "\n";
+echo "murmur3f: " . hash_file('murmur3f', $file, false, ['seed' => 1234]). "\n";
 
 echo "adler32(raw): " . bin2hex(hash_file('adler32', $file, TRUE)) . "\n";
 echo "md5(raw): " . bin2hex(hash_file('md5', $file, TRUE)). "\n";
@@ -70,6 +76,12 @@ sha512: 1f42adaf938fbf136e381b164bae5f984c7f9fe60c82728bd889c14f187c7d63e81a0305
 snefru: d414b2345d3e7fa1a31c044cf334bfc1fec24d89e464411998d579d24663895f
 tiger192,3: 7acf4ebea075fac6fc8ea0e2b4af3cfa71b9460e4c53403a
 whirlpool: 4248b149e000477269a4a5f1a84d97cfc3d0199b7aaf505913e6f010a6f83276029d11a9ad545374bc710eb59c7d958985023ab886ffa9ec9a23852844c764ec
+murmur3a: bc6554c8
+murmur3a: 432e4379
+murmur3c: 8779de509ffc06fb27bcf5fc861504d6
+murmur3c: b43afac65c38a617323020432c170005
+murmur3f: 2b84cd546b2f18a9ab6f893194224afd
+murmur3f: 6cc7716646664d6a83d68cb6563ac38e
 adler32(raw): ff87222e
 md5(raw): 704bf818448f5bbb94061332d2c889aa
 sha256(raw): a0f5702fa5d3670b80033d668e8732b70550392abb53841355447f8bb0f72245

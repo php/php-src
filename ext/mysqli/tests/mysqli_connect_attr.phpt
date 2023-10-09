@@ -6,9 +6,6 @@ mysqli
 <?php
 require_once 'connect.inc';
 
-if (!$IS_MYSQLND)
-    die("skip: test applies only to mysqlnd");
-
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
     die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 

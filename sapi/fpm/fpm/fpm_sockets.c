@@ -313,7 +313,7 @@ static int fpm_socket_af_inet_socket_by_addr(struct fpm_worker_pool_s *wp, const
 	hints.ai_socktype = SOCK_STREAM;
 
 	if ((status = getaddrinfo(addr, port, &hints, &servinfo)) != 0) {
-		zlog(ZLOG_ERROR, "getaddrinfo: %s\n", gai_strerror(status));
+		zlog(ZLOG_ERROR, "getaddrinfo: %s", gai_strerror(status));
 		return -1;
 	}
 
@@ -396,9 +396,25 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 static int fpm_socket_af_unix_listening_socket(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct sockaddr_un sa_un;
+    size_t socket_length = sizeof(sa_un.sun_path);
+    size_t address_length = strlen(wp->config->listen_address);
 
 	memset(&sa_un, 0, sizeof(sa_un));
-	strlcpy(sa_un.sun_path, wp->config->listen_address, sizeof(sa_un.sun_path));
+	strlcpy(sa_un.sun_path, wp->config->listen_address, socket_length);
+
+    if (address_length >= socket_length) {
+        zlog(
+            ZLOG_WARNING,
+            "[pool %s] cannot bind to UNIX socket '%s' as path is too long (found length: %zu, "
+				"maximal length: %zu), trying cut socket path instead '%s'",
+            wp->config->name,
+			wp->config->listen_address,
+			address_length,
+			socket_length,
+			sa_un.sun_path
+        );
+    }
+
 	sa_un.sun_family = AF_UNIX;
 	return fpm_sockets_get_listening_socket(wp, (struct sockaddr *) &sa_un, sizeof(struct sockaddr_un));
 }
@@ -418,7 +434,7 @@ static zend_result fpm_socket_setfib_init(void)
 }
 #endif
 
-int fpm_sockets_init_main() /* {{{ */
+int fpm_sockets_init_main(void)
 {
 	unsigned i, lq_len;
 	struct fpm_worker_pool_s *wp;
@@ -523,7 +539,6 @@ int fpm_sockets_init_main() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 #if HAVE_FPM_LQ
 

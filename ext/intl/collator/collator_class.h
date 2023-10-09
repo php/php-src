@@ -46,7 +46,7 @@ static inline Collator_object *php_intl_collator_fetch_object(zend_object *obj) 
 }
 #define Z_INTL_COLLATOR_P(zv) php_intl_collator_fetch_object(Z_OBJ_P(zv))
 
-void collator_register_Collator_class( void );
+void collator_register_Collator_symbols(int module_number);
 void collator_object_init( Collator_object* co );
 void collator_object_destroy( Collator_object* co );
 

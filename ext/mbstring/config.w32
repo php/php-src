@@ -17,19 +17,13 @@ if (PHP_MBSTRING != "no") {
 			"ext\\mbstring\\libmbfl\\config.h", true);
 
 		ADD_SOURCES("ext/mbstring/libmbfl/filters", "html_entities.c \
-			mbfilter_7bit.c mbfilter_base64.c mbfilter_big5.c mbfilter_cp932.c \
-			mbfilter_cp936.c mbfilter_cp51932.c mbfilter_euc_cn.c \
-			mbfilter_euc_jp.c mbfilter_euc_jp_win.c mbfilter_euc_kr.c \
-			mbfilter_euc_tw.c mbfilter_htmlent.c mbfilter_hz.c mbfilter_iso2022_kr.c \
-			mbfilter_jis.c mbfilter_iso2022_jp_ms.c mbfilter_gb18030.c \
-			mbfilter_sjis_2004.c mbfilter_qprint.c mbfilter_sjis.c mbfilter_ucs2.c \
-			mbfilter_ucs4.c mbfilter_uhc.c mbfilter_utf16.c mbfilter_utf32.c \
+			mbfilter_7bit.c mbfilter_base64.c \
+			mbfilter_cjk.c mbfilter_htmlent.c \
+			mbfilter_qprint.c mbfilter_ucs2.c \
+			mbfilter_ucs4.c mbfilter_utf16.c mbfilter_utf32.c \
 			mbfilter_utf7.c mbfilter_utf7imap.c mbfilter_utf8.c \
 			mbfilter_utf8_mobile.c mbfilter_uuencode.c \
-			mbfilter_cp5022x.c mbfilter_sjis_mobile.c \
-			mbfilter_sjis_mac.c \
-			mbfilter_iso2022jp_mobile.c mbfilter_singlebyte.c \
-			mbfilter_tl_jisx0201_jisx0208.c", "mbstring");
+			mbfilter_singlebyte.c", "mbstring");
 
 		ADD_SOURCES("ext/mbstring/libmbfl/mbfl", "mbfilter.c mbfilter_8bit.c \
 			mbfilter_pass.c mbfilter_wchar.c mbfl_convert.c mbfl_encoding.c \

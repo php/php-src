@@ -5,6 +5,9 @@ mbstring
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+if (substr(PHP_OS, 0, 3) === 'WIN' && PHP_INT_SIZE === 4) {
+    die('xfail Fails on 32-bit Windows');
+}
 ?>
 --FILE--
 <?php
@@ -774,6 +777,14 @@ $invalid = array(
   "\xDF" => "\x00\x00\x00%",         // should have been 2-byte
   "\xEF\xBF" => "\x00\x00\x00%",     // should have been 3-byte
   "\xF0\xBF\xBF" => "\x00\x00\x00%", // should have been 4-byte
+  "\xF1\x96" => "\x00\x00\x00%",
+  "\xF1\x96\x80" => "\x00\x00\x00%",
+  "\xF2\x94" => "\x00\x00\x00%",
+  "\xF2\x94\x80" => "\x00\x00\x00%",
+  "\xF3\x94" => "\x00\x00\x00%",
+  "\xF3\x94\x80" => "\x00\x00\x00%",
+  "\xE0\x9F" => "\x00\x00\x00%\x00\x00\x00%",
+  "\xED\xA6" => "\x00\x00\x00%\x00\x00\x00%",
 
   // Multi-byte characters which end too soon and go to ASCII
   "\xDFA" => "\x00\x00\x00%\x00\x00\x00A",
@@ -804,6 +815,20 @@ $invalid = array(
 );
 
 testInvalidCodepoints($invalid, 'UTF-8');
+
+// Regression test for bug in SSE2-based accelerated UTF-8 validation function
+$truncated16byte = [
+  "k\x08`\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xc6",
+  "k\x08`\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xef",
+  "k\x08`\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xef\xbf",
+  "k\x08`\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf0",
+  "k\x08`\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf0\xbf",
+  "k\x08`\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf0\xbf\xbf"
+];
+foreach ($truncated16byte as $trunc) {
+  if (mb_check_encoding($trunc, 'UTF-8'))
+    die("UTF-8 validation was incorrect on 16-byte string with truncated multi-byte char at end");
+}
 
 echo "== UTF-16 ==\n";
 
@@ -872,6 +897,17 @@ testValidString("\xDC\x00", "\x00\xDC", 'UCS-2BE', 'UTF-16LE', false);
 // Try codepoint over U+10FFFF
 convertInvalidString("\x00\x11\x56\x78", "\x00%", 'UCS-4BE', 'UTF-16BE');
 convertInvalidString("\x00\x11\x56\x78", "%\x00", 'UCS-4BE', 'UTF-16LE');
+
+// Regression tests for bugs with initial AVX2-accelerated implementation
+convertInvalidString(str_repeat("a\x00", 15) . "\x00\xD8\x00\xFC", str_repeat("\x00a", 15) . "\x00%\xFC\x00", 'UTF-16LE', 'UCS-2BE');
+convertInvalidString(str_repeat("\x00a", 15) . "\xD8\x00\xFC\x00", str_repeat("\x00a", 15) . "\x00%\xFC\x00", 'UTF-16BE', 'UCS-2BE');
+
+// This string caused an out-of-bounds read; it was found by a fuzzer
+$str = "\xdb\xdb\xdb#\xdb\xdb\xdf\xdb\xdf\xdb\xdb\x0b\xdb\x00\xdc\xdb\xdf\xdb\xdf\xdb\xda\x0b\xdb\x00\xdcY\xdf\x03\xdb\x03\xd9\xd9\xd8";
+convertInvalidString($str, "\x00\x25\x00\x25\xdb\xdb\xdf\xdb\x00\x25\x00\x25\xdb\x00\xdc\xdb\x00\x25\x00\x25\x00\x25\xdb\x00\xdc\x59\x00\x25\x00\x25\x00\x25\x00\x25", 'UTF-16BE', 'UTF-16BE');
+
+$str = "\xda\xda\xda\xda\xda\xda\xd9\xdb\xda\xda\xda\xda\xdd\xda\xda\xd9\xdb\xda\xda\xda\xda\xdd\xda\xdd\xd9\x0a\xda\xda\xda\xda\xdd\xda\xdd\xd9\xda\xda\xda\xda\xda\xda\xda\xda\xda\xd9\xdb\xda\xda\xda\xd9\xdb\xda\xda\xda\xda\xdd\xda\xda\xd9\xdb";
+convertInvalidString($str, "\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\xda\xda\xda\xdd\x25\x00\xd9\x0a\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00\x25\x00", 'UTF-16LE', 'UTF-16LE');
 
 echo "== UTF-32 ==\n";
 
@@ -1003,17 +1039,8 @@ testValidString('+' . encode('AB', 'ASCII') . '-+' . encode('CD', 'ASCII') . '-'
 // (Just trying to be exhaustive here)
 testValidString('+' . encode('AB', 'ASCII') . '-!+' . encode('CD', 'ASCII') . '-', "\x00A\x00B\x00!\x00C\x00D", 'UTF-7', 'UTF-16BE', false);
 
-// + section terminated by a non-Base64 ASCII character which is NOT -
-for ($i = 0; $i < 128; $i++) {
-  if ($i >= ord('A') && $i <= ord('Z'))
-    continue;
-  if ($i >= ord('a') && $i <= ord('z'))
-    continue;
-  if ($i >= ord('0') && $i <= ord('9'))
-    continue;
-  if ($i == ord('+') || $i == ord('/') || $i == ord('-') || $i == ord('\\') || $i == ord('~'))
-    continue;
-  $char = chr($i);
+// + section terminated by a non-Base64 direct character which is NOT -
+foreach (str_split(" \t\r\n'(),.:?!\"#$%&*;<=>@[]^_`{|}\x00") as $char) {
   testValidString('+' . encode("\x12\x34", 'UTF-16BE') . $char, "\x00\x00\x12\x34\x00\x00\x00" . $char, 'UTF-7', 'UTF-32BE', false);
 }
 
@@ -1050,10 +1077,23 @@ testInvalidString('+' . rawEncode("\x00.\x00.\xD8\x01\xD9\x02") . '-', "\x00\x00
 // First half of surrogate pair appearing at end of string
 testInvalidString('+' . rawEncode("\xD8\x01") . '-', "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
 testInvalidString('+' . rawEncode("\xD8\x01"), "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
+testInvalidString("+999999uJ", "\xEF\x9F\x9F\xE7\xB7\xB7%", 'UTF-7', 'UTF-8');
+testInvalidString("+999euJ", "\xEF\x9F\x9F\xE5\xBA\xB8%", "UTF-7", "UTF-8");
+testInvalidString("+euJ", "\xE7\xAB\xA2%", "UTF-7", "UTF-8");
 
 // Truncated string
 testInvalidString('+' . rawEncode("\x01") . '-', "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
 testInvalidString('+l', "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
+
+// Base64 section should not have 4 ASCII characters; the first 3 can encode one
+// UTF-16 character, so there is no need for the 4th
+testInvalidString('+RR8I', "\xE4\x94\x9F%", 'UTF-7', 'UTF-8');
+// Likewise with 7 characters
+testInvalidString('+RR8IAAA', "\xE4\x94\x9F\xE0\xA0\x80%", 'UTF-7', 'UTF-8');
+
+// Similarly, it is useless for a Base64 section to only contain a single 'A'
+// (which decodes to only zero bits)
+testInvalidString("+A", "\x00\x00\x00%", 'UTF-7', 'UTF-32BE');
 
 // And then, messed up Base64 encoding
 

@@ -182,6 +182,7 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 	php_struct *ctx = SG(server_context);
 	request_rec *r;
 	apr_bucket_brigade *brigade;
+	apr_status_t status;
 
 	r = ctx->r;
 	brigade = ctx->brigade;
@@ -193,7 +194,7 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 	 * need to make sure that if data is available we fill the buffer completely.
 	 */
 
-	while (ap_get_brigade(r->input_filters, brigade, AP_MODE_READBYTES, APR_BLOCK_READ, len) == APR_SUCCESS) {
+	while ((status = ap_get_brigade(r->input_filters, brigade, AP_MODE_READBYTES, APR_BLOCK_READ, len)) == APR_SUCCESS) {
 		apr_brigade_flatten(brigade, buf, &len);
 		apr_brigade_cleanup(brigade);
 		tlen += len;
@@ -202,6 +203,10 @@ php_apache_sapi_read_post(char *buf, size_t count_bytes)
 		}
 		buf += len;
 		len = count_bytes - tlen;
+	}
+
+	if (status != APR_SUCCESS) {
+		return 0;
 	}
 
 	return tlen;
@@ -480,7 +485,16 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp
 		apache2_sapi_module.php_ini_path_override = apache2_php_ini_path_override;
 	}
 #ifdef ZTS
-	php_tsrm_startup();
+	int expected_threads;
+#ifdef AP_MPMQ_MAX_THREADS
+	if (ap_mpm_query(AP_MPMQ_MAX_THREADS, &expected_threads) != APR_SUCCESS) {
+		expected_threads = 1;
+	}
+#else
+	expected_threads = 1;
+#endif
+
+	php_tsrm_startup_ex(expected_threads);
 # ifdef PHP_WIN32
 	ZEND_TSRMLS_CACHE_UPDATE();
 # endif

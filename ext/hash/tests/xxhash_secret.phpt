@@ -3,6 +3,13 @@ Hash: xxHash secret
 --FILE--
 <?php
 
+class StringableThrowingClass {
+    public function __toString(): string {
+        throw new Exception('exception in __toString');
+        return '';
+    }
+}
+
 foreach (["xxh3", "xxh128"] as $a) {
 
 	//$secret = random_bytes(256);
@@ -10,6 +17,12 @@ foreach (["xxh3", "xxh128"] as $a) {
 
 	try {
 		$ctx = hash_init($a, options: ["seed" => 24, "secret" => $secret]);
+	} catch (Throwable $e) {
+		var_dump($e->getMessage());
+	}
+
+	try {
+		$ctx = hash_init($a, options: ["secret" => new StringableThrowingClass()]);
 	} catch (Throwable $e) {
 		var_dump($e->getMessage());
 	}
@@ -35,8 +48,10 @@ foreach (["xxh3", "xxh128"] as $a) {
 ?>
 --EXPECT--
 string(67) "xxh3: Only one of seed or secret is to be passed for initialization"
+string(23) "exception in __toString"
 string(57) "xxh3: Secret length must be >= 136 bytes, 17 bytes passed"
 8028aa834c03557a == 8028aa834c03557a == true
 string(69) "xxh128: Only one of seed or secret is to be passed for initialization"
+string(23) "exception in __toString"
 string(59) "xxh128: Secret length must be >= 136 bytes, 17 bytes passed"
 54279097795e7218093a05d4d781cbb9 == 54279097795e7218093a05d4d781cbb9 == true

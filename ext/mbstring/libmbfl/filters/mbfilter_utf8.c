@@ -51,6 +51,7 @@ const unsigned char mblen_table_utf8[] = {
 
 static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
 static void mb_wchar_to_utf8(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+static zend_string* mb_cut_utf8(unsigned char *str, size_t from, size_t len, unsigned char *end);
 
 static const char *mbfl_encoding_utf8_aliases[] = {"utf8", NULL};
 
@@ -64,7 +65,9 @@ const mbfl_encoding mbfl_encoding_utf8 = {
 	&vtbl_utf8_wchar,
 	&vtbl_wchar_utf8,
 	mb_utf8_to_wchar,
-	mb_wchar_to_utf8
+	mb_wchar_to_utf8,
+	NULL,
+	mb_cut_utf8
 };
 
 const struct mbfl_convert_vtbl vtbl_utf8_wchar = {
@@ -180,6 +183,7 @@ int mbfl_filt_conv_utf8_wchar_flush(mbfl_convert_filter *filter)
 {
 	if (filter->status) {
 		(*filter->output_function)(MBFL_BAD_INPUT, filter->data);
+		filter->status = 0;
 	}
 
 	if (filter->flush_function) {
@@ -224,7 +228,9 @@ static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 
 		if (c < 0x80) {
 			*out++ = c;
-		} else if (c >= 0xC2 && c <= 0xDF) { /* 2 byte character */
+		} else if (c < 0xC2) {
+			*out++ = MBFL_BAD_INPUT;
+		} else if (c <= 0xDF) { /* 2 byte character */
 			if (p < e) {
 				unsigned char c2 = *p++;
 				if ((c2 & 0xC0) != 0x80) {
@@ -236,7 +242,7 @@ static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 			} else {
 				*out++ = MBFL_BAD_INPUT;
 			}
-		} else if (c >= 0xE0 && c <= 0xEF) { /* 3 byte character */
+		} else if (c <= 0xEF) { /* 3 byte character */
 			if ((e - p) >= 2) {
 				unsigned char c2 = *p++;
 				unsigned char c3 = *p++;
@@ -248,19 +254,20 @@ static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 					p--;
 				} else {
 					uint32_t decoded = ((c & 0xF) << 12) | ((c2 & 0x3F) << 6) | (c3 & 0x3F);
-					if (decoded < 0x800 || (decoded >= 0xD800 && decoded <= 0xDFFF)) {
-						*out++ = MBFL_BAD_INPUT;
-					} else {
-						*out++ = decoded;
-					}
+					ZEND_ASSERT(decoded >= 0x800); /* Not an overlong code unit */
+					ZEND_ASSERT(decoded < 0xD800 || decoded > 0xDFFF); /* U+D800-DFFF are reserved, illegal code points */
+					*out++ = decoded;
 				}
 			} else {
 				*out++ = MBFL_BAD_INPUT;
-				while (p < e && (*p & 0xC0) == 0x80) {
+				if (p < e && (c != 0xE0 || *p >= 0xA0) && (c != 0xED || *p < 0xA0) && (*p & 0xC0) == 0x80) {
 					p++;
+					if (p < e && (*p & 0xC0) == 0x80) {
+						p++;
+					}
 				}
 			}
-		} else if (c >= 0xF0 && c <= 0xF4) { /* 4 byte character */
+		} else if (c <= 0xF4) { /* 4 byte character */
 			if ((e - p) >= 3) {
 				unsigned char c2 = *p++;
 				unsigned char c3 = *p++;
@@ -279,13 +286,14 @@ static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf
 					p--;
 				} else {
 					uint32_t decoded = ((c & 0x7) << 18) | ((c2 & 0x3F) << 12) | ((c3 & 0x3F) << 6) | (c4 & 0x3F);
-					*out++ = (decoded < 0x10000) ? MBFL_BAD_INPUT : decoded;
+					ZEND_ASSERT(decoded >= 0x10000); /* Not an overlong code unit */
+					*out++ = decoded;
 				}
 			} else {
 				*out++ = MBFL_BAD_INPUT;
 				if (p < e) {
 					unsigned char c2 = *p;
-					if ((c == 0xF0 && c2 >= 0x90) || (c == 0xF4 && c2 < 0x90)) {
+					if ((c == 0xF0 && c2 >= 0x90) || (c == 0xF4 && c2 < 0x90) || (c >= 0xF1 && c <= 0xF3)) {
 						while (p < e && (*p & 0xC0) == 0x80) {
 							p++;
 						}
@@ -328,4 +336,22 @@ static void mb_wchar_to_utf8(uint32_t *in, size_t len, mb_convert_buf *buf, bool
 	}
 
 	MB_CONVERT_BUF_STORE(buf, out, limit);
+}
+
+static zend_string* mb_cut_utf8(unsigned char *str, size_t from, size_t len, unsigned char *end)
+{
+	unsigned char *start = str + from;
+	/* Byte values less than -64 are UTF-8 continuation bytes, that is,
+	 * the 2nd, 3rd, or 4th byte of a multi-byte character */
+	while (start > str && ((signed char)*start) < -64) {
+		start--;
+	}
+	unsigned char *_end = start + len;
+	if (_end >= end) {
+		return zend_string_init_fast((char*)start, end - start);
+	}
+	while (_end > start && ((signed char)*_end) < -64) {
+		_end--;
+	}
+	return zend_string_init_fast((char*)start, _end - start);
 }

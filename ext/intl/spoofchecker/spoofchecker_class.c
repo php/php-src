@@ -47,8 +47,6 @@ zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 	zend_object_std_init(&intern->zo, ce);
 	object_properties_init(&intern->zo, ce);
 
-	intern->zo.handlers = &Spoofchecker_handlers;
-
 	return &intern->zo;
 }
 /* }}} */
@@ -79,7 +77,7 @@ static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
 		/* set up error in case error handler is interested */
 		intl_error_set( NULL, SPOOFCHECKER_ERROR_CODE(new_sfo), "Failed to clone SpoofChecker object", 0 );
 		Spoofchecker_objects_free(&new_sfo->zo); /* free new object */
-		zend_error(E_ERROR, "Failed to clone SpoofChecker object");
+		zend_error_noreturn(E_ERROR, "Failed to clone SpoofChecker object");
 	}
 	return new_obj_val;
 }
@@ -93,6 +91,7 @@ void spoofchecker_register_Spoofchecker_class(void)
 	/* Create and register 'Spoofchecker' class. */
 	Spoofchecker_ce_ptr = register_class_Spoofchecker();
 	Spoofchecker_ce_ptr->create_object = Spoofchecker_object_create;
+	Spoofchecker_ce_ptr->default_object_handlers = &Spoofchecker_handlers;
 
 	memcpy(&Spoofchecker_handlers, &std_object_handlers,
 		sizeof Spoofchecker_handlers);
@@ -129,6 +128,13 @@ void spoofchecker_object_destroy(Spoofchecker_object* co)
 		uspoof_close(co->uspoof);
 		co->uspoof = NULL;
 	}
+
+#if U_ICU_VERSION_MAJOR_NUM >= 58
+	if (co->uspoofres) {
+		uspoof_closeCheckResult(co->uspoofres);
+		co->uspoofres = NULL;
+	}
+#endif
 
 	intl_error_reset(SPOOFCHECKER_ERROR_P(co));
 }

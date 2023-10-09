@@ -53,6 +53,15 @@ interface RecursiveIterator extends Iterator
 
 class RecursiveIteratorIterator implements OuterIterator
 {
+    /** @cvalue RIT_LEAVES_ONLY */
+    public const int LEAVES_ONLY = UNKNOWN;
+    /** @cvalue RIT_SELF_FIRST */
+    public const int SELF_FIRST = UNKNOWN;
+    /** @cvalue RIT_CHILD_FIRST */
+    public const int CHILD_FIRST = UNKNOWN;
+    /** @cvalue RIT_CATCH_GET_CHILD */
+    public const int CATCH_GET_CHILD = UNKNOWN;
+
     public function __construct(Traversable $iterator, int $mode = RecursiveIteratorIterator::LEAVES_ONLY, int $flags = 0) {}
 
     /** @tentative-return-type */
@@ -200,6 +209,19 @@ class LimitIterator extends IteratorIterator
 
 class CachingIterator extends IteratorIterator implements ArrayAccess, Countable, Stringable
 {
+    /** @cvalue CIT_CALL_TOSTRING */
+    public const int CALL_TOSTRING = UNKNOWN;
+    /** @cvalue CIT_CATCH_GET_CHILD */
+    public const int CATCH_GET_CHILD = UNKNOWN;
+    /** @cvalue CIT_TOSTRING_USE_KEY */
+    public const int TOSTRING_USE_KEY = UNKNOWN;
+    /** @cvalue CIT_TOSTRING_USE_CURRENT */
+    public const int TOSTRING_USE_CURRENT = UNKNOWN;
+    /** @cvalue CIT_TOSTRING_USE_INNER */
+    public const int TOSTRING_USE_INNER = UNKNOWN;
+    /** @cvalue CIT_FULL_CACHE */
+    public const int FULL_CACHE = UNKNOWN;
+
     public function __construct(Iterator $iterator, int $flags = CachingIterator::CALL_TOSTRING) {}
 
     /** @tentative-return-type */
@@ -320,6 +342,21 @@ class InfiniteIterator extends IteratorIterator
 
 class RegexIterator extends FilterIterator
 {
+    /** @cvalue REGIT_USE_KEY */
+    public const int USE_KEY = UNKNOWN;
+    /** @cvalue REGIT_INVERTED */
+    public const int INVERT_MATCH = UNKNOWN;
+    /** @cvalue REGIT_MODE_MATCH */
+    public const int MATCH = UNKNOWN;
+    /** @cvalue REGIT_MODE_GET_MATCH */
+    public const int GET_MATCH = UNKNOWN;
+    /** @cvalue REGIT_MODE_ALL_MATCHES */
+    public const int ALL_MATCHES = UNKNOWN;
+    /** @cvalue REGIT_MODE_SPLIT */
+    public const int SPLIT = UNKNOWN;
+    /** @cvalue REGIT_MODE_REPLACE */
+    public const int REPLACE = UNKNOWN;
+
     public ?string $replacement = null;
 
     public function __construct(Iterator $iterator, string $pattern, int $mode = RegexIterator::MATCH, int $flags = 0, int $pregFlags = 0) {}
@@ -368,6 +405,23 @@ class RecursiveRegexIterator extends RegexIterator implements RecursiveIterator
 
 class RecursiveTreeIterator extends RecursiveIteratorIterator
 {
+    /** @cvalue RTIT_BYPASS_CURRENT */
+    public const int BYPASS_CURRENT = UNKNOWN;
+    /** @cvalue RTIT_BYPASS_KEY */
+    public const int BYPASS_KEY = UNKNOWN;
+
+    public const int PREFIX_LEFT = 0;
+
+    public const int PREFIX_MID_HAS_NEXT = 1;
+
+    public const int PREFIX_MID_LAST = 2;
+
+    public const int PREFIX_END_HAS_NEXT = 3;
+
+    public const int PREFIX_END_LAST = 4;
+
+    public const int PREFIX_RIGHT = 5;
+
     /** @param RecursiveIterator|IteratorAggregate $iterator */
     public function __construct(
         $iterator,

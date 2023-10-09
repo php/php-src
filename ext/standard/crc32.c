@@ -20,7 +20,9 @@
 #include "crc32_x86.h"
 
 #ifdef HAVE_AARCH64_CRC32
+#ifndef PHP_WIN32
 # include <arm_acle.h>
+#endif
 # if defined(__linux__)
 #  include <sys/auxv.h>
 #  include <asm/hwcap.h>
@@ -37,7 +39,7 @@ static unsigned long getauxval(unsigned long key) {
 }
 # endif
 
-static inline int has_crc32_insn() {
+static inline int has_crc32_insn(void) {
 	/* Only go through the runtime detection once. */
 	static int res = -1;
 	if (res != -1)
@@ -53,15 +55,24 @@ static inline int has_crc32_insn() {
 	if (sysctlbyname("hw.optional.armv8_crc32", &res, &reslen, NULL, 0) < 0)
 		res = 0;
 	return res;
+# elif defined(WIN32)
+	res = (int)IsProcessorFeaturePresent(PF_ARM_V8_CRC32_INSTRUCTIONS_AVAILABLE);
+	return res;
 # else
 	res = 0;
 	return res;
 # endif
 }
 
-# if defined(__GNUC__) && !defined(__clang__)
-#  pragma GCC push_options
-#  pragma GCC target ("+nothing+crc")
+# if defined(__GNUC__)
+#  if!defined(__clang__)
+#   pragma GCC push_options
+#   pragma GCC target ("+nothing+crc")
+#  elif defined(__APPLE__)
+#   pragma clang attribute push(__attribute__((target("crc"))), apply_to=function)
+#  else
+#   pragma clang attribute push(__attribute__((target("+nothing+crc"))), apply_to=function)
+#  endif
 # endif
 static uint32_t crc32_aarch64(uint32_t crc, const char *p, size_t nr) {
 	while (nr >= sizeof(uint64_t)) {
@@ -84,8 +95,14 @@ static uint32_t crc32_aarch64(uint32_t crc, const char *p, size_t nr) {
 	}
 	return crc;
 }
-# if defined(__GNUC__) && !defined(__clang__)
-#  pragma GCC pop_options
+# if defined(__GNUC__)
+#  if !defined(__clang__)
+#   pragma GCC pop_options
+#  elif defined(__APPLE__)
+#   pragma clang attribute pop
+#  else
+#   pragma clang attribute pop
+#  endif
 # endif
 #endif
 

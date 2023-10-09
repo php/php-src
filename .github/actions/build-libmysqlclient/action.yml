@@ -1,0 +1,34 @@
+name: Build libmysqlclient
+inputs:
+  configurationParameters:
+    default: ''
+    required: false
+  libmysql:
+    required: true
+  withMysqli:
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -x
+        LIBMYSQL=${{ inputs.libmysql }}
+        MYSQL_BASE=${LIBMYSQL%%-linux-*}
+        MYSQL_VERSION=${MYSQL_BASE#*-}
+        MYSQL_DIR=$HOME/$MYSQL_BASE
+        mkdir -p $MYSQL_DIR
+        URL=https://cdn.mysql.com/Downloads/MySQL-${MYSQL_VERSION%.*}/$LIBMYSQL
+        wget -nv $URL
+        tar -xf $LIBMYSQL --strip-components=1 -C $MYSQL_DIR
+        PDO_MYSQL=${MYSQL_DIR}
+        ${{ inputs.withMysqli == 'true' && 'MYSQLI=${MYSQL_DIR}/bin/mysql_config' || '' }}
+        ./buildconf --force
+        ./configure ${{ inputs.configurationParameters }} \
+          --enable-option-checking=fatal \
+          --disable-all \
+          --enable-pdo \
+          --with-pdo-mysql=${PDO_MYSQL} \
+          ${{ inputs.withMysqli == 'true' && '--with-mysqli=${MYSQLI}' || '' }}
+        make clean
+        make -j$(/usr/bin/nproc) >/dev/null

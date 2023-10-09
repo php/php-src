@@ -15,7 +15,7 @@
 
 static int monotonic_works;
 
-int fpm_clock_init() /* {{{ */
+int fpm_clock_init(void)
 {
 	struct timespec ts;
 
@@ -27,7 +27,6 @@ int fpm_clock_init() /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 int fpm_clock_get(struct timeval *tv) /* {{{ */
 {
@@ -59,7 +58,7 @@ static clock_serv_t mach_clock;
 
 /* this code borrowed from here: http://lists.apple.com/archives/Darwin-development/2002/Mar/msg00746.html */
 /* mach_clock also should be re-initialized in child process after fork */
-int fpm_clock_init() /* {{{ */
+int fpm_clock_init(void)
 {
 	kern_return_t ret;
 	mach_timespec_t aTime;
@@ -81,7 +80,6 @@ int fpm_clock_init() /* {{{ */
 
 	return 0;
 }
-/* }}} */
 
 int fpm_clock_get(struct timeval *tv) /* {{{ */
 {
@@ -104,11 +102,10 @@ int fpm_clock_get(struct timeval *tv) /* {{{ */
 
 #else /* no clock */
 
-int fpm_clock_init() /* {{{ */
+int fpm_clock_init(void)
 {
 	return 0;
 }
-/* }}} */
 
 int fpm_clock_get(struct timeval *tv) /* {{{ */
 {

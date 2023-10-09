@@ -2,6 +2,10 @@
 oci_fetch_assoc()
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --FILE--
 <?php
 

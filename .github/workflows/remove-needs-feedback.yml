@@ -5,10 +5,16 @@ on:
     types:
       - created
 
+permissions:
+  contents: read
+
 jobs:
   build:
     if: "github.repository_owner == 'php' && contains(github.event.issue.labels.*.name, 'Status: Needs Feedback') && github.event.issue.user.login == github.event.sender.login"
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - uses: actions-ecosystem/action-remove-labels@v1
         with:

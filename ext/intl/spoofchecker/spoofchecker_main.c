@@ -22,7 +22,7 @@
 /* {{{ Checks if a given text contains any suspicious characters */
 PHP_METHOD(Spoofchecker, isSuspicious)
 {
-	int ret;
+	int32_t ret, errmask;
 	char *text;
 	size_t text_len;
 	zval *error_code = NULL;
@@ -34,16 +34,28 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
 
+#if U_ICU_VERSION_MAJOR_NUM >= 58
+	ret = uspoof_check2UTF8(co->uspoof, text, text_len, co->uspoofres, SPOOFCHECKER_ERROR_CODE_P(co));
+#else
 	ret = uspoof_checkUTF8(co->uspoof, text, text_len, NULL, SPOOFCHECKER_ERROR_CODE_P(co));
+#endif
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
 		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
+#if U_ICU_VERSION_MAJOR_NUM >= 58
+		errmask = uspoof_getCheckResultChecks(co->uspoofres, SPOOFCHECKER_ERROR_CODE_P(co));
+
+		if (errmask != ret) {
+			php_error_docref(NULL, E_WARNING, "unexpected error (%d), does not relate to the flags passed to setChecks (%d)", ret, errmask);
+		}
+#endif
 		RETURN_TRUE;
 	}
 
 	if (error_code) {
 		zval_ptr_dtor(error_code);
-		ZVAL_LONG(error_code, ret);
+		ZVAL_LONG(Z_REFVAL_P(error_code), ret);
+		Z_TRY_ADDREF_P(error_code);
 	}
 	RETVAL_BOOL(ret != 0);
 }
@@ -76,7 +88,8 @@ PHP_METHOD(Spoofchecker, areConfusable)
 
 	if (error_code) {
 		zval_ptr_dtor(error_code);
-		ZVAL_LONG(error_code, ret);
+		ZVAL_LONG(Z_REFVAL_P(error_code), ret);
+		Z_TRY_ADDREF_P(error_code);
 	}
 	RETVAL_BOOL(ret != 0);
 }

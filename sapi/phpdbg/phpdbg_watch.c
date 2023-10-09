@@ -306,6 +306,9 @@ int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context) {
 }
 
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
+# if defined(__GNUC__) && !defined(__clang__)
+__attribute__((no_sanitize_address))
+# endif
 void *phpdbg_watchpoint_userfaultfd_thread(void *phpdbg_globals) {
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 	zend_phpdbg_globals *globals = (zend_phpdbg_globals *) phpdbg_globals;
@@ -1362,7 +1365,7 @@ static int phpdbg_watchpoint_parse_symtables(char *input, size_t len, int (*call
 	int ret;
 
 	if (scope && len >= 5 && !memcmp("$this", input, 5)) {
-		zend_hash_str_add(EG(current_execute_data)->symbol_table, ZEND_STRL("this"), &EG(current_execute_data)->This);
+		zend_hash_add(EG(current_execute_data)->symbol_table, ZSTR_KNOWN(ZEND_STR_THIS), &EG(current_execute_data)->This);
 	}
 
 	if (callback == phpdbg_create_array_watchpoint) {

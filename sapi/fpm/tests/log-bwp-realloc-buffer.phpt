@@ -33,17 +33,14 @@ $tester->start();
 $tester->expectLogStartNotices();
 $tester->request()->expectEmptyBody();
 $tester->terminate();
-var_dump($tester->getLastLogLine() === str_repeat('a', 100) . str_repeat('b', 923) . "\n");
-var_dump($tester->getLastLogLine() === str_repeat('b', 1023) . "\n");
-var_dump($tester->getLastLogLine() === str_repeat('b', 554) . "\n");
+$tester->expectLogLine(str_repeat('a', 100)  . str_repeat('b', 923), decorated: false);
+$tester->expectLogLine(str_repeat('b', 1023), decorated: false);
+$tester->expectLogLine(str_repeat('b', 554), decorated: false);
 $tester->close();
 
 ?>
 Done
 --EXPECT--
-bool(true)
-bool(true)
-bool(true)
 Done
 --CLEAN--
 <?php

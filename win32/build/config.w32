@@ -14,8 +14,10 @@ ARG_WITH('cygwin', 'Path to cygwin utilities on your system', '\\cygwin');
 
 toolset_setup_compiler();
 
-// do we use x64 or 80x86 version of compiler?
-X64 = toolset_is_64();
+HOST_ARCH = toolset_host_arch();
+TARGET_ARCH = toolset_target_arch();
+// for compatible only
+X64 = TARGET_ARCH != 'x86';
 toolset_setup_arch();
 
 toolset_setup_linker();
@@ -212,7 +214,7 @@ if (PHP_ANALYZER == "vs") {
 			pvscfg.WriteLine("exclude-path = " + PROGRAM_FILES + "\\windows kits\\");
 		}
 		pvscfg.WriteLine("vcinstalldir = " + VCINSTALLDIR);
-		pvscfg.WriteLine("platform = " + (X64 ? 'x64' : 'Win32'));
+		pvscfg.WriteLine("platform = " + (TARGET_ARCH == 'x86' ? 'Win32' : 'x64'));
 		pvscfg.WriteLine("preprocessor = visualcpp");
 		pvscfg.WriteLine("language = C");
 		pvscfg.WriteLine("skip-cl-exe = no");
@@ -226,8 +228,8 @@ STDOUT.WriteLine("Build dir: " + get_define('BUILD_DIR'));
 STDOUT.WriteLine("PHP Core:  " + get_define('PHPDLL') + " and " + get_define('PHPLIB'));
 
 ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
-	zend_ini_parser.c zend_ini_scanner.c zend_alloc.c zend_compile.c \
-	zend_constants.c zend_exceptions.c \
+	zend_ini_parser.c zend_ini_scanner.c zend_alloc.c zend_call_stack.c \
+	zend_compile.c zend_constants.c zend_exceptions.c \
 	zend_execute_API.c zend_highlight.c \
 	zend_llist.c zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c \
 	zend_stack.c zend_variables.c zend.c zend_API.c zend_extensions.c \
@@ -238,19 +240,47 @@ ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_default_classes.c zend_execute.c zend_strtod.c zend_gc.c zend_closures.c zend_weakrefs.c \
 	zend_float.c zend_string.c zend_generators.c zend_virtual_cwd.c zend_ast.c \
 	zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_observer.c zend_system_id.c \
-	zend_enum.c zend_fibers.c zend_atomic.c");
+	zend_enum.c zend_fibers.c zend_atomic.c zend_hrtime.c");
 ADD_SOURCES("Zend\\Optimizer", "zend_optimizer.c pass1.c pass3.c optimize_func_calls.c block_pass.c optimize_temp_vars_5.c nop_removal.c compact_literals.c zend_cfg.c zend_dfg.c dfa_pass.c zend_ssa.c zend_inference.c zend_func_info.c zend_call_graph.c zend_dump.c escape_analysis.c compact_vars.c dce.c sccp.c scdf.c");
 
-var FIBER_ASSEMBLER = X64 ? PATH_PROG('ML64') : PATH_PROG('ML');
-DEFINE('FIBER_ASSEMBLER', FIBER_ASSEMBLER);
+var PHP_ASSEMBLER = PATH_PROG({
+	'x64': 'ML64',
+	'x86': 'ML',
+	'arm64': 'armasm64'
+}[TARGET_ARCH]);
+if (!PHP_ASSEMBLER) {
+	ERROR("No assembler found, fiber cannot be built");
+}
+DEFINE('PHP_ASSEMBLER', PHP_ASSEMBLER);
+DEFINE('FIBER_ASSEMBLER', PHP_ASSEMBLER);// for compatible
 
-var FIBER_ASM_ARCH = X64 ? 'x86_64' : 'i386';
-DEFINE('FIBER_ASM_ARCH', FIBER_ASM_ARCH);
+var FIBER_ASM_ARCH = {
+	'x64': 'x86_64',
+	'x86': 'i386',
+	'arm64': 'arm64'
+}[TARGET_ARCH];
+DEFINE('FIBER_ASM_ARCH', FIBER_ASM_ARCH); // for compatible only
 
-ADD_FLAG('LDFLAGS', '$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ARCH + '_ms_pe_masm.obj');
-ADD_FLAG('LDFLAGS', '$(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ARCH + '_ms_pe_masm.obj');
+var FIBER_ASM_ABI = {
+	'x64': 'x86_64_ms_pe_masm',
+	'x86': 'i386_ms_pe_masm',
+	'arm64': 'arm64_aapcs_pe_armasm'
+}[TARGET_ARCH];
+DEFINE('FIBER_ASM_ABI', FIBER_ASM_ABI);
 
-ADD_MAKEFILE_FRAGMENT('win32/build/Makefile.frag.w32');
+if (TARGET_ARCH == 'arm64') {
+	DEFINE('FIBER_ASM_FLAGS', '-nologo -machine ARM64 -o');
+} else {
+	DEFINE('FIBER_ASM_FLAGS', '/DBOOST_CONTEXT_EXPORT=EXPORT /nologo /c /Fo');
+}
+
+ADD_FLAG('ASM_OBJS', '$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj $(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj');
+
+MFO.WriteLine('$(BUILD_DIR)\\Zend\\jump_' + FIBER_ASM_ABI + '.obj: Zend\\asm\\jump_' + FIBER_ASM_ABI + '.asm');
+MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\jump_$(FIBER_ASM_ABI).obj Zend\\asm\\jump_$(FIBER_ASM_ABI).asm');
+
+MFO.WriteLine('$(BUILD_DIR)\\Zend\\make_' + FIBER_ASM_ABI + '.obj: Zend\\asm\\make_' + FIBER_ASM_ABI + '.asm');
+MFO.WriteLine('\t$(PHP_ASSEMBLER) $(FIBER_ASM_FLAGS) $(BUILD_DIR)\\Zend\\make_$(FIBER_ASM_ABI).obj Zend\\asm\\make_$(FIBER_ASM_ABI).asm');
 
 ADD_FLAG("CFLAGS_BD_ZEND", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 if (VS_TOOLSET && VCVERS >= 1914) {
@@ -272,6 +302,8 @@ if (VS_TOOLSET && VCVERS >= 1914) {
 }
 
 AC_DEFINE('HAVE_STRNLEN', 1);
+
+AC_DEFINE('ZEND_CHECK_STACK_LIMIT', 1)
 
 ADD_SOURCES("main/streams", "streams.c cast.c memory.c filter.c plain_wrapper.c \
 	userspace.c transports.c xp_socket.c mmap.c glob_wrapper.c");

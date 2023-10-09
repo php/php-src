@@ -30,6 +30,37 @@
 
 #define RECORD_ERROR(stmt) _firebird_error(NULL, stmt,  __FILE__, __LINE__)
 
+#define READ_AND_RETURN_USING_MEMCPY(type, sqldata) do { \
+		type ret; \
+		memcpy(&ret, sqldata, sizeof(ret)); \
+		return ret; \
+	} while (0);
+
+static zend_always_inline ISC_INT64 get_isc_int64_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	READ_AND_RETURN_USING_MEMCPY(ISC_INT64, sqldata);
+}
+
+static zend_always_inline ISC_LONG get_isc_long_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	READ_AND_RETURN_USING_MEMCPY(ISC_LONG, sqldata);
+}
+
+static zend_always_inline double get_double_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	READ_AND_RETURN_USING_MEMCPY(double, sqldata);
+}
+
+static zend_always_inline ISC_TIMESTAMP get_isc_timestamp_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	READ_AND_RETURN_USING_MEMCPY(ISC_TIMESTAMP, sqldata);
+}
+
+static zend_always_inline ISC_QUAD get_isc_quad_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	READ_AND_RETURN_USING_MEMCPY(ISC_QUAD, sqldata);
+}
+
 /* free the allocated space for passing field values to the db and back */
 static void free_sqlda(XSQLDA const *sqlda) /* {{{ */
 {
@@ -380,16 +411,18 @@ static int firebird_stmt_get_col(
 					n = *(short*)var->sqldata;
 					break;
 				case SQL_LONG:
-					n = *(ISC_LONG*)var->sqldata;
+					n = get_isc_long_from_sqldata(var->sqldata);
 					break;
 				case SQL_INT64:
-					n = *(ISC_INT64*)var->sqldata;
+					n = get_isc_int64_from_sqldata(var->sqldata);
+					break;
+				case SQL_DOUBLE:
 					break;
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 
 			if ((var->sqltype & ~1) == SQL_DOUBLE) {
-				str = zend_strpprintf(0, "%.*F", -var->sqlscale, *(double*)var->sqldata);
+				str = zend_strpprintf(0, "%.*F", -var->sqlscale, get_double_from_sqldata(var->sqldata));
 			} else if (n >= 0) {
 				str = zend_strpprintf(0, "%" LL_MASK "d.%0*" LL_MASK "d",
 					n / f, -var->sqlscale, n % f);
@@ -415,13 +448,13 @@ static int firebird_stmt_get_col(
 					ZVAL_LONG(result, *(short*)var->sqldata);
 					break;
 				case SQL_LONG:
-					ZVAL_LONG(result, *(ISC_LONG*)var->sqldata);
+					ZVAL_LONG(result, get_isc_long_from_sqldata(var->sqldata));
 					break;
 				case SQL_INT64:
 #if SIZEOF_ZEND_LONG >= 8
-					ZVAL_LONG(result, *(ISC_INT64*)var->sqldata);
+					ZVAL_LONG(result, get_isc_int64_from_sqldata(var->sqldata));
 #else
-					ZVAL_STR(result, zend_strpprintf(0, "%" LL_MASK "d", *(ISC_INT64*)var->sqldata));
+					ZVAL_STR(result, zend_strpprintf(0, "%" LL_MASK "d", get_isc_int64_from_sqldata(var->sqldata)));
 #endif
 					break;
 				case SQL_FLOAT:
@@ -430,7 +463,7 @@ static int firebird_stmt_get_col(
 					break;
 				case SQL_DOUBLE:
 					/* TODO: Why is this not returned as the native type? */
-					ZVAL_STR(result, zend_strpprintf(0, "%F", *(double*)var->sqldata));
+					ZVAL_STR(result, zend_strpprintf(0, "%F", get_double_from_sqldata(var->sqldata)));
 					break;
 #ifdef SQL_BOOLEAN
 				case SQL_BOOLEAN:
@@ -446,7 +479,10 @@ static int firebird_stmt_get_col(
 						fmt = S->H->time_format ? S->H->time_format : PDO_FB_DEF_TIME_FMT;
 					} else if (0) {
 				case SQL_TIMESTAMP:
-						isc_decode_timestamp((ISC_TIMESTAMP*)var->sqldata, &t);
+						{
+							ISC_TIMESTAMP timestamp = get_isc_timestamp_from_sqldata(var->sqldata);
+							isc_decode_timestamp(&timestamp, &t);
+						}
 						fmt = S->H->timestamp_format ? S->H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT;
 					}
 					/* convert the timestamp into a string */
@@ -454,8 +490,10 @@ static int firebird_stmt_get_col(
 					size_t len = strftime(buf, sizeof(buf), fmt, &t);
 					ZVAL_STRINGL(result, buf, len);
 					break;
-				case SQL_BLOB:
-					return firebird_fetch_blob(stmt, colno, result, (ISC_QUAD*)var->sqldata);
+				case SQL_BLOB: {
+					ISC_QUAD quad = get_isc_quad_from_sqldata(var->sqldata);
+					return firebird_fetch_blob(stmt, colno, result, &quad);
+				}
 			}
 		}
 	}
@@ -608,7 +646,12 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						*var->sqlind = -1;
 						return 1;
 					}
-					return firebird_bind_blob(stmt, (ISC_QUAD*)var->sqldata, parameter);
+					ISC_QUAD quad = get_isc_quad_from_sqldata(var->sqldata);
+					if (firebird_bind_blob(stmt, &quad, parameter) != 0) {
+						memcpy(var->sqldata, &quad, sizeof(quad));
+						return 1;
+					}
+					return 0;
 				}
 			}
 
@@ -627,7 +670,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 							zend_long lval;
 							double dval;
 
-							if ((Z_STRLEN_P(parameter) == 0)) {
+							if (Z_STRLEN_P(parameter) == 0) {
 								*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
 								break;
 							}

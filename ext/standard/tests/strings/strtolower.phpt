@@ -30,6 +30,7 @@ $strings = array (
   "ZZZZZZZZZZZZZZZZZZZZ",
   "@@@@@@@@@@@@@@@@@@@@",
   "[[[[[[[[[[[[[[[[[[[[",
+  "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 );
 
 $count = 0;
@@ -346,6 +347,9 @@ string(20) "@@@@@@@@@@@@@@@@@@@@"
 
 -- Iteration 11 --
 string(20) "[[[[[[[[[[[[[[[[[[[["
+
+-- Iteration 12 --
+string(62) "abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz"
 
 *** Testing strtolower() with two different case strings ***
 strings are same, with Case Insensitive

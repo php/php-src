@@ -78,6 +78,7 @@ void php_com_object_enable_event_sink(php_com_dotnet_object *obj, bool enable);
 /* com_saproxy.c */
 zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *object, int by_ref);
 void php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index);
+extern zend_object_handlers php_com_saproxy_handlers;
 
 /* com_olechar.c */
 PHP_COM_DOTNET_API zend_string *php_com_olestring_to_string(OLECHAR *olestring, int codepage);

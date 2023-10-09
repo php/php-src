@@ -21,7 +21,7 @@ static float fpm_scoreboard_tick;
 #endif
 
 
-int fpm_scoreboard_init_main() /* {{{ */
+int fpm_scoreboard_init_main(void)
 {
 	struct fpm_worker_pool_s *wp;
 
@@ -72,7 +72,6 @@ int fpm_scoreboard_init_main() /* {{{ */
 	}
 	return 0;
 }
-/* }}} */
 
 static struct fpm_scoreboard_s *fpm_scoreboard_get_for_update(struct fpm_scoreboard_s *scoreboard) /* {{{ */
 {
@@ -186,11 +185,10 @@ void fpm_scoreboard_update(
 }
 /* }}} */
 
-struct fpm_scoreboard_s *fpm_scoreboard_get() /* {{{*/
+struct fpm_scoreboard_s *fpm_scoreboard_get(void)
 {
 	return fpm_scoreboard;
 }
-/* }}} */
 
 static inline struct fpm_scoreboard_proc_s *fpm_scoreboard_proc_get_ex(
 		struct fpm_scoreboard_s *scoreboard, int child_index, unsigned int nprocs) /* {{{*/
@@ -442,9 +440,8 @@ int fpm_scoreboard_proc_alloc(struct fpm_child_s *child) /* {{{ */
 /* }}} */
 
 #ifdef HAVE_TIMES
-float fpm_scoreboard_get_tick() /* {{{ */
+float fpm_scoreboard_get_tick(void)
 {
 	return fpm_scoreboard_tick;
 }
-/* }}} */
 #endif

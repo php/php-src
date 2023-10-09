@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e8e9909c2548a2259ba58ecf9f2ad6fe5add70f4 */
+ * Stub hash: c52e89992bd3c04877daab47f4328af0b6ce619e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
@@ -40,19 +40,19 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_setF
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_asort, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_asort, 0, 0, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "SORT_REGULAR")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_ksort arginfo_class_ArrayObject_asort
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_uasort, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_uasort, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_uksort arginfo_class_ArrayObject_uasort
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_natsort, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_natsort, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_natcasesort arginfo_class_ArrayObject_natsort
@@ -139,7 +139,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayIterator_next arginfo_class_ArrayIterator_rewind
 
-#define arginfo_class_ArrayIterator_valid arginfo_class_ArrayObject_natsort
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayIterator_valid, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayIterator_seek, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
@@ -147,7 +148,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayIterator___debugInfo arginfo_class_ArrayObject_getArrayCopy
 
-#define arginfo_class_RecursiveArrayIterator_hasChildren arginfo_class_ArrayObject_natsort
+#define arginfo_class_RecursiveArrayIterator_hasChildren arginfo_class_ArrayIterator_valid
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_RecursiveArrayIterator_getChildren, 0, 0, RecursiveArrayIterator, 1)
 ZEND_END_ARG_INFO()
@@ -265,6 +266,18 @@ static zend_class_entry *register_class_ArrayObject(zend_class_entry *class_entr
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	zend_class_implements(class_entry, 4, class_entry_IteratorAggregate, class_entry_ArrayAccess, class_entry_Serializable, class_entry_Countable);
 
+	zval const_STD_PROP_LIST_value;
+	ZVAL_LONG(&const_STD_PROP_LIST_value, SPL_ARRAY_STD_PROP_LIST);
+	zend_string *const_STD_PROP_LIST_name = zend_string_init_interned("STD_PROP_LIST", sizeof("STD_PROP_LIST") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_STD_PROP_LIST_name, &const_STD_PROP_LIST_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_STD_PROP_LIST_name);
+
+	zval const_ARRAY_AS_PROPS_value;
+	ZVAL_LONG(&const_ARRAY_AS_PROPS_value, SPL_ARRAY_ARRAY_AS_PROPS);
+	zend_string *const_ARRAY_AS_PROPS_name = zend_string_init_interned("ARRAY_AS_PROPS", sizeof("ARRAY_AS_PROPS") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ARRAY_AS_PROPS_name, &const_ARRAY_AS_PROPS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ARRAY_AS_PROPS_name);
+
 	return class_entry;
 }
 
@@ -276,6 +289,18 @@ static zend_class_entry *register_class_ArrayIterator(zend_class_entry *class_en
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	zend_class_implements(class_entry, 4, class_entry_SeekableIterator, class_entry_ArrayAccess, class_entry_Serializable, class_entry_Countable);
 
+	zval const_STD_PROP_LIST_value;
+	ZVAL_LONG(&const_STD_PROP_LIST_value, SPL_ARRAY_STD_PROP_LIST);
+	zend_string *const_STD_PROP_LIST_name = zend_string_init_interned("STD_PROP_LIST", sizeof("STD_PROP_LIST") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_STD_PROP_LIST_name, &const_STD_PROP_LIST_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_STD_PROP_LIST_name);
+
+	zval const_ARRAY_AS_PROPS_value;
+	ZVAL_LONG(&const_ARRAY_AS_PROPS_value, SPL_ARRAY_ARRAY_AS_PROPS);
+	zend_string *const_ARRAY_AS_PROPS_name = zend_string_init_interned("ARRAY_AS_PROPS", sizeof("ARRAY_AS_PROPS") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ARRAY_AS_PROPS_name, &const_ARRAY_AS_PROPS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ARRAY_AS_PROPS_name);
+
 	return class_entry;
 }
 
@@ -286,6 +311,12 @@ static zend_class_entry *register_class_RecursiveArrayIterator(zend_class_entry 
 	INIT_CLASS_ENTRY(ce, "RecursiveArrayIterator", class_RecursiveArrayIterator_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_ArrayIterator);
 	zend_class_implements(class_entry, 1, class_entry_RecursiveIterator);
+
+	zval const_CHILD_ARRAYS_ONLY_value;
+	ZVAL_LONG(&const_CHILD_ARRAYS_ONLY_value, SPL_ARRAY_CHILD_ARRAYS_ONLY);
+	zend_string *const_CHILD_ARRAYS_ONLY_name = zend_string_init_interned("CHILD_ARRAYS_ONLY", sizeof("CHILD_ARRAYS_ONLY") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_CHILD_ARRAYS_ONLY_name, &const_CHILD_ARRAYS_ONLY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_CHILD_ARRAYS_ONLY_name);
 
 	return class_entry;
 }

@@ -22,14 +22,20 @@ foo();
 echo 'You should not see this.';
 ?>
 --EXPECTF--
-<!-- init '%s%eobserver_error_%d.php' -->
-<file '%s%eobserver_error_%d.php'>
+<!-- init '%s' -->
+<file '%s'>
+  <!-- init set_error_handler() -->
+  <set_error_handler>
+  </set_error_handler:NULL>
   <!-- init foo() -->
   <foo>
     <!-- init {closure}() -->
     <{closure}>
+      <!-- init trigger_error() -->
+      <trigger_error>
 
 Fatal error: Foo error in %s on line %d
+      </trigger_error:NULL>
     </{closure}:NULL>
   </foo:NULL>
-</file '%s%eobserver_error_%d.php'>
+</file '%s'>

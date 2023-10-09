@@ -112,13 +112,11 @@
 #define MBFL_VERSION_MINOR 3
 #define MBFL_VERSION_TEENY 2
 
-/*
- * convert filter
- */
 #define MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE 0
 #define MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR 1
 #define MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG 2
 #define MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY 3
+#define MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8 4 /* For internal use only; deliberately uses invalid UTF-8 byte sequence as error marker */
 
 /*
  * convenience macros
@@ -127,74 +125,10 @@
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
 
-/*
- * buffering converter
- */
-typedef struct _mbfl_buffer_converter mbfl_buffer_converter;
-
-struct _mbfl_buffer_converter {
-	mbfl_convert_filter *filter1;
-	mbfl_convert_filter *filter2;
-	mbfl_memory_device device;
-	const mbfl_encoding *to;
-};
-
-MBFLAPI extern mbfl_buffer_converter * mbfl_buffer_converter_new(const mbfl_encoding *from, const mbfl_encoding *to, size_t buf_initsz);
-MBFLAPI extern void mbfl_buffer_converter_delete(mbfl_buffer_converter *convd);
-MBFLAPI extern void mbfl_buffer_converter_illegal_mode(mbfl_buffer_converter *convd, int mode);
-MBFLAPI extern void mbfl_buffer_converter_illegal_substchar(mbfl_buffer_converter *convd, int substchar);
-MBFLAPI extern size_t mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string);
-MBFLAPI extern void mbfl_buffer_converter_flush(mbfl_buffer_converter *convd);
-MBFLAPI extern mbfl_string * mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result);
-MBFLAPI extern mbfl_string * mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result);
-MBFLAPI extern size_t mbfl_buffer_illegalchars(mbfl_buffer_converter *convd);
-
-/*
- * encoding detector
- */
-typedef struct _mbfl_encoding_detector mbfl_encoding_detector;
-
-typedef struct {
-	size_t num_illegalchars;
-	size_t score;
-} mbfl_encoding_detector_data;
-
-struct _mbfl_encoding_detector {
-	mbfl_convert_filter **filter_list;
-	mbfl_encoding_detector_data *filter_data;
-	int filter_list_size;
-	int strict;
-};
-
-MBFLAPI extern mbfl_encoding_detector * mbfl_encoding_detector_new(const mbfl_encoding **elist, int elistsz, int strict);
-MBFLAPI extern void mbfl_encoding_detector_delete(mbfl_encoding_detector *identd);
-MBFLAPI extern int mbfl_encoding_detector_feed(mbfl_encoding_detector *identd, mbfl_string *string);
-MBFLAPI extern const mbfl_encoding *mbfl_encoding_detector_judge(mbfl_encoding_detector *identd);
-
-
-/*
- * encoding converter
- */
-MBFLAPI extern mbfl_string *
-mbfl_convert_encoding(mbfl_string *string, mbfl_string *result, const mbfl_encoding *toenc);
-
-
-/*
- * identify encoding
- */
-MBFLAPI extern const mbfl_encoding *
-mbfl_identify_encoding(mbfl_string *string, const mbfl_encoding **elist, int elistsz, int strict);
-
 /* Lengths -1 through -16 are reserved for error return values */
 static inline int mbfl_is_error(size_t len) {
 	return len >= (size_t) -16;
 }
-
-/*
- * strlen
- */
-MBFLAPI extern size_t
-mbfl_strlen(const mbfl_string *string);
 
 #define MBFL_ERROR_NOT_FOUND ((size_t) -1)
 #define MBFL_ERROR_ENCODING ((size_t) -4)
@@ -202,102 +136,14 @@ mbfl_strlen(const mbfl_string *string);
 #define MBFL_ERROR_OFFSET ((size_t) -16)
 
 /*
- * strpos.
- * Errors: MBFL_ERROR_NOT_FOUND, MBFL_ERROR_ENCODING, MBFL_ERROR_OFFSET
- */
-MBFLAPI extern size_t
-mbfl_strpos(mbfl_string *haystack, mbfl_string *needle, ssize_t offset, int reverse);
-
-/*
- * substr_count
- */
-MBFLAPI extern size_t
-mbfl_substr_count(mbfl_string *haystack, mbfl_string *needle);
-
-/*
  * If specified as length, the substr until the end of the string is taken.
  */
 #define MBFL_SUBSTR_UNTIL_END ((size_t) -1)
-
-/*
- * substr
- */
-MBFLAPI extern mbfl_string *
-mbfl_substr(mbfl_string *string, mbfl_string *result, size_t from, size_t length);
 
 /*
  * strcut
  */
 MBFLAPI extern mbfl_string *
 mbfl_strcut(mbfl_string *string, mbfl_string *result, size_t from, size_t length);
-
-/*
- *  strwidth
- */
-MBFLAPI extern size_t
-mbfl_strwidth(mbfl_string *string);
-
-/*
- *  strimwidth
- */
-MBFLAPI extern mbfl_string *
-mbfl_strimwidth(mbfl_string *string, mbfl_string *marker, mbfl_string *result, size_t from, size_t width);
-
-/*
- * MIME header encode
- */
-struct mime_header_encoder_data;	/* forward declaration */
-
-MBFLAPI extern struct mime_header_encoder_data *
-mime_header_encoder_new(
-    const mbfl_encoding *incode,
-    const mbfl_encoding *outcode,
-    const mbfl_encoding *encoding);
-
-MBFLAPI extern void
-mime_header_encoder_delete(struct mime_header_encoder_data *pe);
-
-MBFLAPI extern mbfl_string *
-mime_header_encoder_result(struct mime_header_encoder_data *pe, mbfl_string *result);
-
-MBFLAPI extern mbfl_string *
-mbfl_mime_header_encode(
-    mbfl_string *string, mbfl_string *result,
-    const mbfl_encoding *outcode,
-    const mbfl_encoding *encoding,
-    const char *linefeed,
-    int indent);
-
-/*
- * MIME header decode
- */
-struct mime_header_decoder_data;	/* forward declaration */
-
-MBFLAPI extern struct mime_header_decoder_data *
-mime_header_decoder_new(const mbfl_encoding *outcode);
-
-MBFLAPI extern void
-mime_header_decoder_delete(struct mime_header_decoder_data *pd);
-
-MBFLAPI extern mbfl_string *
-mime_header_decoder_result(struct mime_header_decoder_data *pd, mbfl_string *result);
-
-MBFLAPI extern mbfl_string *
-mbfl_mime_header_decode(
-    mbfl_string *string,
-    mbfl_string *result,
-    const mbfl_encoding *outcode);
-
-/*
- * convert HTML numeric entity
- */
-MBFLAPI extern mbfl_string *
-mbfl_html_numeric_entity(mbfl_string *string, mbfl_string *result, int *convmap, int mapsize, int type);
-
-/*
- * convert of halfwidth and fullwidth for japanese
- */
-MBFLAPI extern mbfl_string *
-mbfl_ja_jp_hantozen(mbfl_string *string, mbfl_string *result, int mode);
 
 #endif	/* MBFL_MBFILTER_H */

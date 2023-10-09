@@ -45,6 +45,12 @@ convertFromEntities("\x00", '&#00000;');
 
 testConversion(str_repeat('あ', 100), str_repeat('&#12354;', 100));
 
+convertFromEntities("&;", "&;");
+convertFromEntities("&f;", "&f;");
+
+convertFromEntities("&A", "&&#65;");
+convertFromEntities("&A", "&&#x41;");
+
 echo "Done!\n";
 ?>
 --EXPECTF--

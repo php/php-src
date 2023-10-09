@@ -4,10 +4,17 @@
 
 class SplPriorityQueue implements Iterator, Countable
 {
+    /** @cvalue SPL_PQUEUE_EXTR_BOTH */
+    public const int EXTR_BOTH = UNKNOWN;
+    /** @cvalue SPL_PQUEUE_EXTR_PRIORITY */
+    public const int EXTR_PRIORITY = UNKNOWN;
+    /** @cvalue SPL_PQUEUE_EXTR_DATA */
+    public const int EXTR_DATA = UNKNOWN;
+
     /** @tentative-return-type */
     public function compare(mixed $priority1, mixed $priority2): int {}
 
-    /** @return bool */
+    /** @return true */
     public function insert(mixed $value, mixed $priority) {} // TODO make return type void
 
     /** @tentative-return-type */

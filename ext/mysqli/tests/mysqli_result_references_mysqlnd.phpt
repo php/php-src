@@ -5,8 +5,6 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-if (!$IS_MYSQLND)
-    die("skip Test for mysqlnd only");
 ?>
 --FILE--
 <?php
@@ -51,7 +49,7 @@ if (!$IS_MYSQLND)
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 array(1) refcount(%d){

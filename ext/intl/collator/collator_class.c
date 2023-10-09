@@ -13,14 +13,16 @@
    +----------------------------------------------------------------------+
  */
 
+#include "collator.h"
 #include "collator_class.h"
 #include "php_intl.h"
 #include "collator_sort.h"
 #include "collator_convert.h"
-#include "collator_arginfo.h"
 #include "intl_error.h"
 
 #include <unicode/ucol.h>
+
+#include "collator_arginfo.h"
 
 zend_class_entry *Collator_ce_ptr = NULL;
 static zend_object_handlers Collator_handlers;
@@ -48,8 +50,6 @@ zend_object *Collator_object_create(zend_class_entry *ce )
 	zend_object_std_init(&intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
 
-	intern->zo.handlers = &Collator_handlers;
-
 	return &intern->zo;
 }
 /* }}} */
@@ -58,14 +58,17 @@ zend_object *Collator_object_create(zend_class_entry *ce )
  * 'Collator' class registration structures & functions
  */
 
-/* {{{ collator_register_Collator_class
+/* {{{ collator_register_Collator_symbols
  * Initialize 'Collator' class
  */
-void collator_register_Collator_class( void )
+void collator_register_Collator_symbols(int module_number)
 {
+	register_collator_symbols(module_number);
+
 	/* Create and register 'Collator' class. */
 	Collator_ce_ptr = register_class_Collator();
 	Collator_ce_ptr->create_object = Collator_object_create;
+	Collator_ce_ptr->default_object_handlers = &Collator_handlers;
 
 	memcpy(&Collator_handlers, &std_object_handlers,
 		sizeof Collator_handlers);

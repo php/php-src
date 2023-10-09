@@ -275,14 +275,4 @@ U_CFUNC void breakiterator_register_IntlPartsIterator_class(void)
 {
 	/* Create and register 'BreakIterator' class. */
 	IntlPartsIterator_ce_ptr = register_class_IntlPartsIterator(IntlIterator_ce_ptr);
-
-#define PARTSITER_DECL_LONG_CONST(name) \
-	zend_declare_class_constant_long(IntlPartsIterator_ce_ptr, #name, \
-		sizeof(#name) - 1, PARTS_ITERATOR_ ## name)
-
-	PARTSITER_DECL_LONG_CONST(KEY_SEQUENTIAL);
-	PARTSITER_DECL_LONG_CONST(KEY_LEFT);
-	PARTSITER_DECL_LONG_CONST(KEY_RIGHT);
-
-#undef PARTSITER_DECL_LONG_CONST
 }

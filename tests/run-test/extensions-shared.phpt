@@ -4,7 +4,7 @@ phpt EXTENSIONS directive - shared module
 openssl
 --SKIPIF--
 <?php
-$php = getenv('TEST_PHP_EXECUTABLE');
+$php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
 if (false !== stripos(`$php -n -m`, 'openssl')) {
     die('skip openssl is built static');
 }

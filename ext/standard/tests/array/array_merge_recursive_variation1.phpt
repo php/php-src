@@ -157,20 +157,20 @@ echo "Done";
 -- With more arguments --array_merge_recursive(): Argument #1 must be of type array, null given
 
 -- Iteration 12 --
--- With default argument --array_merge_recursive(): Argument #1 must be of type array, bool given
--- With more arguments --array_merge_recursive(): Argument #1 must be of type array, bool given
+-- With default argument --array_merge_recursive(): Argument #1 must be of type array, true given
+-- With more arguments --array_merge_recursive(): Argument #1 must be of type array, true given
 
 -- Iteration 13 --
--- With default argument --array_merge_recursive(): Argument #1 must be of type array, bool given
--- With more arguments --array_merge_recursive(): Argument #1 must be of type array, bool given
+-- With default argument --array_merge_recursive(): Argument #1 must be of type array, false given
+-- With more arguments --array_merge_recursive(): Argument #1 must be of type array, false given
 
 -- Iteration 14 --
--- With default argument --array_merge_recursive(): Argument #1 must be of type array, bool given
--- With more arguments --array_merge_recursive(): Argument #1 must be of type array, bool given
+-- With default argument --array_merge_recursive(): Argument #1 must be of type array, true given
+-- With more arguments --array_merge_recursive(): Argument #1 must be of type array, true given
 
 -- Iteration 15 --
--- With default argument --array_merge_recursive(): Argument #1 must be of type array, bool given
--- With more arguments --array_merge_recursive(): Argument #1 must be of type array, bool given
+-- With default argument --array_merge_recursive(): Argument #1 must be of type array, false given
+-- With more arguments --array_merge_recursive(): Argument #1 must be of type array, false given
 
 -- Iteration 16 --
 -- With default argument --array_merge_recursive(): Argument #1 must be of type array, string given

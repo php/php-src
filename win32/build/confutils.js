@@ -95,10 +95,10 @@ if (typeof(CWD) == "undefined") {
 if (!MODE_PHPIZE) {
 	/* defaults; we pick up the precise versions from configure.ac */
 	var PHP_VERSION = 8;
-	var PHP_MINOR_VERSION = 2;
+	var PHP_MINOR_VERSION = 4;
 	var PHP_RELEASE_VERSION = 0;
 	var PHP_EXTRA_VERSION = "";
-	var PHP_VERSION_STRING = "8.2.0";
+	var PHP_VERSION_STRING = "8.4.0";
 }
 
 /* Get version numbers and DEFINE as a string */
@@ -168,9 +168,13 @@ function probe_binary(EXE, what)
 	}
 	var version = execute(command + '" 2>&1"');
 
-	if (what == "64") {
-		if (version.match(/x64/)) {
-			return 1;
+	if (what == "arch") {
+		if (version.match(/x86/)) {
+			return "x86";
+		} else if (version.match(/x64/)) {
+			return "x64";
+		} else if (version.match(/ARM64/)) {
+			return "arm64";
 		}
 	} else {
 		if (version.match(/(\d+\.\d+(\.\d+)?(\.\d+)?)/)) {
@@ -1665,7 +1669,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 		}
 
 		if (PHP_ANALYZER == "clang") {
-			var analyzer_base_args = X64 ? "-m64" : "-m32";
+			var analyzer_base_args = TARGET_ARCH == 'x86' ? "-m32" : "-m64";
 			var analyzer_base_flags = "";
 
 			analyzer_base_args += " --analyze";
@@ -1688,10 +1692,14 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 				analyzer_base_flags += " -D _MSC_VER=" + probe_binary(PATH_PROG('cl', null));
 			}
 
-			if (X64) {
+			if (TARGET_ARCH == 'x64') {
 				analyzer_base_flags += " -D _M_X64 -D _WIN64";
-			} else {
+			} else if (TARGET_ARCH == 'ARM64') {
+				analyzer_base_flags += " -D _M_ARM64 -D _WIN64";
+			} else if (TARGET_ARCH == 'x86') {
 				analyzer_base_flags += " -D _M_IX86 ";
+			} else {
+				ERROR("analyzer is not supported at arch " + TARGET_ARCH);
 			}
 			analyzer_base_flags += " -D _WIN32 -D WIN32 -D _WINDOWS";
 
@@ -1703,8 +1711,8 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 				analyzer_base_flags += " -I " + "\"" + vc_incs[i] + "\"";
 			}
 
-			var cppcheck_platform = X64 ? "win64" : "win32A";
-			var cppcheck_lib = "win32\\build\\cppcheck_" + (X64 ? "x64" : "x86") + ".cfg";
+			var cppcheck_platform = TARGET_ARCH == 'x86' ? "win32A" : "win64";
+			var cppcheck_lib = "win32\\build\\cppcheck_" + (TARGET_ARCH == 'x86' ? "x86" : "x64") + ".cfg"; // use x64 for arm64 yet
 			analyzer_base_args += "--enable=warning,performance,portability,information,missingInclude " +
 						"--platform=" + cppcheck_platform + " " +
 						"--library=windows.cfg --library=microsoft_sal.cfg " +
@@ -1955,7 +1963,8 @@ function write_summary()
 	ar[k++] = ['Build type', PHP_DEBUG == "yes" ? "Debug" : "Release"];
 	ar[k++] = ['Thread Safety', PHP_ZTS == "yes" ? "Yes" : "No"];
 	ar[k++] = ['Compiler', COMPILER_NAME_LONG];
-	ar[k++] = ['Architecture', X64 ? 'x64' : 'x86'];
+	ar[k++] = ['Target Architecture', TARGET_ARCH];
+	ar[k++] = ['Host Architecture', HOST_ARCH];
 	if (PHP_PGO == "yes") {
 		ar[k++] = ['Optimization', "PGO"];
 	} else if (PHP_PGI == "yes") {
@@ -2078,9 +2087,7 @@ function generate_files()
 	}
 
 	STDOUT.WriteLine("Generating files...");
-	if (!MODE_PHPIZE) {
-		generate_tmp_php_ini();
-	}
+	generate_tmp_php_ini();
 	generate_makefile();
 	if (!MODE_PHPIZE) {
 		generate_internal_functions();
@@ -2523,11 +2530,9 @@ function generate_makefile()
 		handle_analyzer_makefile_flags(MF, keys[i], val);
 	}
 
-	if (!MODE_PHPIZE) {
-		var val = "yes" == PHP_TEST_INI ? PHP_TEST_INI_PATH : "";
-		/* Be sure it's done after generate_tmp_php_ini(). */
-		MF.WriteLine("PHP_TEST_INI_PATH=\"" + val + "\"");
-	}
+	var val = "yes" == PHP_TEST_INI ? PHP_TEST_INI_PATH : "";
+	/* Be sure it's done after generate_tmp_php_ini(). */
+	MF.WriteLine("PHP_TEST_INI_PATH=\"" + val + "\"");
 
 	MF.WriteBlankLines(1);
 	if (MODE_PHPIZE) {
@@ -3128,10 +3133,32 @@ function toolset_get_compiler_name(short)
 }
 
 
-function toolset_is_64()
+function toolset_host_arch()
+{
+	var command = 'cmd /c "where cl.exe"';
+	var clpath = execute(command).split(/\n/)[0].replace(/\s$/, '');
+
+	var command = 'cmd /c "dumpbin "' + clpath + '" /nologo /headers"';
+	var full = execute(command);
+
+	/*
+	output is something like
+	FILE HEADER VALUES
+		8664 machine (x64)
+	*/
+	var matches = full.match(/FILE HEADER VALUES\s+[A-F0-9]{3,4}\smachine \((x64|x86|ARM64)\)/);
+
+	if(!matches){
+		ERROR("Unsupported toolset host");
+	}
+
+	return matches[1].toLowerCase();
+}
+
+function toolset_target_arch()
 {
 	if (VS_TOOLSET) {
-		return probe_binary(PHP_CL, 64);
+		return probe_binary(PHP_CL, 'arch');
 	} else if (CLANG_TOOLSET) {
 		/*var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
@@ -3141,26 +3168,22 @@ function toolset_is_64()
 		/* Even executed within an environment setup with vcvars32.bat,
 		clang-cl doesn't recognize the arch toolset. But as it needs
 		the VS environment, checking the arch of cl.exe is correct. */
-		return probe_binary(PATH_PROG('cl', null), 64);
+		return probe_binary(PATH_PROG('cl', null), 'arch');
 	} else if (ICC_TOOLSET) {
-		var command = 'cmd /c ""' + PHP_CL + '" -v"';
+		var command = 'cmd /c "where cl"';
 		var full = execute(command + '" 2>&1"');
 
 		return null != full.match(/Intel\(R\) 64/);
 	}
 
-	ERROR("Unsupported toolset");
+	ERROR("Unsupported toolset target");
 }
 
 function toolset_setup_arch()
 {
-	if (X64) {
-		STDOUT.WriteLine("  Detected 64-bit compiler");
-	} else {
-		STDOUT.WriteLine("  Detected 32-bit compiler");
-	}
-	AC_DEFINE('PHP_BUILD_ARCH', X64 ? 'x64' : 'x86', "Detected compiler architecture");
-	DEFINE("PHP_ARCHITECTURE", X64 ? 'x64' : 'x86');
+	STDOUT.WriteLine("  Detected " + TARGET_ARCH + " compiler" + (TARGET_ARCH == HOST_ARCH ? "" : " (cross compile from " + HOST_ARCH + ")"));
+	AC_DEFINE('PHP_BUILD_ARCH', TARGET_ARCH, "Detected compiler architecture");
+	DEFINE("PHP_ARCHITECTURE", TARGET_ARCH);
 }
 
 function toolset_setup_codegen_arch()
@@ -3174,7 +3197,7 @@ function toolset_setup_codegen_arch()
 
 		if ("IA32" != arc) {
 			ERROR("Only IA32 arch is supported by --with-codegen-arch, got '" + arc + "'");
-		} else if (X64) {
+		} else if (TARGET_ARCH != 'x86') {
 			ERROR("IA32 arch is only supported with 32-bit build");
 		}
 		ADD_FLAG("CFLAGS", "/arch:" + arc);
@@ -3234,10 +3257,10 @@ function toolset_setup_common_cflags()
 		// fun stuff: MS deprecated ANSI stdio and similar functions
 		// disable annoying warnings.  In addition, time_t defaults
 		// to 64-bit.  Ask for 32-bit.
-		if (X64) {
-			ADD_FLAG('CFLAGS', ' /wd4996 ');
-		} else {
+		if (TARGET_ARCH == 'x86') {
 			ADD_FLAG('CFLAGS', ' /wd4996 /D_USE_32BIT_TIME_T=1 ');
+		} else {
+			ADD_FLAG('CFLAGS', ' /wd4996 ');
 		}
 
 		if (PHP_DEBUG == "yes") {
@@ -3289,10 +3312,10 @@ function toolset_setup_common_cflags()
 
 		ADD_FLAG("CFLAGS", "/Zc:wchar_t");
 	} else if (CLANG_TOOLSET) {
-		if (X64) {
-			ADD_FLAG('CFLAGS', '-m64');
-		} else {
+		if (TARGET_ARCH == 'x86') {
 			ADD_FLAG('CFLAGS', '-m32');
+		} else {
+			ADD_FLAG('CFLAGS', '-m64');
 		}
 		ADD_FLAG("CFLAGS", " /fallback ");
 		ADD_FLAG("CFLAGS", "-Xclang -fmodules");
@@ -3322,6 +3345,14 @@ function toolset_setup_intrinsic_cflags()
 			ERROR("Can't enable intrinsics, --with-codegen-arch passed with an incompatible option. ")
 		}
 
+		if (TARGET_ARCH == 'arm64') {
+			/* arm64 supports neon */
+			configure_subst.Add("PHP_SIMD_SCALE", 'NEON');
+			/* all officially supported arm64 cpu supports crc32 (TODO: to be confirmed) */
+			AC_DEFINE('HAVE_ARCH64_CRC32', 1);
+			return;
+		}
+
 		if ("no" == PHP_NATIVE_INTRINSICS || "yes" == PHP_NATIVE_INTRINSICS) {
 			PHP_NATIVE_INTRINSICS = default_enabled;
 		}
@@ -3349,7 +3380,7 @@ function toolset_setup_intrinsic_cflags()
 					}
 				}
 			}
-			if (!X64) {
+			if (TARGET_ARCH == 'x86') {
 				/* SSE2 is currently the default on 32-bit. It could change later,
 					for now no need to pass it. But, if SSE only was chosen,
 					/arch:SSE is required. */
@@ -3420,7 +3451,7 @@ function toolset_setup_build_mode()
 {
 	if (PHP_DEBUG == "yes") {
 		ADD_FLAG("CFLAGS", "/LDd /MDd /Od /D _DEBUG /D ZEND_DEBUG=1 " +
-			(X64?"/Zi":"/ZI"));
+			(TARGET_ARCH == 'x86'?"/ZI":"/Zi"));
 		ADD_FLAG("LDFLAGS", "/debug");
 		// Avoid problems when linking to release libraries that use the release
 		// version of the libc
@@ -3455,8 +3486,13 @@ function object_out_dir_option_handle()
 	} else {
 		PHP_OBJECT_OUT_DIR = FSO.GetAbsolutePathName(".") + '\\';
 
-		if (X64) {
+		if (TARGET_ARCH == 'x64') {
 			PHP_OBJECT_OUT_DIR += 'x64\\';
+			if (!FSO.FolderExists(PHP_OBJECT_OUT_DIR)) {
+				FSO.CreateFolder(PHP_OBJECT_OUT_DIR);
+			}
+		} else if (TARGET_ARCH == 'arm64') {
+			PHP_OBJECT_OUT_DIR += 'arm64\\';
 			if (!FSO.FolderExists(PHP_OBJECT_OUT_DIR)) {
 				FSO.CreateFolder(PHP_OBJECT_OUT_DIR);
 			}
@@ -3516,7 +3552,7 @@ function php_build_option_handle()
 			if (FSO.FolderExists("..\\php_build")) {
 				PHP_PHP_BUILD = "..\\php_build";
 			} else {
-				if (X64) {
+				if (TARGET_ARCH != 'x86') {
 					if (FSO.FolderExists("..\\win64build")) {
 						PHP_PHP_BUILD = "..\\win64build";
 					} else if (FSO.FolderExists("..\\php-win64-dev\\php_build")) {
@@ -3678,7 +3714,7 @@ function get_clang_lib_dir()
 		ERROR("Failed to determine clang lib path");
 	}
 
-	if (X64) {
+	if (TARGET_ARCH != 'x86') {
 		ret = PROGRAM_FILES + "\\LLVM\\lib\\clang\\" + ver + "\\lib";
 		if (!FSO.FolderExists(ret)) {
 			ret = null;
@@ -3715,10 +3751,13 @@ function add_asan_opts(cflags_name, libs_name, ldflags_name)
 		ADD_FLAG(cflags_name, "-fsanitize=address,undefined");
 	}
 	if (!!libs_name) {
-		if (X64) {
+		if (TARGET_ARCH == 'x64') {
 			ADD_FLAG(libs_name, "clang_rt.asan_dynamic-x86_64.lib clang_rt.asan_dynamic_runtime_thunk-x86_64.lib");
-		} else {
+		} else if (TARGET_ARCH == 'x86') {
 			ADD_FLAG(libs_name, "clang_rt.asan_dynamic-i386.lib clang_rt.asan_dynamic_runtime_thunk-i386.lib");
+		} else {
+			// TODO: support arm64?
+			ERROR("Failed to determine clang lib path");
 		}
 	}
 

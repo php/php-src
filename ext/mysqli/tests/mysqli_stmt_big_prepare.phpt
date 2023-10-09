@@ -4,22 +4,22 @@ mysqli_stmt_prepare()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
+    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+        printf("Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+            $host, $user, $db, $port, $socket);
+        exit(1);
+    }
 
     // Note: No SQL tests here! We can expand one of the *fetch()
     // tests to a generic SQL test, if we ever need that.
     // We would duplicate the SQL test cases if we have it here and in one of the
     // fetch tests, because the fetch tests would have to call prepare/execute etc.
     // anyway.
-
-    $tmp    = NULL;
-    $link   = NULL;
-
-    require('table.inc');
 
     $cleanupIds = range(1000, 3007);
     $model = 50;
@@ -41,10 +41,6 @@ require_once('skipifconnectfailure.inc');
 
     mysqli_close($link);
     print "done!";
-?>
---CLEAN--
-<?php
-    require_once("clean_table.inc");
 ?>
 --EXPECT--
 done!

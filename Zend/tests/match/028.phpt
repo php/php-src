@@ -34,4 +34,4 @@ try {
 usesValue 42
 usesValue 42
 int(42)
-Caught Test::usesRef(): Argument #1 ($x) cannot be passed by reference
+Caught Test::usesRef(): Argument #1 ($x) could not be passed by reference

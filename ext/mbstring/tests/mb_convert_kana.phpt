@@ -78,6 +78,7 @@ echo bin2hex(mb_convert_kana("\x30\x9B", 'k', 'UTF-16BE')), "\n";
 echo bin2hex(mb_convert_kana("\x30\x9C", 'k', 'UTF-16BE')), "\n";
 echo bin2hex(mb_convert_kana("\x30\xFC", 'k', 'UTF-16BE')), "\n";
 echo bin2hex(mb_convert_kana("\x30\xFB", 'k', 'UTF-16BE')), "\n";
+echo bin2hex(mb_convert_kana("fooあいうエオ", "rnaskh", "UTF-8")), "\n";
 echo "Including one which will expand to two codepoints:\n";
 echo bin2hex(mb_convert_kana("\x30\x52", 'h', 'UTF-16BE')), "\n\n";
 
@@ -117,7 +118,6 @@ tryIncompatibleFlags('R', 'r');
 tryIncompatibleFlags('N', 'n');
 tryIncompatibleFlags('S', 's');
 tryIncompatibleFlags('K', 'H');
-tryIncompatibleFlags('k', 'h');
 tryIncompatibleFlags('C', 'c');
 tryIncompatibleFlags('M', 'm');
 tryIncompatibleFlags('h', 'C');
@@ -131,6 +131,17 @@ try {
 } catch (ValueError $e) {
   echo $e->getMessage() . "\n";
 }
+
+// Regression test: Two codepoints collapsed into one, just one position
+// before the end of the string
+$converted = mb_convert_kana("\xb9\xde\xde", 'HV', 'JIS');
+if ($converted !== "\x1b\$B\$2!+\x1b(B")
+  echo "Failed! Expected " . bin2hex("\x1b\$B\$2!+\x1b(B") . ", got: " . bin2hex($converted) . "\n";
+
+// Regression test: the old implementation of mb_convert_kana would swallow
+// zero bytes in some cases
+if (mb_convert_kana("abc\x00abc", 'c', 'ASCII') !== "abc\x00abc")
+  echo "mb_convert_kana is swallowing zero bytes!\n";
 
 ?>
 --EXPECT--
@@ -193,6 +204,7 @@ ff9e
 ff9f
 ff70
 ff65
+666f6fefbdb1efbdb2efbdb3efbdb4efbdb5
 Including one which will expand to two codepoints:
 ff79ff9e
 
@@ -226,8 +238,6 @@ mb_convert_kana(): Argument #2 ($mode) must not combine 'S' and 's' flags
 mb_convert_kana(): Argument #2 ($mode) must not combine 'S' and 's' flags
 mb_convert_kana(): Argument #2 ($mode) must not combine 'H' and 'K' flags
 mb_convert_kana(): Argument #2 ($mode) must not combine 'H' and 'K' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'h' and 'k' flags
-mb_convert_kana(): Argument #2 ($mode) must not combine 'h' and 'k' flags
 mb_convert_kana(): Argument #2 ($mode) must not combine 'C' and 'c' flags
 mb_convert_kana(): Argument #2 ($mode) must not combine 'C' and 'c' flags
 mb_convert_kana(): Argument #2 ($mode) must not combine 'M' and 'm' flags

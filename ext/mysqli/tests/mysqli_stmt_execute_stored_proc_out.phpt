@@ -11,11 +11,6 @@ if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 if (mysqli_get_server_version($link) < 50503) {
     die(sprintf('skip Needs MySQL 5.5.3+, found version %d.', mysqli_get_server_version($link)));
 }
-/*
-if ($IS_MYSQLND) {
-    die(sprintf("skip WHY ?!"));
-}
-*/
 ?>
 --FILE--
 <?php
@@ -69,7 +64,7 @@ if ($IS_MYSQLND) {
 ?>
 --CLEAN--
 <?php
-require_once "connect.inc";
+require_once 'connect.inc';
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

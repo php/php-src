@@ -5,6 +5,7 @@ openssl
 --SKIPIF--
 <?php
 if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
+if (!defined("OPENSSL_KEYTYPE_EC")) die("skip EC disabled");
 ?>
 --FILE--
 <?php

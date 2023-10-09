@@ -218,7 +218,6 @@ static void get_lazy_object(pdo_stmt_t *stmt, zval *return_value) /* {{{ */
 		row->stmt = stmt;
 		zend_object_std_init(&row->std, pdo_row_ce);
 		ZVAL_OBJ(&stmt->lazy_object_ref, &row->std);
-		row->std.handlers = &pdo_row_object_handlers;
 		GC_ADDREF(&stmt->std);
 		GC_DELREF(&row->std);
 	}
@@ -1281,7 +1280,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 			/* Figure out correct class */
 			if (arg2) {
 				if (Z_TYPE_P(arg2) != IS_STRING) {
-					zend_argument_type_error(2, "must be of type string, %s given", zend_zval_type_name(arg2));
+					zend_argument_type_error(2, "must be of type string, %s given", zend_zval_value_name(arg2));
 					RETURN_THROWS();
 				}
 				stmt->fetch.cls.ce = zend_fetch_class(Z_STR_P(arg2), ZEND_FETCH_CLASS_AUTO);
@@ -1334,7 +1333,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 			if (arg2) {
 				// Reuse convert_to_long(arg2); ?
 				if (Z_TYPE_P(arg2) != IS_LONG) {
-					zend_argument_type_error(2, "must be of type int, %s given", zend_zval_type_name(arg2));
+					zend_argument_type_error(2, "must be of type int, %s given", zend_zval_value_name(arg2));
 					RETURN_THROWS();
 				}
 				if (Z_LVAL_P(arg2) < 0) {
@@ -1753,7 +1752,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				return false;
 			}
 			if (Z_TYPE(args[0]) != IS_LONG) {
-				zend_argument_type_error(arg1_arg_num, "must be of type int, %s given", zend_zval_type_name(&args[0]));
+				zend_argument_type_error(arg1_arg_num, "must be of type int, %s given", zend_zval_value_name(&args[0]));
 				return false;
 			}
 			if (Z_LVAL(args[0]) < 0) {
@@ -1795,7 +1794,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 					return false;
 				}
 				if (Z_TYPE(args[0]) != IS_STRING) {
-					zend_argument_type_error(arg1_arg_num, "must be of type string, %s given", zend_zval_type_name(&args[0]));
+					zend_argument_type_error(arg1_arg_num, "must be of type string, %s given", zend_zval_value_name(&args[0]));
 					return false;
 				}
 				cep = zend_lookup_class(Z_STR(args[0]));
@@ -1808,7 +1807,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				if (variadic_num_args == 2) {
 					if (Z_TYPE(args[1]) != IS_NULL && Z_TYPE(args[1]) != IS_ARRAY) {
 						zend_argument_type_error(constructor_arg_num, "must be of type ?array, %s given",
-							zend_zval_type_name(&args[1]));
+							zend_zval_value_name(&args[1]));
 						return false;
 					}
 					if (Z_TYPE(args[1]) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL(args[1]))) {
@@ -1835,7 +1834,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				return false;
 			}
 			if (Z_TYPE(args[0]) != IS_OBJECT) {
-				zend_argument_type_error(arg1_arg_num, "must be of type object, %s given", zend_zval_type_name(&args[0]));
+				zend_argument_type_error(arg1_arg_num, "must be of type object, %s given", zend_zval_value_name(&args[0]));
 				return false;
 			}
 
@@ -2136,8 +2135,6 @@ zend_object *pdo_dbstmt_new(zend_class_entry *ce)
 	stmt = zend_object_alloc(sizeof(pdo_stmt_t), ce);
 	zend_object_std_init(&stmt->std, ce);
 	object_properties_init(&stmt->std, ce);
-
-	stmt->std.handlers = &pdo_dbstmt_object_handlers;
 
 	return &stmt->std;
 }
@@ -2464,7 +2461,6 @@ zend_object *pdo_row_new(zend_class_entry *ce)
 {
 	pdo_row_t *row = ecalloc(1, sizeof(pdo_row_t));
 	zend_object_std_init(&row->std, ce);
-	row->std.handlers = &pdo_row_object_handlers;
 
 	return &row->std;
 }
@@ -2474,6 +2470,7 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_ce = register_class_PDOStatement(zend_ce_aggregate);
 	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
 	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
+	pdo_dbstmt_ce->default_object_handlers = &pdo_dbstmt_object_handlers;
 
 	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_dbstmt_object_handlers.offset = XtOffsetOf(pdo_stmt_t, std);
@@ -2486,6 +2483,7 @@ void pdo_stmt_init(void)
 
 	pdo_row_ce = register_class_PDORow();
 	pdo_row_ce->create_object = pdo_row_new;
+	pdo_row_ce->default_object_handlers = &pdo_row_object_handlers;
 
 	memcpy(&pdo_row_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_row_object_handlers.free_obj = pdo_row_free_storage;

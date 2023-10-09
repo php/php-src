@@ -4,12 +4,11 @@ Interface of the class mysqli_stmt
 mysqli
 --SKIPIF--
 <?php
-    require_once('skipifconnectfailure.inc');
+    require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require('connect.inc');
-    require('table.inc');
+    require 'table.inc';
 
     $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
     $stmt = new mysqli_stmt($link);
@@ -40,11 +39,9 @@ mysqli
         'store_result'      => true,
     );
 
-    if ($IS_MYSQLND) {
-        $expected_methods['get_result'] = true;
-        $expected_methods['more_results'] = true;
-        $expected_methods['next_result'] = true;
-    }
+    $expected_methods['get_result'] = true;
+    $expected_methods['more_results'] = true;
+    $expected_methods['next_result'] = true;
 
     foreach ($methods as $k => $method) {
     if (isset($expected_methods[$method])) {

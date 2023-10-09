@@ -37,7 +37,7 @@ using icu::GregorianCalendar;
 using icu::StringPiece;
 using icu::SimpleDateFormat;
 
-static const DateFormat::EStyle valid_styles[] = {
+static constexpr DateFormat::EStyle valid_styles[] = {
 		DateFormat::kNone,
 		DateFormat::kFull,
 		DateFormat::kLong,
@@ -181,7 +181,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		}
 	} else {
 		intl_error_set(NULL, status, "datefmt_format_object: the passed object "
-				"must be an instance of either IntlCalendar or DateTime",
+				"must be an instance of either IntlCalendar or DateTimeInterface",
 				0);
 		RETURN_FALSE;
 	}

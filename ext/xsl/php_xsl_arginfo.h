@@ -1,11 +1,11 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7c920913c15c9cd663f19f7ec5ad81648d6eddbc */
+ * Stub hash: 5518a63a4adec49c81e650d620ce2dbce41d8d65 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_importStylesheet, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, stylesheet, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_XSLTProcessor_transformToDoc, 0, 1, DOMDocument, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_XSLTProcessor_transformToDoc, 0, 1, MAY_BE_OBJECT|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, document, IS_OBJECT, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, returnClass, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
@@ -84,12 +84,46 @@ static const zend_function_entry class_XSLTProcessor_methods[] = {
 	ZEND_FE_END
 };
 
+static void register_php_xsl_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("XSL_CLONE_AUTO", 0, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSL_CLONE_NEVER", -1, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSL_CLONE_ALWAYS", 1, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSL_SECPREF_NONE", XSL_SECPREF_NONE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSL_SECPREF_READ_FILE", XSL_SECPREF_READ_FILE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSL_SECPREF_WRITE_FILE", XSL_SECPREF_WRITE_FILE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSL_SECPREF_CREATE_DIRECTORY", XSL_SECPREF_CREATE_DIRECTORY, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSL_SECPREF_READ_NETWORK", XSL_SECPREF_READ_NETWORK, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSL_SECPREF_WRITE_NETWORK", XSL_SECPREF_WRITE_NETWORK, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSL_SECPREF_DEFAULT", XSL_SECPREF_DEFAULT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXSLT_VERSION", LIBXSLT_VERSION, CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("LIBXSLT_DOTTED_VERSION", LIBXSLT_DOTTED_VERSION, CONST_PERSISTENT);
+#if defined(HAVE_XSL_EXSLT)
+	REGISTER_LONG_CONSTANT("LIBEXSLT_VERSION", LIBEXSLT_VERSION, CONST_PERSISTENT);
+#endif
+#if defined(HAVE_XSL_EXSLT)
+	REGISTER_STRING_CONSTANT("LIBEXSLT_DOTTED_VERSION", LIBEXSLT_DOTTED_VERSION, CONST_PERSISTENT);
+#endif
+}
+
 static zend_class_entry *register_class_XSLTProcessor(void)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "XSLTProcessor", class_XSLTProcessor_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval property_doXInclude_default_value;
+	ZVAL_FALSE(&property_doXInclude_default_value);
+	zend_string *property_doXInclude_name = zend_string_init("doXInclude", sizeof("doXInclude") - 1, 1);
+	zend_declare_typed_property(class_entry, property_doXInclude_name, &property_doXInclude_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_doXInclude_name);
+
+	zval property_cloneDocument_default_value;
+	ZVAL_FALSE(&property_cloneDocument_default_value);
+	zend_string *property_cloneDocument_name = zend_string_init("cloneDocument", sizeof("cloneDocument") - 1, 1);
+	zend_declare_typed_property(class_entry, property_cloneDocument_name, &property_cloneDocument_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_cloneDocument_name);
 
 	return class_entry;
 }

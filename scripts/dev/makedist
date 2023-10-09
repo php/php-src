@@ -5,6 +5,15 @@
 # Written by Stig Bakken <ssb@guardian.no> 1997-05-28.
 # Adapted to Git by Stanislav Malyshev <stas@php.net>.
 
+# Check whether gtar is present (GNU tar)
+tar="$(which gtar)"
+tar="${tar:-$(which tar)}"
+
+if [[ $($tar --version) == *"bsdtar"* ]]; then
+  echo "Found bsdtar at $tar, but this script needs GNU tar."
+  exit 1
+fi
+
 # Go to project root directory.
 cd $(CDPATH= cd -- "$(dirname -- "$0")/../../" && pwd -P)
 
@@ -124,7 +133,7 @@ fi
 
 # Export PHP.
 echo "makedist: Exporting $treeish from $git"
-git archive --format=tar $remote_option --prefix=$prefix/ $treeish | tar xvf - || exit 4
+git archive --format=tar $remote_option --prefix=$prefix/ $treeish | "$tar" xvf - || exit 4
 
 cd $prefix || exit 5
 
@@ -166,7 +175,7 @@ cd ..
 
 echo ""
 echo "makedist: Creating $prefix.tar archive."
-tar cf "$prefix".tar "$prefix"
+"$tar" cf "$prefix".tar --owner=0 --group=0 --numeric-owner --sort=name "$prefix"
 rm -rf "$prefix" "$prefix".tar.*
 
 echo "makedist: Creating $prefix.tar.gz archive."

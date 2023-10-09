@@ -101,7 +101,6 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 		ITypeLib *pTL;
 		char *typelib_name;
 		char *modifier, *ptr;
-		int mode = CONST_CS | CONST_PERSISTENT;	/* CONST_PERSISTENT is ok here */
 
 		if (typelib_name_buffer[0]==';') {
 			continue;
@@ -129,7 +128,7 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 		}
 
 		if ((pTL = php_com_load_typelib_via_cache(typelib_name, COMG(code_page))) != NULL) {
-			php_com_import_typelib(pTL, mode, COMG(code_page));
+			php_com_import_typelib(pTL, CONST_PERSISTENT, COMG(code_page));
 			ITypeLib_Release(pTL);
 		}
 	}
@@ -184,18 +183,22 @@ PHP_MINIT_FUNCTION(com_dotnet)
 
 	php_com_saproxy_class_entry = register_class_com_safearray_proxy();
 /*	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
+	php_com_saproxy_class_entry->default_object_handlers = &php_com_saproxy_handlers;
 	php_com_saproxy_class_entry->get_iterator = php_com_saproxy_iter_get;
 
 	php_com_variant_class_entry = register_class_variant();
+	php_com_variant_class_entry->default_object_handlers = &php_com_object_handlers;
 	php_com_variant_class_entry->create_object = php_com_object_new;
 	php_com_variant_class_entry->get_iterator = php_com_iter_get;
 
 	tmp = register_class_com(php_com_variant_class_entry);
+	tmp->default_object_handlers = &php_com_object_handlers;
 	tmp->create_object = php_com_object_new;
 	tmp->get_iterator = php_com_iter_get;
 
 #if HAVE_MSCOREE_H
 	tmp = register_class_dotnet(php_com_variant_class_entry);
+	tmp->default_object_handlers = &php_com_object_handlers;
 	tmp->create_object = php_com_object_new;
 	tmp->get_iterator = php_com_iter_get;
 #endif
@@ -252,13 +255,13 @@ PHP_MINFO_FUNCTION(com_dotnet)
 {
 	php_info_print_table_start();
 
-	php_info_print_table_header(2, "COM support", "enabled");
-	php_info_print_table_header(2, "DCOM support", COMG(allow_dcom) ? "enabled" : "disabled");
+	php_info_print_table_row(2, "COM support", "enabled");
+	php_info_print_table_row(2, "DCOM support", COMG(allow_dcom) ? "enabled" : "disabled");
 
 #if HAVE_MSCOREE_H
-	php_info_print_table_header(2, ".Net support", "enabled");
+	php_info_print_table_row(2, ".Net support", "enabled");
 #else
-	php_info_print_table_header(2, ".Net support", "not present in this build");
+	php_info_print_table_row(2, ".Net support", "not present in this build");
 #endif
 
 	php_info_print_table_end();

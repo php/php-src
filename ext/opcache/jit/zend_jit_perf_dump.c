@@ -26,7 +26,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#if !defined(__APPLE__)
+#if !defined(HAVE_OS_SIGNPOST_H)
 #if defined(__linux__)
 #include <sys/syscall.h>
 #elif defined(__darwin__)
@@ -278,6 +278,14 @@ static void zend_jit_perf_map_register(const char *name, void *start, size_t siz
 #else
 #include <os/log.h>
 #include <os/signpost.h>
+
+/*
+ * 1) To generate an Instrument tracing data:
+ * xcrun xctrace record --template <Template name> --launch -- php
+ * xcrun xctrace record --template Logging --launch -- php -dopcache.jit=1255 -dopcache.jit_debug=32 bench.php
+ * 2) An instrument trace folder is created:
+ * e.g. open Launch_php_2022-07-03_15.41.05_5F96D825.trace
+ */
 
 static os_log_t jitdump_fd;
 static os_signpost_id_t jitdump_sp = OS_SIGNPOST_ID_NULL;

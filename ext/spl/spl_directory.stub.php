@@ -150,6 +150,31 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
 
 class FilesystemIterator extends DirectoryIterator
 {
+    /** @cvalue SPL_FILE_DIR_CURRENT_MODE_MASK */
+    public const int CURRENT_MODE_MASK = UNKNOWN;
+    /** @cvalue SPL_FILE_DIR_CURRENT_AS_PATHNAME */
+    public const int CURRENT_AS_PATHNAME = UNKNOWN;
+    /** @cvalue SPL_FILE_DIR_CURRENT_AS_FILEINFO */
+    public const int CURRENT_AS_FILEINFO = UNKNOWN;
+    /** @cvalue SPL_FILE_DIR_CURRENT_AS_SELF */
+    public const int CURRENT_AS_SELF = UNKNOWN;
+    /** @cvalue SPL_FILE_DIR_KEY_MODE_MASK */
+    public const int KEY_MODE_MASK = UNKNOWN;
+    /** @cvalue SPL_FILE_DIR_KEY_AS_PATHNAME */
+    public const int KEY_AS_PATHNAME = UNKNOWN;
+    /** @cvalue SPL_FILE_DIR_FOLLOW_SYMLINKS */
+    public const int FOLLOW_SYMLINKS = UNKNOWN;
+    /** @cvalue SPL_FILE_DIR_KEY_AS_FILENAME */
+    public const int KEY_AS_FILENAME = UNKNOWN;
+    /** @cvalue SPL_FILE_NEW_CURRENT_AND_KEY */
+    public const int NEW_CURRENT_AND_KEY = UNKNOWN;
+    /** @cvalue SPL_FILE_DIR_OTHERS_MASK */
+    public const int OTHER_MODE_MASK = UNKNOWN;
+    /** @cvalue SPL_FILE_DIR_SKIPDOTS */
+    public const int SKIP_DOTS = UNKNOWN;
+    /** @cvalue SPL_FILE_DIR_UNIXPATHS */
+    public const int UNIX_PATHS = UNKNOWN;
+
     public function __construct(string $directory, int $flags = FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS) {}
 
     /** @tentative-return-type */
@@ -197,6 +222,15 @@ class GlobIterator extends FilesystemIterator implements Countable
 
 class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIterator
 {
+    /** @cvalue SPL_FILE_OBJECT_DROP_NEW_LINE */
+    public const int DROP_NEW_LINE = UNKNOWN;
+    /** @cvalue SPL_FILE_OBJECT_READ_AHEAD */
+    public const int READ_AHEAD = UNKNOWN;
+    /** @cvalue SPL_FILE_OBJECT_SKIP_EMPTY */
+    public const int SKIP_EMPTY = UNKNOWN;
+    /** @cvalue SPL_FILE_OBJECT_READ_CSV */
+    public const int READ_CSV = UNKNOWN;
+
     /** @param resource|null $context */
     public function __construct(string $filename, string $mode = "r", bool $useIncludePath = false, $context = null) {}
 
@@ -296,7 +330,6 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
      */
     public function getCurrentLine(): string {}
 
-    /** @implementation-alias SplFileObject::fgets */
     public function __toString(): string {}
 }
 

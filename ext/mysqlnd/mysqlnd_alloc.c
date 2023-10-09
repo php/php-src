@@ -346,7 +346,7 @@ static char * _mysqlnd_pestrdup(const char * const ptr, bool persistent MYSQLND_
 		smart_str_appendc(&tmp_str, *p);
 	} while (*p++);
 
-	ret = pemalloc_rel(ZSTR_LEN(tmp_str.s) + sizeof(size_t), persistent);
+	ret = pemalloc_rel(REAL_SIZE(ZSTR_LEN(tmp_str.s)), persistent);
 	memcpy(FAKE_PTR(ret), ZSTR_VAL(tmp_str.s), ZSTR_LEN(tmp_str.s));
 
 	if (ret && collect_memory_statistics) {

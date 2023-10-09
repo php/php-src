@@ -33,11 +33,6 @@
 
 #define SPL_HEAP_CORRUPTED       0x00000001
 
-#define SPL_PQUEUE_EXTR_MASK     0x00000003
-#define SPL_PQUEUE_EXTR_BOTH     0x00000003
-#define SPL_PQUEUE_EXTR_DATA     0x00000001
-#define SPL_PQUEUE_EXTR_PRIORITY 0x00000002
-
 zend_object_handlers spl_handler_SplHeap;
 zend_object_handlers spl_handler_SplPriorityQueue;
 
@@ -126,7 +121,7 @@ static void spl_ptr_heap_pqueue_elem_ctor(void *elem) { /* {{{ */
 }
 /* }}} */
 
-static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object, zval *a, zval *b, zend_long *result) { /* {{{ */
+static zend_result spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object, zval *a, zval *b, zend_long *result) { /* {{{ */
 	zval zresult;
 
 	zend_call_method_with_2_params(Z_OBJ_P(object), heap_object->std.ce, &heap_object->fptr_cmp, "compare", &zresult, a, b);
@@ -252,7 +247,7 @@ static int spl_ptr_pqueue_elem_cmp_long(void *x, void *y, zval *object) {
 static int spl_ptr_pqueue_elem_cmp_double(void *x, void *y, zval *object) {
 	double a = Z_DVAL(((spl_pqueue_elem*) x)->priority);
 	double b = Z_DVAL(((spl_pqueue_elem*) y)->priority);
-	return ZEND_NORMALIZE_BOOL(a - b);
+	return ZEND_THREEWAY_COMPARE(a, b);
 }
 
 static spl_ptr_heap *spl_ptr_heap_init(spl_ptr_heap_cmp_func cmp, spl_ptr_heap_ctor_func ctor, spl_ptr_heap_dtor_func dtor, size_t elem_size) /* {{{ */
@@ -307,7 +302,7 @@ static void *spl_ptr_heap_top(spl_ptr_heap *heap) { /* {{{ */
 }
 /* }}} */
 
-static int spl_ptr_heap_delete_top(spl_ptr_heap *heap, void *elem, void *cmp_userdata) { /* {{{ */
+static zend_result spl_ptr_heap_delete_top(spl_ptr_heap *heap, void *elem, void *cmp_userdata) { /* {{{ */
 	int i, j;
 	const int limit = (heap->count-1)/2;
 	void *bottom;
@@ -377,6 +372,11 @@ static spl_ptr_heap *spl_ptr_heap_clone(spl_ptr_heap *from) { /* {{{ */
 /* }}} */
 
 static void spl_ptr_heap_destroy(spl_ptr_heap *heap) { /* {{{ */
+	/* Heap might be null if we OOMed during object initialization. */
+	if (!heap) {
+		return;
+	}
+
 	int i;
 
 	for (i = 0; i < heap->count; ++i) {
@@ -433,7 +433,6 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zend_ob
 	while (parent) {
 		if (parent == spl_ce_SplPriorityQueue) {
 			intern->heap = spl_ptr_heap_init(spl_ptr_pqueue_elem_cmp, spl_ptr_heap_pqueue_elem_ctor, spl_ptr_heap_pqueue_elem_dtor, sizeof(spl_pqueue_elem));
-			intern->std.handlers = &spl_handler_SplPriorityQueue;
 			intern->flags = SPL_PQUEUE_EXTR_DATA;
 			break;
 		}
@@ -443,7 +442,6 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zend_ob
 			intern->heap = spl_ptr_heap_init(
 				parent == spl_ce_SplMinHeap ? spl_ptr_heap_zval_min_cmp : spl_ptr_heap_zval_max_cmp,
 				spl_ptr_heap_zval_ctor, spl_ptr_heap_zval_dtor, sizeof(zval));
-			intern->std.handlers = &spl_handler_SplHeap;
 			break;
 		}
 
@@ -458,7 +456,8 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zend_ob
 		if (intern->fptr_cmp->common.scope == parent) {
 			intern->fptr_cmp = NULL;
 		}
-		intern->fptr_count = zend_hash_str_find_ptr(&class_type->function_table, "count", sizeof("count") - 1);
+		/* Find count() method */
+		intern->fptr_count = zend_hash_find_ptr(&class_type->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
 		if (intern->fptr_count->common.scope == parent) {
 			intern->fptr_count = NULL;
 		}
@@ -1092,7 +1091,7 @@ static const zend_object_iterator_funcs spl_pqueue_it_funcs = {
 	NULL, /* get_gc */
 };
 
-zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
+static zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
 	if (by_ref) {
 		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
@@ -1111,7 +1110,7 @@ zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, 
 }
 /* }}} */
 
-zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
+static zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
 	if (by_ref) {
 		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
@@ -1134,6 +1133,7 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 {
 	spl_ce_SplHeap = register_class_SplHeap(zend_ce_iterator, zend_ce_countable);
 	spl_ce_SplHeap->create_object = spl_heap_object_new;
+	spl_ce_SplHeap->default_object_handlers = &spl_handler_SplHeap;
 	spl_ce_SplHeap->get_iterator = spl_heap_get_iterator;
 
 	memcpy(&spl_handler_SplHeap, &std_object_handlers, sizeof(zend_object_handlers));
@@ -1154,6 +1154,7 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 
 	spl_ce_SplPriorityQueue = register_class_SplPriorityQueue(zend_ce_iterator, zend_ce_countable);
 	spl_ce_SplPriorityQueue->create_object = spl_heap_object_new;
+	spl_ce_SplPriorityQueue->default_object_handlers = &spl_handler_SplPriorityQueue;
 	spl_ce_SplPriorityQueue->get_iterator = spl_pqueue_get_iterator;
 
 	memcpy(&spl_handler_SplPriorityQueue, &std_object_handlers, sizeof(zend_object_handlers));
@@ -1163,10 +1164,6 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 	spl_handler_SplPriorityQueue.count_elements = spl_heap_object_count_elements;
 	spl_handler_SplPriorityQueue.get_gc         = spl_pqueue_object_get_gc;
 	spl_handler_SplPriorityQueue.free_obj = spl_heap_object_free_storage;
-
-	REGISTER_SPL_CLASS_CONST_LONG(SplPriorityQueue, "EXTR_BOTH",      SPL_PQUEUE_EXTR_BOTH);
-	REGISTER_SPL_CLASS_CONST_LONG(SplPriorityQueue, "EXTR_PRIORITY",  SPL_PQUEUE_EXTR_PRIORITY);
-	REGISTER_SPL_CLASS_CONST_LONG(SplPriorityQueue, "EXTR_DATA",      SPL_PQUEUE_EXTR_DATA);
 
 	return SUCCESS;
 }

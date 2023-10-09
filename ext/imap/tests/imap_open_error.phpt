@@ -8,7 +8,7 @@ imap
 --SKIPIF--
 <?php
 require_once(__DIR__.'/setup/skipif.inc');
-if (getenv("SKIP_ASAN")) die("skip leak sanitizer crashes");
+if (getenv("SKIP_ASAN")) die("xleak leak sanitizer crashes");
 ?>
 --FILE--
 <?php
@@ -36,4 +36,4 @@ Warning: imap_open(): Couldn't open stream  in %s on line %d
 imap_open(): Argument #4 ($flags) must be a bitmask of the OP_* constants, and CL_EXPUNGE
 imap_open(): Argument #5 ($retries) must be greater than or equal to 0
 
-Notice: Unknown: Can't open mailbox : no such mailbox (errflg=2) in Unknown on line 0
+Notice: PHP Request Shutdown: Can't open mailbox : no such mailbox (errflg=2) in Unknown on line 0

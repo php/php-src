@@ -300,6 +300,15 @@ testSJISVariant($docomo,   $nonInvertibleDocomo,   'SJIS-Mobile#DOCOMO');
 testSJISVariant($kddi,     $nonInvertible,         'SJIS-Mobile#KDDI');
 testSJISVariant($softbank, $nonInvertibleSoftbank, 'SJIS-Mobile#SOFTBANK');
 
+// Special Softbank escape sequences can appear at end of string
+convertValidString("\x1B\$O", "", "SJIS-Mobile#SOFTBANK", "UTF-8", false);
+convertValidString("\x1B\$P", "", "SJIS-Mobile#SOFTBANK", "UTF-8", false);
+convertValidString("\x1B\$Q", "", "SJIS-Mobile#SOFTBANK", "UTF-8", false);
+// Try invalid escape sequence
+convertInvalidString("\x1B\$X", "%", "SJIS-Mobile#SOFTBANK", "UTF-8", false);
+// Try truncated escape sequence
+convertInvalidString("\x1B\$", "%", "SJIS-Mobile#SOFTBANK", "UTF-8", false);
+
 // Regression test for problem with not allocating enough space in output buffer
 // This occurred when the input string was shorter than the output
 convertValidString("\xA9\xA9\xA9\xA9", "\xF9\xD6\xF9\xD6\xF9\xD6\xF9\xD6", '8bit', 'SJIS-Mobile#DOCOMO');
@@ -323,6 +332,20 @@ for ($i = 0; $i <= 256; $i++) {
   convertValidString(str_repeat("\x00a", $i) . "\x00\x30\x20\xE3", str_repeat('a', $i) . "\xF7\xC9", 'UTF-16BE', 'SJIS-Mobile#KDDI');
   convertValidString(str_repeat("\x00a", $i) . "\x00\x30\x20\xE3", str_repeat('a', $i) . "\xF7\xC5", 'UTF-16BE', 'SJIS-Mobile#SOFTBANK');
 }
+
+// Regression test for 0-9 appearing at end of one buffer and U+203E NOT appearing
+// at the beginning of the next
+for ($i = 0; $i <= 256; $i++) {
+  convertValidString(str_repeat("\x000", $i), str_repeat('0', $i), 'UTF-16BE', 'SJIS-Mobile#DOCOMO');
+  convertValidString(str_repeat("\x000", $i), str_repeat('0', $i), 'UTF-16BE', 'SJIS-Mobile#KDDI');
+  convertValidString(str_repeat("\x000", $i), str_repeat('0', $i), 'UTF-16BE', 'SJIS-Mobile#SOFTBANK');
+}
+
+// Regression test for not making enough space in output buffer when 0-9 appeared
+// at the end of one buffer and was re-processed together with the next
+// This crazy-looking string was found by a fuzzer
+$str = "\x04\xff\x930\x00\xffUTF7~'F\x00A\x00\xffA\x0018030@\x00[\x1b\$EEEEE\x5C\x80(8~\x00F\x00zgb-18030$\x008~\x00F\x00z-gb-18EUC_JP-2004\x00z-g0\x0018030\x00b-18030$\x008~\x00F\x00z-gb-18EUC_JP-2004\x00z-g0\x0018030\x00";
+mb_convert_encoding($str, 'SJIS-Mobile#SOFTBANK', 'SJIS-Mobile#SOFTBANK');
 
 ?>
 --EXPECT--

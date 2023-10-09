@@ -30,6 +30,7 @@
 #include "tsrm_win32.h"
 #include "zend_virtual_cwd.h"
 #include "win32/ioutil.h"
+#include "win32/winutil.h"
 
 #ifdef ZTS
 static ts_rsrc_id win32_globals_id;
@@ -88,7 +89,7 @@ static void tsrm_win32_dtor(tsrm_win32_globals *globals)
 TSRM_API void tsrm_win32_startup(void)
 {/*{{{*/
 #ifdef ZTS
-	ts_allocate_id(&win32_globals_id, sizeof(tsrm_win32_globals), (ts_allocate_ctor)tsrm_win32_ctor, (ts_allocate_ctor)tsrm_win32_dtor);
+	ts_allocate_id(&win32_globals_id, sizeof(tsrm_win32_globals), (ts_allocate_ctor)tsrm_win32_ctor, (ts_allocate_dtor)tsrm_win32_dtor);
 #else
 	tsrm_win32_ctor(&win32_globals);
 #endif
@@ -610,6 +611,22 @@ TSRM_API int pclose(FILE *stream)
 #define SEGMENT_PREFIX "TSRM_SHM_SEGMENT:"
 #define INT_MIN_AS_STRING "-2147483648"
 
+
+#define TSRM_BASE_SHM_KEY_ADDRESS 0x20000000
+/* Returns a number between 0x2000_0000 and 0x3fff_ffff. On Windows, key_t is int. */
+static key_t tsrm_choose_random_shm_key(key_t prev_key) {
+	unsigned char buf[4];
+	if (php_win32_get_random_bytes(buf, 4) != SUCCESS) {
+		return prev_key + 2;
+	}
+	uint32_t n =
+		((uint32_t)(buf[0]) << 24) |
+	    (((uint32_t)buf[1]) << 16) |
+	    (((uint32_t)buf[2]) << 8) |
+	    (((uint32_t)buf[3]));
+	return (n & 0x1fffffff) + TSRM_BASE_SHM_KEY_ADDRESS;
+}
+
 TSRM_API int shmget(key_t key, size_t size, int flags)
 {/*{{{*/
 	shm_pair *shm;
@@ -621,11 +638,14 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 		snprintf(shm_segment, sizeof(shm_segment), SEGMENT_PREFIX "%d", key);
 
 		shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
+	} else {
+		/* IPC_PRIVATE always creates a new segment even if IPC_CREAT flag isn't passed. */
+		flags |= IPC_CREAT;
 	}
 
 	if (!shm_handle) {
 		if (flags & IPC_CREAT) {
-			if (size > SIZE_MAX - sizeof(shm->descriptor)) {
+			if (size == 0 || size > SIZE_MAX - sizeof(shm->descriptor)) {
 				return -1;
 			}
 			size += sizeof(shm->descriptor);
@@ -646,6 +666,19 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 		if (flags & IPC_EXCL) {
 			CloseHandle(shm_handle);
 			return -1;
+		}
+	}
+
+	if (key == IPC_PRIVATE) {
+		/* This should call shm_get with a brand new key id that isn't used yet. See https://man7.org/linux/man-pages/man2/shmget.2.html
+		 * Because extensions such as shmop/sysvshm can be used in userland to attach to shared memory segments, use unpredictable high positive numbers to avoid accidentally conflicting with userland. */
+		key = tsrm_choose_random_shm_key(TSRM_BASE_SHM_KEY_ADDRESS);
+		for (shm_pair *ptr = TWG(shm); ptr < (TWG(shm) + TWG(shm_size)); ptr++) {
+			if (ptr->descriptor && ptr->descriptor->shm_perm.key == key) {
+				key = tsrm_choose_random_shm_key(key);
+				ptr = TWG(shm);
+				continue;
+			}
 		}
 	}
 
@@ -686,18 +719,11 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 {/*{{{*/
 	shm_pair *shm = shm_get(key, NULL);
 
-	if (!shm->segment) {
+	if (!shm || !shm->segment) {
 		return (void*)-1;
 	}
 
 	shm->addr = shm->descriptor + sizeof(shm->descriptor);
-
-	if (NULL == shm->addr) {
-		int err = GetLastError();
-		SET_ERRNO_FROM_WIN32_CODE(err);
-		return (void*)-1;
-	}
-
 	shm->descriptor->shm_atime = time(NULL);
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch++;
@@ -710,7 +736,7 @@ TSRM_API int shmdt(const void *shmaddr)
 	shm_pair *shm = shm_get(0, (void*)shmaddr);
 	int ret;
 
-	if (!shm->segment) {
+	if (!shm || !shm->segment) {
 		return -1;
 	}
 
@@ -730,7 +756,7 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 {/*{{{*/
 	shm_pair *shm = shm_get(key, NULL);
 
-	if (!shm->segment) {
+	if (!shm || !shm->segment) {
 		return -1;
 	}
 

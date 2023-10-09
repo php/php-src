@@ -12,6 +12,7 @@ runs:
           re2c
         brew install \
           openssl@1.1 \
+          curl \
           krb5 \
           bzip2 \
           enchant \
@@ -27,8 +28,9 @@ runs:
           gd \
           libzip \
           gmp \
-          tidyp \
+          tidy-html5 \
           libxml2 \
+          libjpeg \
           libxslt \
           postgresql
         brew link icu4c gettext --force

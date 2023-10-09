@@ -4,61 +4,61 @@
 
 /**
  * @var int
- * @cname MAGIC_NONE
+ * @cvalue MAGIC_NONE
  */
 const FILEINFO_NONE = UNKNOWN;
 /**
  * @var int
- * @cname MAGIC_SYMLINK
+ * @cvalue MAGIC_SYMLINK
  */
 const FILEINFO_SYMLINK = UNKNOWN;
 /**
  * @var int
- * @cname MAGIC_MIME
+ * @cvalue MAGIC_MIME
  */
 const FILEINFO_MIME = UNKNOWN;
 /**
  * @var int
- * @cname MAGIC_MIME_TYPE
+ * @cvalue MAGIC_MIME_TYPE
  */
 const FILEINFO_MIME_TYPE = UNKNOWN;
 /**
  * @var int
- * @cname MAGIC_MIME_ENCODING
+ * @cvalue MAGIC_MIME_ENCODING
  */
 const FILEINFO_MIME_ENCODING = UNKNOWN;
 /**
  * @var int
- * @cname MAGIC_DEVICES
+ * @cvalue MAGIC_DEVICES
  */
 const FILEINFO_DEVICES = UNKNOWN;
 /**
  * @var int
- * @cname MAGIC_CONTINUE
+ * @cvalue MAGIC_CONTINUE
  */
 const FILEINFO_CONTINUE = UNKNOWN;
 #ifdef MAGIC_PRESERVE_ATIME
 /**
  * @var int
- * @cname MAGIC_PRESERVE_ATIME
+ * @cvalue MAGIC_PRESERVE_ATIME
  */
 const FILEINFO_PRESERVE_ATIME = UNKNOWN;
 #endif
 #ifdef MAGIC_RAW
 /**
  * @var int
- * @cname MAGIC_RAW
+ * @cvalue MAGIC_RAW
  */
 const FILEINFO_RAW = UNKNOWN;
 #endif
 /**
  * @var int
- * @cname MAGIC_APPLE
+ * @cvalue MAGIC_APPLE
  */
 const FILEINFO_APPLE = UNKNOWN;
 /**
  * @var int
- * @cname MAGIC_EXTENSION
+ * @cvalue MAGIC_EXTENSION
  */
 const FILEINFO_EXTENSION = UNKNOWN;
 

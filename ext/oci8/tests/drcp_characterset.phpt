@@ -2,6 +2,10 @@
 DRCP: oci_pconnect() and oci_connect() with different character sets
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --FILE--
 <?php
 

@@ -183,7 +183,7 @@ static void sapi_read_post_data(void)
 	 * - Make the content type lowercase
 	 * - Trim descriptive data, stay with the content-type only
 	 */
-	for (p=content_type; p<content_type+content_type_length; p++) {
+	for (p = content_type; p < content_type + content_type_length; p++) {
 		switch (*p) {
 			case ';':
 			case ',':
@@ -207,10 +207,11 @@ static void sapi_read_post_data(void)
 	} else {
 		/* fallback */
 		SG(request_info).post_entry = NULL;
-		if (!sapi_module.default_post_reader) {
-			/* no default reader ? */
+		if (UNEXPECTED(!sapi_module.default_post_reader)) {
+			/* this should not happen as there should always be a default_post_reader */
 			SG(request_info).content_type_dup = NULL;
 			sapi_module.sapi_error(E_WARNING, "Unsupported content type:  '%s'", content_type);
+			efree(content_type);
 			return;
 		}
 	}
@@ -218,6 +219,7 @@ static void sapi_read_post_data(void)
 		*(p-1) = oldchar;
 	}
 
+	/* the content_type_dup is not set at this stage so no need to try to free it first */
 	SG(request_info).content_type_dup = content_type;
 
 	if(post_reader_func) {
@@ -357,7 +359,7 @@ SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_h
  * there is not already a charset option in there.
  *
  * If "mimetype" is non-NULL, it should point to a pointer allocated
- * with emalloc().  If a charset is added, the string will be
+ * with emalloc(). If a charset is added, the string will be
  * re-allocated and the new length is returned.  If mimetype is
  * unchanged, 0 is returned.
  *
@@ -489,7 +491,7 @@ static void sapi_send_headers_free(void)
 	}
 }
 
-SAPI_API void sapi_deactivate(void)
+SAPI_API void sapi_deactivate_module(void)
 {
 	zend_llist_destroy(&SG(sapi_headers).headers);
 	if (SG(request_info).request_body) {
@@ -523,6 +525,10 @@ SAPI_API void sapi_deactivate(void)
 	if (sapi_module.deactivate) {
 		sapi_module.deactivate();
 	}
+}
+
+SAPI_API void sapi_deactivate_destroy(void)
+{
 	if (SG(rfc1867_uploaded_files)) {
 		destroy_uploaded_files_hash();
 	}
@@ -535,6 +541,12 @@ SAPI_API void sapi_deactivate(void)
 	SG(headers_sent) = 0;
 	SG(request_info).headers_read = 0;
 	SG(global_request_time) = 0;
+}
+
+SAPI_API void sapi_deactivate(void)
+{
+	sapi_deactivate_module();
+	sapi_deactivate_destroy();
 }
 
 
@@ -671,7 +683,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 
 	switch (op) {
 		case SAPI_HEADER_SET_STATUS:
-			sapi_update_response_code((int)(zend_intptr_t) arg);
+			sapi_update_response_code((int)(intptr_t) arg);
 			return SUCCESS;
 
 		case SAPI_HEADER_ADD:
@@ -786,10 +798,10 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 			} else if (!strcasecmp(header_line, "Content-Length")) {
 				/* Script is setting Content-length. The script cannot reasonably
 				 * know the size of the message body after compression, so it's best
-				 * do disable compression altogether. This contributes to making scripts
+				 * to disable compression altogether. This contributes to making scripts
 				 * portable between setups that have and don't have zlib compression
 				 * enabled globally. See req #44164 */
-				zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
+				zend_string *key = ZSTR_INIT_LITERAL("zlib.output_compression", 0);
 				zend_alter_ini_entry_chars(key,
 					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 				zend_string_release_ex(key, 0);
@@ -834,7 +846,7 @@ SAPI_API int sapi_send_headers(void)
 		return SUCCESS;
 	}
 
-	/* Success-oriented.  We set headers_sent to 1 here to avoid an infinite loop
+	/* Success-oriented. We set headers_sent to 1 here to avoid an infinite loop
 	 * in case of an error situation.
 	 */
 	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers) {

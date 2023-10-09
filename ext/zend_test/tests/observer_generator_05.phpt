@@ -26,8 +26,8 @@ function doSomething() {
 echo doSomething() . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s%eobserver_generator_%d.php' -->
-<file '%s%eobserver_generator_%d.php'>
+<!-- init '%s' -->
+<file '%s'>
   <!-- init doSomething() -->
   <doSomething>
     <!-- init fooResults() -->
@@ -38,12 +38,27 @@ echo doSomething() . PHP_EOL;
     </fooResults:1>
 1
     <fooResults>
+      <!-- init Exception::__construct() -->
+      <Exception::__construct>
+      </Exception::__construct:NULL>
       <!-- Exception: RuntimeException -->
     </fooResults:NULL>
     <!-- Exception: RuntimeException -->
   </doSomething:NULL>
   <!-- Exception: RuntimeException -->
-</file '%s%eobserver_generator_%d.php'>
+</file '%s'>
+<!-- init Exception::__toString() -->
+<Exception::__toString>
+  <!-- init Exception::getTraceAsString() -->
+  <Exception::getTraceAsString>
+  </Exception::getTraceAsString:'#0 %s(%d): fooResults()
+#1 %s(%d): doSomething()
+#2 {main}'>
+</Exception::__toString:'RuntimeException: Oops! in %s%eobserver_generator_%d.php:%d
+Stack trace:
+#0 %s%eobserver_generator_%d.php(%d): fooResults()
+#1 %s%eobserver_generator_%d.php(%d): doSomething()
+#2 {main}'>
 
 Fatal error: Uncaught RuntimeException: Oops! in %s%eobserver_generator_%d.php:%d
 Stack trace:

@@ -38,7 +38,7 @@ struct _zend_call_info {
 	bool               send_unpack;  /* Parameters passed by SEND_UNPACK or SEND_ARRAY */
 	bool               named_args;   /* Function has named arguments */
 	bool               is_prototype; /* An overridden child method may be called */
-	int                     num_args;
+	int                     num_args;	/* Number of arguments, excluding named and variadic arguments */
 	zend_send_arg_info      arg_info[1];
 };
 

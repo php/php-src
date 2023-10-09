@@ -43,7 +43,9 @@ const mbfl_encoding mbfl_encoding_uuencode = {
 	NULL,
 	NULL,
 	mb_uuencode_to_wchar,
-	mb_wchar_to_uuencode
+	mb_wchar_to_uuencode,
+	NULL,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_uuencode_8bit = {
@@ -250,10 +252,16 @@ static void mb_wchar_to_uuencode(uint32_t *in, size_t len, mb_convert_buf *buf, 
 	/* Every 3 bytes of input gets encoded as 4 bytes of output
 	 * Additionally, we have a 'length' byte and a newline for each line of output
 	 * (Maximum 45 input bytes can be encoded on a single output line)
-	 * Make space for two more bytes in case we start close to where a line must end */
-	MB_CONVERT_BUF_ENSURE(buf, out, limit, ((len + 2) * 4 / 3) + (((len + 44) / 45) * 2) + (buf->state ? 0 : sizeof("begin 0644 filename\n")) + 2);
+	 * Make space for two more bytes in case we start close to where a line must end,
+	 * and another two if there are cached bits remaining from the previous call */
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, ((len + 2) * 4 / 3) + (((len + 44) / 45) * 2) + (buf->state ? 0 : sizeof("begin 0644 filename\n")) + 4);
 
-	unsigned int bytes_encoded = buf->state >> 1;
+	unsigned int bytes_encoded = (buf->state >> 1) & 0x7F;
+	/* UUEncode naturally wants to process input bytes in groups of 3, but
+	 * our buffer size may not be a multiple of 3
+	 * So there may be data from the previous call which we need to flush out */
+	unsigned int n_cached_bits = (buf->state >> 8) & 0xFF;
+	unsigned int cached_bits = buf->state >> 16;
 
 	if (!buf->state) {
 		for (char *s = "begin 0644 filename\n"; *s; s++) {
@@ -261,38 +269,102 @@ static void mb_wchar_to_uuencode(uint32_t *in, size_t len, mb_convert_buf *buf, 
 		}
 		out = mb_convert_buf_add(out, MIN(len, 45) + 32);
 		buf->state |= 1;
+	} else if (!len && end && !bytes_encoded && !n_cached_bits) {
+		/* Corner case: under EXTREMELY rare circumstances, it's possible that the
+		 * final call to this conversion function will happen with an empty input
+		 * buffer, leaving an unwanted trailing len byte in the output buffer. */
+		buf->out--;
+		return;
+	} else {
+		/* UUEncode starts each line with a byte which indicates how many bytes
+		 * are encoded on the line
+		 * This can create a problem, since we receive the incoming data one buffer
+		 * at a time, and there is no requirement that the buffers should be aligned
+		 * with line boundaries
+		 * So if a previous line was cut off, we need to go back and fix up
+		 * the preceding len byte */
+		unsigned char *len_byte = out - (bytes_encoded * 4 / 3) - 1;
+		if (n_cached_bits) {
+			len_byte -= (n_cached_bits == 2) ? 1 : 2;
+		}
+		*len_byte = MIN(bytes_encoded + len + (n_cached_bits ? (n_cached_bits == 2 ? 1 : 2) : 0), 45) + 32;
+
+		if (n_cached_bits) {
+			/* Flush out bits which remained from previous call */
+			if (n_cached_bits == 2) {
+				uint32_t w = cached_bits;
+				uint32_t w2 = 0, w3 = 0;
+				if (len) {
+					w2 = *in++;
+					len--;
+				}
+				if (len) {
+					w3 = *in++;
+					len--;
+				}
+				out = mb_convert_buf_add3(out, uuencode_six_bits((w << 4) + ((w2 >> 4) & 0xF)), uuencode_six_bits(((w2 & 0xF) << 2) + ((w3 >> 6) & 0x3)), uuencode_six_bits(w3 & 0x3F));
+			} else {
+				uint32_t w2 = cached_bits;
+				uint32_t w3 = 0;
+				if (len) {
+					w3 = *in++;
+					len--;
+				}
+				out = mb_convert_buf_add2(out, uuencode_six_bits((w2 << 2) + ((w3 >> 6) & 0x3)), uuencode_six_bits(w3 & 0x3F));
+			}
+			n_cached_bits = cached_bits = 0;
+			goto possible_line_break;
+		}
 	}
 
 	while (len--) {
 		uint32_t w = *in++;
 		uint32_t w2 = 0, w3 = 0;
 
-		if (len) {
+		if (!len) {
+			if (!end) {
+				out = mb_convert_buf_add(out, uuencode_six_bits((w >> 2) & 0x3F));
+				/* Cache 2 remaining bits from 'w' */
+				cached_bits = w & 0x3;
+				n_cached_bits = 2;
+				break;
+			}
+		} else {
 			w2 = *in++;
 			len--;
 		}
-		if (len) {
+
+		if (!len) {
+			if (!end) {
+				out = mb_convert_buf_add2(out, uuencode_six_bits((w >> 2) & 0x3F), uuencode_six_bits(((w & 0x3) << 4) + ((w2 >> 4) & 0xF)));
+				/* Cache 4 remaining bits from 'w2' */
+				cached_bits = w2 & 0xF;
+				n_cached_bits = 4;
+				break;
+			}
+		} else {
 			w3 = *in++;
 			len--;
 		}
 
 		out = mb_convert_buf_add4(out, uuencode_six_bits((w >> 2) & 0x3F), uuencode_six_bits(((w & 0x3) << 4) + ((w2 >> 4) & 0xF)), uuencode_six_bits(((w2 & 0xF) << 2) + ((w3 >> 6) & 0x3)), uuencode_six_bits(w3 & 0x3F));
 
+possible_line_break:
 		bytes_encoded += 3;
 
 		if (bytes_encoded >= 45) {
 			out = mb_convert_buf_add(out, '\n');
-			if (len) {
+			if (len || !end) {
 				out = mb_convert_buf_add(out, MIN(len, 45) + 32);
 			}
 			bytes_encoded = 0;
 		}
 	}
 
-	if (bytes_encoded) {
+	if (bytes_encoded && end) {
 		out = mb_convert_buf_add(out, '\n');
 	}
 
-	buf->state = (bytes_encoded << 1) | (buf->state & 1);
+	buf->state = ((cached_bits & 0xFF) << 16) | ((n_cached_bits & 0xFF) << 8) | ((bytes_encoded & 0x7F) << 1) | (buf->state & 1);
 	MB_CONVERT_BUF_STORE(buf, out, limit);
 }

@@ -14,7 +14,7 @@ opcache.log_verbosity_level=-1
 opcache
 --SKIPIF--
 <?php
-if (getenv('SKIP_ASAN')) die('xfail Startup failure leak');
+if (getenv('SKIP_ASAN')) die('xleak Startup failure leak');
 ?>
 --FILE--
 <?php

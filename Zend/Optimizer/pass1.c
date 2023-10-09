@@ -164,7 +164,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				if (ce) {
 					zend_class_constant *cc = zend_hash_find_ptr(
 						&ce->constants_table, Z_STR(ZEND_OP2_LITERAL(opline)));
-					if (cc && (ZEND_CLASS_CONST_FLAGS(cc) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
+					if (cc && !(ZEND_CLASS_CONST_FLAGS(cc) & ZEND_ACC_DEPRECATED) && (ZEND_CLASS_CONST_FLAGS(cc) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC && !(ce->ce_flags & ZEND_ACC_TRAIT)) {
 						zval *c = &cc->value;
 						if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
 							zend_ast *ast = Z_ASTVAL_P(c);
@@ -354,6 +354,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_ASSERT_CHECK:
 		case ZEND_JMP_NULL:
 		case ZEND_VERIFY_NEVER_TYPE:
+		case ZEND_BIND_INIT_STATIC_OR_JMP:
 			collect_constants = 0;
 			break;
 		}

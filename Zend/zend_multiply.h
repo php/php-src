@@ -94,6 +94,19 @@
 		(dval) = (double)(a) * (double)(b); \
 	} \
 } while (0)
+# elif defined(_M_ARM64)
+#  pragma intrinsic(__mulh)
+#  define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {       \
+	__int64 __high = __mulh((a), (b)); \
+	__int64 __low  = (a) * (b); \
+	if ((__low >> 63I64) == __high) { \
+		(usedval) = 0; \
+		(lval) = __low; \
+	} else { \
+		(usedval) = 1; \
+		(dval) = (double)(a) * (double)(b); \
+	} \
+} while (0)
 # else
 #  define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
 	zend_long   __lres  = (a) * (b);										\

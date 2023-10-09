@@ -29,6 +29,7 @@ ZEND_API zend_class_entry *zend_ce_return_type_will_change_attribute;
 ZEND_API zend_class_entry *zend_ce_allow_dynamic_properties;
 ZEND_API zend_class_entry *zend_ce_sensitive_parameter;
 ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
+ZEND_API zend_class_entry *zend_ce_override;
 
 static zend_object_handlers attributes_object_handlers_sensitive_parameter_value;
 
@@ -50,7 +51,7 @@ void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry 
 		if (Z_TYPE(flags) != IS_LONG) {
 			zend_error_noreturn(E_ERROR,
 				"Attribute::__construct(): Argument #1 ($flags) must be of type int, %s given",
-				zend_zval_type_name(&flags)
+				zend_zval_value_name(&flags)
 			);
 		}
 
@@ -114,7 +115,7 @@ ZEND_METHOD(SensitiveParameterValue, __construct)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_update_property(zend_ce_sensitive_parameter_value, Z_OBJ_P(ZEND_THIS), "value", strlen("value"), value);
+	zend_update_property_ex(zend_ce_sensitive_parameter_value, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_VALUE), value);
 }
 
 ZEND_METHOD(SensitiveParameterValue, getValue)
@@ -131,21 +132,14 @@ ZEND_METHOD(SensitiveParameterValue, __debugInfo)
 	RETURN_EMPTY_ARRAY();
 }
 
-static zend_object *attributes_sensitive_parameter_value_new(zend_class_entry *ce)
-{
-	zend_object *object;
-
-	object = zend_objects_new(ce);
-	object->handlers = &attributes_object_handlers_sensitive_parameter_value;
-
-	object_properties_init(object, ce);
-
-	return object;
-}
-
 static HashTable *attributes_sensitive_parameter_value_get_properties_for(zend_object *zobj, zend_prop_purpose purpose)
 {
 	return NULL;
+}
+
+ZEND_METHOD(Override, __construct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
 }
 
 static zend_attribute *get_attribute(HashTable *attributes, zend_string *lcname, uint32_t offset)
@@ -382,7 +376,10 @@ void zend_register_attribute_ce(void)
 
 	/* This is not an actual attribute, thus the zend_mark_internal_attribute() call is missing. */
 	zend_ce_sensitive_parameter_value = register_class_SensitiveParameterValue();
-	zend_ce_sensitive_parameter_value->create_object = attributes_sensitive_parameter_value_new;
+	zend_ce_sensitive_parameter_value->default_object_handlers = &attributes_object_handlers_sensitive_parameter_value;
+
+	zend_ce_override = register_class_Override();
+	zend_mark_internal_attribute(zend_ce_override);
 }
 
 void zend_attributes_shutdown(void)

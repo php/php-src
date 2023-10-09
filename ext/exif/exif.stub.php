@@ -4,7 +4,7 @@
 
 /**
  * @var int
- * @cname USE_MBSTRING
+ * @cvalue USE_MBSTRING
  */
 const EXIF_USE_MBSTRING = UNKNOWN;
 
