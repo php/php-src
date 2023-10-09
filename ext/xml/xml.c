@@ -1078,7 +1078,8 @@ static bool php_xml_check_string_method_arg(
 	}
 
 	parser_handler_fcc->function_handler = method_ptr;
-	parser_handler_fcc->calling_scope = ce;
+	/* We set the calling scope to NULL to be able to differentiate a "method" set from a proper callable */
+	parser_handler_fcc->calling_scope = NULL;
 	parser_handler_fcc->called_scope = ce;
 	parser_handler_fcc->object = object;
 
@@ -1086,7 +1087,11 @@ static bool php_xml_check_string_method_arg(
 }
 
 #define PHP_XML_CHECK_NEW_THIS_METHODS(parser_to_check, new_this_obj, fcc_field) \
-	if (ZEND_FCC_INITIALIZED(parser_to_check->fcc_field) && parser_to_check->fcc_field.object == parser_to_check->object) { \
+	if ( \
+		ZEND_FCC_INITIALIZED(parser_to_check->fcc_field) \
+		&& parser_to_check->fcc_field.object == parser_to_check->object \
+		&& parser_to_check->fcc_field.calling_scope == NULL \
+	) { \
 		zend_string *method_name = zend_string_copy(parser_to_check->fcc_field.function_handler->common.function_name); \
 		zend_fcc_dtor(&parser_to_check->fcc_field); \
 		bool status = php_xml_check_string_method_arg(2, new_this_obj, method_name, &parser_to_check->fcc_field); \
