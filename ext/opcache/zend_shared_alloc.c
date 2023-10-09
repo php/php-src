@@ -103,7 +103,7 @@ void zend_shared_alloc_create_lock(char *lockfile_path)
 	snprintf(lockfile_name, sizeof(lockfile_name), "%s/%sXXXXXX", lockfile_path, SEM_FILENAME_PREFIX);
 	lock_file = mkstemp(lockfile_name);
 	if (lock_file == -1) {
-		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Unable to create lock file: %s (%d)", strerror(errno), errno);
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Unable to create opcache lock file in %s: %s (%d)", lockfile_path, strerror(errno), errno);
 	}
 
 	fchmod(lock_file, 0666);

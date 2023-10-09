@@ -34,6 +34,12 @@ PHP 8.4 UPGRADE NOTES
     This is no longer the case as a consequence of the bugfixes for GH-12192,
     GH-12208, #55098.
 
+- SPL:
+  . Out of bounds accesses in SplFixedArray now throw an exception of type
+    OutOfBoundsException instead of RuntimeException. As OutOfBoundsException
+    is a child class of RuntimeException, code that uses RuntimeException
+    continues to function.
+
 - Standard:
   . round() now validates the value of the $mode parameter and throws a ValueError
     for invalid modes. Previously invalid modes would have been interpreted as
@@ -43,6 +49,8 @@ PHP 8.4 UPGRADE NOTES
   . XSLTProcessor::setParameter() will now throw a ValueError when its arguments
     contain null bytes. This never actually worked correctly in the first place,
     which is why it throws an exception nowadays.
+  . The typed properties XSLTProcessor::$cloneDocument and
+    XSLTProcessor::$doXInclude are now declared.
 
 ========================================
 2. New Features
@@ -72,6 +80,9 @@ PHP 8.4 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- PGSQL:
+  . pg_select, the conditions arguments accepts an empty array and is optional.
+
 - Standard:
   . The internal implementation for rounding to integers has been rewritten
     to be easier to verify for correctness and to be easier to maintain.
@@ -80,6 +91,10 @@ PHP 8.4 UPGRADE NOTES
     would have resulted in 1.0 instead of the correct result 0.0. Additional
     inputs might also be affected and result in different outputs compared to
     earlier PHP versions.
+  . The default value of the 'cost' option for PASSWORD_BCRYPT for password_hash()
+    has been increased from '10' to '12'.
+
+    RFC: https://wiki.php.net/rfc/bcrypt_cost_2023
 
 ========================================
 6. New Functions
@@ -99,6 +114,9 @@ PHP 8.4 UPGRADE NOTES
 ========================================
 9. Other Changes to Extensions
 ========================================
+
+- Spl:
+  . The class constants are typed now.
 
 ========================================
 10. New Global Constants
