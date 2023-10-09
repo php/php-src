@@ -7,6 +7,7 @@ exec_prefix="@exec_prefix@"
 version="@PHP_VERSION@"
 vernum="@PHP_VERSION_ID@"
 include_dir="@includedir@/php"
+lib_dir="@orig_libdir@"
 includes="-I$include_dir -I$include_dir/main -I$include_dir/TSRM -I$include_dir/Zend -I$include_dir/ext -I$include_dir/ext/date/lib"
 ldflags="@PHP_LDFLAGS@"
 libs="@EXTRA_LIBS@"
@@ -21,6 +22,7 @@ configure_options="@CONFIGURE_OPTIONS@"
 php_sapis="@PHP_INSTALLED_SAPIS@"
 ini_dir="@EXPANDED_PHP_CONFIG_FILE_SCAN_DIR@"
 ini_path="@EXPANDED_PHP_CONFIG_FILE_PATH@"
+php_embed_type="@PHP_EMBED_TYPE@"
 
 # Set php_cli_binary and php_cgi_binary if available
 for sapi in $php_sapis; do
@@ -41,6 +43,13 @@ else
   php_binary="$php_cgi_binary"
 fi
 
+# Set embed SAPI library path
+if test "$php_embed_type" = "shared"; then
+  php_embed_lib=@SAPI_LIBNAME_SHARED@
+elif test "$php_embed_type" = "static"; then
+  php_embed_lib=@SAPI_LIBNAME_STATIC@
+fi
+
 # Remove quotes
 configure_options=`echo $configure_options | $SED -e "s#'##g"`
 
@@ -57,6 +66,10 @@ case "$1" in
   echo $extension_dir;;
 --include-dir)
   echo $include_dir;;
+--lib-dir)
+  echo $lib_dir;;
+--lib-embed)
+  echo $php_embed_lib;;
 --php-binary)
   echo $php_binary;;
 --php-sapis)
@@ -83,6 +96,8 @@ Options:
   --libs              [$libs]
   --extension-dir     [$extension_dir]
   --include-dir       [$include_dir]
+  --lib-dir           [$lib_dir]
+  --lib-embed         [$php_embed_lib]
   --man-dir           [$man_dir]
   --php-binary        [$php_binary]
   --php-sapis         [$php_sapis]

@@ -39,6 +39,14 @@ Directory where extensions are searched by default
 Directory prefix where header files are installed by default
 .TP
 .PD 0
+.B \-\-lib-dir
+Directory where libraries are installed by default
+.TP
+.PD 0
+.B \-\-lib-embed
+PHP embed library name
+.TP
+.PD 0
 .B \-\-php-binary
 Full path to php CLI or CGI binary
 .TP

@@ -293,8 +293,11 @@ dnl SAPI configuration.
 dnl ----------------------------------------------------------------------------
 
 dnl Paths to the targets are relative to the build directory.
-SAPI_SHARED=libs/libphp.[]$SHLIB_DL_SUFFIX_NAME
-SAPI_STATIC=libs/libphp.a
+SAPI_LIBNAME=libphp
+SAPI_LIBNAME_SHARED=$SAPI_LIBNAME.[]$SHLIB_DL_SUFFIX_NAME
+SAPI_LIBNAME_STATIC=$SAPI_LIBNAME.a
+SAPI_SHARED=libs/$SAPI_LIBNAME_SHARED
+SAPI_STATIC=libs/$SAPI_LIBNAME_STATIC
 SAPI_LIBTOOL=libphp.la
 
 PHP_CONFIGURE_PART(Configuring SAPI modules)
@@ -1392,6 +1395,7 @@ test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
 test "$program_prefix" = "NONE" && program_prefix=
 test "$program_suffix" = "NONE" && program_suffix=
 
+orig_libdir=$libdir
 case $libdir in
   '${exec_prefix}/lib')
     libdir=$libdir/php
@@ -1531,6 +1535,7 @@ PHP_SUBST(exec_prefix)
 PHP_SUBST_OLD(program_prefix)
 PHP_SUBST_OLD(program_suffix)
 PHP_SUBST(includedir)
+PHP_SUBST_OLD(orig_libdir)
 PHP_SUBST(libdir)
 PHP_SUBST(mandir)
 PHP_SUBST(phplibdir)
@@ -1578,6 +1583,8 @@ PHP_SUBST(SHARED_LIBTOOL)
 PHP_SUBST(PHP_FRAMEWORKS)
 PHP_SUBST(PHP_FRAMEWORKPATH)
 PHP_SUBST(INSTALL_HEADERS)
+PHP_SUBST_OLD(SAPI_LIBNAME_SHARED)
+PHP_SUBST_OLD(SAPI_LIBNAME_STATIC)
 
 old_CC=$CC
 
