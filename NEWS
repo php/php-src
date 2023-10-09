@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.26
 
+- Fiber:
+  . Fixed bug GH-11121 (ReflectionFiber segfault). (danog, trowski, bwoebi)
+
 - Opcache:
   . Added warning when JIT cannot be enabled. (danog)
   . Fixed bug GH-8143 (Crashes in zend_accel_inheritance_cache_find since
