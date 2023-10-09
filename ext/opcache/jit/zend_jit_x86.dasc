@@ -15445,8 +15445,6 @@ static int zend_jit_fe_fetch(dasm_State **Dst, const zend_op *opline, uint32_t o
 		if (exit_addr) {
 			if (exit_opcode == ZEND_JMP) {
 				|	jmp &exit_addr
-			} else {
-				|	jmp >3
 			}
 		} else {
 			|	jmp =>target_label
