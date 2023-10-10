@@ -388,10 +388,6 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 
 	zend_observer_fiber_switch_notify(from, to);
 
-	if (from->kind == zend_ce_fiber) {
-		zend_fiber_from_context(from)->execute_data = EG(current_execute_data);
-	}
-
 	zend_fiber_capture_vm_state(&state);
 
 	to->status = ZEND_FIBER_STATUS_RUNNING;
@@ -558,6 +554,10 @@ static zend_always_inline zend_fiber_transfer zend_fiber_resume(zend_fiber *fibe
 {
 	zend_fiber *previous = EG(active_fiber);
 
+	if (previous) {
+		previous->execute_data = EG(current_execute_data);
+	}
+
 	fiber->caller = EG(current_fiber_context);
 	EG(active_fiber) = fiber;
 
@@ -575,6 +575,7 @@ static zend_always_inline zend_fiber_transfer zend_fiber_suspend(zend_fiber *fib
 	zend_fiber_context *caller = fiber->caller;
 	fiber->previous = EG(current_fiber_context);
 	fiber->caller = NULL;
+	fiber->execute_data = EG(current_execute_data);
 
 	return zend_fiber_switch_to(caller, value, false);
 }
@@ -745,7 +746,6 @@ ZEND_METHOD(Fiber, suspend)
 
 	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_RUNNING || fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED);
 
-	fiber->execute_data = EG(current_execute_data);
 	fiber->stack_bottom->prev_execute_data = NULL;
 
 	zend_fiber_transfer transfer = zend_fiber_suspend(fiber, value);
