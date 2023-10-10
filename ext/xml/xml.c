@@ -1157,49 +1157,35 @@ PHP_FUNCTION(xml_set_element_handler)
 	zend_string *start_method_name = NULL;
 	zend_string *end_method_name = NULL;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "Of!f!", &pind, xml_parser_ce, &start_fci, &start_fcc, &end_fci, &end_fcc) == SUCCESS) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OF!F!", &pind, xml_parser_ce, &start_fci, &start_fcc, &end_fci, &end_fcc) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
-		if (ZEND_FCI_INITIALIZED(start_fci) && !ZEND_FCC_INITIALIZED(start_fcc)) {
-			zend_is_callable_ex(&start_fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &start_fcc, NULL);
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it ourselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-		}
-		if (ZEND_FCI_INITIALIZED(end_fci) && !ZEND_FCC_INITIALIZED(end_fcc)) {
-			zend_is_callable_ex(&end_fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &end_fcc, NULL);
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it ourselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-		}
-	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "Of!S", &pind, xml_parser_ce, &start_fci, &start_fcc, &end_method_name) == SUCCESS) {
+		goto set_handlers;
+	}
+	zend_release_fcall_info_cache(&start_fcc);
+	zend_release_fcall_info_cache(&end_fcc);
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OF!S", &pind, xml_parser_ce, &start_fci, &start_fcc, &end_method_name) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
 
 		bool status = php_xml_check_string_method_arg(3, parser->object, end_method_name, &end_fcc);
 		if (status == false) {
+			zend_release_fcall_info_cache(&start_fcc);
+			zend_release_fcall_info_cache(&end_fcc);
 			RETURN_THROWS();
 		}
-
-		if (ZEND_FCI_INITIALIZED(start_fci) && !ZEND_FCC_INITIALIZED(start_fcc)) {
-			zend_is_callable_ex(&start_fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &start_fcc, NULL);
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it ourselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-		}
-	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OSf!", &pind, xml_parser_ce, &start_method_name, &end_fci, &end_fcc) == SUCCESS) {
+	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OSF!", &pind, xml_parser_ce, &start_method_name, &end_fci, &end_fcc) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
 
 		bool status = php_xml_check_string_method_arg(2, parser->object, start_method_name, &start_fcc);
 		if (status == false) {
+			zend_release_fcall_info_cache(&start_fcc);
+			zend_release_fcall_info_cache(&end_fcc);
 			RETURN_THROWS();
 		}
-
-		if (ZEND_FCI_INITIALIZED(end_fci) && !ZEND_FCC_INITIALIZED(end_fcc)) {
-			zend_is_callable_ex(&end_fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &end_fcc, NULL);
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it ourselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-		}
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OSS", &pind, xml_parser_ce, &start_method_name, &end_method_name) == SUCCESS) {
+		zend_release_fcall_info_cache(&start_fcc);
+		zend_release_fcall_info_cache(&end_fcc);
+
 		parser = Z_XMLPARSER_P(pind);
 
 		bool status = php_xml_check_string_method_arg(2, parser->object, start_method_name, &start_fcc);
@@ -1213,6 +1199,9 @@ PHP_FUNCTION(xml_set_element_handler)
 	} else {
 		zval *dummy_start;
 		zval *dummy_end;
+
+		zend_release_fcall_info_cache(&start_fcc);
+		zend_release_fcall_info_cache(&end_fcc);
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ozz", &pind, xml_parser_ce, &dummy_start, &dummy_end) == FAILURE) {
 			RETURN_THROWS();
 		} else {
@@ -1229,6 +1218,7 @@ PHP_FUNCTION(xml_set_element_handler)
 		}
 	}
 
+	set_handlers:
 	xml_set_handler(&parser->startElementHandler, &start_fcc);
 	xml_set_handler(&parser->endElementHandler, &end_fcc);
 	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
@@ -1247,17 +1237,11 @@ static void php_xml_set_handler_parse_callable(
 	zend_fcall_info_cache handler_fcc = {0};
 	zend_string *method_name = NULL;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "Of!", &pind, xml_parser_ce, &handler_fci, &handler_fcc) == SUCCESS) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OF!", &pind, xml_parser_ce, &handler_fci, &handler_fcc) == SUCCESS) {
 		*parser = Z_XMLPARSER_P(pind);
 		if (!ZEND_FCI_INITIALIZED(handler_fci)) {
 			/* Free handler, so just return and a uninitialized FCC communicates this */
 			return;
-		}
-		if (!ZEND_FCC_INITIALIZED(handler_fcc)) {
-			zend_is_callable_ex(&handler_fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &handler_fcc, NULL);
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it ourselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
 		}
 		memcpy(parser_handler_fcc, &handler_fcc, sizeof(zend_fcall_info_cache));
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OS", &pind, xml_parser_ce, &method_name) == SUCCESS) {
