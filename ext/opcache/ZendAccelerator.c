@@ -3271,7 +3271,6 @@ static zend_result accel_post_startup(void)
 				JIT_G(enabled) = 0;
 				JIT_G(on) = 0;
 				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT!");
-				return SUCCESS;
 			}
 		}
 #endif
