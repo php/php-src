@@ -305,6 +305,8 @@ function main(): void
         'opcache.jit_hot_func=1',
         'opcache.jit_hot_return=1',
         'opcache.jit_hot_side_exit=1',
+        'opcache.jit_blacklist_root_trace=255',
+        'opcache.jit_blacklist_side_trace=255',
         'zend.assertions=1',
         'zend.exception_ignore_args=0',
         'zend.exception_string_param_max_len=15',
