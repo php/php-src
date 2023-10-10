@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.0RC4
+?? ??? ????, PHP 8.3.0RC5
+
+
+12 Oct 2023, PHP 8.3.0RC4
 
 - Core:
   . Fixed bug #80092 (ZTS + preload = segfault on shutdown). (nielsdos)
