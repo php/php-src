@@ -159,6 +159,12 @@ function date_create_from_format(
 function date_create_immutable_from_format(
     string $format, string $datetime, ?DateTimeZone $timezone = null): DateTimeImmutable|false {}
 
+/** @refcount 1 */
+function date_create_from_timestamp(int|float $timestamp): DateTime|false {}
+
+/** @refcount 1 */
+function date_create_immutable_from_timestamp(int|float $timestamp): DateTimeImmutable|false {}
+
 /**
  * @return array<string, mixed>
  * @refcount 1
@@ -363,6 +369,12 @@ class DateTime implements DateTimeInterface
     public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null): DateTime|false {}
 
     /**
+     * @tentative-return-type
+     * @alias date_create_from_timestamp
+     */
+    public static function createFromTimestamp(int|float $timestamp): DateTime|false {}
+
+    /**
      * @return array<string, int|array>|false
      * @tentative-return-type
      * @alias date_get_last_errors
@@ -465,6 +477,12 @@ class DateTimeImmutable implements DateTimeInterface
      * @alias date_create_immutable_from_format
      */
     public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null): DateTimeImmutable|false {}
+
+    /**
+     * @tentative-return-type
+     * @alias date_create_immutable_from_timestamp
+     */
+    public static function createFromTimestamp(int|float $timestamp): DateTimeImmutable|false {}
 
     /**
      * @return array<string, int|array>|false
