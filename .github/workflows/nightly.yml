@@ -390,6 +390,8 @@ jobs:
           echo opcache.jit_blacklist_root_trace=255 >> /etc/php.d/opcache.ini
           echo opcache.jit_blacklist_side_trace=255 >> /etc/php.d/opcache.ini
           echo opcache.file_update_protection=0 >> /etc/php.d/opcache.ini
+          echo opcache.memory_consumption=2G >> /etc/php.d/opcache.ini
+          echo opcache.max_accelerated_files=1000000 >> /etc/php.d/opcache.ini
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
           php -v
       - name: Test PHPSeclib
@@ -402,7 +404,6 @@ jobs:
           export PHPSECLIB_ALLOW_JIT=1
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
-          git clean -ffdx
       - name: Test Psalm
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
@@ -410,16 +411,18 @@ jobs:
           cd psalm
           git checkout 7428e49b115a2a837aa29cf0fafd0ca902fe2457
           export ASAN_OPTIONS=exitcode=139
+          # Needed to avoid overwriting JIT config
           export PSALM_ALLOW_XDEBUG=1
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php ../.github/patch.php ./psalm
           php ./psalm --no-cache || exit $?
       - name: Test PHPStan
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
           git clone https://github.com/phpstan/phpstan-src
           cd phpstan-src
-          git checkout 1f608dc6a560f4a5accc854add8e005da0e7ceea
-          sed 's/80299/89999/g' -i conf/config.neon
+          git checkout d02cc99d4480a203a2dbe54a5ded2da016266b11
+          sed 's/80399/89999/g' -i conf/parametersSchema.neon
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           export ASAN_OPTIONS=exitcode=139
           php bin/phpstan clear-result-cache
@@ -427,12 +430,6 @@ jobs:
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
-          sudo apt-get update && sudo apt-get install -y libuv1-dev
-          git clone https://github.com/amphp/ext-uv --depth 1
-          cd ext-uv
-          phpize && ./configure --enable-debug && make -j$(nproc) && sudo make install
-          cd ..
-          echo extension=uv >> /etc/php.d/uv.ini
           repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
           X=0
           for repository in $repositories; do
@@ -442,6 +439,7 @@ jobs:
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-reqs
             export ASAN_OPTIONS=exitcode=139
+            php ../.github/patch.php vendor/bin/phpunit
             vendor/bin/phpunit || EXIT_CODE=$?
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
@@ -459,6 +457,7 @@ jobs:
           # Hack to disable a test that hangs
           php -r '$c = file_get_contents("tests/Filesystem/FilesystemTest.php"); $c = str_replace("*/\n    public function testSharedGet()", "* @group skip\n     */\n    public function testSharedGet()", $c); file_put_contents("tests/Filesystem/FilesystemTest.php", $c);'
           export ASAN_OPTIONS=exitcode=139
+          php ../.github/patch.php vendor/bin/phpunit
           php vendor/bin/phpunit --exclude-group skip || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
@@ -475,6 +474,7 @@ jobs:
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-reqs
             export ASAN_OPTIONS=exitcode=139
+            php ../.github/patch.php vendor/bin/phpunit
             vendor/bin/phpunit || EXIT_CODE=$?
             if [ $[EXIT_CODE:-0} -gt 128 ]; then
               X=1;
@@ -490,6 +490,7 @@ jobs:
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           export ASAN_OPTIONS=exitcode=139
+          php ../.github/patch.php vendor/bin/phpunit
           vendor/bin/phpunit || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
@@ -508,8 +509,10 @@ jobs:
           php -r '$c = file_get_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php"); $c = str_replace("*/\n    public function testCastNonTrailingCharPointer()", "* @group skip\n     */\n    public function testCastNonTrailingCharPointer()", $c); file_put_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php", $c);'
           export ASAN_OPTIONS=exitcode=139
           export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
+          PATCH_PATH=$(realpath ../.github/patch.php)
           X=0
           for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
+            php $PATCH_PATH vendor/bin/phpunit
             php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient --exclude-group skip || EXIT_CODE=$?
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
@@ -524,6 +527,7 @@ jobs:
           git rev-parse HEAD
           export ASAN_OPTIONS=exitcode=139
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php ../.github/patch.php ./phpunit
           php ./phpunit || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
@@ -548,6 +552,7 @@ jobs:
           sed -i 's/youremptytestdbnamehere/test/g' wp-tests-config.php
           sed -i 's/yourusernamehere/root/g' wp-tests-config.php
           sed -i 's/yourpasswordhere/root/g' wp-tests-config.php
+          php ../.github/patch.php vendor/bin/phpunit
           php vendor/bin/phpunit || EXIT_CODE=$?
           if [ $EXIT_CODE -gt 128 ]; then
             exit 1
