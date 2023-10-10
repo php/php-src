@@ -5,15 +5,15 @@ register_shutdown_function(function () {
     var_dump($status);
 
     $ok = true;
-    if ($status["memory_usage"]["free_memory"] < 10*1024) {
+    if ($status["memory_usage"]["free_memory"] < 10*1024*1024) {
         echo "Not enough free opcache memory!".PHP_EOL;
         $ok = false;
     }
-    if ($status["interned_strings_usage"]["free_memory"] < 1*1024) {
+    if ($status["interned_strings_usage"]["free_memory"] < 1*1024*1024) {
         echo "Not enough free interned strings memory!".PHP_EOL;
         $ok = false;
     }
-    if ($status["jit"]["buffer_free"] < 10*1024) {
+    if ($status["jit"]["buffer_free"] < 10*1024*1024) {
         echo "Not enough free JIT memory!".PHP_EOL;
         $ok = false;
     }
