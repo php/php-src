@@ -10,8 +10,8 @@ LSAN_OPTIONS=detect_leaks=0
 <?php
 require 'testdb.inc';
 
-$dbh->exec('recreate table atable (id integer not null, content blob sub_type 1 segment size 80)');
-$S = $dbh->prepare('insert into atable (id, content) values (:id, :content)');
+$dbh->exec('recreate table test73087 (id integer not null, content blob sub_type 1 segment size 80)');
+$S = $dbh->prepare('insert into test73087 (id, content) values (:id, :content)');
 for ($I = 1; $I < 10; $I++) {
     $Params = [
         'id' => $I,
@@ -24,6 +24,11 @@ for ($I = 1; $I < 10; $I++) {
 unset($S);
 unset($dbh);
 echo 'OK';
+?>
+--CLEAN--
+<?php
+require 'testdb.inc';
+$dbh->exec("DROP TABLE IF EXISTS test73087");
 ?>
 --EXPECT--
 OK

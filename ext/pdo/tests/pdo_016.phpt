@@ -20,13 +20,13 @@ if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
     $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
 }
 
-$db->exec('CREATE TABLE test(idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
-$db->exec('INSERT INTO test VALUES(0, \'String0\')');
-$db->exec('INSERT INTO test VALUES(1, \'String1\')');
-$db->exec('INSERT INTO test VALUES(2, \'String2\')');
+$db->exec('CREATE TABLE test016(idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
+$db->exec('INSERT INTO test016 VALUES(0, \'String0\')');
+$db->exec('INSERT INTO test016 VALUES(1, \'String1\')');
+$db->exec('INSERT INTO test016 VALUES(2, \'String2\')');
 
-$stmt1 = $db->prepare('SELECT COUNT(idx) FROM test');
-$stmt2 = $db->prepare('SELECT idx, txt FROM test ORDER by idx');
+$stmt1 = $db->prepare('SELECT COUNT(idx) FROM test016');
+$stmt2 = $db->prepare('SELECT idx, txt FROM test016 ORDER by idx');
 
 $stmt1->execute();
 var_dump($stmt1->fetchColumn());
@@ -48,10 +48,10 @@ while($stmt2->fetch(PDO::FETCH_BOUND)) {
 
 echo "===ALONE===\n";
 
-$stmt3 = $db->prepare('SELECT txt FROM test WHERE idx=:inp');
+$stmt3 = $db->prepare('SELECT txt FROM test016 WHERE idx=:inp');
 $stmt3->bindParam(':inp', $idx); /* by foreign name */
 
-$stmt4 = $db->prepare('SELECT idx FROM test WHERE txt=:txt');
+$stmt4 = $db->prepare('SELECT idx FROM test016 WHERE txt=:txt');
 $stmt4->bindParam(':txt', $txt);  /* using same name */
 
 foreach($cont as $idx => $txt)
@@ -107,6 +107,12 @@ while($stmt2->fetch(PDO::FETCH_BOUND))
 }
 
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+$db->exec("DROP TABLE test016");
 ?>
 --EXPECT--
 string(1) "3"

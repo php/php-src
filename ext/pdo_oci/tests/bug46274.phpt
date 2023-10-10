@@ -16,16 +16,11 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
-try {
-    $db->exec("DROP TABLE test_one_blob");
-} catch (Exception $e) {
-}
-
 $db->beginTransaction();
 
-$db->query('CREATE TABLE test_one_blob (id INT NOT NULL, blob1 BLOB)');
+$db->query('CREATE TABLE test46274 (id INT NOT NULL, blob1 BLOB)');
 
-$stmt = $db->prepare("INSERT INTO test_one_blob (id, blob1) VALUES (:id, EMPTY_BLOB()) RETURNING blob1 INTO :foo");
+$stmt = $db->prepare("INSERT INTO test46274 (id, blob1) VALUES (:id, EMPTY_BLOB()) RETURNING blob1 INTO :foo");
 
 $data = 'foo';
 $blob = fopen('php://memory', 'a');
@@ -47,15 +42,18 @@ $stmt->bindparam(':id', $id);
 $stmt->bindparam(':foo', $blob, PDO::PARAM_LOB);
 $stmt->execute();
 
-$res = $db->query("SELECT blob1 from test_one_blob");
+$res = $db->query("SELECT blob1 from test46274");
 // Resource
 var_dump($res->fetch());
 
 // Empty string
 var_dump($res->fetch());
-
-$db->exec("DROP TABLE test_one_blob");
-
+?>
+--CLEAN--
+<?php
+require 'ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
+$db->exec("DROP TABLE test46274");
 ?>
 --EXPECT--
 array(2) {

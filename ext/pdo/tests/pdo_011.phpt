@@ -15,11 +15,11 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10), grp VARCHAR(10))');
-$db->exec('INSERT INTO test VALUES(1, \'A\', \'Group1\')');
-$db->exec('INSERT INTO test VALUES(2, \'B\', \'Group1\')');
-$db->exec('INSERT INTO test VALUES(3, \'C\', \'Group2\')');
-$db->exec('INSERT INTO test VALUES(4, \'D\', \'Group2\')');
+$db->exec('CREATE TABLE test011(id int NOT NULL PRIMARY KEY, val VARCHAR(10), grp VARCHAR(10))');
+$db->exec('INSERT INTO test011 VALUES(1, \'A\', \'Group1\')');
+$db->exec('INSERT INTO test011 VALUES(2, \'B\', \'Group1\')');
+$db->exec('INSERT INTO test011 VALUES(3, \'C\', \'Group2\')');
+$db->exec('INSERT INTO test011 VALUES(4, \'D\', \'Group2\')');
 
 class DerivedStatement extends PDOStatement
 {
@@ -34,9 +34,9 @@ class DerivedStatement extends PDOStatement
     }
 }
 
-$select1 = $db->prepare('SELECT grp, id FROM test');
-$select2 = $db->prepare('SELECT id, val FROM test');
-$derived = $db->prepare('SELECT id, val FROM test', array(PDO::ATTR_STATEMENT_CLASS=>array('DerivedStatement', array('Overloaded', $db))));
+$select1 = $db->prepare('SELECT grp, id FROM test011');
+$select2 = $db->prepare('SELECT id, val FROM test011');
+$derived = $db->prepare('SELECT id, val FROM test011', array(PDO::ATTR_STATEMENT_CLASS=>array('DerivedStatement', array('Overloaded', $db))));
 
 class Test1
 {
@@ -80,6 +80,12 @@ var_dump($derived->fetchAll(PDO::FETCH_FUNC, array($derived, 'reTrieve')));
 $derived->execute();
 var_dump($derived->fetchAll(PDO::FETCH_FUNC, array($derived, 'RETRIEVE')));
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+$db->exec("DROP TABLE test011");
 ?>
 --EXPECTF--
 DerivedStatement::__construct(Overloaded)

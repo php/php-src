@@ -26,7 +26,7 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
+$db->exec('CREATE TABLE test022(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
 
 $data = array(
     array('10', 'Abc', 'zxy'),
@@ -38,13 +38,13 @@ $data = array(
 );
 
 // Insert using question mark placeholders
-$stmt = $db->prepare("INSERT INTO test VALUES(?, ?, ?)");
+$stmt = $db->prepare("INSERT INTO test022 VALUES(?, ?, ?)");
 foreach ($data as $row) {
     $stmt->execute($row);
 }
 
 // Retrieve column metadata for a result set returned by explicit SELECT
-$select = $db->query('SELECT id, val, val2 FROM test');
+$select = $db->query('SELECT id, val, val2 FROM test022');
 $meta = $select->getColumnMeta(0);
 var_dump($meta);
 $meta = $select->getColumnMeta(1);
@@ -53,10 +53,16 @@ $meta = $select->getColumnMeta(2);
 var_dump($meta);
 
 // Retrieve column metadata for a result set returned by a function
-$select = $db->query('SELECT COUNT(*) FROM test');
+$select = $db->query('SELECT COUNT(*) FROM test022');
 $meta = $select->getColumnMeta(0);
 var_dump($meta);
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+$db->exec("DROP TABLE test022");
 ?>
 --EXPECT--
 The unexpected!

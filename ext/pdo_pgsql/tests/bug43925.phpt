@@ -14,10 +14,8 @@ PDOTest::skip();
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 $dbh = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
-@$dbh->query('DROP TABLE nodes');
-
 $dbh->query('
-CREATE TABLE nodes
+CREATE TABLE test43925
 (
    id   integer NOT NULL PRIMARY KEY
  , root integer NOT NULL
@@ -25,14 +23,14 @@ CREATE TABLE nodes
  , rgt  integer NOT NULL
 );');
 
-$dbh->query('INSERT INTO nodes (id, root, lft, rgt) VALUES (1, 1, 1, 6);');
-$dbh->query('INSERT INTO nodes (id, root, lft, rgt) VALUES (2, 1, 2, 3);');
-$dbh->query('INSERT INTO nodes (id, root, lft, rgt) VALUES (3, 1, 4, 5);');
+$dbh->query('INSERT INTO test43925 (id, root, lft, rgt) VALUES (1, 1, 1, 6);');
+$dbh->query('INSERT INTO test43925 (id, root, lft, rgt) VALUES (2, 1, 2, 3);');
+$dbh->query('INSERT INTO test43925 (id, root, lft, rgt) VALUES (3, 1, 4, 5);');
 
 
 $stmt = $dbh->prepare('
     SELECT *
-    FROM nodes
+    FROM test43925
     WHERE (:rootId > 0 OR lft > :left OR rgt > :left)
         AND (root = :rootId OR root  = :left)
         AND (1 > :left OR 1 < :left OR 1 = :left)
@@ -51,9 +49,12 @@ foreach ($stmt->fetchAll() as $row) {
     print implode(' - ', $row);
     print "\n";
 }
-
-$dbh->query('DROP TABLE nodes');
-
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->exec("DROP TABLE IF EXIST test43925");
 ?>
 --EXPECT--
 1 - 1 - 1 - 1 - 1 - 1 - 6 - 6

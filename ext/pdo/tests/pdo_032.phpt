@@ -15,25 +15,31 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10))');
-$db->exec("INSERT INTO test VALUES(1, 'A')");
-$db->exec("INSERT INTO test VALUES(2, 'B')");
-$db->exec("INSERT INTO test VALUES(3, 'C')");
+$db->exec('CREATE TABLE test032(id int NOT NULL PRIMARY KEY, val VARCHAR(10))');
+$db->exec("INSERT INTO test032 VALUES(1, 'A')");
+$db->exec("INSERT INTO test032 VALUES(2, 'B')");
+$db->exec("INSERT INTO test032 VALUES(3, 'C')");
 
 // Lower case columns
 $db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
-$stmt = $db->prepare('SELECT * from test');
+$stmt = $db->prepare('SELECT * from test032');
 $stmt->execute();
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 $stmt->closeCursor();
 
 // Upper case columns
 $db->setAttribute(PDO::ATTR_CASE, PDO::CASE_UPPER);
-$stmt = $db->prepare('SELECT * from test');
+$stmt = $db->prepare('SELECT * from test032');
 $stmt->execute();
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 $stmt->closeCursor();
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+$db->exec("DROP TABLE test032");
 ?>
 --EXPECT--
 array(3) {

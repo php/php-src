@@ -19,9 +19,9 @@ $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
 $is_oci = $driver == 'oci';
 
 if ($is_oci) {
-    $db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val BLOB)');
+    $db->exec('CREATE TABLE test34630 (id int NOT NULL PRIMARY KEY, val BLOB)');
 } else {
-    $db->exec('CREATE TABLE test (id int NOT NULL PRIMARY KEY, val VARCHAR(256))');
+    $db->exec('CREATE TABLE test34630 (id int NOT NULL PRIMARY KEY, val VARCHAR(256))');
 }
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -34,17 +34,23 @@ if ($is_oci) {
      * the empty blob will be committed implicitly when the statement is
      * executed */
     $db->beginTransaction();
-    $insert = $db->prepare("insert into test (id, val) values (1, EMPTY_BLOB()) RETURNING val INTO :blob");
+    $insert = $db->prepare("insert into test34630 (id, val) values (1, EMPTY_BLOB()) RETURNING val INTO :blob");
 } else {
-    $insert = $db->prepare("insert into test (id, val) values (1, :blob)");
+    $insert = $db->prepare("insert into test34630 (id, val) values (1, :blob)");
 }
 $insert->bindValue(':blob', $fp, PDO::PARAM_LOB);
 $insert->execute();
 $insert = null;
 
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-var_dump($db->query("SELECT * from test")->fetchAll(PDO::FETCH_ASSOC));
+var_dump($db->query("SELECT * from test34630")->fetchAll(PDO::FETCH_ASSOC));
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+$db->exec("DROP TABLE test34630");
 ?>
 --EXPECT--
 array(1) {

@@ -36,15 +36,15 @@ if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
     $suf = '';
 }
 
-$db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10))'.$suf);
-$db->exec("INSERT INTO test VALUES(1, 'A')");
-$db->exec("INSERT INTO test VALUES(2, 'B')");
-$db->exec("INSERT INTO test VALUES(3, 'C')");
-$delete = $db->prepare('DELETE FROM test');
+$db->exec('CREATE TABLE test017(id INT NOT NULL PRIMARY KEY, val VARCHAR(10))'.$suf);
+$db->exec("INSERT INTO test017 VALUES(1, 'A')");
+$db->exec("INSERT INTO test017 VALUES(2, 'B')");
+$db->exec("INSERT INTO test017 VALUES(3, 'C')");
+$delete = $db->prepare('DELETE FROM test017');
 
 function countRows($action) {
     global $db;
-    $select = $db->prepare('SELECT COUNT(*) FROM test');
+    $select = $db->prepare('SELECT COUNT(*) FROM test017');
     $select->execute();
     $res = $select->fetchColumn();
     return "Counted $res rows after $action.\n";
@@ -66,6 +66,12 @@ $db->commit();
 
 echo countRows('commit');
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+$db->exec("DROP TABLE test017");
 ?>
 --EXPECT--
 Counted 3 rows after insert.

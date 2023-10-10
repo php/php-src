@@ -12,14 +12,13 @@ LSAN_OPTIONS=detect_leaks=0
 require("testdb.inc");
 
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-@$dbh->exec('DROP TABLE test_insert');
-$dbh->exec("CREATE TABLE test_insert (ID INTEGER NOT NULL, TEXT VARCHAR(10))");
+$dbh->exec("CREATE TABLE test62024 (ID INTEGER NOT NULL, TEXT VARCHAR(10))");
 
 $dbh->commit();
 
 //start actual test
 
-$sql = "insert into test_insert (id, text) values (?, ?)";
+$sql = "insert into test62024 (id, text) values (?, ?)";
 $sttmt = $dbh->prepare($sql);
 
 $args_ok = array(1, "test1");
@@ -35,16 +34,19 @@ $dbh->commit();
 
 
 //teardown test data
-$sttmt = $dbh->prepare('DELETE FROM test_insert');
+$sttmt = $dbh->prepare('DELETE FROM test62024');
 $sttmt->execute();
 
 $dbh->commit();
 
-$dbh->exec('DROP TABLE test_insert');
-
 unset($sttmt);
 unset($dbh);
 
+?>
+--CLEAN--
+<?php
+require 'testdb.inc';
+$dbh->exec("DROP TABLE IF EXISTS test62024");
 ?>
 --EXPECT--
 bool(true)

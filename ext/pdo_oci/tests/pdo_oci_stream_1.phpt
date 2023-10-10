@@ -19,10 +19,8 @@ $dbh = PDOTest::factory();
 $dbh->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
 // Initialization
-@$dbh->exec("drop table pdo_oci_stream_1_tab");
-
 $stmtarray = array(
-    "create table pdo_oci_stream_1_tab (id number, data clob)",
+    "create table test_pdo_oci_stream_1 (id number, data clob)",
 );
 
 foreach ($stmtarray as $stmt) {
@@ -33,13 +31,13 @@ $dbh->exec("
   declare
     lob1 clob := 'abc' || lpad('j',30000,'j') || 'xyz';
    begin
-    insert into pdo_oci_stream_1_tab (id,data) values (1, 'abcdefghijklmnopqrstuvwxyz');
-    insert into pdo_oci_stream_1_tab (id,data) values (2, lob1);
+    insert into test_pdo_oci_stream_1 (id,data) values (1, 'abcdefghijklmnopqrstuvwxyz');
+    insert into test_pdo_oci_stream_1 (id,data) values (2, lob1);
   end;");
 
 echo "Test 1\n";
 
-$s = $dbh->prepare("select data from pdo_oci_stream_1_tab where id = 1");
+$s = $dbh->prepare("select data from test_pdo_oci_stream_1 where id = 1");
 $s->execute();
 $r = $s->fetch();
 
@@ -57,7 +55,7 @@ echo 'Read '.stream_get_contents($r['data'], 1, 0)."$\n";  // a
 
 echo "\nTest 2\n";
 
-$s = $dbh->prepare("select data from pdo_oci_stream_1_tab where id = 2");
+$s = $dbh->prepare("select data from test_pdo_oci_stream_1 where id = 2");
 $s->execute();
 $r = $s->fetch();
 
@@ -74,17 +72,12 @@ echo 'Read '.strlen(stream_get_contents($r['data']))."\n";         // 0
 echo 'Read '.strlen(stream_get_contents($r['data'], 0))."\n";      // 0
 echo 'Read '.strlen(stream_get_contents($r['data'], -1))."\n";     // 0
 echo 'Read '.stream_get_contents($r['data'], -1, 30000)."\n";      // jjjxyz
-
-// Clean up
-
-$stmtarray = array(
-    "drop table pdo_oci_stream_1_tab"
-);
-
-foreach ($stmtarray as $stmt) {
-    $dbh->exec($stmt);
-}
-
+?>
+--CLEAN--
+<?php
+require 'ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
+$db->exec("DROP TABLE test_pdo_oci_stream_1");
 ?>
 --EXPECT--
 Test 1

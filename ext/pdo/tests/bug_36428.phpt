@@ -16,11 +16,17 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 $db = PDOTest::factory();
-$db->exec("CREATE TABLE test (a VARCHAR(10))");
-$db->exec("INSERT INTO test (a) VALUES ('xyz')");
-$res = $db->query("SELECT a FROM test");
+$db->exec("CREATE TABLE test36428 (a VARCHAR(10))");
+$db->exec("INSERT INTO test36428 (a) VALUES ('xyz')");
+$res = $db->query("SELECT a FROM test36428");
 var_dump($res->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, 'SimpleXMLElement', array('<root/>')));
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+$db->exec("DROP TABLE test36428");
 ?>
 --EXPECTF--
 array(1) {

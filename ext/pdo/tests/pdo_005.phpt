@@ -15,10 +15,10 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(10))');
-$db->exec("INSERT INTO test VALUES(1, 'A', 'AA')");
-$db->exec("INSERT INTO test VALUES(2, 'B', 'BB')");
-$db->exec("INSERT INTO test VALUES(3, 'C', 'CC')");
+$db->exec('CREATE TABLE test005(id int NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(10))');
+$db->exec("INSERT INTO test005 VALUES(1, 'A', 'AA')");
+$db->exec("INSERT INTO test005 VALUES(2, 'B', 'BB')");
+$db->exec("INSERT INTO test005 VALUES(3, 'C', 'CC')");
 
 $stmt = $db->prepare('SELECT id, val, val2 from test');
 
@@ -50,6 +50,12 @@ var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'TestBase'));
 $stmt->execute();
 var_dump($stmt->fetchAll(PDO::FETCH_CLASS, 'TestDerived', array(0)));
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+$db->exec("DROP TABLE test005");
 ?>
 --EXPECTF--
 array(3) {

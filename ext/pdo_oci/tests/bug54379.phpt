@@ -15,10 +15,7 @@ PDOTest::skip();
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-try {
-        $db->exec("DROP TABLE test");
-} catch (Exception $e) {
-}
+
 $db->exec("CREATE TABLE test (col1 NVARCHAR2(20))");
 $db->exec("INSERT INTO test VALUES('12345678901234567890')");
 $db->exec("INSERT INTO test VALUES('あいうえおかきくけこさしすせそたちつてと')");
@@ -26,6 +23,12 @@ $stmt = $db->prepare("SELECT * FROM test");
 $stmt->execute();
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 $db->exec("DROP TABLE test");
+?>
+--CLEAN--
+<?php
+require 'ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
+$db->exec("DROP TABLE test54379");
 ?>
 --EXPECT--
 array(2) {

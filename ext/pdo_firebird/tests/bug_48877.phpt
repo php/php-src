@@ -13,15 +13,13 @@ require("testdb.inc");
 
 $value = '2';
 
-$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-@$dbh->exec('DROP TABLE testz');
-$dbh->exec('CREATE TABLE testz (A integer)');
-$dbh->exec("INSERT INTO testz VALUES ('1')");
-$dbh->exec("INSERT INTO testz VALUES ('2')");
-$dbh->exec("INSERT INTO testz VALUES ('3')");
+$dbh->exec('CREATE TABLE test48877 (A integer)');
+$dbh->exec("INSERT INTO test48877 VALUES ('1')");
+$dbh->exec("INSERT INTO test48877 VALUES ('2')");
+$dbh->exec("INSERT INTO test48877 VALUES ('3')");
 $dbh->commit();
 
-$query = "SELECT * FROM testz WHERE A = :paramno";
+$query = "SELECT * FROM test48877 WHERE A = :paramno";
 
 $stmt = $dbh->prepare($query);
 $stmt->bindParam(':paramno', $value, PDO::PARAM_STR);
@@ -31,16 +29,18 @@ var_dump($stmt->fetch());
 var_dump($stmt->rowCount());
 
 
-$stmt = $dbh->prepare('DELETE FROM testz');
+$stmt = $dbh->prepare('DELETE FROM test48877');
 $stmt->execute();
 
 $dbh->commit();
-
-$dbh->exec('DROP TABLE testz');
-
 unset($stmt);
 unset($dbh);
 
+?>
+--CLEAN--
+<?php
+require 'testdb.inc';
+$dbh->exec("DROP TABLE IF EXISTS test48877");
 ?>
 --EXPECT--
 bool(false)

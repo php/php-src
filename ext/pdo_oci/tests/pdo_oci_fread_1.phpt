@@ -20,12 +20,11 @@ $dbh->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
 // Initialization
 $stmtarray = array(
-    "begin execute immediate 'drop table pdo_oci_fread_tab'; exception when others then null; end;",
-    "create table pdo_oci_fread_tab (id number, data clob)",
+    "create table test_oci_fread_1 (id number, data clob)",
     "declare
     lob1 clob := 'abc' || lpad('j',4020,'j') || 'xyz';
    begin
-    insert into pdo_oci_fread_tab (id,data) values (1, lob1);
+    insert into test_oci_fread_1 (id,data) values (1, lob1);
   end;"
 );
 
@@ -35,7 +34,7 @@ foreach ($stmtarray as $stmt) {
 
 echo "Test 1\n";
 
-$s = $dbh->query("select data from pdo_oci_fread_tab where id = 1");
+$s = $dbh->query("select data from test_oci_fread_1 where id = 1");
 $r = $s->fetch();
 $sh = $r['data'];
 
@@ -45,17 +44,12 @@ while (!feof($sh)) {
 }
 echo "\n";
 fclose($sh);
-
-// Clean up
-
-$stmtarray = array(
-    "drop table pdo_oci_fread_tab"
-);
-
-foreach ($stmtarray as $stmt) {
-    $dbh->exec($stmt);
-}
-
+?>
+--CLEAN--
+<?php
+require 'ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
+$db->exec("DROP TABLE test_oci_fread_1");
 ?>
 --EXPECT--
 Test 1

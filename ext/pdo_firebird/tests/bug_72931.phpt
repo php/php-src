@@ -10,13 +10,18 @@ LSAN_OPTIONS=detect_leaks=0
 <?php
 require 'testdb.inc';
 
-$dbh->exec('recreate table tablea (id integer)');
-$S = $dbh->prepare('insert into tablea (id) values (1) returning id');
+$dbh->exec('recreate table test72931 (id integer)');
+$S = $dbh->prepare('insert into test72931 (id) values (1) returning id');
 $S->execute();
 $D = $S->fetch(PDO::FETCH_NUM);
 echo $D[0];
 unset($S);
 unset($dbh);
+?>
+--CLEAN--
+<?php
+require 'testdb.inc';
+$dbh->exec("DROP TABLE IF EXISTS test72931");
 ?>
 --EXPECT--
 1

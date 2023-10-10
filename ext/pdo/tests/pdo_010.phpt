@@ -15,17 +15,17 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE classtypes(id int NOT NULL PRIMARY KEY, name VARCHAR(10) NOT NULL UNIQUE)');
-$db->exec('INSERT INTO classtypes VALUES(0, \'stdClass\')');
-$db->exec('INSERT INTO classtypes VALUES(1, \'Test1\')');
-$db->exec('INSERT INTO classtypes VALUES(2, \'Test2\')');
-$db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, classtype int, val VARCHAR(10), grp VARCHAR(10))');
-$db->exec('INSERT INTO test VALUES(1, 0, \'A\', \'Group1\')');
-$db->exec('INSERT INTO test VALUES(2, 1, \'B\', \'Group1\')');
-$db->exec('INSERT INTO test VALUES(3, 2, \'C\', \'Group2\')');
-$db->exec('INSERT INTO test VALUES(4, 3, \'D\', \'Group2\')');
+$db->exec('CREATE TABLE classtypes010(id int NOT NULL PRIMARY KEY, name VARCHAR(10) NOT NULL UNIQUE)');
+$db->exec('INSERT INTO classtypes010 VALUES(0, \'stdClass\')');
+$db->exec('INSERT INTO classtypes010 VALUES(1, \'Test1\')');
+$db->exec('INSERT INTO classtypes010 VALUES(2, \'Test2\')');
+$db->exec('CREATE TABLE test010(id int NOT NULL PRIMARY KEY, classtype int, val VARCHAR(10), grp VARCHAR(10))');
+$db->exec('INSERT INTO test010 VALUES(1, 0, \'A\', \'Group1\')');
+$db->exec('INSERT INTO test010 VALUES(2, 1, \'B\', \'Group1\')');
+$db->exec('INSERT INTO test010 VALUES(3, 2, \'C\', \'Group2\')');
+$db->exec('INSERT INTO test010 VALUES(4, 3, \'D\', \'Group2\')');
 
-$stmt = $db->prepare('SELECT classtypes.name, test.grp AS grp, test.id AS id, test.val AS val FROM test LEFT JOIN classtypes ON test.classtype=classtypes.id');
+$stmt = $db->prepare('SELECT classtypes.name, test.grp AS grp, test.id AS id, test.val AS val FROM test010 LEFT JOIN classtypes010 ON test.classtype=classtypes.id');
 
 class Test1
 {
@@ -67,6 +67,13 @@ var_dump($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_CLASSTYPE|PDO::FETCH_GROUP,
 $stmt->execute();
 var_dump($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_CLASSTYPE|PDO::FETCH_UNIQUE, 'Test3'));
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+$db->exec("DROP TABLE test010");
+$db->exec("DROP TABLE classtypes010");
 ?>
 --EXPECTF--
 Test1::__construct()

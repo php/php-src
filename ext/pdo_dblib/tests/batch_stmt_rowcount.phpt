@@ -13,11 +13,11 @@ if (!driver_supports_batch_statements_without_select($db)) die('xfail test will 
 require __DIR__ . '/config.inc';
 
 $stmt = $db->query(
-"create table #php_pdo(id int); " .
+"create table #test_batch_stmt_rowcount(id int); " .
 "set rowcount 2; " .
-"insert into #php_pdo values(1), (2), (3); " .
-"insert into #php_pdo values(4), (5), (6); " .
-"update #php_pdo set id = 4; " .
+"insert into #test_batch_stmt_rowcount values(1), (2), (3); " .
+"insert into #test_batch_stmt_rowcount values(4), (5), (6); " .
+"update #test_batch_stmt_rowcount set id = 4; " .
 "select @@rowcount; "
 );
 
@@ -52,9 +52,9 @@ var_dump($stmt->nextRowset());
 
 // now cleanup and check that the results are expected
 $stmt = $db->query("set rowcount 0;" .
-"select * from #php_pdo;" .
-"delete from #php_pdo;" .
-"drop table #php_pdo;"
+"select * from #test_batch_stmt_rowcount;" .
+"delete from #test_batch_stmt_rowcount;" .
+"drop table #test_batch_stmt_rowcount;"
 );
 
 // check results from set rowcount

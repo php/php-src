@@ -20,7 +20,6 @@ $dbh = PDOTest::factory();
 $dbh->setAttribute(PDO::ATTR_CASE, PDO::CASE_NATURAL);
 $dbh->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
-@$dbh->exec('DROP TABLE pdo_oci_bug60994');
 $dbh->exec('CREATE TABLE pdo_oci_bug60994 (id NUMBER, data CLOB, data2 NCLOB)');
 
 $id = null;
@@ -108,6 +107,12 @@ echo 'end  of stream4 is ', $ending4, PHP_EOL;
 if ($string4 != $stream4 || $stream4 != stream_get_contents($row['DATA2'])) {
     echo 'Expected nclob value to match clob value for stream4', PHP_EOL;
 }
+?>
+--CLEAN--
+<?php
+require 'ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
+$db->exec("DROP TABLE pdo_oci_bug60994");
 ?>
 --EXPECT--
 Test 1:  j

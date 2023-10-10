@@ -18,7 +18,7 @@ if (getenv('PDOTEST_DSN') === false) {
 class PDOTest {
     // create an instance of the PDO driver, based on
     // the current environment
-    static function factory($classname = 'PDO', $drop_test_tables = true) {
+    static function factory($classname = 'PDO') {
         $dsn = getenv('PDOTEST_DSN');
         $user = getenv('PDOTEST_USER');
         $pass = getenv('PDOTEST_PASS');
@@ -39,19 +39,6 @@ class PDOTest {
         }
         // Ignore errors about non-existent tables
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-
-        // clean up any crufty test tables we might have left behind
-        // on a previous run
-        static $test_tables = array(
-            'test',
-            'test2',
-            'classtypes'
-            );
-        if ($drop_test_tables) {
-            foreach ($test_tables as $table) {
-                $db->exec("DROP TABLE $table");
-            }
-        }
 
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
         $db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);

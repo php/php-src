@@ -67,27 +67,27 @@ class TestLeaf extends TestDerived
 {
 }
 
-$db->exec('CREATE TABLE classtypes(id int NOT NULL PRIMARY KEY, name VARCHAR(20) NOT NULL UNIQUE)');
-$db->exec('INSERT INTO classtypes VALUES(0, \'stdClass\')');
-$db->exec('INSERT INTO classtypes VALUES(1, \'TestBase\')');
-$db->exec('INSERT INTO classtypes VALUES(2, \'TestDerived\')');
+$db->exec('CREATE TABLE classtypes018(id int NOT NULL PRIMARY KEY, name VARCHAR(20) NOT NULL UNIQUE)');
+$db->exec('INSERT INTO classtypes018 VALUES(0, \'stdClass\')');
+$db->exec('INSERT INTO classtypes018 VALUES(1, \'TestBase\')');
+$db->exec('INSERT INTO classtypes018 VALUES(2, \'TestDerived\')');
 
 switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
   case 'dblib':
     // environment settings can influence how the table is created if specifics are missing
     // https://msdn.microsoft.com/en-us/library/ms174979.aspx#Nullability Rules Within a Table Definition
-    $sql = 'CREATE TABLE test(id int NOT NULL PRIMARY KEY, classtype int NULL, val VARCHAR(255) NULL)';
+    $sql = 'CREATE TABLE test018(id int NOT NULL PRIMARY KEY, classtype int NULL, val VARCHAR(255) NULL)';
     break;
   default:
-    $sql = 'CREATE TABLE test(id int NOT NULL PRIMARY KEY, classtype int, val VARCHAR(255))';
+    $sql = 'CREATE TABLE test018(id int NOT NULL PRIMARY KEY, classtype int, val VARCHAR(255))';
     break;
 }
 $db->exec($sql);
 
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-var_dump($db->query('SELECT COUNT(*) FROM classtypes')->fetchColumn());
-var_dump($db->query('SELECT id, name FROM classtypes ORDER by id')->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_UNIQUE));
+var_dump($db->query('SELECT COUNT(*) FROM classtypes018')->fetchColumn());
+var_dump($db->query('SELECT id, name FROM classtypes018 ORDER by id')->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_UNIQUE));
 
 $objs = array();
 $objs[0] = new stdClass;
@@ -95,7 +95,7 @@ $objs[1] = new TestBase;
 $objs[2] = new TestDerived;
 $objs[3] = new TestLeaf;
 
-$stmt = $db->prepare('SELECT id FROM classtypes WHERE name=:cname');
+$stmt = $db->prepare('SELECT id FROM classtypes018 WHERE name=:cname');
 $stmt->bindParam(':cname', $cname);
 
 $ctypes = array();
@@ -116,7 +116,7 @@ var_dump($ctypes);
 unset($stmt);
 
 echo "===INSERT===\n";
-$stmt = $db->prepare('INSERT INTO test VALUES(:id, :classtype, :val)');
+$stmt = $db->prepare('INSERT INTO test018 VALUES(:id, :classtype, :val)');
 $stmt->bindParam(':id', $idx);
 $stmt->bindParam(':classtype', $ctype);
 $stmt->bindParam(':val', $val);
@@ -138,7 +138,7 @@ foreach($objs as $idx => $obj)
 unset($stmt);
 
 echo "===DATA===\n";
-$res = $db->query('SELECT test.val FROM test')->fetchAll(PDO::FETCH_COLUMN);
+$res = $db->query('SELECT test.val FROM test018')->fetchAll(PDO::FETCH_COLUMN);
 
 switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
     case 'dblib':
@@ -160,7 +160,7 @@ var_dump($res);
 echo "===FAILURE===\n";
 try
 {
-    $db->query('SELECT classtypes.name AS name, test.val AS val FROM test LEFT JOIN classtypes ON test.classtype=classtypes.id')->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_CLASSTYPE|PDO::FETCH_SERIALIZE, 'TestLeaf', array());
+    $db->query('SELECT classtypes.name AS name, test.val AS val FROM test018 LEFT JOIN classtypes ON test.classtype=classtypes.id')->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_CLASSTYPE|PDO::FETCH_SERIALIZE, 'TestLeaf', array());
 }
 catch (PDOException $e)
 {
@@ -169,10 +169,10 @@ catch (PDOException $e)
 }
 
 echo "===COUNT===\n";
-var_dump($db->query('SELECT COUNT(*) FROM test LEFT JOIN classtypes ON test.classtype=classtypes.id WHERE (classtypes.id IS NULL OR classtypes.id > 0)')->fetchColumn());
+var_dump($db->query('SELECT COUNT(*) FROM test018 LEFT JOIN classtypes ON test.classtype=classtypes.id WHERE (classtypes.id IS NULL OR classtypes.id > 0)')->fetchColumn());
 
 echo "===DATABASE===\n";
-$stmt = $db->prepare('SELECT classtypes.name AS name, test.val AS val FROM test LEFT JOIN classtypes ON test.classtype=classtypes.id WHERE (classtypes.id IS NULL OR classtypes.id > 0)');
+$stmt = $db->prepare('SELECT classtypes.name AS name, test.val AS val FROM test018 LEFT JOIN classtypes ON test.classtype=classtypes.id WHERE (classtypes.id IS NULL OR classtypes.id > 0)');
 
 $stmt->execute();
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -182,6 +182,13 @@ $stmt->execute();
 var_dump($stmt->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_CLASSTYPE|PDO::FETCH_SERIALIZE, 'TestLeaf'));
 
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+$db->exec("DROP TABLE test018");
+$db->exec("DROP TABLE classtypes018");
 ?>
 --EXPECTF--
 Deprecated: %s implements the Serializable interface, which is deprecated. Implement __serialize() and __unserialize() instead (or in addition, if support for old PHP versions is necessary) in %s on line %d

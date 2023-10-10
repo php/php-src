@@ -15,7 +15,7 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
+$db->exec('CREATE TABLE test025(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
 
 $data = array(
     array('10', 'Abc', 'zxy'),
@@ -28,7 +28,7 @@ $data = array(
 
 
 // Insert using question mark placeholders
-$stmt = $db->prepare("INSERT INTO test VALUES(?, ?, ?)");
+$stmt = $db->prepare("INSERT INTO test025 VALUES(?, ?, ?)");
 foreach ($data as $row) {
     $stmt->execute($row);
 }
@@ -37,7 +37,7 @@ class Test {
     public $id, $val, $val2;
 }
 
-$stmt = $db->prepare('SELECT * FROM test');
+$stmt = $db->prepare('SELECT * FROM test025');
 $stmt->setFetchMode(PDO::FETCH_INTO, new Test);
 $stmt->execute();
 
@@ -59,6 +59,12 @@ foreach($stmt as $obj) {
     var_dump($obj);
 }
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+$db->exec("DROP TABLE test025");
 ?>
 --EXPECTF--
 object(Test)#%d (3) {

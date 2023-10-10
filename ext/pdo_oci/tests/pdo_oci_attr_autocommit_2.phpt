@@ -14,8 +14,6 @@ PDOTest::skip();
 require(__DIR__ . '/../../pdo/tests/pdo_test.inc');
 $dbh = PDOTest::factory();
 
-$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-$dbh->exec("drop table pdo_ac_tab");
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $dbh->exec("create table pdo_ac_tab (col1 varchar2(25))");
@@ -102,6 +100,12 @@ while ($r = $s->fetch()) {
 
 echo "Done\n";
 
+?>
+--CLEAN--
+<?php
+require 'ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
+$db->exec("DROP TABLE test_pdo_oci_attr_autocommit_2");
 ?>
 --EXPECTF--
 Test 1 Check beginTransaction insertion

@@ -33,7 +33,7 @@ var_dump($data === $string);
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
-$db->exec("DROP TABLE bug80783a");
+$db->exec("DROP TABLE IF EXISTS bug80783a");
 ?>
 --EXPECT--
 bool(true)

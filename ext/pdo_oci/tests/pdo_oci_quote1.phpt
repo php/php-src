@@ -14,9 +14,8 @@ PDOTest::skip();
 require __DIR__ . '/../../pdo/tests/pdo_test.inc';
 $db = PDOTest::factory();
 
-@$db->exec("drop table poq_tab");
-$db->query("create table poq_tab (t varchar2(100))");
-$stmt = $db->prepare('select * from poq_tab');
+$db->query("create table test_pdo_oci_quote1 (t varchar2(100))");
+$stmt = $db->prepare('select * from test_pdo_oci_quote1');
 
 // The intent is that the fetched data be identical to the unquoted string.
 // Remember!: use bind variables instead of PDO->quote()
@@ -29,17 +28,20 @@ foreach ($a as $u) {
     echo "Quoted   : ";
     var_dump($q);
 
-    $db->exec("delete from poq_tab");
+    $db->exec("delete from test_pdo_oci_quote1");
 
-    $db->query("insert into poq_tab (t) values($q)");
+    $db->query("insert into test_pdo_oci_quote1 (t) values($q)");
     $stmt->execute();
     var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 }
 
 echo "Done\n";
-
-@$db->exec("drop table poq_tab");
-
+?>
+--CLEAN--
+<?php
+require 'ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
+$db->exec("DROP TABLE test_pdo_oci_quote1");
 ?>
 --EXPECT--
 Unquoted : string(0) ""
