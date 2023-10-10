@@ -35,6 +35,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12380 (JIT+private array property access inside closure
     accesses private property in child class). (nielsdos)
 
+- Random:
+  . Fix Randomizer::getFloat() returning incorrect results under
+    certain circumstances. (timwolla)
+
 - SimpleXML:
   . Apply iterator fixes only on master. (nielsdos)
 
