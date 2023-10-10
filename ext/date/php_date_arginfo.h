@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0f204ac6646be79b515189a384fce9bcea9a4f42 */
+ * Stub hash: 1445f6053da5ca9dc7bb618f2eadc4a8ea56a15f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -280,6 +280,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DateTime_cre
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timezone, DateTimeZone, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTime_createFromTimestamp, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_MASK(0, timestamp, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DateTime_getLastErrors, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
@@ -347,6 +351,8 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DateTimeImmu
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timezone, DateTimeZone, 1, "null")
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_DateTimeImmutable_createFromTimestamp arginfo_class_DateTime_createFromTimestamp
 
 #define arginfo_class_DateTimeImmutable_getLastErrors arginfo_class_DateTime_getLastErrors
 
@@ -554,6 +560,7 @@ ZEND_METHOD(DateTime, __wakeup);
 ZEND_METHOD(DateTime, __set_state);
 ZEND_METHOD(DateTime, createFromImmutable);
 ZEND_METHOD(DateTime, createFromInterface);
+ZEND_METHOD(DateTime, createFromTimestamp);
 ZEND_METHOD(DateTime, modify);
 ZEND_METHOD(DateTime, sub);
 ZEND_METHOD(DateTimeImmutable, __construct);
@@ -561,6 +568,7 @@ ZEND_METHOD(DateTimeImmutable, __serialize);
 ZEND_METHOD(DateTimeImmutable, __unserialize);
 ZEND_METHOD(DateTimeImmutable, __wakeup);
 ZEND_METHOD(DateTimeImmutable, __set_state);
+ZEND_METHOD(DateTimeImmutable, createFromTimestamp);
 ZEND_METHOD(DateTimeImmutable, modify);
 ZEND_METHOD(DateTimeImmutable, add);
 ZEND_METHOD(DateTimeImmutable, sub);
@@ -670,6 +678,7 @@ static const zend_function_entry class_DateTime_methods[] = {
 	ZEND_ME(DateTime, createFromImmutable, arginfo_class_DateTime_createFromImmutable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(DateTime, createFromInterface, arginfo_class_DateTime_createFromInterface, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(createFromFormat, date_create_from_format, arginfo_class_DateTime_createFromFormat, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(DateTime, createFromTimestamp, arginfo_class_DateTime_createFromTimestamp, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(getLastErrors, date_get_last_errors, arginfo_class_DateTime_getLastErrors, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(format, date_format, arginfo_class_DateTime_format, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTime, modify, arginfo_class_DateTime_modify, ZEND_ACC_PUBLIC)
@@ -695,6 +704,7 @@ static const zend_function_entry class_DateTimeImmutable_methods[] = {
 	ZEND_ME(DateTimeImmutable, __wakeup, arginfo_class_DateTimeImmutable___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeImmutable, __set_state, arginfo_class_DateTimeImmutable___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(createFromFormat, date_create_immutable_from_format, arginfo_class_DateTimeImmutable_createFromFormat, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(DateTimeImmutable, createFromTimestamp, arginfo_class_DateTimeImmutable_createFromTimestamp, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(getLastErrors, date_get_last_errors, arginfo_class_DateTimeImmutable_getLastErrors, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(format, date_format, arginfo_class_DateTimeImmutable_format, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getTimezone, date_timezone_get, arginfo_class_DateTimeImmutable_getTimezone, ZEND_ACC_PUBLIC)

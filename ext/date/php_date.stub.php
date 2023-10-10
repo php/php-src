@@ -362,6 +362,9 @@ class DateTime implements DateTimeInterface
      */
     public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null): DateTime|false {}
 
+    /** @tentative-return-type */
+    public static function createFromTimestamp(int|float $timestamp): static {}
+
     /**
      * @return array<string, int|array>|false
      * @tentative-return-type
@@ -465,6 +468,9 @@ class DateTimeImmutable implements DateTimeInterface
      * @alias date_create_immutable_from_format
      */
     public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null): DateTimeImmutable|false {}
+
+    /** @tentative-return-type */
+    public static function createFromTimestamp(int|float $timestamp): static {}
 
     /**
      * @return array<string, int|array>|false
