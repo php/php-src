@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.26
 
-
+- Opcache:
+  . Added warning when JIT cannot be enabled. (danog)
 
 26 Oct 2023, PHP 8.1.25
 
