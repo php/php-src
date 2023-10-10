@@ -3,6 +3,7 @@ env:
 
 freebsd_task:
   name: FREEBSD_DEBUG_NTS
+  only_if: $CIRRUS_CRON == 'nightly' || $CIRRUS_CHANGE_TITLE =~ '.*\[ci freebsd\].*'
   freebsd_instance:
     image_family: freebsd-13-2
   env:
@@ -30,6 +31,7 @@ freebsd_task:
 
 arm_task:
   name: ARM_DEBUG_NTS
+  only_if: $CIRRUS_CRON == 'nightly' || $CIRRUS_CHANGE_TITLE =~ '.*\[ci arm\].*'
   arm_container:
     image: debian:12
     additional_containers:
