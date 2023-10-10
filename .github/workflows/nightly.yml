@@ -391,6 +391,7 @@ jobs:
           echo opcache.jit_blacklist_side_trace=255 >> /etc/php.d/opcache.ini
           echo opcache.file_update_protection=0 >> /etc/php.d/opcache.ini
           echo opcache.memory_consumption=2G >> /etc/php.d/opcache.ini
+          echo opcache.interned_strings_buffer=64 >> /etc/php.d/opcache.ini
           echo opcache.max_accelerated_files=100000 >> /etc/php.d/opcache.ini
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
           php -v
