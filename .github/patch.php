@@ -1,7 +1,7 @@
 <?php
 
 register_shutdown_function(function () {
-    $status = opcache_get_status();
+    $status = opcache_get_status(false);
     var_dump($status);
 
     if ($status["memory_usage"]["free_memory"] < 10*1024) {

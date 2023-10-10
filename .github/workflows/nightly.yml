@@ -414,8 +414,8 @@ jobs:
           sed 's/80399/89999/g' -i conf/parametersSchema.neon
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           export ASAN_OPTIONS=exitcode=139
-          php bin/phpstan clear-result-cache
-          php bin/phpstan || exit $?
+          php $GITHUB_WORKSPACE/.github/patch.php bin/phpstan clear-result-cache
+          php $GITHUB_WORKSPACE/.github/patch.php bin/phpstan || exit $?
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
@@ -511,7 +511,7 @@ jobs:
           export ASAN_OPTIONS=exitcode=139
           export PHPSECLIB_ALLOW_JIT=1
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
+          php $GITHUB_WORKSPACE/.github/patch.php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
       - name: Test PHPUnit
         if: always()
         run: |
