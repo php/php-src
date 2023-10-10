@@ -229,6 +229,7 @@ zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce)
 					ZSTR_VAL(name));
 				goto failure;
 			}
+			Z_TRY_ADDREF_P(case_name);
 			zend_hash_index_add_new(backed_enum_table, long_key, case_name);
 		} else {
 			ZEND_ASSERT(ce->enum_backing_type == IS_STRING);
@@ -241,6 +242,7 @@ zend_result zend_enum_build_backed_enum_table(zend_class_entry *ce)
 					ZSTR_VAL(name));
 				goto failure;
 			}
+			Z_TRY_ADDREF_P(case_name);
 			zend_hash_add_new(backed_enum_table, string_key, case_name);
 		}
 	} ZEND_HASH_FOREACH_END();
