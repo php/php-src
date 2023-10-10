@@ -1,7 +1,5 @@
 <?php
 
-$code = '<?php
-
 register_shutdown_function(function () {
     $status = opcache_get_status();
     var_dump($status);
@@ -19,10 +17,9 @@ register_shutdown_function(function () {
         die(130);
     }
 
-    gc_collect_cycles();
-});';
+    unset($status);
 
-file_put_contents(
-    $argv[1],
-    str_replace('<?php', $code, file_get_contents($argv[1]))
-);
+    gc_collect_cycles();
+});
+
+require $argv[1];
