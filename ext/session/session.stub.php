@@ -6,17 +6,17 @@
  * @var int
  * @cvalue php_session_disabled
  */
-const PHP_SESSION_DISABLED = UNKNOWN;
+const PHP_SESSION_DISABLED = 0;
 /**
  * @var int
  * @cvalue php_session_none
  */
-const PHP_SESSION_NONE = UNKNOWN;
+const PHP_SESSION_NONE = 1;
 /**
  * @var int
  * @cvalue php_session_active
  */
-const PHP_SESSION_ACTIVE = UNKNOWN;
+const PHP_SESSION_ACTIVE = 2;
 
 /** @refcount 1 */
 function session_name(?string $name = null): string|false {}
