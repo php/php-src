@@ -3278,6 +3278,7 @@ static zend_result accel_post_startup(void)
 			 || zend_jit_startup(ZSMMG(reserved), jit_size, reattached) != SUCCESS) {
 				JIT_G(enabled) = false;
 				JIT_G(on) = false;
+				zend_accel_error(ACCEL_LOG_WARNING, "Could not enable JIT!");
 			}
 		}
 #endif
