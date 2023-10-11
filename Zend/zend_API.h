@@ -1794,7 +1794,7 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_DOUBLE_EX(dest, is_null, 1, 0)
 
 /* old "f" */
-#define Z_PARAM_FUNC_EX(dest_fci, dest_fcc, check_null, deref, free_trampoline) \
+#define Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, deref, free_trampoline) \
 		Z_PARAM_PROLOGUE(deref, 0); \
 		if (UNEXPECTED(!zend_parse_arg_func(_arg, &dest_fci, &dest_fcc, check_null, &_error, free_trampoline))) { \
 			if (!_error) { \
@@ -1806,20 +1806,22 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 			break; \
 		} \
 
+#define Z_PARAM_FUNC_EX(dest_fci, dest_fcc, check_null, deref) Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, deref, true)
+
 #define Z_PARAM_FUNC(dest_fci, dest_fcc) \
-	Z_PARAM_FUNC_EX(dest_fci, dest_fcc, 0, 0, true)
+	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, 0, 0, true)
 
 #define Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(dest_fci, dest_fcc) \
-	Z_PARAM_FUNC_EX(dest_fci, dest_fcc, 0, 0, false)
+	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, 0, 0, false)
 
 #define Z_PARAM_FUNC_OR_NULL(dest_fci, dest_fcc) \
-	Z_PARAM_FUNC_EX(dest_fci, dest_fcc, 1, 0, true)
+	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, 1, 0, true)
 
 #define Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(dest_fci, dest_fcc) \
-	Z_PARAM_FUNC_EX(dest_fci, dest_fcc, 1, 0, false)
+	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, 1, 0, false)
 
 #define Z_PARAM_FUNC_OR_NULL_WITH_ZVAL(dest_fci, dest_fcc, dest_zp) \
-	Z_PARAM_FUNC_EX(dest_fci, dest_fcc, 1, 0, true) \
+	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, 1, 0, true) \
 	Z_PARAM_GET_PREV_ZVAL(dest_zp)
 
 /* old "h" */

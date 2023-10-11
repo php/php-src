@@ -23,6 +23,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   This is identical to the 'f' or Z_PARAM_FUNC type check, except the FCC is
   always initialized because it doesn't free trampolines.
   Trampolines MUST be freed using zend_release_fcall_info_cache() or consumed.
+  Z_PARAM_FUNC_EX2 was added as well with the same arguments as Z_PARAM_FUNC_EX
+  plus an additional argument free_trampoline.
 
 ========================
 2. Build system changes
