@@ -547,7 +547,7 @@ int ir_sccp(ir_ctx *ctx)
 
 	ctx->flags |= IR_OPT_IN_SCCP;
 
-	/* A bit modified SCCP algorith of M. N. Wegman and F. K. Zadeck */
+	/* A bit modified SCCP algorithm of M. N. Wegman and F. K. Zadeck */
 	ir_bitqueue_init(&worklist, ctx->insns_count);
 	worklist.pos = 0;
 	ir_bitset_incl(worklist.set, 1);
@@ -605,7 +605,7 @@ int ir_sccp(ir_ctx *ctx)
 							/* Perform folding only if some of direct inputs
 							 * is going to be replaced by a constant or copy.
 							 * This approach may miss some folding optimizations
-							 * dependent on indirect inputs. e.g reassociation.
+							 * dependent on indirect inputs. e.g. reassociation.
 							 */
 							may_benefit = 1;
 						}
@@ -738,7 +738,7 @@ int ir_sccp(ir_ctx *ctx)
 			} else {
 				IR_MAKE_BOTTOM(i);
 
-				/* control, call, load and strore instructions may have unprocessed inputs */
+				/* control, call, load and store instructions may have unprocessed inputs */
 				n = IR_INPUT_EDGES_COUNT(flags);
 				if (IR_OP_HAS_VAR_INPUTS(flags) && (n = insn->inputs_count) > 3) {
 					for (j = 0; j < (n>>2); j++) {

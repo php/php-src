@@ -852,7 +852,7 @@ static void ir_match_insn2(ir_ctx *ctx, ir_ref ref, uint32_t rule)
 {
 }
 
-/* code genertion */
+/* code generation */
 static int32_t ir_ref_spill_slot(ir_ctx *ctx, ir_ref ref, ir_reg *reg)
 {
 	int32_t offset;
@@ -2105,7 +2105,7 @@ static void ir_emit_cmp_fp(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	dasm_State **Dst = &data->dasm_state;
 	ir_op op = ir_emit_cmp_fp_common(ctx, def, insn);
 	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
-//???	ir_reg tmp_reg = ctx->regs[def][3]; // TODO: take into accouny vs flag
+//???	ir_reg tmp_reg = ctx->regs[def][3]; // TODO: take into account vs flag
 
 	IR_ASSERT(def_reg != IR_REG_NONE);
 	switch (op) {
@@ -3389,7 +3389,7 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 		ir_emit_load(ctx, type, op2_reg, insn->op2);
 	}
 
-	/* Generate a table jmp or a seqence of calls */
+	/* Generate a table jmp or a sequence of calls */
 	if ((max.i64-min.i64) < count * 8) {
 		int *labels = ir_mem_malloc(sizeof(int) * (max.i64 - min.i64 + 1));
 
@@ -3734,7 +3734,7 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 		}
 	}
 
-	/* 2. move all arguments that should be passed from one register to anouther (REG->REG movs) */
+	/* 2. move all arguments that should be passed from one register to another (REG->REG movs) */
 	if (count) {
 		ir_parallel_copy(ctx, copies, count, tmp_reg, tmp_fp_reg);
 	}
@@ -5058,7 +5058,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 					ir_emit_tls(ctx, i, insn);
 					break;
 				default:
-					IR_ASSERT(0 && "NIY rule/insruction");
+					IR_ASSERT(0 && "NIY rule/instruction");
 					dasm_free(&data.dasm_state);
 					ctx->data = NULL;
 					ctx->status = IR_ERROR_UNSUPPORTED_CODE_RULE;

@@ -1185,7 +1185,7 @@ binop_fp:
 						return IR_IMUL3;
 					}
 				}
-				/* Prefer IMUL over MUL because it's more flexable and uses less registers ??? */
+				/* Prefer IMUL over MUL because it's more flexible and uses less registers ??? */
 //				if (IR_IS_TYPE_SIGNED(insn->type) && ir_type_size[insn->type] != 1) {
 				if (ir_type_size[insn->type] != 1) {
 					goto binop_int;
@@ -1877,7 +1877,7 @@ static void ir_match_insn2(ir_ctx *ctx, ir_ref ref, uint32_t rule)
 	}
 }
 
-/* code genertion */
+/* code generation */
 static int32_t ir_ref_spill_slot(ir_ctx *ctx, ir_ref ref, ir_reg *reg)
 {
 	int32_t offset;
@@ -5899,7 +5899,7 @@ static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_
 			loc[from_reg] = from_reg;
 			pred[to] = from_reg;
 			types[from_reg] = copies[i].type;
-			/* temporary register may de the same as some of destionations */
+			/* temporary register may be the same as some of destinations */
 			if (to == tmp_reg) {
 				IR_ASSERT(last_reg == IR_REG_NONE);
 				last_reg = to;
@@ -6205,7 +6205,7 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 		}
 	}
 
-	/* 2. move all arguments that should be passed from one register to anouther (REG->REG movs) */
+	/* 2. move all arguments that should be passed from one register to another (REG->REG movs) */
 	if (count) {
 		ir_parallel_copy(ctx, copies, count, tmp_reg, tmp_fp_reg);
 	}
@@ -6405,6 +6405,13 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 		}
 	}
 #endif
+#ifdef IR_REG_VARARG_FP_REGS
+	/* set hidden argument to specify the number of vector registers used */
+	if (ir_is_vararg(ctx, insn)) {
+		fp_param = IR_MIN(fp_param, fp_reg_params_count);
+		|	mov Rd(IR_REG_VARARG_FP_REGS), fp_param
+	}
+#endif
 
 	return used_stack;
 }
@@ -6430,12 +6437,19 @@ static void ir_emit_call(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			|	call aword &addr
 		} else {
 |.if X64
-			if (IR_IS_SIGNED_32BIT(addr)) {
-				|	mov rax, ((ptrdiff_t)addr)    // 0x48 0xc7 0xc0 <imm-32-bit>
-			} else {
-				|	mov64 rax, ((ptrdiff_t)addr)  // 0x48 0xb8 <imm-64-bit>
-			}
-			|	call rax
+||			ir_reg tmp_reg = IR_REG_RAX;
+
+#ifdef IR_REG_VARARG_FP_REGS
+||			if (ir_is_vararg(ctx, insn)) {
+||				tmp_reg = IR_REG_R11;
+||			}
+#endif
+||			if (IR_IS_SIGNED_32BIT(addr)) {
+				|	mov Rq(tmp_reg), ((ptrdiff_t)addr)    // 0x48 0xc7 0xc0 <imm-32-bit>
+||			} else {
+				|	mov64 Rq(tmp_reg), ((ptrdiff_t)addr)  // 0x48 0xb8 <imm-64-bit>
+||			}
+			|	call Rq(tmp_reg)
 |.endif
 		}
     } else {
@@ -6541,12 +6555,19 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			|	jmp aword &addr
 		} else {
 |.if X64
-			if (IR_IS_SIGNED_32BIT(addr)) {
-				|	mov rax, ((ptrdiff_t)addr)    // 0x48 0xc7 0xc0 <imm-32-bit>
-			} else {
-				|	mov64 rax, ((ptrdiff_t)addr)  // 0x48 0xb8 <imm-64-bit>
-			}
-			|	jmp rax
+||			ir_reg tmp_reg = IR_REG_RAX;
+
+#ifdef IR_REG_VARARG_FP_REGS
+||			if (ir_is_vararg(ctx, insn)) {
+||				tmp_reg = IR_REG_R11;
+||			}
+#endif
+||			if (IR_IS_SIGNED_32BIT(addr)) {
+				|	mov Rq(tmp_reg), ((ptrdiff_t)addr)    // 0x48 0xc7 0xc0 <imm-32-bit>
+||			} else {
+				|	mov64 Rq(tmp_reg), ((ptrdiff_t)addr)  // 0x48 0xb8 <imm-64-bit>
+||			}
+			|	jmp Rq(tmp_reg)
 |.endif
 		}
     } else {
@@ -8513,7 +8534,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 					|	int3
 					break;
 				default:
-					IR_ASSERT(0 && "NIY rule/insruction");
+					IR_ASSERT(0 && "NIY rule/instruction");
 					dasm_free(&data.dasm_state);
 					ctx->data = NULL;
 					ctx->status = IR_ERROR_UNSUPPORTED_CODE_RULE;

@@ -134,7 +134,7 @@ int ir_build_cfg(ir_ctx *ctx)
 		n = use_list->count;
 		if (n > 1) {
 			for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
-				/* Remember possible inaccessible succcessors */
+				/* Remember possible inaccessible successors */
 				ir_bitset_incl(bb_leaks, *p);
 			}
 		}
@@ -164,12 +164,12 @@ int ir_build_cfg(ir_ctx *ctx)
 	}
 
 	/* Backward DFS way miss some branches ending by infinite loops.  */
-	/* Try forward DFS. (in most cases all nodes are already proceed. */
+	/* Try forward DFS. (in most cases all nodes are already proceed). */
 
-	/* START node my be inaccessible from "stop" nodes */
+	/* START node may be inaccessible from "stop" nodes */
 	ir_bitset_incl(bb_leaks, 1);
 
-	/* Add not processed START and succcessor of IF and SWITCH */
+	/* Add not processed START and successor of IF and SWITCH */
 	IR_BITSET_FOREACH_DIFFERENCE(bb_leaks, bb_starts, len, start) {
 		ir_worklist_push(&worklist, start);
 	} IR_BITSET_FOREACH_END();
@@ -225,12 +225,12 @@ next_successor:
 
 	IR_ASSERT(bb_count > 0);
 
-	/* Create array of basic blocks and count succcessor/predecessors edges for each BB */
+	/* Create array of basic blocks and count successor/predecessors edges for each BB */
 	blocks = ir_mem_malloc((bb_count + 1) * sizeof(ir_block));
 	b = 1;
 	bb = blocks + 1;
 	count = 0;
-	/* SCCP already removed UNREACHABKE blocks, otherwiseall blocks are marked as UNREACHABLE first */
+	/* SCCP already removed UNREACHABKE blocks, otherwise all blocks are marked as UNREACHABLE first */
 	bb_init_falgs = (ctx->flags & IR_SCCP_DONE) ? 0 : IR_BB_UNREACHABLE;
 	IR_BITSET_FOREACH(bb_starts, len, start) {
 		end = _blocks[start];

@@ -837,8 +837,7 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 							ival = ctx->live_intervals[v];
 						}
 						ir_add_use(ctx, ival, j, use_pos, reg, IR_USE_FLAGS(def_flags, j), hint_ref);
-					} else {
-						IR_ASSERT(ctx->rules);
+					} else if (ctx->rules) {
 						if (ctx->rules[input] & IR_FUSED) {
 						    ir_add_fusion_ranges(ctx, ref, input, bb, live);
 						} else if (ctx->rules[input] == (IR_SKIPPED|IR_RLOAD)) {
@@ -922,7 +921,7 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 }
 
 #else
-/* Path exploration by defiition livness for SSA using sets represented by linked lists */
+/* Path exploration by definition liveness for SSA using sets represented by linked lists */
 
 #define IS_LIVE_IN_BLOCK(v, b) \
 	(live_in_block[v] == b)
@@ -1035,14 +1034,14 @@ static void ir_compute_live_sets(ir_ctx *ctx, uint32_t *live_outs, ir_list *live
 				} else {
 					uint32_t use_block = ctx->cfg_map[use];
 
-					/* Check if the vitual register is alive at the start of 'use_block' */
+					/* Check if the virtual register is alive at the start of 'use_block' */
 					if (def_block != use_block && ir_live_out_top(ctx, live_outs, live_lists, use_block) != v) {
 						ir_list_push(&block_queue, use_block);
 					}
 				}
 			}
 
-			/* UP_AND_MARK: Traverse through predecessor blocks until we reache the block where 'v' is defined*/
+			/* UP_AND_MARK: Traverse through predecessor blocks until we reach the block where 'v' is defined*/
 			while (ir_list_len(&block_queue)) {
 				uint32_t b = ir_list_pop(&block_queue);
 				ir_block *bb = &ctx->cfg_blocks[b];
@@ -1449,8 +1448,7 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 							ival = ctx->live_intervals[v];
 						}
 						ir_add_use(ctx, ival, j, use_pos, reg, IR_USE_FLAGS(def_flags, j), hint_ref);
-					} else {
-						IR_ASSERT(ctx->rules);
+					} else if (ctx->rules) {
 						if (ctx->rules[input] & IR_FUSED) {
 						    ir_add_fusion_ranges(ctx, ref, input, bb, live_in_block, b);
 						} else {
@@ -1814,7 +1812,7 @@ int ir_coalesce(ir_ctx *ctx)
 	ir_worklist blocks;
 	bool compact = 0;
 
-	/* Collect a list of blocks which are predecossors to block with phi finctions */
+	/* Collect a list of blocks which are predecossors to block with phi functions */
 	ir_worklist_init(&blocks, ctx->cfg_blocks_count + 1);
 	for (b = 1, bb = &ctx->cfg_blocks[1]; b <= ctx->cfg_blocks_count; b++, bb++) {
 		IR_ASSERT(!(bb->flags & IR_BB_UNREACHABLE));
@@ -3716,7 +3714,7 @@ static void assign_regs(ir_ctx *ctx)
 							while (use_pos) {
 								reg = ival->reg;
 								ref = IR_LIVE_POS_TO_REF(use_pos->pos);
-								// TODO: Insert spill loads and stotres in optimal positons (resolution)
+								// TODO: Insert spill loads and stores in optimal positions (resolution)
 								if (use_pos->op_num == 0) {
 									if (ctx->ir_base[ref].op == IR_PHI) {
 										/* Spilled PHI var is passed through memory */

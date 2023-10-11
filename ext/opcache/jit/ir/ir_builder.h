@@ -33,6 +33,7 @@ extern "C" {
 
 #define ir_CMP_OP(_op, _op1, _op2)        ir_fold2(_ir_CTX, IR_OPT((_op), IR_BOOL), (_op1), (_op2))
 
+#define ir_UNARY_OP(_op, _type, _op1)     ir_fold1(_ir_CTX, IR_OPT((_op), (_type)),   (_op1))
 #define ir_UNARY_OP_B(_op, _op1)          ir_fold1(_ir_CTX, IR_OPT((_op), IR_BOOL),   (_op1))
 #define ir_UNARY_OP_U8(_op, _op1)         ir_fold1(_ir_CTX, IR_OPT((_op), IR_U8),     (_op1))
 #define ir_UNARY_OP_U16(_op, _op1)        ir_fold1(_ir_CTX, IR_OPT((_op), IR_U16),    (_op1))
@@ -47,6 +48,7 @@ extern "C" {
 #define ir_UNARY_OP_D(_op, _op1)          ir_fold1(_ir_CTX, IR_OPT((_op), IR_DOUBLE), (_op1))
 #define ir_UNARY_OP_F(_op, _op1)          ir_fold1(_ir_CTX, IR_OPT((_op), IR_FLOAT),  (_op1))
 
+#define ir_BINARY_OP(_op, _t, _op1, _op2) ir_fold2(_ir_CTX, IR_OPT((_op), (_t)),      (_op1), (_op2))
 #define ir_BINARY_OP_B(_op, _op1, _op2)   ir_fold2(_ir_CTX, IR_OPT((_op), IR_BOOL),   (_op1), (_op2))
 #define ir_BINARY_OP_U8(_op, _op1, _op2)  ir_fold2(_ir_CTX, IR_OPT((_op), IR_U8),     (_op1), (_op2))
 #define ir_BINARY_OP_U16(_op, _op1, _op2) ir_fold2(_ir_CTX, IR_OPT((_op), IR_U16),    (_op1), (_op2))
@@ -74,6 +76,7 @@ extern "C" {
 #define ir_ULE(_op1, _op2)                ir_CMP_OP(IR_ULE, (_op1), (_op2))
 #define ir_UGT(_op1, _op2)                ir_CMP_OP(IR_UGT, (_op1), (_op2))
 
+#define ir_ADD(_type, _op1, _op2)         ir_BINARY_OP(IR_ADD, (_type), (_op1), (_op2))
 #define ir_ADD_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_ADD, (_op1), (_op2))
 #define ir_ADD_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_ADD, (_op1), (_op2))
 #define ir_ADD_U32(_op1, _op2)            ir_BINARY_OP_U32(IR_ADD, (_op1), (_op2))
@@ -87,6 +90,7 @@ extern "C" {
 #define ir_ADD_D(_op1, _op2)              ir_BINARY_OP_D(IR_ADD, (_op1), (_op2))
 #define ir_ADD_F(_op1, _op2)              ir_BINARY_OP_F(IR_ADD, (_op1), (_op2))
 
+#define ir_SUB(_type, _op1, _op2)         ir_BINARY_OP(IR_SUB, (_type), (_op1), (_op2))
 #define ir_SUB_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_SUB, (_op1), (_op2))
 #define ir_SUB_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_SUB, (_op1), (_op2))
 #define ir_SUB_U32(_op1, _op2)            ir_BINARY_OP_U32(IR_SUB, (_op1), (_op2))
@@ -100,6 +104,7 @@ extern "C" {
 #define ir_SUB_D(_op1, _op2)              ir_BINARY_OP_D(IR_SUB, (_op1), (_op2))
 #define ir_SUB_F(_op1, _op2)              ir_BINARY_OP_F(IR_SUB, (_op1), (_op2))
 
+#define ir_MUL(_type, _op1, _op2)         ir_BINARY_OP(IR_MUL, (_type), (_op1), (_op2))
 #define ir_MUL_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_MUL, (_op1), (_op2))
 #define ir_MUL_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_MUL, (_op1), (_op2))
 #define ir_MUL_U32(_op1, _op2)            ir_BINARY_OP_U32(IR_MUL, (_op1), (_op2))
@@ -113,6 +118,7 @@ extern "C" {
 #define ir_MUL_D(_op1, _op2)              ir_BINARY_OP_D(IR_MUL, (_op1), (_op2))
 #define ir_MUL_F(_op1, _op2)              ir_BINARY_OP_F(IR_MUL, (_op1), (_op2))
 
+#define ir_DIV(_type, _op1, _op2)         ir_BINARY_OP(IR_DIV, (_type), (_op1), (_op2))
 #define ir_DIV_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_DIV, (_op1), (_op2))
 #define ir_DIV_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_DIV, (_op1), (_op2))
 #define ir_DIV_U32(_op1, _op2)            ir_BINARY_OP_U32(IR_DIV, (_op1), (_op2))
@@ -126,6 +132,7 @@ extern "C" {
 #define ir_DIV_D(_op1, _op2)              ir_BINARY_OP_D(IR_DIV, (_op1), (_op2))
 #define ir_DIV_F(_op1, _op2)              ir_BINARY_OP_F(IR_DIV, (_op1), (_op2))
 
+#define ir_MOD(_type, _op1, _op2)         ir_BINARY_OP(IR_MOD, (_type), (_op1), (_op2))
 #define ir_MOD_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_MOD, (_op1), (_op2))
 #define ir_MOD_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_MOD, (_op1), (_op2))
 #define ir_MOD_U32(_op1, _op2)            ir_BINARY_OP_U32(IR_MOD, (_op1), (_op2))
@@ -137,6 +144,7 @@ extern "C" {
 #define ir_MOD_I32(_op1, _op2)            ir_BINARY_OP_I32(IR_MOD, (_op1), (_op2))
 #define ir_MOD_I64(_op1, _op2)            ir_BINARY_OP_I64(IR_MOD, (_op1), (_op2))
 
+#define ir_NEG(_type, _op1)               ir_UNARY_OP(IR_NEG, (_type), (_op1))
 #define ir_NEG_C(_op1)                    ir_UNARY_OP_C(IR_NEG, (_op1))
 #define ir_NEG_I8(_op1)                   ir_UNARY_OP_I8(IR_NEG, (_op1))
 #define ir_NEG_I16(_op1)                  ir_UNARY_OP_I16(IR_NEG, (_op1))
@@ -145,6 +153,7 @@ extern "C" {
 #define ir_NEG_D(_op1)                    ir_UNARY_OP_D(IR_NEG, (_op1))
 #define ir_NEG_F(_op1)                    ir_UNARY_OP_F(IR_NEG, (_op1))
 
+#define ir_ABS(_type, _op1)               ir_UNARY_OP(IR_ABS, (_type), (_op1))
 #define ir_ABS_C(_op1)                    ir_UNARY_OP_C(IR_ABS, (_op1))
 #define ir_ABS_I8(_op1)                   ir_UNARY_OP_I8(IR_ABS, (_op1))
 #define ir_ABS_I16(_op1)                  ir_UNARY_OP_I16(IR_ABS, (_op1))
@@ -153,6 +162,7 @@ extern "C" {
 #define ir_ABS_D(_op1)                    ir_UNARY_OP_D(IR_ABS, (_op1))
 #define ir_ABS_F(_op1)                    ir_UNARY_OP_F(IR_ABS, (_op1))
 
+#define ir_SEXT(_type, _op1)              ir_UNARY_OP(IR_SEXT, (_type), (_op1))
 #define ir_SEXT_U8(_op1)                  ir_UNARY_OP_U8(IR_SEXT, (_op1))
 #define ir_SEXT_U16(_op1)                 ir_UNARY_OP_U16(IR_SEXT, (_op1))
 #define ir_SEXT_U32(_op1)                 ir_UNARY_OP_U32(IR_SEXT, (_op1))
@@ -164,6 +174,7 @@ extern "C" {
 #define ir_SEXT_I32(_op1)                 ir_UNARY_OP_I32(IR_SEXT, (_op1))
 #define ir_SEXT_I64(_op1)                 ir_UNARY_OP_I64(IR_SEXT, (_op1))
 
+#define ir_ZEXT(_type, _op1)              ir_UNARY_OP(IR_ZEXT, (_type), (_op1))
 #define ir_ZEXT_U8(_op1)                  ir_UNARY_OP_U8(IR_ZEXT, (_op1))
 #define ir_ZEXT_U16(_op1)                 ir_UNARY_OP_U16(IR_ZEXT, (_op1))
 #define ir_ZEXT_U32(_op1)                 ir_UNARY_OP_U32(IR_ZEXT, (_op1))
@@ -175,6 +186,7 @@ extern "C" {
 #define ir_ZEXT_I32(_op1)                 ir_UNARY_OP_I32(IR_ZEXT, (_op1))
 #define ir_ZEXT_I64(_op1)                 ir_UNARY_OP_I64(IR_ZEXT, (_op1))
 
+#define ir_TRUNC(_type, _op1)             ir_UNARY_OP(IR_TRUNC, (_type), (_op1))
 #define ir_TRUNC_U8(_op1)                 ir_UNARY_OP_U8(IR_TRUNC, (_op1))
 #define ir_TRUNC_U16(_op1)                ir_UNARY_OP_U16(IR_TRUNC, (_op1))
 #define ir_TRUNC_U32(_op1)                ir_UNARY_OP_U32(IR_TRUNC, (_op1))
@@ -186,6 +198,7 @@ extern "C" {
 #define ir_TRUNC_I32(_op1)                ir_UNARY_OP_I32(IR_TRUNC, (_op1))
 #define ir_TRUNC_I64(_op1)                ir_UNARY_OP_I64(IR_TRUNC, (_op1))
 
+#define ir_BITCAST(_type, _op1)           ir_UNARY_OP(IR_BITCAST, (_type), (_op1))
 #define ir_BITCAST_U8(_op1)               ir_UNARY_OP_U8(IR_BITCAST, (_op1))
 #define ir_BITCAST_U16(_op1)              ir_UNARY_OP_U16(IR_BITCAST, (_op1))
 #define ir_BITCAST_U32(_op1)              ir_UNARY_OP_U32(IR_BITCAST, (_op1))
@@ -199,9 +212,11 @@ extern "C" {
 #define ir_BITCAST_D(_op1)                ir_UNARY_OP_D(IR_BITCAST, (_op1))
 #define ir_BITCAST_F(_op1)                ir_UNARY_OP_F(IR_BITCAST, (_op1))
 
+#define ir_INT2FP(_type, _op1)            ir_UNARY_OP(IR_INT2FP, (_type), (_op1))
 #define ir_INT2D(_op1)                    ir_UNARY_OP_D(IR_INT2FP, (_op1))
-#define ir_INT2F(_op1)                    ir_UNARY_OP_F(IR_INT2FP,  (_op1))
+#define ir_INT2F(_op1)                    ir_UNARY_OP_F(IR_INT2FP, (_op1))
 
+#define ir_FP2INT(_type, _op1)            ir_UNARY_OP(IR_FP2INT, (_type), (_op1))
 #define ir_FP2U8(_op1)                    ir_UNARY_OP_U8(IR_FP2INT, (_op1))
 #define ir_FP2U16(_op1)                   ir_UNARY_OP_U16(IR_FP2INT, (_op1))
 #define ir_FP2U32(_op1)                   ir_UNARY_OP_U32(IR_FP2INT, (_op1))
@@ -211,9 +226,11 @@ extern "C" {
 #define ir_FP2I32(_op1)                   ir_UNARY_OP_I32(IR_FP2INT, (_op1))
 #define ir_FP2I64(_op1)                   ir_UNARY_OP_I64(IR_FP2INT, (_op1))
 
+#define ir_FP2FP(_type, _op1)             ir_UNARY_OP(IR_FP2FP, (_type), (_op1))
 #define ir_F2D(_op1)                      ir_UNARY_OP_D(IR_FP2FP, (_op1))
 #define ir_D2F(_op1)                      ir_UNARY_OP_F(IR_FP2FP, (_op1))
 
+#define ir_ADD_OV(_type, _op1, _op2)      ir_BINARY_OP(IR_ADD_OV, (_type), (_op1), (_op2))
 #define ir_ADD_OV_U8(_op1, _op2)          ir_BINARY_OP_U8(IR_ADD_OV, (_op1), (_op2))
 #define ir_ADD_OV_U16(_op1, _op2)         ir_BINARY_OP_U16(IR_ADD_OV, (_op1), (_op2))
 #define ir_ADD_OV_U32(_op1, _op2)         ir_BINARY_OP_U32(IR_ADD_OV, (_op1), (_op2))
@@ -225,6 +242,7 @@ extern "C" {
 #define ir_ADD_OV_I32(_op1, _op2)         ir_BINARY_OP_I32(IR_ADD_OV, (_op1), (_op2))
 #define ir_ADD_OV_I64(_op1, _op2)         ir_BINARY_OP_I64(IR_ADD_OV, (_op1), (_op2))
 
+#define ir_SUB_OV(_type, _op1, _op2)      ir_BINARY_OP(IR_SUB_OV, (_type), (_op1), (_op2))
 #define ir_SUB_OV_U8(_op1, _op2)          ir_BINARY_OP_U8(IR_SUB_OV, (_op1), (_op2))
 #define ir_SUB_OV_U16(_op1, _op2)         ir_BINARY_OP_U16(IR_SUB_OV, (_op1), (_op2))
 #define ir_SUB_OV_U32(_op1, _op2)         ir_BINARY_OP_U32(IR_SUB_OV, (_op1), (_op2))
@@ -236,6 +254,7 @@ extern "C" {
 #define ir_SUB_OV_I32(_op1, _op2)         ir_BINARY_OP_I32(IR_SUB_OV, (_op1), (_op2))
 #define ir_SUB_OV_I64(_op1, _op2)         ir_BINARY_OP_I64(IR_SUB_OV, (_op1), (_op2))
 
+#define ir_MUL_OV(_type, _op1, _op2)      ir_BINARY_OP(IR_MUL_OV, (_type), (_op1), (_op2))
 #define ir_MUL_OV_U8(_op1, _op2)          ir_BINARY_OP_U8(IR_MUL_OV, (_op1), (_op2))
 #define ir_MUL_OV_U16(_op1, _op2)         ir_BINARY_OP_U16(IR_MUL_OV, (_op1), (_op2))
 #define ir_MUL_OV_U32(_op1, _op2)         ir_BINARY_OP_U32(IR_MUL_OV, (_op1), (_op2))
@@ -249,6 +268,7 @@ extern "C" {
 
 #define ir_OVERFLOW(_op1)                 ir_fold1(_ir_CTX, IR_OPT(IR_OVERFLOW, IR_BOOL), (_op1))
 
+#define ir_NOT(_type, _op1)               ir_UNARY_OP(IR_NOT, (_type), (_op1))
 #define ir_NOT_B(_op1)                    ir_UNARY_OP_B(IR_NOT, (_op1))
 #define ir_NOT_U8(_op1)                   ir_UNARY_OP_U8(IR_NOT, (_op1))
 #define ir_NOT_U16(_op1)                  ir_UNARY_OP_U16(IR_NOT, (_op1))
@@ -261,6 +281,7 @@ extern "C" {
 #define ir_NOT_I32(_op1)                  ir_UNARY_OP_I32(IR_NOT, (_op1))
 #define ir_NOT_I64(_op1)                  ir_UNARY_OP_I64(IR_NOT, (_op1))
 
+#define ir_OR(_type, _op1, _op2)          ir_BINARY_OP(IR_OR, (_type), (_op1), (_op2))
 #define ir_OR_B(_op1, _op2)               ir_BINARY_OP_B(IR_OR, (_op1), (_op2))
 #define ir_OR_U8(_op1, _op2)              ir_BINARY_OP_U8(IR_OR, (_op1), (_op2))
 #define ir_OR_U16(_op1, _op2)             ir_BINARY_OP_U16(IR_OR, (_op1), (_op2))
@@ -273,6 +294,7 @@ extern "C" {
 #define ir_OR_I32(_op1, _op2)             ir_BINARY_OP_I32(IR_OR, (_op1), (_op2))
 #define ir_OR_I64(_op1, _op2)             ir_BINARY_OP_I64(IR_OR, (_op1), (_op2))
 
+#define ir_AND(_type, _op1, _op2)         ir_BINARY_OP(IR_AND, (_type), (_op1), (_op2))
 #define ir_AND_B(_op1, _op2)              ir_BINARY_OP_B(IR_AND, (_op1), (_op2))
 #define ir_AND_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_AND, (_op1), (_op2))
 #define ir_AND_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_AND, (_op1), (_op2))
@@ -285,6 +307,7 @@ extern "C" {
 #define ir_AND_I32(_op1, _op2)            ir_BINARY_OP_I32(IR_AND, (_op1), (_op2))
 #define ir_AND_I64(_op1, _op2)            ir_BINARY_OP_I64(IR_AND, (_op1), (_op2))
 
+#define ir_XOR(_type, _op1, _op2)         ir_BINARY_OP(IR_XOR, (_type), (_op1), (_op2))
 #define ir_XOR_B(_op1, _op2)              ir_BINARY_OP_B(IR_XOR, (_op1), (_op2))
 #define ir_XOR_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_XOR, (_op1), (_op2))
 #define ir_XOR_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_XOR, (_op1), (_op2))
@@ -297,6 +320,7 @@ extern "C" {
 #define ir_XOR_I32(_op1, _op2)            ir_BINARY_OP_I32(IR_XOR, (_op1), (_op2))
 #define ir_XOR_I64(_op1, _op2)            ir_BINARY_OP_I64(IR_XOR, (_op1), (_op2))
 
+#define ir_SHL(_type, _op1, _op2)         ir_BINARY_OP(IR_SHL, (_type), (_op1), (_op2))
 #define ir_SHL_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_SHL, (_op1), (_op2))
 #define ir_SHL_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_SHL, (_op1), (_op2))
 #define ir_SHL_U32(_op1, _op2)            ir_BINARY_OP_U32(IR_SHL, (_op1), (_op2))
@@ -308,6 +332,7 @@ extern "C" {
 #define ir_SHL_I32(_op1, _op2)            ir_BINARY_OP_I32(IR_SHL, (_op1), (_op2))
 #define ir_SHL_I64(_op1, _op2)            ir_BINARY_OP_I64(IR_SHL, (_op1), (_op2))
 
+#define ir_SHR(_type, _op1, _op2)         ir_BINARY_OP(IR_SHR, (_type), (_op1), (_op2))
 #define ir_SHR_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_SHR, (_op1), (_op2))
 #define ir_SHR_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_SHR, (_op1), (_op2))
 #define ir_SHR_U32(_op1, _op2)            ir_BINARY_OP_U32(IR_SHR, (_op1), (_op2))
@@ -319,6 +344,7 @@ extern "C" {
 #define ir_SHR_I32(_op1, _op2)            ir_BINARY_OP_I32(IR_SHR, (_op1), (_op2))
 #define ir_SHR_I64(_op1, _op2)            ir_BINARY_OP_I64(IR_SHR, (_op1), (_op2))
 
+#define ir_SAR(_type, _op1, _op2)         ir_BINARY_OP(IR_SAR, (_type), (_op1), (_op2))
 #define ir_SAR_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_SAR, (_op1), (_op2))
 #define ir_SAR_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_SAR, (_op1), (_op2))
 #define ir_SAR_U32(_op1, _op2)            ir_BINARY_OP_U32(IR_SAR, (_op1), (_op2))
@@ -330,6 +356,7 @@ extern "C" {
 #define ir_SAR_I32(_op1, _op2)            ir_BINARY_OP_I32(IR_SAR, (_op1), (_op2))
 #define ir_SAR_I64(_op1, _op2)            ir_BINARY_OP_I64(IR_SAR, (_op1), (_op2))
 
+#define ir_ROL(_type, _op1, _op2)         ir_BINARY_OP(IR_ROL, (_type), (_op1), (_op2))
 #define ir_ROL_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_ROL, (_op1), (_op2))
 #define ir_ROL_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_ROL, (_op1), (_op2))
 #define ir_ROL_U32(_op1, _op2)            ir_BINARY_OP_U32(IR_ROL, (_op1), (_op2))
@@ -341,6 +368,7 @@ extern "C" {
 #define ir_ROL_I32(_op1, _op2)            ir_BINARY_OP_I32(IR_ROL, (_op1), (_op2))
 #define ir_ROL_I64(_op1, _op2)            ir_BINARY_OP_I64(IR_ROL, (_op1), (_op2))
 
+#define ir_ROR(_type, _op1, _op2)         ir_BINARY_OP(IR_ROR, (_type), (_op1), (_op2))
 #define ir_ROR_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_ROR, (_op1), (_op2))
 #define ir_ROR_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_ROR, (_op1), (_op2))
 #define ir_ROR_U32(_op1, _op2)            ir_BINARY_OP_U32(IR_ROR, (_op1), (_op2))
@@ -352,6 +380,7 @@ extern "C" {
 #define ir_ROR_I32(_op1, _op2)            ir_BINARY_OP_I32(IR_ROR, (_op1), (_op2))
 #define ir_ROR_I64(_op1, _op2)            ir_BINARY_OP_I64(IR_ROR, (_op1), (_op2))
 
+#define ir_BSWAP(_type, _op1)             ir_UNARY_OP(IR_BSWAP, (_type), (_op1))
 #define ir_BSWAP_U16(_op1)                ir_UNARY_OP_U16(IR_BSWAP, (_op1))
 #define ir_BSWAP_U32(_op1)                ir_UNARY_OP_U32(IR_BSWAP, (_op1))
 #define ir_BSWAP_U64(_op1)                ir_UNARY_OP_U64(IR_BSWAP, (_op1))
@@ -360,6 +389,7 @@ extern "C" {
 #define ir_BSWAP_I32(_op1)                ir_UNARY_OP_I32(IR_BSWAP, (_op1))
 #define ir_BSWAP_I64(_op1)                ir_UNARY_OP_I64(IR_BSWAP, (_op1))
 
+#define ir_MIN(_type, _op1, _op2)         ir_BINARY_OP(IR_MIN, (_type), (_op1), (_op2))
 #define ir_MIN_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_MIN, (_op1), (_op2))
 #define ir_MIN_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_MIN, (_op1), (_op2))
 #define ir_MIN_U32(_op1, _op2)            ir_BINARY_OP_U32(IR_MIN, (_op1), (_op2))
@@ -373,6 +403,7 @@ extern "C" {
 #define ir_MIN_D(_op1, _op2)              ir_BINARY_OP_D(IR_MIN, (_op1), (_op2))
 #define ir_MIN_F(_op1, _op2)              ir_BINARY_OP_F(IR_MIN, (_op1), (_op2))
 
+#define ir_MAX(_type, _op1, _op2)         ir_BINARY_OP(IR_MAX, (_type), (_op1), (_op2))
 #define ir_MAX_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_MAX, (_op1), (_op2))
 #define ir_MAX_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_MAX, (_op1), (_op2))
 #define ir_MAX_U32(_op1, _op2)            ir_BINARY_OP_U32(IR_MAX, (_op1), (_op2))
@@ -386,6 +417,7 @@ extern "C" {
 #define ir_MAX_D(_op1, _op2)              ir_BINARY_OP_D(IR_MAX, (_op1), (_op2))
 #define ir_MAX_F(_op1, _op2)              ir_BINARY_OP_F(IR_MAX, (_op1), (_op2))
 
+#define ir_COND(_type, _op1, _op2, _op3)  ir_fold3(_ir_CTX, IR_OPT(IR_COND, (_type)),   (_op1), (_op2), (_op3))
 #define ir_COND_U8(_op1, _op2, _op3)      ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_U8),     (_op1), (_op2), (_op3))
 #define ir_COND_U16(_op1, _op2, _op3)     ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_U16),    (_op1), (_op2), (_op3))
 #define ir_COND_U32(_op1, _op2, _op3)     ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_U32),    (_op1), (_op2), (_op3))
@@ -399,10 +431,11 @@ extern "C" {
 #define ir_COND_D(_op1, _op2, _op3)       ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_DOUBLE), (_op1), (_op2), (_op3))
 #define ir_COND_F(_op1, _op2, _op3)       ir_fold3(_ir_CTX, IR_OPT(IR_COND, IR_FLOAT),  (_op1), (_op2), (_op3))
 
-#define ir_PHI_2(_src1, _src2)            _ir_PHI_2(_ir_CTX, (_src1), (_src2))
-#define ir_PHI_N(_n, _inputs)             _ir_PHI_N(_ir_CTX, (_n), (_inputs))
+#define ir_PHI_2(type, _src1, _src2)      _ir_PHI_2(_ir_CTX, type, (_src1), (_src2))
+#define ir_PHI_N(type, _n, _inputs)       _ir_PHI_N(_ir_CTX, type, (_n), (_inputs))
 #define ir_PHI_SET_OP(_ref, _pos, _src)   _ir_PHI_SET_OP(_ir_CTX, (_ref), (_pos), (_src))
 
+#define ir_COPY(_type, _op1)              ir_UNARY_OP(IR_COPY, (_type), (_op1))
 #define ir_COPY_B(_op1)                   ir_UNARY_OP_B(IR_COPY, (_op1))
 #define ir_COPY_U8(_op1)                  ir_UNARY_OP_U8(IR_COPY, (_op1))
 #define ir_COPY_U16(_op1)                 ir_UNARY_OP_U16(IR_COPY, (_op1))
@@ -421,6 +454,7 @@ extern "C" {
 #define ir_ADD_OFFSET(_addr, _offset)     _ir_ADD_OFFSET(_ir_CTX, (_addr), (_offset))
 
 /* Unfoldable variant of COPY */
+#define ir_HARD_COPY(_type, _op1)         ir_BINARY_OP(IR_COPY, (_type), (_op1), 1)
 #define ir_HARD_COPY_B(_op1)              ir_BINARY_OP_B(IR_COPY, (_op1), 1)
 #define ir_HARD_COPY_U8(_op1)             ir_BINARY_OP_U8(IR_COPY, (_op1), 1)
 #define ir_HARD_COPY_U16(_op1)            ir_BINARY_OP_U16(IR_COPY, (_op1), 1)
@@ -444,6 +478,7 @@ extern "C" {
 #define ir_CALL_3(type, func, a1, a2, a3)          _ir_CALL_3(_ir_CTX, type, func, a1, a2, a3)
 #define ir_CALL_4(type, func, a1, a2, a3, a4)      _ir_CALL_4(_ir_CTX, type, func, a1, a2, a3, a4)
 #define ir_CALL_5(type, func, a1, a2, a3, a4, a5)  _ir_CALL_5(_ir_CTX, type, func, a1, a2, a3, a4, a5)
+#define ir_CALL_N(type, func, count, args)         _ir_CALL_N(_ir_CTX, type, func, count, args)
 
 #define ir_TAILCALL(func)                          _ir_TAILCALL(_ir_CTX, func)
 #define ir_TAILCALL_1(func, a1)                    _ir_TAILCALL_1(_ir_CTX, func, a1)
@@ -451,10 +486,12 @@ extern "C" {
 #define ir_TAILCALL_3(func, a1, a2, a3)            _ir_TAILCALL_3(_ir_CTX, func, a1, a2, a3)
 #define ir_TAILCALL_4(func, a1, a2, a3, a4)        _ir_TAILCALL_4(_ir_CTX, func, a1, a2, a3, a4)
 #define ir_TAILCALL_5(func, a1, a2, a3, a4, a5)    _ir_TAILCALL_5(_ir_CTX, func, a1, a2, a3, a4, a5)
+#define ir_TAILCALL_N(func, count, args)           _ir_TAILCALL_N(_ir_CTX, func, count, args)
 
 #define ir_ALLOCA(_size)                  _ir_ALLOCA(_ir_CTX, (_size))
 #define ir_AFREE(_size)                   _ir_AFREE(_ir_CTX, (_size))
 #define ir_VADDR(_var)                    ir_emit1(_ir_CTX, IR_OPT(IR_VADDR, IR_ADDR), (_var))
+#define ir_VLOAD(_type, _var)             _ir_VLOAD(_ir_CTX, (_type), (_var))
 #define ir_VLOAD_B(_var)                  _ir_VLOAD(_ir_CTX, IR_BOOL, (_var))
 #define ir_VLOAD_U8(_var)                 _ir_VLOAD(_ir_CTX, IR_U8, (_var))
 #define ir_VLOAD_U16(_var)                _ir_VLOAD(_ir_CTX, IR_U16, (_var))
@@ -539,8 +576,8 @@ extern "C" {
 #define ir_MERGE_WITH_EMPTY_FALSE(_if)    do {ir_ref end = ir_END(); ir_IF_FALSE(_if); ir_MERGE_2(end, ir_END());} while (0)
 
 ir_ref _ir_ADD_OFFSET(ir_ctx *ctx, ir_ref addr, uintptr_t offset);
-ir_ref _ir_PHI_2(ir_ctx *ctx, ir_ref src1, ir_ref src2);
-ir_ref _ir_PHI_N(ir_ctx *ctx, ir_ref n, ir_ref *inputs);
+ir_ref _ir_PHI_2(ir_ctx *ctx, ir_type type, ir_ref src1, ir_ref src2);
+ir_ref _ir_PHI_N(ir_ctx *ctx, ir_type type, ir_ref n, ir_ref *inputs);
 void   _ir_PHI_SET_OP(ir_ctx *ctx, ir_ref phi, ir_ref pos, ir_ref src);
 ir_ref _ir_PARAM(ir_ctx *ctx, ir_type type, const char* name, ir_ref num);
 ir_ref _ir_VAR(ir_ctx *ctx, ir_type type, const char* name);
@@ -550,12 +587,14 @@ ir_ref _ir_CALL_2(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref ar
 ir_ref _ir_CALL_3(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3);
 ir_ref _ir_CALL_4(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4);
 ir_ref _ir_CALL_5(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5);
+ir_ref _ir_CALL_N(ir_ctx *ctx, ir_type type, ir_ref func, uint32_t count, ir_ref *args);
 void   _ir_TAILCALL(ir_ctx *ctx, ir_ref func);
 void   _ir_TAILCALL_1(ir_ctx *ctx, ir_ref func, ir_ref arg1);
 void   _ir_TAILCALL_2(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2);
 void   _ir_TAILCALL_3(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3);
 void   _ir_TAILCALL_4(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4);
 void   _ir_TAILCALL_5(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5);
+ir_ref _ir_TAILCALL_N(ir_ctx *ctx, ir_ref func, uint32_t count, ir_ref *args);
 ir_ref _ir_ALLOCA(ir_ctx *ctx, ir_ref size);
 void   _ir_AFREE(ir_ctx *ctx, ir_ref size);
 ir_ref _ir_VLOAD(ir_ctx *ctx, ir_type type, ir_ref var);

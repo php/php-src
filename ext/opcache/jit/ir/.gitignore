@@ -8,6 +8,7 @@ ir_emit_aarch64.h
 minilua
 gen_ir_fold_hash
 ir_test
+tester
 ir
 b.c
 

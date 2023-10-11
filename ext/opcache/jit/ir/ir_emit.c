@@ -70,7 +70,7 @@ static const int8_t *_ir_fp_reg_params;
 static const int8_t _ir_int_fc_reg_params[IR_REG_INT_FCARGS];
 static const int8_t *_ir_fp_fc_reg_params;
 
-static bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn)
+bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn)
 {
 	if (sizeof(void*) == 4) {
 		if (IR_IS_CONST_REF(insn->op2)) {
@@ -83,11 +83,13 @@ static bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn)
 	return 0;
 }
 #else
-# define ir_is_fastcall(ctx, insn) 0
+bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn)
+{
+	return 0;
+}
 #endif
 
-#ifdef _WIN64
-static bool ir_is_vararg(const ir_ctx *ctx, ir_insn *insn)
+bool ir_is_vararg(const ir_ctx *ctx, ir_insn *insn)
 {
 	if (IR_IS_CONST_REF(insn->op2)) {
 		return (ctx->ir_base[insn->op2].const_flags & IR_CONST_VARARG_FUNC) != 0;
@@ -96,7 +98,6 @@ static bool ir_is_vararg(const ir_ctx *ctx, ir_insn *insn)
 	}
 	return 0;
 }
-#endif
 
 IR_ALWAYS_INLINE uint32_t ir_rule(const ir_ctx *ctx, ir_ref ref)
 {
@@ -463,7 +464,7 @@ static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)
 					ir_emit_store(ctx, insn->type, ref, src);
 				}
 			} else if (src == IR_REG_NONE) {
-				/* STORE of constant or memory can't be clobber by parallel reg->reg copies (delay it) */
+				/* STORE of constant or memory can't be clobbered by parallel reg->reg copies (delay it) */
 				copies2[n2].input = input;
 				copies2[n2].output = ref;
 				copies2[n2].type = insn->type;

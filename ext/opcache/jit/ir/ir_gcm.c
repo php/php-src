@@ -505,7 +505,7 @@ int ir_schedule(ir_ctx *ctx)
 			bb = &ctx->cfg_blocks[b];
 			IR_ASSERT(i != bb->start);
 			if (_prev[bb->end]) {
-				/* move up, insert before the end of the alredy scheduled BB */
+				/* move up, insert before the end of the already scheduled BB */
 				k = bb->end;
 			} else {
 				/* move up, insert at the end of the block */

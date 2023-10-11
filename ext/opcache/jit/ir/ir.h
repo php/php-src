@@ -166,7 +166,7 @@ typedef enum _ir_type {
  * def - reference to a definition op (data-flow use-def dependency edge)
  * ref - memory reference (data-flow use-def dependency edge)
  * var - variable reference (data-flow use-def dependency edge)
- * arg - argument referene CALL/TAILCALL/CARG->CARG
+ * arg - argument reference CALL/TAILCALL/CARG->CARG
  * src - reference to a previous control region (IF, IF_TRUE, IF_FALSE, MERGE, LOOP_BEGIN, LOOP_END, RETURN)
  * reg - data-control dependency on region (PHI, VAR, PARAM)
  * ret - reference to a previous RETURN instruction (RETURN)
@@ -180,7 +180,7 @@ typedef enum _ir_type {
  * - NOP is never used (code 0 is used as ANY pattern)
  * - CONST is the most often used instruction (encode with 1 bit)
  * - equality inversion:  EQ <-> NE                         => op =^ 1
- * - comparison inversio: [U]LT <-> [U]GT, [U]LE <-> [U]GE  => op =^ 3
+ * - comparison inversion: [U]LT <-> [U]GT, [U]LE <-> [U]GE  => op =^ 3
  */
 
 #define IR_OPS(_) \
@@ -484,7 +484,7 @@ void ir_strtab_free(ir_strtab *strtab);
 #define IR_OPT_IN_SCCP         (1<<19)
 #define IR_LINEAR              (1<<20)
 #define IR_GEN_NATIVE          (1<<21)
-#define IR_GEN_C               (1<<22)
+#define IR_GEN_CODE            (1<<22) /* C or LLVM */
 
 /* Temporary: SCCP -> CFG */
 #define IR_SCCP_DONE           (1<<25)
@@ -499,7 +499,7 @@ void ir_strtab_free(ir_strtab *strtab);
 #define IR_RA_HAVE_SPLITS      (1<<25)
 #define IR_RA_HAVE_SPILLS      (1<<26)
 
-/* debug relted */
+/* debug related */
 #ifdef IR_DEBUG
 # define IR_DEBUG_SCCP        (1<<27)
 # define IR_DEBUG_GCM         (1<<28)
@@ -525,7 +525,7 @@ typedef bool (*ir_set_veneer_t)(ir_ctx *ctx, const void *addr, const void *venee
 
 struct _ir_ctx {
 	ir_insn           *ir_base;                 /* two directional array - instructions grow down, constants grow up */
-	ir_ref             insns_count;             /* number of instructins stored in instructions buffer */
+	ir_ref             insns_count;             /* number of instructions stored in instructions buffer */
 	ir_ref             insns_limit;             /* size of allocated instructions buffer (it's extended when overflow) */
 	ir_ref             consts_count;            /* number of constants stored in constants buffer */
 	ir_ref             consts_limit;            /* size of allocated constants buffer (it's extended when overflow) */
@@ -551,7 +551,7 @@ struct _ir_ctx {
 	int32_t            fixed_stack_red_zone;    /* reusable stack allocated by caller (default 0) */
 	int32_t            fixed_stack_frame_size;  /* fixed stack allocated by generated code for spills and registers save/restore */
 	int32_t            fixed_call_stack_size;   /* fixed preallocated stack for parameter passing (default 0) */
-	uint64_t           fixed_save_regset;       /* registers that always saved/restored in prologue/epilugue */
+	uint64_t           fixed_save_regset;       /* registers that always saved/restored in prologue/epilogue */
 	ir_live_interval **live_intervals;
 	ir_arena          *arena;
 	ir_live_range     *unused_ranges;
@@ -711,7 +711,7 @@ bool ir_reg_is_int(int32_t reg);
 const char *ir_reg_name(int8_t reg, ir_type type);
 int32_t ir_get_spill_slot_offset(ir_ctx *ctx, ir_ref ref);
 
-/* Target CPU instruction selection and code geneartion (see ir_x86.c) */
+/* Target CPU instruction selection and code generation (see ir_x86.c) */
 int ir_match(ir_ctx *ctx);
 void *ir_emit_code(ir_ctx *ctx, size_t *size);
 
@@ -750,6 +750,10 @@ void ir_loader_init(void);
 void ir_loader_free(void);
 int ir_load(ir_ctx *ctx, FILE *f);
 
+/* IR LLVM load API (implementation in ir_load_llvm.c) */
+int ir_load_llvm_bitcode(const char *filename, uint32_t flags);
+int ir_load_llvm_asm(const char *filename, uint32_t flags);
+
 /* IR save API (implementation in ir_save.c) */
 void ir_save(const ir_ctx *ctx, FILE *f);
 
@@ -763,7 +767,10 @@ void ir_dump_live_ranges(const ir_ctx *ctx, FILE *f);
 void ir_dump_codegen(const ir_ctx *ctx, FILE *f);
 
 /* IR to C conversion (implementation in ir_emit_c.c) */
-int ir_emit_c(ir_ctx *ctx, FILE *f);
+int ir_emit_c(ir_ctx *ctx, const char *name, FILE *f);
+
+/* IR to LLVM conversion (implementation in ir_emit_llvm.c) */
+int ir_emit_llvm(ir_ctx *ctx, const char *name, FILE *f);
 
 /* IR verification API (implementation in ir_check.c) */
 bool ir_check(const ir_ctx *ctx);

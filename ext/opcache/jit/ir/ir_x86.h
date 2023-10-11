@@ -165,6 +165,8 @@ enum _ir_reg {
 # define IR_MAX_REG_ARGS 14
 # define IR_SHADOW_ARGS  0
 
+# define IR_REG_VARARG_FP_REGS IR_REG_RAX /* hidden argument to specify the number of vector registers used */
+
 # define IR_REGSET_SCRATCH \
 	(IR_REGSET_INTERVAL(IR_REG_RAX, IR_REG_RDX) \
 	| IR_REGSET_INTERVAL(IR_REG_RSI, IR_REG_RDI) \

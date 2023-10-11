@@ -123,7 +123,7 @@ void ir_disasm_add_symbol(const char *name,
 			}
 		} while (1);
 
-		/* fix rbtree after instering */
+		/* fix rbtree after inserting */
 		while (sym && sym != _symbols && sym->parent->info == 1) {
 			if (sym->parent == sym->parent->parent->child[0]) {
 				node = sym->parent->parent->child[1];

@@ -746,6 +746,18 @@ ir_ref ir_hashtab_find(const ir_hashtab *tab, uint32_t key);
 bool ir_hashtab_add(ir_hashtab *tab, uint32_t key, ir_ref val);
 void ir_hashtab_key_sort(ir_hashtab *tab);
 
+/* IR Addr Table */
+typedef struct _ir_addrtab_bucket {
+	uint64_t    key;
+	ir_ref      val;
+	uint32_t    next;
+} ir_addrtab_bucket;
+
+void ir_addrtab_init(ir_hashtab *tab, uint32_t size);
+void ir_addrtab_free(ir_hashtab *tab);
+ir_ref ir_addrtab_find(const ir_hashtab *tab, uint64_t key);
+bool ir_addrtab_add(ir_hashtab *tab, uint64_t key, ir_ref val);
+
 /*** IR OP info ***/
 extern const uint8_t ir_type_flags[IR_LAST_TYPE];
 extern const char *ir_type_name[IR_LAST_TYPE];
@@ -1186,6 +1198,8 @@ void ir_fix_stack_frame(ir_ctx *ctx);
 
 /* Utility */
 ir_type ir_get_return_type(ir_ctx *ctx);
+bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn);
+bool ir_is_vararg(const ir_ctx *ctx, ir_insn *insn);
 
 //#define IR_BITSET_LIVENESS
 
