@@ -2261,17 +2261,23 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 		schema_content_model_fixup(ctx, type->model);
 	}
 	if (type->attributes) {
-		zend_string *str_key;
-		zend_ulong index;
+		HashPosition pos;
+		zend_hash_internal_pointer_reset_ex(type->attributes, &pos);
 
-		ZEND_HASH_FOREACH_KEY_PTR(type->attributes, index, str_key, attr) {
-			if (str_key) {
+		while ((attr = zend_hash_get_current_data_ptr_ex(type->attributes, &pos)) != NULL) {
+			zend_string *str_key;
+			zend_ulong index;
+
+			if (zend_hash_get_current_key_ex(type->attributes, &str_key, &index, &pos) == HASH_KEY_IS_STRING) {
 				schema_attribute_fixup(ctx, attr);
+				zend_result result = zend_hash_move_forward_ex(type->attributes, &pos);
+				ZEND_ASSERT(result == SUCCESS);
 			} else {
 				schema_attributegroup_fixup(ctx, attr, type->attributes);
-				zend_hash_index_del(type->attributes, index);
+				zend_result result = zend_hash_index_del(type->attributes, index);
+				ZEND_ASSERT(result == SUCCESS);
 			}
-		} ZEND_HASH_FOREACH_END();
+		}
 	}
 }
 
