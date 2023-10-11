@@ -11245,7 +11245,7 @@ static int zend_jit_zval_copy_deref(zend_jit_ctx *jit, zend_jit_addr res_addr, z
 	type = ir_PHI_2(IR_U32, type2, type);
 	ptr = ir_PHI_2(IR_ADDR, ptr2, ptr);
 #if SIZEOF_ZEND_LONG == 4
-	val = ir_PHI_2(val2, val);
+	val = ir_PHI_2(IR_ADDR, val2, val);
 #endif
 
 	// JIT:	Z_ADDREF_P(val);
