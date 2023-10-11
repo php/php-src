@@ -34,3 +34,4 @@ foreach (MyPhpToken::tokenize($code) as $token) {
 function foo() {
     echo "bar";
 }
+?>

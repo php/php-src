@@ -31,6 +31,7 @@ class Loop {
 Loop::test();
 Loop::test2();
 Loop::test3();
+?>
 --EXPECTF--
 $_main:
      ; (lines=7, args=0, vars=0, tmps=0)

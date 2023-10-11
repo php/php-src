@@ -29,3 +29,4 @@ class C {
 }
 
 print B;
+?>

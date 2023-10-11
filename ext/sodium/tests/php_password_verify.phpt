@@ -15,6 +15,7 @@ list(, $algo) = explode('$', $hash, 3);
 if (!in_array($algo, password_algos(), true /* strict */)) {
  echo "skip - No $algo support in password_verify()";
 }
+?>
 --FILE--
 <?php
 

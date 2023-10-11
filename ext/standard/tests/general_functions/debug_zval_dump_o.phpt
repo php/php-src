@@ -2,6 +2,7 @@
 Test debug_zval_dump() function : working on objects
 --SKIPIF--
 <?php if (PHP_ZTS) { print "skip only for no-zts build"; }
+?>
 --INI--
 opcache.enable=0
 --FILE--

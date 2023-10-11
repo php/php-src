@@ -22,3 +22,4 @@ class bar {
 }
 
 (new bar)->foo("test");
+?>

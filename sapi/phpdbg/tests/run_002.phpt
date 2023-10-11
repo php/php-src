@@ -48,3 +48,4 @@ var_dump($argv);
 var_dump(stream_get_contents(STDIN));
 
 echo "ok\n";
+?>

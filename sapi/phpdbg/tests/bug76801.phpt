@@ -13,3 +13,4 @@ prompt>
 for ($i = 0; $i < 25000; ++$i) {
     include __DIR__.'/empty.inc';
 }
+?>

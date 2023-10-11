@@ -17,6 +17,7 @@ chdir(__DIR__);
 $proc->importStylesheet($xsl);
 print "\n";
 print $proc->transformToXML($dom);
+?>
 --EXPECT--
 Test 8: Stream Wrapper Includes 
 <?xml version="1.0" encoding="iso-8859-1"?>

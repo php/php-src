@@ -9,5 +9,6 @@ print fread($fp, 1000);
 
 __HALT_COMPILER();
 Overlay information...
+?>
 --EXPECT--
 Overlay information...

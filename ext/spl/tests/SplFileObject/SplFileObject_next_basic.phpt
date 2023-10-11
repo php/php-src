@@ -20,3 +20,4 @@ echo $s->current();
 --EXPECT--
 <?php
 //line 2
+?>

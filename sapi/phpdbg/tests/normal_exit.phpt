@@ -13,3 +13,4 @@ prompt>
 (function($argv) {
 	die();
 })($argv);
+?>

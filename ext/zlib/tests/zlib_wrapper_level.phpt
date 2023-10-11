@@ -4,6 +4,7 @@ compress.zlib:// wrapper with compression level
 zlib
 --SKIPIF--
 <?php in_array('compress.zlib', stream_get_wrappers()) || print 'skip No zlib wrapper';
+?>
 --FILE--
 <?php declare(strict_types=1);
 

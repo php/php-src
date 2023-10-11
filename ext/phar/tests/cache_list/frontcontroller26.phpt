@@ -14,3 +14,4 @@ files/frontcontroller8.phar
 Content-type: application/octet-stream
 --EXPECT--
 <?php var_dump("hi");
+?>

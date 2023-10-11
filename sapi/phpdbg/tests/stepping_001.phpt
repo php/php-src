@@ -56,3 +56,4 @@ try {
 } finally {
 	echo " ... ok\n";
 }
+?>

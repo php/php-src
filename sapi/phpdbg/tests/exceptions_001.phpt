@@ -46,3 +46,4 @@ prompt>
 		var_dump($e);
 	}
 })();
+?>
