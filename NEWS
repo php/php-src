@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed double-free of non-interned enum case name. (ilutov)
 
+- Opcache:
+  . Added warning when JIT cannot be enabled. (danog)
+
 12 Oct 2023, PHP 8.3.0RC4
 
 - Core:
