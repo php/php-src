@@ -19,5 +19,6 @@ try {
     echo $e->getMessage();
 }
 
+?>
 --EXPECT--
 datefmt_create: time format must be UDAT_PATTERN if date format is UDAT_PATTERN: U_ILLEGAL_ARGUMENT_ERROR

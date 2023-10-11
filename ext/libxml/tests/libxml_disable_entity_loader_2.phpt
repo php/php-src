@@ -6,6 +6,7 @@ dom
 --SKIPIF--
 <?php
 if (LIBXML_VERSION < 20912) die('skip For libxml2 >= 2.9.12 only');
+?>
 --FILE--
 <?php
 

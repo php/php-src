@@ -26,5 +26,6 @@ for ($i = 0; $i < 10; $i++) {
 touch(__DIR__ . '/gh8461-002.inc');
 
 print "OK";
+?>
 --EXPECT--
 OK

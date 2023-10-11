@@ -31,11 +31,12 @@ class Loop {
 Loop::test();
 Loop::test2();
 Loop::test3();
+?>
 --EXPECTF--
 $_main:
      ; (lines=7, args=0, vars=0, tmps=0)
      ; (after optimizer)
-     ; %sdce_009.php:1-23
+     ; %sdce_009.php:1-24
 0000 INIT_STATIC_METHOD_CALL 0 string("Loop") string("test")
 0001 DO_UCALL
 0002 INIT_STATIC_METHOD_CALL 0 string("Loop") string("test2")
