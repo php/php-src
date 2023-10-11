@@ -371,7 +371,7 @@ jobs:
           git clone https://github.com/phpstan/phpstan-src
           cd phpstan-src
           git checkout d02cc99d4480a203a2dbe54a5ded2da016266b11
-          sed 's/80399/89999/g' -i conf/parametersSchema.neon
+          sed -E 's/phpVersion(.*)max[^)]+/phpVersion\1max(89999/g' conf/parametersSchema.neon -i
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           export ASAN_OPTIONS=exitcode=139
           php $GITHUB_WORKSPACE/.github/patch.php bin/phpstan clear-result-cache
