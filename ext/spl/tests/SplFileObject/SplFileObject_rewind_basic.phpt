@@ -19,4 +19,3 @@ echo $s->current();
 ?>
 --EXPECT--
 <?php
-?>

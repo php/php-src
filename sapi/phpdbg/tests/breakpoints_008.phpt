@@ -31,4 +31,3 @@ namespace Foo {
 namespace {
 	(new \Foo\Bar)->Foo("test");
 }
-?>

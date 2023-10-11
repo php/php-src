@@ -23,4 +23,3 @@ function foo($bar) {
 }
 
 foo("test");
-?>

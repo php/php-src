@@ -55,4 +55,3 @@ $a->b();
 $a->b('ha');
 
 var_dump(phpdbg_end_oplog(["functions" => true]));
-?>

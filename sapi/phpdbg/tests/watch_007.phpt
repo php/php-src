@@ -23,4 +23,3 @@ function test() {
 }
 test();
 $a = 2;
-?>

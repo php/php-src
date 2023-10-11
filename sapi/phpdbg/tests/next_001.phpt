@@ -33,4 +33,3 @@ function foo() {
 
 foo();
 echo 1 . PHP_EOL;
-?>

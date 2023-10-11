@@ -13,4 +13,3 @@ prompt>
 
 include __DIR__.'/include.inc';
 include_once __DIR__.'/include.inc';
-?>

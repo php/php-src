@@ -52,4 +52,3 @@ namespace {
 	(new \Foo\Bar)->Foo("test");
 	foo("test");
 }
-?>

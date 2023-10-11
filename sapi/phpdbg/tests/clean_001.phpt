@@ -58,4 +58,3 @@ foo();
 function foo() {
 	echo 4;
 }
-?>

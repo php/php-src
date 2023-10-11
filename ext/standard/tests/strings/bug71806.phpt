@@ -9,4 +9,3 @@ echo php_strip_whitespace(__DIR__ . '/bug71806.data');
 --EXPECT--
 <?php
  echo 098 ;
-?>

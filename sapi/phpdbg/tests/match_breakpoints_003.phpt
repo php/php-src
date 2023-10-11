@@ -30,4 +30,3 @@ $foo->bar = match (1) {
     0 => 'foo',
     default => 'bar', // breakpoint #1
 };
-?>

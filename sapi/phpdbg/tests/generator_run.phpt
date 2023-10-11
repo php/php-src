@@ -22,4 +22,3 @@ function gen() {
 foreach (gen() as $v) {
 	print $v;
 }
-?>

@@ -6,6 +6,5 @@ Note: the closing ?> has been deliberately elided.
 <?php
 
 echo <<<'END'
-?>
 --EXPECTF--
 Parse error: syntax error, unexpected end of file in %s on line %d

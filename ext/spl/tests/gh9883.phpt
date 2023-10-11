@@ -18,4 +18,3 @@ echo $file_stream; // line 9
 <?php
 <?php
 <?php
-?>

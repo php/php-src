@@ -17,4 +17,3 @@ prompt>
 
 set_exception_handler(function () { print "EX\n"; });
 throw new Exception("test");
-?>

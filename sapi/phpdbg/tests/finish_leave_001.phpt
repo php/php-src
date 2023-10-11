@@ -41,4 +41,3 @@ function bar() {
 }
 
 foo();
-?>

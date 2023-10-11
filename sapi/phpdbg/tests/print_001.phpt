@@ -75,4 +75,3 @@ namespace {
 	(new \Foo\Bar)->Foo('test "quotes"');
 	foo("test");
 }
-?>
