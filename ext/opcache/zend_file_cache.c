@@ -867,6 +867,8 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 
 	ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
+
+	ce->inheritance_cache = NULL;
 }
 
 static void zend_file_cache_serialize_warnings(
