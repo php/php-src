@@ -26,6 +26,10 @@ PHP 8.4 UPGRADE NOTES
     Consult sections 2. New Features and 6. New Functions for a list of
     newly implemented methods and constants.
 
+- PDO_PGSQL:
+  . The DSN's credentials, when set, are given priority over their PDO
+    constructor counterparts, being closer to the documentation states.
+
 - SimpleXML:
   . Get methods called, or casting to a string on a SimpleXMLElement will no
     longer implicitly reset the iterator data, unless explicitly rewound.

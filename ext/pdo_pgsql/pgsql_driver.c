@@ -1281,8 +1281,8 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 	}
 
 	/* escape username and password, if provided */
-	tmp_user = _pdo_pgsql_escape_credentials(dbh->username);
-	tmp_pass = _pdo_pgsql_escape_credentials(dbh->password);
+	tmp_user = !strstr((char *) dbh->data_source, "user=") ? _pdo_pgsql_escape_credentials(dbh->username) : NULL;
+	tmp_pass = !strstr((char *) dbh->data_source, "password=") ? _pdo_pgsql_escape_credentials(dbh->password) : NULL;
 
 	/* support both full connection string & connection string + login and/or password */
 	if (tmp_user && tmp_pass) {
