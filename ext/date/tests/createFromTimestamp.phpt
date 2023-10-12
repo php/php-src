@@ -1,5 +1,5 @@
 --TEST--
-Tests for DateTime[Immutable]::createFromTimestamp & date_create_[immutable_]_from_timestamp
+Tests for DateTime[Immutable]::createFromTimestamp & date_create_[immutable_]from_timestamp
 --INI--
 date.timezone=Europe/London
 --FILE--
@@ -7,10 +7,6 @@ date.timezone=Europe/London
 
 define('MAX_32BIT', 2147483647);
 define('MIN_32BIT', -2147483648);
-define('UMAX_64BIT', 18446744073709551616.0);
-
-$int = 1696883232;
-$float = 1696883232.013981;
 
 $timestamps = array(
     1696883232,
@@ -24,8 +20,8 @@ $timestamps = array(
     -0.0,
     MAX_32BIT,
     MIN_32BIT,
-    UMAX_64BIT,
-    -UMAX_64BIT,
+    PHP_INT_MAX + 1024.0,
+    PHP_INT_MIN - 1025.0,
     NAN,
     +INF,
     -INF
@@ -399,14 +395,14 @@ DateTimeImmutable::createFromTimestamp(-2147483648): object(DateTimeImmutable)#%
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(1.8446744073709552E+19): bool(false)
-DateTime::createFromTimestamp(1.8446744073709552E+19): bool(false)
-date_create_immutable_from_timestamp(1.8446744073709552E+19): bool(false)
-DateTimeImmutable::createFromTimestamp(1.8446744073709552E+19): bool(false)
-date_create_from_timestamp(-1.8446744073709552E+19): bool(false)
-DateTime::createFromTimestamp(-1.8446744073709552E+19): bool(false)
-date_create_immutable_from_timestamp(-1.8446744073709552E+19): bool(false)
-DateTimeImmutable::createFromTimestamp(-1.8446744073709552E+19): bool(false)
+date_create_from_timestamp(9.223372036854776E+18): bool(false)
+DateTime::createFromTimestamp(9.223372036854776E+18): bool(false)
+date_create_immutable_from_timestamp(9.223372036854776E+18): bool(false)
+DateTimeImmutable::createFromTimestamp(9.223372036854776E+18): bool(false)
+date_create_from_timestamp(-9.223372036854778E+18): bool(false)
+DateTime::createFromTimestamp(-9.223372036854778E+18): bool(false)
+date_create_immutable_from_timestamp(-9.223372036854778E+18): bool(false)
+DateTimeImmutable::createFromTimestamp(-9.223372036854778E+18): bool(false)
 date_create_from_timestamp(NAN): bool(false)
 DateTime::createFromTimestamp(NAN): bool(false)
 date_create_immutable_from_timestamp(NAN): bool(false)

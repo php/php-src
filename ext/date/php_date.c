@@ -2504,8 +2504,6 @@ PHPAPI void php_date_initialize_from_ts_long(php_date_obj *dateobj, zend_long se
 {
 	dateobj->time = timelib_time_ctor();
 	dateobj->time->zone_type = TIMELIB_ZONETYPE_OFFSET;
-	dateobj->time->z = (timelib_sll)0;
-	dateobj->time->have_relative = 0;
 
 	timelib_unixtime2gmt(dateobj->time, (timelib_sll)sec);
 	timelib_update_ts(dateobj->time, NULL);
