@@ -176,6 +176,7 @@ jobs:
             echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
       - run:
           name: Test
+          no_output_timeout: 30m
           command: |
             sapi/cli/php run-tests.php \
               -d zend_extension=opcache.so \
