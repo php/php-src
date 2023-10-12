@@ -45,7 +45,7 @@ echo "Done\n";
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
-$db->exec("DROP TABLE test_pdo_oci_attr_autocommit_3");
+PDOTest::dropTableIfExists($db, "test_pdo_oci_attr_autocommit_3");
 ?>
 --EXPECT--
 PDO::ATTR_AUTOCOMMIT: bool(false)

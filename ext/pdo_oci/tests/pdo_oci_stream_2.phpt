@@ -115,7 +115,7 @@ echo "Fetch operation done!\n";
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
-$db->exec("DROP TABLE test_pdo_oci_stream_2");
+PDOTest::dropTableIfExists($db, "test_pdo_oci_stream_2");
 ?>
 --EXPECT--
 Inserting 1000 Records ... Done

@@ -39,7 +39,7 @@ var_dump($stmt->fetch(PDO::FETCH_COLUMN));
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test43130");
+PDOTest::dropTableIfExists($db, "test43130");
 ?>
 --EXPECTF--
 Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: parameter was not defined in %s on line %d

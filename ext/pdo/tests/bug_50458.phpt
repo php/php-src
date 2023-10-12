@@ -25,7 +25,7 @@ var_dump($res->fetchAll(PDO::FETCH_FUNC, function($a) { return strtoupper($a); }
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test50458");
+PDOTest::dropTableIfExists($db, "test50458");
 ?>
 --EXPECT--
 array(1) {

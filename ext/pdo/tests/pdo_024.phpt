@@ -19,10 +19,10 @@ switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
     case 'dblib':
         // environment settings can influence how the table is created if specifics are missing
         // https://msdn.microsoft.com/en-us/library/ms174979.aspx#Nullability Rules Within a Table Definition
-        $sql = 'create test024 (id int, name varchar(10) null)';
+        $sql = 'create table test024 (id int, name varchar(10) null)';
         break;
     default:
-        $sql = 'create test024 (id int, name varchar(10))';
+        $sql = 'create table test024 (id int, name varchar(10))';
         break;
 }
 $db->exec($sql);
@@ -44,7 +44,7 @@ var_dump($db->query('select name from test024 where id=0')->fetchColumn());
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test024");
+PDOTest::dropTableIfExists($db, "test024");
 ?>
 --EXPECT--
 bind: success

@@ -23,9 +23,7 @@ CREATE TABLE test43925
  , rgt  integer NOT NULL
 );');
 
-$dbh->query('INSERT INTO test43925 (id, root, lft, rgt) VALUES (1, 1, 1, 6);');
-$dbh->query('INSERT INTO test43925 (id, root, lft, rgt) VALUES (2, 1, 2, 3);');
-$dbh->query('INSERT INTO test43925 (id, root, lft, rgt) VALUES (3, 1, 4, 5);');
+$dbh->query('INSERT INTO test43925 (id, root, lft, rgt) VALUES (1, 1, 1, 6), (2, 1, 2, 3), (3, 1, 4, 5);');
 
 
 $stmt = $dbh->prepare('

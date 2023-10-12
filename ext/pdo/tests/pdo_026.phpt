@@ -80,7 +80,7 @@ echo "===DONE===\n";
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test026");
+PDOTest::dropTableIfExists($db, "test026");
 ?>
 --EXPECT--
 string(11) "PDODatabase"

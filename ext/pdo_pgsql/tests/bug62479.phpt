@@ -45,7 +45,6 @@ $pdo = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $user = "pdo_test62479";
 $template = "CREATE USER $user WITH PASSWORD '%s'";
-$dropUser = "DROP USER $user";
 $testQuery = 'SELECT 1 as verification';
 
 // Create temp user with space in password

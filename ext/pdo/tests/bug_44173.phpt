@@ -76,7 +76,7 @@ try {
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test44173");
+PDOTest::dropTableIfExists($db, "test44173");
 ?>
 --EXPECT--
 PDO::query() expects exactly 2 arguments for the fetch mode provided, 4 given

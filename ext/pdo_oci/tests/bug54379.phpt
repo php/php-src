@@ -16,19 +16,17 @@ require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$db->exec("CREATE TABLE test (col1 NVARCHAR2(20))");
-$db->exec("INSERT INTO test VALUES('12345678901234567890')");
-$db->exec("INSERT INTO test VALUES('あいうえおかきくけこさしすせそたちつてと')");
-$stmt = $db->prepare("SELECT * FROM test");
+$db->exec("CREATE TABLE test54379 (col1 NVARCHAR2(20))");
+$db->exec("INSERT INTO test54379 VALUES('12345678901234567890'), ('あいうえおかきくけこさしすせそたちつてと')");
+$stmt = $db->prepare("SELECT * FROM test54379");
 $stmt->execute();
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-$db->exec("DROP TABLE test");
 ?>
 --CLEAN--
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
-$db->exec("DROP TABLE test54379");
+PDOTest::dropTableIfExists($db, "test54379");
 ?>
 --EXPECT--
 array(2) {

@@ -29,7 +29,7 @@ $db = PDOTest::factory();
 $db->exec("CREATE TABLE test36798 (id INTEGER)");
 $db->exec("INSERT INTO test36798 (id) VALUES (1)");
 
-$stmt = $db->prepare("SELECT '�' as test FROM test36798 WHERE id = :id");
+$stmt = $db->prepare("SELECT 'Ã' as test FROM test36798 WHERE id = :id");
 $stmt->execute(array(":id" => 1));
 
 $row = $stmt->fetch(PDO::FETCH_NUM);
@@ -40,7 +40,7 @@ var_dump( $row );
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test36798");
+PDOTest::dropTableIfExists($db, "test36798");
 ?>
 --EXPECT--
 array(1) {

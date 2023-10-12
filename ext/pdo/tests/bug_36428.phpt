@@ -26,7 +26,7 @@ var_dump($res->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, 'SimpleXMLElemen
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test36428");
+PDOTest::dropTableIfExists($db, "test36428");
 ?>
 --EXPECTF--
 array(1) {

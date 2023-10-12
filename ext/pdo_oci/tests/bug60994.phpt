@@ -112,7 +112,7 @@ if ($string4 != $stream4 || $stream4 != stream_get_contents($row['DATA2'])) {
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
-$db->exec("DROP TABLE pdo_oci_bug60994");
+PDOTest::dropTableIfExists($db, "pdo_oci_bug60994");
 ?>
 --EXPECT--
 Test 1:  j

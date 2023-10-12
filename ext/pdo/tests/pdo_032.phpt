@@ -16,9 +16,7 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test032(id int NOT NULL PRIMARY KEY, val VARCHAR(10))');
-$db->exec("INSERT INTO test032 VALUES(1, 'A')");
-$db->exec("INSERT INTO test032 VALUES(2, 'B')");
-$db->exec("INSERT INTO test032 VALUES(3, 'C')");
+$db->exec("INSERT INTO test032 VALUES(1, 'A'), (2, 'B'), (3, 'C')");
 
 // Lower case columns
 $db->setAttribute(PDO::ATTR_CASE, PDO::CASE_LOWER);
@@ -39,7 +37,7 @@ $stmt->closeCursor();
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test032");
+PDOTest::dropTableIfExists($db, "test032");
 ?>
 --EXPECT--
 array(3) {

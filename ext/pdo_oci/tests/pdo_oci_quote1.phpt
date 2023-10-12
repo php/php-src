@@ -41,7 +41,7 @@ echo "Done\n";
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
-$db->exec("DROP TABLE test_pdo_oci_quote1");
+PDOTest::dropTableIfExists($db, "test_pdo_oci_quote1");
 ?>
 --EXPECT--
 Unquoted : string(0) ""

@@ -77,7 +77,7 @@ echo 'Read '.stream_get_contents($r['data'], -1, 30000)."\n";      // jjjxyz
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
-$db->exec("DROP TABLE test_pdo_oci_stream_1");
+PDOTest::dropTableIfExists($db, test_pdo_oci_stream_1");
 ?>
 --EXPECT--
 Test 1

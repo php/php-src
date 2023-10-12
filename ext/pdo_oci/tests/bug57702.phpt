@@ -143,7 +143,7 @@ print "done\n";
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
-$db->exec("DROP TABLE test57702");
+PDOTest::dropTableIfExists($db, "test57702");
 ?>
 --EXPECT--
 First Query

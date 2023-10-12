@@ -31,7 +31,7 @@ var_dump($db->query("SELECT a,a FROM test034")->fetchAll(PDO::FETCH_KEY_PAIR));
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test034");
+PDOTest::dropTableIfExists($db, "test034");
 ?>
 --EXPECTF--
 array(1) {

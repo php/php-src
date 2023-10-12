@@ -53,7 +53,7 @@ var_dump($res->fetch());
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
-$db->exec("DROP TABLE test46274");
+PDOTest::dropTableIfExists($db, "test46274");
 ?>
 --EXPECT--
 array(2) {

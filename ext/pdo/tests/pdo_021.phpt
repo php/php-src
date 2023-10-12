@@ -59,7 +59,7 @@ echo 'There are ' . $num . " rows in the table.\n";
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test021");
+PDOTest::dropTableIfExists($db, "test021");
 ?>
 --EXPECT--
 There are 6 rows in the table.

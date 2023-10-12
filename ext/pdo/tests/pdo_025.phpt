@@ -64,7 +64,7 @@ foreach($stmt as $obj) {
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test025");
+PDOTest::dropTableIfExists($db, "test025");
 ?>
 --EXPECTF--
 object(Test)#%d (3) {

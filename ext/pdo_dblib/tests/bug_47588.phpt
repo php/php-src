@@ -11,9 +11,7 @@ require __DIR__ . '/config.inc';
 require __DIR__ . '/config.inc';
 
 $db->query('CREATE TABLE "Test Table47588" ("My Field" int, "Another Field" varchar(32) not null default \'test_string\')');
-$db->query('INSERT INTO "Test Table47588" ("My Field") values(1)');
-$db->query('INSERT INTO "Test Table47588" ("My Field") values(2)');
-$db->query('INSERT INTO "Test Table47588" ("My Field") values(3)');
+$db->query('INSERT INTO "Test Table47588" ("My Field") values(1), (2), (3)');
 $rs = $db->query('SELECT * FROM "Test Table47588"');
 var_dump($rs->fetchAll(PDO::FETCH_ASSOC));
 echo "Done.\n";

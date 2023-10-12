@@ -16,17 +16,7 @@ echo "Preparations before the test\n";
 require(__DIR__ . '/../../pdo/tests/pdo_test.inc');
 try {
     $db = PDOTest::factory();
-    $db->exec(<<<SQL
-BEGIN
-   EXECUTE IMMEDIATE 'DROP TABLE test';
-EXCEPTION
-   WHEN OTHERS THEN
-      IF SQLCODE != -942 THEN
-     RAISE;
-      END IF;
-END;
-SQL
-);
+
     $db->exec("CREATE TABLE test_pdo_oci_stmt_getcolumnmeta(id INT)");
 
     $db->beginTransaction();
@@ -308,7 +298,7 @@ print "done!";
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
-$db->exec("DROP TABLE test_pdo_oci_stmt_getcolumnmeta");
+PDOTest::dropTableIfExists($db, "test_pdo_oci_stmt_getcolumnmeta");
 ?>
 --EXPECT--
 Preparations before the test

@@ -49,7 +49,7 @@ fclose($sh);
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
-$db->exec("DROP TABLE test_oci_fread_1");
+PDOTest::dropTableIfExists($db, test_oci_fread_1");
 ?>
 --EXPECT--
 Test 1

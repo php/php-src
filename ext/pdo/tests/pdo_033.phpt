@@ -34,7 +34,7 @@ print_r($stmt->fetchAll(PDO::FETCH_ASSOC));
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test033");
+PDOTest::dropTableIfExists($db, "test033");
 ?>
 --EXPECT--
 Array

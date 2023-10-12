@@ -16,9 +16,7 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test007(id CHAR(1) NOT NULL PRIMARY KEY, val VARCHAR(10))');
-$db->exec("INSERT INTO test007 VALUES('A', 'A')");
-$db->exec("INSERT INTO test007 VALUES('B', 'A')");
-$db->exec("INSERT INTO test007 VALUES('C', 'C')");
+$db->exec("INSERT INTO test007 VALUES('A', 'A'), ('B', 'A'), ('C', 'C')");
 
 $stmt = $db->prepare('SELECT id, val from test007');
 
@@ -33,7 +31,7 @@ var_dump($stmt->fetchAll(PDO::FETCH_ASSOC|PDO::FETCH_UNIQUE));
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test007");
+PDOTest::dropTableIfExists($db, "test007");
 ?>
 --EXPECT--
 array(3) {

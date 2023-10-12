@@ -52,7 +52,7 @@ try {
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test71885");
+PDOTest::dropTableIfExists($db, "test71885");
 ?>
 --EXPECT--
 bool(true)

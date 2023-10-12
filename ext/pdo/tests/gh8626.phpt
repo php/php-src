@@ -21,7 +21,6 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-$db->exec('DROP TABLE test8626');
 $db->exec('CREATE TABLE test8626 (x int NOT NULL)');
 
 $stmt = $db->prepare('INSERT INTO test8626 VALUES(?)');
@@ -43,7 +42,7 @@ var_dump(array_slice($errorInfo, 0, 3)); // odbc, dblib
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test8626");
+PDOTest::dropTableIfExists($db, "test8626");
 ?>
 --EXPECTF--
 bool(false)

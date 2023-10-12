@@ -19,13 +19,13 @@ $db->exec('CREATE TABLE test65946(id int)');
 $db->exec('INSERT INTO test65946 VALUES(1)');
 switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
     case 'dblib':
-        $sql = 'SELECT TOP :limit * FROM test';
+        $sql = 'SELECT TOP :limit * FROM test65946';
         break;
     case 'odbc':
-        $sql = 'SELECT TOP (:limit) * FROM test';
+        $sql = 'SELECT TOP (:limit) * FROM test65946';
         break;
     case 'firebird':
-        $sql = 'SELECT FIRST :limit * FROM test';
+        $sql = 'SELECT FIRST :limit * FROM test65946';
         break;
     case 'oci':
         //$sql = 'SELECT * FROM test65946 FETCH FIRST :limit ROWS ONLY';  // Oracle 12c syntax
@@ -45,7 +45,7 @@ var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test65946");
+PDOTest::dropTableIfExists($db, "test65946");
 ?>
 --EXPECT--
 array(1) {

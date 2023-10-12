@@ -33,7 +33,7 @@ var_dump($stmt->fetchAll());
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test38253");
+PDOTest::dropTableIfExists($db, "test38253");
 ?>
 --EXPECTF--
 Warning: PDOStatement::fetchAll(): SQLSTATE[HY000]: General error: No fetch class specified in %s on line %d

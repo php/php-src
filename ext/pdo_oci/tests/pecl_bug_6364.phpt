@@ -42,7 +42,7 @@ print "Done\n";
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
-$db->exec("DROP TABLE test6364");
+PDOTest::dropTableIfExists($db, "test6364");
 $db->exec("DROP PROCEDURE test6364_sp");
 ?>
 --EXPECT--

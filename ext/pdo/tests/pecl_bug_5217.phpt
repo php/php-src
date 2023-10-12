@@ -29,7 +29,7 @@ echo "PHP Didn't crash!\n";
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test5217");
+PDOTest::dropTableIfExists($db, "test5217");
 ?>
 --EXPECT--
 Safely caught Serialization of 'PDO' is not allowed

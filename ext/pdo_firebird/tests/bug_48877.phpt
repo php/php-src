@@ -14,9 +14,7 @@ require("testdb.inc");
 $value = '2';
 
 $dbh->exec('CREATE TABLE test48877 (A integer)');
-$dbh->exec("INSERT INTO test48877 VALUES ('1')");
-$dbh->exec("INSERT INTO test48877 VALUES ('2')");
-$dbh->exec("INSERT INTO test48877 VALUES ('3')");
+$dbh->exec("INSERT INTO test48877 VALUES ('1'), ('2'), ('3')");
 $dbh->commit();
 
 $query = "SELECT * FROM test48877 WHERE A = :paramno";

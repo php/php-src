@@ -99,7 +99,7 @@ var_dump($stmt->fetchColumn());
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test71447");
+PDOTest::dropTableIfExists($db, "test71447");
 ?>
 --EXPECT--
 string(10) ""abc":8000"

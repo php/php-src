@@ -58,7 +58,7 @@ fclose($row[0]);
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
-$db->exec("DROP TABLE test46274_2");
+PDOTest::dropTableIfExists($db, "test46274_2");
 ?>
 --EXPECTF--
 array(2) {

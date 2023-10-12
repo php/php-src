@@ -30,7 +30,7 @@ foreach ($db->query("SELECT * FROM test5772")->fetchAll(PDO::FETCH_FUNC, 'heLLO'
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test5772");
+PDOTest::dropTableIfExists($db, "test5772");
 ?>
 --EXPECT--
 string(1) "1"

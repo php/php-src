@@ -92,7 +92,7 @@ exit(0);
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test030");
+PDOTest::dropTableIfExists($db, "test030");
 ?>
 --EXPECTF--
 string(11) "PDODatabase"

@@ -28,7 +28,7 @@ echo "Done\n";
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-$db->exec("DROP TABLE test40285");
+PDOTest::dropTableIfExists($db, "test40285");
 ?>
 --EXPECT--
 Done

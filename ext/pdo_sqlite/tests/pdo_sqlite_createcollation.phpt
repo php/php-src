@@ -10,9 +10,7 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)');
 
-$db->query('INSERT INTO foobar VALUES (NULL, "1")');
-$db->query('INSERT INTO foobar VALUES (NULL, "2")');
-$db->query('INSERT INTO foobar VALUES (NULL, "10")');
+$db->query('INSERT INTO foobar VALUES (NULL, "1"), (NULL, "2"), (NULL, "10")');
 
 $db->sqliteCreateCollation('MYCOLLATE', function($a, $b) { return strnatcmp($a, $b); });
 
