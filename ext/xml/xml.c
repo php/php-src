@@ -1094,8 +1094,10 @@ static bool php_xml_check_string_method_arg(
 		if (status == false) { \
 			zend_argument_value_error(2, "cannot safely swap to object of class %s as method \"%s\" does not exist which was set via " handler_set_method, \
 			ZSTR_VAL(new_this_obj->ce->name), ZSTR_VAL(method_name)); \
+			zend_string_release(method_name); \
 			RETURN_THROWS(); \
 		} \
+		zend_string_release(method_name); \
 		zend_fcc_addref(&parser_to_check->fcc_field); \
 	}
 
