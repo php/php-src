@@ -271,9 +271,20 @@ static encodePtr find_encoder_by_type_name(sdlPtr sdl, const char *type)
 		encodePtr enc;
 
 		ZEND_HASH_FOREACH_PTR(sdl->encoders, enc)  {
-		    if (strcmp(enc->details.type_str, type) == 0) {
-				return enc;
-			}
+
+            if (type[0] == '{') {
+                size_t ns_len = strlen(enc->details.ns);
+                if (strncmp(enc->details.ns, type + 1, ns_len) == 0
+                    && type[ns_len + 1] == '}'
+                    && strcmp(enc->details.type_str, type + ns_len + 2) == 0) {
+                    return enc;
+                }
+            } else {
+                if (strcmp(enc->details.type_str, type) == 0) {
+                    return enc;
+                }
+            }
+
 		} ZEND_HASH_FOREACH_END();
 	}
 	return NULL;
@@ -1380,8 +1391,15 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 	} else if (SOAP_GLOBAL(class_map) && type->type_str) {
 		zval              *classname;
 		zend_class_entry  *tmp;
-
-		if ((classname = zend_hash_str_find_deref(SOAP_GLOBAL(class_map), type->type_str, strlen(type->type_str))) != NULL &&
+        classname = zend_hash_str_find_deref(SOAP_GLOBAL(class_map), type->type_str, strlen(type->type_str));
+        if(classname == NULL){
+            if (type->ns) {
+                zend_string *nscat =zend_strpprintf(0, "{%s}%s", type->ns, type->type_str);
+                classname = zend_hash_find_deref(SOAP_GLOBAL(class_map),nscat);
+                zend_string_release_ex(nscat, 0);
+            }
+        }
+		if (classname != NULL &&
 		    Z_TYPE_P(classname) == IS_STRING &&
 		    (tmp = zend_fetch_class(Z_STR_P(classname), ZEND_FETCH_CLASS_AUTO)) != NULL) {
 			ce = tmp;
