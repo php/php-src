@@ -78,7 +78,6 @@ typedef struct {
 	zend_fcall_info_cache unparsedEntityDeclHandler;
 	zend_fcall_info_cache notationDeclHandler;
 	zend_fcall_info_cache externalEntityRefHandler;
-	zend_fcall_info_cache unknownEncodingHandler;
 	zend_fcall_info_cache startNamespaceDeclHandler;
 	zend_fcall_info_cache endNamespaceDeclHandler;
 
@@ -344,10 +343,6 @@ static void xml_parser_free_obj(zend_object *object)
 		zend_fcc_dtor(&parser->externalEntityRefHandler);
 		parser->externalEntityRefHandler.function_handler = NULL;
 	}
-	if (ZEND_FCC_INITIALIZED(parser->unknownEncodingHandler)) {
-		zend_fcc_dtor(&parser->unknownEncodingHandler);
-		parser->unknownEncodingHandler.function_handler = NULL;
-	}
 	if (ZEND_FCC_INITIALIZED(parser->startNamespaceDeclHandler)) {
 		zend_fcc_dtor(&parser->startNamespaceDeclHandler);
 		parser->startNamespaceDeclHandler.function_handler = NULL;
@@ -397,9 +392,6 @@ static HashTable *xml_parser_get_gc(zend_object *object, zval **table, int *n)
 	}
 	if (ZEND_FCC_INITIALIZED(parser->externalEntityRefHandler)) {
 		zend_get_gc_buffer_add_fcc(gc_buffer, &parser->externalEntityRefHandler);
-	}
-	if (ZEND_FCC_INITIALIZED(parser->unknownEncodingHandler)) {
-		zend_get_gc_buffer_add_fcc(gc_buffer, &parser->unknownEncodingHandler);
 	}
 	if (ZEND_FCC_INITIALIZED(parser->startNamespaceDeclHandler)) {
 		zend_get_gc_buffer_add_fcc(gc_buffer, &parser->startNamespaceDeclHandler);
@@ -1131,7 +1123,6 @@ PHP_FUNCTION(xml_set_object)
 		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, unparsedEntityDeclHandler, "xml_set_unparsed_entity_decl_handler()");
 		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, notationDeclHandler, "xml_set_notation_decl_handler()");
 		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, externalEntityRefHandler, "xml_set_external_entity_ref_handler()");
-		//PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, unknownEncodingHandler, "we_dont_have_a_function_for_this_loool()");
 		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, startNamespaceDeclHandler, "xml_set_start_namespace_decl_handler()");
 		PHP_XML_CHECK_NEW_THIS_METHODS(parser, new_this, endNamespaceDeclHandler, "xml_set_end_namespace_decl_handler()");
 
