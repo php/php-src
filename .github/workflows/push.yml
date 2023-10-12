@@ -12,6 +12,7 @@ on:
       - .cirrus.yml
       - .travis.yml
       - travis/*
+      - .circleci/*
     branches:
       - PHP-7.4
       - PHP-8.0
@@ -30,6 +31,7 @@ on:
       - .cirrus.yml
       - .travis.yml
       - travis/*
+      - .circleci/*
     branches:
       - '**'
 concurrency:

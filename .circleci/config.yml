@@ -1,0 +1,198 @@
+version: 2.1
+
+jobs:
+  arm:
+    resource_class: arm.medium
+    docker:
+      - image: cimg/base:current-22.04
+      - image: mysql:8
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_DATABASE: test
+      - image: postgres:16
+        environment:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+    environment:
+      LANGUAGE: ''
+      LANG: en_US.UTF-8
+      MYSQL_TEST_HOST: '127.0.0.1'
+      MYSQL_TEST_PASSWD: ''
+      MYSQL_TEST_USER: root
+      PDO_MYSQL_TEST_DSN: 'mysql:host=127.0.0.1;dbname=test'
+      PDO_MYSQL_TEST_PASS: ''
+      PDO_MYSQL_TEST_USER: root
+      PDO_PGSQL_TEST_DSN: 'pgsql:host=127.0.0.1 port=5432 dbname=test user=postgres password=postgres'
+    steps:
+      - checkout
+      - run:
+          name: apt
+          command: |
+            export DEBIAN_FRONTEND=noninteractive
+            sudo apt-get update -y
+            sudo apt-get install -y \
+              gcc \
+              g++ \
+              autoconf \
+              bison \
+              re2c \
+              locales \
+              locales-all \
+              ldap-utils \
+              openssl \
+              slapd \
+              libgmp-dev \
+              libicu-dev \
+              libtidy-dev \
+              libenchant-2-dev \
+              libaspell-dev \
+              libpspell-dev \
+              libsasl2-dev \
+              libxpm-dev \
+              libzip-dev \
+              libbz2-dev \
+              libsqlite3-dev \
+              libwebp-dev \
+              libonig-dev \
+              libkrb5-dev \
+              libgssapi-krb5-2 \
+              libcurl4-openssl-dev \
+              libxml2-dev \
+              libxslt1-dev \
+              libpq-dev \
+              libreadline-dev \
+              libldap2-dev \
+              libsodium-dev \
+              libargon2-0-dev \
+              libmm-dev \
+              libsnmp-dev \
+              snmpd \
+              `#snmp-mibs-downloader` \
+              freetds-dev \
+              `#unixodbc-dev` \
+              libc-client-dev \
+              dovecot-core \
+              dovecot-pop3d \
+              dovecot-imapd \
+              sendmail \
+              firebird-dev \
+              liblmdb-dev \
+              libtokyocabinet-dev \
+              libdb-dev \
+              libqdbm-dev \
+              libjpeg-dev \
+              libpng-dev \
+              libfreetype6-dev
+      - run:
+          name: ./configure
+          command: |
+            ./buildconf -f
+            ./configure \
+              --enable-debug \
+              --enable-zts \
+              --enable-option-checking=fatal \
+              --prefix=/usr \
+              --enable-phpdbg \
+              --enable-fpm \
+              --enable-opcache \
+              --with-pdo-mysql=mysqlnd \
+              --with-mysqli=mysqlnd \
+              --with-pgsql \
+              --with-pdo-pgsql \
+              --with-pdo-sqlite \
+              --enable-intl \
+              --without-pear \
+              --enable-gd \
+              --with-jpeg \
+              --with-webp \
+              --with-freetype \
+              --with-xpm \
+              --enable-exif \
+              --with-zip \
+              --with-zlib \
+              --with-zlib-dir=/usr \
+              --enable-soap \
+              --enable-xmlreader \
+              --with-xsl \
+              --with-tidy \
+              --enable-sysvsem \
+              --enable-sysvshm \
+              --enable-shmop \
+              --enable-pcntl \
+              --with-readline \
+              --enable-mbstring \
+              --with-curl \
+              --with-gettext \
+              --enable-sockets \
+              --with-bz2 \
+              --with-openssl \
+              --with-gmp \
+              --enable-bcmath \
+              --enable-calendar \
+              --enable-ftp \
+              --with-pspell=/usr \
+              --with-enchant=/usr \
+              --with-kerberos \
+              --enable-sysvmsg \
+              --with-ffi \
+              --enable-zend-test \
+              --enable-dl-test=shared \
+              --with-ldap \
+              --with-ldap-sasl \
+              --with-password-argon2 \
+              --with-mhash \
+              --with-sodium \
+              --enable-dba \
+              --with-cdb \
+              --enable-flatfile \
+              --enable-inifile \
+              --with-tcadb \
+              --with-lmdb \
+              --with-qdbm \
+              --with-snmp \
+              `#--with-unixODBC` \
+              --with-imap \
+              --with-kerberos \
+              --with-imap-ssl \
+              `#--with-pdo-odbc=unixODBC,/usr` \
+              `#--with-pdo-oci=shared,instantclient,/opt/oracle/instantclient` \
+              `#--with-oci8=shared,instantclient,/opt/oracle/instantclient` \
+              --with-config-file-path=/etc \
+              --with-config-file-scan-dir=/etc/php.d \
+              --with-pdo-firebird \
+              `#--with-pdo-dblib` \
+              --disable-phpdbg \
+              `#--enable-werror`
+      - run:
+          name: make
+          command: make -j2 > /dev/null
+      - run:
+          name: make install
+          command: |
+            sudo make install
+            sudo mkdir -p /etc/php.d
+            sudo chmod 777 /etc/php.d
+            echo opcache.enable_cli=1 > /etc/php.d/opcache.ini
+            echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
+      - run:
+          name: Test
+          command: |
+            sapi/cli/php run-tests.php \
+              -d zend_extension=opcache.so \
+              -d opcache.enable_cli=1 \
+              -d opcache.jit_buffer_size=16M \
+              -d opcache.jit=tracing \
+              -P -q -x -j2 \
+              -g FAIL,BORK,LEAK,XLEAK \
+              --no-progress \
+              --offline \
+              --show-diff \
+              --show-slow 1000 \
+              --set-timeout 120 \
+              --repeat 2
+
+workflows:
+  push-workflow:
+    jobs:
+      - arm
