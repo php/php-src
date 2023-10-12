@@ -153,6 +153,9 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 				new_enc->details.ns = estrndup(ns, ns_len);
 				new_enc->details.type_str = estrdup(new_enc->details.type_str);
 			}
+			if (new_enc->details.clark_notation) {
+				zend_string_addref(new_enc->details.clark_notation);
+			}
 			if (sdl->encoders == NULL) {
 				sdl->encoders = pemalloc(sizeof(HashTable), sdl->is_persistent);
 				zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, sdl->is_persistent);
@@ -1419,6 +1422,9 @@ static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, char **in)
 	WSDL_CACHE_GET_INT(enc->details.type, in);
 	enc->details.type_str = sdl_deserialize_string(in);
 	enc->details.ns = sdl_deserialize_string(in);
+	if (enc->details.ns) {
+		enc->details.clark_notation = zend_strpprintf(0, "{%s}%s", enc->details.ns, enc->details.type_str);
+	}
 	WSDL_CACHE_GET_INT(i, in);
 	enc->details.sdl_type = types[i];
 	enc->to_xml = sdl_guess_convert_xml;
@@ -2845,6 +2851,7 @@ static encodePtr make_persistent_sdl_encoder(encodePtr enc, HashTable *ptr_map, 
 	}
 	if (penc->details.ns) {
 		penc->details.ns = strdup(penc->details.ns);
+		penc->details.clark_notation = zend_string_dup(penc->details.clark_notation, 1);
 	}
 
 	if (penc->details.sdl_type) {
