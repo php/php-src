@@ -12,6 +12,7 @@ on:
       - .cirrus.yml
       - .travis.yml
       - travis/*
+      - .circleci/*
     branches:
       - PHP-7.4
       - PHP-8.0
@@ -31,6 +32,7 @@ on:
       - .cirrus.yml
       - .travis.yml
       - travis/*
+      - .circleci/*
     branches:
       - '**'
 permissions:
@@ -126,11 +128,10 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}_${{ matrix.asan && 'OpCache' || 'Tracing JIT' }}
-          jitType: tracing
+          jitType: ${{ matrix.asan && 'disable' || 'tracing' }}
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            ${{ !matrix.asan && '-d opcache.jit_buffer_size=16M' || '' }}
             ${{ matrix.asan && '--asan -x' || '' }}
       - name: Verify generated files are up to date
         if: ${{ !matrix.asan }}
@@ -166,7 +167,6 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             -d opcache.protect_memory=1
-            -d opcache.jit_buffer_size=16M
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   WINDOWS:
