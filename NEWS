@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed double-free of non-interned enum case name. (ilutov)
 
+- DOM:
+  . Fix registerNodeClass with abstract class crashing. (nielsdos)
+
 - Fiber:
   . Fixed bug GH-11121 (ReflectionFiber segfault). (danog, trowski, bwoebi)
 
