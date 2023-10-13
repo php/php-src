@@ -1599,17 +1599,38 @@ PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len)
 /* {{{ php_strspn */
 PHPAPI size_t php_strspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end)
 {
-	const char *p = s1, *spanp;
-	char c = *p;
-
-cont:
-	for (spanp = s2; p != s1_end && spanp != s2_end;) {
-		if (*spanp++ == c) {
-			c = *(++p);
-			goto cont;
+	/* Fast path for short strings.
+	 * The table lookup cannot be faster in this case because we not only have to compare, but
+	 * also build the table. We only compare in this case.
+	 * Empirically tested that the table lookup approach is only beneficial for s2 longer than 1 character. */
+	if (s2_end - s2 == 1) {
+		const char *ptr = s1;
+		while (ptr < s1_end && *ptr == *s2) {
+			ptr++;
 		}
+		return ptr - s1;
 	}
-	return (p - s1);
+
+	/* Every character in s2 will set a boolean in this lookup table.
+	 * We'll use the lookup table as a fast lookup for the characters in s2 while looping over s1. */
+	bool table[256];
+	/* Use multiple small memsets to inline the memset with intrinsics, trick learned from glibc. */
+	memset(table, 0, 64);
+	memset(table + 64, 0, 64);
+	memset(table + 128, 0, 64);
+	memset(table + 192, 0, 64);
+
+	while (s2 < s2_end) {
+		table[(unsigned char) *s2] = true;
+		s2++;
+	}
+
+	const char *ptr = s1;
+	while (ptr < s1_end && table[(unsigned char) *ptr]) {
+		ptr++;
+	}
+
+	return ptr - s1;
 }
 /* }}} */
 
