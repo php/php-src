@@ -91,7 +91,6 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
@@ -112,7 +111,6 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
@@ -175,7 +173,6 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
@@ -191,7 +188,6 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
@@ -240,7 +236,6 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             -d opcache.protect_memory=1
-            -d opcache.jit_buffer_size=16M
       - name: Test OpCache
         uses: ./.github/actions/test-macos
         with:
@@ -258,7 +253,6 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
             -d opcache.protect_memory=1
-            -d opcache.jit_buffer_size=16M
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack

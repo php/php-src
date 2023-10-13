@@ -35,6 +35,7 @@ runs:
         export TEST_PHP_JUNIT=junit.out.xml
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           -d opcache.jit=${{ inputs.jitType }} \
+          -d opcache.jit_buffer_size=16M \
           -j$(/usr/bin/nproc) \
           -g FAIL,BORK,LEAK,XLEAK \
           --no-progress \
