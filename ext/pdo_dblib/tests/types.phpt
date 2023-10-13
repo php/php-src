@@ -19,6 +19,8 @@ function get_expected_float_string() {
         case '7.0':
         case '7.1':
         case '7.2':
+        case '7.3':
+        case '7.4':
         case '8.0':
             return '10.500';
         default:
