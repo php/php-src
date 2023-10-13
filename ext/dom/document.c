@@ -2072,6 +2072,10 @@ PHP_METHOD(DOMDocument, registerNodeClass)
 	}
 
 	if (ce == NULL || instanceof_function(ce, basece)) {
+		if (UNEXPECTED(ce != NULL && (ce->ce_flags & ZEND_ACC_ABSTRACT))) {
+			zend_argument_value_error(2, "must not be an abstract class");
+			RETURN_THROWS();
+		}
 		DOM_GET_THIS_INTERN(intern);
 		dom_set_doc_classmap(intern->document, basece, ce);
 		RETURN_TRUE;
