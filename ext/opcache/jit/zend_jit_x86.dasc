@@ -9475,7 +9475,16 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 			} else if (opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				|	LOAD_ADDR FCARG1a, Z_STR_P(zv + 1);
 				|	lea FCARG2a, aword [r2 + opline->result.num]
-				|	EXT_CALL zend_jit_find_func_helper, r0
+				|.if X64
+				|	LOAD_ADDR CARG3, opline
+				|.else
+				|	sub r4, 12
+				|	push opline
+				|.endif
+				|	EXT_CALL zend_jit_find_func_by_name_helper, r0
+				|.if not(X64)
+				|	add r4, 12
+				|.endif
 			} else if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 				|	LOAD_ADDR FCARG1a, zv;
 				|	lea FCARG2a, aword [r2 + opline->result.num]

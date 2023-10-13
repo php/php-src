@@ -3948,7 +3948,7 @@ static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast 
 			opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 			opline->op2_type = IS_CONST;
 			opline->op2.constant = zend_add_func_name_literal(str);
-			opline->result.num = zend_alloc_cache_slot();
+			opline->result.num = zend_alloc_cache_slots(2);
 		}
 	} else {
 		zend_emit_op(NULL, ZEND_INIT_DYNAMIC_CALL, NULL, name_node);

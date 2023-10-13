@@ -459,7 +459,7 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 			drop_leading_backslash(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
-			opline->result.num = alloc_cache_slots(op_array, 1);
+			opline->result.num = alloc_cache_slots(op_array, 2);
 			break;
 		case ZEND_ASSIGN_STATIC_PROP:
 		case ZEND_ASSIGN_STATIC_PROP_REF:
@@ -512,7 +512,7 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 				drop_leading_backslash(val);
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 				zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
-				opline->result.num = alloc_cache_slots(op_array, 1);
+				opline->result.num = alloc_cache_slots(op_array, 2);
 			} else {
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			}

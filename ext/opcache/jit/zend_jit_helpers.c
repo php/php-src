@@ -67,6 +67,24 @@ static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name,
 	return fbc;
 }
 
+static zend_function* ZEND_FASTCALL zend_jit_find_func_by_name_helper(zend_string *name, void **cache_slot, zend_op *opline)
+{
+	zval *func = zend_hash_find_known_hash(EG(function_table), name);
+	zend_function *fbc;
+
+	if (UNEXPECTED(func == NULL)) {
+		/* When opcache.preload is used, func can be null when compiling - ext/opcache/tests/jit/bug81256.phpt */
+		return NULL;
+	}
+	fbc = Z_FUNC_P(func);
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+		fbc = _zend_jit_init_func_run_time_cache(&fbc->op_array);
+	}
+	cache_slot[0] = fbc;
+	cache_slot[1] = (void*)(uintptr_t)zend_vm_calc_used_stack(opline->extended_value, fbc);
+	return fbc;
+}
+
 static zend_function* ZEND_FASTCALL zend_jit_find_ns_func_helper(zval *func_name, void **cache_slot)
 {
 	zval *func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 1));

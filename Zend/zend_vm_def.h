@@ -3760,7 +3760,8 @@ ZEND_VM_HOT_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 	zval *function_name, *func;
 	zend_execute_data *call;
 
-	fbc = CACHED_PTR(opline->result.num);
+	int num = opline->result.num;
+	fbc = CACHED_PTR(num);
 	if (UNEXPECTED(fbc == NULL)) {
 		function_name = (zval*)RT_CONSTANT(opline, opline->op2);
 		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(function_name+1));
@@ -3771,9 +3772,13 @@ ZEND_VM_HOT_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
-		CACHE_PTR(opline->result.num, fbc);
+		CACHE_PTR(num, fbc);
+		CACHE_PTR(num + sizeof(void*), (void*)(uintptr_t)zend_vm_calc_used_stack(opline->extended_value, fbc));
 	}
-	call = _zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
+	/* Because zend_vm_calc_used_stack depends only on the number of arguments and the function definition fbc,
+	 * it can be cached in the run time cache. */
+	call = _zend_vm_stack_push_call_frame_ex(
+		(uint32_t)(uintptr_t)CACHED_PTR(num + sizeof(void*)), ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, NULL);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;

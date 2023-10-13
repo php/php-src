@@ -606,7 +606,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						opline->result.num = func_slot[opline->op2.constant];
 					} else {
 						opline->result.num = cache_size;
-						cache_size += sizeof(void *);
+						cache_size += opline->opcode == ZEND_INIT_FCALL_BY_NAME ? 2 * sizeof(void *) : sizeof(void *);
 						func_slot[opline->op2.constant] = opline->result.num;
 					}
 					break;

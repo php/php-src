@@ -8790,9 +8790,11 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 				|	ADD_SUB_64_WITH_CONST_32 add, FCARG2x, REG2, opline->result.num, TMP1
 				|	EXT_CALL zend_jit_find_func_helper, REG0
 			} else if (opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
+				/* TODO: Actually use the precomputed stack size in the JIT For ZEND_INIT_FCALL_BY_NAME */
 				|	LOAD_ADDR FCARG1x, Z_STR_P(zv + 1);
 				|	ADD_SUB_64_WITH_CONST_32 add, FCARG2x, REG2, opline->result.num, TMP1
-				|	EXT_CALL zend_jit_find_func_helper, REG0
+				|	LOAD_ADDR CARG3, opline
+				|	EXT_CALL zend_jit_find_func_by_name_helper, REG0
 			} else if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 				|	LOAD_ADDR FCARG1x, zv;
 				|	ADD_SUB_64_WITH_CONST_32 add, FCARG2x, REG2, opline->result.num, TMP1
