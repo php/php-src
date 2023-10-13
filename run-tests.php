@@ -310,7 +310,6 @@ function main(): void
         'opcache.jit_max_exit_counters=100000',
         'opcache.jit_blacklist_root_trace=255',
         'opcache.jit_blacklist_side_trace=255',
-        'opcache.jit_buffer_size=64M',
         'opcache.protect_memory=1',
         'zend.assertions=1',
         'zend.exception_ignore_args=0',

@@ -31,6 +31,7 @@ runs:
         export SKIP_IO_CAPTURE_TESTS=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           -d opcache.jit=${{ inputs.jitType }} \
+          -d opcache.jit_buffer_size=64M \
           -j$(/usr/bin/nproc) \
           -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
           --offline \

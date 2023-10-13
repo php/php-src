@@ -16,6 +16,7 @@ runs:
         export CI_NO_IPV6=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           -d opcache.jit=${{ inputs.jitType }} \
+          -d opcache.jit_buffer_size=64M \
           -j$(sysctl -n hw.ncpu) \
           -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
           --offline \
