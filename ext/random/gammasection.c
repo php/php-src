@@ -13,6 +13,9 @@
    | Authors: Tim Düsterhus <timwolla@php.net>                            |
    |                                                                      |
    | Based on code from: Frédéric Goualard                                |
+   | Corrected to handled appropriately random integers larger than 2^53  |
+   | converted to double precision floats, and to avoid overflows for     |
+   | large gammas.                                                        |
    +----------------------------------------------------------------------+
 */
 
@@ -46,6 +49,12 @@ static double gamma_max(double x, double y)
 	return (fabs(x) > fabs(y)) ? gamma_high(x) : gamma_low(y);
 }
 
+static void splitint64(uint64_t v, double *vhi, double *vlo)
+{
+	*vhi = v >> 2;
+	*vlo = v & UINT64_C(0x3);
+}
+
 static uint64_t ceilint(double a, double b, double g)
 {
 	double s = b / g - a / g;
@@ -74,9 +83,19 @@ PHPAPI double php_random_gammasection_closed_open(const php_random_algo *algo, p
 	uint64_t k = 1 + php_random_range64(algo, status, hi - 1); /* [1, hi] */
 
 	if (fabs(min) <= fabs(max)) {
-		return k == hi ? min : max - k * g;
+		if (k == hi) {
+			return min;
+		} else {
+			double k_hi, k_lo;
+			splitint64(k, &k_hi, &k_lo);
+
+			return 0x1p+2 * (max * 0x1p-2 - k_hi * g) - k_lo * g;
+		}
 	} else {
-		return min + (k - 1) * g;
+		double k_hi, k_lo;
+		splitint64(k - 1, &k_hi, &k_lo);
+
+		return 0x1p+2 * (min * 0x1p-2 + k_hi * g) + k_lo * g;
 	}
 }
 
@@ -92,9 +111,23 @@ PHPAPI double php_random_gammasection_closed_closed(const php_random_algo *algo,
 	uint64_t k = php_random_range64(algo, status, hi); /* [0, hi] */
 
 	if (fabs(min) <= fabs(max)) {
-		return k == hi ? min : max - k * g;
+		if (k == hi) {
+			return min;
+		} else {
+			double k_hi, k_lo;
+			splitint64(k, &k_hi, &k_lo);
+
+			return 0x1p+2 * (max * 0x1p-2 - k_hi * g) - k_lo * g;
+		}
 	} else {
-		return k == hi ? max : min + k * g;
+		if (k == hi) {
+			return max;
+		} else {
+			double k_hi, k_lo;
+			splitint64(k, &k_hi, &k_lo);
+
+			return 0x1p+2 * (min * 0x1p-2 + k_hi * g) + k_lo * g;
+		}
 	}
 }
 
@@ -110,9 +143,19 @@ PHPAPI double php_random_gammasection_open_closed(const php_random_algo *algo, p
 	uint64_t k = php_random_range64(algo, status, hi - 1); /* [0, hi - 1] */
 
 	if (fabs(min) <= fabs(max)) {
-		return max - k * g;
+		double k_hi, k_lo;
+		splitint64(k, &k_hi, &k_lo);
+
+		return 0x1p+2 * (max * 0x1p-2 - k_hi * g) - k_lo * g;
 	} else {
-		return k == (hi - 1) ? max : min + (k + 1) * g;
+		if (k == (hi - 1)) {
+			return max;
+		} else {
+			double k_hi, k_lo;
+			splitint64(k + 1, &k_hi, &k_lo);
+
+			return 0x1p+2 * (min * 0x1p-2 + k_hi * g) + k_lo * g;
+		}
 	}
 }
 
@@ -128,8 +171,14 @@ PHPAPI double php_random_gammasection_open_open(const php_random_algo *algo, php
 	uint64_t k = 1 + php_random_range64(algo, status, hi - 2); /* [1, hi - 1] */
 
 	if (fabs(min) <= fabs(max)) {
-		return max - k * g;
+		double k_hi, k_lo;
+		splitint64(k, &k_hi, &k_lo);
+
+		return 0x1p+2 * (max * 0x1p-2 - k_hi * g) - k_lo * g;
 	} else {
-		return min + k * g;
+		double k_hi, k_lo;
+		splitint64(k, &k_hi, &k_lo);
+
+		return 0x1p+2 * (min * 0x1p-2 + k_hi * g) + k_lo * g;
 	}
 }
