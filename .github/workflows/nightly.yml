@@ -383,10 +383,6 @@ jobs:
           echo opcache.jit_max_root_traces=100000 >> /etc/php.d/opcache.ini
           echo opcache.jit_max_side_traces=100000 >> /etc/php.d/opcache.ini
           echo opcache.jit_max_exit_counters=100000 >> /etc/php.d/opcache.ini
-          echo opcache.jit_hot_loop=1 >> /etc/php.d/opcache.ini
-          echo opcache.jit_hot_func=1 >> /etc/php.d/opcache.ini
-          echo opcache.jit_hot_return=1 >> /etc/php.d/opcache.ini
-          echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
           php -v
       - name: Test AMPHP
