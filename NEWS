@@ -85,6 +85,7 @@ SOAP:
     lost the setPersistence()). (nielsdos)
   . Fixed bug #49278 (SoapClient::__getLastResponseHeaders returns NULL if
     wsdl operation !has output). (nielsdos)
+  . Fixed bug #44383 (PHP DateTime not converted to xsd:datetime). (nielsdos)
 
 Sockets:
   . Removed the deprecated inet_ntoa call support. (David Carlier)

@@ -139,6 +139,9 @@ PHP 8.4 UPGRADE NOTES
     It is now possible to specify entries in a class map with clark notation
     to resolve a type with a specific namespace to a specific class.
     For example: '{http://example.com}foo' => 'FooClass'.
+  . Instances of DateTimeInterface that are passed to xsd:datetime or similar
+    elements are now serialized as such instead of being serialized as an
+    empty string.
 
 - XSL:
   . It is now possible to use parameters that contain both single and double

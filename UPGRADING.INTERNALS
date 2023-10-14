@@ -56,6 +56,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Added php_libxml_pretend_ctx_error_ex() to emit errors as if they had come
      from libxml.
 
+ e. ext/date
+   - Added the php_format_date_ex() API to format instances of php_date_obj.
+
 ========================
 4. OpCode changes
 ========================
