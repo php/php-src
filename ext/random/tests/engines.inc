@@ -80,4 +80,27 @@ final class TestXoshiro128PlusPlusEngine implements Engine
     }
 }
 
+final class TestCountingEngine32 implements Engine
+{
+    private int $count = 0;
+
+    public function generate(): string
+    {
+        return pack('V', $this->count++);
+    }
+}
+
+final class TestCountingEngine64 implements Engine
+{
+    private int $count = 0;
+
+    public function generate(): string
+    {
+        if ($this->count > 2147483647 || $this->count < 0) {
+            throw new \Exception('Overflow');
+        }
+        return pack('V', $this->count++) . "\x00\x00\x00\x00";
+    }
+}
+
 ?>
