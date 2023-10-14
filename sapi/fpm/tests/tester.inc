@@ -331,13 +331,23 @@ class Tester
     }
 
     /**
+     * Skip if shared extension is not available in extension directory.
+     */
+    static public function skipIfSharedExtensionNotFound($extensionName)
+    {
+        $soPath = ini_get('extension_dir') . '/' . $extensionName . '.so';
+        if ( ! file_exists($soPath)) {
+            die("skip $extensionName extension not present in extension_dir");
+        }
+    }
+
+    /**
      * Skip if posix extension not loaded.
      */
-    static public function skipIfUserDoesNotExist($userName)
-    {
+    static public function skipIfUserDoesNotExist($userName) {
         self::skipIfPosixNotLoaded();
-        if (posix_getpwnam($userName) === false) {
-            die("skip user $userName does not exist");
+        if ( posix_getpwnam( $userName ) === false ) {
+            die( "skip user $userName does not exist" );
         }
     }
 
