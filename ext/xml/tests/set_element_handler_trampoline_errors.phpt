@@ -23,25 +23,7 @@ $xml = <<<HERE
 </a>
 HERE;
 
-/*
-echo "1st arg is rubbish:\n";
-$rc = new ReflectionClass(XMLParser::class);
-$obj = $rc->newInstanceWithoutConstructor();
-
-try {
-    xml_set_element_handler($obj, $startCallback, $endCallback);
-} catch (\Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
-}
-*/
 $parser = xml_parser_create();
-/*
-try {
-    xml_set_element_handler($parser, $startCallback, $endCallback);
-} catch (\Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
-}
-*/
 echo "2nd arg is rubbish:\n";
 try {
     xml_set_element_handler($parser, [], $endCallback);

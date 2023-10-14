@@ -43,4 +43,4 @@ XML);
 ?>
 --EXPECT--
 A::start_element(CONTAINER)
-ValueError: xml_set_object(): Argument #2 ($object) cannot safely swap to object of class B as method "end_element" does not exist which was set via xml_set_element_handler()
+ValueError: xml_set_object(): Argument #2 ($object) cannot safely swap to object of class B as method "end_element" does not exist, which was set via xml_set_element_handler()
