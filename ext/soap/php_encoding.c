@@ -21,6 +21,7 @@
 #include "php_soap.h"
 #include "ext/libxml/php_libxml.h"
 #include "ext/standard/base64.h"
+#include "ext/date/php_date.h"
 #include <libxml/parserInternals.h>
 #include "zend_strtod.h"
 #include "zend_interfaces.h"
@@ -57,7 +58,7 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 static xmlNodePtr to_xml_list1(encodeTypePtr enc, zval *data, int style, xmlNodePtr parent);
 
 /* Datetime encode/decode */
-static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *format, int style, xmlNodePtr parent);
+static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *format, const char *ext_date_format, size_t ext_date_format_len, int style, xmlNodePtr parent);
 static xmlNodePtr to_xml_datetime(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
 static xmlNodePtr to_xml_time(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
 static xmlNodePtr to_xml_date(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
@@ -2847,7 +2848,7 @@ static zval *guess_zval_convert(zval *ret, encodeTypePtr type, xmlNodePtr data)
 }
 
 /* Time encode/decode */
-static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *format, int style, xmlNodePtr parent)
+static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *format, const char *ext_date_format, size_t ext_date_format_len, int style, xmlNodePtr parent)
 {
 	/* logic hacked from ext/standard/datetime.c */
 	struct tm *ta, tmbuf;
@@ -2905,6 +2906,17 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 		efree(buf);
 	} else if (Z_TYPE_P(data) == IS_STRING) {
 		xmlNodeSetContentLen(xmlParam, BAD_CAST(Z_STRVAL_P(data)), Z_STRLEN_P(data));
+	} else if (Z_TYPE_P(data) == IS_OBJECT) {
+		if (instanceof_function_slow(Z_OBJCE_P(data), php_date_get_interface_ce())) {
+			php_date_obj *dateobj = Z_PHPDATE_P(data);
+			if (dateobj->time) {
+				zend_string *formatted = php_format_date_ex(ext_date_format, ext_date_format_len, dateobj->time, dateobj->time->is_localtime);
+				xmlNodeSetContentLen(xmlParam, BAD_CAST(ZSTR_VAL(formatted)), ZSTR_LEN(formatted));
+				zend_string_release_ex(formatted, false);
+			} else {
+				soap_error0(E_ERROR, "Encoding: Invalid DateTimeInterface");
+			}
+		}
 	}
 
 	if (style == SOAP_ENCODED) {
@@ -2919,45 +2931,47 @@ static xmlNodePtr to_xml_duration(encodeTypePtr type, zval *data, int style, xml
 	return to_xml_string(type, data, style, parent);
 }
 
+#define TO_XML_DATETIME_EX_HELPER(type, date, format, ext_date_format, style, parent) \
+	to_xml_datetime_ex(type, data, format, ext_date_format, strlen(ext_date_format), style, parent)
+
 static xmlNodePtr to_xml_datetime(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
-	return to_xml_datetime_ex(type, data, "%Y-%m-%dT%H:%M:%S", style, parent);
+	return TO_XML_DATETIME_EX_HELPER(type, data, "%Y-%m-%dT%H:%M:%S", "Y-m-d\\TH:i:s.up", style, parent);
 }
 
 static xmlNodePtr to_xml_time(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
-	/* TODO: microsecconds */
-	return to_xml_datetime_ex(type, data, "%H:%M:%S", style, parent);
+	return TO_XML_DATETIME_EX_HELPER(type, data, "%H:%M:%S", "H:i:s.up", style, parent);
 }
 
 static xmlNodePtr to_xml_date(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
-	return to_xml_datetime_ex(type, data, "%Y-%m-%d", style, parent);
+	return TO_XML_DATETIME_EX_HELPER(type, data, "%Y-%m-%d", "Y-m-dp", style, parent);
 }
 
 static xmlNodePtr to_xml_gyearmonth(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
-	return to_xml_datetime_ex(type, data, "%Y-%m", style, parent);
+	return TO_XML_DATETIME_EX_HELPER(type, data, "%Y-%m", "Y-mp", style, parent);
 }
 
 static xmlNodePtr to_xml_gyear(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
-	return to_xml_datetime_ex(type, data, "%Y", style, parent);
+	return TO_XML_DATETIME_EX_HELPER(type, data, "%Y", "Yp", style, parent);
 }
 
 static xmlNodePtr to_xml_gmonthday(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
-	return to_xml_datetime_ex(type, data, "--%m-%d", style, parent);
+	return TO_XML_DATETIME_EX_HELPER(type, data, "--%m-%d", "--m-dp", style, parent);
 }
 
 static xmlNodePtr to_xml_gday(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
-	return to_xml_datetime_ex(type, data, "---%d", style, parent);
+	return TO_XML_DATETIME_EX_HELPER(type, data, "---%d", "---dp", style, parent);
 }
 
 static xmlNodePtr to_xml_gmonth(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
-	return to_xml_datetime_ex(type, data, "--%m--", style, parent);
+	return TO_XML_DATETIME_EX_HELPER(type, data, "--%m--", "--m--p", style, parent);
 }
 
 static zval* to_zval_list(zval *ret, encodeTypePtr enc, xmlNodePtr data) {

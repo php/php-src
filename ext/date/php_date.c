@@ -841,6 +841,11 @@ static zend_string *date_format(const char *format, size_t format_len, timelib_t
 	return string.s;
 }
 
+PHPAPI zend_string *php_format_date_ex(const char *format, size_t format_len, timelib_time *t, bool localtime)
+{
+	return date_format(format, format_len, t, localtime);
+}
+
 static void php_date(INTERNAL_FUNCTION_PARAMETERS, bool localtime)
 {
 	zend_string *format;
