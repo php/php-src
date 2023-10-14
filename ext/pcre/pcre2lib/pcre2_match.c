@@ -5640,7 +5640,7 @@ fprintf(stderr, "++ op=%d\n", *Fecode);
         {
         P = (heapframe *)((char *)N - frame_size);
         memcpy((char *)F + offsetof(heapframe, ovector), P->ovector,
-          P->offset_top * sizeof(PCRE2_SIZE));
+          Foffset_top * sizeof(PCRE2_SIZE));
         Foffset_top = P->offset_top;
         Fcapture_last = P->capture_last;
         Fcurrent_recurse = P->current_recurse;
