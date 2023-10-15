@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fix registerNodeClass with abstract class crashing. (nielsdos)
+  . Fix compile error when php_libxml.h header is included in C++.
+    (Remi, nielsdos)
 
 - Fiber:
   . Fixed bug GH-11121 (ReflectionFiber segfault). (danog, trowski, bwoebi)
