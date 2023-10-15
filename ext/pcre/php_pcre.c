@@ -963,13 +963,13 @@ static zend_always_inline void populate_match_value(
 }
 
 static inline void add_named(
-		zval *subpats, zend_string *name, zval *val, bool unmatched) {
+		HashTable *subpats, zend_string *name, zval *val, bool unmatched) {
 	/* If the DUPNAMES option is used, multiple subpatterns might have the same name.
 	 * In this case we want to preserve the one that actually has a value. */
 	if (!unmatched) {
-		zend_hash_update(Z_ARRVAL_P(subpats), name, val);
+		zend_hash_update(subpats, name, val);
 	} else {
-		if (!zend_hash_add(Z_ARRVAL_P(subpats), name, val)) {
+		if (!zend_hash_add(subpats, name, val)) {
 			return;
 		}
 	}
@@ -978,7 +978,7 @@ static inline void add_named(
 
 /* {{{ add_offset_pair */
 static inline void add_offset_pair(
-		zval *result, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
+		HashTable *result, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
 		zend_string *name, uint32_t unmatched_as_null)
 {
 	zval match_pair;
@@ -1006,7 +1006,7 @@ static inline void add_offset_pair(
 	if (name) {
 		add_named(result, name, &match_pair, start_offset == PCRE2_UNSET);
 	}
-	zend_hash_next_index_insert_new(Z_ARRVAL_P(result), &match_pair);
+	zend_hash_next_index_insert_new(result, &match_pair);
 }
 /* }}} */
 
@@ -1017,16 +1017,17 @@ static void populate_subpat_array(
 	bool unmatched_as_null = (flags & PREG_UNMATCHED_AS_NULL) != 0;
 	zval val;
 	int i;
+	HashTable *subpats_ht = Z_ARRVAL_P(subpats);
 	if (subpat_names) {
 		if (offset_capture) {
 			for (i = 0; i < count; i++) {
 				add_offset_pair(
-					subpats, subject, offsets[2*i], offsets[2*i+1],
+					subpats_ht, subject, offsets[2*i], offsets[2*i+1],
 					subpat_names[i], unmatched_as_null);
 			}
 			if (unmatched_as_null) {
 				for (i = count; i < num_subpats; i++) {
-					add_offset_pair(subpats, NULL, PCRE2_UNSET, PCRE2_UNSET, subpat_names[i], 1);
+					add_offset_pair(subpats_ht, NULL, PCRE2_UNSET, PCRE2_UNSET, subpat_names[i], 1);
 				}
 			}
 		} else {
@@ -1034,17 +1035,17 @@ static void populate_subpat_array(
 				populate_match_value(
 					&val, subject, offsets[2*i], offsets[2*i+1], unmatched_as_null);
 				if (subpat_names[i]) {
-					add_named(subpats, subpat_names[i], &val, offsets[2*i] == PCRE2_UNSET);
+					add_named(subpats_ht, subpat_names[i], &val, offsets[2*i] == PCRE2_UNSET);
 				}
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(subpats), &val);
+				zend_hash_next_index_insert_new(subpats_ht, &val);
 			}
 			if (unmatched_as_null) {
 				for (i = count; i < num_subpats; i++) {
 					ZVAL_NULL(&val);
 					if (subpat_names[i]) {
-						zend_hash_add(Z_ARRVAL_P(subpats), subpat_names[i], &val);
+						zend_hash_add(subpats_ht, subpat_names[i], &val);
 					}
-					zend_hash_next_index_insert_new(Z_ARRVAL_P(subpats), &val);
+					zend_hash_next_index_insert_new(subpats_ht, &val);
 				}
 			}
 		}
@@ -1052,18 +1053,18 @@ static void populate_subpat_array(
 		if (offset_capture) {
 			for (i = 0; i < count; i++) {
 				add_offset_pair(
-					subpats, subject, offsets[2*i], offsets[2*i+1], NULL, unmatched_as_null);
+					subpats_ht, subject, offsets[2*i], offsets[2*i+1], NULL, unmatched_as_null);
 			}
 			if (unmatched_as_null) {
 				for (i = count; i < num_subpats; i++) {
-					add_offset_pair(subpats, NULL, PCRE2_UNSET, PCRE2_UNSET, NULL, 1);
+					add_offset_pair(subpats_ht, NULL, PCRE2_UNSET, PCRE2_UNSET, NULL, 1);
 				}
 			}
 		} else {
 			for (i = 0; i < count; i++) {
 				populate_match_value(
 					&val, subject, offsets[2*i], offsets[2*i+1], unmatched_as_null);
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(subpats), &val);
+				zend_hash_next_index_insert_new(subpats_ht, &val);
 			}
 			if (unmatched_as_null) {
 				for (i = count; i < num_subpats; i++) {
@@ -1129,9 +1130,9 @@ static zend_always_inline bool is_known_valid_utf8(
 PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	zval *subpats, int global, int use_flags, zend_long flags, zend_off_t start_offset)
 {
-	zval			 result_set,		/* Holds a set of subpatterns after
+	zval			 result_set;		/* Holds a set of subpatterns after
 										   a global match */
-					*match_sets = NULL;	/* An array of sets of matches for each
+	HashTable	   **match_sets = NULL;	/* An array of sets of matches for each
 										   subpattern after a global match */
 	uint32_t		 options;			/* Execution options */
 	int				 count;				/* Count of matched subpatterns */
@@ -1233,9 +1234,9 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 
 	/* Allocate match sets array and initialize the values. */
 	if (global && subpats && subpats_order == PREG_PATTERN_ORDER) {
-		match_sets = (zval *)safe_emalloc(num_subpats, sizeof(zval), 0);
+		match_sets = safe_emalloc(num_subpats, sizeof(HashTable *), 0);
 		for (i=0; i<num_subpats; i++) {
-			array_init(&match_sets[i]);
+			match_sets[i] = zend_new_array(0);
 		}
 	}
 
@@ -1286,7 +1287,7 @@ matched:
 						if (offset_capture) {
 							for (i = 0; i < count; i++) {
 								add_offset_pair(
-									&match_sets[i], subject, offsets[2*i], offsets[2*i+1],
+									match_sets[i], subject, offsets[2*i], offsets[2*i+1],
 									NULL, unmatched_as_null);
 							}
 						} else {
@@ -1294,7 +1295,7 @@ matched:
 								zval val;
 								populate_match_value(
 									&val, subject, offsets[2*i], offsets[2*i+1], unmatched_as_null);
-								zend_hash_next_index_insert_new(Z_ARRVAL(match_sets[i]), &val);
+								zend_hash_next_index_insert_new(match_sets[i], &val);
 							}
 						}
 						mark = pcre2_get_mark(match_data);
@@ -1314,12 +1315,16 @@ matched:
 							for (; i < num_subpats; i++) {
 								if (offset_capture) {
 									add_offset_pair(
-										&match_sets[i], NULL, PCRE2_UNSET, PCRE2_UNSET,
+										match_sets[i], NULL, PCRE2_UNSET, PCRE2_UNSET,
 										NULL, unmatched_as_null);
 								} else if (unmatched_as_null) {
-									add_next_index_null(&match_sets[i]);
+									zval tmp;
+									ZVAL_NULL(&tmp);
+									zend_hash_next_index_insert_new(match_sets[i], &tmp);
 								} else {
-									add_next_index_str(&match_sets[i], ZSTR_EMPTY_ALLOC());
+									zval tmp;
+									ZVAL_EMPTY_STRING(&tmp);
+									zend_hash_next_index_insert_new(match_sets[i], &tmp);
 								}
 							}
 						}
@@ -1408,15 +1413,19 @@ error:
 	if (match_sets) {
 		if (subpat_names) {
 			for (i = 0; i < num_subpats; i++) {
+				zval wrapper;
+				ZVAL_ARR(&wrapper, match_sets[i]);
 				if (subpat_names[i]) {
-					zend_hash_update(Z_ARRVAL_P(subpats), subpat_names[i], &match_sets[i]);
-					Z_ADDREF(match_sets[i]);
+					zend_hash_update(Z_ARRVAL_P(subpats), subpat_names[i], &wrapper);
+					GC_ADDREF(match_sets[i]);
 				}
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(subpats), &match_sets[i]);
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(subpats), &wrapper);
 			}
 		} else {
 			for (i = 0; i < num_subpats; i++) {
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(subpats), &match_sets[i]);
+				zval wrapper;
+				ZVAL_ARR(&wrapper, match_sets[i]);
+				zend_hash_next_index_insert_new(Z_ARRVAL_P(subpats), &wrapper);
 			}
 		}
 		efree(match_sets);
@@ -2563,7 +2572,7 @@ matched:
 				if (offset_capture) {
 					/* Add (match, offset) pair to the return value */
 					add_offset_pair(
-						return_value, subject, last_match_offset, offsets[0],
+						Z_ARRVAL_P(return_value), subject, last_match_offset, offsets[0],
 						NULL, 0);
 				} else {
 					/* Add the piece to the return value */
@@ -2583,7 +2592,7 @@ matched:
 					if (!no_empty || offsets[2*i] != offsets[2*i+1]) {
 						if (offset_capture) {
 							add_offset_pair(
-								return_value, subject, offsets[2*i], offsets[2*i+1], NULL, 0);
+								Z_ARRVAL_P(return_value), subject, offsets[2*i], offsets[2*i+1], NULL, 0);
 						} else {
 							populate_match_value_str(&tmp, subject, offsets[2*i], offsets[2*i+1]);
 							zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
@@ -2660,7 +2669,7 @@ last:
 	if (!no_empty || start_offset < ZSTR_LEN(subject_str)) {
 		if (offset_capture) {
 			/* Add the last (match, offset) pair to the return value */
-			add_offset_pair(return_value, subject, start_offset, ZSTR_LEN(subject_str), NULL, 0);
+			add_offset_pair(Z_ARRVAL_P(return_value), subject, start_offset, ZSTR_LEN(subject_str), NULL, 0);
 		} else {
 			/* Add the last piece to the return value */
 			if (start_offset == 0) {
