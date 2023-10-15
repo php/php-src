@@ -1239,6 +1239,8 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		}
 	}
 
+	offsets = pcre2_get_ovector_pointer(match_data);
+
 	orig_start_offset = start_offset2;
 	options =
 		(pce->compile_options & PCRE2_UTF) && !is_known_valid_utf8(subject_str, orig_start_offset)
@@ -1265,8 +1267,6 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 
 matched:
 			matched++;
-
-			offsets = pcre2_get_ovector_pointer(match_data);
 
 			/* If subpatterns array has been passed, fill it in with values. */
 			if (subpats != NULL) {
@@ -1606,6 +1606,8 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 
 	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
+	offsets = pcre2_get_ovector_pointer(match_data);
+
 	/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if ((pce->preg_options & PREG_JIT) && options) {
@@ -1629,8 +1631,6 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 			}
 
 matched:
-			offsets = pcre2_get_ovector_pointer(match_data);
-
 			if (UNEXPECTED(offsets[1] < offsets[0])) {
 				PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
 				if (result) {
@@ -1862,6 +1862,8 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 
 	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
+	offsets = pcre2_get_ovector_pointer(match_data);
+
 	/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if ((pce->preg_options & PREG_JIT) && options) {
@@ -1883,8 +1885,6 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 			}
 
 matched:
-			offsets = pcre2_get_ovector_pointer(match_data);
-
 			if (UNEXPECTED(offsets[1] < offsets[0])) {
 				PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
 				if (result) {
@@ -2533,6 +2533,8 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 
 	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
+	offsets = pcre2_get_ovector_pointer(match_data);
+
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if ((pce->preg_options & PREG_JIT) && options) {
 		count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, ZSTR_LEN(subject_str), start_offset,
@@ -2552,8 +2554,6 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 			}
 
 matched:
-			offsets = pcre2_get_ovector_pointer(match_data);
-
 			if (UNEXPECTED(offsets[1] < offsets[0])) {
 				PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
 				break;
