@@ -29,6 +29,7 @@ static zend_object_handlers xsl_object_handlers;
 
 static const zend_module_dep xsl_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
+	ZEND_MOD_REQUIRED("dom")
 	ZEND_MOD_END
 };
 

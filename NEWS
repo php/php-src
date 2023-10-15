@@ -30,6 +30,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-12392 (Segmentation fault on SoapClient::__getTypes).
     (nielsdos)
 
+- XSL:
+  . Add missing module dependency. (nielsdos)
+
 12 Oct 2023, PHP 8.3.0RC4
 
 - Core:
