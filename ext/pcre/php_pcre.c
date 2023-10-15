@@ -1271,7 +1271,7 @@ matched:
 			/* If subpatterns array has been passed, fill it in with values. */
 			if (subpats != NULL) {
 				/* Try to get the list of substrings and display a warning if failed. */
-				if (offsets[1] < offsets[0]) {
+				if (UNEXPECTED(offsets[1] < offsets[0])) {
 					if (subpat_names) {
 						free_subpats_table(subpat_names, num_subpats);
 					}
