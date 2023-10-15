@@ -1215,14 +1215,6 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		}
 	}
 
-	/* Allocate match sets array and initialize the values. */
-	if (global && subpats && subpats_order == PREG_PATTERN_ORDER) {
-		match_sets = (zval *)safe_emalloc(num_subpats, sizeof(zval), 0);
-		for (i=0; i<num_subpats; i++) {
-			array_init(&match_sets[i]);
-		}
-	}
-
 	matched = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
@@ -1235,10 +1227,15 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 			if (subpat_names) {
 				free_subpats_table(subpat_names, num_subpats);
 			}
-			if (match_sets) {
-				efree(match_sets);
-			}
 			RETURN_FALSE;
+		}
+	}
+
+	/* Allocate match sets array and initialize the values. */
+	if (global && subpats && subpats_order == PREG_PATTERN_ORDER) {
+		match_sets = (zval *)safe_emalloc(num_subpats, sizeof(zval), 0);
+		for (i=0; i<num_subpats; i++) {
+			array_init(&match_sets[i]);
 		}
 	}
 
