@@ -2209,6 +2209,7 @@ static size_t preg_replace_func_impl(zval *return_value,
 		ZEND_ASSERT(subject_ht != NULL);
 
 		array_init_size(return_value, zend_hash_num_elements(subject_ht));
+		HashTable *return_value_ht = Z_ARRVAL_P(return_value);
 
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
@@ -2222,9 +2223,9 @@ static size_t preg_replace_func_impl(zval *return_value,
 				/* Add to return array */
 				ZVAL_STR(&zv, result);
 				if (string_key) {
-					zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, &zv);
+					zend_hash_add_new(return_value_ht, string_key, &zv);
 				} else {
-					zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, &zv);
+					zend_hash_index_add_new(return_value_ht, num_key, &zv);
 				}
 			}
 			zend_tmp_string_release(tmp_subject_entry_str);
@@ -2289,6 +2290,7 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, bool is_filter)
 		ZEND_ASSERT(subject_ht != NULL);
 
 		array_init_size(return_value, zend_hash_num_elements(subject_ht));
+		HashTable *return_value_ht = Z_ARRVAL_P(return_value);
 
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
@@ -2304,9 +2306,9 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, bool is_filter)
 					/* Add to return array */
 					ZVAL_STR(&zv, result);
 					if (string_key) {
-						zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, &zv);
+						zend_hash_add_new(return_value_ht, string_key, &zv);
 					} else {
-						zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, &zv);
+						zend_hash_index_add_new(return_value_ht, num_key, &zv);
 					}
 				} else {
 					zend_string_release_ex(result, 0);
@@ -2512,6 +2514,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 
 	/* Initialize return value */
 	array_init(return_value);
+	HashTable *return_value_ht = Z_ARRVAL_P(return_value);
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
@@ -2572,12 +2575,12 @@ matched:
 				if (offset_capture) {
 					/* Add (match, offset) pair to the return value */
 					add_offset_pair(
-						Z_ARRVAL_P(return_value), subject, last_match_offset, offsets[0],
+						return_value_ht, subject, last_match_offset, offsets[0],
 						NULL, 0);
 				} else {
 					/* Add the piece to the return value */
 					populate_match_value_str(&tmp, subject, last_match_offset, offsets[0]);
-					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+					zend_hash_next_index_insert_new(return_value_ht, &tmp);
 				}
 
 				/* One less left to do */
@@ -2592,10 +2595,10 @@ matched:
 					if (!no_empty || offsets[2*i] != offsets[2*i+1]) {
 						if (offset_capture) {
 							add_offset_pair(
-								Z_ARRVAL_P(return_value), subject, offsets[2*i], offsets[2*i+1], NULL, 0);
+								return_value_ht, subject, offsets[2*i], offsets[2*i+1], NULL, 0);
 						} else {
 							populate_match_value_str(&tmp, subject, offsets[2*i], offsets[2*i+1]);
-							zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+							zend_hash_next_index_insert_new(return_value_ht, &tmp);
 						}
 					}
 				}
@@ -2669,7 +2672,7 @@ last:
 	if (!no_empty || start_offset < ZSTR_LEN(subject_str)) {
 		if (offset_capture) {
 			/* Add the last (match, offset) pair to the return value */
-			add_offset_pair(Z_ARRVAL_P(return_value), subject, start_offset, ZSTR_LEN(subject_str), NULL, 0);
+			add_offset_pair(return_value_ht, subject, start_offset, ZSTR_LEN(subject_str), NULL, 0);
 		} else {
 			/* Add the last piece to the return value */
 			if (start_offset == 0) {
@@ -2677,7 +2680,7 @@ last:
 			} else {
 				populate_match_value_str(&tmp, subject, start_offset, ZSTR_LEN(subject_str));
 			}
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+			zend_hash_next_index_insert_new(return_value_ht, &tmp);
 		}
 	}
 }
@@ -2864,6 +2867,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 	/* Initialize return array */
 	array_init(return_value);
+	HashTable *return_value_ht = Z_ARRVAL_P(return_value);
 
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
@@ -2905,9 +2909,9 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 				/* Add to return array */
 				if (string_key) {
-					zend_hash_update(Z_ARRVAL_P(return_value), string_key, entry);
+					zend_hash_update(return_value_ht, string_key, entry);
 				} else {
-					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry);
+					zend_hash_index_update(return_value_ht, num_key, entry);
 				}
 			}
 		} else if (count == PCRE2_ERROR_NOMATCH) {
@@ -2916,9 +2920,9 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 				/* Add to return array */
 				if (string_key) {
-					zend_hash_update(Z_ARRVAL_P(return_value), string_key, entry);
+					zend_hash_update(return_value_ht, string_key, entry);
 				} else {
-					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry);
+					zend_hash_index_update(return_value_ht, num_key, entry);
 				}
 			}
 		} else {
