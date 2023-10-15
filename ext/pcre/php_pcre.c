@@ -948,9 +948,9 @@ static zend_always_inline void populate_match_value_str(
 	ZVAL_STRINGL_FAST(val, subject + start_offset, end_offset - start_offset);
 }
 
-static inline void populate_match_value(
+static zend_always_inline void populate_match_value(
 		zval *val, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
-		uint32_t unmatched_as_null) {
+		bool unmatched_as_null) {
 	if (PCRE2_UNSET == start_offset) {
 		if (unmatched_as_null) {
 			ZVAL_NULL(val);
