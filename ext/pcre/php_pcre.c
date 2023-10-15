@@ -1281,7 +1281,7 @@ matched:
 				}
 
 				if (global) {	/* global pattern matching */
-					if (subpats && subpats_order == PREG_PATTERN_ORDER) {
+					if (subpats_order == PREG_PATTERN_ORDER) {
 						/* For each subpattern, insert it into the appropriate array. */
 						if (offset_capture) {
 							for (i = 0; i < count; i++) {
