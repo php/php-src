@@ -778,28 +778,6 @@ static int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, siz
 }
 /* }}} */
 
-/* {{{ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding) */
-static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
-{
-	if (new_value) {
-		php_error_docref("ref.mbstring", E_DEPRECATED, "Use of mbstring.internal_encoding is deprecated");
-	}
-
-	if (OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage) == FAILURE) {
-		return FAILURE;
-	}
-
-	if (new_value && ZSTR_LEN(new_value)) {
-		MBSTRG(internal_encoding_set) = 1;
-		return _php_mb_ini_mbstring_internal_encoding_set(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
-	} else {
-		const char *encoding = php_get_internal_encoding();
-		MBSTRG(internal_encoding_set) = 0;
-		return _php_mb_ini_mbstring_internal_encoding_set(encoding, strlen(encoding));
-	}
-}
-/* }}} */
-
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_substitute_character) */
 static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 {
@@ -893,7 +871,6 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY("mbstring.language", "neutral", PHP_INI_ALL, OnUpdate_mbstring_language)
 	PHP_INI_ENTRY("mbstring.detect_order", NULL, PHP_INI_ALL, OnUpdate_mbstring_detect_order)
-	STD_PHP_INI_ENTRY("mbstring.internal_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_internal_encoding, internal_encoding_name, zend_mbstring_globals, mbstring_globals)
 	PHP_INI_ENTRY("mbstring.substitute_character", NULL, PHP_INI_ALL, OnUpdate_mbstring_substitute_character)
 
 	STD_PHP_INI_BOOLEAN("mbstring.encoding_translation", "0",

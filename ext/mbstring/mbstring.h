@@ -70,7 +70,6 @@ MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const 
 MBSTRING_API const mbfl_encoding* mb_guess_encoding_for_strings(const unsigned char **strings, size_t *str_lengths, size_t n, const mbfl_encoding **elist, unsigned int elist_size, bool strict, bool order_significant);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
-	char *internal_encoding_name;
 	const mbfl_encoding *internal_encoding;
 	const mbfl_encoding *current_internal_encoding;
 	const mbfl_encoding *http_output_encoding;

@@ -19,7 +19,6 @@ var_dump(ini_get('default_charset'));
 var_dump(ini_get('input_encoding'));
 var_dump(ini_get('output_encoding'));
 var_dump(ini_get('internal_encoding'));
-var_dump(ini_get('mbstring.internal_encoding'));
 
 var_dump(mb_internal_encoding());   //default internal encoding
 var_dump(mb_internal_encoding('UTF-8'));    //change internal encoding to UTF-8
@@ -33,7 +32,6 @@ string(0) ""
 string(10) "ISO-8859-1"
 string(10) "ISO-8859-1"
 string(10) "ISO-8859-1"
-string(0) ""
 string(10) "ISO-8859-1"
 bool(true)
 string(5) "UTF-8"

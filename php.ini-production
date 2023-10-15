@@ -1643,15 +1643,7 @@ zend.assertions = -1
 ; https://php.net/mbstring.language
 ;mbstring.language = Japanese
 
-; Use of this INI entry is deprecated, use global internal_encoding instead.
-; internal/script encoding.
-; Some encoding cannot work as internal encoding. (e.g. SJIS, BIG5, ISO-2022-*)
-; If empty, default_charset or internal_encoding or iconv.internal_encoding is used.
-; The precedence is: default_charset < internal_encoding < iconv.internal_encoding
-;mbstring.internal_encoding =
-
-; enable automatic encoding translation according to
-; mbstring.internal_encoding setting. Input chars are
+; enable automatic encoding translation. Input chars are
 ; converted to internal encoding by setting this to On.
 ; Note: Do _not_ use automatic encoding translation for
 ;       portable libs/applications.
@@ -1694,8 +1686,8 @@ zend.assertions = -1
 [exif]
 ; Exif UNICODE user comments are handled as UCS-2BE/UCS-2LE and JIS as JIS.
 ; With mbstring support this will automatically be converted into the encoding
-; given by corresponding encode setting. When empty mbstring.internal_encoding
-; is used. For the decode settings you can distinguish between motorola and
+; given by corresponding encode setting.
+; For the decode settings you can distinguish between motorola and
 ; intel byte order. A decode setting cannot be empty.
 ; https://php.net/exif.encode-unicode
 ;exif.encode_unicode = ISO-8859-15
