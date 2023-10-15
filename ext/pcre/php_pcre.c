@@ -1405,7 +1405,7 @@ error:
 	}
 
 	/* Add the match sets to the output array and clean up */
-	if (global && subpats && subpats_order == PREG_PATTERN_ORDER) {
+	if (match_sets) {
 		if (subpat_names) {
 			for (i = 0; i < num_subpats; i++) {
 				if (subpat_names[i]) {
