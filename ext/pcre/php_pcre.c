@@ -1325,8 +1325,8 @@ matched:
 						}
 					} else {
 						/* Allocate and populate the result set array */
-						array_init_size(&result_set, count + (mark ? 1 : 0));
 						mark = pcre2_get_mark(match_data);
+						array_init_size(&result_set, count + (mark ? 1 : 0));
 						populate_subpat_array(
 							&result_set, subject, offsets, subpat_names,
 							num_subpats, count, mark, flags);
