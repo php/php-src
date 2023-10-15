@@ -19,7 +19,6 @@ var_dump(ini_get('default_charset'));
 var_dump(ini_get('input_encoding'));
 var_dump(ini_get('output_encoding'));
 var_dump(ini_get('internal_encoding'));
-var_dump(ini_get('mbstring.http_input'));
 var_dump(ini_get('mbstring.http_output'));
 var_dump(ini_get('mbstring.internal_encoding'));
 
@@ -35,7 +34,6 @@ string(0) ""
 string(10) "ISO-8859-1"
 string(10) "ISO-8859-1"
 string(10) "ISO-8859-1"
-string(0) ""
 string(0) ""
 string(0) ""
 string(10) "ISO-8859-1"

@@ -738,25 +738,6 @@ static int _php_mb_ini_mbstring_http_input_set(const char *new_value, size_t new
 	return SUCCESS;
 }
 
-/* {{{ static PHP_INI_MH(OnUpdate_mbstring_http_input) */
-static PHP_INI_MH(OnUpdate_mbstring_http_input)
-{
-	if (new_value) {
-		php_error_docref("ref.mbstring", E_DEPRECATED, "Use of mbstring.http_input is deprecated");
-	}
-
-	if (!new_value || !ZSTR_LEN(new_value)) {
-		const char *encoding = php_get_input_encoding();
-		MBSTRG(http_input_set) = 0;
-		_php_mb_ini_mbstring_http_input_set(encoding, strlen(encoding));
-		return SUCCESS;
-	}
-
-	MBSTRG(http_input_set) = 1;
-	return _php_mb_ini_mbstring_http_input_set(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
-}
-/* }}} */
-
 static int _php_mb_ini_mbstring_http_output_set(const char *new_value) {
 	const mbfl_encoding *encoding = php_mb_get_encoding_or_pass(new_value);
 	if (!encoding) {
@@ -930,7 +911,6 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY("mbstring.language", "neutral", PHP_INI_ALL, OnUpdate_mbstring_language)
 	PHP_INI_ENTRY("mbstring.detect_order", NULL, PHP_INI_ALL, OnUpdate_mbstring_detect_order)
-	PHP_INI_ENTRY("mbstring.http_input", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_input)
 	PHP_INI_ENTRY("mbstring.http_output", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_output)
 	STD_PHP_INI_ENTRY("mbstring.internal_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_internal_encoding, internal_encoding_name, zend_mbstring_globals, mbstring_globals)
 	PHP_INI_ENTRY("mbstring.substitute_character", NULL, PHP_INI_ALL, OnUpdate_mbstring_substitute_character)
@@ -967,10 +947,8 @@ static void mbstring_internal_encoding_changed_hook(void) {
 		_php_mb_ini_mbstring_http_output_set(encoding);
 	}
 
-	if (!MBSTRG(http_input_set)) {
-		const char *encoding = php_get_input_encoding();
-		_php_mb_ini_mbstring_http_input_set(encoding, strlen(encoding));
-	}
+	const char *encoding = php_get_input_encoding();
+	_php_mb_ini_mbstring_http_input_set(encoding, strlen(encoding));
 }
 
 /* {{{ module global initialize handler */
@@ -1015,7 +993,6 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	mbstring_globals->last_used_encoding = NULL;
 	mbstring_globals->internal_encoding_set = 0;
 	mbstring_globals->http_output_set = 0;
-	mbstring_globals->http_input_set = 0;
 	mbstring_globals->all_encodings_list = NULL;
 }
 /* }}} */
@@ -1152,7 +1129,6 @@ PHP_RSHUTDOWN_FUNCTION(mbstring)
 
 	MBSTRG(internal_encoding_set) = 0;
 	MBSTRG(http_output_set) = 0;
-	MBSTRG(http_input_set) = 0;
 
 	MBSTRG(outconv_enabled) = false;
 	MBSTRG(outconv_state) = 0;

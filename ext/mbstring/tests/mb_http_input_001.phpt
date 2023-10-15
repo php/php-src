@@ -11,7 +11,5 @@ var_dump(mb_http_input('l'));
 ?>
 --EXPECT--
 Warning: PHP Startup: INI setting contains invalid encoding "-1" in Unknown on line 0
-
-Warning: PHP Startup: INI setting contains invalid encoding "-1" in Unknown on line 0
 bool(false)
 bool(false)

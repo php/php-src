@@ -109,7 +109,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	/* Whether an explicit internal_encoding / http_output / http_input encoding was set. */
 	bool internal_encoding_set;
 	bool http_output_set;
-	bool http_input_set;
 #ifdef HAVE_MBREGEX
     zend_long regex_retry_limit;
 #endif
