@@ -14,7 +14,8 @@ Intl:
   . Added IntlDateFormatter::PATTERN constant. (David Carlier)
 
 MBString:
-  . Long-deprecated INI setting mbstring.http_input has been removed. (Alex Dowad)
+  . Long-deprecated INI settings mbstring.http_input and mbstring.http_output
+    have been removed. (Alex Dowad)
 
 Opcache:
   . Added large shared segments support for FreeBSD. (David Carlier)

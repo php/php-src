@@ -1650,16 +1650,6 @@ zend.assertions = -1
 ; The precedence is: default_charset < internal_encoding < iconv.internal_encoding
 ;mbstring.internal_encoding =
 
-; Use of this INI entry is deprecated, use global output_encoding instead.
-; http output encoding.
-; mb_output_handler must be registered as output buffer to function.
-; If empty, default_charset or output_encoding or mbstring.http_output is used.
-; The precedence is: default_charset < output_encoding < mbstring.http_output
-; To use an output encoding conversion, mbstring's output handler must be set
-; otherwise output encoding conversion cannot be performed.
-; https://php.net/mbstring.http-output
-;mbstring.http_output =
-
 ; enable automatic encoding translation according to
 ; mbstring.internal_encoding setting. Input chars are
 ; converted to internal encoding by setting this to On.

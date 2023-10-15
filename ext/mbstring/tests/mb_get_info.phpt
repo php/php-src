@@ -6,7 +6,6 @@ mbstring
 mbstring.encoding_translation=1
 mbstring.language=Korean
 mbstring.internal_encoding=UTF-8
-mbstring.http_output=ISO-8859-15
 mbstring.http_output_conv_mimetypes=abc
 mbstring.detect_order=UTF-8,ISO-8859-15,ISO-8859-1,ASCII
 mbstring.substitute_character=123
@@ -22,8 +21,6 @@ foreach (array_keys($result) as $key) {
 }
 ?>
 --EXPECT--
-Deprecated: PHP Startup: Use of mbstring.http_output is deprecated in Unknown on line 0
-
 Deprecated: PHP Startup: Use of mbstring.internal_encoding is deprecated in Unknown on line 0
 array(13) {
   ["internal_encoding"]=>
@@ -31,7 +28,7 @@ array(13) {
   ["http_input"]=>
   string(5) "UTF-8"
   ["http_output"]=>
-  string(11) "ISO-8859-15"
+  string(5) "UTF-8"
   ["http_output_conv_mimetypes"]=>
   string(3) "abc"
   ["mail_charset"]=>
@@ -66,8 +63,8 @@ string(5) "UTF-8"
 string(5) "UTF-8"
 string(5) "UTF-8"
 string(5) "UTF-8"
-string(11) "ISO-8859-15"
-string(11) "ISO-8859-15"
+string(5) "UTF-8"
+string(5) "UTF-8"
 string(3) "abc"
 string(3) "abc"
 string(11) "ISO-2022-KR"
