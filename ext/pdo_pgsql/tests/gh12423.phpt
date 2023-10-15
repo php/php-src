@@ -9,16 +9,8 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-require __DIR__ . '/config.inc';
-
-[
-    'ENV' => [
-        'PDOTEST_DSN' => $dsnWithCredentials,
-        'PDOTEST_USER' => $user,
-        'PDOTEST_PASS' => $password,
-    ],
-] = __DIR__ . '/common.phpt';
-
+$user = $password = "postgres";
+$dsnWithCredentials = "pgsql:host=localhost port=5432 dbname=test user={$user} password={$password}";
 $dsn = str_replace(" user={$user} password={$password}", '', $dsnWithCredentials);
 
 echo "dsn without credentials / correct user / correct password\n";
