@@ -106,8 +106,8 @@ static zend_always_inline void php_libxml_invalidate_node_list_cache(php_libxml_
 static zend_always_inline void php_libxml_invalidate_node_list_cache_from_doc(xmlDocPtr docp)
 {
 	if (docp && docp->_private) { /* docp is NULL for detached nodes */
-		php_libxml_node_ptr *private = docp->_private;
-		php_libxml_node_object *object_private = private->_private;
+		php_libxml_node_ptr *node_private = (php_libxml_node_ptr *) docp->_private;
+		php_libxml_node_object *object_private = (php_libxml_node_object *) node_private->_private;
 		if (object_private) {
 			php_libxml_invalidate_node_list_cache(object_private->document);
 		}
