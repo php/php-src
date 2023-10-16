@@ -5171,7 +5171,7 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 		result_reg = ZREG_R0;
 	} else {
 		/* ASSIGN_DIM_OP */
-		if (sizeof(void*) == 4
+		if (ZREG_FCARG1 == ZREG_RCX
 		 && (opcode == ZEND_SL || opcode == ZEND_SR)
 		 && Z_MODE(op2_addr) != IS_CONST_ZVAL) {
 			result_reg = ZREG_R2;
