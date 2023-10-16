@@ -963,7 +963,7 @@ static zend_always_inline void populate_match_value(
 }
 
 static inline void add_named(
-		HashTable *subpats, zend_string *name, zval *val, bool unmatched) {
+		HashTable *const subpats, zend_string *name, zval *val, bool unmatched) {
 	/* If the DUPNAMES option is used, multiple subpatterns might have the same name.
 	 * In this case we want to preserve the one that actually has a value. */
 	if (!unmatched) {
@@ -978,7 +978,7 @@ static inline void add_named(
 
 /* {{{ add_offset_pair */
 static inline void add_offset_pair(
-		HashTable *result, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
+		HashTable *const result, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
 		zend_string *name, uint32_t unmatched_as_null)
 {
 	zval match_pair;
@@ -1136,7 +1136,6 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 										   subpattern after a global match */
 	uint32_t		 options;			/* Execution options */
 	int				 count;				/* Count of matched subpatterns */
-	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
 	uint32_t		 num_subpats;		/* Number of captured subpatterns */
 	int				 matched;			/* Has anything matched */
 	zend_string	   **subpat_names;		/* Array for named subpatterns */
@@ -1240,7 +1239,8 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		}
 	}
 
-	offsets = pcre2_get_ovector_pointer(match_data);
+	/* Array of subpattern offsets */
+	PCRE2_SIZE *const offsets = pcre2_get_ovector_pointer(match_data);
 
 	orig_start_offset = start_offset2;
 	options =
@@ -1573,7 +1573,6 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 {
 	uint32_t		 options;			/* Execution options */
 	int				 count;				/* Count of matched subpatterns */
-	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
 	uint32_t		 num_subpats;		/* Number of captured subpatterns */
 	size_t			 new_len;			/* Length of needed storage */
 	size_t			 alloc_len;			/* Actual allocated length */
@@ -1615,7 +1614,8 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 
 	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
-	offsets = pcre2_get_ovector_pointer(match_data);
+	/* Array of subpattern offsets */
+	PCRE2_SIZE *const offsets = pcre2_get_ovector_pointer(match_data);
 
 	/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
@@ -1813,7 +1813,6 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 {
 	uint32_t		 options;			/* Execution options */
 	int				 count;				/* Count of matched subpatterns */
-	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
 	zend_string		**subpat_names;		/* Array for named subpatterns */
 	uint32_t		 num_subpats;		/* Number of captured subpatterns */
 	size_t			 new_len;			/* Length of needed storage */
@@ -1871,7 +1870,8 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 
 	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
-	offsets = pcre2_get_ovector_pointer(match_data);
+	/* Array of subpattern offsets */
+	PCRE2_SIZE *const offsets = pcre2_get_ovector_pointer(match_data);
 
 	/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
@@ -2495,7 +2495,6 @@ PHP_FUNCTION(preg_split)
 PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	zend_long limit_val, zend_long flags)
 {
-	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
 	uint32_t		 options;			/* Execution options */
 	int				 count;				/* Count of matched subpatterns */
 	PCRE2_SIZE		 start_offset;		/* Where the new search starts */
@@ -2545,7 +2544,8 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 
 	options = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 
-	offsets = pcre2_get_ovector_pointer(match_data);
+	/* Array of subpattern offsets */
+	PCRE2_SIZE *const offsets = pcre2_get_ovector_pointer(match_data);
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if ((pce->preg_options & PREG_JIT) && options) {
