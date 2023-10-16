@@ -11,14 +11,17 @@ PDOTest::skip();
 <?php
 require __DIR__ . '/config.inc';
 
-[
-    'ENV' => [
-        'PDOTEST_DSN' => $dsnWithCredentials,
-        'PDOTEST_USER' => $user,
-        'PDOTEST_PASS' => $password,
-    ],
-] = __DIR__ . '/common.phpt';
-
+$dsnWithCredentials = $config['ENV']['PDOTEST_DSN'];
+$user = $config['ENV']['PDOTEST_USER'] ?? null;
+$password = $config['ENV']['PDOTEST_PASS'] ?? null;
+if (!$user) {
+    preg_match('/user=(.*?) /', $dsnWithCredentials, $match);
+    $user = $match[1] ?? '';
+}
+if (!$password) {
+    preg_match('/password=(.*?) /', $dsnWithCredentials, $match);
+    $password = $match[1] ?? '';
+}
 $dsn = str_replace(" user={$user} password={$password}", '', $dsnWithCredentials);
 
 echo "dsn without credentials / correct user / correct password\n";
