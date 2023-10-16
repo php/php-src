@@ -64,7 +64,8 @@ $db->test();
 var_dump($db);
 
 $db->query('CREATE TABLE test023(id INT NOT NULL PRIMARY KEY, val VARCHAR(10))');
-$db->query("INSERT INTO test023 VALUES(0, 'A'), (1, 'B')");
+$db->query("INSERT INTO test023 VALUES(0, 'A')");
+$db->query("INSERT INTO test023 VALUES(1, 'B')");
 
 
 $stmt = $db->query('SELECT val, id FROM test023');

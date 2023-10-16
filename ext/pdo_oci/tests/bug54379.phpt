@@ -17,7 +17,8 @@ $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $db->exec("CREATE TABLE test54379 (col1 NVARCHAR2(20))");
-$db->exec("INSERT INTO test54379 VALUES('12345678901234567890'), ('あいうえおかきくけこさしすせそたちつてと')");
+$db->exec("INSERT INTO test54379 VALUES('12345678901234567890')");
+$db->exec("INSERT INTO test54379 VALUES('あいうえおかきくけこさしすせそたちつてと')");
 $stmt = $db->prepare("SELECT * FROM test54379");
 $stmt->execute();
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));

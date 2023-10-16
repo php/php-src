@@ -16,7 +16,9 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test003(id int NOT NULL PRIMARY KEY, val VARCHAR(10))');
-$db->exec("INSERT INTO test003 VALUES(1, 'A'), (2, 'B'), (3, 'C')");
+$db->exec("INSERT INTO test003 VALUES(1, 'A')");
+$db->exec("INSERT INTO test003 VALUES(2, 'B')");
+$db->exec("INSERT INTO test003 VALUES(3, 'C')");
 
 $stmt = $db->prepare('SELECT * from test003');
 $stmt->execute();

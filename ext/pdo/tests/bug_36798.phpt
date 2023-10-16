@@ -45,5 +45,5 @@ PDOTest::dropTableIfExists($db, "test36798");
 --EXPECT--
 array(1) {
   [0]=>
-  string(1) "�"
+  string(2) "Ã"
 }

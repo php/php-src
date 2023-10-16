@@ -16,7 +16,9 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test020(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
-$db->exec("INSERT INTO test020 VALUES(1, 'A', 'A'), (2, 'B', 'B'), (3, 'C', 'C')");
+$db->exec("INSERT INTO test020 VALUES(1, 'A', 'A')");
+$db->exec("INSERT INTO test020 VALUES(2, 'B', 'B')");
+$db->exec("INSERT INTO test020 VALUES(3, 'C', 'C')");
 
 foreach (array('SELECT id, val FROM test020', 'SELECT id, val, val2 FROM test020', 'SELECT COUNT(*) FROM test020') as $sql) {
 

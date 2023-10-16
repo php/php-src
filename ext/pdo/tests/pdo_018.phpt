@@ -68,7 +68,9 @@ class TestLeaf extends TestDerived
 }
 
 $db->exec('CREATE TABLE classtypes018(id int NOT NULL PRIMARY KEY, name VARCHAR(20) NOT NULL UNIQUE)');
-$db->exec("INSERT INTO classtypes018 VALUES(0, 'stdClass'), (1, 'TestBase'), (2, 'TestDerived')");
+$db->exec("INSERT INTO classtypes018 VALUES(0, 'stdClass')");
+$db->exec("INSERT INTO classtypes018 VALUES(1, 'TestBase')");
+$db->exec("INSERT INTO classtypes018 VALUES(2, 'TestDerived')");
 
 switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
   case 'dblib':

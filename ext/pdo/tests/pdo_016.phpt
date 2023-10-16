@@ -21,7 +21,9 @@ if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
 }
 
 $db->exec('CREATE TABLE test016(idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
-$db->exec("INSERT INTO test016 VALUES(0, 'String0'), (1, 'String1'), (2, 'String2')");
+$db->exec("INSERT INTO test016 VALUES(0, 'String0')");
+$db->exec("INSERT INTO test016 VALUES(1, 'String1')");
+$db->exec("INSERT INTO test016 VALUES(2, 'String2')");
 
 $stmt1 = $db->prepare('SELECT COUNT(idx) FROM test016');
 $stmt2 = $db->prepare('SELECT idx, txt FROM test016 ORDER by idx');

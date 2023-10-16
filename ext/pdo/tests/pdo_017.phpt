@@ -37,7 +37,9 @@ if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
 }
 
 $db->exec('CREATE TABLE test017(id INT NOT NULL PRIMARY KEY, val VARCHAR(10))'.$suf);
-$db->exec("INSERT INTO test017 VALUES(1, 'A'), (2, 'B'), (3, 'C')");
+$db->exec("INSERT INTO test017 VALUES(1, 'A')");
+$db->exec("INSERT INTO test017 VALUES(2, 'B')");
+$db->exec("INSERT INTO test017 VALUES(3, 'C')");
 $delete = $db->prepare('DELETE FROM test017');
 
 function countRows($action) {

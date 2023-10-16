@@ -16,11 +16,16 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE classtypes009(id int NOT NULL PRIMARY KEY, name VARCHAR(10) NOT NULL UNIQUE)');
-$db->exec("INSERT INTO classtypes009 VALUES(0, 'stdClass'), (1, 'Test1'), (2, 'Test2')");
+$db->exec("INSERT INTO classtypes009 VALUES(0, 'stdClass')");
+$db->exec("INSERT INTO classtypes009 VALUES(1, 'Test1')");
+$db->exec("INSERT INTO classtypes009 VALUES(2, 'Test2')");
 $db->exec('CREATE TABLE test009(id int NOT NULL PRIMARY KEY, classtype int, val VARCHAR(10))');
-$db->exec("INSERT INTO test009 VALUES(1, 0, 'A'), (2, 1, 'B'), (3, 2, 'C'), (4, 3, 'D')");
+$db->exec("INSERT INTO test009 VALUES(1, 0, 'A')");
+$db->exec("INSERT INTO test009 VALUES(2, 1, 'B')");
+$db->exec("INSERT INTO test009 VALUES(3, 2, 'C')");
+$db->exec("INSERT INTO test009 VALUES(4, 3, 'D')");
 
-$stmt = $db->prepare('SELECT classtypes.name, test.id AS id, test.val AS val FROM test009 LEFT JOIN classtypes009 ON test.classtype=classtypes.id');
+$stmt = $db->prepare('SELECT classtypes009.name, test009.id AS id, test009.val AS val FROM test009 LEFT JOIN classtypes009 ON test009.classtype=classtypes009.id');
 
 class Test1
 {
