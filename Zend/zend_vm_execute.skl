@@ -4,7 +4,9 @@
 # pragma GCC push_options
 # pragma GCC optimize("no-gcse")
 # pragma GCC optimize("no-ivopts")
+#ifdef HAVE_BOLT
 # pragma GCC optimize("no-reorder-blocks-and-partition")
+#endif
 #endif
 ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *ex)
 {

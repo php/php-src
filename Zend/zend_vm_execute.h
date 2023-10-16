@@ -52134,7 +52134,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDL
 # pragma GCC push_options
 # pragma GCC optimize("no-gcse")
 # pragma GCC optimize("no-ivopts")
+#ifdef HAVE_BOLT
 # pragma GCC optimize("no-reorder-blocks-and-partition")
+#endif
 #endif
 ZEND_API void execute_ex(zend_execute_data *ex)
 {
