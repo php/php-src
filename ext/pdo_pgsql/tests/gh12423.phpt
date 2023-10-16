@@ -19,7 +19,7 @@ if (!$user) {
     $user = $match[1] ?? '';
 }
 if (!$password) {
-    preg_match('/password=(.*?) /', $dsnWithCredentials, $match);
+    preg_match('/password=(.*?)$/', $dsnWithCredentials, $match);
     $password = $match[1] ?? '';
 }
 $dsn = str_replace(" user={$user} password={$password}", '', $dsnWithCredentials);
