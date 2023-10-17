@@ -1519,7 +1519,8 @@ static void dom_reconcile_ns_list_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlN
 		if (nodep->type == XML_ELEMENT_NODE) {
 			dom_reconcile_ns_internal(doc, nodep, search_parent);
 			if (nodep->children) {
-				dom_reconcile_ns_list_internal(doc, nodep->children, nodep->last /* process the whole children list */, search_parent);
+				/* Normally we can use search_parent, but older versions of libxml2 break on that because the closest namespace may not be in the search_parent */
+				dom_reconcile_ns_list_internal(doc, nodep->children, nodep->last /* process the whole children list */, nodep->parent);
 			}
 		}
 		if (nodep == last) {

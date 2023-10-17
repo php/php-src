@@ -58,12 +58,6 @@ echo "-- children manually document element --\n"; case2('insertBefore'); echo "
 echo "-- fragment to document where first element is not a text node --\n"; case3('insertBefore'); echo "\n";
 echo "-- fragment with namespace declarations in children --\n"; case4('insertBefore'); echo "\n";
 
-echo "== insertAfter ==\n";
-echo "-- fragment to document element --\n"; case1('insertBefore'); echo "\n";
-echo "-- children manually document element --\n"; case2('insertBefore'); echo "\n";
-echo "-- fragment to document where first element is not a text node --\n"; case3('insertBefore'); echo "\n";
-echo "-- fragment with namespace declarations in children --\n"; case4('insertBefore'); echo "\n";
-
 ?>
 --EXPECT--
 == appendChild ==
@@ -95,34 +89,6 @@ echo "-- fragment with namespace declarations in children --\n"; case4('insertBe
 </rootElement>
 
 == insertBefore ==
--- fragment to document element --
-<?xml version="1.0"?>
-<rootElement xmlns:myns="http://example/ns" xmlns:myns2="http://example/ns2">
-<myns:childNode>1</myns:childNode>
-<myns:childNode>2</myns:childNode>
-</rootElement>
-
--- children manually document element --
-<?xml version="1.0"?>
-<rootElement xmlns:myns="http://example/ns" xmlns:myns2="http://example/ns2">
-<myns:childNode>1</myns:childNode>
-<myns:childNode>2</myns:childNode>
-</rootElement>
-
--- fragment to document where first element is not a text node --
-<?xml version="1.0"?>
-<rootElement xmlns:myns="http://example/ns" xmlns:myns2="http://example/ns2"><myns:childNode>1</myns:childNode>
-<myns:childNode>2</myns:childNode>
-</rootElement>
-
--- fragment with namespace declarations in children --
-<?xml version="1.0"?>
-<rootElement xmlns:myns="http://example/ns" xmlns:myns2="http://example/ns2">
-<myns:childNode>1<myns2:childNode>3</myns2:childNode></myns:childNode>
-<myns:childNode>2</myns:childNode>
-</rootElement>
-
-== insertAfter ==
 -- fragment to document element --
 <?xml version="1.0"?>
 <rootElement xmlns:myns="http://example/ns" xmlns:myns2="http://example/ns2">
