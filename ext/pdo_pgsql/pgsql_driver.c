@@ -278,10 +278,6 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 		execute_only = H->disable_prepares;
 	}
 
-	if (!emulate && PQprotocolVersion(H->server) <= 2) {
-		emulate = 1;
-	}
-
 	if (emulate) {
 		stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 	} else {
@@ -445,19 +441,7 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 		}
 
 		case PDO_ATTR_SERVER_VERSION:
-			if (PQprotocolVersion(H->server) >= 3) { /* PostgreSQL 7.4 or later */
-				ZVAL_STRING(return_value, (char*)PQparameterStatus(H->server, "server_version"));
-			} else /* emulate above via a query */
-			{
-				PGresult *res = PQexec(H->server, "SELECT VERSION()");
-				if (res && PQresultStatus(res) == PGRES_TUPLES_OK) {
-					ZVAL_STRING(return_value, (char *)PQgetvalue(res, 0, 0));
-				}
-
-				if (res) {
-					PQclear(res);
-				}
-			}
+			ZVAL_STRING(return_value, (char*)PQparameterStatus(H->server, "server_version"));
 			break;
 
 		case PDO_ATTR_CONNECTION_STATUS:
@@ -675,8 +659,8 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray)
 				buffer_len = Z_STRLEN_P(tmp);
 				query = erealloc(query, buffer_len + 2); /* room for \n\0 */
 			}
-			memcpy(query, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 			query_len = Z_STRLEN_P(tmp);
+			memcpy(query, Z_STRVAL_P(tmp), query_len);
 			if (query[query_len - 1] != '\n') {
 				query[query_len++] = '\n';
 			}
