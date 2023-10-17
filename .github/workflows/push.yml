@@ -48,19 +48,24 @@ jobs:
     services:
       mysql:
         image: mysql:8
+        ports:
+          - 3306:3306
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: root
       postgres:
         image: postgres
+        ports:
+          - 5432:5432
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
     env:
       MYSQL_TEST_HOST: mysql
-      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
-      PDO_MYSQL_TEST_HOST: mysql
+      PDO_MYSQL_TEST_DSN: mysql:host=localhost;dbname=test
+      PDO_MYSQL_TEST_HOST: localhost
+      PDO_PGSQL_TEST_DSN: pgsql:host=localhost port=5432 dbname=test user=postgres password=postgres
     strategy:
       fail-fast: false
       matrix:
