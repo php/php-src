@@ -31,8 +31,10 @@ runs:
         export PDO_OCI_TEST_USER="system"
         export PDO_OCI_TEST_PASS="pass"
         export PDO_OCI_TEST_DSN="oci:dbname=localhost/XEPDB1;charset=AL32UTF8"
-        export PGSQL_TEST_CONNSTR="host=postgres dbname=test port=5432 user=postgres password=postgres"
-        export PDO_PGSQL_TEST_DSN="host=postgres dbname=test port=5432 user=postgres password=postgres"
+        export PGSQL_TEST_CONNSTR="host=localhost dbname=test port=5432 user=postgres password=postgres"
+        if [[ -z "$PDO_PGSQL_TEST_DSN" ]]; then
+          export PDO_PGSQL_TEST_DSN="pgsql:host=localhost port=5432 dbname=test user=postgres password=postgres"
+        fi
         export ODBC_TEST_USER="odbc_test"
         export ODBC_TEST_PASS="password"
         export ODBC_TEST_DSN="Driver={ODBC Driver 17 for SQL Server};Server=127.0.0.1;Database=odbc;uid=$ODBC_TEST_USER;pwd=$ODBC_TEST_PASS"
