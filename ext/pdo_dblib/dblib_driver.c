@@ -160,6 +160,22 @@ static zend_string* dblib_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 	if ((paramtype & PDO_PARAM_STR_CHAR) == PDO_PARAM_STR_CHAR) {
 		use_national_character_set = 0;
 	}
+	/*
+	 * A user could be passing a binary (i.e. an image file) in a query.
+	 * It's fragile trying to escape it as a string, so encode it as a
+	 * binary literal instead.
+	 */
+	if (paramtype == PDO_PARAM_BINARY) {
+		/* 1 char = 2 chars in hex, plus 0x */
+		quoted_str = zend_string_safe_alloc(ZSTR_LEN(unquoted), 2, 2, false);
+		q = ZSTR_VAL(quoted_str);
+		*q++ = '0';
+		*q++ = 'x';
+		for (i = 0; i < ZSTR_LEN(unquoted); i++) {
+			q += sprintf(q, "%02X", (unsigned char)ZSTR_VAL(unquoted)[i]);
+		}
+		return quoted_str;
+	}
 
 	/* Detect quoted length, adding extra char for doubled single quotes */
 	for (i = 0; i < ZSTR_LEN(unquoted); i++) {
