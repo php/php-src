@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed double-free of non-interned enum case name. (ilutov)
+  . Fixed bug GH-12457 (Incorrect result of stripos with single character
+    needle). (SakiTakamachi)
 
 - DOM:
   . Fix registerNodeClass with abstract class crashing. (nielsdos)
