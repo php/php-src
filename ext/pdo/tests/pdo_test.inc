@@ -75,21 +75,21 @@ class PDOTest {
             return;
         }
 
-        if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) === "oci") {
-            $db->exec(<<<SQL
-                BEGIN
-                    EXECUTE IMMEDIATE 'DROP TABLE $tableName';
-                EXCEPTION
-                    WHEN OTHERS THEN
-                        IF SQLCODE != -942 THEN
-                            RAISE;
-                        END IF;
+        match ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+            "oci" => $db->exec(<<<SQL
+                 BEGIN
+                     EXECUTE IMMEDIATE 'DROP TABLE $tableName';
+                 EXCEPTION
+                     WHEN OTHERS THEN
+                         IF SQLCODE != -942 THEN
+                             RAISE;
+                         END IF;
                     END;
-            SQL
-            );
-        } else {
-            $db->exec("DROP TABLE IF EXISTS $tableName");
-        }
+                SQL
+            ),
+            "firebird" => $db->exec("DROP TABLE $tableName"),
+            default => $db->exec("DROP TABLE IF EXISTS $tableName"),
+        };
     }
 }
 ?>

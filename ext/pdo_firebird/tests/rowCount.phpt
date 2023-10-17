@@ -12,7 +12,9 @@ LSAN_OPTIONS=detect_leaks=0
 require("testdb.inc");
 
 $dbh->exec('CREATE TABLE test_rowcount (A VARCHAR(10))');
-$dbh->exec("INSERT INTO test_rowcount VALUES ('A'), ('A'), ('B')");
+$dbh->exec("INSERT INTO test_rowcount VALUES ('A')");
+$dbh->exec("INSERT INTO test_rowcount VALUES ('A')");
+$dbh->exec("INSERT INTO test_rowcount VALUES ('B')");
 $dbh->commit();
 
 $query = "SELECT * FROM test_rowcount WHERE A = ?";
@@ -42,7 +44,7 @@ unset($dbh);
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec('DROP TABLE IF EXISTS test_rowcount');
+$dbh->exec('DROP TABLE test_rowcount');
 --EXPECT--
 bool(false)
 int(2)

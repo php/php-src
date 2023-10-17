@@ -23,7 +23,7 @@ echo 'OK';
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec("DROP TABLE IF EXISTS test_aaa");
+$dbh->exec("DROP TABLE test_aaa");
 ?>
 --EXPECT--
 OK

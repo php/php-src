@@ -14,7 +14,9 @@ require("testdb.inc");
 $value = '2';
 
 $dbh->exec('CREATE TABLE test48877 (A integer)');
-$dbh->exec("INSERT INTO test48877 VALUES ('1'), ('2'), ('3')");
+$dbh->exec("INSERT INTO test48877 VALUES ('1')");
+$dbh->exec("INSERT INTO test48877 VALUES ('2')");
+$dbh->exec("INSERT INTO test48877 VALUES ('3')");
 $dbh->commit();
 
 $query = "SELECT * FROM test48877 WHERE A = :paramno";
@@ -38,7 +40,7 @@ unset($dbh);
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec("DROP TABLE IF EXISTS test48877");
+$dbh->exec("DROP TABLE test48877");
 ?>
 --EXPECT--
 bool(false)

@@ -11,7 +11,9 @@ LSAN_OPTIONS=detect_leaks=0
 require 'testdb.inc';
 
 $dbh->exec('recreate table test74462 (id integer not null, abool boolean)');
-$dbh->exec('insert into test74462 (id, abool) values (1, true), (2, false), (3, null)');
+$dbh->exec('insert into test74462 (id, abool) values (1, true)');
+$dbh->exec('insert into test74462 (id, abool) values (2, false)');
+$dbh->exec('insert into test74462 (id, abool) values (3, null)');
 $S = $dbh->query('select abool from test74462 order by id');
 $D = $S->fetchAll(PDO::FETCH_COLUMN);
 unset($S);
@@ -21,7 +23,7 @@ var_dump($D);
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec("DROP TABLE IF EXISTS test74462");
+$dbh->exec("DROP TABLE test74462");
 ?>
 --EXPECT--
 array(3) {

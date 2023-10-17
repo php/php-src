@@ -110,7 +110,7 @@ PDOTest::dropTableIfExists($db, test_pdo_oci_attr_autocommit_2");
 --EXPECTF--
 Test 1 Check beginTransaction insertion
 Test 2 Cause an exception and test beginTransaction rollback
-Caught expected exception at line 35
+Caught expected exception at line 33
 SQLSTATE[HY000]: General error: 12899 OCIStmtExecute: ORA-12899: %s
 %s
 Test 3 Setting ATTR_AUTOCOMMIT to true will commit and end the transaction

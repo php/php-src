@@ -46,7 +46,7 @@ unset($dbh);
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec("DROP TABLE IF EXISTS test62024");
+$dbh->exec("DROP TABLE test62024");
 ?>
 --EXPECT--
 bool(true)

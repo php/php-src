@@ -13,7 +13,9 @@ require("testdb.inc");
 
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $dbh->exec("CREATE TABLE test64037 (ID INTEGER NOT NULL, TEXT VARCHAR(10), COST NUMERIC(15, 2))");
-$dbh->exec("INSERT INTO test64037 (ID, TEXT, COST) VALUES (1, 'test', -1.0), (2, 'test', -0.99), (3, 'test', -1.01)");
+$dbh->exec("INSERT INTO test64037 (ID, TEXT, COST) VALUES (1, 'test', -1.0)");
+$dbh->exec("INSERT INTO test64037 (ID, TEXT, COST) VALUES (2, 'test', -0.99)");
+$dbh->exec("INSERT INTO test64037 (ID, TEXT, COST) VALUES (3, 'test', -1.01)");
 
 $dbh->commit();
 
@@ -38,7 +40,7 @@ unset($dbh);
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec("DROP TABLE IF EXISTS test64037");
+$dbh->exec("DROP TABLE test64037");
 ?>
 --EXPECT--
 string(5) "-1.00"

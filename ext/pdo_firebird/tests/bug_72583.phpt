@@ -22,7 +22,7 @@ unset($dbh);
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec("DROP TABLE IF EXISTS test72583");
+$dbh->exec("DROP TABLE test72583");
 ?>
 --EXPECT--
 integer
