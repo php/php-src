@@ -24,6 +24,7 @@
 /ext/mbstring @alexdowad
 /ext/opcache @dstogov @iluuu1994
 /ext/openssl @bukka
+/ext/pdo_pgsql @devnexen
 /ext/pgsql @devnexen
 /ext/random @TimWolla @zeriyoshi
 /ext/session @Girgias
