@@ -945,7 +945,7 @@ zend_memnistr(const char *haystack, const char *needle, size_t needle_len, const
 	const char *p_upper = NULL;
 	if (first_lower != first_upper) {
 		// If the needle length is 1 we don't need to look beyond p_lower as it is a guaranteed match
-		size_t upper_search_length = end - (needle_len == 1 && p_lower != NULL ? p_lower : haystack);
+		size_t upper_search_length = needle_len == 1 && p_lower != NULL ? p_lower - haystack : end - haystack;
 		p_upper = (const char *)memchr(haystack, first_upper, upper_search_length);
 	}
 	const char *p = !p_upper || (p_lower && p_lower < p_upper) ? p_lower : p_upper;
