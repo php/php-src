@@ -3253,7 +3253,11 @@ static zend_result accel_post_startup(void)
 			 || zend_jit_startup(ZSMMG(reserved), jit_size, reattached) != SUCCESS) {
 				JIT_G(enabled) = false;
 				JIT_G(on) = false;
-				zend_accel_error(ACCEL_LOG_WARNING, "Could not enable JIT!");
+				/* The JIT is implicitly disabled with opcache.jit_buffer_size=0, so we don't want to
+				 * emit a warning here. */
+				if (JIT_G(buffer_size) != 0) {
+					zend_accel_error(ACCEL_LOG_WARNING, "Could not enable JIT!");
+				}
 			}
 		}
 #endif
