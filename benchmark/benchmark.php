@@ -27,8 +27,8 @@ function main() {
     $data['Symfony Demo 2.2.3 JIT'] = runSymfonyDemo(true);
     $data['Wordpress 6.2'] = runWordpress(false);
     $data['Wordpress 6.2 JIT'] = runWordpress(true);
-    $data['Laravel'] = runLaravelDemo(false);
-    $data['Laravel JIT'] = runLaravelDemo(true);
+    $data['Laravel 10.10'] = runLaravelDemo(false);
+    $data['Laravel 10.10 JIT'] = runLaravelDemo(true);
     $result = json_encode($data, JSON_PRETTY_PRINT) . "\n";
 
     fwrite(STDOUT, $result);
@@ -96,6 +96,9 @@ function runLaravelDemo(bool $jit): array {
     $dir = __DIR__ . '/repos/laravel-demo-10.10';
     cloneRepo($dir, 'https://github.com/nielsdos/laravel-demo-app.git');
     runPhpCommand([$dir . '/artisan', 'config:cache']);
+    runPhpCommand([$dir . '/artisan', 'event:cache']);
+    runPhpCommand([$dir . '/artisan', 'route:cache']);
+    runPhpCommand([$dir . '/artisan', 'view:cache']);
     return runValgrindPhpCgiCommand('laravel-demo', [$dir . '/public/index.php'], cwd: $dir, jit: $jit, warmup: 50, repeat: 100);
 }
 
