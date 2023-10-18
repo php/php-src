@@ -47,9 +47,9 @@
 # endif
 
  /* these are used for quota support */
- ZEND_CGG_DIAGNOSTIC_IGNORED_START("-Wstrict-prototypes")
+ ZEND_DIAGNOSTIC_IGNORED_START("-Wstrict-prototypes")
 # include "c-client.h"	/* includes mail.h and rfc822.h */
- ZEND_CGG_DIAGNOSTIC_IGNORED_END
+ ZEND_DIAGNOSTIC_IGNORED_END
 # include "imap4r1.h"	/* location of c-client quota functions */
 #else
 # include "mail.h"

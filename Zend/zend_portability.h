@@ -743,18 +743,29 @@ extern "C++" {
 # define ZEND_INDIRECT_RETURN
 #endif
 
-#if __GNUC__ && !defined(__clang__)
-# define __DO_PRAGMA(x) _Pragma(#x)
-# define _DO_PRAGMA(x) __DO_PRAGMA(x)
-# define ZEND_CGG_DIAGNOSTIC_IGNORED_START(warning) \
+#define __ZEND_DO_PRAGMA(x) _Pragma(#x)
+#define _ZEND_DO_PRAGMA(x) __ZEND_DO_PRAGMA(x)
+#if defined(__clang__)
+# define ZEND_DIAGNOSTIC_IGNORED_START(warning) \
+	_Pragma("clang diagnostic push") \
+	_ZEND_DO_PRAGMA(clang diagnostic ignored warning)
+# define ZEND_DIAGNOSTIC_IGNORED_END \
+	_Pragma("clang diagnostic pop")
+#elif defined(__GNUC__)
+# define ZEND_DIAGNOSTIC_IGNORED_START(warning) \
 	_Pragma("GCC diagnostic push") \
-	_DO_PRAGMA(GCC diagnostic ignored warning)
-# define ZEND_CGG_DIAGNOSTIC_IGNORED_END \
+	_ZEND_DO_PRAGMA(GCC diagnostic ignored warning)
+# define ZEND_DIAGNOSTIC_IGNORED_END \
 	_Pragma("GCC diagnostic pop")
 #else
-# define ZEND_CGG_DIAGNOSTIC_IGNORED_START(warning)
-# define ZEND_CGG_DIAGNOSTIC_IGNORED_END
+# define ZEND_DIAGNOSTIC_IGNORED_START(warning)
+# define ZEND_DIAGNOSTIC_IGNORED_END
 #endif
+
+/** @deprecated */
+#define ZEND_CGG_DIAGNOSTIC_IGNORED_START ZEND_DIAGNOSTIC_IGNORED_START
+/** @deprecated */
+#define ZEND_CGG_DIAGNOSTIC_IGNORED_END ZEND_DIAGNOSTIC_IGNORED_END
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) /* C11 */
 # define ZEND_STATIC_ASSERT(c, m) _Static_assert((c), m)
