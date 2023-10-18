@@ -22,6 +22,7 @@
 
 #include "ext/standard/md5.h"
 #include "zend_virtual_cwd.h"
+#include "main/php_open_temporary_file.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -2119,7 +2120,10 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	HashTable tmp_bindings;
 	HashTable tmp_functions;
 
-	f = open(fn,O_CREAT|O_WRONLY|O_EXCL|O_BINARY,S_IREAD|S_IWRITE);
+	/* To avoid race conditions, we first create a temporary file and then rename it atomically
+	 * at the end of the function. (see bug #66150) */
+	zend_string *temp_file_path;
+	f = php_open_temporary_fd_ex(NULL, "tmp.wsdl.", &temp_file_path, PHP_TMP_FILE_SILENT);
 
 	if (f < 0) {return;}
 
@@ -2371,13 +2375,21 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	php_ignore_value(write(f, ZSTR_VAL(buf.s), ZSTR_LEN(buf.s)));
+	bool valid_file = write(f, ZSTR_VAL(buf.s), ZSTR_LEN(buf.s)) == ZSTR_LEN(buf.s);
 	close(f);
+
+	/* Make sure that incomplete files (e.g. due to disk space issues, see bug #66150) are not utilised. */
+	if (valid_file) {
+		/* This is allowed to fail, this means that another process was raced to create the file. */
+		(void) VCWD_RENAME(ZSTR_VAL(temp_file_path), fn);
+	}
+
 	smart_str_free(&buf);
 	zend_hash_destroy(&tmp_functions);
 	zend_hash_destroy(&tmp_bindings);
 	zend_hash_destroy(&tmp_encoders);
 	zend_hash_destroy(&tmp_types);
+	zend_string_release_ex(temp_file_path, false);
 }
 
 
