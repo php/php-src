@@ -2512,14 +2512,21 @@ PHPAPI void php_date_initialize_from_ts_long(php_date_obj *dateobj, zend_long se
 
 PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts) /* {{{ */
 {
+	double sec_dval = trunc(ts);
 	zend_long sec;
 	int usec;
 
-	if (UNEXPECTED(isnan(ts) || !ZEND_DOUBLE_FITS_LONG(ts))) {
-		return 0;
+	if (UNEXPECTED(isnan(sec_dval)
+		|| sec_dval >= (double)TIMELIB_LONG_MAX
+		|| sec_dval < (double)TIMELIB_LONG_MIN
+	)) {
+		zend_throw_error(date_ce_date_range_error,
+						"Seconds must be a finite number between "TIMELIB_LONG_FMT" and "TIMELIB_LONG_FMT", %g given",
+						TIMELIB_LONG_MIN, TIMELIB_LONG_MAX, sec_dval);
+		return false;
 	}
 
-	sec = (zend_long)ts;
+	sec = (zend_long)sec_dval;
 	usec = (int)(fmod(ts, 1) * 1000000);
 
 	if (UNEXPECTED(usec < 0)) {
@@ -2529,7 +2536,7 @@ PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts)
 
 	php_date_initialize_from_ts_long(dateobj, sec, usec);
 
-	return 1;
+	return true;
 } /* }}} */
 
 /* {{{ Returns new DateTime object */
@@ -2621,60 +2628,66 @@ PHP_FUNCTION(date_create_immutable_from_format)
 /* {{{ Returns new DateTime object from given unix timetamp */
 PHP_FUNCTION(date_create_from_timestamp)
 {
-	php_date_obj *dateobj;
 	zval         *value;
+	zval         new_object;
+	php_date_obj *new_dateobj;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_NUMBER(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(date_ce_date, return_value);
-	dateobj = Z_PHPDATE_P(return_value);
+	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_date, &new_object);
+	new_dateobj = Z_PHPDATE_P(&new_object);
 
 	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
-			php_date_initialize_from_ts_long(dateobj, Z_LVAL_P(value), 0);
+			php_date_initialize_from_ts_long(new_dateobj, Z_LVAL_P(value), 0);
 			break;
 
 		case IS_DOUBLE:
-			if (!php_date_initialize_from_ts_double(dateobj, Z_DVAL_P(value))) {
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
+			if (!php_date_initialize_from_ts_double(new_dateobj, Z_DVAL_P(value))) {
+				zval_ptr_dtor(&new_object);
+				RETURN_THROWS();
 			}
 			break;
 
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
+
+	RETURN_OBJ(Z_OBJ(new_object));
 }
 /* }}} */
 
 /* {{{ Returns new DateTimeImmutable object from given unix timestamp */
 PHP_FUNCTION(date_create_immutable_from_timestamp)
 {
-	php_date_obj *dateobj;
 	zval         *value;
+	zval         new_object;
+	php_date_obj *new_dateobj;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_NUMBER(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_date_instantiate(date_ce_immutable, return_value);
-	dateobj = Z_PHPDATE_P(return_value);
+	php_date_instantiate(execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_immutable, &new_object);
+	new_dateobj = Z_PHPDATE_P(&new_object);
 
 	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
-			php_date_initialize_from_ts_long(dateobj, Z_LVAL_P(value), 0);
+			php_date_initialize_from_ts_long(new_dateobj, Z_LVAL_P(value), 0);
 			break;
 
 		case IS_DOUBLE:
-			if (!php_date_initialize_from_ts_double(dateobj, Z_DVAL_P(value))) {
-				zval_ptr_dtor(return_value);
-				RETURN_FALSE;
+			if (!php_date_initialize_from_ts_double(new_dateobj, Z_DVAL_P(value))) {
+				zval_ptr_dtor(&new_object);
+				RETURN_THROWS();
 			}
 			break;
 
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
+
+	RETURN_OBJ(Z_OBJ(new_object));
 }
 /* }}} */
 

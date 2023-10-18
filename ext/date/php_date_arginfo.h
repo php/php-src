@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d4cdf0d730b96add41971f720191db9567bd8180 */
+ * Stub hash: c73aefc473674996f63494a7812df9c7e1a5a0fe */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -76,11 +76,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_date_create_immutable_from_f
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timezone, DateTimeZone, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_date_create_from_timestamp, 0, 1, DateTime, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_date_create_from_timestamp, 0, 1, DateTime, 0)
 	ZEND_ARG_TYPE_MASK(0, timestamp, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_date_create_immutable_from_timestamp, 0, 1, DateTimeImmutable, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_date_create_immutable_from_timestamp, 0, 1, DateTimeImmutable, 0)
 	ZEND_ARG_TYPE_MASK(0, timestamp, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
@@ -288,7 +288,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DateTime_cre
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timezone, DateTimeZone, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DateTime_createFromTimestamp, 0, 1, DateTime, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTime_createFromTimestamp, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_MASK(0, timestamp, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
@@ -360,9 +360,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DateTimeImmu
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, timezone, DateTimeZone, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DateTimeImmutable_createFromTimestamp, 0, 1, DateTimeImmutable, MAY_BE_FALSE)
-	ZEND_ARG_TYPE_MASK(0, timestamp, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
-ZEND_END_ARG_INFO()
+#define arginfo_class_DateTimeImmutable_createFromTimestamp arginfo_class_DateTime_createFromTimestamp
 
 #define arginfo_class_DateTimeImmutable_getLastErrors arginfo_class_DateTime_getLastErrors
 

@@ -5,6 +5,9 @@ date.timezone=Europe/London
 --FILE--
 <?php
 
+class MyDateTime extends DateTime {};
+class MyDateTimeImmutable extends DateTimeImmutable {};
+
 define('MAX_32BIT', 2147483647);
 define('MIN_32BIT', -2147483648);
 
@@ -29,16 +32,46 @@ $timestamps = array(
 
 foreach ($timestamps as $ts) {
     echo 'date_create_from_timestamp(' . var_export($ts, true) . '): ';
-    var_dump(date_create_from_timestamp($ts));
+    try {
+        var_dump(date_create_from_timestamp($ts));
+    } catch (Throwable $e) {
+        echo get_class($e) . ': ' . $e->getMessage() . "\n";
+    }
 
     echo 'DateTime::createFromTimestamp(' . var_export($ts, true) . '): ';
-    var_dump(DateTime::createFromTimestamp($ts));
+    try {
+        var_dump(DateTime::createFromTimestamp($ts));
+    } catch (Throwable $e) {
+        echo get_class($e) . ': ' . $e->getMessage() . "\n";
+    }
 
     echo 'date_create_immutable_from_timestamp(' . var_export($ts, true) . '): ';
-    var_dump(date_create_immutable_from_timestamp($ts));
+    try {
+        var_dump(date_create_immutable_from_timestamp($ts));
+    } catch (Throwable $e) {
+        echo get_class($e) . ': ' . $e->getMessage() . "\n";
+    }
 
     echo 'DateTimeImmutable::createFromTimestamp(' . var_export($ts, true) . '): ';
-    var_dump(DateTimeImmutable::createFromTimestamp($ts));
+    try {
+        var_dump(DateTimeImmutable::createFromTimestamp($ts));
+    } catch (Throwable $e) {
+        echo get_class($e) . ': ' . $e->getMessage() . "\n";
+    }
+}
+
+echo 'MyDateTime::createFromTimestamp(' . var_export(0, true) . '): ';
+try {
+    var_dump(MyDateTime::createFromTimestamp(0));
+} catch (Throwable $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . "\n";
+}
+
+echo 'MyDateTimeImmutable::createFromTimestamp(' . var_export(0, true) . '): ';
+try {
+    var_dump(MyDateTimeImmutable::createFromTimestamp(0));
+} catch (Throwable $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . "\n";
 }
 
 ?>
@@ -395,23 +428,39 @@ DateTimeImmutable::createFromTimestamp(-2147483648): object(DateTimeImmutable)#%
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(9.223372036854776E+18): bool(false)
-DateTime::createFromTimestamp(9.223372036854776E+18): bool(false)
-date_create_immutable_from_timestamp(9.223372036854776E+18): bool(false)
-DateTimeImmutable::createFromTimestamp(9.223372036854776E+18): bool(false)
-date_create_from_timestamp(-9.223372036854778E+18): bool(false)
-DateTime::createFromTimestamp(-9.223372036854778E+18): bool(false)
-date_create_immutable_from_timestamp(-9.223372036854778E+18): bool(false)
-DateTimeImmutable::createFromTimestamp(-9.223372036854778E+18): bool(false)
-date_create_from_timestamp(NAN): bool(false)
-DateTime::createFromTimestamp(NAN): bool(false)
-date_create_immutable_from_timestamp(NAN): bool(false)
-DateTimeImmutable::createFromTimestamp(NAN): bool(false)
-date_create_from_timestamp(INF): bool(false)
-DateTime::createFromTimestamp(INF): bool(false)
-date_create_immutable_from_timestamp(INF): bool(false)
-DateTimeImmutable::createFromTimestamp(INF): bool(false)
-date_create_from_timestamp(-INF): bool(false)
-DateTime::createFromTimestamp(-INF): bool(false)
-date_create_immutable_from_timestamp(-INF): bool(false)
-DateTimeImmutable::createFromTimestamp(-INF): bool(false)
+date_create_from_timestamp(9.223372036854776E+18): DateRangeError: Seconds must be a finite number between %i and %i, 9.22337e+18 given
+DateTime::createFromTimestamp(9.223372036854776E+18): DateRangeError: Seconds must be a finite number between %i and %i, 9.22337e+18 given
+date_create_immutable_from_timestamp(9.223372036854776E+18): DateRangeError: Seconds must be a finite number between %i and %i, 9.22337e+18 given
+DateTimeImmutable::createFromTimestamp(9.223372036854776E+18): DateRangeError: Seconds must be a finite number between %i and %i, 9.22337e+18 given
+date_create_from_timestamp(-9.223372036854778E+18): DateRangeError: Seconds must be a finite number between %i and %i, -9.22337e+18 given
+DateTime::createFromTimestamp(-9.223372036854778E+18): DateRangeError: Seconds must be a finite number between %i and %i, -9.22337e+18 given
+date_create_immutable_from_timestamp(-9.223372036854778E+18): DateRangeError: Seconds must be a finite number between %i and %i, -9.22337e+18 given
+DateTimeImmutable::createFromTimestamp(-9.223372036854778E+18): DateRangeError: Seconds must be a finite number between %i and %i, -9.22337e+18 given
+date_create_from_timestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
+DateTime::createFromTimestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
+date_create_immutable_from_timestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
+DateTimeImmutable::createFromTimestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
+date_create_from_timestamp(INF): DateRangeError: Seconds must be a finite number between %i and %i, INF given
+DateTime::createFromTimestamp(INF): DateRangeError: Seconds must be a finite number between %i and %i, INF given
+date_create_immutable_from_timestamp(INF): DateRangeError: Seconds must be a finite number between %i and %i, INF given
+DateTimeImmutable::createFromTimestamp(INF): DateRangeError: Seconds must be a finite number between %i and %i, INF given
+date_create_from_timestamp(-INF): DateRangeError: Seconds must be a finite number between %i and %i, -INF given
+DateTime::createFromTimestamp(-INF): DateRangeError: Seconds must be a finite number between %i and %i, -INF given
+date_create_immutable_from_timestamp(-INF): DateRangeError: Seconds must be a finite number between %i and %i, -INF given
+DateTimeImmutable::createFromTimestamp(-INF): DateRangeError: Seconds must be a finite number between %i and %i, -INF given
+MyDateTime::createFromTimestamp(0): object(MyDateTime)#%d (3) {
+  ["date"]=>
+  string(26) "1970-01-01 00:00:00.000000"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+MyDateTimeImmutable::createFromTimestamp(0): object(MyDateTimeImmutable)#%d (3) {
+  ["date"]=>
+  string(26) "1970-01-01 00:00:00.000000"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
