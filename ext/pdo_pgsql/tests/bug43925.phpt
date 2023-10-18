@@ -52,7 +52,7 @@ foreach ($stmt->fetchAll() as $row) {
 <?php
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
-$db->exec("DROP TABLE IF EXIST test43925");
+$db->exec("DROP TABLE IF EXISTS test43925");
 ?>
 --EXPECT--
 1 - 1 - 1 - 1 - 1 - 1 - 6 - 6

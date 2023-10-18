@@ -24,7 +24,7 @@ echo "Done\n";
 <?php
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
-$db->exec("DROP TABLE IF EXIST test36727");
+$db->exec("DROP TABLE IF EXISTS test36727");
 ?>
 --EXPECTF--
 Warning: PDOStatement::bindValue(): SQLSTATE[HY093]: Invalid parameter number: :test in %s on line %d
