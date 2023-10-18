@@ -24,6 +24,8 @@ void ir_save(const ir_ctx *ctx, FILE *f)
 			} else {
 				fprintf(f, "func(%s, %d)", ir_get_str(ctx, insn->val.i32), insn->const_flags);
 			}
+		} else if (insn->op == IR_SYM) {
+			fprintf(f, "sym(%s)", ir_get_str(ctx, insn->val.i32));
 		} else if (insn->op == IR_FUNC_ADDR) {
 			fprintf(f, "func_addr(");
 			ir_print_const(ctx, insn, f, true);

@@ -137,6 +137,15 @@ static bool aarch64_may_encode_addr_offset(int64_t offset, uint32_t type_size)
 ||	}
 |.endmacro
 
+|.macro ASM_FP_REG_IMM_OP, op, type, reg, val
+||	if (type == IR_DOUBLE) {
+|		op Rd(reg-IR_REG_FP_FIRST), #val
+||	} else {
+||		IR_ASSERT(type == IR_FLOAT);
+|		op Rs(reg-IR_REG_FP_FIRST), #val
+||	}
+|.endmacro
+
 |.macro ASM_FP_REG_REG_REG_OP, op, type, dst, src1, src2
 ||	if (type == IR_DOUBLE) {
 |		op Rd(dst-IR_REG_FP_FIRST), Rd(src1-IR_REG_FP_FIRST), Rd(src2-IR_REG_FP_FIRST)
@@ -2364,6 +2373,69 @@ static void ir_emit_if_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 	}
 	|	ASM_REG_IMM_OP cmp, type, op2_reg, 0
 	ir_emit_jcc(ctx, IR_NE, b, def, insn, 1);
+}
+
+static void ir_emit_cond(ir_ctx *ctx, ir_ref def, ir_insn *insn)
+{
+	ir_backend_data *data = ctx->data;
+	dasm_State **Dst = &data->dasm_state;
+	ir_type type = insn->type;
+	ir_ref op1 = insn->op1;
+	ir_ref op2 = insn->op2;
+	ir_ref op3 = insn->op3;
+	ir_type op1_type = ctx->ir_base[op1].type;
+	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
+	ir_reg op1_reg = ctx->regs[def][1];
+	ir_reg op2_reg = ctx->regs[def][2];
+	ir_reg op3_reg = ctx->regs[def][3];
+
+	IR_ASSERT(def_reg != IR_REG_NONE);
+
+	if (IR_REG_SPILLED(op2_reg) || IR_IS_CONST_REF(op2)) {
+		op2_reg = IR_REG_NUM(op2_reg);
+		ir_emit_load(ctx, type, op2_reg, op2);
+		if (op1 == op2) {
+			op1_reg = op2_reg;
+		}
+		if (op3 == op2) {
+			op3_reg = op2_reg;
+		}
+	}
+	if (op3 != op2 && (IR_REG_SPILLED(op3_reg) || IR_IS_CONST_REF(op3))) {
+		op3_reg = IR_REG_NUM(op3_reg);
+		ir_emit_load(ctx, type, op3_reg, op3);
+		if (op1 == op2) {
+			op1_reg = op3_reg;
+		}
+	}
+	if (op1 != op2 && op1 != op3 && (IR_REG_SPILLED(op1_reg) || IR_IS_CONST_REF(op1))) {
+		op1_reg = IR_REG_NUM(op1_reg);
+		ir_emit_load(ctx, op1_type, op1_reg, op1);
+	}
+
+	if (IR_IS_TYPE_INT(op1_type)) {
+		|	ASM_REG_IMM_OP cmp, op1_type, op1_reg, 0
+	} else{
+		|	ASM_FP_REG_IMM_OP fcmp, op1_type, op1_reg, 0.0
+	}
+
+	if (IR_IS_TYPE_INT(type)) {
+		if (ir_type_size[type] == 8) {
+			|	csel Rx(def_reg), Rx(op2_reg), Rx(op3_reg), eq
+		} else {
+			|	csel Rw(def_reg), Rw(op2_reg), Rw(op3_reg), eq
+		}
+	} else{
+		if (type == IR_DOUBLE) {
+			|	fcsel Rd(def_reg-IR_REG_FP_FIRST), Rd(op2_reg-IR_REG_FP_FIRST), Rd(op3_reg-IR_REG_FP_FIRST), eq
+		} else {
+			|	fcsel Rs(def_reg-IR_REG_FP_FIRST), Rs(op2_reg-IR_REG_FP_FIRST), Rs(op3_reg-IR_REG_FP_FIRST), eq
+		}
+	}
+
+	if (IR_REG_SPILLED(ctx->regs[def][0])) {
+		ir_emit_store(ctx, type, def, def_reg);
+	}
 }
 
 static void ir_emit_return_void(ir_ctx *ctx)
@@ -4951,6 +5023,9 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 					break;
 				case IR_IF_INT:
 					ir_emit_if_int(ctx, b, i, insn);
+					break;
+				case IR_COND:
+					ir_emit_cond(ctx, i, insn);
 					break;
 				case IR_SWITCH:
 					ir_emit_switch(ctx, b, i, insn);

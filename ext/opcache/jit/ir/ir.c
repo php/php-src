@@ -69,7 +69,7 @@ const char *ir_op_name[IR_LAST_OP] = {
 
 void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted)
 {
-	if (insn->op == IR_FUNC) {
+	if (insn->op == IR_FUNC || insn->op == IR_SYM) {
 		fprintf(f, "%s", ir_get_str(ctx, insn->val.i32));
 		return;
 	} else if (insn->op == IR_STR) {
@@ -462,7 +462,7 @@ ir_ref ir_unique_const_addr(ir_ctx *ctx, uintptr_t addr)
 	return ref;
 }
 
-IR_NEVER_INLINE ir_ref ir_const(ir_ctx *ctx, ir_val val, uint8_t type)
+static IR_NEVER_INLINE ir_ref ir_const_ex(ir_ctx *ctx, ir_val val, uint8_t type, uint32_t optx)
 {
 	ir_insn *insn, *prev_insn;
 	ir_ref ref, prev;
@@ -477,7 +477,7 @@ IR_NEVER_INLINE ir_ref ir_const(ir_ctx *ctx, ir_val val, uint8_t type)
 	while (ref) {
 		insn = &ctx->ir_base[ref];
 		if (UNEXPECTED(insn->val.u64 >= val.u64)) {
-			if (insn->val.u64 == val.u64) {
+			if (insn->val.u64 == val.u64 && insn->optx == optx) {
 				return ref;
 			} else {
 				break;
@@ -499,10 +499,15 @@ IR_NEVER_INLINE ir_ref ir_const(ir_ctx *ctx, ir_val val, uint8_t type)
 	insn = &ctx->ir_base[ref];
 	insn->prev_const = prev;
 
-	insn->optx = IR_OPT(type, type);
+	insn->optx = optx;
 	insn->val.u64 = val.u64;
 
 	return ref;
+}
+
+ir_ref ir_const(ir_ctx *ctx, ir_val val, uint8_t type)
+{
+	return ir_const_ex(ctx, val, type, IR_OPT(type, type));
 }
 
 ir_ref ir_const_i8(ir_ctx *ctx, int8_t c)
@@ -600,47 +605,33 @@ ir_ref ir_const_addr(ir_ctx *ctx, uintptr_t c)
 
 ir_ref ir_const_func_addr(ir_ctx *ctx, uintptr_t c, uint16_t flags)
 {
-	ir_ref top = -ctx->consts_count;
-	ir_ref ref;
-	ir_insn *insn;
-
 	if (c == 0) {
 		return IR_NULL;
 	}
 	ir_val val;
 	val.u64 = c;
-	ref = ir_const(ctx, val, IR_ADDR);
-	if (ref == top) {
-		insn = &ctx->ir_base[ref];
-		insn->optx = IR_OPT(IR_FUNC_ADDR, IR_ADDR);
-		insn->const_flags = flags;
-	} else {
-		IR_ASSERT(ctx->ir_base[ref].opt == IR_OPT(IR_FUNC_ADDR, IR_ADDR) && ctx->ir_base[ref].const_flags == flags);
-	}
-	return ref;
+	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_FUNC_ADDR, IR_ADDR, flags));
 }
 
 ir_ref ir_const_func(ir_ctx *ctx, ir_ref str, uint16_t flags)
 {
-	ir_ref ref = ir_next_const(ctx);
-	ir_insn *insn = &ctx->ir_base[ref];
+	ir_val val;
+	val.addr = str;
+	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_FUNC, IR_ADDR, flags));
+}
 
-	insn->optx = IR_OPT(IR_FUNC, IR_ADDR);
-	insn->const_flags = flags;
-	insn->val.addr = str;
-
-	return ref;
+ir_ref ir_const_sym(ir_ctx *ctx, ir_ref str)
+{
+	ir_val val;
+	val.addr = str;
+	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_SYM, IR_ADDR, 0));
 }
 
 ir_ref ir_const_str(ir_ctx *ctx, ir_ref str)
 {
-	ir_ref ref = ir_next_const(ctx);
-	ir_insn *insn = &ctx->ir_base[ref];
-
-	insn->optx = IR_OPT(IR_STR, IR_ADDR);
-	insn->val.addr = str;
-
-	return ref;
+	ir_val val;
+	val.addr = str;
+	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_STR, IR_ADDR, 0));
 }
 
 ir_ref ir_str(ir_ctx *ctx, const char *s)
@@ -1997,26 +1988,26 @@ void _ir_UNREACHABLE(ir_ctx *ctx)
 	ctx->control = IR_UNUSED;
 }
 
-void _ir_TAILCALL(ir_ctx *ctx, ir_ref func)
+void _ir_TAILCALL(ir_ctx *ctx, ir_type type, ir_ref func)
 {
 	IR_ASSERT(ctx->control);
-	ctx->control = ir_emit2(ctx, IR_OPTX(IR_TAILCALL, IR_VOID, 2), ctx->control, func);
+	ctx->control = ir_emit2(ctx, IR_OPTX(IR_TAILCALL, type, 2), ctx->control, func);
 	_ir_UNREACHABLE(ctx);
 }
 
-void _ir_TAILCALL_1(ir_ctx *ctx, ir_ref func, ir_ref arg1)
+void _ir_TAILCALL_1(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1)
 {
 	IR_ASSERT(ctx->control);
-	ctx->control = ir_emit3(ctx, IR_OPTX(IR_TAILCALL, IR_VOID, 3), ctx->control, func, arg1);
+	ctx->control = ir_emit3(ctx, IR_OPTX(IR_TAILCALL, type, 3), ctx->control, func, arg1);
 	_ir_UNREACHABLE(ctx);
 }
 
-void _ir_TAILCALL_2(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2)
+void _ir_TAILCALL_2(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2)
 {
 	ir_ref call;
 
 	IR_ASSERT(ctx->control);
-	call = ir_emit_N(ctx, IR_TAILCALL, 4);
+	call = ir_emit_N(ctx, IR_OPT(IR_TAILCALL, type), 4);
 	ir_set_op(ctx, call, 1, ctx->control);
 	ir_set_op(ctx, call, 2, func);
 	ir_set_op(ctx, call, 3, arg1);
@@ -2025,12 +2016,12 @@ void _ir_TAILCALL_2(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2)
 	_ir_UNREACHABLE(ctx);
 }
 
-void _ir_TAILCALL_3(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3)
+void _ir_TAILCALL_3(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3)
 {
 	ir_ref call;
 
 	IR_ASSERT(ctx->control);
-	call = ir_emit_N(ctx, IR_TAILCALL, 5);
+	call = ir_emit_N(ctx, IR_OPT(IR_TAILCALL, type), 5);
 	ir_set_op(ctx, call, 1, ctx->control);
 	ir_set_op(ctx, call, 2, func);
 	ir_set_op(ctx, call, 3, arg1);
@@ -2040,12 +2031,12 @@ void _ir_TAILCALL_3(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref a
 	_ir_UNREACHABLE(ctx);
 }
 
-void _ir_TAILCALL_4(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4)
+void _ir_TAILCALL_4(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4)
 {
 	ir_ref call;
 
 	IR_ASSERT(ctx->control);
-	call = ir_emit_N(ctx, IR_TAILCALL, 6);
+	call = ir_emit_N(ctx, IR_OPT(IR_TAILCALL, type), 6);
 	ir_set_op(ctx, call, 1, ctx->control);
 	ir_set_op(ctx, call, 2, func);
 	ir_set_op(ctx, call, 3, arg1);
@@ -2056,12 +2047,12 @@ void _ir_TAILCALL_4(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref a
 	_ir_UNREACHABLE(ctx);
 }
 
-void _ir_TAILCALL_5(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5)
+void _ir_TAILCALL_5(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5)
 {
 	ir_ref call;
 
 	IR_ASSERT(ctx->control);
-	call = ir_emit_N(ctx, IR_TAILCALL, 7);
+	call = ir_emit_N(ctx, IR_OPT(IR_TAILCALL, type), 7);
 	ir_set_op(ctx, call, 1, ctx->control);
 	ir_set_op(ctx, call, 2, func);
 	ir_set_op(ctx, call, 3, arg1);
@@ -2073,13 +2064,13 @@ void _ir_TAILCALL_5(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref a
 	_ir_UNREACHABLE(ctx);
 }
 
-void _ir_TAILCALL_N(ir_ctx *ctx, ir_ref func, uint32_t count, ir_ref *args)
+void _ir_TAILCALL_N(ir_ctx *ctx, ir_type type, ir_ref func, uint32_t count, ir_ref *args)
 {
 	ir_ref call;
 	uint32_t i;
 
 	IR_ASSERT(ctx->control);
-	call = ir_emit_N(ctx, IR_TAILCALL, count + 2);
+	call = ir_emit_N(ctx, IR_OPT(IR_TAILCALL, type), count + 2);
 	ir_set_op(ctx, call, 1, ctx->control);
 	ir_set_op(ctx, call, 2, func);
 	for (i = 0; i < count; i++) {
@@ -2375,7 +2366,9 @@ check_type:
 			insn = &ctx->ir_base[insn->op1];
 			if (insn->op == IR_TAILCALL) {
 				type = insn->type;
-				goto check_type;
+				if (type != IR_VOID) {
+					goto check_type;
+				}
 			}
 		}
 		ref = ctx->ir_base[ref].op3;

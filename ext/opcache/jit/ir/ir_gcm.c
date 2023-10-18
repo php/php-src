@@ -343,6 +343,10 @@ int ir_gcm(ir_ctx *ctx)
 				} else if (use_insn->op == IR_VAR) {
 					bb->flags |= IR_BB_HAS_VAR;
 					_blocks[ref] = b; /* pin to block */
+					if (EXPECTED(ctx->use_lists[ref].count != 0)) {
+						/* This is necessary only for VADDR */
+						ir_list_push_unchecked(&queue_late, ref);
+					}
 				}
 			}
 		}
@@ -480,6 +484,7 @@ int ir_schedule(ir_ctx *ctx)
 	_prev[ctx->cfg_blocks[1].end] = 0;
 	for (i = 2, j = 1; i < ctx->insns_count; i++) {
 		b = _blocks[i];
+		IR_ASSERT((int32_t)b >= 0);
 		if (b == prev_b) {
 			/* add to the end of the list */
 			_next[j] = i;
@@ -714,7 +719,7 @@ restart:
 		memcpy(new_insn, insn, sizeof(ir_insn) * (IR_TRUE - ref));
 		if (ctx->strtab.data) {
 			while (ref != IR_TRUE) {
-				if (new_insn->op == IR_FUNC || new_insn->op == IR_STR) {
+				if (new_insn->op == IR_FUNC || new_insn->op == IR_SYM || new_insn->op == IR_STR) {
 					new_insn->val.addr = ir_str(&new_ctx, ir_get_str(ctx, new_insn->val.i32));
 				}
 				new_insn++;
@@ -730,7 +735,7 @@ restart:
 			}
 			new_insn->optx = insn->optx;
 			new_insn->prev_const = 0;
-			if (insn->op == IR_FUNC || insn->op == IR_STR) {
+			if (insn->op == IR_FUNC || insn->op == IR_SYM || insn->op == IR_STR) {
 				new_insn->val.addr = ir_str(&new_ctx, ir_get_str(ctx, insn->val.i32));
 			} else {
 				new_insn->val.u64 = insn->val.u64;

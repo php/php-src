@@ -480,13 +480,13 @@ extern "C" {
 #define ir_CALL_5(type, func, a1, a2, a3, a4, a5)  _ir_CALL_5(_ir_CTX, type, func, a1, a2, a3, a4, a5)
 #define ir_CALL_N(type, func, count, args)         _ir_CALL_N(_ir_CTX, type, func, count, args)
 
-#define ir_TAILCALL(func)                          _ir_TAILCALL(_ir_CTX, func)
-#define ir_TAILCALL_1(func, a1)                    _ir_TAILCALL_1(_ir_CTX, func, a1)
-#define ir_TAILCALL_2(func, a1, a2)                _ir_TAILCALL_2(_ir_CTX, func, a1, a2)
-#define ir_TAILCALL_3(func, a1, a2, a3)            _ir_TAILCALL_3(_ir_CTX, func, a1, a2, a3)
-#define ir_TAILCALL_4(func, a1, a2, a3, a4)        _ir_TAILCALL_4(_ir_CTX, func, a1, a2, a3, a4)
-#define ir_TAILCALL_5(func, a1, a2, a3, a4, a5)    _ir_TAILCALL_5(_ir_CTX, func, a1, a2, a3, a4, a5)
-#define ir_TAILCALL_N(func, count, args)           _ir_TAILCALL_N(_ir_CTX, func, count, args)
+#define ir_TAILCALL(type, func)                       _ir_TAILCALL(_ir_CTX, type, func)
+#define ir_TAILCALL_1(type, func, a1)                 _ir_TAILCALL_1(_ir_CTX, type, func, a1)
+#define ir_TAILCALL_2(type, func, a1, a2)             _ir_TAILCALL_2(_ir_CTX, type, func, a1, a2)
+#define ir_TAILCALL_3(type, func, a1, a2, a3)         _ir_TAILCALL_3(_ir_CTX, type, func, a1, a2, a3)
+#define ir_TAILCALL_4(type, func, a1, a2, a3, a4)     _ir_TAILCALL_4(_ir_CTX, type, func, a1, a2, a3, a4)
+#define ir_TAILCALL_5(type, func, a1, a2, a3, a4, a5) _ir_TAILCALL_5(_ir_CTX, type, func, a1, a2, a3, a4, a5)
+#define ir_TAILCALL_N(type, func, count, args)        _ir_TAILCALL_N(_ir_CTX, type, func, count, args)
 
 #define ir_ALLOCA(_size)                  _ir_ALLOCA(_ir_CTX, (_size))
 #define ir_AFREE(_size)                   _ir_AFREE(_ir_CTX, (_size))
@@ -588,13 +588,13 @@ ir_ref _ir_CALL_3(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref ar
 ir_ref _ir_CALL_4(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4);
 ir_ref _ir_CALL_5(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5);
 ir_ref _ir_CALL_N(ir_ctx *ctx, ir_type type, ir_ref func, uint32_t count, ir_ref *args);
-void   _ir_TAILCALL(ir_ctx *ctx, ir_ref func);
-void   _ir_TAILCALL_1(ir_ctx *ctx, ir_ref func, ir_ref arg1);
-void   _ir_TAILCALL_2(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2);
-void   _ir_TAILCALL_3(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3);
-void   _ir_TAILCALL_4(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4);
-void   _ir_TAILCALL_5(ir_ctx *ctx, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5);
-ir_ref _ir_TAILCALL_N(ir_ctx *ctx, ir_ref func, uint32_t count, ir_ref *args);
+void   _ir_TAILCALL(ir_ctx *ctx, ir_type type, ir_ref func);
+void   _ir_TAILCALL_1(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1);
+void   _ir_TAILCALL_2(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2);
+void   _ir_TAILCALL_3(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3);
+void   _ir_TAILCALL_4(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4);
+void   _ir_TAILCALL_5(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref arg2, ir_ref arg3, ir_ref arg4, ir_ref arg5);
+ir_ref _ir_TAILCALL_N(ir_ctx *ctx, ir_type type, ir_ref func, uint32_t count, ir_ref *args);
 ir_ref _ir_ALLOCA(ir_ctx *ctx, ir_ref size);
 void   _ir_AFREE(ir_ctx *ctx, ir_ref size);
 ir_ref _ir_VLOAD(ir_ctx *ctx, ir_type type, ir_ref var);

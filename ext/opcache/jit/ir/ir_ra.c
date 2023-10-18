@@ -790,6 +790,10 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 					ir_bitset_excl(live, v);
 					/* PHIs inputs must not be processed */
 					ival = ctx->live_intervals[v];
+					if (UNEXPECTED(!ival)) {
+						/* Dead PHI */
+						ival = ir_add_live_range(ctx, v, IR_DEF_LIVE_POS_FROM_REF(ref), IR_USE_LIVE_POS_FROM_REF(ref));
+					}
 					ival->type = insn->type;
 					ir_add_use(ctx, ival, 0, IR_DEF_LIVE_POS_FROM_REF(ref), IR_REG_NONE, IR_USE_SHOULD_BE_IN_REG, 0);
 					continue;
@@ -1397,6 +1401,10 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 				} else {
 					/* PHIs inputs must not be processed */
 					ival = ctx->live_intervals[v];
+					if (UNEXPECTED(!ival)) {
+						/* Dead PHI */
+						ival = ir_add_live_range(ctx, v, IR_DEF_LIVE_POS_FROM_REF(ref), IR_USE_LIVE_POS_FROM_REF(ref));
+					}
 					ival->type = insn->type;
 					ir_add_use(ctx, ival, 0, IR_DEF_LIVE_POS_FROM_REF(ref), IR_REG_NONE, IR_USE_SHOULD_BE_IN_REG, 0);
 					continue;
@@ -1579,6 +1587,9 @@ static void ir_vregs_join(ir_ctx *ctx, uint32_t r1, uint32_t r2)
 
 	ctx->live_intervals[r1]->flags |=
 		IR_LIVE_INTERVAL_COALESCED | (ival->flags & (IR_LIVE_INTERVAL_HAS_HINT_REGS|IR_LIVE_INTERVAL_HAS_HINT_REFS));
+	if (ctx->ir_base[IR_LIVE_POS_TO_REF(ctx->live_intervals[r1]->use_pos->pos)].op != IR_VLOAD) {
+		ctx->live_intervals[r1]->flags &= ~IR_LIVE_INTERVAL_MEM_LOAD;
+	}
 	ctx->live_intervals[r2] = NULL;
 
 	// TODO: remember to reuse ???
@@ -3098,6 +3109,11 @@ try_next_available_register:
 				split_pos = ir_find_optimal_split_position(ctx, other, split_pos, ival->range.start, 1);
 				if (split_pos > other->range.start) {
 					child = ir_split_interval_at(ctx, other, split_pos);
+					if (prev) {
+						prev->list_next = other->list_next;
+					} else {
+						*active = other->list_next;
+					}
 					IR_LOG_LSRA("      ---- Finish", other, "");
 				} else {
 					if (ir_first_use_pos(other, IR_USE_MUST_BE_IN_REG) <= other->end) {
