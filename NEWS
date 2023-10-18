@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.26
 
+- Core:
+  . Fixed bug GH-12468 (Double-free of doc_comment when overriding static
+    property via trait). (ilutov)
+
 - DOM:
   . Fix registerNodeClass with abstract class crashing. (nielsdos)
 
