@@ -1040,9 +1040,9 @@ PHP_FUNCTION(mysqli_insert_id)
 /* {{{ Kill a mysql process on the server */
 PHP_FUNCTION(mysqli_kill)
 {
-	MY_MYSQL	*mysql;
-	zval		*mysql_link;
-	zend_long		processid;
+	MY_MYSQL	        *mysql;
+	zval		        *mysql_link;
+	zend_long	        processid;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol", &mysql_link, mysqli_link_class_entry, &processid) == FAILURE) {
 		RETURN_THROWS();
@@ -1055,7 +1055,11 @@ PHP_FUNCTION(mysqli_kill)
 
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	if (mysql_kill(mysql->mysql, processid)) {
+	char query[64];
+	snprintf(query, sizeof(query), "KILL CONNECTION " ZEND_LONG_FMT, processid);
+
+	// 1317 is ER_QUERY_INTERRUPTED from server's side
+	if (mysql_real_query(mysql->mysql, query, strlen(query)) && mysql_errno(mysql->mysql) != 1317) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
@@ -1981,14 +1985,36 @@ PHP_FUNCTION(mysqli_store_result)
 PHP_FUNCTION(mysqli_thread_id)
 {
 	MY_MYSQL	*mysql;
+	MYSQL_RES       *result;
+	MYSQL_ROW       row;
 	zval		*mysql_link;
+	zend_long       processid;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	RETURN_LONG((zend_long) mysql_thread_id(mysql->mysql));
+	static const char *query = "SELECT CONNECTION_ID()";
+
+	if (mysql_real_query(mysql->mysql, query, strlen(query))) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
+		RETURN_LONG(-1);
+	}
+
+	result = mysql_store_result(mysql->mysql);
+	if (!result) {
+		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
+		RETURN_LONG(-1);
+	}
+
+	row = mysql_fetch_row(result);
+	processid = (zend_long)strtoll(row[0], NULL, 10);
+
+	efree(row);
+	mysql_free_result(result);
+
+	RETURN_LONG(processid);
 }
 /* }}} */
 
