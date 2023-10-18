@@ -1844,12 +1844,12 @@ static int zend_jit_exception_handler_stub(zend_jit_ctx *jit)
 		handler = zend_get_opcode_handler_func(EG(exception_op));
 
 		ir_CALL(IR_VOID, ir_CONST_FUNC(handler));
-		ir_TAILCALL(ir_LOAD_A(jit_IP(jit)));
+		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else {
 		handler = EG(exception_op)->handler;
 
 		if (GCC_GLOBAL_REGS) {
-			ir_TAILCALL(ir_CONST_FUNC(handler));
+			ir_TAILCALL(IR_VOID, ir_CONST_FUNC(handler));
 		} else {
 			ir_ref ref, if_negative;
 
@@ -1959,7 +1959,7 @@ static int zend_jit_interrupt_handler_stub(zend_jit_ctx *jit)
 	}
 
 	if (GCC_GLOBAL_REGS) {
-		ir_TAILCALL(ir_LOAD_A(jit_IP(jit)));
+		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else {
 		ir_RETURN(ir_CONST_I32(1));
 	}
@@ -1977,22 +1977,22 @@ static int zend_jit_leave_function_handler_stub(zend_jit_ctx *jit)
 		ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_leave_nested_func_helper), call_info);
 		jit_STORE_IP(jit,
 			ir_LOAD_A(jit_EX(opline)));
-		ir_TAILCALL(ir_LOAD_A(jit_IP(jit)));
+		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else if (GCC_GLOBAL_REGS) {
-		ir_TAILCALL_1(ir_CONST_FC_FUNC(zend_jit_leave_nested_func_helper), call_info);
+		ir_TAILCALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_leave_nested_func_helper), call_info);
 	} else {
-		ir_TAILCALL_2(ir_CONST_FC_FUNC(zend_jit_leave_nested_func_helper), call_info, jit_FP(jit));
+		ir_TAILCALL_2(IR_I32, ir_CONST_FC_FUNC(zend_jit_leave_nested_func_helper), call_info, jit_FP(jit));
 	}
 
 	ir_IF_TRUE(if_top);
 
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_leave_top_func_helper), call_info);
-		ir_TAILCALL(ir_LOAD_A(jit_IP(jit)));
+		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else if (GCC_GLOBAL_REGS) {
-		ir_TAILCALL_1(ir_CONST_FC_FUNC(zend_jit_leave_top_func_helper), call_info);
+		ir_TAILCALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_leave_top_func_helper), call_info);
 	} else {
-		ir_TAILCALL_2(ir_CONST_FC_FUNC(zend_jit_leave_top_func_helper), call_info, jit_FP(jit));
+		ir_TAILCALL_2(IR_I32, ir_CONST_FC_FUNC(zend_jit_leave_top_func_helper), call_info, jit_FP(jit));
 	}
 
 	return 1;
@@ -2342,7 +2342,7 @@ static int zend_jit_hybrid_loop_trace_counter_stub(zend_jit_ctx *jit)
 static int zend_jit_trace_halt_stub(zend_jit_ctx *jit)
 {
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-		ir_TAILCALL(ir_CONST_FC_FUNC(zend_jit_halt_op->handler));
+		ir_TAILCALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_halt_op->handler));
 	} else if (GCC_GLOBAL_REGS) {
 		jit_STORE_IP(jit, IR_NULL);
 		ir_RETURN(IR_VOID);
@@ -2355,7 +2355,7 @@ static int zend_jit_trace_halt_stub(zend_jit_ctx *jit)
 static int zend_jit_trace_escape_stub(zend_jit_ctx *jit)
 {
 	if (GCC_GLOBAL_REGS) {
-		ir_TAILCALL(ir_LOAD_A(jit_IP(jit)));
+		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else {
 		ir_RETURN(ir_CONST_I32(1)); // ZEND_VM_ENTER
 	}
@@ -2383,7 +2383,7 @@ static int zend_jit_trace_exit_stub(zend_jit_ctx *jit)
 		jit_STORE_FP(jit, ir_LOAD_A(ref));
 		ref = ir_LOAD_A(jit_EX(opline));
 		jit_STORE_IP(jit, ref);
-		ir_TAILCALL(ir_LOAD_A(jit_IP(jit)));
+		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else {
 		ir_RETURN(ir_CONST_I32(1)); // ZEND_VM_ENTER
 	}
@@ -2407,7 +2407,7 @@ static int zend_jit_trace_exit_stub(zend_jit_ctx *jit)
 
 	addr = zend_jit_orig_opline_handler(jit);
 	if (GCC_GLOBAL_REGS) {
-		ir_TAILCALL(addr);
+		ir_TAILCALL(IR_VOID, addr);
 	} else {
 #if defined(IR_TARGET_X86)
 		addr = ir_CAST_FC_FUNC(addr);
@@ -4012,20 +4012,20 @@ static int zend_jit_tail_handler(zend_jit_ctx *jit, const zend_op *opline)
 
 			/* Use inlined HYBRID VM handler */
 			handler = opline->handler;
-			ir_TAILCALL(ir_CONST_FUNC(handler));
+			ir_TAILCALL(IR_VOID, ir_CONST_FUNC(handler));
 		} else {
 			handler = zend_get_opcode_handler_func(opline);
 			ir_CALL(IR_VOID, ir_CONST_FUNC(handler));
 			ref = ir_LOAD_A(jit_IP(jit));
-			ir_TAILCALL(ref);
+			ir_TAILCALL(IR_VOID, ref);
 		}
 	} else {
 		handler = opline->handler;
 		if (GCC_GLOBAL_REGS) {
-			ir_TAILCALL(ir_CONST_FUNC(handler));
+			ir_TAILCALL(IR_VOID, ir_CONST_FUNC(handler));
 		} else {
 			ref = jit_FP(jit);
-			ir_TAILCALL_1(ir_CONST_FC_FUNC(handler), ref);
+			ir_TAILCALL_1(IR_I32, ir_CONST_FC_FUNC(handler), ref);
 		}
 	}
 	if (jit->b >= 0) {
@@ -9845,7 +9845,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 				}
 				/* fallback to indirect JMP or RETURN */
 				if (GCC_GLOBAL_REGS) {
-					ir_TAILCALL(ir_LOAD_A(jit_IP(jit)));
+					ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 				} else {
 					ir_RETURN(ir_CONST_I32(1));
 				}
@@ -10598,7 +10598,7 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 				ir_IF_FALSE(if_eq);
 
 #ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
-				ir_TAILCALL(ir_LOAD_A(jit_IP(jit)));
+				ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 #else
 				ir_IJMP(jit_STUB_ADDR(jit, jit_stub_trace_escape));
 #endif
@@ -10634,7 +10634,7 @@ static int zend_jit_leave_func(zend_jit_ctx         *jit,
 	}
 
 	if (GCC_GLOBAL_REGS) {
-		ir_TAILCALL(ir_LOAD_A(jit_IP(jit)));
+		ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 	} else {
 		ir_RETURN(ir_CONST_I32(2)); // ZEND_VM_LEAVE
 	}
@@ -16244,9 +16244,9 @@ static int zend_jit_trace_return(zend_jit_ctx *jit, bool original_handler, const
 {
 	if (GCC_GLOBAL_REGS) {
 		if (!original_handler) {
-			ir_TAILCALL(ir_LOAD_A(jit_IP(jit)));
+			ir_TAILCALL(IR_VOID, ir_LOAD_A(jit_IP(jit)));
 		} else {
-			ir_TAILCALL(zend_jit_orig_opline_handler(jit));
+			ir_TAILCALL(IR_VOID, zend_jit_orig_opline_handler(jit));
 		}
 	} else {
 		if (original_handler) {
