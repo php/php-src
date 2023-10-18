@@ -70,6 +70,9 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 * _php_stream_dirent now has an extra d_type field that is used to store the
   directory entry type. This can be used to avoid additional stat calls for
   types when the type is already known.
+* The misspelled ZEND_CGG_DIAGNOSTIC_IGNORED_(START|END) macros are deprecated.
+  Use ZEND_DIAGNOSTIC_IGNORED_(START|END) instead. These macros now also support
+  Clang.
 
 ========================
 2. Build system changes
