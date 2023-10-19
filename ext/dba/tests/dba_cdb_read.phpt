@@ -1,4 +1,4 @@
---TEST--
+--TEST----TEST--
 DBA CDB handler test (read only)
 --EXTENSIONS--
 dba

@@ -6,7 +6,7 @@
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
+   
    | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
@@ -611,7 +611,7 @@ function main(): void
                     $show_progress = false;
                     break;
                 case '--version':
-                    echo '$Id$' . "\n";
+                    echo '$Id: e12912ca4aa71df7f5abdc77af46a366c19329e2 $' . "\n";
                     exit(1);
 
                 default:

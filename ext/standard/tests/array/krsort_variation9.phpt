@@ -1,5 +1,5 @@
---TEST--
-Test krsort() function : usage variations - sort array with/without key values
+--TE--TEST----TEST--ST--
+TestTestTestTest krsort() function : usage variations - sort array with/without key values
 --FILE--
 <?php
 /*
