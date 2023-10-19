@@ -360,7 +360,7 @@ jobs:
           # Needed to avoid overwriting JIT config
           export PSALM_ALLOW_XDEBUG=1
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php $GITHUB_WORKSPACE/.github/patch.php ./psalm --no-cache || exit $?
+          php $GITHUB_WORKSPACE/.github/jit_check.php ./psalm --no-cache || exit $?
       - name: Test PHPStan
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
@@ -370,8 +370,8 @@ jobs:
           sed -E 's/phpVersion(.*)max[^)]+/phpVersion\1max(89999/g' conf/parametersSchema.neon -i
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           export ASAN_OPTIONS=exitcode=139
-          php $GITHUB_WORKSPACE/.github/patch.php bin/phpstan clear-result-cache
-          php $GITHUB_WORKSPACE/.github/patch.php bin/phpstan || exit $?
+          php $GITHUB_WORKSPACE/.github/jit_check.php bin/phpstan clear-result-cache
+          php $GITHUB_WORKSPACE/.github/jit_check.php bin/phpstan || exit $?
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
@@ -384,7 +384,7 @@ jobs:
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-reqs
             export ASAN_OPTIONS=exitcode=139
-            php $GITHUB_WORKSPACE/.github/patch.php vendor/bin/phpunit || EXIT_CODE=$?
+            php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit || EXIT_CODE=$?
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
             fi
@@ -401,7 +401,7 @@ jobs:
           # Hack to disable a test that hangs
           php -r '$c = file_get_contents("tests/Filesystem/FilesystemTest.php"); $c = str_replace("*/\n    public function testSharedGet()", "* @group skip\n     */\n    public function testSharedGet()", $c); file_put_contents("tests/Filesystem/FilesystemTest.php", $c);'
           export ASAN_OPTIONS=exitcode=139
-          php $GITHUB_WORKSPACE/.github/patch.php vendor/bin/phpunit --exclude-group skip || EXIT_CODE=$?
+          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit --exclude-group skip || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
@@ -417,7 +417,7 @@ jobs:
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-reqs
             export ASAN_OPTIONS=exitcode=139
-            php $GITHUB_WORKSPACE/.github/patch.php vendor/bin/phpunit || EXIT_CODE=$?
+            php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit || EXIT_CODE=$?
             if [ $[EXIT_CODE:-0} -gt 128 ]; then
               X=1;
             fi
@@ -432,7 +432,7 @@ jobs:
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           export ASAN_OPTIONS=exitcode=139
-          php $GITHUB_WORKSPACE/.github/patch.php vendor/bin/phpunit || EXIT_CODE=$?
+          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
@@ -452,7 +452,7 @@ jobs:
           export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
           X=0
           for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
-            php $GITHUB_WORKSPACE/.github/patch.php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient --exclude-group skip || EXIT_CODE=$?
+            php $GITHUB_WORKSPACE/.github/jit_check.php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient --exclude-group skip || EXIT_CODE=$?
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
             fi
@@ -467,7 +467,7 @@ jobs:
           export ASAN_OPTIONS=exitcode=139
           export PHPSECLIB_ALLOW_JIT=1
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php $GITHUB_WORKSPACE/.github/patch.php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
+          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
       - name: Test PHPUnit
         if: always()
         run: |
@@ -476,7 +476,7 @@ jobs:
           git rev-parse HEAD
           export ASAN_OPTIONS=exitcode=139
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php $GITHUB_WORKSPACE/.github/patch.php ./phpunit || EXIT_CODE=$?
+          php $GITHUB_WORKSPACE/.github/jit_check.php ./phpunit || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
@@ -500,7 +500,7 @@ jobs:
           sed -i 's/youremptytestdbnamehere/test/g' wp-tests-config.php
           sed -i 's/yourusernamehere/root/g' wp-tests-config.php
           sed -i 's/yourpasswordhere/root/g' wp-tests-config.php
-          php $GITHUB_WORKSPACE/.github/patch.php vendor/bin/phpunit || EXIT_CODE=$?
+          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit || EXIT_CODE=$?
           if [ $EXIT_CODE -gt 128 ]; then
             exit 1
           fi
