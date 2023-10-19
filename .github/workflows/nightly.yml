@@ -353,9 +353,9 @@ jobs:
       - name: Test Psalm
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
-          git clone https://github.com/vimeo/psalm --branch=master
+          git clone https://github.com/vimeo/psalm --branch=master --depth 1
           cd psalm
-          git checkout 7428e49b115a2a837aa29cf0fafd0ca902fe2457
+          git rev-parse HEAD
           export ASAN_OPTIONS=exitcode=139
           # Needed to avoid overwriting JIT config
           export PSALM_ALLOW_XDEBUG=1
@@ -364,9 +364,9 @@ jobs:
       - name: Test PHPStan
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
-          git clone https://github.com/phpstan/phpstan-src
+          git clone https://github.com/phpstan/phpstan-src --depth 1
           cd phpstan-src
-          git checkout d02cc99d4480a203a2dbe54a5ded2da016266b11
+          git rev-parse HEAD
           sed -E 's/phpVersion(.*)max[^)]+/phpVersion\1max(89999/g' conf/parametersSchema.neon -i
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           export ASAN_OPTIONS=exitcode=139
@@ -461,9 +461,9 @@ jobs:
       - name: Test PHPSeclib
         if: always()
         run: |
-          git clone https://github.com/phpseclib/phpseclib --branch=master
+          git clone https://github.com/phpseclib/phpseclib --depth 1
           cd phpseclib
-          git checkout 259bd9f1e8af11726ed74acf527c2c046549061b
+          git rev-parse HEAD
           export ASAN_OPTIONS=exitcode=139
           export PHPSECLIB_ALLOW_JIT=1
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
