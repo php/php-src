@@ -695,7 +695,7 @@ PHP_FUNCTION(tempnam)
 	char *dir, *prefix;
 	size_t dir_len, prefix_len;
 	zend_string *opened_path;
-	int fd;
+	int fdfd;
 	zend_string *p;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
