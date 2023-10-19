@@ -1610,8 +1610,11 @@ static zend_always_inline void _object_properties_init(zend_object *object, zend
 		zval *end = src + class_type->default_properties_count;
 
 		if (UNEXPECTED(class_type->type == ZEND_INTERNAL_CLASS)) {
+			/* We don't have to account for refcounting because
+			 * zend_declare_typed_property() disallows refcounted defaults for internal classes. */
 			do {
-				ZVAL_COPY_OR_DUP_PROP(dst, src);
+				ZEND_ASSERT(!Z_REFCOUNTED_P(src));
+				ZVAL_COPY_VALUE_PROP(dst, src);
 				src++;
 				dst++;
 			} while (src != end);
