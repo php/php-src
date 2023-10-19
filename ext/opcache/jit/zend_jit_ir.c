@@ -5392,6 +5392,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 			     op2_range->max >= SIZEOF_ZEND_LONG * 8) {
 
 				ir_ref if_wrong, cold_path, ref2, if_ok;
+				ir_ref op1_ref = jit_Z_LVAL(jit, op1_addr);
 
 				if_wrong = ir_IF(ir_UGT(ref, ir_CONST_LONG((SIZEOF_ZEND_LONG * 8) - 1)));
 				ir_IF_TRUE_cold(if_wrong);
@@ -5405,7 +5406,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 				ref2 = ir_CONST_LONG(0);
 				cold_path = ir_END();
 				ir_IF_FALSE(if_wrong);
-				ref = ir_SHL_L(jit_Z_LVAL(jit, op1_addr), ref);
+				ref = ir_SHL_L(op1_ref, ref);
 				ir_MERGE_WITH(cold_path);
 				ref = ir_PHI_2(IR_LONG, ref, ref2);
 			} else {
@@ -5477,6 +5478,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 			}
 		} else {
 			ir_ref zero_path = 0;
+			ir_ref op1_ref = jit_Z_LVAL(jit, op1_addr);
 
 			ref = jit_Z_LVAL(jit, op2_addr);
 			if ((op2_type & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) || !op2_range || (op2_range->min <= 0 && op2_range->max >= 0)) {
@@ -5496,7 +5498,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 				zero_path = ir_END();
 				ir_IF_FALSE(if_minus_one);
 			}
-			ref = ir_MOD_L(jit_Z_LVAL(jit, op1_addr), ref);
+			ref = ir_MOD_L(op1_ref, ref);
 
 			if (zero_path) {
 				ir_MERGE_WITH(zero_path);
