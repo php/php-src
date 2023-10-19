@@ -2123,7 +2123,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	/* To avoid race conditions, we first create a temporary file and then rename it atomically
 	 * at the end of the function. (see bug #66150) */
 	zend_string *temp_file_path;
-	f = php_open_temporary_fd_ex(NULL, "tmp.wsdl.", &temp_file_path, PHP_TMP_FILE_SILENT);
+	f = php_open_temporary_fd_ex(SOAP_GLOBAL(cache_dir), "tmp.wsdl.", &temp_file_path, PHP_TMP_FILE_SILENT);
 
 	if (f < 0) {return;}
 
