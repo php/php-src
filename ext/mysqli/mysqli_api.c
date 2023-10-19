@@ -1060,6 +1060,9 @@ PHP_FUNCTION(mysqli_kill)
 
 	// 1317 is ER_QUERY_INTERRUPTED from server's side
 	if (mysql_real_query(mysql->mysql, query, strlen(query)) && mysql_errno(mysql->mysql) != 1317) {
+		if (!mysql_kill(mysql->mysql, processid)) {
+			RETURN_TRUE;
+		}
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}
@@ -1998,13 +2001,8 @@ PHP_FUNCTION(mysqli_thread_id)
 	static const char *query = "SELECT CONNECTION_ID()";
 	size_t query_len = strlen(query);
 
-	if (mysql_ping(mysql->mysql)) {
-		RETURN_LONG(0);
-	}
-
 	if (mysql_real_query(mysql->mysql, query, query_len)) {
-		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
-		RETURN_THROWS();
+		goto fail;
 	}
 
 	result = mysql_store_result(mysql->mysql);
@@ -2020,6 +2018,9 @@ PHP_FUNCTION(mysqli_thread_id)
 	mysql_free_result(result);
 
 	RETURN_LONG(processid);
+
+fail:
+	RETURN_LONG((zend_long)mysql_thread_id(mysql->mysql));
 }
 /* }}} */
 
