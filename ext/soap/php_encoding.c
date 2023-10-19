@@ -1561,10 +1561,12 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 					if (Z_TYPE_P(prop) != IS_ARRAY) {
 						/* Convert into array */
 						array_init(&arr);
-						Z_ADDREF_P(prop);
+						Z_TRY_ADDREF_P(prop);
 						add_next_index_zval(&arr, prop);
 						set_zval_property(ret, (char*)trav->name, &arr);
 						prop = &arr;
+					} else {
+						SEPARATE_ARRAY(prop);
 					}
 					/* Add array element */
 					add_next_index_zval(prop, &tmpVal);

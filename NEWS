@@ -28,6 +28,8 @@ PHP                                                                        NEWS
     Fault). (nielsdos)
   . Fixed bug #67617 (SOAP leaves incomplete cache file on ENOSPC). (nielsdos)
   . Fix incorrect uri check in SOAP caching. (nielsdos)
+  . Fix segfault and assertion failure with refcounted props and arrays.
+    (nielsdos)
 
 - XSL:
   . Add missing module dependency. (nielsdos)
