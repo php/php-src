@@ -62,7 +62,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
     env:
-      MYSQL_TEST_HOST: mysql
+      MYSQL_TEST_HOST: localhost
       PDO_MYSQL_TEST_HOST: localhost
     strategy:
       fail-fast: false

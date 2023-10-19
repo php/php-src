@@ -24,6 +24,6 @@ try {
 echo 'done!';
 ?>
 --EXPECTF--
-Warning: failed loading cafile stream: `x509.ca' in %s
+Warning: mysqli_real_connect(): This stream does not support SSL/crypto in %s
 Cannot connect to MySQL using SSL
 done!
