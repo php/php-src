@@ -148,9 +148,11 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 			if (sdl->is_persistent) {
 				new_enc->details.ns = zend_strndup(ns, ns_len);
 				new_enc->details.type_str = strdup(new_enc->details.type_str);
+				new_enc->details.clark_notation = zend_string_dup(new_enc->details.clark_notation, 1);
 			} else {
 				new_enc->details.ns = estrndup(ns, ns_len);
 				new_enc->details.type_str = estrdup(new_enc->details.type_str);
+                new_enc->details.clark_notation = zend_string_dup(new_enc->details.clark_notation, 0);
 			}
 			if (sdl->encoders == NULL) {
 				sdl->encoders = pemalloc(sizeof(HashTable), sdl->is_persistent);
@@ -2833,6 +2835,7 @@ static encodePtr make_persistent_sdl_encoder(encodePtr enc, HashTable *ptr_map, 
 	}
 	if (penc->details.ns) {
 		penc->details.ns = strdup(penc->details.ns);
+		penc->details.clark_notation = zend_string_dup(penc->details.clark_notation, 1);
 	}
 
 	if (penc->details.sdl_type) {

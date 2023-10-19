@@ -138,93 +138,93 @@ static void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 }
 
 const encode defaultEncoding[] = {
-	{{UNKNOWN_TYPE, NULL, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert},
+	{{UNKNOWN_TYPE, NULL, NULL, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert},
 
-	{{IS_NULL, "nil", XSI_NAMESPACE, NULL, NULL}, to_zval_null, to_xml_null},
-	{{IS_STRING, XSD_STRING_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_string, to_xml_string},
-	{{IS_LONG, XSD_INT_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{IS_DOUBLE, XSD_FLOAT_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_double, to_xml_double},
-	{{IS_FALSE, XSD_BOOLEAN_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_bool, to_xml_bool},
-	{{IS_TRUE, XSD_BOOLEAN_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_bool, to_xml_bool},
-	{{IS_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_1_ENC_NAMESPACE, NULL, NULL}, to_zval_array, guess_array_map},
-	{{IS_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_1_1_ENC_NAMESPACE, NULL, NULL}, to_zval_object, to_xml_object},
-	{{IS_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_2_ENC_NAMESPACE, NULL, NULL}, to_zval_array, guess_array_map},
-	{{IS_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_1_2_ENC_NAMESPACE, NULL, NULL}, to_zval_object, to_xml_object},
+	{{IS_NULL, "nil", XSI_NAMESPACE, NULL, NULL,NULL}, to_zval_null, to_xml_null},
+	{{IS_STRING, XSD_STRING_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_string, to_xml_string},
+	{{IS_LONG, XSD_INT_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{IS_DOUBLE, XSD_FLOAT_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_double, to_xml_double},
+	{{IS_FALSE, XSD_BOOLEAN_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_bool, to_xml_bool},
+	{{IS_TRUE, XSD_BOOLEAN_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_bool, to_xml_bool},
+	{{IS_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_1_ENC_NAMESPACE, NULL, NULL, NULL}, to_zval_array, guess_array_map},
+	{{IS_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_1_1_ENC_NAMESPACE, NULL, NULL, NULL}, to_zval_object, to_xml_object},
+	{{IS_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_2_ENC_NAMESPACE, NULL, NULL, NULL}, to_zval_array, guess_array_map},
+	{{IS_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_1_2_ENC_NAMESPACE, NULL, NULL, NULL}, to_zval_object, to_xml_object},
 
-	{{XSD_STRING, XSD_STRING_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_string, to_xml_string},
-	{{XSD_BOOLEAN, XSD_BOOLEAN_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_bool, to_xml_bool},
-	{{XSD_DECIMAL, XSD_DECIMAL_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_FLOAT, XSD_FLOAT_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_double, to_xml_double},
-	{{XSD_DOUBLE, XSD_DOUBLE_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_double, to_xml_double},
+	{{XSD_STRING, XSD_STRING_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_string, to_xml_string},
+	{{XSD_BOOLEAN, XSD_BOOLEAN_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_bool, to_xml_bool},
+	{{XSD_DECIMAL, XSD_DECIMAL_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_FLOAT, XSD_FLOAT_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_double, to_xml_double},
+	{{XSD_DOUBLE, XSD_DOUBLE_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_double, to_xml_double},
 
-	{{XSD_DATETIME, XSD_DATETIME_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_datetime},
-	{{XSD_TIME, XSD_TIME_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_time},
-	{{XSD_DATE, XSD_DATE_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_date},
-	{{XSD_GYEARMONTH, XSD_GYEARMONTH_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_gyearmonth},
-	{{XSD_GYEAR, XSD_GYEAR_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_gyear},
-	{{XSD_GMONTHDAY, XSD_GMONTHDAY_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_gmonthday},
-	{{XSD_GDAY, XSD_GDAY_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_gday},
-	{{XSD_GMONTH, XSD_GMONTH_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_gmonth},
-	{{XSD_DURATION, XSD_DURATION_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_duration},
+	{{XSD_DATETIME, XSD_DATETIME_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_datetime},
+	{{XSD_TIME, XSD_TIME_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_time},
+	{{XSD_DATE, XSD_DATE_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_date},
+	{{XSD_GYEARMONTH, XSD_GYEARMONTH_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_gyearmonth},
+	{{XSD_GYEAR, XSD_GYEAR_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_gyear},
+	{{XSD_GMONTHDAY, XSD_GMONTHDAY_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_gmonthday},
+	{{XSD_GDAY, XSD_GDAY_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_gday},
+	{{XSD_GMONTH, XSD_GMONTH_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_gmonth},
+	{{XSD_DURATION, XSD_DURATION_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_duration},
 
-	{{XSD_HEXBINARY, XSD_HEXBINARY_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_hexbin, to_xml_hexbin},
-	{{XSD_BASE64BINARY, XSD_BASE64BINARY_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_base64, to_xml_base64},
+	{{XSD_HEXBINARY, XSD_HEXBINARY_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_hexbin, to_xml_hexbin},
+	{{XSD_BASE64BINARY, XSD_BASE64BINARY_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_base64, to_xml_base64},
 
-	{{XSD_LONG, XSD_LONG_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_INT, XSD_INT_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_SHORT, XSD_SHORT_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_BYTE, XSD_BYTE_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_NONPOSITIVEINTEGER, XSD_NONPOSITIVEINTEGER_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_POSITIVEINTEGER, XSD_POSITIVEINTEGER_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_NONNEGATIVEINTEGER, XSD_NONNEGATIVEINTEGER_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_NEGATIVEINTEGER, XSD_NEGATIVEINTEGER_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_UNSIGNEDBYTE, XSD_UNSIGNEDBYTE_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_UNSIGNEDSHORT, XSD_UNSIGNEDSHORT_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_UNSIGNEDINT, XSD_UNSIGNEDINT_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_UNSIGNEDLONG, XSD_UNSIGNEDLONG_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_INTEGER, XSD_INTEGER_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_LONG, XSD_LONG_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_INT, XSD_INT_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_SHORT, XSD_SHORT_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_BYTE, XSD_BYTE_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_NONPOSITIVEINTEGER, XSD_NONPOSITIVEINTEGER_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_POSITIVEINTEGER, XSD_POSITIVEINTEGER_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_NONNEGATIVEINTEGER, XSD_NONNEGATIVEINTEGER_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_NEGATIVEINTEGER, XSD_NEGATIVEINTEGER_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_UNSIGNEDBYTE, XSD_UNSIGNEDBYTE_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_UNSIGNEDSHORT, XSD_UNSIGNEDSHORT_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_UNSIGNEDINT, XSD_UNSIGNEDINT_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_UNSIGNEDLONG, XSD_UNSIGNEDLONG_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_INTEGER, XSD_INTEGER_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
 
-	{{XSD_ANYTYPE, XSD_ANYTYPE_STRING, XSD_NAMESPACE, NULL, NULL}, guess_zval_convert, guess_xml_convert},
-	{{XSD_UR_TYPE, XSD_UR_TYPE_STRING, XSD_NAMESPACE, NULL, NULL}, guess_zval_convert, guess_xml_convert},
-	{{XSD_ANYURI, XSD_ANYURI_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_QNAME, XSD_QNAME_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_NOTATION, XSD_NOTATION_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_NORMALIZEDSTRING, XSD_NORMALIZEDSTRING_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringr, to_xml_string},
-	{{XSD_TOKEN, XSD_TOKEN_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_LANGUAGE, XSD_LANGUAGE_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_NMTOKEN, XSD_NMTOKEN_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_NMTOKENS, XSD_NMTOKENS_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_list1},
-	{{XSD_NAME, XSD_NAME_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_NCNAME, XSD_NCNAME_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_ID, XSD_ID_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_IDREF, XSD_IDREF_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_IDREFS, XSD_IDREFS_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_list1},
-	{{XSD_ENTITY, XSD_ENTITY_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_ENTITIES, XSD_ENTITIES_STRING, XSD_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_list1},
+	{{XSD_ANYTYPE, XSD_ANYTYPE_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert},
+	{{XSD_UR_TYPE, XSD_UR_TYPE_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert},
+	{{XSD_ANYURI, XSD_ANYURI_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_QNAME, XSD_QNAME_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_NOTATION, XSD_NOTATION_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_NORMALIZEDSTRING, XSD_NORMALIZEDSTRING_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringr, to_xml_string},
+	{{XSD_TOKEN, XSD_TOKEN_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_LANGUAGE, XSD_LANGUAGE_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_NMTOKEN, XSD_NMTOKEN_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_NMTOKENS, XSD_NMTOKENS_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_list1},
+	{{XSD_NAME, XSD_NAME_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_NCNAME, XSD_NCNAME_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_ID, XSD_ID_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_IDREF, XSD_IDREF_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_IDREFS, XSD_IDREFS_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_list1},
+	{{XSD_ENTITY, XSD_ENTITY_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_ENTITIES, XSD_ENTITIES_STRING, XSD_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_list1},
 
-	{{APACHE_MAP, APACHE_MAP_STRING, APACHE_NAMESPACE, NULL, NULL}, to_zval_map, to_xml_map},
+	{{APACHE_MAP, APACHE_MAP_STRING, APACHE_NAMESPACE, NULL, NULL, NULL}, to_zval_map, to_xml_map},
 
-	{{SOAP_ENC_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_1_1_ENC_NAMESPACE, NULL, NULL}, to_zval_object, to_xml_object},
-	{{SOAP_ENC_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_1_ENC_NAMESPACE, NULL, NULL}, to_zval_array, to_xml_array},
-	{{SOAP_ENC_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_1_2_ENC_NAMESPACE, NULL, NULL}, to_zval_object, to_xml_object},
-	{{SOAP_ENC_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_2_ENC_NAMESPACE, NULL, NULL}, to_zval_array, to_xml_array},
+	{{SOAP_ENC_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_1_1_ENC_NAMESPACE, NULL, NULL, NULL}, to_zval_object, to_xml_object},
+	{{SOAP_ENC_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_1_ENC_NAMESPACE, NULL, NULL, NULL}, to_zval_array, to_xml_array},
+	{{SOAP_ENC_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_1_2_ENC_NAMESPACE, NULL, NULL, NULL}, to_zval_object, to_xml_object},
+	{{SOAP_ENC_ARRAY, SOAP_ENC_ARRAY_STRING, SOAP_1_2_ENC_NAMESPACE, NULL, NULL, NULL}, to_zval_array, to_xml_array},
 
 	/* support some of the 1999 data types */
-	{{XSD_STRING, XSD_STRING_STRING, XSD_1999_NAMESPACE, NULL, NULL}, to_zval_string, to_xml_string},
-	{{XSD_BOOLEAN, XSD_BOOLEAN_STRING, XSD_1999_NAMESPACE, NULL, NULL}, to_zval_bool, to_xml_bool},
-	{{XSD_DECIMAL, XSD_DECIMAL_STRING, XSD_1999_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_string},
-	{{XSD_FLOAT, XSD_FLOAT_STRING, XSD_1999_NAMESPACE, NULL, NULL}, to_zval_double, to_xml_double},
-	{{XSD_DOUBLE, XSD_DOUBLE_STRING, XSD_1999_NAMESPACE, NULL, NULL}, to_zval_double, to_xml_double},
+	{{XSD_STRING, XSD_STRING_STRING, XSD_1999_NAMESPACE, NULL, NULL, NULL}, to_zval_string, to_xml_string},
+	{{XSD_BOOLEAN, XSD_BOOLEAN_STRING, XSD_1999_NAMESPACE, NULL, NULL, NULL}, to_zval_bool, to_xml_bool},
+	{{XSD_DECIMAL, XSD_DECIMAL_STRING, XSD_1999_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_FLOAT, XSD_FLOAT_STRING, XSD_1999_NAMESPACE, NULL, NULL, NULL}, to_zval_double, to_xml_double},
+	{{XSD_DOUBLE, XSD_DOUBLE_STRING, XSD_1999_NAMESPACE, NULL, NULL, NULL}, to_zval_double, to_xml_double},
 
-	{{XSD_LONG, XSD_LONG_STRING, XSD_1999_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_INT, XSD_INT_STRING, XSD_1999_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_SHORT, XSD_SHORT_STRING, XSD_1999_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_BYTE, XSD_BYTE_STRING, XSD_1999_NAMESPACE, NULL, NULL}, to_zval_long, to_xml_long},
-	{{XSD_1999_TIMEINSTANT, XSD_1999_TIMEINSTANT_STRING, XSD_1999_NAMESPACE, NULL, NULL}, to_zval_stringc, to_xml_string},
+	{{XSD_LONG, XSD_LONG_STRING, XSD_1999_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_INT, XSD_INT_STRING, XSD_1999_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_SHORT, XSD_SHORT_STRING, XSD_1999_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_BYTE, XSD_BYTE_STRING, XSD_1999_NAMESPACE, NULL, NULL, NULL}, to_zval_long, to_xml_long},
+	{{XSD_1999_TIMEINSTANT, XSD_1999_TIMEINSTANT_STRING, XSD_1999_NAMESPACE, NULL, NULL, NULL}, to_zval_stringc, to_xml_string},
 
-	{{XSD_ANYXML, "<anyXML>", "<anyXML>", NULL, NULL}, to_zval_any, to_xml_any},
+	{{XSD_ANYXML, "<anyXML>", "<anyXML>", NULL, NULL, NULL}, to_zval_any, to_xml_any},
 
-	{{END_KNOWN_TYPES, NULL, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert}
+	{{END_KNOWN_TYPES, NULL, NULL, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert}
 };
 
 int numDefaultEncodings = sizeof(defaultEncoding)/sizeof(encode);
@@ -272,13 +272,10 @@ static encodePtr find_encoder_by_type_name(sdlPtr sdl, const char *type)
 
 		ZEND_HASH_FOREACH_PTR(sdl->encoders, enc)  {
 
-            if (type[0] == '{') {
-                size_t ns_len = strlen(enc->details.ns);
-                if (strncmp(enc->details.ns, type + 1, ns_len) == 0
-                    && type[ns_len + 1] == '}'
-                    && strcmp(enc->details.type_str, type + ns_len + 2) == 0) {
-                    return enc;
-                }
+            if (type[0] == '{'
+                && enc->details.clark_notation
+                && strcmp(ZSTR_VAL(enc->details.clark_notation), type) == 0) {
+                return enc;
             } else {
                 if (strcmp(enc->details.type_str, type) == 0) {
                     return enc;
@@ -1394,9 +1391,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
         classname = zend_hash_str_find_deref(SOAP_GLOBAL(class_map), type->type_str, strlen(type->type_str));
         if(classname == NULL){
             if (type->ns) {
-                zend_string *nscat =zend_strpprintf(0, "{%s}%s", type->ns, type->type_str);
-                classname = zend_hash_find_deref(SOAP_GLOBAL(class_map),nscat);
-                zend_string_release_ex(nscat, 0);
+                classname = zend_hash_find_deref(SOAP_GLOBAL(class_map),type->clark_notation);
             }
         }
 		if (classname != NULL &&
@@ -3629,6 +3624,9 @@ void delete_encoder(zval *zv)
 	if (t->details.map) {
 		delete_mapping(t->details.map);
 	}
+    if (t->details.clark_notation) {
+        zend_string_release_ex(t->details.clark_notation, 0);
+    }
 	efree(t);
 }
 
@@ -3641,6 +3639,9 @@ void delete_encoder_persistent(zval *zv)
 	if (t->details.type_str) {
 		free(t->details.type_str);
 	}
+    if (t->details.clark_notation) {
+        zend_string_release_ex(t->details.clark_notation, 0);
+    }
 	/* we should never have mapping in persistent encoder */
 	assert(t->details.map == NULL);
 	free(t);

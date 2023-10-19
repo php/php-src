@@ -181,6 +181,7 @@ struct _encodeType {
 	int type;
 	char *type_str;
 	char *ns;
+    zend_string *clark_notation;
 	sdlTypePtr sdl_type;
 	soapMappingPtr map;
 };

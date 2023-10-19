@@ -64,6 +64,9 @@ static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlChar *
 		if (enc->details.type_str) {
 			efree(enc->details.type_str);
 		}
+        if (enc->details.clark_notation) {
+            zend_string_release_ex(enc->details.clark_notation, 0);
+        }
 	} else {
 		enc_ptr = NULL;
 		enc = emalloc(sizeof(encode));
@@ -73,6 +76,10 @@ static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlChar *
 	enc->details.ns = estrdup((char*)ns);
 	enc->details.type_str = estrdup((char*)type);
 	enc->details.sdl_type = cur_type;
+    enc->details.clark_notation = NULL;
+    if (enc->details.ns != NULL){
+        enc->details.clark_notation = zend_strpprintf(0, "{%s}%s", enc->details.ns, enc->details.type_str );
+    }
 	enc->to_xml = sdl_guess_convert_xml;
 	enc->to_zval = sdl_guess_convert_zval;
 
@@ -335,6 +342,9 @@ static int schema_simpleType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr simpleType, 
 		memset(cur_type->encode, 0, sizeof(encode));
 		cur_type->encode->details.ns = estrdup(newType->namens);
 		cur_type->encode->details.type_str = estrdup(newType->name);
+        if (cur_type->encode->details.ns){
+            cur_type->encode->details.clark_notation = zend_strpprintf(0, "{%s}%s", cur_type->encode->details.ns, cur_type->encode->details.type_str );
+        }
 		cur_type->encode->details.sdl_type = ptr;
 		cur_type->encode->to_xml = sdl_guess_convert_xml;
 		cur_type->encode->to_zval = sdl_guess_convert_zval;
@@ -1390,6 +1400,9 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr compType, s
 		memset(cur_type->encode, 0, sizeof(encode));
 		cur_type->encode->details.ns = estrdup(newType->namens);
 		cur_type->encode->details.type_str = estrdup(newType->name);
+        if (cur_type->encode->details.ns){
+            cur_type->encode->details.clark_notation = zend_strpprintf(0, "{%s}%s", cur_type->encode->details.ns, cur_type->encode->details.type_str );
+        }
 		cur_type->encode->details.sdl_type = ptr;
 		cur_type->encode->to_xml = sdl_guess_convert_xml;
 		cur_type->encode->to_zval = sdl_guess_convert_zval;
