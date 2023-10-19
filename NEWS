@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed double-free of non-interned enum case name. (ilutov)
   . Fixed bug GH-12457 (Incorrect result of stripos with single character
     needle). (SakiTakamachi)
+  . Fixed bug GH-12468 (Double-free of doc_comment when overriding static
+    property via trait). (ilutov)
 
 - DOM:
   . Fix registerNodeClass with abstract class crashing. (nielsdos)

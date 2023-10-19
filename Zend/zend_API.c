@@ -4332,7 +4332,7 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		    (property_info_ptr->flags & ZEND_ACC_STATIC) != 0) {
 			property_info->offset = property_info_ptr->offset;
 			zval_ptr_dtor(&ce->default_static_members_table[property_info->offset]);
-			if (property_info_ptr->doc_comment) {
+			if (property_info_ptr->doc_comment && property_info_ptr->ce == ce) {
 				zend_string_release(property_info_ptr->doc_comment);
 			}
 			zend_hash_del(&ce->properties_info, name);
@@ -4353,7 +4353,7 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		    (property_info_ptr->flags & ZEND_ACC_STATIC) == 0) {
 			property_info->offset = property_info_ptr->offset;
 			zval_ptr_dtor(&ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
-			if (property_info_ptr->doc_comment) {
+			if (property_info_ptr->doc_comment && property_info_ptr->ce == ce) {
 				zend_string_release_ex(property_info_ptr->doc_comment, 1);
 			}
 			zend_hash_del(&ce->properties_info, name);
