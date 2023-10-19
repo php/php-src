@@ -885,14 +885,7 @@ static zend_result dom_common_save(dom_output_ctx *output_ctx, const xmlDoc *doc
 {
 	/* Initialize everything related to encoding & decoding */
 	const lxb_encoding_data_t *decoding_data = lxb_encoding_data(LXB_ENCODING_UTF_8);
-	const lxb_encoding_data_t *encoding_data = NULL;
-	if (docp->encoding != NULL) {
-		encoding_data = lxb_encoding_data_by_name((const lxb_char_t *) docp->encoding, strlen((const char *) docp->encoding));
-	}
-	if (encoding_data == NULL) {
-		encoding_data = lxb_encoding_data(DOM_FALLBACK_ENCODING_ID);
-		ZEND_ASSERT(encoding_data != NULL);
-	}
+	const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name((const lxb_char_t *) docp->encoding, strlen((const char *) docp->encoding));
 	lxb_encoding_encode_t encode;
 	lxb_encoding_decode_t decode;
 	lxb_char_t encoding_output[4096];
