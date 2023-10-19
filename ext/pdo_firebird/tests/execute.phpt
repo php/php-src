@@ -46,7 +46,7 @@ echo "done\n";
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec('DROP TABLE test_execute');
+@$dbh->exec('DROP TABLE test_execute');
 --EXPECT--
 bool(true)
 int(1)

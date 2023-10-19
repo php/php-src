@@ -26,5 +26,5 @@ array(1) {
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec("DROP TABLE gh8576");
+@$dbh->exec("DROP TABLE gh8576");
 ?>

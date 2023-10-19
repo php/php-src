@@ -31,14 +31,13 @@ $dbh->commit();
 
 unset($dbh);
 echo "done\n";
-
-?>
+-?>
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec('DROP TABLE test_ddl');
-$dbh->exec('DROP GENERATOR gen_ddl_id');
-$dbh->exec('DROP TRIGGER ddl_bi');
+@$dbh->exec('DROP TABLE test_ddl');
+@$dbh->exec('DROP GENERATOR gen_ddl_id');
+@$dbh->exec('DROP TRIGGER ddl_bi');
 ?>
 --EXPECT--
 int(1)

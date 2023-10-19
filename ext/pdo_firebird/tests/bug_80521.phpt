@@ -21,5 +21,5 @@ object(PDOStatement)#%d (1) {
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec("DROP TABLE bug80521");
+@$dbh->exec("DROP TABLE bug80521");
 ?>

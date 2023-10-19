@@ -11,7 +11,6 @@ LSAN_OPTIONS=detect_leaks=0
 require 'testdb.inc';
 
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-@$dbh->exec('drop table test_aaa');
 $dbh->exec('create table test_aaa (id integer)');
 $S = $dbh->prepare('insert into test_aaa (id) values (:id) returning id');
 $S->execute(['id' => 1]);
@@ -23,7 +22,7 @@ echo 'OK';
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec("DROP TABLE test_aaa");
+@$dbh->exec("DROP TABLE test_aaa");
 ?>
 --EXPECT--
 OK

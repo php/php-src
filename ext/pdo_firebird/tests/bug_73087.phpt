@@ -28,7 +28,7 @@ echo 'OK';
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec("DROP TABLE test73087");
+@$dbh->exec("DROP TABLE test73087");
 ?>
 --EXPECT--
 OK

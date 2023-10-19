@@ -40,7 +40,7 @@ unset($dbh);
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec("DROP TABLE test48877");
+@$dbh->exec("DROP TABLE test48877");
 ?>
 --EXPECT--
 bool(false)

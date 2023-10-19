@@ -55,7 +55,7 @@ echo "done\n";
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec('DROP TABLE test_dialect_1');
+@$dbh->exec('DROP TABLE test_dialect_1');
 --EXPECT--
 int(1)
 string(8) "2.000000"

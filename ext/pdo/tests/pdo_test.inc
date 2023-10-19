@@ -87,7 +87,7 @@ class PDOTest {
                     END;
                 SQL
             ),
-            "firebird" => $db->exec("DROP TABLE $tableName"),
+            "firebird" => @$db->exec("DROP TABLE $tableName"),
             default => $db->exec("DROP TABLE IF EXISTS $tableName"),
         };
     }

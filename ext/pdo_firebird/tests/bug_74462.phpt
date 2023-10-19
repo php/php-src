@@ -23,7 +23,7 @@ var_dump($D);
 --CLEAN--
 <?php
 require 'testdb.inc';
-$dbh->exec("DROP TABLE test74462");
+@$dbh->exec("DROP TABLE test74462");
 ?>
 --EXPECT--
 array(3) {

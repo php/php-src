@@ -49,7 +49,7 @@ Done
 <?php
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
-$db->exec("DROP TABLE IF EXIST test62498_32");
+$db->exec("DROP TABLE IF EXISTS test62498_32");
 ?>
 --EXPECTF--
 Begin test...
