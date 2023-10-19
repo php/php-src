@@ -1420,6 +1420,11 @@ static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, char **in)
 	WSDL_CACHE_GET_INT(enc->details.type, in);
 	enc->details.type_str = sdl_deserialize_string(in);
 	enc->details.ns = sdl_deserialize_string(in);
+    char *clark_notation = sdl_deserialize_string(in);
+    if(strcmp(clark_notation,"") != 0){
+        enc->details.clark_notation = zend_string_init(clark_notation,strlen(clark_notation),0);
+    }
+    efree(clark_notation);
 	WSDL_CACHE_GET_INT(i, in);
 	enc->details.sdl_type = types[i];
 	enc->to_xml = sdl_guess_convert_xml;
@@ -2025,6 +2030,11 @@ static void sdl_serialize_encoder(encodePtr enc, HashTable *tmp_types, smart_str
 	WSDL_CACHE_PUT_INT(enc->details.type, out);
 	sdl_serialize_string(enc->details.type_str, out);
 	sdl_serialize_string(enc->details.ns, out);
+    if(enc->details.clark_notation){
+        sdl_serialize_string(ZSTR_VAL(enc->details.clark_notation), out);
+    }else{
+        sdl_serialize_string("", out);
+    }
 	sdl_serialize_type_ref(enc->details.sdl_type, tmp_types, out);
 }
 
