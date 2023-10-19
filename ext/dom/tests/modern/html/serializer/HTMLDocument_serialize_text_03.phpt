@@ -1,5 +1,5 @@
 --TEST--
-DOM\HTMLDocument serialization escape text 03
+DOM\HTMLDocument serialization escape text 03 - special tags in namespace should encode content
 --EXTENSIONS--
 dom
 --FILE--

@@ -1,5 +1,5 @@
 --TEST--
-DOM\HTMLDocument serialization escape text 02
+DOM\HTMLDocument serialization escape text 02 - special tags in html namespace
 --EXTENSIONS--
 dom
 --FILE--
