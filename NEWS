@@ -27,6 +27,7 @@ PHP                                                                        NEWS
   . Fixed bug #66150 (SOAP WSDL cache race condition causes Segmentation
     Fault). (nielsdos)
   . Fixed bug #67617 (SOAP leaves incomplete cache file on ENOSPC). (nielsdos)
+  . Fix incorrect uri check in SOAP caching. (nielsdos)
 
 - XSL:
   . Add missing module dependency. (nielsdos)

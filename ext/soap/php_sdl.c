@@ -1537,7 +1537,7 @@ static HashTable* sdl_deserialize_parameters(encodePtr *encoders, sdlTypePtr *ty
 	return ht;
 }
 
-static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t, time_t *cached)
+static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, size_t uri_len, time_t t, time_t *cached)
 {
 	sdlPtr sdl;
 	time_t old_t;
@@ -1584,7 +1584,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t, time
 	*cached = old_t;
 
 	WSDL_CACHE_GET_INT(i, &in);
-	if (i == 0 && strncmp(in, uri, i) != 0) {
+	if (i != uri_len || strncmp(in, uri, i) != 0) {
 		unlink(fn);
 		efree(buf);
 		return NULL;
@@ -3244,7 +3244,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		}
 		memcpy(key+len,md5str,sizeof(md5str));
 
-		if ((sdl = get_sdl_from_cache(key, uri, t-SOAP_GLOBAL(cache_ttl), &cached)) != NULL) {
+		if ((sdl = get_sdl_from_cache(key, uri, uri_len, t-SOAP_GLOBAL(cache_ttl), &cached)) != NULL) {
 			t = cached;
 			efree(key);
 			goto cache_in_memory;
