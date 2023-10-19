@@ -1996,16 +1996,21 @@ PHP_FUNCTION(mysqli_thread_id)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
 	static const char *query = "SELECT CONNECTION_ID()";
+	size_t query_len = strlen(query);
 
-	if (mysql_real_query(mysql->mysql, query, strlen(query))) {
+	if (mysql_ping(mysql->mysql)) {
+		RETURN_LONG(0);
+	}
+
+	if (mysql_real_query(mysql->mysql, query, query_len)) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
-		RETURN_LONG(-1);
+		RETURN_THROWS();
 	}
 
 	result = mysql_store_result(mysql->mysql);
 	if (!result) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
-		RETURN_LONG(-1);
+		RETURN_THROWS();
 	}
 
 	row = mysql_fetch_row(result);
