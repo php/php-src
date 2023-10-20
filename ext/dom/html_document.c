@@ -538,16 +538,16 @@ PHP_METHOD(DOM_HTMLDocument, createEmpty)
 	}
 	
 #ifdef LIBXML_HTML_ENABLED
-    xmlDocPtr lxml_doc = htmlNewDocNoDtD(NULL, NULL);
+	xmlDocPtr lxml_doc = htmlNewDocNoDtD(NULL, NULL);
 	if (UNEXPECTED(lxml_doc == NULL)) {
 		goto oom;
 	}
 #else
-    xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) "1.0");
+	xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) "1.0");
 	if (UNEXPECTED(lxml_doc == NULL)) {
 		goto oom;
 	}
-    lxml_doc->type = XML_HTML_DOCUMENT_NODE;
+	lxml_doc->type = XML_HTML_DOCUMENT_NODE;
 #endif
 
 	lxml_doc->encoding = xmlStrdup((const xmlChar *) encoding);
@@ -1008,6 +1008,7 @@ PHP_METHOD(DOM_HTMLDocument, saveHTML)
 
 PHP_METHOD(DOM_HTMLDocument, __construct)
 {
+	/* Private constructor cannot be called. */
 	ZEND_UNREACHABLE();
 }
 

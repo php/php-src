@@ -329,7 +329,7 @@ static zend_result dom_html5_serialize_node(dom_html5_serialize_context *ctx, co
 	return SUCCESS;
 }
 
-/* https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments
+/* https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments (Date 2023-10-18)
  * Note: this serializes the _children_, excluding the node itself! */
 zend_result dom_html5_serialize(dom_html5_serialize_context *ctx, const xmlNode *node)
 {

@@ -269,27 +269,27 @@ PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_string(const char *sta
 			/* 11.8.2. Collect a sequence of code points that are not ';' */
 			start += collect_a_sequence_of_code_points(start, end, is_not_semicolon);
 		} else {
-			/* 9. Otherwise */
-			/* 9.1. Set parameterValue to the result of collecting a sequence of code points that are not ';' */
+			/* 11.9. Otherwise */
+			/* 11.9.1. Set parameterValue to the result of collecting a sequence of code points that are not ';' */
 			size_t parameter_value_length = collect_a_sequence_of_code_points(start, end, is_not_semicolon);
 			parameter_value = zend_string_init(start, parameter_value_length, false);
 			start += parameter_name_length;
 
-			/* 9.2. Remove trailing HTTP whitespace from parameterValue */
+			/* 11.9.2. Remove trailing HTTP whitespace from parameterValue */
 			while (ZSTR_LEN(parameter_value) > 0 && is_http_whitespace(ZSTR_VAL(parameter_value)[ZSTR_LEN(parameter_value) - 1])) {
 				ZSTR_LEN(parameter_value)--;
 			}
 			ZSTR_VAL(parameter_value)[ZSTR_LEN(parameter_value)] = '\0';
 
-			/* 9.3. Continue if parameterValue is empty */
+			/* 11.9.3. Continue if parameterValue is empty */
 			if (ZSTR_LEN(parameter_value) == 0) {
 				zend_string_release_ex(parameter_value, false);
 				continue;
 			}
 		}
 
-		/* 10. We diverge from the spec here: we're only interested in charset.
-		 *     Furthermore, as only the first match matters, we can stop immediately with the loop once we set the charset. */
+		/* 11.10. We diverge from the spec here: we're only interested in charset.
+		 *        Furthermore, as only the first match matters, we can stop immediately with the loop once we set the charset. */
 		if (parameter_name_length == strlen("charset")
 			&& strncasecmp(parameter_name, "charset", strlen("charset")) == 0 /* Because of lowercasing in step 11.4 */
 			&& solely_contains_http_quoted_string_tokens(ZSTR_VAL(parameter_value), ZSTR_LEN(parameter_value))) {
