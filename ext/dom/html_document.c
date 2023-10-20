@@ -951,7 +951,7 @@ PHP_METHOD(DOM_HTMLDocument, saveHTMLFile)
 		RETURN_THROWS();
 	}
 
-	php_stream *stream = php_stream_open_wrapper_ex(file, "wb", REPORT_ERRORS, /* opened_path */ NULL, /* context */ NULL);
+	php_stream *stream = php_stream_open_wrapper_ex(file, "wb", REPORT_ERRORS, /* opened_path */ NULL, /* context */ php_libxml_get_stream_context());
 	if (!stream) {
 		RETURN_FALSE;
 	}
