@@ -29,7 +29,7 @@ $db = PDOTest::factory();
 $db->exec("CREATE TABLE test36798 (id INTEGER)");
 $db->exec("INSERT INTO test36798 (id) VALUES (1)");
 
-$stmt = $db->prepare("SELECT 'ï¿½' as test FROM test36798 WHERE id = :id");
+$stmt = $db->prepare("SELECT 'Ã' as test FROM test36798 WHERE id = :id");
 $stmt->execute(array(":id" => 1));
 
 $row = $stmt->fetch(PDO::FETCH_NUM);
@@ -45,5 +45,5 @@ PDOTest::dropTableIfExists($db, "test36798");
 --EXPECT--
 array(1) {
   [0]=>
-  string(1) "ï¿½"
+  string(1) "Ã"
 }
