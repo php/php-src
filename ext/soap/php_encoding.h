@@ -215,7 +215,7 @@ encodePtr get_conversion(int encode);
 void delete_encoder(zval *zv);
 void delete_encoder_persistent(zval *zv);
 
-extern const encode defaultEncoding[];
+extern encode defaultEncoding[];
 extern int numDefaultEncodings;
 
 #endif

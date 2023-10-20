@@ -148,11 +148,15 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 			if (sdl->is_persistent) {
 				new_enc->details.ns = zend_strndup(ns, ns_len);
 				new_enc->details.type_str = strdup(new_enc->details.type_str);
-				new_enc->details.clark_notation = zend_string_dup(new_enc->details.clark_notation, 1);
+                if(new_enc->details.clark_notation){
+                    new_enc->details.clark_notation = zend_string_dup(new_enc->details.clark_notation, 1);
+                }
 			} else {
 				new_enc->details.ns = estrndup(ns, ns_len);
 				new_enc->details.type_str = estrdup(new_enc->details.type_str);
-                new_enc->details.clark_notation = zend_string_dup(new_enc->details.clark_notation, 0);
+                if(new_enc->details.clark_notation){
+                    new_enc->details.clark_notation = zend_string_copy(new_enc->details.clark_notation);
+                }
 			}
 			if (sdl->encoders == NULL) {
 				sdl->encoders = pemalloc(sizeof(HashTable), sdl->is_persistent);
@@ -1420,11 +1424,9 @@ static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, char **in)
 	WSDL_CACHE_GET_INT(enc->details.type, in);
 	enc->details.type_str = sdl_deserialize_string(in);
 	enc->details.ns = sdl_deserialize_string(in);
-    char *clark_notation = sdl_deserialize_string(in);
-    if(strcmp(clark_notation,"") != 0){
-        enc->details.clark_notation = zend_string_init(clark_notation,strlen(clark_notation),0);
+    if(enc->details.ns){
+        enc->details.clark_notation = zend_strpprintf(0, "{%s}%s", enc->details.ns, enc->details.type_str );
     }
-    efree(clark_notation);
 	WSDL_CACHE_GET_INT(i, in);
 	enc->details.sdl_type = types[i];
 	enc->to_xml = sdl_guess_convert_xml;
@@ -2030,11 +2032,6 @@ static void sdl_serialize_encoder(encodePtr enc, HashTable *tmp_types, smart_str
 	WSDL_CACHE_PUT_INT(enc->details.type, out);
 	sdl_serialize_string(enc->details.type_str, out);
 	sdl_serialize_string(enc->details.ns, out);
-    if(enc->details.clark_notation){
-        sdl_serialize_string(ZSTR_VAL(enc->details.clark_notation), out);
-    }else{
-        sdl_serialize_string("", out);
-    }
 	sdl_serialize_type_ref(enc->details.sdl_type, tmp_types, out);
 }
 

@@ -137,7 +137,7 @@ static void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 	} \
 }
 
-const encode defaultEncoding[] = {
+encode defaultEncoding[] = {
 	{{UNKNOWN_TYPE, NULL, NULL, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert},
 
 	{{IS_NULL, "nil", XSI_NAMESPACE, NULL, NULL,NULL}, to_zval_null, to_xml_null},
@@ -1390,7 +1390,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 		zend_class_entry  *tmp;
         classname = zend_hash_str_find_deref(SOAP_GLOBAL(class_map), type->type_str, strlen(type->type_str));
         if(classname == NULL){
-            if (type->ns) {
+            if (type->clark_notation != NULL) {
                 classname = zend_hash_find_deref(SOAP_GLOBAL(class_map),type->clark_notation);
             }
         }
@@ -3640,7 +3640,7 @@ void delete_encoder_persistent(zval *zv)
 		free(t->details.type_str);
 	}
     if (t->details.clark_notation) {
-        zend_string_release_ex(t->details.clark_notation, 0);
+        zend_string_release_ex(t->details.clark_notation, 1);
     }
 	/* we should never have mapping in persistent encoder */
 	assert(t->details.map == NULL);

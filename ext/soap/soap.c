@@ -269,7 +269,7 @@ static HashTable defEnc, defEncIndex, defEncNs;
 static void php_soap_prepare_globals(void)
 {
 	int i;
-	const encode* enc;
+	encode* enc;
 
 	zend_hash_init(&defEnc, 0, NULL, NULL, 1);
 	zend_hash_init(&defEncIndex, 0, NULL, NULL, 1);
@@ -283,6 +283,7 @@ static void php_soap_prepare_globals(void)
 		if (defaultEncoding[i].details.type_str) {
 			if (defaultEncoding[i].details.ns != NULL) {
 				char *ns_type;
+                enc->details.clark_notation = zend_strpprintf(0, "{%s}%s", enc->details.ns, enc->details.type_str );
 				spprintf(&ns_type, 0, "%s:%s", defaultEncoding[i].details.ns, defaultEncoding[i].details.type_str);
 				zend_hash_str_add_ptr(&defEnc, ns_type, strlen(ns_type), (void*)enc);
 				efree(ns_type);

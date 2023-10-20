@@ -76,7 +76,6 @@ static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlChar *
 	enc->details.ns = estrdup((char*)ns);
 	enc->details.type_str = estrdup((char*)type);
 	enc->details.sdl_type = cur_type;
-    enc->details.clark_notation = NULL;
     if (enc->details.ns != NULL){
         enc->details.clark_notation = zend_strpprintf(0, "{%s}%s", enc->details.ns, enc->details.type_str );
     }
