@@ -1058,9 +1058,9 @@ PHP_FUNCTION(mysqli_kill)
 	char query[64];
 	snprintf(query, sizeof(query), "KILL CONNECTION " ZEND_LONG_FMT, processid);
 
-	// 1317 is ER_QUERY_INTERRUPTED from server's side
-	if (mysql_real_query(mysql->mysql, query, strlen(query)) && mysql_errno(mysql->mysql) != 1317) {
-		if (!mysql_kill(mysql->mysql, processid)) {
+	if (mysql_real_query(mysql->mysql, query, strlen(query))) {
+		// 1317 is ER_QUERY_INTERRUPTED from server's side
+		if (mysql_errno(mysql->mysql) == 1317) {
 			RETURN_TRUE;
 		}
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
@@ -2002,7 +2002,7 @@ PHP_FUNCTION(mysqli_thread_id)
 	size_t query_len = strlen(query);
 
 	if (mysql_real_query(mysql->mysql, query, query_len)) {
-		goto fail;
+		RETURN_LONG((zend_long)mysql_thread_id(mysql->mysql));
 	}
 
 	result = mysql_store_result(mysql->mysql);
@@ -2018,9 +2018,6 @@ PHP_FUNCTION(mysqli_thread_id)
 	mysql_free_result(result);
 
 	RETURN_LONG(processid);
-
-fail:
-	RETURN_LONG((zend_long)mysql_thread_id(mysql->mysql));
 }
 /* }}} */
 
