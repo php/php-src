@@ -35,6 +35,7 @@
 #include <libxml/uri.h>
 #include <libxml/xmlerror.h>
 #include <libxml/xmlsave.h>
+#include <libxml/xmlerror.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
@@ -815,6 +816,14 @@ PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(int line, int column, const 
 	va_start(args, msg);
 	php_libxml_internal_error_handler_ex(PHP_LIBXML_CTX_ERROR, NULL, &msg, args, line, column);
 	va_end(args);
+
+	/* Propagate back into libxml */
+	if (LIBXML(error_list)) {
+		xmlErrorPtr last = zend_llist_get_last(LIBXML(error_list));
+		if (last) {
+			xmlCopyError(last, &xmlLastError);
+		}
+	}
 }
 
 PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...)
