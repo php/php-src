@@ -615,7 +615,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	/* tell ODBC to put it straight into our buffer, but only if it
 	 * isn't "long" data, and only if we haven't already bound a long
 	 * column. */
-	if (colsize < 256 && !S->going_long) {
+	if (colsize < 2048 && !S->going_long) {
 		S->cols[colno].data = emalloc(colsize+1);
 		S->cols[colno].is_long = 0;
 
@@ -631,7 +631,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	} else {
 		/* allocate a smaller buffer to keep around for smaller
 		 * "long" columns */
-		S->cols[colno].data = emalloc(256);
+		S->cols[colno].data = emalloc(2048);
 		S->going_long = 1;
 		S->cols[colno].is_long = 1;
 	}
@@ -657,14 +657,14 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 		RETCODE rc;
 
 		/* fetch it into C->data, which is allocated with a length
-		 * of 256 bytes; if there is more to be had, we then allocate
+		 * of 2048 bytes; if there is more to be had, we then allocate
 		 * bigger buffer for the caller to free */
 
 		rc = SQLGetData(S->stmt, colno+1, C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR, C->data,
- 			256, &C->fetched_len);
+ 			2048, &C->fetched_len);
 		orig_fetched_len = C->fetched_len;
 
-		if (rc == SQL_SUCCESS && C->fetched_len < 256) {
+		if (rc == SQL_SUCCESS && C->fetched_len < 2048) {
 			/* all the data fit into our little buffer;
 			 * jump down to the generic bound data case */
 			goto in_data;
@@ -684,16 +684,29 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 			 * The extension previously tried getting it in 256
 			 * byte blocks, but this could have created trouble
 			 * with some drivers.
+			 *
+			 * However, depending on the driver, fetched_len may
+			 * not contain the number of bytes and SQL_NO_TOTAL
+			 * may be passed.
+			 * The behavior in this case is the same as before,
+			 * dividing the data into blocks. However, it has been
+			 * changed from 256 byte to 2048 byte block.
 			 */
-			SQLLEN to_fetch_len = orig_fetched_len + 1; /* for 0 at end */
-			char *buf2 = emalloc(to_fetch_len);
-			zend_string *str = zend_string_init(C->data, to_fetch_len, 0);
-			size_t used = orig_fetched_len; /* not n + 1; the driver NUL terminated the buffer */
+			ssize_t to_fetch_len;
+			if (orig_fetched_len == SQL_NO_TOTAL) {
+				to_fetch_len = C->datalen > 2047 ? 2047 : C->datalen;
+			} else {
+				to_fetch_len = orig_fetched_len;
+			}
+			ssize_t to_fetch_byte = to_fetch_len + 1;
+			char *buf2 = emalloc(to_fetch_byte);
+			zend_string *str = zend_string_init(C->data, to_fetch_byte, 0);
+			size_t used = to_fetch_len;
 
 			do {
 				C->fetched_len = 0;
 				/* read block. n + 1 bytes => n bytes are actually read, the last 1 is NULL */
-				rc = SQLGetData(S->stmt, colno+1, C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR, buf2, to_fetch_len, &C->fetched_len);
+				rc = SQLGetData(S->stmt, colno+1, C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR, buf2, to_fetch_byte, &C->fetched_len);
 
 				/* adjust `used` in case we have proper length info from the driver */
 				if (orig_fetched_len >= 0 && C->fetched_len >= 0) {
@@ -704,13 +717,13 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 				}
 
 				/* resize output buffer and reassemble block */
-				if (rc==SQL_SUCCESS_WITH_INFO || (rc==SQL_SUCCESS && C->fetched_len > orig_fetched_len)) {
+				if (rc==SQL_SUCCESS_WITH_INFO || (rc==SQL_SUCCESS && C->fetched_len > to_fetch_len)) {
 					/* point 5, in section "Retrieving Data with SQLGetData" in http://msdn.microsoft.com/en-us/library/windows/desktop/ms715441(v=vs.85).aspx
 					 states that if SQL_SUCCESS_WITH_INFO, fetched_len will be > n (greater than buf2's size)
 					 (if a driver fails to follow that and wrote less than n bytes to buf2, this will AV or read garbage into buf) */
-					str = zend_string_realloc(str, used + to_fetch_len, 0);
-					memcpy(ZSTR_VAL(str) + used, buf2, to_fetch_len);
-					used = used + orig_fetched_len;
+					str = zend_string_realloc(str, used + to_fetch_byte, 0);
+					memcpy(ZSTR_VAL(str) + used, buf2, to_fetch_byte);
+					used = used + to_fetch_len;
 				} else if (rc==SQL_SUCCESS) {
 					str = zend_string_realloc(str, used + C->fetched_len, 0);
 					memcpy(ZSTR_VAL(str) + used, buf2, C->fetched_len);
