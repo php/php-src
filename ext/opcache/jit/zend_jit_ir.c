@@ -2657,6 +2657,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 	flags |= IR_OPT_FOLDING | IR_OPT_CFG | IR_OPT_CODEGEN | IR_HAS_CALLS;
 
 	ir_init(&jit->ctx, flags, 256, 1024);
+	jit->ctx.ret_type = -1;
 
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
 	if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
