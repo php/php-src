@@ -810,7 +810,7 @@ static xmlParserInputPtr _php_libxml_pre_ext_ent_loader(const char *URL,
 	}
 }
 
-PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(int line, int column, const char *msg,...)
+PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(const char *file, int line, int column, const char *msg,...)
 {
 	va_list args;
 	va_start(args, msg);
@@ -821,6 +821,9 @@ PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(int line, int column, const 
 	if (LIBXML(error_list)) {
 		xmlErrorPtr last = zend_llist_get_last(LIBXML(error_list));
 		if (last) {
+			if (!last->file) {
+				last->file = strdup(file);
+			}
 			xmlCopyError(last, &xmlLastError);
 		}
 	}

@@ -39,7 +39,7 @@ object(LibXMLError)#4 (6) {
   ["message"]=>
   string(71) "tree error doctype-token-in-body-mode in Entity, line: 1, column: 10-16"
   ["file"]=>
-  string(0) ""
+  string(6) "Entity"
   ["line"]=>
   int(1)
 }

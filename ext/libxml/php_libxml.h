@@ -132,7 +132,7 @@ PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node);
 PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *object);
 PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...);
 PHP_LIBXML_API void php_libxml_ctx_warning(void *ctx, const char *msg, ...);
-PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(int line, int column, const char *msg,...);
+PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(const char *file, int line, int column, const char *msg,...);
 PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...);
 PHP_LIBXML_API int php_libxml_xmlCheckUTF8(const unsigned char *s);
 PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext);

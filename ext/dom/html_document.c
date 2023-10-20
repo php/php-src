@@ -247,7 +247,7 @@ static void dom_lexbor_libxml2_bridge_tokenizer_error_reporter(void *application
 {
 	dom_lexbor_libxml2_bridge_application_data *application_data = application_data_voidptr;
 	dom_find_line_and_column_using_cache(application_data, &application_data->cache_tokenizer, offset);
-	php_libxml_pretend_ctx_error_ex(application_data->cache_tokenizer.last_line, application_data->cache_tokenizer.last_column, "tokenizer error %s in %s, line: %zu, column: %zu\n", dom_lexbor_tokenizer_error_code_to_string(error->id), application_data->input_name, application_data->cache_tokenizer.last_line, application_data->cache_tokenizer.last_column);
+	php_libxml_pretend_ctx_error_ex(application_data->input_name, application_data->cache_tokenizer.last_line, application_data->cache_tokenizer.last_column, "tokenizer error %s in %s, line: %zu, column: %zu\n", dom_lexbor_tokenizer_error_code_to_string(error->id), application_data->input_name, application_data->cache_tokenizer.last_line, application_data->cache_tokenizer.last_column);
 }
 
 static void dom_lexbor_libxml2_bridge_tree_error_reporter(void *application_data_voidptr, lxb_html_tree_error_t *error, size_t line, size_t column, size_t len)
@@ -261,9 +261,9 @@ static void dom_lexbor_libxml2_bridge_tree_error_reporter(void *application_data
 
 	if (UNEXPECTED(len <= 1)) {
 		/* Possible with EOF, or single-character tokens, don't use a range in the error display in this case */
-		php_libxml_pretend_ctx_error_ex(line, column, "tree error %s in %s, line: %zu, column: %zu\n", dom_lexbor_tree_error_code_to_string(error->id), application_data->input_name, line, column);
+		php_libxml_pretend_ctx_error_ex(application_data->input_name, line, column, "tree error %s in %s, line: %zu, column: %zu\n", dom_lexbor_tree_error_code_to_string(error->id), application_data->input_name, line, column);
 	} else {
-		php_libxml_pretend_ctx_error_ex(line, column, "tree error %s in %s, line: %zu, column: %zu-%zu\n", dom_lexbor_tree_error_code_to_string(error->id), application_data->input_name, line, column, column + len - 1);
+		php_libxml_pretend_ctx_error_ex(application_data->input_name, line, column, "tree error %s in %s, line: %zu, column: %zu-%zu\n", dom_lexbor_tree_error_code_to_string(error->id), application_data->input_name, line, column, column + len - 1);
 	}
 }
 
