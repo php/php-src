@@ -63,9 +63,7 @@ jobs:
           POSTGRES_DB: test
     env:
       MYSQL_TEST_HOST: mysql
-      PDO_MYSQL_TEST_DSN: mysql:host=localhost;dbname=test
       PDO_MYSQL_TEST_HOST: localhost
-      PDO_PGSQL_TEST_DSN: pgsql:host=localhost port=5432 dbname=test user=postgres password=postgres
     strategy:
       fail-fast: false
       matrix:
