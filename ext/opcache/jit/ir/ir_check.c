@@ -277,6 +277,18 @@ bool ir_check(const ir_ctx *ctx)
 					ok = 0;
 				}
 				break;
+			case IR_RETURN:
+				if (ctx->ret_type != (insn->op2 ? ctx->ir_base[insn->op2].type : IR_VOID)) {
+					fprintf(stderr, "ir_base[%d].type incompatible return type\n", i);
+					ok = 0;
+				}
+				break;
+			case IR_TAILCALL:
+				if (ctx->ret_type != insn->type) {
+					fprintf(stderr, "ir_base[%d].type incompatible return type\n", i);
+					ok = 0;
+				}
+				break;
 		}
 
 		if (ctx->use_lists) {

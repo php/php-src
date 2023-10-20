@@ -465,27 +465,32 @@ void ir_strtab_free(ir_strtab *strtab);
 /* IR Context Flags */
 #define IR_FUNCTION            (1<<0) /* Generate a function. */
 #define IR_FASTCALL_FUNC       (1<<1) /* Generate a function with fastcall calling convention, x86 32-bit only. */
-#define IR_SKIP_PROLOGUE       (1<<2) /* Don't generate function prologue. */
-#define IR_USE_FRAME_POINTER   (1<<3)
-#define IR_PREALLOCATED_STACK  (1<<4)
-#define IR_HAS_ALLOCA          (1<<5)
-#define IR_HAS_CALLS           (1<<6)
-#define IR_NO_STACK_COMBINE    (1<<7)
-#define IR_START_BR_TARGET     (1<<8)
-#define IR_ENTRY_BR_TARGET     (1<<9)
-#define IR_GEN_ENDBR           (1<<10)
-#define IR_MERGE_EMPTY_ENTRIES (1<<11)
+#define IR_VARARG_FUNC         (1<<2)
+#define IR_STATIC              (1<<3)
+#define IR_EXTERN              (1<<4)
+#define IR_CONST               (1<<5)
 
-#define IR_CFG_HAS_LOOPS       (1<<14)
-#define IR_IRREDUCIBLE_CFG     (1<<15)
+#define IR_SKIP_PROLOGUE       (1<<6) /* Don't generate function prologue. */
+#define IR_USE_FRAME_POINTER   (1<<7)
+#define IR_PREALLOCATED_STACK  (1<<8)
+#define IR_HAS_ALLOCA          (1<<9)
+#define IR_HAS_CALLS           (1<<10)
+#define IR_NO_STACK_COMBINE    (1<<11)
+#define IR_START_BR_TARGET     (1<<12)
+#define IR_ENTRY_BR_TARGET     (1<<13)
+#define IR_GEN_ENDBR           (1<<14)
+#define IR_MERGE_EMPTY_ENTRIES (1<<15)
 
-#define IR_OPT_FOLDING         (1<<16)
-#define IR_OPT_CFG             (1<<17) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
-#define IR_OPT_CODEGEN         (1<<18)
-#define IR_OPT_IN_SCCP         (1<<19)
-#define IR_LINEAR              (1<<20)
-#define IR_GEN_NATIVE          (1<<21)
-#define IR_GEN_CODE            (1<<22) /* C or LLVM */
+#define IR_CFG_HAS_LOOPS       (1<<16)
+#define IR_IRREDUCIBLE_CFG     (1<<17)
+
+#define IR_OPT_FOLDING         (1<<18)
+#define IR_OPT_CFG             (1<<19) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
+#define IR_OPT_CODEGEN         (1<<20)
+#define IR_OPT_IN_SCCP         (1<<21)
+#define IR_LINEAR              (1<<22)
+#define IR_GEN_NATIVE          (1<<23)
+#define IR_GEN_CODE            (1<<24) /* C or LLVM */
 
 /* Temporary: SCCP -> CFG */
 #define IR_SCCP_DONE           (1<<25)
@@ -514,6 +519,7 @@ typedef struct _ir_block         ir_block;
 typedef struct _ir_arena         ir_arena;
 typedef struct _ir_live_interval ir_live_interval;
 typedef struct _ir_live_range    ir_live_range;
+typedef struct _ir_loader        ir_loader;
 typedef int8_t ir_regs[4];
 
 typedef void (*ir_snapshot_create_t)(ir_ctx *ctx, ir_ref addr);
@@ -531,6 +537,7 @@ struct _ir_ctx {
 	ir_ref             consts_count;            /* number of constants stored in constants buffer */
 	ir_ref             consts_limit;            /* size of allocated constants buffer (it's extended when overflow) */
 	uint32_t           flags;                   /* IR context flags (see IR_* defines above) */
+	ir_type            ret_type;                /* Function return type */
 	uint32_t           mflags;                  /* CPU specific flags (see IR_X86_... macros below) */
 	int32_t            status;                  /* non-zero error code (see IR_ERROR_... macros), app may use negative codes */
 	ir_ref             fold_cse_limit;          /* CSE finds identical insns backward from "insn_count" to "fold_cse_limit" */
@@ -588,6 +595,7 @@ struct _ir_ctx {
 	ir_get_veneer_t    get_veneer;
 	ir_set_veneer_t    set_veneer;
 #endif
+	ir_loader         *loader;
 	ir_strtab          strtab;
 	ir_ref             prev_insn_chain[IR_LAST_FOLDABLE_OP + 1];
 	ir_ref             prev_const_chain[IR_LAST_TYPE];
@@ -748,23 +756,25 @@ void ir_gdb_unregister_all(void);
 bool ir_gdb_present(void);
 
 /* IR load API (implementation in ir_load.c) */
-
-typedef struct _ir_loader ir_loader;
-
 struct _ir_loader {
 	uint32_t default_func_flags;
 	bool (*init_module)       (ir_loader *loader, const char *name, const char *filename, const char *target);
-	bool (*external_sym_dcl)  (ir_loader *loader, const char *name, bool is_const);
-	bool (*sym_dcl)           (ir_loader *loader, const char *name, bool is_const, bool is_static, size_t size, const void *data);
-	bool (*external_func_dcl) (ir_loader *loader, const char *name);
-	bool (*forward_func_dcl)  (ir_loader *loader, const char *name, bool is_static);
-	bool (*init_func)         (ir_loader *loader, ir_ctx *ctx, const char *name);
-	bool (*process_func)      (ir_loader *loader, ir_ctx *ctx, const char *name);
+	bool (*external_sym_dcl)  (ir_loader *loader, const char *name, uint32_t flags);
+	bool (*external_func_dcl) (ir_loader *loader, const char *name,
+                               uint32_t flags, ir_type ret_type, uint32_t params_count, ir_type *param_types);
+	bool (*forward_func_dcl)  (ir_loader *loader, const char *name,
+                               uint32_t flags, ir_type ret_type, uint32_t params_count, ir_type *param_types);
+	bool (*sym_dcl)           (ir_loader *loader, const char *name, uint32_t flags, size_t size, bool has_data);
+	bool (*sym_data)          (ir_loader *loader, ir_type type, uint32_t count, const void *data);
+	bool (*sym_data_end)      (ir_loader *loader);
+	bool (*func_init)         (ir_loader *loader, ir_ctx *ctx, const char *name);
+	bool (*func_process)      (ir_loader *loader, ir_ctx *ctx, const char *name);
+	void*(*resolve_sym_name)  (ir_loader *loader, const char *name);
 };
 
 void ir_loader_init(void);
 void ir_loader_free(void);
-int ir_load(ir_ctx *ctx, FILE *f);
+int ir_load(ir_loader *loader, FILE *f);
 
 /* IR LLVM load API (implementation in ir_load_llvm.c) */
 int ir_load_llvm_bitcode(ir_loader *loader, const char *filename);
@@ -784,9 +794,11 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f);
 
 /* IR to C conversion (implementation in ir_emit_c.c) */
 int ir_emit_c(ir_ctx *ctx, const char *name, FILE *f);
+void ir_emit_c_func_decl(const char *name, uint32_t flags, ir_type ret_type, uint32_t params_count, ir_type *param_types, FILE *f);
 
 /* IR to LLVM conversion (implementation in ir_emit_llvm.c) */
 int ir_emit_llvm(ir_ctx *ctx, const char *name, FILE *f);
+void ir_emit_llvm_func_decl(const char *name, uint32_t flags, ir_type ret_type, uint32_t params_count, ir_type *param_types, FILE *f);
 
 /* IR verification API (implementation in ir_check.c) */
 bool ir_check(const ir_ctx *ctx);

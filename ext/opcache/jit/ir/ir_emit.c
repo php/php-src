@@ -308,7 +308,9 @@ static void *ir_jmp_addr(ir_ctx *ctx, ir_insn *insn, ir_insn *addr_insn)
 
 	IR_ASSERT(addr_insn->type == IR_ADDR);
 	if (addr_insn->op == IR_FUNC) {
-		addr = ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.i32));
+		addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
+			ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, addr_insn->val.i32)) :
+			ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.i32));
 	} else {
 		IR_ASSERT(addr_insn->op == IR_ADDR || addr_insn->op == IR_FUNC_ADDR);
 		addr = (void*)addr_insn->val.addr;

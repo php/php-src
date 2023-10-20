@@ -89,7 +89,6 @@ static void ir_strtab_grow_buf(ir_strtab *strtab, uint32_t len)
 	}
 }
 
-
 void ir_strtab_init(ir_strtab *strtab, uint32_t size, uint32_t buf_size)
 {
 	IR_ASSERT(size > 0);

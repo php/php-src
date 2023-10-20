@@ -2055,7 +2055,7 @@ static void ir_emit_load(ir_ctx *ctx, ir_type type, ir_reg reg, ir_ref src)
 		if (IR_IS_TYPE_INT(type)) {
 			ir_insn *insn = &ctx->ir_base[src];
 
-			IR_ASSERT(insn->op != IR_STR);
+			IR_ASSERT(insn->op != IR_STR && insn->op != IR_SYM && insn->op != IR_FUNC);
 			ir_emit_load_imm_int(ctx, type, reg, insn->val.i64);
 		} else {
 			ir_emit_load_imm_fp(ctx, type, reg, src);
@@ -6484,7 +6484,20 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 									val_insn->const_flags |= IR_CONST_EMIT;
 									|	lea Ra(dst_reg), aword [=>label]
 									continue;
+								} else if (val_insn->op == IR_SYM || val_insn->op == IR_FUNC) {
+									void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
+										ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, val_insn->val.i32)) :
+										ir_resolve_sym_name(ir_get_str(ctx, val_insn->val.i32));
+									if (sizeof(void*) == 4 || IR_IS_SIGNED_32BIT(addr)) {
+										|	mov Ra(dst_reg), ((ptrdiff_t)addr)
+									} else {
+|.if X64
+										|	mov64 Rq(dst_reg), ((ptrdiff_t)addr)
+|.endif
+									}
+									continue;
 								}
+								IR_ASSERT(val_insn->op == IR_ADDR || val_insn->op == IR_FUNC_ADDR);
 							}
 							if (type == IR_I8 || type == IR_I16) {
 								type = IR_I32;
@@ -6549,6 +6562,21 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 |.else
 							|	mov [Ra(IR_REG_RSP)+stack_offset], =>label
 |.endif
+						} else if (val_insn->op == IR_FUNC || val_insn->op == IR_SYM) {
+							void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
+								ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, val_insn->val.i32)) :
+								ir_resolve_sym_name(ir_get_str(ctx, val_insn->val.i32));
+							if (sizeof(void*) == 4) {
+								|	mov aword [Ra(IR_REG_RSP)+stack_offset], ((ptrdiff_t)addr)
+|.if X64
+||							} else if (IR_IS_SIGNED_32BIT(addr)) {
+								|	mov Ra(tmp_reg), ((ptrdiff_t)addr)
+								|	mov [Ra(IR_REG_RSP)+stack_offset], Ra(tmp_reg)
+||							} else {
+								|	mov64 Rq(tmp_reg), ((ptrdiff_t)addr)
+								|	mov [Ra(IR_REG_RSP)+stack_offset], Ra(tmp_reg)
+|.endif
+							}
 						} else if (IR_IS_SIGNED_32BIT(val_insn->val.i64)) {
 							if (ir_type_size[type] <= 4) {
 								|	mov dword [Ra(IR_REG_RSP)+stack_offset], val_insn->val.i32
@@ -6655,8 +6683,11 @@ static void ir_emit_call(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 
 		IR_ASSERT(addr_insn->type == IR_ADDR);
 		if (addr_insn->op == IR_FUNC) {
-			addr = ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.i32));
+			addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
+				ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, addr_insn->val.i32)) :
+				ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.i32));
 		} else {
+			IR_ASSERT(addr_insn->op == IR_ADDR || addr_insn->op == IR_FUNC_ADDR);
 			addr = (void*)addr_insn->val.addr;
 		}
 		if (sizeof(void*) == 4 || IR_MAY_USE_32BIT_ADDR(addr)) {
@@ -6773,8 +6804,11 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 
 		IR_ASSERT(addr_insn->type == IR_ADDR);
 		if (addr_insn->op == IR_FUNC) {
-			addr = ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.i32));
+			addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
+				ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, addr_insn->val.i32)) :
+				ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.i32));
 		} else {
+			IR_ASSERT(addr_insn->op == IR_ADDR || addr_insn->op == IR_FUNC_ADDR);
 			addr = (void*)addr_insn->val.addr;
 		}
 		if (sizeof(void*) == 4 || IR_MAY_USE_32BIT_ADDR(addr)) {
@@ -7880,9 +7914,8 @@ static void ir_allocate_unique_spill_slots(ir_ctx *ctx)
 	ir_reg reg;
 
 #ifndef IR_REG_FP_RET1
-	ir_type ret_type = ir_get_return_type(ctx);
-	if (ret_type == IR_FLOAT || ret_type == IR_DOUBLE) {
-		ctx->ret_slot = ir_allocate_spill_slot(ctx, ret_type, &data->ra_data);
+	if (ctx->ret_type == IR_FLOAT || ctx->ret_type == IR_DOUBLE) {
+		ctx->ret_slot = ir_allocate_spill_slot(ctx, ctx->ret_type, &data->ra_data);
 	} else {
 		ctx->ret_slot = -1;
 	}

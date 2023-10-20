@@ -3598,10 +3598,8 @@ static int ir_linear_scan(ir_ctx *ctx)
 	}
 
 #ifdef IR_TARGET_X86
-	ir_type ret_type = ir_get_return_type(ctx);
-
-	if (ret_type == IR_FLOAT || ret_type == IR_DOUBLE) {
-		ctx->ret_slot = ir_allocate_spill_slot(ctx, ret_type, &data);
+	if (ctx->ret_type == IR_FLOAT || ctx->ret_type == IR_DOUBLE) {
+		ctx->ret_slot = ir_allocate_spill_slot(ctx, ctx->ret_type, &data);
 	} else {
 		ctx->ret_slot = -1;
 	}

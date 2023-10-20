@@ -694,6 +694,7 @@ restart:
 
 	ir_init(&new_ctx, ctx->flags, consts_count, insns_count);
 	new_ctx.insns_count = insns_count;
+	new_ctx.ret_type = ctx->ret_type;
 	new_ctx.mflags = ctx->mflags;
 	new_ctx.spill_base = ctx->spill_base;
 	new_ctx.fixed_stack_red_zone = ctx->fixed_stack_red_zone;
@@ -708,6 +709,7 @@ restart:
 	new_ctx.get_veneer = ctx->get_veneer;
 	new_ctx.set_veneer = ctx->set_veneer;
 #endif
+	new_ctx.loader = ctx->loader;
 
 	/* Copy constants */
 	if (consts_count == ctx->consts_count) {

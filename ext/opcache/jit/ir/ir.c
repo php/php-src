@@ -144,7 +144,7 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 			if (isnan(insn->val.f)) {
 				fprintf(f, "nan");
 			} else {
-				fprintf(f, "%f", insn->val.f);
+				fprintf(f, "%g", insn->val.f);
 			}
 			break;
 		default:
@@ -301,58 +301,17 @@ void ir_init(ir_ctx *ctx, uint32_t flags, ir_ref consts_limit, ir_ref insns_limi
 	IR_ASSERT(consts_limit >= IR_CONSTS_LIMIT_MIN);
 	IR_ASSERT(insns_limit >= IR_INSNS_LIMIT_MIN);
 
+	memset(ctx, 0, sizeof(ir_ctx));
+
 	ctx->insns_count = IR_UNUSED + 1;
 	ctx->insns_limit = insns_limit;
 	ctx->consts_count = -(IR_TRUE - 1);
 	ctx->consts_limit = consts_limit;
 	ctx->fold_cse_limit = IR_UNUSED + 1;
 	ctx->flags = flags;
-	ctx->mflags = 0;
-	ctx->status = 0;
 
-	ctx->binding = NULL;
-
-	ctx->use_lists = NULL;
-	ctx->use_edges = NULL;
-	ctx->use_edges_count = 0;
-
-	ctx->cfg_blocks_count = 0;
-	ctx->cfg_edges_count = 0;
-	ctx->cfg_blocks = NULL;
-	ctx->cfg_edges = NULL;
-	ctx->cfg_map = NULL;
-	ctx->rules = NULL;
-	ctx->vregs = NULL;
-	ctx->vregs_count = 0;
 	ctx->spill_base = -1;
-	ctx->fixed_stack_red_zone = 0;
 	ctx->fixed_stack_frame_size = -1;
-	ctx->fixed_call_stack_size = 0;
-	ctx->fixed_regset = 0;
-	ctx->fixed_save_regset = 0;
-	ctx->live_intervals = NULL;
-	ctx->arena = NULL;
-	ctx->unused_ranges = NULL;
-	ctx->regs = NULL;
-	ctx->prev_ref = NULL;
-	ctx->data = NULL;
-	ctx->snapshot_create = NULL;
-	ctx->entries_count = 0;
-	ctx->entries = NULL;
-	ctx->osr_entry_loads = NULL;
-
-	ctx->code_buffer = NULL;
-	ctx->code_buffer_size = 0;
-
-#if defined(IR_TARGET_AARCH64)
-	ctx->deoptimization_exits = 0;
-	ctx->veneers_size = 0;
-	ctx->get_exit_addr = NULL;
-	ctx->get_veneer = NULL;
-	ctx->set_veneer = NULL;
-#endif
-
-	ctx->strtab.data = NULL;
 
 	buf = ir_mem_malloc((consts_limit + insns_limit) * sizeof(ir_insn));
 	ctx->ir_base = buf + consts_limit;
@@ -364,9 +323,6 @@ void ir_init(ir_ctx *ctx, uint32_t flags, ir_ref consts_limit, ir_ref insns_limi
 	ctx->ir_base[IR_FALSE].val.u64 = 0;
 	ctx->ir_base[IR_TRUE].optx = IR_OPT(IR_C_BOOL, IR_BOOL);
 	ctx->ir_base[IR_TRUE].val.u64 = 1;
-
-	memset(ctx->prev_insn_chain, 0, sizeof(ctx->prev_insn_chain));
-	memset(ctx->prev_const_chain, 0, sizeof(ctx->prev_const_chain));
 }
 
 void ir_free(ir_ctx *ctx)
@@ -1991,6 +1947,10 @@ void _ir_UNREACHABLE(ir_ctx *ctx)
 void _ir_TAILCALL(ir_ctx *ctx, ir_type type, ir_ref func)
 {
 	IR_ASSERT(ctx->control);
+	if (ctx->ret_type == (ir_type)-1) {
+		ctx->ret_type = type;
+	}
+	IR_ASSERT(ctx->ret_type == type && "conflicting return type");
 	ctx->control = ir_emit2(ctx, IR_OPTX(IR_TAILCALL, type, 2), ctx->control, func);
 	_ir_UNREACHABLE(ctx);
 }
@@ -1998,6 +1958,10 @@ void _ir_TAILCALL(ir_ctx *ctx, ir_type type, ir_ref func)
 void _ir_TAILCALL_1(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1)
 {
 	IR_ASSERT(ctx->control);
+	if (ctx->ret_type == (ir_type)-1) {
+		ctx->ret_type = type;
+	}
+	IR_ASSERT(ctx->ret_type == type && "conflicting return type");
 	ctx->control = ir_emit3(ctx, IR_OPTX(IR_TAILCALL, type, 3), ctx->control, func, arg1);
 	_ir_UNREACHABLE(ctx);
 }
@@ -2007,6 +1971,10 @@ void _ir_TAILCALL_2(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref 
 	ir_ref call;
 
 	IR_ASSERT(ctx->control);
+	if (ctx->ret_type == (ir_type)-1) {
+		ctx->ret_type = type;
+	}
+	IR_ASSERT(ctx->ret_type == type && "conflicting return type");
 	call = ir_emit_N(ctx, IR_OPT(IR_TAILCALL, type), 4);
 	ir_set_op(ctx, call, 1, ctx->control);
 	ir_set_op(ctx, call, 2, func);
@@ -2021,6 +1989,10 @@ void _ir_TAILCALL_3(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref 
 	ir_ref call;
 
 	IR_ASSERT(ctx->control);
+	if (ctx->ret_type == (ir_type)-1) {
+		ctx->ret_type = type;
+	}
+	IR_ASSERT(ctx->ret_type == type && "conflicting return type");
 	call = ir_emit_N(ctx, IR_OPT(IR_TAILCALL, type), 5);
 	ir_set_op(ctx, call, 1, ctx->control);
 	ir_set_op(ctx, call, 2, func);
@@ -2036,6 +2008,10 @@ void _ir_TAILCALL_4(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref 
 	ir_ref call;
 
 	IR_ASSERT(ctx->control);
+	if (ctx->ret_type == (ir_type)-1) {
+		ctx->ret_type = type;
+	}
+	IR_ASSERT(ctx->ret_type == type && "conflicting return type");
 	call = ir_emit_N(ctx, IR_OPT(IR_TAILCALL, type), 6);
 	ir_set_op(ctx, call, 1, ctx->control);
 	ir_set_op(ctx, call, 2, func);
@@ -2052,6 +2028,10 @@ void _ir_TAILCALL_5(ir_ctx *ctx, ir_type type, ir_ref func, ir_ref arg1, ir_ref 
 	ir_ref call;
 
 	IR_ASSERT(ctx->control);
+	if (ctx->ret_type == (ir_type)-1) {
+		ctx->ret_type = type;
+	}
+	IR_ASSERT(ctx->ret_type == type && "conflicting return type");
 	call = ir_emit_N(ctx, IR_OPT(IR_TAILCALL, type), 7);
 	ir_set_op(ctx, call, 1, ctx->control);
 	ir_set_op(ctx, call, 2, func);
@@ -2070,6 +2050,10 @@ void _ir_TAILCALL_N(ir_ctx *ctx, ir_type type, ir_ref func, uint32_t count, ir_r
 	uint32_t i;
 
 	IR_ASSERT(ctx->control);
+	if (ctx->ret_type == (ir_type)-1) {
+		ctx->ret_type = type;
+	}
+	IR_ASSERT(ctx->ret_type == type && "conflicting return type");
 	call = ir_emit_N(ctx, IR_OPT(IR_TAILCALL, type), count + 2);
 	ir_set_op(ctx, call, 1, ctx->control);
 	ir_set_op(ctx, call, 2, func);
@@ -2104,7 +2088,13 @@ void _ir_CASE_DEFAULT(ir_ctx *ctx, ir_ref switch_ref)
 
 void _ir_RETURN(ir_ctx *ctx, ir_ref val)
 {
+	ir_type type = (val != IR_UNUSED) ? ctx->ir_base[val].type : IR_VOID;
+
 	IR_ASSERT(ctx->control);
+	if (ctx->ret_type == (ir_type)-1) {
+		ctx->ret_type = type;
+	}
+	IR_ASSERT(ctx->ret_type == type && "conflicting return type");
 	ctx->control = ir_emit3(ctx, IR_RETURN, ctx->control, val, ctx->ir_base[1].op1);
 	ctx->ir_base[1].op1 = ctx->control;
 	ctx->control = IR_UNUSED;
@@ -2329,53 +2319,4 @@ check_aliasing:
 		ref = insn->op1;
 	}
 	ctx->control = ir_emit3(ctx, IR_STORE, ctx->control, addr, val);
-}
-
-ir_type ir_get_return_type(ir_ctx *ctx)
-{
-	ir_ref ref;
-	ir_insn *insn;
-	uint8_t ret_type = 255;
-	ir_type type;
-
-	/* Check all RETURN nodes */
-	ref = ctx->ir_base[1].op1;
-	while (ref) {
-		insn = &ctx->ir_base[ref];
-		if (insn->op == IR_RETURN) {
-			type = ctx->ir_base[insn->op2].type;
-check_type:
-			if (ret_type == 255) {
-				if (insn->op2) {
-					ret_type = type;
-				} else {
-					ret_type = IR_VOID;
-				}
-			} else if (insn->op2) {
-				if (ret_type != type) {
-					IR_ASSERT(0 && "conflicting return types");
-					return IR_VOID;
-				}
-			} else {
-				if (ret_type != IR_VOID) {
-					IR_ASSERT(0 && "conflicting return types");
-					return IR_VOID;
-				}
-			}
-		} else if (insn->op == IR_UNREACHABLE) {
-			insn = &ctx->ir_base[insn->op1];
-			if (insn->op == IR_TAILCALL) {
-				type = insn->type;
-				if (type != IR_VOID) {
-					goto check_type;
-				}
-			}
-		}
-		ref = ctx->ir_base[ref].op3;
-	}
-
-	if (ret_type == 255) {
-		ret_type = IR_VOID;
-	}
-	return (ir_type)ret_type;
 }
