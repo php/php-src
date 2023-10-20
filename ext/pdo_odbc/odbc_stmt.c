@@ -276,7 +276,6 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt)
 
 		stmt->column_count = S->col_count = (int)colcount;
 		S->cols = ecalloc(colcount, sizeof(pdo_odbc_column));
-		S->going_long = 0;
 	}
 
 	return 1;
@@ -571,24 +570,6 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 			sizeof(S->cols[colno].colname)-1, &colnamelen,
 			&S->cols[colno].coltype, &colsize, NULL, NULL);
 
-	/* This fixes a known issue with SQL Server and (max) lengths,
-	may affect others as well.  If we are SQL_VARCHAR,
-	SQL_VARBINARY, or SQL_WVARCHAR (or any of the long variations)
-	and zero is returned from colsize then consider it long */
-	if (0 == colsize &&
-		(S->cols[colno].coltype == SQL_VARCHAR ||
-		 S->cols[colno].coltype == SQL_LONGVARCHAR ||
-#ifdef SQL_WVARCHAR
-		 S->cols[colno].coltype == SQL_WVARCHAR ||
-#endif
-#ifdef SQL_WLONGVARCHAR
-		 S->cols[colno].coltype == SQL_WLONGVARCHAR ||
-#endif
-		 S->cols[colno].coltype == SQL_VARBINARY ||
-		 S->cols[colno].coltype == SQL_LONGVARBINARY)) {
-			 S->going_long = 1;
-	}
-
 	if (rc != SQL_SUCCESS) {
 		pdo_odbc_stmt_error("SQLDescribeCol");
 		if (rc != SQL_SUCCESS_WITH_INFO) {
@@ -611,29 +592,16 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	col->maxlen = S->cols[colno].datalen = colsize;
 	col->name = zend_string_init(S->cols[colno].colname, colnamelen, 0);
 	S->cols[colno].is_unicode = pdo_odbc_sqltype_is_unicode(S, S->cols[colno].coltype);
+	S->cols[colno].data = emalloc(colsize + 1);
 
-	/* tell ODBC to put it straight into our buffer, but only if it
-	 * isn't "long" data, and only if we haven't already bound a long
-	 * column. */
-	if (colsize < 256 && !S->going_long) {
-		S->cols[colno].data = emalloc(colsize+1);
-		S->cols[colno].is_long = 0;
+	rc = SQLBindCol(S->stmt, colno + 1,
+		S->cols[colno].is_unicode ? SQL_C_BINARY : SQL_C_CHAR,
+		S->cols[colno].data,
+		S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
 
-		rc = SQLBindCol(S->stmt, colno+1,
-			S->cols[colno].is_unicode ? SQL_C_BINARY : SQL_C_CHAR,
-			S->cols[colno].data,
-			S->cols[colno].datalen+1, &S->cols[colno].fetched_len);
-
-		if (rc != SQL_SUCCESS) {
-			pdo_odbc_stmt_error("SQLBindCol");
-			return 0;
-		}
-	} else {
-		/* allocate a smaller buffer to keep around for smaller
-		 * "long" columns */
-		S->cols[colno].data = emalloc(256);
-		S->going_long = 1;
-		S->cols[colno].is_long = 1;
+	if (rc != SQL_SUCCESS) {
+		pdo_odbc_stmt_error("SQLBindCol");
+		return 0;
 	}
 
 	return 1;
@@ -651,91 +619,16 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	pdo_odbc_column *C = &S->cols[colno];
 
-	/* if it is a column containing "long" data, perform late binding now */
-	if (C->is_long) {
-		SQLLEN orig_fetched_len = SQL_NULL_DATA;
-		RETCODE rc;
-
-		/* fetch it into C->data, which is allocated with a length
-		 * of 256 bytes; if there is more to be had, we then allocate
-		 * bigger buffer for the caller to free */
-
-		rc = SQLGetData(S->stmt, colno+1, C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR, C->data,
- 			256, &C->fetched_len);
-		orig_fetched_len = C->fetched_len;
-
-		if (rc == SQL_SUCCESS && C->fetched_len < 256) {
-			/* all the data fit into our little buffer;
-			 * jump down to the generic bound data case */
-			goto in_data;
-		}
-
-		if (rc == SQL_SUCCESS_WITH_INFO || rc == SQL_SUCCESS) {
-			/* this is a 'long column'
-
-			 read the column in 255 byte blocks until the end of the column is reached, reassembling those blocks
-			 in order into the output buffer; 255 bytes are an optimistic assumption, since the driver may assert
-			 more or less NUL bytes at the end; we cater to that later, if actual length information is available
-
-			 this loop has to work whether or not SQLGetData() provides the total column length.
-			 calling SQLDescribeCol() or other, specifically to get the column length, then doing a single read
-			 for that size would be slower except maybe for extremely long columns.*/
-			char *buf2 = emalloc(256);
-			zend_string *str = zend_string_init(C->data, 256, 0);
-			size_t used = 255; /* not 256; the driver NUL terminated the buffer */
-
-			do {
-				C->fetched_len = 0;
-				/* read block. 256 bytes => 255 bytes are actually read, the last 1 is NULL */
-				rc = SQLGetData(S->stmt, colno+1, C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR, buf2, 256, &C->fetched_len);
-
-				/* adjust `used` in case we have length info from the driver */
-				if (orig_fetched_len >= 0 && C->fetched_len >= 0) {
-					SQLLEN fixed_used = orig_fetched_len - C->fetched_len;
-					ZEND_ASSERT(fixed_used <= used + 1);
-					used = fixed_used;
-				}
-
-				/* resize output buffer and reassemble block */
-				if (rc==SQL_SUCCESS_WITH_INFO || (rc==SQL_SUCCESS && C->fetched_len > 255)) {
-					/* point 5, in section "Retrieving Data with SQLGetData" in http://msdn.microsoft.com/en-us/library/windows/desktop/ms715441(v=vs.85).aspx
-					 states that if SQL_SUCCESS_WITH_INFO, fetched_len will be > 255 (greater than buf2's size)
-					 (if a driver fails to follow that and wrote less than 255 bytes to buf2, this will AV or read garbage into buf) */
-					str = zend_string_realloc(str, used + 256, 0);
-					memcpy(ZSTR_VAL(str) + used, buf2, 256);
-					used = used + 255;
-				} else if (rc==SQL_SUCCESS) {
-					str = zend_string_realloc(str, used + C->fetched_len, 0);
-					memcpy(ZSTR_VAL(str) + used, buf2, C->fetched_len);
-					used = used + C->fetched_len;
-				} else {
-					/* includes SQL_NO_DATA */
-					break;
-				}
-
-			} while (1);
-
-			efree(buf2);
-
-			/* NULL terminate the buffer once, when finished, for use with the rest of PHP */
-			ZSTR_VAL(str)[used] = '\0';
-			ZVAL_STR(result, str);
-			if (C->is_unicode) {
-				goto unicode_conv;
-			}
-			return 1;
-		}
-
-		/* something went caca */
-		return 1;
-	}
-
-in_data:
 	/* check the indicator to ensure that the data is intact */
 	if (C->fetched_len == SQL_NULL_DATA) {
 		/* A NULL value */
 		ZVAL_NULL(result);
 		return 1;
+	} else if (C->fetched_len == SQL_NO_TOTAL) {
+		char buf[80];
+		sprintf(buf, "Cannot get data of column #%d (driver cannot determine length)", colno + 1);
+		pdo_odbc_stmt_error(buf);
+		return 0;
 	} else if (C->fetched_len >= 0) {
 		/* it was stored perfectly */
 		ZVAL_STRINGL_FAST(result, C->data, C->fetched_len);
@@ -841,7 +734,6 @@ static int odbc_stmt_next_rowset(pdo_stmt_t *stmt)
 	SQLNumResultCols(S->stmt, &colcount);
 	stmt->column_count = S->col_count = (int)colcount;
 	S->cols = ecalloc(colcount, sizeof(pdo_odbc_column));
-	S->going_long = 0;
 
 	return 1;
 }

@@ -135,7 +135,6 @@ typedef struct {
 	SQLLEN fetched_len;
 	SWORD	coltype;
 	char colname[128];
-	unsigned is_long;
 	unsigned is_unicode:1;
 	unsigned _spare:31;
 } pdo_odbc_column;
@@ -147,7 +146,6 @@ typedef struct {
 	pdo_odbc_errinfo einfo;
 	char *convbuf;
 	zend_ulong convbufsize;
-	unsigned going_long:1;
 	unsigned assume_utf8:1;
 	signed col_count:16;
 	unsigned _spare:14;
