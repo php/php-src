@@ -14,9 +14,9 @@ require("testdb.inc");
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $dbh->exec("CREATE TABLE test_ddl (id INT NOT NULL PRIMARY KEY, text BLOB SUB_TYPE 1)");
-$dbh->exec("CREATE GENERATOR gen_ddl_id");
-$dbh->exec("CREATE TRIGGER ddl_bi FOR test_ddl BEFORE INSERT AS
-    BEGIN IF (NEW.id IS NULL) THEN NEW.id=GEN_ID(gen_ddl_id,1); END");
+$dbh->exec("CREATE GENERATOR gen_test_ddl_id");
+$dbh->exec("CREATE TRIGGER test_ddl_bi FOR test_ddl BEFORE INSERT AS
+    BEGIN IF (NEW.id IS NULL) THEN NEW.id=GEN_ID(gen_test_ddl_id,1); END");
 
 $dbh->setAttribute(PDO::ATTR_AUTOCOMMIT,0);
 
@@ -31,13 +31,15 @@ $dbh->commit();
 
 unset($dbh);
 echo "done\n";
--?>
---CLEAN--
+?>
+-CLEAN--
 <?php
-require 'testdb.inc';
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+require("testdb.inc");
 @$dbh->exec('DROP TABLE test_ddl');
-@$dbh->exec('DROP GENERATOR gen_ddl_id');
-@$dbh->exec('DROP TRIGGER ddl_bi');
+@$dbh->exec('DROP GENERATOR gen_test_ddl_id');
+@$dbh->exec('DROP TRIGGER test_ddl_bi');
+
 ?>
 --EXPECT--
 int(1)
