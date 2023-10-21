@@ -45,6 +45,7 @@ unset($dbh);
 <?php
 require 'testdb.inc';
 @$dbh->exec('DROP TABLE test_rowcount');
+unset($dbh);
 --EXPECT--
 bool(false)
 int(2)

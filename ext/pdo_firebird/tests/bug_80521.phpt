@@ -22,4 +22,5 @@ object(PDOStatement)#%d (1) {
 <?php
 require 'testdb.inc';
 @$dbh->exec("DROP TABLE bug80521");
+unset($dbh);
 ?>

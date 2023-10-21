@@ -27,4 +27,5 @@ array(1) {
 <?php
 require 'testdb.inc';
 @$dbh->exec("DROP TABLE gh8576");
+unset($dbh);
 ?>

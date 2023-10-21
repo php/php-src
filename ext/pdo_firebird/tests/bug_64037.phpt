@@ -41,6 +41,7 @@ unset($dbh);
 <?php
 require 'testdb.inc';
 @$dbh->exec("DROP TABLE test64037");
+unset($dbh);
 ?>
 --EXPECT--
 string(5) "-1.00"

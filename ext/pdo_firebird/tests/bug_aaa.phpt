@@ -23,6 +23,7 @@ echo 'OK';
 <?php
 require 'testdb.inc';
 @$dbh->exec("DROP TABLE test_aaa");
+unset($dbh);
 ?>
 --EXPECT--
 OK

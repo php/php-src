@@ -56,6 +56,7 @@ echo "done\n";
 <?php
 require 'testdb.inc';
 @$dbh->exec('DROP TABLE test_dialect_1');
+unset($dbh);
 --EXPECT--
 int(1)
 string(8) "2.000000"

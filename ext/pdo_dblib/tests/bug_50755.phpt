@@ -7,6 +7,8 @@ pdo_dblib
 if (getenv('SKIP_REPEAT')) die('skip May fail on repeat');
 require __DIR__ . '/config.inc';
 ?>
+--CONFLICTS--
+pdo_dblib
 --FILE--
 <?php
 require __DIR__ . '/config.inc';

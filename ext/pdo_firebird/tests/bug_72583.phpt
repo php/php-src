@@ -23,6 +23,7 @@ unset($dbh);
 <?php
 require 'testdb.inc';
 @$dbh->exec("DROP TABLE test72583");
+unset($dbh);
 ?>
 --EXPECT--
 integer

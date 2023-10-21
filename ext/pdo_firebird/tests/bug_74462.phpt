@@ -24,6 +24,7 @@ var_dump($D);
 <?php
 require 'testdb.inc';
 @$dbh->exec("DROP TABLE test74462");
+unset($dbh);
 ?>
 --EXPECT--
 array(3) {

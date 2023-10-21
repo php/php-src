@@ -57,6 +57,7 @@ echo "Did not crash\n";
 <?php
 require 'testdb.inc';
 @$dbh->exec("DROP TABLE gh10908");
+unset($dbh);
 ?>
 --EXPECT--
 Array
