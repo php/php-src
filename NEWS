@@ -2,11 +2,19 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.26
 
+- Core:
+  . Fixed bug GH-12468 (Double-free of doc_comment when overriding static
+    property via trait). (ilutov)
+
 - DOM:
   . Fix registerNodeClass with abstract class crashing. (nielsdos)
 
 - Fiber:
   . Fixed bug GH-11121 (ReflectionFiber segfault). (danog, trowski, bwoebi)
+
+- FPM:
+  . Fixed bug GH-12232 (FPM: segfault dynamically loading extension without
+    opcache). (Jakub Zelenka)
 
 - Opcache:
   . Added warning when JIT cannot be enabled. (danog)
@@ -16,6 +24,15 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug GH-12392 (Segmentation fault on SoapClient::__getTypes).
     (nielsdos)
+  . Fixed bug #66150 (SOAP WSDL cache race condition causes Segmentation
+    Fault). (nielsdos)
+  . Fixed bug #67617 (SOAP leaves incomplete cache file on ENOSPC). (nielsdos)
+  . Fix incorrect uri check in SOAP caching. (nielsdos)
+  . Fix segfault and assertion failure with refcounted props and arrays.
+    (nielsdos)
+
+- XSL:
+  . Add missing module dependency. (nielsdos)
 
 26 Oct 2023, PHP 8.1.25
 
