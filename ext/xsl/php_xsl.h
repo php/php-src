@@ -75,7 +75,6 @@ static inline xsl_object *php_xsl_fetch_object(zend_object *obj) {
 
 void php_xsl_set_object(zval *wrapper, void *obj);
 void xsl_objects_free_storage(zend_object *object);
-void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return_value );
 
 void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs);
 void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
