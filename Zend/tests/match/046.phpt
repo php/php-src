@@ -29,7 +29,8 @@ echo "\n";
 $d = 'd';
 echo match($d) {
     'foo' => 'bar',
-    match ($d) { default => 'd' }, match ($d) { default => 'e' } => 500
+    match ($d) { default => 'd' },
+    match ($d) { default => 'e' } => 500
 };
 
 
