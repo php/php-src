@@ -32,7 +32,7 @@ $dbh->commit();
 unset($dbh);
 echo "done\n";
 ?>
--CLEAN--
+--CLEAN--
 <?php
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 require("testdb.inc");
