@@ -397,6 +397,15 @@ jobs:
           echo opcache.max_accelerated_files=100000 >> /etc/php.d/opcache.ini
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
           php -v
+      - name: Test Infection
+        if: matrix.branch.ref != 'PHP-8.0'
+        run: |
+          git clone https://github.com/infection/infection --branch=master --depth 1
+          cd infection
+          git rev-parse HEAD
+          export ASAN_OPTIONS=exitcode=139
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit || exit $?
       - name: Test Psalm
         if: matrix.branch.ref != 'PHP-8.0'
         run: |

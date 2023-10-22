@@ -46,26 +46,17 @@ function get_matrix_include(array $branches) {
     $jobs = [];
     foreach ($branches as $branch) {
         $jobs[] = [
-            'name' => '_ASAN_UBSAN',
+            'name' => '_ASAN_UBSAN_REPEAT',
             'branch' => $branch,
             'debug' => true,
             'zts' => true,
             'configuration_parameters' => "CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC' LDFLAGS='-fsanitize=undefined,address'",
             'run_tests_parameters' => '--asan',
-            'test_function_jit' => false,
+            'timeout_minutes' => 3600,
+            'test_function_jit' => true,
             'asan' => true,
         ];
         if ($branch['ref'] !== 'PHP-8.0') {
-            $jobs[] = [
-                'name' => '_REPEAT',
-                'branch' => $branch,
-                'debug' => true,
-                'zts' => false,
-                'run_tests_parameters' => '--repeat 2',
-                'timeout_minutes' => 360,
-                'test_function_jit' => true,
-                'asan' => false,
-            ];
             $jobs[] = [
                 'name' => '_VARIATION',
                 'branch' => $branch,
