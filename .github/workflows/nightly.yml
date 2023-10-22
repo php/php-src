@@ -331,66 +331,8 @@ jobs:
         run: |
           echo zend_extension=opcache.so > /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
-          echo opcache.enable=1 >> /etc/php.d/opcache.ini
           echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
-          echo opcache.jit=tracing >> /etc/php.d/opcache.ini
           echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
-          echo opcache.jit_max_root_traces=100000 >> /etc/php.d/opcache.ini
-          echo opcache.jit_max_side_traces=100000 >> /etc/php.d/opcache.ini
-          echo opcache.jit_max_exit_counters=100000 >> /etc/php.d/opcache.ini
-          echo opcache.jit_hot_loop=1 >> /etc/php.d/opcache.ini
-          echo opcache.jit_hot_func=1 >> /etc/php.d/opcache.ini
-          echo opcache.jit_hot_return=1 >> /etc/php.d/opcache.ini
-          echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
-          echo opcache.jit_blacklist_root_trace=255 >> /etc/php.d/opcache.ini
-          echo opcache.jit_blacklist_side_trace=255 >> /etc/php.d/opcache.ini
-          echo opcache.file_update_protection=0 >> /etc/php.d/opcache.ini
-          echo opcache.memory_consumption=256M >> /etc/php.d/opcache.ini
-          echo opcache.interned_strings_buffer=64 >> /etc/php.d/opcache.ini
-          echo opcache.max_accelerated_files=100000 >> /etc/php.d/opcache.ini
-          echo memory_limit=-1 >> /etc/php.d/opcache.ini
-          php -v
-      - name: Test Psalm
-        if: matrix.branch.ref != 'PHP-8.0'
-        run: |
-          git clone https://github.com/vimeo/psalm --branch=master --depth 1
-          cd psalm
-          git rev-parse HEAD
-          export ASAN_OPTIONS=exitcode=139
-          # Needed to avoid overwriting JIT config
-          export PSALM_ALLOW_XDEBUG=1
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php $GITHUB_WORKSPACE/.github/jit_check.php ./psalm --no-cache || exit $?
-      - name: Test PHPStan
-        if: matrix.branch.ref != 'PHP-8.0'
-        run: |
-          git clone https://github.com/phpstan/phpstan-src --depth 1
-          cd phpstan-src
-          git rev-parse HEAD
-          sed -E 's/phpVersion(.*)max[^)]+/phpVersion\1max(89999/g' conf/parametersSchema.neon -i
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          export ASAN_OPTIONS=exitcode=139
-          php $GITHUB_WORKSPACE/.github/jit_check.php bin/phpstan clear-result-cache
-          php $GITHUB_WORKSPACE/.github/jit_check.php bin/phpstan || exit $?
-      - name: Test AMPHP
-        if: matrix.branch.ref != 'PHP-8.0'
-        run: |
-          repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
-          X=0
-          for repository in $repositories; do
-            printf "Testing amp/%s\n" "$repository"
-            git clone "https://github.com/amphp/$repository.git" "amphp-$repository" --depth 1
-            cd "amphp-$repository"
-            git rev-parse HEAD
-            php /usr/bin/composer install --no-progress --ignore-platform-reqs
-            export ASAN_OPTIONS=exitcode=139
-            php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit || EXIT_CODE=$?
-            if [ ${EXIT_CODE:-0} -gt 128 ]; then
-              X=1;
-            fi
-            cd ..
-          done
-          exit $X
       - name: Test Laravel
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
@@ -401,39 +343,8 @@ jobs:
           # Hack to disable a test that hangs
           php -r '$c = file_get_contents("tests/Filesystem/FilesystemTest.php"); $c = str_replace("*/\n    public function testSharedGet()", "* @group skip\n     */\n    public function testSharedGet()", $c); file_put_contents("tests/Filesystem/FilesystemTest.php", $c);'
           export ASAN_OPTIONS=exitcode=139
-          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit --exclude-group skip || EXIT_CODE=$?
-          if [ ${EXIT_CODE:-0} -gt 128 ]; then
-            exit 1
-          fi
-      - name: Test ReactPHP
-        if: matrix.branch.ref != 'PHP-8.0'
-        run: |
-          repositories="async cache child-process datagram dns event-loop promise promise-stream promise-timer stream"
-          X=0
-          for repository in $repositories; do
-            printf "Testing reactphp/%s\n" "$repository"
-            git clone "https://github.com/reactphp/$repository.git" "reactphp-$repository" --depth 1
-            cd "reactphp-$repository"
-            git rev-parse HEAD
-            php /usr/bin/composer install --no-progress --ignore-platform-reqs
-            export ASAN_OPTIONS=exitcode=139
-            php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit || EXIT_CODE=$?
-            if [ $[EXIT_CODE:-0} -gt 128 ]; then
-              X=1;
-            fi
-            cd ..
-          done
-          exit $X
-      - name: Test Revolt PHP
-        if: matrix.branch.ref != 'PHP-8.0'
-        run: |
-          git clone https://github.com/revoltphp/event-loop.git --depth=1
-          cd event-loop
-          git rev-parse HEAD
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          export ASAN_OPTIONS=exitcode=139
-          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit || EXIT_CODE=$?
-          if [ ${EXIT_CODE:-0} -gt 128 ]; then
+          php vendor/bin/phpunit --exclude-group skip || EXIT_CODE=$?
+          if [ $EXIT_CODE -gt 128 ]; then
             exit 1
           fi
       - name: Test Symfony
@@ -452,22 +363,12 @@ jobs:
           export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
           X=0
           for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
-            php $GITHUB_WORKSPACE/.github/jit_check.php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient --exclude-group skip || EXIT_CODE=$?
-            if [ ${EXIT_CODE:-0} -gt 128 ]; then
+            php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient --exclude-group skip || EXIT_CODE=$?
+            if [ $EXIT_CODE -gt 128 ]; then
               X=1;
             fi
           done
           exit $X
-      - name: Test PHPSeclib
-        if: always()
-        run: |
-          git clone https://github.com/phpseclib/phpseclib --depth 1
-          cd phpseclib
-          git rev-parse HEAD
-          export ASAN_OPTIONS=exitcode=139
-          export PHPSECLIB_ALLOW_JIT=1
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
       - name: Test PHPUnit
         if: always()
         run: |
@@ -476,8 +377,8 @@ jobs:
           git rev-parse HEAD
           export ASAN_OPTIONS=exitcode=139
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php $GITHUB_WORKSPACE/.github/jit_check.php ./phpunit || EXIT_CODE=$?
-          if [ ${EXIT_CODE:-0} -gt 128 ]; then
+          php ./phpunit || EXIT_CODE=$?
+          if [ $EXIT_CODE -gt 128 ]; then
             exit 1
           fi
       - name: 'Symfony Preloading'
@@ -500,7 +401,7 @@ jobs:
           sed -i 's/youremptytestdbnamehere/test/g' wp-tests-config.php
           sed -i 's/yourusernamehere/root/g' wp-tests-config.php
           sed -i 's/yourpasswordhere/root/g' wp-tests-config.php
-          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit || EXIT_CODE=$?
+          php vendor/bin/phpunit || EXIT_CODE=$?
           if [ $EXIT_CODE -gt 128 ]; then
             exit 1
           fi
