@@ -27,3 +27,6 @@
 
 # The OSS fuzz files are binary
 /ext/date/tests/ossfuzz*.txt binary
+
+# Vendored libraries
+/ext/dom/lexbor/lexbor linguist-vendored

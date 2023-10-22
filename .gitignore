@@ -295,5 +295,6 @@ tmp-php.ini
 !/ext/fileinfo/libmagic/config.h
 !/ext/fileinfo/libmagic.patch
 !/ext/fileinfo/magicdata.patch
+!/ext/dom/lexbor/patches/*.patch
 !/ext/pcre/pcre2lib/config.h
 !/win32/build/Makefile
