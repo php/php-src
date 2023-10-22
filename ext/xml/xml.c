@@ -61,7 +61,6 @@ ZEND_DECLARE_MODULE_GLOBALS(xml)
 #define XML(v) ZEND_MODULE_GLOBALS_ACCESSOR(xml, v)
 
 typedef struct {
-	int case_folding;
 	XML_Parser parser;
 	XML_Char *target_encoding;
 
@@ -88,10 +87,11 @@ typedef struct {
 	int curtag;
 	zval *ctag;
 	char **ltags;
-	int lastwasopen;
-	int skipwhite;
-	int isparsing;
+	bool lastwasopen;
+	bool skipwhite;
+	bool isparsing;
 	bool parsehuge;
+	bool case_folding;
 
 	XML_Char *baseURI;
 
