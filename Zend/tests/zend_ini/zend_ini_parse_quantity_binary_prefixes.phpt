@@ -28,6 +28,7 @@ foreach (['', ' '] as $leadingWS) {
     }
   }
 }
+?>
 --EXPECT--
 # "0b11"
 int(3)

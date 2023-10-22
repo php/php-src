@@ -600,7 +600,6 @@ PHP_FUNCTION(pcntl_signal)
 	zend_long signo;
 	bool restart_syscalls = 1;
 	bool restart_syscalls_is_null = 1;
-	char *error = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_LONG(signo)
@@ -654,14 +653,12 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_TRUE;
 	}
 
-	if (!zend_is_callable_ex(handle, NULL, 0, NULL, NULL, &error)) {
+	if (!zend_is_callable_ex(handle, NULL, 0, NULL, NULL, NULL)) {
 		PCNTL_G(last_error) = EINVAL;
 
 		zend_argument_type_error(2, "must be of type callable|int, %s given", zend_zval_value_name(handle));
-		efree(error);
 		RETURN_THROWS();
 	}
-	ZEND_ASSERT(!error);
 
 	/* Add the function name to our signal table */
 	handle = zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);

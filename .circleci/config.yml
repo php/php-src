@@ -111,7 +111,6 @@ jobs:
               --enable-exif \
               --with-zip \
               --with-zlib \
-              --with-zlib-dir=/usr \
               --enable-soap \
               --enable-xmlreader \
               --with-xsl \
@@ -177,6 +176,7 @@ jobs:
             echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
       - run:
           name: Test
+          no_output_timeout: 30m
           command: |
             sapi/cli/php run-tests.php \
               -d zend_extension=opcache.so \
@@ -185,10 +185,6 @@ jobs:
               -d opcache.jit_max_root_traces=100000 \
               -d opcache.jit_max_side_traces=100000 \
               -d opcache.jit_max_exit_counters=100000 \
-              -d opcache.jit_hot_loop=1 \
-              -d opcache.jit_hot_func=1 \
-              -d opcache.jit_hot_return=1 \
-              -d opcache.jit_hot_side_exit=1 \
               -d opcache.jit=tracing \
               -P -q -x -j2 \
               -g FAIL,BORK,LEAK,XLEAK \

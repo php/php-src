@@ -19,6 +19,7 @@ gc_collect_cycles();
 
 var_dump($m);
 
+?>
 --EXPECT--
 object(WeakMap)#1 (0) {
 }

@@ -5,6 +5,7 @@ curl
 --SKIPIF--
 <?php
 if (curl_version()['version_number'] < 0x73800) die('skip requires curl >= 7.56.0');
+?>
 --FILE--
 <?php
 include 'server.inc';

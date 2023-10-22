@@ -394,6 +394,20 @@ static int php_skip_variable(php_stream * stream)
 }
 /* }}} */
 
+static size_t php_read_stream_all_chunks(php_stream *stream, char *buffer, size_t length)
+{
+	size_t read_total = 0;
+	do {
+		ssize_t read_now = php_stream_read(stream, buffer, length - read_total);
+		read_total += read_now;
+		if (read_now < stream->chunk_size && read_total != length) {
+			return 0;
+		}
+	} while (read_total < length);
+
+	return read_total;
+}
+
 /* {{{ php_read_APP */
 static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 {
@@ -410,7 +424,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 
 	buffer = emalloc(length);
 
-	if (php_stream_read(stream, buffer, (size_t) length) != length) {
+	if (php_read_stream_all_chunks(stream, buffer, length) != length) {
 		efree(buffer);
 		return 0;
 	}

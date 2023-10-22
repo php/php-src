@@ -14,13 +14,6 @@ include('config.inc');
 include('nonblocking.inc');
 
 $db = pg_connect($conn_str);
-
-$version = pg_version($db);
-if ($version['protocol'] < 3) {
-    echo "OK";
-    exit(0);
-}
-
 $db_socket = pg_socket($db);
 stream_set_blocking($db_socket, false);
 

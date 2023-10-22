@@ -17,5 +17,6 @@ try {
 } catch (\IntlException $e) {
     echo $e->getMessage();
 }
+?>
 --EXPECT--
 datefmt_create: invalid locale: U_ILLEGAL_ARGUMENT_ERROR

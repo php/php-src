@@ -23,6 +23,7 @@ gc_collect_cycles();
 
 var_dump($map2);
 
+?>
 --EXPECT--
 object(WeakMap)#1 (1) {
   [0]=>

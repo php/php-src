@@ -108,5 +108,6 @@ for ($y = 0; $y < 10; $y++) {
     }
 }
 $m = Matrix::fromArray($a);
+?>
 --EXPECT--
 These are the array bounds: 10 * 10

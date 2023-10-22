@@ -48,6 +48,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      should either be inlined and undefined behavior fixed or it should be
      replaced by a non-biased scaler.
 
+ c. ext/xsl
+   - The function php_xsl_create_object() was removed as it was not used
+     nor exported.
+
 ========================
 4. OpCode changes
 ========================

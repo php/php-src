@@ -16,6 +16,11 @@ Intl:
 Opcache:
   . Added large shared segments support for FreeBSD. (David Carlier)
 
+PDO_PGSQL:
+  . Fixed GH-12423, DSN credentials being prioritized over the user/password
+    PDO constructor arguments. (SakiTakamachi)
+  . Fixed native float support with pdo_pgsql query results. (Yurunsoft)
+
 PGSQL:
   . Added the possibility to have no conditions for pg_select. (OmarEmaraDev)
 

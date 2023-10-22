@@ -26,6 +26,10 @@ PHP 8.4 UPGRADE NOTES
     Consult sections 2. New Features and 6. New Functions for a list of
     newly implemented methods and constants.
 
+- PDO_PGSQL:
+  . The DSN's credentials, when set, are given priority over their PDO
+    constructor counterparts, being closer to the documentation states.
+
 - SimpleXML:
   . Get methods called, or casting to a string on a SimpleXMLElement will no
     longer implicitly reset the iterator data, unless explicitly rewound.
@@ -44,6 +48,17 @@ PHP 8.4 UPGRADE NOTES
   . round() now validates the value of the $mode parameter and throws a ValueError
     for invalid modes. Previously invalid modes would have been interpreted as
     PHP_ROUND_HALF_UP.
+
+- XML:
+  . The xml_set_*_handler() functions now declare and check for an effective
+    signature of callable|string|null for the $handler parameters.
+    Moreover, values of type string that correspond to method names,
+    of object set with xml_set_object() are now checked to see if the method
+    exists on the class of the previously passed object.
+    This means that xml_set_object() must now always be called prior to setting
+    method names as callables.
+    Passing an empty string to disable the handler is still allowed,
+    but not recommended.
 
 - XSL:
   . XSLTProcessor::setParameter() will now throw a ValueError when its arguments
@@ -126,6 +141,11 @@ PHP 8.4 UPGRADE NOTES
   . The IntlDateFormatter class exposes now the new PATTERN constant
     reflecting udat api's UDAT_PATTERN.
 
+- XML:
+  . Added XML_OPTION_PARSE_HUGE to allow large inputs in xml_parse and
+    xml_parse_into_struct.
+    RFC: https://wiki.php.net/rfc/xml_option_parse_huge.
+
 ========================================
 11. Changes to INI File Handling
 ========================================
@@ -145,3 +165,6 @@ PHP 8.4 UPGRADE NOTES
 * The performance of DOMNode::C14N() is greatly improved for the case without
   an xpath query. This can give a time improvement of easily two order of
   magnitude for documents with tens of thousands of nodes.
+
+* The performance of strspn() is greatly improved. It now runs in linear time
+  instead of being bounded by quadratic time.
