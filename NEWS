@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fix segfault and assertion failure with refcounted props and arrays.
     (nielsdos)
 
+- Streams:
+  . Fixed bug #75708 (getimagesize with "&$imageinfo" fails on StreamWrappers).
+    (Jakub Zelenka)
+
 - XSL:
   . Add missing module dependency. (nielsdos)
 
