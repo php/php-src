@@ -12,6 +12,7 @@ PDOTest::skip();
 $db = PDOTest::factory();
 try {
   $db->beginTransaction();
+  $db->rollback();
 } catch (PDOException $e) {
   die('skip no working transactions: ' . $e->getMessage());
 }
@@ -65,7 +66,6 @@ echo countRows('delete');
 $db->commit();
 
 echo countRows('commit');
-
 ?>
 --CLEAN--
 <?php

@@ -34,8 +34,8 @@ echo "done\n";
 ?>
 --CLEAN--
 <?php
-require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 require("testdb.inc");
+$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 @$dbh->exec('DROP TABLE test_ddl');
 @$dbh->exec('DROP GENERATOR gen_test_ddl_id');
 @$dbh->exec('DROP TRIGGER test_ddl_bi');
