@@ -206,6 +206,8 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(lxb_html_doc
 #ifdef LIBXML_HTML_ENABLED
     xmlDocPtr lxml_doc = htmlNewDocNoDtD(NULL, NULL);
 #else
+    /* If HTML support is not enabled, then htmlNewDocNoDtD() is not available.
+     * This code mimics the behaviour. */
     xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) "1.0");
     lxml_doc->type = XML_HTML_DOCUMENT_NODE;
 #endif

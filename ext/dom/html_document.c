@@ -68,7 +68,7 @@ typedef struct {
 
 typedef struct {
 	/* We can skip some conversion if the input and output encoding are both UTF-8, we only have to validate and substitute replacement characters */
-	bool fast_path; /* Put first, close to the encode & decode structures, for cache locality */
+	bool fast_path; /* Put first, near the encode & decode structures, for cache locality */
 	lxb_encoding_encode_t encode;
 	lxb_encoding_decode_t decode;
 	const lxb_encoding_data_t *encode_data;
@@ -215,7 +215,7 @@ static void dom_find_line_and_column_using_cache(const dom_lexbor_libxml2_bridge
 	/* Either unicode or UTF-8 data */
 	if (application_data->current_input_codepoints != NULL) {
 		while (cache->last_offset < offset) {
-			if (application_data->current_input_codepoints[cache->last_offset] == 0x000A) {
+			if (application_data->current_input_codepoints[cache->last_offset] == 0x000A /* Unicode codepoint for line feed */) {
 				cache->last_line++;
 				cache->last_column = 1;
 			} else {
@@ -512,11 +512,11 @@ static bool dom_parse_decode_encode_finish(lexbor_libxml2_bridge_parse_context *
 	return true;
 }
 
-static bool check_options_validity(zend_long options)
+static bool check_options_validity(uint32_t arg_num, zend_long options)
 {
 	const zend_long VALID_OPTIONS = XML_PARSE_NOERROR | XML_PARSE_COMPACT | HTML_PARSE_NOIMPLIED | DOM_HTML_NO_DEFAULT_NS;
 	if ((options & ~VALID_OPTIONS) != 0) {
-		zend_argument_value_error(2, "contains invalid flags (allowed flags: LIBXML_NOERROR, LIBXML_COMPACT, LIBXML_HTML_NOIMPLIED, DOM\\NO_DEFAULT_NS)");
+		zend_argument_value_error(arg_num, "contains invalid flags (allowed flags: LIBXML_NOERROR, LIBXML_COMPACT, LIBXML_HTML_NOIMPLIED, DOM\\NO_DEFAULT_NS)");
 		return false;
 	}
 	return true;
@@ -526,7 +526,7 @@ PHP_METHOD(DOM_HTMLDocument, createEmpty)
 {
 	const char *encoding = "UTF-8";
 	size_t encoding_len = strlen("UTF-8");
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p", &encoding, &encoding_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -570,7 +570,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 		RETURN_THROWS();
 	}
 
-	if (!check_options_validity(options)) {
+	if (!check_options_validity(2, options)) {
 		RETURN_THROWS();
 	}
 
@@ -673,7 +673,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	size_t filename_len, override_encoding_len;
 	zend_long options = 0;
 	php_stream *stream = NULL;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|ls!", &filename, &filename_len, &options, &override_encoding, &override_encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|lp!", &filename, &filename_len, &options, &override_encoding, &override_encoding_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -683,7 +683,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		RETURN_THROWS();
 	}
 
-	if (!check_options_validity(options)) {
+	if (!check_options_validity(2, options)) {
 		RETURN_THROWS();
 	}
 

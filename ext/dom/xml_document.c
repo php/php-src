@@ -23,7 +23,7 @@
 #include "php_dom.h"
 #include "namespace_compat.h"
 
-static bool check_options_validity(zend_long options)
+static bool check_options_validity(uint32_t arg_num, zend_long options)
 {
 	const zend_long VALID_OPTIONS = XML_PARSE_NOENT | XML_PARSE_DTDLOAD | XML_PARSE_DTDATTR | XML_PARSE_DTDVALID | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NOBLANKS | XML_PARSE_XINCLUDE | XML_PARSE_NSCLEAN | XML_PARSE_NOCDATA | XML_PARSE_NONET | XML_PARSE_PEDANTIC | XML_PARSE_COMPACT | XML_PARSE_HUGE | XML_PARSE_BIG_LINES;
 	if ((options & ~VALID_OPTIONS) != 0) {
@@ -107,7 +107,7 @@ PHP_METHOD(DOM_XMLDocument, createEmpty)
 	size_t encoding_len = strlen("UTF-8");
 	const char *encoding = "UTF-8";
 	size_t version_len;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ss", &version, &version_len, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sp", &version, &version_len, &encoding, &encoding_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -120,7 +120,7 @@ PHP_METHOD(DOM_XMLDocument, createEmpty)
 		RETURN_THROWS();
 	}
 	
-    xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) version);
+	xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) version);
 	if (UNEXPECTED(lxml_doc == NULL)) {
 		goto oom;
 	}
@@ -161,7 +161,7 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_THROWS();
 	}
 
-	if (!check_options_validity(options)) {
+	if (!check_options_validity(2, options)) {
 		RETURN_THROWS();
 	}
 

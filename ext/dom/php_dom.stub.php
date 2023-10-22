@@ -1061,7 +1061,7 @@ namespace DOM
         /** @return Attr|false */
         public function createAttributeNS(?string $namespace, string $qualifiedName) {}
 
-        /** @return CDataSection|false */
+        /** @return CDATASection|false */
         public function createCDATASection(string $data) {}
 
         /** @tentative-return-type */

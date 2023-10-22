@@ -131,7 +131,9 @@ static zend_result dom_html5_serialize_text_node(dom_html5_serialize_context *ct
 	if (node->parent->type == XML_ELEMENT_NODE && dom_is_html_ns(node->parent)) {
 		const xmlNode *parent = node->parent;
 		size_t name_length = strlen((const char *) parent->name);
-		/* Note: <noscript> is not handled because scripting is not enabled because the user agent (PHP) does not support (JS) scripting */
+		/* Spec tells us to only emit noscript content as-is if scripting is enabled.
+		 * However, the user agent (PHP) does not support (JS) scripting.
+		 * Furthermore, if actually consumed by a browser then we should err on the safe side and not emit the content as-is. */
 		if (dom_local_name_compare_ex(parent, "style", strlen("style"), name_length)
 			|| dom_local_name_compare_ex(parent, "script", strlen("script"), name_length)
 			|| dom_local_name_compare_ex(parent, "xmp", strlen("xmp"), name_length)
