@@ -2074,7 +2074,7 @@ PHP_METHOD(DOM_Document, registerNodeClass)
 	}
 
 	if (basece->ce_flags & ZEND_ACC_ABSTRACT) {
-		zend_argument_value_error(1, "must be a non-abstract class");
+		zend_argument_value_error(1, "must not be an abstract class");
 		RETURN_THROWS();
 	}
 

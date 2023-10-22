@@ -27,7 +27,7 @@ $element->ownerDocument->foo();
 
 ?>
 --EXPECTF--
-DOM\Document::registerNodeClass(): Argument #1 ($baseClass) must be a non-abstract class
+DOM\Document::registerNodeClass(): Argument #1 ($baseClass) must not be an abstract class
 string(11) "DOMDocument"
 
 Fatal error: Uncaught Error: Call to undefined method DOMDocument::foo() in %s:%d
