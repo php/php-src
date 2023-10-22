@@ -81,6 +81,13 @@ jobs:
         uses: actions/checkout@v4
       - name: apt
         uses: ./.github/actions/apt-x64
+      - name: LLVM 16 (ASAN-only)
+        if: ${{ matrix.asan }}
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y lsb-release wget software-properties-common gnupg
+          wget https://apt.llvm.org/llvm.sh
+          chmod u+x llvm.sh
+          sudo ./llvm.sh 16
       - name: System info
         run: |
           echo "::group::Show host CPU info"
@@ -112,7 +119,7 @@ jobs:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
-            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address" CC=clang CXX=clang++ --disable-opcache-jit' || '' }}
+            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address" CC=clang-16 CXX=clang++-16 --disable-opcache-jit' || '' }}
           skipSlow: ${{ matrix.asan }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
