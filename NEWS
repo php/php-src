@@ -38,6 +38,9 @@ Standard:
   . Fix GH-12252 (round(): Validate the rounding mode). (timwolla)
   . Increase the default BCrypt cost to 12. (timwolla)
 
+XML:
+  . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)
+
 XSL:
   . Implement request #64137 (XSLTProcessor::setParameter() should allow both
     quotes to be used). (nielsdos)
