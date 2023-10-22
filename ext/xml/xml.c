@@ -91,6 +91,7 @@ typedef struct {
 	int lastwasopen;
 	int skipwhite;
 	int isparsing;
+	bool parsehuge;
 
 	XML_Char *baseURI;
 
@@ -263,6 +264,28 @@ PHP_MINFO_FUNCTION(xml)
 /* }}} */
 
 /* {{{ extension-internal functions */
+
+static int xml_parse_helper(xml_parser *parser, const char *data, size_t data_len, bool is_final)
+{
+	ZEND_ASSERT(!parser->isparsing);
+
+	/* libxml2 specific options */
+#if LIBXML_EXPAT_COMPAT
+	/* See xmlInitSAXParserCtxt() and xmlCtxtUseOptions() */
+	if (parser->parsehuge) {
+		parser->parser->parser->options |= XML_PARSE_HUGE;
+		xmlDictSetLimit(parser->parser->parser->dict, 0);
+	} else {
+		parser->parser->parser->options &= ~XML_PARSE_HUGE;
+		xmlDictSetLimit(parser->parser->parser->dict, XML_MAX_DICTIONARY_LIMIT);
+	}
+#endif
+
+	parser->isparsing = 1;
+	int ret = XML_Parse(parser->parser, (const XML_Char *) data, data_len, is_final);
+	parser->isparsing = 0;
+	return ret;
+}
 
 static void _xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encoding, zval *ret)
 {
@@ -1024,6 +1047,7 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	parser->target_encoding = encoding;
 	parser->case_folding = 1;
 	parser->isparsing = 0;
+	parser->parsehuge = false; /* It's the default for BC & DoS protection */
 
 	XML_SetUserData(parser->parser, parser);
 	ZVAL_COPY_VALUE(&parser->index, return_value);
@@ -1283,7 +1307,6 @@ PHP_FUNCTION(xml_parse)
 	zval *pind;
 	char *data;
 	size_t data_len;
-	int ret;
 	bool isFinal = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|b", &pind, xml_parser_ce, &data, &data_len, &isFinal) == FAILURE) {
@@ -1295,10 +1318,7 @@ PHP_FUNCTION(xml_parse)
 		zend_throw_error(NULL, "Parser must not be called recursively");
 		RETURN_THROWS();
 	}
-	parser->isparsing = 1;
-	ret = XML_Parse(parser->parser, (XML_Char*)data, data_len, isFinal);
-	parser->isparsing = 0;
-	RETVAL_LONG(ret);
+	RETURN_LONG(xml_parse_helper(parser, data, data_len, isFinal));
 }
 
 /* }}} */
@@ -1310,7 +1330,6 @@ PHP_FUNCTION(xml_parse_into_struct)
 	zval *pind, *xdata, *info = NULL;
 	char *data;
 	size_t data_len;
-	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osz|z", &pind, xml_parser_ce, &data, &data_len, &xdata, &info) == FAILURE) {
 		RETURN_THROWS();
@@ -1348,11 +1367,7 @@ PHP_FUNCTION(xml_parse_into_struct)
 	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
 	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
 
-	parser->isparsing = 1;
-	ret = XML_Parse(parser->parser, (XML_Char*)data, data_len, 1);
-	parser->isparsing = 0;
-
-	RETVAL_LONG(ret);
+	RETURN_LONG(xml_parse_helper(parser, data, data_len, true));
 }
 /* }}} */
 
@@ -1481,6 +1496,15 @@ PHP_FUNCTION(xml_parser_set_option)
 		case PHP_XML_OPTION_SKIP_WHITE:
 			parser->skipwhite = zend_is_true(value);
 			break;
+		/* Boolean option */
+		case PHP_XML_OPTION_PARSE_HUGE:
+			/* Prevent wreaking havock to the parser internals during parsing */
+			if (UNEXPECTED(parser->isparsing)) {
+				zend_throw_error(NULL, "Cannot change option XML_OPTION_PARSE_HUGE while parsing");
+				RETURN_THROWS();
+			}
+			parser->parsehuge = zend_is_true(value);
+			break;
 		/* Integer option */
 		case PHP_XML_OPTION_SKIP_TAGSTART:
 			/* The tag start offset is stored in an int */
@@ -1541,6 +1565,9 @@ PHP_FUNCTION(xml_parser_get_option)
 			break;
 		case PHP_XML_OPTION_SKIP_WHITE:
 			RETURN_BOOL(parser->skipwhite);
+			break;
+		case PHP_XML_OPTION_PARSE_HUGE:
+			RETURN_BOOL(parser->parsehuge);
 			break;
 		case PHP_XML_OPTION_TARGET_ENCODING:
 			RETURN_STRING((char *)parser->target_encoding);

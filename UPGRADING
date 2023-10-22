@@ -141,6 +141,11 @@ PHP 8.4 UPGRADE NOTES
   . The IntlDateFormatter class exposes now the new PATTERN constant
     reflecting udat api's UDAT_PATTERN.
 
+- XML:
+  . Added XML_OPTION_PARSE_HUGE to allow large inputs in xml_parse and
+    xml_parse_into_struct.
+    RFC: https://wiki.php.net/rfc/xml_option_parse_huge.
+
 ========================================
 11. Changes to INI File Handling
 ========================================
