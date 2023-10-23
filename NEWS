@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.27
 
-
+- Standard:
+  . Fix memory leak in syslog device handling. (danog)
 
 23 Nov 2023, PHP 8.1.26
 
