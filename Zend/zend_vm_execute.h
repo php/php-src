@@ -53444,14 +53444,14 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 
 #if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_FP_GLOBAL_REG)
 	struct {
+#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
+		char hybrid_jit_red_zone[ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE];
+#endif
 #ifdef ZEND_VM_IP_GLOBAL_REG
 		const zend_op *orig_opline;
 #endif
 #ifdef ZEND_VM_FP_GLOBAL_REG
 		zend_execute_data *orig_execute_data;
-#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE
-		char hybrid_jit_red_zone[ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE];
-#endif
 #endif
 	} vm_stack_data;
 #endif
@@ -56960,6 +56960,16 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 	}
 #endif
 
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+	/* Force C compiler to store preserved registers to allow JIT using them */
+# if defined(__GNUC__) && defined(__i386__)
+	__asm__ __volatile__ (""::: "ebx");
+# elif defined(__GNUC__) && defined(__x86_64__)
+	__asm__ __volatile__ (""::: "rbx","r12","r13");
+# elif defined(__GNUC__) && defined(__aarch64__)
+	__asm__ __volatile__ (""::: "x19","x20","x21","x22","x23","x24","x25","x26");
+# endif
+#endif
 	LOAD_OPLINE();
 	ZEND_VM_LOOP_INTERRUPT_CHECK();
 

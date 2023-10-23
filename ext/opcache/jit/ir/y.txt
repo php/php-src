@@ -1,0 +1,6 @@
+llvm.floor.f64
+llvm.fmuladd.f64
+llvm.memcpy.p0.p0.i64
+llvm.memset.p0.i64
+llvm.va_end
+llvm.va_start

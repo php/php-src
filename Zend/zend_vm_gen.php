@@ -2046,14 +2046,14 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                     } else {
                         out($f,"#if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_FP_GLOBAL_REG)\n");
                         out($f,$m[1]."struct {\n");
+                        out($f,"#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE\n");
+                        out($f,$m[1]."\tchar hybrid_jit_red_zone[ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE];\n");
+                        out($f,"#endif\n");
                         out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
                         out($f,$m[1]."\tconst zend_op *orig_opline;\n");
                         out($f,"#endif\n");
                         out($f,"#ifdef ZEND_VM_FP_GLOBAL_REG\n");
                         out($f,$m[1]."\tzend_execute_data *orig_execute_data;\n");
-                        out($f,"#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE\n");
-                        out($f,$m[1]."\tchar hybrid_jit_red_zone[ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE];\n");
-                        out($f,"#endif\n");
                         out($f,"#endif\n");
                         out($f,$m[1]."} vm_stack_data;\n");
                         out($f,"#endif\n");
@@ -2339,7 +2339,7 @@ function gen_vm_opcodes_header(
     $str .= "\n";
     $str .= "#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) && !defined(__SANITIZE_ADDRESS__)\n";
     $str .= "# if ((defined(i386) && !defined(__PIC__)) || defined(__x86_64__) || defined(_M_X64))\n";
-    $str .= "#  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 16\n";
+    $str .= "#  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 48\n";
     $str .= "# endif\n";
     $str .= "#endif\n";
     $str .= "\n";
