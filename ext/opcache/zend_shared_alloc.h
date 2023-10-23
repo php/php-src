@@ -95,7 +95,7 @@ typedef struct _handler_entry {
 } zend_shared_memory_handler_entry;
 
 typedef struct _zend_shared_memory_state {
-	int *positions;   /* current positions for each segment */
+	size_t *positions;  /* current positions for each segment */
 	size_t shared_free; /* amount of free shared memory */
 } zend_shared_memory_state;
 
