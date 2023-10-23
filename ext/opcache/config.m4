@@ -24,6 +24,13 @@ PHP_ARG_WITH([capstone],,
   [no],
   [no])
 
+PHP_ARG_ENABLE([opcache-jit-ir],
+  [whether to enable JIT based on IR framework],
+  [AS_HELP_STRING([--disable-opcache-jit-ir],
+    [Disable JIT based on IR framework (use old JIT)])],
+  [yes],
+  [no])
+
 if test "$PHP_OPCACHE" != "no"; then
 
   dnl Always build as shared extension
@@ -44,7 +51,7 @@ if test "$PHP_OPCACHE" != "no"; then
     esac
   fi
 
-  if test "$PHP_OPCACHE_JIT" = "yes"; then
+  if test "$PHP_OPCACHE_JIT" = "yes" -a "$PHP_OPCACHE_JIT_IR" = "no" ; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
     ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_gdb.c jit/zend_jit_vm_helpers.c"
 
@@ -86,6 +93,62 @@ if test "$PHP_OPCACHE" != "no"; then
 
     PHP_SUBST(DASM_FLAGS)
     PHP_SUBST(DASM_ARCH)
+
+    JIT_CFLAGS=
+
+  elif test "$PHP_OPCACHE_JIT" = "yes" -a "$PHP_OPCACHE_JIT_IR" = "yes"; then
+    AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
+    AC_DEFINE(ZEND_JIT_IR, 1, [Use JIT IR framework])
+    ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c jit/ir/ir.c jit/ir/ir_strtab.c \
+		jit/ir/ir_cfg.c	jit/ir/ir_sccp.c jit/ir/ir_gcm.c jit/ir/ir_ra.c jit/ir/ir_save.c \
+		jit/ir/ir_dump.c jit/ir/ir_gdb.c jit/ir/ir_perf.c jit/ir/ir_check.c \
+		jit/ir/ir_patch.c jit/ir/ir_emit.c"
+
+    dnl Find out which ABI we are using.
+    case $host_alias in
+      x86_64-*-darwin*)
+        IR_TARGET=IR_TARGET_X64
+        DASM_FLAGS="-D X64APPLE=1 -D X64=1"
+        DASM_ARCH="x86"
+        ;;
+      x86_64*)
+        IR_TARGET=IR_TARGET_X64
+        DASM_FLAGS="-D X64=1"
+        DASM_ARCH="x86"
+        ;;
+      i[[34567]]86*)
+        IR_TARGET=IR_TARGET_X86
+        DASM_ARCH="x86"
+        ;;
+      x86*)
+        IR_TARGET=IR_TARGET_X86
+        DASM_ARCH="x86"
+        ;;
+      aarch64*)
+        IR_TARGET=IR_TARGET_AARCH64
+        DASM_ARCH="aarch64"
+        ;;
+     esac
+
+    AS_IF([test x"$with_capstone" = "xyes"],[
+      PKG_CHECK_MODULES([CAPSTONE],[capstone >= 3.0.0],[
+        AC_DEFINE([HAVE_CAPSTONE], [1], [Capstone is available])
+        PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
+        PHP_EVAL_INCLINE($CAPSTONE_CFLAGS)
+        ZEND_JIT_SRC+=" jit/ir/ir_disasm.c"
+      ],[
+        AC_MSG_ERROR([capstone >= 3.0 required but not found])
+      ])
+    ])
+
+    PHP_SUBST(IR_TARGET)
+    PHP_SUBST(DASM_FLAGS)
+    PHP_SUBST(DASM_ARCH)
+
+    JIT_CFLAGS="-I@ext_builddir@/jit/ir -D${IR_TARGET} -DIR_PHP"
+    if test "$ZEND_DEBUG" = "yes"; then
+      JIT_CFLAGS="${JIT_CFLAGS} -DIR_DEBUG"
+    fi
   fi
 
   AC_CHECK_FUNCS([mprotect memfd_create shm_create_largepage])
@@ -310,7 +373,7 @@ int main(void) {
 	shared_alloc_mmap.c \
 	shared_alloc_posix.c \
 	$ZEND_JIT_SRC,
-	shared,,"-Wno-implicit-fallthrough -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1",,yes)
+	shared,,"-Wno-implicit-fallthrough -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 ${JIT_CFLAGS}",,yes)
 
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
 
@@ -320,6 +383,9 @@ int main(void) {
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     PHP_ADD_BUILD_DIR([$ext_builddir/jit], 1)
+    if test "$PHP_OPCACHE_JIT_IR" = "yes"; then
+      PHP_ADD_BUILD_DIR([$ext_builddir/jit/ir], 1)
+    fi
     PHP_ADD_MAKEFILE_FRAGMENT($ext_srcdir/jit/Makefile.frag)
   fi
   PHP_SUBST(OPCACHE_SHARED_LIBADD)

@@ -36,7 +36,7 @@
 
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) && !defined(__SANITIZE_ADDRESS__)
 # if ((defined(i386) && !defined(__PIC__)) || defined(__x86_64__) || defined(_M_X64))
-#  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 16
+#  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 48
 # endif
 #endif
 
