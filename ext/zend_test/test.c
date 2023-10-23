@@ -647,7 +647,11 @@ static ZEND_FUNCTION(zend_test_fill_packed_array)
 static ZEND_FUNCTION(get_open_basedir)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
-	RETURN_STRING(PG(open_basedir));
+	if (PG(open_basedir)) {
+		RETURN_STRING(PG(open_basedir));
+	} else {
+		RETURN_NULL();
+	}
 }
 
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
