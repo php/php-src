@@ -28,13 +28,6 @@
 #include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_call_graph.h"
 #include "zend_jit.h"
-#ifndef ZEND_JIT_IR
-#if ZEND_JIT_TARGET_X86
-# include "zend_jit_x86.h"
-#elif ZEND_JIT_TARGET_ARM64
-# include "zend_jit_arm64.h"
-#endif
-#endif /* ZEND_JIT_IR */
 
 #include "zend_jit_internal.h"
 

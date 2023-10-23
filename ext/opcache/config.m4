@@ -24,13 +24,6 @@ PHP_ARG_WITH([capstone],,
   [no],
   [no])
 
-PHP_ARG_ENABLE([opcache-jit-ir],
-  [whether to enable JIT based on IR framework],
-  [AS_HELP_STRING([--disable-opcache-jit-ir],
-    [Disable JIT based on IR framework (use old JIT)])],
-  [yes],
-  [no])
-
 if test "$PHP_OPCACHE" != "no"; then
 
   dnl Always build as shared extension
@@ -51,52 +44,7 @@ if test "$PHP_OPCACHE" != "no"; then
     esac
   fi
 
-  if test "$PHP_OPCACHE_JIT" = "yes" -a "$PHP_OPCACHE_JIT_IR" = "no" ; then
-    AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
-    ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_gdb.c jit/zend_jit_vm_helpers.c"
-
-    dnl Find out which ABI we are using.
-    case $host_alias in
-      x86_64-*-darwin*)
-        DASM_FLAGS="-D X64APPLE=1 -D X64=1"
-        DASM_ARCH="x86"
-        ;;
-      x86_64*)
-        DASM_FLAGS="-D X64=1"
-        DASM_ARCH="x86"
-        ;;
-      i[[34567]]86*)
-        DASM_ARCH="x86"
-        ;;
-      x86*)
-        DASM_ARCH="x86"
-        ;;
-      aarch64*)
-        DASM_FLAGS="-D ARM64=1"
-        DASM_ARCH="arm64"
-        ;;
-    esac
-
-    if test "$PHP_THREAD_SAFETY" = "yes"; then
-      DASM_FLAGS="$DASM_FLAGS -D ZTS=1"
-    fi
-
-    AS_IF([test x"$with_capstone" = "xyes"],[
-      PKG_CHECK_MODULES([CAPSTONE],[capstone >= 3.0.0],[
-        AC_DEFINE([HAVE_CAPSTONE], [1], [Capstone is available])
-        PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
-        PHP_EVAL_INCLINE($CAPSTONE_CFLAGS)
-      ],[
-        AC_MSG_ERROR([capstone >= 3.0 required but not found])
-      ])
-    ])
-
-    PHP_SUBST(DASM_FLAGS)
-    PHP_SUBST(DASM_ARCH)
-
-    JIT_CFLAGS=
-
-  elif test "$PHP_OPCACHE_JIT" = "yes" -a "$PHP_OPCACHE_JIT_IR" = "yes"; then
+  if test "$PHP_OPCACHE_JIT" = "yes" ; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
     AC_DEFINE(ZEND_JIT_IR, 1, [Use JIT IR framework])
     ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c jit/ir/ir.c jit/ir/ir_strtab.c \
@@ -383,9 +331,7 @@ int main(void) {
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     PHP_ADD_BUILD_DIR([$ext_builddir/jit], 1)
-    if test "$PHP_OPCACHE_JIT_IR" = "yes"; then
-      PHP_ADD_BUILD_DIR([$ext_builddir/jit/ir], 1)
-    fi
+    PHP_ADD_BUILD_DIR([$ext_builddir/jit/ir], 1)
     PHP_ADD_MAKEFILE_FRAGMENT($ext_srcdir/jit/Makefile.frag)
   fi
   PHP_SUBST(OPCACHE_SHARED_LIBADD)
