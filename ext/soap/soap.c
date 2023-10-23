@@ -327,6 +327,14 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 
 PHP_MSHUTDOWN_FUNCTION(soap)
 {
+    int i;
+    i = 0;
+    do {
+        if(defaultEncoding[i].details.clark_notation){
+            zend_string_release_ex(defaultEncoding[i].details.clark_notation, 1);
+        }
+        i++;
+    } while (defaultEncoding[i].details.type != END_KNOWN_TYPES);
 	zend_error_cb = old_error_handler;
 	zend_hash_destroy(&SOAP_GLOBAL(defEnc));
 	zend_hash_destroy(&SOAP_GLOBAL(defEncIndex));
