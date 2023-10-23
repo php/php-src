@@ -248,7 +248,7 @@ OK
 Single byte: []
 With from=1: []
 Bad surrogate: []
-Bad surrogate followed by other bytes: [003f1243]
+Bad surrogate followed by other bytes: [d9001243]
 BE byte order mark: []
 LE byte order mark: []
 Length=0: []
