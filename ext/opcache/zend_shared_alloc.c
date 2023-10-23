@@ -281,7 +281,7 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 	free(ZSMMG(shared_segments));
 	ZSMMG(shared_segments) = tmp_shared_segments;
 
-	ZSMMG(shared_memory_state).positions = (int *)zend_shared_alloc(sizeof(int) * ZSMMG(shared_segments_count));
+	ZSMMG(shared_memory_state).positions = (size_t *)zend_shared_alloc(sizeof(size_t) * ZSMMG(shared_segments_count));
 	if (!ZSMMG(shared_memory_state).positions) {
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
 		return ALLOC_FAILURE;
