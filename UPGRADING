@@ -101,6 +101,10 @@ PHP 8.4 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- MBString:
+  . The behavior of mb_strcut is more consistent now on invalid UTF-8 and UTF-16
+    strings. (For valid UTF-8 and UTF-16 strings, there is no change.)
+
 - PGSQL:
   . pg_select, the conditions arguments accepts an empty array and is optional.
 
@@ -177,3 +181,5 @@ PHP 8.4 UPGRADE NOTES
 
 * The performance of strspn() is greatly improved. It now runs in linear time
   instead of being bounded by quadratic time.
+
+* mb_strcut() is much faster now for UTF-8 and UTF-16 strings.
