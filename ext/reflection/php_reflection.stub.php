@@ -105,7 +105,7 @@ abstract class ReflectionFunctionAbstract implements Reflector
     public function hasReturnType(): bool {}
 
     /** @tentative-return-type */
-    public function getReturnType(): ?ReflectionType {}
+    public function getReturnType(): ReflectionNamedType|ReflectionUnionType|ReflectionIntersectionType|null {}
 
     public function hasTentativeReturnType(): bool {}
 
@@ -535,7 +535,7 @@ class ReflectionProperty implements Reflector
     public function setAccessible(bool $accessible): void {}
 
     /** @tentative-return-type */
-    public function getType(): ?ReflectionType {}
+    public function getType(): ReflectionNamedType|ReflectionUnionType|ReflectionIntersectionType|null {}
 
     /** @tentative-return-type */
     public function hasType(): bool {}
@@ -614,7 +614,7 @@ class ReflectionClassConstant implements Reflector
 
     public function hasType(): bool {}
 
-    public function getType(): ?ReflectionType {}
+    public function getType(): ReflectionNamedType|ReflectionUnionType|ReflectionIntersectionType|null {}
 }
 
 /** @not-serializable */
@@ -655,7 +655,7 @@ class ReflectionParameter implements Reflector
     public function hasType(): bool {}
 
     /** @tentative-return-type */
-    public function getType(): ?ReflectionType {}
+    public function getType(): ReflectionNamedType|ReflectionUnionType|ReflectionIntersectionType|null {}
 
     /**
      * @tentative-return-type
