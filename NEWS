@@ -23,8 +23,8 @@ PHP                                                                        NEWS
     upgrading to 8.1.3 due to corrupt on-disk file cache). (turchanov)
 
 - OpenSSL:
-  Fixed bug GH-12489 (Missing sigbio creation checking in openssl_cms_verify).
-  (Jakub Zelenka)
+  . Fixed bug GH-12489 (Missing sigbio creation checking in openssl_cms_verify).
+    (Jakub Zelenka)
 
 - SOAP:
   . Fixed bug GH-12392 (Segmentation fault on SoapClient::__getTypes).
