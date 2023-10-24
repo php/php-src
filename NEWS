@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fix registerNodeClass with abstract class crashing. (nielsdos)
+  . Add missing NULL pointer error check. (icy17)
 
 - Fiber:
   . Fixed bug GH-11121 (ReflectionFiber segfault). (danog, trowski, bwoebi)
@@ -38,6 +39,12 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug #75708 (getimagesize with "&$imageinfo" fails on StreamWrappers).
     (Jakub Zelenka)
+
+- XMLReader:
+  . Add missing NULL pointer error check. (icy17)
+
+- XMLWriter:
+  . Add missing NULL pointer error check. (icy17)
 
 - XSL:
   . Add missing module dependency. (nielsdos)
