@@ -15549,9 +15549,13 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 				ir_MERGE_list(continue_list);
 			} else {
 				if (default_input_list) {
-					ZEND_ASSERT(jit->ctx.ir_base[ref].op == IR_SWITCH);
-					ZEND_ASSERT(jit->ctx.ir_base[ref].op3 == IR_UNUSED);
-					jit->ctx.ir_base[ref].op3 = default_input_list;
+					if (jit->ctx.ir_base[ref].op == IR_SWITCH) {
+						ZEND_ASSERT(jit->ctx.ir_base[ref].op3 == IR_UNUSED);
+						jit->ctx.ir_base[ref].op3 = default_input_list;
+					} else {
+						ir_MERGE_list(default_input_list);
+						_zend_jit_add_predecessor_ref(jit, default_b, jit->b, ir_END());
+					}
 				}
 				jit->b = -1;
 			}
