@@ -1157,6 +1157,9 @@ char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_p
 	int isFileUri = 0;
 
 	uri = xmlCreateURI();
+	if (uri == NULL) {
+		return NULL;
+	}
 	escsource = xmlURIEscapeStr((xmlChar *) source, (xmlChar *) ":");
 	xmlParseURIReference(uri, (char *) escsource);
 	xmlFree(escsource);
