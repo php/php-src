@@ -5559,29 +5559,35 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 		}
 
 		if (op1_info & MAY_BE_UNDEF) {
-			ir_ref if_def;
+			ir_ref if_def, ref, ref2;
 
+			ref = jit_ZVAL_ADDR(jit, op1_addr);
 			if_def = jit_if_not_Z_TYPE(jit, op1_addr, IS_UNDEF);
 			ir_IF_FALSE_cold(if_def);
 
 			// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(opline->op1.var));
 
-			jit_set_Z_TYPE_INFO(jit, op1_addr, IS_NULL);
+			ref2 = jit_EG(uninitialized_zval);
 			ir_MERGE_WITH_EMPTY_TRUE(if_def);
+			ref = ir_PHI_2(IR_ADDR, ref2, ref);
+			op1_addr = ZEND_ADDR_REF_ZVAL(ref);
 		}
 
 		if (op2_info & MAY_BE_UNDEF) {
-			ir_ref if_def;
+			ir_ref if_def, ref, ref2;
 
+			ref = jit_ZVAL_ADDR(jit, op2_addr);
 			if_def = jit_if_not_Z_TYPE(jit, op2_addr, IS_UNDEF);
 			ir_IF_FALSE_cold(if_def);
 
 			// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op2.var))));
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(opline->op2.var));
 
-			jit_set_Z_TYPE_INFO(jit, op2_addr, IS_NULL);
+			ref2 = jit_EG(uninitialized_zval);
 			ir_MERGE_WITH_EMPTY_TRUE(if_def);
+			ref = ir_PHI_2(IR_ADDR, ref2, ref);
+			op2_addr = ZEND_ADDR_REF_ZVAL(ref);
 		}
 
 		if (Z_MODE(op1_addr) == IS_REG) {
@@ -16327,6 +16333,15 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 		case ZEND_MUL:
 			op1_info = OP1_INFO();
 			op2_info = OP2_INFO();
+			if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
+				return 0;
+			}
+			if (trace && trace->op1_type != IS_UNKNOWN) {
+				op1_info &= 1U << (trace->op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED));
+			}
+			if (trace && trace->op2_type != IS_UNKNOWN) {
+				op2_info &= 1U << (trace->op2_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED));
+			}
 			return !(op1_info & MAY_BE_UNDEF)
 				&& !(op2_info & MAY_BE_UNDEF)
 				&& (op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE))
@@ -16339,6 +16354,12 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 		case ZEND_MOD:
 			op1_info = OP1_INFO();
 			op2_info = OP2_INFO();
+			if (trace && trace->op1_type != IS_UNKNOWN) {
+				op1_info &= 1U << (trace->op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED));
+			}
+			if (trace && trace->op2_type != IS_UNKNOWN) {
+				op2_info &= 1U << (trace->op2_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED));
+			}
 			return (op1_info & MAY_BE_LONG)
 				&& (op2_info & MAY_BE_LONG);
 		case ZEND_PRE_INC:
@@ -16383,6 +16404,13 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			 && trace->op1_type != IS_UNKNOWN
 			 && (trace->op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED)) == IS_ARRAY) {
 				op1_info &= ~((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY);
+			}
+			if (trace && trace->op2_type != IS_UNKNOWN) {
+				if ((trace->op2_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED)) == IS_LONG) {
+					op2_info &= ~((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_LONG);
+				} else if ((trace->op2_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED)) == IS_STRING) {
+					op2_info &= ~((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_STRING);
+				}
 			}
 			return ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) &&
 				(!(opline->op1_type & (IS_TMP_VAR|IS_VAR)) || !(op1_info & MAY_BE_RC1)) &&
