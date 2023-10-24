@@ -12,6 +12,9 @@ LSAN_OPTIONS=detect_leaks=0
 require("testdb.inc");
 
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+@$dbh->exec('DROP TABLE test_ddl');
+@$dbh->exec('DROP GENERATOR gen_test_ddl_id');
+@$dbh->exec('DROP TRIGGER test_ddl_bi');
 
 $dbh->exec("CREATE TABLE test_ddl (id INT NOT NULL PRIMARY KEY, text BLOB SUB_TYPE 1)");
 $dbh->exec("CREATE GENERATOR gen_test_ddl_id");
@@ -29,18 +32,12 @@ $dbh->beginTransaction();
 var_dump($dbh->exec("DELETE FROM test_ddl"));
 $dbh->commit();
 
-unset($dbh);
-echo "done\n";
-?>
---CLEAN--
-<?php
-require("testdb.inc");
-$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 @$dbh->exec('DROP TABLE test_ddl');
 @$dbh->exec('DROP GENERATOR gen_test_ddl_id');
 @$dbh->exec('DROP TRIGGER test_ddl_bi');
-unset($dbh);
 
+unset($dbh);
+echo "done\n";
 ?>
 --EXPECT--
 int(1)
