@@ -154,7 +154,13 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 				new_enc->details.type_str = estrdup(new_enc->details.type_str);
 			}
 			if (new_enc->details.clark_notation) {
-				zend_string_addref(new_enc->details.clark_notation);
+				/* If it was persistent or becomes persistent, we must dup. Otherwise we can copy. */
+				bool was_persistent = GC_FLAGS(new_enc->details.clark_notation) & IS_STR_PERSISTENT;
+				if (was_persistent || sdl->is_persistent) {
+					new_enc->details.clark_notation = zend_string_dup(new_enc->details.clark_notation, sdl->is_persistent);
+				} else {
+					zend_string_addref(new_enc->details.clark_notation);
+				}
 			}
 			if (sdl->encoders == NULL) {
 				sdl->encoders = pemalloc(sizeof(HashTable), sdl->is_persistent);
