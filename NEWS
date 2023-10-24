@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.12
+26 Oct 2023, PHP 8.2.12
 
 - Core:
   . Fixed bug GH-12207 (memory leak when class using trait with doc block).
