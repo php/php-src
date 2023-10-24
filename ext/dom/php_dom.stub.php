@@ -294,7 +294,6 @@ interface DOMChildNode
     public function replaceWith(...$nodes): void;
 }
 
-/** @not-serializable */
 class DOMNode
 {
     public const int DOCUMENT_POSITION_DISCONNECTED = 0x01;
@@ -354,6 +353,10 @@ class DOMNode
     public ?string $baseURI;
 
     public string $textContent;
+
+    public function __sleep(): array {}
+
+    public function __wakeup(): void {}
 
     /** @return DOMNode|false */
     public function appendChild(DOMNode $node) {}
@@ -415,7 +418,6 @@ class DOMNode
     public function compareDocumentPosition(DOMNode $other): int {}
 }
 
-/** @not-serializable */
 class DOMNameSpaceNode
 {
     /** @readonly */
@@ -447,6 +449,12 @@ class DOMNameSpaceNode
 
     /** @readonly */
     public ?DOMElement $parentElement;
+
+    /** @implementation-alias DOMNode::__sleep */
+    public function __sleep(): array {}
+
+    /** @implementation-alias DOMNode::__wakeup */
+    public function __wakeup(): void {}
 }
 
 class DOMImplementation

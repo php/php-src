@@ -201,7 +201,7 @@ zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 			break;
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+	php_libxml_invalidate_node_list_cache(obj->document);
 
 	zend_string_release_ex(str, 0);
 	return SUCCESS;
@@ -794,7 +794,7 @@ zend_result dom_node_text_content_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+	php_libxml_invalidate_node_list_cache(obj->document);
 
 	/* Typed property, this is already a string */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
@@ -919,7 +919,7 @@ PHP_METHOD(DOMNode, insertBefore)
 		php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL);
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(parentp->doc);
+	php_libxml_invalidate_node_list_cache(intern->document);
 
 	if (ref != NULL) {
 		DOM_GET_OBJ(refp, ref, xmlNodePtr, refpobj);
@@ -1124,7 +1124,7 @@ PHP_METHOD(DOMNode, replaceChild)
 			nodep->doc->intSubset = (xmlDtd *) newchild;
 		}
 	}
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+	php_libxml_invalidate_node_list_cache(intern->document);
 	DOM_RET_OBJ(oldchild, &ret, intern);
 }
 /* }}} end dom_node_replace_child */
@@ -1166,7 +1166,7 @@ PHP_METHOD(DOMNode, removeChild)
 	}
 
 	xmlUnlinkNode(child);
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+	php_libxml_invalidate_node_list_cache(intern->document);
 	DOM_RET_OBJ(child, &ret, intern);
 }
 /* }}} end dom_node_remove_child */
@@ -1271,7 +1271,7 @@ PHP_METHOD(DOMNode, appendChild)
 		dom_reconcile_ns(nodep->doc, new_child);
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+	php_libxml_invalidate_node_list_cache(intern->document);
 
 	DOM_RET_OBJ(new_child, &ret, intern);
 	return;
@@ -1387,7 +1387,7 @@ PHP_METHOD(DOMNode, normalize)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
+	php_libxml_invalidate_node_list_cache(intern->document);
 
 	dom_normalize(nodep);
 
@@ -2203,5 +2203,26 @@ disconnected:;
 	RETURN_LONG(DOCUMENT_POSITION_DISCONNECTED | DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | ordering);
 }
 /* }}} */
+
+/**
+ * We want to block the serialization and unserialization of DOM classes.
+ * However, using @not-serializable makes the child classes also not serializable, even if the user implements the methods.
+ * So instead, we implement the methods wherein we throw exceptions.
+ * The reason we choose these methods is because:
+ *   - If the user implements __serialize / __unserialize, the respective throwing methods are not called.
+ *   - If the user implements __sleep / __wakeup, then it's also not a problem because they will not enter the throwing methods.
+ */
+
+PHP_METHOD(DOMNode, __sleep)
+{
+	zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed, unless serialization methods are implemented in a subclass", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+	RETURN_THROWS();
+}
+
+PHP_METHOD(DOMNode, __wakeup)
+{
+	zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed, unless unserialization methods are implemented in a subclass", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
+	RETURN_THROWS();
+}
 
 #endif

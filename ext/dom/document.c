@@ -818,7 +818,7 @@ PHP_METHOD(DOMDocument, importNode)
 		}
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(docp);
+	php_libxml_invalidate_node_list_cache(intern->document);
 
 	DOM_RET_OBJ((xmlNodePtr) retnodep, &ret, intern);
 }
@@ -1031,7 +1031,7 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 {
 	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
 	if (nodep->doc != new_document) {
-		php_libxml_invalidate_node_list_cache_from_doc(new_document);
+		php_libxml_invalidate_node_list_cache(dom_object_new_document->document);
 
 		/* Note for ATTRIBUTE_NODE: specified is always true in ext/dom,
 		 * and since this unlink it; the owner element will be unset (i.e. parentNode). */
@@ -1101,7 +1101,7 @@ PHP_METHOD(DOMDocument, normalizeDocument)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	php_libxml_invalidate_node_list_cache_from_doc(docp);
+	php_libxml_invalidate_node_list_cache(intern->document);
 
 	dom_normalize((xmlNodePtr) docp);
 }
@@ -1327,7 +1327,7 @@ static void dom_finish_loading_document(zval *this, zval *return_value, xmlDocPt
 		xmlDocPtr docp = (xmlDocPtr) dom_object_get_node(intern);
 		dom_doc_propsptr doc_prop = NULL;
 		if (docp != NULL) {
-			const php_libxml_doc_ptr *doc_ptr = docp->_private;
+			const php_libxml_ref_obj *doc_ptr = intern->document;
 			ZEND_ASSERT(doc_ptr != NULL); /* Must exist, we have a document */
 			old_modification_nr = doc_ptr->cache_tag.modification_nr;
 			php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
@@ -1348,9 +1348,8 @@ static void dom_finish_loading_document(zval *this, zval *return_value, xmlDocPt
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)newdoc, (void *)intern);
 	/* Since iterators should invalidate, we need to start the modification number from the old counter */
 	if (old_modification_nr != 0) {
-		php_libxml_doc_ptr* doc_ptr = (php_libxml_doc_ptr*) ((php_libxml_node_object*) intern)->node; /* downcast */
-		doc_ptr->cache_tag.modification_nr = old_modification_nr;
-		php_libxml_invalidate_node_list_cache(doc_ptr);
+		intern->document->cache_tag.modification_nr = old_modification_nr;
+		php_libxml_invalidate_node_list_cache(intern->document);
 	}
 
 	RETURN_TRUE;
@@ -1611,7 +1610,7 @@ PHP_METHOD(DOMDocument, xinclude)
 		php_dom_remove_xinclude_nodes(root);
 	}
 
-	php_libxml_invalidate_node_list_cache_from_doc(docp);
+	php_libxml_invalidate_node_list_cache(intern->document);
 
 	if (err) {
 		RETVAL_LONG(err);
@@ -2073,6 +2072,10 @@ PHP_METHOD(DOMDocument, registerNodeClass)
 	}
 
 	if (ce == NULL || instanceof_function(ce, basece)) {
+		if (UNEXPECTED(ce != NULL && (ce->ce_flags & ZEND_ACC_ABSTRACT))) {
+			zend_argument_value_error(2, "must not be an abstract class");
+			RETURN_THROWS();
+		}
 		DOM_GET_THIS_INTERN(intern);
 		dom_set_doc_classmap(intern->document, basece, ce);
 		RETURN_TRUE;

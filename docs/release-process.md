@@ -904,6 +904,25 @@ feature development that cannot go into the new version.
    there is only a single section about PHP X.Y.0, instead of individual
    sections for each pre-release.
 
+4. On the announcement day for the initial stable version (or shortly before),
+   update the `Expires` field in the <https://www.php.net/.well-known/security.txt>
+   file. The `Expires` field should be set to the expected date of the next X.Y.0
+   release (following the one currently being prepared), which is usually the
+   fourth Thursday of November in the next year.
+
+   Following the recommendation of [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116),
+   we maintain an `Expires` time of about a year for our security policies. This
+   provides security researchers with confidence they are using our most
+   up-to-date reporting policies.
+
+   The `security.txt` file is located in the [web-php repository](https://github.com/php/web-php)
+   under the `.well-known/` directory. We may make changes to this file at other
+   times, as needed, but we will always advance the `Expires` timestamp on a
+   yearly cadence, coinciding with our X.Y.0 releases.
+
+   Please see the instructions for
+   [making changes to security.txt](security-policies.md#making-changes-to-securitytxt).
+
 
 ## Prime the selection of release managers for the next version
 

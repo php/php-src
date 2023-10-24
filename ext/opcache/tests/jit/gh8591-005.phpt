@@ -36,6 +36,7 @@ touch(__DIR__ . '/gh8591-005.inc');
 var_dump($x);
 
 print "OK";
+?>
 --EXPECT--
 int(1)
 OK

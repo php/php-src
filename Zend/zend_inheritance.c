@@ -1547,7 +1547,10 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 			do {
 				dst--;
 				src--;
-				ZVAL_COPY_OR_DUP_PROP(dst, src);
+				/* We don't have to account for refcounting because
+				 * zend_declare_typed_property() disallows refcounted defaults for internal classes. */
+				ZEND_ASSERT(!Z_REFCOUNTED_P(src));
+				ZVAL_COPY_VALUE_PROP(dst, src);
 				if (Z_OPT_TYPE_P(dst) == IS_CONSTANT_AST) {
 					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 					ce->ce_flags |= ZEND_ACC_HAS_AST_PROPERTIES;

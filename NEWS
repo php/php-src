@@ -13,10 +13,39 @@ DOM:
 Intl:
   . Added IntlDateFormatter::PATTERN constant. (David Carlier)
 
+Opcache:
+  . Added large shared segments support for FreeBSD. (David Carlier)
+
+PDO_PGSQL:
+  . Fixed GH-12423, DSN credentials being prioritized over the user/password
+    PDO constructor arguments. (SakiTakamachi)
+  . Fixed native float support with pdo_pgsql query results. (Yurunsoft)
+
+PGSQL:
+  . Added the possibility to have no conditions for pg_select. (OmarEmaraDev)
+
+SimpleXML:
+  . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
+    within foreach). (nielsdos)
+  . Fixed bug GH-12208 (SimpleXML infinite loop when a cast is used inside a
+    foreach). (nielsdos)
+  . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
+
+SOAP:
+  . Add support for clark notation for namespaces in class map. (lxShaDoWxl)
+
 Standard:
   . Implement GH-12188 (Indication for the int size in phpinfo()). (timwolla)
   . Partly fix GH-12143 (Incorrect round() result for 0.49999999999999994).
     (timwolla)
   . Fix GH-12252 (round(): Validate the rounding mode). (timwolla)
+  . Increase the default BCrypt cost to 12. (timwolla)
+
+XML:
+  . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)
+
+XSL:
+  . Implement request #64137 (XSLTProcessor::setParameter() should allow both
+    quotes to be used). (nielsdos)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

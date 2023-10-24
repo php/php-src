@@ -122,6 +122,11 @@ clean:
 	rm -f ext/opcache/jit/zend_jit_x86.c
 	rm -f ext/opcache/jit/zend_jit_arm64.c
 	rm -f ext/opcache/minilua
+	rm -f ext/opcache/jit/ir/gen_ir_fold_hash
+	rm -f ext/opcache/jit/ir/minilua
+	rm -f ext/opcache/jit/ir/ir_fold_hash.h
+	rm -f ext/opcache/jit/ir/ir_emit_x86.h
+	rm -f ext/opcache/jit/ir/ir_emit_aarch64.h
 
 distclean: clean
 	rm -f Makefile config.cache config.log config.status Makefile.objects Makefile.fragments libtool main/php_config.h main/internal_functions_cli.c main/internal_functions.c Zend/zend_dtrace_gen.h Zend/zend_dtrace_gen.h.bak Zend/zend_config.h

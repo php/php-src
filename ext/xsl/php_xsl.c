@@ -29,6 +29,7 @@ static zend_object_handlers xsl_object_handlers;
 
 static const zend_module_dep xsl_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
+	ZEND_MOD_REQUIRED("dom")
 	ZEND_MOD_END
 };
 
@@ -165,41 +166,6 @@ void php_xsl_set_object(zval *wrapper, void *obj)
 	object = Z_XSL_P(wrapper);
 	object->ptr = obj;
 	xsl_object_set_data(obj, wrapper);
-}
-/* }}} */
-
-/* {{{ php_xsl_create_object */
-void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return_value )
-{
-	zval *wrapper;
-	zend_class_entry *ce;
-
-	if (!obj) {
-		wrapper = wrapper_in;
-		ZVAL_NULL(wrapper);
-		return;
-	}
-
-	if ((wrapper = xsl_object_get_data((void *) obj))) {
-		ZVAL_COPY(wrapper, wrapper_in);
-		return;
-	}
-
-	if (!wrapper_in) {
-		wrapper = return_value;
-	} else {
-		wrapper = wrapper_in;
-	}
-
-
-	ce = xsl_xsltprocessor_class_entry;
-
-	if (!wrapper_in) {
-		object_init_ex(wrapper, ce);
-	}
-	php_xsl_set_object(wrapper, (void *) obj);
-
-	return;
 }
 /* }}} */
 

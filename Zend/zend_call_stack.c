@@ -35,10 +35,10 @@
 #  include <sys/types.h>
 # endif
 #endif /* ZEND_WIN32 */
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
 # include <pthread.h>
 #endif
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__DragonFly__)
 # include <pthread_np.h>
 # include <sys/mman.h>
 # include <sys/sysctl.h>
@@ -54,6 +54,9 @@ typedef int boolean_t;
 #ifdef __NetBSD__
 # include <sys/sysctl.h>
 # include <sys/syscall.h>
+#endif
+#ifdef __HAIKU__
+# include <kernel/OS.h>
 #endif
 #ifdef __linux__
 #include <sys/syscall.h>
@@ -248,7 +251,7 @@ static bool zend_call_stack_get_linux(zend_call_stack *stack)
 }
 #endif /* __linux__ */
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__DragonFly__)
 static bool zend_call_stack_is_main_thread(void)
 {
 	int is_main = pthread_main_np();
@@ -507,6 +510,32 @@ static bool zend_call_stack_get_openbsd(zend_call_stack *stack)
 	return false;
 }
 #endif /* defined(__OpenBSD__) */
+#if defined(__HAIKU__)
+static bool zend_call_stack_get_haiku(zend_call_stack *stack)
+{
+	thread_id id;
+	thread_info ti;
+	size_t guard_size;
+
+	// unlikely, main thread ought to be always available but we never know
+	if ((id = find_thread(NULL)) == B_NAME_NOT_FOUND || get_thread_info(id, &ti) != B_OK) {
+		return false;
+	}
+
+	// USER_STACK_GUARD_SIZE
+	guard_size = sysconf(_SC_PAGESIZE) * 4;
+
+	stack->base = ti.stack_end;
+	stack->max_size = ((size_t)ti.stack_end - (size_t)ti.stack_base) - guard_size;
+
+	return true;
+}
+#else
+static bool zend_call_stack_get_haiku(zend_call_stack *stack)
+{
+	return false;
+}
+#endif /* defined(__HAIKU__) */
 
 #if defined(__NetBSD__)
 # ifdef HAVE_PTHREAD_GETATTR_NP
@@ -645,6 +674,10 @@ ZEND_API bool zend_call_stack_get(zend_call_stack *stack)
 	}
 
 	if (zend_call_stack_get_netbsd(stack)) {
+		return true;
+	}
+
+	if (zend_call_stack_get_haiku(stack)) {
 		return true;
 	}
 

@@ -71,6 +71,10 @@ const LIBEXSLT_DOTTED_VERSION = UNKNOWN;
 
 class XSLTProcessor
 {
+    public bool $doXInclude = false;
+
+    public bool $cloneDocument = false;
+
     /**
      * @param DOMDocument|SimpleXMLElement $stylesheet
      * @tentative-return-type
@@ -81,7 +85,7 @@ class XSLTProcessor
      * @param DOMDocument|SimpleXMLElement $document
      * @tentative-return-type
      */
-    public function transformToDoc(object $document, ?string $returnClass = null): DOMDocument|false {}
+    public function transformToDoc(object $document, ?string $returnClass = null): object|false {}
 
     /**
      * @param DOMDocument|SimpleXMLElement $document

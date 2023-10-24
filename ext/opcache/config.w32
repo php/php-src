@@ -5,6 +5,8 @@ if (PHP_OPCACHE != "no") {
 
 	ARG_ENABLE("opcache-jit", "whether to enable JIT", "yes");
 
+	ARG_ENABLE("opcache-jit-ir", "whether to enable JIT based on IR framework", "yes");
+
 	ZEND_EXTENSION('opcache', "\
 		ZendAccelerator.c \
 		zend_accelerator_blacklist.c \
@@ -18,7 +20,7 @@ if (PHP_OPCACHE != "no") {
 		zend_shared_alloc.c \
 		shared_alloc_win32.c", true, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
-	if (PHP_OPCACHE_JIT == "yes") {
+	if (PHP_OPCACHE_JIT == "yes" && PHP_OPCACHE_JIT_IR == "no") {
 		if (CHECK_HEADER_ADD_INCLUDE("dynasm/dasm_x86.h", "CFLAGS_OPCACHE", PHP_OPCACHE + ";ext\\opcache\\jit")) {
 			var dasm_flags = (X64 ? "-D X64=1" : "") + (X64 ? " -D X64WIN=1" : "") + " -D WIN=1";
 			if (PHP_ZTS == "yes") {
@@ -34,6 +36,45 @@ if (PHP_OPCACHE != "no") {
 			ADD_MAKEFILE_FRAGMENT(configure_module_dirname + "\\jit\\Makefile.frag.w32");
 
 			ADD_SOURCES(configure_module_dirname + "\\jit", "zend_jit.c zend_jit_vm_helpers.c", "opcache", "ext\\opcache\\jit");
+		} else {
+			WARNING("JIT not enabled, headers not found");
+		}
+	} else if (PHP_OPCACHE_JIT == "yes" && PHP_OPCACHE_JIT_IR == "yes") {
+		if (CHECK_HEADER_ADD_INCLUDE("ir/ir.h", "CFLAGS_OPCACHE", PHP_OPCACHE + ";ext\\opcache\\jit")) {
+			var dasm_flags = (X64 ? "-D X64=1" : "") + (X64 ? " -D X64WIN=1" : "") + " -D WIN=1";
+			var ir_target = (X64 ? "IR_TARGET_X64" : "IR_TARGET_X86");
+			var ir_src = "ir_strtab.c ir_cfg.c ir_sccp.c ir_gcm.c ir_ra.c ir_save.c \
+				 ir_dump.c ir_check.c ir_patch.c";
+
+			DEFINE("IR_TARGET", ir_target);
+			DEFINE("DASM_FLAGS", dasm_flags);
+			DEFINE("DASM_ARCH", "x86");
+
+			AC_DEFINE('HAVE_JIT', 1, 'Define to enable JIT');
+			AC_DEFINE('ZEND_JIT_IR', 1, 'Use JIT IR framework');
+
+			ADD_FLAG("CFLAGS_OPCACHE", "/I \"ext\\opcache\\jit\\ir\" /D "+ir_target+" /D IR_PHP");
+			if (PHP_DEBUG == "yes") {
+				ADD_FLAG("CFLAGS_OPCACHE", "/D IR_DEBUG");
+			}
+
+			if (CHECK_HEADER_ADD_INCLUDE("capstone\\capstone.h", "CFLAGS_OPCACHE", PHP_OPCACHE+ ";" + PHP_PHP_BUILD + "\\include") &&
+				CHECK_LIB("capstone.lib", "opcache", PHP_OPCACHE)) {
+				AC_DEFINE('HAVE_CAPSTONE', 1, 'capstone support enabled');
+				ir_src += " ir_disasm.c";
+			}
+
+			ADD_MAKEFILE_FRAGMENT(configure_module_dirname + "\\jit\\Makefile.frag.w32");
+
+			ADD_SOURCES(configure_module_dirname + "\\jit",
+				"zend_jit.c zend_jit_vm_helpers.c",
+				"opcache", "ext\\opcache\\jit");
+			ADD_SOURCES(configure_module_dirname + "\\jit\\ir",
+				"ir.c", "opcache", "ext\\opcache\\jit\\ir");
+			ADD_SOURCES(configure_module_dirname + "\\jit\\ir",
+				"ir_emit.c", "opcache", "ext\\opcache\\jit\\ir");
+			ADD_SOURCES(configure_module_dirname + "\\jit\\ir",
+				ir_src, "opcache", "ext\\opcache\\jit\\ir");
 		} else {
 			WARNING("JIT not enabled, headers not found");
 		}

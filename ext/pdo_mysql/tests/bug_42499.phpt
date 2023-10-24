@@ -20,6 +20,7 @@ $version = $matches[1] * 10000 + $matches[2] * 100 + $matches[3];
 if ($version < 41000)
     die(sprintf("skip Need MySQL Server 4.1.0+, found %d.%02d.%02d (%d)\n",
         $matches[1], $matches[2], $matches[3], $version));
+?>
 --FILE--
 <?php
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');

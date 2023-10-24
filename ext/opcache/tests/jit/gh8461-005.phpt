@@ -32,6 +32,7 @@ for ($i = 0; $i < 10; $i++) {
 
 var_dump($initialRequest ? $x : $y);
 print "OK";
+?>
 --EXPECT--
 int(10)
 OK

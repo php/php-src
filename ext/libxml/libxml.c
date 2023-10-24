@@ -136,7 +136,12 @@ PHP_LIBXML_API void php_libxml_set_old_ns(xmlDocPtr doc, xmlNsPtr ns)
 	php_libxml_set_old_ns_list(doc, ns, ns);
 }
 
+/* Function pointer typedef changed in 2.9.8, see https://github.com/GNOME/libxml2/commit/e03f0a199a67017b2f8052354cf732b2b4cae787 */
+#if LIBXML_VERSION >= 20908
 static void php_libxml_unlink_entity(void *data, void *table, const xmlChar *name)
+#else
+static void php_libxml_unlink_entity(void *data, void *table, xmlChar *name)
+#endif
 {
 	xmlEntityPtr entity = data;
 	if (entity->_private != NULL) {
@@ -1176,7 +1181,7 @@ PHP_FUNCTION(libxml_set_external_entity_loader)
 	zend_fcall_info_cache	fcc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC_OR_NULL(fci, fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Unset old callback if it's defined */
@@ -1184,12 +1189,6 @@ PHP_FUNCTION(libxml_set_external_entity_loader)
 		zend_fcc_dtor(&LIBXML(entity_loader_callback));
 	}
 	if (ZEND_FCI_INITIALIZED(fci)) { /* argument not null */
-		if (!ZEND_FCC_INITIALIZED(fcc)) {
-			zend_is_callable_ex(&fci.function_name, NULL, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL, &fcc, NULL);
-			/* Call trampoline has been cleared by zpp. Refetch it, because we want to deal
-			 * with it outselves. It is important that it is not refetched on every call,
-			 * because calls may occur from different scopes. */
-		}
 		zend_fcc_dup(&LIBXML(entity_loader_callback), &fcc);
 	}
 	RETURN_TRUE;
@@ -1288,13 +1287,7 @@ PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object,
 				object->node->_private = private_data;
 			}
 		} else {
-			if (UNEXPECTED(node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE)) {
-				php_libxml_doc_ptr *doc_ptr = emalloc(sizeof(php_libxml_doc_ptr));
-				doc_ptr->cache_tag.modification_nr = 1; /* iterators start at 0, such that they will start in an uninitialised state */
-				object->node = (php_libxml_node_ptr *) doc_ptr; /* downcast */
-			} else {
-				object->node = emalloc(sizeof(php_libxml_node_ptr));
-			}
+			object->node = emalloc(sizeof(php_libxml_node_ptr));
 			ret_refcount = 1;
 			object->node->node = node;
 			object->node->refcount = 1;
@@ -1339,6 +1332,7 @@ PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, 
 		object->document->ptr = docp;
 		object->document->refcount = ret_refcount;
 		object->document->doc_props = NULL;
+		object->document->cache_tag.modification_nr = 1; /* iterators start at 0, such that they will start in an uninitialised state */
 	}
 
 	return ret_refcount;

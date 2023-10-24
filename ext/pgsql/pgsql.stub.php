@@ -961,7 +961,7 @@ namespace {
      * @return array<int, array>|string|false
      * @refcount 1
      */
-    function pg_select(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC, int $mode = PGSQL_ASSOC): array|string|false {}
+    function pg_select(PgSql\Connection $connection, string $table_name, array $conditions = [], int $flags = PGSQL_DML_EXEC, int $mode = PGSQL_ASSOC): array|string|false {}
 
 #ifdef LIBPQ_HAS_PIPELINING
     function pg_enter_pipeline_mode(PgSql\Connection $connection): bool {}

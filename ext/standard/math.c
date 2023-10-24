@@ -159,6 +159,8 @@ static inline double php_round_helper(double value, int mode) {
 			return integral;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
+	// FIXME: GCC bug, branch is considered reachable.
+	ZEND_UNREACHABLE();
 }
 /* }}} */
 

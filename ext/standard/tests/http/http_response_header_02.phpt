@@ -22,6 +22,7 @@ var_dump($http_response_header);
 
 http_server_kill($pid);
 
+?>
 --EXPECT--
 string(4) "Body"
 array(5) {

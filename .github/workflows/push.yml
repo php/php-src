@@ -12,6 +12,7 @@ on:
       - .cirrus.yml
       - .travis.yml
       - travis/*
+      - .circleci/*
     branches:
       - PHP-7.4
       - PHP-8.0
@@ -31,6 +32,7 @@ on:
       - .cirrus.yml
       - .travis.yml
       - travis/*
+      - .circleci/*
     branches:
       - '**'
 permissions:
@@ -46,19 +48,19 @@ jobs:
     services:
       mysql:
         image: mysql:8
+        ports:
+          - 3306:3306
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: root
       postgres:
         image: postgres
+        ports:
+          - 5432:5432
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
-    env:
-      MYSQL_TEST_HOST: mysql
-      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
-      PDO_MYSQL_TEST_HOST: mysql
     strategy:
       fail-fast: false
       matrix:
@@ -71,13 +73,17 @@ jobs:
             asan: true
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
     runs-on: ubuntu-22.04
-    container:
-      image: ${{ matrix.asan && 'ubuntu:23.04' || null }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
       - name: apt
         uses: ./.github/actions/apt-x64
+      - name: LLVM 16 (ASAN-only)
+        if: ${{ matrix.asan }}
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod u+x llvm.sh
+          sudo ./llvm.sh 16
       - name: System info
         run: |
           echo "::group::Show host CPU info"
@@ -108,7 +114,7 @@ jobs:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
-            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address" CC=clang CXX=clang++ --disable-opcache-jit' || '' }}
+            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address" CC=clang-16 CXX=clang++-16 --disable-opcache-jit' || '' }}
           skipSlow: ${{ matrix.asan }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
@@ -126,10 +132,10 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}_${{ matrix.asan && 'OpCache' || 'Tracing JIT' }}
+          jitType: ${{ matrix.asan && 'disable' || 'tracing' }}
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            ${{ !matrix.asan && '-d opcache.jit_buffer_size=16M' || '' }}
             ${{ matrix.asan && '--asan -x' || '' }}
       - name: Verify generated files are up to date
         if: ${{ !matrix.asan }}
@@ -160,11 +166,10 @@ jobs:
         uses: ./.github/actions/test-macos
         with:
           testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+          jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.protect_memory=1
-            -d opcache.jit_buffer_size=16M
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   WINDOWS:

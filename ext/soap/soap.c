@@ -293,7 +293,7 @@ static HashTable defEnc, defEncIndex, defEncNs;
 static void php_soap_prepare_globals(void)
 {
 	int i;
-	const encode* enc;
+	encode* enc;
 
 	zend_hash_init(&defEnc, 0, NULL, NULL, 1);
 	zend_hash_init(&defEncIndex, 0, NULL, NULL, 1);
@@ -306,9 +306,12 @@ static void php_soap_prepare_globals(void)
 		/* If has a ns and a str_type then index it */
 		if (defaultEncoding[i].details.type_str) {
 			if (defaultEncoding[i].details.ns != NULL) {
-				char *ns_type;
-				spprintf(&ns_type, 0, "%s:%s", defaultEncoding[i].details.ns, defaultEncoding[i].details.type_str);
-				zend_hash_str_add_ptr(&defEnc, ns_type, strlen(ns_type), (void*)enc);
+				char *ns_type, *clark_notation;
+				size_t clark_notation_len = spprintf(&clark_notation, 0, "{%s}%s", enc->details.ns, enc->details.type_str);
+				enc->details.clark_notation = zend_string_init(clark_notation, clark_notation_len, true);
+				size_t ns_type_len = spprintf(&ns_type, 0, "%s:%s", enc->details.ns, enc->details.type_str);
+				zend_hash_str_add_ptr(&defEnc, ns_type, ns_type_len, (void*)enc);
+				efree(clark_notation);
 				efree(ns_type);
 			} else {
 				zend_hash_str_add_ptr(&defEnc, defaultEncoding[i].details.type_str, strlen(defaultEncoding[i].details.type_str), (void*)enc);
@@ -348,6 +351,13 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 
 PHP_MSHUTDOWN_FUNCTION(soap)
 {
+	int i = 0;
+	do {
+		if (defaultEncoding[i].details.clark_notation) {
+			zend_string_release_ex(defaultEncoding[i].details.clark_notation, 1);
+		}
+		i++;
+	} while (defaultEncoding[i].details.type != END_KNOWN_TYPES);
 	zend_error_cb = old_error_handler;
 	zend_hash_destroy(&SOAP_GLOBAL(defEnc));
 	zend_hash_destroy(&SOAP_GLOBAL(defEncIndex));

@@ -7,6 +7,7 @@ $o = new SplObjectStorage();
 $o[new StdClass] = $o;
 
 var_dump($o);
+?>
 --EXPECTF--
 object(SplObjectStorage)#%d (1) {
   ["storage":"SplObjectStorage":private]=>

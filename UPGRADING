@@ -26,10 +26,46 @@ PHP 8.4 UPGRADE NOTES
     Consult sections 2. New Features and 6. New Functions for a list of
     newly implemented methods and constants.
 
+- PDO_PGSQL:
+  . The DSN's credentials, when set, are given priority over their PDO
+    constructor counterparts, being closer to the documentation states.
+
+- SimpleXML:
+  . Get methods called, or casting to a string on a SimpleXMLElement will no
+    longer implicitly reset the iterator data, unless explicitly rewound.
+    For example, casting an element to a string within a foreach loop would
+    cause an infinite loop because it destroyed the current iterator data.
+    This is no longer the case as a consequence of the bugfixes for GH-12192,
+    GH-12208, #55098.
+
+- SPL:
+  . Out of bounds accesses in SplFixedArray now throw an exception of type
+    OutOfBoundsException instead of RuntimeException. As OutOfBoundsException
+    is a child class of RuntimeException, code that uses RuntimeException
+    continues to function.
+
 - Standard:
   . round() now validates the value of the $mode parameter and throws a ValueError
     for invalid modes. Previously invalid modes would have been interpreted as
     PHP_ROUND_HALF_UP.
+
+- XML:
+  . The xml_set_*_handler() functions now declare and check for an effective
+    signature of callable|string|null for the $handler parameters.
+    Moreover, values of type string that correspond to method names,
+    of object set with xml_set_object() are now checked to see if the method
+    exists on the class of the previously passed object.
+    This means that xml_set_object() must now always be called prior to setting
+    method names as callables.
+    Passing an empty string to disable the handler is still allowed,
+    but not recommended.
+
+- XSL:
+  . XSLTProcessor::setParameter() will now throw a ValueError when its arguments
+    contain null bytes. This never actually worked correctly in the first place,
+    which is why it throws an exception nowadays.
+  . The typed properties XSLTProcessor::$cloneDocument and
+    XSLTProcessor::$doXInclude are now declared.
 
 ========================================
 2. New Features
@@ -43,6 +79,16 @@ PHP 8.4 UPGRADE NOTES
   . Added constant DOMNode::DOCUMENT_POSITION_CONTAINED_BY.
   . Added constant DOMNode::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC.
 
+- SOAP:
+  . Added support for clark notation for namespaces in class map.
+    It is now possible to specify entries in a class map with clark notation
+    to resolve a type with a specific namespace to a specific class.
+    For example: '{http://example.com}foo' => 'FooClass'.
+
+- XSL:
+  . It is now possible to use parameters that contain both single and double
+    quotes.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -55,6 +101,9 @@ PHP 8.4 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- PGSQL:
+  . pg_select, the conditions arguments accepts an empty array and is optional.
+
 - Standard:
   . The internal implementation for rounding to integers has been rewritten
     to be easier to verify for correctness and to be easier to maintain.
@@ -63,6 +112,10 @@ PHP 8.4 UPGRADE NOTES
     would have resulted in 1.0 instead of the correct result 0.0. Additional
     inputs might also be affected and result in different outputs compared to
     earlier PHP versions.
+  . The default value of the 'cost' option for PASSWORD_BCRYPT for password_hash()
+    has been increased from '10' to '12'.
+
+    RFC: https://wiki.php.net/rfc/bcrypt_cost_2023
 
 ========================================
 6. New Functions
@@ -83,6 +136,9 @@ PHP 8.4 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Spl:
+  . The class constants are typed now.
+
 ========================================
 10. New Global Constants
 ========================================
@@ -90,6 +146,11 @@ PHP 8.4 UPGRADE NOTES
 - Intl:
   . The IntlDateFormatter class exposes now the new PATTERN constant
     reflecting udat api's UDAT_PATTERN.
+
+- XML:
+  . Added XML_OPTION_PARSE_HUGE to allow large inputs in xml_parse and
+    xml_parse_into_struct.
+    RFC: https://wiki.php.net/rfc/xml_option_parse_huge.
 
 ========================================
 11. Changes to INI File Handling
@@ -110,3 +171,6 @@ PHP 8.4 UPGRADE NOTES
 * The performance of DOMNode::C14N() is greatly improved for the case without
   an xpath query. This can give a time improvement of easily two order of
   magnitude for documents with tens of thousands of nodes.
+
+* The performance of strspn() is greatly improved. It now runs in linear time
+  instead of being bounded by quadratic time.

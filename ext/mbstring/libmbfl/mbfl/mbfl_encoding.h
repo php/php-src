@@ -145,6 +145,7 @@ typedef struct {
 typedef size_t (*mb_to_wchar_fn)(unsigned char **in, size_t *in_len, uint32_t *out, size_t out_len, unsigned int *state);
 typedef void (*mb_from_wchar_fn)(uint32_t *in, size_t in_len, mb_convert_buf *out, bool end);
 typedef bool (*mb_check_fn)(unsigned char *in, size_t in_len);
+typedef zend_string* (*mb_cut_fn)(unsigned char *str, size_t from, size_t len, unsigned char *end);
 
 /* When converting encoded text to a buffer of wchars (Unicode codepoints) using `mb_to_wchar_fn`,
  * the buffer must be at least this size (to work with all supported text encodings) */
@@ -251,6 +252,7 @@ typedef struct {
 	mb_to_wchar_fn to_wchar;
 	mb_from_wchar_fn from_wchar;
 	mb_check_fn check;
+	mb_cut_fn cut;
 } mbfl_encoding;
 
 extern const mbfl_encoding mbfl_encoding_utf8;

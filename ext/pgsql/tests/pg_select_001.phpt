@@ -36,6 +36,12 @@ var_dump(pg_select($conn, 'phptests.bar', array('id4' => 4)));
 /* Use a different result type */
 var_dump(pg_select($conn, 'phptests.bar', array('id4' => 4), 0, PGSQL_NUM));
 
+/* Empty array */
+var_dump(pg_select($conn, 'phptests.bar', array()));
+
+/* No array */
+var_dump(pg_select($conn, 'phptests.bar'));
+
 pg_query($conn, 'DROP TABLE phptests.foo');
 pg_query($conn, 'DROP TABLE phptests.bar');
 pg_query($conn, 'DROP SCHEMA phptests');
@@ -72,5 +78,37 @@ array(1) {
     string(1) "4"
     [1]=>
     string(1) "5"
+  }
+}
+array(2) {
+  [0]=>
+  array(2) {
+    ["id4"]=>
+    string(1) "4"
+    ["id3"]=>
+    string(1) "5"
+  }
+  [1]=>
+  array(2) {
+    ["id4"]=>
+    string(1) "6"
+    ["id3"]=>
+    string(1) "7"
+  }
+}
+array(2) {
+  [0]=>
+  array(2) {
+    ["id4"]=>
+    string(1) "4"
+    ["id3"]=>
+    string(1) "5"
+  }
+  [1]=>
+  array(2) {
+    ["id4"]=>
+    string(1) "6"
+    ["id3"]=>
+    string(1) "7"
   }
 }

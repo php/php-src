@@ -100,7 +100,6 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 						for (j = 0; j < obj->nodesetval->nodeNr; j++) {
 							xmlNodePtr node = obj->nodesetval->nodeTab[j];
 							zval child;
-							/* not sure, if we need this... it's copied from xpath.c */
 							if (node->type == XML_NAMESPACE_DECL) {
 								xmlNodePtr nsparent = node->_private;
 								xmlNsPtr original = (xmlNsPtr) node;

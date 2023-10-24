@@ -70,6 +70,7 @@ require_once 'skipifconnectfailure.inc';
     $mysqli->close();
 
     print "done!";
+?>
 --CLEAN--
 <?php
     require_once 'clean_table.inc';

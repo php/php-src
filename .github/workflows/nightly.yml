@@ -103,11 +103,11 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+          jitType: tracing
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
@@ -123,12 +123,11 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
+          jitType: function
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
-            -d opcache.jit=1205
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
@@ -149,10 +148,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ubuntu:${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
-    env:
-      MYSQL_TEST_HOST: mysql
-      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
-      PDO_MYSQL_TEST_HOST: mysql
     services:
       mysql:
         image: mysql:8
@@ -194,11 +189,11 @@ jobs:
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
+          jitType: tracing
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
@@ -209,12 +204,11 @@ jobs:
       - name: Test Function JIT
         uses: ./.github/actions/test-linux
         with:
+          jitType: function
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
-            -d opcache.jit=1205
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
@@ -258,11 +252,10 @@ jobs:
         uses: ./.github/actions/test-macos
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+          jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.protect_memory=1
-            -d opcache.jit_buffer_size=16M
       - name: Test OpCache
         uses: ./.github/actions/test-macos
         with:
@@ -270,17 +263,14 @@ jobs:
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.protect_memory=1
       - name: Test Function JIT
         uses: ./.github/actions/test-macos
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
+          jitType: function
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.protect_memory=1
-            -d opcache.jit_buffer_size=16M
-            -d opcache.jit=1205
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
@@ -321,6 +311,7 @@ jobs:
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
+          jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
@@ -375,6 +366,15 @@ jobs:
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
           echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
+          echo opcache.jit_max_root_traces=100000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_max_side_traces=100000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_max_exit_counters=100000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_hot_loop=1 >> /etc/php.d/opcache.ini
+          echo opcache.jit_hot_func=1 >> /etc/php.d/opcache.ini
+          echo opcache.jit_hot_return=1 >> /etc/php.d/opcache.ini
+          echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
+          echo memory_limit=-1 >> /etc/php.d/opcache.ini
+          php -v
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |

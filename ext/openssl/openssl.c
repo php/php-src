@@ -5986,10 +5986,13 @@ PHP_FUNCTION(openssl_cms_verify)
 		goto clean_exit;
 	}
 	if (sigfile && (flags & CMS_DETACHED)) {
-		sigbio = php_openssl_bio_new_file(sigfile, sigfile_len, 1, PHP_OPENSSL_BIO_MODE_R(flags));
 		if (encoding == ENCODING_SMIME)  {
 			php_error_docref(NULL, E_WARNING,
 					 "Detached signatures not possible with S/MIME encoding");
+			goto clean_exit;
+		}
+		sigbio = php_openssl_bio_new_file(sigfile, sigfile_len, 1, PHP_OPENSSL_BIO_MODE_R(flags));
+		if (sigbio == NULL) {
 			goto clean_exit;
 		}
 	} else  {

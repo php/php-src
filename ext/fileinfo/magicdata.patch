@@ -51,3 +51,26 @@ diff -ur Magdir.orig/securitycerts Magdir/securitycerts
  0	belong	0xedfeedfe	Sun 'jks' Java Keystore File data
 +
 +0	string \0volume_key	volume_key escrow packet
+diff --git a/magic/Magdir/sgml b/magic/Magdir/sgml
+--- Magdir.orig/sgml
++++ Magdir/sgml
+@@ -1,16 +1,17 @@
+ 
+ #------------------------------------------------------------------------------
+-# $File: sgml,v 1.48 2023/01/18 16:10:21 christos Exp $
++# $File: sgml,v 1.49 2023/08/05 14:34:47 christos Exp $
+ # Type:	SVG Vectorial Graphics
+ # From:	Noel Torres <tecnico@ejerciciosresueltos.com>
+-0	string		\<?xml\ version=
++0	string/bt	\<?xml\ version=
+ >14	regex		['"\ \t]*[0-9.]+['"\ \t]*
+ >>19	search/4096	\<svg			SVG Scalable Vector Graphics image
++!:strength +50
+ !:mime	image/svg+xml
+ !:ext   svg
+ >>19	search/4096	\<gnc-v2		GnuCash file
+ !:mime	application/x-gnucash
+-0	string		\<svg			SVG Scalable Vector Graphics image
++0	string/bt	\<svg			SVG Scalable Vector Graphics image
+ !:mime	image/svg+xml
+ !:ext   svg

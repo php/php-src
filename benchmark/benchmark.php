@@ -27,6 +27,8 @@ function main() {
     $data['Symfony Demo 2.2.3 JIT'] = runSymfonyDemo(true);
     $data['Wordpress 6.2'] = runWordpress(false);
     $data['Wordpress 6.2 JIT'] = runWordpress(true);
+    $data['Laravel 10.10'] = runLaravelDemo(false);
+    $data['Laravel 10.10 JIT'] = runLaravelDemo(true);
     $result = json_encode($data, JSON_PRETTY_PRINT) . "\n";
 
     fwrite(STDOUT, $result);
@@ -87,6 +89,17 @@ function runWordpress(bool $jit): array {
     // Warmup
     runPhpCommand([$dir . '/index.php'], $dir);
     return runValgrindPhpCgiCommand('wordpress', [$dir . '/index.php'], cwd: $dir, jit: $jit, warmup: 50, repeat: 50);
+}
+
+function runLaravelDemo(bool $jit): array {
+
+    $dir = __DIR__ . '/repos/laravel-demo-10.10';
+    cloneRepo($dir, 'https://github.com/php/benchmarking-laravel-demo-10.10.git');
+    runPhpCommand([$dir . '/artisan', 'config:cache']);
+    runPhpCommand([$dir . '/artisan', 'event:cache']);
+    runPhpCommand([$dir . '/artisan', 'route:cache']);
+    runPhpCommand([$dir . '/artisan', 'view:cache']);
+    return runValgrindPhpCgiCommand('laravel-demo', [$dir . '/public/index.php'], cwd: $dir, jit: $jit, warmup: 50, repeat: 100);
 }
 
 function runPhpCommand(array $args, ?string $cwd = null): ProcessResult {

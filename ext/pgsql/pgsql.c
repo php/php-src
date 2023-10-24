@@ -362,7 +362,7 @@ static int _rollback_transactions(zval *el)
 	while ((res = PQgetResult(link))) {
 		PQclear(res);
 	}
-	if ((PQprotocolVersion(link) >= 3 && PQtransactionStatus(link) != PQTRANS_IDLE) || PQprotocolVersion(link) < 3) {
+	if (PQtransactionStatus(link) != PQTRANS_IDLE) {
 		int orig = PGG(ignore_notices);
 		PGG(ignore_notices) = 1;
 		res = PQexec(link,"ROLLBACK;");
@@ -614,7 +614,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 			pgsql = (PGconn *) le->ptr;
 			/* consider to use php_version_compare() here */
-			if (PQprotocolVersion(pgsql) >= 3 && zend_strtod(PQparameterStatus(pgsql, "server_version"), NULL) >= 7.2) {
+			if (zend_strtod(PQparameterStatus(pgsql, "server_version"), NULL) >= 7.2) {
 				pg_result = PQexec(pgsql, "RESET ALL;");
 				PQclear(pg_result);
 			}
@@ -815,31 +815,29 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 		case PHP_PG_HOST:
 			result = PQhost(pgsql);
 			break;
-		case PHP_PG_VERSION:
+		case PHP_PG_VERSION: {
 			array_init(return_value);
+			char *tmp;
 			add_assoc_string(return_value, "client", pgsql_libpq_version);
 			add_assoc_long(return_value, "protocol", PQprotocolVersion(pgsql));
-			if (PQprotocolVersion(pgsql) >= 3) {
-				/* 8.0 or grater supports protorol version 3 */
-				char *tmp;
-				add_assoc_string(return_value, "server", (char*)PQparameterStatus(pgsql, "server_version"));
+			add_assoc_string(return_value, "server", (char*)PQparameterStatus(pgsql, "server_version"));
 
 #define PHP_PQ_COPY_PARAM(_x) tmp = (char*)PQparameterStatus(pgsql, _x); \
 	if(tmp) add_assoc_string(return_value, _x, tmp); \
 	else add_assoc_null(return_value, _x);
 
-				PHP_PQ_COPY_PARAM("server_encoding");
-				PHP_PQ_COPY_PARAM("client_encoding");
-				PHP_PQ_COPY_PARAM("is_superuser");
-				PHP_PQ_COPY_PARAM("session_authorization");
-				PHP_PQ_COPY_PARAM("DateStyle");
-				PHP_PQ_COPY_PARAM("IntervalStyle");
-				PHP_PQ_COPY_PARAM("TimeZone");
-				PHP_PQ_COPY_PARAM("integer_datetimes");
-				PHP_PQ_COPY_PARAM("standard_conforming_strings");
-				PHP_PQ_COPY_PARAM("application_name");
-			}
+			PHP_PQ_COPY_PARAM("server_encoding");
+			PHP_PQ_COPY_PARAM("client_encoding");
+			PHP_PQ_COPY_PARAM("is_superuser");
+			PHP_PQ_COPY_PARAM("session_authorization");
+			PHP_PQ_COPY_PARAM("DateStyle");
+			PHP_PQ_COPY_PARAM("IntervalStyle");
+			PHP_PQ_COPY_PARAM("TimeZone");
+			PHP_PQ_COPY_PARAM("integer_datetimes");
+			PHP_PQ_COPY_PARAM("standard_conforming_strings");
+			PHP_PQ_COPY_PARAM("application_name");
 			return;
+		}
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	if (result) {
@@ -4015,7 +4013,7 @@ PHP_FUNCTION(pg_get_notify)
 		add_index_string(return_value, 0, pgsql_notify->relname);
 		add_index_long(return_value, 1, pgsql_notify->be_pid);
 		/* consider to use php_version_compare() here */
-		if (PQprotocolVersion(pgsql) >= 3 && zend_strtod(PQparameterStatus(pgsql, "server_version"), NULL) >= 9.0) {
+		if (zend_strtod(PQparameterStatus(pgsql, "server_version"), NULL) >= 9.0) {
 			add_index_string(return_value, 2, pgsql_notify->extra);
 		}
 	}
@@ -4023,7 +4021,7 @@ PHP_FUNCTION(pg_get_notify)
 		add_assoc_string(return_value, "message", pgsql_notify->relname);
 		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
 		/* consider to use php_version_compare() here */
-		if (PQprotocolVersion(pgsql) >= 3 && zend_strtod(PQparameterStatus(pgsql, "server_version"), NULL) >= 9.0) {
+		if (zend_strtod(PQparameterStatus(pgsql, "server_version"), NULL) >= 9.0) {
 			add_assoc_string(return_value, "payload", pgsql_notify->extra);
 		}
 	}
@@ -5777,29 +5775,34 @@ PHP_PGSQL_API zend_result php_pgsql_select(PGconn *pg_link, const zend_string *t
 
 	ZEND_ASSERT(pg_link != NULL);
 	ZEND_ASSERT(table != NULL);
-	ZEND_ASSERT(Z_TYPE_P(ids_array) == IS_ARRAY);
+	if (ids_array) {
+		ZEND_ASSERT(Z_TYPE_P(ids_array) == IS_ARRAY);
+	}
 	ZEND_ASSERT(Z_TYPE_P(ret_array) == IS_ARRAY);
 	ZEND_ASSERT(!(opt & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)));
 
-	if (zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
-		return FAILURE;
-	}
+	zend_bool is_valid_ids_array = ids_array && zend_hash_num_elements(Z_ARRVAL_P(ids_array)) != 0;
 
-	ZVAL_UNDEF(&ids_converted);
-	if (!(opt & (PGSQL_DML_NO_CONV|PGSQL_DML_ESCAPE))) {
-		array_init(&ids_converted);
-		if (php_pgsql_convert(pg_link, table, ids_array, &ids_converted, (opt & PGSQL_CONV_OPTS)) == FAILURE) {
-			goto cleanup;
+	if (is_valid_ids_array) {
+		ZVAL_UNDEF(&ids_converted);
+		if (!(opt & (PGSQL_DML_NO_CONV|PGSQL_DML_ESCAPE))) {
+			array_init(&ids_converted);
+			if (php_pgsql_convert(pg_link, table, ids_array, &ids_converted, (opt & PGSQL_CONV_OPTS)) == FAILURE) {
+				goto cleanup;
+			}
+			ids_array = &ids_converted;
 		}
-		ids_array = &ids_converted;
 	}
 
 	smart_str_appends(&querystr, "SELECT * FROM ");
 	build_tablename(&querystr, pg_link, table);
-	smart_str_appends(&querystr, " WHERE ");
 
-	if (build_assignment_string(pg_link, &querystr, Z_ARRVAL_P(ids_array), 1, " AND ", sizeof(" AND ")-1, opt))
-		goto cleanup;
+	if (is_valid_ids_array) {
+		smart_str_appends(&querystr, " WHERE ");
+		if (build_assignment_string(pg_link, &querystr, Z_ARRVAL_P(ids_array), 1, " AND ", sizeof(" AND ")-1, opt)) {
+			goto cleanup;
+		}
+	}
 
 	smart_str_appendc(&querystr, ';');
 	smart_str_0(&querystr);
@@ -5814,7 +5817,9 @@ PHP_PGSQL_API zend_result php_pgsql_select(PGconn *pg_link, const zend_string *t
 	PQclear(pg_result);
 
 cleanup:
-	zval_ptr_dtor(&ids_converted);
+	if (is_valid_ids_array) {
+		zval_ptr_dtor(&ids_converted);
+	}
 	if (ret == SUCCESS && (opt & PGSQL_DML_STRING)) {
 		*sql = querystr.s;
 	}
@@ -5828,7 +5833,8 @@ cleanup:
 /* {{{ Select records that has ids (id=>value) */
 PHP_FUNCTION(pg_select)
 {
-	zval *pgsql_link, *ids;
+	zval *pgsql_link;
+	zval *ids = NULL;
 	pgsql_link_handle *link;
 	zend_string *table;
 	zend_ulong option = PGSQL_DML_EXEC;
@@ -5837,7 +5843,7 @@ PHP_FUNCTION(pg_select)
 	zend_string *sql = NULL;
 
 	/* TODO Document result_type param on php.net (apparently it was added in PHP 7.1) */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OPa|ll",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|all",
 		&pgsql_link, pgsql_link_ce, &table, &ids, &option, &result_type
 	) == FAILURE) {
 		RETURN_THROWS();

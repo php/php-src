@@ -968,11 +968,6 @@ void dom_xpath_objects_free_storage(zend_object *object)
 void dom_objects_free_storage(zend_object *object)
 {
 	dom_object *intern = php_dom_obj_from_obj(object);
-#if defined(__GNUC__) && __GNUC__ >= 3
-	int retcount __attribute__((unused)); /* keep compiler quiet */
-#else
-	int retcount;
-#endif
 
 	zend_object_std_dtor(&intern->std);
 
@@ -981,7 +976,7 @@ void dom_objects_free_storage(zend_object *object)
 			php_libxml_node_decrement_resource((php_libxml_node_object *) intern);
 		} else {
 			php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
-			retcount = php_libxml_decrement_doc_ref((php_libxml_node_object *)intern);
+			php_libxml_decrement_doc_ref((php_libxml_node_object *) intern);
 		}
 		intern->ptr = NULL;
 	}

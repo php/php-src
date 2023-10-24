@@ -20,6 +20,7 @@ A::out();
 B::out();
 C::out();
 echo PHP_EOL;
+?>
 --EXPECT--
 A
 B

@@ -1391,6 +1391,7 @@ zend_result zend_accel_invalidate(zend_string *filename, bool force)
 {
 	zend_string *realpath;
 	zend_persistent_script *persistent_script;
+	zend_bool file_found = true;
 
 	if (!ZCG(accelerator_enabled) || accelerator_shm_read_lock() != SUCCESS) {
 		return FAILURE;
@@ -1399,7 +1400,10 @@ zend_result zend_accel_invalidate(zend_string *filename, bool force)
 	realpath = accelerator_orig_zend_resolve_path(filename);
 
 	if (!realpath) {
-		return FAILURE;
+		//file could have been deleted, but we still need to invalidate it.
+		//so instead of failing, just use the provided filename for the lookup
+		realpath = zend_string_copy(filename);
+		file_found = false;
 	}
 
 	if (ZCG(accel_directives).file_cache) {
@@ -1424,12 +1428,13 @@ zend_result zend_accel_invalidate(zend_string *filename, bool force)
 
 		file_handle.opened_path = NULL;
 		zend_destroy_file_handle(&file_handle);
+		file_found = true;
 	}
 
 	accelerator_shm_read_unlock();
 	zend_string_release_ex(realpath, 0);
 
-	return SUCCESS;
+	return file_found ? SUCCESS : FAILURE;
 }
 
 static zend_string* accel_new_interned_key(zend_string *key)
@@ -3248,6 +3253,11 @@ static zend_result accel_post_startup(void)
 			 || zend_jit_startup(ZSMMG(reserved), jit_size, reattached) != SUCCESS) {
 				JIT_G(enabled) = false;
 				JIT_G(on) = false;
+				/* The JIT is implicitly disabled with opcache.jit_buffer_size=0, so we don't want to
+				 * emit a warning here. */
+				if (JIT_G(buffer_size) != 0) {
+					zend_accel_error(ACCEL_LOG_WARNING, "Could not enable JIT!");
+				}
 			}
 		}
 #endif
@@ -4629,6 +4639,8 @@ static zend_result accel_finish_startup_preload(bool in_child)
 		SIGG(check) = false;
 #endif
 		php_request_shutdown(NULL); /* calls zend_shared_alloc_unlock(); */
+		EG(class_table) = NULL;
+		EG(function_table) = NULL;
 		PG(report_memleaks) = orig_report_memleaks;
 	} else {
 		zend_shared_alloc_unlock();

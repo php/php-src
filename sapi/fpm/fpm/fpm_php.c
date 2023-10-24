@@ -87,7 +87,9 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 
 	if (!strcmp(name, "extension") && *value) {
 		zval zv;
+		zend_interned_strings_switch_storage(0);
 		php_dl(value, MODULE_PERSISTENT, &zv, 1);
+		zend_interned_strings_switch_storage(1);
 		return Z_TYPE(zv) == IS_TRUE;
 	}
 

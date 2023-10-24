@@ -19,6 +19,13 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   to do this at the call site anymore. Writing the handle should happen after
   successful registration.
 
+* ZPP now accepts a F or Z_PARAM_FUNC_NO_TRAMPOLINE_FREE type check.
+  This is identical to the 'f' or Z_PARAM_FUNC type check, except the FCC is
+  always initialized because it doesn't free trampolines.
+  Trampolines MUST be freed using zend_release_fcall_info_cache() or consumed.
+  Z_PARAM_FUNC_EX2 was added as well with the same arguments as Z_PARAM_FUNC_EX
+  plus an additional argument free_trampoline.
+
 ========================
 2. Build system changes
 ========================
@@ -35,6 +42,15 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - dom_read_t and dom_write_t now expect the function to return zend_result
      instead of int.
    - The macros DOM_NO_ARGS() and DOM_NOT_IMPLEMENTED() have been removed.
+
+ b. ext/random
+   - The macro RAND_RANGE_BADSCALING() has been removed. The implementation
+     should either be inlined and undefined behavior fixed or it should be
+     replaced by a non-biased scaler.
+
+ c. ext/xsl
+   - The function php_xsl_create_object() was removed as it was not used
+     nor exported.
 
 ========================
 4. OpCode changes

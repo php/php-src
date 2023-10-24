@@ -64,5 +64,6 @@ $test
     ->f()->f()->f()->f()->f()->f()->f()->f()->f()->f()
 ;
 
+?>
 --EXPECTF--
 Fatal error: Maximum call stack size of %d bytes reached during compilation. Try splitting expression in %s on line %d
