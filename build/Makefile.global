@@ -119,9 +119,6 @@ clean:
 	find . -name \*.so | xargs rm -f
 	find . -name .libs -a -type d|xargs rm -rf
 	rm -f libphp.la $(SAPI_CLI_PATH) $(SAPI_CGI_PATH) $(SAPI_LITESPEED_PATH) $(SAPI_FPM_PATH) $(OVERALL_TARGET) modules/* libs/*
-	rm -f ext/opcache/jit/zend_jit_x86.c
-	rm -f ext/opcache/jit/zend_jit_arm64.c
-	rm -f ext/opcache/minilua
 	rm -f ext/opcache/jit/ir/gen_ir_fold_hash
 	rm -f ext/opcache/jit/ir/minilua
 	rm -f ext/opcache/jit/ir/ir_fold_hash.h

@@ -165,8 +165,6 @@ ZEND_EXT_API void zend_jit_deactivate(void);
 ZEND_EXT_API void zend_jit_status(zval *ret);
 ZEND_EXT_API void zend_jit_restart(void);
 
-#ifdef ZEND_JIT_IR
-
 #define ZREG_LOAD           (1<<0)
 #define ZREG_STORE          (1<<1)
 #define ZREG_LAST_USE       (1<<2)
@@ -184,40 +182,5 @@ ZEND_EXT_API void zend_jit_restart(void);
 #define ZREG_THIS           (5<<4)
 
 #define ZREG_NONE           -1
-
-#else
-typedef struct _zend_lifetime_interval zend_lifetime_interval;
-typedef struct _zend_life_range zend_life_range;
-
-struct _zend_life_range {
-	uint32_t         start;
-	uint32_t         end;
-	zend_life_range *next;
-};
-
-#define ZREG_FLAGS_SHIFT    8
-
-#define ZREG_STORE          (1<<0)
-#define ZREG_LOAD           (1<<1)
-#define ZREG_LAST_USE       (1<<2)
-#define ZREG_SPLIT          (1<<3)
-
-struct _zend_lifetime_interval {
-	int                     ssa_var;
-	union {
-		struct {
-		ZEND_ENDIAN_LOHI_3(
-			int8_t          reg,
-			uint8_t         flags,
-			uint16_t        reserved
-		)};
-		uint32_t            reg_flags;
-	};
-	zend_life_range         range;
-	zend_lifetime_interval *hint;
-	zend_lifetime_interval *used_as_hint;
-	zend_lifetime_interval *list_next;
-};
-#endif
 
 #endif /* HAVE_JIT_H */

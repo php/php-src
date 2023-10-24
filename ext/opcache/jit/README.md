@@ -2,33 +2,10 @@ Opcache JIT
 ===========
 
 This is the implementation of Opcache's JIT (Just-In-Time compiler),
-This converts the PHP Virtual Machine's opcodes into x64/x86 assembly,
-on POSIX platforms and Windows.
-
-It generates native code directly from PHP byte-code and information collected
-by the SSA static analysis framework (a part of the opcache optimizer).
-Code is usually generated separately for each PHP byte-code instruction. Only
-a few combinations are considered together (e.g. compare + conditional jump).
-
-See [the JIT RFC](https://wiki.php.net/rfc/jit) for more details.
-
-DynAsm
-------
-
-This uses [DynAsm](https://luajit.org/dynasm.html) (developed for LuaJIT project)
-for the generation of native code.  It's a very lightweight and advanced tool,
-but does assume good, and very low-level development knowledge of target
-assembler languages. In the past we tried LLVM, but its code generation speed
-was almost 100 times slower, making it prohibitively expensive to use.
-
-[The unofficial DynASM Documentation](https://corsix.github.io/dynasm-doc/tutorial.html)
-has a tutorial, reference, and instruction listing.
-
-In x86 builds, `zend_jit_x86.dasc` gets automatically converted to `zend_jit_x86.c` by the bundled
-`dynasm` during `make`.
-
-In arm64 builds, `zend_jit_arm64.dasc` gets automatically converted to `zend_jit_arm64.c` by the bundled
-`dynasm` during `make`.
+This converts the PHP Virtual Machine's opcodes into Intermediate
+Representation and uses [IR - Lightweight JIT Compilation Framework](https://github.com/dstogov/ir)
+to produce optimized native code. The necessary part of the IR
+Framework is embedded into php-src.
 
 Running tests of the JIT
 ------------------------
@@ -61,17 +38,6 @@ Note that the JIT supports 3 different architectures: `X86_64`, `i386`, and `arm
 
 Miscellaneous
 -------------
-
-### Checking dasc files for in a different architecture
-
-The following command can be run to manually check if the modified `.dasc code` is at least transpilable
-for an architecture you're not using, e.g.:
-
-For arm64: `ext/opcache/minilua ext/opcache/jit/dynasm/dynasm.lua -D ARM64=1 -o ext/opcache/jit/zend_jit_arm64.ignored.c ext/opcache/jit/zend_jit_arm64.dasc`
-
-For x86_64: `ext/opcache/minilua ext/opcache/jit/dynasm/dynasm.lua -D X64=1 -o ext/opcache/jit/zend_jit_x86.ignored.c ext/opcache/jit/zend_jit_x86.dasc`
-
-For i386 (i.e. 32-bit): `ext/opcache/minilua ext/opcache/jit/dynasm/dynasm.lua  -o ext/opcache/jit/zend_jit_x86.ignored.c ext/opcache/jit/zend_jit_x86.dasc`
 
 ### How to build 32-bit builds on x86_64 environments
 
