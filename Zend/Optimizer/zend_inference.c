@@ -3455,7 +3455,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 			UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			break;
 		case ZEND_FETCH_THIS:
-			UPDATE_SSA_OBJ_TYPE(op_array->scope, 1, ssa_op->result_def);
+			if (!(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
+				UPDATE_SSA_OBJ_TYPE(op_array->scope, 1, ssa_op->result_def);
+			}
 			UPDATE_SSA_TYPE(MAY_BE_RCN|MAY_BE_OBJECT, ssa_op->result_def);
 			break;
 		case ZEND_FETCH_OBJ_R:
