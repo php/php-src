@@ -6952,6 +6952,10 @@ static int zend_jit_cmp(zend_jit_ctx   *jit,
 		} else {
 			ir_MERGE_N(n, end_inputs->refs);
 		}
+	} else if (smart_branch_opcode && !exit_addr) {
+		/* dead code */
+		_zend_jit_add_predecessor_ref(jit, target_label, jit->b, ir_END());
+		jit->b = -1;
 	}
 
 	return 1;
