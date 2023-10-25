@@ -15166,18 +15166,10 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 		int b;
 		int32_t exit_point;
 		const void *exit_addr;
-		const void *fallback_label = NULL;
 		const void *default_label = NULL;
 		zval *zv;
 
 		if (next_opline) {
-			if (opline->opcode != ZEND_MATCH && next_opline != opline + 1) {
-				exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
-				fallback_label = zend_jit_trace_get_exit_addr(exit_point);
-				if (!fallback_label) {
-					return 0;
-				}
-			}
 			if (next_opline != default_opline) {
 				exit_point = zend_jit_trace_get_exit_point(default_opline, 0);
 				default_label = zend_jit_trace_get_exit_addr(exit_point);
@@ -15189,6 +15181,17 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 
 		if (opline->opcode == ZEND_SWITCH_LONG) {
 			if (op1_info & MAY_BE_LONG) {
+				const void *fallback_label = NULL;
+
+				if (next_opline) {
+					if (next_opline != opline + 1) {
+						exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+						fallback_label = zend_jit_trace_get_exit_addr(exit_point);
+						if (!fallback_label) {
+							return 0;
+						}
+					}
+				}
 				if (op1_info & MAY_BE_REF) {
 					ir_ref ref, if_long, fast_path, ref2;
 
@@ -15294,13 +15297,23 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 					}
 					jit->b = -1;
 				}
-			} else {
-				ZEND_ASSERT(!next_opline);
+			} else if (!next_opline) {
 				_zend_jit_add_predecessor_ref(jit, jit->b + 1, jit->b, ir_END());
 				jit->b = -1;
 			}
 		} else if (opline->opcode == ZEND_SWITCH_STRING) {
 			if (op1_info & MAY_BE_STRING) {
+				const void *fallback_label = NULL;
+
+				if (next_opline) {
+					if (next_opline != opline + 1) {
+						exit_point = zend_jit_trace_get_exit_point(opline + 1, 0);
+						fallback_label = zend_jit_trace_get_exit_addr(exit_point);
+						if (!fallback_label) {
+							return 0;
+						}
+					}
+				}
 				if (op1_info & MAY_BE_REF) {
 					ir_ref ref, if_string, fast_path, ref2;
 
@@ -15403,8 +15416,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 					}
 					jit->b = -1;
 				}
-			} else {
-				ZEND_ASSERT(!next_opline);
+			} else if (!next_opline) {
 				_zend_jit_add_predecessor_ref(jit, jit->b + 1, jit->b, ir_END());
 				jit->b = -1;
 			}
