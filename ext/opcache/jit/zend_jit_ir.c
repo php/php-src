@@ -5413,7 +5413,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 					jit_SET_EX_OPLINE(jit, opline);
 					ir_GUARD(IR_FALSE, jit_STUB_ADDR(jit, jit_stub_negative_shift));
 					if (Z_MODE(res_addr) == IS_REG) {
-						zend_jit_def_reg(jit, res_addr, ir_CONST_LONG(0)); // dead code
+						ref = ir_CONST_LONG(0); // dead code
 					}
 				}
 			} else {
@@ -5462,7 +5462,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 					jit_SET_EX_OPLINE(jit, opline);
 					ir_GUARD(IR_FALSE, jit_STUB_ADDR(jit, jit_stub_negative_shift));
 					if (Z_MODE(res_addr) == IS_REG) {
-						zend_jit_def_reg(jit, res_addr, ir_CONST_LONG(0)); // dead code
+						ref = ir_CONST_LONG(0); // dead code
 					}
 				}
 			} else {
@@ -5503,7 +5503,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 				jit_SET_EX_OPLINE(jit, opline);
 				ir_GUARD(IR_FALSE,	jit_STUB_ADDR(jit, jit_stub_mod_by_zero));
 				if (Z_MODE(res_addr) == IS_REG) {
-					zend_jit_def_reg(jit, res_addr, ir_CONST_LONG(0)); // dead code
+					ref = ir_CONST_LONG(0); // dead code
 				}
 			} else if (zend_long_is_power_of_two(op2_lval) && op1_range && op1_range->min >= 0) {
 				ref = ir_AND_L(jit_Z_LVAL(jit, op1_addr), ir_CONST_LONG(op2_lval - 1));
