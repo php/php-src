@@ -155,7 +155,7 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 			}
 			if (sdl->encoders == NULL) {
 				sdl->encoders = pemalloc(sizeof(HashTable), sdl->is_persistent);
-				zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, sdl->is_persistent);
+				zend_hash_init(sdl->encoders, 0, NULL, sdl->is_persistent ? delete_encoder_persistent : delete_encoder, sdl->is_persistent);
 			}
 			zend_hash_str_update_ptr(sdl->encoders, nscat, len, new_enc);
 			enc = new_enc;
