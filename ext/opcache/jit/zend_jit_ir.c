@@ -12799,19 +12799,21 @@ static int zend_jit_assign_dim(zend_jit_ctx *jit, const zend_op *opline, uint32_
 				var_info |= MAY_BE_RC1;
 			}
 
-			ir_MERGE_N(found_inputs->count, found_inputs->refs);
-			ref = ir_PHI_N(IR_ADDR, found_values->count, found_values->refs);
-			var_addr = ZEND_ADDR_REF_ZVAL(ref);
+			if (found_inputs->count) {
+				ir_MERGE_N(found_inputs->count, found_inputs->refs);
+				ref = ir_PHI_N(IR_ADDR, found_values->count, found_values->refs);
+				var_addr = ZEND_ADDR_REF_ZVAL(ref);
 
-			// JIT: value = zend_assign_to_variable(variable_ptr, value, OP_DATA_TYPE);
-			if (opline->op1_type == IS_VAR) {
-				ZEND_ASSERT(opline->result_type == IS_UNUSED);
-				if (!zend_jit_assign_to_variable_call(jit, opline, var_addr, var_addr, var_info, -1, (opline+1)->op1_type, op3_addr, val_info, res_addr, 0)) {
-					return 0;
-				}
-			} else {
-				if (!zend_jit_assign_to_variable(jit, opline, var_addr, var_addr, var_info, -1, (opline+1)->op1_type, op3_addr, val_info, res_addr, 0, 0)) {
-					return 0;
+				// JIT: value = zend_assign_to_variable(variable_ptr, value, OP_DATA_TYPE);
+				if (opline->op1_type == IS_VAR) {
+					ZEND_ASSERT(opline->result_type == IS_UNUSED);
+					if (!zend_jit_assign_to_variable_call(jit, opline, var_addr, var_addr, var_info, -1, (opline+1)->op1_type, op3_addr, val_info, res_addr, 0)) {
+						return 0;
+					}
+				} else {
+					if (!zend_jit_assign_to_variable(jit, opline, var_addr, var_addr, var_info, -1, (opline+1)->op1_type, op3_addr, val_info, res_addr, 0, 0)) {
+						return 0;
+					}
 				}
 			}
 		}
