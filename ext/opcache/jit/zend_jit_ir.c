@@ -14723,13 +14723,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 					jit_ZVAL_ADDR(jit, op1_addr),
 					ir_CONST_ADDR(ZSTR_VAL(name)));
 
-				may_throw = 1;
-
-				if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) && !delayed_fetch_this && !op1_indirect) {
-					ir_END_list(end_inputs);
-				} else {
-					ir_IJMP(jit_STUB_ADDR(jit, jit_stub_exception_handler));
-				}
+				ir_IJMP(jit_STUB_ADDR(jit, jit_stub_exception_handler));
 				ir_IF_TRUE(if_obj);
 			}
 		}
