@@ -33,6 +33,16 @@ if ($conn) odbc_close($conn);
 
 echo "dsn with correct credentials / incorrect user / incorrect password\n";
 $conn = odbc_connect("{$dsn};Uid={$user};pwD={$pass}", 'hoge', 'fuga');
+echo $conn ? "Connected.\n\n" : "";
+if ($conn) odbc_close($conn);
+
+echo "dsn with correct credentials / null user / null password\n";
+$conn = odbc_connect("{$dsn};Uid={$user};pwD={$pass}", null, null);
+echo $conn ? "Connected.\n\n" : "";
+if ($conn) odbc_close($conn);
+
+echo "dsn with correct credentials / not set user / not set password\n";
+$conn = odbc_connect("{$dsn};Uid={$user};pwD={$pass}");
 echo $conn ? "Connected.\n" : "";
 if ($conn) odbc_close($conn);
 ?>
@@ -47,4 +57,10 @@ dsn with correct password / correct user / incorrect password
 Connected.
 
 dsn with correct credentials / incorrect user / incorrect password
+Connected.
+
+dsn with correct credentials / null user / null password
+Connected.
+
+dsn with correct credentials / not set user / not set password
 Connected.

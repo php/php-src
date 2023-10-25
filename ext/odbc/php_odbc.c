@@ -2098,8 +2098,8 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 
 			size_t db_len = strlen(db);
 			char *db_end = db + db_len;
-			bool use_uid_arg = !php_memnistr(db, "uid=", strlen("uid="), db_end);
-			bool use_pwd_arg = !php_memnistr(db, "pwd=", strlen("pwd="), db_end);
+			bool use_uid_arg = uid != NULL && !php_memnistr(db, "uid=", strlen("uid="), db_end);
+			bool use_pwd_arg = pwd != NULL && !php_memnistr(db, "pwd=", strlen("pwd="), db_end);
 
 			/* Force UID and PWD to be set in the DSN */
 			if (use_uid_arg || use_pwd_arg) {
@@ -2190,18 +2190,19 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 /* {{{ odbc_do_connect */
 void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	char *db, *uid, *pwd;
+	char *db, *uid=NULL, *pwd=NULL;
 	size_t db_len, uid_len, pwd_len;
 	zend_long pv_opt = SQL_CUR_DEFAULT;
 	odbc_connection *db_conn;
 	int cur_opt;
 
-	/*  Now an optional 4th parameter specifying the cursor type
-	 *  defaulting to the cursors default
-	 */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|l", &db, &db_len, &uid, &uid_len, &pwd, &pwd_len, &pv_opt) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_STRING(db, db_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_OR_NULL(uid, uid_len)
+		Z_PARAM_STRING_OR_NULL(pwd, pwd_len)
+		Z_PARAM_LONG(pv_opt)
+	ZEND_PARSE_PARAMETERS_END();
 
 	cur_opt = pv_opt;
 
