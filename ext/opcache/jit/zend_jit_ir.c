@@ -16450,13 +16450,6 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			 && (trace->op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED)) == IS_ARRAY) {
 				op1_info &= ~((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY);
 			}
-			if (trace && trace->op2_type != IS_UNKNOWN) {
-				if ((trace->op2_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED)) == IS_LONG) {
-					op2_info &= ~((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_LONG);
-				} else if ((trace->op2_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED)) == IS_STRING) {
-					op2_info &= ~((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_STRING);
-				}
-			}
 			return ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) &&
 				(!(opline->op1_type & (IS_TMP_VAR|IS_VAR)) || !(op1_info & MAY_BE_RC1)) &&
 					(((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) ||
