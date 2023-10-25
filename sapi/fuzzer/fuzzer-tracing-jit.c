@@ -62,12 +62,18 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 		"zend_extension=%s\n"
 		"opcache.validate_timestamps=0\n"
 		"opcache.file_update_protection=0\n"
-		"opcache.jit_buffer_size=256M\n"
+		"opcache.memory_consumption=1024\n"
+		"opcache.jit_buffer_size=1024M\n"
 		"opcache.jit_hot_func=1\n"
 		"opcache.jit_hot_loop=1\n"
 		"opcache.jit_hot_return=1\n"
 		"opcache.jit_hot_side_exit=1\n"
-		"opcache.jit_max_root_traces=32768",
+		"opcache.jit_max_root_traces=100000\n"
+		"opcache.jit_max_side_traces=100000\n"
+		"opcache.jit_max_exit_counters=100000\n"
+		"opcache.jit_blacklist_root_trace=255\n"
+		"opcache.jit_blacklist_side_trace=255\n"
+		"opcache.protect_memory=1\n",
 		opcache_path);
 	free(opcache_path);
 
