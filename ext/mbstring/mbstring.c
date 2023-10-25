@@ -3068,6 +3068,12 @@ static size_t count_demerits(struct candidate *array, size_t length, bool strict
 	uint32_t wchar_buf[128];
 	unsigned int finished = 0; /* For how many candidate encodings have we processed all the input? */
 
+	for (size_t i = 0; i < length; i++) {
+		if (array[i].in_len == 0) {
+			finished++;
+		}
+	}
+
 	while ((strict || length > 1) && finished < length) {
 		/* Iterate in reverse order to avoid moving candidates that can be eliminated. */
 		for (size_t i = length - 1; i != (size_t)-1; i--) {
