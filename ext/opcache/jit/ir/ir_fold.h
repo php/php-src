@@ -1282,7 +1282,7 @@ IR_FOLD(SUB(_,NEG))
 {
 	/* a + (-b) => a - b */
 	opt ^= 1; /* ADD <-> SUB */
-	op2 = op2_insn->op2;
+	op2 = op2_insn->op1;
 	IR_FOLD_RESTART;
 }
 

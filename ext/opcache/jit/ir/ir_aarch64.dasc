@@ -463,6 +463,22 @@ int ir_get_target_constraints(const ir_ctx *ctx, ir_ref ref, ir_target_constrain
 			}
 			flags = IR_USE_SHOULD_BE_IN_REG | IR_OP2_SHOULD_BE_IN_REG | IR_OP3_SHOULD_BE_IN_REG;
 			break;
+		case IR_COND:
+			insn = &ctx->ir_base[ref];
+			n = 0;
+			if (IR_IS_CONST_REF(insn->op1)) {
+				constraints->tmp_regs[n] = IR_TMP_REG(1, ctx->ir_base[insn->op1].type, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+				n++;
+			}
+			if (IR_IS_CONST_REF(insn->op2)) {
+				constraints->tmp_regs[n] = IR_TMP_REG(2, insn->type, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+				n++;
+			}
+			if (IR_IS_CONST_REF(insn->op3)) {
+				constraints->tmp_regs[n] = IR_TMP_REG(3, insn->type, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+				n++;
+			}
+			break;
 		case IR_COPY_INT:
 		case IR_COPY_FP:
 			flags = IR_DEF_REUSES_OP1_REG | IR_USE_MUST_BE_IN_REG;
@@ -2138,6 +2154,18 @@ static void ir_emit_cmp_fp(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		case IR_GT:
 			|	cset Rw(def_reg), gt
 			break;
+		case IR_ULT:
+			|	cset Rw(def_reg), lt
+			break;
+		case IR_UGE:
+			|	cset Rw(def_reg), hs
+			break;
+		case IR_ULE:
+			|	cset Rw(def_reg), le
+			break;
+		case IR_UGT:
+			|	cset Rw(def_reg), hi
+			break;
 	}
 	if (IR_REG_SPILLED(ctx->regs[def][0])) {
 		ir_emit_store(ctx, insn->type, def, def_reg);
@@ -2212,7 +2240,11 @@ static void ir_emit_jcc(ir_ctx *ctx, uint8_t op, uint32_t b, ir_ref def, ir_insn
 	ir_get_true_false_blocks(ctx, b, &true_block, &false_block, &next_block);
 	if (true_block == next_block) {
 		/* swap to avoid unconditional JMP */
-		op ^= 1; // reverse
+		if (int_cmp || op == IR_EQ || op == IR_NE) {
+			op ^= 1; // reverse
+		} else {
+			op ^= 5; // reverse
+		}
 		true_block = false_block;
 		false_block = 0;
 	} else if (false_block == next_block) {
@@ -2275,6 +2307,18 @@ static void ir_emit_jcc(ir_ctx *ctx, uint8_t op, uint32_t b, ir_ref def, ir_insn
 				break;
 			case IR_GT:
 				|	bgt =>true_block
+				break;
+			case IR_ULT:
+				|	blt =>true_block
+				break;
+			case IR_UGE:
+				|	bhs =>true_block
+				break;
+			case IR_ULE:
+				|	ble =>true_block
+				break;
+			case IR_UGT:
+				|	bhi =>true_block
 				break;
 //			case IR_ULT: fprintf(stderr, "\tjb .LL%d\n", true_block); break;
 //			case IR_UGE: fprintf(stderr, "\tjae .LL%d\n", true_block); break;
@@ -2421,15 +2465,15 @@ static void ir_emit_cond(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 
 	if (IR_IS_TYPE_INT(type)) {
 		if (ir_type_size[type] == 8) {
-			|	csel Rx(def_reg), Rx(op2_reg), Rx(op3_reg), eq
+			|	csel Rx(def_reg), Rx(op2_reg), Rx(op3_reg), ne
 		} else {
-			|	csel Rw(def_reg), Rw(op2_reg), Rw(op3_reg), eq
+			|	csel Rw(def_reg), Rw(op2_reg), Rw(op3_reg), ne
 		}
 	} else{
 		if (type == IR_DOUBLE) {
-			|	fcsel Rd(def_reg-IR_REG_FP_FIRST), Rd(op2_reg-IR_REG_FP_FIRST), Rd(op3_reg-IR_REG_FP_FIRST), eq
+			|	fcsel Rd(def_reg-IR_REG_FP_FIRST), Rd(op2_reg-IR_REG_FP_FIRST), Rd(op3_reg-IR_REG_FP_FIRST), ne
 		} else {
-			|	fcsel Rs(def_reg-IR_REG_FP_FIRST), Rs(op2_reg-IR_REG_FP_FIRST), Rs(op3_reg-IR_REG_FP_FIRST), eq
+			|	fcsel Rs(def_reg-IR_REG_FP_FIRST), Rs(op2_reg-IR_REG_FP_FIRST), Rs(op3_reg-IR_REG_FP_FIRST), ne
 		}
 	}
 
@@ -3851,6 +3895,12 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 									val_insn->const_flags |= IR_CONST_EMIT;
 									|	adr Rx(dst_reg), =>label
 									continue;
+								} else if (val_insn->op == IR_SYM || val_insn->op == IR_FUNC) {
+									void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
+										ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, val_insn->val.i32)) :
+										ir_resolve_sym_name(ir_get_str(ctx, val_insn->val.i32));
+									ir_emit_load_imm_int(ctx, IR_ADDR, dst_reg, (intptr_t)addr);
+									continue;
 								}
 								IR_ASSERT(val_insn->op == IR_ADDR || val_insn->op == IR_FUNC_ADDR);
 							} else if (ir_type_size[type] == 1) {
@@ -3875,7 +3925,11 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 							|	adr Rx(tmp_reg), =>label
 							|	str Rx(tmp_reg), [sp, #stack_offset]
 						} else if (val_insn->op == IR_FUNC || val_insn->op == IR_SYM) {
-							IR_ASSERT(0 && "sym");
+							void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
+								ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, val_insn->val.i32)) :
+								ir_resolve_sym_name(ir_get_str(ctx, val_insn->val.i32));
+							ir_emit_load_imm_int(ctx, IR_ADDR, tmp_reg, (intptr_t)addr);
+							|	str Rx(tmp_reg), [sp, #stack_offset]
 						} else {
 							IR_ASSERT(tmp_reg != IR_REG_NONE);
 							ir_emit_load_imm_int(ctx, type, tmp_reg, val_insn->val.i64);

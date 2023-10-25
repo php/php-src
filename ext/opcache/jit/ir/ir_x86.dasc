@@ -4088,17 +4088,17 @@ static void ir_emit_cmp_fp(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			|	setb Rb(def_reg)
 			break;
 		case IR_UGE:
-			|	setnp Rb(def_reg)
-			|	mov Rd(tmp_reg), 0
-			|	cmovb Rd(def_reg), Rd(tmp_reg)
+			|	setp Rb(def_reg)
+			|	mov Rd(tmp_reg), 1
+			|	cmovae Rd(def_reg), Rd(tmp_reg)
 			break;
 		case IR_ULE:
 			|	setbe Rb(def_reg)
 			break;
 		case IR_UGT:
-			|	setnp Rb(def_reg)
-			|	mov Rd(tmp_reg), 0
-			|	cmovbe Rd(def_reg), Rd(tmp_reg)
+			|	setp Rb(def_reg)
+			|	mov Rd(tmp_reg), 1
+			|	cmova Rd(def_reg), Rd(tmp_reg)
 			break;
 	}
 	if (IR_REG_SPILLED(ctx->regs[def][0])) {
@@ -4135,15 +4135,17 @@ static void ir_emit_jcc(ir_ctx *ctx, uint8_t op, uint32_t b, ir_ref def, ir_insn
 	uint32_t true_block, false_block, next_block;
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
-	bool swap = 0;
 
 	ir_get_true_false_blocks(ctx, b, &true_block, &false_block, &next_block);
 	if (true_block == next_block) {
 		/* swap to avoid unconditional JMP */
-		op ^= 1; // reverse
+		if (int_cmp || op == IR_EQ || op == IR_NE) {
+			op ^= 1; // reverse
+		} else {
+			op ^= 5; // reverse
+		}
 		true_block = false_block;
 		false_block = 0;
-		swap = 1;
 	} else if (false_block == next_block) {
 		false_block = 0;
 	}
@@ -4202,9 +4204,7 @@ static void ir_emit_jcc(ir_ctx *ctx, uint8_t op, uint32_t b, ir_ref def, ir_insn
 				|	jp =>true_block
 				break;
 			case IR_LT:
-				if (swap) {
-					|	jb =>true_block
-				} else if (!false_block) {
+				if (!false_block) {
 					|	jp >1
 					|	jb =>true_block
 					|1:
@@ -4214,15 +4214,10 @@ static void ir_emit_jcc(ir_ctx *ctx, uint8_t op, uint32_t b, ir_ref def, ir_insn
 				}
 				break;
 			case IR_GE:
-				if (swap) {
-					|	jp =>true_block
-				}
 				|	jae =>true_block
 				break;
 			case IR_LE:
-				if (swap) {
-					|	jbe =>true_block
-				} else if (!false_block) {
+				if (!false_block) {
 					|	jp >1
 					|	jbe =>true_block
 					|1:
@@ -4232,47 +4227,21 @@ static void ir_emit_jcc(ir_ctx *ctx, uint8_t op, uint32_t b, ir_ref def, ir_insn
 				}
 				break;
 			case IR_GT:
-				if (swap) {
-					|	jp =>true_block
-				}
 				|	ja =>true_block
 				break;
-//
 			case IR_ULT:
-				if (swap) {
-					|	jp =>true_block
-				}
 				|	jb =>true_block
 				break;
 			case IR_UGE:
-				if (swap) {
-					|	jae =>true_block
-				} else if (!false_block) {
-					|	jp >1
-					|	jae =>true_block
-					|1:
-				} else {
-					|	jp =>false_block
-					|	jae =>true_block
-				}
+				|	jp =>true_block
+				|	jae =>true_block
 				break;
 			case IR_ULE:
-				if (swap) {
-					|	jp =>true_block
-				}
 				|	jbe =>true_block
 				break;
 			case IR_UGT:
-				if (swap) {
-					|	ja =>true_block
-				} else if (!false_block) {
-					|	jp >1
-					|	ja =>true_block
-					|1:
-				} else {
-					|	jp =>false_block
-					|	ja =>true_block
-				}
+				|	jp =>true_block
+				|	ja =>true_block
 				break;
 		}
 	}
