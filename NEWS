@@ -38,6 +38,7 @@ PHP                                                                        NEWS
   . Fix incorrect uri check in SOAP caching. (nielsdos)
   . Fix segfault and assertion failure with refcounted props and arrays.
     (nielsdos)
+  . Fix potential crash with an edge case of persistent encoders. (nielsdos)
 
 - Streams:
   . Fixed bug #75708 (getimagesize with "&$imageinfo" fails on StreamWrappers).
