@@ -26,6 +26,9 @@
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
 
+/* Buffer size; bigger columns than this become a "long column" */
+#define LONG_COLUMN_BUFFER_SIZE 2048
+
 enum pdo_odbc_conv_result {
 	PDO_ODBC_CONV_NOT_REQUIRED,
 	PDO_ODBC_CONV_OK,
@@ -615,7 +618,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	/* tell ODBC to put it straight into our buffer, but only if it
 	 * isn't "long" data, and only if we haven't already bound a long
 	 * column. */
-	if (colsize < 2048 && !S->going_long) {
+	if (colsize < LONG_COLUMN_BUFFER_SIZE && !S->going_long) {
 		S->cols[colno].data = emalloc(colsize+1);
 		S->cols[colno].is_long = 0;
 
@@ -631,7 +634,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	} else {
 		/* allocate a smaller buffer to keep around for smaller
 		 * "long" columns */
-		S->cols[colno].data = emalloc(2048);
+		S->cols[colno].data = emalloc(LONG_COLUMN_BUFFER_SIZE);
 		S->going_long = 1;
 		S->cols[colno].is_long = 1;
 	}
@@ -661,10 +664,10 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 		 * bigger buffer for the caller to free */
 
 		rc = SQLGetData(S->stmt, colno+1, C->is_unicode ? SQL_C_BINARY : SQL_C_CHAR, C->data,
- 			2048, &C->fetched_len);
+ 			LONG_COLUMN_BUFFER_SIZE, &C->fetched_len);
 		orig_fetched_len = C->fetched_len;
 
-		if (rc == SQL_SUCCESS && C->fetched_len < 2048) {
+		if (rc == SQL_SUCCESS && C->fetched_len < LONG_COLUMN_BUFFER_SIZE) {
 			/* all the data fit into our little buffer;
 			 * jump down to the generic bound data case */
 			goto in_data;
@@ -694,7 +697,7 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, zval *result, enum pdo
 			 */
 			ssize_t to_fetch_len;
 			if (orig_fetched_len == SQL_NO_TOTAL) {
-				to_fetch_len = C->datalen > 2047 ? 2047 : C->datalen;
+				to_fetch_len = C->datalen > (LONG_COLUMN_BUFFER_SIZE - 1) ? (LONG_COLUMN_BUFFER_SIZE - 1) : C->datalen;
 			} else {
 				to_fetch_len = orig_fetched_len;
 			}
