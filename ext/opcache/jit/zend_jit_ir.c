@@ -3462,6 +3462,10 @@ static void _zend_jit_merge_smart_branch_inputs(zend_jit_ctx *jit,
 	if (true_label == false_label && true_path && false_path) {
 		ir_MERGE_2(true_path, false_path);
 		_zend_jit_add_predecessor_ref(jit, true_label, jit->b, ir_END());
+	} else if (!true_path && !false_path) {
+		/* dead code */
+		true_path = ir_END();
+		_zend_jit_add_predecessor_ref(jit, true_label, jit->b, true_path);
 	} else {
 		if (true_path) {
 			_zend_jit_add_predecessor_ref(jit, true_label, jit->b, true_path);
