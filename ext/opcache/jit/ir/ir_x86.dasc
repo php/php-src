@@ -3185,12 +3185,12 @@ static void ir_emit_mem_op_int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 
 	if (op_insn->op == IR_ADD) {
 		|	ASM_MEM_OP inc, type, [Ra(reg)+offset]
-	} else if (insn->op == IR_SUB) {
+	} else if (op_insn->op == IR_SUB) {
 		|	ASM_MEM_OP dec, type, [Ra(reg)+offset]
-	} else if (insn->op == IR_NOT) {
+	} else if (op_insn->op == IR_NOT) {
 		|	ASM_MEM_OP not, type, [Ra(reg)+offset]
 	} else {
-		IR_ASSERT(insn->op == IR_NEG);
+		IR_ASSERT(op_insn->op == IR_NEG);
 		|	ASM_MEM_OP neg, type, [Ra(reg)+offset]
 	}
 }
