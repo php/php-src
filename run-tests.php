@@ -398,15 +398,13 @@ function main(): void
 
             $is_switch = true;
 
-            if ($repeat) {
-                foreach ($cfgtypes as $type) {
-                    if (strpos($switch, '--' . $type) === 0) {
-                        foreach ($cfgfiles as $file) {
-                            if ($switch == '--' . $type . '-' . $file) {
-                                $cfg[$type][$file] = true;
-                                $is_switch = false;
-                                break;
-                            }
+            foreach ($cfgtypes as $type) {
+                if (strpos($switch, '--' . $type) === 0) {
+                    foreach ($cfgfiles as $file) {
+                        if ($switch == '--' . $type . '-' . $file) {
+                            $cfg[$type][$file] = true;
+                            $is_switch = false;
+                            break;
                         }
                     }
                 }
