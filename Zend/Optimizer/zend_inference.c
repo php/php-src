@@ -282,7 +282,9 @@ static int zend_scc_next(const zend_op_array *op_array, zend_ssa *ssa, int var, 
 		case 7:  use = iterator->use; goto state_7;
 		case 8:  use = iterator->use; goto state_8;
 		case 9:  phi = iterator->phi; goto state_9;
+#ifdef SYM_RANGE
 		case 10: phi = iterator->phi; goto state_10;
+#endif
 		case 11:                      goto state_11;
 	}
 
