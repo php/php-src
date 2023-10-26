@@ -3268,6 +3268,9 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		tmp = Z_CLIENT_STREAM_CONTEXT_P(this_ptr);
 		if (Z_TYPE_P(tmp) == IS_RESOURCE) {
 			context = php_stream_context_from_zval(tmp, 0);
+			/* Share a reference with new_context down below.
+			 * For new contexts, the reference is only in new_context so that doesn't need extra refcounting. */
+			GC_ADDREF(context->res);
 		}
 
 		tmp = Z_CLIENT_USER_AGENT_P(this_ptr);
@@ -3334,7 +3337,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	}
 
 	if (context) {
-		php_stream_context_to_zval(context, &new_context);
+		ZVAL_RES(&new_context, context->res);
 		php_libxml_switch_context(&new_context, &orig_context);
 	}
 
