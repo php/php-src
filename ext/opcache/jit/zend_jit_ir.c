@@ -6982,13 +6982,13 @@ static int zend_jit_identical(zend_jit_ctx   *jit,
 
 	if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
 		ir_ref op1 = jit_ZVAL_ADDR(jit, op1_addr);
-		op1 = zend_jit_zval_check_undef(jit, op1, opline->op1.var, NULL, 0);
+		op1 = zend_jit_zval_check_undef(jit, op1, opline->op1.var, opline, 0);
 		op1_info |= MAY_BE_NULL;
 		op1_addr = ZEND_ADDR_REF_ZVAL(op1);
 	}
 	if (opline->op2_type == IS_CV && (op2_info & MAY_BE_UNDEF)) {
 		ir_ref op2 = jit_ZVAL_ADDR(jit, op2_addr);
-		op2 = zend_jit_zval_check_undef(jit, op2, opline->op2.var, NULL, 0);
+		op2 = zend_jit_zval_check_undef(jit, op2, opline->op2.var, opline, 0);
 		op2_info |= MAY_BE_NULL;
 		op2_addr = ZEND_ADDR_REF_ZVAL(op2);
 	}
