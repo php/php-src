@@ -1876,6 +1876,8 @@ ZEND_API uint32_t ZEND_FASTCALL zend_array_type_info(const zval *zv)
 	} ZEND_HASH_FOREACH_END();
 	if (HT_IS_PACKED(ht)) {
 		tmp &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
+	} else {
+		tmp &= ~MAY_BE_ARRAY_PACKED;
 	}
 	return tmp;
 }

@@ -11399,9 +11399,6 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 					packed_loaded = 1;
 				} else {
 					bad_packed_key = 1;
-					if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
-						jit_SIDE_EXIT(jit, ir_CONST_ADDR(exit_addr));
-					}
 				}
 				h = ir_CONST_LONG(val);
 			} else {
@@ -11511,9 +11508,18 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 						ir_refs_add(found_inputs, ir_END());
 						ir_refs_add(found_vals, ref);
 						ir_IF_FALSE(if_def);
+						if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
+							jit_SIDE_EXIT(jit, ir_CONST_ADDR(exit_addr));
+						} else if (type == BP_VAR_IS && not_found_exit_addr) {
+							jit_SIDE_EXIT(jit, ir_CONST_ADDR(not_found_exit_addr));
+						} else if (type == BP_VAR_IS && result_type_guard) {
+							ir_END_list(*not_found_inputs);
+						} else {
+							ir_END_list(idx_not_found_inputs);
+						}
 					} else if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
 						/* perform IS_UNDEF check only after result type guard (during deoptimization) */
-						if (!result_type_guard || (op1_info & MAY_BE_ARRAY_NUMERIC_HASH)) {
+						if (!result_type_guard) {
 							ir_GUARD(type_ref, ir_CONST_ADDR(exit_addr));
 						}
 					} else if (type == BP_VAR_IS && not_found_exit_addr) {
@@ -11530,18 +11536,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 						ir_IF_TRUE(if_def);
 					}
 				}
-				if (!(op1_info & MAY_BE_ARRAY_KEY_LONG) || (packed_loaded && (op1_info & MAY_BE_ARRAY_NUMERIC_HASH))) {
-					if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
-						jit_SIDE_EXIT(jit, ir_CONST_ADDR(exit_addr));
-					} else if (type == BP_VAR_IS && not_found_exit_addr) {
-						jit_SIDE_EXIT(jit, ir_CONST_ADDR(not_found_exit_addr));
-					} else if (type == BP_VAR_IS && result_type_guard) {
-						ir_END_list(*not_found_inputs);
-					} else {
-						ir_END_list(idx_not_found_inputs);
-					}
-				}
-				if (/*!packed_loaded ||*/ (op1_info & MAY_BE_ARRAY_NUMERIC_HASH)) {
+				if (op1_info & MAY_BE_ARRAY_NUMERIC_HASH) {
 					if (if_packed) {
 						ir_IF_FALSE(if_packed);
 						if_packed = IR_UNUSED;
@@ -11575,6 +11570,16 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 				} else if (packed_loaded) {
 					ir_refs_add(found_inputs, ir_END());
 					ir_refs_add(found_vals, ref);
+				} else {
+					if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
+						jit_SIDE_EXIT(jit, ir_CONST_ADDR(exit_addr));
+					} else if (type == BP_VAR_IS && not_found_exit_addr) {
+						jit_SIDE_EXIT(jit, ir_CONST_ADDR(not_found_exit_addr));
+					} else if (type == BP_VAR_IS && result_type_guard) {
+						ir_END_list(*not_found_inputs);
+					} else {
+						ir_END_list(idx_not_found_inputs);
+					}
 				}
 
 				if (idx_not_found_inputs) {
