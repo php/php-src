@@ -77,11 +77,12 @@
 #define CHECK_SCC_VAR(var2) \
 	do { \
 		if (!ssa->vars[var2].no_val) { \
-			if (dfs[var2] < 0) { \
-				zend_ssa_check_scc_var(op_array, ssa, var2, index, dfs, root, stack); \
+			if (ssa->vars[var2].scc < 0) { \
+				zend_ssa_check_scc_var(op_array, ssa, var2, index, stack); \
 			} \
-			if (ssa->vars[var2].scc < 0 && dfs[root[var]] >= dfs[root[var2]]) { \
-				root[var] = root[var2]; \
+			if (ssa->vars[var2].scc < ssa->vars[var].scc) { \
+				ssa->vars[var].scc = ssa->vars[var2].scc; \
+				is_root = 0; \
 			} \
 		} \
 	} while (0)
@@ -172,15 +173,15 @@ static inline bool sub_will_overflow(zend_long a, zend_long b) {
 }
 #endif
 
-static void zend_ssa_check_scc_var(const zend_op_array *op_array, zend_ssa *ssa, int var, int *index, int *dfs, int *root, zend_worklist_stack *stack) /* {{{ */
+static void zend_ssa_check_scc_var(const zend_op_array *op_array, zend_ssa *ssa, int var, int *index, zend_worklist_stack *stack) /* {{{ */
 {
+	int is_root = 1;
 #ifdef SYM_RANGE
 	zend_ssa_phi *p;
 #endif
 
-	dfs[var] = *index;
+	ssa->vars[var].scc = *index;
 	(*index)++;
-	root[var] = var;
 
 	FOR_EACH_VAR_USAGE(var, CHECK_SCC_VAR);
 
@@ -193,17 +194,20 @@ static void zend_ssa_check_scc_var(const zend_op_array *op_array, zend_ssa *ssa,
 	}
 #endif
 
-	if (root[var] == var) {
-		ssa->vars[var].scc = ssa->sccs;
+	if (is_root) {
+		ssa->sccs--;
 		while (stack->len > 0) {
 			int var2 = zend_worklist_stack_peek(stack);
-			if (dfs[var2] <= dfs[var]) {
+			if (ssa->vars[var2].scc < ssa->vars[var].scc) {
 				break;
 			}
 			zend_worklist_stack_pop(stack);
 			ssa->vars[var2].scc = ssa->sccs;
+			(*index)--;
 		}
-		ssa->sccs++;
+		ssa->vars[var].scc = ssa->sccs;
+		ssa->vars[var].scc_entry = 1;
+		(*index)--;
 	} else {
 		zend_worklist_stack_push(stack, var);
 	}
@@ -212,45 +216,39 @@ static void zend_ssa_check_scc_var(const zend_op_array *op_array, zend_ssa *ssa,
 
 ZEND_API void zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
-	int index = 0, *dfs, *root;
+	int index = 0;
 	zend_worklist_stack stack;
 	int j;
-	ALLOCA_FLAG(dfs_use_heap)
-	ALLOCA_FLAG(root_use_heap)
 	ALLOCA_FLAG(stack_use_heap)
 
-	dfs = do_alloca(sizeof(int) * ssa->vars_count, dfs_use_heap);
-	memset(dfs, -1, sizeof(int) * ssa->vars_count);
-	root = do_alloca(sizeof(int) * ssa->vars_count, root_use_heap);
 	ZEND_WORKLIST_STACK_ALLOCA(&stack, ssa->vars_count, stack_use_heap);
 
-	/* Find SCCs using Tarjan's algorithm. */
+	/* Find SCCs using Pearce's algorithm. */
+	ssa->sccs = ssa->vars_count;
 	for (j = 0; j < ssa->vars_count; j++) {
-		if (!ssa->vars[j].no_val && dfs[j] < 0) {
-			zend_ssa_check_scc_var(op_array, ssa, j, &index, dfs, root, &stack);
+		if (!ssa->vars[j].no_val && ssa->vars[j].scc < 0) {
+			zend_ssa_check_scc_var(op_array, ssa, j, &index, &stack);
 		}
 	}
 
-	/* Revert SCC order. This results in a topological order. */
-	for (j = 0; j < ssa->vars_count; j++) {
-		if (ssa->vars[j].scc >= 0) {
-			ssa->vars[j].scc = ssa->sccs - (ssa->vars[j].scc + 1);
+	if (ssa->sccs) {
+		/* Shift SCC indexes. */
+		for (j = 0; j < ssa->vars_count; j++) {
+			if (ssa->vars[j].scc >= 0) {
+				ssa->vars[j].scc -= ssa->sccs;
+			}
 		}
 	}
+	ssa->sccs = ssa->vars_count - ssa->sccs;
 
 	for (j = 0; j < ssa->vars_count; j++) {
 		if (ssa->vars[j].scc >= 0) {
 			int var = j;
-			if (root[j] == j) {
-				ssa->vars[j].scc_entry = 1;
-			}
 			FOR_EACH_VAR_USAGE(var, CHECK_SCC_ENTRY);
 		}
 	}
 
 	ZEND_WORKLIST_STACK_FREE_ALLOCA(&stack, stack_use_heap);
-	free_alloca(root, root_use_heap);
-	free_alloca(dfs, dfs_use_heap);
 }
 /* }}} */
 
