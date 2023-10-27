@@ -791,7 +791,6 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const
 {
 	int var, use, def, src;
 	zend_ssa_op *op;
-	uint32_t n;
 
 	if (tssa->vars[ssa_var].definition_phi) {
 		uint32_t b = ssa->cfg.map[tssa_opcodes[0] - op_array->opcodes];
@@ -817,8 +816,10 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const
 				src = pi->ssa_var;
 				goto copy_info;
 			}
-
+#if 0
 			while (bb->idom >= 0) {
+				uint32_t n;
+
 				b = bb->idom;
 				bb = ssa->cfg.blocks + b;
 
@@ -854,6 +855,7 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const
 					goto copy_info;
 				}
 			}
+#endif
 		}
 	} else if (tssa->vars[ssa_var].definition >= 0) {
 		def = tssa->vars[ssa_var].definition;
