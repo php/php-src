@@ -3125,7 +3125,7 @@ ZEND_VM_HOT_HANDLER(127, ZEND_FE_FREE, TMPVAR, ANY)
 		if (Z_FE_ITER_P(var) != (uint32_t)-1) {
 			zend_hash_iterator_del(Z_FE_ITER_P(var));
 		}
-		zval_ptr_dtor_nogc(var);
+		zval_ptr_dtor(var);
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 

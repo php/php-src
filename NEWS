@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-12468 (Double-free of doc_comment when overriding static
     property via trait). (ilutov)
   . Fixed segfault caused by weak references to FFI objects. (sj-i)
+  . Fix memory leak if a circular reference is created inside a by-ref foreach
+    on the array variable. (danog)
 
 - DOM:
   . Fix registerNodeClass with abstract class crashing. (nielsdos)

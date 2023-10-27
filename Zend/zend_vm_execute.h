@@ -14317,7 +14317,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FREE_SPEC_TMPVA
 		if (Z_FE_ITER_P(var) != (uint32_t)-1) {
 			zend_hash_iterator_del(Z_FE_ITER_P(var));
 		}
-		zval_ptr_dtor_nogc(var);
+		zval_ptr_dtor(var);
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
 
