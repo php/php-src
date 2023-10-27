@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12489 (Missing sigbio creation checking in openssl_cms_verify).
     (Jakub Zelenka)
 
+- PCRE:
+  . Fixed bug GH-11374 (Backport upstream fix, Different preg_match result
+    with -d pcre.jit=0). (mvorisek)
+
 - Random:
   . Fix Randomizer::getFloat() returning incorrect results under
     certain circumstances. (timwolla)
