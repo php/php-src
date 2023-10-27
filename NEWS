@@ -33,6 +33,8 @@ SimpleXML:
 
 SOAP:
   . Add support for clark notation for namespaces in class map. (lxShaDoWxl)
+  . Mitigate #51561 (SoapServer with a extented class and using sessions,
+    lost the setPersistence()). (nielsdos)
 
 Standard:
   . Implement GH-12188 (Indication for the int size in phpinfo()). (timwolla)
