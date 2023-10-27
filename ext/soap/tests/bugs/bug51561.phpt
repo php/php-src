@@ -20,7 +20,7 @@ if (php_ini_loaded_file()) {
   $args[] = php_ini_loaded_file();
 }
 $code = "session_start();" .
-        "require_once '" . __DIR__ . "/bug51561.inc.php';" .
+        "require_once '" . __DIR__ . "/bug51561.inc';" .
         <<<'PHP'
         class Server extends Server2 {
             private $value;
