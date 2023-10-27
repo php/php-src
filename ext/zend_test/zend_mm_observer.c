@@ -31,12 +31,6 @@ static void zend_mm_test_observer_malloc(size_t len, void *ptr ZEND_FILE_LINE_DC
 	fflush(stdout);
 }
 
-static void zend_mm_test_observer_gc(size_t len ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
-{
-	printf("garbage collection ended with %zu bytes collected\n", len);
-	fflush(stdout);
-}
-
 static void zend_mm_test_observer_free(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	size_t block_len = 0;
@@ -57,6 +51,18 @@ static void zend_mm_test_observer_realloc(void *ptr, size_t len, void *newptr ZE
 	fflush(stdout);
 }
 
+static void zend_mm_test_observer_gc(size_t len)
+{
+	printf("garbage collection ended with %zu bytes collected\n", len);
+	fflush(stdout);
+}
+
+static void zend_mm_test_observer_shutdown(bool full, bool silent)
+{
+	printf("shutdown in progress: full(%d), silent(%d)\n", full, silent);
+	fflush(stdout);
+}
+
 static PHP_INI_MH(OnUpdateZendTestMMObserverEnabled)
 {
 	if (new_value == NULL) {
@@ -72,7 +78,8 @@ static PHP_INI_MH(OnUpdateZendTestMMObserverEnabled)
 				zend_mm_test_observer_malloc,
 				zend_mm_test_observer_free,
 				zend_mm_test_observer_realloc,
-				zend_mm_test_observer_gc
+				zend_mm_test_observer_gc,
+				zend_mm_test_observer_shutdown
 			);
 		}
 	} else {
@@ -105,7 +112,8 @@ void zend_test_mm_observer_rinit(void)
 			zend_mm_test_observer_malloc,
 			zend_mm_test_observer_free,
 			zend_mm_test_observer_realloc,
-			zend_mm_test_observer_gc
+			zend_mm_test_observer_gc,
+			zend_mm_test_observer_shutdown
 		);
 		printf("ZendMM Observer enabled\n");
 		fflush(stdout);
@@ -121,4 +129,3 @@ void zend_test_mm_observer_rshutdown(void)
 	}
 	ZT_G(observer) = NULL;
 }
-
