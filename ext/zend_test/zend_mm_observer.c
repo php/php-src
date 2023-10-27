@@ -31,6 +31,12 @@ static void zend_mm_test_observer_malloc(size_t len, void *ptr ZEND_FILE_LINE_DC
 	fflush(stdout);
 }
 
+static void zend_mm_test_observer_gc(size_t len ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+{
+	printf("garbage collection ended with %zu bytes collected\n", len);
+	fflush(stdout);
+}
+
 static void zend_mm_test_observer_free(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	size_t block_len = 0;
@@ -61,7 +67,13 @@ static PHP_INI_MH(OnUpdateZendTestMMObserverEnabled)
 
 	if (int_value == 1) {
 		if (ZT_G(observer) == NULL) {
-			ZT_G(observer) = zend_mm_observer_register(zend_mm_get_heap(), zend_mm_test_observer_malloc, zend_mm_test_observer_free, zend_mm_test_observer_realloc);
+			ZT_G(observer) = zend_mm_observer_register(
+				zend_mm_get_heap(),
+				zend_mm_test_observer_malloc,
+				zend_mm_test_observer_free,
+				zend_mm_test_observer_realloc,
+				zend_mm_test_observer_gc
+			);
 		}
 	} else {
 		if (ZT_G(observer) != NULL) {
@@ -88,7 +100,13 @@ void zend_test_mm_observer_minit(INIT_FUNC_ARGS)
 void zend_test_mm_observer_rinit(void)
 {
 	if (ZT_G(zend_mm_observer_enabled)) {
-		ZT_G(observer) = zend_mm_observer_register(zend_mm_get_heap(), zend_mm_test_observer_malloc, zend_mm_test_observer_free, zend_mm_test_observer_realloc);
+		ZT_G(observer) = zend_mm_observer_register(
+			zend_mm_get_heap(),
+			zend_mm_test_observer_malloc,
+			zend_mm_test_observer_free,
+			zend_mm_test_observer_realloc,
+			zend_mm_test_observer_gc
+		);
 		printf("ZendMM Observer enabled\n");
 		fflush(stdout);
 	}
