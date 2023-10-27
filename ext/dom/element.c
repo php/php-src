@@ -418,9 +418,68 @@ PHP_METHOD(DOMElement, setAttribute)
 }
 /* }}} end dom_element_set_attribute */
 
-static bool dom_remove_attribute(xmlNodePtr attrp)
+typedef struct {
+	xmlNodePtr current_node;
+	xmlNsPtr defined_ns;
+} dom_deep_ns_redef_item;
+
+/* Reconciliation for a *single* namespace, but reconciles *closest* to the subtree needing it. */
+static void dom_deep_ns_redef(xmlNodePtr node, xmlNsPtr ns_to_redefine)
 {
+	size_t worklist_capacity = 128;
+	dom_deep_ns_redef_item *worklist = emalloc(sizeof(dom_deep_ns_redef_item) * worklist_capacity);
+	worklist[0].current_node = node;
+	worklist[0].defined_ns = NULL;
+	size_t worklist_size = 1;
+
+	while (worklist_size > 0) {
+		worklist_size--;
+		dom_deep_ns_redef_item *current_worklist_item = &worklist[worklist_size];
+		ZEND_ASSERT(current_worklist_item->current_node->type == XML_ELEMENT_NODE);
+		xmlNsPtr defined_ns = current_worklist_item->defined_ns;
+
+		if (current_worklist_item->current_node->ns == ns_to_redefine) {
+			if (defined_ns == NULL) {
+				defined_ns = xmlNewNs(current_worklist_item->current_node, ns_to_redefine->href, ns_to_redefine->prefix);
+			}
+			current_worklist_item->current_node->ns = defined_ns;
+		}
+
+		for (xmlAttrPtr attr = current_worklist_item->current_node->properties; attr; attr = attr->next) {
+			if (attr->ns == ns_to_redefine) {
+				if (defined_ns == NULL) {
+					defined_ns = xmlNewNs(current_worklist_item->current_node, ns_to_redefine->href, ns_to_redefine->prefix);
+				}
+				attr->ns = defined_ns;
+			}
+		}
+
+		for (xmlNodePtr child = current_worklist_item->current_node->children; child; child = child->next) {
+			if (child->type != XML_ELEMENT_NODE) {
+				continue;
+			}
+			if (worklist_size == worklist_capacity) {
+				if (UNEXPECTED(worklist_capacity >= SIZE_MAX / 3 * 2 / sizeof(dom_deep_ns_redef_item))) {
+					/* Shouldn't be possible to hit, but checked for safety anyway */
+					return;
+				}
+				worklist_capacity = worklist_capacity * 3 / 2;
+				worklist = erealloc(worklist, sizeof(dom_deep_ns_redef_item) * worklist_capacity);
+			}
+			worklist[worklist_size].current_node = child;
+			worklist[worklist_size].defined_ns = defined_ns;
+			worklist_size++;
+		}
+	}
+
+	efree(worklist);
+}
+
+static bool dom_remove_attribute(xmlNodePtr thisp, xmlNodePtr attrp)
+{
+	ZEND_ASSERT(thisp != NULL);
 	ZEND_ASSERT(attrp != NULL);
+
 	switch (attrp->type) {
 		case XML_ATTRIBUTE_NODE:
 			if (php_dom_object_get_data(attrp) == NULL) {
@@ -431,8 +490,42 @@ static bool dom_remove_attribute(xmlNodePtr attrp)
 				xmlUnlinkNode(attrp);
 			}
 			break;
-		case XML_NAMESPACE_DECL:
-			return false;
+		case XML_NAMESPACE_DECL: {
+			/* They will always be removed, but can be re-added.
+			 *
+			 * If any reference was left to the namespace, the only effect is that
+			 * the definition is potentially moved closer to the element using it.
+			 * If no reference was left, it is actually removed. */
+			xmlNsPtr ns = (xmlNsPtr) attrp;
+			if (thisp->nsDef == ns) {
+				thisp->nsDef = ns->next;
+			} else if (thisp->nsDef != NULL) {
+				xmlNsPtr prev = thisp->nsDef;
+				xmlNsPtr cur = prev->next;
+				while (cur) {
+					if (cur == ns) {
+						prev->next = cur->next;
+						break;
+					}
+					prev = cur;
+					cur = cur->next;
+				}
+			} else {
+				/* defensive: attrp not defined in thisp ??? */
+#if ZEND_DEBUG
+				ZEND_UNREACHABLE();
+#endif
+				break; /* defensive */
+			}
+
+			ns->next = NULL;
+			php_libxml_set_old_ns(thisp->doc, ns); /* note: can't deallocate as it might be referenced by a "fake namespace node" */
+			/* xmlReconciliateNs() redefines at the top of the tree instead of closest to the child, own reconciliation here.
+			 * Similarly, the DOM version has other issues too (see dom_libxml_reconcile_ensure_namespaces_are_declared). */
+			dom_deep_ns_redef(thisp, ns);
+
+			break;
+		}
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 	return true;
@@ -461,7 +554,7 @@ PHP_METHOD(DOMElement, removeAttribute)
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(dom_remove_attribute(attrp));
+	RETURN_BOOL(dom_remove_attribute(nodep, attrp));
 }
 /* }}} end dom_element_remove_attribute */
 
@@ -1425,37 +1518,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 
 	/* Step 5 */
 	if (force_is_null || !force) {
-		if (attribute->type == XML_NAMESPACE_DECL) {
-			/* The behaviour isn't defined by spec, but by observing browsers I found
-			 * that you can remove the nodes, but they'll get reconciled.
-			 * So if any reference was left to the namespace, the only effect is that
-			 * the definition is potentially moved closer to the element using it.
-			 * If no reference was left, it is actually removed. */
-			xmlNsPtr ns = (xmlNsPtr) attribute;
-			if (thisp->nsDef == ns) {
-				thisp->nsDef = ns->next;
-			} else if (thisp->nsDef != NULL) {
-				xmlNsPtr prev = thisp->nsDef;
-				xmlNsPtr cur = prev->next;
-				while (cur) {
-					if (cur == ns) {
-						prev->next = cur->next;
-						break;
-					}
-					prev = cur;
-					cur = cur->next;
-				}
-			}
-
-			ns->next = NULL;
-			php_libxml_set_old_ns(thisp->doc, ns);
-			dom_reconcile_ns(thisp->doc, thisp);
-		} else {
-			/* TODO: in the future when namespace bugs are fixed,
-			 * the above if-branch should be merged into this called function
-			 * such that the removal will work properly with all APIs. */
-			dom_remove_attribute(attribute);
-		}
+		dom_remove_attribute(thisp, attribute);
 		retval = false;
 		goto out;
 	}
