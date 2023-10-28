@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-12468 (Double-free of doc_comment when overriding static
     property via trait). (ilutov)
+  . Fixed segfault caused by weak references to FFI objects. (sj-i)
 
 - DOM:
   . Fix registerNodeClass with abstract class crashing. (nielsdos)
