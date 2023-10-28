@@ -152,6 +152,7 @@ zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep);
 bool php_dom_is_node_connected(const xmlNode *node);
 bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, xmlDocPtr new_document);
 xmlNsPtr dom_get_ns_resolve_prefix_conflict(xmlNodePtr tree, const char *uri);
+void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp);
 
 /* parentnode */
 void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc);

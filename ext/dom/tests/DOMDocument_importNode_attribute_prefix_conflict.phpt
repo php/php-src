@@ -26,7 +26,9 @@ $dom1->loadXML('<?xml version="1.0"?><container xmlns:foo="http://php.net" foo:b
 $dom2->loadXML('<?xml version="1.0"?><container xmlns="http://php.net" xmlns:foo="http://php.net/2"/>');
 $attribute = $dom1->documentElement->getAttributeNode('foo:bar');
 $imported = $dom2->importNode($attribute);
+var_dump($imported->prefix, $imported->namespaceURI);
 $dom2->documentElement->setAttributeNodeNS($imported);
+var_dump($imported->prefix, $imported->namespaceURI);
 
 echo $dom1->saveXML();
 echo $dom2->saveXML();
@@ -54,6 +56,10 @@ echo $dom2->saveXML();
 <?xml version="1.0"?>
 <container xmlns:foo="http://php.net/2" xmlns:default="http://php.net" default:bar="yes"/>
 --- Non-default namespace test case with a default namespace in the destination ---
+string(7) "default"
+string(14) "http://php.net"
+string(7) "default"
+string(14) "http://php.net"
 <?xml version="1.0"?>
 <container xmlns:foo="http://php.net" foo:bar="yes"/>
 <?xml version="1.0"?>
