@@ -1139,9 +1139,9 @@ namespace DOM
 
         public static function createEmpty(string $encoding = "UTF-8"): HTMLDocument {}
 
-        public static function createFromFile(string $path, int $options = 0, ?string $override_encoding = null): HTMLDocument {}
+        public static function createFromFile(string $path, int $options = 0, ?string $overrideEncoding = null): HTMLDocument {}
 
-        public static function createFromString(string $source, int $options = 0, ?string $override_encoding = null): HTMLDocument {}
+        public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): HTMLDocument {}
 
         /** @implementation-alias DOMDocument::saveXML */
         public function saveXML(?Node $node = null, int $options = 0): string|false {}
@@ -1161,9 +1161,9 @@ namespace DOM
 
         public static function createEmpty(string $version = "1.0", string $encoding = "UTF-8"): XMLDocument {}
 
-        public static function createFromFile(string $path, int $options = 0, ?string $override_encoding = null): XMLDocument {}
+        public static function createFromFile(string $path, int $options = 0, ?string $overrideEncoding = null): XMLDocument {}
 
-        public static function createFromString(string $source, int $options = 0, ?string $override_encoding = null): XMLDocument {}
+        public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): XMLDocument {}
 
         /** @readonly */
         public ?string $xmlEncoding;

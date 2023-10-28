@@ -1,5 +1,5 @@
 --TEST--
-DOM\HTMLDocument: override_encoding with incompatible charset
+DOM\HTMLDocument: overrideEncoding with incompatible charset
 --EXTENSIONS--
 iconv
 dom
@@ -22,7 +22,7 @@ $doc = DOM\HTMLDocument::createFromString(
 			</html>
 			DOC,
 	),
-	override_encoding: 'utf-8'
+	overrideEncoding: 'utf-8'
 );
 
 var_dump(iconv('UTF-8', 'ISO-8859-1', $doc->getElementsByTagName('title')->item(0)->textContent));
