@@ -407,7 +407,6 @@ void shutdown_executor(void) /* {{{ */
 	zend_shutdown_executor_values(fast_shutdown);
 
 	zend_weakrefs_shutdown();
-	zend_max_execution_timer_shutdown();
 	zend_fiber_shutdown();
 
 	zend_try {
