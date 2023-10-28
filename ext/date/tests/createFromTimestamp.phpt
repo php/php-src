@@ -23,6 +23,7 @@ $timestamps = array(
     -0.0,
     MAX_32BIT,
     MIN_32BIT,
+    MIN_32BIT - 0.5,
     PHP_INT_MAX + 1024.0,
     PHP_INT_MIN - 1025.0,
     NAN,
@@ -428,14 +429,46 @@ DateTimeImmutable::createFromTimestamp(-2147483648): object(DateTimeImmutable)#%
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(9.223372036854776E+18): DateRangeError: Seconds must be a finite number between %i and %i, 9.22337e+18 given
-DateTime::createFromTimestamp(9.223372036854776E+18): DateRangeError: Seconds must be a finite number between %i and %i, 9.22337e+18 given
-date_create_immutable_from_timestamp(9.223372036854776E+18): DateRangeError: Seconds must be a finite number between %i and %i, 9.22337e+18 given
-DateTimeImmutable::createFromTimestamp(9.223372036854776E+18): DateRangeError: Seconds must be a finite number between %i and %i, 9.22337e+18 given
-date_create_from_timestamp(-9.223372036854778E+18): DateRangeError: Seconds must be a finite number between %i and %i, -9.22337e+18 given
-DateTime::createFromTimestamp(-9.223372036854778E+18): DateRangeError: Seconds must be a finite number between %i and %i, -9.22337e+18 given
-date_create_immutable_from_timestamp(-9.223372036854778E+18): DateRangeError: Seconds must be a finite number between %i and %i, -9.22337e+18 given
-DateTimeImmutable::createFromTimestamp(-9.223372036854778E+18): DateRangeError: Seconds must be a finite number between %i and %i, -9.22337e+18 given
+date_create_from_timestamp(-2147483648.5): object(DateTime)#%d (3) {
+  ["date"]=>
+  string(26) "1901-12-13 20:45:51.500000"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTime::createFromTimestamp(-2147483648.5): object(DateTime)#%d (3) {
+  ["date"]=>
+  string(26) "1901-12-13 20:45:51.500000"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+date_create_immutable_from_timestamp(-2147483648.5): object(DateTimeImmutable)#%d (3) {
+  ["date"]=>
+  string(26) "1901-12-13 20:45:51.500000"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTimeImmutable::createFromTimestamp(-2147483648.5): object(DateTimeImmutable)#%d (3) {
+  ["date"]=>
+  string(26) "1901-12-13 20:45:51.500000"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+date_create_from_timestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
+DateTime::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
+date_create_immutable_from_timestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
+DateTimeImmutable::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
+date_create_from_timestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
+DateTime::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
+date_create_immutable_from_timestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
+DateTimeImmutable::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
 date_create_from_timestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
 DateTime::createFromTimestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
 date_create_immutable_from_timestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
