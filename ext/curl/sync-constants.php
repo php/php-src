@@ -3,12 +3,12 @@
 
 /**
  * This script checks the constants defined in the curl PHP extension, against those documented on the cURL website:
- * https://curl.haxx.se/libcurl/c/symbols-in-versions.html
+ * https://curl.se/libcurl/c/symbols-in-versions.html
  *
  * See the discussion at: https://github.com/php/php-src/pull/2961
  */
 
-const CURL_DOC_FILE = 'https://curl.haxx.se/libcurl/c/symbols-in-versions.html';
+const CURL_DOC_FILE = 'https://curl.se/libcurl/c/symbols-in-versions.html';
 
 const SOURCE_FILE = __DIR__ . '/curl_arginfo.h';
 
@@ -25,7 +25,7 @@ const IGNORED_PHP_CONSTANTS = [
     'CURLOPT_SAFE_UPLOAD',
 ];
 
-const CONSTANTS_REGEX_PATTERN = '~^CURL(?:OPT|_VERSION)_[A-Z0-9_]+$~';
+const CONSTANTS_REGEX_PATTERN = '~^CURL(?:OPT|_VERSION|_HTTP)_[A-Z0-9_]+$~';
 
 /**
  * A simple helper to create ASCII tables.
