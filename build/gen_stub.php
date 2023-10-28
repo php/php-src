@@ -1572,8 +1572,18 @@ class FuncInfo {
 
         /* Creation of <refsect1 role="errors"> */
         $errorsRefSec = $this->generateRefSect1($doc, 'errors');
+        $errorsDescriptionParaConstantTag = $doc->createElement('constant');
+        $errorsDescriptionParaConstantTag->append("E_*");
+        $errorsDescriptionParaExceptionTag = $doc->createElement('exceptionname');
+        $errorsDescriptionParaExceptionTag->append("Exception");
         $errorsDescriptionPara = $doc->createElement('para');
-        $errorsDescriptionPara->appendChild(new DOMText("\n   When does this function issue E_* level errors, and/or throw exceptions.\n  "));
+        $errorsDescriptionPara->append(
+            "\n   When does this function issue ",
+            $errorsDescriptionParaConstantTag,
+            " level errors, and/or throw ",
+            $errorsDescriptionParaExceptionTag,
+            "s.\n  "
+        );
         $errorsRefSec->appendChild($errorsDescriptionPara);
         $errorsRefSec->appendChild(new DOMText("\n "));
 
@@ -1583,28 +1593,51 @@ class FuncInfo {
         $changelogRefSec = $this->getChangelogSection($doc);
         $refentry->append($changelogRefSec, $REFSEC1_SEPERATOR);
 
-        $exampleRefSec = $this->getExampleSection($doc);
+        $exampleRefSec = $this->getExampleSection($doc, $id);
         $refentry->append($exampleRefSec, $REFSEC1_SEPERATOR);
 
-        // TODO Notes section?
+        /* Creation of <refsect1 role="notes"> */
+        $notesRefSec = $this->generateRefSect1($doc, 'notes');
+
+        $noteTagSimara = $doc->createElement('simpara');
+        $noteTagSimara->append(
+            "\n    Any notes that don't fit anywhere else should go here.\n   "
+        );
+        $noteTag = $doc->createElement('note');
+        $noteTag->append("\n   ", $noteTagSimara, "\n  ");
+        $notesRefSec->append($noteTag, "\n ");
+
+        $refentry->append($notesRefSec, $REFSEC1_SEPERATOR);
 
         /* Creation of <refsect1 role="seealso"> */
         $seeAlsoRefSec = $this->generateRefSect1($doc, 'seealso');
 
-        /* TODO Actually generate a markup for class names, functions and links?
-  <simplelist>
-   <member><methodname>ClassName::otherMethodName</methodname></member>
-   <member><function>some_function</function></member>
-   <member>The <link linkend="something">something appendix</link></member>
-  </simplelist>
-         */
-        $seeAlsoMember = $doc->createElement('member');
-        $seeAlsoMember->appendChild(new DOMText("Method name, function, or link to reference"));
+        $seeAlsoMemberClassMethod = $doc->createElement('member');
+        $seeAlsoMemberClassMethodTag = $doc->createElement('methodname');
+        $seeAlsoMemberClassMethodTag->appendChild(new DOMText("ClassName::otherMethodName"));
+        $seeAlsoMemberClassMethod->appendChild($seeAlsoMemberClassMethodTag);
+
+        $seeAlsoMemberFunction = $doc->createElement('member');
+        $seeAlsoMemberFunctionTag = $doc->createElement('function');
+        $seeAlsoMemberFunctionTag->appendChild(new DOMText("some_function"));
+        $seeAlsoMemberFunction->appendChild($seeAlsoMemberFunctionTag);
+
+        $seeAlsoMemberLink = $doc->createElement('member');
+        $seeAlsoMemberLinkTag = $doc->createElement('link');
+        $seeAlsoMemberLinkTag->setAttribute('linkend', 'some.id.chunk.to.link');
+        $seeAlsoMemberLinkTag->appendChild(new DOMText("something appendix"));
+        $seeAlsoMemberLink->appendChild($seeAlsoMemberLinkTag);
 
         $seeAlsoList = $doc->createElement('simplelist');
-        $seeAlsoList->appendChild(new DOMText("\n   "));
-        $seeAlsoList->appendChild($seeAlsoMember);
-        $seeAlsoList->appendChild(new DOMText("\n  "));
+        $seeAlsoList->append(
+            "\n   ",
+            $seeAlsoMemberClassMethod,
+            "\n   ",
+            $seeAlsoMemberFunction,
+            "\n   ",
+            $seeAlsoMemberLink,
+            "\n  "
+        );
 
         $seeAlsoRefSec->appendChild($seeAlsoList);
         $seeAlsoRefSec->appendChild(new DOMText("\n "));
@@ -1709,12 +1742,28 @@ ENDCOMMENT
         } else if (count($returnType->types) === 1) {
             $type = $returnType->types[0];
             $name = $type->name;
+            /*
             $descriptionNode = match ($name) {
                 'void' => $doc->createEntityReference('return.void'),
                 'true' => $doc->createEntityReference('return.true.always'),
                 'bool' => $doc->createEntityReference('return.success'),
                 default => new DOMText("Description"),
             };
+            */
+            switch ($name) {
+                case 'void':
+                    $descriptionNode = $doc->createEntityReference('return.void');
+                    break;
+                case 'true':
+                    $descriptionNode = $doc->createEntityReference('return.true.always');
+                    break;
+                case 'bool':
+                    $descriptionNode = $doc->createEntityReference('return.success');
+                    break;
+                default:
+                    $descriptionNode = new DOMText("Description");
+                    break;
+            }
             $returnDescriptionPara->appendChild($descriptionNode);
         } else {
             $returnDescriptionPara->appendChild(new DOMText("Description"));
@@ -1796,21 +1845,25 @@ ENDCOMMENT
             new DOMText('8.X.0'),
             new DOMText("\n       Description\n      "),
         ]];
-        $table = $this->generateDocbookInformalTable($doc, indent: 2, columns: 2, headers: $headers, rows: $rows);
+        $table = $this->generateDocbookInformalTable(
+            $doc,
+            /* indent: */ 2,
+            /* columns: */ 2,
+            /* headers: */ $headers,
+            /* rows: */ $rows
+        );
         $refSec->appendChild($table);
 
         $refSec->appendChild(new DOMText("\n "));
         return $refSec;
     }
 
-    private function getExampleSection(DOMDocument $doc): DOMElement {
+    private function getExampleSection(DOMDocument $doc, string $id): DOMElement {
         $refSec = $this->generateRefSect1($doc, 'examples');
 
         $example = $doc->createElement('example');
         $fnName = $this->name->__toString();
-        $fnNameForId = strtolower($fnName);
-        $fnNameForId = str_replace(['_', '\\', '::'], ['-', '-', '.'], $fnNameForId);
-        $example->setAttribute('xml:id', $fnNameForId . '.example.basic');
+        $example->setAttribute('xml:id', $id . '.example.basic');
 
         $title = $doc->createElement('title');
         $fn = $doc->createElement($this->isMethod() ? 'methodname' : 'function');
