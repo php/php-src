@@ -3166,6 +3166,11 @@ const CURLOPT_SASL_AUTHZID = UNKNOWN;
 const CURL_VERSION_HTTP3 = UNKNOWN;
 /**
  * @var int
+ * @cvalue CURL_HTTP_VERSION_3
+ */
+const CURL_HTTP_VERSION_3  = UNKNOWN;
+/**
+ * @var int
  * @cvalue CURLINFO_RETRY_AFTER
  */
 const CURLINFO_RETRY_AFTER = UNKNOWN;

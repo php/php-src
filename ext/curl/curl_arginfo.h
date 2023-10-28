@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d524d2fd58e484682c860d8a72eafc9a7d544911 */
+ * Stub hash: d59eebc1f49c60af9bc69e3aef510c38c160cc57 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -1095,6 +1095,9 @@ static void register_curl_symbols(int module_number)
 #endif
 #if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
 	REGISTER_LONG_CONSTANT("CURL_VERSION_HTTP3", CURL_VERSION_HTTP3, CONST_PERSISTENT);
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
+	REGISTER_LONG_CONSTANT("CURL_HTTP_VERSION_3", CURL_HTTP_VERSION_3, CONST_PERSISTENT);
 #endif
 #if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
 	REGISTER_LONG_CONSTANT("CURLINFO_RETRY_AFTER", CURLINFO_RETRY_AFTER, CONST_PERSISTENT);
