@@ -640,6 +640,7 @@ PHP_METHOD(DOMElement, setAttributeNode)
 	}
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);
+	php_dom_reconcile_attribute_namespace_after_insertion(attrp);
 
 	/* Returns old property if removed otherwise NULL */
 	if (existattrp != NULL) {
@@ -1012,6 +1013,7 @@ PHP_METHOD(DOMElement, setAttributeNodeNS)
 	}
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);
+	php_dom_reconcile_attribute_namespace_after_insertion(attrp);
 
 	/* Returns old property if removed otherwise NULL */
 	if (existattrp != NULL) {

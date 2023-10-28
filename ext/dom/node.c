@@ -1259,6 +1259,7 @@ PHP_METHOD(DOMNode, appendChild)
 		if (UNEXPECTED(new_child == NULL)) {
 			goto cannot_add;
 		}
+		php_dom_reconcile_attribute_namespace_after_insertion((xmlAttrPtr) new_child);
 	} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
 		xmlNodePtr last = child->last;
 		new_child = _php_dom_insert_fragment(nodep, nodep->last, NULL, child, intern, childobj);
@@ -1360,6 +1361,13 @@ PHP_METHOD(DOMNode, cloneNode)
 		if (n->properties != NULL) {
 			node->properties = xmlCopyPropList(node, n->properties);
 		}
+	}
+
+	if (node->type == XML_ATTRIBUTE_NODE && n->ns != NULL && node->ns == NULL) {
+		/* Let reconciliation deal with this. The lifetime of the namespace poses no problem
+		 * because we're increasing the refcount of the document proxy at the return.
+		 * libxml2 doesn't set the ns because it can't know that this is safe. */
+		node->ns = n->ns;
 	}
 
 	/* If document cloned we want a new document proxy */

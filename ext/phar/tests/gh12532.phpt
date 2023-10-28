@@ -2,6 +2,7 @@
 GH-12532 (PharData created from zip has incorrect timestamp)
 --EXTENSIONS--
 phar
+zlib
 --FILE--
 <?php
 

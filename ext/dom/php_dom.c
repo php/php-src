@@ -1458,6 +1458,22 @@ static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePt
 	}
 }
 
+void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp)
+{
+	ZEND_ASSERT(attrp != NULL);
+
+	if (attrp->ns != NULL) {
+		/* Try to link to an existing namespace. If that won't work, reconcile. */
+		xmlNodePtr nodep = attrp->parent;
+		xmlNsPtr matching_ns = xmlSearchNs(nodep->doc, nodep, attrp->ns->prefix);
+		if (matching_ns && xmlStrEqual(matching_ns->href, attrp->ns->href)) {
+			attrp->ns = matching_ns;
+		} else {
+			xmlReconciliateNs(nodep->doc, nodep);
+		}
+	}
+}
+
 static void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep)
 {
 	/* Ideally we'd use the DOM-wrapped version, but we cannot: https://github.com/php/php-src/pull/12308. */
@@ -1474,6 +1490,8 @@ static void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep
 
 void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
 {
+	ZEND_ASSERT(nodep->type != XML_ATTRIBUTE_NODE);
+
 	/* Although the node type will be checked by the libxml2 API,
 	 * we still want to do the internal reconciliation conditionally. */
 	if (nodep->type == XML_ELEMENT_NODE) {

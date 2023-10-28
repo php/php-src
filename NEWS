@@ -9,6 +9,7 @@ DOM:
   . Added DOMNode::compareDocumentPosition(). (nielsdos)
   . Implement #53655 (Improve speed of DOMNode::C14N() on large XML documents).
     (nielsdos)
+  . Fix cloning attribute with namespace disappearing namespace. (nielsdos)
 
 Intl:
   . Added IntlDateFormatter::PATTERN constant. (David Carlier)
