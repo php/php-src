@@ -1703,7 +1703,7 @@ ENDCOMMENT
         $returnDescriptionPara = $doc->createElement('para');
         $returnDescriptionPara->appendChild(new DOMText("\n   "));
 
-        $returnType = $this->return->type;
+        $returnType = $this->return->getMethodSynopsisType();
         if ($returnType === null) {
             $returnDescriptionPara->appendChild(new DOMText("Description"));
         } else if (count($returnType->types) === 1) {
