@@ -15,12 +15,12 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(20))');
-$db->exec('INSERT INTO test VALUES(1, \'A\', \'A2\')');
-$db->exec('INSERT INTO test VALUES(2, \'A\', \'B2\')');
+$db->exec('CREATE TABLE test015(id int NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(20))');
+$db->exec("INSERT INTO test015 VALUES(1, 'A', 'A2')");
+$db->exec("INSERT INTO test015 VALUES(2, 'A', 'B2')");
 
-$select1 = $db->prepare('SELECT id, val, val2 FROM test');
-$select2 = $db->prepare('SELECT val, val2 FROM test');
+$select1 = $db->prepare('SELECT id, val, val2 FROM test015');
+$select2 = $db->prepare('SELECT val, val2 FROM test015');
 
 $select1->execute();
 var_dump($select1->fetchAll(PDO::FETCH_COLUMN));
@@ -40,6 +40,12 @@ var_dump($select1->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_UNIQUE, 2));
 $select2->execute();
 var_dump($select2->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_GROUP));
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test015");
 ?>
 --EXPECT--
 array(2) {

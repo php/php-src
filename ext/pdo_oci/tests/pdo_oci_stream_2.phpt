@@ -16,18 +16,14 @@ require(__DIR__ . '/../../pdo/tests/pdo_test.inc');
 
 $db = PDOTest::factory();
 
-$query = "begin execute immediate 'drop table pdo_oci_stream_2'; exception when others then if sqlcode <> -942 then raise; end if; end;";
-$stmt = $db->prepare($query);
-$stmt->execute();
-
-$query = "create table pdo_oci_stream_2 (id number, data1 blob, data2 blob)";
+$query = "create table test_pdo_oci_stream_2 (id number, data1 blob, data2 blob)";
 $stmt = $db->prepare($query);
 $stmt->execute();
 
 function do_insert($db, $id, $data1, $data2)
 {
     $db->beginTransaction();
-    $stmt = $db->prepare("insert into pdo_oci_stream_2 (id, data1, data2) values (:id, empty_blob(), empty_blob()) returning data1, data2 into :blob1, :blob2");
+    $stmt = $db->prepare("insert into test_pdo_oci_stream_2 (id, data1, data2) values (:id, empty_blob(), empty_blob()) returning data1, data2 into :blob1, :blob2");
     $stmt->bindParam(':id', $id);
     $stmt->bindParam(':blob1', $blob1, PDO::PARAM_LOB);
     $stmt->bindParam(':blob2', $blob2, PDO::PARAM_LOB);
@@ -68,9 +64,6 @@ for($i=0; $i<100; $i++) {
 }
 printf("Done\n");
 
-/* Cleanup is done in pdo_oci_stream_2b.phpt */
-//$db->exec("drop table pdo_oci_stream_2");
-
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);  // Let's use streams
 
 // Since each column only has one lob descriptor, the last row is
@@ -80,7 +73,7 @@ $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);  // Let's use streams
 $i = 0;
 $j = 9;
 $a_val = ord('a');
-foreach($db->query("select data1 as d4_1, data2 as d4_2 from pdo_oci_stream_2 order by id") as $row) {
+foreach($db->query("select data1 as d4_1, data2 as d4_2 from test_pdo_oci_stream_2 order by id") as $row) {
     $a = $row['d4_1'];
     $a1 = $row['d4_2'];
 
@@ -117,10 +110,12 @@ foreach($db->query("select data1 as d4_1, data2 as d4_2 from pdo_oci_stream_2 or
         $j = 9;
 }
 echo "Fetch operation done!\n";
-
-/* Cleanup */
-$db->exec("drop table pdo_oci_stream_2");
-
+?>
+--CLEAN--
+<?php
+require 'ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
+PDOTest::dropTableIfExists($db, "test_pdo_oci_stream_2");
 ?>
 --EXPECT--
 Inserting 1000 Records ... Done

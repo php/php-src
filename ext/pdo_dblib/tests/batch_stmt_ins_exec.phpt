@@ -13,21 +13,21 @@ if (!driver_supports_batch_statements_without_select($db)) die('xfail test will 
 require __DIR__ . '/config.inc';
 
 // creating a proc need to be a statement in it's own batch, so we need to do a little setup first
-$db->query("create table #php_pdo(id int); ");
+$db->query("create table #test_batch_stmt_ins_exec(id int); ");
 $db->query(
-"create proc php_pdo_exec_select_proc as " .
+"create proc test_proc_batch_stmt_ins_exec as " .
 "begin " .
-"  insert into #php_pdo values(2), (3), (4); " .
-"  select * from #php_pdo; " .
+"  insert into #test_batch_stmt_ins_exec values(2), (3), (4); " .
+"  select * from #test_batch_stmt_ins_exec; " .
 "end; "
 );
 
 // now lets get some results
 $stmt = $db->query(
-"insert into #php_pdo values(1); " .
-"exec php_pdo_exec_select_proc; " .
-"drop table #php_pdo; " .
-"drop procedure php_pdo_exec_select_proc; ");
+"insert into #test_batch_stmt_ins_exec values(1); " .
+"exec test_proc_batch_stmt_ins_exec; " .
+"drop table #test_batch_stmt_ins_exec; " .
+"drop procedure test_proc_batch_stmt_ins_exec; ");
 
 // check results from the insert
 var_dump($stmt->rowCount());

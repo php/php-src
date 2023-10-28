@@ -22,9 +22,9 @@ $data = array(
 
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
+$db->exec('CREATE TABLE test031(id INT NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(16))');
 
-$stmt = $db->prepare("INSERT INTO test VALUES(?, ?, ?)");
+$stmt = $db->prepare("INSERT INTO test031 VALUES(?, ?, ?)");
 foreach ($data as $row) {
     $stmt->execute($row);
 }
@@ -33,7 +33,7 @@ unset($stmt);
 
 echo "===QUERY===\n";
 
-$stmt = $db->query('SELECT * FROM test');
+$stmt = $db->query('SELECT * FROM test031');
 
 foreach(new RecursiveTreeIterator(new RecursiveArrayIterator($stmt->fetchAll(PDO::FETCH_ASSOC)), RecursiveTreeIterator::BYPASS_KEY) as $c=>$v)
 {
@@ -42,6 +42,12 @@ foreach(new RecursiveTreeIterator(new RecursiveArrayIterator($stmt->fetchAll(PDO
 
 echo "===DONE===\n";
 exit(0);
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test031");
 ?>
 --EXPECT--
 ===QUERY===

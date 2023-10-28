@@ -6,6 +6,8 @@ pdo_dblib
 <?php
 require __DIR__ . '/config.inc';
 ?>
+--CONFLICTS--
+all
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
