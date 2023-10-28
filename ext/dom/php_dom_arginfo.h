@@ -1,11 +1,11 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 512273df3d4b8f601ffb0d78d6b4ec289fb68d6d */
+ * Stub hash: 77c532f4d00b3489e09ee9753e2cb6dd42152eed */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_DOM_import_simplexml, 0, 1, DOM\\DOMElement, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_DOM_import_simplexml, 0, 1, DOM\\Element, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
@@ -493,12 +493,17 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Document_getE
 	ZEND_ARG_TYPE_INFO(0, elementId, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOM_Document_getElementsByTagName arginfo_class_DOMElement_getElementsByTagName
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Document_getElementsByTagName, 0, 1, DOM\\NodeList, 0)
+	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOM_Document_getElementsByTagNameNS arginfo_class_DOMElement_getElementsByTagNameNS
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Document_getElementsByTagNameNS, 0, 2, DOM\\NodeList, 0)
+	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOM_Document_importNode, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
+	ZEND_ARG_OBJ_INFO(0, node, DOM\\Node, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, deep, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
@@ -535,8 +540,8 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOM_Document_rel
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOM_Document_adoptNode, 0, 1, DOMNode, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOM_Document_adoptNode, 0, 1, DOM\\Node, MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, node, DOM\\Node, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_Document_append arginfo_class_DOMParentNode_append
@@ -564,7 +569,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_HTMLDocument_createFrom
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_DOM_HTMLDocument_saveXML, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOMNode, 1, "null")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOM\\Node, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -574,7 +579,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_DOM_HTMLDocument_saveXMLFi
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_DOM_HTMLDocument_saveHTML, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOMNode, 1, "null")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOM\\Node, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_DOM_HTMLDocument_saveHTMLFile, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
@@ -606,7 +611,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_XMLDocument_xinclude arginfo_class_DOMDocument_xinclude
 
-#define arginfo_class_DOM_XMLDocument_saveXML arginfo_class_DOMDocument_saveXML
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DOM_XMLDocument_saveXML, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOM\\Node, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_XMLDocument_saveXMLFile arginfo_class_DOMDocument_save
 

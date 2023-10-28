@@ -1086,13 +1086,13 @@ namespace DOM
         public function getElementById(string $elementId): ?Element {}
 
         /** @tentative-return-type */
-        public function getElementsByTagName(string $qualifiedName): \DOMNodeList {}
+        public function getElementsByTagName(string $qualifiedName): NodeList {}
 
         /** @tentative-return-type */
-        public function getElementsByTagNameNS(?string $namespace, string $localName): \DOMNodeList {}
+        public function getElementsByTagNameNS(?string $namespace, string $localName): NodeList {}
 
         /** @return Node|false */
-        public function importNode(\DOMNode $node, bool $deep = false) {}
+        public function importNode(Node $node, bool $deep = false) {}
 
         /** @tentative-return-type */
         public function normalizeDocument(): void {}
@@ -1115,7 +1115,7 @@ namespace DOM
 #endif
 
         /** @tentative-return-type */
-        public function adoptNode(\DOMNode $node): \DOMNode|false {}
+        public function adoptNode(Node $node): Node|false {}
 
         /**
          * @param Node|string $nodes
@@ -1144,12 +1144,12 @@ namespace DOM
         public static function createFromString(string $source, int $options = 0, ?string $override_encoding = null): HTMLDocument {}
 
         /** @implementation-alias DOMDocument::saveXML */
-        public function saveXML(?\DOMNode $node = null, int $options = 0): string|false {}
+        public function saveXML(?Node $node = null, int $options = 0): string|false {}
 
         /** @implementation-alias DOMDocument::save */
         public function saveXMLFile(string $filename, int $options = 0): int|false {}
 
-        public function saveHTML(?\DOMNode $node = null): string|false {}
+        public function saveHTML(?Node $node = null): string|false {}
 
         public function saveHTMLFile(string $filename): int|false {}
     }
@@ -1190,7 +1190,7 @@ namespace DOM
 
         /**
          * @implementation-alias DOMDocument::createEntityReference
-         * @return DOMEntityReference|false
+         * @return EntityReference|false
          */
         public function createEntityReference(string $name) {}
 
@@ -1210,7 +1210,7 @@ namespace DOM
          * @tentative-return-type
          * @implementation-alias DOMDocument::saveXML
          */
-        public function saveXML(?\DOMNode $node = null, int $options = 0): string|false {}
+        public function saveXML(?Node $node = null, int $options = 0): string|false {}
 
         /**
          * @tentative-return-type
@@ -1220,5 +1220,5 @@ namespace DOM
     }
 
     /** @implementation-alias dom_import_simplexml */
-    function import_simplexml(object $node): DOMElement {}
+    function import_simplexml(object $node): Element {}
 }
