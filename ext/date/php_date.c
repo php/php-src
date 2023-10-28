@@ -2186,10 +2186,23 @@ static void date_interval_object_to_hash(php_interval_obj *intervalobj, HashTabl
 
 	/* Records whether this is a special relative interval that needs to be recreated from a string */
 	if (intervalobj->from_string) {
+		ZVAL_NULL(&zv); \
+		zend_hash_str_update(props, "y", sizeof("y")-1, &zv);
+		zend_hash_str_update(props, "m", sizeof("m")-1, &zv);
+		zend_hash_str_update(props, "d", sizeof("d")-1, &zv);
+		zend_hash_str_update(props, "h", sizeof("h")-1, &zv);
+		zend_hash_str_update(props, "i", sizeof("i")-1, &zv);
+		zend_hash_str_update(props, "s", sizeof("s")-1, &zv);
+		zend_hash_str_update(props, "f", sizeof("f")-1, &zv);
+		zend_hash_str_update(props, "invert", sizeof("invert")-1, &zv);
+
+		ZVAL_FALSE(&zv);
+		zend_hash_str_update(props, "days", sizeof("days")-1, &zv);
 		ZVAL_BOOL(&zv, (bool)intervalobj->from_string);
 		zend_hash_str_update(props, "from_string", strlen("from_string"), &zv);
 		ZVAL_STR_COPY(&zv, intervalobj->date_string);
 		zend_hash_str_update(props, "date_string", strlen("date_string"), &zv);
+
 		return;
 	}
 
@@ -2212,8 +2225,10 @@ static void date_interval_object_to_hash(php_interval_obj *intervalobj, HashTabl
 		ZVAL_FALSE(&zv);
 		zend_hash_str_update(props, "days", sizeof("days")-1, &zv);
 	}
-	ZVAL_BOOL(&zv, (bool)intervalobj->from_string);
+	ZVAL_FALSE(&zv);
 	zend_hash_str_update(props, "from_string", strlen("from_string"), &zv);
+	ZVAL_NULL(&zv);
+	zend_hash_str_update(props, "date_string", strlen("date_string"), &zv);
 
 #undef PHP_DATE_INTERVAL_ADD_PROPERTY
 }
@@ -4384,6 +4399,8 @@ static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string
 		zend_string_equals_literal(name, "s") ||
 		zend_string_equals_literal(name, "f") ||
 		zend_string_equals_literal(name, "days") ||
+		zend_string_equals_literal(name, "from_string") ||
+		zend_string_equals_literal(name, "date_string") ||
 		zend_string_equals_literal(name, "invert") ) {
 		/* Fallback to read_property. */
 		ret = NULL;

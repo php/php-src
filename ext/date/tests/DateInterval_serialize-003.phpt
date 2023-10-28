@@ -41,6 +41,24 @@ try {
 --EXPECTF--
 Original object:
 object(DateInterval)#1 (%d) {
+  ["y"]=>
+  NULL
+  ["m"]=>
+  NULL
+  ["d"]=>
+  NULL
+  ["h"]=>
+  NULL
+  ["i"]=>
+  NULL
+  ["s"]=>
+  NULL
+  ["f"]=>
+  NULL
+  ["invert"]=>
+  NULL
+  ["days"]=>
+  bool(false)
   ["from_string"]=>
   bool(true)
   ["date_string"]=>
@@ -49,11 +67,29 @@ object(DateInterval)#1 (%d) {
 
 
 Serialised object:
-string(%d) "O:12:"DateInterval":2:{s:11:"from_string";b:1;s:11:"date_string";s:%d:"next weekday";}"
+string(187) "O:12:"DateInterval":11:{s:1:"y";N;s:1:"m";N;s:1:"d";N;s:1:"h";N;s:1:"i";N;s:1:"s";N;s:1:"f";N;s:6:"invert";N;s:4:"days";b:0;s:11:"from_string";b:1;s:11:"date_string";s:12:"next weekday";}"
 
 
 Unserialised object:
-object(DateInterval)#2 (2) {
+object(DateInterval)#2 (11) {
+  ["y"]=>
+  NULL
+  ["m"]=>
+  NULL
+  ["d"]=>
+  NULL
+  ["h"]=>
+  NULL
+  ["i"]=>
+  NULL
+  ["s"]=>
+  NULL
+  ["f"]=>
+  NULL
+  ["invert"]=>
+  NULL
+  ["days"]=>
+  bool(false)
   ["from_string"]=>
   bool(true)
   ["date_string"]=>
@@ -62,7 +98,25 @@ object(DateInterval)#2 (2) {
 
 
 Calling __serialize manually:
-array(2) {
+array(11) {
+  ["y"]=>
+  NULL
+  ["m"]=>
+  NULL
+  ["d"]=>
+  NULL
+  ["h"]=>
+  NULL
+  ["i"]=>
+  NULL
+  ["s"]=>
+  NULL
+  ["f"]=>
+  NULL
+  ["invert"]=>
+  NULL
+  ["days"]=>
+  bool(false)
   ["from_string"]=>
   bool(true)
   ["date_string"]=>
@@ -71,7 +125,25 @@ array(2) {
 
 
 Calling __unserialize manually:
-object(DateInterval)#3 (2) {
+object(DateInterval)#3 (11) {
+  ["y"]=>
+  NULL
+  ["m"]=>
+  NULL
+  ["d"]=>
+  NULL
+  ["h"]=>
+  NULL
+  ["i"]=>
+  NULL
+  ["s"]=>
+  NULL
+  ["f"]=>
+  NULL
+  ["invert"]=>
+  NULL
+  ["days"]=>
+  bool(false)
   ["from_string"]=>
   bool(true)
   ["date_string"]=>

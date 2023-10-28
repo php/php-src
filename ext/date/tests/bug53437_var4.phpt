@@ -42,6 +42,8 @@ object(DateInterval)#%d (%d) {
   int(2)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
 }
 int(0)
 int(0)

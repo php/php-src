@@ -79,6 +79,8 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
 }
 2016-10-03 13:20:06.724934
 2016-10-03 13:20:07.103123

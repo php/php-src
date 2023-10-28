@@ -9,6 +9,24 @@ echo $i->format("%a"), "\n";
 ?>
 --EXPECTF--
 object(DateInterval)#1 (%d) {
+  ["y"]=>
+  NULL
+  ["m"]=>
+  NULL
+  ["d"]=>
+  NULL
+  ["h"]=>
+  NULL
+  ["i"]=>
+  NULL
+  ["s"]=>
+  NULL
+  ["f"]=>
+  NULL
+  ["invert"]=>
+  NULL
+  ["days"]=>
+  bool(false)
   ["from_string"]=>
   bool(true)
   ["date_string"]=>

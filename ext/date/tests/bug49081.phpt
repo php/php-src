@@ -21,4 +21,5 @@ DateInterval Object
     [invert] => 0
     [days] => 30
     [from_string] => 
+    [date_string] => 
 )

@@ -23,16 +23,8 @@ $u = unserialize($s);
 
 var_dump($i, str_replace(chr(0), '!', $s), $u);
 ?>
---EXPECTF--
-object(I)#1 (14) {
-  ["var1":"I":private]=>
-  int(1)
-  ["var2":"I":private]=>
-  int(2)
-  ["var3":protected]=>
-  int(3)
-  ["var4":protected]=>
-  int(4)
+--EXPECT--
+object(I)#1 (15) {
   ["y"]=>
   int(0)
   ["m"]=>
@@ -53,17 +45,19 @@ object(I)#1 (14) {
   bool(false)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
+  ["var1":"I":private]=>
+  int(1)
+  ["var2":"I":private]=>
+  int(2)
+  ["var3":protected]=>
+  int(3)
+  ["var4":protected]=>
+  int(4)
 }
-string(224) "O:1:"I":14:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:3;s:1:"h";i:0;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";b:0;s:11:"from_string";b:0;s:7:"!I!var1";i:1;s:7:"!I!var2";i:2;s:7:"!*!var3";i:3;s:7:"!*!var4";i:4;}"
-object(I)#2 (14) {
-  ["var1":"I":private]=>
-  int(1)
-  ["var2":"I":private]=>
-  int(2)
-  ["var3":protected]=>
-  int(3)
-  ["var4":protected]=>
-  int(4)
+string(245) "O:1:"I":15:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:3;s:1:"h";i:0;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";b:0;s:11:"from_string";b:0;s:11:"date_string";N;s:7:"!I!var1";i:1;s:7:"!I!var2";i:2;s:7:"!*!var3";i:3;s:7:"!*!var4";i:4;}"
+object(I)#2 (15) {
   ["y"]=>
   int(0)
   ["m"]=>
@@ -84,4 +78,14 @@ object(I)#2 (14) {
   bool(false)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
+  ["var1":"I":private]=>
+  int(1)
+  ["var2":"I":private]=>
+  int(2)
+  ["var3":protected]=>
+  int(3)
+  ["var4":protected]=>
+  int(4)
 }

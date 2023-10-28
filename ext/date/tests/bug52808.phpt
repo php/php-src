@@ -48,6 +48,8 @@ object(DateInterval)#%d (%d) {
   int(437)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
 }
 object(DateInterval)#%d (%d) {
   ["y"]=>
@@ -70,6 +72,8 @@ object(DateInterval)#%d (%d) {
   int(294)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
 }
 object(DateInterval)#%d (%d) {
   ["y"]=>
@@ -92,6 +96,8 @@ object(DateInterval)#%d (%d) {
   int(294)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
 }
 DateMalformedIntervalStringException: Failed to parse interval (2007-05-11T15:30:00Z/)
 DateMalformedIntervalStringException: Failed to parse interval (2007-05-11T15:30:00Z)

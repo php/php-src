@@ -45,7 +45,7 @@ var_dump($now->sub($e));
 ?>
 --EXPECTF--
 Original object:
-object(DateInterval)#3 (10) {
+object(DateInterval)#3 (11) {
   ["y"]=>
   int(43)
   ["m"]=>
@@ -66,15 +66,17 @@ object(DateInterval)#3 (10) {
   int(15820)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
 }
 
 
 Serialised object:
-string(172) "O:12:"DateInterval":10:{s:1:"y";i:43;s:1:"m";i:3;s:1:"d";i:24;s:1:"h";i:1;s:1:"i";i:12;s:1:"s";i:27;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";i:15820;s:11:"from_string";b:0;}"
+string(193) "O:12:"DateInterval":11:{s:1:"y";i:43;s:1:"m";i:3;s:1:"d";i:24;s:1:"h";i:1;s:1:"i";i:12;s:1:"s";i:27;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";i:15820;s:11:"from_string";b:0;s:11:"date_string";N;}"
 
 
 Unserialised object:
-object(DateInterval)#4 (10) {
+object(DateInterval)#4 (11) {
   ["y"]=>
   int(43)
   ["m"]=>
@@ -95,6 +97,8 @@ object(DateInterval)#4 (10) {
   int(15820)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
 }
 
 
@@ -120,11 +124,13 @@ array(%d) {
   int(15820)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
 }
 
 
 Calling __unserialize manually:
-object(DateInterval)#5 (10) {
+object(DateInterval)#5 (11) {
   ["y"]=>
   int(43)
   ["m"]=>
@@ -145,6 +151,8 @@ object(DateInterval)#5 (10) {
   int(15820)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
 }
 
 

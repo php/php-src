@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0f204ac6646be79b515189a384fce9bcea9a4f42 */
+ * Stub hash: a02e90d2aff0b9a7bc44e15e0ba5e29726750a0e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -1066,6 +1066,72 @@ static zend_class_entry *register_class_DateInterval(void)
 
 	INIT_CLASS_ENTRY(ce, "DateInterval", class_DateInterval_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval property_y_default_value;
+	ZVAL_UNDEF(&property_y_default_value);
+	zend_string *property_y_name = zend_string_init("y", sizeof("y") - 1, 1);
+	zend_declare_typed_property(class_entry, property_y_name, &property_y_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property_y_name);
+
+	zval property_m_default_value;
+	ZVAL_UNDEF(&property_m_default_value);
+	zend_string *property_m_name = zend_string_init("m", sizeof("m") - 1, 1);
+	zend_declare_typed_property(class_entry, property_m_name, &property_m_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property_m_name);
+
+	zval property_d_default_value;
+	ZVAL_UNDEF(&property_d_default_value);
+	zend_string *property_d_name = zend_string_init("d", sizeof("d") - 1, 1);
+	zend_declare_typed_property(class_entry, property_d_name, &property_d_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property_d_name);
+
+	zval property_h_default_value;
+	ZVAL_UNDEF(&property_h_default_value);
+	zend_string *property_h_name = zend_string_init("h", sizeof("h") - 1, 1);
+	zend_declare_typed_property(class_entry, property_h_name, &property_h_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property_h_name);
+
+	zval property_i_default_value;
+	ZVAL_UNDEF(&property_i_default_value);
+	zend_string *property_i_name = zend_string_init("i", sizeof("i") - 1, 1);
+	zend_declare_typed_property(class_entry, property_i_name, &property_i_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property_i_name);
+
+	zval property_s_default_value;
+	ZVAL_UNDEF(&property_s_default_value);
+	zend_string *property_s_name = zend_string_init("s", sizeof("s") - 1, 1);
+	zend_declare_typed_property(class_entry, property_s_name, &property_s_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property_s_name);
+
+	zval property_f_default_value;
+	ZVAL_UNDEF(&property_f_default_value);
+	zend_string *property_f_name = zend_string_init("f", sizeof("f") - 1, 1);
+	zend_declare_typed_property(class_entry, property_f_name, &property_f_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_DOUBLE|MAY_BE_NULL));
+	zend_string_release(property_f_name);
+
+	zval property_invert_default_value;
+	ZVAL_UNDEF(&property_invert_default_value);
+	zend_string *property_invert_name = zend_string_init("invert", sizeof("invert") - 1, 1);
+	zend_declare_typed_property(class_entry, property_invert_name, &property_invert_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property_invert_name);
+
+	zval property_days_default_value;
+	ZVAL_UNDEF(&property_days_default_value);
+	zend_string *property_days_name = zend_string_init("days", sizeof("days") - 1, 1);
+	zend_declare_typed_property(class_entry, property_days_name, &property_days_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_FALSE));
+	zend_string_release(property_days_name);
+
+	zval property_from_string_default_value;
+	ZVAL_UNDEF(&property_from_string_default_value);
+	zend_string *property_from_string_name = zend_string_init("from_string", sizeof("from_string") - 1, 1);
+	zend_declare_typed_property(class_entry, property_from_string_name, &property_from_string_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_from_string_name);
+
+	zval property_date_string_default_value;
+	ZVAL_UNDEF(&property_date_string_default_value);
+	zend_string *property_date_string_name = zend_string_init("date_string", sizeof("date_string") - 1, 1);
+	zend_declare_typed_property(class_entry, property_date_string_name, &property_date_string_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_date_string_name);
 
 	return class_entry;
 }

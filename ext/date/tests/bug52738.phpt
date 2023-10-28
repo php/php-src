@@ -21,7 +21,6 @@ print_r($I);
 42
 di Object
 (
-    [unit] => 42
     [y] => 0
     [m] => 0
     [d] => 11
@@ -32,4 +31,6 @@ di Object
     [invert] => 0
     [days] => 
     [from_string] => 
+    [date_string] => 
+    [unit] => 42
 )

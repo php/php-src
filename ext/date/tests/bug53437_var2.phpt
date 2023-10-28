@@ -33,6 +33,8 @@ object(DateInterval)#1 (%d) {
   bool(false)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
 }
 object(DateInterval)#2 (%d) {
   ["y"]=>
@@ -55,4 +57,6 @@ object(DateInterval)#2 (%d) {
   bool(false)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
 }

@@ -36,7 +36,7 @@ object(MyDatePeriod)#1 (7) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#3 (10) {
+  object(DateInterval)#3 (11) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -57,6 +57,8 @@ object(MyDatePeriod)#1 (7) {
     bool(false)
     ["from_string"]=>
     bool(false)
+    ["date_string"]=>
+    NULL
   }
   ["recurrences"]=>
   int(5)

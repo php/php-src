@@ -25,7 +25,7 @@ $u = unserialize($s);
 
 var_dump($i, str_replace(chr(0), '!', $s), $u);
 ?>
---EXPECTF--
+--EXPECT--
 object(I)#1 (11) {
   ["start"]=>
   object(DateTimeImmutable)#5 (3) {
@@ -48,7 +48,7 @@ object(I)#1 (11) {
     string(3) "UTC"
   }
   ["interval"]=>
-  object(DateInterval)#7 (10) {
+  object(DateInterval)#7 (11) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -69,6 +69,8 @@ object(I)#1 (11) {
     bool(false)
     ["from_string"]=>
     bool(false)
+    ["date_string"]=>
+    NULL
   }
   ["recurrences"]=>
   int(1)
@@ -85,7 +87,7 @@ object(I)#1 (11) {
   ["var4":protected]=>
   int(4)
 }
-string(631) "O:1:"I":11:{s:5:"start";O:17:"DateTimeImmutable":3:{s:4:"date";s:26:"2023-03-03 16:24:00.000000";s:13:"timezone_type";i:3;s:8:"timezone";s:3:"UTC";}s:7:"current";N;s:3:"end";O:17:"DateTimeImmutable":3:{s:4:"date";s:26:"2023-03-09 16:24:00.000000";s:13:"timezone_type";i:3;s:8:"timezone";s:3:"UTC";}s:8:"interval";O:12:"DateInterval":10:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:1;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";b:0;s:11:"from_string";b:0;}s:11:"recurrences";i:1;s:18:"include_start_date";b:1;s:16:"include_end_date";b:0;s:7:"!I!var1";i:1;s:7:"!I!var2";i:2;s:7:"!*!var3";i:3;s:7:"!*!var4";i:4;}"
+string(652) "O:1:"I":11:{s:5:"start";O:17:"DateTimeImmutable":3:{s:4:"date";s:26:"2023-03-03 16:24:00.000000";s:13:"timezone_type";i:3;s:8:"timezone";s:3:"UTC";}s:7:"current";N;s:3:"end";O:17:"DateTimeImmutable":3:{s:4:"date";s:26:"2023-03-09 16:24:00.000000";s:13:"timezone_type";i:3;s:8:"timezone";s:3:"UTC";}s:8:"interval";O:12:"DateInterval":11:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:1;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";b:0;s:11:"from_string";b:0;s:11:"date_string";N;}s:11:"recurrences";i:1;s:18:"include_start_date";b:1;s:16:"include_end_date";b:0;s:7:"!I!var1";i:1;s:7:"!I!var2";i:2;s:7:"!*!var3";i:3;s:7:"!*!var4";i:4;}"
 object(I)#2 (11) {
   ["start"]=>
   object(DateTimeImmutable)#9 (3) {
@@ -108,7 +110,7 @@ object(I)#2 (11) {
     string(3) "UTC"
   }
   ["interval"]=>
-  object(DateInterval)#11 (10) {
+  object(DateInterval)#11 (11) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -129,6 +131,8 @@ object(I)#2 (11) {
     bool(false)
     ["from_string"]=>
     bool(false)
+    ["date_string"]=>
+    NULL
   }
   ["recurrences"]=>
   int(1)

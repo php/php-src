@@ -54,8 +54,10 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
 }
-string(164) "O:12:"DateInterval":10:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:4;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";i:0;s:11:"from_string";b:0;}"
+string(185) "O:12:"DateInterval":11:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:4;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";i:0;s:11:"from_string";b:0;s:11:"date_string";N;}"
 \DateInterval::__set_state(array(
    'y' => 0,
    'm' => 0,
@@ -67,6 +69,7 @@ string(164) "O:12:"DateInterval":10:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h"
    'invert' => 0,
    'days' => 0,
    'from_string' => false,
+   'date_string' => NULL,
 ))object(DateInterval)#%d (%d) {
   ["y"]=>
   int(0)
@@ -88,6 +91,8 @@ string(164) "O:12:"DateInterval":10:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h"
   int(0)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
 }
 object(DatePeriod)#%d (%d) {
   ["start"]=>
@@ -125,6 +130,8 @@ object(DatePeriod)#%d (%d) {
     int(0)
     ["from_string"]=>
     bool(false)
+    ["date_string"]=>
+    NULL
   }
   ["recurrences"]=>
   int(3)
@@ -154,6 +161,8 @@ object(DateInterval)#%d (%d) {
   int(2400)
   ["from_string"]=>
   bool(false)
+  ["date_string"]=>
+  NULL
 }
 object(DatePeriod)#%d (%d) {
   ["start"]=>
@@ -191,6 +200,8 @@ object(DatePeriod)#%d (%d) {
     int(0)
     ["from_string"]=>
     bool(false)
+    ["date_string"]=>
+    NULL
   }
   ["recurrences"]=>
   int(3)

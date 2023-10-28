@@ -9,7 +9,7 @@ $dt2 = new DateTimeImmutable('2020-07-19 16:30:00', new DateTimeZone('UTC'));
 print_r($dt2->diff($dt1));
 print_r($dt1->diff($dt2));
 ?>
---EXPECTF--
+--EXPECT--
 DateInterval Object
 (
     [y] => 0
@@ -22,6 +22,7 @@ DateInterval Object
     [invert] => 0
     [days] => 0
     [from_string] => 
+    [date_string] => 
 )
 DateInterval Object
 (
@@ -35,4 +36,5 @@ DateInterval Object
     [invert] => 0
     [days] => 0
     [from_string] => 
+    [date_string] => 
 )
