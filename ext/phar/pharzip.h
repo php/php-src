@@ -146,6 +146,13 @@ typedef struct _phar_zip_unix3 {
 /* (var.)        variable    symbolic link filename */
 } phar_zip_unix3;
 
+/* See https://libzip.org/specifications/extrafld.txt */
+typedef struct _phar_zip_unix_time {
+    phar_zip_extra_field_header header;
+    char flags;                 /* flags                            1 byte  */
+    char time[4];               /* time in standard Unix format     4 bytes	*/
+} phar_zip_unix_time;
+
 typedef struct _phar_zip_central_dir_file {
 	char signature[4];            /* central file header signature   4 bytes  (0x02014b50) */
 	char madeby[2];               /* version made by                 2 bytes */

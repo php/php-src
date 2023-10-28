@@ -24,6 +24,10 @@ PDO_PGSQL:
 PGSQL:
   . Added the possibility to have no conditions for pg_select. (OmarEmaraDev)
 
+Phar:
+  . Fixed bug GH-12532 (PharData created from zip has incorrect timestamp).
+    (nielsdos)
+
 SimpleXML:
   . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
     within foreach). (nielsdos)

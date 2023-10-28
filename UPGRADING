@@ -79,6 +79,9 @@ PHP 8.4 UPGRADE NOTES
   . Added constant DOMNode::DOCUMENT_POSITION_CONTAINED_BY.
   . Added constant DOMNode::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC.
 
+- Phar:
+  . Added support for the unix timestamp extension for zip archives.
+
 - SOAP:
   . Added support for clark notation for namespaces in class map.
     It is now possible to specify entries in a class map with clark notation

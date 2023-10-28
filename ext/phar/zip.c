@@ -44,12 +44,42 @@ static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16
 	union {
 		phar_zip_extra_field_header header;
 		phar_zip_unix3 unix3;
+		phar_zip_unix_time time;
 	} h;
 	size_t read;
 
 	do {
 		if (sizeof(h.header) != php_stream_read(fp, (char *) &h.header, sizeof(h.header))) {
 			return FAILURE;
+		}
+
+		if (h.header.tag[0] == 'U' && h.header.tag[1] == 'T') {
+			/* Unix timestamp header found.
+			 * The flags field indicates which timestamp fields are present.
+			 * The size with a timestamp is at least 5 (== 9 - tag size) bytes, but may be larger.
+			 * We only store the modification time in the entry, so only read that.
+			 */
+			const size_t min_size = 5;
+			uint16_t header_size = PHAR_GET_16(h.header.size);
+			if (header_size >= min_size) {
+				read = php_stream_read(fp, &h.time.flags, min_size);
+				if (read != min_size) {
+					return FAILURE;
+				}
+				if (h.time.flags & (1 << 0)) {
+					/* Modification time set */
+					entry->timestamp = PHAR_GET_32(h.time.time);
+				}
+
+				len -= header_size + 4;
+
+				/* Consume remaining bytes */
+				if (header_size != read) {
+					php_stream_seek(fp, header_size - read, SEEK_CUR);
+				}
+				continue;
+			}
+			/* Fallthrough to next if to skip header */
 		}
 
 		if (h.header.tag[0] != 'n' || h.header.tag[1] != 'u') {
