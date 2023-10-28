@@ -2,6 +2,8 @@
 PDO_Firebird: DDL/transactions
 --EXTENSIONS--
 pdo_firebird
+--CONFLICTS--
+pdo_transactions
 --SKIPIF--
 <?php require('skipif.inc'); ?>
 --ENV--
