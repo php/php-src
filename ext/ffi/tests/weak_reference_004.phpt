@@ -9,11 +9,11 @@ ffi.enable=1
 $map = new WeakMap();
 
 $ffi = \FFI::cdef('');
-$cdata_value = \FFI::new('int');
-$cdata_array = \FFI::new('int[1]');
-$cdata_free = \FFI::new('int[1]', false);
+$cdata_value = $ffi->new('int');
+$cdata_array = $ffi->new('int[1]');
+$cdata_free = $ffi->new('int[1]', false);
 \FFI::free($cdata_free);
-$ctype = \FFI::type('int');
+$ctype = $ffi->type('int');
 
 $map[$ffi] = 'ffi';
 $map[$cdata_value] = 'cdata_value';
