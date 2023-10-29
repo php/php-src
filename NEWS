@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-12468 (Double-free of doc_comment when overriding static
     property via trait). (ilutov)
   . Fixed segfault caused by weak references to FFI objects. (sj-i)
+  . Fixed max_execution_time: don't delete an unitialized timer. (Kévin Dunglas)
 
 - DOM:
   . Fix registerNodeClass with abstract class crashing. (nielsdos)
