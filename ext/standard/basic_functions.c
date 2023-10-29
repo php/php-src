@@ -102,6 +102,10 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 # define INADDR_NONE ((zend_ulong) -1)
 #endif
 
+#ifndef HAVE_INET_NTOP
+# error inet_ntop unsupported on this platform
+#endif
+
 #include "zend_globals.h"
 #include "php_globals.h"
 #include "SAPI.h"
@@ -531,7 +535,6 @@ PHP_FUNCTION(constant)
 }
 /* }}} */
 
-#ifdef HAVE_INET_NTOP
 /* {{{ Converts a packed inet address to a human readable IP address string */
 PHP_FUNCTION(inet_ntop)
 {
@@ -560,7 +563,6 @@ PHP_FUNCTION(inet_ntop)
 	RETURN_STRING(buffer);
 }
 /* }}} */
-#endif /* HAVE_INET_NTOP */
 
 #ifdef HAVE_INET_PTON
 /* {{{ Converts a human readable IP address to a packed binary string */
@@ -652,15 +654,11 @@ PHP_FUNCTION(long2ip)
 	ip = (zend_ulong)sip;
 
 	myaddr.s_addr = htonl(ip);
-#ifdef HAVE_INET_PTON
 	if (inet_ntop(AF_INET, &myaddr, str, sizeof(str))) {
 		RETURN_STRING(str);
 	} else {
 		RETURN_FALSE;
 	}
-#else
-	RETURN_STRING(inet_ntoa(myaddr));
-#endif
 }
 /* }}} */
 

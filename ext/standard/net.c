@@ -47,13 +47,15 @@
 # include <netdb.h>
 #endif
 
+#ifndef HAVE_INET_NTOP
+#error inet_ntop unsupported on this platform
+#endif
+
 PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 	socklen_t addrlen = sizeof(struct sockaddr_in);
 
 	if (!addr) { return NULL; }
 
-	/* Prefer inet_ntop() as it's more task-specific and doesn't have to be demangled */
-#ifdef HAVE_INET_NTOP
 	switch (addr->sa_family) {
 #ifdef AF_INET6
 		case AF_INET6: {
@@ -76,7 +78,6 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 			break;
 		}
 	}
-#endif
 
 	/* Fallback on getnameinfo() */
 	switch (addr->sa_family) {

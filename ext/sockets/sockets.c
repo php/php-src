@@ -927,9 +927,7 @@ PHP_FUNCTION(socket_getsockname)
 #if HAVE_IPV6
 	struct sockaddr_in6		*sin6;
 #endif
-#ifdef HAVE_INET_NTOP
 	char					addrbuf[INET6_ADDRSTRLEN];
-#endif
 	struct sockaddr_un		*s_un;
 	const char				*addr_string;
 	socklen_t				salen = sizeof(php_sockaddr_storage);
@@ -997,9 +995,7 @@ PHP_FUNCTION(socket_getpeername)
 #if HAVE_IPV6
 	struct sockaddr_in6		*sin6;
 #endif
-#ifdef HAVE_INET_NTOP
 	char					addrbuf[INET6_ADDRSTRLEN];
-#endif
 	struct sockaddr_un		*s_un;
 	const char				*addr_string;
 	socklen_t				salen = sizeof(php_sockaddr_storage);
