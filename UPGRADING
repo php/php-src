@@ -140,10 +140,13 @@ PHP 8.4 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
-- Spl:
+- PDO:
   . The class constants are typed now.
 
 - Reflection:
+  . The class constants are typed now.
+
+- Spl:
   . The class constants are typed now.
 
 ========================================
