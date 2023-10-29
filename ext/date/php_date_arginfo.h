@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1445f6053da5ca9dc7bb618f2eadc4a8ea56a15f */
+ * Stub hash: 6fb121a5992ae96d12dea6055d1b0f0d6534cf21 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -307,6 +307,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTime_getOffset arginfo_class_DateTimeInterface_getOffset
 
+#define arginfo_class_DateTime_getMicroseconds arginfo_class_DateTimeInterface_getOffset
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTime_setTime, 0, 2, DateTime, 0)
 	ZEND_ARG_TYPE_INFO(0, hour, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, minute, IS_LONG, 0)
@@ -328,6 +330,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTime_setTimestamp, 0, 1, DateTime, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTime_setMicroseconds, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, microseconds, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTime_getTimestamp arginfo_class_DateTimeInterface_getOffset
@@ -363,6 +369,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DateTimeImmutable_getOffset arginfo_class_DateTimeInterface_getOffset
 
 #define arginfo_class_DateTimeImmutable_getTimestamp arginfo_class_DateTimeInterface_getOffset
+
+#define arginfo_class_DateTimeImmutable_getMicroseconds arginfo_class_DateTimeInterface_getOffset
 
 #define arginfo_class_DateTimeImmutable_diff arginfo_class_DateTimeInterface_diff
 
@@ -402,6 +410,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeImmutable_setTimestamp, 0, 1, DateTimeImmutable, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_DateTimeImmutable_setMicroseconds arginfo_class_DateTime_setMicroseconds
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTimeImmutable_createFromMutable, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_OBJ_INFO(0, object, DateTime, 0)
@@ -563,6 +573,8 @@ ZEND_METHOD(DateTime, createFromInterface);
 ZEND_METHOD(DateTime, createFromTimestamp);
 ZEND_METHOD(DateTime, modify);
 ZEND_METHOD(DateTime, sub);
+ZEND_METHOD(DateTime, getMicroseconds);
+ZEND_METHOD(DateTime, setMicroseconds);
 ZEND_METHOD(DateTimeImmutable, __construct);
 ZEND_METHOD(DateTimeImmutable, __serialize);
 ZEND_METHOD(DateTimeImmutable, __unserialize);
@@ -577,6 +589,7 @@ ZEND_METHOD(DateTimeImmutable, setTime);
 ZEND_METHOD(DateTimeImmutable, setDate);
 ZEND_METHOD(DateTimeImmutable, setISODate);
 ZEND_METHOD(DateTimeImmutable, setTimestamp);
+ZEND_METHOD(DateTimeImmutable, setMicroseconds);
 ZEND_METHOD(DateTimeImmutable, createFromMutable);
 ZEND_METHOD(DateTimeImmutable, createFromInterface);
 ZEND_METHOD(DateTimeZone, __construct);
@@ -687,10 +700,12 @@ static const zend_function_entry class_DateTime_methods[] = {
 	ZEND_ME_MAPPING(getTimezone, date_timezone_get, arginfo_class_DateTime_getTimezone, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(setTimezone, date_timezone_set, arginfo_class_DateTime_setTimezone, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getOffset, date_offset_get, arginfo_class_DateTime_getOffset, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTime, getMicroseconds, arginfo_class_DateTime_getMicroseconds, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(setTime, date_time_set, arginfo_class_DateTime_setTime, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(setDate, date_date_set, arginfo_class_DateTime_setDate, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(setISODate, date_isodate_set, arginfo_class_DateTime_setISODate, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(setTimestamp, date_timestamp_set, arginfo_class_DateTime_setTimestamp, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTime, setMicroseconds, arginfo_class_DateTime_setMicroseconds, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getTimestamp, date_timestamp_get, arginfo_class_DateTime_getTimestamp, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(diff, date_diff, arginfo_class_DateTime_diff, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
@@ -710,6 +725,7 @@ static const zend_function_entry class_DateTimeImmutable_methods[] = {
 	ZEND_ME_MAPPING(getTimezone, date_timezone_get, arginfo_class_DateTimeImmutable_getTimezone, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getOffset, date_offset_get, arginfo_class_DateTimeImmutable_getOffset, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getTimestamp, date_timestamp_get, arginfo_class_DateTimeImmutable_getTimestamp, ZEND_ACC_PUBLIC)
+	ZEND_MALIAS(DateTime, getMicroseconds, getMicroseconds, arginfo_class_DateTimeImmutable_getMicroseconds, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(diff, date_diff, arginfo_class_DateTimeImmutable_diff, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeImmutable, modify, arginfo_class_DateTimeImmutable_modify, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeImmutable, add, arginfo_class_DateTimeImmutable_add, ZEND_ACC_PUBLIC)
@@ -719,6 +735,7 @@ static const zend_function_entry class_DateTimeImmutable_methods[] = {
 	ZEND_ME(DateTimeImmutable, setDate, arginfo_class_DateTimeImmutable_setDate, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeImmutable, setISODate, arginfo_class_DateTimeImmutable_setISODate, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeImmutable, setTimestamp, arginfo_class_DateTimeImmutable_setTimestamp, ZEND_ACC_PUBLIC)
+	ZEND_ME(DateTimeImmutable, setMicroseconds, arginfo_class_DateTimeImmutable_setMicroseconds, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeImmutable, createFromMutable, arginfo_class_DateTimeImmutable_createFromMutable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(DateTimeImmutable, createFromInterface, arginfo_class_DateTimeImmutable_createFromInterface, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END

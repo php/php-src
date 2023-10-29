@@ -3844,12 +3844,74 @@ PHP_METHOD(DateTimeImmutable, setTimestamp)
 }
 /* }}} */
 
+/* {{{ */
+PHP_METHOD(DateTimeImmutable, setMicroseconds)
+{
+	zval *object, new_object;
+	php_date_obj *dateobj, *new_dateobj;
+	zend_long us;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &us) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(us < 0 || us > 999999)) {
+		zend_throw_error(
+			date_ce_date_range_error,
+			"Microseconds must be between 0 and 999999, "ZEND_LONG_FMT" given",
+			us
+		);
+		RETURN_THROWS();
+	}
+
+	object = ZEND_THIS;
+	dateobj = Z_PHPDATE_P(object);
+	DATE_CHECK_INITIALIZED(dateobj->time, Z_OBJCE_P(object));
+
+	date_clone_immutable(object, &new_object);
+	new_dateobj = Z_PHPDATE_P(&new_object);
+
+	php_date_set_time_fraction(new_dateobj->time, (int)us);
+
+	RETURN_OBJ(Z_OBJ(new_object));
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateTime, setMicroseconds)
+{
+	zval *object;
+	php_date_obj *dateobj;
+	zend_long us;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &us) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(us < 0 || us > 999999)) {
+		zend_throw_error(
+			date_ce_date_range_error,
+			"Microseconds must be between 0 and 999999, "ZEND_LONG_FMT" given",
+			us
+		);
+		RETURN_THROWS();
+	}
+
+	object = ZEND_THIS;
+	dateobj = Z_PHPDATE_P(object);
+	DATE_CHECK_INITIALIZED(dateobj->time, Z_OBJCE_P(object));
+	php_date_set_time_fraction(dateobj->time, (int)us);
+
+	RETURN_OBJ_COPY(Z_OBJ_P(object));
+}
+/* }}} */
+
 /* {{{ Gets the Unix timestamp. */
 PHP_FUNCTION(date_timestamp_get)
 {
 	zval         *object;
 	php_date_obj *dateobj;
-	zend_long          timestamp;
+	zend_long     timestamp;
 	int           epoch_does_not_fit_in_zend_long;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &object, date_ce_interface) == FAILURE) {
@@ -3870,6 +3932,21 @@ PHP_FUNCTION(date_timestamp_get)
 	}
 
 	RETURN_LONG(timestamp);
+}
+/* }}} */
+
+PHP_METHOD(DateTime, getMicroseconds) /* {{{ */
+{
+	zval *object;
+	php_date_obj *dateobj;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	object = ZEND_THIS;
+	dateobj = Z_PHPDATE_P(object);
+	DATE_CHECK_INITIALIZED(dateobj->time, Z_OBJCE_P(object));
+
+	RETURN_LONG((zend_long)dateobj->time->us);
 }
 /* }}} */
 
