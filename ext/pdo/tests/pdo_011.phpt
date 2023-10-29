@@ -52,7 +52,7 @@ class Test1
     }
 }
 
-function test($id,$val='N/A')
+function callback($id,$val='N/A')
 {
     echo __METHOD__ . "($id,$val)\n";
     return array($id=>$val);
@@ -61,10 +61,10 @@ function test($id,$val='N/A')
 $f = new Test1(0,0);
 
 $select1->execute();
-var_dump($select1->fetchAll(PDO::FETCH_FUNC|PDO::FETCH_GROUP, 'test'));
+var_dump($select1->fetchAll(PDO::FETCH_FUNC|PDO::FETCH_GROUP, 'callback'));
 
 $select2->execute();
-var_dump($select2->fetchAll(PDO::FETCH_FUNC, 'test'));
+var_dump($select2->fetchAll(PDO::FETCH_FUNC, 'callback'));
 
 $select2->execute();
 var_dump($select2->fetchAll(PDO::FETCH_FUNC, array('Test1','factory')));

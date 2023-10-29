@@ -30,7 +30,7 @@ foreach ($stmt as $data)
     var_dump($data);
 }
 
-class Test
+class TestClass
 {
     public $val;
     public $grp;
@@ -43,14 +43,14 @@ class Test
 
 unset($stmt);
 
-foreach ($db->query($SELECT, PDO::FETCH_CLASS, 'Test') as $data)
+foreach ($db->query($SELECT, PDO::FETCH_CLASS, TestClass::class) as $data)
 {
     var_dump($data);
 }
 
 unset($stmt);
 
-$stmt = $db->query($SELECT, PDO::FETCH_CLASS, 'Test', array('WOW'));
+$stmt = $db->query($SELECT, PDO::FETCH_CLASS, TestClass::class, array('WOW'));
 
 foreach($stmt as $data)
 {

@@ -63,7 +63,7 @@ class bar extends foo {
         var_dump($st->fetchAll(PDO::FETCH_FUNC, array($this, 'parent::method')));
     }
 
-    static public function test($x, $y) {
+    static public function test1($x, $y) {
         return $x .'---'. $y;
     }
 
@@ -79,7 +79,7 @@ class bar extends foo {
 new bar($db);
 
 $st = $db->query('SELECT * FROM test_fetch_func_001');
-var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'test')));
+var_dump($st->fetchAll(PDO::FETCH_FUNC, array('bar', 'test1')));
 
 try {
     $st = $db->query('SELECT * FROM test_fetch_func_001');
@@ -113,7 +113,7 @@ object(PDOStatement)#%d (1) {
   ["queryString"]=>
   string(33) "SELECT * FROM test_fetch_func_001"
 }
-data: 2, 
+data: 2,
 array(2) {
   [0]=>
   string(3) "PHP"

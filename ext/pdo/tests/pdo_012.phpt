@@ -24,7 +24,7 @@ $SELECT = 'SELECT val, grp FROM test012';
 $stmt = $db->query($SELECT, PDO::FETCH_NUM);
 var_dump($stmt->fetchAll());
 
-class Test
+class TestClass
 {
     public $val;
     public $grp;
@@ -37,13 +37,13 @@ class Test
 
 unset($stmt);
 
-$stmt = $db->query($SELECT, PDO::FETCH_CLASS, 'Test');
+$stmt = $db->query($SELECT, PDO::FETCH_CLASS, TestClass::class);
 var_dump($stmt->fetchAll());
 
 unset($stmt);
 
 $stmt = $db->query($SELECT, PDO::FETCH_NUM);
-$stmt->setFetchMode(PDO::FETCH_CLASS, 'Test', array('Changed'));
+$stmt->setFetchMode(PDO::FETCH_CLASS, TestClass::class, array('Changed'));
 var_dump($stmt->fetchAll());
 
 ?>
