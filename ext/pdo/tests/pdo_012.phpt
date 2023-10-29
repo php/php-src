@@ -70,36 +70,36 @@ array(2) {
     string(6) "Group2"
   }
 }
-Test::__construct(N/A)
-Test::__construct(N/A)
+TestClass::__construct(N/A)
+TestClass::__construct(N/A)
 array(2) {
   [0]=>
-  object(Test)#%d (2) {
+  object(TestClass)#%d (2) {
     ["val"]=>
     string(1) "A"
     ["grp"]=>
     string(6) "Group1"
   }
   [1]=>
-  object(Test)#%d (2) {
+  object(TestClass)#%d (2) {
     ["val"]=>
     string(1) "B"
     ["grp"]=>
     string(6) "Group2"
   }
 }
-Test::__construct(Changed)
-Test::__construct(Changed)
+TestClass::__construct(Changed)
+TestClass::__construct(Changed)
 array(2) {
   [0]=>
-  object(Test)#%d (2) {
+  object(TestClass)#%d (2) {
     ["val"]=>
     string(1) "A"
     ["grp"]=>
     string(6) "Group1"
   }
   [1]=>
-  object(Test)#%d (2) {
+  object(TestClass)#%d (2) {
     ["val"]=>
     string(1) "B"
     ["grp"]=>

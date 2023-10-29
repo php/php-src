@@ -76,29 +76,29 @@ array(2) {
   [1]=>
   string(6) "Group2"
 }
-Test::__construct(N/A)
-object(Test)#%d (2) {
+TestClass::__construct(N/A)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "A"
   ["grp"]=>
   string(6) "Group1"
 }
-Test::__construct(N/A)
-object(Test)#%d (2) {
+TestClass::__construct(N/A)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "B"
   ["grp"]=>
   string(6) "Group2"
 }
-Test::__construct(WOW)
-object(Test)#%d (2) {
+TestClass::__construct(WOW)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "A"
   ["grp"]=>
   string(6) "Group1"
 }
-Test::__construct(WOW)
-object(Test)#%d (2) {
+TestClass::__construct(WOW)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "B"
   ["grp"]=>

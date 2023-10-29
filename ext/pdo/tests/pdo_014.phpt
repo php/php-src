@@ -78,15 +78,15 @@ $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "test014");
 ?>
 --EXPECTF--
-Test::__construct(WOW)
-object(Test)#%d (2) {
+TestClass::__construct(WOW)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "A"
   ["grp"]=>
   string(6) "Group1"
 }
-Test::__construct(WOW)
-object(Test)#%d (2) {
+TestClass::__construct(WOW)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "B"
   ["grp"]=>

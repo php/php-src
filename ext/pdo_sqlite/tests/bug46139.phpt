@@ -12,7 +12,7 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 class Person {
     public $testProp = NULL;
     public function __construct() {
-        var_dump($this->test);
+        var_dump($this->testProp);
     }
 }
 
