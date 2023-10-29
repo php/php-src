@@ -1198,7 +1198,7 @@ PHP_METHOD(RecursiveTreeIterator, current)
 	}
 
 	if (object->flags & RTIT_BYPASS_CURRENT) {
-		zend_object_iterator      *iterator = object->iterators[object->level].iterator;
+		zend_object_iterator      *iterator;
 		zval                      *data;
 
 		SPL_FETCH_SUB_ITERATOR(iterator, object);
@@ -1920,7 +1920,7 @@ PHP_METHOD(RegexIterator, accept)
 /* {{{ Returns current regular expression */
 PHP_METHOD(RegexIterator, getRegex)
 {
-	spl_dual_it_object *intern = Z_SPLDUAL_IT_P(ZEND_THIS);
+	spl_dual_it_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();

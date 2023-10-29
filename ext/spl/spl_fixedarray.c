@@ -740,7 +740,7 @@ PHP_METHOD(SplFixedArray, fromArray)
 		}
 		spl_fixedarray_init(&array, tmp);
 
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_index, str_index, element) {
+		ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(data), num_index, element) {
 			ZVAL_COPY_DEREF(&array.elements[num_index], element);
 		} ZEND_HASH_FOREACH_END();
 
