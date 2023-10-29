@@ -152,6 +152,9 @@ PHP 8.4 UPGRADE NOTES
 - Spl:
   . The class constants are typed now.
 
+- Sqlite:
+  . The class constants are typed now.
+
 ========================================
 10. New Global Constants
 ========================================
