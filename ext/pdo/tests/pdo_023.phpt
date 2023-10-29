@@ -42,7 +42,7 @@ class PDODatabaseX extends PDO
         echo __METHOD__ . "()\n";
     }
 
-    function test()
+    function testMethod()
     {
         $this->test2 = 2;
         var_dump($this->test1);
@@ -60,7 +60,7 @@ class PDODatabaseX extends PDO
 }
 
 $db = PDOTest::factory('PDODatabaseX');
-$db->test();
+$db->testMethod();
 var_dump($db);
 
 $db->query('CREATE TABLE test023(id INT NOT NULL PRIMARY KEY, val VARCHAR(10))');

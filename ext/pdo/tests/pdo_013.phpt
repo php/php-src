@@ -30,7 +30,7 @@ foreach ($stmt as $data)
     var_dump($data);
 }
 
-class Test
+class TestClass
 {
     public $val;
     public $grp;
@@ -43,14 +43,14 @@ class Test
 
 unset($stmt);
 
-foreach ($db->query($SELECT, PDO::FETCH_CLASS, 'Test') as $data)
+foreach ($db->query($SELECT, PDO::FETCH_CLASS, TestClass::class) as $data)
 {
     var_dump($data);
 }
 
 unset($stmt);
 
-$stmt = $db->query($SELECT, PDO::FETCH_CLASS, 'Test', array('WOW'));
+$stmt = $db->query($SELECT, PDO::FETCH_CLASS, TestClass::class, array('WOW'));
 
 foreach($stmt as $data)
 {
@@ -76,29 +76,29 @@ array(2) {
   [1]=>
   string(6) "Group2"
 }
-Test::__construct(N/A)
-object(Test)#%d (2) {
+TestClass::__construct(N/A)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "A"
   ["grp"]=>
   string(6) "Group1"
 }
-Test::__construct(N/A)
-object(Test)#%d (2) {
+TestClass::__construct(N/A)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "B"
   ["grp"]=>
   string(6) "Group2"
 }
-Test::__construct(WOW)
-object(Test)#%d (2) {
+TestClass::__construct(WOW)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "A"
   ["grp"]=>
   string(6) "Group1"
 }
-Test::__construct(WOW)
-object(Test)#%d (2) {
+TestClass::__construct(WOW)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "B"
   ["grp"]=>

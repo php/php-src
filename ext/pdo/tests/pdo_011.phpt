@@ -52,7 +52,7 @@ class Test1
     }
 }
 
-function test($id,$val='N/A')
+function callback($id,$val='N/A')
 {
     echo __METHOD__ . "($id,$val)\n";
     return array($id=>$val);
@@ -61,10 +61,10 @@ function test($id,$val='N/A')
 $f = new Test1(0,0);
 
 $select1->execute();
-var_dump($select1->fetchAll(PDO::FETCH_FUNC|PDO::FETCH_GROUP, 'test'));
+var_dump($select1->fetchAll(PDO::FETCH_FUNC|PDO::FETCH_GROUP, 'callback'));
 
 $select2->execute();
-var_dump($select2->fetchAll(PDO::FETCH_FUNC, 'test'));
+var_dump($select2->fetchAll(PDO::FETCH_FUNC, 'callback'));
 
 $select2->execute();
 var_dump($select2->fetchAll(PDO::FETCH_FUNC, array('Test1','factory')));
@@ -90,10 +90,10 @@ PDOTest::dropTableIfExists($db, "test011");
 --EXPECTF--
 DerivedStatement::__construct(Overloaded)
 Test1::__construct(0,0)
-test(1,N/A)
-test(2,N/A)
-test(3,N/A)
-test(4,N/A)
+callback(1,N/A)
+callback(2,N/A)
+callback(3,N/A)
+callback(4,N/A)
 array(2) {
   ["Group1"]=>
   array(2) {
@@ -122,10 +122,10 @@ array(2) {
     }
   }
 }
-test(1,A)
-test(2,B)
-test(3,C)
-test(4,D)
+callback(1,A)
+callback(2,B)
+callback(3,C)
+callback(4,D)
 array(4) {
   [0]=>
   array(1) {

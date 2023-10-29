@@ -20,7 +20,7 @@ $db->exec("INSERT INTO test014 VALUES(1, 'A', 'Group1')");
 $db->exec("INSERT INTO test014 VALUES(2, 'B', 'Group2')");
 $SELECT = 'SELECT val, grp FROM test014';
 
-class Test
+class TestClass
 {
     public $val;
     public $grp;
@@ -31,7 +31,7 @@ class Test
     }
 }
 
-$stmt = $db->query($SELECT, PDO::FETCH_CLASS, 'Test', array('WOW'));
+$stmt = $db->query($SELECT, PDO::FETCH_CLASS, TestClass::class, array('WOW'));
 
 $it = new IteratorIterator($stmt); /* check if we can convert that thing */
 
@@ -78,15 +78,15 @@ $db = PDOTest::factory();
 PDOTest::dropTableIfExists($db, "test014");
 ?>
 --EXPECTF--
-Test::__construct(WOW)
-object(Test)#%d (2) {
+TestClass::__construct(WOW)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "A"
   ["grp"]=>
   string(6) "Group1"
 }
-Test::__construct(WOW)
-object(Test)#%d (2) {
+TestClass::__construct(WOW)
+object(TestClass)#%d (2) {
   ["val"]=>
   string(1) "B"
   ["grp"]=>

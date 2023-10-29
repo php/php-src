@@ -24,7 +24,7 @@ $SELECT = 'SELECT val, grp FROM test012';
 $stmt = $db->query($SELECT, PDO::FETCH_NUM);
 var_dump($stmt->fetchAll());
 
-class Test
+class TestClass
 {
     public $val;
     public $grp;
@@ -37,13 +37,13 @@ class Test
 
 unset($stmt);
 
-$stmt = $db->query($SELECT, PDO::FETCH_CLASS, 'Test');
+$stmt = $db->query($SELECT, PDO::FETCH_CLASS, TestClass::class);
 var_dump($stmt->fetchAll());
 
 unset($stmt);
 
 $stmt = $db->query($SELECT, PDO::FETCH_NUM);
-$stmt->setFetchMode(PDO::FETCH_CLASS, 'Test', array('Changed'));
+$stmt->setFetchMode(PDO::FETCH_CLASS, TestClass::class, array('Changed'));
 var_dump($stmt->fetchAll());
 
 ?>
@@ -70,36 +70,36 @@ array(2) {
     string(6) "Group2"
   }
 }
-Test::__construct(N/A)
-Test::__construct(N/A)
+TestClass::__construct(N/A)
+TestClass::__construct(N/A)
 array(2) {
   [0]=>
-  object(Test)#%d (2) {
+  object(TestClass)#%d (2) {
     ["val"]=>
     string(1) "A"
     ["grp"]=>
     string(6) "Group1"
   }
   [1]=>
-  object(Test)#%d (2) {
+  object(TestClass)#%d (2) {
     ["val"]=>
     string(1) "B"
     ["grp"]=>
     string(6) "Group2"
   }
 }
-Test::__construct(Changed)
-Test::__construct(Changed)
+TestClass::__construct(Changed)
+TestClass::__construct(Changed)
 array(2) {
   [0]=>
-  object(Test)#%d (2) {
+  object(TestClass)#%d (2) {
     ["val"]=>
     string(1) "A"
     ["grp"]=>
     string(6) "Group1"
   }
   [1]=>
-  object(Test)#%d (2) {
+  object(TestClass)#%d (2) {
     ["val"]=>
     string(1) "B"
     ["grp"]=>
