@@ -41,11 +41,12 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 	sev.sigev_signo = SIGRTMIN;
 	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
 
-	EG(pid) = getpid();
 	// Measure wall time instead of CPU time as originally planned now that it is possible https://github.com/php/php-src/pull/6504#issuecomment-1370303727
 	if (timer_create(CLOCK_BOOTTIME, &sev, &EG(max_execution_timer_timer)) != 0) {
 		zend_strerror_noreturn(E_ERROR, errno, "Could not create timer");
 	}
+
+	EG(pid) = getpid();
 
 #  ifdef MAX_EXECUTION_TIMERS_DEBUG
 		fprintf(stderr, "Timer %#jx created on thread %d\n", (uintmax_t) EG(max_execution_timer_timer), sev.sigev_notify_thread_id);
