@@ -1,7 +1,7 @@
 --TEST--
 Bug #69753 - libXMLError::file contains invalid URI
 --XFAIL--
-Awaiting upstream fix: https://bugzilla.gnome.org/show_bug.cgi?id=750365
+Awaiting upstream fix: https://gitlab.gnome.org/GNOME/libxml2/-/issues/611
 --EXTENSIONS--
 dom
 --SKIPIF--
