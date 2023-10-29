@@ -4,53 +4,26 @@
 
 class Locale
 {
-    /**
-     * @var int
-     * @cvalue ULOC_ACTUAL_LOCALE
-     */
-    public const ACTUAL_LOCALE = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ULOC_VALID_LOCALE
-     */
-    public const VALID_LOCALE = UNKNOWN;
-    /** @var null */
-    public const DEFAULT_LOCALE = null;
-    /**
-     * @var string
-     * @cvalue LOC_LANG_TAG
-     */
-    public const LANG_TAG = UNKNOWN;
-    /**
-     * @var string
-     * @cvalue LOC_EXTLANG_TAG
-     */
-    public const EXTLANG_TAG = UNKNOWN;
-    /**
-     * @var string
-     * @cvalue LOC_SCRIPT_TAG
-     */
-    public const SCRIPT_TAG = UNKNOWN;
-    /**
-     * @var string
-     * @cvalue LOC_REGION_TAG
-     */
-    public const REGION_TAG = UNKNOWN;
-    /**
-     * @var string
-     * @cvalue LOC_VARIANT_TAG
-     */
-    public const VARIANT_TAG = UNKNOWN;
-    /**
-     * @var string
-     * @cvalue LOC_GRANDFATHERED_LANG_TAG
-     */
-    public const GRANDFATHERED_LANG_TAG = UNKNOWN;
-    /**
-     * @var string
-     * @cvalue LOC_PRIVATE_TAG
-     */
-    public const PRIVATE_TAG = UNKNOWN;
+    /** @cvalue ULOC_ACTUAL_LOCALE */
+    public const int ACTUAL_LOCALE = UNKNOWN;
+    /** @cvalue ULOC_VALID_LOCALE */
+    public const int VALID_LOCALE = UNKNOWN;
+
+    public const null DEFAULT_LOCALE = null;
+    /** @cvalue LOC_LANG_TAG */
+    public const string LANG_TAG = UNKNOWN;
+    /** @cvalue LOC_EXTLANG_TAG */
+    public const string EXTLANG_TAG = UNKNOWN;
+    /** @cvalue LOC_SCRIPT_TAG */
+    public const string SCRIPT_TAG = UNKNOWN;
+    /** @cvalue LOC_REGION_TAG */
+    public const string REGION_TAG = UNKNOWN;
+    /** @cvalue LOC_VARIANT_TAG */
+    public const string VARIANT_TAG = UNKNOWN;
+    /** @cvalue LOC_GRANDFATHERED_LANG_TAG */
+    public const string GRANDFATHERED_LANG_TAG = UNKNOWN;
+    /** @cvalue LOC_PRIVATE_TAG */
+    public const string PRIVATE_TAG = UNKNOWN;
 
     /**
      * @tentative-return-type
