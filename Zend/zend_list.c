@@ -276,6 +276,7 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
 	ZVAL_PTR(&zv, lde);
 
 	if (zend_hash_next_index_insert(&list_destructors, &zv) == NULL) {
+		free(lde);
 		return FAILURE;
 	}
 	return list_destructors.nNextFreeElement-1;
