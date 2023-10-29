@@ -1,16 +1,15 @@
 --TEST--
 Bug #80908: pdo_mysql lastInsertId() return wrong, when table id bigger than the maximum value of int64
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
 function createDB(): PDO {
     $db = MySQLPDOTest::factory();
@@ -42,7 +41,7 @@ echo "\n";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--

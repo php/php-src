@@ -4,7 +4,7 @@ MySQL PDO->exec(), SELECT
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
 --FILE--
@@ -30,7 +30,7 @@ MySQLPDOTest::skip();
         return true;
     }
 
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
     $db = MySQLPDOTest::factory();
     MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 
@@ -56,9 +56,8 @@ MySQLPDOTest::skip();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-$db = MySQLPDOTest::factory();
-@$db->exec('DROP TABLE IF EXISTS test');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
 Warning: PDO::exec(): SQLSTATE[HY000]: General error: 2014 Cannot execute queries while other unbuffered queries are active.  Consider using PDOStatement::fetchAll().  Alternatively, if your code is only ever going to run against mysql, you may enable query buffering by setting the PDO::MYSQL_ATTR_USE_BUFFERED_QUERY attribute. in %s on line %d

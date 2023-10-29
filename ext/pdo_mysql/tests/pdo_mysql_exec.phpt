@@ -4,7 +4,7 @@ MySQL PDO->exec(), affected rows
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
 --FILE--
@@ -30,7 +30,7 @@ MySQLPDOTest::skip();
         return true;
     }
 
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
     $db = MySQLPDOTest::factory();
     MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 
@@ -175,10 +175,8 @@ MySQLPDOTest::skip();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-$db = MySQLPDOTest::factory();
-$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-@$db->exec('DROP TABLE IF EXISTS test');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
 Warning: PDO::exec(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'THIS IS NOT VALID SQL, I HOPE' at line 1 in %s on line %d

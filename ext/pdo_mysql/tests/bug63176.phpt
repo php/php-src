@@ -4,12 +4,12 @@ Bug #63176 (Segmentation fault when instantiate 2 persistent PDO to the same db 
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require(__DIR__. DIRECTORY_SEPARATOR . 'config.inc');
+require_once(__DIR__. DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'init.inc');
 class PDO2 extends PDO {
     protected $transLevel;
 }
@@ -17,7 +17,6 @@ class PDO2 extends PDO {
 class PDO3 extends PDO {
     protected $tomato;
 }
-
 
 class ModelA {
     public $db;

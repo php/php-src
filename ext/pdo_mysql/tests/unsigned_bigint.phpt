@@ -1,18 +1,16 @@
 --TEST--
 Bug GH-7837 (large bigints may be truncated)
 --EXTENSIONS--
-pdo
 pdo_mysql
-mysqlnd
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-if (!MySQLPDOTest::isPDOMySQLnd()) die('skip only for mysqlnd');
+MySQLPDOTest::skipNotMySQLnd();
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $pdo = MySQLPDOTest::factory();
 
 $tbl = "test";
@@ -26,7 +24,7 @@ var_dump($result);
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--

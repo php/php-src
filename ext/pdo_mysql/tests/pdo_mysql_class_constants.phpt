@@ -6,13 +6,13 @@ pdo_mysql
 <?php
 if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
     /* Need connection to detect library version */
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
     MySQLPDOTest::skip();
 }
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
     function get_client_version() {
         if (extension_loaded('mysqli')) {

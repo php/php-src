@@ -4,13 +4,12 @@ Bug #44327 (PDORow::queryString property & numeric offsets / Crash)
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-include __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
@@ -43,7 +42,7 @@ echo "\ndone\n";
 ?>
 --CLEAN--
 <?php
-include __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS bug53551');
 ?>

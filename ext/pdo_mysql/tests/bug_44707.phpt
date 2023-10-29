@@ -1,12 +1,10 @@
 --TEST--
 Bug #44707 (The MySQL PDO driver resets variable content after bindParam on tinyint field)
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 
 $db = MySQLPDOTest::factory();
@@ -23,9 +21,8 @@ if ($version < 41000)
 ?>
 --FILE--
 <?php
-require __DIR__ . '/config.inc';
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+$db = MySQLPDOTest::factory();
 
 function bug_44707($db) {
 
@@ -71,6 +68,11 @@ $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
 bug_44707($db);
 
 print "done!";
+?>
+--CLEAN--
+<?php
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--
 Native Prepared Statements

@@ -1,14 +1,13 @@
 --TEST--
 Bug #61411 (PDO Segfaults with PERSISTENT == TRUE && EMULATE_PREPARES == FALSE)
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 
+$db = MySQLPDOTest::factory();
 $row = $db->query('SELECT VERSION() as _version')->fetch(PDO::FETCH_ASSOC);
 $matches = array();
 if (!preg_match('/^(\d+)\.(\d+)\.(\d+)/ismU', $row['_version'], $matches))
@@ -21,7 +20,7 @@ if ($version < 40106)
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
 $attr	= getenv('PDOTEST_ATTR');
 if (!$attr) {

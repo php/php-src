@@ -1,19 +1,16 @@
 --TEST--
 PDO MySQL Bug #38546 (bindParam incorrect processing of bool types)
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+$db = MySQLPDOTest::factory();
 
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
@@ -191,7 +188,7 @@ foreach ($db->query('SELECT * from test') as $row) {
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--

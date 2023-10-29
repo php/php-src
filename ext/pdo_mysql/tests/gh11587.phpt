@@ -4,13 +4,13 @@ GH-11587 PHP8.1: Fixed the condition for result set values to be of native type,
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-if (!extension_loaded('mysqlnd')) die('skip: This test requires the loading of mysqlnd');
+MySQLPDOTest::skipNotMySQLnd();
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 
 $db->exec('DROP TABLE IF EXISTS test');
@@ -76,7 +76,7 @@ echo 'done!';
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--

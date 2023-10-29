@@ -4,13 +4,13 @@ MySQL PDO->prepare(), emulated PS, anonymous placeholder
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 // TODO: This test is MySQL version specific - for whatever reason
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
     $db = MySQLPDOTest::factory();
 
     try {
@@ -57,9 +57,8 @@ MySQLPDOTest::skip();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-$db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
 Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number in %s on line %d

@@ -4,13 +4,12 @@ Bug #44327 (PDORow::queryString property & numeric offsets / Crash)
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
     $db = MySQLPDOTest::factory();
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
@@ -41,6 +40,11 @@ $db = MySQLPDOTest::factory();
     $row = $stmt->fetch();
     var_dump($row->queryString);
 
+?>
+--CLEAN--
+<?php
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
 object(PDORow)#%d (2) {

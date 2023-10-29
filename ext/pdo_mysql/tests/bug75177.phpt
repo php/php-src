@@ -4,13 +4,13 @@ PDO MySQL Bug #75177 Type 'bit' is fetched as unexpected string
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-if (!MySQLPDOTest::isPDOMySQLnd()) die('skip only for mysqlnd');
+MySQLPDOTest::skipNotMySQLnd();
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $pdo = MySQLPDOTest::factory();
 
 $tbl = "test";
@@ -35,7 +35,7 @@ foreach ($ret as $i) {
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--

@@ -4,15 +4,12 @@ PDO->beginTransaction()
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
-if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
-    die("skip Transactional engine not found");
-?>
+MySQLPDOTest::skipNotTransactionalEngine();
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
     $db = MySQLPDOTest::factory();
 
     MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
@@ -186,7 +183,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--

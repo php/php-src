@@ -4,9 +4,9 @@ PDO_MYSQL: check the session_connect_attrs table for connection attributes
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-if (!MySQLPDOTest::isPDOMySQLnd()) die('skip only for mysqlnd');
+MySQLPDOTest::skipNotMySQLnd();
 
 $pdo = MySQLPDOTest::factory();
 
@@ -24,7 +24,7 @@ if (!$stmt || $stmt->fetchColumn(1) !== 'ON') {
 --FILE--
 <?php
 
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $pdo = MySQLPDOTest::factory();
 
 if (preg_match('/host=([^;]+)/', PDO_MYSQL_TEST_DSN, $m)) {

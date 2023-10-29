@@ -1,19 +1,16 @@
 --TEST--
 PDO MySQL national character set parameters don't affect true prepared statements
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require __DIR__ . '/config.inc';
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require __DIR__ . '/config.inc';
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+$db = MySQLPDOTest::factory();
 
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
 
@@ -31,7 +28,7 @@ foreach ($db->query('SELECT * from test') as $row) {
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--

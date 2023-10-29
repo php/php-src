@@ -4,13 +4,13 @@ Bug #80808: PDO returns ZEROFILL integers without leading zeros
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
 
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $pdo = MySQLPDOTest::factory();
 
 $pdo->exec('DROP TABLE IF EXISTS test');
@@ -22,6 +22,11 @@ var_dump($pdo->query('SELECT * FROM test')->fetchColumn(0));
 $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 var_dump($pdo->query('SELECT * FROM test')->fetchColumn(0));
 
+?>
+--CLEAN--
+<?php
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--
 string(4) "0800"

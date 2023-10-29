@@ -4,7 +4,7 @@ MySQL PDO->exec(), affected rows
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 
 // Run test only locally - not against remote hosts
@@ -59,7 +59,7 @@ if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
         return true;
     }
 
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
     putenv('PDOTEST_ATTR='.serialize([PDO::MYSQL_ATTR_LOCAL_INFILE=>true]));
     $db = MySQLPDOTest::factory();
     MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
@@ -106,9 +106,8 @@ if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != '')) {
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-$db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--
 done!

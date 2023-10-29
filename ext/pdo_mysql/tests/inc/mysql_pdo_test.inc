@@ -1,6 +1,6 @@
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'config.inc');
-require_once(dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc');
+require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'init.inc');
+require_once(dirname(__FILE__) . str_replace('/', DIRECTORY_SEPARATOR, '/../../../../ext/pdo/tests/pdo_test.inc'));
 
 class MySQLPDOTest extends PDOTest {
 
@@ -158,12 +158,29 @@ class MySQLPDOTest extends PDOTest {
     }
 
     static function isPDOMySQLnd() {
-            ob_start();
-            phpinfo();
-            $tmp = ob_get_contents();
-            ob_end_clean();
-            return (preg_match('/PDO Driver for MySQL.*enabled/', $tmp) &&
-                preg_match('/Client API version.*mysqlnd/', $tmp));
+        ob_start();
+        phpinfo();
+        $tmp = ob_get_contents();
+        ob_end_clean();
+        return (preg_match('/PDO Driver for MySQL.*enabled/', $tmp) &&
+            preg_match('/Client API version.*mysqlnd/', $tmp));
+    }
+
+    static function skipNotMySQLnd(?string $message = null) {
+        $message = $message ?? 'skip only for mysqlnd';
+        if (!self::isPDOMySQLnd()) die($message);
+    }
+
+    static function skipNotTransactionalEngine(?string $message = null) {
+        $db = self::factory();
+        $message = $message ?? 'skip Transactional engine not found';
+        if (false == self::detect_transactional_mysql_engine($db)) die($message);
+    }
+
+    static function skipNoMySQLAttrLocalInfileDirectorySupport(?string $message = null) {
+        $message = $message ?? 'skip No MYSQL_ATTR_LOCAL_INFILE_DIRECTORY support';
+        require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipifinfilenotallowed.inc');
+        if (!defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) die($message);
     }
 
     static function dropTestTable($db = NULL) {
@@ -172,6 +189,5 @@ class MySQLPDOTest extends PDOTest {
 
         $db->exec('DROP TABLE IF EXISTS test');
     }
-
 }
 ?>

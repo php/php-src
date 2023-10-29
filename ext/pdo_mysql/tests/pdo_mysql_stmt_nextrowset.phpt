@@ -4,7 +4,7 @@ MySQL PDOStatement->nextRowSet()
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 $row = $db->query('SELECT VERSION() as _version')->fetch(PDO::FETCH_ASSOC);
@@ -22,7 +22,7 @@ if (!MySQLPDOTest::isPDOMySQLnd())
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
     $db = MySQLPDOTest::factory();
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
@@ -110,7 +110,7 @@ if (!MySQLPDOTest::isPDOMySQLnd())
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--

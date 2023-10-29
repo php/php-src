@@ -1,14 +1,13 @@
 --TEST--
 PECL Bug #7976 (Calling stored procedure several times)
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 
+$db = MySQLPDOTest::factory();
 $row = $db->query('SELECT VERSION() as _version')->fetch(PDO::FETCH_ASSOC);
 $matches = array();
 if (!preg_match('/^(\d+)\.(\d+)\.(\d+)/ismU', $row['_version'], $matches))
@@ -21,7 +20,7 @@ if ($version < 50000)
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 
 function bug_pecl_7976($db) {
@@ -53,7 +52,7 @@ print "done!";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 $db->exec('DROP PROCEDURE IF EXISTS p');
 ?>

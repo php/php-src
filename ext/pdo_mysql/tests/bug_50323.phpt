@@ -1,18 +1,16 @@
 --TEST--
 Bug #50323 (No ability to connect to database named 't;', no chance to escape semicolon)
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require __DIR__ . '/config.inc';
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+$db = MySQLPDOTest::factory();
 
     function changeDSN($original, $new_options) {
         $old_options = array();
@@ -53,8 +51,8 @@ echo 'done!';
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+$db = MySQLPDOTest::factory();
 
 @$db->exec('DROP DATABASE IF EXISTS `crazy;dbname`');
 ?>

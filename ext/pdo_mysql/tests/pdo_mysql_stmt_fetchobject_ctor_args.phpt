@@ -4,10 +4,10 @@ MySQL PDO: PDOStatement->fetchObject() with $constructorArgs
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 
+$db = MySQLPDOTest::factory();
 try {
     $query = "SELECT '', NULL, \"\" FROM DUAL";
     $stmt = $db->prepare($query);
@@ -20,7 +20,7 @@ if (!$ok)
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 /** @var PDO $db */
 $db = MySQLPDOTest::factory();
 MySQLPDOTest::createTestTable($db);
@@ -77,7 +77,7 @@ try {
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--

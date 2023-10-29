@@ -4,7 +4,7 @@ MySQL PDO->exec(), BIT columns - remove after fix!
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 if (MySQLPDOTest::isPDOMySQLnd())
     die("skip Known bug - mysqlnd handles BIT incorrectly!");
@@ -12,7 +12,7 @@ if (MySQLPDOTest::isPDOMySQLnd())
 --FILE--
 <?php
     /* TODO: remove this test after fix and enable the BIT test in pdo_mysql_types.phpt again */
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
     function test_type(&$db, $offset, $sql_type, $value, $ret_value = NULL, $pattern = NULL) {
 
@@ -50,9 +50,8 @@ if (MySQLPDOTest::isPDOMySQLnd())
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-$db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--
 array(2) {

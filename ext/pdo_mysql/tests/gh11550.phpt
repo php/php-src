@@ -1,16 +1,15 @@
 --TEST--
 Bug GH-11550 (MySQL Statement has a empty query result when the response field has changed, also Segmentation fault)
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $pdo = MySQLPDOTest::factory();
 
 $pdo->exec(<<<'SQL'
@@ -40,7 +39,7 @@ echo 'Done';
 ?>
 --CLEAN--
 <?php
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $pdo = MySQLPDOTest::factory();
 $pdo->query('DROP TABLE IF EXISTS test_gh11550');
 ?>

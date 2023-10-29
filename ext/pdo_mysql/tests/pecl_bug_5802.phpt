@@ -1,18 +1,16 @@
 --TEST--
 PDO MySQL PECL Bug #5802 (bindParam/bindValue retain the is_null flag)
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require __DIR__ . '/config.inc';
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(__DIR__. '/common.phpt');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+$db = MySQLPDOTest::factory();
 
 $db->exec('create table test ( bar char(3) NULL )');
 $stmt = $db->prepare('insert into test (bar) values(:bar)') or var_dump($db->errorInfo());
@@ -38,9 +36,8 @@ print "done!";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-$db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--
 array(3) {

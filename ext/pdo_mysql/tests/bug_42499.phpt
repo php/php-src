@@ -1,12 +1,10 @@
 --TEST--
 Bug #42499 (Multi-statement execution via PDO::exec() makes connection unusable)
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 
 $db = MySQLPDOTest::factory();
@@ -23,7 +21,7 @@ if ($version < 41000)
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 
 function bug_42499($db) {
@@ -57,6 +55,11 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 
 print "done!";
+?>
+--CLEAN--
+<?php
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
 Emulated Prepared Statements...
