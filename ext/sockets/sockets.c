@@ -219,8 +219,7 @@ ZEND_GET_MODULE(sockets)
 #endif
 
 #ifndef HAVE_INET_NTOP
-/* inet_ntop should be used instead of inet_ntoa */
-int inet_ntoa_lock = 0;
+#error inet_ntop unsupported on this platform
 #endif
 
 static bool php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ */
@@ -964,14 +963,7 @@ PHP_FUNCTION(socket_getsockname)
 #endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
-#ifdef HAVE_INET_NTOP
 			addr_string = inet_ntop(AF_INET, &sin->sin_addr, addrbuf, sizeof(addrbuf));
-#else
-			while (inet_ntoa_lock == 1);
-			inet_ntoa_lock = 1;
-			addr_string = inet_ntoa(sin->sin_addr);
-			inet_ntoa_lock = 0;
-#endif
 			ZEND_TRY_ASSIGN_REF_STRING(addr, addr_string);
 
 			if (port != NULL) {
@@ -1043,14 +1035,7 @@ PHP_FUNCTION(socket_getpeername)
 #endif
 		case AF_INET:
 			sin = (struct sockaddr_in *) sa;
-#ifdef HAVE_INET_NTOP
 			addr_string = inet_ntop(AF_INET, &sin->sin_addr, addrbuf, sizeof(addrbuf));
-#else
-			while (inet_ntoa_lock == 1);
-			inet_ntoa_lock = 1;
-			addr_string = inet_ntoa(sin->sin_addr);
-			inet_ntoa_lock = 0;
-#endif
 			ZEND_TRY_ASSIGN_REF_STRING(arg2, addr_string);
 
 			if (arg3 != NULL) {
@@ -1383,9 +1368,7 @@ PHP_FUNCTION(socket_recvfrom)
 #if HAVE_IPV6
 	struct sockaddr_in6	sin6;
 #endif
-#ifdef HAVE_INET_NTOP
 	char				addrbuf[INET6_ADDRSTRLEN];
-#endif
 	socklen_t			slen;
 	int					retval;
 	zend_long				arg3, arg4;
@@ -1447,11 +1430,7 @@ PHP_FUNCTION(socket_recvfrom)
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
-#ifdef HAVE_INET_NTOP
 			address = inet_ntop(AF_INET, &sin.sin_addr, addrbuf, sizeof(addrbuf));
-#else
-			address = inet_ntoa(sin.sin_addr);
-#endif
 
 			ZEND_TRY_ASSIGN_REF_NEW_STR(arg2, recv_buf);
 			ZEND_TRY_ASSIGN_REF_STRING(arg5, address ? address : "0.0.0.0");
