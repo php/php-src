@@ -140,6 +140,9 @@ PHP 8.4 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Intl:
+  . The class constants are typed now.
+
 - PDO:
   . The class constants are typed now.
 
