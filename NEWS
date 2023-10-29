@@ -11,6 +11,9 @@ DOM:
     (nielsdos)
   . Fix cloning attribute with namespace disappearing namespace. (nielsdos)
 
+FTP:
+  . Removed the deprecated inet_ntoa call support. (David Carlier)
+
 Intl:
   . Added IntlDateFormatter::PATTERN constant. (David Carlier)
 
@@ -36,6 +39,9 @@ SimpleXML:
     foreach). (nielsdos)
   . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
 
+SNMP:
+  . Removed the deprecated inet_ntoa call support. (David Carlier)
+
 SOAP:
   . Add support for clark notation for namespaces in class map. (lxShaDoWxl)
   . Mitigate #51561 (SoapServer with a extented class and using sessions,
@@ -52,6 +58,7 @@ Standard:
   . Increase the default BCrypt cost to 12. (timwolla)
   . Fixed bug GH-12592 (strcspn() odd behaviour with NUL bytes and empty mask).
     (nielsdos)
+  . Removed the deprecated inet_ntoa call support. (David Carlier)
 
 XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)

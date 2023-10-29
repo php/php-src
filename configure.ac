@@ -609,7 +609,6 @@ getgrnam_r \
 getpwuid_r \
 getwd \
 glob \
-inet_ntoa \
 inet_ntop \
 inet_pton \
 localtime_r \

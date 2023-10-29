@@ -60,6 +60,10 @@
 #endif
 #endif
 
+#ifndef HAVE_INET_NTOP
+#error inet_ntop unsupported on this platform
+#endif
+
 #ifndef HAVE_INET_ATON
 int inet_aton(const char *, struct in_addr *);
 #endif
@@ -620,19 +624,13 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 	}
 
 	if (textaddr) {
-#ifdef HAVE_INET_NTOP
 		char abuf[256];
-#endif
 		const char *buf = NULL;
 
 		switch (sa->sa_family) {
 			case AF_INET:
 				/* generally not thread safe, but it *is* thread safe under win32 */
-#ifdef HAVE_INET_NTOP
 				buf = inet_ntop(AF_INET, &((struct sockaddr_in*)sa)->sin_addr, (char *)&abuf, sizeof(abuf));
-#else
-				buf = inet_ntoa(((struct sockaddr_in*)sa)->sin_addr);
-#endif
 				if (buf) {
 					*textaddr = strpprintf(0, "%s:%d",
 						buf, ntohs(((struct sockaddr_in*)sa)->sin_port));
@@ -640,7 +638,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 
 				break;
 
-#if HAVE_IPV6 && HAVE_INET_NTOP
+#if HAVE_IPV6
 			case AF_INET6:
 				buf = (char*)inet_ntop(sa->sa_family, &((struct sockaddr_in6*)sa)->sin6_addr, (char *)&abuf, sizeof(abuf));
 				if (buf) {

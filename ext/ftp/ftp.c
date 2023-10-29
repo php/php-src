@@ -56,6 +56,10 @@
 #include <openssl/err.h>
 #endif
 
+#ifndef HAVE_INET_NTOP
+#error inet_ntop unsupported on this platform
+#endif
+
 #include "ftp.h"
 #include "ext/standard/fsock.h"
 
@@ -1685,13 +1689,16 @@ ftp_getdata(ftpbuf_t *ftp)
 
 	data->listener = fd;
 
-#if defined(HAVE_IPV6) && defined(HAVE_INET_NTOP)
+#if defined(HAVE_IPV6)
 	if (sa->sa_family == AF_INET6) {
 		/* need to use EPRT */
 		char eprtarg[INET6_ADDRSTRLEN + sizeof("|x||xxxxx|")];
 		char out[INET6_ADDRSTRLEN];
 		int eprtarg_len;
-		inet_ntop(AF_INET6, &((struct sockaddr_in6*) sa)->sin6_addr, out, sizeof(out));
+		if (!inet_ntop(AF_INET6, &((struct sockaddr_in6*) sa)->sin6_addr, out, sizeof(out))) {
+			goto bail;
+		}
+
 		eprtarg_len = snprintf(eprtarg, sizeof(eprtarg), "|2|%s|%hu|", out, ntohs(((struct sockaddr_in6 *) &addr)->sin6_port));
 
 		if (eprtarg_len < 0) {
