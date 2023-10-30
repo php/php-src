@@ -15572,6 +15572,16 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 					} ZEND_HASH_FOREACH_END();
 					_zend_jit_add_predecessor_ref(jit, default_b, jit->b, ref);
 				}
+			} else if (!(op1_info & MAY_BE_UNDEF)) {
+				if (next_opline) {
+					if (next_opline == default_opline) {
+						ir_END_list(continue_list);
+					} else {
+						jit_SIDE_EXIT(jit, ir_CONST_ADDR(default_label));
+					}
+				} else {
+					_zend_jit_add_predecessor_ref(jit, default_b, jit->b, ir_END());
+				}
 			}
 
 			if (op1_info & MAY_BE_UNDEF) {
