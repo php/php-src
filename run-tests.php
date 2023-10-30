@@ -3654,6 +3654,11 @@ class RuntestsValgrind
     protected $version_3_8_0 = false;
     protected $tool = null;
 
+    public function getHeader(): string
+    {
+        return $this->header;
+    }
+
     public function __construct(array $environment, string $tool = 'memcheck')
     {
         $this->tool = $tool;
