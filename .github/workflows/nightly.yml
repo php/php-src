@@ -628,7 +628,7 @@ jobs:
       - name: Build mysql-5.7
         uses: ./.github/actions/build-libmysqlclient
         with:
-          libmysql: mysql-5.7.41-linux-glibc2.12-x86_64.tar.gz
+          libmysql: mysql-5.7.44-linux-glibc2.12-x86_64.tar.gz
           withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Test mysql-5.7
         uses: ./.github/actions/test-libmysqlclient
