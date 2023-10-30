@@ -2052,7 +2052,7 @@ static void zend_gc_root_tmpvars(void) {
 			}
 
 			uint32_t kind = range->var & ZEND_LIVE_MASK;
-			if (kind == ZEND_LIVE_TMPVAR) {
+			if (kind == ZEND_LIVE_TMPVAR || kind == ZEND_LIVE_LOOP) {
 				uint32_t var_num = range->var & ~ZEND_LIVE_MASK;
 				zval *var = ZEND_CALL_VAR(ex, var_num);
 				if (Z_REFCOUNTED_P(var)) {
