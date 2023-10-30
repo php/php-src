@@ -22,6 +22,11 @@ print_r($db->query("INSERT INTO test (num) VALUES (451)"));
 
 print_r($db->lastInsertId());
 ?>
+--CLEAN--
+<?php
+require __DIR__ . '/mysql_pdo_test.inc';
+MySQLPDOTest::dropTestTable();
+?>
 --EXPECT--
 PDOStatement Object
 (
