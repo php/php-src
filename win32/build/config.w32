@@ -323,7 +323,7 @@ if (VS_TOOLSET && VCVERS >= 1914) {
 }
 
 PHP_INSTALL_HEADERS("", "Zend/ TSRM/ main/ main/streams/ win32/");
-PHP_INSTALL_HEADERS("Zend/Optimizer", "zend_call_graph.h zend_cfg.h zend_dump.h zend_func_info.h zend_inference.h zend_optimizer.h zend_ssa.h");
+PHP_INSTALL_HEADERS("Zend/Optimizer", "zend_call_graph.h zend_cfg.h zend_dump.h zend_func_info.h zend_inference.h zend_optimizer.h zend_ssa.h zend_worklist.h");
 
 STDOUT.WriteBlankLines(1);
 

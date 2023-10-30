@@ -1699,7 +1699,8 @@ PHP_INSTALL_HEADERS([Zend/Optimizer], [ \
     zend_func_info.h \
     zend_inference.h \
     zend_optimizer.h \
-    zend_ssa.h])
+    zend_ssa.h \
+    zend_worklist.h])
 
 PHP_ADD_SOURCES(TSRM, TSRM.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
