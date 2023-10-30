@@ -190,6 +190,11 @@ namespace ZendTestNS {
         public function method(): ?UnlikelyCompileError {}
     }
 
+    class NotUnlikelyCompileError {
+        /* This method signature would create a compile error due to the string
+         * "ZendTestNS\NotUnlikelyCompileError" in the generated macro call */
+        public function method(): ?NotUnlikelyCompileError {}
+    }
 }
 
 namespace ZendTestNS2 {
