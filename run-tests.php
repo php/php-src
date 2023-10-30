@@ -3844,7 +3844,6 @@ class TestFile
 
     /**
      * @throws BorkageException
-     * @throws Exception
      */
     private function validateAndProcess(bool $inRedirect): void
     {
