@@ -12450,6 +12450,9 @@ static int zend_jit_fetch_dim(zend_jit_ctx   *jit,
 					jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
 					end_inputs = ir_END();
 				}
+			} else if (!(op2_info & (MAY_BE_ANY|MAY_BE_UNDEF))) {
+				/* impossible dead path */
+				end_inputs = ir_END();
 			} else {
 				ZEND_ASSERT(end_inputs == IR_UNUSED);
 			}
