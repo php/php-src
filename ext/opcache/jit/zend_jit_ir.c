@@ -310,7 +310,7 @@ typedef struct _zend_jit_registers_buf {
 #define ZEND_JIT_EXIT_POINTS_SPACING   4  // push byte + short jmp = bytes
 #define ZEND_JIT_EXIT_POINTS_PER_GROUP 32 // number of continuous exit points
 
-static uint32_t zend_jit_exit_point_by_addr(void *addr);
+static uint32_t zend_jit_exit_point_by_addr(const void *addr);
 int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs);
 
 static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
@@ -358,7 +358,7 @@ static const void *zend_jit_get_veneer(ir_ctx *ctx, const void *addr)
 
 	if (((zend_jit_ctx*)ctx)->trace
 	 && (void*)addr >= dasm_buf && (void*)addr < dasm_end) {
-		uint32_t exit_point = zend_jit_exit_point_by_addr((void*)addr);
+		uint32_t exit_point = zend_jit_exit_point_by_addr(addr);
 
 		if (exit_point != (uint32_t)-1) {
 			zend_jit_trace_info *t = ((zend_jit_ctx*)ctx)->trace;
@@ -375,7 +375,11 @@ static bool zend_jit_set_veneer(ir_ctx *ctx, const void *addr, const void *venee
 {
 	int i, count = sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0]);
 	int64_t offset;
+	uint32_t exit_point = zend_jit_exit_point_by_addr(addr);
 
+	if (exit_point != (uint32_t)-1) {
+		return 1;
+	}
 	for (i = 0; i < count; i++) {
 		if (zend_jit_stub_handlers[i] == addr) {
 			const void **ptr = (const void**)&zend_jit_stub_handlers[count + i];

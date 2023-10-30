@@ -117,7 +117,7 @@ static const void *zend_jit_trace_get_exit_addr(uint32_t n)
 		((n % ZEND_JIT_EXIT_POINTS_PER_GROUP) * ZEND_JIT_EXIT_POINTS_SPACING));
 }
 
-static uint32_t zend_jit_exit_point_by_addr(void *addr)
+static uint32_t zend_jit_exit_point_by_addr(const void *addr)
 {
 	uint32_t n = (ZEND_JIT_EXIT_NUM + (ZEND_JIT_EXIT_POINTS_PER_GROUP - 1)) / ZEND_JIT_EXIT_POINTS_PER_GROUP;
 	uint32_t i;
