@@ -24,7 +24,7 @@
  */
 
 /* Temporary variables while this file is being refactored. */
-/** @var ?JUnit */
+/** @var ?JUnit $junit */
 $junit = null;
 
 /* End temporary variables. */
@@ -143,6 +143,7 @@ HELP;
  * This is the entry point and exit point überfunction. It contains all the
  * code that was previously found at the top level. It could and should be
  * refactored to be smaller and more manageable.
+ * @throws Exception
  */
 function main(): void
 {
@@ -166,7 +167,7 @@ function main(): void
     global $context_line_count;
 
     // Temporary for the duration of refactoring
-    /** @var JUnit */
+    /** @var JUnit $junit */
     global $junit;
 
     define('IS_WINDOWS', substr(PHP_OS, 0, 3) == "WIN");
@@ -465,7 +466,6 @@ function main(): void
                 case 'g':
                     $SHOW_ONLY_GROUPS = explode(",", $argv[++$i]);
                     break;
-                //case 'h'
                 case '--keep-all':
                     foreach ($cfgfiles as $file) {
                         $cfg['keep'][$file] = true;
@@ -1825,6 +1825,7 @@ function skip_test(string $tested, string $tested_file, string $shortname, strin
 //
 /**
  * @param string|array $file
+ * @throws Exception
  */
 function run_test(string $php, $file, array $env): string
 {
@@ -1842,7 +1843,7 @@ function run_test(string $php, $file, array $env): string
     global $show_progress;
 
     // Temporary
-    /** @var JUnit */
+    /** @var JUnit $junit */
     global $junit;
 
     static $skipCache;
@@ -3354,9 +3355,8 @@ class JUnit
         fwrite($this->fp, $xml);
     }
 
-    private function getSuitesXML(string $suite_name = ''): string
+    private function getSuitesXML(): string
     {
-        // FIXME: $suite_name gets overwritten
         $result = '';
 
         foreach ($this->suites as $suite_name => $suite) {
@@ -3649,10 +3649,10 @@ class SkipCache
 
 class RuntestsValgrind
 {
-    protected $version = '';
-    protected $header = '';
-    protected $version_3_8_0 = false;
-    protected $tool = null;
+    protected string $version = '';
+    protected string $header = '';
+    protected bool $version_3_8_0 = false;
+    protected string $tool = '';
 
     public function getHeader(): string
     {
@@ -3665,17 +3665,17 @@ class RuntestsValgrind
         $header = system_with_timeout("valgrind --tool={$this->tool} --version", $environment);
         if (!$header) {
             error("Valgrind returned no version info for {$this->tool}, cannot proceed.\n".
-                  "Please check if Valgrind is installed and the tool is named correctly.");
+                "Please check if Valgrind is installed and the tool is named correctly.");
         }
         $count = 0;
         $version = preg_replace("/valgrind-(\d+)\.(\d+)\.(\d+)([.\w_-]+)?(\s+)/", '$1.$2.$3', $header, 1, $count);
         if ($count != 1) {
             error("Valgrind returned invalid version info (\"{$header}\") for {$this->tool}, cannot proceed.");
         }
-        $this->version = $version;
+        $this->version = (string) $version;
         $this->header = sprintf(
             "%s (%s)", trim($header), $this->tool);
-        $this->version_3_8_0 = version_compare($version, '3.8.0', '>=');
+        $this->version_3_8_0 = (bool) version_compare($version, '3.8.0', '>=');
     }
 
     public function wrapCommand(string $cmd, string $memcheck_filename, bool $check_all): string
@@ -3753,6 +3753,9 @@ class TestFile
         return $this->sections[$name];
     }
 
+    /**
+     * @throws Exception
+     */
     public function getName(): string
     {
         return trim($this->getSection('TEST'));
@@ -3846,6 +3849,7 @@ class TestFile
 
     /**
      * @throws BorkageException
+     * @throws Exception
      */
     private function validateAndProcess(bool $inRedirect): void
     {
@@ -4193,4 +4197,8 @@ class DiffOutputBuilder
     }
 }
 
-main();
+try {
+    main();
+}catch (Exception $exception){
+    error($exception->getMessage());
+}
