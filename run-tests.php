@@ -471,7 +471,6 @@ function main(): void
                         $cfg['keep'][$file] = true;
                     }
                     break;
-                //case 'l'
                 case 'm':
                     $valgrind = new RuntestsValgrind($environment);
                     break;
@@ -520,7 +519,6 @@ function main(): void
                     putenv('NO_INTERACTION=1');
                     $environment['NO_INTERACTION'] = 1;
                     break;
-                //case 'r'
                 case 's':
                     $output_file = $argv[++$i];
                     $just_save_results = true;
@@ -594,7 +592,6 @@ function main(): void
                 case '--bless':
                     $bless = true;
                     break;
-                //case 'w'
                 case '-':
                     // repeat check with full switch
                     $switch = $argv[$i];
@@ -1813,7 +1810,8 @@ function show_file_block(string $file, string $block, ?string $section = null): 
     }
 }
 
-function skip_test(string $tested, string $tested_file, string $shortname, string $reason) {
+function skip_test(string $tested, string $tested_file, string $shortname, string $reason): string
+{
     global $junit;
 
     show_result('SKIP', $tested, $tested_file, "reason: $reason");
@@ -2203,7 +2201,6 @@ TEST $file
             $junit->markTestAs('SKIP', $shortname, $tested, null, $message);
             return 'SKIPPED';
         }
-
 
         if (!strncasecmp('info', $output, 4) && preg_match('/^info\s*(.+)/i', $output, $m)) {
             $info = " (info: $m[1])";
@@ -2935,8 +2932,7 @@ function generate_diff(string $wanted, ?string $wanted_re, string $output): stri
         $regex = '/^' . expectf_to_regex($expected). '$/s';
         return preg_match($regex, $new);
     });
-    $result = $differ->diff($w, $o);
-    return $result;
+    return $differ->diff($w, $o);
 }
 
 function error(string $message): void
@@ -3358,7 +3354,7 @@ class JUnit
         fwrite($this->fp, $xml);
     }
 
-    private function getSuitesXML(string $suite_name = '')
+    private function getSuitesXML(string $suite_name = ''): string
     {
         // FIXME: $suite_name gets overwritten
         $result = '';
@@ -3649,17 +3645,6 @@ class SkipCache
 
         return $result;
     }
-
-//    public function __destruct()
-//    {
-//        echo "Skips: {$this->hits} hits, {$this->misses} misses.\n";
-//        echo "Extensions: {$this->extHits} hits, {$this->extMisses} misses.\n";
-//        echo "Cache distribution:\n";
-//
-//        foreach ($this->skips as $php => $cache) {
-//            echo "$php: " . count($cache) . "\n";
-//        }
-//    }
 }
 
 class RuntestsValgrind
@@ -3668,11 +3653,6 @@ class RuntestsValgrind
     protected $header = '';
     protected $version_3_8_0 = false;
     protected $tool = null;
-
-    public function getVersion(): string
-    {
-        return $this->version;
-    }
 
     public function getHeader(): string
     {
@@ -3744,17 +3724,6 @@ class TestFile
     public function hasSection(string $name): bool
     {
         return isset($this->sections[$name]);
-    }
-
-    public function hasAllSections(string ...$names): bool
-    {
-        foreach ($names as $section) {
-            if (!isset($this->sections[$section])) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     public function hasAnySections(string ...$names): bool
@@ -3981,7 +3950,7 @@ final class Differ
     public const OLD = 0;
     public const ADDED = 1;
     public const REMOVED = 2;
-    private $outputBuilder;
+    private DiffOutputBuilder $outputBuilder;
     private $isEqual;
 
     public function __construct(callable $isEqual)
@@ -4043,8 +4012,6 @@ final class Differ
 
         foreach ($end as $token) {
             $diff[] = [$token, self::OLD];
-            $fromLine++;
-            $toLine++;
         }
 
         return $diff;
@@ -4163,7 +4130,6 @@ class DiffOutputBuilder
     {
         global $context_line_count;
         $i = 0;
-        $string = '';
         $number_len = max(3, strlen((string)count($diffs)));
         $line_number_spec = '%0' . $number_len . 'd';
         $buffer = fopen('php://memory', 'r+b');
