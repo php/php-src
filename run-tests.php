@@ -143,7 +143,6 @@ HELP;
  * This is the entry point and exit point überfunction. It contains all the
  * code that was previously found at the top level. It could and should be
  * refactored to be smaller and more manageable.
- * @throws Exception
  */
 function main(): void
 {
@@ -1825,7 +1824,6 @@ function skip_test(string $tested, string $tested_file, string $shortname, strin
 //
 /**
  * @param string|array $file
- * @throws Exception
  */
 function run_test(string $php, $file, array $env): string
 {
@@ -3649,9 +3647,9 @@ class SkipCache
 
 class RuntestsValgrind
 {
-    protected string $version = '';
+    protected $version = '';
     protected string $header = '';
-    protected bool $version_3_8_0 = false;
+    protected $version_3_8_0 = false;
     protected string $tool = '';
 
     public function getHeader(): string
@@ -3672,10 +3670,10 @@ class RuntestsValgrind
         if ($count != 1) {
             error("Valgrind returned invalid version info (\"{$header}\") for {$this->tool}, cannot proceed.");
         }
-        $this->version = (string) $version;
+        $this->version = $version;
         $this->header = sprintf(
             "%s (%s)", trim($header), $this->tool);
-        $this->version_3_8_0 = (bool) version_compare($version, '3.8.0', '>=');
+        $this->version_3_8_0 = version_compare($version, '3.8.0', '>=');
     }
 
     public function wrapCommand(string $cmd, string $memcheck_filename, bool $check_all): string
@@ -3753,9 +3751,6 @@ class TestFile
         return $this->sections[$name];
     }
 
-    /**
-     * @throws Exception
-     */
     public function getName(): string
     {
         return trim($this->getSection('TEST'));
@@ -4197,8 +4192,4 @@ class DiffOutputBuilder
     }
 }
 
-try {
-    main();
-}catch (Exception $exception){
-    error($exception->getMessage());
-}
+main();
