@@ -4538,7 +4538,7 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 			stack = JIT_G(current_frame)->stack;
 			if (opline->result_type != IS_UNUSED) {
 				old_res_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
-				if (opline->opcode == ZEND_PRE_INC) {
+				if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) {
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_LONG, 0);
 				}
 			}
