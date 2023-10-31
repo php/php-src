@@ -4893,6 +4893,21 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info))) {
 							goto jit_failure;
 						}
+						if (ssa_op->op2_def > 0
+						 && Z_MODE(op2_addr) == IS_REG
+						 && ssa->vars[ssa_op->op2_def].no_val) {
+							uint8_t type = (op2_info & MAY_BE_LONG) ? IS_LONG : IS_DOUBLE;
+							uint32_t var_num = EX_VAR_TO_NUM(opline->op2.var);
+
+							if (STACK_MEM_TYPE(stack, var_num) != type
+							 && ssa->vars[ssa_op->op2_def].use_chain < 0
+							 && !ssa->vars[ssa_op->op2_def].phi_use_chain) {
+								if (!zend_jit_store_type(&ctx, var_num, type)) {
+									return 0;
+								}
+								SET_STACK_TYPE(stack, var_num, type, 1);
+							}
+						}
 						if (opline->op2_type == IS_CV
 						 && ssa_op->op2_def >= 0
 						 && ssa->vars[ssa_op->op2_def].alias == NO_ALIAS) {
@@ -4930,6 +4945,21 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_info, op1_addr, op1_def_addr,
 								res_use_info, res_info, res_addr)) {
 							goto jit_failure;
+						}
+						if (ssa_op->op1_def > 0
+						 && Z_MODE(op1_addr) == IS_REG
+						 && ssa->vars[ssa_op->op1_def].no_val) {
+							uint8_t type = (op1_info & MAY_BE_LONG) ? IS_LONG : IS_DOUBLE;
+							uint32_t var_num = EX_VAR_TO_NUM(opline->op1.var);
+
+							if (STACK_MEM_TYPE(stack, var_num) != type
+							 && ssa->vars[ssa_op->op1_def].use_chain < 0
+							 && !ssa->vars[ssa_op->op1_def].phi_use_chain) {
+								if (!zend_jit_store_type(&ctx, var_num, type)) {
+									return 0;
+								}
+								SET_STACK_TYPE(stack, var_num, type, 1);
+							}
 						}
 						if (opline->op1_type == IS_CV
 						 && ssa_op->op1_def >= 0
@@ -5012,6 +5042,21 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (!zend_jit_send_var(&ctx, opline, op_array,
 								op1_info, op1_addr, op1_def_addr)) {
 							goto jit_failure;
+						}
+						if (ssa_op->op1_def > 0
+						 && Z_MODE(op1_addr) == IS_REG
+						 && ssa->vars[ssa_op->op1_def].no_val) {
+							uint8_t type = (op1_info & MAY_BE_LONG) ? IS_LONG : IS_DOUBLE;
+							uint32_t var_num = EX_VAR_TO_NUM(opline->op1.var);
+
+							if (STACK_MEM_TYPE(stack, var_num) != type
+							 && ssa->vars[ssa_op->op1_def].use_chain < 0
+							 && !ssa->vars[ssa_op->op1_def].phi_use_chain) {
+								if (!zend_jit_store_type(&ctx, var_num, type)) {
+									return 0;
+								}
+								SET_STACK_TYPE(stack, var_num, type, 1);
+							}
 						}
 						if (opline->op1_type == IS_CV
 						 && ssa_op->op1_def >= 0
