@@ -1133,6 +1133,7 @@ namespace DOM
         public function replaceChildren(...$nodes): void {}
     }
 
+    /** @strict-properties */
     final class HTMLDocument extends DOM\Document
     {
         private function __construct() {}
@@ -1154,6 +1155,7 @@ namespace DOM
         public function saveHTMLFile(string $filename): int|false {}
     }
 
+    /** @strict-properties */
     final class XMLDocument extends DOM\Document
     {
         /** @implementation-alias DOM\HTMLDocument::__construct */

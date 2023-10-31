@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 00c85801438f6e1054b82fd376d287488ec52a2f */
+ * Stub hash: c550911c409dac315afdbfc5858b0d8b0cba2bf3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -493,17 +493,17 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Document_getE
 	ZEND_ARG_TYPE_INFO(0, elementId, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Document_getElementsByTagName, 0, 1, DOM\\NodeList, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Document_getElementsByTagName, 0, 1, DOM\\\116odeList, 0)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Document_getElementsByTagNameNS, 0, 2, DOM\\NodeList, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Document_getElementsByTagNameNS, 0, 2, DOM\\\116odeList, 0)
 	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOM_Document_importNode, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, node, DOM\\Node, 0)
+	ZEND_ARG_OBJ_INFO(0, node, DOM\\\116ode, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, deep, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
@@ -540,8 +540,8 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOM_Document_rel
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOM_Document_adoptNode, 0, 1, DOM\\Node, MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, node, DOM\\Node, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOM_Document_adoptNode, 0, 1, DOM\\\116ode, MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, node, DOM\\\116ode, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_Document_append arginfo_class_DOMParentNode_append
@@ -569,7 +569,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_HTMLDocument_createFrom
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_DOM_HTMLDocument_saveXML, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOM\\Node, 1, "null")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOM\\\116ode, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -579,7 +579,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_DOM_HTMLDocument_saveXMLFi
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_DOM_HTMLDocument_saveHTML, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOM\\Node, 1, "null")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOM\\\116ode, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_DOM_HTMLDocument_saveHTMLFile, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
@@ -612,7 +612,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOM_XMLDocument_xinclude arginfo_class_DOMDocument_xinclude
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DOM_XMLDocument_saveXML, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOM\\Node, 1, "null")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOM\\\116ode, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -2040,7 +2040,7 @@ static zend_class_entry *register_class_DOM_HTMLDocument(zend_class_entry *class
 
 	INIT_NS_CLASS_ENTRY(ce, "DOM", "HTMLDocument", class_DOM_HTMLDocument_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOM_DOM_Document);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
 	return class_entry;
 }
@@ -2051,7 +2051,7 @@ static zend_class_entry *register_class_DOM_XMLDocument(zend_class_entry *class_
 
 	INIT_NS_CLASS_ENTRY(ce, "DOM", "XMLDocument", class_DOM_XMLDocument_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOM_DOM_Document);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
 	zval property_xmlEncoding_default_value;
 	ZVAL_UNDEF(&property_xmlEncoding_default_value);
