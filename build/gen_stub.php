@@ -1554,7 +1554,7 @@ class FuncInfo {
         $descriptionRefSec->appendChild($undocumentedEntity);
         $descriptionRefSec->appendChild(new DOMText("\n  "));
         $returnDescriptionPara = $doc->createElement('para');
-        $returnDescriptionPara->appendChild(new DOMText("\n   Description\n  "));
+        $returnDescriptionPara->appendChild(new DOMText("\n   Description.\n  "));
         $descriptionRefSec->appendChild($returnDescriptionPara);
 
         $descriptionRefSec->appendChild(new DOMText("\n "));
@@ -1573,14 +1573,14 @@ class FuncInfo {
         /* Creation of <refsect1 role="errors"> */
         $errorsRefSec = $this->generateRefSect1($doc, 'errors');
         $errorsDescriptionParaConstantTag = $doc->createElement('constant');
-        $errorsDescriptionParaConstantTag->append("E_*");
+        $errorsDescriptionParaConstantTag->append('E_*');
         $errorsDescriptionParaExceptionTag = $doc->createElement('exceptionname');
-        $errorsDescriptionParaExceptionTag->append("Exception");
+        $errorsDescriptionParaExceptionTag->append('Exception');
         $errorsDescriptionPara = $doc->createElement('para');
         $errorsDescriptionPara->append(
             "\n   When does this function issue ",
             $errorsDescriptionParaConstantTag,
-            " level errors, and/or throw ",
+            " level errors,\n   and/or throw ",
             $errorsDescriptionParaExceptionTag,
             "s.\n  "
         );
@@ -1625,7 +1625,7 @@ class FuncInfo {
         $seeAlsoMemberLink = $doc->createElement('member');
         $seeAlsoMemberLinkTag = $doc->createElement('link');
         $seeAlsoMemberLinkTag->setAttribute('linkend', 'some.id.chunk.to.link');
-        $seeAlsoMemberLinkTag->appendChild(new DOMText("something appendix"));
+        $seeAlsoMemberLinkTag->appendChild(new DOMText('something appendix'));
         $seeAlsoMemberLink->appendChild($seeAlsoMemberLinkTag);
 
         $seeAlsoList = $doc->createElement('simplelist');
@@ -1702,23 +1702,28 @@ ENDCOMMENT
                 $parameterTerm = $doc->createElement('term');
                 $parameterTerm->appendChild($parameter);
 
-                $parameterEntry = $doc->createElement('varlistentry');
-                $parameterEntry->appendChild(new DOMText("\n     "));
-                $parameterEntry->appendChild($parameterTerm);
-                $parameterEntry->appendChild(new DOMText("\n     "));
-
                 $listItemPara = $doc->createElement('para');
-                $listItemPara->appendChild(new DOMText("\n       "));
-                $listItemPara->appendChild(new DOMText("Description."));
-                $listItemPara->appendChild(new DOMText("\n      "));
+                $listItemPara->append(
+                    "\n       ",
+                    "Description.",
+                    "\n      ",
+                );
 
                 $parameterEntryListItem = $doc->createElement('listitem');
-                $parameterEntryListItem->appendChild(new DOMText("\n      "));
-                $parameterEntryListItem->appendChild($listItemPara);
-                $parameterEntryListItem->appendChild(new DOMText("\n     "));
+                $parameterEntryListItem->append(
+                    "\n      ",
+                    $listItemPara,
+                    "\n     ",
+                );
 
-                $parameterEntry->appendChild($parameterEntryListItem);
-                $parameterEntry->appendChild(new DOMText("\n    "));
+                $parameterEntry = $doc->createElement('varlistentry');
+                $parameterEntry->append(
+                    "\n     ",
+                    $parameterTerm,
+                    "\n     ",
+                    $parameterEntryListItem,
+                    "\n    ",
+                );
 
                 $parametersList->appendChild(new DOMText("\n    "));
                 $parametersList->appendChild($parameterEntry);
@@ -1738,18 +1743,11 @@ ENDCOMMENT
 
         $returnType = $this->return->getMethodSynopsisType();
         if ($returnType === null) {
-            $returnDescriptionPara->appendChild(new DOMText("Description"));
+            $returnDescriptionPara->appendChild(new DOMText("Description."));
         } else if (count($returnType->types) === 1) {
             $type = $returnType->types[0];
             $name = $type->name;
-            /*
-            $descriptionNode = match ($name) {
-                'void' => $doc->createEntityReference('return.void'),
-                'true' => $doc->createEntityReference('return.true.always'),
-                'bool' => $doc->createEntityReference('return.success'),
-                default => new DOMText("Description"),
-            };
-            */
+
             switch ($name) {
                 case 'void':
                     $descriptionNode = $doc->createEntityReference('return.void');
@@ -1761,12 +1759,12 @@ ENDCOMMENT
                     $descriptionNode = $doc->createEntityReference('return.success');
                     break;
                 default:
-                    $descriptionNode = new DOMText("Description");
+                    $descriptionNode = new DOMText("Description.");
                     break;
             }
             $returnDescriptionPara->appendChild($descriptionNode);
         } else {
-            $returnDescriptionPara->appendChild(new DOMText("Description"));
+            $returnDescriptionPara->appendChild(new DOMText("Description."));
         }
         $returnDescriptionPara->appendChild(new DOMText("\n  "));
         $returnRefSec->appendChild($returnDescriptionPara);
@@ -1792,15 +1790,16 @@ ENDCOMMENT
             $headerEntry = $doc->createElement('entry');
             $headerEntry->appendChild($header);
 
-            $headerRow->appendChild(new DOMText("\n$strIndent    "));
-            $headerRow->appendChild($headerEntry);
+            $headerRow->append("\n$strIndent    ", $headerEntry);
         }
-        $headerRow->appendChild(new DOMText("\n$strIndent   "));
+        $headerRow->append("\n$strIndent   ");
 
         $thead = $doc->createElement('thead');
-        $thead->appendChild(new DOMText("\n$strIndent   "));
-        $thead->appendChild($headerRow);
-        $thead->appendChild(new DOMText("\n$strIndent  "));
+        $thead->append(
+            "\n$strIndent   ",
+            $headerRow,
+            "\n$strIndent  ",
+        );
 
         $tbody = $doc->createElement('tbody');
         foreach ($rows as $row) {
@@ -1814,23 +1813,29 @@ ENDCOMMENT
             }
             $bodyRow->appendChild(new DOMText("\n$strIndent   "));
 
-            $tbody->appendChild(new DOMText("\n$strIndent   "));
-            $tbody->appendChild($bodyRow);
-            $tbody->appendChild(new DOMText("\n$strIndent  "));
+            $tbody->append(
+                "\n$strIndent   ",
+                $bodyRow,
+                "\n$strIndent  ",
+            );
         }
 
         $tgroup = $doc->createElement('tgroup');
         $tgroup->setAttribute('cols', (string) $columns);
-        $tgroup->appendChild(new DOMText("\n$strIndent  "));
-        $tgroup->appendChild($thead);
-        $tgroup->appendChild(new DOMText("\n$strIndent  "));
-        $tgroup->appendChild($tbody);
-        $tgroup->appendChild(new DOMText("\n$strIndent "));
+        $tgroup->append(
+            "\n$strIndent  ",
+            $thead,
+            "\n$strIndent  ",
+            $tbody,
+            "\n$strIndent ",
+        );
 
         $table = $doc->createElement('informaltable');
-        $table->appendChild(new DOMText("\n$strIndent "));
-        $table->appendChild($tgroup);
-        $table->appendChild(new DOMText("\n$strIndent"));
+        $table->append(
+            "\n$strIndent ",
+            $tgroup,
+            "\n$strIndent",
+        );
 
         return $table;
     }
@@ -1906,12 +1911,16 @@ OUPUT_EXAMPLE
         $screen->appendChild($output);
         $screen->append("\n   ");
 
-        $example->append("\n   ", $screen);
-        $example->append("\n  ");
+        $example->append(
+            "\n   ",
+            $screen,
+            "\n  ",
+        );
 
-        $refSec->append($example);
-
-        $refSec->appendChild(new DOMText("\n "));
+        $refSec->append(
+            $example,
+            "\n ",
+        );
         return $refSec;
     }
 
