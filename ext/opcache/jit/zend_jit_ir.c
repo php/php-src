@@ -3864,7 +3864,8 @@ static void zend_jit_type_check_undef(zend_jit_ctx  *jit,
                                       uint32_t       var,
                                       const zend_op *opline,
                                       bool           check_exception,
-                                      bool           in_cold_path)
+                                      bool           in_cold_path,
+                                      bool           undef_result)
 {
 	ir_ref if_def = ir_IF(type);
 
@@ -3878,7 +3879,11 @@ static void zend_jit_type_check_undef(zend_jit_ctx  *jit,
 	}
 	ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(var));
 	if (check_exception) {
-		zend_jit_check_exception(jit);
+		if (undef_result) {
+			zend_jit_check_exception_undef_result(jit, opline);
+		} else {
+			zend_jit_check_exception(jit);
+		}
 	}
 	ir_MERGE_WITH_EMPTY_TRUE(if_def);
 }
@@ -7301,7 +7306,7 @@ static int zend_jit_bool_jmpznz(zend_jit_ctx *jit, const zend_op *opline, uint32
 				zend_jit_type_check_undef(jit,
 					type,
 					opline->op1.var,
-					opline, 1, 0);
+					opline, 1, 0, 1);
 			}
 			if (set_bool) {
 				jit_set_Z_TYPE_INFO(jit, res_addr, set_bool_not ? IS_TRUE : IS_FALSE);
@@ -12201,12 +12206,12 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 				jit_SET_EX_OPLINE(jit, opline);
 				if (opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) {
 					may_throw = 1;
-					zend_jit_type_check_undef(jit, jit_Z_TYPE(jit, op1_addr), opline->op1.var, NULL, 0, 1);
+					zend_jit_type_check_undef(jit, jit_Z_TYPE(jit, op1_addr), opline->op1.var, NULL, 0, 1, 0);
 				}
 
 				if (op2_info & MAY_BE_UNDEF) {
 					may_throw = 1;
-					zend_jit_type_check_undef(jit, jit_Z_TYPE(jit, op2_addr), opline->op2.var, NULL, 0, 1);
+					zend_jit_type_check_undef(jit, jit_Z_TYPE(jit, op2_addr), opline->op2.var, NULL, 0, 1, 0);
 				}
 			}
 
