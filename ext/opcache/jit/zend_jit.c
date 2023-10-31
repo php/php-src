@@ -3369,6 +3369,15 @@ ZEND_EXT_API int zend_jit_check_support(void)
 		}
 	}
 
+#if defined(IR_TARGET_AARCH64)
+	if (JIT_G(buffer_size) > 128*1024*1024) {
+		zend_error(E_WARNING, "JIT on AArch64 doesn't support opcache.jit_buffer_size above 128M.");
+		JIT_G(enabled) = 0;
+		JIT_G(on) = 0;
+		return FAILURE;
+	}
+#endif
+
 	return SUCCESS;
 }
 
