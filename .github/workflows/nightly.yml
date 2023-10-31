@@ -350,7 +350,7 @@ jobs:
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           # Hack to disable a test that hangs
-          php -r '$c = file_get_contents("tests/Filesystem/FilesystemTest.php"); $c = str_replace("public function testSharedGet()", "/** @group skip */\n    public function testSharedGet()", $c); file_put_contents("tests/Filesystem/FilesystemTest.php", $c);'
+          php -r '$c = file_get_contents("tests/Filesystem/FilesystemTest.php"); $c = str_replace("public function testSharedGet()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testSharedGet()", $c); file_put_contents("tests/Filesystem/FilesystemTest.php", $c);'
           export ASAN_OPTIONS=exitcode=139
           php vendor/bin/phpunit --exclude-group skip || EXIT_CODE=$?
           if [ $EXIT_CODE -gt 128 ]; then
