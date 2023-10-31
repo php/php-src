@@ -5786,12 +5786,7 @@ if ($replaceClassSynopses || $verifyManual) {
 }
 
 if ($generateMethodSynopses) {
-    // Use the manual as target if we are targeting a specific extension
-    if (str_contains($manualTarget, 'reference')) {
-        $methodSynopsesDirectory = $manualTarget;
-    } else {
-        $methodSynopsesDirectory = getcwd() . "/methodsynopses";
-    }
+    $methodSynopsesDirectory = array_pop($locations);
 
     $methodSynopses = generateMethodSynopses($funcMap, $aliasMap);
     if (!empty($methodSynopses)) {
