@@ -3647,10 +3647,10 @@ class SkipCache
 
 class RuntestsValgrind
 {
-    protected $version = '';
-    protected string $header = '';
-    protected $version_3_8_0 = false;
-    protected string $tool = '';
+    protected string $version;
+    protected string $header;
+    protected bool $version_3_8_0;
+    protected string $tool;
 
     public function getHeader(): string
     {
