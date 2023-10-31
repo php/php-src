@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 06ac12255321035a2669fbc5abf2f3fda4c6ad76 */
+ * Stub hash: fe312caaaedac29794ab90e4210eaaad667c391c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -209,6 +209,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ZendTestNS_UnlikelyCompileError_method, 0, 0, ZendTestNS\\\125nlikelyCompileError, 1)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ZendTestNS_NotUnlikelyCompileError_method, 0, 0, ZendTestNS\\\116otUnlikelyCompileError, 1)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_ZendTestNS2_Foo_method arginfo_zend_test_void_return
 
 #define arginfo_class_ZendTestNS2_ZendSubNS_Foo_method arginfo_zend_test_void_return
@@ -277,6 +280,7 @@ static ZEND_METHOD(ZendTestForbidDynamicCall, call);
 static ZEND_METHOD(ZendTestForbidDynamicCall, callStatic);
 static ZEND_METHOD(ZendTestNS_Foo, method);
 static ZEND_METHOD(ZendTestNS_UnlikelyCompileError, method);
+static ZEND_METHOD(ZendTestNS_NotUnlikelyCompileError, method);
 static ZEND_METHOD(ZendTestNS2_Foo, method);
 static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method);
 
@@ -441,6 +445,12 @@ static const zend_function_entry class_ZendTestNS_Foo_methods[] = {
 
 static const zend_function_entry class_ZendTestNS_UnlikelyCompileError_methods[] = {
 	ZEND_ME(ZendTestNS_UnlikelyCompileError, method, arginfo_class_ZendTestNS_UnlikelyCompileError_method, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_ZendTestNS_NotUnlikelyCompileError_methods[] = {
+	ZEND_ME(ZendTestNS_NotUnlikelyCompileError, method, arginfo_class_ZendTestNS_NotUnlikelyCompileError_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -921,6 +931,16 @@ static zend_class_entry *register_class_ZendTestNS_UnlikelyCompileError(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "ZendTestNS", "UnlikelyCompileError", class_ZendTestNS_UnlikelyCompileError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestNS_NotUnlikelyCompileError(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "ZendTestNS", "NotUnlikelyCompileError", class_ZendTestNS_NotUnlikelyCompileError_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 
 	return class_entry;
