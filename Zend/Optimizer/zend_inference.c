@@ -3348,10 +3348,18 @@ static zend_always_inline zend_result _zend_update_type_info(
 						uint8_t opcode;
 
 						if (!ssa_opcodes) {
-							ZEND_ASSERT(j == (opline - op_array->opcodes) + 1 && "Use must be in next opline");
+							if (j != (opline - op_array->opcodes) + 1) {
+								/* Use must be in next opline */
+								tmp |= key_type | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+								break;
+							}
 							opcode = op_array->opcodes[j].opcode;
 						} else {
-							ZEND_ASSERT(ssa_opcodes[j] == opline + 1 && "Use must be in next opline");
+							if (ssa_opcodes[j] != opline + 1) {
+								/* Use must be in next opline */
+								tmp |= key_type | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+								break;
+							}
 							opcode = ssa_opcodes[j]->opcode;
 						}
 						switch (opcode) {
@@ -3413,7 +3421,10 @@ static zend_always_inline zend_result _zend_update_type_info(
 							EMPTY_SWITCH_DEFAULT_CASE()
 						}
 						j = zend_ssa_next_use(ssa->ops, ssa_op->result_def, j);
-						ZEND_ASSERT(j < 0 && "There should only be one use");
+						if (j >= 0) {
+							tmp |= key_type | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+							break;
+						}
 					}
 				}
 				if (((tmp & MAY_BE_ARRAY) && (tmp & MAY_BE_ARRAY_KEY_ANY))
