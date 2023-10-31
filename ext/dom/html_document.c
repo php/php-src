@@ -435,16 +435,44 @@ static bool dom_decode_encode_fast_path(lexbor_libxml2_bridge_parse_context *ctx
 		lxb_codepoint_t codepoint = decoding_encoding_ctx->decode_data->decode_single(&decoding_encoding_ctx->decode, &buf_ref, buf_end);
 		if (UNEXPECTED(codepoint > LXB_ENCODING_MAX_CODEPOINT)) {
 			size_t skip = buf_ref - buf_ref_backup; /* Skip invalid data, it's replaced by the UTF-8 replacement bytes */
-			if (!dom_process_parse_chunk(ctx, document, parser, buf_ref - last_output - skip, last_output, buf_ref - last_output, tokenizer_error_offset, tree_error_offset)) {
+			if (!dom_process_parse_chunk(
+				ctx,
+				document,
+				parser,
+				buf_ref - last_output - skip,
+				last_output,
+				buf_ref - last_output,
+				tokenizer_error_offset,
+				tree_error_offset
+			)) {
 				goto fail_oom;
 			}
-			if (!dom_process_parse_chunk(ctx, document, parser, LXB_ENCODING_REPLACEMENT_SIZE, LXB_ENCODING_REPLACEMENT_BYTES, 0, tokenizer_error_offset, tree_error_offset)) {
+			if (!dom_process_parse_chunk(
+				ctx,
+				document,
+				parser,
+				LXB_ENCODING_REPLACEMENT_SIZE,
+				LXB_ENCODING_REPLACEMENT_BYTES,
+				0,
+				tokenizer_error_offset,
+				tree_error_offset
+			)) {
 				goto fail_oom;
 			}
 			last_output = buf_ref;
 		}
 	}
-	if (buf_ref != last_output && !dom_process_parse_chunk(ctx, document, parser, buf_ref - last_output, last_output, buf_ref - last_output, tokenizer_error_offset, tree_error_offset)) {
+	if (buf_ref != last_output
+		&& !dom_process_parse_chunk(
+			ctx,
+			document,
+			parser,
+			buf_ref - last_output,
+			last_output,
+			buf_ref - last_output,
+			tokenizer_error_offset,
+			tree_error_offset
+	)) {
 		goto fail_oom;
 	}
 	*buf_ref_ref = buf_ref;
@@ -467,7 +495,16 @@ static bool dom_decode_encode_slow_path(lexbor_libxml2_bridge_parse_context *ctx
 		do {
 			encode_status = decoding_encoding_ctx->encode_data->encode(&decoding_encoding_ctx->encode, &codepoints_ref, codepoints_end);
 			ZEND_ASSERT(encode_status != LXB_STATUS_ERROR && "parameters and replacements should be valid");
-			if (!dom_process_parse_chunk(ctx, document, parser, lxb_encoding_encode_buf_used(&decoding_encoding_ctx->encode), decoding_encoding_ctx->encoding_output, decoding_buffer_used, tokenizer_error_offset, tree_error_offset)) {
+			if (!dom_process_parse_chunk(
+				ctx,
+				document,
+				parser,
+				lxb_encoding_encode_buf_used(&decoding_encoding_ctx->encode),
+				decoding_encoding_ctx->encoding_output,
+				decoding_buffer_used,
+				tokenizer_error_offset,
+				tree_error_offset
+			)) {
 				goto fail_oom;
 			}
 			lxb_encoding_encode_buf_used_set(&decoding_encoding_ctx->encode, 0);
@@ -500,13 +537,32 @@ static bool dom_parse_decode_encode_finish(lexbor_libxml2_bridge_parse_context *
 			const lxb_codepoint_t *codepoints_ref = (const lxb_codepoint_t *) decoding_encoding_ctx->codepoints;
 			const lxb_codepoint_t *codepoints_end = codepoints_ref + decoding_buffer_size;
 			(void) decoding_encoding_ctx->encode_data->encode(&decoding_encoding_ctx->encode, &codepoints_ref, codepoints_end);
-			if (!dom_process_parse_chunk(ctx, document, parser, lxb_encoding_encode_buf_used(&decoding_encoding_ctx->encode), decoding_encoding_ctx->encoding_output, decoding_buffer_size, tokenizer_error_offset, tree_error_offset)) {
+			if (!dom_process_parse_chunk(
+				ctx,
+				document,
+				parser,
+				lxb_encoding_encode_buf_used(&decoding_encoding_ctx->encode),
+				decoding_encoding_ctx->encoding_output,
+				decoding_buffer_size,
+				tokenizer_error_offset,
+				tree_error_offset
+			)) {
 				return false;
 			}
 		}
 	}
 	(void) lxb_encoding_encode_finish(&decoding_encoding_ctx->encode);
-	if (lxb_encoding_encode_buf_used(&decoding_encoding_ctx->encode) && !dom_process_parse_chunk(ctx, document, parser, lxb_encoding_encode_buf_used(&decoding_encoding_ctx->encode), decoding_encoding_ctx->encoding_output, lxb_encoding_decode_buf_used(&decoding_encoding_ctx->decode), tokenizer_error_offset, tree_error_offset)) {
+	if (lxb_encoding_encode_buf_used(&decoding_encoding_ctx->encode)
+		&& !dom_process_parse_chunk(
+			ctx,
+			document,
+			parser,
+			lxb_encoding_encode_buf_used(&decoding_encoding_ctx->encode),
+			decoding_encoding_ctx->encoding_output,
+			lxb_encoding_decode_buf_used(&decoding_encoding_ctx->decode),
+			tokenizer_error_offset,
+			tree_error_offset
+	)) {
 		return false;
 	}
 	return true;
