@@ -24,6 +24,7 @@ if (!have_innodb($link))
 
     $mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
+    $mysqli->begin_transaction();
     if (true !== ($tmp = $mysqli->commit())) {
         printf("[002] Expecting boolean/true got %s/%s\n", gettype($tmp), $tmp);
     }
@@ -66,16 +67,21 @@ if (!have_innodb($link))
         printf("[011] [%d] %s\n", $mysqli->errno, $mysqli->error);
     }
 
+    $mysqli->begin_transaction();
     if (!$mysqli->commit(0 , "tx_name0123")) {
         printf("[012] [%d] %s\n", $mysqli->errno, $mysqli->error);
     }
 
+    $mysqli->begin_transaction();
     var_dump($mysqli->commit(0 , "*/ nonsense"));
 
+    $mysqli->begin_transaction();
     var_dump($mysqli->commit(0 , "tx_name ulf вендел"));
 
+    $mysqli->begin_transaction();
     var_dump($mysqli->commit(0 , "tx_name \t\n\r\b"));
 
+    $mysqli->begin_transaction();
     if (!$mysqli->commit(MYSQLI_TRANS_COR_AND_CHAIN | MYSQLI_TRANS_COR_NO_RELEASE , "tx_name")) {
         printf("[016] [%d] %s\n", $mysqli->errno, $mysqli->error);
     }

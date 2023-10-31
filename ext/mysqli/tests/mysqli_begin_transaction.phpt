@@ -85,13 +85,29 @@ if (!have_innodb($link))
 
     if (mysqli_get_server_version($link) >= 50605) {
         /* does it like stupid names? */
-        if (@!$link->begin_transaction(MYSQLI_TRANS_START_READ_WRITE, "*/trick me?\n\0"))
-                printf("[020] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+        if (@!$link->begin_transaction(MYSQLI_TRANS_START_READ_WRITE, "*/trick me?\n\0")) {
+            printf("[020] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+        } else {
+            mysqli_rollback($link);
+        }
 
         /* does it like stupid names? */
-        if (@!$link->begin_transaction(MYSQLI_TRANS_START_READ_WRITE, "az09"))
+        if (@!$link->begin_transaction(MYSQLI_TRANS_START_READ_WRITE, "az09")) {
             printf("[021] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+        } else {
+            mysqli_rollback($link);
+        }
     }
+
+    mysqli_report(MYSQLI_REPORT_ERROR|MYSQLI_REPORT_STRICT);
+    try {
+        mysqli_begin_transaction($link);
+        mysqli_begin_transaction($link);
+    } catch (\mysqli_sql_exception $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+
+    mysqli_rollback($link);
 
     print "done!";
 ?>
@@ -102,4 +118,5 @@ if (!have_innodb($link))
 --EXPECT--
 NULL
 mysqli_begin_transaction(): Argument #2 ($flags) must be one of the MYSQLI_TRANS_* constants
+There is already an active transaction
 done!

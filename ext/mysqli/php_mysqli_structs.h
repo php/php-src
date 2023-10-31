@@ -234,6 +234,8 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 	intern->ptr = NULL; \
 }
 
+#define MYSQLI_IS_IN_TRANSACTION(__mysql) \
+	((mysqli_server_status(__mysql->mysql) & SERVER_STATUS_IN_TRANS) != 0)
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	zend_long			num_links;

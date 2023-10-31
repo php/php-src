@@ -323,9 +323,9 @@ Warning: mysqli_real_query(): (%d/%d): You have an error in your SQL syntax; che
 
 Warning: mysqli_autocommit(): (%s/%d): Commands out of sync; you can't run this command now in %s on line %d
 
-Warning: mysqli_commit(): (%s/%d): Commands out of sync; you can't run this command now in %s on line %d
+Warning: mysqli_commit(): (%s/%d): There is no active transaction in %s on line %d
 
-Warning: mysqli_rollback(): (%s/%d): Commands out of sync; you can't run this command now in %s on line %d
+Warning: mysqli_rollback(): (%s/%d): There is no active transaction in %s on line %d
 
 Warning: mysqli_stmt_prepare(): (%s/%d): Commands out of sync; you can't run this command now in %s on line %d
 
@@ -335,6 +335,10 @@ Warning: mysqli_store_result(): (%s/%d): You have an error in your SQL syntax; c
 
 Warning: mysqli_stmt_attr_set(): (%s/%d): Not implemented in %s on line %d
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
+
+Warning: mysqli_commit(): (%s/%d): There is no active transaction in %s on line %d
+
+Warning: mysqli_rollback(): (%s/%d): There is no active transaction in %s on line %d
 
 Warning: mysqli_stmt_prepare(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 [013] Access denied for user '%s'@'%s'%r( \(using password: \w+\)){0,1}%r
