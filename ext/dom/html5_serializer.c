@@ -167,7 +167,7 @@ static zend_result dom_html5_serialize_element_start(dom_html5_serialize_context
 	/* We don't support the "is" value during element creation, so no handling here. */
 
 	/* Some namespace declarations are also attributes (see https://html.spec.whatwg.org/multipage/parsing.html#create-an-element-for-the-token) */
-	for (const xmlNs *ns = node->nsDef; ns; ns = ns->next) {
+	for (const xmlNs *ns = node->nsDef; ns != NULL; ns = ns->next) {
 		if (!dom_ns_is_also_an_attribute(ns)) {
 			continue;
 		}
