@@ -4950,14 +4950,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						op2_addr = OP2_REG_ADDR();
 						op2_info = OP2_INFO();
-						if (ra
-						 && ssa_op->op2_def >= 0
-						 && (!ssa->vars[ssa_op->op2_def].no_val
-						  || (zend_jit_trace_type_to_info(STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var))) & MAY_BE_ANY) !=
-						      (op2_info & MAY_BE_ANY))) {
-							op2_def_addr = OP2_DEF_REG_ADDR();
-						} else {
+
+						if (ssa_op->op2_def < 0 || (Z_MODE(op2_addr) == IS_REG && ssa->vars[ssa_op->op2_def].no_val)) {
 							op2_def_addr = op2_addr;
+						} else {
+							op2_def_addr = OP2_DEF_REG_ADDR();
 						}
 						CHECK_OP2_TRACE_TYPE();
 						op1_info = OP1_INFO();
@@ -5053,12 +5050,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						ZEND_FALLTHROUGH;
 					case ZEND_QM_ASSIGN:
 						op1_addr = OP1_REG_ADDR();
-						if (ra
-						 && ssa_op->op1_def >= 0
-						 && !ssa->vars[ssa_op->op1_def].no_val) {
-							op1_def_addr = OP1_DEF_REG_ADDR();
-						} else {
+						if (ssa_op->op1_def < 0 || (Z_MODE(op1_addr) == IS_REG && ssa->vars[ssa_op->op1_def].no_val)) {
 							op1_def_addr = op1_addr;
+						} else {
+							op1_def_addr = OP1_DEF_REG_ADDR();
 						}
 						op1_info = OP1_INFO();
 						CHECK_OP1_TRACE_TYPE();
@@ -5149,12 +5144,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							break;
 						}
 						op1_addr = OP1_REG_ADDR();
-						if (ra
-						 && ssa_op->op1_def >= 0
-						 && !ssa->vars[ssa_op->op1_def].no_val) {
-							op1_def_addr = OP1_DEF_REG_ADDR();
-						} else {
+						if (ssa_op->op1_def < 0 || (Z_MODE(op1_addr) == IS_REG && ssa->vars[ssa_op->op1_def].no_val)) {
 							op1_def_addr = op1_addr;
+						} else {
+							op1_def_addr = OP1_DEF_REG_ADDR();
 						}
 						op1_info = OP1_INFO();
 						CHECK_OP1_TRACE_TYPE();
@@ -6332,7 +6325,14 @@ done:
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op1.var), type,
 						(gen_handler || type == IS_UNKNOWN || !ra ||
 							(!ra[ssa_op->op1_def] &&
-								(opline->opcode == ZEND_ASSIGN || !ssa->vars[ssa_op->op1_def].no_val))));
+								!(ssa->vars[ssa_op->op1_def].no_val &&
+									Z_MODE(OP1_REG_ADDR()) == IS_REG &&
+										(opline->opcode == ZEND_QM_ASSIGN ||
+											opline->opcode == ZEND_SEND_VAR ||
+											opline->opcode == ZEND_SEND_VAR_EX ||
+											opline->opcode == ZEND_SEND_VAR_NO_REF ||
+											opline->opcode == ZEND_SEND_VAR_NO_REF_EX ||
+											opline->opcode == ZEND_SEND_FUNC_ARG)))));
 					if (type != IS_UNKNOWN) {
 						ssa->var_info[ssa_op->op1_def].type &= ~MAY_BE_GUARD;
 						if (ra && ra[ssa_op->op1_def]) {
@@ -6378,7 +6378,10 @@ done:
 					}
 					SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->op2.var), type,
 						(gen_handler || type == IS_UNKNOWN || !ra ||
-							(!ra[ssa_op->op2_def] /*&& !ssa->vars[ssa_op->op2_def].no_val*/)));
+							(!ra[ssa_op->op2_def] &&
+								!(ssa->vars[ssa_op->op2_def].no_val &&
+									Z_MODE(OP2_REG_ADDR()) == IS_REG &&
+									opline->opcode == ZEND_ASSIGN))));
 					if (type != IS_UNKNOWN) {
 						ssa->var_info[ssa_op->op2_def].type &= ~MAY_BE_GUARD;
 						if (ra && ra[ssa_op->op2_def]) {
