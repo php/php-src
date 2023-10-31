@@ -5580,6 +5580,9 @@ if ($replacePredefinedConstants && $locationCount < 2) {
 if ($replaceClassSynopses && $locationCount < 2) {
     die("At least one source stub path and a target manual directory has to be provided:\n./build/gen_stub.php --replace-classsynopses ./ ../doc-en/\n");
 }
+if ($generateMethodSynopses && $locationCount < 2) {
+    die("At least one source stub path and a target manual directory has to be provided:\n./build/gen_stub.php --generate-methodsynopses ./ ../doc-en/\n");
+}
 if ($replaceMethodSynopses && $locationCount < 2) {
     die("At least one source stub path and a target manual directory has to be provided:\n./build/gen_stub.php --replace-methodsynopses ./ ../doc-en/\n");
 }
@@ -5587,7 +5590,7 @@ if ($verifyManual && $locationCount < 2) {
     die("At least one source stub path and a target manual directory has to be provided:\n./build/gen_stub.php --verify-manual ./ ../doc-en/\n");
 }
 $manualTarget = null;
-if ($replacePredefinedConstants || $replaceClassSynopses || $replaceMethodSynopses || $verifyManual) {
+if ($replacePredefinedConstants || $replaceClassSynopses || $generateMethodSynopses || $replaceMethodSynopses || $verifyManual) {
     $manualTarget = array_pop($locations);
 }
 if ($locations === []) {
@@ -5786,19 +5789,15 @@ if ($replaceClassSynopses || $verifyManual) {
 }
 
 if ($generateMethodSynopses) {
-    $methodSynopsesDirectory = array_pop($locations);
-
     $methodSynopses = generateMethodSynopses($funcMap, $aliasMap);
-    if (!empty($methodSynopses)) {
-        if (!file_exists($methodSynopsesDirectory)) {
-            mkdir($methodSynopsesDirectory);
-        }
+    if (!file_exists($manualTarget)) {
+        mkdir($manualTarget);
+    }
 
-        foreach ($methodSynopses as $filename => $content) {
-            if (!file_exists("$methodSynopsesDirectory/$filename")) {
-                if (file_put_contents("$methodSynopsesDirectory/$filename", $content)) {
-                    echo "Saved $filename\n";
-                }
+    foreach ($methodSynopses as $filename => $content) {
+        if (!file_exists("$manualTarget/$filename")) {
+            if (file_put_contents("$manualTarget/$filename", $content)) {
+                echo "Saved $filename\n";
             }
         }
     }
