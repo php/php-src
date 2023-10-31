@@ -29,6 +29,10 @@
 #include <libxml/HTMLtree.h>
 #include <Zend/zend.h>
 
+#define WORK_LIST_INIT_SIZE 128
+/* libxml2 reserves 2 pointer-sized words for interned strings */
+#define LXML_INTERNED_STRINGS_SIZE (sizeof(void *) * 2)
+
 typedef struct {
     lxb_dom_node_t *node;
     uintptr_t current_active_namespace;
@@ -69,7 +73,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(lxb_dom_node_t
     lexbor_libxml2_bridge_status retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OK;
 
     lexbor_array_obj_t work_list;
-    lexbor_array_obj_init(&work_list, 128, sizeof(work_list_item));
+    lexbor_array_obj_init(&work_list, WORK_LIST_INIT_SIZE, sizeof(work_list_item));
 
     for (lxb_dom_node_t *node = start_node; node != NULL; node = node->prev) {
         lexbor_libxml2_bridge_work_list_item_push(&work_list, node, LXB_NS__UNDEF, (xmlNodePtr) lxml_doc, NULL);
@@ -120,7 +124,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(lxb_dom_node_t
                 goto out;
             }
             xmlNodePtr lxml_text;
-            if (compact_text_nodes && data_length < sizeof(void *) * 2) {
+            if (compact_text_nodes && data_length < LXML_INTERNED_STRINGS_SIZE) {
                 /* See xmlSAX2TextNode() in libxml2 */
                 lxml_text = xmlMalloc(sizeof(xmlNode));
                 if (UNEXPECTED(lxml_text == NULL)) {
