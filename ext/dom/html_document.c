@@ -674,8 +674,9 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 
 	while (source_len > 0) {
 		size_t chunk_size = source_len;
-		if (chunk_size > sizeof(decoding_encoding_ctx.encoding_output) / sizeof(lxb_char_t)) {
-			chunk_size = sizeof(decoding_encoding_ctx.encoding_output) / sizeof(lxb_char_t);
+		const size_t MAX_CHUNK_SIZE = sizeof(decoding_encoding_ctx.encoding_output) / sizeof(*decoding_encoding_ctx.encoding_output);
+		if (chunk_size > MAX_CHUNK_SIZE) {
+			chunk_size = MAX_CHUNK_SIZE;
 		}
 		source_len -= chunk_size;
 
