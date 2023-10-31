@@ -24,7 +24,7 @@
  */
 
 /* Temporary variables while this file is being refactored. */
-/** @var ?JUnit */
+/** @var ?JUnit $junit */
 $junit = null;
 
 /* End temporary variables. */
@@ -166,7 +166,7 @@ function main(): void
     global $context_line_count;
 
     // Temporary for the duration of refactoring
-    /** @var JUnit */
+    /** @var JUnit $junit */
     global $junit;
 
     define('IS_WINDOWS', substr(PHP_OS, 0, 3) == "WIN");
@@ -465,7 +465,6 @@ function main(): void
                 case 'g':
                     $SHOW_ONLY_GROUPS = explode(",", $argv[++$i]);
                     break;
-                //case 'h'
                 case '--keep-all':
                     foreach ($cfgfiles as $file) {
                         $cfg['keep'][$file] = true;
@@ -1842,7 +1841,7 @@ function run_test(string $php, $file, array $env): string
     global $show_progress;
 
     // Temporary
-    /** @var JUnit */
+    /** @var JUnit $junit */
     global $junit;
 
     static $skipCache;
@@ -3354,9 +3353,8 @@ class JUnit
         fwrite($this->fp, $xml);
     }
 
-    private function getSuitesXML(string $suite_name = ''): string
+    private function getSuitesXML(): string
     {
-        // FIXME: $suite_name gets overwritten
         $result = '';
 
         foreach ($this->suites as $suite_name => $suite) {
@@ -3649,10 +3647,10 @@ class SkipCache
 
 class RuntestsValgrind
 {
-    protected $version = '';
-    protected $header = '';
-    protected $version_3_8_0 = false;
-    protected $tool = null;
+    protected string $version;
+    protected string $header;
+    protected bool $version_3_8_0;
+    protected string $tool;
 
     public function getHeader(): string
     {
@@ -3665,7 +3663,7 @@ class RuntestsValgrind
         $header = system_with_timeout("valgrind --tool={$this->tool} --version", $environment);
         if (!$header) {
             error("Valgrind returned no version info for {$this->tool}, cannot proceed.\n".
-                  "Please check if Valgrind is installed and the tool is named correctly.");
+                "Please check if Valgrind is installed and the tool is named correctly.");
         }
         $count = 0;
         $version = preg_replace("/valgrind-(\d+)\.(\d+)\.(\d+)([.\w_-]+)?(\s+)/", '$1.$2.$3', $header, 1, $count);
