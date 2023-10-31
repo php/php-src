@@ -5143,23 +5143,33 @@ $generateOptimizerInfo = isset($options["generate-optimizer-info"]);
 $context->forceRegeneration = isset($options["f"]) || isset($options["force-regeneration"]);
 $context->forceParse = $context->forceRegeneration || $printParameterStats || $verify || $verifyManual || $replacePredefinedConstants || $generateClassSynopses || $generateOptimizerInfo || $replaceClassSynopses || $generateMethodSynopses || $replaceMethodSynopses;
 
-$manualTarget = $argv[$argc - 1] ?? null;
-if (($replacePredefinedConstants || $verifyManual) && $manualTarget === null) {
-    die("A target manual directory must be provided.\n");
-}
-if (($replaceClassSynopses || $verifyManual) && $manualTarget === null) {
-    die("A target manual directory must be provided.\n");
-}
-if (($replaceMethodSynopses || $verifyManual) && $manualTarget === null) {
-    die("A target manual directory must be provided.\n");
-}
-
 if (isset($options["h"]) || isset($options["help"])) {
     die("\nUsage: gen_stub.php [ -f | --force-regeneration ] [ --replace-predefined-constants ] [ --generate-classsynopses ] [ --replace-classsynopses ] [ --generate-methodsynopses ] [ --replace-methodsynopses ] [ --parameter-stats ] [ --verify ]  [ --verify-manual ] [ --generate-optimizer-info ] [ -h | --help ] [ name.stub.php | directory ] [ directory ]\n\n");
 }
 
+$locations = array_slice($argv, $optind);
+$locationCount = count($locations);
+if ($replacePredefinedConstants && $locationCount < 2) {
+    die("At least one source stub path and a target manual directory has to be provided:\n./build/gen_stub.php --replace-predefined-constants ./ ../doc-en/\n");
+}
+if ($replaceClassSynopses && $locationCount < 2) {
+    die("At least one source stub path and a target manual directory has to be provided:\n./build/gen_stub.php --replace-classsynopses ./ ../doc-en/\n");
+}
+if ($replaceMethodSynopses && $locationCount < 2) {
+    die("At least one source stub path and a target manual directory has to be provided:\n./build/gen_stub.php --replace-methodsynopses ./ ../doc-en/\n");
+}
+if ($verifyManual && $locationCount < 2) {
+    die("At least one source stub path and a target manual directory has to be provided:\n./build/gen_stub.php --verify-manual ./ ../doc-en/\n");
+}
+$manualTarget = null;
+if ($replacePredefinedConstants || $replaceClassSynopses || $replaceMethodSynopses || $verifyManual) {
+    $manualTarget = array_pop($locations);
+}
+if ($locations === []) {
+    $locations = ['.'];
+}
+
 $fileInfos = [];
-$locations = array_slice($argv, $optind) ?: ['.'];
 foreach (array_unique($locations) as $location) {
     if (is_file($location)) {
         // Generate single file.
