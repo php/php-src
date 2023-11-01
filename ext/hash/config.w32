@@ -3,6 +3,7 @@
 ARG_WITH('mhash', 'mhash support (BC via hash)', 'no');
 
 if (PHP_MHASH != 'no') {
+	WARNING("mhash* functions are deprecated as of PHP 8.1.0");
 	AC_DEFINE('PHP_MHASH_BC', 1);
 }
 
