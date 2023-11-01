@@ -1095,24 +1095,62 @@ static void zend_jit_allocate_registers(zend_jit_ctx *ctx, const zend_op_array *
 
 		/* Remove intervals used once */
 		for (i = 0; i < ssa->vars_count; i++) {
-			if (ra[i].ref &&
-			    (ra[i].flags & ZREG_LOAD) &&
-			    (ra[i].flags & ZREG_STORE) &&
-			    (ssa->vars[i].use_chain < 0 ||
-			     zend_ssa_next_use(ssa->ops, i, ssa->vars[i].use_chain) < 0)) {
-				bool may_remove = 1;
-				zend_ssa_phi *phi = ssa->vars[i].phi_use_chain;
+			if (ra[i].ref) {
+				if (!(ra[i].flags & (ZREG_LOAD|ZREG_STORE))) {
+					uint32_t var_num = ssa->vars[i].var;
+					uint32_t op_num = ssa->vars[i].definition;
 
-				while (phi) {
-					if (ra[phi->ssa_var].ref &&
-					    !(ra[phi->ssa_var].flags & ZREG_LOAD)) {
-						may_remove = 0;
-						break;
+					/* Check if a tempoary variable may be freed by exception handler */
+					if (op_array->last_live_range
+					 && var_num >= op_array->last_var
+					 && ssa->vars[i].definition >= 0
+					 && ssa->ops[op_num].result_def == i) {
+						const zend_live_range *range = op_array->live_range;
+						int j;
+
+						op_num++;
+						if (op_array->opcodes[op_num].opcode == ZEND_OP_DATA) {
+							op_num++;
+						}
+						for (j = 0; j < op_array->last_live_range; range++, j++) {
+							if (range->start > op_num) {
+								/* further blocks will not be relevant... */
+								break;
+							} else if (op_num < range->end && var_num == (range->var & ~ZEND_LIVE_MASK)) {
+								/* check if opcodes in range may throw */
+								do {
+									if (zend_may_throw(op_array->opcodes + op_num, ssa->ops + op_num, op_array, ssa)) {
+										ra[i].flags |= ZREG_STORE;
+										break;
+									}
+									op_num++;
+									if (op_array->opcodes[op_num].opcode == ZEND_OP_DATA) {
+										op_num++;
+									}
+								} while (op_num < range->end);
+								break;
+							}
+						}
 					}
-					phi = zend_ssa_next_use_phi(ssa, i, phi);
 				}
-				if (may_remove) {
-					ra[i].ref = IR_UNUSED;
+				if ((ra[i].flags & ZREG_LOAD)
+				 && (ra[i].flags & ZREG_STORE)
+				 && (ssa->vars[i].use_chain < 0
+				  || zend_ssa_next_use(ssa->ops, i, ssa->vars[i].use_chain) < 0)) {
+					bool may_remove = 1;
+					zend_ssa_phi *phi = ssa->vars[i].phi_use_chain;
+
+					while (phi) {
+						if (ra[phi->ssa_var].ref &&
+						    !(ra[phi->ssa_var].flags & ZREG_LOAD)) {
+							may_remove = 0;
+							break;
+						}
+						phi = zend_ssa_next_use_phi(ssa, i, phi);
+					}
+					if (may_remove) {
+						ra[i].ref = IR_UNUSED;
+					}
 				}
 			}
 		}

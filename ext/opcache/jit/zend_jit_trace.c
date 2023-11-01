@@ -6174,6 +6174,56 @@ done:
 					} else {
 						SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), type,
 							(gen_handler || type == IS_UNKNOWN || !ra || !RA_HAS_REG(ssa_op->result_def)));
+
+						if (op_array->last_live_range
+						 && opline->result.var > op_array->last_var
+						 && STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var)) != type) {
+							if (!gen_handler && type != IS_UNKNOWN && ra && RA_HAS_REG(ssa_op->result_def)) {
+								uint32_t var_num = opline->result.var;
+								uint32_t op_num = opline - op_array->opcodes;
+								const zend_live_range *range = op_array->live_range;
+								int j;
+
+								op_num += zend_jit_trace_op_len(opline);
+								for (j = 0; j < op_array->last_live_range; range++, j++) {
+									if (range->start > op_num) {
+										/* further blocks will not be relevant... */
+										break;
+									} else if (op_num < range->end && var_num == (range->var & ~ZEND_LIVE_MASK)) {
+										/* check if opcodes in range may throw */
+										bool store_type = 0;
+										const zend_ssa_op *next_ssa_op = ssa_op + zend_jit_trace_op_len(opline);
+										const zend_jit_trace_rec *q = p + 1;
+
+										while (1) {
+											if (q->op != ZEND_JIT_TRACE_VM) {
+												store_type = 1;
+												break;
+											}
+											op_num = q->opline - op_array->opcodes;
+											if (op_num >= range->end || op_num < range->start) {
+												break;
+											}
+											if (zend_may_throw(q->opline, next_ssa_op, op_array, ssa)) {
+												store_type = 1;
+												break;
+											}
+											next_ssa_op += zend_jit_trace_op_len(q->opline);
+											q++;
+										}
+										if (store_type) {
+											var_num = EX_VAR_TO_NUM(var_num);
+
+											if (!zend_jit_store_type(&ctx, var_num, type)) {
+												return 0;
+											}
+											SET_STACK_TYPE(stack, var_num, type, 1);
+										}
+										break;
+									}
+								}
+							}
+						}
 						if (ssa->var_info[ssa_op->result_def].type & MAY_BE_INDIRECT) {
 							RESET_STACK_MEM_TYPE(stack, EX_VAR_TO_NUM(opline->result.var));
 						}
