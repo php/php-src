@@ -282,6 +282,8 @@ PHP 8.3 UPGRADE NOTES
     now returns true on success, previously null was returned.
   . IntlChar::enumCharNames is now returning a boolean.
     Previously it returned null on success and false on failure.
+  . IntlDateFormatter::construct throws an U_ILLEGALE_ARGUMENT_ERROR
+    exception when an invalid locale had been set.
 
 - MBString:
   . mb_strtolower, mb_strtotitle, and mb_convert_case implement conditional
