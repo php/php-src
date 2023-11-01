@@ -244,21 +244,34 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 		}
 		if (info & MAY_BE_ARRAY) {
 			if (first) first = 0; else fprintf(stderr, ", ");
-			if (!(info & MAY_BE_ARRAY_KEY_STRING) || (info & MAY_BE_PACKED_GUARD)) {
-				if (MAY_BE_PACKED_ONLY(info)) {
-					if (info & MAY_BE_PACKED_GUARD) {
-						fprintf(stderr, "!");
-					}
+			if (info & MAY_BE_PACKED_GUARD) {
+				fprintf(stderr, "!");
+			}
+			if (MAY_BE_EMPTY_ONLY(info)) {
+				fprintf(stderr, "empry ");
+			} else if (MAY_BE_PACKED_ONLY(info)) {
+				fprintf(stderr, "packed ");
+			} else if (MAY_BE_HASH_ONLY(info)) {
+				fprintf(stderr, "hash ");
+			} else if ((info & MAY_BE_ARRAY_KEY_ANY) != MAY_BE_ARRAY_KEY_ANY && (info & MAY_BE_ARRAY_KEY_ANY) != 0) {
+				bool afirst = 1;
+				fprintf(stderr, "[");
+				if (info & MAY_BE_ARRAY_EMPTY) {
+					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					fprintf(stderr, "empty ");
+				}
+				if (MAY_BE_PACKED(info)) {
+					if (afirst) afirst = 0; else fprintf(stderr, ", ");
 					fprintf(stderr, "packed ");
-				} else if (MAY_BE_HASH_ONLY(info)) {
-					if (info & MAY_BE_PACKED_GUARD) {
-						fprintf(stderr, "!");
-					}
+				}
+				if (MAY_BE_HASH(info)) {
+					if (afirst) afirst = 0; else fprintf(stderr, ", ");
 					fprintf(stderr, "hash ");
 				}
+				fprintf(stderr, "] ");
 			}
 			fprintf(stderr, "array");
-			if ((info & MAY_BE_ARRAY_KEY_ANY) != 0 &&
+			if ((info & (MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING)) != 0 &&
 			    ((info & MAY_BE_ARRAY_KEY_LONG) == 0 ||
 			     (info & MAY_BE_ARRAY_KEY_STRING) == 0)) {
 				bool afirst = 1;

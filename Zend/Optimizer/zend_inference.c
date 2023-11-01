@@ -2105,18 +2105,22 @@ ZEND_API uint32_t ZEND_FASTCALL zend_array_type_info(const zval *zv)
 		tmp |= MAY_BE_RCN;
 	}
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(ht, str, val) {
-		if (str) {
-			tmp |= MAY_BE_ARRAY_KEY_STRING;
-		} else {
-			tmp |= MAY_BE_ARRAY_KEY_LONG;
-		}
-		tmp |= 1 << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
-	} ZEND_HASH_FOREACH_END();
-	if (HT_IS_PACKED(ht)) {
-		tmp &= ~(MAY_BE_ARRAY_NUMERIC_HASH|MAY_BE_ARRAY_STRING_HASH);
+	if (zend_hash_num_elements(ht) == 0) {
+		tmp |=  MAY_BE_ARRAY_EMPTY;
+	} else if (HT_IS_PACKED(ht)) {
+		tmp |= MAY_BE_ARRAY_PACKED;
+		ZEND_HASH_PACKED_FOREACH_VAL(ht, val) {
+			tmp |= 1 << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
+		} ZEND_HASH_FOREACH_END();
 	} else {
-		tmp &= ~MAY_BE_ARRAY_PACKED;
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht, str, val) {
+			if (str) {
+				tmp |= MAY_BE_ARRAY_STRING_HASH;
+			} else {
+				tmp |= MAY_BE_ARRAY_NUMERIC_HASH;
+			}
+			tmp |= 1 << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT);
+		} ZEND_HASH_FOREACH_END();
 	}
 	return tmp;
 }
@@ -2224,6 +2228,7 @@ static uint32_t assign_dim_array_result_type(
 	if (tmp & MAY_BE_ARRAY_KEY_ANY) {
 		tmp |= (value_type & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT;
 	}
+	tmp &= ~MAY_BE_ARRAY_EMPTY;
 	return tmp;
 }
 
@@ -3661,6 +3666,9 @@ static zend_always_inline zend_result _zend_update_type_info(
 							break;
 						}
 					}
+					if (opline->opcode != ZEND_FETCH_DIM_FUNC_ARG) {
+						tmp &= ~MAY_BE_ARRAY_EMPTY;
+					}
 				}
 				if (((tmp & MAY_BE_ARRAY) && (tmp & MAY_BE_ARRAY_KEY_ANY))
 				 || opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
@@ -3828,7 +3836,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			UPDATE_SSA_TYPE(MAY_BE_LONG, ssa_op->result_def);
 			break;
 		case ZEND_FUNC_GET_ARGS:
-			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_RCN| MAY_BE_ARRAY | MAY_BE_ARRAY_PACKED | MAY_BE_ARRAY_OF_ANY, ssa_op->result_def);
+			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ARRAY|MAY_BE_ARRAY_EMPTY|MAY_BE_ARRAY_PACKED|MAY_BE_ARRAY_OF_ANY, ssa_op->result_def);
 			break;
 		case ZEND_GET_CLASS:
 		case ZEND_GET_CALLED_CLASS:
