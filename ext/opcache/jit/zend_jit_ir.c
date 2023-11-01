@@ -16354,6 +16354,7 @@ static int zend_jit_trace_return(zend_jit_ctx *jit, bool original_handler, const
 			  || opline->opcode == ZEND_YIELD
 			  || opline->opcode == ZEND_YIELD_FROM)) {
 				ir_RETURN(ref);
+				return 1;
 			}
 		}
 		ir_RETURN(ir_CONST_I32(2)); // ZEND_VM_LEAVE
