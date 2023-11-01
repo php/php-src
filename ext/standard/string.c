@@ -3200,19 +3200,17 @@ PHP_FUNCTION(strtr)
 	char *to = NULL;
 	size_t to_len = 0;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STR(str)
-		Z_PARAM_ARRAY_HT_OR_STR(from_ht, from_str)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(to, to_len)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (!to && from_ht == NULL) {
-		zend_argument_type_error(2, "must be of type array, string given");
-		RETURN_THROWS();
-	} else if (to && from_str == NULL) {
-		zend_argument_type_error(2, "must be of type string, array given");
-		RETURN_THROWS();
+	if (ZEND_NUM_ARGS() <= 2) {
+		ZEND_PARSE_PARAMETERS_START(2, 2)
+			Z_PARAM_STR(str)
+			Z_PARAM_ARRAY_HT(from_ht)
+		ZEND_PARSE_PARAMETERS_END();
+	} else {
+		ZEND_PARSE_PARAMETERS_START(3, 3)
+			Z_PARAM_STR(str)
+			Z_PARAM_STR(from_str)
+			Z_PARAM_STRING(to, to_len)
+		ZEND_PARSE_PARAMETERS_END();
 	}
 
 	/* shortcut for empty string */
