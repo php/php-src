@@ -83,7 +83,7 @@ static void dom_decoding_encoding_ctx_init(dom_decoding_encoding_ctx *ctx)
 	ctx->decode_data = NULL;
 	/* Set fast path on by default so that the decoder finishing is skipped if this was never initialised properly. */
 	ctx->fast_path = true;
-	(void) lxb_encoding_encode_init(&ctx->encode, ctx->encode_data, ctx->encoding_output, sizeof(ctx->encoding_output) / sizeof(lxb_char_t));
+	(void) lxb_encoding_encode_init(&ctx->encode, ctx->encode_data, ctx->encoding_output, sizeof(ctx->encoding_output) / sizeof(*ctx->encoding_output));
 	(void) lxb_encoding_encode_replace_set(&ctx->encode, LXB_ENCODING_REPLACEMENT_BYTES, LXB_ENCODING_REPLACEMENT_SIZE);
 }
 
@@ -389,7 +389,7 @@ static void dom_setup_parser_encoding_manually(const lxb_char_t *buf_start, cons
 
 	decoding_encoding_ctx->decode_data = encoding_data;
 
-	(void) lxb_encoding_decode_init(&decoding_encoding_ctx->decode, decoding_encoding_ctx->decode_data, decoding_encoding_ctx->codepoints, sizeof(decoding_encoding_ctx->codepoints) / sizeof(lxb_codepoint_t));
+	(void) lxb_encoding_decode_init(&decoding_encoding_ctx->decode, decoding_encoding_ctx->decode_data, decoding_encoding_ctx->codepoints, sizeof(decoding_encoding_ctx->codepoints) / sizeof(*decoding_encoding_ctx->codepoints));
 	(void) lxb_encoding_decode_replace_set(&decoding_encoding_ctx->decode, &replacement_codepoint, LXB_ENCODING_REPLACEMENT_BUFFER_LEN);
 	decoding_encoding_ctx->fast_path = decoding_encoding_ctx->decode_data == decoding_encoding_ctx->encode_data; /* Note: encode_data is for UTF-8 */
 
@@ -947,8 +947,8 @@ static zend_result dom_common_save(dom_output_ctx *output_ctx, const xmlDoc *doc
 	lxb_encoding_decode_t decode;
 	lxb_char_t encoding_output[4096];
 	lxb_codepoint_t codepoints[4096];
-	(void) lxb_encoding_encode_init(&encode, encoding_data, encoding_output, sizeof(encoding_output) / sizeof(lxb_char_t));
-	(void) lxb_encoding_decode_init(&decode, decoding_data, codepoints, sizeof(codepoints) / sizeof(lxb_codepoint_t));
+	(void) lxb_encoding_encode_init(&encode, encoding_data, encoding_output, sizeof(encoding_output) / sizeof(*encoding_output));
+	(void) lxb_encoding_decode_init(&decode, decoding_data, codepoints, sizeof(codepoints) / sizeof(*codepoints));
 	if (encoding_data->encoding == LXB_ENCODING_UTF_8) {
 		lxb_encoding_encode_replace_set(&encode, LXB_ENCODING_REPLACEMENT_BYTES, LXB_ENCODING_REPLACEMENT_SIZE);
 	} else {

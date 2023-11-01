@@ -126,12 +126,12 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(lxb_dom_node_t
             xmlNodePtr lxml_text;
             if (compact_text_nodes && data_length < LXML_INTERNED_STRINGS_SIZE) {
                 /* See xmlSAX2TextNode() in libxml2 */
-                lxml_text = xmlMalloc(sizeof(xmlNode));
+                lxml_text = xmlMalloc(sizeof(*lxml_text));
                 if (UNEXPECTED(lxml_text == NULL)) {
                     retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
                     goto out;
                 }
-                memset(lxml_text, 0, sizeof(xmlNode));
+                memset(lxml_text, 0, sizeof(*lxml_text));
                 lxml_text->name = xmlStringText;
                 lxml_text->type = XML_TEXT_NODE;
                 lxml_text->doc = lxml_doc;
