@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12232 (FPM: segfault dynamically loading extension without
     opcache). (Jakub Zelenka)
 
+- Intl:
+  . Removed the BC break on IntlDateFormatter::construct which threw an
+    exception with an invalid locale. (David Carlier)
+
 - Opcache:
   . Added warning when JIT cannot be enabled. (danog)
   . Fixed bug GH-8143 (Crashes in zend_accel_inheritance_cache_find since
