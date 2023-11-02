@@ -253,15 +253,15 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 				fprintf(stderr, "[");
 				if (info & MAY_BE_ARRAY_EMPTY) {
 					if (afirst) afirst = 0; else fprintf(stderr, ", ");
-					fprintf(stderr, "empty ");
+					fprintf(stderr, "empty");
 				}
 				if (MAY_BE_PACKED(info)) {
 					if (afirst) afirst = 0; else fprintf(stderr, ", ");
-					fprintf(stderr, "packed ");
+					fprintf(stderr, "packed");
 				}
 				if (MAY_BE_HASH(info)) {
 					if (afirst) afirst = 0; else fprintf(stderr, ", ");
-					fprintf(stderr, "hash ");
+					fprintf(stderr, "hash");
 				}
 				fprintf(stderr, "] ");
 			}
