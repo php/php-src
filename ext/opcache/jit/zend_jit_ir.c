@@ -1301,13 +1301,14 @@ static void zend_jit_def_reg(zend_jit_ctx *jit, zend_jit_addr addr, ir_ref val)
 
 			if (jit->ra[dst_phi->ssa_var].ref > 0) {
 				ir_insn *phi_insn = &jit->ctx.ir_base[jit->ra[dst_phi->ssa_var].ref];
-				ZEND_ASSERT(phi_insn->op == IR_PHI);
-//				ZEND_ASSERT(ir_operands_count(ctx, phi_insn) == n + 1);
-				bb = &jit->ssa->cfg.blocks[dst_phi->block];
-				n = bb->predecessors_count;
-				for (j = 0, p = &dst_phi->sources[0], q = phi_insn->ops + 2; j < n; j++, p++, q++) {
-					if (*p == src_var) {
-						*q = val;
+				if (phi_insn->op == IR_PHI) {
+//					ZEND_ASSERT(ir_operands_count(ctx, phi_insn) == n + 1);
+					bb = &jit->ssa->cfg.blocks[dst_phi->block];
+					n = bb->predecessors_count;
+					for (j = 0, p = &dst_phi->sources[0], q = phi_insn->ops + 2; j < n; j++, p++, q++) {
+						if (*p == src_var) {
+							*q = val;
+						}
 					}
 				}
 			}
