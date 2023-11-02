@@ -48,6 +48,8 @@ PHP 8.4 UPGRADE NOTES
   . round() now validates the value of the $mode parameter and throws a ValueError
     for invalid modes. Previously invalid modes would have been interpreted as
     PHP_ROUND_HALF_UP.
+  . strcspn() with empty $characters now returns the length of the string instead
+    of incorrectly stopping at the first NUL character. See GH-12592.
 
 - XML:
   . The xml_set_*_handler() functions now declare and check for an effective
