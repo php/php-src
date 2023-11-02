@@ -2545,6 +2545,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 	 * code may assume that operands have at least one type. */
 	if (!(t1 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS))
 	 || !(t2 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS))
+	 || (ssa_op->result_use >= 0 && !(RES_USE_INFO() & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS)))
 	 || ((opline->opcode == ZEND_ASSIGN_DIM_OP
 	   || opline->opcode == ZEND_ASSIGN_OBJ_OP
 	   || opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP
