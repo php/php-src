@@ -5104,7 +5104,7 @@ ZEND_EXT_API void zend_jit_activate(void)
 
 ZEND_EXT_API void zend_jit_deactivate(void)
 {
-	if (zend_jit_profile_counter) {
+	if (zend_jit_profile_counter && !CG(unclean_shutdown)) {
 		zend_class_entry *ce;
 
 		zend_shared_alloc_lock();
@@ -5122,9 +5122,9 @@ ZEND_EXT_API void zend_jit_deactivate(void)
 		zend_jit_protect();
 		SHM_PROTECT();
 		zend_shared_alloc_unlock();
-
-		zend_jit_profile_counter = 0;
 	}
+
+	zend_jit_profile_counter = 0;
 }
 
 static void zend_jit_restart_preloaded_op_array(zend_op_array *op_array)
