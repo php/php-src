@@ -181,8 +181,8 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 	}
 cleanup:
 	zend_string_release_ex(callable, 0);
-cleanup_no_callable:
 	zval_ptr_dtor_nogc(&fci.function_name);
+cleanup_no_callable:
 	if (fci.param_count > 0) {
 		for (i = 0; i < nargs - 1; i++) {
 			zval_ptr_dtor(&fci.params[i]);
