@@ -3,11 +3,11 @@ PostgreSQL escape functions
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 
-include 'config.inc';
+include 'inc/config.inc';
 define('FILE_NAME', __DIR__ . '/php.gif');
 
 // pg_escape_string() test

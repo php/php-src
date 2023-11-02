@@ -4,13 +4,13 @@ GH-10672 (pg_lo_open segfaults in the strict_types mode)
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 ?>
 --FILE--
 <?php
 declare(strict_types=1);
 
-include "config.inc";
+include "inc/config.inc";
 
 $db = pg_connect($conn_str);
 pg_query($db, "DROP TABLE IF EXISTS gh10672");

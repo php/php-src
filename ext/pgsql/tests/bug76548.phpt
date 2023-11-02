@@ -3,10 +3,10 @@ Bug #76548 pg_fetch_result did not fetch the next row
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
-include('config.inc');
+include('inc/config.inc');
 
 $conn = pg_connect($conn_str);
 

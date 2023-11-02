@@ -4,11 +4,11 @@ Bug #65119 (pg_copy_from() modifies input array variable)
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 ?>
 --FILE--
 <?php
-include 'config.inc';
+include 'inc/config.inc';
 
 function test(Array $values, $conn_str) {
   $connection = pg_pconnect($conn_str, PGSQL_CONNECT_FORCE_NEW);

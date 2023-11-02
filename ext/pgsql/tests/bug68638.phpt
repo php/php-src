@@ -3,11 +3,11 @@ Bug #68638 pg_update() fails to store infinite values
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 
-include('config.inc');
+include('inc/config.inc');
 
 $conn = pg_connect($conn_str);
 

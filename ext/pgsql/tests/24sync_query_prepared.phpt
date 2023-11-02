@@ -4,13 +4,13 @@ PostgreSQL sync prepared queries
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 if (!function_exists('pg_prepare')) die('skip function pg_prepare() does not exist');
 ?>
 --FILE--
 <?php
 
-include('config.inc');
+include('inc/config.inc');
 
 $db = pg_connect($conn_str);
 

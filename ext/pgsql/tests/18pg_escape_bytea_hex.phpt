@@ -4,14 +4,14 @@ PostgreSQL pg_escape_bytea() functions (hex format)
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 skip_bytea_not_hex();
 ?>
 --FILE--
 <?php
 // optional functions
 
-include('config.inc');
+include('inc/config.inc');
 
 $db = pg_connect($conn_str);
 @pg_query($db, "SET bytea_output = 'hex'");

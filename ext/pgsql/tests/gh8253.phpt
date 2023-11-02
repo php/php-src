@@ -4,11 +4,11 @@ pg_insert() fails for references
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 ?>
 --FILE--
 <?php
-include "config.inc";
+include "inc/config.inc";
 
 function fee(&$a) {}
 $a = ["bar" => "testing"];

@@ -4,12 +4,12 @@ Bug #47199 (pg_delete fails on NULL)
 pgsql
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require_once('inc/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once('config.inc');
+require_once('inc/config.inc');
 
 $dbh = pg_connect($conn_str);
 $tbl_name = 'test_47199';

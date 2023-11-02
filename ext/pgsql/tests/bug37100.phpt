@@ -4,13 +4,13 @@ Bug #37100 (data is returned truncated with BINARY CURSOR)
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 skip_bytea_not_escape();
 ?>
 --FILE--
 <?php
 
-include 'config.inc';
+include 'inc/config.inc';
 
 $db = pg_connect($conn_str);
 @pg_query("SET bytea_output = 'escape'");

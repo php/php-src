@@ -4,13 +4,13 @@ PostgreSQL sync query params
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 if (!function_exists('pg_query_params')) die('skip function pg_query_params() does not exist');
 ?>
 --FILE--
 <?php
 
-include('config.inc');
+include('inc/config.inc');
 
 $db = pg_connect($conn_str);
 $result = pg_query_params($db, "SELECT * FROM ".$table_name." WHERE num > \$1;", array(100));

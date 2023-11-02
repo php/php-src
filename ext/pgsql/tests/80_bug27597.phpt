@@ -4,12 +4,12 @@ Bug #27597 (pg_fetch_array not returning false)
 pgsql
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require_once('inc/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once(__DIR__ . '/config.inc');
+require_once(__DIR__ . '/inc/config.inc');
 
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {

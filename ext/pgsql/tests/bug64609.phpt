@@ -4,14 +4,14 @@ Bug #64609 (pg_convert enum type support)
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 skip_server_version('8.3', '<');
 ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
 
-include 'config.inc';
+include 'inc/config.inc';
 
 $db = pg_connect($conn_str);
 pg_query($db, "BEGIN");

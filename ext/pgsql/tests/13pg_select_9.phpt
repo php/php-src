@@ -4,14 +4,14 @@ PostgreSQL pg_select() (9.0+)
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 skip_server_version('9.0', '<');
 ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
 
-include 'config.inc';
+include 'inc/config.inc';
 
 $db = pg_connect($conn_str);
 pg_query($db, "SET bytea_output = 'hex'");

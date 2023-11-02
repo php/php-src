@@ -3,12 +3,12 @@ PostgreSQL create db
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 // create test table
 
-include('config.inc');
+include('inc/config.inc');
 
 $db = pg_connect($conn_str);
 if (!($q = @pg_query($db, "SELECT * FROM ".$table_name)) || !@pg_num_rows($q))

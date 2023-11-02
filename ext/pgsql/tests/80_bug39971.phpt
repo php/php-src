@@ -4,12 +4,12 @@ Bug #39971 (8.0+) (pg_insert/pg_update do not allow now() to be used for timesta
 pgsql
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require_once('inc/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once('config.inc');
+require_once('inc/config.inc');
 
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {

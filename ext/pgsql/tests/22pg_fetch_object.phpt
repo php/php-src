@@ -3,12 +3,12 @@ PostgreSQL pg_fetch_object()
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
 
-include 'config.inc';
+include 'inc/config.inc';
 
 class test_class {
     function __construct($arg1, $arg2) {

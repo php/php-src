@@ -3,12 +3,12 @@ PostgreSQL pg_delete()
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
 
-include 'config.inc';
+include 'inc/config.inc';
 
 $db = pg_connect($conn_str);
 

@@ -3,13 +3,13 @@ Bug #71998 Function pg_insert does not insert when column type = inet
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 // Kudos for the IP regex to
 // http://stackoverflow.com/a/17871737/3358424
 
-include('config.inc');
+include('inc/config.inc');
 
 $db = pg_connect($conn_str);
 

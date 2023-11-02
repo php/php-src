@@ -4,13 +4,13 @@ PostgreSQL async prepared queries
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 if (!function_exists('pg_send_prepare')) die('skip function pg_send_prepare() does not exist');
 ?>
 --FILE--
 <?php
 
-include('config.inc');
+include('inc/config.inc');
 
 $db = pg_connect($conn_str);
 if (!pg_send_prepare($db, 'php_test', "SELECT * FROM ".$table_name." WHERE num > \$1;")) {

@@ -4,12 +4,12 @@ Bug #60244 (pg_fetch_* functions do not validate that row param is >0)
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 ?>
 --FILE--
 <?php
 
-include 'config.inc';
+include 'inc/config.inc';
 
 $db = pg_connect($conn_str);
 $result = pg_query($db, "select 'a' union select 'b'");

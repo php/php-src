@@ -4,14 +4,14 @@ PostgreSQL pg_update() (9.0+)
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 skip_bytea_not_hex();
 ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
 
-include 'config.inc';
+include 'inc/config.inc';
 
 $db = pg_connect($conn_str);
 pg_query($db, "SET standard_conforming_strings = 0");

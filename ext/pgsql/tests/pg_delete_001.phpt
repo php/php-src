@@ -3,11 +3,11 @@ PostgreSQL pg_delete() - basic test using schema
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 
-include('config.inc');
+include('inc/config.inc');
 
 $conn = pg_connect($conn_str);
 

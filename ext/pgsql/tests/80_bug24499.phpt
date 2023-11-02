@@ -4,12 +4,12 @@ Bug #24499 (Notice: Undefined property: stdClass::)
 pgsql
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require_once('inc/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once('config.inc');
+require_once('inc/config.inc');
 
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {

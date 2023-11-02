@@ -4,14 +4,14 @@ PostgreSQL non-blocking async query params
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 if (!function_exists('pg_send_query_params')) die('skip function pg_send_query_params() does not exist');
 ?>
 --FILE--
 <?php
 
-include('config.inc');
-include('nonblocking.inc');
+include('inc/config.inc');
+include('inc/nonblocking.inc');
 
 $db = pg_connect($conn_str);
 $db_socket = pg_socket($db);

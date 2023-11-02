@@ -4,7 +4,7 @@ PostgreSQL import large object with given oid
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 $v = pg_version($conn);
 if (version_compare("8.4devel", $v["client"]) > 0) die("skip - requires pg client >= 8.4\n");
 if (version_compare("8.4devel", $v["server"]) > 0) die("skip - requires pg server >= 8.4\n");
@@ -12,7 +12,7 @@ if (version_compare("8.4devel", $v["server"]) > 0) die("skip - requires pg serve
 --FILE--
 <?php
 
-include('config.inc');
+include('inc/config.inc');
 
 $db = pg_connect($conn_str);
 

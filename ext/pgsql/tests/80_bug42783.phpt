@@ -4,12 +4,12 @@ Bug #42783 (pg_insert() does not support an empty value array)
 pgsql
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require_once('inc/skipif.inc');
 ?>
 --FILE--
 <?php
 
-require_once('config.inc');
+require_once('inc/config.inc');
 
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {

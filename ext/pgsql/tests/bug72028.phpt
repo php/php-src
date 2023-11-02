@@ -3,12 +3,12 @@ Bug #72028 pg_query_params(): NULL converts to empty string
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 // create test table
 
-include('config.inc');
+include('inc/config.inc');
 
 $conn = pg_connect($conn_str);
 

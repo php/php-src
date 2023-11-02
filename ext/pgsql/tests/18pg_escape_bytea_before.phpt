@@ -3,12 +3,12 @@ PostgreSQL pg_escape_bytea() functions (before connection)
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 // optional functions
 
-include('config.inc');
+include('inc/config.inc');
 
 $image = file_get_contents(__DIR__ . '/php.gif');
 $esc_image = pg_escape_bytea($image);

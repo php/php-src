@@ -4,13 +4,13 @@ Bug #77047 pg_insert has a broken regex for the 'TIME WITHOUT TIMEZONE' data typ
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 ?>
 --FILE--
 <?php
 error_reporting(E_ALL);
 
-include 'config.inc';
+include 'inc/config.inc';
 
 $db = pg_connect($conn_str);
 
