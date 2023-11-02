@@ -5,18 +5,18 @@ intl
 --FILE--
 <?php
 
-try {
-    new IntlDateFormatter(
+var_dump(new IntlDateFormatter(
 	'xx',
 	IntlDateFormatter::FULL,
 	IntlDateFormatter::FULL,
 	null,
 	null,
 	'w'
-    );
-} catch (\IntlException $e) {
-    echo $e->getMessage();
-}
-?>
+));
+Locale::setDefault('xx');
+var_dump(new IntlDateFormatter(Locale::getDefault()));
 --EXPECT--
-datefmt_create: invalid locale: U_ILLEGAL_ARGUMENT_ERROR
+object(IntlDateFormatter)#1 (0) {
+}
+object(IntlDateFormatter)#1 (0) {
+}
