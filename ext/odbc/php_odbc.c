@@ -2096,6 +2096,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 		if (strstr((char*)db, "=")) {
 			direct = 1;
 
+			/* This should be identical to the code in the PDO driver and vice versa. */
 			size_t db_len = strlen(db);
 			char *db_end = db + db_len;
 			bool use_uid_arg = uid != NULL && !php_memnistr(db, "uid=", strlen("uid="), db_end);
