@@ -11893,6 +11893,10 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 	}
 
 	if (type == BP_JIT_IS
+	 && !(op2_info & (MAY_BE_ANY|MAY_BE_UNDEF))) {
+	 	/* dead code */
+		ir_END_list(*end_inputs);
+	} else if (type == BP_JIT_IS
 	 && (op1_info & MAY_BE_ARRAY)
 	 && (op2_info & (MAY_BE_LONG|MAY_BE_STRING))
 	 && test_zval_inputs->count) {
