@@ -45,228 +45,72 @@ static zend_result php_xsl_xslt_apply_params(xsltTransformContextPtr ctxt, HashT
 	return SUCCESS;
 }
 
-static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type) /* {{{ */
+static void xsl_proxy_factory(xmlNodePtr node, zval *child, dom_object *intern, xmlXPathParserContextPtr ctxt)
 {
-	xsltTransformContextPtr tctxt;
-	zval *args = NULL;
-	zval retval;
-	int i;
-	int error = 0;
-	zend_fcall_info fci;
-	zval handler;
-	xmlXPathObjectPtr obj;
-	char *str;
-	xsl_object *intern;
-	zend_string *callable = NULL;
+	ZEND_ASSERT(node->type != XML_NAMESPACE_DECL);
 
+	/**
+	 * Upon freeing libxslt's context, every document that is not the *main* document will be freed by libxslt.
+	 * If a node of a document that is *not the main* document gets returned to userland, we'd free the node twice:
+	 * first by the cleanup of the xslt context, and then by our own refcounting mechanism.
+	 * To prevent this, we'll take a copy if the node is not from the main document.
+	 * It is important that we do not copy the node unconditionally, because that means that:
+	 *  - modifications to the node will only modify the copy, and not the original
+	 *  - accesses to the parent, path, ... will not work
+	 */
+	xsltTransformContextPtr transform_ctxt = (xsltTransformContextPtr) ctxt->context->extra;
+	if (node->doc != transform_ctxt->document->doc) {
+		node = xmlDocCopyNode(node, intern->document->ptr, 1);
+	}
+	php_dom_create_object(node, child, intern);
+}
+
+static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, php_dom_xpath_nodeset_evaluation_mode evaluation_mode) /* {{{ */
+{
+	bool error = false;
+	xsl_object *intern;
 
 	if (! zend_is_executing()) {
 		xsltGenericError(xsltGenericErrorContext,
 		"xsltExtFunctionTest: Function called from outside of PHP\n");
-		error = 1;
+		error = true;
 	} else {
-		tctxt = xsltXPathGetTransformContext(ctxt);
+		xsltTransformContextPtr tctxt = xsltXPathGetTransformContext(ctxt);
 		if (tctxt == NULL) {
 			xsltGenericError(xsltGenericErrorContext,
 			"xsltExtFunctionTest: failed to get the transformation context\n");
-			error = 1;
+			error = true;
 		} else {
 			intern = (xsl_object*)tctxt->_private;
 			if (intern == NULL) {
 				xsltGenericError(xsltGenericErrorContext,
 				"xsltExtFunctionTest: failed to get the internal object\n");
-				error = 1;
+				error = true;
 			}
-			else if (intern->registerPhpFunctions == 0) {
-				xsltGenericError(xsltGenericErrorContext,
-				"xsltExtFunctionTest: PHP Object did not register PHP functions\n");
-				error = 1;
-			}
-		}
-	}
-
-	if (error == 1) {
-		for (i = nargs - 1; i >= 0; i--) {
-			obj = valuePop(ctxt);
-			if (obj) {
-				xmlXPathFreeObject(obj);
+			else if (intern->xpath_callbacks.mode == PHP_DOM_REG_FUNC_MODE_NONE) {
+				zend_throw_error(NULL, "No callbacks were registered");
+				error = true;
 			}
 		}
-		return;
 	}
 
-	if (UNEXPECTED(nargs == 0)) {
-		zend_throw_error(NULL, "Function name must be passed as the first argument");
-		return;
-	}
-
-	fci.param_count = nargs - 1;
-	if (fci.param_count > 0) {
-		args = safe_emalloc(fci.param_count, sizeof(zval), 0);
-	}
-	/* Reverse order to pop values off ctxt stack */
-	for (i = fci.param_count - 1; i >= 0; i--) {
-		obj = valuePop(ctxt);
-		if (obj == NULL) {
-			ZVAL_NULL(&args[i]);
-			continue;
-		}
-		switch (obj->type) {
-			case XPATH_STRING:
-				ZVAL_STRING(&args[i], (char *)obj->stringval);
-				break;
-			case XPATH_BOOLEAN:
-				ZVAL_BOOL(&args[i],  obj->boolval);
-				break;
-			case XPATH_NUMBER:
-				ZVAL_DOUBLE(&args[i], obj->floatval);
-				break;
-			case XPATH_NODESET:
-				if (type == 1) {
-					str = (char*)xmlXPathCastToString(obj);
-					ZVAL_STRING(&args[i], str);
-					xmlFree(str);
-				} else if (type == 2) {
-					int j;
-					dom_object *domintern = (dom_object *)intern->doc;
-					if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
-						array_init(&args[i]);
-						for (j = 0; j < obj->nodesetval->nodeNr; j++) {
-							xmlNodePtr node = obj->nodesetval->nodeTab[j];
-							zval child;
-							/* not sure, if we need this... it's copied from xpath.c */
-							if (node->type == XML_NAMESPACE_DECL) {
-								xmlNsPtr curns;
-								xmlNodePtr nsparent;
-
-								nsparent = node->_private;
-								curns = xmlNewNs(NULL, node->name, NULL);
-								if (node->children) {
-									curns->prefix = xmlStrdup((xmlChar *)node->children);
-								}
-								if (node->children) {
-									node = xmlNewDocNode(node->doc, NULL, (xmlChar *) node->children, node->name);
-								} else {
-									node = xmlNewDocNode(node->doc, NULL, (const xmlChar *) "xmlns", node->name);
-								}
-								node->type = XML_NAMESPACE_DECL;
-								node->parent = nsparent;
-								node->ns = curns;
-							} else {
-								/**
-								 * Upon freeing libxslt's context, every document which is not the *main* document will be freed by libxslt.
-								 * If a node of a document which is *not the main* document gets returned to userland, we'd free the node twice:
-								 * first by the cleanup of the xslt context, and then by our own refcounting mechanism.
-								 * To prevent this, we'll take a copy if the node is not from the main document.
-								 * It is important that we do not copy the node unconditionally, because that means that:
-								 *  - modifications to the node will only modify the copy, and not the original
-								 *  - accesses to the parent, path, ... will not work
-								 */
-								xsltTransformContextPtr transform_ctxt = (xsltTransformContextPtr) ctxt->context->extra;
-								if (node->doc != transform_ctxt->document->doc) {
-									node = xmlDocCopyNode(node, domintern->document->ptr, 1);
-								}
-							}
-
-							php_dom_create_object(node, &child, domintern);
-							add_next_index_zval(&args[i], &child);
-						}
-					} else {
-						ZVAL_EMPTY_ARRAY(&args[i]);
-					}
-				}
-				break;
-			default:
-				str = (char *) xmlXPathCastToString(obj);
-				ZVAL_STRING(&args[i], str);
-				xmlFree(str);
-		}
-		xmlXPathFreeObject(obj);
-	}
-
-	fci.size = sizeof(fci);
-	fci.named_params = NULL;
-	if (fci.param_count > 0) {
-		fci.params = args;
+	if (error) {
+		php_dom_xpath_callbacks_clean_argument_stack(ctxt, nargs);
 	} else {
-		fci.params = NULL;
-	}
-
-	/* Last element of the stack is the function name */
-	obj = valuePop(ctxt);
-	if (obj == NULL || obj->stringval == NULL) {
-		php_error_docref(NULL, E_WARNING, "Handler name must be a string");
-		xmlXPathFreeObject(obj);
-		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
-		if (fci.param_count > 0) {
-			for (i = 0; i < nargs - 1; i++) {
-				zval_ptr_dtor(&args[i]);
-			}
-			efree(args);
-		}
-		return;
-	}
-	ZVAL_STRING(&handler, (char *) obj->stringval);
-	xmlXPathFreeObject(obj);
-
-	ZVAL_COPY_VALUE(&fci.function_name, &handler);
-	fci.object = NULL;
-	fci.retval = &retval;
-	if (!zend_make_callable(&handler, &callable)) {
-		if (!EG(exception)) {
-			php_error_docref(NULL, E_WARNING, "Unable to call handler %s()", ZSTR_VAL(callable));
-		}
-		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
-	} else if ( intern->registerPhpFunctions == 2 && zend_hash_exists(intern->registered_phpfunctions, callable) == 0) {
-		php_error_docref(NULL, E_WARNING, "Not allowed to call handler '%s()'", ZSTR_VAL(callable));
-		/* Push an empty string, so that we at least have an xslt result... */
-		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
-	} else {
-		zend_call_function(&fci, NULL);
-		if (Z_ISUNDEF(retval)) {
-			/* Exception thrown, don't do anything further. */
-		} else if (Z_TYPE(retval) == IS_OBJECT && instanceof_function(Z_OBJCE(retval), dom_node_class_entry)) {
-			xmlNode *nodep;
-			dom_object *obj;
-			if (intern->node_list == NULL) {
-				intern->node_list = zend_new_array(0);
-			}
-			Z_ADDREF(retval);
-			zend_hash_next_index_insert(intern->node_list, &retval);
-			obj = Z_DOMOBJ_P(&retval);
-			nodep = dom_object_get_node(obj);
-			valuePush(ctxt, xmlXPathNewNodeSet(nodep));
-		} else if (Z_TYPE(retval) == IS_TRUE || Z_TYPE(retval) == IS_FALSE) {
-			valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(retval) == IS_TRUE));
-		} else if (Z_TYPE(retval) == IS_OBJECT) {
-			php_error_docref(NULL, E_WARNING, "A PHP Object cannot be converted to a XPath-string");
-			valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
-		} else {
-			convert_to_string(&retval);
-			valuePush(ctxt, xmlXPathNewString((xmlChar *) Z_STRVAL(retval)));
-		}
-		zval_ptr_dtor(&retval);
-	}
-	zend_string_release_ex(callable, 0);
-	zval_ptr_dtor_nogc(&handler);
-	if (fci.param_count > 0) {
-		for (i = 0; i < nargs - 1; i++) {
-			zval_ptr_dtor(&args[i]);
-		}
-		efree(args);
+		php_dom_xpath_callbacks_call(&intern->xpath_callbacks, ctxt, nargs, evaluation_mode, (dom_object *) intern->doc, xsl_proxy_factory);
 	}
 }
 /* }}} */
 
 void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{{ */
 {
-	xsl_ext_function_php(ctxt, nargs, 1);
+	xsl_ext_function_php(ctxt, nargs, PHP_DOM_XPATH_EVALUATE_NODESET_TO_STRING);
 }
 /* }}} */
 
 void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{{ */
 {
-	xsl_ext_function_php(ctxt, nargs, 2);
+	xsl_ext_function_php(ctxt, nargs, PHP_DOM_XPATH_EVALUATE_NODESET_TO_NODESET);
 }
 /* }}} */
 
@@ -475,11 +319,7 @@ out:
 		xsltFreeSecurityPrefs(secPrefs);
 	}
 
-	if (intern->node_list != NULL) {
-		zend_hash_destroy(intern->node_list);
-		FREE_HASHTABLE(intern->node_list);
-		intern->node_list = NULL;
-	}
+	php_dom_xpath_callbacks_clean_node_list(&intern->xpath_callbacks);
 
 	php_libxml_decrement_doc_ref(intern->doc);
 	efree(intern->doc);
@@ -734,38 +574,8 @@ PHP_METHOD(XSLTProcessor, removeParameter)
 /* {{{ */
 PHP_METHOD(XSLTProcessor, registerPHPFunctions)
 {
-	zval *id = ZEND_THIS;
-	xsl_object *intern;
-	zval *entry, new_string;
-	zend_string *restrict_str = NULL;
-	HashTable *restrict_ht = NULL;
-
-	ZEND_PARSE_PARAMETERS_START(0, 1)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(restrict_ht, restrict_str)
-	ZEND_PARSE_PARAMETERS_END();
-
-	intern = Z_XSL_P(id);
-
-	if (restrict_ht) {
-		ZEND_HASH_FOREACH_VAL(restrict_ht, entry) {
-			zend_string *str = zval_try_get_string(entry);
-			if (UNEXPECTED(!str)) {
-				return;
-			}
-			ZVAL_LONG(&new_string, 1);
-			zend_hash_update(intern->registered_phpfunctions, str, &new_string);
-			zend_string_release(str);
-		} ZEND_HASH_FOREACH_END();
-
-		intern->registerPhpFunctions = 2;
-	} else if (restrict_str) {
-		ZVAL_LONG(&new_string, 1);
-		zend_hash_update(intern->registered_phpfunctions, restrict_str, &new_string);
-		intern->registerPhpFunctions = 2;
-	} else {
-		intern->registerPhpFunctions = 1;
-	}
+	xsl_object *intern = Z_XSL_P(ZEND_THIS);
+	php_dom_xpath_callbacks_update_method_handler(&intern->xpath_callbacks, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} end XSLTProcessor::registerPHPFunctions(); */
 

@@ -53,6 +53,7 @@ extern zend_module_entry dom_module_entry;
 
 #include "xml_common.h"
 #include "ext/libxml/php_libxml.h"
+#include "xpath_callbacks.h"
 #include "zend_exceptions.h"
 #include "dom_ce.h"
 /* DOM API_VERSION, please bump it up, if you change anything in the API
@@ -64,10 +65,8 @@ extern zend_module_entry dom_module_entry;
 #define DOM_NODESET XML_XINCLUDE_START
 
 typedef struct _dom_xpath_object {
-	int registerPhpFunctions;
+	php_dom_xpath_callbacks xpath_callbacks;
 	int register_node_ns;
-	HashTable *registered_phpfunctions;
-	HashTable *node_list;
 	dom_object dom;
 } dom_xpath_object;
 

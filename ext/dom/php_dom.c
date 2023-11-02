@@ -596,8 +596,10 @@ static int dom_nodelist_has_dimension(zend_object *object, zval *member, int che
 static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
 static int dom_nodemap_has_dimension(zend_object *object, zval *member, int check_empty);
 static zend_object *dom_objects_store_clone_obj(zend_object *zobject);
+
 #ifdef LIBXML_XPATH_ENABLED
 void dom_xpath_objects_free_storage(zend_object *object);
+HashTable *dom_xpath_get_gc(zend_object *object, zval **table, int *n);
 #endif
 
 static void *dom_malloc(size_t size) {
@@ -889,6 +891,7 @@ PHP_MINIT_FUNCTION(dom)
 	memcpy(&dom_xpath_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_xpath_object_handlers.offset = XtOffsetOf(dom_xpath_object, dom) + XtOffsetOf(dom_object, std);
 	dom_xpath_object_handlers.free_obj = dom_xpath_objects_free_storage;
+	dom_xpath_object_handlers.get_gc = dom_xpath_get_gc;
 
 	dom_xpath_class_entry = register_class_DOMXPath();
 	dom_xpath_class_entry->create_object = dom_xpath_objects_new;
@@ -1001,32 +1004,6 @@ void node_list_unlink(xmlNodePtr node)
 }
 /* }}} end node_list_unlink */
 
-#ifdef LIBXML_XPATH_ENABLED
-/* {{{ dom_xpath_objects_free_storage */
-void dom_xpath_objects_free_storage(zend_object *object)
-{
-	dom_xpath_object *intern = php_xpath_obj_from_obj(object);
-
-	zend_object_std_dtor(&intern->dom.std);
-
-	if (intern->dom.ptr != NULL) {
-		xmlXPathFreeContext((xmlXPathContextPtr) intern->dom.ptr);
-		php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom);
-	}
-
-	if (intern->registered_phpfunctions) {
-		zend_hash_destroy(intern->registered_phpfunctions);
-		FREE_HASHTABLE(intern->registered_phpfunctions);
-	}
-
-	if (intern->node_list) {
-		zend_hash_destroy(intern->node_list);
-		FREE_HASHTABLE(intern->node_list);
-	}
-}
-/* }}} */
-#endif
-
 /* {{{ dom_objects_free_storage */
 void dom_objects_free_storage(zend_object *object)
 {
@@ -1133,12 +1110,13 @@ static void dom_object_namespace_node_free_storage(zend_object *object)
 }
 
 #ifdef LIBXML_XPATH_ENABLED
+
 /* {{{ zend_object dom_xpath_objects_new(zend_class_entry *class_type) */
 zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 {
 	dom_xpath_object *intern = zend_object_alloc(sizeof(dom_xpath_object), class_type);
 
-	intern->registered_phpfunctions = zend_new_array(0);
+	php_dom_xpath_callbacks_ctor(&intern->xpath_callbacks);
 	intern->register_node_ns = 1;
 
 	intern->dom.prop_handler = &dom_xpath_prop_handlers;
@@ -1149,6 +1127,7 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 	return &intern->dom.std;
 }
 /* }}} */
+
 #endif
 
 void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
