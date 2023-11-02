@@ -6446,8 +6446,14 @@ static int zend_jit_assign(zend_jit_ctx  *jit,
 			/* We have to update type of CV because it may be captured by exception backtrace or released on RETURN */
 			if ((op1_def_info & MAY_BE_ANY) == MAY_BE_LONG) {
 				jit_set_Z_TYPE_INFO(jit, op1_use_addr, IS_LONG);
+				if (JIT_G(current_frame)) {
+					SET_STACK_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(op1_use_addr)), IS_LONG, 1);
+				}
 			} else if ((op1_def_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
 				jit_set_Z_TYPE_INFO(jit, op1_use_addr, IS_DOUBLE);
+				if (JIT_G(current_frame)) {
+					SET_STACK_TYPE(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(Z_OFFSET(op1_use_addr)), IS_DOUBLE, 1);
+				}
 			} else {
 				ZEND_UNREACHABLE();
 			}
