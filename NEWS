@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - DOM:
   . Fix registerNodeClass with abstract class crashing. (nielsdos)
   . Add missing NULL pointer error check. (icy17)
+  . Fix validation logic of php:function() callbacks. (nielsdos)
 
 - Fiber:
   . Fixed bug GH-11121 (ReflectionFiber segfault). (danog, trowski, bwoebi)
@@ -65,6 +66,7 @@ PHP                                                                        NEWS
 
 - XSL:
   . Add missing module dependency. (nielsdos)
+  . Fix validation logic of php:function() callbacks. (nielsdos)
 
 26 Oct 2023, PHP 8.2.12
 

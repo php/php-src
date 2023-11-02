@@ -141,12 +141,17 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 		return;
 	}
 
+	if (UNEXPECTED(nargs == 0)) {
+		zend_throw_error(NULL, "Function name must be passed as the first argument");
+		return;
+	}
+
 	fci.param_count = nargs - 1;
 	if (fci.param_count > 0) {
 		args = safe_emalloc(fci.param_count, sizeof(zval), 0);
 	}
 	/* Reverse order to pop values off ctxt stack */
-	for (i = nargs - 2; i >= 0; i--) {
+	for (i = fci.param_count - 1; i >= 0; i--) {
 		obj = valuePop(ctxt);
 		if (obj == NULL) {
 			ZVAL_NULL(&args[i]);
@@ -221,7 +226,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 		fci.params = NULL;
 	}
 
-
+	/* Last element of the stack is the function name */
 	obj = valuePop(ctxt);
 	if (obj == NULL || obj->stringval == NULL) {
 		php_error_docref(NULL, E_WARNING, "Handler name must be a string");
