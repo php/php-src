@@ -11,8 +11,12 @@ if (!function_exists('pg_query_params')) die('skip function pg_query_params() do
 <?php
 
 include('inc/config.inc');
+$table_name = "table_23sync_query_params";
 
 $db = pg_connect($conn_str);
+pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "insert into {$table_name} (num) values(1000)");
+
 $result = pg_query_params($db, "SELECT * FROM ".$table_name." WHERE num > \$1;", array(100));
 if (!($rows   = pg_num_rows($result)))
 {
@@ -52,6 +56,14 @@ pg_free_result($result);
 pg_close($db);
 
 echo "OK";
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_23sync_query_params";
+
+$db = pg_connect($conn_str);
+pg_query($db, "drop table {$table_name}");
 ?>
 --EXPECT--
 OK

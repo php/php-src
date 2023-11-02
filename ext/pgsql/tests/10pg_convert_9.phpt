@@ -12,8 +12,11 @@ skip_bytea_not_hex();
 error_reporting(E_ALL);
 
 include 'inc/config.inc';
+$table_name = "table_10pg_convert_9";
 
 $db = pg_connect($conn_str);
+pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+
 pg_query($db, "SET standard_conforming_strings = 0");
 
 $fields = array('num'=>'1234', 'str'=>'AAA', 'bin'=>'BBB');
@@ -48,6 +51,14 @@ try {
 } catch (\TypeError $e) {
     echo $e->getMessage(), \PHP_EOL;
 }
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_10pg_convert_9";
+
+$db = pg_connect($conn_str);
+pg_query($db, "drop table {$table_name}");
 ?>
 --EXPECT--
 array(3) {

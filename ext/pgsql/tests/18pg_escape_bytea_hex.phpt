@@ -12,8 +12,11 @@ skip_bytea_not_hex();
 // optional functions
 
 include('inc/config.inc');
+$table_name = "table_18pg_escape_bytea_hex";
 
 $db = pg_connect($conn_str);
+pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+
 @pg_query($db, "SET bytea_output = 'hex'");
 
 $image = file_get_contents(__DIR__ . '/php.gif');
@@ -30,6 +33,14 @@ if ($unesc_image !== $image) {
 else {
     echo "OK";
 }
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_18pg_escape_bytea_hex";
+
+$db = pg_connect($conn_str);
+pg_query($db, "drop table {$table_name}");
 ?>
 --EXPECT--
 OK

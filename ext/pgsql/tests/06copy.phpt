@@ -8,8 +8,10 @@ pgsql
 <?php
 
 include('inc/config.inc');
+$table_name = "table_06copy";
 
 $db = pg_connect($conn_str);
+pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
 
 $rows = pg_copy_to($db, $table_name);
 
@@ -19,6 +21,14 @@ pg_copy_from($db, $table_name, $rows);
 
 echo "OK";
 
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_06copy";
+
+$db = pg_connect($conn_str);
+pg_query($db, "drop table {$table_name}");
 ?>
 --EXPECT--
 OK

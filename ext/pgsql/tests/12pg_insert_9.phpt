@@ -12,8 +12,11 @@ skip_bytea_not_hex();
 error_reporting(E_ALL);
 
 include 'inc/config.inc';
+$table_name = "table_12pg_insert_9";
 
 $db = pg_connect($conn_str);
+pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+
 pg_query($db, "SET standard_conforming_strings = 0");
 
 $fields = array('num'=>'1234', 'str'=>'AAA', 'bin'=>'BBB');
@@ -53,9 +56,17 @@ try {
 
 echo "Ok\n";
 ?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_12pg_insert_9";
+
+$db = pg_connect($conn_str);
+pg_query($db, "drop table {$table_name}");
+?>
 --EXPECTF--
-INSERT INTO "php_pgsql_test" ("num","str","bin") VALUES (1234,E'AAA',E'\\x424242');
-INSERT INTO "php_pgsql_test" ("num","str","bin") VALUES ('1234','AAA','BBB');
+INSERT INTO "table_12pg_insert_9" ("num","str","bin") VALUES (1234,E'AAA',E'\\x424242');
+INSERT INTO "table_12pg_insert_9" ("num","str","bin") VALUES ('1234','AAA','BBB');
 object(PgSql\Result)#%d (0) {
 }
 Array of values must be an associative array with string keys

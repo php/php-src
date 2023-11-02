@@ -9,8 +9,12 @@ pgsql
 error_reporting(E_ALL);
 
 include 'inc/config.inc';
+$table_name = "table_17result";
 
 $db = pg_connect($conn_str);
+pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "insert into {$table_name} values(1, 'ABC', null)");
+pg_query($db, "insert into {$table_name} values(1, 'ABC', null)");
 
 $sql = "SELECT * FROM $table_name ORDER BY num";
 $result = pg_query($db, $sql) or die('Cannot query db');
@@ -24,6 +28,14 @@ var_dump(pg_fetch_assoc($result, 1));
 var_dump(pg_result_seek($result, 0));
 
 echo "Ok\n";
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_17result";
+
+$db = pg_connect($conn_str);
+pg_query($db, "drop table {$table_name}");
 ?>
 --EXPECTF--
 bool(true)

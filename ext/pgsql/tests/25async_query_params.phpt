@@ -11,8 +11,12 @@ if (!function_exists('pg_send_query_params')) die('skip function pg_send_query_p
 <?php
 
 include('inc/config.inc');
+$table_name = "table_25async_query_params";
 
 $db = pg_connect($conn_str);
+pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "insert into {$table_name} (num) values(1000)");
+
 if (!pg_send_query_params($db, "SELECT * FROM ".$table_name." WHERE num > \$1;", array(100))) {
 	echo "pg_send_query_params() error\n";
 }
@@ -63,6 +67,14 @@ pg_free_result($result);
 pg_close($db);
 
 echo "OK";
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_25async_query_params";
+
+$db = pg_connect($conn_str);
+pg_query($db, "drop table {$table_name}");
 ?>
 --EXPECT--
 OK

@@ -12,8 +12,12 @@ if (!function_exists('pg_send_prepare')) die('skip function pg_send_prepare() do
 
 include('inc/config.inc');
 include('inc/nonblocking.inc');
+$table_name = "table_32nb_async_query";
 
 $db = pg_connect($conn_str);
+pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "insert into {$table_name} default values");
+
 $db_socket = pg_socket($db);
 stream_set_blocking($db_socket, false);
 
@@ -73,6 +77,14 @@ pg_free_result($result);
 pg_close($db);
 
 echo "OK";
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_32nb_async_query";
+
+$db = pg_connect($conn_str);
+pg_query($db, "drop table {$table_name}");
 ?>
 --EXPECT--
 OK

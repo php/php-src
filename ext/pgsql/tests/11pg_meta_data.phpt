@@ -9,12 +9,22 @@ pgsql
 error_reporting(E_ALL);
 
 include 'inc/config.inc';
+$table_name = "table_11pg_meta_data";
 
 $db = pg_connect($conn_str);
+pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
 
 $meta = pg_meta_data($db, $table_name);
 
 var_dump($meta);
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_11pg_meta_data";
+
+$db = pg_connect($conn_str);
+pg_query($db, "drop table {$table_name}");
 ?>
 --EXPECT--
 array(3) {

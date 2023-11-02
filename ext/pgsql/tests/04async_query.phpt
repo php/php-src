@@ -8,8 +8,11 @@ pgsql
 <?php
 
 include('inc/config.inc');
+$table_name = "table_04async_query";
 
 $db = pg_connect($conn_str);
+pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "insert into {$table_name} default values");
 
 if (!pg_send_query($db, "SELECT * FROM ".$table_name.";")) {
     echo "pg_send_query() error\n";
@@ -62,6 +65,14 @@ pg_free_result($result);
 
 
 echo "OK";
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_04async_query";
+
+$db = pg_connect($conn_str);
+pg_query($db, "drop table {$table_name}");
 ?>
 --EXPECT--
 OK

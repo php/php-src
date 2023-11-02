@@ -12,8 +12,10 @@ skip_server_version('9.2');
 error_reporting(E_ALL);
 
 include 'inc/config.inc';
+$table_name_92 = "table_10pg_convert_json_array_92";
 
 $db = pg_connect($conn_str);
+pg_query($db, "create table {$table_name_92} (textary text[],  jsn json)");
 
 $fields = array(
     'textary'=>'{"meeting", "lunch", "training", "presentation"}',
@@ -28,6 +30,14 @@ if (!pg_insert($db, $table_name_92, $fields)) {
     echo "OK\n";
 }
 
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name_92 = "table_10pg_convert_json_array_92";
+
+$db = pg_connect($conn_str);
+pg_query($db, "drop table {$table_name_92}");
 ?>
 --EXPECT--
 array(2) {

@@ -9,8 +9,12 @@ pgsql
 error_reporting(E_ALL);
 
 include 'inc/config.inc';
+$table_name = "table_15pg_delete";
 
 $db = pg_connect($conn_str);
+pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "insert into {$table_name} values(1, 'ABC', null)");
+pg_query($db, "insert into {$table_name} values(1, 'ABC', null)");
 
 $fields = array('num'=>'1234', 'str'=>'XXX', 'bin'=>'YYY');
 $ids = array('num'=>'1234');
@@ -23,7 +27,15 @@ else {
     echo "Ok\n";
 }
 ?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_15pg_delete";
+
+$db = pg_connect($conn_str);
+pg_query($db, "drop table {$table_name}");
+?>
 --EXPECT--
-DELETE FROM "php_pgsql_test" WHERE "num"=1234;
-DELETE FROM "php_pgsql_test" WHERE "num"='1234';
+DELETE FROM "table_15pg_delete" WHERE "num"=1234;
+DELETE FROM "table_15pg_delete" WHERE "num"='1234';
 Ok

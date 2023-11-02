@@ -9,11 +9,14 @@ pgsql
 // optional functions
 
 include('inc/config.inc');
+$table_name = "table_18pg_escape_bytea_before";
 
 $image = file_get_contents(__DIR__ . '/php.gif');
 $esc_image = pg_escape_bytea($image);
 
 $db = pg_connect($conn_str);
+pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+
 @pg_query($db, "SET bytea_output = 'escape'");
 
 pg_query($db, 'INSERT INTO '.$table_name.' (num, bin) VALUES (9876, E\''.$esc_image.'\');');
@@ -27,6 +30,14 @@ if ($unesc_image !== $image) {
 else {
     echo "OK";
 }
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_18pg_escape_bytea_before";
+
+$db = pg_connect($conn_str);
+pg_query($db, "drop table {$table_name}");
 ?>
 --EXPECTF--
 Deprecated: pg_escape_bytea(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d

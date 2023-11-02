@@ -8,8 +8,11 @@ pgsql
 <?php
 
 include('inc/config.inc');
+$table_name = "table_03sync_query";
 
 $db = pg_connect($conn_str);
+pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "insert into {$table_name} default values");
 
 $result = pg_query($db, "SELECT * FROM ".$table_name.";");
 if (!($rows   = pg_num_rows($result)))
@@ -133,6 +136,14 @@ pg_free_result($result);
 pg_close($db);
 
 echo "OK";
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_03sync_query";
+
+$db = pg_connect($conn_str);
+pg_query($db, "drop table {$table_name}");
 ?>
 --EXPECT--
 Argument #3 must be greater than or equal to 0
