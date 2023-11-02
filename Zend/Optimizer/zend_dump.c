@@ -248,7 +248,7 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 				fprintf(stderr, "!");
 			}
 			if (MAY_BE_EMPTY_ONLY(info)) {
-				fprintf(stderr, "empry ");
+				fprintf(stderr, "empty ");
 			} else if (MAY_BE_PACKED_ONLY(info)) {
 				fprintf(stderr, "packed ");
 			} else if (MAY_BE_HASH_ONLY(info)) {
