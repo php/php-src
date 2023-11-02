@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . Fixed max_execution_time: don't delete an unitialized timer. (Kévin Dunglas)
   . Fixed bug GH-12558 (Arginfo soft-breaks with namespaced class return type
     if the class name starts with N). (kocsismate)
+  . Fixed oss-fuzz #63802 (OP1 leak in error path of post inc/dec). (ilutov)
 
 - DOM:
   . Fix registerNodeClass with abstract class crashing. (nielsdos)
