@@ -22,11 +22,15 @@ var_dump(pg_meta_data($conn, 'foo'));
 var_dump(pg_meta_data($conn, 'phptests.foo'));
 var_dump(pg_meta_data($conn, 'phptests.foo', TRUE));
 
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$conn = pg_connect($conn_str);
 
 pg_query($conn, 'DROP TABLE foo');
 pg_query($conn, 'DROP TABLE phptests.foo');
 pg_query($conn, 'DROP SCHEMA phptests');
-
 ?>
 --EXPECT--
 array(2) {

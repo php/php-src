@@ -12,7 +12,7 @@ include('inc/config.inc');
 
 $conn = pg_connect($conn_str);
 
-$table = "bug72028_" . md5(uniqid(time()));
+$table = "bug72028";
 
 pg_query($conn, "CREATE TABLE $table (value TEXT, details TEXT);");
 
@@ -33,9 +33,14 @@ $r = pg_query($conn, "SELECT * FROM $table");
 while (false !== ($i = pg_fetch_assoc($r))) {
     var_dump($i);
 }
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$table = "bug72028";;
+$conn = pg_connect($conn_str);
 
 pg_query($conn, "DROP TABLE $table");
-
 ?>
 --EXPECT--
 array(2) {

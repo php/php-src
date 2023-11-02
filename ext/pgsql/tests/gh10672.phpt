@@ -13,7 +13,6 @@ declare(strict_types=1);
 include "inc/config.inc";
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE IF EXISTS gh10672");
 pg_query($db, "CREATE TABLE gh10672 (bar text);");
 
 // Begin a transaction
@@ -34,6 +33,13 @@ if ($oid === false) {
 }
 
 echo 'The large object has been opened successfully.', PHP_EOL;
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$dbh = pg_connect($conn_str);
+
+pg_query($dbh, "DROP TABLE IF EXISTS gh10672");
 ?>
 --EXPECT--
 The large object has been opened successfully.

@@ -11,10 +11,7 @@ require_once('inc/skipif.inc');
 
 require_once('inc/config.inc');
 
-$dbh = @pg_connect($conn_str);
-if (!$dbh) {
-    die ("Could not connect to the server");
-}
+$dbh = pg_connect($conn_str);
 
 pg_query($dbh, "CREATE TABLE php_test (id SERIAL, tm timestamp NOT NULL)");
 
@@ -24,9 +21,15 @@ pg_insert($dbh, 'php_test', $values);
 $ids = array('id' => 1);
 pg_update($dbh, 'php_test', $values, $ids);
 
-pg_query($dbh, "DROP TABLE php_test");
 pg_close($dbh);
 ?>
 ===DONE===
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$dbh = pg_connect($conn_str);
+
+pg_query($dbh, "DROP TABLE php_test");
+?>
 --EXPECT--
 ===DONE===

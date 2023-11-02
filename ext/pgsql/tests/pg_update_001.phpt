@@ -31,10 +31,15 @@ while ($row = pg_fetch_assoc($rs)) {
     var_dump($row);
 }
 
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$conn = pg_connect($conn_str);
+
 pg_query($conn, 'DROP TABLE foo');
 pg_query($conn, 'DROP TABLE phptests.foo');
 pg_query($conn, 'DROP SCHEMA phptests');
-
 ?>
 --EXPECT--
 string(38) "UPDATE "foo" SET "id"=10 WHERE "id"=1;"

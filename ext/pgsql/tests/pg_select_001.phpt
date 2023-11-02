@@ -42,10 +42,15 @@ var_dump(pg_select($conn, 'phptests.bar', array()));
 /* No array */
 var_dump(pg_select($conn, 'phptests.bar'));
 
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$conn = pg_connect($conn_str);
+
 pg_query($conn, 'DROP TABLE phptests.foo');
 pg_query($conn, 'DROP TABLE phptests.bar');
 pg_query($conn, 'DROP SCHEMA phptests');
-
 ?>
 --EXPECTF--
 Warning: pg_select(): Table 'foo' doesn't exists in %s on line %d

@@ -14,7 +14,6 @@ include 'inc/config.inc';
 
 $db = pg_connect($conn_str);
 
-pg_query($db, "DROP TABLE IF EXISTS bug77047");
 pg_query($db, "CREATE TABLE bug77047 (
         t TIME WITHOUT TIME ZONE
     )");
@@ -39,6 +38,13 @@ while (false !== ($row = pg_fetch_row($res))) {
     var_dump(array_pop($row));
 }
 
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$db = pg_connect($conn_str);
+
+pg_query($db, "DROP TABLE IF EXISTS bug77047");
 ?>
 --EXPECTF--
 pg_insert(): Field "t" must be of type string|null, time given

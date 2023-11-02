@@ -41,10 +41,15 @@ var_dump(pg_fetch_all(pg_query($conn, 'SELECT * FROM phptests.foo')));
 pg_delete($conn, 'bar', array('id' => 1, 'id2' => 2));
 var_dump(pg_delete($conn, 'bar', array('id' => 1, 'id2' => 2), PGSQL_DML_STRING));
 
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$conn = pg_connect($conn_str);
+
 pg_query($conn, 'DROP TABLE foo');
 pg_query($conn, 'DROP TABLE phptests.foo');
 pg_query($conn, 'DROP SCHEMA phptests');
-
 ?>
 --EXPECTF--
 string(43) "DELETE FROM "foo" WHERE "id"=1 AND "id2"=2;"

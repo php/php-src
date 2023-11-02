@@ -14,8 +14,6 @@ include 'inc/config.inc';
 
 $db = pg_connect($conn_str);
 
-@pg_query($db, 'DROP TABLE test_bug');
-
 pg_query($db, 'CREATE TABLE test_bug (binfield byteA) ;');
 pg_query($db, "INSERT INTO test_bug VALUES (decode('0103AA000812','hex'))");
 
@@ -36,10 +34,16 @@ var_dump(bin2hex($res));
 pg_close($db);
 
 $db = pg_connect($conn_str);
-pg_query($db, 'DROP TABLE test_bug');
 pg_close($db);
 
 
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$db = pg_connect($conn_str);
+
+pg_query($db, 'DROP TABLE test_bug');
 ?>
 --EXPECT--
 string(14) "\x0103aa000812"

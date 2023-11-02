@@ -80,9 +80,15 @@ while (false != ($row = pg_fetch_row($r))) {
 }
 echo $errors, " errors caught\n";
 
-pg_query($db, "DROP TABLE tmp_statistics");
 pg_close($db);
 
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$db = @pg_connect($conn_str);
+
+pg_query($db, "DROP TABLE tmp_statistics");
 ?>
 --EXPECT--
 pg_insert(): Field "remote_addr" must be a valid IPv4 or IPv6 address string, "256.257.258.259" given

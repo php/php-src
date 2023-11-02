@@ -15,8 +15,6 @@ include 'inc/config.inc';
 $db = pg_connect($conn_str);
 @pg_query("SET bytea_output = 'escape'");
 
-@pg_query('DROP TABLE test_bug');
-
 pg_query('CREATE TABLE test_bug (binfield byteA) ;');
 pg_query("INSERT INTO test_bug VALUES (decode('0103AA000812','hex'))");
 
@@ -35,12 +33,13 @@ var_dump(strlen($res));
 var_dump(bin2hex($res));
 
 pg_close($db);
-
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
 $db = pg_connect($conn_str);
+
 pg_query('DROP TABLE test_bug');
-pg_close($db);
-
-
 ?>
 --EXPECT--
 string(24) "\001\003\252\000\010\022"

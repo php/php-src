@@ -23,9 +23,14 @@ var_dump(pg_insert($conn, 'phptests.foo', array('id' => 1, 'id2' => 2), PGSQL_DM
 
 var_dump(pg_select($conn, 'phptests.foo', array('id' => 1)));
 
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$conn = pg_connect($conn_str);
+
 pg_query($conn, 'DROP TABLE phptests.foo');
 pg_query($conn, 'DROP SCHEMA phptests');
-
 ?>
 --EXPECTF--
 Warning: pg_insert(): Table 'foo' doesn't exists in %s on line %d

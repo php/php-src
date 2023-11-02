@@ -30,10 +30,16 @@ pg_convert($db, $table, ['test_field' => $date_string_modified_iso8601]);
 
 print "done\n";
 
-pg_query($db, "DROP TABLE $table");
-
 ?>
 ==OK==
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$db = @pg_connect($conn_str);
+$table = "public.test_table_bug71062_bug71062";
+
+pg_query($db, "DROP TABLE $table");
+?>
 --EXPECT--
 trying format Y-m-d\TH:i:sO 
 trying format Y-m-d H:i:sO 

@@ -16,8 +16,6 @@ if (!$dbh) {
     die ("Could not connect to the server");
 }
 
-@pg_query($dbh, "DROP SEQUENCE id_id_seq");
-@pg_query($dbh, "DROP TABLE id");
 pg_query($dbh, "CREATE TABLE id (id SERIAL, t INT)");
 
 for ($i=0; $i<4; $i++) {
@@ -48,6 +46,13 @@ pg_close($dbh);
 
 echo "Done\n";
 
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$dbh = pg_connect($conn_str);
+
+pg_query($dbh, "DROP TABLE id CASCADE");
 ?>
 --EXPECTF--
 Array

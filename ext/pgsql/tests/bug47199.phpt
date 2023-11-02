@@ -13,7 +13,6 @@ require_once('inc/config.inc');
 
 $dbh = pg_connect($conn_str);
 $tbl_name = 'test_47199';
-@pg_query($dbh, "DROP TABLE $tbl_name");
 pg_query($dbh, "CREATE TABLE $tbl_name (null_field INT, not_null_field INT NOT NULL)");
 
 pg_insert($dbh, $tbl_name, array('null_field' => null, 'not_null_field' => 1));
@@ -31,11 +30,18 @@ echo $query, "\n";
 
 var_dump(pg_fetch_all(pg_query($dbh, 'SELECT * FROM '. $tbl_name)));
 
-@pg_query($dbh, "DROP TABLE $tbl_name");
 pg_close($dbh);
 
 echo PHP_EOL."Done".PHP_EOL;
 
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$dbh = pg_connect($conn_str);
+
+$tbl_name = 'test_47199';
+pg_query($dbh, "DROP TABLE $tbl_name");
 ?>
 --EXPECT--
 array(2) {

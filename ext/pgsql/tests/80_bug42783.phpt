@@ -22,8 +22,14 @@ pg_insert($dbh, 'php_test', array());
 
 var_dump(pg_fetch_assoc(pg_query($dbh, "SELECT * FROM php_test")));
 
-pg_query($dbh, "DROP TABLE php_test");
 pg_close($dbh);
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$dbh = pg_connect($conn_str);
+
+pg_query($dbh, "DROP TABLE php_test");
 ?>
 --EXPECTF--
 array(2) {

@@ -16,7 +16,6 @@ if (!$dbh) {
     die ("Could not connect to the server");
 }
 
-@pg_query($dbh, "DROP TABLE id");
 pg_query($dbh, "CREATE TABLE id (id INT)");
 
 for ($i=0; $i<4; $i++) {
@@ -40,6 +39,13 @@ while($row = xi_fetch_array($res)) {
 
 pg_close($dbh);
 
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$dbh = pg_connect($conn_str);
+
+pg_query($dbh, "DROP TABLE id");
 ?>
 --EXPECT--
 Array
