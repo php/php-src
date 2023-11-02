@@ -2331,7 +2331,9 @@ ZEND_API void zend_startup_modules(void) /* {{{ */
 ZEND_API void zend_destroy_modules(void) /* {{{ */
 {
 	free(class_cleanup_handlers);
+	class_cleanup_handlers = NULL;
 	free(module_request_startup_handlers);
+	module_request_startup_handlers = NULL;
 	zend_hash_graceful_reverse_destroy(&module_registry);
 }
 /* }}} */
