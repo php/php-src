@@ -70,6 +70,11 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 		return;
 	}
 
+	if (UNEXPECTED(nargs == 0)) {
+		zend_throw_error(NULL, "Function name must be passed as the first argument");
+		return;
+	}
+
 	fci.param_count = nargs - 1;
 	if (fci.param_count > 0) {
 		fci.params = safe_emalloc(fci.param_count, sizeof(zval), 0);
@@ -132,7 +137,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 	if (obj->stringval == NULL) {
 		zend_type_error("Handler name must be a string");
 		xmlXPathFreeObject(obj);
-		goto cleanup;
+		goto cleanup_no_callable;
 	}
 	ZVAL_STRING(&fci.function_name, (char *) obj->stringval);
 	xmlXPathFreeObject(obj);
@@ -176,6 +181,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 	}
 cleanup:
 	zend_string_release_ex(callable, 0);
+cleanup_no_callable:
 	zval_ptr_dtor_nogc(&fci.function_name);
 	if (fci.param_count > 0) {
 		for (i = 0; i < nargs - 1; i++) {
