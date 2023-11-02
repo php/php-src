@@ -61,7 +61,7 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 		uint32_t t2 = _ssa_op1_info(op_array, ssa, call_info->arg_info[1].opline,
 			&ssa->ops[call_info->arg_info[1].opline - op_array->opcodes]);
 		uint32_t t3 = 0;
-		uint32_t tmp = MAY_BE_RC1 | MAY_BE_ARRAY;
+		uint32_t tmp = MAY_BE_RC1 | MAY_BE_ARRAY | MAY_BE_ARRAY_EMPTY;
 
 		if (call_info->num_args == 3) {
 			t3 = _ssa_op1_info(op_array, ssa, call_info->arg_info[2].opline,
@@ -87,7 +87,7 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 		return tmp;
 	} else {
 		/* May throw */
-		return MAY_BE_RC1 | MAY_BE_ARRAY | MAY_BE_ARRAY_PACKED | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING;
+		return MAY_BE_RC1 | MAY_BE_ARRAY | MAY_BE_ARRAY_EMPTY | MAY_BE_ARRAY_PACKED | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING;
 	}
 }
 
@@ -120,7 +120,12 @@ uint32_t zend_get_internal_func_info(
 	if (info->info_func) {
 		return call_info ? info->info_func(call_info, ssa) : 0;
 	} else {
-		return info->info;
+		uint32_t ret = info->info;
+
+		if (ret & MAY_BE_ARRAY) {
+			ret |= MAY_BE_ARRAY_EMPTY;
+		}
+		return ret;
 	}
 }
 
