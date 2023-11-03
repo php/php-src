@@ -409,6 +409,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 	} else if (param->is_param && event_type == PDO_PARAM_EVT_NORMALIZE) {
 		/* We need to manually convert to a pg native boolean value */
 		if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL &&
+			Z_TYPE_P(&param->parameter) != IS_NULL &&
 			((param->param_type & PDO_PARAM_INPUT_OUTPUT) != PDO_PARAM_INPUT_OUTPUT)) {
 			const char *s = zend_is_true(&param->parameter) ? "t" : "f";
 			param->param_type = PDO_PARAM_STR;
