@@ -348,60 +348,104 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 						parameter = &param->parameter;
 					}
 
-					if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB &&
-							Z_TYPE_P(parameter) == IS_RESOURCE) {
-						php_stream *stm;
-						php_stream_from_zval_no_verify(stm, parameter);
-						if (stm) {
-							if (php_stream_is(stm, &pdo_pgsql_lob_stream_ops)) {
-								struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stm->abstract;
-								pdo_pgsql_bound_param *P = param->driver_data;
+exec_pre_retry:
+					switch (PDO_PARAM_TYPE(param->param_type)) {
+						case PDO_PARAM_NULL:
+							S->param_values[param->paramno] = NULL;
+							S->param_lengths[param->paramno] = 0;
+							break;
 
-								if (P == NULL) {
-									P = ecalloc(1, sizeof(*P));
-									param->driver_data = P;
-								}
-								P->oid = htonl(self->oid);
-								S->param_values[param->paramno] = (char*)&P->oid;
-								S->param_lengths[param->paramno] = sizeof(P->oid);
-								S->param_formats[param->paramno] = 1;
-								S->param_types[param->paramno] = OIDOID;
-								return 1;
-							} else {
-								zend_string *str = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
-								if (str != NULL) {
-									ZVAL_STR(parameter, str);
+						case PDO_PARAM_STMT:
+							return 0;
+
+						case PDO_PARAM_INT:
+							if (Z_TYPE_P(parameter) == IS_NULL) {
+								param->param_type = PDO_PARAM_NULL;
+								goto exec_pre_retry;
+							}
+							convert_to_long(parameter);
+							convert_to_string(parameter);
+							S->param_values[param->paramno] = Z_STRVAL_P(parameter);
+							S->param_lengths[param->paramno] = Z_STRLEN_P(parameter);
+							S->param_formats[param->paramno] = 0;
+#if SIZEOF_ZEND_LONG >= 8
+							S->param_types[param->paramno] = INT8OID;
+#else
+							S->param_types[param->paramno] = INT4OID;
+#endif
+							break;
+
+						case PDO_PARAM_BOOL:
+							if (Z_TYPE_P(parameter) == IS_NULL) {
+								param->param_type = PDO_PARAM_NULL;
+								goto exec_pre_retry;
+							}
+							convert_to_boolean(parameter);
+							S->param_values[param->paramno] = Z_TYPE_P(parameter) == IS_TRUE ? "t" : "f";
+							S->param_lengths[param->paramno] = 1;
+							S->param_formats[param->paramno] = 0;
+							break;
+
+						case PDO_PARAM_LOB:
+							if (Z_TYPE_P(parameter) == IS_RESOURCE) {
+								php_stream *stm;
+								php_stream_from_zval_no_verify(stm, parameter);
+								if (stm) {
+									if (php_stream_is(stm, &pdo_pgsql_lob_stream_ops)) {
+										struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stm->abstract;
+										pdo_pgsql_bound_param *P = param->driver_data;
+
+										if (P == NULL) {
+											P = ecalloc(1, sizeof(*P));
+											param->driver_data = P;
+										}
+										P->oid = htonl(self->oid);
+										S->param_values[param->paramno] = (char*)&P->oid;
+										S->param_lengths[param->paramno] = sizeof(P->oid);
+										S->param_formats[param->paramno] = 1;
+										S->param_types[param->paramno] = OIDOID;
+										return 1;
+									} else {
+										zend_string *str = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
+										if (str != NULL) {
+											ZVAL_STR(parameter, str);
+										} else {
+											ZVAL_EMPTY_STRING(parameter);
+										}
+									}
 								} else {
-									ZVAL_EMPTY_STRING(parameter);
+									/* expected a stream resource */
+									pdo_pgsql_error_stmt(stmt, PGRES_FATAL_ERROR, "HY105");
+									return 0;
+								}
+							} else if (Z_TYPE_P(parameter) == IS_NULL) {
+								param->param_type = PDO_PARAM_NULL;
+								goto exec_pre_retry;
+							} else {
+								// fallback
+								if (!try_convert_to_string(parameter)) {
+									return 0;
 								}
 							}
-						} else {
-							/* expected a stream resource */
-							pdo_pgsql_error_stmt(stmt, PGRES_FATAL_ERROR, "HY105");
-							return 0;
-						}
-					}
+							S->param_values[param->paramno] = Z_STRVAL_P(parameter);
+							S->param_lengths[param->paramno] = Z_STRLEN_P(parameter);
+							S->param_types[param->paramno] = 0;
+							S->param_formats[param->paramno] = 1;
+							break;
 
-					if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL ||
-							Z_TYPE_P(parameter) == IS_NULL) {
-						S->param_values[param->paramno] = NULL;
-						S->param_lengths[param->paramno] = 0;
-					} else if (Z_TYPE_P(parameter) == IS_FALSE || Z_TYPE_P(parameter) == IS_TRUE) {
-						S->param_values[param->paramno] = Z_TYPE_P(parameter) == IS_TRUE ? "t" : "f";
-						S->param_lengths[param->paramno] = 1;
-						S->param_formats[param->paramno] = 0;
-					} else {
-						convert_to_string(parameter);
-						S->param_values[param->paramno] = Z_STRVAL_P(parameter);
-						S->param_lengths[param->paramno] = Z_STRLEN_P(parameter);
-						S->param_formats[param->paramno] = 0;
-					}
-
-					if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB) {
-						S->param_types[param->paramno] = 0;
-						S->param_formats[param->paramno] = 1;
-					} else {
-						S->param_types[param->paramno] = 0;
+						case PDO_PARAM_STR:
+						default:
+							if (Z_TYPE_P(parameter) == IS_NULL) {
+								param->param_type = PDO_PARAM_NULL;
+								goto exec_pre_retry;
+							}
+							if (!try_convert_to_string(parameter)) {
+								return 0;
+							}
+							S->param_values[param->paramno] = Z_STRVAL_P(parameter);
+							S->param_lengths[param->paramno] = Z_STRLEN_P(parameter);
+							S->param_formats[param->paramno] = 0;
+							break;
 					}
 				}
 				break;
@@ -409,6 +453,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 	} else if (param->is_param && event_type == PDO_PARAM_EVT_NORMALIZE) {
 		/* We need to manually convert to a pg native boolean value */
 		if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL &&
+			Z_TYPE_P(&param->parameter) != IS_NULL &&
 			((param->param_type & PDO_PARAM_INPUT_OUTPUT) != PDO_PARAM_INPUT_OUTPUT)) {
 			const char *s = zend_is_true(&param->parameter) ? "t" : "f";
 			param->param_type = PDO_PARAM_STR;
