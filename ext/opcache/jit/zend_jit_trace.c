@@ -6833,14 +6833,18 @@ done:
 		if (ra && (p-1)->op != ZEND_JIT_TRACE_ENTER) {
 			for (i = 0; i < op_array->last_var + op_array->T; i++) {
 				int32_t ref = STACK_REF(stack, i);
+				uint8_t type = STACK_TYPE(stack, i);
 
-				if (ref) {
-					uint8_t type = STACK_TYPE(stack, i);
-
-					if (!(STACK_FLAGS(stack, i) & (ZREG_LOAD|ZREG_STORE))
-					 && !zend_jit_store_ref(jit, 1 << type, i, ref, STACK_MEM_TYPE(stack, i) != type)) {
+				if (ref && (!(STACK_FLAGS(stack, i) & (ZREG_LOAD|ZREG_STORE)))) {
+					if (!zend_jit_store_ref(jit, 1 << type, i, ref, STACK_MEM_TYPE(stack, i) != type)) {
 						goto jit_failure;
 					}
+					SET_STACK_TYPE(stack, i, type, 1);
+				} else if (type != IS_UNKNOWN && type != STACK_MEM_TYPE(stack, i)) {
+					if (!zend_jit_store_type(jit, i, type)) {
+						return 0;
+					}
+					SET_STACK_TYPE(stack, i, type, 1);
 				}
 				CLEAR_STACK_REF(stack, i);
 			}
