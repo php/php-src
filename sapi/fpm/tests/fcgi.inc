@@ -389,9 +389,9 @@ class Client
     const OVERLOADED           = 2;
     const UNKNOWN_ROLE         = 3;
 
-    const MAX_CONNS            = 'MAX_CONNS';
-    const MAX_REQS             = 'MAX_REQS';
-    const MPXS_CONNS           = 'MPXS_CONNS';
+    const MAX_CONNS            = 'FCGI_MAX_CONNS';
+    const MAX_REQS             = 'FCGI_MAX_REQS';
+    const MPXS_CONNS           = 'FCGI_MPXS_CONNS';
 
     const HEADER_LEN           = 8;
 
@@ -710,8 +710,8 @@ class Client
         $this->transport->write($this->buildPacket(self::GET_VALUES, $request, 0));
 
         $resp = $this->readPacket();
-        if ($resp['type'] == self::GET_VALUES_RESULT) {
-            return $this->readNvpair($resp['content'], $resp['length']);
+        if (isset($resp['type']) && $resp['type'] == self::GET_VALUES_RESULT) {
+            return $this->readNvpair($resp['content'], $resp['contentLength']);
         } else {
             throw new \Exception('Unexpected response type, expecting GET_VALUES_RESULT');
         }

@@ -29,6 +29,8 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug GH-12232 (FPM: segfault dynamically loading extension without
     opcache). (Jakub Zelenka)
+  . Fixed bug #76922 (FastCGI terminates conn after FCGI_GET_VALUES).
+    (Jakub Zelenka)
 
 - Intl:
   . Removed the BC break on IntlDateFormatter::construct which threw an
