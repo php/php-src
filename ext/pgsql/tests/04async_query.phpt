@@ -49,7 +49,7 @@ for ($i=0; $i < $rows; $i++)
 pg_num_rows(pg_query($db, "SELECT * FROM ".$table_name.";"));
 pg_num_fields(pg_query($db, "SELECT * FROM ".$table_name.";"));
 pg_field_name($result, 0);
-pg_field_num($result, $field_name);
+pg_field_num($result, "num");
 pg_field_size($result, 0);
 pg_field_type($result, 0);
 pg_field_prtlen($result, 0);
