@@ -27,6 +27,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-11121 (ReflectionFiber segfault). (danog, trowski, bwoebi)
 
 - FPM:
+  . Fixed bug GH-9921 (Loading ext in FPM config does not register module
+    handlers). (Jakub Zelenka)
   . Fixed bug GH-12232 (FPM: segfault dynamically loading extension without
     opcache). (Jakub Zelenka)
   . Fixed bug #76922 (FastCGI terminates conn after FCGI_GET_VALUES).
