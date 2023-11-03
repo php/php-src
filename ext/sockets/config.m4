@@ -6,7 +6,7 @@ PHP_ARG_ENABLE([sockets],
 if test "$PHP_SOCKETS" != "no"; then
   AC_CHECK_FUNCS([hstrerror if_nametoindex if_indextoname])
   AC_CHECK_FUNCS(sockatmark)
-  AC_CHECK_HEADERS([netinet/tcp.h sys/un.h sys/sockio.h linux/filter.h])
+  AC_CHECK_HEADERS([sys/sockio.h linux/filter.h])
   AC_DEFINE([HAVE_SOCKETS], 1, [ ])
 
   dnl Check for fied ss_family in sockaddr_storage (missing in AIX until 5.3)
