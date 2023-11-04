@@ -46,6 +46,8 @@ SOAP:
   . Add support for clark notation for namespaces in class map. (lxShaDoWxl)
   . Mitigate #51561 (SoapServer with a extented class and using sessions,
     lost the setPersistence()). (nielsdos)
+  . Fixed bug #49278 (SoapClient::__getLastResponseHeaders returns NULL if
+    wsdl operation !has output). (nielsdos)
 
 Sockets:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
