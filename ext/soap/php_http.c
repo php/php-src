@@ -896,57 +896,57 @@ try_again:
 
 	http_headers = NULL;
 	if (return_value || client_trace) {
-	do {
-		http_headers = get_http_headers(stream);
-		if (!http_headers) {
-			if (request != buf) {
-				zend_string_release_ex(request, 0);
-			}
-			php_stream_close(stream);
-			convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-			convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
-			add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL);
-			smart_str_free(&soap_headers_z);
-			return FALSE;
-		}
-
-		if (client_trace) {
-			zval_ptr_dtor(Z_CLIENT_LAST_RESPONSE_HEADERS_P(this_ptr));
-			ZVAL_STR_COPY(Z_CLIENT_LAST_RESPONSE_HEADERS_P(this_ptr), http_headers);
-		}
-
-		/* Check to see what HTTP status was sent */
-		http_1_1 = 0;
-		http_status = 0;
-		http_version = get_http_header_value(ZSTR_VAL(http_headers), "HTTP/");
-		if (http_version) {
-			char *tmp;
-
-			if (!strncmp(http_version,"1.1", 3)) {
-				http_1_1 = 1;
-			}
-
-			tmp = strstr(http_version," ");
-			if (tmp != NULL) {
-				tmp++;
-				http_status = atoi(tmp);
-			}
-			tmp = strstr(tmp," ");
-			if (tmp != NULL) {
-				tmp++;
-				if (http_msg) {
-					efree(http_msg);
+		do {
+			http_headers = get_http_headers(stream);
+			if (!http_headers) {
+				if (request != buf) {
+					zend_string_release_ex(request, 0);
 				}
-				http_msg = estrdup(tmp);
+				php_stream_close(stream);
+				convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
+				convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+				add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL);
+				smart_str_free(&soap_headers_z);
+				return FALSE;
 			}
-			efree(http_version);
 
-			/* Try and get headers again */
-			if (http_status == 100) {
-				zend_string_release_ex(http_headers, 0);
+			if (client_trace) {
+				zval_ptr_dtor(Z_CLIENT_LAST_RESPONSE_HEADERS_P(this_ptr));
+				ZVAL_STR_COPY(Z_CLIENT_LAST_RESPONSE_HEADERS_P(this_ptr), http_headers);
 			}
-		}
-	} while (http_status == 100);
+
+			/* Check to see what HTTP status was sent */
+			http_1_1 = 0;
+			http_status = 0;
+			http_version = get_http_header_value(ZSTR_VAL(http_headers), "HTTP/");
+			if (http_version) {
+				char *tmp;
+
+				if (!strncmp(http_version,"1.1", 3)) {
+					http_1_1 = 1;
+				}
+
+				tmp = strstr(http_version," ");
+				if (tmp != NULL) {
+					tmp++;
+					http_status = atoi(tmp);
+				}
+				tmp = strstr(tmp," ");
+				if (tmp != NULL) {
+					tmp++;
+					if (http_msg) {
+						efree(http_msg);
+					}
+					http_msg = estrdup(tmp);
+				}
+				efree(http_version);
+
+				/* Try and get headers again */
+				if (http_status == 100) {
+					zend_string_release_ex(http_headers, 0);
+				}
+			}
+		} while (http_status == 100);
 	}
 
 	if (!return_value) {
