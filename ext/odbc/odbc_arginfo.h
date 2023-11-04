@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0417b68a519527b0ee916bad75116ffe4a3ad304 */
+ * Stub hash: ff33935d54ae09f494fe957ca0b86d6c5c8bcab2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_close_all, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -78,10 +78,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_free_result, 0, 1, _IS_BOOL
 	ZEND_ARG_INFO(0, statement)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_connect, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_connect, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, user, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, user, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, password, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, cursor_option, IS_LONG, 0, "SQL_CUR_USE_DRIVER")
 ZEND_END_ARG_INFO()
 
