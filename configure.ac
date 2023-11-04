@@ -404,7 +404,6 @@ fcntl.h \
 grp.h \
 ieeefp.h \
 langinfo.h \
-linux/filter.h \
 linux/sock_diag.h \
 malloc.h \
 os/signpost.h \
