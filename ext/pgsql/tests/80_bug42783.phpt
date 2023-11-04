@@ -10,26 +10,28 @@ require_once('inc/skipif.inc');
 <?php
 
 require_once('inc/config.inc');
+$table_name = 'table_80_bug42783';
 
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
     die ("Could not connect to the server");
 }
 
-pg_query($dbh, "CREATE TABLE php_test (id SERIAL PRIMARY KEY, time TIMESTAMP NOT NULL DEFAULT now())");
+pg_query($dbh, "CREATE TABLE {$table_name} (id SERIAL PRIMARY KEY, time TIMESTAMP NOT NULL DEFAULT now())");
 
-pg_insert($dbh, 'php_test', array());
+pg_insert($dbh, $table_name, array());
 
-var_dump(pg_fetch_assoc(pg_query($dbh, "SELECT * FROM php_test")));
+var_dump(pg_fetch_assoc(pg_query($dbh, "SELECT * FROM {$table_name}")));
 
 pg_close($dbh);
 ?>
 --CLEAN--
 <?php
 require_once('inc/config.inc');
-$dbh = pg_connect($conn_str);
+$table_name = 'table_80_bug42783';
 
-pg_query($dbh, "DROP TABLE php_test");
+$dbh = pg_connect($conn_str);
+pg_query($dbh, "DROP TABLE {$table_name}");
 ?>
 --EXPECTF--
 array(2) {

@@ -11,20 +11,21 @@ skip_bytea_not_escape();
 <?php
 
 include 'inc/config.inc';
+$table_name = 'table_bug37100';
 
 $db = pg_connect($conn_str);
 @pg_query("SET bytea_output = 'escape'");
 
-pg_query('CREATE TABLE test_bug (binfield byteA) ;');
-pg_query("INSERT INTO test_bug VALUES (decode('0103AA000812','hex'))");
+pg_query("CREATE TABLE {$table_name} (binfield byteA) ;");
+pg_query("INSERT INTO {$table_name} VALUES (decode('0103AA000812','hex'))");
 
 
-$data = pg_query("SELECT binfield FROM test_bug");
+$data = pg_query("SELECT binfield FROM {$table_name}");
 $res = pg_fetch_result($data,0);
 var_dump($res);
 var_dump(bin2hex(pg_unescape_bytea($res)));
 
-$sql = "BEGIN; DECLARE mycursor BINARY CURSOR FOR SELECT binfield FROM test_bug; FETCH ALL IN mycursor;";
+$sql = "BEGIN; DECLARE mycursor BINARY CURSOR FOR SELECT binfield FROM {$table_name}; FETCH ALL IN mycursor;";
 
 $data = pg_query($sql);
 $res = pg_fetch_result($data,0);
@@ -37,9 +38,10 @@ pg_close($db);
 --CLEAN--
 <?php
 require_once('inc/config.inc');
-$db = pg_connect($conn_str);
+$table_name = 'table_bug37100';
 
-pg_query('DROP TABLE test_bug');
+$db = pg_connect($conn_str);
+pg_query("DROP TABLE {$table_name}");
 ?>
 --EXPECT--
 string(24) "\001\003\252\000\010\022"

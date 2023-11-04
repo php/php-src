@@ -8,33 +8,37 @@ pgsql
 <?php
 
 include('inc/config.inc');
+$schema_name = 'schema_pg_insert_001';
+$table_name = 'table_pg_insert_001';
 
 $conn = pg_connect($conn_str);
 
-pg_query($conn, 'CREATE SCHEMA phptests');
-pg_query($conn, 'CREATE TABLE phptests.foo (id INT, id2 INT)');
+pg_query($conn, "CREATE SCHEMA {$schema_name}");
+pg_query($conn, "CREATE TABLE {$schema_name}.{$table_name} (id INT, id2 INT)");
 
 
-pg_insert($conn, 'foo', array('id' => 1, 'id2' => 1));
+pg_insert($conn, $table_name, array('id' => 1, 'id2' => 1));
 
-pg_insert($conn, 'phptests.foo', array('id' => 1, 'id2' => 2));
+pg_insert($conn, "{$schema_name}.{$table_name}", array('id' => 1, 'id2' => 2));
 
-var_dump(pg_insert($conn, 'phptests.foo', array('id' => 1, 'id2' => 2), PGSQL_DML_STRING));
+var_dump(pg_insert($conn, "{$schema_name}.{$table_name}", array('id' => 1, 'id2' => 2), PGSQL_DML_STRING));
 
-var_dump(pg_select($conn, 'phptests.foo', array('id' => 1)));
+var_dump(pg_select($conn, "{$schema_name}.{$table_name}", array('id' => 1)));
 
 ?>
 --CLEAN--
 <?php
 require_once('inc/config.inc');
-$conn = pg_connect($conn_str);
+$schema_name = 'schema_pg_insert_001';
+$table_name = 'table_pg_insert_001';
 
-pg_query($conn, 'DROP TABLE phptests.foo');
-pg_query($conn, 'DROP SCHEMA phptests');
+$conn = pg_connect($conn_str);
+pg_query($conn, "DROP TABLE {$schema_name}.{$table_name}");
+pg_query($conn, "DROP SCHEMA {$schema_name}");
 ?>
 --EXPECTF--
-Warning: pg_insert(): Table 'foo' doesn't exists in %s on line %d
-string(55) "INSERT INTO "phptests"."foo" ("id","id2") VALUES (1,2);"
+Warning: pg_insert(): Table 'table_pg_insert_001' doesn't exists in %s on line %d
+string(83) "INSERT INTO "schema_pg_insert_001"."table_pg_insert_001" ("id","id2") VALUES (1,2);"
 array(1) {
   [0]=>
   array(2) {

@@ -10,16 +10,17 @@ require_once('inc/skipif.inc');
 <?php
 
 require_once(__DIR__ . '/inc/config.inc');
+$table_name = 'table_80_bug27597';
 
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
     die ("Could not connect to the server");
 }
 
-pg_query($dbh, "CREATE TABLE id (id INT)");
+pg_query($dbh, "CREATE TABLE {$table_name} (id INT)");
 
 for ($i=0; $i<4; $i++) {
-    pg_query($dbh, "INSERT INTO id (id) VALUES ($i)");
+    pg_query($dbh, "INSERT INTO {$table_name} (id) VALUES ($i)");
 }
 
 function xi_fetch_array($res, $type = PGSQL_ASSOC) {
@@ -27,7 +28,7 @@ function xi_fetch_array($res, $type = PGSQL_ASSOC) {
     return $a ;
 }
 
-$res = pg_query($dbh, "SELECT * FROM id");
+$res = pg_query($dbh, "SELECT * FROM {$table_name}");
 $i = 0; // endless-loop protection
 while($row = xi_fetch_array($res)) {
     print_r($row);
@@ -43,9 +44,10 @@ pg_close($dbh);
 --CLEAN--
 <?php
 require_once('inc/config.inc');
-$dbh = pg_connect($conn_str);
+$table_name = 'table_80_bug27597';
 
-pg_query($dbh, "DROP TABLE id");
+$dbh = pg_connect($conn_str);
+pg_query($dbh, "DROP TABLE {$table_name}");
 ?>
 --EXPECT--
 Array

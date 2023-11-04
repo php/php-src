@@ -8,29 +8,33 @@ pgsql
 <?php
 
 include('inc/config.inc');
+$schema_name = 'schema_pg_meta_data_001';
+$table_name = 'table_pg_meta_data_001';
 
 $conn = pg_connect($conn_str);
 
-pg_query($conn, 'CREATE SCHEMA phptests');
+pg_query($conn, "CREATE SCHEMA {$schema_name}");
 
-pg_query($conn, 'CREATE TABLE phptests.foo (id INT, id2 INT)');
+pg_query($conn, "CREATE TABLE {$schema_name}.{$table_name} (id INT, id2 INT)");
 
-pg_query($conn, 'CREATE TABLE foo (id INT, id3 INT)');
+pg_query($conn, "CREATE TABLE {$table_name} (id INT, id3 INT)");
 
 
-var_dump(pg_meta_data($conn, 'foo'));
-var_dump(pg_meta_data($conn, 'phptests.foo'));
-var_dump(pg_meta_data($conn, 'phptests.foo', TRUE));
+var_dump(pg_meta_data($conn, $table_name));
+var_dump(pg_meta_data($conn, "{$schema_name}.{$table_name}"));
+var_dump(pg_meta_data($conn, "{$schema_name}.{$table_name}", TRUE));
 
 ?>
 --CLEAN--
 <?php
 require_once('inc/config.inc');
-$conn = pg_connect($conn_str);
+$schema_name = 'schema_pg_meta_data_001';
+$table_name = 'table_pg_meta_data_001';
 
-pg_query($conn, 'DROP TABLE foo');
-pg_query($conn, 'DROP TABLE phptests.foo');
-pg_query($conn, 'DROP SCHEMA phptests');
+$conn = pg_connect($conn_str);
+pg_query($conn, "DROP TABLE {$table_name}");
+pg_query($conn, "DROP TABLE {$schema_name}.{$table_name}");
+pg_query($conn, "DROP SCHEMA {$schema_name}");
 ?>
 --EXPECT--
 array(2) {

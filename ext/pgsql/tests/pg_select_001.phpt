@@ -8,49 +8,50 @@ pgsql
 <?php
 
 include('inc/config.inc');
+$schema_name = 'schema_pg_select_001';
 
 $conn = pg_connect($conn_str);
 
-pg_query($conn, 'CREATE SCHEMA phptests');
+pg_query($conn, "CREATE SCHEMA {$schema_name}");
 
-pg_query($conn, 'CREATE TABLE phptests.foo (id INT, id2 INT)');
-pg_query($conn, 'INSERT INTO phptests.foo VALUES (1,2)');
-pg_query($conn, 'INSERT INTO phptests.foo VALUES (2,3)');
+pg_query($conn, "CREATE TABLE {$schema_name}.foo (id INT, id2 INT)");
+pg_query($conn, "INSERT INTO {$schema_name}.foo VALUES (1,2)");
+pg_query($conn, "INSERT INTO {$schema_name}.foo VALUES (2,3)");
 
-pg_query($conn, 'CREATE TABLE phptests.bar (id4 INT, id3 INT)');
-pg_query($conn, 'INSERT INTO phptests.bar VALUES (4,5)');
-pg_query($conn, 'INSERT INTO phptests.bar VALUES (6,7)');
+pg_query($conn, "CREATE TABLE {$schema_name}.bar (id4 INT, id3 INT)");
+pg_query($conn, "INSERT INTO {$schema_name}.bar VALUES (4,5)");
+pg_query($conn, "INSERT INTO {$schema_name}.bar VALUES (6,7)");
 
 /* Nonexistent table */
 var_dump(pg_select($conn, 'foo', array('id' => 1)));
 
 /* Existent column */
-var_dump(pg_select($conn, 'phptests.foo', array('id' => 1)));
+var_dump(pg_select($conn, "{$schema_name}.foo", array('id' => 1)));
 
 /* Testing with inexistent column */
-var_dump(pg_select($conn, 'phptests.bar', array('id' => 1)));
+var_dump(pg_select($conn, "{$schema_name}.bar", array('id' => 1)));
 
 /* Existent column */
-var_dump(pg_select($conn, 'phptests.bar', array('id4' => 4)));
+var_dump(pg_select($conn, "{$schema_name}.bar", array('id4' => 4)));
 
 /* Use a different result type */
-var_dump(pg_select($conn, 'phptests.bar', array('id4' => 4), 0, PGSQL_NUM));
+var_dump(pg_select($conn, "{$schema_name}.bar", array('id4' => 4), 0, PGSQL_NUM));
 
 /* Empty array */
-var_dump(pg_select($conn, 'phptests.bar', array()));
+var_dump(pg_select($conn, "{$schema_name}.bar", array()));
 
 /* No array */
-var_dump(pg_select($conn, 'phptests.bar'));
+var_dump(pg_select($conn, "{$schema_name}.bar"));
 
 ?>
 --CLEAN--
 <?php
 require_once('inc/config.inc');
+$schema_name = 'schema_pg_select_001';
+
 $conn = pg_connect($conn_str);
 
-pg_query($conn, 'DROP TABLE phptests.foo');
-pg_query($conn, 'DROP TABLE phptests.bar');
-pg_query($conn, 'DROP SCHEMA phptests');
+pg_query($conn, "DROP SCHEMA {$schema_name} CASCADE");
 ?>
 --EXPECTF--
 Warning: pg_select(): Table 'foo' doesn't exists in %s on line %d

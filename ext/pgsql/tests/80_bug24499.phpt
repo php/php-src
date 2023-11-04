@@ -10,16 +10,17 @@ require_once('inc/skipif.inc');
 <?php
 
 require_once('inc/config.inc');
+$table_name = 'table_80_bug24499';
 
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
     die ("Could not connect to the server");
 }
 
-pg_query($dbh, "CREATE TABLE id (id SERIAL, t INT)");
+pg_query($dbh, "CREATE TABLE {$table_name} (id SERIAL, t INT)");
 
 for ($i=0; $i<4; $i++) {
-    pg_query($dbh, "INSERT INTO id (t) VALUES ($i)");
+    pg_query($dbh, "INSERT INTO {$table_name} (t) VALUES ($i)");
 }
 
 class Id
@@ -29,8 +30,9 @@ class Id
     public function getId()
     {
         global $dbh;
+        global $table_name;
 
-        $q  = pg_query($dbh, "SELECT id FROM id");
+        $q  = pg_query($dbh, "SELECT id FROM {$table_name}");
         print_r(pg_fetch_array($q));
         print_r(pg_fetch_array($q));
         $id = pg_fetch_object($q);
@@ -50,9 +52,10 @@ echo "Done\n";
 --CLEAN--
 <?php
 require_once('inc/config.inc');
-$dbh = pg_connect($conn_str);
+$table_name = 'table_80_bug24499';
 
-pg_query($dbh, "DROP TABLE id CASCADE");
+$dbh = pg_connect($conn_str);
+pg_query($dbh, "DROP TABLE {$table_name} CASCADE");
 ?>
 --EXPECTF--
 Array

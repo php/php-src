@@ -10,16 +10,17 @@ require_once('inc/skipif.inc');
 <?php
 
 require_once('inc/config.inc');
+$table_name = 'table_80_bug39971';
 
 $dbh = pg_connect($conn_str);
 
-pg_query($dbh, "CREATE TABLE php_test (id SERIAL, tm timestamp NOT NULL)");
+pg_query($dbh, "CREATE TABLE {$table_name} (id SERIAL, tm timestamp NOT NULL)");
 
 $values = array('tm' => 'now()');
-pg_insert($dbh, 'php_test', $values);
+pg_insert($dbh, $table_name, $values);
 
 $ids = array('id' => 1);
-pg_update($dbh, 'php_test', $values, $ids);
+pg_update($dbh, $table_name, $values, $ids);
 
 pg_close($dbh);
 ?>
@@ -27,9 +28,10 @@ pg_close($dbh);
 --CLEAN--
 <?php
 require_once('inc/config.inc');
-$dbh = pg_connect($conn_str);
+$table_name = 'table_80_bug39971';
 
-pg_query($dbh, "DROP TABLE php_test");
+$dbh = pg_connect($conn_str);
+pg_query($dbh, "DROP TABLE {$table_name}");
 ?>
 --EXPECT--
 ===DONE===
