@@ -820,7 +820,7 @@ zend_result dom_node_text_content_write(dom_object *obj, zval *newval)
 
 /* }}} */
 
-static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlNodePtr nextsib, xmlNodePtr fragment, dom_object *intern, dom_object *childobj) /* {{{ */
+static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlNodePtr nextsib, xmlNodePtr fragment, dom_object *intern) /* {{{ */
 {
 	xmlNodePtr newchild, node;
 
@@ -845,8 +845,8 @@ static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib,
 			node->parent = nodep;
 			if (node->doc != nodep->doc) {
 				xmlSetTreeDoc(node, nodep->doc);
-				if (node->_private != NULL) {
-					childobj = node->_private;
+				dom_object *childobj = node->_private;
+				if (childobj != NULL) {
 					childobj->document = intern->document;
 					php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL);
 				}
@@ -973,7 +973,7 @@ PHP_METHOD(DOMNode, insertBefore)
 			}
 		} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
 			xmlNodePtr last = child->last;
-			new_child = _php_dom_insert_fragment(parentp, refp->prev, refp, child, intern, childobj);
+			new_child = _php_dom_insert_fragment(parentp, refp->prev, refp, child, intern);
 			dom_reconcile_ns_list(parentp->doc, new_child, last);
 		} else {
 			new_child = xmlAddPrevSibling(refp, child);
@@ -1023,7 +1023,7 @@ PHP_METHOD(DOMNode, insertBefore)
 			}
 		} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
 			xmlNodePtr last = child->last;
-			new_child = _php_dom_insert_fragment(parentp, parentp->last, NULL, child, intern, childobj);
+			new_child = _php_dom_insert_fragment(parentp, parentp->last, NULL, child, intern);
 			dom_reconcile_ns_list(parentp->doc, new_child, last);
 		} else {
 			new_child = xmlAddChild(parentp, child);
@@ -1104,7 +1104,7 @@ PHP_METHOD(DOMNode, replaceChild)
 		xmlUnlinkNode(oldchild);
 
 		xmlNodePtr last = newchild->last;
-		newchild = _php_dom_insert_fragment(nodep, prevsib, nextsib, newchild, intern, newchildobj);
+		newchild = _php_dom_insert_fragment(nodep, prevsib, nextsib, newchild, intern);
 		if (newchild) {
 			dom_reconcile_ns_list(nodep->doc, newchild, last);
 		}
@@ -1262,7 +1262,7 @@ PHP_METHOD(DOMNode, appendChild)
 		php_dom_reconcile_attribute_namespace_after_insertion((xmlAttrPtr) new_child);
 	} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
 		xmlNodePtr last = child->last;
-		new_child = _php_dom_insert_fragment(nodep, nodep->last, NULL, child, intern, childobj);
+		new_child = _php_dom_insert_fragment(nodep, nodep->last, NULL, child, intern);
 		dom_reconcile_ns_list(nodep->doc, new_child, last);
 	} else {
 		new_child = xmlAddChild(nodep, child);
