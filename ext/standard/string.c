@@ -1596,8 +1596,7 @@ PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len)
 }
 /* }}} */
 
-/* {{{ php_strspn */
-PHPAPI size_t php_strspn(const char *haystack, const char *characters, const char *haystack_end, const char *characters_end)
+static size_t php_strspn_strcspn_common(const char *haystack, const char *characters, const char *haystack_end, const char *characters_end, bool must_match)
 {
 	/* Fast path for short strings.
 	 * The table lookup cannot be faster in this case because we not only have to compare, but also build the table.
@@ -1605,7 +1604,7 @@ PHPAPI size_t php_strspn(const char *haystack, const char *characters, const cha
 	 * Empirically tested that the table lookup approach is only beneficial if characters is longer than 1 character. */
 	if (characters_end - characters == 1) {
 		const char *ptr = haystack;
-		while (ptr < haystack_end && *ptr == *characters) {
+		while (ptr < haystack_end && (*ptr == *characters) == must_match) {
 			ptr++;
 		}
 		return ptr - haystack;
@@ -1626,30 +1625,24 @@ PHPAPI size_t php_strspn(const char *haystack, const char *characters, const cha
 	}
 
 	const char *ptr = haystack;
-	while (ptr < haystack_end && table[(unsigned char) *ptr]) {
+	while (ptr < haystack_end && table[(unsigned char) *ptr] == must_match) {
 		ptr++;
 	}
 
 	return ptr - haystack;
 }
+
+/* {{{ php_strspn */
+PHPAPI size_t php_strspn(const char *haystack, const char *characters, const char *haystack_end, const char *characters_end)
+{
+	return php_strspn_strcspn_common(haystack, characters, haystack_end, characters_end, true);
+}
 /* }}} */
 
 /* {{{ php_strcspn */
-PHPAPI size_t php_strcspn(const char *s1, const char *s2, const char *s1_end, const char *s2_end)
+PHPAPI size_t php_strcspn(const char *haystack, const char *characters, const char *haystack_end, const char *characters_end)
 {
-	const char *p, *spanp;
-	char c = *s1;
-
-	for (p = s1;;) {
-		spanp = s2;
-		do {
-			if (*spanp == c || p == s1_end) {
-				return p - s1;
-			}
-		} while (spanp++ < (s2_end - 1));
-		c = *++p;
-	}
-	/* NOTREACHED */
+	return php_strspn_strcspn_common(haystack, characters, haystack_end, characters_end, false);
 }
 /* }}} */
 
