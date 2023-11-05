@@ -37,7 +37,7 @@ include('inc/config.inc');
 $table_name = "table_18pg_escape_bytea_esc";
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE {$table_name}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 OK

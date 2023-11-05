@@ -36,7 +36,7 @@ include('inc/config.inc');
 $table_name = "table_14pg_update_9";
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE {$table_name}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 UPDATE "table_14pg_update_9" SET "num"=1234,"str"=E'ABC',"bin"=E'\\x58595a' WHERE "num"=1234;

@@ -65,7 +65,7 @@ include('inc/config.inc');
 $table_name = "table_13pg_select_9";
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE {$table_name}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 array(2) {

@@ -112,7 +112,7 @@ include('inc/config.inc');
 $table_name = "table_31nb_async_query_prepared";
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE {$table_name}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 OK

@@ -31,7 +31,7 @@ require_once('inc/config.inc');
 $table_name = 'table_80_bug39971';
 
 $dbh = pg_connect($conn_str);
-pg_query($dbh, "DROP TABLE {$table_name}");
+pg_query($dbh, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 ===DONE===

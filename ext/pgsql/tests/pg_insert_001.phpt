@@ -33,8 +33,8 @@ $schema_name = 'schema_pg_insert_001';
 $table_name = 'table_pg_insert_001';
 
 $conn = pg_connect($conn_str);
-pg_query($conn, "DROP TABLE {$schema_name}.{$table_name}");
-pg_query($conn, "DROP SCHEMA {$schema_name}");
+pg_query($conn, "DROP TABLE IF EXISTS {$schema_name}.{$table_name}");
+pg_query($conn, "DROP SCHEMA IF EXISTS {$schema_name}");
 ?>
 --EXPECTF--
 Warning: pg_insert(): Table 'table_pg_insert_001' doesn't exists in %s on line %d

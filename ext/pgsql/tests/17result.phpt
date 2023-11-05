@@ -35,7 +35,7 @@ include('inc/config.inc');
 $table_name = "table_17result";
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE {$table_name}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECTF--
 bool(true)

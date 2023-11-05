@@ -29,8 +29,8 @@ $table_name = "table_06_bug73498";
 $view_name = "view_06_bug73498";
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP VIEW {$view_name}");
-pg_query($db, "DROP TABLE {$table_name}");
+pg_query($db, "DROP VIEW IF EXISTS {$view_name}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 string(5) "array"

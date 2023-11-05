@@ -91,7 +91,7 @@ $table_name = 'table_bug71998';
 
 $db = @pg_connect($conn_str);
 
-pg_query($db, "DROP TABLE {$table_name}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 pg_insert(): Field "remote_addr" must be a valid IPv4 or IPv6 address string, "256.257.258.259" given

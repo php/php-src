@@ -107,7 +107,7 @@ include('inc/config.inc');
 $table_name = "table_08escape";
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE {$table_name}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECTF--
 Deprecated: pg_escape_string(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d

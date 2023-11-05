@@ -45,7 +45,7 @@ $table_name = 'table_01createdb';
 $table_name_92 = 'table_01createdb_92';
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE {$table_name} cascade");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name} cascade");
 pg_query($db, "DROP TABLE if exists {$table_name_92} cascade");
 ?>
 --EXPECT--

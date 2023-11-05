@@ -63,7 +63,7 @@ include('inc/config.inc');
 $table_name = "table_23sync_query_params";
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE {$table_name}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 OK

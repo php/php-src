@@ -24,7 +24,7 @@ include('inc/config.inc');
 $table_name = "table_16pg_result_status";
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE {$table_name}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 1

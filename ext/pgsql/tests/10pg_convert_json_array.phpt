@@ -37,7 +37,7 @@ include('inc/config.inc');
 $table_name_92 = "table_10pg_convert_json_array_92";
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE {$table_name_92}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name_92}");
 ?>
 --EXPECT--
 array(2) {

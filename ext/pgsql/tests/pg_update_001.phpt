@@ -42,9 +42,9 @@ $table_name = 'table_pg_update_001';
 
 $conn = pg_connect($conn_str);
 
-pg_query($conn, "DROP TABLE {$table_name}");
-pg_query($conn, "DROP TABLE {$schema_name}.{$table_name}");
-pg_query($conn, "DROP SCHEMA {$schema_name}");
+pg_query($conn, "DROP TABLE IF EXISTS {$table_name}");
+pg_query($conn, "DROP TABLE IF EXISTS {$schema_name}.{$table_name}");
+pg_query($conn, "DROP SCHEMA IF EXISTS {$schema_name}");
 ?>
 --EXPECT--
 string(54) "UPDATE "table_pg_update_001" SET "id"=10 WHERE "id"=1;"

@@ -18,7 +18,7 @@ pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
 pg_query($db, "CREATE TABLE {$table_name_92} (textary text[],  jsn json)");
 pg_query($db, "CREATE VIEW {$view_name} as SELECT * FROM {$table_name}");
 
-pg_query($db, "DROP VIEW {$view_name}");
+pg_query($db, "DROP VIEW IF EXISTS {$view_name}");
 pg_query($db, "DROP TABLE ".$table_name);
 @pg_query($db, "DROP TABLE ".$table_name_92);
 

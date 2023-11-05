@@ -33,7 +33,7 @@ include('inc/config.inc');
 $table_name = "table_15pg_delete";
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE {$table_name}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 DELETE FROM "table_15pg_delete" WHERE "num"=1234;

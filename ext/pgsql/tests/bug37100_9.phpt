@@ -45,7 +45,7 @@ require_once('inc/config.inc');
 $table_name = 'table_bug37100_9';
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE {$table_name}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 string(14) "\x0103aa000812"

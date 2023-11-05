@@ -143,7 +143,7 @@ include('inc/config.inc');
 $table_name = "table_03sync_query";
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE {$table_name}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 Argument #3 must be greater than or equal to 0

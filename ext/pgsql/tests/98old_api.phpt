@@ -42,7 +42,7 @@ include('inc/config.inc');
 $table_name = "table_98old_api";
 
 $db = pg_connect($conn_str);
-pg_query($db, "DROP TABLE {$table_name}");
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECTF--
 Deprecated: Function pg_numrows() is deprecated in %s on line %d

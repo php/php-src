@@ -55,7 +55,7 @@ require_once('inc/config.inc');
 $table_name = 'table_80_bug24499';
 
 $dbh = pg_connect($conn_str);
-pg_query($dbh, "DROP TABLE {$table_name} CASCADE");
+pg_query($dbh, "DROP TABLE IF EXISTS {$table_name} CASCADE");
 ?>
 --EXPECTF--
 Array
