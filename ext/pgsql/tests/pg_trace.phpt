@@ -18,7 +18,7 @@ try {
 	echo $e->getMessage() . PHP_EOL;
 }
 var_dump(pg_trace($tracefile, 'w', $db, 0));
-$res = pg_query($db, 'select 1');
+$res = pg_query($db, 'SELECT 1');
 
 ?>
 --EXPECTF--

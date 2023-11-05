@@ -15,8 +15,8 @@ include('inc/nonblocking.inc');
 $table_name = "table_31nb_async_query_prepared";
 
 $db = pg_connect($conn_str);
-pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
-pg_query($db, "insert into {$table_name} (num) values(1000)");
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} (num) VALUES(1000)");
 
 $db_socket = pg_socket($db);
 stream_set_blocking($db_socket, false);
@@ -112,7 +112,7 @@ include('inc/config.inc');
 $table_name = "table_31nb_async_query_prepared";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop table {$table_name}");
+pg_query($db, "DROP TABLE {$table_name}");
 ?>
 --EXPECT--
 OK

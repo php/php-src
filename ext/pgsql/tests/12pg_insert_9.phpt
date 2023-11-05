@@ -15,7 +15,7 @@ include 'inc/config.inc';
 $table_name = "table_12pg_insert_9";
 
 $db = pg_connect($conn_str);
-pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
 
 pg_query($db, "SET standard_conforming_strings = 0");
 
@@ -62,7 +62,7 @@ include('inc/config.inc');
 $table_name = "table_12pg_insert_9";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop table {$table_name}");
+pg_query($db, "DROP TABLE {$table_name}");
 ?>
 --EXPECTF--
 INSERT INTO "table_12pg_insert_9" ("num","str","bin") VALUES (1234,E'AAA',E'\\x424242');

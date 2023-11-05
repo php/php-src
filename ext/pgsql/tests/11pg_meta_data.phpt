@@ -12,7 +12,7 @@ include 'inc/config.inc';
 $table_name = "table_11pg_meta_data";
 
 $db = pg_connect($conn_str);
-pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
 
 $meta = pg_meta_data($db, $table_name);
 
@@ -24,7 +24,7 @@ include('inc/config.inc');
 $table_name = "table_11pg_meta_data";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop table {$table_name}");
+pg_query($db, "DROP TABLE {$table_name}");
 ?>
 --EXPECT--
 array(3) {

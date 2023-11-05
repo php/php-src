@@ -14,10 +14,10 @@ $table_name = 'table_bug65119';
 function test(Array $values, $conn_str) {
   global $table_name;
   $connection = pg_pconnect($conn_str, PGSQL_CONNECT_FORCE_NEW);
-  pg_query($connection, "begin");
+  pg_query($connection, "BEGIN");
   pg_query($connection, "CREATE TABLE {$table_name} (i INTEGER)");
   pg_copy_from($connection, $table_name, $values, "\t", "NULL");
-  pg_query($connection, "rollback");
+  pg_query($connection, "ROLLBACK");
 }
 
 $values = Array(1,2,3);

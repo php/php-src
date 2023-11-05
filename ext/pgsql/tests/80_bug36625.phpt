@@ -22,14 +22,14 @@ $tracefile = __DIR__ . '/trace.tmp';
 var_dump(file_exists($tracefile));
 
 pg_trace($tracefile, 'w', $dbh);
-$res = pg_query($dbh, 'select 1');
+$res = pg_query($dbh, 'SELECT 1');
 var_dump($res);
 pg_close($dbh);
 
 $found = 0;
 function search_trace_file($line)
 {
-    if (strpos($line, '"select 1"') !== false || strpos($line, "'select 1'") !== false) {
+    if (strpos($line, '"SELECT 1"') !== false || strpos($line, "'SELECT 1'") !== false) {
         $GLOBALS['found']++;
     }
 }

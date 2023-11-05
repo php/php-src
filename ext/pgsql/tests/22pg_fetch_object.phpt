@@ -18,8 +18,8 @@ class test_class {
 }
 
 $db = pg_connect($conn_str);
-pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
-pg_query($db, "insert into {$table_name} values(0, 'ABC', null)");
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} VALUES(0, 'ABC', null)");
 
 $sql = "SELECT * FROM $table_name WHERE num = 0";
 $result = pg_query($db, $sql) or die('Cannot query db');
@@ -41,7 +41,7 @@ include('inc/config.inc');
 $table_name = "table_22pg_fetch_object";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop table {$table_name}");
+pg_query($db, "DROP TABLE {$table_name}");
 ?>
 --EXPECTF--
 test_class::__construct(1,2)

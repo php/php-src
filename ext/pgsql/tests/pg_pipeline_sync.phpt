@@ -46,7 +46,7 @@ if (!pg_enter_pipeline_mode($db)) {
     die('pg_enter_pipeline_mode{}');
 }
 
-if (!pg_send_query_params($db, "select $1 as index, now() + ($1||' day')::interval as time", array(1))) {
+if (!pg_send_query_params($db, "SELECT $1 as index, now() + ($1||' day')::interval as time", array(1))) {
     die('pg_send_query_params failed');
 }
 

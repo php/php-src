@@ -15,7 +15,7 @@ include 'inc/config.inc';
 $table_name_92 = "table_10pg_convert_json_array_92";
 
 $db = pg_connect($conn_str);
-pg_query($db, "create table {$table_name_92} (textary text[],  jsn json)");
+pg_query($db, "CREATE TABLE {$table_name_92} (textary text[],  jsn json)");
 
 $fields = array(
     'textary'=>'{"meeting", "lunch", "training", "presentation"}',
@@ -37,7 +37,7 @@ include('inc/config.inc');
 $table_name_92 = "table_10pg_convert_json_array_92";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop table {$table_name_92}");
+pg_query($db, "DROP TABLE {$table_name_92}");
 ?>
 --EXPECT--
 array(2) {

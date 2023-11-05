@@ -44,7 +44,7 @@ else {
 // Test using database
 $data = file_get_contents(FILE_NAME);
 $db   = pg_connect($conn_str);
-pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
 
 // Insert binary to DB
 $escaped_data = pg_escape_bytea($db, $data);
@@ -107,7 +107,7 @@ include('inc/config.inc');
 $table_name = "table_08escape";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop table {$table_name}");
+pg_query($db, "DROP TABLE {$table_name}");
 ?>
 --EXPECTF--
 Deprecated: pg_escape_string(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d

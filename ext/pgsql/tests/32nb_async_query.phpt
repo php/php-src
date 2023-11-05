@@ -15,8 +15,8 @@ include('inc/nonblocking.inc');
 $table_name = "table_32nb_async_query";
 
 $db = pg_connect($conn_str);
-pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
-pg_query($db, "insert into {$table_name} default values");
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} DEFAULT VALUES");
 
 $db_socket = pg_socket($db);
 stream_set_blocking($db_socket, false);
@@ -84,7 +84,7 @@ include('inc/config.inc');
 $table_name = "table_32nb_async_query";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop table {$table_name}");
+pg_query($db, "DROP TABLE {$table_name}");
 ?>
 --EXPECT--
 OK

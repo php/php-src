@@ -12,11 +12,11 @@ $table_name = "table_06_bug73498";
 $view_name = "view_06_bug73498";
 
 $db = pg_connect($conn_str);
-pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
-pg_query($db, "create view {$view_name} as select * from {$table_name}");
-pg_query($db, "insert into {$table_name} default values");
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "CREATE VIEW {$view_name} as SELECT * FROM {$table_name}");
+pg_query($db, "INSERT INTO {$table_name} DEFAULT VALUES");
 
-$rows = pg_copy_to($db, "(select * from {$view_name})");
+$rows = pg_copy_to($db, "(SELECT * FROM {$view_name})");
 
 var_dump(gettype($rows));
 var_dump(count($rows) > 0);
@@ -29,8 +29,8 @@ $table_name = "table_06_bug73498";
 $view_name = "view_06_bug73498";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop view {$view_name}");
-pg_query($db, "drop table {$table_name}");
+pg_query($db, "DROP VIEW {$view_name}");
+pg_query($db, "DROP TABLE {$table_name}");
 ?>
 --EXPECT--
 string(5) "array"

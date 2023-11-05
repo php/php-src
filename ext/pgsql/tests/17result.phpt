@@ -12,9 +12,9 @@ include 'inc/config.inc';
 $table_name = "table_17result";
 
 $db = pg_connect($conn_str);
-pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
-pg_query($db, "insert into {$table_name} values(1, 'ABC', null)");
-pg_query($db, "insert into {$table_name} values(1, 'ABC', null)");
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} VALUES(1, 'ABC', null)");
+pg_query($db, "INSERT INTO {$table_name} VALUES(1, 'ABC', null)");
 
 $sql = "SELECT * FROM $table_name ORDER BY num";
 $result = pg_query($db, $sql) or die('Cannot query db');
@@ -35,7 +35,7 @@ include('inc/config.inc');
 $table_name = "table_17result";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop table {$table_name}");
+pg_query($db, "DROP TABLE {$table_name}");
 ?>
 --EXPECTF--
 bool(true)

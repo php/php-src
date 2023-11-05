@@ -12,9 +12,9 @@ include 'inc/config.inc';
 $table_name = "table_15pg_delete";
 
 $db = pg_connect($conn_str);
-pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
-pg_query($db, "insert into {$table_name} values(1, 'ABC', null)");
-pg_query($db, "insert into {$table_name} values(1, 'ABC', null)");
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} VALUES(1, 'ABC', null)");
+pg_query($db, "INSERT INTO {$table_name} VALUES(1, 'ABC', null)");
 
 $fields = array('num'=>'1234', 'str'=>'XXX', 'bin'=>'YYY');
 $ids = array('num'=>'1234');
@@ -33,7 +33,7 @@ include('inc/config.inc');
 $table_name = "table_15pg_delete";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop table {$table_name}");
+pg_query($db, "DROP TABLE {$table_name}");
 ?>
 --EXPECT--
 DELETE FROM "table_15pg_delete" WHERE "num"=1234;

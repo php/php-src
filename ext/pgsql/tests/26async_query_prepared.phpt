@@ -14,8 +14,8 @@ include('inc/config.inc');
 $table_name = "table_26async_query_prepared";
 
 $db = pg_connect($conn_str);
-pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
-pg_query($db, "insert into {$table_name} (num) values(1000)");
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} (num) VALUES(1000)");
 
 if (!pg_send_prepare($db, 'php_test', "SELECT * FROM ".$table_name." WHERE num > \$1;")) {
 	echo "pg_send_prepare() error\n";
@@ -110,7 +110,7 @@ include('inc/config.inc');
 $table_name = "table_26async_query_prepared";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop table {$table_name}");
+pg_query($db, "DROP TABLE {$table_name}");
 ?>
 --EXPECT--
 OK

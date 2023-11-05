@@ -11,8 +11,8 @@ include('inc/config.inc');
 $table_name = "table_03sync_query";
 
 $db = pg_connect($conn_str);
-pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
-pg_query($db, "insert into {$table_name} default values");
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} DEFAULT VALUES");
 
 $result = pg_query($db, "SELECT * FROM ".$table_name.";");
 if (!($rows   = pg_num_rows($result)))
@@ -143,7 +143,7 @@ include('inc/config.inc');
 $table_name = "table_03sync_query";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop table {$table_name}");
+pg_query($db, "DROP TABLE {$table_name}");
 ?>
 --EXPECT--
 Argument #3 must be greater than or equal to 0

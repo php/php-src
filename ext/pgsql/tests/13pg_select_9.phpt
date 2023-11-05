@@ -15,9 +15,9 @@ include 'inc/config.inc';
 $table_name = "table_13pg_select_9";
 
 $db = pg_connect($conn_str);
-pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
-pg_query($db, "insert into {$table_name} values(1234, 'AAA', 'BBB')");
-pg_query($db, "insert into {$table_name} values(1234, 'AAA', 'BBB')");
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} VALUES(1234, 'AAA', 'BBB')");
+pg_query($db, "INSERT INTO {$table_name} VALUES(1234, 'AAA', 'BBB')");
 
 pg_query($db, "SET bytea_output = 'hex'");
 
@@ -65,7 +65,7 @@ include('inc/config.inc');
 $table_name = "table_13pg_select_9";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop table {$table_name}");
+pg_query($db, "DROP TABLE {$table_name}");
 ?>
 --EXPECT--
 array(2) {

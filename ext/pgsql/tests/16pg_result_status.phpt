@@ -10,7 +10,7 @@ include 'inc/config.inc';
 $table_name = "table_16pg_result_status";
 
 $db = pg_connect($conn_str);
-pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
 
 $sql = "SELECT * FROM ".$table_name." WHERE num = -2";
 $result = pg_query($db, "BEGIN;END");
@@ -24,7 +24,7 @@ include('inc/config.inc');
 $table_name = "table_16pg_result_status";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop table {$table_name}");
+pg_query($db, "DROP TABLE {$table_name}");
 ?>
 --EXPECT--
 1

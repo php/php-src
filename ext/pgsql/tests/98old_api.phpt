@@ -11,8 +11,8 @@ include('inc/config.inc');
 $table_name = "table_98old_api";
 
 $db = pg_connect($conn_str);
-pg_query($db, "create table {$table_name} (num int, str text, bin bytea)");
-pg_query($db, "insert into {$table_name} default values");
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} DEFAULT VALUES");
 
 $result = pg_exec($db, "SELECT * FROM ".$table_name);
 pg_numrows($result);
@@ -42,7 +42,7 @@ include('inc/config.inc');
 $table_name = "table_98old_api";
 
 $db = pg_connect($conn_str);
-pg_query($db, "drop table {$table_name}");
+pg_query($db, "DROP TABLE {$table_name}");
 ?>
 --EXPECTF--
 Deprecated: Function pg_numrows() is deprecated in %s on line %d
