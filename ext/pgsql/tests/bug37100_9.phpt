@@ -11,7 +11,7 @@ skip_bytea_not_hex();
 <?php
 
 include 'inc/config.inc';
-$table_name = 'ttable_bug37100_9';
+$table_name = 'table_bug37100_9';
 
 $db = pg_connect($conn_str);
 
@@ -42,7 +42,7 @@ pg_close($db);
 --CLEAN--
 <?php
 require_once('inc/config.inc');
-$table_name = 'ttable_bug37100_9';
+$table_name = 'table_bug37100_9';
 
 $db = pg_connect($conn_str);
 pg_query($db, "DROP TABLE {$table_name}");
