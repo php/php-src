@@ -50,6 +50,8 @@ Standard:
     (timwolla)
   . Fix GH-12252 (round(): Validate the rounding mode). (timwolla)
   . Increase the default BCrypt cost to 12. (timwolla)
+  . Fixed bug GH-12592 (strcspn() odd behaviour with NUL bytes and empty mask).
+    (nielsdos)
 
 XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)
