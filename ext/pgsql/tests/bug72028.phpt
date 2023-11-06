@@ -40,7 +40,7 @@ require_once('inc/config.inc');
 $table = "bug72028";;
 $conn = pg_connect($conn_str);
 
-pg_query($conn, "DROP TABLE $table");
+pg_query($conn, "DROP TABLE IF EXISTS $table");
 ?>
 --EXPECT--
 array(2) {
