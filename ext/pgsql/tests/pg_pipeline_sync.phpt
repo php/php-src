@@ -4,7 +4,7 @@ PostgreSQL pipeline mode
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 if (!defined('PGSQL_PIPELINE_SYNC') || !function_exists('pg_send_query_params')) {
     die('skip pipeline mode not available');
 }
@@ -12,8 +12,8 @@ if (!defined('PGSQL_PIPELINE_SYNC') || !function_exists('pg_send_query_params'))
 --FILE--
 <?php
 
-include('config.inc');
-include('nonblocking.inc');
+include('inc/config.inc');
+include('inc/nonblocking.inc');
 
 if (!$db = pg_connect($conn_str, PGSQL_CONNECT_ASYNC)) {
     die("pg_connect() error");
@@ -46,7 +46,7 @@ if (!pg_enter_pipeline_mode($db)) {
     die('pg_enter_pipeline_mode{}');
 }
 
-if (!pg_send_query_params($db, "select $1 as index, now() + ($1||' day')::interval as time", array(1))) {
+if (!pg_send_query_params($db, "SELECT $1 as index, now() + ($1||' day')::interval as time", array(1))) {
     die('pg_send_query_params failed');
 }
 

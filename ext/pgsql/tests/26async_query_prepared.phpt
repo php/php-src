@@ -4,15 +4,19 @@ PostgreSQL async prepared queries
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 if (!function_exists('pg_send_prepare')) die('skip function pg_send_prepare() does not exist');
 ?>
 --FILE--
 <?php
 
-include('config.inc');
+include('inc/config.inc');
+$table_name = "table_26async_query_prepared";
 
 $db = pg_connect($conn_str);
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} (num) VALUES(1000)");
+
 if (!pg_send_prepare($db, 'php_test', "SELECT * FROM ".$table_name." WHERE num > \$1;")) {
 	echo "pg_send_prepare() error\n";
 }
@@ -61,7 +65,7 @@ for ($i=0; $i < $rows; $i++)
 pg_num_rows(pg_query_params($db, "SELECT * FROM ".$table_name." WHERE num > \$1;", array(100)));
 pg_num_fields(pg_query_params($db, "SELECT * FROM ".$table_name." WHERE num > \$1;", array(100)));
 pg_field_name($result, 0);
-pg_field_num($result, $field_name);
+pg_field_num($result, "num");
 pg_field_size($result, 0);
 pg_field_type($result, 0);
 pg_field_prtlen($result, 0);
@@ -99,6 +103,14 @@ pg_free_result($result);
 pg_close($db);
 
 echo "OK";
+?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_26async_query_prepared";
+
+$db = pg_connect($conn_str);
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 OK

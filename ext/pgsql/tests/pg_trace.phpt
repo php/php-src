@@ -3,11 +3,11 @@ pg_trace
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 
-include('config.inc');
+include('inc/config.inc');
 
 $db = pg_connect($conn_str);
 $tracefile = __DIR__ . '/trace.tmp';
@@ -18,7 +18,7 @@ try {
 	echo $e->getMessage() . PHP_EOL;
 }
 var_dump(pg_trace($tracefile, 'w', $db, 0));
-$res = pg_query($db, 'select 1');
+$res = pg_query($db, 'SELECT 1');
 
 ?>
 --EXPECTF--

@@ -3,12 +3,12 @@ PostgreSQL connection
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 // connection function tests
 
-include('config.inc');
+include('inc/config.inc');
 
 $db = pg_pconnect($conn_str);
 var_dump($db);

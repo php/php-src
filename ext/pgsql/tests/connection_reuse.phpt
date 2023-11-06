@@ -3,10 +3,10 @@ Reusing connection with same connection string
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
-include('config.inc');
+include('inc/config.inc');
 
 $db1 = pg_connect($conn_str);
 $db2 = pg_connect($conn_str);
