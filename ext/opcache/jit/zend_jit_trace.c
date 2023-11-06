@@ -6830,7 +6830,11 @@ done:
 		}
 	} else if (p->stop == ZEND_JIT_TRACE_STOP_LINK
 	        || p->stop == ZEND_JIT_TRACE_STOP_INTERPRETER) {
-		if (ra && (p-1)->op != ZEND_JIT_TRACE_ENTER) {
+		if (ra
+		 && (p-1)->op != ZEND_JIT_TRACE_ENTER
+		 && opline->opcode != ZEND_DO_UCALL
+		 && opline->opcode != ZEND_DO_FCALL
+		 && opline->opcode != ZEND_DO_FCALL_BY_NAME) {
 			for (i = 0; i < op_array->last_var + op_array->T; i++) {
 				int32_t ref = STACK_REF(stack, i);
 				uint8_t type = STACK_TYPE(stack, i);
