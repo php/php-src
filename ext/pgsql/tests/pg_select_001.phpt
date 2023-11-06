@@ -51,7 +51,9 @@ $schema_name = 'schema_pg_select_001';
 
 $conn = pg_connect($conn_str);
 
-pg_query($conn, "DROP SCHEMA IF EXISTS {$schema_name} CASCADE");
+pg_query($conn, "DROP TABLE IF EXISTS {$schema_name}.foo");
+pg_query($conn, "DROP TABLE IF EXISTS {$schema_name}.bar");
+pg_query($conn, "DROP SCHEMA IF EXISTS {$schema_name}");
 ?>
 --EXPECTF--
 Warning: pg_select(): Table 'foo' doesn't exists in %s on line %d
