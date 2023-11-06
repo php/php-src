@@ -10,6 +10,8 @@ if (strpos($dsn, '=') === false) {
 }
 include 'skipif.inc';
 ?>
+--XLEAK--
+A bug in msodbcsql causes a memory leak when reconnecting after closing. See GH-12306
 --FILE--
 <?php
 
