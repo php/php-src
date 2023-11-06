@@ -2667,7 +2667,7 @@ static zend_always_inline int _zend_update_type_info(
 			}
 			if (t1 & (MAY_BE_RC1|MAY_BE_RCN)) {
 				tmp |= (t1 & (MAY_BE_RC1|MAY_BE_RCN));
-				if (opline->opcode == ZEND_COPY_TMP || opline->op1_type == IS_CV) {
+				if (opline->opcode == ZEND_COPY_TMP || opline->op1_type == IS_CV || opline->result_type == IS_CV) {
 					tmp |= MAY_BE_RCN;
 				}
 			}
@@ -3033,7 +3033,7 @@ static zend_always_inline int _zend_update_type_info(
 			if (t1 & MAY_BE_REF) {
 				tmp |= MAY_BE_REF;
 			}
-			if (t2 & MAY_BE_REF) {
+			if (opline->op1_type == IS_CV || (t2 & MAY_BE_REF)) {
 				tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 			} else if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
 				tmp |= t2 & (MAY_BE_RC1|MAY_BE_RCN);
