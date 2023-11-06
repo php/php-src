@@ -42,6 +42,7 @@ PHP                                                                        NEWS
   . Added warning when JIT cannot be enabled. (danog)
   . Fixed bug GH-8143 (Crashes in zend_accel_inheritance_cache_find since
     upgrading to 8.1.3 due to corrupt on-disk file cache). (turchanov)
+  . Fixed COPY_TMP type inference for references. (ilutov)
 
 - OpenSSL:
   . Fixed bug GH-12489 (Missing sigbio creation checking in openssl_cms_verify).
