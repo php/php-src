@@ -38,7 +38,7 @@ require_once('inc/config.inc');
 $db = @pg_connect($conn_str);
 $table = "public.test_table_bug71062_bug71062";
 
-pg_query($db, "DROP TABLE $table");
+pg_query($db, "DROP TABLE IF EXISTS $table");
 ?>
 --EXPECT--
 trying format Y-m-d\TH:i:sO 
