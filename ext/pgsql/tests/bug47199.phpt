@@ -41,7 +41,7 @@ require_once('inc/config.inc');
 $dbh = pg_connect($conn_str);
 
 $tbl_name = 'test_47199';
-pg_query($dbh, "DROP TABLE $tbl_name");
+pg_query($dbh, "DROP TABLE IF EXISTS $tbl_name");
 ?>
 --EXPECT--
 array(2) {
