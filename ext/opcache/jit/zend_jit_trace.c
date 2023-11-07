@@ -787,6 +787,19 @@ static int zend_jit_trace_add_ret_phis(zend_jit_trace_rec *trace_buffer, uint32_
 	return ssa_vars_count;
 }
 
+static bool zend_jit_trace_is_false_loop(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op **tssa_opcodes, zend_ssa *tssa)
+{
+	uint32_t b;
+	zend_basic_block *bb;
+
+	ZEND_ASSERT(tssa->cfg.blocks_count == 2);
+	ZEND_ASSERT(tssa->cfg.blocks[1].len > 0);
+
+	b = ssa->cfg.map[tssa_opcodes[0] - op_array->opcodes];
+	bb = ssa->cfg.blocks + ssa->cfg.map[tssa_opcodes[tssa->cfg.blocks[1].len - 1] - op_array->opcodes];
+	return bb->loop_header != b;
+}
+
 static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op **tssa_opcodes, zend_ssa *tssa, int ssa_var)
 {
 	int var, use, def, src;
@@ -796,7 +809,8 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const
 		uint32_t b = ssa->cfg.map[tssa_opcodes[0] - op_array->opcodes];
 		zend_basic_block *bb = ssa->cfg.blocks + b;
 
-		if (bb->flags & ZEND_BB_LOOP_HEADER) {
+		if ((bb->flags & ZEND_BB_LOOP_HEADER)
+		 && !zend_jit_trace_is_false_loop(op_array, ssa, tssa_opcodes, tssa)) {
 			zend_ssa_phi *phi = ssa->blocks[b].phis;
 			zend_ssa_phi *pi = NULL;
 
@@ -1391,7 +1405,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 		tssa->cfg.blocks[0].successors = tssa->cfg.blocks[0].successors_storage;
 		tssa->cfg.blocks[0].successors[0] = 1;
 
-		tssa->cfg.blocks[0].flags = ZEND_BB_FOLLOW|ZEND_BB_TARGET|ZEND_BB_LOOP_HEADER|ZEND_BB_REACHABLE;
+		tssa->cfg.blocks[1].flags = ZEND_BB_FOLLOW|ZEND_BB_TARGET|ZEND_BB_LOOP_HEADER|ZEND_BB_REACHABLE;
+		tssa->cfg.blocks[1].len = ssa_ops_count;
 		tssa->cfg.blocks[1].successors_count = 1;
 		tssa->cfg.blocks[1].predecessors_count = 2;
 		tssa->cfg.blocks[1].successors = tssa->cfg.blocks[1].successors_storage;
@@ -1401,6 +1416,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 		tssa->cfg.edges_count = 0;
 
 		tssa->cfg.blocks[0].flags = ZEND_BB_START|ZEND_BB_EXIT|ZEND_BB_REACHABLE;
+		tssa->cfg.blocks[0].len = ssa_ops_count;
 		tssa->cfg.blocks[0].successors_count = 0;
 		tssa->cfg.blocks[0].predecessors_count = 0;
 	}
