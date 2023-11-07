@@ -11,6 +11,8 @@ if (!$dsn || strpos($dsn, '=') === false) {
     die('skip');
 }
 ?>
+--XLEAK--
+A bug in msodbcsql causes a memory leak when reconnecting after closing. See GH-12306
 --FILE--
 <?php
 $dsnWithCredentials = getenv('PDO_ODBC_TEST_DSN');
