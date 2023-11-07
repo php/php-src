@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.26
+09 Nov 2023, PHP 8.1.26RC1
 
 - Core:
   . Fixed bug GH-12468 (Double-free of doc_comment when overriding static
