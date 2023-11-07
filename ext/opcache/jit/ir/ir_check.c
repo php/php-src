@@ -95,6 +95,11 @@ bool ir_check(const ir_ctx *ctx)
 	bool ok = 1;
 
 	for (i = IR_UNUSED + 1, insn = ctx->ir_base + i; i < ctx->insns_count;) {
+		if (insn->op >= IR_LAST_OP) {
+			fprintf(stderr, "ir_base[%d].op invalid opcode (%d)\n", i, insn->op);
+			ok = 0;
+			break;
+		}
 		flags = ir_op_flags[insn->op];
 		n = ir_input_edges_count(ctx, insn);
 		for (j = 1, p = insn->ops + 1; j <= n; j++, p++) {
