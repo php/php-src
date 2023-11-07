@@ -3540,11 +3540,14 @@ static void _zend_jit_fix_merges(zend_jit_ctx *jit)
 							phi->op = IR_COPY;
 							phi->op1 = phi->op2;
 							phi->op2 = 1;
+							phi->inputs_count = 0;
+						} else {
+							phi->inputs_count = k + 1;
 						}
 						n2 = 1 + ((n + 1) >> 2);
 						k2 = 1 + ((k + 1) >> 2);
 						while (k2 != n2) {
-							(insn+k2)->optx = IR_NOP;
+							(phi+k2)->optx = IR_NOP;
 							k2++;
 						}
 						phi += 1 + ((n + 1) >> 2);
