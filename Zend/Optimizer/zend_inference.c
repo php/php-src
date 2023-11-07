@@ -3689,7 +3689,9 @@ static zend_always_inline int _zend_update_type_info(
 					tmp |= zend_fetch_prop_type(script, prop_info, &ce);
 					if (opline->result_type == IS_VAR) {
 						tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
-						if ((opline->extended_value & ZEND_FETCH_OBJ_FLAGS) == ZEND_FETCH_DIM_WRITE) {
+						if ((opline->extended_value & ZEND_FETCH_OBJ_FLAGS) == ZEND_FETCH_DIM_WRITE
+						 /* FETCH_OBJ_UNSET may result in UNDEF for typed properties. */
+						 || (opline->opcode == ZEND_FETCH_OBJ_UNSET && (!prop_info || ZEND_TYPE_IS_SET(prop_info->type)))) {
 							tmp |= MAY_BE_UNDEF;
 						}
 					} else if (!(opline->op1_type & (IS_VAR|IS_TMP_VAR)) || !(t1 & MAY_BE_RC1)) {
