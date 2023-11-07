@@ -12123,6 +12123,8 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 			ir_MERGE_list(not_found_inputs);
 			jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
 			ir_END_list(end_inputs);
+		} else if (!end_inputs && jit->ctx.control) {
+			ir_END_list(end_inputs); /* dead code */
 		}
 	}
 
