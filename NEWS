@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.0RC6
+09 Nov 2023, PHP 8.3.0RC6
 
 - Core:
   . Fixed segfault caused by weak references to FFI objects. (sj-i)
