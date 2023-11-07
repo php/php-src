@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.13
+09 Nov 2023, PHP 8.2.13RC1
 
 - Core:
   . Fixed double-free of non-interned enum case name. (ilutov)
