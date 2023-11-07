@@ -4041,6 +4041,10 @@ static int zend_jit_tail_handler(zend_jit_ctx *jit, const zend_op *opline)
 		handler = opline->handler;
 		if (GCC_GLOBAL_REGS) {
 			ir_TAILCALL(IR_VOID, ir_CONST_FUNC(handler));
+		} else if (jit->ssa->cfg.flags & ZEND_FUNC_RECURSIVE_DIRECTLY) {
+			ref = jit_FP(jit);
+			ir_CALL_1(IR_I32, ir_CONST_FC_FUNC(handler), ref);
+			ir_RETURN(ir_CONST_I32(1));
 		} else {
 			ref = jit_FP(jit);
 			ir_TAILCALL_1(IR_I32, ir_CONST_FC_FUNC(handler), ref);
@@ -4071,7 +4075,7 @@ static int zend_jit_tail_handler(zend_jit_ctx *jit, const zend_op *opline)
 				jit->ssa->cfg.blocks[succ].flags |= ZEND_BB_ENTRY;
 			}
 			ref = jit->ctx.insns_count - 1;
-			ZEND_ASSERT(jit->ctx.ir_base[ref].op == IR_UNREACHABLE);
+			ZEND_ASSERT(jit->ctx.ir_base[ref].op == IR_UNREACHABLE || jit->ctx.ir_base[ref].op == IR_RETURN);
 			ref = zend_jit_continue_entry(jit, ref, jit->ssa->cfg.blocks[succ].start);
 			_zend_jit_add_predecessor_ref(jit, succ, jit->b, ref);
 		}
