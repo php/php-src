@@ -6,18 +6,20 @@ Type inference verification 005
 class C {
     private array $prop;
 
-    public function unset(string $offset)
-    {
-        unset($this->prop[$offset]);
+    public function w() {
+        $this->prop->prop2 = 42;
+    }
+
+    public function unset() {
+        unset($this->prop['foo']);
     }
 }
 
-function test() {
-    $c = new C();
-    $c->unset('foo');
-}
-
-test();
+$c = new C();
+try {
+    $c->w('foo');
+} catch (Error $e) {}
+$c->unset('foo');
 
 ?>
 ===DONE===

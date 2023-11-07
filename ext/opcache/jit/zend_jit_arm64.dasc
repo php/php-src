@@ -12639,7 +12639,8 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 		if (opline->opcode != ZEND_FETCH_OBJ_IS) {
 			|	SET_EX_OPLINE opline, REG0
 			if (opline->opcode != ZEND_FETCH_OBJ_W
-			 && (op1_info & MAY_BE_UNDEF)) {
+			 && (op1_info & MAY_BE_UNDEF)
+			 && opline->op1_type == IS_CV) {
 				zend_jit_addr orig_op1_addr = OP1_ADDR();
 
 				if (op1_info & MAY_BE_ANY) {

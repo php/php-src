@@ -3687,11 +3687,14 @@ static zend_always_inline int _zend_update_type_info(
 				if (opline->op1_type == IS_UNUSED || (t1 & MAY_BE_OBJECT)) {
 					zend_property_info *prop_info = zend_fetch_prop_info(op_array, ssa, opline, ssa_op);
 					tmp |= zend_fetch_prop_type(script, prop_info, &ce);
+					/* Typed properties may be UNDEF for UNSET and W. */
+					if ((opline->opcode == ZEND_FETCH_OBJ_UNSET || opline->opcode == ZEND_FETCH_OBJ_W)
+					 && (!prop_info || ZEND_TYPE_IS_SET(prop_info->type))) {
+						tmp |= MAY_BE_UNDEF;
+					}
 					if (opline->result_type == IS_VAR) {
 						tmp |= MAY_BE_REF | MAY_BE_INDIRECT;
-						if ((opline->extended_value & ZEND_FETCH_OBJ_FLAGS) == ZEND_FETCH_DIM_WRITE
-						 /* FETCH_OBJ_UNSET may result in UNDEF for typed properties. */
-						 || (opline->opcode == ZEND_FETCH_OBJ_UNSET && (!prop_info || ZEND_TYPE_IS_SET(prop_info->type)))) {
+						if ((opline->extended_value & ZEND_FETCH_OBJ_FLAGS) == ZEND_FETCH_DIM_WRITE) {
 							tmp |= MAY_BE_UNDEF;
 						}
 					} else if (!(opline->op1_type & (IS_VAR|IS_TMP_VAR)) || !(t1 & MAY_BE_RC1)) {
