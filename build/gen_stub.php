@@ -1648,7 +1648,7 @@ class FuncInfo {
 
         $doc->appendChild(new DOMComment(
             <<<ENDCOMMENT
-Keep this comment at the end of the file
+ Keep this comment at the end of the file
 Local variables:
 mode: sgml
 sgml-omittag:t
