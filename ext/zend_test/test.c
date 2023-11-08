@@ -364,6 +364,16 @@ static ZEND_FUNCTION(zend_test_crash)
 	php_printf("%s", invalid);
 }
 
+static ZEND_FUNCTION(zend_test_is_pcre_bundled)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+#if HAVE_BUNDLED_PCRE
+	RETURN_TRUE;
+#else
+	RETURN_FALSE;
+#endif
+}
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
 	zend_object *obj = zend_objects_new(class_type);

@@ -1,5 +1,11 @@
 --TEST--
 GH-11374 (PCRE regular expression without JIT enabled gives different result)
+--EXTENSIONS--
+zend_test
+--SKIPIF--
+<?php
+if (!zend_test_is_pcre_bundled() && (PCRE_VERSION_MAJOR == 10 && PCRE_VERSION_MINOR <= 42)) die("skip old pcre version");
+?>
 --FILE--
 <?php
 

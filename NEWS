@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.27
 
+- PCRE:
+  . Fixed bug GH-12628 (The gh11374 test fails on Alpinelinux). (nielsdos)
+
 - Standard:
   . Fix memory leak in syslog device handling. (danog)
 
