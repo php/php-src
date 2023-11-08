@@ -366,6 +366,7 @@ static ZEND_FUNCTION(zend_test_crash)
 
 static ZEND_FUNCTION(zend_test_is_pcre_bundled)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
 #if HAVE_BUNDLED_PCRE
 	RETURN_TRUE;
 #else
