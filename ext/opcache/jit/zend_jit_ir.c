@@ -4041,7 +4041,13 @@ static int zend_jit_tail_handler(zend_jit_ctx *jit, const zend_op *opline)
 		handler = opline->handler;
 		if (GCC_GLOBAL_REGS) {
 			ir_TAILCALL(IR_VOID, ir_CONST_FUNC(handler));
-		} else if (jit->ssa->cfg.flags & ZEND_FUNC_RECURSIVE_DIRECTLY) {
+		} else if ((jit->ssa->cfg.flags & ZEND_FUNC_RECURSIVE_DIRECTLY)
+		 && (opline->opcode == ZEND_CATCH
+		  || opline->opcode == ZEND_FAST_CALL
+		  || opline->opcode == ZEND_FAST_RET
+		  || opline->opcode == ZEND_MATCH_ERROR
+		  || opline->opcode == ZEND_THROW
+		  || opline->opcode == ZEND_VERIFY_NEVER_TYPE)) {
 			ref = jit_FP(jit);
 			ir_CALL_1(IR_I32, ir_CONST_FC_FUNC(handler), ref);
 			ir_RETURN(ir_CONST_I32(1));
