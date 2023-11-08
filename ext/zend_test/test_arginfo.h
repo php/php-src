@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7effabe18579113dbfc4c61231d93c8c262d959a */
+ * Stub hash: ae75eda2b4b40224858d680c3fcf3d7cd2056bb6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -91,8 +91,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_override_libxml_global
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_is_pcre_bundled, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_ZendTestNS2_ZendSubNS_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_class__ZendTestClass_is_object arginfo_zend_get_map_ptr_last
 
@@ -112,7 +114,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class__ZendTestChildClass_returnsThrowable, 0, 0, Exception, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class__ZendTestTrait_testMethod arginfo_ZendTestNS2_ZendSubNS_namespaced_func
+#define arginfo_class__ZendTestTrait_testMethod arginfo_zend_test_is_pcre_bundled
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZendTestParameterAttribute___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, parameter, IS_STRING, 0)
@@ -156,6 +158,7 @@ static ZEND_FUNCTION(zend_test_crash);
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 static ZEND_FUNCTION(zend_test_override_libxml_global_state);
 #endif
+static ZEND_FUNCTION(zend_test_is_pcre_bundled);
 static ZEND_FUNCTION(namespaced_func);
 static ZEND_METHOD(_ZendTestClass, is_object);
 static ZEND_METHOD(_ZendTestClass, __toString);
@@ -199,6 +202,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 	ZEND_FE(zend_test_override_libxml_global_state, arginfo_zend_test_override_libxml_global_state)
 #endif
+	ZEND_FE(zend_test_is_pcre_bundled, arginfo_zend_test_is_pcre_bundled)
 	ZEND_NS_FE("ZendTestNS2\\ZendSubNS", namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func)
 	ZEND_FE_END
 };
