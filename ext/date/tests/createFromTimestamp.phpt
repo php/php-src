@@ -1,5 +1,5 @@
 --TEST--
-Tests for DateTime[Immutable]::createFromTimestamp & date_create_[immutable_]from_timestamp
+Tests for DateTime[Immutable]::createFromTimestamp
 --INI--
 date.timezone=Europe/London
 --FILE--
@@ -32,23 +32,9 @@ $timestamps = array(
 );
 
 foreach ($timestamps as $ts) {
-    echo 'date_create_from_timestamp(' . var_export($ts, true) . '): ';
-    try {
-        var_dump(date_create_from_timestamp($ts));
-    } catch (Throwable $e) {
-        echo get_class($e) . ': ' . $e->getMessage() . "\n";
-    }
-
     echo 'DateTime::createFromTimestamp(' . var_export($ts, true) . '): ';
     try {
         var_dump(DateTime::createFromTimestamp($ts));
-    } catch (Throwable $e) {
-        echo get_class($e) . ': ' . $e->getMessage() . "\n";
-    }
-
-    echo 'date_create_immutable_from_timestamp(' . var_export($ts, true) . '): ';
-    try {
-        var_dump(date_create_immutable_from_timestamp($ts));
     } catch (Throwable $e) {
         echo get_class($e) . ': ' . $e->getMessage() . "\n";
     }
@@ -77,23 +63,7 @@ try {
 
 ?>
 --EXPECTF--
-date_create_from_timestamp(1696883232): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "2023-10-09 20:27:12.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
 DateTime::createFromTimestamp(1696883232): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "2023-10-09 20:27:12.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-date_create_immutable_from_timestamp(1696883232): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "2023-10-09 20:27:12.000000"
   ["timezone_type"]=>
@@ -109,23 +79,7 @@ DateTimeImmutable::createFromTimestamp(1696883232): object(DateTimeImmutable)#%d
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(-1696883232): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1916-03-25 03:32:48.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
 DateTime::createFromTimestamp(-1696883232): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1916-03-25 03:32:48.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-date_create_immutable_from_timestamp(-1696883232): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "1916-03-25 03:32:48.000000"
   ["timezone_type"]=>
@@ -141,23 +95,7 @@ DateTimeImmutable::createFromTimestamp(-1696883232): object(DateTimeImmutable)#%
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(1696883232.013981): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "2023-10-09 20:27:12.013981"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
 DateTime::createFromTimestamp(1696883232.013981): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "2023-10-09 20:27:12.013981"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-date_create_immutable_from_timestamp(1696883232.013981): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "2023-10-09 20:27:12.013981"
   ["timezone_type"]=>
@@ -173,23 +111,7 @@ DateTimeImmutable::createFromTimestamp(1696883232.013981): object(DateTimeImmuta
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(-1696883232.013981): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1916-03-25 03:32:47.986019"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
 DateTime::createFromTimestamp(-1696883232.013981): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1916-03-25 03:32:47.986019"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-date_create_immutable_from_timestamp(-1696883232.013981): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "1916-03-25 03:32:47.986019"
   ["timezone_type"]=>
@@ -205,23 +127,7 @@ DateTimeImmutable::createFromTimestamp(-1696883232.013981): object(DateTimeImmut
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(0.123456): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1970-01-01 00:00:00.123456"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
 DateTime::createFromTimestamp(0.123456): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1970-01-01 00:00:00.123456"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-date_create_immutable_from_timestamp(0.123456): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "1970-01-01 00:00:00.123456"
   ["timezone_type"]=>
@@ -237,23 +143,7 @@ DateTimeImmutable::createFromTimestamp(0.123456): object(DateTimeImmutable)#%d (
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(-0.123456): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1969-12-31 23:59:59.876544"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
 DateTime::createFromTimestamp(-0.123456): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1969-12-31 23:59:59.876544"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-date_create_immutable_from_timestamp(-0.123456): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "1969-12-31 23:59:59.876544"
   ["timezone_type"]=>
@@ -269,23 +159,7 @@ DateTimeImmutable::createFromTimestamp(-0.123456): object(DateTimeImmutable)#%d 
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(0): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1970-01-01 00:00:00.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
 DateTime::createFromTimestamp(0): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1970-01-01 00:00:00.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-date_create_immutable_from_timestamp(0): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "1970-01-01 00:00:00.000000"
   ["timezone_type"]=>
@@ -301,23 +175,7 @@ DateTimeImmutable::createFromTimestamp(0): object(DateTimeImmutable)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(0.0): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1970-01-01 00:00:00.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
 DateTime::createFromTimestamp(0.0): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1970-01-01 00:00:00.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-date_create_immutable_from_timestamp(0.0): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "1970-01-01 00:00:00.000000"
   ["timezone_type"]=>
@@ -333,23 +191,7 @@ DateTimeImmutable::createFromTimestamp(0.0): object(DateTimeImmutable)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(-0.0): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1970-01-01 00:00:00.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
 DateTime::createFromTimestamp(-0.0): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1970-01-01 00:00:00.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-date_create_immutable_from_timestamp(-0.0): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "1970-01-01 00:00:00.000000"
   ["timezone_type"]=>
@@ -365,23 +207,7 @@ DateTimeImmutable::createFromTimestamp(-0.0): object(DateTimeImmutable)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(2147483647): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "2038-01-19 03:14:07.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
 DateTime::createFromTimestamp(2147483647): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "2038-01-19 03:14:07.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-date_create_immutable_from_timestamp(2147483647): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "2038-01-19 03:14:07.000000"
   ["timezone_type"]=>
@@ -397,23 +223,7 @@ DateTimeImmutable::createFromTimestamp(2147483647): object(DateTimeImmutable)#%d
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(-2147483648): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1901-12-13 20:45:52.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
 DateTime::createFromTimestamp(-2147483648): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1901-12-13 20:45:52.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-date_create_immutable_from_timestamp(-2147483648): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "1901-12-13 20:45:52.000000"
   ["timezone_type"]=>
@@ -429,23 +239,7 @@ DateTimeImmutable::createFromTimestamp(-2147483648): object(DateTimeImmutable)#%
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(-2147483648.5): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1901-12-13 20:45:51.500000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
 DateTime::createFromTimestamp(-2147483648.5): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1901-12-13 20:45:51.500000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-date_create_immutable_from_timestamp(-2147483648.5): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "1901-12-13 20:45:51.500000"
   ["timezone_type"]=>
@@ -461,25 +255,15 @@ DateTimeImmutable::createFromTimestamp(-2147483648.5): object(DateTimeImmutable)
   ["timezone"]=>
   string(6) "+00:00"
 }
-date_create_from_timestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
 DateTime::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
-date_create_immutable_from_timestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
 DateTimeImmutable::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
-date_create_from_timestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
 DateTime::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
-date_create_immutable_from_timestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
 DateTimeImmutable::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
-date_create_from_timestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
 DateTime::createFromTimestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
-date_create_immutable_from_timestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
 DateTimeImmutable::createFromTimestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
-date_create_from_timestamp(INF): DateRangeError: Seconds must be a finite number between %i and %i, INF given
 DateTime::createFromTimestamp(INF): DateRangeError: Seconds must be a finite number between %i and %i, INF given
-date_create_immutable_from_timestamp(INF): DateRangeError: Seconds must be a finite number between %i and %i, INF given
 DateTimeImmutable::createFromTimestamp(INF): DateRangeError: Seconds must be a finite number between %i and %i, INF given
-date_create_from_timestamp(-INF): DateRangeError: Seconds must be a finite number between %i and %i, -INF given
 DateTime::createFromTimestamp(-INF): DateRangeError: Seconds must be a finite number between %i and %i, -INF given
-date_create_immutable_from_timestamp(-INF): DateRangeError: Seconds must be a finite number between %i and %i, -INF given
 DateTimeImmutable::createFromTimestamp(-INF): DateRangeError: Seconds must be a finite number between %i and %i, -INF given
 MyDateTime::createFromTimestamp(0): object(MyDateTime)#%d (3) {
   ["date"]=>
