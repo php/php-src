@@ -560,15 +560,26 @@ static bool browscap_match_string_wildcard(const char *s, const char *s_end, con
 			while (pattern_current < pattern_end && *pattern_current == '*') {
 				pattern_current++;
 			}
+
 			/* If we're at the end of the pattern, it means that the ending was just '*', so this is a trivial match */
 			if (pattern_current == pattern_end) {
 				return true;
 			}
-			/* We will first assume the skipped part by * is a 0-length string.
+
+			/* Optimization: if there is a non-wildcard character X after a *, then we can immediately jump to the first
+			 * character X in s starting from s_current because it is the only way to match beyond the *. */
+			if (*pattern_current != '?') {
+				while (s_current < s_end && *s_current != *pattern_current) {
+					s_current++;
+				}
+			}
+
+			/* We will first assume the skipped part by * is a 0-length string (or n-length if the optimization above skipped n characters).
 			 * When a mismatch happens we will backtrack and move s one position to assume * skipped a 1-length string.
 			 * Then 2, 3, 4, ... */
 			wildcard_pattern_restore_pos = pattern_current;
 			wildcard_s_restore_pos = s_current;
+
 			continue;
 		} else if (pattern_char == s_char || pattern_char == '?') {
 			/* Match */
