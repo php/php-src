@@ -752,9 +752,14 @@ PHP_FUNCTION(get_browser)
 			}
 
 			/* Quickly discard patterns where the prefix doesn't match. */
-			if (zend_binary_strcasecmp(
-					ZSTR_VAL(lookup_browser_name), entry->prefix_len,
-					ZSTR_VAL(entry->pattern), entry->prefix_len) != 0) {
+			bool prefix_matches = true;
+			for (size_t i = 0; i < entry->prefix_len; i++) {
+				if (ZSTR_VAL(lookup_browser_name)[i] != zend_tolower_ascii(ZSTR_VAL(entry->pattern)[i])) {
+					prefix_matches = false;
+					break;
+				}
+			}
+			if (!prefix_matches) {
 				continue;
 			}
 
