@@ -585,7 +585,8 @@ static bool browscap_match_string_wildcard(const char *s, const char *s_end, con
 			/* Match */
 			pattern_current++;
 			s_current++;
-			/* If this was the last character of the pattern, either we fully matched s, or we have a mismatch */
+
+			/* If this was the last character of the pattern, we either fully matched s, or we have a mismatch */
 			if (pattern_current == pattern_end) {
 				if (s_current == s_end) {
 					return true;
