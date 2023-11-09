@@ -24,7 +24,6 @@
 
 #define PHP_STREAM_BRIGADE_RES_NAME	"userfilter.bucket brigade"
 #define PHP_STREAM_BUCKET_RES_NAME "userfilter.bucket"
-#define PHP_STREAM_FILTER_RES_NAME "userfilter.filter"
 
 struct php_user_filter_data {
 	zend_class_entry *ce;
