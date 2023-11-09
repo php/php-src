@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - Standard:
   . Fix memory leak in syslog device handling. (danog)
 
+- SQLite3:
+  . Fixed bug GH-12633 (sqlite3_defensive.phpt fails with sqlite 3.44.0).
+    (SakiTakamachi)
+
 23 Nov 2023, PHP 8.1.26
 
 - Core:
