@@ -152,20 +152,16 @@ static zend_string *browscap_convert_pattern(zend_string *pattern, int persisten
 	size_t i, j=0;
 	char *t;
 	zend_string *res;
-	char *lc_pattern;
-	ALLOCA_FLAG(use_heap);
 
 	res = zend_string_alloc(browscap_compute_regex_len(pattern), persistent);
 	t = ZSTR_VAL(res);
-
-	lc_pattern = do_alloca(ZSTR_LEN(pattern) + 1, use_heap);
-	zend_str_tolower_copy(lc_pattern, ZSTR_VAL(pattern), ZSTR_LEN(pattern));
 
 	t[j++] = '~';
 	t[j++] = '^';
 
 	for (i = 0; i < ZSTR_LEN(pattern); i++, j++) {
-		switch (lc_pattern[i]) {
+		char c = ZSTR_VAL(pattern)[i];
+		switch (c) {
 			case '?':
 				t[j] = '.';
 				break;
@@ -198,7 +194,7 @@ static zend_string *browscap_convert_pattern(zend_string *pattern, int persisten
 				t[j] = '+';
 				break;
 			default:
-				t[j] = lc_pattern[i];
+				t[j] = zend_tolower_ascii(c);
 				break;
 		}
 	}
@@ -208,7 +204,6 @@ static zend_string *browscap_convert_pattern(zend_string *pattern, int persisten
 	t[j]=0;
 
 	ZSTR_LEN(res) = j;
-	free_alloca(lc_pattern, use_heap);
 	return res;
 }
 /* }}} */
