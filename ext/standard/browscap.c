@@ -282,7 +282,7 @@ static void browscap_entry_add_kv_to_existing_array(browser_data *bdata, browsca
 
 static HashTable *browscap_entry_to_array(browser_data *bdata, browscap_entry *entry) {
 	zval tmp;
-	HashTable *ht = zend_new_array(8);
+	HashTable *ht = zend_new_array(2 + (entry->parent ? 1 : 0) + (entry->kv_end - entry->kv_start));
 
 	ZVAL_STR(&tmp, browscap_convert_pattern(entry->pattern, 0));
 	zend_hash_str_add_new(ht, "browser_name_regex", sizeof("browser_name_regex")-1, &tmp);
