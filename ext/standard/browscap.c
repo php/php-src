@@ -659,22 +659,6 @@ static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, b
 }
 /* }}} */
 
-static void browscap_zval_copy_ctor(zval *p) /* {{{ */
-{
-	if (Z_REFCOUNTED_P(p)) {
-		zend_string *str;
-
-		ZEND_ASSERT(Z_TYPE_P(p) == IS_STRING);
-		str = Z_STR_P(p);
-		if (!(GC_FLAGS(str) & GC_PERSISTENT)) {
-			GC_ADDREF(str);
-		} else {
-			ZVAL_NEW_STR(p, zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0));
-		}
-	}
-}
-/* }}} */
-
 /* {{{ Get information about the capabilities of a browser. If browser_name is omitted or null, HTTP_USER_AGENT is used. Returns an object by default; if return_array is true, returns an array. */
 PHP_FUNCTION(get_browser)
 {
