@@ -725,7 +725,7 @@ PHP_FUNCTION(get_browser)
 	if (found_entry == NULL) {
 		browscap_entry *entry;
 
-		ZEND_HASH_FOREACH_PTR(bdata->htab, entry) {
+		ZEND_HASH_MAP_FOREACH_PTR(bdata->htab, entry) {
 			if (browser_reg_compare(entry, lookup_browser_name, &found_entry)) {
 				break;
 			}
