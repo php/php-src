@@ -625,18 +625,6 @@ static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, b
 	const char *cur;
 	int i;
 
-	/* Agent name too short */
-	if (ZSTR_LEN(agent_name) < browscap_get_minimum_length(entry)) {
-		return 0;
-	}
-
-	/* Quickly discard patterns where the prefix doesn't match. */
-	if (zend_binary_strcasecmp(
-			ZSTR_VAL(agent_name), entry->prefix_len,
-			ZSTR_VAL(entry->pattern), entry->prefix_len) != 0) {
-		return 0;
-	}
-
 	/* Lowercase the pattern, the agent name is already lowercase */
 	ZSTR_ALLOCA_ALLOC(pattern_lc, ZSTR_LEN(entry->pattern), use_heap);
 	zend_str_tolower_copy(ZSTR_VAL(pattern_lc), ZSTR_VAL(entry->pattern), ZSTR_LEN(entry->pattern));
@@ -758,6 +746,18 @@ PHP_FUNCTION(get_browser)
 		size_t cached_prev_len = 0; /* silence compiler warning */
 
 		ZEND_HASH_MAP_FOREACH_PTR(bdata->htab, entry) {
+			/* Agent name too short */
+			if (ZSTR_LEN(lookup_browser_name) < browscap_get_minimum_length(entry)) {
+				continue;
+			}
+
+			/* Quickly discard patterns where the prefix doesn't match. */
+			if (zend_binary_strcasecmp(
+					ZSTR_VAL(lookup_browser_name), entry->prefix_len,
+					ZSTR_VAL(entry->pattern), entry->prefix_len) != 0) {
+				continue;
+			}
+
 			if (browser_reg_compare(entry, lookup_browser_name, &found_entry, &cached_prev_len)) {
 				break;
 			}
