@@ -284,6 +284,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 	zend_string *key;
 	zval *val;
 	uint32_t count;
+	char *packed;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -325,11 +326,12 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 			GC_PROTECT_RECURSION(myht);
 		}
 		count = zend_hash_num_elements(myht);
+		packed = HT_IS_PACKED(myht) ? "packed " : "";
 		if (Z_REFCOUNTED_P(struc)) {
 			/* -1 because of ADDREF above. */
-			php_printf("array(%d) refcount(%u){\n", count, Z_REFCOUNT_P(struc) - 1);
+			php_printf("array(%d) %srefcount(%u){\n", count, packed, Z_REFCOUNT_P(struc) - 1);
 		} else {
-			php_printf("array(%d) interned {\n", count);
+			php_printf("array(%d) %sinterned {\n", count, packed);
 		}
 		ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
 			zval_array_element_dump(val, index, key, level);
