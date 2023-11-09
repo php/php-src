@@ -2,8 +2,15 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.14
 
+- PCRE:
+  . Fixed bug GH-12628 (The gh11374 test fails on Alpinelinux). (nielsdos)
+
 - Standard:
   . Fix memory leak in syslog device handling. (danog)
+
+- SQLite3:
+  . Fixed bug GH-12633 (sqlite3_defensive.phpt fails with sqlite 3.44.0).
+    (SakiTakamachi)
 
 23 Nov 2023, PHP 8.2.13
 
