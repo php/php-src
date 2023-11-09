@@ -542,18 +542,76 @@ static inline size_t browscap_get_minimum_length(browscap_entry *entry) {
 	return len;
 }
 
+static bool browscap_match_string_wildcard(const char *s, const char *s_end, const char *pattern, const char *pattern_end)
+{
+	const char *pattern_current = pattern;
+	const char *s_current = s;
+
+	const char *wildcard_pattern_restore_pos = NULL;
+	const char *wildcard_s_restore_pos = NULL;
+
+	while (s_current < s_end) {
+		char pattern_char = *pattern_current;
+		char s_char = *s_current;
+
+		if (pattern_char == '*') {
+			/* Collapse wildcards */
+			pattern_current++;
+			while (pattern_current < pattern_end && *pattern_current == '*') {
+				pattern_current++;
+			}
+			/* If we're at the end of the pattern, it means that the ending was just '*', so this is a trivial match */
+			if (pattern_current == pattern_end) {
+				return true;
+			}
+			/* We will first assume the skipped part by * is a 0-length string.
+			 * When a mismatch happens we will backtrack and move s one position to assume * skipped a 1-length string.
+			 * Then 2, 3, 4, ... */
+			wildcard_pattern_restore_pos = pattern_current;
+			wildcard_s_restore_pos = s_current;
+			continue;
+		} else if (pattern_char == s_char || pattern_char == '?') {
+			/* Match */
+			pattern_current++;
+			s_current++;
+			/* If this was the last character of the pattern, either we fully matched s, or we have a mismatch */
+			if (pattern_current == pattern_end) {
+				if (s_current == s_end) {
+					return true;
+				}
+				/* Fallthrough to mismatch */
+			} else {
+				continue;
+			}
+		}
+
+		/* Mismatch */
+		if (wildcard_pattern_restore_pos) {
+			pattern_current = wildcard_pattern_restore_pos;
+			wildcard_s_restore_pos++;
+			s_current = wildcard_s_restore_pos;
+		} else {
+			/* No wildcard is active, so it is impossible to match */
+			return false;
+		}
+	}
+
+	/* Skip remaining * wildcards, they match nothing here as we are at the end of s */
+	while (pattern_current < pattern_end && *pattern_current == '*') {
+		pattern_current++;
+	}
+
+	ZEND_ASSERT(s_current == s_end);
+	return pattern_current == pattern_end;
+}
+
 static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, browscap_entry **found_entry_ptr) /* {{{ */
 {
 	browscap_entry *found_entry = *found_entry_ptr;
 	ALLOCA_FLAG(use_heap)
-	zend_string *pattern_lc, *regex;
+	zend_string *pattern_lc;
 	const char *cur;
 	int i;
-
-	pcre2_code *re;
-	pcre2_match_data *match_data;
-	uint32_t capture_count;
-	int rc;
 
 	/* Agent name too short */
 	if (ZSTR_LEN(agent_name) < browscap_get_minimum_length(entry)) {
@@ -594,23 +652,12 @@ static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, b
 		return 1;
 	}
 
-	regex = browscap_convert_pattern(entry->pattern, 0);
-	re = pcre_get_compiled_regex(regex, &capture_count);
-	if (re == NULL) {
-		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
-		zend_string_release(regex);
-		return 0;
-	}
-
-	match_data = php_pcre_create_match_data(capture_count, re);
-	if (!match_data) {
-		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
-		zend_string_release(regex);
-		return 0;
-	}
-	rc = pcre2_match(re, (PCRE2_SPTR)ZSTR_VAL(agent_name), ZSTR_LEN(agent_name), 0, 0, match_data, php_pcre_mctx());
-	php_pcre_free_match_data(match_data);
-	if (rc >= 0) {
+	if (browscap_match_string_wildcard(
+		ZSTR_VAL(agent_name) + entry->prefix_len,
+		ZSTR_VAL(agent_name) + ZSTR_LEN(agent_name),
+		ZSTR_VAL(pattern_lc) + entry->prefix_len,
+		ZSTR_VAL(pattern_lc) + ZSTR_LEN(pattern_lc))
+	) {
 		/* If we've found a possible browser, we need to do a comparison of the
 		   number of characters changed in the user agent being checked versus
 		   the previous match found and the current match. */
@@ -654,7 +701,6 @@ static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, b
 	}
 
 	ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
-	zend_string_release(regex);
 	return 0;
 }
 /* }}} */
