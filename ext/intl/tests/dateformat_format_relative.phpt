@@ -5,6 +5,8 @@ intl
 --FILE--
 <?php
 
+date_default_timezone_set('America/Los_Angeles');
+
 printFormat(IntlDateFormatter::RELATIVE_FULL, IntlDateFormatter::NONE, getYesterday());
 printFormat(IntlDateFormatter::RELATIVE_LONG, IntlDateFormatter::NONE, getYesterday());
 printFormat(IntlDateFormatter::RELATIVE_MEDIUM, IntlDateFormatter::NONE, getYesterday());
@@ -38,19 +40,19 @@ function printFormat(int $dateFormat, int $timeFormat, DateTimeImmutable $time) 
 }
 
 function getToday(): DateTimeImmutable {
-    return new DateTimeImmutable("now", new DateTimeZone("America/Los_Angeles"));
+    return new DateTimeImmutable();
 }
 
 function getYesterday(): DateTimeImmutable {
-    return new DateTimeImmutable("-1 day", new DateTimeZone("America/Los_Angeles"));
+    return new DateTimeImmutable("-1 day");
 }
 
 function getTomorrow(): DateTimeImmutable {
-    return new DateTimeImmutable("+1 day", new DateTimeZone("America/Los_Angeles"));
+    return new DateTimeImmutable("+1 day");
 }
 
 function getDayInPast(): DateTimeImmutable {
-    return new DateTimeImmutable("2020-01-20 20:20:20", new DateTimeZone("America/Los_Angeles"));
+    return new DateTimeImmutable("2020-01-20 20:20:20");
 }
 
 ?>
