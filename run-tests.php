@@ -2873,10 +2873,30 @@ SH;
     return $restype[0] . 'ED';
 }
 
+function is_flaky(TestFile $test): bool
+{
+    if ($test->hasSection('FLAKY')) {
+        return true;
+    }
+    if (!$test->hasSection('FILE')) {
+        return false;
+    }
+    $file = $test->getSection('FILE');
+    $flaky_functions = [
+        'disk_free_space',
+        'hrtime',
+        'microtime',
+        'sleep',
+        'usleep',
+    ];
+    $regex = '(\b(' . implode('|', $flaky_functions) . ')\()i';
+    return preg_match($regex, $file) === 1;
+}
+
 function error_may_be_retried(TestFile $test, string $output): bool
 {
     return preg_match('((timed out)|(connection refused)|(404: page not found)|(address already in use)|(mailbox already exists))i', $output) === 1
-        || $test->hasSection('FLAKY');
+        || is_flaky($test);
 }
 
 /**
