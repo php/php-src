@@ -3937,7 +3937,7 @@ static int zend_jit_find_ssa_var(const zend_op_array *op_array,
 			zend_worklist_push(&worklist, b);
 		}
 	}
-	return -1;
+	ssa_var = -1;
 
 found:
 	ZEND_WORKLIST_FREE_ALLOCA(&worklist, use_heap);
@@ -6974,9 +6974,11 @@ done:
 	        || p->stop == ZEND_JIT_TRACE_STOP_INTERPRETER) {
 		if (ra
 		 && (p-1)->op != ZEND_JIT_TRACE_ENTER
+		 && (p-1)->op != ZEND_JIT_TRACE_BACK
 		 && opline->opcode != ZEND_DO_UCALL
 		 && opline->opcode != ZEND_DO_FCALL
-		 && opline->opcode != ZEND_DO_FCALL_BY_NAME) {
+		 && opline->opcode != ZEND_DO_FCALL_BY_NAME
+		 && opline->opcode != ZEND_INCLUDE_OR_EVAL) {
 			for (i = 0; i < op_array->last_var + op_array->T; i++) {
 				int32_t ref = STACK_REF(stack, i);
 				uint8_t type = STACK_TYPE(stack, i);
