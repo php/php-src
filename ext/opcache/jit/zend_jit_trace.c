@@ -3842,6 +3842,126 @@ static bool zend_jit_trace_next_is_send_result(const zend_op              *oplin
 	return 0;
 }
 
+static int zend_jit_find_ssa_var(const zend_op_array *op_array,
+                                 const zend_ssa      *ssa,
+                                 uint32_t             opline_num,
+                                 uint32_t             var_num)
+{
+	int ssa_var, j, b = ssa->cfg.map[opline_num];
+	const zend_basic_block *bb = ssa->cfg.blocks + b;
+	const zend_ssa_phi *phi;
+	const zend_ssa_op *ssa_op;
+	zend_worklist worklist;
+	ALLOCA_FLAG(use_heap)
+
+	while (1) {
+		ssa_op = ssa->ops + opline_num;
+		ssa_var = ssa_op->result_def;
+		if (ssa_var >= 0 && ssa->vars[ssa_var].var == var_num) {
+			return ssa_var;
+		}
+		ssa_var = ssa_op->op2_def;
+		if (ssa_var >= 0 && ssa->vars[ssa_var].var == var_num) {
+			return ssa_var;
+		}
+		ssa_var = ssa_op->op1_def;
+		if (ssa_var >= 0 && ssa->vars[ssa_var].var == var_num) {
+			return ssa_var;
+		}
+		if (opline_num == bb->start) {
+			break;
+		}
+		opline_num--;
+	}
+	phi = ssa->blocks[b].phis;
+	ssa_var = -1;
+	while (phi) {
+		if (phi->var == var_num) {
+			ssa_var = phi->ssa_var;
+		}
+		phi = phi->next;
+	}
+	if (ssa_var >= 0) {
+		return ssa_var;
+	}
+
+	if (!bb->predecessors_count) {
+		return -1;
+	}
+
+	ZEND_WORKLIST_ALLOCA(&worklist, ssa->cfg.blocks_count, use_heap);
+
+	for (j = 0; j < bb->predecessors_count; j++) {
+		b = ssa->cfg.predecessors[bb->predecessor_offset + j];
+		zend_worklist_push(&worklist, b);
+	}
+
+	while (zend_worklist_len(&worklist) != 0) {
+		b = zend_worklist_pop(&worklist);
+		bb = &ssa->cfg.blocks[b];
+		if (bb->len) {
+			opline_num = bb->start + bb->len - 1;
+			while (1) {
+				ssa_op = ssa->ops + opline_num;
+				ssa_var = ssa_op->result_def;
+				if (ssa_var >= 0 && ssa->vars[ssa_var].var == var_num) {
+					goto found;
+				}
+				ssa_var = ssa_op->op2_def;
+				if (ssa_var >= 0 && ssa->vars[ssa_var].var == var_num) {
+					goto found;
+				}
+				ssa_var = ssa_op->op1_def;
+				if (ssa_var >= 0 && ssa->vars[ssa_var].var == var_num) {
+					goto found;
+				}
+				if (opline_num == bb->start) {
+					break;
+				}
+				opline_num--;
+			}
+		}
+		phi = ssa->blocks[b].phis;
+		ssa_var = -1;
+		while (phi) {
+			if (phi->var == var_num) {
+				ssa_var = phi->ssa_var;
+			}
+			phi = phi->next;
+		}
+		if (ssa_var >= 0) {
+			goto found;
+		}
+		for (j = 0; j < bb->predecessors_count; j++) {
+			b = ssa->cfg.predecessors[bb->predecessor_offset + j];
+			zend_worklist_push(&worklist, b);
+		}
+	}
+	return -1;
+
+found:
+	ZEND_WORKLIST_FREE_ALLOCA(&worklist, use_heap);
+	return ssa_var;
+}
+
+static bool zend_jit_trace_must_store_type(const zend_op_array *op_array,
+                                           const zend_ssa      *ssa,
+                                           uint32_t             opline_num,
+                                           uint32_t             var_num,
+                                           uint8_t              type)
+{
+	if (ssa->var_info) {
+		int ssa_var = zend_jit_find_ssa_var(op_array, ssa, opline_num, var_num);
+
+		if (ssa_var >= 0) {
+			if ((ssa->var_info[ssa_var].type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1U << type)) {
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+
 static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t parent_trace, uint32_t exit_num)
 {
 	const void *handler = NULL;
@@ -6861,12 +6981,15 @@ done:
 				int32_t ref = STACK_REF(stack, i);
 				uint8_t type = STACK_TYPE(stack, i);
 
-				if (ref && (!(STACK_FLAGS(stack, i) & (ZREG_LOAD|ZREG_STORE)))) {
+				if (ref && !(STACK_FLAGS(stack, i) & (ZREG_LOAD|ZREG_STORE))) {
 					if (!zend_jit_store_ref(jit, 1 << type, i, ref, STACK_MEM_TYPE(stack, i) != type)) {
 						goto jit_failure;
 					}
 					SET_STACK_TYPE(stack, i, type, 1);
-				} else if (type != IS_UNKNOWN && type != STACK_MEM_TYPE(stack, i)) {
+				} else if (i < op_array->last_var
+				 && type != IS_UNKNOWN
+				 && type != STACK_MEM_TYPE(stack, i)
+				 && zend_jit_trace_must_store_type(op_array, op_array_ssa, opline - op_array->opcodes, i, type)) {
 					if (!zend_jit_store_type(jit, i, type)) {
 						return 0;
 					}
