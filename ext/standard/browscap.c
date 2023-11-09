@@ -605,7 +605,7 @@ static bool browscap_match_string_wildcard(const char *s, const char *s_end, con
 	return pattern_current == pattern_end;
 }
 
-static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, browscap_entry **found_entry_ptr) /* {{{ */
+static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, browscap_entry **found_entry_ptr, size_t *cached_prev_len) /* {{{ */
 {
 	browscap_entry *found_entry = *found_entry_ptr;
 	ALLOCA_FLAG(use_heap)
@@ -648,6 +648,7 @@ static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, b
 	/* See if we have an exact match, if so, we're done... */
 	if (zend_string_equals(agent_name, pattern_lc)) {
 		*found_entry_ptr = entry;
+		/* cached_prev_len doesn't matter here because we end the search when an exact match is found. */
 		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
 		return 1;
 	}
@@ -661,42 +662,30 @@ static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, b
 		/* If we've found a possible browser, we need to do a comparison of the
 		   number of characters changed in the user agent being checked versus
 		   the previous match found and the current match. */
+		size_t curr_len = 0;
+		zend_string *current_match = entry->pattern;
+		for (size_t i = 0; i < ZSTR_LEN(current_match); i++) {
+			switch (ZSTR_VAL(current_match)[i]) {
+				case '?':
+				case '*':
+					/* do nothing, ignore these characters in the count */
+				break;
+
+				default:
+					++curr_len;
+			}
+		}
+
 		if (found_entry) {
-			size_t i, prev_len = 0, curr_len = 0;
-			zend_string *previous_match = found_entry->pattern;
-			zend_string *current_match = entry->pattern;
-
-			for (i = 0; i < ZSTR_LEN(previous_match); i++) {
-				switch (ZSTR_VAL(previous_match)[i]) {
-					case '?':
-					case '*':
-						/* do nothing, ignore these characters in the count */
-					break;
-
-					default:
-						++prev_len;
-				}
-			}
-
-			for (i = 0; i < ZSTR_LEN(current_match); i++) {
-				switch (ZSTR_VAL(current_match)[i]) {
-					case '?':
-					case '*':
-						/* do nothing, ignore these characters in the count */
-					break;
-
-					default:
-						++curr_len;
-				}
-			}
-
 			/* Pick which browser pattern replaces the least amount of
 			   characters when compared to the original user agent string... */
-			if (prev_len < curr_len) {
+			if (*cached_prev_len < curr_len) {
 				*found_entry_ptr = entry;
+				*cached_prev_len = curr_len;
 			}
 		} else {
 			*found_entry_ptr = entry;
+			*cached_prev_len = curr_len;
 		}
 	}
 
@@ -754,9 +743,10 @@ PHP_FUNCTION(get_browser)
 	found_entry = zend_hash_find_ptr(bdata->htab, lookup_browser_name);
 	if (found_entry == NULL) {
 		browscap_entry *entry;
+		size_t cached_prev_len = 0; /* silence compiler warning */
 
 		ZEND_HASH_MAP_FOREACH_PTR(bdata->htab, entry) {
-			if (browser_reg_compare(entry, lookup_browser_name, &found_entry)) {
+			if (browser_reg_compare(entry, lookup_browser_name, &found_entry, &cached_prev_len)) {
 				break;
 			}
 		} ZEND_HASH_FOREACH_END();
