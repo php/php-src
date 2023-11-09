@@ -741,6 +741,8 @@ PHP_FUNCTION(get_browser)
 		}
 	}
 
+	zend_string_release_ex(lookup_browser_name, false);
+
 	agent_ht = browscap_entry_to_array(bdata, found_entry);
 
 	if (return_array) {
@@ -759,7 +761,5 @@ PHP_FUNCTION(get_browser)
 
 		browscap_entry_add_kv_to_existing_array(bdata, found_entry, target_ht);
 	}
-
-	zend_string_release_ex(lookup_browser_name, 0);
 }
 /* }}} */
