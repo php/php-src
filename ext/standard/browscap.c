@@ -272,27 +272,30 @@ static void browscap_add_kv(
 	bdata->kv_used++;
 }
 
-static HashTable *browscap_entry_to_array(browser_data *bdata, browscap_entry *entry) {
-	zval tmp;
-	uint32_t i;
-
-	HashTable *ht = zend_new_array(8);
-
-	ZVAL_STR(&tmp, browscap_convert_pattern(entry->pattern, 0));
-	zend_hash_str_add(ht, "browser_name_regex", sizeof("browser_name_regex")-1, &tmp);
-
-	ZVAL_STR_COPY(&tmp, entry->pattern);
-	zend_hash_str_add(ht, "browser_name_pattern", sizeof("browser_name_pattern")-1, &tmp);
-
-	if (entry->parent) {
-		ZVAL_STR_COPY(&tmp, entry->parent);
-		zend_hash_str_add(ht, "parent", sizeof("parent")-1, &tmp);
-	}
-
-	for (i = entry->kv_start; i < entry->kv_end; i++) {
+static void browscap_entry_add_kv_to_existing_array(browser_data *bdata, browscap_entry *entry, HashTable *ht) {
+	for (uint32_t i = entry->kv_start; i < entry->kv_end; i++) {
+		zval tmp;
 		ZVAL_STR_COPY(&tmp, bdata->kv[i].value);
 		zend_hash_add(ht, bdata->kv[i].key, &tmp);
 	}
+}
+
+static HashTable *browscap_entry_to_array(browser_data *bdata, browscap_entry *entry) {
+	zval tmp;
+	HashTable *ht = zend_new_array(8);
+
+	ZVAL_STR(&tmp, browscap_convert_pattern(entry->pattern, 0));
+	zend_hash_str_add_new(ht, "browser_name_regex", sizeof("browser_name_regex")-1, &tmp);
+
+	ZVAL_STR_COPY(&tmp, entry->pattern);
+	zend_hash_str_add_new(ht, "browser_name_pattern", sizeof("browser_name_pattern")-1, &tmp);
+
+	if (entry->parent) {
+		ZVAL_STR_COPY(&tmp, entry->parent);
+		zend_hash_str_add_new(ht, "parent", sizeof("parent")-1, &tmp);
+	}
+
+	browscap_entry_add_kv_to_existing_array(bdata, entry, ht);
 
 	return ht;
 }
