@@ -476,16 +476,16 @@ class Client
     }
 
     /**
-     * Define whether or not the FastCGI application should keep the connection
-     * alive at the end of a request
+     * Define whether the FastCGI application should keep the connection
+     * alive at the end of a request and additionally set SO_KEEPALIVE or not.
      *
-     * @param bool $b true if the connection should stay alive, false otherwise
+     * @param bool $connKeepAlive true if the connection should stay alive, false otherwise
+     * @param bool $socketKeepAlive true if the socket SO_KEEPALIVE should be set, false otherwise
      */
-    public function setKeepAlive($b)
+    public function setKeepAlive(bool $connKeepAlive, bool $socketKeepAlive)
     {
-        $value = (bool) $b;
-        $this->_keepAlive = $value;
-        $this->transport->setKeepAlive($value);
+        $this->_keepAlive = $connKeepAlive;
+        $this->transport->setKeepAlive($socketKeepAlive);
     }
 
     /**
