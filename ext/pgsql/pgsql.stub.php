@@ -966,6 +966,7 @@ namespace {
 #ifdef LIBPQ_HAS_PIPELINING
     function pg_enter_pipeline_mode(PgSql\Connection $connection): bool {}
     function pg_exit_pipeline_mode(PgSql\Connection $connection): bool {}
+    function pg_send_flush_request(PgSql\Connection $connection): bool {}
     function pg_pipeline_sync(PgSql\Connection $connection): bool {}
     function pg_pipeline_status(PgSql\Connection $connection): int {}
 #endif

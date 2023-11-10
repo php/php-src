@@ -432,6 +432,7 @@ PHP 8.3 UPGRADE NOTES
     in error messages (with libpq >= 9.6).
   . Added pg_enter_pipeline_mode().
   . Added pg_exit_pipeline_mode().
+  . Added pg_send_flush_request().
   . Added pg_pipeline_sync().
   . Added pg_pipeline_status().
 
