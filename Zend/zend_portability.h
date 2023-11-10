@@ -327,6 +327,14 @@ char *alloca();
 # define HAVE_BUILTIN_CONSTANT_P
 #endif
 
+#if __has_attribute(element_count)
+#define ZEND_ELEMENT_COUNT(m) __attribute__((element_count(m)))
+#elif __has_attribute(counted_by)
+#define ZEND_ELEMENT_COUNT(m) __attribute__((counted_by(m)))
+#else
+#define ZEND_ELEMENT_COUNT(m)
+#endif
+
 #ifdef HAVE_BUILTIN_CONSTANT_P
 # define ZEND_CONST_COND(_condition, _default) \
 	(__builtin_constant_p(_condition) ? (_condition) : (_default))
