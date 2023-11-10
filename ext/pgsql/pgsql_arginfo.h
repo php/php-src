@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0d6ef9904082180bf9205d61c2f45c0752be8f7b */
+ * Stub hash: 25badfac7b1d807202b80fd544e6db234fd726fd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -717,7 +717,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_exit_pipeline_mode, arginfo_pg_exit_pipeline_mode)
 #endif
 #if defined(LIBPQ_HAS_PIPELINING)
-	ZEND_FE(pg_send_flush_request, arginfo_pg_pipeline_sync)
+	ZEND_FE(pg_send_flush_request, arginfo_pg_send_flush_request)
 #endif
 #if defined(LIBPQ_HAS_PIPELINING)
 	ZEND_FE(pg_pipeline_sync, arginfo_pg_pipeline_sync)
