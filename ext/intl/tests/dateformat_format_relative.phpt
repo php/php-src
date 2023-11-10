@@ -5,6 +5,8 @@ intl
 --FILE--
 <?php
 
+date_default_timezone_set('America/Los_Angeles');
+
 printFormat(IntlDateFormatter::RELATIVE_FULL, IntlDateFormatter::NONE, getYesterday());
 printFormat(IntlDateFormatter::RELATIVE_LONG, IntlDateFormatter::NONE, getYesterday());
 printFormat(IntlDateFormatter::RELATIVE_MEDIUM, IntlDateFormatter::NONE, getYesterday());
@@ -50,7 +52,7 @@ function getTomorrow(): DateTimeImmutable {
 }
 
 function getDayInPast(): DateTimeImmutable {
-    return new DateTimeImmutable("2020-01-20 20:20:20", new DateTimeZone("UTC"));
+    return new DateTimeImmutable("2020-01-20 20:20:20");
 }
 
 ?>
