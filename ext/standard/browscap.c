@@ -666,8 +666,8 @@ static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, b
 		ZSTR_VAL(agent_name) + entry->prefix_len,
 		ZSTR_VAL(agent_name) + ZSTR_LEN(agent_name),
 		ZSTR_VAL(pattern_lc) + entry->prefix_len,
-		ZSTR_VAL(pattern_lc) + ZSTR_LEN(pattern_lc))
-	) {
+		ZSTR_VAL(pattern_lc) + ZSTR_LEN(pattern_lc)
+	)) {
 		/* If we've found a possible browser, we need to do a comparison of the
 		   number of characters changed in the user agent being checked versus
 		   the previous match found and the current match. */
