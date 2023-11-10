@@ -15,10 +15,14 @@ PHP                                                                        NEWS
   . Implement #81724 (openssl_cms_encrypt only allows specific ciphers).
     (Jakub Zelenka)
 
+- Session:
+  . Added support for partitioned cookies. (nielsdos)
+
 - Standard:
   . Fixed bug GH-16649 (UAF during array_splice). (alexandre-daubois)
   . Passing integers outside the interval [0, 255] to chr() is now deprecated.
     (Girgias)
+  . Added support for partitioned cookies. (nielsdos)
 
 14 Aug 2025, PHP 8.5.0beta1
 

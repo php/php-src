@@ -253,6 +253,11 @@ PHP 8.5 UPGRADE NOTES
     Pdo_Sqlite::EXPLAIN_MODE_PREPARED, Pdo_Sqlite::EXPLAIN_MODE_EXPLAIN,
     Pdo_Sqlite::EXPLAIN_MODE_EXPLAIN_QUERY_PLAN.
 
+- Session:
+  . session_set_cookie_params(), session_get_cookie_params(), and session_start()
+    now support partitioned cookies via the "partitioned" key.
+    RFC: https://wiki.php.net/rfc/CHIPS
+
 - SOAP:
   . Enumeration cases are now dumped in __getTypes().
   . Implemented request #61105:
@@ -279,6 +284,8 @@ PHP 8.5 UPGRADE NOTES
     "width_unit" and "height_unit" to indicate in which units the dimensions
     are expressed. These units are px by default. They are not necessarily
     the same (just to give one example: one may be cm and the other may be px).
+  . setcookie() and setrawcookie() now support the "partitioned" key.
+    RFC: https://wiki.php.net/rfc/CHIPS
 
 - XSL:
   . The $namespace argument of XSLTProcessor::getParameter(),

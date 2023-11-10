@@ -898,6 +898,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.cookie_path",        "/",         PHP_INI_ALL, OnUpdateSessionStr, cookie_path,        php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cookie_domain",      "",          PHP_INI_ALL, OnUpdateSessionStr, cookie_domain,      php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.cookie_secure",    "0",         PHP_INI_ALL, OnUpdateSessionBool,   cookie_secure,      php_ps_globals,    ps_globals)
+	STD_PHP_INI_BOOLEAN("session.cookie_partitioned","0",        PHP_INI_ALL, OnUpdateSessionBool,   cookie_partitioned,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.cookie_httponly",  "0",         PHP_INI_ALL, OnUpdateSessionBool,   cookie_httponly,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cookie_samesite",    "",          PHP_INI_ALL, OnUpdateSessionStr, cookie_samesite,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_cookies",      "1",         PHP_INI_ALL, OnUpdateSessionBool,   use_cookies,        php_ps_globals,    ps_globals)
@@ -1362,6 +1363,12 @@ static zend_result php_session_send_cookie(void)
 		return FAILURE;
 	}
 
+	/* Check for invalid settings combinations */
+	if (UNEXPECTED(PS(cookie_partitioned) && !PS(cookie_secure))) {
+		php_error_docref(NULL, E_WARNING, "Partitioned session cookie cannot be used without also configuring it as secure");
+		return FAILURE;
+	}
+
 	ZEND_ASSERT(strpbrk(ZSTR_VAL(PS(session_name)), SESSION_FORBIDDEN_CHARS) == NULL);
 
 	/* URL encode id because it might be user supplied */
@@ -1404,6 +1411,10 @@ static zend_result php_session_send_cookie(void)
 
 	if (PS(cookie_secure)) {
 		smart_str_appends(&ncookie, COOKIE_SECURE);
+	}
+
+	if (PS(cookie_partitioned)) {
+		smart_str_appends(&ncookie, COOKIE_PARTITIONED);
 	}
 
 	if (PS(cookie_httponly)) {
@@ -1699,6 +1710,7 @@ PHP_FUNCTION(session_set_cookie_params)
 	zend_string *lifetime = NULL, *path = NULL, *domain = NULL, *samesite = NULL;
 	bool secure = 0, secure_null = 1;
 	bool httponly = 0, httponly_null = 1;
+	bool partitioned = false, partitioned_null = true;
 	zend_string *ini_name;
 	zend_result result;
 	int found = 0;
@@ -1766,6 +1778,10 @@ PHP_FUNCTION(session_set_cookie_params)
 					secure = zval_is_true(value);
 					secure_null = 0;
 					found++;
+				} else if (zend_string_equals_literal_ci(key, "partitioned")) {
+					partitioned = zval_is_true(value);
+					partitioned_null = 0;
+					found++;
 				} else if (zend_string_equals_literal_ci(key, "httponly")) {
 					httponly = zval_is_true(value);
 					httponly_null = 0;
@@ -1830,6 +1846,15 @@ PHP_FUNCTION(session_set_cookie_params)
 			goto cleanup;
 		}
 	}
+	if (!partitioned_null) {
+		ini_name = ZSTR_INIT_LITERAL("session.cookie_partitioned", 0);
+		result = zend_alter_ini_entry_chars(ini_name, partitioned ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		zend_string_release_ex(ini_name, 0);
+		if (result == FAILURE) {
+			RETVAL_FALSE;
+			goto cleanup;
+		}
+	}
 	if (!httponly_null) {
 		ini_name = ZSTR_INIT_LITERAL("session.cookie_httponly", 0);
 		result = zend_alter_ini_entry_chars(ini_name, httponly ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
@@ -1872,6 +1897,7 @@ PHP_FUNCTION(session_get_cookie_params)
 	add_assoc_str(return_value, "path", zend_string_dup(PS(cookie_path), false));
 	add_assoc_str(return_value, "domain", zend_string_dup(PS(cookie_domain), false));
 	add_assoc_bool(return_value, "secure", PS(cookie_secure));
+	add_assoc_bool(return_value, "partitioned", PS(cookie_partitioned));
 	add_assoc_bool(return_value, "httponly", PS(cookie_httponly));
 	add_assoc_str(return_value, "samesite", zend_string_dup(PS(cookie_samesite), false));
 }
