@@ -280,14 +280,23 @@ static HashTable *browscap_entry_to_array(browser_data *bdata, browscap_entry *e
 	HashTable *ht = zend_new_array(2 + (entry->parent ? 1 : 0) + (entry->kv_end - entry->kv_start));
 
 	ZVAL_STR(&tmp, browscap_convert_pattern(entry->pattern, 0));
-	zend_hash_str_add_new(ht, "browser_name_regex", sizeof("browser_name_regex")-1, &tmp);
+	zend_string *key = ZSTR_INIT_LITERAL("browser_name_regex", 0);
+	ZSTR_H(key) = zend_inline_hash_func("browser_name_regex", sizeof("browser_name_regex")-1);
+	zend_hash_add_new(ht, key, &tmp);
+	zend_string_release_ex(key, false);
 
 	ZVAL_STR_COPY(&tmp, entry->pattern);
-	zend_hash_str_add_new(ht, "browser_name_pattern", sizeof("browser_name_pattern")-1, &tmp);
+	key = ZSTR_INIT_LITERAL("browser_name_pattern", 0);
+	ZSTR_H(key) = zend_inline_hash_func("browser_name_pattern", sizeof("browser_name_pattern")-1);
+	zend_hash_add_new(ht, key, &tmp);
+	zend_string_release_ex(key, false);
 
 	if (entry->parent) {
 		ZVAL_STR_COPY(&tmp, entry->parent);
-		zend_hash_str_add_new(ht, "parent", sizeof("parent")-1, &tmp);
+		key = ZSTR_INIT_LITERAL("parent", 0);
+		ZSTR_H(key) = zend_inline_hash_func("parent", sizeof("parent")-1);
+		zend_hash_add_new(ht, key, &tmp);
+		zend_string_release_ex(key, false);
 	}
 
 	browscap_entry_add_kv_to_existing_array(bdata, entry, ht);
