@@ -1329,6 +1329,9 @@ session.use_cookies = 1
 ; https://php.net/session.cookie-secure
 ;session.cookie_secure =
 
+; https://php.net/session.cookie-partitioned
+;session.cookie_partitioned = 0
+
 ; This option forces PHP to fetch and use a cookie for storing and maintaining
 ; the session id. We encourage this operation as it's very helpful in combating
 ; session hijacking when not specifying and managing your own session id. It is
