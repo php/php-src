@@ -139,7 +139,7 @@ typedef struct {
 
 typedef struct {
 	uint32_t num_types;
-	zend_type types[1];
+	zend_type types[1] ZEND_ELEMENT_COUNT(num_types);
 } zend_type_list;
 
 #define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
@@ -374,7 +374,7 @@ struct _zend_string {
 	zend_refcounted_h gc;
 	zend_ulong        h;                /* hash value */
 	size_t            len;
-	char              val[1];
+	char              val[1] ZEND_ELEMENT_COUNT(len);
 };
 
 typedef struct _Bucket {
