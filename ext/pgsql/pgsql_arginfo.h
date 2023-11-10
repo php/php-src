@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 29e402e7c708a25c99a4b2df0e858ea65a221e9b */
+ * Stub hash: b52f6b94faabab12457bf0d8ec035295aaacbfba */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -463,6 +463,10 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBPQ_HAS_PIPELINING)
+#define arginfo_pg_send_flush_request arginfo_pg_enter_pipeline_mode
+#endif
+
+#if defined(LIBPQ_HAS_PIPELINING)
 #define arginfo_pg_pipeline_sync arginfo_pg_enter_pipeline_mode
 #endif
 
@@ -576,6 +580,9 @@ ZEND_FUNCTION(pg_enter_pipeline_mode);
 #endif
 #if defined(LIBPQ_HAS_PIPELINING)
 ZEND_FUNCTION(pg_exit_pipeline_mode);
+#endif
+#if defined(LIBPQ_HAS_PIPELINING)
+ZEND_FUNCTION(pg_send_flush_request);
 #endif
 #if defined(LIBPQ_HAS_PIPELINING)
 ZEND_FUNCTION(pg_pipeline_sync);
@@ -708,6 +715,9 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(LIBPQ_HAS_PIPELINING)
 	ZEND_FE(pg_exit_pipeline_mode, arginfo_pg_exit_pipeline_mode)
+#endif
+#if defined(LIBPQ_HAS_PIPELINING)
+	ZEND_FE(pg_send_flush_request, arginfo_pg_send_flush_request)
 #endif
 #if defined(LIBPQ_HAS_PIPELINING)
 	ZEND_FE(pg_pipeline_sync, arginfo_pg_pipeline_sync)

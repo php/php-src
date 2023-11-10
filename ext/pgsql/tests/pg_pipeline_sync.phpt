@@ -50,6 +50,26 @@ if (!pg_send_query_params($db, "SELECT $1 as index, now() + ($1||' day')::interv
     die('pg_send_query_params failed');
 }
 
+if (!pg_flush($db)) {
+    die('pg_flush failed');
+}
+
+for ($i = 2; $i < 50; ++$i) {
+    if (!pg_send_query_params($db, "select $1 as index, now() + ($1||' day')::interval as time", array($i))) {
+        die('pg_send_query_params failed');
+    }
+}
+
+if (!pg_send_flush_request($db)) {
+    die('pg_send_flush_request failed');
+}
+
+for ($i = 50; $i < 99; ++$i) {
+    if (!pg_send_query_params($db, "select $1 as index, now() + ($1||' day')::interval as time", array($i))) {
+        die('pg_send_query_params failed');
+    }
+}
+
 if (!pg_pipeline_sync($db)) {
     die('pg_pipeline_sync failed');
 }
@@ -58,26 +78,37 @@ if (pg_pipeline_status($db) !== PGSQL_PIPELINE_ON) {
     die('pg_pipeline_status failed');
 }
 
-if (!($result = pg_get_result($db))) {
-    die('pg_get_result');
+if (!($stream = pg_socket($db))) {
+    die('pg_socket');
 }
 
-if (pg_result_status($result) !== PGSQL_TUPLES_OK) {
-    die('pg_result_status failed');
+if (pg_connection_busy($db)) {
+    $read = [$stream]; $write = $ex = [];
+    while (!stream_select($read, $write, $ex, null, null)) { }
 }
 
-if (pg_num_rows($result) == -1) {
-    die('pg_num_rows failed');
-}
+for ($i = 1; $i < 99; ++$i) {
+    if (!($result = pg_get_result($db))) {
+        die('pg_get_result');
+    }
 
-if (!pg_fetch_row($result, null)) {
-    die('pg_fetch_row failed');
-}
+    if (pg_result_status($result) !== PGSQL_TUPLES_OK) {
+        die('pg_result_status failed');
+    }
 
-pg_free_result($result);
+    if (pg_num_rows($result) == -1) {
+        die('pg_num_rows failed');
+    }
 
-if (pg_get_result($db) !== false) {
-    die('pg_get_result failed');
+    if (!($row = pg_fetch_row($result, null))) {
+        die('pg_fetch_row failed');
+    }
+
+    pg_free_result($result);
+
+    if (pg_get_result($db) !== false) {
+        die('pg_get_result failed');
+    }
 }
 
 if (($result = pg_get_result($db)) !== false) {
