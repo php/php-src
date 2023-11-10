@@ -100,14 +100,25 @@ function get_windows_matrix_include(array $branches) {
     return $jobs;
 }
 
+function get_version(): array {
+    $file = dirname(__DIR__) . '/main/php_version.h';
+    $content = file_get_contents($file);
+    preg_match('(^#define PHP_MAJOR_VERSION (?<num>\d+)$)m', $content, $matches);
+    $major = $matches['num'];
+    preg_match('(^#define PHP_MINOR_VERSION (?<num>\d+)$)m', $content, $matches);
+    $minor = $matches['num'];
+    return ['major' => $major, 'minor' => $minor];
+}
+
 $trigger = $argv[1] ?? 'schedule';
 $attempt = (int) ($argv[2] ?? 1);
 $discard_cache = ($trigger === 'schedule' && $attempt !== 1) || $trigger === 'workflow_dispatch';
 if ($discard_cache) {
     @unlink(get_branch_commit_cache_file_path());
 }
+$branch = $argv[3] ?? 'master';
 
-$branches = get_branches();
+$branches = $branch === 'master' ? get_branches() : get_branch_matrix([$branch]);
 $matrix_include = get_matrix_include($branches);
 $windows_matrix_include = get_windows_matrix_include($branches);
 
@@ -115,4 +126,5 @@ $f = fopen(getenv('GITHUB_OUTPUT'), 'a');
 fwrite($f, 'branches=' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n");
 fwrite($f, 'matrix-include=' . json_encode($matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
 fwrite($f, 'windows-matrix-include=' . json_encode($windows_matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
+fwrite($f, 'version=' . json_encode(get_version(), JSON_UNESCAPED_SLASHES) . "\n");
 fclose($f);
