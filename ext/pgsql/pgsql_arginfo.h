@@ -463,6 +463,10 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBPQ_HAS_PIPELINING)
+#define arginfo_pg_send_flush_request arginfo_pg_enter_pipeline_mode
+#endif
+
+#if defined(LIBPQ_HAS_PIPELINING)
 #define arginfo_pg_pipeline_sync arginfo_pg_enter_pipeline_mode
 #endif
 
@@ -576,6 +580,9 @@ ZEND_FUNCTION(pg_enter_pipeline_mode);
 #endif
 #if defined(LIBPQ_HAS_PIPELINING)
 ZEND_FUNCTION(pg_exit_pipeline_mode);
+#endif
+#if defined(LIBPQ_HAS_PIPELINING)
+ZEND_FUNCTION(pg_send_flush_request);
 #endif
 #if defined(LIBPQ_HAS_PIPELINING)
 ZEND_FUNCTION(pg_pipeline_sync);
@@ -708,6 +715,9 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(LIBPQ_HAS_PIPELINING)
 	ZEND_FE(pg_exit_pipeline_mode, arginfo_pg_exit_pipeline_mode)
+#endif
+#if defined(LIBPQ_HAS_PIPELINING)
+	ZEND_FE(pg_send_flush_request, arginfo_pg_pipeline_sync)
 #endif
 #if defined(LIBPQ_HAS_PIPELINING)
 	ZEND_FE(pg_pipeline_sync, arginfo_pg_pipeline_sync)
