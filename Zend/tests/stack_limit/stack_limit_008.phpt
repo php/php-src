@@ -55,4 +55,4 @@ array(4) {
   string(%d) "0x%x"
 }
 Will throw:
-Maximum call stack size of %d bytes reached. Infinite recursion?
+Maximum call stack size of %d bytes (zend.max_allowed_stack_size-zend.reserved_stack_size) reached. Infinite recursion?

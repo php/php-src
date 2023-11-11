@@ -41,5 +41,5 @@ array(4) {
   ["EG(stack_limit)"]=>
   string(%d) "0x%x"
 }
-Maximum call stack size of %d bytes reached. Infinite recursion?
+Maximum call stack size of %d bytes (zend.max_allowed_stack_size-zend.reserved_stack_size) reached. Infinite recursion?
 Try executed: 1
