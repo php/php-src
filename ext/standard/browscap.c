@@ -755,6 +755,10 @@ PHP_FUNCTION(get_browser)
 		size_t cached_prev_len = 0; /* silence compiler warning */
 
 		ZEND_HASH_MAP_FOREACH_PTR(bdata->htab, entry) {
+			/* The following two early-skip checks are inside this loop instead of inside browser_reg_compare().
+			 * That's because we want to avoid the call frame overhead, especially as browser_reg_compare() is
+			 * a function that uses alloca(). */
+
 			/* Agent name too short */
 			if (ZSTR_LEN(lookup_browser_name) < browscap_get_minimum_length(entry)) {
 				continue;
