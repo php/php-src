@@ -20,7 +20,7 @@ runs:
         export TEST_PHP_JUNIT=junit.out.xml
         export STACK_LIMIT_DEFAULTS_CHECK=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
-          ${{ inputs.jitType == 'disable' && '' || '--repeat 2' }}
+          ${{ inputs.jitType == 'disable' && '' || '--repeat 2' }} \
           -d opcache.jit=${{ inputs.jitType }} \
           -d opcache.protect_memory=1 \
           -d opcache.jit_buffer_size=64M \
