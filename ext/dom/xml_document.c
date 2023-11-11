@@ -228,10 +228,12 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		}
 		RETURN_THROWS();
 	}
-	if (override_encoding) {
-		lxml_doc->encoding = xmlStrdup((const xmlChar *) override_encoding);
-	} else {
-		lxml_doc->encoding = xmlStrdup((const xmlChar *) "UTF-8");
+	if (lxml_doc->encoding == NULL) {
+		if (override_encoding) {
+			lxml_doc->encoding = xmlStrdup((const xmlChar *) override_encoding);
+		} else {
+			lxml_doc->encoding = xmlStrdup((const xmlChar *) "UTF-8");
+		}
 	}
 	dom_object *intern = php_dom_instantiate_object_helper(
 		return_value,
