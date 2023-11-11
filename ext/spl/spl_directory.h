@@ -30,30 +30,24 @@ extern PHPAPI zend_class_entry *spl_ce_SplTempFileObject;
 
 PHP_MINIT_FUNCTION(spl_directory);
 
-typedef enum {
-	SPL_FS_INFO, /* must be 0 */
-	SPL_FS_DIR,
-	SPL_FS_FILE
-} SPL_FS_OBJ_TYPE;
-
+/* Internal objecte structure and helpers for Directory and File SPL objects */
 typedef struct _spl_filesystem_object  spl_filesystem_object;
 
 typedef void (*spl_foreign_dtor_t)(spl_filesystem_object *object);
 typedef void (*spl_foreign_clone_t)(spl_filesystem_object *src, spl_filesystem_object *dst);
 
-PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, size_t *len);
+PHPAPI zend_string *spl_filesystem_object_get_path(spl_filesystem_object *intern);
 
 typedef struct _spl_other_handler {
 	spl_foreign_dtor_t     dtor;
 	spl_foreign_clone_t    clone;
 } spl_other_handler;
 
-/* define an overloaded iterator structure */
-typedef struct {
-	zend_object_iterator  intern;
-	zval                  current;
-	void                 *object;
-} spl_filesystem_iterator;
+typedef enum {
+	SPL_FS_INFO, /* must be 0 */
+	SPL_FS_DIR,
+	SPL_FS_FILE
+} SPL_FS_OBJ_TYPE;
 
 struct _spl_filesystem_object {
 	void               *oth;
@@ -96,28 +90,6 @@ struct _spl_filesystem_object {
 	zend_object        std;
 };
 
-static inline spl_filesystem_object *spl_filesystem_from_obj(zend_object *obj) /* {{{ */ {
-	return (spl_filesystem_object*)((char*)(obj) - XtOffsetOf(spl_filesystem_object, std));
-}
-/* }}} */
-
-#define Z_SPLFILESYSTEM_P(zv)  spl_filesystem_from_obj(Z_OBJ_P((zv)))
-
-static inline spl_filesystem_iterator* spl_filesystem_object_to_iterator(spl_filesystem_object *obj)
-{
-	spl_filesystem_iterator    *it;
-
-	it = ecalloc(1, sizeof(spl_filesystem_iterator));
-	it->object = (void *)obj;
-	zend_iterator_init(&it->intern);
-	return it;
-}
-
-static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_filesystem_iterator *it)
-{
-	return (spl_filesystem_object*)it->object;
-}
-
 #define SPL_FILE_OBJECT_DROP_NEW_LINE      0x00000001 /* drop new lines */
 #define SPL_FILE_OBJECT_READ_AHEAD         0x00000002 /* read on rewind/next */
 #define SPL_FILE_OBJECT_SKIP_EMPTY         0x00000004 /* skip empty lines */
@@ -133,6 +105,7 @@ static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_files
 #define SPL_FILE_DIR_KEY_AS_PATHNAME       0x00000000 /* make RecursiveDirectoryTree::key() return getPathname() */
 #define SPL_FILE_DIR_KEY_AS_FILENAME       0x00000100 /* make RecursiveDirectoryTree::key() return getFilename() */
 #define SPL_FILE_DIR_KEY_MODE_MASK         0x00000F00 /* mask RecursiveDirectoryTree::key() */
+#define SPL_FILE_NEW_CURRENT_AND_KEY       SPL_FILE_DIR_KEY_AS_FILENAME|SPL_FILE_DIR_CURRENT_AS_FILEINFO
 #define SPL_FILE_DIR_KEY(intern,mode)      ((intern->flags&SPL_FILE_DIR_KEY_MODE_MASK)==mode)
 
 #define SPL_FILE_DIR_SKIPDOTS              0x00001000 /* Tells whether it should skip dots or not */

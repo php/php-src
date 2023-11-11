@@ -175,7 +175,7 @@ cd ..
 
 echo ""
 echo "makedist: Creating $prefix.tar archive."
-"$tar" cf "$prefix".tar "$prefix"
+"$tar" cf "$prefix".tar --owner=0 --group=0 --numeric-owner --sort=name "$prefix"
 rm -rf "$prefix" "$prefix".tar.*
 
 echo "makedist: Creating $prefix.tar.gz archive."

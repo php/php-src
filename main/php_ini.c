@@ -125,7 +125,7 @@ PHPAPI ZEND_COLD void display_ini_entries(zend_module_entry *module)
 		module_number = 0;
 	}
 
-	ZEND_HASH_FOREACH_PTR(EG(ini_directives), ini_entry) {
+	ZEND_HASH_MAP_FOREACH_PTR(EG(ini_directives), ini_entry) {
 		if (ini_entry->module_number != module_number) {
 			continue;
 		}
@@ -566,7 +566,7 @@ int php_init_config(void)
 
 		/* Check if php_ini_file_name is a file and can be opened */
 		if (php_ini_file_name && php_ini_file_name[0]) {
-			zend_stat_t statbuf;
+			zend_stat_t statbuf = {0};
 
 			if (!VCWD_STAT(php_ini_file_name, &statbuf)) {
 				if (!((statbuf.st_mode & S_IFMT) == S_IFDIR)) {
@@ -642,7 +642,7 @@ int php_init_config(void)
 	if (!sapi_module.php_ini_ignore && php_ini_scanned_path_len) {
 		struct dirent **namelist;
 		int ndir, i;
-		zend_stat_t sb;
+		zend_stat_t sb = {0};
 		char ini_file[MAXPATHLEN];
 		char *p;
 		zend_llist scanned_ini_list;
@@ -768,7 +768,7 @@ void php_ini_register_extensions(void)
 /* {{{ php_parse_user_ini_file */
 PHPAPI int php_parse_user_ini_file(const char *dirname, const char *ini_filename, HashTable *target_hash)
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 	char ini_file[MAXPATHLEN];
 
 	snprintf(ini_file, MAXPATHLEN, "%s%c%s", dirname, DEFAULT_SLASH, ini_filename);
@@ -813,7 +813,7 @@ PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int
 	zval *data;
 
 	/* Walk through config hash and alter matching ini entries using the values found in the hash */
-	ZEND_HASH_FOREACH_STR_KEY_VAL(source_hash, str, data) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(source_hash, str, data) {
 		zend_string *data_str = zend_string_dup(Z_STR_P(data), 0);
 		zend_alter_ini_entry_ex(str, data_str, modify_type, stage, 0);
 		zend_string_release(data_str);

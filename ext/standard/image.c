@@ -17,17 +17,18 @@
 
 #include "php.h"
 #include <stdio.h>
-#if HAVE_FCNTL_H
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 #include "fopen_wrappers.h"
 #include "ext/standard/fsock.h"
-#if HAVE_UNISTD_H
+#include "libavifinfo/avifinfo.h"
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include "php_image.h"
 
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
+#if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
 #include "zlib.h"
 #endif
 
@@ -62,38 +63,6 @@ struct gfxinfo {
 	unsigned int bits;
 	unsigned int channels;
 };
-
-/* {{{ PHP_MINIT_FUNCTION(imagetypes)
- * Register IMAGETYPE_<xxx> constants used by GetImageSize(), image_type_to_mime_type, ext/exif */
-PHP_MINIT_FUNCTION(imagetypes)
-{
-	REGISTER_LONG_CONSTANT("IMAGETYPE_GIF",     IMAGE_FILETYPE_GIF,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG",    IMAGE_FILETYPE_JPEG,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_PNG",     IMAGE_FILETYPE_PNG,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_SWF",     IMAGE_FILETYPE_SWF,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_PSD",     IMAGE_FILETYPE_PSD,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_BMP",     IMAGE_FILETYPE_BMP,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_TIFF_II", IMAGE_FILETYPE_TIFF_II, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_TIFF_MM", IMAGE_FILETYPE_TIFF_MM, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_JPC",     IMAGE_FILETYPE_JPC,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_JP2",     IMAGE_FILETYPE_JP2,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_JPX",     IMAGE_FILETYPE_JPX,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_JB2",     IMAGE_FILETYPE_JB2,     CONST_CS | CONST_PERSISTENT);
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
-	REGISTER_LONG_CONSTANT("IMAGETYPE_SWC",     IMAGE_FILETYPE_SWC,     CONST_CS | CONST_PERSISTENT);
-#endif
-	REGISTER_LONG_CONSTANT("IMAGETYPE_IFF",     IMAGE_FILETYPE_IFF,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_WBMP",    IMAGE_FILETYPE_WBMP,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG2000",IMAGE_FILETYPE_JPC,     CONST_CS | CONST_PERSISTENT); /* keep alias */
-	REGISTER_LONG_CONSTANT("IMAGETYPE_XBM",     IMAGE_FILETYPE_XBM,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_ICO",     IMAGE_FILETYPE_ICO,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_WEBP",    IMAGE_FILETYPE_WEBP,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_AVIF",    IMAGE_FILETYPE_AVIF,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_UNKNOWN", IMAGE_FILETYPE_UNKNOWN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMAGETYPE_COUNT",   IMAGE_FILETYPE_COUNT,   CONST_CS | CONST_PERSISTENT);
-	return SUCCESS;
-}
-/* }}} */
 
 /* {{{ php_handle_gif
  * routine to handle GIF files. If only everything were that easy... ;} */
@@ -187,7 +156,7 @@ static unsigned long int php_swf_get_bits (unsigned char* buffer, unsigned int p
 }
 /* }}} */
 
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
+#if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
 /* {{{ php_handle_swc */
 static struct gfxinfo *php_handle_swc(php_stream * stream)
 {
@@ -425,6 +394,20 @@ static int php_skip_variable(php_stream * stream)
 }
 /* }}} */
 
+static size_t php_read_stream_all_chunks(php_stream *stream, char *buffer, size_t length)
+{
+	size_t read_total = 0;
+	do {
+		ssize_t read_now = php_stream_read(stream, buffer, length - read_total);
+		read_total += read_now;
+		if (read_now < stream->chunk_size && read_total != length) {
+			return 0;
+		}
+	} while (read_total < length);
+
+	return read_total;
+}
+
 /* {{{ php_read_APP */
 static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 {
@@ -441,7 +424,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 
 	buffer = emalloc(length);
 
-	if (php_stream_read(stream, buffer, (size_t) length) != length) {
+	if (php_read_stream_all_chunks(stream, buffer, length) != length) {
 		efree(buffer);
 		return 0;
 	}
@@ -618,7 +601,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream)
 	result->width = php_read4(stream); /* Xsiz */
 	result->height = php_read4(stream); /* Ysiz */
 
-#if MBO_0
+#ifdef MBO_0
 	php_read4(stream); /* XOsiz */
 	php_read4(stream); /* YOsiz */
 	php_read4(stream); /* XTsiz */
@@ -1155,95 +1138,76 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 }
 /* }}} */
 
-/* {{{ php_handle_avif
- * There's no simple way to get this information - so, for now, this is unsupported.
- * Simply return 0 for everything.
- */
-static struct gfxinfo *php_handle_avif(php_stream * stream) {
-	return ecalloc(1, sizeof(struct gfxinfo));
+/* {{{ User struct and stream read/skip implementations for libavifinfo API */
+struct php_avif_stream {
+	php_stream* stream;
+	uint8_t buffer[AVIFINFO_MAX_NUM_READ_BYTES];
+};
+
+static const uint8_t* php_avif_stream_read(void* stream, size_t num_bytes) {
+	struct php_avif_stream* avif_stream = (struct php_avif_stream*)stream;
+
+	if (avif_stream == NULL || avif_stream->stream == NULL) {
+		return NULL;
+	}
+	if (php_stream_read(avif_stream->stream, (char*)avif_stream->buffer, num_bytes) != num_bytes) {
+		avif_stream->stream = NULL; /* fail further calls */
+		return NULL;
+	}
+	return avif_stream->buffer;
+}
+
+static void php_avif_stream_skip(void* stream, size_t num_bytes) {
+	struct php_avif_stream* avif_stream = (struct php_avif_stream*)stream;
+
+	if (avif_stream == NULL || avif_stream->stream == NULL) {
+		return;
+	}
+	if (php_stream_seek(avif_stream->stream, num_bytes, SEEK_CUR)) {
+		avif_stream->stream = NULL; /* fail further calls */
+	}
 }
 /* }}} */
 
-/* {{{ php_ntohl
- * Convert a big-endian network uint32 to host order - 
- * which may be either little-endian or big-endian.
- * Thanks to Rob Pike via Joe Drago:
- * https://commandcenter.blogspot.nl/2012/04/byte-order-fallacy.html
+/* {{{ php_handle_avif
+ * Parse AVIF features
+ *
+ * The stream must be positioned at the beginning of a box, so it does not
+ * matter whether the "ftyp" box was already read by php_is_image_avif() or not.
+ * It will read bytes from the stream until features are found or the file is
+ * declared as invalid. Around 450 bytes are usually enough.
+ * Transforms such as mirror and rotation are not applied on width and height.
  */
-static uint32_t php_ntohl(uint32_t val) {
-	uint8_t data[4];
+static struct gfxinfo *php_handle_avif(php_stream * stream) {
+	struct gfxinfo* result = NULL;
+	AvifInfoFeatures features;
+	struct php_avif_stream avif_stream;
+	avif_stream.stream = stream;
 
-	memcpy(&data, &val, sizeof(data));
-	return ((uint32_t)data[3] << 0) |
-		((uint32_t)data[2] << 8) |
-		((uint32_t)data[1] << 16) |
-		((uint32_t)data[0] << 24);
+	if (AvifInfoGetFeaturesStream(&avif_stream, php_avif_stream_read, php_avif_stream_skip, &features) == kAvifInfoOk) {
+		result = (struct gfxinfo*)ecalloc(1, sizeof(struct gfxinfo));
+		result->width = features.width;
+		result->height = features.height;
+		result->bits = features.bit_depth;
+		result->channels = features.num_channels;
+	}
+	return result;
 }
 /* }}} */
 
 /* {{{ php_is_image_avif
- * detect whether an image is of type AVIF
- * 
- * An AVIF image will start off a header "box".
- * This starts with with a four-byte integer containing the number of bytes in the filetype box.
- * This must be followed by the string "ftyp".
- * Next comes a four-byte string indicating the "major brand".
- * If that's "avif" or "avis", this is an AVIF image.
- * Next, there's a four-byte "minor version" field, which we can ignore.
- * Next comes an array of four-byte strings containing "compatible brands".
- * These extend to the end of the box.
- * If any of the compatible brands is "avif" or "avis", then this is an AVIF image.
- * Otherwise, well, it's not.
- * For more, see https://mpeg.chiariglione.org/standards/mpeg-4/iso-base-media-file-format/text-isoiec-14496-12-5th-edition
+ * Detect whether an image is of type AVIF
+ *
+ * Only the first "ftyp" box is read.
+ * For a valid file, 12 bytes are usually read, but more might be necessary.
  */
-bool php_is_image_avif(php_stream * stream) {
-	uint32_t header_size_reversed, header_size, i;
-	char box_type[4], brand[4];
+bool php_is_image_avif(php_stream* stream) {
+	struct php_avif_stream avif_stream;
+	avif_stream.stream = stream;
 
-	ZEND_ASSERT(stream != NULL);
-
-	if (php_stream_read(stream, (char *) &header_size_reversed, 4) != 4) {
-		return 0;
-	}
-
-	header_size = php_ntohl(header_size_reversed);
-
-	/* If the box type isn't "ftyp", it can't be an AVIF image. */
-	if (php_stream_read(stream, box_type, 4) != 4) {
-		return 0;
-	}
-
-	if (memcmp(box_type, "ftyp", 4)) {
-		return 0;
-	}
-	
-	/* If the major brand is "avif" or "avis", it's an AVIF image. */
-	if (php_stream_read(stream, brand, 4) != 4) {
-		return 0;
-	}
-
-	if (!memcmp(brand, "avif", 4) || !memcmp(brand, "avis", 4)) {
+	if (AvifInfoIdentifyStream(&avif_stream, php_avif_stream_read, php_avif_stream_skip) == kAvifInfoOk) {
 		return 1;
 	}
-
-	/* Skip the next four bytes, which are the "minor version". */
-	if (php_stream_read(stream, brand, 4) != 4) {
-		return 0;
-	}
-
-	/* Look for "avif" or "avis" in any member of compatible_brands[], to the end of the header.
-	   Note we've already read four groups of four bytes. */
-
-	for (i = 16; i < header_size; i += 4) {
-		if (php_stream_read(stream, brand, 4) != 4) {
-			return 0;
-		}
-
-		if (!memcmp(brand, "avif", 4) || !memcmp(brand, "avis", 4)) {
-			return 1;
-		}
-	}
-
 	return 0;
 }
 /* }}} */
@@ -1504,7 +1468,7 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 			result = php_handle_swf(stream);
 			break;
 		case IMAGE_FILETYPE_SWC:
-#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
+#if defined(HAVE_ZLIB) && !defined(COMPILE_DL_ZLIB)
 			result = php_handle_swc(stream);
 #else
 			php_error_docref(NULL, E_NOTICE, "The image is a compressed SWF file, but you do not have a static version of the zlib extension enabled");

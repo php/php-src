@@ -771,12 +771,6 @@ PHP_MINIT_FUNCTION(cli_readline)
 	ZEND_INIT_MODULE_GLOBALS(cli_readline, cli_readline_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
-#if HAVE_LIBEDIT
-	REGISTER_STRING_CONSTANT("READLINE_LIB", "libedit", CONST_CS|CONST_PERSISTENT);
-#else
-	REGISTER_STRING_CONSTANT("READLINE_LIB", "readline", CONST_CS|CONST_PERSISTENT);
-#endif
-
 	GET_SHELL_CB(cb);
 	if (cb) {
 		cb->cli_shell_write = readline_shell_write;

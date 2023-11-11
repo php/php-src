@@ -37,6 +37,8 @@
 #define EXIFERR_CC
 #endif
 
+#define USE_MBSTRING zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)
+
 #include "php_exif.h"
 #include "exif_arginfo.h"
 #include <math.h>
@@ -163,11 +165,9 @@ static PHP_GINIT_FUNCTION(exif)
 PHP_MINIT_FUNCTION(exif)
 {
 	REGISTER_INI_ENTRIES();
-	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)) {
-		REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", 1, CONST_CS | CONST_PERSISTENT);
-	} else {
-		REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", 0, CONST_CS | CONST_PERSISTENT);
-	}
+
+	register_exif_symbols(module_number);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -4409,7 +4409,7 @@ static bool exif_discard_imageinfo(image_info_type *ImageInfo)
 static bool exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, int read_thumbnail, int read_all)
 {
 	bool ret;
-	zend_stat_t st;
+	zend_stat_t st = {0};
 
 	/* Start with an empty image information structure. */
 	memset(ImageInfo, 0, sizeof(*ImageInfo));

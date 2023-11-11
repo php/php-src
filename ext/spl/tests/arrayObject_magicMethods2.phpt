@@ -69,6 +69,10 @@ var_dump($ao);
 ?>
 --EXPECTF--
 --> Write existent, non-existent and dynamic:
+
+Deprecated: Creation of dynamic property ArrayObject::$a is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property ArrayObject::$dynamic is deprecated in %s on line %d
   Original wrapped object:
 object(UsesMagic)#1 (4) {
   ["a"]=>

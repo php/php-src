@@ -4,11 +4,7 @@ mysqlnd.net_read_timeout limit check
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
-if (!$IS_MYSQLND)
-    /* The libmysql read_timeout limit default is 365 * 24 * 3600 seconds. It cannot be altered through PHP API calls */
-    die("skip mysqlnd only test");
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 default_socket_timeout=60
@@ -16,7 +12,7 @@ max_execution_time=60
 mysqlnd.net_read_timeout=1
 --FILE--
 <?php
-    include ("connect.inc");
+    include "connect.inc";
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
         printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());

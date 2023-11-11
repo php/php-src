@@ -306,7 +306,7 @@ void phpdbg_string_init(char *buffer) {
 
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, bool free_init) /* {{{ */
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 
 	if (init_file && VCWD_STAT(init_file, &sb) != -1) {
 		FILE *fp = fopen(init_file, "r");
@@ -398,7 +398,7 @@ void phpdbg_clean(bool full, bool resubmit) /* {{{ */
 
 PHPDBG_COMMAND(exec) /* {{{ */
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 
 	if (VCWD_STAT(param->str, &sb) != FAILURE) {
 		if (sb.st_mode & (S_IFREG|S_IFLNK)) {
@@ -514,7 +514,7 @@ exec_code:
 } /* }}} */
 
 int phpdbg_compile_stdin(zend_string *code) {
-	PHPDBG_G(ops) = zend_compile_string(code, "Standard input code");
+	PHPDBG_G(ops) = zend_compile_string(code, "Standard input code", ZEND_COMPILE_POSITION_AFTER_OPEN_TAG);
 	zend_string_release(code);
 
 	if (EG(exception)) {
@@ -1390,7 +1390,7 @@ PHPDBG_COMMAND(dl) /* {{{ */
 
 PHPDBG_COMMAND(source) /* {{{ */
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 
 	if (VCWD_STAT(param->str, &sb) != -1) {
 		phpdbg_try_file_init(param->str, param->len, 0);
@@ -1663,7 +1663,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 		}
 
 #ifdef ZEND_WIN32
-		if (EG(timed_out)) {
+		if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 			zend_timeout();
 		}
 #endif

@@ -23,18 +23,16 @@ extern zend_module_entry tokenizer_module_entry;
 #include "php_version.h"
 #define PHP_TOKENIZER_VERSION PHP_VERSION
 
+#define TOKEN_PARSE (1 << 0)
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif
 
-void tokenizer_register_constants(INIT_FUNC_ARGS);
 char *get_token_type_name(int token_type);
 
 
 PHP_MINIT_FUNCTION(tokenizer);
 PHP_MINFO_FUNCTION(tokenizer);
-
-PHP_FUNCTION(token_get_all);
-PHP_FUNCTION(token_name);
 
 #endif	/* PHP_TOKENIZER_H */

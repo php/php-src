@@ -3,40 +3,64 @@ Zero byte test
 --FILE--
 <?php
 
-preg_match("\0//i", "");
-preg_match("/\0/i", "");
-preg_match("//\0i", "");
-preg_match("//i\0", "");
-preg_match("/\\\0/i", "");
+var_dump(preg_match("\0//i", ""));
+var_dump(preg_match("/\0/i", ""));
+var_dump(preg_match("/\0/i", "\0"));
+var_dump(preg_match("//\0i", ""));
+var_dump(preg_match("//i\0", ""));
+var_dump(preg_match("/\\\0/i", ""));
+var_dump(preg_match("/\\\0/i", "\\\0"));
 
-preg_match("\0[]i", "");
-preg_match("[\0]i", "");
-preg_match("[]\0i", "");
-preg_match("[]i\0", "");
-preg_match("[\\\0]i", "");
+var_dump(preg_match("\0[]i", ""));
+var_dump(preg_match("[\0]i", ""));
+var_dump(preg_match("[\0]i", "\0"));
+var_dump(preg_match("[]\0i", ""));
+var_dump(preg_match("[]i\0", ""));
+var_dump(preg_match("[\\\0]i", ""));
+var_dump(preg_match("[\\\0]i", "\\\0"));
+
+var_dump(preg_match("/abc\0def/", "abc"));
+var_dump(preg_match("/abc\0def/", "abc\0def"));
+var_dump(preg_match("/abc\0def/", "abc\0fed"));
+
+var_dump(preg_match("[abc\0def]", "abc"));
+var_dump(preg_match("[abc\0def]", "abc\0def"));
+var_dump(preg_match("[abc\0def]", "abc\0fed"));
 
 preg_replace("/foo/e\0/i", "echo('Eek');", "");
 
 ?>
 --EXPECTF--
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 3
+Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL in %snull_bytes.php on line 3
+bool(false)
+int(0)
+int(1)
 
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 4
+Warning: preg_match(): NUL is not a valid modifier in %snull_bytes.php on line 6
+bool(false)
 
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 5
+Warning: preg_match(): NUL is not a valid modifier in %snull_bytes.php on line 7
+bool(false)
+int(0)
+int(1)
 
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 6
+Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL in %snull_bytes.php on line 11
+bool(false)
+int(0)
+int(1)
 
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 7
+Warning: preg_match(): NUL is not a valid modifier in %snull_bytes.php on line 14
+bool(false)
 
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 9
+Warning: preg_match(): NUL is not a valid modifier in %snull_bytes.php on line 15
+bool(false)
+int(0)
+int(1)
+int(0)
+int(1)
+int(0)
+int(0)
+int(1)
+int(0)
 
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 10
-
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 11
-
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 12
-
-Warning: preg_match(): Null byte in regex in %snull_bytes.php on line 13
-
-Warning: preg_replace(): Null byte in regex in %snull_bytes.php on line 15
+Warning: preg_replace(): NUL is not a valid modifier in %snull_bytes.php on line 27

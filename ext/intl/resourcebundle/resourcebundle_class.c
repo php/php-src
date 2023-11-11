@@ -252,7 +252,7 @@ PHP_FUNCTION( resourcebundle_get )
 /* }}} */
 
 /* {{{ resourcebundle_array_count */
-int resourcebundle_array_count(zend_object *object, zend_long *count)
+static zend_result resourcebundle_array_count(zend_object *object, zend_long *count)
 {
 	ResourceBundle_object *rb = php_intl_resourcebundle_fetch_object(object);
 

@@ -106,6 +106,14 @@ function testInvalidString($fromString, $toString, $fromEncoding, $toEncoding) {
 function testAllValidChars($charMap, $fromEncoding, $toEncoding, $bothWays = true) {
     $goodChars = array_keys($charMap);
     shuffle($goodChars);
+    // Try a long string
+    $fromString = $toString = '';
+    foreach ($goodChars as $goodChar) {
+        $fromString .= $goodChar;
+        $toString .= $charMap[$goodChar];
+    }
+    testValidString($fromString, $toString, $fromEncoding, $toEncoding, $bothWays);
+    // Try various shorter ones
     while (!empty($goodChars)) {
         $length = min(rand(5,10), count($goodChars));
         $fromString = $toString = '';

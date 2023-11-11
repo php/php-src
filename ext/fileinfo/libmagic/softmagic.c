@@ -2199,14 +2199,13 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		slen = MIN(m->vallen, sizeof(m->value.s));
 		l = 0;
 		v = 0;
-#ifdef HAVE_MEMMEM
 		if (slen > 0 && m->str_flags == 0) {
 			const char *found;
 			idx = m->str_range + slen;
 			if (m->str_range == 0 || ms->search.s_len < idx)
 				idx = ms->search.s_len;
-			found = CAST(const char *, memmem(ms->search.s, idx,
-			    m->value.s, slen));
+			found = CAST(const char *, php_memnstr(ms->search.s,
+			    m->value.s, slen, ms->search.s + idx));
 			if (!found)
 				return 0;
 			idx = found - ms->search.s;
@@ -2214,7 +2213,6 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			ms->search.rm_len = ms->search.s_len - idx;
 			break;
 		}
-#endif
 
 		for (idx = 0; m->str_range == 0 || idx < m->str_range; idx++) {
 			if (slen + idx > ms->search.s_len)

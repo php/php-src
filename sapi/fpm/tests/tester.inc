@@ -132,6 +132,16 @@ class Tester
     private ?Response $response;
 
     /**
+     * @var string[]
+     */
+    private $expectedAccessLogs;
+
+    /**
+     * @var bool
+     */
+    private $expectSuppressableAccessLogEntries;
+
+    /**
      * Clean all the created files up
      *
      * @param int $backTraceIndex
@@ -259,10 +269,11 @@ class Tester
     static public function skipIfConfigFails(string $configTemplate)
     {
         $tester     = new self($configTemplate, '', [], self::getCallerFileName());
-        $testResult = $tester->testConfig();
+        $testResult = $tester->testConfig(true);
         if ($testResult !== null) {
             self::clean(2);
-            die("skip $testResult");
+            $message = $testResult[0] ?? 'Config failed';
+            die("skip $message");
         }
     }
 
@@ -294,7 +305,7 @@ class Tester
      */
     static public function skipIfNotRoot()
     {
-        if (getmyuid() != 0) {
+        if (exec('whoami') !== 'root') {
             die('skip not running as root');
         }
     }
@@ -304,7 +315,7 @@ class Tester
      */
     static public function skipIfRoot()
     {
-        if (getmyuid() == 0) {
+        if (exec('whoami') === 'root') {
             die('skip running as root');
         }
     }
@@ -316,6 +327,27 @@ class Tester
     {
         if ( ! extension_loaded('posix')) {
             die('skip posix extension not loaded');
+        }
+    }
+
+    /**
+     * Skip if shared extension is not available in extension directory.
+     */
+    static public function skipIfSharedExtensionNotFound($extensionName)
+    {
+        $soPath = ini_get('extension_dir') . '/' . $extensionName . '.so';
+        if ( ! file_exists($soPath)) {
+            die("skip $extensionName extension not present in extension_dir");
+        }
+    }
+
+    /**
+     * Skip if posix extension not loaded.
+     */
+    static public function skipIfUserDoesNotExist($userName) {
+        self::skipIfPosixNotLoaded();
+        if ( posix_getpwnam( $userName ) === false ) {
+            die( "skip user $userName does not exist" );
         }
     }
 
@@ -357,17 +389,26 @@ class Tester
     /**
      * Test configuration file.
      *
-     * @return null|string
+     * @return null|array
      * @throws \Exception
      */
-    public function testConfig()
+    public function testConfig($silent = false)
     {
         $configFile = $this->createConfig();
-        $cmd        = self::findExecutable() . ' -t -y ' . $configFile . ' 2>&1';
+        $cmd        = self::findExecutable() . ' -tt -y ' . $configFile . ' 2>&1';
         $this->trace('Testing config using command', $cmd, true);
         exec($cmd, $output, $code);
         if ($code) {
-            return preg_replace("/\[.+?\]/", "", $output[0]);
+            $messages = [];
+            foreach ($output as $outputLine) {
+                $message    = preg_replace("/\[.+?\]/", "", $outputLine, 1);
+                $messages[] = $message;
+                if ( ! $silent) {
+                    $this->error($message, null, false);
+                }
+            }
+
+            return $messages;
         }
 
         return null;
@@ -825,6 +866,38 @@ class Tester
 
             return array_map(fn($request) => new Response(null, true), $requests);
         }
+    }
+
+    /**
+     * Execute request for getting FastCGI values.
+     *
+     * @param string|null $address
+     * @param bool        $connKeepAlive
+     *
+     * @return ValuesResponse
+     * @throws \Exception
+     */
+    public function requestValues(
+        string $address = null,
+        bool $connKeepAlive = false
+    ): ValuesResponse {
+        if ($this->hasError()) {
+            return new Response(null, true);
+        }
+
+        try {
+            $valueResponse = new ValuesResponse(
+                $this->getClient($address, $connKeepAlive)->getValues(['FCGI_MPXS_CONNS'])
+            );
+            if ($this->debug) {
+                $this->response->debugOutput();
+            }
+        } catch (\Exception $exception) {
+            $this->error("Request for getting values failed", $exception);
+            $valueResponse = new ValuesResponse();
+        }
+
+        return $valueResponse;
     }
 
     /**
@@ -1288,6 +1361,7 @@ class Tester
             return $filePath;
         }
         file_put_contents($filePath, $content);
+
         $this->trace('Created file: ' . $filePath, $content, isFile: true);
 
         return $filePath;
@@ -1328,14 +1402,15 @@ class Tester
     /**
      * Display error.
      *
-     * @param string          $msg
-     * @param \Exception|null $exception
+     * @param string          $msg       Error message.
+     * @param \Exception|null $exception If there is an exception, log its message
+     * @param bool            $prefix    Whether to prefix the error message
      *
      * @return false
      */
-    private function error($msg, \Exception $exception = null): bool
+    private function error(string $msg, \Exception $exception = null, bool $prefix = true): bool
     {
-        $this->error = 'ERROR: ' . $msg;
+        $this->error = $prefix ? 'ERROR: ' . $msg : ltrim($msg);
         if ($exception) {
             $this->error .= '; EXCEPTION: ' . $exception->getMessage();
         }
@@ -1835,12 +1910,22 @@ class Tester
      */
     public function expectLogConfigOptions(array $options)
     {
-        foreach ($options as $name => $value) {
-            $this->expectLogNotice("\s+$name\s=\s$value", checkAllLogs: true);
+        foreach ($options as $value) {
+            $confValue = str_replace(
+                ']',
+                '\]',
+                str_replace(
+                    '[',
+                    '\[',
+                    str_replace('/', '\/', $value)
+                )
+            );
+            $this->expectLogNotice("\s+$confValue", checkAllLogs: true);
         }
 
         return true;
     }
+
 
     /**
      * Print content of access log.
@@ -1854,6 +1939,70 @@ class Tester
     }
 
     /**
+     * Return content of access log.
+     *
+     * @return string|false
+     */
+    public function getAccessLog()
+    {
+        $accessLog = $this->getFile('acc.log');
+        if (is_file($accessLog)) {
+            return file_get_contents($accessLog);
+        }
+        return false;
+    }
+
+    /**
+     * Expect a single access log line.
+     *
+     * @param string $LogLine
+     * @param bool $suppressable see expectSuppressableAccessLogEntries
+     */
+    public function expectAccessLog(
+        string $logLine,
+        bool $suppressable = false
+    ) {
+        if (!$suppressable || $this->expectSuppressableAccessLogEntries) {
+            $this->expectedAccessLogs[] = $logLine;
+        }
+    }
+
+    /**
+     * Checks that all access log entries previously listed as expected by
+     * calling "expectAccessLog" are in the access log.
+     */
+    public function checkAccessLog()
+    {
+        if (isset($this->expectedAccessLogs)) {
+            $expectedAccessLog = implode("\n", $this->expectedAccessLogs) . "\n";
+        } else {
+            $this->error("Called checkAccessLog but did not previous call expectAccessLog");
+        }
+        if ($accessLog = $this->getAccessLog()) {
+            if ($expectedAccessLog !== $accessLog) {
+                $this->error(sprintf(
+                    "Access log was not as expected.\nEXPECTED:\n%s\n\nACTUAL:\n%s",
+                    $expectedAccessLog,
+                    $accessLog
+                ));
+            }
+        } else {
+            $this->error("Called checkAccessLog but access log does not exist");
+        }
+    }
+
+    /**
+     * Flags whether the access log check should expect to see suppressable
+     * log entries, i.e. the URL is not in access.suppress_path[] config
+     *
+     * @param bool
+     */
+    public function expectSuppressableAccessLogEntries(bool $expectSuppressableAccessLogEntries)
+    {
+        $this->expectSuppressableAccessLogEntries = $expectSuppressableAccessLogEntries;
+    }
+
+    /*
      * Read all log entries.
      *
      * @param string      $type    The log type

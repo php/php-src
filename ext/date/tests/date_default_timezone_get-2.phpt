@@ -12,4 +12,5 @@ date.timezone=
     echo date_default_timezone_get(), "\n";
 ?>
 --EXPECT--
+Warning: PHP Startup: Invalid date.timezone value '', using 'UTC' instead in Unknown on line 0
 UTC

@@ -14,4 +14,4 @@ enum Foo {
 
 ?>
 --EXPECTF--
-Fatal error: Enum may not include __get in %s on line %d
+Fatal error: Enum Foo cannot include magic method __get in %s on line %d

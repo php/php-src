@@ -21,14 +21,14 @@
 
 #include "php.h"
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #if PHP_USE_PHP_CRYPT_R
 # include "php_crypt_r.h"
 # include "crypt_freesec.h"
 #else
-# if HAVE_CRYPT_H
+# ifdef HAVE_CRYPT_H
 #  if defined(CRYPT_R_GNU_SOURCE) && !defined(_GNU_SOURCE)
 #   define _GNU_SOURCE
 #  endif
@@ -43,7 +43,7 @@
 #endif
 
 #include "php_crypt.h"
-#include "php_random.h"
+#include "ext/random/php_random.h"
 
 /* sha512 crypt has the maximal salt length of 123 characters */
 #define PHP_MAX_SALT_LEN 123

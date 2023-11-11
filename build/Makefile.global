@@ -137,6 +137,7 @@ distclean: clean
 
 prof-gen:
 	CCACHE_DISABLE=1 $(MAKE) PROF_FLAGS=-fprofile-generate all
+	find . -name \*.gcda | xargs rm -f
 
 prof-clean:
 	find . -name \*.lo -o -name \*.o | xargs rm -f

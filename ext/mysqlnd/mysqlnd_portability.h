@@ -38,7 +38,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
   #define atoll atol
 #endif
 
-#include "php_stdint.h"
+#include <stdint.h>
 
 #if SIZEOF_LONG_LONG > 4 && !defined(_LONG_LONG)
 #define _LONG_LONG 1        /* For AIX string library */

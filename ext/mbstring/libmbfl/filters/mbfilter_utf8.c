@@ -49,6 +49,9 @@ const unsigned char mblen_table_utf8[] = {
 	4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 };
 
+static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_utf8(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+
 static const char *mbfl_encoding_utf8_aliases[] = {"utf8", NULL};
 
 const mbfl_encoding mbfl_encoding_utf8 = {
@@ -60,6 +63,8 @@ const mbfl_encoding mbfl_encoding_utf8 = {
 	0,
 	&vtbl_utf8_wchar,
 	&vtbl_wchar_utf8,
+	mb_utf8_to_wchar,
+	mb_wchar_to_utf8,
 	NULL
 };
 
@@ -165,9 +170,8 @@ retry:
 			goto retry;
 		}
 		break;
-	default:
-		filter->status = 0;
-		break;
+
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;
@@ -210,4 +214,123 @@ int mbfl_filt_conv_wchar_utf8(int c, mbfl_convert_filter *filter)
 	}
 
 	return 0;
+}
+
+static size_t mb_utf8_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	unsigned char *p = *in, *e = p + *in_len;
+	uint32_t *out = buf, *limit = buf + bufsize;
+
+	while (p < e && out < limit) {
+		unsigned char c = *p++;
+
+		if (c < 0x80) {
+			*out++ = c;
+		} else if (c >= 0xC2 && c <= 0xDF) { /* 2 byte character */
+			if (p < e) {
+				unsigned char c2 = *p++;
+				if ((c2 & 0xC0) != 0x80) {
+					*out++ = MBFL_BAD_INPUT;
+					p--;
+				} else {
+					*out++ = ((c & 0x1F) << 6) | (c2 & 0x3F);
+				}
+			} else {
+				*out++ = MBFL_BAD_INPUT;
+			}
+		} else if (c >= 0xE0 && c <= 0xEF) { /* 3 byte character */
+			if ((e - p) >= 2) {
+				unsigned char c2 = *p++;
+				unsigned char c3 = *p++;
+				if ((c2 & 0xC0) != 0x80 || (c == 0xE0 && c2 < 0xA0) || (c == 0xED && c2 >= 0xA0)) {
+					*out++ = MBFL_BAD_INPUT;
+					p -= 2;
+				} else if ((c3 & 0xC0) != 0x80) {
+					*out++ = MBFL_BAD_INPUT;
+					p--;
+				} else {
+					uint32_t decoded = ((c & 0xF) << 12) | ((c2 & 0x3F) << 6) | (c3 & 0x3F);
+					if (decoded < 0x800 || (decoded >= 0xD800 && decoded <= 0xDFFF)) {
+						*out++ = MBFL_BAD_INPUT;
+					} else {
+						*out++ = decoded;
+					}
+				}
+			} else {
+				*out++ = MBFL_BAD_INPUT;
+				if (p < e && (c != 0xE0 || *p >= 0xA0) && (c != 0xED || *p < 0xA0) && (*p & 0xC0) == 0x80) {
+					p++;
+					if (p < e && (*p & 0xC0) == 0x80) {
+						p++;
+					}
+				}
+			}
+		} else if (c >= 0xF0 && c <= 0xF4) { /* 4 byte character */
+			if ((e - p) >= 3) {
+				unsigned char c2 = *p++;
+				unsigned char c3 = *p++;
+				unsigned char c4 = *p++;
+				/* If c == 0xF0 and c2 < 0x90, then this is an over-long code unit; it could have
+				 * fit in 3 bytes only. If c == 0xF4 and c2 >= 0x90, then this codepoint is
+				 * greater than U+10FFFF, which is the highest legal codepoint */
+				if ((c2 & 0xC0) != 0x80 || (c == 0xF0 && c2 < 0x90) || (c == 0xF4 && c2 >= 0x90)) {
+					*out++ = MBFL_BAD_INPUT;
+					p -= 3;
+				} else if ((c3 & 0xC0) != 0x80) {
+					*out++ = MBFL_BAD_INPUT;
+					p -= 2;
+				} else if ((c4 & 0xC0) != 0x80) {
+					*out++ = MBFL_BAD_INPUT;
+					p--;
+				} else {
+					uint32_t decoded = ((c & 0x7) << 18) | ((c2 & 0x3F) << 12) | ((c3 & 0x3F) << 6) | (c4 & 0x3F);
+					*out++ = (decoded < 0x10000) ? MBFL_BAD_INPUT : decoded;
+				}
+			} else {
+				*out++ = MBFL_BAD_INPUT;
+				if (p < e) {
+					unsigned char c2 = *p;
+					if ((c == 0xF0 && c2 >= 0x90) || (c == 0xF4 && c2 < 0x90) || (c >= 0xF1 && c <= 0xF3)) {
+						while (p < e && (*p & 0xC0) == 0x80) {
+							p++;
+						}
+					}
+				}
+			}
+		} else {
+			*out++ = MBFL_BAD_INPUT;
+		}
+	}
+
+	*in_len = e - p;
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_utf8(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+
+	while (len--) {
+		uint32_t w = *in++;
+		if (w < 0x80) {
+			out = mb_convert_buf_add(out, w & 0xFF);
+		} else if (w < 0x800) {
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 2);
+			out = mb_convert_buf_add2(out, ((w >> 6) & 0x1F) | 0xC0, (w & 0x3F) | 0x80);
+		} else if (w < 0x10000) {
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 3);
+			out = mb_convert_buf_add3(out, ((w >> 12) & 0xF) | 0xE0, ((w >> 6) & 0x3F) | 0x80, (w & 0x3F) | 0x80);
+		} else if (w < 0x110000) {
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 4);
+			out = mb_convert_buf_add4(out, ((w >> 18) & 0x7) | 0xF0, ((w >> 12) & 0x3F) | 0x80, ((w >> 6) & 0x3F) | 0x80, (w & 0x3F) | 0x80);
+		} else {
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_utf8);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }

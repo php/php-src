@@ -31,6 +31,11 @@
 #include "mbfilter_utf16.h"
 
 static int mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter);
+static size_t mb_utf16_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static size_t mb_utf16be_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_utf16be(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+static size_t mb_utf16le_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_utf16le(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 
 static const char *mbfl_encoding_utf16_aliases[] = {"utf16", NULL};
 
@@ -40,9 +45,11 @@ const mbfl_encoding mbfl_encoding_utf16 = {
 	"UTF-16",
 	mbfl_encoding_utf16_aliases,
 	NULL,
-	MBFL_ENCTYPE_MWC2,
+	0,
 	&vtbl_utf16_wchar,
 	&vtbl_wchar_utf16,
+	mb_utf16_to_wchar,
+	mb_wchar_to_utf16be,
 	NULL
 };
 
@@ -52,9 +59,11 @@ const mbfl_encoding mbfl_encoding_utf16be = {
 	"UTF-16BE",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MWC2,
+	0,
 	&vtbl_utf16be_wchar,
 	&vtbl_wchar_utf16be,
+	mb_utf16be_to_wchar,
+	mb_wchar_to_utf16be,
 	NULL
 };
 
@@ -64,9 +73,11 @@ const mbfl_encoding mbfl_encoding_utf16le = {
 	"UTF-16LE",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MWC2,
+	0,
 	&vtbl_utf16le_wchar,
 	&vtbl_wchar_utf16le,
+	mb_utf16le_to_wchar,
+	mb_wchar_to_utf16le,
 	NULL
 };
 
@@ -141,10 +152,10 @@ int mbfl_filt_conv_utf16_wchar(int c, mbfl_convert_filter *filter)
 		filter->status = 1;
 	} else {
 		int n = (filter->cache << 8) | (c & 0xFF);
+		filter->cache = filter->status = 0;
 		if (n == 0xFFFE) {
 			/* Switch to little-endian mode */
 			filter->filter_function = mbfl_filt_conv_utf16le_wchar;
-			filter->cache = filter->status = 0;
 		} else {
 			filter->filter_function = mbfl_filt_conv_utf16be_wchar;
 			if (n >= 0xD800 && n <= 0xDBFF) {
@@ -157,7 +168,6 @@ int mbfl_filt_conv_utf16_wchar(int c, mbfl_convert_filter *filter)
 			} else if (n != 0xFEFF) {
 				CK((*filter->output_function)(n, filter->data));
 			}
-			filter->cache = filter->status = 0;
 		}
 	}
 
@@ -181,11 +191,11 @@ int mbfl_filt_conv_utf16be_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 2;
 		} else if (n >= 0xDC00 && n <= 0xDFFF) {
 			/* This is wrong; second part of surrogate pair has come first */
+			filter->status = 0;
 			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-			filter->status = 0;
 		} else {
-			CK((*filter->output_function)(n, filter->data));
 			filter->status = 0;
+			CK((*filter->output_function)(n, filter->data));
 		}
 		break;
 
@@ -198,17 +208,17 @@ int mbfl_filt_conv_utf16be_wchar(int c, mbfl_convert_filter *filter)
 		n = ((filter->cache & 0xFF) << 8) | (c & 0xFF);
 		if (n >= 0xD800 && n <= 0xDBFF) {
 			/* Wrong; that's the first half of a surrogate pair, not the second */
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			filter->cache = n & 0x3FF;
 			filter->status = 2;
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		} else if (n >= 0xDC00 && n <= 0xDFFF) {
+			filter->status = 0;
 			n = ((filter->cache & 0x3FF00) << 2) + (n & 0x3FF) + 0x10000;
 			CK((*filter->output_function)(n, filter->data));
-			filter->status = 0;
 		} else {
+			filter->status = 0;
 			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			CK((*filter->output_function)(n, filter->data));
-			filter->status = 0;
 		}
 	}
 
@@ -253,11 +263,11 @@ int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter)
 			filter->status = 2;
 		} else if ((c & 0xfc) == 0xdc) {
 			/* This is wrong; the second part of the surrogate pair has come first */
+			filter->status = 0;
 			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
-			filter->status = 0;
 		} else {
-			CK((*filter->output_function)(filter->cache + ((c & 0xff) << 8), filter->data));
 			filter->status = 0;
+			CK((*filter->output_function)(filter->cache + ((c & 0xff) << 8), filter->data));
 		}
 		break;
 
@@ -271,19 +281,19 @@ int mbfl_filt_conv_utf16le_wchar(int c, mbfl_convert_filter *filter)
 		if (n >= 0xD800 && n <= 0xDBFF) {
 			/* We previously saw the first part of a surrogate pair and were
 			 * expecting the second part; this is another first part */
-			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			filter->cache = n & 0x3FF;
 			filter->status = 2;
+			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 		} else if (n >= 0xDC00 && n <= 0xDFFF) {
 			n = filter->cache + ((c & 0x3) << 8) + 0x10000;
-			CK((*filter->output_function)(n, filter->data));
 			filter->status = 0;
+			CK((*filter->output_function)(n, filter->data));
 		} else {
 			/* The first part of a surrogate pair was followed by some other codepoint
 			 * which is not part of a surrogate pair at all */
+			filter->status = 0;
 			CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			CK((*filter->output_function)(n, filter->data));
-			filter->status = 0;
 		}
 		break;
 	}
@@ -325,4 +335,192 @@ static int mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter)
 	}
 
 	return 0;
+}
+
+#define DETECTED_BE 1
+#define DETECTED_LE 2
+
+static size_t mb_utf16_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	if (*state == DETECTED_BE) {
+		return mb_utf16be_to_wchar(in, in_len, buf, bufsize, NULL);
+	} else if (*state == DETECTED_LE) {
+		return mb_utf16le_to_wchar(in, in_len, buf, bufsize, NULL);
+	} else if (*in_len >= 2) {
+		unsigned char *p = *in;
+		unsigned char c1 = *p++;
+		unsigned char c2 = *p++;
+		uint16_t n = (c1 << 8) | c2;
+
+		if (n == 0xFFFE) {
+			/* Little-endian BOM */
+			*in = p;
+			*in_len -= 2;
+			*state = DETECTED_LE;
+			return mb_utf16le_to_wchar(in, in_len, buf, bufsize, NULL);
+		} if (n == 0xFEFF) {
+			/* Big-endian BOM; don't send to output */
+			*in = p;
+			*in_len -= 2;
+		}
+	}
+
+	*state = DETECTED_BE;
+	return mb_utf16be_to_wchar(in, in_len, buf, bufsize, NULL);
+}
+
+static size_t mb_utf16be_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	/* We only want to read 16-bit words out of `str`; any trailing byte will be handled at the end */
+	unsigned char *p = *in, *e = p + (*in_len & ~1);
+	/* Set `limit` to one less than the actual amount of space in the buffer; this is because
+	 * on some iterations of the below loop, we might produce two output words */
+	uint32_t *out = buf, *limit = buf + bufsize - 1;
+
+	while (p < e && out < limit) {
+		unsigned char c1 = *p++;
+		unsigned char c2 = *p++;
+		uint16_t n = (c1 << 8) | c2;
+
+		if (n >= 0xD800 && n <= 0xDBFF) {
+			/* Handle surrogate */
+			if (p < e) {
+				unsigned char c3 = *p++;
+				unsigned char c4 = *p++;
+				uint16_t n2 = (c3 << 8) | c4;
+
+				if (n2 >= 0xD800 && n2 <= 0xDBFF) {
+					/* Wrong; that's the first half of a surrogate pair, when we were expecting the second */
+					*out++ = MBFL_BAD_INPUT;
+					p -= 2;
+				} else if (n2 >= 0xDC00 && n2 <= 0xDFFF) {
+					*out++ = (((n & 0x3FF) << 10) | (n2 & 0x3FF)) + 0x10000;
+				} else {
+					/* The first half of a surrogate pair was followed by a 'normal' codepoint */
+					*out++ = MBFL_BAD_INPUT;
+					*out++ = n2;
+				}
+			} else {
+				*out++ = MBFL_BAD_INPUT;
+			}
+		} else if (n >= 0xDC00 && n <= 0xDFFF) {
+			/* This is wrong; second part of surrogate pair has come first */
+			*out++ = MBFL_BAD_INPUT;
+		} else {
+			*out++ = n;
+		}
+	}
+
+	if (p == e && (*in_len & 0x1) && out < limit) {
+		/* There is an extra trailing byte (which shouldn't be there) */
+		*out++ = MBFL_BAD_INPUT;
+		p++;
+	}
+
+	*in_len -= (p - *in);
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_utf16be(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+
+	while (len--) {
+		uint32_t w = *in++;
+
+		if (w < MBFL_WCSPLANE_UCS2MAX) {
+			out = mb_convert_buf_add2(out, (w >> 8) & 0xFF, w & 0xFF);
+		} else if (w < MBFL_WCSPLANE_UTF32MAX) {
+			uint16_t n1 = ((w >> 10) - 0x40) | 0xD800;
+			uint16_t n2 = (w & 0x3FF) | 0xDC00;
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, (len * 2) + 4);
+			out = mb_convert_buf_add4(out, (n1 >> 8) & 0xFF, n1 & 0xFF, (n2 >> 8) & 0xFF, n2 & 0xFF);
+		} else {
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_utf16be);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
+}
+
+static size_t mb_utf16le_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	/* We only want to read 16-bit words out of `str`; any trailing byte will be handled at the end */
+	unsigned char *p = *in, *e = p + (*in_len & ~1);
+	/* Set `limit` to one less than the actual amount of space in the buffer; this is because
+	 * on some iterations of the below loop, we might produce two output words */
+	uint32_t *out = buf, *limit = buf + bufsize - 1;
+
+	while (p < e && out < limit) {
+		unsigned char c1 = *p++;
+		unsigned char c2 = *p++;
+		uint16_t n = (c2 << 8) | c1;
+
+		if (n >= 0xD800 && n <= 0xDBFF) {
+			/* Handle surrogate */
+			if (p < e) {
+				unsigned char c3 = *p++;
+				unsigned char c4 = *p++;
+				uint16_t n2 = (c4 << 8) | c3;
+
+				if (n2 >= 0xD800 && n2 <= 0xDBFF) {
+					/* Wrong; that's the first half of a surrogate pair, when we were expecting the second */
+					*out++ = MBFL_BAD_INPUT;
+					p -= 2;
+				} else if (n2 >= 0xDC00 && n2 <= 0xDFFF) {
+					*out++ = (((n & 0x3FF) << 10) | (n2 & 0x3FF)) + 0x10000;
+				} else {
+					/* The first half of a surrogate pair was followed by a 'normal' codepoint */
+					*out++ = MBFL_BAD_INPUT;
+					*out++ = n2;
+				}
+			} else {
+				*out++ = MBFL_BAD_INPUT;
+			}
+		} else if (n >= 0xDC00 && n <= 0xDFFF) {
+			/* This is wrong; second part of surrogate pair has come first */
+			*out++ = MBFL_BAD_INPUT;
+		} else {
+			*out++ = n;
+		}
+	}
+
+	if (p == e && (*in_len & 0x1) && out < limit) {
+		/* There is an extra trailing byte (which shouldn't be there) */
+		*out++ = MBFL_BAD_INPUT;
+		p++;
+	}
+
+	*in_len -= (p - *in);
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_utf16le(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+
+	while (len--) {
+		uint32_t w = *in++;
+
+		if (w < MBFL_WCSPLANE_UCS2MAX) {
+			out = mb_convert_buf_add2(out, w & 0xFF, (w >> 8) & 0xFF);
+		} else if (w < MBFL_WCSPLANE_UTF32MAX) {
+			uint16_t n1 = ((w >> 10) - 0x40) | 0xD800;
+			uint16_t n2 = (w & 0x3FF) | 0xDC00;
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, (len * 2) + 4);
+			out = mb_convert_buf_add4(out, n1 & 0xFF, (n1 >> 8) & 0xFF, n2 & 0xFF, (n2 >> 8) & 0xFF);
+		} else {
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_utf16le);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }

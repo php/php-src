@@ -21,10 +21,10 @@ dir2_cp1252
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = iconv('cp1252', 'utf-8', "Voláçao"); // cp1252 string
-$prefix = create_data("dir2_cp1252", "${item}3");
-$path = $prefix . DIRECTORY_SEPARATOR . "${item}3";
+$prefix = create_data("dir2_cp1252", "{$item}3");
+$path = $prefix . DIRECTORY_SEPARATOR . "{$item}3";
 
-$subpath = $path . DIRECTORY_SEPARATOR . "${item}4";
+$subpath = $path . DIRECTORY_SEPARATOR . "{$item}4";
 
 /* The mb dirname exists*/
 var_dump(file_exists($path));

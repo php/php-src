@@ -3,6 +3,26 @@
 /** @generate-class-entries */
 
 /**
+ * @var int
+ * @cvalue PHP_ENCHANT_MYSPELL
+ * @deprecated
+ */
+const ENCHANT_MYSPELL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ENCHANT_ISPELL
+ * @deprecated
+ */
+const ENCHANT_ISPELL = UNKNOWN;
+#ifdef HAVE_ENCHANT_GET_VERSION
+/**
+ * @var string
+ * @cvalue PHP_ENCHANT_GET_VERSION
+ */
+const LIBENCHANT_VERSION = UNKNOWN;
+#endif
+
+/**
  * @strict-properties
  * @not-serializable
  */

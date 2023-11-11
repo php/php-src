@@ -247,9 +247,7 @@ PHPAPI void PHP_SHA1Final(unsigned char digest[20], PHP_SHA1_CTX * context)
 /* {{{ SHA1Transform
  * SHA1 basic transformation. Transforms state based on block.
  */
-static void SHA1Transform(state, block)
-uint32_t state[5];
-const unsigned char block[64];
+static void SHA1Transform(uint32_t state[5], const unsigned char block[64])
 {
 	uint32_t a = state[0], b = state[1], c = state[2];
 	uint32_t d = state[3], e = state[4], x[16], tmp;
@@ -359,10 +357,7 @@ const unsigned char block[64];
    Encodes input (uint32_t) into output (unsigned char). Assumes len is
    a multiple of 4.
  */
-static void SHA1Encode(output, input, len)
-unsigned char *output;
-uint32_t *input;
-unsigned int len;
+static void SHA1Encode(unsigned char *output, uint32_t *input, unsigned int len)
 {
 	unsigned int i, j;
 
@@ -379,10 +374,7 @@ unsigned int len;
    Decodes input (unsigned char) into output (uint32_t). Assumes len is
    a multiple of 4.
  */
-static void SHA1Decode(output, input, len)
-uint32_t *output;
-const unsigned char *input;
-unsigned int len;
+static void SHA1Decode(uint32_t *output, const unsigned char *input, unsigned int len)
 {
 	unsigned int i, j;
 

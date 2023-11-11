@@ -44,7 +44,7 @@
 #include "php_string.h"
 #include "SAPI.h"
 #include <locale.h>
-#if HAVE_LANGINFO_H
+#ifdef HAVE_LANGINFO_H
 #include <langinfo.h>
 #endif
 
@@ -95,7 +95,7 @@ static inline unsigned int get_next_char(
 		const unsigned char *str,
 		size_t str_len,
 		size_t *cursor,
-		int *status)
+		zend_result *status)
 {
 	size_t pos = *cursor;
 	unsigned int this_char = 0;
@@ -356,7 +356,7 @@ PHPAPI unsigned int php_next_utf8_char(
 		const unsigned char *str,
 		size_t str_len,
 		size_t *cursor,
-		int *status)
+		zend_result *status)
 {
 	return get_next_char(cs_utf_8, str, str_len, cursor, status);
 }
@@ -1045,8 +1045,8 @@ static inline void find_entity_for_char(
 		*entity_len = c->data.ent.entity_len;
 	} else {
 		/* peek at next char */
-		size_t	 cursor_before	= *cursor;
-		int		 status			= SUCCESS;
+		size_t cursor_before = *cursor;
+		zend_result status = SUCCESS;
 		unsigned next_char;
 
 		if (!(*cursor < oldlen))
@@ -1156,7 +1156,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t
 		const unsigned char *mbsequence = NULL;
 		size_t mbseqlen					= 0,
 		       cursor_before			= cursor;
-		int status						= SUCCESS;
+		zend_result status				= SUCCESS;
 		unsigned int this_char			= get_next_char(charset, old, oldlen, &cursor, &status);
 
 		/* guarantee we have at least 40 bytes to write.

@@ -2,8 +2,67 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class IntlTimeZone
 {
+    /**
+     * @var int
+     * @cvalue TimeZone::SHORT
+     */
+    public const DISPLAY_SHORT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TimeZone::LONG
+     */
+    public const DISPLAY_LONG = UNKNOWN;
+
+    /**
+     * @var int
+     * @cvalue TimeZone::SHORT_GENERIC
+     */
+    public const DISPLAY_SHORT_GENERIC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TimeZone::LONG_GENERIC
+     */
+    public const DISPLAY_LONG_GENERIC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TimeZone::SHORT_GMT
+     */
+    public const DISPLAY_SHORT_GMT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TimeZone::LONG_GMT
+     */
+    public const DISPLAY_LONG_GMT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TimeZone::SHORT_COMMONLY_USED
+     */
+    public const DISPLAY_SHORT_COMMONLY_USED = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TimeZone::GENERIC_LOCATION
+     */
+    public const DISPLAY_GENERIC_LOCATION = UNKNOWN;
+
+    /**
+     * @var int
+     * @cvalue UCAL_ZONE_TYPE_ANY
+     */
+    public const TYPE_ANY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue UCAL_ZONE_TYPE_CANONICAL
+     */
+    public const TYPE_CANONICAL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue UCAL_ZONE_TYPE_CANONICAL_LOCATION
+     */
+    public const TYPE_CANONICAL_LOCATION = UNKNOWN;
+
     private function __construct() {}
 
     /**

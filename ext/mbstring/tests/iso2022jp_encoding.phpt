@@ -127,6 +127,10 @@ for ($i = 0x21; $i <= 0x7E; $i++) {
 	testInvalid("\x1B\$B" . chr($i), "\x00%", 'ISO-2022-JP');
 }
 
+/* Switch from Kanji to ASCII */
+testValidString("\x30\x00\x00A", "\x1B\$B\x21\x21\x1B(BA", "UTF-16BE", "JIS", false);
+testValidString("\x30\x00\x00A", "\x1B\$B\x21\x21\x1B(BA", "UTF-16BE", "ISO-2022-JP", false);
+
 echo "JIS X 0208 support OK\n";
 
 /* JIS7 supports escape to switch to JIS X 0212 charset, but ISO-2022-JP does not */
@@ -150,6 +154,10 @@ for ($i = 0x21; $i <= 0x7E; $i++) {
 for ($i = 0x21; $i <= 0x7E; $i++) {
 	testInvalid("\x1B\$(D" . chr($i) . "\x1B(B", "\x00%\x00%", 'JIS');
 }
+
+testValidString("\x00\xA1", "\x1B\$(D\x22\x42\x1B(B", "UTF-16BE", "JIS", false);
+// Check that ISO-2022-JP treats JISX 0212 chars as error
+convertInvalidString("\x00\xA1", "%", "UTF-16BE", "ISO-2022-JP", false);
 
 echo "JIS X 0212 support OK\n";
 
@@ -186,6 +194,16 @@ for ($i = 0; $i <= 0xFF; $i++) {
 		identifyInvalidString($escapeSequence . "\x1B(B", 'ISO-2022-JP');
 	}
 }
+/* Also try a bare ESC */
+identifyInvalidString("\x1B", 'JIS');
+identifyInvalidString("\x1B", 'ISO-2022-JP');
+
+convertInvalidString("\x1B$", "%", "JIS", "UTF-8");
+convertInvalidString("\x1B$", "%", "ISO-2022-JP", "UTF-8");
+convertInvalidString("\x1B(", "%", "JIS", "UTF-8");
+convertInvalidString("\x1B(", "%", "ISO-2022-JP", "UTF-8");
+convertInvalidString("\x1B,", "%,", "JIS", "UTF-8");
+convertInvalidString("\x1B,", "%,", "ISO-2022-JP", "UTF-8");
 
 echo "All escape sequences work as expected\n";
 
@@ -198,8 +216,29 @@ foreach (['JIS', 'ISO-2022-JP'] as $encoding) {
 
 	testValidString("\x00\xA5", "\x1B(J\x5C\x1B(B", 'UTF-16BE', $encoding, false);
 }
+testValidString("\x20\x3E", "\x1B\$B!1\x1B(B", 'UTF-16BE', 'ISO-2022-JP', false);
 
 echo "Other mappings from Unicode -> ISO-2022-JP are OK\n";
+
+// Single bytes from 0xA3-0xDF can be used to encode kana in JIS8
+$grInvoked = [
+	"\xA3" => "\x1B(I\x23\x1B(B",
+	"\xB1" => "\x1B(I\x31\x1B(B",
+	"\xC2" => "\x1B(I\x42\x1B(B",
+	"\xDF" => "\x1B(I\x5F\x1B(B"
+];
+foreach ($grInvoked as $gr => $jisx) {
+	// JISX 0201 is used as the canonical form for outputting kana
+	testValidString($gr, $jisx, 'JIS', 'JIS', false);
+	if (mb_convert_encoding($gr, 'UTF-16BE', 'JIS') !== mb_convert_encoding($jisx, 'UTF-16BE', 'JIS'))
+		die("Equivalent GR byte and JISX 0201 sequence do not decode to the same codepoint");
+}
+
+echo "GR-invoked kana support OK\n";
+
+// Check handling of BOM
+convertInvalidString("\xFF\xFE", "%", "UTF-16BE", "JIS", false);
+convertInvalidString("\xFF\xFE", "%", "UTF-16BE", "ISO-2022-JP", false);
 
 // Test "long" illegal character markers
 mb_substitute_character("long");
@@ -219,4 +258,5 @@ JIS X 0208 support OK
 JIS X 0212 support OK
 All escape sequences work as expected
 Other mappings from Unicode -> ISO-2022-JP are OK
+GR-invoked kana support OK
 Done!

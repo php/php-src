@@ -27,7 +27,6 @@
 #include "main/php_output.h"
 #include "ext/standard/info.h"
 
-#include "php_variables.h"
 #include "php_globals.h"
 #include "rfc1867.h"
 #include "php_content_types.h"
@@ -133,12 +132,10 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 
 	info.data_type              = arg;
 	info.separator              = separator;
-	info.report_errors          = 0;
+	info.report_errors          = false;
 	info.to_encoding            = MBSTRG(internal_encoding);
-	info.to_language            = MBSTRG(language);
 	info.from_encodings         = MBSTRG(http_input_list);
 	info.num_from_encodings     = MBSTRG(http_input_list_size);
-	info.from_language          = MBSTRG(language);
 
 	MBSTRG(illegalchars) = 0;
 
@@ -173,33 +170,23 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 /* }}} */
 
 /* {{{ mbfl_no_encoding _php_mb_encoding_handler_ex() */
-const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_info_t *info, zval *arg, char *res)
+const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_info_t *info, zval *array_ptr, char *res)
 {
 	char *var, *val;
-	const char *s1, *s2;
 	char *strtok_buf = NULL, **val_list = NULL;
-	zval *array_ptr = (zval *) arg;
-	size_t n, num, *len_list = NULL;
-	size_t val_len, new_val_len;
-	mbfl_string string, resvar, resval;
+	size_t n, num = 1, *len_list = NULL;
+	size_t new_val_len;
 	const mbfl_encoding *from_encoding = NULL;
 	mbfl_encoding_detector *identd = NULL;
-	mbfl_buffer_converter *convd = NULL;
-
-	mbfl_string_init_set(&string, info->to_encoding);
-	mbfl_string_init_set(&resvar, info->to_encoding);
-	mbfl_string_init_set(&resval, info->to_encoding);
 
 	if (!res || *res == '\0') {
 		goto out;
 	}
 
-	/* count the variables(separators) contained in the "res".
-	 * separator may contain multiple separator chars.
-	 */
-	num = 1;
-	for (s1=res; *s1 != '\0'; s1++) {
-		for (s2=info->separator; *s2 != '\0'; s2++) {
+	/* count variables contained in `res`.
+	 * separator may contain multiple separator chars; ANY of them demarcate variables */
+	for (char *s1 = res; *s1; s1++) {
+		for (const char *s2 = info->separator; *s2; s2++) {
 			if (*s1 == *s2) {
 				num++;
 			}
@@ -212,7 +199,6 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 
 	/* split and decode the query */
 	n = 0;
-	strtok_buf = NULL;
 	var = php_strtok_r(res, info->separator, &strtok_buf);
 	while (var)  {
 		val = strchr(var, '=');
@@ -255,6 +241,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 		if (identd != NULL) {
 			n = 0;
 			while (n < num) {
+				mbfl_string string;
 				string.val = (unsigned char *)val_list[n];
 				string.len = len_list[n];
 				if (mbfl_encoding_detector_feed(identd, &string)) {
@@ -273,62 +260,40 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 		}
 	}
 
-	convd = NULL;
-	if (from_encoding != &mbfl_encoding_pass) {
-		convd = mbfl_buffer_converter_new(from_encoding, info->to_encoding, 0);
-		if (convd != NULL) {
-			mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-			mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
-		} else {
-			if (info->report_errors) {
-				php_error_docref(NULL, E_WARNING, "Unable to create converter");
-			}
-			goto out;
-		}
-	}
-
 	/* convert encoding */
-	string.encoding = from_encoding;
-
 	n = 0;
 	while (n < num) {
-		string.val = (unsigned char *)val_list[n];
-		string.len = len_list[n];
-		if (convd != NULL && mbfl_buffer_converter_feed_result(convd, &string, &resvar) != NULL) {
-			var = (char *)resvar.val;
+		if (from_encoding != &mbfl_encoding_pass && info->to_encoding != &mbfl_encoding_pass) {
+			unsigned int num_errors = 0;
+			zend_string *converted_var = mb_fast_convert((unsigned char*)val_list[n], len_list[n], from_encoding, info->to_encoding, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode), &num_errors);
+			MBSTRG(illegalchars) += num_errors;
+			n++;
+
+			num_errors = 0;
+			zend_string *converted_val = mb_fast_convert((unsigned char*)val_list[n], len_list[n], from_encoding, info->to_encoding, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode), &num_errors);
+			MBSTRG(illegalchars) += num_errors;
+			n++;
+
+			/* `val` must be a pointer returned by `emalloc` */
+			val = estrndup(ZSTR_VAL(converted_val), ZSTR_LEN(converted_val));
+			if (sapi_module.input_filter(info->data_type, ZSTR_VAL(converted_var), &val, ZSTR_LEN(converted_val), &new_val_len)) {
+				/* add variable to symbol table */
+				php_register_variable_safe(ZSTR_VAL(converted_var), val, new_val_len, array_ptr);
+			}
+			zend_string_free(converted_var);
+			zend_string_free(converted_val);
 		} else {
-			var = val_list[n];
-		}
-		n++;
-		string.val = (unsigned char *)val_list[n];
-		string.len = len_list[n];
-		if (convd != NULL && mbfl_buffer_converter_feed_result(convd, &string, &resval) != NULL) {
-			val = (char *)resval.val;
-			val_len = resval.len;
-		} else {
-			val = val_list[n];
-			val_len = len_list[n];
-		}
-		n++;
-		/* we need val to be emalloc()ed */
-		val = estrndup(val, val_len);
-		if (sapi_module.input_filter(info->data_type, var, &val, val_len, &new_val_len)) {
-			/* add variable to symbol table */
-			php_register_variable_safe(var, val, new_val_len, array_ptr);
+			var = val_list[n++];
+			val = estrndup(val_list[n], len_list[n]);
+			if (sapi_module.input_filter(info->data_type, var, &val, len_list[n], &new_val_len)) {
+				php_register_variable_safe(var, val, new_val_len, array_ptr);
+			}
+			n++;
 		}
 		efree(val);
-
-		if (convd != NULL){
-			mbfl_string_clear(&resvar);
-			mbfl_string_clear(&resval);
-		}
 	}
 
 out:
-	if (convd != NULL) {
-		MBSTRG(illegalchars) += mbfl_buffer_illegalchars(convd);
-		mbfl_buffer_converter_delete(convd);
-	}
 	if (val_list != NULL) {
 		efree((void *)val_list);
 	}
@@ -351,12 +316,10 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 
 	info.data_type              = PARSE_POST;
 	info.separator              = "&";
-	info.report_errors          = 0;
+	info.report_errors          = false;
 	info.to_encoding            = MBSTRG(internal_encoding);
-	info.to_language            = MBSTRG(language);
 	info.from_encodings         = MBSTRG(http_input_list);
 	info.num_from_encodings     = MBSTRG(http_input_list_size);
-	info.from_language          = MBSTRG(language);
 
 	php_stream_rewind(SG(request_info).request_body);
 	post_data_str = php_stream_copy_to_mem(SG(request_info).request_body, PHP_STREAM_COPY_ALL, 0);

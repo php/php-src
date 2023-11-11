@@ -39,7 +39,7 @@ static void zend_stream_stdio_closer(void *handle) /* {{{ */
 
 static size_t zend_stream_stdio_fsizer(void *handle) /* {{{ */
 {
-	zend_stat_t buf;
+	zend_stat_t buf = {0};
 	if (handle && zend_fstat(fileno((FILE*)handle), &buf) == 0) {
 #ifdef S_ISREG
 		if (!S_ISREG(buf.st_mode)) {

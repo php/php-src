@@ -13,6 +13,7 @@ printModifiers(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_READONLY);
 printModifiers(ReflectionClass::IS_EXPLICIT_ABSTRACT);
 printModifiers(ReflectionMethod::IS_ABSTRACT | ReflectionMethod::IS_FINAL);
 printModifiers(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_STATIC | ReflectionProperty::IS_READONLY);
+printModifiers(ReflectionClass::IS_READONLY);
 ?>
 --EXPECT--
 private
@@ -21,3 +22,4 @@ public,readonly
 abstract
 abstract,final
 public,static,readonly
+readonly

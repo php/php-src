@@ -18,7 +18,6 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "php_pcre.h"
-#include "php_pcre_arginfo.h"
 #include "ext/standard/info.h"
 #include "ext/standard/basic_functions.h"
 #include "zend_smart_str.h"
@@ -42,6 +41,16 @@
 #define PREG_JIT                    (1<<3)
 
 #define PCRE_CACHE_SIZE 4096
+
+#ifdef HAVE_PCRE_JIT_SUPPORT
+#define PHP_PCRE_JIT_SUPPORT 1
+#else
+#define PHP_PCRE_JIT_SUPPORT 0
+#endif
+
+char *php_pcre_version;
+
+#include "php_pcre_arginfo.h"
 
 struct _pcre_cache_entry {
 	pcre2_code *re;
@@ -360,7 +369,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("pcre.backtrack_limit", "1000000", PHP_INI_ALL, OnUpdateBacktrackLimit, backtrack_limit, zend_pcre_globals, pcre_globals)
 	STD_PHP_INI_ENTRY("pcre.recursion_limit", "100000",  PHP_INI_ALL, OnUpdateRecursionLimit, recursion_limit, zend_pcre_globals, pcre_globals)
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	STD_PHP_INI_ENTRY("pcre.jit",             "1",       PHP_INI_ALL, OnUpdateJit, jit,             zend_pcre_globals, pcre_globals)
+	STD_PHP_INI_BOOLEAN("pcre.jit",           "1",       PHP_INI_ALL, OnUpdateJit,            jit,             zend_pcre_globals, pcre_globals)
 #endif
 PHP_INI_END()
 
@@ -422,8 +431,6 @@ static PHP_MINFO_FUNCTION(pcre)
 /* {{{ PHP_MINIT_FUNCTION(pcre) */
 static PHP_MINIT_FUNCTION(pcre)
 {
-	char *version;
-
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if (UNEXPECTED(!pcre2_init_ok)) {
 		/* Retry. */
@@ -436,33 +443,9 @@ static PHP_MINIT_FUNCTION(pcre)
 
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_OFFSET_CAPTURE", PREG_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_UNMATCHED_AS_NULL", PREG_UNMATCHED_AS_NULL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_SPLIT_NO_EMPTY", PREG_SPLIT_NO_EMPTY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_SPLIT_DELIM_CAPTURE", PREG_SPLIT_DELIM_CAPTURE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_SPLIT_OFFSET_CAPTURE", PREG_SPLIT_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_GREP_INVERT", PREG_GREP_INVERT, CONST_CS | CONST_PERSISTENT);
+	php_pcre_version = _pcre2_config_str(PCRE2_CONFIG_VERSION);
 
-	REGISTER_LONG_CONSTANT("PREG_NO_ERROR", PHP_PCRE_NO_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_INTERNAL_ERROR", PHP_PCRE_INTERNAL_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_BACKTRACK_LIMIT_ERROR", PHP_PCRE_BACKTRACK_LIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_RECURSION_LIMIT_ERROR", PHP_PCRE_RECURSION_LIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_ERROR", PHP_PCRE_BAD_UTF8_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_OFFSET_ERROR", PHP_PCRE_BAD_UTF8_OFFSET_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PREG_JIT_STACKLIMIT_ERROR", PHP_PCRE_JIT_STACKLIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
-	version = _pcre2_config_str(PCRE2_CONFIG_VERSION);
-	REGISTER_STRING_CONSTANT("PCRE_VERSION", version, CONST_CS | CONST_PERSISTENT);
-	free(version);
-	REGISTER_LONG_CONSTANT("PCRE_VERSION_MAJOR", PCRE2_MAJOR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PCRE_VERSION_MINOR", PCRE2_MINOR, CONST_CS | CONST_PERSISTENT);
-
-#ifdef HAVE_PCRE_JIT_SUPPORT
-	REGISTER_BOOL_CONSTANT("PCRE_JIT_SUPPORT", 1, CONST_CS | CONST_PERSISTENT);
-#else
-	REGISTER_BOOL_CONSTANT("PCRE_JIT_SUPPORT", 0, CONST_CS | CONST_PERSISTENT);
-#endif
+	register_php_pcre_symbols(module_number);
 
 	return SUCCESS;
 }
@@ -472,6 +455,8 @@ static PHP_MINIT_FUNCTION(pcre)
 static PHP_MSHUTDOWN_FUNCTION(pcre)
 {
 	UNREGISTER_INI_ENTRIES();
+
+	free(php_pcre_version);
 
 	return SUCCESS;
 }
@@ -624,7 +609,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	pcre_cache_entry	 new_entry;
 	int					 rc;
 	zend_string 		*key;
-	pcre_cache_entry *ret;
+	pcre_cache_entry	*ret;
 
 	if (locale_aware && BG(ctype_string)) {
 		key = zend_string_concat2(
@@ -645,16 +630,16 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	}
 
 	p = ZSTR_VAL(regex);
+	const char* end_p = ZSTR_VAL(regex) + ZSTR_LEN(regex);
 
 	/* Parse through the leading whitespace, and display a warning if we
 	   get to the end without encountering a delimiter. */
 	while (isspace((int)*(unsigned char *)p)) p++;
-	if (*p == 0) {
+	if (p >= end_p) {
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
-		php_error_docref(NULL, E_WARNING,
-						 p < ZSTR_VAL(regex) + ZSTR_LEN(regex) ? "Null byte in regex" : "Empty regular expression");
+		php_error_docref(NULL, E_WARNING, "Empty regular expression");
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
 	}
@@ -662,11 +647,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 	/* Get the delimiter and display a warning if it is alphanumeric
 	   or a backslash. */
 	delimiter = *p++;
-	if (isalnum((int)*(unsigned char *)&delimiter) || delimiter == '\\') {
+	if (isalnum((int)*(unsigned char *)&delimiter) || delimiter == '\\' || delimiter == '\0') {
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
-		php_error_docref(NULL,E_WARNING, "Delimiter must not be alphanumeric or backslash");
+		php_error_docref(NULL, E_WARNING, "Delimiter must not be alphanumeric, backslash, or NUL");
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
 	}
@@ -682,8 +667,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 		/* We need to iterate through the pattern, searching for the ending delimiter,
 		   but skipping the backslashed delimiters.  If the ending delimiter is not
 		   found, display a warning. */
-		while (*pp != 0) {
-			if (*pp == '\\' && pp[1] != 0) pp++;
+		while (pp < end_p) {
+			if (*pp == '\\' && pp + 1 < end_p) pp++;
 			else if (*pp == delimiter)
 				break;
 			pp++;
@@ -695,8 +680,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 		 * reach the end of the pattern without matching, display a warning.
 		 */
 		int brackets = 1; 	/* brackets nesting level */
-		while (*pp != 0) {
-			if (*pp == '\\' && pp[1] != 0) pp++;
+		while (pp < end_p) {
+			if (*pp == '\\' && pp + 1 < end_p) pp++;
 			else if (*pp == end_delimiter && --brackets <= 0)
 				break;
 			else if (*pp == start_delimiter)
@@ -705,13 +690,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 		}
 	}
 
-	if (*pp == 0) {
+	if (pp >= end_p) {
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
-		if (pp < ZSTR_VAL(regex) + ZSTR_LEN(regex)) {
-			php_error_docref(NULL,E_WARNING, "Null byte in regex");
-		} else if (start_delimiter == end_delimiter) {
+		if (start_delimiter == end_delimiter) {
 			php_error_docref(NULL,E_WARNING, "No ending delimiter '%c' found", delimiter);
 		} else {
 			php_error_docref(NULL,E_WARNING, "No ending matching delimiter '%c' found", delimiter);
@@ -729,11 +712,12 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 
 	/* Parse through the options, setting appropriate flags.  Display
 	   a warning if we encounter an unknown modifier. */
-	while (pp < ZSTR_VAL(regex) + ZSTR_LEN(regex)) {
+	while (pp < end_p) {
 		switch (*pp++) {
 			/* Perl compatible options */
 			case 'i':	coptions |= PCRE2_CASELESS;		break;
 			case 'm':	coptions |= PCRE2_MULTILINE;		break;
+			case 'n':	coptions |= PCRE2_NO_AUTO_CAPTURE;	break;
 			case 's':	coptions |= PCRE2_DOTALL;		break;
 			case 'x':	coptions |= PCRE2_EXTENDED;		break;
 
@@ -763,9 +747,9 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, in
 
 			default:
 				if (pp[-1]) {
-					php_error_docref(NULL,E_WARNING, "Unknown modifier '%c'", pp[-1]);
+					php_error_docref(NULL, E_WARNING, "Unknown modifier '%c'", pp[-1]);
 				} else {
-					php_error_docref(NULL,E_WARNING, "Null byte in regex");
+					php_error_docref(NULL, E_WARNING, "NUL is not a valid modifier");
 				}
 				pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 				efree(pattern);
@@ -2115,7 +2099,7 @@ static zend_string *php_pcre_replace_array(HashTable *regex,
 					tmp_replace_entry_str = NULL;
 					break;
 				}
-				zv = &replace_ht->arData[replace_idx].val;
+				zv = ZEND_HASH_ELEMENT(replace_ht, replace_idx);
 				replace_idx++;
 				if (Z_TYPE_P(zv) != IS_UNDEF) {
 					replace_entry_str = zval_get_tmp_string(zv, &tmp_replace_entry_str);
@@ -2437,14 +2421,12 @@ PHP_FUNCTION(preg_replace_callback_array)
 	}
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(pattern, str_idx_regex, replace) {
-		if (!str_idx_regex) {
-			php_error_docref(NULL, E_WARNING, "Delimiter must not be alphanumeric or backslash");
-			RETVAL_NULL();
-			goto error;
-		}
-
 		if (!zend_is_callable_ex(replace, NULL, 0, NULL, &fcc, NULL)) {
 			zend_argument_type_error(1, "must contain only valid callbacks");
+			goto error;
+		}
+		if (!str_idx_regex) {
+			zend_argument_type_error(1, "must contain only string patterns as keys");
 			goto error;
 		}
 

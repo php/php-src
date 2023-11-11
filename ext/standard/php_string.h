@@ -18,14 +18,16 @@
 #ifndef PHP_STRING_H
 #define PHP_STRING_H
 
-#if defined(ZTS)
+# include "ext/random/php_random.h"
+
+#ifdef ZTS
 PHP_MINIT_FUNCTION(localeconv);
 PHP_MSHUTDOWN_FUNCTION(localeconv);
 #endif
-#if HAVE_NL_LANGINFO
+#ifdef HAVE_NL_LANGINFO
 PHP_MINIT_FUNCTION(nl_langinfo);
 #endif
-#if ZEND_INTRIN_SSE4_2_FUNC_PTR
+#ifdef ZEND_INTRIN_SSE4_2_FUNC_PTR
 PHP_MINIT_FUNCTION(string_intrin);
 #endif
 
@@ -33,7 +35,7 @@ PHP_MINIT_FUNCTION(string_intrin);
 	strnatcmp_ex(a, strlen(a), b, strlen(b), 0)
 #define strnatcasecmp(a, b) \
 	strnatcmp_ex(a, strlen(a), b, strlen(b), 1)
-PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, int fold_case);
+PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, bool is_case_insensitive);
 PHPAPI struct lconv *localeconv_r(struct lconv *out);
 PHPAPI char *php_strtoupper(char *s, size_t len);
 PHPAPI char *php_strtolower(char *s, size_t len);
@@ -63,7 +65,9 @@ PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2
 PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2);
 PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2);
 
-#if defined(_REENTRANT)
+PHPAPI bool php_binary_string_shuffle(const php_random_algo *algo, php_random_status *status, char *str, zend_long len);
+
+#ifdef _REENTRANT
 # ifdef PHP_WIN32
 #  include <wchar.h>
 # endif
@@ -74,6 +78,16 @@ PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *o
 # define php_mb_reset() php_ignore_value(mblen(NULL, 0))
 #endif
 
-void register_string_constants(INIT_FUNC_ARGS);
+#define PHP_STR_PAD_LEFT		0
+#define PHP_STR_PAD_RIGHT		1
+#define PHP_STR_PAD_BOTH		2
+#define PHP_PATHINFO_DIRNAME 	1
+#define PHP_PATHINFO_BASENAME 	2
+#define PHP_PATHINFO_EXTENSION 	4
+#define PHP_PATHINFO_FILENAME 	8
+#define PHP_PATHINFO_ALL	(PHP_PATHINFO_DIRNAME | PHP_PATHINFO_BASENAME | PHP_PATHINFO_EXTENSION | PHP_PATHINFO_FILENAME)
+
+#define PHP_STR_STRSPN			0
+#define PHP_STR_STRCSPN			1
 
 #endif /* PHP_STRING_H */

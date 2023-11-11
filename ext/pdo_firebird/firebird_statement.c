@@ -235,6 +235,9 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	int colname_len;
 	char *cp;
 
+	if ((var->sqltype & ~1) == SQL_TEXT) {
+		var->sqltype = SQL_VARYING | (var->sqltype & 1);
+	}
 	colname_len = (S->H->fetch_table_names && var->relname_length)
 					? (var->aliasname_length + var->relname_length + 1)
 					: (var->aliasname_length);
@@ -667,7 +670,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 							zend_long lval;
 							double dval;
 
-							if ((Z_STRLEN_P(parameter) == 0)) {
+							if (Z_STRLEN_P(parameter) == 0) {
 								*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
 								break;
 							}

@@ -17,7 +17,7 @@ dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
-AC_INIT([PHP],[8.1.26-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
+AC_INIT([PHP],[8.2.14-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
@@ -267,6 +267,12 @@ else
   AC_MSG_RESULT(no)
 fi
 
+dnl The effect of _GNU_SOURCE defined in config.h depeds on includes order
+if test "$ac_cv_safe_to_define___extensions__" = yes ; then
+  AC_MSG_CHECKING(whether to use -D_GNU_SOURCE cflag)
+  CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
+  AC_MSG_RESULT(yes)
+fi
 
 dnl Include Zend configurations.
 dnl ----------------------------------------------------------------------------
@@ -396,7 +402,10 @@ fcntl.h \
 grp.h \
 ieeefp.h \
 langinfo.h \
+linux/filter.h \
+linux/sock_diag.h \
 malloc.h \
+os/signpost.h \
 poll.h \
 pty.h \
 pwd.h \
@@ -589,12 +598,14 @@ inet_ntop \
 inet_pton \
 localtime_r \
 lchown \
+memcntl \
 memmove \
 mkstemp \
 mmap \
 nice \
 nl_langinfo \
 poll \
+pthread_jit_write_protect_np \
 putenv \
 scandir \
 setitimer \
@@ -617,6 +628,7 @@ vasprintf \
 asprintf \
 nanosleep \
 memmem \
+memrchr \
 )
 
 dnl Check for strerror_r, and if its a POSIX-compatible or a GNU specific version.
@@ -687,6 +699,35 @@ int main(void) {
 [ac_cv_func_getaddrinfo=no])])
 if test "$ac_cv_func_getaddrinfo" = yes; then
   AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
+fi
+
+dnl on FreeBSD, copy_file_range() works only with the undocumented flag 0x01000000;
+dnl until the problem is fixed properly, copy_file_range() is used only on Linux
+AC_CACHE_CHECK([for copy_file_range], ac_cv_copy_file_range,
+[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#ifdef __linux__
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <linux/version.h>
+#include <unistd.h>
+
+int main(void) {
+(void)copy_file_range(-1, 0, -1, 0, 0, 0);
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,3,0)
+#error "kernel too old"
+#else
+return 0;
+#endif
+}
+#else
+#error "unsupported platform"
+#endif
+]])], [ac_cv_copy_file_range=yes], [ac_cv_copy_file_range=no], [ac_cv_copy_file_range=no])
+])
+
+if test "$ac_cv_copy_file_range" = yes; then
+  AC_DEFINE(HAVE_COPY_FILE_RANGE,1,[Define if copy_file_range support])
 fi
 
 AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
@@ -1532,8 +1573,14 @@ fi
 
 if test "$PHP_UNDEFINED_SANITIZER" = "yes"; then
   AX_CHECK_COMPILE_FLAG([-fsanitize=undefined], [
-    CFLAGS="$CFLAGS -fsanitize=undefined"
-    CXXFLAGS="$CXXFLAGS -fsanitize=undefined"
+    CFLAGS="$CFLAGS -fsanitize=undefined -fno-sanitize-recover=undefined"
+    CXXFLAGS="$CXXFLAGS -fsanitize=undefined -fno-sanitize-recover=undefined"
+    AX_CHECK_COMPILE_FLAG([-fno-sanitize=object-size], [
+      dnl Disable object-size sanitizer, because it is incompatible with our zend_function
+      dnl union, and this can't be easily fixed.
+      CFLAGS="$CFLAGS -fno-sanitize=object-size"
+      CXXFLAGS="$CFLAGS -fno-sanitize=object-size"
+    ])
   ], [AC_MSG_ERROR([UndefinedBehaviorSanitizer is not available])])
 fi
 
@@ -1616,10 +1663,11 @@ PHP_INSTALL_HEADERS([Zend/Optimizer], [ \
 PHP_ADD_SOURCES(TSRM, TSRM.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
-       fopen_wrappers.c alloca.c  php_scandir.c \
+       fopen_wrappers.c php_scandir.c \
+       php_ini_builder.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c explicit_bzero.c reentrancy.c php_variables.c php_ticks.c \
-       network.c php_open_temporary_file.c \
+       network.c php_open_temporary_file.c php_odbc_utils.c safe_bcmp.c \
        output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)
@@ -1644,7 +1692,8 @@ PHP_ADD_SOURCES(Zend, \
     zend_closures.c zend_weakrefs.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
     zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c \
-    zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c zend_max_execution_timer.c \
+    zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c zend_atomic.c \
+    zend_max_execution_timer.c \
 	Optimizer/zend_optimizer.c \
 	Optimizer/pass1.c \
 	Optimizer/pass3.c \

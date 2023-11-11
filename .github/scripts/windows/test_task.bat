@@ -51,6 +51,20 @@ set ODBC_TEST_PASS=Password12!
 set ODBC_TEST_DSN=Driver={ODBC Driver 17 for SQL Server};Server=^(local^)\SQLEXPRESS;Database=master;uid=%ODBC_TEST_USER%;pwd=%ODBC_TEST_PASS%
 set PDOTEST_DSN=odbc:%ODBC_TEST_DSN%
 
+rem setup Firebird related exts
+curl -sLo Firebird.zip https://github.com/FirebirdSQL/firebird/releases/download/v3.0.9/Firebird-3.0.9.33560-0_x64.zip
+7z x -oC:\Firebird Firebird.zip
+set PDO_FIREBIRD_TEST_DATABASE=C:\test.fdb
+set PDO_FIREBIRD_TEST_DSN=firebird:dbname=%PDO_FIREBIRD_TEST_DATABASE%
+set PDO_FIREBIRD_TEST_USER=SYSDBA
+set PDO_FIREBIRD_TEST_PASS=phpfi
+echo create database '%PDO_FIREBIRD_TEST_DATABASE%' user '%PDO_FIREBIRD_TEST_USER%' password '%PDO_FIREBIRD_TEST_PASS%';> C:\Firebird\setup.sql
+C:\Firebird\instsvc.exe install -n TestInstance
+C:\Firebird\isql -q -i C:\Firebird\setup.sql
+C:\Firebird\instsvc.exe start -n TestInstance
+if %errorlevel% neq 0 exit /b 3
+path C:\Firebird;%PATH%
+
 rem prepare for ext/openssl
 rmdir /s /q C:\OpenSSL-Win32 >NUL 2>NUL
 rmdir /s /q C:\OpenSSL-Win64 >NUL 2>NUL
@@ -89,8 +103,18 @@ unzip dict.zip
 del /q dict.zip
 popd
 
+rem prepare for snmp
+set MIBDIRS=%DEPS_DIR%\share\mibs
+start %DEPS_DIR%\bin\snmpd.exe -C -c %APPVEYOR_BUILD_FOLDER%\ext\snmp\tests\snmpd.conf -Ln
+
 set PHP_BUILD_DIR=%PHP_BUILD_OBJ_DIR%\Release
 if "%THREAD_SAFE%" equ "1" set PHP_BUILD_DIR=%PHP_BUILD_DIR%_TS
+
+rem prepare for mail
+curl -sLo hMailServer.exe https://www.hmailserver.com/download_file/?downloadid=271
+hMailServer.exe /verysilent
+cd %APPVEYOR_BUILD_FOLDER%
+%PHP_BUILD_DIR%\php.exe -dextension_dir=%PHP_BUILD_DIR% -dextension=com_dotnet appveyor\setup_hmailserver.php
 
 mkdir %PHP_BUILD_DIR%\test_file_cache
 rem generate php.ini
@@ -101,7 +125,7 @@ rem work-around for some spawned PHP processes requiring OpenSSL
 echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\php.ini
 
 rem remove ext dlls for which tests are not supported
-for %%i in (imap ldap oci8_12c pdo_firebird pdo_oci snmp) do (
+for %%i in (ldap oci8_12c pdo_oci) do (
 	del %PHP_BUILD_DIR%\php_%%i.dll
 )
 
@@ -111,9 +135,11 @@ mkdir c:\tests_tmp
 
 set TEST_PHP_JUNIT=c:\junit.out.xml
 
-nmake test TESTS="%OPCACHE_OPTS% -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp --bless %PARALLEL%"
+nmake test TESTS="%OPCACHE_OPTS% -g FAIL,BORK,LEAK,XLEAK --no-progress -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp --bless %PARALLEL%"
 
 set EXIT_CODE=%errorlevel%
+
+taskkill /f /im snmpd.exe
 
 if %EXIT_CODE% GEQ 1 (
 	git checkout ext\pgsql\tests\config.inc

@@ -1,6 +1,6 @@
 // vim:ft=javascript
 
-ARG_ENABLE("zip", "ZIP support", "yes");
+ARG_ENABLE("zip", "ZIP support", "yes,shared");
 
 if (PHP_ZIP != "no") {
 	if (CHECK_HEADER_ADD_INCLUDE("zip.h", "CFLAGS_ZIP", PHP_PHP_BUILD + "\\include;" + PHP_EXTRA_INCLUDES) &&

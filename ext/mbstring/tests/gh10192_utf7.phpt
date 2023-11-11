@@ -43,13 +43,21 @@ $testcases = [
     'valid base64 character consisting only of + between + and end of string' => 'A +++++++++',
     'invalid base64 character consisting only of + between + and end of string' => 'A +++++++++',
     'valid base64 character using surrogate pair between + and -' => 'A +2GfePQ- B', // 𩸽 in UTF-16BE
-    'invalid base64 character using surrogate pair between + and -' => 'A +2Gc- B', // first 16 bits of 𩸽 in UTF-16BE
+    'first 16 bits of base64 character using surrogate pair between + and -' => 'A +2Gc- B', // first 16 bits of 𩸽 in UTF-16BE
     'valid base64 character using surrogate pair between + and non-base64 character' => 'A +2GfePQ B',
-    'invalid base64 character using surrogate pair between + and non-base64 character' => 'A +2Gc B',
+    'first 16 bits of base64 character using surrogate pair between + and non-base64 character' => 'A +2Gc B',
     'valid base64 character using surrogate pair between + and base64 character' => 'A +2GfePQ1 B',
-    'invalid base64 character using surrogate pair between + and base64 character' => 'A +2Gc1 B',
+    'first 16 bits of base64 character using surrogate pair between + and base64 character' => 'A +2Gc1 B',
     'valid base64 character using surrogate pair between + and end of string' => 'A +2GfePQ',
-    'invalid base64 character using surrogate pair between + and end of string' => 'A +2Gc'
+    'first 16 bits of base64 character using surrogate pair between + and end of string' => 'A +2Gc',
+    'invalid base64 character using surrogate pair in reverse order between + and -' => 'A +3j3YZw- B', // 𩸽 in reverse order in UTF-16BE
+    'last 16 bits of base64 character using surrogate pair in reverse order between + and -' => 'A +3j0- B', // last 16 bits of 𩸽 in UTF-16BE
+    'invalid base64 character using surrogate pair in reverse order between + and non-base64 character' => 'A +3j3YZw B',
+    'last 16 bits of base64 character using surrogate pair in reverse order between + and non-base64 character' => 'A +3j0 B',
+    'invalid base64 character using surrogate pair in reverse order between + and base64 character' => 'A +3j3YZw1 B',
+    'last 16 bits of base64 character using surrogate pair in reverse order between + and base64 character' => 'A +3j01 B',
+    'invalid base64 character using surrogate pair in reverse order between + and end of string' => 'A +3j3YZw',
+    'last 16 bits of base64 character using surrogate pair in reverse order between + and end of string' => 'A +3j0'
 ];
 
 foreach ($testcases as $title => $case) {
@@ -398,7 +406,7 @@ bool(true)
 string(8) "A 𩸽 B"
 int(8)
 
-invalid base64 character using surrogate pair between + and -
+first 16 bits of base64 character using surrogate pair between + and -
 string(5) "UTF-8"
 string(5) "UTF-8"
 bool(false)
@@ -416,7 +424,7 @@ bool(true)
 string(8) "A 𩸽 B"
 int(9)
 
-invalid base64 character using surrogate pair between + and non-base64 character
+first 16 bits of base64 character using surrogate pair between + and non-base64 character
 string(5) "UTF-8"
 string(5) "UTF-8"
 bool(false)
@@ -434,7 +442,7 @@ bool(false)
 string(9) "A 𩸽? B"
 int(11)
 
-invalid base64 character using surrogate pair between + and base64 character
+first 16 bits of base64 character using surrogate pair between + and base64 character
 string(5) "UTF-8"
 string(5) "UTF-8"
 bool(false)
@@ -452,7 +460,7 @@ bool(true)
 string(6) "A 𩸽"
 int(12)
 
-invalid base64 character using surrogate pair between + and end of string
+first 16 bits of base64 character using surrogate pair between + and end of string
 string(5) "UTF-8"
 string(5) "UTF-8"
 bool(false)
@@ -460,3 +468,75 @@ string(5) "UTF-7"
 bool(false)
 string(3) "A ?"
 int(13)
+
+invalid base64 character using surrogate pair in reverse order between + and -
+string(5) "UTF-8"
+string(5) "UTF-8"
+bool(false)
+string(5) "UTF-7"
+bool(false)
+string(6) "A ?? B"
+int(15)
+
+last 16 bits of base64 character using surrogate pair in reverse order between + and -
+string(5) "UTF-8"
+string(5) "UTF-8"
+bool(false)
+string(5) "UTF-7"
+bool(false)
+string(5) "A ? B"
+int(16)
+
+invalid base64 character using surrogate pair in reverse order between + and non-base64 character
+string(5) "UTF-8"
+string(5) "UTF-8"
+bool(false)
+string(5) "UTF-7"
+bool(false)
+string(6) "A ?? B"
+int(18)
+
+last 16 bits of base64 character using surrogate pair in reverse order between + and non-base64 character
+string(5) "UTF-8"
+string(5) "UTF-8"
+bool(false)
+string(5) "UTF-7"
+bool(false)
+string(5) "A ? B"
+int(19)
+
+invalid base64 character using surrogate pair in reverse order between + and base64 character
+string(5) "UTF-8"
+string(5) "UTF-8"
+bool(false)
+string(5) "UTF-7"
+bool(false)
+string(6) "A ?? B"
+int(21)
+
+last 16 bits of base64 character using surrogate pair in reverse order between + and base64 character
+string(5) "UTF-8"
+string(5) "UTF-8"
+bool(false)
+string(5) "UTF-7"
+bool(false)
+string(6) "A ?? B"
+int(23)
+
+invalid base64 character using surrogate pair in reverse order between + and end of string
+string(5) "UTF-8"
+string(5) "UTF-8"
+bool(false)
+string(5) "UTF-7"
+bool(false)
+string(4) "A ??"
+int(25)
+
+last 16 bits of base64 character using surrogate pair in reverse order between + and end of string
+string(5) "UTF-8"
+string(5) "UTF-8"
+bool(false)
+string(5) "UTF-7"
+bool(false)
+string(3) "A ?"
+int(26)

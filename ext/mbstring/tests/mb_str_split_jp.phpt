@@ -23,8 +23,15 @@ $charset = [
     "UTF-8"
 ];
 
+/* Try empty strings first */
+foreach ($charset as $cs) {
+    if (count(mb_str_split("", 1, $cs)) !== 0)
+        echo "Empty $cs string should convert to empty array!\n";
+    if (count(mb_str_split("", 2, $cs)) !== 0)
+        echo "Empty $cs string should convert to empty array!\n";
+}
 
-foreach($charset as $cs){
+foreach ($charset as $cs) {
     $enc = mb_convert_encoding($string, $cs, "UTF-8");
     $split = mb_str_split($enc, 1, $cs);
 
@@ -32,7 +39,7 @@ foreach($charset as $cs){
     for($i = 1; $i <= $len; ++$i){
         $ceil = ceil($len / $i);
         $cnt = count(mb_str_split($enc,$i,$cs));
-        if($ceil != $cnt){
+        if ($ceil != $cnt){
           echo "$cs WRONG CHUNKS NUMBER: expected/actual: $ceil/$cnt\n";
         }
     }

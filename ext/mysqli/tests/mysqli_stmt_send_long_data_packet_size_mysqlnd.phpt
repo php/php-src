@@ -5,9 +5,6 @@ mysqli
 --SKIPIF--
 <?php
 require_once('skipifconnectfailure.inc');
-
-if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
-    die("skip: warnings only available in mysqlnd");
 ?>
 --FILE--
 <?php

@@ -2,35 +2,416 @@
 
 /** @generate-class-entries */
 
-namespace PgSql {
-
-    /**
-     * @strict-properties
-     * @not-serializable
-     */
-    final class Connection
-    {
-    }
-
-    /**
-     * @strict-properties
-     * @not-serializable
-     */
-    final class Result
-    {
-    }
-
-    /**
-     * @strict-properties
-     * @not-serializable
-     */
-    final class Lob
-    {
-    }
-
-}
-
 namespace {
+    /* libpq version */
+
+    /**
+     * @var string
+     * @cvalue pgsql_libpq_version
+     */
+    const PGSQL_LIBPQ_VERSION = UNKNOWN;
+    /**
+     * @var string
+     * @cvalue pgsql_libpq_version
+     * @deprecated
+     */
+    const PGSQL_LIBPQ_VERSION_STR = UNKNOWN;
+
+    /* For connection option */
+
+    /**
+     * @var int
+     * @cvalue PGSQL_CONNECT_FORCE_NEW
+     */
+    const PGSQL_CONNECT_FORCE_NEW = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_CONNECT_ASYNC
+     */
+    const PGSQL_CONNECT_ASYNC = UNKNOWN;
+
+    /* For pg_fetch_array() */
+
+    /**
+     * @var int
+     * @cvalue PGSQL_ASSOC
+     */
+    const PGSQL_ASSOC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_NUM
+     */
+    const PGSQL_NUM = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_BOTH
+     */
+    const PGSQL_BOTH = UNKNOWN;
+
+    /* For pg_last_notice() */
+
+    /**
+     * @var int
+     * @cvalue PGSQL_NOTICE_LAST
+     */
+    const PGSQL_NOTICE_LAST = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_NOTICE_ALL
+     */
+    const PGSQL_NOTICE_ALL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_NOTICE_CLEAR
+     */
+    const PGSQL_NOTICE_CLEAR = UNKNOWN;
+
+    /* For pg_connection_status() */
+
+    /**
+     * @var int
+     * @cvalue CONNECTION_BAD
+     */
+    const PGSQL_CONNECTION_BAD = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CONNECTION_OK
+     */
+    const PGSQL_CONNECTION_OK = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CONNECTION_STARTED
+     */
+    const PGSQL_CONNECTION_STARTED = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CONNECTION_MADE
+     */
+    const PGSQL_CONNECTION_MADE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CONNECTION_AWAITING_RESPONSE
+     */
+    const PGSQL_CONNECTION_AWAITING_RESPONSE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CONNECTION_AUTH_OK
+     */
+    const PGSQL_CONNECTION_AUTH_OK = UNKNOWN;
+#ifdef CONNECTION_SSL_STARTUP
+    /**
+     * @var int
+     * @cvalue CONNECTION_SSL_STARTUP
+     */
+    const PGSQL_CONNECTION_SSL_STARTUP = UNKNOWN;
+#endif
+    /**
+     * @var int
+     * @cvalue CONNECTION_SETENV
+     */
+    const PGSQL_CONNECTION_SETENV = UNKNOWN;
+
+    /* For pg_connect_poll() */
+    /**
+     * @var int
+     * @cvalue PGRES_POLLING_FAILED
+     */
+    const PGSQL_POLLING_FAILED = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_POLLING_READING
+     */
+    const PGSQL_POLLING_READING = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_POLLING_WRITING
+     */
+    const PGSQL_POLLING_WRITING = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_POLLING_OK
+     */
+    const PGSQL_POLLING_OK = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_POLLING_ACTIVE
+     */
+    const PGSQL_POLLING_ACTIVE = UNKNOWN;
+
+    /* For pg_transaction_status() */
+
+    /**
+     * @var int
+     * @cvalue PQTRANS_IDLE
+     */
+    const PGSQL_TRANSACTION_IDLE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQTRANS_ACTIVE
+     */
+    const PGSQL_TRANSACTION_ACTIVE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQTRANS_INTRANS
+     */
+    const PGSQL_TRANSACTION_INTRANS = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQTRANS_INERROR
+     */
+    const PGSQL_TRANSACTION_INERROR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQTRANS_UNKNOWN
+     */
+    const PGSQL_TRANSACTION_UNKNOWN = UNKNOWN;
+
+    /* For pg_set_error_verbosity() */
+
+    /**
+     * @var int
+     * @cvalue PQERRORS_TERSE
+     */
+    const PGSQL_ERRORS_TERSE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQERRORS_DEFAULT
+     */
+    const PGSQL_ERRORS_DEFAULT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PQERRORS_VERBOSE
+     */
+    const PGSQL_ERRORS_VERBOSE = UNKNOWN;
+
+    /* For lo_seek() */
+
+    /**
+     * @var int
+     * @cvalue SEEK_SET
+     */
+    const PGSQL_SEEK_SET = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SEEK_CUR
+     */
+    const PGSQL_SEEK_CUR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue SEEK_END
+     */
+    const PGSQL_SEEK_END = UNKNOWN;
+
+    /* For pg_result_status() return value type */
+
+    /**
+     * @var int
+     * @cvalue PGSQL_STATUS_LONG
+     */
+    const PGSQL_STATUS_LONG = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_STATUS_STRING
+     */
+    const PGSQL_STATUS_STRING = UNKNOWN;
+
+    /* For pg_result_status() return value */
+
+    /**
+     * @var int
+     * @cvalue PGRES_EMPTY_QUERY
+     */
+    const PGSQL_EMPTY_QUERY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_COMMAND_OK
+     */
+    const PGSQL_COMMAND_OK = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_TUPLES_OK
+     */
+    const PGSQL_TUPLES_OK = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_COPY_OUT
+     */
+    const PGSQL_COPY_OUT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_COPY_IN
+     */
+    const PGSQL_COPY_IN = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_BAD_RESPONSE
+     */
+    const PGSQL_BAD_RESPONSE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_NONFATAL_ERROR
+     */
+    const PGSQL_NONFATAL_ERROR = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_FATAL_ERROR
+     */
+    const PGSQL_FATAL_ERROR = UNKNOWN;
+
+    /* For pg_result_error_field() field codes */
+
+    /**
+     * @var int
+     * @cvalue PG_DIAG_SEVERITY
+     */
+    const PGSQL_DIAG_SEVERITY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_SQLSTATE
+     */
+    const PGSQL_DIAG_SQLSTATE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_MESSAGE_PRIMARY
+     */
+    const PGSQL_DIAG_MESSAGE_PRIMARY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_MESSAGE_DETAIL
+     */
+    const PGSQL_DIAG_MESSAGE_DETAIL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_MESSAGE_HINT
+     */
+    const PGSQL_DIAG_MESSAGE_HINT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_STATEMENT_POSITION
+     */
+    const PGSQL_DIAG_STATEMENT_POSITION = UNKNOWN;
+#ifdef PG_DIAG_INTERNAL_POSITION
+    /**
+     * @var int
+     * @cvalue PG_DIAG_INTERNAL_POSITION
+     */
+    const PGSQL_DIAG_INTERNAL_POSITION = UNKNOWN;
+#endif
+#ifdef PG_DIAG_INTERNAL_QUERY
+    /**
+     * @var int
+     * @cvalue PG_DIAG_INTERNAL_QUERY
+     */
+    const PGSQL_DIAG_INTERNAL_QUERY = UNKNOWN;
+#endif
+    /**
+     * @var int
+     * @cvalue PG_DIAG_CONTEXT
+     */
+    const PGSQL_DIAG_CONTEXT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_SOURCE_FILE
+     */
+    const PGSQL_DIAG_SOURCE_FILE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_SOURCE_LINE
+     */
+    const PGSQL_DIAG_SOURCE_LINE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PG_DIAG_SOURCE_FUNCTION
+     */
+    const PGSQL_DIAG_SOURCE_FUNCTION = UNKNOWN;
+#ifdef PG_DIAG_SCHEMA_NAME
+    /**
+     * @var int
+     * @cvalue PG_DIAG_SCHEMA_NAME
+     */
+    const PGSQL_DIAG_SCHEMA_NAME = UNKNOWN;
+#endif
+#ifdef PG_DIAG_TABLE_NAME
+    /**
+     * @var int
+     * @cvalue PG_DIAG_TABLE_NAME
+     */
+    const PGSQL_DIAG_TABLE_NAME = UNKNOWN;
+#endif
+#ifdef PG_DIAG_COLUMN_NAME
+    /**
+     * @var int
+     * @cvalue PG_DIAG_COLUMN_NAME
+     */
+    const PGSQL_DIAG_COLUMN_NAME = UNKNOWN;
+#endif
+#ifdef PG_DIAG_DATATYPE_NAME
+    /**
+     * @var int
+     * @cvalue PG_DIAG_DATATYPE_NAME
+     */
+    const PGSQL_DIAG_DATATYPE_NAME = UNKNOWN;
+#endif
+#ifdef PG_DIAG_CONSTRAINT_NAME
+    /**
+     * @var int
+     * @cvalue PG_DIAG_CONSTRAINT_NAME
+     */
+    const PGSQL_DIAG_CONSTRAINT_NAME = UNKNOWN;
+#endif
+#ifdef PG_DIAG_SEVERITY_NONLOCALIZED
+    /**
+     * @var int
+     * @cvalue PG_DIAG_SEVERITY_NONLOCALIZED
+     */
+    const PGSQL_DIAG_SEVERITY_NONLOCALIZED = UNKNOWN;
+#endif
+
+    /* pg_convert options */
+
+    /**
+     * @var int
+     * @cvalue PGSQL_CONV_IGNORE_DEFAULT
+     */
+    const PGSQL_CONV_IGNORE_DEFAULT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_CONV_FORCE_NULL
+     */
+    const PGSQL_CONV_FORCE_NULL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_CONV_IGNORE_NOT_NULL
+     */
+    const PGSQL_CONV_IGNORE_NOT_NULL = UNKNOWN;
+
+    /* pg_insert/update/delete/select options */
+
+    /**
+     * @var int
+     * @cvalue PGSQL_DML_ESCAPE
+     */
+    const PGSQL_DML_ESCAPE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_DML_NO_CONV
+     */
+    const PGSQL_DML_NO_CONV = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_DML_EXEC
+     */
+    const PGSQL_DML_EXEC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_DML_ASYNC
+     */
+    const PGSQL_DML_ASYNC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGSQL_DML_STRING
+     */
+    const PGSQL_DML_STRING = UNKNOWN;
 
     function pg_connect(string $connection_string, int $flags = 0): PgSql\Connection|false {}
 
@@ -513,5 +894,31 @@ namespace {
      * @refcount 1
      */
     function pg_select(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC, int $mode = PGSQL_ASSOC): array|string|false {}
+}
+
+namespace PgSql {
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Connection
+    {
+    }
+
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Result
+    {
+    }
+
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Lob
+    {
+    }
 
 }

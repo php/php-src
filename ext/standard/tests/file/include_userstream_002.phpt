@@ -6,6 +6,7 @@ allow_url_include=0
 --FILE--
 <?php
 class test {
+    public $context;
     private $data = '<?php echo "Hello World\n";?>';
     private $pos;
     private $stream = null;
@@ -19,7 +20,7 @@ class test {
         if (strchr($mode, 'a'))
             $this->pos = strlen($this->data);
         else
-            $this->po = 0;
+            $this->pos = 0;
 
         return true;
     }
@@ -98,10 +99,10 @@ include "test2://hello";
 <?php echo "Hello World\n";?>
 <?php echo "Hello World\n";?>
 
-Warning: fopen(): test1:// wrapper is disabled in the server configuration by allow_url_include=0 in %sinclude_userstream_002.php on line 10
+Warning: fopen(): test1:// wrapper is disabled in the server configuration by allow_url_include=0 in %sinclude_userstream_002.php on line 11
 
-Warning: fopen(test1://hello): Failed to open stream: no suitable wrapper could be found in %sinclude_userstream_002.php on line 10
+Warning: fopen(test1://hello): Failed to open stream: no suitable wrapper could be found in %sinclude_userstream_002.php on line 11
 
-Warning: include(test2://hello): Failed to open stream: "test::stream_open" call failed in %sinclude_userstream_002.php on line 89
+Warning: include(test2://hello): Failed to open stream: "test::stream_open" call failed in %sinclude_userstream_002.php on line 90
 
-Warning: include(): Failed opening 'test2://hello' for inclusion (include_path='%s') in %sinclude_userstream_002.php on line 89
+Warning: include(): Failed opening 'test2://hello' for inclusion (include_path='%s') in %sinclude_userstream_002.php on line 90

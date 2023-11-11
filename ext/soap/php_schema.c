@@ -2293,17 +2293,17 @@ void schema_pass2(sdlCtx *ctx)
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (ctx->attributeGroups) {
-		ZEND_HASH_FOREACH_PTR(ctx->attributeGroups, type) {
+		ZEND_HASH_MAP_FOREACH_PTR(ctx->attributeGroups, type) {
 			schema_type_fixup(ctx, type);
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (sdl->elements) {
-		ZEND_HASH_FOREACH_PTR(sdl->elements, type) {
+		ZEND_HASH_MAP_FOREACH_PTR(sdl->elements, type) {
 			schema_type_fixup(ctx, type);
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (sdl->groups) {
-		ZEND_HASH_FOREACH_PTR(sdl->groups, type) {
+		ZEND_HASH_MAP_FOREACH_PTR(sdl->groups, type) {
 			schema_type_fixup(ctx, type);
 		} ZEND_HASH_FOREACH_END();
 	}

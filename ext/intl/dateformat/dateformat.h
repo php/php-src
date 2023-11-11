@@ -16,8 +16,6 @@
 
 #include <php.h>
 
-void dateformat_register_constants( INIT_FUNC_ARGS );
-
 /*
 These are not necessary at this point of time
 #define DATEF_GREGORIAN 1

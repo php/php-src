@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 27358fb446398ea651c62abb29c81589a37df028 */
+ * Stub hash: f64e67d8e955bc14c03dfd884dd9e5f7f047dc44 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_session_name, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, name, IS_STRING, 1, "null")
@@ -229,6 +229,13 @@ static const zend_function_entry class_SessionHandler_methods[] = {
 	ZEND_ME(SessionHandler, create_sid, arginfo_class_SessionHandler_create_sid, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static void register_session_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("PHP_SESSION_DISABLED", php_session_disabled, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHP_SESSION_NONE", php_session_none, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHP_SESSION_ACTIVE", php_session_active, CONST_PERSISTENT);
+}
 
 static zend_class_entry *register_class_SessionHandlerInterface(void)
 {

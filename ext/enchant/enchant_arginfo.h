@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 751d42c599a97854a00ddae296e9b20efeee6a3e */
+ * Stub hash: 42bb5a4488d254e87d763c75ccff62e283e63335 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_enchant_broker_init, 0, 0, EnchantBroker, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
@@ -157,6 +157,15 @@ static const zend_function_entry class_EnchantBroker_methods[] = {
 static const zend_function_entry class_EnchantDictionary_methods[] = {
 	ZEND_FE_END
 };
+
+static void register_enchant_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_PERSISTENT | CONST_DEPRECATED);
+	REGISTER_LONG_CONSTANT("ENCHANT_ISPELL", PHP_ENCHANT_ISPELL, CONST_PERSISTENT | CONST_DEPRECATED);
+#if defined(HAVE_ENCHANT_GET_VERSION)
+	REGISTER_STRING_CONSTANT("LIBENCHANT_VERSION", PHP_ENCHANT_GET_VERSION, CONST_PERSISTENT);
+#endif
+}
 
 static zend_class_entry *register_class_EnchantBroker(void)
 {

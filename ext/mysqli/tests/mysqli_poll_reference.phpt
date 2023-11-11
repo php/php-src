@@ -4,14 +4,10 @@ mysqli_poll() & references
 mysqli
 --SKIPIF--
 <?php
-require_once('connect.inc');
-require_once('skipifconnectfailure.inc');
+require_once 'connect.inc';
 
-if (!$IS_MYSQLND)
-    die("skip mysqlnd only feature, compile PHP using --with-mysqli=mysqlnd");
-
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-    die("skip cannot connect");
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 if (mysqli_get_server_version($link) < 50012)
     die("skip Test needs SQL function SLEEP() available as of MySQL 5.0.12");
@@ -19,7 +15,7 @@ if (mysqli_get_server_version($link) < 50012)
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
+    require_once 'connect.inc';
 
     function get_connection() {
         global $host, $user, $passwd, $db, $port, $socket;

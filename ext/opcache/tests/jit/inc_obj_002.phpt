@@ -8,6 +8,7 @@ opcache.jit_buffer_size=64M
 opcache.protect_memory=1
 --FILE--
 <?php
+#[AllowDynamicProperties]
 class Test {
     function foo() {
         $this->prop = PHP_INT_MAX - 5;

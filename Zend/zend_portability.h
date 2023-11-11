@@ -63,10 +63,6 @@
 
 #include <limits.h>
 
-#if HAVE_ALLOCA_H && !defined(_ALLOCA_H)
-# include <alloca.h>
-#endif
-
 #if defined(ZEND_WIN32) && !defined(__clang__)
 #include <intrin.h>
 #endif
@@ -181,6 +177,9 @@
 # define ZEND_EXTENSIONS_SUPPORT	0
 #endif
 
+#if defined(HAVE_ALLOCA_H) && !defined(_ALLOCA_H)
+# include <alloca.h>
+#endif
 /* AIX requires this to be the first thing in the file.  */
 #ifndef __GNUC__
 # ifndef HAVE_ALLOCA_H
@@ -194,8 +193,29 @@ char *alloca();
 # endif
 #endif
 
+#if !ZEND_DEBUG && (defined(HAVE_ALLOCA) || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
+# define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
+# define ALLOCA_FLAG(name) \
+	bool name;
+# define SET_ALLOCA_FLAG(name) \
+	name = true
+# define do_alloca_ex(size, limit, use_heap) \
+	((use_heap = (UNEXPECTED((size) > (limit)))) ? emalloc(size) : alloca(size))
+# define do_alloca(size, use_heap) \
+	do_alloca_ex(size, ZEND_ALLOCA_MAX_SIZE, use_heap)
+# define free_alloca(p, use_heap) \
+	do { if (UNEXPECTED(use_heap)) efree(p); } while (0)
+#else
+# define ALLOCA_FLAG(name)
+# define SET_ALLOCA_FLAG(name)
+# define do_alloca(p, use_heap)		emalloc(p)
+# define free_alloca(p, use_heap)	efree(p)
+#endif
+
 #if ZEND_GCC_VERSION >= 2096 || __has_attribute(__malloc__)
 # define ZEND_ATTRIBUTE_MALLOC __attribute__ ((__malloc__))
+#elif defined(ZEND_WIN32)
+# define ZEND_ATTRIBUTE_MALLOC __declspec(allocator) __declspec(restrict)
 #else
 # define ZEND_ATTRIBUTE_MALLOC
 #endif
@@ -206,6 +226,12 @@ char *alloca();
 #else
 # define ZEND_ATTRIBUTE_ALLOC_SIZE(X)
 # define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y)
+#endif
+
+#if ZEND_GCC_VERSION >= 3000
+# define ZEND_ATTRIBUTE_CONST __attribute__((const))
+#else
+# define ZEND_ATTRIBUTE_CONST
 #endif
 
 #if ZEND_GCC_VERSION >= 2007 || __has_attribute(format)
@@ -345,25 +371,6 @@ char *alloca();
 # define XtOffsetOf(s_type, field) offsetof(s_type, field)
 #endif
 
-#if (defined(HAVE_ALLOCA) || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
-# define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
-# define ALLOCA_FLAG(name) \
-	bool name;
-# define SET_ALLOCA_FLAG(name) \
-	name = 1
-# define do_alloca_ex(size, limit, use_heap) \
-	((use_heap = (UNEXPECTED((size) > (limit)))) ? emalloc(size) : alloca(size))
-# define do_alloca(size, use_heap) \
-	do_alloca_ex(size, ZEND_ALLOCA_MAX_SIZE, use_heap)
-# define free_alloca(p, use_heap) \
-	do { if (UNEXPECTED(use_heap)) efree(p); } while (0)
-#else
-# define ALLOCA_FLAG(name)
-# define SET_ALLOCA_FLAG(name)
-# define do_alloca(p, use_heap)		emalloc(p)
-# define free_alloca(p, use_heap)	efree(p)
-#endif
-
 #ifdef HAVE_SIGSETJMP
 # define SETJMP(a) sigsetjmp(a, 0)
 # define LONGJMP(a,b) siglongjmp(a, b)
@@ -457,6 +464,12 @@ extern "C++" {
 #define ZEND_TRUTH(x)		((x) ? 1 : 0)
 #define ZEND_LOG_XOR(a, b)		(ZEND_TRUTH(a) ^ ZEND_TRUTH(b))
 
+/**
+ * Do a three-way comparison of two integers and returns -1, 0 or 1
+ * depending on whether #a is smaller, equal or larger than #b.
+ */
+#define ZEND_THREEWAY_COMPARE(a, b) ((a) == (b) ? 0 : ((a) < (b) ? -1 : 1))
+
 #define ZEND_MAX_RESERVED_RESOURCES	6
 
 /* excpt.h on Digital Unix 4.0 defines function_table */
@@ -517,7 +530,7 @@ extern "C++" {
 #ifdef __SSSE3__
 /* Instructions compiled directly. */
 # define ZEND_INTRIN_SSSE3_NATIVE 1
-#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSSE3)) || defined(ZEND_WIN32)
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSSE3)) || (defined(ZEND_WIN32) && (!defined(_M_ARM64)))
 /* Function resolved by ifunc or MINIT. */
 # define ZEND_INTRIN_SSSE3_RESOLVER 1
 #endif
@@ -542,7 +555,7 @@ extern "C++" {
 #ifdef __SSE4_2__
 /* Instructions compiled directly. */
 # define ZEND_INTRIN_SSE4_2_NATIVE 1
-#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSE4_2)) || defined(ZEND_WIN32)
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSE4_2)) || (defined(ZEND_WIN32) && (!defined(_M_ARM64)))
 /* Function resolved by ifunc or MINIT. */
 # define ZEND_INTRIN_SSE4_2_RESOLVER 1
 #endif
@@ -567,7 +580,7 @@ extern "C++" {
 #ifdef __PCLMUL__
 /* Instructions compiled directly. */
 # define ZEND_INTRIN_PCLMUL_NATIVE 1
-#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_PCLMUL)) || defined(ZEND_WIN32)
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_PCLMUL)) || (defined(ZEND_WIN32) && (!defined(_M_ARM64)))
 /* Function resolved by ifunc or MINIT. */
 # define ZEND_INTRIN_PCLMUL_RESOLVER 1
 #endif
@@ -593,7 +606,7 @@ extern "C++" {
 #if defined(ZEND_INTRIN_SSE4_2_NATIVE) && defined(ZEND_INTRIN_PCLMUL_NATIVE)
 /* Instructions compiled directly. */
 # define ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE 1
-#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSE4_2) && defined(PHP_HAVE_PCLMUL)) || defined(ZEND_WIN32)
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSE4_2) && defined(PHP_HAVE_PCLMUL)) || (defined(ZEND_WIN32) && (!defined(_M_ARM64)))
 /* Function resolved by ifunc or MINIT. */
 # define ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER 1
 #endif
@@ -618,7 +631,7 @@ extern "C++" {
 
 #ifdef __AVX2__
 # define ZEND_INTRIN_AVX2_NATIVE 1
-#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_AVX2)) || defined(ZEND_WIN32)
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_AVX2)) || (defined(ZEND_WIN32) && (!defined(_M_ARM64)))
 # define ZEND_INTRIN_AVX2_RESOLVER 1
 #endif
 

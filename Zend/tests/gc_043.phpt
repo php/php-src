@@ -8,7 +8,8 @@ STR;
 var_dump(unserialize($s));
 gc_collect_cycles();
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property RegexIterator::$5 is deprecated in %s on line %d
 object(stdClass)#1 (2) {
   ["5"]=>
   object(SplStack)#2 (2) {

@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#if !defined(HAVE_OS_SIGNPOST_H)
 #if defined(__linux__)
 #include <sys/syscall.h>
 #elif defined(__darwin__)
@@ -46,6 +47,7 @@ extern unsigned int thr_self(void);
 #endif
 
 #include "zend_elf.h"
+#include "zend_mmap.h"
 
 /*
  * 1) Profile using perf-<pid>.map
@@ -171,8 +173,9 @@ static void zend_jit_perf_jitdump_open(void)
 		return;
 	}
 
+	const size_t page_size = sysconf(_SC_PAGESIZE);
 	jitdump_mem = mmap(NULL,
-			sysconf(_SC_PAGESIZE),
+			page_size,
 			PROT_READ|PROT_EXEC,
 			MAP_PRIVATE, jitdump_fd, 0);
 
@@ -181,6 +184,8 @@ static void zend_jit_perf_jitdump_open(void)
 		jitdump_fd = -1;
 		return;
 	}
+
+	zend_mmap_set_name(jitdump_mem, page_size, "zend_jitdump");
 
 	memset(&jit_hdr, 0, sizeof(jit_hdr));
 	jit_hdr.magic           = ZEND_PERF_JITDUMP_HEADER_MAGIC;
@@ -270,3 +275,53 @@ static void zend_jit_perf_map_register(const char *name, void *start, size_t siz
 	}
 	fprintf(fp, "%zx %zx %s\n", (size_t)(uintptr_t)start, size, name);
 }
+#else
+#include <os/log.h>
+#include <os/signpost.h>
+
+/*
+ * 1) To generate an Instrument tracing data:
+ * xcrun xctrace record --template <Template name> --launch -- php
+ * xcrun xctrace record --template Logging --launch -- php -dopcache.jit=1255 -dopcache.jit_debug=32 bench.php
+ * 2) An instrument trace folder is created:
+ * e.g. open Launch_php_2022-07-03_15.41.05_5F96D825.trace
+ */
+
+static os_log_t jitdump_fd;
+static os_signpost_id_t jitdump_sp = OS_SIGNPOST_ID_NULL;
+
+static void zend_jit_perf_jitdump_open(void)
+{
+	/**
+	 *  The `os_log_t` list per namespace is maintained by the os
+	 *  and are not deallocated by (and not deallocatable)
+	 *  but are reusable.
+	 */
+	jitdump_fd = os_log_create("net.php.opcache.jit", OS_LOG_CATEGORY_POINTS_OF_INTEREST);
+	jitdump_sp = os_signpost_id_generate(jitdump_fd);
+
+	if (jitdump_sp != OS_SIGNPOST_ID_NULL && jitdump_sp != OS_SIGNPOST_ID_INVALID) {
+		os_signpost_interval_begin(jitdump_fd, jitdump_sp, "zend_jitdump");
+	}
+}
+
+static void zend_jit_perf_jitdump_close(void)
+{
+	if (jitdump_sp != OS_SIGNPOST_ID_NULL && jitdump_sp != OS_SIGNPOST_ID_INVALID) {
+		os_signpost_interval_end(jitdump_fd, jitdump_sp, "zend_jitdump");
+	}
+}
+
+static void zend_jit_perf_jitdump_register(const char *name, void *start, size_t size)
+{
+}
+
+static void zend_jit_perf_map_register(const char *name, void *start, size_t size)
+{
+	os_signpost_id_t map = os_signpost_id_make_with_pointer(jitdump_fd, start);
+	if (map != OS_SIGNPOST_ID_NULL && map != OS_SIGNPOST_ID_INVALID) {
+		os_signpost_event_emit(jitdump_fd, map, "zend_jitdump_name", "%s", name);
+		os_signpost_event_emit(jitdump_fd, map, "zend_jitdump_size", "%lu", size);
+	}
+}
+#endif

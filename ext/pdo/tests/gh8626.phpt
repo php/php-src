@@ -46,7 +46,7 @@ array(3) {
   [0]=>
   string(%d) "%s"
   [1]=>
-  int(%d)
+  int(%i)
   [2]=>
   string(%d) "%s%w%S"
 }

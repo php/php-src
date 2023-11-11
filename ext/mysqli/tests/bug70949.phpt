@@ -4,15 +4,11 @@ Bug #70949 (SQL Result Sets With NULL Can Cause Fatal Memory Errors)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once("connect.inc");
-if (!$IS_MYSQLND) {
-    die("skip mysqlnd only test");
-}
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once("connect.inc");
+require_once "connect.inc";
 $mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
 $mysql->query("DROP TABLE IF EXISTS bug70949");
@@ -47,7 +43,7 @@ if ($stmt = $mysql->prepare($sql))
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once "connect.inc";
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

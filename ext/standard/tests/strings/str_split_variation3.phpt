@@ -39,9 +39,7 @@ echo "Done"
 --EXPECTF--
 *** Testing str_split() : double quoted strings for 'str' ***
 -- Iteration 1 --
-array(1) {
-  [0]=>
-  string(0) ""
+array(0) {
 }
 -- Iteration 2 --
 array(1) {

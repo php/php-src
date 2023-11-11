@@ -311,7 +311,7 @@ static void zval_ini_dtor(zval *zv)
 
 statement_list:
 		statement_list statement
-	|	%empty
+	|	%empty { (void) ini_nerrs; }
 ;
 
 statement:

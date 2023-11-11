@@ -1,4 +1,4 @@
-.TH PHAR 1 "2021" "The PHP Group" "User Commands"
+.TH PHAR 1 "2022" "The PHP Group" "User Commands"
 .SH NAME
 phar, phar.phar \- PHAR (PHP archive) command line tool
 .SH SYNOPSIS
@@ -497,7 +497,7 @@ You can view the list of known bugs or report any new bug you
 found at:
 .PD 0
 .P
-.B http://bugs.php.net
+.B https://github.com/php/php-src/issues
 .PD 1
 .SH AUTHORS
 The PHP Group: Thies C. Arntzen, Stig Bakken, Andi Gutmans, Rasmus Lerdorf, Sam Ruby, Sascha Schumann, Zeev Suraski, Jim Winstead, Andrei Zmievski.

@@ -26,8 +26,6 @@ echo $phar->getAlias() . "\n";
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phartmp.php');
-__HALT_COMPILER();
 ?>
 --EXPECT--
 hio

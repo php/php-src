@@ -20,7 +20,7 @@
 #include "php_version.h"
 #define PHP_DBA_VERSION PHP_VERSION
 
-#if HAVE_DBA
+#ifdef HAVE_DBA
 
 typedef enum {
 	/* do not allow 0 here */
@@ -32,7 +32,6 @@ typedef enum {
 
 typedef struct dba_lock {
 	php_stream *fp;
-	char *name;
 	int mode; /* LOCK_EX,LOCK_SH */
 } dba_lock;
 
@@ -43,14 +42,17 @@ typedef struct dba_info {
 	dba_mode_t mode;
 	php_stream *fp;  /* this is the database stream for builtin handlers */
 	int fd;
-	/* arg[cv] are only available when the dba_open handler is called! */
-	int argc;
-	zval *argv;
+	int file_permission;
+	zend_long map_size;
+	/* -1 for default driver flags */
+	zend_long driver_flags;
 	/* private */
 	int flags; /* whether and how dba did locking and other flags*/
 	struct dba_handler *hnd;
 	dba_lock lock;
 } dba_info;
+
+#define DBA_DEFAULT_DRIVER_FLAGS -1
 
 #define DBA_LOCK_READER  (0x0001)
 #define DBA_LOCK_WRITER  (0x0002)
@@ -73,16 +75,16 @@ extern zend_module_entry dba_module_entry;
 typedef struct dba_handler {
 	char *name; /* handler name */
 	int flags; /* whether and how dba does locking and other flags*/
-	int (*open)(dba_info *, char **error);
+	zend_result (*open)(dba_info *, char **error);
 	void (*close)(dba_info *);
-	char* (*fetch)(dba_info *, char *, size_t, int, size_t *);
-	int (*update)(dba_info *, char *, size_t, char *, size_t, int);
-	int (*exists)(dba_info *, char *, size_t);
-	int (*delete)(dba_info *, char *, size_t);
-	char* (*firstkey)(dba_info *, size_t *);
-	char* (*nextkey)(dba_info *, size_t *);
-	int (*optimize)(dba_info *);
-	int (*sync)(dba_info *);
+	zend_string* (*fetch)(dba_info *, zend_string *, int);
+	zend_result (*update)(dba_info *, zend_string *, zend_string *, int);
+	zend_result (*exists)(dba_info *, zend_string *);
+	zend_result (*delete)(dba_info *, zend_string *);
+	zend_string* (*firstkey)(dba_info *);
+	zend_string* (*nextkey)(dba_info *);
+	zend_result (*optimize)(dba_info *);
+	zend_result (*sync)(dba_info *);
 	char* (*info)(struct dba_handler *hnd, dba_info *);
 		/* dba_info==NULL: Handler info, dba_info!=NULL: Database info */
 } dba_handler;
@@ -90,25 +92,25 @@ typedef struct dba_handler {
 /* common prototypes which must be supplied by modules */
 
 #define DBA_OPEN_FUNC(x) \
-	int dba_open_##x(dba_info *info, char **error)
+	zend_result dba_open_##x(dba_info *info, char **error)
 #define DBA_CLOSE_FUNC(x) \
 	void dba_close_##x(dba_info *info)
 #define DBA_FETCH_FUNC(x) \
-	char *dba_fetch_##x(dba_info *info, char *key, size_t keylen, int skip, size_t *newlen)
+	zend_string *dba_fetch_##x(dba_info *info, zend_string *key, int skip)
 #define DBA_UPDATE_FUNC(x) \
-	int dba_update_##x(dba_info *info, char *key, size_t keylen, char *val, size_t vallen, int mode)
+	zend_result dba_update_##x(dba_info *info, zend_string *key, zend_string *val, int mode)
 #define DBA_EXISTS_FUNC(x) \
-	int dba_exists_##x(dba_info *info, char *key, size_t keylen)
+	zend_result dba_exists_##x(dba_info *info, zend_string *key)
 #define DBA_DELETE_FUNC(x) \
-	int dba_delete_##x(dba_info *info, char *key, size_t keylen)
+	zend_result dba_delete_##x(dba_info *info, zend_string *key)
 #define DBA_FIRSTKEY_FUNC(x) \
-	char *dba_firstkey_##x(dba_info *info, size_t *newlen)
+	zend_string *dba_firstkey_##x(dba_info *info)
 #define DBA_NEXTKEY_FUNC(x) \
-	char *dba_nextkey_##x(dba_info *info, size_t *newlen)
+	zend_string *dba_nextkey_##x(dba_info *info)
 #define DBA_OPTIMIZE_FUNC(x) \
-	int dba_optimize_##x(dba_info *info)
+	zend_result dba_optimize_##x(dba_info *info)
 #define DBA_SYNC_FUNC(x) \
-	int dba_sync_##x(dba_info *info)
+	zend_result dba_sync_##x(dba_info *info)
 #define DBA_INFO_FUNC(x) \
 	char *dba_info_##x(dba_handler *hnd, dba_info *info)
 

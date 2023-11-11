@@ -27,7 +27,6 @@ echo "*** Done ***\n";
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__."/copy_copy_variation12");
 rmdir(__DIR__."/copy_variation12");
 ?>
 --EXPECTF--

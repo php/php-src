@@ -2,6 +2,7 @@
 GH-10251 (Assertion `(flag & (1<<3)) == 0' failed.)
 --FILE--
 <?php
+#[\AllowDynamicProperties]
 class A
 {
     function __set($o, $l)

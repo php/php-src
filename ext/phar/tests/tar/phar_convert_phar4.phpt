@@ -48,8 +48,6 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.gz');
-__HALT_COMPILER();
 ?>
 --EXPECT--
 bool(false)

@@ -9,7 +9,6 @@ if (PHP_INTL != "no") {
 		EXTENSION("intl", "php_intl.c intl_convert.c intl_convertcpp.cpp intl_error.c ", true,
 								"/I \"" + configure_module_dirname + "\" /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		ADD_SOURCES(configure_module_dirname + "/collator", "\
-				collator.c \
 				collator_attr.c \
 				collator_class.c \
 				collator_compare.c \
@@ -29,7 +28,6 @@ if (PHP_INTL != "no") {
 				converter.c \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/formatter", "\
-				formatter.c \
 				formatter_attr.c \
 				formatter_class.c \
 				formatter_data.c \
@@ -55,7 +53,6 @@ if (PHP_INTL != "no") {
                                 grapheme_string.c grapheme_util.c  \
                                 ", "intl");
 		ADD_SOURCES(configure_module_dirname + "/normalizer", "\
-				normalizer.c \
 				normalizer_class.c \
 				normalizer_normalize.c \
 				", "intl");
@@ -87,7 +84,6 @@ if (PHP_INTL != "no") {
 
 		if (CHECK_HEADER_ADD_INCLUDE("unicode/uspoof.h", "CFLAGS_INTL")) {
 			ADD_SOURCES(configure_module_dirname + "/spoofchecker", "\
-					spoofchecker.c \
 					spoofchecker_class.c \
 					spoofchecker_create.c \
 					spoofchecker_main.c",
@@ -95,7 +91,6 @@ if (PHP_INTL != "no") {
 		}
 
 		ADD_SOURCES(configure_module_dirname + "/transliterator", "\
-				transliterator.c \
 				transliterator_class.c \
 				transliterator_methods.c",
 				"intl");

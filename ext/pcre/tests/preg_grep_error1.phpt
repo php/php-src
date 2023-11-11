@@ -37,7 +37,7 @@ echo "Done"
 
 Arg value is abcdef
 
-Warning: preg_grep(): Delimiter must not be alphanumeric or backslash in %spreg_grep_error1.php on line %d
+Warning: preg_grep(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_grep_error1.php on line %d
 bool(false)
 
 Arg value is /[a-zA-Z]

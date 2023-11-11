@@ -1148,6 +1148,9 @@ char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_p
 	int isFileUri = 0;
 
 	uri = xmlCreateURI();
+	if (uri == NULL) {
+		return NULL;
+	}
 	escsource = xmlURIEscapeStr((xmlChar *) source, (xmlChar *) ":");
 	xmlParseURIReference(uri, (char *) escsource);
 	xmlFree(escsource);
@@ -2096,6 +2099,10 @@ PHP_METHOD(DOMDocument, registerNodeClass)
 	}
 
 	if (ce == NULL || instanceof_function(ce, basece)) {
+		if (UNEXPECTED(ce != NULL && (ce->ce_flags & ZEND_ACC_ABSTRACT))) {
+			zend_argument_value_error(2, "must not be an abstract class");
+			RETURN_THROWS();
+		}
 		DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 		dom_set_doc_classmap(intern->document, basece, ce);
 		RETURN_TRUE;

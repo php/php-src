@@ -23,9 +23,8 @@ $db->exec('INSERT INTO test VALUES(4, \'D\', \'Group2\')');
 
 class DerivedStatement extends PDOStatement
 {
-    private function __construct($name, $db)
+    private function __construct(public $name, $db)
     {
-        $this->name = $name;
         echo __METHOD__ . "($name)\n";
     }
 
@@ -41,11 +40,9 @@ $derived = $db->prepare('SELECT id, val FROM test', array(PDO::ATTR_STATEMENT_CL
 
 class Test1
 {
-    public function __construct($id, $val)
+    public function __construct(public $id, public $val)
     {
         echo __METHOD__ . "($id,$val)\n";
-        $this->id = $id;
-        $this->val = $val;
     }
 
     static public function factory($id, $val)

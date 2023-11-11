@@ -31,6 +31,9 @@
 #include "mbfilter.h"
 #include "mbfilter_base64.h"
 
+static size_t mb_base64_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_base64(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+
 const mbfl_encoding mbfl_encoding_base64 = {
 	mbfl_no_encoding_base64,
 	"BASE64",
@@ -40,6 +43,8 @@ const mbfl_encoding mbfl_encoding_base64 = {
 	MBFL_ENCTYPE_GL_UNSAFE,
 	NULL,
 	NULL,
+	mb_base64_to_wchar,
+	mb_wchar_to_base64,
 	NULL
 };
 
@@ -141,6 +146,11 @@ int mbfl_filt_conv_base64enc_flush(mbfl_convert_filter *filter)
 			CK((*filter->output_function)(0x3d, filter->data));		/* '=' */
 		}
 	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
 }
 
@@ -166,6 +176,9 @@ int mbfl_filt_conv_base64dec(int c, mbfl_convert_filter *filter)
 		n = 62;
 	} else if (c == 0x2f) {			/* '/' */
 		n = 63;
+	} else {
+		CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
+		return 0;
 	}
 	n &= 0x3f;
 
@@ -209,5 +222,134 @@ int mbfl_filt_conv_base64dec_flush(mbfl_convert_filter *filter)
 			CK((*filter->output_function)((cache >> 8) & 0xff, filter->data));
 		}
 	}
+
+	if (filter->flush_function) {
+		(*filter->flush_function)(filter->data);
+	}
+
 	return 0;
+}
+
+static int decode_base64(char c)
+{
+	if (c >= 'A' && c <= 'Z') {
+		return c - 'A';
+	} else if (c >= 'a' && c <= 'z') {	/* a - z */
+		return c - 'a' + 26;
+	} else if (c >= '0' && c <= '9') {	/* 0 - 9 */
+		return c - '0' + 52;
+	} else if (c == '+') {
+		return 62;
+	} else if (c == '/') {
+		return 63;
+	}
+	return -1;
+}
+
+static size_t mb_base64_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	ZEND_ASSERT(bufsize >= 3);
+
+	unsigned char *p = *in, *e = p + *in_len;
+	uint32_t *out = buf, *limit = buf + bufsize;
+
+	unsigned int bits = *state & 0xFF, cache = *state >> 8;
+
+	while (p < e && (limit - out) >= 3) {
+		unsigned char c = *p++;
+
+		if (c == '\r' || c == '\n' || c == ' ' || c == '\t' || c == '=') {
+			continue;
+		}
+
+		int value = decode_base64(c);
+
+		if (value == -1) {
+			*out++ = MBFL_BAD_INPUT;
+		} else {
+			bits += 6;
+			cache = (cache << 6) | (value & 0x3F);
+			if (bits == 24) {
+				*out++ = (cache >> 16) & 0xFF;
+				*out++ = (cache >> 8) & 0xFF;
+				*out++ = cache & 0xFF;
+				bits = cache = 0;
+			}
+		}
+	}
+
+	if (p == e) {
+		if (bits) {
+			/* If we reach here, there will be at least 3 spaces remaining in output buffer */
+			if (bits == 18) {
+				*out++ = (cache >> 10) & 0xFF;
+				*out++ = (cache >> 2) & 0xFF;
+			} else if (bits == 12) {
+				*out++ = (cache >> 4) & 0xFF;
+			}
+		}
+	} else {
+		*state = (cache << 8) | (bits & 0xFF);
+	}
+
+	*in_len = e - p;
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_base64(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned int bits = (buf->state & 0x3) * 8;
+	unsigned int chars_output = ((buf->state >> 2) & 0x3F) * 4;
+	unsigned int cache = buf->state >> 8;
+
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	/* Every 3 bytes of input converts to 4 bytes of output... but if the number of input
+	 * bytes is not a multiple of 3, we still pad the output out to a multiple of 4
+	 * That's `(len + 2) * 4 / 3`, to calculate the amount of space needed in the output buffer
+	 *
+	 * But also, we add a CR+LF line ending (2 bytes) for every 76 bytes of output
+	 * That means we must multiply the above number by 78/76
+	 * Use `zend_safe_address_guarded` to check that the multiplication doesn't overflow
+	 *
+	 * And since we may enter this function multiple times when converting a large string, and
+	 * we might already be close to where a CR+LF needs to be emitted, make space for an extra
+	 * CR+LF pair in the output buffer */
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, (zend_safe_address_guarded(len + (bits / 8), 26, 52) / 19) + 2);
+
+	while (len--) {
+		uint32_t w = *in++;
+		cache = (cache << 8) | (w & 0xFF);
+		bits += 8;
+		if (bits == 24) {
+			if (chars_output > 72) {
+				out = mb_convert_buf_add2(out, '\r', '\n');
+				chars_output = 0;
+			}
+			out = mb_convert_buf_add4(out,
+				mbfl_base64_table[(cache >> 18) & 0x3F],
+				mbfl_base64_table[(cache >> 12) & 0x3F],
+				mbfl_base64_table[(cache >> 6) & 0x3F],
+				mbfl_base64_table[cache & 0x3F]);
+			chars_output += 4;
+			bits = cache = 0;
+		}
+	}
+
+	if (end && bits) {
+		if (chars_output > 72) {
+			out = mb_convert_buf_add2(out, '\r', '\n');
+			chars_output = 0;
+		}
+		if (bits == 8) {
+			out = mb_convert_buf_add4(out, mbfl_base64_table[(cache >> 2) & 0x3F], mbfl_base64_table[(cache & 0x3) << 4], '=', '=');
+		} else {
+			out = mb_convert_buf_add4(out, mbfl_base64_table[(cache >> 10) & 0x3F], mbfl_base64_table[(cache >> 4) & 0x3F], mbfl_base64_table[(cache & 0xF) << 2], '=');
+		}
+	} else {
+		buf->state = (cache << 8) | (((chars_output / 4) & 0x3F) << 2) | ((bits / 8) & 0x3);
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }

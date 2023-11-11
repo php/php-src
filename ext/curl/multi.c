@@ -88,7 +88,7 @@ PHP_FUNCTION(curl_multi_add_handle)
 	mh = Z_CURL_MULTI_P(z_mh);
 	ch = Z_CURL_P(z_ch);
 
-	_php_curl_verify_handlers(ch, 1);
+	_php_curl_verify_handlers(ch, /* reporterror */ true);
 
 	_php_curl_cleanup_handle(ch);
 
@@ -217,7 +217,7 @@ PHP_FUNCTION(curl_multi_exec)
 			pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
 			ch = Z_CURL_P(pz_ch);
 
-			_php_curl_verify_handlers(ch, 1);
+			_php_curl_verify_handlers(ch, /* reporterror */ true);
 		}
 	}
 
@@ -318,7 +318,7 @@ PHP_FUNCTION(curl_multi_close)
 	for (pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
 		pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
 		php_curl *ch = Z_CURL_P(pz_ch);
-		_php_curl_verify_handlers(ch, 1);
+		_php_curl_verify_handlers(ch, /* reporterror */ true);
 		curl_multi_remove_handle(mh->multi, ch->cp);
 	}
 	zend_llist_clean(&mh->easyh);
@@ -374,7 +374,7 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	zval 					headers;
 	zval 					retval;
 	char 					*header;
-	int  					error;
+	zend_result				error;
 	zend_fcall_info 		fci 			= empty_fcall_info;
 
 	pz_parent_ch = _php_curl_multi_find_easy_handle(mh, parent_ch);
@@ -431,7 +431,7 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 
 #endif
 
-static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
+static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
 {
 	CURLMcode error = CURLM_OK;
 
@@ -444,6 +444,9 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 		case CURLMOPT_MAX_HOST_CONNECTIONS:
 		case CURLMOPT_MAX_PIPELINE_LENGTH:
 		case CURLMOPT_MAX_TOTAL_CONNECTIONS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074300 /* Available since 7.67.0 */
+		case CURLMOPT_MAX_CONCURRENT_STREAMS:
 #endif
 		{
 			zend_long lval = zval_get_long(zvalue);
@@ -468,9 +471,9 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 			}
 
 			ZVAL_COPY(&mh->handlers.server_push->func_name, zvalue);
-			error = curl_multi_setopt(mh->multi, option, _php_server_push_callback);
+			error = curl_multi_setopt(mh->multi, CURLMOPT_PUSHFUNCTION, _php_server_push_callback);
 			if (error != CURLM_OK) {
-				return 0;
+				return false;
 			}
 			error = curl_multi_setopt(mh->multi, CURLMOPT_PUSHDATA, mh);
 			break;
@@ -483,7 +486,7 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 
 	SAVE_CURLM_ERROR(mh, error);
 
-	return error != CURLM_OK;
+	return error == CURLM_OK;
 }
 /* }}} */
 
@@ -502,7 +505,7 @@ PHP_FUNCTION(curl_multi_setopt)
 
 	mh = Z_CURL_MULTI_P(z_mh);
 
-	if (!_php_curl_multi_setopt(mh, options, zvalue, return_value)) {
+	if (_php_curl_multi_setopt(mh, options, zvalue, return_value)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -547,7 +550,7 @@ void curl_multi_free_obj(zend_object *object)
 		pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
 		if (!(OBJ_FLAGS(Z_OBJ_P(pz_ch)) & IS_OBJ_FREE_CALLED)) {
 			ch = Z_CURL_P(pz_ch);
-			_php_curl_verify_handlers(ch, 0);
+			_php_curl_verify_handlers(ch, /* reporterror */ false);
 		}
 	}
 

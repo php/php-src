@@ -18,4 +18,4 @@ enum Suit {
 
 ?>
 --EXPECTF--
-Fatal error: Enum may not include __construct in %s on line %d
+Fatal error: Enum Suit cannot include magic method __construct in %s on line %d

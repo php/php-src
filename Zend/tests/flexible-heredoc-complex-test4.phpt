@@ -28,7 +28,10 @@ the same delimiter name as the heredoc
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Using ${expr} (variable variables) in strings is deprecated, use {${expr}} instead in %s on line %d
+
+Deprecated: Using ${expr} (variable variables) in strings is deprecated, use {${expr}} instead in %s on line %d
 string(8) "Test
 FOO"
 string(16) "    Test

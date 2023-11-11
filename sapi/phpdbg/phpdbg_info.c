@@ -69,7 +69,7 @@ PHPDBG_INFO(files) /* {{{ */
 	} phpdbg_end_try_access();
 
 	phpdbg_try_access {
-		ZEND_HASH_FOREACH_STR_KEY(&EG(included_files), fname) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY(&EG(included_files), fname) {
 			phpdbg_writeln("File: %s", ZSTR_VAL(fname));
 		} ZEND_HASH_FOREACH_END();
 	} phpdbg_catch_access {
@@ -105,7 +105,7 @@ PHPDBG_INFO(constants) /* {{{ */
 
 	if (EG(zend_constants)) {
 		phpdbg_try_access {
-			ZEND_HASH_FOREACH_PTR(EG(zend_constants), data) {
+			ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), data) {
 				if (ZEND_CONSTANT_MODULE_NUMBER(data) == PHP_USER_CONSTANT) {
 					zend_hash_update_ptr(&consts, data->name, data);
 				}
@@ -119,7 +119,7 @@ PHPDBG_INFO(constants) /* {{{ */
 
 	if (zend_hash_num_elements(&consts)) {
 		phpdbg_out("Address            Refs    Type      Constant\n");
-		ZEND_HASH_FOREACH_PTR(&consts, data) {
+		ZEND_HASH_MAP_FOREACH_PTR(&consts, data) {
 
 #define VARIABLEINFO(msg, ...) \
 	phpdbg_writeln( \
@@ -196,7 +196,7 @@ static int phpdbg_print_symbols(bool show_globals) {
 	zend_hash_init(&vars, 8, NULL, NULL, 0);
 
 	phpdbg_try_access {
-		ZEND_HASH_FOREACH_STR_KEY_VAL(symtable, var, data) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(symtable, var, data) {
 			if (zend_is_auto_global(var) ^ !show_globals) {
 				zend_hash_update(&vars, var, data);
 			}
@@ -227,7 +227,7 @@ static int phpdbg_print_symbols(bool show_globals) {
 
 	if (zend_hash_num_elements(&vars)) {
 		phpdbg_out("Address            Refs    Type      Variable\n");
-		ZEND_HASH_FOREACH_STR_KEY_VAL(&vars, var, data) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(&vars, var, data) {
 			phpdbg_try_access {
 				const char *isref = "";
 #define VARIABLEINFO(msg, ...) \
@@ -387,7 +387,7 @@ PHPDBG_INFO(classes) /* {{{ */
 	zend_hash_init(&classes, 8, NULL, NULL, 0);
 
 	phpdbg_try_access {
-		ZEND_HASH_FOREACH_PTR(EG(class_table), ce) {
+		ZEND_HASH_MAP_FOREACH_PTR(EG(class_table), ce) {
 			if (ce->type == ZEND_USER_CLASS) {
 				zend_hash_next_index_insert_ptr(&classes, ce);
 			}
@@ -399,7 +399,7 @@ PHPDBG_INFO(classes) /* {{{ */
 	phpdbg_notice("User Classes (%d)", zend_hash_num_elements(&classes));
 
 	/* once added, assume that classes are stable... until shutdown. */
-	ZEND_HASH_FOREACH_PTR(&classes, ce) {
+	ZEND_HASH_PACKED_FOREACH_PTR(&classes, ce) {
 		phpdbg_print_class_name(ce);
 
 		if (ce->parent) {
@@ -431,7 +431,7 @@ PHPDBG_INFO(funcs) /* {{{ */
 	zend_hash_init(&functions, 8, NULL, NULL, 0);
 
 	phpdbg_try_access {
-		ZEND_HASH_FOREACH_PTR(EG(function_table), zf) {
+		ZEND_HASH_MAP_FOREACH_PTR(EG(function_table), zf) {
 			if (zf->type == ZEND_USER_FUNCTION) {
 				zend_hash_next_index_insert_ptr(&functions, zf);
 			}
@@ -442,7 +442,7 @@ PHPDBG_INFO(funcs) /* {{{ */
 
 	phpdbg_notice("User Functions (%d)", zend_hash_num_elements(&functions));
 
-	ZEND_HASH_FOREACH_PTR(&functions, zf) {
+	ZEND_HASH_PACKED_FOREACH_PTR(&functions, zf) {
 		zend_op_array *op_array = &zf->op_array;
 
 		phpdbg_write("|-------- %s", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "{main}");

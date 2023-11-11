@@ -399,28 +399,5 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 	TimeZone_handlers.compare = TimeZone_compare_objects;
 	TimeZone_handlers.get_debug_info = TimeZone_get_debug_info;
 	TimeZone_handlers.free_obj = TimeZone_objects_free;
-
-
-	/* Declare 'IntlTimeZone' class constants */
-#define TIMEZONE_DECL_LONG_CONST(name, val) \
-	zend_declare_class_constant_long(TimeZone_ce_ptr, name, sizeof(name) - 1, \
-		val)
-
-	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT", TimeZone::SHORT);
-	TIMEZONE_DECL_LONG_CONST("DISPLAY_LONG", TimeZone::LONG);
-
-	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT_GENERIC", TimeZone::SHORT_GENERIC);
-	TIMEZONE_DECL_LONG_CONST("DISPLAY_LONG_GENERIC", TimeZone::LONG_GENERIC);
-	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT_GMT", TimeZone::SHORT_GMT);
-	TIMEZONE_DECL_LONG_CONST("DISPLAY_LONG_GMT", TimeZone::LONG_GMT);
-	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT_COMMONLY_USED", TimeZone::SHORT_COMMONLY_USED);
-	TIMEZONE_DECL_LONG_CONST("DISPLAY_GENERIC_LOCATION", TimeZone::GENERIC_LOCATION);
-
-	TIMEZONE_DECL_LONG_CONST("TYPE_ANY", UCAL_ZONE_TYPE_ANY);
-	TIMEZONE_DECL_LONG_CONST("TYPE_CANONICAL", UCAL_ZONE_TYPE_CANONICAL);
-	TIMEZONE_DECL_LONG_CONST("TYPE_CANONICAL_LOCATION", UCAL_ZONE_TYPE_CANONICAL_LOCATION);
-
-	/* Declare 'IntlTimeZone' class properties */
-
 }
 /* }}} */

@@ -16,6 +16,6 @@ runs:
         export PDO_MYSQL_TEST_PASS=root
         export REPORT_EXIT_STATUS=no
         sapi/cli/php run-tests.php -P -q \
-          -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
-          --offline --show-diff --show-slow 1000 --set-timeout 120 \
+          -g FAIL,BORK,LEAK,XLEAK \
+          --no-progress --offline --show-diff --show-slow 1000 --set-timeout 120 \
           ext/pdo_mysql

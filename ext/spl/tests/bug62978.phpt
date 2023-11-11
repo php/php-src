@@ -49,5 +49,5 @@ bool(false)
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %sbug62978.php on line %d
 
-Warning: Undefined array key 5 in %s on line %d
+Warning: Undefined array key %d in %s on line %d
 NULL

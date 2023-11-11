@@ -11,6 +11,7 @@ function checkAuth($peid,$auth) {
 }
 
 class TestSoap extends SoapClient {
+    private $server;
 
     function __construct($wsdl, $options) {
         parent::__construct($wsdl, $options);

@@ -82,22 +82,22 @@ array(5) {
 - With default sort flag -
 bool(true)
 array(3) {
+  ["c"]=>
+  string(5) "apple"
   ["a"]=>
   string(6) "orange"
   [0]=>
   string(6) "banana"
-  ["c"]=>
-  string(5) "apple"
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
 array(3) {
+  ["c"]=>
+  string(5) "apple"
   ["a"]=>
   string(6) "orange"
   [0]=>
   string(6) "banana"
-  ["c"]=>
-  string(5) "apple"
 }
 
 -- Iteration 3 --

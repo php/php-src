@@ -2,8 +2,66 @@
 
 /** @generate-class-entries */
 
+/** @not-serializable */
 class IntlDateFormatter
 {
+    /**
+     * @var int
+     * @cvalue UDAT_FULL
+     */
+    public const FULL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue UDAT_LONG
+     */
+    public const LONG = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue UDAT_MEDIUM
+     */
+    public const MEDIUM = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue UDAT_SHORT
+     */
+    public const SHORT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue UDAT_NONE
+     */
+    public const NONE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue UDAT_FULL_RELATIVE
+     */
+    public const RELATIVE_FULL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue UDAT_LONG_RELATIVE
+     */
+    public const RELATIVE_LONG = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue UDAT_MEDIUM_RELATIVE
+     */
+    public const RELATIVE_MEDIUM = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue UDAT_SHORT_RELATIVE
+     */
+    public const RELATIVE_SHORT = UNKNOWN;
+
+    /**
+     * @var int
+     * @cvalue UCAL_GREGORIAN
+     */
+    public const GREGORIAN = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue UCAL_TRADITIONAL
+     */
+    public const TRADITIONAL = UNKNOWN;
+
     /**
      * @param IntlTimeZone|DateTimeZone|string|null $timezone
      * @param IntlCalendar|int|null $calendar

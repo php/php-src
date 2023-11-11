@@ -23,6 +23,8 @@
 #include "ext/standard/info.h"
 #include "pdo/php_pdo.h"
 #include "pdo/php_pdo_driver.h"
+/* this file actually lives in main/ */
+#include "php_odbc_utils.h"
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
 #include "zend_exceptions.h"
@@ -394,11 +396,19 @@ static zend_result odbc_handle_check_liveness(pdo_dbh_t *dbh)
 	RETCODE ret;
 	UCHAR d_name[32];
 	SQLSMALLINT len;
+	SQLUINTEGER dead = SQL_CD_FALSE;
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 
+	ret = SQLGetConnectAttr(H->dbc, SQL_ATTR_CONNECTION_DEAD, &dead, 0, NULL);
+	if (ret == SQL_SUCCESS && dead == SQL_CD_TRUE) {
+		/* Bail early here, since we know it's gone */
+		return FAILURE;
+	}
 	/*
-	 * SQL_ATTR_CONNECTION_DEAD is tempting, but only in ODBC 3.5,
-	 * and not all drivers implement it properly
+	 * If the driver doesn't support SQL_ATTR_CONNECTION_DEAD, or if
+	 * it returns false (which could be a false positive), fall back
+	 * to using SQL_DATA_SOURCE_READ_ONLY, which isn't semantically
+	 * correct, but works with many drivers.
 	 */
 	ret = SQLGetInfo(H->dbc, SQL_DATA_SOURCE_READ_ONLY, d_name,
 		sizeof(d_name), &len);
@@ -491,12 +501,43 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 		use_direct = 1;
 
 		/* Force UID and PWD to be set in the DSN */
-		if (dbh->username && *dbh->username && !strstr(dbh->data_source, "uid")
-				&& !strstr(dbh->data_source, "UID")) {
-			char *dsn;
-			spprintf(&dsn, 0, "%s;UID=%s;PWD=%s", dbh->data_source, dbh->username, dbh->password);
+		bool is_uid_set = dbh->username && *dbh->username
+			&& !strstr(dbh->data_source, "uid=")
+			&& !strstr(dbh->data_source, "UID=");
+		bool is_pwd_set = dbh->password && *dbh->password
+			&& !strstr(dbh->data_source, "pwd=")
+			&& !strstr(dbh->data_source, "PWD=");
+		if (is_uid_set && is_pwd_set) {
+			char *uid = NULL, *pwd = NULL;
+			bool should_quote_uid = !php_odbc_connstr_is_quoted(dbh->username) && php_odbc_connstr_should_quote(dbh->username);
+			bool should_quote_pwd = !php_odbc_connstr_is_quoted(dbh->password) && php_odbc_connstr_should_quote(dbh->password);
+			if (should_quote_uid) {
+				size_t estimated_length = php_odbc_connstr_estimate_quote_length(dbh->username);
+				uid = emalloc(estimated_length);
+				php_odbc_connstr_quote(uid, dbh->username, estimated_length);
+			} else {
+				uid = dbh->username;
+			}
+			if (should_quote_pwd) {
+				size_t estimated_length = php_odbc_connstr_estimate_quote_length(dbh->password);
+				pwd = emalloc(estimated_length);
+				php_odbc_connstr_quote(pwd, dbh->password, estimated_length);
+			} else {
+				pwd = dbh->password;
+			}
+			size_t new_dsn_size = strlen(dbh->data_source)
+				+ strlen(uid) + strlen(pwd)
+				+ strlen(";UID=;PWD=") + 1;
+			char *dsn = pemalloc(new_dsn_size, dbh->is_persistent);
+			snprintf(dsn, new_dsn_size, "%s;UID=%s;PWD=%s", dbh->data_source, uid, pwd);
 			pefree((char*)dbh->data_source, dbh->is_persistent);
 			dbh->data_source = dsn;
+			if (uid && should_quote_uid) {
+				efree(uid);
+			}
+			if (pwd && should_quote_pwd) {
+				efree(pwd);
+			}
 		}
 
 		rc = SQLDriverConnect(H->dbc, NULL, (SQLCHAR *) dbh->data_source, strlen(dbh->data_source),

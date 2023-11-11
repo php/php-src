@@ -30,6 +30,12 @@
 #include "mbfilter.h"
 #include "mbfilter_ucs4.h"
 
+static size_t mb_ucs4_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static size_t mb_ucs4be_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_ucs4be(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+static size_t mb_ucs4le_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_ucs4le(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+
 static const char *mbfl_encoding_ucs4_aliases[] = {"ISO-10646-UCS-4", "UCS4", NULL};
 
 /* This library historically had encodings called 'byte4be' and 'byte4le'
@@ -49,6 +55,8 @@ const mbfl_encoding mbfl_encoding_ucs4 = {
 	MBFL_ENCTYPE_WCS4,
 	&vtbl_ucs4_wchar,
 	&vtbl_wchar_ucs4,
+	mb_ucs4_to_wchar,
+	mb_wchar_to_ucs4be,
 	NULL
 };
 
@@ -61,6 +69,8 @@ const mbfl_encoding mbfl_encoding_ucs4be = {
 	MBFL_ENCTYPE_WCS4,
 	&vtbl_ucs4be_wchar,
 	&vtbl_wchar_ucs4be,
+	mb_ucs4be_to_wchar,
+	mb_wchar_to_ucs4be,
 	NULL
 };
 
@@ -73,6 +83,8 @@ const mbfl_encoding mbfl_encoding_ucs4le = {
 	MBFL_ENCTYPE_WCS4,
 	&vtbl_ucs4le_wchar,
 	&vtbl_wchar_ucs4le,
+	mb_ucs4le_to_wchar,
+	mb_wchar_to_ucs4le,
 	NULL
 };
 
@@ -182,6 +194,7 @@ int mbfl_filt_conv_ucs4_wchar(int c, mbfl_convert_filter *filter)
 			n = c & 0xff;
 		}
 		n |= filter->cache;
+		filter->status &= ~0xff;
 		if ((n & 0xffff) == 0 && ((n >> 16) & 0xffff) == 0xfffe) {
 			if (endian) {
 				filter->status = 0;		/* big-endian */
@@ -191,7 +204,6 @@ int mbfl_filt_conv_ucs4_wchar(int c, mbfl_convert_filter *filter)
 		} else if (n != 0xfeff) {
 			CK((*filter->output_function)(n, filter->data));
 		}
-		filter->status &= ~0xff;
 		break;
 	}
 
@@ -299,4 +311,126 @@ static int mbfl_filt_conv_ucs4_wchar_flush(mbfl_convert_filter *filter)
 	}
 
 	return 0;
+}
+
+#define DETECTED_BE 1
+#define DETECTED_LE 2
+
+static size_t mb_ucs4_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	if (*state == DETECTED_BE) {
+		return mb_ucs4be_to_wchar(in, in_len, buf, bufsize, NULL);
+	} else if (*state == DETECTED_LE) {
+		return mb_ucs4le_to_wchar(in, in_len, buf, bufsize, NULL);
+	} else if (*in_len >= 4) {
+		unsigned char *p = *in;
+		uint32_t c1 = *p++;
+		uint32_t c2 = *p++;
+		uint32_t c3 = *p++;
+		uint32_t c4 = *p++;
+		uint32_t w = (c1 << 24) | (c2 << 16) | (c3 << 8) | c4;
+
+		if (w == 0xFFFE0000) {
+			/* Little-endian BOM */
+			*in = p;
+			*in_len -= 4;
+			*state = DETECTED_LE;
+			return mb_ucs4le_to_wchar(in, in_len, buf, bufsize, NULL);
+		} else if (w == 0xFEFF) {
+			/* Big-endian BOM; don't send it to output */
+			*in = p;
+			*in_len -= 4;
+		}
+	}
+
+	*state = DETECTED_BE;
+	return mb_ucs4be_to_wchar(in, in_len, buf, bufsize, NULL);
+}
+
+static size_t mb_ucs4be_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	unsigned char *p = *in, *e = p + (*in_len & ~3);
+	uint32_t *out = buf, *limit = buf + bufsize;
+
+	while (p < e && out < limit) {
+		uint32_t c1 = *p++;
+		uint32_t c2 = *p++;
+		uint32_t c3 = *p++;
+		uint32_t c4 = *p++;
+		uint32_t w = (c1 << 24) | (c2 << 16) | (c3 << 8) | c4;
+		*out++ = w;
+	}
+
+	if (p == e && (*in_len & 0x3) && out < limit) {
+		/* There are 1-3 trailing bytes, which shouldn't be there */
+		*out++ = MBFL_BAD_INPUT;
+		p = *in + *in_len;
+	}
+
+	*in_len -= (p - *in);
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_ucs4be(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 4);
+
+	while (len--) {
+		uint32_t w = *in++;
+		if (w != MBFL_BAD_INPUT) {
+			out = mb_convert_buf_add4(out, (w >> 24) & 0xFF, (w >> 16) & 0xFF, (w >> 8) & 0xFF, w & 0xFF);
+		} else {
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_ucs4be);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 4);
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
+}
+
+static size_t mb_ucs4le_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	unsigned char *p = *in, *e = p + (*in_len & ~3);
+	uint32_t *out = buf, *limit = buf + bufsize;
+
+	while (p < e && out < limit) {
+		uint32_t c1 = *p++;
+		uint32_t c2 = *p++;
+		uint32_t c3 = *p++;
+		uint32_t c4 = *p++;
+		uint32_t w = (c4 << 24) | (c3 << 16) | (c2 << 8) | c1;
+		*out++ = w;
+	}
+
+	if (p == e && (*in_len & 0x3) && out < limit) {
+		/* There are 1-3 trailing bytes, which shouldn't be there */
+		*out++ = MBFL_BAD_INPUT;
+		p = *in + *in_len;
+	}
+
+	*in_len -= (p - *in);
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_ucs4le(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 4);
+
+	while (len--) {
+		uint32_t w = *in++;
+		if (w != MBFL_BAD_INPUT) {
+			out = mb_convert_buf_add4(out, w & 0xFF, (w >> 8) & 0xFF, (w >> 16) & 0xFF, (w >> 24) & 0xFF);
+		} else {
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_ucs4le);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 4);
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }

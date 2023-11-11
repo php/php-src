@@ -225,7 +225,7 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 
 	proc_p = fpm_scoreboard_proc_acquire(child->wp->scoreboard, child->scoreboard_i, 1);
 	if (!proc_p) {
-		zlog(ZLOG_WARNING, "failed to acquire scoreboard");
+		zlog(ZLOG_NOTICE, "failed to acquire scoreboard");
 		return;
 	}
 

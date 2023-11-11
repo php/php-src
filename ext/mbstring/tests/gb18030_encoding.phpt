@@ -302,6 +302,10 @@ echo "Tested GB18030 4-byte characters <-> UTF-16BE\n";
 testAllValidChars($fromUnicode, 'UTF-16BE', 'GB18030', false);
 echo "Tested UTF-16BE -> GB18030 (1 and 2 byte characters)\n";
 
+// Regression test
+// This was found by a fuzzer (previously the invalid codepoint would be converted to \x00)
+convertInvalidString("\xAA\xB8\x2D\x38\x00\x00\x00#", "%#", "UTF-32BE", "GB18030");
+
 // Test "long" illegal character markers
 mb_substitute_character("long");
 convertInvalidString("\x81\x30\x81\xFF", "%", "GB18030", "UTF-8");

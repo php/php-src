@@ -4,15 +4,11 @@ References to result sets - mysqlnd (no copies but references)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
-if (!$IS_MYSQLND)
-    die("skip Test for mysqlnd only");
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
-    require_once('table.inc');
+    require_once 'table.inc';
 
     $references = array();
 
@@ -50,6 +46,10 @@ if (!$IS_MYSQLND)
 
     debug_zval_dump($references);
     print "done!";
+?>
+--CLEAN--
+<?php
+require_once "clean_table.inc";
 ?>
 --EXPECTF--
 array(1) refcount(%d){

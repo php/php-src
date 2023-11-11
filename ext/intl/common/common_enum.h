@@ -77,6 +77,6 @@ using icu::StringEnumeration;
 U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object);
 #endif
 
-U_CFUNC void intl_register_IntlIterator_class(void);
+U_CFUNC void intl_register_common_symbols(int module_number);
 
 #endif // INTL_COMMON_ENUM_H

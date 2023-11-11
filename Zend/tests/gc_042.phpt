@@ -3,6 +3,7 @@ Object properties HT may need to be removed from nested data
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class Test {
     public function __destruct() {
         $GLOBALS['x'] = $this;

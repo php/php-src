@@ -53,20 +53,16 @@ PHP_RINIT_FUNCTION(mbstring);
 PHP_RSHUTDOWN_FUNCTION(mbstring);
 PHP_MINFO_FUNCTION(mbstring);
 
-MBSTRING_API char *php_mb_safe_strrchr_ex(const char *s, unsigned int c,
-                                    size_t nbytes, const mbfl_encoding *enc);
-MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c,
-                                 size_t nbytes);
+MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c, size_t nbytes, const mbfl_encoding *enc);
 
-MBSTRING_API char *php_mb_convert_encoding_ex(
+MBSTRING_API zend_string* php_mb_convert_encoding_ex(
 		const char *input, size_t length,
-		const mbfl_encoding *to_encoding, const mbfl_encoding *from_encoding, size_t *output_len);
-MBSTRING_API char * php_mb_convert_encoding(
+		const mbfl_encoding *to_encoding, const mbfl_encoding *from_encoding);
+MBSTRING_API zend_string* php_mb_convert_encoding(
 		const char *input, size_t length, const mbfl_encoding *to_encoding,
-		const mbfl_encoding **from_encodings, size_t num_from_encodings, size_t *output_len);
+		const mbfl_encoding **from_encodings, size_t num_from_encodings);
 
-MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc);
-MBSTRING_API size_t php_mb_mbchar_bytes(const char *s);
+MBSTRING_API size_t php_mb_mbchar_bytes(const char *s, const mbfl_encoding *enc);
 
 MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, zend_long offset, const mbfl_encoding *encoding);
 MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding);

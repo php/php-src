@@ -27,12 +27,8 @@
 # define PHPDBG_API
 #endif
 
-#ifndef PHP_WIN32
-#	include <stdint.h>
-#	include <stddef.h>
-#else
-#	include "main/php_stdint.h"
-#endif
+#include <stdint.h>
+#include <stddef.h>
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"
@@ -247,6 +243,10 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 #ifndef _WIN32
 	struct sigaction old_sigsegv_signal;         /* segv signal handler */
 #endif
+#ifdef HAVE_USERFAULTFD_WRITEFAULT
+    int watch_userfaultfd;                       /* userfaultfd(2) handler, 0 if unused */
+    pthread_t watch_userfault_thread;            /* thread for watch fault handling */
+#endif
 	phpdbg_btree watchpoint_tree;                /* tree with watchpoints */
 	phpdbg_btree watch_HashTables;               /* tree with original dtors of watchpoints */
 	HashTable watch_elements;                    /* user defined watch elements */
@@ -270,7 +270,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 
 	zend_op_array *(*compile_file)(zend_file_handle *file_handle, int type);
 	zend_op_array *(*init_compile_file)(zend_file_handle *file_handle, int type);
-	zend_op_array *(*compile_string)(zend_string *source_string, const char *filename);
+	zend_op_array *(*compile_string)(zend_string *source_string, const char *filename, zend_compile_position position);
 	HashTable file_sources;
 
 	zend_arena *oplog_arena;                     /* arena for storing oplog */

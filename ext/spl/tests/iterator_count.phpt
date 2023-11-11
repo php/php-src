@@ -13,7 +13,7 @@ iterator_count('1');
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: iterator_count(): Argument #1 ($iterator) must be of type Traversable, string given in %s:%d
+Fatal error: Uncaught TypeError: iterator_count(): Argument #1 ($iterator) must be of type Traversable|array, string given in %s:%d
 Stack trace:
 #0 %s(%d): iterator_count('1')
 #1 {main}

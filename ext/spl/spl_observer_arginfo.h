@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 63dde3294f600164805befd79b1f670fbfb23571 */
+ * Stub hash: e2d66473e8e2436652b78abd9c237e1a50c3d0dc */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObserver_update, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)
@@ -267,6 +267,30 @@ static zend_class_entry *register_class_MultipleIterator(zend_class_entry *class
 	INIT_CLASS_ENTRY(ce, "MultipleIterator", class_MultipleIterator_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
+
+	zval const_MIT_NEED_ANY_value;
+	ZVAL_LONG(&const_MIT_NEED_ANY_value, MIT_NEED_ANY);
+	zend_string *const_MIT_NEED_ANY_name = zend_string_init_interned("MIT_NEED_ANY", sizeof("MIT_NEED_ANY") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_MIT_NEED_ANY_name, &const_MIT_NEED_ANY_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_MIT_NEED_ANY_name);
+
+	zval const_MIT_NEED_ALL_value;
+	ZVAL_LONG(&const_MIT_NEED_ALL_value, MIT_NEED_ALL);
+	zend_string *const_MIT_NEED_ALL_name = zend_string_init_interned("MIT_NEED_ALL", sizeof("MIT_NEED_ALL") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_MIT_NEED_ALL_name, &const_MIT_NEED_ALL_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_MIT_NEED_ALL_name);
+
+	zval const_MIT_KEYS_NUMERIC_value;
+	ZVAL_LONG(&const_MIT_KEYS_NUMERIC_value, MIT_KEYS_NUMERIC);
+	zend_string *const_MIT_KEYS_NUMERIC_name = zend_string_init_interned("MIT_KEYS_NUMERIC", sizeof("MIT_KEYS_NUMERIC") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_MIT_KEYS_NUMERIC_name, &const_MIT_KEYS_NUMERIC_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_MIT_KEYS_NUMERIC_name);
+
+	zval const_MIT_KEYS_ASSOC_value;
+	ZVAL_LONG(&const_MIT_KEYS_ASSOC_value, MIT_KEYS_ASSOC);
+	zend_string *const_MIT_KEYS_ASSOC_name = zend_string_init_interned("MIT_KEYS_ASSOC", sizeof("MIT_KEYS_ASSOC") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_MIT_KEYS_ASSOC_name, &const_MIT_KEYS_ASSOC_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_MIT_KEYS_ASSOC_name);
 
 	return class_entry;
 }

@@ -3,6 +3,7 @@ User-space streams: stream_set_option()
 --FILE--
 <?php
 class test_wrapper_base {
+    public $context;
     public $return_value;
     public $expected_option;
     public $expected_value;

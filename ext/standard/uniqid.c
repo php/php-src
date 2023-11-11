@@ -17,7 +17,7 @@
 #include "php.h"
 
 #include <stdlib.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -31,8 +31,7 @@
 #include <sys/time.h>
 #endif
 
-#include "php_lcg.h"
-#include "php_random.h"
+#include "ext/random/php_random.h"
 
 #ifdef HAVE_GETTIMEOFDAY
 ZEND_TLS struct timeval prev_tv = { 0, 0 };

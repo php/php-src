@@ -31,6 +31,10 @@ $a['waa'];
 --EXPECTF--
 Notice: ob_end_flush(): Failed to delete and flush buffer. No buffer to delete or flush in %sbug64960.php on line 3
 
+Deprecated: Creation of dynamic property Exception::$_trace is deprecated in %s on line %d
+
+Deprecated: Creation of dynamic property Exception::$_trace is deprecated in %s on line %d
+
 Fatal error: Uncaught Exception in %sbug64960.php:19
 Stack trace:
 #0 [internal function]: {closure}(8, 'ob_end_clean():...', '%s', 9)

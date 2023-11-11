@@ -31,11 +31,6 @@ foreach( $filenames as $filename ) {
   clearstatcache();
 }
 ?>
---CLEAN--
-<?php
-$file_path = __DIR__;
-unlink($file_path."/fileowner_variation2.tmp");
-?>
 --EXPECTF--
 *** Testing Invalid file types ***
 

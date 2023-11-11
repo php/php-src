@@ -85,8 +85,6 @@ static const struct mbfl_convert_vtbl *mbfl_special_filter_list[] = {
 	&vtbl_uuencode_8bit,
 	&vtbl_8bit_qprint,
 	&vtbl_qprint_8bit,
-	&vtbl_8bit_7bit,
-	&vtbl_7bit_8bit,
 	&vtbl_pass,
 	NULL
 };
@@ -302,13 +300,11 @@ int mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 const struct mbfl_convert_vtbl* mbfl_convert_filter_get_vtbl(const mbfl_encoding *from, const mbfl_encoding *to)
 {
 	if (to->no_encoding == mbfl_no_encoding_base64 ||
-	    to->no_encoding == mbfl_no_encoding_qprint ||
-	    to->no_encoding == mbfl_no_encoding_7bit) {
+	    to->no_encoding == mbfl_no_encoding_qprint) {
 		from = &mbfl_encoding_8bit;
 	} else if (from->no_encoding == mbfl_no_encoding_base64 ||
 			   from->no_encoding == mbfl_no_encoding_qprint ||
-			   from->no_encoding == mbfl_no_encoding_uuencode ||
-			   from->no_encoding == mbfl_no_encoding_7bit) {
+			   from->no_encoding == mbfl_no_encoding_uuencode) {
 		to = &mbfl_encoding_8bit;
 	}
 
@@ -346,4 +342,102 @@ int mbfl_filt_conv_common_flush(mbfl_convert_filter *filter)
 		(*filter->flush_function)(filter->data);
 	}
 	return 0;
+}
+
+zend_string* mb_fast_convert(unsigned char *in, size_t in_len, const mbfl_encoding *from, const mbfl_encoding *to, uint32_t replacement_char, unsigned int error_mode, unsigned int *num_errors)
+{
+	uint32_t wchar_buf[128];
+	unsigned int state = 0;
+
+	if (to == &mbfl_encoding_base64 || to == &mbfl_encoding_qprint) {
+		from = &mbfl_encoding_8bit;
+	} else if (from == &mbfl_encoding_base64 || from == &mbfl_encoding_qprint || from == &mbfl_encoding_uuencode) {
+		to = &mbfl_encoding_8bit;
+	}
+
+	mb_convert_buf buf;
+	mb_convert_buf_init(&buf, in_len, replacement_char, error_mode);
+
+	while (in_len) {
+		size_t out_len = from->to_wchar(&in, &in_len, wchar_buf, 128, &state);
+		ZEND_ASSERT(out_len <= 128);
+		to->from_wchar(wchar_buf, out_len, &buf, !in_len);
+	}
+
+	*num_errors = buf.errors;
+	return mb_convert_buf_result(&buf);
+}
+
+static uint32_t* convert_cp_to_hex(uint32_t cp, uint32_t *out)
+{
+	bool nonzero = false;
+	int shift = 28;
+
+	while (shift >= 0) {
+		int n = (cp >> shift) & 0xF;
+		if (n || nonzero) {
+			nonzero = true;
+			*out++ = mbfl_hexchar_table[n];
+		}
+		shift -= 4;
+	}
+
+	if (!nonzero) {
+		/* No hex digits were output by above loop */
+		*out++ = '0';
+	}
+
+	return out;
+}
+
+static size_t mb_illegal_marker(uint32_t bad_cp, uint32_t *out, unsigned int err_mode, uint32_t replacement_char)
+{
+	uint32_t *start = out;
+
+	if (bad_cp == MBFL_BAD_INPUT && err_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
+		*out++ = replacement_char;
+	} else {
+		switch (err_mode) {
+		case MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR:
+			*out++ = replacement_char;
+			break;
+
+		case MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG:
+			out[0] = 'U';
+			out[1] = '+';
+			out = convert_cp_to_hex(bad_cp, &out[2]);
+			break;
+
+		case MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY:
+			out[0] = '&'; out[1] = '#'; out[2] = 'x';
+			out = convert_cp_to_hex(bad_cp, &out[3]);
+			*out++ = ';';
+			break;
+		}
+	}
+
+	return out - start;
+}
+
+void mb_illegal_output(uint32_t bad_cp, mb_from_wchar_fn fn, mb_convert_buf* buf)
+{
+	buf->errors++;
+
+	uint32_t temp[12];
+	uint32_t repl_char = buf->replacement_char;
+	unsigned int err_mode = buf->error_mode;
+
+	size_t len = mb_illegal_marker(bad_cp, temp, err_mode, repl_char);
+
+	/* Avoid infinite loop if `fn` is not able to handle `repl_char` */
+	if (err_mode == MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR && repl_char != '?') {
+		buf->replacement_char = '?';
+	} else {
+		buf->error_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
+	}
+
+	fn(temp, len, buf, false);
+
+	buf->replacement_char = repl_char;
+	buf->error_mode = err_mode;
 }

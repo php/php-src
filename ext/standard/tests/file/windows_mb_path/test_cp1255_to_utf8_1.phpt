@@ -21,10 +21,10 @@ dir_cp1255
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "כללים מרובים";
-$prefix = create_data("dir_cp1255", "${item}42");
-$path = $prefix . DIRECTORY_SEPARATOR . "${item}42";
+$prefix = create_data("dir_cp1255", "{$item}42");
+$path = $prefix . DIRECTORY_SEPARATOR . "{$item}42";
 
-$subpath = $path . DIRECTORY_SEPARATOR . "${item}4";
+$subpath = $path . DIRECTORY_SEPARATOR . "{$item}4";
 
 /* The mb dirname exists*/
 var_dump(file_exists($path));

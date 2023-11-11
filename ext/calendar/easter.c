@@ -21,7 +21,7 @@
 #include "sdncal.h"
 #include <time.h>
 
-static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
+static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, bool gm)
 {
 	/* based on code by Simon Kershaw, <webmaster@ely.anglican.org> */
 
@@ -118,13 +118,13 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 /* {{{ Return the timestamp of midnight on Easter of a given year (defaults to current year) */
 PHP_FUNCTION(easter_date)
 {
-	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
 /* {{{ Return the number of days after March 21 that Easter falls on for a given year (defaults to current year) */
 PHP_FUNCTION(easter_days)
 {
-	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */

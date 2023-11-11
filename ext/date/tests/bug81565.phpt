@@ -12,7 +12,7 @@ var_export(
 echo "\n", (new DatetimeZone('+01:45:30'))->getName();
 ?>
 --EXPECT--
-DateTime::__set_state(array(
+\DateTime::__set_state(array(
    'date' => '0021-08-21 00:00:00.000000',
    'timezone_type' => 1,
    'timezone' => '+00:49',

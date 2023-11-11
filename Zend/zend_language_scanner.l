@@ -620,7 +620,6 @@ static zend_op_array *zend_compile(int type)
 		zend_emit_final_return(type == ZEND_USER_FUNCTION);
 		op_array->line_start = 1;
 		op_array->line_end = last_lineno;
-		zend_init_static_variables_map_ptr(op_array);
 		pass_two(op_array);
 		zend_oparray_context_end(&original_oparray_context);
 		zend_file_context_end(&original_file_context);
@@ -782,7 +781,7 @@ ZEND_API size_t zend_get_scanned_file_offset(void)
 	return offset;
 }
 
-zend_op_array *compile_string(zend_string *source_string, const char *filename)
+zend_op_array *compile_string(zend_string *source_string, const char *filename, zend_compile_position position)
 {
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = NULL;
@@ -799,7 +798,19 @@ zend_op_array *compile_string(zend_string *source_string, const char *filename)
 	filename_str = zend_string_init(filename, strlen(filename), 0);
 	zend_prepare_string_for_scanning(&tmp, filename_str);
 	zend_string_release(filename_str);
-	BEGIN(ST_IN_SCRIPTING);
+
+	switch (position) {
+		case ZEND_COMPILE_POSITION_AT_SHEBANG:
+			BEGIN(SHEBANG);
+			break;
+		case ZEND_COMPILE_POSITION_AT_OPEN_TAG:
+			BEGIN(INITIAL);
+			break;
+		case ZEND_COMPILE_POSITION_AFTER_OPEN_TAG:
+			BEGIN(ST_IN_SCRIPTING);
+			break;
+	}
+
 	op_array = zend_compile(ZEND_EVAL_CODE);
 
 	zend_restore_lexical_state(&original_lex_state);
@@ -1716,12 +1727,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"readonly" {
 	RETURN_TOKEN_WITH_IDENT(T_READONLY);
-}
-
-/* Don't treat "readonly(" as a keyword, to allow using it as a function name. */
-<ST_IN_SCRIPTING>"readonly"[ \n\r\t]*"(" {
-	yyless(strlen("readonly"));
-	RETURN_TOKEN_WITH_STR(T_STRING, 0);
 }
 
 <ST_IN_SCRIPTING>"unset" {

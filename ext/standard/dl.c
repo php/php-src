@@ -24,7 +24,7 @@
 
 #include "SAPI.h"
 
-#if defined(HAVE_LIBDL)
+#ifdef HAVE_LIBDL
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -77,7 +77,7 @@ PHPAPI PHP_FUNCTION(dl)
 }
 /* }}} */
 
-#if defined(HAVE_LIBDL)
+#ifdef HAVE_LIBDL
 
 /* {{{ php_load_shlib */
 PHPAPI void *php_load_shlib(const char *path, char **errp)
@@ -205,6 +205,11 @@ PHPAPI int php_load_extension(const char *filename, int type, int start_now)
 		return FAILURE;
 	}
 	module_entry = get_module();
+	if (zend_hash_str_exists(&module_registry, module_entry->name, strlen(module_entry->name))) {
+		zend_error(E_CORE_WARNING, "Module \"%s\" is already loaded", module_entry->name);
+		DL_UNLOAD(handle);
+		return FAILURE;
+	}
 	if (module_entry->zend_api != ZEND_MODULE_API_NO) {
 			php_error_docref(NULL, error_type,
 					"%s: Unable to initialize module\n"

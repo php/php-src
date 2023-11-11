@@ -10,7 +10,7 @@ class EmptyIteratorEx extends EmptyIterator
         echo __METHOD__ . "\n";
         parent::rewind();
     }
-    function valid(): bool
+    function valid(): false
     {
         echo __METHOD__ . "\n";
         return parent::valid();

@@ -33,7 +33,7 @@ try {
 
 Arg value is abcdef
 
-Warning: preg_replace(): Delimiter must not be alphanumeric or backslash in %spreg_replace_error1.php on line %d
+Warning: preg_replace(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_replace_error1.php on line %d
 NULL
 
 Arg value is /[a-zA-Z]

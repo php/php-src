@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3bf2b34e1b63d9bb8dec6e013aafb9a861b40975 */
+ * Stub hash: 8e4784e749d6c70174a0958e73e4e9907adcd4b5 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplPriorityQueue_compare, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, priority1, IS_MIXED, 0)
@@ -168,6 +168,24 @@ static zend_class_entry *register_class_SplPriorityQueue(zend_class_entry *class
 	INIT_CLASS_ENTRY(ce, "SplPriorityQueue", class_SplPriorityQueue_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	zend_class_implements(class_entry, 2, class_entry_Iterator, class_entry_Countable);
+
+	zval const_EXTR_BOTH_value;
+	ZVAL_LONG(&const_EXTR_BOTH_value, SPL_PQUEUE_EXTR_BOTH);
+	zend_string *const_EXTR_BOTH_name = zend_string_init_interned("EXTR_BOTH", sizeof("EXTR_BOTH") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_EXTR_BOTH_name, &const_EXTR_BOTH_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_EXTR_BOTH_name);
+
+	zval const_EXTR_PRIORITY_value;
+	ZVAL_LONG(&const_EXTR_PRIORITY_value, SPL_PQUEUE_EXTR_PRIORITY);
+	zend_string *const_EXTR_PRIORITY_name = zend_string_init_interned("EXTR_PRIORITY", sizeof("EXTR_PRIORITY") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_EXTR_PRIORITY_name, &const_EXTR_PRIORITY_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_EXTR_PRIORITY_name);
+
+	zval const_EXTR_DATA_value;
+	ZVAL_LONG(&const_EXTR_DATA_value, SPL_PQUEUE_EXTR_DATA);
+	zend_string *const_EXTR_DATA_name = zend_string_init_interned("EXTR_DATA", sizeof("EXTR_DATA") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_EXTR_DATA_name, &const_EXTR_DATA_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_EXTR_DATA_name);
 
 	return class_entry;
 }

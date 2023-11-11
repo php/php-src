@@ -9,11 +9,6 @@
 #define ASCII 0xFE
 #define ILLEGAL 0xFF
 
-static inline bool is_base64_end(unsigned char c)
-{
-	return c >= DASH;
-}
-
 static inline bool is_base64_end_valid(unsigned char n, bool gap, bool is_surrogate)
 {
 	return !(gap || is_surrogate || n == ASCII || n == ILLEGAL);

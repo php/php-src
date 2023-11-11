@@ -1,0 +1,23 @@
+name: Close stale feature requests
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  stale:
+    if: github.repository_owner == 'php'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v4
+        with:
+          days-before-close: 14
+          days-before-stale: 90
+          exempt-all-assignees: true
+          only-issue-labels: "Status: Requires RFC,Feature"
+          # Hack to skip PRs, unfortunately there's no option to disable PRs
+          only-pr-labels: inexistent-label
+          stale-issue-message: >-
+            There has not been any recent activity in this feature request. It will automatically be closed in 14 days
+            if no further action is taken. Please see https://github.com/probot/stale#is-closing-stale-issues-really-a-good-idea
+            to understand why we auto-close stale feature requests.

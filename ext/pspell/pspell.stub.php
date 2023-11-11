@@ -3,7 +3,6 @@
 /** @generate-class-entries */
 
 namespace PSpell {
-
     /**
      * @strict-properties
      * @not-serializable
@@ -15,10 +14,29 @@ namespace PSpell {
      * @not-serializable
      */
     final class Config {}
-
 }
 
 namespace {
+    /**
+     * @var int
+     * @cvalue PSPELL_FAST
+     */
+    const PSPELL_FAST = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PSPELL_NORMAL
+     */
+    const PSPELL_NORMAL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PSPELL_BAD_SPELLERS
+     */
+    const PSPELL_BAD_SPELLERS = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PSPELL_RUN_TOGETHER
+     */
+    const PSPELL_RUN_TOGETHER = UNKNOWN;
 
     function pspell_new(string $language, string $spelling = "", string $jargon = "", string $encoding = "", int $mode = 0): PSpell\Dictionary|false {}
 

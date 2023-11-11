@@ -4,16 +4,11 @@ Multiple result set with PS
 mysqli
 --SKIPIF--
 <?php
-require_once("connect.inc");
-if (!$IS_MYSQLND) {
-    die("skip mysqlnd only test");
-}
-require_once('skipifconnectfailure.inc');
+require_once "skipifconnectfailure.inc";
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-    require('table.inc');
+    require 'table.inc';
 
     $stmt = mysqli_stmt_init($link);
     if (!$link->query('DROP PROCEDURE IF EXISTS p123')) {

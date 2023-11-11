@@ -13,7 +13,6 @@
  */
 
 #include "converter.h"
-#include "converter_arginfo.h"
 #include "zend_exceptions.h"
 
 #include <unicode/utypes.h>
@@ -24,6 +23,7 @@
 
 #include "../intl_error.h"
 #include "../intl_common.h"
+#include "converter_arginfo.h"
 
 typedef struct _php_converter_object {
 	UConverter *src, *dest;
@@ -969,9 +969,6 @@ static zend_object *php_converter_clone_object(zend_object *object) {
 }
 /* }}} */
 
-#define CONV_REASON_CONST(v) zend_declare_class_constant_long(php_converter_ce, "REASON_" #v, sizeof("REASON_" #v) - 1, UCNV_ ## v)
-#define CONV_TYPE_CONST(v)   zend_declare_class_constant_long(php_converter_ce, #v ,          sizeof(#v) - 1,           UCNV_ ## v)
-
 /* {{{ php_converter_minit */
 int php_converter_minit(INIT_FUNC_ARGS) {
 	php_converter_ce = register_class_UConverter();
@@ -980,51 +977,6 @@ int php_converter_minit(INIT_FUNC_ARGS) {
 	php_converter_object_handlers.offset = XtOffsetOf(php_converter_object, obj);
 	php_converter_object_handlers.clone_obj = php_converter_clone_object;
 	php_converter_object_handlers.free_obj = php_converter_free_object;
-
-	/* enum UConverterCallbackReason */
-	CONV_REASON_CONST(UNASSIGNED);
-	CONV_REASON_CONST(ILLEGAL);
-	CONV_REASON_CONST(IRREGULAR);
-	CONV_REASON_CONST(RESET);
-	CONV_REASON_CONST(CLOSE);
-	CONV_REASON_CONST(CLONE);
-
-	/* enum UConverterType */
-	CONV_TYPE_CONST(UNSUPPORTED_CONVERTER);
-	CONV_TYPE_CONST(SBCS);
-	CONV_TYPE_CONST(DBCS);
-	CONV_TYPE_CONST(MBCS);
-	CONV_TYPE_CONST(LATIN_1);
-	CONV_TYPE_CONST(UTF8);
-	CONV_TYPE_CONST(UTF16_BigEndian);
-	CONV_TYPE_CONST(UTF16_LittleEndian);
-	CONV_TYPE_CONST(UTF32_BigEndian);
-	CONV_TYPE_CONST(UTF32_LittleEndian);
-	CONV_TYPE_CONST(EBCDIC_STATEFUL);
-	CONV_TYPE_CONST(ISO_2022);
-	CONV_TYPE_CONST(LMBCS_1);
-	CONV_TYPE_CONST(LMBCS_2);
-	CONV_TYPE_CONST(LMBCS_3);
-	CONV_TYPE_CONST(LMBCS_4);
-	CONV_TYPE_CONST(LMBCS_5);
-	CONV_TYPE_CONST(LMBCS_6);
-	CONV_TYPE_CONST(LMBCS_8);
-	CONV_TYPE_CONST(LMBCS_11);
-	CONV_TYPE_CONST(LMBCS_16);
-	CONV_TYPE_CONST(LMBCS_17);
-	CONV_TYPE_CONST(LMBCS_18);
-	CONV_TYPE_CONST(LMBCS_19);
-	CONV_TYPE_CONST(LMBCS_LAST);
-	CONV_TYPE_CONST(HZ);
-	CONV_TYPE_CONST(SCSU);
-	CONV_TYPE_CONST(ISCII);
-	CONV_TYPE_CONST(US_ASCII);
-	CONV_TYPE_CONST(UTF7);
-	CONV_TYPE_CONST(BOCU1);
-	CONV_TYPE_CONST(UTF16);
-	CONV_TYPE_CONST(UTF32);
-	CONV_TYPE_CONST(CESU8);
-	CONV_TYPE_CONST(IMAP_MAILBOX);
 
 	return SUCCESS;
 }

@@ -122,6 +122,7 @@ var_dump(strlen(strlen("Hello"))); 				// len=1
 echo "Done\n";
 ?>
 --EXPECTF--
+Deprecated: Using ${var} in strings is deprecated, use {$var} instead in %s on line %d
 #### Basic operations and  variations ####
 String length of 'Hello, World' is => int(12)
 String length of 'Hello, World' is => int(12)

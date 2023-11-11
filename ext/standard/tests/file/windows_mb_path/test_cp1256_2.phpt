@@ -24,8 +24,8 @@ default_charset=cp1256
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "„”«— „ ⁄œœ «·»«Ì  «Œ »«—";
-$prefix = create_data("dir_cp1256", "${item}42}", 1256);
-$fn = $prefix . DIRECTORY_SEPARATOR . "${item}33";
+$prefix = create_data("dir_cp1256", "{$item}42}", 1256);
+$fn = $prefix . DIRECTORY_SEPARATOR . "{$item}33";
 
 $f = fopen($fn, 'w');
 if ($f) {

@@ -7,6 +7,7 @@ SPL: ArrayObject/Iterator from IteratorAggregate
 // since they cannot be accessed from the external object which iterates
 // them.
 
+#[AllowDynamicProperties]
 class test implements IteratorAggregate
 {
     public    $pub = "public";

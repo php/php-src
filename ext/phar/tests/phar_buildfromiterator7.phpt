@@ -44,11 +44,6 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/buildfromiterator7.phar');
-__HALT_COMPILER();
-?>
 --EXPECTF--
 rewind
 valid

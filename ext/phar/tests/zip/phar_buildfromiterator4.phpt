@@ -35,20 +35,14 @@ class myIterator implements Iterator
         reset($this->a);
     }
 }
-try {
-    chdir(__DIR__);
-    $phar = new Phar(__DIR__ . '/buildfromiterator.phar.zip');
-    var_dump($phar->buildFromIterator(new myIterator(array('a' => basename(__FILE__, 'php') . 'phpt'))));
-    var_dump($phar->isFileFormat(Phar::ZIP));
-} catch (Exception $e) {
-    var_dump(get_class($e));
-    echo $e->getMessage() . "\n";
-}
+chdir(__DIR__);
+$phar = new Phar(__DIR__ . '/buildfromiterator4.phar.zip');
+var_dump($phar->buildFromIterator(new myIterator(array('a' => basename(__FILE__, 'php') . 'phpt'))));
+var_dump($phar->isFileFormat(Phar::ZIP));
 ?>
 --CLEAN--
 <?php
-unlink(__DIR__ . '/buildfromiterator.phar.zip');
-__HALT_COMPILER();
+unlink(__DIR__ . '/buildfromiterator4.phar.zip');
 ?>
 --EXPECTF--
 rewind

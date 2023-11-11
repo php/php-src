@@ -4,17 +4,18 @@ ensure an error is returned when mysqli.allow_local_infile is off
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'connect.inc';
 
 $link = mysqli_init();
-if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
-    die(sprintf("skip Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error()));
+if (!@my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 }
 
-require_once('local_infile_tools.inc');
+include_once "local_infile_tools.inc";
 if ($msg = check_local_infile_support($link, $engine))
     die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
 
+mysqli_close($link);
 ?>
 --INI--
 mysqli.allow_local_infile=0

@@ -10,9 +10,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 require_once('connect.inc');
 
-if (!is_object($driver = new mysqli_driver())) {
-    printf("[001] Failed to create mysqli_driver object\n");
-}
+$driver = new mysqli_driver();
 
 $client_info = mysqli_get_client_info();
 if (($tmp = $driver->client_info) !== $client_info) {
@@ -107,17 +105,6 @@ if (MYSQLI_REPORT_ERROR !== $driver->report_mode) {
 /* TODO - more report testing should go in here, but it's not really documented what behaviour is expected */
 
 $driver->report_mode = $report_mode;
-
-$reconnect = $driver->reconnect;
-if (!is_bool($reconnect)) {
-    printf("[019] Expecting boolean/any, got %s/%s\n",
-    gettype($reconnect), $reconnect);
-}
-
-/* pointless, but I need more documentation */
-$driver->reconnect = true;
-$driver->reconnect = false;
-$driver->reconnect = $reconnect;
 
 print "done!";
 ?>

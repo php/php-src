@@ -14,7 +14,7 @@ class EmptyIterator implements Iterator
     public function key(): never {}
 
     /** @tentative-return-type */
-    public function valid(): bool {}
+    public function valid(): false {}
 
     /** @tentative-return-type */
     public function rewind(): void {}
@@ -53,6 +53,27 @@ interface RecursiveIterator extends Iterator
 
 class RecursiveIteratorIterator implements OuterIterator
 {
+    /**
+     * @var int
+     * @cvalue RIT_LEAVES_ONLY
+     */
+    public const LEAVES_ONLY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue RIT_SELF_FIRST
+     */
+    public const SELF_FIRST = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue RIT_CHILD_FIRST
+     */
+    public const CHILD_FIRST = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue RIT_CATCH_GET_CHILD
+     */
+    public const CATCH_GET_CHILD = UNKNOWN;
+
     public function __construct(Traversable $iterator, int $mode = RecursiveIteratorIterator::LEAVES_ONLY, int $flags = 0) {}
 
     /** @tentative-return-type */
@@ -200,6 +221,37 @@ class LimitIterator extends IteratorIterator
 
 class CachingIterator extends IteratorIterator implements ArrayAccess, Countable, Stringable
 {
+    /**
+     * @var int
+     * @cvalue CIT_CALL_TOSTRING
+     */
+    public const CALL_TOSTRING = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CIT_CATCH_GET_CHILD
+     */
+    public const CATCH_GET_CHILD = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CIT_TOSTRING_USE_KEY
+     */
+    public const TOSTRING_USE_KEY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CIT_TOSTRING_USE_CURRENT
+     */
+    public const TOSTRING_USE_CURRENT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CIT_TOSTRING_USE_INNER
+     */
+    public const TOSTRING_USE_INNER = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue CIT_FULL_CACHE
+     */
+    public const FULL_CACHE = UNKNOWN;
+
     public function __construct(Iterator $iterator, int $flags = CachingIterator::CALL_TOSTRING) {}
 
     /** @tentative-return-type */
@@ -320,6 +372,42 @@ class InfiniteIterator extends IteratorIterator
 
 class RegexIterator extends FilterIterator
 {
+    /**
+     * @var int
+     * @cvalue REGIT_USE_KEY
+     */
+    public const USE_KEY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue REGIT_INVERTED
+     */
+    public const INVERT_MATCH = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue REGIT_MODE_MATCH
+     */
+    public const MATCH = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue REGIT_MODE_GET_MATCH
+     */
+    public const GET_MATCH = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue REGIT_MODE_ALL_MATCHES
+     */
+    public const ALL_MATCHES = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue REGIT_MODE_SPLIT
+     */
+    public const SPLIT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue REGIT_MODE_REPLACE
+     */
+    public const REPLACE = UNKNOWN;
+
     public ?string $replacement = null;
 
     public function __construct(Iterator $iterator, string $pattern, int $mode = RegexIterator::MATCH, int $flags = 0, int $pregFlags = 0) {}
@@ -368,6 +456,29 @@ class RecursiveRegexIterator extends RegexIterator implements RecursiveIterator
 
 class RecursiveTreeIterator extends RecursiveIteratorIterator
 {
+    /**
+     * @var int
+     * @cvalue RTIT_BYPASS_CURRENT
+     */
+    public const BYPASS_CURRENT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue RTIT_BYPASS_KEY
+     */
+    public const BYPASS_KEY = UNKNOWN;
+    /** @var int */
+    public const PREFIX_LEFT = 0;
+    /** @var int */
+    public const PREFIX_MID_HAS_NEXT = 1;
+    /** @var int */
+    public const PREFIX_MID_LAST = 2;
+    /** @var int */
+    public const PREFIX_END_HAS_NEXT = 3;
+    /** @var int */
+    public const PREFIX_END_LAST = 4;
+    /** @var int */
+    public const PREFIX_RIGHT = 5;
+
     /** @param RecursiveIterator|IteratorAggregate $iterator */
     public function __construct(
         $iterator,

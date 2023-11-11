@@ -5,6 +5,7 @@ zend.enable_gc=1
 --FILE--
 <?php
 class Action {
+    private $iterator;
     function __construct() {
         $this->iterator = new ArrayIterator($this);
     }

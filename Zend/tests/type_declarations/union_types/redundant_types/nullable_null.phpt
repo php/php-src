@@ -8,4 +8,4 @@ function test(): ?null {
 
 ?>
 --EXPECTF--
-Fatal error: Null can not be used as a standalone type in %s on line %d
+Fatal error: null cannot be marked as nullable in %s on line %d

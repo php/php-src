@@ -39,7 +39,7 @@ PHP_METHOD(SessionHandler, open)
 {
 	char *save_path = NULL, *session_name = NULL;
 	size_t save_path_len, session_name_len;
-	int ret;
+	zend_result ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &save_path, &save_path_len, &session_name, &session_name_len) == FAILURE) {
 		RETURN_THROWS();
@@ -56,14 +56,14 @@ PHP_METHOD(SessionHandler, open)
 		zend_bailout();
 	} zend_end_try();
 
-	RETVAL_BOOL(SUCCESS == ret);
+	RETURN_BOOL(SUCCESS == ret);
 }
 /* }}} */
 
 /* {{{ Wraps the old close handler */
 PHP_METHOD(SessionHandler, close)
 {
-	int ret;
+	zend_result ret;
 
 	// don't return on failure, since not closing the default handler
 	// could result in memory leaks or other nasties
@@ -80,7 +80,7 @@ PHP_METHOD(SessionHandler, close)
 		zend_bailout();
 	} zend_end_try();
 
-	RETVAL_BOOL(SUCCESS == ret);
+	RETURN_BOOL(SUCCESS == ret);
 }
 /* }}} */
 

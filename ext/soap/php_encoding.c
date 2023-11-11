@@ -448,7 +448,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 			zval *tmp;
 			zend_string *type_name;
 
-			ZEND_HASH_FOREACH_STR_KEY_VAL(SOAP_GLOBAL(class_map), type_name, tmp) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(SOAP_GLOBAL(class_map), type_name, tmp) {
 				ZVAL_DEREF(tmp);
 				if (Z_TYPE_P(tmp) == IS_STRING &&
 				    ZSTR_LEN(ce->name) == Z_STRLEN_P(tmp) &&
@@ -1561,10 +1561,12 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 					if (Z_TYPE_P(prop) != IS_ARRAY) {
 						/* Convert into array */
 						array_init(&arr);
-						Z_ADDREF_P(prop);
+						Z_TRY_ADDREF_P(prop);
 						add_next_index_zval(&arr, prop);
 						set_zval_property(ret, (char*)trav->name, &arr);
 						prop = &arr;
+					} else {
+						SEPARATE_ARRAY(prop);
 					}
 					/* Add array element */
 					add_next_index_zval(prop, &tmpVal);

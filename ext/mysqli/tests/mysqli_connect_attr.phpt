@@ -4,13 +4,10 @@ mysqli check the session_connect_attrs table for connection attributes
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'connect.inc';
 
-if (!$IS_MYSQLND)
-    die("skip: test applies only to mysqlnd");
-
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-    die("skip Cannot connect to the server");
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 /* skip test if the server version does not have session_connect_attrs table yet*/
 if (!$res = mysqli_query($link, "select count(*) as count from information_schema.tables where table_schema='performance_schema' and table_name='session_connect_attrs';"))
@@ -38,7 +35,7 @@ mysqli_close($link);
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once 'connect.inc';
 
     $tmp    = NULL;
     $link   = NULL;

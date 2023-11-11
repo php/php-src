@@ -42,11 +42,19 @@ _EXTENSION_DLL=$(PECL_TARGETS)
 _EXTENSION_DLL=$(EXT_TARGETS)
 !endif
 
+!if $(PHP_TEST_INI_PATH) == ""
 test: set-tmp-env
-	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(PHP_PREFIX)\php.exe" -d open_basedir= -d output_buffering=0 run-tests.php $(TESTS) -p "$(PHP_PREFIX)\php.exe" -d extension=$(BUILD_DIR)\$(_EXTENSION_DLL)
+	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(PHP_PREFIX)\php.exe" -d open_basedir= -d output_buffering=0 run-tests.php -p "$(PHP_PREFIX)\php.exe" -d extension=$(BUILD_DIR)\$(_EXTENSION_DLL) $(TESTS)
 
 run: set-tmp-env
 	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(PHP_PREFIX)\php.exe" -n -d extension=$(BUILD_DIR)\\$(_EXTENSION_DLL) $(ARGS)
+!else
+test: set-tmp-env
+	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(PHP_PREFIX)\php.exe" -n -d open_basedir= -d output_buffering=0 -d memory_limit=-1 run-tests.php -p "$(PHP_PREFIX)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(TESTS)
+
+run: set-tmp-env
+	$(DEBUGGER_CMD) $(DEBUGGER_ARGS) "$(PHP_PREFIX)\php.exe" -n -c $(PHP_TEST_INI_PATH) $(ARGS)
+!endif
 
 !if $(MT) == ""
 _VC_MANIFEST_EMBED_EXE=

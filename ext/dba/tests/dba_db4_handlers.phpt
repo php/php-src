@@ -2,6 +2,8 @@
 DBA DB4 Handler Test
 --EXTENSIONS--
 dba
+--CONFLICTS--
+dba
 --SKIPIF--
 <?php
 $handler="db4";

@@ -19,7 +19,8 @@
 #ifndef ZEND_LONG_H
 #define ZEND_LONG_H
 
-#include "main/php_stdint.h"
+#include <inttypes.h>
+#include <stdint.h>
 
 /* This is the heart of the whole int64 enablement in zval. */
 #if defined(__x86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)

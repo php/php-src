@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #45543: DateTime::setTimezone can not set timezones without ID.
+Test for bug #45543: DateTime::setTimezone cannot set timezones without ID.
 --INI--
 date.timezone=UTC
 --FILE--

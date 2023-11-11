@@ -82,53 +82,6 @@
 		php_tidy_load_config(_doc, ZSTR_VAL(_val_str)); \
 	}
 
-
-#define TIDY_TAG_CONST(tag) REGISTER_LONG_CONSTANT("TIDY_TAG_" #tag, TidyTag_##tag, CONST_CS | CONST_PERSISTENT)
-#define TIDY_NODE_CONST(name, type) REGISTER_LONG_CONSTANT("TIDY_NODETYPE_" #name, TidyNode_##type, CONST_CS | CONST_PERSISTENT)
-
-#define ADD_PROPERTY_STRING(_table, _key, _string) \
-	{ \
-		zval tmp; \
-		if (_string) { \
-			ZVAL_STRING(&tmp, (char *)_string); \
-		} else { \
-			ZVAL_EMPTY_STRING(&tmp); \
-		} \
-		zend_hash_str_update(_table, #_key, sizeof(#_key) - 1, &tmp); \
-	}
-
-#define ADD_PROPERTY_STRINGL(_table, _key, _string, _len) \
-	{ \
-		zval tmp; \
-		if (_string) { \
-			ZVAL_STRINGL(&tmp, (char *)_string, _len); \
-		} else { \
-			ZVAL_EMPTY_STRING(&tmp); \
-		} \
-		zend_hash_str_update(_table, #_key, sizeof(#_key) - 1, &tmp); \
-	}
-
-#define ADD_PROPERTY_LONG(_table, _key, _long) \
-	{ \
-		zval tmp; \
-		ZVAL_LONG(&tmp, _long); \
-		zend_hash_str_update(_table, #_key, sizeof(#_key) - 1, &tmp); \
-	}
-
-#define ADD_PROPERTY_NULL(_table, _key) \
-	{ \
-		zval tmp; \
-		ZVAL_NULL(&tmp); \
-		zend_hash_str_update(_table, #_key, sizeof(#_key) - 1, &tmp); \
-	}
-
-#define ADD_PROPERTY_BOOL(_table, _key, _bool) \
-	{ \
-		zval tmp; \
-		ZVAL_BOOL(&tmp, _bool); \
-		zend_hash_str_update(_table, #_key, sizeof(#_key) - 1, &tmp); \
-	}
-
 #define TIDY_OPEN_BASE_DIR_CHECK(filename) \
 if (php_check_open_basedir(filename)) { \
 	RETURN_FALSE; \
@@ -182,17 +135,15 @@ static zend_string *php_tidy_file_to_mem(char *, bool);
 static void tidy_object_free_storage(zend_object *);
 static zend_object *tidy_object_new_node(zend_class_entry *);
 static zend_object *tidy_object_new_doc(zend_class_entry *);
-static zval * tidy_instanciate(zend_class_entry *, zval *);
-static int tidy_doc_cast_handler(zend_object *, zval *, int);
-static int tidy_node_cast_handler(zend_object *, zval *, int);
+static zval *tidy_instantiate(zend_class_entry *, zval *);
+static zend_result tidy_doc_cast_handler(zend_object *, zval *, int);
+static zend_result tidy_node_cast_handler(zend_object *, zval *, int);
 static void tidy_doc_update_properties(PHPTidyObj *);
-static void tidy_add_default_properties(PHPTidyObj *, tidy_obj_type);
+static void tidy_add_node_default_properties(PHPTidyObj *);
 static void *php_tidy_get_opt_val(PHPTidyDoc *, TidyOption, TidyOptionType *);
 static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetypes);
 static int _php_tidy_set_tidy_opt(TidyDoc, char *, zval *);
 static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options);
-static void _php_tidy_register_nodetypes(INIT_FUNC_ARGS);
-static void _php_tidy_register_tags(INIT_FUNC_ARGS);
 static PHP_INI_MH(php_tidy_set_clean_output);
 static void php_tidy_clean_output_start(const char *name, size_t name_len);
 static php_output_handler *php_tidy_output_handler_init(const char *handler_name, size_t handler_name_len, size_t chunk_size, int flags);
@@ -208,7 +159,7 @@ ZEND_DECLARE_MODULE_GLOBALS(tidy)
 
 PHP_INI_BEGIN()
 STD_PHP_INI_ENTRY("tidy.default_config",	"",		PHP_INI_SYSTEM,		OnUpdateString,				default_config,		zend_tidy_globals,	tidy_globals)
-STD_PHP_INI_ENTRY("tidy.clean_output",		"0",	PHP_INI_USER,		php_tidy_set_clean_output,	clean_output,		zend_tidy_globals,	tidy_globals)
+STD_PHP_INI_BOOLEAN("tidy.clean_output",	"0",	PHP_INI_USER,		php_tidy_set_clean_output,	clean_output,		zend_tidy_globals,	tidy_globals)
 PHP_INI_END()
 
 static zend_class_entry *tidy_ce_doc, *tidy_ce_node;
@@ -482,8 +433,6 @@ static zend_object *tidy_object_new(zend_class_entry *class_type, zend_object_ha
 			tidyOptSetBool(intern->ptdoc->doc, TidyMark, no);
 
 			TIDY_SET_DEFAULT_CONFIG(intern->ptdoc->doc);
-
-			tidy_add_default_properties(intern, is_doc);
 			break;
 	}
 
@@ -502,13 +451,13 @@ static zend_object *tidy_object_new_doc(zend_class_entry *class_type)
 	return tidy_object_new(class_type, &tidy_object_handlers_doc, is_doc);
 }
 
-static zval * tidy_instanciate(zend_class_entry *pce, zval *object)
+static zval *tidy_instantiate(zend_class_entry *pce, zval *object)
 {
 	object_init_ex(object, pce);
 	return object;
 }
 
-static int tidy_doc_cast_handler(zend_object *in, zval *out, int type)
+static zend_result tidy_doc_cast_handler(zend_object *in, zval *out, int type)
 {
 	TidyBuffer output;
 	PHPTidyObj *obj;
@@ -546,7 +495,7 @@ static int tidy_doc_cast_handler(zend_object *in, zval *out, int type)
 	return SUCCESS;
 }
 
-static int tidy_node_cast_handler(zend_object *in, zval *out, int type)
+static zend_result tidy_node_cast_handler(zend_object *in, zval *out, int type)
 {
 	TidyBuffer buf;
 	PHPTidyObj *obj;
@@ -586,120 +535,181 @@ static int tidy_node_cast_handler(zend_object *in, zval *out, int type)
 
 static void tidy_doc_update_properties(PHPTidyObj *obj)
 {
-
 	TidyBuffer output;
-	zval temp;
 
 	tidyBufInit(&output);
 	tidySaveBuffer (obj->ptdoc->doc, &output);
 
 	if (output.size) {
-		if (!obj->std.properties) {
-			rebuild_object_properties(&obj->std);
-		}
-		ZVAL_STRINGL(&temp, (char*)output.bp, output.size-1);
-		zend_hash_str_update(obj->std.properties, "value", sizeof("value") - 1, &temp);
+		zend_update_property_stringl(
+			tidy_ce_doc,
+			&obj->std,
+			"value",
+			sizeof("value") - 1,
+			(char*) output.bp,
+			output.size-1
+		);
 	}
 
 	tidyBufFree(&output);
 
 	if (obj->ptdoc->errbuf->size) {
-		if (!obj->std.properties) {
-			rebuild_object_properties(&obj->std);
-		}
-		ZVAL_STRINGL(&temp, (char*)obj->ptdoc->errbuf->bp, obj->ptdoc->errbuf->size-1);
-		zend_hash_str_update(obj->std.properties, "errorBuffer", sizeof("errorBuffer") - 1, &temp);
+		zend_update_property_stringl(
+			tidy_ce_doc,
+			&obj->std,
+			"errorBuffer",
+			sizeof("errorBuffer") - 1,
+			(char*) obj->ptdoc->errbuf->bp,
+			obj->ptdoc->errbuf->size-1
+		);
 	}
 }
 
-static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type)
+static void tidy_add_node_default_properties(PHPTidyObj *obj)
 {
-
 	TidyBuffer buf;
 	TidyAttr	tempattr;
 	TidyNode	tempnode;
 	zval attribute, children, temp;
 	PHPTidyObj *newobj;
+	char *name;
 
-	switch(type) {
+	tidyBufInit(&buf);
+	tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
 
-		case is_node:
-			if (!obj->std.properties) {
-				rebuild_object_properties(&obj->std);
-			}
-			tidyBufInit(&buf);
-			tidyNodeGetText(obj->ptdoc->doc, obj->node, &buf);
-			ADD_PROPERTY_STRINGL(obj->std.properties, value, buf.bp, buf.size ? buf.size-1 : 0);
-			tidyBufFree(&buf);
+	zend_update_property_stringl(
+		tidy_ce_node,
+		&obj->std,
+		"value",
+		sizeof("value") - 1,
+		buf.size ? (char *) buf.bp : "",
+		buf.size ? buf.size - 1 : 0
+	);
 
-			ADD_PROPERTY_STRING(obj->std.properties, name, tidyNodeGetName(obj->node));
-			ADD_PROPERTY_LONG(obj->std.properties, type, tidyNodeGetType(obj->node));
-			ADD_PROPERTY_LONG(obj->std.properties, line, tidyNodeLine(obj->node));
-			ADD_PROPERTY_LONG(obj->std.properties, column, tidyNodeColumn(obj->node));
-			ADD_PROPERTY_BOOL(obj->std.properties, proprietary, tidyNodeIsProp(obj->ptdoc->doc, obj->node));
+	tidyBufFree(&buf);
 
-			switch(tidyNodeGetType(obj->node)) {
-				case TidyNode_Root:
-				case TidyNode_DocType:
-				case TidyNode_Text:
-				case TidyNode_Comment:
-					break;
+	name = (char *) tidyNodeGetName(obj->node);
 
-				default:
-					ADD_PROPERTY_LONG(obj->std.properties, id, tidyNodeGetId(obj->node));
-			}
+	zend_update_property_string(
+		tidy_ce_node,
+		&obj->std,
+		"name",
+		sizeof("name") - 1,
+		name ? name : ""
+	);
 
-			tempattr = tidyAttrFirst(obj->node);
+	zend_update_property_long(
+		tidy_ce_node,
+		&obj->std,
+		"type",
+		sizeof("type") - 1,
+		tidyNodeGetType(obj->node)
+	);
 
-			if (tempattr) {
-				char *name, *val;
-				array_init(&attribute);
+	zend_update_property_long(
+		tidy_ce_node,
+		&obj->std,
+		"line",
+		sizeof("line") - 1,
+		tidyNodeLine(obj->node)
+	);
 
-				do {
-					name = (char *)tidyAttrName(tempattr);
-					val = (char *)tidyAttrValue(tempattr);
-					if (name && val) {
-						add_assoc_string(&attribute, name, val);
-					}
-				} while((tempattr = tidyAttrNext(tempattr)));
-			} else {
-				ZVAL_NULL(&attribute);
-			}
-			zend_hash_str_update(obj->std.properties, "attribute", sizeof("attribute") - 1, &attribute);
+	zend_update_property_long(
+		tidy_ce_node,
+		&obj->std,
+		"column",
+		sizeof("column") - 1,
+		tidyNodeColumn(obj->node)
+	);
 
-			tempnode = tidyGetChild(obj->node);
+	zend_update_property_bool(
+		tidy_ce_node,
+		&obj->std,
+		"proprietary",
+		sizeof("proprietary") - 1,
+		tidyNodeIsProp(obj->ptdoc->doc, obj->node)
+	);
 
-			if (tempnode) {
-				array_init(&children);
-				do {
-					tidy_instanciate(tidy_ce_node, &temp);
-					newobj = Z_TIDY_P(&temp);
-					newobj->node = tempnode;
-					newobj->type = is_node;
-					newobj->ptdoc = obj->ptdoc;
-					newobj->ptdoc->ref_count++;
-
-					tidy_add_default_properties(newobj, is_node);
-					add_next_index_zval(&children, &temp);
-
-				} while((tempnode = tidyGetNext(tempnode)));
-
-			} else {
-				ZVAL_NULL(&children);
-			}
-
-			zend_hash_str_update(obj->std.properties, "child", sizeof("child") - 1, &children);
-
+	switch(tidyNodeGetType(obj->node)) {
+		case TidyNode_Root:
+		case TidyNode_DocType:
+		case TidyNode_Text:
+		case TidyNode_Comment:
+			zend_update_property_null(
+				tidy_ce_node,
+				&obj->std,
+				"id",
+				sizeof("id") - 1
+			);
 			break;
 
-		case is_doc:
-			if (!obj->std.properties) {
-				rebuild_object_properties(&obj->std);
-			}
-			ADD_PROPERTY_NULL(obj->std.properties, errorBuffer);
-			ADD_PROPERTY_NULL(obj->std.properties, value);
-			break;
+		default:
+			zend_update_property_long(
+				tidy_ce_node,
+				&obj->std,
+				"id",
+				sizeof("id") - 1,
+				tidyNodeGetId(obj->node)
+			);
 	}
+
+	tempattr = tidyAttrFirst(obj->node);
+
+	if (tempattr) {
+		char *name, *val;
+		array_init(&attribute);
+
+		do {
+			name = (char *)tidyAttrName(tempattr);
+			val = (char *)tidyAttrValue(tempattr);
+			if (name && val) {
+				add_assoc_string(&attribute, name, val);
+			}
+		} while((tempattr = tidyAttrNext(tempattr)));
+	} else {
+		ZVAL_NULL(&attribute);
+	}
+
+	zend_update_property(
+		tidy_ce_node,
+		&obj->std,
+		"attribute",
+		sizeof("attribute") - 1,
+		&attribute
+	);
+
+	zval_ptr_dtor(&attribute);
+
+	tempnode = tidyGetChild(obj->node);
+
+	if (tempnode) {
+		array_init(&children);
+		do {
+			tidy_instantiate(tidy_ce_node, &temp);
+			newobj = Z_TIDY_P(&temp);
+			newobj->node = tempnode;
+			newobj->type = is_node;
+			newobj->ptdoc = obj->ptdoc;
+			newobj->ptdoc->ref_count++;
+
+			tidy_add_node_default_properties(newobj);
+			add_next_index_zval(&children, &temp);
+
+		} while((tempnode = tidyGetNext(tempnode)));
+
+	} else {
+		ZVAL_NULL(&children);
+	}
+
+	zend_update_property(
+		tidy_ce_node,
+		&obj->std,
+		"child",
+		sizeof("child") - 1,
+		&children
+	);
+
+	zval_ptr_dtor(&children);
 }
 
 static void *php_tidy_get_opt_val(PHPTidyDoc *ptdoc, TidyOption opt, TidyOptionType *type)
@@ -760,14 +770,14 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 		RETURN_NULL();
 	}
 
-	tidy_instanciate(tidy_ce_node, return_value);
+	tidy_instantiate(tidy_ce_node, return_value);
 	newobj = Z_TIDY_P(return_value);
 	newobj->type  = is_node;
 	newobj->ptdoc = obj->ptdoc;
 	newobj->node  = node;
 	newobj->ptdoc->ref_count++;
 
-	tidy_add_default_properties(newobj, is_node);
+	tidy_add_node_default_properties(newobj);
 }
 
 static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options)
@@ -775,13 +785,14 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options)
 	zval *opt_val;
 	zend_string *opt_name;
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(ht_options, opt_name, opt_val) {
-		if (opt_name == NULL) {
-			continue;
-		}
-		_php_tidy_set_tidy_opt(doc, ZSTR_VAL(opt_name), opt_val);
-	} ZEND_HASH_FOREACH_END();
-
+	if (!HT_IS_PACKED(ht_options)) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(ht_options, opt_name, opt_val) {
+			if (opt_name == NULL) {
+				continue;
+			}
+			_php_tidy_set_tidy_opt(doc, ZSTR_VAL(opt_name), opt_val);
+		} ZEND_HASH_FOREACH_END();
+	}
 	return SUCCESS;
 }
 
@@ -834,8 +845,7 @@ static PHP_MINIT_FUNCTION(tidy)
 	tidy_object_handlers_node.offset = tidy_object_handlers_doc.offset = XtOffsetOf(PHPTidyObj, std);
 	tidy_object_handlers_node.free_obj = tidy_object_handlers_doc.free_obj = tidy_object_free_storage;
 
-	_php_tidy_register_tags(INIT_FUNC_ARGS_PASSTHRU);
-	_php_tidy_register_nodetypes(INIT_FUNC_ARGS_PASSTHRU);
+	register_tidy_symbols(module_number);
 
 	php_output_handler_alias_register(ZEND_STRL("ob_tidyhandler"), php_tidy_output_handler_init);
 
@@ -1002,7 +1012,7 @@ PHP_FUNCTION(tidy_parse_string)
 		RETURN_THROWS();
 	}
 
-	tidy_instanciate(tidy_ce_doc, return_value);
+	tidy_instantiate(tidy_ce_doc, return_value);
 	obj = Z_TIDY_P(return_value);
 
 	TIDY_APPLY_CONFIG(obj->ptdoc->doc, options_str, options_ht);
@@ -1071,7 +1081,7 @@ PHP_FUNCTION(tidy_parse_file)
 		RETURN_THROWS();
 	}
 
-	tidy_instanciate(tidy_ce_doc, return_value);
+	tidy_instantiate(tidy_ce_doc, return_value);
 	obj = Z_TIDY_P(return_value);
 
 	TIDY_APPLY_CONFIG(obj->ptdoc->doc, options_str, options_ht);
@@ -1596,13 +1606,13 @@ PHP_METHOD(tidyNode, getParent)
 
 	parent_node = tidyGetParent(obj->node);
 	if(parent_node) {
-		tidy_instanciate(tidy_ce_node, return_value);
+		tidy_instantiate(tidy_ce_node, return_value);
 		newobj = Z_TIDY_P(return_value);
 		newobj->node = parent_node;
 		newobj->type = is_node;
 		newobj->ptdoc = obj->ptdoc;
 		newobj->ptdoc->ref_count++;
-		tidy_add_default_properties(newobj, is_node);
+		tidy_add_node_default_properties(newobj);
 	} else {
 		ZVAL_NULL(return_value);
 	}
@@ -1616,176 +1626,5 @@ PHP_METHOD(tidyNode, __construct)
 	zend_throw_error(NULL, "You should not create a tidyNode manually");
 }
 /* }}} */
-
-static void _php_tidy_register_nodetypes(INIT_FUNC_ARGS)
-{
-	TIDY_NODE_CONST(ROOT, Root);
-	TIDY_NODE_CONST(DOCTYPE, DocType);
-	TIDY_NODE_CONST(COMMENT, Comment);
-	TIDY_NODE_CONST(PROCINS, ProcIns);
-	TIDY_NODE_CONST(TEXT, Text);
-	TIDY_NODE_CONST(START, Start);
-	TIDY_NODE_CONST(END, End);
-	TIDY_NODE_CONST(STARTEND, StartEnd);
-	TIDY_NODE_CONST(CDATA, CDATA);
-	TIDY_NODE_CONST(SECTION, Section);
-	TIDY_NODE_CONST(ASP, Asp);
-	TIDY_NODE_CONST(JSTE, Jste);
-	TIDY_NODE_CONST(PHP, Php);
-	TIDY_NODE_CONST(XMLDECL, XmlDecl);
-}
-
-static void _php_tidy_register_tags(INIT_FUNC_ARGS)
-{
-	TIDY_TAG_CONST(UNKNOWN);
-	TIDY_TAG_CONST(A);
-	TIDY_TAG_CONST(ABBR);
-	TIDY_TAG_CONST(ACRONYM);
-	TIDY_TAG_CONST(ADDRESS);
-	TIDY_TAG_CONST(ALIGN);
-	TIDY_TAG_CONST(APPLET);
-	TIDY_TAG_CONST(AREA);
-	TIDY_TAG_CONST(B);
-	TIDY_TAG_CONST(BASE);
-	TIDY_TAG_CONST(BASEFONT);
-	TIDY_TAG_CONST(BDO);
-	TIDY_TAG_CONST(BGSOUND);
-	TIDY_TAG_CONST(BIG);
-	TIDY_TAG_CONST(BLINK);
-	TIDY_TAG_CONST(BLOCKQUOTE);
-	TIDY_TAG_CONST(BODY);
-	TIDY_TAG_CONST(BR);
-	TIDY_TAG_CONST(BUTTON);
-	TIDY_TAG_CONST(CAPTION);
-	TIDY_TAG_CONST(CENTER);
-	TIDY_TAG_CONST(CITE);
-	TIDY_TAG_CONST(CODE);
-	TIDY_TAG_CONST(COL);
-	TIDY_TAG_CONST(COLGROUP);
-	TIDY_TAG_CONST(COMMENT);
-	TIDY_TAG_CONST(DD);
-	TIDY_TAG_CONST(DEL);
-	TIDY_TAG_CONST(DFN);
-	TIDY_TAG_CONST(DIR);
-	TIDY_TAG_CONST(DIV);
-	TIDY_TAG_CONST(DL);
-	TIDY_TAG_CONST(DT);
-	TIDY_TAG_CONST(EM);
-	TIDY_TAG_CONST(EMBED);
-	TIDY_TAG_CONST(FIELDSET);
-	TIDY_TAG_CONST(FONT);
-	TIDY_TAG_CONST(FORM);
-	TIDY_TAG_CONST(FRAME);
-	TIDY_TAG_CONST(FRAMESET);
-	TIDY_TAG_CONST(H1);
-	TIDY_TAG_CONST(H2);
-	TIDY_TAG_CONST(H3);
-	TIDY_TAG_CONST(H4);
-	TIDY_TAG_CONST(H5);
-	TIDY_TAG_CONST(H6);
-	TIDY_TAG_CONST(HEAD);
-	TIDY_TAG_CONST(HR);
-	TIDY_TAG_CONST(HTML);
-	TIDY_TAG_CONST(I);
-	TIDY_TAG_CONST(IFRAME);
-	TIDY_TAG_CONST(ILAYER);
-	TIDY_TAG_CONST(IMG);
-	TIDY_TAG_CONST(INPUT);
-	TIDY_TAG_CONST(INS);
-	TIDY_TAG_CONST(ISINDEX);
-	TIDY_TAG_CONST(KBD);
-	TIDY_TAG_CONST(KEYGEN);
-	TIDY_TAG_CONST(LABEL);
-	TIDY_TAG_CONST(LAYER);
-	TIDY_TAG_CONST(LEGEND);
-	TIDY_TAG_CONST(LI);
-	TIDY_TAG_CONST(LINK);
-	TIDY_TAG_CONST(LISTING);
-	TIDY_TAG_CONST(MAP);
-	TIDY_TAG_CONST(MARQUEE);
-	TIDY_TAG_CONST(MENU);
-	TIDY_TAG_CONST(META);
-	TIDY_TAG_CONST(MULTICOL);
-	TIDY_TAG_CONST(NOBR);
-	TIDY_TAG_CONST(NOEMBED);
-	TIDY_TAG_CONST(NOFRAMES);
-	TIDY_TAG_CONST(NOLAYER);
-	TIDY_TAG_CONST(NOSAVE);
-	TIDY_TAG_CONST(NOSCRIPT);
-	TIDY_TAG_CONST(OBJECT);
-	TIDY_TAG_CONST(OL);
-	TIDY_TAG_CONST(OPTGROUP);
-	TIDY_TAG_CONST(OPTION);
-	TIDY_TAG_CONST(P);
-	TIDY_TAG_CONST(PARAM);
-	TIDY_TAG_CONST(PLAINTEXT);
-	TIDY_TAG_CONST(PRE);
-	TIDY_TAG_CONST(Q);
-	TIDY_TAG_CONST(RB);
-	TIDY_TAG_CONST(RBC);
-	TIDY_TAG_CONST(RP);
-	TIDY_TAG_CONST(RT);
-	TIDY_TAG_CONST(RTC);
-	TIDY_TAG_CONST(RUBY);
-	TIDY_TAG_CONST(S);
-	TIDY_TAG_CONST(SAMP);
-	TIDY_TAG_CONST(SCRIPT);
-	TIDY_TAG_CONST(SELECT);
-	TIDY_TAG_CONST(SERVER);
-	TIDY_TAG_CONST(SERVLET);
-	TIDY_TAG_CONST(SMALL);
-	TIDY_TAG_CONST(SPACER);
-	TIDY_TAG_CONST(SPAN);
-	TIDY_TAG_CONST(STRIKE);
-	TIDY_TAG_CONST(STRONG);
-	TIDY_TAG_CONST(STYLE);
-	TIDY_TAG_CONST(SUB);
-	TIDY_TAG_CONST(SUP);
-	TIDY_TAG_CONST(TABLE);
-	TIDY_TAG_CONST(TBODY);
-	TIDY_TAG_CONST(TD);
-	TIDY_TAG_CONST(TEXTAREA);
-	TIDY_TAG_CONST(TFOOT);
-	TIDY_TAG_CONST(TH);
-	TIDY_TAG_CONST(THEAD);
-	TIDY_TAG_CONST(TITLE);
-	TIDY_TAG_CONST(TR);
-	TIDY_TAG_CONST(TT);
-	TIDY_TAG_CONST(U);
-	TIDY_TAG_CONST(UL);
-	TIDY_TAG_CONST(VAR);
-	TIDY_TAG_CONST(WBR);
-	TIDY_TAG_CONST(XMP);
-# ifdef HAVE_TIDYBUFFIO_H
-	TIDY_TAG_CONST(ARTICLE);
-	TIDY_TAG_CONST(ASIDE);
-	TIDY_TAG_CONST(AUDIO);
-	TIDY_TAG_CONST(BDI);
-	TIDY_TAG_CONST(CANVAS);
-	TIDY_TAG_CONST(COMMAND);
-	TIDY_TAG_CONST(DATALIST);
-	TIDY_TAG_CONST(DETAILS);
-	TIDY_TAG_CONST(DIALOG);
-	TIDY_TAG_CONST(FIGCAPTION);
-	TIDY_TAG_CONST(FIGURE);
-	TIDY_TAG_CONST(FOOTER);
-	TIDY_TAG_CONST(HEADER);
-	TIDY_TAG_CONST(HGROUP);
-	TIDY_TAG_CONST(MAIN);
-	TIDY_TAG_CONST(MARK);
-	TIDY_TAG_CONST(MENUITEM);
-	TIDY_TAG_CONST(METER);
-	TIDY_TAG_CONST(NAV);
-	TIDY_TAG_CONST(OUTPUT);
-	TIDY_TAG_CONST(PROGRESS);
-	TIDY_TAG_CONST(SECTION);
-	TIDY_TAG_CONST(SOURCE);
-	TIDY_TAG_CONST(SUMMARY);
-	TIDY_TAG_CONST(TEMPLATE);
-	TIDY_TAG_CONST(TIME);
-	TIDY_TAG_CONST(TRACK);
-	TIDY_TAG_CONST(VIDEO);
-# endif
-}
 
 #endif

@@ -772,15 +772,6 @@ static int authorizer(void *autharg, int access_type, const char *arg3, const ch
 {
 	char *filename;
 	switch (access_type) {
-		case SQLITE_COPY: {
-			filename = make_filename_safe(arg4);
-			if (!filename) {
-				return SQLITE_DENY;
-			}
-			efree(filename);
-			return SQLITE_OK;
-		}
-
 		case SQLITE_ATTACH: {
 			filename = make_filename_safe(arg3);
 			if (!filename) {

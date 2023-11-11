@@ -18,4 +18,4 @@ var_dump(Bar::Baz);
 
 ?>
 --EXPECTF--
-Fatal error: Enum may not include __construct in %s on line %d
+Fatal error: Enum Bar cannot include magic method __construct in %s on line %d

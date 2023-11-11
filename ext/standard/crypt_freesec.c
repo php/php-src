@@ -69,25 +69,25 @@
 
 #define _PASSWORD_EFMT1 '_'
 
-static const u_char	IP[64] = {
+static const uint8_t IP[64] = {
 	58, 50, 42, 34, 26, 18, 10,  2, 60, 52, 44, 36, 28, 20, 12,  4,
 	62, 54, 46, 38, 30, 22, 14,  6, 64, 56, 48, 40, 32, 24, 16,  8,
 	57, 49, 41, 33, 25, 17,  9,  1, 59, 51, 43, 35, 27, 19, 11,  3,
 	61, 53, 45, 37, 29, 21, 13,  5, 63, 55, 47, 39, 31, 23, 15,  7
 };
 
-static const u_char	key_perm[56] = {
+static const uint8_t key_perm[56] = {
 	57, 49, 41, 33, 25, 17,  9,  1, 58, 50, 42, 34, 26, 18,
 	10,  2, 59, 51, 43, 35, 27, 19, 11,  3, 60, 52, 44, 36,
 	63, 55, 47, 39, 31, 23, 15,  7, 62, 54, 46, 38, 30, 22,
 	14,  6, 61, 53, 45, 37, 29, 21, 13,  5, 28, 20, 12,  4
 };
 
-static const u_char	key_shifts[16] = {
+static const uint8_t key_shifts[16] = {
 	1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1
 };
 
-static const u_char	comp_perm[48] = {
+static const uint8_t comp_perm[48] = {
 	14, 17, 11, 24,  1,  5,  3, 28, 15,  6, 21, 10,
 	23, 19, 12,  4, 26,  8, 16,  7, 27, 20, 13,  2,
 	41, 52, 31, 37, 47, 55, 30, 40, 51, 45, 33, 48,
@@ -98,7 +98,7 @@ static const u_char	comp_perm[48] = {
  *	No E box is used, as it's replaced by some ANDs, shifts, and ORs.
  */
 
-static const u_char	sbox[8][64] = {
+static const uint8_t sbox[8][64] = {
 	{
 		14,  4, 13,  1,  2, 15, 11,  8,  3, 10,  6, 12,  5,  9,  0,  7,
 		 0, 15,  7,  4, 14,  2, 13,  1, 10,  6, 12, 11,  9,  5,  3,  8,
@@ -149,7 +149,7 @@ static const u_char	sbox[8][64] = {
 	}
 };
 
-static const u_char	pbox[32] = {
+static const uint8_t pbox[32] = {
 	16,  7, 20, 21, 29, 12, 28, 17,  1, 15, 23, 26,  5, 18, 31, 10,
 	 2,  8, 24, 14, 32, 27,  3,  9, 19, 13, 30,  6, 22, 11,  4, 25
 };
@@ -166,12 +166,12 @@ static const uint32_t bits32[32] =
 	0x00000008, 0x00000004, 0x00000002, 0x00000001
 };
 
-static const u_char	bits8[8] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
+static const uint8_t bits8[8] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
 
 static const unsigned char	ascii64[] =
 	 "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-static u_char m_sbox[4][4096];
+static uint8_t m_sbox[4][4096];
 static uint32_t psbox[4][256];
 static uint32_t ip_maskl[8][256], ip_maskr[8][256];
 static uint32_t fp_maskl[8][256], fp_maskr[8][256];
@@ -211,11 +211,11 @@ _crypt_extended_init(void)
 	int i, j, b, k, inbit, obit;
 	uint32_t *p, *il, *ir, *fl, *fr;
 	const uint32_t *bits28, *bits24;
-	u_char inv_key_perm[64];
-	u_char inv_comp_perm[56];
-	u_char init_perm[64], final_perm[64];
-	u_char u_sbox[8][64];
-	u_char un_pbox[32];
+	uint8_t inv_key_perm[64];
+	uint8_t inv_comp_perm[56];
+	uint8_t init_perm[64], final_perm[64];
+	uint8_t u_sbox[8][64];
+	uint8_t un_pbox[32];
 
 	bits24 = (bits28 = bits32 + 4) + 4;
 
@@ -374,15 +374,15 @@ des_setkey(const char *key, struct php_crypt_extended_data *data)
 	int	shifts, round;
 
 	rawkey0 =
-		(uint32_t)(u_char)key[3] |
-		((uint32_t)(u_char)key[2] << 8) |
-		((uint32_t)(u_char)key[1] << 16) |
-		((uint32_t)(u_char)key[0] << 24);
+		(uint32_t)(uint8_t)key[3] |
+		((uint32_t)(uint8_t)key[2] << 8) |
+		((uint32_t)(uint8_t)key[1] << 16) |
+		((uint32_t)(uint8_t)key[0] << 24);
 	rawkey1 =
-		(uint32_t)(u_char)key[7] |
-		((uint32_t)(u_char)key[6] << 8) |
-		((uint32_t)(u_char)key[5] << 16) |
-		((uint32_t)(u_char)key[4] << 24);
+		(uint32_t)(uint8_t)key[7] |
+		((uint32_t)(uint8_t)key[6] << 8) |
+		((uint32_t)(uint8_t)key[5] << 16) |
+		((uint32_t)(uint8_t)key[4] << 24);
 
 	if ((rawkey0 | rawkey1)
 	    && rawkey0 == data->old_rawkey0
@@ -580,15 +580,15 @@ des_cipher(const char *in, char *out, uint32_t salt, int count,
 	setup_salt(salt, data);
 
 	rawl =
-		(uint32_t)(u_char)in[3] |
-		((uint32_t)(u_char)in[2] << 8) |
-		((uint32_t)(u_char)in[1] << 16) |
-		((uint32_t)(u_char)in[0] << 24);
+		(uint32_t)(uint8_t)in[3] |
+		((uint32_t)(uint8_t)in[2] << 8) |
+		((uint32_t)(uint8_t)in[1] << 16) |
+		((uint32_t)(uint8_t)in[0] << 24);
 	rawr =
-		(uint32_t)(u_char)in[7] |
-		((uint32_t)(u_char)in[6] << 8) |
-		((uint32_t)(u_char)in[5] << 16) |
-		((uint32_t)(u_char)in[4] << 24);
+		(uint32_t)(uint8_t)in[7] |
+		((uint32_t)(uint8_t)in[6] << 8) |
+		((uint32_t)(uint8_t)in[5] << 16) |
+		((uint32_t)(uint8_t)in[4] << 24);
 
 	retval = do_des(rawl, rawr, &l_out, &r_out, count, data);
 
@@ -610,7 +610,7 @@ _crypt_extended_r(const unsigned char *key, const char *setting,
 {
 	int		i;
 	uint32_t	count, salt, l, r0, r1, keybuf[2];
-	u_char		*p, *q;
+	uint8_t		*p, *q;
 
 	if (!data->initialized)
 		des_init_local(data);
@@ -619,8 +619,8 @@ _crypt_extended_r(const unsigned char *key, const char *setting,
 	 * Copy the key, shifting each character up by one bit
 	 * and padding with zeros.
 	 */
-	q = (u_char *) keybuf;
-	while ((size_t)(q - (u_char *) keybuf) < sizeof(keybuf)) {
+	q = (uint8_t *) keybuf;
+	while ((size_t)(q - (uint8_t *) keybuf) < sizeof(keybuf)) {
 		*q++ = *key << 1;
 		if (*key)
 			key++;
@@ -660,8 +660,8 @@ _crypt_extended_r(const unsigned char *key, const char *setting,
 			/*
 			 * And XOR with the next 8 characters of the key.
 			 */
-			q = (u_char *) keybuf;
-			while ((size_t)(q - (u_char *) keybuf) < sizeof(keybuf) && *key)
+			q = (uint8_t *) keybuf;
+			while ((size_t)(q - (uint8_t *) keybuf) < sizeof(keybuf) && *key)
 				*q++ ^= *key++ << 1;
 
 			if (des_setkey((char *) keybuf, data))
@@ -669,7 +669,7 @@ _crypt_extended_r(const unsigned char *key, const char *setting,
 		}
 		memcpy(data->output, setting, 9);
 		data->output[9] = '\0';
-		p = (u_char *) data->output + 9;
+		p = (uint8_t *) data->output + 9;
 	} else {
 		/*
 		 * "old"-style:
@@ -686,7 +686,7 @@ _crypt_extended_r(const unsigned char *key, const char *setting,
 
 		data->output[0] = setting[0];
 		data->output[1] = setting[1];
-		p = (u_char *) data->output + 2;
+		p = (uint8_t *) data->output + 2;
 	}
 	setup_salt(salt, data);
 	/*

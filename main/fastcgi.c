@@ -1202,7 +1202,7 @@ static int fcgi_read_request(fcgi_request *req)
 			req->keep = 0;
 			return 0;
 		}
-		return 0;
+		return 2;
 	} else {
 		return 0;
 	}
@@ -1470,7 +1470,8 @@ int fcgi_accept_request(fcgi_request *req)
 			return -1;
 		}
 		req->hook.on_read();
-		if (fcgi_read_request(req)) {
+		int read_result = fcgi_read_request(req);
+		if (read_result == 1) {
 #ifdef _WIN32
 			if (is_impersonate && !req->tcp) {
 				pipe = (HANDLE)_get_osfhandle(req->fd);
@@ -1481,7 +1482,7 @@ int fcgi_accept_request(fcgi_request *req)
 			}
 #endif
 			return req->fd;
-		} else {
+		} else if (read_result == 0) {
 			fcgi_close(req, 1, 1);
 		}
 	}
@@ -1742,7 +1743,7 @@ void fcgi_free_mgmt_var_cb(zval *zv)
 	pefree(Z_STR_P(zv), 1);
 }
 
-const char *fcgi_get_last_client_ip()
+const char *fcgi_get_last_client_ip(void)
 {
 	static char str[INET6_ADDRSTRLEN];
 

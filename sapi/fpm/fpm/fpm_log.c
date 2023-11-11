@@ -27,6 +27,9 @@
 
 static char *fpm_log_format = NULL;
 static int fpm_log_fd = -1;
+static struct key_value_s *fpm_access_suppress_paths = NULL;
+
+static int fpm_access_log_suppress(struct fpm_scoreboard_proc_s *proc);
 
 int fpm_log_open(int reopen) /* {{{ */
 {
@@ -77,6 +80,17 @@ int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
 		if (wp->config->access_format) {
 			fpm_log_format = strdup(wp->config->access_format);
 		}
+	}
+
+	for (struct key_value_s *kv = wp->config->access_suppress_paths; kv; kv = kv->next) {
+		struct key_value_s *kvcopy = calloc(1, sizeof(*kvcopy));
+		if (kvcopy == NULL) {
+			zlog(ZLOG_ERROR, "unable to allocate memory while opening the access log");
+			return -1;
+		}
+		kvcopy->value = strdup(kv->value);
+		kvcopy->next = fpm_access_suppress_paths;
+		fpm_access_suppress_paths = kvcopy;
 	}
 
 	if (fpm_log_fd == -1) {
@@ -136,6 +150,10 @@ int fpm_log_write(char *log_format) /* {{{ */
 		}
 		proc = *proc_p;
 		fpm_scoreboard_proc_release(proc_p);
+
+		if (UNEXPECTED(fpm_access_log_suppress(&proc))) {
+			return -1;
+		}
 	}
 
 	token = 0;
@@ -474,3 +492,38 @@ int fpm_log_write(char *log_format) /* {{{ */
 	return 0;
 }
 /* }}} */
+
+static int fpm_access_log_suppress(struct fpm_scoreboard_proc_s *proc)
+{
+	// Never suppress when query string is passed
+	if (proc->query_string[0] != '\0') {
+		return 0;
+	}
+
+	// Never suppress if request method is not GET or HEAD
+	if (
+		strcmp(proc->request_method, "GET") != 0
+		&& strcmp(proc->request_method, "HEAD") != 0
+	) {
+		return 0;
+	}
+
+	// Never suppress when response code does not indicate success
+	if (SG(sapi_headers).http_response_code < 200 || SG(sapi_headers).http_response_code > 299) {
+		return 0;
+	}
+
+	// Never suppress when a body has been sent
+	if (SG(request_info).content_length > 0) {
+		return 0;
+	}
+
+	// Suppress when request URI is an exact match for one of our entries
+	for (struct key_value_s *kv = fpm_access_suppress_paths; kv; kv = kv->next) {
+		if (kv->value && strcmp(kv->value, proc->request_uri) == 0) {
+			return 1;
+		}
+	}
+
+	return 0;
+}

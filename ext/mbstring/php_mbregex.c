@@ -46,6 +46,8 @@ typedef void OnigMatchParam;
 
 ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 
+char php_mb_oniguruma_version[256];
+
 struct _zend_mb_regex_globals {
 	OnigEncoding default_mbctype;
 	OnigEncoding current_mbctype;
@@ -110,13 +112,11 @@ void php_mb_regex_globals_free(zend_mb_regex_globals *pglobals)
 /* {{{ PHP_MINIT_FUNCTION(mb_regex) */
 PHP_MINIT_FUNCTION(mb_regex)
 {
-	char version[256];
-
 	onig_init();
 
-	snprintf(version, sizeof(version), "%d.%d.%d",
+	snprintf(php_mb_oniguruma_version, sizeof(php_mb_oniguruma_version), "%d.%d.%d",
 		ONIGURUMA_VERSION_MAJOR, ONIGURUMA_VERSION_MINOR, ONIGURUMA_VERSION_TEENY);
-	REGISTER_STRING_CONSTANT("MB_ONIGURUMA_VERSION", version, CONST_CS | CONST_PERSISTENT);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -721,7 +721,7 @@ static inline void mb_regex_substitute(
 	eos = replace + replace_len;
 
 	while (p < eos) {
-		clen = (int) php_mb_mbchar_bytes_ex(p, enc);
+		clen = (int) php_mb_mbchar_bytes(p, enc);
 		if (clen != 1 || p == eos || p[0] != '\\') {
 			/* skip anything that's not an ascii backslash */
 			smart_str_appendl(pbuf, p, clen);
@@ -729,7 +729,7 @@ static inline void mb_regex_substitute(
 			continue;
 		}
 		sp = p; /* save position */
-		clen = (int) php_mb_mbchar_bytes_ex(++p, enc);
+		clen = (int) php_mb_mbchar_bytes(++p, enc);
 		if (clen != 1 || p == eos) {
 			/* skip backslash followed by multibyte char */
 			smart_str_appendl(pbuf, sp, p - sp);
@@ -759,7 +759,7 @@ static inline void mb_regex_substitute(
 				break;
 			case 'k':
 			{
-				clen = (int) php_mb_mbchar_bytes_ex(++p, enc);
+				clen = (int) php_mb_mbchar_bytes(++p, enc);
 				if (clen != 1 || p == eos || (p[0] != '<' && p[0] != '\'')) {
 					/* not a backref delimiter */
 					p += clen;
@@ -772,7 +772,7 @@ static inline void mb_regex_substitute(
 				char maybe_num = 1;
 				name_end = name = p + 1;
 				while (name_end < eos) {
-					clen = (int) php_mb_mbchar_bytes_ex(name_end, enc);
+					clen = (int) php_mb_mbchar_bytes(name_end, enc);
 					if (clen != 1) {
 						name_end += clen;
 						maybe_num = 0;
@@ -1144,13 +1144,10 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 
 	if (err <= -2) {
 		smart_str_free(&out_buf);
-		RETVAL_FALSE;
-	} else if (out_buf.s) {
-		smart_str_0(&out_buf);
-		RETVAL_STR(out_buf.s);
-	} else {
-		RETVAL_EMPTY_STRING();
+		RETURN_FALSE;
 	}
+
+	RETURN_STR(smart_str_extract(&out_buf));
 }
 /* }}} */
 

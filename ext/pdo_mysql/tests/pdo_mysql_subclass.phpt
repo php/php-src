@@ -78,6 +78,8 @@ $db->exec('DROP TABLE IF EXISTS test');
 ?>
 --EXPECTF--
 __construct('%S', '%S', %s)
+
+Deprecated: Callables of the form ["MyPDO", "parent::__construct"] are deprecated in %s on line %d
 exec('DROP TABLE IF EXISTS test')
 exec('CREATE TABLE test(id INT)')
 exec('INSERT INTO test(id) VALUES (1), (2)')

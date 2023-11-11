@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2022 Derick Rethans
+ * Copyright (c) 2015-2023 Derick Rethans
  * Copyright (c) 2018,2021 MongoDB, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,9 +30,9 @@
 # include "timelib_config.h"
 #endif
 
-#define TIMELIB_VERSION 202119
-#define TIMELIB_EXTENDED_VERSION 20211901
-#define TIMELIB_ASCII_VERSION "2021.19"
+#define TIMELIB_VERSION 202209
+#define TIMELIB_EXTENDED_VERSION 20220901
+#define TIMELIB_ASCII_VERSION "2022.09"
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -321,6 +321,7 @@ typedef struct _timelib_abbr_info {
 #define TIMELIB_ERR_INVALID_TZ_OFFSET          0x223
 #define TIMELIB_ERR_FORMAT_LITERAL_MISMATCH    0x224
 #define TIMELIB_ERR_MIX_ISO_WITH_NATURAL       0x225
+#define TIMELIB_ERR_NUMBER_OUT_OF_RANGE        0x226
 
 #define TIMELIB_ZONETYPE_NONE   0
 #define TIMELIB_ZONETYPE_OFFSET 1
@@ -438,6 +439,7 @@ typedef enum _timelib_format_specifier_code {
 	TIMELIB_FORMAT_WHITESPACE,
 	TIMELIB_FORMAT_YEAR_TWO_DIGIT,
 	TIMELIB_FORMAT_YEAR_FOUR_DIGIT,
+	TIMELIB_FORMAT_YEAR_EXPANDED,
 	TIMELIB_FORMAT_YEAR_ISO
 } timelib_format_specifier_code;
 
@@ -791,6 +793,19 @@ int timelib_timestamp_is_in_dst(timelib_sll ts, timelib_tzinfo *tz);
  * 'transition_time');
  */
 timelib_time_offset *timelib_get_time_zone_info(timelib_sll ts, timelib_tzinfo *tz);
+
+/**
+ * Returns offset information with time zone 'tz' for the time stamp 'ts'.
+ *
+ * The returned information contains: the offset in seconds East of UTC (in
+ * the output parameter 'offset'), whether DST is active (in the output
+ * parameter 'is_dst'), and the transition time that got to this state (in
+ * the output parameter 'transition_time'); if NULL is passed, the value is
+ * not retrieved
+ *
+ * Returns 1 if successful, 0 for failure.
+ */
+int timelib_get_time_zone_offset_info(timelib_sll ts, timelib_tzinfo *tz, int32_t* offset, timelib_sll* transition_time, unsigned int* is_dst);
 
 /**
  * Returns the UTC offset currently applicable for the information stored in 't'.

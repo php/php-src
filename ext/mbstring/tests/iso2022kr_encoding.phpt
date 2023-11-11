@@ -24,8 +24,10 @@ function testValid($from, $to, $bothWays = true) {
       $from = substr($from, 1, strlen($from) - 1);
     /* If the string switches to a different charset, it should switch back to
      * ASCII at the end */
-    if (strpos($from, "\x1B\$C") !== false)
+    if (strpos($from, "\x0E") !== false && $from[-1] !== "\x0F")
       $from .= "\x0F";
+    if (strpos($from, "\x1B\$)C") === false && $from !== '')
+      $from = "\x1B\$)C" . $from;
 
     convertValidString($to, $from, 'UTF-16BE', 'ISO-2022-KR', false);
   }
@@ -95,6 +97,25 @@ for ($i = 0; $i < 256; $i++) {
 testValid("\x0E\x0E\x0F\x0E\x0Fabc", "\x00a\x00b\x00c", false);
 
 echo "Escapes behave as expected\n";
+
+// Test switching between KS X 1001 and ASCII when converting Unicode -> ISO-2022-KR
+convertValidString("\x76\x20\x00a\x00b", "\x1B$)C\x0E\x74\x30\x0Fab", "UTF-16BE", "ISO-2022-KR", false);
+
+// Regression test: Our conversion table for KS X 1001 only goes up to 0x7D7E, but
+// we previously accepted and tried to convert two-byte sequences starting with
+// 0x7E, resulting in a failed assertion
+convertInvalidString("\x0E~/", "%", "ISO-2022-KR", "UTF-8");
+
+// Regression test: The old implementation would wrongly convert some codepoints
+// which are not in KS X 1001 at all to 'random' characters in KS X 1001
+convertInvalidString("\xFF\x86", "\x1B\$)C%", "UTF-16BE", "ISO-2022-KR");
+
+// Regression test: The old implementation would sometimes emit an extra 0x0F ('shift out')
+// character at the end of a string, although the string was already ending in ASCII mode
+convertValidString("\x68\x46\x00a", "\x1B\$)C\x0E\x68\x46\x0Fa", "UTF-16BE", "ISO-2022-KR", false);
+
+// Regression test: Don't shift from KS X 1001 to ASCII mode on invalid escape sequence
+convertInvalidString("\x0E\x1BX\x74\x30", "\x00%\x76\x20", "ISO-2022-KR", "UTF-16BE", false);
 
 // Test "long" illegal character markers
 mb_substitute_character("long");

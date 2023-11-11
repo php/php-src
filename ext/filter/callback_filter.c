@@ -22,7 +22,7 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 	zval args[1];
 	int status;
 
-	if (!option_array || !zend_is_callable(option_array, 0, NULL)) {
+	if (!option_array || !zend_is_callable(option_array, IS_CALLABLE_SUPPRESS_DEPRECATIONS, NULL)) {
 		zend_type_error("%s(): Option must be a valid callback", get_active_function_name());
 		zval_ptr_dtor(value);
 		ZVAL_NULL(value);

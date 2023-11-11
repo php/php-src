@@ -7,5 +7,5 @@ ffi
 var_export(FFI::new('int'));
 ?>
 --EXPECT--
-FFI\CData::__set_state(array(
+\FFI\CData::__set_state(array(
 ))

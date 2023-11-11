@@ -7,4 +7,4 @@ function foo(): iterable&Iterator {}
 
 ?>
 --EXPECTF--
-Fatal error: Type iterable cannot be part of an intersection type in %s on line %d
+Fatal error: Type Traversable|array cannot be part of an intersection type in %s on line %d

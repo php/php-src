@@ -13,7 +13,16 @@
 /UPGRADING           merge=NEWS
 /UPGRADING.INTERNALS merge=NEWS
 
-# Enable commit diffs for binary PHP test files. Some PHP test files include
-# special characters, such as ASCII control characters. Git recognizes these as
-# binary and wouldn't generate diffs.
-*.phpt diff
+# Configure proper diff drivers to improve the context lines in the output
+# of git diff and to improve token splitting for --word-diff.
+*.phpt diff=php
+*.php diff=php
+*.[ch] diff=cpp
+
+# Collapse generated files within a pull request.
+**/*_arginfo.h linguist-generated
+/Zend/zend_vm_execute.h linguist-generated
+/Zend/zend_vm_opcodes.{h,c} linguist-generated
+
+# The OSS fuzz files are bunary
+/ext/date/tests/ossfuzz*.txt binary

@@ -1,5 +1,5 @@
 --TEST--
-Bug #34785 (Can not properly subclass mysqli_stmt)
+Bug #34785 (Cannot properly subclass mysqli_stmt)
 --EXTENSIONS--
 mysqli
 --SKIPIF--

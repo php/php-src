@@ -8,7 +8,8 @@ ADD_FLAG('CFLAGS_DATE', "/wd4244");
 
 var tl_config = FSO.CreateTextFile("ext/date/lib/timelib_config.h", true);
 tl_config.WriteLine("#include \"config.w32.h\"");
-tl_config.WriteLine("#include <php_stdint.h>");
+tl_config.WriteLine("#include <inttypes.h>");
+tl_config.WriteLine("#include <stdint.h>");
 tl_config.WriteLine("#include \"zend.h\"");
 tl_config.WriteLine("#define timelib_malloc  emalloc");
 tl_config.WriteLine("#define timelib_realloc erealloc");

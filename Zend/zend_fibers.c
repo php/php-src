@@ -24,6 +24,7 @@
 #include "zend_exceptions.h"
 #include "zend_builtin_functions.h"
 #include "zend_observer.h"
+#include "zend_mmap.h"
 #include "zend_compile.h"
 #include "zend_closures.h"
 
@@ -217,6 +218,8 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 		return NULL;
 	}
 
+	zend_mmap_set_name(pointer, alloc_size, "zend_fiber_stack");
+
 # if ZEND_FIBER_GUARD_PAGES
 	if (mprotect(pointer, ZEND_FIBER_GUARD_PAGES * page_size, PROT_NONE) < 0) {
 		zend_throw_exception_ex(NULL, 0, "Fiber stack protect failed: mprotect failed: %s (%d)", strerror(errno), errno);
@@ -363,6 +366,10 @@ ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context)
 {
 	zend_observer_fiber_destroy_notify(context);
 
+	if (context->cleanup) {
+		context->cleanup(context);
+	}
+
 	zend_fiber_stack_free(context->stack);
 }
 
@@ -444,6 +451,19 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
 	}
 }
 
+static void zend_fiber_cleanup(zend_fiber_context *context)
+{
+	zend_fiber *fiber = zend_fiber_from_context(context);
+
+	zend_vm_stack current_stack = EG(vm_stack);
+	EG(vm_stack) = fiber->vm_stack;
+	zend_vm_stack_destroy();
+	EG(vm_stack) = current_stack;
+	fiber->execute_data = NULL;
+	fiber->stack_bottom = NULL;
+	fiber->caller = NULL;
+}
+
 static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 {
 	ZEND_ASSERT(Z_TYPE(transfer->value) == IS_NULL && "Initial transfer value to fiber context must be NULL");
@@ -504,12 +524,10 @@ static ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer)
 		transfer->flags = ZEND_FIBER_TRANSFER_FLAG_BAILOUT;
 	} zend_end_try();
 
-	transfer->context = fiber->caller;
+	fiber->context.cleanup = &zend_fiber_cleanup;
+	fiber->vm_stack = EG(vm_stack);
 
-	zend_vm_stack_destroy();
-	fiber->execute_data = NULL;
-	fiber->stack_bottom = NULL;
-	fiber->caller = NULL;
+	transfer->context = fiber->caller;
 }
 
 /* Handles forwarding of result / error from a transfer into the running fiber. */
@@ -657,7 +675,7 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	HashTable *lastSymTable = NULL;
 	zend_execute_data *ex = fiber->execute_data;
 	for (; ex; ex = ex->prev_execute_data) {
-		HashTable *symTable = zend_unfinished_execution_gc_ex(ex, ex->call, buf, false);
+		HashTable *symTable = zend_unfinished_execution_gc_ex(ex, ex->func && ZEND_USER_CODE(ex->func->type) ? ex->call : NULL, buf, false);
 		if (symTable) {
 			if (lastSymTable) {
 				zval *val;
@@ -679,11 +697,22 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 
 ZEND_METHOD(Fiber, __construct)
 {
-	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_FUNC(fiber->fci, fiber->fci_cache)
+		Z_PARAM_FUNC(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
+
+	zend_fiber *fiber = (zend_fiber *) Z_OBJ_P(ZEND_THIS);
+
+	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_INIT || Z_TYPE(fiber->fci.function_name) != IS_UNDEF)) {
+		zend_throw_error(zend_ce_fiber_error, "Cannot call constructor twice");
+		RETURN_THROWS();
+	}
+
+	fiber->fci = fci;
+	fiber->fci_cache = fcc;
 
 	// Keep a reference to closures or callable objects while the fiber is running.
 	Z_TRY_ADDREF(fiber->fci.function_name);

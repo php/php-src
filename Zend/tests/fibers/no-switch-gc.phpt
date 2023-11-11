@@ -5,9 +5,10 @@ Context switches are prevented during GC collect cycles
 
 $fiber = new Fiber(function () {
     call_user_func(function () {
-        $a = new class () {};
+        $a = new class { public $next; };
 
-        $b = new class () {
+        $b = new class {
+            public $next;
             public function __destruct() {
                 Fiber::suspend();
             }

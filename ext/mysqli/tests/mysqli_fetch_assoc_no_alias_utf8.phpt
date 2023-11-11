@@ -4,11 +4,10 @@ mysqli_fetch_assoc() - utf8
 mysqli
 --SKIPIF--
 <?php
-    require_once('skipifconnectfailure.inc');
-    require_once("connect.inc");
+    require_once "connect.inc";
 
-    if (!$link = mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-        die("skip Cannot connect to server to check charsets");
+    if (!$link = @mysqli_connect($host, $user, $passwd, $db, $port, $socket))
+        die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
     if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'UTF8'"))
         die("skip Cannot run SHOW CHARACTER SET to check charsets");
@@ -35,7 +34,7 @@ mysqli
 ?>
 --FILE--
 <?php
-    require('table.inc');
+    require 'table.inc';
 
     /* some cyrillic (utf8) comes here */
     if (!$res = mysqli_query($link, "SET NAMES UTF8")) {
@@ -77,6 +76,10 @@ mysqli
 
     mysqli_close($link);
     print "done!";
+?>
+--CLEAN--
+<?php
+require_once "clean_table.inc";
 ?>
 --EXPECTF--
 [003]

@@ -18,8 +18,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
 #endif
 
 #include "php.h"
@@ -317,7 +317,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			return NULL;
 		}
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 		dtablesize = getdtablesize();
 #else
 		dtablesize = INT_MAX;
@@ -392,7 +392,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 
 #if defined(S_IFSOCK) && !defined(PHP_WIN32)
 	do {
-		zend_stat_t st;
+		zend_stat_t st = {0};
 		memset(&st, 0, sizeof(st));
 		if (zend_fstat(fd, &st) == 0 && (st.st_mode & S_IFMT) == S_IFSOCK) {
 			stream = php_stream_sock_open_from_socket(fd, NULL);

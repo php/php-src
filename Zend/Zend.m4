@@ -222,7 +222,7 @@ typedef union _mm_align_test {
 
 int main()
 {
-  int i = ZEND_MM_ALIGNMENT;
+  size_t i = ZEND_MM_ALIGNMENT;
   int zeros = 0;
   FILE *fp;
 
@@ -232,7 +232,7 @@ int main()
   }
 
   fp = fopen("conftest.zend", "w");
-  fprintf(fp, "%d %d\n", ZEND_MM_ALIGNMENT, zeros);
+  fprintf(fp, "(size_t)%zu (size_t)%d %d\n", ZEND_MM_ALIGNMENT, zeros, ZEND_MM_ALIGNMENT < 4);
   fclose(fp);
 
   return 0;
@@ -240,12 +240,15 @@ int main()
 ]])], [
   LIBZEND_MM_ALIGN=`cat conftest.zend | cut -d ' ' -f 1`
   LIBZEND_MM_ALIGN_LOG2=`cat conftest.zend | cut -d ' ' -f 2`
+  LIBZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT=`cat conftest.zend | cut -d ' ' -f 3`
   AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT, $LIBZEND_MM_ALIGN, [ ])
   AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT_LOG2, $LIBZEND_MM_ALIGN_LOG2, [ ])
+  AC_DEFINE_UNQUOTED(ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT, $LIBZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT, [ ])
 ], [], [
   dnl Cross compilation needs something here.
-  AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT, 8, [ ])
-  AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT_LOG2, 3, [ ])
+  AC_DEFINE(ZEND_MM_ALIGNMENT, 8, [ ])
+  AC_DEFINE(ZEND_MM_ALIGNMENT_LOG2, 3, [ ])
+  AC_DEFINE(ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT, 0, [ ])
 ])
 
 AC_MSG_RESULT(done)

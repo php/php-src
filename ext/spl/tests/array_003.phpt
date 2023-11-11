@@ -7,6 +7,7 @@ SPL: ArrayObject from object
 // since they cannot be accessed from the external object which iterates
 // them.
 
+#[AllowDynamicProperties]
 class test
 {
     public    $pub = "public";

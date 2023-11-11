@@ -11,4 +11,4 @@ echo Foo::A."\n";
 Fatal error: Uncaught Error: Undefined constant self::B in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %sbug41633_2.php on line 5
+  thrown in %sbug41633_2.php on line 3

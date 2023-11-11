@@ -30,6 +30,6 @@ try {
 ?>
 --EXPECT--
 string(36) "Cannot use string offset as an array"
-string(27) "Cannot unset string offsets"
-string(41) "Only variables can be passed by reference"
+string(36) "Cannot use string offset as an array"
+string(47) "Cannot create references to/from string offsets"
 string(41) "Cannot increment/decrement string offsets"

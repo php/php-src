@@ -109,6 +109,13 @@ typedef enum _zend_accel_restart_reason {
 	ACCEL_RESTART_USER    /* restart scheduled by opcache_reset() */
 } zend_accel_restart_reason;
 
+typedef struct _zend_early_binding {
+	zend_string *lcname;
+	zend_string *rtd_key;
+	zend_string *lc_parent_name;
+	uint32_t cache_slot;
+} zend_early_binding;
+
 typedef struct _zend_persistent_script {
 	zend_script    script;
 	zend_long      compiler_halt_offset;   /* position of __HALT_COMPILER or -1 */
@@ -118,7 +125,9 @@ typedef struct _zend_persistent_script {
 	bool      is_phar;
 	bool      empty;
 	uint32_t       num_warnings;
+	uint32_t       num_early_bindings;
 	zend_error_info **warnings;
+	zend_early_binding *early_bindings;
 
 	void          *mem;                    /* shared memory area used by script structures */
 	size_t         size;                   /* size of used shared memory */
@@ -128,11 +137,7 @@ typedef struct _zend_persistent_script {
 	 */
 	struct zend_persistent_script_dynamic_members {
 		time_t       last_used;
-#ifdef ZEND_WIN32
-		LONGLONG   hits;
-#else
-		zend_ulong        hits;
-#endif
+		zend_ulong   hits;
 		unsigned int memory_consumption;
 		unsigned int checksum;
 		time_t       revalidate;
@@ -195,7 +200,7 @@ typedef struct _zend_accel_directives {
 } zend_accel_directives;
 
 typedef struct _zend_accel_globals {
-	int                     counted;   /* the process uses shared memory */
+	bool               counted;   /* the process uses shared memory */
 	bool               enabled;
 	bool               locked;    /* thread obtained exclusive lock */
 	bool               accelerator_enabled; /* accelerator enabled for current request */
@@ -206,9 +211,9 @@ typedef struct _zend_accel_globals {
 	char                    include_path_key[32]; /* key of current "include_path" */
 	char                    cwd_key[32];          /* key of current working directory */
 	int                     include_path_key_len;
-	int                     include_path_check;
+	bool                    include_path_check;
 	int                     cwd_key_len;
-	int                     cwd_check;
+	bool                    cwd_check;
 	int                     auto_globals_mask;
 	time_t                  request_time;
 	time_t                  last_restart_time; /* used to synchronize SHM and in-process caches */
@@ -302,6 +307,8 @@ extern zend_accel_globals accel_globals;
 
 extern char *zps_api_failure_reason;
 
+BEGIN_EXTERN_C()
+
 void accel_shutdown(void);
 zend_result  accel_activate(INIT_FUNC_ARGS);
 zend_result accel_post_deactivate(void);
@@ -323,6 +330,8 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
 
 uint32_t zend_accel_get_class_name_map_ptr(zend_string *type_name);
+
+END_EXTERN_C()
 
 /* memory write protection */
 #define SHM_PROTECT() \
