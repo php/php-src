@@ -25,9 +25,38 @@
 
 static bool check_options_validity(uint32_t arg_num, zend_long options)
 {
-	const zend_long VALID_OPTIONS = XML_PARSE_NOENT | XML_PARSE_DTDLOAD | XML_PARSE_DTDATTR | XML_PARSE_DTDVALID | XML_PARSE_NOERROR | XML_PARSE_NOWARNING | XML_PARSE_NOBLANKS | XML_PARSE_XINCLUDE | XML_PARSE_NSCLEAN | XML_PARSE_NOCDATA | XML_PARSE_NONET | XML_PARSE_PEDANTIC | XML_PARSE_COMPACT | XML_PARSE_HUGE | XML_PARSE_BIG_LINES;
+	const zend_long VALID_OPTIONS = XML_PARSE_NOENT
+								  | XML_PARSE_DTDLOAD
+								  | XML_PARSE_DTDATTR
+								  | XML_PARSE_DTDVALID
+								  | XML_PARSE_NOERROR
+								  | XML_PARSE_NOWARNING
+								  | XML_PARSE_NOBLANKS
+								  | XML_PARSE_XINCLUDE
+								  | XML_PARSE_NSCLEAN
+								  | XML_PARSE_NOCDATA
+								  | XML_PARSE_NONET
+								  | XML_PARSE_PEDANTIC
+								  | XML_PARSE_COMPACT
+								  | XML_PARSE_HUGE
+								  | XML_PARSE_BIG_LINES;
 	if ((options & ~VALID_OPTIONS) != 0) {
-		zend_argument_value_error(2, "contains invalid flags (allowed flags: LIBXML_NOENT, LIBXML_DTDLOAD, LIBXML_DTDATTR, LIBXML_DTDVALID, LIBXML_NOERROR, LIBXML_NOWARNING, LIBXML_NOBLANKS, LIBXML_XINCLUDE, LIBXML_NSCLEAN, LIBXML_NOCDATA, LIBXML_NONET, LIBXML_PEDANTIC, LIBXML_COMPACT, LIBXML_PARSEHUGE, LIBXML_BIGLINES)");
+		zend_argument_value_error(2, "contains invalid flags (allowed flags: "
+									 "LIBXML_NOENT, "
+									 "LIBXML_DTDLOAD, "
+									 "LIBXML_DTDATTR, "
+									 "LIBXML_DTDVALID, "
+									 "LIBXML_NOERROR, "
+									 "LIBXML_NOWARNING, "
+									 "LIBXML_NOBLANKS, "
+									 "LIBXML_XINCLUDE, "
+									 "LIBXML_NSCLEAN, "
+									 "LIBXML_NOCDATA, "
+									 "LIBXML_NONET, "
+									 "LIBXML_PEDANTIC, "
+									 "LIBXML_COMPACT, "
+									 "LIBXML_PARSEHUGE, "
+									 "LIBXML_BIGLINES)");
 		return false;
 	}
 	return true;
@@ -127,7 +156,12 @@ PHP_METHOD(DOM_XMLDocument, createEmpty)
 
 	lxml_doc->encoding = xmlStrdup((const xmlChar *) encoding);
 
-	dom_object *intern = php_dom_instantiate_object_helper(return_value, dom_xml_document_class_entry, (xmlNodePtr) lxml_doc, NULL);
+	dom_object *intern = php_dom_instantiate_object_helper(
+		return_value,
+		dom_xml_document_class_entry,
+		(xmlNodePtr) lxml_doc,
+		NULL
+	);
 	intern->document->is_modern_api_class = true;
 	return;
 
@@ -141,7 +175,15 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	const char *source, *override_encoding = NULL;
 	size_t source_len, override_encoding_len;
 	zend_long options = 0;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lp!", &source, &source_len, &options, &override_encoding, &override_encoding_len) == FAILURE) {
+	if (zend_parse_parameters(
+		ZEND_NUM_ARGS(),
+		"s|lp!",
+		&source,
+		&source_len,
+		&options,
+		&override_encoding,
+		&override_encoding_len
+	) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -186,7 +228,12 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		}
 		RETURN_THROWS();
 	}
-	dom_object *intern = php_dom_instantiate_object_helper(return_value, dom_xml_document_class_entry, (xmlNodePtr) lxml_doc, NULL);
+	dom_object *intern = php_dom_instantiate_object_helper(
+		return_value,
+		dom_xml_document_class_entry,
+		(xmlNodePtr) lxml_doc,
+		NULL
+	);
 	intern->document->is_modern_api_class = true;
 	dom_mark_namespaces_as_attributes_too(lxml_doc);
 }

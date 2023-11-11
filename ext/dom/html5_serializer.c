@@ -336,7 +336,10 @@ static zend_result dom_html5_serialize_node(dom_html5_serialize_context *ctx, co
 zend_result dom_html5_serialize(dom_html5_serialize_context *ctx, const xmlNode *node)
 {
 	/* Step 1. Note that this algorithm serializes children. Only elements, documents, and fragments can have children. */
-	if (node->type != XML_ELEMENT_NODE && node->type != XML_DOCUMENT_FRAG_NODE && node->type != XML_DOCUMENT_NODE && node->type != XML_HTML_DOCUMENT_NODE) {
+	if (node->type != XML_ELEMENT_NODE
+		&& node->type != XML_DOCUMENT_FRAG_NODE
+		&& node->type != XML_DOCUMENT_NODE
+		&& node->type != XML_HTML_DOCUMENT_NODE) {
 		return SUCCESS;
 	}
 	if (node->type == XML_ELEMENT_NODE && dom_html5_serializes_as_void(node)) {

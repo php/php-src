@@ -67,7 +67,8 @@ typedef struct {
 } dom_output_ctx;
 
 typedef struct {
-	/* We can skip some conversion if the input and output encoding are both UTF-8, we only have to validate and substitute replacement characters */
+	/* We can skip some conversion if the input and output encoding are both UTF-8,
+	 * we only have to validate and substitute replacement characters */
 	bool fast_path; /* Put first, near the encode & decode structures, for cache locality */
 	lxb_encoding_encode_t encode;
 	lxb_encoding_decode_t decode;
@@ -83,7 +84,12 @@ static void dom_decoding_encoding_ctx_init(dom_decoding_encoding_ctx *ctx)
 	ctx->decode_data = NULL;
 	/* Set fast path on by default so that the decoder finishing is skipped if this was never initialised properly. */
 	ctx->fast_path = true;
-	(void) lxb_encoding_encode_init(&ctx->encode, ctx->encode_data, ctx->encoding_output, sizeof(ctx->encoding_output) / sizeof(*ctx->encoding_output));
+	(void) lxb_encoding_encode_init(
+		&ctx->encode,
+		ctx->encode_data,
+		ctx->encoding_output,
+		sizeof(ctx->encoding_output) / sizeof(*ctx->encoding_output)
+	);
 	(void) lxb_encoding_encode_replace_set(&ctx->encode, LXB_ENCODING_REPLACEMENT_BYTES, LXB_ENCODING_REPLACEMENT_SIZE);
 }
 
@@ -204,7 +210,11 @@ static void dom_reset_line_column_cache(dom_line_column_cache *cache)
 	cache->last_offset = 0;
 }
 
-static void dom_find_line_and_column_using_cache(const dom_lexbor_libxml2_bridge_application_data *application_data, dom_line_column_cache *cache, size_t offset)
+static void dom_find_line_and_column_using_cache(
+	const dom_lexbor_libxml2_bridge_application_data *application_data,
+	dom_line_column_cache *cache,
+	size_t offset
+)
 {
 	offset -= application_data->current_total_offset;
 	if (offset > application_data->current_input_length) {
@@ -243,14 +253,24 @@ static void dom_find_line_and_column_using_cache(const dom_lexbor_libxml2_bridge
 	}
 }
 
-static void dom_lexbor_libxml2_bridge_tokenizer_error_reporter(void *application_data_voidptr, lxb_html_tokenizer_error_t *error, size_t offset)
+static void dom_lexbor_libxml2_bridge_tokenizer_error_reporter(
+	void *application_data_voidptr,
+	lxb_html_tokenizer_error_t *error,
+	size_t offset
+)
 {
 	dom_lexbor_libxml2_bridge_application_data *application_data = application_data_voidptr;
 	dom_find_line_and_column_using_cache(application_data, &application_data->cache_tokenizer, offset);
 	php_libxml_pretend_ctx_error_ex(application_data->input_name, application_data->cache_tokenizer.last_line, application_data->cache_tokenizer.last_column, "tokenizer error %s in %s, line: %zu, column: %zu\n", dom_lexbor_tokenizer_error_code_to_string(error->id), application_data->input_name, application_data->cache_tokenizer.last_line, application_data->cache_tokenizer.last_column);
 }
 
-static void dom_lexbor_libxml2_bridge_tree_error_reporter(void *application_data_voidptr, lxb_html_tree_error_t *error, size_t line, size_t column, size_t len)
+static void dom_lexbor_libxml2_bridge_tree_error_reporter(
+	void *application_data_voidptr,
+	lxb_html_tree_error_t *error,
+	size_t line,
+	size_t column,
+	size_t len
+)
 {
 	dom_lexbor_libxml2_bridge_application_data *application_data = application_data_voidptr;
 
@@ -261,9 +281,28 @@ static void dom_lexbor_libxml2_bridge_tree_error_reporter(void *application_data
 
 	if (UNEXPECTED(len <= 1)) {
 		/* Possible with EOF, or single-character tokens, don't use a range in the error display in this case */
-		php_libxml_pretend_ctx_error_ex(application_data->input_name, line, column, "tree error %s in %s, line: %zu, column: %zu\n", dom_lexbor_tree_error_code_to_string(error->id), application_data->input_name, line, column);
+		php_libxml_pretend_ctx_error_ex(
+			application_data->input_name,
+			line,
+			column,
+			"tree error %s in %s, line: %zu, column: %zu\n",
+			dom_lexbor_tree_error_code_to_string(error->id),
+			application_data->input_name,
+			line,
+			column
+		);
 	} else {
-		php_libxml_pretend_ctx_error_ex(application_data->input_name, line, column, "tree error %s in %s, line: %zu, column: %zu-%zu\n", dom_lexbor_tree_error_code_to_string(error->id), application_data->input_name, line, column, column + len - 1);
+		php_libxml_pretend_ctx_error_ex(
+			application_data->input_name,
+			line,
+			column,
+			"tree error %s in %s, line: %zu, column: %zu-%zu\n",
+			dom_lexbor_tree_error_code_to_string(error->id),
+			application_data->input_name,
+			line,
+			column,
+			column + len - 1
+		);
 	}
 }
 
@@ -296,7 +335,11 @@ static void dom_place_remove_element_and_hoist_children(xmlNodePtr parent, const
 	}
 }
 
-static void dom_post_process_html5_loading(xmlDocPtr lxml_doc, zend_long options, const lexbor_libxml2_bridge_extracted_observations *observations)
+static void dom_post_process_html5_loading(
+	xmlDocPtr lxml_doc,
+	zend_long options,
+	const lexbor_libxml2_bridge_extracted_observations *observations
+)
 {
 	if (options & HTML_PARSE_NOIMPLIED) {
 		xmlNodePtr html_node = dom_search_child((xmlNodePtr) lxml_doc, "html");
@@ -317,7 +360,8 @@ static void dom_post_process_html5_loading(xmlDocPtr lxml_doc, zend_long options
 			if (!(options & DOM_HTML_NO_DEFAULT_NS) && EXPECTED(lxml_doc->children != NULL)) {
 				xmlNodePtr node = lxml_doc->children;
 				while (node) {
-					/* Fine to use the DOM wrap reconciliation here because it's the "modern" world of DOM, and no user manipulation happened yet. */
+					/* Fine to use the DOM wrap reconciliation here because it's the "modern" world of DOM,
+					 * and no user manipulation happened yet. */
 					xmlDOMWrapCtxt dummy_ctxt = {0};
 					xmlDOMWrapReconcileNamespaces(&dummy_ctxt, node, /* options */ 0);
 					node = node->next;
@@ -389,9 +433,19 @@ static void dom_setup_parser_encoding_manually(const lxb_char_t *buf_start, cons
 
 	decoding_encoding_ctx->decode_data = encoding_data;
 
-	(void) lxb_encoding_decode_init(&decoding_encoding_ctx->decode, decoding_encoding_ctx->decode_data, decoding_encoding_ctx->codepoints, sizeof(decoding_encoding_ctx->codepoints) / sizeof(*decoding_encoding_ctx->codepoints));
-	(void) lxb_encoding_decode_replace_set(&decoding_encoding_ctx->decode, &replacement_codepoint, LXB_ENCODING_REPLACEMENT_BUFFER_LEN);
-	decoding_encoding_ctx->fast_path = decoding_encoding_ctx->decode_data == decoding_encoding_ctx->encode_data; /* Note: encode_data is for UTF-8 */
+	(void) lxb_encoding_decode_init(
+		&decoding_encoding_ctx->decode,
+		decoding_encoding_ctx->decode_data,
+		decoding_encoding_ctx->codepoints,
+		sizeof(decoding_encoding_ctx->codepoints) / sizeof(*decoding_encoding_ctx->codepoints)
+	);
+	(void) lxb_encoding_decode_replace_set(
+		&decoding_encoding_ctx->decode,
+		&replacement_codepoint,
+		LXB_ENCODING_REPLACEMENT_BUFFER_LEN
+	);
+	/* Note: encode_data is for UTF-8 */
+	decoding_encoding_ctx->fast_path = decoding_encoding_ctx->decode_data == decoding_encoding_ctx->encode_data;
 
 	if (decoding_encoding_ctx->fast_path) {
 		application_data->current_input_codepoints = NULL;
@@ -402,7 +456,12 @@ static void dom_setup_parser_encoding_manually(const lxb_char_t *buf_start, cons
 	}
 }
 
-static void dom_setup_parser_encoding_implicitly(const lxb_char_t **buf_ref, size_t *read, dom_decoding_encoding_ctx *decoding_encoding_ctx, dom_lexbor_libxml2_bridge_application_data *application_data)
+static void dom_setup_parser_encoding_implicitly(
+	const lxb_char_t **buf_ref,
+	size_t *read,
+	dom_decoding_encoding_ctx *decoding_encoding_ctx,
+	dom_lexbor_libxml2_bridge_application_data *application_data
+)
 {
 	const char *buf_start = (const char *) *buf_ref;
 	dom_character_encoding_data dom_encoding_data = dom_determine_encoding(buf_start, *read);
@@ -411,7 +470,16 @@ static void dom_setup_parser_encoding_implicitly(const lxb_char_t **buf_ref, siz
 	dom_setup_parser_encoding_manually((const lxb_char_t *) buf_start, dom_encoding_data.encoding_data, decoding_encoding_ctx, application_data);
 }
 
-static bool dom_process_parse_chunk(lexbor_libxml2_bridge_parse_context *ctx, lxb_html_document_t *document, lxb_html_parser_t *parser, size_t encoded_length, const lxb_char_t *encoding_output, size_t input_buffer_length, size_t *tokenizer_error_offset, size_t *tree_error_offset)
+static bool dom_process_parse_chunk(
+	lexbor_libxml2_bridge_parse_context *ctx,
+	lxb_html_document_t *document,
+	lxb_html_parser_t *parser,
+	size_t encoded_length,
+	const lxb_char_t *encoding_output,
+	size_t input_buffer_length,
+	size_t *tokenizer_error_offset,
+	size_t *tree_error_offset
+)
 {
 	dom_lexbor_libxml2_bridge_application_data *application_data = ctx->application_data;
 	application_data->current_input_length = input_buffer_length;
@@ -426,7 +494,16 @@ static bool dom_process_parse_chunk(lexbor_libxml2_bridge_parse_context *ctx, lx
 	return true;
 }
 
-static bool dom_decode_encode_fast_path(lexbor_libxml2_bridge_parse_context *ctx, lxb_html_document_t *document, lxb_html_parser_t *parser, const lxb_char_t **buf_ref_ref, const lxb_char_t *buf_end, dom_decoding_encoding_ctx *decoding_encoding_ctx, size_t *tokenizer_error_offset, size_t *tree_error_offset)
+static bool dom_decode_encode_fast_path(
+	lexbor_libxml2_bridge_parse_context *ctx,
+	lxb_html_document_t *document,
+	lxb_html_parser_t *parser,
+	const lxb_char_t **buf_ref_ref,
+	const lxb_char_t *buf_end,
+	dom_decoding_encoding_ctx *decoding_encoding_ctx,
+	size_t *tokenizer_error_offset,
+	size_t *tree_error_offset
+)
 {
 	const lxb_char_t *buf_ref = *buf_ref_ref;
 	const lxb_char_t *last_output = buf_ref;
@@ -482,7 +559,16 @@ fail_oom:
 	return false;
 }
 
-static bool dom_decode_encode_slow_path(lexbor_libxml2_bridge_parse_context *ctx, lxb_html_document_t *document, lxb_html_parser_t *parser, const lxb_char_t **buf_ref_ref, const lxb_char_t *buf_end, dom_decoding_encoding_ctx *decoding_encoding_ctx, size_t *tokenizer_error_offset, size_t *tree_error_offset)
+static bool dom_decode_encode_slow_path(
+	lexbor_libxml2_bridge_parse_context *ctx,
+	lxb_html_document_t *document,
+	lxb_html_parser_t *parser,
+	const lxb_char_t **buf_ref_ref,
+	const lxb_char_t *buf_end,
+	dom_decoding_encoding_ctx *decoding_encoding_ctx,
+	size_t *tokenizer_error_offset,
+	size_t *tree_error_offset
+)
 {
 	const lxb_char_t *buf_ref = *buf_ref_ref;
 	lexbor_status_t decode_status, encode_status;
@@ -518,16 +604,50 @@ fail_oom:
 	return false;
 }
 
-static bool dom_parse_decode_encode_step(lexbor_libxml2_bridge_parse_context *ctx, lxb_html_document_t *document, lxb_html_parser_t *parser, const lxb_char_t **buf_ref_ref, const lxb_char_t *buf_end, dom_decoding_encoding_ctx *decoding_encoding_ctx, size_t *tokenizer_error_offset, size_t *tree_error_offset)
+static bool dom_parse_decode_encode_step(
+	lexbor_libxml2_bridge_parse_context *ctx,
+	lxb_html_document_t *document,
+	lxb_html_parser_t *parser,
+	const lxb_char_t **buf_ref_ref,
+	const lxb_char_t *buf_end,
+	dom_decoding_encoding_ctx *decoding_encoding_ctx,
+	size_t *tokenizer_error_offset,
+	size_t *tree_error_offset
+)
 {
 	if (decoding_encoding_ctx->fast_path) {
-		return dom_decode_encode_fast_path(ctx, document, parser, buf_ref_ref, buf_end, decoding_encoding_ctx, tokenizer_error_offset, tree_error_offset);
+		return dom_decode_encode_fast_path(
+			ctx,
+			document,
+			parser,
+			buf_ref_ref,
+			buf_end,
+			decoding_encoding_ctx,
+			tokenizer_error_offset,
+			tree_error_offset
+		);
 	} else {
-		return dom_decode_encode_slow_path(ctx, document, parser, buf_ref_ref, buf_end, decoding_encoding_ctx, tokenizer_error_offset, tree_error_offset);
+		return dom_decode_encode_slow_path(
+			ctx,
+			document,
+			parser,
+			buf_ref_ref,
+			buf_end,
+			decoding_encoding_ctx,
+			tokenizer_error_offset,
+			tree_error_offset
+		);
 	}
 }
 
-static bool dom_parse_decode_encode_finish(lexbor_libxml2_bridge_parse_context *ctx, lxb_html_document_t *document, lxb_html_parser_t *parser, dom_decoding_encoding_ctx *decoding_encoding_ctx, size_t *tokenizer_error_offset, size_t *tree_error_offset)
+static bool dom_parse_decode_encode_finish(
+	lexbor_libxml2_bridge_parse_context *ctx,
+	lxb_html_document_t *document,
+	lxb_html_parser_t *parser,
+	dom_decoding_encoding_ctx *decoding_encoding_ctx,
+	size_t *tokenizer_error_offset,
+	size_t *tree_error_offset
+)
 {
 	if (!decoding_encoding_ctx->fast_path) {
 		/* Fast path handles codepoints one by one, so this part is not applicable in that case */
@@ -572,7 +692,11 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
 {
 	const zend_long VALID_OPTIONS = XML_PARSE_NOERROR | XML_PARSE_COMPACT | HTML_PARSE_NOIMPLIED | DOM_HTML_NO_DEFAULT_NS;
 	if ((options & ~VALID_OPTIONS) != 0) {
-		zend_argument_value_error(arg_num, "contains invalid flags (allowed flags: LIBXML_NOERROR, LIBXML_COMPACT, LIBXML_HTML_NOIMPLIED, DOM\\NO_DEFAULT_NS)");
+		zend_argument_value_error(arg_num, "contains invalid flags (allowed flags: "
+										   "LIBXML_NOERROR, "
+										   "LIBXML_COMPACT, "
+										   "LIBXML_HTML_NOIMPLIED, "
+										   "DOM\\NO_DEFAULT_NS)");
 		return false;
 	}
 	return true;
@@ -608,7 +732,12 @@ PHP_METHOD(DOM_HTMLDocument, createEmpty)
 
 	lxml_doc->encoding = xmlStrdup((const xmlChar *) encoding);
 
-	dom_object *intern = php_dom_instantiate_object_helper(return_value, dom_html_document_class_entry, (xmlNodePtr) lxml_doc, NULL);
+	dom_object *intern = php_dom_instantiate_object_helper(
+		return_value,
+		dom_html_document_class_entry,
+		(xmlNodePtr) lxml_doc,
+		NULL
+	);
 	intern->document->is_modern_api_class = true;
 	return;
 
@@ -622,7 +751,15 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 	const char *source, *override_encoding = NULL;
 	size_t source_len, override_encoding_len;
 	zend_long options = 0;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lp!", &source, &source_len, &options, &override_encoding, &override_encoding_len) == FAILURE) {
+	if (zend_parse_parameters(
+		ZEND_NUM_ARGS(),
+		"s|lp!",
+		&source,
+		&source_len,
+		&options,
+		&override_encoding,
+		&override_encoding_len
+	) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -638,7 +775,11 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 	lexbor_libxml2_bridge_parse_context ctx;
 	lexbor_libxml2_bridge_parse_context_init(&ctx);
 	if (!(options & XML_PARSE_NOERROR)) {
-		lexbor_libxml2_bridge_parse_set_error_callbacks(&ctx, dom_lexbor_libxml2_bridge_tokenizer_error_reporter, dom_lexbor_libxml2_bridge_tree_error_reporter);
+		lexbor_libxml2_bridge_parse_set_error_callbacks(
+			&ctx,
+			dom_lexbor_libxml2_bridge_tokenizer_error_reporter,
+			dom_lexbor_libxml2_bridge_tree_error_reporter
+		);
 	}
 	ctx.application_data = &application_data;
 
@@ -650,7 +791,10 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 	dom_decoding_encoding_ctx decoding_encoding_ctx;
 	dom_decoding_encoding_ctx_init(&decoding_encoding_ctx);
 	if (override_encoding != NULL) {
-		const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name((const lxb_char_t *) override_encoding, override_encoding_len);
+		const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name(
+			(const lxb_char_t *) override_encoding,
+			override_encoding_len
+		);
 		if (!encoding_data) {
 			zend_argument_value_error(3, "must be a valid document encoding");
 			RETURN_THROWS();
@@ -681,7 +825,16 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 		source_len -= chunk_size;
 
 		const lxb_char_t *buf_end = buf_ref + chunk_size;
-		bool result = dom_parse_decode_encode_step(&ctx, document, parser, &buf_ref, buf_end, &decoding_encoding_ctx, &tokenizer_error_offset, &tree_error_offset);
+		bool result = dom_parse_decode_encode_step(
+			&ctx,
+			document,
+			parser,
+			&buf_ref,
+			buf_end,
+			&decoding_encoding_ctx,
+			&tokenizer_error_offset,
+			&tree_error_offset
+		);
 		if (!result) {
 			goto fail_oom;
 		}
@@ -697,10 +850,20 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 	}
 
 	xmlDocPtr lxml_doc;
-	lexbor_libxml2_bridge_status bridge_status = lexbor_libxml2_bridge_convert_document(document, &lxml_doc, options & XML_PARSE_COMPACT, !(options & DOM_HTML_NO_DEFAULT_NS));
+	lexbor_libxml2_bridge_status bridge_status = lexbor_libxml2_bridge_convert_document(
+		document,
+		&lxml_doc,
+		options & XML_PARSE_COMPACT,
+		!(options & DOM_HTML_NO_DEFAULT_NS)
+	);
 	lexbor_libxml2_bridge_copy_observations(parser->tree, &ctx.observations);
 	if (UNEXPECTED(bridge_status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
-		php_libxml_ctx_error(NULL, "%s in %s", dom_lexbor_libxml2_bridge_status_code_to_string(bridge_status), application_data.input_name);
+		php_libxml_ctx_error(
+			NULL,
+			"%s in %s",
+			dom_lexbor_libxml2_bridge_status_code_to_string(bridge_status),
+			application_data.input_name
+		);
 		lxb_html_document_destroy(document);
 		RETURN_FALSE;
 	}
@@ -714,7 +877,12 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 		lxml_doc->encoding = xmlStrdup((const xmlChar *) "UTF-8");
 	}
 
-	dom_object *intern = php_dom_instantiate_object_helper(return_value, dom_html_document_class_entry, (xmlNodePtr) lxml_doc, NULL);
+	dom_object *intern = php_dom_instantiate_object_helper(
+		return_value,
+		dom_html_document_class_entry,
+		(xmlNodePtr) lxml_doc,
+		NULL
+	);
 	intern->document->is_modern_api_class = true;
 	return;
 
@@ -730,7 +898,15 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	size_t filename_len, override_encoding_len;
 	zend_long options = 0;
 	php_stream *stream = NULL;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|lp!", &filename, &filename_len, &options, &override_encoding, &override_encoding_len) == FAILURE) {
+	if (zend_parse_parameters(
+		ZEND_NUM_ARGS(),
+		"p|lp!",
+		&filename,
+		&filename_len,
+		&options,
+		&override_encoding,
+		&override_encoding_len
+	) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -752,7 +928,11 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	lexbor_libxml2_bridge_parse_context ctx;
 	lexbor_libxml2_bridge_parse_context_init(&ctx);
 	if (!(options & XML_PARSE_NOERROR)) {
-		lexbor_libxml2_bridge_parse_set_error_callbacks(&ctx, dom_lexbor_libxml2_bridge_tokenizer_error_reporter, dom_lexbor_libxml2_bridge_tree_error_reporter);
+		lexbor_libxml2_bridge_parse_set_error_callbacks(
+			&ctx,
+			dom_lexbor_libxml2_bridge_tokenizer_error_reporter,
+			dom_lexbor_libxml2_bridge_tree_error_reporter
+		);
 	}
 	ctx.application_data = &application_data;
 
@@ -763,7 +943,10 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	dom_decoding_encoding_ctx_init(&decoding_encoding_ctx);
 	bool should_determine_encoding_implicitly = true; /* First read => determine encoding implicitly */
 	if (override_encoding != NULL) {
-		const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name((const lxb_char_t *) override_encoding, override_encoding_len);
+		const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name(
+			(const lxb_char_t *) override_encoding,
+			override_encoding_len
+		);
 		if (!encoding_data) {
 			zend_argument_value_error(3, "must be a valid document encoding");
 			RETURN_THROWS();
@@ -772,7 +955,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		dom_setup_parser_encoding_manually((const lxb_char_t *) buf, encoding_data, &decoding_encoding_ctx, &application_data);
 	}
 
-	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, /* opened_path */ NULL, /* context */ php_libxml_get_stream_context());
+	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, /* opened_path */ NULL, php_libxml_get_stream_context());
 	if (!stream) {
 		if (!EG(exception)) {
 			zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", filename);
@@ -784,10 +967,18 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	if (should_determine_encoding_implicitly) {
 		zend_string *charset = php_libxml_sniff_charset_from_stream(stream);
 		if (charset != NULL) {
-			const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name((const lxb_char_t *) ZSTR_VAL(charset), ZSTR_LEN(charset));
+			const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name(
+				(const lxb_char_t *) ZSTR_VAL(charset),
+				ZSTR_LEN(charset)
+			);
 			if (encoding_data != NULL) {
 				should_determine_encoding_implicitly = false;
-				dom_setup_parser_encoding_manually((const lxb_char_t *) buf, encoding_data, &decoding_encoding_ctx, &application_data);
+				dom_setup_parser_encoding_manually(
+					(const lxb_char_t *) buf,
+					encoding_data,
+					&decoding_encoding_ctx,
+					&application_data
+				);
 			}
 			zend_string_release_ex(charset, false);
 		}
@@ -817,7 +1008,16 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		}
 
 		const lxb_char_t *buf_end = buf_ref + read;
-		bool result = dom_parse_decode_encode_step(&ctx, document, parser, &buf_ref, buf_end, &decoding_encoding_ctx, &tokenizer_error_offset, &tree_error_offset);
+		bool result = dom_parse_decode_encode_step(
+			&ctx,
+			document,
+			parser,
+			&buf_ref,
+			buf_end,
+			&decoding_encoding_ctx,
+			&tokenizer_error_offset,
+			&tree_error_offset
+		);
 		if (!result) {
 			goto fail_oom;
 		}
@@ -833,7 +1033,12 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	}
 
 	xmlDocPtr lxml_doc;
-	lexbor_libxml2_bridge_status bridge_status = lexbor_libxml2_bridge_convert_document(document, &lxml_doc, options & XML_PARSE_COMPACT, !(options & DOM_HTML_NO_DEFAULT_NS));
+	lexbor_libxml2_bridge_status bridge_status = lexbor_libxml2_bridge_convert_document(
+		document,
+		&lxml_doc,
+		options & XML_PARSE_COMPACT,
+		!(options & DOM_HTML_NO_DEFAULT_NS)
+	);
 	lexbor_libxml2_bridge_copy_observations(parser->tree, &ctx.observations);
 	if (UNEXPECTED(bridge_status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
 		php_libxml_ctx_error(NULL, "%s in %s", dom_lexbor_libxml2_bridge_status_code_to_string(bridge_status), filename);
@@ -880,7 +1085,12 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 
 	php_stream_close(stream);
 
-	dom_object *intern = php_dom_instantiate_object_helper(return_value, dom_html_document_class_entry, (xmlNodePtr) lxml_doc, NULL);
+	dom_object *intern = php_dom_instantiate_object_helper(
+		return_value,
+		dom_html_document_class_entry,
+		(xmlNodePtr) lxml_doc,
+		NULL
+	);
 	intern->document->is_modern_api_class = true;
 	return;
 
@@ -922,7 +1132,11 @@ static zend_result dom_saveHTML_write_string_len(void *application_data, const c
 		const lxb_codepoint_t *codepoints_end = codepoints_ref + lxb_encoding_decode_buf_used(output->decode);
 		do {
 			encode_status = output->encoding_data->encode(output->encode, &codepoints_ref, codepoints_end);
-			if (UNEXPECTED(output->write_output(output->output_data, (const char *) output->encoding_output, lxb_encoding_encode_buf_used(output->encode)) != SUCCESS)) {
+			if (UNEXPECTED(output->write_output(
+				output->output_data,
+				(const char *) output->encoding_output,
+				lxb_encoding_encode_buf_used(output->encode)
+			) != SUCCESS)) {
 				return FAILURE;
 			}
 			lxb_encoding_encode_buf_used_set(output->encode, 0);
@@ -942,7 +1156,10 @@ static zend_result dom_common_save(dom_output_ctx *output_ctx, const xmlDoc *doc
 {
 	/* Initialize everything related to encoding & decoding */
 	const lxb_encoding_data_t *decoding_data = lxb_encoding_data(LXB_ENCODING_UTF_8);
-	const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name((const lxb_char_t *) docp->encoding, strlen((const char *) docp->encoding));
+	const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name(
+		(const lxb_char_t *) docp->encoding,
+		strlen((const char *) docp->encoding)
+	);
 	lxb_encoding_encode_t encode;
 	lxb_encoding_decode_t decode;
 	lxb_char_t encoding_output[4096];
@@ -976,13 +1193,21 @@ static zend_result dom_common_save(dom_output_ctx *output_ctx, const xmlDoc *doc
 	if (lxb_encoding_decode_buf_used(&decode)) {
 		const lxb_codepoint_t *codepoints_ref = (const lxb_codepoint_t *) codepoints;
 		(void) encoding_data->encode(&encode, &codepoints_ref, codepoints_ref + lxb_encoding_decode_buf_used(&decode));
-		if (UNEXPECTED(output_ctx->write_output(output_ctx->output_data, (const char *) encoding_output, lxb_encoding_encode_buf_used(&encode)) != SUCCESS)) {
+		if (UNEXPECTED(output_ctx->write_output(
+			output_ctx->output_data,
+			(const char *) encoding_output,
+			lxb_encoding_encode_buf_used(&encode)) != SUCCESS
+		)) {
 			return FAILURE;
 		}
 	}
 	(void) lxb_encoding_encode_finish(&encode);
 	if (lxb_encoding_encode_buf_used(&encode)) {
-		if (UNEXPECTED(output_ctx->write_output(output_ctx->output_data, (const char *) encoding_output, lxb_encoding_encode_buf_used(&encode)) != SUCCESS)) {
+		if (UNEXPECTED(output_ctx->write_output(
+			output_ctx->output_data,
+			(const char *) encoding_output,
+			lxb_encoding_encode_buf_used(&encode)) != SUCCESS
+		)) {
 			return FAILURE;
 		}
 	}
@@ -1008,7 +1233,7 @@ PHP_METHOD(DOM_HTMLDocument, saveHTMLFile)
 		RETURN_THROWS();
 	}
 
-	php_stream *stream = php_stream_open_wrapper_ex(file, "wb", REPORT_ERRORS, /* opened_path */ NULL, /* context */ php_libxml_get_stream_context());
+	php_stream *stream = php_stream_open_wrapper_ex(file, "wb", REPORT_ERRORS, /* opened_path */ NULL, php_libxml_get_stream_context());
 	if (!stream) {
 		RETURN_FALSE;
 	}

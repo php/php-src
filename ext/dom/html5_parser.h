@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef CONVERT_H
-#define CONVERT_H
+#ifndef HTML5_PARSER_H
+#define HTML5_PARSER_H
 
 #include <lexbor/html/parser.h>
 #include <libxml/tree.h>
@@ -29,8 +29,18 @@ typedef enum {
     LEXBOR_LIBXML2_BRIDGE_STATUS_OOM,
 } lexbor_libxml2_bridge_status;
 
-typedef void (*lexbor_libxml2_bridge_tokenizer_error_reporter)(void *application_data, lxb_html_tokenizer_error_t *error, size_t offset);
-typedef void (*lexbor_libxml2_bridge_tree_error_reporter)(void *application_data, lxb_html_tree_error_t *error, size_t line, size_t column, size_t len);
+typedef void (*lexbor_libxml2_bridge_tokenizer_error_reporter)(
+    void *application_data,
+    lxb_html_tokenizer_error_t *error,
+    size_t offset
+);
+typedef void (*lexbor_libxml2_bridge_tree_error_reporter)(
+    void *application_data,
+    lxb_html_tree_error_t *error,
+    size_t line,
+    size_t column,
+    size_t len
+);
 
 typedef struct {
     bool has_explicit_html_tag;
@@ -49,9 +59,28 @@ typedef struct {
 } lexbor_libxml2_bridge_parse_context;
 
 void lexbor_libxml2_bridge_parse_context_init(lexbor_libxml2_bridge_parse_context *ctx);
-void lexbor_libxml2_bridge_parse_set_error_callbacks(lexbor_libxml2_bridge_parse_context *ctx, lexbor_libxml2_bridge_tokenizer_error_reporter tokenizer_error_reporter, lexbor_libxml2_bridge_tree_error_reporter tree_error_reporter);
-lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(lxb_html_document_t *document, xmlDocPtr *doc_out, bool compact_text_nodes, bool create_default_ns);
-void lexbor_libxml2_bridge_report_errors(const lexbor_libxml2_bridge_parse_context *ctx, lxb_html_parser_t *parser, const lxb_char_t *input_html, size_t chunk_offset, size_t *error_index_offset_tokenizer, size_t *error_index_offset_tree);
-void lexbor_libxml2_bridge_copy_observations(lxb_html_tree_t *tree, lexbor_libxml2_bridge_extracted_observations *observations);
+void lexbor_libxml2_bridge_parse_set_error_callbacks(
+    lexbor_libxml2_bridge_parse_context *ctx,
+    lexbor_libxml2_bridge_tokenizer_error_reporter tokenizer_error_reporter,
+    lexbor_libxml2_bridge_tree_error_reporter tree_error_reporter
+);
+lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
+    lxb_html_document_t *document,
+    xmlDocPtr *doc_out,
+    bool compact_text_nodes,
+    bool create_default_ns
+);
+void lexbor_libxml2_bridge_report_errors(
+    const lexbor_libxml2_bridge_parse_context *ctx,
+    lxb_html_parser_t *parser,
+    const lxb_char_t *input_html,
+    size_t chunk_offset,
+    size_t *error_index_offset_tokenizer,
+    size_t *error_index_offset_tree
+);
+void lexbor_libxml2_bridge_copy_observations(
+    lxb_html_tree_t *tree,
+    lexbor_libxml2_bridge_extracted_observations *observations
+);
 
 #endif

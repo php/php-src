@@ -40,7 +40,13 @@ typedef struct {
     xmlNsPtr lxml_ns;
 } work_list_item;
 
-static void lexbor_libxml2_bridge_work_list_item_push(lexbor_array_obj_t *array, lxb_dom_node_t *node, uintptr_t current_active_namespace, xmlNodePtr lxml_parent, xmlNsPtr lxml_ns)
+static void lexbor_libxml2_bridge_work_list_item_push(
+    lexbor_array_obj_t *array,
+    lxb_dom_node_t *node,
+    uintptr_t current_active_namespace,
+    xmlNodePtr lxml_parent,
+    xmlNsPtr lxml_ns
+)
 {
     work_list_item *item = (work_list_item *) lexbor_array_obj_push_wo_cls(array);
     item->node = node;
@@ -68,7 +74,12 @@ static const xmlChar *get_libxml_namespace_href(uintptr_t lexbor_namespace)
     }
 }
 
-static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(lxb_dom_node_t *start_node, xmlDocPtr lxml_doc, bool compact_text_nodes, bool create_default_ns)
+static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
+    lxb_dom_node_t *start_node,
+    xmlDocPtr lxml_doc,
+    bool compact_text_nodes,
+    bool create_default_ns
+)
 {
     lexbor_libxml2_bridge_status retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OK;
 
@@ -106,14 +117,27 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(lxb_dom_node_t
             if (create_default_ns && UNEXPECTED(entering_namespace != current_stack_item->current_active_namespace)) {
                 current_lxml_ns = xmlNewNs(lxml_element, get_libxml_namespace_href(entering_namespace), NULL);
             }
-            lxml_element->ns = current_lxml_ns; /* Instead of xmlSetNs() because we know the arguments are valid. Prevents overhead. */
+            /* Instead of xmlSetNs() because we know the arguments are valid. Prevents overhead. */
+            lxml_element->ns = current_lxml_ns;
 
             for (lxb_dom_node_t *child_node = element->node.last_child; child_node != NULL; child_node = child_node->prev) {
-                lexbor_libxml2_bridge_work_list_item_push(&work_list, child_node, entering_namespace, lxml_element, current_lxml_ns);
+                lexbor_libxml2_bridge_work_list_item_push(
+                    &work_list,
+                    child_node,
+                    entering_namespace,
+                    lxml_element,
+                    current_lxml_ns
+                );
             }
 
             for (lxb_dom_attr_t *attr = element->last_attr; attr != NULL; attr = attr->prev) {
-                lexbor_libxml2_bridge_work_list_item_push(&work_list, (lxb_dom_node_t *) attr, entering_namespace, lxml_element, current_lxml_ns);
+                lexbor_libxml2_bridge_work_list_item_push(
+                    &work_list,
+                    (lxb_dom_node_t *) attr,
+                    entering_namespace,
+                    lxml_element,
+                    current_lxml_ns
+                );
             }
         } else if (node->type == LXB_DOM_NODE_TYPE_TEXT) {
             lxb_dom_text_t *text = lxb_dom_interface_text(node);
@@ -157,7 +181,12 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(lxb_dom_node_t
             size_t public_id_len, system_id_len;
             const lxb_char_t *public_id = lxb_dom_document_type_public_id(doctype, &public_id_len);
             const lxb_char_t *system_id = lxb_dom_document_type_system_id(doctype, &system_id_len);
-            xmlDtdPtr lxml_dtd = xmlCreateIntSubset(lxml_doc, name, public_id_len ? public_id : NULL, system_id_len ? system_id : NULL);
+            xmlDtdPtr lxml_dtd = xmlCreateIntSubset(
+                lxml_doc,
+                name,
+                public_id_len ? public_id : NULL,
+                system_id_len ? system_id : NULL
+            );
             if (UNEXPECTED(lxml_dtd == NULL)) {
                 retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
                 goto out;
@@ -199,13 +228,22 @@ void lexbor_libxml2_bridge_parse_context_init(lexbor_libxml2_bridge_parse_contex
     memset(ctx, 0, sizeof(*ctx));
 }
 
-void lexbor_libxml2_bridge_parse_set_error_callbacks(lexbor_libxml2_bridge_parse_context *ctx, lexbor_libxml2_bridge_tokenizer_error_reporter tokenizer_error_reporter, lexbor_libxml2_bridge_tree_error_reporter tree_error_reporter)
+void lexbor_libxml2_bridge_parse_set_error_callbacks(
+    lexbor_libxml2_bridge_parse_context *ctx,
+    lexbor_libxml2_bridge_tokenizer_error_reporter tokenizer_error_reporter,
+    lexbor_libxml2_bridge_tree_error_reporter tree_error_reporter
+)
 {
     ctx->tokenizer_error_reporter = tokenizer_error_reporter;
     ctx->tree_error_reporter = tree_error_reporter;
 }
 
-lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(lxb_html_document_t *document, xmlDocPtr *doc_out, bool compact_text_nodes, bool create_default_ns)
+lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
+    lxb_html_document_t *document,
+    xmlDocPtr *doc_out,
+    bool compact_text_nodes,
+    bool create_default_ns
+)
 {
 #ifdef LIBXML_HTML_ENABLED
     xmlDocPtr lxml_doc = htmlNewDocNoDtD(NULL, NULL);
@@ -218,7 +256,12 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(lxb_html_doc
     if (!lxml_doc) {
         return LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
     }
-    lexbor_libxml2_bridge_status status = lexbor_libxml2_bridge_convert(lxb_dom_interface_node(document)->last_child, lxml_doc, compact_text_nodes, create_default_ns);
+    lexbor_libxml2_bridge_status status = lexbor_libxml2_bridge_convert(
+        lxb_dom_interface_node(document)->last_child,
+        lxml_doc,
+        compact_text_nodes,
+        create_default_ns
+    );
     if (status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK) {
         xmlFreeDoc(lxml_doc);
         return status;
@@ -227,7 +270,14 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(lxb_html_doc
     return LEXBOR_LIBXML2_BRIDGE_STATUS_OK;
 }
 
-void lexbor_libxml2_bridge_report_errors(const lexbor_libxml2_bridge_parse_context *ctx, lxb_html_parser_t *parser, const lxb_char_t *input_html, size_t chunk_offset, size_t *error_index_offset_tokenizer, size_t *error_index_offset_tree)
+void lexbor_libxml2_bridge_report_errors(
+    const lexbor_libxml2_bridge_parse_context *ctx,
+    lxb_html_parser_t *parser,
+    const lxb_char_t *input_html,
+    size_t chunk_offset,
+    size_t *error_index_offset_tokenizer,
+    size_t *error_index_offset_tree
+)
 {
     void *error;
 
@@ -238,7 +288,11 @@ void lexbor_libxml2_bridge_report_errors(const lexbor_libxml2_bridge_parse_conte
         /* See https://github.com/lexbor/lexbor/blob/master/source/lexbor/html/tokenizer/error.h */
         lxb_html_tokenizer_error_t *token_error = error;
         if (ctx->tokenizer_error_reporter) {
-            ctx->tokenizer_error_reporter(ctx->application_data, token_error, token_error->pos - input_html + chunk_offset);
+            ctx->tokenizer_error_reporter(
+                ctx->application_data,
+                token_error,
+                token_error->pos - input_html + chunk_offset
+            );
         }
         index++;
     }
@@ -251,7 +305,13 @@ void lexbor_libxml2_bridge_report_errors(const lexbor_libxml2_bridge_parse_conte
         /* See https://github.com/lexbor/lexbor/blob/master/source/lexbor/html/tree/error.h */
         lxb_html_tree_error_t *tree_error = error;
         if (ctx->tree_error_reporter) {
-            ctx->tree_error_reporter(ctx->application_data, tree_error, tree_error->line + 1, tree_error->column + 1, tree_error->length);
+            ctx->tree_error_reporter(
+                ctx->application_data,
+                tree_error,
+                tree_error->line + 1,
+                tree_error->column + 1,
+                tree_error->length
+            );
         }
         index++;
     }
