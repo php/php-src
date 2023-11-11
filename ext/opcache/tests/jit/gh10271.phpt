@@ -4,7 +4,7 @@ GH-10271: Incorrect arithmetic calculations when using JIT
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
+opcache.jit_buffer_size=64M
 opcache.jit_hot_loop=1
 --FILE--
 <?php

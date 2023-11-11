@@ -9,7 +9,7 @@ if (PHP_OS_FAMILY === "Windows") die("skip Windows does not support preloading")
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.jit_buffer_size=1M
+opcache.jit_buffer_size=64M
 opcache.jit=1255
 opcache.file_update_protection=0
 opcache.revalidate_freq=0

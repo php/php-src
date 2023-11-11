@@ -4,7 +4,7 @@ Bug #80839: PHP problem with JIT
 error_log=
 opcache.enable=1
 opcache.enable_cli=1
-opcache.jit_buffer_size=1M
+opcache.jit_buffer_size=64M
 opcache.jit=tracing
 --EXTENSIONS--
 opcache

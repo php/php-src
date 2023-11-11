@@ -3,7 +3,7 @@ Bug #80802: zend_jit_fetch_indirect_var assert failure with tracing JIT
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.jit_buffer_size=1M
+opcache.jit_buffer_size=64M
 opcache.jit=tracing
 --EXTENSIONS--
 opcache
