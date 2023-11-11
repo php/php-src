@@ -25,6 +25,6 @@ var_dump($dom->encoding);
 --EXPECT--
 DOM\XMLDocument::createFromString(): Argument #3 ($overrideEncoding) must be a valid document encoding
 string(2) "é"
-NULL
+string(5) "UTF-8"
 string(4) "Ã©"
-NULL
+string(12) "Windows-1252"

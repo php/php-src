@@ -15,9 +15,9 @@ var_dump($element->ownerDocument);
 --EXPECTF--
 object(DOM\XMLDocument)#1 (37) {
   ["encoding"]=>
-  NULL
+  string(5) "UTF-8"
   ["xmlEncoding"]=>
-  NULL
+  string(5) "UTF-8"
   ["standalone"]=>
   bool(false)
   ["xmlStandalone"]=>

@@ -22,7 +22,7 @@ echo $html->saveHTML(), "\n";
 
 ?>
 --EXPECT--
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <container xmlns="some:ns" xmlns:bar="another:ns" xmlns:foo="http://foo/" foo:bar="value"><child xmlns="some:ns2"/></container>
 --- After import into HTML ---
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>

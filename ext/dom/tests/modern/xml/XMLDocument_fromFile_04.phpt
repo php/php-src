@@ -10,7 +10,7 @@ echo $dom->saveXML();
 
 ?>
 --EXPECT--
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <books>
  <book>
   <title>The Grapes of Wrath</title>

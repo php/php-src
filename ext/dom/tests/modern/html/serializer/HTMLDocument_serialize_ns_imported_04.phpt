@@ -21,7 +21,7 @@ echo $html->saveHTML(), "\n";
 
 ?>
 --EXPECT--
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <container xmlns="some:ns" xmlns:bar="another:ns">
     <x>
         <subcontainer>
