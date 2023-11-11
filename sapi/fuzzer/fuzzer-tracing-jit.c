@@ -63,7 +63,7 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 		"opcache.validate_timestamps=0\n"
 		"opcache.file_update_protection=0\n"
 		"opcache.memory_consumption=1024\n"
-		"opcache.jit_buffer_size=1024M\n"
+		"opcache.jit_buffer_size=128M\n"
 		"opcache.jit_hot_func=1\n"
 		"opcache.jit_hot_loop=1\n"
 		"opcache.jit_hot_return=1\n"
