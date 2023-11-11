@@ -1197,7 +1197,6 @@ namespace DOM
         public function createEntityReference(string $name) {}
 
         /**
-         * @tentative-return-type
          * @implementation-alias DOMDocument::validate
          */
         public function validate(): bool {}

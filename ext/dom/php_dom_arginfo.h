@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c550911c409dac315afdbfc5858b0d8b0cba2bf3 */
+ * Stub hash: fbdcec5b706fe7dc0e757edfa262d96b44bd510f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -607,7 +607,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_XMLDocument_createEntityReference arginfo_class_DOMDocument_createEntityReference
 
-#define arginfo_class_DOM_XMLDocument_validate arginfo_class_DOMNode_hasAttributes
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOM_XMLDocument_validate, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_XMLDocument_xinclude arginfo_class_DOMDocument_xinclude
 
