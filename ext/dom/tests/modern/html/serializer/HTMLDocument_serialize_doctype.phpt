@@ -18,7 +18,7 @@ HTML, LIBXML_NOERROR);
 echo "--- XML encoding ---\n";
 echo $dom->saveXML();
 echo "--- HTML encoding ---\n";
-// We don't expec to see the public ID and the system ID because the serialization algorithm doesn't serialize those
+// We don't expect to see the public ID and the system ID because the serialization algorithm doesn't serialize those
 echo $dom->saveHTML();
 
 ?>

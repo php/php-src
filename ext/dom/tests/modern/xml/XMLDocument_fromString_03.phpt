@@ -16,9 +16,23 @@ try {
 }
 
 foreach ($flags as $flag) {
-    DOM\XMLDocument::createFromString('<?xml version="1.0"?><container/>', $flag);
+    var_dump(DOM\XMLDocument::createFromString('<?xml version="1.0"?><container/>', $flag) instanceof DOM\XMLDocument);
 }
 
 ?>
 --EXPECT--
-DOM\XMLDocument::createFromString(): Argument #2 ($options) contains invalid flags (allowed flags: LIBXML_NOENT, LIBXML_DTDLOAD, LIBXML_DTDATTR, LIBXML_DTDVALID, LIBXML_NOERROR, LIBXML_NOWARNING, LIBXML_NOBLANKS, LIBXML_XINCLUDE, LIBXML_NSCLEAN, LIBXML_NOCDATA, LIBXML_NONET, LIBXML_PEDANTIC, LIBXML_COMPACT, LIBXML_PARSEHUGE, LIBXML_BIGLINES)
+DOM\XMLDocument::createFromString(): Argument #2 ($options) contains invalid flags (allowed flags: LIBXML_NOENT, LIBXML_DTDLOAD, LIBXML_DTDATTR, LIBXML_DTDVALID, LIBXML_NOERROR, LIBXML_NOWARNING, LIBXML_NOBLANKS, LIBXML_XINCLUDE, LIBXML_NSCLEAN, LIBXML_NOCDATA, LIBXML_NONET, LIBXML_PEDANTIC, LIBXML_COMPACT, LIBXML_PARSEHUGE, LIBXML_BIGLINES)bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)

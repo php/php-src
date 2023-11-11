@@ -11,10 +11,12 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+// The override encoding matches with the document encoding attribute
 $dom = DOM\XMLDocument::createFromString(file_get_contents(__DIR__ . '/dummy.xml'), overrideEncoding: 'UTF-8');
 var_dump($dom->documentElement->lastChild->textContent);
 var_dump($dom->encoding);
 
+// The override encoding mismatches with the document encoding attribute
 $dom = DOM\XMLDocument::createFromString(file_get_contents(__DIR__ . '/dummy.xml'), overrideEncoding: 'Windows-1252');
 var_dump($dom->documentElement->lastChild->textContent);
 var_dump($dom->encoding);
