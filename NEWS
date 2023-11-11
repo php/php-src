@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.27
 
+- Intl:
+  . Fixed bug GH-12635 (Test bug69398.phpt fails with ICU 74.1). (nielsdos)
+
 - PCRE:
   . Fixed bug GH-12628 (The gh11374 test fails on Alpinelinux). (nielsdos)
 
