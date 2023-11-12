@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fix memory leak in syslog device handling. (danog)
   . Fixed bug GH-12621 (browscap segmentation fault when configured in the
     vhost). (nielsdos)
+  . Fixed bug GH-12655 (proc_open() does not take into account references
+    in the descriptor array). (nielsdos)
 
 - SQLite3:
   . Fixed bug GH-12633 (sqlite3_defensive.phpt fails with sqlite 3.44.0).

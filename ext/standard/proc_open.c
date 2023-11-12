@@ -1096,6 +1096,7 @@ PHP_FUNCTION(proc_open)
 
 		descriptors[ndesc].index = (int)nindex;
 
+		ZVAL_DEREF(descitem);
 		if (Z_TYPE_P(descitem) == IS_RESOURCE) {
 			if (set_proc_descriptor_from_resource(descitem, &descriptors[ndesc], ndesc) == FAILURE) {
 				goto exit_fail;
