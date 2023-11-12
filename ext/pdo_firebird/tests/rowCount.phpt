@@ -15,7 +15,6 @@ $dbh->exec('CREATE TABLE test_rowcount (A VARCHAR(10))');
 $dbh->exec("INSERT INTO test_rowcount VALUES ('A')");
 $dbh->exec("INSERT INTO test_rowcount VALUES ('A')");
 $dbh->exec("INSERT INTO test_rowcount VALUES ('B')");
-$dbh->commit();
 
 $query = "SELECT * FROM test_rowcount WHERE A = ?";
 
@@ -29,13 +28,10 @@ var_dump($stmt->rowCount());
 $stmt = $dbh->prepare('UPDATE test_rowcount SET A="A" WHERE A != ?');
 $stmt->execute(array('A'));
 var_dump($stmt->rowCount());
-$dbh->commit();
 
 $stmt = $dbh->prepare('DELETE FROM test_rowcount');
 $stmt->execute();
 var_dump($stmt->rowCount());
-
-$dbh->commit();
 
 unset($stmt);
 unset($dbh);
