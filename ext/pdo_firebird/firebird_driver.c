@@ -884,7 +884,7 @@ static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *
 						}
 					} else {
 						/* close the transaction */
-						if (H->tr && !firebird_handle_commit(dbh)) {
+						if (H->tr && isc_commit_transaction(H->isc_status, &H->tr)) {
 							return false;
 						}
 						H->in_manually_txn = 0;
