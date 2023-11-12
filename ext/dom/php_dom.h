@@ -160,10 +160,12 @@ void php_dom_document_constructor(INTERNAL_FUNCTION_PARAMETERS);
 
 dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_entry *ce, xmlNodePtr obj, dom_object *parent);
 
-#define DOM_LOAD_STRING 0
-#define DOM_LOAD_FILE 1
+typedef enum {
+	DOM_LOAD_STRING = 0,
+	DOM_LOAD_FILE = 1,
+} dom_load_mode;
 
-xmlDocPtr dom_document_parser(zval *id, int mode, const char *source, size_t source_len, size_t options, xmlCharEncodingHandlerPtr encoding);
+xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, size_t source_len, size_t options, xmlCharEncodingHandlerPtr encoding);
 
 /* parentnode */
 void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc);

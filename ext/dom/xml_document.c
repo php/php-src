@@ -193,7 +193,7 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	if (ZEND_SIZE_T_INT_OVFL(source_len)) {
-		zend_argument_value_error(1, "must not exceed INT_MAX in length");
+		zend_argument_value_error(1, "is too long");
 		RETURN_THROWS();
 	}
 

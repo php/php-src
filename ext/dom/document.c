@@ -1197,7 +1197,7 @@ const char *_dom_get_valid_file_path(const char *source, char *resolved_path, in
 }
 /* }}} */
 
-xmlDocPtr dom_document_parser(zval *id, int mode, const char *source, size_t source_len, size_t options, xmlCharEncodingHandlerPtr encoding) /* {{{ */
+xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, size_t source_len, size_t options, xmlCharEncodingHandlerPtr encoding) /* {{{ */
 {
 	xmlDocPtr ret;
 	xmlParserCtxtPtr ctxt = NULL;
