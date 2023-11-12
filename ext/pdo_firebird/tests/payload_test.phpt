@@ -16,6 +16,9 @@ $dsn = "firebird:dbname=inet://$address/test";
 $username = 'SYSDBA';
 $password = 'masterkey';
 
-new PDO($dsn, $username, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+new PDO($dsn, $username, $password, [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_AUTOCOMMIT => false,
+]);
 ?>
 --EXPECT--
