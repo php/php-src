@@ -73,9 +73,9 @@ typedef struct _php_random_status_state_combinedlcg {
 } php_random_status_state_combinedlcg;
 
 typedef struct _php_random_status_state_mt19937 {
-	uint32_t state[MT_N];
 	uint32_t count;
 	enum php_random_mt19937_mode mode;
+	uint32_t state[MT_N];
 } php_random_status_state_mt19937;
 
 typedef struct _php_random_status_state_pcgoneseq128xslrr64 {
