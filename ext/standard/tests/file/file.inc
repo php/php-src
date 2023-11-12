@@ -608,7 +608,7 @@ function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
     {
        case "==":
          if ( $stat1[ $fields[$index] ] != $stat2[ $fields[$index] ] ) {
-          if ( ! in_array( $index, $stat_time_diff_keys ) ) {
+          if ( ! in_array( $fields[$index], $stat_time_diff_keys ) ) {
             $result = false;
             echo "Error: stat1 do not match with stat2 at key value: $fields[$index]\n";
           } elseif (abs($stat1[ $fields[$index] ] - $stat2[ $fields[$index] ]) > 1)  {
