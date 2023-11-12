@@ -69,6 +69,7 @@ typedef struct {
 
 	/* the transaction handle */
 	isc_tr_handle tr;
+	bool in_manually_txn:1;
 
 	/* the last error that didn't come from the API */
 	char const *last_app_error;
