@@ -363,6 +363,11 @@ PHP 8.3 UPGRADE NOTES
   . password_hash() will now chain the underlying Random\RandomException
     as the ValueError’s $previous Exception when salt generation fails.
   . proc_open() $command array must now have at least one non empty element.
+  . proc_open() returns false if $command array is invalid command instead of
+    resource object that produces warning later. This was already the case for
+    Windows but it is now also the case if posix_spawn implementation is in use
+    (most Linux, BSD and MacOS platforms). There are still some old platforms
+    where this behavior is not changed as posix_spawn is not supported there.
   . array_sum() and array_product() now warn when values in the array cannot
     be converted to int/float. Previously arrays and objects where ignored
     whilst every other value was cast to int. Moreover, objects that define
