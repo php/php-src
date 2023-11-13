@@ -31,8 +31,9 @@
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
-static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const zend_string*, XSQLDA*, isc_stmt_handle*,
-	HashTable*);
+static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const zend_string*, XSQLDA*, isc_stmt_handle*, HashTable*);
+static bool _firebird_commit_transaction(pdo_dbh_t *dbh, bool retain);
+static bool _firebird_rollback_transaction(pdo_dbh_t *dbh, bool retain);
 
 const char CHR_LETTER = 1;
 const char CHR_DIGIT = 2;
@@ -477,13 +478,9 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 
 	if (H->tr) {
 		if (dbh->auto_commit) {
-			if (isc_commit_transaction(H->isc_status, &H->tr)) {
-				RECORD_ERROR(dbh);
-			}
+			_firebird_commit_transaction(dbh, false);
 		} else {
-			if (isc_rollback_transaction(H->isc_status, &H->tr)) {
-				RECORD_ERROR(dbh);
-			}
+			_firebird_rollback_transaction(dbh, false);
 		}
 	}
 	H->in_manually_txn = 0;
@@ -649,9 +646,7 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /*
 
 	/* commit if we're in auto_commit mode */
 	if (dbh->auto_commit && !H->in_manually_txn) {
-		if (isc_commit_retaining(H->isc_status, &H->tr)) {
-			RECORD_ERROR(dbh);
-		}
+		_firebird_commit_transaction(dbh, true);
 	}
 
 free_statement:
@@ -703,8 +698,8 @@ static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *un
 }
 /* }}} */
 
-/* firebird_begin_transaction */
-static bool firebird_begin_transaction(pdo_dbh_t *dbh) /* {{{ */
+/* _firebird_begin_transaction */
+static bool _firebird_begin_transaction(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	char tpb[8] = { isc_tpb_version3 }, *ptpb = tpb+1;
@@ -757,16 +752,15 @@ static bool firebird_begin_transaction(pdo_dbh_t *dbh) /* {{{ */
 /* }}} */
 
 /* called by PDO to start a transaction */
-static bool firebird_handle_begin(pdo_dbh_t *dbh) /* {{{ */
+static bool firebird_handle_manually_begin(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
-	if (dbh->auto_commit && H->tr && isc_commit_transaction(H->isc_status, &H->tr)) {
-		RECORD_ERROR(dbh);
+	if (dbh->auto_commit && H->tr && !_firebird_commit_transaction(dbh, false)) {
 		return false;
 	}
 
-	if (!firebird_begin_transaction(dbh)) {
+	if (!_firebird_begin_transaction(dbh)) {
 		return false;
 	}
 
@@ -775,12 +769,12 @@ static bool firebird_handle_begin(pdo_dbh_t *dbh) /* {{{ */
 }
 /* }}} */
 
-/* called by PDO to commit a transaction */
-static bool firebird_handle_commit(pdo_dbh_t *dbh) /* {{{ */
+/* _firebird_commit_transaction */
+static bool _firebird_commit_transaction(pdo_dbh_t *dbh, bool retain) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
-	if (dbh->auto_commit) {
+	if (retain) {
 		if (isc_commit_retaining(H->isc_status, &H->tr)) {
 			RECORD_ERROR(dbh);
 			return false;
@@ -791,17 +785,31 @@ static bool firebird_handle_commit(pdo_dbh_t *dbh) /* {{{ */
 			return false;
 		}
 	}
+
+	return true;
+}
+/* }}} */
+
+/* called by PDO to commit a transaction */
+static bool firebird_handle_manually_commit(pdo_dbh_t *dbh) /* {{{ */
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+
+	if (!_firebird_commit_transaction(dbh, dbh->auto_commit)) {
+		return false;
+	}
+
 	H->in_manually_txn = 0;
 	return true;
 }
 /* }}} */
 
-/* called by PDO to rollback a transaction */
-static bool firebird_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
+/* _firebird_rollback_transaction */
+static bool _firebird_rollback_transaction(pdo_dbh_t *dbh, bool retain) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
-	if (dbh->auto_commit) {
+	if (retain) {
 		if (isc_rollback_retaining(H->isc_status, &H->tr)) {
 			RECORD_ERROR(dbh);
 			return false;
@@ -812,6 +820,20 @@ static bool firebird_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 			return false;
 		}
 	}
+
+	return true;
+}
+/* }}} */
+
+/* called by PDO to rollback a transaction */
+static bool firebird_handle_manually_rollback(pdo_dbh_t *dbh) /* {{{ */
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+
+	if (!_firebird_rollback_transaction(dbh, dbh->auto_commit)) {
+		return false;
+	}
+
 	H->in_manually_txn = 0;
 	return true;
 }
@@ -879,12 +901,12 @@ static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *
 							H->last_app_error = "Cannot enable auto-commit while a transaction is already open";
 							return false;
 						}
-						if (!H->tr && !firebird_begin_transaction(dbh)) {
+						if (!H->tr && !_firebird_begin_transaction(dbh)) {
 							return false;
 						}
 					} else {
 						/* close the transaction */
-						if (H->tr && isc_commit_transaction(H->isc_status, &H->tr)) {
+						if (H->tr && !_firebird_commit_transaction(dbh, false)) {
 							return false;
 						}
 						H->in_manually_txn = 0;
@@ -1042,8 +1064,8 @@ static void pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval
 }
 /* }}} */
 
-/* {{{ firebird_in_transaction */
-static bool firebird_in_transaction(pdo_dbh_t *dbh)
+/* {{{ firebird_in_manually_transaction */
+static bool firebird_in_manually_transaction(pdo_dbh_t *dbh)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	return H->tr && H->in_manually_txn;
@@ -1055,9 +1077,9 @@ static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	firebird_handle_preparer,
 	firebird_handle_doer,
 	firebird_handle_quoter,
-	firebird_handle_begin,
-	firebird_handle_commit,
-	firebird_handle_rollback,
+	firebird_handle_manually_begin,
+	firebird_handle_manually_commit,
+	firebird_handle_manually_rollback,
 	firebird_handle_set_attribute,
 	NULL, /* last_id not supported */
 	pdo_firebird_fetch_error_func,
@@ -1065,7 +1087,7 @@ static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	NULL, /* check_liveness */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
-	firebird_in_transaction,
+	firebird_in_manually_transaction,
 	NULL /* get gc */
 };
 /* }}} */
@@ -1148,7 +1170,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 
 	H->in_manually_txn = 0;
 	if (dbh->auto_commit && !H->tr) {
-		ret = firebird_begin_transaction(dbh);
+		ret = _firebird_begin_transaction(dbh);
 	}
 
 	if (!ret) {
