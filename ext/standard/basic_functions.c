@@ -230,6 +230,8 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 
 	BG(page_uid) = -1;
 	BG(page_gid) = -1;
+
+	BG(syslog_device)=NULL;
 }
 /* }}} */
 

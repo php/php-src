@@ -90,7 +90,6 @@ PHP_MINIT_FUNCTION(syslog)
 	/* AIX doesn't have LOG_PERROR */
 	REGISTER_LONG_CONSTANT("LOG_PERROR", LOG_PERROR, CONST_CS | CONST_PERSISTENT); /*log to stderr*/
 #endif
-	BG(syslog_device)=NULL;
 
 	return SUCCESS;
 }
