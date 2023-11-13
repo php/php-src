@@ -912,7 +912,7 @@ typedef struct _zend_ffi_callback_data {
 	ffi_cif                cif;
 	uint32_t               arg_count;
 	ffi_type              *ret_type;
-	ffi_type              *arg_types[0];
+	ffi_type              *arg_types[0] ZEND_ELEMENT_COUNT(arg_count);
 } zend_ffi_callback_data;
 
 static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */

@@ -538,7 +538,7 @@ struct _zend_jit_trace_stack_frame {
 	int                         used_stack;
 	int                         old_checked_stack;
 	int                         old_peek_checked_stack;
-	zend_jit_trace_stack        stack[1];
+	zend_jit_trace_stack        stack[1] ZEND_ELEMENT_COUNT(used_stack);
 };
 
 #define TRACE_FRAME_SHIFT_NUM_ARGS            16

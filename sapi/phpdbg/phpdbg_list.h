@@ -44,7 +44,7 @@ typedef struct {
 	size_t len;
 	zend_op_array op_array;
 	uint32_t lines;
-	uint32_t line[1];
+	uint32_t line[1] ZEND_ELEMENT_COUNT(lines);
 } phpdbg_file_source;
 
 #endif /* PHPDBG_LIST_H */

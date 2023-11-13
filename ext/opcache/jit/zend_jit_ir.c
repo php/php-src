@@ -142,7 +142,7 @@
 typedef struct _ir_refs {
   uint32_t count;
   uint32_t limit;
-  ir_ref   refs[0];
+  ir_ref   refs[0] ZEND_ELEMENT_COUNT(count);
 } ir_refs;
 
 #define ir_refs_size(_n)          (offsetof(ir_refs, refs) + sizeof(ir_ref) * (_n))
