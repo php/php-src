@@ -83,6 +83,11 @@ typedef struct _sccp_ctx {
 	zval bot;
 } sccp_ctx;
 
+typedef struct _named_arg_pair {
+	zval *name;
+	zval *value;
+} named_arg_pair;
+
 #define TOP ((uint8_t)-1)
 #define BOT ((uint8_t)-2)
 #define PARTIAL_ARRAY ((uint8_t)-3)
@@ -755,7 +760,7 @@ static inline zend_result ct_eval_array_key_exists(zval *result, zval *op1, zval
 	return SUCCESS;
 }
 
-static bool can_ct_eval_func_call(zend_function *func, zend_string *name, uint32_t num_args, zval **args) {
+static bool can_ct_eval_func_call(zend_function *func, zend_string *name, uint32_t num_args, zval **args, uint32_t num_named_args) {
 	/* Precondition: func->type == ZEND_INTERNAL_FUNCTION, this is a global function */
 	/* Functions setting ZEND_ACC_COMPILE_TIME_EVAL (@compile-time-eval) must always produce the same result for the same arguments,
 	 * and have no dependence on global state (such as locales). It is okay if they throw
@@ -764,6 +769,13 @@ static bool can_ct_eval_func_call(zend_function *func, zend_string *name, uint32
 		/* This has @compile-time-eval in stub info and uses a macro such as ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE */
 		return true;
 	}
+
+	/* Has a named argument, but dirname doesn't expect that, and checking the str_repeat case is too complex.
+	 * The complexity is not worth it for one function which will unlikely be used with named parameters. */
+	if (num_named_args > 0) {
+		return false;
+	}
+
 #ifndef ZEND_WIN32
 	/* On Windows this function may be code page dependent. */
 	if (zend_string_equals_literal(name, "dirname")) {
@@ -790,7 +802,7 @@ static bool can_ct_eval_func_call(zend_function *func, zend_string *name, uint32
  * or just happened to be commonly used with constant operands in WP (need to test other
  * applications as well, of course). */
 static inline zend_result ct_eval_func_call(
-		zend_op_array *op_array, zval *result, zend_string *name, uint32_t num_args, zval **args) {
+		zend_op_array *op_array, zval *result, zend_string *name, uint32_t num_args, zval **args, named_arg_pair *named_args, uint32_t num_named_args) {
 	uint32_t i;
 	zend_function *func = zend_hash_find_ptr(CG(function_table), name);
 	if (!func || func->type != ZEND_INTERNAL_FUNCTION) {
@@ -802,7 +814,7 @@ static inline zend_result ct_eval_func_call(
 		return SUCCESS;
 	}
 
-	if (!can_ct_eval_func_call(func, name, num_args, args)) {
+	if (!can_ct_eval_func_call(func, name, num_args, args, num_named_args)) {
 		return FAILURE;
 	}
 
@@ -817,8 +829,11 @@ static inline zend_result ct_eval_func_call(
 	dummy_frame.opline = &dummy_opline;
 	dummy_opline.opcode = ZEND_DO_FCALL;
 
-	execute_data = safe_emalloc(num_args, sizeof(zval), ZEND_CALL_FRAME_SLOT * sizeof(zval));
-	memset(execute_data, 0, sizeof(zend_execute_data));
+	execute_data = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION, func, num_args, func->common.scope);
+	execute_data->return_value = NULL;
+	execute_data->symbol_table = NULL;
+	execute_data->run_time_cache = NULL;
+	execute_data->extra_named_params = NULL;
 	execute_data->prev_execute_data = &dummy_frame;
 	EG(current_execute_data) = execute_data;
 
@@ -832,12 +847,47 @@ static inline zend_result ct_eval_func_call(
 		ZVAL_COPY(EX_VAR_NUM(i), args[i]);
 	}
 	ZVAL_NULL(result);
-	func->internal_function.handler(execute_data, result);
+
+	zend_result retval = SUCCESS;
+	zval *named_args_copies[3] = {NULL};
+	ZEND_ASSERT(num_named_args <= sizeof(named_args_copies) / sizeof(named_args_copies[0]));
+
+	for (i = 0; i < num_named_args; i++) {
+		uint32_t arg_num_unused;
+		/* Need 2 cache slots for zend_get_arg_offset_by_name() */
+		void *cache_slots[2] = {NULL};
+		zval *arg = zend_handle_named_arg(&execute_data, Z_STR_P(named_args[i].name), &arg_num_unused, cache_slots);
+		if (!arg) {
+			retval = FAILURE;
+			break;
+		}
+		ZVAL_COPY(arg, named_args[i].value);
+		named_args_copies[i] = arg;
+	}
+
+	if (retval == SUCCESS) {
+		/* Handle undef arguments in the same way as how the VM does it */
+		if (UNEXPECTED(ZEND_CALL_INFO(execute_data) & ZEND_CALL_MAY_HAVE_UNDEF)) {
+			/* Have to hackisly set the current EX() back one frame because zend_handle_undef_args()
+			 * temporarily starts its own "fake frame" for execute_data. */
+			EG(current_execute_data) = &dummy_frame;
+			retval = zend_handle_undef_args(execute_data);
+			EG(current_execute_data) = execute_data;
+		}
+		if (retval == SUCCESS) {
+			func->internal_function.handler(execute_data, result);
+		}
+	}
+
 	for (i = 0; i < num_args; i++) {
 		zval_ptr_dtor_nogc(EX_VAR_NUM(i));
 	}
+	for (i = 0; i < num_named_args; i++) {
+		if (named_args_copies[i]) {
+			zval_ptr_dtor_nogc(named_args_copies[i]);
+		}
+	}
 
-	zend_result retval = SUCCESS;
 	if (EG(exception)) {
 		zval_ptr_dtor(result);
 		zend_clear_exception();
@@ -850,7 +900,7 @@ static inline zend_result ct_eval_func_call(
 	}
 	EG(capture_warnings_during_sccp) = 0;
 
-	efree(execute_data);
+	zend_vm_stack_free_call_frame(execute_data);
 	EG(current_execute_data) = prev_execute_data;
 	return retval;
 }
@@ -1643,7 +1693,8 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		{
 			zend_call_info *call;
 			zval *name, *args[3] = {NULL};
-			int i;
+			named_arg_pair named_args[3] = {{NULL, NULL}};
+			unsigned int i;
 
 			if (!ctx->call_map) {
 				SET_RESULT_BOT(result);
@@ -1658,9 +1709,8 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				break;
 			}
 
-			/* We're only interested in functions with up to three arguments right now.
-			 * Note that named arguments with the argument in declaration order will still work. */
-			if (call->num_args > 3 || call->send_unpack || call->is_prototype || call->named_args) {
+			/* We're only interested in functions with up to three positional arguments right now. */
+			if (call->num_args > 3 || call->send_unpack || call->is_prototype) {
 				SET_RESULT_BOT(result);
 				break;
 			}
@@ -1684,12 +1734,44 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				}
 			}
 
+			i = 0;
+			if (call->first_named_arg.opline) {
+				for (zend_op *opline = call->first_named_arg.opline; opline != call->caller_call_opline; opline++, i++) {
+					if (opline->opcode == ZEND_CHECK_UNDEF_ARGS) {
+						break;
+					}
+					if ((opline->opcode != ZEND_SEND_VAL && opline->opcode != ZEND_SEND_VAR)
+						/* must have a name, which is a const */
+						|| opline->op2_type != IS_CONST
+						/* must not exceed the maximum number of named parameters */
+						|| i == sizeof(named_args) / sizeof(named_args[0])) {
+						SET_RESULT_BOT(result);
+						return;
+					}
+					zval *argument_name = get_op2_value(ctx, opline,
+						&ctx->scdf.ssa->ops[opline - ctx->scdf.op_array->opcodes]);
+					ZEND_ASSERT(Z_TYPE_P(argument_name) == IS_STRING);
+					zval *argument_value = get_op1_value(ctx, opline,
+						&ctx->scdf.ssa->ops[opline - ctx->scdf.op_array->opcodes]);
+					if (argument_value) {
+						if (IS_BOT(argument_value) || IS_PARTIAL_ARRAY(argument_value)) {
+							SET_RESULT_BOT(result);
+							return;
+						} else if (IS_TOP(argument_value)) {
+							return;
+						}
+						named_args[i].name = argument_name;
+						named_args[i].value = argument_value;
+					}
+				}
+			}
+
 			/* We didn't get a BOT argument, so value stays the same */
 			if (!IS_TOP(&ctx->values[ssa_op->result_def])) {
 				break;
 			}
 
-			if (ct_eval_func_call(scdf->op_array, &zv, Z_STR_P(name), call->num_args, args) == SUCCESS) {
+			if (ct_eval_func_call(scdf->op_array, &zv, Z_STR_P(name), call->num_args, args, named_args, i) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
 				break;
@@ -2036,7 +2118,6 @@ static int remove_call(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op)
 	zend_ssa *ssa = ctx->scdf.ssa;
 	zend_op_array *op_array = ctx->scdf.op_array;
 	zend_call_info *call;
-	int i;
 
 	ZEND_ASSERT(ctx->call_map);
 	call = ctx->call_map[opline - op_array->opcodes];
@@ -2046,15 +2127,23 @@ static int remove_call(sccp_ctx *ctx, zend_op *opline, zend_ssa_op *ssa_op)
 	zend_ssa_remove_instr(ssa, call->caller_init_opline,
 		&ssa->ops[call->caller_init_opline - op_array->opcodes]);
 
-	for (i = 0; i < call->num_args; i++) {
+	int removed = 2 + call->num_args;
+	for (int i = 0; i < call->num_args; i++) {
 		zend_ssa_remove_instr(ssa, call->arg_info[i].opline,
 			&ssa->ops[call->arg_info[i].opline - op_array->opcodes]);
+	}
+	zend_op *named_arg = call->first_named_arg.opline;
+	if (named_arg) {
+		for (; named_arg != opline; named_arg++, removed++) {
+			zend_ssa_remove_instr(ssa, named_arg,
+				&ssa->ops[named_arg - op_array->opcodes]);
+		}
 	}
 
 	// TODO: remove call_info completely???
 	call->callee_func = NULL;
 
-	return call->num_args + 2;
+	return removed;
 }
 
 /* This is a basic DCE pass we run after SCCP. It only works on those instructions those result

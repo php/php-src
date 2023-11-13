@@ -125,7 +125,9 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 			case ZEND_SEND_USER:
 				if (call_info) {
 					if (opline->op2_type == IS_CONST) {
-						call_info->named_args = 1;
+						if (!call_info->first_named_arg.opline) {
+							call_info->first_named_arg.opline = opline;
+						}
 						break;
 					}
 

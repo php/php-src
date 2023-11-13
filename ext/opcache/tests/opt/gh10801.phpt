@@ -8,9 +8,9 @@ opcache.optimization_level=0xe0
 opcache
 --FILE--
 <?php
-// Named argument case and does not do CTE as expected
+// Named argument case with CTE
 print_r(array_keys(array: [1 => 1], strict: true, filter_value: 0));
-// Will not use named arguments and do CTE as expected
+// Will not use named arguments, and must result in the same output
 print_r(array_keys(array: [1 => 1], filter_value: 0, strict: true));
 ?>
 --EXPECT--
