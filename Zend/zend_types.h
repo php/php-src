@@ -572,7 +572,7 @@ struct _zend_resource {
 typedef struct {
 	size_t num;
 	size_t num_allocated;
-	struct _zend_property_info *ptr[1];
+	struct _zend_property_info *ptr[1] ZEND_ELEMENT_COUNT(num);
 } zend_property_info_list;
 
 typedef union {
