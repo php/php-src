@@ -21,4 +21,4 @@ $dom->createElement("foo");
 
 ?>
 --EXPECT--
-ValueError: DOMDocument::registerNodeClass(): Argument #2 ($extendedClass) must not be an abstract class
+ValueError: DOM\Document::registerNodeClass(): Argument #2 ($extendedClass) must not be an abstract class

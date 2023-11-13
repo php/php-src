@@ -10,6 +10,7 @@ DOM:
   . Implement #53655 (Improve speed of DOMNode::C14N() on large XML documents).
     (nielsdos)
   . Fix cloning attribute with namespace disappearing namespace. (nielsdos)
+  . Implement DOM HTML5 parsing and serialization RFC. (nielsdos)
 
 FTP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)

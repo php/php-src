@@ -215,7 +215,7 @@ PHP_METHOD(DOMXPath, __construct)
 	dom_xpath_object *intern;
 	xmlXPathContextPtr ctx, oldctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &doc, dom_document_class_entry, &register_node_ns) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &doc, dom_abstract_base_document_class_entry, &register_node_ns) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -382,7 +382,6 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			nsnbr++;
 		}
 	}
-
 
 	ctxp->namespaces = ns;
 	ctxp->nsNr = nsnbr;

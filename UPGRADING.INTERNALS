@@ -52,6 +52,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The function php_xsl_create_object() was removed as it was not used
      nor exported.
 
+ d. ext/libxml
+   - Added php_libxml_pretend_ctx_error_ex() to emit errors as if they had come
+     from libxml.
+
 ========================
 4. OpCode changes
 ========================

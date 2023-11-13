@@ -63,9 +63,10 @@ typedef struct {
 
 typedef struct _php_libxml_ref_obj {
 	void *ptr;
-	int   refcount;
 	libxml_doc_props *doc_props;
 	php_libxml_cache_tag cache_tag;
+	int refcount;
+	bool is_modern_api_class;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {
@@ -131,12 +132,17 @@ PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node);
 PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *object);
 PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...);
 PHP_LIBXML_API void php_libxml_ctx_warning(void *ctx, const char *msg, ...);
+PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(const char *file, int line, int column, const char *msg,...);
 PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...);
 PHP_LIBXML_API int php_libxml_xmlCheckUTF8(const unsigned char *s);
 PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext);
 PHP_LIBXML_API void php_libxml_issue_error(int level, const char *msg);
 PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable);
 PHP_LIBXML_API void php_libxml_set_old_ns(xmlDocPtr doc, xmlNsPtr ns);
+PHP_LIBXML_API php_stream_context *php_libxml_get_stream_context(void);
+
+PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_string(const char *start, const char *end);
+PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_stream(const php_stream *s);
 
 /* Init/shutdown functions*/
 PHP_LIBXML_API void php_libxml_initialize(void);

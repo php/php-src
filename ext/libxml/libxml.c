@@ -35,6 +35,7 @@
 #include <libxml/uri.h>
 #include <libxml/xmlerror.h>
 #include <libxml/xmlsave.h>
+#include <libxml/xmlerror.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
@@ -369,6 +370,11 @@ static PHP_GINIT_FUNCTION(libxml)
 	libxml_globals->entity_loader_callback = empty_fcall_info_cache;
 }
 
+PHP_LIBXML_API php_stream_context *php_libxml_get_stream_context(void)
+{
+	return php_stream_context_from_zval(Z_ISUNDEF(LIBXML(stream_context)) ? NULL : &LIBXML(stream_context), false);
+}
+
 /* Channel libxml file io layer through the PHP streams subsystem.
  * This allows use of ftps:// and https:// urls */
 
@@ -436,7 +442,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 		}
 	}
 
-	context = php_stream_context_from_zval(Z_ISUNDEF(LIBXML(stream_context))? NULL : &LIBXML(stream_context), 0);
+	context = php_libxml_get_stream_context();
 
 	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, REPORT_ERRORS, NULL, context);
 	if (ret_val) {
@@ -496,47 +502,13 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 	/* Check if there's been an external transport protocol with an encoding information */
 	if (enc == XML_CHAR_ENCODING_NONE) {
 		php_stream *s  = (php_stream *) context;
-
-		if (Z_TYPE(s->wrapperdata) == IS_ARRAY) {
-			zval *header;
-
-			ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(s->wrapperdata), header) {
-				const char buf[] = "Content-Type:";
-				if (Z_TYPE_P(header) == IS_STRING &&
-						!zend_binary_strncasecmp(Z_STRVAL_P(header), Z_STRLEN_P(header), buf, sizeof(buf)-1, sizeof(buf)-1)) {
-					char needle[] = "charset=";
-					char *haystack = estrndup(Z_STRVAL_P(header), Z_STRLEN_P(header));
-					char *encoding = php_stristr(haystack, needle, Z_STRLEN_P(header), strlen(needle));
-
-					if (encoding) {
-						char *end;
-
-						encoding += sizeof("charset=")-1;
-						if (*encoding == '"') {
-							encoding++;
-						}
-						end = strchr(encoding, ';');
-						if (end == NULL) {
-							end = encoding + strlen(encoding);
-						}
-						end--; /* end == encoding-1 isn't a buffer underrun */
-						while (*end == ' ' || *end == '\t') {
-							end--;
-						}
-						if (*end == '"') {
-							end--;
-						}
-						if (encoding >= end) continue;
-						*(end+1) = '\0';
-						enc = xmlParseCharEncoding(encoding);
-						if (enc <= XML_CHAR_ENCODING_NONE) {
-							enc = XML_CHAR_ENCODING_NONE;
-						}
-					}
-					efree(haystack);
-					break; /* found content-type */
-				}
-			} ZEND_HASH_FOREACH_END();
+		zend_string *charset = php_libxml_sniff_charset_from_stream(s);
+		if (charset != NULL) {
+			enc = xmlParseCharEncoding(ZSTR_VAL(charset));
+			if (enc <= XML_CHAR_ENCODING_NONE) {
+				enc = XML_CHAR_ENCODING_NONE;
+			}
+			zend_string_release_ex(charset, false);
 		}
 	}
 
@@ -608,7 +580,7 @@ static void _php_libxml_free_error(void *ptr)
 	xmlResetError((xmlErrorPtr) ptr);
 }
 
-static void _php_list_set_error_structure(xmlErrorPtr error, const char *msg)
+static void _php_list_set_error_structure(xmlErrorPtr error, const char *msg, int line, int column)
 {
 	xmlError error_copy;
 	int ret;
@@ -621,6 +593,8 @@ static void _php_list_set_error_structure(xmlErrorPtr error, const char *msg)
 	} else {
 		error_copy.code = XML_ERR_INTERNAL_ERROR;
 		error_copy.level = XML_ERR_ERROR;
+		error_copy.line = line;
+		error_copy.int2 = column;
 		error_copy.message = (char*)xmlStrdup((const xmlChar*)msg);
 		ret = 0;
 	}
@@ -630,7 +604,7 @@ static void _php_list_set_error_structure(xmlErrorPtr error, const char *msg)
 	}
 }
 
-static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg)
+static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg, int line)
 {
 	xmlParserCtxtPtr parser;
 
@@ -638,9 +612,9 @@ static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg)
 
 	if (parser != NULL && parser->input != NULL) {
 		if (parser->input->filename) {
-			php_error_docref(NULL, level, "%s in %s, line: %d", msg, parser->input->filename, parser->input->line);
+			php_error_docref(NULL, level, "%s in %s, line: %d", msg, parser->input->filename, line);
 		} else {
-			php_error_docref(NULL, level, "%s in Entity, line: %d", msg, parser->input->line);
+			php_error_docref(NULL, level, "%s in Entity, line: %d", msg, line);
 		}
 	} else {
 		php_error_docref(NULL, E_WARNING, "%s", msg);
@@ -650,13 +624,13 @@ static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg)
 void php_libxml_issue_error(int level, const char *msg)
 {
 	if (LIBXML(error_list)) {
-		_php_list_set_error_structure(NULL, msg);
+		_php_list_set_error_structure(NULL, msg, 0, 0);
 	} else {
 		php_error_docref(NULL, level, "%s", msg);
 	}
 }
 
-static void php_libxml_internal_error_handler(int error_type, void *ctx, const char **msg, va_list ap)
+static void php_libxml_internal_error_handler_ex(int error_type, void *ctx, const char **msg, va_list ap, int line, int column)
 {
 	char *buf;
 	int len, len_iter, output = 0;
@@ -676,15 +650,15 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx, const c
 
 	if (output == 1) {
 		if (LIBXML(error_list)) {
-			_php_list_set_error_structure(NULL, ZSTR_VAL(LIBXML(error_buffer).s));
+			_php_list_set_error_structure(NULL, ZSTR_VAL(LIBXML(error_buffer).s), line, column);
 		} else if (!EG(exception)) {
 			/* Don't throw additional notices/warnings if an exception has already been thrown. */
 			switch (error_type) {
 				case PHP_LIBXML_CTX_ERROR:
-					php_libxml_ctx_error_level(E_WARNING, ctx, ZSTR_VAL(LIBXML(error_buffer).s));
+					php_libxml_ctx_error_level(E_WARNING, ctx, ZSTR_VAL(LIBXML(error_buffer).s), line);
 					break;
 				case PHP_LIBXML_CTX_WARNING:
-					php_libxml_ctx_error_level(E_NOTICE, ctx, ZSTR_VAL(LIBXML(error_buffer).s));
+					php_libxml_ctx_error_level(E_NOTICE, ctx, ZSTR_VAL(LIBXML(error_buffer).s), line);
 					break;
 				default:
 					php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(LIBXML(error_buffer).s));
@@ -692,6 +666,19 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx, const c
 		}
 		smart_str_free(&LIBXML(error_buffer));
 	}
+}
+
+static void php_libxml_internal_error_handler(int error_type, void *ctx, const char **msg, va_list ap)
+{
+	int line = 0;
+	int column = 0;
+	xmlParserCtxtPtr parser = (xmlParserCtxtPtr) ctx;
+	/* Context is not valid for PHP_LIBXML_ERROR, don't dereference it in that case */
+	if (error_type != PHP_LIBXML_ERROR && parser != NULL && parser->input != NULL) {
+		line = parser->input->line;
+		column = parser->input->col;
+	}
+	php_libxml_internal_error_handler_ex(error_type, ctx, msg, ap, line, column);
 }
 
 static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
@@ -823,6 +810,25 @@ static xmlParserInputPtr _php_libxml_pre_ext_ent_loader(const char *URL,
 	}
 }
 
+PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(const char *file, int line, int column, const char *msg,...)
+{
+	va_list args;
+	va_start(args, msg);
+	php_libxml_internal_error_handler_ex(PHP_LIBXML_CTX_ERROR, NULL, &msg, args, line, column);
+	va_end(args);
+
+	/* Propagate back into libxml */
+	if (LIBXML(error_list)) {
+		xmlErrorPtr last = zend_llist_get_last(LIBXML(error_list));
+		if (last) {
+			if (!last->file) {
+				last->file = strdup(file);
+			}
+			xmlCopyError(last, &xmlLastError);
+		}
+	}
+}
+
 PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...)
 {
 	va_list args;
@@ -841,7 +847,7 @@ PHP_LIBXML_API void php_libxml_ctx_warning(void *ctx, const char *msg, ...)
 
 static void php_libxml_structured_error_handler(void *userData, xmlErrorPtr error)
 {
-	_php_list_set_error_structure(error, NULL);
+	_php_list_set_error_structure(error, NULL, 0, 0);
 
 	return;
 }
@@ -1333,6 +1339,7 @@ PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, 
 		object->document->refcount = ret_refcount;
 		object->document->doc_props = NULL;
 		object->document->cache_tag.modification_nr = 1; /* iterators start at 0, such that they will start in an uninitialised state */
+		object->document->is_modern_api_class = false;
 	}
 
 	return ret_refcount;

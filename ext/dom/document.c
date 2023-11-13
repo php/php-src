@@ -35,9 +35,6 @@ struct _idsIterator {
 	xmlNode *element;
 };
 
-#define DOM_LOAD_STRING 0
-#define DOM_LOAD_FILE 1
-
 /*
 * class DOMDocument extends DOMNode
 *
@@ -486,7 +483,7 @@ zend_result dom_document_config_read(dom_object *obj, zval *retval)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-2141741547
 Since:
 */
-PHP_METHOD(DOMDocument, createElement)
+PHP_METHOD(DOM_Document, createElement)
 {
 	zval *id;
 	xmlNode *node;
@@ -521,7 +518,7 @@ PHP_METHOD(DOMDocument, createElement)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-35CB04B5
 Since:
 */
-PHP_METHOD(DOMDocument, createDocumentFragment)
+PHP_METHOD(DOM_Document, createDocumentFragment)
 {
 	zval *id;
 	xmlNode *node;
@@ -549,7 +546,7 @@ PHP_METHOD(DOMDocument, createDocumentFragment)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1975348127
 Since:
 */
-PHP_METHOD(DOMDocument, createTextNode)
+PHP_METHOD(DOM_Document, createTextNode)
 {
 	zval *id;
 	xmlNode *node;
@@ -579,7 +576,7 @@ PHP_METHOD(DOMDocument, createTextNode)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1334481328
 Since:
 */
-PHP_METHOD(DOMDocument, createComment)
+PHP_METHOD(DOM_Document, createComment)
 {
 	zval *id;
 	xmlNode *node;
@@ -609,7 +606,7 @@ PHP_METHOD(DOMDocument, createComment)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D26C0AF8
 Since:
 */
-PHP_METHOD(DOMDocument, createCDATASection)
+PHP_METHOD(DOM_Document, createCDATASection)
 {
 	zval *id;
 	xmlNode *node;
@@ -639,7 +636,7 @@ PHP_METHOD(DOMDocument, createCDATASection)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-135944439
 Since:
 */
-PHP_METHOD(DOMDocument, createProcessingInstruction)
+PHP_METHOD(DOM_Document, createProcessingInstruction)
 {
 	zval *id;
 	xmlNode *node;
@@ -676,7 +673,7 @@ PHP_METHOD(DOMDocument, createProcessingInstruction)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1084891198
 Since:
 */
-PHP_METHOD(DOMDocument, createAttribute)
+PHP_METHOD(DOM_Document, createAttribute)
 {
 	zval *id;
 	xmlAttrPtr node;
@@ -747,7 +744,7 @@ PHP_METHOD(DOMDocument, createEntityReference)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-A6C9094
 Since:
 */
-PHP_METHOD(DOMDocument, getElementsByTagName)
+PHP_METHOD(DOM_Document, getElementsByTagName)
 {
 	size_t name_len;
 	dom_object *intern, *namednode;
@@ -768,7 +765,7 @@ PHP_METHOD(DOMDocument, getElementsByTagName)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Core-Document-importNode
 Since: DOM Level 2
 */
-PHP_METHOD(DOMDocument, importNode)
+PHP_METHOD(DOM_Document, importNode)
 {
 	zval *node;
 	xmlDocPtr docp;
@@ -776,8 +773,6 @@ PHP_METHOD(DOMDocument, importNode)
 	dom_object *intern, *nodeobj;
 	int ret;
 	bool recursive = 0;
-	/* See http://www.xmlsoft.org/html/libxml-tree.html#xmlDocCopyNode for meaning of values */
-	int extended_recursive;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &node, dom_node_class_entry, &recursive) == FAILURE) {
 		RETURN_THROWS();
@@ -796,11 +791,7 @@ PHP_METHOD(DOMDocument, importNode)
 	if (nodep->doc == docp) {
 		retnodep = nodep;
 	} else {
-		extended_recursive = recursive;
-		if ((recursive == 0) && (nodep->type == XML_ELEMENT_NODE)) {
-			extended_recursive = 2;
-		}
-		retnodep = xmlDocCopyNode(nodep, docp, extended_recursive);
+		retnodep = dom_clone_node(nodep, docp, intern, recursive);
 		if (!retnodep) {
 			RETURN_FALSE;
 		}
@@ -827,7 +818,7 @@ PHP_METHOD(DOMDocument, importNode)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrElNS
 Since: DOM Level 2
 */
-PHP_METHOD(DOMDocument, createElementNS)
+PHP_METHOD(DOM_Document, createElementNS)
 {
 	zval *id;
 	xmlDocPtr docp;
@@ -887,7 +878,7 @@ PHP_METHOD(DOMDocument, createElementNS)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrAttrNS
 Since: DOM Level 2
 */
-PHP_METHOD(DOMDocument, createAttributeNS)
+PHP_METHOD(DOM_Document, createAttributeNS)
 {
 	zval *id;
 	xmlDocPtr docp;
@@ -953,7 +944,7 @@ PHP_METHOD(DOMDocument, createAttributeNS)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getElBTNNS
 Since: DOM Level 2
 */
-PHP_METHOD(DOMDocument, getElementsByTagNameNS)
+PHP_METHOD(DOM_Document, getElementsByTagNameNS)
 {
 	size_t uri_len, name_len;
 	dom_object *intern, *namednode;
@@ -974,7 +965,7 @@ PHP_METHOD(DOMDocument, getElementsByTagNameNS)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getElBId
 Since: DOM Level 2
 */
-PHP_METHOD(DOMDocument, getElementById)
+PHP_METHOD(DOM_Document, getElementById)
 {
 	zval *id;
 	xmlDocPtr docp;
@@ -1051,7 +1042,7 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 Since: DOM Level 3
 Modern spec URL: https://dom.spec.whatwg.org/#dom-document-adoptnode
 */
-PHP_METHOD(DOMDocument, adoptNode)
+PHP_METHOD(DOM_Document, adoptNode)
 {
 	zval *node_zval;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node_zval, dom_node_class_entry) == FAILURE) {
@@ -1088,7 +1079,7 @@ PHP_METHOD(DOMDocument, adoptNode)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-normalizeDocument
 Since: DOM Level 3
 */
-PHP_METHOD(DOMDocument, normalizeDocument)
+PHP_METHOD(DOM_Document, normalizeDocument)
 {
 	zval *id;
 	xmlDocPtr docp;
@@ -1149,11 +1140,11 @@ PHP_METHOD(DOMDocument, __construct)
 }
 /* }}} end DOMDocument::__construct */
 
-char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_path_len ) /* {{{ */
+const char *_dom_get_valid_file_path(const char *source, char *resolved_path, int resolved_path_len ) /* {{{ */
 {
 	xmlURI *uri;
 	xmlChar *escsource;
-	char *file_dest;
+	const char *file_dest;
 	int isFileUri = 0;
 
 	uri = xmlCreateURI();
@@ -1206,7 +1197,7 @@ char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_p
 }
 /* }}} */
 
-static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t source_len, size_t options) /* {{{ */
+xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, size_t source_len, size_t options, xmlCharEncodingHandlerPtr encoding) /* {{{ */
 {
 	xmlDocPtr ret;
 	xmlParserCtxtPtr ctxt = NULL;
@@ -1215,10 +1206,14 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 	int old_error_reporting = 0;
 	char *directory=NULL, resolved_path[MAXPATHLEN + 1];
 
-	dom_object *intern = Z_DOMOBJ_P(id);
-	php_libxml_ref_obj *document = intern->document;
-
-	libxml_doc_props const* doc_props = dom_get_doc_props_read_only(document);
+	libxml_doc_props const* doc_props;
+	if (id == NULL) {
+		doc_props = dom_get_doc_props_read_only(NULL);
+	} else {
+		dom_object *intern = Z_DOMOBJ_P(id);
+		php_libxml_ref_obj *document = intern->document;
+		doc_props = dom_get_doc_props_read_only(document);
+	}
 	validate = doc_props->validateonparse;
 	resolve_externals = doc_props->resolveexternals;
 	keep_blanks = doc_props->preservewhitespace;
@@ -1228,12 +1223,11 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 	xmlInitParser();
 
 	if (mode == DOM_LOAD_FILE) {
-		char *file_dest;
 		if (CHECK_NULL_PATH(source, source_len)) {
-			zend_value_error("Path to document must not contain any null bytes");
+			zend_argument_value_error(1, "must not contain any null bytes");
 			return NULL;
 		}
-		file_dest = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
+		const char *file_dest = _dom_get_valid_file_path(source, resolved_path, MAXPATHLEN);
 		if (file_dest) {
 			ctxt = xmlCreateFileParserCtxt(file_dest);
 		}
@@ -1245,6 +1239,8 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 	if (ctxt == NULL) {
 		return(NULL);
 	}
+
+	(void) xmlSwitchToEncoding(ctxt, encoding);
 
 	/* If loading from memory, we need to set the base directory for the document */
 	if (mode != DOM_LOAD_FILE) {
@@ -1319,7 +1315,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, size_t so
 }
 /* }}} */
 
-static void dom_finish_loading_document(zval *this, zval *return_value, xmlDocPtr newdoc)
+static void php_dom_finish_loading_document(zval *this, zval *return_value, xmlDocPtr newdoc)
 {
 	if (!newdoc)
 		RETURN_FALSE;
@@ -1327,11 +1323,13 @@ static void dom_finish_loading_document(zval *this, zval *return_value, xmlDocPt
 	dom_object *intern = Z_DOMOBJ_P(this);
 	size_t old_modification_nr = 0;
 	if (intern != NULL) {
+		bool is_modern_api_class = false;
 		xmlDocPtr docp = (xmlDocPtr) dom_object_get_node(intern);
 		dom_doc_propsptr doc_prop = NULL;
 		if (docp != NULL) {
 			const php_libxml_ref_obj *doc_ptr = intern->document;
 			ZEND_ASSERT(doc_ptr != NULL); /* Must exist, we have a document */
+			is_modern_api_class = doc_ptr->is_modern_api_class;
 			old_modification_nr = doc_ptr->cache_tag.modification_nr;
 			php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
 			doc_prop = intern->document->doc_props;
@@ -1346,6 +1344,7 @@ static void dom_finish_loading_document(zval *this, zval *return_value, xmlDocPt
 			RETURN_FALSE;
 		}
 		intern->document->doc_props = doc_prop;
+		intern->document->is_modern_api_class = is_modern_api_class;
 	}
 
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)newdoc, (void *)intern);
@@ -1358,8 +1357,8 @@ static void dom_finish_loading_document(zval *this, zval *return_value, xmlDocPt
 	RETURN_TRUE;
 }
 
-/* {{{ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) */
-static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
+static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode)
+{
 	char *source;
 	size_t source_len;
 	zend_long options = 0;
@@ -1381,11 +1380,9 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 		RETURN_FALSE;
 	}
 
-	xmlDocPtr newdoc = dom_document_parser(ZEND_THIS, mode, source, source_len, options);
-
-	dom_finish_loading_document(ZEND_THIS, return_value, newdoc);
+	xmlDocPtr newdoc = dom_document_parser(ZEND_THIS, mode, source, source_len, options, NULL);
+	php_dom_finish_loading_document(ZEND_THIS, return_value, newdoc);
 }
-/* }}} end dom_parser_document */
 
 /* {{{ URL: http://www.w3.org/TR/DOM-Level-3-LS/load-save.html#LS-DocumentLS-load
 Since: DOM Level 3
@@ -1664,7 +1661,8 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 	zval *id;
 	xmlDoc *docp;
 	dom_object *intern;
-	char *source = NULL, *valid_file = NULL;
+	char *source = NULL;
+	const char *valid_file = NULL;
 	size_t source_len = 0;
 	int valid_opts = 0;
 	zend_long flags = 0;
@@ -1756,14 +1754,14 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(DOMDocument, schemaValidate)
+PHP_METHOD(DOM_Document, schemaValidate)
 {
 	_dom_document_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }
 /* }}} end dom_document_schema_validate_file */
 
 /* {{{ */
-PHP_METHOD(DOMDocument, schemaValidateSource)
+PHP_METHOD(DOM_Document, schemaValidateSource)
 {
 	_dom_document_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
 }
@@ -1774,7 +1772,8 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 	zval *id;
 	xmlDoc *docp;
 	dom_object *intern;
-	char *source = NULL, *valid_file = NULL;
+	char *source = NULL;
+	const char *valid_file = NULL;
 	size_t source_len = 0;
 	xmlRelaxNGParserCtxtPtr parser;
 	xmlRelaxNGPtr           sptr;
@@ -1852,14 +1851,14 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(DOMDocument, relaxNGValidate)
+PHP_METHOD(DOM_Document, relaxNGValidate)
 {
 	_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }
 /* }}} end dom_document_relaxNG_validate_file */
 
 /* {{{ */
-PHP_METHOD(DOMDocument, relaxNGValidateSource)
+PHP_METHOD(DOM_Document, relaxNGValidateSource)
 {
 	_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
 }
@@ -1923,7 +1922,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	xmlDocPtr newdoc = ctxt->myDoc;
 	htmlFreeParserCtxt(ctxt);
 
-	dom_finish_loading_document(ZEND_THIS, return_value, newdoc);
+	php_dom_finish_loading_document(ZEND_THIS, return_value, newdoc);
 }
 /* }}} */
 
@@ -2065,12 +2064,17 @@ PHP_METHOD(DOMDocument, saveHTML)
 #endif  /* defined(LIBXML_HTML_ENABLED) */
 
 /* {{{ Register extended class used to create base node type */
-PHP_METHOD(DOMDocument, registerNodeClass)
+PHP_METHOD(DOM_Document, registerNodeClass)
 {
 	zend_class_entry *basece = dom_node_class_entry, *ce = NULL;
 	dom_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "CC!", &basece, &ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (basece->ce_flags & ZEND_ACC_ABSTRACT) {
+		zend_argument_value_error(1, "must not be an abstract class");
 		RETURN_THROWS();
 	}
 
@@ -2091,7 +2095,7 @@ PHP_METHOD(DOMDocument, registerNodeClass)
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-parentnode-replacechildren
 Since:
 */
-PHP_METHOD(DOMDocument, replaceChildren)
+PHP_METHOD(DOM_Document, replaceChildren)
 {
 	uint32_t argc = 0;
 	zval *args;

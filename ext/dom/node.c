@@ -1329,38 +1329,10 @@ PHP_METHOD(DOMNode, cloneNode)
 
 	DOM_GET_OBJ(n, id, xmlNodePtr, intern);
 
-	node = xmlDocCopyNode(n, n->doc, recursive);
+	node = dom_clone_node(n, n->doc, intern, recursive);
 
 	if (!node) {
 		RETURN_FALSE;
-	}
-
-	/* When deep is false Element nodes still require the attributes
-	Following taken from libxml as xmlDocCopyNode doesn't do this */
-	if (n->type == XML_ELEMENT_NODE && recursive == 0) {
-		if (n->nsDef != NULL) {
-			node->nsDef = xmlCopyNamespaceList(n->nsDef);
-		}
-		if (n->ns != NULL) {
-			xmlNsPtr ns;
-			ns = xmlSearchNs(n->doc, node, n->ns->prefix);
-			if (ns == NULL) {
-				ns = xmlSearchNs(n->doc, n, n->ns->prefix);
-				if (ns != NULL) {
-					xmlNodePtr root = node;
-
-					while (root->parent != NULL) {
-						root = root->parent;
-					}
-					node->ns = xmlNewNs(root, ns->href, ns->prefix);
-				}
-			} else {
-				node->ns = ns;
-			}
-		}
-		if (n->properties != NULL) {
-			node->properties = xmlCopyPropList(node, n->properties);
-		}
 	}
 
 	if (node->type == XML_ATTRIBUTE_NODE && n->ns != NULL && node->ns == NULL) {
