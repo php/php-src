@@ -1084,6 +1084,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	}
 
 	php_stream_close(stream);
+	stream = NULL;
 
 	dom_object *intern = php_dom_instantiate_object_helper(
 		return_value,
