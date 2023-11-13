@@ -71,8 +71,6 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 		"opcache.jit_max_root_traces=100000\n"
 		"opcache.jit_max_side_traces=100000\n"
 		"opcache.jit_max_exit_counters=100000\n"
-		"opcache.jit_blacklist_root_trace=255\n"
-		"opcache.jit_blacklist_side_trace=255\n"
 		"opcache.protect_memory=1\n",
 		opcache_path);
 	free(opcache_path);
