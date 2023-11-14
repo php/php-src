@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12633 (sqlite3_defensive.phpt fails with sqlite 3.44.0).
     (SakiTakamachi)
 
+- Zip:
+  . Fixed bug GH-12661 (Inconsistency in ZipArchive::addGlob remove_path Option
+    Behavior). (Remi)
+
 23 Nov 2023, PHP 8.2.13
 
 - Core:
