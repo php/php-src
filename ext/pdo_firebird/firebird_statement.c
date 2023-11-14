@@ -177,10 +177,8 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 				;
 		}
 
-		if (stmt->dbh->auto_commit && !S->H->in_manually_txn) {
-			if (isc_commit_retaining(H->isc_status, &H->tr)) {
-				break;
-			}
+		if (stmt->dbh->auto_commit && !S->H->in_manually_txn && !firebird_commit_transaction(stmt->dbh, true)) {
+			break;
 		}
 
 		*S->name = 0;

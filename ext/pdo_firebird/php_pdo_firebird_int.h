@@ -59,6 +59,12 @@ typedef void (*info_func_t)(char*);
 # define PDO_FIREBIRD_HANDLE_INITIALIZER NULL
 #endif
 
+extern bool _firebird_commit_transaction(pdo_dbh_t *dbh, bool retain);
+#define firebird_commit_transaction(d, r)	_firebird_commit_transaction(d, r)
+
+extern bool _firebird_rollback_transaction(pdo_dbh_t *dbh, bool retain);
+#define firebird_rollback_transaction(d, r)	_firebird_rollback_transaction(d, r)
+
 typedef struct {
 
 	/* the result of the last API call */
