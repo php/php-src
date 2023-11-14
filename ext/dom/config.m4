@@ -38,6 +38,16 @@ if test "$PHP_DOM" != "no"; then
                             namednodemap.c \
                             $LEXBOR_SOURCES],
                             $ext_shared,,$PHP_LEXBOR_CFLAGS)
+    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/ports/posix/lexbor/core)
+    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/core)
+    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/dom/interfaces)
+    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/html/tree/insertion_mode)
+    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/html/tokenizer)
+    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/html/interfaces)
+    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/encoding)
+    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/selectors)
+    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/ns)
+    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/tag)
     PHP_SUBST(DOM_SHARED_LIBADD)
     PHP_INSTALL_HEADERS([ext/dom/xml_common.h])
     PHP_ADD_EXTENSION_DEP(dom, libxml)
