@@ -45,9 +45,9 @@ class NumberFormatter
     /** @cvalue UNUM_ROUND_UP */
     public const int ROUND_UP = UNKNOWN;
     /** @cvalue UNUM_ROUND_DOWN */
-    public const ROUND_TOWARD_ZERO = UNKNOWN;
+    public const int ROUND_TOWARD_ZERO = UNKNOWN;
     /** @cvalue UNUM_ROUND_UP */
-    public const ROUND_AWAY_FROM_ZERO = UNKNOWN;
+    public const int ROUND_AWAY_FROM_ZERO = UNKNOWN;
     /** @cvalue UNUM_ROUND_HALFEVEN */
     public const int ROUND_HALFEVEN = UNKNOWN;
     /** @cvalue UNUM_ROUND_HALFDOWN */
