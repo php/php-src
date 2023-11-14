@@ -46,9 +46,6 @@ runs:
           -d opcache.jit=${{ inputs.jitType }} \
           -d opcache.protect_memory=1 \
           -d opcache.jit_buffer_size=64M \
-          -d opcache.jit_max_root_traces=100000 \
-          -d opcache.jit_max_side_traces=100000 \
-          -d opcache.jit_max_exit_counters=100000 \
           -j$(/usr/bin/nproc) \
           -g FAIL,BORK,LEAK,XLEAK \
           --no-progress \

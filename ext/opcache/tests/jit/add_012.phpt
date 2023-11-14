@@ -4,7 +4,7 @@ JIT ADD: 012 register allocation for 64-bit constant
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
+opcache.jit_buffer_size=64M
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip: 64-bit only"); ?>
 --FILE--

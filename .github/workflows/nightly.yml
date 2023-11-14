@@ -382,7 +382,6 @@ jobs:
           echo opcache.max_accelerated_files=100000 >> /etc/php.d/opcache.ini
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
           php -v
-
       - name: Test AMPHP
         if: matrix.branch.ref != 'PHP-8.0'
         run: |
