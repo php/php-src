@@ -7,10 +7,14 @@ precision=14
 echo "*** Testing ceil() : basic functionality ***\n";
 $values = array(0,
                 -0,
+                0.0,
+                -0.0,
                 0.5,
                 -0.5,
                 1,
                 -1,
+                1.0,
+                -1.0,
                 1.5,
                 -1.5,
                 2.6,
@@ -35,25 +39,29 @@ for ($i = 0; $i < count($values); $i++) {
 ?>
 --EXPECTF--
 *** Testing ceil() : basic functionality ***
+int(0)
+int(0)
 float(0)
-float(0)
+float(-0)
 float(1)
 float(-0)
+int(1)
+int(-1)
 float(1)
 float(-1)
 float(2)
 float(-1)
 float(3)
 float(-2)
-float(31)
-float(95)
+int(31)
+int(95)
 float(11)
 float(-10)
 float(3950)
 float(-3950)
-float(39)
-float(1)
-float(0)
+int(39)
+int(1)
+int(0)
 
 Deprecated: ceil(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
-float(0)
+int(0)

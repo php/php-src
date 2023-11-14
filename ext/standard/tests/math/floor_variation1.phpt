@@ -77,24 +77,24 @@ fclose($fp);
 -- Iteration 1 --
 
 Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
-float(0)
+int(0)
 
 -- Iteration 2 --
 
 Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
-float(0)
+int(0)
 
 -- Iteration 3 --
-float(1)
+int(1)
 
 -- Iteration 4 --
-float(0)
+int(0)
 
 -- Iteration 5 --
-float(1)
+int(1)
 
 -- Iteration 6 --
-float(0)
+int(0)
 
 -- Iteration 7 --
 floor(): Argument #1 ($num) must be of type int|float, string given
@@ -120,12 +120,12 @@ floor(): Argument #1 ($num) must be of type int|float, classA given
 -- Iteration 14 --
 
 Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
-float(0)
+int(0)
 
 -- Iteration 15 --
 
 Deprecated: floor(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
-float(0)
+int(0)
 
 -- Iteration 16 --
 floor(): Argument #1 ($num) must be of type int|float, resource given

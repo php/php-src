@@ -89,19 +89,19 @@ fclose($fp);
 *** Testing round() : usage variations ***
 
 -- Iteration 1 --
-float(0)
+int(0)
 
 -- Iteration 2 --
-float(1)
+int(1)
 
 -- Iteration 3 --
-float(12345)
+int(12345)
 
 -- Iteration 4 --
-float(-2345)
+int(-2345)
 
 -- Iteration 5 --
-float(2147483647)
+int(2147483647)
 
 -- Iteration 6 --
 float(10.5)
@@ -121,24 +121,24 @@ float(0.5)
 -- Iteration 11 --
 
 Deprecated: round(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
-float(0)
+int(0)
 
 -- Iteration 12 --
 
 Deprecated: round(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
-float(0)
+int(0)
 
 -- Iteration 13 --
-float(1)
+int(1)
 
 -- Iteration 14 --
-float(0)
+int(0)
 
 -- Iteration 15 --
-float(1)
+int(1)
 
 -- Iteration 16 --
-float(0)
+int(0)
 
 -- Iteration 17 --
 round(): Argument #1 ($num) must be of type int|float, string given
@@ -164,12 +164,12 @@ round(): Argument #1 ($num) must be of type int|float, classA given
 -- Iteration 24 --
 
 Deprecated: round(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
-float(0)
+int(0)
 
 -- Iteration 25 --
 
 Deprecated: round(): Passing null to parameter #1 ($num) of type int|float is deprecated in %s on line %d
-float(0)
+int(0)
 
 -- Iteration 26 --
 round(): Argument #1 ($num) must be of type int|float, resource given

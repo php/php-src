@@ -40,21 +40,21 @@ for ($i = 0; $i < count($values); $i++) {
 --EXPECTF--
 *** Testing round() : basic functionality ***
 round: 123456789
-...with precision 2-> float(123456789)
-...with precision 8-> float(123456789)
-...with precision 3-> float(123456789)
-...with precision 4-> float(123456789)
+...with precision 2-> int(123456789)
+...with precision 8-> int(123456789)
+...with precision 3-> int(123456789)
+...with precision 4-> int(123456789)
 
 Deprecated: Implicit conversion from float 3.6 to int loses precision in %s on line %d
-...with precision 3.6-> float(123456789)
-...with precision 2-> float(123456789)
-...with precision 04-> float(123456789)
+...with precision 3.6-> int(123456789)
+...with precision 2-> int(123456789)
+...with precision 04-> int(123456789)
 
 Deprecated: Implicit conversion from float-string "3.6" to int loses precision in %s on line %d
-...with precision 3.6-> float(123456789)
-...with precision 2.1e1-> float(123456789)
-...with precision 1-> float(123456789)
-...with precision -> float(123456789)
+...with precision 3.6-> int(123456789)
+...with precision 2.1e1-> int(123456789)
+...with precision 1-> int(123456789)
+...with precision -> int(123456789)
 round: 123.456789
 ...with precision 2-> float(123.46)
 ...with precision 8-> float(123.456789)
@@ -120,37 +120,37 @@ Deprecated: Implicit conversion from float-string "3.6" to int loses precision i
 ...with precision 1-> float(-4567)
 ...with precision -> float(-4567)
 round: 2311527
-...with precision 2-> float(2311527)
-...with precision 8-> float(2311527)
-...with precision 3-> float(2311527)
-...with precision 4-> float(2311527)
+...with precision 2-> int(2311527)
+...with precision 8-> int(2311527)
+...with precision 3-> int(2311527)
+...with precision 4-> int(2311527)
 
 Deprecated: Implicit conversion from float 3.6 to int loses precision in %s on line %d
-...with precision 3.6-> float(2311527)
-...with precision 2-> float(2311527)
-...with precision 04-> float(2311527)
+...with precision 3.6-> int(2311527)
+...with precision 2-> int(2311527)
+...with precision 04-> int(2311527)
 
 Deprecated: Implicit conversion from float-string "3.6" to int loses precision in %s on line %d
-...with precision 3.6-> float(2311527)
-...with precision 2.1e1-> float(2311527)
-...with precision 1-> float(2311527)
-...with precision -> float(2311527)
+...with precision 3.6-> int(2311527)
+...with precision 2.1e1-> int(2311527)
+...with precision 1-> int(2311527)
+...with precision -> int(2311527)
 round: 14680063
-...with precision 2-> float(14680063)
-...with precision 8-> float(14680063)
-...with precision 3-> float(14680063)
-...with precision 4-> float(14680063)
+...with precision 2-> int(14680063)
+...with precision 8-> int(14680063)
+...with precision 3-> int(14680063)
+...with precision 4-> int(14680063)
 
 Deprecated: Implicit conversion from float 3.6 to int loses precision in %s on line %d
-...with precision 3.6-> float(14680063)
-...with precision 2-> float(14680063)
-...with precision 04-> float(14680063)
+...with precision 3.6-> int(14680063)
+...with precision 2-> int(14680063)
+...with precision 04-> int(14680063)
 
 Deprecated: Implicit conversion from float-string "3.6" to int loses precision in %s on line %d
-...with precision 3.6-> float(14680063)
-...with precision 2.1e1-> float(14680063)
-...with precision 1-> float(14680063)
-...with precision -> float(14680063)
+...with precision 3.6-> int(14680063)
+...with precision 2.1e1-> int(14680063)
+...with precision 1-> int(14680063)
+...with precision -> int(14680063)
 round: 1.234567
 ...with precision 2-> float(1.23)
 ...with precision 8-> float(1.234567)
