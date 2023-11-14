@@ -2,6 +2,10 @@
 DOM\XMLDocument::createFromString 04
 --EXTENSIONS--
 dom
+--SKIPIF--
+<?php
+if (getenv('SKIP_ASAN') && LIBXML_VERSION < 20911) die('xleak leaks under libxml2 versions older than 2.9.11');
+?>
 --FILE--
 <?php
 
