@@ -105,7 +105,7 @@ static inline double php_round_helper(double value, int mode) {
 
 	switch (mode) {
 		case PHP_ROUND_HALF_UP:
-			if (fractional >= 0.5 || fractional <= -0.5) {
+			if (fabs(fractional) >= 0.5) {
 				/* We must increase the magnitude of the integral part
 				 * (rounding up / towards infinity). copysign(1.0, integral)
 				 * will either result in 1.0 or -1.0 depending on the sign
@@ -120,7 +120,7 @@ static inline double php_round_helper(double value, int mode) {
 			return integral;
 
 		case PHP_ROUND_HALF_DOWN:
-			if (fractional > 0.5 || fractional < -0.5) {
+			if (fabs(fractional) > 0.5) {
 				return integral + copysign(1.0, integral);
 			}
 
@@ -145,11 +145,12 @@ static inline double php_round_helper(double value, int mode) {
 			return fractional == 0 ? integral : integral + copysign(1.0, integral);
 
 		case PHP_ROUND_HALF_EVEN:
-			if (fractional > 0.5 || fractional < -0.5) {
+			fractional = fabs(fractional);
+			if (fractional > 0.5) {
 				return integral + copysign(1.0, integral);
 			}
 
-			if (UNEXPECTED(fractional == 0.5 || fractional == -0.5)) {
+			if (UNEXPECTED(fractional == 0.5)) {
 				bool even = !fmod(integral, 2.0);
 
 				/* If the integral part is not even we can make it even
@@ -163,11 +164,12 @@ static inline double php_round_helper(double value, int mode) {
 			return integral;
 
 		case PHP_ROUND_HALF_ODD:
-			if (fractional > 0.5 || fractional < -0.5) {
+			fractional = fabs(fractional);
+			if (fractional > 0.5) {
 				return integral + copysign(1.0, integral);
 			}
 
-			if (UNEXPECTED(fractional == 0.5 || fractional == -0.5)) {
+			if (UNEXPECTED(fractional == 0.5)) {
 				bool even = !fmod(integral, 2.0);
 
 				if (even) {
@@ -296,8 +298,8 @@ PHP_FUNCTION(abs)
 
 /* {{{ Returns the next highest integer value of the number */
 PHP_FUNCTION(ceil)
-{
-	zval *value;
+		{
+				zval * value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_NUMBER(value)
@@ -347,26 +349,26 @@ PHP_FUNCTION(round)
 		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() >= 2) {
-		if (precision >= 0) {
-			places = ZEND_LONG_INT_OVFL(precision) ? INT_MAX : (int)precision;
-		} else {
-			places = ZEND_LONG_INT_UDFL(precision) ? INT_MIN : (int)precision;
+		if (ZEND_NUM_ARGS() >= 2) {
+			if (precision >= 0) {
+				places = ZEND_LONG_INT_OVFL(precision) ? INT_MAX : (int) precision;
+			} else {
+				places = ZEND_LONG_INT_UDFL(precision) ? INT_MIN : (int) precision;
+			}
 		}
-	}
 
-	switch (mode) {
-		case PHP_ROUND_HALF_UP:
-		case PHP_ROUND_HALF_DOWN:
-		case PHP_ROUND_HALF_EVEN:
-		case PHP_ROUND_HALF_ODD:
-		case PHP_ROUND_AWAY_FROM_ZERO:
-		case PHP_ROUND_TOWARD_ZERO:
-		case PHP_ROUND_CEILING:
-		case PHP_ROUND_FLOOR:
-			break;
-		default:
-			zend_argument_value_error(3, "must be a valid rounding mode (PHP_ROUND_*)");
+		switch (mode) {
+			case PHP_ROUND_HALF_UP:
+			case PHP_ROUND_HALF_DOWN:
+			case PHP_ROUND_HALF_EVEN:
+			case PHP_ROUND_HALF_ODD:
+			case PHP_ROUND_AWAY_FROM_ZERO:
+			case PHP_ROUND_TOWARD_ZERO:
+			case PHP_ROUND_CEILING:
+			case PHP_ROUND_FLOOR:
+				break;
+			default:
+				zend_argument_value_error(3, "must be a valid rounding mode (PHP_ROUND_*)");
 			RETURN_THROWS();
 	}
 
@@ -378,411 +380,422 @@ PHP_FUNCTION(round)
 			}
 			ZEND_FALLTHROUGH;
 
-		case IS_DOUBLE:
-			RETURN_DOUBLE(_php_math_round(zval_get_double(value), (int)places, (int)mode));
+			case IS_DOUBLE:
+				RETURN_DOUBLE(_php_math_round(zval_get_double(value), (int) places, (int) mode));
 
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-}
+			EMPTY_SWITCH_DEFAULT_CASE();
+		}
+		}
 /* }}} */
 
 /* {{{ Returns the sine of the number in radians */
 PHP_FUNCTION(sin)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(sin(num));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_DOUBLE(sin(num));
+		}
 /* }}} */
 
 /* {{{ Returns the cosine of the number in radians */
 PHP_FUNCTION(cos)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(cos(num));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_DOUBLE(cos(num));
+		}
 /* }}} */
 
 /* {{{ Returns the tangent of the number in radians */
 PHP_FUNCTION(tan)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(tan(num));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_DOUBLE(tan(num));
+		}
 /* }}} */
 
 /* {{{ Returns the arc sine of the number in radians */
 PHP_FUNCTION(asin)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(asin(num));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_DOUBLE(asin(num));
+		}
 /* }}} */
 
 /* {{{ Return the arc cosine of the number in radians */
 PHP_FUNCTION(acos)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(acos(num));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_DOUBLE(acos(num));
+		}
 /* }}} */
 
 /* {{{ Returns the arc tangent of the number in radians */
 PHP_FUNCTION(atan)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(atan(num));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_DOUBLE(atan(num));
+		}
 /* }}} */
 
 /* {{{ Returns the arc tangent of y/x, with the resulting quadrant determined by the signs of y and x */
 PHP_FUNCTION(atan2)
-{
-	double num1, num2;
+		{
+				double num1, num2;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_DOUBLE(num1)
-		Z_PARAM_DOUBLE(num2)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(atan2(num1, num2));
-}
+				ZEND_PARSE_PARAMETERS_START(2, 2)
+				Z_PARAM_DOUBLE(num1)
+				Z_PARAM_DOUBLE(num2)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_DOUBLE(atan2(num1, num2));
+		}
 /* }}} */
 
 /* {{{ Returns the hyperbolic sine of the number, defined as (exp(number) - exp(-number))/2 */
 PHP_FUNCTION(sinh)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(sinh(num));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_DOUBLE(sinh(num));
+		}
 /* }}} */
 
 /* {{{ Returns the hyperbolic cosine of the number, defined as (exp(number) + exp(-number))/2 */
 PHP_FUNCTION(cosh)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(cosh(num));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_DOUBLE(cosh(num));
+		}
 /* }}} */
 
 /* {{{ Returns the hyperbolic tangent of the number, defined as sinh(number)/cosh(number) */
 PHP_FUNCTION(tanh)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(tanh(num));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_DOUBLE(tanh(num));
+		}
 /* }}} */
 
 /* {{{ Returns the inverse hyperbolic sine of the number, i.e. the value whose hyperbolic sine is number */
 PHP_FUNCTION(asinh)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(asinh(num));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_DOUBLE(asinh(num));
+		}
 /* }}} */
 
 /* {{{ Returns the inverse hyperbolic cosine of the number, i.e. the value whose hyperbolic cosine is number */
 PHP_FUNCTION(acosh)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(acosh(num));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_DOUBLE(acosh(num));
+		}
 /* }}} */
 
 /* {{{ Returns the inverse hyperbolic tangent of the number, i.e. the value whose hyperbolic tangent is number */
 PHP_FUNCTION(atanh)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(atanh(num));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_DOUBLE(atanh(num));
+		}
 /* }}} */
 
 /* {{{ Returns an approximation of pi */
 PHP_FUNCTION(pi)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
+		{
+				ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_DOUBLE(M_PI);
-}
+		RETURN_DOUBLE(M_PI);
+		}
 /* }}} */
 
 /* {{{ Returns whether argument is finite */
 PHP_FUNCTION(is_finite)
-{
-	double dval;
+		{
+				double dval;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(dval)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_BOOL(zend_finite(dval));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(dval)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_BOOL(zend_finite(dval));
+		}
 /* }}} */
 
 /* {{{ Returns whether argument is infinite */
 PHP_FUNCTION(is_infinite)
-{
-	double dval;
+		{
+				double dval;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(dval)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_BOOL(zend_isinf(dval));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(dval)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_BOOL(zend_isinf(dval));
+		}
 /* }}} */
 
 /* {{{ Returns whether argument is not a number */
 PHP_FUNCTION(is_nan)
-{
-	double dval;
+		{
+				double dval;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(dval)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_BOOL(zend_isnan(dval));
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(dval)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_BOOL(zend_isnan(dval));
+		}
 /* }}} */
 
 /* {{{ Returns base raised to the power of exponent. Returns integer result when possible */
 PHP_FUNCTION(pow)
-{
-	zval *zbase, *zexp;
+		{
+				zval * zbase, *zexp;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+		ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ZVAL(zbase)
 		Z_PARAM_ZVAL(zexp)
-	ZEND_PARSE_PARAMETERS_END();
+		ZEND_PARSE_PARAMETERS_END();
 
-	pow_function(return_value, zbase, zexp);
-}
+		pow_function(return_value, zbase, zexp);
+		}
 /* }}} */
 
 /* {{{ Returns e raised to the power of the number */
 PHP_FUNCTION(exp)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE(exp(num));
-}
+				RETURN_DOUBLE(exp(num));
+		}
 /* }}} */
 
 /* {{{ Returns exp(number) - 1, computed in a way that accurate even when the value of number is close to zero */
 PHP_FUNCTION(expm1)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE(expm1(num));
-}
+				RETURN_DOUBLE(expm1(num));
+		}
 /* }}} */
 
 /* {{{ Returns log(1 + number), computed in a way that accurate even when the value of number is close to zero */
 PHP_FUNCTION(log1p)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE(log1p(num));
-}
+				RETURN_DOUBLE(log1p(num));
+		}
 /* }}} */
 
 /* {{{ Returns the natural logarithm of the number, or the base log if base is specified */
 PHP_FUNCTION(log)
-{
-	double num, base = 0;
+		{
+				double num, base = 0;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_DOUBLE(num)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_DOUBLE(base)
-	ZEND_PARSE_PARAMETERS_END();
+				ZEND_PARSE_PARAMETERS_START(1, 2)
+				Z_PARAM_DOUBLE(num)
+				Z_PARAM_OPTIONAL
+				Z_PARAM_DOUBLE(base)
+				ZEND_PARSE_PARAMETERS_END();
 
-	if (ZEND_NUM_ARGS() == 1) {
-		RETURN_DOUBLE(log(num));
-	}
+				if (ZEND_NUM_ARGS() == 1) {
+					RETURN_DOUBLE(log(num));
+				}
 
-	if (base == 2.0) {
-		RETURN_DOUBLE(log2(num));
-	}
+				if (base == 2.0) {
+					RETURN_DOUBLE(log2(num));
+				}
 
-	if (base == 10.0) {
-		RETURN_DOUBLE(log10(num));
-	}
+				if (base == 10.0) {
+					RETURN_DOUBLE(log10(num));
+				}
 
-	if (base == 1.0) {
-		RETURN_DOUBLE(ZEND_NAN);
-	}
+				if (base == 1.0) {
+					RETURN_DOUBLE(ZEND_NAN);
+				}
 
-	if (base <= 0.0) {
-		zend_argument_value_error(2, "must be greater than 0");
-		RETURN_THROWS();
-	}
+				if (base <= 0.0) {
+					zend_argument_value_error(2, "must be greater than 0");
+					RETURN_THROWS();
+				}
 
-	RETURN_DOUBLE(log(num) / log(base));
-}
+				RETURN_DOUBLE(log(num) / log(base));
+		}
 /* }}} */
 
 /* {{{ Returns the base-10 logarithm of the number */
 PHP_FUNCTION(log10)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE(log10(num));
-}
+				RETURN_DOUBLE(log10(num));
+		}
 /* }}} */
 
 /* {{{ Returns the square root of the number */
 PHP_FUNCTION(sqrt)
-{
-	double num;
+		{
+				double num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(num)
-	ZEND_PARSE_PARAMETERS_END();
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(num)
+				ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE(sqrt(num));
-}
+				RETURN_DOUBLE(sqrt(num));
+		}
 /* }}} */
 
 /* {{{ Returns sqrt(num1*num1 + num2*num2) */
 PHP_FUNCTION(hypot)
-{
-	double num1, num2;
+		{
+				double num1, num2;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_DOUBLE(num1)
-		Z_PARAM_DOUBLE(num2)
-	ZEND_PARSE_PARAMETERS_END();
+				ZEND_PARSE_PARAMETERS_START(2, 2)
+				Z_PARAM_DOUBLE(num1)
+				Z_PARAM_DOUBLE(num2)
+				ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE(hypot(num1, num2));
-}
+				RETURN_DOUBLE(hypot(num1, num2));
+		}
 /* }}} */
 
 /* {{{ Converts the number in degrees to the radian equivalent */
 PHP_FUNCTION(deg2rad)
-{
-	double deg;
+		{
+				double deg;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(deg)
-	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE((deg / 180.0) * M_PI);
-}
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(deg)
+				ZEND_PARSE_PARAMETERS_END();
+				RETURN_DOUBLE((deg / 180.0) * M_PI);
+		}
 /* }}} */
 
 /* {{{ Converts the radian number to the equivalent number in degrees */
 PHP_FUNCTION(rad2deg)
-{
-	double rad;
+		{
+				double rad;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_DOUBLE(rad)
-	ZEND_PARSE_PARAMETERS_END();
+				ZEND_PARSE_PARAMETERS_START(1, 1)
+				Z_PARAM_DOUBLE(rad)
+				ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE((rad / M_PI) * 180);
-}
+				RETURN_DOUBLE((rad / M_PI) * 180);
+		}
 /* }}} */
 
 /* {{{ _php_math_basetolong */
 /*
  * Convert a string representation of a base(2-36) number to a long.
  */
-PHPAPI zend_long _php_math_basetolong(zval *arg, int base)
+PHPAPI zend_long
+_php_math_basetolong(zval
+*arg,
+int base
+)
 {
-	zend_long num = 0, digit, onum;
-	zend_long i;
-	char c, *s;
+zend_long num = 0, digit, onum;
+zend_long i;
+char c, *s;
 
-	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
-		return 0;
-	}
+if (
+Z_TYPE_P(arg)
+!= IS_STRING || base < 2 || base > 36) {
+return 0;
+}
 
-	s = Z_STRVAL_P(arg);
+s = Z_STRVAL_P(arg);
 
-	for (i = Z_STRLEN_P(arg); i > 0; i--) {
-		c = *s++;
+for (
+i = Z_STRLEN_P(arg);
+i > 0; i--) {
+c = *s++;
 
-		digit = (c >= '0' && c <= '9') ? c - '0'
-			: (c >= 'A' && c <= 'Z') ? c - 'A' + 10
-			: (c >= 'a' && c <= 'z') ? c - 'a' + 10
-			: base;
+digit = (c >= '0' && c <= '9') ? c - '0'
+							   : (c >= 'A' && c <= 'Z') ? c - 'A' + 10
+														: (c >= 'a' && c <= 'z') ? c - 'a' + 10
+																				 : base;
 
-		if (digit >= base) {
-			continue;
-		}
+if (digit >= base) {
+continue;
+}
 
-		onum = num;
-		num = num * base + digit;
-		if (num > onum)
-			continue;
+onum = num;
+num = num * base + digit;
+if (num > onum)
+continue;
 
-		{
+{
 
-			php_error_docref(NULL, E_WARNING, "Number %s is too big to fit in long", s);
-			return ZEND_LONG_MAX;
-		}
-	}
+php_error_docref(NULL, E_WARNING,
+"Number %s is too big to fit in long", s);
+return
+ZEND_LONG_MAX;
+}
+}
 
-	return num;
+return
+num;
 }
 /* }}} */
 
@@ -790,8 +803,7 @@ PHPAPI zend_long _php_math_basetolong(zval *arg, int base)
 /*
  * Convert a string representation of a base(2-36) number to a zval.
  */
-PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
-{
+PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret) {
 	zend_long num = 0;
 	double fnum = 0;
 	int mode = 0;
@@ -806,7 +818,7 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 	/* Skip leading whitespace */
 	while (s < e && isspace(*s)) s++;
 	/* Skip trailing whitespace */
-	while (s < e && isspace(*(e-1))) e--;
+	while (s < e && isspace(*(e - 1))) e--;
 
 	if (e - s >= 2) {
 		if (base == 16 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) s += 2;
@@ -838,17 +850,17 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 		}
 
 		switch (mode) {
-		case 0: /* Integer */
-			if (num < cutoff || (num == cutoff && c <= cutlim)) {
-				num = num * base + c;
-				break;
-			} else {
-				fnum = (double)num;
-				mode = 1;
-			}
-			ZEND_FALLTHROUGH;
-		case 1: /* Float */
-			fnum = fnum * base + c;
+			case 0: /* Integer */
+				if (num < cutoff || (num == cutoff && c <= cutlim)) {
+					num = num * base + c;
+					break;
+				} else {
+					fnum = (double) num;
+					mode = 1;
+				}
+				ZEND_FALLTHROUGH;
+			case 1: /* Float */
+				fnum = fnum * base + c;
 		}
 	}
 
@@ -869,29 +881,43 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
  * Convert a long to a string containing a base(2-36) representation of
  * the number.
  */
-PHPAPI zend_string * _php_math_longtobase(zend_long arg, int base)
+PHPAPI zend_string
+*
+_php_math_longtobase(zend_long
+arg,
+int base
+)
 {
-	static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-	char buf[(sizeof(zend_ulong) << 3) + 1];
-	char *ptr, *end;
-	zend_ulong value;
+static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+char buf[(sizeof(zend_ulong) << 3) + 1];
+char *ptr, *end;
+zend_ulong value;
 
-	if (base < 2 || base > 36) {
-		return ZSTR_EMPTY_ALLOC();
-	}
+if (base < 2 || base > 36) {
+return
 
-	value = arg;
+ZSTR_EMPTY_ALLOC();
 
-	end = ptr = buf + sizeof(buf) - 1;
-	*ptr = '\0';
+}
 
-	do {
-		ZEND_ASSERT(ptr > buf);
-		*--ptr = digits[value % base];
-		value /= base;
-	} while (value);
+value = arg;
 
-	return zend_string_init(ptr, end - ptr, 0);
+end = ptr = buf + sizeof(buf) - 1;
+*
+ptr = '\0';
+
+do {
+ZEND_ASSERT(ptr
+> buf);
+*--
+ptr = digits[value % base];
+value /=
+base;
+} while (value);
+
+return
+zend_string_init(ptr, end
+- ptr, 0);
 }
 /* }}} */
 
@@ -900,33 +926,45 @@ PHPAPI zend_string * _php_math_longtobase(zend_long arg, int base)
  * Convert a long to a string containing a base(2,4,6,16,32) representation of
  * the number.
  */
-static zend_always_inline zend_string * _php_math_longtobase_pwr2(zend_long arg, int base_log2)
+static zend_always_inline zend_string
+*
+_php_math_longtobase_pwr2(zend_long
+arg,
+int base_log2
+)
 {
-	static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-	zend_ulong value;
-	size_t len;
-	zend_string *ret;
-	char *ptr;
+static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+zend_ulong value;
+size_t len;
+zend_string *ret;
+char *ptr;
 
-	value = arg;
+value = arg;
 
-	if (value == 0) {
-		len = 1;
-	} else {
-		len = ((sizeof(value) * 8 - zend_ulong_nlz(value)) + (base_log2 - 1)) / base_log2;
-	}
+if (value == 0) {
+len = 1;
+} else {
+len = ((sizeof(value) * 8 - zend_ulong_nlz(value)) + (base_log2 - 1)) / base_log2;
+}
 
-	ret = zend_string_alloc(len, 0);
-	ptr = ZSTR_VAL(ret) + len;
-	*ptr = '\0';
+ret = zend_string_alloc(len, 0);
+ptr = ZSTR_VAL(ret) + len;
+*
+ptr = '\0';
 
-	do {
-		ZEND_ASSERT(ptr > ZSTR_VAL(ret));
-		*--ptr = digits[value & ((1 << base_log2) - 1)];
-		value >>= base_log2;
-	} while (value);
+do {
+ZEND_ASSERT(ptr
+>
+ZSTR_VAL(ret)
+);
+*--
+ptr = digits[value & ((1 << base_log2) - 1)];
+value >>=
+base_log2;
+} while (value);
 
-	return ret;
+return
+ret;
 }
 /* }}} */
 
@@ -935,162 +973,192 @@ static zend_always_inline zend_string * _php_math_longtobase_pwr2(zend_long arg,
  * Convert a zval to a string containing a base(2-36) representation of
  * the number.
  */
-PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base)
+PHPAPI zend_string
+*
+_php_math_zvaltobase(zval
+*arg,
+int base
+)
 {
-	static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-	if ((Z_TYPE_P(arg) != IS_LONG && Z_TYPE_P(arg) != IS_DOUBLE) || base < 2 || base > 36) {
-		return ZSTR_EMPTY_ALLOC();
-	}
+if ((
+Z_TYPE_P(arg)
+!= IS_LONG &&
+Z_TYPE_P(arg)
+!= IS_DOUBLE) || base < 2 || base > 36) {
+return
 
-	if (Z_TYPE_P(arg) == IS_DOUBLE) {
-		double fvalue = floor(Z_DVAL_P(arg)); /* floor it just in case */
-		char *ptr, *end;
-		char buf[(sizeof(double) << 3) + 1];
+ZSTR_EMPTY_ALLOC();
 
-		/* Don't try to convert +/- infinity */
-		if (fvalue == ZEND_INFINITY || fvalue == -ZEND_INFINITY) {
-			zend_value_error("An infinite value cannot be converted to base %d", base);
-			return NULL;
-		}
+}
 
-		end = ptr = buf + sizeof(buf) - 1;
-		*ptr = '\0';
+if (
+Z_TYPE_P(arg)
+== IS_DOUBLE) {
+double fvalue = floor(Z_DVAL_P(arg)); /* floor it just in case */
+char *ptr, *end;
+char buf[(sizeof(double) << 3) + 1];
 
-		do {
-			*--ptr = digits[(int) fmod(fvalue, base)];
-			fvalue /= base;
-		} while (ptr > buf && fabs(fvalue) >= 1);
+/* Don't try to convert +/- infinity */
+if (fvalue == ZEND_INFINITY || fvalue == -ZEND_INFINITY) {
+zend_value_error("An infinite value cannot be converted to base %d", base);
+return
+NULL;
+}
 
-		return zend_string_init(ptr, end - ptr, 0);
-	}
+end = ptr = buf + sizeof(buf) - 1;
+*
+ptr = '\0';
 
-	return _php_math_longtobase(Z_LVAL_P(arg), base);
+do {
+*--
+ptr = digits[(int) fmod(fvalue, base)];
+fvalue /=
+base;
+} while (ptr > buf &&
+fabs(fvalue)
+>= 1);
+
+return
+zend_string_init(ptr, end
+- ptr, 0);
+}
+
+return
+
+_php_math_longtobase(Z_LVAL_P(arg), base
+
+);
 }
 /* }}} */
 
 /* {{{ Returns the decimal equivalent of the binary number */
 PHP_FUNCTION(bindec)
-{
-	zend_string *arg;
+		{
+				zend_string * arg;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+		ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(arg)
-	ZEND_PARSE_PARAMETERS_END();
+		ZEND_PARSE_PARAMETERS_END();
 
-	_php_math_basetozval(arg, 2, return_value);
-}
+		_php_math_basetozval(arg, 2, return_value);
+		}
 /* }}} */
 
 /* {{{ Returns the decimal equivalent of the hexadecimal number */
 PHP_FUNCTION(hexdec)
-{
-	zend_string *arg;
+		{
+				zend_string * arg;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+		ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(arg)
-	ZEND_PARSE_PARAMETERS_END();
+		ZEND_PARSE_PARAMETERS_END();
 
-	_php_math_basetozval(arg, 16, return_value);
-}
+		_php_math_basetozval(arg, 16, return_value);
+		}
 /* }}} */
 
 /* {{{ Returns the decimal equivalent of an octal string */
 PHP_FUNCTION(octdec)
-{
-	zend_string *arg;
+		{
+				zend_string * arg;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+		ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(arg)
-	ZEND_PARSE_PARAMETERS_END();
+		ZEND_PARSE_PARAMETERS_END();
 
-	_php_math_basetozval(arg, 8, return_value);
-}
+		_php_math_basetozval(arg, 8, return_value);
+		}
 /* }}} */
 
 /* {{{ Returns a string containing a binary representation of the number */
 PHP_FUNCTION(decbin)
-{
-	zend_long arg;
+		{
+				zend_long arg;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+		ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(arg)
-	ZEND_PARSE_PARAMETERS_END();
+		ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(_php_math_longtobase_pwr2(arg, 1));
-}
+		RETURN_STR(_php_math_longtobase_pwr2(arg, 1));
+		}
 /* }}} */
 
 /* {{{ Returns a string containing an octal representation of the given number */
 PHP_FUNCTION(decoct)
-{
-	zend_long arg;
+		{
+				zend_long arg;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+		ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(arg)
-	ZEND_PARSE_PARAMETERS_END();
+		ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(_php_math_longtobase_pwr2(arg, 3));
-}
+		RETURN_STR(_php_math_longtobase_pwr2(arg, 3));
+		}
 /* }}} */
 
 /* {{{ Returns a string containing a hexadecimal representation of the given number */
 PHP_FUNCTION(dechex)
-{
-	zend_long arg;
+		{
+				zend_long arg;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+		ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(arg)
-	ZEND_PARSE_PARAMETERS_END();
+		ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(_php_math_longtobase_pwr2(arg, 4));
-}
+		RETURN_STR(_php_math_longtobase_pwr2(arg, 4));
+		}
 /* }}} */
 
 /* {{{ Converts a number in a string from any base <= 36 to any base <= 36 */
 PHP_FUNCTION(base_convert)
-{
-	zval temp;
-	zend_string *number;
-	zend_long frombase, tobase;
-	zend_string *result;
+		{
+				zval temp;
+		zend_string *number;
+		zend_long frombase, tobase;
+		zend_string *result;
 
-	ZEND_PARSE_PARAMETERS_START(3, 3)
+		ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_STR(number)
 		Z_PARAM_LONG(frombase)
 		Z_PARAM_LONG(tobase)
-	ZEND_PARSE_PARAMETERS_END();
+		ZEND_PARSE_PARAMETERS_END();
 
-	if (frombase < 2 || frombase > 36) {
-		zend_argument_value_error(2, "must be between 2 and 36 (inclusive)");
-		RETURN_THROWS();
-	}
-	if (tobase < 2 || tobase > 36) {
-		zend_argument_value_error(3, "must be between 2 and 36 (inclusive)");
-		RETURN_THROWS();
-	}
+		if (frombase < 2 || frombase > 36) {
+			zend_argument_value_error(2, "must be between 2 and 36 (inclusive)");
+			RETURN_THROWS();
+		}
+		if (tobase < 2 || tobase > 36) {
+			zend_argument_value_error(3, "must be between 2 and 36 (inclusive)");
+			RETURN_THROWS();
+		}
 
-	_php_math_basetozval(number, (int)frombase, &temp);
-	result = _php_math_zvaltobase(&temp, (int)tobase);
-	if (!result) {
-		RETURN_THROWS();
-	}
+		_php_math_basetozval(number, (int)frombase, &temp);
+		result = _php_math_zvaltobase(&temp, (int)tobase);
+		if (!result) {
+			RETURN_THROWS();
+		}
 
-	RETVAL_STR(result);
-}
+		RETVAL_STR(result);
+		}
 /* }}} */
 
 /* {{{ _php_math_number_format */
-PHPAPI zend_string *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep)
-{
+PHPAPI zend_string
+*
+
+_php_math_number_format(double d, int dec, char dec_point, char thousand_sep) {
 	return _php_math_number_format_ex(d, dec, &dec_point, 1, &thousand_sep, 1);
 }
 
-PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *dec_point,
-		size_t dec_point_len, const char *thousand_sep, size_t thousand_sep_len)
-{
-	zend_string *res;
-	zend_string *tmpbuf;
+PHPAPI zend_string
+*
+
+_php_math_number_format_ex(double d, int dec, const char *dec_point,
+						   size_t dec_point_len, const char *thousand_sep, size_t thousand_sep_len) {
+	zend_string * res;
+	zend_string * tmpbuf;
 	char *s, *t;  /* source, target */
 	char *dp;
 	size_t integral;
@@ -1108,7 +1176,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	tmpbuf = strpprintf(0, "%.*F", dec, d);
 	if (tmpbuf == NULL) {
 		return NULL;
-	} else if (!isdigit((int)ZSTR_VAL(tmpbuf)[0])) {
+	} else if (!isdigit((int) ZSTR_VAL(tmpbuf)[0])) {
 		return tmpbuf;
 	}
 
@@ -1134,7 +1202,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 
 	/* allow for thousand separators */
 	if (thousand_sep) {
-		integral = zend_safe_addmult((integral-1)/3, thousand_sep_len, integral, "number formatting");
+		integral = zend_safe_addmult((integral - 1) / 3, thousand_sep_len, integral, "number formatting");
 	}
 
 	reslen = integral;
@@ -1162,7 +1230,9 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	 * we requested due to internal buffer limitations */
 	if (dec) {
 		size_t declen = (dp ? s - dp : 0);
-		size_t topad = (size_t)dec > declen ? dec - declen : 0;
+		size_t
+				topad = (size_t)
+		dec > declen ? dec - declen : 0;
 
 		/* pad with '0's */
 		while (topad--) {
@@ -1188,7 +1258,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	 * separator every three digits */
 	while (s >= ZSTR_VAL(tmpbuf)) {
 		*t-- = *s--;
-		if (thousand_sep && (++count%3)==0 && s >= ZSTR_VAL(tmpbuf)) {
+		if (thousand_sep && (++count % 3) == 0 && s >= ZSTR_VAL(tmpbuf)) {
 			t -= thousand_sep_len;
 			memcpy(t + 1, thousand_sep, thousand_sep_len);
 		}
@@ -1204,10 +1274,18 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	return res;
 }
 
-PHPAPI zend_string *_php_math_number_format_long(zend_long num, zend_long dec, const char *dec_point,
-		size_t dec_point_len, const char *thousand_sep, size_t thousand_sep_len)
+PHPAPI zend_string
+*
+_php_math_number_format_long(zend_long
+num,
+zend_long dec,
+const char *dec_point,
+		size_t
+dec_point_len,
+const char *thousand_sep, size_t
+thousand_sep_len)
 {
-	static const zend_ulong powers[] = {
+static const zend_ulong powers[] = {
 		1, 10, 100, 1000, 10000,
 		100000, 1000000, 10000000, 100000000, 1000000000,
 #if SIZEOF_ZEND_LONG == 8
@@ -1216,154 +1294,158 @@ PHPAPI zend_string *_php_math_number_format_long(zend_long num, zend_long dec, c
 #elif SIZEOF_ZEND_LONG > 8
 # error "Unknown SIZEOF_ZEND_LONG"
 #endif
-	};
+};
 
-	int is_negative = 0;
-	zend_ulong tmpnum;
-	zend_ulong power;
-	zend_ulong power_half;
-	zend_ulong rest;
+int is_negative = 0;
+zend_ulong tmpnum;
+zend_ulong power;
+zend_ulong power_half;
+zend_ulong rest;
 
-	zend_string *tmpbuf;
-	zend_string *res;
-	size_t reslen;
-	char *s, *t;  /* source, target */
-	int count = 0;
-	size_t topad;
+zend_string *tmpbuf;
+zend_string *res;
+size_t reslen;
+char *s, *t;  /* source, target */
+int count = 0;
+size_t topad;
 
-	// unsigned absolute number and memorize negative sign
-	if (num < 0) {
-		is_negative = 1;
-		tmpnum = ((zend_ulong)-(num + 1)) + 1;
-	} else {
-		tmpnum = (zend_ulong)num;
-	}
+// unsigned absolute number and memorize negative sign
+if (num < 0) {
+is_negative = 1;
+tmpnum = ((zend_ulong) - (num + 1)) + 1;
+} else {
+tmpnum = (zend_ulong) num;
+}
 
-	// rounding the number
-	if (dec < 0) {
-		// Check rounding to more negative places than possible
-		if (dec < -(sizeof(powers) / sizeof(powers[0]) - 1)) {
-			tmpnum = 0;
-		} else {
-			power = powers[-dec];
-			power_half = power / 2;
-			rest = tmpnum % power;
-			tmpnum = tmpnum / power;
+// rounding the number
+if (dec < 0) {
+// Check rounding to more negative places than possible
+if (dec < -(sizeof(powers) / sizeof(powers[0]) - 1)) {
+tmpnum = 0;
+} else {
+power = powers[-dec];
+power_half = power / 2;
+rest = tmpnum % power;
+tmpnum = tmpnum / power;
 
-			if (rest >= power_half) {
-				tmpnum = tmpnum * power + power;
-			} else {
-				tmpnum = tmpnum * power;
-			}
-		}
+if (rest >= power_half) {
+tmpnum = tmpnum * power + power;
+} else {
+tmpnum = tmpnum * power;
+}
+}
 
-		// prevent resulting in negative zero
-		if (tmpnum == 0) {
-			is_negative = 0;
-		}
-	}
+// prevent resulting in negative zero
+if (tmpnum == 0) {
+is_negative = 0;
+}
+}
 
-	tmpbuf = strpprintf(0, ZEND_ULONG_FMT, tmpnum);
-	reslen = ZSTR_LEN(tmpbuf);
+tmpbuf = strpprintf(0, ZEND_ULONG_FMT, tmpnum);
+reslen = ZSTR_LEN(tmpbuf);
 
-	/* allow for thousand separators */
-	if (thousand_sep) {
-		reslen = zend_safe_addmult((reslen-1)/3, thousand_sep_len, reslen, "number formatting");
-	}
+/* allow for thousand separators */
+if (thousand_sep) {
+reslen = zend_safe_addmult((reslen - 1) / 3, thousand_sep_len, reslen, "number formatting");
+}
 
-	reslen += is_negative;
+reslen +=
+is_negative;
 
-	if (dec > 0) {
-		reslen += dec;
+if (dec > 0) {
+reslen +=
+dec;
 
-		if (dec_point) {
-			reslen = zend_safe_addmult(reslen, 1, dec_point_len, "number formatting");
-		}
-	}
+if (dec_point) {
+reslen = zend_safe_addmult(reslen, 1, dec_point_len, "number formatting");
+}
+}
 
-	res = zend_string_alloc(reslen, 0);
+res = zend_string_alloc(reslen, 0);
 
-	s = ZSTR_VAL(tmpbuf) + ZSTR_LEN(tmpbuf) - 1;
-	t = ZSTR_VAL(res) + reslen;
-	*t-- = '\0';
+s = ZSTR_VAL(tmpbuf) + ZSTR_LEN(tmpbuf) - 1;
+t = ZSTR_VAL(res) + reslen;
+*t-- = '\0';
 
-	/* copy the decimal places. */
-	if (dec > 0) {
-		topad = (size_t)dec;
+/* copy the decimal places. */
+if (dec > 0) {
+topad = (size_t)
+dec;
 
-		/* pad with '0's */
-		while (topad--) {
-			*t-- = '0';
-		}
+/* pad with '0's */
+while (topad--) {
+*t-- = '0';
+}
 
-		/* add decimal point */
-		if (dec_point) {
-			t -= dec_point_len;
-			memcpy(t + 1, dec_point, dec_point_len);
-		}
-	}
+/* add decimal point */
+if (dec_point) {
+t -=
+dec_point_len;
+memcpy(t
++ 1, dec_point, dec_point_len);
+}
+}
 
-	/* copy the numbers before the decimal point, adding thousand
-	 * separator every three digits */
-	while (s >= ZSTR_VAL(tmpbuf)) {
-		*t-- = *s--;
-		if (thousand_sep && (++count % 3) == 0 && s >= ZSTR_VAL(tmpbuf)) {
-			t -= thousand_sep_len;
-			memcpy(t + 1, thousand_sep, thousand_sep_len);
-		}
-	}
+/* copy the numbers before the decimal point, adding thousand
+ * separator every three digits */
+while (s >=
+ZSTR_VAL(tmpbuf)
+) {
+*t-- = *s--;
+if (thousand_sep && (++count % 3) == 0 && s >=
+ZSTR_VAL(tmpbuf)
+) {
+t -=
+thousand_sep_len;
+memcpy(t
++ 1, thousand_sep, thousand_sep_len);
+}
+}
 
-	if (is_negative) {
-		*t-- = '-';
-	}
+if (is_negative) {
+*t-- = '-';
+}
 
-	ZSTR_LEN(res) = reslen;
-	zend_string_release_ex(tmpbuf, 0);
-	return res;
+ZSTR_LEN(res) = reslen;
+zend_string_release_ex(tmpbuf,
+0);
+return
+res;
 }
 
 /* {{{ Formats a number with grouped thousands */
 PHP_FUNCTION(number_format)
-{
-	zval* num;
-	zend_long dec = 0;
-	int dec_int;
-	char *thousand_sep = NULL, *dec_point = NULL;
-	size_t thousand_sep_len = 0, dec_point_len = 0;
+		{
+				zval * num;
+		zend_long dec = 0;
+		int dec_int;
+		char *thousand_sep = NULL, *dec_point = NULL;
+		size_t thousand_sep_len = 0, dec_point_len = 0;
 
-	ZEND_PARSE_PARAMETERS_START(1, 4)
+		ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_NUMBER(num)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(dec)
 		Z_PARAM_STRING_OR_NULL(dec_point, dec_point_len)
 		Z_PARAM_STRING_OR_NULL(thousand_sep, thousand_sep_len)
-	ZEND_PARSE_PARAMETERS_END();
+		ZEND_PARSE_PARAMETERS_END();
 
-	if (dec_point == NULL) {
-		dec_point = ".";
-		dec_point_len = 1;
-	}
-	if (thousand_sep == NULL) {
-		thousand_sep = ",";
-		thousand_sep_len = 1;
-	}
+		if (dec_point == NULL) {
+			dec_point = ".";
+			dec_point_len = 1;
+		}
+		if (thousand_sep == NULL) {
+			thousand_sep = ",";
+			thousand_sep_len = 1;
+		}
 
-	switch (Z_TYPE_P(num)) {
-		case IS_LONG:
-			RETURN_STR(_php_math_number_format_long(Z_LVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+		switch (Z_TYPE_P(num)) {
+			case IS_LONG:
+				RETURN_STR(_php_math_number_format_long(Z_LVAL_P(num), dec, dec_point, dec_point_len, thousand_sep,
+														thousand_sep_len));
 			break;
 
 		case IS_DOUBLE:
-			// double values of >= 2^52 can not have fractional digits anymore
-			// Casting to long on 64bit will not loose precision on rounding
-			if (UNEXPECTED(
-				(Z_DVAL_P(num) >= 4503599627370496.0 || Z_DVAL_P(num) <= -4503599627370496.0)
-				&& ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(num))
-			)) {
-				RETURN_STR(_php_math_number_format_long((zend_long)Z_DVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
-                break;
-			}
-
 			if (dec >= 0) {
 				dec_int = ZEND_LONG_INT_OVFL(dec) ? INT_MAX : (int)dec;
 			} else {
@@ -1372,23 +1454,23 @@ PHP_FUNCTION(number_format)
 			RETURN_STR(_php_math_number_format_ex(Z_DVAL_P(num), dec_int, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 			break;
 
-		EMPTY_SWITCH_DEFAULT_CASE()
-	}
-}
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
+		}
 /* }}} */
 
 /* {{{ Returns the remainder of dividing x by y as a float */
 PHP_FUNCTION(fmod)
-{
-	double num1, num2;
+		{
+				double num1, num2;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_DOUBLE(num1)
-		Z_PARAM_DOUBLE(num2)
-	ZEND_PARSE_PARAMETERS_END();
+				ZEND_PARSE_PARAMETERS_START(2, 2)
+				Z_PARAM_DOUBLE(num1)
+				Z_PARAM_DOUBLE(num2)
+				ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE(fmod(num1, num2));
-}
+				RETURN_DOUBLE(fmod(num1, num2));
+		}
 /* }}} */
 
 /* {{{ Perform floating-point division of dividend / divisor
@@ -1397,38 +1479,38 @@ PHP_FUNCTION(fmod)
 __attribute__((no_sanitize("float-divide-by-zero")))
 #endif
 PHP_FUNCTION(fdiv)
-{
-	double dividend, divisor;
+		{
+				double dividend, divisor;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_DOUBLE(dividend)
-		Z_PARAM_DOUBLE(divisor)
-	ZEND_PARSE_PARAMETERS_END();
+				ZEND_PARSE_PARAMETERS_START(2, 2)
+				Z_PARAM_DOUBLE(dividend)
+				Z_PARAM_DOUBLE(divisor)
+				ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE(dividend / divisor);
-}
+				RETURN_DOUBLE(dividend / divisor);
+		}
 /* }}} */
 
 /* {{{ Returns the integer quotient of the division of dividend by divisor */
 PHP_FUNCTION(intdiv)
-{
-	zend_long dividend, divisor;
+		{
+				zend_long dividend, divisor;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+		ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(dividend)
 		Z_PARAM_LONG(divisor)
-	ZEND_PARSE_PARAMETERS_END();
+		ZEND_PARSE_PARAMETERS_END();
 
-	if (divisor == 0) {
-		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
-		RETURN_THROWS();
-	} else if (divisor == -1 && dividend == ZEND_LONG_MIN) {
-		/* Prevent overflow error/crash ... really should not happen:
-		   We don't return a float here as that violates function contract */
-		zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Division of PHP_INT_MIN by -1 is not an integer");
-		RETURN_THROWS();
-	}
+		if (divisor == 0) {
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
+			RETURN_THROWS();
+		} else if (divisor == -1 && dividend == ZEND_LONG_MIN) {
+			/* Prevent overflow error/crash ... really should not happen:
+			   We don't return a float here as that violates function contract */
+			zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Division of PHP_INT_MIN by -1 is not an integer");
+			RETURN_THROWS();
+		}
 
-	RETURN_LONG(dividend / divisor);
-}
+		RETURN_LONG(dividend / divisor);
+		}
 /* }}} */
