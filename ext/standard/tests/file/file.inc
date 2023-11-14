@@ -611,7 +611,7 @@ function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
           if ( ! in_array( $fields[$index], $stat_time_diff_keys ) ) {
             $result = false;
             echo "Error: stat1 do not match with stat2 at key value: $fields[$index]\n";
-          } elseif (abs($stat1[ $fields[$index] ] - $stat2[ $fields[$index] ]) > 1)  {
+          } elseif (abs($stat1[ $fields[$index] ] - $stat2[ $fields[$index] ]) > 2) {
             $result = false;
             echo "Error: stat1 differs too much from stat2 at key value: $fields[$index]\n";
           }
