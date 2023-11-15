@@ -724,6 +724,83 @@ PHP_METHOD(DOMElement, setAttributeNS)
 }
 /* }}} end dom_element_set_attribute_ns */
 
+static void dom_remove_eliminated_ns_single_element(xmlNodePtr node, xmlNsPtr eliminatedNs)
+{
+	ZEND_ASSERT(node->type == XML_ELEMENT_NODE);
+	if (node->ns == eliminatedNs) {
+		node->ns = NULL;
+	}
+
+	for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
+		if (attr->ns == eliminatedNs) {
+			attr->ns = NULL;
+		}
+	}
+}
+
+static void dom_remove_eliminated_ns(xmlNodePtr node, xmlNsPtr eliminatedNs)
+{
+	dom_remove_eliminated_ns_single_element(node, eliminatedNs);
+
+	xmlNodePtr base = node;
+	node = node->children;
+	while (node != NULL) {
+		ZEND_ASSERT(node != base);
+
+		if (node->type == XML_ELEMENT_NODE) {
+			dom_remove_eliminated_ns_single_element(node, eliminatedNs);
+
+			if (node->children) {
+				node = node->children;
+				continue;
+			}
+		}
+
+		if (node->next) {
+			node = node->next;
+		} else {
+			/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
+			do {
+				node = node->parent;
+				if (node == base) {
+					return;
+				}
+			} while (node->next == NULL);
+			node = node->next;
+		}
+	}
+}
+
+static void dom_eliminate_ns(xmlNodePtr nodep, xmlNsPtr nsptr)
+{
+	if (nsptr->href != NULL) {
+		xmlFree((char *) nsptr->href);
+		nsptr->href = NULL;
+	}
+	if (nsptr->prefix != NULL) {
+		xmlFree((char *) nsptr->prefix);
+		nsptr->prefix = NULL;
+	}
+
+	/* Remove it from the list and move it to the old ns list */
+	xmlNsPtr current_ns = nodep->nsDef;
+	if (current_ns == nsptr) {
+		nodep->nsDef = nsptr->next;
+	} else {
+		do {
+			if (current_ns->next == nsptr) {
+				current_ns->next = nsptr->next;
+				break;
+			}
+			current_ns = current_ns->next;
+		} while (current_ns != NULL);
+	}
+	nsptr->next = NULL;
+	dom_set_old_ns(nodep->doc, nsptr);
+
+	dom_remove_eliminated_ns(nodep, nsptr);
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElRemAtNS
 Since: DOM Level 2
 */
@@ -754,14 +831,7 @@ PHP_METHOD(DOMElement, removeAttributeNS)
 	nsptr = dom_get_nsdecl(nodep, (xmlChar *)name);
 	if (nsptr != NULL) {
 		if (xmlStrEqual((xmlChar *)uri, nsptr->href)) {
-			if (nsptr->href != NULL) {
-				xmlFree((char *) nsptr->href);
-				nsptr->href = NULL;
-			}
-			if (nsptr->prefix != NULL) {
-				xmlFree((char *) nsptr->prefix);
-				nsptr->prefix = NULL;
-			}
+			dom_eliminate_ns(nodep, nsptr);
 		} else {
 			RETURN_NULL();
 		}
