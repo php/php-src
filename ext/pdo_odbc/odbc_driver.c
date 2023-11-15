@@ -513,7 +513,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 				*db_end = '\0';
 			}
 
-			char *uid = NULL, *pwd = NULL, *dsn;
+			char *uid = NULL, *pwd = NULL, *dsn = NULL;
 			bool should_quote_uid, should_quote_pwd;
 			size_t new_dsn_size;
 
