@@ -1,5 +1,7 @@
 --TEST--
 GH-12675 (MEMORY_LEAK in phpdbg_prompt.c)
+--INI--
+opcache.enable=0
 --PHPDBG--
 ev file_put_contents("gh12675_1.tmp", "<?php echo 'hi';\necho 2;")
 ev file_put_contents("gh12675_2.tmp", "<?php echo 'hi';")
