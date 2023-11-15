@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug GH-12628 (The gh11374 test fails on Alpinelinux). (nielsdos)
 
+- PHPDBG:
+  . Fixed bug GH-12675 (MEMORY_LEAK in phpdbg_prompt.c). (nielsdos)
+
 - Standard:
   . Fix memory leak in syslog device handling. (danog)
   . Fixed bug GH-12621 (browscap segmentation fault when configured in the
