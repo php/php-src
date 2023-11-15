@@ -7,11 +7,11 @@ soap
 $options = array("cache_wsdl" => WSDL_CACHE_NONE);
 // Need a warm-up for globals
 for ($i = 0; $i < 10; $i++) {
-    $client = new SoapClient("ext/soap/tests/test.wsdl", $options);
+    $client = new SoapClient(__DIR__ . "/test.wsdl", $options);
 }
 $usage = memory_get_usage();
 for ($i = 0; $i < 10; $i++) {
-    $client = new SoapClient("ext/soap/tests/test.wsdl", $options);
+    $client = new SoapClient(__DIR__ . "/test.wsdl", $options);
 }
 $usage_delta = memory_get_usage() - $usage;
 var_dump($usage_delta);
