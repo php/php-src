@@ -359,10 +359,10 @@ PHP_FUNCTION(round)
 		case PHP_ROUND_HALF_DOWN:
 		case PHP_ROUND_HALF_EVEN:
 		case PHP_ROUND_HALF_ODD:
-			case PHP_ROUND_AWAY_FROM_ZERO:
-			case PHP_ROUND_TOWARD_ZERO:
-			case PHP_ROUND_CEILING:
-			case PHP_ROUND_FLOOR:
+		case PHP_ROUND_AWAY_FROM_ZERO:
+		case PHP_ROUND_TOWARD_ZERO:
+		case PHP_ROUND_CEILING:
+		case PHP_ROUND_FLOOR:
 			break;
 		default:
 			zend_argument_value_error(3, "must be a valid rounding mode (PHP_ROUND_*)");
