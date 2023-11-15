@@ -23,6 +23,10 @@
 # include "valgrind/callgrind.h"
 #endif
 
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+#endif
+
 ZEND_API zend_new_interned_string_func_t zend_new_interned_string;
 ZEND_API zend_string_init_interned_func_t zend_string_init_interned;
 ZEND_API zend_string_init_existing_interned_func_t zend_string_init_existing_interned;
@@ -508,3 +512,27 @@ ZEND_API zend_string *zend_string_concat3(
 
 	return res;
 }
+
+/* strlcpy and strlcat are not intercepted by msan, so we need to do it ourselves. */
+#if __has_feature(memory_sanitizer)
+static size_t (*libc_strlcpy)(char *__restrict, const char *__restrict, size_t);
+size_t strlcpy(char *__restrict dest, const char *__restrict src, size_t n)
+{
+	if (!libc_strlcpy) {
+		libc_strlcpy = dlsym(RTLD_NEXT, "strlcpy");
+	}
+	size_t result = libc_strlcpy(dest, src, n);
+	__msan_unpoison_string(dest);
+	return result;
+}
+static size_t (*libc_strlcat)(char *__restrict, const char *__restrict, size_t);
+size_t strlcat (char *__restrict dest, const char *restrict src, size_t n)
+{
+	if (!libc_strlcat) {
+		libc_strlcat = dlsym(RTLD_NEXT, "strlcat");
+	}
+	size_t result = libc_strlcat(dest, src, n);
+	__msan_unpoison_string(dest);
+	return result;
+}
+#endif
