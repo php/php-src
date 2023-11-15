@@ -36,7 +36,7 @@ static inline int php_intlog10abs(double value) {
 	value = fabs(value);
 
 	if (value < 1e-8 || value > 1e22) {
-		return (int)floor(log10(value));
+		return (int) floor(log10(value));
 	} else {
 		/* Do a binary search with 5 steps */
 		int result = 15;
@@ -79,7 +79,7 @@ static inline int php_intlog10abs(double value) {
 static inline double php_intpow10(int power) {
 	/* Not in lookup table */
 	if (power < 0 || power > 22) {
-		return pow(10.0, (double)power);
+		return pow(10.0, (double) power);
 	}
 
 	static const double powers[] = {
@@ -101,11 +101,11 @@ static inline double php_round_helper(double value, int mode) {
 	 * in branches in the assembly) to make the following cases simpler.
 	 */
 	double integral;
-	double fractional = modf(value, &integral);
+	double fractional = fabs(modf(value, &integral));
 
 	switch (mode) {
 		case PHP_ROUND_HALF_UP:
-			if (fabs(fractional) >= 0.5) {
+			if (fractional >= 0.5) {
 				/* We must increase the magnitude of the integral part
 				 * (rounding up / towards infinity). copysign(1.0, integral)
 				 * will either result in 1.0 or -1.0 depending on the sign
@@ -120,7 +120,7 @@ static inline double php_round_helper(double value, int mode) {
 			return integral;
 
 		case PHP_ROUND_HALF_DOWN:
-			if (fabs(fractional) > 0.5) {
+			if (fractional > 0.5) {
 				return integral + copysign(1.0, integral);
 			}
 
@@ -145,7 +145,6 @@ static inline double php_round_helper(double value, int mode) {
 			return fractional == 0 ? integral : integral + copysign(1.0, integral);
 
 		case PHP_ROUND_HALF_EVEN:
-			fractional = fabs(fractional);
 			if (fractional > 0.5) {
 				return integral + copysign(1.0, integral);
 			}
@@ -164,7 +163,6 @@ static inline double php_round_helper(double value, int mode) {
 			return integral;
 
 		case PHP_ROUND_HALF_ODD:
-			fractional = fabs(fractional);
 			if (fractional > 0.5) {
 				return integral + copysign(1.0, integral);
 			}
@@ -179,7 +177,7 @@ static inline double php_round_helper(double value, int mode) {
 
 			return integral;
 
-		EMPTY_SWITCH_DEFAULT_CASE();
+			EMPTY_SWITCH_DEFAULT_CASE();
 	}
 	// FIXME: GCC bug, branch is considered reachable.
 	ZEND_UNREACHABLE();
@@ -200,7 +198,7 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		return value;
 	}
 
-	places = places < INT_MIN+1 ? INT_MIN+1 : places;
+	places = places < INT_MIN + 1 ? INT_MIN + 1 : places;
 	precision_places = 14 - php_intlog10abs(value);
 
 	f1 = php_intpow10(abs(places));
@@ -209,9 +207,9 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	   the requested places BUT is small enough to make sure a non-zero value
 	   is returned, pre-round the result to the precision */
 	if (precision_places > places && precision_places - 15 < places) {
-		int64_t use_precision = precision_places < INT_MIN+1 ? INT_MIN+1 : precision_places;
+		int64_t use_precision = precision_places < INT_MIN + 1 ? INT_MIN + 1 : precision_places;
 
-		f2 = php_intpow10(abs((int)use_precision));
+		f2 = php_intpow10(abs((int) use_precision));
 		if (use_precision >= 0) {
 			tmp_value = value * f2;
 		} else {
@@ -222,9 +220,9 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		tmp_value = php_round_helper(tmp_value, mode);
 
 		use_precision = places - precision_places;
-		use_precision = use_precision < INT_MIN+1 ? INT_MIN+1 : use_precision;
+		use_precision = use_precision < INT_MIN + 1 ? INT_MIN + 1 : use_precision;
 		/* now correctly move the decimal point */
-		f2 = php_intpow10(abs((int)use_precision));
+		f2 = php_intpow10(abs((int) use_precision));
 		/* because places < precision_places */
 		tmp_value = tmp_value / f2;
 	} else {
@@ -275,25 +273,25 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 
 /* {{{ Return the absolute value of the number */
 PHP_FUNCTION(abs)
-{
-	zval *value;
+		{
+				zval * value;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+		ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_NUMBER(value)
-	ZEND_PARSE_PARAMETERS_END();
+		ZEND_PARSE_PARAMETERS_END();
 
-	switch (Z_TYPE_P(value)) {
-		case IS_LONG:
-			if (UNEXPECTED(Z_LVAL_P(value) == ZEND_LONG_MIN)) {
-				RETURN_DOUBLE(-(double)ZEND_LONG_MIN);
-			} else {
-				RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
-			}
-		case IS_DOUBLE:
-			RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-}
+		switch (Z_TYPE_P(value)) {
+			case IS_LONG:
+				if (UNEXPECTED(Z_LVAL_P(value) == ZEND_LONG_MIN)) {
+					RETURN_DOUBLE(-(double) ZEND_LONG_MIN);
+				} else {
+					RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
+				}
+			case IS_DOUBLE:
+				RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
+			EMPTY_SWITCH_DEFAULT_CASE();
+		}
+		}
 /* }}} */
 
 /* {{{ Returns the next highest integer value of the number */
@@ -301,53 +299,53 @@ PHP_FUNCTION(ceil)
 		{
 				zval * value;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+		ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_NUMBER(value)
-	ZEND_PARSE_PARAMETERS_END();
+		ZEND_PARSE_PARAMETERS_END();
 
-	switch (Z_TYPE_P(value)) {
-		case IS_LONG:
-			RETURN_DOUBLE(zval_get_double(value));
-		case IS_DOUBLE:
-			RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-}
+		switch (Z_TYPE_P(value)) {
+			case IS_LONG:
+				RETURN_DOUBLE(zval_get_double(value));
+			case IS_DOUBLE:
+				RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
+			EMPTY_SWITCH_DEFAULT_CASE();
+		}
+		}
 /* }}} */
 
 /* {{{ Returns the next lowest integer value from the number */
 PHP_FUNCTION(floor)
-{
-	zval *value;
+		{
+				zval * value;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+		ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_NUMBER(value)
-	ZEND_PARSE_PARAMETERS_END();
+		ZEND_PARSE_PARAMETERS_END();
 
-	switch (Z_TYPE_P(value)) {
-		case IS_LONG:
-			RETURN_DOUBLE(zval_get_double(value));
-		case IS_DOUBLE:
-			RETURN_DOUBLE(floor(Z_DVAL_P(value)));
-		EMPTY_SWITCH_DEFAULT_CASE();
-	}
-}
+		switch (Z_TYPE_P(value)) {
+			case IS_LONG:
+				RETURN_DOUBLE(zval_get_double(value));
+			case IS_DOUBLE:
+				RETURN_DOUBLE(floor(Z_DVAL_P(value)));
+			EMPTY_SWITCH_DEFAULT_CASE();
+		}
+		}
 /* }}} */
 
 /* {{{ Returns the number rounded to specified precision */
 PHP_FUNCTION(round)
-{
-	zval *value;
-	int places = 0;
-	zend_long precision = 0;
-	zend_long mode = PHP_ROUND_HALF_UP;
+		{
+				zval * value;
+		int places = 0;
+		zend_long precision = 0;
+		zend_long mode = PHP_ROUND_HALF_UP;
 
-	ZEND_PARSE_PARAMETERS_START(1, 3)
+		ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_NUMBER(value)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(precision)
 		Z_PARAM_LONG(mode)
-	ZEND_PARSE_PARAMETERS_END();
+		ZEND_PARSE_PARAMETERS_END();
 
 		if (ZEND_NUM_ARGS() >= 2) {
 			if (precision >= 0) {
@@ -370,14 +368,14 @@ PHP_FUNCTION(round)
 			default:
 				zend_argument_value_error(3, "must be a valid rounding mode (PHP_ROUND_*)");
 			RETURN_THROWS();
-	}
+		}
 
-	switch (Z_TYPE_P(value)) {
-		case IS_LONG:
-			/* Simple case - long that doesn't need to be rounded. */
-			if (places >= 0) {
-				RETURN_DOUBLE(zval_get_double(value));
-			}
+		switch (Z_TYPE_P(value)) {
+			case IS_LONG:
+				/* Simple case - long that doesn't need to be rounded. */
+				if (places >= 0) {
+					RETURN_DOUBLE(zval_get_double(value));
+				}
 			ZEND_FALLTHROUGH;
 
 			case IS_DOUBLE:
