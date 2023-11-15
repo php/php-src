@@ -1024,33 +1024,21 @@ PHPAPI void php_implode(const zend_string *glue, HashTable *pieces, zval *return
 PHP_FUNCTION(implode)
 {
 	zend_string *arg1_str = NULL;
-	HashTable *arg1_array = NULL;
 	zend_array *pieces = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ARRAY_HT_OR_STR(arg1_array, arg1_str)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_HT_OR_NULL(pieces)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (arg1_str != NULL && pieces == NULL) {
-		zend_type_error("%s(): Argument #2 ($array) must be of type array, null given", get_active_function_name());
-		RETURN_THROWS();
-	}
-
-	if (pieces == NULL) {
-		if (arg1_array == NULL) {
-			zend_type_error("%s(): Argument #1 ($array) must be of type array, string given", get_active_function_name());
-			RETURN_THROWS();
-		}
+	if (ZEND_NUM_ARGS() == 1) {
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_ARRAY_HT(pieces)
+		ZEND_PARSE_PARAMETERS_END();
 
 		arg1_str = ZSTR_EMPTY_ALLOC();
-		pieces = arg1_array;
-	} else {
-		if (arg1_str == NULL) {
-			zend_argument_type_error(1, "must be of type string, array given");
-			RETURN_THROWS();
-		}
+	}
+
+	if (ZEND_NUM_ARGS() == 2) {
+		ZEND_PARSE_PARAMETERS_START(1, 2)
+			Z_PARAM_STR(arg1_str)
+			Z_PARAM_ARRAY_HT(pieces)
+		ZEND_PARSE_PARAMETERS_END();
 	}
 
 	php_implode(arg1_str, pieces, return_value);
