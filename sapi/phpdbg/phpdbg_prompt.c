@@ -408,6 +408,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 			if ((res_len != PHPDBG_G(exec_len)) || (memcmp(res, PHPDBG_G(exec), res_len) != SUCCESS)) {
 				if (PHPDBG_G(in_execution)) {
 					if (phpdbg_ask_user_permission("Do you really want to stop execution to set a new execution context?") == FAILURE) {
+						free(res);
 						return FAILURE;
 					}
 				}
@@ -441,6 +442,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 				phpdbg_compile();
 			} else {
+				free(res);
 				phpdbg_notice("Execution context not changed");
 			}
 		} else {
