@@ -1035,7 +1035,7 @@ PHP_FUNCTION(implode)
 
 	if (pieces == NULL) {
 		if (arg1_array == NULL) {
-			zend_type_error("%s(): Argument #1 ($array) must be of type array, string given", get_active_function_name());
+			zend_type_error("%s(): Argument #1 ($array) must be of type array, null given", get_active_function_name());
 			RETURN_THROWS();
 		}
 
