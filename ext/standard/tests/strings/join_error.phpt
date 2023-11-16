@@ -20,5 +20,5 @@ echo "Done\n";
 *** Testing join() : error conditions ***
 
 -- Testing join() with less than expected no. of arguments --
-join(): Argument #1 ($array) must be of type array, string given
+join(): Argument #2 ($array) must be of type array, null given
 Done

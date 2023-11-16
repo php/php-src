@@ -102,49 +102,49 @@ echo "Done\n";
 
 --- Testing join() by supplying different values for 'pieces' argument ---
 -- Iteration 1 --
-join(): Argument #2 ($array) must be of type ?array, int given
+join(): Argument #2 ($array) must be of type array, int given
 -- Iteration 2 --
-join(): Argument #2 ($array) must be of type ?array, int given
+join(): Argument #2 ($array) must be of type array, int given
 -- Iteration 3 --
-join(): Argument #2 ($array) must be of type ?array, int given
+join(): Argument #2 ($array) must be of type array, int given
 -- Iteration 4 --
-join(): Argument #2 ($array) must be of type ?array, int given
+join(): Argument #2 ($array) must be of type array, int given
 -- Iteration 5 --
-join(): Argument #2 ($array) must be of type ?array, float given
+join(): Argument #2 ($array) must be of type array, float given
 -- Iteration 6 --
-join(): Argument #2 ($array) must be of type ?array, float given
+join(): Argument #2 ($array) must be of type array, float given
 -- Iteration 7 --
-join(): Argument #2 ($array) must be of type ?array, float given
+join(): Argument #2 ($array) must be of type array, float given
 -- Iteration 8 --
-join(): Argument #2 ($array) must be of type ?array, float given
+join(): Argument #2 ($array) must be of type array, float given
 -- Iteration 9 --
-join(): Argument #2 ($array) must be of type ?array, float given
+join(): Argument #2 ($array) must be of type array, float given
 -- Iteration 10 --
-join(): Argument #2 ($array) must be of type ?array, true given
+join(): Argument #2 ($array) must be of type array, true given
 -- Iteration 11 --
-join(): Argument #2 ($array) must be of type ?array, false given
+join(): Argument #2 ($array) must be of type array, false given
 -- Iteration 12 --
-join(): Argument #2 ($array) must be of type ?array, true given
+join(): Argument #2 ($array) must be of type array, true given
 -- Iteration 13 --
-join(): Argument #2 ($array) must be of type ?array, false given
+join(): Argument #2 ($array) must be of type array, false given
 -- Iteration 14 --
-join(): Argument #2 ($array) must be of type ?array, string given
+join(): Argument #2 ($array) must be of type array, string given
 -- Iteration 15 --
-join(): Argument #2 ($array) must be of type ?array, string given
+join(): Argument #2 ($array) must be of type array, string given
 -- Iteration 16 --
-join(): Argument #2 ($array) must be of type ?array, test given
+join(): Argument #2 ($array) must be of type array, test given
 -- Iteration 17 --
-join(): Argument #2 ($array) must be of type ?array, string given
+join(): Argument #2 ($array) must be of type array, string given
 -- Iteration 18 --
-join(): Argument #2 ($array) must be of type ?array, string given
+join(): Argument #2 ($array) must be of type array, string given
 -- Iteration 19 --
-join(): Argument #1 ($array) must be of type array, string given
+join(): Argument #2 ($array) must be of type array, null given
 -- Iteration 20 --
-join(): Argument #1 ($array) must be of type array, string given
+join(): Argument #2 ($array) must be of type array, null given
 -- Iteration 21 --
-join(): Argument #2 ($array) must be of type ?array, resource given
+join(): Argument #2 ($array) must be of type array, resource given
 -- Iteration 22 --
-join(): Argument #1 ($array) must be of type array, string given
+join(): Argument #2 ($array) must be of type array, null given
 -- Iteration 23 --
-join(): Argument #1 ($array) must be of type array, string given
+join(): Argument #2 ($array) must be of type array, null given
 Done

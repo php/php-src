@@ -106,50 +106,6 @@ $resources = array($file_handle, $dir_handle);
 
 var_dump( implode("::", $resources) );
 
-echo "\n*** Testing error conditions ***\n";
-
-/* only glue */
-try {
-    var_dump( implode("glue") );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-/* int as pieces */
-try {
-    var_dump( implode("glue",1234) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-/* NULL as pieces */
-try {
-    var_dump( implode("glue", NULL) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-/* pieces as NULL array */
-try {
-    var_dump( implode(",", array(NULL)) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-/* integer as glue */
-try {
-    var_dump( implode(12, "pieces") );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-/* NULL as glue */
-try {
-    var_dump( implode(NULL, "abcd") );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
 /* closing resource handles */
 fclose($file_handle);
 closedir($dir_handle);
@@ -236,7 +192,7 @@ string(35) "2000-639010PHP000 0string%0with%0...%0"
 string(43) "2\00\0-639\01\0PHP\0\0\0 \0string%0with%0...%0"
 
 *** Testing implode() on empty string ***
-implode(): Argument #1 ($array) must be of type array, string given
+implode(): Argument #2 ($array) must be of type array, null given
 
 *** Testing implode() on sub-arrays ***
 
@@ -264,14 +220,4 @@ array(2) {
 
 *** Testing end() on resource type ***
 string(%d) "Resource id #%d::Resource id #%d"
-
-*** Testing error conditions ***
-implode(): Argument #1 ($array) must be of type array, string given
-implode(): Argument #2 ($array) must be of type ?array, int given
-implode(): Argument #1 ($array) must be of type array, string given
-string(0) ""
-implode(): Argument #2 ($array) must be of type ?array, string given
-
-Deprecated: implode(): Passing null to parameter #1 ($separator) of type array|string is deprecated in %s on line %d
-implode(): Argument #2 ($array) must be of type ?array, string given
 Done
