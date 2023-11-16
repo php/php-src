@@ -33,6 +33,9 @@ Phar:
   . Fixed bug GH-12532 (PharData created from zip has incorrect timestamp).
     (nielsdos)
 
+POSIX:
+  . Added POSIX_SC_CHILD_MAX and POSIX_SC_CLK_TCK constants. (Jakub Zelenka)
+
 SimpleXML:
   . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
     within foreach). (nielsdos)
