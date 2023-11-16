@@ -163,6 +163,10 @@ PHP 8.4 UPGRADE NOTES
   . Added mb_trim, mb_ltrim and mb_rtrim functions.
     RFC: https://wiki.php.net/rfc/mb_trim
 
+- Opcache:
+  . If JIT is enabled, PHP will now exit with a fatal error on startup in case
+    of JIT startup initialization issues.
+
 ========================================
 7. New Classes and Interfaces
 ========================================

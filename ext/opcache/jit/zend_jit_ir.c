@@ -2869,7 +2869,7 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 	return entry;
 }
 
-static int zend_jit_setup_stubs(void)
+static void zend_jit_setup_stubs(void)
 {
 	zend_jit_ctx jit;
 	void *entry;
@@ -2888,7 +2888,7 @@ static int zend_jit_setup_stubs(void)
 		entry = zend_jit_ir_compile(&jit.ctx, &size, zend_jit_stubs[i].name);
 		if (!entry) {
 			zend_jit_free_ctx(&jit);
-			return 0;
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: could not compile stub");
 		}
 
 		zend_jit_stub_handlers[i] = entry;
@@ -2920,7 +2920,6 @@ static int zend_jit_setup_stubs(void)
 		}
 		zend_jit_free_ctx(&jit);
 	}
-	return 1;
 }
 
 #define REGISTER_HELPER(n)  \
@@ -3121,7 +3120,7 @@ static void zend_jit_setup_disasm(void)
 #endif
 }
 
-static int zend_jit_calc_trace_prologue_size(void)
+static void zend_jit_calc_trace_prologue_size(void)
 {
 	zend_jit_ctx jit_ctx;
 	zend_jit_ctx *jit = &jit_ctx;
@@ -3142,11 +3141,10 @@ static int zend_jit_calc_trace_prologue_size(void)
 	zend_jit_free_ctx(jit);
 
 	if (!entry) {
-		return 0;
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: could not compile prologue");
 	}
 
 	zend_jit_trace_prologue_size = size;
-	return 1;
 }
 
 #if !ZEND_WIN32 && !defined(IR_TARGET_AARCH64)
@@ -3197,12 +3195,11 @@ static zend_never_inline void zend_jit_set_sp_adj_vm(void)
 }
 #endif
 
-static int zend_jit_setup(void)
+static void zend_jit_setup(void)
 {
 #if defined(IR_TARGET_X86)
 	if (!zend_cpu_supports_sse2()) {
-		zend_error(E_CORE_ERROR, "CPU doesn't support SSE2");
-		return FAILURE;
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: CPU doesn't support SSE2");
 	}
 #endif
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
@@ -3235,8 +3232,7 @@ static int zend_jit_setup(void)
 			offset += sizeof(void*);
 		}
 		if (offset >= size) {
-			// TODO: error message ???
-			return FAILURE;
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: offset >= size");
 		}
 	} while(0);
 # elif ZEND_WIN32
@@ -3259,8 +3255,7 @@ static int zend_jit_setup(void)
 			offset += sizeof(void*);
 		}
 		if (offset >= size) {
-			// TODO: error message ???
-			return FAILURE;
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: offset >= size");
 		}
 	} while(0);
 # elif defined(__APPLE__) && defined(__x86_64__)
@@ -3345,17 +3340,9 @@ static int zend_jit_setup(void)
 			ZEND_JIT_DEBUG_IR_AFTER_SCCP|ZEND_JIT_DEBUG_IR_AFTER_SCHEDULE|ZEND_JIT_DEBUG_IR_AFTER_REGS);
 	}
 
-	if (!zend_jit_calc_trace_prologue_size()) {
-	    JIT_G(debug) = debug;
-		return FAILURE;
-	}
-	if (!zend_jit_setup_stubs()) {
-	    JIT_G(debug) = debug;
-		return FAILURE;
-	}
+	zend_jit_calc_trace_prologue_size();
+	zend_jit_setup_stubs();
 	JIT_G(debug) = debug;
-
-	return SUCCESS;
 }
 
 static void zend_jit_shutdown_ir(void)
