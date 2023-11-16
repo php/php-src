@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5a4a863892761475f2d34d9463e0660b0a8ede5d */
+ * Stub hash: bf0c3b394a47374357d6ac95b4c401fbcf7bc697 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_kill, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
@@ -417,6 +417,12 @@ static void register_posix_symbols(int module_number)
 #endif
 #if defined(_SC_ARG_MAX)
 	REGISTER_LONG_CONSTANT("POSIX_SC_ARG_MAX", _SC_ARG_MAX, CONST_PERSISTENT);
+#endif
+#if defined(_SC_CHILD_MAX)
+	REGISTER_LONG_CONSTANT("POSIX_SC_CHILD_MAX", _SC_CHILD_MAX, CONST_PERSISTENT);
+#endif
+#if defined(_SC_CLK_TCK)
+	REGISTER_LONG_CONSTANT("POSIX_SC_CLK_TCK", _SC_CLK_TCK, CONST_PERSISTENT);
 #endif
 #if defined(_SC_PAGESIZE)
 	REGISTER_LONG_CONSTANT("POSIX_SC_PAGESIZE", _SC_PAGESIZE, CONST_PERSISTENT);
