@@ -697,7 +697,7 @@ jobs:
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
         exclude:
-          - branch: { name: 'PHP-80', ref: 'PHP-8.0' }
+          - branch: { name: 'PHP-80', ref: 'PHP-8.0', major: 8, minor: 0 }
     name: "${{ matrix.branch.name }}_LIBMYSQLCLIENT"
     runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     steps:
@@ -715,30 +715,23 @@ jobs:
           mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
           # Ensure local_infile tests can run.
           mysql -uroot -proot -e "SET GLOBAL local_infile = true"
-      # Does not support caching_sha2_auth :(
-      # - name: Build mysql-5.6
-      #  uses: ./.github/actions/build-libmysqlclient
-      #  with:
-      #    libmysql: mysql-5.6.49-linux-glibc2.12-x86_64.tar.gz
-      # - name: Test mysql-5.6
-      #   uses: ./.github/actions/test-libmysqlclient
-      - name: Build mysql-5.7
-        uses: ./.github/actions/build-libmysqlclient
-        with:
-          libmysql: mysql-5.7.44-linux-glibc2.12-x86_64.tar.gz
-          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
-      - name: Test mysql-5.7
-        uses: ./.github/actions/test-libmysqlclient
-        with:
-          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Build mysql-8.0
         uses: ./.github/actions/build-libmysqlclient
         with:
-          # FIXME: There are new warnings
-          # configurationParameters: --enable-werror
-          libmysql: mysql-8.0.35-linux-glibc2.12-x86_64.tar.xz
+          configurationParameters: --enable-werror
+          libmysql: mysql-8.0.35-linux-glibc2.28-x86_64.tar.xz
           withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Test mysql-8.0
+        uses: ./.github/actions/test-libmysqlclient
+        with:
+          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
+      - name: Build mysql-8.2
+        uses: ./.github/actions/build-libmysqlclient
+        with:
+          configurationParameters: --enable-werror
+          libmysql: mysql-8.2.0-linux-glibc2.28-x86_64.tar.xz
+          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
+      - name: Test mysql-8.2
         uses: ./.github/actions/test-libmysqlclient
         with:
           withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}

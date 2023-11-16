@@ -40,11 +40,12 @@ permissions:
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.url || github.run_id }}
   cancel-in-progress: true
-env:
-  CC: ccache gcc
-  CXX: ccache g++
+# env:
+#   CC: ccache gcc
+#   CXX: ccache g++
 jobs:
   LINUX_X64:
+    if: false
     services:
       mysql:
         image: mysql:8
@@ -141,6 +142,7 @@ jobs:
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/verify-generated-files
   MACOS_DEBUG_NTS:
+    if: false
     runs-on: macos-12
     steps:
       - name: git checkout
@@ -173,6 +175,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   WINDOWS:
+    if: false
     name: WINDOWS_X64_ZTS
     runs-on: windows-2019
     env:
@@ -199,7 +202,8 @@ jobs:
         run: .github/scripts/windows/test.bat
   BENCHMARKING:
     name: BENCHMARKING
-    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+    if: false
+    # if: github.repository_owner == 'php' || github.event_name == 'pull_request'
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
@@ -298,3 +302,52 @@ jobs:
           name: profiles
           path: ${{ github.workspace }}/benchmark/profiles
           retention-days: 30
+  LIBMYSQLCLIENT:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - branch: { name: 'MASTER', ref: 'master', version: { major: 8, minor: 4 } }
+          - branch: { name: 'PHP-83', ref: 'PHP-8.3', version: { major: 8, minor: 3 } }
+          - branch: { name: 'PHP-82', ref: 'PHP-8.2', version: { major: 8, minor: 2 } }
+    name: "${{ matrix.branch.name }}_LIBMYSQLCLIENT"
+    runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch.ref }}
+      - name: apt
+        run: |
+          sudo apt-get update -y | true
+          sudo apt install bison re2c
+      - name: Setup
+        run: |
+          sudo service mysql start
+          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+          # Ensure local_infile tests can run.
+          mysql -uroot -proot -e "SET GLOBAL local_infile = true"
+      - name: Build mysql-8.0
+        uses: ./.github/actions/build-libmysqlclient
+        with:
+          # FIXME: There are new warnings
+          # configurationParameters: --enable-werror
+          libmysql: mysql-8.0.35-linux-glibc2.28-x86_64.tar.xz
+          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
+      - name: Test mysql-8.0
+        uses: ./.github/actions/test-libmysqlclient
+        with:
+          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
+      - name: Build mysql-8.2
+        uses: ./.github/actions/build-libmysqlclient
+        with:
+          # FIXME: There are new warnings
+          # configurationParameters: --enable-werror
+          libmysql: mysql-8.2.0-linux-glibc2.28-x86_64.tar.xz
+          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
+      - name: Test mysql-8.2
+        uses: ./.github/actions/test-libmysqlclient
+        with:
+          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
+      - name: Verify generated files are up to date
+        uses: ./.github/actions/verify-generated-files
