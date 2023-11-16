@@ -384,6 +384,7 @@ static bool zend_jit_set_veneer(ir_ctx *ctx, const void *addr, const void *venee
 		if (zend_jit_stub_handlers[i] == addr) {
 			const void **ptr = (const void**)&zend_jit_stub_handlers[count + i];
 			*ptr = veneer;
+#ifdef HAVE_CAPSTONE
 		    if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM) {
 				const char *name = ir_disasm_find_symbol((uint64_t)(uintptr_t)addr, &offset);
 
@@ -399,6 +400,7 @@ static bool zend_jit_set_veneer(ir_ctx *ctx, const void *addr, const void *venee
 					}
 				}
 			}
+#endif
 			return 1;
 		}
 	}
