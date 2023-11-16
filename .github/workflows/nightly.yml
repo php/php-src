@@ -48,6 +48,15 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
     strategy:
       fail-fast: false
       matrix:
@@ -287,6 +296,15 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
@@ -518,6 +536,15 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
     strategy:
       fail-fast: false
       matrix:
