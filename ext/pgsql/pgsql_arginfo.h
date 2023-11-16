@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b52f6b94faabab12457bf0d8ec035295aaacbfba */
+ * Stub hash: 385f886f10623e6801607d367efb30fbb2f95890 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -859,6 +859,9 @@ static void register_pgsql_symbols(int module_number)
 #endif
 #if defined(LIBPQ_HAS_PIPELINING)
 	REGISTER_LONG_CONSTANT("PGSQL_PIPELINE_ABORTED", PQ_PIPELINE_ABORTED, CONST_PERSISTENT);
+#endif
+#if defined(LIBPQ_HAS_PIPELINING)
+	REGISTER_LONG_CONSTANT("PGSQL_STATUS_PIPELINE_ABORTED", PGRES_PIPELINE_ABORTED, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_PG_CONTEXT_VISIBILITY)
 	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_NEVER", PQSHOW_CONTEXT_NEVER, CONST_PERSISTENT);

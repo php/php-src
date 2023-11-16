@@ -461,6 +461,11 @@ namespace {
      * @cvalue PQ_PIPELINE_ABORTED
      */
     const PGSQL_PIPELINE_ABORTED = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PGRES_PIPELINE_ABORTED
+     */
+    const PGSQL_STATUS_PIPELINE_ABORTED = UNKNOWN;
 #endif
     
 #ifdef HAVE_PG_CONTEXT_VISIBILITY
