@@ -3419,7 +3419,7 @@ ZEND_EXT_API int zend_jit_check_support(void)
 	return SUCCESS;
 }
 
-ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
+ZEND_EXT_API void zend_jit_startup(void *buf, size_t size, bool reattached)
 {
 	zend_jit_halt_op = zend_get_halt_op();
 	zend_jit_profile_counter_rid = zend_get_op_array_extension_handle(ACCELERATOR_PRODUCT_NAME);
@@ -3494,24 +3494,16 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 	}
 
 	zend_jit_unprotect();
-	if (zend_jit_setup() != SUCCESS) {
-		zend_jit_protect();
-		// TODO: error reporting and cleanup ???
-		return FAILURE;
-	}
+	zend_jit_setup();
 	zend_jit_protect();
 	zend_jit_init_handlers();
 
-	if (zend_jit_trace_startup(reattached) != SUCCESS) {
-		return FAILURE;
-	}
+	zend_jit_trace_startup(reattached);
 
 	zend_jit_unprotect();
 	/* save JIT buffer pos */
 	dasm_ptr[1] = dasm_ptr[0];
 	zend_jit_protect();
-
-	return SUCCESS;
 }
 
 ZEND_EXT_API void zend_jit_shutdown(void)

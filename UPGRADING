@@ -153,6 +153,10 @@ PHP 8.4 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- Opcache:
+  . If JIT is enabled, PHP will now exit with a fatal error on startup
+    in case of JIT startup initialization issues.
+
 - Intl:
   . The class constants are typed now.
 

@@ -3248,16 +3248,13 @@ static zend_result accel_post_startup(void)
 		zend_shared_alloc_lock();
 #ifdef HAVE_JIT
 		if (JIT_G(enabled)) {
-			if (JIT_G(buffer_size) == 0
-		     || !ZSMMG(reserved)
-			 || zend_jit_startup(ZSMMG(reserved), jit_size, reattached) != SUCCESS) {
+			if (JIT_G(buffer_size) == 0) {
 				JIT_G(enabled) = false;
 				JIT_G(on) = false;
-				/* The JIT is implicitly disabled with opcache.jit_buffer_size=0, so we don't want to
-				 * emit a warning here. */
-				if (JIT_G(buffer_size) != 0) {
-					zend_accel_error(ACCEL_LOG_WARNING, "Could not enable JIT!");
-				}
+			} else if (!ZSMMG(reserved)) {
+				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: could not use reserved buffer!");
+			} else {
+				zend_jit_startup(ZSMMG(reserved), jit_size, reattached);
 			}
 		}
 #endif
