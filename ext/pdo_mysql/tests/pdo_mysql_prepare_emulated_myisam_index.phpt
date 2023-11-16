@@ -96,62 +96,61 @@ $db = MySQLPDOTest::factory();
             echo $e->getMessage(), \PHP_EOL;
         }
 
-        // lets be fair and do the most simple SELECT first
-        $stmt = prepex(4, $db, 'SELECT 1 as "one"');
-        var_dump($stmt->fetch(PDO::FETCH_ASSOC));
-
-        prepex(6, $db, sprintf('CREATE TABLE test_prepare_emulated(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
-        prepex(7, $db, "INSERT INTO test_prepare_emulated(id, label) VALUES(1, ':placeholder')");
-        $stmt = prepex(8, $db, 'SELECT label FROM test_prepare_emulated');
-        var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-
-        prepex(9, $db, 'DELETE FROM test_prepare_emulated');
-        prepex(10, $db, "INSERT INTO test_prepare_emulated(id, label) VALUES(1, ':placeholder')",
-            array(':placeholder' => 'first row'));
-        $stmt = prepex(11, $db, 'SELECT label FROM test_prepare_emulated');
-
-        var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-        prepex(12, $db, 'DELETE FROM test_prepare_emulated');
-        prepex(13, $db, 'INSERT INTO test_prepare_emulated(id, label) VALUES(1, :placeholder)',
-            array(':placeholder' => 'first row'));
-        prepex(14, $db, 'INSERT INTO test_prepare_emulated(id, label) VALUES(2, :placeholder)',
-            array(':placeholder' => 'second row'));
-        $stmt = prepex(15, $db, 'SELECT label FROM test_prepare_emulated');
-        var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-
-        // Is PDO fun?
-        prepex(16, $db, 'SELECT label FROM test_prepare_emulated WHERE :placeholder > 1',
-            array(':placeholder' => 'id'));
-        prepex(17, $db, 'SELECT :placeholder FROM test_prepare_emulated WHERE id > 1',
-            array(':placeholder' => 'id'));
-        prepex(18, $db, 'SELECT :placeholder FROM test_prepare_emulated WHERE :placeholder > :placeholder',
-            array(':placeholder' => 'test'));
-
-        for ($num_params = 2; $num_params < 100; $num_params++) {
-            $params = array(':placeholder' => 'a');
-            for ($i = 1; $i < $num_params; $i++) {
-                $params[str_repeat('a', $i)] = 'some data';
-            }
-            prepex(19, $db, 'SELECT id, label FROM test_prepare_emulated WHERE label > :placeholder',
-                $params, array('execute' => array('sqlstate' => 'HY093')));
+        prepex(4, $db, 'CREATE TABLE test_prepare_emulated_myisam_index(id INT, label CHAR(255)) ENGINE=MyISAM');
+        if (is_object(prepex(5, $db, 'CREATE FULLTEXT INDEX idx1 ON test_prepare_emulated_myisam_index(label)'))) {
+            prepex(6, $db, 'INSERT INTO test_prepare_emulated_myisam_index(id, label) VALUES (1, ?)',
+                array('MySQL is the best database in the world!'));
+            prepex(7, $db, 'INSERT INTO test_prepare_emulated_myisam_index(id, label) VALUES (1, ?)',
+                array('If I have the freedom to choose, I would always go again for the MySQL Server'));
+            $stmt = prepex(8, $db, 'SELECT id, label FROM test_prepare_emulated_myisam_index WHERE MATCH label AGAINST (?)',
+                array('mysql'));
+            /*
+            Lets ignore that
+            if (count(($tmp = $stmt->fetchAll(PDO::FETCH_ASSOC))) != 2)
+                printf("[074] Expecting two rows, got %d rows\n", $tmp);
+            */
         }
 
-        prepex(20, $db, 'DELETE FROM test_prepare_emulated');
-        prepex(21, $db, 'INSERT INTO test_prepare_emulated(id, label) VALUES (1, :placeholder), (2, :placeholder)',
-            array(':placeholder' => 'row'));
-        $stmt = prepex(22, $db, 'SELECT id, label FROM test_prepare_emulated');
-        var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+        prepex(9, $db, 'DELETE FROM test_prepare_emulated_myisam_index');
+        prepex(10, $db, 'INSERT INTO test_prepare_emulated_myisam_index(id, label) VALUES (1, ?), (2, ?)',
+            array('row', 'row'));
 
-        $stmt = prepex(23, $db, 'SELECT id, label FROM test_prepare_emulated WHERE :placeholder IS NOT NULL',
-            array(':placeholder' => 1));
-        if (count(($tmp = $stmt->fetchAll(PDO::FETCH_ASSOC))) != 2)
-            printf("[024] '1' IS NOT NULL evaluates to true, expecting two rows, got %d rows\n", $tmp);
+        $stmt = prepex(11, $db, 'SELECT id, label FROM "test_prepare_emulated_myisam_index WHERE MATCH label AGAINST (?)',
+            array('row'),
+            array('execute' => array('sqlstate' => '42000', 'mysql' => 1064)));
 
-        $stmt = prepex(25, $db, 'SELECT id, label FROM test_prepare_emulated WHERE :placeholder IS NULL',
-            array(':placeholder' => 1));
+        /*
+        TODO enable after fix
+        $stmt = prepex(12, $db, 'SELECT id, label FROM \'test_prepare_emulated_myisam_index WHERE MATCH label AGAINST (:placeholder)',
+            array(':placeholder' => 'row'),
+            array('execute' => array('sqlstate' => '42000', 'mysql' => 1064)));
+        */
+
+        $stmt = prepex(13, $db, 'SELECT id, label AS "label" FROM test_prepare_emulated_myisam_index WHERE label = ?',
+            array('row'));
+
+        $sql = sprintf("SELECT id, label FROM test_prepare_emulated_myisam_index WHERE (label LIKE %s) AND (id = ?)",
+            $db->quote('%ro%'));
+        $stmt = prepex(14, $db, $sql,	array(-1));
         if (count(($tmp = $stmt->fetchAll(PDO::FETCH_ASSOC))) != 0)
-            printf("[026] '1' IS NOT NULL evaluates to true, expecting zero rows, got %d rows\n", $tmp);
+                printf("[080] Expecting zero rows, got %d rows\n", $tmp);
 
+
+        $sql = sprintf("SELECT id, label FROM test_prepare_emulated_myisam_index WHERE  (id = ?) OR (label LIKE %s)",
+            $db->quote('%ro%'));
+        $stmt = prepex(15, $db, $sql,	array(1));
+        if (count(($tmp = $stmt->fetchAll(PDO::FETCH_ASSOC))) != 2)
+                printf("[082] Expecting two rows, got %d rows\n", $tmp);
+
+        $sql = "SELECT id, label FROM test_prepare_emulated_myisam_index WHERE id = ? AND label = (SELECT label AS 'SELECT' FROM test_prepare_emulated_myisam_index WHERE id = ?)";
+        $stmt = prepex(16, $db, $sql,	array(1, 1));
+        if (count(($tmp = $stmt->fetchAll(PDO::FETCH_ASSOC))) != 1)
+                printf("[084] Expecting one row, got %d rows\n", $tmp);
+
+        $sql = "SELECT id, label FROM test_prepare_emulated_myisam_index WHERE id = :placeholder AND label = (SELECT label AS 'SELECT' FROM test_prepare_emulated_myisam_index WHERE id = ?)";
+        $stmt = prepex(17, $db, $sql,	array(1, 1), array('execute' => array('sqlstate' => 'HY093')));
+        if (is_object($stmt) && count(($tmp = $stmt->fetchAll(PDO::FETCH_ASSOC))) != 0)
+                printf("[086] Expecting no rows, got %d rows\n", $tmp);
     } catch (PDOException $e) {
         printf("[001] %s [%s] %s\n",
             $e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
@@ -162,51 +161,8 @@ $db = MySQLPDOTest::factory();
 --CLEAN--
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable(NULL, 'test_prepare_emulated');
+MySQLPDOTest::dropTestTable(NULL, 'test_prepare_emulated_myisam_index');
 ?>
 --EXPECTF--
 PDO::prepare(): Argument #1 ($query) cannot be empty
-array(1) {
-  ["one"]=>
-  string(1) "1"
-}
-array(1) {
-  [0]=>
-  array(1) {
-    ["label"]=>
-    string(12) ":placeholder"
-  }
-}
-
-Warning: PDOStatement::execute(): SQLSTATE[HY093]: Invalid parameter number: number of bound variables does not match number of tokens in %s on line %d
-array(0) {
-}
-array(2) {
-  [0]=>
-  array(1) {
-    ["label"]=>
-    string(9) "first row"
-  }
-  [1]=>
-  array(1) {
-    ["label"]=>
-    string(10) "second row"
-  }
-}
-array(2) {
-  [0]=>
-  array(2) {
-    ["id"]=>
-    string(1) "1"
-    ["label"]=>
-    string(3) "row"
-  }
-  [1]=>
-  array(2) {
-    ["id"]=>
-    string(1) "2"
-    ["label"]=>
-    string(3) "row"
-  }
-}
 done!

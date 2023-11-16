@@ -29,14 +29,13 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
 function bug_44707($db) {
 
-    $db->exec('DROP TABLE IF EXISTS test');
-    $db->exec('CREATE TABLE test(id INT, mybool TINYINT)');
+    $db->exec('CREATE TABLE test_44707(id INT, mybool TINYINT)');
 
     $id = 1;
     $mybool = false;
     var_dump($mybool);
 
-    $stmt = $db->prepare('INSERT INTO test(id, mybool) VALUES (?, ?)');
+    $stmt = $db->prepare('INSERT INTO test_44707(id, mybool) VALUES (?, ?)');
     $stmt->bindParam(1, $id);
     $stmt->bindParam(2, $mybool, PDO::PARAM_BOOL);
     var_dump($mybool);
@@ -44,16 +43,16 @@ function bug_44707($db) {
     $stmt->execute();
     var_dump($mybool);
 
-    $stmt = $db->query('SELECT * FROM test');
+    $stmt = $db->query('SELECT * FROM test_44707');
     var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-    $stmt = $db->prepare('INSERT INTO test(id, mybool) VALUES (?, ?)');
+    $stmt = $db->prepare('INSERT INTO test_44707(id, mybool) VALUES (?, ?)');
     $stmt->bindParam(1, $id);
     // INT and integer work well together
     $stmt->bindParam(2, $mybool, PDO::PARAM_INT);
     $stmt->execute();
 
-    $stmt = $db->query('SELECT * FROM test');
+    $stmt = $db->query('SELECT * FROM test_44707');
     var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
 }
@@ -71,6 +70,12 @@ $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
 bug_44707($db);
 
 print "done!";
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_44707');
 ?>
 --EXPECT--
 Native Prepared Statements

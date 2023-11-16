@@ -166,11 +166,11 @@ class MySQLPDOTest extends PDOTest {
                 preg_match('/Client API version.*mysqlnd/', $tmp));
     }
 
-    static function dropTestTable($db = NULL) {
+    static function dropTestTable($db = NULL, $tableName = 'test') {
         if (is_null($db))
             $db = self::factory();
 
-        $db->exec('DROP TABLE IF EXISTS test');
+        $db->exec('DROP TABLE IF EXISTS '.$tableName);
     }
 
 }

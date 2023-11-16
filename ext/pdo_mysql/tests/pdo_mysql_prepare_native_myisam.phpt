@@ -106,56 +106,46 @@ $db = MySQLPDOTest::factory();
             echo $e->getMessage(), \PHP_EOL;
         }
 
-        // lets be fair and do the most simple SELECT first
-        $stmt = prepex(4, $db, 'SELECT 1 as "one"');
-        if (MySQLPDOTest::isPDOMySQLnd())
-            // native types - int
-            $expected = array('one' => 1);
-        else
-            // always strings, like STRINGIFY flag
-            $expected = array('one' => '1');
+        prepex(4, $db, 'CREATE TABLE test_prepare_native_myisam(id INT, label CHAR(255)) ENGINE=MyISAM');
+        // Not every MySQL Server version supports this
+        if (is_object(prepex(5, $db, 'CREATE FULLTEXT INDEX idx1 ON test_prepare_native_myisam(label)', null, null, true))) {
+            prepex(6, $db, 'INSERT INTO test_prepare_native_myisam(id, label) VALUES (1, :placeholder)',
+                array(':placeholder' => 'MySQL is the best database in the world!'));
+            prepex(7, $db, 'INSERT INTO test_prepare_native_myisam(id, label) VALUES (2, :placeholder)',
+                array(':placeholder' => 'If I have the freedom to choose, I would always go again for the MySQL Server'));
+            $stmt = prepex(8, $db, 'SELECT id, label FROM test_prepare_native_myisam WHERE MATCH label AGAINST (:placeholder)',
+                array(':placeholder' => 'mysql'), null, true);
+            if (is_object($stmt)) {
+                /*
+                Lets ignore this
+                if (count(($tmp = $stmt->fetchAll(PDO::FETCH_ASSOC))) != 2)
+                    printf("[033] Expecting two rows, got %d rows\n", $tmp);
+                */
+                $stmt = prepex(9, $db, 'SELECT id, label FROM test_prepare_native_myisam ORDER BY id ASC');
+                if (count(($tmp = $stmt->fetchAll(PDO::FETCH_ASSOC))) != 2)
+                    printf("[027] Expecting two rows, got %d rows\n", $tmp);
 
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($row !== $expected) {
-            printf("[004a] Expecting %s got %s\n", var_export($expected, true), var_export($row, true));
-        }
-
-        prepex(6, $db, sprintf('CREATE TABLE test_prepare_native(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
-        prepex(7, $db, "INSERT INTO test_prepare_native(id, label) VALUES(1, ':placeholder')");
-        $stmt = prepex(8, $db, 'SELECT label FROM test_prepare_native ORDER BY id ASC');
-        var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-
-        prepex(9, $db, 'DELETE FROM test_prepare_native');
-        prepex(10, $db, 'INSERT INTO test_prepare_native(id, label) VALUES(1, :placeholder)',
-            array(':placeholder' => 'first row'));
-        prepex(11, $db, 'INSERT INTO test_prepare_native(id, label) VALUES(2, :placeholder)',
-            array(':placeholder' => 'second row'));
-        $stmt = prepex(12, $db, 'SELECT label FROM test_prepare_native ORDER BY id ASC');
-        var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-
-        // Is PDO fun?
-        $stmt = prepex(13, $db, 'SELECT label FROM test_prepare_native WHERE :placeholder > 1',
-            array(':placeholder' => 'id'));
-        var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-
-        for ($num_params = 2; $num_params < 100; $num_params++) {
-            $params = array(':placeholder' => 'a');
-            for ($i = 1; $i < $num_params; $i++) {
-                $params[str_repeat('a', $i)] = 'some data';
+                if ($tmp[0]['label'] !== 'MySQL is the best database in the world!') {
+                    printf("[028] INSERT seems to have failed, dumping data, check manually\n");
+                    var_dump($tmp);
+                }
             }
-            prepex(16, $db, 'SELECT id, label FROM test_prepare_native WHERE label > :placeholder',
-                $params, array('execute' => array('sqlstate' => 'HY093')));
         }
 
-        $stmt = prepex(16, $db, 'SELECT id, label FROM test_prepare_native WHERE :placeholder IS NOT NULL',
-            array(':placeholder' => 1));
-        if (count(($tmp = $stmt->fetchAll(PDO::FETCH_ASSOC))) != 2)
-            printf("[017] '1' IS NOT NULL evaluates to true, expecting two rows, got %d rows\n", $tmp);
+        $db->exec('DELETE FROM test_prepare_native_myisam');
+        $db->exec("INSERT INTO test_prepare_native_myisam(id, label) VALUES (1, 'row1'), (2, 'row2')");
 
-        $stmt = prepex(18, $db, 'SELECT id, label FROM test_prepare_native WHERE :placeholder IS NULL',
-            array(':placeholder' => 1));
+        $sql = sprintf("SELECT id, label FROM test_prepare_native_myisam WHERE (label LIKE %s) AND (id = :placeholder)",
+            $db->quote('%ro%'));
+        $stmt = prepex(10, $db, $sql,	array('placeholder' => -1));
         if (count(($tmp = $stmt->fetchAll(PDO::FETCH_ASSOC))) != 0)
-            printf("[019] '1' IS NOT NULL evaluates to true, expecting zero rows, got %d rows\n", $tmp);
+                printf("[030] Expecting zero rows, got %d rows\n", $tmp);
+
+        $sql = sprintf("SELECT id, label FROM test_prepare_native_myisam WHERE  (id = :placeholder) OR (label LIKE %s)",
+            $db->quote('%go%'));
+        $stmt = prepex(11, $db, $sql,	array('placeholder' => 1));
+        if (count(($tmp = $stmt->fetchAll(PDO::FETCH_ASSOC))) != 1)
+            printf("[032] Expecting one row, got %d rows\n", $tmp);
     } catch (PDOException $e) {
         printf("[001] %s [%s] %s\n",
             $e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
@@ -166,29 +156,8 @@ $db = MySQLPDOTest::factory();
 --CLEAN--
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable(NULL, 'test_prepare_native');
+MySQLPDOTest::dropTestTable(NULL, 'test_prepare_native_myisam');
 ?>
 --EXPECT--
 PDO::prepare(): Argument #1 ($query) cannot be empty
-array(1) {
-  [0]=>
-  array(1) {
-    ["label"]=>
-    string(12) ":placeholder"
-  }
-}
-array(2) {
-  [0]=>
-  array(1) {
-    ["label"]=>
-    string(9) "first row"
-  }
-  [1]=>
-  array(1) {
-    ["label"]=>
-    string(10) "second row"
-  }
-}
-array(0) {
-}
 done!

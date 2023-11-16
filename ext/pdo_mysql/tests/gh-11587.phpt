@@ -13,10 +13,8 @@ if (!extension_loaded('mysqlnd')) die('skip: This test requires the loading of m
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 
-$db->exec('DROP TABLE IF EXISTS test');
-
 $createTestTable = <<<SQL
-CREATE TABLE test(
+CREATE TABLE test_11587(
    id INT,
   `float_col` FLOAT(3,2) DEFAULT NULL,
   `double_col` DOUBLE(3,2) DEFAULT NULL,
@@ -27,7 +25,7 @@ SQL;
 $db->exec($createTestTable);
 
 $insertTestTable = <<<SQL
-INSERT INTO test(id, float_col, double_col, decimal_col) VALUES(1, 2.60, 3.60, 4.60)
+INSERT INTO test_11587(id, float_col, double_col, decimal_col) VALUES(1, 2.60, 3.60, 4.60)
 SQL;
 
 $db->exec($insertTestTable);
@@ -35,7 +33,7 @@ $db->exec($insertTestTable);
 echo "PDO::ATTR_EMULATE_PREPARES = true, PDO::ATTR_STRINGIFY_FETCHES = true\n";
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-$results = $db->query('SELECT * FROM test');
+$results = $db->query('SELECT * FROM test_11587');
 foreach ($results as $result) {
     var_dump($result);
 }
@@ -45,7 +43,7 @@ echo "\n";
 echo "PDO::ATTR_EMULATE_PREPARES = true, PDO::ATTR_STRINGIFY_FETCHES = false\n";
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
-$results = $db->query('SELECT * FROM test');
+$results = $db->query('SELECT * FROM test_11587');
 foreach ($results as $result) {
     var_dump($result);
 }
@@ -55,7 +53,7 @@ echo "\n";
 echo "PDO::ATTR_EMULATE_PREPARES = false, PDO::ATTR_STRINGIFY_FETCHES = true\n";
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-$results = $db->query('SELECT * FROM test');
+$results = $db->query('SELECT * FROM test_11587');
 foreach ($results as $result) {
     var_dump($result);
 }
@@ -65,7 +63,7 @@ echo "\n";
 echo "PDO::ATTR_EMULATE_PREPARES = false, PDO::ATTR_STRINGIFY_FETCHES = false\n";
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
-$results = $db->query('SELECT * FROM test');
+$results = $db->query('SELECT * FROM test_11587');
 foreach ($results as $result) {
     var_dump($result);
 }
@@ -77,7 +75,8 @@ echo 'done!';
 --CLEAN--
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_11587');
 ?>
 --EXPECT--
 PDO::ATTR_EMULATE_PREPARES = true, PDO::ATTR_STRINGIFY_FETCHES = true

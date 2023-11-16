@@ -23,11 +23,10 @@ if ($version < 40100)
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-$db->exec("DROP TABLE IF EXISTS test");
 
 // And now allow the evil to do his work
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
-$sql = "CREATE TABLE IF NOT EXISTS test(id INT); INSERT INTO test(id) VALUES (1); SELECT * FROM test; INSERT INTO test(id) VALUES (2); SELECT * FROM test;";
+$sql = "CREATE TABLE IF NOT EXISTS test_41125(id INT); INSERT INTO test_41125(id) VALUES (1); SELECT * FROM test_41125; INSERT INTO test_41125(id) VALUES (2); SELECT * FROM test_41125;";
 $stmt = $db->query($sql);
 do {
     var_dump($stmt->fetchAll());
@@ -39,7 +38,7 @@ print "done!";
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-$db->exec("DROP TABLE IF EXISTS test");
+$db->exec("DROP TABLE IF EXISTS test_41125");
 ?>
 --EXPECT--
 array(0) {

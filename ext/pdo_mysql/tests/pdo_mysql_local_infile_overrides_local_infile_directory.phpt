@@ -40,14 +40,13 @@ if (!defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) {
 	MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 
 	try {
-		exec_and_count(1, $db, 'DROP TABLE IF EXISTS test', 0);
-		exec_and_count(2, $db, sprintf('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
+		exec_and_count(2, $db, sprintf('CREATE TABLE test_local_inifile_overrides(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
 
 		$filepath = str_replace('\\', '/', __DIR__.'/foo/foo.data');
 
-		$sql = sprintf("LOAD DATA LOCAL INFILE %s INTO TABLE test FIELDS TERMINATED BY ';' LINES TERMINATED  BY '\n'", $db->quote($filepath));
+		$sql = sprintf("LOAD DATA LOCAL INFILE %s INTO TABLE test_local_inifile_overrides FIELDS TERMINATED BY ';' LINES TERMINATED  BY '\n'", $db->quote($filepath));
 		if (exec_and_count(3, $db, $sql, 3)) {
-			$stmt = $db->query('SELECT id, col1 FROM test ORDER BY id ASC');
+			$stmt = $db->query('SELECT id, col1 FROM test_local_inifile_overrides ORDER BY id ASC');
 			$expected = array(
 				array("id" => 1, "col1" => "one"),
 				array("id" => 2, "col1" => "two"),
@@ -80,7 +79,7 @@ if (!defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) {
 <?php
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS test_local_inifile_overrides');
 ?>
 --EXPECT--
 done!

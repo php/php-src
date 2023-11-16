@@ -21,13 +21,12 @@ $db = MySQLPDOTest::factory();
             else
                 $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
 
-            $db->exec('DROP TABLE IF EXISTS test');
-            $sql = sprintf('CREATE TABLE test(id INT, label %s) ENGINE=%s', $sql_type, MySQLPDOTest::getTableEngine());
+            $sql = sprintf('CREATE TABLE test_stmt_bindparam_types(id INT, label %s) ENGINE=%s', $sql_type, MySQLPDOTest::getTableEngine());
             if ((!$stmt = @$db->prepare($sql)) || (!@$stmt->execute()))
                 // Server might not support column type - skip it
                 return true;
 
-            $stmt = $db->prepare('INSERT INTO test(id, label) VALUES (1, ?)');
+            $stmt = $db->prepare('INSERT INTO test_stmt_bindparam_types(id, label) VALUES (1, ?)');
             if (!$stmt->bindParam(1, $value)) {
                 printf("[%03d/%s + 1] %s\n", $offset, ($native) ? 'native' : 'emulated',
                     var_export($stmt->errorInfo(), true));
@@ -39,7 +38,7 @@ $db = MySQLPDOTest::factory();
                 return false;
             }
 
-            $stmt = $db->query('SELECT id, label FROM test');
+            $stmt = $db->query('SELECT id, label FROM test_stmt_bindparam_types');
             $id = $label = null;
             if (!$stmt->bindColumn(1, $id)) {
                 printf("[%03d/%s + 3] %s\n", $offset, ($native) ? 'native' : 'emulated',
@@ -88,7 +87,7 @@ $db = MySQLPDOTest::factory();
                 return false;
             }
 
-            $db->exec('DROP TABLE IF EXISTS test');
+            $db->exec('DROP TABLE IF EXISTS test_stmt_bindparam_types');
             return true;
     }
 
@@ -168,7 +167,8 @@ $db = MySQLPDOTest::factory();
 --CLEAN--
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_stmt_bindparam_types');
 ?>
 --EXPECT--
 done!

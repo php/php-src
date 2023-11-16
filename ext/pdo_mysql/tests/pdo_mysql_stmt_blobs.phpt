@@ -25,11 +25,11 @@ MySQLPDOTest::skip();
 
     function test_blob($db, $offset, $sql_type, $test_len) {
 
-        $db->exec('DROP TABLE IF EXISTS test');
-        $db->exec(sprintf('CREATE TABLE test(id INT, label %s) ENGINE=%s', $sql_type, PDO_MYSQL_TEST_ENGINE));
+        $db->exec('DROP TABLE IF EXISTS test_stmt_blobs');
+        $db->exec(sprintf('CREATE TABLE test_stmt_blobs(id INT, label %s) ENGINE=%s', $sql_type, PDO_MYSQL_TEST_ENGINE));
 
         $value = str_repeat('a', $test_len);
-        $stmt = $db->prepare('INSERT INTO test(id, label) VALUES (?, ?)');
+        $stmt = $db->prepare('INSERT INTO test_stmt_blobs(id, label) VALUES (?, ?)');
         $stmt->bindValue(1, 1);
         $stmt->bindValue(2, $value);
         if (!$stmt->execute()) {
@@ -38,7 +38,7 @@ MySQLPDOTest::skip();
             return false;
         }
 
-        $stmt = $db->query('SELECT id, label FROM test');
+        $stmt = $db->query('SELECT id, label FROM test_stmt_blobs');
         $id = $label = NULL;
         $stmt->bindColumn(1, $id, PDO::PARAM_INT);
         $stmt->bindColumn(2, $label, PDO::PARAM_LOB);
@@ -67,7 +67,7 @@ MySQLPDOTest::skip();
             return false;
         }
 
-        $stmt = $db->query('SELECT id, label FROM test');
+        $stmt = $db->query('SELECT id, label FROM test_stmt_blobs');
         $ret = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($ret['label'] !== $value) {
@@ -99,7 +99,7 @@ MySQLPDOTest::skip();
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+$db->exec('DROP TABLE IF EXISTS test_stmt_blobs');
 ?>
 --EXPECT--
 done!

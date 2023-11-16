@@ -96,62 +96,60 @@ $db = MySQLPDOTest::factory();
             echo $e->getMessage(), \PHP_EOL;
         }
 
-        // lets be fair and do the most simple SELECT first
-        $stmt = prepex(4, $db, 'SELECT 1 as "one"');
-        var_dump($stmt->fetch(PDO::FETCH_ASSOC));
-
-        prepex(6, $db, sprintf('CREATE TABLE test_prepare_emulated(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
-        prepex(7, $db, "INSERT INTO test_prepare_emulated(id, label) VALUES(1, ':placeholder')");
-        $stmt = prepex(8, $db, 'SELECT label FROM test_prepare_emulated');
+        prepex(4, $db, sprintf('CREATE TABLE test_prepare_emulated_anonymous_placeholder(id INT, label CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
+        prepex(5, $db, "INSERT INTO test_prepare_emulated_anonymous_placeholder(id, label) VALUES(1, '?')");
+        $stmt = prepex(6, $db, 'SELECT label FROM test_prepare_emulated_anonymous_placeholder');
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-        prepex(9, $db, 'DELETE FROM test_prepare_emulated');
-        prepex(10, $db, "INSERT INTO test_prepare_emulated(id, label) VALUES(1, ':placeholder')",
-            array(':placeholder' => 'first row'));
-        $stmt = prepex(11, $db, 'SELECT label FROM test_prepare_emulated');
+        prepex(7, $db, 'DELETE FROM test_prepare_emulated_anonymous_placeholder');
+        prepex(8, $db, "INSERT INTO test_prepare_emulated_anonymous_placeholder(id, label) VALUES(1, '?')",
+            array('first row'));
+        $stmt = prepex(9, $db, 'SELECT label FROM test_prepare_emulated_anonymous_placeholder');
 
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-        prepex(12, $db, 'DELETE FROM test_prepare_emulated');
-        prepex(13, $db, 'INSERT INTO test_prepare_emulated(id, label) VALUES(1, :placeholder)',
-            array(':placeholder' => 'first row'));
-        prepex(14, $db, 'INSERT INTO test_prepare_emulated(id, label) VALUES(2, :placeholder)',
-            array(':placeholder' => 'second row'));
-        $stmt = prepex(15, $db, 'SELECT label FROM test_prepare_emulated');
+        prepex(10, $db, 'DELETE FROM test_prepare_emulated_anonymous_placeholder');
+        prepex(11, $db, 'INSERT INTO test_prepare_emulated_anonymous_placeholder(id, label) VALUES(1, ?)',
+            array('first row'));
+        prepex(12, $db, 'INSERT INTO test_prepare_emulated_anonymous_placeholder(id, label) VALUES(2, ?)',
+            array('second row'));
+        $stmt = prepex(13, $db, 'SELECT label FROM test_prepare_emulated_anonymous_placeholder');
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
         // Is PDO fun?
-        prepex(16, $db, 'SELECT label FROM test_prepare_emulated WHERE :placeholder > 1',
-            array(':placeholder' => 'id'));
-        prepex(17, $db, 'SELECT :placeholder FROM test_prepare_emulated WHERE id > 1',
-            array(':placeholder' => 'id'));
-        prepex(18, $db, 'SELECT :placeholder FROM test_prepare_emulated WHERE :placeholder > :placeholder',
-            array(':placeholder' => 'test'));
+        prepex(14, $db, 'SELECT label FROM test_prepare_emulated_anonymous_placeholder WHERE ? > 1',
+            array('id'));
+        prepex(15, $db, 'SELECT ? FROM test_prepare_emulated_anonymous_placeholder WHERE id > 1',
+            array('id'));
+        prepex(16, $db, 'SELECT ? FROM test_prepare_emulated_anonymous_placeholder WHERE ? > ?',
+            array('test'), array('execute' => array('sqlstate' => 'HY093')));
+
+        prepex(17, $db, 'SELECT ? FROM test_prepare_emulated_anonymous_placeholder WHERE ? > ?',
+            array('id', 'label', 'value'));
 
         for ($num_params = 2; $num_params < 100; $num_params++) {
-            $params = array(':placeholder' => 'a');
+            $params = array('a');
             for ($i = 1; $i < $num_params; $i++) {
-                $params[str_repeat('a', $i)] = 'some data';
+                $params[] = 'some data';
             }
-            prepex(19, $db, 'SELECT id, label FROM test_prepare_emulated WHERE label > :placeholder',
+            prepex(18, $db, 'SELECT id, label FROM test_prepare_emulated_anonymous_placeholder WHERE label > ?',
                 $params, array('execute' => array('sqlstate' => 'HY093')));
         }
 
-        prepex(20, $db, 'DELETE FROM test_prepare_emulated');
-        prepex(21, $db, 'INSERT INTO test_prepare_emulated(id, label) VALUES (1, :placeholder), (2, :placeholder)',
-            array(':placeholder' => 'row'));
-        $stmt = prepex(22, $db, 'SELECT id, label FROM test_prepare_emulated');
+        prepex(19, $db, 'DELETE FROM test_prepare_emulated_anonymous_placeholder');
+        prepex(20, $db, 'INSERT INTO test_prepare_emulated_anonymous_placeholder(id, label) VALUES (1, ?), (2, ?)',
+            array('row', 'row'));
+        $stmt = prepex(21, $db, 'SELECT id, label FROM test_prepare_emulated_anonymous_placeholder');
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-        $stmt = prepex(23, $db, 'SELECT id, label FROM test_prepare_emulated WHERE :placeholder IS NOT NULL',
-            array(':placeholder' => 1));
+        $stmt = prepex(22, $db, 'SELECT id, label FROM test_prepare_emulated_anonymous_placeholder WHERE ? IS NOT NULL',
+            array(1));
         if (count(($tmp = $stmt->fetchAll(PDO::FETCH_ASSOC))) != 2)
-            printf("[024] '1' IS NOT NULL evaluates to true, expecting two rows, got %d rows\n", $tmp);
+            printf("[065] '1' IS NOT NULL evaluates to true, expecting two rows, got %d rows\n", $tmp);
 
-        $stmt = prepex(25, $db, 'SELECT id, label FROM test_prepare_emulated WHERE :placeholder IS NULL',
-            array(':placeholder' => 1));
+        $stmt = prepex(23, $db, 'SELECT id, label FROM test_prepare_emulated_anonymous_placeholder WHERE ? IS NULL',
+            array(1));
         if (count(($tmp = $stmt->fetchAll(PDO::FETCH_ASSOC))) != 0)
-            printf("[026] '1' IS NOT NULL evaluates to true, expecting zero rows, got %d rows\n", $tmp);
-
+            printf("[067] '1' IS NOT NULL evaluates to true, expecting zero rows, got %d rows\n", $tmp);
     } catch (PDOException $e) {
         printf("[001] %s [%s] %s\n",
             $e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
@@ -162,19 +160,15 @@ $db = MySQLPDOTest::factory();
 --CLEAN--
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable(NULL, 'test_prepare_emulated');
+MySQLPDOTest::dropTestTable(NULL, 'test_prepare_emulated_anonymous_placeholder');
 ?>
 --EXPECTF--
 PDO::prepare(): Argument #1 ($query) cannot be empty
 array(1) {
-  ["one"]=>
-  string(1) "1"
-}
-array(1) {
   [0]=>
   array(1) {
     ["label"]=>
-    string(12) ":placeholder"
+    string(1) "?"
   }
 }
 

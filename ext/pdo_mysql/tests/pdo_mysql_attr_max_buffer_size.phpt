@@ -30,13 +30,12 @@ if (MySQLPDOTest::isPDOMySQLnd())
                 PDO::ATTR_EMULATE_PREPARES => 0,
             ));
 
-            $db->exec('DROP TABLE IF EXISTS test');
-            $db->exec(sprintf('CREATE TABLE test(id INT, val LONGBLOB) ENGINE = %s', PDO_MYSQL_TEST_ENGINE));
+            $db->exec(sprintf('CREATE TABLE test_attr_max_buffer_size(id INT, val LONGBLOB) ENGINE = %s', PDO_MYSQL_TEST_ENGINE));
 
             // 10 * (10 * 1024) = 10 * (10 * 1k) = 100k
-            $db->exec('INSERT INTO test(id, val) VALUES (1, REPEAT("01234567890", 10240))');
+            $db->exec('INSERT INTO test_attr_max_buffer_size(id, val) VALUES (1, REPEAT("01234567890", 10240))');
 
-            $stmt = $db->prepare('SELECT id, val FROM test');
+            $stmt = $db->prepare('SELECT id, val FROM test_attr_max_buffer_size');
             $stmt->execute();
 
             $id = $val = NULL;
@@ -46,7 +45,6 @@ if (MySQLPDOTest::isPDOMySQLnd())
                 printf("[%03d] id = %d, val = %s... (length: %d)\n",
                     $offset, $id, substr($val, 0, 10), strlen($val));
             }
-            $db->exec('DROP TABLE IF EXISTS test');
 
         } catch (PDOException $e) {
             printf("[%03d] %s, [%s] %s\n",
@@ -71,8 +69,7 @@ if (MySQLPDOTest::isPDOMySQLnd())
 --CLEAN--
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
-$db = MySQLPDOTest::factory();
-$db->exec('DROP TABLE IF EXISTS test');
+MySQLPDOTest::dropTestTable(NULL, 'test_attr_max_buffer_size');
 ?>
 --EXPECTF--
 [001] id = 1, val = 0123456789... (length: %d)

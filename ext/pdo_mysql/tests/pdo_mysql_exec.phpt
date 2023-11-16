@@ -37,28 +37,28 @@ MySQLPDOTest::skip();
     /* affected rows related */
     try {
 
-        exec_and_count(2, $db, 'DROP TABLE IF EXISTS test', 0);
-        exec_and_count(3, $db, sprintf('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
-        exec_and_count(4, $db, "INSERT INTO test(id, col1) VALUES (1, 'a')", 1);
-        exec_and_count(5, $db, "INSERT INTO test(id, col1) VALUES (2, 'b'), (3, 'c')", 2);
-        exec_and_count(6, $db, "UPDATE test SET id = 4 WHERE id = 3", 1);
-        exec_and_count(7, $db, "INSERT INTO test(id, col1) VALUES (1, 'd') ON DUPLICATE KEY UPDATE id = 3", 2);
-        exec_and_count(8, $db, "UPDATE test SET id = 5 WHERE id = 5", 0);
-        exec_and_count(9, $db, "INSERT INTO test(id, col1) VALUES (5, 'e') ON DUPLICATE KEY UPDATE id = 6", 1);
-        exec_and_count(10, $db, "REPLACE INTO test(id, col1) VALUES (5, 'f')", 2);
-        exec_and_count(11, $db, "REPLACE INTO test(id, col1) VALUES (6, 'g')", 1);
-        exec_and_count(12, $db, 'DELETE FROM test WHERE id > 2', 4);
-        exec_and_count(13, $db, 'DROP TABLE test', 0);
+        exec_and_count(2, $db, 'DROP TABLE IF EXISTS test_mysql_exec', 0);
+        exec_and_count(3, $db, sprintf('CREATE TABLE test_mysql_exec(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
+        exec_and_count(4, $db, "INSERT INTO test_mysql_exec(id, col1) VALUES (1, 'a')", 1);
+        exec_and_count(5, $db, "INSERT INTO test_mysql_exec(id, col1) VALUES (2, 'b'), (3, 'c')", 2);
+        exec_and_count(6, $db, "UPDATE test_mysql_exec SET id = 4 WHERE id = 3", 1);
+        exec_and_count(7, $db, "INSERT INTO test_mysql_exec(id, col1) VALUES (1, 'd') ON DUPLICATE KEY UPDATE id = 3", 2);
+        exec_and_count(8, $db, "UPDATE test_mysql_exec SET id = 5 WHERE id = 5", 0);
+        exec_and_count(9, $db, "INSERT INTO test_mysql_exec(id, col1) VALUES (5, 'e') ON DUPLICATE KEY UPDATE id = 6", 1);
+        exec_and_count(10, $db, "REPLACE INTO test_mysql_exec(id, col1) VALUES (5, 'f')", 2);
+        exec_and_count(11, $db, "REPLACE INTO test_mysql_exec(id, col1) VALUES (6, 'g')", 1);
+        exec_and_count(12, $db, 'DELETE FROM test_mysql_exec WHERE id > 2', 4);
+        exec_and_count(13, $db, 'DROP TABLE test_mysql_exec', 0);
         exec_and_count(14, $db, 'SET @myvar = 1', 0);
 
         exec_and_count(15, $db, 'THIS IS NOT VALID SQL, I HOPE', false);
         printf("[016] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
-        exec_and_count(36, $db, sprintf('CREATE TABLE test(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
-        exec_and_count(37, $db, "INSERT INTO test(id, col1) VALUES (1, 'a')", 1);
+        exec_and_count(36, $db, sprintf('CREATE TABLE test_mysql_exec(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
+        exec_and_count(37, $db, "INSERT INTO test_mysql_exec(id, col1) VALUES (1, 'a')", 1);
         // Results may vary. Typically you will get 1. But the MySQL 5.1 manual states: Truncation operations do not return the number of deleted rows.
         // Don't rely on any return value!
-        exec_and_count(38, $db, 'TRUNCATE TABLE test', NULL);
+        exec_and_count(38, $db, 'TRUNCATE TABLE test_mysql_exec', NULL);
 
     } catch (PDOException $e) {
         printf("[001] %s, [%s] %s\n",
@@ -152,7 +152,7 @@ MySQLPDOTest::skip();
         $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
         $exp = 0;
 
-        $tmp = @$db->exec(sprintf('DROP TABLE IF EXISTS test; CREATE TABLE test(id INT) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
+        $tmp = @$db->exec(sprintf('DROP TABLE IF EXISTS test_mysql_exec; CREATE TABLE test_mysql_exec(id INT) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
         if ($exp !== $tmp)
             printf("[034] Expecting %s/%s got %s/%s, [%s] %s\n",
                 $exp, gettype($exp),
@@ -160,7 +160,7 @@ MySQLPDOTest::skip();
                 $db->errorCode(), var_export($db->errorInfo(), true));
 
         // this is interesting: if we get sort of affected rows, what will happen now?
-        $tmp = @$db->exec('INSERT INTO test(id) VALUES (1); INSERT INTO test(id) VALUES (2)');
+        $tmp = @$db->exec('INSERT INTO test_mysql_exec(id) VALUES (1); INSERT INTO test_mysql_exec(id) VALUES (2)');
         printf("[035] With emulated PS it works but makes no sense given that exec() returns sort of affected rows...\n");
 
 
@@ -176,9 +176,7 @@ MySQLPDOTest::skip();
 --CLEAN--
 <?php
 require __DIR__ . '/mysql_pdo_test.inc';
-$db = MySQLPDOTest::factory();
-$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-@$db->exec('DROP TABLE IF EXISTS test');
+MySQLPDOTest::dropTestTable(NULL, 'test_mysql_exec');
 ?>
 --EXPECTF--
 Warning: PDO::exec(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'THIS IS NOT VALID SQL, I HOPE' at line 1 in %s on line %d
