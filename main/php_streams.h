@@ -206,6 +206,9 @@ struct _php_stream  {
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
 	uint8_t fclose_stdiocast:2;
 
+	/* whether stdio cast flushing is in progress */
+	int8_t fclose_stdiocast_flush_in_progress:1;
+
 	char mode[16];			/* "rwb" etc. ala stdio */
 
 	uint32_t flags;	/* PHP_STREAM_FLAG_XXX */
