@@ -30,6 +30,22 @@ PHP 8.4 UPGRADE NOTES
   . The DSN's credentials, when set, are given priority over their PDO
     constructor counterparts, being closer to the documentation states.
 
+- PCNTL:
+  . The functions pcntl_sigprocmask(), pcntl_sigwaitinfo() and
+    pcntl_sigtimedwait() now throw:
+    - A ValueError if the $signals array is empty (except for
+      pcntl_sigprocmask() if the $mode is SIG_SETMASK).
+    - A TypeError if a value of the $signals array is not an integer
+    - A ValueError if a value of the $signals array is not a valid signal number
+    Moreover, those functions now always return false on failure.
+    In some case previously it could return the value -1.
+  . The function pcntl_sigprocmask() will also now throw:
+    - A ValueError if $mode is not one of SIG_BLOCK, SIG_UNBLOCK, or SIG_SETMASK
+  . The function pcntl_sigtimedwait() will also now throw:
+    - A ValueError if $seconds is less than 0
+    - A ValueError if $nanoseconds is less than 0 or greater than 1e9
+    - A ValueError if both $seconds and $nanoseconds are 0
+
 - SimpleXML:
   . Get methods called, or casting to a string on a SimpleXMLElement will no
     longer implicitly reset the iterator data, unless explicitly rewound.
