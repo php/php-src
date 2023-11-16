@@ -736,7 +736,7 @@ jobs:
         with:
           # FIXME: There are new warnings
           # configurationParameters: --enable-werror
-          libmysql: mysql-8.0.33-linux-glibc2.12-x86_64.tar.xz
+          libmysql: mysql-8.0.35-linux-glibc2.12-x86_64.tar.xz
           withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Test mysql-8.0
         uses: ./.github/actions/test-libmysqlclient
