@@ -1026,7 +1026,7 @@ PHP_FUNCTION(implode)
 	zend_string *arg1_str = NULL;
 	zend_array *pieces = NULL;
 
-	if (ZEND_NUM_ARGS() == 1) {
+	if (ZEND_NUM_ARGS() <= 1) {
 		ZEND_PARSE_PARAMETERS_START(1, 1)
 			Z_PARAM_ARRAY_HT(pieces)
 		ZEND_PARSE_PARAMETERS_END();
@@ -1034,8 +1034,8 @@ PHP_FUNCTION(implode)
 		arg1_str = ZSTR_EMPTY_ALLOC();
 	}
 
-	if (ZEND_NUM_ARGS() == 2) {
-		ZEND_PARSE_PARAMETERS_START(1, 2)
+	if (ZEND_NUM_ARGS() >= 2) {
+		ZEND_PARSE_PARAMETERS_START(2, 2)
 			Z_PARAM_STR(arg1_str)
 			Z_PARAM_ARRAY_HT(pieces)
 		ZEND_PARSE_PARAMETERS_END();
