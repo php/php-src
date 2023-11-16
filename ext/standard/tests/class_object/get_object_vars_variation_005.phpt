@@ -7,7 +7,6 @@ get_object_vars() no-declared/declared discrepancies
 class Test {
     public $prop;
 }
-// Using ArrayObject here to get around property name restrictions
 
 $obj = new stdClass;
 $ao = new ArrayObject($obj);
