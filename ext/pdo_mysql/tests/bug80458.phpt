@@ -81,14 +81,10 @@ $stmt = $db->prepare('SELECT first FROM test_80458 WHERE first=12');
 $stmt->execute();
 var_dump($stmt->fetchAll());
 
-$db->exec('DROP PROCEDURE IF EXISTS nores');
 $db->exec('CREATE PROCEDURE nores() BEGIN DELETE FROM test_80458 WHERE first=13; END;');
 $stmt4 = $db->prepare('CALL nores()');
 $stmt4->execute();
 var_dump($stmt4->fetchAll());
-$db->exec('DROP PROCEDURE IF EXISTS nores');
-
-$db->exec('DROP PROCEDURE IF EXISTS ret');
 $db->exec('CREATE PROCEDURE ret() BEGIN SELECT first FROM test_80458 WHERE first=14; END;');
 $stmt5 = $db->prepare('CALL ret()');
 $stmt5->execute();
