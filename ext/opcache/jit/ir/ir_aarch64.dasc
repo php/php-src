@@ -5337,9 +5337,6 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 	if (ret != DASM_S_OK) {
 		IR_ASSERT(0);
 		dasm_free(&data.dasm_state);
-		if (ctx->code_buffer == NULL) {
-			ir_mem_unmap(entry, size);
-		}
 		ctx->data = NULL;
 		ctx->status = IR_ERROR_LINK;
 		return NULL;
