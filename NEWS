@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12616 (DOM: Removing XMLNS namespace node results in invalid
     default: prefix). (nielsdos)
 
+- FPM:
+  . Fixed bug GH-12705 (Segmentation fault in fpm_status_export_to_zval).
+    (Patrick Prasse)
+   
 - Intl:
   . Fixed bug GH-12635 (Test bug69398.phpt fails with ICU 74.1). (nielsdos)
 
