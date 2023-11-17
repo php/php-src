@@ -23,7 +23,7 @@ $(srcdir)/zend_language_parser.c: $(srcdir)/zend_language_parser.y
 
 $(srcdir)/zend_ini_parser.h: $(srcdir)/zend_ini_parser.c
 $(srcdir)/zend_ini_parser.c: $(srcdir)/zend_ini_parser.y
-	$(YACC) $(YFLAGS) -v -d $(srcdir)/zend_ini_parser.y -o $@
+	@$(YACC) $(YFLAGS) -v -d $(srcdir)/zend_ini_parser.y -o $@
 
 $(srcdir)/zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
 	@(cd $(top_srcdir); $(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l)
