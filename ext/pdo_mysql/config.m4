@@ -98,8 +98,5 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     PHP_ADD_EXTENSION_DEP(pdo_mysql, mysqlnd)
   fi
 
-  PDO_MYSQL_MODULE_TYPE=external
-
   PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)
-  PHP_SUBST_OLD(PDO_MYSQL_MODULE_TYPE)
 fi
