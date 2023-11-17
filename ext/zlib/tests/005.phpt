@@ -7,7 +7,7 @@ zlib
 
 try {
     var_dump(gzcompress("", 1000));
-} catch (\ValueError $e) {
+} catch (\Throwable $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
@@ -24,23 +24,36 @@ var_dump($data2 = gzcompress($string, 9));
 
 try {
     var_dump(gzuncompress("", 1000));
-} catch (\ValueError $e) {
+} catch (\Throwable $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
 try {
     var_dump(gzuncompress("", -1));
-} catch (\ValueError $e) {
+} catch (\Throwable $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
-var_dump(gzuncompress(""));
-var_dump(gzuncompress("", 9));
+try {
+    var_dump(gzuncompress(""));
+} catch (\Throwable $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    var_dump(gzuncompress("", 9));
+} catch (\Throwable $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump(gzuncompress($data1));
 var_dump(gzuncompress($data2));
 $data2[4] = 0;
-var_dump(gzuncompress($data2));
+try {
+    var_dump(gzuncompress($data2));
+} catch (\Throwable $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
 --EXPECTF--
@@ -50,22 +63,14 @@ string(%d) "%a"
 string(%d) "%a"
 string(%d) "%a"
 string(%d) "%a"
-
-Warning: gzuncompress(): %s error in %s on line %d
-bool(false)
+data error
 gzuncompress(): Argument #2 ($max_length) must be greater than or equal to 0
-
-Warning: gzuncompress(): %s error in %s on line %d
-bool(false)
-
-Warning: gzuncompress(): %s error in %s on line %d
-bool(false)
+data error
+data error
 string(94) "Answer me, it can't be so hard
 Cry to relieve what's in your heart
 Desolation, grief and agony"
 string(94) "Answer me, it can't be so hard
 Cry to relieve what's in your heart
 Desolation, grief and agony"
-
-Warning: gzuncompress(): %s error in %s on line %d
-bool(false)
+data error

@@ -13,13 +13,14 @@ if (strcmp($original,$unpacked)==0) echo "Strings are equal\n";
 $unpacked=gzinflate($packed, strlen($original)*10);
 if (strcmp($original,$unpacked)==0) echo "Strings are equal\n";
 
-$unpacked=gzinflate($packed, 1);
-if ($unpacked === false) echo "Failed (as expected)\n";
+try {
+    $unpacked=gzinflate($packed, 1);
+} catch (\Throwable $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
 --EXPECTF--
 5 15
 Strings are equal
 Strings are equal
-
-Warning: gzinflate(): insufficient memory in %s on line %d
-Failed (as expected)
+insufficient memory

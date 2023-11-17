@@ -60,7 +60,7 @@ static int php_gziop_seek(php_stream *stream, zend_off_t offset, int whence, zen
 	assert(self != NULL);
 
 	if (whence == SEEK_END) {
-		php_error_docref(NULL, E_WARNING, "SEEK_END is not supported");
+		zend_throw_error(NULL, "SEEK_END is not supported");
 		return -1;
 	}
 	*newoffs = gzseek(self->gz_file, offset, whence);
@@ -114,7 +114,7 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 	/* sanity check the stream: it can be either read-only or write-only */
 	if (strchr(mode, '+')) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL, E_WARNING, "Cannot open a zlib stream for reading and writing at the same time!");
+			zend_throw_error(NULL, "Cannot open a zlib stream for reading and writing at the same time!");
 		}
 		return NULL;
 	}
@@ -152,7 +152,7 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 
 			efree(self);
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "gzopen failed");
+				zend_throw_error(NULL, "gzopen failed");
 			}
 		}
 

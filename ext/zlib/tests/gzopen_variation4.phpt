@@ -31,42 +31,57 @@ function test_gzopen($mode) {
     global $scriptFile, $secondFile, $firstFile, $filename;
 
     // create a file in the middle directory
-    $h = gzopen($secondFile, "w");
-    gzwrite($h, "This is a file in dir2");
-    gzclose($h);
+    $handle = gzopen($secondFile, "w");
+    gzwrite($handle, "This is a file in dir2");
+    gzclose($handle);
 
     echo "\n** testing with mode=$mode **\n";
     // should read dir2 file
-    $h = gzopen($filename, $mode, true);
-    if ($h) {
-        gzpassthru($h);
-        gzclose($h);
+    $handle = null;
+    try {
+        $handle = gzopen($filename, $mode, true);
+    } catch (\Throwable $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    if ($handle) {
+        gzpassthru($handle);
+        gzclose($handle);
         echo "\n";
     }
 
     //create a file in dir1
-    $h = gzopen($firstFile, "w");
-    gzwrite($h, "This is a file in dir1");
-    gzclose($h);
+    $handle = gzopen($firstFile, "w");
+    gzwrite($handle, "This is a file in dir1");
+    gzclose($handle);
 
     //should now read dir1 file
-    $h = gzopen($filename, $mode, true);
-    if ($h) {
-        gzpassthru($h);
-        gzclose($h);
+    $handle = null;
+    try {
+        $handle = gzopen($filename, $mode, true);
+    } catch (\Throwable $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    if ($handle) {
+        gzpassthru($handle);
+        gzclose($handle);
         echo "\n";
     }
 
     // create a file in working directory
-    $h = gzopen($filename, "w");
-    gzwrite($h, "This is a file in working dir");
-    gzclose($h);
+    $handle = gzopen($filename, "w");
+    gzwrite($handle, "This is a file in working dir");
+    gzclose($handle);
 
     //should still read dir1 file
-    $h = gzopen($filename, $mode, true);
-    if ($h) {
-        gzpassthru($h);
-        gzclose($h);
+    $handle = null;
+    try {
+        $handle = gzopen($filename, $mode, true);
+    } catch (\Throwable $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    if ($handle) {
+        gzpassthru($handle);
+        gzclose($handle);
         echo "\n";
     }
 
@@ -74,23 +89,33 @@ function test_gzopen($mode) {
     unlink($secondFile);
 
     //should read the file in working dir
-    $h = gzopen($filename, $mode, true);
-    if ($h) {
-        gzpassthru($h);
-        gzclose($h);
+    $handle = null;
+    try {
+        $handle = gzopen($filename, $mode, true);
+    } catch (\Throwable $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    if ($handle) {
+        gzpassthru($handle);
+        gzclose($handle);
         echo "\n";
     }
 
     // create a file in the script directory
-    $h = gzopen($scriptFile, "w");
-    gzwrite($h, "This is a file in script dir");
-    gzclose($h);
+    $handle = gzopen($scriptFile, "w");
+    gzwrite($handle, "This is a file in script dir");
+    gzclose($handle);
 
     //should read the file in script dir
-    $h = gzopen($filename, $mode, true);
-    if ($h) {
-        gzpassthru($h);
-        gzclose($h);
+    $handle = null;
+    try {
+        $handle = gzopen($filename, $mode, true);
+    } catch (\Throwable $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    if ($handle) {
+        gzpassthru($handle);
+        gzclose($handle);
         echo "\n";
     }
 
@@ -113,16 +138,11 @@ This is a file in working dir
 This is a file in script dir
 
 ** testing with mode=r+ **
-
-Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
-
-Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
-
-Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
-
-Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
-
-Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Cannot open a zlib stream for reading and writing at the same time!
+Cannot open a zlib stream for reading and writing at the same time!
+Cannot open a zlib stream for reading and writing at the same time!
+Cannot open a zlib stream for reading and writing at the same time!
+Cannot open a zlib stream for reading and writing at the same time!
 
 ** testing with mode=rt **
 This is a file in dir2

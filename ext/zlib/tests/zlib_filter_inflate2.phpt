@@ -11,7 +11,11 @@ fclose($a);
 
 $fp = fopen(__DIR__ . '/test.txt.gz', 'r');
 stream_filter_append($fp, 'zlib.inflate', STREAM_FILTER_READ);
-echo fread($fp, 2000);
+try {
+    echo fread($fp, 2000);
+} catch (\Throwable $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 fclose($fp);
 echo "1\n";
 $fp = fopen(__DIR__ . '/test.txt.gz', 'r');
@@ -34,7 +38,7 @@ fclose($fp);
 @unlink(__DIR__ . '/test.txt.gz');
 ?>
 --EXPECTF--
-Notice: fread(): zlib: data error in %s on line %d
+zlib: data error
 1
 2
 This is quite the thing ain't it

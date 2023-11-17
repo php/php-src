@@ -13,20 +13,25 @@ $modes = array('w', 'w+');
 $data = "This was the information that was written";
 
 foreach($modes as $mode) {
-   echo "testing mode -- $mode --\n";
-   $h = gzopen($filename, $mode);
-   if ($h !== false) {
-      gzwrite($h, $data);
-      gzclose($h);
-      $h = gzopen($filename, 'r');
-      gzpassthru($h);
-      gzclose($h);
-      echo "\n";
-      unlink($filename);
-   }
-   else {
-      var_dump($h);
-   }
+    echo "testing mode -- $mode --\n";
+    $h = false;
+    try {
+        $h = gzopen($filename, $mode);
+    } catch (\Throwable $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    if ($h !== false) {
+        gzwrite($h, $data);
+        gzclose($h);
+        $h = gzopen($filename, 'r');
+        gzpassthru($h);
+        gzclose($h);
+        echo "\n";
+        unlink($filename);
+    }
+    else {
+        var_dump($h);
+    }
 }
 
 ?>
@@ -35,6 +40,5 @@ foreach($modes as $mode) {
 testing mode -- w --
 This was the information that was written
 testing mode -- w+ --
-
-Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Cannot open a zlib stream for reading and writing at the same time!
 bool(false)

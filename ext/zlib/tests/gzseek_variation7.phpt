@@ -14,7 +14,11 @@ var_dump(gztell($h));
 
 //seek to the end which is not sensible of course.
 echo "move to the end of the file\n";
-var_dump(gzseek($h, 0, SEEK_END));
+try {
+    var_dump(gzseek($h, 0, SEEK_END));
+} catch (\Throwable $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 echo "tell=";
 var_dump(gztell($h));
 gzwrite($h, $str2);
@@ -31,9 +35,7 @@ unlink($f);
 --EXPECTF--
 tell=int(23)
 move to the end of the file
-
-Warning: gzseek(): SEEK_END is not supported in %s on line %d
-int(-1)
+SEEK_END is not supported
 tell=int(23)
 tell=int(47)
 

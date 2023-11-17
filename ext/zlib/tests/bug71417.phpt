@@ -45,15 +45,23 @@ function test($case) {
     // The gzdecode() function applied to the corrupted compressed data always
     // detects the error:
     // --> gzdecode(): PHP Fatal error:  Uncaught ErrorException: gzdecode(): data error in ...
-    echo "gzdecode(): ", rawurldecode(gzdecode($compressed)), "\n";
+    try {
+        echo "gzdecode(): ", rawurldecode(gzdecode($compressed)), "\n";
+    } catch (\Throwable $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     file_put_contents($fn, $compressed);
 
     $r = fopen($fn, "r");
     stream_filter_append($r, 'zlib.inflate', STREAM_FILTER_READ, array('window' => 15+16));
     while (!feof($r)) {
-        $s = fread($r, 100);
-        echo "read: "; var_dump($s);
+        try {
+            $s = fread($r, 100);
+            echo "read: "; var_dump($s);
+        } catch (\Throwable $e) {
+            echo $e->getMessage() . \PHP_EOL;
+        }
     }
     fclose($r);
     unlink($fn);
@@ -66,25 +74,11 @@ test(4);
 
 ?>
 --EXPECTF--
-gzdecode(): 
-Warning: gzdecode(): data error in %s on line %d
-
-
-Notice: fread(): zlib: data error in %s on line %d
-read: bool(false)
-gzdecode(): 
-Warning: gzdecode(): data error in %s on line %d
-
+gzdecode(): data error
+zlib: data error
+gzdecode(): data error
 read: string(32) "The quick brown fox jumps over t"
-gzdecode(): 
-Warning: gzdecode(): data error in %s on line %d
-
-
-Notice: fread(): zlib: data error in %s on line %d
-read: bool(false)
-gzdecode(): 
-Warning: gzdecode(): data error in %s on line %d
-
-
-Notice: fread(): zlib: data error in %s on line %d
-read: bool(false)
+gzdecode(): data error
+zlib: data error
+gzdecode(): data error
+zlib: data error

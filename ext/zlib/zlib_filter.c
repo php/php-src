@@ -90,7 +90,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 				exit_status = PSFS_PASS_ON;
 			} else if (status != Z_OK && status != Z_BUF_ERROR) {
 				/* Something bad happened */
-				php_error_docref(NULL, E_NOTICE, "zlib: %s", zError(status));
+				zend_throw_error(NULL, "zlib: %s", zError(status));
 				php_stream_bucket_delref(bucket);
 				/* reset these because despite the error the filter may be used again */
 				data->strm.next_in = data->inbuf;
@@ -289,7 +289,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 	/* Create this filter */
 	data = pecalloc(1, sizeof(php_zlib_filter_data), persistent);
 	if (!data) {
-		php_error_docref(NULL, E_WARNING, "Failed allocating %zd bytes", sizeof(php_zlib_filter_data));
+		zend_throw_error(NULL, "Failed allocating %zd bytes", sizeof(php_zlib_filter_data));
 		return NULL;
 	}
 
@@ -301,14 +301,14 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 	data->strm.avail_out = data->outbuf_len = data->inbuf_len = 0x8000;
 	data->strm.next_in = data->inbuf = (Bytef *) pemalloc(data->inbuf_len, persistent);
 	if (!data->inbuf) {
-		php_error_docref(NULL, E_WARNING, "Failed allocating %zd bytes", data->inbuf_len);
+		zend_throw_error(NULL, "Failed allocating %zd bytes", data->inbuf_len);
 		pefree(data, persistent);
 		return NULL;
 	}
 	data->strm.avail_in = 0;
 	data->strm.next_out = data->outbuf = (Bytef *) pemalloc(data->outbuf_len, persistent);
 	if (!data->outbuf) {
-		php_error_docref(NULL, E_WARNING, "Failed allocating %zd bytes", data->outbuf_len);
+		zend_throw_error(NULL, "Failed allocating %zd bytes", data->outbuf_len);
 		pefree(data->inbuf, persistent);
 		pefree(data, persistent);
 		return NULL;
@@ -327,7 +327,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 				/* log-2 base of history window (9 - 15) */
 				zend_long tmp = zval_get_long(tmpzval);
 				if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 32) {
-					php_error_docref(NULL, E_WARNING, "Invalid parameter given for window size (" ZEND_LONG_FMT ")", tmp);
+					zend_throw_error(NULL, "Invalid parameter given for window size (" ZEND_LONG_FMT ")", tmp);
 				} else {
 					windowBits = tmp;
 				}
@@ -359,7 +359,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 						/* Memory Level (1 - 9) */
 						tmp = zval_get_long(tmpzval);
 						if (tmp < 1 || tmp > MAX_MEM_LEVEL) {
-							php_error_docref(NULL, E_WARNING, "Invalid parameter given for memory level (" ZEND_LONG_FMT ")", tmp);
+							zend_throw_error(NULL, "Invalid parameter given for memory level (" ZEND_LONG_FMT ")", tmp);
 						} else {
 							memLevel = tmp;
 						}
@@ -369,7 +369,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 						/* log-2 base of history window (9 - 15) */
 						tmp = zval_get_long(tmpzval);
 						if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 16) {
-							php_error_docref(NULL, E_WARNING, "Invalid parameter given for window size (" ZEND_LONG_FMT ")", tmp);
+							zend_throw_error(NULL, "Invalid parameter given for window size (" ZEND_LONG_FMT ")", tmp);
 						} else {
 							windowBits = tmp;
 						}
@@ -389,13 +389,13 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 factory_setlevel:
 					/* Set compression level within reason (-1 == default, 0 == none, 1-9 == least to most compression */
 					if (tmp < -1 || tmp > 9) {
-						php_error_docref(NULL, E_WARNING, "Invalid compression level specified. (" ZEND_LONG_FMT ")", tmp);
+						zend_throw_error(NULL, "Invalid compression level specified. (" ZEND_LONG_FMT ")", tmp);
 					} else {
 						level = tmp;
 					}
 					break;
 				default:
-					php_error_docref(NULL, E_WARNING, "Invalid filter parameter, ignored");
+					zend_throw_error(NULL, "Invalid filter parameter, ignored");
 			}
 		}
 		status = deflateInit2(&(data->strm), level, Z_DEFLATED, windowBits, memLevel, 0);

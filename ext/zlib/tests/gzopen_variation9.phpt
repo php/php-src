@@ -12,7 +12,12 @@ $file = __DIR__."/004.txt.gz";
 
 foreach ($modes as $mode) {
     echo "mode=$mode\n";
-    $h = gzopen($file, $mode);
+    $h = false;
+    try {
+        $h = gzopen($file, $mode);
+    } catch (\Throwable $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     echo "gzopen=";
     var_dump($h);
     if ($h !== false) {
@@ -24,16 +29,14 @@ foreach ($modes as $mode) {
 --EXPECTF--
 *** Testing gzopen() : variation ***
 mode=r+
-
-Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Cannot open a zlib stream for reading and writing at the same time!
 gzopen=bool(false)
 
 mode=rf
 gzopen=resource(%d) of type (stream)
 
 mode=w+
-
-Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Cannot open a zlib stream for reading and writing at the same time!
 gzopen=bool(false)
 
 mode=e

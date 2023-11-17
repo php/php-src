@@ -270,13 +270,13 @@ function gzread($stream, int $length): string|false {}
  */
 function gzgets($stream, ?int $length = null): string|false {}
 
-function deflate_init(int $encoding, array $options = []): DeflateContext|false {}
+function deflate_init(int $encoding, array $options = []): DeflateContext {}
 
-function deflate_add(DeflateContext $context, string $data, int $flush_mode = ZLIB_SYNC_FLUSH): string|false {}
+function deflate_add(DeflateContext $context, string $data, int $flush_mode = ZLIB_SYNC_FLUSH): string {}
 
-function inflate_init(int $encoding, array $options = []): InflateContext|false {}
+function inflate_init(int $encoding, array $options = []): InflateContext {}
 
-function inflate_add(InflateContext $context, string $data, int $flush_mode = ZLIB_SYNC_FLUSH): string|false {}
+function inflate_add(InflateContext $context, string $data, int $flush_mode = ZLIB_SYNC_FLUSH): string {}
 
 function inflate_get_status(InflateContext $context): int {}
 

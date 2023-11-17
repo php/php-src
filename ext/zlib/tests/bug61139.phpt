@@ -4,12 +4,14 @@ Bug #61139 (gzopen leaks when specifying invalid mode)
 zlib
 --FILE--
 <?php
-
-gzopen('someFile', 'c');
-?>
+try {
+    gzopen('someFile', 'c');
+} catch (\Throwable $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 --CLEAN--
 <?php
     unlink('someFile');
 ?>
 --EXPECTF--
-Warning: gzopen(): gzopen failed in %s on line %d
+gzopen failed

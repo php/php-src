@@ -412,7 +412,7 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 		}
 	}
 
-	php_error_docref(NULL, E_WARNING, "%s", zError(status));
+	zend_throw_error(NULL, "%s", zError(status));
 	return NULL;
 }
 /* }}} */
@@ -503,7 +503,7 @@ retry_raw_inflate:
 	*out_buf = NULL;
 	*out_len = 0;
 
-	php_error_docref(NULL, E_WARNING, "%s", zError(status));
+	zend_throw_error(NULL, "%s", zError(status));
 	return FAILURE;
 }
 /* }}} */
@@ -914,8 +914,8 @@ PHP_FUNCTION(inflate_init)
 
 	if (inflateInit2(&ctx->Z, encoding) != Z_OK) {
 		zval_ptr_dtor(return_value);
-		php_error_docref(NULL, E_WARNING, "Failed allocating zlib.inflate context");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Failed allocating zlib.inflate context");
+		RETURN_THROWS();
 	}
 
 	if (encoding == PHP_ZLIB_ENCODING_RAW && dictlen > 0) {
@@ -925,9 +925,10 @@ PHP_FUNCTION(inflate_init)
 				ctx->inflateDict = NULL;
 				break;
 			case Z_DATA_ERROR:
-				php_error_docref(NULL, E_WARNING, "Dictionary does not match expected dictionary (incorrect adler32 hash)");
+				zend_throw_error(NULL, "Dictionary does not match expected dictionary (incorrect adler32 hash)");
 				efree(ctx->inflateDict);
 				ctx->inflateDict = NULL;
+				RETURN_THROWS();
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
@@ -1024,19 +1025,19 @@ PHP_FUNCTION(inflate_add)
 							efree(ctx->inflateDict);
 							ctx->inflateDict = NULL;
 							zend_string_release_ex(out, 0);
-							php_error_docref(NULL, E_WARNING, "Dictionary does not match expected dictionary (incorrect adler32 hash)");
-							RETURN_FALSE;
+							zend_throw_error(NULL, "Dictionary does not match expected dictionary (incorrect adler32 hash)");
+							RETURN_THROWS();
 						EMPTY_SWITCH_DEFAULT_CASE()
 					}
 					break;
 				} else {
-					php_error_docref(NULL, E_WARNING, "Inflating this data requires a preset dictionary, please specify it in the options array of inflate_init()");
-					RETURN_FALSE;
+					zend_throw_error(NULL, "Inflating this data requires a preset dictionary, please specify it in the options array of inflate_init()");
+					RETURN_THROWS();
 				}
 			default:
 				zend_string_release_ex(out, 0);
-				php_error_docref(NULL, E_WARNING, "%s", zError(status));
-				RETURN_FALSE;
+				zend_throw_error(NULL, "%s", zError(status));
+				RETURN_THROWS();
 		}
 	} while (1);
 
@@ -1160,8 +1161,8 @@ PHP_FUNCTION(deflate_init)
 
 	if (deflateInit2(&ctx->Z, level, Z_DEFLATED, encoding, memory, strategy) != Z_OK) {
 		zval_ptr_dtor(return_value);
-		php_error_docref(NULL, E_WARNING, "Failed allocating zlib.deflate context");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Failed allocating zlib.deflate context");
+		RETURN_THROWS();
 	}
 
 	if (dict) {
@@ -1248,8 +1249,8 @@ PHP_FUNCTION(deflate_add)
 			break;
 		default:
 			zend_string_release_ex(out, 0);
-			php_error_docref(NULL, E_WARNING, "zlib error (%s)", zError(status));
-			RETURN_FALSE;
+			zend_throw_error(NULL, "zlib error (%s)", zError(status));
+			RETURN_THROWS();
 	}
 }
 /* }}} */

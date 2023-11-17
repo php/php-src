@@ -13,13 +13,15 @@ $data = 'string_val';
 $short_len = strlen($data) - 1;
 $compressed = gzcompress($data);
 
-var_dump(gzinflate($compressed, $short_len));
+try {
+    var_dump(gzinflate($compressed, $short_len));
+} catch (\Throwable $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
 --EXPECTF--
 *** Testing gzinflate() : error conditions ***
 
 -- Testing with a buffer that is too small --
-
-Warning: gzinflate(): data error in %s on line %d
-bool(false)
+data error
