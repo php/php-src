@@ -212,7 +212,7 @@ struct _php_stream  {
 	uint8_t fclose_stdiocast:2;
 
 	/* whether stdio cast flushing is in progress */
-	int8_t fclose_stdiocast_flush_in_progress:1;
+	uint8_t fclose_stdiocast_flush_in_progress:1;
 
 	char mode[16];			/* "rwb" etc. ala stdio */
 
