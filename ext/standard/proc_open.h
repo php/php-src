@@ -49,4 +49,5 @@ typedef struct _php_process_handle {
 	int cached_exit_wait_status_value;
 	bool has_cached_exit_wait_status;
 #endif
+	zend_object std;
 } php_process_handle;

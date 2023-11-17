@@ -37,6 +37,11 @@
 extern zend_module_entry basic_functions_module;
 #define basic_functions_module_ptr &basic_functions_module
 
+#ifdef PHP_CAN_SUPPORT_PROC_OPEN
+extern zend_class_entry *process_ce;
+extern void php_register_process_class_handlers(void);
+#endif
+
 PHP_MINIT_FUNCTION(basic);
 PHP_MSHUTDOWN_FUNCTION(basic);
 PHP_RINIT_FUNCTION(basic);

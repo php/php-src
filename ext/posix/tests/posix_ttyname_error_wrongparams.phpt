@@ -15,12 +15,10 @@ standard
 
 var_dump(posix_ttyname(0)); // param not a resource
 
-$descriptors = [["pty"], ["pty"], ["pty"], ["pipe", "w"]];
-$pipes = [];
-$process = proc_open('echo "foo";', $descriptors, $pipes);
+$bucket = stream_bucket_new(fopen('php://temp', 'w+'), '');
 
 try {
-    var_dump(posix_ttyname($process)); // wrong resource type
+    var_dump(posix_ttyname($bucket->bucket)); // wrong resource type
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }

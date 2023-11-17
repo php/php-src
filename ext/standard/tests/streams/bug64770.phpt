@@ -14,7 +14,7 @@ $other_opts = array('suppress_errors' => false);
 $cmd = (substr(PHP_OS, 0, 3) == 'WIN') ? 'dir' : 'ls';
 $p = proc_open($cmd, $descs, $pipes, '.', NULL, $other_opts);
 
-if (is_resource($p)) {
+if ($p) {
     $data = '';
 
     while (1) {

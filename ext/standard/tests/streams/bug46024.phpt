@@ -45,6 +45,7 @@ if (defined('SIGKILL')) {
 proc_close($proc);
 ?>
 --EXPECTF--
-resource(%d) of type (process)
+object(Standard\Process)#1 (0) {
+}
 bool(true)
 bool(true)

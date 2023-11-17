@@ -309,6 +309,11 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 	assertion_error_ce = register_class_AssertionError(zend_ce_error);
 
+#ifdef PHP_CAN_SUPPORT_PROC_OPEN
+	process_ce = register_class_Standard_Process();
+	php_register_process_class_handlers();
+#endif
+
 	BASIC_MINIT_SUBMODULE(var)
 	BASIC_MINIT_SUBMODULE(file)
 	BASIC_MINIT_SUBMODULE(pack)
@@ -342,9 +347,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(array)
 	BASIC_MINIT_SUBMODULE(assert)
 	BASIC_MINIT_SUBMODULE(url_scanner_ex)
-#ifdef PHP_CAN_SUPPORT_PROC_OPEN
-	BASIC_MINIT_SUBMODULE(proc_open)
-#endif
 	BASIC_MINIT_SUBMODULE(exec)
 
 	BASIC_MINIT_SUBMODULE(user_streams)

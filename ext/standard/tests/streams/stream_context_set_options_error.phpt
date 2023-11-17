@@ -2,17 +2,10 @@
 Error test for stream_context_set_options()
 --FILE--
 <?php
-$pipes = [];
-$description = array(
-   0 => array("pipe", "r"),
-   1 => array("pipe", "w"),
-   2 => array("pipe", "r")
-);
-
-$process = proc_open('nothing', $description, $pipes);
+$bucket = stream_bucket_new(fopen('php://temp', 'w+'), '');
 
 try {
-    stream_context_set_options($process, []);
+    stream_context_set_options($bucket->bucket, []);
 } catch (TypeError $e) {
     echo $e->getMessage();
 }

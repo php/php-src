@@ -135,7 +135,8 @@ fail:
 
 #include "proc_open.h"
 
-static int le_proc_open; /* Resource number for `proc` resources */
+zend_class_entry *process_ce;
+static zend_object_handlers process_object_handlers;
 
 /* {{{ _php_array_to_envp
  * Process the `environment` argument to `proc_open`
@@ -223,6 +224,22 @@ static php_process_env _php_array_to_envp(zval *environment)
 }
 /* }}} */
 
+static inline php_process_handle *php_process_from_obj(zend_object *obj) {
+	return (php_process_handle *)((char *)(obj) - XtOffsetOf(php_process_handle, std));
+}
+
+#define Z_PROCESS_P(zv) php_process_from_obj(Z_OBJ_P(zv))
+
+static zend_object *php_process_create_object(zend_class_entry *class_type) {
+	php_process_handle *intern = zend_object_alloc(sizeof(php_process_handle), class_type);
+
+	zend_object_std_init(&intern->std, class_type);
+	object_properties_init(&intern->std, class_type);
+
+	return &intern->std;
+}
+
+
 /* {{{ _php_free_envp
  * Free the structures allocated by `_php_array_to_envp` */
 static void _php_free_envp(php_process_env env)
@@ -260,12 +277,8 @@ static pid_t waitpid_cached(php_process_handle *proc, int *wait_status, int opti
 }
 #endif
 
-/* {{{ proc_open_rsrc_dtor
- * Free `proc` resource, either because all references to it were dropped or because `pclose` or
- * `proc_close` were called */
-static void proc_open_rsrc_dtor(zend_resource *rsrc)
+static void php_process_free(php_process_handle *proc)
 {
-	php_process_handle *proc = (php_process_handle*)rsrc->ptr;
 #ifdef PHP_WIN32
 	DWORD wstatus;
 #elif HAVE_SYS_WAIT_H
@@ -323,18 +336,40 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	_php_free_envp(proc->env);
 	efree(proc->pipes);
 	zend_string_release_ex(proc->command, false);
-	efree(proc);
+	proc->command = NULL;
 }
-/* }}} */
 
-/* {{{ PHP_MINIT_FUNCTION(proc_open) */
-PHP_MINIT_FUNCTION(proc_open)
+static void php_process_free_obj(zend_object *object)
 {
-	le_proc_open = zend_register_list_destructors_ex(proc_open_rsrc_dtor, NULL, "process",
-		module_number);
-	return SUCCESS;
+	php_process_handle *proc = php_process_from_obj(object);
+
+	if (proc->command == NULL) {
+		zend_object_std_dtor(&proc->std);
+		return;
+	}
+
+	php_process_free(proc);
+
+	zend_object_std_dtor(&proc->std);
 }
-/* }}} */
+
+static zend_function *php_process_get_constructor(zend_object *object) {
+	zend_throw_error(NULL, "Cannot directly construct Standard\\Process, use proc_open() instead");
+	return NULL;
+}
+
+void php_register_process_class_handlers(void)
+{
+	process_ce->default_object_handlers = &process_object_handlers;
+	process_ce->create_object = php_process_create_object;
+
+	memcpy(&process_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	process_object_handlers.offset = XtOffsetOf(php_process_handle, std);
+	process_object_handlers.free_obj = php_process_free_obj;
+	process_object_handlers.get_constructor = php_process_get_constructor;
+	process_object_handlers.clone_obj = NULL;
+	process_object_handlers.compare = zend_objects_not_comparable;
+}
 
 /* {{{ Kill a process opened by `proc_open` */
 PHP_FUNCTION(proc_terminate)
@@ -344,13 +379,14 @@ PHP_FUNCTION(proc_terminate)
 	zend_long sig_no = SIGTERM;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_RESOURCE(zproc)
+		Z_PARAM_OBJECT_OF_CLASS(zproc, process_ce)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sig_no)
 	ZEND_PARSE_PARAMETERS_END();
 
-	proc = (php_process_handle*)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open);
-	if (proc == NULL) {
+	proc = Z_PROCESS_P(zproc);
+	if (proc->command == NULL) {
+		zend_throw_error(NULL, "Process has already been closed");
 		RETURN_THROWS();
 	}
 
@@ -369,16 +405,17 @@ PHP_FUNCTION(proc_close)
 	php_process_handle *proc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_RESOURCE(zproc)
+		Z_PARAM_OBJECT_OF_CLASS(zproc, process_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	proc = (php_process_handle*)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open);
-	if (proc == NULL) {
+	proc = Z_PROCESS_P(zproc);
+	if (proc->command == NULL) {
+		zend_throw_error(NULL, "Process has already been closed");
 		RETURN_THROWS();
 	}
 
-	FG(pclose_wait) = 1; /* See comment in `proc_open_rsrc_dtor` */
-	zend_list_close(Z_RES_P(zproc));
+	FG(pclose_wait) = 1; /* See comment in `proc_open_free` */
+	php_process_free(proc);
 	FG(pclose_wait) = 0;
 	RETURN_LONG(FG(pclose_ret));
 }
@@ -399,11 +436,12 @@ PHP_FUNCTION(proc_get_status)
 	int exitcode = -1, termsig = 0, stopsig = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_RESOURCE(zproc)
+		Z_PARAM_OBJECT_OF_CLASS(zproc, process_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	proc = (php_process_handle*)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open);
-	if (proc == NULL) {
+	proc = Z_PROCESS_P(zproc);
+	if (proc->command == NULL) {
+		zend_throw_error(NULL, "Process has already been closed");
 		RETURN_THROWS();
 	}
 
@@ -1344,7 +1382,8 @@ PHP_FUNCTION(proc_open)
 		goto exit_fail;
 	}
 
-	proc = (php_process_handle*) emalloc(sizeof(php_process_handle));
+	object_init_ex(return_value, process_ce);
+	proc = Z_PROCESS_P(return_value);
 	proc->command = zend_string_copy(command_str);
 	proc->pipes = emalloc(sizeof(zend_resource *) * ndesc);
 	proc->npipes = ndesc;
@@ -1414,9 +1453,7 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
-	if (1) {
-		RETVAL_RES(zend_register_resource(proc, le_proc_open));
-	} else {
+	if (0) {
 exit_fail:
 		_php_free_envp(env);
 		RETVAL_FALSE;
