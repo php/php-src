@@ -60,10 +60,6 @@
 #endif
 #endif
 
-#ifndef HAVE_INET_NTOP
-#error inet_ntop unsupported on this platform
-#endif
-
 #ifndef HAVE_INET_ATON
 int inet_aton(const char *, struct in_addr *);
 #endif

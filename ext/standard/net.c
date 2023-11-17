@@ -47,10 +47,6 @@
 # include <netdb.h>
 #endif
 
-#ifndef HAVE_INET_NTOP
-#error inet_ntop unsupported on this platform
-#endif
-
 PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 	socklen_t addrlen = sizeof(struct sockaddr_in);
 

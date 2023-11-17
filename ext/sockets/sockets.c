@@ -218,10 +218,6 @@ zend_module_entry sockets_module_entry = {
 ZEND_GET_MODULE(sockets)
 #endif
 
-#ifndef HAVE_INET_NTOP
-#error inet_ntop unsupported on this platform
-#endif
-
 static bool php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ */
 {
 	struct sockaddr_in  la;
