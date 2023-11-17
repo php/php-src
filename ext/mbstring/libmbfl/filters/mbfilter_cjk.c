@@ -7656,13 +7656,13 @@ static void mb_wchar_to_cp932(uint32_t *in, size_t len, mb_convert_buf *buf, boo
 		}
 
 		if (!s1 || (s1 >= 0x8080 && !s2)) { /* not found or X 0212 */
-			const unsigned short *lookup = mbfl_binary_search_paired_sorted_table(w, cp932ext1_ucs_table_paired_sorted, cp932ext1_ucs_table_max - cp932ext1_ucs_table_min);
+			const unsigned short *lookup = mbfl_binary_search_paired_sorted_table(w, cp932ext1_ucs_table_paired_sorted, sizeof(cp932ext1_ucs_table_paired_sorted) / sizeof(*cp932ext1_ucs_table_paired_sorted));
 			if (lookup) {
 				s1 = ((*lookup/94 + 0x2D) << 8) + (*lookup%94 + 0x21);
 				goto emit_output;
 			}
 
-			lookup = mbfl_binary_search_paired_sorted_table(w, cp932ext3_ucs_table_paired_sorted, cp932ext3_ucs_table_max - cp932ext3_ucs_table_min);
+			lookup = mbfl_binary_search_paired_sorted_table(w, cp932ext3_ucs_table_paired_sorted, sizeof(cp932ext3_ucs_table_paired_sorted) / sizeof(*cp932ext3_ucs_table_paired_sorted));
 			if (lookup) {
 				s1 = ((*lookup/94 + 0x93) << 8) + (*lookup%94 + 0x21);
 				goto emit_output;
@@ -7733,13 +7733,13 @@ static void mb_wchar_to_sjiswin(uint32_t *in, size_t len, mb_convert_buf *buf, b
 		}
 
 		if (!s1 || (s1 >= 0x8080 && !s2)) { /* not found or X 0212 */
-			const unsigned short *lookup = mbfl_binary_search_paired_sorted_table(w, cp932ext1_ucs_table_paired_sorted, cp932ext1_ucs_table_max - cp932ext1_ucs_table_min);
+			const unsigned short *lookup = mbfl_binary_search_paired_sorted_table(w, cp932ext1_ucs_table_paired_sorted, sizeof(cp932ext1_ucs_table_paired_sorted) / sizeof(*cp932ext1_ucs_table_paired_sorted));
 			if (lookup) {
 				s1 = ((*lookup/94 + 0x2D) << 8) + (*lookup%94 + 0x21);
 				goto emit_output;
 			}
 
-			lookup = mbfl_binary_search_paired_sorted_table(w, cp932ext3_ucs_table_paired_sorted, cp932ext3_ucs_table_max - cp932ext3_ucs_table_min);
+			lookup = mbfl_binary_search_paired_sorted_table(w, cp932ext3_ucs_table_paired_sorted, sizeof(cp932ext3_ucs_table_paired_sorted) / sizeof(*cp932ext3_ucs_table_paired_sorted));
 			if (lookup) {
 				s1 = ((*lookup/94 + 0x93) << 8) + (*lookup%94 + 0x21);
 				goto emit_output;
