@@ -102,10 +102,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 # define INADDR_NONE ((zend_ulong) -1)
 #endif
 
-#ifndef HAVE_INET_NTOP
-# error inet_ntop unsupported on this platform
-#endif
-
 #include "zend_globals.h"
 #include "php_globals.h"
 #include "SAPI.h"
@@ -636,9 +632,7 @@ PHP_FUNCTION(long2ip)
 	zend_ulong ip;
 	zend_long sip;
 	struct in_addr myaddr;
-#ifdef HAVE_INET_PTON
 	char str[40];
-#endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(sip)

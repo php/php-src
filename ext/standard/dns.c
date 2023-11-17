@@ -57,10 +57,6 @@ extern void __res_ndestroy(res_state statp);
 #endif
 #endif
 
-#ifndef HAVE_INET_NTOP
-#error inet_ntop unsupported on this platform
-#endif
-
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN 255
 #endif

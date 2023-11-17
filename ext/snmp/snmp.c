@@ -51,10 +51,6 @@
 #endif
 #include <locale.h>
 
-#ifndef HAVE_INET_NTOP
-#error inet_ntop unsupported on this platform
-#endif
-
 #ifndef __P
 #ifdef __GNUC__
 #define __P(args) args

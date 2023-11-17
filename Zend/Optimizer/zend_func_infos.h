@@ -525,9 +525,7 @@ static const func_info_t func_infos[] = {
 	F1("md5_file", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("sha1", MAY_BE_STRING),
 	F1("sha1_file", MAY_BE_STRING|MAY_BE_FALSE),
-#if defined(HAVE_INET_NTOP)
 	F1("inet_ntop", MAY_BE_STRING|MAY_BE_FALSE),
-#endif
 #if defined(HAVE_INET_PTON)
 	F1("inet_pton", MAY_BE_STRING|MAY_BE_FALSE),
 #endif

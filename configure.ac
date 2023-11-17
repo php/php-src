@@ -609,7 +609,6 @@ getgrnam_r \
 getpwuid_r \
 getwd \
 glob \
-inet_ntop \
 inet_pton \
 localtime_r \
 lchown \
@@ -644,6 +643,11 @@ asprintf \
 nanosleep \
 memmem \
 memrchr \
+)
+
+AC_CHECK_FUNCS(inet_ntop,[],[
+    AC_MSG_ERROR([Cannot find inet_ntop which is required])
+]
 )
 
 dnl Check for strerror_r, and if its a POSIX-compatible or a GNU specific version.
