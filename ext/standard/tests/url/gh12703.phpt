@@ -1,5 +1,5 @@
 --TEST--
-Bug #X	parse_url() return false on absolute path containing ':' and no query string.
+GH-12703 parse_url() return false on absolute path containing ':' and no query string.
 --FILE--
 <?php
 var_dump(
