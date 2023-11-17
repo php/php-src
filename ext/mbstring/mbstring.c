@@ -276,6 +276,14 @@ static const mbfl_encoding *php_mb_get_encoding_or_pass(const char *encoding_nam
 	return mbfl_name2encoding(encoding_name);
 }
 
+static const mbfl_encoding *php_mb_get_encoding_or_pass_ex(const char *encoding_name, size_t encoding_name_len) {
+	if (strncmp(encoding_name, "pass", encoding_name_len) == 0) {
+		return &mbfl_encoding_pass;
+	}
+
+	return mbfl_name2encoding_ex(encoding_name, encoding_name_len);
+}
+
 static size_t count_commas(const char *p, const char *end) {
 	size_t count = 0;
 	while ((p = memchr(p, ',', end - p))) {
@@ -300,15 +308,15 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 	} else {
 		bool included_auto;
 		size_t n, size;
-		char *p1, *endp, *tmpstr;
+		const char *p1, *endp, *tmpstr;
 		const mbfl_encoding **entry, **list;
 
 		/* copy the value string for work */
 		if (value[0]=='"' && value[value_length-1]=='"' && value_length>2) {
-			tmpstr = (char *)estrndup(value+1, value_length-2);
+			tmpstr = value + 1;
 			value_length -= 2;
 		} else {
-			tmpstr = (char *)estrndup(value, value_length);
+			tmpstr = value;
 		}
 
 		endp = tmpstr + value_length;
@@ -319,20 +327,19 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 		included_auto = 0;
 		p1 = tmpstr;
 		while (1) {
-			char *comma = memchr(p1, ',', endp - p1);
-			char *p = comma ? comma : endp;
-			*p = '\0';
+			const char *comma = memchr(p1, ',', endp - p1);
+			const char *p = comma ? comma : endp;
 			/* trim spaces */
 			while (p1 < p && (*p1 == ' ' || *p1 == '\t')) {
 				p1++;
 			}
 			p--;
 			while (p > p1 && (*p == ' ' || *p == '\t')) {
-				*p = '\0';
 				p--;
 			}
+			size_t p1_length = p - p1 + 1;
 			/* convert to the encoding number and check encoding */
-			if (strcasecmp(p1, "auto") == 0) {
+			if (strncasecmp(p1, "auto", p1_length) == 0) {
 				if (!included_auto) {
 					const enum mbfl_no_encoding *src = MBSTRG(default_detect_order_list);
 					const size_t identify_list_size = MBSTRG(default_detect_order_list_size);
@@ -345,15 +352,14 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 				}
 			} else {
 				const mbfl_encoding *encoding =
-					allow_pass_encoding ? php_mb_get_encoding_or_pass(p1) : mbfl_name2encoding(p1);
+					allow_pass_encoding ? php_mb_get_encoding_or_pass_ex(p1, p1_length) : mbfl_name2encoding_ex(p1, p1_length);
 				if (!encoding) {
 					/* Called from an INI setting modification */
 					if (arg_num == 0) {
-						php_error_docref("ref.mbstring", E_WARNING, "INI setting contains invalid encoding \"%s\"", p1);
+						php_error_docref("ref.mbstring", E_WARNING, "INI setting contains invalid encoding \"%.*s\"", (int) p1_length, p1);
 					} else {
-						zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", p1);
+						zend_argument_value_error(arg_num, "contains invalid encoding \"%.*s\"", (int) p1_length, p1);
 					}
-					efree(tmpstr);
 					pefree(ZEND_VOIDP(list), persistent);
 					return FAILURE;
 				}
@@ -368,7 +374,6 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 		}
 		*return_list = list;
 		*return_size = n;
-		efree(tmpstr);
 	}
 
 	return SUCCESS;
