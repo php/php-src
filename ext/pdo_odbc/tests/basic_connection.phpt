@@ -4,20 +4,19 @@ Basic test for connection. (When not using a DSN alias)
 pdo_odbc
 --SKIPIF--
 <?php
-require 'ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
-$dsn = getenv('PDO_ODBC_TEST_DSN');
-if (!$dsn || strpos($dsn, '=') === false) {
-    die('skip');
-}
+require_once __DIR__ . '/inc/odbc_pdo_test.inc';
+ODBCPDOTest::skipNoDirect();
+ODBCPDOTest::skipToofewCredentials();
+ODBCPDOTest::skip();
 ?>
 --XLEAK--
 A bug in msodbcsql causes a memory leak when reconnecting after closing. See GH-12306
 --FILE--
 <?php
-$dsnWithCredentials = getenv('PDO_ODBC_TEST_DSN');
-$user = getenv('PDO_ODBC_TEST_USER');
-$password = getenv('PDO_ODBC_TEST_PASS');
+require_once __DIR__ . '/inc/odbc_pdo_test.inc';
+$dsnWithCredentials = PDO_ODBC_TEST_DSN;
+$user = PDO_ODBC_TEST_USER;
+$password = PDO_ODBC_TEST_PASS;
 
 $dsn = str_replace(";uid={$user};pwd={$password}", '', $dsnWithCredentials);
 
