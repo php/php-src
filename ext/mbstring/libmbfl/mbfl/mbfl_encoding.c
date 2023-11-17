@@ -144,13 +144,212 @@ static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	NULL
 };
 
+/* The following perfect hashing table was amended from gperf, and hashing code was generated using gperf.
+ * The table was amended to refer to the table above such that it is lighter for the data cache.
+ * Command used: gperf encodings.txt --readonly-tables --null-strings --ignore-case
+ * The encodings.txt contains all the contents of the name fields of the mbfl_encoding_ptr_list table. */
+
+static const int8_t mbfl_encoding_ptr_list_after_hashing[187] = {
+	-1, -1, -1,
+	65,
+	23,
+	9,
+	-1,
+	60,
+	36,
+	-1, -1,
+	58,
+	42,
+	-1, -1,
+	18,
+	27,
+	77,
+	26,
+	40,
+	72,
+	12,
+	10,
+	2,
+	31,
+	-1, -1,
+	75,
+	74,
+	33,
+	45,
+	-1,
+	67,
+	13,
+	-1,
+	51,
+	53,
+	11,
+	1,
+	-1,
+	48,
+	56,
+	-1,
+	38,
+	20,
+	46,
+	54,
+	-1,
+	14,
+	24,
+	44,
+	39,
+	43,
+	-1,
+	30,
+	49,
+	57,
+	76,
+	-1, -1,
+	68,
+	73,
+	7,
+	16,
+	-1,
+	35,
+	66,
+	-1, -1, -1,
+	47,
+	55,
+	-1, -1, -1,
+	63,
+	15,
+	8,
+	17,
+	-1,
+	21,
+	70,
+	-1,
+	29,
+	5,
+	6,
+	61,
+	-1, -1,
+	71,
+	52,
+	3,
+	37,
+	-1, -1,
+	28,
+	-1, -1, -1,
+	32,
+	50,
+	34,
+	-1, -1, -1,
+	62,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1,
+	59,
+	0,
+	-1, -1, -1, -1,
+	22,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1,
+	25,
+	41,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	19,
+	-1, -1, -1,
+	4,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	69,
+	-1, -1, -1, -1,
+	64,
+};
+
+static unsigned int mbfl_name2encoding_perfect_hash(const char *str, size_t len)
+{
+	static const unsigned char asso_values[] =
+	{
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187,   0, 187, 187,   5,  20,
+		0,  15,  40,  10,  25,  70,   5,  60, 187, 187,
+		187, 187, 187, 187, 187,  75,   5,   0,  20,   5,
+		0,  75,   5,   0,  40,  75,  20,   0,   0,   0,
+		35,  45,  50,   0,  75,   0, 187,   0, 187, 187,
+		0, 187, 187, 187, 187, 187, 187,  75,   5,   0,
+		20,   5,   0,  75,   5,   0,  40,  75,  20,   0,
+		0,   0,  35,  45,  50,   0,  75,   0, 187,   0,
+		187, 187,   0, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187, 187, 187, 187, 187,
+		187, 187, 187, 187, 187, 187
+	};
+	unsigned int hval = len;
+
+	switch (hval)
+	{
+		default:
+			hval += asso_values[(unsigned char)str[6]];
+			ZEND_FALLTHROUGH;
+		case 6:
+			hval += asso_values[(unsigned char)str[5]];
+			ZEND_FALLTHROUGH;
+		case 5:
+			hval += asso_values[(unsigned char)str[4]];
+			ZEND_FALLTHROUGH;
+		case 4:
+		case 3:
+			hval += asso_values[(unsigned char)str[2]];
+			ZEND_FALLTHROUGH;
+		case 2:
+		case 1:
+			hval += asso_values[(unsigned char)str[0]];
+			break;
+	}
+	return hval + asso_values[(unsigned char)str[len - 1]];
+}
+
+#define NAME_HASH_MIN_NAME_LENGTH 2
+#define NAME_HASH_MAX_NAME_LENGTH 23
+
 const mbfl_encoding *mbfl_name2encoding(const char *name)
 {
-	const mbfl_encoding **encoding;
+	const mbfl_encoding *const *encoding;
 
+	/* Sanity check perfect hash for name.
+	 * Never enable this in production, this is only a development-time sanity check! */
+#if ZEND_DEBUG && 0
 	for (encoding = mbfl_encoding_ptr_list; *encoding; encoding++) {
-		if (strcasecmp((*encoding)->name, name) == 0) {
-			return *encoding;
+		size_t name_length = strlen((*encoding)->name);
+		if (!(name_length <= NAME_HASH_MAX_NAME_LENGTH && name_length >= NAME_HASH_MIN_NAME_LENGTH)) {
+			fprintf(stderr, "name length is not satisfying bound check: %zu %s\n", name_length, (*encoding)->name);
+			abort();
+		}
+		unsigned int key = mbfl_name2encoding_perfect_hash((*encoding)->name, name_length);
+		if (mbfl_encoding_ptr_list[mbfl_encoding_ptr_list_after_hashing[key]] != *encoding) {
+			fprintf(stderr, "mbfl_name2encoding_perfect_hash: key %u %s mismatch\n", key, (*encoding)->name);
+			abort();
+		}
+	}
+#endif
+
+	/* Use perfect hash lookup for name */
+	size_t name_len = strlen(name);
+	if (name_len <= NAME_HASH_MAX_NAME_LENGTH && name_len >= NAME_HASH_MIN_NAME_LENGTH) {
+		unsigned int key = mbfl_name2encoding_perfect_hash(name, name_len);
+		if (key <= 186) {
+			int8_t offset = mbfl_encoding_ptr_list_after_hashing[key];
+			if (offset >= 0) {
+				encoding = mbfl_encoding_ptr_list + offset;
+				if (strcasecmp((*encoding)->name, name) == 0) {
+					return *encoding;
+				}
+			}
 		}
 	}
 
