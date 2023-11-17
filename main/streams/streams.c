@@ -1322,8 +1322,13 @@ PHPAPI zend_off_t _php_stream_tell(php_stream *stream)
 PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 {
 	if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
-		/* flush to commit data written to the fopencookie FILE* */
-		fflush(stream->stdiocast);
+		/* flush can call seek internally so we need to prevent an infinite loop */
+		if (!stream->fclose_stdiocast_flush_in_progress) {
+			stream->fclose_stdiocast_flush_in_progress = 1;
+			/* flush to commit data written to the fopencookie FILE* */
+			fflush(stream->stdiocast);
+			stream->fclose_stdiocast_flush_in_progress = 0;
+		}
 	}
 
 	/* handle the case where we are in the buffer */
