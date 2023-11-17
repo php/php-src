@@ -35,8 +35,6 @@
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(syslog)
 {
-	BG(syslog_device)=NULL;
-
 	return SUCCESS;
 }
 /* }}} */

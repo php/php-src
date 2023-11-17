@@ -2,15 +2,29 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.0
 
+- Intl:
+  . Fixed bug GH-12635 (Test bug69398.phpt fails with ICU 74.1). (nielsdos)
+
 - PCRE:
   . Fixed bug GH-12628 (The gh11374 test fails on Alpinelinux). (nielsdos)
 
+- PHPDBG:
+  . Fixed bug GH-12675 (MEMORY_LEAK in phpdbg_prompt.c). (nielsdos)
+
 - Standard:
   . Fix memory leak in syslog device handling. (danog)
+  . Fixed bug GH-12621 (browscap segmentation fault when configured in the
+    vhost). (nielsdos)
+  . Fixed bug GH-12655 (proc_open() does not take into account references
+    in the descriptor array). (nielsdos)
 
 - SQLite3:
   . Fixed bug GH-12633 (sqlite3_defensive.phpt fails with sqlite 3.44.0).
     (SakiTakamachi)
+
+- Zip:
+  . Fixed bug GH-12661 (Inconsistency in ZipArchive::addGlob remove_path Option
+    Behavior). (Remi)
 
 09 Nov 2023, PHP 8.3.0RC6
 
@@ -43,6 +57,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug GH-11374 (Backport upstream fix, Different preg_match result
     with -d pcre.jit=0). (mvorisek)
+
+- PGSQL:
+  . Fixed pipeline mode GH-9344. (degtyaryov)
 
 - SOAP:
   . Fix potential crash with an edge case of persistent encoders. (nielsdos)

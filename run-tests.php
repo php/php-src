@@ -2833,10 +2833,44 @@ SH;
     return $restype[0] . 'ED';
 }
 
+function is_flaky(TestFile $test): bool
+{
+    if ($test->hasSection('FLAKY')) {
+        return true;
+    }
+    if (!$test->hasSection('FILE')) {
+        return false;
+    }
+    $file = $test->getSection('FILE');
+    $flaky_functions = [
+        'disk_free_space',
+        'hrtime',
+        'microtime',
+        'sleep',
+        'usleep',
+    ];
+    $regex = '(\b(' . implode('|', $flaky_functions) . ')\()i';
+    return preg_match($regex, $file) === 1;
+}
+
+function is_flaky_output(string $output): bool
+{
+    $messages = [
+        '404: page not found',
+        'address already in use',
+        'connection refused',
+        'deadlock',
+        'mailbox already exists',
+        'timed out',
+    ];
+    $regex = '(\b(' . implode('|', $messages) . ')\b)i';
+    return preg_match($regex, $output) === 1;
+}
+
 function error_may_be_retried(TestFile $test, string $output): bool
 {
-    return preg_match('((timed out)|(connection refused)|(404: page not found)|(address already in use)|(mailbox already exists))i', $output) === 1
-        || $test->hasSection('FLAKY');
+    return is_flaky_output($output)
+        || is_flaky($test);
 }
 
 function expectf_to_regex(?string $wanted): string
