@@ -4,6 +4,9 @@ Bug ##76452 (Crash while parsing blob data in firebird_fetch_blob)
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
+--XLEAK--
+A bug in firebird causes a memory leak when calling `isc_attach_database()`.
+See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 require_once "payload_server.inc";
