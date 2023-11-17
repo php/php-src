@@ -22,6 +22,6 @@ try {
     echo $e->getMessage(), "\n";
 }
 --EXPECTF--
-implode(): Argument #2 ($array) must be of type array, null given
+implode(): If argument #1 ($separator) is of type string, argument #2 ($array) must be of type array, null given
 implode(): Argument #2 ($array) must be of type array, null given
 implode(): Argument #2 ($array) must be of type array, string given

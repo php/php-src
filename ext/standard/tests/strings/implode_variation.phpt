@@ -198,7 +198,7 @@ string(35) "2000-639010PHP000 0string%0with%0...%0"
 string(43) "2\00\0-639\01\0PHP\0\0\0 \0string%0with%0...%0"
 
 *** Testing implode() on empty string ***
-implode(): Argument #2 ($array) must be of type array, null given
+implode(): If argument #1 ($separator) is of type string, argument #2 ($array) must be of type array, null given
 
 *** Testing implode() on sub-arrays ***
 
