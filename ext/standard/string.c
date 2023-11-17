@@ -1034,7 +1034,11 @@ PHP_FUNCTION(implode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (arg1_str != NULL && pieces == NULL) {
-		zend_type_error("%s(): Argument #2 ($array) must be of type array, null given", get_active_function_name());
+		zend_type_error(
+			"%s(): If argument #1 ($separator) is of type string, "
+			"argument #2 ($array) must be of type array, null given",
+			get_active_function_name()
+		);
 		RETURN_THROWS();
 	}
 

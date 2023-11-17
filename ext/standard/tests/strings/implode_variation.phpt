@@ -9,7 +9,8 @@ $arrays = array (
   array(array(2),array(1)),
   array(false,true),
   array(),
-  array("a","aaaa","b","bbbb","c","ccccccccccccccccccccc")
+  array("a","aaaa","b","bbbb","c","ccccccccccccccccccccc"),
+  array(NULL),
 );
 /* loop to output string with ', ' as $glue, using implode() */
 foreach ($arrays as $array) {
@@ -169,6 +170,11 @@ array(6) {
   string(1) "c"
   [5]=>
   string(21) "ccccccccccccccccccccc"
+}
+string(0) ""
+array(1) {
+  [0]=>
+  NULL
 }
 
 *** Testing implode() with variations of glue ***
