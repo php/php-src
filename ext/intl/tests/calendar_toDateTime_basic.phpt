@@ -14,6 +14,7 @@ $dt = $cal->toDateTime();
 
 var_dump($dt->format("c"), $dt->getTimeZone()->getName());
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Calling IntlGregorianCalendar::__construct() with more than 2 arguments is deprecated in %s on line %d
 string(25) "2012-05-17T17:35:36+01:00"
 string(13) "Europe/Lisbon"

@@ -316,7 +316,7 @@ class IntlCalendar
 
     /**
      * @return true
-     * @alias intlcal_set
+     * @implementation-alias intlcal_set
      */
     public function set(int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN) {} // TODO make return type void
 

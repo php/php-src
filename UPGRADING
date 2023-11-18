@@ -132,6 +132,10 @@ PHP 8.4 UPGRADE NOTES
   . Calling DatePeriod::__construct(string $isostr, int $options = 0) is
     deprecated. Use DatePeriod::createFromISO8601String() instead.
 
+- Intl:
+  . Calling intlcal_set() as well as calling IntlCalendar::set() with
+    more than 2 arguments is deprecated. Use either IntlCalendar::setDate()
+    or IntlCalendar::setDateTime() instead.
 ========================================
 5. Changed Functions
 ========================================

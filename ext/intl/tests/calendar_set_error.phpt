@@ -40,9 +40,16 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Calling IntlCalendar::set() with more than 2 arguments is deprecated, use either IntlCalendar::setDate() or IntlCalendar::setDateTime() instead in %s on line %d
 IntlCalendar::set() expects at most 6 arguments, 7 given
+
+Deprecated: Calling IntlCalendar::set() with more than 2 arguments is deprecated, use either IntlCalendar::setDate() or IntlCalendar::setDateTime() instead in %s on line %d
 IntlCalendar::set() has no variant with exactly 4 parameters
 IntlCalendar::set(): Argument #1 ($year) must be a valid field
+
+Deprecated: Function intlcal_set() is deprecated in %s on line %d
 intlcal_set(): Argument #2 ($year) must be a valid field
+
+Deprecated: Function intlcal_set() is deprecated in %s on line %d
 intlcal_set(): Argument #1 ($calendar) must be of type IntlCalendar, int given
