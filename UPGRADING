@@ -136,6 +136,11 @@ PHP 8.4 UPGRADE NOTES
   . Calling intlcal_set() as well as calling IntlCalendar::set() with
     more than 2 arguments is deprecated. Use either IntlCalendar::setDate()
     or IntlCalendar::setDateTime() instead.
+  . Calling intlgregcal_create_instance() as well as calling
+    IntlGregorianCalendar::__construct() with more than 2 arguments is
+    deprecated. Use either IntlGregorianCalendar::createFromDate() or
+    IntlGregorianCalendar::createFromDateTime() instead.
+
 ========================================
 5. Changed Functions
 ========================================

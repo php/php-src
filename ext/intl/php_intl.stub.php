@@ -278,6 +278,7 @@ function intlcal_get_error_message(IntlCalendar $calendar): string|false {}
  * @param int $hour
  * @param int $minute
  * @param int $second
+ * @deprecated
  */
 function intlgregcal_create_instance($timezoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $day = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN): ?IntlGregorianCalendar {}
 
