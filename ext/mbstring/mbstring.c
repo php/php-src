@@ -760,7 +760,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 }
 /* }}} */
 
-static zend_result _php_mb_ini_mbstring_http_output_set(const char *new_value) {
+static zend_result _php_mb_ini_mbstring_http_output_set(const char *new_value, size_t length) {
 	const mbfl_encoding *encoding = php_mb_get_encoding_or_pass(new_value);
 	if (!encoding) {
 		return FAILURE;
@@ -779,13 +779,14 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 	}
 
 	if (new_value == NULL || ZSTR_LEN(new_value) == 0) {
+		const char *encoding = php_get_output_encoding();
 		MBSTRG(http_output_set) = 0;
-		_php_mb_ini_mbstring_http_output_set(php_get_output_encoding());
+		_php_mb_ini_mbstring_http_output_set(encoding, strlen(encoding));
 		return SUCCESS;
 	}
 
 	MBSTRG(http_output_set) = 1;
-	return _php_mb_ini_mbstring_http_output_set(ZSTR_VAL(new_value));
+	return _php_mb_ini_mbstring_http_output_set(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 }
 /* }}} */
 
@@ -966,7 +967,7 @@ static void mbstring_internal_encoding_changed_hook(void) {
 
 	if (!MBSTRG(http_output_set)) {
 		const char *encoding = php_get_output_encoding();
-		_php_mb_ini_mbstring_http_output_set(encoding);
+		_php_mb_ini_mbstring_http_output_set(encoding, strlen(encoding));
 	}
 
 	if (!MBSTRG(http_input_set)) {
