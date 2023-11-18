@@ -319,6 +319,11 @@ static unsigned int mbfl_name2encoding_perfect_hash(const char *str, size_t len)
 
 const mbfl_encoding *mbfl_name2encoding(const char *name)
 {
+	return mbfl_name2encoding_ex(name, strlen(name));
+}
+
+const mbfl_encoding *mbfl_name2encoding_ex(const char *name, size_t name_len)
+{
 	const mbfl_encoding *const *encoding;
 
 	/* Sanity check perfect hash for name.
@@ -339,14 +344,13 @@ const mbfl_encoding *mbfl_name2encoding(const char *name)
 #endif
 
 	/* Use perfect hash lookup for name */
-	size_t name_len = strlen(name);
 	if (name_len <= NAME_HASH_MAX_NAME_LENGTH && name_len >= NAME_HASH_MIN_NAME_LENGTH) {
 		unsigned int key = mbfl_name2encoding_perfect_hash(name, name_len);
 		if (key <= 186) {
 			int8_t offset = mbfl_encoding_ptr_list_after_hashing[key];
 			if (offset >= 0) {
 				encoding = mbfl_encoding_ptr_list + offset;
-				if (strcasecmp((*encoding)->name, name) == 0) {
+				if (strncasecmp((*encoding)->name, name, name_len) == 0) {
 					return *encoding;
 				}
 			}
