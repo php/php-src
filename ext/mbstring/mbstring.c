@@ -1407,23 +1407,23 @@ PHP_FUNCTION(mb_detect_order)
 }
 /* }}} */
 
-static inline int php_mb_check_code_point(zend_long cp)
+static inline bool php_mb_check_code_point(zend_long cp)
 {
 	if (cp < 0 || cp >= 0x110000) {
 		/* Out of Unicode range */
-		return 0;
+		return false;
 	}
 
 	if (cp >= 0xd800 && cp <= 0xdfff) {
 		/* Surrogate code-point. These are never valid on their own and we only allow a single
 		 * substitute character. */
-		return 0;
+		return false;
 	}
 
 	/* As we do not know the target encoding of the conversion operation that is going to
 	 * use the substitution character, we cannot check whether the codepoint is actually mapped
 	 * in the given encoding at this point. Thus we have to accept everything. */
-	return 1;
+	return true;
 }
 
 /* {{{ Sets the current substitute_character or returns the current substitute_character */
@@ -5509,38 +5509,38 @@ static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encodin
 	}
 }
 
-static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding *encoding)
+static bool php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding *encoding)
 {
 	zend_long idx;
 	zend_string *key;
 	zval *entry;
-	int valid = 1;
+	bool valid = true;
 
 	(void)(idx); /* Suppress spurious compiler warning that `idx` is not used */
 
 	if (GC_IS_RECURSIVE(vars)) {
 		php_error_docref(NULL, E_WARNING, "Cannot not handle circular references");
-		return 0;
+		return false;
 	}
 	GC_TRY_PROTECT_RECURSION(vars);
 	ZEND_HASH_FOREACH_KEY_VAL(vars, idx, key, entry) {
 		ZVAL_DEREF(entry);
 		if (key) {
 			if (!mb_check_str_encoding(key, encoding)) {
-				valid = 0;
+				valid = false;
 				break;
 			}
 		}
 		switch (Z_TYPE_P(entry)) {
 			case IS_STRING:
 				if (!mb_check_str_encoding(Z_STR_P(entry), encoding)) {
-					valid = 0;
+					valid = false;
 					break;
 				}
 				break;
 			case IS_ARRAY:
 				if (!php_mb_check_encoding_recursive(Z_ARRVAL_P(entry), encoding)) {
-					valid = 0;
+					valid = false;
 					break;
 				}
 				break;
@@ -5552,7 +5552,7 @@ static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding 
 				break;
 			default:
 				/* Other types are error. */
-				valid = 0;
+				valid = false;
 				break;
 		}
 	} ZEND_HASH_FOREACH_END();
