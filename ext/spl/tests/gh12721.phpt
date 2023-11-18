@@ -28,7 +28,7 @@ foreach (new GlobIterator('./*.gh12721') as $fileInfo) {
 <?php
 @unlink('file1.gh12721');
 ?>
---EXPECT--
+--EXPECTF--
 --- No slash ---
 file1.gh12721
 gh12721
@@ -45,7 +45,7 @@ gh12721
 file1.gh12721
 object(SplFileInfo)#3 (2) {
   ["pathName":"SplFileInfo":private]=>
-  string(15) "./file1.gh12721"
+  string(15) "%sfile1.gh12721"
   ["fileName":"SplFileInfo":private]=>
   string(13) "file1.gh12721"
 }
