@@ -3320,7 +3320,7 @@ function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $sec
 function stream_context_create(?array $options = null, ?array $params = null) {}
 
 /** @param resource $context */
-function stream_context_set_params($context, array $params): bool {}
+function stream_context_set_params($context, array $params): true {}
 
 /**
  * @param resource $context
@@ -3330,10 +3330,10 @@ function stream_context_set_params($context, array $params): bool {}
 function stream_context_get_params($context): array {}
 
 /** @param resource $context */
-function stream_context_set_option($context, array|string $wrapper_or_options, ?string $option_name = null, mixed $value = UNKNOWN): bool {}
+function stream_context_set_option($context, array|string $wrapper_or_options, ?string $option_name = null, mixed $value = UNKNOWN): true {}
 
 /** @param resource $context */
-function stream_context_set_options($context, array $options): bool {}
+function stream_context_set_options($context, array $options): true {}
 
 /**
  * @param resource $stream_or_context
