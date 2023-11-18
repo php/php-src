@@ -379,11 +379,11 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 }
 /* }}} */
 
-/* {{{ static int php_mb_parse_encoding_array()
+/* {{{
  *  Return FAILURE if input contains any illegal encoding, otherwise SUCCESS.
  * 	Emits a ValueError in function context and a warning in INI context, in INI context arg_num must be 0.
  */
-static int php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encoding ***return_list,
+static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encoding ***return_list,
 	size_t *return_size, uint32_t arg_num)
 {
 	/* Allocate enough space to include the default detect order if "auto" is used. */
@@ -728,7 +728,7 @@ static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 }
 /* }}} */
 
-static int _php_mb_ini_mbstring_http_input_set(const char *new_value, size_t new_value_length) {
+static zend_result _php_mb_ini_mbstring_http_input_set(const char *new_value, size_t new_value_length) {
 	const mbfl_encoding **list;
 	size_t size;
 	if (FAILURE == php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, /* persistent */ 1, /* arg_num */ 0, /* allow_pass_encoding */ 1) || size == 0) {
@@ -761,7 +761,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 }
 /* }}} */
 
-static int _php_mb_ini_mbstring_http_output_set(const char *new_value) {
+static zend_result _php_mb_ini_mbstring_http_output_set(const char *new_value) {
 	const mbfl_encoding *encoding = php_mb_get_encoding_or_pass(new_value);
 	if (!encoding) {
 		return FAILURE;
@@ -791,7 +791,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 /* }}} */
 
 /* {{{ static _php_mb_ini_mbstring_internal_encoding_set */
-static int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, size_t new_value_length)
+static zend_result _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, size_t new_value_length)
 {
 	const mbfl_encoding *encoding;
 
