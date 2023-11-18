@@ -34,9 +34,13 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 DateMalformedIntervalStringException: Unknown or bad format (P3"D)
+
+Deprecated: Calling DatePeriod::__construct(string $isostr, int $options = 0) is deprecated, use DatePeriod::createFromISO8601String() instead in %s on line %d
 DateMalformedPeriodStringException: Unknown or bad format (P3"D)
 DateMalformedPeriodStringException: Unknown or bad format (P3"D)
+
+Deprecated: Calling DatePeriod::__construct(string $isostr, int $options = 0) is deprecated, use DatePeriod::createFromISO8601String() instead in %s on line %d
 DateMalformedPeriodStringException: Unknown or bad format (2008-03-01T12:00:00Z1)
 DateMalformedPeriodStringException: Unknown or bad format (2008-03-01T12:00:00Z1)

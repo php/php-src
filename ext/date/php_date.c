@@ -5061,6 +5061,12 @@ PHP_METHOD(DatePeriod, __construct)
 	dpobj->current = NULL;
 
 	if (isostr) {
+		zend_error(E_DEPRECATED, "Calling DatePeriod::__construct(string $isostr, int $options = 0) is deprecated, "
+			"use DatePeriod::createFromISO8601String() instead");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+
 		if (!date_period_init_iso8601_string(dpobj, date_ce_date, isostr, isostr_len, options, &recurrences)) {
 			RETURN_THROWS();
 		}
