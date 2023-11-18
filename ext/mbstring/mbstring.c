@@ -2494,9 +2494,9 @@ static size_t character_width(uint32_t c)
 	}
 
 	/* Do a binary search to see if we fall in any of the fullwidth ranges */
-	int lo = 0, hi = sizeof(mbfl_eaw_table) / sizeof(mbfl_eaw_table[0]);
+	unsigned int lo = 0, hi = sizeof(mbfl_eaw_table) / sizeof(mbfl_eaw_table[0]);
 	while (lo < hi) {
-		int probe = (lo + hi) / 2;
+		unsigned int probe = (lo + hi) / 2;
 		if (c < mbfl_eaw_table[probe].begin) {
 			hi = probe;
 		} else if (c > mbfl_eaw_table[probe].end) {
@@ -2570,7 +2570,7 @@ static zend_string* mb_trim_string(zend_string *input, zend_string *marker, cons
 		if (out_len <= to_skip) {
 			to_skip -= out_len;
 		} else {
-			for (int i = to_skip; i < out_len; i++) {
+			for (unsigned int i = to_skip; i < out_len; i++) {
 				uint32_t w = wchar_buf[i];
 				input_err |= (w == MBFL_BAD_INPUT);
 				remaining_width -= character_width(w);
@@ -2630,7 +2630,7 @@ dont_restart_conversion:
 		if (out_len <= from) {
 			from -= out_len;
 		} else {
-			for (int i = from; i < out_len; i++) {
+			for (unsigned int i = from; i < out_len; i++) {
 				width -= character_width(wchar_buf[i]);
 				if (width < 0) {
 					enc->from_wchar(wchar_buf + from, i - from, &buf, true);
@@ -2831,8 +2831,8 @@ static void remove_non_encodings_from_elist(const mbfl_encoding **elist, size_t 
 	/* mbstring supports some 'text encodings' which aren't really text encodings
 	 * at all, but really 'byte encodings', like Base64, QPrint, and so on.
 	 * These should never be returned by `mb_detect_encoding`. */
-	int shift = 0;
-	for (int i = 0; i < *size; i++) {
+	unsigned int shift = 0;
+	for (unsigned int i = 0; i < *size; i++) {
 		const mbfl_encoding *encoding = elist[i];
 		if (encoding->no_encoding <= mbfl_no_encoding_charset_min) {
 			shift++; /* Remove this encoding from the list */
@@ -4822,7 +4822,7 @@ MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const 
 	 * buffer of 128 codepoints, convert and check just a few codepoints first */
 	size_t out_len = encoding->to_wchar(&in, &length, wchar_buf, 8, &state);
 	ZEND_ASSERT(out_len <= 8);
-	for (int i = 0; i < out_len; i++) {
+	for (unsigned int i = 0; i < out_len; i++) {
 		if (wchar_buf[i] == MBFL_BAD_INPUT) {
 			return false;
 		}
@@ -4831,7 +4831,7 @@ MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const 
 	while (length) {
 		out_len = encoding->to_wchar(&in, &length, wchar_buf, 128, &state);
 		ZEND_ASSERT(out_len <= 128);
-		for (int i = 0; i < out_len; i++) {
+		for (unsigned int i = 0; i < out_len; i++) {
 			if (wchar_buf[i] == MBFL_BAD_INPUT) {
 				return false;
 			}
