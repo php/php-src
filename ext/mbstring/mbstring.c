@@ -311,7 +311,6 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 		const char *p1, *endp, *tmpstr;
 		const mbfl_encoding **entry, **list;
 
-		/* copy the value string for work */
 		if (value[0]=='"' && value[value_length-1]=='"' && value_length>2) {
 			tmpstr = value + 1;
 			value_length -= 2;
