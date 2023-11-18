@@ -1776,7 +1776,7 @@ static size_t mb_fast_strlen_utf8(unsigned char *p, size_t len)
 		const __m128i delta = _mm_set1_epi8(1);
 		__m128i counter = _mm_setzero_si128(); /* Vector of 16 continuation-byte counters */
 
-		int reset_counter = 255;
+		unsigned char reset_counter = 255;
 		do {
 			__m128i operand = _mm_loadu_si128((__m128i*)p); /* Load 16 bytes */
 			__m128i lt = _mm_cmplt_epi8(operand, threshold); /* Find all which are continuation bytes */
