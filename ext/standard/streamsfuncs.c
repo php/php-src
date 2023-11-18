@@ -1207,7 +1207,7 @@ PHP_FUNCTION(stream_context_create)
 	context = php_stream_context_alloc();
 
 	if (options) {
-		if (parse_context_options(context, options) === FAILURE) {
+		if (parse_context_options(context, options) == FAILURE) {
 			RETURN_THROWS();
 		}
 	}
