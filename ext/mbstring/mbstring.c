@@ -3517,7 +3517,7 @@ static zend_string* jp_kana_convert(zend_string *input, const mbfl_encoding *enc
 			continue;
 		}
 
-		for (int i = 0; i < out_len-1; i++) {
+		for (size_t i = 0; i < out_len-1; i++) {
 			uint32_t second = 0;
 			bool consumed = false;
 			*converted++ = mb_convert_kana_codepoint(wchar_buf[i], wchar_buf[i+1], &consumed, &second, mode);
@@ -3589,7 +3589,7 @@ next_option:
 			} else if (c == 'a') {
 				opt |= MBFL_ZEN2HAN_ALL | MBFL_ZEN2HAN_ALPHA | MBFL_ZEN2HAN_NUMERIC;
 			} else {
-				for (int i = 0; i < sizeof(mb_convert_kana_flags) / sizeof(char); i++) {
+				for (size_t i = 0; i < sizeof(mb_convert_kana_flags) / sizeof(char); i++) {
 					if (c == mb_convert_kana_flags[i]) {
 						opt |= (1 << i);
 						goto next_option;
@@ -3930,7 +3930,7 @@ static zend_string* html_numeric_entity_encode(zend_string *input, const mbfl_en
 
 		/* Run through wchars and see if any of them fall into the ranges
 		 * which we want to convert to HTML entities */
-		for (int i = 0; i < out_len; i++) {
+		for (size_t i = 0; i < out_len; i++) {
 			uint32_t w = wchar_buf[i];
 
 			if (html_numeric_entity_convert(w, convmap, mapsize, &w)) {
