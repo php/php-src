@@ -71,6 +71,23 @@ int mbfl_bisec_srch2(int w, const unsigned short tbl[], int n)
 	return -1;
 }
 
+static const unsigned short *mbfl_binary_search_paired_sorted_table(uint32_t w, const unsigned short tbl[][2], int n)
+{
+	int r = n;
+	int l = 0;
+	while (l < r) {
+		int probe = (l + r) >> 1;
+		if (w < tbl[probe][0]) {
+			r = probe;
+		} else if (w > tbl[probe][0]) {
+			l = probe + 1;
+		} else {
+			return &tbl[probe][1];
+		}
+	}
+	return NULL;
+}
+
 #define SJIS_ENCODE(c1,c2,s1,s2) \
 	do { \
 		s1 = ((c1 - 1) >> 1) + ((c1) < 0x5F ? 0x71 : 0xB1); \
@@ -7639,18 +7656,16 @@ static void mb_wchar_to_cp932(uint32_t *in, size_t len, mb_convert_buf *buf, boo
 		}
 
 		if (!s1 || (s1 >= 0x8080 && !s2)) { /* not found or X 0212 */
-			for (unsigned int i = 0; i < cp932ext1_ucs_table_max - cp932ext1_ucs_table_min; i++) {
-				if (cp932ext1_ucs_table[i] == w) {
-					s1 = ((i/94 + 0x2D) << 8) + (i%94 + 0x21);
-					goto emit_output;
-				}
+			const unsigned short *lookup = mbfl_binary_search_paired_sorted_table(w, cp932ext1_ucs_table_paired_sorted, sizeof(cp932ext1_ucs_table_paired_sorted) / sizeof(*cp932ext1_ucs_table_paired_sorted));
+			if (lookup) {
+				s1 = ((*lookup/94 + 0x2D) << 8) + (*lookup%94 + 0x21);
+				goto emit_output;
 			}
 
-			for (unsigned int i = 0; i < cp932ext3_ucs_table_max - cp932ext3_ucs_table_min; i++) {
-				if (cp932ext3_ucs_table[i] == w) {
-					s1 = ((i/94 + 0x93) << 8) + (i%94 + 0x21);
-					goto emit_output;
-				}
+			lookup = mbfl_binary_search_paired_sorted_table(w, cp932ext3_ucs_table_paired_sorted, sizeof(cp932ext3_ucs_table_paired_sorted) / sizeof(*cp932ext3_ucs_table_paired_sorted));
+			if (lookup) {
+				s1 = ((*lookup/94 + 0x93) << 8) + (*lookup%94 + 0x21);
+				goto emit_output;
 			}
 
 			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_cp932);
@@ -7718,18 +7733,16 @@ static void mb_wchar_to_sjiswin(uint32_t *in, size_t len, mb_convert_buf *buf, b
 		}
 
 		if (!s1 || (s1 >= 0x8080 && !s2)) { /* not found or X 0212 */
-			for (unsigned int i = 0; i < cp932ext1_ucs_table_max - cp932ext1_ucs_table_min; i++) {
-				if (cp932ext1_ucs_table[i] == w) {
-					s1 = ((i/94 + 0x2D) << 8) + (i%94 + 0x21);
-					goto emit_output;
-				}
+			const unsigned short *lookup = mbfl_binary_search_paired_sorted_table(w, cp932ext1_ucs_table_paired_sorted, sizeof(cp932ext1_ucs_table_paired_sorted) / sizeof(*cp932ext1_ucs_table_paired_sorted));
+			if (lookup) {
+				s1 = ((*lookup/94 + 0x2D) << 8) + (*lookup%94 + 0x21);
+				goto emit_output;
 			}
 
-			for (unsigned int i = 0; i < cp932ext3_ucs_table_max - cp932ext3_ucs_table_min; i++) {
-				if (cp932ext3_ucs_table[i] == w) {
-					s1 = ((i/94 + 0x93) << 8) + (i%94 + 0x21);
-					goto emit_output;
-				}
+			lookup = mbfl_binary_search_paired_sorted_table(w, cp932ext3_ucs_table_paired_sorted, sizeof(cp932ext3_ucs_table_paired_sorted) / sizeof(*cp932ext3_ucs_table_paired_sorted));
+			if (lookup) {
+				s1 = ((*lookup/94 + 0x93) << 8) + (*lookup%94 + 0x21);
+				goto emit_output;
 			}
 
 			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_cp932);
