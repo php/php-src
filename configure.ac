@@ -553,7 +553,6 @@ if test "`uname -s 2>/dev/null`" != "QNX"; then
 fi
 
 dnl Checks for types.
-AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 
 dnl Checks for sockaddr_storage and sockaddr.sa_len.
