@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9b71cd87f05bb7644a98c9855afba4742ac6203c */
+ * Stub hash: 893419f59d38566a8f6a766829250c18663e339c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -1021,7 +1021,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(intlcal_to_date_time, arginfo_intlcal_to_date_time)
 	ZEND_FE(intlcal_get_error_code, arginfo_intlcal_get_error_code)
 	ZEND_FE(intlcal_get_error_message, arginfo_intlcal_get_error_message)
-	ZEND_FE(intlgregcal_create_instance, arginfo_intlgregcal_create_instance)
+	ZEND_DEP_FE(intlgregcal_create_instance, arginfo_intlgregcal_create_instance)
 	ZEND_FE(intlgregcal_set_gregorian_change, arginfo_intlgregcal_set_gregorian_change)
 	ZEND_FE(intlgregcal_get_gregorian_change, arginfo_intlgregcal_get_gregorian_change)
 	ZEND_FE(intlgregcal_is_leap_year, arginfo_intlgregcal_is_leap_year)
