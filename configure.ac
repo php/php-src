@@ -395,7 +395,6 @@ netinet/in.h \
 alloca.h \
 arpa/inet.h \
 arpa/nameser.h \
-crypt.h \
 dns.h \
 fcntl.h \
 grp.h \
@@ -663,7 +662,6 @@ dnl getaddrinfo.
 AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <netdb.h>]],
   [[struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);]])],[AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <string.h>
 #include <netdb.h>
 #include <sys/types.h>
 #include <string.h>
