@@ -844,9 +844,6 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_substitute_character) */
 static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 {
-	int c;
-	char *endptr = NULL;
-
 	if (new_value != NULL) {
 		if (zend_string_equals_literal_ci(new_value, "none")) {
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
@@ -861,7 +858,9 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 			MBSTRG(filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 			MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 			if (ZSTR_LEN(new_value) > 0) {
-				c = strtol(ZSTR_VAL(new_value), &endptr, 0);
+				char *endptr = NULL;
+				int c = strtol(ZSTR_VAL(new_value), &endptr, 0);
+
 				if (*endptr == '\0') {
 					MBSTRG(filter_illegal_substchar) = c;
 					MBSTRG(current_filter_illegal_substchar) = c;
