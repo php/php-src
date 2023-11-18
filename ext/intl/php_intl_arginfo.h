@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c32e74bddb55455f69083a302bcaf52f654b1293 */
+ * Stub hash: 9b71cd87f05bb7644a98c9855afba4742ac6203c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -987,7 +987,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(intlcal_set_time_zone, arginfo_intlcal_set_time_zone)
 	ZEND_FE(intlcal_after, arginfo_intlcal_after)
 	ZEND_FE(intlcal_before, arginfo_intlcal_before)
-	ZEND_FE(intlcal_set, arginfo_intlcal_set)
+	ZEND_DEP_FE(intlcal_set, arginfo_intlcal_set)
 	ZEND_FE(intlcal_roll, arginfo_intlcal_roll)
 	ZEND_FE(intlcal_clear, arginfo_intlcal_clear)
 	ZEND_FE(intlcal_field_difference, arginfo_intlcal_field_difference)
