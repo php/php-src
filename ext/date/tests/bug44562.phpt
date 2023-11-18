@@ -26,7 +26,8 @@ foreach ( $dp as $d )
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Calling DatePeriod::__construct(string $isostr, int $options = 0) is deprecated, use DatePeriod::createFromISO8601String() instead in %s on line %d
 DateMalformedPeriodStringException: Unknown or bad format (2D)
 DateMalformedPeriodStringException: Unknown or bad format (2D)
 string(24) "2008-07-20T22:44:53+0200"
