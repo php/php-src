@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - LibXML:
   . Fixed bug GH-12702 (libxml2 2.12.0 issue building from src). (nono303)
 
+- MBString:
+  . Fixed bug GH-11992 (utf_encodings.phpt fails on Windows 32-bit). (nielsdos)
+
 - OpenSSL:
   . Fixed bug #50713 (openssl_pkcs7_verify() may ignore untrusted CAs).
     (Jakub Zelenka)
