@@ -1,0 +1,16 @@
+Read before write:
+
+Warning: Trying to access array offset on false in %s on line %d
+NULL
+Write:
+
+Deprecated: Automatic conversion of false to array is deprecated %s on line %d
+Read:
+string(1) "v"
+Read-Write:
+isset():
+bool(true)
+empty():
+bool(false)
+Coalesce():
+string(7) "vappend"

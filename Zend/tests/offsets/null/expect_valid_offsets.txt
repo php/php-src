@@ -1,0 +1,14 @@
+Read before write:
+
+Warning: Trying to access array offset on null in %s on line %d
+NULL
+Write:
+Read:
+string(1) "v"
+Read-Write:
+isset():
+bool(true)
+empty():
+bool(false)
+Coalesce():
+string(7) "vappend"
