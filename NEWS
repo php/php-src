@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fixed bug GH-12675 (MEMORY_LEAK in phpdbg_prompt.c). (nielsdos)
 
+- SPL:
+  . Fixed bug GH-12721 (SplFileInfo::getFilename() segfault in combination
+    with GlobIterator and no directory separator). (nielsdos)
+
 - SQLite3:
   . Fixed bug GH-12633 (sqlite3_defensive.phpt fails with sqlite 3.44.0).
     (SakiTakamachi)
