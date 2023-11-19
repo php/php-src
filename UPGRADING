@@ -144,6 +144,8 @@ PHP 8.4 UPGRADE NOTES
 - LDAP:
   . Calling ldap_connect() with more than 2 arguments is deprecated. Use
     ldap_connect_wallet() instead.
+  . Calling ldap_exop() with more than 4 arguments is deprecated. Use
+    ldap_exop_sync() instead.
 
 ========================================
 5. Changed Functions
