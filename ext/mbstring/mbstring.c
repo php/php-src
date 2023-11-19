@@ -4643,6 +4643,14 @@ MBSTRING_API bool php_mb_check_encoding(const char *input, size_t length, const 
 	return true;
 }
 
+/* MSVC 32-bit has issues with 64-bit intrinsics.
+ * (Bad 7/8-byte UTF-8 strings would be wrongly passed through as 'valid')
+ * It seems this is caused by a bug in MS Visual C++
+ * Ref: https://stackoverflow.com/questions/37509129/potential-bug-in-visual-studio-c-compiler-or-in-intel-intrinsics-avx2-mm256-s */
+#if defined(PHP_WIN32) && !defined(__clang__) && defined(_MSC_VER) && defined(_M_IX86)
+# define MBSTRING_BROKEN_X86_MSVC_INTRINSICS
+#endif
+
 /* If we are building an AVX2-only binary, don't compile the next function */
 #ifndef ZEND_INTRIN_AVX2_NATIVE
 
@@ -4808,7 +4816,11 @@ finish_up_remaining_bytes:
 			goto check_operand;
 		case 7:
 		case 8:
+#ifdef MBSTRING_BROKEN_X86_MSVC_INTRINSICS
+			operand = _mm_set_epi32(0, 0, ((int32_t*)p)[1], ((int32_t*)p)[0]);
+#else
 			operand = _mm_set_epi64x(0, *((uint64_t*)p));
+#endif
 			goto check_operand;
 		case 9:
 			operand = _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 6)), 6);
@@ -5201,12 +5213,11 @@ finish_up_remaining_bytes:
 			goto check_operand;
 		case 7:
 		case 8:
-			/* This was originally: operand = _mm256_set_epi64x(0, 0, 0, *((int64_t*)p));
-			 * However, that caused test failures on 32-bit MS Windows
-			 * (Bad 7/8-byte UTF-8 strings would be wrongly passed through as 'valid')
-			 * It seems this is caused by a bug in MS Visual C++
-			 * Ref: https://stackoverflow.com/questions/37509129/potential-bug-in-visual-studio-c-compiler-or-in-intel-intrinsics-avx2-mm256-s */
+#ifdef MBSTRING_BROKEN_X86_MSVC_INTRINSICS
 			operand = _mm256_set_epi32(0, 0, 0, 0, 0, 0, ((int32_t*)p)[1], ((int32_t*)p)[0]);
+#else
+			operand = _mm256_set_epi64x(0, 0, 0, *((int64_t*)p));
+#endif
 			goto check_operand;
 		case 9:
 			operand = _mm256_set_m128i(_mm_setzero_si128(), _mm_srli_si128(_mm_loadu_si128((__m128i*)(p - 6)), 6));
