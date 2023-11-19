@@ -269,15 +269,7 @@ static const mbfl_encoding *php_mb_get_encoding(zend_string *encoding_name, uint
 	}
 }
 
-static const mbfl_encoding *php_mb_get_encoding_or_pass(const char *encoding_name) {
-	if (strcmp(encoding_name, "pass") == 0) {
-		return &mbfl_encoding_pass;
-	}
-
-	return mbfl_name2encoding(encoding_name);
-}
-
-static const mbfl_encoding *php_mb_get_encoding_or_pass_ex(const char *encoding_name, size_t encoding_name_len) {
+static const mbfl_encoding *php_mb_get_encoding_or_pass(const char *encoding_name, size_t encoding_name_len) {
 	if (strncmp(encoding_name, "pass", encoding_name_len) == 0) {
 		return &mbfl_encoding_pass;
 	}
@@ -352,7 +344,7 @@ static zend_result php_mb_parse_encoding_list(const char *value, size_t value_le
 				}
 			} else {
 				const mbfl_encoding *encoding =
-					allow_pass_encoding ? php_mb_get_encoding_or_pass_ex(p1, p1_length) : mbfl_name2encoding_ex(p1, p1_length);
+					allow_pass_encoding ? php_mb_get_encoding_or_pass(p1, p1_length) : mbfl_name2encoding_ex(p1, p1_length);
 				if (!encoding) {
 					/* Called from an INI setting modification */
 					if (arg_num == 0) {
@@ -763,7 +755,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 /* }}} */
 
 static zend_result _php_mb_ini_mbstring_http_output_set(const char *new_value, size_t length) {
-	const mbfl_encoding *encoding = php_mb_get_encoding_or_pass(new_value);
+	const mbfl_encoding *encoding = php_mb_get_encoding_or_pass(new_value, length);
 	if (!encoding) {
 		return FAILURE;
 	}
@@ -1350,7 +1342,7 @@ PHP_FUNCTION(mb_http_output)
 		ZEND_ASSERT(MBSTRG(current_http_output_encoding));
 		RETURN_STRING(MBSTRG(current_http_output_encoding)->name);
 	} else {
-		const mbfl_encoding *encoding = php_mb_get_encoding_or_pass(name);
+		const mbfl_encoding *encoding = php_mb_get_encoding_or_pass(name, name_len);
 		if (!encoding) {
 			zend_argument_value_error(1, "must be a valid encoding, \"%s\" given", name);
 			RETURN_THROWS();
