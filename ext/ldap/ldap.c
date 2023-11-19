@@ -3898,6 +3898,13 @@ static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 	LDAPControl **lserverctrls = NULL;
 	int rc, msgid;
 
+	if (force_sync == false && ZEND_NUM_ARGS() > 4) {
+		zend_error(E_DEPRECATED, "Calling ldap_exop() with more than 4 arguments is deprecated, use ldap_exop_sync() instead");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS|S!a!zz", &link, ldap_link_ce, &reqoid, &reqdata, &serverctrls, &retdata, &retoid) != SUCCESS) {
 		RETURN_THROWS();
 	}
