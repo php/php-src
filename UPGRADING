@@ -147,6 +147,14 @@ PHP 8.4 UPGRADE NOTES
   . Calling ldap_exop() with more than 4 arguments is deprecated. Use
     ldap_exop_sync() instead.
 
+- PgSQL:
+  . Calling pgsql_fetch_result() with 2 arguments is deprecated. Use the
+    3-parameter signature with a null $row parameter instead.
+  . Calling pg_field_prtlen() with 2 arguments is deprecated. Use the
+    3-parameter signature with a null $row parameter instead.
+  . Calling pg_field_is_null() with 2 arguments is deprecated. Use the
+    3-parameter signature with a null $row parameter instead.
+
 ========================================
 5. Changed Functions
 ========================================

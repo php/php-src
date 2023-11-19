@@ -12,7 +12,7 @@ $conn = pg_connect($conn_str);
 
 $result = pg_query($conn, 'SELECT v FROM (VALUES (1), (2), (3)) AS t(v)');
 
-while ($value = pg_fetch_result($result, 0)) {
+while ($value = pg_fetch_result($result, null, 0)) {
   var_dump($value); // should be 1, 2 then 3.
 }
 

@@ -68,8 +68,8 @@ pg_field_name($result, 0);
 pg_field_num($result, "num");
 pg_field_size($result, 0);
 pg_field_type($result, 0);
-pg_field_prtlen($result, 0);
-pg_field_is_null($result, 0);
+pg_field_prtlen($result, null, 0);
+pg_field_is_null($result, null, 0);
 
 if (!pg_send_prepare($db, "php_test2", "INSERT INTO ".$table_name." VALUES (\$1, \$2);"))
 {
