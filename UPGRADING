@@ -155,6 +155,10 @@ PHP 8.4 UPGRADE NOTES
     deprecated. Use either IntlGregorianCalendar::createFromDate() or
     IntlGregorianCalendar::createFromDateTime() instead.
 
+- LDAP:
+  . Calling ldap_connect() with more than 2 arguments is deprecated. Use
+    ldap_connect_wallet() instead.
+
 ========================================
 5. Changed Functions
 ========================================
