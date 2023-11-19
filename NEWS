@@ -31,6 +31,10 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fixed bug GH-12675 (MEMORY_LEAK in phpdbg_prompt.c). (nielsdos)
 
+- POSIX:
+  . Fixed bug GH-12725 (Call to undefined function posix_fpathconf() in default
+    configure setting). (petk)
+
 - SPL:
   . Fixed bug GH-12721 (SplFileInfo::getFilename() segfault in combination
     with GlobIterator and no directory separator). (nielsdos)
