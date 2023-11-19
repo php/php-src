@@ -1698,6 +1698,14 @@ PHP_FUNCTION(pg_fetch_result)
 	int pgsql_row;
 
 	if (ZEND_NUM_ARGS() == 2) {
+		if (zend_string_equals_literal(EX(func)->common.function_name, "pg_fetch_result")) {
+			zend_error(E_DEPRECATED, "Calling pg_fetch_result() with 2 arguments is deprecated, "
+				"use the 3-parameter signature with a null $row parameter instead");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+
 		ZEND_PARSE_PARAMETERS_START(2, 2)
 			Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
 			Z_PARAM_STR_OR_LONG(field_name, field_offset)
@@ -2009,6 +2017,15 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type, bo
 	int pgsql_row;
 
 	if (ZEND_NUM_ARGS() == 2) {
+		if (nullable_row) {
+			zend_error(E_DEPRECATED, "Calling %s() with 2 arguments is deprecated, "
+				"use the 3-parameter signature with a null $row parameter instead",
+				ZSTR_VAL(EX(func)->common.function_name));
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+
 		ZEND_PARSE_PARAMETERS_START(2, 2)
 			Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
 			Z_PARAM_STR_OR_LONG(field_name, field_offset)
