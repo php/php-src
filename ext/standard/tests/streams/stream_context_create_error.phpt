@@ -2,22 +2,21 @@
 Test the error cases of stream_context_create()
 --FILE--
 <?php
-$arr = [];
 try {
-    stream_context_create($arr);
+    stream_context_create(['ssl' => "abc"]);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 
 try {
-    stream_context_create(['ssl' => ['verify_peer'=> false]], ["options" => $arr]);
+    stream_context_create(['ssl' => ['verify_peer'=> false]], ["options" => ['ssl' => "abc"]]);
 } catch (ValueError $exception) {
     echo $exception->getMessage() . "\n";
 }
 
 try {
     stream_context_create(['ssl' => ['verify_peer'=> false]], ["options" => false]);
-} catch (ValueError $exception) {
+} catch (TypeError $exception) {
     echo $exception->getMessage() . "\n";
 }
 ?>
