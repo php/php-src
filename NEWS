@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.1.27
 
+- Core:
+  . Fixed oss-fuzz #54325 (Use-after-free of name in var-var with malicious
+    error handler). (ilutov)
+
 - DOM:
   . Fixed bug GH-12616 (DOM: Removing XMLNS namespace node results in invalid
     default: prefix). (nielsdos)
