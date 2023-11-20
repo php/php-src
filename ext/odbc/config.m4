@@ -14,7 +14,6 @@ AC_DEFUN([PHP_ODBC_FIND_SOLID_LIBS],[
   case $ac_solid_uname_s in
     AIX) ac_solid_os=a3x;;   # a4x for AIX4/ Solid 2.3/3.0 only
     HP-UX) ac_solid_os=h9x;; # h1x for hpux11, h0x for hpux10
-    IRIX) ac_solid_os=irx;;  # Solid 2.3(?)/ 3.0 only
     Linux)
       if ldd -v /bin/sh | grep GLIBC > /dev/null; then
         AC_DEFINE(SS_LINUX,1,[Needed in sqlunix.h ])
