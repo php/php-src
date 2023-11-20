@@ -197,14 +197,58 @@ if (($result = pg_get_result($db)) !== false) {
     }
 }
 
-
 if (!pg_exit_pipeline_mode($db)) {
     die('pg_exit_pipeline_mode failed');
 }
 
-echo "OK";
+if (!pg_enter_pipeline_mode($db)) {
+    die('pg_exit_pipeline_mode failed');
+}
+
+if (!pg_send_query_params($db, "create table if not exists __test__pg_pipeline_sync__test__(f1 integer, f2 character varying)", array())) {
+    die('pg_send_query_params failed');
+}
+
+if (pg_exit_pipeline_mode($db)) {
+    die('pg_exit_pipeline_mode failed');
+}
 
 pg_close($db);
+
+if (!$db = pg_connect($conn_str)) {
+    die("pg_connect() error");
+}
+
+if (!pg_send_query_params($db, "select * from __test__pg_pipeline_sync__test__", array())) {
+    die('pg_send_query_params failed');
+}
+
+if (!($stream = pg_socket($db))) {
+    die('pg_socket');
+}
+
+if (pg_connection_busy($db)) {
+    $read = [$stream]; $write = $ex = [];
+    while (!stream_select($read, $write, $ex, null, null)) { }
+}
+
+if (!($result = pg_get_result($db))) {
+    die('pg_get_result');
+}
+
+if (pg_result_status($result) !== PGSQL_FATAL_ERROR) {
+    die('pg_result_status failed');
+}
+
+pg_free_result($result);
+
+if (pg_get_result($db) !== false) {
+    die('pg_get_result failed');
+}
+
+pg_close($db);
+
+echo "OK";
 
 ?>
 --EXPECT--
