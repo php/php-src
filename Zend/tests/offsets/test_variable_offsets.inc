@@ -1,5 +1,7 @@
 <?php
 
+//$container var declaration in const generated file
+
 // Read before write
 try {
     echo "Read before write:\n";
