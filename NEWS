@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed oss-fuzz #54325 (Use-after-free of name in var-var with malicious
     error handler). (ilutov)
+  . Fixed oss-fuzz #64209 (In-place modification of filename in
+    php_message_handler_for_zend). (ilutov)
 
 - DOM:
   . Fixed bug GH-12616 (DOM: Removing XMLNS namespace node results in invalid
