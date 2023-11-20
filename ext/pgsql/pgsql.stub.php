@@ -440,29 +440,6 @@ namespace {
     const PGSQL_TRACE_REGRESS_MODE = UNKNOWN;
 #endif
 
-#ifdef LIBPQ_HAS_PIPELINING
-    /**
-     * @var int
-     * @cvalue PGRES_PIPELINE_SYNC
-     */
-    const PGSQL_PIPELINE_SYNC = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PQ_PIPELINE_ON
-     */
-    const PGSQL_PIPELINE_ON = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PQ_PIPELINE_OFF
-     */
-    const PGSQL_PIPELINE_OFF = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PQ_PIPELINE_ABORTED
-     */
-    const PGSQL_PIPELINE_ABORTED = UNKNOWN;
-#endif
-    
 #ifdef HAVE_PG_CONTEXT_VISIBILITY
     /* For pg_set_error_context_visibility() */
 
@@ -962,14 +939,6 @@ namespace {
      * @refcount 1
      */
     function pg_select(PgSql\Connection $connection, string $table_name, array $conditions, int $flags = PGSQL_DML_EXEC, int $mode = PGSQL_ASSOC): array|string|false {}
-
-#ifdef LIBPQ_HAS_PIPELINING
-    function pg_enter_pipeline_mode(PgSql\Connection $connection): bool {}
-    function pg_exit_pipeline_mode(PgSql\Connection $connection): bool {}
-    function pg_send_flush_request(PgSql\Connection $connection): bool {}
-    function pg_pipeline_sync(PgSql\Connection $connection): bool {}
-    function pg_pipeline_status(PgSql\Connection $connection): int {}
-#endif
 
 #ifdef HAVE_PG_CONTEXT_VISIBILITY
     function pg_set_error_context_visibility(PgSql\Connection $connection, int $visibility): int {}

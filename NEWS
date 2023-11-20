@@ -28,6 +28,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug GH-12628 (The gh11374 test fails on Alpinelinux). (nielsdos)
 
+- PGSQL:
+  . Reverted PG pipeline addition. (Jakub Zelenka)
+
 - PHPDBG:
   . Fixed bug GH-12675 (MEMORY_LEAK in phpdbg_prompt.c). (nielsdos)
 
