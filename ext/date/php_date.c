@@ -1959,6 +1959,13 @@ static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_
 
 	switch (purpose) {
 		case ZEND_PROP_PURPOSE_DEBUG:
+			ZEND_ASSERT(object->ce->__debugInfo != NULL);
+			int is_temp = 0;
+			HashTable *ht = zend_std_get_debug_info(object, &is_temp);
+			if (ht && !is_temp) {
+				GC_TRY_ADDREF(ht);
+			}
+			return ht;
 		case ZEND_PROP_PURPOSE_SERIALIZE:
 		case ZEND_PROP_PURPOSE_VAR_EXPORT:
 		case ZEND_PROP_PURPOSE_JSON:
@@ -2842,6 +2849,50 @@ PHP_METHOD(DateTimeImmutable, __serialize)
 	date_object_to_hash(dateobj, myht);
 
 	add_common_properties(myht, &dateobj->std);
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateTime, __debugInfo)
+{
+	zval             *object = ZEND_THIS;
+	php_date_obj     *dateobj;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	dateobj = Z_PHPDATE_P(object);
+
+	array_init(return_value);
+	myht = Z_ARRVAL_P(return_value);
+
+	add_common_properties(myht, &dateobj->std);
+
+	if (dateobj->time) {
+		date_object_to_hash(dateobj, myht);
+	}
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateTimeImmutable, __debugInfo)
+{
+	zval             *object = ZEND_THIS;
+	php_date_obj     *dateobj;
+	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	dateobj = Z_PHPDATE_P(object);
+
+	array_init(return_value);
+	myht = Z_ARRVAL_P(return_value);
+
+	add_common_properties(myht, &dateobj->std);
+
+	if (dateobj->time) {
+		date_object_to_hash(dateobj, myht);
+	}
 }
 /* }}} */
 

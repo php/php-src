@@ -345,6 +345,9 @@ class DateTime implements DateTimeInterface
     public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
+    public function __debugInfo(): array {}
+
+    /** @tentative-return-type */
     public function __wakeup(): void {}
 
     /** @tentative-return-type */
@@ -453,6 +456,9 @@ class DateTimeImmutable implements DateTimeInterface
     public function __serialize(): array {}
 
     public function __unserialize(array $data): void {}
+
+    /** @tentative-return-type */
+    public function __debugInfo(): array {}
 
     /** @tentative-return-type */
     public function __wakeup(): void {}
