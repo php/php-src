@@ -533,8 +533,8 @@ PHP_FUNCTION(posix_isatty)
 /* }}} */
 
 /*
-	POSIX.1, 4.8.1 sysconf() - TODO
-	POSIX.1, 5.7.1 pathconf(), fpathconf() - TODO
+	POSIX.1, 4.8.1 sysconf()
+	POSIX.1, 5.7.1 pathconf(), fpathconf()
 
 	POSIX.1, 5.1.2 opendir(), readdir(), rewinddir(), closedir()
 	POSIX.1, 5.2.1 chdir()
@@ -1240,7 +1240,7 @@ PHP_FUNCTION(posix_sysconf)
 	RETURN_LONG(sysconf(conf_id));
 }
 
-#ifdef HAVE_POSIX_PATHCONF
+#ifdef HAVE_PATHCONF
 PHP_FUNCTION(posix_pathconf)
 {
 	zend_long name, ret;
@@ -1269,7 +1269,9 @@ PHP_FUNCTION(posix_pathconf)
 
 	RETURN_LONG(ret);
 }
+#endif
 
+#ifdef HAVE_FPATHCONF
 PHP_FUNCTION(posix_fpathconf)
 {
 	zend_long name, ret, fd = 0;
