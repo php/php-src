@@ -155,6 +155,10 @@ PHP 8.4 UPGRADE NOTES
   . Calling pg_field_is_null() with 2 arguments is deprecated. Use the
     3-parameter signature with a null $row parameter instead.
 
+- Reflection:
+  . Calling ReflectionMethod::__construct() with 1 argument is deprecated.
+    Use ReflectionMethod::createFromMethodName() instead.
+
 ========================================
 5. Changed Functions
 ========================================
