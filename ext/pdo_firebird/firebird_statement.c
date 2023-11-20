@@ -28,8 +28,6 @@
 
 #include <time.h>
 
-#define RECORD_ERROR(stmt) _firebird_error(NULL, stmt,  __FILE__, __LINE__)
-
 #define READ_AND_RETURN_USING_MEMCPY(type, sqldata) do { \
 		type ret; \
 		memcpy(&ret, sqldata, sizeof(ret)); \
@@ -89,7 +87,7 @@ static int firebird_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 
 	/* release the statement */
 	if (isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop)) {
-		RECORD_ERROR(stmt);
+		firebird_error_stmt(stmt);
 		result = 0;
 	}
 
@@ -195,7 +193,7 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 	} while (0);
 
 error:
-	RECORD_ERROR(stmt);
+	firebird_error_stmt(stmt);
 
 	return 0;
 }
@@ -209,8 +207,8 @@ static int firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
 	pdo_firebird_db_handle *H = S->H;
 
 	if (!stmt->executed) {
-		strcpy(stmt->error_code, "HY000");
-		H->last_app_error = "Cannot fetch from a closed cursor";
+		const char *msg = "Cannot fetch from a closed cursor";
+		firebird_error_stmt_with_info(stmt, "HY000", strlen("HY000"), msg, strlen(msg));
 	} else if (!S->exhausted) {
 		if (S->statement_type == isc_info_sql_stmt_exec_procedure) {
 			stmt->row_count = 1;
@@ -219,7 +217,7 @@ static int firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
 		}
 		if (isc_dsql_fetch(H->isc_status, &S->stmt, PDO_FB_SQLDA_VERSION, &S->out_sqlda)) {
 			if (H->isc_status[0] && H->isc_status[1]) {
-				RECORD_ERROR(stmt);
+				firebird_error_stmt(stmt);
 			}
 			S->exhausted = 1;
 			return 0;
@@ -308,13 +306,13 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, zval *result, ISC_QU
 	size_t len = 0;
 
 	if (isc_open_blob(H->isc_status, &H->db, &H->tr, &blobh, blob_id)) {
-		RECORD_ERROR(stmt);
+		firebird_error_stmt(stmt);
 		return 0;
 	}
 
 	if (isc_blob_info(H->isc_status, &blobh, 1, const_cast(&bl_item),
 			sizeof(bl_info), bl_info)) {
-		RECORD_ERROR(stmt);
+		firebird_error_stmt(stmt);
 		goto fetch_blob_end;
 	}
 
@@ -325,7 +323,8 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, zval *result, ISC_QU
 
 		if (item == isc_info_end || item == isc_info_truncated || item == isc_info_error
 				|| i >= sizeof(bl_info)) {
-			H->last_app_error = "Couldn't determine BLOB size";
+			const char *msg = "Couldn't determine BLOB size";
+			firebird_error_stmt_with_info(stmt, "HY000", strlen("HY000"), msg, strlen(msg));
 			goto fetch_blob_end;
 		}
 
@@ -366,7 +365,8 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, zval *result, ISC_QU
 		ZVAL_STR(result, str);
 
 		if (H->isc_status[0] == 1 && (stat != 0 && stat != isc_segstr_eof && stat != isc_segment)) {
-			H->last_app_error = "Error reading from BLOB";
+			const char *msg = "Error reading from BLOB";
+			firebird_error_stmt_with_info(stmt, "HY000", strlen("HY000"), msg, strlen(msg));
 			goto fetch_blob_end;
 		}
 	}
@@ -374,7 +374,7 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, zval *result, ISC_QU
 
 fetch_blob_end:
 	if (isc_close_blob(H->isc_status, &blobh)) {
-		RECORD_ERROR(stmt);
+		firebird_error_stmt(stmt);
 		return 0;
 	}
 	return retval;
@@ -516,7 +516,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 	int result = 1;
 
 	if (isc_create_blob(H->isc_status, &H->db, &H->tr, &h, blob_id)) {
-		RECORD_ERROR(stmt);
+		firebird_error_stmt(stmt);
 		return 0;
 	}
 
@@ -529,7 +529,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 	for (rem_cnt = Z_STRLEN(data); rem_cnt > 0; rem_cnt -= chunk_size) {
 		chunk_size = rem_cnt > USHRT_MAX ? USHRT_MAX : (unsigned short)rem_cnt;
 		if (isc_put_segment(H->isc_status, &h, chunk_size, &Z_STRVAL(data)[put_cnt])) {
-			RECORD_ERROR(stmt);
+			firebird_error_stmt(stmt);
 			result = 0;
 			break;
 		}
@@ -541,7 +541,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 	}
 
 	if (isc_close_blob(H->isc_status, &h)) {
-		RECORD_ERROR(stmt);
+		firebird_error_stmt(stmt);
 		return 0;
 	}
 	return result;
@@ -559,8 +559,8 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 	}
 
 	if (!sqlda || param->paramno >= sqlda->sqld) {
-		strcpy(stmt->error_code, "HY093");
-		S->H->last_app_error = "Invalid parameter index";
+		const char *msg = "Invalid parameter index";
+		firebird_error_stmt_with_info(stmt, "HY093", strlen("HY093"), msg, strlen(msg));
 		return 0;
 	}
 	if (param->is_param && param->paramno == -1) {
@@ -585,8 +585,8 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 				}
 			}
 			if (i >= sqlda->sqld) {
-				strcpy(stmt->error_code, "HY093");
-				S->H->last_app_error = "Invalid parameter name";
+				const char *msg = "Invalid parameter name";
+				firebird_error_stmt_with_info(stmt, "HY093", strlen("HY093"), msg, strlen(msg));
 				return 0;
 			}
 		}
@@ -636,16 +636,18 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 
 			switch (var->sqltype & ~1) {
 				case SQL_ARRAY:
-					strcpy(stmt->error_code, "HY000");
-					S->H->last_app_error = "Cannot bind to array field";
+					{
+						const char *msg = "Cannot bind to array field";
+						firebird_error_stmt_with_info(stmt, "HY000", strlen("HY000"), msg, strlen(msg));
+					}
 					return 0;
 
 				case SQL_BLOB: {
 					if (Z_TYPE_P(parameter) == IS_NULL) {
 						/* Check if field allow NULL values */
 						if (~var->sqltype & 1) {
-							strcpy(stmt->error_code, "HY105");
-							S->H->last_app_error = "Parameter requires non-null value";
+							const char *msg = "Parameter requires non-null value";
+							firebird_error_stmt_with_info(stmt, "HY105", strlen("HY105"), msg, strlen(msg));
 							return 0;
 						}
 						*var->sqlind = -1;
@@ -693,8 +695,8 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 									} else if (!zend_binary_strncasecmp(Z_STRVAL_P(parameter), Z_STRLEN_P(parameter), "false", 5, 5)) {
 										*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
 									} else {
-										strcpy(stmt->error_code, "HY105");
-										S->H->last_app_error = "Cannot convert string to boolean";
+										const char *msg = "Cannot convert string to boolean";
+										firebird_error_stmt_with_info(stmt, "HY105", strlen("HY105"), msg, strlen(msg));
 										return 0;
 									}
 
@@ -705,8 +707,10 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						*var->sqlind = -1;
 						break;
 					default:
-						strcpy(stmt->error_code, "HY105");
-						S->H->last_app_error = "Binding arrays/objects is not supported";
+						{
+							const char *msg = "Binding arrays/objects is not supported";
+							firebird_error_stmt_with_info(stmt, "HY105", strlen("HY105"), msg, strlen(msg));
+						}
 						return 0;
 				}
 				break;
@@ -756,15 +760,17 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 				case IS_NULL:
 					/* complain if this field doesn't allow NULL values */
 					if (~var->sqltype & 1) {
-						strcpy(stmt->error_code, "HY105");
-						S->H->last_app_error = "Parameter requires non-null value";
+						const char *msg = "Parameter requires non-null value";
+						firebird_error_stmt_with_info(stmt, "HY105", strlen("HY105"), msg, strlen(msg));
 						return 0;
 					}
 					*var->sqlind = -1;
 					break;
 				default:
-					strcpy(stmt->error_code, "HY105");
-					S->H->last_app_error = "Binding arrays/objects is not supported";
+					{
+						const char *msg = "Binding arrays/objects is not supported";
+						firebird_error_stmt_with_info(stmt, "HY105", strlen("HY105"), msg, strlen(msg));
+					}
 					return 0;
 			}
 			break;
@@ -804,7 +810,7 @@ static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *v
 			}
 
 			if (isc_dsql_set_cursor_name(S->H->isc_status, &S->stmt, Z_STRVAL_P(val),0)) {
-				RECORD_ERROR(stmt);
+				firebird_error_stmt(stmt);
 				return 0;
 			}
 			strlcpy(S->name, Z_STRVAL_P(val), sizeof(S->name));
@@ -839,7 +845,7 @@ static int firebird_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 
 	/* close the statement handle */
 	if ((*S->name || S->cursor_open) && isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_close)) {
-		RECORD_ERROR(stmt);
+		firebird_error_stmt(stmt);
 		return 0;
 	}
 	*S->name = 0;
