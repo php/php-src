@@ -117,6 +117,87 @@ if (($result = pg_get_result($db)) !== false) {
 	}
 }
 
+for ($i = 99; $i < 199; ++$i) {
+    if (!pg_send_query_params($db, "select $1 as index, now() + ($1||' day')::interval as time, pg_sleep(0.001)", array($i))) {
+        die('pg_send_query_params failed');
+    }
+}
+
+if (!pg_pipeline_sync($db)) {
+    die('pg_pipeline_sync failed');
+}
+
+usleep(10000);
+
+pg_cancel_query($db);
+
+if (pg_pipeline_status($db) !== PGSQL_PIPELINE_ON) {
+    die('pg_pipeline_status failed');
+}
+
+if (pg_connection_busy($db)) {
+    $read = [$stream]; $write = $ex = [];
+    while (!stream_select($read, $write, $ex, null, null)) { }
+}
+
+$canceled_count = 0;
+for ($i = 99; $i < 199; ++$i) {
+    if (!($result = pg_get_result($db))) {
+        die('pg_get_result');
+    }
+
+    $result_status = pg_result_status($result);
+    if ($result_status === PGSQL_FATAL_ERROR) {
+        if (pg_connection_status($db) !== PGSQL_CONNECTION_OK) {
+            die('pg_cancel_query failed');
+        }
+        if (strpos(pg_last_error($db), 'canceling statement') === false) {
+            die('pg_cancel_query failed');
+        }
+        pg_free_result($result);
+        if ($result = pg_get_result($db)) {
+            die('pg_get_result');
+        }
+        continue;
+    }
+    if ($result_status === 11/*PGSQL_STATUS_PIPELINE_ABORTED*/) {
+        ++$canceled_count;
+        pg_free_result($result);
+        if ($result = pg_get_result($db)) {
+            die('pg_get_result');
+        }
+        continue;
+    }
+    if ($result_status !== PGSQL_TUPLES_OK) {
+        die('pg_result_status failed');
+    }
+
+    if (pg_num_rows($result) == -1) {
+        die('pg_num_rows failed');
+    }
+
+    if (!($row = pg_fetch_row($result, null))) {
+        die('pg_fetch_row failed');
+    }
+
+    pg_free_result($result);
+
+    if (pg_get_result($db) !== false) {
+        die('pg_get_result failed');
+    }
+}
+
+if ($canceled_count < 1) {
+    die('pg_cancel_query failed');
+}
+
+if (($result = pg_get_result($db)) !== false) {
+    if (pg_result_status($result) !== PGSQL_PIPELINE_SYNC) {
+        die('pg_result_status failed');
+    }
+}
+
+
 if (!pg_exit_pipeline_mode($db)) {
     die('pg_exit_pipeline_mode failed');
 }
