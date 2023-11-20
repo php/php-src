@@ -1030,7 +1030,7 @@ PHP_FUNCTION(implode)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY_HT_OR_STR(arg1_array, arg1_str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_HT(pieces)
+		Z_PARAM_ARRAY_HT_OR_NULL(pieces)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (arg1_str != NULL && pieces == NULL) {
