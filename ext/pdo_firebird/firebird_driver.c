@@ -460,15 +460,66 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 }
 
 /* map driver specific error message to PDO error */
-void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_long line) /* {{{ */
+void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state, const size_t state_len,
+	const char *msg, const size_t msg_len) /* {{{ */
 {
 	pdo_error_type *const error_code = stmt ? &stmt->error_code : &dbh->error_code;
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+	pdo_firebird_error_info *einfo = &H->einfo;
+	int sqlcode = -999;
 
-	strcpy(*error_code, "HY000");
+	if (einfo->errmsg) {
+		pefree(einfo->errmsg, dbh->is_persistent);
+		einfo->errmsg = NULL;
+		einfo->errmsg_length = 0;
+	}
+
+	if (H->isc_status && (H->isc_status[0] == 1 && H->isc_status[1] > 0)) {
+		char buf[512];
+		size_t buf_size = sizeof(buf), read_len = 0;
+		ssize_t tmp_len;
+		const ISC_STATUS *s = H->isc_status;
+		sqlcode = isc_sqlcode(s);
+
+		while ((buf_size > (read_len + 1)) && (tmp_len = fb_interpret(&buf[read_len], (buf_size - read_len - 1), &s)) && tmp_len > 0) {
+			read_len += tmp_len;
+			buf[read_len++] = ' ';
+		}
+
+		/* remove last space */
+		if (read_len) {
+			buf[read_len--] = '\0';
+		}
+
+		einfo->errmsg_length = read_len;
+		einfo->errmsg = pestrndup(buf, read_len, dbh->is_persistent);
+
+#if FB_API_VER >= 25
+		char sqlstate[sizeof(pdo_error_type)];
+		fb_sqlstate(sqlstate, H->isc_status);
+		if (sqlstate != NULL && strlen(sqlstate) < sizeof(pdo_error_type)) {
+			strcpy(*error_code, sqlstate);
+			goto end;
+		}
+#endif
+	} else if (msg && msg_len) {
+		einfo->errmsg_length = msg_len;
+		einfo->errmsg = pestrndup(msg, einfo->errmsg_length, dbh->is_persistent);
+	}
+
+	if (state && state_len && state_len < sizeof(pdo_error_type)) {
+		memcpy(*error_code, state, state_len + 1);
+	} else {
+		memcpy(*error_code, "HY000", sizeof("HY000"));
+	}
+
+end:
+	einfo->sqlcode = sqlcode;
+	if (!dbh->methods) {
+		pdo_throw_exception(0, einfo->errmsg, error_code);
+	}
 }
 /* }}} */
-
-#define RECORD_ERROR(dbh) _firebird_error(dbh, NULL, __FILE__, __LINE__)
 
 /* called by PDO to close a db handle */
 static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
@@ -478,17 +529,17 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	if (dbh->in_txn) {
 		if (dbh->auto_commit) {
 			if (isc_commit_transaction(H->isc_status, &H->tr)) {
-				RECORD_ERROR(dbh);
+				firebird_error(dbh);
 			}
 		} else {
 			if (isc_rollback_transaction(H->isc_status, &H->tr)) {
-				RECORD_ERROR(dbh);
+				firebird_error(dbh);
 			}
 		}
 	}
 
 	if (isc_detach_database(H->isc_status, &H->db)) {
-		RECORD_ERROR(dbh);
+		firebird_error(dbh);
 	}
 
 	if (H->date_format) {
@@ -499,6 +550,11 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	}
 	if (H->timestamp_format) {
 		efree(H->timestamp_format);
+	}
+
+	if (H->einfo.errmsg) {
+		pefree(H->einfo.errmsg, dbh->is_persistent);
+		H->einfo.errmsg = NULL;
 	}
 
 	pefree(H, dbh->is_persistent);
@@ -547,7 +603,7 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 
 		/* fill the output sqlda with information about the prepared query */
 		if (isc_dsql_describe(H->isc_status, &s, PDO_FB_SQLDA_VERSION, &S->out_sqlda)) {
-			RECORD_ERROR(dbh);
+			firebird_error(dbh);
 			break;
 		}
 
@@ -574,7 +630,7 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 
 	} while (0);
 
-	RECORD_ERROR(dbh);
+	firebird_error(dbh);
 
 	zend_hash_destroy(np);
 	FREE_HASHTABLE(np);
@@ -612,7 +668,7 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /*
 
 	/* execute the statement */
 	if (isc_dsql_execute2(H->isc_status, &H->tr, &stmt, PDO_FB_SQLDA_VERSION, &in_sqlda, &out_sqlda)) {
-		RECORD_ERROR(dbh);
+		firebird_error(dbh);
 		ret = -1;
 		goto free_statement;
 	}
@@ -620,7 +676,7 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /*
 	/* find out how many rows were affected */
 	if (isc_dsql_sql_info(H->isc_status, &stmt, sizeof(info_count), const_cast(info_count),
 			sizeof(result),	result)) {
-		RECORD_ERROR(dbh);
+		firebird_error(dbh);
 		ret = -1;
 		goto free_statement;
 	}
@@ -648,13 +704,13 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /*
 
 	/* commit if we're in auto_commit mode */
 	if (dbh->auto_commit && isc_commit_retaining(H->isc_status, &H->tr)) {
-		RECORD_ERROR(dbh);
+		firebird_error(dbh);
 	}
 
 free_statement:
 
 	if (isc_dsql_free_statement(H->isc_status, &stmt, DSQL_drop)) {
-		RECORD_ERROR(dbh);
+		firebird_error(dbh);
 	}
 
 	return ret;
@@ -746,7 +802,7 @@ static bool firebird_handle_begin(pdo_dbh_t *dbh) /* {{{ */
 	}
 #endif
 	if (isc_start_transaction(H->isc_status, &H->tr, 1, &H->db, (unsigned short)(ptpb-tpb), tpb)) {
-		RECORD_ERROR(dbh);
+		firebird_error(dbh);
 		return false;
 	}
 	return true;
@@ -759,7 +815,7 @@ static bool firebird_handle_commit(pdo_dbh_t *dbh) /* {{{ */
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
 	if (isc_commit_transaction(H->isc_status, &H->tr)) {
-		RECORD_ERROR(dbh);
+		firebird_error(dbh);
 		return false;
 	}
 	return true;
@@ -772,7 +828,7 @@ static bool firebird_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
 	if (isc_rollback_transaction(H->isc_status, &H->tr)) {
-		RECORD_ERROR(dbh);
+		firebird_error(dbh);
 		return false;
 	}
 	return true;
@@ -804,7 +860,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sql,
 
 	/* allocate the statement */
 	if (isc_dsql_allocate_statement(H->isc_status, &H->db, s)) {
-		RECORD_ERROR(dbh);
+		firebird_error(dbh);
 		return 0;
 	}
 
@@ -820,7 +876,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sql,
 
 	/* prepare the statement */
 	if (isc_dsql_prepare(H->isc_status, &H->tr, s, 0, new_sql, H->sql_dialect, out_sqlda)) {
-		RECORD_ERROR(dbh);
+		firebird_error(dbh);
 		efree(new_sql);
 		return 0;
 	}
@@ -848,7 +904,8 @@ static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *
 						if (bval) {
 							/* turning on auto_commit with an open transaction is illegal, because
 							   we won't know what to do with it */
-							H->last_app_error = "Cannot enable auto-commit while a transaction is already open";
+							const char *msg = "Cannot enable auto-commit while a transaction is already open";
+							firebird_error_with_info(dbh, "HY000", strlen("HY000"), msg, strlen(msg));
 							return false;
 						} else {
 							/* close the transaction */
@@ -992,21 +1049,11 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 static void pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
-	const ISC_STATUS *s = H->isc_status;
-	char buf[400];
-	zend_long i = 0, l, sqlcode = isc_sqlcode(s);
-
-	if (sqlcode) {
-		add_next_index_long(info, sqlcode);
-
-		while ((sizeof(buf)>(i+2))&&(l = fb_interpret(&buf[i],(sizeof(buf)-i-2),&s))) {
-			i += l;
-			strcpy(&buf[i++], " ");
-		}
-		add_next_index_string(info, buf);
-	} else if (H->last_app_error) {
-		add_next_index_long(info, -999);
-		add_next_index_string(info, const_cast(H->last_app_error));
+	if (H->einfo.sqlcode != IS_NULL) {
+		add_next_index_long(info, H->einfo.sqlcode);
+	}
+	if (H->einfo.errmsg && H->einfo.errmsg_length) {
+		add_next_index_stringl(info, H->einfo.errmsg, H->einfo.errmsg_length);
 	}
 }
 /* }}} */
