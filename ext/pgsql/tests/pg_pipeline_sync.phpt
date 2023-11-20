@@ -248,6 +248,25 @@ if (pg_get_result($db) !== false) {
 
 pg_close($db);
 
+if (!$db = pg_connect($conn_str)) {
+    die("pg_connect() error");
+}
+
+if (!pg_enter_pipeline_mode($db)) {
+    die('pg_enter_pipeline_mode');
+}
+
+if (!pg_send_query_params($db, "select $1 as index, now() + ($1||' day')::interval as time", array(199))) {
+    die('pg_send_query_params failed');
+}
+
+@pg_query_params($db, "select $1 as index, now() + ($1||' day')::interval as time", array(200));
+if (strpos(pg_last_error($db), 'synchronous command execution functions are not allowed in pipeline mode') === false) {
+    die('pg_query_params failed');
+}
+
+pg_close($db);
+
 echo "OK";
 
 ?>

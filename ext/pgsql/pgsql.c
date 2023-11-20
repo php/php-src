@@ -1020,17 +1020,23 @@ PHP_FUNCTION(pg_query)
 
 	pgsql = link->conn;
 
-	if (PQsetnonblocking(pgsql, 0)) {
-		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
-		RETURN_FALSE;
+#ifdef LIBPQ_HAS_PIPELINING
+	if (PQpipelineStatus(pgsql) == PQ_PIPELINE_OFF) {
+#endif
+		if (PQsetnonblocking(pgsql, 0)) {
+			php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
+			RETURN_FALSE;
+		}
+		while ((pgsql_result = PQgetResult(pgsql))) {
+			PQclear(pgsql_result);
+			leftover = 1;
+		}
+		if (leftover) {
+			php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
+		}
+#ifdef LIBPQ_HAS_PIPELINING
 	}
-	while ((pgsql_result = PQgetResult(pgsql))) {
-		PQclear(pgsql_result);
-		leftover = 1;
-	}
-	if (leftover) {
-		php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
-	}
+#endif
 	pgsql_result = PQexec(pgsql, query);
 	if ((PGG(auto_reset_persistent) & 2) && PQstatus(pgsql) != CONNECTION_OK) {
 		PQclear(pgsql_result);
@@ -1114,17 +1120,23 @@ PHP_FUNCTION(pg_query_params)
 
 	pgsql = link->conn;
 
-	if (PQsetnonblocking(pgsql, 0)) {
-		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
-		RETURN_FALSE;
+#ifdef LIBPQ_HAS_PIPELINING
+	if (PQpipelineStatus(pgsql) == PQ_PIPELINE_OFF) {
+#endif
+		if (PQsetnonblocking(pgsql, 0)) {
+			php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
+			RETURN_FALSE;
+		}
+		while ((pgsql_result = PQgetResult(pgsql))) {
+			PQclear(pgsql_result);
+			leftover = 1;
+		}
+		if (leftover) {
+			php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
+		}
+#ifdef LIBPQ_HAS_PIPELINING
 	}
-	while ((pgsql_result = PQgetResult(pgsql))) {
-		PQclear(pgsql_result);
-		leftover = 1;
-	}
-	if (leftover) {
-		php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
-	}
+#endif
 
 	num_params = zend_hash_num_elements(Z_ARRVAL_P(pv_param_arr));
 	if (num_params > 0) {
@@ -1219,17 +1231,23 @@ PHP_FUNCTION(pg_prepare)
 
 	pgsql = link->conn;
 
-	if (PQsetnonblocking(pgsql, 0)) {
-		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
-		RETURN_FALSE;
+#ifdef LIBPQ_HAS_PIPELINING
+	if (PQpipelineStatus(pgsql) == PQ_PIPELINE_OFF) {
+#endif
+		if (PQsetnonblocking(pgsql, 0)) {
+			php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
+			RETURN_FALSE;
+		}
+		while ((pgsql_result = PQgetResult(pgsql))) {
+			PQclear(pgsql_result);
+			leftover = 1;
+		}
+		if (leftover) {
+			php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
+		}
+#ifdef LIBPQ_HAS_PIPELINING
 	}
-	while ((pgsql_result = PQgetResult(pgsql))) {
-		PQclear(pgsql_result);
-		leftover = 1;
-	}
-	if (leftover) {
-		php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
-	}
+#endif
 	pgsql_result = PQprepare(pgsql, stmtname, query, 0, NULL);
 	if ((PGG(auto_reset_persistent) & 2) && PQstatus(pgsql) != CONNECTION_OK) {
 		PQclear(pgsql_result);
@@ -1300,17 +1318,23 @@ PHP_FUNCTION(pg_execute)
 
 	pgsql = link->conn;
 
-	if (PQsetnonblocking(pgsql, 0)) {
-		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
-		RETURN_FALSE;
+#ifdef LIBPQ_HAS_PIPELINING
+	if (PQpipelineStatus(pgsql) == PQ_PIPELINE_OFF) {
+#endif
+		if (PQsetnonblocking(pgsql, 0)) {
+			php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
+			RETURN_FALSE;
+		}
+		while ((pgsql_result = PQgetResult(pgsql))) {
+			PQclear(pgsql_result);
+			leftover = 1;
+		}
+		if (leftover) {
+			php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
+		}
+#ifdef LIBPQ_HAS_PIPELINING
 	}
-	while ((pgsql_result = PQgetResult(pgsql))) {
-		PQclear(pgsql_result);
-		leftover = 1;
-	}
-	if (leftover) {
-		php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
-	}
+#endif
 
 	num_params = zend_hash_num_elements(Z_ARRVAL_P(pv_param_arr));
 	if (num_params > 0) {
