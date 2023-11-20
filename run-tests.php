@@ -682,13 +682,13 @@ function main(): void
     if ($test_cnt) {
         putenv('NO_INTERACTION=1');
         usort($test_files, "test_sort");
-        $start_time = microtime(true);
+        $start_time = hrtime(true);
 
         echo "Running selected tests.\n";
 
         $test_idx = 0;
         run_all_tests($test_files, $environment);
-        $end_time = microtime(true);
+        $end_time = hrtime(true);
 
         if ($failed_tests_file) {
             fclose($failed_tests_file);
@@ -730,13 +730,13 @@ function main(): void
         $test_files = array_unique($test_files);
         usort($test_files, "test_sort");
 
-        $start_time = microtime(true);
+        $start_time = hrtime(true);
         show_start($start_time);
 
         $test_cnt = count($test_files);
         $test_idx = 0;
         run_all_tests($test_files, $environment);
-        $end_time = microtime(true);
+        $end_time = hrtime(true);
 
         if ($failed_tests_file) {
             fclose($failed_tests_file);
@@ -3064,7 +3064,7 @@ Expected leak   : ' . sprintf('%5d (%5.1f%%)', $sum_results['XLEAKED'], $percent
     $summary .= '
 Tests passed    : ' . sprintf('%5d (%5.1f%%)', $sum_results['PASSED'], $percent_results['PASSED']) . ' ' . sprintf('(%5.1f%%)', $x_passed) . '
 ---------------------------------------------------------------------
-Time taken      : ' . sprintf('%5.3f seconds', $end_time - $start_time) . '
+Time taken      : ' . sprintf('%5.3f seconds', ($end_time - $start_time) / 1e9) . '
 =====================================================================
 ';
     $failed_test_summary = '';
@@ -3169,12 +3169,12 @@ EXPECTED LEAK TEST SUMMARY
 
 function show_start(int $start_time): void
 {
-    echo "TIME START " . date('Y-m-d H:i:s', $start_time) . "\n=====================================================================\n";
+    echo "TIME START " . date('Y-m-d H:i:s', $start_time / 1e9) . "\n=====================================================================\n";
 }
 
 function show_end(int $end_time): void
 {
-    echo "=====================================================================\nTIME END " . date('Y-m-d H:i:s', $end_time) . "\n";
+    echo "=====================================================================\nTIME END " . date('Y-m-d H:i:s', $end_time / 1e9) . "\n";
 }
 
 function show_summary(): void
