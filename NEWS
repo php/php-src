@@ -2,14 +2,36 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.0
 
+- DOM:
+  . Fixed bug GH-12616 (DOM: Removing XMLNS namespace node results in invalid
+    default: prefix). (nielsdos)
+
 - Intl:
   . Fixed bug GH-12635 (Test bug69398.phpt fails with ICU 74.1). (nielsdos)
+
+- LibXML:
+  . Fixed bug GH-12702 (libxml2 2.12.0 issue building from src). (nono303)
+
+- MBString:
+  . Fixed bug GH-11992 (utf_encodings.phpt fails on Windows 32-bit). (nielsdos)
+
+- OpenSSL:
+  . Fixed bug #50713 (openssl_pkcs7_verify() may ignore untrusted CAs).
+    (Jakub Zelenka)
 
 - PCRE:
   . Fixed bug GH-12628 (The gh11374 test fails on Alpinelinux). (nielsdos)
 
 - PHPDBG:
   . Fixed bug GH-12675 (MEMORY_LEAK in phpdbg_prompt.c). (nielsdos)
+
+- SPL:
+  . Fixed bug GH-12721 (SplFileInfo::getFilename() segfault in combination
+    with GlobIterator and no directory separator). (nielsdos)
+
+- SQLite3:
+  . Fixed bug GH-12633 (sqlite3_defensive.phpt fails with sqlite 3.44.0).
+    (SakiTakamachi)
 
 - Standard:
   . Fix memory leak in syslog device handling. (danog)
@@ -18,9 +40,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-12655 (proc_open() does not take into account references
     in the descriptor array). (nielsdos)
 
-- SQLite3:
-  . Fixed bug GH-12633 (sqlite3_defensive.phpt fails with sqlite 3.44.0).
-    (SakiTakamachi)
+- Streams:
+  . Fixed bug #79945 (Stream wrappers in imagecreatefrompng causes segfault).
+    (Jakub Zelenka)
 
 - Zip:
   . Fixed bug GH-12661 (Inconsistency in ZipArchive::addGlob remove_path Option
