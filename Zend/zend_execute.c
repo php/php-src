@@ -1677,6 +1677,60 @@ try_again:
 	return zval_get_long_func(dim, /* is_strict */ false);
 }
 
+/* This is a copy of zend_check_string_offset() use for BP_VAR_IS operations.
+ * Compared to the behaviour of array offsets, isset()/empty() did not throw
+ * TypeErrors for invalid offsets, or warn on type coercions.
+ * The coalesce operator did throw on invalid offset types but not for type coercions. */
+static zend_never_inline zend_long zend_check_string_offset_is_ops(zval *dim, bool *is_type_valid, bool is_coalesce EXECUTE_DATA_DC)
+{
+	zend_long offset;
+	*is_type_valid = true;
+
+try_again:
+	switch(Z_TYPE_P(dim)) {
+		case IS_LONG:
+			return Z_LVAL_P(dim);
+		case IS_STRING:
+		{
+			bool trailing_data = false;
+			/* For BC reasons we allow errors so that we can warn on leading numeric string */
+			if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL,
+					/* allow errors */ true, NULL, &trailing_data)) {
+				if (UNEXPECTED(trailing_data)) {
+					*is_type_valid = false;
+					zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+				}
+				return offset;
+			}
+			*is_type_valid = false;
+			zend_error(E_WARNING, "Cannot access offset of type %s in isset or empty", zend_zval_type_name(dim));
+			return 0;
+		}
+		case IS_UNDEF:
+			ZVAL_UNDEFINED_OP2();
+			ZEND_FALLTHROUGH;
+		case IS_DOUBLE:
+		case IS_NULL:
+		case IS_FALSE:
+		case IS_TRUE:
+			zend_error(E_WARNING, "String offset cast occurred");
+			break;
+		case IS_REFERENCE:
+			dim = Z_REFVAL_P(dim);
+			goto try_again;
+		default:
+			*is_type_valid = false;
+			if (is_coalesce) {
+				zend_illegal_string_offset(dim, BP_VAR_IS);
+			} else {
+				zend_error(E_WARNING, "Cannot access offset of type %s in isset or empty", zend_zval_type_name(dim));
+			}
+			return 0;
+	}
+
+	return zval_get_long_func(dim, /* is_strict */ false);
+}
+
 ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 {
 	const char *msg = NULL;
@@ -2747,73 +2801,35 @@ try_array:
 		zend_string *str = Z_STR_P(container);
 		zend_long offset;
 
-try_string_offset:
 		if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-			switch (Z_TYPE_P(dim)) {
-				case IS_STRING:
-				{
-					bool trailing_data = false;
-					/* For BC reasons we allow errors so that we can warn on leading numeric string */
-					if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset,
-							NULL, /* allow errors */ true, NULL, &trailing_data)) {
-						if (UNEXPECTED(trailing_data)) {
-							zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
-						}
-						goto out;
-					}
-					if (type == BP_VAR_IS) {
-						ZVAL_NULL(result);
-						return;
-					}
-					zend_illegal_string_offset(dim, BP_VAR_R);
-					ZVAL_NULL(result);
-					return;
-				}
-				case IS_UNDEF:
-					/* The string may be destroyed while throwing the notice.
-					 * Temporarily increase the refcount to detect this situation. */
-					if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
-						GC_ADDREF(str);
-					}
-					ZVAL_UNDEFINED_OP2();
-					if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
-						zend_string_efree(str);
-						ZVAL_NULL(result);
-						return;
-					}
-					ZEND_FALLTHROUGH;
-				case IS_DOUBLE:
-				case IS_NULL:
-				case IS_FALSE:
-				case IS_TRUE:
-					if (type != BP_VAR_IS) {
-						/* The string may be destroyed while throwing the notice.
-						 * Temporarily increase the refcount to detect this situation. */
-						if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
-							GC_ADDREF(str);
-						}
-						zend_error(E_WARNING, "String offset cast occurred");
-						if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
-							zend_string_efree(str);
-							ZVAL_NULL(result);
-							return;
-						}
-					}
-					break;
-				case IS_REFERENCE:
-					dim = Z_REFVAL_P(dim);
-					goto try_string_offset;
-				default:
-					zend_illegal_string_offset(dim, BP_VAR_R);
-					ZVAL_NULL(result);
-					return;
+			/* The string may be destroyed while throwing the notice.
+			 * Temporarily increase the refcount to detect this situation. */
+			if (!(GC_FLAGS(str) & IS_STR_INTERNED)) {
+				GC_ADDREF(str);
+			}
+			/* Coalesce operator didn't behave like isset()/empty() in that a
+			 * TypeError was thrown if the offset was of type array/resource/object
+			 * However, null/bool/float type coercion warnings were suppressed. */
+			bool is_type_valid = true;
+			if (type == BP_VAR_IS) {
+				offset = zend_check_string_offset_is_ops(dim, &is_type_valid, /* is_coalesce */ true EXECUTE_DATA_CC);
+			} else {
+				offset = zend_check_string_offset(dim, dim_type EXECUTE_DATA_CC);
 			}
 
-			offset = zval_get_long_func(dim, /* is_strict */ false);
+			if (!(GC_FLAGS(str) & IS_STR_INTERNED) && UNEXPECTED(GC_DELREF(str) == 0)) {
+				zend_string_efree(str);
+				ZVAL_NULL(result);
+				return;
+			}
+			/* Illegal offset assignment */
+			if (!is_type_valid || UNEXPECTED(EG(exception) != NULL)) {
+				ZVAL_NULL(result);
+				return;
+			}
 		} else {
 			offset = Z_LVAL_P(dim);
 		}
-		out:
 
 		if (UNEXPECTED(ZSTR_LEN(str) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
 			if (type != BP_VAR_IS) {
@@ -2957,15 +2973,17 @@ str_offset:
 			/*if (OP2_TYPE & (IS_CV|IS_VAR)) {*/
 				ZVAL_DEREF(offset);
 			/*}*/
-			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				lval = zval_get_long_ex(offset, /* is_strict */ true);
-				goto str_offset;
+
+			bool is_type_valid = true;
+			/* For BC we currently emit E_WARNINGs */
+			lval = zend_check_string_offset_is_ops(offset, &is_type_valid, /* is_coalesce */ false EXECUTE_DATA_CC);
+			if (!is_type_valid || UNEXPECTED(EG(exception) != NULL)) {
+				return false;
 			}
-			return 0;
+			goto str_offset;
 		}
 	} else {
+		/* Container is invalid, TODO deprecate this? */
 		return 0;
 	}
 }
@@ -2996,15 +3014,17 @@ str_offset:
 			/*if (OP2_TYPE & (IS_CV|IS_VAR)) {*/
 				ZVAL_DEREF(offset);
 			/*}*/
-			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
-				lval = zval_get_long_ex(offset, /* is_strict */ true);
-				goto str_offset;
+
+			bool is_type_valid = true;
+			/* For BC we currently emit E_WARNINGs */
+			lval = zend_check_string_offset_is_ops(offset, &is_type_valid, /* is_coalesce */ false EXECUTE_DATA_CC);
+			if (!is_type_valid || UNEXPECTED(EG(exception) != NULL)) {
+				return true;
 			}
-			return 1;
+			goto str_offset;
 		}
 	} else {
+		/* Container is invalid, TODO deprecate this? */
 		return 1;
 	}
 }

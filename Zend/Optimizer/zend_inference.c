@@ -5115,7 +5115,8 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				return 0;
 			}
 		case ZEND_FETCH_IS:
-			return (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT));
+			return (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT))
+				|| (t1 & MAY_BE_STRING && t2 & MAY_BE_STRING);
 		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 			return (t1 & MAY_BE_OBJECT) || (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT));
 		case ZEND_FETCH_DIM_IS:

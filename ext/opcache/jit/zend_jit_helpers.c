@@ -1058,6 +1058,60 @@ try_again:
 	return zval_get_long_func(dim, /* is_strict */ false);
 }
 
+/* This is a copy of zend_check_string_offset() use for BP_VAR_IS operations.
+ * Compared to the behaviour of array offsets, isset()/empty() did not throw
+ * TypeErrors for invalid offsets, or warn on type coercions.
+ * The coalesce operator did throw on invalid offset types but not for type coercions. */
+static zend_never_inline zend_long zend_check_string_offset_is_ops(zval *dim, bool *is_type_valid, bool is_coalesce)
+{
+	zend_long offset;
+	*is_type_valid = true;
+
+try_again:
+	switch(Z_TYPE_P(dim)) {
+		case IS_LONG:
+			return Z_LVAL_P(dim);
+		case IS_STRING:
+		{
+			bool trailing_data = false;
+			/* For BC reasons we allow errors so that we can warn on leading numeric string */
+			if (IS_LONG == is_numeric_string_ex(Z_STRVAL_P(dim), Z_STRLEN_P(dim), &offset, NULL,
+					/* allow errors */ true, NULL, &trailing_data)) {
+				if (UNEXPECTED(trailing_data)) {
+					*is_type_valid = false;
+					zend_error(E_WARNING, "Illegal string offset \"%s\"", Z_STRVAL_P(dim));
+				}
+				return offset;
+			}
+			*is_type_valid = false;
+			zend_error(E_WARNING, "Cannot access offset of type %s in isset or empty", zend_zval_type_name(dim));
+			return 0;
+		}
+		case IS_UNDEF:
+			zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
+			ZEND_FALLTHROUGH;
+		case IS_DOUBLE:
+		case IS_NULL:
+		case IS_FALSE:
+		case IS_TRUE:
+			zend_error(E_WARNING, "String offset cast occurred");
+			break;
+		case IS_REFERENCE:
+			dim = Z_REFVAL_P(dim);
+			goto try_again;
+		default:
+			*is_type_valid = false;
+			if (is_coalesce) {
+				zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), dim, BP_VAR_IS);
+			} else {
+				zend_error(E_WARNING, "Cannot access offset of type %s in isset or empty", zend_zval_type_name(dim));
+			}
+			return 0;
+	}
+
+	return zval_get_long_func(dim, /* is_strict */ false);
+}
+
 static zend_always_inline zend_string* zend_jit_fetch_dim_str_offset(zend_string *str, zend_long offset)
 {
 	if (UNEXPECTED((zend_ulong)offset >= (zend_ulong)ZSTR_LEN(str))) {
@@ -1105,32 +1159,17 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_str_is_helper(zend_string *str, zva
 {
 	zend_long offset;
 
-try_string_offset:
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-		switch (Z_TYPE_P(dim)) {
-			/* case IS_LONG: */
-			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, false)) {
-					break;
-				}
-				ZVAL_NULL(result);
-				return;
-			case IS_UNDEF:
-				zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);
-			case IS_DOUBLE:
-			case IS_NULL:
-			case IS_FALSE:
-			case IS_TRUE:
-				break;
-			case IS_REFERENCE:
-				dim = Z_REFVAL_P(dim);
-				goto try_string_offset;
-			default:
-				zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), dim, BP_VAR_IS);
-				break;
+		bool is_type_valid = true;
+		/* Coalesce operator didn't behave like isset()/empty() in that a
+		 * TypeError was thrown if the offset was of type array/resource/object
+		 * However, null/bool/float type coercion warnings were suppressed. */
+		offset = zend_check_string_offset_is_ops(dim, &is_type_valid, /* is_coalesce */ true);
+		/* Illegal offset */
+		if (!is_type_valid || UNEXPECTED(EG(exception) != NULL)) {
+			ZVAL_NULL(result);
+			return;
 		}
-
-		offset = zval_get_long_func(dim, /* is_strict */ false);
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
@@ -1736,12 +1775,13 @@ isset_str_offset:
 			}
 		} else {
 			ZVAL_DEREF(offset);
-			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
-					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, false))) {
-				lval = zval_get_long_ex(offset, /* is_strict */ true);
-				goto isset_str_offset;
+			bool is_type_valid = true;
+			/* For BC we currently emit E_WARNINGs */
+			lval = zend_check_string_offset_is_ops(offset, &is_type_valid, /* is_coalesce */ false);
+			if (!is_type_valid || UNEXPECTED(EG(exception) != NULL)) {
+				return 0;
 			}
+			goto isset_str_offset;
 		}
 	}
 	return 0;
