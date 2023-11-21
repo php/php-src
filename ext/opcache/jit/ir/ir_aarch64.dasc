@@ -5198,6 +5198,9 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 				case IR_TLS:
 					ir_emit_tls(ctx, i, insn);
 					break;
+				case IR_TRAP:
+					|	brk;
+					break;
 				default:
 					IR_ASSERT(0 && "NIY rule/instruction");
 					dasm_free(&data.dasm_state);
