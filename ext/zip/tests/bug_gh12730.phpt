@@ -16,9 +16,9 @@ $zip->open(__DIR__ . '/bug_gh12730.zip');
 $zip->extractTo(__DIR__);
 $zip->close();
 
-var_dump(fileperms(__DIR__ . '/bug_gh12730/foo') == 0100644); // file
-var_dump(fileperms(__DIR__ . '/bug_gh12730/bar') == 0100755); // executable
-var_dump(fileperms(__DIR__ . '/bug_gh12730')     == 0040750); // dir
+var_dump(fileperms(__DIR__ . '/bug_gh12730/foo')); // file
+var_dump(fileperms(__DIR__ . '/bug_gh12730/bar')); // executable
+var_dump(fileperms(__DIR__ . '/bug_gh12730')    ); // dir
 ?>
 Done
 --CLEAN--
