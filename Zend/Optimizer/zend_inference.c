@@ -1647,6 +1647,10 @@ static bool zend_inference_widening_meet(zend_ssa_var_info *var_info, zend_ssa_r
 			return 0;
 		}
 	}
+	if (var_info->type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
+		if (r->min > 0) r->min = 0;
+		if (r->max < 0) r->max = 0;
+	}
 	var_info->range = *r;
 	return 1;
 }
@@ -1691,6 +1695,10 @@ static bool zend_inference_narrowing_meet(zend_ssa_var_info *var_info, zend_ssa_
 		    var_info->range.overflow == r->overflow) {
 			return 0;
 		}
+	}
+	if (var_info->type & (MAY_BE_UNDEF|MAY_BE_NULL)) {
+		if (r->min > 0) r->min = 0;
+		if (r->max < 0) r->max = 0;
 	}
 	var_info->range = *r;
 	return 1;
@@ -1955,6 +1963,11 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 	}
 }
 
+typedef enum {
+	INFERENCE_NARROW,
+	INFERENCE_WIDEN,
+} inference_direction;
+
 #define UPDATE_SSA_TYPE(_type, _var)									\
 	do {																\
 		uint32_t __type = (_type) & ~MAY_BE_GUARD;						\
@@ -1987,8 +2000,11 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 					__ssa_var->var >= op_array->last_var ||				\
 					(ssa_var_info[__var].type & MAY_BE_REF)				\
 						== (__type & MAY_BE_REF));						\
-				if (ssa_var_info[__var].type & ~__type) {				\
-					emit_type_narrowing_warning(op_array, ssa, __var);	\
+				bool direction_failure = direction == INFERENCE_NARROW	\
+					? (__type & ~ssa_var_info[__var].type)				\
+					: (ssa_var_info[__var].type & ~__type);				\
+				if (direction_failure) {								\
+					emit_type_direction_warning(op_array, ssa, __var, direction); \
 					return FAILURE;										\
 				}														\
 				ssa_var_info[__var].type = __type;						\
@@ -2078,17 +2094,22 @@ static void add_usages(const zend_op_array *op_array, zend_ssa *ssa, zend_bitset
 	}
 }
 
-static void emit_type_narrowing_warning(const zend_op_array *op_array, zend_ssa *ssa, int var)
+static void emit_type_direction_warning(const zend_op_array *op_array, zend_ssa *ssa, int var, inference_direction direction)
 {
 	int def_op_num = ssa->vars[var].definition;
 	const zend_op *def_opline = def_op_num >= 0 ? &op_array->opcodes[def_op_num] : NULL;
 	const char *def_op_name = def_opline ? zend_get_opcode_name(def_opline->opcode) : "PHI";
 	uint32_t lineno = def_opline ? def_opline->lineno : 0;
+	const char *direction_str = direction == INFERENCE_NARROW ? "Widening" : "Narrowing";
 	zend_error_at(
 		E_WARNING, op_array->filename, lineno,
-		"Narrowing occurred during type inference of %s. Please file a bug report on https://github.com/php/php-src/issues", def_op_name);
+		"%s occurred during type inference of %s. Please file a bug report on https://github.com/php/php-src/issues", direction_str, def_op_name);
 #if ZEND_DEBUG
-	ZEND_ASSERT(0 && "Narrowing during type inference");
+	if (direction == INFERENCE_NARROW) {
+		ZEND_ASSERT(0 && "Widening during type inference");
+	} else {
+		ZEND_ASSERT(0 && "Narrowing during type inference");
+	}
 #endif
 }
 
@@ -2530,7 +2551,8 @@ static zend_always_inline zend_result _zend_update_type_info(
 			zend_ssa_op         *ssa_op,
 			const zend_op      **ssa_opcodes,
 			zend_long            optimization_level,
-			bool            update_worklist)
+			bool                 update_worklist,
+			inference_direction  direction)
 {
 	uint32_t t1, t2;
 	uint32_t tmp, orig;
@@ -3976,7 +3998,7 @@ ZEND_API zend_result zend_update_type_info(
 			const zend_op      **ssa_opcodes,
 			zend_long            optimization_level)
 {
-	return _zend_update_type_info(op_array, ssa, script, NULL, opline, ssa_op, ssa_opcodes, optimization_level, 0);
+	return _zend_update_type_info(op_array, ssa, script, NULL, opline, ssa_op, ssa_opcodes, optimization_level, 0, INFERENCE_WIDEN);
 }
 
 static uint32_t get_class_entry_rank(zend_class_entry *ce) {
@@ -4036,7 +4058,7 @@ static bool safe_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
 	return instanceof_function(ce1, ce2);
 }
 
-static zend_result zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_long optimization_level)
+static zend_result zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_long optimization_level, inference_direction direction)
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_var *ssa_vars = ssa->vars;
@@ -4112,7 +4134,7 @@ static zend_result zend_infer_types_ex(const zend_op_array *op_array, const zend
 			}
 		} else if (ssa_vars[j].definition >= 0) {
 			i = ssa_vars[j].definition;
-			if (_zend_update_type_info(op_array, ssa, script, worklist, op_array->opcodes + i, ssa->ops + i, NULL, optimization_level, 1) == FAILURE) {
+			if (_zend_update_type_info(op_array, ssa, script, worklist, op_array->opcodes + i, ssa->ops + i, NULL, optimization_level, 1, direction) == FAILURE) {
 				return FAILURE;
 			}
 		}
@@ -4294,7 +4316,7 @@ static zend_result zend_type_narrowing(const zend_op_array *op_array, const zend
 {
 	uint32_t bitset_len = zend_bitset_len(ssa->vars_count);
 	zend_bitset visited, worklist;
-	int i, v;
+	int v;
 	zend_op *opline;
 	bool narrowed = 0;
 	ALLOCA_FLAG(use_heap)
@@ -4305,27 +4327,76 @@ static zend_result zend_type_narrowing(const zend_op_array *op_array, const zend
 	zend_bitset_clear(worklist, bitset_len);
 
 	for (v = op_array->last_var; v < ssa->vars_count; v++) {
-		if ((ssa->var_info[v].type & (MAY_BE_REF | MAY_BE_ANY | MAY_BE_UNDEF)) != MAY_BE_LONG) continue;
 		if (ssa->vars[v].definition < 0) continue;
 		if (ssa->vars[v].no_val) continue;
 		opline = op_array->opcodes + ssa->vars[v].definition;
+		zend_ssa_op *ssa_op = ssa->ops + ssa->vars[v].definition;
 		/* Go through assignments of literal integers and check if they can be converted to
 		 * doubles instead, in the hope that we'll narrow long|double to double. */
-		if (opline->opcode == ZEND_ASSIGN && opline->result_type == IS_UNUSED &&
-				opline->op1_type == IS_CV && opline->op2_type == IS_CONST) {
+		if ((ssa->var_info[v].type & (MAY_BE_REF | MAY_BE_ANY | MAY_BE_UNDEF)) == MAY_BE_LONG &&
+		 opline->opcode == ZEND_ASSIGN && opline->result_type == IS_UNUSED &&
+		 opline->op1_type == IS_CV && opline->op2_type == IS_CONST) {
 			zval *value = CRT_CONSTANT(opline->op2);
 
 			zend_bitset_clear(visited, bitset_len);
 			if (can_convert_to_double(op_array, ssa, v, value, visited)) {
 				narrowed = 1;
 				ssa->var_info[v].use_as_double = 1;
-				/* The "visited" vars are exactly those which may change their type due to
-				 * narrowing. Reset their types and add them to the type inference worklist */
-				ZEND_BITSET_FOREACH(visited, bitset_len, i) {
-					ssa->var_info[i].type &= ~MAY_BE_ANY;
-				} ZEND_BITSET_FOREACH_END();
 				zend_bitset_union(worklist, visited, bitset_len);
 			}
+		}
+		/* Narrow int|float to int where possible through over-/underflow analysis. */
+		if ((ssa->var_info[v].type & (MAY_BE_DOUBLE|MAY_BE_DOUBLE)) == (MAY_BE_DOUBLE|MAY_BE_DOUBLE)) {
+			uint32_t t1, t2;
+
+			if (!ssa->var_info[v].has_range || (ssa->var_info[v].range.underflow && ssa->var_info[v].range.overflow)) {
+				goto skip_over_underflow_narrowing;
+			}
+
+			switch (opline->opcode) {
+				case ZEND_ADD:
+				case ZEND_SUB:
+				case ZEND_MUL:
+				case ZEND_ASSIGN_OP:
+					t1 = OP1_INFO();
+					t2 = OP2_INFO();
+					break;
+				case ZEND_PRE_INC:
+				case ZEND_POST_INC:
+				case ZEND_PRE_DEC:
+				case ZEND_POST_DEC:
+					t1 = OP1_INFO();
+					t2 = MAY_BE_LONG;
+					break;
+				case ZEND_ASSIGN_DIM_OP:
+					t1 = zend_array_element_type(OP1_INFO(), opline->op1_type, 1, 0);
+					t2 = OP1_DATA_INFO();
+					break;
+				case ZEND_ASSIGN_OBJ_OP: {
+					const zend_property_info *prop_info = zend_fetch_prop_info(op_array, ssa, opline, ssa_op);
+					t1 = zend_fetch_prop_type(script, prop_info, NULL);
+					t2 = OP1_DATA_INFO();
+					break;
+				}
+				case ZEND_ASSIGN_STATIC_PROP_OP: {
+					const zend_property_info *prop_info = zend_fetch_static_prop_info(script, op_array, ssa, opline);
+					t1 = zend_fetch_prop_type(script, prop_info, NULL);
+					t2 = OP1_DATA_INFO();
+					break;
+				}
+				default:
+					goto skip_over_underflow_narrowing;
+			}
+
+			if ((t1 & (MAY_BE_ANY|MAY_BE_UNDEF)) != MAY_BE_LONG
+			 || (t2 & (MAY_BE_ANY|MAY_BE_UNDEF)) != MAY_BE_LONG) {
+				goto skip_over_underflow_narrowing;
+			}
+
+			narrowed = 1;
+			zend_bitset_incl(worklist, v);
+
+skip_over_underflow_narrowing:;
 		}
 	}
 
@@ -4334,7 +4405,7 @@ static zend_result zend_type_narrowing(const zend_op_array *op_array, const zend
 		return SUCCESS;
 	}
 
-	if (zend_infer_types_ex(op_array, script, ssa, worklist, optimization_level) == FAILURE) {
+	if (zend_infer_types_ex(op_array, script, ssa, worklist, optimization_level, INFERENCE_NARROW) == FAILURE) {
 		free_alloca(visited, use_heap);
 		return FAILURE;
 	}
@@ -4577,18 +4648,9 @@ static zend_result zend_infer_types(const zend_op_array *op_array, const zend_sc
 		zend_bitset_incl(worklist, j);
 	}
 
-	if (zend_infer_types_ex(op_array, script, ssa, worklist, optimization_level) == FAILURE) {
+	if (zend_infer_types_ex(op_array, script, ssa, worklist, optimization_level, INFERENCE_WIDEN) == FAILURE) {
 		free_alloca(worklist,  use_heap);
 		return FAILURE;
-	}
-
-	if (optimization_level & ZEND_OPTIMIZER_NARROW_TO_DOUBLE) {
-		/* Narrowing integer initialization to doubles */
-		zend_type_narrowing(op_array, script, ssa, optimization_level);
-	}
-
-	if (ZEND_FUNC_INFO(op_array)) {
-		zend_func_return_info(op_array, script, 1, 0, &ZEND_FUNC_INFO(op_array)->return_info);
 	}
 
 	free_alloca(worklist,  use_heap);
@@ -4764,10 +4826,19 @@ ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array 
 
 	zend_mark_cv_references(op_array, script, ssa);
 
-	zend_infer_ranges(op_array, ssa);
-
 	if (zend_infer_types(op_array, script, ssa, optimization_level) == FAILURE) {
 		return FAILURE;
+	}
+
+	zend_infer_ranges(op_array, ssa);
+
+	if (optimization_level & ZEND_OPTIMIZER_NARROW_TO_DOUBLE) {
+		/* Narrowing integer initialization to doubles */
+		zend_type_narrowing(op_array, script, ssa, optimization_level);
+	}
+
+	if (ZEND_FUNC_INFO(op_array)) {
+		zend_func_return_info(op_array, script, 1, 0, &ZEND_FUNC_INFO(op_array)->return_info);
 	}
 
 	return SUCCESS;
