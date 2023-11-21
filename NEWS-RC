@@ -1,0 +1,305 @@
+PHP                                                                        NEWS
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? ????, PHP 8.3.0
+
+- Core:
+  . Fixed oss-fuzz #54325 (Use-after-free of name in var-var with malicious
+    error handler). (ilutov)
+  . Fixed oss-fuzz #64209 (In-place modification of filename in
+    php_message_handler_for_zend). (ilutov)
+
+- DOM:
+  . Fixed bug GH-12616 (DOM: Removing XMLNS namespace node results in invalid
+    default: prefix). (nielsdos)
+
+- Intl:
+  . Fixed bug GH-12635 (Test bug69398.phpt fails with ICU 74.1). (nielsdos)
+
+- LibXML:
+  . Fixed bug GH-12702 (libxml2 2.12.0 issue building from src). (nono303)
+
+- MBString:
+  . Fixed bug GH-11992 (utf_encodings.phpt fails on Windows 32-bit). (nielsdos)
+
+- OpenSSL:
+  . Fixed bug #50713 (openssl_pkcs7_verify() may ignore untrusted CAs).
+    (Jakub Zelenka)
+
+- PCRE:
+  . Fixed bug GH-12628 (The gh11374 test fails on Alpinelinux). (nielsdos)
+
+- PGSQL:
+  . Reverted PG pipeline addition. (Jakub Zelenka)
+
+- PHPDBG:
+  . Fixed bug GH-12675 (MEMORY_LEAK in phpdbg_prompt.c). (nielsdos)
+
+- POSIX:
+  . Fixed bug GH-12725 (Call to undefined function posix_fpathconf() in default
+    configure setting). (petk)
+
+- SPL:
+  . Fixed bug GH-12721 (SplFileInfo::getFilename() segfault in combination
+    with GlobIterator and no directory separator). (nielsdos)
+
+- SQLite3:
+  . Fixed bug GH-12633 (sqlite3_defensive.phpt fails with sqlite 3.44.0).
+    (SakiTakamachi)
+
+- Standard:
+  . Fix memory leak in syslog device handling. (danog)
+  . Fixed bug GH-12621 (browscap segmentation fault when configured in the
+    vhost). (nielsdos)
+  . Fixed bug GH-12655 (proc_open() does not take into account references
+    in the descriptor array). (nielsdos)
+
+- Streams:
+  . Fixed bug #79945 (Stream wrappers in imagecreatefrompng causes segfault).
+    (Jakub Zelenka)
+
+- Zip:
+  . Fixed bug GH-12661 (Inconsistency in ZipArchive::addGlob remove_path Option
+    Behavior). (Remi)
+
+09 Nov 2023, PHP 8.3.0RC6
+
+- Core:
+  . Fixed segfault caused by weak references to FFI objects. (sj-i)
+  . Fixed max_execution_time: don't delete an unitialized timer. (Kévin Dunglas)
+  . Fixed bug GH-12558 (Arginfo soft-breaks with namespaced class return type
+    if the class name starts with N). (kocsismate)
+  . Fixed oss-fuzz #63802 (OP1 leak in error path of post inc/dec). (ilutov)
+
+- DOM:
+  . Add missing NULL pointer error check. (icy17)
+  . Fixed bug #47531 (No way of removing redundant xmlns: declarations).
+    (nielsdos)
+  . Fix validation logic of php:function() callbacks. (nielsdos)
+
+- FPM:
+  . Fixed bug GH-9921 (Loading ext in FPM config does not register module
+    handlers). (Jakub Zelenka)
+  . Fixed bug #76922 (FastCGI terminates conn after FCGI_GET_VALUES).
+    (Jakub Zelenka)
+
+- Intl:
+  . Removed the BC break on IntlDateFormatter::construct which threw an
+    exception with an invalid locale. (David Carlier)
+
+- Opcache:
+  . Fixed COPY_TMP type inference for references. (ilutov)
+
+- PCRE:
+  . Fixed bug GH-11374 (Backport upstream fix, Different preg_match result
+    with -d pcre.jit=0). (mvorisek)
+
+- PGSQL:
+  . Fixed pipeline mode GH-9344. (degtyaryov)
+
+- SOAP:
+  . Fix potential crash with an edge case of persistent encoders. (nielsdos)
+  . Fixed bug #75306 (Memleak in SoapClient). (nielsdos)
+
+- XMLReader:
+  . Add missing NULL pointer error check. (icy17)
+
+- XMLWriter:
+  . Add missing NULL pointer error check. (icy17)
+
+- XSL:
+  . Fix validation logic of php:function() callbacks. (nielsdos)
+
+
+26 Oct 2023, PHP 8.3.0RC5
+
+- Core:
+  . Fixed double-free of non-interned enum case name. (ilutov)
+  . Fixed bug GH-12457 (Incorrect result of stripos with single character
+    needle). (SakiTakamachi)
+  . Fixed bug GH-12468 (Double-free of doc_comment when overriding static
+    property via trait). (ilutov)
+
+- DOM:
+  . Fix registerNodeClass with abstract class crashing. (nielsdos)
+  . Fix compile error when php_libxml.h header is included in C++.
+    (Remi, nielsdos)
+
+- Fiber:
+  . Fixed bug GH-11121 (ReflectionFiber segfault). (danog, trowski, bwoebi)
+
+- FPM:
+  . Fixed bug GH-12232 (FPM: segfault dynamically loading extension without
+    opcache). (Jakub Zelenka)
+
+- Opcache:
+  . Added warning when JIT cannot be enabled. (danog)
+  . Fixed bug GH-8143 (Crashes in zend_accel_inheritance_cache_find since
+    upgrading to 8.1.3 due to corrupt on-disk file cache). (turchanov)
+
+- OpenSSL:
+  . Fixed bug GH-12489 (Missing sigbio creation checking in openssl_cms_verify).
+    (Jakub Zelenka)
+
+- Random:
+  . Fix Randomizer::getFloat() returning incorrect results under
+    certain circumstances. (timwolla)
+
+- SOAP:
+  . Fixed bug GH-12392 (Segmentation fault on SoapClient::__getTypes).
+    (nielsdos)
+  . Fixed bug #66150 (SOAP WSDL cache race condition causes Segmentation
+    Fault). (nielsdos)
+  . Fixed bug #67617 (SOAP leaves incomplete cache file on ENOSPC). (nielsdos)
+  . Fix incorrect uri check in SOAP caching. (nielsdos)
+  . Fix segfault and assertion failure with refcounted props and arrays.
+    (nielsdos)
+
+- Streams:
+  . Fixed bug #75708 (getimagesize with "&$imageinfo" fails on StreamWrappers).
+    (Jakub Zelenka)
+
+- XSL:
+  . Add missing module dependency. (nielsdos)
+
+12 Oct 2023, PHP 8.3.0RC4
+
+- Core:
+  . Fixed bug #80092 (ZTS + preload = segfault on shutdown). (nielsdos)
+  . Fixed buffer underflow when compiling memoized expression. (ilutov)
+
+- CLI:
+  . Ensure a single Date header is present. (coppolafab)
+
+- CType:
+  . Fixed bug GH-11997 (ctype_alnum 5 times slower in PHP 8.1 or greater).
+    (nielsdos)
+
+- DOM:
+  . Restore old namespace reconciliation behaviour. (nielsdos)
+  . Fix broken cache invalidation with deallocated and reallocated document
+    node. (nielsdos)
+  . Fixed bug GH-8996 (DOMNode serialization on PHP ^8.1). (nielsdos)
+
+- Fileinfo:
+  . Fixed bug GH-11891 (fileinfo returns text/xml for some svg files). (usarise)
+
+- LibXML:
+  . Fix compile error with -Werror=incompatible-function-pointer-types and
+    old libxml2. (nielsdos)
+
+- MySQLnd:
+  . Fixed bug GH-12297 (PHP Startup: Invalid library (maybe not a PHP library)
+    'mysqlnd.so' in Unknown on line). (nielsdos)
+
+- Opcache:
+  . Fixed opcache_invalidate() on deleted file. (mikhainin)
+  . Fixed bug GH-12380 (JIT+private array property access inside closure
+    accesses private property in child class). (nielsdos)
+
+- SimpleXML:
+  . Apply iterator fixes only on master. (nielsdos)
+
+- Standard:
+  . Fixed str_decrement() on "1". (ilutov)
+
+- XSL:
+  . Fix type error on XSLTProcessor::transformToDoc return value with
+    SimpleXML. (nielsdos)
+
+28 Sep 2023, PHP 8.3.0RC3
+
+- Core:
+  . Fixed bug GH-12189 (#[Override] attribute in trait does not check for
+    parent class implementations). (timwolla)
+  . Fixed OSS Fuzz #62294 (Unsetting variable after ++/-- on string variable
+    warning). (Girgias)
+  . Fixed bug GH-12215 (Module entry being overwritten causes type errors in
+    ext/dom). (nielsdos)
+  . Fixed bug GH-12207 (memory leak when class using trait with doc block).
+    (rioderelfte)
+  . Fixed bug GH-12273 (__builtin_cpu_init check). (Freaky)
+
+- Filter:
+  . Fix explicit FILTER_REQUIRE_SCALAR with FILTER_CALLBACK (ilutov)
+
+- Hash:
+  . Fixed bug GH-12186 (segfault copying/cloning a finalized HashContext).
+    (MaxSem)
+
+- Intl:
+  . Fixed bug GH-12243 (segfault on IntlDateFormatter::construct).
+    (David Carlier)
+  . Fixed bug GH-12282 (IntlDateFormatter::construct should throw an exception
+    on an invalid locale). (David Carlier)
+
+- SimpleXML:
+  . Fixed bug GH-12170 (Can't use xpath with comments in SimpleXML). (nielsdos)
+  . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
+    within foreach). (nielsdos)
+  . Fixed bug GH-12223 (Entity reference produces infinite loop in
+    var_dump/print_r). (nielsdos)
+  . Fixed bug GH-12208 (SimpleXML infinite loop when a cast is used inside a
+    foreach). (nielsdos)
+  . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
+  . Fixed bug GH-12167 (Unable to get processing instruction contents in
+    SimpleXML). (nielsdos)
+  . Fixed bug GH-12169 (Unable to get comment contents in SimpleXML).
+    (nielsdos)
+
+- Streams:
+  . Fixed bug GH-12190 (binding ipv4 address with both address and port at 0).
+    (David Carlier)
+
+- XML:
+  . Fix return type of stub of xml_parse_into_struct(). (nielsdos)
+  . Fix memory leak when calling xml_parse_into_struct() twice. (nielsdos)
+
+14 Sep 2023, PHP 8.3.0RC2
+
+- Core:
+  . Fixed GH-11847 (DTrace enabled build is broken). (Filip Zrůst)
+  . Fixed bug GH-11876: ini_parse_quantity() accepts invalid quantities.
+    (Girgias)
+  . Fixed bug GH-12073 (Segfault when freeing incompletely initialized
+    closures). (ilutov)
+  . Fixed bug GH-12060 (Internal iterator rewind handler is called twice).
+    (ju1ius)
+  . Fixed OSS Fuzz #61865 (Undef variable in ++/-- for declared property
+    that is unset in error handler). (Girgias)
+  . Fixed bug GH-12102 (Incorrect compile error when using array access on TMP
+    value in function call). (ilutov)
+  . Fixed warning emitted when checking if a user stream is castable. (Girgias)
+  . Fixed bug GH-12123 (Compile error on MacOS with C++ extension when using
+    ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX). (kocsismate)
+
+- FPM:
+  . Fixed GH-12077 (PHP 8.3.0RC1 borked socket-close-on-exec.phpt).
+    (Jakub Zelenka)
+
+- Intl:
+  . Fixed bug GH-12020 (intl_get_error_message() broken after
+    MessageFormatter::formatMessage() fails). (Girgias)
+
+- ODBC:
+  . Fixed memory leak with failed SQLPrepare. (NattyNarwhal)
+  . Fixed persistent procedural ODBC connections not getting closed.
+    (NattyNarwhal)
+
+- PCRE:
+  . Update bundled libpcre2 to 10.42. (nielsdos)
+
+- SimpleXML:
+  . Fixed bug #52751 (XPath processing-instruction() function is not
+    supported). (nielsdos)
+
+- SPL:
+  . Fixed bug GH-11972 (RecursiveCallbackFilterIterator regression in 8.1.18).
+    (nielsdos)
+
+- Standard:
+  . Fixed bug GH-12151 (str_getcsv ending with escape zero segfualt).
+    (Jakub Zelenka)
+
+- SQLite3:
+  . Fixed bug GH-11878 (SQLite3 callback functions cause a memory leak with
+    a callable array). (nielsdos, arnaud-lb)
