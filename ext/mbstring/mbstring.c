@@ -2518,14 +2518,14 @@ PHP_FUNCTION(mb_strwidth)
 	RETVAL_LONG(mb_get_strwidth(string, enc));
 }
 
-static zend_string* mb_trim_string(zend_string *input, zend_string *marker, const mbfl_encoding *enc, unsigned int from, int width)
+static zend_string* mb_trim_string(zend_string *input, zend_string *marker, const mbfl_encoding *enc, size_t from, size_t width)
 {
 	uint32_t wchar_buf[128];
 	unsigned char *in = (unsigned char*)ZSTR_VAL(input);
 	size_t in_len = ZSTR_LEN(input);
 	unsigned int state = 0;
-	int remaining_width = width;
-	unsigned int to_skip = from;
+	size_t remaining_width = width;
+	size_t to_skip = from;
 	size_t out_len = 0;
 	bool first_call = true, input_err = false;
 	mb_convert_buf buf;
@@ -2537,17 +2537,23 @@ static zend_string* mb_trim_string(zend_string *input, zend_string *marker, cons
 		if (out_len <= to_skip) {
 			to_skip -= out_len;
 		} else {
-			for (unsigned int i = to_skip; i < out_len; i++) {
+			for (size_t i = to_skip; i < out_len; i++) {
 				uint32_t w = wchar_buf[i];
+				size_t current_w_width = character_width(w);
+
 				input_err |= (w == MBFL_BAD_INPUT);
-				remaining_width -= character_width(w);
-				if (remaining_width < 0) {
-					/* We need to truncate string and append trim marker */
-					width -= mb_get_strwidth(marker, enc);
-					/* 'width' is now the amount we want to take from 'input' */
-					if (width <= 0) {
+
+				if (remaining_width < current_w_width) {
+					size_t marker_width = mb_get_strwidth(marker, enc);
+
+					/* The trim marker is larger than the desired string width */
+					if (width <= marker_width) {
 						return zend_string_copy(marker);
 					}
+
+					/* We need to truncate string and append trim marker */
+					width -= marker_width;
+					/* 'width' is now the amount we want to take from 'input' */
 					mb_convert_buf_init(&buf, width, MBSTRG(current_filter_illegal_substchar), MBSTRG(current_filter_illegal_mode));
 
 					if (first_call) {
@@ -2558,6 +2564,7 @@ static zend_string* mb_trim_string(zend_string *input, zend_string *marker, cons
 						goto restart_conversion;
 					}
 				}
+				remaining_width -= current_w_width;
 			}
 			to_skip = 0;
 		}
@@ -2597,12 +2604,13 @@ dont_restart_conversion:
 		if (out_len <= from) {
 			from -= out_len;
 		} else {
-			for (unsigned int i = from; i < out_len; i++) {
-				width -= character_width(wchar_buf[i]);
-				if (width < 0) {
+			for (size_t i = from; i < out_len; i++) {
+				size_t current_wchar_char_width = character_width(wchar_buf[i]);
+				if (width < current_wchar_char_width) {
 					enc->from_wchar(wchar_buf + from, i - from, &buf, true);
 					goto append_trim_marker;
 				}
+				width -= current_wchar_char_width;
 			}
 			ZEND_ASSERT(in_len > 0);
 			enc->from_wchar(wchar_buf + from, out_len - from, &buf, false);
