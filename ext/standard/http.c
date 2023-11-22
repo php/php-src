@@ -226,7 +226,7 @@ PHP_FUNCTION(http_build_query)
 		Z_PARAM_ARRAY_OR_OBJECT(formdata)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(prefix, prefix_len)
-		Z_PARAM_STR(arg_sep)
+		Z_PARAM_STR_OR_NULL(arg_sep)
 		Z_PARAM_LONG(enc_type)
 	ZEND_PARSE_PARAMETERS_END();
 
