@@ -29,7 +29,6 @@ class test
 
 // array with different values
 $values =  array (
-
   // integer values
   0,
   1,
@@ -84,7 +83,7 @@ for($index = 0; $index < count($values); $index ++) {
     $pieces = $values [$index];
 
     try {
-        var_dump( join($glue, $pieces) );
+        var_dump(join($glue, $pieces));
     } catch (TypeError $e) {
         echo $e->getMessage(), "\n";
     }
