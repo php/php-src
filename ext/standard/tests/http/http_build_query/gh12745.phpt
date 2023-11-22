@@ -1,5 +1,5 @@
 --TEST--
-Bug GH-9316 (http_build_query() default null argument for $arg_separator is implicitly coerced to string)
+Bug GH-12745 (http_build_query() default null argument for $arg_separator is implicitly coerced to string)
 --FILE--
 <?php
 
