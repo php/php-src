@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.1
 
-
+- Standard
+  . Fixed GH-9316 (http_build_query() default null argument for $arg_separator
+    is implicitly coerced to string). (Girgias)
 
 23 Nov 2023, PHP 8.3.0
 
