@@ -577,7 +577,8 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 				} else if (opnd_kind == IR_OPND_NUM) {
 					fprintf(f, "%s%d", first ? "(" : ", ", ref);
 					first = 0;
-				} else if (IR_IS_REF_OPND_KIND(opnd_kind) && j != n) {
+				} else if (j != n &&
+						(IR_IS_REF_OPND_KIND(opnd_kind) || (opnd_kind == IR_OPND_UNUSED && p[n-j]))) {
 					fprintf(f, "%snull", first ? "(" : ", ");
 					first = 0;
 				}

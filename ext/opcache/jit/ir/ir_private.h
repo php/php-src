@@ -876,6 +876,27 @@ IR_ALWAYS_INLINE uint32_t ir_insn_len(const ir_insn *insn)
 	return ir_insn_inputs_to_len(insn->inputs_count);
 }
 
+/*** IR Context Private Flags (ir_ctx->flags2) ***/
+#define IR_CFG_HAS_LOOPS       (1<<0)
+#define IR_IRREDUCIBLE_CFG     (1<<1)
+#define IR_HAS_ALLOCA          (1<<2)
+#define IR_HAS_CALLS           (1<<3)
+#define IR_OPT_IN_SCCP         (1<<4)
+#define IR_LINEAR              (1<<5)
+
+/* Temporary: SCCP -> CFG */
+#define IR_SCCP_DONE           (1<<25)
+
+/* Temporary: Dominators -> Loops */
+#define IR_NO_LOOPS            (1<<25)
+
+/* Temporary: Live Ranges */
+#define IR_LR_HAVE_DESSA_MOVES (1<<25)
+
+/* Temporary: Register Allocator */
+#define IR_RA_HAVE_SPLITS      (1<<25)
+#define IR_RA_HAVE_SPILLS      (1<<26)
+
 /*** IR Binding ***/
 IR_ALWAYS_INLINE ir_ref ir_binding_find(const ir_ctx *ctx, ir_ref ref)
 {

@@ -127,7 +127,7 @@ bool ir_check(const ir_ctx *ctx)
 							}
 							if (use >= i
 							 && !(insn->op == IR_PHI
-							  && (!(ctx->flags & IR_LINEAR) || ctx->ir_base[insn->op1].op == IR_LOOP_BEGIN))) {
+							  && (!(ctx->flags2 & IR_LINEAR) || ctx->ir_base[insn->op1].op == IR_LOOP_BEGIN))) {
 								fprintf(stderr, "ir_base[%d].ops[%d] invalid forward reference (%d)\n", i, j, use);
 								ok = 0;
 							}
@@ -194,7 +194,7 @@ bool ir_check(const ir_ctx *ctx)
 										break;
 								}
 							}
-							if ((ctx->flags & IR_LINEAR)
+							if ((ctx->flags2 & IR_LINEAR)
 							 && ctx->cfg_map
 							 && insn->op != IR_PHI
 							 && !ir_check_domination(ctx, use, i)) {

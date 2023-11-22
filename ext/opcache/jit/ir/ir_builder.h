@@ -389,6 +389,42 @@ extern "C" {
 #define ir_BSWAP_I32(_op1)                ir_UNARY_OP_I32(IR_BSWAP, (_op1))
 #define ir_BSWAP_I64(_op1)                ir_UNARY_OP_I64(IR_BSWAP, (_op1))
 
+#define ir_CTPOP(_type, _op1)             ir_UNARY_OP(IR_CTPOP, (_type), (_op1))
+#define ir_CTPOP_8(_op1)                  ir_UNARY_OP_U8(IR_CTPOP, (_op1))
+#define ir_CTPOP_U16(_op1)                ir_UNARY_OP_U16(IR_CTPOP, (_op1))
+#define ir_CTPOP_U32(_op1)                ir_UNARY_OP_U32(IR_CTPOP, (_op1))
+#define ir_CTPOP_U64(_op1)                ir_UNARY_OP_U64(IR_CTPOP, (_op1))
+#define ir_CTPOP_A(_op1)                  ir_UNARY_OP_A(IR_CTPOP, (_op1))
+#define ir_CTPOP_C(_op1)                  ir_UNARY_OP_C(IR_CTPOP, (_op1))
+#define ir_CTPOP_I8(_op1)                 ir_UNARY_OP_I8(IR_CTPOP, (_op1))
+#define ir_CTPOP_I16(_op1)                ir_UNARY_OP_I16(IR_CTPOP, (_op1))
+#define ir_CTPOP_I32(_op1)                ir_UNARY_OP_I32(IR_CTPOP, (_op1))
+#define ir_CTPOP_I64(_op1)                ir_UNARY_OP_I64(IR_CTPOP, (_op1))
+
+#define ir_CTLZ(_type, _op1)              ir_UNARY_OP(IR_CTLZ, (_type), (_op1))
+#define ir_CTLZ_8(_op1)                   ir_UNARY_OP_U8(IR_CTLZ, (_op1))
+#define ir_CTLZ_U16(_op1)                 ir_UNARY_OP_U16(IR_CTLZ, (_op1))
+#define ir_CTLZ_U32(_op1)                 ir_UNARY_OP_U32(IR_CTLZ, (_op1))
+#define ir_CTLZ_U64(_op1)                 ir_UNARY_OP_U64(IR_CTLZ, (_op1))
+#define ir_CTLZ_A(_op1)                   ir_UNARY_OP_A(IR_CTLZ, (_op1))
+#define ir_CTLZ_C(_op1)                   ir_UNARY_OP_C(IR_CTLZ, (_op1))
+#define ir_CTLZ_I8(_op1)                  ir_UNARY_OP_I8(IR_CTLZ, (_op1))
+#define ir_CTLZ_I16(_op1)                 ir_UNARY_OP_I16(IR_CTLZ, (_op1))
+#define ir_CTLZ_I32(_op1)                 ir_UNARY_OP_I32(IR_CTLZ, (_op1))
+#define ir_CTLZ_I64(_op1)                 ir_UNARY_OP_I64(IR_CTLZ, (_op1))
+
+#define ir_CTTZ(_type, _op1)              ir_UNARY_OP(IR_CTTZ, (_type), (_op1))
+#define ir_CTTZ_8(_op1)                   ir_UNARY_OP_U8(IR_CTTZ, (_op1))
+#define ir_CTTZ_U16(_op1)                 ir_UNARY_OP_U16(IR_CTTZ, (_op1))
+#define ir_CTTZ_U32(_op1)                 ir_UNARY_OP_U32(IR_CTTZ, (_op1))
+#define ir_CTTZ_U64(_op1)                 ir_UNARY_OP_U64(IR_CTTZ, (_op1))
+#define ir_CTTZ_A(_op1)                   ir_UNARY_OP_A(IR_CTTZ, (_op1))
+#define ir_CTTZ_C(_op1)                   ir_UNARY_OP_C(IR_CTTZ, (_op1))
+#define ir_CTTZ_I8(_op1)                  ir_UNARY_OP_I8(IR_CTTZ, (_op1))
+#define ir_CTTZ_I16(_op1)                 ir_UNARY_OP_I16(IR_CTTZ, (_op1))
+#define ir_CTTZ_I32(_op1)                 ir_UNARY_OP_I32(IR_CTTZ, (_op1))
+#define ir_CTTZ_I64(_op1)                 ir_UNARY_OP_I64(IR_CTTZ, (_op1))
+
 #define ir_MIN(_type, _op1, _op2)         ir_BINARY_OP(IR_MIN, (_type), (_op1), (_op2))
 #define ir_MIN_U8(_op1, _op2)             ir_BINARY_OP_U8(IR_MIN, (_op1), (_op2))
 #define ir_MIN_U16(_op1, _op2)            ir_BINARY_OP_U16(IR_MIN, (_op1), (_op2))
@@ -539,6 +575,13 @@ extern "C" {
 #define ir_TLS(_index, _offset)           _ir_TLS(_ir_CTX, (_index), (_offset))
 #define ir_TRAP()                         do {_ir_CTX->control = ir_emit1(_ir_CTX, IR_TRAP, _ir_CTX->control);} while (0)
 
+#define ir_FRAME_ADDR()                   ir_fold0(_ir_CTX, IR_OPT(IR_FRAME_ADDR, IR_ADDR))
+
+#define ir_VA_START(_list)                _ir_VA_START(_ir_CTX, _list)
+#define ir_VA_END(_list)                  _ir_VA_END(_ir_CTX, _list)
+#define ir_VA_COPY(_dst, _src)            _ir_VA_COPY(_ir_CTX, _dst, _src)
+#define ir_VA_ARG(_list, _type)           _ir_VA_ARG(_ir_CTX, _type, _list)
+
 #define ir_START()                        _ir_START(_ir_CTX)
 #define ir_ENTRY(_src, _num)              _ir_ENTRY(_ir_CTX, (_src), (_num))
 #define ir_BEGIN(_src)                    _ir_BEGIN(_ir_CTX, (_src))
@@ -603,6 +646,10 @@ ir_ref _ir_RLOAD(ir_ctx *ctx, ir_type type, ir_ref reg);
 void   _ir_RSTORE(ir_ctx *ctx, ir_ref reg, ir_ref val);
 ir_ref _ir_LOAD(ir_ctx *ctx, ir_type type, ir_ref addr);
 void   _ir_STORE(ir_ctx *ctx, ir_ref addr, ir_ref val);
+void   _ir_VA_START(ir_ctx *ctx, ir_ref list);
+void   _ir_VA_END(ir_ctx *ctx, ir_ref list);
+void   _ir_VA_COPY(ir_ctx *ctx, ir_ref dst, ir_ref src);
+ir_ref _ir_VA_ARG(ir_ctx *ctx, ir_type type, ir_ref list);
 void   _ir_START(ir_ctx *ctx);
 void   _ir_ENTRY(ir_ctx *ctx, ir_ref src, ir_ref num);
 void   _ir_BEGIN(ir_ctx *ctx, ir_ref src);

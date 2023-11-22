@@ -682,7 +682,7 @@ restart:
 			ir_mem_free(_next);
 
 			ctx->prev_ref = _prev;
-			ctx->flags |= IR_LINEAR;
+			ctx->flags2 |= IR_LINEAR;
 			ir_truncate(ctx);
 
 			return 1;
@@ -694,6 +694,7 @@ restart:
 
 	ir_init(&new_ctx, ctx->flags, consts_count, insns_count);
 	new_ctx.insns_count = insns_count;
+	new_ctx.flags2 = ctx->flags2;
 	new_ctx.ret_type = ctx->ret_type;
 	new_ctx.mflags = ctx->mflags;
 	new_ctx.spill_base = ctx->spill_base;
@@ -867,7 +868,7 @@ restart:
 	IR_ASSERT(new_ctx.consts_count == new_ctx.consts_limit);
 	IR_ASSERT(new_ctx.insns_count == new_ctx.insns_limit);
 	memcpy(ctx, &new_ctx, sizeof(ir_ctx));
-	ctx->flags |= IR_LINEAR;
+	ctx->flags2 |= IR_LINEAR;
 
 	ir_mem_free(_next);
 

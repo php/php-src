@@ -201,6 +201,7 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 #define ir_op_flag_s3      (ir_op_flag_s | 3 | (3 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_x1      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | 1 | (1 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_x2      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | 2 | (2 << IR_OP_FLAG_OPERANDS_SHIFT))
+#define ir_op_flag_x3      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | 3 | (3 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_xN      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | IR_OP_FLAG_VAR_INPUTS)
 #define ir_op_flag_a2      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_ALLOC | 2 | (2 << IR_OP_FLAG_OPERANDS_SHIFT))
 
@@ -433,8 +434,10 @@ static IR_NEVER_INLINE ir_ref ir_const_ex(ir_ctx *ctx, ir_val val, uint8_t type,
 	while (ref) {
 		insn = &ctx->ir_base[ref];
 		if (UNEXPECTED(insn->val.u64 >= val.u64)) {
-			if (insn->val.u64 == val.u64 && insn->optx == optx) {
-				return ref;
+			if (insn->val.u64 == val.u64) {
+				if (insn->optx == optx) {
+					return ref;
+				}
 			} else {
 				break;
 			}
@@ -779,7 +782,7 @@ restart:
 	} while (1);
 
 ir_fold_restart:
-	if (!(ctx->flags & IR_OPT_IN_SCCP)) {
+	if (!(ctx->flags2 & IR_OPT_IN_SCCP)) {
 		op1_insn = ctx->ir_base + op1;
 		op2_insn = ctx->ir_base + op2;
 		op3_insn = ctx->ir_base + op3;
@@ -792,7 +795,7 @@ ir_fold_restart:
 		return IR_FOLD_DO_RESTART;
 	}
 ir_fold_cse:
-	if (!(ctx->flags & IR_OPT_IN_SCCP)) {
+	if (!(ctx->flags2 & IR_OPT_IN_SCCP)) {
 		/* Local CSE */
 		ref = _ir_fold_cse(ctx, opt, op1, op2, op3);
 		if (ref) {
@@ -816,7 +819,7 @@ ir_fold_cse:
 		return ref;
 	}
 ir_fold_emit:
-	if (!(ctx->flags & IR_OPT_IN_SCCP)) {
+	if (!(ctx->flags2 & IR_OPT_IN_SCCP)) {
 		return ir_emit(ctx, opt, op1, op2, op3);
 	} else {
 		ctx->fold_insn.optx = opt;
@@ -826,14 +829,14 @@ ir_fold_emit:
 		return IR_FOLD_DO_EMIT;
 	}
 ir_fold_copy:
-	if (!(ctx->flags & IR_OPT_IN_SCCP)) {
+	if (!(ctx->flags2 & IR_OPT_IN_SCCP)) {
 		return ref;
 	} else {
 		ctx->fold_insn.op1 = ref;
 		return IR_FOLD_DO_COPY;
 	}
 ir_fold_const:
-	if (!(ctx->flags & IR_OPT_IN_SCCP)) {
+	if (!(ctx->flags2 & IR_OPT_IN_SCCP)) {
 		return ir_const(ctx, val, IR_OPT_TYPE(opt));
 	} else {
 		ctx->fold_insn.type = IR_OPT_TYPE(opt);
@@ -2319,4 +2322,28 @@ check_aliasing:
 		ref = insn->op1;
 	}
 	ctx->control = ir_emit3(ctx, IR_STORE, ctx->control, addr, val);
+}
+
+void _ir_VA_START(ir_ctx *ctx, ir_ref list)
+{
+	IR_ASSERT(ctx->control);
+	ctx->control = ir_emit2(ctx, IR_VA_START, ctx->control, list);
+}
+
+void _ir_VA_END(ir_ctx *ctx, ir_ref list)
+{
+	IR_ASSERT(ctx->control);
+	ctx->control = ir_emit2(ctx, IR_VA_END, ctx->control, list);
+}
+
+void _ir_VA_COPY(ir_ctx *ctx, ir_ref dst, ir_ref src)
+{
+	IR_ASSERT(ctx->control);
+	ctx->control = ir_emit3(ctx, IR_VA_COPY, ctx->control, dst, src);
+}
+
+ir_ref _ir_VA_ARG(ir_ctx *ctx, ir_type type, ir_ref list)
+{
+	IR_ASSERT(ctx->control);
+	return ctx->control = ir_emit2(ctx, IR_OPT(IR_VA_ARG, type), ctx->control, list);
 }

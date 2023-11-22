@@ -136,6 +136,18 @@ typedef enum _ir_type {
 	IR_LAST_TYPE
 } ir_type;
 
+#ifdef IR_64
+# define IR_SIZE_T     IR_U64
+# define IR_SSIZE_T    IR_I64
+# define IR_UINTPTR_T  IR_U64
+# define IR_INTPTR_T   IR_I64
+#else
+# define IR_SIZE_T     IR_U32
+# define IR_SSIZE_T    IR_I32
+# define IR_UINTPTR_T  IR_U32
+# define IR_INTPTR_T   IR_I32
+#endif
+
 /* List of IR opcodes
  * ==================
  *
@@ -252,6 +264,9 @@ typedef enum _ir_type {
 	_(ROL,	        d2,   def, def, ___) /* rotate left                 */ \
 	_(ROR,	        d2,   def, def, ___) /* rotate right                */ \
 	_(BSWAP,        d1,   def, ___, ___) /* byte swap                   */ \
+	_(CTPOP,        d1,   def, ___, ___) /* count population            */ \
+	_(CTLZ,         d1,   def, ___, ___) /* count leading zeros         */ \
+	_(CTTZ,         d1,   def, ___, ___) /* count trailing zeros        */ \
 	\
 	/* branch-less conditional ops                                      */ \
 	_(MIN,	        d2C,  def, def, ___) /* min(op1, op2)               */ \
@@ -262,6 +277,7 @@ typedef enum _ir_type {
 	_(PHI,          pN,   reg, def, def) /* SSA Phi function            */ \
 	_(COPY,         d1X1, def, opt, ___) /* COPY (last foldable op)     */ \
 	_(PI,           p2,   reg, def, ___) /* e-SSA Pi constraint ???     */ \
+	_(FRAME_ADDR,   d0,   ___, ___, ___) /* function frame address      */ \
 	/* (USE, RENAME)                                                    */ \
 	\
 	/* data ops                                                         */ \
@@ -289,6 +305,12 @@ typedef enum _ir_type {
 	_(TLS,          l1X2, src, num, num) /* thread local variable       */ \
 	_(TRAP,         x1,   src, ___, ___) /* DebugBreak                  */ \
 	/* memory reference ops (A, H, U, S, TMP, STR, NEW, X, V) ???       */ \
+	\
+	/* va_args                                                          */ \
+	_(VA_START,     x2,   src, def, ___) /* va_start(va_list)           */ \
+	_(VA_END,       x2,   src, def, ___) /* va_end(va_list)             */ \
+	_(VA_COPY,      x3,   src, def, def) /* va_copy(dst, stc)           */ \
+	_(VA_ARG,       x2,   src, def, ___) /* va_arg(va_list)             */ \
 	\
 	/* guards                                                           */ \
 	_(GUARD,        c3,   src, def, def) /* IF without second successor */ \
@@ -399,6 +421,7 @@ typedef union _ir_val {
 #define IR_CONST_EMIT          (1<<0)
 #define IR_CONST_FASTCALL_FUNC (1<<1)
 #define IR_CONST_VARARG_FUNC   (1<<2)
+#define IR_CONST_BUILTIN_FUNC  (1<<3)
 
 /* IR Instruction */
 typedef struct _ir_insn {
@@ -473,37 +496,17 @@ void ir_strtab_free(ir_strtab *strtab);
 #define IR_SKIP_PROLOGUE       (1<<6) /* Don't generate function prologue. */
 #define IR_USE_FRAME_POINTER   (1<<7)
 #define IR_PREALLOCATED_STACK  (1<<8)
-#define IR_HAS_ALLOCA          (1<<9)
-#define IR_HAS_CALLS           (1<<10)
-#define IR_NO_STACK_COMBINE    (1<<11)
-#define IR_START_BR_TARGET     (1<<12)
-#define IR_ENTRY_BR_TARGET     (1<<13)
-#define IR_GEN_ENDBR           (1<<14)
-#define IR_MERGE_EMPTY_ENTRIES (1<<15)
-
-#define IR_CFG_HAS_LOOPS       (1<<16)
-#define IR_IRREDUCIBLE_CFG     (1<<17)
+#define IR_NO_STACK_COMBINE    (1<<9)
+#define IR_START_BR_TARGET     (1<<10)
+#define IR_ENTRY_BR_TARGET     (1<<11)
+#define IR_GEN_ENDBR           (1<<12)
+#define IR_MERGE_EMPTY_ENTRIES (1<<13)
 
 #define IR_OPT_FOLDING         (1<<18)
 #define IR_OPT_CFG             (1<<19) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
 #define IR_OPT_CODEGEN         (1<<20)
-#define IR_OPT_IN_SCCP         (1<<21)
-#define IR_LINEAR              (1<<22)
 #define IR_GEN_NATIVE          (1<<23)
 #define IR_GEN_CODE            (1<<24) /* C or LLVM */
-
-/* Temporary: SCCP -> CFG */
-#define IR_SCCP_DONE           (1<<25)
-
-/* Temporary: Dominators -> Loops */
-#define IR_NO_LOOPS            (1<<25)
-
-/* Temporary: Live Ranges */
-#define IR_LR_HAVE_DESSA_MOVES (1<<25)
-
-/* Temporary: Register Allocator */
-#define IR_RA_HAVE_SPLITS      (1<<25)
-#define IR_RA_HAVE_SPILLS      (1<<26)
 
 /* debug related */
 #ifdef IR_DEBUG
@@ -537,6 +540,7 @@ struct _ir_ctx {
 	ir_ref             consts_count;            /* number of constants stored in constants buffer */
 	ir_ref             consts_limit;            /* size of allocated constants buffer (it's extended when overflow) */
 	uint32_t           flags;                   /* IR context flags (see IR_* defines above) */
+	uint32_t           flags2;                  /* IR context provate flags (see IR_* defines in ir_private.h) */
 	ir_type            ret_type;                /* Function return type */
 	uint32_t           mflags;                  /* CPU specific flags (see IR_X86_... macros below) */
 	int32_t            status;                  /* non-zero error code (see IR_ERROR_... macros), app may use negative codes */
@@ -766,6 +770,7 @@ struct _ir_loader {
                                uint32_t flags, ir_type ret_type, uint32_t params_count, ir_type *param_types);
 	bool (*sym_dcl)           (ir_loader *loader, const char *name, uint32_t flags, size_t size, bool has_data);
 	bool (*sym_data)          (ir_loader *loader, ir_type type, uint32_t count, const void *data);
+	bool (*sym_data_ref)      (ir_loader *loader, ir_op op, const char *ref);
 	bool (*sym_data_end)      (ir_loader *loader);
 	bool (*func_init)         (ir_loader *loader, ir_ctx *ctx, const char *name);
 	bool (*func_process)      (ir_loader *loader, ir_ctx *ctx, const char *name);
@@ -816,6 +821,7 @@ int ir_patch(const void *code, size_t size, uint32_t jmp_table_size, const void 
 # define IR_X86_SSE42 (1<<4)
 # define IR_X86_AVX   (1<<5)
 # define IR_X86_AVX2  (1<<6)
+# define IR_X86_BMI1  (1<<7)
 #endif
 
 uint32_t ir_cpuinfo(void);

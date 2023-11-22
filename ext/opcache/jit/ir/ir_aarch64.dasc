@@ -354,6 +354,12 @@ int ir_get_target_constraints(const ir_ctx *ctx, ir_ref ref, ir_target_constrain
 				n++;
 			}
 			break;
+		case IR_CTPOP:
+			flags = IR_USE_MUST_BE_IN_REG | IR_OP1_MUST_BE_IN_REG;
+			insn = &ctx->ir_base[ref];
+			constraints->tmp_regs[0] = IR_TMP_REG(2, IR_DOUBLE, IR_USE_SUB_REF, IR_SAVE_SUB_REF);
+			n = 1;
+			break;
 		case IR_BINOP_FP:
 		case IR_MIN_MAX_INT:
 			insn = &ctx->ir_base[ref];
@@ -649,6 +655,8 @@ binop_fp:
 			return IR_BINOP_INT;
 		case IR_BSWAP:
 		case IR_NOT:
+		case IR_CTLZ:
+		case IR_CTTZ:
 			IR_ASSERT(IR_IS_TYPE_INT(insn->type));
 			return IR_OP_INT;
 		case IR_NEG:
@@ -744,7 +752,7 @@ binop_fp:
 			}
 			break;
 		case IR_CALL:
-			ctx->flags |= IR_HAS_CALLS;
+			ctx->flags2 |= IR_HAS_CALLS;
 			return IR_CALL;
 		case IR_VAR:
 			return IR_SKIPPED | IR_VAR;
@@ -752,7 +760,8 @@ binop_fp:
 			return ctx->use_lists[ref].count > 0 ? IR_PARAM : IR_SKIPPED | IR_PARAM;
 		case IR_ALLOCA:
 			if (ctx->flags & IR_FUNCTION) {
-				ctx->flags |= IR_USE_FRAME_POINTER | IR_HAS_ALLOCA;
+				ctx->flags |= IR_USE_FRAME_POINTER;
+				ctx->flags2 |= IR_HAS_ALLOCA;
 			}
 			return IR_ALLOCA;
 		case IR_LOAD:
@@ -1353,7 +1362,7 @@ static void ir_emit_epilogue(ir_ctx *ctx)
 	}
 
 	if (ctx->flags & IR_USE_FRAME_POINTER) {
-		if (ctx->call_stack_size || (ctx->flags & IR_HAS_ALLOCA)) {
+		if (ctx->call_stack_size || (ctx->flags2 & IR_HAS_ALLOCA)) {
 			| mov sp, x29
 		}
 		|	ldp x29, x30, [sp], # (ctx->stack_frame_size+16)
@@ -1874,9 +1883,77 @@ static void ir_emit_op_int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			|	cmp Rw(op1_reg), #0
 			|	cneg Rw(def_reg), Rw(op1_reg), lt
 		}
+	} else if (insn->op == IR_CTLZ) {
+		if (ir_type_size[type] == 1) {
+			|	and	Rw(def_reg), Rw(op1_reg), #0xff
+			|	clz Rw(def_reg), Rw(def_reg)
+			|	sub Rw(def_reg), Rw(def_reg), #24
+		} else if (ir_type_size[type] == 2) {
+			|	and	Rw(def_reg), Rw(op1_reg), #0xffff
+			|	clz Rw(def_reg), Rw(def_reg)
+			|	sub Rw(def_reg), Rw(def_reg), #16
+		} else {
+			|	ASM_REG_REG_OP clz, type, def_reg, op1_reg
+		}
+	} else if (insn->op == IR_CTTZ) {
+		|	ASM_REG_REG_OP rbit, insn->type, def_reg, op1_reg
+		|	ASM_REG_REG_OP clz, insn->type, def_reg, def_reg
 	} else {
 		IR_ASSERT(insn->op == IR_BSWAP);
 		|	ASM_REG_REG_OP rev, insn->type, def_reg, op1_reg
+	}
+	if (IR_REG_SPILLED(ctx->regs[def][0])) {
+		ir_emit_store(ctx, type, def, def_reg);
+	}
+}
+
+static void ir_emit_ctpop(ir_ctx *ctx, ir_ref def, ir_insn *insn)
+{
+	ir_backend_data *data = ctx->data;
+	dasm_State **Dst = &data->dasm_state;
+	ir_type type = insn->type;
+	ir_ref op1 = insn->op1;
+	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
+	ir_reg op1_reg = ctx->regs[def][1];
+	ir_reg tmp_reg = ctx->regs[def][2];
+	uint32_t code1 = 0x0e205800 | (tmp_reg-IR_REG_FP_FIRST); // cnt v0.8b, v0.8b
+	uint32_t code2 = 0x0e31b800 | (tmp_reg-IR_REG_FP_FIRST); // addv b0, v0.8b
+
+	IR_ASSERT(def_reg != IR_REG_NONE && op1_reg != IR_REG_NONE && tmp_reg != IR_REG_NONE);
+
+	if (IR_REG_SPILLED(op1_reg) || IR_IS_CONST_REF(op1)) {
+		op1_reg = IR_REG_NUM(op1_reg);
+		ir_emit_load(ctx, type, op1_reg, op1);
+	}
+	switch (ir_type_size[insn->type]) {
+		default:
+			IR_ASSERT(0);
+		case 1:
+			|	and	Rw(def_reg), Rw(op1_reg), #0xff
+			|	fmov Rs(tmp_reg-IR_REG_FP_FIRST), Rw(def_reg)
+			|	.long code1 // cnt v0.8b, v0.8b
+			|	.long code2 // addv b0, v0.8b
+			|	fmov Rw(def_reg), Rs(tmp_reg-IR_REG_FP_FIRST)
+			break;
+		case 2:
+			|	and	Rw(def_reg), Rw(op1_reg), #0xffff
+			|	fmov Rs(tmp_reg-IR_REG_FP_FIRST), Rw(def_reg)
+			|	.long code1 // cnt v0.8b, v0.8b
+			|	.long code2 // addv b0, v0.8b
+			|	fmov Rw(def_reg), Rs(tmp_reg-IR_REG_FP_FIRST)
+			break;
+		case 4:
+			|	fmov Rs(tmp_reg-IR_REG_FP_FIRST), Rw(op1_reg)
+			|	.long code1 // cnt v0.8b, v0.8b
+			|	.long code2 // addv b0, v0.8b
+			|	fmov Rw(def_reg), Rs(tmp_reg-IR_REG_FP_FIRST)
+			break;
+		case 8:
+			|	fmov Rd(tmp_reg-IR_REG_FP_FIRST), Rx(op1_reg)
+			|	.long code1 // cnt v0.8b, v0.8b
+			|	.long code2 // addv b0, v0.8b
+			|	fmov Rx(def_reg), Rd(tmp_reg-IR_REG_FP_FIRST)
+			break;
 	}
 	if (IR_REG_SPILLED(ctx->regs[def][0])) {
 		ir_emit_store(ctx, type, def, def_reg);
@@ -3372,7 +3449,7 @@ static void ir_emit_alloca(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		IR_ASSERT(IR_IS_TYPE_INT(val->type));
 		IR_ASSERT(IR_IS_TYPE_UNSIGNED(val->type) || val->val.i64 > 0);
 
-		if (ctx->flags & IR_HAS_CALLS) {
+		if (ctx->flags2 & IR_HAS_CALLS) {
 			/* Stack must be 16 byte aligned */
 			size = IR_ALIGNED_SIZE(size, 16);
 		} else {
@@ -3383,11 +3460,12 @@ static void ir_emit_alloca(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			ctx->call_stack_size += size;
 		}
 	} else {
-		int32_t alignment = (ctx->flags & IR_HAS_CALLS) ? 16 : 8;
+		int32_t alignment = (ctx->flags2 & IR_HAS_CALLS) ? 16 : 8;
 		ir_reg op2_reg = ctx->regs[def][2];
 		ir_type type = ctx->ir_base[insn->op2].type;
 
 		IR_ASSERT(ctx->flags & IR_FUNCTION);
+		IR_ASSERT(ctx->flags & IR_USE_FRAME_POINTER);
 		IR_ASSERT(def_reg != IR_REG_NONE && op2_reg != IR_REG_NONE);
 		if (IR_REG_SPILLED(op2_reg)) {
 			op2_reg = IR_REG_NUM(op2_reg);
@@ -3419,7 +3497,7 @@ static void ir_emit_afree(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		IR_ASSERT(IR_IS_TYPE_INT(val->type));
 		IR_ASSERT(IR_IS_TYPE_UNSIGNED(val->type) || val->val.i64 > 0);
 
-		if (ctx->flags & IR_HAS_CALLS) {
+		if (ctx->flags2 & IR_HAS_CALLS) {
 			/* Stack must be 16 byte aligned */
 			size = IR_ALIGNED_SIZE(size, 16);
 		} else {
@@ -3430,7 +3508,7 @@ static void ir_emit_afree(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			ctx->call_stack_size -= size;
 		}
 	} else {
-//		int32_t alignment = (ctx->flags & IR_HAS_CALLS) ? 16 : 8;
+//		int32_t alignment = (ctx->flags2 & IR_HAS_CALLS) ? 16 : 8;
 		ir_reg op2_reg = ctx->regs[def][2];
 		ir_type type = ctx->ir_base[insn->op2].type;
 
@@ -3445,6 +3523,34 @@ static void ir_emit_afree(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 
 		|	add sp, sp, Rx(op2_reg);
 	}
+}
+
+static void ir_emit_frame_addr(ir_ctx *ctx, ir_ref def)
+{
+	ir_backend_data *data = ctx->data;
+	dasm_State **Dst = &data->dasm_state;
+	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
+
+	if (ctx->flags & IR_USE_FRAME_POINTER) {
+		|	mov Rx(def_reg), Rx(IR_REG_X29)
+	} else {
+		|	add Rx(def_reg), Rx(IR_REG_X31), #(ctx->stack_frame_size + ctx->call_stack_size)
+	}
+	if (IR_REG_SPILLED(ctx->regs[def][0])) {
+		ir_emit_store(ctx, IR_ADDR, def, def_reg);
+	}
+}
+
+static void ir_emit_va_start(ir_ctx *ctx, ir_ref def, ir_insn *insn)
+{
+}
+
+static void ir_emit_va_copy(ir_ctx *ctx, ir_ref def, ir_insn *insn)
+{
+}
+
+static void ir_emit_va_arg(ir_ctx *ctx, ir_ref def, ir_insn *insn)
+{
 }
 
 static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
@@ -4886,12 +4992,12 @@ void ir_fix_stack_frame(ir_ctx *ctx)
 	ctx->stack_frame_alignment = 0;
 	ctx->call_stack_size = 0;
 
-	if ((ctx->flags & IR_HAS_CALLS) && !(ctx->flags & IR_FUNCTION)) {
+	if ((ctx->flags2 & IR_HAS_CALLS) && !(ctx->flags & IR_FUNCTION)) {
 		while (IR_ALIGNED_SIZE(ctx->stack_frame_size, 16) != ctx->stack_frame_size) {
 			ctx->stack_frame_size += sizeof(void*);
 			ctx->stack_frame_alignment += sizeof(void*);
 		}
-	} else if (ctx->flags & IR_HAS_CALLS) {
+	} else if (ctx->flags2 & IR_HAS_CALLS) {
 		ctx->flags |= IR_USE_FRAME_POINTER;
 		/* Stack must be 16 byte aligned */
 		if (!(ctx->flags & IR_FUNCTION)) {
@@ -5018,6 +5124,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 				case IR_PI:
 				case IR_PHI:
 				case IR_SNAPSHOT:
+				case IR_VA_END:
 					break;
 				case IR_MUL_PWR2:
 				case IR_DIV_PWR2:
@@ -5029,6 +5136,9 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 					break;
 				case IR_SHIFT_CONST:
 					ir_emit_shift_const(ctx, i, insn);
+					break;
+				case IR_CTPOP:
+					ir_emit_ctpop(ctx, i, insn);
 					break;
 				case IR_OP_INT:
 					ir_emit_op_int(ctx, i, insn);
@@ -5182,8 +5292,20 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 				case IR_ALLOCA:
 					ir_emit_alloca(ctx, i, insn);
 					break;
+				case IR_VA_START:
+					ir_emit_va_start(ctx, i, insn);
+					break;
+				case IR_VA_COPY:
+					ir_emit_va_copy(ctx, i, insn);
+					break;
+				case IR_VA_ARG:
+					ir_emit_va_arg(ctx, i, insn);
+					break;
 				case IR_AFREE:
 					ir_emit_afree(ctx, i, insn);
+					break;
+				case IR_FRAME_ADDR:
+					ir_emit_frame_addr(ctx, i);
 					break;
 				case IR_EXITCALL:
 					ir_emit_exitcall(ctx, i, insn);
@@ -5197,6 +5319,9 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 					break;
 				case IR_TLS:
 					ir_emit_tls(ctx, i, insn);
+					break;
+				case IR_TRAP:
+					|	brk;
 					break;
 				default:
 					IR_ASSERT(0 && "NIY rule/instruction");
@@ -5337,9 +5462,6 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 	if (ret != DASM_S_OK) {
 		IR_ASSERT(0);
 		dasm_free(&data.dasm_state);
-		if (ctx->code_buffer == NULL) {
-			ir_mem_unmap(entry, size);
-		}
 		ctx->data = NULL;
 		ctx->status = IR_ERROR_LINK;
 		return NULL;

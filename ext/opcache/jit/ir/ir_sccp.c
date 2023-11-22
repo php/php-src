@@ -545,7 +545,7 @@ int ir_sccp(ir_ctx *ctx)
 	ir_bitqueue worklist;
 	ir_insn *_values = ir_mem_calloc(ctx->insns_count, sizeof(ir_insn));
 
-	ctx->flags |= IR_OPT_IN_SCCP;
+	ctx->flags2 |= IR_OPT_IN_SCCP;
 
 	/* A bit modified SCCP algorithm of M. N. Wegman and F. K. Zadeck */
 	ir_bitqueue_init(&worklist, ctx->insns_count);
@@ -878,8 +878,8 @@ int ir_sccp(ir_ctx *ctx)
 	ir_mem_free(_values);
 	ir_bitqueue_free(&worklist);
 
-	ctx->flags &= ~IR_OPT_IN_SCCP;
-	ctx->flags |= IR_SCCP_DONE;
+	ctx->flags2 &= ~IR_OPT_IN_SCCP;
+	ctx->flags2 |= IR_SCCP_DONE;
 
 	return 1;
 }

@@ -593,7 +593,7 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 	ir_bitqueue queue;
 	ir_live_interval *ival;
 
-	if (!(ctx->flags & IR_LINEAR) || !ctx->vregs) {
+	if (!(ctx->flags2 & IR_LINEAR) || !ctx->vregs) {
 		return 0;
 	}
 
@@ -606,7 +606,7 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 	ctx->vars = IR_UNUSED;
 
 	/* Compute Live Ranges */
-	ctx->flags &= ~IR_LR_HAVE_DESSA_MOVES;
+	ctx->flags2 &= ~IR_LR_HAVE_DESSA_MOVES;
 	len = ir_bitset_len(ctx->vregs_count + 1);
 	bb_live = ir_mem_malloc((ctx->cfg_blocks_count + 1) * len * sizeof(ir_bitset_base_t));
 
@@ -1243,7 +1243,7 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 	ir_list live_lists;
 	ir_live_interval *ival;
 
-	if (!(ctx->flags & IR_LINEAR) || !ctx->vregs) {
+	if (!(ctx->flags2 & IR_LINEAR) || !ctx->vregs) {
 		return 0;
 	}
 
@@ -1256,7 +1256,7 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 	ctx->vars = IR_UNUSED;
 
 	/* Compute Live Ranges */
-	ctx->flags &= ~IR_LR_HAVE_DESSA_MOVES;
+	ctx->flags2 &= ~IR_LR_HAVE_DESSA_MOVES;
 
 	/* vregs + tmp + fixed + SRATCH + ALL */
 	ctx->live_intervals = ir_mem_calloc(ctx->vregs_count + 1 + IR_REG_NUM + 2, sizeof(ir_live_interval*));
@@ -1645,7 +1645,7 @@ static void ir_add_phi_move(ir_ctx *ctx, uint32_t b, ir_ref from, ir_ref to)
 	if (IR_IS_CONST_REF(from) || ctx->vregs[from] != ctx->vregs[to]) {
 		ctx->cfg_blocks[b].flags &= ~IR_BB_EMPTY;
 		ctx->cfg_blocks[b].flags |= IR_BB_DESSA_MOVES;
-		ctx->flags |= IR_LR_HAVE_DESSA_MOVES;
+		ctx->flags2 |= IR_LR_HAVE_DESSA_MOVES;
 #if 0
 		fprintf(stderr, "BB%d: MOV %d -> %d\n", b, from, to);
 #endif
@@ -1980,7 +1980,7 @@ int ir_compute_dessa_moves(ir_ctx *ctx)
 								int pred = ctx->cfg_edges[bb->predecessors + (j-2)];
 								ctx->cfg_blocks[pred].flags &= ~IR_BB_EMPTY;
 								ctx->cfg_blocks[pred].flags |= IR_BB_DESSA_MOVES;
-								ctx->flags |= IR_LR_HAVE_DESSA_MOVES;
+								ctx->flags2 |= IR_LR_HAVE_DESSA_MOVES;
 							}
 						}
 					}
@@ -2295,7 +2295,7 @@ static ir_live_interval *ir_split_interval_at(ir_ctx *ctx, ir_live_interval *iva
 
 	IR_LOG_LSRA_SPLIT(ival, pos);
 	IR_ASSERT(pos > ival->range.start);
-	ctx->flags |= IR_RA_HAVE_SPLITS;
+	ctx->flags2 |= IR_RA_HAVE_SPLITS;
 
 	p = &ival->range;
 	prev = NULL;
@@ -2883,7 +2883,7 @@ static ir_reg ir_allocate_blocked_reg(ir_ctx *ctx, ir_live_interval *ival, ir_li
 		if (!use_pos) {
 			/* spill */
 			IR_LOG_LSRA("    ---- Spill", ival, " (no use pos that must be in reg)");
-			ctx->flags |= IR_RA_HAVE_SPILLS;
+			ctx->flags2 |= IR_RA_HAVE_SPILLS;
 			return IR_REG_NONE;
 		}
 		next_use_pos = use_pos->pos;
@@ -3333,7 +3333,7 @@ static int ir_linear_scan(ir_ctx *ctx)
 		return 0;
 	}
 
-	if (ctx->flags & IR_LR_HAVE_DESSA_MOVES) {
+	if (ctx->flags2 & IR_LR_HAVE_DESSA_MOVES) {
 		/* Add fixed intervals for temporary registers used for DESSA moves */
 		for (b = 1, bb = &ctx->cfg_blocks[1]; b <= ctx->cfg_blocks_count; b++, bb++) {
 			IR_ASSERT(!(bb->flags & IR_BB_UNREACHABLE));
@@ -3385,7 +3385,7 @@ static int ir_linear_scan(ir_ctx *ctx)
 		}
 	}
 
-	ctx->flags &= ~(IR_RA_HAVE_SPLITS|IR_RA_HAVE_SPILLS);
+	ctx->flags2 &= ~(IR_RA_HAVE_SPLITS|IR_RA_HAVE_SPILLS);
 
 #ifdef IR_DEBUG
 	if (ctx->flags & IR_DEBUG_RA) {
@@ -3499,7 +3499,7 @@ static int ir_linear_scan(ir_ctx *ctx)
 	}
 #endif
 
-	if (ctx->flags & (IR_RA_HAVE_SPLITS|IR_RA_HAVE_SPILLS)) {
+	if (ctx->flags2 & (IR_RA_HAVE_SPLITS|IR_RA_HAVE_SPILLS)) {
 
 		if (ctx->binding) {
 			ir_assign_bound_spill_slots(ctx);
@@ -3674,7 +3674,7 @@ static void assign_regs(ir_ctx *ctx)
 		memset(ctx->regs, IR_REG_NONE, sizeof(ir_regs) * ctx->insns_count);
 	}
 
-	if (!(ctx->flags & (IR_RA_HAVE_SPLITS|IR_RA_HAVE_SPILLS))) {
+	if (!(ctx->flags2 & (IR_RA_HAVE_SPLITS|IR_RA_HAVE_SPILLS))) {
 		for (i = 1; i <= ctx->vregs_count; i++) {
 			ival = ctx->live_intervals[i];
 			if (ival) {
