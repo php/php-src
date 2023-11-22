@@ -149,9 +149,6 @@
 "Extension: posix":
 - ext/posix/**/*
 
-"Extension: pspell":
-- ext/pspell/**/*
-
 "Extension: random":
 - ext/random/**/*
 

@@ -47,7 +47,6 @@ jobs:
               libtidy-dev \
               libenchant-2-dev \
               libaspell-dev \
-              libpspell-dev \
               libsasl2-dev \
               libxpm-dev \
               libzip-dev \

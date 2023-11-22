@@ -414,7 +414,6 @@ static const func_info_t func_infos[] = {
 #if defined(HAVE_GETRLIMIT)
 	F1("posix_getrlimit", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 #endif
-	F1("pspell_suggest", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 	F1("random_bytes", MAY_BE_STRING),
 #if defined(HAVE_HISTORY_LIST)
 	F1("readline_list_history", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),

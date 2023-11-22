@@ -31,7 +31,6 @@ runs:
           libonig-dev:i386 \
           libpng-dev:i386 \
           libpq-dev:i386 \
-          libpspell-dev:i386 \
           libreadline-dev:i386 \
           libsasl2-dev:i386 \
           libsodium-dev:i386 \
