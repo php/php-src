@@ -1135,7 +1135,8 @@ try_string_offset:
 				goto try_string_offset;
 			default:
 				zend_jit_illegal_string_offset(dim);
-				break;
+				ZVAL_NULL(result);
+				return;
 		}
 
 		offset = zval_get_long_func(dim, /* is_strict */ false);
