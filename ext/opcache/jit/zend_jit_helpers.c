@@ -620,7 +620,9 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 			hval = 1;
 			goto num_index;
 		default:
-			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_IS);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim,
+				EG(current_execute_data)->opline->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ?
+					BP_VAR_IS : BP_VAR_RW);
 			undef_result_after_exception();
 			return;
 	}
