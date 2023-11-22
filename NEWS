@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 Core:
   . Added zend_call_stack_get implementation for NetBSD. (David Carlier)
 
+Date:
+  . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
+
 DOM:
   . Added DOMNode::compareDocumentPosition(). (nielsdos)
   . Implement #53655 (Improve speed of DOMNode::C14N() on large XML documents).

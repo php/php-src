@@ -142,6 +142,7 @@ PHPAPI zend_class_entry *php_date_get_period_ce(void);
 
 PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object);
 PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, const char *format, zval *timezone_object, int flags);
-
+PHPAPI void php_date_initialize_from_ts_long(php_date_obj *dateobj, zend_long sec, int usec);
+PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts);
 
 #endif /* PHP_DATE_H */
