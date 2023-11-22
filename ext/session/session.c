@@ -2092,6 +2092,11 @@ PHP_FUNCTION(session_set_save_handler)
 		RETURN_TRUE;
 	}
 
+	zend_error(E_DEPRECATED, "Calling session_set_save_handler() with more than 2 arguments is deprecated");
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+
 	/* Procedural version */
 	zend_fcall_info open_fci = {0};
 	zend_fcall_info_cache open_fcc;
