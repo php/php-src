@@ -1341,7 +1341,7 @@ PHP_FUNCTION(mb_http_output)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_OR_NULL(name, name_len)
+		Z_PARAM_PATH_OR_NULL(name, name_len) /* For null byte check */
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (name == NULL) {
