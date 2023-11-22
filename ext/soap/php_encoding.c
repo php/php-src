@@ -2910,7 +2910,7 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 		if (instanceof_function_slow(Z_OBJCE_P(data), php_date_get_interface_ce())) {
 			php_date_obj *dateobj = Z_PHPDATE_P(data);
 			if (dateobj->time) {
-				zend_string *formatted = php_format_date_ex(ext_date_format, ext_date_format_len, dateobj->time, dateobj->time->is_localtime);
+				zend_string *formatted = php_format_date_obj(ext_date_format, ext_date_format_len, dateobj);
 				xmlNodeSetContentLen(xmlParam, BAD_CAST(ZSTR_VAL(formatted)), ZSTR_LEN(formatted));
 				zend_string_release_ex(formatted, false);
 			} else {
