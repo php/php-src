@@ -844,7 +844,7 @@ static int php_firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sq
 
 	/* Firebird allows SQL statements up to 64k, so bail if it doesn't fit */
 	if (ZSTR_LEN(sql) > 65536) {
-		strcpy(dbh->error_code, "01004");
+		php_firebird_error_with_info(dbh, "01004", strlen("01004"), NULL, 0);
 		return 0;
 	}
 
@@ -869,7 +869,7 @@ static int php_firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sq
 	new_sql = emalloc(ZSTR_LEN(sql)+1);
 	new_sql[0] = '\0';
 	if (!php_firebird_preprocess(sql, new_sql, named_params)) {
-		strcpy(dbh->error_code, "07000");
+		php_firebird_error_with_info(dbh, "07000", strlen("07000"), NULL, 0);
 		efree(new_sql);
 		return 0;
 	}
