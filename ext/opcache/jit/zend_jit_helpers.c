@@ -1128,8 +1128,11 @@ try_string_offset:
 				dim = Z_REFVAL_P(dim);
 				goto try_string_offset;
 			default:
-				zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), dim, BP_VAR_IS);
-				break;
+				zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), dim,
+					EG(current_execute_data)->opline->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ?
+						BP_VAR_IS : BP_VAR_RW);
+				ZVAL_NULL(result);
+				return;
 		}
 
 		offset = zval_get_long_func(dim, /* is_strict */ false);
