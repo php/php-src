@@ -31,7 +31,7 @@
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
-static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const zend_string*, XSQLDA*, isc_stmt_handle*,
+static int php_firebird_alloc_prepare_stmt(pdo_dbh_t*, const zend_string*, XSQLDA*, isc_stmt_handle*,
 	HashTable*);
 
 const char CHR_LETTER = 1;
@@ -173,7 +173,7 @@ static const char classes_array[] = {
 	/* 127     */ 0
 };
 
-static inline char classes(char idx)
+static inline char php_firebird_classes(char idx)
 {
 	unsigned char uidx = (unsigned char) idx;
 	if (uidx > 127) return 0;
@@ -191,7 +191,7 @@ typedef enum {
 	ttOther
 } FbTokenType;
 
-static FbTokenType getToken(const char** begin, const char* end)
+static FbTokenType php_firebird_get_token(const char** begin, const char* end)
 {
 	FbTokenType ret = ttNone;
 	const char* p = *begin;
@@ -259,27 +259,27 @@ static FbTokenType getToken(const char** begin, const char* end)
 		break;
 
 	default:
-		if (classes(c) & CHR_DIGIT)
+		if (php_firebird_classes(c) & CHR_DIGIT)
 		{
-			while (p < end && (classes(*p) & CHR_DIGIT))
+			while (p < end && (php_firebird_classes(*p) & CHR_DIGIT))
 				p++;
 			ret = ttOther;
 		}
-		else if (classes(c) & CHR_IDENT)
+		else if (php_firebird_classes(c) & CHR_IDENT)
 		{
-			while (p < end && (classes(*p) & CHR_IDENT))
+			while (p < end && (php_firebird_classes(*p) & CHR_IDENT))
 				p++;
 			ret = ttIdent;
 		}
-		else if (classes(c) & CHR_WHITE)
+		else if (php_firebird_classes(c) & CHR_WHITE)
 		{
-			while (p < end && (classes(*p) & CHR_WHITE))
+			while (p < end && (php_firebird_classes(*p) & CHR_WHITE))
 				p++;
 			ret = ttWhite;
 		}
 		else
 		{
-			while (p < end && !(classes(*p) & (CHR_DIGIT | CHR_IDENT | CHR_WHITE)) &&
+			while (p < end && !(php_firebird_classes(*p) & (CHR_DIGIT | CHR_IDENT | CHR_WHITE)) &&
 				(*p != '/') && (*p != '-') && (*p != ':') && (*p != '?') &&
 				(*p != '\'') && (*p != '"'))
 			{
@@ -293,7 +293,7 @@ static FbTokenType getToken(const char** begin, const char* end)
 	return ret;
 }
 
-int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
+static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 {
 	bool passAsIs = 1, execBlock = 0;
 	zend_long pindex = -1;
@@ -301,13 +301,13 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 	unsigned int l;
 	const char* p = ZSTR_VAL(sql), * end = ZSTR_VAL(sql) + ZSTR_LEN(sql);
 	const char* start = p;
-	FbTokenType tok = getToken(&p, end);
+	FbTokenType tok = php_firebird_get_token(&p, end);
 
 	const char* i = start;
 	while (p < end && (tok == ttComment || tok == ttWhite))
 	{
 		i = p;
-		tok = getToken(&p, end);
+		tok = php_firebird_get_token(&p, end);
 	}
 
 	if (p >= end || tok != ttIdent)
@@ -331,11 +331,11 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 		/* For EXECUTE PROCEDURE and EXECUTE BLOCK statements, named parameters must be processed. */
 		/* However, in EXECUTE BLOCK this is done in a special way. */
 		const char* i2 = p;
-		tok = getToken(&p, end);
+		tok = php_firebird_get_token(&p, end);
 		while (p < end && (tok == ttComment || tok == ttWhite))
 		{
 			i2 = p;
-			tok = getToken(&p, end);
+			tok = php_firebird_get_token(&p, end);
 		}
 		if (p >= end || tok != ttIdent)
 		{
@@ -374,11 +374,11 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 	while (p < end)
 	{
 		start = p;
-		tok = getToken(&p, end);
+		tok = php_firebird_get_token(&p, end);
 		switch (tok)
 		{
 		case ttParamMark:
-			tok = getToken(&p, end);
+			tok = php_firebird_get_token(&p, end);
 			if (tok == ttIdent /*|| tok == ttString*/)
 			{
 				++pindex;
@@ -460,7 +460,7 @@ int preprocess(const zend_string* sql, char* sql_out, HashTable* named_params)
 }
 
 /* map driver specific error message to PDO error */
-void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state, const size_t state_len,
+void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state, const size_t state_len,
 	const char *msg, const size_t msg_len) /* {{{ */
 {
 	pdo_error_type *const error_code = stmt ? &stmt->error_code : &dbh->error_code;
@@ -529,17 +529,17 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 	if (dbh->in_txn) {
 		if (dbh->auto_commit) {
 			if (isc_commit_transaction(H->isc_status, &H->tr)) {
-				firebird_error(dbh);
+				php_firebird_error(dbh);
 			}
 		} else {
 			if (isc_rollback_transaction(H->isc_status, &H->tr)) {
-				firebird_error(dbh);
+				php_firebird_error(dbh);
 			}
 		}
 	}
 
 	if (isc_detach_database(H->isc_status, &H->db)) {
-		firebird_error(dbh);
+		php_firebird_error(dbh);
 	}
 
 	if (H->date_format) {
@@ -582,7 +582,7 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 		zend_hash_init(np, 8, NULL, NULL, 0);
 
 		/* allocate and prepare statement */
-		if (!firebird_alloc_prepare_stmt(dbh, sql, &num_sqlda, &s, np)) {
+		if (!php_firebird_alloc_prepare_stmt(dbh, sql, &num_sqlda, &s, np)) {
 			break;
 		}
 
@@ -603,7 +603,7 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 
 		/* fill the output sqlda with information about the prepared query */
 		if (isc_dsql_describe(H->isc_status, &s, PDO_FB_SQLDA_VERSION, &S->out_sqlda)) {
-			firebird_error(dbh);
+			php_firebird_error(dbh);
 			break;
 		}
 
@@ -630,7 +630,7 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 
 	} while (0);
 
-	firebird_error(dbh);
+	php_firebird_error(dbh);
 
 	zend_hash_destroy(np);
 	FREE_HASHTABLE(np);
@@ -662,13 +662,13 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /*
 	out_sqlda.sqln = 1;
 
 	/* allocate and prepare statement */
-	if (!firebird_alloc_prepare_stmt(dbh, sql, &out_sqlda, &stmt, 0)) {
+	if (!php_firebird_alloc_prepare_stmt(dbh, sql, &out_sqlda, &stmt, 0)) {
 		return -1;
 	}
 
 	/* execute the statement */
 	if (isc_dsql_execute2(H->isc_status, &H->tr, &stmt, PDO_FB_SQLDA_VERSION, &in_sqlda, &out_sqlda)) {
-		firebird_error(dbh);
+		php_firebird_error(dbh);
 		ret = -1;
 		goto free_statement;
 	}
@@ -676,7 +676,7 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /*
 	/* find out how many rows were affected */
 	if (isc_dsql_sql_info(H->isc_status, &stmt, sizeof(info_count), const_cast(info_count),
 			sizeof(result),	result)) {
-		firebird_error(dbh);
+		php_firebird_error(dbh);
 		ret = -1;
 		goto free_statement;
 	}
@@ -704,13 +704,13 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /*
 
 	/* commit if we're in auto_commit mode */
 	if (dbh->auto_commit && isc_commit_retaining(H->isc_status, &H->tr)) {
-		firebird_error(dbh);
+		php_firebird_error(dbh);
 	}
 
 free_statement:
 
 	if (isc_dsql_free_statement(H->isc_status, &stmt, DSQL_drop)) {
-		firebird_error(dbh);
+		php_firebird_error(dbh);
 	}
 
 	return ret;
@@ -802,7 +802,7 @@ static bool firebird_handle_begin(pdo_dbh_t *dbh) /* {{{ */
 	}
 #endif
 	if (isc_start_transaction(H->isc_status, &H->tr, 1, &H->db, (unsigned short)(ptpb-tpb), tpb)) {
-		firebird_error(dbh);
+		php_firebird_error(dbh);
 		return false;
 	}
 	return true;
@@ -815,7 +815,7 @@ static bool firebird_handle_commit(pdo_dbh_t *dbh) /* {{{ */
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
 	if (isc_commit_transaction(H->isc_status, &H->tr)) {
-		firebird_error(dbh);
+		php_firebird_error(dbh);
 		return false;
 	}
 	return true;
@@ -828,7 +828,7 @@ static bool firebird_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
 	if (isc_rollback_transaction(H->isc_status, &H->tr)) {
-		firebird_error(dbh);
+		php_firebird_error(dbh);
 		return false;
 	}
 	return true;
@@ -836,7 +836,7 @@ static bool firebird_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 /* }}} */
 
 /* used by prepare and exec to allocate a statement handle and prepare the SQL */
-static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sql,
+static int php_firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sql,
 	XSQLDA *out_sqlda, isc_stmt_handle *s, HashTable *named_params)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
@@ -860,7 +860,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sql,
 
 	/* allocate the statement */
 	if (isc_dsql_allocate_statement(H->isc_status, &H->db, s)) {
-		firebird_error(dbh);
+		php_firebird_error(dbh);
 		return 0;
 	}
 
@@ -868,7 +868,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sql,
 	   we need to replace :foo by ?, and store the name we just replaced */
 	new_sql = emalloc(ZSTR_LEN(sql)+1);
 	new_sql[0] = '\0';
-	if (!preprocess(sql, new_sql, named_params)) {
+	if (!php_firebird_preprocess(sql, new_sql, named_params)) {
 		strcpy(dbh->error_code, "07000");
 		efree(new_sql);
 		return 0;
@@ -876,7 +876,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sql,
 
 	/* prepare the statement */
 	if (isc_dsql_prepare(H->isc_status, &H->tr, s, 0, new_sql, H->sql_dialect, out_sqlda)) {
-		firebird_error(dbh);
+		php_firebird_error(dbh);
 		efree(new_sql);
 		return 0;
 	}
@@ -886,7 +886,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sql,
 }
 
 /* called by PDO to set a driver-specific dbh attribute */
-static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
+static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	bool bval;
@@ -905,7 +905,7 @@ static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *
 							/* turning on auto_commit with an open transaction is illegal, because
 							   we won't know what to do with it */
 							const char *msg = "Cannot enable auto-commit while a transaction is already open";
-							firebird_error_with_info(dbh, "HY000", strlen("HY000"), msg, strlen(msg));
+							php_firebird_error_with_info(dbh, "HY000", strlen("HY000"), msg, strlen(msg));
 							return false;
 						} else {
 							/* close the transaction */
@@ -976,7 +976,7 @@ static bool firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *
 #define INFO_BUF_LEN 512
 
 /* callback to used to report database server info */
-static void firebird_info_cb(void *arg, char const *s) /* {{{ */
+static void php_firebird_info_cb(void *arg, char const *s) /* {{{ */
 {
 	if (arg) {
 		if (*(char*)arg) { /* second call */
@@ -988,7 +988,7 @@ static void firebird_info_cb(void *arg, char const *s) /* {{{ */
 /* }}} */
 
 /* called by PDO to get a driver-specific dbh attribute */
-static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
+static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
@@ -1000,7 +1000,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 			return 1;
 
 		case PDO_ATTR_CONNECTION_STATUS:
-			ZVAL_BOOL(val, !isc_version(&H->db, firebird_info_cb, NULL));
+			ZVAL_BOOL(val, !isc_version(&H->db, php_firebird_info_cb, NULL));
 			return 1;
 
 		case PDO_ATTR_CLIENT_VERSION: {
@@ -1030,7 +1030,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 		case PDO_ATTR_SERVER_INFO:
 			*tmp = 0;
 
-			if (!isc_version(&H->db, firebird_info_cb, (void*)tmp)) {
+			if (!isc_version(&H->db, php_firebird_info_cb, (void*)tmp)) {
 				ZVAL_STRING(val, tmp);
 				return 1;
 			}
@@ -1066,10 +1066,10 @@ static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	firebird_handle_begin,
 	firebird_handle_commit,
 	firebird_handle_rollback,
-	firebird_handle_set_attribute,
+	pdo_firebird_set_attribute,
 	NULL, /* last_id not supported */
 	pdo_firebird_fetch_error_func,
-	firebird_handle_get_attribute,
+	pdo_firebird_get_attribute,
 	NULL, /* check_liveness */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */

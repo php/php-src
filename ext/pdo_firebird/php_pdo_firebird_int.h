@@ -129,12 +129,12 @@ extern const pdo_driver_t pdo_firebird_driver;
 
 extern const struct pdo_stmt_methods firebird_stmt_methods;
 
-extern void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state, const size_t state_len,
+extern void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state, const size_t state_len,
 	const char *msg, const size_t msg_len);
-#define firebird_error(d) _firebird_error(d, NULL, NULL, 0, NULL, 0)
-#define firebird_error_stmt(s) _firebird_error(s->dbh, s, NULL, 0, NULL, 0)
-#define firebird_error_with_info(d,e,el,m,ml) _firebird_error(d, NULL, e, el, m, ml)
-#define firebird_error_stmt_with_info(s,e,el,m,ml) _firebird_error(s->dbh, s, e, el, m, ml)
+#define php_firebird_error(d) php_firebird_set_error(d, NULL, NULL, 0, NULL, 0)
+#define php_firebird_error_stmt(s) php_firebird_set_error(s->dbh, s, NULL, 0, NULL, 0)
+#define php_firebird_error_with_info(d,e,el,m,ml) php_firebird_set_error(d, NULL, e, el, m, ml)
+#define php_firebird_error_stmt_with_info(s,e,el,m,ml) php_firebird_set_error(s->dbh, s, e, el, m, ml)
 
 enum {
 	PDO_FB_ATTR_DATE_FORMAT = PDO_ATTR_DRIVER_SPECIFIC,
