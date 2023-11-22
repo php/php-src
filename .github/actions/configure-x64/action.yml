@@ -52,7 +52,6 @@ runs:
           --enable-bcmath \
           --enable-calendar \
           --enable-ftp \
-          --with-pspell=/usr \
           ${{ inputs.skipSlow == 'false' && '--with-enchant=/usr' || '' }} \
           --with-kerberos \
           --enable-sysvmsg \
