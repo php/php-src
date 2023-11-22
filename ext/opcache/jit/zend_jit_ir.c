@@ -2661,7 +2661,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 #if defined (__CET__) && (__CET__ & 1) != 0
 	flags |= IR_GEN_ENDBR;
 #endif
-	flags |= IR_OPT_FOLDING | IR_OPT_CFG | IR_OPT_CODEGEN | IR_HAS_CALLS;
+	flags |= IR_OPT_FOLDING | IR_OPT_CFG | IR_OPT_CODEGEN;
 
 	ir_init(&jit->ctx, flags, 256, 1024);
 	jit->ctx.ret_type = -1;
