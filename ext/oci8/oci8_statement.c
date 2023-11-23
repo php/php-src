@@ -1178,8 +1178,12 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 		}
 			break;
 
-		case SQLT_INT:
 		case SQLT_NUM:
+			php_error_docref(NULL, E_WARNING, "Datatype SQLT_NUM not implemented yet");
+			return 1;
+			break;
+			
+		case SQLT_INT:
 			if (Z_TYPE_P(param) == IS_RESOURCE || Z_TYPE_P(param) == IS_OBJECT) {
 				php_error_docref(NULL, E_WARNING, "Invalid variable used for bind");
 				return 1;
