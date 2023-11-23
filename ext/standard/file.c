@@ -582,9 +582,8 @@ PHP_FUNCTION(file_put_contents)
 			numbytes = -1;
 			break;
 	}
-	php_stream_close(stream);
 
-	if (numbytes < 0) {
+	if (php_stream_close(stream) || numbytes < 0) {
 		RETURN_FALSE;
 	}
 
@@ -782,11 +781,9 @@ PHPAPI PHP_FUNCTION(fclose)
 		RETURN_FALSE;
 	}
 
-	php_stream_free(stream,
+	RETURN_BOOL(!php_stream_free(stream,
 		PHP_STREAM_FREE_KEEP_RSRC |
-		(stream->is_persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE));
-
-	RETURN_TRUE;
+		(stream->is_persistent ? PHP_STREAM_FREE_CLOSE_PERSISTENT : PHP_STREAM_FREE_CLOSE)));
 }
 /* }}} */
 
@@ -1617,11 +1614,11 @@ safe_to_copy:
 	if (srcstream && deststream) {
 		ret = php_stream_copy_to_stream_ex(srcstream, deststream, PHP_STREAM_COPY_ALL, NULL);
 	}
-	if (srcstream) {
-		php_stream_close(srcstream);
+	if (srcstream && php_stream_close(srcstream)) {
+		ret = FAILURE;
 	}
-	if (deststream) {
-		php_stream_close(deststream);
+	if (deststream && php_stream_close(deststream)) {
+		ret = FAILURE;
 	}
 	return ret;
 }
