@@ -30,6 +30,7 @@
 #include "zend_interfaces.h"
 #include "zend_weakrefs.h"
 #include "Zend/Optimizer/zend_optimizer.h"
+#include "Zend/zend_alloc.h"
 #include "test_arginfo.h"
 
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
@@ -362,6 +363,67 @@ static ZEND_FUNCTION(zend_test_crash)
 
 	char *invalid = (char *) 1;
 	php_printf("%s", invalid);
+}
+
+zend_mm_heap* zend_test_heap;
+zend_mm_heap* zend_orig_heap;
+volatile uint32_t lineno = 0;
+
+static bool has_opline(zend_execute_data *execute_data)
+{
+	return execute_data
+		&& execute_data->func
+		&& ZEND_USER_CODE(execute_data->func->type)
+		&& execute_data->opline
+	;
+}
+
+#pragma GCC push_options
+#pragma GCC optimize("O0")
+void * __attribute__((optnone)) zend_test_custom_malloc(size_t len)
+{
+	if (has_opline(EG(current_execute_data))) {
+		lineno = EG(current_execute_data)->opline->lineno;
+	}
+	return _zend_mm_alloc(zend_orig_heap, len);
+}
+
+void __attribute__((optnone)) zend_test_custom_free(void *ptr)
+{
+	if (has_opline(EG(current_execute_data))) {
+		lineno = EG(current_execute_data)->opline->lineno;
+	}
+	_zend_mm_free(zend_orig_heap, ptr);
+}
+
+void * __attribute__((optnone)) zend_test_custom_realloc(void * ptr, size_t len)
+{
+	if (has_opline(EG(current_execute_data))) {
+		lineno = EG(current_execute_data)->opline->lineno;
+	}
+	return _zend_mm_realloc(zend_orig_heap, ptr, len);
+}
+#pragma GCC pop_options
+
+static ZEND_FUNCTION(zend_test_observe_opline_in_zendmm)
+{
+	zend_test_heap = malloc(4096);
+	memset(zend_test_heap, 0, 4096);
+	zend_mm_set_custom_handlers(
+		zend_test_heap,
+		zend_test_custom_malloc,
+		zend_test_custom_free,
+		zend_test_custom_realloc
+	);
+	zend_orig_heap = zend_mm_get_heap();
+	zend_mm_set_heap(zend_test_heap);
+}
+
+static ZEND_FUNCTION(zend_test_unobserve_opline_in_zendmm)
+{
+	free(zend_test_heap);
+	zend_test_heap = NULL;
+	zend_mm_set_heap(zend_orig_heap);
 }
 
 static ZEND_FUNCTION(zend_test_is_pcre_bundled)

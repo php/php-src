@@ -122,6 +122,10 @@ namespace {
 
     function zend_test_crash(?string $message = null): void {}
 
+    function zend_test_observe_opline_in_zendmm(): void {}
+
+    function zend_test_unobserve_opline_in_zendmm(): void {}
+
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 function zend_test_override_libxml_global_state(): void {}
 #endif

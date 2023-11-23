@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ae75eda2b4b40224858d680c3fcf3d7cd2056bb6 */
+ * Stub hash: a57c9d1fc85dbea853f4cc910b9495a7a0c72eb3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -86,6 +86,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_crash, 0, 0, IS_VOID, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, message, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
+#define arginfo_zend_test_observe_opline_in_zendmm arginfo_zend_test_void_return
+
+#define arginfo_zend_test_unobserve_opline_in_zendmm arginfo_zend_test_void_return
+
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_override_libxml_global_state, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -155,6 +159,8 @@ static ZEND_FUNCTION(zend_get_current_func_name);
 static ZEND_FUNCTION(zend_call_method);
 static ZEND_FUNCTION(zend_get_map_ptr_last);
 static ZEND_FUNCTION(zend_test_crash);
+static ZEND_FUNCTION(zend_test_observe_opline_in_zendmm);
+static ZEND_FUNCTION(zend_test_unobserve_opline_in_zendmm);
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 static ZEND_FUNCTION(zend_test_override_libxml_global_state);
 #endif
@@ -199,6 +205,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_call_method, arginfo_zend_call_method)
 	ZEND_FE(zend_get_map_ptr_last, arginfo_zend_get_map_ptr_last)
 	ZEND_FE(zend_test_crash, arginfo_zend_test_crash)
+	ZEND_FE(zend_test_observe_opline_in_zendmm, arginfo_zend_test_observe_opline_in_zendmm)
+	ZEND_FE(zend_test_unobserve_opline_in_zendmm, arginfo_zend_test_unobserve_opline_in_zendmm)
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 	ZEND_FE(zend_test_override_libxml_global_state, arginfo_zend_test_override_libxml_global_state)
 #endif
