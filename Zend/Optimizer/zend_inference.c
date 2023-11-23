@@ -4316,7 +4316,7 @@ static zend_result zend_type_narrowing(const zend_op_array *op_array, const zend
 {
 	uint32_t bitset_len = zend_bitset_len(ssa->vars_count);
 	zend_bitset visited, worklist;
-	int v;
+	int i, v;
 	zend_op *opline;
 	bool narrowed = 0;
 	ALLOCA_FLAG(use_heap)
@@ -4342,6 +4342,11 @@ static zend_result zend_type_narrowing(const zend_op_array *op_array, const zend
 			if (can_convert_to_double(op_array, ssa, v, value, visited)) {
 				narrowed = 1;
 				ssa->var_info[v].use_as_double = 1;
+				/* The "visited" vars are exactly those which may change their type due to
+				 * narrowing. Reset their types and add them to the type inference worklist */
+				ZEND_BITSET_FOREACH(visited, bitset_len, i) {
+					ssa->var_info[i].type |= (MAY_BE_LONG|MAY_BE_DOUBLE);
+				} ZEND_BITSET_FOREACH_END();
 				zend_bitset_union(worklist, visited, bitset_len);
 			}
 		}
