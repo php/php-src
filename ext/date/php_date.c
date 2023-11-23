@@ -843,6 +843,10 @@ static zend_string *date_format(const char *format, size_t format_len, timelib_t
 
 PHPAPI zend_string *php_format_date_obj(const char *format, size_t format_len, php_date_obj *date_obj)
 {
+	if (!date_obj->time) {
+		return NULL;
+	}
+
 	return date_format(format, format_len, date_obj->time, date_obj->time->is_localtime);
 }
 

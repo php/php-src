@@ -2908,11 +2908,11 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 		xmlNodeSetContentLen(xmlParam, BAD_CAST(Z_STRVAL_P(data)), Z_STRLEN_P(data));
 	} else if (Z_TYPE_P(data) == IS_OBJECT) {
 		if (instanceof_function_slow(Z_OBJCE_P(data), php_date_get_interface_ce())) {
-			php_date_obj *dateobj = Z_PHPDATE_P(data);
-			if (dateobj->time) {
-				zend_string *formatted = php_format_date_obj(ext_date_format, ext_date_format_len, dateobj);
-				xmlNodeSetContentLen(xmlParam, BAD_CAST(ZSTR_VAL(formatted)), ZSTR_LEN(formatted));
-				zend_string_release_ex(formatted, false);
+			php_date_obj *date_obj = Z_PHPDATE_P(data);
+			zend_string *formatted_date_string = php_format_date_obj(ext_date_format, ext_date_format_len, date_obj);
+			if (formatted_date_string) {
+				xmlNodeSetContentLen(xmlParam, BAD_CAST(ZSTR_VAL(formatted_date_string)), ZSTR_LEN(formatted_date_string));
+				zend_string_release_ex(formatted_date_string, false);
 			} else {
 				soap_error0(E_ERROR, "Encoding: Invalid DateTimeInterface");
 			}
