@@ -21,6 +21,10 @@ FTP:
 Intl:
   . Added IntlDateFormatter::PATTERN constant. (David Carlier)
 
+MBString:
+  . Long-deprecated INI settings mbstring.http_input, mbstring.http_output,
+    and mbstring.internal_encoding have been removed. (Alex Dowad)
+
 Opcache:
   . Added large shared segments support for FreeBSD. (David Carlier)
 
