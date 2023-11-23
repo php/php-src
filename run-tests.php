@@ -390,7 +390,7 @@ function main(): void
         $argc = count($argv);
     }
 
-    for ($i = 1; $i < $argc; $i++) {
+    for ($i = 1; $i < $argc; ++$i) {
         $is_switch = false;
         $switch = substr($argv[$i], 1, 1);
         $repeat = substr($argv[$i], 0, 1) == '-';

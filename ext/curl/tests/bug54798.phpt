@@ -2,6 +2,13 @@
 Bug #54798 (Segfault when CURLOPT_STDERR file pointer is closed before calling curl_exec)
 --EXTENSIONS--
 curl
+--SKIPIF--
+<?php
+if (getenv("SKIP_SLOW_TESTS")) {
+    // finished in 1.34s in a best-of-3 on an idle Intel Xeon X5670 on PHP 8.3.0-dev
+    die("skip slow test");
+}
+?>
 --FILE--
 <?php
 
