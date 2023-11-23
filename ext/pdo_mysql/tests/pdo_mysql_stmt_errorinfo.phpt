@@ -4,15 +4,16 @@ MySQL PDOStatement->errorInfo();
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
-    MySQLPDOTest::createTestTable($db);
+
+    $table = 'pdo_mysql_stmt_errorinfo';
+    MySQLPDOTest::createTestTable($table , $db);
 
     printf("Testing emulated PS...\n");
     try {
@@ -20,14 +21,14 @@ $db = MySQLPDOTest::factory();
         if (1 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[002] Unable to turn on emulated prepared statements\n");
 
-        $stmt = $db->prepare('SELECT id FROM ihopeitdoesnotexist ORDER BY id ASC');
+        $stmt = $db->prepare('SELECT id FROM pdo_mysql_stmt_errorinfo_ihopeitdoesnotexist ORDER BY id ASC');
         var_dump($stmt->errorInfo());
         $stmt->execute();
         var_dump($stmt->errorInfo());
 
-        MySQLPDOTest::createTestTable($db);
-        $stmt = $db->prepare('SELECT label FROM test ORDER BY id ASC LIMIT 1');
-        $db->exec('DROP TABLE test');
+        MySQLPDOTest::createTestTable($table, $db);
+        $stmt = $db->prepare("SELECT label FROM {$table} ORDER BY id ASC LIMIT 1");
+        $db->exec("DROP TABLE {$table}");
         var_dump($stmt->execute());
         var_dump($stmt->errorInfo());
         var_dump($db->errorInfo());
@@ -43,13 +44,13 @@ $db = MySQLPDOTest::factory();
         if (0 != $db->getAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY))
             printf("[004] Unable to turn off emulated prepared statements\n");
 
-        $stmt = $db->prepare('SELECT id FROM ihopeitdoesnotexist ORDER BY id ASC');
+        $stmt = $db->prepare('SELECT id FROM pdo_mysql_stmt_errorinfo_ihopeitdoesnotexist ORDER BY id ASC');
         var_dump($stmt);
 
-        MySQLPDOTest::createTestTable($db);
-        $stmt = $db->prepare('SELECT label FROM test ORDER BY id ASC LIMIT 1');
+        MySQLPDOTest::createTestTable($table, $db);
+        $stmt = $db->prepare("SELECT label FROM {$table} ORDER BY id ASC LIMIT 1");
         var_dump($stmt->errorInfo());
-        $db->exec('DROP TABLE test');
+        $db->exec("DROP TABLE {$table}");
         $stmt->execute();
         var_dump($stmt->errorInfo());
         var_dump($db->errorInfo());
@@ -62,8 +63,9 @@ $db = MySQLPDOTest::factory();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_stmt_errorinfo');
 ?>
 --EXPECTF--
 Testing emulated PS...
@@ -76,17 +78,17 @@ array(3) {
   NULL
 }
 
-Warning: PDOStatement::execute(): SQLSTATE[42S02]: Base table or view not found: 1146 Table '%s.ihopeitdoesnotexist' doesn't exist in %s on line %d
+Warning: PDOStatement::execute(): SQLSTATE[42S02]: Base table or view not found: 1146 Table '%s.pdo_mysql_stmt_errorinfo_ihopeitdoesnotexist' doesn't exist in %s on line %d
 array(3) {
   [0]=>
   string(5) "42S02"
   [1]=>
   int(1146)
   [2]=>
-  string(%d) "Table '%s.ihopeitdoesnotexist' doesn't exist"
+  string(%d) "Table '%s.pdo_mysql_stmt_errorinfo_ihopeitdoesnotexist' doesn't exist"
 }
 
-Warning: PDOStatement::execute(): SQLSTATE[42S02]: Base table or view not found: 1146 Table '%s.test' doesn't exist in %s on line %d
+Warning: PDOStatement::execute(): SQLSTATE[42S02]: Base table or view not found: 1146 Table '%s.pdo_mysql_stmt_errorinfo' doesn't exist in %s on line %d
 bool(false)
 array(3) {
   [0]=>
@@ -94,7 +96,7 @@ array(3) {
   [1]=>
   int(1146)
   [2]=>
-  string(%d) "Table '%s.test' doesn't exist"
+  string(%d) "Table '%s.pdo_mysql_stmt_errorinfo' doesn't exist"
 }
 array(3) {
   [0]=>
@@ -106,7 +108,7 @@ array(3) {
 }
 Testing native PS...
 
-Warning: PDO::prepare(): SQLSTATE[42S02]: Base table or view not found: 1146 Table '%s.ihopeitdoesnotexist' doesn't exist in %s on line %d
+Warning: PDO::prepare(): SQLSTATE[42S02]: Base table or view not found: 1146 Table '%s.pdo_mysql_stmt_errorinfo_ihopeitdoesnotexist' doesn't exist in %s on line %d
 bool(false)
 array(3) {
   [0]=>
@@ -117,14 +119,14 @@ array(3) {
   NULL
 }
 
-Warning: PDOStatement::execute(): SQLSTATE[42S02]: Base table or view not found: 1146 Table '%s.test' doesn't exist in %s on line %d
+Warning: PDOStatement::execute(): SQLSTATE[42S02]: Base table or view not found: 1146 Table '%s.pdo_mysql_stmt_errorinfo' doesn't exist in %s on line %d
 array(3) {
   [0]=>
   string(5) "42S02"
   [1]=>
   int(1146)
   [2]=>
-  string(%d) "Table '%s.test' doesn't exist"
+  string(%d) "Table '%s.pdo_mysql_stmt_errorinfo' doesn't exist"
 }
 array(3) {
   [0]=>

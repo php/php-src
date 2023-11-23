@@ -4,43 +4,43 @@ PDO MySQL Bug #38671 (PDO#getAttribute() cannot be called with platform-specific
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $pdo = MySQLPDOTest::factory();
 $pdo->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-$attrs = array(
+$attrs = [
     // Extensive test: default value and set+get values
     PDO::ATTR_EMULATE_PREPARES		=> array(null, 1, 0),
     PDO::MYSQL_ATTR_DIRECT_QUERY	=> array(null, 0, 1),
     PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => array(null, false, true),
 
     // Just test the default
-    PDO::ATTR_AUTOCOMMIT			=> array(null),
-    PDO::ATTR_PREFETCH				=> array(null),
-    PDO::ATTR_TIMEOUT				=> array(null),
-    PDO::ATTR_ERRMODE				=> array(null),
-    PDO::ATTR_SERVER_VERSION		=> array(null),
-    PDO::ATTR_CLIENT_VERSION		=> array(null),
-    PDO::ATTR_SERVER_INFO			=> array(null),
-    PDO::ATTR_CONNECTION_STATUS		=> array(null),
-    PDO::ATTR_CASE					=> array(null),
-    PDO::ATTR_CURSOR_NAME			=> array(null),
-    PDO::ATTR_CURSOR				=> array(null),
-    PDO::ATTR_ORACLE_NULLS			=> array(null),
-    PDO::ATTR_PERSISTENT			=> array(null),
-    PDO::ATTR_STATEMENT_CLASS		=> array(null),
-    PDO::ATTR_FETCH_TABLE_NAMES		=> array(null),
-    PDO::ATTR_FETCH_CATALOG_NAMES	=> array(null),
-    PDO::ATTR_DRIVER_NAME			=> array(null),
-    PDO::ATTR_STRINGIFY_FETCHES		=> array(null),
-    PDO::ATTR_MAX_COLUMN_LEN		=> array(null),
-    PDO::ATTR_DEFAULT_FETCH_MODE	=> array(null),
-);
+    PDO::ATTR_AUTOCOMMIT			=> [null],
+    PDO::ATTR_PREFETCH				=> [null],
+    PDO::ATTR_TIMEOUT				=> [null],
+    PDO::ATTR_ERRMODE				=> [null],
+    PDO::ATTR_SERVER_VERSION		=> [null],
+    PDO::ATTR_CLIENT_VERSION		=> [null],
+    PDO::ATTR_SERVER_INFO			=> [null],
+    PDO::ATTR_CONNECTION_STATUS		=> [null],
+    PDO::ATTR_CASE					=> [null],
+    PDO::ATTR_CURSOR_NAME			=> [null],
+    PDO::ATTR_CURSOR				=> [null],
+    PDO::ATTR_ORACLE_NULLS			=> [null],
+    PDO::ATTR_PERSISTENT			=> [null],
+    PDO::ATTR_STATEMENT_CLASS		=> [null],
+    PDO::ATTR_FETCH_TABLE_NAMES		=> [null],
+    PDO::ATTR_FETCH_CATALOG_NAMES	=> [null],
+    PDO::ATTR_DRIVER_NAME			=> [null],
+    PDO::ATTR_STRINGIFY_FETCHES		=> [null],
+    PDO::ATTR_MAX_COLUMN_LEN		=> [null],
+    PDO::ATTR_DEFAULT_FETCH_MODE	=> [null],
+];
 
 foreach ($attrs as $a => $vals) {
     foreach ($vals as $v) {

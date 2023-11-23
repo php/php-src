@@ -4,22 +4,25 @@ Bug #76815: PDOStatement cannot be GCed/closeCursor-ed when a PROCEDURE resultse
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
 $pdo = MySQLPDOTest::factory();
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$pdo->query('DROP FUNCTION IF EXISTS tst');
-$pdo->query('DROP PROCEDURE IF EXISTS tst2');
-$pdo->query('CREATE FUNCTION tst() RETURNS VARCHAR(5) DETERMINISTIC BEGIN RETURN \'x12345\'; END');
-$pdo->query('CREATE PROCEDURE tst2() BEGIN SELECT tst(); END');
+$func = 'bug76815_pdo_mysql_f';
+$procedure = 'bug76815_pdo_mysql_p';
 
-$st = $pdo->prepare('CALL tst2()');
+$pdo->query("DROP FUNCTION IF EXISTS {$func}");
+$pdo->query("DROP PROCEDURE IF EXISTS {$procedure}");
+$pdo->query("CREATE FUNCTION {$func}() RETURNS VARCHAR(5) DETERMINISTIC BEGIN RETURN 'x12345'; END");
+$pdo->query("CREATE PROCEDURE {$procedure}() BEGIN SELECT {$func}(); END");
+
+$st = $pdo->prepare("CALL {$procedure}()");
 try {
     $st->execute();
 } catch (PDOException $ex) {
@@ -27,15 +30,14 @@ try {
 }
 unset($st);
 echo "Ok.\n";
-
 ?>
 --CLEAN--
 <?php
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $pdo = MySQLPDOTest::factory();
-$pdo->query('DROP FUNCTION IF EXISTS tst');
-$pdo->query('DROP PROCEDURE IF EXISTS tst2');
+$pdo->query('DROP FUNCTION IF EXISTS bug76815_pdo_mysql_f');
+$pdo->query('DROP PROCEDURE IF EXISTS bug76815_pdo_mysql_p');
 ?>
 --EXPECT--
-SQLSTATE[22001]: String data, right truncated: 1406 Data too long for column 'tst()' at row 1
+SQLSTATE[22001]: String data, right truncated: 1406 Data too long for column 'bug76815_pdo_mysql_f()' at row 1
 Ok.

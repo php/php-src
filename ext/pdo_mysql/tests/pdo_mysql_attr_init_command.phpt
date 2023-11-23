@@ -4,21 +4,20 @@ PDO::MYSQL_ATTR_INIT_COMMAND
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --INI--
 error_reporting=E_ALL
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
     $dsn = MySQLPDOTest::getDSN();
     $user = PDO_MYSQL_TEST_USER;
     $pass = PDO_MYSQL_TEST_PASS;
 
-    $table = sprintf("test_%s", md5(mt_rand(0, PHP_INT_MAX)));
+    $table = 'pdo_mysql_attr_init_command';
     $db = new PDO($dsn, $user, $pass);
     $db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
 
@@ -37,8 +36,14 @@ error_reporting=E_ALL
     $db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
     print "done!";
 ?>
---EXPECTF--
-string(58) "CREATE TABLE test_%s(id INT)"
+--CLEAN--
+<?php
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->query('DROP TABLE IF EXISTS pdo_mysql_attr_init_command');
+?>
+--EXPECT--
+string(48) "CREATE TABLE pdo_mysql_attr_init_command(id INT)"
 string(5) "00000"
 array(1) {
   [0]=>

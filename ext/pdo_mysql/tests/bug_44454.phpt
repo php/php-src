@@ -1,24 +1,19 @@
 --TEST--
 Bug #44454 (Unexpected exception thrown in foreach() statement)
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require __DIR__ . '/config.inc';
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require __DIR__ . '/config.inc';
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
 
 function bug_44454($db) {
-
     try {
-
         $db->exec('DROP TABLE IF EXISTS test_44454');
         $db->exec('CREATE TABLE test_44454(a INT, b INT, UNIQUE KEY idx_ab (a, b))');
         $db->exec('INSERT INTO test_44454(a, b) VALUES (1, 1)');
@@ -54,7 +49,6 @@ function bug_44454($db) {
             printf("... PDO  - %s\n", var_export($db->errorInfo(), true));
         }
     }
-
 }
 
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -71,7 +65,7 @@ print "done!";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_44454');
 ?>

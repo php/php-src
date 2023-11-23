@@ -4,20 +4,22 @@ MySQL PDOStatement->bindParam()
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
-    MySQLPDOTest::createTestTable($db);
+    $table = 'pdo_mysql_stmt_bindparam';
+    MySQLPDOTest::createTestTable($table, $db);
 
     function pdo_mysql_stmt_bindparam($db, $offset) {
+        global $table;
 
-        $stmt = $db->prepare('SELECT id, label FROM test WHERE id > ? ORDER BY id ASC LIMIT 2');
+        $stmt = $db->prepare("SELECT id, label FROM {$table} WHERE id > ? ORDER BY id ASC LIMIT 2");
         $in = 0;
         if (!$stmt->bindParam(1, $in))
             printf("[%03d + 1] Cannot bind parameter, %s %s\n", $offset,
@@ -50,7 +52,7 @@ MySQLPDOTest::skip();
 
         // NULL values
         printf("NULL...\n");
-        $stmt = $db->prepare('INSERT INTO test(id, label) VALUES (100, ?)');
+        $stmt = $db->prepare("INSERT INTO {$table}(id, label) VALUES (100, ?)");
         $label = null;
         if (!$stmt->bindParam(1, $label))
             printf("[%03d + 4] Cannot bind parameter, %s %s\n", $offset,
@@ -61,7 +63,7 @@ MySQLPDOTest::skip();
                 $stmt->errorCode(), var_export($stmt->errorInfo(), true));
 
         /* NOTE: you cannot use PDO::query() with unbuffered, native PS - see extra test */
-        $stmt = $db->prepare('SELECT id, NULL AS _label FROM test WHERE label IS NULL');
+        $stmt = $db->prepare("SELECT id, NULL AS _label FROM {$table} WHERE label IS NULL");
         $stmt->execute();
 
         $id = $label = 'bogus';
@@ -91,7 +93,7 @@ MySQLPDOTest::skip();
         pdo_mysql_stmt_bindparam($db, 3);
 
         printf("Unbuffered...\n");
-        MySQLPDOTest::createTestTable($db);
+        MySQLPDOTest::createTestTable($table, $db);
         $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
         pdo_mysql_stmt_bindparam($db, 4);
 
@@ -101,12 +103,12 @@ MySQLPDOTest::skip();
             printf("[004] Unable to turn off emulated prepared statements\n");
 
         printf("Buffered...\n");
-        MySQLPDOTest::createTestTable($db);
+        MySQLPDOTest::createTestTable($table, $db);
         $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
         pdo_mysql_stmt_bindparam($db, 5);
 
         printf("Unbuffered...\n");
-        MySQLPDOTest::createTestTable($db);
+        MySQLPDOTest::createTestTable($table, $db);
         $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
         pdo_mysql_stmt_bindparam($db, 6);
 
@@ -119,8 +121,9 @@ MySQLPDOTest::skip();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_stmt_bindparam');
 ?>
 --EXPECT--
 Emulated PS...

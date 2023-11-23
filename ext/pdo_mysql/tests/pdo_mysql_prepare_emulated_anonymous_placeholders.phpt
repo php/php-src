@@ -4,20 +4,17 @@ MySQL PDO->prepare(), emulated PS
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
     function prepex($offset, &$db, $query, $input_params = null, $error_info = null) {
-
         try {
-
             if (is_array($error_info) && isset($error_info['prepare']))
                 $stmt = @$db->prepare($query);
             else
@@ -44,7 +41,7 @@ $db = MySQLPDOTest::factory();
             }
 
             if (is_null($input_params))
-                $input_params = array();
+                $input_params = [];
 
             if (is_array($error_info) && isset($error_info['execute']))
                 $ret = @$stmt->execute($input_params);
@@ -159,8 +156,9 @@ $db = MySQLPDOTest::factory();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable(NULL, 'test_prepare_emulated_anonymous_placeholder');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->query('DROP TABLE IF EXISTS test_prepare_emulated_anonymous_placeholder');
 ?>
 --EXPECTF--
 PDO::prepare(): Argument #1 ($query) cannot be empty

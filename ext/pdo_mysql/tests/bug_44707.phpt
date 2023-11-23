@@ -1,34 +1,20 @@
 --TEST--
 Bug #44707 (The MySQL PDO driver resets variable content after bindParam on tinyint field)
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-
-$db = MySQLPDOTest::factory();
-$stmt = $db->query('SELECT VERSION() as _version');
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
-$matches = array();
-if (!preg_match('/^(\d+)\.(\d+)\.(\d+)/ismU', $row['_version'], $matches))
-    die(sprintf("skip Cannot determine MySQL Server version\n"));
-
-$version = $matches[1] * 10000 + $matches[2] * 100 + $matches[3];
-if ($version < 41000)
-    die(sprintf("skip Will work different with MySQL Server < 4.1.0, found %d.%02d.%02d (%d)\n",
-        $matches[1], $matches[2], $matches[3], $version));
+MySQLPDOTest::skipVersionThanLess(40100);
 ?>
 --FILE--
 <?php
-require __DIR__ . '/config.inc';
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
 function bug_44707($db) {
-
     $db->exec('CREATE TABLE test_44707(id INT, mybool TINYINT)');
 
     $id = 1;
@@ -54,7 +40,6 @@ function bug_44707($db) {
 
     $stmt = $db->query('SELECT * FROM test_44707');
     var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-
 }
 
 
@@ -73,7 +58,7 @@ print "done!";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_44707');
 ?>

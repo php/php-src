@@ -4,18 +4,15 @@ MySQL PDOStatement->bindParam() - SQL column types
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
-    MySQLPDOTest::createTestTable($db);
 
     function pdo_mysql_stmt_bindparam_types_do($db, $offset, $native, $sql_type, $value) {
-
             if ($native)
                 $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
             else
@@ -92,14 +89,11 @@ $db = MySQLPDOTest::factory();
     }
 
     function pdo_mysql_stmt_bindparam_types($db, $offset, $sql_type, $value) {
-
         pdo_mysql_stmt_bindparam_types_do($db, $offset, true, $sql_type, $value);
         pdo_mysql_stmt_bindparam_types_do($db, $offset, false, $sql_type, $value);
-
     }
 
     try {
-
         // pdo_mysql_stmt_bindparam_types($db, 2, 'BIT(8)', 1);
         pdo_mysql_stmt_bindparam_types($db, 3, 'TINYINT', -127);
         pdo_mysql_stmt_bindparam_types($db, 4, 'TINYINT UNSIGNED', 255);
@@ -156,7 +150,6 @@ $db = MySQLPDOTest::factory();
         pdo_mysql_stmt_bindparam_types($db, 55, 'LONGTEXT BINARY', str_repeat('d', 300));
         pdo_mysql_stmt_bindparam_types($db, 56, "ENUM('yes', 'no') DEFAULT 'yes'", "no");
         pdo_mysql_stmt_bindparam_types($db, 57, "SET('yes', 'no') DEFAULT 'yes'", "no");
-
     } catch (PDOException $e) {
         printf("[001] %s [%s] %s\n",
             $e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
@@ -166,7 +159,7 @@ $db = MySQLPDOTest::factory();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_stmt_bindparam_types');
 ?>

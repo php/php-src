@@ -4,41 +4,34 @@ MySQL PDOStatement->nextRowSet() with PDO::MYSQL_ATTR_MULTI_STATEMENTS either tr
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
-$row = $db->query('SELECT VERSION() as _version')->fetch(PDO::FETCH_ASSOC);
-$matches = array();
-if (!preg_match('/^(\d+)\.(\d+)\.(\d+)/ismU', $row['_version'], $matches))
-    die(sprintf("skip Cannot determine MySQL Server version\n"));
-
-$version = $matches[1] * 10000 + $matches[2] * 100 + $matches[3];
-if ($version < 50000)
-    die(sprintf("skip Need MySQL Server 5.0.0+, found %d.%02d.%02d (%d)\n",
-        $matches[1], $matches[2], $matches[3], $version));
+MySQLPDOTest::skipVersionThanLess(50000);
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
-    MySQLPDOTest::createTestTable($db);
+    $table = 'pdo_mysql_multi_stmt_nextrowset';
+    $procedure = 'pdo_mysql_multi_stmt_nextrowset_p';
+    MySQLPDOTest::createTestTable($table, $db);
 
     function test_proc($db) {
+        global $table;
+        global $procedure;
 
-        $db->exec('DROP PROCEDURE IF EXISTS p');
-        $db->exec('CREATE PROCEDURE p() BEGIN SELECT id FROM test ORDER BY id ASC LIMIT 3; SELECT id, label FROM test WHERE id < 4 ORDER BY id DESC LIMIT 3; END;');
-        $stmt = $db->query('CALL p()');
+        $db->exec("DROP PROCEDURE IF EXISTS {$procedure}");
+        $db->exec("CREATE PROCEDURE {$procedure}() BEGIN SELECT id FROM $table ORDER BY id ASC LIMIT 3; SELECT id, label FROM {$table} WHERE id < 4 ORDER BY id DESC LIMIT 3; END;");
+        $stmt = $db->query("CALL {$procedure}()");
         do {
             var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
         } while ($stmt->nextRowSet());
         var_dump($stmt->nextRowSet());
-
     }
 
     try {
-
         // Using native PS for proc, since emulated fails.
         printf("Native PS...\n");
         foreach (array(false, true) as $multi) {
@@ -65,15 +58,13 @@ if ($version < 50000)
             // Switch back to emulated prepares to verify multi statement attribute.
             $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
             // This will fail when $multi is false.
-            $stmt = $db->query("SELECT * FROM test; INSERT INTO test (id, label) VALUES (99, 'x')");
+            $stmt = $db->query("SELECT * FROM {$table}; INSERT INTO {$table} (id, label) VALUES (99, 'x')");
             if ($stmt !== false) {
                 $stmt->closeCursor();
             }
             $info = $db->errorInfo();
             var_dump($info[0]);
         }
-        @$db->exec('DROP PROCEDURE IF EXISTS p');
-
     } catch (PDOException $e) {
         printf("[001] %s [%s] %s\n",
             $e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
@@ -83,8 +74,10 @@ if ($version < 50000)
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_multi_stmt_nextrowset');
+$db->exec('DROP PROCEDURE IF EXISTS pdo_mysql_multi_stmt_nextrowset_p');
 ?>
 --EXPECTF--
 Native PS...
@@ -177,7 +170,7 @@ array(0) {
 }
 bool(false)
 
-Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'INSERT INTO test (id, label) VALUES (99, 'x')' at line 1 in %s on line %d
+Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'INSERT INTO pdo_mysql_multi_stmt_nextrowset (id, label) VALUES (99, 'x')' at line 1 in %s on line %d
 string(5) "42000"
 
 Testing with PDO::MYSQL_ATTR_MULTI_STATEMENTS set to true

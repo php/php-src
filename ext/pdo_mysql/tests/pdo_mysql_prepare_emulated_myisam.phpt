@@ -4,20 +4,17 @@ MySQL PDO->prepare(), emulated PS
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
     function prepex($offset, &$db, $query, $input_params = null, $error_info = null) {
-
         try {
-
             if (is_array($error_info) && isset($error_info['prepare']))
                 $stmt = @$db->prepare($query);
             else
@@ -74,7 +71,6 @@ $db = MySQLPDOTest::factory();
 
                 return false;
             }
-
         } catch (PDOException $e) {
             printf("[%03d] %s, [%s} %s\n",
                 $offset, $e->getMessage(),
@@ -151,9 +147,10 @@ $db = MySQLPDOTest::factory();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable(NULL, 'test_prepare_emulated_myisam');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_prepare_emulated_myisam');
 ?>
---EXPECTF--
+--EXPECT--
 PDO::prepare(): Argument #1 ($query) cannot be empty
 done!

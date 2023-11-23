@@ -4,9 +4,9 @@ PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY vs access denied
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipifinfilenotallowed.inc');
+MySQLPDOTest::skipInfileNotAllowed();
 if (!defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) {
     die("skip No MYSQL_ATTR_LOCAL_INFILE_DIRECTORY support");
 }
@@ -31,13 +31,11 @@ if (!defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) {
 		return true;
 	}
 
-	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-	putenv('PDOTEST_ATTR='.serialize([
+	require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+	$db = MySQLPDOTest::factoryWithAttr([
 		PDO::MYSQL_ATTR_LOCAL_INFILE=>false,
-		PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY=>__DIR__."/foo/bar"
-		]));
-	$db = MySQLPDOTest::factory();
-	MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
+		PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY=>__DIR__."/foo/bar",
+	]);
 
 	try {
 		exec_and_count(2, $db, sprintf('CREATE TABLE test_local_inifile_dir_denied(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
@@ -67,8 +65,9 @@ if (!defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) {
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
-$db = MySQLPDOTest::dropTestTable(NULL, 'test_local_inifile_dir_denied');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_local_inifile_dir_denied');
 ?>
 --EXPECTF--
 Warning: PDO::exec(): SQLSTATE[HY000]: General error: 2068 LOAD DATA LOCAL INFILE %s in %s on line %d

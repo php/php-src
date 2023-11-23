@@ -4,7 +4,7 @@ MySQL PDO: PDOStatement->fetchObject()
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 $db = MySQLPDOTest::factory();
 
@@ -20,14 +20,16 @@ if (!$ok)
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-MySQLPDOTest::createTestTable($db);
+
+$table = 'pdo_mysql_stmt_fetchobject';
+MySQLPDOTest::createTestTable($table, $db);
 
 try {
 
-    $query = "SELECT id, '', NULL, \"\" FROM test ORDER BY id ASC LIMIT 3";
+    $query = "SELECT id, '', NULL, \"\" FROM {$table} ORDER BY id ASC LIMIT 3";
     $stmt = $db->prepare($query);
 
     #[AllowDynamicProperties]
@@ -85,8 +87,9 @@ print "done!";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_stmt_fetchobject');
 ?>
 --EXPECTF--
 myclass::__set(id, -'1'-) 1

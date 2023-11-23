@@ -4,15 +4,13 @@ MySQL PDO->exec(), affected rows
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
     function exec_and_count($offset, &$db, $sql, $exp = NULL) {
-
         try {
-
             $ret = $db->exec($sql);
             if (!is_null($exp) && ($ret !== $exp)) {
                 printf("[%03d] Expecting '%s'/%s got '%s'/%s when running '%s', [%s] %s\n",
@@ -20,7 +18,6 @@ MySQLPDOTest::skip();
                     $db->errorCode(), implode(' ', $db->errorInfo()));
                 return false;
             }
-
         } catch (PDOException $e) {
             printf("[%03d] '%s' has failed, [%s] %s\n",
                 $offset, $sql, $db->errorCode(), implode(' ', $db->errorInfo()));
@@ -30,13 +27,11 @@ MySQLPDOTest::skip();
         return true;
     }
 
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
-    MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 
     /* affected rows related */
     try {
-
         exec_and_count(2, $db, 'DROP TABLE IF EXISTS test_mysql_exec', 0);
         exec_and_count(3, $db, sprintf('CREATE TABLE test_mysql_exec(id INT NOT NULL PRIMARY KEY, col1 CHAR(10)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE), 0);
         exec_and_count(4, $db, "INSERT INTO test_mysql_exec(id, col1) VALUES (1, 'a')", 1);
@@ -59,7 +54,6 @@ MySQLPDOTest::skip();
         // Results may vary. Typically you will get 1. But the MySQL 5.1 manual states: Truncation operations do not return the number of deleted rows.
         // Don't rely on any return value!
         exec_and_count(38, $db, 'TRUNCATE TABLE test_mysql_exec', NULL);
-
     } catch (PDOException $e) {
         printf("[001] %s, [%s] %s\n",
             $e->getMessage(),
@@ -148,7 +142,6 @@ MySQLPDOTest::skip();
 
     // multi query
     try {
-
         $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
         $exp = 0;
 
@@ -162,8 +155,6 @@ MySQLPDOTest::skip();
         // this is interesting: if we get sort of affected rows, what will happen now?
         $tmp = @$db->exec('INSERT INTO test_mysql_exec(id) VALUES (1); INSERT INTO test_mysql_exec(id) VALUES (2)');
         printf("[035] With emulated PS it works but makes no sense given that exec() returns sort of affected rows...\n");
-
-
     } catch (PDOException $e) {
         printf("[033] %s, [%s] %s\n",
             $e->getMessage(),
@@ -175,8 +166,9 @@ MySQLPDOTest::skip();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable(NULL, 'test_mysql_exec');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->query('DROP TABLE IF EXISTS test_mysql_exec');
 ?>
 --EXPECTF--
 Warning: PDO::exec(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'THIS IS NOT VALID SQL, I HOPE' at line 1 in %s on line %d
