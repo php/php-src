@@ -48471,6 +48471,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_UNUSED_HAN
 
 	variable_ptr = EX_VAR(opline->op1.var);
 
+	SAVE_OPLINE();
+
 	ht = ZEND_MAP_PTR_GET(EX(func)->op_array.static_variables_ptr);
 	if (!ht) {
 		ht = zend_array_dup(EX(func)->op_array.static_variables);
@@ -48480,7 +48482,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_UNUSED_HAN
 
 	value = (zval*)((char*)ht->arData + (opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
 
-	SAVE_OPLINE();
 	if (opline->extended_value & ZEND_BIND_REF) {
 		if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
 			if (UNEXPECTED(zval_update_constant_ex(value, EX(func)->op_array.scope) != SUCCESS)) {
