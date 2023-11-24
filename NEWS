@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     error handler). (ilutov)
   . Fixed oss-fuzz #64209 (In-place modification of filename in
     php_message_handler_for_zend). (ilutov)
+  . Fixed bug GH-12758 / GH-12768 (Invalid opline in OOM handlers within
+    ZEND_FUNC_GET_ARGS and ZEND_BIND_STATIC). (Florian Engelhardt)
 
 - DOM:
   . Fixed bug GH-12616 (DOM: Removing XMLNS namespace node results in invalid
