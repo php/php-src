@@ -12,7 +12,6 @@ addons:
       - re2c
       - ccache
       - mysql-server
-      - libaspell-dev
       - libbz2-dev
       - libcurl4-gnutls-dev
       - libenchant-dev
