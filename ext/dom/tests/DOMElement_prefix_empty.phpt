@@ -15,6 +15,11 @@ echo "--- Changing the prefix to an empty string ---\n";
 $container->prefix = "";
 echo $dom->saveXML();
 
+echo "--- Changing the prefix to an empty C-style string ---\n";
+
+$container->prefix = "\0foobar";
+echo $dom->saveXML();
+
 echo "--- Changing the prefix to \"hello\" ---\n";
 
 $container->prefix = "hello";
@@ -32,6 +37,9 @@ echo $dom->saveXML();
 ?>
 --EXPECT--
 --- Changing the prefix to an empty string ---
+<?xml version="1.0"?>
+<container xmlns:conflict="urn:foo" xmlns:hello="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml"/>
+--- Changing the prefix to an empty C-style string ---
 <?xml version="1.0"?>
 <container xmlns:conflict="urn:foo" xmlns:hello="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml"/>
 --- Changing the prefix to "hello" ---

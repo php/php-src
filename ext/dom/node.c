@@ -674,7 +674,7 @@ zend_result dom_node_prefix_write(dom_object *obj, zval *newval)
 			prefix_str = Z_STR_P(newval);
 
 			prefix = ZSTR_VAL(prefix_str);
-			if (ZSTR_LEN(prefix_str) == 0) {
+			if (*prefix == '\0') {
 				/* The empty string namespace prefix does not exist.
 				 * We should fall back to the default namespace in this case. */
 				prefix = NULL;
