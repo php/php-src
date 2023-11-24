@@ -22,7 +22,7 @@ error_reporting=E_ALL
     $db = new PDO($dsn, $user, $pass);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-    $db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
+
     $create = sprintf('CREATE TABLE %s(id INT)', $table);
     $db->exec($create);
     $db->exec(sprintf('INSERT INTO %s(id) VALUES (1)', $table));

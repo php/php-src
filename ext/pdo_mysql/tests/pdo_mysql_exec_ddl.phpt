@@ -41,15 +41,11 @@ MySQLPDOTest::skip();
     $table2 = 'pdo_mysql_exec_ddl_2';
     /* affected rows related */
     try {
-        @$db->exec("DROP DATABASE IF EXISTS {$db_name}");
-        @$db->exec("DROP DATABASE IF EXISTS {$db_name_2}");
         if (1 === @$db->exec("CREATE DATABASE {$db_name}")) {
             // yippie - we can create databases etc.
             exec_and_count(3, $db, "ALTER DATABASE {$db_name} CHARACTER SET latin1", 1);
         }
 
-        exec_and_count(4, $db, "DROP TABLE IF EXISTS {$table}", 0);
-        exec_and_count(5, $db, "DROP TABLE IF EXISTS {$table2}", 0);
         if (0 === $db->exec("CREATE TABLE {$table} (id INT, col1 CHAR(2))")) {
             exec_and_count(5, $db, "CREATE INDEX idx1 ON {$table} (id)", 0);
             exec_and_count(6, $db, "DROP INDEX idx1 ON {$table}", 0);

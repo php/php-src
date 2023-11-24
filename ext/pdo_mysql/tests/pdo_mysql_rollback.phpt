@@ -36,7 +36,6 @@ MySQLPDOTest::skipNotTransactionalEngine();
 
     $db->beginTransaction();
     $db->query("INSERT INTO {$table}(id, label) VALUES (100, 'z')");
-    $db->query("DROP TABLE IF EXISTS {$table2}");
     $db->query("CREATE TABLE {$table2}(id INT)");
     $num++;
     try {

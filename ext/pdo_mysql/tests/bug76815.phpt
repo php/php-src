@@ -17,8 +17,6 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $func = 'bug76815_pdo_mysql_f';
 $procedure = 'bug76815_pdo_mysql_p';
 
-$pdo->query("DROP FUNCTION IF EXISTS {$func}");
-$pdo->query("DROP PROCEDURE IF EXISTS {$procedure}");
 $pdo->query("CREATE FUNCTION {$func}() RETURNS VARCHAR(5) DETERMINISTIC BEGIN RETURN 'x12345'; END");
 $pdo->query("CREATE PROCEDURE {$procedure}() BEGIN SELECT {$func}(); END");
 

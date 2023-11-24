@@ -6,7 +6,6 @@ pdo_mysql
 <?php
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-MySQLPDOTest::skipVersionThanLess(50000);
 ?>
 --FILE--
 <?php
@@ -39,7 +38,6 @@ MySQLPDOTest::skipVersionThanLess(50000);
     try {
         // What will happen if a PS returns a different number of result set column upon each execution?
         // Lets try with a SP accepting parameters...
-        $db->exec("DROP PROCEDURE IF EXISTS {$procedure}");
         $db->exec("CREATE PROCEDURE {$procedure}(IN cols INT) BEGIN IF cols < 2 THEN SELECT cols AS 'one'; ELSE SELECT 1 AS 'one', cols AS 'two'; END IF; END;");
 
         // Emulates PS first

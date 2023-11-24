@@ -19,7 +19,6 @@ error_reporting=E_ALL
 
     $table = 'pdo_mysql_attr_init_command';
     $db = new PDO($dsn, $user, $pass);
-    $db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
 
     $create = sprintf('CREATE TABLE %s(id INT)', $table);
     var_dump($create);
@@ -33,7 +32,6 @@ error_reporting=E_ALL
     $stmt = $db->query(sprintf('SELECT id FROM %s', $table));
     var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-    $db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
     print "done!";
 ?>
 --CLEAN--

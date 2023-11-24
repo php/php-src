@@ -18,7 +18,6 @@ $createSql = "CREATE TABLE `bug53551` (
   `count` BIGINT(20) UNSIGNED NOT NULL DEFAULT '0'
 )";
 
-$db->exec('DROP TABLE IF EXISTS bug53551');
 $db->exec($createSql);
 $db->exec("INSERT INTO bug53551 SET `count` = 1 ");
 $db->exec("SET sql_mode = 'Traditional'");

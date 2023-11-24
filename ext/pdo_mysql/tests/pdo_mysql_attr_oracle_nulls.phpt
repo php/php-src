@@ -12,6 +12,8 @@ MySQLPDOTest::skip();
     require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
+    $procedure = 'pdo_mysql_attr_oracle_nulls_p';
+
     try {
         $db->setAttribute(PDO::ATTR_ORACLE_NULLS, []);
     } catch (\TypeError $e) {
@@ -47,10 +49,10 @@ MySQLPDOTest::skip();
     $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
     $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
 
-    if ($have_procedures && (false !== $db->exec('DROP PROCEDURE IF EXISTS p')) &&
-        (false !== $db->exec("CREATE PROCEDURE p() BEGIN SELECT NULL as z, '' AS a, ' ' AS b, TRIM(' ') as c, ' d' AS d, ' e' AS e; END;"))) {
+    if ($have_procedures && (false !== $db->exec("DROP PROCEDURE IF EXISTS {$procedure}")) &&
+        (false !== $db->exec("CREATE PROCEDURE {$procedure}() BEGIN SELECT NULL as z, '' AS a, ' ' AS b, TRIM(' ') as c, ' d' AS d, ' e' AS e; END;"))) {
         // requires MySQL 5+
-        $stmt = $db->prepare('CALL p()');
+        $stmt = $db->prepare("CALL {$procedure}()");
         $stmt->execute();
         do {
             var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -63,10 +65,13 @@ MySQLPDOTest::skip();
 
     }
 
-    if ($have_procedures)
-        @$db->exec('DROP PROCEDURE IF EXISTS p');
-
     print "done!";
+?>
+--CLEAN--
+<?php
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec("DROP PROCEDURE IF EXISTS pdo_mysql_attr_oracle_nulls_p");
 ?>
 --EXPECTF--
 Attribute value must be of type int for selected attribute, array given

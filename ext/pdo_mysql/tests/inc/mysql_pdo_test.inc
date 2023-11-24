@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/config.inc';
-require_once __DIR__ . '/../../../../ext/pdo/tests/pdo_test.inc';
+require_once dirname(__DIR__, 4) . '/ext/pdo/tests/pdo_test.inc';
 
 foreach ($env as $k => $v) {
     define($k, $v);

@@ -6,7 +6,6 @@ pdo_mysql
 <?php
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-MySQLPDOTest::skipVersionThanLess(50000);
 ?>
 --FILE--
 <?php
@@ -16,7 +15,6 @@ $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
 $procedure = 'bug_41997_pdo_mysql_p';
 
-$db->exec("DROP PROCEDURE IF EXISTS {$procedure}");
 $db->exec("CREATE PROCEDURE {$procedure}() BEGIN SELECT 1 AS 'one'; END");
 
 $stmt = $db->query("CALL {$procedure}()");

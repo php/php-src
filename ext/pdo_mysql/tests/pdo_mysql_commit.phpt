@@ -22,7 +22,6 @@ MySQLPDOTest::skipNotTransactionalEngine();
         }
 
         // DDL will issue an implicit commit
-        $db->exec(sprintf('DROP TABLE IF EXISTS %s', $table2));
         $db->exec(sprintf('CREATE TABLE %s (id INT) ENGINE=%s', $table2, MySQLPDOTest::detect_transactional_mysql_engine($db)));
         try {
             $db->commit();

@@ -54,7 +54,7 @@ MySQLPDOTest::skip();
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 
-@$db->exec('DROP DATABASE IF EXISTS `crazy;dbname`');
+$db->exec('DROP DATABASE IF EXISTS `crazy;dbname`');
 ?>
 --EXPECT--
 done!

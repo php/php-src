@@ -16,7 +16,6 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $procedure = 'test_procedure_error_at_second_63185';
 
-$pdo->exec("DROP PROCEDURE IF EXISTS {$procedure}");
 $pdo->exec("CREATE PROCEDURE {$procedure} ()
 	BEGIN
 		SELECT 'x' AS foo;
