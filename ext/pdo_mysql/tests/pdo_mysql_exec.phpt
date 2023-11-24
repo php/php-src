@@ -148,7 +148,7 @@ MySQLPDOTest::skip();
         $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
         $exp = 0;
 
-        $tmp = @$db->exec(sprintf('DROP TABLE IF EXISTS test_mysql_exec; CREATE TABLE test_mysql_exec(id INT) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
+        $tmp = $db->exec(sprintf('DROP TABLE IF EXISTS test_mysql_exec; CREATE TABLE test_mysql_exec(id INT) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
         if ($exp !== $tmp)
             printf("[034] Expecting %s/%s got %s/%s, [%s] %s\n",
                 $exp, gettype($exp),
@@ -156,7 +156,7 @@ MySQLPDOTest::skip();
                 $db->errorCode(), var_export($db->errorInfo(), true));
 
         // this is interesting: if we get sort of affected rows, what will happen now?
-        $tmp = @$db->exec('INSERT INTO test_mysql_exec(id) VALUES (1); INSERT INTO test_mysql_exec(id) VALUES (2)');
+        $tmp = $db->exec('INSERT INTO test_mysql_exec(id) VALUES (1); INSERT INTO test_mysql_exec(id) VALUES (2)');
         printf("[035] With emulated PS it works but makes no sense given that exec() returns sort of affected rows...\n");
     } catch (PDOException $e) {
         printf("[033] %s, [%s] %s\n",

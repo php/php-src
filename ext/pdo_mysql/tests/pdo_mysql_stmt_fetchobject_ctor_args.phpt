@@ -11,7 +11,7 @@ $db = MySQLPDOTest::factory();
 try {
     $query = "SELECT '', NULL, \"\" FROM DUAL";
     $stmt = $db->prepare($query);
-    $ok = @$stmt->execute();
+    $ok = $stmt->execute();
 } catch (PDOException $e) {
     die("skip: Test cannot be run with SQL mode ANSI");
 }

@@ -19,7 +19,7 @@ MySQLPDOTest::skip();
                 $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 1);
 
             $sql = sprintf('CREATE TABLE test_stmt_bindparam_types(id INT, label %s) ENGINE=%s', $sql_type, MySQLPDOTest::getTableEngine());
-            if ((!$stmt = @$db->prepare($sql)) || (!@$stmt->execute()))
+            if ((!$stmt = $db->prepare($sql)) || (!$stmt->execute()))
                 // Server might not support column type - skip it
                 return true;
 

@@ -15,7 +15,7 @@ MySQLPDOTest::skip();
 
         $db->exec('DROP TABLE IF EXISTS test_mysql_types_zerofill');
         $sql = sprintf('CREATE TABLE test_mysql_types_zerofill(id INT, label %s) ENGINE=%s', $sql_type, MySQLPDOTest::getTableEngine());
-        @$db->exec($sql);
+        $db->exec($sql);
         if ($db->errorCode() != 0) {
             // not all MySQL Server versions and/or engines might support the type
             return true;

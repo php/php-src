@@ -52,7 +52,7 @@ MySQLPDOTest::skip();
         sleep(1);
         if ('00000' == $db1->errorCode()) {
             // looks like KILL has worked ? Or not... TODO: why no warning with libmysql?!
-            @$db1->exec("SET @pdo_persistent_connection=2");
+            $db1->exec("SET @pdo_persistent_connection=2");
             // but now I want to see some error...
             if ('HY000' != $db1->errorCode())
                 printf("[004] Wrong error code %s\n", $db1->errorCode());
@@ -68,7 +68,7 @@ MySQLPDOTest::skip();
         $tmp = $stmt->fetch(PDO::FETCH_ASSOC);
         $con1 = $tmp['_con1'];
 
-        @$db2 = new PDO($dsn, $user, $pass, [PDO::ATTR_PERSISTENT => true]);
+        $db2 = new PDO($dsn, $user, $pass, [PDO::ATTR_PERSISTENT => true]);
         $db2->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
         $stmt = $db2->query('SELECT CONNECTION_ID() AS _con2');
         $tmp = $stmt->fetch(PDO::FETCH_ASSOC);
