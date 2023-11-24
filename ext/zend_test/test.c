@@ -413,6 +413,8 @@ static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 	int int_value = zend_ini_parse_bool(new_value);
 
 	if (int_value == 1) {
+		// `zend_mm_heap` is a private struct, so we have not way to find the
+		// actual size, but 4096 bytes should be enough
 		ZT_G(zend_test_heap) = malloc(4096);
 		memset(ZT_G(zend_test_heap), 0, 4096);
 		zend_mm_set_custom_handlers(
