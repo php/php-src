@@ -215,10 +215,14 @@ PHP_MINIT_FUNCTION(soap);
 PHP_MSHUTDOWN_FUNCTION(soap);
 PHP_MINFO_FUNCTION(soap);
 
+static const zend_module_dep soap_deps[] = {
+	ZEND_MOD_REQUIRED("date")
+	ZEND_MOD_END
+};
+
 zend_module_entry soap_module_entry = {
-#ifdef STANDARD_MODULE_HEADER
-  STANDARD_MODULE_HEADER,
-#endif
+  STANDARD_MODULE_HEADER_EX, NULL,
+  soap_deps,
   "soap",
   ext_functions,
   PHP_MINIT(soap),
