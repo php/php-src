@@ -82,8 +82,6 @@ PHP 8.4 UPGRADE NOTES
   . XSLTProcessor::setParameter() will now throw a ValueError when its arguments
     contain null bytes. This never actually worked correctly in the first place,
     which is why it throws an exception nowadays.
-  . The typed properties XSLTProcessor::$cloneDocument and
-    XSLTProcessor::$doXInclude are now declared.
 
 ========================================
 2. New Features
@@ -192,6 +190,10 @@ PHP 8.4 UPGRADE NOTES
 - Sqlite:
   . The class constants are typed now.
 
+- XSL:
+  . The typed properties XSLTProcessor::$cloneDocument and
+    XSLTProcessor::$doXInclude are now declared.
+
 ========================================
 10. New Global Constants
 ========================================
@@ -230,6 +232,8 @@ PHP 8.4 UPGRADE NOTES
 
 * mb_strcut() is much faster now for UTF-8 and UTF-16 strings.
 
-* get_browser() is much faster now, up to 1.5x - 2.5x for some test cases.
-
 * Looking up mbstring encoding names is much faster now.
+
+* The performance of converting SJIS-win to unicode is greatly improved.
+
+* get_browser() is much faster now, up to 1.5x - 2.5x for some test cases.
