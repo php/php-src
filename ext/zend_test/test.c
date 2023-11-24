@@ -14,6 +14,7 @@
   +----------------------------------------------------------------------+
 */
 
+#include <stdint.h>
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -367,7 +368,6 @@ static ZEND_FUNCTION(zend_test_crash)
 
 zend_mm_heap* zend_test_heap;
 zend_mm_heap* zend_orig_heap;
-volatile uint32_t lineno = 0;
 
 static bool has_opline(zend_execute_data *execute_data)
 {
@@ -378,32 +378,29 @@ static bool has_opline(zend_execute_data *execute_data)
 	;
 }
 
-#pragma GCC push_options
-#pragma GCC optimize("O0")
-void * __attribute__((optnone)) zend_test_custom_malloc(size_t len)
+void * zend_test_custom_malloc(size_t len)
 {
 	if (has_opline(EG(current_execute_data))) {
-		lineno = EG(current_execute_data)->opline->lineno;
+		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
 	}
 	return _zend_mm_alloc(zend_orig_heap, len);
 }
 
-void __attribute__((optnone)) zend_test_custom_free(void *ptr)
+void zend_test_custom_free(void *ptr)
 {
 	if (has_opline(EG(current_execute_data))) {
-		lineno = EG(current_execute_data)->opline->lineno;
+		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
 	}
 	_zend_mm_free(zend_orig_heap, ptr);
 }
 
-void * __attribute__((optnone)) zend_test_custom_realloc(void * ptr, size_t len)
+void * zend_test_custom_realloc(void * ptr, size_t len)
 {
 	if (has_opline(EG(current_execute_data))) {
-		lineno = EG(current_execute_data)->opline->lineno;
+		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
 	}
 	return _zend_mm_realloc(zend_orig_heap, ptr, len);
 }
-#pragma GCC pop_options
 
 static ZEND_FUNCTION(zend_test_observe_opline_in_zendmm)
 {
