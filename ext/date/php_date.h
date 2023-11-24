@@ -20,6 +20,23 @@
 #include "lib/timelib.h"
 #include "Zend/zend_hash.h"
 
+/* Same as SIZEOF_ZEND_LONG but using TIMELIB_LONG_MAX/MIN */
+#if TIMELIB_LONG_MAX == 2147483647
+#	define PHP_DATE_SIZEOF_LONG 4
+#elif TIMELIB_LONG_MAX == 9223372036854775807
+#	define PHP_DATE_SIZEOF_LONG 8
+#else
+#	error "Unknown TIMELIB LONG SIZE"
+#endif
+
+/* Same as ZEND_DOUBLE_FITS_LONG but using TIMELIB_LONG_MAX/MIN */
+#if PHP_DATE_SIZEOF_LONG == 4
+#	define PHP_DATE_DOUBLE_FITS_LONG(d) (!((d) > (double)TIMELIB_LONG_MAX || (d) < (double)TIMELIB_LONG_MIN))
+#elif PHP_DATE_SIZEOF_LONG == 8
+	/* >= as (double)TIMELIB_LONG_MAX is outside signed range */
+#	define PHP_DATE_DOUBLE_FITS_LONG(d) (!((d) >= (double)TIMELIB_LONG_MAX || (d) < (double)TIMELIB_LONG_MIN))
+#endif
+
 #include "php_version.h"
 #define PHP_DATE_VERSION PHP_VERSION
 
