@@ -2286,7 +2286,7 @@ PHP_FUNCTION(pg_untrace)
 	PGconn *pgsql;
 	pgsql_link_handle *link;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r!", &pgsql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O!", &pgsql_link, pgsql_link_ce) == FAILURE) {
 		RETURN_THROWS();
 	}
 
