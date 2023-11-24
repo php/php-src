@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12996 (Incorrect SCRIPT_NAME with Apache ProxyPassMatch when
     plus in path). (Jakub Zelenka)
 
+- MySQLnd:
+  . Fixed bug GH-12107 (When running a stored procedure (that returns a result
+    set) twice, PHP crashes). (nielsdos)
+
 - OpenSSL:
   . Fixed LibreSSL undefined reference when OPENSSL_NO_ENGINE not set.
    (David Carlier).
