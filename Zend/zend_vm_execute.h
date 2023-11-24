@@ -10700,6 +10700,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_CONST_UNUSE
 	}
 
 	if (result_size) {
+		SAVE_OPLINE();
 		uint32_t first_extra_arg = EX(func)->op_array.num_args;
 
 		ht = zend_new_array(result_size);
@@ -36064,6 +36065,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_UNUSED_UNUS
 	}
 
 	if (result_size) {
+		SAVE_OPLINE();
 		uint32_t first_extra_arg = EX(func)->op_array.num_args;
 
 		ht = zend_new_array(result_size);

@@ -9251,6 +9251,7 @@ ZEND_VM_HANDLER(172, ZEND_FUNC_GET_ARGS, UNUSED|CONST, UNUSED)
 	}
 
 	if (result_size) {
+		SAVE_OPLINE();
 		uint32_t first_extra_arg = EX(func)->op_array.num_args;
 
 		ht = zend_new_array(result_size);
