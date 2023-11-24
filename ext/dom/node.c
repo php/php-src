@@ -674,8 +674,14 @@ zend_result dom_node_prefix_write(dom_object *obj, zval *newval)
 			prefix_str = Z_STR_P(newval);
 
 			prefix = ZSTR_VAL(prefix_str);
+			if (ZSTR_LEN(prefix_str) == 0) {
+				/* The empty string namespace prefix does not exist.
+				 * We should fall back to the default namespace in this case. */
+				prefix = NULL;
+			}
 			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
 				strURI = (char *) nodep->ns->href;
+				/* Validate namespace naming constraints */
 				if (strURI == NULL ||
 					(zend_string_equals_literal(prefix_str, "xml") && strcmp(strURI, (char *) XML_XML_NAMESPACE)) ||
 					(nodep->type == XML_ATTRIBUTE_NODE && zend_string_equals_literal(prefix_str, "xmlns") &&
