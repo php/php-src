@@ -2522,12 +2522,13 @@ PHPAPI void php_date_initialize_from_ts_long(php_date_obj *dateobj, zend_long se
 PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts) /* {{{ */
 {
 	double sec_dval = trunc(ts);
-	zend_long sec;
-	int usec;
+	zend_long sec = (zend_long)sec_dval;
+	int usec = (int)(fmod(ts, 1) * 1000000);
 
 	if (UNEXPECTED(isnan(sec_dval)
-		|| sec_dval >= (double)TIMELIB_LONG_MAX
+		|| sec_dval > (double)TIMELIB_LONG_MAX
 		|| sec_dval < (double)TIMELIB_LONG_MIN
+		|| (sec == TIMELIB_LONG_MIN && usec < 0)
 	)) {
 		zend_throw_error(
 			date_ce_date_range_error,
@@ -2538,9 +2539,6 @@ PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts)
 		);
 		return false;
 	}
-
-	sec = (zend_long)sec_dval;
-	usec = (int)(fmod(ts, 1) * 1000000);
 
 	if (UNEXPECTED(usec < 0)) {
 		sec = sec - 1;
