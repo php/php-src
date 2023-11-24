@@ -177,6 +177,10 @@ PHP 8.4 UPGRADE NOTES
   . Calling session_set_save_handler() with more than 2 arguments is
     deprecated. Use the 2-parameter signature instead.
 
+- Standard:
+  . Calling stream_context_set_option() with 2 arguments is deprecated.
+    Use stream_context_set_options() instead.
+
 ========================================
 5. Changed Functions
 ========================================

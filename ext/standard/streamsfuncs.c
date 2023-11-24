@@ -1021,6 +1021,15 @@ PHP_FUNCTION(stream_context_set_option)
 	size_t optionname_len;
 	zval *zvalue = NULL;
 
+	if (ZEND_NUM_ARGS() == 2) {
+		zend_error(E_DEPRECATED, "Calling stream_context_set_option() with 2 arguments is deprecated, "
+			"use stream_context_set_options() instead"
+		);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_RESOURCE(zcontext)
 		Z_PARAM_ARRAY_HT_OR_STR(options, wrappername)
