@@ -14,7 +14,6 @@
   +----------------------------------------------------------------------+
 */
 
-#include <stdint.h>
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -366,9 +365,6 @@ static ZEND_FUNCTION(zend_test_crash)
 	php_printf("%s", invalid);
 }
 
-zend_mm_heap* zend_test_heap;
-zend_mm_heap* zend_orig_heap;
-
 static bool has_opline(zend_execute_data *execute_data)
 {
 	return execute_data
@@ -383,7 +379,7 @@ void * zend_test_custom_malloc(size_t len)
 	if (has_opline(EG(current_execute_data))) {
 		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
 	}
-	return _zend_mm_alloc(zend_orig_heap, len);
+	return _zend_mm_alloc(ZT_G(zend_orig_heap), len ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
 }
 
 void zend_test_custom_free(void *ptr)
@@ -391,7 +387,7 @@ void zend_test_custom_free(void *ptr)
 	if (has_opline(EG(current_execute_data))) {
 		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
 	}
-	_zend_mm_free(zend_orig_heap, ptr);
+	_zend_mm_free(ZT_G(zend_orig_heap), ptr ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
 }
 
 void * zend_test_custom_realloc(void * ptr, size_t len)
@@ -399,28 +395,34 @@ void * zend_test_custom_realloc(void * ptr, size_t len)
 	if (has_opline(EG(current_execute_data))) {
 		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
 	}
-	return _zend_mm_realloc(zend_orig_heap, ptr, len);
+	return _zend_mm_realloc(ZT_G(zend_orig_heap), ptr, len ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
 }
 
-static ZEND_FUNCTION(zend_test_observe_opline_in_zendmm)
+static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 {
-	zend_test_heap = malloc(4096);
-	memset(zend_test_heap, 0, 4096);
-	zend_mm_set_custom_handlers(
-		zend_test_heap,
-		zend_test_custom_malloc,
-		zend_test_custom_free,
-		zend_test_custom_realloc
-	);
-	zend_orig_heap = zend_mm_get_heap();
-	zend_mm_set_heap(zend_test_heap);
-}
+	if (new_value == NULL) {
+		return FAILURE;
+	}
 
-static ZEND_FUNCTION(zend_test_unobserve_opline_in_zendmm)
-{
-	free(zend_test_heap);
-	zend_test_heap = NULL;
-	zend_mm_set_heap(zend_orig_heap);
+	int int_value = zend_ini_parse_bool(new_value);
+
+	if (int_value == 1) {
+		ZT_G(zend_test_heap) = malloc(4096);
+		memset(ZT_G(zend_test_heap), 0, 4096);
+		zend_mm_set_custom_handlers(
+			ZT_G(zend_test_heap),
+			zend_test_custom_malloc,
+			zend_test_custom_free,
+			zend_test_custom_realloc
+		);
+		ZT_G(zend_orig_heap) = zend_mm_get_heap();
+		zend_mm_set_heap(ZT_G(zend_test_heap));
+	} else if (ZT_G(zend_test_heap))  {
+		free(ZT_G(zend_test_heap));
+		ZT_G(zend_test_heap) = NULL;
+		zend_mm_set_heap(ZT_G(zend_orig_heap));
+	}
+	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
 static ZEND_FUNCTION(zend_test_is_pcre_bundled)
@@ -617,6 +619,7 @@ static ZEND_METHOD(ZendTestChildClassWithMethodWithParameterAttribute, override)
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_BOOLEAN("zend_test.observe_opline_in_zendmm", "0", PHP_INI_ALL, OnUpdateZendTestObserveOplineInZendMM, observe_opline_in_zendmm, zend_zend_test_globals, zend_test_globals)
 PHP_INI_END()
 
 void (*old_zend_execute_ex)(zend_execute_data *execute_data);
@@ -759,6 +762,13 @@ PHP_RSHUTDOWN_FUNCTION(zend_test)
 		zend_weakrefs_hash_del(&ZT_G(global_weakmap), (zend_object *)(uintptr_t)objptr);
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&ZT_G(global_weakmap));
+
+	if (ZT_G(zend_test_heap))  {
+		free(ZT_G(zend_test_heap));
+		ZT_G(zend_test_heap) = NULL;
+		zend_mm_set_heap(ZT_G(zend_orig_heap));
+	}
+
 	return SUCCESS;
 }
 
