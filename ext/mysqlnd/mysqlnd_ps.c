@@ -652,8 +652,11 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, const enum_my
 		  Executed, but the user hasn't started to fetch
 		  This will clean also the metadata, but after the EXECUTE call we will
 		  have it again.
+		  stmt->result may be freed by free_stmt_result, transitively called from flush.
 		*/
-		stmt->result->m.free_result_buffers(stmt->result);
+		if (stmt->result) {
+			stmt->result->m.free_result_buffers(stmt->result);
+		}
 
 		stmt->state = MYSQLND_STMT_PREPARED;
 	} else if (stmt->state < MYSQLND_STMT_PREPARED) {
