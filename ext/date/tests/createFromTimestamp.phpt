@@ -9,7 +9,8 @@ class MyDateTime extends DateTime {};
 class MyDateTimeImmutable extends DateTimeImmutable {};
 
 define('MAX_32BIT', 2147483647);
-define('MIN_32BIT', -2147483648);
+// -2147483648 may not be expressed in a literal due to parsing peculiarities.
+define('MIN_32BIT', -2147483647 - 1);
 
 $timestamps = array(
     1696883232,
