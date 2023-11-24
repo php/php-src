@@ -21,6 +21,9 @@ FTP:
 Intl:
   . Added IntlDateFormatter::PATTERN constant. (David Carlier)
 
+MBString:
+  . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
+
 Opcache:
   . Added large shared segments support for FreeBSD. (David Carlier)
 

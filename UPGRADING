@@ -161,6 +161,10 @@ PHP 8.4 UPGRADE NOTES
 - DOM:
   . Added DOMNode::compareDocumentPosition().
 
+- MBString:
+  . Added mb_trim, mb_ltrim and mb_rtrim functions.
+    RFC: https://wiki.php.net/rfc/mb_trim
+
 ========================================
 7. New Classes and Interfaces
 ========================================
