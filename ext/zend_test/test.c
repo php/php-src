@@ -33,6 +33,12 @@
 #include "Zend/zend_alloc.h"
 #include "test_arginfo.h"
 
+// `php.h` sets `NDEBUG` when not `PHP_DEBUG` which will make `assert()` from
+// assert.h a no-op. In order to have `assert()` working on NDEBUG builds, we
+// undefine `NDEBUG` and re-include assert.h
+#undef NDEBUG
+#include "assert.h"
+
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 # include <libxml/globals.h>
 # include <libxml/parser.h>
