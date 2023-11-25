@@ -2104,7 +2104,6 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	zuf.getenv_function = sapi_getenv;
 	zuf.resolve_path_function = php_resolve_path_for_zend;
 	zend_startup(&zuf);
-	zend_reset_lc_ctype_locale();
 	zend_update_current_locale();
 
 	zend_observer_startup();

@@ -63,3 +63,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 ========================
 5. SAPI changes
 ========================
+
+* The LC_CTYPE locale is no longer overridden at module startup to C.UTF-8.
+  This was originally introduced to fix an issue with UTF-8 characters when
+  libedit was used for providing the readline functionality. The new fix now
+  delays the locale reset until the readline functionality is actually used.
+  SAPIs relying on this behaviour must manually call zend_reset_lc_ctype_locale().
+  This change is done to fix a performance regression.
+  See https://github.com/php/php-src/pull/12784.
