@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.1
 
+- Core:
+  . Fixed bug GH-12758 / GH-12768 (Invalid opline in OOM handlers within
+    ZEND_FUNC_GET_ARGS and ZEND_BIND_STATIC). (Florian Engelhardt)
+
 - Standard
   . Fixed GH-12745 (http_build_query() default null argument for $arg_separator
     is implicitly coerced to string). (Girgias)

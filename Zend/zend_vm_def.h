@@ -8955,6 +8955,8 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, ANY, REF)
 
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 
+	SAVE_OPLINE();
+
 	ht = ZEND_MAP_PTR_GET(EX(func)->op_array.static_variables_ptr);
 	if (!ht) {
 		ht = zend_array_dup(EX(func)->op_array.static_variables);
@@ -8964,7 +8966,6 @@ ZEND_VM_HANDLER(183, ZEND_BIND_STATIC, CV, ANY, REF)
 
 	value = (zval*)((char*)ht->arData + (opline->extended_value & ~(ZEND_BIND_REF|ZEND_BIND_IMPLICIT|ZEND_BIND_EXPLICIT)));
 
-	SAVE_OPLINE();
 	if (opline->extended_value & ZEND_BIND_REF) {
 		i_zval_ptr_dtor(variable_ptr);
 		if (UNEXPECTED(!Z_ISREF_P(value))) {
@@ -9468,6 +9469,7 @@ ZEND_VM_HANDLER(172, ZEND_FUNC_GET_ARGS, UNUSED|CONST, UNUSED)
 	}
 
 	if (result_size) {
+		SAVE_OPLINE();
 		uint32_t first_extra_arg = EX(func)->op_array.num_args;
 
 		ht = zend_new_array(result_size);
