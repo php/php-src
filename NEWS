@@ -16,6 +16,10 @@ DOM:
   . Implement DOM HTML5 parsing and serialization RFC. (nielsdos)
   . Fix DOMElement->prefix with empty string creates bogus prefix. (nielsdos)
 
+FPM:
+  . Implement GH-12385 (flush headers without body when calling flush()).
+    (nielsdos)
+
 FTP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
 

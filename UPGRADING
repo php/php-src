@@ -103,6 +103,9 @@ PHP 8.4 UPGRADE NOTES
     Furthermore, the DOM\HTMLDocument class implements spec-compliant HTML5
     parsing and serialization.
 
+- FPM:
+  . Flushing headers without a body will now succeed. See GH-12785.
+
 - Phar:
   . Added support for the unix timestamp extension for zip archives.
 
