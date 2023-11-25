@@ -1109,6 +1109,10 @@ smtp_port = 25
 ; the 5th parameter to mail().
 ;mail.force_extra_parameters =
 
+; Allow the blacklisted sendmail flags -O, -X, -C and -be to be passed into the 
+; the 5th parameter of the mail() function by setting to On.
+mail.allow_additional_sendmail_flags = Off
+
 ; Add X-PHP-Originating-Script: that will include uid of the script followed by the filename
 mail.add_x_header = Off
 
