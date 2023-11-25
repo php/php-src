@@ -199,6 +199,28 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 	return s.s;
 }
 
+/* {{{ php_mail_disable_flags
+   Remove all dangerous command line flags
+   from the sendmail shell command
+*/
+PHPAPI zend_string *php_mail_disable_flags(const char *str)
+{
+        const char* blacklist[4] = {"-O", "-C", "-X", "-be"};
+        size_t str_length = strlen(str);
+        char *return_str = emalloc(str_length + 1);
+        strcpy(return_str, str);
+        for (int i = 0; i < 4; ++i) {
+                size_t blacklist_length = strlen(blacklist[i]);
+                char* position = return_str;
+                while ((position = strstr(position, blacklist[i])) != NULL) {
+                        memset(position, ' ', blacklist_length);
+                        position += blacklist_length;
+                }
+        }
+        zend_string *cmd = zend_string_init(return_str, str_length, 0);
+        efree(return_str);
+        return cmd;
+}
 
 /* {{{ Send an email message */
 PHP_FUNCTION(mail)
@@ -278,6 +300,9 @@ PHP_FUNCTION(mail)
 	if (force_extra_parameters) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
 	} else if (extra_cmd) {
+		if (!PG(allow_additional_sendmail_flags)) {
+                	extra_cmd = php_mail_disable_flags(ZSTR_VAL(extra_cmd));
+		}
 		extra_cmd = php_escape_shell_cmd(ZSTR_VAL(extra_cmd));
 	}
 
