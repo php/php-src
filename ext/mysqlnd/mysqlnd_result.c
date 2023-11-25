@@ -344,8 +344,8 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 					}
 					MYSQLND_INC_CONN_STATISTIC(conn->stats, statistic);
 				}
+				PACKET_FREE(&fields_eof);
 			} while (0);
-			PACKET_FREE(&fields_eof);
 			break; /* switch break */
 		}
 	} while (0);
