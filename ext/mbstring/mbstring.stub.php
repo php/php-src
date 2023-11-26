@@ -171,10 +171,10 @@ function mb_decode_numericentity(string $string, array $map, ?string $encoding =
 function mb_send_mail(string $to, string $subject, string $message, array|string $additional_headers = [], ?string $additional_params = null): bool {}
 
 /**
- * @return array<int|string, int|string|array>|string|int|false
+ * @return array<int|string, int|string|array>|string|int|false|null
  * @refcount 1
  */
-function mb_get_info(string $type = "all"): array|string|int|false {}
+function mb_get_info(string $type = "all"): array|string|int|false|null {}
 
 function mb_check_encoding(array|string|null $value = null, ?string $encoding = null): bool {}
 
