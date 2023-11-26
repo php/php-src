@@ -59,24 +59,37 @@ PHP_FUNCTION( numfmt_format )
 
 	switch(type) {
 		case FORMAT_TYPE_INT32:
+		{
+			bool failed = true;
+			int64_t value_64 = zval_try_get_long(number, &failed);
+			if (failed || value_64 < -2147483648 || value_64 > 2147483647) {
+				zend_argument_value_error(object ? 1 : 2, "must be numeric and fit in 32 bits");
+				RETURN_THROWS();
+			}
 			convert_to_long(number);
-			formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number),
+			formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)value_64,
 				formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
 				intl_error_reset(INTL_DATA_ERROR_P(nfo));
 				formatted = eumalloc(formatted_len);
-				formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number),
+				formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)value_64,
 					formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 				if (U_FAILURE( INTL_DATA_ERROR_CODE(nfo) ) ) {
 					efree(formatted);
 				}
 			}
 			INTL_METHOD_CHECK_STATUS( nfo, "Number formatting failed" );
+		}
 			break;
 
 		case FORMAT_TYPE_INT64:
 		{
-			int64_t value = (Z_TYPE_P(number) == IS_DOUBLE)?(int64_t)Z_DVAL_P(number):Z_LVAL_P(number);
+			bool failed = true;
+			int64_t value = zval_try_get_long(number, &failed);
+			if (failed) {
+				zend_argument_value_error(object ? 1 : 2, "must be numeric");
+				RETURN_THROWS();
+			}
 			formatted_len = unum_formatInt64(FORMATTER_OBJECT(nfo), value, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
 				intl_error_reset(INTL_DATA_ERROR_P(nfo));
