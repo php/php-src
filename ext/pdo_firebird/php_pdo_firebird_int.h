@@ -66,7 +66,6 @@ typedef struct {
 } pdo_firebird_error_info;
 
 typedef struct {
-
 	/* the result of the last API call */
 	ISC_STATUS isc_status[20];
 
@@ -75,6 +74,7 @@ typedef struct {
 
 	/* the transaction handle */
 	isc_tr_handle tr;
+	bool in_manually_txn;
 
 	/* date and time format strings, can be set by the set_attribute method */
 	char *date_format;
@@ -93,7 +93,6 @@ typedef struct {
 
 
 typedef struct {
-
 	/* the link that owns this statement */
 	pdo_firebird_db_handle *H;
 
@@ -122,7 +121,6 @@ typedef struct {
 
 	/* the output SQLDA */
 	XSQLDA out_sqlda; /* last member */
-
 } pdo_firebird_stmt;
 
 extern const pdo_driver_t pdo_firebird_driver;
@@ -135,6 +133,8 @@ extern void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char 
 #define php_firebird_error_stmt(s) php_firebird_set_error(s->dbh, s, NULL, 0, NULL, 0)
 #define php_firebird_error_with_info(d,e,el,m,ml) php_firebird_set_error(d, NULL, e, el, m, ml)
 #define php_firebird_error_stmt_with_info(s,e,el,m,ml) php_firebird_set_error(s->dbh, s, e, el, m, ml)
+
+extern bool php_firebird_commit_transaction(pdo_dbh_t *dbh, bool retain);
 
 enum {
 	PDO_FB_ATTR_DATE_FORMAT = PDO_ATTR_DRIVER_SPECIFIC,

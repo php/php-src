@@ -15,8 +15,6 @@ require("testdb.inc");
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $dbh->exec("CREATE TABLE test62024 (ID INTEGER NOT NULL, TEXT VARCHAR(10))");
 
-$dbh->commit();
-
 //start actual test
 
 $sql = "insert into test62024 (id, text) values (?, ?)";
@@ -31,14 +29,10 @@ var_dump($res);
 $res = $sttmt->execute($args_err);
 var_dump($res);
 
-$dbh->commit();
-
 
 //teardown test data
 $sttmt = $dbh->prepare('DELETE FROM test62024');
 $sttmt->execute();
-
-$dbh->commit();
 
 unset($sttmt);
 unset($dbh);

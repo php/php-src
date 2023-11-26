@@ -14,7 +14,6 @@ require("testdb.inc");
 
 $dbh->exec('CREATE TABLE test53280(A VARCHAR(30), B VARCHAR(30), C VARCHAR(30))');
 $dbh->exec("INSERT INTO test53280 VALUES ('A', 'B', 'C')");
-$dbh->commit();
 
 $stmt1 = "SELECT B FROM test53280 WHERE A = ? AND B = ?";
 $stmt2 = "SELECT B, C FROM test53280 WHERE A = ? AND B = ?";
@@ -29,7 +28,6 @@ $stmth1->execute(array('A', 'B'));
 $rows = $stmth1->fetchAll(); // <------- segfault
 var_dump($rows);
 
-$dbh->commit();
 unset($stmth1);
 unset($stmth2);
 unset($stmt);
