@@ -71,3 +71,12 @@ final class Override
 {
     public function __construct() {}
 }
+
+/**
+ * @strict-properties
+ */
+#[Attribute(Attribute::TARGET_CLASS)]
+final class NotSerializable
+{
+    public function __construct() {}
+}

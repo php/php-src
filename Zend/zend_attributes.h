@@ -44,6 +44,7 @@ extern ZEND_API zend_class_entry *zend_ce_allow_dynamic_properties;
 extern ZEND_API zend_class_entry *zend_ce_sensitive_parameter;
 extern ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
 extern ZEND_API zend_class_entry *zend_ce_override;
+extern ZEND_API zend_class_entry *zend_ce_not_serializable;
 
 typedef struct {
 	zend_string *name;
