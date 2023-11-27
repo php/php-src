@@ -140,13 +140,14 @@ AC_DEFUN([PHP_GD_JISX0208],[
 
 
 dnl Build and run a program to determine if GD has support for the given
-dnl format. The sole argument is the proper-noun-capitalized name of the
+dnl format. The first argument is the proper-noun-capitalized name of the
 dnl format -- basically the word Foo in gdImageCreateFromFoo -- such as
-dnl Png. If support for format Foo exists, HAVE_GD_FOO will be defined
-dnl to 1. The reason for this charade is that gd defines "junk" versions
-dnl of each gdImageCreateFromFoo function even when it does not support
-dnl the Foo format. Those junk functions display a warning but eventually
-dnl return normally, making a simple link or run test insufficient.
+dnl Png. If support for format Foo exists, the second argument (the name
+dnl of a constant) will be defined to 1. The reason for this charade is
+dnl that gd defines "junk" versions of each gdImageCreateFromFoo function
+dnl even when it does not support the Foo format. Those junk functions
+dnl display a warning but eventually return normally, making a simple link
+dnl or run test insufficient.
 AC_DEFUN([PHP_GD_CHECK_FORMAT],[
   old_LIBS="${LIBS}"
   LIBS="${LIBS} ${GD_SHARED_LIBADD}"
@@ -171,7 +172,7 @@ int main(int argc, char** argv) {
   return 0;
 } ]])],[
     AC_MSG_RESULT([yes])
-    AC_DEFINE(HAVE_GD_[]m4_toupper($1), 1, [ ])
+    AC_DEFINE($2, 1, [ ])
   ],[
     AC_MSG_RESULT([no])
   ],[
@@ -182,13 +183,13 @@ int main(int argc, char** argv) {
 ])
 
 AC_DEFUN([PHP_GD_CHECK_VERSION],[
-  PHP_GD_CHECK_FORMAT([Png])
-  PHP_GD_CHECK_FORMAT([Avif])
-  PHP_GD_CHECK_FORMAT([Webp])
-  PHP_GD_CHECK_FORMAT([Jpeg])
-  PHP_GD_CHECK_FORMAT([Xpm])
-  PHP_GD_CHECK_FORMAT([Bmp])
-  PHP_GD_CHECK_FORMAT([Tga])
+  PHP_GD_CHECK_FORMAT([Png],  [HAVE_GD_PNG])
+  PHP_GD_CHECK_FORMAT([Avif], [HAVE_GD_AVIF])
+  PHP_GD_CHECK_FORMAT([Webp], [HAVE_GD_WEBP])
+  PHP_GD_CHECK_FORMAT([Jpeg], [HAVE_GD_JPG])
+  PHP_GD_CHECK_FORMAT([Xpm],  [HAVE_GD_XPM])
+  PHP_GD_CHECK_FORMAT([Bmp],  [HAVE_GD_BMP])
+  PHP_GD_CHECK_FORMAT([Tga],  [HAVE_GD_TGA])
   PHP_CHECK_LIBRARY(gd, gdFontCacheShutdown,           [AC_DEFINE(HAVE_GD_FREETYPE,          1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdVersionString,               [AC_DEFINE(HAVE_GD_LIBVERSION,        1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageGetInterpolationMethod, [AC_DEFINE(HAVE_GD_GET_INTERPOLATION, 1, [ ])], [], [ $GD_SHARED_LIBADD ])
