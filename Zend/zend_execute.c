@@ -1504,9 +1504,9 @@ ZEND_API bool zend_never_inline zend_verify_class_constant_type(zend_class_const
 	return 1;
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(void)
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(const zend_object *object)
 {
-	zend_throw_error(NULL, "Cannot use object as array");
+	zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(object->ce->name));
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_array_offset_access(const zval *offset)
@@ -1584,7 +1584,7 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zend_object *obj, zv
 		}
 		zval_ptr_dtor(&res);
 	} else {
-		zend_use_object_as_array();
+		zend_use_object_as_array(obj);
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
