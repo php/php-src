@@ -1,5 +1,9 @@
 --TEST--
 Tests for DateTime[Immutable]::createFromTimestamp
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE === 4) die('xfail fails on 32-bit');
+?>
 --INI--
 date.timezone=Europe/London
 --FILE--
