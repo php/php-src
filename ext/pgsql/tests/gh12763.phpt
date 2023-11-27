@@ -3,7 +3,7 @@ Bug #GH12763 (pg_untrace(): Argument #1 ($connection) must be of type resource o
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 include('config.inc');
