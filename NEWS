@@ -32,6 +32,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed JIT bug (Function JIT emits "Uninitialized string offset" warning
     at the same time as invalid offset Error). (Girgias)
+  . Fixed JIT bug (JIT emits "Attempt to assign property of non-object"
+    warning at the same time as Error is being thrown). (Girgias)
 
 - OpenSSL:
   . Fixed bug #50713 (openssl_pkcs7_verify() may ignore untrusted CAs).
