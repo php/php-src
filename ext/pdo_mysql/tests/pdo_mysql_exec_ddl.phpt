@@ -4,15 +4,13 @@ MySQL PDO->exec(), affected rows
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
     function exec_and_count($offset, &$db, $sql, $exp, $suppress_warning = false) {
-
         try {
-
             if ($suppress_warning)
                 $ret = @$db->exec($sql);
             else
@@ -34,29 +32,27 @@ MySQLPDOTest::skip();
         return true;
     }
 
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
-    MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 
+    $db_name = 'pdo_mysql_exec_ddl_db';
+    $db_name_2 = 'pdo_mysql_exec_ddl_db_2';
+    $table = 'pdo_mysql_exec_ddl';
+    $table2 = 'pdo_mysql_exec_ddl_2';
     /* affected rows related */
     try {
-
-        @$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl');
-        @$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl2');
-        if (1 === @$db->exec('CREATE DATABASE pdo_exec_ddl')) {
+        if (1 === @$db->exec("CREATE DATABASE {$db_name}")) {
             // yippie - we can create databases etc.
-            exec_and_count(3, $db, 'ALTER DATABASE pdo_exec_ddl CHARACTER SET latin1', 1);
+            exec_and_count(3, $db, "ALTER DATABASE {$db_name} CHARACTER SET latin1", 1);
         }
 
-        exec_and_count(4, $db, 'DROP TABLE IF EXISTS pdo_exec_ddl', 0);
-        exec_and_count(5, $db, 'DROP TABLE IF EXISTS pdo_exec_ddl2', 0);
-        if (0 === $db->exec('CREATE TABLE pdo_exec_ddl(id INT, col1 CHAR(2))')) {
-            exec_and_count(5, $db, 'CREATE INDEX idx1 ON pdo_exec_ddl(id)', 0);
-            exec_and_count(6, $db, 'DROP INDEX idx1 ON pdo_exec_ddl', 0);
-            exec_and_count(7, $db, 'ALTER TABLE pdo_exec_ddl DROP id', 0);
-            exec_and_count(8, $db, 'ALTER TABLE pdo_exec_ddl ADD id INT', 0);
-            exec_and_count(9, $db, 'ALTER TABLE pdo_exec_ddl ALTER id SET DEFAULT 1', 0);
-            exec_and_count(10, $db, 'RENAME TABLE pdo_exec_ddl TO pdo_exec_ddl2', 0);
+        if (0 === $db->exec("CREATE TABLE {$table} (id INT, col1 CHAR(2))")) {
+            exec_and_count(5, $db, "CREATE INDEX idx1 ON {$table} (id)", 0);
+            exec_and_count(6, $db, "DROP INDEX idx1 ON {$table}", 0);
+            exec_and_count(7, $db, "ALTER TABLE {$table} DROP id", 0);
+            exec_and_count(8, $db, "ALTER TABLE {$table} ADD id INT", 0);
+            exec_and_count(9, $db, "ALTER TABLE {$table} ALTER id SET DEFAULT 1", 0);
+            exec_and_count(10, $db, "RENAME TABLE {$table} TO {$table2}", 0);
         }
 
         /*
@@ -81,14 +77,12 @@ MySQLPDOTest::skip();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
-MySQLPDOTest::dropTestTable($db);
-// clean up
-@$db->exec('DROP TABLE IF EXISTS pdo_exec_ddl');
-@$db->exec('DROP TABLE IF EXISTS pdo_exec_ddl2');
-@$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl');
-@$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl2');
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_exec_ddl');
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_exec_ddl_2');
+$db->exec('DROP DATABASE IF EXISTS pdo_mysql_exec_ddl_db');
+$db->exec('DROP DATABASE IF EXISTS pdo_mysql_exec_ddl_db_2');
 ?>
 --EXPECT--
 done!

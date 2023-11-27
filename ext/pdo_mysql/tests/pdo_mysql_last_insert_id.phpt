@@ -4,13 +4,12 @@ MySQL PDO->lastInsertId()
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
     try {
@@ -59,7 +58,7 @@ $db = MySQLPDOTest::factory();
         if ($next_id <= 101)
             printf("[009] Expecting at least 102, got %d\n",$next_id);
 
-        $stmt = $db->query('SELECT LAST_INSERT_ID() as _last_id');
+        $stmt = $db->query('SELECT LAST_INSERT_ID() AS _last_id');
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         $last_id = $row['_last_id'];
         if ($next_id != $last_id) {
@@ -87,7 +86,7 @@ $db = MySQLPDOTest::factory();
                 $inc = 1;
             }
 
-            $stmt = $db->query('SELECT LAST_INSERT_ID() as _last_id');
+            $stmt = $db->query('SELECT LAST_INSERT_ID() AS _last_id');
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             $last_id = $row['_last_id'];
 
@@ -112,8 +111,9 @@ $db = MySQLPDOTest::factory();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable(NULL, 'test_pdo_mysql_last_insert_id');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_pdo_mysql_last_insert_id');
 ?>
 --EXPECT--
 done!

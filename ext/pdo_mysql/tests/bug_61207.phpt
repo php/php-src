@@ -4,21 +4,20 @@ PDO MySQL Bug #61207 (PDO::nextRowset() after a multi-statement query doesn't al
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 /** @var PDO $db */
 $db = MySQLPDOTest::factory();
 
-$db->query('create table `test_61207`( `id` int )');
+$db->query('CREATE TABLE `test_61207`(`id` INT)');
 
-$handle1 = $db->prepare('insert into test_61207(id) values(1);
-                          select * from test_61207 where id = ?;
-                          update test_61207 set id = 2 where id = ?;');
+$handle1 = $db->prepare('INSERT INTO test_61207(id) VALUES (1);
+                          SELECT * FROM test_61207 WHERE id = ?;
+                          UPDATE test_61207 SET id = 2 WHERE id = ?;');
 
 $handle1->bindValue(1, '1');
 $handle1->bindValue(2, '1');
@@ -32,8 +31,8 @@ do {
         print("Results detected\n");
 } while($handle1->nextRowset());
 
-$handle2 = $db->prepare('select * from test_61207 where id = ?;
-                           update test_61207 set id = 1 where id = ?;');
+$handle2 = $db->prepare('SELECT * FROM test_61207 WHERE id = ?;
+                           UPDATE test_61207 SET id = 1 WHERE id = ?;');
 
 $handle2->bindValue(1, '2');
 $handle2->bindValue(2, '2');
@@ -48,8 +47,8 @@ do {
         print("Results detected\n");
 } while($handle2->nextRowset());
 
-$handle3 = $db->prepare('update test_61207 set id = 2 where id = ?;
-                           select * from test_61207 where id = ?;');
+$handle3 = $db->prepare('UPDATE test_61207 SET id = 2 WHERE id = ?;
+                           SELECT * FROM test_61207 WHERE id = ?;');
 
 $handle3->bindValue(1, '1');
 $handle3->bindValue(2, '2');
@@ -64,9 +63,9 @@ do {
         print("Results detected\n");
 } while($handle3->nextRowset());
 
-$handle4 = $db->prepare('insert into test_61207(id) values(3);
-                           update test_61207 set id = 2 where id = ?;
-                           select * from test_61207 where id = ?;');
+$handle4 = $db->prepare('INSERT INTO test_61207(id) VALUES (3);
+                           UPDATE test_61207 SET id = 2 WHERE id = ?;
+                           SELECT * FROM test_61207 WHERE id = ?;');
 
 $handle4->bindValue(1, '3');
 $handle4->bindValue(2, '2');
@@ -83,7 +82,7 @@ do {
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_61207');
 ?>

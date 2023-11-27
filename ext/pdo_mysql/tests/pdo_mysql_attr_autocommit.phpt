@@ -4,13 +4,12 @@ PDO::ATTR_AUTOCOMMIT
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
     // autocommit should be on by default
@@ -51,49 +50,50 @@ $db = MySQLPDOTest::factory();
     if (1 !== ($tmp = $db->getAttribute(PDO::ATTR_AUTOCOMMIT)))
         printf("[010] Expecting int/1 got %s\n", var_export($tmp, true));
 
+    $table = 'pdo_mysql_attr_autocommit';
     if (MySQLPDOTest::detect_transactional_mysql_engine($db)) {
         // nice, we have a transactional engine to play with
 
-        MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
-        $row = $db->query('SELECT COUNT(*) AS _num FROM test')->fetch(PDO::FETCH_ASSOC);
+        MySQLPDOTest::createTestTable($table, $db, MySQLPDOTest::detect_transactional_mysql_engine($db));
+        $row = $db->query("SELECT COUNT(*) AS _num FROM {$table}")->fetch(PDO::FETCH_ASSOC);
         $num = $row['_num'];
 
-        $db->query("INSERT INTO test(id, label) VALUES (100, 'z')");
+        $db->query("INSERT INTO {$table} (id, label) VALUES (100, 'z')");
         $num++;
-        $row = $db->query('SELECT COUNT(*) AS _num FROM test')->fetch(PDO::FETCH_ASSOC);
+        $row = $db->query("SELECT COUNT(*) AS _num FROM {$table}")->fetch(PDO::FETCH_ASSOC);
         if ($row['_num'] != $num)
             printf("[011] Insert has failed, test will fail\n");
 
         // autocommit is on, no rollback possible
         $db->query('ROLLBACK');
-        $row = $db->query('SELECT COUNT(*) AS _num FROM test')->fetch(PDO::FETCH_ASSOC);
+        $row = $db->query("SELECT COUNT(*) AS _num FROM {$table}")->fetch(PDO::FETCH_ASSOC);
         if ($row['_num'] != $num)
             printf("[012] ROLLBACK should not have undone anything\n");
 
         if (!$db->setAttribute(PDO::ATTR_AUTOCOMMIT, 0))
             printf("[013] Cannot turn off autocommit\n");
 
-        $db->query('DELETE FROM test WHERE id = 100');
+        $db->query("DELETE FROM {$table} WHERE id = 100");
         $db->query('ROLLBACK');
-        $row = $db->query('SELECT COUNT(*) AS _num FROM test')->fetch(PDO::FETCH_ASSOC);
+        $row = $db->query("SELECT COUNT(*) AS _num FROM {$table}")->fetch(PDO::FETCH_ASSOC);
         if ($row['_num'] != $num)
             printf("[014] ROLLBACK should have undone the DELETE\n");
 
-        $db->query('DELETE FROM test WHERE id = 100');
+        $db->query("DELETE FROM {$table} WHERE id = 100");
         $db->query('COMMIT');
         $num--;
-        $row = $db->query('SELECT COUNT(*) AS _num FROM test')->fetch(PDO::FETCH_ASSOC);
+        $row = $db->query("SELECT COUNT(*) AS _num FROM {$table}")->fetch(PDO::FETCH_ASSOC);
         if ($row['_num'] != $num)
             printf("[015] DELETE should have been committed\n");
-
     }
 
     print "done!";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->query('DROP TABLE IF EXISTS pdo_mysql_attr_autocommit');
 ?>
 --EXPECT--
 done!

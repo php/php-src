@@ -4,19 +4,12 @@ MySQL: PDOStatement->getColumnMeta()
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-// Too many differences among MySQL version - run only with a recent one
-$db = MySQLPDOTest::factory();
-$stmt = $db->query('SELECT VERSION() as _version');
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
-$version = ((int)substr($row['_version'], 0, 1) * 10) + (int)substr($row['_version'], 2, 1);
-if ($version < 51)
-    die("skip Test needs MySQL 5.1+");
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
@@ -304,7 +297,7 @@ print "done!";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_stmt_getcolumnmeta');
 ?>

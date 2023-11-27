@@ -1,25 +1,24 @@
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'config.inc');
-require_once(dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc');
+require_once __DIR__ . '/config.inc';
+require_once dirname(__DIR__, 4) . '/ext/pdo/tests/pdo_test.inc';
+
+foreach ($env as $k => $v) {
+    define($k, $v);
+}
 
 class MySQLPDOTest extends PDOTest {
 
-    static function factory($classname = 'PDO', $drop_test_tables = false, $myattr = null, $mydsn = null) {
-
+    static function factory($classname = 'PDO', $mydsn = null, $myAttr = null) {
         $dsn 	= self::getDSN($mydsn);
         $user	= PDO_MYSQL_TEST_USER;
         $pass	= PDO_MYSQL_TEST_PASS;
-        $attr	= getenv('PDOTEST_ATTR');
+        $attr	= PDO_MYSQL_TEST_ATTR;
 
-        if (is_string($attr) && strlen($attr)) {
-            $attr = unserialize($attr);
+        if ($myAttr) {
+            $attr = $myAttr;
         } else {
-            $attr = null;
+            $attr = is_string($attr) && strlen($attr) ? unserialize($attr) : null;
         }
-        if ($user === false)
-            $user = NULL;
-        if ($pass === false)
-            $pass = NULL;
 
         $db = new $classname($dsn, $user, $pass, $attr);
         if (!$db) {
@@ -32,19 +31,22 @@ class MySQLPDOTest extends PDOTest {
         return $db;
     }
 
-    static function createTestTable($db, $engine = null) {
+    static function factoryWithAttr($attr) {
+        return self::factory('PDO', null, $attr);
+    }
+
+    static function createTestTable($table, $db, $engine = null) {
         if (!$engine)
             $engine = PDO_MYSQL_TEST_ENGINE;
 
-        $db->exec('DROP TABLE IF EXISTS test');
-        $db->exec('CREATE TABLE test(id INT, label CHAR(1), PRIMARY KEY(id)) ENGINE=' . $engine);
-        $db->exec("INSERT INTO test(id, label) VALUES (1, 'a'), (2, 'b'), (3, 'c'), (4, 'd'), (5, 'e'), (6, 'f')");
+        $db->exec("DROP TABLE IF EXISTS {$table}");
+        $db->exec("CREATE TABLE {$table} (id INT, label CHAR(1), PRIMARY KEY(id)) ENGINE={$engine}");
+        $db->exec("INSERT INTO {$table} (id, label) VALUES (1, 'a'), (2, 'b'), (3, 'c'), (4, 'd'), (5, 'e'), (6, 'f')");
     }
 
     static function getTableEngine() {
         return PDO_MYSQL_TEST_ENGINE;
     }
-
 
     static function getDSN($new_options = null, $addition = '') {
         if (!$new_options)
@@ -118,27 +120,20 @@ class MySQLPDOTest extends PDOTest {
     }
 
     static function getTempDir() {
+        if (!empty($_ENV['TMP']))
+            return realpath( $_ENV['TMP'] );
+        if (!empty($_ENV['TMPDIR']))
+            return realpath( $_ENV['TMPDIR'] );
+        if (!empty($_ENV['TEMP']))
+            return realpath( $_ENV['TEMP'] );
 
-        if (!function_exists('sys_get_temp_dir')) {
-
-            if (!empty($_ENV['TMP']))
-                return realpath( $_ENV['TMP'] );
-            if (!empty($_ENV['TMPDIR']))
-                return realpath( $_ENV['TMPDIR'] );
-            if (!empty($_ENV['TEMP']))
-                return realpath( $_ENV['TEMP'] );
-
-            $temp_file = tempnam(md5(uniqid(rand(), TRUE)), '');
-            if ($temp_file) {
-                $temp_dir = realpath(dirname($temp_file));
-                unlink($temp_file);
-                return $temp_dir;
-            }
-            return FALSE;
-        } else {
-            return sys_get_temp_dir();
+        $temp_file = tempnam(md5(uniqid(rand(), TRUE)), '');
+        if ($temp_file) {
+            $temp_dir = realpath(dirname($temp_file));
+            unlink($temp_file);
+            return $temp_dir;
         }
-
+        return false;
     }
 
     static function detect_transactional_mysql_engine($db) {
@@ -158,20 +153,59 @@ class MySQLPDOTest extends PDOTest {
     }
 
     static function isPDOMySQLnd() {
-            ob_start();
-            phpinfo();
-            $tmp = ob_get_contents();
-            ob_end_clean();
-            return (preg_match('/PDO Driver for MySQL.*enabled/', $tmp) &&
-                preg_match('/Client API version.*mysqlnd/', $tmp));
+        ob_start();
+        phpinfo();
+        $tmp = ob_get_contents();
+        ob_end_clean();
+        return (preg_match('/PDO Driver for MySQL.*enabled/', $tmp) &&
+            preg_match('/Client API version.*mysqlnd/', $tmp));
     }
 
-    static function dropTestTable($db = NULL, $tableName = 'test') {
-        if (is_null($db))
+    static function skip() {
+        try {
             $db = self::factory();
-
-        $db->exec('DROP TABLE IF EXISTS '.$tableName);
+        } catch (PDOException $e) {
+            die('skip could not connect');
+        }
     }
 
+    static function skipInfileNotAllowed() {
+        $db = self::factory();
+        $stmt = $db->query("SHOW VARIABLES LIKE 'local_infile'");
+        if (($row = $stmt->fetch(PDO::FETCH_ASSOC)) && ($row['value'] != 'ON'))
+            die("skip Server variable 'local_infile' seems not set to 'ON', found '". $row['value'] ."'");
+    }
+
+    static function skipVersionThanLess ($expected_version) {
+        $nums = [
+            (int) substr($expected_version, 0, 1),
+            (int) substr($expected_version, 1, 2),
+            (int) substr($expected_version, 3, 2),
+        ];
+        $expected_version_str = implode('.', $nums);
+
+        $db = self::factory();
+        $stmt = $db->query('SELECT VERSION() as _version');
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $matches = array();
+        if (!preg_match('/^(\d+)\.(\d+)\.(\d+)/ismU', $row['_version'], $matches))
+            die(sprintf("skip Cannot determine MySQL Server version\n"));
+
+        $version = $matches[1] * 10000 + $matches[2] * 100 + $matches[3];
+        if ($version < $expected_version)
+            die(sprintf("skip Need MySQL Server %s+, found %d.%02d.%02d (%d)\n",
+                $expected_version_str, $matches[1], $matches[2], $matches[3], $version));
+    }
+
+    static function skipNotMySQLnd(?string $message = null) {
+        $message = $message ?? 'skip only for mysqlnd';
+        if (!self::isPDOMySQLnd()) die($message);
+    }
+
+    static function skipNotTransactionalEngine(?string $message = null) {
+        $db = self::factory();
+        $message = $message ?? 'skip Transactional engine not found';
+        if (false == self::detect_transactional_mysql_engine($db)) die($message);
+    }
 }
 ?>

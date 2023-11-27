@@ -4,19 +4,17 @@ MySQL PDO->__construct(), PDO::MYSQL_ATTR_MAX_BUFFER_SIZE
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 if (MySQLPDOTest::isPDOMySQLnd())
     die("skip PDO::MYSQL_ATTR_MAX_BUFFER_SIZE not supported with mysqlnd");
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
     function try_buffer_size($offset, $buffer_size) {
-
         try {
-
             $dsn = MySQLPDOTest::getDSN();
             $user = PDO_MYSQL_TEST_USER;
             $pass = PDO_MYSQL_TEST_PASS;
@@ -68,8 +66,9 @@ if (MySQLPDOTest::isPDOMySQLnd())
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable(NULL, 'test_attr_max_buffer_size');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->query('DROP TABLE IF EXISTS test_attr_max_buffer_size');
 ?>
 --EXPECTF--
 [001] id = 1, val = 0123456789... (length: %d)

@@ -4,18 +4,16 @@ MySQL PDO->prepare(), native PS, named placeholder II
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
     try {
-
         $db->exec(sprintf('CREATE TABLE test_prepare_native_dup_named(id INT, label1 CHAR(255), label2 CHAR(255)) ENGINE=%s', PDO_MYSQL_TEST_ENGINE));
 
         $db->setAttribute(PDO::MYSQL_ATTR_DIRECT_QUERY, 0);
@@ -86,8 +84,6 @@ $db = MySQLPDOTest::factory();
                 var_export($stmt->errorCode(), true),
                 var_export($stmt->errorInfo(), true));
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-
-
     } catch (PDOException $e) {
         printf("[001] %s [%s] %s\n",
             $e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
@@ -97,7 +93,7 @@ $db = MySQLPDOTest::factory();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_prepare_native_dup_named');
 ?>

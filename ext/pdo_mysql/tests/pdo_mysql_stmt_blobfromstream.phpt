@@ -4,7 +4,7 @@ MySQL PDOStatement - inserting BLOB from stream
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 
 $tmp = MySQLPDOTest::getTempDir();
@@ -29,7 +29,7 @@ unlink($file);
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
     function blob_from_stream($offset, $db, $file, $blob) {
 
@@ -139,8 +139,9 @@ unlink($file);
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable(NULL, 'test_stmt_blobfromstream');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_stmt_blobfromstream');
 @unlink(MySQLPDOTest::getTempDir() . DIRECTORY_SEPARATOR . 'pdoblob.tst');
 ?>
 --EXPECT--
