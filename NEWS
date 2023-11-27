@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12791 (Possible dereference of NULL in MySQLnd debug code).
     (nielsdos)
 
+- Opcache:
+  . Fixed JIT bug (Function JIT emits "Uninitialized string offset" warning
+    at the same time as invalid offset Error). (Girgias)
+
 - Standard
   . Fixed GH-12745 (http_build_query() default null argument for $arg_separator
     is implicitly coerced to string). (Girgias)
