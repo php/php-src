@@ -1587,7 +1587,9 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 			}
 			zval_ptr_dtor(&res);
 		} else {
-			zend_error(E_WARNING, "Attempt to assign property of non-object");
+			/* Exception is thrown in this case */
+			GC_DELREF(obj);
+			return;
 		}
 		if (UNEXPECTED(GC_DELREF(obj) == 0)) {
 			zend_objects_store_del(obj);
