@@ -122,7 +122,7 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 # define CWD_STATE_FREE(s)  efree(s)
 
 /* {{{ php_zip_extract_file */
-static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t file_len)
+static int php_zip_extract_file(struct zip * za, char *dest, const char *file, size_t file_len, zip_int64_t idx)
 {
 	php_stream_statbuf ssb;
 	struct zip_file *zf;
@@ -140,6 +140,12 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 	cwd_state new_state;
 	zend_string *file_basename;
 
+	if (idx < 0) {
+		idx = zip_name_locate(za, file, 0);
+		if (idx < 0) {
+			return 0;
+		}
+	}
 	new_state.cwd = CWD_STATE_ALLOC(1);
 	new_state.cwd[0] = '\0';
 	new_state.cwd_length = 0;
@@ -155,7 +161,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 	}
 	path_cleaned_len = strlen(path_cleaned);
 
-	if (path_cleaned_len >= MAXPATHLEN || zip_stat(za, file, 0, &sb) != 0) {
+	if (path_cleaned_len >= MAXPATHLEN || zip_stat_index(za, idx, 0, &sb) != 0) {
 		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
@@ -230,7 +236,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 		return 0;
 	}
 
-	zf = zip_fopen(za, file, 0);
+	zf = zip_fopen_index(za, idx, 0);
 	if (zf == NULL) {
 		n = -1;
 		goto done;
@@ -2819,7 +2825,7 @@ PHP_METHOD(ZipArchive, extractTo)
 	uint32_t nelems, i;
 
 	if (files_str) {
-		if (!php_zip_extract_file(intern, pathto, ZSTR_VAL(files_str), ZSTR_LEN(files_str))) {
+		if (!php_zip_extract_file(intern, pathto, ZSTR_VAL(files_str), ZSTR_LEN(files_str), -1)) {
 			RETURN_FALSE;
 		}
 	} else if (files_ht) {
@@ -2834,7 +2840,7 @@ PHP_METHOD(ZipArchive, extractTo)
 					case IS_LONG:
 						break;
 					case IS_STRING:
-						if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file))) {
+						if (!php_zip_extract_file(intern, pathto, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file), -1)) {
 							RETURN_FALSE;
 						}
 						break;
@@ -2851,8 +2857,8 @@ PHP_METHOD(ZipArchive, extractTo)
 		}
 
 		for (i = 0; i < filecount; i++) {
-			char *file = (char*)zip_get_name(intern, i, ZIP_FL_UNCHANGED);
-			if (!file || !php_zip_extract_file(intern, pathto, file, strlen(file))) {
+			const char *file = zip_get_name(intern, i, ZIP_FL_UNCHANGED);
+			if (!file || !php_zip_extract_file(intern, pathto, file, strlen(file), i)) {
 					RETURN_FALSE;
 			}
 		}
