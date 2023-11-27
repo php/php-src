@@ -607,7 +607,7 @@ namespace
     }
 
     /** @alias DOM\Element */
-    class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
+    class DOMElement extends DOMNode implements \DOMParentNode, \DOMChildNode
     {
         /** @readonly */
         public string $tagName;
@@ -1032,7 +1032,7 @@ namespace DOM
      */
     const HTML_NO_DEFAULT_NS = UNKNOWN;
 
-    abstract class Document extends DOMNode implements DOMParentNode
+    abstract class Document extends \DOMNode implements \DOMParentNode
     {
         /** @readonly */
         public ?DocumentType $doctype;
@@ -1134,7 +1134,7 @@ namespace DOM
     }
 
     /** @strict-properties */
-    final class HTMLDocument extends DOM\Document
+    final class HTMLDocument extends Document
     {
         private function __construct() {}
 
@@ -1156,7 +1156,7 @@ namespace DOM
     }
 
     /** @strict-properties */
-    final class XMLDocument extends DOM\Document
+    final class XMLDocument extends Document
     {
         /** @implementation-alias DOM\HTMLDocument::__construct */
         private function __construct() {}

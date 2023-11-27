@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fbdcec5b706fe7dc0e757edfa262d96b44bd510f */
+ * Stub hash: 53f161ae504057211c907938819f6e7f1f4fbfa2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1971,14 +1971,14 @@ static zend_class_entry *register_class_DOMXPath(void)
 }
 #endif
 
-static zend_class_entry *register_class_DOM_Document(zend_class_entry *class_entry_DOM_DOMNode, zend_class_entry *class_entry_DOM_DOMParentNode)
+static zend_class_entry *register_class_DOM_Document(zend_class_entry *class_entry_DOMNode, zend_class_entry *class_entry_DOMParentNode)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "DOM", "Document", class_DOM_Document_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOM_DOMNode);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
 	class_entry->ce_flags |= ZEND_ACC_ABSTRACT;
-	zend_class_implements(class_entry, 1, class_entry_DOM_DOMParentNode);
+	zend_class_implements(class_entry, 1, class_entry_DOMParentNode);
 
 	zval property_doctype_default_value;
 	ZVAL_UNDEF(&property_doctype_default_value);
@@ -2035,23 +2035,23 @@ static zend_class_entry *register_class_DOM_Document(zend_class_entry *class_ent
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DOM_HTMLDocument(zend_class_entry *class_entry_DOM_DOM_Document)
+static zend_class_entry *register_class_DOM_HTMLDocument(zend_class_entry *class_entry_DOM_Document)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "DOM", "HTMLDocument", class_DOM_HTMLDocument_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOM_DOM_Document);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOM_Document);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DOM_XMLDocument(zend_class_entry *class_entry_DOM_DOM_Document)
+static zend_class_entry *register_class_DOM_XMLDocument(zend_class_entry *class_entry_DOM_Document)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "DOM", "XMLDocument", class_DOM_XMLDocument_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOM_DOM_Document);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOM_Document);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
 	zval property_xmlEncoding_default_value;
