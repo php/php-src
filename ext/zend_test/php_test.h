@@ -56,8 +56,11 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	bool print_stderr_mshutdown;
 	zend_long limit_copy_file_range;
 	int observe_opline_in_zendmm;
-	zend_mm_heap* zend_orig_heap;
-	zend_mm_heap* zend_test_heap;
+	// previous handlers that might have been installed
+	// `USE_ZEND_ALLOC=0` installs custom handlers
+	void* (*zendmm_orig_malloc)(size_t);
+	void (*zendmm_orig_free)(void*);
+	void* (*zendmm_orig_realloc)(void *, size_t);
 	zend_test_fiber *active_fiber;
 	zend_long quantity_value;
 	zend_string *str_test;

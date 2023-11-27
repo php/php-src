@@ -4,8 +4,6 @@ possible segfault in `ZEND_BIND_STATIC`
 https://github.com/php/php-src/pull/12758
 --EXTENSIONS--
 zend_test
---ENV--
-USE_ZEND_ALLOC=1
 --INI--
 zend_test.observe_opline_in_zendmm=1
 --FILE--

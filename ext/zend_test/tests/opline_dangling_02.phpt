@@ -2,8 +2,6 @@
 possible segfault in `ZEND_FUNC_GET_ARGS`
 --EXTENSIONS--
 zend_test
---ENV--
-USE_ZEND_ALLOC=1
 --INI--
 zend_test.observe_opline_in_zendmm=1
 --FILE--

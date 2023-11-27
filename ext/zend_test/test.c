@@ -517,12 +517,37 @@ static bool has_opline(zend_execute_data *execute_data)
 	;
 }
 
+// When a custom memory manager is installed, ZendMM alters its behaviour. For
+// example `zend_mm_gc()` will not do anything anymore, or `zend_mm_shutdown()`
+// won't cleanup chunks and leak memory. This might not be a problem in tests,
+// but I fear folks might see and use this implementation as a boiler plate when
+// trying to use this hook
+int zend_test_prepare_zendmm_for_call(zend_mm_heap *heap)
+{
+	int flag = 0;
+	memcpy(&flag, heap, sizeof(int));
+	int new_flag = 0;
+	memcpy(heap, &new_flag, sizeof(int));
+	return flag;
+}
+
+void zend_test_restore_zendmm_after_call(zend_mm_heap *heap, int flag)
+{
+	memcpy(heap, &flag, sizeof(int));
+}
+
 void * zend_test_custom_malloc(size_t len)
 {
 	if (has_opline(EG(current_execute_data))) {
 		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
 	}
-	return _zend_mm_alloc(ZT_G(zend_orig_heap), len ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
+	if (ZT_G(zendmm_orig_malloc)) {
+		return ZT_G(zendmm_orig_malloc)(len);
+	}
+	int flag = zend_test_prepare_zendmm_for_call(zend_mm_get_heap());
+	void * ptr = _zend_mm_alloc(zend_mm_get_heap(), len ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
+	zend_test_restore_zendmm_after_call(zend_mm_get_heap(), flag);
+	return ptr;
 }
 
 void zend_test_custom_free(void *ptr)
@@ -530,7 +555,13 @@ void zend_test_custom_free(void *ptr)
 	if (has_opline(EG(current_execute_data))) {
 		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
 	}
-	_zend_mm_free(ZT_G(zend_orig_heap), ptr ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
+	if (ZT_G(zendmm_orig_free)) {
+		ZT_G(zendmm_orig_free)(ptr);
+		return;
+	}
+	int flag = zend_test_prepare_zendmm_for_call(zend_mm_get_heap());
+	_zend_mm_free(zend_mm_get_heap(), ptr ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
+	zend_test_restore_zendmm_after_call(zend_mm_get_heap(), flag);
 }
 
 void * zend_test_custom_realloc(void * ptr, size_t len)
@@ -538,7 +569,58 @@ void * zend_test_custom_realloc(void * ptr, size_t len)
 	if (has_opline(EG(current_execute_data))) {
 		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
 	}
-	return _zend_mm_realloc(ZT_G(zend_orig_heap), ptr, len ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
+	if (ZT_G(zendmm_orig_realloc)) {
+		return ZT_G(zendmm_orig_realloc)(ptr, len);
+	}
+	int flag = zend_test_prepare_zendmm_for_call(zend_mm_get_heap());
+	void * new_ptr = _zend_mm_realloc(zend_mm_get_heap(), ptr, len ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
+	zend_test_restore_zendmm_after_call(zend_mm_get_heap(), flag);
+	return new_ptr;
+}
+
+void zend_test_install_custom_mm_handler(void)
+{
+	// fetch maybe installed previous handlers
+	if (!is_zend_mm()) {
+		zend_mm_get_custom_handlers(
+			zend_mm_get_heap(),
+			&ZT_G(zendmm_orig_malloc),
+			&ZT_G(zendmm_orig_free),
+			&ZT_G(zendmm_orig_realloc)
+		);
+	}
+	zend_mm_set_custom_handlers(
+		zend_mm_get_heap(),
+		zend_test_custom_malloc,
+		zend_test_custom_free,
+		zend_test_custom_realloc
+	);
+}
+
+void zend_test_uninstall_custom_mm_handler(void)
+{
+	void* (*custom_malloc)(size_t);
+	void (*custom_free)(void*);
+	void* (*custom_realloc)(void *, size_t);
+	zend_mm_get_custom_handlers(
+		zend_mm_get_heap(),
+		&custom_malloc,
+		&custom_free,
+		&custom_realloc
+	);
+	if (custom_malloc == zend_test_custom_malloc ||
+		custom_free == zend_test_custom_free ||
+		custom_realloc == zend_test_custom_realloc) {
+		zend_mm_set_custom_handlers(
+			zend_mm_get_heap(),
+			ZT_G(zendmm_orig_malloc),
+			ZT_G(zendmm_orig_free),
+			ZT_G(zendmm_orig_realloc)
+		);
+		ZT_G(zendmm_orig_malloc) = NULL;
+		ZT_G(zendmm_orig_free) = NULL;
+		ZT_G(zendmm_orig_realloc) = NULL;
+	}
 }
 
 static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
@@ -550,22 +632,9 @@ static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 	int int_value = zend_ini_parse_bool(new_value);
 
 	if (int_value == 1) {
-		// `zend_mm_heap` is a private struct, so we have not way to find the
-		// actual size, but 4096 bytes should be enough
-		ZT_G(zend_test_heap) = malloc(4096);
-		memset(ZT_G(zend_test_heap), 0, 4096);
-		zend_mm_set_custom_handlers(
-			ZT_G(zend_test_heap),
-			zend_test_custom_malloc,
-			zend_test_custom_free,
-			zend_test_custom_realloc
-		);
-		ZT_G(zend_orig_heap) = zend_mm_get_heap();
-		zend_mm_set_heap(ZT_G(zend_test_heap));
-	} else if (ZT_G(zend_test_heap))  {
-		free(ZT_G(zend_test_heap));
-		ZT_G(zend_test_heap) = NULL;
-		zend_mm_set_heap(ZT_G(zend_orig_heap));
+		zend_test_install_custom_mm_handler();
+	} else {
+		zend_test_uninstall_custom_mm_handler();
 	}
 	return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
@@ -948,6 +1017,8 @@ PHP_MSHUTDOWN_FUNCTION(zend_test)
 
 	zend_test_observer_shutdown(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
+	zend_test_uninstall_custom_mm_handler();
+
 	if (ZT_G(print_stderr_mshutdown)) {
 		fprintf(stderr, "[zend-test] MSHUTDOWN\n");
 	}
@@ -969,12 +1040,6 @@ PHP_RSHUTDOWN_FUNCTION(zend_test)
 		zend_weakrefs_hash_del(&ZT_G(global_weakmap), zend_weakref_key_to_object(obj_key));
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(&ZT_G(global_weakmap));
-
-	if (ZT_G(zend_test_heap))  {
-		free(ZT_G(zend_test_heap));
-		ZT_G(zend_test_heap) = NULL;
-		zend_mm_set_heap(ZT_G(zend_orig_heap));
-	}
 
 	return SUCCESS;
 }
