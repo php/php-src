@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 
 - MySQLnd:
   . Avoid using uninitialised struct. (mikhainin)
+  . Fixed bug GH-12791 (Possible dereference of NULL in MySQLnd debug code).
+    (nielsdos)
 
 - OpenSSL:
   . Fixed bug #50713 (openssl_pkcs7_verify() may ignore untrusted CAs).
