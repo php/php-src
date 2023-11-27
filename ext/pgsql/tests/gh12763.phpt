@@ -6,7 +6,7 @@ pgsql
 <?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
-include('config.inc');
+include('inc/config.inc');
 
 $conn = pg_connect($conn_str);
 
