@@ -1862,6 +1862,14 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						ADD_OP1_TRACE_GUARD();
 					}
 					break;
+				case ZEND_ADD:
+				case ZEND_SUB:
+				case ZEND_MUL:
+//				case ZEND_DIV: // TODO: check for division by zero ???
+					if (orig_op1_type == IS_UNDEF || orig_op2_type == IS_UNDEF) {
+						break;
+					}
+					ZEND_FALLTHROUGH;
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_NOT_EQUAL:
 				case ZEND_IS_SMALLER:
@@ -1876,10 +1884,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_SL:
 				case ZEND_SR:
 				case ZEND_MOD:
-				case ZEND_ADD:
-				case ZEND_SUB:
-				case ZEND_MUL:
-//				case ZEND_DIV: // TODO: check for division by zero ???
 					ADD_OP2_TRACE_GUARD();
 					ZEND_FALLTHROUGH;
 				case ZEND_ECHO:
