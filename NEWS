@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 
 - MySQLnd:
   . Avoid using uninitialised struct. (mikhainin)
+  . Fixed bug GH-12791 (Possible dereference of NULL in MySQLnd debug code).
+    (nielsdos)
 
 - Standard
   . Fixed GH-12745 (http_build_query() default null argument for $arg_separator

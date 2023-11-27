@@ -733,8 +733,8 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 				UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 free_end:
 	PACKET_FREE(&row_packet);
+	DBG_INF_FMT("rows=%llu", (unsigned long long)set->row_count);
 end:
-	DBG_INF_FMT("rows=%llu", (unsigned long long)result->stored_data->row_count);
 	DBG_RETURN(ret);
 }
 /* }}} */
