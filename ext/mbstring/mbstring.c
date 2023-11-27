@@ -2990,6 +2990,9 @@ static zend_string* trim_each_wchar(zend_string *str, const HashTable *what_ht, 
 		}
 	}
 
+	if (left == 0 && right == 0) {
+		return zend_string_copy(str);
+	}
 	return mb_get_substr(str, left, total_len - (right + left), enc);
 }
 
