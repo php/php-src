@@ -1100,6 +1100,9 @@ static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zend_string *s
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		return ZSTR_EMPTY_ALLOC();
+	}
 	return zend_jit_fetch_dim_str_offset(str, offset);
 }
 
