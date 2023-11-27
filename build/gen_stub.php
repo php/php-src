@@ -5659,6 +5659,10 @@ foreach ($fileInfos as $fileInfo) {
 
     foreach ($fileInfo->classInfos as $classInfo) {
         $classMap[$classInfo->name->__toString()] = $classInfo;
+
+        if ($classInfo->alias !== null) {
+            $classMap[$classInfo->alias] = $classInfo;
+        }
     }
 }
 
