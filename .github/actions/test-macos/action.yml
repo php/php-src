@@ -23,7 +23,7 @@ runs:
           -d opcache.jit=${{ inputs.jitType }} \
           -d opcache.protect_memory=1 \
           -d opcache.jit_buffer_size=64M \
-          -j$(sysctl -n hw.ncpu) \
+          -j$(($(sysctl -n hw.ncpu) - 1)) \
           -g FAIL,BORK,LEAK,XLEAK \
           --no-progress \
           --offline \
