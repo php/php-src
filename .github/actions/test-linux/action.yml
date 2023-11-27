@@ -9,6 +9,9 @@ inputs:
   jitType:
     default: 'disable'
     required: false
+  idleCpu:
+    default: 'false'
+    required: false
 runs:
   using: composite
   steps:
@@ -45,7 +48,7 @@ runs:
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           -d opcache.jit=${{ inputs.jitType }} \
           -d opcache.jit_buffer_size=16M \
-          -j$(/usr/bin/nproc) \
+          ${{ inputs.idleCpu == 'true' && '-j$(($(/usr/bin/nproc) - 1))' || '-j$(/usr/bin/nproc)' }} \
           -g FAIL,BORK,LEAK,XLEAK \
           --no-progress \
           --offline \
