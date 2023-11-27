@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12791 (Possible dereference of NULL in MySQLnd debug code).
     (nielsdos)
 
+- Opcache:
+  . Fixed JIT bug (Function JIT emits "Uninitialized string offset" warning
+    at the same time as invalid offset Error). (Girgias)
+
 - OpenSSL:
   . Fixed bug #50713 (openssl_pkcs7_verify() may ignore untrusted CAs).
     (Jakub Zelenka)
