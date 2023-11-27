@@ -18,8 +18,6 @@ $dbh->exec("INSERT INTO test64037 (ID, TEXT, COST) VALUES (1, 'test', -1.0)");
 $dbh->exec("INSERT INTO test64037 (ID, TEXT, COST) VALUES (2, 'test', -0.99)");
 $dbh->exec("INSERT INTO test64037 (ID, TEXT, COST) VALUES (3, 'test', -1.01)");
 
-$dbh->commit();
-
 $query = "SELECT * from test64037 order by ID";
 $stmt = $dbh->prepare($query);
 $stmt->execute();
@@ -31,8 +29,6 @@ var_dump($rows[2]['COST']);
 
 $stmt = $dbh->prepare('DELETE FROM test64037');
 $stmt->execute();
-
-$dbh->commit();
 
 unset($stmt);
 unset($dbh);

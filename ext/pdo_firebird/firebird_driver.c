@@ -33,6 +33,7 @@
 
 static int php_firebird_alloc_prepare_stmt(pdo_dbh_t*, const zend_string*, XSQLDA*, isc_stmt_handle*,
 	HashTable*);
+static bool php_firebird_rollback_transaction(pdo_dbh_t *dbh);
 
 const char CHR_LETTER = 1;
 const char CHR_DIGIT = 2;
@@ -526,17 +527,14 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
-	if (dbh->in_txn) {
+	if (H->tr) {
 		if (dbh->auto_commit) {
-			if (isc_commit_transaction(H->isc_status, &H->tr)) {
-				php_firebird_error(dbh);
-			}
+			php_firebird_commit_transaction(dbh, /* release */ false);
 		} else {
-			if (isc_rollback_transaction(H->isc_status, &H->tr)) {
-				php_firebird_error(dbh);
-			}
+			php_firebird_rollback_transaction(dbh);
 		}
 	}
+	H->in_manually_txn = 0;
 
 	if (isc_detach_database(H->isc_status, &H->db)) {
 		php_firebird_error(dbh);
@@ -702,9 +700,10 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const zend_string *sql) /*
 		}
 	}
 
-	/* commit if we're in auto_commit mode */
-	if (dbh->auto_commit && isc_commit_retaining(H->isc_status, &H->tr)) {
-		php_firebird_error(dbh);
+	if (dbh->auto_commit && !H->in_manually_txn) {
+		if (!php_firebird_commit_transaction(dbh, /* retain */ true)) {
+			ret = -1;
+		}
 	}
 
 free_statement:
@@ -756,8 +755,8 @@ static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *un
 }
 /* }}} */
 
-/* called by PDO to start a transaction */
-static bool firebird_handle_begin(pdo_dbh_t *dbh) /* {{{ */
+/* php_firebird_begin_transaction */
+static bool php_firebird_begin_transaction(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	char tpb[8] = { isc_tpb_version3 }, *ptpb = tpb+1;
@@ -809,12 +808,84 @@ static bool firebird_handle_begin(pdo_dbh_t *dbh) /* {{{ */
 }
 /* }}} */
 
-/* called by PDO to commit a transaction */
-static bool firebird_handle_commit(pdo_dbh_t *dbh) /* {{{ */
+/* called by PDO to start a transaction */
+static bool firebird_handle_manually_begin(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
-	if (isc_commit_transaction(H->isc_status, &H->tr)) {
+	/**
+	 * If in autocommit mode and in transaction, we will need to close the transaction once.
+	 */
+	if (dbh->auto_commit && H->tr) {
+		if (!php_firebird_commit_transaction(dbh, /* release */ false)) {
+			return false;
+		}
+	}
+
+	if (!php_firebird_begin_transaction(dbh)) {
+		return false;
+	}
+	H->in_manually_txn = 1;
+	return true;
+}
+/* }}} */
+
+/* php_firebird_commit_transaction */
+bool php_firebird_commit_transaction(pdo_dbh_t *dbh, bool retain) /* {{{ */
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+
+	/**
+	 * `retaining` keeps the transaction open without closing it.
+	 *
+	 * firebird needs to always have a transaction open to emulate autocommit mode,
+	 * and in autocommit mode it keeps the transaction open.
+	 *
+	 * Same as close and then begin again, but use retain to save overhead.
+	 */
+	if (retain) {
+		if (isc_commit_retaining(H->isc_status, &H->tr)) {
+			php_firebird_error(dbh);
+			return false;
+		}
+	} else {
+		if (isc_commit_transaction(H->isc_status, &H->tr)) {
+			php_firebird_error(dbh);
+			return false;
+		}
+	}
+	return true;
+}
+/* }}} */
+
+/* called by PDO to commit a transaction */
+static bool firebird_handle_manually_commit(pdo_dbh_t *dbh) /* {{{ */
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+	if (!php_firebird_commit_transaction(dbh, /*release*/ false)) {
+		return false;
+	}
+
+	/**
+	 * If in autocommit mode, begin the transaction again
+	 * Reopen instead of retain because isolation level may change
+	 */
+	if (dbh->auto_commit) {
+		if (!php_firebird_begin_transaction(dbh)) {
+			return false;
+		}
+	}
+	H->in_manually_txn = 0;
+	return true;
+}
+/* }}} */
+
+/* php_firebird_rollback_transaction */
+static bool php_firebird_rollback_transaction(pdo_dbh_t *dbh) /* {{{ */
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+
+	if (isc_rollback_transaction(H->isc_status, &H->tr)) {
 		php_firebird_error(dbh);
 		return false;
 	}
@@ -823,14 +894,24 @@ static bool firebird_handle_commit(pdo_dbh_t *dbh) /* {{{ */
 /* }}} */
 
 /* called by PDO to rollback a transaction */
-static bool firebird_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
+static bool firebird_handle_manually_rollback(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
-	if (isc_rollback_transaction(H->isc_status, &H->tr)) {
-		php_firebird_error(dbh);
+	if (!php_firebird_rollback_transaction(dbh)) {
 		return false;
 	}
+
+	/**
+	 * If in autocommit mode, begin the transaction again
+	 * Reopen instead of retain because isolation level may change
+	 */
+	if (dbh->auto_commit) {
+		if (!php_firebird_begin_transaction(dbh)) {
+			return false;
+		}
+	}
+	H->in_manually_txn = 0;
 	return true;
 }
 /* }}} */
@@ -846,16 +927,6 @@ static int php_firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sq
 	if (ZSTR_LEN(sql) > 65536) {
 		php_firebird_error_with_info(dbh, "01004", strlen("01004"), NULL, 0);
 		return 0;
-	}
-
-	/* start a new transaction implicitly if auto_commit is enabled and no transaction is open */
-	if (dbh->auto_commit && !dbh->in_txn) {
-		/* dbh->transaction_flags = PDO_TRANS_READ_UNCOMMITTED; */
-
-		if (!firebird_handle_begin(dbh)) {
-			return 0;
-		}
-		dbh->in_txn = true;
 	}
 
 	/* allocate the statement */
@@ -898,21 +969,34 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 					return false;
 				}
 
+				if (H->in_manually_txn) {
+					/* change auto commit mode with an open transaction is illegal, because
+						we won't know what to do with it */
+					pdo_raise_impl_error(dbh, NULL, "HY000", "Cannot change autocommit mode while a transaction is already open");
+					return false;
+				}
+
 				/* ignore if the new value equals the old one */
 				if (dbh->auto_commit ^ bval) {
-					if (dbh->in_txn) {
-						if (bval) {
-							/* turning on auto_commit with an open transaction is illegal, because
-							   we won't know what to do with it */
-							const char *msg = "Cannot enable auto-commit while a transaction is already open";
-							php_firebird_error_with_info(dbh, "HY000", strlen("HY000"), msg, strlen(msg));
-							return false;
-						} else {
-							/* close the transaction */
-							if (!firebird_handle_commit(dbh)) {
-								break;
+					if (bval) {
+						/* change to auto commit mode.
+						 * If the transaction is not started, start it.
+						 * However, this is a fallback since such a situation usually does not occur.
+						 */
+						if (!H->tr) {
+							if (!php_firebird_begin_transaction(dbh)) {
+								return false;
 							}
-							dbh->in_txn = false;
+						}
+					} else {
+						/* change to not auto commit mode.
+						 * close the transaction if exists.
+						 * However, this is a fallback since such a situation usually does not occur.
+						 */
+						if (H->tr) {
+							if (!php_firebird_commit_transaction(dbh, /* release */ false)) {
+								return false;
+							}
 						}
 					}
 					dbh->auto_commit = bval;
@@ -1058,14 +1142,27 @@ static void pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval
 }
 /* }}} */
 
+/* {{{ firebird_in_manually_transaction */
+static bool pdo_firebird_in_manually_transaction(pdo_dbh_t *dbh)
+{
+	/**
+	 * we can tell if a transaction exists now by checking H->tr,
+	 * but which will always be true in autocommit mode.
+	 * So this function checks if there is currently a "manually begun transaction".
+	 */
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+	return H->in_manually_txn;
+}
+/* }}} */
+
 static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	firebird_handle_closer,
 	firebird_handle_preparer,
 	firebird_handle_doer,
 	firebird_handle_quoter,
-	firebird_handle_begin,
-	firebird_handle_commit,
-	firebird_handle_rollback,
+	firebird_handle_manually_begin,
+	firebird_handle_manually_commit,
+	firebird_handle_manually_rollback,
 	pdo_firebird_set_attribute,
 	NULL, /* last_id not supported */
 	pdo_firebird_fetch_error_func,
@@ -1073,7 +1170,7 @@ static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	NULL, /* check_liveness */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
-	NULL, /* in transaction, use PDO's internal tracking mechanism */
+	pdo_firebird_in_manually_transaction,
 	NULL /* get gc */
 };
 /* }}} */
@@ -1152,6 +1249,11 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 		fb_interpret(errmsg, sizeof(errmsg),&s);
 		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1], "SQLSTATE[%s] [%ld] %s",
 				"HY000", H->isc_status[1], errmsg);
+	}
+
+	H->in_manually_txn = 0;
+	if (dbh->auto_commit && !H->tr) {
+		ret = php_firebird_begin_transaction(dbh);
 	}
 
 	if (!ret) {

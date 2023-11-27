@@ -180,8 +180,7 @@ static int pdo_firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 				;
 		}
 
-		/* commit? */
-		if (stmt->dbh->auto_commit && isc_commit_retaining(H->isc_status, &H->tr)) {
+		if (stmt->dbh->auto_commit && !S->H->in_manually_txn && !php_firebird_commit_transaction(stmt->dbh, /* retain */ true)) {
 			break;
 		}
 

@@ -16,8 +16,6 @@ $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $dbh->exec('CREATE TABLE test47415 (idx int NOT NULL PRIMARY KEY, txt VARCHAR(20))');
 $dbh->exec('INSERT INTO test47415 VALUES(0, \'String0\')');
 
-$dbh->commit();
-
 $query = "SELECT idx, txt FROM test47415 ORDER by idx";
 $idx = $txt = 0;
 $stmt = $dbh->prepare($query);
@@ -31,8 +29,6 @@ var_dump($stmt->rowCount());
 
 $stmt = $dbh->prepare('DELETE FROM test47415');
 $stmt->execute();
-
-$dbh->commit();
 
 unset($stmt);
 unset($dbh);
