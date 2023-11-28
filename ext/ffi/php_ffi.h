@@ -47,6 +47,7 @@ ZEND_BEGIN_MODULE_GLOBALS(ffi)
 	/* predefined ffi_types */
 	HashTable types;
 
+	zend_atomic_bool callback_in_progress;
 	pthread_mutex_t vm_lock;
 	pthread_cond_t vm_ack;
 	zend_ffi_call_data callback_data;

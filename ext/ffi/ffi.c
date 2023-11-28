@@ -938,7 +938,9 @@ static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
 static void zend_ffi_interrupt_function(zend_execute_data *execute_data){
-	
+	if(!zend_atomic_bool_load_ex(&FFI_G(callback_in_progress))) goto end;
+
+
 	zend_ffi_callback_data *callback_data = FFI_G(callback_data).data;
 	zend_fcall_info fci;
 	zend_ffi_type *ret_type;
@@ -989,35 +991,50 @@ static void zend_ffi_interrupt_function(zend_execute_data *execute_data){
 	}
 
 	zval_ptr_dtor(&retval);
+	
+	zend_atomic_bool_store_ex(&FFI_G(callback_in_progress), false);
+	pthread_cond_broadcast(&FFI_G(vm_ack));
+	pthread_mutex_unlock(&FFI_G(vm_lock));
 
+	end:
 	if (orig_interrupt_function) {
 		orig_interrupt_function(execute_data);
 	}
-	zend_interrupt_function = orig_interrupt_function;
+}
 
-	pthread_cond_signal(&FFI_G(vm_ack));
-	pthread_mutex_unlock(&FFI_G(vm_lock));
+static void zend_ffi_wait_request_barrier(void){
+	// get lock, first
+	pthread_mutex_lock(&FFI_G(vm_lock));
+	
+	while(zend_atomic_bool_load_ex(&FFI_G(callback_in_progress))){
+		// we acquired the lock before the request could be serviced
+		// unlock it and wait for the flag
+		pthread_cond_wait(&FFI_G(vm_ack), &FFI_G(vm_lock));
+	}
 }
 
 static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, void* data) /* {{{ */
 {
-	// get lock, first
-	pthread_mutex_lock(&FFI_G(vm_lock));
+	zend_ffi_wait_request_barrier();
+
+	// mutex is now locked, and request is not pending.
+	// start a new one
+	zend_atomic_bool_store_ex(&FFI_G(callback_in_progress), true);
+
 	zend_ffi_call_data call_data = {
 		.cif = cif,
 		.ret = ret,
 		.args = args,
-		.data = (zend_ffi_call_data *)data
+		.data = (zend_ffi_callback_data *)data
 	};
 	FFI_G(callback_data) = call_data;
-	
-	/** post interrupt request */
-	orig_interrupt_function = zend_interrupt_function;
-	zend_interrupt_function = zend_ffi_interrupt_function;
+
+	// post interrupt request
 	zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
 
-	pthread_mutex_lock(&FFI_G(vm_lock));
-	pthread_cond_wait(&FFI_G(vm_ack), &FFI_G(vm_lock));
+	// mutex will be released by the VM interrupt
+
+	zend_ffi_wait_request_barrier();
 	pthread_mutex_unlock(&FFI_G(vm_lock));
 }
 /* }}} */
@@ -5551,6 +5568,10 @@ ZEND_MINIT_FUNCTION(ffi)
 		return zend_ffi_preload(FFI_G(preload));
 	}
 
+	zend_atomic_bool_store_ex(&FFI_G(callback_in_progress), false);
+	orig_interrupt_function = zend_interrupt_function;
+	zend_interrupt_function = zend_ffi_interrupt_function;
+
 	pthread_mutex_init(&FFI_G(vm_lock), NULL);
 	pthread_cond_init(&FFI_G(vm_ack), NULL);
 
@@ -5561,6 +5582,10 @@ ZEND_MINIT_FUNCTION(ffi)
 /* {{{ ZEND_RSHUTDOWN_FUNCTION */
 ZEND_RSHUTDOWN_FUNCTION(ffi)
 {
+	zend_ffi_wait_request_barrier();
+	pthread_mutex_unlock(&FFI_G(vm_lock));
+	zend_interrupt_function = orig_interrupt_function;
+
 	if (FFI_G(callbacks)) {
 		zend_hash_destroy(FFI_G(callbacks));
 		efree(FFI_G(callbacks));
