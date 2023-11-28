@@ -77,10 +77,6 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 			"xmlExtFunctionTest: failed to get the internal object\n");
 			error = true;
 		}
-		else if (intern->xpath_callbacks.mode == PHP_DOM_REG_FUNC_MODE_NONE) {
-			zend_throw_error(NULL, "No callbacks were registered");
-			error = true;
-		}
 	}
 
 	if (error) {
@@ -381,7 +377,16 @@ PHP_METHOD(DOMXPath, evaluate)
 PHP_METHOD(DOMXPath, registerPhpFunctions)
 {
 	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
-	php_dom_xpath_callbacks_update_method_handler(&intern->xpath_callbacks, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+
+	zend_string *name = NULL;
+	HashTable *callable_ht = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(callable_ht, name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_dom_xpath_callbacks_update_method_handler(&intern->xpath_callbacks, NULL, name, callable_ht);
 }
 /* }}} end dom_xpath_register_php_functions */
 

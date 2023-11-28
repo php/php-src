@@ -65,6 +65,11 @@ $xpath->registerNamespace("php", "http://php.net/xpath");
 $xpath->registerCycle();
 $xpath->evaluate("//a[php:function('cycle', string(@href))]");
 
+echo "--- Legit cases: reset to null ---\n";
+
+$xpath->registerPhpFunctions(null);
+$xpath->evaluate("//a[php:function('var_dump', string(@href))]");
+
 echo "--- Error cases ---\n";
 
 $xpath = new DOMXPath($doc);
@@ -118,6 +123,8 @@ string(15) "https://php.net"
 No callback handler "notinset" registered
 --- Legit cases: set with cycle ---
 dummy: https://php.net
+--- Legit cases: reset to null ---
+string(15) "https://php.net"
 --- Error cases ---
 DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be a callable, function "nonexistent" not found or invalid function name
 DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be of type array|string|null, Closure given
