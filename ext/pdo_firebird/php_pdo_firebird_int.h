@@ -75,6 +75,8 @@ typedef struct {
 	/* the transaction handle */
 	isc_tr_handle tr;
 	bool in_manually_txn;
+	bool is_writable_txn;
+	zend_ulong txn_isolation_level;
 
 	/* date and time format strings, can be set by the set_attribute method */
 	char *date_format;
@@ -140,6 +142,18 @@ enum {
 	PDO_FB_ATTR_DATE_FORMAT = PDO_ATTR_DRIVER_SPECIFIC,
 	PDO_FB_ATTR_TIME_FORMAT,
 	PDO_FB_ATTR_TIMESTAMP_FORMAT,
+
+	/*
+	 * transaction isolation level
+	 * firebird does not have a level equivalent to read uncommited.
+	 */
+	PDO_FB_TRANSACTION_ISOLATION_LEVEL,
+	PDO_FB_READ_COMMITTED,
+	PDO_FB_REPEATABLE_READ,
+	PDO_FB_SERIALIZABLE,
+
+	/* transaction access mode */
+	PDO_FB_WRITABLE_TRANSACTION,
 };
 
 #endif	/* PHP_PDO_FIREBIRD_INT_H */
