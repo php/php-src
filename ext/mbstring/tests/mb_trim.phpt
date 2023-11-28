@@ -40,6 +40,15 @@ var_dump(mb_trim(str_repeat("　", 129)));
 var_dump(mb_trim(str_repeat("　", 129) . "a"));
 var_dump(mb_rtrim(str_repeat("　", 129) . "a"));
 
+echo "== Very long trim characters ==\n";
+$trim_chars = "";
+for ($i = 1024; $i < 2048; $i++) {
+    $trim_chars .= mb_chr($i);
+}
+var_dump(mb_trim($trim_chars . "hello" . $trim_chars, $trim_chars));
+var_dump(strlen(mb_ltrim($trim_chars . "hello" . $trim_chars, $trim_chars)));
+var_dump(strlen(mb_rtrim($trim_chars . "hello" . $trim_chars, $trim_chars)));
+
 echo "== mb_ltrim ==\n";
 var_dump(mb_ltrim("あああああああああああああああああああああああああああああああああいああああ", "あ"));
 echo "== mb_rtrim ==\n";
@@ -103,6 +112,10 @@ string(26) "　あいうおえお 　a"
 string(0) ""
 string(1) "a"
 string(388) "　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　a"
+== Very long trim characters ==
+string(5) "hello"
+int(2053)
+int(2053)
 == mb_ltrim ==
 string(15) "いああああ"
 == mb_rtrim ==

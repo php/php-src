@@ -2951,12 +2951,21 @@ typedef enum {
 	MB_BOTH_TRIM = 3
 } mb_trim_mode;
 
-static zend_always_inline bool is_trim_wchar(uint32_t w, const HashTable *ht)
+static bool is_trim_wchar(uint32_t w, const HashTable *ht, const uint32_t *default_chars, size_t default_chars_length)
 {
-	return zend_hash_index_exists(ht, w);
+	if (ht) {
+		return zend_hash_index_exists(ht, w);
+	} else {
+		for (size_t i = 0; i < default_chars_length; i++) {
+			if (w == default_chars[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
 
-static zend_string* trim_each_wchar(zend_string *str, const HashTable *what_ht, mb_trim_mode mode, const mbfl_encoding *enc)
+static zend_string* trim_each_wchar(zend_string *str, const HashTable *what_ht, const uint32_t *default_chars, size_t default_chars_length, mb_trim_mode mode, const mbfl_encoding *enc)
 {
 	unsigned char *in = (unsigned char*)ZSTR_VAL(str);
 	uint32_t wchar_buf[128];
@@ -2974,7 +2983,7 @@ static zend_string* trim_each_wchar(zend_string *str, const HashTable *what_ht, 
 
 		for (size_t i = 0; i < out_len; i++) {
 			uint32_t w = wchar_buf[i];
-			if (is_trim_wchar(w, what_ht)) {
+			if (is_trim_wchar(w, what_ht, default_chars, default_chars_length)) {
 				if (mode & MB_LTRIM) {
 					left += 1;
 				}
@@ -2990,6 +2999,9 @@ static zend_string* trim_each_wchar(zend_string *str, const HashTable *what_ht, 
 		}
 	}
 
+	if (left == 0 && right == 0) {
+		return zend_string_copy(str);
+	}
 	return mb_get_substr(str, left, total_len - (right + left), enc);
 }
 
@@ -3012,7 +3024,7 @@ static zend_string* mb_trim_default_chars(zend_string *str, mb_trim_mode mode, c
 	for (size_t i = 0; i < trim_default_chars_length; i++) {
 		zend_hash_index_add_new(&what_ht, trim_default_chars[i], &val);
 	}
-	zend_string* retval = trim_each_wchar(str, &what_ht, mode, enc);
+	zend_string* retval = trim_each_wchar(str, &what_ht, NULL, 0, mode, enc);
 	zend_hash_destroy(&what_ht);
 
 	return retval;
@@ -3027,18 +3039,32 @@ static zend_string* mb_trim_what_chars(zend_string *str, zend_string *what, mb_t
 	size_t what_len = ZSTR_LEN(what);
 	HashTable what_ht;
 	zval val;
-	ZVAL_TRUE(&val);
-	zend_hash_init(&what_ht, what_len, NULL, NULL, false);
+	bool hash_initialized = false;
 
 	while (what_len) {
 		what_out_len = enc->to_wchar(&what_in, &what_len, what_wchar_buf, 128, &state);
 		ZEND_ASSERT(what_out_len <= 128);
-		for (size_t i = 0; i < what_out_len; i++) {
-			zend_hash_index_add(&what_ht, what_wchar_buf[i], &val);
+
+		if (what_out_len <= 4 && !hash_initialized) {
+			return trim_each_wchar(str, NULL, what_wchar_buf, what_out_len, mode, enc);
+		} else {
+			if (!hash_initialized) {
+				hash_initialized = true;
+				ZVAL_TRUE(&val);
+				zend_hash_init(&what_ht, what_len, NULL, NULL, false);
+			}
+			for (size_t i = 0; i < what_out_len; i++) {
+				zend_hash_index_add(&what_ht, what_wchar_buf[i], &val);
+			}
 		}
 	}
 
-	zend_string *retval = trim_each_wchar(str, &what_ht, mode, enc);
+	if (UNEXPECTED(!hash_initialized)) {
+		/* This is only possible if what is empty */
+		return zend_string_copy(str);
+	}
+
+	zend_string *retval = trim_each_wchar(str, &what_ht, NULL, 0, mode, enc);
 	zend_hash_destroy(&what_ht);
 
 	return retval;
