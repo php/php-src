@@ -118,7 +118,8 @@ function runValgrindPhpCgiCommand(
         '-T' . ($warmup ? $warmup . ',' : '') . $repeat,
         '-d max_execution_time=0',
         '-d opcache.enable=1',
-        '-d opcache.jit_buffer_size=' . ($jit ? '128M' : '0'),
+        '-d opcache.jit=' . ($jit ? 'tracing' : 'disable'),
+        '-d opcache.jit_buffer_size=128M',
         '-d opcache.validate_timestamps=0',
         ...$args,
     ]);

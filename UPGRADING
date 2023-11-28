@@ -111,6 +111,18 @@ PHP 8.4 UPGRADE NOTES
     contain null bytes. This never actually worked correctly in the first place,
     which is why it throws an exception nowadays.
 
+- Opcache:
+  . JIT config defaults changed from
+  `opcache.jit=tracing`, `opcache.jit_buffer_size=0` to
+  `opcache.jit=disable`, `opcache.jit_buffer_size=64M`:
+  this does not change the default behavior,
+  JIT was and still is disabled by default, however
+  now it is now disabled by default
+  using the `opcache.jit` setting, not the `opcache.jit_buffer_size` setting.  
+  This may affect users who enabled JIT by only setting a different
+  `opcache.jit_buffer_size`, without specifying a JIT mode in `opcache.jit`.  
+  To enable JIT, it is now required to populate the `opcache.jit` config value.
+
 ========================================
 2. New Features
 ========================================
