@@ -1966,50 +1966,10 @@ static int zend_jit_undefined_offset_ex_stub(dasm_State **Dst)
 static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 {
 	|->undefined_offset:
-	|.if X64WIN
-		|	sub r4, 0x28
-	|.elif X64
-		|	sub r4, 8
-	|.else
-		|	sub r4, 12
-	|.endif
-	|	mov r0, EX->opline
-	|	mov ecx, dword OP:r0->result.var
-	|	cmp byte OP:r0->op2_type, IS_CONST
-	|	SET_Z_TYPE_INFO FP + r1, IS_NULL
-	|	jne >2
-	|.if X64
-		|	movsxd r1, dword OP:r0->op2.constant
-		|	add r0, r1
-	|.else
-		|	mov r0, aword OP:r0->op2.zv
-	|.endif
-	|	jmp >3
-	|2:
-	|	mov eax, dword OP:r0->op2.var
-	|	add r0, FP
-	|3:
-	|.if X64WIN
-		|	mov CARG1, E_WARNING
-		|	LOAD_ADDR CARG2, "Undefined array key " ZEND_LONG_FMT
-		|	mov CARG3, aword [r0]
-		|	EXT_CALL zend_error, r0
-		|	add r4, 0x28 // stack alignment
-	|.elif X64
-		|	mov CARG1, E_WARNING
-		|	LOAD_ADDR CARG2, "Undefined array key " ZEND_LONG_FMT
-		|	mov CARG3, aword [r0]
-		|	EXT_CALL zend_error, r0
-		|	add r4, 8 // stack alignment
-	|.else
-		|	sub r4, 4
-		|	push aword [r0]
-		|	push "Undefined array key " ZEND_LONG_FMT
-		|	push E_WARNING
-		|	EXT_CALL zend_error, r0
-		|	add r4, 28
-	|.endif
-	|	ret
+	||	if (!GCC_GLOBAL_REGS) {
+	|		mov FCARG1a, FP
+	||	}
+	|	EXT_JMP zend_jit_undefined_long_key, r0
 
 	return 1;
 }
@@ -2026,54 +1986,10 @@ static int zend_jit_undefined_index_ex_stub(dasm_State **Dst)
 static int zend_jit_undefined_index_stub(dasm_State **Dst)
 {
 	|->undefined_index:
-	|.if X64WIN
-		|	sub r4, 0x28
-	|.elif X64
-		|	sub r4, 8
-	|.else
-		|	sub r4, 12
-	|.endif
-	|	mov r0, EX->opline
-	|	mov ecx, dword OP:r0->result.var
-	|	cmp byte OP:r0->op2_type, IS_CONST
-	|	SET_Z_TYPE_INFO FP + r1, IS_NULL
-	|	jne >2
-	|.if X64
-		|	movsxd r1, dword OP:r0->op2.constant
-		|   add r0, r1
-	|.else
-		|	mov r0, aword OP:r0->op2.zv
-	|.endif
-	|	jmp >3
-	|2:
-	|	mov eax, dword OP:r0->op2.var
-	|	add r0, FP
-	|3:
-	|.if X64WIN
-		|	mov CARG1, E_WARNING
-		|	LOAD_ADDR CARG2, "Undefined array key \"%s\""
-		|	mov CARG3, aword [r0]
-		|	add CARG3, offsetof(zend_string, val)
-		|	EXT_CALL zend_error, r0
-		|	add r4, 0x28
-	|.elif X64
-		|	mov CARG1, E_WARNING
-		|	LOAD_ADDR CARG2, "Undefined array key \"%s\""
-		|	mov CARG3, aword [r0]
-		|	add CARG3, offsetof(zend_string, val)
-		|	EXT_CALL zend_error, r0
-		|	add r4, 8
-	|.else
-		|	sub r4, 4
-		|	mov r0, aword [r0]
-		|	add r0, offsetof(zend_string, val)
-		|	push r0
-		|	push "Undefined array key \"%s\""
-		|	push E_WARNING
-		|	EXT_CALL zend_error, r0
-		|	add r4, 28
-	|.endif
-	|	ret
+	||	if (!GCC_GLOBAL_REGS) {
+	|		mov FCARG1a, FP
+	||	}
+	|	EXT_JMP zend_jit_undefined_string_key, r0
 
 	return 1;
 }
