@@ -935,9 +935,11 @@ static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */
 }
 /* }}} */
 
-static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, void* data) /* {{{ */
-{
-	zend_ffi_callback_data *callback_data = (zend_ffi_callback_data*)data;
+static void (*orig_interrupt_function)(zend_execute_data *execute_data);
+
+static void zend_ffi_interrupt_function(zend_execute_data *execute_data){
+	
+	zend_ffi_callback_data *callback_data = FFI_G(callback_data).data;
 	zend_fcall_info fci;
 	zend_ffi_type *ret_type;
 	zval retval;
@@ -951,13 +953,14 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 	fci.param_count = callback_data->arg_count;
 	fci.named_params = NULL;
 
+
 	if (callback_data->type->func.args) {
 		int n = 0;
 		zend_ffi_type *arg_type;
 
 		ZEND_HASH_PACKED_FOREACH_PTR(callback_data->type->func.args, arg_type) {
 			arg_type = ZEND_FFI_TYPE(arg_type);
-			zend_ffi_cdata_to_zval(NULL, args[n], arg_type, BP_VAR_R, &fci.params[n], (zend_ffi_flags)(arg_type->attr & ZEND_FFI_ATTR_CONST), 0, 0);
+			zend_ffi_cdata_to_zval(NULL, FFI_G(callback_data).args[n], arg_type, BP_VAR_R, &fci.params[n], (zend_ffi_flags)(arg_type->attr & ZEND_FFI_ATTR_CONST), 0, 0);
 			n++;
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -982,10 +985,40 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 
 	ret_type = ZEND_FFI_TYPE(callback_data->type->func.ret_type);
 	if (ret_type->kind != ZEND_FFI_TYPE_VOID) {
-		zend_ffi_zval_to_cdata(ret, ret_type, &retval);
+		zend_ffi_zval_to_cdata(FFI_G(callback_data).ret, ret_type, &retval);
 	}
 
 	zval_ptr_dtor(&retval);
+
+	if (orig_interrupt_function) {
+		orig_interrupt_function(execute_data);
+	}
+	zend_interrupt_function = orig_interrupt_function;
+
+	pthread_cond_signal(&FFI_G(vm_ack));
+	pthread_mutex_unlock(&FFI_G(vm_lock));
+}
+
+static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, void* data) /* {{{ */
+{
+	// get lock, first
+	pthread_mutex_lock(&FFI_G(vm_lock));
+	zend_ffi_call_data call_data = {
+		.cif = cif,
+		.ret = ret,
+		.args = args,
+		.data = (zend_ffi_call_data *)data
+	};
+	FFI_G(callback_data) = call_data;
+	
+	/** post interrupt request */
+	orig_interrupt_function = zend_interrupt_function;
+	zend_interrupt_function = zend_ffi_interrupt_function;
+	zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+
+	pthread_mutex_lock(&FFI_G(vm_lock));
+	pthread_cond_wait(&FFI_G(vm_ack), &FFI_G(vm_lock));
+	pthread_mutex_unlock(&FFI_G(vm_lock));
 }
 /* }}} */
 
@@ -5517,6 +5550,9 @@ ZEND_MINIT_FUNCTION(ffi)
 	if (FFI_G(preload)) {
 		return zend_ffi_preload(FFI_G(preload));
 	}
+
+	pthread_mutex_init(&FFI_G(vm_lock), NULL);
+	pthread_cond_init(&FFI_G(vm_ack), NULL);
 
 	return SUCCESS;
 }
