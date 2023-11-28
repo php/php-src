@@ -2429,92 +2429,22 @@ static int zend_jit_trace_exit_stub(zend_jit_ctx *jit)
 
 static int zend_jit_undefined_offset_stub(zend_jit_ctx *jit)
 {
-	ir_ref opline = ir_LOAD_A(jit_EX(opline));
-	ir_ref ref = ir_LOAD_U32(ir_ADD_OFFSET(opline, offsetof(zend_op, result.var)));
-	ir_ref if_const, end1, ref1;
-
-	if (sizeof(void*) == 8) {
-		ref = ir_ZEXT_A(ref);
+	if (GCC_GLOBAL_REGS) {
+		ir_TAILCALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_long_key));
+	} else {
+		ir_TAILCALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_long_key), jit_FP(jit));
 	}
-	jit_set_Z_TYPE_INFO_ref(jit, ir_ADD_A(jit_FP(jit), ref), ir_CONST_U32(IS_NULL));
-
-	if_const = ir_IF(ir_EQ(ir_LOAD_U8(ir_ADD_OFFSET(opline, offsetof(zend_op, op2_type))), ir_CONST_U8(IS_CONST)));
-
-	ir_IF_TRUE(if_const);
-#if ZEND_USE_ABS_CONST_ADDR
-	ref1 = ir_LOAD_A(ir_ADD_OFFSET(opline, offsetof(zend_op, op2.zv)));
-#else
-	ref = ir_LOAD_U32(ir_ADD_OFFSET(opline, offsetof(zend_op, op2.constant)));
-	if (sizeof(void*) == 8) {
-		ref = ir_SEXT_A(ref);
-	}
-	ref1 = ir_ADD_A(ref, opline);
-#endif
-
-	end1 = ir_END();
-
-	ir_IF_FALSE(if_const);
-	ref = ir_LOAD_U32(ir_ADD_OFFSET(opline, offsetof(zend_op, op2.var)));
-	if (sizeof(void*) == 8) {
-		ref = ir_ZEXT_A(ref);
-	}
-	ref = ir_ADD_A(jit_FP(jit), ref);
-
-	ir_MERGE_WITH(end1);
-	ref = ir_PHI_2(IR_ADDR, ref, ref1);
-
-	ref = jit_Z_LVAL_ref(jit, ref);
-	ir_CALL_3(IR_VOID, ir_CONST_FUNC(zend_error),
-		ir_CONST_U8(E_WARNING),
-		ir_CONST_ADDR("Undefined array key " ZEND_LONG_FMT),
-		ref);
-	ir_RETURN(IR_VOID);
 
 	return 1;
 }
 
 static int zend_jit_undefined_key_stub(zend_jit_ctx *jit)
 {
-	ir_ref opline = ir_LOAD_A(jit_EX(opline));
-	ir_ref ref = ir_LOAD_U32(ir_ADD_OFFSET(opline, offsetof(zend_op, result.var)));
-	ir_ref if_const, end1, ref1;
-
-	if (sizeof(void*) == 8) {
-		ref = ir_ZEXT_A(ref);
+	if (GCC_GLOBAL_REGS) {
+		ir_TAILCALL(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_string_key));
+	} else {
+		ir_TAILCALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_string_key), jit_FP(jit));
 	}
-	jit_set_Z_TYPE_INFO_ref(jit, ir_ADD_A(jit_FP(jit), ref), ir_CONST_U32(IS_NULL));
-
-	if_const = ir_IF(ir_EQ(ir_LOAD_U8(ir_ADD_OFFSET(opline, offsetof(zend_op, op2_type))), ir_CONST_U8(IS_CONST)));
-
-	ir_IF_TRUE(if_const);
-#if ZEND_USE_ABS_CONST_ADDR
-	ref1 = ir_LOAD_A(ir_ADD_OFFSET(opline, offsetof(zend_op, op2.zv)));
-#else
-	ref = ir_LOAD_U32(ir_ADD_OFFSET(opline, offsetof(zend_op, op2.constant)));
-	if (sizeof(void*) == 8) {
-		ref = ir_SEXT_A(ref);
-	}
-	ref1 = ir_ADD_A(ref, opline);
-#endif
-
-	end1 = ir_END();
-
-	ir_IF_FALSE(if_const);
-	ref = ir_LOAD_U32(ir_ADD_OFFSET(opline, offsetof(zend_op, op2.var)));
-	if (sizeof(void*) == 8) {
-		ref = ir_ZEXT_A(ref);
-	}
-	ref = ir_ADD_A(jit_FP(jit), ref);
-
-	ir_MERGE_WITH(end1);
-	ref = ir_PHI_2(IR_ADDR, ref, ref1);
-
-	ref = ir_ADD_OFFSET(jit_Z_PTR_ref(jit, ref), offsetof(zend_string, val));
-	ir_CALL_3(IR_VOID, ir_CONST_FUNC(zend_error),
-		ir_CONST_U8(E_WARNING),
-		ir_CONST_ADDR("Undefined array key \"%s\""),
-		ref);
-	ir_RETURN(IR_VOID);
 
 	return 1;
 }
@@ -3039,6 +2969,8 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_free_trampoline_helper);
 	REGISTER_HELPER(zend_jit_verify_return_slow);
 	REGISTER_HELPER(zend_jit_deprecated_helper);
+	REGISTER_HELPER(zend_jit_undefined_long_key);
+	REGISTER_HELPER(zend_jit_undefined_string_key);
 	REGISTER_HELPER(zend_jit_copy_extra_args_helper);
 	REGISTER_HELPER(zend_jit_vm_stack_free_args_helper);
 	REGISTER_HELPER(zend_free_extra_named_params);

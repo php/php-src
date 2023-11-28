@@ -194,6 +194,43 @@ bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D)
 	return 1;
 }
 
+void ZEND_FASTCALL zend_jit_undefined_long_key(EXECUTE_DATA_D)
+{
+	const zend_op *opline = EX(opline);
+	zval *result = EX_VAR(opline->result.var);
+	zval *dim;
+
+	ZVAL_NULL(result);
+	if (opline->op2_type == IS_CONST) {
+		dim = RT_CONSTANT(opline, opline->op2);
+	} else {
+		dim = EX_VAR(opline->op2.var);
+	}
+	ZEND_ASSERT(Z_TYPE_P(dim) == IS_LONG);
+	zend_error(E_WARNING, "Undefined array key " ZEND_LONG_FMT, Z_LVAL_P(dim));
+}
+
+void ZEND_FASTCALL zend_jit_undefined_string_key(EXECUTE_DATA_D)
+{
+	const zend_op *opline = EX(opline);
+	zval *result = EX_VAR(opline->result.var);
+	zval *dim;
+	zend_ulong lval;
+
+	ZVAL_NULL(result);
+	if (opline->op2_type == IS_CONST) {
+		dim = RT_CONSTANT(opline, opline->op2);
+	} else {
+		dim = EX_VAR(opline->op2.var);
+	}
+	ZEND_ASSERT(Z_TYPE_P(dim) == IS_STRING);
+	if (ZEND_HANDLE_NUMERIC(Z_STR_P(dim), lval)) {
+		zend_error(E_WARNING, "Undefined array key " ZEND_LONG_FMT, lval);
+	} else {
+		zend_error(E_WARNING, "Undefined array key \"%s\"", Z_STRVAL_P(dim));
+	}
+}
+
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_profile_helper(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op_array *op_array = (zend_op_array*)EX(func);
