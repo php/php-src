@@ -111,7 +111,17 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	if (FromEncoding->check != NULL) {
 		bool good = FromEncoding->check((unsigned char*)Data, Size);
 		if (errors1 > 0) {
-			ZEND_ASSERT(!good);
+			/* If the conversion function emits an error marker, that may or may not mean the input
+			 * was invalid; it could also be that the input was valid, but it contains codepoints
+			 * which cannot be represented in the output encoding.
+			 * To confirm if that is the case, try converting to UTF-8, which can represent any
+			 * Unicode codepoint. */
+			unsigned int errors3 = 0;
+			zend_string *Temp = convert_encoding(Data, Size, FromEncoding, &mbfl_encoding_utf8, 128, &errors3);
+			if (errors3 > 0) {
+				ZEND_ASSERT(!good);
+			}
+			zend_string_release(Temp);
 		}
 	}
 
