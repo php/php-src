@@ -2023,39 +2023,10 @@ static int zend_jit_undefined_offset_ex_stub(dasm_State **Dst)
 static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 {
 	|->undefined_offset:
-#ifdef __APPLE__
-	|	stp x29, x30, [sp, # -16]!
-	|	mov x29, sp
-#endif
-	|	//sub r4, 8
-	|	ldr REG0, EX->opline
-	|	ldr REG1w, OP:REG0->result.var
-	|	add REG1, REG1, FP
-	|	SET_Z_TYPE_INFO REG1, IS_NULL, TMP1w
-	|	ldrb REG1w, OP:REG0->op2_type
-	|	cmp REG1w, #IS_CONST
-	|	bne >2
-	|	ldrsw REG1, OP:REG0->op2.constant
-	|	add REG0, REG0, REG1
-	|	b >3
-	|2:
-	|	ldr REG0w, OP:REG0->op2.var
-	|	add REG0, REG0, FP
-	|3:
-	|	mov CARG1, #E_WARNING
-	|	LOAD_ADDR CARG2, "Undefined array key " ZEND_LONG_FMT
-	|	ldr CARG3, [REG0]
-#ifdef __APPLE__
-	|	str CARG3, [sp, #-16]!
-	|	EXT_CALL zend_error, REG0
-	|	add sp, sp, #16
-	|	ldp x29, x30, [sp], #16
-	|	ret
-#else
-	|	EXT_JMP zend_error, REG0 // tail call
-	|	//add r4, 8 // stack alignment
-	|	//ret
-#endif
+	||	if (!GCC_GLOBAL_REGS) {
+	|		mov FCARG1x, FP
+	||	}
+	|	EXT_JMP zend_jit_undefined_long_key, R0
 
 	return 1;
 }
@@ -2072,40 +2043,10 @@ static int zend_jit_undefined_index_ex_stub(dasm_State **Dst)
 static int zend_jit_undefined_index_stub(dasm_State **Dst)
 {
 	|->undefined_index:
-#ifdef __APPLE__
-	|	stp x29, x30, [sp, # -16]!
-	|	mov x29, sp
-#endif
-	|	//sub r4, 8
-	|	ldr REG0, EX->opline
-	|	ldr REG1w, OP:REG0->result.var
-	|	add REG1, REG1, FP
-	|	SET_Z_TYPE_INFO REG1, IS_NULL, TMP1w
-	|	ldrb REG1w, OP:REG0->op2_type
-	|	cmp REG1w, #IS_CONST
-	|	bne >2
-	|	ldrsw REG1, OP:REG0->op2.constant
-	|	add REG0, REG0, REG1
-	|	b >3
-	|2:
-	|	ldr REG0w, OP:REG0->op2.var
-	|	add REG0, REG0, FP
-	|3:
-	|	mov CARG1, #E_WARNING
-	|	LOAD_ADDR CARG2, "Undefined array key \"%s\""
-	|	ldr CARG3, [REG0]
-	|	add CARG3, CARG3, #offsetof(zend_string, val)
-#ifdef __APPLE__
-	|	str CARG3, [sp, #-16]!
-	|	EXT_CALL zend_error, REG0
-	|	add sp, sp, #16
-	|	ldp x29, x30, [sp], #16
-	|	ret
-#else
-	|	EXT_JMP zend_error, REG0 // tail call
-	|	//add r4, 8
-	|	//ret
-#endif
+	||	if (!GCC_GLOBAL_REGS) {
+	|		mov FCARG1x, FP
+	||	}
+	|	EXT_JMP zend_jit_undefined_string_key, R0
 
 	return 1;
 }
