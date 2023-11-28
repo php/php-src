@@ -4,7 +4,6 @@ JIT INIT_FCALL: 003 incorrect init fcall guard (fail with tracing JIT and --repe
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=64M
 opcache.jit_max_polymorphic_calls=0
 opcache.jit=tracing
 opcache.jit_hot_loop=64
