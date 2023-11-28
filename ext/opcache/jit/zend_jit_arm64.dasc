@@ -2026,7 +2026,7 @@ static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 	||	if (!GCC_GLOBAL_REGS) {
 	|		mov FCARG1x, FP
 	||	}
-	|	EXT_JMP zend_jit_undefined_long_key, R0
+	|	EXT_JMP zend_jit_undefined_long_key, REG0
 
 	return 1;
 }
@@ -2046,7 +2046,7 @@ static int zend_jit_undefined_index_stub(dasm_State **Dst)
 	||	if (!GCC_GLOBAL_REGS) {
 	|		mov FCARG1x, FP
 	||	}
-	|	EXT_JMP zend_jit_undefined_string_key, R0
+	|	EXT_JMP zend_jit_undefined_string_key, REG0
 
 	return 1;
 }
