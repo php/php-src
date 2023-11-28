@@ -332,7 +332,7 @@ _comment_handler(void *user, const xmlChar *comment)
 		xmlChar *d_comment;
 		size_t   d_comment_len;
 
-		_build_comment(comment, xmlStrlen(comment), &d_comment, &d_comment_len);
+		_build_comment(comment, (size_t) xmlStrlen(comment), &d_comment, &d_comment_len);
 		parser->h_default(parser->user, d_comment, d_comment_len);
 		xmlFree(d_comment);
 	}
@@ -382,7 +382,7 @@ _get_entity(void *user, const xmlChar *name)
 					xmlChar *entity;
 					size_t   len;
 
-					_build_entity(name, xmlStrlen(name), &entity, &len);
+					_build_entity(name, (size_t) xmlStrlen(name), &entity, &len);
 					parser->h_default(parser->user, (const xmlChar *) entity, len);
 					xmlFree(entity);
 				} else {
