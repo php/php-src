@@ -24,6 +24,7 @@
 
 /* Builtins are used to avoid library linkage */
 #if __has_feature(c_atomic)
+#include <stdatomic.h>
 #define	HAVE_C11_ATOMICS 1
 #elif ZEND_GCC_PREREQ(4, 7)
 #define	HAVE_GNUC_ATOMICS 1
@@ -82,18 +83,18 @@ static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, 
 
 #elif defined(HAVE_C11_ATOMICS)
 
-#define ZEND_ATOMIC_BOOL_INIT(obj, desired) __c11_atomic_init(&(obj)->value, (desired))
+#define ZEND_ATOMIC_BOOL_INIT(obj, desired) atomic_init(&(obj)->value, (desired))
 
 static zend_always_inline bool zend_atomic_bool_exchange_ex(zend_atomic_bool *obj, bool desired) {
-	return __c11_atomic_exchange(&obj->value, desired, __ATOMIC_SEQ_CST);
+	return atomic_exchange_explicit(&obj->value, desired, memory_order_seq_cst);
 }
 
 static zend_always_inline bool zend_atomic_bool_load_ex(const zend_atomic_bool *obj) {
-	return __c11_atomic_load(&obj->value, __ATOMIC_SEQ_CST);
+	return atomic_load_explicit(&obj->value, memory_order_seq_cst);
 }
 
 static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, bool desired) {
-	__c11_atomic_store(&obj->value, desired, __ATOMIC_SEQ_CST);
+	atomic_store_explicit(&obj->value, desired, memory_order_seq_cst);
 }
 
 #elif defined(HAVE_GNUC_ATOMICS)
