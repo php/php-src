@@ -1,2 +1,0 @@
-<?php
-$container = 10;
