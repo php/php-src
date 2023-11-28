@@ -14,6 +14,7 @@ DOM:
     (nielsdos)
   . Fix cloning attribute with namespace disappearing namespace. (nielsdos)
   . Implement DOM HTML5 parsing and serialization RFC. (nielsdos)
+  . Fix DOMElement->prefix with empty string creates bogus prefix. (nielsdos)
 
 FTP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
