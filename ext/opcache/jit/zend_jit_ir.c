@@ -2683,6 +2683,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 			/* Stack must be 16 byte aligned */
 			/* TODO: select stack size ??? */
 #if defined(IR_TARGET_AARCH64)
+			jit->ctx.flags |= IR_USE_FRAME_POINTER;
 			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 16; /* 10 saved registers and 6 spill slots (8 bytes) */
 #elif defined(_WIN64)
 			jit->ctx.fixed_stack_frame_size = sizeof(void*) * 11; /* 8 saved registers and 3 spill slots (8 bytes) */
@@ -2812,7 +2813,9 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 	}
 
 	ir_match(ctx);
+#if !defined(IR_TARGET_AARCH64)
 	ctx->flags &= ~IR_USE_FRAME_POINTER; /* don't use FRAME_POINTER even with ALLOCA, TODO: cleanup this ??? */
+#endif
 	ir_assign_virtual_registers(ctx);
 	ir_compute_live_ranges(ctx);
 	ir_coalesce(ctx);
