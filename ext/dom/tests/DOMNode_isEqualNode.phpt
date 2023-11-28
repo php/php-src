@@ -2,6 +2,12 @@
 DOMNode::isEqualNode()
 --EXTENSIONS--
 dom
+--SKIPIF--
+<?php
+if (LIBXML_VERSION >= 21200 && LIBXML_VERSION <= 21201) {
+    die("xfail Broken for libxml2 2.12.0 - 2.12.1 see https://gitlab.gnome.org/GNOME/libxml2/-/issues/634");
+}
+?>
 --FILE--
 <?php
 
@@ -200,8 +206,7 @@ echo "--- Test documents ---\n";
 $dom1Clone = clone $dom1;
 var_dump($dom1->documentElement->isEqualNode($dom1Clone->documentElement));
 var_dump($dom1->documentElement->isEqualNode($dom2->documentElement));
-// TODO: re-enable this once this is figured out: https://gitlab.gnome.org/GNOME/libxml2/-/issues/634
-//var_dump($dom1->isEqualNode($dom1Clone));
+var_dump($dom1->isEqualNode($dom1Clone));
 var_dump($dom1->isEqualNode($dom2));
 var_dump($dom1->documentElement->isEqualNode($dom1Clone));
 var_dump($dom1->documentElement->isEqualNode($dom2));
@@ -344,6 +349,7 @@ bool(false)
 --- Test documents ---
 bool(true)
 bool(false)
+bool(true)
 bool(false)
 bool(false)
 bool(false)

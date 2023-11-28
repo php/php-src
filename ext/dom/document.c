@@ -1241,7 +1241,7 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 	}
 
 	if (encoding != NULL) {
-		/* Note: libxml 2.12+ don't handle NULL encoding well. */
+		/* Note: libxml 2.12+ doesn't handle NULL encoding well. */
 		(void) xmlSwitchToEncoding(ctxt, encoding);
 	}
 
