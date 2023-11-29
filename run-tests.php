@@ -3852,12 +3852,9 @@ class TestFile
             $key = $prefix . '_EXTERNAL';
 
             if ($this->hasSection($key)) {
-                $dir = dirname($this->fileName);
                 // don't allow tests to retrieve files from anywhere but this subdirectory
-                //$fileName = $dir . '/' . trim(str_replace('..', '', $this->getSection($key)));
-
-                // Allow tests to retrieve files from parent directories
-                $fileName = $dir . '/' . trim($this->getSection($key));
+                $dir = dirname($this->fileName);
+                $fileName = $dir . '/' . trim(str_replace('..', '', $this->getSection($key)));
 
                 if (file_exists($fileName)) {
                     $this->sections[$prefix] = file_get_contents($fileName);
