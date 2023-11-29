@@ -1815,7 +1815,7 @@ lxb_html_tokenizer_state_char_ref_named(lxb_html_tokenizer_t *tkz,
             goto done;
         }
 
-        if (entry->value != NULL) {
+        if (entry->value[0] != 0) {
             tkz->entity_end = (tkz->pos + (data - begin)) - tkz->start;
             tkz->entity_match = entry;
         }
