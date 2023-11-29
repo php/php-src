@@ -35,6 +35,10 @@
 
 ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 {
+	if (EG(pid)) {
+		timer_delete(EG(max_execution_timer_timer));
+	}
+
 	struct sigevent sev;
 	sev.sigev_notify = SIGEV_THREAD_ID;
 	sev.sigev_value.sival_ptr = &EG(max_execution_timer_timer);
