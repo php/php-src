@@ -1,2 +1,0 @@
-<?php
-$dimension = "3";
