@@ -2,7 +2,7 @@
 Test DOMDocument::load() detects not-well formed
 --SKIPIF--
 <?php
-if (LIBXML_VERSION < 21100 || LIBXML_VERSION >= 21200) die('skip libxml2 test variant for version >= 2.11 && <= 2.12');
+if (LIBXML_VERSION < 21200) die('skip libxml2 test variant for version >= 2.12');
 ?>
 --DESCRIPTION--
 This test verifies the method detects attributes values not closed between " or '
@@ -28,5 +28,3 @@ Warning: DOMDocument::load(): internal error: xmlParseStartTag: problem parsing 
 Warning: DOMDocument::load(): Couldn't find end of Start Tag book line 4 in %s on line %d
 
 Warning: DOMDocument::load(): Opening and ending tag mismatch: books line 3 and book in %s on line %d
-
-Warning: DOMDocument::load(): Extra content at the end of the document in %s on line %d

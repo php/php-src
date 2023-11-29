@@ -1240,7 +1240,10 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 		return(NULL);
 	}
 
-	(void) xmlSwitchToEncoding(ctxt, encoding);
+	if (encoding != NULL) {
+		/* Note: libxml 2.12+ doesn't handle NULL encoding well. */
+		(void) xmlSwitchToEncoding(ctxt, encoding);
+	}
 
 	/* If loading from memory, we need to set the base directory for the document */
 	if (mode != DOM_LOAD_FILE) {

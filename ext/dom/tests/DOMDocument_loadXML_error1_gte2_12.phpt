@@ -2,7 +2,7 @@
 Test DOMDocument::loadXML() detects not-well formed XML
 --SKIPIF--
 <?php
-if (LIBXML_VERSION >= 21200) die('skip libxml2 test variant for version < 2.12');
+if (LIBXML_VERSION < 21200) die('skip libxml2 test variant for version >= 2.12');
 ?>
 --DESCRIPTION--
 This test verifies the method detects an opening and ending tag mismatch
@@ -24,5 +24,3 @@ domdocumentloadxml_test_method.inc
 Warning: DOMDocument::load%r(XML){0,1}%r(): Opening and ending tag mismatch: title line 5 and book %s
 
 Warning: DOMDocument::load%r(XML){0,1}%r(): %rexpected '>'|Opening and ending tag mismatch: book line (4|5) and books%r %s
-
-Warning: DOMDocument::load%r(XML){0,1}%r(): %rPremature end of data in tag books|EndTag: '<\/' not found in Entity, line: 13%r %s

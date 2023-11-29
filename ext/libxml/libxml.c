@@ -580,7 +580,11 @@ static void _php_libxml_free_error(void *ptr)
 	xmlResetError((xmlErrorPtr) ptr);
 }
 
-static void _php_list_set_error_structure(xmlErrorPtr error, const char *msg, int line, int column)
+#if LIBXML_VERSION >= 21200
+static void _php_list_set_error_structure(const xmlError *error, const char *msg, int line, int column)
+#else
+static void _php_list_set_error_structure(xmlError *error, const char *msg, int line, int column)
+#endif
 {
 	xmlError error_copy;
 	int ret;
@@ -824,7 +828,10 @@ PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(const char *file, int line, 
 			if (!last->file) {
 				last->file = strdup(file);
 			}
+			/* Until there is a replacement */
+			ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 			xmlCopyError(last, &xmlLastError);
+			ZEND_DIAGNOSTIC_IGNORED_END
 		}
 	}
 }
@@ -845,11 +852,13 @@ PHP_LIBXML_API void php_libxml_ctx_warning(void *ctx, const char *msg, ...)
 	va_end(args);
 }
 
+#if LIBXML_VERSION >= 21200
+static void php_libxml_structured_error_handler(void *userData, const xmlError *error)
+#else
 static void php_libxml_structured_error_handler(void *userData, xmlErrorPtr error)
+#endif
 {
 	_php_list_set_error_structure(error, NULL, 0, 0);
-
-	return;
 }
 
 PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...)
@@ -1077,11 +1086,9 @@ PHP_FUNCTION(libxml_use_internal_errors)
 /* {{{ Retrieve last error from libxml */
 PHP_FUNCTION(libxml_get_last_error)
 {
-	xmlErrorPtr error;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	error = xmlGetLastError();
+	const xmlError* error = xmlGetLastError();
 
 	if (error) {
 		object_init_ex(return_value, libxmlerror_class_entry);
@@ -1108,7 +1115,6 @@ PHP_FUNCTION(libxml_get_last_error)
 /* {{{ Retrieve array of errors */
 PHP_FUNCTION(libxml_get_errors)
 {
-
 	xmlErrorPtr error;
 
 	ZEND_PARSE_PARAMETERS_NONE();
