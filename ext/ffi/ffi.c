@@ -5613,7 +5613,6 @@ ZEND_MINIT_FUNCTION(ffi)
 ZEND_RSHUTDOWN_FUNCTION(ffi)
 {
 	zend_ffi_wait_request_barrier(true);
-	zend_interrupt_function = orig_interrupt_function;
 
 	if (FFI_G(callbacks)) {
 		zend_hash_destroy(FFI_G(callbacks));
@@ -5726,6 +5725,7 @@ static ZEND_GINIT_FUNCTION(ffi)
 /* {{{ ZEND_GINIT_FUNCTION */
 static ZEND_GSHUTDOWN_FUNCTION(ffi)
 {
+	zend_ffi_wait_request_barrier(true);
 	if (ffi_globals->scopes) {
 		zend_hash_destroy(ffi_globals->scopes);
 		free(ffi_globals->scopes);
