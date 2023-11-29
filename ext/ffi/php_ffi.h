@@ -50,6 +50,8 @@ ZEND_BEGIN_MODULE_GLOBALS(ffi)
 	zend_atomic_bool callback_in_progress;
 	pthread_mutex_t vm_lock;
 	pthread_cond_t vm_ack;
+	pthread_t main_tid;
+	pthread_t requester_tid;
 	zend_ffi_call_data callback_data;
 
 	/* preloading */
