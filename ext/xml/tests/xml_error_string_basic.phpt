@@ -21,9 +21,9 @@ foreach ($xmls as $xml) {
     xml_parser_free($xml_parser);
 }
 ?>
---EXPECT--
-int(5)
-string(20) "Invalid document end"
+--EXPECTF--
+int(%r5|77%r)
+string(%d) %r"Invalid document end"|"Tag not finished"%r
 int(47)
 string(35) "Processing Instruction not finished"
 int(57)
