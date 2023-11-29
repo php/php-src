@@ -2,7 +2,7 @@
 Test DOMDocument::loadXML() detects not-well formed XML
 --SKIPIF--
 <?php
-if (LIBXML_VERSION < 21100 || LIBXML_VERSION >= 21200) die('skip libxml2 test variant for version >= 2.11 && <= 2.12');
+if (LIBXML_VERSION < 21200) die('skip libxml2 test variant for version >= 2.12');
 ?>
 --DESCRIPTION--
 This test verifies the method detects attributes values not closed between " or '
@@ -12,8 +12,6 @@ Environment variables used in the test:
 - EXPECTED_RESULT: the expected result
 --CREDITS--
 Antonio Diaz Ruiz <dejalatele@gmail.com>
---INI--
-assert.bail=true
 --EXTENSIONS--
 dom
 --ENV--
@@ -30,5 +28,3 @@ Warning: DOMDocument::loadXML(): internal error: xmlParseStartTag: problem parsi
 Warning: DOMDocument::loadXML(): Couldn't find end of Start Tag book line 4 in Entity, line: 4 in %s on line %d
 
 Warning: DOMDocument::loadXML(): Opening and ending tag mismatch: books line 3 and book in Entity, line: 7 in %s on line %d
-
-Warning: DOMDocument::loadXML(): Extra content at the end of the document in Entity, line: 8 in %s on line %d

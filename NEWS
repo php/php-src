@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 
 - LibXML:
   . Fixed bug GH-12702 (libxml2 2.12.0 issue building from src). (nono303)
+  . Fixed test failures for libxml2 2.12.0. (nielsdos)
 
 - MySQLnd:
   . Avoid using uninitialised struct. (mikhainin)
