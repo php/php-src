@@ -10,6 +10,8 @@ opcache.file_update_protection=1
 --FILE--
 <?php
 
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'test_offset_helpers.inc';
+
 $containers = [
     null,
     false,
@@ -23,56 +25,6 @@ $containers = [
     STDERR,
     new stdClass(),
 ];
-
-$offsets = [
-    null,
-    false,
-    true,
-    4,
-    5.5,
-    6.0,
-    //PHP_INT_MAX,
-    //PHP_INT_MIN,
-    PHP_INT_MAX * 2,
-    PHP_INT_MIN * 2,
-    INF,
-    NAN,
-    'string',
-    '7',
-    '8.5',
-    '9.0',
-    '2e3',
-    '20a',
-    '  20',
-    '20  ',
-    //"9179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368",
-    //"-9179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368",
-    "0x14",
-    (string) PHP_INT_MAX * 2,
-    (string) PHP_INT_MIN * 2,
-];
-
-function makeContainer($container) {
-    if (is_array($container)) {
-        return "[]";
-    }
-    if (is_resource($container)) {
-        return "STDERR";
-    }
-    if ($container instanceof stdClass) {
-        return "new stdClass()";
-    }
-    return var_export($container, true);
-}
-function makeOffset($offset) {
-    if ($offset === PHP_INT_MIN) {
-        return "PHP_INT_MIN";
-    }
-    if ($offset === PHP_INT_MAX) {
-        return "PHP_INT_MAX";
-    }
-    return var_export($offset, true);
-}
 
 function makeTestFile($container, $offset) {
     $offset_p = makeOffset($offset);
@@ -134,12 +86,6 @@ test;
 }
 
 $const_dim_filename = __DIR__ . DIRECTORY_SEPARATOR . 'compare_binary_offsets_temp.php';
-
-$failures = [];
-$failuresNb = 0;
-$testCasesTotal = 0;
-
-$var_dim_filename = __DIR__ . DIRECTORY_SEPARATOR . 'test_variable_offsets.inc';
 
 ob_start();
 foreach ($containers as $container_orig) {
