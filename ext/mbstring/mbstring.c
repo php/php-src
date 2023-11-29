@@ -2443,12 +2443,22 @@ PHP_FUNCTION(mb_strcut)
 
 	if (enc->cut) {
 		RETURN_STR(enc->cut(string.val, from, len, string.val + string.len));
-	} else {
-		ret = mbfl_strcut(&string, &result, from, len);
-		ZEND_ASSERT(ret != NULL);
-		RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
-		efree(ret->val);
 	}
+
+	unsigned int char_len = string.encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2 | MBFL_ENCTYPE_WCS4);
+	if (char_len) {
+		/* Round `from` down to a multiple of `char_len`; works because `char_len` is a power of 2 */
+		from &= -char_len;
+		if (len > string.len - from) {
+			len = string.len - from;
+		}
+		RETURN_STR(zend_string_init_fast((const char*)(string.val + from), len & -char_len));
+	}
+
+	ret = mbfl_strcut(&string, &result, from, len);
+	ZEND_ASSERT(ret != NULL);
+	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
+	efree(ret->val);
 }
 /* }}} */
 
