@@ -1424,13 +1424,23 @@ int ir_mem_unmap(void *ptr, size_t size)
 
 int ir_mem_protect(void *ptr, size_t size)
 {
-	mprotect(ptr, size, PROT_READ | PROT_EXEC);
+	if (mprotect(ptr, size, PROT_READ | PROT_EXEC) != 0) {
+#ifdef IR_DEBUG
+		fprintf(stderr, "mprotect() failed\n");
+#endif
+		return 0;
+	}
 	return 1;
 }
 
 int ir_mem_unprotect(void *ptr, size_t size)
 {
-	mprotect(ptr, size, PROT_READ | PROT_WRITE);
+	if (mprotect(ptr, size, PROT_READ | PROT_WRITE) != 0) {
+#ifdef IR_DEBUG
+		fprintf(stderr, "mprotect() failed\n");
+#endif
+		return 0;
+	}
 	return 1;
 }
 

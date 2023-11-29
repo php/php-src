@@ -152,6 +152,16 @@ enum _ir_reg {
 	(IR_REGSET_INTERVAL(IR_REG_X19, IR_REG_X30) \
 	| IR_REGSET_INTERVAL(IR_REG_V8, IR_REG_V15))
 
+#ifndef __APPLE__
+typedef struct _ir_va_list {
+	void    *stack;
+	void    *gr_top;
+	void    *vr_top;
+	int32_t  gr_offset;
+	int32_t  vr_offset;
+} ir_va_list;
+#endif
+
 typedef struct _ir_tmp_reg {
 	union {
 		uint8_t num;

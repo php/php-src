@@ -564,6 +564,10 @@ struct _ir_ctx {
 	int32_t            fixed_stack_frame_size;  /* fixed stack allocated by generated code for spills and registers save/restore */
 	int32_t            fixed_call_stack_size;   /* fixed preallocated stack for parameter passing (default 0) */
 	uint64_t           fixed_save_regset;       /* registers that always saved/restored in prologue/epilogue */
+	uint32_t           locals_area_size;
+	uint32_t           gp_reg_params;
+	uint32_t           fp_reg_params;
+	int32_t            param_stack_size;
 	ir_live_interval **live_intervals;
 	ir_arena          *arena;
 	ir_live_range     *unused_ranges;
@@ -581,7 +585,6 @@ struct _ir_ctx {
 	int32_t            call_stack_size;         /* stack for parameter passing (used by register allocator and code generator) */
 	uint64_t           used_preserved_regs;
 #ifdef IR_TARGET_X86
-	int32_t            param_stack_size;
 	int32_t            ret_slot;
 #endif
 	uint32_t           rodata_offset;

@@ -883,6 +883,11 @@ IR_ALWAYS_INLINE uint32_t ir_insn_len(const ir_insn *insn)
 #define IR_HAS_CALLS           (1<<3)
 #define IR_OPT_IN_SCCP         (1<<4)
 #define IR_LINEAR              (1<<5)
+#define IR_HAS_VA_START        (1<<6)
+#define IR_HAS_VA_COPY         (1<<7)
+#define IR_HAS_VA_ARG_GP       (1<<8)
+#define IR_HAS_VA_ARG_FP       (1<<9)
+#define IR_HAS_FP_RET_SLOT     (1<<10)
 
 /* Temporary: SCCP -> CFG */
 #define IR_SCCP_DONE           (1<<25)

@@ -3598,7 +3598,9 @@ static int ir_linear_scan(ir_ctx *ctx)
 	}
 
 #ifdef IR_TARGET_X86
-	if (ctx->ret_type == IR_FLOAT || ctx->ret_type == IR_DOUBLE) {
+	if (ctx->flags2 & IR_HAS_FP_RET_SLOT) {
+		ctx->ret_slot = ir_allocate_spill_slot(ctx, IR_DOUBLE, &data);
+	} else if (ctx->ret_type == IR_FLOAT || ctx->ret_type == IR_DOUBLE) {
 		ctx->ret_slot = ir_allocate_spill_slot(ctx, ctx->ret_type, &data);
 	} else {
 		ctx->ret_slot = -1;
@@ -3732,6 +3734,10 @@ static void assign_regs(ir_ctx *ctx)
 								if (use_pos->op_num == 0) {
 									if (ctx->ir_base[ref].op == IR_PHI) {
 										/* Spilled PHI var is passed through memory */
+										reg = IR_REG_NONE;
+									} else if (ctx->ir_base[ref].op == IR_PARAM
+									 && (ival->flags & IR_LIVE_INTERVAL_MEM_PARAM)) {
+										/* Stack PARAM var is passed through memory */
 										reg = IR_REG_NONE;
 									} else {
 										uint32_t use_b = ctx->cfg_map[ref];
