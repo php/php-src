@@ -937,6 +937,13 @@ static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
+static void zend_ffi_dispatch_callback_end(void){ /* {{{ */
+	zend_atomic_bool_store_ex(&FFI_G(callback_in_progress), false);
+	pthread_cond_broadcast(&FFI_G(vm_ack));
+	pthread_mutex_unlock(&FFI_G(vm_lock));
+}
+/* }}} */
+
 static void zend_ffi_dispatch_callback(void){ /* {{{ */
 	// this function must always run on the main thread
 	assert(pthread_self() == FFI_G(main_tid));
@@ -986,6 +993,7 @@ static void zend_ffi_dispatch_callback(void){ /* {{{ */
 	free_alloca(fci.params, use_heap);
 
 	if (EG(exception)) {
+		zend_ffi_dispatch_callback_end();
 		zend_error_noreturn(E_ERROR, "Throwing from FFI callbacks is not allowed");
 	}
 
@@ -995,9 +1003,7 @@ static void zend_ffi_dispatch_callback(void){ /* {{{ */
 	}
 
 	zval_ptr_dtor(&retval);
-	
-	zend_atomic_bool_store_ex(&FFI_G(callback_in_progress), false);
-	pthread_cond_broadcast(&FFI_G(vm_ack));
+	zend_ffi_dispatch_callback_end();
 }
 /* }}} */
 
@@ -1051,9 +1057,8 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 	} else {
 		// post interrupt request to acquire the main thread
 		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+		pthread_mutex_unlock(&FFI_G(vm_lock));
 	}
-	
-	pthread_mutex_unlock(&FFI_G(vm_lock));
 
 	if(!is_main_thread){
 		// wait for the request to complete before returning
