@@ -937,12 +937,12 @@ static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
-static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{ */
+static void zend_ffi_dispatch_callback(void){ /* {{{ */
 	// this function must always run on the main thread
 	assert(pthread_self() == FFI_G(main_tid));
 
 	if (!zend_atomic_bool_load_ex(&FFI_G(callback_in_progress))) {
-		goto end;
+		return;
 	}
 
 	zend_ffi_callback_data *callback_data = FFI_G(callback_data).data;
@@ -998,8 +998,12 @@ static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{
 	
 	zend_atomic_bool_store_ex(&FFI_G(callback_in_progress), false);
 	pthread_cond_broadcast(&FFI_G(vm_ack));
+}
+/* }}} */
 
-	end:
+static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{ */
+	zend_ffi_dispatch_callback();
+
 	if (orig_interrupt_function) {
 		orig_interrupt_function(execute_data);
 	}
@@ -1038,18 +1042,23 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 		.data = (zend_ffi_callback_data *)data
 	};
 	FFI_G(callback_data) = call_data;
-	FFI_G(requester_tid) = pthread_self();
 
-	if(pthread_self() == FFI_G(main_tid)){
-		
+	bool is_main_thread = pthread_self() == FFI_G(main_tid);
+
+	if(is_main_thread){
+		// dispatch the callback directly
+		zend_ffi_dispatch_callback();
+	} else {
+		// post interrupt request to acquire the main thread
+		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
 	}
-
-	// post interrupt request
-	zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+	
 	pthread_mutex_unlock(&FFI_G(vm_lock));
 
-	// wait for the request to complete before returning
-	zend_ffi_wait_request_barrier(true);
+	if(!is_main_thread){
+		// wait for the request to complete before returning
+		zend_ffi_wait_request_barrier(true);
+	}
 }
 /* }}} */
 
