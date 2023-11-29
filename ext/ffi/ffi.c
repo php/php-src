@@ -937,7 +937,7 @@ static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */
 
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
-static void zend_ffi_interrupt_function(zend_execute_data *execute_data){
+static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{ */
 	if(!zend_atomic_bool_load_ex(&FFI_G(callback_in_progress))) goto end;
 
 
@@ -1001,8 +1001,9 @@ static void zend_ffi_interrupt_function(zend_execute_data *execute_data){
 		orig_interrupt_function(execute_data);
 	}
 }
+/* }}} */
 
-static void zend_ffi_wait_request_barrier(void){
+static void zend_ffi_wait_request_barrier(void){ /* {{{ */
 	// get lock, first
 	pthread_mutex_lock(&FFI_G(vm_lock));
 	
@@ -1012,6 +1013,7 @@ static void zend_ffi_wait_request_barrier(void){
 		pthread_cond_wait(&FFI_G(vm_ack), &FFI_G(vm_lock));
 	}
 }
+/* }}} */
 
 static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, void* data) /* {{{ */
 {
