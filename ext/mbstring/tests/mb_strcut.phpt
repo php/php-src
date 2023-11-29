@@ -225,6 +225,33 @@ print "== UHC ==\n";
 
 print "Single byte 0x96: [" . bin2hex(mb_strcut("\x96", 1, 1280, "UHC")) . "]\n";
 
+print "== ASCII ==\n";
+
+print "Empty: [" . bin2hex(mb_strcut("ABC", 0, 0, "ASCII")) . "]\n";
+print "Empty: [" . bin2hex(mb_strcut("ABC", 1, 0, "ASCII")) . "]\n";
+print "Empty: [" . bin2hex(mb_strcut("ABC", 2, 0, "ASCII")) . "]\n";
+
+print "One char: [" . bin2hex(mb_strcut("ABC", 2, 1, "ASCII")) . "]\n";
+print "Two chars: [" . bin2hex(mb_strcut("ABC", 1, 2, "ASCII")) . "]\n";
+print "Two chars: [" . bin2hex(mb_strcut("ABC", 1, 3, "ASCII")) . "]\n";
+
+print "== UCS-2BE ==\n";
+
+print "Empty: [" . bin2hex(mb_strcut("\x00A\x00B\x00C", 0, 0, "UCS-2BE")) . "]\n";
+print "Empty: [" . bin2hex(mb_strcut("\x00A\x00B\x00C", 1, 0, "UCS-2BE")) . "]\n";
+print "Empty: [" . bin2hex(mb_strcut("\x00A\x00B\x00C", 2, 0, "UCS-2BE")) . "]\n";
+
+print "Empty: [" . bin2hex(mb_strcut("\x00A\x00B\x00C", 2, 1, "UCS-2BE")) . "]\n";
+print "One char: [" . bin2hex(mb_strcut("\x00A\x00B\x00C", 1, 2, "UCS-2BE")) . "]\n";
+print "Cut in middle of following char: [" . bin2hex(mb_strcut("\x00A\x00B\x00C", 1, 3, "UCS-2BE")) . "]\n";
+print "Two chars: [" . bin2hex(mb_strcut("\x00A\x00B\x00C", 1, 4, "UCS-2BE")) . "]\n";
+
+print "== UCS-4BE ==\n";
+
+print "From 1, Length 5: [" . bin2hex(mb_strcut("\x00\x00\x00\x41\x00\x00\x00\x42", 1, 5, "UCS-4BE")) . "]\n";
+print "From 1, Length 6: [" . bin2hex(mb_strcut("\x00\x00\x00\x41\x00\x00\x00\x42", 1, 6, "UCS-4BE")) . "]\n";
+print "From 1, Length 8: [" . bin2hex(mb_strcut("\x00\x00\x00\x41\x00\x00\x00\x42", 1, 8, "UCS-4BE")) . "]\n";
+
 ?>
 --EXPECT--
 == EUC-JP ==
@@ -382,3 +409,22 @@ Invalid byte 0xF5: []
 Double-byte char: []
 == UHC ==
 Single byte 0x96: [96]
+== ASCII ==
+Empty: []
+Empty: []
+Empty: []
+One char: [43]
+Two chars: [4243]
+Two chars: [4243]
+== UCS-2BE ==
+Empty: []
+Empty: []
+Empty: []
+Empty: []
+One char: [0041]
+Cut in middle of following char: [0041]
+Two chars: [00410042]
+== UCS-4BE ==
+From 1, Length 5: [00000041]
+From 1, Length 6: [00000041]
+From 1, Length 8: [0000004100000042]
