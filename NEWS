@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-12758 / GH-12768 (Invalid opline in OOM handlers within
     ZEND_FUNC_GET_ARGS and ZEND_BIND_STATIC). (Florian Engelhardt)
 
+- LibXML:
+  . Fixed test failures for libxml2 2.12.0. (nielsdos)
+
 - MySQLnd:
   . Avoid using uninitialised struct. (mikhainin)
   . Fixed bug GH-12791 (Possible dereference of NULL in MySQLnd debug code).
