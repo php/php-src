@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fix various missing NULL checks. (nielsdos, dstogov)
   . Fixed bug GH-12835 (Leak of call->extra_named_params on internal __call).
     (ilutov)
+  . Fixed bug GH-12826 (Weird pointers issue in nested loops). (nielsdos)
 
 - FPM:
   . Fixed bug GH-12705 (Segmentation fault in fpm_status_export_to_zval).
