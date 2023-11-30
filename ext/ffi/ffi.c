@@ -57,6 +57,13 @@
 # define __BIGGEST_ALIGNMENT__ sizeof(size_t)
 #endif
 
+//#define FFI_DEBUG
+#ifdef FFI_DEBUG
+#define FFI_DPRINTF(fmt, ...) printf(fmt, ##__VA_ARGS__)
+#else
+#define FFI_DPRINTF(fmt, ...) 
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(ffi)
 
 typedef enum _zend_ffi_tag_kind {
@@ -227,6 +234,10 @@ static ZEND_COLD void zend_ffi_return_unsupported(zend_ffi_type *type);
 static ZEND_COLD void zend_ffi_pass_unsupported(zend_ffi_type *type);
 static ZEND_COLD void zend_ffi_assign_incompatible(zval *arg, zend_ffi_type *type);
 static bool zend_ffi_is_compatible_type(zend_ffi_type *dst_type, zend_ffi_type *src_type);
+static void zend_ffi_wait_cond(
+	pthread_mutex_t *mutex, pthread_cond_t *cond,
+	zend_atomic_bool *flag, bool wanted_value, bool release
+);
 
 #if FFI_CLOSURES
 static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value);
@@ -938,15 +949,13 @@ static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
 static void zend_ffi_dispatch_callback_end(void){ /* {{{ */
-	zend_atomic_bool_store_ex(&FFI_G(callback_in_progress), false);
-	pthread_cond_broadcast(&FFI_G(vm_ack));
-	pthread_mutex_unlock(&FFI_G(vm_lock));
+	//pthread_cond_broadcast(&FFI_G(vm_ack));
 }
 /* }}} */
 
 static void zend_ffi_dispatch_callback(void){ /* {{{ */
 	// this function must always run on the main thread
-	assert(pthread_self() == FFI_G(main_tid));
+	//ZEND_ASSERT(pthread_self() == FFI_G(main_tid));
 
 	if (!zend_atomic_bool_load_ex(&FFI_G(callback_in_progress))) {
 		return;
@@ -993,7 +1002,6 @@ static void zend_ffi_dispatch_callback(void){ /* {{{ */
 	free_alloca(fci.params, use_heap);
 
 	if (EG(exception)) {
-		zend_ffi_dispatch_callback_end();
 		zend_error_noreturn(E_ERROR, "Throwing from FFI callbacks is not allowed");
 	}
 
@@ -1003,32 +1011,56 @@ static void zend_ffi_dispatch_callback(void){ /* {{{ */
 	}
 
 	zval_ptr_dtor(&retval);
-	zend_ffi_dispatch_callback_end();
 }
 /* }}} */
 
 static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{ */
-	zend_ffi_dispatch_callback();
-
+	bool is_main_tid = FFI_G(callback_tid) == FFI_G(main_tid);
+	if(!is_main_tid){
+		pthread_mutex_lock(&FFI_G(vm_response_lock));
+		
+		FFI_DPRINTF("<-- ACK\n");
+		// notify calling thread and release
+		pthread_cond_broadcast(&FFI_G(vm_ack));
+		
+		// release mutex and wait for the unlock signal		
+		FFI_DPRINTF("-- wait unlock --\n");
+		pthread_cond_wait(&FFI_G(vm_unlock), &FFI_G(vm_response_lock));
+		pthread_mutex_unlock(&FFI_G(vm_response_lock));
+		FFI_DPRINTF("-- end\n");
+	}
+	
 	if (orig_interrupt_function) {
 		orig_interrupt_function(execute_data);
 	}
 }
 /* }}} */
 
-static void zend_ffi_wait_request_barrier(bool release){ /* {{{ */
+static void zend_ffi_wait_cond(
+	pthread_mutex_t *mutex, pthread_cond_t *cond,
+	zend_atomic_bool *flag, bool wanted_value, bool release
+){  /* {{{ */
 	// get lock, first
-	pthread_mutex_lock(&FFI_G(vm_lock));
+	pthread_mutex_lock(mutex);
 	
-	while(zend_atomic_bool_load_ex(&FFI_G(callback_in_progress))){
-		// we acquired the lock before the request could be serviced
-		// unlock it and wait for the flag
-		pthread_cond_wait(&FFI_G(vm_ack), &FFI_G(vm_lock));
+	// if we acquired the lock before the request could be serviced
+	// unlock it and wait for the flag
+	if(flag == NULL){
+		pthread_cond_wait(cond, mutex);
+	} else {
+		while(zend_atomic_bool_load_ex(flag) != wanted_value){
+			pthread_cond_wait(cond, mutex);
+		}
 	}
 
 	if(release){
-		pthread_mutex_unlock(&FFI_G(vm_lock));
+		pthread_mutex_unlock(mutex);
 	}
+}
+/* }}} */
+
+static void zend_ffi_wait_request_barrier(bool release){ /* {{{ */
+	zend_ffi_wait_cond(&FFI_G(vm_request_lock), &FFI_G(vm_unlock), &FFI_G(callback_in_progress), false, release);
 }
 /* }}} */
 
@@ -1036,34 +1068,47 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 {
 	// wait for a previously initiated request to complete
 	zend_ffi_wait_request_barrier(false);
+	{
+		// mutex is now locked, and request is not pending.
+		// start a new one
+		zend_atomic_bool_store_ex(&FFI_G(callback_in_progress), true);
 
-	// mutex is now locked, and request is not pending.
-	// start a new one
-	zend_atomic_bool_store_ex(&FFI_G(callback_in_progress), true);
+		zend_ffi_call_data call_data = {
+			.cif = cif,
+			.ret = ret,
+			.args = args,
+			.data = (zend_ffi_callback_data *)data
+		};
+		FFI_G(callback_data) = call_data;
 
-	zend_ffi_call_data call_data = {
-		.cif = cif,
-		.ret = ret,
-		.args = args,
-		.data = (zend_ffi_callback_data *)data
-	};
-	FFI_G(callback_data) = call_data;
+		FFI_G(callback_tid) = pthread_self();
+		bool is_main_thread = FFI_G(callback_tid) == FFI_G(main_tid);
+		
+		if(!is_main_thread){
+			// post interrupt request to synchronize with the main thread
+			zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+			
+			// wait for the ack, keep the lock
+			//zend_ffi_wait_cond(&FFI_G(vm_response_lock), &FFI_G(vm_ack), &FFI_G(callback_in_progress), true, false);
 
-	bool is_main_thread = pthread_self() == FFI_G(main_tid);
+			pthread_mutex_lock(&FFI_G(vm_response_lock));
+			pthread_cond_wait(&FFI_G(vm_ack), &FFI_G(vm_response_lock));
+		}
 
-	if(is_main_thread){
-		// dispatch the callback directly
+		// dispatch the callback
+		FFI_DPRINTF("dispatch from %ld, is_main=%d", pthread_self(), pthread_self() == FFI_G(main_tid));
 		zend_ffi_dispatch_callback();
-	} else {
-		// post interrupt request to acquire the main thread
-		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
-		pthread_mutex_unlock(&FFI_G(vm_lock));
-	}
+		FFI_DPRINTF("done\n");
 
-	if(!is_main_thread){
-		// wait for the request to complete before returning
-		zend_ffi_wait_request_barrier(true);
+		if(!is_main_thread){
+			// unlock interrupt handler
+			zend_atomic_bool_store_ex(&FFI_G(callback_in_progress), false);
+			FFI_DPRINTF("--> unlock\n");
+			pthread_cond_broadcast(&FFI_G(vm_unlock));
+			pthread_mutex_unlock(&FFI_G(vm_response_lock));
+		}
 	}
+	pthread_mutex_unlock(&FFI_G(vm_request_lock));
 }
 /* }}} */
 
@@ -5602,8 +5647,10 @@ ZEND_MINIT_FUNCTION(ffi)
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = zend_ffi_interrupt_function;
 
-	pthread_mutex_init(&FFI_G(vm_lock), NULL);
+	pthread_mutex_init(&FFI_G(vm_request_lock), NULL);
+	pthread_mutex_init(&FFI_G(vm_response_lock), NULL);
 	pthread_cond_init(&FFI_G(vm_ack), NULL);
+	pthread_cond_init(&FFI_G(vm_unlock), NULL);
 
 	return SUCCESS;
 }
