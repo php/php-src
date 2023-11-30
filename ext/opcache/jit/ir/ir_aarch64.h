@@ -105,13 +105,13 @@ enum _ir_reg {
 #define IR_REG_FRAME_POINTER \
 	IR_REG_X29
 
-#if defined(_WIN32) || defined(__APPLE__)
+#if defined(__linux__)
 #define IR_REGSET_FIXED \
-	( IR_REGSET(IR_REG_INT_TMP) | IR_REGSET_INTERVAL(IR_REG_X29, IR_REG_X31) \
-	| IR_REGSET(IR_REG_X18)) /* Windows and MacOS reserve x18 register */
+	(IR_REGSET(IR_REG_INT_TMP) | IR_REGSET_INTERVAL(IR_REG_X29, IR_REG_X31))
 #else
 #define IR_REGSET_FIXED \
-	( IR_REGSET(IR_REG_INT_TMP) | IR_REGSET_INTERVAL(IR_REG_X29, IR_REG_X31))
+	(IR_REGSET(IR_REG_INT_TMP) | IR_REGSET_INTERVAL(IR_REG_X29, IR_REG_X31) \
+	| IR_REGSET(IR_REG_X18)) /* Other platforms reserve x18 register */
 #endif
 
 #define IR_REGSET_GP \
