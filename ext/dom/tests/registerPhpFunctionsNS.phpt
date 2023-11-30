@@ -55,7 +55,7 @@ var_dump($xpath->query('//a[foo:strtoupper(string(@href)) = "https://php.net"]')
 
 echo "--- Legit cases: callable in array ---\n";
 
-$xpath->registerPhpFunctionsNS('urn:foo', ['test' => 'var_dump']);
+$xpath->registerPhpFunctionsNS('urn:foo', ['test' => var_dump(...)]);
 $xpath->query('//a[foo:test(string(@href))]');
 
 echo "--- Legit cases: multiple namespaces ---\n";
@@ -85,7 +85,7 @@ object(DOMNodeList)#6 (1) {
 --- Legit cases: callable in array ---
 string(15) "https://PHP.net"
 --- Legit cases: multiple namespaces ---
-object(DOMNodeList)#4 (1) {
+object(DOMNodeList)#7 (1) {
   ["length"]=>
   int(1)
 }

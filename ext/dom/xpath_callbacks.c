@@ -76,7 +76,7 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_dtor(php_dom_xpath_callbacks *regist
 	}
 	if (registry->namespaces) {
 		php_dom_xpath_callback_ns *ns;
-		ZEND_HASH_FOREACH_PTR(registry->namespaces, ns) {
+		ZEND_HASH_MAP_FOREACH_PTR(registry->namespaces, ns) {
 			php_dom_xpath_callback_ns_dtor(ns);
 			efree(ns);
 		} ZEND_HASH_FOREACH_END();
@@ -89,10 +89,9 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_dtor(php_dom_xpath_callbacks *regist
 
 static void php_dom_xpath_callback_ns_get_gc(php_dom_xpath_callback_ns *ns, zend_get_gc_buffer *gc_buffer)
 {
-	zval *entry;
-	ZEND_HASH_FOREACH_VAL(&ns->functions, entry) {
-		ZEND_ASSERT(Z_TYPE_P(entry) == IS_PTR);
-		zend_get_gc_buffer_add_fcc(gc_buffer, Z_PTR_P(entry));
+	zend_fcall_info_cache *entry;
+	ZEND_HASH_MAP_FOREACH_PTR(&ns->functions, entry) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, entry);
 	} ZEND_HASH_FOREACH_END();
 }
 
@@ -103,7 +102,7 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_get_gc(php_dom_xpath_callbacks *regi
 	}
 	if (registry->namespaces) {
 		php_dom_xpath_callback_ns *ns;
-		ZEND_HASH_FOREACH_PTR(registry->namespaces, ns) {
+		ZEND_HASH_MAP_FOREACH_PTR(registry->namespaces, ns) {
 			php_dom_xpath_callback_ns_get_gc(ns, gc_buffer);
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -154,6 +153,20 @@ static bool php_dom_xpath_is_callback_name_valid_and_throw(const zend_string *na
 		return false;
 	}
 	return true;
+}
+
+PHP_DOM_EXPORT void php_dom_xpath_callbacks_delayed_lib_registration(const php_dom_xpath_callbacks* registry, void *ctxt, php_dom_xpath_callbacks_register_func_ctx register_func)
+{
+	if (registry->namespaces) {
+		zend_string *namespace;
+		php_dom_xpath_callback_ns *ns;
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(registry->namespaces, namespace, ns) {
+			zend_string *name;
+			ZEND_HASH_MAP_FOREACH_STR_KEY(&ns->functions, name) {
+				register_func(ctxt, namespace, name);
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
+	}
 }
 
 static zend_result php_dom_xpath_callback_ns_update_method_handler(php_dom_xpath_callback_ns* ns, xmlXPathContextPtr ctxt, const zend_string *namespace, zend_string *name, const HashTable *callable_ht, php_dom_xpath_callback_name_validation name_validation, php_dom_xpath_callbacks_register_func_ctx register_func)

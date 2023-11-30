@@ -114,6 +114,8 @@ class XSLTProcessor
     /** @tentative-return-type */
     public function registerPHPFunctions(array|string|null $functions = null): void {}
 
+    public function registerPHPFunctionsNS(string $namespace, array|string $functions): void {}
+
     /** @return true */
     public function setProfiling(?string $filename) {} // TODO make return type void
 

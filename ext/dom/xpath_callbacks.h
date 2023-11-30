@@ -34,7 +34,7 @@ typedef enum {
 } php_dom_xpath_nodeset_evaluation_mode;
 
 typedef void (*php_dom_xpath_callbacks_proxy_factory)(xmlNodePtr node, zval *proxy, dom_object *intern, xmlXPathParserContextPtr ctxt);
-typedef void (*php_dom_xpath_callbacks_register_func_ctx)(xmlXPathContextPtr ctxt, const zend_string *ns, const zend_string *name);
+typedef void (*php_dom_xpath_callbacks_register_func_ctx)(void *ctxt, const zend_string *ns, const zend_string *name);
 
 typedef struct {
 	HashTable functions;
@@ -58,6 +58,7 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_clean_node_list(php_dom_xpath_callba
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_clean_argument_stack(xmlXPathParserContextPtr ctxt, uint32_t num_args);
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_get_gc(php_dom_xpath_callbacks *registry, zend_get_gc_buffer *gc_buffer);
 PHP_DOM_EXPORT HashTable *php_dom_xpath_callbacks_get_gc_for_whole_object(php_dom_xpath_callbacks *registry, zend_object *object, zval **table, int *n);
+PHP_DOM_EXPORT void php_dom_xpath_callbacks_delayed_lib_registration(const php_dom_xpath_callbacks* registry, void *ctxt, php_dom_xpath_callbacks_register_func_ctx register_func);
 PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_update_method_handler(php_dom_xpath_callbacks* registry, xmlXPathContextPtr ctxt, zend_string *ns, zend_string *name, const HashTable *callable_ht, php_dom_xpath_callback_name_validation name_validation, php_dom_xpath_callbacks_register_func_ctx register_func);
 PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call_php_ns(php_dom_xpath_callbacks *xpath_callbacks, xmlXPathParserContextPtr ctxt, int num_args, php_dom_xpath_nodeset_evaluation_mode evaluation_mode, dom_object *intern, php_dom_xpath_callbacks_proxy_factory proxy_factory);
 PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call_custom_ns(php_dom_xpath_callbacks *xpath_callbacks, xmlXPathParserContextPtr ctxt, int num_args, php_dom_xpath_nodeset_evaluation_mode evaluation_mode, dom_object *intern, php_dom_xpath_callbacks_proxy_factory proxy_factory);

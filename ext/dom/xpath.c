@@ -410,9 +410,9 @@ PHP_METHOD(DOMXPath, registerPhpFunctions)
 }
 /* }}} end dom_xpath_register_php_functions */
 
-static void dom_xpath_register_func_in_ctx(xmlXPathContextPtr ctxt, const zend_string *ns, const zend_string *name)
+static void dom_xpath_register_func_in_ctx(void *ctxt, const zend_string *ns, const zend_string *name)
 {
-	xmlXPathRegisterFuncNS(ctxt, (const xmlChar *) ZSTR_VAL(name), (const xmlChar *) ZSTR_VAL(ns), dom_xpath_ext_function_trampoline);
+	xmlXPathRegisterFuncNS((xmlXPathContextPtr) ctxt, (const xmlChar *) ZSTR_VAL(name), (const xmlChar *) ZSTR_VAL(ns), dom_xpath_ext_function_trampoline);
 }
 
 PHP_METHOD(DOMXPath, registerPhpFunctionsNS)
@@ -428,7 +428,7 @@ PHP_METHOD(DOMXPath, registerPhpFunctionsNS)
 		Z_PARAM_ARRAY_HT_OR_STR(callable_ht, callable_name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_string_equals_literal(namespace, "http://php.net/xpath")) { // TODO: this is different for XSL!!!
+	if (zend_string_equals_literal(namespace, "http://php.net/xpath")) {
 		zend_argument_value_error(1, "must not be \"http://php.net/xpath\" because it is reserved for PHP");
 		RETURN_THROWS();
 	}

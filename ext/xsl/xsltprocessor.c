@@ -65,32 +65,34 @@ static void xsl_proxy_factory(xmlNodePtr node, zval *child, dom_object *intern, 
 	php_dom_create_object(node, child, intern);
 }
 
-static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, php_dom_xpath_nodeset_evaluation_mode evaluation_mode) /* {{{ */
+static xsl_object *xsl_ext_fetch_intern(xmlXPathParserContextPtr ctxt)
 {
-	bool error = false;
-	xsl_object *intern;
-
-	if (! zend_is_executing()) {
+	if (!zend_is_executing()) {
 		xsltGenericError(xsltGenericErrorContext,
 		"xsltExtFunctionTest: Function called from outside of PHP\n");
-		error = true;
 	} else {
 		xsltTransformContextPtr tctxt = xsltXPathGetTransformContext(ctxt);
 		if (tctxt == NULL) {
 			xsltGenericError(xsltGenericErrorContext,
 			"xsltExtFunctionTest: failed to get the transformation context\n");
-			error = true;
 		} else {
-			intern = (xsl_object*)tctxt->_private;
+			xsl_object *intern = (xsl_object *) tctxt->_private;
 			if (intern == NULL) {
 				xsltGenericError(xsltGenericErrorContext,
 				"xsltExtFunctionTest: failed to get the internal object\n");
-				error = true;
+				return NULL;
 			}
+			return intern;
 		}
 	}
 
-	if (error) {
+	return NULL;
+}
+
+static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, php_dom_xpath_nodeset_evaluation_mode evaluation_mode) /* {{{ */
+{
+	xsl_object *intern = xsl_ext_fetch_intern(ctxt);
+	if (!intern) {
 		php_dom_xpath_callbacks_clean_argument_stack(ctxt, nargs);
 	} else {
 		php_dom_xpath_callbacks_call_php_ns(&intern->xpath_callbacks, ctxt, nargs, evaluation_mode, (dom_object *) intern->doc, xsl_proxy_factory);
@@ -109,6 +111,16 @@ void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs) /* {{
 	xsl_ext_function_php(ctxt, nargs, PHP_DOM_XPATH_EVALUATE_NODESET_TO_NODESET);
 }
 /* }}} */
+
+static void xsl_ext_function_trampoline(xmlXPathParserContextPtr ctxt, int nargs)
+{
+	xsl_object *intern = xsl_ext_fetch_intern(ctxt);
+	if (!intern) {
+		php_dom_xpath_callbacks_clean_argument_stack(ctxt, nargs);
+	} else {
+		php_dom_xpath_callbacks_call_custom_ns(&intern->xpath_callbacks, ctxt, nargs, PHP_DOM_XPATH_EVALUATE_NODESET_TO_NODESET, (dom_object *) intern->doc, xsl_proxy_factory);
+	}
+}
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since:
@@ -192,6 +204,12 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	RETVAL_TRUE;
 }
 /* }}} end XSLTProcessor::importStylesheet */
+
+static void php_xsl_delayed_lib_registration(void *ctxt, const zend_string *ns, const zend_string *name)
+{
+	xsltTransformContextPtr xsl = (xsltTransformContextPtr) ctxt;
+	xsltRegisterExtFunction(xsl, (const xmlChar *) ZSTR_VAL(name), (const xmlChar *) ZSTR_VAL(ns), xsl_ext_function_trampoline);
+}
 
 static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStylesheetPtr style, zval *docp) /* {{{ */
 {
@@ -298,6 +316,8 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 			secPrefsError = 1;
 		}
 	}
+
+	php_dom_xpath_callbacks_delayed_lib_registration(&intern->xpath_callbacks, ctxt, php_xsl_delayed_lib_registration);
 
 	if (secPrefsError == 1) {
 		php_error_docref(NULL, E_WARNING, "Can't set libxslt security properties, not doing transformation for security reasons");
@@ -591,6 +611,35 @@ PHP_METHOD(XSLTProcessor, registerPHPFunctions)
 	);
 }
 /* }}} end XSLTProcessor::registerPHPFunctions(); */
+
+PHP_METHOD(XSLTProcessor, registerPHPFunctionsNS)
+{
+	xsl_object *intern = Z_XSL_P(ZEND_THIS);
+
+	zend_string *namespace;
+	zend_string *callable_name;
+	HashTable *callable_ht;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH_STR(namespace)
+		Z_PARAM_ARRAY_HT_OR_STR(callable_ht, callable_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_string_equals_literal(namespace, "http://php.net/xsl")) {
+		zend_argument_value_error(1, "must not be \"http://php.net/xsl\" because it is reserved for PHP");
+		RETURN_THROWS();
+	}
+
+	php_dom_xpath_callbacks_update_method_handler(
+		&intern->xpath_callbacks,
+		NULL,
+		namespace,
+		callable_name,
+		callable_ht,
+		PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NCNAME,
+		NULL
+	);
+}
 
 /* {{{ */
 PHP_METHOD(XSLTProcessor, setProfiling)
