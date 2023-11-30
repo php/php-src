@@ -56,6 +56,10 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fixed bug GH-12675 (MEMORY_LEAK in phpdbg_prompt.c). (nielsdos)
 
+- SOAP:
+  . Fixed bug GH-12838 ([SOAP] Temporary WSDL cache files not being deleted).
+    (nielsdos)
+
 - SPL:
   . Fixed bug GH-12721 (SplFileInfo::getFilename() segfault in combination
     with GlobIterator and no directory separator). (nielsdos)
