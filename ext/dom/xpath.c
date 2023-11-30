@@ -61,28 +61,30 @@ static void dom_xpath_proxy_factory(xmlNodePtr node, zval *child, dom_object *in
 	php_dom_create_object(node, child, intern);
 }
 
-static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, php_dom_xpath_nodeset_evaluation_mode evaluation_mode) /* {{{ */
+static dom_xpath_object *dom_xpath_ext_fetch_intern(xmlXPathParserContextPtr ctxt)
 {
-	bool error = false;
-	dom_xpath_object *intern;
-
-	if (! zend_is_executing()) {
+	if (!zend_is_executing()) {
 		xmlGenericError(xmlGenericErrorContext,
 		"xmlExtFunctionTest: Function called from outside of PHP\n");
-		error = true;
 	} else {
-		intern = (dom_xpath_object *) ctxt->context->userData;
+		dom_xpath_object *intern = (dom_xpath_object *) ctxt->context->userData;
 		if (intern == NULL) {
 			xmlGenericError(xmlGenericErrorContext,
 			"xmlExtFunctionTest: failed to get the internal object\n");
-			error = true;
+			return NULL;
 		}
+		return intern;
 	}
+	return NULL;
+}
 
-	if (error) {
+static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, php_dom_xpath_nodeset_evaluation_mode evaluation_mode) /* {{{ */
+{
+	dom_xpath_object *intern = dom_xpath_ext_fetch_intern(ctxt);
+	if (!intern) {
 		php_dom_xpath_callbacks_clean_argument_stack(ctxt, nargs);
 	} else {
-		php_dom_xpath_callbacks_call(&intern->xpath_callbacks, ctxt, nargs, evaluation_mode, &intern->dom, dom_xpath_proxy_factory);
+		php_dom_xpath_callbacks_call_php_ns(&intern->xpath_callbacks, ctxt, nargs, evaluation_mode, &intern->dom, dom_xpath_proxy_factory);
 	}
 }
 /* }}} */
@@ -98,6 +100,16 @@ static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int
 	dom_xpath_ext_function_php(ctxt, nargs, PHP_DOM_XPATH_EVALUATE_NODESET_TO_NODESET);
 }
 /* }}} */
+
+static void dom_xpath_ext_function_trampoline(xmlXPathParserContextPtr ctxt, int nargs)
+{
+	dom_xpath_object *intern = dom_xpath_ext_fetch_intern(ctxt);
+	if (!intern) {
+		php_dom_xpath_callbacks_clean_argument_stack(ctxt, nargs);
+	} else {
+		php_dom_xpath_callbacks_call_custom_ns(&intern->xpath_callbacks, ctxt, nargs, PHP_DOM_XPATH_EVALUATE_NODESET_TO_NODESET, &intern->dom, dom_xpath_proxy_factory);
+	}
+}
 
 /* {{{ */
 PHP_METHOD(DOMXPath, __construct)
@@ -378,17 +390,59 @@ PHP_METHOD(DOMXPath, registerPhpFunctions)
 {
 	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
 
-	zend_string *name = NULL;
+	zend_string *callable_name = NULL;
 	HashTable *callable_ht = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(callable_ht, name)
+		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(callable_ht, callable_name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_dom_xpath_callbacks_update_method_handler(&intern->xpath_callbacks, NULL, name, callable_ht);
+	php_dom_xpath_callbacks_update_method_handler(
+		&intern->xpath_callbacks,
+		intern->dom.ptr,
+		NULL,
+		callable_name,
+		callable_ht,
+		PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NULLS,
+		NULL
+	);
 }
 /* }}} end dom_xpath_register_php_functions */
+
+static void dom_xpath_register_func_in_ctx(xmlXPathContextPtr ctxt, const zend_string *ns, const zend_string *name)
+{
+	xmlXPathRegisterFuncNS(ctxt, (const xmlChar *) ZSTR_VAL(name), (const xmlChar *) ZSTR_VAL(ns), dom_xpath_ext_function_trampoline);
+}
+
+PHP_METHOD(DOMXPath, registerPhpFunctionsNS)
+{
+	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
+
+	zend_string *namespace;
+	zend_string *callable_name;
+	HashTable *callable_ht;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH_STR(namespace)
+		Z_PARAM_ARRAY_HT_OR_STR(callable_ht, callable_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (zend_string_equals_literal(namespace, "http://php.net/xpath")) { // TODO: this is different for XSL!!!
+		zend_argument_value_error(1, "must not be \"http://php.net/xpath\" because it is reserved for PHP");
+		RETURN_THROWS();
+	}
+
+	php_dom_xpath_callbacks_update_method_handler(
+		&intern->xpath_callbacks,
+		intern->dom.ptr,
+		namespace,
+		callable_name,
+		callable_ht,
+		PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NCNAME,
+		dom_xpath_register_func_in_ctx
+	);
+}
 
 #endif /* LIBXML_XPATH_ENABLED */
 

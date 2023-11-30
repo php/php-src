@@ -119,6 +119,18 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+try {
+    $proc->registerPhpFunctions(["\0" => var_dump(...)]);
+} catch (Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    $proc->registerPhpFunctions("");
+} catch (Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
 --- Legit cases: none ---
@@ -147,4 +159,6 @@ XSLTProcessor::registerPHPFunctions(): Argument #1 ($functions) must be of type 
 Object of class Closure could not be converted to string
 Object of class Closure could not be converted to string
 XSLTProcessor::registerPHPFunctions(): Argument #1 ($functions) must be an array with valid callbacks as values, function "nonexistent" not found or invalid function name
-XSLTProcessor::registerPHPFunctions(): Argument #1 ($functions) array key must not be empty
+XSLTProcessor::registerPHPFunctions(): Argument #1 ($functions) must be an array containing valid callback names
+XSLTProcessor::registerPHPFunctions(): Argument #1 ($functions) must be an array containing valid callback names
+XSLTProcessor::registerPHPFunctions(): Argument #1 ($functions) must be a valid callback name

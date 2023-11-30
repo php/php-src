@@ -126,7 +126,37 @@ PHP_DOM_EXPORT HashTable *php_dom_xpath_callbacks_get_gc_for_whole_object(php_do
 	}
 }
 
-static void php_dom_xpath_callback_ns_update_method_handler(php_dom_xpath_callback_ns* ns, zend_string *name, const HashTable *callable_ht)
+static bool php_dom_xpath_is_callback_name_valid(const zend_string *name, php_dom_xpath_callback_name_validation name_validation)
+{
+	if (ZSTR_LEN(name) == 0) {
+		return false;
+	}
+
+	if (name_validation == PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NULLS || name_validation == PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NCNAME) {
+		if (zend_str_has_nul_byte(name)) {
+			return false;
+		}
+	}
+
+	if (name_validation == PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NCNAME) {
+		if (xmlValidateNCName((xmlChar *) ZSTR_VAL(name), /* pass 0 to disallow spaces */ 0) != 0) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+static bool php_dom_xpath_is_callback_name_valid_and_throw(const zend_string *name, php_dom_xpath_callback_name_validation name_validation)
+{
+	if (!php_dom_xpath_is_callback_name_valid(name, name_validation)) {
+		zend_argument_value_error(1, "must be an array containing valid callback names");
+		return false;
+	}
+	return true;
+}
+
+static zend_result php_dom_xpath_callback_ns_update_method_handler(php_dom_xpath_callback_ns* ns, xmlXPathContextPtr ctxt, const zend_string *namespace, zend_string *name, const HashTable *callable_ht, php_dom_xpath_callback_name_validation name_validation, php_dom_xpath_callbacks_register_func_ctx register_func)
 {
 	zval *entry, registered_value;
 
@@ -139,7 +169,7 @@ static void php_dom_xpath_callback_ns_update_method_handler(php_dom_xpath_callba
 				zend_argument_type_error(1, "must be an array with valid callbacks as values, %s", error);
 				efree(fcc);
 				efree(error);
-				return;
+				return FAILURE;
 			}
 
 			zend_fcc_addref(fcc);
@@ -147,26 +177,35 @@ static void php_dom_xpath_callback_ns_update_method_handler(php_dom_xpath_callba
 
 			if (!key) {
 				zend_string *str = zval_try_get_string(entry);
-				if (str) {
+				if (str && php_dom_xpath_is_callback_name_valid_and_throw(str, name_validation)) {
 					zend_hash_update(&ns->functions, str, &registered_value);
-					zend_string_release_ex(str, 0);
+					if (register_func) {
+						register_func(ctxt, namespace, str);
+					}
+					zend_string_release_ex(str, false);
 				} else {
 					zend_fcc_dtor(fcc);
 					efree(fcc);
-					return;
+					return FAILURE;
 				}
 			} else {
-				if (ZSTR_LEN(key) == 0) {
-					zend_argument_value_error(1, "array key must not be empty");
+				if (!php_dom_xpath_is_callback_name_valid_and_throw(key, name_validation)) {
 					zend_fcc_dtor(fcc);
 					efree(fcc);
-					return;
+					return FAILURE;
 				}
 				zend_hash_update(&ns->functions, key, &registered_value);
+				if (register_func) {
+					register_func(ctxt, namespace, key);
+				}
 			}
 		} ZEND_HASH_FOREACH_END();
 		ns->mode = PHP_DOM_REG_FUNC_MODE_SET;
 	} else if (name) {
+		if (!php_dom_xpath_is_callback_name_valid(name, name_validation)) {
+			zend_argument_value_error(1, "must be a valid callback name");
+			return FAILURE;
+		}
 		zend_fcall_info_cache* fcc = emalloc(sizeof(zend_fcall_info));
 		char *error;
 		zval tmp;
@@ -175,27 +214,42 @@ static void php_dom_xpath_callback_ns_update_method_handler(php_dom_xpath_callba
 			zend_argument_type_error(1, "must be a callable, %s", error);
 			efree(fcc);
 			efree(error);
-			return;
+			return FAILURE;
 		}
 		zend_fcc_addref(fcc);
 		ZVAL_PTR(&registered_value, fcc);
 		zend_hash_update(&ns->functions, name, &registered_value);
+		if (register_func) {
+			register_func(ctxt, namespace, name);
+		}
 		ns->mode = PHP_DOM_REG_FUNC_MODE_SET;
 	} else {
 		ns->mode = PHP_DOM_REG_FUNC_MODE_ALL;
 	}
+
+	return SUCCESS;
 }
 
-PHP_DOM_EXPORT void php_dom_xpath_callbacks_update_method_handler(php_dom_xpath_callbacks* registry, zend_string *ns, zend_string *name, const HashTable *callable_ht)
+PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_update_method_handler(php_dom_xpath_callbacks* registry, xmlXPathContextPtr ctxt, zend_string *ns, zend_string *name, const HashTable *callable_ht, php_dom_xpath_callback_name_validation name_validation, php_dom_xpath_callbacks_register_func_ctx register_func)
 {
 	if (ns == NULL) {
 		if (!registry->php_ns) {
 			registry->php_ns = emalloc(sizeof(php_dom_xpath_callback_ns));
 			php_dom_xpath_callback_ns_ctor(registry->php_ns);
 		}
-		php_dom_xpath_callback_ns_update_method_handler(registry->php_ns, name, callable_ht);
+		return php_dom_xpath_callback_ns_update_method_handler(registry->php_ns, ctxt, ns, name, callable_ht, name_validation, register_func);
 	} else {
-		abort(); // TODO
+		if (!registry->namespaces) {
+			/* In most cases probably only a single namespace is registered. */
+			registry->namespaces = zend_new_array(1);
+		}
+		php_dom_xpath_callback_ns *namespace = zend_hash_find_ptr(registry->namespaces, ns);
+		if (namespace == NULL) {
+			namespace = emalloc(sizeof(php_dom_xpath_callback_ns));
+			php_dom_xpath_callback_ns_ctor(namespace);
+			zend_hash_add_new_ptr(registry->namespaces, ns, namespace);
+		}
+		return php_dom_xpath_callback_ns_update_method_handler(namespace, ctxt, ns, name, callable_ht, name_validation, register_func);
 	}
 }
 
@@ -338,7 +392,7 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 	return SUCCESS;
 }
 
-PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call(php_dom_xpath_callbacks *xpath_callbacks, xmlXPathParserContextPtr ctxt, int num_args, php_dom_xpath_nodeset_evaluation_mode evaluation_mode, dom_object *intern, php_dom_xpath_callbacks_proxy_factory proxy_factory)
+PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call_php_ns(php_dom_xpath_callbacks *xpath_callbacks, xmlXPathParserContextPtr ctxt, int num_args, php_dom_xpath_nodeset_evaluation_mode evaluation_mode, dom_object *intern, php_dom_xpath_callbacks_proxy_factory proxy_factory)
 {
 	zend_result result = FAILURE;
 
@@ -360,7 +414,7 @@ PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call(php_dom_xpath_callbacks 
 	const char *function_name = (const char *) obj->stringval;
 	size_t function_name_length = strlen(function_name);
 
-    result = php_dom_xpath_callback_dispatch(xpath_callbacks, xpath_callbacks->php_ns, ctxt, params, param_count, function_name, function_name_length);
+	result = php_dom_xpath_callback_dispatch(xpath_callbacks, xpath_callbacks->php_ns, ctxt, params, param_count, function_name, function_name_length);
 
 cleanup:
 	xmlXPathFreeObject(obj);
@@ -371,7 +425,34 @@ cleanup_no_obj:
 		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
 	}
 
-    return result;
+	return result;
+}
+
+PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call_custom_ns(php_dom_xpath_callbacks *xpath_callbacks, xmlXPathParserContextPtr ctxt, int num_args, php_dom_xpath_nodeset_evaluation_mode evaluation_mode, dom_object *intern, php_dom_xpath_callbacks_proxy_factory proxy_factory)
+{
+	uint32_t param_count = num_args;
+	zval *params = php_dom_xpath_callback_fetch_args(ctxt, param_count, evaluation_mode, intern, proxy_factory);
+
+	const char *namespace = (const char *) ctxt->context->functionURI;
+	/* Impossible because it wouldn't have been registered inside the context. */
+	ZEND_ASSERT(xpath_callbacks->namespaces != NULL);
+
+	php_dom_xpath_callback_ns *ns = zend_hash_str_find_ptr(xpath_callbacks->namespaces, namespace, strlen(namespace));
+	/* Impossible because it wouldn't have been registered inside the context. */
+	ZEND_ASSERT(ns != NULL);
+
+	const char *function_name = (const char *) ctxt->context->function;
+	size_t function_name_length = strlen(function_name);
+
+	zend_result result = php_dom_xpath_callback_dispatch(xpath_callbacks, ns, ctxt, params, param_count, function_name, function_name_length);
+
+	php_dom_xpath_callback_cleanup_args(params, param_count);
+	if (UNEXPECTED(result != SUCCESS)) {
+		/* Push sentinel value */
+		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
+	}
+
+	return result;
 }
 
 #endif

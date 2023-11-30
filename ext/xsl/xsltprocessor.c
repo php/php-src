@@ -93,7 +93,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, php_d
 	if (error) {
 		php_dom_xpath_callbacks_clean_argument_stack(ctxt, nargs);
 	} else {
-		php_dom_xpath_callbacks_call(&intern->xpath_callbacks, ctxt, nargs, evaluation_mode, (dom_object *) intern->doc, xsl_proxy_factory);
+		php_dom_xpath_callbacks_call_php_ns(&intern->xpath_callbacks, ctxt, nargs, evaluation_mode, (dom_object *) intern->doc, xsl_proxy_factory);
 	}
 }
 /* }}} */
@@ -580,7 +580,15 @@ PHP_METHOD(XSLTProcessor, registerPHPFunctions)
 		Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(callable_ht, name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_dom_xpath_callbacks_update_method_handler(&intern->xpath_callbacks, NULL, name, callable_ht);
+	php_dom_xpath_callbacks_update_method_handler(
+		&intern->xpath_callbacks,
+		NULL,
+		NULL,
+		name,
+		callable_ht,
+		PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NULLS,
+		NULL
+	);
 }
 /* }}} end XSLTProcessor::registerPHPFunctions(); */
 

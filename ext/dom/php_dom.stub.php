@@ -932,6 +932,8 @@ namespace
 
         /** @tentative-return-type */
         public function registerPhpFunctions(string|array|null $restrict = null): void {}
+
+        public function registerPhpFunctionsNS(string $namespace, string|array $restrict): void {}
     }
 #endif
 

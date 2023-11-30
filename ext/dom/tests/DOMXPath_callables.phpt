@@ -109,6 +109,18 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+try {
+    $xpath->registerPhpFunctions(["\0" => var_dump(...)]);
+} catch (Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    $xpath->registerPhpFunctions("");
+} catch (Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
 --- Legit cases: none ---
@@ -131,4 +143,6 @@ DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be of type array|
 Object of class Closure could not be converted to string
 Object of class Closure could not be converted to string
 DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be an array with valid callbacks as values, function "nonexistent" not found or invalid function name
-DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) array key must not be empty
+DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be an array containing valid callback names
+DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be an array containing valid callback names
+DOMXPath::registerPhpFunctions(): Argument #1 ($restrict) must be a valid callback name
