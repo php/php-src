@@ -57,13 +57,6 @@
 # define __BIGGEST_ALIGNMENT__ sizeof(size_t)
 #endif
 
-//#define FFI_DEBUG
-#ifdef FFI_DEBUG
-#define FFI_DPRINTF(fmt, ...) printf(fmt, ##__VA_ARGS__)
-#else
-#define FFI_DPRINTF(fmt, ...) 
-#endif
-
 ZEND_DECLARE_MODULE_GLOBALS(ffi)
 
 typedef enum _zend_ffi_tag_kind {
@@ -953,7 +946,6 @@ static void zend_ffi_dispatch_callback_end(void){ /* {{{ */
 	bool is_main_thread = FFI_G(callback_tid) == FFI_G(main_tid);
 	if(!is_main_thread){
 		// unlock interrupt handler	
-		FFI_DPRINTF("--> unlock\n");
 		pthread_cond_broadcast(&FFI_G(vm_unlock));
 		pthread_mutex_unlock(&FFI_G(vm_response_lock));
 	}
@@ -1033,18 +1025,15 @@ static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{
 	bool is_main_tid = FFI_G(callback_tid) == FFI_G(main_tid);
 	if(!is_main_tid){
 	
-		FFI_DPRINTF("<-- ACK\n");
 		// notify calling thread and release
 		pthread_cond_broadcast(&FFI_G(vm_ack));
 		
 		// release mutex and wait for the unlock signal		
-		FFI_DPRINTF("-- wait unlock --\n");
 		pthread_cond_wait(&FFI_G(vm_unlock), &FFI_G(vm_response_lock));
 	}
 	
 	end:
 	pthread_mutex_unlock(&FFI_G(vm_response_lock));
-	FFI_DPRINTF("-- end\n");
 	if (orig_interrupt_function) {
 		orig_interrupt_function(execute_data);
 	}
@@ -1103,17 +1092,12 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 			// post interrupt request to synchronize with the main thread
 			zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
 			
-			// wait for the ack, keep the lock
-			//zend_ffi_wait_cond(&FFI_G(vm_response_lock), &FFI_G(vm_ack), &FFI_G(callback_in_progress), true, false);
-
 			pthread_mutex_lock(&FFI_G(vm_response_lock));
 			pthread_cond_wait(&FFI_G(vm_ack), &FFI_G(vm_response_lock));
 		}
 
 		// dispatch the callback
-		FFI_DPRINTF("dispatch from %ld, is_main=%d", pthread_self(), pthread_self() == FFI_G(main_tid));
 		zend_ffi_dispatch_callback();
-		FFI_DPRINTF("done\n");
 
 		zend_ffi_dispatch_callback_end();
 	}
