@@ -204,6 +204,14 @@ const char *ir_strtab_str(const ir_strtab *strtab, ir_ref idx)
 	return ((const ir_strtab_bucket*)strtab->data)[idx].str;
 }
 
+const char *ir_strtab_strl(const ir_strtab *strtab, ir_ref idx, size_t *len)
+{
+	const ir_strtab_bucket *b = ((const ir_strtab_bucket*)strtab->data) + idx;
+	IR_ASSERT(idx >= 0 && (uint32_t)idx < strtab->count);
+	*len = b->len;
+	return b->str;
+}
+
 void ir_strtab_free(ir_strtab *strtab)
 {
 	uint32_t hash_size = (uint32_t)(-(int32_t)strtab->mask);

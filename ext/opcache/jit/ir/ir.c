@@ -28,6 +28,7 @@
 #include "ir.h"
 #include "ir_private.h"
 
+#include <stddef.h>
 #include <math.h>
 
 #ifdef HAVE_VALGRIND
@@ -70,13 +71,13 @@ const char *ir_op_name[IR_LAST_OP] = {
 void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted)
 {
 	if (insn->op == IR_FUNC || insn->op == IR_SYM) {
-		fprintf(f, "%s", ir_get_str(ctx, insn->val.i32));
+		fprintf(f, "%s", ir_get_str(ctx, insn->val.name));
 		return;
 	} else if (insn->op == IR_STR) {
 		if (quoted) {
-			fprintf(f, "\"%s\"", ir_get_str(ctx, insn->val.i32));
+			fprintf(f, "\"%s\"", ir_get_str(ctx, insn->val.str));
 		} else {
-			fprintf(f, "%s", ir_get_str(ctx, insn->val.i32));
+			fprintf(f, "%s", ir_get_str(ctx, insn->val.str));
 		}
 		return;
 	}
@@ -217,6 +218,7 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 #define ir_op_kind_var     IR_OPND_DATA
 #define ir_op_kind_prb     IR_OPND_PROB
 #define ir_op_kind_opt     IR_OPND_PROB
+#define ir_op_kind_pro     IR_OPND_PROTO
 
 #define _IR_OP_FLAGS(name, flags, op1, op2, op3) \
 	IR_OP_FLAGS(ir_op_flag_ ## flags, ir_op_kind_ ## op1, ir_op_kind_ ## op2, ir_op_kind_ ## op3),
@@ -562,34 +564,36 @@ ir_ref ir_const_addr(ir_ctx *ctx, uintptr_t c)
 	return ir_const(ctx, val, IR_ADDR);
 }
 
-ir_ref ir_const_func_addr(ir_ctx *ctx, uintptr_t c, uint16_t flags)
+ir_ref ir_const_func_addr(ir_ctx *ctx, uintptr_t c, ir_ref proto)
 {
 	if (c == 0) {
 		return IR_NULL;
 	}
 	ir_val val;
 	val.u64 = c;
-	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_FUNC_ADDR, IR_ADDR, flags));
+	IR_ASSERT(proto >= 0 && proto < 0xffff);
+	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_FUNC_ADDR, IR_ADDR, proto));
 }
 
-ir_ref ir_const_func(ir_ctx *ctx, ir_ref str, uint16_t flags)
+ir_ref ir_const_func(ir_ctx *ctx, ir_ref str, ir_ref proto)
 {
 	ir_val val;
-	val.addr = str;
-	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_FUNC, IR_ADDR, flags));
+	val.u64 = str;
+	IR_ASSERT(proto >= 0 && proto < 0xffff);
+	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_FUNC, IR_ADDR, proto));
 }
 
 ir_ref ir_const_sym(ir_ctx *ctx, ir_ref str)
 {
 	ir_val val;
-	val.addr = str;
+	val.u64 = str;
 	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_SYM, IR_ADDR, 0));
 }
 
 ir_ref ir_const_str(ir_ctx *ctx, ir_ref str)
 {
 	ir_val val;
-	val.addr = str;
+	val.u64 = str;
 	return ir_const_ex(ctx, val, IR_ADDR, IR_OPTX(IR_STR, IR_ADDR, 0));
 }
 
@@ -618,6 +622,101 @@ const char *ir_get_str(const ir_ctx *ctx, ir_ref idx)
 {
 	IR_ASSERT(ctx->strtab.data);
 	return ir_strtab_str(&ctx->strtab, idx - 1);
+}
+
+const char *ir_get_strl(const ir_ctx *ctx, ir_ref idx, size_t *len)
+{
+	IR_ASSERT(ctx->strtab.data);
+	return ir_strtab_strl(&ctx->strtab, idx - 1, len);
+}
+
+ir_ref ir_proto_0(ir_ctx *ctx, uint8_t flags, ir_type ret_type)
+{
+	ir_proto_t proto;
+
+	proto.flags = flags;
+	proto.ret_type = ret_type;
+	proto.params_count = 0;
+	return ir_strl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 0);
+}
+
+ir_ref ir_proto_1(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1)
+{
+	ir_proto_t proto;
+
+	proto.flags = flags;
+	proto.ret_type = ret_type;
+	proto.params_count = 1;
+	proto.param_types[0] = t1;
+	return ir_strl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 1);
+}
+
+ir_ref ir_proto_2(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2)
+{
+	ir_proto_t proto;
+
+	proto.flags = flags;
+	proto.ret_type = ret_type;
+	proto.params_count = 2;
+	proto.param_types[0] = t1;
+	proto.param_types[1] = t2;
+	return ir_strl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 2);
+}
+
+ir_ref ir_proto_3(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2, ir_type t3)
+{
+	ir_proto_t proto;
+
+	proto.flags = flags;
+	proto.ret_type = ret_type;
+	proto.params_count = 3;
+	proto.param_types[0] = t1;
+	proto.param_types[1] = t2;
+	proto.param_types[2] = t3;
+	return ir_strl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 3);
+}
+
+ir_ref ir_proto_4(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2, ir_type t3,
+                                                                ir_type t4)
+{
+	ir_proto_t proto;
+
+	proto.flags = flags;
+	proto.ret_type = ret_type;
+	proto.params_count = 4;
+	proto.param_types[0] = t1;
+	proto.param_types[1] = t2;
+	proto.param_types[2] = t3;
+	proto.param_types[3] = t4;
+	return ir_strl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 4);
+}
+
+ir_ref ir_proto_5(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2, ir_type t3,
+                                                                ir_type t4, ir_type t5)
+{
+	ir_proto_t proto;
+
+	proto.flags = flags;
+	proto.ret_type = ret_type;
+	proto.params_count = 5;
+	proto.param_types[0] = t1;
+	proto.param_types[1] = t2;
+	proto.param_types[2] = t3;
+	proto.param_types[3] = t4;
+	proto.param_types[4] = t5;
+	return ir_strl(ctx, (const char *)&proto, offsetof(ir_proto_t, param_types) + 5);
+}
+
+ir_ref ir_proto(ir_ctx *ctx, uint8_t flags, ir_type ret_type, uint32_t params_count, uint8_t *param_types)
+{
+	ir_proto_t *proto = alloca(offsetof(ir_proto_t, param_types) + params_count);
+
+	IR_ASSERT(params_count <= IR_MAX_PROTO_PARAMS);
+	proto->flags = flags;
+	proto->ret_type = ret_type;
+	proto->params_count = params_count;
+	memcpy(proto->param_types, param_types, params_count);
+	return ir_strl(ctx, (const char *)proto, offsetof(ir_proto_t, param_types) + params_count);
 }
 
 /* IR construction */

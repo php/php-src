@@ -828,6 +828,7 @@ IR_ALWAYS_INLINE bool ir_ref_is_true(ir_ctx *ctx, ir_ref ref)
 #define IR_OPND_STR               0x5
 #define IR_OPND_NUM               0x6
 #define IR_OPND_PROB              0x7
+#define IR_OPND_PROTO             0x8
 
 #define IR_OP_FLAGS(op_flags, op1_flags, op2_flags, op3_flags) \
 	((op_flags) | ((op1_flags) << 20) | ((op2_flags) << 24) | ((op3_flags) << 28))

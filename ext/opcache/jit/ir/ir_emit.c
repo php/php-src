@@ -74,9 +74,19 @@ bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn)
 {
 	if (sizeof(void*) == 4) {
 		if (IR_IS_CONST_REF(insn->op2)) {
-			return (ctx->ir_base[insn->op2].const_flags & IR_CONST_FASTCALL_FUNC) != 0;
-		} else if (ctx->ir_base[insn->op2].op == IR_BITCAST) {
-			return (ctx->ir_base[insn->op2].op2 & IR_CONST_FASTCALL_FUNC) != 0;
+			const ir_insn *func = &ctx->ir_base[insn->op2];
+
+			if (func->op == IR_FUNC || func->op == IR_FUNC_ADDR) {
+				if (func->proto) {
+					const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, func->proto);
+
+					return (proto->flags & IR_FASTCALL_FUNC) != 0;
+				}
+			}
+		} else if (ctx->ir_base[insn->op2].op == IR_PROTO) {
+			const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, ctx->ir_base[insn->op2].op2);
+
+			return (proto->flags & IR_FASTCALL_FUNC) != 0;
 		}
 		return 0;
 	}
@@ -92,9 +102,19 @@ bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn)
 bool ir_is_vararg(const ir_ctx *ctx, ir_insn *insn)
 {
 	if (IR_IS_CONST_REF(insn->op2)) {
-		return (ctx->ir_base[insn->op2].const_flags & IR_CONST_VARARG_FUNC) != 0;
-	} else if (ctx->ir_base[insn->op2].op == IR_BITCAST) {
-		return (ctx->ir_base[insn->op2].op2 & IR_CONST_VARARG_FUNC) != 0;
+		const ir_insn *func = &ctx->ir_base[insn->op2];
+
+		if (func->op == IR_FUNC || func->op == IR_FUNC_ADDR) {
+			if (func->proto) {
+				const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, func->proto);
+
+				return (proto->flags & IR_VARARG_FUNC) != 0;
+			}
+		}
+	} else if (ctx->ir_base[insn->op2].op == IR_PROTO) {
+		const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, ctx->ir_base[insn->op2].op2);
+
+		return (proto->flags & IR_VARARG_FUNC) != 0;
 	}
 	return 0;
 }
@@ -309,8 +329,8 @@ static void *ir_jmp_addr(ir_ctx *ctx, ir_insn *insn, ir_insn *addr_insn)
 	IR_ASSERT(addr_insn->type == IR_ADDR);
 	if (addr_insn->op == IR_FUNC) {
 		addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
-			ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, addr_insn->val.i32)) :
-			ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.i32));
+			ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, addr_insn->val.name)) :
+			ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.name));
 	} else {
 		IR_ASSERT(addr_insn->op == IR_ADDR || addr_insn->op == IR_FUNC_ADDR);
 		addr = (void*)addr_insn->val.addr;

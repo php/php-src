@@ -364,6 +364,7 @@ typedef struct _ir_backend_data {
     ir_reg_alloc_data  ra_data;
 	uint32_t           dessa_from_block;
 	dasm_State        *dasm_state;
+	ir_bitset          emit_constants;
 	int                rodata_label, jmp_table_label;
 	bool               double_neg_const;
 	bool               float_neg_const;
@@ -1927,6 +1928,7 @@ store_int:
 		case IR_INT2FP:
 		case IR_FP2INT:
 		case IR_FP2FP:
+		case IR_PROTO:
 			ir_match_fuse_load(ctx, insn->op1, ref);
 			return insn->op;
 		case IR_CTLZ:
@@ -2117,7 +2119,7 @@ static void ir_emit_load_imm_fp(ir_ctx *ctx, ir_type type, ir_reg reg, ir_ref sr
 		}
 	} else {
 		label = ctx->cfg_blocks_count - src;
-		insn->const_flags |= IR_CONST_EMIT;
+		ir_bitset_incl(data->emit_constants, -src);
 		|	ASM_FP_REG_MEM_OP movss, movsd, vmovss, vmovsd, type, reg, [=>label]
 	}
 }
@@ -2310,10 +2312,10 @@ static void ir_emit_prologue(ir_ctx *ctx)
 		}
 	}
 	if ((ctx->flags & IR_VARARG_FUNC) && (ctx->flags2 & IR_HAS_VA_START)) {
+#if defined(_WIN64)
 		ir_reg fp;
 		int offset;
 
-#if defined(_WIN64)
 		if (ctx->flags & IR_USE_FRAME_POINTER) {
 			fp = IR_REG_FRAME_POINTER;
 			offset = sizeof(void*) * 2;
@@ -2330,6 +2332,8 @@ static void ir_emit_prologue(ir_ctx *ctx)
 		const int8_t *int_reg_params = _ir_int_reg_params;
 		const int8_t *fp_reg_params = _ir_fp_reg_params;
 		uint32_t i;
+		ir_reg fp;
+		int offset;
 
 		if (ctx->flags & IR_USE_FRAME_POINTER) {
 			fp = IR_REG_FRAME_POINTER;
@@ -4046,10 +4050,9 @@ static void ir_emit_binop_sse2(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 				break;
 		}
 	} else if (IR_IS_CONST_REF(op2)) {
-		ir_insn *val_insn = &ctx->ir_base[op2];
 		int label = ctx->cfg_blocks_count - op2;
 
-		val_insn->const_flags |= IR_CONST_EMIT;
+		ir_bitset_incl(data->emit_constants, -op2);
 		switch (insn->op) {
 			default:
 				IR_ASSERT(0 && "NIY binary op");
@@ -4155,10 +4158,9 @@ static void ir_emit_binop_avx(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 				break;
 		}
 	} else if (IR_IS_CONST_REF(op2)) {
-		ir_insn *val_insn = &ctx->ir_base[op2];
 		int label = ctx->cfg_blocks_count - op2;
 
-		val_insn->const_flags |= IR_CONST_EMIT;
+		ir_bitset_incl(data->emit_constants, -op2);
 		switch (insn->op) {
 			default:
 				IR_ASSERT(0 && "NIY binary op");
@@ -4528,10 +4530,9 @@ static ir_op ir_emit_cmp_fp_common(ir_ctx *ctx, ir_ref cmp_ref, ir_insn *cmp_ins
 		}
 		|	ASM_FP_REG_REG_OP ucomiss, ucomisd, vucomiss, vucomisd, type, op1_reg, op2_reg
 	} else if (IR_IS_CONST_REF(op2)) {
-		ir_insn *val_insn = &ctx->ir_base[op2];
 		int label = ctx->cfg_blocks_count - op2;
 
-		val_insn->const_flags |= IR_CONST_EMIT;
+		ir_bitset_incl(data->emit_constants, -op2);
 		|	ASM_FP_REG_MEM_OP ucomiss, ucomisd, vucomiss, vucomisd, type, op1_reg, [=>label]
 	} else {
 		int32_t offset = 0;
@@ -5448,10 +5449,9 @@ static void ir_emit_bitcast(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 				}
 			}
 		} else if (IR_IS_CONST_REF(insn->op1)) {
-			ir_insn *val_insn = &ctx->ir_base[insn->op1];
 			int label = ctx->cfg_blocks_count - insn->op1;
 
-			val_insn->const_flags |= IR_CONST_EMIT;
+			ir_bitset_incl(data->emit_constants, -insn->op1);
 			|	ASM_FP_REG_MEM_OP  movss, movsd, vmovss, vmovsd, dst_type, def_reg, [=>label]
 		} else {
 			int32_t offset = 0;
@@ -5648,10 +5648,9 @@ static void ir_emit_fp2int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |.endif
 		}
 	} else if (IR_IS_CONST_REF(insn->op1)) {
-		ir_insn *_insn = &ctx->ir_base[insn->op1];
 		int label = ctx->cfg_blocks_count - insn->op1;
 
-		_insn->const_flags |= IR_CONST_EMIT;
+		ir_bitset_incl(data->emit_constants, -insn->op1);
 		if (!dst64) {
 			if (src_type == IR_DOUBLE) {
 				if (ctx->mflags & IR_X86_AVX) {
@@ -5771,10 +5770,9 @@ static void ir_emit_fp2fp(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			}
 		}
 	} else if (IR_IS_CONST_REF(insn->op1)) {
-		ir_insn *_insn = &ctx->ir_base[insn->op1];
 		int label = ctx->cfg_blocks_count - insn->op1;
 
-		_insn->const_flags |= IR_CONST_EMIT;
+		ir_bitset_incl(data->emit_constants, -insn->op1);
 		if (src_type == IR_DOUBLE) {
 			if (ctx->mflags & IR_X86_AVX) {
 				|	vcvtsd2ss xmm(def_reg-IR_REG_FP_FIRST), xmm(def_reg-IR_REG_FP_FIRST), qword [=>label]
@@ -7149,13 +7147,13 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 								if (val_insn->op == IR_STR) {
 									int label = ctx->cfg_blocks_count - arg;
 
-									val_insn->const_flags |= IR_CONST_EMIT;
+									ir_bitset_incl(data->emit_constants, -arg);
 									|	lea Ra(dst_reg), aword [=>label]
 									continue;
 								} else if (val_insn->op == IR_SYM || val_insn->op == IR_FUNC) {
 									void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
-										ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, val_insn->val.i32)) :
-										ir_resolve_sym_name(ir_get_str(ctx, val_insn->val.i32));
+										ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, val_insn->val.name)) :
+										ir_resolve_sym_name(ir_get_str(ctx, val_insn->val.name));
 									if (sizeof(void*) == 4 || IR_IS_SIGNED_32BIT(addr)) {
 										|	mov Ra(dst_reg), ((ptrdiff_t)addr)
 									} else {
@@ -7222,7 +7220,7 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 						if (val_insn->op == IR_STR) {
 							int label = ctx->cfg_blocks_count - arg;
 
-							val_insn->const_flags |= IR_CONST_EMIT;
+							ir_bitset_incl(data->emit_constants, -arg);
 							IR_ASSERT(tmp_reg != IR_REG_NONE);
 |.if X64
 							|	lea Ra(tmp_reg), aword [=>label]
@@ -7232,8 +7230,8 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 |.endif
 						} else if (val_insn->op == IR_FUNC || val_insn->op == IR_SYM) {
 							void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
-								ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, val_insn->val.i32)) :
-								ir_resolve_sym_name(ir_get_str(ctx, val_insn->val.i32));
+								ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, val_insn->val.name)) :
+								ir_resolve_sym_name(ir_get_str(ctx, val_insn->val.name));
 							if (sizeof(void*) == 4) {
 								|	mov aword [Ra(IR_REG_RSP)+stack_offset], ((ptrdiff_t)addr)
 |.if X64
@@ -7352,8 +7350,8 @@ static void ir_emit_call(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		IR_ASSERT(addr_insn->type == IR_ADDR);
 		if (addr_insn->op == IR_FUNC) {
 			addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
-				ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, addr_insn->val.i32)) :
-				ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.i32));
+				ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, addr_insn->val.name)) :
+				ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.name));
 		} else {
 			IR_ASSERT(addr_insn->op == IR_ADDR || addr_insn->op == IR_FUNC_ADDR);
 			addr = (void*)addr_insn->val.addr;
@@ -7501,8 +7499,8 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		IR_ASSERT(addr_insn->type == IR_ADDR);
 		if (addr_insn->op == IR_FUNC) {
 			addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
-				ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, addr_insn->val.i32)) :
-				ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.i32));
+				ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, addr_insn->val.name)) :
+				ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.name));
 		} else {
 			IR_ASSERT(addr_insn->op == IR_ADDR || addr_insn->op == IR_FUNC_ADDR);
 			addr = (void*)addr_insn->val.addr;
@@ -8941,6 +8939,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 	dasm_setup(&data.dasm_state, dasm_actions);
 	/* labels for each block + for each constant + rodata label + jmp_table label + for each entry */
 	dasm_growpc(&data.dasm_state, ctx->cfg_blocks_count + 1 + ctx->consts_count + 1 + 1 + 1 + ctx->entries_count);
+	data.emit_constants = ir_bitset_malloc(ctx->consts_count);
 
 	if ((ctx->flags & IR_GEN_ENDBR) && (ctx->flags & IR_START_BR_TARGET)) {
 		|.if X64
@@ -9319,6 +9318,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 					ir_emit_trunc(ctx, i, insn);
 					break;
 				case IR_BITCAST:
+				case IR_PROTO:
 					ir_emit_bitcast(ctx, i, insn);
 					break;
 				case IR_INT2FP:
@@ -9536,6 +9536,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 					break;
 				default:
 					IR_ASSERT(0 && "NIY rule/instruction");
+					ir_mem_free(data.emit_constants);
 					dasm_free(&data.dasm_state);
 					ctx->data = NULL;
 					ctx->status = IR_ERROR_UNSUPPORTED_CODE_RULE;
@@ -9552,95 +9553,95 @@ next_block:;
 	if (data.rodata_label) {
 		|.rodata
 	}
-	for (i = IR_UNUSED + 1, insn = ctx->ir_base - i; i < ctx->consts_count; i++, insn--) {
-		if (insn->const_flags & IR_CONST_EMIT) {
-			if (IR_IS_TYPE_FP(insn->type)) {
-				int label = ctx->cfg_blocks_count + i;
+	IR_BITSET_FOREACH(data.emit_constants, ir_bitset_len(ctx->consts_count), i) {
+		insn = &ctx->ir_base[-i];
+		if (IR_IS_TYPE_FP(insn->type)) {
+			int label = ctx->cfg_blocks_count + i;
 
-				if (!data.rodata_label) {
-					data.rodata_label = ctx->cfg_blocks_count + ctx->consts_count + 2;
+			if (!data.rodata_label) {
+				data.rodata_label = ctx->cfg_blocks_count + ctx->consts_count + 2;
 
-					|.rodata
-					|=>data.rodata_label:
-				}
-				if (insn->type == IR_DOUBLE) {
-					|.align 8
-					|=>label:
-					|.dword insn->val.u32, insn->val.u32_hi
-				} else {
-					IR_ASSERT(insn->type == IR_FLOAT);
-					|.align 4
-					|=>label:
-					|.dword insn->val.u32
-				}
-			} else if (insn->op == IR_STR) {
-				int label = ctx->cfg_blocks_count + i;
-				const char *str = ir_get_str(ctx, insn->val.i32);
-				int i = 0;
-
-				if (!data.rodata_label) {
-					data.rodata_label = ctx->cfg_blocks_count + ctx->consts_count + 2;
-
-					|.rodata
-					|=>data.rodata_label:
-				}
+				|.rodata
+				|=>data.rodata_label:
+			}
+			if (insn->type == IR_DOUBLE) {
 				|.align 8
 				|=>label:
-				while (str[i]) {
-					char c = str[i];
-
-					if (c == '\\') {
-						if (str[i+1] == '\\') {
-							i++;
-							c = '\\';
-						} else if (str[i+1] == '\'') {
-							i++;
-							c = '\'';
-						} else if (str[i+1] == '"') {
-							i++;
-							c = '"';
-						} else if (str[i+1] == 'a') {
-							i++;
-							c = '\a';
-						} else if (str[i+1] == 'b') {
-							i++;
-							c = '\b';
-						} else if (str[i+1] == 'e') {
-							i++;
-							c = 27; /* '\e'; */
-						} else if (str[i+1] == 'f') {
-							i++;
-							c = '\f';
-						} else if (str[i+1] == 'n') {
-							i++;
-							c = '\n';
-						} else if (str[i+1] == 'r') {
-							i++;
-							c = '\r';
-						} else if (str[i+1] == 't') {
-							i++;
-							c = '\t';
-						} else if (str[i+1] == 'v') {
-							i++;
-							c = '\v';
-						} else if (str[i+1] == '?') {
-							i++;
-							c = 0x3f;
-						}
-					}
-					|.byte c
-					i++;
-				}
-				|.byte 0
-
+				|.dword insn->val.u32, insn->val.u32_hi
 			} else {
-				IR_ASSERT(0);
+				IR_ASSERT(insn->type == IR_FLOAT);
+				|.align 4
+				|=>label:
+				|.dword insn->val.u32
 			}
+		} else if (insn->op == IR_STR) {
+			int label = ctx->cfg_blocks_count + i;
+			const char *str = ir_get_str(ctx, insn->val.str);
+			int i = 0;
+
+			if (!data.rodata_label) {
+				data.rodata_label = ctx->cfg_blocks_count + ctx->consts_count + 2;
+
+				|.rodata
+				|=>data.rodata_label:
+			}
+			|.align 8
+			|=>label:
+			while (str[i]) {
+				char c = str[i];
+
+				if (c == '\\') {
+					if (str[i+1] == '\\') {
+						i++;
+						c = '\\';
+					} else if (str[i+1] == '\'') {
+						i++;
+						c = '\'';
+					} else if (str[i+1] == '"') {
+						i++;
+						c = '"';
+					} else if (str[i+1] == 'a') {
+						i++;
+						c = '\a';
+					} else if (str[i+1] == 'b') {
+						i++;
+						c = '\b';
+					} else if (str[i+1] == 'e') {
+						i++;
+						c = 27; /* '\e'; */
+					} else if (str[i+1] == 'f') {
+						i++;
+						c = '\f';
+					} else if (str[i+1] == 'n') {
+						i++;
+						c = '\n';
+					} else if (str[i+1] == 'r') {
+						i++;
+						c = '\r';
+					} else if (str[i+1] == 't') {
+						i++;
+						c = '\t';
+					} else if (str[i+1] == 'v') {
+						i++;
+						c = '\v';
+					} else if (str[i+1] == '?') {
+						i++;
+						c = 0x3f;
+					}
+				}
+				|.byte c
+				i++;
+			}
+			|.byte 0
+
+		} else {
+			IR_ASSERT(0);
 		}
-	}
+	} IR_BITSET_FOREACH_END();
 	if (data.rodata_label) {
 		|.code
 	}
+	ir_mem_free(data.emit_constants);
 
 	if (ctx->status) {
 		dasm_free(&data.dasm_state);
@@ -9660,7 +9661,6 @@ next_block:;
 
 	if (ctx->code_buffer != NULL) {
 		if (IR_ALIGNED_SIZE(size, 16) > ctx->code_buffer_size) {
-			dasm_free(&data.dasm_state);
 			ctx->data = NULL;
 			ctx->status = IR_ERROR_CODE_MEM_OVERFLOW;
 			return NULL;

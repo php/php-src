@@ -458,20 +458,14 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 	for (i = IR_UNUSED + 1, insn = ctx->ir_base - i; i < ctx->consts_count; i++, insn--) {
 		fprintf(f, "\t%s c_%d = ", ir_type_cname[insn->type], i);
 		if (insn->op == IR_FUNC) {
-			if (!insn->const_flags) {
-				fprintf(f, "func(%s)", ir_get_str(ctx, insn->val.i32));
-			} else {
-				fprintf(f, "func(%s, %d)", ir_get_str(ctx, insn->val.i32), insn->const_flags);
-			}
+			fprintf(f, "func %s", ir_get_str(ctx, insn->val.name));
+			ir_print_proto(ctx, insn->proto, f);
 		} else if (insn->op == IR_SYM) {
-			fprintf(f, "sym(%s)", ir_get_str(ctx, insn->val.i32));
+			fprintf(f, "sym(%s)", ir_get_str(ctx, insn->val.name));
 		} else if (insn->op == IR_FUNC_ADDR) {
-			fprintf(f, "func_addr(");
+			fprintf(f, "func *");
 			ir_print_const(ctx, insn, f, true);
-			if (insn->const_flags) {
-				fprintf(f, ", %d", insn->const_flags);
-			}
-			fprintf(f, ")");
+			ir_print_proto(ctx, insn->proto, f);
 		} else {
 			ir_print_const(ctx, insn, f, true);
 		}
@@ -563,6 +557,10 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 						case IR_OPND_STR:
 							fprintf(f, "%s\"%s\"", first ? "(" : ", ", ir_get_str(ctx, ref));
 							first = 0;
+							break;
+						case IR_OPND_PROTO:
+							fprintf(f, "%sfunc ", first ? "(" : ", ");
+							ir_print_proto(ctx, ref, f);
 							break;
 						case IR_OPND_PROB:
 							if (ref == 0) {

@@ -722,8 +722,21 @@ restart:
 		memcpy(new_insn, insn, sizeof(ir_insn) * (IR_TRUE - ref));
 		if (ctx->strtab.data) {
 			while (ref != IR_TRUE) {
-				if (new_insn->op == IR_FUNC || new_insn->op == IR_SYM || new_insn->op == IR_STR) {
-					new_insn->val.addr = ir_str(&new_ctx, ir_get_str(ctx, new_insn->val.i32));
+				if (new_insn->op == IR_FUNC_ADDR) {
+					if (new_insn->proto) {
+						size_t len;
+						const char *proto = ir_get_strl(ctx, new_insn->proto, &len);
+						new_insn->proto = ir_strl(&new_ctx, proto, len);
+					}
+				} else if (new_insn->op == IR_FUNC) {
+					new_insn->val.u64 = ir_str(&new_ctx, ir_get_str(ctx, new_insn->val.name));
+					if (new_insn->proto) {
+						size_t len;
+						const char *proto = ir_get_strl(ctx, new_insn->proto, &len);
+						new_insn->proto = ir_strl(&new_ctx, proto, len);
+					}
+				} else if (new_insn->op == IR_SYM || new_insn->op == IR_STR) {
+					new_insn->val.u64 = ir_str(&new_ctx, ir_get_str(ctx, new_insn->val.name));
 				}
 				new_insn++;
 				ref++;
@@ -738,8 +751,26 @@ restart:
 			}
 			new_insn->optx = insn->optx;
 			new_insn->prev_const = 0;
-			if (insn->op == IR_FUNC || insn->op == IR_SYM || insn->op == IR_STR) {
-				new_insn->val.addr = ir_str(&new_ctx, ir_get_str(ctx, insn->val.i32));
+			if (insn->op == IR_FUNC_ADDR) {
+				new_insn->val.u64 = insn->val.u64;
+				if (insn->proto) {
+					size_t len;
+					const char *proto = ir_get_strl(ctx, insn->proto, &len);
+					new_insn->proto = ir_strl(&new_ctx, proto, len);
+				} else {
+					new_insn->proto = 0;
+				}
+			} else if (insn->op == IR_FUNC) {
+				new_insn->val.u64 = ir_str(&new_ctx, ir_get_str(ctx, insn->val.name));
+				if (insn->proto) {
+					size_t len;
+					const char *proto = ir_get_strl(ctx, insn->proto, &len);
+					new_insn->proto = ir_strl(&new_ctx, proto, len);
+				} else {
+					new_insn->proto = 0;
+				}
+			} else if (insn->op == IR_SYM || insn->op == IR_STR) {
+				new_insn->val.u64 = ir_str(&new_ctx, ir_get_str(ctx, insn->val.name));
 			} else {
 				new_insn->val.u64 = insn->val.u64;
 			}
@@ -806,6 +837,10 @@ restart:
 				new_insn->op1 = _xlat[insn->op1];
 				if (new_insn->op == IR_PARAM || insn->op == IR_VAR) {
 					new_insn->op2 = ir_str(&new_ctx, ir_get_str(ctx, insn->op2));
+				} else if (new_insn->op == IR_PROTO) {
+					size_t len;
+					const char *proto = ir_get_strl(ctx, insn->op2, &len);
+					new_insn->op2 = ir_strl(&new_ctx, proto, len);
 				} else {
 					new_insn->op2 = insn->op2;
 				}
