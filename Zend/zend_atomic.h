@@ -23,8 +23,8 @@
 	((__GNUC__ == (x) && __GNUC_MINOR__ >= (y)) || (__GNUC__ > (x)))
 
 /* Builtins are used to avoid library linkage */
-#if __has_feature(c_atomic)
-#define	HAVE_C11_ATOMICS 1
+#if __has_feature(c_atomic) && defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201710L
+#define	HAVE_C17_ATOMICS 1
 #elif ZEND_GCC_PREREQ(4, 7)
 #define	HAVE_GNUC_ATOMICS 1
 #elif defined(__GNUC__)
@@ -43,7 +43,7 @@
 typedef struct zend_atomic_bool_s {
 	volatile char value;
 } zend_atomic_bool;
-#elif defined(HAVE_C11_ATOMICS)
+#elif defined(HAVE_C17_ATOMICS)
 typedef struct zend_atomic_bool_s {
 	_Atomic(bool) value;
 } zend_atomic_bool;
@@ -80,7 +80,7 @@ static zend_always_inline void zend_atomic_bool_store_ex(zend_atomic_bool *obj, 
 	(void)InterlockedExchange8(&obj->value, desired);
 }
 
-#elif defined(HAVE_C11_ATOMICS)
+#elif defined(HAVE_C17_ATOMICS)
 
 #define ZEND_ATOMIC_BOOL_INIT(obj, desired) __c11_atomic_init(&(obj)->value, (desired))
 
