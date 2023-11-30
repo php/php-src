@@ -949,7 +949,14 @@ static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 
 static void zend_ffi_dispatch_callback_end(void){ /* {{{ */
-	//pthread_cond_broadcast(&FFI_G(vm_ack));
+	zend_atomic_bool_store_ex(&FFI_G(callback_in_progress), false);
+	bool is_main_thread = FFI_G(callback_tid) == FFI_G(main_tid);
+	if(!is_main_thread){
+		// unlock interrupt handler	
+		FFI_DPRINTF("--> unlock\n");
+		pthread_cond_broadcast(&FFI_G(vm_unlock));
+		pthread_mutex_unlock(&FFI_G(vm_response_lock));
+	}
 }
 /* }}} */
 
@@ -1002,6 +1009,9 @@ static void zend_ffi_dispatch_callback(void){ /* {{{ */
 	free_alloca(fci.params, use_heap);
 
 	if (EG(exception)) {
+		// we're about to do a hard exit. unlock all mutexes
+		zend_ffi_dispatch_callback_end();
+		pthread_mutex_unlock(&FFI_G(vm_request_lock));
 		zend_error_noreturn(E_ERROR, "Throwing from FFI callbacks is not allowed");
 	}
 
@@ -1015,10 +1025,14 @@ static void zend_ffi_dispatch_callback(void){ /* {{{ */
 /* }}} */
 
 static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{ */
+	pthread_mutex_lock(&FFI_G(vm_response_lock));
+	if (!zend_atomic_bool_load_ex(&FFI_G(callback_in_progress))) {
+		goto end;
+	}
+
 	bool is_main_tid = FFI_G(callback_tid) == FFI_G(main_tid);
 	if(!is_main_tid){
-		pthread_mutex_lock(&FFI_G(vm_response_lock));
-		
+	
 		FFI_DPRINTF("<-- ACK\n");
 		// notify calling thread and release
 		pthread_cond_broadcast(&FFI_G(vm_ack));
@@ -1026,10 +1040,11 @@ static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{
 		// release mutex and wait for the unlock signal		
 		FFI_DPRINTF("-- wait unlock --\n");
 		pthread_cond_wait(&FFI_G(vm_unlock), &FFI_G(vm_response_lock));
-		pthread_mutex_unlock(&FFI_G(vm_response_lock));
-		FFI_DPRINTF("-- end\n");
 	}
 	
+	end:
+	pthread_mutex_unlock(&FFI_G(vm_response_lock));
+	FFI_DPRINTF("-- end\n");
 	if (orig_interrupt_function) {
 		orig_interrupt_function(execute_data);
 	}
@@ -1100,13 +1115,7 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 		zend_ffi_dispatch_callback();
 		FFI_DPRINTF("done\n");
 
-		if(!is_main_thread){
-			// unlock interrupt handler
-			zend_atomic_bool_store_ex(&FFI_G(callback_in_progress), false);
-			FFI_DPRINTF("--> unlock\n");
-			pthread_cond_broadcast(&FFI_G(vm_unlock));
-			pthread_mutex_unlock(&FFI_G(vm_response_lock));
-		}
+		zend_ffi_dispatch_callback_end();
 	}
 	pthread_mutex_unlock(&FFI_G(vm_request_lock));
 }
