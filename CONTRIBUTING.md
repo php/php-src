@@ -358,8 +358,8 @@ Currently, we have the following branches in use:
 | master    | Active development branch for PHP 8.4, which is open for backwards incompatible changes and major internal API changes. |
 | PHP-8.3   | Is used to release the PHP 8.3.x series. This is a current stable version and is open for bugfixes only. |
 | PHP-8.2   | Is used to release the PHP 8.2.x series. This is a current stable version and is open for bugfixes only. |
-| PHP-8.1   | Is used to release the PHP 8.1.x series. This is a current stable version and is open for bugfixes only. |
-| PHP-8.0   | Is used to release the PHP 8.0.x series. This is an old stable version and is open for security fixes only. |
+| PHP-8.1   | Is used to release the PHP 8.1.x series. This is an old stable version and is open for security fixes only. |
+| PHP-8.0   | This branch is closed. |
 | PHP-7.4   | This branch is closed. |
 | PHP-7.3   | This branch is closed. |
 | PHP-7.2   | This branch is closed. |
