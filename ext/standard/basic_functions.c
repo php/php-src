@@ -1541,7 +1541,7 @@ PHP_FUNCTION(forward_static_call)
 		Z_PARAM_VARIADIC('*', fci.params, fci.param_count)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!EX(prev_execute_data)->func->common.scope) {
+	if (!EX(prev_execute_data) || !EX(prev_execute_data)->func->common.scope) {
 		zend_throw_error(NULL, "Cannot call forward_static_call() when no class scope is active");
 		RETURN_THROWS();
 	}
