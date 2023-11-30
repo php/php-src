@@ -15,12 +15,14 @@ MySQLPDOTest::skip();
     $table = 'pdo_mysql_attr_fetch_table_names';
     MySQLPDOTest::createTestTable($table, $db);
 
-    $db->setAttribute(PDO::ATTR_FETCH_TABLE_NAMES, 1);
+    $db->setAttribute(PDO::ATTR_FETCH_TABLE_NAMES, true);
+    var_dump($db->getAttribute(PDO::ATTR_FETCH_TABLE_NAMES));
     $stmt = $db->query("SELECT label FROM {$table} LIMIT 1");
     var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
     $stmt->closeCursor();
 
-    $db->setAttribute(PDO::ATTR_FETCH_TABLE_NAMES, 0);
+    $db->setAttribute(PDO::ATTR_FETCH_TABLE_NAMES, false);
+    var_dump($db->getAttribute(PDO::ATTR_FETCH_TABLE_NAMES));
     $stmt = $db->query("SELECT label FROM {$table} LIMIT 1");
     var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
     $stmt->closeCursor();
@@ -34,6 +36,7 @@ $db = MySQLPDOTest::factory();
 $db->query('DROP TABLE IF EXISTS pdo_mysql_attr_fetch_table_names');
 ?>
 --EXPECT--
+bool(true)
 array(1) {
   [0]=>
   array(1) {
@@ -41,6 +44,7 @@ array(1) {
     string(1) "a"
   }
 }
+bool(false)
 array(1) {
   [0]=>
   array(1) {

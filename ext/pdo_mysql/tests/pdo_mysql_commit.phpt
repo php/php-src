@@ -35,7 +35,7 @@ MySQLPDOTest::skipNotTransactionalEngine();
 
         // pdo_transaction_transitions should check this as well...
         // ... just to be sure the most basic stuff really works we check it again...
-        if (1 !== ($tmp = $db->getAttribute(PDO::ATTR_AUTOCOMMIT)))
+        if (true !== ($tmp = $db->getAttribute(PDO::ATTR_AUTOCOMMIT)))
             printf("[003] According to the manual we should be back to autocommit mode, got %s/%s\n",
                 gettype($tmp), var_export($tmp, true));
 

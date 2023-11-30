@@ -54,15 +54,15 @@ MySQLPDOTest::skip();
 
         $defaults = [
             PDO::ATTR_PERSISTENT               => false,
-            PDO::ATTR_AUTOCOMMIT               => 1,
+            PDO::ATTR_AUTOCOMMIT               => true,
             /* TODO - why is this a valid option if getAttribute() does not support it?! */
             PDO::ATTR_TIMEOUT                  => false,
-            PDO::ATTR_EMULATE_PREPARES         => 1,
+            PDO::ATTR_EMULATE_PREPARES         => true,
             PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
             /* TODO getAttribute() does not handle it */
             PDO::MYSQL_ATTR_LOCAL_INFILE       => false,
             /* TODO getAttribute() does not handle it */
-            PDO::MYSQL_ATTR_DIRECT_QUERY       => 1,
+            PDO::MYSQL_ATTR_DIRECT_QUERY       => true,
             PDO::MYSQL_ATTR_INIT_COMMAND       => '',
         ];
 
@@ -151,8 +151,8 @@ MySQLPDOTest::skip();
         set_option_and_check(24, PDO::MYSQL_ATTR_INIT_COMMAND, '', 'PDO::MYSQL_ATTR_INIT_COMMAND');
         set_option_and_check(25, PDO::MYSQL_ATTR_INIT_COMMAND, 'INSERT INTO nonexistent(invalid) VALUES (1)', 'PDO::MYSQL_ATTR_INIT_COMMAND');
 
-        set_option_and_check(33, PDO::MYSQL_ATTR_DIRECT_QUERY, 1, 'PDO::MYSQL_ATTR_DIRECT_QUERY');
-        set_option_and_check(34, PDO::MYSQL_ATTR_DIRECT_QUERY, 0, 'PDO::MYSQL_ATTR_DIRECT_QUERY');
+        set_option_and_check(33, PDO::MYSQL_ATTR_DIRECT_QUERY, true, 'PDO::MYSQL_ATTR_DIRECT_QUERY');
+        set_option_and_check(34, PDO::MYSQL_ATTR_DIRECT_QUERY, false, 'PDO::MYSQL_ATTR_DIRECT_QUERY');
 
         if (defined('PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY')) {
             set_option_and_check(35, PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY, null, 'PDO::MYSQL_ATTR_LOCAL_INFILE_DIRECTORY');
