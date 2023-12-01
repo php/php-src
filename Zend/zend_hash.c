@@ -2407,7 +2407,7 @@ static zend_always_inline uint32_t zend_array_dup_elements(HashTable *source, Ha
 					idx++; p++;
 				}
 			} else {
-				target->nNumUsed = source->nNumOfElements;
+				target->nNumUsed = source->nNumUsed;
 				uint32_t iter_pos = zend_hash_iterators_lower_pos(target, idx);
 
 				while (p != end) {
