@@ -3424,10 +3424,6 @@ ZEND_EXT_API void zend_jit_startup(void *buf, size_t size, bool reattached)
 	zend_jit_halt_op = zend_get_halt_op();
 	zend_jit_profile_counter_rid = zend_get_op_array_extension_handle(ACCELERATOR_PRODUCT_NAME);
 
-#if ZEND_JIT_SUPPORT_CLDEMOTE
-	cpu_support_cldemote = zend_cpu_supports_cldemote();
-#endif
-
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 	zend_write_protect = pthread_jit_write_protect_supported_np();
 #endif

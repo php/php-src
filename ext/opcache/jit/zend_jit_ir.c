@@ -162,6 +162,7 @@ static void ir_refs_add(ir_refs *refs, ir_ref ref)
 static size_t zend_jit_trace_prologue_size = (size_t)-1;
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
 static uint32_t allowed_opt_flags = 0;
+static uint32_t default_mflags = 0;
 #endif
 static bool delayed_call_chain = 0; // TODO: remove this var (use jit->delayed_call_level) ???
 
@@ -2609,6 +2610,7 @@ static void zend_jit_init_ctx(zend_jit_ctx *jit, uint32_t flags)
 	jit->ctx.ret_type = -1;
 
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
+	jit->ctx.mflags |= default_mflags;
 	if (JIT_G(opt_flags) & allowed_opt_flags & ZEND_JIT_CPU_AVX) {
 		jit->ctx.mflags |= IR_X86_AVX;
 	}
@@ -3153,6 +3155,9 @@ static void zend_jit_setup(void)
 	allowed_opt_flags = 0;
 	if (zend_cpu_supports_avx()) {
 		allowed_opt_flags |= ZEND_JIT_CPU_AVX;
+	}
+	if (zend_cpu_supports_cldemote()) {
+		default_mflags |= IR_X86_CLDEMOTE;
 	}
 #endif
 #ifdef ZTS
@@ -15664,6 +15669,10 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 		jit->ctx.deoptimization_exits = jit->trace->exit_count;
 		jit->ctx.get_exit_addr = zend_jit_trace_get_exit_addr;
 #endif
+	} else {
+#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
+		jit->ctx.flags |= IR_GEN_CACHE_DEMOTE;
+#endif
 	}
 
 	entry = zend_jit_ir_compile(&jit->ctx, &size, str ? ZSTR_VAL(str) : NULL);
@@ -15747,12 +15756,6 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 			}
 
 			zend_jit_trace_add_code(entry, size);
-
-#if ZEND_JIT_SUPPORT_CLDEMOTE
-			if (cpu_support_cldemote) {
-				shared_cacheline_demote((uintptr_t)entry, size);
-			}
-#endif
 		}
 	}
 
