@@ -3156,9 +3156,11 @@ static void zend_jit_setup(void)
 	if (zend_cpu_supports_avx()) {
 		allowed_opt_flags |= ZEND_JIT_CPU_AVX;
 	}
+# if PHP_HAVE_BUILTIN_CPU_SUPPORTS && defined(__GNUC__) && (ZEND_GCC_VERSION >= 11000)
 	if (zend_cpu_supports_cldemote()) {
 		default_mflags |= IR_X86_CLDEMOTE;
 	}
+# endif
 #endif
 #ifdef ZTS
 #if defined(IR_TARGET_AARCH64)
