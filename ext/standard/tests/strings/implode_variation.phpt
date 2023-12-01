@@ -3,23 +3,24 @@ Test implode() function
 --FILE--
 <?php
 echo "*** Testing implode() for basic operations ***\n";
-$arrays = array (
+$arrays = array(
   array(1,2),
   array(1.1,2.2),
   array(array(2),array(1)),
   array(false,true),
   array(),
-  array("a","aaaa","b","bbbb","c","ccccccccccccccccccccc")
+  array("a","aaaa","b","bbbb","c","ccccccccccccccccccccc"),
+  array(NULL),
 );
 /* loop to output string with ', ' as $glue, using implode() */
 foreach ($arrays as $array) {
-  var_dump( implode(', ', $array) );
+  var_dump(implode(', ', $array));
   var_dump($array);
 }
 
 echo "\n*** Testing implode() with variations of glue ***\n";
 /* checking possible variations */
-$pieces = array (
+$pieces = array(
   2,
   0,
   -639,
@@ -30,7 +31,7 @@ $pieces = array (
   " ",
   "string\x00with\x00...\0"
 );
-$glues = array (
+$glues = array(
   "TRUE",
   true,
   false,
@@ -72,7 +73,7 @@ try {
   echo $exception->getMessage() . "\n";
 }
 try {
-   var_dump( implode(2, $sub_array) );
+   var_dump(implode(2, $sub_array));
 } catch (TypeError $exception) {
   echo $exception->getMessage() . "\n";
 }
@@ -90,7 +91,7 @@ $obj = new foo(); //creating new object
 $arr = array();
 $arr[0] = &$obj;
 $arr[1] = &$obj;
-var_dump( implode(",", $arr) );
+var_dump(implode(",", $arr));
 var_dump($arr);
 
 /* Checking on resource types */
@@ -104,51 +105,7 @@ $dir_handle = opendir( __DIR__ );
 /* store resources in array for comparison */
 $resources = array($file_handle, $dir_handle);
 
-var_dump( implode("::", $resources) );
-
-echo "\n*** Testing error conditions ***\n";
-
-/* only glue */
-try {
-    var_dump( implode("glue") );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-/* int as pieces */
-try {
-    var_dump( implode("glue",1234) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-/* NULL as pieces */
-try {
-    var_dump( implode("glue", NULL) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-/* pieces as NULL array */
-try {
-    var_dump( implode(",", array(NULL)) );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-/* integer as glue */
-try {
-    var_dump( implode(12, "pieces") );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-/* NULL as glue */
-try {
-    var_dump( implode(NULL, "abcd") );
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
+var_dump(implode("::", $resources));
 
 /* closing resource handles */
 fclose($file_handle);
@@ -214,6 +171,11 @@ array(6) {
   [5]=>
   string(21) "ccccccccccccccccccccc"
 }
+string(0) ""
+array(1) {
+  [0]=>
+  NULL
+}
 
 *** Testing implode() with variations of glue ***
 -- Iteration 1 --
@@ -236,7 +198,7 @@ string(35) "2000-639010PHP000 0string%0with%0...%0"
 string(43) "2\00\0-639\01\0PHP\0\0\0 \0string%0with%0...%0"
 
 *** Testing implode() on empty string ***
-implode(): Argument #1 ($array) must be of type array, string given
+implode(): If argument #1 ($separator) is of type string, argument #2 ($array) must be of type array, null given
 
 *** Testing implode() on sub-arrays ***
 
@@ -264,14 +226,4 @@ array(2) {
 
 *** Testing end() on resource type ***
 string(%d) "Resource id #%d::Resource id #%d"
-
-*** Testing error conditions ***
-implode(): Argument #1 ($array) must be of type array, string given
-implode(): Argument #2 ($array) must be of type ?array, int given
-implode(): Argument #1 ($array) must be of type array, string given
-string(0) ""
-implode(): Argument #2 ($array) must be of type ?array, string given
-
-Deprecated: implode(): Passing null to parameter #1 ($separator) of type array|string is deprecated in %s on line %d
-implode(): Argument #2 ($array) must be of type ?array, string given
 Done

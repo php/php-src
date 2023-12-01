@@ -29,7 +29,6 @@ class test
 
 // array with different values
 $values =  array (
-
   // integer values
   0,
   1,
@@ -84,7 +83,7 @@ for($index = 0; $index < count($values); $index ++) {
     $pieces = $values [$index];
 
     try {
-        var_dump( join($glue, $pieces) );
+        var_dump(join($glue, $pieces));
     } catch (TypeError $e) {
         echo $e->getMessage(), "\n";
     }
@@ -138,13 +137,13 @@ join(): Argument #2 ($array) must be of type ?array, string given
 -- Iteration 18 --
 join(): Argument #2 ($array) must be of type ?array, string given
 -- Iteration 19 --
-join(): Argument #1 ($array) must be of type array, string given
+join(): If argument #1 ($separator) is of type string, argument #2 ($array) must be of type array, null given
 -- Iteration 20 --
-join(): Argument #1 ($array) must be of type array, string given
+join(): If argument #1 ($separator) is of type string, argument #2 ($array) must be of type array, null given
 -- Iteration 21 --
 join(): Argument #2 ($array) must be of type ?array, resource given
 -- Iteration 22 --
-join(): Argument #1 ($array) must be of type array, string given
+join(): If argument #1 ($separator) is of type string, argument #2 ($array) must be of type array, null given
 -- Iteration 23 --
-join(): Argument #1 ($array) must be of type array, string given
+join(): If argument #1 ($separator) is of type string, argument #2 ($array) must be of type array, null given
 Done
