@@ -9,7 +9,7 @@ class Collection extends ArrayObject
 
     function __construct()
     {
-        $this->data = array();
+        $this->data = [];
         parent::__construct($this->data);
     }
 
@@ -26,7 +26,7 @@ class Collection extends ArrayObject
     }
 }
 
-echo "\n\nInitiate Obj\n";
+echo "Initiate Obj\n";
 $arrayObj = new Collection();
 
 echo "Assign values\n";
@@ -41,7 +41,7 @@ var_dump($arrayObj[1]);
 $arrayObj["foo"] = "baz";
 var_dump($arrayObj["foo"]);
 
-print_r($arrayObj);
+var_dump($arrayObj);
 
 var_dump(count($arrayObj));
 
@@ -58,18 +58,18 @@ string(3) "bar"
 Collection::offsetSet(foo,baz)
 Collection::offsetGet(foo)
 string(3) "baz"
-Collection Object
-(
-    [data:Collection:private] => Array
-        (
-        )
-
-    [storage:ArrayObject:private] => Array
-        (
-            [0] => foo
-            [1] => bar
-            [foo] => baz
-        )
-
-)
+object(Collection)#1 (2) {
+  ["data":"Collection":private]=>
+  array(0) {
+  }
+  ["storage":"ArrayObject":private]=>
+  array(3) {
+    [0]=>
+    string(3) "foo"
+    [1]=>
+    string(3) "bar"
+    ["foo"]=>
+    string(3) "baz"
+  }
+}
 int(3)

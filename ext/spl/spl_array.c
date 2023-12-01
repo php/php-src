@@ -49,10 +49,14 @@ typedef struct _spl_array_object {
 	unsigned char	  nApplyCount;
 	bool			  is_child;
 	Bucket			  *bucket;
+	/* Overridden ArrayAccess methods */
 	zend_function     *fptr_offset_get;
 	zend_function     *fptr_offset_set;
 	zend_function     *fptr_offset_has;
 	zend_function     *fptr_offset_del;
+	/* Overridden append() method */
+	zend_function     *fptr_append;
+	/* Overridden count() method */
 	zend_function     *fptr_count;
 	zend_class_entry* ce_get_iterator;
 	zend_object       std;
@@ -192,6 +196,7 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 	ZEND_ASSERT(parent);
 
 	if (inherited) {
+		/* Find potentially overridden ArrayAccess methods */
 		intern->fptr_offset_get = zend_hash_str_find_ptr(&class_type->function_table, "offsetget", sizeof("offsetget") - 1);
 		if (intern->fptr_offset_get->common.scope == parent) {
 			intern->fptr_offset_get = NULL;
@@ -208,7 +213,12 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 		if (intern->fptr_offset_del->common.scope == parent) {
 			intern->fptr_offset_del = NULL;
 		}
-		/* Find count() method */
+		/* Find potentially overridden append() method */
+		intern->fptr_append = zend_hash_str_find_ptr(&class_type->function_table, "append",  sizeof("append") - 1);
+		if (intern->fptr_append->common.scope == parent) {
+			intern->fptr_append = NULL;
+		}
+		/* Find potentially overridden count() method */
 		intern->fptr_count = zend_hash_find_ptr(&class_type->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
 		if (intern->fptr_count->common.scope == parent) {
 			intern->fptr_count = NULL;
@@ -460,7 +470,7 @@ static uint32_t spl_array_set_refcount(bool is_child, HashTable *ht, uint32_t re
 	return old_refcount;
 } /* }}} */
 
-static void spl_array_write_dimension_ex(int check_inherited, zend_object *object, zval *offset, zval *value) /* {{{ */
+static void spl_array_write_dimension_ex(bool check_inherited, zend_object *object, zval *offset, zval *value) /* {{{ */
 {
 	spl_array_object *intern = spl_array_from_obj(object);
 	HashTable *ht;
@@ -474,6 +484,20 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 
 	/* We are appending */
 	if (!offset) {
+		/* append() method is overridden, so call it */
+		if (check_inherited && intern->fptr_append) {
+			zend_call_known_function(
+				intern->fptr_append,
+				object,
+				object->ce,
+				/* retval_ptr */NULL,
+				/* param_count */ 1,
+				/* params */ value,
+				/* named_params */ NULL
+			);
+			return;
+		}
+
 		/* Cannot append if backing value is an object */
 		if (spl_array_is_object(intern)) {
 			zend_throw_error(NULL, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(object->ce->name));
@@ -491,6 +515,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 		return;
 	}
 
+	/* offsetSet() method is overridden, so call it */
 	if (check_inherited && intern->fptr_offset_set) {
 		zend_call_method_with_2_params(object, object->ce, &intern->fptr_offset_set, "offsetSet", NULL, offset, value);
 		return;
@@ -542,7 +567,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 
 static void spl_array_write_dimension(zend_object *object, zval *offset, zval *value) /* {{{ */
 {
-	spl_array_write_dimension_ex(1, object, offset, value);
+	spl_array_write_dimension_ex(/* check_inherited */ true, object, offset, value);
 } /* }}} */
 
 static void spl_array_unset_dimension_ex(int check_inherited, zend_object *object, zval *offset) /* {{{ */
@@ -703,9 +728,10 @@ PHP_METHOD(ArrayObject, offsetSet)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &index, &value) == FAILURE) {
 		RETURN_THROWS();
 	}
-	spl_array_write_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, value);
+	spl_array_write_dimension_ex(/* check_inherited */ false, Z_OBJ_P(ZEND_THIS), index, value);
 } /* }}} */
 
+/* Needed for spl_iterators.c:2938 */
 void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
 {
 	spl_array_write_dimension(Z_OBJ_P(object), NULL, append_value);
@@ -719,7 +745,7 @@ PHP_METHOD(ArrayObject, append)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
 		RETURN_THROWS();
 	}
-	spl_array_iterator_append(ZEND_THIS, value);
+	spl_array_write_dimension_ex(/* check_inherited */ false, Z_OBJ_P(ZEND_THIS), /* offset */ NULL, value);
 } /* }}} */
 
 /* {{{ Unsets the value at the specified $index. */
