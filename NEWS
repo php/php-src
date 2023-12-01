@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-12758 / GH-12768 (Invalid opline in OOM handlers within
     ZEND_FUNC_GET_ARGS and ZEND_BIND_STATIC). (Florian Engelhardt)
+  . Fix various missing NULL checks. (nielsdos, dstogov)
 
 - LibXML:
   . Fixed test failures for libxml2 2.12.0. (nielsdos)
