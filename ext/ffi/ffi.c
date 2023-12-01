@@ -1094,6 +1094,9 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 			
 			pthread_mutex_lock(&FFI_G(vm_response_lock));
 			pthread_cond_wait(&FFI_G(vm_ack), &FFI_G(vm_response_lock));
+
+			// prepare the stack call info/limits for the current thread
+			zend_call_stack_init();
 		}
 
 		// dispatch the callback
