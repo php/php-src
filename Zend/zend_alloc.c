@@ -79,6 +79,9 @@
 #include <limits.h>
 #include <fcntl.h>
 #include <errno.h>
+#ifdef __SANITIZE_ADDRESS__
+# include <sanitizer/asan_interface.h>
+#endif
 
 #ifndef _WIN32
 # include <sys/mman.h>
@@ -724,6 +727,9 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 		if (zend_mm_use_huge_pages) {
 			zend_mm_hugepage(ptr, size);
 		}
+#ifdef __SANITIZE_ADDRESS__
+		__asan_unpoison_memory_region(ptr, size);
+#endif
 		return ptr;
 	} else {
 		size_t offset;
@@ -763,6 +769,9 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 		if (zend_mm_use_huge_pages) {
 			zend_mm_hugepage(ptr, size);
 		}
+# ifdef __SANITIZE_ADDRESS__
+		__asan_unpoison_memory_region(ptr, size);
+# endif
 #endif
 		return ptr;
 	}
