@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed JIT bug (JIT emits "Attempt to assign property of non-object"
     warning at the same time as Error is being thrown). (Girgias)
 
+- SOAP:
+  . Fixed bug GH-12838 ([SOAP] Temporary WSDL cache files not being deleted).
+    (nielsdos)
+
 - Standard
   . Fixed GH-12745 (http_build_query() default null argument for $arg_separator
     is implicitly coerced to string). (Girgias)
