@@ -3680,7 +3680,8 @@ static zend_always_inline zend_result _zend_update_type_info(
 						tmp &= ~MAY_BE_ARRAY_EMPTY;
 					}
 				}
-				if (((tmp & MAY_BE_ARRAY) && (tmp & MAY_BE_ARRAY_KEY_ANY))
+				if (!(tmp & MAY_BE_ARRAY)
+				 || (tmp & MAY_BE_ARRAY_KEY_ANY)
 				 || opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
 				 || opline->opcode == ZEND_FETCH_DIM_R
 				 || opline->opcode == ZEND_FETCH_DIM_IS
