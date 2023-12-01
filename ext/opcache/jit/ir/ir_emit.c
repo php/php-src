@@ -66,6 +66,22 @@ static const int8_t _ir_fp_reg_params[IR_REG_FP_ARGS];
 static const int8_t *_ir_fp_reg_params;
 #endif
 
+static const ir_proto_t *ir_call_proto(const ir_ctx *ctx, ir_insn *insn)
+{
+	if (IR_IS_CONST_REF(insn->op2)) {
+		const ir_insn *func = &ctx->ir_base[insn->op2];
+
+		if (func->op == IR_FUNC || func->op == IR_FUNC_ADDR) {
+			if (func->proto) {
+				return (const ir_proto_t *)ir_get_str(ctx, func->proto);
+			}
+		}
+	} else if (ctx->ir_base[insn->op2].op == IR_PROTO) {
+		return (const ir_proto_t *)ir_get_str(ctx, ctx->ir_base[insn->op2].op2);
+	}
+	return NULL;
+}
+
 #ifdef IR_HAVE_FASTCALL
 static const int8_t _ir_int_fc_reg_params[IR_REG_INT_FCARGS];
 static const int8_t *_ir_fp_fc_reg_params;
@@ -101,19 +117,9 @@ bool ir_is_fastcall(const ir_ctx *ctx, const ir_insn *insn)
 
 bool ir_is_vararg(const ir_ctx *ctx, ir_insn *insn)
 {
-	if (IR_IS_CONST_REF(insn->op2)) {
-		const ir_insn *func = &ctx->ir_base[insn->op2];
+	const ir_proto_t *proto = ir_call_proto(ctx, insn);
 
-		if (func->op == IR_FUNC || func->op == IR_FUNC_ADDR) {
-			if (func->proto) {
-				const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, func->proto);
-
-				return (proto->flags & IR_VARARG_FUNC) != 0;
-			}
-		}
-	} else if (ctx->ir_base[insn->op2].op == IR_PROTO) {
-		const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, ctx->ir_base[insn->op2].op2);
-
+	if (proto) {
 		return (proto->flags & IR_VARARG_FUNC) != 0;
 	}
 	return 0;

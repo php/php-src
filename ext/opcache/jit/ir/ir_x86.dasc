@@ -9717,6 +9717,19 @@ next_block:;
 
 	ir_mem_flush(entry, size);
 
+#if defined(__GNUC__)
+	if ((ctx->flags & IR_GEN_CACHE_DEMOTE) && (ctx->mflags & IR_X86_CLDEMOTE)) {
+		uintptr_t start = (uintptr_t)entry;
+		uintptr_t p = (uintptr_t)start & ~0x3F;
+
+		do {
+			/* _cldemote(p); */
+			asm volatile(".byte 0x0f, 0x1c, 0x06" :: "S" (p));
+			p += 64;
+		} while (p < start + size);
+	}
+#endif
+
 	if (ctx->code_buffer == NULL) {
 		ir_mem_protect(entry, size);
 	}

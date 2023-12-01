@@ -4102,10 +4102,19 @@ static int32_t ir_call_used_stack(ir_ctx *ctx, ir_insn *insn)
 	int int_reg_params_count = IR_REG_INT_ARGS;
 	int fp_reg_params_count = IR_REG_FP_ARGS;
 	int32_t used_stack = 0;
+#ifdef __APPLE__
+	const ir_proto_t *proto = ir_call_proto(ctx, insn);
+	int last_named_input = (proto && (proto->flags & IR_VARARG_FUNC)) ? proto->params_count + 2 : insn->inputs_count;
+#endif
 
 	n = insn->inputs_count;
 	for (j = 3; j <= n; j++) {
 		type = ctx->ir_base[ir_insn_op(insn, j)].type;
+#ifdef __APPLE__
+		if (j > last_named_input) {
+			used_stack += IR_MAX(sizeof(void*), ir_type_size[type]);
+		} else
+#endif
 		if (IR_IS_TYPE_INT(type)) {
 			if (int_param >= int_reg_params_count) {
 				used_stack += IR_MAX(sizeof(void*), ir_type_size[type]);
@@ -4171,6 +4180,11 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 		}
 	}
 
+#ifdef __APPLE__
+	const ir_proto_t *proto = ir_call_proto(ctx, insn);
+	int last_named_input = (proto && (proto->flags & IR_VARARG_FUNC)) ? proto->params_count + 2 : insn->inputs_count;
+#endif
+
 	/* 1. move all register arguments that should be passed through stack
 	 *    and collect arguments that should be passed through registers */
 	copies = ir_mem_malloc((n - 2) * sizeof(ir_copy));
@@ -4179,6 +4193,11 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 		src_reg = ir_get_alocated_reg(ctx, def, j);
 		arg_insn = &ctx->ir_base[arg];
 		type = arg_insn->type;
+#ifdef __APPLE__
+		if (j > last_named_input) {
+			dst_reg = IR_REG_NONE; /* pass argument through stack */
+		} else
+#endif
 		if (IR_IS_TYPE_INT(type)) {
 			if (int_param < int_reg_params_count) {
 				dst_reg = int_reg_params[int_param];
@@ -4244,6 +4263,11 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 			src_reg = ir_get_alocated_reg(ctx, def, j);
 			arg_insn = &ctx->ir_base[arg];
 			type = arg_insn->type;
+#ifdef __APPLE__
+			if (j > last_named_input) {
+				dst_reg = IR_REG_NONE; /* pass argument through stack */
+			} else
+#endif
 			if (IR_IS_TYPE_INT(type)) {
 				if (int_param < int_reg_params_count) {
 					dst_reg = int_reg_params[int_param];

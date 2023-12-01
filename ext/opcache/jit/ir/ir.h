@@ -507,6 +507,8 @@ void ir_strtab_free(ir_strtab *strtab);
 #define IR_GEN_NATIVE          (1<<19)
 #define IR_GEN_CODE            (1<<20) /* C or LLVM */
 
+#define IR_GEN_CACHE_DEMOTE    (1<<21) /* Demote the generated code from closest CPU caches */
+
 /* debug related */
 #ifdef IR_DEBUG
 # define IR_DEBUG_SCCP         (1<<27)
@@ -837,14 +839,15 @@ int ir_patch(const void *code, size_t size, uint32_t jmp_table_size, const void 
 
 /* CPU information (implementation in ir_cpuinfo.c) */
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
-# define IR_X86_SSE2  (1<<0)
-# define IR_X86_SSE3  (1<<1)
-# define IR_X86_SSSE3 (1<<2)
-# define IR_X86_SSE41 (1<<3)
-# define IR_X86_SSE42 (1<<4)
-# define IR_X86_AVX   (1<<5)
-# define IR_X86_AVX2  (1<<6)
-# define IR_X86_BMI1  (1<<7)
+# define IR_X86_SSE2     (1<<0)
+# define IR_X86_SSE3     (1<<1)
+# define IR_X86_SSSE3    (1<<2)
+# define IR_X86_SSE41    (1<<3)
+# define IR_X86_SSE42    (1<<4)
+# define IR_X86_AVX      (1<<5)
+# define IR_X86_AVX2     (1<<6)
+# define IR_X86_BMI1     (1<<7)
+# define IR_X86_CLDEMOTE (1<<8)
 #endif
 
 uint32_t ir_cpuinfo(void);
