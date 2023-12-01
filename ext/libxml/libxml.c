@@ -1088,7 +1088,7 @@ PHP_FUNCTION(libxml_get_last_error)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	const xmlError* error = xmlGetLastError();
+	const xmlError *error = xmlGetLastError();
 
 	if (error) {
 		object_init_ex(return_value, libxmlerror_class_entry);
