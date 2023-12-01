@@ -70,6 +70,7 @@ static zend_class_entry *zend_test_ns2_ns_foo_class;
 static zend_class_entry *zend_test_unit_enum;
 static zend_class_entry *zend_test_string_enum;
 static zend_class_entry *zend_test_int_enum;
+static zend_class_entry *zend_test_magic_call;
 static zend_object_handlers zend_test_class_handlers;
 
 static int le_throwing_resource;
@@ -962,6 +963,24 @@ static ZEND_METHOD(ZendTestForbidDynamicCall, callStatic)
 	zend_forbid_dynamic_call();
 }
 
+static ZEND_METHOD(_ZendTestMagicCall, __call)
+{
+	zend_string *name;
+	zval *arguments;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(name)
+		Z_PARAM_ARRAY(arguments)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval name_zv;
+	ZVAL_STR(&name_zv, name);
+
+	zend_string_addref(name);
+	Z_TRY_ADDREF_P(arguments);
+	RETURN_ARR(zend_new_pair(&name_zv, arguments));
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.replace_zend_execute_ex", "0", PHP_INI_SYSTEM, OnUpdateBool, replace_zend_execute_ex, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.register_passes", "0", PHP_INI_SYSTEM, OnUpdateBool, register_passes, zend_zend_test_globals, zend_test_globals)
@@ -1145,6 +1164,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_unit_enum = register_class_ZendTestUnitEnum();
 	zend_test_string_enum = register_class_ZendTestStringEnum();
 	zend_test_int_enum = register_class_ZendTestIntEnum();
+
+	zend_test_magic_call = register_class__ZendTestMagicCall();
 
 	zend_register_functions(NULL, ext_function_legacy, NULL, EG(current_module)->type);
 
