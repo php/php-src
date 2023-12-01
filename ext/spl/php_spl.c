@@ -588,8 +588,10 @@ PHP_FUNCTION(spl_autoload_unregister)
 
 	if (fcc.function_handler && zend_string_equals_literal(
 			fcc.function_handler->common.function_name, "spl_autoload_call")) {
-		/* Don't destroy the hash table, as we might be iterating over it right now. */
-		zend_hash_clean(spl_autoload_functions);
+		if (spl_autoload_functions) {
+			/* Don't destroy the hash table, as we might be iterating over it right now. */
+			zend_hash_clean(spl_autoload_functions);
+		}
 		RETURN_TRUE;
 	}
 
