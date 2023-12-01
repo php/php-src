@@ -529,7 +529,7 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 
 	if (H->tr) {
 		if (dbh->auto_commit) {
-			php_firebird_commit_transaction(dbh, /* release */ false);
+			php_firebird_commit_transaction(dbh, /* retain */ false);
 		} else {
 			php_firebird_rollback_transaction(dbh);
 		}
@@ -822,12 +822,12 @@ static bool firebird_handle_manually_begin(pdo_dbh_t *dbh) /* {{{ */
 	 * If in autocommit mode and in transaction, we will need to close the transaction once.
 	 */
 	if (dbh->auto_commit && H->tr) {
-		if (!php_firebird_commit_transaction(dbh, /* release */ false)) {
+		if (!php_firebird_commit_transaction(dbh, /* retain */ false)) {
 			return false;
 		}
 	}
 
-	if (!php_firebird_begin_transaction(dbh, /* manually */ false)) {
+	if (!php_firebird_begin_transaction(dbh, /* auto commit mode */ false)) {
 		return false;
 	}
 	H->in_manually_txn = 1;
@@ -1000,7 +1000,7 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 						 * close the transaction if exists.
 						 */
 						if (H->tr) {
-							if (!php_firebird_commit_transaction(dbh, /* release */ false)) {
+							if (!php_firebird_commit_transaction(dbh, /* retain */ false)) {
 								return false;
 							}
 						}
@@ -1106,7 +1106,7 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 					H->is_writable_txn = bval;
 					if (dbh->auto_commit) {
 						if (H->tr) {
-							if (!php_firebird_commit_transaction(dbh, /* release */ false)) {
+							if (!php_firebird_commit_transaction(dbh, /* retain */ false)) {
 								/* In case of error, revert the setting */
 								H->is_writable_txn = !bval;
 								return false;
