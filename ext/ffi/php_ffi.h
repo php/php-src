@@ -49,7 +49,6 @@ ZEND_BEGIN_MODULE_GLOBALS(ffi)
 
 	zend_atomic_bool callback_in_progress;
 
-	pthread_mutex_t vm_response_lock;
 	pthread_mutex_t vm_request_lock;
 	pthread_cond_t vm_ack;
 	pthread_cond_t vm_unlock;

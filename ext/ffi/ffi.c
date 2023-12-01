@@ -947,7 +947,7 @@ static void zend_ffi_dispatch_callback_end(void){ /* {{{ */
 	if(!is_main_thread){
 		// unlock interrupt handler	
 		pthread_cond_broadcast(&FFI_G(vm_unlock));
-		pthread_mutex_unlock(&FFI_G(vm_response_lock));
+		pthread_mutex_unlock(&FFI_G(vm_request_lock));
 	}
 }
 /* }}} */
@@ -1017,7 +1017,7 @@ static void zend_ffi_dispatch_callback(void){ /* {{{ */
 /* }}} */
 
 static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{ */
-	pthread_mutex_lock(&FFI_G(vm_response_lock));
+	pthread_mutex_lock(&FFI_G(vm_request_lock));
 	if (!zend_atomic_bool_load_ex(&FFI_G(callback_in_progress))) {
 		goto end;
 	}
@@ -1029,11 +1029,11 @@ static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{
 		pthread_cond_broadcast(&FFI_G(vm_ack));
 		
 		// release mutex and wait for the unlock signal		
-		pthread_cond_wait(&FFI_G(vm_unlock), &FFI_G(vm_response_lock));
+		pthread_cond_wait(&FFI_G(vm_unlock), &FFI_G(vm_request_lock));
 	}
 	
 	end:
-	pthread_mutex_unlock(&FFI_G(vm_response_lock));
+	pthread_mutex_unlock(&FFI_G(vm_request_lock));
 	if (orig_interrupt_function) {
 		orig_interrupt_function(execute_data);
 	}
@@ -1092,8 +1092,8 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 			// post interrupt request to synchronize with the main thread
 			zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
 			
-			pthread_mutex_lock(&FFI_G(vm_response_lock));
-			pthread_cond_wait(&FFI_G(vm_ack), &FFI_G(vm_response_lock));
+			// release mutex and wait for ack
+			pthread_cond_wait(&FFI_G(vm_ack), &FFI_G(vm_request_lock));
 
 			// prepare the stack call info/limits for the current thread
 			zend_call_stack_init();
@@ -5644,7 +5644,6 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_interrupt_function = zend_ffi_interrupt_function;
 
 	pthread_mutex_init(&FFI_G(vm_request_lock), NULL);
-	pthread_mutex_init(&FFI_G(vm_response_lock), NULL);
 	pthread_cond_init(&FFI_G(vm_ack), NULL);
 	pthread_cond_init(&FFI_G(vm_unlock), NULL);
 
