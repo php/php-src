@@ -59,6 +59,17 @@ PHP 8.4 UPGRADE NOTES
     OutOfBoundsException instead of RuntimeException. As OutOfBoundsException
     is a child class of RuntimeException, code that uses RuntimeException
     continues to function.
+  . ArrayObject now follows property write restrictions.
+    This means, writing a dynamic property now emits a deprecation warning,
+    it is not possible to assign a value of an incorrect type to a typed
+    property, nor assigning to a property name which contains null bytes.
+    ArrayObject continues to bypass any __set() handler and continues to
+    allow assigning to inaccessible property names (e.g. integer as name).
+  . Calling ArrayObject::offsetSet() with an offset of type null will now
+    set an offset instead of appending.
+  . Instances of classes that extend ArrayObject now call append($value)
+    instead of offsetSet(null, $value) when using the append operator
+    e.g. $object[] = $value;
 
 - Standard:
   . round() now validates the value of the $mode parameter and throws a ValueError
