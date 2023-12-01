@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     ZEND_FUNC_GET_ARGS and ZEND_BIND_STATIC). (Florian Engelhardt)
   . Fix various missing NULL checks. (nielsdos, dstogov)
 
+- FPM:
+  . Fixed bug GH-12705 (Segmentation fault in fpm_status_export_to_zval).
+    (Patrick Prasse)
+
 - LibXML:
   . Fixed test failures for libxml2 2.12.0. (nielsdos)
 

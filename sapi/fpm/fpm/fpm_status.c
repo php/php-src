@@ -56,7 +56,7 @@ int fpm_status_export_to_zval(zval *status)
 
 	scoreboard_p = fpm_scoreboard_acquire(NULL, 1);
 	if (!scoreboard_p) {
-		zlog(ZLOG_NOTICE, "[pool %s] status: scoreboard already in use.", scoreboard_p->pool);
+		zlog(ZLOG_NOTICE, "[pool (unknown)] status: scoreboard already in use.");
 		return -1;
 	}
 
