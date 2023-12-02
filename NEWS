@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-12705 (Segmentation fault in fpm_status_export_to_zval).
     (Patrick Prasse)
 
+- FTP:
+  . Fixed bug GH-9348 (FTP & SSL session reuse). (nielsdos)
+
 - LibXML:
   . Fixed test failures for libxml2 2.12.0. (nielsdos)
 
