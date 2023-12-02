@@ -20,6 +20,7 @@ empty():
 bool(false)
 Coalesce():
 string(7) "vappend"
+unset():
 
 OUTPUT;
 
@@ -54,6 +55,9 @@ Coalesce():
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line 48
 string(7) "vappend"
+unset():
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line 54
 
 OUTPUT;
 

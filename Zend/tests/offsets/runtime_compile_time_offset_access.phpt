@@ -81,6 +81,12 @@ try {
 } catch (\Throwable \$e) {
     echo \$e->getMessage(), "\\n";
 }
+try {
+    echo "unset():\\n";
+    unset(\$container[$offset_p]);
+} catch (\Throwable \$e) {
+    echo \$e->getMessage(), "\\n";
+}
 test;
     return $fileContent;
 }

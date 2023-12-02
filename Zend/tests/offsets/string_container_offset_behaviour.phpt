@@ -23,6 +23,8 @@ empty():
 bool(false)
 Coalesce():
 string(1) "v"
+unset():
+Cannot unset string offsets
 
 OUTPUT;
 
@@ -52,6 +54,8 @@ empty():
 bool(false)
 Coalesce():
 string(1) "v"
+unset():
+Cannot unset string offsets
 
 OUTPUT;
 
@@ -87,6 +91,8 @@ Coalesce():
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line 48
 string(7) "vappend"
+unset():
+Cannot unset string offsets
 
 OUTPUT;
 
@@ -107,6 +113,8 @@ empty():
 bool(true)
 Coalesce():
 Cannot access offset of type %s on string
+unset():
+Cannot unset string offsets
 
 OUTPUT;
 
@@ -127,6 +135,8 @@ empty():
 bool(true)
 Coalesce():
 string(7) "default"
+unset():
+Cannot unset string offsets
 
 OUTPUT;
 
@@ -156,6 +166,8 @@ Coalesce():
 
 Warning: Illegal string offset %s in %s on line 48
 string(1) "v"
+unset():
+Cannot unset string offsets
 
 OUTPUT;
 

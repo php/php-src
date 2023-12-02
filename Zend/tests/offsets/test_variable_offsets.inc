@@ -49,3 +49,9 @@ try {
 } catch (\Throwable $e) {
     echo $e->getMessage(), "\n";
 }
+try {
+    echo "unset():\n";
+    unset($container[$dimension]);
+} catch (\Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
