@@ -2455,6 +2455,29 @@ PHP_FUNCTION(mb_strcut)
 		RETURN_STR(zend_string_init_fast((const char*)(string.val + from), len & -char_len));
 	}
 
+	if (enc->mblen_table) {
+		const unsigned char *mbtab = enc->mblen_table;
+		const unsigned char *p, *q, *end;
+		int m = 0;
+		/* Search for start position */
+		for (p = (const unsigned char*)string.val, q = p + from; p < q; p += (m = mbtab[*p]));
+		if (p > q) {
+			p -= m;
+		}
+		const unsigned char *start = p;
+		/* Search for end position */
+		if (len >= string.len - (start - (const unsigned char*)string.val)) {
+			end = (const unsigned char*)(string.val + string.len);
+		} else {
+			for (q = p + len; p < q; p += (m = mbtab[*p]));
+			if (p > q) {
+				p -= m;
+			}
+			end = p;
+		}
+		RETURN_STR(zend_string_init_fast((const char*)start, end - start));
+	}
+
 	ret = mbfl_strcut(&string, &result, from, len);
 	ZEND_ASSERT(ret != NULL);
 	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
