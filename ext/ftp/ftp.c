@@ -878,8 +878,6 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t pat
 		goto bail;
 	}
 
-	ftp->data = data;
-
 	if (resumepos > 0) {
 		int arg_len = snprintf(arg, sizeof(arg), ZEND_LONG_FMT, resumepos);
 
@@ -973,7 +971,6 @@ ftp_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *inst
 	if ((data = ftp_getdata(ftp)) == NULL) {
 		goto bail;
 	}
-	ftp->data = data;
 
 	if (startpos > 0) {
 		int arg_len = snprintf(arg, sizeof(arg), ZEND_LONG_FMT, startpos);
