@@ -410,7 +410,9 @@ static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 		case PDO_ODBC_ATTR_ASSUME_UTF8:
 			ZVAL_BOOL(val, H->assume_utf8 ? 1 : 0);
 			return 1;
-
+		case PDO_ATTR_AUTOCOMMIT:
+			ZVAL_BOOL(val, dbh->auto_commit);
+			return 1;
 	}
 	return 0;
 }
