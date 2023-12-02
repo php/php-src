@@ -94,8 +94,8 @@ static databuf_t*	ftp_getdata(ftpbuf_t *ftp);
 /* accepts the data connection, returns updated data buffer */
 static databuf_t*	data_accept(databuf_t *data, ftpbuf_t *ftp);
 
-/* closes the data connection, returns NULL */
-static databuf_t*	data_close(ftpbuf_t *ftp, databuf_t *data);
+/* closes the data connection, no-op if already closed */
+static void		data_close(ftpbuf_t *ftp);
 
 /* generic file lister */
 static char**		ftp_genlist(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *path, const size_t path_len);
@@ -167,9 +167,7 @@ ftp_close(ftpbuf_t *ftp)
 	if (ftp == NULL) {
 		return NULL;
 	}
-	if (ftp->data) {
-		data_close(ftp, ftp->data);
-	}
+	data_close(ftp);
 	if (ftp->stream && ftp->closestream) {
 			php_stream_close(ftp->stream);
 	}
@@ -943,7 +941,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t pat
 		}
 	}
 
-	ftp->data = data = data_close(ftp, data);
+	data_close(ftp);
 
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
 		goto bail;
@@ -951,7 +949,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t pat
 
 	return 1;
 bail:
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 	return 0;
 }
 /* }}} */
@@ -1025,14 +1023,14 @@ ftp_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *inst
 	if (size && my_send(ftp, data->fd, data->buf, size) != size) {
 		goto bail;
 	}
-	ftp->data = data = data_close(ftp, data);
+	data_close(ftp);
 
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250 && ftp->resp != 200)) {
 		goto bail;
 	}
 	return 1;
 bail:
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 	return 0;
 }
 /* }}} */
@@ -1092,14 +1090,14 @@ ftp_append(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *i
 	if (size && my_send(ftp, data->fd, data->buf, size) != size) {
 		goto bail;
 	}
-	ftp->data = data = data_close(ftp, data);
+	data_close(ftp);
 
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250 && ftp->resp != 200)) {
 		goto bail;
 	}
 	return 1;
 bail:
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 	return 0;
 }
 /* }}} */
@@ -1917,11 +1915,12 @@ static void ftp_ssl_shutdown(ftpbuf_t *ftp, php_socket_t fd, SSL *ssl_handle) {
 /* }}} */
 
 /* {{{ data_close */
-databuf_t*
-data_close(ftpbuf_t *ftp, databuf_t *data)
+void
+data_close(ftpbuf_t *ftp)
 {
+	databuf_t *data = ftp->data;
 	if (data == NULL) {
-		return NULL;
+		return;
 	}
 	if (data->listener != -1) {
 #ifdef HAVE_FTP_SSL
@@ -1943,11 +1942,8 @@ data_close(ftpbuf_t *ftp, databuf_t *data)
 #endif
 		closesocket(data->fd);
 	}
-	if (ftp) {
-		ftp->data = NULL;
-	}
+	ftp->data = NULL;
 	efree(data);
-	return NULL;
 }
 /* }}} */
 
@@ -1989,7 +1985,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *pa
 
 	/* some servers don't open a ftp-data connection if the directory is empty */
 	if (ftp->resp == 226) {
-		ftp->data = data_close(ftp, data);
+		data_close(ftp);
 		php_stream_close(tmpstream);
 		return ecalloc(1, sizeof(char*));
 	}
@@ -2017,7 +2013,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *pa
 		}
 	}
 
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 
 	php_stream_rewind(tmpstream);
 
@@ -2047,7 +2043,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const size_t cmd_len, const char *pa
 
 	return ret;
 bail:
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 	php_stream_close(tmpstream);
 	if (ret)
 		efree(ret);
@@ -2069,7 +2065,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t 
 	if (ftp->data != NULL) {
 		/* If there is a transfer in action, abort it.
 		 * If we don't, we get an invalid state and memory leaks when the new connection gets opened. */
-		data_close(ftp, ftp->data);
+		data_close(ftp);
 		if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
 			goto bail;
 		}
@@ -2116,7 +2112,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t 
 	return (ftp_nb_continue_read(ftp));
 
 bail:
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 	return PHP_FTP_FAILED;
 }
 /* }}} */
@@ -2168,7 +2164,7 @@ ftp_nb_continue_read(ftpbuf_t *ftp)
 		php_stream_putc(ftp->stream, '\r');
 	}
 
-	ftp->data = data = data_close(ftp, data);
+	data_close(ftp);
 
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
 		goto bail;
@@ -2178,7 +2174,7 @@ ftp_nb_continue_read(ftpbuf_t *ftp)
 	return PHP_FTP_FINISHED;
 bail:
 	ftp->nb = 0;
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 	return PHP_FTP_FAILED;
 }
 /* }}} */
@@ -2230,7 +2226,7 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *i
 	return (ftp_nb_continue_write(ftp));
 
 bail:
-	ftp->data = data_close(ftp, data);
+	data_close(ftp);
 	return PHP_FTP_FAILED;
 }
 /* }}} */
@@ -2273,7 +2269,7 @@ ftp_nb_continue_write(ftpbuf_t *ftp)
 	if (size && my_send(ftp, ftp->data->fd, ftp->data->buf, size) != size) {
 		goto bail;
 	}
-	ftp->data = data_close(ftp, ftp->data);
+	data_close(ftp);
 
 	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
 		goto bail;
@@ -2281,7 +2277,7 @@ ftp_nb_continue_write(ftpbuf_t *ftp)
 	ftp->nb = 0;
 	return PHP_FTP_FINISHED;
 bail:
-	ftp->data = data_close(ftp, ftp->data);
+	data_close(ftp);
 	ftp->nb = 0;
 	return PHP_FTP_FAILED;
 }
