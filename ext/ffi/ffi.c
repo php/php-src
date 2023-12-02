@@ -26,6 +26,7 @@
 #include "zend_closures.h"
 #include "zend_weakrefs.h"
 #include "main/SAPI.h"
+#include "TSRM.h"
 
 #include <ffi.h>
 
@@ -228,7 +229,7 @@ static ZEND_COLD void zend_ffi_pass_unsupported(zend_ffi_type *type);
 static ZEND_COLD void zend_ffi_assign_incompatible(zval *arg, zend_ffi_type *type);
 static bool zend_ffi_is_compatible_type(zend_ffi_type *dst_type, zend_ffi_type *src_type);
 static void zend_ffi_wait_cond(
-	pthread_mutex_t *mutex, pthread_cond_t *cond,
+	MUTEX_T mutex, pthread_cond_t *cond,
 	zend_atomic_bool *flag, bool wanted_value, bool release
 );
 
@@ -947,7 +948,7 @@ static void zend_ffi_dispatch_callback_end(void){ /* {{{ */
 	if(!is_main_thread){
 		// unlock interrupt handler	
 		pthread_cond_broadcast(&FFI_G(vm_unlock));
-		pthread_mutex_unlock(&FFI_G(vm_request_lock));
+		tsrm_mutex_unlock(FFI_G(vm_request_lock));
 	}
 }
 /* }}} */
@@ -1003,7 +1004,7 @@ static void zend_ffi_dispatch_callback(void){ /* {{{ */
 	if (EG(exception)) {
 		// we're about to do a hard exit. unlock all mutexes
 		zend_ffi_dispatch_callback_end();
-		pthread_mutex_unlock(&FFI_G(vm_request_lock));
+		tsrm_mutex_unlock(FFI_G(vm_request_lock));
 		zend_error_noreturn(E_ERROR, "Throwing from FFI callbacks is not allowed");
 	}
 
@@ -1017,7 +1018,7 @@ static void zend_ffi_dispatch_callback(void){ /* {{{ */
 /* }}} */
 
 static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{ */
-	pthread_mutex_lock(&FFI_G(vm_request_lock));
+	tsrm_mutex_lock(FFI_G(vm_request_lock));
 	if (!zend_atomic_bool_load_ex(&FFI_G(callback_in_progress))) {
 		goto end;
 	}
@@ -1029,11 +1030,11 @@ static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{
 		pthread_cond_broadcast(&FFI_G(vm_ack));
 		
 		// release mutex and wait for the unlock signal		
-		pthread_cond_wait(&FFI_G(vm_unlock), &FFI_G(vm_request_lock));
+		pthread_cond_wait(&FFI_G(vm_unlock), FFI_G(vm_request_lock));
 	}
 	
 	end:
-	pthread_mutex_unlock(&FFI_G(vm_request_lock));
+	tsrm_mutex_unlock(FFI_G(vm_request_lock));
 	if (orig_interrupt_function) {
 		orig_interrupt_function(execute_data);
 	}
@@ -1045,7 +1046,7 @@ static void zend_ffi_wait_cond(
 	zend_atomic_bool *flag, bool wanted_value, bool release
 ){  /* {{{ */
 	// get lock, first
-	pthread_mutex_lock(mutex);
+	tsrm_mutex_lock(mutex);
 	
 	// if we acquired the lock before the request could be serviced
 	// unlock it and wait for the flag
@@ -1058,13 +1059,13 @@ static void zend_ffi_wait_cond(
 	}
 
 	if(release){
-		pthread_mutex_unlock(mutex);
+		tsrm_mutex_unlock(mutex);
 	}
 }
 /* }}} */
 
 static void zend_ffi_wait_request_barrier(bool release){ /* {{{ */
-	zend_ffi_wait_cond(&FFI_G(vm_request_lock), &FFI_G(vm_unlock), &FFI_G(callback_in_progress), false, release);
+	zend_ffi_wait_cond(FFI_G(vm_request_lock), &FFI_G(vm_unlock), &FFI_G(callback_in_progress), false, release);
 }
 /* }}} */
 
@@ -1093,7 +1094,7 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 			zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
 			
 			// release mutex and wait for ack
-			pthread_cond_wait(&FFI_G(vm_ack), &FFI_G(vm_request_lock));
+			pthread_cond_wait(&FFI_G(vm_ack), FFI_G(vm_request_lock));
 
 			// prepare the stack call info/limits for the current thread
 			zend_call_stack_init();
@@ -1104,7 +1105,7 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 
 		zend_ffi_dispatch_callback_end();
 	}
-	pthread_mutex_unlock(&FFI_G(vm_request_lock));
+	tsrm_mutex_unlock(FFI_G(vm_request_lock));
 }
 /* }}} */
 
@@ -5643,7 +5644,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = zend_ffi_interrupt_function;
 
-	pthread_mutex_init(&FFI_G(vm_request_lock), NULL);
+	FFI_G(vm_request_lock) = tsrm_mutex_alloc();
 	pthread_cond_init(&FFI_G(vm_ack), NULL);
 	pthread_cond_init(&FFI_G(vm_unlock), NULL);
 
@@ -5767,6 +5768,7 @@ static ZEND_GINIT_FUNCTION(ffi)
 /* {{{ ZEND_GINIT_FUNCTION */
 static ZEND_GSHUTDOWN_FUNCTION(ffi)
 {
+	tsrm_mutex_free(ffi_globals->vm_request_lock);
 	zend_ffi_wait_request_barrier(true);
 	if (ffi_globals->scopes) {
 		zend_hash_destroy(ffi_globals->scopes);

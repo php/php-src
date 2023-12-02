@@ -12,6 +12,130 @@
 
 #include "TSRM.h"
 
+
+#ifdef TSRM_DEBUG
+#define TSRM_ERROR(args) tsrm_error args
+#define TSRM_SAFE_RETURN_RSRC(array, offset, range)																		\
+	{																													\
+		int unshuffled_offset = TSRM_UNSHUFFLE_RSRC_ID(offset);															\
+																														\
+		if (offset==0) {																								\
+			return &array;																								\
+		} else if ((unshuffled_offset)>=0 && (unshuffled_offset)<(range)) {												\
+			TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Successfully fetched resource id %d for thread id %ld - 0x%0.8X",		\
+						unshuffled_offset, (long) thread_resources->thread_id, array[unshuffled_offset]));				\
+			return array[unshuffled_offset];																			\
+		} else {																										\
+			TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Resource id %d is out of range (%d..%d)",								\
+						unshuffled_offset, TSRM_SHUFFLE_RSRC_ID(0), TSRM_SHUFFLE_RSRC_ID(thread_resources->count-1)));	\
+			return NULL;																								\
+		}																												\
+	}
+#else
+#define TSRM_ERROR(args)
+#define TSRM_SAFE_RETURN_RSRC(array, offset, range)		\
+	if (offset==0) {									\
+		return &array;									\
+	} else {											\
+		return array[TSRM_UNSHUFFLE_RSRC_ID(offset)];	\
+	}
+#endif
+
+
+/*
+ * Utility Functions
+ */
+
+/* Obtain the current thread id */
+TSRM_API THREAD_T tsrm_thread_id(void)
+{/*{{{*/
+#ifdef TSRM_WIN32
+	return GetCurrentThreadId();
+#else
+	return pthread_self();
+#endif
+}/*}}}*/
+
+
+/* Allocate a mutex */
+TSRM_API MUTEX_T tsrm_mutex_alloc(void)
+{/*{{{*/
+	MUTEX_T mutexp;
+#ifdef TSRM_WIN32
+	mutexp = malloc(sizeof(CRITICAL_SECTION));
+	InitializeCriticalSection(mutexp);
+#else
+	mutexp = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_init(mutexp,NULL);
+#endif
+#ifdef THR_DEBUG
+	printf("Mutex created thread: %d\n",mythreadid());
+#endif
+	return( mutexp );
+}/*}}}*/
+
+
+/* Free a mutex */
+TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
+{/*{{{*/
+	if (mutexp) {
+#ifdef TSRM_WIN32
+		DeleteCriticalSection(mutexp);
+		free(mutexp);
+#else
+		pthread_mutex_destroy(mutexp);
+		free(mutexp);
+#endif
+	}
+#ifdef THR_DEBUG
+	printf("Mutex freed thread: %d\n",mythreadid());
+#endif
+}/*}}}*/
+
+
+/*
+  Lock a mutex.
+  A return value of 0 indicates success
+*/
+TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
+{/*{{{*/
+	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Mutex locked thread: %ld", tsrm_thread_id()));
+#ifdef TSRM_WIN32
+	EnterCriticalSection(mutexp);
+	return 0;
+#else
+	return pthread_mutex_lock(mutexp);
+#endif
+}/*}}}*/
+
+
+/*
+  Unlock a mutex.
+  A return value of 0 indicates success
+*/
+TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
+{/*{{{*/
+	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Mutex unlocked thread: %ld", tsrm_thread_id()));
+#ifdef TSRM_WIN32
+	LeaveCriticalSection(mutexp);
+	return 0;
+#else
+	return pthread_mutex_unlock(mutexp);
+#endif
+}/*}}}*/
+
+/*
+  Changes the signal mask of the calling thread
+*/
+#ifdef HAVE_SIGPROCMASK
+TSRM_API int tsrm_sigmask(int how, const sigset_t *set, sigset_t *oldset)
+{/*{{{*/
+	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Changed sigmask in thread: %ld", tsrm_thread_id()));
+
+    return pthread_sigmask(how, set, oldset);
+}/*}}}*/
+#endif
+
 #ifdef ZTS
 
 #include <stdio.h>
@@ -74,33 +198,6 @@ int tsrm_error(int level, const char *format, ...);
 static int tsrm_error_level;
 static FILE *tsrm_error_file;
 
-#ifdef TSRM_DEBUG
-#define TSRM_ERROR(args) tsrm_error args
-#define TSRM_SAFE_RETURN_RSRC(array, offset, range)																		\
-	{																													\
-		int unshuffled_offset = TSRM_UNSHUFFLE_RSRC_ID(offset);															\
-																														\
-		if (offset==0) {																								\
-			return &array;																								\
-		} else if ((unshuffled_offset)>=0 && (unshuffled_offset)<(range)) {												\
-			TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Successfully fetched resource id %d for thread id %ld - 0x%0.8X",		\
-						unshuffled_offset, (long) thread_resources->thread_id, array[unshuffled_offset]));				\
-			return array[unshuffled_offset];																			\
-		} else {																										\
-			TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Resource id %d is out of range (%d..%d)",								\
-						unshuffled_offset, TSRM_SHUFFLE_RSRC_ID(0), TSRM_SHUFFLE_RSRC_ID(thread_resources->count-1)));	\
-			return NULL;																								\
-		}																												\
-	}
-#else
-#define TSRM_ERROR(args)
-#define TSRM_SAFE_RETURN_RSRC(array, offset, range)		\
-	if (offset==0) {									\
-		return &array;									\
-	} else {											\
-		return array[TSRM_UNSHUFFLE_RSRC_ID(offset)];	\
-	}
-#endif
 
 #ifdef TSRM_WIN32
 static DWORD tls_key;
@@ -575,101 +672,6 @@ void ts_free_id(ts_rsrc_id id)
 
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully freed resource id %d", id));
 }/*}}}*/
-
-
-/*
- * Utility Functions
- */
-
-/* Obtain the current thread id */
-TSRM_API THREAD_T tsrm_thread_id(void)
-{/*{{{*/
-#ifdef TSRM_WIN32
-	return GetCurrentThreadId();
-#else
-	return pthread_self();
-#endif
-}/*}}}*/
-
-
-/* Allocate a mutex */
-TSRM_API MUTEX_T tsrm_mutex_alloc(void)
-{/*{{{*/
-	MUTEX_T mutexp;
-#ifdef TSRM_WIN32
-	mutexp = malloc(sizeof(CRITICAL_SECTION));
-	InitializeCriticalSection(mutexp);
-#else
-	mutexp = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(mutexp,NULL);
-#endif
-#ifdef THR_DEBUG
-	printf("Mutex created thread: %d\n",mythreadid());
-#endif
-	return( mutexp );
-}/*}}}*/
-
-
-/* Free a mutex */
-TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
-{/*{{{*/
-	if (mutexp) {
-#ifdef TSRM_WIN32
-		DeleteCriticalSection(mutexp);
-		free(mutexp);
-#else
-		pthread_mutex_destroy(mutexp);
-		free(mutexp);
-#endif
-	}
-#ifdef THR_DEBUG
-	printf("Mutex freed thread: %d\n",mythreadid());
-#endif
-}/*}}}*/
-
-
-/*
-  Lock a mutex.
-  A return value of 0 indicates success
-*/
-TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
-{/*{{{*/
-	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Mutex locked thread: %ld", tsrm_thread_id()));
-#ifdef TSRM_WIN32
-	EnterCriticalSection(mutexp);
-	return 0;
-#else
-	return pthread_mutex_lock(mutexp);
-#endif
-}/*}}}*/
-
-
-/*
-  Unlock a mutex.
-  A return value of 0 indicates success
-*/
-TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
-{/*{{{*/
-	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Mutex unlocked thread: %ld", tsrm_thread_id()));
-#ifdef TSRM_WIN32
-	LeaveCriticalSection(mutexp);
-	return 0;
-#else
-	return pthread_mutex_unlock(mutexp);
-#endif
-}/*}}}*/
-
-/*
-  Changes the signal mask of the calling thread
-*/
-#ifdef HAVE_SIGPROCMASK
-TSRM_API int tsrm_sigmask(int how, const sigset_t *set, sigset_t *oldset)
-{/*{{{*/
-	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Changed sigmask in thread: %ld", tsrm_thread_id()));
-
-    return pthread_sigmask(how, set, oldset);
-}/*}}}*/
-#endif
 
 
 TSRM_API void *tsrm_set_new_thread_begin_handler(tsrm_thread_begin_func_t new_thread_begin_handler)

@@ -21,6 +21,7 @@
 #include <pthread.h>
 #include "zend_compile.h"
 #include "zend_API.h"
+#include "TSRM.h"
 
 extern zend_module_entry ffi_module_entry;
 #define phpext_ffi_ptr &ffi_module_entry
@@ -51,7 +52,7 @@ ZEND_BEGIN_MODULE_GLOBALS(ffi)
 
 	zend_atomic_bool callback_in_progress;
 
-	pthread_mutex_t vm_request_lock;
+	MUTEX_T vm_request_lock;
 	pthread_cond_t vm_ack;
 	pthread_cond_t vm_unlock;
 	pthread_t callback_tid;
