@@ -82,6 +82,7 @@ typedef struct ftpbuf
 	int				old_ssl;	/* old mode = forced data encryption */
 	SSL				*ssl_handle;      /* handle for control connection */
 	int				ssl_active;		  /* ssl active on control conn */
+	SSL_SESSION     *last_ssl_session; /* last negotiated session */
 #endif
 
 } ftpbuf_t;

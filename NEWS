@@ -24,6 +24,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug GH-12705 (Segmentation fault in fpm_status_export_to_zval).
     (Patrick Prasse)
+
+- FTP:
+  . Fixed bug GH-9348 (FTP & SSL session reuse). (nielsdos)
    
 - Intl:
   . Fixed bug GH-12635 (Test bug69398.phpt fails with ICU 74.1). (nielsdos)
