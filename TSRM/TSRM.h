@@ -53,6 +53,7 @@ typedef uintptr_t tsrm_uintptr_t;
 #else
 # define THREAD_T pthread_t
 # define MUTEX_T pthread_mutex_t *
+# define COND_T pthread_cond_t *
 #endif
 
 #include <signal.h>
@@ -65,9 +66,14 @@ typedef uintptr_t tsrm_uintptr_t;
 /* utility functions */
 TSRM_API THREAD_T tsrm_thread_id(void);
 TSRM_API MUTEX_T tsrm_mutex_alloc(void);
+TSRM_API COND_T tsrm_cond_alloc(void);
 TSRM_API void tsrm_mutex_free(MUTEX_T mutexp);
 TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp);
 TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp);
+TSRM_API int tsrm_cond_wait(COND_T condp, MUTEX_T mutexp);
+TSRM_API int tsrm_cond_broadcast(COND_T condp);
+TSRM_API void tsrm_cond_free(COND_T condp);
+
 #ifdef HAVE_SIGPROCMASK
 TSRM_API int tsrm_sigmask(int how, const sigset_t *set, sigset_t *oldset);
 #endif

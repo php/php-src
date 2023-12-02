@@ -28,8 +28,6 @@
 #include "main/SAPI.h"
 #include "TSRM.h"
 
-#include <ffi.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -229,7 +227,7 @@ static ZEND_COLD void zend_ffi_pass_unsupported(zend_ffi_type *type);
 static ZEND_COLD void zend_ffi_assign_incompatible(zval *arg, zend_ffi_type *type);
 static bool zend_ffi_is_compatible_type(zend_ffi_type *dst_type, zend_ffi_type *src_type);
 static void zend_ffi_wait_cond(
-	MUTEX_T mutex, pthread_cond_t *cond,
+	MUTEX_T mutexp, COND_T condp,
 	zend_atomic_bool *flag, bool wanted_value, bool release
 );
 
@@ -947,16 +945,13 @@ static void zend_ffi_dispatch_callback_end(void){ /* {{{ */
 	bool is_main_thread = FFI_G(callback_tid) == FFI_G(main_tid);
 	if(!is_main_thread){
 		// unlock interrupt handler	
-		pthread_cond_broadcast(&FFI_G(vm_unlock));
+		tsrm_cond_broadcast(FFI_G(vm_unlock));
 		tsrm_mutex_unlock(FFI_G(vm_request_lock));
 	}
 }
 /* }}} */
 
 static void zend_ffi_dispatch_callback(void){ /* {{{ */
-	// this function must always run on the main thread
-	//ZEND_ASSERT(pthread_self() == FFI_G(main_tid));
-
 	if (!zend_atomic_bool_load_ex(&FFI_G(callback_in_progress))) {
 		return;
 	}
@@ -1027,10 +1022,10 @@ static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{
 	if(!is_main_tid){
 	
 		// notify calling thread and release
-		pthread_cond_broadcast(&FFI_G(vm_ack));
+		tsrm_cond_broadcast(FFI_G(vm_ack));
 		
 		// release mutex and wait for the unlock signal		
-		pthread_cond_wait(&FFI_G(vm_unlock), FFI_G(vm_request_lock));
+		tsrm_cond_wait(FFI_G(vm_unlock), FFI_G(vm_request_lock));
 	}
 	
 	end:
@@ -1042,30 +1037,30 @@ static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{
 /* }}} */
 
 static void zend_ffi_wait_cond(
-	pthread_mutex_t *mutex, pthread_cond_t *cond,
+	MUTEX_T mutexp, COND_T condp,
 	zend_atomic_bool *flag, bool wanted_value, bool release
 ){  /* {{{ */
 	// get lock, first
-	tsrm_mutex_lock(mutex);
+	tsrm_mutex_lock(mutexp);
 	
 	// if we acquired the lock before the request could be serviced
 	// unlock it and wait for the flag
 	if(flag == NULL){
-		pthread_cond_wait(cond, mutex);
+		tsrm_cond_wait(condp, mutexp);
 	} else {
 		while(zend_atomic_bool_load_ex(flag) != wanted_value){
-			pthread_cond_wait(cond, mutex);
+			tsrm_cond_wait(condp, mutexp);
 		}
 	}
 
 	if(release){
-		tsrm_mutex_unlock(mutex);
+		tsrm_mutex_unlock(mutexp);
 	}
 }
 /* }}} */
 
 static void zend_ffi_wait_request_barrier(bool release){ /* {{{ */
-	zend_ffi_wait_cond(FFI_G(vm_request_lock), &FFI_G(vm_unlock), &FFI_G(callback_in_progress), false, release);
+	zend_ffi_wait_cond(FFI_G(vm_request_lock), FFI_G(vm_unlock), &FFI_G(callback_in_progress), false, release);
 }
 /* }}} */
 
@@ -1086,7 +1081,7 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 		};
 		FFI_G(callback_data) = call_data;
 
-		FFI_G(callback_tid) = pthread_self();
+		FFI_G(callback_tid) = tsrm_thread_id();
 		bool is_main_thread = FFI_G(callback_tid) == FFI_G(main_tid);
 		
 		if(!is_main_thread){
@@ -1094,7 +1089,7 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 			zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
 			
 			// release mutex and wait for ack
-			pthread_cond_wait(&FFI_G(vm_ack), FFI_G(vm_request_lock));
+			tsrm_cond_wait(FFI_G(vm_ack), FFI_G(vm_request_lock));
 
 			// prepare the stack call info/limits for the current thread
 			zend_call_stack_init();
@@ -5638,15 +5633,15 @@ ZEND_MINIT_FUNCTION(ffi)
 		return zend_ffi_preload(FFI_G(preload));
 	}
 
-	FFI_G(main_tid) = pthread_self();
+	FFI_G(main_tid) = tsrm_thread_id();
 
 	zend_atomic_bool_store_ex(&FFI_G(callback_in_progress), false);
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = zend_ffi_interrupt_function;
 
 	FFI_G(vm_request_lock) = tsrm_mutex_alloc();
-	pthread_cond_init(&FFI_G(vm_ack), NULL);
-	pthread_cond_init(&FFI_G(vm_unlock), NULL);
+	FFI_G(vm_ack) = tsrm_cond_alloc();
+	FFI_G(vm_unlock) = tsrm_cond_alloc();
 
 	return SUCCESS;
 }

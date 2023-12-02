@@ -11,6 +11,8 @@
 */
 
 #include "TSRM.h"
+#include <bits/pthreadtypes.h>
+#include <pthread.h>
 
 
 #ifdef TSRM_DEBUG
@@ -56,6 +58,35 @@ TSRM_API THREAD_T tsrm_thread_id(void)
 #endif
 }/*}}}*/
 
+TSRM_API COND_T tsrm_cond_alloc(void)
+{
+	COND_T condp;
+#ifdef TSRM_WIN32
+#error "TODO"
+#else
+	condp = (pthread_cond_t *)malloc(sizeof(pthread_cond_t));
+	pthread_cond_init(condp, NULL);
+#endif
+	return( condp );
+}
+
+TSRM_API int tsrm_cond_wait(COND_T condp, MUTEX_T mutexp)
+{
+#ifdef TSRM_WIN32
+#error "TODO"
+#else
+	return pthread_cond_wait(condp, mutexp);
+#endif
+}
+
+TSRM_API int tsrm_cond_broadcast(COND_T condp)
+{
+#ifdef TSRM_WIN32
+#error "TODO"
+#else
+	return pthread_cond_broadcast(condp);
+#endif
+}
 
 /* Allocate a mutex */
 TSRM_API MUTEX_T tsrm_mutex_alloc(void)
@@ -92,6 +123,17 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 #endif
 }/*}}}*/
 
+TSRM_API void tsrm_cond_free(COND_T condp)
+{
+#ifdef TSRM_WIN32
+#error "TODO"
+#else
+	if(condp){
+		pthread_cond_destroy(condp);
+		free(condp);
+	}
+#endif
+}
 
 /*
   Lock a mutex.
