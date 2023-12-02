@@ -19,6 +19,8 @@
 
 #include <ffi.h>
 #include <pthread.h>
+#include "zend_compile.h"
+#include "zend_API.h"
 
 extern zend_module_entry ffi_module_entry;
 #define phpext_ffi_ptr &ffi_module_entry
