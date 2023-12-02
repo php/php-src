@@ -1912,9 +1912,9 @@ static void ftp_ssl_shutdown(ftpbuf_t *ftp, php_socket_t fd, SSL *ssl_handle) {
 /* }}} */
 
 /* {{{ data_close */
-void
-data_close(ftpbuf_t *ftp)
+void data_close(ftpbuf_t *ftp)
 {
+	ZEND_ASSERT(ftp != NULL);
 	databuf_t *data = ftp->data;
 	if (data == NULL) {
 		return;
