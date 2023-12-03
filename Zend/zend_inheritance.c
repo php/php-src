@@ -1949,6 +1949,10 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 	zend_function *new_fn;
 	bool check_inheritance = false;
 
+	if ((fn->common.fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) == (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) {
+		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");
+	}
+
 	if ((existing_fn = zend_hash_find_ptr(&ce->function_table, key)) != NULL) {
 		/* if it is the same function with the same visibility and has not been assigned a class scope yet, regardless
 		 * of where it is coming from there is no conflict and we do not need to add it again */
@@ -2048,10 +2052,10 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 				&& zend_string_equals_ci(alias->trait_method.method_name, fnname)
 			) {
 				fn_copy = *fn;
-
-				/* if it is 0, no modifiers have been changed */
-				if (alias->modifiers) {
+				if (alias->modifiers & ZEND_ACC_PPP_MASK) {
 					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
+				} else {
+					fn_copy.common.fn_flags = alias->modifiers | fn->common.fn_flags;
 				}
 
 				lcname = zend_string_tolower(alias->alias);
@@ -2079,7 +2083,11 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 					&& fn->common.scope == aliases[i]
 					&& zend_string_equals_ci(alias->trait_method.method_name, fnname)
 				) {
-					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
+					if (alias->modifiers & ZEND_ACC_PPP_MASK) {
+						fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
+					} else {
+						fn_copy.common.fn_flags = alias->modifiers | fn->common.fn_flags;
+					}
 				}
 				alias_ptr++;
 				alias = *alias_ptr;
