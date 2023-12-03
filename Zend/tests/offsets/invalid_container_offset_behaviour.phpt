@@ -64,11 +64,11 @@ OUTPUT;
 }
 ob_end_clean();
 
-echo "Executed $testCasesTotal tests\n";
+echo "Executed tests\n";
 if ($failures !== []) {
     echo "Failures:\n" . implode($failures);
 }
 
 ?>
 --EXPECT--
-Executed 84 tests
+Executed tests

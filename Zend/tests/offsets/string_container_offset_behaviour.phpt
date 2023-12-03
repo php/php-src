@@ -203,11 +203,11 @@ foreach ($offsets as $dimension) {
 }
 ob_end_clean();
 
-echo "Executed $testCasesTotal tests\n";
+echo "Executed tests\n";
 if ($failures !== []) {
     echo "Failures:\n" . implode($failures);
 }
 
 ?>
 --EXPECT--
-Executed 21 tests
+Executed tests

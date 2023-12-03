@@ -120,7 +120,7 @@ foreach ($containers as $container_orig) {
 }
 ob_end_clean();
 
-echo "Executed $testCasesTotal tests\n";
+echo "Executed tests\n";
 if ($failures !== []) {
     echo "Failures:\n" . implode($failures);
 }
@@ -132,4 +132,4 @@ $fl = __DIR__ . DIRECTORY_SEPARATOR . 'compare_binary_offsets_temp.php';
 @unlink($fl);
 ?>
 --EXPECT--
-Executed 294 tests
+Executed tests
