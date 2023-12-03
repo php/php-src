@@ -3,17 +3,7 @@ Appending containers
 --FILE--
 <?php
 
-$containers = [
-    null,
-    false,
-    true,
-    10,
-    25.5,
-    'string',
-    [],
-    new stdClass(),
-    STDERR,
-];
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'test_offset_helpers.inc';
 
 foreach ($containers as $container) {
     try {
@@ -40,9 +30,31 @@ Cannot use a scalar value as an array
 Cannot use a scalar value as an array
 Cannot use a scalar value as an array
 [] operator not supported for strings
+[] operator not supported for strings
+[] operator not supported for strings
 array(1) {
   [0]=>
   string(5) "value"
 }
-Cannot use object of type stdClass as array
 Cannot use a scalar value as an array
+Cannot use object of type stdClass as array
+object(ArrayObject)#2 (1) {
+  ["storage":"ArrayObject":private]=>
+  array(1) {
+    [0]=>
+    string(5) "value"
+  }
+}
+string(12) "A::offsetSet"
+NULL
+string(5) "value"
+object(A)#3 (0) {
+}
+string(12) "B::offsetSet"
+NULL
+string(5) "value"
+object(B)#4 (1) {
+  ["storage":"ArrayObject":private]=>
+  array(0) {
+  }
+}

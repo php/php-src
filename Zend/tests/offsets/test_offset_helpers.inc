@@ -22,6 +22,15 @@ function makeContainer($container) {
     if ($container instanceof stdClass) {
         return "new stdClass()";
     }
+    if ($container instanceof B) {
+        return "new B()";
+    }
+    if ($container instanceof A) {
+        return "new A()";
+    }
+    if ($container instanceof ArrayObject) {
+        return "new ArrayObject()";
+    }
     return var_export($container, true);
 }
 function makeOffset($offset) {
@@ -54,6 +63,71 @@ function expectf_to_regex(string $wanted): string
         '%0' => '\x00',
     ]);
 }
+
+class A implements ArrayAccess {
+    public function offsetSet($offset, $value): void {
+        var_dump(__METHOD__);
+        var_dump($offset);
+        var_dump($value);
+    }
+    public function offsetGet($offset): mixed {
+        var_dump(__METHOD__);
+        var_dump($offset);
+        return "dummy";
+    }
+    public function offsetUnset($offset): void {
+        var_dump(__METHOD__);
+        var_dump($offset);
+    }
+    public function offsetExists($offset): bool {
+        var_dump(__METHOD__);
+        var_dump($offset);
+        return false;
+    }
+}
+
+class B extends ArrayObject {
+    public function offsetSet($offset, $value): void {
+        var_dump(__METHOD__);
+        var_dump($offset);
+        var_dump($value);
+    }
+    public function offsetGet($offset): mixed {
+        var_dump(__METHOD__);
+        var_dump($offset);
+        return "dummy";
+    }
+    public function offsetUnset($offset): void {
+        var_dump(__METHOD__);
+        var_dump($offset);
+    }
+    public function offsetExists($offset): bool {
+        var_dump(__METHOD__);
+        var_dump($offset);
+        return false;
+    }
+    public function append(mixed $value) : void{
+        var_dump(__METHOD__);
+        var_dump($value);
+    }
+}
+
+$containers = [
+    null,
+    false,
+    true,
+    4,
+    5.5,
+    '10',
+    '25.5',
+    'string',
+    [],
+    STDERR,
+    new stdClass(),
+    new ArrayObject(),
+    new A(),
+    new B(),
+];
 
 $offsets = [
     null,

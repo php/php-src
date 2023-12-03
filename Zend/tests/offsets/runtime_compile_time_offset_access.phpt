@@ -12,20 +12,6 @@ opcache.file_update_protection=1
 
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'test_offset_helpers.inc';
 
-$containers = [
-    null,
-    false,
-    true,
-    4,
-    5.5,
-    '10',
-    '25.5',
-    'string',
-    [],
-    STDERR,
-    new stdClass(),
-];
-
 function makeTestFile($container, $offset) {
     $offset_p = makeOffset($offset);
     $container_p = makeContainer($container);
@@ -110,6 +96,9 @@ foreach ($containers as $container_orig) {
 
         $dimension = $offset;
         $container = $container_orig;
+        if (is_object($container_orig)) {
+            $container = clone $container_orig;
+        }
         include $var_dim_filename;
         $varOutput = ob_get_contents();
         ob_clean();
@@ -120,9 +109,9 @@ foreach ($containers as $container_orig) {
         );
 
         if ($constOutput !== $varOutput) {
-            file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_const_{$failuresNb}.txt", $constOutput);
-            file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_var_{$failuresNb}.txt", $varOutput);
-            file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_test_case_{$failuresNb}.txt", makeTestFile($container_orig, $offset));
+            file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_{$failuresNb}_const.txt", $constOutput);
+            file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_{$failuresNb}_var.txt", $varOutput);
+            file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_{$failuresNb}_test_case.txt", makeTestFile($container_orig, $offset));
             ++$failuresNb;
             $failures[] = $error;
         }
@@ -143,4 +132,4 @@ $fl = __DIR__ . DIRECTORY_SEPARATOR . 'compare_binary_offsets_temp.php';
 @unlink($fl);
 ?>
 --EXPECT--
-Executed 231 tests
+Executed 294 tests
