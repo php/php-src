@@ -120,8 +120,9 @@ PHP 8.4 UPGRADE NOTES
   now it is now disabled by default
   using the `opcache.jit` setting, not the `opcache.jit_buffer_size` setting.  
   This may affect users who enabled JIT by only setting a different
-  `opcache.jit_buffer_size`, without specifying a JIT mode in `opcache.jit`.  
-  To enable JIT, it is now required to populate the `opcache.jit` config value.
+  `opcache.jit_buffer_size`, without specifying a JIT mode
+  in `opcache.jit`.  
+  To enable JIT, you should now populate the `opcache.jit` config value.
 
 ========================================
 2. New Features
