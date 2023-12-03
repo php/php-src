@@ -30,6 +30,7 @@
 #include "main/SAPI.h"
 #include "TSRM.h"
 #include "zend_fibers.h"
+#include "zend_call_stack.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -918,10 +919,10 @@ typedef struct _zend_ffi_callback_data {
 	void                  *code;
 	void                  *callback;
 	ffi_cif                cif;
-	uint32_t               arg_count;
-	ffi_type              *ret_type;
-	ffi_type              *arg_types[0] ZEND_ELEMENT_COUNT(arg_count);
 	zend_ffi_call_data    ffi_args;
+	ffi_type              *ret_type;
+	uint32_t               arg_count;
+	ffi_type              *arg_types[0] ZEND_ELEMENT_COUNT(arg_count);
 } zend_ffi_callback_data;
 
 static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */
@@ -932,9 +933,10 @@ static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */
 	if (callback_data->fcc.function_handler->common.fn_flags & ZEND_ACC_CLOSURE) {
 		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(callback_data->fcc.function_handler));
 	}
+	ffi_type **arg_types = callback_data->arg_types;
 	for (int i = 0; i < callback_data->arg_count; ++i) {
-		if (callback_data->arg_types[i]->type == FFI_TYPE_STRUCT) {
-			efree(callback_data->arg_types[i]);
+		if (arg_types[i]->type == FFI_TYPE_STRUCT) {
+			efree(arg_types[i]);
 		}
 	}
 	if (callback_data->ret_type->type == FFI_TYPE_STRUCT) {
@@ -1076,7 +1078,7 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 		
 		if (zend_atomic_bool_load_ex(&FFI_G(callback_in_progress))) {
 			// call PHP function
-			zend_fiber_transfer transfer = zend_fiber_resume(&call_data.data->fiber, NULL, false);
+			zend_fiber_resume(&call_data.data->fiber, NULL, false);
 			zend_ffi_type *ret_type = ZEND_FFI_TYPE(call_data.data->type->func.ret_type);
 			if(ret_type->kind != ZEND_FFI_TYPE_VOID){
 				// extract return value from fiber
@@ -1135,6 +1137,7 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 	callback_data->fiber.previous = &callback_data->fiber.context;
 
 	zend_ffi_fci_prepare(callback_data, &callback_data->fiber.fci);
+	ffi_type **arg_types = callback_data->arg_types;
 
 	if (type->func.args) {
 		int n = 0;
@@ -1142,12 +1145,12 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 
 		ZEND_HASH_PACKED_FOREACH_PTR(type->func.args, arg_type) {
 			arg_type = ZEND_FFI_TYPE(arg_type);
-			callback_data->arg_types[n] = zend_ffi_get_type(arg_type);
-			if (!callback_data->arg_types[n]) {
+			arg_types[n] = zend_ffi_get_type(arg_type);
+			if (!arg_types[n]) {
 				zend_ffi_pass_unsupported(arg_type);
 				for (int i = 0; i < n; ++i) {
-					if (callback_data->arg_types[i]->type == FFI_TYPE_STRUCT) {
-						efree(callback_data->arg_types[i]);
+					if (arg_types[i]->type == FFI_TYPE_STRUCT) {
+						efree(arg_types[i]);
 					}
 				}
 				efree(callback_data);
@@ -1161,8 +1164,8 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 	if (!callback_data->ret_type) {
 		zend_ffi_return_unsupported(type->func.ret_type);
 		for (int i = 0; i < callback_data->arg_count; ++i) {
-			if (callback_data->arg_types[i]->type == FFI_TYPE_STRUCT) {
-				efree(callback_data->arg_types[i]);
+			if (arg_types[i]->type == FFI_TYPE_STRUCT) {
+				efree(arg_types[i]);
 			}
 		}
 		efree(callback_data);
@@ -1179,8 +1182,8 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 		zend_throw_error(zend_ffi_exception_ce, "Cannot prepare callback");
 free_on_failure: ;
 		for (int i = 0; i < callback_data->arg_count; ++i) {
-			if (callback_data->arg_types[i]->type == FFI_TYPE_STRUCT) {
-				efree(callback_data->arg_types[i]);
+			if (arg_types[i]->type == FFI_TYPE_STRUCT) {
+				efree(arg_types);
 			}
 		}
 		if (callback_data->ret_type->type == FFI_TYPE_STRUCT) {

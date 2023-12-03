@@ -13,14 +13,6 @@
 #ifndef TSRM_H
 #define TSRM_H
 
-#ifdef TSRM_WIN32
-# ifndef TSRM_INCLUDE_FULL_WINDOWS_HEADERS
-#  define WIN32_LEAN_AND_MEAN
-# endif
-#else
-# include <pthread.h>
-#endif
-
 #if !defined(__CYGWIN__) && defined(WIN32)
 # define TSRM_WIN32
 # include "Zend/zend_config.w32.h"
@@ -30,6 +22,14 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
+#ifdef TSRM_WIN32
+# ifndef TSRM_INCLUDE_FULL_WINDOWS_HEADERS
+#  define WIN32_LEAN_AND_MEAN
+# endif
+#else
+# include <pthread.h>
+#endif
 
 #ifdef TSRM_WIN32
 #	ifdef TSRM_EXPORTS
@@ -50,6 +50,7 @@ typedef uintptr_t tsrm_uintptr_t;
 #ifdef TSRM_WIN32
 # define THREAD_T DWORD
 # define MUTEX_T CRITICAL_SECTION *
+# define COND_T PCONDITION_VARIABLE
 #else
 # define THREAD_T pthread_t
 # define MUTEX_T pthread_mutex_t *

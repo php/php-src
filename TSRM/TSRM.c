@@ -11,8 +11,6 @@
 */
 
 #include "TSRM.h"
-#include <bits/pthreadtypes.h>
-#include <pthread.h>
 
 
 #ifdef TSRM_DEBUG
