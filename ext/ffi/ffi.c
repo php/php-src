@@ -972,6 +972,10 @@ static void zend_ffi_fci_prepare(
 }
 
 static void zend_ffi_interrupt_function(zend_execute_data *execute_data){ /* {{{ */
+	if(FFI_G(callback_tid) == FFI_G(main_tid)){
+		goto end;
+	}
+
 	tsrm_mutex_lock(FFI_G(vm_request_lock));
 	if (!zend_atomic_bool_load_ex(&FFI_G(callback_in_progress))) {
 		goto end;
@@ -1072,7 +1076,14 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 		}
 		
 		if (zend_atomic_bool_load_ex(&FFI_G(callback_in_progress))) {
-			zend_fiber_resume(&call_data.data->fiber, NULL, false);
+			// call PHP function
+			zend_fiber_transfer transfer = zend_fiber_resume(&call_data.data->fiber, NULL, false);
+			zend_ffi_type *ret_type = ZEND_FFI_TYPE(call_data.data->type->func.ret_type);
+			if(ret_type->kind != ZEND_FFI_TYPE_VOID){
+				// extract return value from fiber
+				zend_ffi_zval_to_cdata(call_data.ret, ret_type, &call_data.data->fiber.result);
+			}
+
 			efree(call_data.data->fiber.fci.params);
 		}
 		
@@ -5613,6 +5624,10 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_ctype_handlers.get_properties       = zend_fake_get_properties;
 	zend_ffi_ctype_handlers.get_gc               = zend_fake_get_gc;
 
+	FFI_G(vm_request_lock) = tsrm_mutex_alloc();
+	FFI_G(vm_ack) = tsrm_cond_alloc();
+	FFI_G(vm_unlock) = tsrm_cond_alloc();
+
 	if (FFI_G(preload)) {
 		return zend_ffi_preload(FFI_G(preload));
 	}
@@ -5622,10 +5637,6 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_atomic_bool_store_ex(&FFI_G(callback_in_progress), false);
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = zend_ffi_interrupt_function;
-
-	FFI_G(vm_request_lock) = tsrm_mutex_alloc();
-	FFI_G(vm_ack) = tsrm_cond_alloc();
-	FFI_G(vm_unlock) = tsrm_cond_alloc();
 
 	return SUCCESS;
 }
@@ -5748,6 +5759,10 @@ static ZEND_GINIT_FUNCTION(ffi)
 static ZEND_GSHUTDOWN_FUNCTION(ffi)
 {
 	zend_ffi_wait_request_barrier(true);
+	tsrm_cond_free(ffi_globals->vm_ack);
+	tsrm_cond_free(ffi_globals->vm_unlock);
+	tsrm_mutex_free(ffi_globals->vm_request_lock);
+
 	if (ffi_globals->scopes) {
 		zend_hash_destroy(ffi_globals->scopes);
 		free(ffi_globals->scopes);
