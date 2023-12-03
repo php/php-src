@@ -53,6 +53,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug GH-12628 (The gh11374 test fails on Alpinelinux). (nielsdos)
 
+- PDO PGSQL:
+  . Fixed the default value of $fetchMode in PDO::pgsqlGetNotify() (kocsismate)
+
 - PGSQL:
   . Fixed bug GH-12763 wrong argument type for pg_untrace. (degtyarov)
 
