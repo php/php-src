@@ -18,7 +18,6 @@
 #define PHP_FFI_H
 
 #include <ffi.h>
-#include <pthread.h>
 #include "zend_compile.h"
 #include "zend_API.h"
 #include "TSRM.h"

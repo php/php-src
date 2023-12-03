@@ -30,7 +30,6 @@
 #include "main/SAPI.h"
 #include "TSRM.h"
 #include "zend_fibers.h"
-#include "zend_stack.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

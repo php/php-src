@@ -62,7 +62,8 @@ TSRM_API COND_T tsrm_cond_alloc(void)
 {
 	COND_T condp;
 #ifdef TSRM_WIN32
-#error "TODO"
+	condp = (PCONDITION_VARIABLE)malloc(sizeof(CONDITION_VARIABLE));
+	InitializeConditionVariable(condp);
 #else
 	condp = (pthread_cond_t *)malloc(sizeof(pthread_cond_t));
 	pthread_cond_init(condp, NULL);
@@ -73,7 +74,7 @@ TSRM_API COND_T tsrm_cond_alloc(void)
 TSRM_API int tsrm_cond_wait(COND_T condp, MUTEX_T mutexp)
 {
 #ifdef TSRM_WIN32
-#error "TODO"
+	return SleepConditionVariableCS(condp, mutexp, INFINITE) ? 0 : -1;
 #else
 	return pthread_cond_wait(condp, mutexp);
 #endif
@@ -82,7 +83,8 @@ TSRM_API int tsrm_cond_wait(COND_T condp, MUTEX_T mutexp)
 TSRM_API int tsrm_cond_broadcast(COND_T condp)
 {
 #ifdef TSRM_WIN32
-#error "TODO"
+	WakeAllConditionVariable(condp);
+	return 0;
 #else
 	return pthread_cond_broadcast(condp);
 #endif
@@ -126,7 +128,7 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 TSRM_API void tsrm_cond_free(COND_T condp)
 {
 #ifdef TSRM_WIN32
-#error "TODO"
+	free(condp);
 #else
 	if(condp){
 		pthread_cond_destroy(condp);
