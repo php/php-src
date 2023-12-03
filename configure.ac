@@ -656,6 +656,9 @@ PHP_CHECK_FUNC_LIB(nanosleep, rt)
 dnl Haiku does not have network api in libc.
 PHP_CHECK_FUNC_LIB(setsockopt, network)
 
+dnl Solaris/Illumos for process mapping.
+PHP_CHECK_FUNC_LIB(Pgrab, proc)
+
 dnl Check for getaddrinfo, should be a better way, but... Also check for working
 dnl getaddrinfo.
 AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
