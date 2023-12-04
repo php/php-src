@@ -2436,7 +2436,7 @@ PHP_FUNCTION(mb_strcut)
 		}
 	}
 
-	if (from > string.len) {
+	if (from > string.len || len == 0) {
 		RETURN_EMPTY_STRING();
 	}
 
