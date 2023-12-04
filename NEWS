@@ -15,6 +15,7 @@ DOM:
   . Fix cloning attribute with namespace disappearing namespace. (nielsdos)
   . Implement DOM HTML5 parsing and serialization RFC. (nielsdos)
   . Fix DOMElement->prefix with empty string creates bogus prefix. (nielsdos)
+  . Handle OOM more consistently. (nielsdos)
 
 FPM:
   . Implement GH-12385 (flush headers without body when calling flush()).
