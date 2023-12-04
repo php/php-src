@@ -416,7 +416,7 @@ PHP_METHOD(SQLite3, loadExtension)
 
 	if (extension_len == 0) {
 		zend_argument_value_error(1, "cannot be empty");
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	extension_dir = SQLITE3G(extension_dir);
