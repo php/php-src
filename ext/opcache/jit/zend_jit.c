@@ -3414,6 +3414,13 @@ ZEND_EXT_API int zend_jit_check_support(void)
 		JIT_G(on) = 0;
 		return FAILURE;
 	}
+#elif defined(IR_TARGET_X64)
+	if (JIT_G(buffer_size) > 2 * Z_L(1024*1024*1024)) {
+		zend_error(E_WARNING, "JIT on x86_64 doesn't support opcache.jit_buffer_size above 2G.");
+		JIT_G(enabled) = 0;
+		JIT_G(on) = 0;
+		return FAILURE;
+	}
 #endif
 
 	return SUCCESS;
