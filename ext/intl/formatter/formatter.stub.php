@@ -171,6 +171,8 @@ class NumberFormatter
     public const int TYPE_INT64 = UNKNOWN;
     /** @cvalue FORMAT_TYPE_DOUBLE */
     public const int TYPE_DOUBLE = UNKNOWN;
+    /** @cvalue FORMAT_TYPE_DECIMAL */
+    public const int TYPE_DECIMAL = UNKNOWN;
     /**
      * @deprecated
      * @cvalue FORMAT_TYPE_CURRENCY
@@ -189,7 +191,7 @@ class NumberFormatter
      * @tentative-return-type
      * @alias numfmt_format
      */
-    public function format(int|float $num, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
+    public function format(int|float|string $num, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
 
     /**
      * @param int $offset
