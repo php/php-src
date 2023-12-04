@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5711a4c90afa943e660fdc5fa15a0e91ae554057 */
+ * Stub hash: 89cbb449ee6146dc8d50ba4bb1e76f83444a2db2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aes256gcm_is_available, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -24,6 +24,52 @@ ZEND_END_ARG_INFO()
 
 #if defined(HAVE_AESGCM)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aes256gcm_keygen, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_sodium_crypto_aead_aegis128l_decrypt, 0, 4, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, ciphertext, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, additional_data, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aegis128l_encrypt, 0, 4, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, additional_data, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aegis128l_keygen, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(crypto_aead_aegis256_KEYBYTES)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_sodium_crypto_aead_aegis256_decrypt, 0, 4, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, ciphertext, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, additional_data, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(crypto_aead_aegis256_KEYBYTES)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aegis256_encrypt, 0, 4, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, additional_data, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, nonce, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(crypto_aead_aegis256_KEYBYTES)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aegis256_keygen, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -516,6 +562,24 @@ ZEND_FUNCTION(sodium_crypto_aead_aes256gcm_encrypt);
 #if defined(HAVE_AESGCM)
 ZEND_FUNCTION(sodium_crypto_aead_aes256gcm_keygen);
 #endif
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+ZEND_FUNCTION(sodium_crypto_aead_aegis128l_decrypt);
+#endif
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+ZEND_FUNCTION(sodium_crypto_aead_aegis128l_encrypt);
+#endif
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+ZEND_FUNCTION(sodium_crypto_aead_aegis128l_keygen);
+#endif
+#if defined(crypto_aead_aegis256_KEYBYTES)
+ZEND_FUNCTION(sodium_crypto_aead_aegis256_decrypt);
+#endif
+#if defined(crypto_aead_aegis256_KEYBYTES)
+ZEND_FUNCTION(sodium_crypto_aead_aegis256_encrypt);
+#endif
+#if defined(crypto_aead_aegis256_KEYBYTES)
+ZEND_FUNCTION(sodium_crypto_aead_aegis256_keygen);
+#endif
 ZEND_FUNCTION(sodium_crypto_aead_chacha20poly1305_decrypt);
 ZEND_FUNCTION(sodium_crypto_aead_chacha20poly1305_encrypt);
 ZEND_FUNCTION(sodium_crypto_aead_chacha20poly1305_keygen);
@@ -701,6 +765,24 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(HAVE_AESGCM)
 	ZEND_FE(sodium_crypto_aead_aes256gcm_keygen, arginfo_sodium_crypto_aead_aes256gcm_keygen)
+#endif
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+	ZEND_FE(sodium_crypto_aead_aegis128l_decrypt, arginfo_sodium_crypto_aead_aegis128l_decrypt)
+#endif
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+	ZEND_FE(sodium_crypto_aead_aegis128l_encrypt, arginfo_sodium_crypto_aead_aegis128l_encrypt)
+#endif
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+	ZEND_FE(sodium_crypto_aead_aegis128l_keygen, arginfo_sodium_crypto_aead_aegis128l_keygen)
+#endif
+#if defined(crypto_aead_aegis256_KEYBYTES)
+	ZEND_FE(sodium_crypto_aead_aegis256_decrypt, arginfo_sodium_crypto_aead_aegis256_decrypt)
+#endif
+#if defined(crypto_aead_aegis256_KEYBYTES)
+	ZEND_FE(sodium_crypto_aead_aegis256_encrypt, arginfo_sodium_crypto_aead_aegis256_encrypt)
+#endif
+#if defined(crypto_aead_aegis256_KEYBYTES)
+	ZEND_FE(sodium_crypto_aead_aegis256_keygen, arginfo_sodium_crypto_aead_aegis256_keygen)
 #endif
 	ZEND_FE(sodium_crypto_aead_chacha20poly1305_decrypt, arginfo_sodium_crypto_aead_chacha20poly1305_decrypt)
 	ZEND_FE(sodium_crypto_aead_chacha20poly1305_encrypt, arginfo_sodium_crypto_aead_chacha20poly1305_encrypt)
@@ -901,6 +983,30 @@ static void register_libsodium_symbols(int module_number)
 #if defined(HAVE_AESGCM)
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_AES256GCM_ABYTES", crypto_aead_aes256gcm_ABYTES, CONST_PERSISTENT);
 #endif
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_AEGIS128L_KEYBYTES", crypto_aead_aegis128l_KEYBYTES, CONST_PERSISTENT);
+#endif
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_AEGIS128L_NSECBYTES", crypto_aead_aegis128l_NSECBYTES, CONST_PERSISTENT);
+#endif
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_AEGIS128L_NPUBBYTES", crypto_aead_aegis128l_NPUBBYTES, CONST_PERSISTENT);
+#endif
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_AEGIS128L_ABYTES", crypto_aead_aegis128l_ABYTES, CONST_PERSISTENT);
+#endif
+#if defined(crypto_aead_aegis256_KEYBYTES)
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_AEGIS256_KEYBYTES", crypto_aead_aegis256_KEYBYTES, CONST_PERSISTENT);
+#endif
+#if defined(crypto_aead_aegis256_KEYBYTES)
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_AEGIS256_NSECBYTES", crypto_aead_aegis256_NSECBYTES, CONST_PERSISTENT);
+#endif
+#if defined(crypto_aead_aegis256_KEYBYTES)
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_AEGIS256_NPUBBYTES", crypto_aead_aegis256_NPUBBYTES, CONST_PERSISTENT);
+#endif
+#if defined(crypto_aead_aegis256_KEYBYTES)
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_AEGIS256_ABYTES", crypto_aead_aegis256_ABYTES, CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_KEYBYTES", crypto_aead_chacha20poly1305_KEYBYTES, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_NSECBYTES", crypto_aead_chacha20poly1305_NSECBYTES, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AEAD_CHACHA20POLY1305_NPUBBYTES", crypto_aead_chacha20poly1305_NPUBBYTES, CONST_PERSISTENT);
@@ -1080,6 +1186,26 @@ static void register_libsodium_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_aes256gcm_encrypt", sizeof("sodium_crypto_aead_aes256gcm_encrypt") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_aes256gcm_encrypt", sizeof("sodium_crypto_aead_aes256gcm_encrypt") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#endif
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_aegis128l_decrypt", sizeof("sodium_crypto_aead_aegis128l_decrypt") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#endif
+#if defined(crypto_aead_aegis128l_KEYBYTES)
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_aegis128l_encrypt", sizeof("sodium_crypto_aead_aegis128l_encrypt") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_aegis128l_encrypt", sizeof("sodium_crypto_aead_aegis128l_encrypt") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#endif
+#if defined(crypto_aead_aegis256_KEYBYTES)
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_aegis256_decrypt", sizeof("sodium_crypto_aead_aegis256_decrypt") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#endif
+#if defined(crypto_aead_aegis256_KEYBYTES)
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_aegis256_encrypt", sizeof("sodium_crypto_aead_aegis256_encrypt") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_aegis256_encrypt", sizeof("sodium_crypto_aead_aegis256_encrypt") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 #endif
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_aead_chacha20poly1305_decrypt", sizeof("sodium_crypto_aead_chacha20poly1305_decrypt") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
