@@ -911,8 +911,13 @@ PHP_METHOD(PDO, getAttribute)
 				add_next_index_zval(return_value, &dbh->def_stmt_ctor_args);
 			}
 			return;
+
 		case PDO_ATTR_DEFAULT_FETCH_MODE:
 			RETURN_LONG(dbh->default_fetch_type);
+
+		case PDO_ATTR_STRINGIFY_FETCHES:
+			RETURN_BOOL(dbh->stringify);
+
 		default:
 			break;
 	}

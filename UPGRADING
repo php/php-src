@@ -26,6 +26,17 @@ PHP 8.4 UPGRADE NOTES
     Consult sections 2. New Features and 6. New Functions for a list of
     newly implemented methods and constants.
 
+- PDO_DBLIB:
+  . setAttribute, DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER and DBLIB_ATTR_DATETIME_CONVERT
+    have been changed to set value as a bool.
+
+- PDO_FIREBIRD:
+  . getAttribute, ATTR_AUTOCOMMIT has been changed to get the value as a bool.
+
+- PDO_MYSQL:
+  . getAttribute, ATTR_AUTOCOMMIT, ATTR_EMULATE_PREPARES, MYSQL_ATTR_DIRECT_QUERY have
+    been changed to get values ​​as bool.
+
 - PDO_PGSQL:
   . The DSN's credentials, when set, are given priority over their PDO
     constructor counterparts, being closer to the documentation states.
@@ -138,6 +149,16 @@ PHP 8.4 UPGRADE NOTES
 - MBString:
   . The behavior of mb_strcut is more consistent now on invalid UTF-8 and UTF-16
     strings. (For valid UTF-8 and UTF-16 strings, there is no change.)
+
+- PDO:
+  . getAttribute, enabled to get the value of ATTR_STRINGIFY_FETCHES.
+
+- PDO_FIREBIRD:
+  . getAttribute, enabled to get values ​​of FB_ATTR_DATE_FORMAT, FB_ATTR_TIME_FORMAT,
+    FB_ATTR_TIMESTAMP_FORMAT.
+
+- PDO_MYSQL:
+  . getAttribute, enabled to get the value of ATTR_FETCH_TABLE_NAMES.
 
 - PGSQL:
   . pg_select, the conditions arguments accepts an empty array and is optional.

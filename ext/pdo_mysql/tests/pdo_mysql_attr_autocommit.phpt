@@ -13,7 +13,7 @@ MySQLPDOTest::skip();
     $db = MySQLPDOTest::factory();
 
     // autocommit should be on by default
-    if (1 !== ($tmp = $db->getAttribute(PDO::ATTR_AUTOCOMMIT)))
+    if (true !== ($tmp = $db->getAttribute(PDO::ATTR_AUTOCOMMIT)))
         printf("[001] Expecting int/1 got %s\n", var_export($tmp, true));
 
     // lets see if the server agrees to that
@@ -33,7 +33,7 @@ MySQLPDOTest::skip();
     if (!$db->query('SET autocommit = 1'))
         printf("[005] Cannot turn on server autocommit mode, %s\n", var_export($db->errorInfo(), true));
 
-    if (0 !== ($tmp = $db->getAttribute(PDO::ATTR_AUTOCOMMIT)))
+    if (false !== ($tmp = $db->getAttribute(PDO::ATTR_AUTOCOMMIT)))
         printf("[006] Expecting int/0 got %s\n", var_export($tmp, true));
 
     // off -> on
@@ -47,7 +47,7 @@ MySQLPDOTest::skip();
     if (!$row['_autocommit'])
         printf("[009] Server autocommit mode should be on, got '%s'\n", var_export($row['_autocommit']));
 
-    if (1 !== ($tmp = $db->getAttribute(PDO::ATTR_AUTOCOMMIT)))
+    if (true !== ($tmp = $db->getAttribute(PDO::ATTR_AUTOCOMMIT)))
         printf("[010] Expecting int/1 got %s\n", var_export($tmp, true));
 
     $table = 'pdo_mysql_attr_autocommit';

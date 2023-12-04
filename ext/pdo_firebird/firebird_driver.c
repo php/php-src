@@ -1080,7 +1080,7 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 		char tmp[INFO_BUF_LEN];
 
 		case PDO_ATTR_AUTOCOMMIT:
-			ZVAL_LONG(val,dbh->auto_commit);
+			ZVAL_BOOL(val,dbh->auto_commit);
 			return 1;
 
 		case PDO_ATTR_CONNECTION_STATUS:
@@ -1123,6 +1123,18 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
 			ZVAL_BOOL(val, H->fetch_table_names);
+			return 1;
+
+		case PDO_FB_ATTR_DATE_FORMAT:
+			ZVAL_STRING(val, H->date_format);
+			return 1;
+
+		case PDO_FB_ATTR_TIME_FORMAT:
+			ZVAL_STRING(val, H->time_format);
+			return 1;
+
+		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
+			ZVAL_STRING(val, H->timestamp_format);
 			return 1;
 	}
 	return 0;

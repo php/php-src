@@ -43,7 +43,7 @@ MySQLPDOTest::skipNotTransactionalEngine();
         return true;
     }
 
-    set_and_get(1, $db, PDO::ATTR_AUTOCOMMIT, 1);
+    set_and_get(1, $db, PDO::ATTR_AUTOCOMMIT, true);
     /*
     set_and_get(2, $db, PDO::ATTR_AUTOCOMMIT, 0);
     set_and_get(3, $db, PDO::ATTR_AUTOCOMMIT, -1);

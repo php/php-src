@@ -34,6 +34,18 @@ Opcache:
   . If JIT is enabled, PHP will now exit with a fatal error on startup in case
     of JIT startup initialization issues. (danog)
 
+PDO:
+  . Fixed setAttribute and getAttribute (SakiTakamachi)
+
+PDO_DBLIB:
+  . Fixed setAttribute and getAttribute (SakiTakamachi)
+
+PDO_FIREBIRD:
+  . Fixed setAttribute and getAttribute (SakiTakamachi)
+
+PDO_MYSQL:
+  . Fixed setAttribute and getAttribute (SakiTakamachi)
+
 PDO_PGSQL:
   . Fixed GH-12423, DSN credentials being prioritized over the user/password
     PDO constructor arguments. (SakiTakamachi)

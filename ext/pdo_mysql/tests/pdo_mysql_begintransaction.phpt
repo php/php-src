@@ -16,14 +16,14 @@ MySQLPDOTest::skipNotTransactionalEngine();
 
     MySQLPDOTest::createTestTable($table, $db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 
-    if (1 !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
+    if (true !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
         printf("[001] Autocommit should be on by default\n");
 
     if (false == $db->beginTransaction())
         printf("[002] Cannot start a transaction, [%s] [%s]\n",
             $db->errorCode(), implode(' ', $db->errorInfo()));
 
-    if (1 !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
+    if (true !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
         printf("[003] Autocommit should be on by default, beginTransaction() shall not impact it\n");
 
     if (0 == $db->exec("DELETE FROM {$table}"))
@@ -50,7 +50,7 @@ MySQLPDOTest::skipNotTransactionalEngine();
     if (!$db->commit())
         printf("[008] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
-    if (1 !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
+    if (true !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
         printf("[009] Autocommit should be on after commit()\n");
 
     if (!($stmt = $db->query(sprintf('SELECT id, label FROM %s WHERE id = %d', $table, $row['id']))))
@@ -91,7 +91,7 @@ MySQLPDOTest::skipNotTransactionalEngine();
     if (!$db->rollback())
         printf("[018] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
-    if (1 !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
+    if (true !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
         printf("[019] Autocommit should be on after rollback\n");
 
     if (!($stmt = $db->query(sprintf('SELECT id, label FROM %s WHERE id = %d', $table, $row['id']))))
@@ -132,7 +132,7 @@ MySQLPDOTest::skipNotTransactionalEngine();
 
     // Turn off autocommit using a server variable
     $db->exec('SET @@autocommit = 0');
-    if (1 === $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
+    if (true === $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
         printf("[028] I'm confused, how can autocommit be on? Didn't I say I want to manually control transactions?\n");
 
     if (!$db->beginTransaction())
@@ -155,7 +155,7 @@ MySQLPDOTest::skipNotTransactionalEngine();
         printf("[031] Cannot start a transaction, [%s] [%s]\n",
             $db->errorCode(), implode(' ', $db->errorInfo()));
 
-    if (1 !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
+    if (true !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
         printf("[032] Autocommit should be on my default, beginTransaction() should not change that\n");
 
     if (0 == $db->exec("DELETE FROM {$table}"))

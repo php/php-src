@@ -93,8 +93,8 @@ $db->exec('DROP TABLE IF EXISTS pdo_mysql_rollback');
 $db->exec('DROP TABLE IF EXISTS pdo_mysql_rollback_2');
 ?>
 --EXPECT--
-int(1)
-int(0)
-int(1)
-int(0)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
 done!

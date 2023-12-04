@@ -384,7 +384,7 @@ static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 		case PDO_ATTR_CONNECTION_STATUS:
 			break;
 		case PDO_ODBC_ATTR_ASSUME_UTF8:
-			ZVAL_BOOL(val, H->assume_utf8 ? 1 : 0);
+			ZVAL_BOOL(val, H->assume_utf8);
 			return 1;
 
 	}
