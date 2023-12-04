@@ -9747,8 +9747,6 @@ const void *ir_emit_exitgroup(uint32_t first_exit_point, uint32_t exit_points_pe
 	int ret;
 
 	IR_ASSERT(code_buffer);
-	IR_ASSERT(IR_IS_SIGNED_32BIT((char*)exit_addr - (char*)code_buffer));
-	IR_ASSERT(IR_IS_SIGNED_32BIT((char*)exit_addr - ((char*)code_buffer + code_buffer_size)));
 
 	Dst = &dasm_state;
 	dasm_state = NULL;
