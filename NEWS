@@ -26,6 +26,8 @@ FTP:
 
 Intl:
   . Added IntlDateFormatter::PATTERN constant. (David Carlier)
+  . Fixed Numberformatter::__construct when the locale is invalid, now
+    throws an exception. (David Carlier)
 
 MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
