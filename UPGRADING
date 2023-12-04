@@ -26,8 +26,10 @@ PHP 8.4 UPGRADE NOTES
     Consult sections 2. New Features and 6. New Functions for a list of
     newly implemented methods and constants.
   . Some DOM methods previously returned false or a PHP_ERR DOMException if a new
-    node could not be allocated.
-    They consistently throw an INVALID_STATE_ERR DOMException now.
+    node could not be allocated. They consistently throw an INVALID_STATE_ERR
+    DOMException now. This situation is extremely unlikely though and probably
+    will not affect you. As a result DOMImplementation::createDocument() now has
+    a tentative return type of DOMDocument instead of DOMDocument|false.
 
 - PDO_DBLIB:
   . setAttribute, DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER and DBLIB_ATTR_DATETIME_CONVERT

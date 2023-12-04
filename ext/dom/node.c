@@ -700,8 +700,10 @@ zend_result dom_node_prefix_write(dom_object *obj, zval *newval)
 					}
 					if (ns == NULL) {
 						ns = xmlNewNs(nsnode, nodep->ns->href, (xmlChar *)prefix);
+						/* Sadly, we cannot distinguish between OOM and namespace conflict.
+						 * But OOM will almost never happen. */
 						if (UNEXPECTED(ns == NULL)) {
-							php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+							php_dom_throw_error(NAMESPACE_ERR, /* strict */ true);
 							return FAILURE;
 						}
 					}

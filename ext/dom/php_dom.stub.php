@@ -477,8 +477,8 @@ namespace
         /** @return DOMDocumentType|false */
         public function createDocumentType(string $qualifiedName, string $publicId = "", string $systemId = "") {}
 
-        /** @return DOMDocument|false */
-        public function createDocument(?string $namespace = null, string $qualifiedName = "", ?DOMDocumentType $doctype = null) {}
+        /** @tentative-return-type */
+        public function createDocument(?string $namespace = null, string $qualifiedName = "", ?DOMDocumentType $doctype = null): DOMDocument {}
     }
 
     /** @alias DOM\DocumentFragment */

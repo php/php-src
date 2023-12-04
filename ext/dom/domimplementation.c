@@ -138,6 +138,8 @@ PHP_METHOD(DOMImplementation, createDocument)
 			RETURN_THROWS();
 		}
 		if (doctype->doc != NULL) {
+			/* As the new document is the context node, and the default for strict error checking
+			 * is true, this will always throw. */
 			php_dom_throw_error(WRONG_DOCUMENT_ERR, 1);
 			RETURN_THROWS();
 		}
@@ -172,6 +174,7 @@ PHP_METHOD(DOMImplementation, createDocument)
 		if (localname != NULL) {
 			xmlFree(localname);
 		}
+		/* See above for strict error checking argument. */
 		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
 	}
