@@ -113,7 +113,8 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handlin
 	locale = Locale::createFromName(locale_str);
 	/* get*Name accessors being set does not preclude being bogus */
 	if (locale.isBogus() || strlen(locale.getISO3Language()) == 0) {
-		goto error;
+        zend_argument_value_error(1, "\"%s\" is invalid", locale_str);
+		return FAILURE;
 	}
 
 	/* process calendar */
