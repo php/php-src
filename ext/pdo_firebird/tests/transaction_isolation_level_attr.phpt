@@ -41,6 +41,22 @@ foreach ($levelStrs as $levelStr) {
     unset($dbh);
 }
 
+echo "Invalid value\n";
+try {
+    $dbh = new PDO(
+        PDO_FIREBIRD_TEST_DSN,
+        PDO_FIREBIRD_TEST_USER,
+        PDO_FIREBIRD_TEST_PASS,
+        [
+            PDO::FB_TRANSACTION_ISOLATION_LEVEL => PDO::ATTR_AUTOCOMMIT, // Invalid value
+        ],
+    );
+} catch (Throwable $e) {
+    echo $e->getMessage()."\n";
+}
+
+unset($dbh);
+
 echo "\n";
 echo "========== Set attr in setAttribute ==========\n";
 
@@ -62,6 +78,13 @@ foreach ($levelStrs as $levelStr) {
     }
 }
 
+echo "Invalid value\n";
+try {
+    $dbh->setAttribute(PDO::FB_TRANSACTION_ISOLATION_LEVEL, PDO::ATTR_AUTOCOMMIT); // Invalid value
+} catch (Throwable $e) {
+    echo $e->getMessage()."\n";
+}
+
 unset($dbh);
 ?>
 --EXPECT--
@@ -69,6 +92,8 @@ unset($dbh);
 OK: PDO::FB_READ_COMMITTED
 OK: PDO::FB_REPEATABLE_READ
 OK: PDO::FB_SERIALIZABLE
+Invalid value
+PDO::FB_TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level (PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, or PDO::FB_SERIALIZABLE)
 
 ========== Set attr in setAttribute ==========
 bool(true)
@@ -77,3 +102,5 @@ bool(true)
 OK: PDO::FB_REPEATABLE_READ
 bool(true)
 OK: PDO::FB_SERIALIZABLE
+Invalid value
+PDO::FB_TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level (PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, or PDO::FB_SERIALIZABLE)
