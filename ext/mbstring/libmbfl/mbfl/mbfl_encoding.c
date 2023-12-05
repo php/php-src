@@ -47,7 +47,6 @@
 #include "filters/mbfilter_utf7.h"
 #include "filters/mbfilter_utf7imap.h"
 #include "filters/mbfilter_utf8.h"
-#include "filters/mbfilter_utf8_mobile.h"
 #include "filters/mbfilter_utf16.h"
 #include "filters/mbfilter_utf32.h"
 #include "filters/mbfilter_ucs4.h"
