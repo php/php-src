@@ -345,7 +345,16 @@ static const void *zend_vm_get_opcode_handler_func(uint8_t opcode, const zend_op
 # define VM_TRACE_END()
 #endif
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
-#define HYBRID_NEXT()     goto *(void**)(OPLINE->handler)
+# if defined(__GNUC__) && defined(__i386__)
+#  define HYBRID_JIT_GUARD() __asm__ __volatile__ (""::: "ebx")
+# elif defined(__GNUC__) && defined(__x86_64__)
+#  define HYBRID_JIT_GUARD() __asm__ __volatile__ (""::: "rbx","r12","r13")
+# elif defined(__GNUC__) && defined(__aarch64__)
+#  define HYBRID_JIT_GUARD() __asm__ __volatile__ (""::: "x19","x20","x21","x22","x23","x24","x25","x26")
+# else
+#  define HYBRID_JIT_GUARD()
+# endif
+#define HYBRID_NEXT()     HYBRID_JIT_GUARD(); goto *(void**)(OPLINE->handler)
 #define HYBRID_SWITCH()   HYBRID_NEXT();
 #define HYBRID_CASE(op)   op ## _LABEL
 #define HYBRID_BREAK()    HYBRID_NEXT()
@@ -56980,16 +56989,6 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 	}
 #endif
 
-#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
-	/* Force C compiler to store preserved registers to allow JIT using them */
-# if defined(__GNUC__) && defined(__i386__)
-	__asm__ __volatile__ (""::: "ebx");
-# elif defined(__GNUC__) && defined(__x86_64__)
-	__asm__ __volatile__ (""::: "rbx","r12","r13");
-# elif defined(__GNUC__) && defined(__aarch64__)
-	__asm__ __volatile__ (""::: "x19","x20","x21","x22","x23","x24","x25","x26");
-# endif
-#endif
 	LOAD_OPLINE();
 	ZEND_VM_LOOP_INTERRUPT_CHECK();
 
