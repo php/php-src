@@ -200,6 +200,10 @@ PHP 8.4 UPGRADE NOTES
 - PDO_FIREBIRD:
   . getAttribute, enabled to get values ​​of FB_ATTR_DATE_FORMAT, FB_ATTR_TIME_FORMAT,
     FB_ATTR_TIMESTAMP_FORMAT.
+  . Added new attributes to specify transaction isolation level and access mode.
+    Along with these, five constants (PDO::FB_TRANSACTION_ISOLATION_LEVEL,
+    PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, PDO::FB_SERIALIZABLE,
+    PDO::FB_WRITABLE_TRANSACTION) have been added.
 
 - PDO_MYSQL:
   . getAttribute, enabled to get the value of ATTR_FETCH_TABLE_NAMES.
