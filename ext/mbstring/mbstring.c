@@ -1814,7 +1814,7 @@ static size_t mb_get_strlen(zend_string *string, const mbfl_encoding *encoding)
 	unsigned int char_len = encoding->flag & (MBFL_ENCTYPE_SBCS | MBFL_ENCTYPE_WCS2 | MBFL_ENCTYPE_WCS4);
 	if (char_len) {
 		return ZSTR_LEN(string) / char_len;
-	} else if (php_mb_is_no_encoding_utf8(encoding->no_encoding) && GC_FLAGS(string) & IS_STR_VALID_UTF8) {
+	} else if (php_mb_is_no_encoding_utf8(encoding->no_encoding) && ZSTR_IS_VALID_UTF8(string)) {
 		return mb_fast_strlen_utf8((unsigned char*)ZSTR_VAL(string), ZSTR_LEN(string));
 	}
 
@@ -2263,7 +2263,7 @@ PHP_FUNCTION(mb_substr_count)
 	if (php_mb_is_no_encoding_utf8(enc->no_encoding)) {
 		/* No need to do any conversion if haystack/needle are already known-valid UTF-8
 		 * (If they are not valid, then not passing them through conversion filters could affect output) */
-		if (GC_FLAGS(haystack) & IS_STR_VALID_UTF8) {
+		if (ZSTR_IS_VALID_UTF8(haystack)) {
 			haystack_u8 = haystack;
 		} else {
 			unsigned int num_errors = 0;
@@ -2273,7 +2273,7 @@ PHP_FUNCTION(mb_substr_count)
 			}
 		}
 
-		if (GC_FLAGS(needle) & IS_STR_VALID_UTF8) {
+		if (ZSTR_IS_VALID_UTF8(needle)) {
 			needle_u8 = needle;
 		} else {
 			unsigned int num_errors = 0;
@@ -3425,7 +3425,7 @@ PHP_FUNCTION(mb_detect_encoding)
 		strict = MBSTRG(strict_detection);
 	}
 
-	if (size == 1 && *elist == &mbfl_encoding_utf8 && (GC_FLAGS(str) & IS_STR_VALID_UTF8)) {
+	if (size == 1 && *elist == &mbfl_encoding_utf8 && ZSTR_IS_VALID_UTF8(str)) {
 		ret = &mbfl_encoding_utf8;
 	} else {
 		ret = mb_guess_encoding((unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), elist, size, strict, order_significant);
@@ -5495,7 +5495,7 @@ finish_up_remaining_bytes:
 static bool mb_check_str_encoding(zend_string *str, const mbfl_encoding *encoding)
 {
 	if (encoding == &mbfl_encoding_utf8) {
-		if (GC_FLAGS(str) & IS_STR_VALID_UTF8) {
+		if (ZSTR_IS_VALID_UTF8(str)) {
 			return true;
 		}
 		bool result = mb_fast_check_utf8(str);
@@ -5888,7 +5888,7 @@ PHP_FUNCTION(mb_scrub)
 		RETURN_THROWS();
 	}
 
-	if (enc == &mbfl_encoding_utf8 && (GC_FLAGS(str) & IS_STR_VALID_UTF8)) {
+	if (enc == &mbfl_encoding_utf8 && ZSTR_IS_VALID_UTF8(str)) {
 		/* A valid UTF-8 string will not be changed by mb_scrub; so just increment the refcount and return it */
 		RETURN_STR_COPY(str);
 	}
