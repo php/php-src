@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.14
+?? ??? ????, PHP 8.2.15
+
+21 Dec 2023, PHP 8.2.14
 
 - Core:
   . Fixed oss-fuzz #54325 (Use-after-free of name in var-var with malicious
