@@ -761,51 +761,49 @@ static bool php_firebird_begin_transaction(pdo_dbh_t *dbh, bool is_auto_commit_t
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 
 	/* isc_xxx are all 1 byte. */
-	char tpb[5] = { isc_tpb_version3 }, *ptpb = tpb + 1;
+	char tpb[4] = { isc_tpb_version3 };
+	size_t tpb_size;
+
+	/* access mode. writable or readonly */
+	tpb[1] = H->is_writable_txn ? isc_tpb_write : isc_tpb_read;
 
 	if (is_auto_commit_txn) {
 		/*
-		 * In autocommit mode, we need to always read the latest information, that is,
-		 * expect phantom reads, so we set read committed.
+		 * In autocommit mode, we need to always read the latest information, so we set `read committed`.
 		 */
-		*ptpb++ = isc_tpb_read_committed;
-		*ptpb++ = isc_tpb_rec_version;
+		tpb[2] = isc_tpb_read_committed;
+		/* Ignore indeterminate data from other transactions. This option only required with `read committed`. */
+		tpb[3] = isc_tpb_rec_version;
+		tpb_size = 4;
 	} else {
 		switch (H->txn_isolation_level) {
 			/*
-			* firebird's read committed has the option to wait until other transactions
+			* firebird's `read committed` has the option to wait until other transactions
 			* commit or rollback if there is indeterminate data.
 			* Introducing too many configuration values ​​at once can cause confusion, so
 			* we don't support in PDO that feature yet.
-			*
-			* Also, there is information that depending on the settings, it is possible to
-			* reproduce behavior like read uncommited, but at least with the current firebird
-			* API, this is not possible.
 			*/
 			case PDO_FB_READ_COMMITTED:
-				*ptpb++ = isc_tpb_read_committed;
-				*ptpb++ = isc_tpb_rec_version;
+				tpb[2] = isc_tpb_read_committed;
+				/* Ignore indeterminate data from other transactions. This option only required with `read committed`. */
+				tpb[3] = isc_tpb_rec_version;
+				tpb_size = 4;
 				break;
 
 			case PDO_FB_SERIALIZABLE:
-				*ptpb++ = isc_tpb_consistency;
+				tpb[2] = isc_tpb_consistency;
+				tpb_size = 3;
 				break;
 
 			case PDO_FB_REPEATABLE_READ:
 			default:
-				*ptpb++ = isc_tpb_concurrency;
+				tpb[2] = isc_tpb_concurrency;
+				tpb_size = 3;
 				break;
 		}
 	}
 
-
-	if (H->is_writable_txn) {
-		*ptpb++ = isc_tpb_write;
-	} else {
-		*ptpb++ = isc_tpb_read;
-	}
-
-	if (isc_start_transaction(H->isc_status, &H->tr, 1, &H->db, (unsigned short)(ptpb - tpb), tpb)) {
+	if (isc_start_transaction(H->isc_status, &H->tr, 1, &H->db, tpb_size, tpb)) {
 		php_firebird_error(dbh);
 		return false;
 	}
