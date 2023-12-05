@@ -539,20 +539,24 @@ static void _php_mb_free_regex(void *opaque)
 }
 /* }}} */
 
-static void php_mb_nls_get_default_detect_order_list(enum mbfl_no_language lang, enum mbfl_no_encoding **plist, size_t *plist_size)
+/* {{{ php_mb_nls_get_default_detect_order_list */
+static int php_mb_nls_get_default_detect_order_list(enum mbfl_no_language lang, enum mbfl_no_encoding **plist, size_t *plist_size)
 {
+	size_t i;
+
 	*plist = (enum mbfl_no_encoding *) php_mb_default_identify_list_neut;
 	*plist_size = sizeof(php_mb_default_identify_list_neut) / sizeof(php_mb_default_identify_list_neut[0]);
 
-	for (size_t i = 0; i < sizeof(php_mb_default_identify_list) / sizeof(php_mb_default_identify_list[0]); i++) {
+	for (i = 0; i < sizeof(php_mb_default_identify_list) / sizeof(php_mb_default_identify_list[0]); i++) {
 		if (php_mb_default_identify_list[i].lang == lang) {
 			*plist = (enum mbfl_no_encoding *)php_mb_default_identify_list[i].list;
 			*plist_size = php_mb_default_identify_list[i].list_size;
-			return;
+			return 1;
 		}
 	}
-	ZEND_UNREACHABLE();
+	return 0;
 }
+/* }}} */
 
 static char *php_mb_rfc1867_substring_conf(const zend_encoding *encoding, char *start, size_t len, char quote)
 {
@@ -855,7 +859,6 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 					MBSTRG(filter_illegal_substchar) = c;
 					MBSTRG(current_filter_illegal_substchar) = c;
 				}
-				// TODO Warn about invalid character?
 			}
 		}
 	} else {
