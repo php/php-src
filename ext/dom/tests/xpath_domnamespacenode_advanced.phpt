@@ -15,17 +15,24 @@ XML);
 $xpath = new DOMXPath($dom);
 $query = '//namespace::*';
 
-echo "-- All namespace attributes --\n";
+echo "=== All namespace declarations ===\n";
 
 foreach ($xpath->query($query) as $attribute) {
+    assert (!is_null($attribute->parentNode));
     echo $attribute->nodeName . ' = ' . $attribute->nodeValue . PHP_EOL;
     var_dump($attribute->parentNode->tagName);
 }
 
-echo "-- All namespace attributes with removal attempt --\n";
+echo "=== All namespace declarations with removal attempt ===\n";
 
 foreach ($xpath->query($query) as $attribute) {
-    echo "Before: ", $attribute->parentNode->tagName, "\n";
+    if (is_null($attribute->parentNode)) {
+        echo "Skipping null parent of attribute: ", $attribute->nodeName, " ", $attribute->namespaceURI, "\n";
+        echo "---\n";
+        continue;
+    }
+    echo $attribute->namespaceURI, "\n";
+    echo "Before: ", $attribute->nodeName, " ", $attribute->parentNode->tagName, "\n";
     // Second & third attempt should fail because it's no longer in the document
     try {
         $attribute->parentNode->remove();
@@ -33,12 +40,17 @@ foreach ($xpath->query($query) as $attribute) {
         echo $e->getMessage(), "\n";
     }
     // However, it should not cause a use-after-free
-    echo "After: ", $attribute->parentNode->tagName, "\n";
+    // Note: not connected, but it still has the element as the parent
+    echo "parent NULL: ";
+    var_dump(is_null($attribute->parentNode));
+    echo "isConnected: ";
+    var_dump($attribute->isConnected);
+    echo "---\n";
 }
 
 ?>
 --EXPECT--
--- All namespace attributes --
+=== All namespace declarations ===
 xmlns:xml = http://www.w3.org/XML/1998/namespace
 string(4) "root"
 xmlns:bar = http://example.com/bar
@@ -53,23 +65,36 @@ xmlns:foo = http://example.com/foo
 string(5) "child"
 xmlns:baz = http://example.com/baz
 string(5) "child"
--- All namespace attributes with removal attempt --
-Before: root
-After: root
-Before: root
+=== All namespace declarations with removal attempt ===
+http://www.w3.org/XML/1998/namespace
+Before: xmlns:xml root
+parent NULL: bool(false)
+isConnected: bool(false)
+---
+http://example.com/bar
+Before: xmlns:bar root
 Not Found Error
-After: root
-Before: root
+parent NULL: bool(false)
+isConnected: bool(false)
+---
+http://example.com/foo
+Before: xmlns:foo root
 Not Found Error
-After: root
-Before: child
-After: child
-Before: child
+parent NULL: bool(false)
+isConnected: bool(false)
+---
+http://www.w3.org/XML/1998/namespace
+Before: xmlns:xml child
+parent NULL: bool(false)
+isConnected: bool(false)
+---
+Skipping null parent of attribute: xmlns:bar http://example.com/bar
+---
+Skipping null parent of attribute: xmlns:foo http://example.com/foo
+---
+http://example.com/baz
+Before: xmlns:baz child
 Not Found Error
-After: child
-Before: child
-Not Found Error
-After: child
-Before: child
-Not Found Error
-After: child
+parent NULL: bool(false)
+isConnected: bool(false)
+---

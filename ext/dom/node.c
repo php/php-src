@@ -52,15 +52,44 @@ zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep)
 	}
 }
 
+static xmlNodePtr dom_node_parent_ns_guarded_read(const xmlNode *node)
+{
+	/* Namespace declarations cannot get notified if they are detached, so check at runtime. */
+	if (UNEXPECTED(node->type == XML_NAMESPACE_DECL)) {
+		xmlNodePtr parent = node->parent;
+		if (!parent) {
+			return NULL;
+		}
+
+		xmlNsPtr surrogate_ns = node->ns;
+		ZEND_ASSERT(surrogate_ns != NULL);
+
+		/* Note: XPath etc. take ns node copies, so we can't check the pointer easily. */
+		xmlNsPtr found = xmlSearchNs(parent->doc, parent, surrogate_ns->prefix);
+		if (found && xmlStrEqual(found->href, surrogate_ns->href)) {
+			return parent;
+		}
+
+		/* Not in the list anymore, so it is detached. */
+		return NULL;
+	}
+
+	return node->parent;
+}
+
 bool php_dom_is_node_connected(const xmlNode *node)
 {
 	ZEND_ASSERT(node != NULL);
-	do {
+	if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE) {
+		return true;
+	}
+	node = dom_node_parent_ns_guarded_read(node);
+	while (node != NULL) {
 		if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE) {
 			return true;
 		}
 		node = node->parent;
-	} while (node != NULL);
+	}
 	return false;
 }
 
@@ -246,7 +275,7 @@ static zend_result dom_node_parent_get(dom_object *obj, zval *retval, bool only_
 		return FAILURE;
 	}
 
-	xmlNodePtr nodeparent = nodep->parent;
+	xmlNodePtr nodeparent = dom_node_parent_ns_guarded_read(nodep);
 	if (!nodeparent || (only_element && nodeparent->type != XML_ELEMENT_NODE)) {
 		ZVAL_NULL(retval);
 		return SUCCESS;
