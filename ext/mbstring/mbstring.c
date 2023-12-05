@@ -2108,7 +2108,7 @@ static zend_string* mb_get_substr(zend_string *input, size_t from, size_t len, c
 	unsigned char *in = (unsigned char*)ZSTR_VAL(input);
 	size_t in_len = ZSTR_LEN(input);
 
-	if (from >= in_len) {
+	if (from >= in_len || len == 0) {
 		/* No supported text encoding decodes to more than one codepoint per byte
 		 * So if the number of codepoints to skip >= number of input bytes,
 		 * then definitely the output should be empty */
