@@ -167,9 +167,11 @@ ftp_close(ftpbuf_t *ftp)
 	if (ftp == NULL) {
 		return NULL;
 	}
+#ifdef HAVE_FTP_SSL
 	if (ftp->last_ssl_session) {
 		SSL_SESSION_free(ftp->last_ssl_session);
 	}
+#endif
 	if (ftp->data) {
 		data_close(ftp, ftp->data);
 	}
@@ -232,6 +234,7 @@ ftp_quit(ftpbuf_t *ftp)
 }
 /* }}} */
 
+#ifdef HAVE_FTP_SSL
 static int ftp_ssl_new_session_cb(SSL *ssl, SSL_SESSION *sess)
 {
 	ftpbuf_t *ftp = SSL_get_app_data(ssl);
@@ -245,6 +248,7 @@ static int ftp_ssl_new_session_cb(SSL *ssl, SSL_SESSION *sess)
 	/* Return 0 as we are not using OpenSSL's session cache. */
 	return 0;
 }
+#endif
 
 /* {{{ ftp_login */
 int
