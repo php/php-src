@@ -2141,7 +2141,7 @@ ftp_nb_continue_read(ftpbuf_t *ftp)
 {
 	databuf_t	*data = NULL;
 	char		*ptr;
-	int		lastch;
+	char		lastch;
 	size_t		rcvd;
 	ftptype_t	type;
 
