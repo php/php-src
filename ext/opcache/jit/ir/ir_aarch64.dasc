@@ -5809,7 +5809,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 	if (data.jmp_table_label) {
 		ctx->code_size = dasm_getpclabel(&data.dasm_state, data.jmp_table_label);
 	} else if (data.rodata_label) {
-		ctx->code_size = dasm_getpclabel(&data.dasm_state, data.jmp_table_label);
+		ctx->code_size = dasm_getpclabel(&data.dasm_state, data.rodata_label);
 	} else {
 		ctx->code_size = size;
 	}
