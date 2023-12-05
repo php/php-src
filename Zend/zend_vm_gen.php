@@ -1844,7 +1844,16 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                     switch ($kind) {
                         case ZEND_VM_KIND_HYBRID:
                             out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
-                            out($f,"#define HYBRID_NEXT()     goto *(void**)(OPLINE->handler)\n");
+                            out($f,"# if defined(__GNUC__) && defined(__i386__)\n");
+                            out($f,"#  define HYBRID_JIT_GUARD() __asm__ __volatile__ (\"\"::: \"ebx\")\n");
+                            out($f,"# elif defined(__GNUC__) && defined(__x86_64__)\n");
+                            out($f,"#  define HYBRID_JIT_GUARD() __asm__ __volatile__ (\"\"::: \"rbx\",\"r12\",\"r13\")\n");
+                            out($f,"# elif defined(__GNUC__) && defined(__aarch64__)\n");
+                            out($f,"#  define HYBRID_JIT_GUARD() __asm__ __volatile__ (\"\"::: \"x19\",\"x20\",\"x21\",\"x22\",\"x23\",\"x24\",\"x25\",\"x26\")\n");
+                            out($f,"# else\n");
+                            out($f,"#  define HYBRID_JIT_GUARD()\n");
+                            out($f,"# endif\n");
+                            out($f,"#define HYBRID_NEXT()     HYBRID_JIT_GUARD(); goto *(void**)(OPLINE->handler)\n");
                             out($f,"#define HYBRID_SWITCH()   HYBRID_NEXT();\n");
                             out($f,"#define HYBRID_CASE(op)   op ## _LABEL\n");
                             out($f,"#define HYBRID_BREAK()    HYBRID_NEXT()\n");
