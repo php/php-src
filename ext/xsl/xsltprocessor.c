@@ -350,8 +350,10 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	newdoc = xmlCopyDoc(doc, 1);
 	xmlNodeSetBase((xmlNodePtr) newdoc, (xmlChar *)doc->URL);
 	PHP_LIBXML_SANITIZE_GLOBALS(parse);
+	PHP_LIBXML_IGNORE_DEPRECATIONS_START
 	xmlSubstituteEntitiesDefault(1);
 	xmlLoadExtDtdDefaultValue = XML_DETECT_IDS | XML_COMPLETE_ATTRS;
+	PHP_LIBXML_IGNORE_DEPRECATIONS_END
 
 	sheetp = xsltParseStylesheetDoc(newdoc);
 	PHP_LIBXML_RESTORE_GLOBALS(parse);
