@@ -35,6 +35,13 @@ PHP 8.4 UPGRADE NOTES
   . mb_encode_numericentity() and mb_decode_numericentity() now check that
     the $map is only composed of integers, if not a ValueError is thrown.
   . mb_http_input() now always throws a ValueError if the $type is invalid.
+  . On invalid strings (those with encoding errors), mb_substr() now interprets
+    character indices in the same manner as most other mbstring functions. This
+    means that character indices returned by mb_strpos() can be passed to mb_substr().
+  . For SJIS-Mac (MacJapanese) strings, character indices passed to mb_substr() now
+    refer to the indices of the Unicode codepoints which are produced when the string
+    is converted to Unicode. This is significant because around 40 SJIS-Mac characters
+    convert to a sequence of multiple Unicode codepoints.
 
 - PDO_DBLIB:
   . setAttribute, DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER and DBLIB_ATTR_DATETIME_CONVERT
