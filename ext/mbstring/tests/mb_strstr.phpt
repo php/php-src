@@ -26,6 +26,11 @@ var_dump(FROM_EUC_JP(mb_strstr(EUC_JP("あいうえおかきくけこ"), EUC_JP(
 var_dump(bin2hex(mb_strstr("\xdd\x00", "", false, 'UTF-8')));
 var_dump(bin2hex(mb_strstr("M\xff\xff\xff\x00", "\x00", false, "SJIS")));
 
+// Test handling of invalid UTF-8 string
+// Thanks to Stefan Schiller
+var_dump(mb_strstr("\xf0start", "start", false, "UTF-8"));
+var_dump(mb_strstr("\xf0start", "start", true, "UTF-8"));
+
 ?>
 --EXPECT--
 string(18) "おかきくけこ"
@@ -36,5 +41,7 @@ string(12) "あいうえ"
 string(18) "おかきくけこ"
 string(18) "おかきくけこ"
 string(12) "あいうえ"
-string(4) "dd00"
+string(4) "3f00"
 string(2) "00"
+string(5) "start"
+string(1) "?"
