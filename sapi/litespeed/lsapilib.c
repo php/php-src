@@ -301,7 +301,7 @@ void lsapi_perror(const char * pMessage, int err_no)
 }
 
 
-static int lsapi_parent_dead()
+static int lsapi_parent_dead(void)
 {
     // Return non-zero if the parent is dead.  0 if still alive.
     if (!s_ppid) {
