@@ -31,6 +31,10 @@ PHP 8.4 UPGRADE NOTES
     will not affect you. As a result DOMImplementation::createDocument() now has
     a tentative return type of DOMDocument instead of DOMDocument|false.
 
+- MBString:
+  . mb_encode_numericentity() and mb_decode_numericentity() now check that
+    the $map is only composed of integers, if not a ValueError is thrown.
+
 - PDO_DBLIB:
   . setAttribute, DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER and DBLIB_ATTR_DATETIME_CONVERT
     have been changed to set value as a bool.

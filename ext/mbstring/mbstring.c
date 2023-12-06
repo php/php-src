@@ -3878,7 +3878,14 @@ static uint32_t *make_conversion_map(HashTable *target_hash, size_t *conversion_
 	uint32_t *mapelm = convmap;
 
 	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-		*mapelm++ = zval_get_long(hash_entry);
+		bool failed = true;
+		zend_long tmp = zval_try_get_long(hash_entry, &failed);
+		if (failed) {
+			efree(convmap);
+			zend_argument_value_error(2, "must only be composed of values of type int");
+			return NULL;
+		}
+		*mapelm++ = tmp;
 	} ZEND_HASH_FOREACH_END();
 
 	return convmap;

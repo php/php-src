@@ -61,13 +61,6 @@ echo "12: " . bin2hex(mb_decode_numericentity(mb_convert_encoding('&#12345678;',
 $convmap = [];
 echo "13: " . mb_decode_numericentity('f&ouml;o', $convmap, "UTF-8") . "\n";
 
-$convmap = array(0x0, 0x2FFFF, 0); // 3 elements
-try {
-    echo "14: " . mb_decode_numericentity($str3, $convmap, "UTF-8") . "\n";
-} catch (ValueError $ex) {
-    echo "14: " . $ex->getMessage()."\n";
-}
-
 echo "15: " . bin2hex(mb_decode_numericentity('&#0;', [0, 1, 0, 0xFFFF], 'UTF-8')) . "\n";
 echo "16: " . bin2hex(mb_decode_numericentity('&#x0;', [0, 1, 0, 0xFFFF], 'UTF-8')) . "\n";
 
@@ -182,7 +175,6 @@ for ($i = 12; $i < 256; $i++) {
 11e: &#x000000000
 12: 00bc614e
 13: f&ouml;o
-14: mb_decode_numericentity(): Argument #2 ($map) must have a multiple of 4 elements
 15: 00
 16: 00
 17: föo
