@@ -1131,6 +1131,13 @@ void zend_shutdown(void) /* {{{ */
 	/* Child classes may reuse structures from parent classes, so destroy in reverse order. */
 	zend_hash_graceful_reverse_destroy(GLOBAL_CLASS_TABLE);
 
+	zend_flf_capacity = 0;
+	zend_flf_count = 0;
+	free(zend_flf_functions);
+	free(zend_flf_handlers);
+	zend_flf_functions = NULL;
+	zend_flf_handlers = NULL;
+
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
 

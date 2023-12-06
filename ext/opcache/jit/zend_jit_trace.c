@@ -598,6 +598,7 @@ static zend_always_inline int zend_jit_trace_op_len(const zend_op *opline)
 		case ZEND_ASSIGN_STATIC_PROP_OP:
 		case ZEND_ASSIGN_OBJ_REF:
 		case ZEND_ASSIGN_STATIC_PROP_REF:
+		case ZEND_FRAMELESS_ICALL_3:
 			return 2; /* OP_DATA */
 		case ZEND_RECV_INIT:
 			len = 1;
@@ -3008,6 +3009,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 				case ZEND_ASSIGN_STATIC_PROP_OP:
 				case ZEND_ASSIGN_OBJ_REF:
 				case ZEND_ASSIGN_STATIC_PROP_REF:
+				case ZEND_FRAMELESS_ICALL_3:
 					/* OP_DATA */
 					ssa_op++;
 					opline++;
@@ -5560,6 +5562,33 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_JMP_FRAMELESS:
+						op1_info = OP1_INFO();
+						ZEND_ASSERT((p+1)->op == ZEND_JIT_TRACE_VM);
+						const zend_op *exit_opline = NULL;
+						uint32_t exit_point;
+						zend_jmp_fl_result guard;
+
+						if ((p+1)->opline == OP_JMP_ADDR(opline, opline->op2)) {
+							/* taken branch */
+							guard = ZEND_JMP_FL_HIT;
+							exit_opline = opline + 1;
+						} else if ((p+1)->opline == opline + 1) {
+							/* not taken branch */
+							guard = ZEND_JMP_FL_MISS;
+							exit_opline = OP_JMP_ADDR(opline, opline->op2);
+						} else {
+							ZEND_UNREACHABLE();
+						}
+						exit_point = zend_jit_trace_get_exit_point(exit_opline, 0);
+						exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+						if (!exit_addr) {
+							goto jit_failure;
+						}
+						if (!zend_jit_jmp_frameless(&ctx, opline, exit_addr, guard)) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_ISSET_ISEMPTY_CV:
 						if ((opline->extended_value & ZEND_ISEMPTY)) {
 							// TODO: support for empty() ???
@@ -6208,6 +6237,23 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (!zend_jit_rope(&ctx, opline, op2_info)) {
 							goto jit_failure;
 						}
+						goto done;
+					case ZEND_FRAMELESS_ICALL_0:
+						jit_frameless_icall0(jit, opline);
+						goto done;
+					case ZEND_FRAMELESS_ICALL_1:
+						op1_info = OP1_INFO();
+						jit_frameless_icall1(jit, opline, op1_info);
+						goto done;
+					case ZEND_FRAMELESS_ICALL_2:
+						op1_info = OP1_INFO();
+						op2_info = OP2_INFO();
+						jit_frameless_icall2(jit, opline, op1_info, op2_info);
+						goto done;
+					case ZEND_FRAMELESS_ICALL_3:
+						op1_info = OP1_INFO();
+						op2_info = OP2_INFO();
+						jit_frameless_icall3(jit, opline, op1_info, op2_info, OP1_DATA_INFO());
 						goto done;
 					default:
 						break;

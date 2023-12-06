@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: afccfc7a2e1a52e73f3c05e4f7f3a994f86eb881 */
+ * Stub hash: 7584d1aec417e84718a7a60e244cb00df2dc039f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2199,6 +2199,112 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_generate_ctrl_event
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_FRAMELESS_FUNCTION(min, 2);
+static const zend_frameless_function_info frameless_function_infos_min[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(min, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(max, 2);
+static const zend_frameless_function_info frameless_function_infos_max[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(max, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(in_array, 2);
+ZEND_FRAMELESS_FUNCTION(in_array, 3);
+static const zend_frameless_function_info frameless_function_infos_in_array[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(in_array, 2), 2 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(in_array, 3), 3 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(trim, 1);
+ZEND_FRAMELESS_FUNCTION(trim, 2);
+static const zend_frameless_function_info frameless_function_infos_trim[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(trim, 1), 1 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(trim, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(implode, 1);
+ZEND_FRAMELESS_FUNCTION(implode, 2);
+static const zend_frameless_function_info frameless_function_infos_implode[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(implode, 1), 1 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(implode, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(dirname, 1);
+ZEND_FRAMELESS_FUNCTION(dirname, 2);
+static const zend_frameless_function_info frameless_function_infos_dirname[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(dirname, 1), 1 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(dirname, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(strstr, 2);
+ZEND_FRAMELESS_FUNCTION(strstr, 3);
+static const zend_frameless_function_info frameless_function_infos_strstr[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(strstr, 2), 2 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(strstr, 3), 3 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(strpos, 2);
+ZEND_FRAMELESS_FUNCTION(strpos, 3);
+static const zend_frameless_function_info frameless_function_infos_strpos[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(strpos, 2), 2 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(strpos, 3), 3 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(str_contains, 2);
+static const zend_frameless_function_info frameless_function_infos_str_contains[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(str_contains, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(str_starts_with, 2);
+static const zend_frameless_function_info frameless_function_infos_str_starts_with[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(str_starts_with, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(substr, 2);
+ZEND_FRAMELESS_FUNCTION(substr, 3);
+static const zend_frameless_function_info frameless_function_infos_substr[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(substr, 2), 2 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(substr, 3), 3 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(strtr, 2);
+ZEND_FRAMELESS_FUNCTION(strtr, 3);
+static const zend_frameless_function_info frameless_function_infos_strtr[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(strtr, 2), 2 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(strtr, 3), 3 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(str_replace, 3);
+static const zend_frameless_function_info frameless_function_infos_str_replace[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(str_replace, 3), 3 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(dechex, 1);
+static const zend_frameless_function_info frameless_function_infos_dechex[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(dechex, 1), 1 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(is_numeric, 1);
+static const zend_frameless_function_info frameless_function_infos_is_numeric[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(is_numeric, 1), 1 },
+	{ 0 },
+};
+
 
 ZEND_FUNCTION(set_time_limit);
 ZEND_FUNCTION(header_register_callback);
@@ -2863,11 +2969,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(current, arginfo_current)
 	ZEND_FALIAS(pos, current, arginfo_pos)
 	ZEND_FE(key, arginfo_key)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(min, arginfo_min)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(max, arginfo_max)
+	ZEND_FRAMELESS_FE(min, arginfo_min, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_min)
+	ZEND_FRAMELESS_FE(max, arginfo_max, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_max)
 	ZEND_FE(array_walk, arginfo_array_walk)
 	ZEND_FE(array_walk_recursive, arginfo_array_walk_recursive)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(in_array, arginfo_in_array)
+	ZEND_FRAMELESS_FE(in_array, arginfo_in_array, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_in_array)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(array_search, arginfo_array_search)
 	ZEND_FE(extract, arginfo_extract)
 	ZEND_FE(compact, arginfo_compact)
@@ -3071,13 +3177,13 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(nl_langinfo, arginfo_nl_langinfo)
 #endif
 	ZEND_FE(strcoll, arginfo_strcoll)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(trim, arginfo_trim)
+	ZEND_FRAMELESS_FE(trim, arginfo_trim, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_trim)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(rtrim, arginfo_rtrim)
 	ZEND_FALIAS(chop, rtrim, arginfo_chop)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(ltrim, arginfo_ltrim)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(wordwrap, arginfo_wordwrap)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(explode, arginfo_explode)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(implode, arginfo_implode)
+	ZEND_FRAMELESS_FE(implode, arginfo_implode, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_implode)
 	ZEND_FALIAS(join, implode, arginfo_join)
 	ZEND_FE(strtok, arginfo_strtok)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strtoupper, arginfo_strtoupper)
@@ -3085,21 +3191,21 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(str_increment, arginfo_str_increment)
 	ZEND_FE(str_decrement, arginfo_str_decrement)
 	ZEND_FE(basename, arginfo_basename)
-	ZEND_FE(dirname, arginfo_dirname)
+	ZEND_FRAMELESS_FE(dirname, arginfo_dirname, 0, frameless_function_infos_dirname)
 	ZEND_FE(pathinfo, arginfo_pathinfo)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(stristr, arginfo_stristr)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strstr, arginfo_strstr)
+	ZEND_FRAMELESS_FE(strstr, arginfo_strstr, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_strstr)
 	ZEND_FALIAS(strchr, strstr, arginfo_strchr)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strpos, arginfo_strpos)
+	ZEND_FRAMELESS_FE(strpos, arginfo_strpos, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_strpos)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(stripos, arginfo_stripos)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strrpos, arginfo_strrpos)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strripos, arginfo_strripos)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strrchr, arginfo_strrchr)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(str_contains, arginfo_str_contains)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(str_starts_with, arginfo_str_starts_with)
+	ZEND_FRAMELESS_FE(str_contains, arginfo_str_contains, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_contains)
+	ZEND_FRAMELESS_FE(str_starts_with, arginfo_str_starts_with, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_starts_with)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(str_ends_with, arginfo_str_ends_with)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(chunk_split, arginfo_chunk_split)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(substr, arginfo_substr)
+	ZEND_FRAMELESS_FE(substr, arginfo_substr, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_substr)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(substr_replace, arginfo_substr_replace)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(quotemeta, arginfo_quotemeta)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(ord, arginfo_ord)
@@ -3107,14 +3213,14 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(ucfirst, arginfo_ucfirst)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(lcfirst, arginfo_lcfirst)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(ucwords, arginfo_ucwords)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strtr, arginfo_strtr)
+	ZEND_FRAMELESS_FE(strtr, arginfo_strtr, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_strtr)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strrev, arginfo_strrev)
 	ZEND_FE(similar_text, arginfo_similar_text)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(addcslashes, arginfo_addcslashes)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(addslashes, arginfo_addslashes)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(stripcslashes, arginfo_stripcslashes)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(stripslashes, arginfo_stripslashes)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(str_replace, arginfo_str_replace)
+	ZEND_FRAMELESS_FE(str_replace, arginfo_str_replace, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_str_replace)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(str_ireplace, arginfo_str_ireplace)
 	ZEND_FE(hebrev, arginfo_hebrev)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(nl2br, arginfo_nl2br)
@@ -3312,7 +3418,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(octdec, arginfo_octdec)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(decbin, arginfo_decbin)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(decoct, arginfo_decoct)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(dechex, arginfo_dechex)
+	ZEND_FRAMELESS_FE(dechex, arginfo_dechex, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_dechex)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(base_convert, arginfo_base_convert)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(number_format, arginfo_number_format)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(fmod, arginfo_fmod)
@@ -3415,7 +3521,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FALIAS(is_long, is_int, arginfo_is_long)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_float, arginfo_is_float)
 	ZEND_FALIAS(is_double, is_float, arginfo_is_double)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_numeric, arginfo_is_numeric)
+	ZEND_FRAMELESS_FE(is_numeric, arginfo_is_numeric, ZEND_ACC_COMPILE_TIME_EVAL, frameless_function_infos_is_numeric)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_string, arginfo_is_string)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_array, arginfo_is_array)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(is_object, arginfo_is_object)

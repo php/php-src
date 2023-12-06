@@ -355,6 +355,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_JMP_NULL:
 		case ZEND_VERIFY_NEVER_TYPE:
 		case ZEND_BIND_INIT_STATIC_OR_JMP:
+		case ZEND_JMP_FRAMELESS:
 			collect_constants = 0;
 			break;
 		}

@@ -1011,6 +1011,17 @@ PHP_FUNCTION(dechex)
 }
 /* }}} */
 
+ZEND_FRAMELESS_FUNCTION(dechex, 1)
+{
+	zend_long arg;
+
+	Z_FLF_PARAM_LONG(1, arg);
+
+	RETVAL_STR(_php_math_longtobase_pwr2(arg, 4));
+
+flf_clean:;
+}
+
 /* {{{ Converts a number in a string from any base <= 36 to any base <= 36 */
 PHP_FUNCTION(base_convert)
 {

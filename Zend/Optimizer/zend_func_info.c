@@ -51,6 +51,8 @@ typedef struct _func_info_t {
 
 static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
+	ZEND_ASSERT(!call_info->is_frameless);
+
 	if (!call_info->send_unpack
 	 && (call_info->num_args == 2 || call_info->num_args == 3)
 	 && ssa
