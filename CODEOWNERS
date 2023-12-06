@@ -19,6 +19,7 @@
 /ext/ffi @dstogov
 /ext/gmp @Girgias
 /ext/imap @Girgias
+/ext/intl @devnexen
 /ext/json @bukka
 /ext/libxml @nielsdos
 /ext/mbstring @alexdowad
