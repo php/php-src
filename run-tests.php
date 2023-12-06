@@ -243,7 +243,7 @@ function main(): void
         $environment["SystemRoot"] = getenv("SystemRoot");
     }
 
-    $php = null;
+    $php = '';
     $php_cgi = null;
     $phpdbg = null;
 
