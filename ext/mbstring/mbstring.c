@@ -3864,11 +3864,11 @@ PHP_FUNCTION(mb_convert_variables)
 /* HTML numeric entities */
 
 /* Convert PHP array to data structure required by mbfl_html_numeric_entity */
-static uint32_t *make_conversion_map(HashTable *target_hash, int *convmap_size)
+static uint32_t *make_conversion_map(HashTable *target_hash, size_t *conversion_map_size)
 {
 	zval *hash_entry;
 
-	int n_elems = zend_hash_num_elements(target_hash);
+	size_t n_elems = *conversion_map_size = zend_hash_num_elements(target_hash);
 	if (n_elems % 4 != 0) {
 		zend_argument_value_error(2, "must have a multiple of 4 elements");
 		return NULL;
@@ -3881,13 +3881,12 @@ static uint32_t *make_conversion_map(HashTable *target_hash, int *convmap_size)
 		*mapelm++ = zval_get_long(hash_entry);
 	} ZEND_HASH_FOREACH_END();
 
-	*convmap_size = n_elems / 4;
 	return convmap;
 }
 
-static bool html_numeric_entity_convert(uint32_t w, uint32_t *convmap, int mapsize, uint32_t *retval)
+static bool html_numeric_entity_convert(uint32_t w, uint32_t *convmap, size_t conversion_map_size, uint32_t *retval)
 {
-	uint32_t *convmap_end = convmap + (mapsize * 4);
+	uint32_t *convmap_end = convmap + conversion_map_size;
 
 	for (uint32_t *mapelm = convmap; mapelm < convmap_end; mapelm += 4) {
 		uint32_t lo_code = mapelm[0];
@@ -3907,7 +3906,7 @@ static bool html_numeric_entity_convert(uint32_t w, uint32_t *convmap, int mapsi
 	return false;
 }
 
-static zend_string* html_numeric_entity_encode(zend_string *input, const mbfl_encoding *encoding, uint32_t *convmap, int mapsize, bool hex)
+static zend_string* html_numeric_entity_encode(zend_string *input, const mbfl_encoding *encoding, uint32_t *convmap, size_t conversion_map_size, bool hex)
 {
 	/* Each wchar which we get from decoding the input string may become up to
 	 * 13 wchars when we convert it to an HTML entity */
@@ -3932,7 +3931,7 @@ static zend_string* html_numeric_entity_encode(zend_string *input, const mbfl_en
 		for (size_t i = 0; i < out_len; i++) {
 			uint32_t w = wchar_buf[i];
 
-			if (html_numeric_entity_convert(w, convmap, mapsize, &w)) {
+			if (html_numeric_entity_convert(w, convmap, conversion_map_size, &w)) {
 				*converted++ = '&';
 				*converted++ = '#';
 				if (hex) {
@@ -3977,7 +3976,7 @@ static zend_string* html_numeric_entity_encode(zend_string *input, const mbfl_en
 PHP_FUNCTION(mb_encode_numericentity)
 {
 	zend_string *encoding = NULL, *str;
-	int mapsize;
+	size_t conversion_map_size;
 	HashTable *target_hash;
 	bool is_hex = false;
 
@@ -3994,19 +3993,19 @@ PHP_FUNCTION(mb_encode_numericentity)
 		RETURN_THROWS();
 	}
 
-	uint32_t *convmap = make_conversion_map(target_hash, &mapsize);
+	uint32_t *convmap = make_conversion_map(target_hash, &conversion_map_size);
 	if (convmap == NULL) {
 		RETURN_THROWS();
 	}
 
-	RETVAL_STR(html_numeric_entity_encode(str, enc, convmap, mapsize, is_hex));
+	RETVAL_STR(html_numeric_entity_encode(str, enc, convmap, conversion_map_size, is_hex));
 	efree(convmap);
 }
 /* }}} */
 
-static bool html_numeric_entity_deconvert(uint32_t number, uint32_t *convmap, int mapsize, uint32_t *retval)
+static bool html_numeric_entity_deconvert(uint32_t number, uint32_t *convmap, size_t conversion_map_size, uint32_t *retval)
 {
-	uint32_t *convmap_end = convmap + (mapsize * 4);
+	uint32_t *convmap_end = convmap + conversion_map_size;
 
 	for (uint32_t *mapelm = convmap; mapelm < convmap_end; mapelm += 4) {
 		uint32_t lo_code = mapelm[0];
@@ -4027,7 +4026,7 @@ static bool html_numeric_entity_deconvert(uint32_t number, uint32_t *convmap, in
 #define DEC_ENTITY_MAXLEN 12 /* For "&#" and 10 decimal digits */
 #define HEX_ENTITY_MAXLEN 11 /* For "&#x" and 8 hexadecimal digits */
 
-static zend_string* html_numeric_entity_decode(zend_string *input, const mbfl_encoding *encoding, uint32_t *convmap, int mapsize)
+static zend_string* html_numeric_entity_decode(zend_string *input, const mbfl_encoding *encoding, uint32_t *convmap, size_t conversion_map_size)
 {
 	uint32_t wchar_buf[128], converted_buf[128];
 
@@ -4121,7 +4120,7 @@ found_ampersand:
 							value = (value * 16) + 10 + (w - 'A');
 						}
 					}
-					if (html_numeric_entity_deconvert(value, convmap, mapsize, converted)) {
+					if (html_numeric_entity_deconvert(value, convmap, conversion_map_size, converted)) {
 						converted++;
 						if (*p2 == ';')
 							p2++;
@@ -4159,7 +4158,7 @@ found_ampersand:
 						}
 						value = (value * 10) + (*p3++ - '0');
 					}
-					if (html_numeric_entity_deconvert(value, convmap, mapsize, converted)) {
+					if (html_numeric_entity_deconvert(value, convmap, conversion_map_size, converted)) {
 						converted++;
 						if (*p2 == ';')
 							p2++;
@@ -4209,7 +4208,7 @@ process_converted_wchars:
 PHP_FUNCTION(mb_decode_numericentity)
 {
 	zend_string *encoding = NULL, *str;
-	int mapsize;
+	size_t conversion_map_size;
 	HashTable *target_hash;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -4224,12 +4223,12 @@ PHP_FUNCTION(mb_decode_numericentity)
 		RETURN_THROWS();
 	}
 
-	uint32_t *convmap = make_conversion_map(target_hash, &mapsize);
+	uint32_t *convmap = make_conversion_map(target_hash, &conversion_map_size);
 	if (convmap == NULL) {
 		RETURN_THROWS();
 	}
 
-	RETVAL_STR(html_numeric_entity_decode(str, enc, convmap, mapsize));
+	RETVAL_STR(html_numeric_entity_decode(str, enc, convmap, conversion_map_size));
 	efree(convmap);
 }
 /* }}} */
