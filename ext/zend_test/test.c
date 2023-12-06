@@ -45,7 +45,6 @@
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 # include <libxml/globals.h>
 # include <libxml/parser.h>
-# include "ext/dom/php_dom.h"
 #endif
 
 ZEND_DECLARE_MODULE_GLOBALS(zend_test)
@@ -378,14 +377,14 @@ static ZEND_FUNCTION(zend_test_override_libxml_global_state)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	PHP_LIBXML_IGNORE_DEPRECATIONS_START
+	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 	xmlLoadExtDtdDefaultValue = 1;
 	xmlDoValidityCheckingDefaultValue = 1;
 	(void) xmlPedanticParserDefault(1);
 	(void) xmlSubstituteEntitiesDefault(1);
 	(void) xmlLineNumbersDefault(1);
 	(void) xmlKeepBlanksDefault(0);
-	PHP_LIBXML_IGNORE_DEPRECATIONS_END
+	ZEND_DIAGNOSTIC_IGNORED_END
 }
 #endif
 
