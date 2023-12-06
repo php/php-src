@@ -894,29 +894,61 @@ PHP_METHOD(DOMDocument, createAttributeNS)
 	xmlNodePtr nodep = NULL, root;
 	xmlNsPtr nsptr;
 	int ret;
-	size_t uri_len = 0, name_len = 0;
-	char *uri, *name;
+	zend_string *name, *uri;
 	char *localname = NULL, *prefix = NULL;
 	dom_object *intern;
 	int errorcode;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S!S", &uri, &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
+	size_t uri_len = uri ? ZSTR_LEN(uri) : 0;
+	if (UNEXPECTED(uri_len == 0)) {
+		uri = zend_empty_string;
+	}
+
 	root = xmlDocGetRootElement(docp);
 	if (root != NULL) {
-		errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
+		errorcode = dom_check_qname(ZSTR_VAL(name), &localname, &prefix, uri_len, ZSTR_LEN(name));
+		/* TODO: switch to early goto-out style error-checking */
 		if (errorcode == 0) {
 			if (xmlValidateName((xmlChar *) localname, 0) == 0) {
+				/* If prefix is "xml" and namespace is not the XML namespace, then throw a "NamespaceError" DOMException. */
+				if (UNEXPECTED(!zend_string_equals_literal(uri, "http://www.w3.org/XML/1998/namespace") && xmlStrEqual(BAD_CAST prefix, BAD_CAST "xml"))) {
+					errorcode = NAMESPACE_ERR;
+					goto error;
+				}
+				/* If either qualifiedName or prefix is "xmlns" and namespace is not the XMLNS namespace, then throw a "NamespaceError" DOMException. */
+				if (UNEXPECTED((zend_string_equals_literal(name, "xmlns") || xmlStrEqual(BAD_CAST prefix, BAD_CAST "xmlns")) && !zend_string_equals_literal(uri, "http://www.w3.org/2000/xmlns/"))) {
+					errorcode = NAMESPACE_ERR;
+					goto error;
+				}
+				/* If namespace is the XMLNS namespace and neither qualifiedName nor prefix is "xmlns", then throw a "NamespaceError" DOMException. */
+				if (UNEXPECTED(zend_string_equals_literal(uri, "http://www.w3.org/2000/xmlns/") && !zend_string_equals_literal(name, "xmlns") && !xmlStrEqual(BAD_CAST prefix, BAD_CAST "xmlns"))) {
+					errorcode = NAMESPACE_ERR;
+					goto error;
+				}
+
 				nodep = (xmlNodePtr) xmlNewDocProp(docp, (xmlChar *) localname, NULL);
 				if (nodep != NULL && uri_len > 0) {
-					nsptr = xmlSearchNsByHref(nodep->doc, root, (xmlChar *) uri);
-					if (nsptr == NULL || nsptr->prefix == NULL) {
-						nsptr = dom_get_ns(root, uri, &errorcode, prefix ? prefix : "default");
+					nsptr = xmlSearchNsByHref(docp, root, BAD_CAST ZSTR_VAL(uri));
+
+					if (zend_string_equals_literal(name, "xmlns") || xmlStrEqual(BAD_CAST prefix, BAD_CAST "xml")) {
+						if (nsptr == NULL) {
+							nsptr = xmlNewNs(NULL, BAD_CAST ZSTR_VAL(uri), BAD_CAST prefix);
+							php_libxml_set_old_ns(docp, nsptr);
+						}
+					} else {
+						if (nsptr == NULL || nsptr->prefix == NULL) {
+							nsptr = dom_get_ns_unchecked(root, ZSTR_VAL(uri), prefix ? prefix : "default");
+							if (UNEXPECTED(nsptr == NULL)) {
+								errorcode = NAMESPACE_ERR;
+							}
+						}
 					}
 					xmlSetNs(nodep, nsptr);
 				}
@@ -929,6 +961,7 @@ PHP_METHOD(DOMDocument, createAttributeNS)
 		RETURN_FALSE;
 	}
 
+error:
 	xmlFree(localname);
 	if (prefix != NULL) {
 		xmlFree(prefix);
