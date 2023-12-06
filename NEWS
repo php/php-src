@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.15
 
+- Cli:
+  . Fix incorrect timeout in built-in web server when using router script and
+    max_input_time. (ilutov)
+
 21 Dec 2023, PHP 8.2.14
 
 - Core:

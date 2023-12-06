@@ -2240,6 +2240,17 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 	zend_try {
 		zval retval;
 
+		/* Normally php_execute_script restarts the timer with max_execution_time if it has
+		 * previously been initialized with max_input_time. We're not using php_execute_script here
+		 * because it does not provide a way to get the return value of the main script, so we need
+		 * to restart the timer manually. */
+		if (PG(max_input_time) != -1) {
+#ifdef PHP_WIN32
+			zend_unset_timeout();
+#endif
+			zend_set_timeout(INI_INT("max_execution_time"), 0);
+		}
+
 		ZVAL_UNDEF(&retval);
 		if (SUCCESS == zend_execute_scripts(ZEND_REQUIRE, &retval, 1, &zfd)) {
 			if (Z_TYPE(retval) != IS_UNDEF) {
