@@ -304,8 +304,10 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	newdoc = xmlCopyDoc(doc, 1);
 	xmlNodeSetBase((xmlNodePtr) newdoc, (xmlChar *)doc->URL);
 	PHP_LIBXML_SANITIZE_GLOBALS(parse);
+	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 	xmlSubstituteEntitiesDefault(1);
 	xmlLoadExtDtdDefaultValue = XML_DETECT_IDS | XML_COMPLETE_ATTRS;
+	ZEND_DIAGNOSTIC_IGNORED_END
 
 	sheetp = xsltParseStylesheetDoc(newdoc);
 	PHP_LIBXML_RESTORE_GLOBALS(parse);
