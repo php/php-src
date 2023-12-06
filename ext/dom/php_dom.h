@@ -128,6 +128,7 @@ void php_dom_throw_error_with_message(int error_code, char *error_message, int s
 void node_list_unlink(xmlNodePtr node);
 int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len);
 xmlNsPtr dom_get_ns(xmlNodePtr node, char *uri, int *errorcode, char *prefix);
+xmlNsPtr dom_get_ns_unchecked(xmlNodePtr nodep, char *uri, char *prefix);
 void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep);
 void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);
