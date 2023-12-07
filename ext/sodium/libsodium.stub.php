@@ -40,6 +40,52 @@ const SODIUM_CRYPTO_AEAD_AES256GCM_NPUBBYTES = UNKNOWN;
 const SODIUM_CRYPTO_AEAD_AES256GCM_ABYTES = UNKNOWN;
 #endif
 
+#ifdef crypto_aead_aegis128l_KEYBYTES
+/**
+ * @var int
+ * @cvalue crypto_aead_aegis128l_KEYBYTES
+ */
+const SODIUM_CRYPTO_AEAD_AEGIS128L_KEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_aegis128l_NSECBYTES
+ */
+const SODIUM_CRYPTO_AEAD_AEGIS128L_NSECBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_aegis128l_NPUBBYTES
+ */
+const SODIUM_CRYPTO_AEAD_AEGIS128L_NPUBBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_aegis128l_ABYTES
+ */
+const SODIUM_CRYPTO_AEAD_AEGIS128L_ABYTES = UNKNOWN;
+#endif
+
+#ifdef crypto_aead_aegis256_KEYBYTES
+/**
+ * @var int
+ * @cvalue crypto_aead_aegis256_KEYBYTES
+ */
+const SODIUM_CRYPTO_AEAD_AEGIS256_KEYBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_aegis256_NSECBYTES
+ */
+const SODIUM_CRYPTO_AEAD_AEGIS256_NSECBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_aegis256_NPUBBYTES
+ */
+const SODIUM_CRYPTO_AEAD_AEGIS256_NPUBBYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_aead_aegis256_ABYTES
+ */
+const SODIUM_CRYPTO_AEAD_AEGIS256_ABYTES = UNKNOWN;
+#endif
+
 /**
  * @var int
  * @cvalue crypto_aead_chacha20poly1305_KEYBYTES
@@ -505,6 +551,22 @@ function sodium_crypto_aead_aes256gcm_decrypt(string $ciphertext, string $additi
 function sodium_crypto_aead_aes256gcm_encrypt(#[\SensitiveParameter] string $message, string $additional_data, string $nonce, #[\SensitiveParameter] string $key): string {}
 
 function sodium_crypto_aead_aes256gcm_keygen(): string {}
+#endif
+
+#ifdef crypto_aead_aegis128l_KEYBYTES
+function sodium_crypto_aead_aegis128l_decrypt(string $ciphertext, string $additional_data, string $nonce, #[\SensitiveParameter] string $key): string|false {}
+
+function sodium_crypto_aead_aegis128l_encrypt(#[\SensitiveParameter] string $message, string $additional_data, string $nonce, #[\SensitiveParameter] string $key): string {}
+
+function sodium_crypto_aead_aegis128l_keygen(): string {}
+#endif
+
+#ifdef crypto_aead_aegis256_KEYBYTES
+function sodium_crypto_aead_aegis256_decrypt(string $ciphertext, string $additional_data, string $nonce, #[\SensitiveParameter] string $key): string|false {}
+
+function sodium_crypto_aead_aegis256_encrypt(#[\SensitiveParameter] string $message, string $additional_data, string $nonce, #[\SensitiveParameter] string $key): string {}
+
+function sodium_crypto_aead_aegis256_keygen(): string {}
 #endif
 
 function sodium_crypto_aead_chacha20poly1305_decrypt(string $ciphertext, string $additional_data, string $nonce, #[\SensitiveParameter] string $key): string|false {}

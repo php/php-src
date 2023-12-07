@@ -87,6 +87,10 @@ SOAP:
 Sockets:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
 
+Sodium:
+  . Add support for AEGIS-128L and AEGIS-256 (jedisct1)
+  . Enable AES-GCM on aarch64 with the ARM crypto extensions (jedisct1)
+
 Standard:
   . Implement GH-12188 (Indication for the int size in phpinfo()). (timwolla)
   . Partly fix GH-12143 (Incorrect round() result for 0.49999999999999994).
