@@ -191,6 +191,13 @@ PHP 8.4 UPGRADE NOTES
   . If JIT is enabled, PHP will now exit with a fatal error on startup in case
     of JIT startup initialization issues.
 
+- Sodium:
+  . Added the sodium_crypto_aead_aegis128l_*() and sodium_crypto_aead_aegis256l_*()
+    functions to support the AEGIS family of authenticated encryption algorithms,
+    that was introduced in libsodium 1.0.19.
+  . sodium_crypto_aead_aes256gcm_*() functions are now enabled on aarch64 CPUs
+    with the ARM cryptographic extensions.
+
 ========================================
 7. New Classes and Interfaces
 ========================================
