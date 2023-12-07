@@ -45,6 +45,8 @@ PDO_DBLIB:
 
 PDO_FIREBIRD:
   . Fixed setAttribute and getAttribute (SakiTakamachi)
+  . Feature: Add transaction isolation level and mode settings to pdo_firebird
+    (SakiTakamachi)
 
 PDO_MYSQL:
   . Fixed setAttribute and getAttribute (SakiTakamachi)

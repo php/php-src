@@ -529,7 +529,7 @@ static void firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 
 	if (H->tr) {
 		if (dbh->auto_commit) {
-			php_firebird_commit_transaction(dbh, /* release */ false);
+			php_firebird_commit_transaction(dbh, /* retain */ false);
 		} else {
 			php_firebird_rollback_transaction(dbh);
 		}
@@ -756,51 +756,54 @@ static zend_string* firebird_handle_quoter(pdo_dbh_t *dbh, const zend_string *un
 /* }}} */
 
 /* php_firebird_begin_transaction */
-static bool php_firebird_begin_transaction(pdo_dbh_t *dbh) /* {{{ */
+static bool php_firebird_begin_transaction(pdo_dbh_t *dbh, bool is_auto_commit_txn) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
-	char tpb[8] = { isc_tpb_version3 }, *ptpb = tpb+1;
-#ifdef abies_0
-	if (dbh->transaction_flags & PDO_TRANS_ISOLATION_LEVEL) {
-		if (dbh->transaction_flags & PDO_TRANS_READ_UNCOMMITTED) {
-			/* this is a poor fit, but it's all we have */
-			*ptpb++ = isc_tpb_read_committed;
-			*ptpb++ = isc_tpb_rec_version;
-			dbh->transaction_flags &= ~(PDO_TRANS_ISOLATION_LEVEL^PDO_TRANS_READ_UNCOMMITTED);
-		} else if (dbh->transaction_flags & PDO_TRANS_READ_COMMITTED) {
-			*ptpb++ = isc_tpb_read_committed;
-			*ptpb++ = isc_tpb_no_rec_version;
-			dbh->transaction_flags &= ~(PDO_TRANS_ISOLATION_LEVEL^PDO_TRANS_READ_COMMITTED);
-		} else if (dbh->transaction_flags & PDO_TRANS_REPEATABLE_READ) {
-			*ptpb++ = isc_tpb_concurrency;
-			dbh->transaction_flags &= ~(PDO_TRANS_ISOLATION_LEVEL^PDO_TRANS_REPEATABLE_READ);
-		} else {
-			*ptpb++ = isc_tpb_consistency;
-			dbh->transaction_flags &= ~(PDO_TRANS_ISOLATION_LEVEL^PDO_TRANS_SERIALIZABLE);
+
+	/* isc_xxx are all 1 byte. */
+	char tpb[4] = { isc_tpb_version3 };
+	size_t tpb_size;
+
+	/* access mode. writable or readonly */
+	tpb[1] = H->is_writable_txn ? isc_tpb_write : isc_tpb_read;
+
+	if (is_auto_commit_txn) {
+		/*
+		 * In autocommit mode, we need to always read the latest information, so we set `read committed`.
+		 */
+		tpb[2] = isc_tpb_read_committed;
+		/* Ignore indeterminate data from other transactions. This option only required with `read committed`. */
+		tpb[3] = isc_tpb_rec_version;
+		tpb_size = 4;
+	} else {
+		switch (H->txn_isolation_level) {
+			/*
+			* firebird's `read committed` has the option to wait until other transactions
+			* commit or rollback if there is indeterminate data.
+			* Introducing too many configuration values ​​at once can cause confusion, so
+			* we don't support in PDO that feature yet.
+			*/
+			case PDO_FB_READ_COMMITTED:
+				tpb[2] = isc_tpb_read_committed;
+				/* Ignore indeterminate data from other transactions. This option only required with `read committed`. */
+				tpb[3] = isc_tpb_rec_version;
+				tpb_size = 4;
+				break;
+
+			case PDO_FB_SERIALIZABLE:
+				tpb[2] = isc_tpb_consistency;
+				tpb_size = 3;
+				break;
+
+			case PDO_FB_REPEATABLE_READ:
+			default:
+				tpb[2] = isc_tpb_concurrency;
+				tpb_size = 3;
+				break;
 		}
 	}
 
-	if (dbh->transaction_flags & PDO_TRANS_ACCESS_MODE) {
-		if (dbh->transaction_flags & PDO_TRANS_READONLY) {
-			*ptpb++ = isc_tpb_read;
-			dbh->transaction_flags &= ~(PDO_TRANS_ACCESS_MODE^PDO_TRANS_READONLY);
-		} else {
-			*ptpb++ = isc_tpb_write;
-			dbh->transaction_flags &= ~(PDO_TRANS_ACCESS_MODE^PDO_TRANS_READWRITE);
-		}
-	}
-
-	if (dbh->transaction_flags & PDO_TRANS_CONFLICT_RESOLUTION) {
-		if (dbh->transaction_flags & PDO_TRANS_RETRY) {
-			*ptpb++ = isc_tpb_wait;
-			dbh->transaction_flags &= ~(PDO_TRANS_CONFLICT_RESOLUTION^PDO_TRANS_RETRY);
-		} else {
-			*ptpb++ = isc_tpb_nowait;
-			dbh->transaction_flags &= ~(PDO_TRANS_CONFLICT_RESOLUTION^PDO_TRANS_ABORT);
-		}
-	}
-#endif
-	if (isc_start_transaction(H->isc_status, &H->tr, 1, &H->db, (unsigned short)(ptpb-tpb), tpb)) {
+	if (isc_start_transaction(H->isc_status, &H->tr, 1, &H->db, tpb_size, tpb)) {
 		php_firebird_error(dbh);
 		return false;
 	}
@@ -817,12 +820,12 @@ static bool firebird_handle_manually_begin(pdo_dbh_t *dbh) /* {{{ */
 	 * If in autocommit mode and in transaction, we will need to close the transaction once.
 	 */
 	if (dbh->auto_commit && H->tr) {
-		if (!php_firebird_commit_transaction(dbh, /* release */ false)) {
+		if (!php_firebird_commit_transaction(dbh, /* retain */ false)) {
 			return false;
 		}
 	}
 
-	if (!php_firebird_begin_transaction(dbh)) {
+	if (!php_firebird_begin_transaction(dbh, /* auto commit mode */ false)) {
 		return false;
 	}
 	H->in_manually_txn = 1;
@@ -871,7 +874,7 @@ static bool firebird_handle_manually_commit(pdo_dbh_t *dbh) /* {{{ */
 	 * Reopen instead of retain because isolation level may change
 	 */
 	if (dbh->auto_commit) {
-		if (!php_firebird_begin_transaction(dbh)) {
+		if (!php_firebird_begin_transaction(dbh, /* auto commit mode */ true)) {
 			return false;
 		}
 	}
@@ -907,7 +910,7 @@ static bool firebird_handle_manually_rollback(pdo_dbh_t *dbh) /* {{{ */
 	 * Reopen instead of retain because isolation level may change
 	 */
 	if (dbh->auto_commit) {
-		if (!php_firebird_begin_transaction(dbh)) {
+		if (!php_firebird_begin_transaction(dbh, /* auto commit mode */ true)) {
 			return false;
 		}
 	}
@@ -961,6 +964,7 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	bool bval;
+	zend_long lval;
 
 	switch (attr) {
 		case PDO_ATTR_AUTOCOMMIT:
@@ -979,22 +983,22 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 				/* ignore if the new value equals the old one */
 				if (dbh->auto_commit ^ bval) {
 					if (bval) {
-						/* change to auto commit mode.
+						/*
+						 * change to auto commit mode.
 						 * If the transaction is not started, start it.
-						 * However, this is a fallback since such a situation usually does not occur.
 						 */
 						if (!H->tr) {
-							if (!php_firebird_begin_transaction(dbh)) {
+							if (!php_firebird_begin_transaction(dbh, /* auto commit mode */ true)) {
 								return false;
 							}
 						}
 					} else {
-						/* change to not auto commit mode.
+						/*
+						 * change to not auto commit mode.
 						 * close the transaction if exists.
-						 * However, this is a fallback since such a situation usually does not occur.
 						 */
 						if (H->tr) {
-							if (!php_firebird_commit_transaction(dbh, /* release */ false)) {
+							if (!php_firebird_commit_transaction(dbh, /* retain */ false)) {
 								return false;
 							}
 						}
@@ -1050,6 +1054,69 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 				}
 				spprintf(&H->timestamp_format, 0, "%s", ZSTR_VAL(str));
 				zend_string_release_ex(str, 0);
+			}
+			return true;
+
+		case PDO_FB_TRANSACTION_ISOLATION_LEVEL:
+			{
+				if (!pdo_get_long_param(&lval, val)) {
+					return false;
+				}
+
+				if (H->in_manually_txn) {
+					pdo_raise_impl_error(dbh, NULL, "HY000", "Cannot change transaction isolation level while a transaction is already open");
+					return false;
+				}
+
+				/* ignore if the new value equals the old one */
+				if (H->txn_isolation_level != lval) {
+					if (lval == PDO_FB_READ_COMMITTED ||
+						lval == PDO_FB_REPEATABLE_READ ||
+						lval == PDO_FB_SERIALIZABLE
+					) {
+						/*
+						 * Autocommit mode is always read-committed, so this setting is used the next time
+						 * a manual transaction starts. Therefore, there is no need to immediately reopen the transaction.
+						 */
+						H->txn_isolation_level = lval;
+					} else {
+						zend_value_error("PDO::FB_TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
+							"(PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, or PDO::FB_SERIALIZABLE)");
+						return false;
+					}
+				}
+			}
+			return true;
+
+		case PDO_FB_WRITABLE_TRANSACTION:
+			{
+				if (!pdo_get_bool_param(&bval, val)) {
+					return false;
+				}
+
+				if (H->in_manually_txn) {
+					pdo_raise_impl_error(dbh, NULL, "HY000", "Cannot change access mode while a transaction is already open");
+					return false;
+				}
+
+				/* ignore if the new value equals the old one */
+				if (H->is_writable_txn != bval) {
+					H->is_writable_txn = bval;
+					if (dbh->auto_commit) {
+						if (H->tr) {
+							if (!php_firebird_commit_transaction(dbh, /* retain */ false)) {
+								/* In case of error, revert the setting */
+								H->is_writable_txn = !bval;
+								return false;
+							}
+						}
+						if (!php_firebird_begin_transaction(dbh, /* auto commit mode */ true)) {
+							/* In case of error, revert the setting */
+							H->is_writable_txn = !bval;
+							return false;
+						}
+					}
+				}
 			}
 			return true;
 	}
@@ -1136,6 +1203,14 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
 			ZVAL_STRING(val, H->timestamp_format);
 			return 1;
+
+		case PDO_FB_TRANSACTION_ISOLATION_LEVEL:
+			ZVAL_LONG(val, H->txn_isolation_level);
+			return 1;
+
+		case PDO_FB_WRITABLE_TRANSACTION:
+			ZVAL_BOOL(val, H->is_writable_txn);
+			return 1;
 	}
 	return 0;
 }
@@ -1213,6 +1288,20 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 		dbh->password = pestrdup(vars[5].optval, dbh->is_persistent);
 	}
 
+	H->in_manually_txn = 0;
+	H->is_writable_txn = pdo_attr_lval(driver_options, PDO_FB_WRITABLE_TRANSACTION, 1);
+	zend_long txn_isolation_level = pdo_attr_lval(driver_options, PDO_FB_TRANSACTION_ISOLATION_LEVEL, PDO_FB_REPEATABLE_READ);
+	if (txn_isolation_level == PDO_FB_READ_COMMITTED ||
+		txn_isolation_level == PDO_FB_REPEATABLE_READ ||
+		txn_isolation_level == PDO_FB_SERIALIZABLE
+	) {
+		H->txn_isolation_level = txn_isolation_level;
+	} else {
+		zend_value_error("PDO::FB_TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
+			"(PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, or PDO::FB_SERIALIZABLE)");
+		ret = 0;
+	}
+
 	do {
 		static char const dpb_flags[] = {
 			isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype, isc_dpb_sql_role_name };
@@ -1263,9 +1352,8 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 				"HY000", H->isc_status[1], errmsg);
 	}
 
-	H->in_manually_txn = 0;
 	if (dbh->auto_commit && !H->tr) {
-		ret = php_firebird_begin_transaction(dbh);
+		ret = php_firebird_begin_transaction(dbh, /* auto commit mode */ true);
 	}
 
 	if (!ret) {
