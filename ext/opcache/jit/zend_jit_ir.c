@@ -69,6 +69,9 @@
 #define ir_CAST_FC_FUNC(_addr)  ir_fold2(_ir_CTX, IR_OPT(IR_PROTO, IR_ADDR), (_addr), \
 	ir_proto_0(_ir_CTX, IR_FASTCALL_FUNC, IR_I32))
 
+#define ir_CONST_FUNC_PROTO(_addr, _proto) \
+	jit_CONST_FUNC_PROTO(jit, (uintptr_t)(_addr), (_proto))
+
 #undef  ir_ADD_OFFSET
 #define ir_ADD_OFFSET(_addr, _offset) \
 	jit_ADD_OFFSET(jit, _addr, _offset)
@@ -489,17 +492,11 @@ static ir_ref jit_CONST_ADDR(zend_jit_ctx *jit, uintptr_t addr)
 	return ref;
 }
 
-static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags)
+static ir_ref jit_CONST_FUNC_PROTO(zend_jit_ctx *jit, uintptr_t addr, ir_ref proto)
 {
 	ir_ref ref;
 	ir_insn *insn;
 	zval *zv;
-#if defined(IR_TARGET_X86)
-	/* TODO: dummy prototype (only flags matter) ??? */
-	ir_ref proto = flags ? ir_proto_0(&jit->ctx, flags, IR_I32) : 0;
-#else
-	ir_ref proto = 0;
-#endif
 
 	ZEND_ASSERT(addr != 0);
 	zv = zend_hash_index_lookup(&jit->addr_hash, addr);
@@ -514,6 +511,18 @@ static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags)
 		ZVAL_LONG(zv, ref);
 	}
 	return ref;
+}
+
+static ir_ref jit_CONST_FUNC(zend_jit_ctx *jit, uintptr_t addr, uint16_t flags)
+{
+#if defined(IR_TARGET_X86)
+	/* TODO: dummy prototype (only flags matter) ??? */
+	ir_ref proto = flags ? ir_proto_0(&jit->ctx, flags, IR_I32) : 0;
+#else
+	ir_ref proto = 0;
+#endif
+
+	return jit_CONST_FUNC_PROTO(jit, addr, proto);
 }
 
 static ir_ref jit_ADD_OFFSET(zend_jit_ctx *jit, ir_ref addr, uintptr_t offset)
@@ -2020,7 +2029,9 @@ static int zend_jit_leave_function_handler_stub(zend_jit_ctx *jit)
 
 static int zend_jit_negative_shift_stub(zend_jit_ctx *jit)
 {
-	ir_CALL_2(IR_VOID, ir_CONST_FUNC(zend_throw_error),
+	ir_CALL_2(IR_VOID,
+		ir_CONST_FUNC_PROTO(zend_throw_error,
+			ir_proto_2(&jit->ctx, IR_VARARG_FUNC, IR_VOID, IR_ADDR, IR_ADDR)),
 		ir_CONST_ADDR(zend_ce_arithmetic_error),
 		ir_CONST_ADDR("Bit shift by negative number"));
 	ir_IJMP(jit_STUB_ADDR(jit, jit_stub_exception_handler_free_op1_op2));
@@ -2029,7 +2040,9 @@ static int zend_jit_negative_shift_stub(zend_jit_ctx *jit)
 
 static int zend_jit_mod_by_zero_stub(zend_jit_ctx *jit)
 {
-	ir_CALL_2(IR_VOID, ir_CONST_FUNC(zend_throw_error),
+	ir_CALL_2(IR_VOID,
+		ir_CONST_FUNC_PROTO(zend_throw_error,
+			ir_proto_2(&jit->ctx, IR_VARARG_FUNC, IR_VOID, IR_ADDR, IR_ADDR)),
 		ir_CONST_ADDR(zend_ce_division_by_zero_error),
 		ir_CONST_ADDR("Modulo by zero"));
 	ir_IJMP(jit_STUB_ADDR(jit, jit_stub_exception_handler_free_op1_op2));
@@ -2038,7 +2051,9 @@ static int zend_jit_mod_by_zero_stub(zend_jit_ctx *jit)
 
 static int zend_jit_invalid_this_stub(zend_jit_ctx *jit)
 {
-	ir_CALL_2(IR_VOID, ir_CONST_FUNC(zend_throw_error),
+	ir_CALL_2(IR_VOID,
+		ir_CONST_FUNC_PROTO(zend_throw_error,
+			ir_proto_2(&jit->ctx, IR_VARARG_FUNC, IR_VOID, IR_ADDR, IR_ADDR)),
 		IR_NULL,
 		ir_CONST_ADDR("Using $this when not in object context"));
 	ir_IJMP(jit_STUB_ADDR(jit, jit_stub_exception_handler_undef));
@@ -2058,7 +2073,9 @@ static int zend_jit_undefined_function_stub(zend_jit_ctx *jit)
 	}
 	arg3 = ir_ADD_OFFSET(arg3, offsetof(zend_string, val));
 
-	ir_CALL_3(IR_VOID, ir_CONST_FUNC(zend_throw_error),
+	ir_CALL_3(IR_VOID,
+		ir_CONST_FUNC_PROTO(zend_throw_error,
+			ir_proto_2(&jit->ctx, IR_VARARG_FUNC, IR_VOID, IR_ADDR, IR_ADDR)),
 		IR_NULL,
 		ir_CONST_ADDR("Call to undefined function %s()"),
 		arg3);
@@ -2479,7 +2496,9 @@ static int zend_jit_cannot_add_element_stub(zend_jit_ctx *jit)
 	jit_set_Z_TYPE_INFO_ref(jit, ir_ADD_A(jit_FP(jit), ref), ir_CONST_U32(IS_UNDEF));
 	ir_MERGE_WITH_EMPTY_FALSE(if_result_used);
 
-	ir_CALL_2(IR_VOID, ir_CONST_FUNC(zend_throw_error),
+	ir_CALL_2(IR_VOID,
+		ir_CONST_FUNC_PROTO(zend_throw_error,
+			ir_proto_2(&jit->ctx, IR_VARARG_FUNC, IR_VOID, IR_ADDR, IR_ADDR)),
 		IR_NULL,
 		ir_CONST_ADDR("Cannot add element to the array as the next element is already occupied"));
 	ir_RETURN(IR_VOID);
