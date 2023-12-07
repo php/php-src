@@ -1187,6 +1187,14 @@ IR_FOLD(COND(C_FLOAT, _))
 	}
 }
 
+IR_FOLD(BITCAST(_))
+{
+	if (IR_OPT_TYPE(opt) == op1_insn->type) {
+		IR_FOLD_COPY(op1);
+	}
+	IR_FOLD_NEXT;
+}
+
 /* Algebraic simplifications */
 IR_FOLD(ABS(ABS))
 {

@@ -30,6 +30,8 @@ void ir_print_proto(const ir_ctx *ctx, ir_ref func_proto, FILE *f)
 		fprintf(f, "): %s", ir_type_cname[proto->ret_type]);
 		if (proto->flags & IR_FASTCALL_FUNC) {
 			fprintf(f, " __fastcall");
+		} else if (proto->flags & IR_BUILTIN_FUNC) {
+			fprintf(f, " __builtin");
 		}
 	} else {
 		fprintf(f, "(): int32_t");

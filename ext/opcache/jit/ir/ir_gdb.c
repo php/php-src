@@ -393,6 +393,7 @@ static void ir_gdbjit_debugabbrev(ir_gdbjit_ctx *ctx)
 	DUV(DW_FORM_data4);
 	DB(0);
 	DB(0);
+	DB(0);
 
 	ctx->p = p;
 }

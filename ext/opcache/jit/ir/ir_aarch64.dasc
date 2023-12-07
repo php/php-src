@@ -1172,8 +1172,16 @@ static void ir_emit_load(ir_ctx *ctx, ir_type type, ir_reg reg, ir_ref src)
 		if (IR_IS_TYPE_INT(type)) {
 			ir_insn *insn = &ctx->ir_base[src];
 
-			IR_ASSERT(insn->op != IR_STR && insn->op != IR_SYM && insn->op != IR_FUNC);
-			ir_emit_load_imm_int(ctx, type, reg, insn->val.i64);
+			if (insn->op == IR_SYM || insn->op == IR_FUNC) {
+				void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
+					ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, insn->val.name)) :
+					ir_resolve_sym_name(ir_get_str(ctx, insn->val.name));
+				IR_ASSERT(addr);
+				ir_emit_load_imm_int(ctx, type, reg, (intptr_t)addr);
+			} else {
+				IR_ASSERT(insn->op != IR_STR);
+				ir_emit_load_imm_int(ctx, type, reg, insn->val.i64);
+			}
 		} else {
 			ir_emit_load_imm_fp(ctx, type, reg, src);
 		}
@@ -4175,6 +4183,11 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 		} else {
 			ctx->call_stack_size += used_stack;
 			if (used_stack) {
+				if (insn->op == IR_TAILCALL && !(ctx->flags & IR_USE_FRAME_POINTER)) {
+					ctx->flags |= IR_USE_FRAME_POINTER;
+					|	stp x29, x30, [sp, # (-(ctx->stack_frame_size+16))]!
+					|	mov x29, sp
+				}
 				|	sub sp, sp, #used_stack
 			}
 		}
@@ -4301,6 +4314,7 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 									void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
 										ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, val_insn->val.name)) :
 										ir_resolve_sym_name(ir_get_str(ctx, val_insn->val.name));
+									IR_ASSERT(addr);
 									ir_emit_load_imm_int(ctx, IR_ADDR, dst_reg, (intptr_t)addr);
 									continue;
 								}
@@ -4330,6 +4344,7 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 							void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
 								ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, val_insn->val.name)) :
 								ir_resolve_sym_name(ir_get_str(ctx, val_insn->val.name));
+							IR_ASSERT(addr);
 							ir_emit_load_imm_int(ctx, IR_ADDR, tmp_reg, (intptr_t)addr);
 							|	str Rx(tmp_reg), [sp, #stack_offset]
 						} else {
@@ -4367,12 +4382,11 @@ static int32_t ir_emit_arguments(ir_ctx *ctx, ir_ref def, ir_insn *insn, ir_reg 
 	return used_stack;
 }
 
-static void ir_emit_call(ir_ctx *ctx, ir_ref def, ir_insn *insn)
+static void ir_emit_call_ex(ir_ctx *ctx, ir_ref def, ir_insn *insn, int32_t used_stack)
 {
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
 	ir_reg def_reg;
-	int32_t used_stack = ir_emit_arguments(ctx, def, insn, ctx->regs[def][1]);
 
 	if (IR_IS_CONST_REF(insn->op2)) {
 		ir_insn *addr_insn = &ctx->ir_base[insn->op2];
@@ -4383,6 +4397,7 @@ static void ir_emit_call(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
 				ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, addr_insn->val.name)) :
 				ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.name));
+			IR_ASSERT(addr);
 		} else {
 			IR_ASSERT(addr_insn->op == IR_ADDR || addr_insn->op == IR_FUNC_ADDR);
 			addr = (void*)addr_insn->val.addr;
@@ -4439,6 +4454,12 @@ static void ir_emit_call(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	}
 }
 
+static void ir_emit_call(ir_ctx *ctx, ir_ref def, ir_insn *insn)
+{
+	int32_t used_stack = ir_emit_arguments(ctx, def, insn, ctx->regs[def][1]);
+	ir_emit_call_ex(ctx, def, insn, used_stack);
+}
+
 static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 {
 	ir_backend_data *data = ctx->data;
@@ -4446,7 +4467,7 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	int32_t used_stack = ir_emit_arguments(ctx, def, insn, ctx->regs[def][1]);
 
 	if (used_stack != 0) {
-		ir_emit_call(ctx, def, insn);
+		ir_emit_call_ex(ctx, def, insn, used_stack);
 		ir_emit_return_void(ctx);
 		return;
 	}
@@ -4462,6 +4483,7 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
 				ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, addr_insn->val.name)) :
 				ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.name));
+			IR_ASSERT(addr);
 		} else {
 			IR_ASSERT(addr_insn->op == IR_ADDR || addr_insn->op == IR_FUNC_ADDR);
 			addr = (void*)addr_insn->val.addr;
@@ -4845,6 +4867,7 @@ static void ir_emit_exitcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
 				ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, addr_insn->val.name)) :
 				ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.name));
+			IR_ASSERT(addr);
 		} else {
 			IR_ASSERT(addr_insn->op == IR_ADDR || addr_insn->op == IR_FUNC_ADDR);
 			addr = (void*)addr_insn->val.addr;
@@ -5809,7 +5832,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 	if (data.jmp_table_label) {
 		ctx->code_size = dasm_getpclabel(&data.dasm_state, data.jmp_table_label);
 	} else if (data.rodata_label) {
-		ctx->code_size = dasm_getpclabel(&data.dasm_state, data.jmp_table_label);
+		ctx->code_size = dasm_getpclabel(&data.dasm_state, data.rodata_label);
 	} else {
 		ctx->code_size = size;
 	}
