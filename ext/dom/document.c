@@ -906,10 +906,10 @@ PHP_METHOD(DOMDocument, createAttributeNS)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	size_t uri_len = uri ? ZSTR_LEN(uri) : 0;
-	if (UNEXPECTED(uri_len == 0)) {
+	if (UNEXPECTED(uri == NULL)) {
 		uri = zend_empty_string;
 	}
+	size_t uri_len = ZSTR_LEN(uri);
 
 	root = xmlDocGetRootElement(docp);
 	if (root != NULL) {
