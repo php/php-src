@@ -247,15 +247,19 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
 {
 #ifdef LIBXML_HTML_ENABLED
     xmlDocPtr lxml_doc = htmlNewDocNoDtD(NULL, NULL);
+    if (UNEXPECTED(!lxml_doc)) {
+        return LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
+    }
 #else
     /* If HTML support is not enabled, then htmlNewDocNoDtD() is not available.
      * This code mimics the behaviour. */
     xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) "1.0");
-    lxml_doc->type = XML_HTML_DOCUMENT_NODE;
-#endif
-    if (!lxml_doc) {
+    if (UNEXPECTED(!lxml_doc)) {
         return LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
     }
+    lxml_doc->type = XML_HTML_DOCUMENT_NODE;
+#endif
+    lxml_doc->dict = xmlDictCreate();
     lexbor_libxml2_bridge_status status = lexbor_libxml2_bridge_convert(
         lxb_dom_interface_node(document)->last_child,
         lxml_doc,
