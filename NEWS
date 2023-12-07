@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.2
 
+- Cli:
+  . Fix incorrect timeout in built-in web server when using router script and
+    max_input_time. (ilutov)
+
 - Core:
   . Fixed bug GH-12854 (8.3 - as final trait-used method does not correctly
     report visibility in Reflection). (nielsdos)
