@@ -34,6 +34,7 @@ PHP 8.4 UPGRADE NOTES
 - MBString:
   . mb_encode_numericentity() and mb_decode_numericentity() now check that
     the $map is only composed of integers, if not a ValueError is thrown.
+  . mb_http_input() now always throws a ValueError if the $type is invalid.
 
 - PDO_DBLIB:
   . setAttribute, DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER and DBLIB_ATTR_DATETIME_CONVERT

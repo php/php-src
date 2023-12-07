@@ -1271,6 +1271,10 @@ PHP_FUNCTION(mb_http_input)
 
 	if (type == NULL) {
 		encoding = MBSTRG(http_input_identify);
+	} else if (type_len != 1) {
+		zend_argument_value_error(1,
+			"must be one of \"G\", \"P\", \"C\", \"S\", \"I\", or \"L\"");
+		RETURN_THROWS();
 	} else {
 		switch (*type) {
 		case 'G':
