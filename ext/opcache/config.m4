@@ -92,6 +92,9 @@ if test "$PHP_OPCACHE" != "no"; then
     PHP_SUBST(IR_TARGET)
     PHP_SUBST(DASM_FLAGS)
     PHP_SUBST(DASM_ARCH)
+    AC_CHECK_FUNC(qsort_r,[], [
+      AC_MSG_ERROR([qsort_r required but not found])
+    ])
 
     JIT_CFLAGS="-I@ext_builddir@/jit/ir -D${IR_TARGET} -DIR_PHP"
     if test "$ZEND_DEBUG" = "yes"; then

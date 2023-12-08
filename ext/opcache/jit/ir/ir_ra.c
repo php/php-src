@@ -1849,8 +1849,10 @@ int ir_coalesce(ir_ctx *ctx)
 # define qsort_fn(base, num, width, func, data) qsort_s(base, num, width, func, data)
 #elif defined(__APPLE__) || defined(__FreeBSD__)
 # define qsort_fn(base, num, width, func, data) qsort_r(base, num, width, data, func)
-#else
+#elif defined(__linux__)
 # define qsort_fn(base, num, width, func, data) qsort_r(base, num, width, func, data)
+#else
+# error "no re-entrant qsort implementation available"
 #endif
 	qsort_fn(blocks.l.a.refs, ir_worklist_len(&blocks), sizeof(ir_ref), ir_block_cmp, ctx);
 
