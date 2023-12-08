@@ -487,8 +487,10 @@ static bool dom_process_parse_chunk(
 	if (UNEXPECTED(lexbor_status != LXB_STATUS_OK)) {
 		return false;
 	}
-	lexbor_libxml2_bridge_report_errors(ctx, parser, encoding_output, application_data->current_total_offset, tokenizer_error_offset, tree_error_offset);
-	dom_find_line_and_column_using_cache(application_data, &application_data->cache_tokenizer, application_data->current_total_offset + input_buffer_length);
+	if (ctx->tokenizer_error_reporter || ctx->tree_error_reporter) {
+		lexbor_libxml2_bridge_report_errors(ctx, parser, encoding_output, application_data->current_total_offset, tokenizer_error_offset, tree_error_offset);
+		dom_find_line_and_column_using_cache(application_data, &application_data->cache_tokenizer, application_data->current_total_offset + input_buffer_length);
+	}
 	application_data->current_total_offset += input_buffer_length;
 	application_data->cache_tokenizer.last_offset = 0;
 	return true;
