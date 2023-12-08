@@ -7833,18 +7833,17 @@ static zend_string *zend_generate_anon_class_name(zend_ast_decl *decl)
 	zend_string *filename = CG(active_op_array)->filename;
 	uint32_t start_lineno = decl->start_lineno;
 
-	/* Use parent or first interface as prefix. */
+	/* Use current_namespace\\ or "class" as prefix */
 	zend_string *prefix = ZSTR_KNOWN(ZEND_STR_CLASS);
-	if (decl->child[0]) {
-		prefix = zend_resolve_const_class_name_reference(decl->child[0], "class name");
-	} else if (decl->child[1]) {
-		zend_ast_list *list = zend_ast_get_list(decl->child[1]);
-		prefix = zend_resolve_const_class_name_reference(list->child[0], "interface name");
+	const char *prefix_suffix = "";
+	if (FC(current_namespace)) {
+		prefix = FC(current_namespace);
+		/* This is necessary to get the right short name of anonymous classes. */
+		prefix_suffix = "\\";
 	}
 
-	zend_string *result = zend_strpprintf(0, "%s@anonymous%c%s:%" PRIu32 "$%" PRIx32,
-		ZSTR_VAL(prefix), '\0', ZSTR_VAL(filename), start_lineno, CG(rtd_key_counter)++);
-	zend_string_release(prefix);
+	zend_string *result = zend_strpprintf(0, "%s%s@anonymous%c%s:%" PRIu32 "$%" PRIx32,
+		ZSTR_VAL(prefix), prefix_suffix, '\0', ZSTR_VAL(filename), start_lineno, CG(rtd_key_counter)++);
 	return zend_new_interned_string(result);
 }
 
