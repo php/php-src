@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12854 (8.3 - as final trait-used method does not correctly
     report visibility in Reflection). (nielsdos)
 
+- DOM:
+  . Fixed bug GH-12870 (Creating an xmlns attribute results in a DOMException).
+    (nielsdos)
+
 07 Dec 2023, PHP 8.3.1RC1
 
 - Core:
