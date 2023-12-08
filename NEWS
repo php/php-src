@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - FFI:
   . Fixed bug GH-9698 (stream_wrapper_register crashes with FFI\CData).
     (Jakub Zelenka)
+  . Fixed bug GH-12905 (FFI::new interacts badly with observers). (nielsdos)
 
 - Hash:
   . Fixed bug GH-12936 (hash() function hangs endlessly if using sha512 on
