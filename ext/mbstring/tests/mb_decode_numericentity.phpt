@@ -106,9 +106,6 @@ test("Starting entity immediately after hex entity which is too long", "&#x11111
 test("Starting entity immediately after invalid decimal entity", "&#0&#65;", "&#0A", [0x1, 0xFFFF, 0, 0xFFFF], 'ASCII');
 test("Starting entity immediately after invalid hex entity", "&#x0&#65;", "&#x0A", [0x1, 0xFFFF, 0, 0xFFFF], 'ASCII');
 
-// Previously, signed arithmetic was used on convmap entries
-test("Regression test (convmap entries are now treated as unsigned)", "&#7,", "?,", [0x22FFFF11, 0xBF111189, 0x67726511, 0x1161E719], "ASCII");
-
 // Try with '&', '&#', or '&#' at the end of a buffer of wchars, with more input
 // still left to process in the next buffer
 // (mb_decode_numericentity splits its input into 'chunks' and processes it one
@@ -179,4 +176,3 @@ Starting entity immediately after decimal entity which is too long: string(18) "
 Starting entity immediately after hex entity which is too long: string(17) "&#x111111111&#65;" => string(13) "&#x111111111A" (Good)
 Starting entity immediately after invalid decimal entity: string(8) "&#0&#65;" => string(4) "&#0A" (Good)
 Starting entity immediately after invalid hex entity: string(9) "&#x0&#65;" => string(5) "&#x0A" (Good)
-Regression test (convmap entries are now treated as unsigned): string(4) "&#7," => string(2) "?," (Good)

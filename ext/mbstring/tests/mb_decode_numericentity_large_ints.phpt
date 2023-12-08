@@ -49,6 +49,9 @@ test("Regression test (entity which decodes to 0xFFFFFFFF)", "&#xe;", "?", [0xFF
 // because some text encodings did not properly invoke the next flush function in the chain
 test("Regression test (truncation of successive & with JIS encoding)", "&&&", "&&&", [0x20FF37FF, 0x7202F569, 0xC4090023, 0xF160], "JIS");
 
+// Previously, signed arithmetic was used on convmap entries
+test("Regression test (convmap entries are now treated as unsigned)", "&#7,", "?,", [0x22FFFF11, 0xBF111189, 0x67726511, 0x1161E719], "ASCII");
+
 ?>
 --EXPECT--
 Starting entity immediately after valid decimal entity which is just within maximum length: 000000260000002300000031000000300000003000000030000000300000003000000030000000300000003000000030000000260000002300000036000000350000003b => 3b9aca0000000041 (Good)
@@ -56,3 +59,4 @@ Starting entity immediately after valid hex entity which is just within maximum 
 Starting entity immediately after too-big decimal entity: string(17) "&#7001492542&#65;" => string(13) "&#7001492542A" (Good)
 Regression test (entity which decodes to 0xFFFFFFFF): string(5) "&#xe;" => string(1) "?" (Good)
 Regression test (truncation of successive & with JIS encoding): string(3) "&&&" => string(3) "&&&" (Good)
+Regression test (convmap entries are now treated as unsigned): string(4) "&#7," => string(2) "?," (Good)
