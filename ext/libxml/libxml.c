@@ -1213,10 +1213,7 @@ PHP_FUNCTION(libxml_get_external_entity_loader)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (ZEND_FCC_INITIALIZED(LIBXML(entity_loader_callback))) {
-		zval tmp;
-		zend_get_callable_zval_from_fcc(&LIBXML(entity_loader_callback), &tmp);
-		RETVAL_COPY(&tmp);
-		zval_ptr_dtor(&tmp);
+		zend_get_callable_zval_from_fcc(&LIBXML(entity_loader_callback), return_value);
 		return;
 	}
 	RETURN_NULL();
