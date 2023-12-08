@@ -154,7 +154,6 @@ static inline bool may_have_side_effects(
 		case ZEND_INCLUDE_OR_EVAL:
 		case ZEND_THROW:
 		case ZEND_MATCH_ERROR:
-		case ZEND_MATCH_BLOCK_NO_VALUE_ERROR:
 		case ZEND_EXT_STMT:
 		case ZEND_EXT_FCALL_BEGIN:
 		case ZEND_EXT_FCALL_END:

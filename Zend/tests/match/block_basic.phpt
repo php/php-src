@@ -12,14 +12,14 @@ function bar() {
 
 function test($value) {
     var_dump(match ($value) {
-        1 => { <- 1; },
+        1 => { 1 },
         2 => {
             $x = 2;
-            <- $x;
+            $x
         },
         3 => {
             foo();
-            <- bar();
+            bar()
         },
     });
 }

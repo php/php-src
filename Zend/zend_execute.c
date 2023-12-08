@@ -887,11 +887,6 @@ ZEND_COLD void zend_match_unhandled_error(const zval *value)
 	smart_str_free(&msg);
 }
 
-ZEND_COLD void zend_match_block_no_value_error(void)
-{
-	zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Match expected a value from block but none was returned");
-}
-
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(
 		const zend_property_info *info) {
 	zend_throw_error(NULL, "Cannot modify readonly property %s::$%s",

@@ -6057,26 +6057,7 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 		}
 
 		znode body_node;
-		if (body_ast->kind == ZEND_AST_MATCH_ARM_BLOCK) {
-			bool prev_in_block_expr = CG(context).in_block_expr;
-			CG(context).in_block_expr = true;
-			zend_compile_stmt_list(body_ast->child[0]);
-			zend_ast *result_expr_ast = body_ast->child[1];
-			if (!result && result_expr_ast) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Blocks of match expression with unused result must not return a value");
-			}
-			if (result_expr_ast) {
-				zend_compile_expr(&body_node, result_expr_ast);
-			} else if (result) {
-				zend_emit_op(NULL, ZEND_MATCH_BLOCK_NO_VALUE_ERROR, NULL, NULL);
-				body_node.op_type = IS_CONST;
-				ZVAL_NULL(&body_node.u.constant);
-			}
-			CG(context).in_block_expr = prev_in_block_expr;
-		} else {
-			zend_compile_expr(&body_node, body_ast);
-		}
-
+		zend_compile_expr(&body_node, body_ast);
 		if (result) {
 			if (is_first_case) {
 				zend_emit_op_tmp(result, ZEND_QM_ASSIGN, &body_node, NULL);
@@ -6085,6 +6066,8 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 				zend_op *opline_qm_assign = zend_emit_op(NULL, ZEND_QM_ASSIGN, &body_node, NULL);
 				SET_NODE(opline_qm_assign->result, result);
 			}
+		} else {
+			zend_do_free(&body_node);
 		}
 
 		jmp_end_opnums[i] = zend_emit_jump(0);
@@ -10510,6 +10493,21 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static void zend_compile_block_expr(znode *result, zend_ast *ast)
+{
+	bool prev_in_block_expr = CG(context).in_block_expr;
+	CG(context).in_block_expr = true;
+	zend_compile_stmt_list(ast->child[0]);
+	zend_ast *result_expr_ast = ast->child[1];
+	if (result_expr_ast) {
+		zend_compile_expr(result, result_expr_ast);
+	} else {
+		result->op_type = IS_CONST;
+		ZVAL_NULL(&result->u.constant);
+	}
+	CG(context).in_block_expr = prev_in_block_expr;
+}
+
 static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 {
 	/* CG(zend_lineno) = ast->lineno; */
@@ -10647,6 +10645,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_MATCH:
 			zend_compile_match(result, ast);
+			return;
+		case ZEND_AST_BLOCK_EXPR:
+			zend_compile_block_expr(result, ast);
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);

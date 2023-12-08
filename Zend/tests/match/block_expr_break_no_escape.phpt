@@ -8,7 +8,7 @@ var_dump(match (1) {
             echo $value, "\n";
             break;
         }
-        <- 42;
+        42
     },
 });
 ?>

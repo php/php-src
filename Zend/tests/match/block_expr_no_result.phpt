@@ -17,4 +17,4 @@ try {
 ?>
 --EXPECT--
 Not returning anything
-Match expected a value from block but none was returned
+NULL

@@ -6,7 +6,7 @@ goto in;
 var_dump(match (1) {
     1 => {
 in:
-        <- 42;
+        42
     },
 });
 ?>
