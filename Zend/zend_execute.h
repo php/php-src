@@ -253,7 +253,7 @@ static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend
 
 static zend_always_inline void zend_vm_init_call_frame(zend_execute_data *call, uint32_t call_info, zend_function *func, uint32_t num_args, void *object_or_called_scope)
 {
-	ZEND_ASSERT(!func->common.scope || object_or_called_scope);
+    ZEND_ASSERT(!func->common.scope || object_or_called_scope || func->common.fn_flags & ZEND_ACC_STATIC);
 	call->func = func;
 	Z_PTR(call->This) = object_or_called_scope;
 	ZEND_CALL_INFO(call) = call_info;
