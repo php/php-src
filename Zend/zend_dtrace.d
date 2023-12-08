@@ -26,8 +26,8 @@ provider php {
 	probe error(char *errormsg, char *request_file, int lineno);
 	probe execute__entry(char* request_file, int lineno);
 	probe execute__return(char* request_file, int lineno);
-	probe function__entry(char* function_name, char* request_file, int lineno, char* classname, char* scope);
-	probe function__return(char* function_name, char* request_file, int lineno, char* classname, char* scope);
+	probe function__entry(char* function_name, char* request_file, int lineno, char* classname, char* scope, char* prev_function_name, char* prev_classname);
+	probe function__return(char* function_name, char* request_file, int lineno, char* classname, char* scope, char* prev_function_name, char* prev_classname);
 };
 
 /*#pragma D attributes Private/Private/Unknown provider php module

@@ -55,8 +55,8 @@ ZEND_API zend_op_array *dtrace_compile_file(zend_file_handle *file_handle, int t
 ZEND_API void dtrace_execute_ex(zend_execute_data *execute_data)
 {
 	int lineno;
-	const char *scope, *filename, *funcname, *classname;
-	scope = filename = funcname = classname = NULL;
+	const char *scope, *filename, *funcname, *classname, *prev_funcname, *prev_classname;
+	scope = filename = funcname = classname = prev_funcname = prev_classname = NULL;
 
 	/* we need filename and lineno for both execute and function probes */
 	if (DTRACE_EXECUTE_ENTRY_ENABLED() || DTRACE_EXECUTE_RETURN_ENABLED()
@@ -68,6 +68,8 @@ ZEND_API void dtrace_execute_ex(zend_execute_data *execute_data)
 	if (DTRACE_FUNCTION_ENTRY_ENABLED() || DTRACE_FUNCTION_RETURN_ENABLED()) {
 		classname = get_active_class_name(&scope);
 		funcname = get_active_function_name();
+		prev_funcname = get_prev_active_function_name();
+		prev_classname = get_prev_active_class_name(NULL);
 	}
 
 	if (DTRACE_EXECUTE_ENTRY_ENABLED()) {
@@ -75,13 +77,13 @@ ZEND_API void dtrace_execute_ex(zend_execute_data *execute_data)
 	}
 
 	if (DTRACE_FUNCTION_ENTRY_ENABLED() && funcname != NULL) {
-		DTRACE_FUNCTION_ENTRY((char *)funcname, (char *)filename, lineno, (char *)classname, (char *)scope);
+		DTRACE_FUNCTION_ENTRY((char *)funcname, (char *)filename, lineno, (char *)classname, (char *)scope, (char *)prev_funcname, (char *)prev_classname);
 	}
 
 	execute_ex(execute_data);
 
 	if (DTRACE_FUNCTION_RETURN_ENABLED() && funcname != NULL) {
-		DTRACE_FUNCTION_RETURN((char *)funcname, (char *)filename, lineno, (char *)classname, (char *)scope);
+		DTRACE_FUNCTION_RETURN((char *)funcname, (char *)filename, lineno, (char *)classname, (char *)scope, (char *)prev_funcname, (char *)prev_classname);
 	}
 
 	if (DTRACE_EXECUTE_RETURN_ENABLED()) {
