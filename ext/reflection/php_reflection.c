@@ -1122,6 +1122,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 	reference->target = target;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_ATTRIBUTE;
+	ZVAL_STR_COPY(reflection_prop_name(object), data->name);
 }
 /* }}} */
 

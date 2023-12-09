@@ -111,6 +111,10 @@ POSIX:
 PSpell:
   . Moved to PECL. (Derick Rethans)
 
+Reflection:
+  . Implement GH-12908 (Show attribute name/class in ReflectionAttribute dump).
+    (nielsdos)
+
 SimpleXML:
   . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
     within foreach). (nielsdos)
