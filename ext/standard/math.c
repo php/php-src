@@ -109,7 +109,7 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
 		case PHP_ROUND_HALF_EVEN:
 			if (value_abs > edge_case) {
 				return integral + copysign(1.0, integral);
-			} else if (value_abs == edge_case) {
+			} else if (UNEXPECTED(value_abs == edge_case)) {
 				bool even = !fmod(integral, 2.0);
 
 				/* If the integral part is not even we can make it even
@@ -125,7 +125,7 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
 		case PHP_ROUND_HALF_ODD:
 			if (value_abs > edge_case) {
 				return integral + copysign(1.0, integral);
-			} else if (value_abs == edge_case) {
+			} else if (UNEXPECTED(value_abs == edge_case)) {
 				bool even = !fmod(integral, 2.0);
 
 				if (even) {
