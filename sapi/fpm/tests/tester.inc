@@ -672,7 +672,7 @@ class Tester
         }
 
         require_once "status.inc";
-        $status = new Status();
+        $status = new Status($this);
         foreach ($formats as $format) {
             $query    = $format === 'plain' ? '' : $format;
             $response = $this->request($query, [], $statusPath, $address);
@@ -838,7 +838,7 @@ class Tester
         int $writeDelay = 0,
     ): Response {
         if ($this->hasError()) {
-            return new Response(null, true);
+            return $this->createResponse(expectInvalid: true);
         }
 
         if (is_array($stdin)) {
@@ -849,7 +849,7 @@ class Tester
         $this->trace('Request params', $params);
 
         try {
-            $this->response = new Response(
+            $this->response = $this->createResponse(
                 $this->getClient($address, $connKeepAlive, $socketKeepAlive)
                     ->request_data($params, $stdin, $readLimit, $writeDelay)
             );
@@ -866,7 +866,7 @@ class Tester
             } else {
                 $this->message($errorMessage);
             }
-            $this->response = new Response();
+            $this->response = $this->createResponse();
         }
         if ($this->debug) {
             $this->response->debugOutput();
@@ -905,7 +905,7 @@ class Tester
         }
 
         if ($this->hasError()) {
-            return array_map(fn($request) => new Response(null, true), $requests);
+            return array_map(fn($request) => $this->createResponse(expectInvalid: true), $requests);
         }
 
         try {
@@ -931,7 +931,9 @@ class Tester
             );
 
             $responses = array_map(function ($conn) use ($readTimeout) {
-                $response = new Response($conn['client']->wait_for_response_data($conn['requestId'], $readTimeout));
+                $response = $this->createResponse(
+                    $conn['client']->wait_for_response_data($conn['requestId'], $readTimeout)
+                );
                 if ($this->debug) {
                     $response->debugOutput();
                 }
@@ -948,7 +950,7 @@ class Tester
                 $this->message($errorMessage);
             }
 
-            return array_map(fn($request) => new Response(null, true), $requests);
+            return array_map(fn($request) => $this->createResponse(expectInvalid: true), $requests);
         }
     }
 
@@ -968,11 +970,11 @@ class Tester
         bool $socketKeepAlive = false
     ): ValuesResponse {
         if ($this->hasError()) {
-            return new Response(null, true);
+            return $this->createValueResponse();
         }
 
         try {
-            $valueResponse = new ValuesResponse(
+            $valueResponse = $this->createValueResponse(
                 $this->getClient($address, $connKeepAlive)->getValues(['FCGI_MPXS_CONNS'])
             );
             if ($this->debug) {
@@ -980,7 +982,7 @@ class Tester
             }
         } catch (\Exception $exception) {
             $this->error("Request for getting values failed", $exception);
-            $valueResponse = new ValuesResponse();
+            $valueResponse = $this->createValueResponse();
         }
 
         return $valueResponse;
@@ -1493,6 +1495,30 @@ class Tester
     }
 
     /**
+     * Create a new response.
+     *
+     * @param mixed $data
+     * @param bool  $expectInvalid
+     * @return Response
+     */
+    private function createResponse($data = null, bool $expectInvalid = false): Response
+    {
+        return new Response($this, $data, $expectInvalid);
+    }
+
+    /**
+     * Create a new values response.
+     *
+     * @param mixed $values
+     * @return ValuesResponse
+     * @throws \Exception
+     */
+    private function createValueResponse($values = null): ValuesResponse
+    {
+        return new ValuesResponse($this, $values);
+    }
+
+    /**
      * @param string|null $msg
      */
     private function message($msg)
@@ -1500,6 +1526,16 @@ class Tester
         if ($msg !== null) {
             echo "$msg\n";
         }
+    }
+
+    /**
+     * Print log reader logs.
+     *
+     * @return void
+     */
+    public function printLogs(): void
+    {
+        $this->logReader->printLogs();
     }
 
     /**
@@ -1520,6 +1556,7 @@ class Tester
         $this->error .= "\n";
 
         echo $this->error;
+        $this->printLogs();
 
         return false;
     }
