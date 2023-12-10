@@ -77,6 +77,18 @@ test;
     return $fileContent;
 }
 
+function normalize_output(string $output, string $filename): string {
+    $output = str_replace(
+        [$filename],
+        ['%s'],
+        $output
+    );
+
+    $output = preg_replace('/\)#\d+ \(/', ')#99 (', $output);
+
+    return $output;
+}
+
 $const_dim_filename = __DIR__ . DIRECTORY_SEPARATOR . 'compare_binary_offsets_temp.php';
 
 ob_start();
@@ -88,11 +100,7 @@ foreach ($containers as $container_orig) {
         include $const_dim_filename;
         $constOutput = ob_get_contents();
         ob_clean();
-        $constOutput = str_replace(
-            [$const_dim_filename],
-            ['%s'],
-            $constOutput
-        );
+        $constOutput = normalize_output($constOutput, $const_dim_filename);
 
         $dimension = $offset;
         $container = $container_orig;
@@ -102,11 +110,7 @@ foreach ($containers as $container_orig) {
         include $var_dim_filename;
         $varOutput = ob_get_contents();
         ob_clean();
-        $varOutput = str_replace(
-            [$var_dim_filename],
-            ['%s'],
-            $varOutput
-        );
+        $varOutput = normalize_output($varOutput, $var_dim_filename);
 
         if ($constOutput !== $varOutput) {
             file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_{$failuresNb}_const.txt", $constOutput);
