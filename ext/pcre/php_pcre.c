@@ -1144,14 +1144,12 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	uint32_t		 offset_capture;	/* Capture match offsets: yes/no */
 	uint32_t		 unmatched_as_null;	/* Null non-matches: yes/no */
 	PCRE2_SPTR       mark = NULL;		/* Target for MARK name */
-	zval			 marks;				/* Array of marks for PREG_PATTERN_ORDER */
+	HashTable		*marks = NULL;		/* Array of marks for PREG_PATTERN_ORDER */
 	pcre2_match_data *match_data;
 	PCRE2_SIZE		 start_offset2, orig_start_offset;
 
 	char *subject = ZSTR_VAL(subject_str);
 	size_t subject_len = ZSTR_LEN(subject_str);
-
-	ZVAL_UNDEF(&marks);
 
 	/* Overwrite the passed-in value for subpatterns with an empty array. */
 	if (subpats != NULL) {
@@ -1301,10 +1299,12 @@ matched:
 						mark = pcre2_get_mark(match_data);
 						/* Add MARK, if available */
 						if (mark) {
-							if (Z_TYPE(marks) == IS_UNDEF) {
-								array_init(&marks);
+							if (!marks) {
+								marks = zend_new_array(0);
 							}
-							add_index_string(&marks, matched - 1, (char *) mark);
+							zval tmp;
+							ZVAL_STRING(&tmp, (char *) mark);
+							zend_hash_index_add_new(marks, matched - 1, &tmp);
 						}
 						/*
 						 * If the number of captured subpatterns on this run is
@@ -1430,8 +1430,10 @@ error:
 		}
 		efree(match_sets);
 
-		if (Z_TYPE(marks) != IS_UNDEF) {
-			add_assoc_zval(subpats, "MARK", &marks);
+		if (marks) {
+			zval tmp;
+			ZVAL_ARR(&tmp, marks);
+			zend_hash_str_update(Z_ARRVAL_P(subpats), "MARK", sizeof("MARK") - 1, &tmp);
 		}
 	}
 
