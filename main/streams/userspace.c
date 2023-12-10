@@ -304,6 +304,12 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 		add_property_null(object, "context");
 	}
 
+	if (EG(exception) != NULL) {
+		zval_ptr_dtor(object);
+		ZVAL_UNDEF(object);
+		return;
+	}
+
 	if (uwrap->ce->constructor) {
 		zend_call_known_instance_method_with_0_params(
 			uwrap->ce->constructor, Z_OBJ_P(object), NULL);

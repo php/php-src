@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fix incorrect timeout in built-in web server when using router script and
     max_input_time. (ilutov)
 
+- FFI:
+  . Fixed bug GH-9698 (stream_wrapper_register crashes with FFI\CData).
+    (Jakub Zelenka)
+
 - Hash:
   . Fixed bug GH-12936 (hash() function hangs endlessly if using sha512 on
     strings >= 4GiB). (nielsdos)
