@@ -61,7 +61,7 @@
 #include <openssl/param_build.h>
 #endif
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L && !defined(OPENSSL_NO_ENGINE)
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)) && !defined(OPENSSL_NO_ENGINE)
 #include <openssl/engine.h>
 #endif
 
