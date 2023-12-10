@@ -527,7 +527,7 @@ static void free_subpats_table(zend_string **subpat_names, uint32_t num_subpats)
 	uint32_t i;
 	for (i = 0; i < num_subpats; i++) {
 		if (subpat_names[i]) {
-			zend_string_release(subpat_names[i]);
+			zend_string_release_ex(subpat_names[i], false);
 		}
 	}
 	efree(subpat_names);
