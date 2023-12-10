@@ -1312,7 +1312,7 @@ matched:
 						 * arrays with NULLs or empty strings.
 						 */
 						if (count < num_subpats) {
-							for (; i < num_subpats; i++) {
+							for (int i = count; i < num_subpats; i++) {
 								if (offset_capture) {
 									add_offset_pair(
 										match_sets[i], NULL, PCRE2_UNSET, PCRE2_UNSET,
