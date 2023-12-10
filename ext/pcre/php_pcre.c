@@ -1394,7 +1394,7 @@ error:
 		/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
 		if ((pce->preg_options & PREG_JIT)) {
-			if (PCRE2_UNSET == start_offset2 || start_offset2 > subject_len) {
+			if (start_offset2 > subject_len) {
 				pcre_handle_exec_error(PCRE2_ERROR_BADOFFSET);
 				break;
 			}
