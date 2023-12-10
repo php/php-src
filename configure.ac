@@ -422,6 +422,7 @@ sys/socket.h \
 sys/stat.h \
 sys/statfs.h \
 sys/statvfs.h \
+sys/sysmacros.h \
 sys/vfs.h \
 sys/sysexits.h \
 sys/uio.h \
