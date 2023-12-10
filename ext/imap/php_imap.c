@@ -806,7 +806,7 @@ PHP_FUNCTION(imap_append)
 
 		zend_string_release(regex);
 		php_pcre_match_impl(pce, internal_date, return_value, subpats, global,
-			0, Z_L(0), Z_L(0));
+			Z_L(0), Z_L(0));
 
 		if (!Z_LVAL_P(return_value)) {
 			// TODO Promoto to error?
