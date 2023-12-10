@@ -1289,6 +1289,10 @@ static zval *zend_ffi_cdata_write_field(zend_object *obj, zend_string *field_nam
 	if (cache_slot && *cache_slot == type) {
 		field = *(cache_slot + 1);
 	} else {
+		if (UNEXPECTED(type == NULL)) {
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to assign field '%s' to uninitialized FFI\\CData object", ZSTR_VAL(field_name));
+			return value;
+		}
 		if (type->kind == ZEND_FFI_TYPE_POINTER) {
 			type = ZEND_FFI_TYPE(type->pointer.type);
 		}
