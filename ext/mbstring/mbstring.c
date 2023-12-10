@@ -38,6 +38,7 @@
 #include "libmbfl/mbfl/mbfilter_wchar.h"
 #include "libmbfl/mbfl/eaw_table.h"
 #include "libmbfl/filters/mbfilter_base64.h"
+#include "libmbfl/filters/mbfilter_cjk.h"
 #include "libmbfl/filters/mbfilter_qprint.h"
 #include "libmbfl/filters/mbfilter_htmlent.h"
 #include "libmbfl/filters/mbfilter_uuencode.h"
@@ -2112,8 +2113,9 @@ static zend_string* mb_get_substr(zend_string *input, size_t from, size_t len, c
 	unsigned char *in = (unsigned char*)ZSTR_VAL(input);
 	size_t in_len = ZSTR_LEN(input);
 
-	if (from >= in_len || len == 0) {
-		/* No supported text encoding decodes to more than one codepoint per byte
+	if (len == 0 || (from >= in_len && enc != &mbfl_encoding_sjis_mac)) {
+		/* Other than MacJapanese, no supported text encoding decodes to
+		 * more than one codepoint per byte
 		 * So if the number of codepoints to skip >= number of input bytes,
 		 * then definitely the output should be empty */
 		return zend_empty_string;
@@ -2134,30 +2136,6 @@ static zend_string* mb_get_substr(zend_string *input, size_t from, size_t len, c
 			len = in_len;
 		}
 		return zend_string_init_fast((const char*)in, len);
-	} else if (enc->mblen_table) {
-		/* The use of the `mblen_table` means that for encodings like MacJapanese,
-		 * we treat each character in its native charset as "1 character", even if it
-		 * maps to a sequence of several codepoints */
-		const unsigned char *mbtab = enc->mblen_table;
-		unsigned char *limit = in + in_len;
-		while (from && in < limit) {
-			in += mbtab[*in];
-			from--;
-		}
-		if (in >= limit) {
-			return zend_empty_string;
-		} else if (len == MBFL_SUBSTR_UNTIL_END) {
-			return zend_string_init_fast((const char*)in, limit - in);
-		}
-		unsigned char *end = in;
-		while (len && end < limit) {
-			end += mbtab[*end];
-			len--;
-		}
-		if (end > limit) {
-			end = limit;
-		}
-		return zend_string_init_fast((const char*)in, end - in);
 	}
 
 	return mb_get_substr_slow(in, in_len, from, len, enc);
@@ -2350,21 +2328,7 @@ PHP_FUNCTION(mb_substr)
 
 	size_t mblen = 0;
 	if (from < 0 || (!len_is_null && len < 0)) {
-		if (enc->mblen_table) {
-			/* Because we use the `mblen_table` when iterating over the string and
-			 * extracting the requested part, we also need to use it here for counting
-			 * the "length" of the string
-			 * Otherwise, we can get wrong results for text encodings like MacJapanese,
-			 * where one native 'character' can map to a sequence of several codepoints */
-			const unsigned char *mbtab = enc->mblen_table;
-			unsigned char *p = (unsigned char*)ZSTR_VAL(str), *e = p + ZSTR_LEN(str);
-			while (p < e) {
-				p += mbtab[*p];
-				mblen++;
-			}
-		} else {
-			mblen = mb_get_strlen(str, enc);
-		}
+		mblen = mb_get_strlen(str, enc);
 	}
 
 	/* if "from" position is negative, count start position from the end

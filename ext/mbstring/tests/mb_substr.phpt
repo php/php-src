@@ -118,6 +118,15 @@ print "3: " . mb_convert_encoding(mb_substr($utf7, -5, 3, 'UTF-7'), 'UTF-8', 'UT
 print "4: " . mb_convert_encoding(mb_substr($utf7, 1, null, 'UTF-7'), 'UTF-8', 'UTF-7') . "\n";
 print "5:" . mb_convert_encoding(mb_substr($utf7, 10, 0, 'UTF-7'), 'UTF-8', 'UTF-7') . "\n";
 
+echo "Testing agreement with mb_strpos on invalid UTF-8 string:\n";
+/* Stefan Schiller pointed out that on invalid UTF-8 strings, character indices returned
+ * by mb_strpos would not extract the desired part of the string when passed to mb_substr.
+ * This is the test case which he provided: */
+$data = "\xF0AAA<b>";
+$pos = mb_strpos($data, "<", 0, "UTF-8");
+$out = mb_substr($data, 0, $pos, "UTF-8");
+print $out . "\n";
+
 echo "Regression:\n";
 /* During development, one >= comparison in mb_get_substr was wrongly written as >
  * This was caught by libFuzzer */
@@ -138,30 +147,30 @@ SJIS:
 4: 967b8cea8365834c8358836782c582b781423031323334825482558256825782588142
 5:
 -- Testing illegal SJIS byte 0x80 --
-6380
-806162
+633f
+3f6162
 SJIS-2004:
-6380
-806162
+633f
+3f6162
 MacJapanese:
 6380
 806162
 SJIS-Mobile#DOCOMO:
-6380
-806162
+633f
+3f6162
 SJIS-Mobile#KDDI:
-6380
-806162
+633f
+3f6162
 SJIS-Mobile#SoftBank:
-6380
-806162
+633f
+3f6162
 -- Testing MacJapanese characters which map to 3-5 codepoints each --
 616263
-85ab85ac
-85ac
+3f3f
+58
 616263
-85bf85c0
-85c0
+3f3f
+78
 ISO-2022-JP:
 1: 1b2442212121721b284241
 2: 43
@@ -200,5 +209,7 @@ UTF-7:
 3: йте
 4: reek: Σὲ γνωρίζω ἀπὸ τὴν κόψη Russian: Зарегистрируйтесь
 5:
+Testing agreement with mb_strpos on invalid UTF-8 string:
+?AAA
 Regression:
 1b28493d3d3d3d3d3d3d3e3d3d3d1b28423f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f000000003f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f1b28493d3d3d3d3d3d3d3e1b2842013a4f1b28492a1b2842
