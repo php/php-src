@@ -83,6 +83,39 @@ OUTPUT;
 
 $EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_INVALID_OFFSETS) . '$/s';
 
+const EXPECTED_OUTPUT_RESOURCE_STDERR_OFFSETS = <<<OUTPUT
+Read before write:
+
+Warning: Trying to access array offset on null in %s on line 8
+NULL
+Write:
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 15
+Read:
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 22
+string(1) "v"
+Read-Write:
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 29
+isset():
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 36
+bool(true)
+empty():
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 42
+bool(false)
+Coalesce():
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 48
+string(7) "vappend"
+unset():
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 54
+
+OUTPUT;
+
 ob_start();
 foreach ($offsets as $dimension) {
     $container = null;
@@ -101,6 +134,7 @@ foreach ($offsets as $dimension) {
         $varOutput !== EXPECTED_OUTPUT_VALID_OFFSETS
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX, $varOutput)
+        && $varOutput !== EXPECTED_OUTPUT_RESOURCE_STDERR_OFFSETS
     ) {
         file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_null_container_{$failuresNb}.txt", $varOutput);
         ++$failuresNb;

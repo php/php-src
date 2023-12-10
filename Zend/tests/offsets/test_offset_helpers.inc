@@ -160,6 +160,7 @@ $offsets = [
     (string) PHP_INT_MAX * 2,
     (string) PHP_INT_MIN * 2,
     [],
+    STDERR,
     new stdClass(),
     new ArrayObject(),
     new A(),
