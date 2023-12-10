@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12996 (Incorrect SCRIPT_NAME with Apache ProxyPassMatch when
     plus in path). (Jakub Zelenka)
 
+- OpenSSL:
+  . Fixed LibreSSL undefined reference when OPENSSL_NO_ENGINE not set.
+   (David Carlier).
+
 - Phar:
   . Fixed bug #71465 (PHAR doesn't know about litespeed). (nielsdos)
 
