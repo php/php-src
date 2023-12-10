@@ -655,7 +655,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 	}
 
 	start_delimiter = delimiter;
-	if ((pp = strchr("([{< )]}> )]}>", delimiter)))
+	if ((pp = strchr("([{< )]}>", delimiter)))
 		delimiter = pp[5];
 	end_delimiter = delimiter;
 
