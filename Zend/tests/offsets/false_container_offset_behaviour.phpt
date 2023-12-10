@@ -83,9 +83,11 @@ Cannot access offset of type %s in isset or empty
 Coalesce():
 Cannot access offset of type %s on array
 unset():
-Cannot unset offset in a non-array variable
+Cannot unset offset of type %s on array
 
 OUTPUT;
+
+$EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_INVALID_OFFSETS) . '$/s';
 
 ob_start();
 foreach ($offsets as $dimension) {
@@ -103,7 +105,7 @@ foreach ($offsets as $dimension) {
 
     if (
         $varOutput !== EXPECTED_OUTPUT_VALID_OFFSETS
-        && $varOutput !== EXPECTED_OUTPUT_INVALID_OFFSETS
+        && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX, $varOutput)
     ) {
         file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_false_container_{$failuresNb}.txt", $varOutput);

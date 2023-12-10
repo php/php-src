@@ -40,6 +40,9 @@ function makeOffset($offset) {
     if ($offset === PHP_INT_MAX) {
         return "PHP_INT_MAX";
     }
+    if (is_array($offset)) {
+        return "[]";
+    }
     return var_export($offset, true);
 }
 
@@ -162,6 +165,7 @@ $offsets = [
     '-17.0',
     (string) PHP_INT_MAX * 2,
     (string) PHP_INT_MIN * 2,
+    [],
 ];
 
 $failures = [];
