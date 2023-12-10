@@ -28,7 +28,7 @@ OUTPUT;
 ob_start();
 foreach ($offsets as $dimension) {
     $container = new stdClass();
-    $error = '(new stdClass())[' . makeOffset($dimension) . '] has different outputs' . "\n";
+    $error = '(new stdClass())[' . zend_test_var_export($dimension) . '] has different outputs' . "\n";
 
     include $var_dim_filename;
     $varOutput = ob_get_contents();

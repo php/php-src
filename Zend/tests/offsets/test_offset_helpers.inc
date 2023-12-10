@@ -12,38 +12,32 @@ function get_zend_debug_type($v) {
     }
     return get_debug_type($v);
 }
-function makeContainer($container) {
-    if (is_array($container)) {
-        return "[]";
-    }
-    if (is_resource($container)) {
-        return "STDERR";
-    }
-    if ($container instanceof stdClass) {
-        return "new stdClass()";
-    }
-    if ($container instanceof B) {
-        return "new B()";
-    }
-    if ($container instanceof A) {
-        return "new A()";
-    }
-    if ($container instanceof ArrayObject) {
-        return "new ArrayObject()";
-    }
-    return var_export($container, true);
-}
-function makeOffset($offset) {
-    if ($offset === PHP_INT_MIN) {
+function zend_test_var_export($value) {
+    if ($value === PHP_INT_MIN) {
         return "PHP_INT_MIN";
     }
-    if ($offset === PHP_INT_MAX) {
+    if ($value === PHP_INT_MAX) {
         return "PHP_INT_MAX";
     }
-    if (is_array($offset)) {
+    if (is_array($value)) {
         return "[]";
     }
-    return var_export($offset, true);
+    if (is_resource($value)) {
+        return "STDERR";
+    }
+    if ($value instanceof stdClass) {
+        return "new stdClass()";
+    }
+    if ($value instanceof B) {
+        return "new B()";
+    }
+    if ($value instanceof A) {
+        return "new A()";
+    }
+    if ($value instanceof ArrayObject) {
+        return "new ArrayObject()";
+    }
+    return var_export($value, true);
 }
 
 /* Taken from run-tests.php */

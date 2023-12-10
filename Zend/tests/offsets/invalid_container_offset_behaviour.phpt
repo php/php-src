@@ -42,7 +42,7 @@ Cannot unset offset in a non-array variable
 OUTPUT;
 
     foreach ($offsets as $dimension) {
-        $error = $containerStr . '[' . makeOffset($dimension) . '] has different outputs' . "\n";
+        $error = $containerStr . '[' . zend_test_var_export($dimension) . '] has different outputs' . "\n";
 
         include $var_dim_filename;
         $varOutput = ob_get_contents();

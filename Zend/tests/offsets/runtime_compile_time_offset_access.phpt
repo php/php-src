@@ -13,8 +13,8 @@ opcache.file_update_protection=1
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'test_offset_helpers.inc';
 
 function makeTestFile($container, $offset) {
-    $offset_p = makeOffset($offset);
-    $container_p = makeContainer($container);
+    $offset_p = zend_test_var_export($offset);
+    $container_p = zend_test_var_export($container);
     $fileContent = <<<test
 <?php
 
@@ -82,7 +82,7 @@ $const_dim_filename = __DIR__ . DIRECTORY_SEPARATOR . 'compare_binary_offsets_te
 ob_start();
 foreach ($containers as $container_orig) {
     foreach ($offsets as $offset) {
-        $error = makeContainer($container_orig) . '[' . makeOffset($offset) . '] has different outputs' . "\n";
+        $error = zend_test_var_export($container_orig) . '[' . zend_test_var_export($offset) . '] has different outputs' . "\n";
         file_put_contents($const_dim_filename, makeTestFile($container_orig, $offset));
 
         include $const_dim_filename;

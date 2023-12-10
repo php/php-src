@@ -92,7 +92,7 @@ $EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT
 ob_start();
 foreach ($offsets as $dimension) {
     $container = false;
-    $error = 'false[' . makeOffset($dimension) . '] has different outputs' . "\n";
+    $error = 'false[' . zend_test_var_export($dimension) . '] has different outputs' . "\n";
 
     include $var_dim_filename;
     $varOutput = ob_get_contents();
