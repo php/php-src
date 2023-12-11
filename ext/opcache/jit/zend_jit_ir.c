@@ -2729,6 +2729,7 @@ static int zend_jit_free_ctx(zend_jit_ctx *jit)
 static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 {
 	void *entry;
+	ir_code_buffer code_buffer;
 
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_SRC) {
 		if (name) fprintf(stderr, "%s: ; after folding\n", name);
@@ -2817,10 +2818,15 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 	ir_check(ctx);
 #endif
 
-	ctx->code_buffer = *dasm_ptr;
-	ctx->code_buffer_size = (char*)dasm_end - (char*)*dasm_ptr;
+	code_buffer.start = dasm_buf;
+	code_buffer.end = dasm_end;
+	code_buffer.pos = *dasm_ptr;
+	ctx->code_buffer = &code_buffer;
 
 	entry = ir_emit_code(ctx, size);
+
+	*dasm_ptr = code_buffer.pos;
+
 	if (entry) {
 		*dasm_ptr = (char*)entry + ZEND_MM_ALIGNED_SIZE_EX(*size, 16);
 	}
@@ -15791,9 +15797,16 @@ static const void *zend_jit_trace_allocate_exit_group(uint32_t n)
 {
 	const void *entry;
 	size_t size;
+	ir_code_buffer code_buffer;
+
+	code_buffer.start = dasm_buf;
+	code_buffer.end = dasm_end;
+	code_buffer.pos = *dasm_ptr;
 
 	entry = ir_emit_exitgroup(n, ZEND_JIT_EXIT_POINTS_PER_GROUP, zend_jit_stub_handlers[jit_stub_trace_exit],
-		*dasm_ptr, (char*)dasm_end - (char*)*dasm_ptr, &size);
+		&code_buffer, &size);
+
+	*dasm_ptr = code_buffer.pos;
 
 	if (entry) {
 		*dasm_ptr = (char*)entry + ZEND_MM_ALIGNED_SIZE_EX(size, 16);
