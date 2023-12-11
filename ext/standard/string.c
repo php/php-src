@@ -2171,7 +2171,7 @@ PHP_FUNCTION(substr_replace)
 			}
 		}
 
-		if ((size_t)l > ZSTR_LEN(str) || (l < 0 && (size_t)(-l) > ZSTR_LEN(str))) {
+		if ((size_t)l > ZSTR_LEN(str)) {
 			l = ZSTR_LEN(str);
 		}
 
