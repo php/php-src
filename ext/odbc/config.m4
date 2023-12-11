@@ -439,7 +439,7 @@ if test "no" != "$PHP_ODBCVER"; then
     AC_DEFINE_UNQUOTED(ODBCVER, $PHP_ODBCVER, [ The highest supported ODBC version ])
   fi
 else
-  AC_DEFINE(ODBCVER, 0x0300, [ The highest supported ODBC version ])
+  AC_DEFINE(ODBCVER, 0x0350, [ The highest supported ODBC version ])
 fi
 
 dnl Extension setup
