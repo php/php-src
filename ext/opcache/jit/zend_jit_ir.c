@@ -351,6 +351,9 @@ static void* zend_jit_stub_handlers[sizeof(zend_jit_stubs) / sizeof(zend_jit_stu
 #endif
 
 #if defined(IR_TARGET_AARCH64)
+
+#define IR_HAS_VENEERS (1U<<31) /* IR_RESERVED_FLAG_1 */
+
 static const void *zend_jit_get_veneer(ir_ctx *ctx, const void *addr)
 {
 	int i, count = sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0]);
@@ -369,7 +372,7 @@ static const void *zend_jit_get_veneer(ir_ctx *ctx, const void *addr)
 			zend_jit_trace_info *t = ((zend_jit_ctx*)ctx)->trace;
 
 			ZEND_ASSERT(exit_point < t->exit_count);
-			return (const void*)((char*)ctx->code_buffer + ctx->code_size - (t->exit_count - exit_point) * 4);
+			return (const void*)((char*)ctx->deoptimization_exits_base + (exit_point * 4));
 		}
 	}
 
@@ -389,6 +392,7 @@ static bool zend_jit_set_veneer(ir_ctx *ctx, const void *addr, const void *venee
 		if (zend_jit_stub_handlers[i] == addr) {
 			const void **ptr = (const void**)&zend_jit_stub_handlers[count + i];
 			*ptr = veneer;
+			ctx->flags2 |= IR_HAS_VENEERS;
 #ifdef HAVE_CAPSTONE
 		    if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM) {
 				const char *name = ir_disasm_find_symbol((uint64_t)(uintptr_t)addr, &offset);
@@ -2827,14 +2831,9 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 
 	*dasm_ptr = code_buffer.pos;
 
-	if (entry) {
-		*dasm_ptr = (char*)entry + ZEND_MM_ALIGNED_SIZE_EX(*size, 16);
-	}
-
 #if defined(IR_TARGET_AARCH64)
-	if (ctx->veneers_size) {
+	if (ctx->flags2 & IR_HAS_VENEERS) {
 		zend_jit_commit_veneers();
-		*size -= ctx->veneers_size;
 	}
 #endif
 
@@ -15809,7 +15808,6 @@ static const void *zend_jit_trace_allocate_exit_group(uint32_t n)
 	*dasm_ptr = code_buffer.pos;
 
 	if (entry) {
-		*dasm_ptr = (char*)entry + ZEND_MM_ALIGNED_SIZE_EX(size, 16);
 #ifdef HAVE_CAPSTONE
 		if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM) {
 			uint32_t i;
