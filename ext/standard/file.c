@@ -1614,12 +1614,10 @@ safe_to_copy:
 
 	deststream = php_stream_open_wrapper_ex(dest, "wb", REPORT_ERRORS, NULL, ctx);
 
-	if (srcstream && deststream) {
+	if (deststream) {
 		ret = php_stream_copy_to_stream_ex(srcstream, deststream, PHP_STREAM_COPY_ALL, NULL);
 	}
-	if (srcstream) {
-		php_stream_close(srcstream);
-	}
+	php_stream_close(srcstream);
 	if (deststream) {
 		php_stream_close(deststream);
 	}
