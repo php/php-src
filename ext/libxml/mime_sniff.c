@@ -195,7 +195,7 @@ PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_string(const char *sta
 	while (start < end && is_http_whitespace(*start)) {
 		start++;
 	}
-	while (start < end && is_http_whitespace(*end)) {
+	while (start < end && is_http_whitespace(*(end - 1))) {
 		end--;
 	}
 
