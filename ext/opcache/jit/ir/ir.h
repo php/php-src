@@ -547,7 +547,7 @@ struct _ir_ctx {
 	ir_ref             consts_count;            /* number of constants stored in constants buffer */
 	ir_ref             consts_limit;            /* size of allocated constants buffer (it's extended when overflow) */
 	uint32_t           flags;                   /* IR context flags (see IR_* defines above) */
-	uint32_t           flags2;                  /* IR context provate flags (see IR_* defines in ir_private.h) */
+	uint32_t           flags2;                  /* IR context private flags (see IR_* defines in ir_private.h) */
 	ir_type            ret_type;                /* Function return type */
 	uint32_t           mflags;                  /* CPU specific flags (see IR_X86_... macros below) */
 	int32_t            status;                  /* non-zero error code (see IR_ERROR_... macros), app may use negative codes */
@@ -602,6 +602,7 @@ struct _ir_ctx {
 	ir_code_buffer    *code_buffer;
 #if defined(IR_TARGET_AARCH64)
 	int32_t            deoptimization_exits;
+	const void        *deoptimization_exits_base;
 	ir_get_exit_addr_t get_exit_addr;
 	ir_get_veneer_t    get_veneer;
 	ir_set_veneer_t    set_veneer;

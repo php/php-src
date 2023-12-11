@@ -5349,8 +5349,8 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 	dasm_init(&data.dasm_state, DASM_MAXSECTION);
 	dasm_setupglobal(&data.dasm_state, dasm_labels, ir_lb_MAX);
 	dasm_setup(&data.dasm_state, dasm_actions);
-	/* labels for each block + for each constant + rodata label + jmp_table label + for each entry */
-	dasm_growpc(&data.dasm_state, ctx->cfg_blocks_count + 1 + ctx->consts_count + 1 + 1 + 1 + ctx->entries_count);
+	/* labels for each block + for each constant + rodata label + jmp_table label + for each entry + exit_table label */
+	dasm_growpc(&data.dasm_state, ctx->cfg_blocks_count + 1 + ctx->consts_count + 1 + 1 + 1 + ctx->entries_count + 1);
 	data.emit_constants = ir_bitset_malloc(ctx->consts_count);
 
 	if (!(ctx->flags & IR_SKIP_PROLOGUE)) {
@@ -5607,6 +5607,9 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 	}
 
 	if (ctx->deoptimization_exits) {
+		uint32_t exit_table_label = ctx->cfg_blocks_count + 1 + ctx->consts_count + 1 + 1 + 1 + ctx->entries_count;
+
+		|=>exit_table_label:
 		for (i = 0; i < ctx->deoptimization_exits; i++) {
 			const void *exit_addr = ctx->get_exit_addr(i);
 
@@ -5755,6 +5758,12 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 			return NULL;
 		}
 		ir_mem_unprotect(entry, size);
+	}
+
+	if (ctx->deoptimization_exits) {
+		uint32_t exit_table_label = ctx->cfg_blocks_count + 1 + ctx->consts_count + 1 + 1 + 1 + ctx->entries_count;
+
+		ctx->deoptimization_exits_base = (const void*)((char*)entry + dasm_getpclabel(&data.dasm_state, exit_table_label));
 	}
 
 	ir_current_ctx = ctx;
