@@ -1,5 +1,5 @@
 --TEST--
-DOMDocument::recover write
+DOMDocument::$recover write
 --EXTENSIONS--
 dom
 --FILE--
