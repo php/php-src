@@ -1652,20 +1652,20 @@ static void ir_add_phi_move(ir_ctx *ctx, uint32_t b, ir_ref from, ir_ref to)
 	}
 }
 
-#if defined(_WIN32) || defined(__APPLE__) || defined(__FreeBSD__)
-static int ir_block_cmp(void *data, const void *b1, const void *b2)
-#else
-static int ir_block_cmp(const void *b1, const void *b2, void *data)
-#endif
-{
-	ir_ctx *ctx = data;
-	int d1 = ctx->cfg_blocks[*(ir_ref*)b1].loop_depth;
-	int d2 = ctx->cfg_blocks[*(ir_ref*)b2].loop_depth;
+typedef struct _ir_coalesce_block {
+	uint32_t b;
+	uint32_t loop_depth;
+} ir_coalesce_block;
 
-	if (d1 > d2) {
+static int ir_block_cmp(const void *b1, const void *b2)
+{
+	ir_coalesce_block *d1 = (ir_coalesce_block*)b1;
+	ir_coalesce_block *d2 = (ir_coalesce_block*)b2;
+
+	if (d1->loop_depth > d2->loop_depth) {
 		return -1;
-	} else if (d1 == d2) {
-		if (ctx->cfg_blocks[*(ir_ref*)b1].start < ctx->cfg_blocks[*(ir_ref*)b2].start) {
+	} else if (d1->loop_depth == d2->loop_depth) {
+		if (d1->b < d2->b) {
 			return -1;
 		} else {
 			return 1;
@@ -1815,49 +1815,56 @@ static int ir_try_swap_operands(ir_ctx *ctx, ir_ref i, ir_insn *insn)
 
 int ir_coalesce(ir_ctx *ctx)
 {
-	uint32_t b, n, succ;
+	uint32_t b, n, succ, pred_b, count = 0;
 	ir_ref *p, use, input, k, j;
 	ir_block *bb, *succ_bb;
 	ir_use_list *use_list;
 	ir_insn *insn;
-	ir_worklist blocks;
+	ir_bitset visited;
+	ir_coalesce_block *list;
 	bool compact = 0;
 
 	/* Collect a list of blocks which are predecossors to block with phi functions */
-	ir_worklist_init(&blocks, ctx->cfg_blocks_count + 1);
+	list = ir_mem_malloc(sizeof(ir_coalesce_block) * ctx->cfg_blocks_count);
+	visited = ir_bitset_malloc(ctx->cfg_blocks_count + 1);
 	for (b = 1, bb = &ctx->cfg_blocks[1]; b <= ctx->cfg_blocks_count; b++, bb++) {
 		IR_ASSERT(!(bb->flags & IR_BB_UNREACHABLE));
 		if (bb->flags & IR_BB_HAS_PHI) {
 			k = bb->predecessors_count;
-			use_list = &ctx->use_lists[bb->start];
-			n = use_list->count;
-			IR_ASSERT(k == ctx->ir_base[bb->start].inputs_count);
-			k++;
-			for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
-				use = *p;
-				insn = &ctx->ir_base[use];
-				if (insn->op == IR_PHI) {
-					for (j = 2; j <= k; j++) {
-						ir_worklist_push(&blocks, ctx->cfg_edges[bb->predecessors + (j-2)]);
+			if (k > 1) {
+				use_list = &ctx->use_lists[bb->start];
+				n = use_list->count;
+				IR_ASSERT(k == ctx->ir_base[bb->start].inputs_count);
+				for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
+					use = *p;
+					insn = &ctx->ir_base[use];
+					if (insn->op == IR_PHI) {
+						do {
+							k--;
+							pred_b = ctx->cfg_edges[bb->predecessors + k];
+							if (!ir_bitset_in(visited, pred_b)) {
+								ir_bitset_incl(visited, pred_b);
+								list[count].b = pred_b;
+								list[count].loop_depth = ctx->cfg_blocks[pred_b].loop_depth;
+								count++;
+							}
+						} while (k > 0);
+						break;
 					}
 				}
 			}
 		}
 	}
+	ir_mem_free(visited);
 
-#ifdef _WIN32
-# define qsort_fn(base, num, width, func, data) qsort_s(base, num, width, func, data)
-#elif defined(__APPLE__) || defined(__FreeBSD__)
-# define qsort_fn(base, num, width, func, data) qsort_r(base, num, width, data, func)
-#else
-# define qsort_fn(base, num, width, func, data) qsort_r(base, num, width, func, data)
-#endif
-	qsort_fn(blocks.l.a.refs, ir_worklist_len(&blocks), sizeof(ir_ref), ir_block_cmp, ctx);
+	/* Sort blocks according to their loop depth */
+	qsort(list, count, sizeof(ir_coalesce_block), ir_block_cmp);
 
-	while (ir_worklist_len(&blocks)) {
+	while (count > 0) {
 		uint32_t i;
 
-		b = ir_worklist_pop(&blocks);
+		count--;
+		b = list[count].b;
 		bb = &ctx->cfg_blocks[b];
 		IR_ASSERT(bb->successors_count == 1);
 		succ = ctx->cfg_edges[bb->successors];
@@ -1884,7 +1891,7 @@ int ir_coalesce(ir_ctx *ctx)
 			}
 		}
 	}
-	ir_worklist_free(&blocks);
+	ir_mem_free(list);
 
 	ir_hint_propagation(ctx);
 
