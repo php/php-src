@@ -534,6 +534,12 @@ typedef const void *(*ir_get_veneer_t)(ir_ctx *ctx, const void *addr);
 typedef bool (*ir_set_veneer_t)(ir_ctx *ctx, const void *addr, const void *veneer);
 #endif
 
+typedef struct _ir_code_buffer {
+	void *start;
+	void *end;
+	void *pos;
+} ir_code_buffer;
+
 struct _ir_ctx {
 	ir_insn           *ir_base;                 /* two directional array - instructions grow down, constants grow up */
 	ir_ref             insns_count;             /* number of instructions stored in instructions buffer */
@@ -593,12 +599,9 @@ struct _ir_ctx {
 	uint32_t           entries_count;
 	uint32_t          *entries;                /* array of ENTRY blocks */
 	void              *osr_entry_loads;
-	void              *code_buffer;
-	size_t             code_buffer_size;
+	ir_code_buffer    *code_buffer;
 #if defined(IR_TARGET_AARCH64)
 	int32_t            deoptimization_exits;
-	int32_t            veneers_size;
-	uint32_t           code_size;
 	ir_get_exit_addr_t get_exit_addr;
 	ir_get_veneer_t    get_veneer;
 	ir_set_veneer_t    set_veneer;
@@ -857,7 +860,7 @@ int ir_patch(const void *code, size_t size, uint32_t jmp_table_size, const void 
 uint32_t ir_cpuinfo(void);
 
 /* Deoptimization helpers */
-const void *ir_emit_exitgroup(uint32_t first_exit_point, uint32_t exit_points_per_group, const void *exit_addr, void *code_buffer, size_t code_buffer_size, size_t *size_ptr);
+const void *ir_emit_exitgroup(uint32_t first_exit_point, uint32_t exit_points_per_group, const void *exit_addr, ir_code_buffer *code_buffer, size_t *size_ptr);
 
 /* A reference IR JIT compiler */
 IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)

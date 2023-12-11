@@ -768,6 +768,7 @@ extern const char *ir_op_name[IR_LAST_OP];
 
 #define IR_IS_CONST_OP(op)       ((op) > IR_NOP && (op) <= IR_C_FLOAT)
 #define IR_IS_FOLDABLE_OP(op)    ((op) <= IR_LAST_FOLDABLE_OP)
+#define IR_IS_SYM_CONST(op)      ((op) == IR_STR || (op) == IR_SYM || (op) == IR_FUNC)
 
 IR_ALWAYS_INLINE bool ir_const_is_true(const ir_insn *v)
 {

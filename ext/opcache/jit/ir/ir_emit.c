@@ -328,7 +328,7 @@ void *ir_resolve_sym_name(const char *name)
 	IR_SNAPSHOT_HANDLER_DCL();
 #endif
 
-static void *ir_jmp_addr(ir_ctx *ctx, ir_insn *insn, ir_insn *addr_insn)
+static void *ir_call_addr(ir_ctx *ctx, ir_insn *insn, ir_insn *addr_insn)
 {
 	void *addr;
 
@@ -342,6 +342,13 @@ static void *ir_jmp_addr(ir_ctx *ctx, ir_insn *insn, ir_insn *addr_insn)
 		IR_ASSERT(addr_insn->op == IR_ADDR || addr_insn->op == IR_FUNC_ADDR);
 		addr = (void*)addr_insn->val.addr;
 	}
+	return addr;
+}
+
+static void *ir_jmp_addr(ir_ctx *ctx, ir_insn *insn, ir_insn *addr_insn)
+{
+	void *addr = ir_call_addr(ctx, insn, addr_insn);
+
 #ifdef IR_SNAPSHOT_HANDLER
 	if (ctx->ir_base[insn->op1].op == IR_SNAPSHOT) {
 		addr = IR_SNAPSHOT_HANDLER(ctx, insn->op1, &ctx->ir_base[insn->op1], addr);
@@ -372,10 +379,26 @@ static int ir_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int *b, ui
 # pragma GCC diagnostic pop
 #endif
 
-
 /* Forward Declarations */
 static void ir_emit_osr_entry_loads(ir_ctx *ctx, int b, ir_block *bb);
 static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb);
+
+typedef struct _ir_common_backend_data {
+    ir_reg_alloc_data  ra_data;
+	uint32_t           dessa_from_block;
+	dasm_State        *dasm_state;
+	ir_bitset          emit_constants;
+} ir_common_backend_data;
+
+static int ir_const_label(ir_ctx *ctx, ir_ref ref)
+{
+	ir_common_backend_data *data = ctx->data;
+	int label = ctx->cfg_blocks_count - ref;
+
+	IR_ASSERT(IR_IS_CONST_REF(ref));
+	ir_bitset_incl(data->emit_constants, -ref);
+	return label;
+}
 
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
 # include "ir_emit_x86.h"
