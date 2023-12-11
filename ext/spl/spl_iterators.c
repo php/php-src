@@ -135,7 +135,6 @@ typedef struct _spl_dual_it_object {
 			pcre_cache_entry *pce;
 			zend_string      *regex;
 			regex_mode       mode;
-			int              use_flags;
 		} regex;
 		zend_fcall_info_cache callback_filter;
 	} u;
@@ -1407,7 +1406,6 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			zend_string *regex;
 			zend_long mode = REGIT_MODE_MATCH;
 
-			intern->u.regex.use_flags = ZEND_NUM_ARGS() >= 5;
 			intern->u.regex.flags = 0;
 			intern->u.regex.preg_flags = 0;
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS|lll", &zobject, ce_inner, &regex, &mode, &intern->u.regex.flags, &intern->u.regex.preg_flags) == FAILURE) {
@@ -1876,7 +1874,7 @@ PHP_METHOD(RegexIterator, accept)
 			zval_ptr_dtor(&intern->current.data);
 			ZVAL_UNDEF(&intern->current.data);
 			php_pcre_match_impl(intern->u.regex.pce, subject, &zcount,
-				&intern->current.data, intern->u.regex.mode == REGIT_MODE_ALL_MATCHES, intern->u.regex.use_flags, intern->u.regex.preg_flags, 0);
+				&intern->current.data, intern->u.regex.mode == REGIT_MODE_ALL_MATCHES, intern->u.regex.preg_flags, 0);
 			RETVAL_BOOL(Z_LVAL(zcount) > 0);
 			break;
 
@@ -2006,11 +2004,7 @@ PHP_METHOD(RegexIterator, getPregFlags)
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
-	if (intern->u.regex.use_flags) {
-		RETURN_LONG(intern->u.regex.preg_flags);
-	} else {
-		RETURN_LONG(0);
-	}
+	RETURN_LONG(intern->u.regex.preg_flags);
 } /* }}} */
 
 /* {{{ Set PREG flags */
@@ -2026,7 +2020,6 @@ PHP_METHOD(RegexIterator, setPregFlags)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
 	intern->u.regex.preg_flags = preg_flags;
-	intern->u.regex.use_flags = 1;
 } /* }}} */
 
 /* {{{ Create an RecursiveRegexIterator from another recursive iterator and a regular expression */

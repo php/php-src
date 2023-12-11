@@ -59,6 +59,12 @@ PHP 8.4 INTERNALS UPGRADE NOTES
  e. ext/date
    - Added the php_format_date_ex() API to format instances of php_date_obj.
 
+ d. ext/pcre
+   - php_pcre_match_impl() now no longer has a use_flags argument.
+     When flags should be ignored, pass 0 to the flags argument.
+   - php_pcre_match_impl() and pcre_get_compiled_regex_cache_ex() now use
+     proper boolean argument types instead of integer types.
+
 ========================
 4. OpCode changes
 ========================
