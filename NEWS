@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fix incorrect timeout in built-in web server when using router script and
     max_input_time. (ilutov)
 
+- Hash:
+  . Fixed bug GH-12936 (hash() function hangs endlessly if using sha512 on
+    strings >= 4GiB). (nielsdos)
+
 - Opcache:
   . Fixed oss-fuzz #64727 (JIT undefined array key warning may overwrite DIM
     with NULL when DIM is the same var as result). (ilutov)
