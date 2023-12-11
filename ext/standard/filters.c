@@ -1188,9 +1188,7 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 			retval = pemalloc(sizeof(php_conv_base64_encode), persistent);
 			if (lbchars != NULL) {
 				if (php_conv_base64_encode_ctor((php_conv_base64_encode *)retval, line_len, lbchars, lbchars_len, 1, persistent) != PHP_CONV_ERR_SUCCESS) {
-					if (lbchars != NULL) {
-						pefree(lbchars, 0);
-					}
+					pefree(lbchars, 0);
 					goto out_failure;
 				}
 				pefree(lbchars, 0);
