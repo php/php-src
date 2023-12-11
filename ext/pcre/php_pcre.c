@@ -979,7 +979,7 @@ static inline void add_named(
 /* {{{ add_offset_pair */
 static inline void add_offset_pair(
 		HashTable *const result, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
-		zend_string *name, uint32_t unmatched_as_null)
+		zend_string *name, zend_long unmatched_as_null)
 {
 	zval match_pair;
 
@@ -1142,7 +1142,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	size_t			 i;
 	uint32_t		 subpats_order;		/* Order of subpattern matches */
 	uint32_t		 offset_capture;	/* Capture match offsets: yes/no */
-	uint32_t		 unmatched_as_null;	/* Null non-matches: yes/no */
+	zend_long		 unmatched_as_null;	/* Null non-matches: yes/no */
 	PCRE2_SPTR       mark = NULL;		/* Target for MARK name */
 	HashTable		*marks = NULL;		/* Array of marks for PREG_PATTERN_ORDER */
 	pcre2_match_data *match_data;
