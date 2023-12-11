@@ -1636,9 +1636,6 @@ PHP_FUNCTION(stream_is_local)
 
 	if (Z_TYPE_P(zstream) == IS_RESOURCE) {
 		php_stream_from_zval(stream, zstream);
-		if (stream == NULL) {
-			RETURN_FALSE;
-		}
 		wrapper = stream->wrapper;
 	} else {
 		if (!try_convert_to_string(zstream)) {
