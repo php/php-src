@@ -5302,6 +5302,12 @@ static zend_result zend_ffi_preload(char *preload) /* {{{ */
 }
 /* }}} */
 
+/* The startup code for observers adds a temporary to each function for internal use.
+ * The "new", "cast", and "type" functions in FFI are both static and non-static.
+ * Only the static versions are in the function table and the non-static versions are not.
+ * This means the non-static versions will be skipped by the observers startup code.
+ * This function fixes that by incrementing the temporary count for the non-static versions.
+ */
 static zend_result (*prev_zend_post_startup_cb)(void);
 static zend_result ffi_fixup_temporaries(void) {
 	if (ZEND_OBSERVER_ENABLED) {
