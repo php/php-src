@@ -62,6 +62,18 @@ static void *find_prefered_mmap_base(size_t requested_size)
 	}
 
 	while (fgets(buffer, MAXPATHLEN, f) && sscanf(buffer, "%lx-%lx", &start, &end) == 2) {
+		/* Don't place the segment directly before or after the heap segment. Due to an selinux bug,
+		 * a segment directly preceding or following the heap is interpreted as heap memory, which
+		 * will result in an execheap violation for the JIT.
+		 * See https://bugzilla.kernel.org/show_bug.cgi?id=218258. */
+		bool heap_segment = strstr(buffer, "[heap]") != NULL;
+		if (heap_segment) {
+			uintptr_t start_base = start & ~(huge_page_size - 1);
+			if (last_free_addr + requested_size >= start_base) {
+				last_free_addr = ZEND_MM_ALIGNED_SIZE_EX(end + huge_page_size, huge_page_size);
+				continue;
+			}
+		}
 		if ((uintptr_t)execute_ex >= start) {
 			/* the current segment lays before PHP .text segment or PHP .text segment itself */
 			if (last_free_addr + requested_size <= start) {
@@ -90,7 +102,9 @@ static void *find_prefered_mmap_base(size_t requested_size)
 			}
 		}
 		last_free_addr = ZEND_MM_ALIGNED_SIZE_EX(end, huge_page_size);
-
+		if (heap_segment) {
+			last_free_addr += huge_page_size;
+		}
 	}
 	fclose(f);
 #elif defined(__FreeBSD__)
