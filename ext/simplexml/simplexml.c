@@ -636,6 +636,9 @@ static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int f
 
 	sxe = php_sxe_fetch_object(object);
 	GET_NODE(sxe, node);
+	if (UNEXPECTED(!node)) {
+		return &EG(error_zval);
+	}
 	name = ZSTR_VAL(zname);
 	node = sxe_get_element_by_name(sxe, node, &name, &type);
 	if (node) {
