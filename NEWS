@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12870 (Creating an xmlns attribute results in a DOMException).
     (nielsdos)
 
+- Hash:
+  . Fixed bug GH-12936 (hash() function hangs endlessly if using sha512 on
+    strings >= 4GiB). (nielsdos)
+
 - Opcache:
   . Fixed oss-fuzz #64727 (JIT undefined array key warning may overwrite DIM
     with NULL when DIM is the same var as result). (ilutov)
