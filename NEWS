@@ -34,6 +34,8 @@ PHP                                                                        NEWS
 - SimpleXML:
   . Fix getting the address of an uninitialized property of a SimpleXMLElement
     resulting in a crash. (nielsdos)
+  . Fixed bug GH-12929 (SimpleXMLElement with stream_wrapper_register can
+    segfault). (nielsdos)
 
 07 Dec 2023, PHP 8.3.1RC1
 
