@@ -23,6 +23,10 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fixed bug GH-12962 (Double free of init_file in phpdbg_prompt.c). (nielsdos)
 
+- SimpleXML:
+  . Fix getting the address of an uninitialized property of a SimpleXMLElement
+    resulting in a crash. (nielsdos)
+
 21 Dec 2023, PHP 8.2.14
 
 - Core:
