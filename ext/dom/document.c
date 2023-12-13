@@ -909,6 +909,7 @@ PHP_METHOD(DOM_Document, createAttributeNS)
 		}
 		if (UNEXPECTED(xmlValidateName((xmlChar *) localname, 0) != 0)) {
 			errorcode = INVALID_CHARACTER_ERR;
+			goto error;
 		}
 		/* If prefix is "xml" and namespace is not the XML namespace, then throw a "NamespaceError" DOMException. */
 		if (UNEXPECTED(!zend_string_equals_literal(uri, "http://www.w3.org/XML/1998/namespace") && xmlStrEqual(BAD_CAST prefix, BAD_CAST "xml"))) {
