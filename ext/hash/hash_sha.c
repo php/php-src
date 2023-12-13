@@ -525,7 +525,7 @@ PHP_HASH_API void PHP_SHA384Update(PHP_SHA384_CTX * context, const unsigned char
 	if ((context->count[0] += ((uint64_t) inputLen << 3)) < ((uint64_t) inputLen << 3)) {
 		context->count[1]++;
 	}
-	context->count[1] += (uint64_t) (inputLen >> 61);
+	context->count[1] += (uint64_t) (inputLen >> (sizeof(inputLen) * 8 - 1));
 
 	partLen = 128 - index;
 
@@ -679,7 +679,7 @@ PHP_HASH_API void PHP_SHA512Update(PHP_SHA512_CTX * context, const unsigned char
 	if ((context->count[0] += ((uint64_t) inputLen << 3)) < ((uint64_t) inputLen << 3)) {
 		context->count[1]++;
 	}
-	context->count[1] += (uint64_t) (inputLen >> 61);
+	context->count[1] += (uint64_t) (inputLen >> (sizeof(inputLen) * 8 - 1));
 
 	partLen = 128 - index;
 
