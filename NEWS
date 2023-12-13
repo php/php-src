@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed oss-fuzz #64727 (JIT undefined array key warning may overwrite DIM
     with NULL when DIM is the same var as result). (ilutov)
+  . Added workaround for SELinux mprotect execheap issue.
+    See https://bugzilla.kernel.org/show_bug.cgi?id=218258. (ilutov)
 
 07 Dec 2023, PHP 8.3.1RC1
 
