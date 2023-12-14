@@ -138,7 +138,9 @@ PHP_METHOD(DOMText, splitText)
 	length = xmlUTF8Strlen(cur);
 
 	if (ZEND_LONG_INT_OVFL(offset) || (int)offset > length) {
-		/* TODO Add warning? */
+		if (php_dom_follow_spec_intern(intern)) {
+			php_dom_throw_error(INDEX_SIZE_ERR, /* strict */ true);
+		}
 		RETURN_FALSE;
 	}
 
