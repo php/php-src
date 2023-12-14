@@ -5,9 +5,13 @@ dom
 --FILE--
 <?php
 
+// Note: can't create CData in an HTML document.
+$dom = DOM\XMLDocument::createEmpty();
+$cdata = $dom->createCDATASection("cdata");
+
 $dom = DOM\HTMLDocument::createEmpty();
 $comment = $dom->appendChild($dom->createComment("comment"));
-$cdata = $dom->appendChild($dom->createCDATASection("cdata"));
+$cdata = $dom->appendChild($dom->importNode($cdata));
 $emptyElement = $dom->appendChild($dom->createElement("empty"));
 $text = $dom->appendChild($dom->createTextNode("text"));
 $pi = $dom->appendChild($dom->createProcessingInstruction("target", "data"));
