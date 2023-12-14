@@ -8,7 +8,7 @@ pdo_sqlite
 // This test was copied from the pdo_sqlite test for sqliteCreateAggregate
 $db = new PdoSqlite('sqlite::memory:');
 
-$db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)');
+$db->query('CREATE TABLE foobar (id INT AUTO INCREMENT, name TEXT)');
 
 $db->query('INSERT INTO foobar VALUES (NULL, "PHP")');
 $db->query('INSERT INTO foobar VALUES (NULL, "PHP6")');

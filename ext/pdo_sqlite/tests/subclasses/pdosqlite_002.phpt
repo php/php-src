@@ -10,7 +10,7 @@ if (!$db instanceof PdoSqlite) {
     echo "Wrong class type. Should be PdoSqlite but is " . get_class($db) . "\n";
 }
 
-$db->query('CREATE TABLE IF NOT EXISTS pdosqlite_002 (id INT AUTO INCREMENT, name TEXT)');
+$db->query('CREATE TABLE pdosqlite_002 (id INT AUTO INCREMENT, name TEXT)');
 $db->query('INSERT INTO pdosqlite_002 VALUES (NULL, "PHP")');
 $db->query('INSERT INTO pdosqlite_002 VALUES (NULL, "PHP6")');
 

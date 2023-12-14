@@ -80,7 +80,7 @@ PHP_METHOD(PdoPgsql, escapeIdentifier)
 	tmp = PQescapeIdentifier(H->server, ZSTR_VAL(from), ZSTR_LEN(from));
 	if (!tmp) {
 		// TODO - exception
-		php_error_docref(NULL, E_WARNING,"Failed to escape identifier");
+		php_error_docref(NULL, E_WARNING, "Failed to escape identifier");
 		RETURN_FALSE;
 	}
 

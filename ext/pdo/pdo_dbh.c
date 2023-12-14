@@ -260,7 +260,7 @@ static bool create_driver_specific_pdo_object(const char *driver_name, zend_clas
 			if (instanceof_function(ce_based_on_called_object, ce_based_on_driver_name) == false) {
 				zend_throw_exception_ex(php_pdo_get_exception(), 0,
 					"%s::connect() cannot be called when connecting to the \"%s\" driver, "
-					"you must call either %s::connect() or PDO::connect() instead",
+					"either %s::connect() or PDO::connect() must be called instead",
 					ZSTR_VAL(called_scope->name), driver_name, ZSTR_VAL(ce_based_on_driver_name->name));
 				return false;
 			}
@@ -270,7 +270,7 @@ static bool create_driver_specific_pdo_object(const char *driver_name, zend_clas
 		} else {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0,
 				"%s::connect() cannot be called when connecting to an unknown driver, "
-				"you must call PDO::connect() instead",
+				"PDO::connect() must be called instead",
 				ZSTR_VAL(called_scope->name));
 			return false;
 		}
@@ -280,7 +280,7 @@ static bool create_driver_specific_pdo_object(const char *driver_name, zend_clas
 		if (called_scope != pdo_dbh_ce) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0,
 				"%s::connect() cannot be called when connecting to the \"%s\" driver, "
-				"you must call either %s::connect() or PDO::connect() instead",
+				"either %s::connect() or PDO::connect() must be called instead",
 				ZSTR_VAL(called_scope->name), driver_name, ZSTR_VAL(ce_based_on_driver_name->name));
 			return false;
 		}

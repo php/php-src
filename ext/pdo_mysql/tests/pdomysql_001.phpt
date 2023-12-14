@@ -14,7 +14,7 @@ require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
 $db = MySQLPDOTest::factory(PdoMysql::class);
 
-$db->query('CREATE TABLE IF NOT EXISTS pdomysql_001 (id INT, name TEXT)');
+$db->query('CREATE TABLE pdomysql_001 (id INT, name TEXT)');
 
 $db->query('INSERT INTO pdomysql_001 VALUES (NULL, "PHP")');
 $db->query('INSERT INTO pdomysql_001 VALUES (NULL, "PHP6")');

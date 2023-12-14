@@ -39,24 +39,24 @@ typedef struct {
 
 /* {{{ pdo_sqlite_deps */
 static const zend_module_dep pdo_sqlite_deps[] = {
-		ZEND_MOD_REQUIRED("pdo")
-		ZEND_MOD_END
+	ZEND_MOD_REQUIRED("pdo")
+	ZEND_MOD_END
 };
 /* }}} */
 
 /* {{{ pdo_sqlite_module_entry */
 zend_module_entry pdo_sqlite_module_entry = {
-		STANDARD_MODULE_HEADER_EX, NULL,
-		pdo_sqlite_deps,
-		"pdo_sqlite",
-		NULL,
-		PHP_MINIT(pdo_sqlite),
-		PHP_MSHUTDOWN(pdo_sqlite),
-		NULL,
-		NULL,
-		PHP_MINFO(pdo_sqlite),
-		PHP_PDO_SQLITE_VERSION,
-		STANDARD_MODULE_PROPERTIES
+	STANDARD_MODULE_HEADER_EX, NULL,
+	pdo_sqlite_deps,
+	"pdo_sqlite",
+	NULL,
+	PHP_MINIT(pdo_sqlite),
+	PHP_MSHUTDOWN(pdo_sqlite),
+	NULL,
+	NULL,
+	PHP_MINFO(pdo_sqlite),
+	PHP_PDO_SQLITE_VERSION,
+	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
@@ -508,7 +508,7 @@ PHP_METHOD(PdoSqlite, openBlob)
 	PDO_CONSTRUCT_CHECK;
 	db_handle = (pdo_sqlite_db_handle *)dbh->driver_data;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssl|pl", &table, &table_len, &column, &column_len, &rowid, &dbname, &dbname_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ppl|pl", &table, &table_len, &column, &column_len, &rowid, &dbname, &dbname_len, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
 

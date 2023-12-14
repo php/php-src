@@ -10,19 +10,15 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 $db->beginTransaction();
 
-$db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)');
+$db->query('CREATE TABLE test_pdo_sqlite_transaction (id INT AUTO INCREMENT, name TEXT)');
 $db->commit();
 
 $db->beginTransaction();
-$db->query('INSERT INTO foobar VALUES (NULL, "PHP")');
-$db->query('INSERT INTO foobar VALUES (NULL, "PHP6")');
+$db->query('INSERT INTO test_pdo_sqlite_transaction VALUES (NULL, "PHP"), (NULL, "PHP6")');
 $db->rollback();
 
-$r = $db->query('SELECT COUNT(*) FROM foobar');
+$r = $db->query('SELECT COUNT(*) FROM test_pdo_sqlite_transaction');
 var_dump($r->rowCount());
-
-
-$db->query('DROP TABLE foobar');
 
 ?>
 --EXPECTF--

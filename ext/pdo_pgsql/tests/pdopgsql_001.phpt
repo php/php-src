@@ -6,7 +6,7 @@ pdo_pgsql
 --SKIPIF--
 <?php
 require __DIR__ . '/config.inc';
-require __DIR__ . '/../../pdo/tests/pdo_test.inc';
+require dirname(__DIR__, 2) . '/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
@@ -16,7 +16,7 @@ require_once __DIR__ . "/config.inc";
 
 $db = new PdoPgsql($config['ENV']['PDOTEST_DSN']);
 
-$db->query('CREATE TABLE IF NOT EXISTS pdopgsql_001 (id INT, name TEXT)');
+$db->query('CREATE TABLE pdopgsql_001 (id INT, name TEXT)');
 $db->query("INSERT INTO pdopgsql_001 VALUES (NULL, 'PHP'), (NULL, 'PHP6')");
 
 foreach ($db->query('SELECT name FROM pdopgsql_001') as $row) {
@@ -27,7 +27,7 @@ echo "Fin.";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/../../pdo/tests/pdo_test.inc';
 $pdo = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $pdo->query("DROP TABLE IF EXISTS pdopgsql_001");
 ?>

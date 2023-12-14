@@ -11,6 +11,7 @@ $db = MyPdoSqlite::connect('sqlite::memory:');
 if (!$db instanceof MyPdoSqlite) {
     echo "Wrong class type. Should be MyPdoSqlite but is " .get_class($db) . "\n";
 }
-
+echo "OK";
 ?>
 --EXPECT--
+OK

@@ -7,7 +7,7 @@ pdo_sqlite
 
 $db = new PdoSqlite('sqlite::memory:');
 
-$db->query('CREATE TABLE IF NOT EXISTS pdosqlite_001 (id INT AUTO INCREMENT, name TEXT)');
+$db->query('CREATE TABLE pdosqlite_001 (id INT AUTO INCREMENT, name TEXT)');
 
 $db->query('INSERT INTO pdosqlite_001 VALUES (NULL, "PHP")');
 $db->query('INSERT INTO pdosqlite_001 VALUES (NULL, "PHP6")');

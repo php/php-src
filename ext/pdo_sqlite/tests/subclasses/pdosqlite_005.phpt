@@ -14,4 +14,4 @@ try {
 
 ?>
 --EXPECT--
-PdoPgsql::connect() cannot be called when connecting to the "sqlite" driver, you must call either PdoSqlite::connect() or PDO::connect() instead
+PdoPgsql::connect() cannot be called when connecting to the "sqlite" driver, either PdoSqlite::connect() or PDO::connect() must be called instead
