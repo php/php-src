@@ -324,6 +324,7 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 				if (curnode->type == XML_ELEMENT_NODE) {
 					/* This ensures that namespace references in this subtree are defined within this subtree,
 					 * otherwise a use-after-free would be possible when the original namespace holder gets freed. */
+					// TODO: Should not leak implementation detail from dom class?
 					php_libxml_node_ptr *ptr = curnode->_private;
 					php_libxml_node_object *obj = ptr->_private;
 					if (obj->document && obj->document->is_modern_api_class) {
