@@ -53,6 +53,7 @@ PHP_METHOD(DOMAttr, __construct)
 		RETURN_THROWS();
 	}
 
+	// TODO: what to do with entity subtitution here?
 	nodep = xmlNewProp(NULL, (xmlChar *) name, (xmlChar *) value);
 
 	if (!nodep) {
@@ -147,7 +148,13 @@ zend_result dom_attr_value_write(dom_object *obj, zval *newval)
 	zend_string *str = Z_STR_P(newval);
 
 	dom_remove_all_children((xmlNodePtr) attrp);
-	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+
+	if (php_dom_follow_spec_intern(obj)) {
+		xmlNodePtr node = xmlNewTextLen((xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+		xmlAddChild((xmlNodePtr) attrp, node);
+	} else {
+		xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+	}
 
 	return SUCCESS;
 }
