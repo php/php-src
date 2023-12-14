@@ -223,11 +223,11 @@ static zend_always_inline bool php_dom_is_cache_tag_stale_from_doc_ptr(const php
 static zend_always_inline bool php_dom_is_cache_tag_stale_from_node(const php_libxml_cache_tag *cache_tag, const xmlNodePtr node)
 {
 	ZEND_ASSERT(node != NULL);
-	php_libxml_node_ptr *private = node->_private;
-	if (!private) {
+	php_libxml_node_ptr *_private = node->_private;
+	if (!_private) {
 		return true;
 	}
-	php_libxml_node_object *object_private = private->_private;
+	php_libxml_node_object *object_private = _private->_private;
 	if (!object_private || !object_private->document) {
 		return true;
 	}
@@ -237,13 +237,38 @@ static zend_always_inline bool php_dom_is_cache_tag_stale_from_node(const php_li
 static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_node(php_libxml_cache_tag *cache_tag, const xmlNodePtr node)
 {
 	ZEND_ASSERT(cache_tag != NULL);
-	php_libxml_node_ptr *private = node->_private;
-	if (private) {
-		php_libxml_node_object *object_private = private->_private;
+	php_libxml_node_ptr *_private = node->_private;
+	if (_private) {
+		php_libxml_node_object *object_private = _private->_private;
 		if (object_private->document) {
 			cache_tag->modification_nr = object_private->document->cache_tag.modification_nr;
 		}
 	}
+}
+
+static zend_always_inline bool php_dom_follow_spec_doc_ref(const php_libxml_ref_obj *document)
+{
+	ZEND_ASSERT(document != NULL);
+	return document->is_modern_api_class;
+}
+
+static zend_always_inline bool php_dom_follow_spec_intern(const dom_object *intern)
+{
+	ZEND_ASSERT(intern != NULL);
+	return intern->document && php_dom_follow_spec_doc_ref(intern->document);
+}
+
+static zend_always_inline bool php_dom_follow_spec_node(const xmlNode *node)
+{
+	ZEND_ASSERT(node != NULL);
+	php_libxml_node_ptr *_private = node->_private;
+	if (_private) {
+		php_libxml_node_object *object_private = _private->_private;
+		if (object_private->document) {
+			return php_dom_follow_spec_doc_ref(object_private->document);
+		}
+	}
+	return false;
 }
 
 PHP_MINIT_FUNCTION(dom);
