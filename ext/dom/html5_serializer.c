@@ -61,7 +61,9 @@ static zend_result dom_html5_serialize_processing_instruction(dom_html5_serializ
 	TRY(ctx->write_string_len(ctx->application_data, "<?", strlen("<?")));
 	TRY(ctx->write_string(ctx->application_data, (const char *) node->name));
 	TRY(ctx->write_string_len(ctx->application_data, " ", strlen(" ")));
-	TRY(ctx->write_string(ctx->application_data, (const char *) node->content));
+	if (node->content) {
+		TRY(ctx->write_string(ctx->application_data, (const char *) node->content));
+	}
 	return ctx->write_string_len(ctx->application_data, ">", strlen(">"));
 }
 

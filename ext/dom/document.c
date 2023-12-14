@@ -670,7 +670,14 @@ PHP_METHOD(DOM_Document, createProcessingInstruction)
 		RETURN_FALSE;
 	}
 
-	node = xmlNewPI((xmlChar *) name, (xmlChar *) value);
+	if (php_dom_follow_spec_intern(intern)) {
+		if (zend_memnstr(value, "?>", strlen("?>"), value + value_len) != NULL) {
+			php_dom_throw_error_with_message(INVALID_CHARACTER_ERR, "Invalid character sequence \"?>\" in processing instruction", /* strict */ true);
+			RETURN_THROWS();
+		}
+	}
+
+	node = xmlNewDocPI(docp, (xmlChar *) name, (xmlChar *) value);
 	if (!node) {
 		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
