@@ -5,8 +5,10 @@ dom
 --FILE--
 <?php
 
+class MyElement extends DOM\Element {}
+
 $dom = DOM\HTMLDocument::createFromString("<p>foo</p>", LIBXML_NOERROR);
-$dom->strictErrorChecking = false;
+$dom->registerNodeClass("DOMElement", "MyElement");
 $child = $dom->appendChild($dom->createElement('html'));
 
 // Destroy reference to the DOM
@@ -17,19 +19,17 @@ unset($dom);
 $dom = $child->ownerDocument;
 var_dump($dom);
 // Test if property is preserved (any random doc_props property will do)
-var_dump($dom->strictErrorChecking);
+var_dump(get_class($dom->getElementsByTagName("p")->item(0)));
 
 ?>
 --EXPECT--
-object(DOM\HTMLDocument)#1 (26) {
+object(DOM\HTMLDocument)#1 (25) {
   ["encoding"]=>
   string(5) "UTF-8"
   ["doctype"]=>
   NULL
   ["documentElement"]=>
   string(22) "(object value omitted)"
-  ["strictErrorChecking"]=>
-  bool(false)
   ["documentURI"]=>
   NULL
   ["firstElementChild"]=>
@@ -75,4 +75,4 @@ object(DOM\HTMLDocument)#1 (26) {
   ["textContent"]=>
   string(3) "foo"
 }
-bool(false)
+string(9) "MyElement"

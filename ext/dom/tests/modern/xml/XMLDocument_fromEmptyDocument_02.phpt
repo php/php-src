@@ -10,7 +10,7 @@ var_dump($dom);
 
 ?>
 --EXPECT--
-object(DOM\XMLDocument)#1 (37) {
+object(DOM\XMLDocument)#1 (36) {
   ["encoding"]=>
   string(5) "UTF-8"
   ["xmlEncoding"]=>
@@ -39,8 +39,6 @@ object(DOM\XMLDocument)#1 (37) {
   NULL
   ["documentElement"]=>
   NULL
-  ["strictErrorChecking"]=>
-  bool(true)
   ["documentURI"]=>
   NULL
   ["firstElementChild"]=>

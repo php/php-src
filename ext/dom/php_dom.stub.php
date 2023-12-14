@@ -759,6 +759,8 @@ namespace
 
         public bool $substituteEntities;
 
+        public bool $strictErrorChecking;
+
         public function __construct(string $version = "1.0", string $encoding = "") {}
 
         /** @return DOMEntityReference|false */
@@ -1045,8 +1047,6 @@ namespace DOM
         public ?Element $documentElement;
 
         public ?string $encoding;
-
-        public bool $strictErrorChecking;
 
         public ?string $documentURI;
 

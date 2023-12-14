@@ -26,6 +26,8 @@ object(DOMDocument)#1 (41) {
   NULL
   ["config"]=>
   NULL
+  ["strictErrorChecking"]=>
+  bool(true)
   ["encoding"]=>
   NULL
   ["xmlEncoding"]=>
@@ -54,8 +56,6 @@ object(DOMDocument)#1 (41) {
   NULL
   ["documentElement"]=>
   string(22) "(object value omitted)"
-  ["strictErrorChecking"]=>
-  bool(true)
   ["documentURI"]=>
   string(%d) "%s"
   ["firstElementChild"]=>
