@@ -11560,6 +11560,45 @@ static void mb_wchar_to_cp936(uint32_t *in, size_t len, mb_convert_buf *buf, boo
 	MB_CONVERT_BUF_STORE(buf, out, limit);
 }
 
+/* Step through a GB18030 string one character at a time. Find the last position at or
+ * before `limit` which falls directly after the end of a (single or multi-byte) character */
+static zend_always_inline unsigned char* step_through_gb18030_str(unsigned char *p, unsigned char *limit)
+{
+	while (p < limit) {
+		unsigned char c = *p;
+		if (c < 0x81 || c == 0xFF) {
+			p++;
+		} else {
+			if (limit - p == 1) {
+				break;
+			}
+			unsigned char c2 = p[1];
+			/* For a 4-byte char, the 2nd byte will be 0x30-0x39 */
+			unsigned int w = (c2 >= 0x30 && c2 <= 0x39) ? 4 : 2;
+			if (limit - p < w) {
+				break;
+			}
+			p += w;
+		}
+	}
+	return p;
+}
+
+static zend_string* mb_cut_gb18030(unsigned char *str, size_t from, size_t len, unsigned char *end)
+{
+	ZEND_ASSERT(str + from <= end);
+	unsigned char *start = step_through_gb18030_str(str, str + from);
+	if (str + from + len > end) {
+		len = (end - str) - from;
+	}
+	if (start + len >= end) {
+		return zend_string_init_fast((const char*)start, end - start);
+	} else {
+		unsigned char *_end = step_through_gb18030_str(start, start + len);
+		return zend_string_init_fast((const char*)start, _end - start);
+	}
+}
+
 static const char *mbfl_encoding_gb18030_aliases[] = {"gb-18030", "gb-18030-2000", NULL};
 
 static const struct mbfl_convert_vtbl vtbl_gb18030_wchar = {
@@ -11594,7 +11633,7 @@ const mbfl_encoding mbfl_encoding_gb18030 = {
 	mb_gb18030_to_wchar,
 	mb_wchar_to_gb18030,
 	NULL,
-	NULL,
+	mb_cut_gb18030,
 };
 
 static const char *mbfl_encoding_cp936_aliases[] = {"CP-936", "GBK", NULL};
