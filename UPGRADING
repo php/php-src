@@ -205,6 +205,10 @@ PHP 8.4 UPGRADE NOTES
 5. Changed Functions
 ========================================
 
+- DOM:
+  . DOMDocument::registerNodeClass() now has a tentative return type of true.
+    Previously, the return type was bool but only true could be returned in practice.
+
 - Intl:
   . IntlDateFormatter::__construct() throws a ValueError if the locale is invalid.
   . NumberFormatter::__construct() throws a ValueError if the locale is invalid.

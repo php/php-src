@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dc65484181a06009b064b650edbb9d831a56fd7c */
+ * Stub hash: 5512165ddaad08287561abac2a325e2aab3c6188 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -509,7 +509,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_Document_normalizeDocument arginfo_class_DOMNode_normalize
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOM_Document_registerNodeClass, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOM_Document_registerNodeClass, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, baseClass, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, extendedClass, IS_STRING, 1)
 ZEND_END_ARG_INFO()
