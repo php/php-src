@@ -70,14 +70,11 @@ static zend_result dom_html5_escape_string(dom_html5_serialize_context *ctx, con
 {
 	const char *last_output = content;
 
+	/* Note: uses UTF-8 internally, so <C2 A0> indicates a non-breaking space */
+	const char *mask = attribute_mode ? "&\xC2\"" : "&\xC2<>";
+
 	while (true) {
-		size_t chunk_length;
-		/* Note: uses UTF-8 internally, so <C2 A0> indicates a non-breaking space */
-		if (attribute_mode) {
-			chunk_length = strcspn(content, "&\xC2\"");
-		} else {
-			chunk_length = strcspn(content, "&\xC2<>");
-		}
+		size_t chunk_length = strcspn(content, mask);
 
 		content += chunk_length;
 		if (*content == '\0') {
