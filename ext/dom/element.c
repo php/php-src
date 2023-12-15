@@ -110,27 +110,15 @@ Since:
 */
 zend_result dom_element_tag_name_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep;
-	xmlNsPtr ns;
-	xmlChar *qname;
-
-	nodep = dom_object_get_node(obj);
+	xmlNodePtr nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
-	ns = nodep->ns;
-	if (ns != NULL && ns->prefix) {
-		qname = xmlStrdup(ns->prefix);
-		qname = xmlStrcat(qname, (xmlChar *)":");
-		qname = xmlStrcat(qname, nodep->name);
-		ZVAL_STRING(retval, (char *)qname);
-		xmlFree(qname);
-	} else {
-		ZVAL_STRING(retval, (char *) nodep->name);
-	}
+	zend_string *result = dom_node_get_node_name_attribute_or_element((const xmlNode *) nodep);
+	ZVAL_STR(retval, result);
 
 	return SUCCESS;
 }
