@@ -1216,6 +1216,18 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 }
 /* }}} */
 
+#if FB_API_VER >= 30
+/* called by PDO to check liveness */
+static zend_result pdo_firebird_check_liveness(pdo_dbh_t *dbh) /* {{{ */
+{
+	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
+
+	/* fb_ping return 0 if the connection is alive */
+	return fb_ping(H->isc_status, &H->db) ? FAILURE : SUCCESS;
+}
+/* }}} */
+#endif
+
 /* called by PDO to retrieve driver-specific information about an error that has occurred */
 static void pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
 {
@@ -1254,7 +1266,11 @@ static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	NULL, /* last_id not supported */
 	pdo_firebird_fetch_error_func,
 	pdo_firebird_get_attribute,
-	NULL, /* check_liveness */
+#if FB_API_VER >= 30
+	pdo_firebird_check_liveness,
+#else
+	NULL,
+#endif
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
 	pdo_firebird_in_manually_transaction,
