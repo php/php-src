@@ -17,6 +17,10 @@ PHP                                                                        NEWS
     (Jakub Zelenka)
   . Fixed bug GH-12905 (FFI::new interacts badly with observers). (nielsdos)
 
+- Intl:
+  . Fixed GH-12943 (IntlDateFormatter::__construct accepts 'C' as valid locale).
+    (David Carlier)
+
 - Hash:
   . Fixed bug GH-12936 (hash() function hangs endlessly if using sha512 on
     strings >= 4GiB). (nielsdos)
