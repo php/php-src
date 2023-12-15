@@ -27,7 +27,7 @@ abstract class PHPUnit_Framework_TestCase
     private $name = null;
     private $result;
 
-    public function run(PHPUnit_Framework_TestResult $result = null)
+    public function run(?PHPUnit_Framework_TestResult $result = null)
     {
         $result->run($this);
     }

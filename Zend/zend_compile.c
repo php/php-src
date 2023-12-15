@@ -7224,6 +7224,11 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 			arg_info->type = zend_compile_typename_ex(type_ast, force_nullable, &forced_allow_nullable);
+			if (forced_allow_nullable) {
+				zend_error(E_DEPRECATED,
+				   "Implicitly marking parameter $%s as nullable is deprecated, the explicit nullable type "
+				   "must be used instead", ZSTR_VAL(name));
+			}
 
 			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_VOID) {
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");

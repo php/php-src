@@ -69,5 +69,10 @@ namespace HTML
     echo 'Done';
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Implicitly marking parameter $attributes as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+
+Deprecated: Implicitly marking parameter $attributes as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+
+Deprecated: Implicitly marking parameter $attributes as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 Done
