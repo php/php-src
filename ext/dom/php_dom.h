@@ -261,7 +261,6 @@ static zend_always_inline bool php_dom_follow_spec_intern(const dom_object *inte
 
 static zend_always_inline bool php_dom_follow_spec_node(const xmlNode *node)
 {
-	// TODO: remove this function?
 	ZEND_ASSERT(node != NULL);
 	php_libxml_node_ptr *_private = node->_private;
 	if (_private) {
