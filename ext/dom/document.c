@@ -676,7 +676,7 @@ PHP_METHOD(DOM_Document, createProcessingInstruction)
 	}
 
 	if (php_dom_follow_spec_intern(intern)) {
-		if (zend_memnstr(value, "?>", strlen("?>"), value + value_len) != NULL) {
+		if (value != NULL && zend_memnstr(value, "?>", strlen("?>"), value + value_len) != NULL) {
 			php_dom_throw_error_with_message(INVALID_CHARACTER_ERR, "Invalid character sequence \"?>\" in processing instruction", /* strict */ true);
 			RETURN_THROWS();
 		}
@@ -868,7 +868,7 @@ PHP_METHOD(DOM_Document, createElementNS)
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
 	if (php_dom_follow_spec_intern(intern)) {
-		xmlChar *localname, *prefix;
+		xmlChar *localname = NULL, *prefix = NULL;
 		errorcode = dom_validate_and_extract(uri, name, &localname, &prefix);
 
 		if (errorcode == 0) {
@@ -927,7 +927,7 @@ PHP_METHOD(DOM_Document, createAttributeNS)
 	xmlNsPtr nsptr;
 	int ret;
 	zend_string *name, *uri;
-	xmlChar *localname, *prefix;
+	xmlChar *localname = NULL, *prefix = NULL;
 	dom_object *intern;
 	int errorcode;
 
