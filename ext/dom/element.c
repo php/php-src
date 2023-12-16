@@ -320,23 +320,25 @@ PHP_METHOD(DOMElement, getAttributeNames)
 {
 	zval *id;
 	xmlNode *nodep;
-	dom_object *unused_intern;
+	dom_object *intern;
 	zval tmp;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, unused_intern);
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
 	array_init(return_value);
 	HashTable *ht = Z_ARRVAL_P(return_value);
 	zend_hash_real_init_packed(ht);
 
-	for (xmlNsPtr nsptr = nodep->nsDef; nsptr; nsptr = nsptr->next) {
-		const char *prefix = (const char *) nsptr->prefix;
-		ZVAL_STR(&tmp, dom_node_concatenated_name_helper(strlen(prefix), prefix, strlen("xmlns"), (const char *) "xmlns"));
-		zend_hash_next_index_insert(ht, &tmp);
+	if (!php_dom_follow_spec_intern(intern)) {
+		for (xmlNsPtr nsptr = nodep->nsDef; nsptr; nsptr = nsptr->next) {
+			const char *prefix = (const char *) nsptr->prefix;
+			ZVAL_STR(&tmp, dom_node_concatenated_name_helper(strlen(prefix), prefix, strlen("xmlns"), (const char *) "xmlns"));
+			zend_hash_next_index_insert(ht, &tmp);
+		}
 	}
 
 	for (xmlAttrPtr attr = nodep->properties; attr; attr = attr->next) {
