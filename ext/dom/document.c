@@ -29,12 +29,6 @@
 #include <libxml/xmlschemas.h>
 #endif
 
-typedef struct _idsIterator idsIterator;
-struct _idsIterator {
-	xmlChar *elementId;
-	xmlNode *element;
-};
-
 /*
 * class DOMDocument extends DOMNode
 *
