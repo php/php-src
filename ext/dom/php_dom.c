@@ -1500,18 +1500,9 @@ static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePt
 	}
 }
 
-static void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep)
+static zend_always_inline void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep)
 {
-	// TODO: check conflicting namespaces
-	if (php_dom_follow_spec_node(nodep)) {
-		/* Put on stack to avoid allocation.
-		* Although libxml2 currently does not use this for the reconciliation, it still
-		* makes sense to do this just in case libxml2's internal change in the future. */
-		xmlDOMWrapCtxt dummy_ctxt = {0};
-		xmlDOMWrapReconcileNamespaces(&dummy_ctxt, nodep, /* options */ 0);
-	} else {
-		xmlReconciliateNs(nodep->doc, nodep);
-	}
+	xmlReconciliateNs(nodep->doc, nodep);
 }
 
 void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp)

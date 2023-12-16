@@ -71,7 +71,11 @@ bool dom_ns_is_fast(const xmlNode *nodep, const dom_ns_magic_token *magic_token)
 		/* cached for fast checking */
 		if (ns->_private == magic_token) {
 			return true;
+		} else if (ns->_private != NULL) {
+			/* Other token stored */
+			return false;
 		}
+		/* Slow path */
 		if (xmlStrEqual(ns->href, BAD_CAST magic_token)) {
 			ns->_private = (void *) magic_token;
 			return true;
@@ -130,7 +134,7 @@ xmlNsPtr dom_ns_create_local_as_is(xmlDocPtr doc, xmlNodePtr parent, zend_string
 
 	const char *href = ZSTR_VAL(uri);
 
-	if (parent == NULL) {
+	if (parent != NULL) {
 		xmlNsPtr existing = xmlSearchNs(doc, parent, BAD_CAST prefix);
 		if (existing != NULL && xmlStrEqual(existing->href, BAD_CAST href)) {
 			return existing;
