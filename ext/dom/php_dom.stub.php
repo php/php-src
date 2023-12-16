@@ -1098,7 +1098,7 @@ namespace DOM
         public function normalizeDocument(): void {}
 
         /** @tentative-return-type */
-        public function registerNodeClass(string $baseClass, ?string $extendedClass): bool {}
+        public function registerNodeClass(string $baseClass, ?string $extendedClass): true {}
 
 #ifdef LIBXML_SCHEMAS_ENABLED
         /** @tentative-return-type */
