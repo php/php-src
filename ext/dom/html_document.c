@@ -1189,7 +1189,7 @@ static zend_result dom_common_save(dom_output_ctx *output_ctx, const xmlDoc *doc
 	ctx.write_string_len = dom_saveHTML_write_string_len;
 	ctx.write_string = dom_saveHTML_write_string;
 	ctx.application_data = output_ctx;
-	if (UNEXPECTED(dom_html5_serialize(&ctx, node) != SUCCESS)) {
+	if (UNEXPECTED(dom_html5_serialize_outer(&ctx, node) != SUCCESS)) {
 		return FAILURE;
 	}
 

@@ -1,5 +1,5 @@
 --TEST--
-DOM\HTMLDocument serialization of different roots resulting in an empty result
+DOM\HTMLDocument serialization of different roots
 --EXTENSIONS--
 dom
 --FILE--
@@ -26,9 +26,9 @@ var_dump($dom->saveHTML($fragment));
 
 ?>
 --EXPECT--
-string(0) ""
-string(0) ""
-string(0) ""
-string(0) ""
-string(0) ""
+string(14) "<!--comment-->"
+string(5) "cdata"
+string(15) "<empty></empty>"
+string(4) "text"
+string(14) "<?target data>"
 string(0) ""

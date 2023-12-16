@@ -25,6 +25,10 @@
 #include "namespace_compat.h"
 #include <lexbor/encoding/encoding.h>
 
+/* This file implements the HTML 5 serialization algorithm.
+ * https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments (Date 2023-12-14)
+ */
+
 #define TRY(x) do { if (UNEXPECTED((x) != SUCCESS)) { return FAILURE; } } while (0)
 
 static bool dom_is_ns(const xmlNode *node, const char *uri)
@@ -315,8 +319,7 @@ static zend_result dom_html5_serialize_node(dom_html5_serialize_context *ctx, co
 	return SUCCESS;
 }
 
-/* https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments (Date 2023-10-18)
- * Note: this serializes the _children_, excluding the node itself! */
+/* Note: this serializes the _children_, excluding the node itself! */
 zend_result dom_html5_serialize(dom_html5_serialize_context *ctx, const xmlNode *node)
 {
 	/* Step 1. Note that this algorithm serializes children. Only elements, documents, and fragments can have children. */
@@ -335,6 +338,24 @@ zend_result dom_html5_serialize(dom_html5_serialize_context *ctx, const xmlNode 
 
 	/* Step 4 */
 	return dom_html5_serialize_node(ctx, node->children, node);
+}
+
+/* Variant on the above that is equivalent to the "outer HTML". */
+zend_result dom_html5_serialize_outer(dom_html5_serialize_context *ctx, const xmlNode *node)
+{
+	if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE || node->type == XML_DOCUMENT_FRAG_NODE) {
+		node = node->children;
+		if (!node) {
+			return SUCCESS;
+		}
+		return dom_html5_serialize_node(ctx, node, node->parent);
+	} else {
+		xmlNodePtr old_next = node->next;
+		((xmlNodePtr) node)->next = NULL;
+		zend_result result = dom_html5_serialize_node(ctx, node, node->parent);
+		((xmlNodePtr) node)->next = old_next;
+		return result;
+	}
 }
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

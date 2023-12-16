@@ -27,5 +27,6 @@ typedef struct {
 } dom_html5_serialize_context;
 
 zend_result dom_html5_serialize(dom_html5_serialize_context *ctx, const xmlNode *node);
+zend_result dom_html5_serialize_outer(dom_html5_serialize_context *ctx, const xmlNode *node);
 
 #endif

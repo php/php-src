@@ -33,7 +33,7 @@ foreach ($tags as $tag) {
     $element->appendChild($dom->createElement("inner"));
     $element->after("\n");
     echo "$tag: ";
-    var_dump(strlen($dom->saveHTML($element)) === 0);
+    var_dump($dom->saveHTML($element));
 
     $element = $dom->appendChild($dom->createElementNS("http://php.net/foo", "x:$tag"));
     $element->appendChild($dom->createElement("inner"));
@@ -44,24 +44,24 @@ echo $dom->saveHTML();
 
 ?>
 --EXPECT--
-area: bool(true)
-base: bool(true)
-br: bool(true)
-col: bool(true)
-embed: bool(true)
-hr: bool(true)
-img: bool(true)
-input: bool(true)
-link: bool(true)
-meta: bool(true)
-source: bool(true)
-track: bool(true)
-wbr: bool(true)
-basefont: bool(true)
-bgsound: bool(true)
-frame: bool(true)
-keygen: bool(true)
-param: bool(true)
+area: string(6) "<area>"
+base: string(6) "<base>"
+br: string(4) "<br>"
+col: string(5) "<col>"
+embed: string(7) "<embed>"
+hr: string(4) "<hr>"
+img: string(5) "<img>"
+input: string(7) "<input>"
+link: string(6) "<link>"
+meta: string(6) "<meta>"
+source: string(8) "<source>"
+track: string(7) "<track>"
+wbr: string(5) "<wbr>"
+basefont: string(10) "<basefont>"
+bgsound: string(9) "<bgsound>"
+frame: string(7) "<frame>"
+keygen: string(8) "<keygen>"
+param: string(7) "<param>"
 <area>
 <x:area><inner></inner></x:area>
 <base>
