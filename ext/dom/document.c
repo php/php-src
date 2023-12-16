@@ -703,23 +703,29 @@ PHP_METHOD(DOM_Document, createAttribute)
 	xmlAttrPtr node;
 	xmlDocPtr docp;
 	int ret;
-	size_t name_len;
 	dom_object *intern;
-	char *name;
+	zend_string *name;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	if (xmlValidateName((xmlChar *) name, 0) != 0) {
+	if (xmlValidateName(BAD_CAST ZSTR_VAL(name), 0) != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
 
-	node = xmlNewDocProp(docp, (xmlChar *) name, NULL);
+	if (docp->type == XML_HTML_DOCUMENT_NODE && php_dom_follow_spec_intern(intern)) {
+		zend_string *lower = zend_string_tolower(name);
+		node = xmlNewDocProp(docp, BAD_CAST ZSTR_VAL(lower), NULL);
+		zend_string_release_ex(lower, false);
+	} else {
+		node = xmlNewDocProp(docp, BAD_CAST ZSTR_VAL(name), NULL);
+	}
+
 	if (!node) {
 		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();

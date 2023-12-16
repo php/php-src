@@ -1,5 +1,5 @@
 --TEST--
-DOMDocument::createElement()
+Document::createElement()
 --EXTENSIONS--
 dom
 --FILE--

@@ -1,5 +1,5 @@
 --TEST--
-DOMDocument::createAttributeNS()
+Document::createAttributeNS()
 --EXTENSIONS--
 dom
 --FILE--
