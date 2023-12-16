@@ -99,7 +99,7 @@ int php_dom_get_nodelist_length(dom_object *obj)
 			nodep = nodep->children;
 		}
 		dom_get_elements_by_tag_name_ns_raw(
-			basep, nodep, (char *) objmap->ns, (char *) objmap->local, &count, INT_MAX - 1 /* because of <= */);
+			basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &count, INT_MAX - 1 /* because of <= */);
 	}
 
 	objmap->cached_length = count;
@@ -200,7 +200,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 									nodep = basep->children;
 								}
 							}
-							itemnode = dom_get_elements_by_tag_name_ns_raw(basep, nodep, (char *) objmap->ns, (char *) objmap->local, &count, relative_index);
+							itemnode = dom_get_elements_by_tag_name_ns_raw(basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &count, relative_index);
 						}
 						cache_itemnode = true;
 					}

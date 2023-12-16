@@ -23,6 +23,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "namespace_compat.h"
 #include "php_dom_arginfo.h"
 #include "dom_properties.h"
 #include "zend_interfaces.h"
@@ -1028,6 +1029,12 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 			mapptr->local = xmlCharStrndup(local, len);
 			mapptr->free_local = true;
 		}
+		mapptr->local_lower = xmlStrdup(mapptr->local);
+		if (len < 0) {
+			zend_str_tolower((char *) mapptr->local_lower, strlen((const char *) mapptr->local_lower));
+		} else {
+			zend_str_tolower((char *) mapptr->local_lower, len);
+		}
 	}
 
 	if (ns) {
@@ -1126,6 +1133,7 @@ void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
 		if (objmap->free_ns) {
 			xmlFree(objmap->ns);
 		}
+		xmlFree(objmap->local_lower);
 		if (!Z_ISUNDEF(objmap->baseobj_zv)) {
 			zval_ptr_dtor(&objmap->baseobj_zv);
 		}
@@ -1152,6 +1160,7 @@ zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type)
 	objmap->nodetype = 0;
 	objmap->ht = NULL;
 	objmap->local = NULL;
+	objmap->local_lower = NULL;
 	objmap->free_local = false;
 	objmap->ns = NULL;
 	objmap->free_ns = false;
@@ -1354,7 +1363,39 @@ bool dom_has_feature(zend_string *feature, zend_string *version)
 }
 /* }}} end dom_has_feature */
 
-xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, char *ns, char *local, int *cur, int index) /* {{{ */
+static bool dom_match_local_helper(const xmlChar *local, const xmlChar *local_lower, const xmlNode *nodep, bool is_html_doc, bool follow_spec)
+{
+	const xmlChar *node_local = nodep->name;
+
+	if (!follow_spec) {
+		return xmlStrEqual(node_local, local);
+	}
+
+	const xmlChar *local_to_use = is_html_doc && dom_ns_is_fast(nodep, dom_ns_is_html_magic_token) ? local_lower : local;
+
+	/* The qualified name must be matched, which means either:
+	 *  - The local parts are equal and there is no ns prefix for this element (i.e. the fqn is in the local name).
+	 *  - There is a prefix, the prefixes are equal and the local parts are equal. */
+	if (nodep->ns != NULL && nodep->ns->prefix != NULL) {
+		const char *prefix = (const char *) nodep->ns->prefix;
+		/* 1. match prefix up to |prefix| characters case-insensitively.
+			*    This won't overflow as it'll stop at the '\0' if the lengths don't match. */
+		size_t prefix_len = strlen(prefix);
+		if (memcmp(local_to_use, prefix, prefix_len) != 0) {
+			return false;
+		}
+		/* 2. match ':' */
+		if (local_to_use[prefix_len] != ':') {
+			return false;
+		}
+		/* 3. match local name */
+		return xmlStrEqual(local_to_use + prefix_len + 1, node_local);
+	} else {
+		return xmlStrEqual(node_local, local_to_use);
+	}
+}
+
+xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, xmlChar *ns, xmlChar *local, xmlChar *local_lower, int *cur, int index) /* {{{ */
 {
 	/* Can happen with detached document */
 	if (UNEXPECTED(nodep == NULL)) {
@@ -1369,10 +1410,13 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep,
 	 *       This is because for PHP ns == NULL has another meaning: "match every namespace" instead of "match the empty namespace". */
 	bool ns_match_any = ns == NULL || (ns[0] == '*' && ns[1] == '\0');
 
+	bool is_html_doc = ns == NULL && nodep->doc->type == XML_HTML_DOCUMENT_NODE;
+	bool follow_spec = php_dom_follow_spec_node(basep);
+
 	while (*cur <= index) {
 		if (nodep->type == XML_ELEMENT_NODE) {
-			if (local_match_any || xmlStrEqual(nodep->name, (xmlChar *)local)) {
-				if (ns_match_any || (ns[0] == '\0' && nodep->ns == NULL) || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, (xmlChar *)ns))) {
+			if (local_match_any || dom_match_local_helper(local, local_lower, nodep, is_html_doc, follow_spec)) {
+				if (ns_match_any || (ns[0] == '\0' && nodep->ns == NULL) || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, ns))) {
 					if (*cur == index) {
 						ret = nodep;
 						break;
@@ -1502,7 +1546,16 @@ static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePt
 
 static zend_always_inline void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep)
 {
-	xmlReconciliateNs(nodep->doc, nodep);
+	// TODO: this breaks with conflicting namespaces
+	if (php_dom_follow_spec_node(nodep)) {
+		/* Put on stack to avoid allocation.
+		* Although libxml2 currently does not use this for the reconciliation, it still
+		* makes sense to do this just in case libxml2's internal change in the future. */
+		xmlDOMWrapCtxt dummy_ctxt = {0};
+		xmlDOMWrapReconcileNamespaces(&dummy_ctxt, nodep, /* options */ 0);
+	} else {
+		xmlReconciliateNs(nodep->doc, nodep);
+	}
 }
 
 void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp)

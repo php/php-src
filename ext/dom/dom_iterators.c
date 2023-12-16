@@ -230,7 +230,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 						curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
 					}
 					curnode = dom_get_elements_by_tag_name_ns_raw(
-						basenode, curnode, (char *) objmap->ns, (char *) objmap->local, &previndex, iter->index);
+						basenode, curnode, objmap->ns, objmap->local, objmap->local_lower, &previndex, iter->index);
 				}
 			}
 		} else {
@@ -316,7 +316,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 						nodep = nodep->children;
 					}
 					curnode = dom_get_elements_by_tag_name_ns_raw(
-						basep, nodep, (char *) objmap->ns, (char *) objmap->local, &curindex, 0);
+						basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &curindex, 0);
 				}
 			}
 		} else {
