@@ -86,11 +86,8 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 		case XML_NAMESPACE_DECL: {
 			xmlNsPtr ns = nodep->ns;
 			if (ns != NULL && ns->prefix) {
-				xmlChar *qname = xmlStrdup((xmlChar *) "xmlns");
-				qname = xmlStrcat(qname, (xmlChar *) ":");
-				qname = xmlStrcat(qname, nodep->name);
-				ZVAL_STRING(retval, (const char *) qname);
-				xmlFree(qname);
+				zend_string *str = dom_node_concatenated_name_helper(strlen((const char *) ns->prefix), (const char *) ns->prefix, strlen("xmlns"), "xmlns");
+				ZVAL_STR(retval, str);
 			} else {
 				ZVAL_STRING(retval, (const char *) nodep->name);
 			}
