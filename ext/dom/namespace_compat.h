@@ -28,13 +28,9 @@
 #define DOM_XMLNS_NS_URI "http://www.w3.org/2000/xmlns/"
 
 /* These functions make it possible to make a namespace declaration also visible as an attribute by
- * setting a flag that can be checked with dom_ns_is_also_an_attribute().
- * This is used in the serializer for example. */
+ * creating an equivalent attribute node. */
 
-bool dom_ns_is_also_an_attribute(const xmlNs *ns);
-void dom_ns_compat_mark_attribute(xmlNsPtr ns);
-void dom_ns_compat_mark_attribute_list(xmlNsPtr ns);
-void dom_ns_compat_copy_attribute_list_mark(xmlNsPtr copy, const xmlNs *original);
+void dom_ns_compat_mark_attribute_list(xmlNodePtr node);
 bool dom_ns_is_html(const xmlNode *nodep);
 bool dom_ns_is_html_and_document_is_html(const xmlNode *nodep);
 

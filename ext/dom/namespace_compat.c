@@ -25,31 +25,36 @@
 
 #define DOM_NS_IS_HTML_MAGIC ((void *) 1)
 
-bool dom_ns_is_also_an_attribute(const xmlNs *ns) {
-    return ns->_private != NULL;
-}
-
-void dom_ns_compat_mark_attribute(xmlNsPtr ns) {
-    ns->_private = (void *) 1;
-}
-
-void dom_ns_compat_mark_attribute_list(xmlNsPtr ns) {
-    while (ns != NULL) {
-        dom_ns_compat_mark_attribute(ns);
-        ns = ns->next;
-    }
-}
-
-void dom_ns_compat_copy_attribute_list_mark(xmlNsPtr copy, const xmlNs *original) {
-    /* It's possible that the original list is shorter than the copy list
-     * because of additional namespace copies from within a fragment. */
-    while (original != NULL) {
-        ZEND_ASSERT(copy != NULL);
-        if (dom_ns_is_also_an_attribute(original)) {
-            dom_ns_compat_mark_attribute(copy);
+static void dom_ns_compat_mark_attribute(xmlNodePtr node, xmlNsPtr ns)
+{
+    xmlChar *name;
+    if (ns->prefix) {
+        /* Can't overflow in practice because it would require the prefix to occupy almost the entire address space. */
+        size_t prefix_len = strlen((char *) ns->prefix);
+        size_t len = strlen("xmlns:") + prefix_len;
+        name = xmlMalloc(len + 1);
+        if (UNEXPECTED(name == NULL)) {
+            return;
         }
-        copy = copy->next;
-        original = original->next;
+        memcpy(name, "xmlns:", strlen("xmlns:"));
+        memcpy(name + strlen("xmlns:"), ns->prefix, prefix_len + 1 /* including '\0' */);
+    } else {
+        name = xmlStrdup(BAD_CAST "xmlns");
+        if (UNEXPECTED(name == NULL)) {
+            return;
+        }
+    }
+
+    xmlSetNsProp(node, NULL, name, ns->href);
+    xmlFree(name);
+}
+
+void dom_ns_compat_mark_attribute_list(xmlNodePtr node)
+{
+    xmlNsPtr ns = node->nsDef;
+    while (ns != NULL) {
+        dom_ns_compat_mark_attribute(node, ns);
+        ns = ns->next;
     }
 }
 

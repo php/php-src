@@ -74,7 +74,7 @@ static void dom_mark_namespaces_as_attributes_too(xmlDocPtr doc)
 	xmlNodePtr node = doc->children;
 	while (node != NULL) {
 		if (node->type == XML_ELEMENT_NODE) {
-			dom_ns_compat_mark_attribute_list(node->nsDef);
+			dom_ns_compat_mark_attribute_list(node);
 
 			if (node->children) {
 				node = node->children;
@@ -93,41 +93,6 @@ static void dom_mark_namespaces_as_attributes_too(xmlDocPtr doc)
 				}
 			} while (node->next == NULL);
 			node = node->next;
-		}
-	}
-}
-
-void dom_mark_namespaces_for_copy_based_on_copy(xmlNodePtr copy, const xmlNode *original)
-{
-	xmlNodePtr copy_current = copy;
-	const xmlNode *original_current = original;
-	while (copy_current != NULL) {
-		ZEND_ASSERT(original_current != NULL);
-
-		if (copy_current->type == XML_ELEMENT_NODE) {
-			dom_ns_compat_copy_attribute_list_mark(copy_current->nsDef, original_current->nsDef);
-
-			if (copy_current->children) {
-				copy_current = copy_current->children;
-				original_current = original_current->children;
-				continue;
-			}
-		}
-
-		if (copy_current->next) {
-			copy_current = copy_current->next;
-			original_current = original_current->next;
-		} else {
-			/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
-			do {
-				copy_current = copy_current->parent;
-				if (copy_current == NULL) {
-					return;
-				}
-				original_current = original_current->parent;
-			} while (copy_current->next == NULL);
-			copy_current = copy_current->next;
-			original_current = original_current->next;
 		}
 	}
 }

@@ -1884,16 +1884,7 @@ xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, const dom_object *inte
 	if (!recursive && node->type == XML_ELEMENT_NODE) {
 		extended_recursive = 2;
 	}
-	xmlNodePtr copy = xmlDocCopyNode(node, doc, extended_recursive);
-	if (UNEXPECTED(!copy)) {
-		return NULL;
-	}
-
-	if (intern->document && intern->document->is_modern_api_class) {
-		dom_mark_namespaces_for_copy_based_on_copy(copy, node);
-	}
-
-	return copy;
+	return xmlDocCopyNode(node, doc, extended_recursive);
 }
 
 #endif /* HAVE_DOM */
