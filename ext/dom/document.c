@@ -854,43 +854,55 @@ PHP_METHOD(DOM_Document, createElementNS)
 	xmlDocPtr docp;
 	xmlNodePtr nodep = NULL;
 	int ret;
-	size_t uri_len = 0, name_len = 0, value_len = 0;
-	char *uri, *name, *value = NULL;
-	char *localname = NULL, *prefix = NULL;
+	size_t value_len = 0;
+	char *value = NULL;
 	int errorcode;
 	dom_object *intern;
+	zend_string *name = NULL, *uri;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s|s", &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S!S|s", &uri, &name, &value, &value_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
+	if (php_dom_follow_spec_intern(intern)) {
+		xmlChar *localname, *prefix;
+		errorcode = dom_validate_and_extract(uri, name, &localname, &prefix);
 
-	if (errorcode == 0) {
-		if (xmlValidateName((xmlChar *) localname, 0) == 0) {
-			nodep = xmlNewDocNode(docp, NULL, (xmlChar *) localname, (xmlChar *) value);
-			if (UNEXPECTED(nodep == NULL)) {
-				php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
-				RETURN_THROWS();
-			}
-
-			if (uri != NULL) {
-				xmlNsPtr nsptr = xmlSearchNsByHref(nodep->doc, nodep, (xmlChar *) uri);
-				if (nsptr == NULL) {
-					nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
-				}
-				xmlSetNs(nodep, nsptr);
-			}
-		} else {
-			errorcode = INVALID_CHARACTER_ERR;
+		if (errorcode == 0) {
+			xmlNsPtr ns = dom_ns_create_local_as_is(docp, xmlDocGetRootElement(docp), uri, prefix);
+			nodep = xmlNewDocRawNode(docp, ns, localname, BAD_CAST value);
 		}
-	}
 
-	xmlFree(localname);
-	if (prefix != NULL) {
+		xmlFree(localname);
+		xmlFree(prefix);
+	} else {
+		char *localname = NULL, *prefix = NULL;
+		errorcode = dom_check_qname(ZSTR_VAL(name), &localname, &prefix, ZSTR_LEN(uri), ZSTR_LEN(name));
+
+		if (errorcode == 0) {
+			if (xmlValidateName(BAD_CAST localname, 0) == 0) {
+				nodep = xmlNewDocNode(docp, NULL, BAD_CAST localname, BAD_CAST value);
+				if (UNEXPECTED(nodep == NULL)) {
+					php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+					RETURN_THROWS();
+				}
+
+				if (uri != NULL) {
+					xmlNsPtr nsptr = xmlSearchNsByHref(nodep->doc, nodep, BAD_CAST ZSTR_VAL(uri));
+					if (nsptr == NULL) {
+						nsptr = dom_get_ns(nodep, ZSTR_VAL(uri), &errorcode, prefix);
+					}
+					xmlSetNs(nodep, nsptr);
+				}
+			} else {
+				errorcode = INVALID_CHARACTER_ERR;
+			}
+		}
+
+		xmlFree(localname);
 		xmlFree(prefix);
 	}
 
@@ -945,7 +957,7 @@ PHP_METHOD(DOM_Document, createAttributeNS)
 
 		if (uri != NULL && ZSTR_LEN(uri) > 0) {
 			if (php_dom_follow_spec_intern(intern)) {
-				nsptr = dom_ns_create_local_as_is(docp, root, ZSTR_VAL(uri), prefix);
+				nsptr = dom_ns_create_local_as_is(docp, root, uri, prefix);
 			} else {
 				nsptr = xmlSearchNsByHref(docp, root, BAD_CAST ZSTR_VAL(uri));
 

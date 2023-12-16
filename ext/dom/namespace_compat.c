@@ -120,9 +120,15 @@ static xmlNsPtr dom_ns_create_local_as_is_unchecked(xmlDocPtr doc, xmlNodePtr pa
 	return ns;
 }
 
-xmlNsPtr dom_ns_create_local_as_is(xmlDocPtr doc, xmlNodePtr parent, const char *href, xmlChar *prefix)
+xmlNsPtr dom_ns_create_local_as_is(xmlDocPtr doc, xmlNodePtr parent, zend_string *uri, xmlChar *prefix)
 {
 	ZEND_ASSERT(doc != NULL);
+
+	if (uri == NULL || ZSTR_VAL(uri)[0] == '\0') {
+		return NULL;
+	}
+
+	const char *href = ZSTR_VAL(uri);
 
 	if (parent == NULL) {
 		xmlNsPtr existing = xmlSearchNs(doc, parent, BAD_CAST prefix);
