@@ -70,7 +70,17 @@ static zend_result dom_html5_escape_string(dom_html5_serialize_context *ctx, con
 {
 	const char *last_output = content;
 
-	while (*content != '\0') {
+	/* Note: uses UTF-8 internally, so <C2 A0> indicates a non-breaking space */
+	const char *mask = attribute_mode ? "&\xC2\"" : "&\xC2<>";
+
+	while (true) {
+		size_t chunk_length = strcspn(content, mask);
+
+		content += chunk_length;
+		if (*content == '\0') {
+			break;
+		}
+
 		switch (*content) {
 			/* Step 1 */
 			case '&': {
@@ -93,29 +103,23 @@ static zend_result dom_html5_escape_string(dom_html5_serialize_context *ctx, con
 
 			/* Step 3 */
 			case '"': {
-				if (attribute_mode) {
-					TRY(ctx->write_string_len(ctx->application_data, last_output, content - last_output));
-					TRY(ctx->write_string_len(ctx->application_data, "&quot;", strlen("&quot;")));
-					last_output = content + 1;
-				}
+				TRY(ctx->write_string_len(ctx->application_data, last_output, content - last_output));
+				TRY(ctx->write_string_len(ctx->application_data, "&quot;", strlen("&quot;")));
+				last_output = content + 1;
 				break;
 			}
 
 			/* Step 4 */
 			case '<': {
-				if (!attribute_mode) {
-					TRY(ctx->write_string_len(ctx->application_data, last_output, content - last_output));
-					TRY(ctx->write_string_len(ctx->application_data, "&lt;", strlen("&lt;")));
-					last_output = content + 1;
-				}
+				TRY(ctx->write_string_len(ctx->application_data, last_output, content - last_output));
+				TRY(ctx->write_string_len(ctx->application_data, "&lt;", strlen("&lt;")));
+				last_output = content + 1;
 				break;
 			}
 			case '>': {
-				if (!attribute_mode) {
-					TRY(ctx->write_string_len(ctx->application_data, last_output, content - last_output));
-					TRY(ctx->write_string_len(ctx->application_data, "&gt;", strlen("&gt;")));
-					last_output = content + 1;
-				}
+				TRY(ctx->write_string_len(ctx->application_data, last_output, content - last_output));
+				TRY(ctx->write_string_len(ctx->application_data, "&gt;", strlen("&gt;")));
+				last_output = content + 1;
 				break;
 			}
 		}
