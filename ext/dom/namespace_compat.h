@@ -27,11 +27,21 @@
 #define DOM_XML_NS_URI "http://www.w3.org/XML/1998/namespace"
 #define DOM_XMLNS_NS_URI "http://www.w3.org/2000/xmlns/"
 
+struct dom_ns_magic_token;
+typedef struct dom_ns_magic_token dom_ns_magic_token;
+
+extern const dom_ns_magic_token *dom_ns_is_html_magic_token;
+extern const dom_ns_magic_token *dom_ns_is_mathml_magic_token;
+extern const dom_ns_magic_token *dom_ns_is_svg_magic_token;
+extern const dom_ns_magic_token *dom_ns_is_xlink_magic_token;
+extern const dom_ns_magic_token *dom_ns_is_xml_magic_token;
+extern const dom_ns_magic_token *dom_ns_is_xmlns_magic_token;
+
 /* These functions make it possible to make a namespace declaration also visible as an attribute by
  * creating an equivalent attribute node. */
 
 void dom_ns_compat_mark_attribute_list(xmlNodePtr node);
-bool dom_ns_is_html(const xmlNode *nodep);
+bool dom_ns_is_fast(const xmlNode *nodep, const dom_ns_magic_token *magic_token);
 bool dom_ns_is_html_and_document_is_html(const xmlNode *nodep);
 xmlNsPtr dom_ns_create_local_as_is(xmlDocPtr doc, xmlNodePtr parent, const char *href, xmlChar *prefix);
 xmlNsPtr dom_ns_fast_get_html_ns(xmlDocPtr docp);

@@ -31,11 +31,6 @@
 
 #define TRY(x) do { if (UNEXPECTED((x) != SUCCESS)) { return FAILURE; } } while (0)
 
-static bool dom_is_ns(const xmlNode *node, const char *uri)
-{
-	return node->ns != NULL && strcmp((const char *) node->ns->href, uri) == 0;
-}
-
 static bool dom_local_name_compare_ex(const xmlNode *node, const char *tag, size_t tag_length, size_t name_length)
 {
 	return name_length == tag_length && zend_binary_strcmp((const char *) node->name, name_length, tag, tag_length) == 0;
@@ -133,7 +128,7 @@ static zend_result dom_html5_escape_string(dom_html5_serialize_context *ctx, con
 
 static zend_result dom_html5_serialize_text_node(dom_html5_serialize_context *ctx, const xmlNode *node)
 {
-	if (node->parent->type == XML_ELEMENT_NODE && dom_ns_is_html(node->parent)) {
+	if (node->parent->type == XML_ELEMENT_NODE && dom_ns_is_fast(node->parent, dom_ns_is_html_magic_token)) {
 		const xmlNode *parent = node->parent;
 		size_t name_length = strlen((const char *) parent->name);
 		/* Spec tells us to only emit noscript content as-is if scripting is enabled.
@@ -157,7 +152,7 @@ static zend_result dom_html5_serialize_element_tag_name(dom_html5_serialize_cont
 {
 	/* Note: it is not the serializer's responsibility to care about uppercase/lowercase (see createElement() note) */
 	if (node->ns != NULL && node->ns->prefix != NULL
-		&& !(dom_ns_is_html(node) || dom_is_ns(node, DOM_MATHML_NS_URI) || dom_is_ns(node, DOM_SVG_NS_URI))) {
+		&& !(dom_ns_is_fast(node, dom_ns_is_html_magic_token) || dom_ns_is_fast(node, dom_ns_is_mathml_magic_token) || dom_ns_is_fast(node, dom_ns_is_svg_magic_token))) {
 		TRY(ctx->write_string(ctx->application_data, (const char *) node->ns->prefix));
 		TRY(ctx->write_string_len(ctx->application_data, ":", strlen(":")));
 	}
@@ -176,10 +171,10 @@ static zend_result dom_html5_serialize_element_start(dom_html5_serialize_context
 		if (attr->ns == NULL) {
 			TRY(ctx->write_string(ctx->application_data, (const char *) attr->name));
 		} else {
-			if (dom_is_ns((const xmlNode *) attr, DOM_XML_NS_URI)) {
+			if (dom_ns_is_fast((const xmlNode *) attr, dom_ns_is_xml_magic_token)) {
 				TRY(ctx->write_string_len(ctx->application_data, "xml:", strlen("xml:")));
 				TRY(ctx->write_string(ctx->application_data, (const char *) attr->name));
-			} else if (dom_is_ns((const xmlNode *) attr, DOM_XMLNS_NS_URI)) {
+			} else if (dom_ns_is_fast((const xmlNode *) attr, dom_ns_is_xmlns_magic_token)) {
 				/* Compatibility for real attributes */
 				if (strcmp((const char *) attr->name, "xmlns") == 0) {
 					TRY(ctx->write_string_len(ctx->application_data, "xmlns", strlen("xmlns")));
@@ -187,7 +182,7 @@ static zend_result dom_html5_serialize_element_start(dom_html5_serialize_context
 					TRY(ctx->write_string_len(ctx->application_data, "xmlns:", strlen("xmlns:")));
 					TRY(ctx->write_string(ctx->application_data, (const char *) attr->name));
 				}
-			} else if (dom_is_ns((const xmlNode *) attr, DOM_XLINK_NS_URI)) {
+			} else if (dom_ns_is_fast((const xmlNode *) attr, dom_ns_is_xlink_magic_token)) {
 				TRY(ctx->write_string_len(ctx->application_data, "xlink:", strlen("xlink:")));
 				TRY(ctx->write_string(ctx->application_data, (const char *) attr->name));
 			} else if (attr->ns->prefix == NULL) {
@@ -217,7 +212,7 @@ static zend_result dom_html5_serialize_element_start(dom_html5_serialize_context
  * https://html.spec.whatwg.org/multipage/parsing.html#serializes-as-void */
 static bool dom_html5_serializes_as_void(const xmlNode *node)
 {
-	if (dom_ns_is_html(node)) {
+	if (dom_ns_is_fast(node, dom_ns_is_html_magic_token)) {
 		size_t name_length = strlen((const char *) node->name);
 		if (/* These are the void elements from https://html.spec.whatwg.org/multipage/syntax.html#void-elements */
 			dom_local_name_compare_ex(node, "area", strlen("area"), name_length)

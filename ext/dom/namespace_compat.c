@@ -23,7 +23,12 @@
 #include "php_dom.h"
 #include "namespace_compat.h"
 
-#define DOM_NS_IS_HTML_MAGIC ((void *) 1)
+const dom_ns_magic_token *dom_ns_is_html_magic_token = (const dom_ns_magic_token *) DOM_XHTML_NS_URI;
+const dom_ns_magic_token *dom_ns_is_mathml_magic_token = (const dom_ns_magic_token *) DOM_MATHML_NS_URI;
+const dom_ns_magic_token *dom_ns_is_svg_magic_token = (const dom_ns_magic_token *) DOM_SVG_NS_URI;
+const dom_ns_magic_token *dom_ns_is_xlink_magic_token = (const dom_ns_magic_token *) DOM_XLINK_NS_URI;
+const dom_ns_magic_token *dom_ns_is_xml_magic_token = (const dom_ns_magic_token *) DOM_XML_NS_URI;
+const dom_ns_magic_token *dom_ns_is_xmlns_magic_token = (const dom_ns_magic_token *) DOM_XMLNS_NS_URI;
 
 static void dom_ns_compat_mark_attribute(xmlNodePtr node, xmlNsPtr ns)
 {
@@ -58,18 +63,17 @@ void dom_ns_compat_mark_attribute_list(xmlNodePtr node)
 	}
 }
 
-// TODO: extend this to other namespaces too?
-bool dom_ns_is_html(const xmlNode *nodep)
+bool dom_ns_is_fast(const xmlNode *nodep, const dom_ns_magic_token *magic_token)
 {
 	ZEND_ASSERT(nodep != NULL);
 	xmlNsPtr ns = nodep->ns;
 	if (ns != NULL) {
 		/* cached for fast checking */
-		if (ns->_private == DOM_NS_IS_HTML_MAGIC) {
+		if (ns->_private == magic_token) {
 			return true;
 		}
-		if (xmlStrEqual(ns->href, BAD_CAST DOM_XHTML_NS_URI)) {
-			ns->_private = DOM_NS_IS_HTML_MAGIC;
+		if (xmlStrEqual(ns->href, BAD_CAST magic_token)) {
+			ns->_private = (void *) magic_token;
 			return true;
 		}
 	}
@@ -79,7 +83,7 @@ bool dom_ns_is_html(const xmlNode *nodep)
 bool dom_ns_is_html_and_document_is_html(const xmlNode *nodep)
 {
 	ZEND_ASSERT(nodep != NULL);
-	return nodep->doc && nodep->doc->type == XML_HTML_DOCUMENT_NODE && dom_ns_is_html(nodep);
+	return nodep->doc && nodep->doc->type == XML_HTML_DOCUMENT_NODE && dom_ns_is_fast(nodep, dom_ns_is_html_magic_token);
 }
 
 static xmlNsPtr dom_ns_create_local_as_is_unchecked(xmlDocPtr doc, xmlNodePtr parent, const char *href, xmlChar *prefix)
@@ -138,7 +142,7 @@ xmlNsPtr dom_ns_fast_get_html_ns(xmlDocPtr docp)
 	if (root != NULL) {
 		/* Fast path: if the root element itself is in the HTML namespace, return its namespace.
 		 * This is the most common case. */
-		if (dom_ns_is_html(root)) {
+		if (dom_ns_is_fast(root, dom_ns_is_html_magic_token)) {
 			return root->ns;
 		}
 
@@ -152,15 +156,15 @@ xmlNsPtr dom_ns_fast_get_html_ns(xmlDocPtr docp)
 				return NULL;
 			}
 		}
-		nsptr->_private = DOM_NS_IS_HTML_MAGIC;
+		nsptr->_private = (void *) dom_ns_is_html_magic_token;
 	} else {
 		/* If there is no root we fall back to the old namespace list. */
 		if (docp->oldNs != NULL) {
 			xmlNsPtr tmp = docp->oldNs;
 			do {
-				if (tmp->_private == DOM_NS_IS_HTML_MAGIC || xmlStrEqual(tmp->href, BAD_CAST DOM_XHTML_NS_URI)) {
+				if (tmp->_private == dom_ns_is_html_magic_token || xmlStrEqual(tmp->href, BAD_CAST DOM_XHTML_NS_URI)) {
 					nsptr = tmp;
-					nsptr->_private = DOM_NS_IS_HTML_MAGIC;
+					nsptr->_private = (void *) dom_ns_is_html_magic_token;
 					break;
 				}
 				tmp = tmp->next;
@@ -175,7 +179,7 @@ xmlNsPtr dom_ns_fast_get_html_ns(xmlDocPtr docp)
 				php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 				return NULL;
 			}
-			nsptr->_private = DOM_NS_IS_HTML_MAGIC;
+			nsptr->_private = (void *) dom_ns_is_html_magic_token;
 		}
 	}
 
