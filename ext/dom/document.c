@@ -1298,7 +1298,6 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 		if (file_dest) {
 			ctxt = xmlCreateFileParserCtxt(file_dest);
 		}
-
 	} else {
 		ctxt = xmlCreateMemoryParserCtxt(source, source_len);
 	}
@@ -1374,7 +1373,7 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 			ret->URL = xmlStrdup((xmlChar *) ctxt->directory);
 		}
 	} else {
-		ret = NULL;
+		ret = DOM_DOCUMENT_MALFORMED;
 		xmlFreeDoc(ctxt->myDoc);
 		ctxt->myDoc = NULL;
 	}
@@ -1451,6 +1450,9 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	xmlDocPtr newdoc = dom_document_parser(ZEND_THIS, mode, source, source_len, options, NULL);
+	if (newdoc == DOM_DOCUMENT_MALFORMED) {
+		newdoc = NULL;
+	}
 	php_dom_finish_loading_document(ZEND_THIS, return_value, newdoc);
 }
 

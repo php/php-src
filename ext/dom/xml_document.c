@@ -185,12 +185,16 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	xmlDocPtr lxml_doc = dom_document_parser(NULL, mode, source, source_len, options, encoding);
-	if (UNEXPECTED(lxml_doc == NULL)) {
+	if (UNEXPECTED(lxml_doc == NULL || lxml_doc == DOM_DOCUMENT_MALFORMED)) {
 		if (!EG(exception)) {
-			if (mode == DOM_LOAD_FILE) {
-				zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", source);
+			if (lxml_doc == DOM_DOCUMENT_MALFORMED) {
+				zend_throw_exception_ex(NULL, 0, "XML document is malformed");
 			} else {
-				php_dom_throw_error(INVALID_STATE_ERR, 1);
+				if (mode == DOM_LOAD_FILE) {
+					zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", source);
+				} else {
+					php_dom_throw_error(INVALID_STATE_ERR, 1);
+				}
 			}
 		}
 		RETURN_THROWS();
@@ -200,6 +204,21 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			lxml_doc->encoding = xmlStrdup((const xmlChar *) override_encoding);
 		} else {
 			lxml_doc->encoding = xmlStrdup((const xmlChar *) "UTF-8");
+		}
+	}
+	if (mode == DOM_LOAD_FILE && lxml_doc->URL != NULL) {
+		/* Check for "file:/" instead of "file://" because of libxml2 quirk */
+		if (strncmp((const char *) lxml_doc->URL, "file:/", sizeof("file:/") - 1) != 0) {
+			xmlChar *buffer = xmlStrdup((const xmlChar *) "file://");
+			if (buffer != NULL) {
+				xmlChar *new_buffer = xmlStrcat(buffer, lxml_doc->URL);
+				if (new_buffer != NULL) {
+					xmlFree(BAD_CAST lxml_doc->URL);
+					lxml_doc->URL = new_buffer;
+				} else {
+					xmlFree(buffer);
+				}
+			}
 		}
 	}
 	dom_object *intern = php_dom_instantiate_object_helper(

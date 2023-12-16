@@ -42,6 +42,6 @@ var_dump($dom->documentURI);
 
 ?>
 --EXPECTF--
-string(%d) "file:/%stest%20foo.html"
+string(%d) "file://%stest%20foo.html"
 string(12) "php://memory"
 string(16) "dummy://foo/ bar"

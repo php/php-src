@@ -958,7 +958,8 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		dom_setup_parser_encoding_manually((const lxb_char_t *) buf, encoding_data, &decoding_encoding_ctx, &application_data);
 	}
 
-	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, /* opened_path */ NULL, php_libxml_get_stream_context());
+	zend_string *opened_path = NULL;
+	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, &opened_path, php_libxml_get_stream_context());
 	if (!stream) {
 		if (!EG(exception)) {
 			zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", filename);
@@ -1045,9 +1046,8 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	lexbor_libxml2_bridge_copy_observations(parser->tree, &ctx.observations);
 	if (UNEXPECTED(bridge_status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
 		php_libxml_ctx_error(NULL, "%s in %s", dom_lexbor_libxml2_bridge_status_code_to_string(bridge_status), filename);
-		lxb_html_document_destroy(document);
-		php_stream_close(stream);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto fail_general;
 	}
 	lxb_html_document_destroy(document);
 
@@ -1059,8 +1059,8 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		lxml_doc->encoding = xmlStrdup((const xmlChar *) "UTF-8");
 	}
 
-	if (stream->wrapper == &php_plain_files_wrapper) {
-		xmlChar *converted = xmlPathToURI((const xmlChar *) filename);
+	if (stream->wrapper == &php_plain_files_wrapper && opened_path != NULL) {
+		xmlChar *converted = xmlPathToURI((const xmlChar *) ZSTR_VAL(opened_path));
 		if (UNEXPECTED(!converted)) {
 			goto fail_oom;
 		}
@@ -1086,6 +1086,9 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		lxml_doc->URL = xmlStrdup((const xmlChar *) filename);
 	}
 
+	if (opened_path != NULL) {
+		zend_string_release_ex(opened_path, false);
+	}
 	php_stream_close(stream);
 	stream = NULL;
 
@@ -1100,11 +1103,14 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 
 fail_oom:
 	php_dom_throw_error(INVALID_STATE_ERR, 1);
+fail_general:
 	lxb_html_document_destroy(document);
 	if (stream) {
 		php_stream_close(stream);
 	}
-	RETURN_THROWS();
+	if (opened_path != NULL) {
+		zend_string_release_ex(opened_path, false);
+	}
 }
 
 static zend_result dom_write_output_smart_str(void *ctx, const char *buf, size_t size)

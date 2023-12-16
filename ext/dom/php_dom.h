@@ -166,6 +166,8 @@ typedef enum {
 	DOM_LOAD_FILE = 1,
 } dom_load_mode;
 
+#define DOM_DOCUMENT_MALFORMED ((xmlDocPtr) -1)
+
 xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, size_t source_len, size_t options, xmlCharEncodingHandlerPtr encoding);
 
 /* parentnode */
