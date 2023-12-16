@@ -67,19 +67,19 @@ var_dump($dom->getElementsByTagNameNS("http://www.w3.org/1998/Math/MathML", "cir
 ?>
 --EXPECT--
 --- getElementsByTagName ---
-string(1) "p"
+string(1) "P"
 string(4) "math"
 string(6) "mtable"
 string(3) "svg"
 string(6) "circle"
 --- getElementsByTagNameNS (*) ---
-string(1) "p"
+string(1) "P"
 string(4) "math"
 string(6) "mtable"
 string(3) "svg"
 string(6) "circle"
 --- getElementsByTagNameNS (xhtml) ---
-string(1) "p"
+string(1) "P"
 NULL
 NULL
 NULL

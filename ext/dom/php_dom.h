@@ -150,7 +150,7 @@ void dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece
 xmlNodePtr php_dom_create_fake_namespace_decl(xmlNodePtr nodep, xmlNsPtr original, zval *return_value, dom_object *parent_intern);
 void php_dom_get_content_into_zval(const xmlNode *nodep, zval *target, bool default_is_null);
 zend_string *dom_node_concatenated_name_helper(size_t name_len, const char *name, size_t prefix_len, const char *prefix);
-zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep);
+zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep, bool uppercase);
 bool php_dom_is_node_connected(const xmlNode *node);
 bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, xmlDocPtr new_document);
 xmlNsPtr dom_get_ns_resolve_prefix_conflict(xmlNodePtr tree, const char *uri);

@@ -118,14 +118,10 @@ zend_result dom_element_tag_name_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	zend_string *result = dom_node_get_node_name_attribute_or_element((const xmlNode *) nodep);
-	ZVAL_STR(retval, result);
+	bool uppercase = php_dom_follow_spec_intern(obj) && dom_ns_is_html_and_document_is_html(nodep);
 
-	if (php_dom_follow_spec_intern(obj)) {
-		if (dom_ns_is_html_and_document_is_html(nodep)) {
-			zend_str_toupper(ZSTR_VAL(result), ZSTR_LEN(result));
-		}
-	}
+	zend_string *result = dom_node_get_node_name_attribute_or_element((const xmlNode *) nodep, uppercase);
+	ZVAL_STR(retval, result);
 
 	return SUCCESS;
 }
@@ -342,7 +338,7 @@ PHP_METHOD(DOMElement, getAttributeNames)
 	}
 
 	for (xmlAttrPtr attr = nodep->properties; attr; attr = attr->next) {
-		ZVAL_STR(&tmp, dom_node_get_node_name_attribute_or_element((const xmlNode *) attr));
+		ZVAL_STR(&tmp, dom_node_get_node_name_attribute_or_element((const xmlNode *) attr, false));
 		zend_hash_next_index_insert(ht, &tmp);
 	}
 }

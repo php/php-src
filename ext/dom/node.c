@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "namespace_compat.h"
 
 /*
 * class DOMNode
@@ -42,14 +43,19 @@ zend_string *dom_node_concatenated_name_helper(size_t name_len, const char *name
 	return str;
 }
 
-zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep)
+zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep, bool uppercase)
 {
+	zend_string *ret;
 	size_t name_len = strlen((const char *) nodep->name);
 	if (nodep->ns != NULL && nodep->ns->prefix != NULL) {
-		return dom_node_concatenated_name_helper(name_len, (const char *) nodep->name, strlen((const char *) nodep->ns->prefix), (const char *) nodep->ns->prefix);
+		ret = dom_node_concatenated_name_helper(name_len, (const char *) nodep->name, strlen((const char *) nodep->ns->prefix), (const char *) nodep->ns->prefix);
 	} else {
-		return zend_string_init((const char *) nodep->name, name_len, false);
+		ret = zend_string_init((const char *) nodep->name, name_len, false);
 	}
+	if (uppercase) {
+		zend_str_toupper(ZSTR_VAL(ret), ZSTR_LEN(ret));
+	}
+	return ret;
 }
 
 bool php_dom_is_node_connected(const xmlNode *node)
@@ -78,10 +84,14 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
+	bool uppercase = false;
+
 	switch (nodep->type) {
-		case XML_ATTRIBUTE_NODE:
 		case XML_ELEMENT_NODE:
-			ZVAL_STR(retval, dom_node_get_node_name_attribute_or_element(nodep));
+			uppercase = php_dom_follow_spec_intern(obj) && dom_ns_is_html_and_document_is_html(nodep);
+			ZEND_FALLTHROUGH;
+		case XML_ATTRIBUTE_NODE:
+			ZVAL_STR(retval, dom_node_get_node_name_attribute_or_element(nodep, uppercase));
 			break;
 		case XML_NAMESPACE_DECL: {
 			xmlNsPtr ns = nodep->ns;

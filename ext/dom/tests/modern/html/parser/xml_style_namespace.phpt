@@ -35,7 +35,7 @@ echo $dom->saveXML();
 ?>
 --EXPECT--
 --- Namespaces ---
-foo:bar http://www.w3.org/1999/xhtml
+FOO:BAR http://www.w3.org/1999/xhtml
 prefix: ""
 --- HTML serialization ---
 <!DOCTYPE html><html><head>
