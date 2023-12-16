@@ -1576,6 +1576,52 @@ void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last)
 	}
 }
 
+/* https://dom.spec.whatwg.org/#validate-and-extract */
+int dom_validate_and_extract(zend_string *namespace, zend_string *qname, xmlChar **localName, xmlChar **prefix)
+{
+	/* 1. If namespace is the empty string, then set it to null.
+	 *    However, we're going to cheat and do the opposite to make
+	 *    implementation of the below steps with existing zend_ helpers easier. */
+	if (namespace == NULL) {
+		namespace = zend_empty_string;
+	}
+
+	/* 2. Validate qualifiedName. */
+	if (xmlValidateQName(BAD_CAST ZSTR_VAL(qname), /* allow spaces */ 0) != 0) {
+		return INVALID_CHARACTER_ERR;
+	}
+
+	/* Steps 3-5 */
+	*localName = xmlSplitQName2(BAD_CAST ZSTR_VAL(qname), prefix);
+
+	/* 6. If prefix is non-null and namespace is null, then throw a "NamespaceError" DOMException.
+	 *    Note that null namespace means empty string here becaue of step 1. */
+	if (*prefix != NULL && ZSTR_VAL(namespace)[0] == '\0') {
+		return NAMESPACE_ERR;
+	}
+
+	/* 7. If prefix is "xml" and namespace is not the XML namespace, then throw a "NamespaceError" DOMException. */
+	if (UNEXPECTED(!zend_string_equals_literal(namespace, "http://www.w3.org/XML/1998/namespace") && xmlStrEqual(*prefix, BAD_CAST "xml"))) {
+		return NAMESPACE_ERR;
+	}
+
+	/* 8. If either qualifiedName or prefix is "xmlns" and namespace is not the XMLNS namespace, then throw a "NamespaceError" DOMException. */
+	if (UNEXPECTED((zend_string_equals_literal(qname, "xmlns") || xmlStrEqual(*prefix, BAD_CAST "xmlns")) && !zend_string_equals_literal(namespace, "http://www.w3.org/2000/xmlns/"))) {
+		return NAMESPACE_ERR;
+	}
+
+	/* 9. If namespace is the XMLNS namespace and neither qualifiedName nor prefix is "xmlns", then throw a "NamespaceError" DOMException. */
+	if (UNEXPECTED(zend_string_equals_literal(namespace, "http://www.w3.org/2000/xmlns/") && !zend_string_equals_literal(qname, "xmlns") && !xmlStrEqual(*prefix, BAD_CAST "xmlns"))) {
+		return NAMESPACE_ERR;
+	}
+
+	if (*localName == NULL) {
+		*localName = xmlStrdup(BAD_CAST ZSTR_VAL(qname));
+	}
+
+	return 0;
+}
+
 /*
 http://www.w3.org/TR/2004/REC-DOM-Level-3-Core-20040407/core.html#ID-DocCrElNS
 
@@ -1585,6 +1631,7 @@ NAMESPACE_ERR: Raised if
 2. the qualifiedName has a prefix and the  namespaceURI is null
 */
 
+// TODO: get rid of this?
 /* {{{ int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len) */
 int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len) {
 	if (name_len == 0) {

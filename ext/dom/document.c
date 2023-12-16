@@ -893,6 +893,50 @@ PHP_METHOD(DOM_Document, createElementNS)
 }
 /* }}} end dom_document_create_element_ns */
 
+// TODO: move me?
+static xmlNsPtr dom_create_local_ns_as_is(xmlDocPtr doc, xmlNodePtr parent, const char *href, xmlChar *prefix)
+{
+	ZEND_ASSERT(doc != NULL);
+
+	if (parent == NULL) {
+		xmlNsPtr existing = xmlSearchNs(doc, parent, BAD_CAST prefix);
+		if (existing != NULL && xmlStrEqual(existing->href, BAD_CAST href)) {
+			return existing;
+		}
+	}
+
+	xmlNsPtr ns = xmlMalloc(sizeof(xmlNs));
+	if (UNEXPECTED(ns == NULL)) {
+		return NULL;
+	}
+	memset(ns, 0, sizeof(xmlNs));
+	ns->type = XML_LOCAL_NAMESPACE;
+	if (href != NULL) {
+		ns->href = xmlStrdup(BAD_CAST href);
+		if (UNEXPECTED(ns->href == NULL)) {
+			xmlFreeNs(ns);
+			return NULL;
+		}
+	}
+	if (prefix != NULL) {
+		ns->prefix = xmlStrdup(BAD_CAST prefix);
+		if (UNEXPECTED(ns->prefix == NULL)) {
+			xmlFreeNs(ns);
+			return NULL;
+		}
+	}
+
+	if (parent != NULL) {
+		/* Order doesn't matter for spec-compliant mode, insert at front for fast insertion. */
+		ns->next = parent->nsDef;
+		parent->nsDef = ns;
+	} else {
+		php_libxml_set_old_ns(doc, ns);
+	}
+
+	return ns;
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrAttrNS
 Since: DOM Level 2
 */
@@ -904,7 +948,7 @@ PHP_METHOD(DOM_Document, createAttributeNS)
 	xmlNsPtr nsptr;
 	int ret;
 	zend_string *name, *uri;
-	char *localname = NULL, *prefix = NULL;
+	xmlChar *localname, *prefix;
 	dom_object *intern;
 	int errorcode;
 
@@ -915,56 +959,40 @@ PHP_METHOD(DOM_Document, createAttributeNS)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	if (UNEXPECTED(uri == NULL)) {
-		uri = zend_empty_string;
-	}
-	size_t uri_len = ZSTR_LEN(uri);
-
 	root = xmlDocGetRootElement(docp);
-	if (root != NULL) {
-		errorcode = dom_check_qname(ZSTR_VAL(name), &localname, &prefix, uri_len, ZSTR_LEN(name));
+	if (root != NULL || php_dom_follow_spec_intern(intern)) {
+		errorcode = dom_validate_and_extract(uri, name, &localname, &prefix);
 		if (UNEXPECTED(errorcode != 0)) {
-			goto error;
-		}
-		if (UNEXPECTED(xmlValidateName((xmlChar *) localname, 0) != 0)) {
-			errorcode = INVALID_CHARACTER_ERR;
-			goto error;
-		}
-		/* If prefix is "xml" and namespace is not the XML namespace, then throw a "NamespaceError" DOMException. */
-		if (UNEXPECTED(!zend_string_equals_literal(uri, "http://www.w3.org/XML/1998/namespace") && xmlStrEqual(BAD_CAST prefix, BAD_CAST "xml"))) {
-			errorcode = NAMESPACE_ERR;
-			goto error;
-		}
-		/* If either qualifiedName or prefix is "xmlns" and namespace is not the XMLNS namespace, then throw a "NamespaceError" DOMException. */
-		if (UNEXPECTED((zend_string_equals_literal(name, "xmlns") || xmlStrEqual(BAD_CAST prefix, BAD_CAST "xmlns")) && !zend_string_equals_literal(uri, "http://www.w3.org/2000/xmlns/"))) {
-			errorcode = NAMESPACE_ERR;
-			goto error;
-		}
-		/* If namespace is the XMLNS namespace and neither qualifiedName nor prefix is "xmlns", then throw a "NamespaceError" DOMException. */
-		if (UNEXPECTED(zend_string_equals_literal(uri, "http://www.w3.org/2000/xmlns/") && !zend_string_equals_literal(name, "xmlns") && !xmlStrEqual(BAD_CAST prefix, BAD_CAST "xmlns"))) {
-			errorcode = NAMESPACE_ERR;
+			if (!php_dom_follow_spec_intern(intern)) {
+				/* legacy behaviour */
+				errorcode = NAMESPACE_ERR;
+			}
 			goto error;
 		}
 
-		nodep = (xmlNodePtr) xmlNewDocProp(docp, (xmlChar *) localname, NULL);
+		nodep = (xmlNodePtr) xmlNewDocProp(docp, localname, NULL);
 		if (UNEXPECTED(nodep == NULL)) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 			RETURN_THROWS();
 		}
 
-		if (uri_len > 0) {
-			nsptr = xmlSearchNsByHref(docp, root, BAD_CAST ZSTR_VAL(uri));
-
-			if (zend_string_equals_literal(name, "xmlns") || xmlStrEqual(BAD_CAST prefix, BAD_CAST "xml")) {
-				if (nsptr == NULL) {
-					nsptr = xmlNewNs(NULL, BAD_CAST ZSTR_VAL(uri), BAD_CAST prefix);
-					php_libxml_set_old_ns(docp, nsptr);
-				}
+		if (uri != NULL && ZSTR_LEN(uri) > 0) {
+			if (php_dom_follow_spec_intern(intern)) {
+				nsptr = dom_create_local_ns_as_is(docp, root, ZSTR_VAL(uri), prefix);
 			} else {
-				if (nsptr == NULL || nsptr->prefix == NULL) {
-					nsptr = dom_get_ns_unchecked(root, ZSTR_VAL(uri), prefix ? prefix : "default");
-					if (UNEXPECTED(nsptr == NULL)) {
-						errorcode = NAMESPACE_ERR;
+				nsptr = xmlSearchNsByHref(docp, root, BAD_CAST ZSTR_VAL(uri));
+
+				if (zend_string_equals_literal(name, "xmlns") || xmlStrEqual(BAD_CAST prefix, BAD_CAST "xml")) {
+					if (nsptr == NULL) {
+						nsptr = xmlNewNs(NULL, BAD_CAST ZSTR_VAL(uri), BAD_CAST prefix);
+						php_libxml_set_old_ns(docp, nsptr);
+					}
+				} else {
+					if (nsptr == NULL || nsptr->prefix == NULL) {
+						nsptr = dom_get_ns_unchecked(root, ZSTR_VAL(uri), prefix ? (char *) prefix : "default");
+						if (UNEXPECTED(nsptr == NULL)) {
+							errorcode = NAMESPACE_ERR;
+						}
 					}
 				}
 			}
@@ -977,9 +1005,7 @@ PHP_METHOD(DOM_Document, createAttributeNS)
 
 error:
 	xmlFree(localname);
-	if (prefix != NULL) {
-		xmlFree(prefix);
-	}
+	xmlFree(prefix);
 
 	if (errorcode != 0) {
 		xmlFreeProp((xmlAttrPtr) nodep);
