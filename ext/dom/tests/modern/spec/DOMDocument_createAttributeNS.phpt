@@ -2,8 +2,6 @@
 DOMDocument::createAttributeNS()
 --EXTENSIONS--
 dom
---XFAIL--
-Won't work until setAttributeNode(NS) is fixed
 --FILE--
 <?php
 
@@ -38,6 +36,7 @@ echo "--- Error cases ---\n";
 testErrorCase($dom, '', 'bar:bar');
 testErrorCase($dom, null, 'bar:bar');
 testErrorCase($dom, 'urn:a', '@');
+testErrorCase($dom, 'urn:a', 'foo:bar:baz');
 testErrorCase($dom, 'http://www.w3.org/2000/xmlns', 'xmlns');
 testErrorCase($dom, 'http://www.w3.org/2000/xmlns', 'xmlns:bar');
 testErrorCase($dom, 'http://www.w3.org/2000/xmlns', 'foo:bar');
@@ -74,3 +73,57 @@ foreach ($attrs as $attr) {
 echo $dom->saveHTML(), "\n";
 ?>
 --EXPECT--
+--- Error cases ---
+("", "bar:bar"): Namespace Error
+(null, "bar:bar"): Namespace Error
+("urn:a", "@"): Invalid Character Error
+("urn:a", "foo:bar:baz"): Invalid Character Error
+("http://www.w3.org/2000/xmlns", "xmlns"): Namespace Error
+("http://www.w3.org/2000/xmlns", "xmlns:bar"): Namespace Error
+("http://www.w3.org/2000/xmlns", "xml:foo"): Namespace Error
+
+--- Normal cases ---
+Attr: foo
+string(5) "xmlns"
+string(9) "xmlns:foo"
+string(29) "http://www.w3.org/2000/xmlns/"
+Attr: bar
+string(5) "xmlns"
+string(9) "xmlns:bar"
+string(29) "http://www.w3.org/2000/xmlns/"
+Attr: xmlns
+string(0) ""
+string(5) "xmlns"
+string(29) "http://www.w3.org/2000/xmlns/"
+Attr: foo
+string(3) "xml"
+string(7) "xml:foo"
+string(36) "http://www.w3.org/XML/1998/namespace"
+Attr: bar
+string(3) "foo"
+string(7) "foo:bar"
+string(5) "urn:a"
+Attr: bar
+string(3) "bar"
+string(7) "bar:bar"
+string(5) "urn:a"
+<foo xmlns:foo="" xmlns:bar="" xmlns="" xml:foo="" bar:bar=""></foo>
+
+--- NULL prefix cases ---
+Attr: baz1
+string(0) ""
+string(4) "baz1"
+NULL
+Attr: baz2
+string(0) ""
+string(4) "baz2"
+NULL
+Attr: baz1
+string(0) ""
+string(4) "baz1"
+NULL
+Attr: baz2
+string(0) ""
+string(4) "baz2"
+NULL
+<foo xmlns:foo="" xmlns:bar="" xmlns="" xml:foo="" bar:bar="" baz1="" baz2=""></foo>

@@ -588,13 +588,11 @@ PHP_METHOD(DOMElement, getAttributeNode)
 }
 /* }}} end dom_element_get_attribute_node */
 
-/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-887236154
-Since:
-*/
-PHP_METHOD(DOMElement, setAttributeNode)
+static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, bool use_ns)
 {
 	zval *id, *node;
 	xmlNode *nodep;
+	xmlNs *nsp;
 	xmlAttr *attrp, *existattrp = NULL;
 	dom_object *intern, *attrobj, *oldobj;
 	int ret;
@@ -605,17 +603,36 @@ PHP_METHOD(DOMElement, setAttributeNode)
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
-
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
+	/* ZPP Guarantees that a DOMAttr class is given, as it is converted to a xmlAttr
+	 * to pass to libxml (see http://www.xmlsoft.org/html/libxml-tree.html#xmlAttr)
+	 * if it is not of type XML_ATTRIBUTE_NODE it indicates a bug somewhere */
 	ZEND_ASSERT(attrp->type == XML_ATTRIBUTE_NODE);
 
-	if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
-		php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));
-		RETURN_FALSE;
+	if (php_dom_follow_spec_intern(intern)) {
+		if (attrp->parent != NULL && attrp->parent != nodep) {
+			php_dom_throw_error(INUSE_ATTRIBUTE_ERR, /* strict */ true);
+			RETURN_THROWS();
+		}
+		use_ns = true;
+		if (attrp->doc != NULL && attrp->doc != nodep->doc) {
+			// TODO: can have problems with refcounts if cross-document setting happens
+		}
+	} else {
+		if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
+			php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));
+			RETURN_FALSE;
+		}
 	}
 
-	existattrp = xmlHasProp(nodep, attrp->name);
+	nsp = attrp->ns;
+	if (use_ns && nsp != NULL) {
+		existattrp = xmlHasNsProp(nodep, attrp->name, nsp->href);
+	} else {
+		existattrp = xmlHasProp(nodep, attrp->name);
+	}
+
 	if (existattrp != NULL && existattrp->type != XML_ATTRIBUTE_DECL) {
 		if ((oldobj = php_dom_object_get_data((xmlNodePtr) existattrp)) != NULL &&
 			((php_libxml_node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
@@ -643,7 +660,14 @@ PHP_METHOD(DOMElement, setAttributeNode)
 	} else {
 		RETVAL_NULL();
 	}
+}
 
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-887236154
+Since:
+*/
+PHP_METHOD(DOMElement, setAttributeNode)
+{
+	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} end dom_element_set_attribute_node */
 
@@ -1027,66 +1051,7 @@ Since: DOM Level 2
 */
 PHP_METHOD(DOMElement, setAttributeNodeNS)
 {
-	zval *id, *node;
-	xmlNode *nodep;
-	xmlNs *nsp;
-	xmlAttr *attrp, *existattrp = NULL;
-	dom_object *intern, *attrobj, *oldobj;
-	int ret;
-
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_attr_class_entry) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
-	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
-
-	/* ZPP Guarantees that a DOMAttr class is given, as it is converted to a xmlAttr
-	 * to pass to libxml (see http://www.xmlsoft.org/html/libxml-tree.html#xmlAttr)
-	 * if it is not of type XML_ATTRIBUTE_NODE it indicates a bug somewhere */
-	ZEND_ASSERT(attrp->type == XML_ATTRIBUTE_NODE);
-
-	if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
-		php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));
-		RETURN_FALSE;
-	}
-
-	nsp = attrp->ns;
-	if (nsp != NULL) {
-		existattrp = xmlHasNsProp(nodep, attrp->name, nsp->href);
-	} else {
-		existattrp = xmlHasProp(nodep, attrp->name);
-	}
-
-	if (existattrp != NULL && existattrp->type != XML_ATTRIBUTE_DECL) {
-		if ((oldobj = php_dom_object_get_data((xmlNodePtr) existattrp)) != NULL &&
-			((php_libxml_node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
-		{
-			RETURN_NULL();
-		}
-		xmlUnlinkNode((xmlNodePtr) existattrp);
-	}
-
-	if (attrp->parent != NULL) {
-		xmlUnlinkNode((xmlNodePtr) attrp);
-	}
-
-	if (attrp->doc == NULL && nodep->doc != NULL) {
-		attrobj->document = intern->document;
-		php_libxml_increment_doc_ref((php_libxml_node_object *)attrobj, NULL);
-	}
-
-	xmlAddChild(nodep, (xmlNodePtr) attrp);
-	php_dom_reconcile_attribute_namespace_after_insertion(attrp);
-
-	/* Returns old property if removed otherwise NULL */
-	if (existattrp != NULL) {
-		DOM_RET_OBJ((xmlNodePtr) existattrp, &ret, intern);
-	} else {
-		RETVAL_NULL();
-	}
-
+	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} end dom_element_set_attribute_node_ns */
 

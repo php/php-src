@@ -1502,6 +1502,7 @@ static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePt
 
 static void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep)
 {
+	// TODO: check conflicting namespaces
 	if (php_dom_follow_spec_node(nodep)) {
 		/* Put on stack to avoid allocation.
 		* Although libxml2 currently does not use this for the reconciliation, it still
@@ -1525,7 +1526,8 @@ void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp)
 			attrp->ns = matching_ns;
 		} else {
 			if (attrp->ns->prefix != NULL) {
-				dom_libxml_reconcile_ensure_namespaces_are_declared(nodep);
+				/* Note: explicitly use the legacy reconciliation as it does the right thing for attributes. */
+				xmlReconciliateNs(nodep->doc, nodep);
 			}
 		}
 	}
