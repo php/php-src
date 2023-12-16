@@ -880,7 +880,7 @@ PHP_METHOD(DOM_Document, createElementNS)
 		xmlFree(prefix);
 	} else {
 		char *localname = NULL, *prefix = NULL;
-		errorcode = dom_check_qname(ZSTR_VAL(name), &localname, &prefix, ZSTR_LEN(uri), ZSTR_LEN(name));
+		errorcode = dom_check_qname(ZSTR_VAL(name), &localname, &prefix, uri ? ZSTR_LEN(uri) : 0, ZSTR_LEN(name));
 
 		if (errorcode == 0) {
 			if (xmlValidateName(BAD_CAST localname, 0) == 0) {
