@@ -58,6 +58,7 @@ void dom_ns_compat_mark_attribute_list(xmlNodePtr node)
     }
 }
 
+// TODO: extend this to other namespaces too?
 bool dom_ns_is_html(const xmlNode *nodep)
 {
 	ZEND_ASSERT(nodep != NULL);
