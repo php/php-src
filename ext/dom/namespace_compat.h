@@ -35,5 +35,7 @@ bool dom_ns_is_also_an_attribute(const xmlNs *ns);
 void dom_ns_compat_mark_attribute(xmlNsPtr ns);
 void dom_ns_compat_mark_attribute_list(xmlNsPtr ns);
 void dom_ns_compat_copy_attribute_list_mark(xmlNsPtr copy, const xmlNs *original);
+bool dom_ns_is_html(const xmlNode *nodep);
+bool dom_ns_is_html_and_document_is_html(const xmlNode *nodep);
 
 #endif

@@ -23,6 +23,8 @@
 #include "php_dom.h"
 #include "namespace_compat.h"
 
+#define DOM_NS_IS_HTML_MAGIC ((void *) 1)
+
 bool dom_ns_is_also_an_attribute(const xmlNs *ns) {
     return ns->_private != NULL;
 }
@@ -49,6 +51,29 @@ void dom_ns_compat_copy_attribute_list_mark(xmlNsPtr copy, const xmlNs *original
         copy = copy->next;
         original = original->next;
     }
+}
+
+bool dom_ns_is_html(const xmlNode *nodep)
+{
+	ZEND_ASSERT(nodep != NULL);
+	xmlNsPtr ns = nodep->ns;
+	if (ns != NULL) {
+		/* cached for fast checking */
+		if (ns->_private == DOM_NS_IS_HTML_MAGIC) {
+			return true;
+		}
+		if (xmlStrEqual(ns->href, BAD_CAST "http://www.w3.org/1999/xhtml")) {
+			ns->_private = DOM_NS_IS_HTML_MAGIC;
+			return true;
+		}
+	}
+	return false;
+}
+
+bool dom_ns_is_html_and_document_is_html(const xmlNode *nodep)
+{
+    ZEND_ASSERT(nodep != NULL);
+    return nodep->doc && nodep->doc->type == XML_HTML_DOCUMENT_NODE && dom_ns_is_html(nodep);
 }
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

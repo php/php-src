@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "namespace_compat.h"
 
 /*
 * class DOMElement extends DOMNode
@@ -119,6 +120,12 @@ zend_result dom_element_tag_name_read(dom_object *obj, zval *retval)
 
 	zend_string *result = dom_node_get_node_name_attribute_or_element((const xmlNode *) nodep);
 	ZVAL_STR(retval, result);
+
+	if (php_dom_follow_spec_intern(obj)) {
+		if (dom_ns_is_html_and_document_is_html(nodep)) {
+			zend_str_toupper(ZSTR_VAL(result), ZSTR_LEN(result));
+		}
+	}
 
 	return SUCCESS;
 }
