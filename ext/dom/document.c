@@ -904,52 +904,52 @@ PHP_METHOD(DOM_Document, createAttributeNS)
 	root = xmlDocGetRootElement(docp);
 	if (root != NULL) {
 		errorcode = dom_check_qname(ZSTR_VAL(name), &localname, &prefix, uri_len, ZSTR_LEN(name));
-		/* TODO: switch to early goto-out style error-checking */
-		if (errorcode == 0) {
-			if (xmlValidateName((xmlChar *) localname, 0) == 0) {
-				/* If prefix is "xml" and namespace is not the XML namespace, then throw a "NamespaceError" DOMException. */
-				if (UNEXPECTED(!zend_string_equals_literal(uri, "http://www.w3.org/XML/1998/namespace") && xmlStrEqual(BAD_CAST prefix, BAD_CAST "xml"))) {
-					errorcode = NAMESPACE_ERR;
-					goto error;
-				}
-				/* If either qualifiedName or prefix is "xmlns" and namespace is not the XMLNS namespace, then throw a "NamespaceError" DOMException. */
-				if (UNEXPECTED((zend_string_equals_literal(name, "xmlns") || xmlStrEqual(BAD_CAST prefix, BAD_CAST "xmlns")) && !zend_string_equals_literal(uri, "http://www.w3.org/2000/xmlns/"))) {
-					errorcode = NAMESPACE_ERR;
-					goto error;
-				}
-				/* If namespace is the XMLNS namespace and neither qualifiedName nor prefix is "xmlns", then throw a "NamespaceError" DOMException. */
-				if (UNEXPECTED(zend_string_equals_literal(uri, "http://www.w3.org/2000/xmlns/") && !zend_string_equals_literal(name, "xmlns") && !xmlStrEqual(BAD_CAST prefix, BAD_CAST "xmlns"))) {
-					errorcode = NAMESPACE_ERR;
-					goto error;
-				}
+		if (UNEXPECTED(errorcode != 0)) {
+			goto error;
+		}
+		if (UNEXPECTED(xmlValidateName((xmlChar *) localname, 0) != 0)) {
+			errorcode = INVALID_CHARACTER_ERR;
+			goto error;
+		}
+		/* If prefix is "xml" and namespace is not the XML namespace, then throw a "NamespaceError" DOMException. */
+		if (UNEXPECTED(!zend_string_equals_literal(uri, "http://www.w3.org/XML/1998/namespace") && xmlStrEqual(BAD_CAST prefix, BAD_CAST "xml"))) {
+			errorcode = NAMESPACE_ERR;
+			goto error;
+		}
+		/* If either qualifiedName or prefix is "xmlns" and namespace is not the XMLNS namespace, then throw a "NamespaceError" DOMException. */
+		if (UNEXPECTED((zend_string_equals_literal(name, "xmlns") || xmlStrEqual(BAD_CAST prefix, BAD_CAST "xmlns")) && !zend_string_equals_literal(uri, "http://www.w3.org/2000/xmlns/"))) {
+			errorcode = NAMESPACE_ERR;
+			goto error;
+		}
+		/* If namespace is the XMLNS namespace and neither qualifiedName nor prefix is "xmlns", then throw a "NamespaceError" DOMException. */
+		if (UNEXPECTED(zend_string_equals_literal(uri, "http://www.w3.org/2000/xmlns/") && !zend_string_equals_literal(name, "xmlns") && !xmlStrEqual(BAD_CAST prefix, BAD_CAST "xmlns"))) {
+			errorcode = NAMESPACE_ERR;
+			goto error;
+		}
 
-				nodep = (xmlNodePtr) xmlNewDocProp(docp, (xmlChar *) localname, NULL);
-				if (UNEXPECTED(nodep == NULL)) {
-					php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
-					RETURN_THROWS();
-				}
+		nodep = (xmlNodePtr) xmlNewDocProp(docp, (xmlChar *) localname, NULL);
+		if (UNEXPECTED(nodep == NULL)) {
+			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+			RETURN_THROWS();
+		}
 
-				if (uri_len > 0) {
-					nsptr = xmlSearchNsByHref(docp, root, BAD_CAST ZSTR_VAL(uri));
+		if (uri_len > 0) {
+			nsptr = xmlSearchNsByHref(docp, root, BAD_CAST ZSTR_VAL(uri));
 
-					if (zend_string_equals_literal(name, "xmlns") || xmlStrEqual(BAD_CAST prefix, BAD_CAST "xml")) {
-						if (nsptr == NULL) {
-							nsptr = xmlNewNs(NULL, BAD_CAST ZSTR_VAL(uri), BAD_CAST prefix);
-							php_libxml_set_old_ns(docp, nsptr);
-						}
-					} else {
-						if (nsptr == NULL || nsptr->prefix == NULL) {
-							nsptr = dom_get_ns_unchecked(root, ZSTR_VAL(uri), prefix ? prefix : "default");
-							if (UNEXPECTED(nsptr == NULL)) {
-								errorcode = NAMESPACE_ERR;
-							}
-						}
-					}
-					xmlSetNs(nodep, nsptr);
+			if (zend_string_equals_literal(name, "xmlns") || xmlStrEqual(BAD_CAST prefix, BAD_CAST "xml")) {
+				if (nsptr == NULL) {
+					nsptr = xmlNewNs(NULL, BAD_CAST ZSTR_VAL(uri), BAD_CAST prefix);
+					php_libxml_set_old_ns(docp, nsptr);
 				}
 			} else {
-				errorcode = INVALID_CHARACTER_ERR;
+				if (nsptr == NULL || nsptr->prefix == NULL) {
+					nsptr = dom_get_ns_unchecked(root, ZSTR_VAL(uri), prefix ? prefix : "default");
+					if (UNEXPECTED(nsptr == NULL)) {
+						errorcode = NAMESPACE_ERR;
+					}
+				}
 			}
+			xmlSetNs(nodep, nsptr);
 		}
 	} else {
 		php_error_docref(NULL, E_WARNING, "Document Missing Root Element");
