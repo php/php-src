@@ -1972,6 +1972,15 @@ static int dom_nodemap_has_dimension(zend_object *object, zval *member, int chec
 
 xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, const dom_object *intern, bool recursive)
 {
+	if (node->type == XML_DTD_NODE) {
+		/* The behaviour w.r.t. the internal subset is implementation-defined according to DOM 3.
+		 * This follows what e.g. Java and C# do: copy it regardless of the recursiveness.
+		 * Makes sense as the subset is not exactly a child in the normal sense. */
+		xmlDtdPtr dtd = xmlCopyDtd((xmlDtdPtr) node);
+		dtd->doc = doc;
+		return (xmlNodePtr) dtd;
+	}
+
 	/* See http://www.xmlsoft.org/html/libxml-tree.html#xmlDocCopyNode for meaning of values */
 	int extended_recursive = recursive;
 	if (!recursive && node->type == XML_ELEMENT_NODE) {

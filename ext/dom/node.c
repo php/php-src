@@ -1291,6 +1291,16 @@ PHP_METHOD(DOMNode, appendChild)
 		xmlNodePtr last = child->last;
 		new_child = _php_dom_insert_fragment(nodep, nodep->last, NULL, child, intern);
 		dom_reconcile_ns_list(nodep->doc, new_child, last);
+	} else if (child->type == XML_DTD_NODE) {
+		if (nodep->doc->intSubset != NULL) {
+			php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Document types must be the first child in a document", stricterror);
+			RETURN_FALSE;
+		}
+		new_child = xmlAddChild(nodep, child);
+		if (UNEXPECTED(new_child == NULL)) {
+			goto cannot_add;
+		}
+		nodep->doc->intSubset = (xmlDtdPtr) new_child;
 	} else {
 		new_child = xmlAddChild(nodep, child);
 		if (UNEXPECTED(new_child == NULL)) {
