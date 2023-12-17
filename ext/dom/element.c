@@ -771,13 +771,18 @@ PHP_METHOD(DOMElement, getAttributeNS)
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
+	bool follow_spec = php_dom_follow_spec_intern(intern);
+	if (follow_spec && uri_len == 0) {
+		uri = NULL;
+	}
+
 	strattr = xmlGetNsProp(elemp, (xmlChar *) name, (xmlChar *) uri);
 
 	if (strattr != NULL) {
 		RETVAL_STRING((char *)strattr);
 		xmlFree(strattr);
 	} else {
-		if (xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
+		if (!follow_spec && xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
 			nsptr = dom_get_nsdecl(elemp, (xmlChar *)name);
 			if (nsptr != NULL) {
 				RETVAL_STRING((char *) nsptr->href);
