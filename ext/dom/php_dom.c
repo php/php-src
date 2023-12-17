@@ -1029,7 +1029,7 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 			mapptr->local = xmlCharStrndup(local, len);
 			mapptr->free_local = true;
 		}
-		mapptr->local_lower = xmlStrdup(mapptr->local);
+		mapptr->local_lower = BAD_CAST estrdup(local);
 		if (len < 0) {
 			zend_str_tolower((char *) mapptr->local_lower, strlen((const char *) mapptr->local_lower));
 		} else {
@@ -1133,7 +1133,9 @@ void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
 		if (objmap->free_ns) {
 			xmlFree(objmap->ns);
 		}
-		xmlFree(objmap->local_lower);
+		if (objmap->local_lower) {
+			efree(objmap->local_lower);
+		}
 		if (!Z_ISUNDEF(objmap->baseobj_zv)) {
 			zval_ptr_dtor(&objmap->baseobj_zv);
 		}
