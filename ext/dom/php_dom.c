@@ -1363,15 +1363,9 @@ bool dom_has_feature(zend_string *feature, zend_string *version)
 }
 /* }}} end dom_has_feature */
 
-static bool dom_match_local_helper(const xmlChar *local, const xmlChar *local_lower, const xmlNode *nodep, bool is_html_doc, bool follow_spec)
+bool dom_match_qualified_name_according_to_spec(const xmlChar *qname, const xmlNode *nodep)
 {
 	const xmlChar *node_local = nodep->name;
-
-	if (!follow_spec) {
-		return xmlStrEqual(node_local, local);
-	}
-
-	const xmlChar *local_to_use = is_html_doc && dom_ns_is_fast(nodep, dom_ns_is_html_magic_token) ? local_lower : local;
 
 	/* The qualified name must be matched, which means either:
 	 *  - The local parts are equal and there is no ns prefix for this element (i.e. the fqn is in the local name).
@@ -1381,18 +1375,28 @@ static bool dom_match_local_helper(const xmlChar *local, const xmlChar *local_lo
 		/* 1. match prefix up to |prefix| characters case-insensitively.
 		 *    This won't overflow as it'll stop at the '\0' if the lengths don't match. */
 		size_t prefix_len = strlen(prefix);
-		if (strncmp((const char *) local_to_use, prefix, prefix_len) != 0) {
+		if (strncmp((const char *) qname, prefix, prefix_len) != 0) {
 			return false;
 		}
 		/* 2. match ':' */
-		if (local_to_use[prefix_len] != ':') {
+		if (qname[prefix_len] != ':') {
 			return false;
 		}
 		/* 3. match local name */
-		return xmlStrEqual(local_to_use + prefix_len + 1, node_local);
+		return xmlStrEqual(qname + prefix_len + 1, node_local);
 	} else {
-		return xmlStrEqual(node_local, local_to_use);
+		return xmlStrEqual(node_local, qname);
 	}
+}
+
+static bool dom_match_qualified_name_for_tag_name_equality(const xmlChar *local, const xmlChar *local_lower, const xmlNode *nodep, bool is_html_doc, bool follow_spec)
+{
+	if (!follow_spec) {
+		return xmlStrEqual(nodep->name, local);
+	}
+
+	const xmlChar *local_to_use = is_html_doc && dom_ns_is_fast(nodep, dom_ns_is_html_magic_token) ? local_lower : local;
+	return dom_match_qualified_name_according_to_spec(local_to_use, nodep);
 }
 
 xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, xmlChar *ns, xmlChar *local, xmlChar *local_lower, int *cur, int index) /* {{{ */
@@ -1415,7 +1419,7 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep,
 
 	while (*cur <= index) {
 		if (nodep->type == XML_ELEMENT_NODE) {
-			if (local_match_any || dom_match_local_helper(local, local_lower, nodep, is_html_doc, follow_spec)) {
+			if (local_match_any || dom_match_qualified_name_for_tag_name_equality(local, local_lower, nodep, is_html_doc, follow_spec)) {
 				if (ns_match_any || (ns[0] == '\0' && nodep->ns == NULL) || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, ns))) {
 					if (*cur == index) {
 						ret = nodep;

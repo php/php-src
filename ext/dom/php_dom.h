@@ -156,6 +156,7 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 xmlNsPtr dom_get_ns_resolve_prefix_conflict(xmlNodePtr tree, const char *uri);
 void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp);
 int dom_validate_and_extract(zend_string *namespace, zend_string *qname, xmlChar **localName, xmlChar **prefix);
+bool dom_match_qualified_name_according_to_spec(const xmlChar *qname, const xmlNode *nodep);
 
 void php_dom_document_constructor(INTERNAL_FUNCTION_PARAMETERS);
 

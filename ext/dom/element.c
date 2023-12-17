@@ -217,7 +217,7 @@ zend_result dom_element_schema_type_info_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* Note: the object returned is not necessarily a node, but can be an attribute or a namespace declaration. */
-static xmlNodePtr dom_get_attribute_or_nsdecl(dom_object *intern, xmlNodePtr elem, xmlChar *name) /* {{{ */
+static xmlNodePtr dom_get_attribute_or_nsdecl(dom_object *intern, xmlNodePtr elem, xmlChar *name, size_t name_len) /* {{{ */
 {
 	if (!php_dom_follow_spec_intern(intern)) {
 		int len;
@@ -255,8 +255,33 @@ static xmlNodePtr dom_get_attribute_or_nsdecl(dom_object *intern, xmlNodePtr ele
 				return NULL;
 			}
 		}
+		return (xmlNodePtr)xmlHasNsProp(elem, name, NULL);
+	} else {
+		xmlNodePtr result = (xmlNodePtr)xmlHasNsProp(elem, name, NULL);
+		if (result != NULL) {
+			return result;
+		}
+
+		// TODO: check if this should be here (i.e. common to all callers?)
+		xmlChar *name_processed = name;
+		if (dom_ns_is_html_and_document_is_html(elem)) {
+			name_processed = emalloc(name_len + 1);
+			zend_str_tolower_copy((char *) name_processed, (const char *) name, name_len);
+		}
+
+		xmlNodePtr ret = NULL;
+		for (xmlAttrPtr attr = elem->properties; attr; attr = attr->next) {
+			if (dom_match_qualified_name_according_to_spec(name_processed, (xmlNodePtr) attr)) {
+				ret = (xmlNodePtr) attr;
+				break;
+			}
+		}
+
+		if (name_processed != name) {
+			efree(name_processed);
+		}
+		return ret;
 	}
-	return (xmlNodePtr)xmlHasNsProp(elem, name, NULL);
 }
 /* }}} */
 
@@ -281,7 +306,7 @@ PHP_METHOD(DOMElement, getAttribute)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	attr = dom_get_attribute_or_nsdecl(intern, nodep, (xmlChar *)name);
+	attr = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attr) {
 		switch (attr->type) {
 			case XML_ATTRIBUTE_NODE:
@@ -384,7 +409,7 @@ PHP_METHOD(DOMElement, setAttribute)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	attr = dom_get_attribute_or_nsdecl(intern, nodep, (xmlChar *)name);
+	attr = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attr != NULL) {
 		switch (attr->type) {
 			case XML_ATTRIBUTE_NODE:
@@ -544,7 +569,7 @@ PHP_METHOD(DOMElement, removeAttribute)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	attrp = dom_get_attribute_or_nsdecl(intern, nodep, (xmlChar *)name);
+	attrp = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attrp == NULL) {
 		RETURN_FALSE;
 	}
@@ -572,7 +597,7 @@ PHP_METHOD(DOMElement, getAttributeNode)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	attrp = dom_get_attribute_or_nsdecl(intern, nodep, (xmlChar *)name);
+	attrp = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attrp == NULL) {
 		RETURN_FALSE;
 	}
@@ -1096,7 +1121,7 @@ PHP_METHOD(DOMElement, hasAttribute)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	attr = dom_get_attribute_or_nsdecl(intern, nodep, (xmlChar *)name);
+	attr = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attr == NULL) {
 		RETURN_FALSE;
 	} else {
@@ -1523,7 +1548,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 	}
 
 	/* Step 3 */
-	xmlNodePtr attribute = dom_get_attribute_or_nsdecl(intern, thisp, (xmlChar *) qname);
+	xmlNodePtr attribute = dom_get_attribute_or_nsdecl(intern, thisp, BAD_CAST qname, qname_length);
 
 	/* Step 4 */
 	if (attribute == NULL) {
