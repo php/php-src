@@ -753,6 +753,33 @@ PHP_METHOD(DOMElement, getElementsByTagName)
 }
 /* }}} end dom_element_get_elements_by_tag_name */
 
+static const xmlChar *dom_get_attribute_ns(dom_object *intern, xmlNodePtr elemp, const char *uri, size_t uri_len, const char *name, bool *should_free_result)
+{
+	bool follow_spec = php_dom_follow_spec_intern(intern);
+	if (follow_spec && uri_len == 0) {
+		uri = NULL;
+	}
+
+	xmlChar *strattr = xmlGetNsProp(elemp, (xmlChar *) name, (xmlChar *) uri);
+
+	if (strattr != NULL) {
+		*should_free_result = true;
+		return strattr;
+	} else {
+		if (!follow_spec && xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
+			xmlNsPtr nsptr = dom_get_nsdecl(elemp, (xmlChar *)name);
+			if (nsptr != NULL) {
+				*should_free_result = false;
+				return nsptr->href;
+			} else {
+				return NULL;
+			}
+		} else {
+			return NULL;
+		}
+	}
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElGetAttrNS
 Since: DOM Level 2
 */
@@ -760,11 +787,9 @@ PHP_METHOD(DOMElement, getAttributeNS)
 {
 	zval *id;
 	xmlNodePtr elemp;
-	xmlNsPtr nsptr;
 	dom_object *intern;
 	size_t uri_len = 0, name_len = 0;
 	char *uri, *name;
-	xmlChar *strattr;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
@@ -773,29 +798,16 @@ PHP_METHOD(DOMElement, getAttributeNS)
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
-	bool follow_spec = php_dom_follow_spec_intern(intern);
-	if (follow_spec && uri_len == 0) {
-		uri = NULL;
-	}
-
-	strattr = xmlGetNsProp(elemp, (xmlChar *) name, (xmlChar *) uri);
-
-	if (strattr != NULL) {
-		RETVAL_STRING((char *)strattr);
-		xmlFree(strattr);
+	bool should_free_result;
+	const xmlChar *result = dom_get_attribute_ns(intern, elemp, uri, uri_len, name, &should_free_result);
+	if (result == NULL) {
+		RETURN_EMPTY_STRING();
 	} else {
-		if (!follow_spec && xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
-			nsptr = dom_get_nsdecl(elemp, (xmlChar *)name);
-			if (nsptr != NULL) {
-				RETVAL_STRING((char *) nsptr->href);
-			} else {
-				RETVAL_EMPTY_STRING();
-			}
-		} else {
-			RETVAL_EMPTY_STRING();
+		RETVAL_STRING((const char *) result);
+		if (should_free_result) {
+			xmlFree(BAD_CAST result);
 		}
 	}
-
 }
 /* }}} end dom_element_get_attribute_ns */
 
@@ -1149,11 +1161,9 @@ PHP_METHOD(DOMElement, hasAttributeNS)
 {
 	zval *id;
 	xmlNodePtr elemp;
-	xmlNs *nsp;
 	dom_object *intern;
 	size_t uri_len, name_len;
 	char *uri, *name;
-	xmlChar *value;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
@@ -1162,21 +1172,16 @@ PHP_METHOD(DOMElement, hasAttributeNS)
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
-	value = xmlGetNsProp(elemp, (xmlChar *)name, (xmlChar *)uri);
-
-	if (value != NULL) {
-		xmlFree(value);
-		RETURN_TRUE;
+	bool should_free_result;
+	const xmlChar *result = dom_get_attribute_ns(intern, elemp, uri, uri_len, name, &should_free_result);
+	if (result == NULL) {
+		RETURN_FALSE;
 	} else {
-		if (xmlStrEqual((xmlChar *)uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
-			nsp = dom_get_nsdecl(elemp, (xmlChar *)name);
-			if (nsp != NULL) {
-				RETURN_TRUE;
-			}
+		if (should_free_result) {
+			xmlFree(BAD_CAST result);
 		}
+		RETURN_TRUE;
 	}
-
-	RETURN_FALSE;
 }
 /* }}} end dom_element_has_attribute_ns */
 
