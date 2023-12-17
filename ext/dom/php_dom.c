@@ -1684,7 +1684,6 @@ NAMESPACE_ERR: Raised if
 2. the qualifiedName has a prefix and the  namespaceURI is null
 */
 
-// TODO: get rid of this?
 /* {{{ int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len) */
 int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len) {
 	if (name_len == 0) {
