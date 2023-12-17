@@ -504,9 +504,11 @@ PHP_METHOD(DOM_Document, createElement)
 	}
 
 	if (docp->type == XML_HTML_DOCUMENT_NODE && php_dom_follow_spec_intern(intern)) {
-		zend_string *lower = zend_string_tolower(name);
-		node = xmlNewDocRawNode(docp, dom_ns_fast_get_html_ns(docp), BAD_CAST ZSTR_VAL(lower), BAD_CAST value);
-		zend_string_release_ex(lower, false);
+		char *lower = zend_str_tolower_dup_ex(ZSTR_VAL(name), ZSTR_LEN(name));
+		node = xmlNewDocRawNode(docp, dom_ns_fast_get_html_ns(docp), BAD_CAST (lower ? lower : ZSTR_VAL(name)), BAD_CAST value);
+		if (lower) {
+			efree(lower);
+		}
 	} else {
 		node = xmlNewDocNode(docp, NULL, BAD_CAST ZSTR_VAL(name), BAD_CAST value);
 	}
@@ -719,9 +721,11 @@ PHP_METHOD(DOM_Document, createAttribute)
 	}
 
 	if (docp->type == XML_HTML_DOCUMENT_NODE && php_dom_follow_spec_intern(intern)) {
-		zend_string *lower = zend_string_tolower(name);
-		node = xmlNewDocProp(docp, BAD_CAST ZSTR_VAL(lower), NULL);
-		zend_string_release_ex(lower, false);
+		char *lower = zend_str_tolower_dup_ex(ZSTR_VAL(name), ZSTR_LEN(name));
+		node = xmlNewDocProp(docp, BAD_CAST (lower ? lower : ZSTR_VAL(name)), NULL);
+		if (lower) {
+			efree(lower);
+		}
 	} else {
 		node = xmlNewDocProp(docp, BAD_CAST ZSTR_VAL(name), NULL);
 	}
