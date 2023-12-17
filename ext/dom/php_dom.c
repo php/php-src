@@ -1571,6 +1571,7 @@ void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp)
 		xmlNodePtr nodep = attrp->parent;
 		xmlNsPtr matching_ns = xmlSearchNs(nodep->doc, nodep, attrp->ns->prefix);
 		if (matching_ns && xmlStrEqual(matching_ns->href, attrp->ns->href)) {
+			/* Doesn't leak because this doesn't define the declaration. */
 			attrp->ns = matching_ns;
 		} else {
 			if (attrp->ns->prefix != NULL) {
