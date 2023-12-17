@@ -664,6 +664,12 @@ zend_result dom_node_prefix_write(dom_object *obj, zval *newval)
 	char *strURI;
 	char *prefix;
 
+	if (php_dom_follow_spec_intern(obj)) {
+		/* Hacky unfortunately because we cannot know which class we're working with without splitting them... */
+		zend_throw_error(NULL, "Cannot modify readonly property %s::$prefix", ZSTR_VAL(obj->std.ce->name));
+		return FAILURE;
+	}
+
 	nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
