@@ -824,36 +824,16 @@ PHP_METHOD(DOMElement, getAttributeNS)
 }
 /* }}} end dom_element_get_attribute_ns */
 
-/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAttrNS
-Since: DOM Level 2
-*/
-PHP_METHOD(DOMElement, setAttributeNS)
+static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, char *uri, char *name, const char *value, size_t uri_len, size_t name_len)
 {
-	zval *id;
-	xmlNodePtr elemp, nodep = NULL;
+	xmlNodePtr nodep = NULL;
 	xmlNsPtr nsptr;
 	xmlAttr *attr;
-	size_t uri_len = 0, name_len = 0, value_len = 0;
-	char *uri, *name, *value;
 	char *localname = NULL, *prefix = NULL;
-	dom_object *intern;
-	int errorcode = 0, stricterror, is_xmlns = 0, name_valid;
+	int is_xmlns = 0, name_valid;
+	int stricterror = dom_get_strict_error(intern->document);
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!ss", &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (name_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
-		RETURN_THROWS();
-	}
-
-	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
-
-	stricterror = dom_get_strict_error(intern->document);
-
-	errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
+	int errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 
 	if (errorcode == 0) {
 		if (uri_len > 0) {
@@ -933,8 +913,32 @@ PHP_METHOD(DOMElement, setAttributeNS)
 	if (errorcode != 0) {
 		php_dom_throw_error(errorcode, stricterror);
 	}
+}
 
-	RETURN_NULL();
+/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAttrNS
+Since: DOM Level 2
+*/
+PHP_METHOD(DOMElement, setAttributeNS)
+{
+	zval *id;
+	xmlNodePtr elemp;
+	size_t uri_len = 0, name_len = 0, value_len = 0;
+	char *uri, *name, *value;
+	dom_object *intern;
+
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!ss", &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (name_len == 0) {
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
+
+	dom_set_attribute_ns_legacy(intern, elemp, uri, name, value, uri_len, name_len);
 }
 /* }}} end dom_element_set_attribute_ns */
 
