@@ -1557,7 +1557,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 	}
 
 	/* Step 2 */
-	if (thisp->doc != NULL && thisp->doc->type == XML_HTML_DOCUMENT_NODE && (thisp->ns == NULL || xmlStrEqual(thisp->ns->href, (const xmlChar *) "http://www.w3.org/1999/xhtml"))) {
+	if (thisp->doc != NULL && thisp->doc->type == XML_HTML_DOCUMENT_NODE && (thisp->ns == NULL || xmlStrEqual(thisp->ns->href, BAD_CAST DOM_XHTML_NS_URI))) {
 		qname_tmp = zend_str_tolower_dup_ex(qname, qname_length);
 		if (qname_tmp != NULL) {
 			qname = qname_tmp;
