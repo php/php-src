@@ -115,6 +115,10 @@ PHP 8.4 UPGRADE NOTES
 2. New Features
 ========================================
 
+- Date:
+  . Added static methods
+    DateTime[Immutable]::createFromTimestamp(int|float $timestamp): static.
+
 - DOM:
   . Added constant DOMNode::DOCUMENT_POSITION_DISCONNECTED.
   . Added constant DOMNode::DOCUMENT_POSITION_PRECEDING.
