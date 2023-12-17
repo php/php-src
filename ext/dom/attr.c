@@ -53,7 +53,6 @@ PHP_METHOD(DOMAttr, __construct)
 		RETURN_THROWS();
 	}
 
-	// TODO: what to do with entity subtitution here?
 	nodep = xmlNewProp(NULL, (xmlChar *) name, (xmlChar *) value);
 
 	if (!nodep) {
