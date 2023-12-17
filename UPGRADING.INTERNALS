@@ -58,6 +58,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 
  e. ext/date
    - Added the php_format_date_ex() API to format instances of php_date_obj.
+   - Added the php_date_initialize_from_ts_long() and
+     php_date_initialize_from_ts_double() to initialize a php_date_obj with
+     the given unix timestamp using GMT +00:00.
 
  d. ext/pcre
    - php_pcre_match_impl() now no longer has a use_flags argument.
