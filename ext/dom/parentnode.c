@@ -127,7 +127,7 @@ zend_result dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 static bool dom_is_node_in_list(const zval *nodes, uint32_t nodesc, const xmlNodePtr node_to_find)
 {
 	for (uint32_t i = 0; i < nodesc; i++) {
-		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
+		if (Z_TYPE(nodes[i]) == IS_OBJECT && instanceof_function(Z_OBJCE(nodes[i]), dom_node_class_entry)) {
 			if (dom_object_get_node(Z_DOMOBJ_P(nodes + i)) == node_to_find) {
 				return true;
 			}
@@ -200,6 +200,9 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 				}
 			} else {
 				dom_add_child_without_merging(fragment, newNode);
+				if (UNEXPECTED(newNode->type == XML_DTD_NODE)) {
+					documentNode->intSubset = (xmlDtdPtr) newNode;
+				}
 			}
 		} else {
 			ZEND_ASSERT(Z_TYPE(nodes[i]) == IS_STRING);

@@ -267,7 +267,7 @@ static void php_libxml_node_free(xmlNodePtr node)
 					xmlHashScan(dtd->pentities, php_libxml_unlink_entity, dtd->pentities);
 					/* No unlinking of notations, see remark above at case XML_NOTATION_NODE. */
 				}
-				xmlFreeNode(node);
+				xmlFreeDtd(dtd);
 				break;
 			}
 			case XML_ELEMENT_NODE:
