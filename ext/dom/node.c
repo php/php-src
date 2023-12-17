@@ -1576,7 +1576,7 @@ static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other
 			&& php_dom_node_is_ns_uri_equal(this, other)
 			/* Check attributes first, then namespace declarations, then children */
 			&& php_dom_node_list_equality_check_unordered_xmlNode((const xmlNode *) this->properties, (const xmlNode *) other->properties, spec_compliant)
-			&& php_dom_node_list_equality_check_unordered_xmlNs(this->nsDef, other->nsDef, spec_compliant)
+			&& (spec_compliant || php_dom_node_list_equality_check_unordered_xmlNs(this->nsDef, other->nsDef, false))
 			&& php_dom_node_list_equality_check_ordered_xmlNode(this->children, other->children, spec_compliant);
 	} else if (this->type == XML_DTD_NODE) {
 		/* Note: in the living spec entity declarations and notations are no longer compared because they're considered obsolete. */
