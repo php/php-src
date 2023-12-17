@@ -262,7 +262,6 @@ static xmlNodePtr dom_get_attribute_or_nsdecl(dom_object *intern, xmlNodePtr ele
 			return result;
 		}
 
-		// TODO: check if this should be here (i.e. common to all callers?)
 		xmlChar *name_processed = name;
 		if (dom_ns_is_html_and_document_is_html(elem)) {
 			char *lowercase_copy = zend_str_tolower_dup_ex((char *) name, name_len);
@@ -411,31 +410,45 @@ PHP_METHOD(DOMElement, setAttribute)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	attr = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
-	if (attr != NULL) {
-		switch (attr->type) {
-			case XML_ATTRIBUTE_NODE:
-				node_list_unlink(attr->children);
-				break;
-			case XML_NAMESPACE_DECL:
-				RETURN_FALSE;
-			default:
-				break;
+	if (php_dom_follow_spec_intern(intern)) {
+		xmlChar *name_processed = BAD_CAST name;
+		if (dom_ns_is_html_and_document_is_html(nodep)) {
+			char *lowercase_copy = zend_str_tolower_dup_ex(name, name_len);
+			if (lowercase_copy != NULL) {
+				name_processed = BAD_CAST lowercase_copy;
+			}
 		}
 
-	}
+		attr = (xmlNodePtr) xmlSetProp(nodep, name_processed, BAD_CAST value);
 
-	attr = dom_create_attribute(nodep, name, value);
-	if (!attr) {
-		zend_argument_value_error(1, "must be a valid XML attribute");
-		RETURN_THROWS();
-	}
-	if (attr->type == XML_NAMESPACE_DECL) {
-		RETURN_TRUE;
+		if (name_processed != BAD_CAST name) {
+			efree(name_processed);
+		}
+	} else {
+		attr = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
+		if (attr != NULL) {
+			switch (attr->type) {
+				case XML_ATTRIBUTE_NODE:
+					node_list_unlink(attr->children);
+					break;
+				case XML_NAMESPACE_DECL:
+					RETURN_FALSE;
+				default:
+					break;
+			}
+		}
+
+		attr = dom_create_attribute(nodep, name, value);
+		if (!attr) {
+			zend_argument_value_error(1, "must be a valid XML attribute");
+			RETURN_THROWS();
+		}
+		if (attr->type == XML_NAMESPACE_DECL) {
+			RETURN_TRUE;
+		}
 	}
 
 	DOM_RET_OBJ(attr, &ret, intern);
-
 }
 /* }}} end dom_element_set_attribute */
 
