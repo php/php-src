@@ -1048,10 +1048,15 @@ PHP_METHOD(DOMElement, getAttributeNodeNS)
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
+	bool follow_spec = php_dom_follow_spec_intern(intern);
+	if (follow_spec && uri_len == 0) {
+		uri = NULL;
+	}
+
 	attrp = xmlHasNsProp(elemp, (xmlChar *)name, (xmlChar *)uri);
 
 	if (attrp == NULL) {
-		if (xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
+		if (!follow_spec && xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
 			xmlNsPtr nsptr;
 			nsptr = dom_get_nsdecl(elemp, (xmlChar *)name);
 			if (nsptr != NULL) {
