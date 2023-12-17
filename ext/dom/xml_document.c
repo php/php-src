@@ -206,7 +206,7 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			lxml_doc->encoding = xmlStrdup((const xmlChar *) "UTF-8");
 		}
 	}
-	if (mode == DOM_LOAD_FILE && lxml_doc->URL != NULL) {
+	if (mode == DOM_LOAD_FILE && lxml_doc->URL != NULL && !php_is_stream_path((char *) lxml_doc->URL)) {
 		/* Check for "file:/" instead of "file://" because of libxml2 quirk */
 		if (strncmp((const char *) lxml_doc->URL, "file:/", sizeof("file:/") - 1) != 0) {
 			xmlChar *buffer = xmlStrdup((const xmlChar *) "file://");
