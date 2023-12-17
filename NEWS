@@ -28,6 +28,13 @@ PHP                                                                        NEWS
   . Added workaround for SELinux mprotect execheap issue.
     See https://bugzilla.kernel.org/show_bug.cgi?id=218258. (ilutov)
 
+- PHPDBG:
+  . Fixed bug GH-12962 (Double free of init_file in phpdbg_prompt.c). (nielsdos)
+
+- SimpleXML:
+  . Fix getting the address of an uninitialized property of a SimpleXMLElement
+    resulting in a crash. (nielsdos)
+
 07 Dec 2023, PHP 8.3.1RC1
 
 - Core:
