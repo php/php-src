@@ -1022,14 +1022,21 @@ PHP_METHOD(DOMElement, removeAttributeNS)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
+	bool follow_spec = php_dom_follow_spec_intern(intern);
+	if (follow_spec && uri_len == 0) {
+		uri = NULL;
+	}
+
 	attrp = xmlHasNsProp(nodep, (xmlChar *)name, (xmlChar *)uri);
 
-	nsptr = dom_get_nsdecl(nodep, (xmlChar *)name);
-	if (nsptr != NULL) {
-		if (xmlStrEqual((xmlChar *)uri, nsptr->href)) {
-			dom_eliminate_ns(nodep, nsptr);
-		} else {
-			RETURN_NULL();
+	if (!follow_spec) {
+		nsptr = dom_get_nsdecl(nodep, (xmlChar *)name);
+		if (nsptr != NULL) {
+			if (xmlStrEqual((xmlChar *)uri, nsptr->href)) {
+				dom_eliminate_ns(nodep, nsptr);
+			} else {
+				return;
+			}
 		}
 	}
 
@@ -1042,8 +1049,6 @@ PHP_METHOD(DOMElement, removeAttributeNS)
 			xmlUnlinkNode((xmlNodePtr) attrp);
 		}
 	}
-
-	RETURN_NULL();
 }
 /* }}} end dom_element_remove_attribute_ns */
 

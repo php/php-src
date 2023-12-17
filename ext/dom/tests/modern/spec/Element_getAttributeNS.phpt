@@ -5,8 +5,6 @@ dom
 --FILE--
 <?php
 
-echo "--- Get after parsing ---\n";
-
 $dom = DOM\HTMLDocument::createFromString('<!DOCTYPE html><html><body align="foo" foo:bar="baz"></body></html>');
 $body = $dom->getElementsByTagName("body")[0];
 
@@ -42,7 +40,6 @@ var_dump($body->getAttributeNS("urn:a", "LOCAL2"));
 
 ?>
 --EXPECT--
---- Get after parsing ---
 --- After parsing, i.e. without namespace ---
 string(3) "foo"
 string(3) "foo"
