@@ -6,6 +6,8 @@ dom
 <?php
 
 $dom = DOM\HTMLDocument::createEmpty();
+$container = $dom->createElement("container");
+$dom->append($container);
 
 $tags = [
     "area",
@@ -29,13 +31,13 @@ $tags = [
 ];
 
 foreach ($tags as $tag) {
-    $element = $dom->appendChild($dom->createElement($tag));
+    $element = $container->appendChild($dom->createElement($tag));
     $element->appendChild($dom->createElement("inner"));
     $element->after("\n");
     echo "$tag: ";
     var_dump($dom->saveHTML($element));
 
-    $element = $dom->appendChild($dom->createElementNS("http://php.net/foo", "x:$tag"));
+    $element = $container->appendChild($dom->createElementNS("http://php.net/foo", "x:$tag"));
     $element->appendChild($dom->createElement("inner"));
     $element->after("\n");
 }
@@ -62,7 +64,7 @@ bgsound: string(9) "<bgsound>"
 frame: string(7) "<frame>"
 keygen: string(8) "<keygen>"
 param: string(7) "<param>"
-<area>
+<container><area>
 <x:area><inner></inner></x:area>
 <base>
 <x:base><inner></inner></x:base>
@@ -98,3 +100,4 @@ param: string(7) "<param>"
 <x:keygen><inner></inner></x:keygen>
 <param>
 <x:param><inner></inner></x:param>
+</container>

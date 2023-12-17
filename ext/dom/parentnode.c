@@ -234,12 +234,68 @@ static void dom_fragment_assign_parent_node(xmlNodePtr parentNode, xmlNodePtr fr
 	fragment->last = NULL;
 }
 
-static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *document, xmlNodePtr parentNode, zval *nodes, int nodesc)
+static bool dom_has_child_of_type(xmlNodePtr node, xmlElementType type)
+{
+	xmlNodePtr child = node->children;
+
+	while (child != NULL) {
+		if (child->type == type) {
+			return true;
+		}
+
+		child = child->next;
+	}
+
+	return false;
+}
+
+static bool dom_has_following_node(xmlNodePtr node, xmlElementType type)
+{
+	xmlNodePtr next = node->next;
+
+	while (next != NULL) {
+		if (next->type == type) {
+			return true;
+		}
+
+		next = next->next;
+	}
+
+	return false;
+}
+
+static bool dom_has_preceding_node(xmlNodePtr node, xmlElementType type)
+{
+	xmlNodePtr prev = node->prev;
+
+	while (prev != NULL) {
+		if (prev->type == type) {
+			return true;
+		}
+
+		prev = prev->prev;
+	}
+
+	return false;
+}
+
+/* https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity */
+static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *document, xmlNodePtr parentNode, xmlNodePtr child, zval *nodes, int nodesc)
 {
 	if (UNEXPECTED(parentNode == NULL)) {
 		/* No error required, this must be a no-op per spec */
 		return FAILURE;
 	}
+
+	/* 1. If parent is not a Document, DocumentFragment, or Element node, then throw a "HierarchyRequestError" DOMException.
+	 *    => Impossible */
+	ZEND_ASSERT(parentNode->type == XML_ELEMENT_NODE
+				|| parentNode->type == XML_DOCUMENT_NODE
+				|| parentNode->type == XML_HTML_DOCUMENT_NODE
+				|| parentNode->type == XML_DOCUMENT_FRAG_NODE
+				|| parentNode->type == XML_ELEMENT_NODE);
+
+	bool parent_is_document = parentNode->type == XML_DOCUMENT_NODE || parentNode->type == XML_HTML_DOCUMENT_NODE;
 
 	xmlDocPtr documentNode = dom_doc_from_context_node(parentNode);
 
@@ -256,15 +312,100 @@ static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *
 					return FAILURE;
 				}
 
-				if (node->type == XML_ATTRIBUTE_NODE || dom_hierarchy(parentNode, node) != SUCCESS) {
+				/* 3. If child is non-null and its parent is not parent, then throw a "NotFoundError" DOMException.
+				 *    => Impossible */
+
+				if (/* 2. If node is a host-including inclusive ancestor of parent, then throw a "HierarchyRequestError" DOMException. */
+					dom_hierarchy(parentNode, node) != SUCCESS
+					/* 4. If node is not a DocumentFragment, DocumentType, Element, or CharacterData node, then throw a "HierarchyRequestError" DOMException. */
+					|| node->type == XML_ATTRIBUTE_NODE
+					|| (php_dom_follow_spec_doc_ref(document) && (
+						node->type == XML_ENTITY_REF_NODE
+						|| node->type == XML_ENTITY_NODE
+						|| node->type == XML_NOTATION_NODE
+						// No need to test these 2 as importing them is impossible.
+						// || node->type == XML_DOCUMENT_NODE
+						// || node->type == XML_HTML_DOCUMENT_NODE
+						|| node->type >= XML_ELEMENT_DECL))) {
 					php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(document));
 					return FAILURE;
+				}
+
+				ZEND_ASSERT(node->type != XML_DOCUMENT_NODE && node->type != XML_HTML_DOCUMENT_NODE);
+
+				if (php_dom_follow_spec_doc_ref(document)) {
+					/* 5. If either node is a Text node and parent is a document... */
+					if (parent_is_document && (node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE)) {
+						php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert text as a child of a document", /* strict */ true);
+						return FAILURE;
+					}
+
+					/* 5. ..., or node is a doctype and parent is not a document, then throw a "HierarchyRequestError" DOMException. */
+					if (!parent_is_document && node->type == XML_DTD_NODE) {
+						php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert a document type into anything other than a document", /* strict */ true);
+						return FAILURE;
+					}
+
+					/* 6. If parent is a document, and any of the statements below, switched on the interface node implements,
+					 *    are true, then throw a "HierarchyRequestError" DOMException. */
+					if (parent_is_document) {
+						/* DocumentFragment */
+						if (node->type == XML_DOCUMENT_FRAG_NODE) {
+							/* If node has more than one element child or has a Text node child. */
+							xmlNodePtr iter = node->children;
+							bool seen_element = false;
+							while (iter != NULL) {
+								if (iter->type == XML_ELEMENT_NODE) {
+									if (seen_element) {
+										php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one element child in a document", /* strict */ true);
+										return FAILURE;
+									}
+									seen_element = true;
+								} else if (iter->type == XML_TEXT_NODE || iter->type == XML_CDATA_SECTION_NODE) {
+									php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert text as a child of a document", /* strict */ true);
+									return FAILURE;
+								}
+								iter = iter->next;
+							}
+						}
+						/* Element */
+						else if (node->type == XML_ELEMENT_NODE) {
+							/* parent has an element child, child is a doctype, or child is non-null and a doctype is following child. */
+							if (dom_has_child_of_type(parentNode, XML_ELEMENT_NODE)) {
+								php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one element child in a document", /* strict */ true);
+								return FAILURE;
+							}
+							if (child != NULL && (child->type == XML_DTD_NODE || dom_has_following_node(child, XML_DTD_NODE))) {
+								php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Document types must be the first child in a document", /* strict */ true);
+								return FAILURE;
+							}
+						}
+						/* DocumentType */
+						else if (node->type == XML_DTD_NODE) {
+							/* parent has a doctype child, child is non-null and an element is preceding child, or child is null and parent has an element child. */
+							if (dom_has_child_of_type(parentNode, XML_DTD_NODE)) {
+								php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one document type", /* strict */ true);
+								return FAILURE;
+							}
+							if ((child != NULL && dom_has_preceding_node(child, XML_ELEMENT_NODE))
+								|| (child == NULL && dom_has_child_of_type(parentNode, XML_ELEMENT_NODE))) {
+								php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Document types must be the first child in a document", /* strict */ true);
+								return FAILURE;
+							}
+						}
+					}
 				}
 			} else {
 				zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_type_name(&nodes[i]));
 				return FAILURE;
 			}
-		} else if (type != IS_STRING) {
+		} else if (type == IS_STRING) {
+			/* Repetition of step 5. If either node is a Text node and parent is a document... */
+			if (parent_is_document && php_dom_follow_spec_doc_ref(document)) {
+				php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert text as a child of a document", /* strict */ true);
+				return FAILURE;
+			}
+		} else {
 			zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_type_name(&nodes[i]));
 			return FAILURE;
 		}
@@ -305,7 +446,7 @@ void dom_parent_node_append(dom_object *context, zval *nodes, uint32_t nodesc)
 	xmlNode *parentNode = dom_object_get_node(context);
 	xmlNodePtr newchild, prevsib;
 
-	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, NULL, nodes, nodesc) != SUCCESS)) {
 		return;
 	}
 
@@ -349,7 +490,7 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc)
 		return;
 	}
 
-	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, parentNode->children, nodes, nodesc) != SUCCESS)) {
 		return;
 	}
 
@@ -388,11 +529,6 @@ void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 	/* Spec step 1 */
 	parentNode = prevsib->parent;
 
-	/* Sanity check for fragment, includes spec step 2 */
-	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
-		return;
-	}
-
 	/* Spec step 3: find first following child not in nodes; otherwise null */
 	xmlNodePtr viable_next_sibling = prevsib->next;
 	while (viable_next_sibling) {
@@ -400,6 +536,11 @@ void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 			break;
 		}
 		viable_next_sibling = viable_next_sibling->next;
+	}
+
+	/* Sanity check for fragment, includes spec step 2 */
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, viable_next_sibling, nodes, nodesc) != SUCCESS)) {
+		return;
 	}
 
 	doc = prevsib->doc;
@@ -440,11 +581,6 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 	/* Spec step 1 */
 	parentNode = nextsib->parent;
 
-	/* Sanity check for fragment, includes spec step 2 */
-	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
-		return;
-	}
-
 	/* Spec step 3: find first following child not in nodes; otherwise null */
 	xmlNodePtr viable_previous_sibling = nextsib->prev;
 	while (viable_previous_sibling) {
@@ -452,6 +588,11 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 			break;
 		}
 		viable_previous_sibling = viable_previous_sibling->prev;
+	}
+
+	/* Sanity check for fragment, includes spec step 2 */
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, viable_previous_sibling, nodes, nodesc) != SUCCESS)) {
+		return;
 	}
 
 	doc = nextsib->doc;
@@ -537,16 +678,6 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 	/* Spec step 1 */
 	xmlNodePtr parentNode = child->parent;
 
-	/* Sanity check for fragment, includes spec step 2 */
-	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, nodes, nodesc) != SUCCESS)) {
-		return;
-	}
-
-	int stricterror = dom_get_strict_error(context->document);
-	if (UNEXPECTED(dom_child_removal_preconditions(child, stricterror) != SUCCESS)) {
-		return;
-	}
-
 	/* Spec step 3: find first following child not in nodes; otherwise null */
 	xmlNodePtr viable_next_sibling = child->next;
 	while (viable_next_sibling) {
@@ -554,6 +685,16 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 			break;
 		}
 		viable_next_sibling = viable_next_sibling->next;
+	}
+
+	/* Sanity check for fragment, includes spec step 2 */
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, viable_next_sibling, nodes, nodesc) != SUCCESS)) {
+		return;
+	}
+
+	int stricterror = dom_get_strict_error(context->document);
+	if (UNEXPECTED(dom_child_removal_preconditions(child, stricterror) != SUCCESS)) {
+		return;
 	}
 
 	xmlDocPtr doc = parentNode->doc;
@@ -593,7 +734,7 @@ void dom_parent_node_replace_children(dom_object *context, zval *nodes, uint32_t
 
 	xmlNodePtr thisp = dom_object_get_node(context);
 	/* Note: Only rule 2 of pre-insertion validity can be broken */
-	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, thisp, nodes, nodesc) != SUCCESS)) {
+	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, thisp, NULL, nodes, nodesc) != SUCCESS)) {
 		return;
 	}
 
