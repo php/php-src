@@ -814,6 +814,10 @@ PHP_METHOD(DOM_Document, importNode)
 
 	if (nodep->type == XML_HTML_DOCUMENT_NODE || nodep->type == XML_DOCUMENT_NODE
 		|| nodep->type == XML_DOCUMENT_TYPE_NODE) {
+		if (php_dom_follow_spec_intern(intern)) {
+			php_dom_throw_error(NOT_SUPPORTED_ERR, /* strict */ true);
+			RETURN_THROWS();
+		}
 		php_error_docref(NULL, E_WARNING, "Cannot import: Node Type Not Supported");
 		RETURN_FALSE;
 	}
