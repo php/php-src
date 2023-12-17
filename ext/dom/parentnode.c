@@ -146,6 +146,22 @@ static xmlDocPtr dom_doc_from_context_node(xmlNodePtr contextNode)
 	}
 }
 
+/* Citing from the docs (https://gnome.pages.gitlab.gnome.org/libxml2/devhelp/libxml2-tree.html#xmlAddChild): 
+ * "Add a new node to @parent, at the end of the child (or property) list merging adjacent TEXT nodes (in which case @cur is freed)".
+ * So we must use a custom way of adding that does not merge. */
+static void dom_add_child_without_merging(xmlNodePtr parent, xmlNodePtr child)
+{
+	if (parent->children == NULL) {
+		parent->children = child;
+	} else {
+		xmlNodePtr last = parent->last;
+		last->next = child;
+		child->prev = last;
+	}
+	parent->last = child;
+	child->parent = parent;
+}
+
 xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNode, zval *nodes, int nodesc)
 {
 	xmlDoc *documentNode;
@@ -173,48 +189,27 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 			newNodeObj->document = document;
 			xmlSetTreeDoc(newNode, documentNode);
 
-			/* Citing from the docs (https://gnome.pages.gitlab.gnome.org/libxml2/devhelp/libxml2-tree.html#xmlAddChild): 
-			 * "Add a new node to @parent, at the end of the child (or property) list merging adjacent TEXT nodes (in which case @cur is freed)".
-			 * So we must take a copy if this situation arises to prevent a use-after-free. */
-			bool will_free = newNode->type == XML_TEXT_NODE && fragment->last && fragment->last->type == XML_TEXT_NODE;
-			if (will_free) {
-				newNode = xmlCopyNode(newNode, 1);
-			}
-
 			if (newNode->type == XML_DOCUMENT_FRAG_NODE) {
 				/* Unpack document fragment nodes, the behaviour differs for different libxml2 versions. */
 				newNode = newNode->children;
 				while (newNode) {
 					xmlNodePtr next = newNode->next;
 					xmlUnlinkNode(newNode);
-					if (!xmlAddChild(fragment, newNode)) {
-						goto err;
-					}
+					dom_add_child_without_merging(fragment, newNode);
 					newNode = next;
 				}
-			} else if (!xmlAddChild(fragment, newNode)) {
-				if (will_free) {
-					xmlFreeNode(newNode);
-				}
-				goto err;
+			} else {
+				dom_add_child_without_merging(fragment, newNode);
 			}
 		} else {
 			ZEND_ASSERT(Z_TYPE(nodes[i]) == IS_STRING);
 
 			newNode = xmlNewDocText(documentNode, (xmlChar *) Z_STRVAL(nodes[i]));
-
-			if (!xmlAddChild(fragment, newNode)) {
-				xmlFreeNode(newNode);
-				goto err;
-			}
+			dom_add_child_without_merging(fragment, newNode);
 		}
 	}
 
 	return fragment;
-
-err:
-	xmlFreeNode(fragment);
-	return NULL;
 }
 
 static void dom_fragment_assign_parent_node(xmlNodePtr parentNode, xmlNodePtr fragment)
