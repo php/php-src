@@ -17,6 +17,11 @@
 #ifndef PHP_FFI_H
 #define PHP_FFI_H
 
+#include <ffi.h>
+#include "zend_compile.h"
+#include "zend_API.h"
+#include "TSRM.h"
+
 extern zend_module_entry ffi_module_entry;
 #define phpext_ffi_ptr &ffi_module_entry
 
@@ -27,6 +32,15 @@ typedef enum _zend_ffi_api_restriction {
 } zend_ffi_api_restriction;
 
 typedef struct _zend_ffi_type  zend_ffi_type;
+typedef struct _zend_ffi_callback_data zend_ffi_callback_data;
+
+
+typedef struct _zend_ffi_call_data {
+	ffi_cif* cif;
+	void* ret;
+	void** args;
+	zend_ffi_callback_data* data;
+} zend_ffi_call_data;
 
 ZEND_BEGIN_MODULE_GLOBALS(ffi)
 	zend_ffi_api_restriction restriction;
@@ -34,6 +48,15 @@ ZEND_BEGIN_MODULE_GLOBALS(ffi)
 
 	/* predefined ffi_types */
 	HashTable types;
+
+	zend_atomic_bool callback_in_progress;
+
+	MUTEX_T vm_request_lock;
+	COND_T vm_ack;
+	COND_T vm_unlock;
+	THREAD_T callback_tid;
+	THREAD_T main_tid;
+	zend_ffi_call_data callback_data;
 
 	/* preloading */
 	char *preload;

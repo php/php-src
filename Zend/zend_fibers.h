@@ -134,8 +134,12 @@ struct _zend_fiber {
 
 /* These functions may be used to create custom fiber objects using the bundled fiber switching context. */
 ZEND_API zend_result zend_fiber_init_context(zend_fiber_context *context, void *kind, zend_fiber_coroutine coroutine, size_t stack_size);
+ZEND_STACK_ALIGNED void zend_fiber_execute(zend_fiber_transfer *transfer);
 ZEND_API void zend_fiber_destroy_context(zend_fiber_context *context);
 ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer);
+ZEND_API zend_fiber_transfer zend_fiber_resume(zend_fiber *fiber, zval *value, bool exception);
+ZEND_API void zend_fiber_delegate_transfer_result(zend_fiber_transfer *transfer, INTERNAL_FUNCTION_PARAMETERS);
+ZEND_API zend_fiber_transfer zend_fiber_switch_to(zend_fiber_context *context, zval *value, bool exception);
 #ifdef ZEND_CHECK_STACK_LIMIT
 ZEND_API void* zend_fiber_stack_limit(zend_fiber_stack *stack);
 ZEND_API void* zend_fiber_stack_base(zend_fiber_stack *stack);
