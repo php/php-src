@@ -363,7 +363,7 @@ void phpdbg_init(char *init_file, size_t init_file_len, bool use_default) /* {{{
 			}
 
 			ZEND_IGNORE_VALUE(asprintf(&init_file, "%s/%s", scan_dir, PHPDBG_INIT_FILENAME));
-			phpdbg_try_file_init(init_file, strlen(init_file), 1);
+			phpdbg_try_file_init(init_file, strlen(init_file), 0);
 			free(init_file);
 			if (i == -1) {
 				break;
