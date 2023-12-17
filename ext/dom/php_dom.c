@@ -1379,9 +1379,9 @@ static bool dom_match_local_helper(const xmlChar *local, const xmlChar *local_lo
 	if (nodep->ns != NULL && nodep->ns->prefix != NULL) {
 		const char *prefix = (const char *) nodep->ns->prefix;
 		/* 1. match prefix up to |prefix| characters case-insensitively.
-			*    This won't overflow as it'll stop at the '\0' if the lengths don't match. */
+		 *    This won't overflow as it'll stop at the '\0' if the lengths don't match. */
 		size_t prefix_len = strlen(prefix);
-		if (memcmp(local_to_use, prefix, prefix_len) != 0) {
+		if (strncmp((const char *) local_to_use, prefix, prefix_len) != 0) {
 			return false;
 		}
 		/* 2. match ':' */
