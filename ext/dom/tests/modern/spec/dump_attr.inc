@@ -5,3 +5,9 @@ function dumpAttr(DOM\Attr $attr) {
     var_dump($attr->nodeName);
     var_dump($attr->namespaceURI);
 }
+
+function dumpAttrs(DOM\Element $element) {
+    foreach ($element->attributes as $attr) {
+        dumpAttr($attr);
+    }
+}

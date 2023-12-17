@@ -826,6 +826,11 @@ PHP_METHOD(DOMElement, getAttributeNS)
 
 static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, char *uri, char *name, const char *value, size_t uri_len, size_t name_len)
 {
+	if (name_len == 0) {
+		zend_argument_value_error(2, "cannot be empty");
+		return;
+	}
+
 	xmlNodePtr nodep = NULL;
 	xmlNsPtr nsptr;
 	xmlAttr *attr;
@@ -915,6 +920,25 @@ static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, ch
 	}
 }
 
+/* https://dom.spec.whatwg.org/#dom-element-setattributens */
+static void dom_set_attribute_ns_modern(dom_object *intern, xmlNodePtr elemp, zend_string *uri, zend_string *name, const char *value)
+{
+	xmlChar *localname = NULL, *prefix = NULL;
+	int errorcode = dom_validate_and_extract(uri, name, &localname, &prefix);
+
+	if (errorcode == 0) {
+		xmlNsPtr ns = dom_ns_create_local_as_is(elemp->doc, elemp, elemp, uri, prefix);
+		if (UNEXPECTED(xmlNewNsProp(elemp, ns, localname, BAD_CAST value) == NULL)) {
+			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		}
+	} else {
+		php_dom_throw_error(errorcode, /* strict */ true);
+	}
+
+	xmlFree(localname);
+	xmlFree(prefix);
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAttrNS
 Since: DOM Level 2
 */
@@ -922,23 +946,24 @@ PHP_METHOD(DOMElement, setAttributeNS)
 {
 	zval *id;
 	xmlNodePtr elemp;
-	size_t uri_len = 0, name_len = 0, value_len = 0;
-	char *uri, *name, *value;
+	size_t value_len = 0;
+	char *value;
+	zend_string *uri;
+	zend_string *name = NULL;
 	dom_object *intern;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!ss", &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (name_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S!Ss", &uri, &name, &value, &value_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
-	dom_set_attribute_ns_legacy(intern, elemp, uri, name, value, uri_len, name_len);
+	if (php_dom_follow_spec_intern(intern)) {
+		dom_set_attribute_ns_modern(intern, elemp, uri, name, value);
+	} else {
+		dom_set_attribute_ns_legacy(intern, elemp, uri ? ZSTR_VAL(uri) : NULL, ZSTR_VAL(name), value, uri ? ZSTR_LEN(uri) : 0, ZSTR_LEN(name));
+	}
 }
 /* }}} end dom_element_set_attribute_ns */
 

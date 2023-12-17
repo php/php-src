@@ -118,6 +118,7 @@ static xmlNsPtr dom_ns_create_local_as_is_unchecked(xmlDocPtr doc, xmlNodePtr pa
 		ns->next = parent->nsDef;
 		parent->nsDef = ns;
 	} else {
+		ZEND_ASSERT(doc != NULL);
 		php_libxml_set_old_ns(doc, ns);
 	}
 
@@ -126,8 +127,6 @@ static xmlNsPtr dom_ns_create_local_as_is_unchecked(xmlDocPtr doc, xmlNodePtr pa
 
 xmlNsPtr dom_ns_create_local_as_is(xmlDocPtr doc, xmlNodePtr ns_holder, xmlNodePtr parent, zend_string *uri, xmlChar *prefix)
 {
-	ZEND_ASSERT(doc != NULL);
-
 	if (uri == NULL || ZSTR_VAL(uri)[0] == '\0') {
 		return NULL;
 	}
