@@ -43,7 +43,7 @@ extern const dom_ns_magic_token *dom_ns_is_xmlns_magic_token;
 void dom_ns_compat_mark_attribute_list(xmlNodePtr node);
 bool dom_ns_is_fast(const xmlNode *nodep, const dom_ns_magic_token *magic_token);
 bool dom_ns_is_html_and_document_is_html(const xmlNode *nodep);
-xmlNsPtr dom_ns_create_local_as_is(xmlDocPtr doc, xmlNodePtr parent, zend_string *uri, xmlChar *prefix);
+xmlNsPtr dom_ns_create_local_as_is(xmlDocPtr doc, xmlNodePtr ns_holder, xmlNodePtr parent, zend_string *uri, xmlChar *prefix);
 xmlNsPtr dom_ns_fast_get_html_ns(xmlDocPtr docp);
 
 #endif

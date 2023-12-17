@@ -872,8 +872,10 @@ PHP_METHOD(DOM_Document, createElementNS)
 		errorcode = dom_validate_and_extract(uri, name, &localname, &prefix);
 
 		if (errorcode == 0) {
-			xmlNsPtr ns = dom_ns_create_local_as_is(docp, xmlDocGetRootElement(docp), uri, prefix);
-			nodep = xmlNewDocRawNode(docp, ns, localname, BAD_CAST value);
+			nodep = xmlNewDocRawNode(docp, NULL, localname, BAD_CAST value);
+			if (EXPECTED(nodep != NULL)) {
+				nodep->ns = dom_ns_create_local_as_is(docp, nodep, xmlDocGetRootElement(docp), uri, prefix);
+			}
 		}
 
 		xmlFree(localname);
@@ -957,7 +959,7 @@ PHP_METHOD(DOM_Document, createAttributeNS)
 
 		if (uri != NULL && ZSTR_LEN(uri) > 0) {
 			if (php_dom_follow_spec_intern(intern)) {
-				nsptr = dom_ns_create_local_as_is(docp, root, uri, prefix);
+				nsptr = dom_ns_create_local_as_is(docp, root, root, uri, prefix);
 			} else {
 				nsptr = xmlSearchNsByHref(docp, root, BAD_CAST ZSTR_VAL(uri));
 

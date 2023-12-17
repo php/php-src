@@ -124,7 +124,7 @@ static xmlNsPtr dom_ns_create_local_as_is_unchecked(xmlDocPtr doc, xmlNodePtr pa
 	return ns;
 }
 
-xmlNsPtr dom_ns_create_local_as_is(xmlDocPtr doc, xmlNodePtr parent, zend_string *uri, xmlChar *prefix)
+xmlNsPtr dom_ns_create_local_as_is(xmlDocPtr doc, xmlNodePtr ns_holder, xmlNodePtr parent, zend_string *uri, xmlChar *prefix)
 {
 	ZEND_ASSERT(doc != NULL);
 
@@ -141,7 +141,7 @@ xmlNsPtr dom_ns_create_local_as_is(xmlDocPtr doc, xmlNodePtr parent, zend_string
 		}
 	}
 
-	return dom_ns_create_local_as_is_unchecked(doc, parent, href, prefix);
+	return dom_ns_create_local_as_is_unchecked(doc, ns_holder, href, prefix);
 }
 
 xmlNsPtr dom_ns_fast_get_html_ns(xmlDocPtr docp)
