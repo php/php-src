@@ -615,9 +615,9 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 			php_dom_throw_error(INUSE_ATTRIBUTE_ERR, /* strict */ true);
 			RETURN_THROWS();
 		}
-		use_ns = true;
+		use_ns = true; /* In modern-day DOM setAttributeNode is an alias for setAttributeNodeNS. */
 		if (attrp->doc != NULL && attrp->doc != nodep->doc) {
-			// TODO: can have problems with refcounts if cross-document setting happens
+			php_dom_adopt_node((xmlNodePtr) attrp, intern, nodep->doc);
 		}
 	} else {
 		if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
