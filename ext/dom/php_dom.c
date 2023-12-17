@@ -1552,7 +1552,6 @@ static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePt
 
 static zend_always_inline void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep)
 {
-	// TODO: this breaks with conflicting namespaces
 	if (php_dom_follow_spec_node(nodep)) {
 		/* Put on stack to avoid allocation.
 		* Although libxml2 currently does not use this for the reconciliation, it still
