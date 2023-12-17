@@ -181,6 +181,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 }
 
                 lxml_attr->children = lxml_attr->last = lxml_text;
+                lxml_text->parent = (xmlNodePtr) lxml_attr;
 
                 if (last_added_attr == NULL) {
                     lxml_element->properties = lxml_attr;
