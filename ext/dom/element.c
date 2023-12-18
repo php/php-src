@@ -419,7 +419,15 @@ PHP_METHOD(DOMElement, setAttribute)
 			}
 		}
 
-		attr = (xmlNodePtr) xmlSetNsProp(nodep, NULL, name_processed, BAD_CAST value);
+		/* Can't use xmlSetNsProp unconditionally here because that doesn't take into account the qualified name matching... */
+		attr = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
+		if (attr != NULL) {
+			dom_remove_all_children(attr);
+			xmlNodePtr node = xmlNewDocText(attr->doc, BAD_CAST value);
+			xmlAddChild(attr, node);
+		} else {
+			attr = (xmlNodePtr) xmlSetNsProp(nodep, NULL, name_processed, BAD_CAST value);
+		}
 
 		if (name_processed != BAD_CAST name) {
 			efree(name_processed);
