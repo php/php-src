@@ -1710,6 +1710,76 @@ PHP_METHOD(DOMNode, lookupPrefix)
 }
 /* }}} end dom_node_lookup_prefix */
 
+/* https://dom.spec.whatwg.org/#locate-a-namespace */
+static const char *dom_locate_a_namespace(xmlNodePtr node, const zend_string *prefix)
+{
+	/* switch on the interface node implements: */
+	if (node->type == XML_ELEMENT_NODE) {
+		if (prefix != NULL) {
+			/* 1. If prefix is "xml", then return the XML namespace. */
+			if (zend_string_equals_literal_ci(prefix, "xml")) {
+				return DOM_XML_NS_URI;
+			}
+
+			/* 2. If prefix is "xmlns", then return the XMLNS namespace. */
+			if (zend_string_equals_literal_ci(prefix, "xmlns")) {
+				return DOM_XMLNS_NS_URI;
+			}
+		}
+
+		do {
+			/* 3. If its namespace is non-null and its namespace prefix is prefix, then return namespace. */
+			if (node->ns != NULL && xmlStrEqual(node->ns->prefix, BAD_CAST (prefix ? ZSTR_VAL(prefix) : NULL))) {
+				return (const char *) node->ns->href;
+			}
+
+			/* 4. If it has an attribute whose namespace is the XMLNS namespace, namespace prefix is "xmlns", and local name is prefix,
+			*    or if prefix is null and it has an attribute whose namespace is the XMLNS namespace, namespace prefix is null, and local name is "xmlns",
+			*    then return its value if it is not the empty string, and null otherwise.  */
+			xmlAttrPtr attr;
+			if (prefix != NULL) {
+				attr = xmlHasNsProp(node, BAD_CAST ZSTR_VAL(prefix), BAD_CAST DOM_XMLNS_NS_URI);
+			} else {
+				attr = xmlHasNsProp(node, BAD_CAST "xmlns", BAD_CAST DOM_XMLNS_NS_URI);
+			}
+			if (attr != NULL) {
+				if (attr->children != NULL && attr->children->content[0] != '\0') {
+					return (const char *) attr->children->content;
+				} else {
+					return NULL;
+				}
+			}
+
+			/* 5. If its parent element is null, then return null. */
+			if (node->parent == NULL || node->parent->type != XML_ELEMENT_NODE) {
+				return NULL;
+			}
+
+			/* 6. Return the result of running locate a namespace on its parent element using prefix. */
+			node = node->parent;
+		} while (true);
+	} else if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE) {
+		/* 1. If its document element is null, then return null. */
+		node = xmlDocGetRootElement((xmlDocPtr) node);
+		if (UNEXPECTED(node == NULL)) {
+			return NULL;
+		}
+
+		/* 2. Return the result of running locate a namespace on its document element using prefix. */
+		return dom_locate_a_namespace(node, prefix);
+	} else if (node->type == XML_DTD_NODE || node->type == XML_DOCUMENT_FRAG_NODE) {
+		return NULL;
+	} else {
+		/* 1. If its element is null, then return null / If its parent element is null, then return null. */
+		if (node->parent == NULL || node->parent->type != XML_ELEMENT_NODE) {
+			return NULL;
+		}
+
+		/* 2. Return the result of running locate a namespace on its element using prefix. */
+		return dom_locate_a_namespace(node->parent, prefix);
+	}
+}
+
 /* {{{ URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-isDefaultNamespace
 Since: DOM Level 3
 */
@@ -1728,11 +1798,21 @@ PHP_METHOD(DOMNode, isDefaultNamespace)
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
-	if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-		nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
-	}
 
-	if (nodep && uri_len > 0) {
+	if (php_dom_follow_spec_intern(intern)) {
+		if (uri_len == 0) {
+			uri = NULL;
+		}
+		const char *ns_uri = dom_locate_a_namespace(nodep, NULL);
+		RETURN_BOOL(xmlStrEqual(BAD_CAST uri, BAD_CAST ns_uri));
+	} else if (uri_len > 0) {
+		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
+			nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
+			if (UNEXPECTED(nodep == NULL)) {
+				RETURN_FALSE;
+			}
+		}
+
 		nsptr = xmlSearchNs(nodep->doc, nodep, NULL);
 		if (nsptr && xmlStrEqual(nsptr->href, (xmlChar *) uri)) {
 			RETURN_TRUE;

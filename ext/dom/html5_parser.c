@@ -183,6 +183,12 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 lxml_attr->children = lxml_attr->last = lxml_text;
                 lxml_text->parent = (xmlNodePtr) lxml_attr;
 
+                if (attr->node.ns == LXB_NS_XMLNS) {
+                    zend_string *tmp = ZSTR_INIT_LITERAL(DOM_XMLNS_NS_URI, false);
+                    lxml_attr->ns = dom_ns_create_local_as_is(lxml_doc, lxml_element, lxml_element, tmp, NULL);
+                    zend_string_release_ex(tmp, false);
+                }
+
                 if (last_added_attr == NULL) {
                     lxml_element->properties = lxml_attr;
                 } else {
