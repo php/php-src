@@ -36,7 +36,7 @@ static inline int php_intlog10abs(double value) {
 	value = fabs(value);
 
 	if (value < 1e-8 || value > 1e22) {
-		return (int) floor(log10(value));
+		return (int)floor(log10(value));
 	} else {
 		/* Do a binary search with 5 steps */
 		int result = 15;
@@ -79,7 +79,7 @@ static inline int php_intlog10abs(double value) {
 static inline double php_intpow10(int power) {
 	/* Not in lookup table */
 	if (power < 0 || power > 22) {
-		return pow(10.0, (double) power);
+		return pow(10.0, (double)power);
 	}
 
 	static const double powers[] = {
@@ -197,7 +197,7 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		return value;
 	}
 
-	places = places < INT_MIN + 1 ? INT_MIN + 1 : places;
+	places = places < INT_MIN+1 ? INT_MIN+1 : places;
 	precision_places = 14 - php_intlog10abs(value);
 
 	f1 = php_intpow10(abs(places));
@@ -206,9 +206,9 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	   the requested places BUT is small enough to make sure a non-zero value
 	   is returned, pre-round the result to the precision */
 	if (precision_places > places && precision_places - 15 < places) {
-		int64_t use_precision = precision_places < INT_MIN + 1 ? INT_MIN + 1 : precision_places;
+		int64_t use_precision = precision_places < INT_MIN+1 ? INT_MIN+1 : precision_places;
 
-		f2 = php_intpow10(abs((int) use_precision));
+		f2 = php_intpow10(abs((int)use_precision));
 		if (use_precision >= 0) {
 			tmp_value = value * f2;
 		} else {
@@ -219,9 +219,9 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 		tmp_value = php_round_helper(tmp_value, mode);
 
 		use_precision = places - precision_places;
-		use_precision = use_precision < INT_MIN + 1 ? INT_MIN + 1 : use_precision;
+		use_precision = use_precision < INT_MIN+1 ? INT_MIN+1 : use_precision;
 		/* now correctly move the decimal point */
-		f2 = php_intpow10(abs((int) use_precision));
+		f2 = php_intpow10(abs((int)use_precision));
 		/* because places < precision_places */
 		tmp_value = tmp_value / f2;
 	} else {
@@ -1353,6 +1353,16 @@ PHP_FUNCTION(number_format)
 			break;
 
 		case IS_DOUBLE:
+			// double values of >= 2^52 can not have fractional digits anymore
+			// Casting to long on 64bit will not loose precision on rounding
+			if (UNEXPECTED(
+				(Z_DVAL_P(num) >= 4503599627370496.0 || Z_DVAL_P(num) <= -4503599627370496.0)
+				&& ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(num))
+			)) {
+				RETURN_STR(_php_math_number_format_long((zend_long)Z_DVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+                break;
+			}
+
 			if (dec >= 0) {
 				dec_int = ZEND_LONG_INT_OVFL(dec) ? INT_MAX : (int)dec;
 			} else {
