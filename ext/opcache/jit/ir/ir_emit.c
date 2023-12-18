@@ -487,6 +487,7 @@ static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)
 					IR_ASSERT(src == IR_REG_NONE);
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
 					if (IR_IS_TYPE_INT(insn->type)
+					 && !IR_IS_SYM_CONST(ctx->ir_base[input].op)
 					 && (ir_type_size[insn->type] != 8 || IR_IS_SIGNED_32BIT(ctx->ir_base[input].val.i64))) {
 						ir_emit_store_imm(ctx, insn->type, ref, ctx->ir_base[input].val.i32);
 						continue;
@@ -609,7 +610,7 @@ int ir_match(ir_ctx *ctx)
 			if (insn->op == IR_END || insn->op == IR_LOOP_END) {
 				ctx->rules[ref] = insn->op;
 				ref = prev_ref[ref];
-				if (ref == start) {
+				if (ref == start && ctx->cfg_edges[bb->successors] != b) {
 					if (EXPECTED(!(bb->flags & IR_BB_ENTRY))) {
 						bb->flags |= IR_BB_EMPTY;
 					} else if (ctx->flags & IR_MERGE_EMPTY_ENTRIES) {

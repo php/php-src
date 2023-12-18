@@ -1880,7 +1880,7 @@ IR_FOLD(ADD(ADD, C_U32))
 IR_FOLD(ADD(ADD, C_U64))
 IR_FOLD(ADD(ADD, C_ADDR))
 {
-	if (IR_IS_CONST_REF(op1_insn->op2)) {
+	if (IR_IS_CONST_REF(op1_insn->op2) && !IR_IS_SYM_CONST(ctx->ir_base[op1_insn->op2].op)) {
 		/* (x + c1) + c2  => x + (c1 + c2) */
 		val.u64 = ctx->ir_base[op1_insn->op2].val.u64 + op2_insn->val.u64;
 		op1 = op1_insn->op1;
@@ -1895,7 +1895,7 @@ IR_FOLD(ADD(ADD, C_I16))
 IR_FOLD(ADD(ADD, C_I32))
 IR_FOLD(ADD(ADD, C_I64))
 {
-	if (IR_IS_CONST_REF(op1_insn->op2)) {
+	if (IR_IS_CONST_REF(op1_insn->op2) && !IR_IS_SYM_CONST(ctx->ir_base[op1_insn->op2].op)) {
 		/* (x + c1) + c2  => x + (c1 + c2) */
 		val.i64 = ctx->ir_base[op1_insn->op2].val.i64 + op2_insn->val.i64;
 		op1 = op1_insn->op1;
@@ -1910,7 +1910,7 @@ IR_FOLD(MUL(MUL, C_U16))
 IR_FOLD(MUL(MUL, C_U32))
 IR_FOLD(MUL(MUL, C_U64))
 {
-	if (IR_IS_CONST_REF(op1_insn->op2)) {
+	if (IR_IS_CONST_REF(op1_insn->op2) && !IR_IS_SYM_CONST(ctx->ir_base[op1_insn->op2].op)) {
 		/* (x * c1) * c2  => x * (c1 * c2) */
 		val.u64 = ctx->ir_base[op1_insn->op2].val.u64 * op2_insn->val.u64;
 		op1 = op1_insn->op1;
@@ -1925,7 +1925,7 @@ IR_FOLD(MUL(MUL, C_I16))
 IR_FOLD(MUL(MUL, C_I32))
 IR_FOLD(MUL(MUL, C_I64))
 {
-	if (IR_IS_CONST_REF(op1_insn->op2)) {
+	if (IR_IS_CONST_REF(op1_insn->op2) && !IR_IS_SYM_CONST(ctx->ir_base[op1_insn->op2].op)) {
 		/* (x * c1) * c2  => x * (c1 * c2) */
 		val.i64 = ctx->ir_base[op1_insn->op2].val.i64 * op2_insn->val.i64;
 		op1 = op1_insn->op1;
@@ -1944,7 +1944,7 @@ IR_FOLD(AND(AND, C_I16))
 IR_FOLD(AND(AND, C_I32))
 IR_FOLD(AND(AND, C_I64))
 {
-	if (IR_IS_CONST_REF(op1_insn->op2)) {
+	if (IR_IS_CONST_REF(op1_insn->op2) && !IR_IS_SYM_CONST(ctx->ir_base[op1_insn->op2].op)) {
 		/* (x & c1) & c2  => x & (c1 & c2) */
 		val.u64 = ctx->ir_base[op1_insn->op2].val.u64 & op2_insn->val.u64;
 		op1 = op1_insn->op1;
@@ -1963,7 +1963,7 @@ IR_FOLD(OR(OR, C_I16))
 IR_FOLD(OR(OR, C_I32))
 IR_FOLD(OR(OR, C_I64))
 {
-	if (IR_IS_CONST_REF(op1_insn->op2)) {
+	if (IR_IS_CONST_REF(op1_insn->op2) && !IR_IS_SYM_CONST(ctx->ir_base[op1_insn->op2].op)) {
 		/* (x | c1) | c2  => x | (c1 | c2) */
 		val.u64 = ctx->ir_base[op1_insn->op2].val.u64 | op2_insn->val.u64;
 		op1 = op1_insn->op1;
@@ -1982,7 +1982,7 @@ IR_FOLD(XOR(XOR, C_I16))
 IR_FOLD(XOR(XOR, C_I32))
 IR_FOLD(XOR(XOR, C_I64))
 {
-	if (IR_IS_CONST_REF(op1_insn->op2)) {
+	if (IR_IS_CONST_REF(op1_insn->op2) && !IR_IS_SYM_CONST(ctx->ir_base[op1_insn->op2].op)) {
 		/* (x ^ c1) ^ c2  => x ^ (c1 ^ c2) */
 		val.u64 = ctx->ir_base[op1_insn->op2].val.u64 ^ op2_insn->val.u64;
 		op1 = op1_insn->op1;
