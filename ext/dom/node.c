@@ -1734,19 +1734,19 @@ static const char *dom_locate_a_namespace(xmlNodePtr node, const zend_string *pr
 			}
 
 			/* 4. If it has an attribute whose namespace is the XMLNS namespace, namespace prefix is "xmlns", and local name is prefix,
-			*    or if prefix is null and it has an attribute whose namespace is the XMLNS namespace, namespace prefix is null, and local name is "xmlns",
-			*    then return its value if it is not the empty string, and null otherwise.  */
-			xmlAttrPtr attr;
-			if (prefix != NULL) {
-				attr = xmlHasNsProp(node, BAD_CAST ZSTR_VAL(prefix), BAD_CAST DOM_XMLNS_NS_URI);
-			} else {
-				attr = xmlHasNsProp(node, BAD_CAST "xmlns", BAD_CAST DOM_XMLNS_NS_URI);
-			}
-			if (attr != NULL) {
-				if (attr->children != NULL && attr->children->content[0] != '\0') {
-					return (const char *) attr->children->content;
-				} else {
-					return NULL;
+			*     or if prefix is null and it has an attribute whose namespace is the XMLNS namespace, namespace prefix is null, and local name is "xmlns",
+			*     then return its value if it is not the empty string, and null otherwise. */
+			for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
+				if (attr->ns == NULL || !xmlStrEqual(attr->ns->href, BAD_CAST DOM_XMLNS_NS_URI)) {
+					continue;
+				}
+				if ((prefix != NULL && xmlStrEqual(attr->ns->prefix, BAD_CAST "xmlns") && xmlStrEqual(attr->name, BAD_CAST ZSTR_VAL(prefix)))
+					|| (prefix == NULL && attr->ns->prefix == NULL && xmlStrEqual(attr->name, BAD_CAST "xmlns"))) {
+					if (attr->children != NULL && attr->children->content[0] != '\0') {
+						return (const char *) attr->children->content;
+					} else {
+						return NULL;
+					}
 				}
 			}
 
@@ -1832,25 +1832,37 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 	xmlNodePtr nodep;
 	dom_object *intern;
 	xmlNsPtr nsptr;
-	size_t prefix_len;
-	char *prefix;
+	zend_string *prefix;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!", &prefix, &prefix_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S!", &prefix) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
-	if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-		nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
-		if (nodep == NULL) {
-			RETURN_NULL();
-		}
-	}
 
-	nsptr = xmlSearchNs(nodep->doc, nodep, (xmlChar *) prefix);
-	if (nsptr && nsptr->href != NULL) {
-		RETURN_STRING((char *) nsptr->href);
+	if (php_dom_follow_spec_intern(intern)) {
+		if (prefix != NULL && ZSTR_LEN(prefix) == 0) {
+			prefix = NULL;
+		}
+		const char *ns_uri = dom_locate_a_namespace(nodep, prefix);
+		if (ns_uri == NULL) {
+			RETURN_NULL();
+		} else {
+			RETURN_STRING(ns_uri);
+		}
+	} else {
+		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
+			nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
+			if (nodep == NULL) {
+				RETURN_NULL();
+			}
+		}
+
+		nsptr = xmlSearchNs(nodep->doc, nodep, BAD_CAST (prefix ? ZSTR_VAL(prefix) : NULL));
+		if (nsptr && nsptr->href != NULL) {
+			RETURN_STRING((char *) nsptr->href);
+		}
 	}
 
 	RETURN_NULL();
