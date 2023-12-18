@@ -297,15 +297,12 @@ static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *
 						node->type == XML_ENTITY_REF_NODE
 						|| node->type == XML_ENTITY_NODE
 						|| node->type == XML_NOTATION_NODE
-						// No need to test these 2 as importing them is impossible.
-						// || node->type == XML_DOCUMENT_NODE
-						// || node->type == XML_HTML_DOCUMENT_NODE
+						|| node->type == XML_DOCUMENT_NODE
+						|| node->type == XML_HTML_DOCUMENT_NODE
 						|| node->type >= XML_ELEMENT_DECL))) {
 					php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(document));
 					return FAILURE;
 				}
-
-				ZEND_ASSERT(node->type != XML_DOCUMENT_NODE && node->type != XML_HTML_DOCUMENT_NODE);
 
 				if (php_dom_follow_spec_doc_ref(document)) {
 					/* 5. If either node is a Text node and parent is a document... */
