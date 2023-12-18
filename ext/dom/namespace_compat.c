@@ -32,26 +32,17 @@ const dom_ns_magic_token *dom_ns_is_xmlns_magic_token = (const dom_ns_magic_toke
 
 static void dom_ns_compat_mark_attribute(xmlNodePtr node, xmlNsPtr ns)
 {
-	xmlChar *name;
-	if (ns->prefix) {
-		/* Can't overflow in practice because it would require the prefix to occupy almost the entire address space. */
-		size_t prefix_len = strlen((char *) ns->prefix);
-		size_t len = strlen("xmlns:") + prefix_len;
-		name = xmlMalloc(len + 1);
-		if (UNEXPECTED(name == NULL)) {
-			return;
-		}
-		memcpy(name, "xmlns:", strlen("xmlns:"));
-		memcpy(name + strlen("xmlns:"), ns->prefix, prefix_len + 1 /* including '\0' */);
+	const xmlChar *name, *prefix;
+	if (ns->prefix != NULL) {
+		prefix = BAD_CAST "xmlns";
+		name = ns->prefix;
 	} else {
-		name = xmlStrdup(BAD_CAST "xmlns");
-		if (UNEXPECTED(name == NULL)) {
-			return;
-		}
+		prefix = NULL;
+		name = BAD_CAST "xmlns";
 	}
 
-	xmlSetNsProp(node, NULL, name, ns->href);
-	xmlFree(name);
+	xmlNsPtr xmlns_ns = dom_ns_create_local_as_is(node->doc, xmlDocGetRootElement(node->doc), node, DOM_XMLNS_NS_URI, prefix);
+	xmlSetNsProp(node, xmlns_ns, name, ns->href);
 }
 
 void dom_ns_compat_mark_attribute_list(xmlNodePtr node)
@@ -125,22 +116,20 @@ static xmlNsPtr dom_ns_create_local_as_is_unchecked(xmlDocPtr doc, xmlNodePtr pa
 	return ns;
 }
 
-xmlNsPtr dom_ns_create_local_as_is(xmlDocPtr doc, xmlNodePtr ns_holder, xmlNodePtr parent, zend_string *uri, xmlChar *prefix)
+xmlNsPtr dom_ns_create_local_as_is(xmlDocPtr doc, xmlNodePtr ns_holder, xmlNodePtr parent, const char *uri, const xmlChar *prefix)
 {
-	if (uri == NULL || ZSTR_VAL(uri)[0] == '\0') {
+	if (uri == NULL || uri[0] == '\0') {
 		return NULL;
 	}
 
-	const char *href = ZSTR_VAL(uri);
-
 	if (parent != NULL) {
 		xmlNsPtr existing = xmlSearchNs(doc, parent, BAD_CAST prefix);
-		if (existing != NULL && xmlStrEqual(existing->href, BAD_CAST href)) {
+		if (existing != NULL && xmlStrEqual(existing->href, BAD_CAST uri)) {
 			return existing;
 		}
 	}
 
-	return dom_ns_create_local_as_is_unchecked(doc, ns_holder, href, prefix);
+	return dom_ns_create_local_as_is_unchecked(doc, ns_holder, uri, BAD_CAST prefix);
 }
 
 xmlNsPtr dom_ns_fast_get_html_ns(xmlDocPtr docp)

@@ -419,7 +419,7 @@ PHP_METHOD(DOMElement, setAttribute)
 			}
 		}
 
-		attr = (xmlNodePtr) xmlSetProp(nodep, name_processed, BAD_CAST value);
+		attr = (xmlNodePtr) xmlSetNsProp(nodep, NULL, name_processed, BAD_CAST value);
 
 		if (name_processed != BAD_CAST name) {
 			efree(name_processed);
@@ -927,7 +927,7 @@ static void dom_set_attribute_ns_modern(dom_object *intern, xmlNodePtr elemp, ze
 	int errorcode = dom_validate_and_extract(uri, name, &localname, &prefix);
 
 	if (errorcode == 0) {
-		xmlNsPtr ns = dom_ns_create_local_as_is(elemp->doc, elemp, elemp, uri, prefix);
+		xmlNsPtr ns = dom_ns_create_local_as_is(elemp->doc, elemp, elemp, uri ? ZSTR_VAL(uri) : NULL, prefix);
 		if (UNEXPECTED(xmlSetNsProp(elemp, ns, localname, BAD_CAST value) == NULL)) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		}

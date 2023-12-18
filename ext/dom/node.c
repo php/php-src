@@ -1659,6 +1659,32 @@ PHP_METHOD(DOMNode, isEqualNode)
 }
 /* }}} end DOMNode::isEqualNode */
 
+/* https://dom.spec.whatwg.org/#locate-a-namespace-prefix */
+static const xmlChar *dom_locate_a_namespace_prefix(xmlNodePtr elem, const char *uri)
+{
+	do {
+		/* 1. If element’s namespace is namespace and its namespace prefix is non-null, then return its namespace prefix. */
+		if (elem->ns != NULL && elem->ns->prefix != NULL && xmlStrEqual(elem->ns->href, BAD_CAST uri)) {
+			return elem->ns->prefix;
+		}
+
+		/* 2. If element has an attribute whose namespace prefix is "xmlns" and value is namespace,
+		*     then return element’s first such attribute’s local name. */
+		for (xmlAttrPtr attr = elem->properties; attr != NULL; attr = attr->next) {
+			if (attr->ns != NULL && attr->children != NULL
+				&& xmlStrEqual(attr->ns->prefix, BAD_CAST "xmlns") && xmlStrEqual(attr->children->content, BAD_CAST uri)) {
+				return attr->name;
+			}
+		}
+
+		/* 3. If element’s parent element is not null, then return the result of running locate a namespace prefix on that element using namespace. */
+		elem = elem->parent;
+	} while (elem != NULL && elem->type == XML_ELEMENT_NODE);
+
+	/* 4. Return null. */
+	return NULL;
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-lookupNamespacePrefix
 Since: DOM Level 3
 */
@@ -1678,7 +1704,9 @@ PHP_METHOD(DOMNode, lookupPrefix)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
+	/* 1. If namespace is null or the empty string, then return null. */
 	if (uri_len > 0) {
+		/* 2. Switch on the interface this implements: */
 		switch (nodep->type) {
 			case XML_ELEMENT_NODE:
 				lookupp = nodep;
@@ -1695,13 +1723,20 @@ PHP_METHOD(DOMNode, lookupPrefix)
 				RETURN_NULL();
 				break;
 			default:
-				lookupp =  nodep->parent;
+				lookupp = nodep->parent;
 		}
 
 		if (lookupp != NULL) {
-			nsptr = xmlSearchNsByHref(lookupp->doc, lookupp, (xmlChar *) uri);
-			if (nsptr && nsptr->prefix != NULL) {
-				RETURN_STRING((char *) nsptr->prefix);
+			if (php_dom_follow_spec_intern(intern)) {
+				const char * result = (const char *) dom_locate_a_namespace_prefix(lookupp, uri);
+				if (result != NULL) {
+					RETURN_STRING(result);
+				}
+			} else {
+				nsptr = xmlSearchNsByHref(lookupp->doc, lookupp, (xmlChar *) uri);
+				if (nsptr && nsptr->prefix != NULL) {
+					RETURN_STRING((const char *) nsptr->prefix);
+				}
 			}
 		}
 	}
