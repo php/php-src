@@ -1586,6 +1586,7 @@ PHP_METHOD(DOMElement, insertAdjacentText)
 	}
 }
 /* }}} end DOMElement::insertAdjacentText */
+
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-element-toggleattribute
 Since:
 */
@@ -1611,8 +1612,11 @@ PHP_METHOD(DOMElement, toggleAttribute)
 		RETURN_THROWS();
 	}
 
+	bool follow_spec = php_dom_follow_spec_intern(intern);
+
 	/* Step 2 */
-	if (thisp->doc != NULL && thisp->doc->type == XML_HTML_DOCUMENT_NODE && (thisp->ns == NULL || xmlStrEqual(thisp->ns->href, BAD_CAST DOM_XHTML_NS_URI))) {
+	if (thisp->doc != NULL && thisp->doc->type == XML_HTML_DOCUMENT_NODE
+		&& ((!follow_spec && thisp->ns == NULL) || (thisp->ns != NULL && xmlStrEqual(thisp->ns->href, BAD_CAST DOM_XHTML_NS_URI)))) {
 		qname_tmp = zend_str_tolower_dup_ex(qname, qname_length);
 		if (qname_tmp != NULL) {
 			qname = qname_tmp;
@@ -1626,16 +1630,20 @@ PHP_METHOD(DOMElement, toggleAttribute)
 	if (attribute == NULL) {
 		/* Step 4.1 */
 		if (force_is_null || force) {
-			/* The behaviour for namespaces isn't defined by spec, but this is based on observing browers behaviour.
-			 * It follows the same rules when you'd manually add an attribute using the other APIs. */
-			int len;
-			const xmlChar *split = xmlSplitQName3((const xmlChar *) qname, &len);
-			if (split == NULL || strncmp(qname, "xmlns:", len + 1) != 0) {
-				/* unqualified name, or qualified name with no xml namespace declaration */
-				dom_create_attribute(thisp, qname, "");
+			if (follow_spec) {
+				xmlSetNsProp(thisp, NULL, BAD_CAST qname, NULL);
 			} else {
-				/* qualified name with xml namespace declaration */
-				xmlNewNs(thisp, (const xmlChar *) "", (const xmlChar *) (qname + len + 1));
+				/* The behaviour for namespaces isn't defined by spec, but this is based on observing browers behaviour.
+				* It follows the same rules when you'd manually add an attribute using the other APIs. */
+				int len;
+				const xmlChar *split = xmlSplitQName3((const xmlChar *) qname, &len);
+				if (split == NULL || strncmp(qname, "xmlns:", len + 1) != 0) {
+					/* unqualified name, or qualified name with no xml namespace declaration */
+					dom_create_attribute(thisp, qname, "");
+				} else {
+					/* qualified name with xml namespace declaration */
+					xmlNewNs(thisp, (const xmlChar *) "", (const xmlChar *) (qname + len + 1));
+				}
 			}
 			retval = true;
 			goto out;
