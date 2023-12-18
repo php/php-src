@@ -7,6 +7,7 @@ dom
 
 $dom = DOM\XMLDocument::createFromString(<<<XML
 <?xml version="1.0"?>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:x="test">
     <body>
         <svg:svg xmlns:svg="http://www.w3.org/2000/svg" height="1"/>
@@ -19,6 +20,10 @@ XML);
 
 $body = $dom->getElementsByTagName("body")[0];
 $body->setAttribute("xmlns:a", "urn:a");
+
+echo "--- NULL case because invalid node type ---\n";
+
+var_dump($dom->doctype->lookupPrefix(""));
 
 echo "--- NULL case because xmlns attribute not in xmlns namespace ---\n";
 
@@ -42,6 +47,8 @@ foreach (['x', 'p', 'html'] as $name) {
 
 ?>
 --EXPECT--
+--- NULL case because invalid node type ---
+NULL
 --- NULL case because xmlns attribute not in xmlns namespace ---
 NULL
 --- svg case ---

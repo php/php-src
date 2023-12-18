@@ -55,6 +55,12 @@ var_dump($body->lookupNamespaceURI(""));
 var_dump($body->lookupNamespaceURI(NULL));
 var_dump($body->lookupNamespaceURI("a"));
 
+echo "--- lookup in empty document ---\n";
+$dom = DOM\HTMLDocument::createEmpty();
+var_dump($dom->lookupNamespaceURI(""));
+var_dump($dom->lookupNamespaceURI(NULL));
+var_dump($dom->lookupNamespaceURI("a"));
+
 ?>
 --EXPECT--
 --- Hardcoded prefixes ---
@@ -82,4 +88,8 @@ string(11) "urn:another"
 --- empty xmlns attribute defines no new namespace ---
 string(28) "http://www.w3.org/1999/xhtml"
 string(28) "http://www.w3.org/1999/xhtml"
+NULL
+--- lookup in empty document ---
+NULL
+NULL
 NULL
