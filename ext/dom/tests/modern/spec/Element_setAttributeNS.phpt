@@ -55,11 +55,7 @@ string(29) "http://www.w3.org/2000/xmlns/"
 --- name validation ---
 Invalid Character Error
 --- ns attributes with same namespace but different prefix ---
-<container x:foo="1" y:foo="2"></container>
-Attr: foo
-string(1) "x"
-string(5) "x:foo"
-string(5) "urn:a"
+<container y:foo="2"></container>
 Attr: foo
 string(1) "y"
 string(5) "y:foo"

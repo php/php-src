@@ -928,7 +928,7 @@ static void dom_set_attribute_ns_modern(dom_object *intern, xmlNodePtr elemp, ze
 
 	if (errorcode == 0) {
 		xmlNsPtr ns = dom_ns_create_local_as_is(elemp->doc, elemp, elemp, uri, prefix);
-		if (UNEXPECTED(xmlNewNsProp(elemp, ns, localname, BAD_CAST value) == NULL)) {
+		if (UNEXPECTED(xmlSetNsProp(elemp, ns, localname, BAD_CAST value) == NULL)) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		}
 	} else {
