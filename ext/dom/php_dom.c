@@ -1391,13 +1391,13 @@ bool dom_match_qualified_name_according_to_spec(const xmlChar *qname, const xmlN
 	}
 }
 
-static bool dom_match_qualified_name_for_tag_name_equality(const xmlChar *local, const xmlChar *local_lower, const xmlNode *nodep, bool is_html_doc, bool follow_spec)
+static bool dom_match_qualified_name_for_tag_name_equality(const xmlChar *local, const xmlChar *local_lower, const xmlNode *nodep, bool match_qname)
 {
-	if (!follow_spec) {
+	if (!match_qname) {
 		return xmlStrEqual(nodep->name, local);
 	}
 
-	const xmlChar *local_to_use = is_html_doc && dom_ns_is_fast(nodep, dom_ns_is_html_magic_token) ? local_lower : local;
+	const xmlChar *local_to_use = nodep->doc->type == XML_HTML_DOCUMENT_NODE && dom_ns_is_fast(nodep, dom_ns_is_html_magic_token) ? local_lower : local;
 	return dom_match_qualified_name_according_to_spec(local_to_use, nodep);
 }
 
@@ -1416,12 +1416,11 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep,
 	 *       This is because for PHP ns == NULL has another meaning: "match every namespace" instead of "match the empty namespace". */
 	bool ns_match_any = ns == NULL || (ns[0] == '*' && ns[1] == '\0');
 
-	bool is_html_doc = ns == NULL && nodep->doc->type == XML_HTML_DOCUMENT_NODE;
-	bool follow_spec = php_dom_follow_spec_node(basep);
+	bool match_qname = ns == NULL && php_dom_follow_spec_node(basep);
 
 	while (*cur <= index) {
 		if (nodep->type == XML_ELEMENT_NODE) {
-			if (local_match_any || dom_match_qualified_name_for_tag_name_equality(local, local_lower, nodep, is_html_doc, follow_spec)) {
+			if (local_match_any || dom_match_qualified_name_for_tag_name_equality(local, local_lower, nodep, match_qname)) {
 				if (ns_match_any || (ns[0] == '\0' && nodep->ns == NULL) || (nodep->ns != NULL && xmlStrEqual(nodep->ns->href, ns))) {
 					if (*cur == index) {
 						ret = nodep;

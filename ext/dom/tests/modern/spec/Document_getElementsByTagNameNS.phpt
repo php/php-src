@@ -20,6 +20,7 @@ HTML);
 $body = $dom->getElementsByTagName('body')->item(0);
 $body->appendChild($dom->createElementNS(NULL, "p", "content 1"));
 $body->appendChild($dom->createElementNS("", "p", "content 2"));
+$body->appendChild($dom->createElementNS("http://www.w3.org/2000/svg", "svg:svg", "content 3"));
 
 function dump($dom, $uri, $local) {
     $list = $dom->getElementsByTagNameNS($uri, $local);
@@ -38,6 +39,8 @@ dump($dom, '*', 'p');
 dump($dom, '*', '*');
 dump($dom, '', '*');
 dump($dom, NULL, '*');
+dump($dom, '*', 'svg');
+dump($dom, '*', 'svg:svg');
 
 ?>
 --EXPECT--
@@ -49,26 +52,27 @@ int(3)
 string(11) "Hello World"
 string(9) "content 1"
 string(9) "content 2"
---- ("*", "*"): 7 ---
-int(7)
-string(47) "
+--- ("*", "*"): 8 ---
+int(8)
+string(56) "
     Test
 
 
     Hello World
 
-content 1content 2"
+content 1content 2content 3"
 string(10) "
     Test
 "
 string(4) "Test"
-string(36) "
+string(45) "
     Hello World
 
-content 1content 2"
+content 1content 2content 3"
 string(11) "Hello World"
 string(9) "content 1"
 string(9) "content 2"
+string(9) "content 3"
 --- ("", "*"): 2 ---
 int(2)
 string(9) "content 1"
@@ -77,3 +81,8 @@ string(9) "content 2"
 int(2)
 string(9) "content 1"
 string(9) "content 2"
+--- ("*", "svg"): 1 ---
+int(1)
+string(9) "content 3"
+--- ("*", "svg:svg"): 0 ---
+int(0)
