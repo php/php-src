@@ -188,124 +188,122 @@ static void php_libxml_unlink_entity_decl(xmlEntityPtr entity)
 
 static void php_libxml_node_free(xmlNodePtr node)
 {
-	if(node) {
-		if (node->_private != NULL) {
-			((php_libxml_node_ptr *) node->_private)->node = NULL;
+	if (node->_private != NULL) {
+		((php_libxml_node_ptr *) node->_private)->node = NULL;
+	}
+	switch (node->type) {
+		case XML_ATTRIBUTE_NODE:
+			xmlFreeProp((xmlAttrPtr) node);
+			break;
+		/* libxml2 has a peculiarity where if you unlink an entity it'll only unlink it from the dtd if the
+		 * dtd is attached to the document. This works around the issue by inspecting the parent directly. */
+		case XML_ENTITY_DECL: {
+			xmlEntityPtr entity = (xmlEntityPtr) node;
+			if (entity->etype != XML_INTERNAL_PREDEFINED_ENTITY) {
+				php_libxml_unlink_entity_decl(entity);
+	#if LIBXML_VERSION >= 21200
+				xmlFreeEntity(entity);
+	#else
+				if (entity->children != NULL && entity->owner && entity == (xmlEntityPtr) entity->children->parent) {
+					xmlFreeNodeList(entity->children);
+				}
+				xmlDictPtr dict = entity->doc != NULL ? entity->doc->dict : NULL;
+				if (dict == NULL || !xmlDictOwns(dict, entity->name)) {
+					xmlFree((xmlChar *) entity->name);
+				}
+				if (dict == NULL || !xmlDictOwns(dict, entity->ExternalID)) {
+					xmlFree((xmlChar *) entity->ExternalID);
+				}
+				if (dict == NULL || !xmlDictOwns(dict, entity->SystemID)) {
+					xmlFree((xmlChar *) entity->SystemID);
+				}
+				if (dict == NULL || !xmlDictOwns(dict, entity->URI)) {
+					xmlFree((xmlChar *) entity->URI);
+				}
+				if (dict == NULL || !xmlDictOwns(dict, entity->content)) {
+					xmlFree(entity->content);
+				}
+				if (dict == NULL || !xmlDictOwns(dict, entity->orig)) {
+					xmlFree(entity->orig);
+				}
+				xmlFree(entity);
+	#endif
+			}
+			break;
 		}
-		switch (node->type) {
-			case XML_ATTRIBUTE_NODE:
-				xmlFreeProp((xmlAttrPtr) node);
-				break;
-			/* libxml2 has a peculiarity where if you unlink an entity it'll only unlink it from the dtd if the
-			 * dtd is attached to the document. This works around the issue by inspecting the parent directly. */
-			case XML_ENTITY_DECL: {
-				xmlEntityPtr entity = (xmlEntityPtr) node;
-				if (entity->etype != XML_INTERNAL_PREDEFINED_ENTITY) {
-					php_libxml_unlink_entity_decl(entity);
-#if LIBXML_VERSION >= 21200
-					xmlFreeEntity(entity);
-#else
-					if (entity->children != NULL && entity->owner && entity == (xmlEntityPtr) entity->children->parent) {
-						xmlFreeNodeList(entity->children);
-					}
-					xmlDictPtr dict = entity->doc != NULL ? entity->doc->dict : NULL;
-					if (dict == NULL || !xmlDictOwns(dict, entity->name)) {
-						xmlFree((xmlChar *) entity->name);
-					}
-					if (dict == NULL || !xmlDictOwns(dict, entity->ExternalID)) {
-						xmlFree((xmlChar *) entity->ExternalID);
-					}
-					if (dict == NULL || !xmlDictOwns(dict, entity->SystemID)) {
-						xmlFree((xmlChar *) entity->SystemID);
-					}
-					if (dict == NULL || !xmlDictOwns(dict, entity->URI)) {
-						xmlFree((xmlChar *) entity->URI);
-					}
-					if (dict == NULL || !xmlDictOwns(dict, entity->content)) {
-						xmlFree(entity->content);
-					}
-					if (dict == NULL || !xmlDictOwns(dict, entity->orig)) {
-						xmlFree(entity->orig);
-					}
-					xmlFree(entity);
-#endif
-				}
-				break;
+		case XML_NOTATION_NODE: {
+			/* See create_notation(), these aren't regular XML_NOTATION_NODE, but entities in disguise... */
+			xmlEntityPtr entity = (xmlEntityPtr) node;
+			if (node->name != NULL) {
+				xmlFree((char *) node->name);
 			}
-			case XML_NOTATION_NODE: {
-				/* See create_notation(), these aren't regular XML_NOTATION_NODE, but entities in disguise... */
-				xmlEntityPtr entity = (xmlEntityPtr) node;
-				if (node->name != NULL) {
-					xmlFree((char *) node->name);
-				}
-				if (entity->ExternalID != NULL) {
-					xmlFree((char *) entity->ExternalID);
-				}
-				if (entity->SystemID != NULL) {
-					xmlFree((char *) entity->SystemID);
-				}
-				xmlFree(node);
-				break;
+			if (entity->ExternalID != NULL) {
+				xmlFree((char *) entity->ExternalID);
 			}
-			case XML_ELEMENT_DECL:
-			case XML_ATTRIBUTE_DECL:
-				break;
-			case XML_NAMESPACE_DECL:
-				if (node->ns) {
-					xmlFreeNs(node->ns);
-					node->ns = NULL;
-				}
-				node->type = XML_ELEMENT_NODE;
-				xmlFreeNode(node);
-				break;
-			case XML_DTD_NODE: {
-				xmlDtdPtr dtd = (xmlDtdPtr) node;
-				if (dtd->_private == NULL) {
-					/* There's no userland reference to the dtd,
-					 * but there might be entities referenced from userland. Unlink those. */
-					xmlHashScan(dtd->entities, php_libxml_unlink_entity, dtd->entities);
-					xmlHashScan(dtd->pentities, php_libxml_unlink_entity, dtd->pentities);
-					/* No unlinking of notations, see remark above at case XML_NOTATION_NODE. */
-				}
-				xmlFreeDtd(dtd);
-				break;
+			if (entity->SystemID != NULL) {
+				xmlFree((char *) entity->SystemID);
 			}
-			case XML_ELEMENT_NODE:
-				if (node->nsDef && node->doc) {
-					/* Make the namespace declaration survive the destruction of the holding element.
-					 * This prevents a use-after-free on the namespace declaration.
-					 *
-					 * The main problem is that libxml2 doesn't have a reference count on the namespace declaration.
-					 * We don't actually need to save the namespace declaration if we know the subtree it belongs to
-					 * has no references from userland. However, we can't know that without traversing the whole subtree
-					 * (=> slow), or without adding some subtree metadata (=> also slow).
-					 * So we have to assume we need to save everything.
-					 *
-					 * However, namespace declarations are quite rare in comparison to other node types.
-					 * Most node types are either elements, text or attributes.
-					 * And you only need one namespace declaration per namespace (in principle).
-					 * So I expect the number of namespace declarations to be low for an average XML document.
-					 *
-					 * In the worst possible case we have to save all namespace declarations when we for example remove
-					 * the whole document. But given the above reasoning this likely won't be a lot of declarations even
-					 * in the worst case.
-					 * A single declaration only takes about 48 bytes of memory, and I don't expect the worst case to occur
-					 * very often (why would you remove the whole document?).
-					 */
-					xmlNsPtr ns = node->nsDef;
-					xmlNsPtr last = ns;
-					while (last->next) {
-						last = last->next;
-					}
-					php_libxml_set_old_ns_list(node->doc, ns, last);
-					node->nsDef = NULL;
-				}
-				xmlFreeNode(node);
-				break;
-			default:
-				xmlFreeNode(node);
-				break;
+			xmlFree(node);
+			break;
 		}
+		case XML_ELEMENT_DECL:
+		case XML_ATTRIBUTE_DECL:
+			break;
+		case XML_NAMESPACE_DECL:
+			if (node->ns) {
+				xmlFreeNs(node->ns);
+				node->ns = NULL;
+			}
+			node->type = XML_ELEMENT_NODE;
+			xmlFreeNode(node);
+			break;
+		case XML_DTD_NODE: {
+			xmlDtdPtr dtd = (xmlDtdPtr) node;
+			if (dtd->_private == NULL) {
+				/* There's no userland reference to the dtd,
+					* but there might be entities referenced from userland. Unlink those. */
+				xmlHashScan(dtd->entities, php_libxml_unlink_entity, dtd->entities);
+				xmlHashScan(dtd->pentities, php_libxml_unlink_entity, dtd->pentities);
+				/* No unlinking of notations, see remark above at case XML_NOTATION_NODE. */
+			}
+			xmlFreeDtd(dtd);
+			break;
+		}
+		case XML_ELEMENT_NODE:
+			if (node->nsDef && node->doc) {
+				/* Make the namespace declaration survive the destruction of the holding element.
+					* This prevents a use-after-free on the namespace declaration.
+					*
+					* The main problem is that libxml2 doesn't have a reference count on the namespace declaration.
+					* We don't actually need to save the namespace declaration if we know the subtree it belongs to
+					* has no references from userland. However, we can't know that without traversing the whole subtree
+					* (=> slow), or without adding some subtree metadata (=> also slow).
+					* So we have to assume we need to save everything.
+					*
+					* However, namespace declarations are quite rare in comparison to other node types.
+					* Most node types are either elements, text or attributes.
+					* And you only need one namespace declaration per namespace (in principle).
+					* So I expect the number of namespace declarations to be low for an average XML document.
+					*
+					* In the worst possible case we have to save all namespace declarations when we for example remove
+					* the whole document. But given the above reasoning this likely won't be a lot of declarations even
+					* in the worst case.
+					* A single declaration only takes about 48 bytes of memory, and I don't expect the worst case to occur
+					* very often (why would you remove the whole document?).
+					*/
+				xmlNsPtr ns = node->nsDef;
+				xmlNsPtr last = ns;
+				while (last->next) {
+					last = last->next;
+				}
+				php_libxml_set_old_ns_list(node->doc, ns, last);
+				node->nsDef = NULL;
+			}
+			xmlFreeNode(node);
+			break;
+		default:
+			xmlFreeNode(node);
+			break;
 	}
 }
 
