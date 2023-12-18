@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.2
 
+- Core:
+  . Fixed bug GH-12953 (false positive SSA integrity verification failed when
+    loading composer classmaps with more than 11k elements). (nielsdos)
+
 - Cli:
   . Fix incorrect timeout in built-in web server when using router script and
     max_input_time. (ilutov)
