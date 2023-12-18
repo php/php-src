@@ -148,10 +148,10 @@ zend_result dom_attr_value_write(dom_object *obj, zval *newval)
 	dom_remove_all_children((xmlNodePtr) attrp);
 
 	if (php_dom_follow_spec_intern(obj)) {
-		xmlNodePtr node = xmlNewTextLen((xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+		xmlNodePtr node = xmlNewDocTextLen(attrp->doc, BAD_CAST ZSTR_VAL(str), ZSTR_LEN(str));
 		xmlAddChild((xmlNodePtr) attrp, node);
 	} else {
-		xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+		xmlNodeSetContentLen((xmlNodePtr) attrp, BAD_CAST ZSTR_VAL(str), ZSTR_LEN(str));
 	}
 
 	return SUCCESS;
