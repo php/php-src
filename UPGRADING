@@ -229,6 +229,9 @@ PHP 8.2 UPGRADE NOTES
     This change only affects the encoding selection,
     not the result of the conversion.
 
+- PDO:
+  . getAttribute, enabled to get the value of ATTR_STRINGIFY_FETCHES.
+
 - Random
   . random_bytes() and random_int() now throw \Random\RandomException on CSPRNG failure.
     Previously a plain \Exception was thrown.
