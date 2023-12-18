@@ -426,7 +426,6 @@ namespace
         public function __wakeup(): void {}
     }
 
-    /** @alias DOM\NameSpaceNode */
     class DOMNameSpaceNode
     {
         /** @readonly */
