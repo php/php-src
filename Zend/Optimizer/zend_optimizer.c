@@ -799,7 +799,9 @@ zend_class_entry *zend_optimizer_get_class_entry(
 	}
 
 	ce = zend_hash_find_ptr(CG(class_table), lcname);
-	if (ce && ce->type == ZEND_INTERNAL_CLASS) {
+	if (ce
+	 && (ce->type == ZEND_INTERNAL_CLASS
+	  || (op_array && ce->info.user.filename == op_array->filename))) {
 		return ce;
 	}
 
