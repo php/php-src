@@ -344,6 +344,30 @@ static bool odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			}
 			H->assume_utf8 = bval;
 			return true;
+		case PDO_ATTR_AUTOCOMMIT:
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			if (dbh->in_txn) {
+				pdo_raise_impl_error(dbh, NULL, "HY000", "Cannot change autocommit mode while a transaction is already open");
+				return false;
+			}
+			if (dbh->auto_commit ^ bval) {
+				dbh->auto_commit = bval;
+				RETCODE rc = SQLSetConnectAttr(
+					H->dbc,
+					SQL_ATTR_AUTOCOMMIT,
+					dbh->auto_commit ? (SQLPOINTER) SQL_AUTOCOMMIT_ON : (SQLPOINTER) SQL_AUTOCOMMIT_OFF,
+					SQL_IS_INTEGER
+				);
+				if (rc != SQL_SUCCESS) {
+					pdo_odbc_drv_error(
+						dbh->auto_commit ? "SQLSetConnectAttr AUTOCOMMIT = ON" : "SQLSetConnectAttr AUTOCOMMIT = OFF"
+					);
+					return false;
+				}
+			}
+			return true;
 		default:
 			strcpy(H->einfo.last_err_msg, "Unknown Attribute");
 			H->einfo.what = "setAttribute";
@@ -386,7 +410,9 @@ static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 		case PDO_ODBC_ATTR_ASSUME_UTF8:
 			ZVAL_BOOL(val, H->assume_utf8);
 			return 1;
-
+		case PDO_ATTR_AUTOCOMMIT:
+			ZVAL_BOOL(val, dbh->auto_commit);
+			return 1;
 	}
 	return 0;
 }
