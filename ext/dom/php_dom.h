@@ -157,6 +157,9 @@ xmlNsPtr dom_get_ns_resolve_prefix_conflict(xmlNodePtr tree, const char *uri);
 void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp);
 int dom_validate_and_extract(zend_string *namespace, zend_string *qname, xmlChar **localName, xmlChar **prefix);
 bool dom_match_qualified_name_according_to_spec(const xmlChar *qname, const xmlNode *nodep);
+bool php_dom_has_sibling_following_node(xmlNodePtr node, xmlElementType type);
+bool php_dom_has_sibling_preceding_node(xmlNodePtr node, xmlElementType type);
+bool php_dom_has_child_of_type(xmlNodePtr node, xmlElementType type);
 
 void php_dom_document_constructor(INTERNAL_FUNCTION_PARAMETERS);
 
@@ -179,8 +182,8 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_parent_node_replace_children(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_child_node_remove(dom_object *context);
 void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc);
-
 void dom_remove_all_children(xmlNodePtr nodep);
+bool php_dom_fragment_insertion_hierarchy_check(xmlNodePtr node);
 
 /* nodemap and nodelist APIs */
 xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, const char *named, bool may_transform);

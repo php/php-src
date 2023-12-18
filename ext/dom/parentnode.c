@@ -232,49 +232,25 @@ static void dom_fragment_assign_parent_node(xmlNodePtr parentNode, xmlNodePtr fr
 	fragment->last = NULL;
 }
 
-static bool dom_has_child_of_type(xmlNodePtr node, xmlElementType type)
+bool php_dom_fragment_insertion_hierarchy_check(xmlNodePtr node)
 {
-	xmlNodePtr child = node->children;
-
-	while (child != NULL) {
-		if (child->type == type) {
-			return true;
+	/* If node has more than one element child or has a Text node child. */
+	xmlNodePtr iter = node->children;
+	bool seen_element = false;
+	while (iter != NULL) {
+		if (iter->type == XML_ELEMENT_NODE) {
+			if (seen_element) {
+				php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one element child in a document", /* strict */ true);
+				return false;
+			}
+			seen_element = true;
+		} else if (iter->type == XML_TEXT_NODE || iter->type == XML_CDATA_SECTION_NODE) {
+			php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert text as a child of a document", /* strict */ true);
+			return false;
 		}
-
-		child = child->next;
+		iter = iter->next;
 	}
-
-	return false;
-}
-
-static bool dom_has_following_node(xmlNodePtr node, xmlElementType type)
-{
-	xmlNodePtr next = node->next;
-
-	while (next != NULL) {
-		if (next->type == type) {
-			return true;
-		}
-
-		next = next->next;
-	}
-
-	return false;
-}
-
-static bool dom_has_preceding_node(xmlNodePtr node, xmlElementType type)
-{
-	xmlNodePtr prev = node->prev;
-
-	while (prev != NULL) {
-		if (prev->type == type) {
-			return true;
-		}
-
-		prev = prev->prev;
-	}
-
-	return false;
+	return true;
 }
 
 /* https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity */
@@ -349,31 +325,18 @@ static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *
 					if (parent_is_document) {
 						/* DocumentFragment */
 						if (node->type == XML_DOCUMENT_FRAG_NODE) {
-							/* If node has more than one element child or has a Text node child. */
-							xmlNodePtr iter = node->children;
-							bool seen_element = false;
-							while (iter != NULL) {
-								if (iter->type == XML_ELEMENT_NODE) {
-									if (seen_element) {
-										php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one element child in a document", /* strict */ true);
-										return FAILURE;
-									}
-									seen_element = true;
-								} else if (iter->type == XML_TEXT_NODE || iter->type == XML_CDATA_SECTION_NODE) {
-									php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert text as a child of a document", /* strict */ true);
-									return FAILURE;
-								}
-								iter = iter->next;
+							if (!php_dom_fragment_insertion_hierarchy_check(node)) {
+								return FAILURE;
 							}
 						}
 						/* Element */
 						else if (node->type == XML_ELEMENT_NODE) {
 							/* parent has an element child, child is a doctype, or child is non-null and a doctype is following child. */
-							if (dom_has_child_of_type(parentNode, XML_ELEMENT_NODE)) {
+							if (php_dom_has_child_of_type(parentNode, XML_ELEMENT_NODE)) {
 								php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one element child in a document", /* strict */ true);
 								return FAILURE;
 							}
-							if (child != NULL && (child->type == XML_DTD_NODE || dom_has_following_node(child, XML_DTD_NODE))) {
+							if (child != NULL && (child->type == XML_DTD_NODE || php_dom_has_sibling_following_node(child, XML_DTD_NODE))) {
 								php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Document types must be the first child in a document", /* strict */ true);
 								return FAILURE;
 							}
@@ -381,12 +344,12 @@ static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *
 						/* DocumentType */
 						else if (node->type == XML_DTD_NODE) {
 							/* parent has a doctype child, child is non-null and an element is preceding child, or child is null and parent has an element child. */
-							if (dom_has_child_of_type(parentNode, XML_DTD_NODE)) {
+							if (php_dom_has_child_of_type(parentNode, XML_DTD_NODE)) {
 								php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one document type", /* strict */ true);
 								return FAILURE;
 							}
-							if ((child != NULL && dom_has_preceding_node(child, XML_ELEMENT_NODE))
-								|| (child == NULL && dom_has_child_of_type(parentNode, XML_ELEMENT_NODE))) {
+							if ((child != NULL && php_dom_has_sibling_preceding_node(child, XML_ELEMENT_NODE))
+								|| (child == NULL && php_dom_has_child_of_type(parentNode, XML_ELEMENT_NODE))) {
 								php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Document types must be the first child in a document", /* strict */ true);
 								return FAILURE;
 							}

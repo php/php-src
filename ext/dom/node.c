@@ -1069,6 +1069,94 @@ cannot_add:
 }
 /* }}} end dom_node_insert_before */
 
+/* https://dom.spec.whatwg.org/#concept-node-replace */
+static zend_result dom_replace_node_validity_checks(xmlNodePtr parent, xmlNodePtr node, xmlNodePtr child)
+{
+	/* 1. If parent is not a Document, DocumentFragment, or Element node, then throw a "HierarchyRequestError" DOMException. */
+	if (parent->type != XML_DOCUMENT_NODE
+		&& parent->type != XML_HTML_DOCUMENT_NODE
+		&& parent->type != XML_ELEMENT_NODE
+		&& parent->type != XML_DOCUMENT_FRAG_NODE) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, /* strict */ true);
+		return FAILURE;
+	}
+
+	/* 2. If node is a host-including inclusive ancestor of parent, then throw a "HierarchyRequestError" DOMException. */
+	if (dom_hierarchy(parent, node) != SUCCESS) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, /* strict */ true);
+		return FAILURE;
+	}
+
+	/* 3. If child’s parent is not parent, then throw a "NotFoundError" DOMException. */
+	if (child->parent != parent) {
+		php_dom_throw_error(NOT_FOUND_ERR, /* strict */ true);
+		return FAILURE;
+	}
+
+	/* 4. If node is not a DocumentFragment, DocumentType, Element, or CharacterData node, then throw a "HierarchyRequestError" DOMException. */
+	if (node->type != XML_DOCUMENT_FRAG_NODE
+		&& node->type != XML_DTD_NODE
+		&& node->type != XML_ELEMENT_NODE
+		&& node->type != XML_TEXT_NODE
+		&& node->type != XML_CDATA_SECTION_NODE
+		&& node->type != XML_COMMENT_NODE
+		&& node->type != XML_PI_NODE) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, /* strict */ true);
+		return FAILURE;
+	}
+
+	/* 5. If either node is a Text node and parent is a document, or node is a doctype and parent is not a document,
+	 *    then throw a "HierarchyRequestError" DOMException. */
+	bool parent_is_document = parent->type == XML_DOCUMENT_NODE || parent->type == XML_HTML_DOCUMENT_NODE;
+	if (parent_is_document && (node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE)) {
+		php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert text as a child of a document", /* strict */ true);
+		return FAILURE;
+	}
+	if (!parent_is_document && node->type == XML_DTD_NODE) {
+		php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert a document type into anything other than a document", /* strict */ true);
+		return FAILURE;
+	}
+
+	/* 6. If parent is a document, and any of the statements below, switched on the interface node implements, are true,
+	 *    then throw a "HierarchyRequestError" DOMException.
+	 *    Spec note: These statements _slightly_ differ from the pre-insert algorithm. */
+	if (parent_is_document) {
+		/* DocumentFragment */
+		if (node->type == XML_DOCUMENT_FRAG_NODE) {
+			if (!php_dom_fragment_insertion_hierarchy_check(node)) {
+				return FAILURE;
+			}
+		}
+		/* Element */
+		else if (node->type == XML_ELEMENT_NODE) {
+			/* parent has an element child that is not child ... */
+			if (xmlDocGetRootElement((xmlDocPtr) parent) != child) {
+				php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one element child in a document", /* strict */ true);
+				return FAILURE;
+			}
+			/* ... or a doctype is following child. */
+			if (php_dom_has_sibling_following_node(child, XML_DTD_NODE)) {
+				php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Document types must be the first child in a document", /* strict */ true);
+				return FAILURE;
+			}
+		}
+		/* DocumentType */
+		else if (node->type == XML_DTD_NODE) {
+			/* parent has a doctype child that is not child, or an element is preceding child. */
+			xmlDocPtr doc = (xmlDocPtr) parent;
+			if (doc->intSubset != (xmlDtdPtr) child || php_dom_has_sibling_preceding_node(child, XML_ELEMENT_NODE)) {
+				php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Document types must be the first child in a document", /* strict */ true);
+				return FAILURE;
+			}
+		}
+	}
+
+	/* Steps 7 and onward perform the removal and insertion, and also track changes for mutation records.
+	 * We don't implement mutation records so we can just skip straight to the replace part. */
+
+	return SUCCESS;
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-785887307
 Since:
 */
@@ -1077,8 +1165,6 @@ PHP_METHOD(DOMNode, replaceChild)
 	zval *id, *newnode, *oldnode;
 	xmlNodePtr newchild, oldchild, nodep;
 	dom_object *intern, *newchildobj, *oldchildobj;
-	int stricterror;
-	bool replacedoctype = false;
 
 	int ret;
 
@@ -1089,38 +1175,44 @@ PHP_METHOD(DOMNode, replaceChild)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	if (dom_node_children_valid(nodep) == FAILURE) {
-		RETURN_FALSE;
-	}
-
 	DOM_GET_OBJ(newchild, newnode, xmlNodePtr, newchildobj);
 	DOM_GET_OBJ(oldchild, oldnode, xmlNodePtr, oldchildobj);
 
-	if (!nodep->children) {
-		RETURN_FALSE;
-	}
-
-	stricterror = dom_get_strict_error(intern->document);
-
-	if (dom_node_is_read_only(nodep) == SUCCESS ||
-		(newchild->parent != NULL && dom_node_is_read_only(newchild->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
-		RETURN_FALSE;
-	}
+	int stricterror = dom_get_strict_error(intern->document);
 
 	if (newchild->doc != nodep->doc && newchild->doc != NULL) {
 		php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror);
 		RETURN_FALSE;
 	}
 
-	if (dom_hierarchy(nodep, newchild) == FAILURE) {
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
-		RETURN_FALSE;
-	}
+	if (php_dom_follow_spec_intern(intern)) {
+		if (dom_replace_node_validity_checks(nodep, newchild, oldchild) != SUCCESS) {
+			RETURN_THROWS();
+		}
+	} else {
+		if (dom_node_children_valid(nodep) == FAILURE) {
+			RETURN_FALSE;
+		}
 
-	if (oldchild->parent != nodep) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-		RETURN_FALSE;
+		if (!nodep->children) {
+			RETURN_FALSE;
+		}
+
+		if (dom_node_is_read_only(nodep) == SUCCESS ||
+			(newchild->parent != NULL && dom_node_is_read_only(newchild->parent) == SUCCESS)) {
+			php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+			RETURN_FALSE;
+		}
+
+		if (dom_hierarchy(nodep, newchild) == FAILURE) {
+			php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+			RETURN_FALSE;
+		}
+
+		if (oldchild->parent != nodep) {
+			php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+			RETURN_FALSE;
+		}
 	}
 
 	if (newchild->type == XML_DOCUMENT_FRAG_NODE) {
@@ -1137,7 +1229,7 @@ PHP_METHOD(DOMNode, replaceChild)
 		}
 	} else if (oldchild != newchild) {
 		xmlDtdPtr intSubset = xmlGetIntSubset(nodep->doc);
-		replacedoctype = (intSubset == (xmlDtd *) oldchild);
+		bool replacedoctype = (intSubset == (xmlDtd *) oldchild);
 
 		if (newchild->doc == NULL && nodep->doc != NULL) {
 			xmlSetTreeDoc(newchild, nodep->doc);

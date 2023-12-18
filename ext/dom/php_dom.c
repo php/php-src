@@ -1993,4 +1993,49 @@ xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, const dom_object *inte
 	return xmlDocCopyNode(node, doc, extended_recursive);
 }
 
+bool php_dom_has_child_of_type(xmlNodePtr node, xmlElementType type)
+{
+	xmlNodePtr child = node->children;
+
+	while (child != NULL) {
+		if (child->type == type) {
+			return true;
+		}
+
+		child = child->next;
+	}
+
+	return false;
+}
+
+bool php_dom_has_sibling_following_node(xmlNodePtr node, xmlElementType type)
+{
+	xmlNodePtr next = node->next;
+
+	while (next != NULL) {
+		if (next->type == type) {
+			return true;
+		}
+
+		next = next->next;
+	}
+
+	return false;
+}
+
+bool php_dom_has_sibling_preceding_node(xmlNodePtr node, xmlElementType type)
+{
+	xmlNodePtr prev = node->prev;
+
+	while (prev != NULL) {
+		if (prev->type == type) {
+			return true;
+		}
+
+		prev = prev->prev;
+	}
+
+	return false;
+}
+
 #endif /* HAVE_DOM */
