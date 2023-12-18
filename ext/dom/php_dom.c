@@ -185,7 +185,7 @@ libxml_doc_props const* dom_get_doc_props_read_only(const php_libxml_ref_obj *do
 	}
 }
 
-static void dom_copy_doc_props(php_libxml_ref_obj *source_doc, php_libxml_ref_obj *dest_doc)
+static void dom_copy_document_ref(php_libxml_ref_obj *source_doc, php_libxml_ref_obj *dest_doc)
 {
 	dom_doc_propsptr dest;
 
@@ -491,7 +491,7 @@ static void dom_update_refcount_after_clone(dom_object *original, xmlNodePtr ori
 	php_libxml_increment_doc_ref((php_libxml_node_object *)clone, cloned_node->doc);
 	php_libxml_increment_node_ptr((php_libxml_node_object *)clone, cloned_node, (void *)clone);
 	if (original->document != clone->document) {
-		dom_copy_doc_props(original->document, clone->document);
+		dom_copy_document_ref(original->document, clone->document);
 		/* Workaround libxml2 bug, see https://gitlab.gnome.org/GNOME/libxml2/-/commit/07920b4381873187c02df53fa9b5d44aff3a7041 */
 #if LIBXML_VERSION < 20911
 		if (original_node->type == XML_HTML_DOCUMENT_NODE) {
