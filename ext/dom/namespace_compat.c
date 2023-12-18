@@ -54,23 +54,30 @@ void dom_ns_compat_mark_attribute_list(xmlNodePtr node)
 	}
 }
 
+static bool dom_ns_is_fast_ex(xmlNsPtr ns, const dom_ns_magic_token *magic_token)
+{
+	ZEND_ASSERT(ns != NULL);
+	/* cached for fast checking */
+	if (ns->_private == magic_token) {
+		return true;
+	} else if (ns->_private != NULL) {
+		/* Other token stored */
+		return false;
+	}
+	/* Slow path */
+	if (xmlStrEqual(ns->href, BAD_CAST magic_token)) {
+		ns->_private = (void *) magic_token;
+		return true;
+	}
+	return false;
+}
+
 bool dom_ns_is_fast(const xmlNode *nodep, const dom_ns_magic_token *magic_token)
 {
 	ZEND_ASSERT(nodep != NULL);
 	xmlNsPtr ns = nodep->ns;
 	if (ns != NULL) {
-		/* cached for fast checking */
-		if (ns->_private == magic_token) {
-			return true;
-		} else if (ns->_private != NULL) {
-			/* Other token stored */
-			return false;
-		}
-		/* Slow path */
-		if (xmlStrEqual(ns->href, BAD_CAST magic_token)) {
-			ns->_private = (void *) magic_token;
-			return true;
-		}
+		return dom_ns_is_fast_ex(ns, magic_token);
 	}
 	return false;
 }
@@ -158,15 +165,15 @@ xmlNsPtr dom_ns_fast_get_html_ns(xmlDocPtr docp)
 	} else {
 		/* If there is no root we fall back to the old namespace list. */
 		if (docp->oldNs != NULL) {
-			xmlNsPtr tmp = docp->oldNs;
-			do {
-				if (tmp->_private == dom_ns_is_html_magic_token || xmlStrEqual(tmp->href, BAD_CAST DOM_XHTML_NS_URI)) {
+			/* Can already start at the second child because the first child is always the xml namespace. */
+			xmlNsPtr tmp = docp->oldNs->next;
+			while (tmp != NULL) {
+				if (dom_ns_is_fast_ex(tmp, dom_ns_is_html_magic_token)) {
 					nsptr = tmp;
-					nsptr->_private = (void *) dom_ns_is_html_magic_token;
 					break;
 				}
 				tmp = tmp->next;
-			} while (tmp != NULL);
+			}
 		}
 
 		/* If there was no old namespace list, or the HTML namespace was not in there, create a new one. */
