@@ -10915,7 +10915,7 @@ static int zend_jit_bind_global(zend_jit_ctx *jit, const zend_op *opline, uint32
 	if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 		ir_ref if_refcounted = IR_UNUSED, refcount, if_non_zero, if_may_not_leak;
 
-		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 			// JIT: if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)))
 			if_refcounted = jit_if_REFCOUNTED(jit, op1_addr);
 			ir_IF_TRUE_cold(if_refcounted);
@@ -10949,13 +10949,13 @@ static int zend_jit_bind_global(zend_jit_ctx *jit, const zend_op *opline, uint32
 			ir_IF_FALSE(if_may_not_leak);
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(gc_possible_root), ref2);
 		}
-		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 			ir_END_list(end_inputs);
 			ir_IF_FALSE(if_refcounted);
 		}
 	}
 
-	if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+	if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 		// JIT: ZVAL_REF(variable_ptr, ref)
 		jit_set_Z_PTR(jit, op1_addr, ref);
 		jit_set_Z_TYPE_INFO(jit, op1_addr, IS_REFERENCE_EX);
