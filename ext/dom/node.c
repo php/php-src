@@ -836,7 +836,7 @@ zend_result dom_node_text_content_write(dom_object *obj, zval *newval)
 	 * the content without encoding. */
 	if (type == XML_DOCUMENT_FRAG_NODE || type == XML_ELEMENT_NODE || type == XML_ATTRIBUTE_NODE) {
 		dom_remove_all_children(nodep);
-		xmlNode *textNode = xmlNewText(xmlChars);
+		xmlNode *textNode = xmlNewDocTextLen(nodep->doc, xmlChars, Z_STRLEN_P(newval));
 		xmlAddChild(nodep, textNode);
 	} else {
 		xmlNodeSetContent(nodep, xmlChars);
