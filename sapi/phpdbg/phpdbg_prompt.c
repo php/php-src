@@ -343,8 +343,8 @@ void phpdbg_init(char *init_file, size_t init_file_len, bool use_default) /* {{{
 		char *sys_ini;
 		int i;
 
-		ZEND_IGNORE_VALUE(asprintf(&sys_ini, "%s/" PHPDBG_INIT_FILENAME, PHP_CONFIG_FILE_PATH));
-		phpdbg_try_file_init(sys_ini, strlen(sys_ini), 0);
+		size_t sys_ini_length = asprintf(&sys_ini, "%s/" PHPDBG_INIT_FILENAME, PHP_CONFIG_FILE_PATH);
+		phpdbg_try_file_init(sys_ini, sys_ini_length, 0);
 		free(sys_ini);
 
 		if (!scan_dir) {
