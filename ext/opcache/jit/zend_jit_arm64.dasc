@@ -11766,7 +11766,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, uint32_
 	|	GC_ADDREF REG0, TMP1w
 	|1:
 	if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 			|	// if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)))
 			|	IF_ZVAL_REFCOUNTED op1_addr, >2, ZREG_TMP1, ZREG_TMP2
 			|.cold_code
@@ -11793,12 +11793,12 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, uint32_
 			|	EXT_CALL gc_possible_root, REG0
 			|	b >5
 		}
-		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 			|.code
 		}
 	}
 
-	if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+	if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 		|	// ZVAL_REF(variable_ptr, ref)
 		|	SET_ZVAL_PTR op1_addr, REG0, TMP1
 		|	SET_ZVAL_TYPE_INFO op1_addr, IS_REFERENCE_EX, TMP1w, TMP2
