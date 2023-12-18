@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Added workaround for SELinux mprotect execheap issue.
     See https://bugzilla.kernel.org/show_bug.cgi?id=218258. (ilutov)
 
+- PDO_ODBC:
+  . Fixed bug GH-12767 (Unable to turn on autocommit mode with setAttribute()).
+    (SakiTakamachi)
+
 - PHPDBG:
   . Fixed bug GH-12962 (Double free of init_file in phpdbg_prompt.c). (nielsdos)
 
