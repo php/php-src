@@ -127,14 +127,14 @@ static inline double php_round_helper(double value, int mode) {
 			return integral;
 
 		case PHP_ROUND_CEILING:
-			if (value > 0.0) {
-				return fractional == 0 ? integral : integral + 1.0;
+			if (value > 0.0 && fractional > 0.0 ) {
+				return integral + 1.0;
 			}
 			return integral;
 
 		case PHP_ROUND_FLOOR:
-			if (value < 0.0) {
-				return fractional == 0 ? integral : integral - 1.0;
+			if (value < 0.0 && fractional > 0.0) {
+				return integral - 1.0;
 			}
 			return integral;
 
