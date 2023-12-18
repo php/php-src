@@ -1417,7 +1417,7 @@ PHPDBG_COMMAND(register) /* {{{ */
 {
 	zend_function *function;
 	char *lcname = zend_str_tolower_dup(param->str, param->len);
-	size_t lcname_len = strlen(lcname);
+	size_t lcname_len = param->len;
 
 	if (!zend_hash_str_exists(&PHPDBG_G(registered), lcname, lcname_len)) {
 		if ((function = zend_hash_str_find_ptr(EG(function_table), lcname, lcname_len))) {
