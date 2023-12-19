@@ -2194,7 +2194,7 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 	}
 
-	if (ODBCG(allow_persistent) <= 0) {
+	if (!ODBCG(allow_persistent)) {
 		persistent = 0;
 	}
 
