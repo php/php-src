@@ -916,7 +916,6 @@ static int fpm_conf_process_all_pools(void)
 
 			if (config->listen_backlog < FPM_BACKLOG_DEFAULT) {
 				zlog(ZLOG_WARNING, "[pool %s] listen.backlog(%d) was too low for the ondemand process manager. I updated it for you to %d.", wp->config->name, config->listen_backlog, FPM_BACKLOG_DEFAULT);
-				config->listen_backlog = FPM_BACKLOG_DEFAULT;
 			}
 
 			/* certainly useless but proper */
