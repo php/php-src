@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Benjamin Eberlei <beberlei@php.net>                         |
+   |          Niels Dossche <nielsdos@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -162,21 +163,38 @@ static void dom_add_child_without_merging(xmlNodePtr parent, xmlNodePtr child)
 	child->parent = parent;
 }
 
-xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNode, zval *nodes, int nodesc)
+/* https://dom.spec.whatwg.org/#converting-nodes-into-a-node */
+xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *contextNode, zval *nodes, uint32_t nodesc)
 {
 	xmlDoc *documentNode;
-	xmlNode *fragment;
 	xmlNode *newNode;
 	dom_object *newNodeObj;
 
 	documentNode = dom_doc_from_context_node(contextNode);
 
-	fragment = xmlNewDocFragment(documentNode);
+	/* 1. Let node be null. */
+	xmlNodePtr node = NULL;
 
-	if (!fragment) {
+	/* 2. => handled in the loop. */
+
+	/* 3. If nodes contains one node, then set node to nodes[0]. */
+	if (nodesc == 1 && Z_TYPE_P(nodes) == IS_OBJECT) {
+		/* ... and return */
+		node = dom_object_get_node(Z_DOMOBJ_P(nodes));
+		/* Fragments can cause problems because of unpacking (see below). Skip this special case. */
+		if (node->type != XML_DOCUMENT_FRAG_NODE) {
+			xmlUnlinkNode(node);
+			return node;
+		}
+	}
+
+	node = xmlNewDocFragment(documentNode);
+	if (UNEXPECTED(!node)) {
 		return NULL;
 	}
 
+	/* 4. Otherwise, set node to a new DocumentFragment node whose node document is document,
+	 *    and then append each node in nodes, if any, to it. */
 	for (uint32_t i = 0; i < nodesc; i++) {
 		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
 			newNodeObj = Z_DOMOBJ_P(&nodes[i]);
@@ -195,24 +213,22 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 				while (newNode) {
 					xmlNodePtr next = newNode->next;
 					xmlUnlinkNode(newNode);
-					dom_add_child_without_merging(fragment, newNode);
+					dom_add_child_without_merging(node, newNode);
 					newNode = next;
 				}
 			} else {
-				dom_add_child_without_merging(fragment, newNode);
-				if (UNEXPECTED(newNode->type == XML_DTD_NODE)) {
-					documentNode->intSubset = (xmlDtdPtr) newNode;
-				}
+				dom_add_child_without_merging(node, newNode);
 			}
 		} else {
+			/* 2. Replace each string in nodes with a new Text node whose data is the string and node document is document. */
 			ZEND_ASSERT(Z_TYPE(nodes[i]) == IS_STRING);
 
 			newNode = xmlNewDocText(documentNode, (xmlChar *) Z_STRVAL(nodes[i]));
-			dom_add_child_without_merging(fragment, newNode);
+			dom_add_child_without_merging(node, newNode);
 		}
 	}
 
-	return fragment;
+	return node;
 }
 
 static void dom_fragment_assign_parent_node(xmlNodePtr parentNode, xmlNodePtr fragment)
@@ -227,9 +243,6 @@ static void dom_fragment_assign_parent_node(xmlNodePtr parentNode, xmlNodePtr fr
 		}
 		node = node->next;
 	}
-
-	fragment->children = NULL;
-	fragment->last = NULL;
 }
 
 bool php_dom_fragment_insertion_hierarchy_check(xmlNodePtr node)
@@ -384,7 +397,7 @@ static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *
 	return SUCCESS;
 }
 
-static void dom_pre_insert(xmlNodePtr insertion_point, xmlNodePtr parentNode, xmlNodePtr newchild, xmlNodePtr fragment)
+static void dom_pre_insert(xmlNodePtr insertion_point, xmlNodePtr parentNode, xmlNodePtr newchild, xmlNodePtr last)
 {
 	if (!insertion_point) {
 		/* Place it as last node */
@@ -396,17 +409,47 @@ static void dom_pre_insert(xmlNodePtr insertion_point, xmlNodePtr parentNode, xm
 			/* No children, because they moved out when they became a fragment */
 			parentNode->children = newchild;
 		}
-		parentNode->last = fragment->last;
+		parentNode->last = last;
 	} else {
 		/* Insert fragment before insertion_point */
-		fragment->last->next = insertion_point;
+		last->next = insertion_point;
 		if (insertion_point->prev) {
 			insertion_point->prev->next = newchild;
 			newchild->prev = insertion_point->prev;
 		}
-		insertion_point->prev = fragment->last;
+		insertion_point->prev = last;
 		if (parentNode->children == insertion_point) {
 			parentNode->children = newchild;
+		}
+	}
+}
+
+static void dom_insert_node_list(xmlNodePtr fragment, xmlNodePtr parentNode, xmlNodePtr insertion_point)
+{
+	if (UNEXPECTED(fragment == NULL)) {
+		return;
+	}
+
+	if (fragment->type == XML_DOCUMENT_FRAG_NODE) {
+		xmlNodePtr newchild = fragment->children;
+
+		if (newchild) {
+			xmlNodePtr last = fragment->last;
+			dom_pre_insert(insertion_point, parentNode, newchild, last);
+			dom_fragment_assign_parent_node(parentNode, fragment);
+			dom_reconcile_ns_list(parentNode->doc, newchild, last);
+			if (parentNode->doc && newchild->type == XML_DTD_NODE) {
+				parentNode->doc->intSubset = (xmlDtdPtr) newchild;
+			}
+		}
+
+		xmlFree(fragment);
+	} else {
+		dom_pre_insert(insertion_point, parentNode, fragment, fragment);
+		fragment->parent = parentNode;
+		dom_reconcile_ns(parentNode->doc, fragment);
+		if (parentNode->doc && fragment->type == XML_DTD_NODE) {
+			parentNode->doc->intSubset = (xmlDtdPtr) fragment;
 		}
 	}
 }
@@ -414,7 +457,6 @@ static void dom_pre_insert(xmlNodePtr insertion_point, xmlNodePtr parentNode, xm
 void dom_parent_node_append(dom_object *context, zval *nodes, uint32_t nodesc)
 {
 	xmlNode *parentNode = dom_object_get_node(context);
-	xmlNodePtr newchild, prevsib;
 
 	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, parentNode, NULL, nodes, nodesc) != SUCCESS)) {
 		return;
@@ -422,33 +464,9 @@ void dom_parent_node_append(dom_object *context, zval *nodes, uint32_t nodesc)
 
 	php_libxml_invalidate_node_list_cache(context->document);
 
-	xmlNode *fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
+	xmlNodePtr fragment = dom_zvals_to_single_node(context->document, parentNode, nodes, nodesc);
 
-	if (fragment == NULL) {
-		return;
-	}
-
-	newchild = fragment->children;
-	prevsib = parentNode->last;
-
-	if (newchild) {
-		if (prevsib != NULL) {
-			prevsib->next = newchild;
-		} else {
-			parentNode->children = newchild;
-		}
-
-		xmlNodePtr last = fragment->last;
-		parentNode->last = last;
-
-		newchild->prev = prevsib;
-
-		dom_fragment_assign_parent_node(parentNode, fragment);
-
-		dom_reconcile_ns_list(parentNode->doc, newchild, last);
-	}
-
-	xmlFree(fragment);
+	dom_insert_node_list(fragment, parentNode, NULL);
 }
 
 void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc)
@@ -466,38 +484,18 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc)
 
 	php_libxml_invalidate_node_list_cache(context->document);
 
-	xmlNode *fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
+	xmlNodePtr fragment = dom_zvals_to_single_node(context->document, parentNode, nodes, nodesc);
 
-	if (fragment == NULL) {
-		return;
-	}
-
-	xmlNode *newchild = fragment->children;
-
-	if (newchild) {
-		xmlNodePtr last = fragment->last;
-
-		dom_pre_insert(parentNode->children, parentNode, newchild, fragment);
-
-		dom_fragment_assign_parent_node(parentNode, fragment);
-
-		dom_reconcile_ns_list(parentNode->doc, newchild, last);
-	}
-
-	xmlFree(fragment);
+	dom_insert_node_list(fragment, parentNode, parentNode->children);
 }
 
+/* https://dom.spec.whatwg.org/#dom-childnode-after */
 void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 {
-	/* Spec link: https://dom.spec.whatwg.org/#dom-childnode-after */
-
 	xmlNode *prevsib = dom_object_get_node(context);
-	xmlNodePtr newchild, parentNode;
-	xmlNode *fragment;
-	xmlDoc *doc;
 
 	/* Spec step 1 */
-	parentNode = prevsib->parent;
+	xmlNodePtr parentNode = prevsib->parent;
 
 	/* Spec step 3: find first following child not in nodes; otherwise null */
 	xmlNodePtr viable_next_sibling = prevsib->next;
@@ -513,43 +511,22 @@ void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 		return;
 	}
 
-	doc = prevsib->doc;
-
 	php_libxml_invalidate_node_list_cache(context->document);
 
 	/* Spec step 4: convert nodes into fragment */
-	fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
+	xmlNodePtr fragment = dom_zvals_to_single_node(context->document, parentNode, nodes, nodesc);
 
-	if (fragment == NULL) {
-		return;
-	}
-
-	newchild = fragment->children;
-
-	if (newchild) {
-		xmlNodePtr last = fragment->last;
-
-		/* Step 5: place fragment into the parent before viable_next_sibling */
-		dom_pre_insert(viable_next_sibling, parentNode, newchild, fragment);
-
-		dom_fragment_assign_parent_node(parentNode, fragment);
-		dom_reconcile_ns_list(doc, newchild, last);
-	}
-
-	xmlFree(fragment);
+	/* Step 5: place fragment into the parent before viable_next_sibling */
+	dom_insert_node_list(fragment, parentNode, viable_next_sibling);
 }
 
+/* https://dom.spec.whatwg.org/#dom-childnode-before */
 void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 {
-	/* Spec link: https://dom.spec.whatwg.org/#dom-childnode-before */
-
 	xmlNode *nextsib = dom_object_get_node(context);
-	xmlNodePtr newchild, parentNode;
-	xmlNode *fragment;
-	xmlDoc *doc;
 
 	/* Spec step 1 */
-	parentNode = nextsib->parent;
+	xmlNodePtr parentNode = nextsib->parent;
 
 	/* Spec step 3: find first following child not in nodes; otherwise null */
 	xmlNodePtr viable_previous_sibling = nextsib->prev;
@@ -565,36 +542,19 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 		return;
 	}
 
-	doc = nextsib->doc;
-
 	php_libxml_invalidate_node_list_cache(context->document);
 
 	/* Spec step 4: convert nodes into fragment */
-	fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
+	xmlNodePtr fragment = dom_zvals_to_single_node(context->document, parentNode, nodes, nodesc);
 
-	if (fragment == NULL) {
-		return;
+	/* Step 5: if viable_previous_sibling is null, set it to the parent's first child, otherwise viable_previous_sibling's next sibling */
+	if (!viable_previous_sibling) {
+		viable_previous_sibling = parentNode->children;
+	} else {
+		viable_previous_sibling = viable_previous_sibling->next;
 	}
 
-	newchild = fragment->children;
-
-	if (newchild) {
-		xmlNodePtr last = fragment->last;
-
-		/* Step 5: if viable_previous_sibling is null, set it to the parent's first child, otherwise viable_previous_sibling's next sibling */
-		if (!viable_previous_sibling) {
-			viable_previous_sibling = parentNode->children;
-		} else {
-			viable_previous_sibling = viable_previous_sibling->next;
-		}
-		/* Step 6: place fragment into the parent after viable_previous_sibling */
-		dom_pre_insert(viable_previous_sibling, parentNode, newchild, fragment);
-
-		dom_fragment_assign_parent_node(parentNode, fragment);
-		dom_reconcile_ns_list(doc, newchild, last);
-	}
-
-	xmlFree(fragment);
+	dom_insert_node_list(fragment, parentNode, viable_previous_sibling);
 }
 
 static zend_result dom_child_removal_preconditions(const xmlNodePtr child, int stricterror)
@@ -639,10 +599,9 @@ void dom_child_node_remove(dom_object *context)
 	xmlUnlinkNode(child);
 }
 
+/* https://dom.spec.whatwg.org/#dom-childnode-replacewith */
 void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 {
-	/* Spec link: https://dom.spec.whatwg.org/#dom-childnode-replacewith */
-
 	xmlNodePtr child = dom_object_get_node(context);
 
 	/* Spec step 1 */
@@ -667,18 +626,10 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 		return;
 	}
 
-	xmlDocPtr doc = parentNode->doc;
 	php_libxml_invalidate_node_list_cache(context->document);
 
 	/* Spec step 4: convert nodes into fragment */
-	xmlNodePtr fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
-	if (UNEXPECTED(fragment == NULL)) {
-		return;
-	}
-
-	/* Spec step 5: perform the replacement */
-
-	xmlNodePtr newchild = fragment->children;
+	xmlNodePtr fragment = dom_zvals_to_single_node(context->document, parentNode, nodes, nodesc);
 
 	/* Unlink it unless it became a part of the fragment.
 	 * Freeing will be taken care of by the lifetime of the returned dom object. */
@@ -686,47 +637,27 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 		xmlUnlinkNode(child);
 	}
 
-	if (newchild) {
-		xmlNodePtr last = fragment->last;
-
-		dom_pre_insert(viable_next_sibling, parentNode, newchild, fragment);
-
-		dom_fragment_assign_parent_node(parentNode, fragment);
-		dom_reconcile_ns_list(doc, newchild, last);
-	}
-
-	xmlFree(fragment);
+	/* Spec step 5: perform the replacement */
+	dom_insert_node_list(fragment, parentNode, viable_next_sibling);
 }
 
+/* https://dom.spec.whatwg.org/#dom-parentnode-replacechildren */
 void dom_parent_node_replace_children(dom_object *context, zval *nodes, uint32_t nodesc)
 {
-	/* Spec link: https://dom.spec.whatwg.org/#dom-parentnode-replacechildren */
-
 	xmlNodePtr thisp = dom_object_get_node(context);
 	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, thisp, NULL, nodes, nodesc) != SUCCESS)) {
 		return;
 	}
 
-	xmlNodePtr fragment = dom_zvals_to_fragment(context->document, thisp, nodes, nodesc);
+	xmlNodePtr fragment = dom_zvals_to_single_node(context->document, thisp, nodes, nodesc);
 	if (UNEXPECTED(fragment == NULL)) {
 		return;
 	}
 
+	/* Spec step 3: replace all */
 	php_libxml_invalidate_node_list_cache(context->document);
-
 	dom_remove_all_children(thisp);
-
-	xmlNodePtr newchild = fragment->children;
-	if (newchild) {
-		xmlNodePtr last = fragment->last;
-
-		dom_pre_insert(NULL, thisp, newchild, fragment);
-
-		dom_fragment_assign_parent_node(thisp, fragment);
-		dom_reconcile_ns_list(thisp->doc, newchild, last);
-	}
-
-	xmlFree(fragment);
+	dom_insert_node_list(fragment, thisp, NULL);
 }
 
 #endif
