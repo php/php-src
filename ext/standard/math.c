@@ -142,7 +142,10 @@ static inline double php_round_helper(double value, int mode) {
 			return integral;
 
 		case PHP_ROUND_AWAY_FROM_ZERO:
-			return fractional == 0 ? integral : integral + copysign(1.0, integral);
+			if (fractional > 0.0) {
+				return integral + copysign(1.0, integral);
+			}
+			return integral:
 
 		case PHP_ROUND_HALF_EVEN:
 			if (fractional > 0.5) {
