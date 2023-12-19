@@ -26,6 +26,7 @@
 #include "zend_closures.h"
 #include "zend_weakrefs.h"
 #include "main/SAPI.h"
+#include "zend_observer.h"
 
 #include <ffi.h>
 
@@ -5373,6 +5374,25 @@ static zend_result zend_ffi_preload(char *preload) /* {{{ */
 }
 /* }}} */
 
+/* The startup code for observers adds a temporary to each function for internal use.
+ * The "new", "cast", and "type" functions in FFI are both static and non-static.
+ * Only the static versions are in the function table and the non-static versions are not.
+ * This means the non-static versions will be skipped by the observers startup code.
+ * This function fixes that by incrementing the temporary count for the non-static versions.
+ */
+static zend_result (*prev_zend_post_startup_cb)(void);
+static zend_result ffi_fixup_temporaries(void) {
+	if (ZEND_OBSERVER_ENABLED) {
+		++zend_ffi_new_fn.T;
+		++zend_ffi_cast_fn.T;
+		++zend_ffi_type_fn.T;
+	}
+	if (prev_zend_post_startup_cb) {
+		return prev_zend_post_startup_cb();
+	}
+	return SUCCESS;
+}
+
 /* {{{ ZEND_MINIT_FUNCTION */
 ZEND_MINIT_FUNCTION(ffi)
 {
@@ -5394,6 +5414,9 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_cast_fn.fn_flags &= ~ZEND_ACC_STATIC;
 	memcpy(&zend_ffi_type_fn, zend_hash_str_find_ptr(&zend_ffi_ce->function_table, "type", sizeof("type")-1), sizeof(zend_internal_function));
 	zend_ffi_type_fn.fn_flags &= ~ZEND_ACC_STATIC;
+
+	prev_zend_post_startup_cb = zend_post_startup_cb;
+	zend_post_startup_cb = ffi_fixup_temporaries;
 
 	memcpy(&zend_ffi_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_ffi_handlers.get_constructor      = zend_fake_get_constructor;
