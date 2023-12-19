@@ -15285,7 +15285,12 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 					ref = ir_CALL_2(IR_LONG, ir_CONST_FC_FUNC(zend_hash_index_find),
 						ir_CONST_ADDR(jumptable), ref);
 					ref = ir_SUB_L(ref, ir_CONST_LONG((uintptr_t)jumptable->arData));
-					ref = ir_DIV_L(ref, ir_CONST_LONG(sizeof(Bucket)));
+					/* Signed DIV by power of 2 may be optimized into SHR only for positive operands */
+					if (sizeof(Bucket) == 32) {
+						ref = ir_SHR_L(ref, ir_CONST_LONG(5));
+					} else {
+						ref = ir_DIV_L(ref, ir_CONST_LONG(sizeof(Bucket)));
+					}
 				}
 				ref = ir_SWITCH(ref);
 
@@ -15406,7 +15411,12 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 				ref = ir_CALL_2(IR_LONG, ir_CONST_FC_FUNC(zend_hash_find),
 					ir_CONST_ADDR(jumptable), ref);
 				ref = ir_SUB_L(ref, ir_CONST_LONG((uintptr_t)jumptable->arData));
-				ref = ir_DIV_L(ref, ir_CONST_LONG(sizeof(Bucket)));
+				/* Signed DIV by power of 2 may be optimized into SHR only for positive operands */
+				if (sizeof(Bucket) == 32) {
+					ref = ir_SHR_L(ref, ir_CONST_LONG(5));
+				} else {
+					ref = ir_DIV_L(ref, ir_CONST_LONG(sizeof(Bucket)));
+				}
 				ref = ir_SWITCH(ref);
 
 				if (next_opline) {
@@ -15534,7 +15544,17 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 				}
 
 				ref = ir_SUB_L(ref, ir_CONST_LONG((uintptr_t)jumptable->arData));
-				ref = ir_DIV_L(ref, ir_CONST_LONG(HT_IS_PACKED(jumptable) ? sizeof(zval) : sizeof(Bucket)));
+				/* Signed DIV by power of 2 may be optimized into SHR only for positive operands */
+				if (HT_IS_PACKED(jumptable)) {
+					ZEND_ASSERT(sizeof(zval) == 16);
+					ref = ir_SHR_L(ref, ir_CONST_LONG(4));
+				} else {
+					if (sizeof(Bucket) == 32) {
+						ref = ir_SHR_L(ref, ir_CONST_LONG(5));
+					} else {
+						ref = ir_DIV_L(ref, ir_CONST_LONG(sizeof(Bucket)));
+					}
+				}
 				ref = ir_SWITCH(ref);
 
 				if (next_opline) {
