@@ -407,7 +407,7 @@ static zend_result dom_sanity_check_node_list_types(zval *nodes, int nodesc)
 	return SUCCESS;
 }
 
-static void dom_pre_insert_helper(xmlNodePtr insertion_point, xmlNodePtr parentNode, xmlNodePtr newchild, xmlNodePtr last)
+static void php_dom_pre_insert_helper(xmlNodePtr insertion_point, xmlNodePtr parentNode, xmlNodePtr newchild, xmlNodePtr last)
 {
 	if (!insertion_point) {
 		/* Place it as last node */
@@ -465,7 +465,7 @@ static void dom_insert_node_list_unchecked(php_libxml_ref_obj *document, xmlNode
 		/* 4. Insert node into parent before referenceChild. */
 		if (newchild) {
 			xmlNodePtr last = node->last;
-			dom_pre_insert_helper(insertion_point, parent, newchild, last);
+			php_dom_pre_insert_helper(insertion_point, parent, newchild, last);
 			dom_fragment_assign_parent_node(parent, node);
 			dom_reconcile_ns_list(parent->doc, newchild, last);
 			if (parent->doc && newchild->type == XML_DTD_NODE) {
@@ -483,7 +483,7 @@ static void dom_insert_node_list_unchecked(php_libxml_ref_obj *document, xmlNode
 
 		/* 4. Insert node into parent before referenceChild. */
 		xmlUnlinkNode(node);
-		dom_pre_insert_helper(insertion_point, parent, node, node);
+		php_dom_pre_insert_helper(insertion_point, parent, node, node);
 		node->parent = parent;
 		if (parent->doc && node->type == XML_DTD_NODE) {
 			parent->doc->intSubset = (xmlDtdPtr) node;
@@ -494,24 +494,26 @@ static void dom_insert_node_list_unchecked(php_libxml_ref_obj *document, xmlNode
 }
 
 /* https://dom.spec.whatwg.org/#concept-node-pre-insert */
-static void dom_insert_node_list(php_libxml_ref_obj *document, xmlNodePtr node, xmlNodePtr parent, xmlNodePtr insertion_point)
+bool php_dom_pre_insert(php_libxml_ref_obj *document, xmlNodePtr node, xmlNodePtr parent, xmlNodePtr insertion_point)
 {
 	if (UNEXPECTED(node == NULL)) {
-		return;
+		return false;
 	}
 
 	/* Step 1 checked here, other steps delegated to other function. */
 	if (dom_is_pre_insert_valid_without_step_1(document, parent, node, insertion_point, parent->doc)) {
 		dom_insert_node_list_unchecked(document, node, parent, insertion_point);
+		return true;
 	} else {
 		dom_insert_node_list_cleanup(node);
+		return false;
 	}
 }
 
 /* https://dom.spec.whatwg.org/#concept-node-append */
 void php_dom_node_append(php_libxml_ref_obj *document, xmlNodePtr node, xmlNodePtr parent)
 {
-	dom_insert_node_list(document, node, parent, NULL);
+	php_dom_pre_insert(document, node, parent, NULL);
 }
 
 /* https://dom.spec.whatwg.org/#dom-parentnode-append */
@@ -558,7 +560,7 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc)
 	}
 
 	/* 2. Pre-insert node into this before this’s first child. */
-	dom_insert_node_list(context->document, node, parentNode, parentNode->children);
+	php_dom_pre_insert(context->document, node, parentNode, parentNode->children);
 }
 
 /* https://dom.spec.whatwg.org/#dom-childnode-after */
@@ -590,7 +592,7 @@ void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 	xmlNodePtr fragment = dom_zvals_to_single_node(context->document, parentNode, nodes, nodesc);
 
 	/* 5. Pre-insert node into parent before viableNextSibling. */
-	dom_insert_node_list(context->document, fragment, parentNode, viable_next_sibling);
+	php_dom_pre_insert(context->document, fragment, parentNode, viable_next_sibling);
 }
 
 /* https://dom.spec.whatwg.org/#dom-childnode-before */
@@ -629,7 +631,7 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 	}
 
 	/* 6. Pre-insert node into parent before viablePreviousSibling. */
-	dom_insert_node_list(context->document, fragment, parentNode, viable_previous_sibling);
+	php_dom_pre_insert(context->document, fragment, parentNode, viable_previous_sibling);
 }
 
 static zend_result dom_child_removal_preconditions(const xmlNodePtr child, int stricterror)
@@ -744,7 +746,7 @@ void dom_parent_node_replace_children(dom_object *context, zval *nodes, uint32_t
 	/* Spec steps 2-3: replace all */
 	if (dom_is_pre_insert_valid_without_step_1(context->document, thisp, node, NULL, thisp->doc)) {
 		dom_remove_all_children(thisp);
-		dom_insert_node_list(context->document, node, thisp, NULL);
+		php_dom_pre_insert(context->document, node, thisp, NULL);
 	} else {
 		dom_insert_node_list_cleanup(node);
 	}

@@ -78,4 +78,4 @@ Syntax Error
 --- Normal cases starting from empty element ---
 <empty>A</empty>
 <empty>BA</empty>
-string(2) "BA"
+string(1) "A"

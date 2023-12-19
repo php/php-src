@@ -1471,7 +1471,9 @@ PHP_METHOD(DOMElement, replaceChildren)
 }
 /* }}} */
 
-#define INSERT_ADJACENT_RES_FAILED ((void*) -1)
+#define INSERT_ADJACENT_RES_ADOPT_FAILED ((void*) -1)
+#define INSERT_ADJACENT_RES_SYNTAX_FAILED INSERT_ADJACENT_RES_ADOPT_FAILED
+#define INSERT_ADJACENT_RES_PRE_INSERT_FAILED ((void*) -2)
 
 static xmlNodePtr dom_insert_adjacent(const zend_string *where, xmlNodePtr thisp, dom_object *this_intern, xmlNodePtr otherp)
 {
@@ -1479,53 +1481,40 @@ static xmlNodePtr dom_insert_adjacent(const zend_string *where, xmlNodePtr thisp
 		if (thisp->parent == NULL) {
 			return NULL;
 		}
-		if (dom_hierarchy(thisp->parent, otherp) == FAILURE) {
-			php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(this_intern->document));
-			return INSERT_ADJACENT_RES_FAILED;
-		}
 		if (!php_dom_adopt_node(otherp, this_intern, thisp->doc)) {
-			return INSERT_ADJACENT_RES_FAILED;
+			return INSERT_ADJACENT_RES_ADOPT_FAILED;
 		}
-		otherp = xmlAddPrevSibling(thisp, otherp);
+		if (!php_dom_pre_insert(this_intern->document, otherp, thisp->parent, thisp)) {
+			return INSERT_ADJACENT_RES_PRE_INSERT_FAILED;
+		}
 	} else if (zend_string_equals_literal_ci(where, "afterbegin")) {
-		if (dom_hierarchy(thisp, otherp) == FAILURE) {
-			php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(this_intern->document));
-			return INSERT_ADJACENT_RES_FAILED;
-		}
 		if (!php_dom_adopt_node(otherp, this_intern, thisp->doc)) {
-			return INSERT_ADJACENT_RES_FAILED;
+			return INSERT_ADJACENT_RES_ADOPT_FAILED;
 		}
-		if (thisp->children == NULL) {
-			otherp = xmlAddChild(thisp, otherp);
-		} else {
-			otherp = xmlAddPrevSibling(thisp->children, otherp);
+		if (!php_dom_pre_insert(this_intern->document, otherp, thisp, thisp->children)) {
+			return INSERT_ADJACENT_RES_PRE_INSERT_FAILED;
 		}
 	} else if (zend_string_equals_literal_ci(where, "beforeend")) {
-		if (dom_hierarchy(thisp, otherp) == FAILURE) {
-			php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(this_intern->document));
-			return INSERT_ADJACENT_RES_FAILED;
-		}
 		if (!php_dom_adopt_node(otherp, this_intern, thisp->doc)) {
-			return INSERT_ADJACENT_RES_FAILED;
+			return INSERT_ADJACENT_RES_ADOPT_FAILED;
 		}
-		otherp = xmlAddChild(thisp, otherp);
+		if (!php_dom_pre_insert(this_intern->document, otherp, thisp, NULL)) {
+			return INSERT_ADJACENT_RES_PRE_INSERT_FAILED;
+		}
 	} else if (zend_string_equals_literal_ci(where, "afterend")) {
 		if (thisp->parent == NULL) {
 			return NULL;
 		}
-		if (dom_hierarchy(thisp->parent, otherp) == FAILURE) {
-			php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(this_intern->document));
-			return INSERT_ADJACENT_RES_FAILED;
-		}
 		if (!php_dom_adopt_node(otherp, this_intern, thisp->doc)) {
-			return INSERT_ADJACENT_RES_FAILED;
+			return INSERT_ADJACENT_RES_ADOPT_FAILED;
 		}
-		otherp = xmlAddNextSibling(thisp, otherp);
+		if (!php_dom_pre_insert(this_intern->document, otherp, thisp->parent, thisp->next))  {
+			return INSERT_ADJACENT_RES_PRE_INSERT_FAILED;
+		}
 	} else {
 		php_dom_throw_error(SYNTAX_ERR, dom_get_strict_error(this_intern->document));
-		return INSERT_ADJACENT_RES_FAILED;
+		return INSERT_ADJACENT_RES_SYNTAX_FAILED;
 	}
-	dom_reconcile_ns(thisp->doc, otherp);
 	return otherp;
 }
 
@@ -1550,7 +1539,7 @@ PHP_METHOD(DOMElement, insertAdjacentElement)
 	xmlNodePtr result = dom_insert_adjacent(where, thisp, this_intern, otherp);
 	if (result == NULL) {
 		RETURN_NULL();
-	} else if (result != INSERT_ADJACENT_RES_FAILED) {
+	} else if (result != INSERT_ADJACENT_RES_ADOPT_FAILED && result != INSERT_ADJACENT_RES_PRE_INSERT_FAILED) {
 		DOM_RET_OBJ(otherp, &ret, other_intern);
 	} else {
 		RETURN_THROWS();
@@ -1581,7 +1570,7 @@ PHP_METHOD(DOMElement, insertAdjacentText)
 
 	xmlNodePtr otherp = xmlNewDocTextLen(thisp->doc, (const xmlChar *) ZSTR_VAL(data), ZSTR_LEN(data));
 	xmlNodePtr result = dom_insert_adjacent(where, thisp, this_intern, otherp);
-	if (result == NULL || result == INSERT_ADJACENT_RES_FAILED) {
+	if (result == NULL || result == INSERT_ADJACENT_RES_ADOPT_FAILED) {
 		xmlFreeNode(otherp);
 	}
 }
