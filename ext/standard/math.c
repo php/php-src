@@ -93,6 +93,7 @@ static inline double php_intpow10(int power) {
 /* {{{ php_round_helper
        Actually performs the rounding of a value to integer in a certain mode */
 static inline double php_round_helper(double value, int mode) {
+	double integral, fractional;
 
 	/* Split the input value into the integral and fractional part.
 	 *
@@ -100,8 +101,7 @@ static inline double php_round_helper(double value, int mode) {
 	 * the absolute value of the fractional part (which will not result
 	 * in branches in the assembly) to make the following cases simpler.
 	 */
-	double integral;
-	double fractional = fabs(modf(value, &integral));
+	fractional = fabs(modf(value, &integral));
 
 	switch (mode) {
 		case PHP_ROUND_HALF_UP:
@@ -127,15 +127,17 @@ static inline double php_round_helper(double value, int mode) {
 			return integral;
 
 		case PHP_ROUND_CEILING:
-			if (value > 0.0 && fractional > 0.0 ) {
+			if (value > 0.0 && fractional > 0.0) {
 				return integral + 1.0;
 			}
+
 			return integral;
 
 		case PHP_ROUND_FLOOR:
 			if (value < 0.0 && fractional > 0.0) {
 				return integral - 1.0;
 			}
+
 			return integral;
 
 		case PHP_ROUND_TOWARD_ZERO:
@@ -145,6 +147,7 @@ static inline double php_round_helper(double value, int mode) {
 			if (fractional > 0.0) {
 				return integral + copysign(1.0, integral);
 			}
+
 			return integral;
 
 		case PHP_ROUND_HALF_EVEN:
@@ -179,6 +182,7 @@ static inline double php_round_helper(double value, int mode) {
 			}
 
 			return integral;
+
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 	// FIXME: GCC bug, branch is considered reachable.
