@@ -254,6 +254,89 @@ bool php_dom_fragment_insertion_hierarchy_check(xmlNodePtr node)
 }
 
 /* https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity */
+static bool dom_is_pre_insert_valid_without_step_1(php_libxml_ref_obj *document, xmlNodePtr parentNode, xmlNodePtr node, xmlNodePtr child, xmlDocPtr documentNode)
+{
+	ZEND_ASSERT(parentNode != NULL);
+
+	if (node->doc != documentNode) {
+		php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(document));
+		return false;
+	}
+
+	bool parent_is_document = parentNode->type == XML_DOCUMENT_NODE || parentNode->type == XML_HTML_DOCUMENT_NODE;
+
+	/* 3. If child is non-null and its parent is not parent, then throw a "NotFoundError" DOMException.
+	 *    => Impossible */
+
+	if (/* 2. If node is a host-including inclusive ancestor of parent, then throw a "HierarchyRequestError" DOMException. */
+		dom_hierarchy(parentNode, node) != SUCCESS
+		/* 4. If node is not a DocumentFragment, DocumentType, Element, or CharacterData node, then throw a "HierarchyRequestError" DOMException. */
+		|| node->type == XML_ATTRIBUTE_NODE
+		|| (php_dom_follow_spec_doc_ref(document) && (
+			node->type == XML_ENTITY_REF_NODE
+			|| node->type == XML_ENTITY_NODE
+			|| node->type == XML_NOTATION_NODE
+			|| node->type == XML_DOCUMENT_NODE
+			|| node->type == XML_HTML_DOCUMENT_NODE
+			|| node->type >= XML_ELEMENT_DECL))) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(document));
+		return false;
+	}
+
+	if (php_dom_follow_spec_doc_ref(document)) {
+		/* 5. If either node is a Text node and parent is a document... */
+		if (parent_is_document && (node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE)) {
+			php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert text as a child of a document", /* strict */ true);
+			return false;
+		}
+
+		/* 5. ..., or node is a doctype and parent is not a document, then throw a "HierarchyRequestError" DOMException. */
+		if (!parent_is_document && node->type == XML_DTD_NODE) {
+			php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert a document type into anything other than a document", /* strict */ true);
+			return false;
+		}
+
+		/* 6. If parent is a document, and any of the statements below, switched on the interface node implements,
+		 *    are true, then throw a "HierarchyRequestError" DOMException. */
+		if (parent_is_document) {
+			/* DocumentFragment */
+			if (node->type == XML_DOCUMENT_FRAG_NODE) {
+				if (!php_dom_fragment_insertion_hierarchy_check(node)) {
+					return false;
+				}
+			}
+			/* Element */
+			else if (node->type == XML_ELEMENT_NODE) {
+				/* parent has an element child, child is a doctype, or child is non-null and a doctype is following child. */
+				if (php_dom_has_child_of_type(parentNode, XML_ELEMENT_NODE)) {
+					php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one element child in a document", /* strict */ true);
+					return false;
+				}
+				if (child != NULL && (child->type == XML_DTD_NODE || php_dom_has_sibling_following_node(child, XML_DTD_NODE))) {
+					php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Document types must be the first child in a document", /* strict */ true);
+					return false;
+				}
+			}
+			/* DocumentType */
+			else if (node->type == XML_DTD_NODE) {
+				/* parent has a doctype child, child is non-null and an element is preceding child, or child is null and parent has an element child. */
+				if (php_dom_has_child_of_type(parentNode, XML_DTD_NODE)) {
+					php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one document type", /* strict */ true);
+					return false;
+				}
+				if ((child != NULL && php_dom_has_sibling_preceding_node(child, XML_ELEMENT_NODE))
+					|| (child == NULL && php_dom_has_child_of_type(parentNode, XML_ELEMENT_NODE))) {
+					php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Document types must be the first child in a document", /* strict */ true);
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+/* https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity */
 static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *document, xmlNodePtr parentNode, xmlNodePtr child, zval *nodes, int nodesc)
 {
 	if (UNEXPECTED(parentNode == NULL)) {
@@ -269,8 +352,6 @@ static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *
 				|| parentNode->type == XML_DOCUMENT_FRAG_NODE
 				|| parentNode->type == XML_ELEMENT_NODE);
 
-	bool parent_is_document = parentNode->type == XML_DOCUMENT_NODE || parentNode->type == XML_HTML_DOCUMENT_NODE;
-
 	xmlDocPtr documentNode = dom_doc_from_context_node(parentNode);
 
 	for (uint32_t i = 0; i < nodesc; i++) {
@@ -281,85 +362,16 @@ static zend_result dom_sanity_check_node_list_for_insertion(php_libxml_ref_obj *
 			if (instanceof_function(ce, dom_node_class_entry)) {
 				xmlNodePtr node = dom_object_get_node(Z_DOMOBJ_P(nodes + i));
 
-				if (node->doc != documentNode) {
-					php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(document));
+				if (!dom_is_pre_insert_valid_without_step_1(document, parentNode, node, child, documentNode)) {
 					return FAILURE;
-				}
-
-				/* 3. If child is non-null and its parent is not parent, then throw a "NotFoundError" DOMException.
-				 *    => Impossible */
-
-				if (/* 2. If node is a host-including inclusive ancestor of parent, then throw a "HierarchyRequestError" DOMException. */
-					dom_hierarchy(parentNode, node) != SUCCESS
-					/* 4. If node is not a DocumentFragment, DocumentType, Element, or CharacterData node, then throw a "HierarchyRequestError" DOMException. */
-					|| node->type == XML_ATTRIBUTE_NODE
-					|| (php_dom_follow_spec_doc_ref(document) && (
-						node->type == XML_ENTITY_REF_NODE
-						|| node->type == XML_ENTITY_NODE
-						|| node->type == XML_NOTATION_NODE
-						|| node->type == XML_DOCUMENT_NODE
-						|| node->type == XML_HTML_DOCUMENT_NODE
-						|| node->type >= XML_ELEMENT_DECL))) {
-					php_dom_throw_error(HIERARCHY_REQUEST_ERR, dom_get_strict_error(document));
-					return FAILURE;
-				}
-
-				if (php_dom_follow_spec_doc_ref(document)) {
-					/* 5. If either node is a Text node and parent is a document... */
-					if (parent_is_document && (node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE)) {
-						php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert text as a child of a document", /* strict */ true);
-						return FAILURE;
-					}
-
-					/* 5. ..., or node is a doctype and parent is not a document, then throw a "HierarchyRequestError" DOMException. */
-					if (!parent_is_document && node->type == XML_DTD_NODE) {
-						php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert a document type into anything other than a document", /* strict */ true);
-						return FAILURE;
-					}
-
-					/* 6. If parent is a document, and any of the statements below, switched on the interface node implements,
-					 *    are true, then throw a "HierarchyRequestError" DOMException. */
-					if (parent_is_document) {
-						/* DocumentFragment */
-						if (node->type == XML_DOCUMENT_FRAG_NODE) {
-							if (!php_dom_fragment_insertion_hierarchy_check(node)) {
-								return FAILURE;
-							}
-						}
-						/* Element */
-						else if (node->type == XML_ELEMENT_NODE) {
-							/* parent has an element child, child is a doctype, or child is non-null and a doctype is following child. */
-							if (php_dom_has_child_of_type(parentNode, XML_ELEMENT_NODE)) {
-								php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one element child in a document", /* strict */ true);
-								return FAILURE;
-							}
-							if (child != NULL && (child->type == XML_DTD_NODE || php_dom_has_sibling_following_node(child, XML_DTD_NODE))) {
-								php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Document types must be the first child in a document", /* strict */ true);
-								return FAILURE;
-							}
-						}
-						/* DocumentType */
-						else if (node->type == XML_DTD_NODE) {
-							/* parent has a doctype child, child is non-null and an element is preceding child, or child is null and parent has an element child. */
-							if (php_dom_has_child_of_type(parentNode, XML_DTD_NODE)) {
-								php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one document type", /* strict */ true);
-								return FAILURE;
-							}
-							if ((child != NULL && php_dom_has_sibling_preceding_node(child, XML_ELEMENT_NODE))
-								|| (child == NULL && php_dom_has_child_of_type(parentNode, XML_ELEMENT_NODE))) {
-								php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Document types must be the first child in a document", /* strict */ true);
-								return FAILURE;
-							}
-						}
-					}
 				}
 			} else {
 				zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_type_name(&nodes[i]));
 				return FAILURE;
 			}
 		} else if (type == IS_STRING) {
-			/* Repetition of step 5. If either node is a Text node and parent is a document... */
-			if (parent_is_document && php_dom_follow_spec_doc_ref(document)) {
+			/* Repetition of pre-insertion validity check step 5. If either node is a Text node and parent is a document... */
+			if ((parentNode->type == XML_DOCUMENT_NODE || parentNode->type == XML_HTML_DOCUMENT_NODE) && php_dom_follow_spec_doc_ref(document)) {
 				php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert text as a child of a document", /* strict */ true);
 				return FAILURE;
 			}
