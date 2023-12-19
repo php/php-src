@@ -145,7 +145,7 @@ static inline double php_round_helper(double value, int mode) {
 			if (fractional > 0.0) {
 				return integral + copysign(1.0, integral);
 			}
-			return integral:
+			return integral;
 
 		case PHP_ROUND_HALF_EVEN:
 			if (fractional > 0.5) {
