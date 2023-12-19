@@ -691,7 +691,6 @@ void dom_parent_node_replace_children(dom_object *context, zval *nodes, uint32_t
 	/* Spec link: https://dom.spec.whatwg.org/#dom-parentnode-replacechildren */
 
 	xmlNodePtr thisp = dom_object_get_node(context);
-	/* Note: Only rule 2 of pre-insertion validity can be broken */
 	if (UNEXPECTED(dom_sanity_check_node_list_for_insertion(context->document, thisp, NULL, nodes, nodesc) != SUCCESS)) {
 		return;
 	}
