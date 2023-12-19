@@ -226,6 +226,10 @@ PHP 8.4 UPGRADE NOTES
   . The behavior of mb_strcut is more consistent now on invalid UTF-8 and UTF-16
     strings. (For valid UTF-8 and UTF-16 strings, there is no change.)
 
+- OpenSSL:
+  . The extra_attributes parameter in openssl_csr_new sets CSR attributes
+    instead of subject DN which was incorrectly done previously.
+
 - PDO:
   . getAttribute, enabled to get the value of ATTR_STRINGIFY_FETCHES.
 

@@ -41,6 +41,10 @@ Opcache:
   . If JIT is enabled, PHP will now exit with a fatal error on startup in case
     of JIT startup initialization issues. (danog)
 
+OpenSSL:
+  . Fixed bug #80269 (OpenSSL sets Subject wrong with extraattribs parameter).
+    (Jakub Zelenka)
+
 PDO:
   . Fixed setAttribute and getAttribute (SakiTakamachi)
 
