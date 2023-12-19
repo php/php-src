@@ -163,74 +163,6 @@ static void dom_add_child_without_merging(xmlNodePtr parent, xmlNodePtr child)
 	child->parent = parent;
 }
 
-/* https://dom.spec.whatwg.org/#converting-nodes-into-a-node */
-xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *contextNode, zval *nodes, uint32_t nodesc)
-{
-	xmlDoc *documentNode;
-	xmlNode *newNode;
-	dom_object *newNodeObj;
-
-	documentNode = dom_doc_from_context_node(contextNode);
-
-	/* 1. Let node be null. */
-	xmlNodePtr node = NULL;
-
-	/* 2. => handled in the loop. */
-
-	/* 3. If nodes contains one node, then set node to nodes[0]. */
-	if (nodesc == 1 && Z_TYPE_P(nodes) == IS_OBJECT) {
-		/* ... and return */
-		node = dom_object_get_node(Z_DOMOBJ_P(nodes));
-		/* Fragments can cause problems because of unpacking (see below). Skip this special case. */
-		if (node->type != XML_DOCUMENT_FRAG_NODE) {
-			xmlUnlinkNode(node);
-			return node;
-		}
-	}
-
-	node = xmlNewDocFragment(documentNode);
-	if (UNEXPECTED(!node)) {
-		return NULL;
-	}
-
-	/* 4. Otherwise, set node to a new DocumentFragment node whose node document is document,
-	 *    and then append each node in nodes, if any, to it. */
-	for (uint32_t i = 0; i < nodesc; i++) {
-		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
-			newNodeObj = Z_DOMOBJ_P(&nodes[i]);
-			newNode = dom_object_get_node(newNodeObj);
-
-			if (newNode->parent != NULL) {
-				xmlUnlinkNode(newNode);
-			}
-
-			newNodeObj->document = document;
-			xmlSetTreeDoc(newNode, documentNode);
-
-			if (newNode->type == XML_DOCUMENT_FRAG_NODE) {
-				/* Unpack document fragment nodes, the behaviour differs for different libxml2 versions. */
-				newNode = newNode->children;
-				while (newNode) {
-					xmlNodePtr next = newNode->next;
-					xmlUnlinkNode(newNode);
-					dom_add_child_without_merging(node, newNode);
-					newNode = next;
-				}
-			} else {
-				dom_add_child_without_merging(node, newNode);
-			}
-		} else {
-			/* 2. Replace each string in nodes with a new Text node whose data is the string and node document is document. */
-			ZEND_ASSERT(Z_TYPE(nodes[i]) == IS_STRING);
-
-			newNode = xmlNewDocText(documentNode, (xmlChar *) Z_STRVAL(nodes[i]));
-			dom_add_child_without_merging(node, newNode);
-		}
-	}
-
-	return node;
-}
-
 static void dom_fragment_assign_parent_node(xmlNodePtr parentNode, xmlNodePtr fragment)
 {
 	xmlNodePtr node = fragment->children;
@@ -347,6 +279,75 @@ static bool dom_is_pre_insert_valid_without_step_1(php_libxml_ref_obj *document,
 	}
 
 	return true;
+}
+
+/* https://dom.spec.whatwg.org/#converting-nodes-into-a-node */
+xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *contextNode, zval *nodes, uint32_t nodesc)
+{
+	xmlDoc *documentNode;
+	xmlNode *newNode;
+	dom_object *newNodeObj;
+
+	documentNode = dom_doc_from_context_node(contextNode);
+
+	/* 1. Let node be null. */
+	xmlNodePtr node = NULL;
+
+	/* 2. => handled in the loop. */
+
+	/* 3. If nodes contains one node, then set node to nodes[0]. */
+	if (nodesc == 1 && Z_TYPE_P(nodes) == IS_OBJECT) {
+		/* ... and return */
+		node = dom_object_get_node(Z_DOMOBJ_P(nodes));
+		/* Fragments can cause problems because of unpacking (see below). Skip this special case. */
+		if (node->type != XML_DOCUMENT_FRAG_NODE) {
+			xmlUnlinkNode(node);
+			return node;
+		}
+	}
+
+	node = xmlNewDocFragment(documentNode);
+	if (UNEXPECTED(!node)) {
+		return NULL;
+	}
+
+	/* 4. Otherwise, set node to a new DocumentFragment node whose node document is document,
+	 *    and then append each node in nodes, if any, to it. */
+	for (uint32_t i = 0; i < nodesc; i++) {
+		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
+			newNodeObj = Z_DOMOBJ_P(&nodes[i]);
+			newNode = dom_object_get_node(newNodeObj);
+
+			if (newNode->parent != NULL) {
+				xmlUnlinkNode(newNode);
+			}
+
+			newNodeObj->document = document;
+			xmlSetTreeDoc(newNode, documentNode);
+
+			if (newNode->type == XML_DOCUMENT_FRAG_NODE) {
+				/* Unpack document fragment nodes, the behaviour differs for different libxml2 versions. */
+				newNode = newNode->children;
+				while (newNode) {
+					xmlNodePtr next = newNode->next;
+					xmlUnlinkNode(newNode);
+					dom_add_child_without_merging(node, newNode);
+					newNode = next;
+				}
+			} else {
+				dom_add_child_without_merging(node, newNode);
+			}
+		} else {
+			/* 2. Replace each string in nodes with a new Text node whose data is the string and node document is document. */
+			ZEND_ASSERT(Z_TYPE(nodes[i]) == IS_STRING);
+
+			newNode = xmlNewDocText(documentNode, (xmlChar *) Z_STRVAL(nodes[i]));
+			dom_add_child_without_merging(node, newNode);
+		}
+	}
+
+	/* 5. Return node. */
+	return node;
 }
 
 /* https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity */
