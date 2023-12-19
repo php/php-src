@@ -1,5 +1,5 @@
 --TEST--
-round() with different rounding modes
+round() with modes PHP_ROUND_CEILING and PHP_ROUND_FLOOR
 --FILE--
 <?php
 $modes = [
