@@ -205,8 +205,7 @@ static bool dom_is_pre_insert_valid_without_step_1(php_libxml_ref_obj *document,
 
 	/* 1. If parent is not a Document, DocumentFragment, or Element node, then throw a "HierarchyRequestError" DOMException.
 	 *    => Impossible */
-	ZEND_ASSERT(parentNode->type == XML_ELEMENT_NODE
-				|| parentNode->type == XML_DOCUMENT_NODE
+	ZEND_ASSERT(parentNode->type == XML_DOCUMENT_NODE
 				|| parentNode->type == XML_HTML_DOCUMENT_NODE
 				|| parentNode->type == XML_DOCUMENT_FRAG_NODE
 				|| parentNode->type == XML_ELEMENT_NODE);

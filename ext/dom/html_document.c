@@ -1105,9 +1105,7 @@ fail_oom:
 	php_dom_throw_error(INVALID_STATE_ERR, 1);
 fail_general:
 	lxb_html_document_destroy(document);
-	if (stream) {
-		php_stream_close(stream);
-	}
+	php_stream_close(stream);
 	if (opened_path != NULL) {
 		zend_string_release_ex(opened_path, false);
 	}

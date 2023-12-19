@@ -967,7 +967,7 @@ PHP_METHOD(DOM_Document, createAttributeNS)
 
 		if (uri != NULL && ZSTR_LEN(uri) > 0) {
 			if (php_dom_follow_spec_intern(intern)) {
-				nsptr = dom_ns_create_local_as_is(docp, root, root, uri ? ZSTR_VAL(uri) : NULL, prefix);
+				nsptr = dom_ns_create_local_as_is(docp, root, root, ZSTR_VAL(uri), prefix);
 			} else {
 				nsptr = xmlSearchNsByHref(docp, root, BAD_CAST ZSTR_VAL(uri));
 
