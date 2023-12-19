@@ -8,15 +8,16 @@ dom
 require __DIR__ . "/node_list_dump.inc";
 
 $dom = DOM\HTMLDocument::createEmpty();
-$dom->appendChild($dom->createElement("HTML", "1"));
-$dom->appendChild($dom->createElementNS("http://www.w3.org/1999/xhtml", "html", "2"));
-$dom->appendChild($dom->createElementNS(NULL, "html", "3"));
-$dom->appendChild($dom->createElementNS(NULL, "HTML", "4"));
-$dom->appendChild($dom->createElementNS("urn:foo", "htML", "5"));
-$dom->appendChild($dom->createElement("foo:HTML", "6"));
-$dom->appendChild($dom->createElementNS("urn:a", "foo:HTML", "7")); // Should never match in this test file
-$dom->appendChild($dom->createElementNS("http://www.w3.org/1999/xhtml", "bar:HTML", "8"));
-$dom->appendChild($dom->createElementNS("http://www.w3.org/1999/xhtml", "bar:html", "9"));
+$container = $dom->appendChild($dom->createElement("container"));
+$container->appendChild($dom->createElement("HTML", "1"));
+$container->appendChild($dom->createElementNS("http://www.w3.org/1999/xhtml", "html", "2"));
+$container->appendChild($dom->createElementNS(NULL, "html", "3"));
+$container->appendChild($dom->createElementNS(NULL, "HTML", "4"));
+$container->appendChild($dom->createElementNS("urn:foo", "htML", "5"));
+$container->appendChild($dom->createElement("foo:HTML", "6"));
+$container->appendChild($dom->createElementNS("urn:a", "foo:HTML", "7")); // Should never match in this test file
+$container->appendChild($dom->createElementNS("http://www.w3.org/1999/xhtml", "bar:HTML", "8"));
+$container->appendChild($dom->createElementNS("http://www.w3.org/1999/xhtml", "bar:html", "9"));
 
 dumpNodeList($dom->getElementsByTagName("HTml"));
 dumpNodeList($dom->getElementsByTagName("htML"));

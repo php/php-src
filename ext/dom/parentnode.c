@@ -436,15 +436,16 @@ static void dom_pre_insert_helper(xmlNodePtr insertion_point, xmlNodePtr parentN
 
 static void dom_insert_node_list_cleanup(xmlNodePtr node)
 {
+	if (node->_private != NULL) {
+		/* Not a temporary node. */
+		return;
+	}
 	if (node->type == XML_DOCUMENT_FRAG_NODE) {
 		dom_free_node_after_zval_single_node_creation(node);
 		xmlFree(node); /* Don't free the children, now-empty fragment! */
 	} else if (node->type == XML_TEXT_NODE) {
-		/* Must have been a temporary node. */
-		if (node->_private == NULL) {
-			ZEND_ASSERT(node->parent == NULL);
-			xmlFreeNode(node);
-		}
+		ZEND_ASSERT(node->parent == NULL);
+		xmlFreeNode(node);
 	} else {
 		/* Must have been a directly-passed node. */
 		ZEND_ASSERT(node->_private != NULL);
@@ -508,7 +509,7 @@ static void dom_insert_node_list(php_libxml_ref_obj *document, xmlNodePtr node, 
 }
 
 /* https://dom.spec.whatwg.org/#concept-node-append */
-static void dom_node_append(php_libxml_ref_obj *document, xmlNodePtr node, xmlNodePtr parent)
+void php_dom_node_append(php_libxml_ref_obj *document, xmlNodePtr node, xmlNodePtr parent)
 {
 	dom_insert_node_list(document, node, parent, NULL);
 }
@@ -531,7 +532,7 @@ void dom_parent_node_append(dom_object *context, zval *nodes, uint32_t nodesc)
 	}
 
 	/* 2. Append node to this. */
-	dom_node_append(context->document, node, parentNode);
+	php_dom_node_append(context->document, node, parentNode);
 }
 
 /* https://dom.spec.whatwg.org/#dom-parentnode-prepend */

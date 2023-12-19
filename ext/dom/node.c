@@ -1293,25 +1293,14 @@ PHP_METHOD(DOMNode, removeChild)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-184E7107
 Since:
 */
-PHP_METHOD(DOMNode, appendChild)
+static void dom_node_append_child_legacy(zval *return_value, dom_object *intern, dom_object *childobj, xmlNodePtr nodep, xmlNodePtr child)
 {
-	zval *id, *node;
-	xmlNodePtr child, nodep, new_child = NULL;
-	dom_object *intern, *childobj;
+	xmlNodePtr new_child = NULL;
 	int ret, stricterror;
-
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_node_class_entry) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
 	if (dom_node_children_valid(nodep) == FAILURE) {
 		RETURN_FALSE;
 	}
-
-	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
 	stricterror = dom_get_strict_error(intern->document);
 
@@ -1410,6 +1399,38 @@ cannot_add:
 	RETURN_FALSE;
 }
 /* }}} end dom_node_append_child */
+
+PHP_METHOD(DOMNode, appendChild)
+{
+	zval *node;
+	xmlNodePtr nodep, child;
+	dom_object *intern, *childobj;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(node, dom_node_class_entry)
+	ZEND_PARSE_PARAMETERS_END();
+
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
+	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
+
+	if (php_dom_follow_spec_intern(intern)) {
+		/* Parent check from pre-insertion validation done here:
+		 * If parent is not a Document, DocumentFragment, or Element node, then throw a "HierarchyRequestError" DOMException. */
+		if (nodep->type != XML_DOCUMENT_NODE
+			&& nodep->type != XML_HTML_DOCUMENT_NODE
+			&& nodep->type != XML_ELEMENT_NODE
+			&& nodep->type != XML_DOCUMENT_FRAG_NODE) {
+			php_dom_throw_error(HIERARCHY_REQUEST_ERR, /* strict */ true);
+			RETURN_THROWS();
+		}
+		/* Append, this doesn't do the parent check so we do it here. */
+		php_dom_node_append(intern->document, child, nodep);
+		int ret;
+		DOM_RET_OBJ(child, &ret, intern);
+	} else {
+		dom_node_append_child_legacy(return_value, intern, childobj, nodep, child);
+	}
+}
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-810594187
 Since:

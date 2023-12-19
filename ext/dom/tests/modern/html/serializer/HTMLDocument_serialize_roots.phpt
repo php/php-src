@@ -10,11 +10,12 @@ $dom = DOM\XMLDocument::createEmpty();
 $cdata = $dom->createCDATASection("cdata");
 
 $dom = DOM\HTMLDocument::createEmpty();
-$comment = $dom->appendChild($dom->createComment("comment"));
-$cdata = $dom->appendChild($dom->importNode($cdata));
-$emptyElement = $dom->appendChild($dom->createElement("empty"));
-$text = $dom->appendChild($dom->createTextNode("text"));
-$pi = $dom->appendChild($dom->createProcessingInstruction("target", "data"));
+$container = $dom->appendChild($dom->createElement("container"));
+$comment = $container->appendChild($dom->createComment("comment"));
+$cdata = $container->appendChild($dom->importNode($cdata));
+$emptyElement = $container->appendChild($dom->createElement("empty"));
+$text = $container->appendChild($dom->createTextNode("text"));
+$pi = $container->appendChild($dom->createProcessingInstruction("target", "data"));
 $fragment = $dom->createDocumentFragment();
 
 var_dump($dom->saveHTML($comment));

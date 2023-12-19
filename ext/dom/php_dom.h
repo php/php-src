@@ -184,6 +184,7 @@ void dom_child_node_remove(dom_object *context);
 void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_remove_all_children(xmlNodePtr nodep);
 bool php_dom_fragment_insertion_hierarchy_check(xmlNodePtr node);
+void php_dom_node_append(php_libxml_ref_obj *document, xmlNodePtr node, xmlNodePtr parent);
 
 /* nodemap and nodelist APIs */
 xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, const char *named, bool may_transform);

@@ -9,7 +9,7 @@ class MyElement extends DOM\Element {}
 
 $dom = DOM\HTMLDocument::createFromString("<p>foo</p>", LIBXML_NOERROR);
 $dom->registerNodeClass("DOMElement", "MyElement");
-$child = $dom->appendChild($dom->createElement('html'));
+$child = $dom->documentElement->appendChild($dom->createElement('html'));
 
 // Destroy reference to the DOM
 unset($dom);
@@ -37,7 +37,7 @@ object(DOM\HTMLDocument)#1 (25) {
   ["lastElementChild"]=>
   string(22) "(object value omitted)"
   ["childElementCount"]=>
-  int(2)
+  int(1)
   ["nodeName"]=>
   string(9) "#document"
   ["nodeValue"]=>
