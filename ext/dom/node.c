@@ -151,9 +151,15 @@ zend_result dom_node_node_value_read(dom_object *obj, zval *retval)
 
 	/* Access to Element node is implemented as a convenience method */
 	switch (nodep->type) {
+		case XML_ELEMENT_NODE: {
+			if (php_dom_follow_spec_intern(obj)) {
+				ZVAL_NULL(retval);
+				break;
+			}
+			ZEND_FALLTHROUGH;
+		}
 		case XML_ATTRIBUTE_NODE:
 		case XML_TEXT_NODE:
-		case XML_ELEMENT_NODE:
 		case XML_COMMENT_NODE:
 		case XML_CDATA_SECTION_NODE:
 		case XML_PI_NODE:
