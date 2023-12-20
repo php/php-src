@@ -189,6 +189,8 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                     } else {
                         lxml_attr->ns = dom_ns_create_local_as_is(lxml_doc, lxml_element, lxml_element, DOM_XMLNS_NS_URI, NULL);
                     }
+                } else if (attr->node.ns == LXB_NS_XLINK) {
+                    lxml_attr->ns = dom_ns_create_local_as_is(lxml_doc, lxml_element, lxml_element, DOM_XLINK_NS_URI, BAD_CAST "xlink");
                 }
 
                 if (last_added_attr == NULL) {
