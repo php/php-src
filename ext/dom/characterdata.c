@@ -306,13 +306,14 @@ PHP_METHOD(DOMCharacterData, replaceData)
 	xmlChar		*cur, *substring, *second = NULL;
 	xmlNodePtr  node;
 	char		*arg;
-	zend_long        offset, count;
+	zend_long        offset, count_input;
+	unsigned int count;
 	int         length;
 	size_t arg_len;
 	dom_object	*intern;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lls", &offset, &count, &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lls", &offset, &count_input, &arg, &arg_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -325,8 +326,12 @@ PHP_METHOD(DOMCharacterData, replaceData)
 
 	length = xmlUTF8Strlen(cur);
 
-	if (offset < 0 || count < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count) || offset > length) {
+	if (offset < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count) || offset > length) {
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
+		RETURN_FALSE;
+	}
+
+	if (!dom_convert_number_unsigned(intern, count_input, &count)) {
 		RETURN_FALSE;
 	}
 
