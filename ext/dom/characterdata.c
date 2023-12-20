@@ -30,6 +30,24 @@
 * Since:
 */
 
+/* For some peculiar reason, many of these methods operate on unsigned numbers.
+ * Unfortunately, "old DOM" doesn't, so we have to conditionally convert...
+ * And the reason we're using "unsigned int" instead of "unsigned zend_long" is because libxml2 internally works with ints. */
+static bool dom_convert_number_unsigned(dom_object *intern, zend_long input, unsigned int *output)
+{
+	if (input < 0) {
+		if (php_dom_follow_spec_intern(intern)) {
+			*output = (unsigned int) input;
+		} else {
+			php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
+			return false;
+		}
+	} else {
+		*output = input;
+	}
+	return true;
+}
+
 /* {{{ data	string
 readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-72AB8359
@@ -219,12 +237,13 @@ PHP_METHOD(DOMCharacterData, deleteData)
 	zval *id;
 	xmlChar    *cur, *substring, *second;
 	xmlNodePtr  node;
-	zend_long        offset, count;
+	zend_long        offset, count_input;
+	unsigned int count;
 	int         length;
 	dom_object	*intern;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &count_input) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -237,8 +256,12 @@ PHP_METHOD(DOMCharacterData, deleteData)
 
 	length = xmlUTF8Strlen(cur);
 
-	if (offset < 0 || count < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count) || offset > length) {
+	if (offset < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count_input) || offset > length) {
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
+		RETURN_FALSE;
+	}
+
+	if (!dom_convert_number_unsigned(intern, count_input, &count)) {
 		RETURN_FALSE;
 	}
 
