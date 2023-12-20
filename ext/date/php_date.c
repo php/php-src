@@ -3856,9 +3856,10 @@ PHP_METHOD(DateTimeImmutable, setMicroseconds)
 	}
 
 	if (UNEXPECTED(us < 0 || us > 999999)) {
-		zend_throw_error(
+		zend_argument_error(
 			date_ce_date_range_error,
-			"Microseconds must be between 0 and 999999, "ZEND_LONG_FMT" given",
+			1,
+			"must be between 0 and 999999, " ZEND_LONG_FMT " given",
 			us
 		);
 		RETURN_THROWS();
@@ -3889,9 +3890,10 @@ PHP_METHOD(DateTime, setMicroseconds)
 	}
 
 	if (UNEXPECTED(us < 0 || us > 999999)) {
-		zend_throw_error(
+		zend_argument_error(
 			date_ce_date_range_error,
-			"Microseconds must be between 0 and 999999, "ZEND_LONG_FMT" given",
+			1,
+			"must be between 0 and 999999, " ZEND_LONG_FMT " given",
 			us
 		);
 		RETURN_THROWS();
