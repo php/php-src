@@ -53,6 +53,7 @@ const DATE_RFC1123 = "D, d M Y H:i:s O";
 /**
  * @var string
  * @cvalue DATE_FORMAT_RFC7231
+ * @deprecated
  */
 const DATE_RFC7231 = "D, d M Y H:i:s \\G\\M\\T";
 
@@ -300,7 +301,10 @@ interface DateTimeInterface
     public const RFC1036 = DATE_RFC1036;
     /** @var string */
     public const RFC1123 = DATE_RFC1123;
-    /** @var string */
+    /**
+     * @var string
+     * @deprecated
+     */
     public const RFC7231 = DATE_RFC7231;
     /** @var string */
     public const RFC2822 = DATE_RFC2822;

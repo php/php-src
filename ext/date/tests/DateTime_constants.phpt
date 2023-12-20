@@ -21,7 +21,10 @@ var_dump(
 );
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Constant DATE_RFC7231 is deprecated in %s on line %d
+
+Deprecated: Constant DateTime::RFC7231 is deprecated in %s on line %d
 bool(true)
 bool(true)
 bool(true)
