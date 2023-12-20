@@ -640,6 +640,7 @@ asprintf \
 nanosleep \
 memmem \
 memrchr \
+mempcpy \
 )
 
 AC_CHECK_FUNCS(inet_ntop,[],[
