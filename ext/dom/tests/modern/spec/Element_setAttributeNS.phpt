@@ -48,7 +48,7 @@ dumpAttrs($container);
 --EXPECT--
 --- xmlns attribute ---
 <container xmlns:foo="1"></container>
-Attr: foo
+Attr: xmlns:foo
 string(5) "xmlns"
 string(9) "xmlns:foo"
 string(29) "http://www.w3.org/2000/xmlns/"
@@ -56,17 +56,17 @@ string(29) "http://www.w3.org/2000/xmlns/"
 Invalid Character Error
 --- ns attributes with same namespace but different prefix ---
 <container y:foo="2"></container>
-Attr: foo
+Attr: y:foo
 string(1) "y"
 string(5) "y:foo"
 string(5) "urn:a"
 --- ns attributes with different namespace but same prefix ---
 <container x:foo="1" x:foo="2"></container>
-Attr: foo
+Attr: x:foo
 string(1) "x"
 string(5) "x:foo"
 string(5) "urn:a"
-Attr: foo
+Attr: x:foo
 string(1) "x"
 string(5) "x:foo"
 string(5) "urn:b"

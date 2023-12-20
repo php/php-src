@@ -66,7 +66,7 @@ Attr: BAR
 string(0) ""
 string(3) "BAR"
 NULL
-Attr: ns
+Attr: in:ns
 string(2) "in"
 string(5) "in:ns"
 string(5) "urn:b"

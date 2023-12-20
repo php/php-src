@@ -78,11 +78,11 @@ echo $dom->saveHTML(), "\n";
 ("http://www.w3.org/2000/xmlns", "xml:foo"): Namespace Error
 
 --- Normal cases ---
-Attr: foo
+Attr: xmlns:foo
 string(5) "xmlns"
 string(9) "xmlns:foo"
 string(29) "http://www.w3.org/2000/xmlns/"
-Attr: bar
+Attr: xmlns:bar
 string(5) "xmlns"
 string(9) "xmlns:bar"
 string(29) "http://www.w3.org/2000/xmlns/"
@@ -90,15 +90,15 @@ Attr: xmlns
 string(0) ""
 string(5) "xmlns"
 string(29) "http://www.w3.org/2000/xmlns/"
-Attr: foo
+Attr: xml:foo
 string(3) "xml"
 string(7) "xml:foo"
 string(36) "http://www.w3.org/XML/1998/namespace"
-Attr: bar
+Attr: foo:bar
 string(3) "foo"
 string(7) "foo:bar"
 string(5) "urn:a"
-Attr: bar
+Attr: bar:bar
 string(3) "bar"
 string(7) "bar:bar"
 string(5) "urn:a"
