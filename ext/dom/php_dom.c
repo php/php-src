@@ -482,6 +482,17 @@ PHP_FUNCTION(dom_import_simplexml)
 
 static dom_object* dom_objects_set_class(zend_class_entry *class_type);
 
+void php_dom_update_document_after_clone(dom_object *original, xmlNodePtr original_node, dom_object *clone, xmlNodePtr cloned_node)
+{
+	dom_copy_document_ref(original->document, clone->document);
+	/* Workaround libxml2 bug, see https://gitlab.gnome.org/GNOME/libxml2/-/commit/07920b4381873187c02df53fa9b5d44aff3a7041 */
+#if LIBXML_VERSION < 20911
+	if (original_node->type == XML_HTML_DOCUMENT_NODE) {
+		cloned_node->type = XML_HTML_DOCUMENT_NODE;
+	}
+#endif
+}
+
 static void dom_update_refcount_after_clone(dom_object *original, xmlNodePtr original_node, dom_object *clone, xmlNodePtr cloned_node)
 {
 	/* If we cloned a document then we must create new doc proxy */
@@ -491,13 +502,7 @@ static void dom_update_refcount_after_clone(dom_object *original, xmlNodePtr ori
 	php_libxml_increment_doc_ref((php_libxml_node_object *)clone, cloned_node->doc);
 	php_libxml_increment_node_ptr((php_libxml_node_object *)clone, cloned_node, (void *)clone);
 	if (original->document != clone->document) {
-		dom_copy_document_ref(original->document, clone->document);
-		/* Workaround libxml2 bug, see https://gitlab.gnome.org/GNOME/libxml2/-/commit/07920b4381873187c02df53fa9b5d44aff3a7041 */
-#if LIBXML_VERSION < 20911
-		if (original_node->type == XML_HTML_DOCUMENT_NODE) {
-			cloned_node->type = XML_HTML_DOCUMENT_NODE;
-		}
-#endif
+		php_dom_update_document_after_clone(original, original_node, clone, cloned_node);
 	}
 }
 
@@ -511,11 +516,11 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 	if (instanceof_function(intern->std.ce, dom_node_class_entry)) {
 		xmlNodePtr node = (xmlNodePtr)dom_object_get_node(intern);
 		if (node != NULL) {
+			// TODO: clone $dtd broken?
 			xmlNodePtr cloned_node = xmlDocCopyNode(node, node->doc, 1);
 			if (cloned_node != NULL) {
 				dom_update_refcount_after_clone(intern, node, clone, cloned_node);
 			}
-
 		}
 	}
 

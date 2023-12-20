@@ -1499,10 +1499,12 @@ PHP_METHOD(DOMNode, cloneNode)
 
 	/* If document cloned we want a new document proxy */
 	if (node->doc != n->doc) {
-		intern = NULL;
+		DOM_RET_OBJ(node, &ret, NULL);
+		dom_object *new_intern = Z_DOMOBJ_P(return_value);
+		php_dom_update_document_after_clone(intern, n, new_intern, node);
+	} else {
+		DOM_RET_OBJ(node, &ret, intern);
 	}
-
-	DOM_RET_OBJ(node, &ret, intern);
 }
 /* }}} end dom_node_clone_node */
 
