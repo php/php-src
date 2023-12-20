@@ -199,16 +199,22 @@ bool php_dom_fragment_insertion_hierarchy_check(xmlNodePtr node)
 }
 
 /* https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity */
+bool php_dom_pre_insert_is_parent_invalid(xmlNodePtr parent)
+{
+	return parent->type != XML_DOCUMENT_NODE
+		&& parent->type != XML_HTML_DOCUMENT_NODE
+		&& parent->type != XML_ELEMENT_NODE
+		&& parent->type != XML_DOCUMENT_FRAG_NODE;
+}
+
+/* https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity */
 static bool dom_is_pre_insert_valid_without_step_1(php_libxml_ref_obj *document, xmlNodePtr parentNode, xmlNodePtr node, xmlNodePtr child, xmlDocPtr documentNode)
 {
 	ZEND_ASSERT(parentNode != NULL);
 
 	/* 1. If parent is not a Document, DocumentFragment, or Element node, then throw a "HierarchyRequestError" DOMException.
 	 *    => Impossible */
-	ZEND_ASSERT(parentNode->type == XML_DOCUMENT_NODE
-				|| parentNode->type == XML_HTML_DOCUMENT_NODE
-				|| parentNode->type == XML_DOCUMENT_FRAG_NODE
-				|| parentNode->type == XML_ELEMENT_NODE);
+	ZEND_ASSERT(!php_dom_pre_insert_is_parent_invalid(parentNode));
 
 	if (node->doc != documentNode) {
 		php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(document));

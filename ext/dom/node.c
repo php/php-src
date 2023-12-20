@@ -1078,17 +1078,18 @@ PHP_METHOD(DOMNode, insertBefore)
 
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
-	dom_node_insert_before_legacy(return_value, ref, intern, childobj, parentp, child);
+	if (php_dom_follow_spec_intern(intern)) {
+		dom_node_insert_before_modern(return_value, ref, intern, childobj, parentp, child);
+	} else {
+		dom_node_insert_before_legacy(return_value, ref, intern, childobj, parentp, child);
+	}
 }
 
 /* https://dom.spec.whatwg.org/#concept-node-replace */
 static zend_result dom_replace_node_validity_checks(xmlNodePtr parent, xmlNodePtr node, xmlNodePtr child)
 {
 	/* 1. If parent is not a Document, DocumentFragment, or Element node, then throw a "HierarchyRequestError" DOMException. */
-	if (parent->type != XML_DOCUMENT_NODE
-		&& parent->type != XML_HTML_DOCUMENT_NODE
-		&& parent->type != XML_ELEMENT_NODE
-		&& parent->type != XML_DOCUMENT_FRAG_NODE) {
+	if (php_dom_pre_insert_is_parent_invalid(parent)) {
 		php_dom_throw_error(HIERARCHY_REQUEST_ERR, /* strict */ true);
 		return FAILURE;
 	}
@@ -1428,10 +1429,7 @@ PHP_METHOD(DOMNode, appendChild)
 	if (php_dom_follow_spec_intern(intern)) {
 		/* Parent check from pre-insertion validation done here:
 		 * If parent is not a Document, DocumentFragment, or Element node, then throw a "HierarchyRequestError" DOMException. */
-		if (nodep->type != XML_DOCUMENT_NODE
-			&& nodep->type != XML_HTML_DOCUMENT_NODE
-			&& nodep->type != XML_ELEMENT_NODE
-			&& nodep->type != XML_DOCUMENT_FRAG_NODE) {
+		if (php_dom_pre_insert_is_parent_invalid(nodep)) {
 			php_dom_throw_error(HIERARCHY_REQUEST_ERR, /* strict */ true);
 			RETURN_THROWS();
 		}
