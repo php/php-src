@@ -191,13 +191,14 @@ PHP_METHOD(DOMCharacterData, insertData)
 	xmlChar		*cur, *first, *second;
 	xmlNodePtr  node;
 	char		*arg;
-	zend_long        offset;
+	zend_long        offset_input;
+	unsigned int offset;
 	int         length;
 	size_t arg_len;
 	dom_object	*intern;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &offset, &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &offset_input, &arg, &arg_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -210,7 +211,16 @@ PHP_METHOD(DOMCharacterData, insertData)
 
 	length = xmlUTF8Strlen(cur);
 
-	if (offset < 0 || ZEND_LONG_INT_OVFL(offset) || offset > length) {
+	if (ZEND_LONG_INT_OVFL(offset_input)) {
+		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
+		RETURN_FALSE;
+	}
+
+	if (!dom_convert_number_unsigned(intern, offset_input, &offset)) {
+		RETURN_FALSE;
+	}
+
+	if (offset > length) {
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
