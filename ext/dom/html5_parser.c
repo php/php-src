@@ -184,7 +184,11 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 lxml_text->parent = (xmlNodePtr) lxml_attr;
 
                 if (attr->node.ns == LXB_NS_XMLNS) {
-                    lxml_attr->ns = dom_ns_create_local_as_is(lxml_doc, lxml_element, lxml_element, DOM_XMLNS_NS_URI, NULL);
+                    if (strcmp((const char *) local_name, "xmlns") != 0) {
+                        lxml_attr->ns = dom_ns_create_local_as_is(lxml_doc, lxml_element, lxml_element, DOM_XMLNS_NS_URI, BAD_CAST "xmlns");
+                    } else {
+                        lxml_attr->ns = dom_ns_create_local_as_is(lxml_doc, lxml_element, lxml_element, DOM_XMLNS_NS_URI, NULL);
+                    }
                 }
 
                 if (last_added_attr == NULL) {
