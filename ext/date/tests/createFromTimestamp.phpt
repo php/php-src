@@ -201,16 +201,16 @@ DateTimeImmutable::createFromTimestamp(-0.0): object(DateTimeImmutable)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-DateTime::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
-DateTimeImmutable::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
-DateTime::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
-DateTimeImmutable::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
-DateTime::createFromTimestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
-DateTimeImmutable::createFromTimestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
-DateTime::createFromTimestamp(INF): DateRangeError: Seconds must be a finite number between %i and %i, INF given
-DateTimeImmutable::createFromTimestamp(INF): DateRangeError: Seconds must be a finite number between %i and %i, INF given
-DateTime::createFromTimestamp(-INF): DateRangeError: Seconds must be a finite number between %i and %i, -INF given
-DateTimeImmutable::createFromTimestamp(-INF): DateRangeError: Seconds must be a finite number between %i and %i, -INF given
+DateTime::createFromTimestamp(%f): DateRangeError: Timestamp must be a finite number between %i and %i.999999, %f given
+DateTimeImmutable::createFromTimestamp(%f): DateRangeError: Timestamp must be a finite number between %i and %i.999999, %f given
+DateTime::createFromTimestamp(%f): DateRangeError: Timestamp must be a finite number between %i and %i.999999, %f given
+DateTimeImmutable::createFromTimestamp(%f): DateRangeError: Timestamp must be a finite number between %i and %i.999999, %f given
+DateTime::createFromTimestamp(NAN): DateRangeError: Timestamp must be a finite number between %i and %i.999999, NAN given
+DateTimeImmutable::createFromTimestamp(NAN): DateRangeError: Timestamp must be a finite number between %i and %i.999999, NAN given
+DateTime::createFromTimestamp(INF): DateRangeError: Timestamp must be a finite number between %i and %i.999999, INF given
+DateTimeImmutable::createFromTimestamp(INF): DateRangeError: Timestamp must be a finite number between %i and %i.999999, INF given
+DateTime::createFromTimestamp(-INF): DateRangeError: Timestamp must be a finite number between %i and %i.999999, -INF given
+DateTimeImmutable::createFromTimestamp(-INF): DateRangeError: Timestamp must be a finite number between %i and %i.999999, -INF given
 MyDateTime::createFromTimestamp(0): object(MyDateTime)#%d (3) {
   ["date"]=>
   string(26) "1970-01-01 00:00:00.000000"
