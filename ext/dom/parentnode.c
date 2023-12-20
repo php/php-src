@@ -482,7 +482,12 @@ static void dom_insert_node_list_unchecked(php_libxml_ref_obj *document, xmlNode
 			}
 		}
 
-		xmlFree(node);
+		if (node->_private == NULL) {
+			xmlFree(node);
+		} else {
+			node->children = NULL;
+			node->last = NULL;
+		}
 	} else {
 		/* 2. Let referenceChild be child.
 		 * 3. If referenceChild is node, then set referenceChild to node’s next sibling. */
