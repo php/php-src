@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.1
+21 Dec 2023, PHP 8.3.1
 
 - Core:
   . Fixed bug GH-12758 / GH-12768 (Invalid opline in OOM handlers within
