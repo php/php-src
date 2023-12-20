@@ -1194,14 +1194,10 @@ static int php_output_stack_pop(int flags)
 	php_output_handler **current, *orphan = OG(active);
 
 	if (!orphan) {
-		if (!(flags & PHP_OUTPUT_POP_SILENT)) {
-			php_error_docref("ref.outcontrol", E_NOTICE, "Failed to %s buffer. No buffer to %s", (flags&PHP_OUTPUT_POP_DISCARD)?"discard":"send", (flags&PHP_OUTPUT_POP_DISCARD)?"discard":"send");
-		}
+		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to %s buffer. No buffer to %s", (flags&PHP_OUTPUT_POP_DISCARD)?"discard":"send", (flags&PHP_OUTPUT_POP_DISCARD)?"discard":"send");
 		return 0;
 	} else if (!(flags & PHP_OUTPUT_POP_FORCE) && !(orphan->flags & PHP_OUTPUT_HANDLER_REMOVABLE)) {
-		if (!(flags & PHP_OUTPUT_POP_SILENT)) {
-			php_error_docref("ref.outcontrol", E_NOTICE, "Failed to %s buffer of %s (%d)", (flags&PHP_OUTPUT_POP_DISCARD)?"discard":"send", ZSTR_VAL(orphan->name), orphan->level);
-		}
+		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to %s buffer of %s (%d)", (flags&PHP_OUTPUT_POP_DISCARD)?"discard":"send", ZSTR_VAL(orphan->name), orphan->level);
 		return 0;
 	} else {
 		php_output_context_init(&context, PHP_OUTPUT_HANDLER_FINAL);

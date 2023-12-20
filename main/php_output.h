@@ -54,7 +54,6 @@ typedef enum _php_output_handler_status_t {
 #define PHP_OUTPUT_POP_TRY			0x000
 #define PHP_OUTPUT_POP_FORCE		0x001
 #define PHP_OUTPUT_POP_DISCARD		0x010
-#define PHP_OUTPUT_POP_SILENT		0x100
 
 /* real global flags */
 #define PHP_OUTPUT_IMPLICITFLUSH		0x01
