@@ -1549,7 +1549,6 @@ PHP_METHOD(DOMNode, normalize)
 	php_libxml_invalidate_node_list_cache(intern->document);
 
 	dom_normalize(nodep);
-
 }
 /* }}} end dom_node_normalize */
 
