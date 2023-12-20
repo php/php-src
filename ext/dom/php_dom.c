@@ -1475,33 +1475,31 @@ static inline void free_node(xmlNodePtr node)
 	}
 }
 
-/* {{{ void dom_normalize (xmlNodePtr nodep) */
-void dom_normalize (xmlNodePtr nodep)
+static void dom_merge_adjacent_exclusive_text_nodes(xmlNodePtr node)
 {
-	xmlNodePtr child, nextp, newnextp;
-	xmlAttrPtr attr;
+	xmlNodePtr nextp = node->next;
+	while (nextp != NULL && nextp->type == XML_TEXT_NODE) {
+		xmlNodePtr newnextp = nextp->next;
+		xmlChar *strContent = nextp->content;
+		if (strContent != NULL) {
+			xmlNodeAddContent(node, strContent);
+		}
+		xmlUnlinkNode(nextp);
+		free_node(nextp);
+		nextp = newnextp;
+	}
+}
 
-	child = nodep->children;
+/* {{{ void php_dom_normalize_legacy(xmlNodePtr nodep) */
+void php_dom_normalize_legacy(xmlNodePtr nodep)
+{
+	xmlNodePtr child = nodep->children;
 	while(child != NULL) {
 		switch (child->type) {
 			case XML_TEXT_NODE:
-				nextp = child->next;
-				while (nextp != NULL) {
-					if (nextp->type == XML_TEXT_NODE) {
-						newnextp = nextp->next;
-						xmlChar *strContent = nextp->content;
-						if (strContent != NULL) {
-							xmlNodeAddContent(child, strContent);
-						}
-						xmlUnlinkNode(nextp);
-						free_node(nextp);
-						nextp = newnextp;
-					} else {
-						break;
-					}
-				}
+				dom_merge_adjacent_exclusive_text_nodes(child);
 				if (is_empty_node(child)) {
-					nextp = child->next;
+					xmlNodePtr nextp = child->next;
 					xmlUnlinkNode(child);
 					free_node(child);
 					child = nextp;
@@ -1509,15 +1507,15 @@ void dom_normalize (xmlNodePtr nodep)
 				}
 				break;
 			case XML_ELEMENT_NODE:
-				dom_normalize (child);
-				attr = child->properties;
+				php_dom_normalize_legacy(child);
+				xmlAttrPtr attr = child->properties;
 				while (attr != NULL) {
-					dom_normalize((xmlNodePtr) attr);
+					php_dom_normalize_legacy((xmlNodePtr) attr);
 					attr = attr->next;
 				}
 				break;
 			case XML_ATTRIBUTE_NODE:
-				dom_normalize (child);
+				php_dom_normalize_legacy(child);
 				break;
 			default:
 				break;
@@ -1525,7 +1523,41 @@ void dom_normalize (xmlNodePtr nodep)
 		child = child->next;
 	}
 }
-/* }}} end dom_normalize */
+/* }}} end php_dom_normalize_legacy */
+
+/* https://dom.spec.whatwg.org/#dom-node-normalize */
+void php_dom_normalize_modern(xmlNodePtr this)
+{
+	/* for each descendant exclusive Text node node of this: */
+	xmlNodePtr node = this->children;
+	while (node != NULL) {
+		if (node->type == XML_TEXT_NODE) {
+			/* 1. Let length be node’s length.
+			 *    We'll deviate a bit here: we'll just check if it's empty or not as we don't want to compute the length. */
+			bool is_empty = is_empty_node(node);
+
+			/* 2. If length is zero, then remove node and continue with the next exclusive Text node, if any. */
+			if (is_empty) {
+				xmlNodePtr next = node->next;
+				xmlUnlinkNode(node);
+				free_node(node);
+				node = next;
+				continue;
+			}
+
+			/* 3. Let data be the concatenation of the data of node’s contiguous exclusive Text nodes (excluding itself), in tree order.
+			 * 4. Replace data with node node, offset length, count 0, and data data.
+			 * 7. Remove node’s contiguous exclusive Text nodes (excluding itself), in tree order. 
+			 *    => In other words: Concat every contiguous text node into node and delete the merged nodes. */
+			dom_merge_adjacent_exclusive_text_nodes(node);
+
+			/* Steps 5-6 deal with mutation records, we don't do that here. */
+		} else if (node->type == XML_ELEMENT_NODE) {
+			php_dom_normalize_modern(node);
+		}
+		node = node->next;
+	}
+}
 
 static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr search_parent)
 {

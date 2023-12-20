@@ -1171,7 +1171,11 @@ PHP_METHOD(DOM_Document, normalizeDocument)
 
 	php_libxml_invalidate_node_list_cache(intern->document);
 
-	dom_normalize((xmlNodePtr) docp);
+	if (php_dom_follow_spec_intern(intern)) {
+		php_dom_normalize_modern(xmlDocGetRootElement(docp));
+	} else {
+		php_dom_normalize_legacy((xmlNodePtr) docp);
+	}
 }
 /* }}} end dom_document_normalize_document */
 

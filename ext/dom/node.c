@@ -1548,7 +1548,11 @@ PHP_METHOD(DOMNode, normalize)
 
 	php_libxml_invalidate_node_list_cache(intern->document);
 
-	dom_normalize(nodep);
+	if (php_dom_follow_spec_intern(intern)) {
+		php_dom_normalize_modern(nodep);
+	} else {
+		php_dom_normalize_legacy(nodep);
+	}
 }
 /* }}} end dom_node_normalize */
 

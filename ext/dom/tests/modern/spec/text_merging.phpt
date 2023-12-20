@@ -16,8 +16,10 @@ var_dump($element->firstChild->nextSibling->textContent);
 var_dump($element->firstChild->nextSibling->nextSibling->textContent);
 
 $dom->normalize();
+echo $dom->saveXML();
 
 var_dump($element->firstChild->textContent);
+var_dump($element->firstChild->nextSibling->textContent);
 
 ?>
 --EXPECT--
@@ -26,4 +28,7 @@ var_dump($element->firstChild->textContent);
 string(3) "foo"
 string(3) "bar"
 string(3) "baz"
+<?xml version="1.0" encoding="UTF-8"?>
+<div>foobarbaz<span>qux</span><![CDATA[a]]><![CDATA[b]]></div>
 string(9) "foobarbaz"
+string(3) "qux"
