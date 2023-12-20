@@ -1153,7 +1153,7 @@ static zend_result dom_replace_node_validity_checks(xmlNodePtr parent, xmlNodePt
 	if (parent_is_document) {
 		/* DocumentFragment */
 		if (node->type == XML_DOCUMENT_FRAG_NODE) {
-			if (!php_dom_fragment_insertion_hierarchy_check(node)) {
+			if (!php_dom_fragment_insertion_hierarchy_check_replace(parent, node, child)) {
 				return FAILURE;
 			}
 		}

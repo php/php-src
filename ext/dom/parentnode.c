@@ -177,24 +177,82 @@ static void dom_fragment_assign_parent_node(xmlNodePtr parentNode, xmlNodePtr fr
 	}
 }
 
-bool php_dom_fragment_insertion_hierarchy_check(xmlNodePtr node)
+/* This part is common logic between the pre-insertion validity and replaceChild code. */
+static bool dom_fragment_common_hierarchy_check_part(xmlNodePtr node, bool *seen_element)
 {
 	/* If node has more than one element child or has a Text node child. */
 	xmlNodePtr iter = node->children;
-	bool seen_element = false;
+	*seen_element = false;
 	while (iter != NULL) {
 		if (iter->type == XML_ELEMENT_NODE) {
-			if (seen_element) {
+			if (*seen_element) {
 				php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one element child in a document", /* strict */ true);
 				return false;
 			}
-			seen_element = true;
+			*seen_element = true;
 		} else if (iter->type == XML_TEXT_NODE || iter->type == XML_CDATA_SECTION_NODE) {
 			php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert text as a child of a document", /* strict */ true);
 			return false;
 		}
 		iter = iter->next;
 	}
+	return true;
+}
+
+/* https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity
+ * DocumentFragment validation part. */
+bool php_dom_fragment_insertion_hierarchy_check_pre_insertion(xmlNodePtr parent, xmlNodePtr node, xmlNodePtr child)
+{
+	bool seen_element;
+	if (!dom_fragment_common_hierarchy_check_part(node, &seen_element)) {
+		return false;
+	}
+
+	/* Otherwise, if node has one element child
+	 * and either parent has an element child, child is a doctype, or child is non-null and a doctype is following child. */
+	if (seen_element) {
+		if (php_dom_has_child_of_type(parent, XML_ELEMENT_NODE)) {
+			php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one element child in a document", /* strict */ true);
+			return false;
+		}
+
+		if (child != NULL && (child->type == XML_DTD_NODE || php_dom_has_sibling_following_node(child, XML_DTD_NODE))) {
+			php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Document types must be the first child in a document", /* strict */ true);
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/* https://dom.spec.whatwg.org/#concept-node-replace
+ * DocumentFragment validation part. */
+bool php_dom_fragment_insertion_hierarchy_check_replace(xmlNodePtr parent, xmlNodePtr node, xmlNodePtr child)
+{
+	bool seen_element;
+	if (!dom_fragment_common_hierarchy_check_part(node, &seen_element)) {
+		return false;
+	}
+
+	/* Otherwise, if node has one element child
+	 * and either parent has an element child that is not child or a doctype is following child. */
+	if (seen_element) {
+		xmlNodePtr iter = parent->children;
+		while (iter != NULL) {
+			if (iter->type == XML_ELEMENT_NODE && iter != child) {
+				php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot have more than one element child in a document", /* strict */ true);
+				return false;
+			}
+			iter = iter->next;
+		}
+
+		ZEND_ASSERT(child != NULL);
+		if (php_dom_has_sibling_following_node(child, XML_DTD_NODE)) {
+			php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Document types must be the first child in a document", /* strict */ true);
+			return false;
+		}
+	}
+
 	return true;
 }
 
@@ -262,7 +320,7 @@ static bool dom_is_pre_insert_valid_without_step_1(php_libxml_ref_obj *document,
 		if (parent_is_document) {
 			/* DocumentFragment */
 			if (node->type == XML_DOCUMENT_FRAG_NODE) {
-				if (!php_dom_fragment_insertion_hierarchy_check(node)) {
+				if (!php_dom_fragment_insertion_hierarchy_check_pre_insertion(parentNode, node, child)) {
 					return false;
 				}
 			}

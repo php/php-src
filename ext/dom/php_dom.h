@@ -183,7 +183,8 @@ void dom_parent_node_replace_children(dom_object *context, zval *nodes, uint32_t
 void dom_child_node_remove(dom_object *context);
 void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc);
 void dom_remove_all_children(xmlNodePtr nodep);
-bool php_dom_fragment_insertion_hierarchy_check(xmlNodePtr node);
+bool php_dom_fragment_insertion_hierarchy_check_pre_insertion(xmlNodePtr parent, xmlNodePtr node, xmlNodePtr child);
+bool php_dom_fragment_insertion_hierarchy_check_replace(xmlNodePtr parent, xmlNodePtr node, xmlNodePtr child);
 void php_dom_node_append(php_libxml_ref_obj *document, xmlNodePtr node, xmlNodePtr parent);
 bool php_dom_pre_insert(php_libxml_ref_obj *document, xmlNodePtr node, xmlNodePtr parent, xmlNodePtr insertion_point);
 bool php_dom_pre_insert_is_parent_invalid(xmlNodePtr parent);
