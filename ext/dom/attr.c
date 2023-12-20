@@ -76,16 +76,18 @@ Since:
 */
 zend_result dom_attr_name_read(dom_object *obj, zval *retval)
 {
-	xmlAttrPtr attrp;
-
-	attrp = (xmlAttrPtr) dom_object_get_node(obj);
+	xmlAttrPtr attrp = (xmlAttrPtr) dom_object_get_node(obj);
 
 	if (attrp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
-	ZVAL_STRING(retval, (char *) attrp->name);
+	if (php_dom_follow_spec_intern(obj)) {
+		ZVAL_STR(retval, dom_node_get_node_name_attribute_or_element((xmlNodePtr) attrp, false));
+	} else {
+		ZVAL_STRING(retval, (char *) attrp->name);
+	}
 
 	return SUCCESS;
 }
