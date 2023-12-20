@@ -124,4 +124,3 @@ DateTime::createFromTimestamp(2147484671.0): DateRangeError: Seconds must be a f
 DateTimeImmutable::createFromTimestamp(2147484671.0): DateRangeError: Seconds must be a finite number between -2147483648 and 2147483647, 2.14748e+9 given
 DateTime::createFromTimestamp(-2147484673.0): DateRangeError: Seconds must be a finite number between -2147483648 and 2147483647, -2.14748e+9 given
 DateTimeImmutable::createFromTimestamp(-2147484673.0): DateRangeError: Seconds must be a finite number between -2147483648 and 2147483647, -2.14748e+9 given
-

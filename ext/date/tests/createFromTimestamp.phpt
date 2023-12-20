@@ -227,4 +227,3 @@ MyDateTimeImmutable::createFromTimestamp(0): object(MyDateTimeImmutable)#%d (3) 
   ["timezone"]=>
   string(6) "+00:00"
 }
-
