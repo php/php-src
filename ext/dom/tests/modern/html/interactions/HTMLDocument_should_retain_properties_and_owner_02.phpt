@@ -73,6 +73,6 @@ object(DOM\HTMLDocument)#1 (25) {
   ["baseURI"]=>
   NULL
   ["textContent"]=>
-  string(3) "foo"
+  string(0) ""
 }
 string(9) "MyElement"

@@ -804,6 +804,20 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-textContent
 Since: DOM Level 3
 */
+/* Determines when the operation is a no-op. */
+static bool dom_skip_text_content(dom_object *obj, xmlNodePtr nodep)
+{
+	if (php_dom_follow_spec_intern(obj)) {
+		int type = nodep->type;
+		if (type != XML_DOCUMENT_FRAG_NODE && type != XML_ELEMENT_NODE && type != XML_ATTRIBUTE_NODE
+			&& type != XML_TEXT_NODE && type != XML_CDATA_SECTION_NODE && type != XML_COMMENT_NODE && type != XML_PI_NODE) {
+			/* Yes, success... It's a no-op for these cases. */
+			return true;
+		}
+	}
+	return false;
+}
+
 zend_result dom_node_text_content_read(dom_object *obj, zval *retval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
@@ -813,7 +827,11 @@ zend_result dom_node_text_content_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	php_dom_get_content_into_zval(nodep, retval, false);
+	if (dom_skip_text_content(obj, nodep)) {
+		ZVAL_EMPTY_STRING(retval);
+	} else {
+		php_dom_get_content_into_zval(nodep, retval, false);
+	}
 
 	return SUCCESS;
 }
@@ -825,6 +843,10 @@ zend_result dom_node_text_content_write(dom_object *obj, zval *newval)
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
+	}
+
+	if (dom_skip_text_content(obj, nodep)) {
+		return SUCCESS;
 	}
 
 	php_libxml_invalidate_node_list_cache(obj->document);
