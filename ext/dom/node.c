@@ -1063,6 +1063,23 @@ cannot_add:
 }
 /* }}} end dom_node_insert_before */
 
+static void dom_node_insert_before_modern(zval *return_value, zval *ref, dom_object *intern, dom_object *childobj, xmlNodePtr parentp, xmlNodePtr child)
+{
+	int ret;
+	xmlNodePtr refp = NULL;
+	dom_object *refobjp;
+	if (php_dom_pre_insert_is_parent_invalid(parentp)) {
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, /* strict */ true);
+		RETURN_THROWS();
+	}
+	if (ref != NULL) {
+		DOM_GET_OBJ(refp, ref, xmlNodePtr, refobjp);
+	}
+	php_libxml_invalidate_node_list_cache(intern->document);
+	php_dom_pre_insert(intern->document, child, parentp, refp);
+	DOM_RET_OBJ(child, &ret, intern);
+}
+
 PHP_METHOD(DOMNode, insertBefore)
 {
 	zval *id, *node, *ref = NULL;
