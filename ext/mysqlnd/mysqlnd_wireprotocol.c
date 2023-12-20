@@ -539,8 +539,7 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 			DBG_RETURN(0);
 		}
 		if (packet->auth_data_len) {
-			p = zend_mempcpy(p, packet->auth_data,
-					 packet->auth_data_len);
+			p = zend_mempcpy(p, packet->auth_data, packet->auth_data_len);
 		}
 
 		if (packet->db_len > 0) {
