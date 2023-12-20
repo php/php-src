@@ -146,6 +146,9 @@ PHP 8.4 UPGRADE NOTES
 - Date:
   . Added static methods
     DateTime[Immutable]::createFromTimestamp(int|float $timestamp): static.
+  . Added method DateTime[Immutable]::getMicroseconds(): int.
+  . Added method
+    DateTime[Immutable]::setMicroseconds(int $microseconds): static.
 
 - DOM:
   . Added constant DOMNode::DOCUMENT_POSITION_DISCONNECTED.

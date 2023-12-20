@@ -18,6 +18,7 @@ Curl:
 
 Date:
   . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
+  . Added DateTime[Immutable]::[get|set]Microseconds. (Marc Bennewitz)
 
 DOM:
   . Added DOMNode::compareDocumentPosition(). (nielsdos)
