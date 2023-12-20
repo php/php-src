@@ -1465,10 +1465,7 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep,
 
 static inline bool is_empty_node(xmlNodePtr nodep)
 {
-	xmlChar	*strContent = xmlNodeGetContent(nodep);
-	bool ret = strContent == NULL || *strContent == '\0';
-	xmlFree(strContent);
-	return ret;
+	return nodep->content == NULL || *nodep->content == '\0';
 }
 
 /* {{{ void dom_normalize (xmlNodePtr nodep) */
