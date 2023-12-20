@@ -644,7 +644,7 @@ asprintf \
 nanosleep \
 memmem \
 memrchr \
-mempcpy
+mempcpy \
 )
 
 dnl Check for strerror_r, and if its a POSIX-compatible or a GNU specific version.
