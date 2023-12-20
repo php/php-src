@@ -44,6 +44,8 @@ Opcache:
 OpenSSL:
   . Fixed bug #80269 (OpenSSL sets Subject wrong with extraattribs parameter).
     (Jakub Zelenka)
+  . Implement request #48520 (openssl_csr_new - allow multiple values in DN).
+    (Jakub Zelenka)
 
 PDO:
   . Fixed setAttribute and getAttribute (SakiTakamachi)
