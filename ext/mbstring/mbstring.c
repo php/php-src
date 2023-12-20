@@ -2092,9 +2092,10 @@ static zend_string* mb_get_substr_slow(unsigned char *in, size_t in_len, size_t 
 		if (from >= out_len) {
 			from -= out_len;
 		} else {
-			enc->from_wchar(wchar_buf + from, MIN(out_len - from, len), &buf, !in_len || out_len >= len);
+			size_t needed_codepoints = MIN(out_len - from, len);
+			enc->from_wchar(wchar_buf + from, needed_codepoints, &buf, !in_len || out_len >= len);
 			from = 0;
-			len -= MIN(out_len, len);
+			len -= needed_codepoints;
 		}
 	}
 

@@ -133,6 +133,11 @@ echo "Regression:\n";
 $str = "\xbd\xbd\xbd\xbd\xbd\xbd\xbd\xbe\xbd\xbd\xbd\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x89\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x00\x00\x00\x00\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8b\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8f\x8b\x8b\x8b\xbd\xbd\xbd\xbd\xbd\xbd\xbd\xbe\x01:O\xaa\xd3";
 echo bin2hex(mb_substr($str, 0, 128, "JIS")), "\n";
 
+/* Alex messed up when reimplementing mb_substr and, in cases where `from` is non-zero and
+ * the number of characters to extract is more than 128, miscalculated where to end the substring
+ * Thanks to Maurício Fauth for finding the issue */
+var_dump(mb_substr('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum dapibus feugiat ex non cursus. Pellentesque vestibulum tellus sit lectus.', 19, -1));
+
 ?>
 --EXPECT--
 EUC-JP:
@@ -213,3 +218,4 @@ Testing agreement with mb_strpos on invalid UTF-8 string:
 ?AAA
 Regression:
 1b28493d3d3d3d3d3d3d3e3d3d3d1b28423f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f000000003f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f1b28493d3d3d3d3d3d3d3e1b2842013a4f1b28492a1b2842
+string(121) "it amet, consectetur adipiscing elit. Vestibulum dapibus feugiat ex non cursus. Pellentesque vestibulum tellus sit lectus"
