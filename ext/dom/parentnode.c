@@ -221,10 +221,13 @@ static bool dom_is_pre_insert_valid_without_step_1(php_libxml_ref_obj *document,
 		return false;
 	}
 
-	bool parent_is_document = parentNode->type == XML_DOCUMENT_NODE || parentNode->type == XML_HTML_DOCUMENT_NODE;
+	/* 3. If child is non-null and its parent is not parent, then throw a "NotFoundError" DOMException. */
+	if (child != NULL && child->parent != parentNode) {
+		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(document));
+		return false;
+	}
 
-	/* 3. If child is non-null and its parent is not parent, then throw a "NotFoundError" DOMException.
-	 *    => Impossible */
+	bool parent_is_document = parentNode->type == XML_DOCUMENT_NODE || parentNode->type == XML_HTML_DOCUMENT_NODE;
 
 	if (/* 2. If node is a host-including inclusive ancestor of parent, then throw a "HierarchyRequestError" DOMException. */
 		dom_hierarchy(parentNode, node) != SUCCESS
