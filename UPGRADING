@@ -231,6 +231,8 @@ PHP 8.4 UPGRADE NOTES
     Along with these, five constants (PDO::FB_TRANSACTION_ISOLATION_LEVEL,
     PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, PDO::FB_SERIALIZABLE,
     PDO::FB_WRITABLE_TRANSACTION) have been added.
+  . When using persistent connections, there is now a liveness check in the
+    constructor.
 
 - PDO_MYSQL:
   . getAttribute, enabled to get the value of ATTR_FETCH_TABLE_NAMES.
