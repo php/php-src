@@ -1644,8 +1644,7 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 		}
 		if (pad) {
 			open_packet(req, type);
-			req->out_pos = zend_mempcpy(req->out_pos,
-						    str + len - rest, rest);
+			req->out_pos = zend_mempcpy(req->out_pos, str + len - rest, rest);
 		}
 	}
 #endif
