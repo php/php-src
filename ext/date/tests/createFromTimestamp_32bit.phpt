@@ -118,9 +118,9 @@ DateTimeImmutable::createFromTimestamp(2147483646.5): object(DateTimeImmutable)#
   ["timezone"]=>
   string(6) "+00:00"
 }
-DateTime::createFromTimestamp(-2147483648.5): DateRangeError: Timestamp must be a finite number between -2147483648 and 2147483647.999999, -2.14748e+9 given
-DateTimeImmutable::createFromTimestamp(-2147483648.5): DateRangeError: Timestamp must be a finite number between -2147483648 and 2147483647.999999, -2.14748e+9 given
-DateTime::createFromTimestamp(2147484671.0): DateRangeError: Timestamp must be a finite number between -2147483648 and 2147483647.999999, 2.14748e+9 given
-DateTimeImmutable::createFromTimestamp(2147484671.0): DateRangeError: Timestamp must be a finite number between -2147483648 and 2147483647.999999, 2.14748e+9 given
-DateTime::createFromTimestamp(-2147484673.0): DateRangeError: Timestamp must be a finite number between -2147483648 and 2147483647.999999, -2.14748e+9 given
-DateTimeImmutable::createFromTimestamp(-2147484673.0): DateRangeError: Timestamp must be a finite number between -2147483648 and 2147483647.999999, -2.14748e+9 given
+DateTime::createFromTimestamp(-2147483648.5): DateRangeError: DateTime::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between -2147483648 and 2147483647.999999, -2.14748e+9 given
+DateTimeImmutable::createFromTimestamp(-2147483648.5): DateRangeError: DateTimeImmutable::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between -2147483648 and 2147483647.999999, -2.14748e+9 given
+DateTime::createFromTimestamp(2147484671.0): DateRangeError: DateTime::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between -2147483648 and 2147483647.999999, 2.14748e+9 given
+DateTimeImmutable::createFromTimestamp(2147484671.0): DateRangeError: DateTimeImmutable::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between -2147483648 and 2147483647.999999, 2.14748e+9 given
+DateTime::createFromTimestamp(-2147484673.0): DateRangeError: DateTime::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between -2147483648 and 2147483647.999999, -2.14748e+9 given
+DateTimeImmutable::createFromTimestamp(-2147484673.0): DateRangeError: DateTimeImmutable::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between -2147483648 and 2147483647.999999, -2.14748e+9 given

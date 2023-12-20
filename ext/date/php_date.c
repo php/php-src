@@ -2526,9 +2526,10 @@ PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts)
 	int usec;
 
 	if (UNEXPECTED(isnan(sec_dval) || !PHP_DATE_DOUBLE_FITS_LONG(sec_dval))) {
-		zend_throw_error(
+		zend_argument_error(
 			date_ce_date_range_error,
-			"Timestamp must be a finite number between " TIMELIB_LONG_FMT " and " TIMELIB_LONG_FMT ".999999, %g given",
+			1,
+			"must be a finite number between " TIMELIB_LONG_FMT " and " TIMELIB_LONG_FMT ".999999, %g given",
 			TIMELIB_LONG_MIN,
 			TIMELIB_LONG_MAX,
 			ts
@@ -2541,9 +2542,10 @@ PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts)
 
 	if (UNEXPECTED(usec < 0)) {
 		if (UNEXPECTED(sec == TIMELIB_LONG_MIN)) {
-			zend_throw_error(
+			zend_argument_error(
 				date_ce_date_range_error,
-				"Timestamp must be a finite number between " TIMELIB_LONG_FMT " and " TIMELIB_LONG_FMT ".999999, %g given",
+				1,
+				"must be a finite number between " TIMELIB_LONG_FMT " and " TIMELIB_LONG_FMT ".999999, %g given",
 				TIMELIB_LONG_MIN,
 				TIMELIB_LONG_MAX,
 				ts
