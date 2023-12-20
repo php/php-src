@@ -901,29 +901,15 @@ static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib,
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-952280727
 Since:
 */
-PHP_METHOD(DOMNode, insertBefore)
+static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_object *intern, dom_object *childobj, xmlNodePtr parentp, xmlNodePtr child)
 {
-	zval *id, *node, *ref = NULL;
-	xmlNodePtr child, new_child, parentp, refp;
-	dom_object *intern, *childobj, *refpobj;
-	int ret, stricterror;
-
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|O!", &node, dom_node_class_entry, &ref, dom_node_class_entry) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	DOM_GET_OBJ(parentp, id, xmlNodePtr, intern);
-
 	if (dom_node_children_valid(parentp) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
-
-	new_child = NULL;
-
-	stricterror = dom_get_strict_error(intern->document);
+	xmlNodePtr new_child = NULL;
+	int stricterror = dom_get_strict_error(intern->document);
+	int ret;
 
 	if (dom_node_is_read_only(parentp) == SUCCESS ||
 		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
@@ -955,6 +941,8 @@ PHP_METHOD(DOMNode, insertBefore)
 	php_libxml_invalidate_node_list_cache(intern->document);
 
 	if (ref != NULL) {
+		xmlNodePtr refp;
+		dom_object *refpobj;
 		DOM_GET_OBJ(refp, ref, xmlNodePtr, refpobj);
 		if (refp->parent != parentp) {
 			php_dom_throw_error(NOT_FOUND_ERR, stricterror);
@@ -1074,6 +1062,24 @@ cannot_add:
 	RETURN_THROWS();
 }
 /* }}} end dom_node_insert_before */
+
+PHP_METHOD(DOMNode, insertBefore)
+{
+	zval *id, *node, *ref = NULL;
+	xmlNodePtr child, parentp;
+	dom_object *intern, *childobj;
+
+	id = ZEND_THIS;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|O!", &node, dom_node_class_entry, &ref, dom_node_class_entry) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_OBJ(parentp, id, xmlNodePtr, intern);
+
+	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
+
+	dom_node_insert_before_legacy(return_value, ref, intern, childobj, parentp, child);
+}
 
 /* https://dom.spec.whatwg.org/#concept-node-replace */
 static zend_result dom_replace_node_validity_checks(xmlNodePtr parent, xmlNodePtr node, xmlNodePtr child)
