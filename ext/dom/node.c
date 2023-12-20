@@ -1434,6 +1434,7 @@ PHP_METHOD(DOMNode, appendChild)
 			RETURN_THROWS();
 		}
 		/* Append, this doesn't do the parent check so we do it here. */
+		php_libxml_invalidate_node_list_cache(intern->document);
 		php_dom_node_append(intern->document, child, nodep);
 		int ret;
 		DOM_RET_OBJ(child, &ret, intern);
