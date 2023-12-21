@@ -1419,7 +1419,7 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 		if (UNEXPECTED(new_child == NULL)) {
 			goto cannot_add;
 		}
-		php_dom_reconcile_attribute_namespace_after_insertion((xmlAttrPtr) new_child);
+		php_dom_reconcile_attribute_namespace_after_insertion((xmlAttrPtr) new_child, false);
 	} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
 		xmlNodePtr last = child->last;
 		new_child = _php_dom_insert_fragment(nodep, nodep->last, NULL, child, intern);

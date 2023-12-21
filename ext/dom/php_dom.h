@@ -155,7 +155,7 @@ zend_string *dom_node_get_node_name_attribute_or_element(const xmlNode *nodep, b
 bool php_dom_is_node_connected(const xmlNode *node);
 bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, xmlDocPtr new_document);
 xmlNsPtr dom_get_ns_resolve_prefix_conflict(xmlNodePtr tree, const char *uri);
-void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp);
+void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp, bool resolve_prefix_conflict);
 int dom_validate_and_extract(zend_string *namespace, zend_string *qname, xmlChar **localName, xmlChar **prefix);
 bool dom_match_qualified_name_according_to_spec(const xmlChar *qname, const xmlNode *nodep);
 bool php_dom_has_sibling_following_node(xmlNodePtr node, xmlElementType type);

@@ -658,20 +658,23 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 	 * if it is not of type XML_ATTRIBUTE_NODE it indicates a bug somewhere */
 	ZEND_ASSERT(attrp->type == XML_ATTRIBUTE_NODE);
 
+	bool follow_spec;
 	if (php_dom_follow_spec_intern(intern)) {
 		if (attrp->parent != NULL && attrp->parent != nodep) {
 			php_dom_throw_error(INUSE_ATTRIBUTE_ERR, /* strict */ true);
 			RETURN_THROWS();
 		}
-		use_ns = true; /* In modern-day DOM setAttributeNode is an alias for setAttributeNodeNS. */
 		if (attrp->doc != NULL && attrp->doc != nodep->doc) {
 			php_dom_adopt_node((xmlNodePtr) attrp, intern, nodep->doc);
 		}
+		use_ns = true; /* In modern-day DOM setAttributeNode is an alias for setAttributeNodeNS. */
+		follow_spec = true;
 	} else {
 		if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
 			php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));
 			RETURN_FALSE;
 		}
+		follow_spec = false;
 	}
 
 	nsp = attrp->ns;
@@ -700,7 +703,7 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 	}
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);
-	php_dom_reconcile_attribute_namespace_after_insertion(attrp);
+	php_dom_reconcile_attribute_namespace_after_insertion(attrp, !follow_spec);
 
 	/* Returns old property if removed otherwise NULL */
 	if (existattrp != NULL) {

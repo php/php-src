@@ -1603,22 +1603,30 @@ static zend_always_inline void dom_libxml_reconcile_ensure_namespaces_are_declar
 	}
 }
 
-void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp)
+/* resolve_prefix_conflict will rename prefixes if there is a declaration with the same prefix but different uri. */
+void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp, bool resolve_prefix_conflict)
 {
 	ZEND_ASSERT(attrp != NULL);
 
 	if (attrp->ns != NULL) {
-		/* Try to link to an existing namespace. If that won't work, reconcile. */
-		xmlNodePtr nodep = attrp->parent;
-		xmlNsPtr matching_ns = xmlSearchNs(nodep->doc, nodep, attrp->ns->prefix);
-		if (matching_ns && xmlStrEqual(matching_ns->href, attrp->ns->href)) {
-			/* Doesn't leak because this doesn't define the declaration. */
-			attrp->ns = matching_ns;
-		} else {
-			if (attrp->ns->prefix != NULL) {
-				/* Note: explicitly use the legacy reconciliation as it does the right thing for attributes. */
-				xmlReconciliateNs(nodep->doc, nodep);
+		if (resolve_prefix_conflict) {
+			/* Try to link to an existing namespace. If that won't work, reconcile. */
+			xmlNodePtr nodep = attrp->parent;
+			xmlNsPtr matching_ns = xmlSearchNs(nodep->doc, nodep, attrp->ns->prefix);
+			if (matching_ns && xmlStrEqual(matching_ns->href, attrp->ns->href)) {
+				/* Doesn't leak because this doesn't define the declaration. */
+				attrp->ns = matching_ns;
+			} else {
+				if (attrp->ns->prefix != NULL) {
+					/* Note: explicitly use the legacy reconciliation as it mostly (i.e. as good as it gets for legacy DOM)
+					* does the right thing for attributes. */
+					xmlReconciliateNs(nodep->doc, nodep);
+				}
 			}
+		} else {
+			attrp->ns = dom_ns_create_local_as_is(
+				attrp->doc, attrp->parent, attrp->parent, (const char *) attrp->ns->href, attrp->ns->prefix
+			);
 		}
 	}
 }
