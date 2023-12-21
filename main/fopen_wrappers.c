@@ -379,7 +379,9 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 			struct passwd pwstruc;
 			long pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 			char *pwbuf;
-
+#if defined(__FreeBSD__) && defined(_SC_PAGESIZE)
+                        if (pwbuflen < 1) pwbuflen = sysconf(_SC_PAGESIZE);
+#endif
 			if (pwbuflen < 1) {
 				return FAILURE;
 			}
