@@ -216,6 +216,11 @@ PHP 8.4 UPGRADE NOTES
 - Intl:
   . IntlDateFormatter::__construct() throws a ValueError if the locale is invalid.
   . NumberFormatter::__construct() throws a ValueError if the locale is invalid.
+  . NumberFormatter::ROUND_TOWARD_ZERO and NumberFormatter::ROUND_AWAY_FROM_ZERO
+    have been added as aliases for NumberFormatter::ROUND_DOWN and
+    NumberFormatter::ROUND_UP to be consistent with the new PHP_ROUND_* modes.
+
+    RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
 
 - MBString:
   . The behavior of mb_strcut is more consistent now on invalid UTF-8 and UTF-16
@@ -250,6 +255,10 @@ PHP 8.4 UPGRADE NOTES
     has been increased from '10' to '12'.
 
     RFC: https://wiki.php.net/rfc/bcrypt_cost_2023
+  . Four new modes have been added to the round() function: PHP_ROUND_CEILING,
+    PHP_ROUND_FLOOR, PHP_ROUND_TOWARD_ZERO, PHP_ROUND_AWAY_FROM_ZERO.
+
+    RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
 
 ========================================
 6. New Functions
