@@ -1528,7 +1528,7 @@ PHP_METHOD(DOMNode, cloneNode)
 
 	DOM_GET_OBJ(n, id, xmlNodePtr, intern);
 
-	node = dom_clone_node(n, n->doc, intern, recursive);
+	node = dom_clone_node(n, n->doc, recursive);
 
 	if (!node) {
 		RETURN_FALSE;

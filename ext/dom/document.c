@@ -829,7 +829,7 @@ PHP_METHOD(DOM_Document, importNode)
 	if (nodep->doc == docp) {
 		retnodep = nodep;
 	} else {
-		retnodep = dom_clone_node(nodep, docp, intern, recursive);
+		retnodep = dom_clone_node(nodep, docp, recursive);
 		if (!retnodep) {
 			RETURN_FALSE;
 		}

@@ -199,7 +199,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 int php_dom_get_namednodemap_length(dom_object *obj);
 int php_dom_get_nodelist_length(dom_object *obj);
 
-xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, const dom_object *intern, bool recursive);
+xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, bool recursive);
 
 #define DOM_GET_INTERN(__id, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \

@@ -517,8 +517,7 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 	if (instanceof_function(intern->std.ce, dom_node_class_entry)) {
 		xmlNodePtr node = (xmlNodePtr)dom_object_get_node(intern);
 		if (node != NULL) {
-			// TODO: clone $dtd broken?
-			xmlNodePtr cloned_node = xmlDocCopyNode(node, node->doc, 1);
+			xmlNodePtr cloned_node = dom_clone_node(node, node->doc, true);
 			if (cloned_node != NULL) {
 				dom_update_refcount_after_clone(intern, node, clone, cloned_node);
 			}
@@ -2000,7 +1999,7 @@ static int dom_nodemap_has_dimension(zend_object *object, zval *member, int chec
 	return offset >= 0 && offset < php_dom_get_namednodemap_length(php_dom_obj_from_obj(object));
 } /* }}} end dom_nodemap_has_dimension */
 
-xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, const dom_object *intern, bool recursive)
+xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, bool recursive)
 {
 	if (node->type == XML_DTD_NODE) {
 		/* The behaviour w.r.t. the internal subset is implementation-defined according to DOM 3.
