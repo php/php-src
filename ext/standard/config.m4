@@ -352,17 +352,17 @@ dnl Detect library functions needed by php dns_xxx functions
 dnl ext/standard/php_dns.h will collect these in a single define
 dnl HAVE_FULL_DNS_FUNCS
 dnl
-PHP_CHECK_FUNC(res_nsearch, resolv, bind, socket)
-PHP_CHECK_FUNC(res_ndestroy, resolv, bind, socket)
-PHP_CHECK_FUNC(dns_search, resolv, bind, socket)
-PHP_CHECK_FUNC(dn_expand, resolv, bind, socket)
-PHP_CHECK_FUNC(dn_skipname, resolv, bind, socket)
+PHP_CHECK_FUNC(res_nsearch, resolv, socket)
+PHP_CHECK_FUNC(res_ndestroy, resolv, socket)
+PHP_CHECK_FUNC(dns_search, resolv, socket)
+PHP_CHECK_FUNC(dn_expand, resolv, socket)
+PHP_CHECK_FUNC(dn_skipname, resolv, socket)
 
 dnl
 dnl These are old deprecated functions
 dnl
 
-PHP_CHECK_FUNC(res_search, resolv, bind, socket)
+PHP_CHECK_FUNC(res_search, resolv, socket)
 
 PHP_CHECK_FUNC(posix_spawn_file_actions_addchdir_np)
 
