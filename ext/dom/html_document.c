@@ -742,6 +742,7 @@ PHP_METHOD(DOM_HTMLDocument, createEmpty)
 		NULL
 	);
 	intern->document->is_modern_api_class = true;
+	intern->document->node_detach_reconcile_func = dom_libxml_reconcile_modern;
 	return;
 
 oom:
@@ -887,6 +888,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 		NULL
 	);
 	intern->document->is_modern_api_class = true;
+	intern->document->node_detach_reconcile_func = dom_libxml_reconcile_modern;
 	return;
 
 fail_oom:
@@ -1099,6 +1101,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		NULL
 	);
 	intern->document->is_modern_api_class = true;
+	intern->document->node_detach_reconcile_func = dom_libxml_reconcile_modern;
 	return;
 
 fail_oom:

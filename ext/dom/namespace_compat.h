@@ -45,5 +45,7 @@ bool dom_ns_is_fast(const xmlNode *nodep, const dom_ns_magic_token *magic_token)
 bool dom_ns_is_html_and_document_is_html(const xmlNode *nodep);
 xmlNsPtr dom_ns_create_local_as_is(xmlDocPtr doc, xmlNodePtr ns_holder, xmlNodePtr parent, const char *uri, const xmlChar *prefix);
 xmlNsPtr dom_ns_fast_get_html_ns(xmlDocPtr docp);
+void dom_libxml_reconcile_modern(xmlNodePtr node);
+void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp, bool resolve_prefix_conflict);
 
 #endif

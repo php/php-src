@@ -62,12 +62,16 @@ typedef struct {
 	size_t modification_nr;
 } php_libxml_cache_tag;
 
+/* Function pointer type for custom reconciliation logic on detaching a referenced node. */
+typedef void (*php_libxml_node_detach_reconcile_func)(xmlNodePtr node);
+
 typedef struct _php_libxml_ref_obj {
 	void *ptr;
 	libxml_doc_props *doc_props;
 	php_libxml_cache_tag cache_tag;
 	int refcount;
 	bool is_modern_api_class;
+	php_libxml_node_detach_reconcile_func node_detach_reconcile_func;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {

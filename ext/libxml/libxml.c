@@ -324,9 +324,8 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 					 * otherwise a use-after-free would be possible when the original namespace holder gets freed. */
 					php_libxml_node_ptr *ptr = curnode->_private;
 					php_libxml_node_object *obj = ptr->_private;
-					if (obj->document && obj->document->is_modern_api_class) {
-						xmlDOMWrapCtxt dummy_ctxt = {0};
-						xmlDOMWrapReconcileNamespaces(&dummy_ctxt, curnode, /* options */ 0);
+					if (obj->document && obj->document->node_detach_reconcile_func) {
+						obj->document->node_detach_reconcile_func(curnode);
 					} else {
 						xmlReconciliateNs(curnode->doc, curnode);
 					}
@@ -1358,6 +1357,7 @@ PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, 
 		object->document->doc_props = NULL;
 		object->document->cache_tag.modification_nr = 1; /* iterators start at 0, such that they will start in an uninitialised state */
 		object->document->is_modern_api_class = false;
+		object->document->node_detach_reconcile_func = NULL;
 	}
 
 	return ret_refcount;

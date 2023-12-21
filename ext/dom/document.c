@@ -1407,6 +1407,7 @@ static void php_dom_finish_loading_document(zval *this, zval *return_value, xmlD
 	size_t old_modification_nr = 0;
 	if (intern != NULL) {
 		bool is_modern_api_class = false;
+		php_libxml_node_detach_reconcile_func reconcile_func = NULL;
 		xmlDocPtr docp = (xmlDocPtr) dom_object_get_node(intern);
 		dom_doc_propsptr doc_prop = NULL;
 		if (docp != NULL) {
@@ -1414,6 +1415,7 @@ static void php_dom_finish_loading_document(zval *this, zval *return_value, xmlD
 			ZEND_ASSERT(doc_ptr != NULL); /* Must exist, we have a document */
 			is_modern_api_class = doc_ptr->is_modern_api_class;
 			old_modification_nr = doc_ptr->cache_tag.modification_nr;
+			reconcile_func = doc_ptr->node_detach_reconcile_func;
 			php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
 			doc_prop = intern->document->doc_props;
 			intern->document->doc_props = NULL;
@@ -1428,6 +1430,7 @@ static void php_dom_finish_loading_document(zval *this, zval *return_value, xmlD
 		}
 		intern->document->doc_props = doc_prop;
 		intern->document->is_modern_api_class = is_modern_api_class;
+		intern->document->node_detach_reconcile_func = reconcile_func;
 	}
 
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)newdoc, (void *)intern);

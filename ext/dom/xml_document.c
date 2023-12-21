@@ -119,6 +119,7 @@ PHP_METHOD(DOM_XMLDocument, createEmpty)
 		NULL
 	);
 	intern->document->is_modern_api_class = true;
+	intern->document->node_detach_reconcile_func = dom_libxml_reconcile_modern;
 	return;
 
 oom:
@@ -217,6 +218,7 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		NULL
 	);
 	intern->document->is_modern_api_class = true;
+	intern->document->node_detach_reconcile_func = dom_libxml_reconcile_modern;
 	dom_mark_namespaces_as_attributes_too(lxml_doc);
 }
 

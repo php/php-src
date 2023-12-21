@@ -30,6 +30,12 @@ const dom_ns_magic_token *dom_ns_is_xlink_magic_token = (const dom_ns_magic_toke
 const dom_ns_magic_token *dom_ns_is_xml_magic_token = (const dom_ns_magic_token *) DOM_XML_NS_URI;
 const dom_ns_magic_token *dom_ns_is_xmlns_magic_token = (const dom_ns_magic_token *) DOM_XMLNS_NS_URI;
 
+typedef struct {
+	/* Fast lookup for created mappings. */
+	// TODO: an even faster "last mapped" xmlNsPtr pair?
+	HashTable mapper;
+} dom_libxml_reconcile_ctx;
+
 static void dom_ns_compat_mark_attribute(xmlNodePtr node, xmlNsPtr ns)
 {
 	const xmlChar *name, *prefix;
@@ -189,6 +195,125 @@ xmlNsPtr dom_ns_fast_get_html_ns(xmlDocPtr docp)
 	}
 
 	return nsptr;
+}
+
+static zend_always_inline void dom_libxml_reconcile_modern_single_attribute_node(xmlAttrPtr attr)
+{
+	attr->ns = dom_ns_create_local_as_is(
+		attr->doc, attr->parent, attr->parent, (const char *) attr->ns->href, attr->ns->prefix
+	);
+}
+
+/* resolve_prefix_conflict will rename prefixes if there is a declaration with the same prefix but different uri. */
+void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp, bool resolve_prefix_conflict)
+{
+	ZEND_ASSERT(attrp != NULL);
+
+	if (attrp->ns != NULL) {
+		if (resolve_prefix_conflict) {
+			/* Try to link to an existing namespace. If that won't work, reconcile. */
+			xmlNodePtr nodep = attrp->parent;
+			xmlNsPtr matching_ns = xmlSearchNs(nodep->doc, nodep, attrp->ns->prefix);
+			if (matching_ns && xmlStrEqual(matching_ns->href, attrp->ns->href)) {
+				/* Doesn't leak because this doesn't define the declaration. */
+				attrp->ns = matching_ns;
+			} else {
+				if (attrp->ns->prefix != NULL) {
+					/* Note: explicitly use the legacy reconciliation as it mostly (i.e. as good as it gets for legacy DOM)
+					* does the right thing for attributes. */
+					xmlReconciliateNs(nodep->doc, nodep);
+				}
+			}
+		} else {
+			dom_libxml_reconcile_modern_single_attribute_node(attrp);
+		}
+	}
+}
+
+static zend_always_inline zend_long dom_mangle_pointer_for_key(void *ptr)
+{
+	zend_ulong value = (zend_ulong) (uintptr_t) ptr;
+	/* Shift 3 for better hash distribution because the low 3 bits are always 0. */
+	return value >> 3;
+}
+
+static void dom_libxml_reconcile_modern_single_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr ns_holder, xmlNodePtr node)
+{
+	ZEND_ASSERT(node->ns != NULL);
+
+	/* If the namespace is the same as in the map, we're good. */
+	xmlNsPtr new_ns = zend_hash_index_find_ptr(&ctx->mapper, dom_mangle_pointer_for_key(node->ns));
+	if (new_ns == NULL) {
+		/* We have to create an alternative declaration, and we'll add it to the map.
+		 * This can only really fail on OOM, which hopefully doesn't happen.
+		 * If it happens anyway, the namespace will be set to NULL. */
+		new_ns = dom_ns_create_local_as_is(node->doc, ns_holder, ns_holder, (const char *) node->ns->href, node->ns->prefix);
+		zend_hash_index_add_new_ptr(&ctx->mapper, dom_mangle_pointer_for_key(node->ns), new_ns);
+		node->ns = new_ns;
+	} else if (node->ns != new_ns) {
+		/* The namespace is different, so we have to replace it. */
+		node->ns = new_ns;
+	}
+}
+
+static zend_always_inline bool dom_libxml_reconcile_fast_element_skip(xmlNodePtr node)
+{
+	/* Fast path: this is a lone element and the namespace is defined by the node (or the namespace is NULL). */
+	ZEND_ASSERT(node->type == XML_ELEMENT_NODE);
+	return node->children == NULL && node->properties == NULL && node->ns == node->nsDef;
+}
+
+static void dom_libxml_reconcile_modern_single_element_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr node)
+{
+	ZEND_ASSERT(node->type == XML_ELEMENT_NODE);
+
+	if (node->ns == NULL || dom_libxml_reconcile_fast_element_skip(node)) {
+		return;
+	}
+
+	/* Add the defined namespaces to the mapper. */
+	for (xmlNsPtr ns = node->nsDef; ns != NULL; ns = ns->next) {
+		zend_hash_index_add_ptr(&ctx->mapper, dom_mangle_pointer_for_key(ns), ns);
+	}
+
+	dom_libxml_reconcile_modern_single_node(ctx, node, node);
+}
+
+void dom_libxml_reconcile_modern(xmlNodePtr node)
+{
+	if (node->type != XML_ELEMENT_NODE || dom_libxml_reconcile_fast_element_skip(node)) {
+		return;
+	}
+
+	dom_libxml_reconcile_ctx ctx;
+	zend_hash_init(&ctx.mapper, 0, NULL, NULL, 0);
+
+	dom_libxml_reconcile_modern_single_element_node(&ctx, node);
+
+	xmlNodePtr base = node;
+	node = node->children;
+	while (node != NULL) {
+		ZEND_ASSERT(node != base);
+
+		if (node->type == XML_ELEMENT_NODE) {
+			dom_libxml_reconcile_modern_single_element_node(&ctx, node);
+
+			for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
+				if (attr->ns != NULL) {
+					dom_libxml_reconcile_modern_single_node(&ctx, node, (xmlNodePtr) attr);
+				}
+			}
+
+			if (node->children) {
+				node = node->children;
+				continue;
+			}
+		}
+
+		node = php_dom_next_in_tree_order(node, base);
+	}
+
+	zend_hash_destroy(&ctx.mapper);
 }
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

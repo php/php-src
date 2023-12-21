@@ -208,6 +208,7 @@ static void dom_copy_document_ref(php_libxml_ref_obj *source_doc, php_libxml_ref
 		}
 
 		dest_doc->is_modern_api_class = source_doc->is_modern_api_class;
+		dest_doc->node_detach_reconcile_func = source_doc->node_detach_reconcile_func;
 	}
 }
 
@@ -1601,41 +1602,9 @@ static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePt
 static zend_always_inline void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep)
 {
 	if (php_dom_follow_spec_node(nodep)) {
-		/* Put on stack to avoid allocation.
-		 * Although libxml2 currently does not use this for the reconciliation, it still
-		 * makes sense to do this just in case libxml2's internal change in the future. */
-		xmlDOMWrapCtxt dummy_ctxt = {0};
-		xmlDOMWrapReconcileNamespaces(&dummy_ctxt, nodep, /* options */ 0);
+		dom_libxml_reconcile_modern(nodep);
 	} else {
 		xmlReconciliateNs(nodep->doc, nodep);
-	}
-}
-
-/* resolve_prefix_conflict will rename prefixes if there is a declaration with the same prefix but different uri. */
-void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp, bool resolve_prefix_conflict)
-{
-	ZEND_ASSERT(attrp != NULL);
-
-	if (attrp->ns != NULL) {
-		if (resolve_prefix_conflict) {
-			/* Try to link to an existing namespace. If that won't work, reconcile. */
-			xmlNodePtr nodep = attrp->parent;
-			xmlNsPtr matching_ns = xmlSearchNs(nodep->doc, nodep, attrp->ns->prefix);
-			if (matching_ns && xmlStrEqual(matching_ns->href, attrp->ns->href)) {
-				/* Doesn't leak because this doesn't define the declaration. */
-				attrp->ns = matching_ns;
-			} else {
-				if (attrp->ns->prefix != NULL) {
-					/* Note: explicitly use the legacy reconciliation as it mostly (i.e. as good as it gets for legacy DOM)
-					* does the right thing for attributes. */
-					xmlReconciliateNs(nodep->doc, nodep);
-				}
-			}
-		} else {
-			attrp->ns = dom_ns_create_local_as_is(
-				attrp->doc, attrp->parent, attrp->parent, (const char *) attrp->ns->href, attrp->ns->prefix
-			);
-		}
 	}
 }
 
