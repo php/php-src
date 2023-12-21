@@ -257,11 +257,6 @@ static xmlNodePtr dom_get_attribute_or_nsdecl(dom_object *intern, xmlNodePtr ele
 		}
 		return (xmlNodePtr)xmlHasNsProp(elem, name, NULL);
 	} else {
-		xmlNodePtr result = (xmlNodePtr)xmlHasNsProp(elem, name, NULL);
-		if (result != NULL) {
-			return result;
-		}
-
 		xmlChar *name_processed = name;
 		if (dom_ns_is_html_and_document_is_html(elem)) {
 			char *lowercase_copy = zend_str_tolower_dup_ex((char *) name, name_len);
