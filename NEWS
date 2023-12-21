@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Added workaround for SELinux mprotect execheap issue.
     See https://bugzilla.kernel.org/show_bug.cgi?id=218258. (ilutov)
 
+- OpenSSL:
+  . Fixed bug GH-12987 (openssl_csr_sign might leak new cert on error).
+    (Jakub Zelenka)
+
 - PDO_ODBC:
   . Fixed bug GH-12767 (Unable to turn on autocommit mode with setAttribute()).
     (SakiTakamachi)
