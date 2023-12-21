@@ -1406,6 +1406,27 @@ static bool dom_match_qualified_name_for_tag_name_equality(const xmlChar *local,
 	return dom_match_qualified_name_according_to_spec(local_to_use, nodep);
 }
 
+xmlNodePtr php_dom_next_in_tree_order(xmlNodePtr nodep, xmlNodePtr basep)
+{
+	if (nodep->next) {
+		return nodep->next;
+	} else {
+		/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
+		do {
+			nodep = nodep->parent;
+			if (nodep == basep) {
+				return NULL;
+			}
+			/* This shouldn't happen, unless there's an invalidation bug somewhere. */
+			if (UNEXPECTED(nodep == NULL)) {
+				zend_throw_error(NULL, "Current node in traversal is not in the document. Please report this as a bug in php-src.");
+				return NULL;
+			}
+		} while (nodep->next == NULL);
+		return nodep->next;
+	}
+}
+
 xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, xmlChar *ns, xmlChar *local, xmlChar *local_lower, int *cur, int index) /* {{{ */
 {
 	/* Can happen with detached document */
@@ -1441,22 +1462,9 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep,
 			}
 		}
 
-		if (nodep->next) {
-			nodep = nodep->next;
-		} else {
-			/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
-			do {
-				nodep = nodep->parent;
-				if (nodep == basep) {
-					return NULL;
-				}
-				/* This shouldn't happen, unless there's an invalidation bug somewhere. */
-				if (UNEXPECTED(nodep == NULL)) {
-					zend_throw_error(NULL, "Current node in traversal is not in the document. Please report this as a bug in php-src.");
-					return NULL;
-				}
-			} while (nodep->next == NULL);
-			nodep = nodep->next;
+		nodep = php_dom_next_in_tree_order(nodep, basep);
+		if (!nodep) {
+			return NULL;
 		}
 	}
 	return ret;

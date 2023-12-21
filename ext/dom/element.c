@@ -1010,18 +1010,7 @@ static void dom_remove_eliminated_ns(xmlNodePtr node, xmlNsPtr eliminatedNs)
 			}
 		}
 
-		if (node->next) {
-			node = node->next;
-		} else {
-			/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
-			do {
-				node = node->parent;
-				if (node == base) {
-					return;
-				}
-			} while (node->next == NULL);
-			node = node->next;
-		}
+		node = php_dom_next_in_tree_order(node, base);
 	}
 }
 

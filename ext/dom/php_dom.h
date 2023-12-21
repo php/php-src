@@ -163,6 +163,7 @@ bool php_dom_has_sibling_preceding_node(xmlNodePtr node, xmlElementType type);
 bool php_dom_has_child_of_type(xmlNodePtr node, xmlElementType type);
 void php_dom_update_document_after_clone(dom_object *original, xmlNodePtr original_node, dom_object *clone, xmlNodePtr cloned_node);
 void php_dom_document_constructor(INTERNAL_FUNCTION_PARAMETERS);
+xmlNodePtr php_dom_next_in_tree_order(xmlNodePtr nodep, xmlNodePtr basep);
 
 dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_entry *ce, xmlNodePtr obj, dom_object *parent);
 

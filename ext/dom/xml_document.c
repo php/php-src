@@ -82,18 +82,7 @@ static void dom_mark_namespaces_as_attributes_too(xmlDocPtr doc)
 			}
 		}
 
-		if (node->next) {
-			node = node->next;
-		} else {
-			/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
-			do {
-				node = node->parent;
-				if (node == NULL) {
-					return;
-				}
-			} while (node->next == NULL);
-			node = node->next;
-		}
+		node = php_dom_next_in_tree_order(node, NULL);
 	}
 }
 
