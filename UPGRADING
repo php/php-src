@@ -19,6 +19,14 @@ PHP 8.4 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- CLI:
+  . The builtin server looks for an index file recursively by traversing parent
+    directories in case the specified file cannot be located. This process was
+    previously skipped if the path looked like it was referring to a file, i.e.
+    if the last path component contained a period. In that case, a 404 error was
+    returned. The behavior has been changed to look for an index file in all
+    cases.
+
 - Core:
   . The type of PHP_DEBUG and PHP_ZTS constants changed to bool.
 
