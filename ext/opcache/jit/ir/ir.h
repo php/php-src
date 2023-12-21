@@ -757,6 +757,10 @@ int32_t ir_get_spill_slot_offset(ir_ctx *ctx, ir_ref ref);
 int ir_match(ir_ctx *ctx);
 void *ir_emit_code(ir_ctx *ctx, size_t *size);
 
+bool ir_needs_thunk(ir_code_buffer *code_buffer, void *addr);
+void *ir_emit_thunk(ir_code_buffer *code_buffer, void *addr, size_t *size_ptr);
+void ir_fix_thunk(void *thunk_entry, void *addr);
+
 /* Target address resolution (implementation in ir_emit.c) */
 void *ir_resolve_sym_name(const char *name);
 
@@ -799,11 +803,11 @@ struct _ir_loader {
 	bool (*sym_dcl)           (ir_loader *loader, const char *name, uint32_t flags, size_t size, bool has_data);
 	bool (*sym_data)          (ir_loader *loader, ir_type type, uint32_t count, const void *data);
 	bool (*sym_data_pad)      (ir_loader *loader, size_t offset);
-	bool (*sym_data_ref)      (ir_loader *loader, ir_op op, const char *ref);
+	bool (*sym_data_ref)      (ir_loader *loader, ir_op op, const char *ref, uintptr_t offset);
 	bool (*sym_data_end)      (ir_loader *loader);
 	bool (*func_init)         (ir_loader *loader, ir_ctx *ctx, const char *name);
 	bool (*func_process)      (ir_loader *loader, ir_ctx *ctx, const char *name);
-	void*(*resolve_sym_name)  (ir_loader *loader, const char *name);
+	void*(*resolve_sym_name)  (ir_loader *loader, const char *name, bool add_thunk);
 	bool (*has_sym)           (ir_loader *loader, const char *name);
 	bool (*add_sym)           (ir_loader *loader, const char *name, void *addr);
 };

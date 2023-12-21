@@ -176,6 +176,35 @@ static void ir_sccp_remove_from_use_list(ir_ctx *ctx, ir_ref from, ir_ref ref)
 #endif
 }
 
+static void ir_sccp_remove_from_use_list_1(ir_ctx *ctx, ir_ref from, ir_ref ref)
+{
+	ir_ref j, n, *p;
+	ir_use_list *use_list = &ctx->use_lists[from];
+
+	n = use_list->count;
+	j = 0;
+	p = &ctx->use_edges[use_list->refs];
+	while (j < n) {
+		if (*p == ref) {
+			break;
+		}
+		j++;
+	}
+
+	if (j < n) {
+		use_list->count--;
+		j++;
+		while (j < n) {
+			*p = *(p+1);
+			p++;
+			j++;
+		}
+#if IR_COMBO_COPY_PROPAGATION
+		*p = IR_UNUSED;
+#endif
+	}
+}
+
 #if IR_COMBO_COPY_PROPAGATION
 static int ir_sccp_add_to_use_list(ir_ctx *ctx, ir_ref to, ir_ref ref)
 {
@@ -521,7 +550,7 @@ static void ir_sccp_remove_unfeasible_merge_inputs(ir_ctx *ctx, ir_insn *_values
 							}
 							i++;
 						} else if (!IR_IS_CONST_REF(input)) {
-							ir_sccp_remove_from_use_list(ctx, input, use);
+							ir_sccp_remove_from_use_list_1(ctx, input, use);
 						}
 					}
 					while (i <= n) {
@@ -577,7 +606,11 @@ int ir_sccp(ir_ctx *ctx)
 						ir_ref input = ir_insn_op(insn, j + 1);
 
 						if (input > 0 && IR_IS_TOP(input)) {
-							ir_bitqueue_add(&worklist, input);
+							/* do backward propagaton only once */
+							if (!_values[input].op1) {
+								_values[input].op1 = 1;
+								ir_bitqueue_add(&worklist, input);
+							}
 						} else if (ir_sccp_join_values(ctx, _values, i, input)) {
 							changed = 1;
 						}
@@ -600,7 +633,11 @@ int ir_sccp(ir_ctx *ctx)
 					if (input > 0) {
 						if (_values[input].optx == IR_TOP) {
 							has_top = 1;
-							ir_bitqueue_add(&worklist, input);
+							/* do backward propagaton only once */
+							if (!_values[input].op1) {
+								_values[input].op1 = 1;
+								ir_bitqueue_add(&worklist, input);
+							}
 						} else if (_values[input].optx != IR_BOTTOM) {
 							/* Perform folding only if some of direct inputs
 							 * is going to be replaced by a constant or copy.
@@ -660,7 +697,11 @@ int ir_sccp(ir_ctx *ctx)
 			}
 			if (insn->op == IR_IF) {
 				if (IR_IS_TOP(insn->op2)) {
-					ir_bitqueue_add(&worklist, insn->op2);
+					/* do backward propagaton only once */
+					if (!_values[insn->op2].op1) {
+						_values[insn->op2].op1 = 1;
+						ir_bitqueue_add(&worklist, insn->op2);
+					}
 					continue;
 				}
 				if (!IR_IS_BOTTOM(insn->op2)
@@ -693,7 +734,11 @@ int ir_sccp(ir_ctx *ctx)
 				IR_MAKE_BOTTOM(i);
 			} else if (insn->op == IR_SWITCH) {
 				if (IR_IS_TOP(insn->op2)) {
-					ir_bitqueue_add(&worklist, insn->op2);
+					/* do backward propagaton only once */
+					if (!_values[insn->op2].op1) {
+						_values[insn->op2].op1 = 1;
+						ir_bitqueue_add(&worklist, insn->op2);
+					}
 					continue;
 				}
 				if (!IR_IS_BOTTOM(insn->op2)) {

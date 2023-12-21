@@ -302,12 +302,6 @@ void *ir_resolve_sym_name(const char *name)
 	DWORD cbNeeded;
 	uint32_t i = 0;
 
-	/* Quick workaraund to prevent *.irt tests failures */
-	// TODO: try to find a general solution ???
-	if (strcmp(name, "printf") == 0) {
-		return (void*)printf;
-	}
-
 	addr = NULL;
 
 	EnumProcessModules(GetCurrentProcess(), mods, sizeof(mods), &cbNeeded);
@@ -320,7 +314,6 @@ void *ir_resolve_sym_name(const char *name)
 		i++;
 	}
 #endif
-	IR_ASSERT(addr != NULL);
 	return addr;
 }
 
@@ -334,9 +327,10 @@ static void *ir_call_addr(ir_ctx *ctx, ir_insn *insn, ir_insn *addr_insn)
 
 	IR_ASSERT(addr_insn->type == IR_ADDR);
 	if (addr_insn->op == IR_FUNC) {
+		const char* name = ir_get_str(ctx, addr_insn->val.name);
 		addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
-			ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, addr_insn->val.name)) :
-			ir_resolve_sym_name(ir_get_str(ctx, addr_insn->val.name));
+			ctx->loader->resolve_sym_name(ctx->loader, name, 1) :
+			ir_resolve_sym_name(name);
 		IR_ASSERT(addr);
 	} else {
 		IR_ASSERT(addr_insn->op == IR_ADDR || addr_insn->op == IR_FUNC_ADDR);

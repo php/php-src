@@ -20,44 +20,44 @@
 #define ADR_IMM         (1<<20)        // signed imm21
 #define ADRP_IMM        (1LL<<32)      // signed imm21 * 4096
 
-static bool aarch64_may_use_b(ir_ctx *ctx, const void *addr)
+static bool aarch64_may_use_b(ir_code_buffer *code_buffer, const void *addr)
 {
-	if (ctx->code_buffer) {
-		if (addr >= ctx->code_buffer->start && (char*)addr < (char*)ctx->code_buffer->end) {
-			return (((char*)ctx->code_buffer->end - (char*)ctx->code_buffer->start) < B_IMM);
-		} else if ((char*)addr >= (char*)ctx->code_buffer->end) {
-			return (((char*)addr - (char*)ctx->code_buffer->start) < B_IMM);
-		} else if (addr < ctx->code_buffer->start) {
-			return (((char*)ctx->code_buffer->end - (char*)addr) < B_IMM);
-		}
-	}
-	return 1; //???
-}
-
-#if 0
-static bool aarch64_may_use_adr(ir_ctx *ctx, const void *addr)
-{
-	if (ctx->code_buffer) {
-		if (addr >= ctx->code_buffer->start && (char*)addr < (char*)ctx->code_buffer->end) {
-			return (((char*)ctx->code_buffer->end - (char*)ctx->code_buffer->start) < ADR_IMM);
-		} else if ((char*)addr >= (char*)ctx->code_buffer->end) {
-			return (((char*)addr - (char*)ctx->code_buffer->start) < ADR_IMM);
-		} else if (addr < ctx->code_buffer->start) {
-			return (((char*)ctx->code_buffer->end - (char*)addr) < ADR_IMM);
+	if (code_buffer) {
+		if (addr >= code_buffer->start && (char*)addr < (char*)code_buffer->end) {
+			return (((char*)code_buffer->end - (char*)code_buffer->start) < B_IMM);
+		} else if ((char*)addr >= (char*)code_buffer->end) {
+			return (((char*)addr - (char*)code_buffer->start) < B_IMM);
+		} else if (addr < code_buffer->start) {
+			return (((char*)code_buffer->end - (char*)addr) < B_IMM);
 		}
 	}
 	return 0;
 }
 
-static bool aarch64_may_use_adrp(ir_ctx *ctx, const void *addr)
+#if 0
+static bool aarch64_may_use_adr(ir_code_buffer *code_buffer, const void *addr)
 {
-	if (ctx->code_buffer) {
-		if (addr >= ctx->code_buffer->start && (char*)addr < (char*)ctx->code_buffer->end) {
-			return (((char*)ctx->code_buffer->end - (char*)ctx->code_buffer->start) < ADRP_IMM);
-		} else if ((char*)addr >= (char*)ctx->code_buffer->end) {
-			return (((char*)addr - (char*)ctx->code_buffer->start) < ADRP_IMM);
-		} else if (addr < ctx->code_buffer->start) {
-			return (((char*)ctx->code_buffer->end - (char*)addr) < ADRP_IMM);
+	if (code_buffer) {
+		if (addr >= code_buffer->start && (char*)addr < (char*)code_buffer->end) {
+			return (((char*)code_buffer->end - (char*)code_buffer->start) < ADR_IMM);
+		} else if ((char*)addr >= (char*)code_buffer->end) {
+			return (((char*)addr - (char*)code_buffer->start) < ADR_IMM);
+		} else if (addr < code_buffer->start) {
+			return (((char*)code_buffer->end - (char*)addr) < ADR_IMM);
+		}
+	}
+	return 0;
+}
+
+static bool aarch64_may_use_adrp(ir_code_buffer *code_buffer, const void *addr)
+{
+	if (code_buffer) {
+		if (addr >= code_buffer->start && (char*)addr < (char*)code_buffer->end) {
+			return (((char*)code_buffer->end - (char*)code_buffer->start) < ADRP_IMM);
+		} else if ((char*)addr >= (char*)code_buffer->end) {
+			return (((char*)addr - (char*)code_buffer->start) < ADRP_IMM);
+		} else if (addr < code_buffer->start) {
+			return (((char*)code_buffer->end - (char*)addr) < ADRP_IMM);
 		}
 	}
 	return 0;
@@ -1176,9 +1176,10 @@ static void ir_emit_load(ir_ctx *ctx, ir_type type, ir_reg reg, ir_ref src)
 			ir_insn *insn = &ctx->ir_base[src];
 
 			if (insn->op == IR_SYM || insn->op == IR_FUNC) {
+				const char *name = ir_get_str(ctx, insn->val.name);
 				void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
-					ctx->loader->resolve_sym_name(ctx->loader, ir_get_str(ctx, insn->val.name)) :
-					ir_resolve_sym_name(ir_get_str(ctx, insn->val.name));
+					ctx->loader->resolve_sym_name(ctx->loader, name, insn->op == IR_FUNC) :
+					ir_resolve_sym_name(name);
 				IR_ASSERT(addr);
 				ir_emit_load_imm_int(ctx, type, reg, (intptr_t)addr);
 			} else if (insn->op == IR_STR) {
@@ -4360,7 +4361,7 @@ static void ir_emit_call_ex(ir_ctx *ctx, ir_ref def, ir_insn *insn, int32_t used
 	if (IR_IS_CONST_REF(insn->op2)) {
 		void *addr = ir_call_addr(ctx, insn, &ctx->ir_base[insn->op2]);
 
-		if (aarch64_may_use_b(ctx, addr)) {
+		if (aarch64_may_use_b(ctx->code_buffer, addr)) {
 			|	bl &addr
 		} else {
 			ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, (intptr_t)addr);
@@ -4435,7 +4436,7 @@ static void ir_emit_tailcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	if (IR_IS_CONST_REF(insn->op2)) {
 		void *addr = ir_call_addr(ctx, insn, &ctx->ir_base[insn->op2]);
 
-		if (aarch64_may_use_b(ctx, addr)) {
+		if (aarch64_may_use_b(ctx->code_buffer, addr)) {
 			|	b &addr
 		} else {
 			ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, (intptr_t)addr);
@@ -4468,7 +4469,7 @@ static void ir_emit_ijmp(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	} else if (IR_IS_CONST_REF(insn->op2)) {
 		void *addr = ir_jmp_addr(ctx, insn, &ctx->ir_base[insn->op2]);
 
-		if (aarch64_may_use_b(ctx, addr)) {
+		if (aarch64_may_use_b(ctx->code_buffer, addr)) {
 			|	b &addr
 		} else {
 			ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, (intptr_t)addr);
@@ -4494,7 +4495,7 @@ static void ir_emit_guard(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			if (IR_IS_CONST_REF(insn->op3)) {
 				void *addr = ir_jmp_addr(ctx, insn, &ctx->ir_base[insn->op3]);
 
-				if (aarch64_may_use_b(ctx, addr)) {
+				if (aarch64_may_use_b(ctx->code_buffer, addr)) {
 					|	b &addr
 				} else {
 					ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, (intptr_t)addr);
@@ -4654,7 +4655,7 @@ static void ir_emit_guard_cmp_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *
 	if (IR_IS_CONST_REF(op2) && ctx->ir_base[op2].val.u64 == 0) {
 		if (op == IR_ULT) {
 			/* always false */
-			if (aarch64_may_use_b(ctx, addr)) {
+			if (aarch64_may_use_b(ctx->code_buffer, addr)) {
 				|	b &addr
 			} else {
 				ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, (intptr_t)addr);
@@ -4807,7 +4808,7 @@ static void ir_emit_exitcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	if (IR_IS_CONST_REF(insn->op2)) {
 		void *addr = ir_call_addr(ctx, insn, &ctx->ir_base[insn->op2]);
 
-		if (aarch64_may_use_b(ctx, addr)) {
+		if (aarch64_may_use_b(ctx->code_buffer, addr)) {
 			|	bl &addr
 		} else {
 			ir_emit_load_imm_int(ctx, IR_ADDR, IR_REG_INT_TMP, (intptr_t)addr);
@@ -5835,17 +5836,8 @@ const void *ir_emit_exitgroup(uint32_t first_exit_point, uint32_t exit_points_pe
 	dasm_State **Dst, *dasm_state;
 	int ret;
 
-	/* IR_ASSERT(aarch64_may_use_b(ctx, exit_addr)) */
 	IR_ASSERT(code_buffer);
-	if ((char*)exit_addr >= (char*)code_buffer->start && (char*)exit_addr < (char*)code_buffer->end) {
-		IR_ASSERT(((char*)code_buffer->end - (char*)code_buffer->end) < B_IMM);
-	} else if ((char*)exit_addr >= (char*)code_buffer->end) {
-		IR_ASSERT(((char*)exit_addr - (char*)code_buffer->start) < B_IMM);
-	} else if ((char*)exit_addr < (char*)code_buffer->start) {
-		IR_ASSERT(((char*)code_buffer->end - (char*)exit_addr) < B_IMM);
-	} else {
-		IR_ASSERT(0);
-	}
+	IR_ASSERT(aarch64_may_use_b(code_buffer, exit_addr));
 
 	Dst = &dasm_state;
 	dasm_state = NULL;
@@ -6009,4 +6001,74 @@ static int ir_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int *b, ui
 	ctx->code_buffer->pos = (char*)ctx->code_buffer->pos + 4;
 
 	return n;
+}
+
+bool ir_needs_thunk(ir_code_buffer *code_buffer, void *addr)
+{
+	return !aarch64_may_use_b(code_buffer, addr);
+}
+
+void *ir_emit_thunk(ir_code_buffer *code_buffer, void *addr, size_t *size_ptr)
+{
+	void *entry;
+	size_t size;
+	dasm_State **Dst, *dasm_state;
+	int ret;
+
+	Dst = &dasm_state;
+	dasm_state = NULL;
+	dasm_init(&dasm_state, DASM_MAXSECTION);
+	dasm_setupglobal(&dasm_state, dasm_labels, ir_lb_MAX);
+	dasm_setup(&dasm_state, dasm_actions);
+
+	|.code
+	|	movz Rx(IR_REG_INT_TMP), #((uint64_t)(addr) & 0xffff)
+	|	movk Rx(IR_REG_INT_TMP), #(((uint64_t)(addr) >> 16) & 0xffff), lsl #16
+	|	movk Rx(IR_REG_INT_TMP), #(((uint64_t)(addr) >> 32) & 0xffff), lsl #32
+	|	movk Rx(IR_REG_INT_TMP), #(((uint64_t)(addr) >> 48) & 0xffff), lsl #48
+	|	br Rx(IR_REG_INT_TMP)
+
+	ret = dasm_link(&dasm_state, &size);
+	if (ret != DASM_S_OK) {
+		IR_ASSERT(0);
+		dasm_free(&dasm_state);
+		return NULL;
+	}
+
+	if (size > (size_t)((char*)code_buffer->end - (char*)code_buffer->pos)) {
+		dasm_free(&dasm_state);
+		return NULL;
+	}
+
+	entry = code_buffer->pos;
+	ret = dasm_encode(&dasm_state, entry);
+	if (ret != DASM_S_OK) {
+		dasm_free(&dasm_state);
+		return NULL;
+	}
+
+	*size_ptr = size;
+	code_buffer->pos = (char*)code_buffer->pos + size;
+
+	dasm_free(&dasm_state);
+	ir_mem_flush(entry, size);
+
+	return entry;
+}
+
+void ir_fix_thunk(void *thunk_entry, void *addr)
+{
+	uint32_t *code = thunk_entry;
+	IR_ASSERT((code[0] & 0xffe00000) == 0xd2800000
+		&& (code[1] & 0xffe00000) == 0xf2a00000
+		&& (code[2] & 0xffe00000) == 0xf2c00000
+		&& (code[3] & 0xffe00000) == 0xf2e00000
+		&& (code[4] & 0xfffffc1f) == 0xd61f0000);
+
+	code[0] = (code[0] & 0xffe0001f) | (uint32_t)((uint64_t)(addr) & 0xffff) << 5;
+	code[1] = (code[1] & 0xffe0001f) | (uint32_t)(((uint64_t)(addr) >> 16) & 0xffff) << 5;
+	code[2] = (code[2] & 0xffe0001f) | (uint32_t)(((uint64_t)(addr) >> 32) & 0xffff) << 5;
+	code[3] = (code[3] & 0xffe0001f) | (uint32_t)(((uint64_t)(addr) >> 48) & 0xffff) << 5;
+
+	ir_mem_flush(code, sizeof(uint32_t) * 4);
 }
