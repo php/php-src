@@ -1594,8 +1594,8 @@ static zend_always_inline void dom_libxml_reconcile_ensure_namespaces_are_declar
 {
 	if (php_dom_follow_spec_node(nodep)) {
 		/* Put on stack to avoid allocation.
-		* Although libxml2 currently does not use this for the reconciliation, it still
-		* makes sense to do this just in case libxml2's internal change in the future. */
+		 * Although libxml2 currently does not use this for the reconciliation, it still
+		 * makes sense to do this just in case libxml2's internal change in the future. */
 		xmlDOMWrapCtxt dummy_ctxt = {0};
 		xmlDOMWrapReconcileNamespaces(&dummy_ctxt, nodep, /* options */ 0);
 	} else {
