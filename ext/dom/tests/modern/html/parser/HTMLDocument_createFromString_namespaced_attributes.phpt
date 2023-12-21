@@ -9,12 +9,15 @@ $dom = DOM\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE html>
 <html>
     <svg width="1" xmlns:xlink='http://www.w3.org/1999/xlink'>
-        <use xlink:href='#test'></use>
+        <use xlink:href='#test' foo="bar"></use>
     </svg>
+    <math>
+        <mo accent="true"></mo>
+    </math>
 </html>
 HTML);
 
-foreach (['svg', 'use'] as $tag) {
+foreach (['svg', 'use', 'mo'] as $tag) {
     $el = $dom->getElementsByTagName($tag)[0];
     foreach ($el->attributes as $attribute) {
         echo "Attribute: \n";
@@ -36,3 +39,11 @@ Attribute:
 string(10) "xlink:href"
 string(5) "#test"
 string(28) "http://www.w3.org/1999/xlink"
+Attribute: 
+string(3) "foo"
+string(3) "bar"
+NULL
+Attribute: 
+string(6) "accent"
+string(4) "true"
+NULL
