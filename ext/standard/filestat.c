@@ -281,7 +281,9 @@ PHPAPI zend_result php_get_gid_by_name(const char *name, gid_t *gid)
 		char *grbuf;
 
 #if defined(__FreeBSD__) && defined(_SC_PAGESIZE)
-		if (grbuflen < 1) grbuflen = sysconf(_SC_PAGESIZE);
+		if (grbuflen < 1) {
+			grbuflen = sysconf(_SC_PAGESIZE);
+		}
 #endif
 		if (grbuflen < 1) {
 			return FAILURE;
@@ -410,7 +412,9 @@ PHPAPI zend_result php_get_uid_by_name(const char *name, uid_t *uid)
 		char *pwbuf;
 
 #if defined(__FreeBSD__) && defined(_SC_PAGESIZE)
-		if (pwbuflen < 1) pwbuflen = sysconf(_SC_PAGESIZE);
+		if (pwbuflen < 1) {
+			pwbuflen = sysconf(_SC_PAGESIZE);
+		}
 #endif
 		if (pwbuflen < 1) {
 			return FAILURE;

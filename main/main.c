@@ -1459,7 +1459,9 @@ PHPAPI char *php_get_current_user(void)
 		char *pwbuf;
 
 #if defined(__FreeBSD__) && defined(_SC_PAGESIZE)
-		if (pwbuflen < 1) pwbuflen = sysconf(_SC_PAGESIZE);
+		if (pwbuflen < 1) {
+			pwbuflen = sysconf(_SC_PAGESIZE);
+		}
 #endif
 		if (pwbuflen < 1) {
 			return "";
