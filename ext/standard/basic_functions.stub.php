@@ -375,6 +375,26 @@ const PHP_ROUND_HALF_EVEN = UNKNOWN;
  * @cvalue PHP_ROUND_HALF_ODD
  */
 const PHP_ROUND_HALF_ODD = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_CEILING
+ */
+const PHP_ROUND_CEILING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_FLOOR
+ */
+const PHP_ROUND_FLOOR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_TOWARD_ZERO
+ */
+const PHP_ROUND_TOWARD_ZERO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_AWAY_FROM_ZERO
+ */
+const PHP_ROUND_AWAY_FROM_ZERO = UNKNOWN;
 
 /* crypt.c */
 

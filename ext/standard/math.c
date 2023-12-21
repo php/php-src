@@ -126,6 +126,30 @@ static inline double php_round_helper(double value, int mode) {
 
 			return integral;
 
+		case PHP_ROUND_CEILING:
+			if (value > 0.0 && fractional > 0.0) {
+				return integral + 1.0;
+			}
+
+			return integral;
+
+		case PHP_ROUND_FLOOR:
+			if (value < 0.0 && fractional > 0.0) {
+				return integral - 1.0;
+			}
+
+			return integral;
+
+		case PHP_ROUND_TOWARD_ZERO:
+			return integral;
+
+		case PHP_ROUND_AWAY_FROM_ZERO:
+			if (fractional > 0.0) {
+				return integral + copysign(1.0, integral);
+			}
+
+			return integral;
+
 		case PHP_ROUND_HALF_EVEN:
 			if (fractional > 0.5) {
 				return integral + copysign(1.0, integral);
@@ -143,6 +167,7 @@ static inline double php_round_helper(double value, int mode) {
 			}
 
 			return integral;
+
 		case PHP_ROUND_HALF_ODD:
 			if (fractional > 0.5) {
 				return integral + copysign(1.0, integral);
@@ -157,6 +182,7 @@ static inline double php_round_helper(double value, int mode) {
 			}
 
 			return integral;
+
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 	// FIXME: GCC bug, branch is considered reachable.
@@ -340,6 +366,10 @@ PHP_FUNCTION(round)
 		case PHP_ROUND_HALF_DOWN:
 		case PHP_ROUND_HALF_EVEN:
 		case PHP_ROUND_HALF_ODD:
+		case PHP_ROUND_AWAY_FROM_ZERO:
+		case PHP_ROUND_TOWARD_ZERO:
+		case PHP_ROUND_CEILING:
+		case PHP_ROUND_FLOOR:
 			break;
 		default:
 			zend_argument_value_error(3, "must be a valid rounding mode (PHP_ROUND_*)");

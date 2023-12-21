@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6178ab530b85aca5c90fb7369c5019bb5cbfe8a7 */
+ * Stub hash: 5d5421c72894a77894872efdf060ec058d275c13 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -225,6 +225,18 @@ static zend_class_entry *register_class_NumberFormatter(void)
 	zend_string *const_ROUND_UP_name = zend_string_init_interned("ROUND_UP", sizeof("ROUND_UP") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ROUND_UP_name, &const_ROUND_UP_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ROUND_UP_name);
+
+	zval const_ROUND_TOWARD_ZERO_value;
+	ZVAL_LONG(&const_ROUND_TOWARD_ZERO_value, UNUM_ROUND_DOWN);
+	zend_string *const_ROUND_TOWARD_ZERO_name = zend_string_init_interned("ROUND_TOWARD_ZERO", sizeof("ROUND_TOWARD_ZERO") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ROUND_TOWARD_ZERO_name, &const_ROUND_TOWARD_ZERO_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ROUND_TOWARD_ZERO_name);
+
+	zval const_ROUND_AWAY_FROM_ZERO_value;
+	ZVAL_LONG(&const_ROUND_AWAY_FROM_ZERO_value, UNUM_ROUND_UP);
+	zend_string *const_ROUND_AWAY_FROM_ZERO_name = zend_string_init_interned("ROUND_AWAY_FROM_ZERO", sizeof("ROUND_AWAY_FROM_ZERO") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ROUND_AWAY_FROM_ZERO_name, &const_ROUND_AWAY_FROM_ZERO_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ROUND_AWAY_FROM_ZERO_name);
 
 	zval const_ROUND_HALFEVEN_value;
 	ZVAL_LONG(&const_ROUND_HALFEVEN_value, UNUM_ROUND_HALFEVEN);

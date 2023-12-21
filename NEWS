@@ -30,6 +30,8 @@ Intl:
   . Added IntlDateFormatter::PATTERN constant. (David Carlier)
   . Fixed Numberformatter::__construct when the locale is invalid, now
     throws an exception. (David Carlier)
+  . Added NumberFormatter::ROUND_TOWARD_ZERO and ::ROUND_AWAY_FROM_ZERO as
+    aliases for ::ROUND_DOWN and ::ROUND_UP. (Jorg Sowa)
 
 MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
@@ -106,7 +108,8 @@ Standard:
     (nielsdos)
   . Removed the deprecated inet_ntoa call support. (David Carlier)
   . Cast large floats that are within int range to int in number_format so
-    the precision is not lost. (Marc Bennewitz) 
+    the precision is not lost. (Marc Bennewitz)
+  . Add support for 4 new rounding modes to the round() function. (Jorg Sowa)
 
 XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)
