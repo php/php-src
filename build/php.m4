@@ -1070,28 +1070,6 @@ AC_DEFUN([PHP_CHECK_SIZEOF], [
 ])
 
 dnl
-dnl PHP_CHECK_IN_ADDR_T
-dnl
-AC_DEFUN([PHP_CHECK_IN_ADDR_T], [
-dnl AIX keeps in_addr_t in /usr/include/netinet/in.h
-AC_MSG_CHECKING([for in_addr_t])
-AC_CACHE_VAL(ac_cv_type_in_addr_t,
-[AC_EGREP_CPP(dnl
-changequote(<<,>>)dnl
-<<in_addr_t[^a-zA-Z_0-9]>>dnl
-changequote([,]), [#include <sys/types.h>
-#include <stdlib.h>
-#include <stddef.h>
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif], ac_cv_type_in_addr_t=yes, ac_cv_type_in_addr_t=no)])dnl
-AC_MSG_RESULT([$ac_cv_type_in_addr_t])
-if test $ac_cv_type_in_addr_t = no; then
-  AC_DEFINE(in_addr_t, u_int, [ ])
-fi
-])
-
-dnl
 dnl PHP_TIME_R_TYPE
 dnl
 dnl Check type of reentrant time-related functions. Type can be: irix, hpux or
