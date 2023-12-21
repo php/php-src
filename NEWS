@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13563 (Setting bool values via env in FPM config fails).
     (Jakub Zelenka)
 
+- OpenSSL:
+  . Fixed bug GH-10495 (feof on OpenSSL stream hangs indefinitely).
+    (Jakub Zelenka)
+
 - Streams:
   . Fixed bug GH-13264 (Part 1 - Memory leak on stream filter failure).
     (Jakub Zelenka)
