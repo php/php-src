@@ -46,6 +46,10 @@ PHP                                                                        NEWS
   . Fix getting the address of an uninitialized property of a SimpleXMLElement
     resulting in a crash. (nielsdos)
 
+- Tidy:
+  . Fixed bug GH-12980 (tidynode.props.attribute is missing
+    "Boolean Attributes" and empty attributes). (nielsdos)
+
 21 Dec 2023, PHP 8.2.14
 
 - Core:
