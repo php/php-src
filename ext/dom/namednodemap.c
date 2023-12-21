@@ -71,7 +71,7 @@ zend_result dom_namednodemap_length_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, const char *named, bool may_transform)
+xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, const zend_string *named, bool may_transform)
 {
 	xmlNodePtr itemnode = NULL;
 	if (objmap != NULL) {
@@ -79,9 +79,9 @@ xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, co
 			objmap->nodetype == XML_ENTITY_NODE) {
 			if (objmap->ht) {
 				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, (const xmlChar *) named);
+					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, (const xmlChar *) ZSTR_VAL(named));
 				} else {
-					xmlNotationPtr notep = xmlHashLookup(objmap->ht, (const xmlChar *) named);
+					xmlNotationPtr notep = xmlHashLookup(objmap->ht, (const xmlChar *) ZSTR_VAL(named));
 					if (notep) {
 						if (may_transform) {
 							itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
@@ -94,14 +94,18 @@ xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, co
 		} else {
 			xmlNodePtr nodep = dom_object_get_node(objmap->baseobj);
 			if (nodep) {
-				itemnode = (xmlNodePtr)xmlHasProp(nodep, (const xmlChar *) named);
+				if (php_dom_follow_spec_intern(objmap->baseobj)) {
+					itemnode = (xmlNodePtr) php_dom_get_attribute_node(nodep, (const xmlChar *) ZSTR_VAL(named), ZSTR_LEN(named));
+				} else {
+					itemnode = (xmlNodePtr) xmlHasProp(nodep, (const xmlChar *) ZSTR_VAL(named));
+				}
 			}
 		}
 	}
 	return itemnode;
 }
 
-void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const char *named, zval *return_value)
+void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, zval *return_value)
 {
 	int ret;
 	xmlNodePtr itemnode = php_dom_named_node_map_get_named_item(objmap, named, true);
@@ -117,10 +121,9 @@ Since:
 */
 PHP_METHOD(DOMNamedNodeMap, getNamedItem)
 {
-	size_t namedlen;
-	char *named;
+	zend_string *named;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &named, &namedlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &named) == FAILURE) {
 		RETURN_THROWS();
 	}
 

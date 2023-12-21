@@ -1972,7 +1972,7 @@ static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int t
 	zend_long lval;
 	if (dom_nodemap_or_nodelist_process_offset_as_named(offset, &lval)) {
 		/* exceptional case, switch to named lookup */
-		php_dom_named_node_map_get_named_item_into_zval(php_dom_obj_from_obj(object)->ptr, Z_STRVAL_P(offset), rv);
+		php_dom_named_node_map_get_named_item_into_zval(php_dom_obj_from_obj(object)->ptr, Z_STR_P(offset), rv);
 		return rv;
 	}
 
@@ -1993,7 +1993,7 @@ static int dom_nodemap_has_dimension(zend_object *object, zval *member, int chec
 	zend_long offset;
 	if (dom_nodemap_or_nodelist_process_offset_as_named(member, &offset)) {
 		/* exceptional case, switch to named lookup */
-		return php_dom_named_node_map_get_named_item(php_dom_obj_from_obj(object)->ptr, Z_STRVAL_P(member), false) != NULL;
+		return php_dom_named_node_map_get_named_item(php_dom_obj_from_obj(object)->ptr, Z_STR_P(member), false) != NULL;
 	}
 
 	return offset >= 0 && offset < php_dom_get_namednodemap_length(php_dom_obj_from_obj(object));
