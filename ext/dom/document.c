@@ -816,8 +816,7 @@ PHP_METHOD(DOM_Document, importNode)
 
 	DOM_GET_OBJ(nodep, node, xmlNodePtr, nodeobj);
 
-	if (nodep->type == XML_HTML_DOCUMENT_NODE || nodep->type == XML_DOCUMENT_NODE
-		|| nodep->type == XML_DOCUMENT_TYPE_NODE) {
+	if (nodep->type == XML_HTML_DOCUMENT_NODE || nodep->type == XML_DOCUMENT_NODE) {
 		if (php_dom_follow_spec_intern(intern)) {
 			php_dom_throw_error(NOT_SUPPORTED_ERR, /* strict */ true);
 			RETURN_THROWS();
