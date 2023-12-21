@@ -217,7 +217,7 @@ zend_result dom_element_schema_type_info_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* Note: the object returned is not necessarily a node, but can be an attribute or a namespace declaration. */
-static xmlNodePtr dom_get_attribute_or_nsdecl(dom_object *intern, xmlNodePtr elem, xmlChar *name, size_t name_len) /* {{{ */
+static xmlNodePtr dom_get_attribute_or_nsdecl(dom_object *intern, xmlNodePtr elem, const xmlChar *name, size_t name_len) /* {{{ */
 {
 	if (!php_dom_follow_spec_intern(intern)) {
 		int len;
@@ -255,28 +255,9 @@ static xmlNodePtr dom_get_attribute_or_nsdecl(dom_object *intern, xmlNodePtr ele
 				return NULL;
 			}
 		}
-		return (xmlNodePtr)xmlHasNsProp(elem, name, NULL);
+		return (xmlNodePtr) xmlHasNsProp(elem, name, NULL);
 	} else {
-		xmlChar *name_processed = name;
-		if (dom_ns_is_html_and_document_is_html(elem)) {
-			char *lowercase_copy = zend_str_tolower_dup_ex((char *) name, name_len);
-			if (lowercase_copy != NULL) {
-				name_processed = BAD_CAST lowercase_copy;
-			}
-		}
-
-		xmlNodePtr ret = NULL;
-		for (xmlAttrPtr attr = elem->properties; attr != NULL; attr = attr->next) {
-			if (dom_match_qualified_name_according_to_spec(name_processed, (xmlNodePtr) attr)) {
-				ret = (xmlNodePtr) attr;
-				break;
-			}
-		}
-
-		if (name_processed != name) {
-			efree(name_processed);
-		}
-		return ret;
+		return (xmlNodePtr) php_dom_get_attribute_node(elem, name, name_len);
 	}
 }
 /* }}} */

@@ -2063,4 +2063,29 @@ bool php_dom_has_sibling_preceding_node(xmlNodePtr node, xmlElementType type)
 	return false;
 }
 
+xmlAttrPtr php_dom_get_attribute_node(xmlNodePtr elem, const xmlChar *name, size_t name_len)
+{
+	xmlChar *name_processed = BAD_CAST name;
+	if (dom_ns_is_html_and_document_is_html(elem)) {
+		char *lowercase_copy = zend_str_tolower_dup_ex((char *) name, name_len);
+		if (lowercase_copy != NULL) {
+			name_processed = BAD_CAST lowercase_copy;
+		}
+	}
+
+	xmlAttrPtr ret = NULL;
+	for (xmlAttrPtr attr = elem->properties; attr != NULL; attr = attr->next) {
+		if (dom_match_qualified_name_according_to_spec(name_processed, (xmlNodePtr) attr)) {
+			ret = attr;
+			break;
+		}
+	}
+
+	if (name_processed != name) {
+		efree(name_processed);
+	}
+
+	return ret;
+}
+
 #endif /* HAVE_DOM */
