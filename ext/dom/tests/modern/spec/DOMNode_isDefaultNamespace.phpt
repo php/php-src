@@ -42,6 +42,14 @@ echo "--- detached attribute ---\n";
 dump($dom->createAttribute('foo'));
 echo "--- custom namespace with a prefix ---\n";
 var_dump($dom->createElementNS('urn:a', 'q:name')->isDefaultNamespace('urn:a'));
+echo "--- custom namespace with a prefix and with attributes ---\n";
+$element = $dom->createElementNS('urn:a', 'q:name');
+$element->setAttributeNS("urn:x", "x:foo", "");
+$element->setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:q", "urn:test");
+$element->setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns", "urn:test2");
+var_dump($element->isDefaultNamespace('urn:a'));
+var_dump($element->isDefaultNamespace('urn:test'));
+var_dump($element->isDefaultNamespace('urn:test2'));
 echo "--- custom namespace without a prefix ---\n";
 var_dump($dom->createElementNS('urn:a', 'name')->isDefaultNamespace('urn:a'));
 
@@ -84,5 +92,9 @@ mathml NS: bool(false)
 empty NS: bool(true)
 --- custom namespace with a prefix ---
 bool(false)
+--- custom namespace with a prefix and with attributes ---
+bool(false)
+bool(false)
+bool(true)
 --- custom namespace without a prefix ---
 bool(true)
