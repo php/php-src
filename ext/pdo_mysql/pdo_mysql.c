@@ -28,8 +28,7 @@
 #include "php_pdo_mysql_int.h"
 #include "pdo_mysql_arginfo.h"
 
-zend_class_entry *pdomysql_ce;
-static pdo_driver_class_entry pdomysql_pdo_driver_class_entry;
+zend_class_entry *pdo_mysql_ce;
 
 #ifdef COMPILE_DL_PDO_MYSQL
 #ifdef ZTS
@@ -150,16 +149,14 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api);
 #endif
 
-	pdomysql_ce = register_class_PdoMysql(pdo_dbh_ce);
-	pdomysql_ce->create_object = pdo_dbh_new;
+	pdo_mysql_ce = register_class_PdoMysql(pdo_dbh_ce);
+	pdo_mysql_ce->create_object = pdo_dbh_new;
 
-	pdomysql_pdo_driver_class_entry.driver_name = "mysql";
-	pdomysql_pdo_driver_class_entry.driver_ce = pdomysql_ce;
-	if (pdo_register_driver_specific_class(&pdomysql_pdo_driver_class_entry) == FAILURE) {
+	if (php_pdo_register_driver(&pdo_mysql_driver) == FAILURE) {
 		return FAILURE;
 	}
 
-	return php_pdo_register_driver(&pdo_mysql_driver);
+	return php_pdo_register_driver_specific_ce(&pdo_mysql_driver, pdo_mysql_ce);
 }
 /* }}} */
 

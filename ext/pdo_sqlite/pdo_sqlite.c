@@ -30,7 +30,6 @@
 #include "pdo_sqlite_arginfo.h"
 
 zend_class_entry *pdosqlite_ce;
-static pdo_driver_class_entry pdosqlite_pdo_driver_class_entry;
 
 typedef struct {
 	zval val;
@@ -284,7 +283,7 @@ PHP_METHOD(PdoSqlite, loadExtension)
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *db_handle;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &extension, &extension_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &extension, &extension_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -542,7 +541,7 @@ PHP_METHOD(PdoSqlite, openBlob)
 	}
 }
 
-static int php_pgsql_collation_callback(void *context, int string1_len, const void *string1,
+static int php_sqlite3_collation_callback(void *context, int string1_len, const void *string1,
 	int string2_len, const void *string2)
 {
 	int ret;
@@ -565,7 +564,11 @@ static int php_pgsql_collation_callback(void *context, int string1_len, const vo
 		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the callback");
 	} else if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) != IS_LONG) {
-			convert_to_long(&retval);
+			zend_string *func_name = get_active_function_or_method_name();
+			zend_type_error("%s(): Return value of the callback must be of type int, %s returned",
+				ZSTR_VAL(func_name), zend_zval_value_name(&retval));
+			zend_string_release(func_name);
+			return FAILURE;
 		}
 		ret = 0;
 		if (Z_LVAL(retval) > 0) {
@@ -653,7 +656,7 @@ PHP_METHOD(PdoSqlite, createCollation)
 
 	collation = (struct pdo_sqlite_collation*)ecalloc(1, sizeof(*collation));
 
-	ret = sqlite3_create_collation(H->db, collation_name, SQLITE_UTF8, collation, php_pgsql_collation_callback);
+	ret = sqlite3_create_collation(H->db, collation_name, SQLITE_UTF8, collation, php_sqlite3_collation_callback);
 	if (ret == SQLITE_OK) {
 		collation->name = estrdup(collation_name);
 
@@ -663,6 +666,10 @@ PHP_METHOD(PdoSqlite, createCollation)
 		H->collations = collation;
 
 		RETURN_TRUE;
+	}
+
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
 	}
 
 	efree(collation);
@@ -686,14 +693,11 @@ PHP_MINIT_FUNCTION(pdo_sqlite)
 	pdosqlite_ce = register_class_PdoSqlite(pdo_dbh_ce);
 	pdosqlite_ce->create_object = pdo_dbh_new;
 
-	pdosqlite_pdo_driver_class_entry.driver_name = "sqlite";
-	pdosqlite_pdo_driver_class_entry.driver_ce = pdosqlite_ce;
-
-	if (pdo_register_driver_specific_class(&pdosqlite_pdo_driver_class_entry) == FAILURE) {
+	if (php_pdo_register_driver(&pdo_sqlite_driver) == FAILURE) {
 		return FAILURE;
 	}
 
-	return php_pdo_register_driver(&pdo_sqlite_driver);
+	return php_pdo_register_driver_specific_ce(&pdo_sqlite_driver, pdosqlite_ce);
 }
 /* }}} */
 

@@ -20,6 +20,8 @@ $db->rollback();
 $r = $db->query('SELECT COUNT(*) FROM test_pdo_sqlite_transaction');
 var_dump($r->rowCount());
 
+$db->query('DROP TABLE test_pdo_sqlite_transaction');
+
 ?>
 --EXPECTF--
 int(0)

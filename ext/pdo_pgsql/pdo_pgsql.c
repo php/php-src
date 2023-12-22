@@ -29,7 +29,6 @@
 #include "pdo_pgsql_arginfo.h"
 
 zend_class_entry *PdoPgsql_ce;
-static pdo_driver_class_entry PdoPgsql_pdo_driver_class_entry;
 
 /* {{{ pdo_sqlite_deps */
 static const zend_module_dep pdo_pgsql_deps[] = {
@@ -157,13 +156,11 @@ PHP_MINIT_FUNCTION(pdo_pgsql)
 	PdoPgsql_ce = register_class_PdoPgsql(pdo_dbh_ce);
 	PdoPgsql_ce->create_object = pdo_dbh_new;
 
-	PdoPgsql_pdo_driver_class_entry.driver_name = "pgsql";
-	PdoPgsql_pdo_driver_class_entry.driver_ce = PdoPgsql_ce;
-	if (pdo_register_driver_specific_class(&PdoPgsql_pdo_driver_class_entry) == FAILURE) {
+	if (php_pdo_register_driver(&pdo_pgsql_driver) == FAILURE) {
 		return FAILURE;
 	}
 
-	return php_pdo_register_driver(&pdo_pgsql_driver);
+	return php_pdo_register_driver_specific_ce(&pdo_pgsql_driver, PdoPgsql_ce);
 }
 /* }}} */
 

@@ -22,6 +22,7 @@
 #include "php_pdo_error.h"
 
 extern HashTable pdo_driver_hash;
+extern HashTable pdo_driver_specific_ce_hash;
 extern zend_class_entry *pdo_exception_ce;
 int php_pdo_list_entry(void);
 

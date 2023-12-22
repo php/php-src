@@ -221,39 +221,19 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
 }
 /* }}} */
 
-#define MAX_PDO_SUB_CLASSES 64
-static unsigned int number_of_pdo_driver_class_entries = 0;
-static pdo_driver_class_entry *pdo_driver_class_entries[MAX_PDO_SUB_CLASSES];
-
-// It would be possible remove this and roll it into the standard driver class entries
-// I chose not to do it at this time, as that would break existing PDO extensions
-zend_result pdo_register_driver_specific_class(pdo_driver_class_entry *driver_class_entry)
+static bool create_driver_specific_pdo_object(pdo_driver_t *driver, zend_class_entry *called_scope, zval *new_object)
 {
-	if (number_of_pdo_driver_class_entries >= MAX_PDO_SUB_CLASSES) {
-		return FAILURE;
-	}
-
-	pdo_driver_class_entries[number_of_pdo_driver_class_entries] = driver_class_entry;
-	number_of_pdo_driver_class_entries += 1;
-
-	return SUCCESS;
-}
-
-static bool create_driver_specific_pdo_object(const char *driver_name, zend_class_entry *called_scope, zval *new_object)
-{
+	zend_class_entry *ce;
 	zend_class_entry *ce_based_on_driver_name = NULL, *ce_based_on_called_object = NULL;
 
-	for (int i = 0; i < number_of_pdo_driver_class_entries && (ce_based_on_driver_name == NULL || ce_based_on_called_object == NULL); i++) {
-		pdo_driver_class_entry *driver_class_entry = pdo_driver_class_entries[i];
+	ce_based_on_driver_name = zend_hash_str_find_ptr(&pdo_driver_specific_ce_hash, driver->driver_name, driver->driver_name_len);
 
-		if (strcmp(driver_class_entry->driver_name, driver_name) == 0) {
-			ce_based_on_driver_name = driver_class_entry->driver_ce;
-		}
-
-		if (called_scope != pdo_dbh_ce && instanceof_function(called_scope, driver_class_entry->driver_ce)) {
+	ZEND_HASH_MAP_FOREACH_PTR(&pdo_driver_specific_ce_hash, ce) {
+		if (called_scope != pdo_dbh_ce && instanceof_function(called_scope, ce)) {
 			ce_based_on_called_object = called_scope;
+			break;
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	if (ce_based_on_called_object) {
 		if (ce_based_on_driver_name) {
@@ -261,7 +241,7 @@ static bool create_driver_specific_pdo_object(const char *driver_name, zend_clas
 				zend_throw_exception_ex(php_pdo_get_exception(), 0,
 					"%s::connect() cannot be called when connecting to the \"%s\" driver, "
 					"either %s::connect() or PDO::connect() must be called instead",
-					ZSTR_VAL(called_scope->name), driver_name, ZSTR_VAL(ce_based_on_driver_name->name));
+					ZSTR_VAL(called_scope->name), driver->driver_name, ZSTR_VAL(ce_based_on_driver_name->name));
 				return false;
 			}
 
@@ -281,7 +261,7 @@ static bool create_driver_specific_pdo_object(const char *driver_name, zend_clas
 			zend_throw_exception_ex(php_pdo_get_exception(), 0,
 				"%s::connect() cannot be called when connecting to the \"%s\" driver, "
 				"either %s::connect() or PDO::connect() must be called instead",
-				ZSTR_VAL(called_scope->name), driver_name, ZSTR_VAL(ce_based_on_driver_name->name));
+				ZSTR_VAL(called_scope->name), driver->driver_name, ZSTR_VAL(ce_based_on_driver_name->name));
 			return false;
 		}
 
@@ -365,7 +345,7 @@ static void internal_construct(INTERNAL_FUNCTION_PARAMETERS, zend_object *object
 
 	if (new_zval_object != NULL) {
 		ZEND_ASSERT((driver->driver_name != NULL) && "PDO driver name is null");
-		bool result = create_driver_specific_pdo_object(driver->driver_name, current_scope, new_zval_object);
+		bool result = create_driver_specific_pdo_object(driver, current_scope, new_zval_object);
 		if (!result) {
 			RETURN_THROWS();
 		}

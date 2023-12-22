@@ -17,7 +17,7 @@ if (!$db instanceof PdoMysql) {
     echo "Wrong class type. Should be PdoMysql but is " . get_class($db) . "\n";
 }
 
-$db->exec('CREATE TABLE IF NOT EXISTS pdomysql_002(id int NOT NULL PRIMARY KEY, name VARCHAR(10))');
+$db->exec('CREATE TABLE pdomysql_002(id int NOT NULL PRIMARY KEY, name VARCHAR(10))');
 $db->exec("INSERT INTO pdomysql_002 VALUES(1, 'A'), (2, 'B'), (3, 'C')");
 
 foreach ($db->query('SELECT name FROM pdomysql_002') as $row) {

@@ -215,16 +215,6 @@ typedef struct {
 
 } pdo_driver_t;
 
-// NOTE - This separate struct, could be rolled it into pdo_driver_t
-// I chose not to, as that would cause BC break and require a lot of
-// downstream work.
-typedef struct {
-	char *driver_name;
-	zend_class_entry *driver_ce;
-} pdo_driver_class_entry;
-
-PHPAPI zend_result pdo_register_driver_specific_class(pdo_driver_class_entry *driver_class_entry);
-
 /* {{{ methods for a database handle */
 
 /* close or otherwise disconnect the database */
@@ -662,6 +652,11 @@ struct _pdo_row_t {
 PDO_API zend_result php_pdo_register_driver(const pdo_driver_t *driver);
 /* call this in MSHUTDOWN to unregister your PDO driver */
 PDO_API void php_pdo_unregister_driver(const pdo_driver_t *driver);
+
+/* Call this in MINIT to register the PDO driver specific class entry.
+ * Registering the driver specific class entry might fail and should be reported accordingly in MINIT.
+ * Unregistering the class entry is not necessary, since php_pdo_unregister_driver() takes care of it. */
+PDO_API zend_result php_pdo_register_driver_specific_ce(const pdo_driver_t *driver, zend_class_entry *ce);
 
 /* For the convenience of drivers, this function will parse a data source
  * string, of the form "name=value; name2=value2" and populate variables
