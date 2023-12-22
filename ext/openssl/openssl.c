@@ -3189,6 +3189,12 @@ PHP_FUNCTION(openssl_csr_export)
 }
 /* }}} */
 
+#if PHP_OPENSSL_API_VERSION >= 0x10100 && !defined (LIBRESSL_VERSION_NUMBER)
+#define PHP_OPENSSL_ASN1_INTEGER_set ASN1_INTEGER_set_int64
+#else
+#define PHP_OPENSSL_ASN1_INTEGER_set ASN1_INTEGER_set
+#endif
+
 /* {{{ Signs a cert with another CERT */
 PHP_FUNCTION(openssl_csr_sign)
 {
@@ -3202,13 +3208,14 @@ PHP_FUNCTION(openssl_csr_sign)
 	zval *zpkey, *args = NULL;
 	zend_long num_days;
 	zend_long serial = Z_L(0);
+	zend_string *serial_hex = NULL;
 	X509 *cert = NULL, *new_cert = NULL;
 	EVP_PKEY * key = NULL, *priv_key = NULL;
 	int i;
 	bool new_cert_used = false;
 	struct php_x509_request req;
 
-	ZEND_PARSE_PARAMETERS_START(4, 6)
+	ZEND_PARSE_PARAMETERS_START(4, 7)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_ZVAL(zpkey)
@@ -3216,6 +3223,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_OR_NULL(args)
 		Z_PARAM_LONG(serial)
+		Z_PARAM_STR_OR_NULL(serial_hex)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETVAL_FALSE;
@@ -3284,11 +3292,28 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 
-#if PHP_OPENSSL_API_VERSION >= 0x10100 && !defined (LIBRESSL_VERSION_NUMBER)
-	ASN1_INTEGER_set_int64(X509_get_serialNumber(new_cert), serial);
-#else
-	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
-#endif
+	if (serial_hex != NULL) {
+		char buffer[256];
+		if (ZSTR_LEN(serial_hex) > 200) {
+			php_error_docref(NULL, E_WARNING, "Error parsing serial number because it is too long");
+			goto cleanup;
+		}
+		BIO *in = BIO_new_mem_buf(ZSTR_VAL(serial_hex), ZSTR_LEN(serial_hex));
+		if (in == NULL) {
+			php_openssl_store_errors();
+			php_error_docref(NULL, E_WARNING, "Error parsing serial number because memory allocation failed");
+			goto cleanup;
+		}
+		int success = a2i_ASN1_INTEGER(in, X509_get_serialNumber(new_cert), buffer, sizeof(buffer));
+		BIO_free(in);
+		if (!success) {
+			php_openssl_store_errors();
+			php_error_docref(NULL, E_WARNING, "Error parsing serial number");
+			goto cleanup;
+		}
+	} else {
+		PHP_OPENSSL_ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
+	}
 
 	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
 
