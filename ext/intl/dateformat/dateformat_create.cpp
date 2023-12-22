@@ -112,7 +112,7 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handlin
 	}
 	locale = Locale::createFromName(locale_str);
 	/* get*Name accessors being set does not preclude being bogus */
-	if (locale.isBogus() || strlen(locale.getISO3Language()) == 0) {
+	if (locale.isBogus() || ((locale_len == 1 && locale_str[0] != 'C') && strlen(locale.getISO3Language()) == 0)) {
 		goto error;
 	}
 
