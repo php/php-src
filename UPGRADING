@@ -231,6 +231,8 @@ PHP 8.4 UPGRADE NOTES
     instead of subject DN which was incorrectly done previously.
   . The dn parameter in openssl_csr_new allows setting array of values for
     a single entry.
+  . New serial_hex parameter added to openssl_csr_sign to allow setting serial
+    number in the hexadecimal format.
 
 - PDO:
   . getAttribute, enabled to get the value of ATTR_STRINGIFY_FETCHES.

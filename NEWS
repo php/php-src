@@ -49,6 +49,7 @@ OpenSSL:
     (Jakub Zelenka)
   . Implement request #48520 (openssl_csr_new - allow multiple values in DN).
     (Jakub Zelenka)
+  . Introduced new serial_hex parameter to openssl_csr_sign. (Jakub Zelenka)
 
 PDO:
   . Fixed setAttribute and getAttribute (SakiTakamachi)
