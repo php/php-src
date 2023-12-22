@@ -682,6 +682,7 @@ function main(): void
     if ($test_cnt) {
         putenv('NO_INTERACTION=1');
         usort($test_files, "test_sort");
+        $start_timestamp = time();
         $start_time = hrtime(true);
 
         echo "Running selected tests.\n";
@@ -730,6 +731,7 @@ function main(): void
         $test_files = array_unique($test_files);
         usort($test_files, "test_sort");
 
+        $start_timestamp = time();
         $start_time = hrtime(true);
         show_start($start_time);
 
@@ -755,7 +757,7 @@ function main(): void
 
         compute_summary();
 
-        show_end($end_time);
+        show_end($start_timestamp, $start_time, $end_time);
         show_summary();
 
         save_results($output_file, /* prompt_to_save_results: */ true);
@@ -3167,14 +3169,14 @@ EXPECTED LEAK TEST SUMMARY
     return $summary;
 }
 
-function show_start(int $start_time): void
+function show_start(int $start_timestamp): void
 {
-    echo "TIME START " . date('Y-m-d H:i:s', $start_time / 1e9) . "\n=====================================================================\n";
+    echo "TIME START " . date('Y-m-d H:i:s', $start_timestamp) . "\n=====================================================================\n";
 }
 
-function show_end(int $end_time): void
+function show_end(int $start_timestamp, float $start_time, float $end_time): void
 {
-    echo "=====================================================================\nTIME END " . date('Y-m-d H:i:s', $end_time / 1e9) . "\n";
+    echo "=====================================================================\nTIME END " . date('Y-m-d H:i:s', $start_timestamp + (int)(($end_time - $start_time)/1e9)) . "\n";
 }
 
 function show_summary(): void
