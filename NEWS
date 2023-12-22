@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12987 (openssl_csr_sign might leak new cert on error).
     (Jakub Zelenka)
 
+- PDO:
+  . Fix GH-12969 (Fixed PDO::getAttribute() to get PDO::ATTR_STRINGIFY_FETCHES).
+    (SakiTakamachi)
+
 - PDO_ODBC:
   . Fixed bug GH-12767 (Unable to turn on autocommit mode with setAttribute()).
     (SakiTakamachi)

@@ -96,6 +96,6 @@ array(1) {
 ERR
 ERR
 string(5) "mysql"
-ERR
+bool(false)
 ERR
 int(4)
