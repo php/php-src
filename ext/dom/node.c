@@ -1819,7 +1819,7 @@ PHP_METHOD(DOMNode, isEqualNode)
 	}
 
 	/* Empty fragments/documents only match if they're both empty */
-	if (UNEXPECTED(nodep == NULL || otherp == NULL)) {
+	if (nodep == NULL || otherp == NULL) {
 		RETURN_BOOL(nodep == NULL && otherp == NULL);
 	}
 
@@ -2011,7 +2011,7 @@ PHP_METHOD(DOMNode, isDefaultNamespace)
 	} else if (uri_len > 0) {
 		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
 			nodep = xmlDocGetRootElement((xmlDocPtr) nodep);
-			if (UNEXPECTED(nodep == NULL)) {
+			if (nodep == NULL) {
 				RETURN_FALSE;
 			}
 		}
@@ -2529,7 +2529,7 @@ PHP_METHOD(DOMNode, compareDocumentPosition)
 
 disconnected:;
 	zend_long ordering;
-	if (UNEXPECTED(node1 == node2)) {
+	if (node1 == node2) {
 		/* Degenerate case, they're both NULL, but the ordering must be consistent... */
 		ZEND_ASSERT(node1 == NULL);
 		ordering = other_intern < this_intern ? DOCUMENT_POSITION_PRECEDING : DOCUMENT_POSITION_FOLLOWING;

@@ -279,7 +279,7 @@ static void dom_lexbor_libxml2_bridge_tree_error_reporter(
 		return;
 	}
 
-	if (UNEXPECTED(len <= 1)) {
+	if (len <= 1) {
 		/* Possible with EOF, or single-character tokens, don't use a range in the error display in this case */
 		php_libxml_pretend_ctx_error_ex(
 			application_data->input_name,
