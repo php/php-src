@@ -1501,9 +1501,6 @@ void php_dom_normalize_legacy(xmlNodePtr nodep)
 					attr = attr->next;
 				}
 				break;
-			case XML_ATTRIBUTE_NODE:
-				php_dom_normalize_legacy(child);
-				break;
 			default:
 				break;
 		}
