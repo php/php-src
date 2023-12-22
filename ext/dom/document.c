@@ -1041,21 +1041,33 @@ PHP_METHOD(DOMDocument, getElementById)
 }
 /* }}} end dom_document_get_element_by_id */
 
-static void php_dom_transfer_document_ref(xmlNodePtr node, dom_object *dom_object_document, xmlDocPtr document)
+static zend_always_inline void php_dom_transfer_document_ref_single_node(xmlNodePtr node, php_libxml_ref_obj *new_document)
+{
+	php_libxml_node_ptr *iteration_object_ptr = node->_private;
+	if (iteration_object_ptr) {
+		php_libxml_node_object *iteration_object = iteration_object_ptr->_private;
+		ZEND_ASSERT(iteration_object != NULL);
+		/* Must increase refcount first because we could be the last reference holder, and the document may be equal. */
+		new_document->refcount++;
+		php_libxml_decrement_doc_ref(iteration_object);
+		iteration_object->document = new_document;
+	}
+}
+
+static void php_dom_transfer_document_ref(xmlNodePtr node, php_libxml_ref_obj *new_document)
 {
 	if (node->children) {
-		php_dom_transfer_document_ref(node->children, dom_object_document, document);
+		php_dom_transfer_document_ref(node->children, new_document);
 	}
+
 	while (node) {
-		php_libxml_node_ptr *iteration_object_ptr = node->_private;
-		if (iteration_object_ptr) {
-			php_libxml_node_object *iteration_object = iteration_object_ptr->_private;
-			ZEND_ASSERT(iteration_object != NULL);
-			/* Must increase refcount first because we could be the last reference holder, and the document may be equal. */
-			dom_object_document->document->refcount++;
-			php_libxml_decrement_doc_ref(iteration_object);
-			iteration_object->document = dom_object_document->document;
+		if (node->type == XML_ELEMENT_NODE) {
+			for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
+				php_dom_transfer_document_ref_single_node((xmlNodePtr) attr, new_document);
+			}
 		}
+
+		php_dom_transfer_document_ref_single_node(node, new_document);
 		node = node->next;
 	}
 }
@@ -1073,7 +1085,7 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 			return false;
 		}
 
-		php_dom_transfer_document_ref(nodep, dom_object_new_document, new_document);
+		php_dom_transfer_document_ref(nodep, dom_object_new_document->document);
 	} else {
 		xmlUnlinkNode(nodep);
 	}

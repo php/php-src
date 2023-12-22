@@ -21,6 +21,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-12870 (Creating an xmlns attribute results in a DOMException).
     (nielsdos)
   . Fix crash when toggleAttribute() is used without a document. (nielsdos)
+  . Fix crash in adoptNode with attribute references. (nielsdos)
 
 - FFI:
   . Fixed bug GH-9698 (stream_wrapper_register crashes with FFI\CData).
