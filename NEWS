@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-12953 (false positive SSA integrity verification failed when
     loading composer classmaps with more than 11k elements). (nielsdos)
+  . Fixed bug GH-12999 (zend_strnlen build when strnlen is unsupported). (rainerjung)
 
 - Cli:
   . Fix incorrect timeout in built-in web server when using router script and
