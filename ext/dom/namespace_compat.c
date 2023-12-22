@@ -32,8 +32,10 @@ const dom_ns_magic_token *dom_ns_is_xmlns_magic_token = (const dom_ns_magic_toke
 
 typedef struct {
 	/* Fast lookup for created mappings. */
-	// TODO: an even faster "last mapped" xmlNsPtr pair?
 	HashTable mapper;
+	/* It is common that the last created mapping will be used for a while,
+	 * cache it too to bypass the hash table. */
+	xmlNsPtr last_mapped_src, last_mapped_dst;
 } dom_libxml_reconcile_ctx;
 
 static void dom_ns_compat_mark_attribute(xmlNodePtr node, xmlNsPtr ns)
@@ -241,9 +243,14 @@ static zend_always_inline zend_long dom_mangle_pointer_for_key(void *ptr)
 #endif
 }
 
-static void dom_libxml_reconcile_modern_single_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr ns_holder, xmlNodePtr node)
+static zend_always_inline void dom_libxml_reconcile_modern_single_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr ns_holder, xmlNodePtr node)
 {
 	ZEND_ASSERT(node->ns != NULL);
+
+	if (node->ns == ctx->last_mapped_src) {
+		node->ns = ctx->last_mapped_dst;
+		return;
+	}
 
 	/* If the namespace is the same as in the map, we're good. */
 	xmlNsPtr new_ns = zend_hash_index_find_ptr(&ctx->mapper, dom_mangle_pointer_for_key(node->ns));
@@ -253,6 +260,8 @@ static void dom_libxml_reconcile_modern_single_node(dom_libxml_reconcile_ctx *ct
 		 * If it happens anyway, the namespace will be set to NULL. */
 		new_ns = dom_ns_create_local_as_is(node->doc, ns_holder, ns_holder, (const char *) node->ns->href, node->ns->prefix);
 		zend_hash_index_add_new_ptr(&ctx->mapper, dom_mangle_pointer_for_key(node->ns), new_ns);
+		ctx->last_mapped_src = node->ns;
+		ctx->last_mapped_dst = new_ns;
 		node->ns = new_ns;
 	} else if (node->ns != new_ns) {
 		/* The namespace is different, so we have to replace it. */
@@ -267,20 +276,18 @@ static zend_always_inline bool dom_libxml_reconcile_fast_element_skip(xmlNodePtr
 	return node->children == NULL && node->properties == NULL && node->ns == node->nsDef;
 }
 
-static void dom_libxml_reconcile_modern_single_element_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr node)
+static zend_always_inline void dom_libxml_reconcile_modern_single_element_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr node)
 {
 	ZEND_ASSERT(node->type == XML_ELEMENT_NODE);
-
-	if (node->ns == NULL || dom_libxml_reconcile_fast_element_skip(node)) {
-		return;
-	}
 
 	/* Add the defined namespaces to the mapper. */
 	for (xmlNsPtr ns = node->nsDef; ns != NULL; ns = ns->next) {
 		zend_hash_index_add_ptr(&ctx->mapper, dom_mangle_pointer_for_key(ns), ns);
 	}
 
-	dom_libxml_reconcile_modern_single_node(ctx, node, node);
+	if (node->ns != NULL) {
+		dom_libxml_reconcile_modern_single_node(ctx, node, node);
+	}
 }
 
 void dom_libxml_reconcile_modern(xmlNodePtr node)
@@ -291,6 +298,8 @@ void dom_libxml_reconcile_modern(xmlNodePtr node)
 
 	dom_libxml_reconcile_ctx ctx;
 	zend_hash_init(&ctx.mapper, 0, NULL, NULL, 0);
+	ctx.last_mapped_src = NULL;
+	ctx.last_mapped_dst = NULL;
 
 	dom_libxml_reconcile_modern_single_element_node(&ctx, node);
 
