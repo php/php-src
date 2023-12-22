@@ -387,11 +387,7 @@ xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *context
 	if (nodesc == 1) {
 		/* ... and return */
 		if (Z_TYPE_P(nodes) == IS_OBJECT) {
-			node = dom_object_get_node(Z_DOMOBJ_P(nodes));
-			/* Fragments can cause problems because of unpacking (see below). Skip this special case. */
-			if (node->type != XML_DOCUMENT_FRAG_NODE) {
-				return node;
-			}
+			return dom_object_get_node(Z_DOMOBJ_P(nodes));
 		} else {
 			ZEND_ASSERT(Z_TYPE_P(nodes) == IS_STRING);
 			return xmlNewDocText(documentNode, BAD_CAST Z_STRVAL_P(nodes));
@@ -529,7 +525,7 @@ static void dom_insert_node_list_unchecked(php_libxml_ref_obj *document, xmlNode
 
 		xmlNodePtr newchild = node->children;
 
-		/* 4. Insert node into parent before referenceChild. */
+		/* 4. Insert node into parent before referenceChild (i.e. insertion_point here because of the impossible condition). */
 		if (newchild) {
 			xmlNodePtr last = node->last;
 			php_dom_pre_insert_helper(insertion_point, parent, newchild, last);
