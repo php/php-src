@@ -396,7 +396,7 @@ PHP_METHOD(DOMElement, setAttribute)
 		}
 
 		/* Can't use xmlSetNsProp unconditionally here because that doesn't take into account the qualified name matching... */
-		attr = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
+		attr = (xmlNodePtr) php_dom_get_attribute_node(nodep, BAD_CAST name, name_len);
 		if (attr != NULL) {
 			dom_remove_all_children(attr);
 			xmlNodePtr node = xmlNewDocText(attr->doc, BAD_CAST value);
