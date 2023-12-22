@@ -11088,7 +11088,7 @@ static void mb_wchar_to_gb18030(uint32_t *in, size_t len, mb_convert_buf *buf, b
 			continue;
 		} else if (w >= ucs_a1_cp936_table_min && w < ucs_a1_cp936_table_max) {
 			if (w == 0x1F9) {
-				s = 0xA8Bf;
+				s = 0xA8BF;
 			} else {
 				s = ucs_a1_cp936_table[w - ucs_a1_cp936_table_min];
 			}
@@ -11560,6 +11560,319 @@ static void mb_wchar_to_cp936(uint32_t *in, size_t len, mb_convert_buf *buf, boo
 	MB_CONVERT_BUF_STORE(buf, out, limit);
 }
 
+static const unsigned short gb18030_2022_pua_tbl3[] = {
+	/* 0xFE50 */
+	0x0000,0xE816,0xE817,0xE818,0x0000,0x0000,0x0000,0x0000,
+	0x0000,0x9FB4,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+	0x0000,0x9FB5,0x0000,0x0000,0x0000,0x0000,0x9FB6,0x9FB7,
+	0x0000,0x0000,0x0000,0x0000,0xE831,0x9FB8,0x0000,0x0000,
+	0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0xE83B,0x0000,
+	0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x9FB9,0x0000,
+	0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+	0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+	0x9FBA,0xE855,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+	0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+	/* 0xFEA0 */
+	0x9FBB
+};
+
+static size_t mb_gb18030_2022_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	unsigned char *p = *in, *e = p + *in_len;
+	uint32_t *out = buf, *limit = buf + bufsize;
+
+	while (p < e && out < limit) {
+		unsigned char c = *p++;
+
+		if (c < 0x80) {
+			*out++ = c;
+		} else if (c == 0x80 || c == 0xFF) {
+			*out++ = MBFL_BAD_INPUT;
+		} else {
+			if (p == e) {
+				*out++ = MBFL_BAD_INPUT;
+				break;
+			}
+			unsigned char c2 = *p++;
+
+			if (((c >= 0x81 && c <= 0x84) || (c >= 0x90 && c <= 0xE3)) && c2 >= 0x30 && c2 <= 0x39) {
+				if (p >= e) {
+					*out++ = MBFL_BAD_INPUT;
+					break;
+				}
+				unsigned char c3 = *p++;
+
+				if (c3 >= 0x81 && c3 <= 0xFE && p < e) {
+					unsigned char c4 = *p++;
+
+					if (c4 >= 0x30 && c4 <= 0x39) {
+						if (c >= 0x90 && c <= 0xE3) {
+							unsigned int w = ((((c - 0x90)*10 + (c2 - 0x30))*126 + (c3 - 0x81)))*10 + (c4 - 0x30) + 0x10000;
+							*out++ = (w > 0x10FFFF) ? MBFL_BAD_INPUT : w;
+						} else {
+							/* Unicode BMP */
+							unsigned int w = (((c - 0x81)*10 + (c2 - 0x30))*126 + (c3 - 0x81))*10 + (c4 - 0x30);
+							if (w == 0x98A4) {
+								*out++ = 0xE78D;
+							} else if (w == 0x98A6) {
+								*out++ = 0xE78E;
+							} else if (w == 0x98A5) {
+								*out++ = 0xE78F;
+							} else if (w >= 0x98A7 && w <= 0x98AD) {
+								*out++ = w + (0xE790 - 0x98A7);
+							} else if (w == 0x1D21) {
+								*out++ = 0xE7C7;
+							} else if (w == 0x4A71) {
+								*out++ = 0xE81E;
+							} else if (w == 0x4A72) {
+								*out++ = 0xE826;
+							} else if (w >= 0x4A73 && w <= 0x4A74) {
+								*out++ = w + (0xE82B - 0x4A73);
+							} else if (w == 0x4A75) {
+								*out++ = 0xE832;
+							} else if (w == 0x4A76) {
+								*out++ = 0xE843;
+							} else if (w == 0x4A77) {
+								*out++ = 0xE854;
+							} else if (w == 0x4A78) {
+								*out++ = 0xE864;
+							} else if (w <= 0x99FB) {
+								*out++ = w + mbfl_gb_uni_ofst[mbfl_bisec_srch(w, mbfl_gb2uni_tbl, mbfl_gb_uni_max)];
+							} else {
+								*out++ = MBFL_BAD_INPUT;
+							}
+						}
+					} else {
+						*out++ = MBFL_BAD_INPUT;
+					}
+				} else {
+					*out++ = MBFL_BAD_INPUT;
+				}
+			} else if (((c >= 0xAA && c <= 0xAF) || (c >= 0xF8 && c <= 0xFE)) && (c2 >= 0xA1 && c2 <= 0xFE)) {
+				/* UDA part 1, 2: U+E000-U+E4C5 */
+				*out++ = 94*(c >= 0xF8 ? c - 0xF2 : c - 0xAA) + (c2 - 0xA1) + 0xE000;
+			} else if (c >= 0xA1 && c <= 0xA7 && c2 >= 0x40 && c2 < 0xA1 && c2 != 0x7F) {
+				/* UDA part 3: U+E4C6-U+E765 */
+				*out++ = 96*(c - 0xA1) + c2 - (c2 >= 0x80 ? 0x41 : 0x40) + 0xE4C6;
+			} else if (c2 >= 0x40 && c2 != 0x7F && c2 != 0xFF) {
+				unsigned int w = (c - 0x81)*192 + c2 - 0x40;
+
+				if (w >= 0x192B) {
+					if (w <= 0x1EBE) {
+						if (w != 0x1963 && w != 0x1DBF && (w < 0x1E49 || w > 0x1E55) && w != 0x1E7F) {
+							*out++ = gb18030_2022_pua_tbl1[w - 0x192B];
+							continue;
+						}
+					} else if (w >= 0x413A) {
+						if (w <= 0x413E) {
+							*out++ = cp936_pua_tbl2[w - 0x413A];
+							continue;
+						} else if (w >= 0x5DD0 && w <= 0x5E20) {
+							unsigned int c = gb18030_2022_pua_tbl3[w - 0x5DD0];
+							if (c) {
+								*out++ = c;
+								continue;
+							}
+						}
+					}
+				}
+
+				if ((c >= 0x81 && c <= 0xA9) || (c >= 0xB0 && c <= 0xF7 && c2 >= 0xA1) || (c >= 0xAA && c <= 0xFE && c2 <= 0xA0)) {
+					ZEND_ASSERT(w < cp936_ucs_table_size);
+					*out++ = cp936_ucs_table[w];
+				} else {
+					*out++ = MBFL_BAD_INPUT;
+				}
+			} else {
+				*out++ = MBFL_BAD_INPUT;
+			}
+		}
+	}
+
+	*in_len = e - p;
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_gb18030_2022(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+
+	while (len--) {
+		uint32_t w = *in++;
+		unsigned int s = 0;
+
+		if (w == 0) {
+			out = mb_convert_buf_add(out, 0);
+			continue;
+		} else if (w >= ucs_a1_cp936_table_min && w < ucs_a1_cp936_table_max) {
+			if (w == 0x1F9) {
+				s = 0xA8BF;
+			} else {
+				s = ucs_a1_cp936_table[w - ucs_a1_cp936_table_min];
+			}
+		} else if (w >= ucs_a2_cp936_table_min && w < ucs_a2_cp936_table_max) {
+			if (w == 0x20AC) { /* Euro sign */
+				s = 0xA2E3;
+			} else {
+				s = ucs_a2_cp936_table[w - ucs_a2_cp936_table_min];
+			}
+		} else if (w >= ucs_a3_cp936_table_min && w < ucs_a3_cp936_table_max) {
+			s = ucs_a3_cp936_table[w - ucs_a3_cp936_table_min];
+		} else if (w >= 0x9FB4 && w <= 0x9FBB) {
+			/* Newly mapped in GB18030-2022 */
+			if (w == 0x9FB4) {
+				s = 0xFE59;
+			} else if (w == 0x9FB5) {
+				s = 0xFE61;
+			} else if (w == 0x9FB6) {
+				s = 0xFE66;
+			} else if (w == 0x9FB7) {
+				s = 0xFE67;
+			} else if (w == 0x9FB8) {
+				s = 0xFE6D;
+			} else if (w == 0x9FB9) {
+				s = 0xFE7E;
+			} else if (w == 0x9FBA) {
+				s = 0xFE90;
+			} else {
+				s = 0xFEA0;
+			}
+		} else if (w >= ucs_i_cp936_table_min && w < ucs_i_cp936_table_max) {
+			s = ucs_i_cp936_table[w - ucs_i_cp936_table_min];
+		} else if (w >= ucs_ci_cp936_table_min && w < ucs_ci_cp936_table_max) {
+			/* U+F900-U+FA2F CJK Compatibility Ideographs */
+			if (w == 0xF92C) {
+				s = 0xFD9C;
+			} else if (w == 0xF979) {
+				s = 0xFD9D;
+			} else if (w == 0xF995) {
+				s = 0xFD9E;
+			} else if (w == 0xF9E7) {
+				s = 0xFD9F;
+			} else if (w == 0xF9F1) {
+				s = 0xFDA0;
+			} else if (w >= 0xFA0C && w <= 0xFA29) {
+				s = ucs_ci_s_cp936_table[w - 0xFA0C];
+			}
+		} else if (w >= ucs_cf_cp936_table_min && w < ucs_cf_cp936_table_max) {
+			/* CJK Compatibility Forms  */
+			s = ucs_cf_cp936_table[w - ucs_cf_cp936_table_min];
+		} else if (w >= ucs_sfv_cp936_table_min && w < ucs_sfv_cp936_table_max) {
+			/* U+FE50-U+FE6F Small Form Variants */
+			s = ucs_sfv_cp936_table[w - ucs_sfv_cp936_table_min];
+		} else if (w >= ucs_hff_cp936_table_min && w < ucs_hff_cp936_table_max) {
+			/* U+FF00-U+FFFF HW/FW Forms */
+			if (w == 0xFF04) {
+				s = 0xA1E7;
+			} else if (w == 0xFF5E) {
+				s = 0xA1AB;
+			} else if (w >= 0xFF01 && w <= 0xFF5D) {
+				s = w - 0xFF01 + 0xA3A1;
+			} else if (w >= 0xFFE0 && w <= 0xFFE5) {
+				s = ucs_hff_s_cp936_table[w - 0xFFE0];
+			}
+		} else if (w >= 0xE000 && w <= 0xE864) {
+			/* PUA */
+			if (w < 0xE766) {
+				if (w < 0xE4C6) {
+					unsigned int c1 = w - 0xE000;
+					s = (c1 % 94) + 0xA1;
+					c1 /= 94;
+					s |= (c1 + (c1 < 0x06 ? 0xAA : 0xF2)) << 8;
+				} else {
+					unsigned int c1 = w - 0xE4C6;
+					s = ((c1 / 96) + 0xA1) << 8;
+					c1 %= 96;
+					s |= c1 + (c1 >= 0x3F ? 0x41 : 0x40);
+				}
+			} else {
+				/* U+E766-U+E864 */
+				unsigned int k1 = 0, k2 = mbfl_gb18030_2022_pua_tbl_max;
+				while (k1 < k2) {
+					unsigned int k = (k1 + k2) >> 1;
+					if (w < mbfl_gb18030_2022_pua_tbl[k][0]) {
+						k2 = k;
+					} else if (w > mbfl_gb18030_2022_pua_tbl[k][1]) {
+						k1 = k + 1;
+					} else {
+						s = w - mbfl_gb18030_2022_pua_tbl[k][0] + mbfl_gb18030_2022_pua_tbl[k][2];
+						break;
+					}
+				}
+			}
+		} else if (w >= 0xFE10 && w <= 0xFE19) {
+			/* Newly mapped codepoints in GB18030-2022 */
+			if (w == 0xFE11) {
+				s = 0xA6DB;
+			} else if (w == 0xFE12) {
+				s = 0xA6DA;
+			} else if (w <= 0xFE16) {
+				s = w - (0xFE10 - 0xA6D9);
+			} else if (w <= 0xFE18) {
+				s = w - (0xFE17 - 0xA6EC);
+			} else {
+				s = 0xA6F3;
+			}
+		} else if (w == 0x1E3F) {
+			/* Newly mapped codepoint in GB18030-2022 */
+			s = 0xA8BC;
+		}
+
+		/* While GB18030 and CP936 are very similar, some mappings are different between these encodings;
+		 * do a binary search in a table of differing codepoints to see if we have one */
+		if (!s && w >= mbfl_gb18030_c_tbl_key[0] && w <= mbfl_gb18030_c_tbl_key[mbfl_gb18030_c_tbl_max-1]) {
+			int i = mbfl_bisec_srch2(w, mbfl_gb18030_c_tbl_key, mbfl_gb18030_c_tbl_max);
+			if (i >= 0) {
+				s = mbfl_gb18030_c_tbl_val[i];
+			}
+		}
+
+		/* If we have not yet found a suitable mapping for this codepoint, it requires a 4-byte code */
+		if (!s && w >= 0x80 && w <= 0xFFFF) {
+			/* BMP */
+			int i = mbfl_bisec_srch(w, mbfl_uni2gb2022_tbl, mbfl_gb2022_uni_max);
+			if (i >= 0) {
+				unsigned int c1 = w - mbfl_gb2022_uni_ofst[i];
+				s = (c1 % 10) + 0x30;
+				c1 /= 10;
+				s |= ((c1 % 126) + 0x81) << 8;
+				c1 /= 126;
+				s |= ((c1 % 10) + 0x30) << 16;
+				c1 /= 10;
+				s |= (c1 + 0x81) << 24;
+			}
+		} else if (w >= 0x10000 && w <= 0x10FFFF) {
+			/* Code set 3: Unicode U+10000-U+10FFFF */
+			unsigned int c1 = w - 0x10000;
+			s = (c1 % 10) + 0x30;
+			c1 /= 10;
+			s |= ((c1 % 126) + 0x81) << 8;
+			c1 /= 126;
+			s |= ((c1 % 10) + 0x30) << 16;
+			c1 /= 10;
+			s |= (c1 + 0x90) << 24;
+		}
+
+		if (!s) {
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_gb18030);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+		} else if (s < 0x80) {
+			out = mb_convert_buf_add(out, s);
+		} else if (s > 0xFFFFFF) {
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 4);
+			out = mb_convert_buf_add4(out, (s >> 24) & 0xFF, (s >> 16) & 0xFF, (s >> 8) & 0xFF, s & 0xFF);
+		} else {
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 2);
+			out = mb_convert_buf_add2(out, (s >> 8) & 0xFF, s & 0xFF);
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
+}
+
 /* Step through a GB18030 string one character at a time. Find the last position at or
  * before `limit` which falls directly after the end of a (single or multi-byte) character */
 static zend_always_inline unsigned char* step_through_gb18030_str(unsigned char *p, unsigned char *limit)
@@ -11671,6 +11984,21 @@ const mbfl_encoding mbfl_encoding_cp936 = {
 	mb_wchar_to_cp936,
 	NULL,
 	NULL,
+};
+
+const mbfl_encoding mbfl_encoding_gb18030_2022 = {
+	mbfl_no_encoding_gb18030_2022,
+	"GB18030-2022",
+	"GB18030-2022",
+	NULL,
+	NULL,
+	MBFL_ENCTYPE_GL_UNSAFE,
+	NULL,
+	NULL,
+	mb_gb18030_2022_to_wchar,
+	mb_wchar_to_gb18030_2022,
+	NULL,
+	mb_cut_gb18030,
 };
 
 /*

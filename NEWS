@@ -35,6 +35,15 @@ Intl:
 
 MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
+  . Added support for the newest version of the GB18030 text encoding,
+    GB18030-2022. The existing implementation of GB18030 is unchanged;
+    users who wish to use the updated implementation must explicitly
+    specify 'GB18030-2022' as the desired text encoding. The standards
+    document published by the People's Republic of China authorities
+    defines 3 levels of standards compliance; MBString's implementation
+    achieves Implementation Level 3, which is the highest level. Experts
+    on the GB18030 standard are requested to assess MBString's handling
+    of GB18030-2022 text and report any bugs via GitHub. (Alex Dowad)
 
 Opcache:
   . Added large shared segments support for FreeBSD. (David Carlier)
