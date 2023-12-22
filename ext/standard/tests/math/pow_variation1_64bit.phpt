@@ -62,6 +62,8 @@ $inputs = array(
 /*20*/ "abcxyz",
        'abcxyz',
        $heredoc,
+       '10.5',
+       '2',
 
        // object data
 /*23*/ new classA(),
@@ -159,13 +161,19 @@ Unsupported operand types: string ** int
 Unsupported operand types: string ** int
 
 -- Iteration 23 --
-Unsupported operand types: classA ** int
+float(1157.625)
 
 -- Iteration 24 --
-int(0)
+int(8)
 
 -- Iteration 25 --
-int(0)
+Unsupported operand types: classA ** int
 
 -- Iteration 26 --
+int(0)
+
+-- Iteration 27 --
+int(0)
+
+-- Iteration 28 --
 Unsupported operand types: resource ** int

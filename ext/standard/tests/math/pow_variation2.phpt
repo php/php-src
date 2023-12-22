@@ -30,7 +30,7 @@ $inputs = array(
        1,
        12345,
        -2345,
-       2147483647,
+       PHP_INT_MAX,
 
        // float data
 /*6*/  2.5,
@@ -58,6 +58,8 @@ $inputs = array(
 /*20*/ "abcxyz",
        'abcxyz',
        $heredoc,
+       '10.5',
+       '2',
 
        // object data
 /*23*/ new classA(),
@@ -155,13 +157,19 @@ Unsupported operand types: float ** string
 Unsupported operand types: float ** string
 
 -- Iteration 23 --
-Unsupported operand types: float ** classA
+float(53543702391195)
 
 -- Iteration 24 --
-float(1)
+float(412.09)
 
 -- Iteration 25 --
-float(1)
+Unsupported operand types: float ** classA
 
 -- Iteration 26 --
+float(1)
+
+-- Iteration 27 --
+float(1)
+
+-- Iteration 28 --
 Unsupported operand types: float ** resource

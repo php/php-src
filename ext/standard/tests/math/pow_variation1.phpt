@@ -62,6 +62,8 @@ $inputs = array(
 /*20*/ "abcxyz",
        'abcxyz',
        $heredoc,
+       '10.5',
+       '2',
 
        // object data
 /*23*/ new classA(),
