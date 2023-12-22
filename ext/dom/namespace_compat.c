@@ -233,8 +233,12 @@ void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp, boo
 static zend_always_inline zend_long dom_mangle_pointer_for_key(void *ptr)
 {
 	zend_ulong value = (zend_ulong) (uintptr_t) ptr;
-	/* Shift 3 for better hash distribution because the low 3 bits are always 0. */
+	/* Shift 3/4 for better hash distribution because the low 3/4 bits are always 0. */
+#if SIZEOF_ZEND_LONG == 8
+	return value >> 4;
+#else
 	return value >> 3;
+#endif
 }
 
 static void dom_libxml_reconcile_modern_single_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr ns_holder, xmlNodePtr node)
