@@ -70,6 +70,9 @@ typedef struct _php_basic_globals {
 
 	zval active_ini_file_section;
 
+	/* http_fopen_wrapper.c */
+	zval last_http_headers;
+
 	/* pageinfo.c */
 	zend_long page_uid;
 	zend_long page_gid;

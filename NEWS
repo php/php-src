@@ -198,6 +198,9 @@ PHP                                                                        NEWS
   . Changed return type of long2ip to string from string|false. (Jorg Sowa)
   . Fix GH-12143 (Extend the maximum precision round can handle by one digit).
     (SakiTakamachi)
+  . Added the http_get_last_response_headers() and
+    http_clear_last_response_headers() that allows retrieving the same content
+    as the magic $http_response_header variable.
 
 - XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)
