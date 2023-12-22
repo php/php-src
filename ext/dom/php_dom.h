@@ -162,10 +162,30 @@ bool php_dom_has_sibling_preceding_node(xmlNodePtr node, xmlElementType type);
 bool php_dom_has_child_of_type(xmlNodePtr node, xmlElementType type);
 void php_dom_update_document_after_clone(dom_object *original, xmlNodePtr original_node, dom_object *clone, xmlNodePtr cloned_node);
 void php_dom_document_constructor(INTERNAL_FUNCTION_PARAMETERS);
-xmlNodePtr php_dom_next_in_tree_order(xmlNodePtr nodep, xmlNodePtr basep);
 xmlAttrPtr php_dom_get_attribute_node(xmlNodePtr elem, const xmlChar *name, size_t name_len);
 
 dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_entry *ce, xmlNodePtr obj, dom_object *parent);
+
+static zend_always_inline xmlNodePtr php_dom_next_in_tree_order(xmlNodePtr nodep, xmlNodePtr basep)
+{
+	if (nodep->next) {
+		return nodep->next;
+	} else {
+		/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
+		do {
+			nodep = nodep->parent;
+			if (nodep == basep) {
+				return NULL;
+			}
+			/* This shouldn't happen, unless there's an invalidation bug somewhere. */
+			if (UNEXPECTED(nodep == NULL)) {
+				zend_throw_error(NULL, "Current node in traversal is not in the document. Please report this as a bug in php-src.");
+				return NULL;
+			}
+		} while (nodep->next == NULL);
+		return nodep->next;
+	}
+}
 
 typedef enum {
 	DOM_LOAD_STRING = 0,
