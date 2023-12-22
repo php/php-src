@@ -1586,15 +1586,16 @@ if test "$PHP_UNDEFINED_SANITIZER" = "yes"; then
     dnl cast to void*. In that case, set -fno-sanitize=function.
     OLD_CFLAGS="$CFLAGS"
     CFLAGS="$CFLAGS -fno-sanitize-recover=undefined"
+    AC_CACHE_CHECK([whether to add -fno-sanitize=function],[php_cv_ubsan_no_function],[
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
 void foo(char *string) {}
 int main(void) {
   void (*f)(void *) = (void (*)(void *))foo;
   f("foo");
 }
-    ]])],,[ubsan_needs_no_function=yes],)
+    ]])],[php_cv_ubsan_no_function=no],[php_cv_ubsan_no_function=yes],[php_cv_ubsan_no_function=no])])
     CFLAGS="$OLD_CFLAGS"
-    if test "$ubsan_needs_no_function" = yes; then
+    if test "$php_cv_ubsan_no_function" = yes; then
       CFLAGS="$CFLAGS -fno-sanitize=function"
       CXXFLAGS="$CFLAGS -fno-sanitize=function"
     fi
