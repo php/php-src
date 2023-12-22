@@ -269,7 +269,7 @@ static zend_always_inline size_t zend_strnlen(const char* s, size_t maxlen)
 #if defined(HAVE_STRNLEN)
 	return strnlen(s, maxlen);
 #else
-	const char *p = memchr(s, '\0', maxlen);
+	const char *p = (const char *)memchr(s, '\0', maxlen);
 	return p ? p-s : maxlen;
 #endif
 }
