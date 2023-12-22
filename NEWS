@@ -57,6 +57,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12929 (SimpleXMLElement with stream_wrapper_register can
     segfault). (nielsdos)
 
+- Tidy:
+  . Fixed bug GH-12980 (tidynode.props.attribute is missing
+    "Boolean Attributes" and empty attributes). (nielsdos)
+
 07 Dec 2023, PHP 8.3.1RC1
 
 - Core:
