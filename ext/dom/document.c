@@ -1101,7 +1101,9 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 		php_libxml_invalidate_node_list_cache(dom_object_new_document->document);
 
 		/* Note for ATTRIBUTE_NODE: specified is always true in ext/dom,
-		 * and since this unlink it; the owner element will be unset (i.e. parentNode). */
+		 * and since this unlink it; the owner element will be unset (i.e. parentNode).
+		 * Note that there is no reconciliation conflict problem for namespaces because
+		 * no namespace search is performed if the destination parent is NULL. */
 		int ret = xmlDOMWrapAdoptNode(NULL, nodep->doc, nodep, new_document, NULL, /* options, unused */ 0);
 		if (UNEXPECTED(ret != 0)) {
 			return false;
