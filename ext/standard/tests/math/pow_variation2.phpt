@@ -58,7 +58,7 @@ $inputs = array(
 /*20*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       '10.5',
+       '5.5',
        '2',
 
        // object data
@@ -157,7 +157,7 @@ Unsupported operand types: float ** string
 Unsupported operand types: float ** string
 
 -- Iteration 23 --
-float(53543702391195)
+float(15532029.564086)
 
 -- Iteration 24 --
 float(412.09)
