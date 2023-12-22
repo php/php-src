@@ -6,11 +6,6 @@ Core:
   . Added zend_call_stack_get implementation for NetBSD, DragonFlyBSD,
     Solaris and Haiku. (David Carlier)
   . Enabled ifunc checks on FreeBSD from the 12.x releases. (Freaky)
-  . Fixed bug GH-12953 (false positive SSA integrity verification failed when
-    loading composer classmaps with more than 11k elements). (nielsdos)
-  . Fixed bug GH-12999 (zend_strnlen build when strnlen is unsupported). (rainerjung)
-  . Fixed bug GH-12966 (missing cross-compiling 3rd argument so Autoconf doesn't
-    emit warnings). (Peter Kokot)
 
 Date:
   . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
