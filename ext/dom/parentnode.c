@@ -533,6 +533,7 @@ static void dom_insert_node_list_unchecked(php_libxml_ref_obj *document, xmlNode
 			dom_reconcile_ns_list(parent->doc, newchild, last);
 			if (parent->doc && newchild->type == XML_DTD_NODE) {
 				parent->doc->intSubset = (xmlDtdPtr) newchild;
+				newchild->parent = (xmlNodePtr) parent->doc;
 			}
 		}
 
@@ -555,6 +556,7 @@ static void dom_insert_node_list_unchecked(php_libxml_ref_obj *document, xmlNode
 		node->parent = parent;
 		if (parent->doc && node->type == XML_DTD_NODE) {
 			parent->doc->intSubset = (xmlDtdPtr) node;
+			node->parent = (xmlNodePtr) parent->doc;
 		} else {
 			dom_reconcile_ns(parent->doc, node);
 		}

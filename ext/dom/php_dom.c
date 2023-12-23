@@ -1975,6 +1975,112 @@ static int dom_nodemap_has_dimension(zend_object *object, zval *member, int chec
 	return offset >= 0 && offset < php_dom_get_namednodemap_length(php_dom_obj_from_obj(object));
 } /* }}} end dom_nodemap_has_dimension */
 
+static xmlNodePtr dom_clone_container_helper(xmlNodePtr src_node, xmlDocPtr dst_doc)
+{
+	xmlNodePtr clone = xmlDocCopyNode(src_node, dst_doc, 0);
+	if (EXPECTED(clone != NULL)) {
+		/* Set namespace to the original, reconciliation will fix this up. */
+		clone->ns = src_node->ns;
+
+		if (src_node->type == XML_ELEMENT_NODE) {
+			/* Attribute cloning logic. */
+			xmlAttrPtr last_added_attr = NULL;
+			for (xmlAttrPtr attr = src_node->properties; attr != NULL; attr = attr->next) {
+				xmlAttrPtr new_attr = (xmlAttrPtr) xmlDocCopyNode((xmlNodePtr) attr, dst_doc, 0);
+				if (UNEXPECTED(new_attr == NULL)) {
+					xmlFreeNode(clone);
+					return NULL;
+				}
+				if (last_added_attr == NULL) {
+					clone->properties = new_attr;
+				} else {
+					new_attr->prev = last_added_attr;
+					last_added_attr->next = new_attr;
+				}
+				new_attr->parent = clone;
+				last_added_attr = new_attr;
+
+				/* Set namespace to the original, reconciliation will fix this up. */
+				new_attr->ns = attr->ns;
+			}
+		}
+	}
+	return clone;
+}
+
+static xmlNodePtr dom_clone_helper(xmlNodePtr src_node, xmlDocPtr dst_doc, bool recursive)
+{
+	xmlNodePtr outer_clone = dom_clone_container_helper(src_node, dst_doc);
+
+	if (!recursive || (src_node->type != XML_ELEMENT_NODE && src_node->type != XML_DOCUMENT_FRAG_NODE && src_node->type != XML_DOCUMENT_NODE && src_node->type != XML_HTML_DOCUMENT_NODE)) {
+		return outer_clone;
+	}
+
+	/* Handle dtd separately, because it is linked twice and requires a special copy function. */
+	if (src_node->type == XML_DOCUMENT_NODE || src_node->type == XML_HTML_DOCUMENT_NODE) {
+		dst_doc = (xmlDocPtr) outer_clone;
+
+		xmlDtdPtr original_subset = ((xmlDocPtr) src_node)->intSubset;
+		if (original_subset != NULL) {
+			dst_doc->intSubset = xmlCopyDtd(((xmlDocPtr) src_node)->intSubset);
+			if (UNEXPECTED(dst_doc->intSubset == NULL)) {
+				xmlFreeNode(outer_clone);
+				return NULL;
+			}
+			dst_doc->intSubset->parent = dst_doc;
+			xmlSetTreeDoc((xmlNodePtr) dst_doc->intSubset, dst_doc);
+			dst_doc->children = dst_doc->last = (xmlNodePtr) dst_doc->intSubset;
+		}
+	}
+
+	xmlNodePtr cloned_parent = outer_clone;
+	xmlNodePtr base = src_node;
+	src_node = src_node->children;
+	while (src_node != NULL) {
+		ZEND_ASSERT(src_node != base);
+
+		xmlNodePtr cloned;
+		if (src_node->type == XML_ELEMENT_NODE) {
+			cloned = dom_clone_container_helper(src_node, dst_doc);
+		} else if (src_node->type == XML_DTD_NODE) {
+			/* Already handled. */
+			cloned = NULL;
+		} else {
+			cloned = xmlDocCopyNode(src_node, dst_doc, 1);
+		}
+
+		if (EXPECTED(cloned != NULL)) {
+			if (cloned_parent->children == NULL) {
+				cloned_parent->children = cloned;
+			} else {
+				cloned->prev = cloned_parent->last;
+				cloned_parent->last->next = cloned;
+			}
+			cloned->parent = cloned_parent;
+			cloned_parent->last = cloned;
+		}
+
+		if (src_node->type == XML_ELEMENT_NODE && src_node->children) {
+			cloned_parent = cloned;
+			src_node = src_node->children;
+		} else if (src_node->next) {
+			src_node = src_node->next;
+		} else {
+			/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
+			do {
+				src_node = src_node->parent;
+				if (src_node == base) {
+					return outer_clone;
+				}
+				cloned_parent = cloned_parent->parent;
+			} while (src_node->next == NULL);
+			src_node = src_node->next;
+		}
+	}
+
+	return outer_clone;
+}
+
 xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, bool recursive)
 {
 	if (node->type == XML_DTD_NODE) {
@@ -1982,16 +2088,32 @@ xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, bool recursive)
 		 * This follows what e.g. Java and C# do: copy it regardless of the recursiveness.
 		 * Makes sense as the subset is not exactly a child in the normal sense. */
 		xmlDtdPtr dtd = xmlCopyDtd((xmlDtdPtr) node);
-		dtd->doc = doc;
+		xmlSetTreeDoc((xmlNodePtr) dtd, doc);
 		return (xmlNodePtr) dtd;
 	}
 
-	/* See http://www.xmlsoft.org/html/libxml-tree.html#xmlDocCopyNode for meaning of values */
-	int extended_recursive = recursive;
-	if (!recursive && node->type == XML_ELEMENT_NODE) {
-		extended_recursive = 2;
+	if (php_dom_follow_spec_node(node)) {
+		xmlNodePtr clone = dom_clone_helper(node, doc, recursive);
+		if (EXPECTED(clone != NULL)) {
+			if (clone->type == XML_DOCUMENT_NODE || clone->type == XML_HTML_DOCUMENT_NODE || clone->type == XML_DOCUMENT_FRAG_NODE) {
+				for (xmlNodePtr child = clone->children; child != NULL; child = child->next) {
+					dom_libxml_reconcile_modern(child);
+				}
+			} else if (clone->type == XML_ATTRIBUTE_NODE) {
+				php_dom_reconcile_attribute_namespace_after_insertion((xmlAttrPtr) clone, false);
+			} else {
+				dom_libxml_reconcile_modern(clone);
+			}
+		}
+		return clone;
+	} else {
+		/* See http://www.xmlsoft.org/html/libxml-tree.html#xmlDocCopyNode for meaning of values */
+		int extended_recursive = recursive;
+		if (!recursive && node->type == XML_ELEMENT_NODE) {
+			extended_recursive = 2;
+		}
+		return xmlDocCopyNode(node, doc, extended_recursive);
 	}
-	return xmlDocCopyNode(node, doc, extended_recursive);
 }
 
 bool php_dom_has_child_of_type(xmlNodePtr node, xmlElementType type)

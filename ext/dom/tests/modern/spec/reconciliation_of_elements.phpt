@@ -43,6 +43,6 @@ echo $dom->saveXML($a_child);
 <a:child xmlns:a="urn:b" xmlns:b="urn:b" xmlns:b="urn:b">
                 <b:child1 xmlns:a="urn:x" xmlns:a="urn:x">bar</b:child1>
             </a:child></root>
-<a:child xmlns:a="urn:b" xmlns:b="urn:b" xmlns:b="urn:b">
-                <b:child1 xmlns:xmlns="http://www.w3.org/2000/xmlns/" xmlns:a="urn:x" xmlns:a="urn:x">bar</b:child1>
+<a:child xmlns:xmlns="http://www.w3.org/2000/xmlns/" xmlns:a="urn:b" xmlns:b="urn:b" xmlns:b="urn:b">
+                <b:child1 xmlns:a="urn:x" xmlns:a="urn:x">bar</b:child1>
             </a:child>

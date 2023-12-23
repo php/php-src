@@ -288,6 +288,12 @@ static zend_always_inline void dom_libxml_reconcile_modern_single_element_node(d
 	if (node->ns != NULL) {
 		dom_libxml_reconcile_modern_single_node(ctx, node, node);
 	}
+
+	for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
+		if (attr->ns != NULL) {
+			dom_libxml_reconcile_modern_single_node(ctx, node, (xmlNodePtr) attr);
+		}
+	}
 }
 
 void dom_libxml_reconcile_modern(xmlNodePtr node)
@@ -310,12 +316,6 @@ void dom_libxml_reconcile_modern(xmlNodePtr node)
 
 		if (node->type == XML_ELEMENT_NODE) {
 			dom_libxml_reconcile_modern_single_element_node(&ctx, node);
-
-			for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
-				if (attr->ns != NULL) {
-					dom_libxml_reconcile_modern_single_node(&ctx, node, (xmlNodePtr) attr);
-				}
-			}
 
 			if (node->children) {
 				node = node->children;

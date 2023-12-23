@@ -833,7 +833,7 @@ PHP_METHOD(DOM_Document, importNode)
 			RETURN_FALSE;
 		}
 
-		if ((retnodep->type == XML_ATTRIBUTE_NODE) && (nodep->ns != NULL)) {
+		if (retnodep->type == XML_ATTRIBUTE_NODE && nodep->ns != NULL && retnodep->ns == NULL) {
 			xmlNsPtr nsptr = NULL;
 			xmlNodePtr root = xmlDocGetRootElement(docp);
 
