@@ -12,7 +12,7 @@ echo "*** Testing pow() : usage variations ***\n";
 
 //get an unset variable
 $unset_var = 10;
-unset ($unset_var);
+unset($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -28,59 +28,59 @@ class classA
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-$inputs = array(
-       // int data
-/*1*/  0,
-       1,
-       12345,
-       -2345,
-       PHP_INT_MAX,
+$inputs = [
+    // int data
+    /*1*/ 0,
+    1,
+    12345,
+    -2345,
+    PHP_INT_MAX,
 
-       // float data
-/*6*/  10.5,
-       -10.5,
-       12.3456789000e10,
-       12.3456789000E-10,
-       .5,
+    // float data
+    /*6*/ 10.5,
+    -10.5,
+    12.3456789e10,
+    12.3456789e-10,
+    0.5,
 
-       // null data
-/*11*/ NULL,
-       null,
+    // null data
+    /*11*/ null,
+    null,
 
-       // boolean data
-/*13*/ true,
-       false,
-       TRUE,
-       FALSE,
+    // boolean data
+    /*13*/ true,
+    false,
+    true,
+    false,
 
-       // empty data
-/*17*/ "",
-       '',
-       array(),
+    // empty data
+    /*17*/ "",
+    "",
+    [],
 
-       // string data
-/*20*/ "abcxyz",
-       'abcxyz',
-       $heredoc,
-       '5.5',
-       '2',
+    // string data
+    /*20*/ "abcxyz",
+    "abcxyz",
+    $heredoc,
+    "5.5",
+    "2",
 
-       // object data
-/*25*/ new classA(),
+    // object data
+    /*25*/ new classA(),
 
-       // undefined data
-/*26*/ @$undefined_var,
+    // undefined data
+    /*26*/ @$undefined_var,
 
-       // unset data
-/*27*/ @$unset_var,
+    // unset data
+    /*27*/ @$unset_var,
 
-       // resource variable
-/*28*/ $fp
-);
+    // resource variable
+    /*28*/ $fp,
+];
 
 // loop through each element of $inputs to check the behaviour of pow()
 $iterator = 1;
-foreach($inputs as $input) {
+foreach ($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
     try {
         var_dump(pow($input, 3));
@@ -88,8 +88,9 @@ foreach($inputs as $input) {
         echo $e->getMessage(), "\n";
     }
     $iterator++;
-};
+}
 fclose($fp);
+
 ?>
 --EXPECTF--
 *** Testing pow() : usage variations ***
