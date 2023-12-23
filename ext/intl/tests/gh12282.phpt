@@ -7,7 +7,7 @@ intl
 
 try {
     new IntlDateFormatter(
-	    'xx',
+	    'xyz',
 	    IntlDateFormatter::FULL,
 	    IntlDateFormatter::FULL,
 	    null,
@@ -25,5 +25,5 @@ try {
     echo $e->getMessage();
 }
 --EXPECT--
-IntlDateFormatter::__construct(): Argument #1 ($locale) "xx" is invalid
-IntlDateFormatter::__construct(): Argument #1 ($locale) "xx" is invalid
+IntlDateFormatter::__construct(): Argument #1 ($locale) "xyz" is invalid
+IntlDateFormatter::__construct(): Argument #1 ($locale) "xyz" is invalid
