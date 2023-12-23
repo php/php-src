@@ -246,6 +246,8 @@ function zend_test_override_libxml_global_state(): void {}
 #endif
 
     function zend_test_is_pcre_bundled(): bool {}
+
+    function zend_test_gh12986(): void {}
 }
 
 namespace ZendTestNS {

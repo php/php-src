@@ -73,6 +73,24 @@ static zend_class_entry *zend_test_int_enum;
 static zend_class_entry *zend_test_magic_call;
 static zend_object_handlers zend_test_class_handlers;
 
+static ZEND_FUNCTION(zend_test_gh12986)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	HashTable *ht = _zend_new_array_0();
+	// The HT_ALLOW_COW_VIOLATION() macro is a noop in non-debug builds,
+	// so we have to set the flag directly.
+	HT_FLAGS(ht) |= HASH_FLAG_ALLOW_COW_VIOLATION;
+	zval value;
+	ZVAL_LONG(&value, 1);
+	zend_hash_next_index_insert(ht, &value);
+	if (HT_FLAGS(ht) & HASH_FLAG_ALLOW_COW_VIOLATION) {
+		php_printf("OK: HASH_FLAG_ALLOW_COW_VIOLATION is preserved by zend_hash_real_init_ex\n");
+	} else {
+		php_printf("KO: HASH_FLAG_ALLOW_COW_VIOLATION was cleared by zend_hash_real_init_ex\n");
+	}
+	zend_array_release(ht);
+}
+
 static int le_throwing_resource;
 
 static ZEND_FUNCTION(zend_test_func)
