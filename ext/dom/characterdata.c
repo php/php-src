@@ -114,6 +114,7 @@ zend_result dom_characterdata_length_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6531BCCF
+Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-substringdata
 Since:
 */
 PHP_METHOD(DOMCharacterData, substringData)
@@ -170,6 +171,7 @@ PHP_METHOD(DOMCharacterData, substringData)
 /* }}} end dom_characterdata_substring_data */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-32791A2F
+Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-appenddata
 Since:
 */
 PHP_METHOD(DOMCharacterData, appendData)
@@ -192,6 +194,7 @@ PHP_METHOD(DOMCharacterData, appendData)
 /* }}} end dom_characterdata_append_data */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3EDB695F
+Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-insertdata
 Since:
 */
 PHP_METHOD(DOMCharacterData, insertData)
@@ -249,6 +252,7 @@ PHP_METHOD(DOMCharacterData, insertData)
 /* }}} end dom_characterdata_insert_data */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7C603781
+Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-deletedata
 Since:
 */
 PHP_METHOD(DOMCharacterData, deleteData)
@@ -307,6 +311,7 @@ PHP_METHOD(DOMCharacterData, deleteData)
 /* }}} end dom_characterdata_delete_data */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-E5CBA7FB
+Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-replacedata
 Since:
 */
 PHP_METHOD(DOMCharacterData, replaceData)

@@ -107,6 +107,7 @@ PHP_METHOD(DOMElement, __construct)
 /* {{{ tagName	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-104682815
+Modern spec URL: https://dom.spec.whatwg.org/#dom-element-tagname
 Since:
 */
 zend_result dom_element_tag_name_read(dom_object *obj, zval *retval)
@@ -263,6 +264,7 @@ static xmlNodePtr dom_get_attribute_or_nsdecl(dom_object *intern, xmlNodePtr ele
 /* }}} */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-666EE0F9
+Modern spec URL: https://dom.spec.whatwg.org/#dom-element-getattribute
 Since:
 */
 PHP_METHOD(DOMElement, getAttribute)
@@ -356,6 +358,7 @@ static xmlNodePtr dom_create_attribute(xmlNodePtr nodep, const char *name, const
 }
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68F082
+Modern spec URL: https://dom.spec.whatwg.org/#dom-element-setattribute
 Since:
 */
 PHP_METHOD(DOMElement, setAttribute)
@@ -551,6 +554,7 @@ static bool dom_remove_attribute(xmlNodePtr thisp, xmlNodePtr attrp)
 }
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D6AC0F9
+Modern spec URL: https://dom.spec.whatwg.org/#dom-element-removeattribute
 Since:
 */
 PHP_METHOD(DOMElement, removeAttribute)
@@ -578,6 +582,7 @@ PHP_METHOD(DOMElement, removeAttribute)
 /* }}} end dom_element_remove_attribute */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-217A91B8
+Modern spec URL: https://dom.spec.whatwg.org/#dom-element-getattributenode
 Since:
 */
 PHP_METHOD(DOMElement, getAttributeNode)
@@ -690,6 +695,7 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 }
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-887236154
+Modern spec URL: https://dom.spec.whatwg.org/#dom-element-setattributenode
 Since:
 */
 PHP_METHOD(DOMElement, setAttributeNode)
@@ -781,6 +787,7 @@ static const xmlChar *dom_get_attribute_ns(dom_object *intern, xmlNodePtr elemp,
 }
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElGetAttrNS
+Modern spec URL: https://dom.spec.whatwg.org/#dom-element-getattributens
 Since: DOM Level 2
 */
 PHP_METHOD(DOMElement, getAttributeNS)
@@ -927,6 +934,7 @@ static void dom_set_attribute_ns_modern(dom_object *intern, xmlNodePtr elemp, ze
 }
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAttrNS
+Modern spec URL: https://dom.spec.whatwg.org/#dom-element-setattributens
 Since: DOM Level 2
 */
 PHP_METHOD(DOMElement, setAttributeNS)
@@ -1021,6 +1029,7 @@ static void dom_eliminate_ns(xmlNodePtr nodep, xmlNsPtr nsptr)
 }
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElRemAtNS
+Modern spec URL: https://dom.spec.whatwg.org/#dom-element-removeattributens
 Since: DOM Level 2
 */
 PHP_METHOD(DOMElement, removeAttributeNS)
@@ -1071,6 +1080,7 @@ PHP_METHOD(DOMElement, removeAttributeNS)
 /* }}} end dom_element_remove_attribute_ns */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElGetAtNodeNS
+Modern spec URL: https://dom.spec.whatwg.org/#dom-element-getattributenodens
 Since: DOM Level 2
 */
 PHP_METHOD(DOMElement, getAttributeNodeNS)
@@ -1119,6 +1129,7 @@ PHP_METHOD(DOMElement, getAttributeNodeNS)
 /* }}} end dom_element_get_attribute_node_ns */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAtNodeNS
+Modern spec URL: https://dom.spec.whatwg.org/#dom-element-setattributenodens
 Since: DOM Level 2
 */
 PHP_METHOD(DOMElement, setAttributeNodeNS)
@@ -1150,6 +1161,7 @@ PHP_METHOD(DOMElement, getElementsByTagNameNS)
 /* }}} end dom_element_get_elements_by_tag_name_ns */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElHasAttr
+Modern spec URL: https://dom.spec.whatwg.org/#dom-element-hasattribute
 Since: DOM Level 2
 */
 PHP_METHOD(DOMElement, hasAttribute)
@@ -1178,6 +1190,7 @@ PHP_METHOD(DOMElement, hasAttribute)
 /* }}} end dom_element_has_attribute */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElHasAttrNS
+Modern spec URL: https://dom.spec.whatwg.org/#dom-element-hasattributens
 Since: DOM Level 2
 */
 PHP_METHOD(DOMElement, hasAttributeNS)

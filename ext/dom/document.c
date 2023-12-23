@@ -476,6 +476,7 @@ zend_result dom_document_config_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-2141741547
+Modern spec URL: https://dom.spec.whatwg.org/#dom-document-createelement
 Since:
 */
 PHP_METHOD(DOM_Document, createElement)
@@ -491,7 +492,7 @@ PHP_METHOD(DOM_Document, createElement)
 
 	id = ZEND_THIS;
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_PATH_STR(name)
+		Z_PARAM_STR(name)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(value, value_len)
 	ZEND_PARSE_PARAMETERS_END();
@@ -611,6 +612,7 @@ PHP_METHOD(DOM_Document, createComment)
 /* }}} end dom_document_create_comment */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D26C0AF8
+Modern spec URL: https://dom.spec.whatwg.org/#dom-document-createcdatasection
 Since:
 */
 PHP_METHOD(DOM_Document, createCDATASection)
@@ -653,6 +655,7 @@ PHP_METHOD(DOM_Document, createCDATASection)
 /* }}} end dom_document_create_cdatasection */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-135944439
+Modern spec URL: https://dom.spec.whatwg.org/#dom-document-createprocessinginstruction
 Since:
 */
 PHP_METHOD(DOM_Document, createProcessingInstruction)
@@ -697,6 +700,7 @@ PHP_METHOD(DOM_Document, createProcessingInstruction)
 /* }}} end dom_document_create_processing_instruction */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1084891198
+Modern spec URL: https://dom.spec.whatwg.org/#dom-document-createattribute
 Since:
 */
 PHP_METHOD(DOM_Document, createAttribute)
@@ -776,6 +780,7 @@ PHP_METHOD(DOMDocument, createEntityReference)
 /* }}} end dom_document_create_entity_reference */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-A6C9094
+Modern spec URL: https://dom.spec.whatwg.org/#concept-getelementsbytagname
 Since:
 */
 PHP_METHOD(DOM_Document, getElementsByTagName)
@@ -797,6 +802,7 @@ PHP_METHOD(DOM_Document, getElementsByTagName)
 /* }}} end dom_document_get_elements_by_tag_name */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Core-Document-importNode
+Modern spec URL: https://dom.spec.whatwg.org/#dom-document-importnode
 Since: DOM Level 2
 */
 PHP_METHOD(DOM_Document, importNode)
@@ -853,6 +859,7 @@ PHP_METHOD(DOM_Document, importNode)
 /* }}} end dom_document_import_node */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrElNS
+Modern spec URL: https://dom.spec.whatwg.org/#internal-createelementns-steps
 Since: DOM Level 2
 */
 PHP_METHOD(DOM_Document, createElementNS)
@@ -926,6 +933,7 @@ PHP_METHOD(DOM_Document, createElementNS)
 /* }}} end dom_document_create_element_ns */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrAttrNS
+Modern spec URL: https://dom.spec.whatwg.org/#dom-document-createattributens
 Since: DOM Level 2
 */
 PHP_METHOD(DOM_Document, createAttributeNS)
@@ -1006,6 +1014,7 @@ error:
 /* }}} end dom_document_create_attribute_ns */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getElBTNNS
+Modern spec URL: https://dom.spec.whatwg.org/#concept-getelementsbytagnamens
 Since: DOM Level 2
 */
 PHP_METHOD(DOM_Document, getElementsByTagNameNS)

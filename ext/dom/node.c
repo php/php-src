@@ -73,6 +73,7 @@ bool php_dom_is_node_connected(const xmlNode *node)
 /* {{{ nodeName	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D095
+Modern spec URL: https://dom.spec.whatwg.org/#dom-node-nodename
 Since:
 */
 zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
@@ -138,6 +139,7 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 /* {{{ nodeValue	string
 readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D080
+Modern spec URL: https://dom.spec.whatwg.org/#dom-node-nodevalue
 Since:
 */
 zend_result dom_node_node_value_read(dom_object *obj, zval *retval)
@@ -626,6 +628,7 @@ zend_result dom_node_namespace_uri_read(dom_object *obj, zval *retval)
 /* {{{ prefix	string
 readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSPrefix
+Modern spec URL: https://dom.spec.whatwg.org/#concept-element-namespace-prefix
 Since: DOM Level 2
 */
 zend_result dom_node_prefix_read(dom_object *obj, zval *retval)
@@ -802,6 +805,7 @@ zend_result dom_node_base_uri_read(dom_object *obj, zval *retval)
 /* {{{ textContent	string
 readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-textContent
+Modern spec URL: https://dom.spec.whatwg.org/#dom-node-textcontent
 Since: DOM Level 3
 */
 /* Determines when the operation is a no-op. */
@@ -1085,6 +1089,7 @@ cannot_add:
 }
 /* }}} end dom_node_insert_before */
 
+/* https://dom.spec.whatwg.org/#dom-node-insertbefore */
 static void dom_node_insert_before_modern(zval *return_value, zval *ref, dom_object *intern, dom_object *childobj, xmlNodePtr parentp, xmlNodePtr child)
 {
 	int ret;
@@ -1210,6 +1215,7 @@ static zend_result dom_replace_node_validity_checks(xmlNodePtr parent, xmlNodePt
 }
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-785887307
+Modern spec URL: https://dom.spec.whatwg.org/#dom-node-replacechild
 Since:
 */
 PHP_METHOD(DOMNode, replaceChild)
@@ -1343,6 +1349,7 @@ PHP_METHOD(DOMNode, removeChild)
 /* }}} end dom_node_remove_child */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-184E7107
+Modern spec URL: https://dom.spec.whatwg.org/#dom-node-appendchild
 Since:
 */
 static void dom_node_append_child_legacy(zval *return_value, dom_object *intern, dom_object *childobj, xmlNodePtr nodep, xmlNodePtr child)
@@ -1854,6 +1861,7 @@ static const xmlChar *dom_locate_a_namespace_prefix(xmlNodePtr elem, const char 
 }
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-lookupNamespacePrefix
+Modern spec URL: https://dom.spec.whatwg.org/#dom-node-lookupprefix
 Since: DOM Level 3
 */
 PHP_METHOD(DOMNode, lookupPrefix)
@@ -1984,6 +1992,7 @@ static const char *dom_locate_a_namespace(xmlNodePtr node, const zend_string *pr
 }
 
 /* {{{ URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-isDefaultNamespace
+Modern spec URL: https://dom.spec.whatwg.org/#dom-node-isdefaultnamespace
 Since: DOM Level 3
 */
 PHP_METHOD(DOMNode, isDefaultNamespace)
@@ -2027,6 +2036,7 @@ PHP_METHOD(DOMNode, isDefaultNamespace)
 /* }}} end dom_node_is_default_namespace */
 
 /* {{{ URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-lookupNamespaceURI
+Modern spec URL: https://dom.spec.whatwg.org/#dom-node-lookupnamespaceuri
 Since: DOM Level 3
 */
 PHP_METHOD(DOMNode, lookupNamespaceURI)

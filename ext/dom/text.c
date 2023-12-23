@@ -100,6 +100,7 @@ zend_result dom_text_whole_text_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
+Modern spec URL: https://dom.spec.whatwg.org/#dom-text-splittext
 Since:
 */
 PHP_METHOD(DOMText, splitText)
