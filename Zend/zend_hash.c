@@ -149,6 +149,7 @@ static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
 static zend_always_inline void zend_hash_real_init_packed_ex(HashTable *ht)
 {
 	void *data;
+	uint8_t prev_flags = HT_FLAGS(ht) & HASH_FLAG_ALLOW_COW_VIOLATION;
 
 	if (UNEXPECTED(GC_FLAGS(ht) & IS_ARRAY_PERSISTENT)) {
 		data = pemalloc(HT_PACKED_SIZE_EX(ht->nTableSize, HT_MIN_MASK), 1);
@@ -160,7 +161,7 @@ static zend_always_inline void zend_hash_real_init_packed_ex(HashTable *ht)
 	}
 	HT_SET_DATA_ADDR(ht, data);
 	/* Don't overwrite iterator count. */
-	ht->u.v.flags = HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS;
+	ht->u.v.flags = prev_flags | HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS;
 	HT_HASH_RESET_PACKED(ht);
 }
 
@@ -168,6 +169,7 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 {
 	void *data;
 	uint32_t nSize = ht->nTableSize;
+	uint8_t prev_flags = HT_FLAGS(ht) & HASH_FLAG_ALLOW_COW_VIOLATION;
 
 	ZEND_ASSERT(HT_SIZE_TO_MASK(nSize));
 
@@ -178,7 +180,7 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 		ht->nTableMask = HT_SIZE_TO_MASK(HT_MIN_SIZE);
 		HT_SET_DATA_ADDR(ht, data);
 		/* Don't overwrite iterator count. */
-		ht->u.v.flags = HASH_FLAG_STATIC_KEYS;
+		ht->u.v.flags = prev_flags | HASH_FLAG_STATIC_KEYS;
 #if defined(__AVX2__)
 		do {
 			__m256i ymm0 = _mm256_setzero_si256();
@@ -227,7 +229,7 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 	}
 	ht->nTableMask = HT_SIZE_TO_MASK(nSize);
 	HT_SET_DATA_ADDR(ht, data);
-	HT_FLAGS(ht) = HASH_FLAG_STATIC_KEYS;
+	HT_FLAGS(ht) = prev_flags | HASH_FLAG_STATIC_KEYS;
 	HT_HASH_RESET(ht);
 }
 
