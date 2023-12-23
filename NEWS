@@ -54,6 +54,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-12767 (Unable to turn on autocommit mode with setAttribute()).
     (SakiTakamachi)
 
+- PGSQL:
+  . Fixed auto_reset_persistent handling and allow_persistent type. (David Carlier)
+
 - PHPDBG:
   . Fixed bug GH-12962 (Double free of init_file in phpdbg_prompt.c). (nielsdos)
 
