@@ -390,7 +390,7 @@ xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *context
 			return dom_object_get_node(Z_DOMOBJ_P(nodes));
 		} else {
 			ZEND_ASSERT(Z_TYPE_P(nodes) == IS_STRING);
-			return xmlNewDocText(documentNode, BAD_CAST Z_STRVAL_P(nodes));
+			return xmlNewDocTextLen(documentNode, BAD_CAST Z_STRVAL_P(nodes), Z_STRLEN_P(nodes));
 		}
 	}
 
@@ -434,7 +434,7 @@ xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *context
 			ZEND_ASSERT(Z_TYPE(nodes[i]) == IS_STRING);
 
 			/* Text nodes can't violate the hierarchy at this point. */
-			newNode = xmlNewDocText(documentNode, BAD_CAST Z_STRVAL(nodes[i]));
+			newNode = xmlNewDocTextLen(documentNode, BAD_CAST Z_STRVAL(nodes[i]), Z_STRLEN(nodes[i]));
 			dom_add_child_without_merging(node, newNode);
 		}
 	}

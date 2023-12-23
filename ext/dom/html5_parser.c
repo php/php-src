@@ -63,14 +63,14 @@ static unsigned short sanitize_line_nr(size_t line)
     return (unsigned short) line;
 }
 
-static const xmlChar *get_libxml_namespace_href(uintptr_t lexbor_namespace)
+static const dom_ns_magic_token *get_libxml_namespace_href(uintptr_t lexbor_namespace)
 {
     if (lexbor_namespace == LXB_NS_SVG) {
-        return (const xmlChar *) DOM_SVG_NS_URI;
+        return dom_ns_is_svg_magic_token;
     } else if (lexbor_namespace == LXB_NS_MATH) {
-        return (const xmlChar *) DOM_MATHML_NS_URI;
+        return dom_ns_is_mathml_magic_token;
     } else {
-        return (const xmlChar *) DOM_XHTML_NS_URI;
+        return dom_ns_is_html_magic_token;
     }
 }
 
@@ -135,7 +135,11 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
             uintptr_t entering_namespace = element->node.ns;
             xmlNsPtr current_lxml_ns = current_stack_item->lxml_ns;
             if (create_default_ns && UNEXPECTED(entering_namespace != current_stack_item->current_active_namespace)) {
-                current_lxml_ns = xmlNewNs(lxml_element, get_libxml_namespace_href(entering_namespace), NULL);
+                const dom_ns_magic_token *magic_token = get_libxml_namespace_href(entering_namespace);
+                current_lxml_ns = xmlNewNs(lxml_element, BAD_CAST magic_token, NULL);
+                if (EXPECTED(current_lxml_ns != NULL)) {
+                    current_lxml_ns->_private = (void *) magic_token;
+                }
             }
             /* Instead of xmlSetNs() because we know the arguments are valid. Prevents overhead. */
             lxml_element->ns = current_lxml_ns;
@@ -189,8 +193,14 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                     } else {
                         lxml_attr->ns = dom_ns_create_local_as_is(lxml_doc, lxml_element, lxml_element, DOM_XMLNS_NS_URI, NULL);
                     }
+                    if (EXPECTED(lxml_attr->ns != NULL)) {
+                        lxml_attr->ns->_private = (void *) dom_ns_is_xmlns_magic_token;
+                    }
                 } else if (attr->node.ns == LXB_NS_XLINK) {
                     lxml_attr->ns = dom_ns_create_local_as_is(lxml_doc, lxml_element, lxml_element, DOM_XLINK_NS_URI, BAD_CAST "xlink");
+                    if (EXPECTED(lxml_attr->ns != NULL)) {
+                        lxml_attr->ns->_private = (void *) dom_ns_is_xlink_magic_token;
+                    }
                 }
 
                 if (last_added_attr == NULL) {
