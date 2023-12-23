@@ -143,7 +143,7 @@ var_dump(epsilon_equal( LONG_MAX*LONG_MAX , pow(LONG_MAX,2.0) ));
 var_dump(epsilon_equal( LONG_MIN*LONG_MIN , pow(LONG_MIN,2.0) ));
 
 ?>
---EXPECT--
+--EXPECTF--
 1,1,0,0
 bool(true)
 bool(true)
@@ -155,7 +155,11 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
 bool(true)
 bool(true)
 bool(true)
@@ -180,8 +184,14 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
 bool(true)
 bool(true)
 bool(true)
@@ -212,8 +222,14 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
 bool(true)
 bool(true)
 bool(true)
@@ -237,8 +253,14 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
 bool(true)
 bool(true)
 bool(true)

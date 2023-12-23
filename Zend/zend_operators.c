@@ -1287,6 +1287,21 @@ ZEND_API zend_result ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
+static void ZEND_COLD zend_power_base_0_exponent_lt_eq_0_error(void)
+{
+	zend_error(E_DEPRECATED, "Power of base 0 and negative exponent is deprecated");
+}
+
+static zend_result safe_pow(double *result, double base, double exponent)
+{
+	if (base == 0.0 && exponent <= 0.0) {
+		zend_power_base_0_exponent_lt_eq_0_error();
+	}
+
+	*result = pow(base, exponent);
+	return SUCCESS;
+}
+
 static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	uint8_t type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
@@ -1311,14 +1326,18 @@ static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval
 					--i;
 					ZEND_SIGNED_MULTIPLY_LONG(l1, l2, l1, dval, overflow);
 					if (overflow) {
-						ZVAL_DOUBLE(result, dval * pow(l2, i));
+						double pow_result;
+						safe_pow(&pow_result, l2, i);
+						ZVAL_DOUBLE(result, dval * pow_result);
 						return SUCCESS;
 					}
 				} else {
 					i /= 2;
 					ZEND_SIGNED_MULTIPLY_LONG(l2, l2, l2, dval, overflow);
 					if (overflow) {
-						ZVAL_DOUBLE(result, (double)l1 * pow(dval, i));
+						double pow_result;
+						safe_pow(&pow_result, dval, i);
+						ZVAL_DOUBLE(result, (double)l1 * pow_result);
 						return SUCCESS;
 					}
 				}
@@ -1326,17 +1345,25 @@ static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval
 			/* i == 0 */
 			ZVAL_LONG(result, l1);
 		} else {
-			ZVAL_DOUBLE(result, pow((double)Z_LVAL_P(op1), (double)Z_LVAL_P(op2)));
+			double pow_result;
+			safe_pow(&pow_result, (double)Z_LVAL_P(op1), (double)Z_LVAL_P(op2));
+			ZVAL_DOUBLE(result, pow_result);
 		}
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
-		ZVAL_DOUBLE(result, pow(Z_DVAL_P(op1), Z_DVAL_P(op2)));
+		double pow_result;
+		safe_pow(&pow_result, Z_DVAL_P(op1), Z_DVAL_P(op2));
+		ZVAL_DOUBLE(result, pow_result);
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_DOUBLE))) {
-		ZVAL_DOUBLE(result, pow((double)Z_LVAL_P(op1), Z_DVAL_P(op2)));
+		double pow_result;
+		safe_pow(&pow_result, (double)Z_LVAL_P(op1), Z_DVAL_P(op2));
+		ZVAL_DOUBLE(result, pow_result);
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
-		ZVAL_DOUBLE(result, pow(Z_DVAL_P(op1), (double)Z_LVAL_P(op2)));
+		double pow_result;
+		safe_pow(&pow_result, Z_DVAL_P(op1), (double)Z_LVAL_P(op2));
+		ZVAL_DOUBLE(result, pow_result);
 		return SUCCESS;
 	} else {
 		return FAILURE;
@@ -1372,7 +1399,7 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 		return SUCCESS;
 	}
 
-	ZEND_ASSERT(0 && "Operation must succeed");
+	ZVAL_UNDEF(result);
 	return FAILURE;
 }
 /* }}} */

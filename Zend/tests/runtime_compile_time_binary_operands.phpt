@@ -184,5 +184,714 @@ if($c === 0) {
 $fl = __DIR__ . DIRECTORY_SEPARATOR . 'compare_binary_operands_temp.php';
 @unlink($fl);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
 Failed: 0
