@@ -45,37 +45,29 @@ $inputs = [
 
     // null data
     /*11*/ null,
-    null,
 
     // boolean data
-    /*13*/ true,
-    false,
-    true,
+    /*12*/ true,
     false,
 
     // empty data
-    /*17*/ "",
-    "",
+    /*14*/ "",
     [],
 
     // string data
-    /*20*/ "abcxyz",
-    "abcxyz",
+    /*16*/ "abcxyz",
     $heredoc,
     "10.5",
     "2",
 
     // object data
-    /*25*/ new classA(),
+    /*20*/ new classA(),
 
     // undefined data
-    /*26*/ @$undefined_var,
-
-    // unset data
-    /*27*/ @$unset_var,
+    /*21*/ @$undefined_var,
 
     // resource variable
-    /*28*/ $fp,
+    /*22*/ $fp,
 ];
 
 // loop through each element of $inputs to check the behaviour of pow()
@@ -128,52 +120,34 @@ float(0.125)
 int(0)
 
 -- Iteration 12 --
-int(0)
+int(1)
 
 -- Iteration 13 --
-int(1)
+int(0)
 
 -- Iteration 14 --
-int(0)
+Unsupported operand types: string ** int
 
 -- Iteration 15 --
-int(1)
+Unsupported operand types: array ** int
 
 -- Iteration 16 --
-int(0)
+Unsupported operand types: string ** int
 
 -- Iteration 17 --
 Unsupported operand types: string ** int
 
 -- Iteration 18 --
-Unsupported operand types: string ** int
-
--- Iteration 19 --
-Unsupported operand types: array ** int
-
--- Iteration 20 --
-Unsupported operand types: string ** int
-
--- Iteration 21 --
-Unsupported operand types: string ** int
-
--- Iteration 22 --
-Unsupported operand types: string ** int
-
--- Iteration 23 --
 float(1157.625)
 
--- Iteration 24 --
+-- Iteration 19 --
 int(8)
 
--- Iteration 25 --
+-- Iteration 20 --
 Unsupported operand types: classA ** int
 
--- Iteration 26 --
+-- Iteration 21 --
 int(0)
 
--- Iteration 27 --
-int(0)
-
--- Iteration 28 --
+-- Iteration 22 --
 Unsupported operand types: resource ** int
