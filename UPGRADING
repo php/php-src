@@ -112,17 +112,14 @@ PHP 8.4 UPGRADE NOTES
     which is why it throws an exception nowadays.
 
 - Opcache:
-  . JIT config defaults changed from
-  `opcache.jit=tracing`, `opcache.jit_buffer_size=0` to
-  `opcache.jit=disable`, `opcache.jit_buffer_size=64M`:
-  this does not change the default behavior,
-  JIT was and still is disabled by default, however
-  now it is now disabled by default
-  using the `opcache.jit` setting, not the `opcache.jit_buffer_size` setting.  
-  This may affect users who enabled JIT by only setting a different
-  `opcache.jit_buffer_size`, without specifying a JIT mode
-  in `opcache.jit`.  
-  To enable JIT, you should now populate the `opcache.jit` config value.
+  . The JIT config defaults changed from opcache.jit=tracing and
+    opcache.jit_buffer_size=0 to opcache.jit=disable and
+    opcache.jit_buffer_size=64M, respectively. This does not affect the default
+    behavior, the JIT is still disabled by default. However, it is now disabled
+    through the opcache.jit setting, rather than opcache.jit_buffer_size. This
+    may affect users who previously enabled JIT through opcache.jit_buffer_size
+    exclusively, without also specifying a JIT mode using opcache.jit. To enable
+    JIT, set the opcache.jit config value accordingly.
 
 ========================================
 2. New Features
