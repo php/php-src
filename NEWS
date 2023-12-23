@@ -22,7 +22,6 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fix crash when toggleAttribute() is used without a document. (nielsdos)
   . Fix crash in adoptNode with attribute references. (nielsdos)
-  . Fix crashes with entity references and predefined entities. (nielsdos)
 
 - FFI:
   . Fixed bug GH-9698 (stream_wrapper_register crashes with FFI\CData).

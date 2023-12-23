@@ -207,10 +207,12 @@ static void php_libxml_node_free(xmlNodePtr node)
 			 * dtd is attached to the document. This works around the issue by inspecting the parent directly. */
 			case XML_ENTITY_DECL: {
 				xmlEntityPtr entity = (xmlEntityPtr) node;
-				if (entity->etype != XML_INTERNAL_PREDEFINED_ENTITY) {
-					php_libxml_unlink_entity_decl(entity);
-					xmlFreeEntity(entity);
+				php_libxml_unlink_entity_decl(entity);
+				if (entity->orig != NULL) {
+					xmlFree((char *) entity->orig);
+					entity->orig = NULL;
 				}
+				xmlFreeNode(node);
 				break;
 			}
 			case XML_NOTATION_NODE: {
@@ -1383,15 +1385,6 @@ PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node)
 	switch (node->type) {
 		case XML_DOCUMENT_NODE:
 		case XML_HTML_DOCUMENT_NODE:
-			break;
-		case XML_ENTITY_REF_NODE:
-			/* Entity reference nodes are special: their children point to entity declarations,
-			 * but they don't own the declarations and therefore shouldn't free the children.
-			 * Moreover, there can be N>1 reference nodes for a single entity declarations. */
-			php_libxml_unregister_node(node);
-			if (node->parent == NULL) {
-				php_libxml_node_free(node);
-			}
 			break;
 		default:
 			if (node->parent == NULL || node->type == XML_NAMESPACE_DECL) {
