@@ -3174,7 +3174,7 @@ function show_start(int $start_timestamp): void
     echo "TIME START " . date('Y-m-d H:i:s', $start_timestamp) . "\n=====================================================================\n";
 }
 
-function show_end(int $start_timestamp, float $start_time, float $end_time): void
+function show_end(int $start_timestamp, int|float $start_time, int|float $end_time): void
 {
     echo "=====================================================================\nTIME END " . date('Y-m-d H:i:s', $start_timestamp + (int)(($end_time - $start_time)/1e9)) . "\n";
 }
