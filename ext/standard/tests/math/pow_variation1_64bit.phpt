@@ -66,16 +66,16 @@ $inputs = array(
        '2',
 
        // object data
-/*23*/ new classA(),
+/*25*/ new classA(),
 
        // undefined data
-/*24*/ @$undefined_var,
+/*26*/ @$undefined_var,
 
        // unset data
-/*25*/ @$unset_var,
+/*27*/ @$unset_var,
 
        // resource variable
-/*26*/ $fp
+/*28*/ $fp
 );
 
 // loop through each element of $inputs to check the behaviour of pow()
