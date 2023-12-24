@@ -23,7 +23,7 @@ const PHP_MINOR_VERSION = UNKNOWN;
  * @cvalue PHP_RELEASE_VERSION
  */
 const PHP_RELEASE_VERSION = UNKNOWN;
-	
+
 /**
  * @var string
  * @cvalue PHP_EXTRA_VERSION
@@ -301,6 +301,11 @@ const PHP_OUTPUT_HANDLER_STARTED = UNKNOWN;
  * @cvalue PHP_OUTPUT_HANDLER_DISABLED
  */
 const PHP_OUTPUT_HANDLER_DISABLED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_OUTPUT_HANDLER_PROCESSED
+ */
+const PHP_OUTPUT_HANDLER_PROCESSED = UNKNOWN;
 
 /**
  * @var int
