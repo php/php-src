@@ -38,7 +38,7 @@ typedef struct {
 	xmlNsPtr last_mapped_src, last_mapped_dst;
 } dom_libxml_reconcile_ctx;
 
-static void dom_ns_compat_mark_attribute(xmlNodePtr node, xmlNsPtr ns)
+static xmlAttrPtr dom_ns_compat_mark_attribute(xmlNodePtr node, xmlNsPtr ns)
 {
 	const xmlChar *name, *prefix;
 	if (ns->prefix != NULL) {
@@ -49,16 +49,38 @@ static void dom_ns_compat_mark_attribute(xmlNodePtr node, xmlNsPtr ns)
 		name = BAD_CAST "xmlns";
 	}
 
+	// TODO: why on the root?
 	xmlNsPtr xmlns_ns = dom_ns_create_local_as_is(node->doc, xmlDocGetRootElement(node->doc), node, DOM_XMLNS_NS_URI, prefix);
-	xmlSetNsProp(node, xmlns_ns, name, ns->href);
+	return xmlSetNsProp(node, xmlns_ns, name, ns->href);
 }
 
 void dom_ns_compat_mark_attribute_list(xmlNodePtr node)
 {
+	if (node->nsDef == NULL) {
+		return;
+	}
+
+	/* We want to prepend at the front, but in order of the namespace definitions.
+	 * So temporarily unlink the existing properties and add them again at the end. */
+	xmlAttrPtr attr = node->properties;
+	node->properties = NULL;
+
 	xmlNsPtr ns = node->nsDef;
-	while (ns != NULL) {
-		dom_ns_compat_mark_attribute(node, ns);
+	xmlAttrPtr last_added = NULL;
+	do {
+		last_added = dom_ns_compat_mark_attribute(node, ns);
 		ns = ns->next;
+	} while (ns != NULL);
+
+	if (last_added != NULL) {
+		/* node->properties now points to the first namespace declaration attribute. */
+		if (attr != NULL) {
+			last_added->next = attr;
+			attr->prev = last_added;
+		}
+	} else {
+		/* Nothing added, so nothing changed. Only really possible on OOM. */
+		node->properties = attr;
 	}
 }
 
