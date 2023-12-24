@@ -602,17 +602,17 @@ PHP_METHOD(PdoSqlite, createAggregate)
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
-			Z_PARAM_STRING(func_name, func_name_len)
-			Z_PARAM_FUNC(step_fci, step_fcc)
-			Z_PARAM_FUNC(fini_fci, fini_fcc)
-			Z_PARAM_OPTIONAL
-			Z_PARAM_LONG(argc)
+		Z_PARAM_STRING(func_name, func_name_len)
+		Z_PARAM_FUNC(step_fci, step_fcc)
+		Z_PARAM_FUNC(fini_fci, fini_fcc)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(argc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	func = (struct pdo_sqlite_func*)ecalloc(1, sizeof(*func));
 
 	ret = sqlite3_create_function(H->db, func_name, argc, SQLITE_UTF8,
-								  func, NULL, php_pgsql_func_step_callback, php_pgsql_func_final_callback);
+		func, NULL, php_pgsql_func_step_callback, php_pgsql_func_final_callback);
 	if (ret == SQLITE_OK) {
 		func->funcname = estrdup(func_name);
 
@@ -646,8 +646,8 @@ PHP_METHOD(PdoSqlite, createCollation)
 	int ret;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-			Z_PARAM_STRING(collation_name, collation_name_len)
-			Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_STRING(collation_name, collation_name_len)
+		Z_PARAM_FUNC(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);

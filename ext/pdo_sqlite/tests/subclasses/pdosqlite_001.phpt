@@ -18,8 +18,6 @@ foreach ($db->query('SELECT testing(name) FROM pdosqlite_001') as $row) {
     var_dump($row);
 }
 
-$db->query('DROP TABLE pdosqlite_001');
-
 echo "Fin.";
 ?>
 --EXPECT--

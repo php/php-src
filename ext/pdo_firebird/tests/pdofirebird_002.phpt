@@ -11,7 +11,7 @@ require_once __DIR__ . "/testdb.inc";
 
 $db = connectToDb();
 if (!$db instanceof PdoFirebird) {
-    echo "Wrong class type. Should be PdoOdbc but is " . get_class($db) . "\n";
+    echo "Wrong class type. Should be PdoFirebird but is " . get_class($db) . "\n";
 }
 
 $db->query('CREATE TABLE pdofirebird_002 (idx int NOT NULL PRIMARY KEY, name VARCHAR(20))');

@@ -9,25 +9,21 @@ pdo_sqlite
 $db = new PdoSqlite('sqlite::memory:');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$db->query('CREATE TABLE IF NOT EXISTS foobar (id INT AUTO INCREMENT, name TEXT)');
+$db->query('CREATE TABLE IF NOT EXISTS test_pdo_sqlite_createcollation (id INT AUTO INCREMENT, name TEXT)');
 
-$db->query('INSERT INTO foobar VALUES (NULL, "1")');
-$db->query('INSERT INTO foobar VALUES (NULL, "2")');
-$db->query('INSERT INTO foobar VALUES (NULL, "10")');
+$db->query('INSERT INTO test_pdo_sqlite_createcollation VALUES (NULL, "1"), (NULL, "2"), (NULL, "10")');
 
 $db->createCollation('MYCOLLATE', function($a, $b) { return strnatcmp($a, $b); });
 
-$result = $db->query('SELECT name FROM foobar ORDER BY name COLLATE MYCOLLATE');
+$result = $db->query('SELECT name FROM test_pdo_sqlite_createcollation ORDER BY name COLLATE MYCOLLATE');
 foreach ($result as $row) {
     echo $row['name'] . "\n";
 }
 
-$result = $db->query('SELECT name FROM foobar ORDER BY name');
+$result = $db->query('SELECT name FROM test_pdo_sqlite_createcollation ORDER BY name');
 foreach ($result as $row) {
   echo $row['name'] . "\n";
 }
-
-$db->query('DROP TABLE foobar');
 
 ?>
 --EXPECT--

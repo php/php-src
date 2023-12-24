@@ -118,7 +118,7 @@ PDO_API zend_result php_pdo_register_driver(const pdo_driver_t *driver) /* {{{ *
 		return FAILURE;
 	}
 	if (!zend_hash_str_exists(&module_registry, "pdo", sizeof("pdo") - 1)) {
-		zend_error_noreturn(E_ERROR, "You MUST load PDO before loading any PDO drivers");
+		zend_error_noreturn(E_ERROR, "The PDO extension must be loaded first in order to load PDO drivers");
 		return FAILURE;	/* NOTREACHED */
 	}
 
@@ -140,7 +140,7 @@ PDO_API void php_pdo_unregister_driver(const pdo_driver_t *driver) /* {{{ */
 PDO_API zend_result php_pdo_register_driver_specific_ce(const pdo_driver_t *driver, zend_class_entry *ce) /* {{{ */
 {
 	if (!zend_hash_str_exists(&module_registry, "pdo", sizeof("pdo") - 1)) {
-		zend_error_noreturn(E_ERROR, "You MUST load PDO before loading any PDO drivers");
+		zend_error_noreturn(E_ERROR, "The PDO extension must be loaded first in order to load PDO drivers");
 		return FAILURE;	/* NOTREACHED */
 	}
 
