@@ -66,7 +66,7 @@ try {
 
 echo "--- Document output ---\n";
 
-echo $dom->saveXML();
+echo $dom->saveXML(), "\n";
 
 echo "--- Document fragment edge cases with multiple elements ---\n";
 
@@ -110,6 +110,7 @@ Exception: Document types must be the first child in a document
 --- Document output ---
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE root>
+
 --- Document fragment edge cases with multiple elements ---
 Exception: Cannot have more than one element child in a document
 --- Document fragment edge cases with text ---

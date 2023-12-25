@@ -9,14 +9,14 @@ $dom = DOM\XMLDocument::createEmpty();
 $element = $dom->createElement("div");
 $element->append("foo", "bar", "baz", $dom->createElement("span", "qux"), $dom->createCDATASection("a"), $dom->createCDATASection("b"));
 $dom->append($element);
-echo $dom->saveXML();
+echo $dom->saveXML(), "\n";
 
 var_dump($element->firstChild->textContent);
 var_dump($element->firstChild->nextSibling->textContent);
 var_dump($element->firstChild->nextSibling->nextSibling->textContent);
 
 $dom->normalize();
-echo $dom->saveXML();
+echo $dom->saveXML(), "\n";
 
 var_dump($element->firstChild->textContent);
 var_dump($element->firstChild->nextSibling->textContent);

@@ -52,6 +52,6 @@ prefix: ""
     <title>Test</title>
 </head>
 <body xmlns:foo="urn:hi">
-    <foo:bar/>
+    <foo:bar></foo:bar>
 
 </body></html>

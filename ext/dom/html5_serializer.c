@@ -23,6 +23,7 @@
 #include "php_dom.h"
 #include "html5_serializer.h"
 #include "namespace_compat.h"
+#include "serialize_common.h"
 #include <lexbor/encoding/encoding.h>
 
 /* This file implements the HTML 5 serialization algorithm.
@@ -30,11 +31,6 @@
  */
 
 #define TRY(x) do { if (UNEXPECTED((x) != SUCCESS)) { return FAILURE; } } while (0)
-
-static bool dom_local_name_compare_ex(const xmlNode *node, const char *tag, size_t tag_length, size_t name_length)
-{
-	return name_length == tag_length && zend_binary_strcmp((const char *) node->name, name_length, tag, tag_length) == 0;
-}
 
 static zend_result dom_html5_serialize_doctype(dom_html5_serialize_context *ctx, const xmlDtd *dtd)
 {

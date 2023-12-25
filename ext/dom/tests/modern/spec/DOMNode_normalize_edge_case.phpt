@@ -14,7 +14,7 @@ $container->appendChild($doc->createTextNode(""));
 
 $doc->normalizeDocument();
 
-echo $doc->saveXML();
+echo $doc->saveXML(), "\n";
 
 var_dump($middle->textContent);
 

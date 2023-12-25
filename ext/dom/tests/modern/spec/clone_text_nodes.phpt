@@ -17,7 +17,7 @@ $child->appendChild($dom->createTextNode("c"));
 $child2 = $root->appendChild($dom->createElement("child2"));
 $child2->appendChild($dom->createTextNode("d"));
 
-echo $dom->saveXML();
+echo $dom->saveXML(), "\n";
 
 $clone = clone $root;
 var_dump($clone->firstChild->textContent);

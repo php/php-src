@@ -23,8 +23,9 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "xml_serializer.h"
 #include <libxml/SAX.h>
-#include <libxml/xmlsave.h>
+// #include <libxml/xmlsave.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
@@ -1110,12 +1111,16 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 		php_libxml_invalidate_node_list_cache(dom_object_new_document->document);
 
 		/* Note for ATTRIBUTE_NODE: specified is always true in ext/dom,
-		 * and since this unlink it; the owner element will be unset (i.e. parentNode).
-		 * Note that there is no reconciliation conflict problem for namespaces because
-		 * no namespace search is performed if the destination parent is NULL. */
-		int ret = xmlDOMWrapAdoptNode(NULL, nodep->doc, nodep, new_document, NULL, /* options, unused */ 0);
-		if (UNEXPECTED(ret != 0)) {
-			return false;
+		 * and since this unlink it; the owner element will be unset (i.e. parentNode). */
+		if (php_dom_follow_spec_intern(dom_object_new_document)) {
+			xmlUnlinkNode(nodep);
+			xmlSetTreeDoc(nodep, new_document);
+			dom_libxml_reconcile_modern(nodep);
+		} else {
+			int ret = xmlDOMWrapAdoptNode(NULL, nodep->doc, nodep, new_document, NULL, /* options, unused */ 0);
+			if (UNEXPECTED(ret != 0)) {
+				return false;
+			}
 		}
 
 		php_dom_transfer_document_ref(nodep, dom_object_new_document->document);
@@ -1583,7 +1588,19 @@ PHP_METHOD(DOMDocument, saveXML)
 		/* Save libxml2 global, override its vaule, and restore after saving. */
 		old_xml_save_no_empty_tags = xmlSaveNoEmptyTags;
 		xmlSaveNoEmptyTags = (options & LIBXML_SAVE_NOEMPTYTAG) ? 1 : 0;
-		xmlNodeDump(buf, docp, node, 0, format);
+		// TODO: return value?
+		int status;
+		if (php_dom_follow_spec_intern(intern)) {
+			// TODO: dedup
+			xmlSaveCtxtPtr ctxt = xmlSaveToBuffer(buf, (const char *) docp->encoding, XML_SAVE_AS_XML);
+			xmlOutputBufferPtr out = xmlOutputBufferCreateBuffer(buf, NULL); // TODO: set handler instead of NULL, & check return value
+			status = dom_xml_serialize(ctxt, out, node, format);
+			status |= xmlOutputBufferFlush(out);
+			status |= xmlOutputBufferClose(out);
+			(void) xmlSaveClose(ctxt);
+		} else {
+			status = xmlNodeDump(buf, docp, node, 0, format);
+		}
 		xmlSaveNoEmptyTags = old_xml_save_no_empty_tags;
 	} else {
 		buf = xmlBufferCreate();
@@ -1610,14 +1627,22 @@ PHP_METHOD(DOMDocument, saveXML)
 			php_error_docref(NULL, E_WARNING, "Could not create save context");
 			RETURN_FALSE;
 		}
-		if (UNEXPECTED(xmlSaveDoc(ctxt, docp) < 0)) {
+		int status;
+		if (php_dom_follow_spec_intern(intern)) {
+			xmlOutputBufferPtr out = xmlOutputBufferCreateBuffer(buf, NULL); // TODO: set handler instead of NULL, & check return value
+			status = dom_xml_serialize(ctxt, out, (xmlNodePtr) docp, format);
+			status |= xmlOutputBufferFlush(out);
+			status |= xmlOutputBufferClose(out);
+		} else {
+			status = xmlSaveDoc(ctxt, docp);
+		}
+		if (UNEXPECTED(status < 0)) {
 			(void) xmlSaveClose(ctxt);
 			xmlBufferFree(buf);
 			php_error_docref(NULL, E_WARNING, "Could not save document");
 			RETURN_FALSE;
 		}
-		(void) xmlSaveFlush(ctxt);
-		(void) xmlSaveClose(ctxt);
+		xmlSaveClose(ctxt);
 	}
 	mem = xmlBufferContent(buf);
 	if (!mem) {

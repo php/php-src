@@ -29,19 +29,19 @@ var_dump($dom->getElementsByTagName("child2")[0]->firstChild->nodeName);
 echo "---\n";
 
 $clone = clone $dom;
-echo $clone->saveXML();
+echo $clone->saveXML(), "\n";
 
 var_dump($clone->getElementsByTagName("child2")[0]->firstChild->nodeName);
 
 echo "---\n";
 
 $clone = $dom->cloneNode(false);
-echo $clone->saveXML();
+echo $clone->saveXML(), "\n";
 
 echo "---\n";
 
 $clone = $dom->documentElement->cloneNode(false);
-echo $clone->ownerDocument->saveXML($clone);
+echo $clone->ownerDocument->saveXML($clone), "\n";
 
 ?>
 --EXPECT--
@@ -55,7 +55,7 @@ string(3) "foo"
 <!ELEMENT child2 (#PCDATA)>
 <!ENTITY foo "bar">
 ]>
-<root xmlns:xmlns="http://www.w3.org/2000/xmlns/" xmlns:a="urn:a" a:foo="bar" xmlns:a="urn:a">
+<root xmlns:a="urn:a" a:foo="bar">
     afoob
     <child>
         <![CDATA[c]]>
@@ -65,5 +65,6 @@ string(3) "foo"
 string(3) "foo"
 ---
 <?xml version="1.0" encoding="UTF-8"?>
+
 ---
-<root xmlns:xmlns="http://www.w3.org/2000/xmlns/" xmlns:a="urn:a" a:foo="bar" xmlns:a="urn:a"/>
+<root xmlns:a="urn:a" a:foo="bar"/>

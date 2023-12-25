@@ -10,7 +10,7 @@ echo "--- Parsing ---\n";
 $dom = DOM\HTMLDocument::createFromString("<!doctype html><html><body><noscript><p>hi</p></noscript></body></html>", DOM\HTML_NO_DEFAULT_NS);
 var_dump($dom->documentElement->textContent);
 echo $dom->saveHTML(), "\n";
-echo $dom->saveXML();
+echo $dom->saveXML(), "\n";
 
 echo "--- Modifying the text content: tag ---\n";
 
@@ -18,13 +18,13 @@ $xpath = new DOMXPath($dom);
 $noscript = $xpath->query("//noscript")[0];
 $noscript->textContent = "<p>bye</p>";
 echo $dom->saveHTML(), "\n";
-echo $dom->saveXML();
+echo $dom->saveXML(), "\n";
 
 echo "--- Modifying the text content: trick ---\n";
 
 $noscript->textContent = "<!-- </noscript> -->";
 echo $dom->saveHTML(), "\n";
-echo $dom->saveXML();
+echo $dom->saveXML(), "\n";
 
 ?>
 --EXPECT--
