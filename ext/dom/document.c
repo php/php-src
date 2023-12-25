@@ -1572,6 +1572,7 @@ PHP_METHOD(DOMDocument, saveXML)
 	libxml_doc_props const* doc_props = dom_get_doc_props_read_only(intern->document);
 	format = doc_props->formatoutput;
 
+	int status;
 	if (nodep != NULL) {
 		/* Dump contents of Node */
 		DOM_GET_OBJ(node, nodep, xmlNodePtr, nodeobj);
@@ -1588,8 +1589,6 @@ PHP_METHOD(DOMDocument, saveXML)
 		/* Save libxml2 global, override its vaule, and restore after saving. */
 		old_xml_save_no_empty_tags = xmlSaveNoEmptyTags;
 		xmlSaveNoEmptyTags = (options & LIBXML_SAVE_NOEMPTYTAG) ? 1 : 0;
-		// TODO: return value?
-		int status;
 		if (php_dom_follow_spec_intern(intern)) {
 			// TODO: dedup
 			xmlSaveCtxtPtr ctxt = xmlSaveToBuffer(buf, (const char *) docp->encoding, XML_SAVE_AS_XML);
@@ -1627,7 +1626,6 @@ PHP_METHOD(DOMDocument, saveXML)
 			php_error_docref(NULL, E_WARNING, "Could not create save context");
 			RETURN_FALSE;
 		}
-		int status;
 		if (php_dom_follow_spec_intern(intern)) {
 			xmlOutputBufferPtr out = xmlOutputBufferCreateBuffer(buf, NULL); // TODO: set handler instead of NULL, & check return value
 			status = dom_xml_serialize(ctxt, out, (xmlNodePtr) docp, format);
@@ -1636,13 +1634,12 @@ PHP_METHOD(DOMDocument, saveXML)
 		} else {
 			status = xmlSaveDoc(ctxt, docp);
 		}
-		if (UNEXPECTED(status < 0)) {
-			(void) xmlSaveClose(ctxt);
-			xmlBufferFree(buf);
-			php_error_docref(NULL, E_WARNING, "Could not save document");
-			RETURN_FALSE;
-		}
-		xmlSaveClose(ctxt);
+		(void) xmlSaveClose(ctxt);
+	}
+	if (UNEXPECTED(status < 0)) {
+		xmlBufferFree(buf);
+		php_error_docref(NULL, E_WARNING, "Could not save document");
+		RETURN_FALSE;
 	}
 	mem = xmlBufferContent(buf);
 	if (!mem) {
