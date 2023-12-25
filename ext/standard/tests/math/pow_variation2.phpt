@@ -4,18 +4,11 @@ Test pow() function : usage variations - different data types as $exp argument
 serialize_precision = 14
 --FILE--
 <?php
-// heredoc string
-$heredoc = <<<EOT
-abc
-xyz
-EOT;
-
-// get a class
 class classA
 {
 }
 
-// get a resource variable
+// resource variable
 $fp = fopen(__FILE__, "r");
 
 $inputs = [
@@ -46,7 +39,6 @@ $inputs = [
 
     // string data
     "abcxyz",
-    $heredoc,
     "5.5",
     "2",
 
@@ -83,7 +75,6 @@ float(20.3)
 float(1)
 Unsupported operand types: float ** string
 Unsupported operand types: float ** array
-Unsupported operand types: float ** string
 Unsupported operand types: float ** string
 float(15532029.564086)
 float(412.09)

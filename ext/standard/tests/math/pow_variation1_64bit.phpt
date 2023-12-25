@@ -8,18 +8,11 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
-// heredoc string
-$heredoc = <<<EOT
-abc
-xyz
-EOT;
-
-// get a class
 class classA
 {
 }
 
-// get a resource variable
+// resource variable
 $fp = fopen(__FILE__, "r");
 
 $inputs = [
@@ -50,7 +43,6 @@ $inputs = [
 
     // string data
     "abcxyz",
-    $heredoc,
     "10.5",
     "2",
 
@@ -87,7 +79,6 @@ int(1)
 int(0)
 Unsupported operand types: string ** int
 Unsupported operand types: array ** int
-Unsupported operand types: string ** int
 Unsupported operand types: string ** int
 float(1157.625)
 int(8)
