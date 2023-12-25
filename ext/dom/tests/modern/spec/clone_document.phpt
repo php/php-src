@@ -8,7 +8,6 @@ dom
 $dom = DOM\XMLDocument::createFromString(<<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE root [
-    <!ELEMENT root (child, child2)>
     <!ELEMENT child (#PCDATA)>
     <!ELEMENT child2 (#PCDATA)>
     <!ENTITY foo "bar">
@@ -50,7 +49,6 @@ string(3) "foo"
 ---
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE root [
-<!ELEMENT root (child , child2)>
 <!ELEMENT child (#PCDATA)>
 <!ELEMENT child2 (#PCDATA)>
 <!ENTITY foo "bar">

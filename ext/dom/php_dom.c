@@ -2186,4 +2186,22 @@ xmlAttrPtr php_dom_get_attribute_node(xmlNodePtr elem, const xmlChar *name, size
 	return ret;
 }
 
+/* Workaround for a libxml2 bug on Windows: https://gitlab.gnome.org/GNOME/libxml2/-/issues/611. */
+xmlChar *php_dom_libxml_fix_file_path(xmlChar *path)
+{
+	if (strncmp((char *) path, "file:/", sizeof("file:/") - 1) == 0) {
+		if (path[6] != '/' && path[6] != '\0' && path[7] != '/' && path[7] != '\0') {
+			/* The path is file:/xx... where xx != "//", which is broken */
+			xmlChar *new_path = xmlStrdup(BAD_CAST "file:///");
+			if (UNEXPECTED(new_path == NULL)) {
+				return path;
+			}
+			new_path = xmlStrcat(new_path, path + 6);
+			xmlFree(path);
+			return new_path;
+		}
+	}
+	return path;
+}
+
 #endif /* HAVE_DOM */

@@ -163,6 +163,7 @@ bool php_dom_has_child_of_type(xmlNodePtr node, xmlElementType type);
 void php_dom_update_document_after_clone(dom_object *original, xmlNodePtr original_node, dom_object *clone, xmlNodePtr cloned_node);
 void php_dom_document_constructor(INTERNAL_FUNCTION_PARAMETERS);
 xmlAttrPtr php_dom_get_attribute_node(xmlNodePtr elem, const xmlChar *name, size_t name_len);
+xmlChar *php_dom_libxml_fix_file_path(xmlChar *path);
 
 dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_entry *ce, xmlNodePtr obj, dom_object *parent);
 
