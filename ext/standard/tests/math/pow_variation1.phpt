@@ -46,6 +46,7 @@ $inputs = [
     "abcxyz",
     "5.5",
     "2",
+    "6.3e-2",
 
     // object data
     new classA(),
@@ -82,8 +83,8 @@ int(0)
 Unsupported operand types: string ** int
 Unsupported operand types: array ** int
 Unsupported operand types: string ** int
-float(15532029.564086)
-float(412.09)
-Unsupported operand types: float ** classA
-float(1)
-Unsupported operand types: float ** resource
+float(166.375)
+int(8)
+float(0.000250047)
+Unsupported operand types: classA ** int
+Unsupported operand types: resource ** int
