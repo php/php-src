@@ -170,8 +170,9 @@ static void _close_odbc_conn(zend_resource *rsrc)
 	efree(conn);
 	/* See https://github.com/php/php-src/issues/12974 why we need to check the if */
 #ifdef ZTS
-	if (odbc_module_entry.module_started) {
+	if (odbc_module_entry.module_started)
 #endif
+	{
 		ODBCG(num_links)--;
 	}
 }
