@@ -1748,6 +1748,13 @@ const SO_DETACH_FILTER = UNKNOWN;
  */
 const SO_DETACH_BPF = UNKNOWN;
 #endif
+#if defined(SO_EXCLUSIVEADDRUSE)
+/**
+ * @var int
+ * @cvalue SO_EXCLUSIVEADDRUSE
+ */
+const SO_EXCLUSIVEADDRUSE = UNKNOWN;
+#endif
 #if defined(TCP_QUICKACK)
 /**
  * @var int

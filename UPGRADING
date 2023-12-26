@@ -329,6 +329,9 @@ PHP 8.4 UPGRADE NOTES
   . The IntlDateFormatter class exposes now the new PATTERN constant
     reflecting udat api's UDAT_PATTERN.
 
+- Sockets:
+  . SO_EXCLUSIVEADDRUSE (Windows only).
+
 - XML:
   . Added XML_OPTION_PARSE_HUGE to allow large inputs in xml_parse and
     xml_parse_into_struct.
