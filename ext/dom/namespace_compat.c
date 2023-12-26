@@ -49,8 +49,7 @@ static xmlAttrPtr dom_ns_compat_mark_attribute(xmlNodePtr node, xmlNsPtr ns)
 		name = BAD_CAST "xmlns";
 	}
 
-	// TODO: why on the root?
-	xmlNsPtr xmlns_ns = dom_ns_create_local_as_is(node->doc, xmlDocGetRootElement(node->doc), node, DOM_XMLNS_NS_URI, prefix);
+	xmlNsPtr xmlns_ns = dom_ns_create_local_as_is(node->doc, node, node, DOM_XMLNS_NS_URI, prefix);
 	return xmlSetNsProp(node, xmlns_ns, name, ns->href);
 }
 
