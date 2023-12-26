@@ -840,6 +840,14 @@ PHP_METHOD(DOM_Document, importNode)
 			RETURN_FALSE;
 		}
 
+		/* TODO: decide if this is useful */
+#if 0
+		/* If importing from "old dom" into "new dom", mark the xmlns declarations as attributes too. */
+		if (php_dom_follow_spec_intern(intern) && !php_dom_follow_spec_intern(nodeobj)) {
+			dom_ns_compat_mark_attribute_list(retnodep);
+		}
+#endif
+
 		if (retnodep->type == XML_ATTRIBUTE_NODE && nodep->ns != NULL && retnodep->ns == NULL) {
 			xmlNsPtr nsptr = NULL;
 			xmlNodePtr root = xmlDocGetRootElement(docp);
