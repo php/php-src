@@ -741,7 +741,11 @@ int ir_sccp(ir_ctx *ctx)
 					}
 					continue;
 				}
-				if (!IR_IS_BOTTOM(insn->op2)) {
+				if (!IR_IS_BOTTOM(insn->op2)
+#if IR_COMBO_COPY_PROPAGATION
+				 && (IR_IS_CONST_REF(insn->op2) || _values[insn->op2].op != IR_COPY)
+#endif
+				) {
 					ir_ref use_case = IR_UNUSED;
 
 					use_list = &ctx->use_lists[i];

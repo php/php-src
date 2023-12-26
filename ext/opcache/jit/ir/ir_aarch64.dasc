@@ -3234,14 +3234,18 @@ static void ir_emit_vstore(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 	}
 }
 
-static int32_t ir_fuse_addr(ir_ctx *ctx, ir_ref ref, ir_reg *preg1, ir_reg *preg2)
+static int32_t ir_fuse_addr(ir_ctx *ctx, ir_ref root, ir_ref ref, ir_reg *preg1, ir_reg *preg2)
 {
 	ir_insn *addr_insn = &ctx->ir_base[ref];
 	ir_reg reg;
 
 	IR_ASSERT(addr_insn->op == IR_ADD);
 	IR_ASSERT(!IR_IS_CONST_REF(addr_insn->op1) && IR_IS_CONST_REF(addr_insn->op2));
-	reg = ctx->regs[ref][1];
+	if (UNEXPECTED(ctx->rules[ref] & IR_FUSED_REG)) {
+		reg = ir_get_fused_reg(ctx, root, ref, 1);
+	} else {
+		reg = ctx->regs[ref][1];
+	}
 	if (IR_REG_SPILLED(reg)) {
 		reg = IR_REG_NUM(reg);
 		ir_emit_load(ctx, IR_ADDR, reg, addr_insn->op1);
@@ -3266,7 +3270,7 @@ static void ir_emit_load_int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	IR_ASSERT(def_reg != IR_REG_NONE);
 	if (!IR_IS_CONST_REF(insn->op2) && (ir_rule(ctx, insn->op2) & IR_FUSED)) {
 		ir_reg op1_reg;
-		int32_t offset = ir_fuse_addr(ctx, insn->op2, &op1_reg, &op2_reg);
+		int32_t offset = ir_fuse_addr(ctx, def, insn->op2, &op1_reg, &op2_reg);
 
 		if (op2_reg == IR_REG_NONE) {
 			if (IR_REG_SPILLED(ctx->regs[def][0]) && ir_is_same_spill_slot(ctx, def, op1_reg, offset)) {
@@ -3334,7 +3338,7 @@ static void ir_emit_load_fp(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	IR_ASSERT(def_reg != IR_REG_NONE);
 	if (!IR_IS_CONST_REF(insn->op2) && (ir_rule(ctx, insn->op2) & IR_FUSED)) {
 		ir_reg op1_reg;
-		int32_t offset = ir_fuse_addr(ctx, insn->op2, &op1_reg, &op2_reg);
+		int32_t offset = ir_fuse_addr(ctx, def, insn->op2, &op1_reg, &op2_reg);
 
 		if (op2_reg == IR_REG_NONE) {
 			if (IR_REG_SPILLED(ctx->regs[def][0]) && ir_is_same_spill_slot(ctx, def, op1_reg, offset)) {
@@ -3381,7 +3385,7 @@ static void ir_emit_store_int(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 
 	if (!IR_IS_CONST_REF(insn->op2) && (ir_rule(ctx, insn->op2) & IR_FUSED)) {
 		ir_reg op1_reg;
-		int32_t offset = ir_fuse_addr(ctx, insn->op2, &op1_reg, &op2_reg);
+		int32_t offset = ir_fuse_addr(ctx, ref, insn->op2, &op1_reg, &op2_reg);
 
 		if (op2_reg == IR_REG_NONE) {
 			if (!IR_IS_CONST_REF(insn->op3) && IR_REG_SPILLED(op3_reg) && ir_is_same_spill_slot(ctx, insn->op3, op1_reg, offset)) {
@@ -3454,7 +3458,7 @@ static void ir_emit_store_fp(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 	IR_ASSERT(op3_reg != IR_REG_NONE);
 	if (!IR_IS_CONST_REF(insn->op2) && (ir_rule(ctx, insn->op2) & IR_FUSED)) {
 		ir_reg op1_reg;
-		int32_t offset = ir_fuse_addr(ctx, insn->op2, &op1_reg, &op2_reg);
+		int32_t offset = ir_fuse_addr(ctx, ref, insn->op2, &op1_reg, &op2_reg);
 
 		if (op2_reg == IR_REG_NONE) {
 			if (!IR_IS_CONST_REF(insn->op3) && IR_REG_SPILLED(op3_reg) && ir_is_same_spill_slot(ctx, insn->op3, op1_reg, offset)) {

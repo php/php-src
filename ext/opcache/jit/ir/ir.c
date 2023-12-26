@@ -368,6 +368,10 @@ void ir_free(ir_ctx *ctx)
 	}
 	if (ctx->regs) {
 		ir_mem_free(ctx->regs);
+		if (ctx->fused_regs) {
+			ir_strtab_free(ctx->fused_regs);
+			ir_mem_free(ctx->fused_regs);
+		}
 	}
 	if (ctx->prev_ref) {
 		ir_mem_free(ctx->prev_ref);

@@ -579,6 +579,7 @@ struct _ir_ctx {
 	ir_arena          *arena;
 	ir_live_range     *unused_ranges;
 	ir_regs           *regs;
+	ir_strtab         *fused_regs;
 	ir_ref            *prev_ref;
 	union {
 		void          *data;

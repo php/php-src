@@ -351,6 +351,24 @@ static void *ir_jmp_addr(ir_ctx *ctx, ir_insn *insn, ir_insn *addr_insn)
 	return addr;
 }
 
+static int8_t ir_get_fused_reg(ir_ctx *ctx, ir_ref root, ir_ref ref, uint8_t op_num)
+{
+	if (ctx->fused_regs) {
+		char key[10];
+		ir_ref val;
+
+		memcpy(key, &root, sizeof(ir_ref));
+		memcpy(key + 4, &ref, sizeof(ir_ref));
+		memcpy(key + 8, &op_num, sizeof(uint8_t));
+
+		val = ir_strtab_find(ctx->fused_regs, key, 9);
+		if (val) {
+			return val;
+		}
+	}
+	return ctx->regs[ref][op_num];
+}
+
 #if defined(__GNUC__)
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Warray-bounds"

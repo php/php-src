@@ -1615,7 +1615,7 @@ static bool ir_try_coalesce(ir_ctx *ctx, ir_ref from, ir_ref to)
 		} else if (from < to) {
 			ir_vregs_join(ctx, v1, v2);
 			if (f2 & IR_LIVE_INTERVAL_COALESCED) {
-				for (i = 0; i < ctx->insns_count; i++) {
+				for (i = 1; i < ctx->insns_count; i++) {
 					if (ctx->vregs[i] == v2) {
 						ctx->vregs[i] = v1;
 					}
@@ -1626,7 +1626,7 @@ static bool ir_try_coalesce(ir_ctx *ctx, ir_ref from, ir_ref to)
 		} else {
 			ir_vregs_join(ctx, v2, v1);
 			if (f1 & IR_LIVE_INTERVAL_COALESCED) {
-				for (i = 0; i < ctx->insns_count; i++) {
+				for (i = 1; i < ctx->insns_count; i++) {
 					if (ctx->vregs[i] == v1) {
 						ctx->vregs[i] = v2;
 					}
@@ -3669,6 +3669,21 @@ static bool needs_spill_load(ir_ctx *ctx, ir_live_interval *ival, ir_use_pos *us
 	return use_pos->next && use_pos->next->op_num != 0;
 }
 
+static void ir_set_fused_reg(ir_ctx *ctx, ir_ref root, ir_ref ref, uint8_t op_num, int8_t reg)
+{
+	char key[10];
+
+	IR_ASSERT(reg != IR_REG_NONE);
+	if (!ctx->fused_regs) {
+		ctx->fused_regs = ir_mem_malloc(sizeof(ir_strtab));
+		ir_strtab_init(ctx->fused_regs, 8, 128);
+	}
+	memcpy(key, &root, sizeof(ir_ref));
+	memcpy(key + 4, &ref, sizeof(ir_ref));
+	memcpy(key + 8, &op_num, sizeof(uint8_t));
+	ir_strtab_lookup(ctx->fused_regs, key, 9, 0x10000000 | reg);
+}
+
 static void assign_regs(ir_ctx *ctx)
 {
 	ir_ref i;
@@ -3739,9 +3754,11 @@ static void assign_regs(ir_ctx *ctx)
 								ref = IR_LIVE_POS_TO_REF(use_pos->pos);
 								// TODO: Insert spill loads and stores in optimal positions (resolution)
 								if (use_pos->op_num == 0) {
+									ir_bitset_clear(available, ir_bitset_len(ctx->cfg_blocks_count + 1));
 									if (ctx->ir_base[ref].op == IR_PHI) {
 										/* Spilled PHI var is passed through memory */
 										reg = IR_REG_NONE;
+										prev_use_ref = IR_UNUSED;
 									} else if (ctx->ir_base[ref].op == IR_PARAM
 									 && (ival->flags & IR_LIVE_INTERVAL_MEM_PARAM)) {
 										/* Stack PARAM var is passed through memory */
@@ -3795,6 +3812,22 @@ static void assign_regs(ir_ctx *ctx)
 											prev_use_ref = ref;
 										}
 									}
+									if (use_pos->hint_ref < 0
+									 && ctx->use_lists[-use_pos->hint_ref].count > 1
+									 && (old_reg = ir_get_alocated_reg(ctx, -use_pos->hint_ref, use_pos->op_num)) != IR_REG_NONE) {
+										if (top_ival->flags & IR_LIVE_INTERVAL_SPILL_SPECIAL) {
+											reg |= IR_REG_SPILL_SPECIAL;
+										} else {
+											reg |= IR_REG_SPILL_LOAD;
+										}
+										if (reg != old_reg) {
+											IR_ASSERT(ctx->rules[-use_pos->hint_ref] & IR_FUSED);
+											ctx->rules[-use_pos->hint_ref] |= IR_FUSED_REG;
+											ir_set_fused_reg(ctx, ref, -use_pos->hint_ref, use_pos->op_num, reg);
+											use_pos = use_pos->next;
+											continue;
+										}
+									}
 								} else if (use_pos->flags & IR_PHI_USE) {
 									IR_ASSERT(use_pos->hint_ref < 0);
 									IR_ASSERT(ctx->vregs[-use_pos->hint_ref]);
@@ -3805,16 +3838,14 @@ static void assign_regs(ir_ctx *ctx)
 									}
 								} else if (use_pos->hint_ref < 0
 										&& ctx->use_lists[-use_pos->hint_ref].count > 1
-										&& (old_reg = ir_get_alocated_reg(ctx, -use_pos->hint_ref, use_pos->op_num)) != IR_REG_NONE
-										&& (old_reg & (IR_REG_SPILL_SPECIAL|IR_REG_SPILL_LOAD))) {
-									/* Force spill load */
-									// TODO: Find a better solution ???
-									if (top_ival->flags & IR_LIVE_INTERVAL_SPILL_SPECIAL) {
-										reg |= IR_REG_SPILL_SPECIAL;
-									} else {
-										reg |= IR_REG_SPILL_LOAD;
+										&& (old_reg = ir_get_alocated_reg(ctx, -use_pos->hint_ref, use_pos->op_num)) != IR_REG_NONE) {
+									if (reg != old_reg) {
+										IR_ASSERT(ctx->rules[-use_pos->hint_ref] & IR_FUSED);
+										ctx->rules[-use_pos->hint_ref] |= IR_FUSED_REG;
+										ir_set_fused_reg(ctx, ref, -use_pos->hint_ref, use_pos->op_num, reg);
+										use_pos = use_pos->next;
+										continue;
 									}
-									IR_ASSERT(reg == old_reg);
 								} else {
 									/* reuse register without spill load */
 								}
