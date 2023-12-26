@@ -192,6 +192,10 @@ PHP 8.4 UPGRADE NOTES
     it references, or null if the reference is no longer valid.
   . The output of Closure::__debugInfo() now includes the name, file, and line
     of the Closure.
+  . new expressions with constructor arguments are now dereferencable, meaning
+    they allow chaining method calls, property accesses, etc. without enclosing
+    the expression in parentheses.
+    RFC: https://wiki.php.net/rfc/new_without_parentheses
 
 - Curl:
   . curl_version() returns an additional feature_list value, which is an
