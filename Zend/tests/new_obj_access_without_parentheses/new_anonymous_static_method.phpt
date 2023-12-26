@@ -4,11 +4,11 @@ Immediate static method call on new anonymous class object
 <?php
 
 new class {
-    public function test()
+    public static function test()
     {
         echo 'called';
     }
-}->test();
+}::test();
 
 ?>
 --EXPECT--
