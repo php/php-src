@@ -1280,6 +1280,16 @@ static php_socket_t php_network_listen_socket(const char *host, int *port, int s
 			setsockopt(retval, SOL_SOCKET, SO_REUSEADDR, (char*)&val, sizeof(val));
 		}
 #endif
+#ifdef SO_EXCLUSIVEADDRUSE
+		{
+			/**
+			 * By default, windows allows multiple sockets to bind the same ip with the same port.
+			 * SO_EXCLUSIVEADDRUSE prevents this while still allowing binding other different ip/port combinations.
+			 **/
+			int val = 1;
+			setsockopt(retval, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, (char*)&val, sizeof(val));
+		}
+#endif
 
 		if (bind(retval, sa, *socklen) == SOCK_CONN_ERR) {
 			err = php_socket_errno();
