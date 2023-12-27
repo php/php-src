@@ -400,14 +400,8 @@ static void php_oci_pconnection_list_dtor(zend_resource *entry)
 
 	if (connection) {
 		php_oci_connection_close(connection);
-		/* See https://github.com/php/php-src/issues/12974 why we need to check the if */
-#ifdef ZTS
-		if (oci8_module_entry.module_started)
-#endif
-		{
-			OCI_G(num_persistent)--;
-			OCI_G(num_links)--;
-		}
+		OCI_G(num_persistent)--;
+		OCI_G(num_links)--;
 	}
 }
 /* }}} */
