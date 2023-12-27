@@ -516,9 +516,7 @@ PHP_METHOD(PdoSqlite, openBlob)
 	sqlite_flags = (flags & SQLITE_OPEN_READWRITE) ? 1 : 0;
 
 	if (sqlite3_blob_open(sqlite_handle, dbname, table, column, rowid, sqlite_flags, &blob) != SQLITE_OK) {
-		// TODO - exception needed here.
-//		php_sqlite3_error(db_obj, "Unable to open blob: %s", sqlite3_errmsg(db_obj->db));
-		// and converting to exception zend_throw_exception_ex(php_pdo_get_exception(), 0, errtext);
+		zend_error(E_WARNING, "Unable to open blob: %s", sqlite3_errmsg(sqlite_handle));
 		RETURN_FALSE;
 	}
 

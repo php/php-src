@@ -603,8 +603,8 @@ void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 	ExecStatusType status;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|sss!",
-					&table_name, &table_name_len, &pg_rows,
-					&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
+		&table_name, &table_name_len, &pg_rows,
+		&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -719,8 +719,8 @@ void pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAMETERS)
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp|sss!",
-				&table_name, &table_name_len, &filename, &filename_len,
-				&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
+		&table_name, &table_name_len, &filename, &filename_len,
+		&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 

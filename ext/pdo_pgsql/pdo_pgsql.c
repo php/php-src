@@ -75,12 +75,15 @@ PHP_METHOD(PdoPgsql, escapeIdentifier)
 
 	/* Obtain db Handle */
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+	if (H->server == NULL) {
+		zend_throw_error(NULL, "PostgreSQL connection has already been closed");
+		RETURN_THROWS();
+	}
 
 	tmp = PQescapeIdentifier(H->server, ZSTR_VAL(from), ZSTR_LEN(from));
 	if (!tmp) {
-		// TODO - exception
-		php_error_docref(NULL, E_WARNING, "Failed to escape identifier");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Failed to escape identifier");
+		RETURN_THROWS();
 	}
 
 	RETVAL_STRING(tmp);

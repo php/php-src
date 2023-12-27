@@ -57,7 +57,7 @@ PHP_MINFO_FUNCTION(pdo);
 
 #define PDO_CONSTRUCT_CHECK \
 	if (!dbh->driver) { \
-		zend_throw_error(NULL, "PDO object is not initialized, constructor was not called"); \
+		zend_throw_error(NULL, "%s object is uninitialized", ZSTR_VAL(Z_OBJ(EX(This))->ce->name)); \
 		RETURN_THROWS(); \
 	} \
 
