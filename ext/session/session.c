@@ -250,7 +250,7 @@ static zend_string *php_session_encode(void) /* {{{ */
 			php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to encode session object");
 			return NULL;
 		}
-		return PS(serializer)->encode();
+		return PS(serializer)->encode(&PS(http_session_vars));
 	} else {
 		php_error_docref(NULL, E_WARNING, "Cannot encode non-existent session");
 	}
@@ -264,7 +264,7 @@ static zend_result php_session_decode(zend_string *data) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to decode session object");
 		return FAILURE;
 	}
-	if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
+	if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data), &PS(http_session_vars)) == FAILURE) {
 		php_session_destroy();
 		php_session_track_init();
 		php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");
@@ -847,7 +847,7 @@ PS_SERIALIZER_ENCODE_FUNC(php_serialize) /* {{{ */
 
 	IF_SESSION_VARS() {
 		PHP_VAR_SERIALIZE_INIT(var_hash);
-		php_var_serialize(&buf, Z_REFVAL(PS(http_session_vars)), &var_hash);
+		php_var_serialize(&buf, Z_REFVAL_P(http_session_vars), &var_hash);
 		PHP_VAR_SERIALIZE_DESTROY(var_hash);
 	}
 	return buf.s;
@@ -872,15 +872,15 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 		ZVAL_NULL(&session_vars);
 	}
 
-	if (!Z_ISUNDEF(PS(http_session_vars))) {
-		zval_ptr_dtor(&PS(http_session_vars));
+	if (!Z_ISUNDEF_P(http_session_vars)) {
+		zval_ptr_dtor(http_session_vars);
 	}
 	if (Z_TYPE(session_vars) == IS_NULL) {
 		array_init(&session_vars);
 	}
-	ZVAL_NEW_REF(&PS(http_session_vars), &session_vars);
-	Z_ADDREF_P(&PS(http_session_vars));
-	zend_hash_update_ind(&EG(symbol_table), var_name, &PS(http_session_vars));
+	ZVAL_NEW_REF(http_session_vars, &session_vars);
+	Z_ADDREF_P(http_session_vars);
+	zend_hash_update_ind(&EG(symbol_table), var_name, http_session_vars);
 	zend_string_release_ex(var_name, 0);
 	return result || !vallen ? SUCCESS : FAILURE;
 }
@@ -1553,7 +1553,7 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 	 * Cookies are preferred, because initially cookie and get
 	 * variables will be available.
 	 * URL/POST session ID may be used when use_only_cookies=Off.
-	 * session.use_strice_mode=On prevents session adoption.
+	 * session.use_strict_mode=On prevents session adoption.
 	 * Session based file upload progress uses non-cookie ID.
 	 */
 
@@ -2891,6 +2891,10 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	php_session_class_entry = register_class_SessionHandler(php_session_iface_entry, php_session_id_iface_entry);
 
 	register_session_symbols(module_number);
+
+	/* Make this available by looking up this module and its globals in HashTable *module_registry for shared libraries.
+	 * Directly referencing the symbol would fail if session was compiled as a shared library and not loaded yet. */
+	PS(register_serializer) = php_session_register_serializer;
 
 	return SUCCESS;
 }

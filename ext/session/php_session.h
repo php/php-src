@@ -20,7 +20,8 @@
 #include "ext/standard/php_var.h"
 #include "ext/hash/php_hash.h"
 
-#define PHP_SESSION_API 20161017
+/* Used externally by PECLs to write portable code. */
+#define PHP_SESSION_API 20211204
 
 #include "php_version.h"
 #define PHP_SESSION_VERSION PHP_VERSION
@@ -112,6 +113,14 @@ typedef struct ps_module_struct {
 	 ps_delete_##x, ps_gc_##x, ps_create_sid_##x, \
 	 ps_validate_sid_##x, ps_update_timestamp_##x
 
+/*
+ * http_session_vars is now passed in as &PS(http_session_vars) to allow extensions to register themselves as serializers/unserializers
+ * without depending on a symbol from session shared library.
+ */
+#define PS_SERIALIZER_ENCODE_ARGS zval *http_session_vars
+#define PS_SERIALIZER_DECODE_ARGS const char *val, size_t vallen, zval *http_session_vars
+
+typedef int(*php_session_register_serializer_func_t)(const char *name, zend_string *(*encode)(PS_SERIALIZER_ENCODE_ARGS), int (*decode)(PS_SERIALIZER_DECODE_ARGS));
 
 typedef enum {
 	php_session_disabled,
@@ -200,6 +209,7 @@ typedef struct _php_ps_globals {
 	bool in_save_handler; /* state if session is in save handler or not */
 	bool set_handler;     /* state if session module i setting handler or not */
 	zend_string *session_vars; /* serialized original session data */
+	php_session_register_serializer_func_t register_serializer; /* Allows registering a serializer without directly depending on the C symbol php_session_register_serializer. */
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;
@@ -215,9 +225,6 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #else
 #define PS(v) (ps_globals.v)
 #endif
-
-#define PS_SERIALIZER_ENCODE_ARGS void
-#define PS_SERIALIZER_DECODE_ARGS const char *val, size_t vallen
 
 typedef struct ps_serializer_struct {
 	const char *name;

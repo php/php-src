@@ -12,7 +12,6 @@ include('skipif.inc');
 require __DIR__.'/../../../sapi/cgi/tests/include.inc';
 
 get_cgi_path() or die('skip no cgi');
-
 ?>
 --FILE--
 <?php
@@ -27,6 +26,9 @@ reset_env_vars();
 $file = __DIR__."/session_regenerate_id_cookie.test.php";
 
 file_put_contents($file, '<?php
+// Workaround for compiling session as a shared extension, will not work in ZTS builds.
+// Note that you will need to run "make install" for this to be available.
+if (!extension_loaded("session")) { dl("session"); }
 ob_start();
 
 function find_cookie_header() {
