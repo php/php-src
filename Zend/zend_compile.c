@@ -8980,7 +8980,7 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 		/* Division by zero throws an error. */
 		return 1;
 	}
-	if ((opcode == ZEND_POW) && zval_get_long(op1) == 0 && zval_get_long(op2) <= 0) {
+	if ((opcode == ZEND_POW) && zval_get_long(op1) == 0 && zval_get_long(op2) < 0) {
 		/* 0 ** (<=0) throws a division by zero error. */
 		zend_error(E_DEPRECATED, "Power of base 0 and negative exponent is deprecated");
 	}
