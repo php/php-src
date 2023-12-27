@@ -5,17 +5,16 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-12953 (false positive SSA integrity verification failed when
     loading composer classmaps with more than 11k elements). (nielsdos)
-  . Fixed bug GH-12999 (zend_strnlen build when strnlen is unsupported). (rainerjung)
-  . Fixed bug GH-12966 (missing cross-compiling 3rd argument so Autoconf doesn't
-    emit warnings). (Peter Kokot)
+  . Fixed bug GH-12999 (zend_strnlen build when strnlen is unsupported).
+    (rainerjung)
+  . Fixed bug GH-12966 (missing cross-compiling 3rd argument so Autoconf
+    doesn't emit warnings). (Peter Kokot)
+  . Fixed bug GH-12854 (8.3 - as final trait-used method does not correctly
+    report visibility in Reflection). (nielsdos)
 
 - Cli:
   . Fix incorrect timeout in built-in web server when using router script and
     max_input_time. (ilutov)
-
-- Core:
-  . Fixed bug GH-12854 (8.3 - as final trait-used method does not correctly
-    report visibility in Reflection). (nielsdos)
 
 - DOM:
   . Fixed bug GH-12870 (Creating an xmlns attribute results in a DOMException).
