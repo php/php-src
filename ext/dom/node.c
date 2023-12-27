@@ -1478,33 +1478,58 @@ static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other
 
 #define PHP_DOM_FUNC_CAT(prefix, suffix) prefix##_##suffix
 /* xmlNode and xmlNs have incompatible struct layouts, i.e. the next field is in a different offset */
-#define PHP_DOM_DEFINE_LIST_EQUALITY_HELPER(type)																\
-	static size_t PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(const type *node)						\
-	{																											\
-		size_t counter = 0;																						\
-		while (node) {																							\
-			counter++;																							\
-			node = node->next;																					\
-		}																										\
-		return counter;																							\
-	}																											\
-	static bool PHP_DOM_FUNC_CAT(php_dom_node_list_equality_check, type)(const type *list1, const type *list2)	\
-	{																											\
-		size_t count = PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list1);								\
-		if (count != PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list2)) {								\
-			return false;																						\
-		}																										\
-		for (size_t i = 0; i < count; i++) {																	\
-			if (!php_dom_node_is_equal_node((const xmlNode *) list1, (const xmlNode *) list2)) {				\
-				return false;																					\
-			}																									\
-			list1 = list1->next;																				\
-			list2 = list2->next;																				\
-		}																										\
-		return true;																							\
+#define PHP_DOM_DEFINE_LIST_COUNTER_HELPER(type)																		\
+	static size_t PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(const type *node)								\
+	{																													\
+		size_t counter = 0;																								\
+		while (node) {																									\
+			counter++;																									\
+			node = node->next;																							\
+		}																												\
+		return counter;																									\
 	}
-PHP_DOM_DEFINE_LIST_EQUALITY_HELPER(xmlNode)
-PHP_DOM_DEFINE_LIST_EQUALITY_HELPER(xmlNs)
+#define PHP_DOM_DEFINE_LIST_EQUALITY_ORDERED_HELPER(type)																\
+	static bool PHP_DOM_FUNC_CAT(php_dom_node_list_equality_check_ordered, type)(const type *list1, const type *list2)	\
+	{																													\
+		size_t count = PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list1);										\
+		if (count != PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list2)) {										\
+			return false;																								\
+		}																												\
+		for (size_t i = 0; i < count; i++) {																			\
+			if (!php_dom_node_is_equal_node((const xmlNode *) list1, (const xmlNode *) list2)) {						\
+				return false;																							\
+			}																											\
+			list1 = list1->next;																						\
+			list2 = list2->next;																						\
+		}																												\
+		return true;																									\
+	}
+#define PHP_DOM_DEFINE_LIST_EQUALITY_UNORDERED_HELPER(type)																\
+	static bool PHP_DOM_FUNC_CAT(php_dom_node_list_equality_check_unordered, type)(const type *list1, const type *list2)\
+	{																													\
+		size_t count = PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list1);										\
+		if (count != PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list2)) {										\
+			return false;																								\
+		}																												\
+		for (const type *n1 = list1; n1 != NULL; n1 = n1->next) {														\
+			bool found = false;																							\
+			for (const type *n2 = list2; n2 != NULL && !found; n2 = n2->next) {											\
+				if (php_dom_node_is_equal_node((const xmlNode *) n1, (const xmlNode *) n2)) {							\
+					found = true;																						\
+				}																										\
+			}																											\
+			if (!found) {																								\
+				return false;																							\
+			}																											\
+		}																												\
+		return true;																									\
+	}
+
+PHP_DOM_DEFINE_LIST_COUNTER_HELPER(xmlNode)
+PHP_DOM_DEFINE_LIST_COUNTER_HELPER(xmlNs)
+PHP_DOM_DEFINE_LIST_EQUALITY_ORDERED_HELPER(xmlNode)
+PHP_DOM_DEFINE_LIST_EQUALITY_UNORDERED_HELPER(xmlNode)
+PHP_DOM_DEFINE_LIST_EQUALITY_UNORDERED_HELPER(xmlNs)
 
 static bool php_dom_is_equal_attr(const xmlAttr *this_attr, const xmlAttr *other_attr)
 {
@@ -1532,9 +1557,9 @@ static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other
 			&& php_dom_node_is_ns_prefix_equal(this, other)
 			&& php_dom_node_is_ns_uri_equal(this, other)
 			/* Check attributes first, then namespace declarations, then children */
-			&& php_dom_node_list_equality_check_xmlNode((const xmlNode *) this->properties, (const xmlNode *) other->properties)
-			&& php_dom_node_list_equality_check_xmlNs(this->nsDef, other->nsDef)
-			&& php_dom_node_list_equality_check_xmlNode(this->children, other->children);
+			&& php_dom_node_list_equality_check_unordered_xmlNode((const xmlNode *) this->properties, (const xmlNode *) other->properties)
+			&& php_dom_node_list_equality_check_unordered_xmlNs(this->nsDef, other->nsDef)
+			&& php_dom_node_list_equality_check_ordered_xmlNode(this->children, other->children);
 	} else if (this->type == XML_DTD_NODE) {
 		/* Note: in the living spec entity declarations and notations are no longer compared because they're considered obsolete. */
 		const xmlDtd *this_dtd = (const xmlDtd *) this;
@@ -1565,7 +1590,7 @@ static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other
 		const xmlNs *other_ns = (const xmlNs *) other;
 		return xmlStrEqual(this_ns->prefix, other_ns->prefix) && xmlStrEqual(this_ns->href, other_ns->href);
 	} else if (this->type == XML_DOCUMENT_FRAG_NODE || this->type == XML_HTML_DOCUMENT_NODE || this->type == XML_DOCUMENT_NODE) {
-		return php_dom_node_list_equality_check_xmlNode(this->children, other->children);
+		return php_dom_node_list_equality_check_ordered_xmlNode(this->children, other->children);
 	}
 
 	return false;
