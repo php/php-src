@@ -38,6 +38,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-12936 (hash() function hangs endlessly if using sha512 on
     strings >= 4GiB). (nielsdos)
 
+- ODBC:
+  . Fix crash on Apache shutdown with persistent connections. (nielsdos)
+
 - Opcache:
   . Fixed oss-fuzz #64727 (JIT undefined array key warning may overwrite DIM
     with NULL when DIM is the same var as result). (ilutov)
@@ -58,6 +61,8 @@ PHP                                                                        NEWS
 
 - PGSQL:
   . Fixed auto_reset_persistent handling and allow_persistent type. (David Carlier)
+  . Fixed bug GH-12974 (Apache crashes on shutdown when using pg_pconnect()).
+    (nielsdos)
 
 - PHPDBG:
   . Fixed bug GH-12962 (Double free of init_file in phpdbg_prompt.c). (nielsdos)
