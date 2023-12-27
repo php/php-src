@@ -1,0 +1,28 @@
+--TEST--
+pow() division by zero error
+--FILE--
+<?php
+
+var_dump(pow(0, -0));
+var_dump(pow(0.0, -0));
+var_dump(pow(0, -0.01));
+var_dump(pow(0.0, -0.01));
+var_dump(pow(0, -1));
+var_dump(pow(0.0, -1));
+
+?>
+--EXPECTF--
+int(1)
+int(1)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+float(INF)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+float(INF)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+float(INF)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
+float(INF)
