@@ -229,9 +229,6 @@ case $host_alias in
   *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
     ;;
-  *mips*)
-    CPPFLAGS="$CPPFLAGS -D_XPG_IV"
-    ;;
   *hpux*)
     if test "$GCC" = "yes"; then
       CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
