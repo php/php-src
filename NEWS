@@ -26,6 +26,9 @@ FPM:
 FTP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
 
+GD:
+  . Fixed detection of image formats in system gd library. (Michael Orlitzky)
+
 Intl:
   . Added IntlDateFormatter::PATTERN constant. (David Carlier)
   . Fixed Numberformatter::__construct when the locale is invalid, now
