@@ -4,7 +4,6 @@ JIT SEND_VAR_EX may leak with named args
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=64M
 --FILE--
 <?php
 for ($i = 0; $i < 3; $i++ ) {

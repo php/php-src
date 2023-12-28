@@ -3,7 +3,6 @@ Bug #80426: Crash when using JIT and an extension replacing zend_execute_ex with
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.jit_buffer_size=64M
 zend_test.replace_zend_execute_ex=1
 --EXTENSIONS--
 opcache
