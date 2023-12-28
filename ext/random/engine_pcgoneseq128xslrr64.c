@@ -47,12 +47,16 @@ static void seed(php_random_status *status, uint64_t seed)
 	seed128(status, php_random_uint128_constant(0ULL, seed));
 }
 
-static uint64_t generate(php_random_status *status)
+static php_random_result generate(php_random_status *status)
 {
 	php_random_status_state_pcgoneseq128xslrr64 *s = status->state;
 
 	step(s);
-	return php_random_pcgoneseq128xslrr64_rotr64(s->state);
+
+	return (php_random_result){
+		.size = sizeof(uint64_t),
+		.result = php_random_pcgoneseq128xslrr64_rotr64(s->state),
+	};
 }
 
 static zend_long range(php_random_status *status, zend_long min, zend_long max)
@@ -103,7 +107,6 @@ static bool unserialize(php_random_status *status, HashTable *data)
 }
 
 const php_random_algo php_random_algo_pcgoneseq128xslrr64 = {
-	sizeof(uint64_t),
 	sizeof(php_random_status_state_pcgoneseq128xslrr64),
 	seed,
 	generate,

@@ -191,7 +191,6 @@ static inline zend_result php_random_int_silent(zend_long min, zend_long max, ze
 }
 
 typedef struct _php_random_status_ {
-	size_t last_generated_size;
 	void *state;
 } php_random_status;
 
@@ -218,11 +217,15 @@ typedef struct _php_random_status_state_user {
 	zend_function *generate_method;
 } php_random_status_state_user;
 
+typedef struct _php_random_result {
+	const uint64_t result;
+	const size_t size;
+} php_random_result;
+
 typedef struct _php_random_algo {
-	const size_t generate_size;
 	const size_t state_size;
 	void (*seed)(php_random_status *status, uint64_t seed);
-	uint64_t (*generate)(php_random_status *status);
+	php_random_result (*generate)(php_random_status *status);
 	zend_long (*range)(php_random_status *status, zend_long min, zend_long max);
 	bool (*serialize)(php_random_status *status, HashTable *data);
 	bool (*unserialize)(php_random_status *status, HashTable *data);
