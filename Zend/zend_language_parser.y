@@ -255,7 +255,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> extends_from parameter optional_type_without_static argument global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
-%type <ast> new_with_parentheses new_without_parentheses anonymous_class class_name class_name_reference simple_variable
+%type <ast> new_dereferenceable new_non_dereferenceable anonymous_class class_name class_name_reference simple_variable
 %type <ast> internal_functions_in_yacc
 %type <ast> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
 %type <ast> variable_class_name dereferenceable_scalar constant class_constant
@@ -1123,7 +1123,7 @@ anonymous_class:
 		}
 ;
 
-new_with_parentheses:
+new_dereferenceable:
 		T_NEW class_name_reference argument_list
 			{ $$ = zend_ast_create(ZEND_AST_NEW, $2, $3); }
 	|	T_NEW anonymous_class
@@ -1132,7 +1132,7 @@ new_with_parentheses:
 			{ zend_ast_with_attributes($3->child[0], $2); $$ = $3; }
 ;
 
-new_without_parentheses:
+new_non_dereferenceable:
 		T_NEW class_name_reference
 			{ $$ = zend_ast_create(ZEND_AST_NEW, $2, zend_ast_create_list(0, ZEND_AST_ARG_LIST)); }
 ;
@@ -1230,7 +1230,7 @@ expr:
 			$$ = $2;
 			if ($$->kind == ZEND_AST_CONDITIONAL) $$->attr = ZEND_PARENTHESIZED_CONDITIONAL;
 		}
-	|	new_without_parentheses { $$ = $1; }
+	|	new_non_dereferenceable { $$ = $1; }
 	|	expr '?' expr ':' expr
 			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, $3, $5); }
 	|	expr '?' ':' expr
@@ -1448,7 +1448,7 @@ callable_variable:
 	|	array_object_dereferenceable T_NULLSAFE_OBJECT_OPERATOR property_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_NULLSAFE_METHOD_CALL, $1, $3, $4); }
 	|	function_call { $$ = $1; }
-	|	new_with_parentheses { $$ = $1; }
+	|	new_dereferenceable { $$ = $1; }
 ;
 
 variable:
