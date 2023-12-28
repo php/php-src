@@ -386,8 +386,6 @@ foundit:
 		entry.timestamp = phar_zip_d2u_time(zipentry.timestamp, zipentry.datestamp);
 		entry.flags = PHAR_ENT_PERM_DEF_FILE;
 		entry.header_offset = PHAR_GET_32(zipentry.offset);
-		entry.offset = entry.offset_abs = PHAR_GET_32(zipentry.offset) + sizeof(phar_zip_file_header) + PHAR_GET_16(zipentry.filename_len) +
-			PHAR_GET_16(zipentry.extra_len);
 
 		if (PHAR_GET_16(zipentry.flags) & PHAR_ZIP_FLAG_ENCRYPTED) {
 			PHAR_ZIP_FAIL("Cannot process encrypted zip files");
@@ -415,6 +413,42 @@ foundit:
 			entry.flags |= PHAR_ENT_PERM_DEF_DIR;
 		} else {
 			entry.is_dir = 0;
+		}
+
+		phar_zip_file_header local; /* Warning: only filled in when the entry is not a directory! */
+		if (!entry.is_dir) {
+			/* A file has a central directory entry, and a local file header. Both of these contain the filename
+			 * and the extra field data. However, at least the extra field data does not have to match between the two!
+			 * This happens for example for the "Extended Timestamp extra field" where the local header has 2 extra fields
+			 * in comparison to the central header. So we have to use the local header to find the right offset to the file
+			 * contents, otherwise we're reading some garbage bytes before reading the actual file contents. */
+			zend_off_t current_central_dir_pos = php_stream_tell(fp);
+
+			php_stream_seek(fp, entry.header_offset, SEEK_SET);
+			if (sizeof(local) != php_stream_read(fp, (char *) &local, sizeof(local))) {
+				pefree(entry.filename, entry.is_persistent);
+				PHAR_ZIP_FAIL("phar error: internal corruption (cannot read local file header)");
+			}
+			php_stream_seek(fp, current_central_dir_pos, SEEK_SET);
+
+			/* verify local header
+			 * Note: normally I'd check the crc32, and file sizes too here, but that breaks tests zip/bug48791.phpt & zip/odt.phpt,
+			 * suggesting that something may be wrong with those files or the assumption doesn't hold. Anyway, the other checks
+			 * _are_ performed for the alias file as was done in the past too. */
+			if (entry.filename_len != PHAR_GET_16(local.filename_len)) {
+				pefree(entry.filename, entry.is_persistent);
+				PHAR_ZIP_FAIL("phar error: internal corruption (local file header does not match central directory)");
+			}
+
+			entry.offset = entry.offset_abs = entry.header_offset
+											+ sizeof(phar_zip_file_header)
+											+ entry.filename_len
+											+ PHAR_GET_16(local.extra_len);
+		} else {
+			entry.offset = entry.offset_abs = entry.header_offset
+											+ sizeof(phar_zip_file_header)
+											+ entry.filename_len
+											+ PHAR_GET_16(zipentry.extra_len);
 		}
 
 		if (entry.filename_len == sizeof(".phar/signature.bin")-1 && !strncmp(entry.filename, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
@@ -445,7 +479,7 @@ foundit:
 			if (metadata) {
 				php_stream_write(sigfile, metadata, PHAR_GET_16(locator.comment_len));
 			}
-			php_stream_seek(fp, sizeof(phar_zip_file_header) + entry.header_offset + entry.filename_len + PHAR_GET_16(zipentry.extra_len), SEEK_SET);
+			php_stream_seek(fp, entry.offset, SEEK_SET);
 			sig = (char *) emalloc(entry.uncompressed_filesize);
 			read = php_stream_read(fp, sig, entry.uncompressed_filesize);
 			if (read != entry.uncompressed_filesize || read <= 8) {
@@ -563,28 +597,17 @@ foundit:
 
 		if (!actual_alias && entry.filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry.filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
 			php_stream_filter *filter;
-			zend_off_t saveloc;
-			/* verify local file header */
-			phar_zip_file_header local;
 
 			/* archive alias found */
-			saveloc = php_stream_tell(fp);
-			php_stream_seek(fp, PHAR_GET_32(zipentry.offset), SEEK_SET);
-
-			if (sizeof(local) != php_stream_read(fp, (char *) &local, sizeof(local))) {
-				pefree(entry.filename, entry.is_persistent);
-				PHAR_ZIP_FAIL("phar error: internal corruption of zip-based phar (cannot read local file header for alias)");
-			}
 
 			/* verify local header */
-			if (entry.filename_len != PHAR_GET_16(local.filename_len) || entry.crc32 != PHAR_GET_32(local.crc32) || entry.uncompressed_filesize != PHAR_GET_32(local.uncompsize) || entry.compressed_filesize != PHAR_GET_32(local.compsize)) {
+			ZEND_ASSERT(!entry.is_dir);
+			if (entry.crc32 != PHAR_GET_32(local.crc32) || entry.uncompressed_filesize != PHAR_GET_32(local.uncompsize) || entry.compressed_filesize != PHAR_GET_32(local.compsize)) {
 				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("phar error: internal corruption of zip-based phar (local header of alias does not match central directory)");
 			}
 
-			/* construct actual offset to file start - local extra_len can be different from central extra_len */
-			entry.offset = entry.offset_abs =
-				sizeof(local) + entry.header_offset + PHAR_GET_16(local.filename_len) + PHAR_GET_16(local.extra_len);
+			zend_off_t restore_pos = php_stream_tell(fp);
 			php_stream_seek(fp, entry.offset, SEEK_SET);
 			/* these next lines should be for php < 5.2.6 after 5.3 filters are fixed */
 			fp->writepos = 0;
@@ -680,7 +703,7 @@ foundit:
 			}
 
 			/* return to central directory parsing */
-			php_stream_seek(fp, saveloc, SEEK_SET);
+			php_stream_seek(fp, restore_pos, SEEK_SET);
 		}
 
 		phar_set_inode(&entry);
