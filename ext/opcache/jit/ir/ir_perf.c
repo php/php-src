@@ -22,6 +22,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+# include <limits.h>
 
 #if defined(__linux__)
 #include <sys/syscall.h>

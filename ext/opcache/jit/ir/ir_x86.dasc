@@ -972,16 +972,21 @@ static void ir_swap_ops(ir_insn *insn)
 static void ir_match_fuse_load_commutative_int(ir_ctx *ctx, ir_insn *insn, ir_ref root)
 {
 	if (IR_IS_CONST_REF(insn->op2)) {
-		if (ir_type_size[insn->type] > 4 && !IR_IS_32BIT(ctx->ir_base[insn->op2].type, ctx->ir_base[insn->op2].val)
-		 && !IR_IS_CONST_REF(insn->op1)
-		 && ir_match_fuse_load(ctx, insn->op1, root)) {
+		if (!IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op)
+		 && (ir_type_size[insn->type] != 8 || IR_IS_32BIT(ctx->ir_base[insn->op2].type, ctx->ir_base[insn->op2].val))) {
+			return;
+		}
+	} else if (ir_match_fuse_load(ctx, insn->op2, root)) {
+		return;
+	}
+
+	if (IR_IS_CONST_REF(insn->op1)) {
+		if (!IR_IS_SYM_CONST(ctx->ir_base[insn->op1].op)
+		 && (ir_type_size[insn->type] != 8 || IR_IS_32BIT(ctx->ir_base[insn->op1].type, ctx->ir_base[insn->op1].val))) {
 			ir_swap_ops(insn);
 		}
-	} else if (!ir_match_fuse_load(ctx, insn->op2, root)) {
-		if (!IR_IS_CONST_REF(insn->op1)
-		 && ir_match_fuse_load(ctx, insn->op1, root)) {
-			ir_swap_ops(insn);
-		}
+	} else if (ir_match_fuse_load(ctx, insn->op1, root)) {
+		ir_swap_ops(insn);
 	}
 }
 
@@ -2337,6 +2342,7 @@ static int32_t ir_fuse_addr(ir_ctx *ctx, ir_ref root, ir_ref ref, ir_reg *preg)
 
 	IR_ASSERT(addr_insn->op == IR_ADD);
 	IR_ASSERT(!IR_IS_CONST_REF(addr_insn->op1) && IR_IS_CONST_REF(addr_insn->op2));
+	IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[addr_insn->op2].op));
 	if (UNEXPECTED(ctx->rules[ref] & IR_FUSED_REG)) {
 		reg = ir_get_fused_reg(ctx, root, ref, 1);
 	} else {
@@ -2889,6 +2895,7 @@ static void ir_emit_mem_binop_int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		reg = ctx->regs[def][2];
 		if (IR_IS_CONST_REF(insn->op2)) {
 			if (reg == IR_REG_NONE) {
+				IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op));
 				offset = ctx->ir_base[insn->op2].val.i32;
 			} else {
 				ir_emit_load(ctx, IR_ADDR, reg, insn->op2);
@@ -3074,6 +3081,8 @@ static void ir_emit_mul_div_mod_pwr2(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
 	ir_reg op1_reg = ctx->regs[def][1];
 
+	IR_ASSERT(IR_IS_CONST_REF(insn->op2));
+	IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op));
 	IR_ASSERT(def_reg != IR_REG_NONE);
 
 	if (op1_reg != IR_REG_NONE && IR_REG_SPILLED(op1_reg)) {
@@ -3119,10 +3128,14 @@ static void ir_emit_mem_mul_div_mod_pwr2(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	ir_reg reg;
 	int32_t offset = 0;
 
+	IR_ASSERT(IR_IS_CONST_REF(op_insn->op2));
+	IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[op_insn->op2].op));
+
 	if (insn->op == IR_STORE) {
 		reg = ctx->regs[def][2];
 		if (IR_IS_CONST_REF(insn->op2)) {
 			if (reg == IR_REG_NONE) {
+				IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op));
 				offset = ctx->ir_base[insn->op2].val.i32;
 			} else {
 				ir_emit_load(ctx, IR_ADDR, reg, insn->op2);
@@ -3227,6 +3240,7 @@ static void ir_emit_mem_shift(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		reg = ctx->regs[def][2];
 		if (IR_IS_CONST_REF(insn->op2)) {
 			if (reg == IR_REG_NONE) {
+				IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op));
 				offset = ctx->ir_base[insn->op2].val.i32;
 			} else {
 				ir_emit_load(ctx, IR_ADDR, reg, insn->op2);
@@ -3334,13 +3348,15 @@ static void ir_emit_mem_shift_const(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	ir_reg reg;
 	int32_t offset = 0;
 
-	IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op));
+	IR_ASSERT(IR_IS_CONST_REF(op_insn->op2));
+	IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[op_insn->op2].op));
 	IR_ASSERT(IR_IS_SIGNED_32BIT(ctx->ir_base[op_insn->op2].val.i64));
 	shift = ctx->ir_base[op_insn->op2].val.i32;
 	if (insn->op == IR_STORE) {
 		reg = ctx->regs[def][2];
 		if (IR_IS_CONST_REF(insn->op2)) {
 			if (reg == IR_REG_NONE) {
+				IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op));
 				offset = ctx->ir_base[insn->op2].val.i32;
 			} else {
 				ir_emit_load(ctx, IR_ADDR, reg, insn->op2);
@@ -3801,6 +3817,7 @@ static void ir_emit_mem_op_int(ir_ctx *ctx, ir_ref def, ir_insn *insn, uint32_t 
 		reg = ctx->regs[def][2];
 		if (IR_IS_CONST_REF(insn->op2)) {
 			if (reg == IR_REG_NONE) {
+				IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op));
 				offset = ctx->ir_base[insn->op2].val.i32;
 			} else {
 				ir_emit_load(ctx, IR_ADDR, reg, insn->op2);
@@ -4376,7 +4393,7 @@ static void ir_emit_cmp_int_common(ir_ctx *ctx, ir_type type, ir_ref root, ir_in
 	if (op1_reg != IR_REG_NONE) {
 		if (op2_reg != IR_REG_NONE) {
 			|	ASM_REG_REG_OP cmp, type, op1_reg, op2_reg
-		} else if (IR_IS_CONST_REF(op2) && ctx->ir_base[op2].val.u64 == 0) {
+		} else if (IR_IS_CONST_REF(op2) && !IR_IS_SYM_CONST(ctx->ir_base[op2].op) && ctx->ir_base[op2].val.u64 == 0) {
 			|	ASM_REG_REG_OP test, type, op1_reg, op1_reg
 		} else if (IR_IS_CONST_REF(op2)) {
 			ir_insn *val_insn = &ctx->ir_base[op2];
@@ -4492,7 +4509,7 @@ static void ir_emit_cmp_int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			ir_emit_load(ctx, type, op2_reg, op2);
 		}
 	}
-	if (IR_IS_CONST_REF(op2) && ctx->ir_base[op2].val.u64 == 0) {
+	if (IR_IS_CONST_REF(op2) && !IR_IS_SYM_CONST(ctx->ir_base[op2].op) && ctx->ir_base[op2].val.u64 == 0) {
 		if (op == IR_ULT) {
 			/* always false */
 			|	xor Ra(def_reg), Ra(def_reg)
@@ -4923,7 +4940,7 @@ static void ir_emit_cmp_and_branch_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_i
 			ir_emit_load(ctx, type, op2_reg, op2);
 		}
 	}
-	if (IR_IS_CONST_REF(op2) && ctx->ir_base[op2].val.u64 == 0) {
+	if (IR_IS_CONST_REF(op2) && !IR_IS_SYM_CONST(ctx->ir_base[op2].op) && ctx->ir_base[op2].val.u64 == 0) {
 		if (op == IR_ULT) {
 			/* always false */
 			ir_emit_jmp_false(ctx, b, def);
@@ -5548,6 +5565,7 @@ static void ir_emit_bitcast(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 			}
 		} else if (IR_IS_CONST_REF(insn->op1)) {
 			ir_insn *_insn = &ctx->ir_base[insn->op1];
+			IR_ASSERT(!IR_IS_SYM_CONST(_insn->op));
 			if (src_type == IR_DOUBLE) {
 				IR_ASSERT(sizeof(void*) == 8);
 |.if X64
@@ -6409,6 +6427,7 @@ static void ir_emit_alloca(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		int32_t size = val->val.i32;
 
 		IR_ASSERT(IR_IS_TYPE_INT(val->type));
+		IR_ASSERT(!IR_IS_SYM_CONST(val->op));
 		IR_ASSERT(IR_IS_TYPE_UNSIGNED(val->type) || val->val.i64 > 0);
 		IR_ASSERT(IR_IS_SIGNED_32BIT(val->val.i64));
 
@@ -6466,6 +6485,7 @@ static void ir_emit_afree(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		int32_t size = val->val.i32;
 
 		IR_ASSERT(IR_IS_TYPE_INT(val->type));
+		IR_ASSERT(!IR_IS_SYM_CONST(val->op));
 		IR_ASSERT(IR_IS_TYPE_UNSIGNED(val->type) || val->val.i64 > 0);
 		IR_ASSERT(IR_IS_SIGNED_32BIT(val->val.i64));
 
@@ -6728,6 +6748,7 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 		use_insn = &ctx->ir_base[ctx->cfg_blocks[use_block].start];
 		if (use_insn->op == IR_CASE_VAL) {
 			val = &ctx->ir_base[use_insn->op2];
+			IR_ASSERT(!IR_IS_SYM_CONST(val->op));
 			if (IR_IS_TYPE_SIGNED(type)) {
 				IR_ASSERT(IR_IS_TYPE_SIGNED(val->type));
 				min.i64 = IR_MIN(min.i64, val->val.i64);
@@ -6768,6 +6789,7 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 			use_insn = &ctx->ir_base[ctx->cfg_blocks[use_block].start];
 			if (use_insn->op == IR_CASE_VAL) {
 				val = &ctx->ir_base[use_insn->op2];
+				IR_ASSERT(!IR_IS_SYM_CONST(val->op));
 				label = ir_skip_empty_target_blocks(ctx, use_block);
 				labels[val->val.i64 - min.i64] = label;
 			}
@@ -6907,6 +6929,7 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 			use_insn = &ctx->ir_base[ctx->cfg_blocks[use_block].start];
 			if (use_insn->op == IR_CASE_VAL) {
 				val = &ctx->ir_base[use_insn->op2];
+				IR_ASSERT(!IR_IS_SYM_CONST(val->op));
 				label = ir_skip_empty_target_blocks(ctx, use_block);
 				if (IR_IS_32BIT(type, val->val)) {
 					|	ASM_REG_IMM_OP cmp, type, op2_reg, val->val.i32
@@ -7997,7 +8020,7 @@ static bool ir_emit_guard_cmp_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *
 	}
 
 	addr = ir_jmp_addr(ctx, insn, &ctx->ir_base[insn->op3]);
-	if (IR_IS_CONST_REF(op2) && ctx->ir_base[op2].val.u64 == 0) {
+	if (IR_IS_CONST_REF(op2) && !IR_IS_SYM_CONST(ctx->ir_base[op2].op) && ctx->ir_base[op2].val.u64 == 0) {
 		if (op == IR_ULT) {
 			/* always false */
 			if (sizeof(void*) == 4 || IR_MAY_USE_32BIT_ADDR(ctx->code_buffer, addr)) {

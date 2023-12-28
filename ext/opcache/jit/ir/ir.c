@@ -20,6 +20,9 @@
 
 #ifndef _WIN32
 # include <sys/mman.h>
+# if defined(__linux__) || defined(__sun)
+#  include <alloca.h>
+# endif
 #else
 # define WIN32_LEAN_AND_MEAN
 # include <windows.h>
@@ -29,6 +32,7 @@
 #include "ir_private.h"
 
 #include <stddef.h>
+#include <stdlib.h>
 #include <math.h>
 
 #ifdef HAVE_VALGRIND
