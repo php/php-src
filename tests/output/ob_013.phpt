@@ -15,6 +15,10 @@ class E {
     public function g($s) {
         return $s;
     }
+
+    public function __invoke($s) {
+        return $s;
+    }
 }
 
 $e = new E();
@@ -26,6 +30,7 @@ ob_start('c');
 ob_start('d');
 ob_start(['E', 'f']);
 ob_start([$e, 'g']);
+ob_start($e);
 ob_start(function ($s) { return $s; });
 ob_start();
 
@@ -51,14 +56,15 @@ Array
     [4] => d
     [5] => E::f
     [6] => E::g
-    [7] => Closure::__invoke
+    [7] => E::__invoke
+    [8] => Closure::__invoke
 )
 Array
 (
     [name] => Closure::__invoke
     [type] => 1
     [flags] => 20593
-    [level] => 7
+    [level] => 8
     [chunk_size] => 0
     [buffer_size] => 16384
     [buffer_used] => %d
@@ -139,15 +145,26 @@ Array
             [level] => 6
             [chunk_size] => 0
             [buffer_size] => 16384
-            [buffer_used] => %d
+            [buffer_used] => 0
         )
 
     [7] => Array
         (
+            [name] => E::__invoke
+            [type] => 1
+            [flags] => 113
+            [level] => 7
+            [chunk_size] => 0
+            [buffer_size] => 16384
+            [buffer_used] => %d
+        )
+
+    [8] => Array
+        (
             [name] => Closure::__invoke
             [type] => 1
             [flags] => 20593
-            [level] => 7
+            [level] => 8
             [chunk_size] => 0
             [buffer_size] => 16384
             [buffer_used] => %d
