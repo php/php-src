@@ -415,17 +415,18 @@ static void dom_xpath_register_func_in_ctx(void *ctxt, const zend_string *ns, co
 	xmlXPathRegisterFuncNS((xmlXPathContextPtr) ctxt, (const xmlChar *) ZSTR_VAL(name), (const xmlChar *) ZSTR_VAL(ns), dom_xpath_ext_function_trampoline);
 }
 
-PHP_METHOD(DOMXPath, registerPhpFunctionsNS)
+PHP_METHOD(DOMXPath, registerPhpFunctionNS)
 {
 	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
 
-	zend_string *namespace;
-	zend_string *callable_name;
-	HashTable *callable_ht;
+	zend_string *namespace, *name;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_PATH_STR(namespace)
-		Z_PARAM_ARRAY_HT_OR_STR(callable_ht, callable_name)
+		Z_PARAM_PATH_STR(name)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_string_equals_literal(namespace, "http://php.net/xpath")) {
@@ -433,12 +434,12 @@ PHP_METHOD(DOMXPath, registerPhpFunctionsNS)
 		RETURN_THROWS();
 	}
 
-	php_dom_xpath_callbacks_update_method_handler(
+	php_dom_xpath_callbacks_update_single_method_handler(
 		&intern->xpath_callbacks,
 		intern->dom.ptr,
 		namespace,
-		callable_name,
-		callable_ht,
+		name,
+		&fcc,
 		PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NCNAME,
 		dom_xpath_register_func_in_ctx
 	);

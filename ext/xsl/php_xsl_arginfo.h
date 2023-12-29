@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 61172e9a28769cacef9f43181cbeafdb42a87cf2 */
+ * Stub hash: 0d12e04d92a3f0cc70179814aab0491d1d3fd2f7 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_importStylesheet, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, stylesheet, IS_OBJECT, 0)
@@ -42,9 +42,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_re
 	ZEND_ARG_TYPE_MASK(0, functions, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_registerPHPFunctionsNS, 0, 2, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 0)
-	ZEND_ARG_TYPE_MASK(0, functions, MAY_BE_ARRAY|MAY_BE_STRING, NULL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_registerPHPFunctionNS, 0, 3, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, namespaceURI, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, callable, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_setProfiling, 0, 0, 1)
@@ -68,7 +69,7 @@ ZEND_METHOD(XSLTProcessor, getParameter);
 ZEND_METHOD(XSLTProcessor, removeParameter);
 ZEND_METHOD(XSLTProcessor, hasExsltSupport);
 ZEND_METHOD(XSLTProcessor, registerPHPFunctions);
-ZEND_METHOD(XSLTProcessor, registerPHPFunctionsNS);
+ZEND_METHOD(XSLTProcessor, registerPHPFunctionNS);
 ZEND_METHOD(XSLTProcessor, setProfiling);
 ZEND_METHOD(XSLTProcessor, setSecurityPrefs);
 ZEND_METHOD(XSLTProcessor, getSecurityPrefs);
@@ -84,7 +85,7 @@ static const zend_function_entry class_XSLTProcessor_methods[] = {
 	ZEND_ME(XSLTProcessor, removeParameter, arginfo_class_XSLTProcessor_removeParameter, ZEND_ACC_PUBLIC)
 	ZEND_ME(XSLTProcessor, hasExsltSupport, arginfo_class_XSLTProcessor_hasExsltSupport, ZEND_ACC_PUBLIC)
 	ZEND_ME(XSLTProcessor, registerPHPFunctions, arginfo_class_XSLTProcessor_registerPHPFunctions, ZEND_ACC_PUBLIC)
-	ZEND_ME(XSLTProcessor, registerPHPFunctionsNS, arginfo_class_XSLTProcessor_registerPHPFunctionsNS, ZEND_ACC_PUBLIC)
+	ZEND_ME(XSLTProcessor, registerPHPFunctionNS, arginfo_class_XSLTProcessor_registerPHPFunctionNS, ZEND_ACC_PUBLIC)
 	ZEND_ME(XSLTProcessor, setProfiling, arginfo_class_XSLTProcessor_setProfiling, ZEND_ACC_PUBLIC)
 	ZEND_ME(XSLTProcessor, setSecurityPrefs, arginfo_class_XSLTProcessor_setSecurityPrefs, ZEND_ACC_PUBLIC)
 	ZEND_ME(XSLTProcessor, getSecurityPrefs, arginfo_class_XSLTProcessor_getSecurityPrefs, ZEND_ACC_PUBLIC)

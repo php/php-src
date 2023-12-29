@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8a158902b843f63a3da76d4e8b12669c186976f2 */
+ * Stub hash: 184308dfd1a133145d170c467e7600a12b14e327 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -452,9 +452,10 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_XPATH_ENABLED)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMXPath_registerPhpFunctionsNS, 0, 2, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 0)
-	ZEND_ARG_TYPE_MASK(0, restrict, MAY_BE_STRING|MAY_BE_ARRAY, NULL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMXPath_registerPhpFunctionNS, 0, 3, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, namespaceURI, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, callable, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -746,7 +747,7 @@ ZEND_METHOD(DOMXPath, registerNamespace);
 ZEND_METHOD(DOMXPath, registerPhpFunctions);
 #endif
 #if defined(LIBXML_XPATH_ENABLED)
-ZEND_METHOD(DOMXPath, registerPhpFunctionsNS);
+ZEND_METHOD(DOMXPath, registerPhpFunctionNS);
 #endif
 ZEND_METHOD(DOM_Document, createAttribute);
 ZEND_METHOD(DOM_Document, createAttributeNS);
@@ -1024,7 +1025,7 @@ static const zend_function_entry class_DOMXPath_methods[] = {
 	ZEND_ME(DOMXPath, query, arginfo_class_DOMXPath_query, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMXPath, registerNamespace, arginfo_class_DOMXPath_registerNamespace, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMXPath, registerPhpFunctions, arginfo_class_DOMXPath_registerPhpFunctions, ZEND_ACC_PUBLIC)
-	ZEND_ME(DOMXPath, registerPhpFunctionsNS, arginfo_class_DOMXPath_registerPhpFunctionsNS, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMXPath, registerPhpFunctionNS, arginfo_class_DOMXPath_registerPhpFunctionNS, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 #endif

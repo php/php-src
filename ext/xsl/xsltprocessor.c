@@ -612,17 +612,18 @@ PHP_METHOD(XSLTProcessor, registerPHPFunctions)
 }
 /* }}} end XSLTProcessor::registerPHPFunctions(); */
 
-PHP_METHOD(XSLTProcessor, registerPHPFunctionsNS)
+PHP_METHOD(XSLTProcessor, registerPHPFunctionNS)
 {
 	xsl_object *intern = Z_XSL_P(ZEND_THIS);
 
-	zend_string *namespace;
-	zend_string *callable_name;
-	HashTable *callable_ht;
+	zend_string *namespace, *name;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_PATH_STR(namespace)
-		Z_PARAM_ARRAY_HT_OR_STR(callable_ht, callable_name)
+		Z_PARAM_PATH_STR(name)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_string_equals_literal(namespace, "http://php.net/xsl")) {
@@ -630,12 +631,12 @@ PHP_METHOD(XSLTProcessor, registerPHPFunctionsNS)
 		RETURN_THROWS();
 	}
 
-	php_dom_xpath_callbacks_update_method_handler(
+	php_dom_xpath_callbacks_update_single_method_handler(
 		&intern->xpath_callbacks,
 		NULL,
 		namespace,
-		callable_name,
-		callable_ht,
+		name,
+		&fcc,
 		PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NCNAME,
 		NULL
 	);
