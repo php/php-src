@@ -9,12 +9,8 @@ AC_MSG_CHECKING(for CGI build)
 if test "$PHP_CGI" != "no"; then
     AC_MSG_RESULT(yes)
 
-    AC_MSG_CHECKING([for sun_len in sys/un.h])
-    AC_EGREP_HEADER([sun_len], [sys/un.h],
-      [AC_MSG_RESULT([yes])
-       AC_DEFINE([HAVE_SOCKADDR_UN_SUN_LEN], [1],
-        [Define if sockaddr_un in sys/un.h contains a sun_len component])],
-      AC_MSG_RESULT([no]))
+    dnl BSD systems.
+    AC_CHECK_MEMBERS([struct sockaddr_un.sun_len],,,[#include <sys/un.h>])
 
     AC_MSG_CHECKING([whether cross-process locking is required by accept()])
     case "`uname -sr`" in
