@@ -25,8 +25,7 @@
  */
 
 /*
-   This file contains a simple W^X executable memory allocator for POSIX
-   like systems and Windows
+   This file contains a simple W^X executable memory allocator
 
    In *NIX, MAP_ANON is required (that is considered a feature) so make
    sure to set the right availability macros for your system or the code
@@ -51,55 +50,41 @@
    not possible.
 */
 
-#define SLJIT_UPDATE_WX_FLAGS(from, to, enable_exec) \
-	sljit_update_wx_flags((from), (to), (enable_exec))
-
-#ifndef _WIN32
 #include <sys/types.h>
 #include <sys/mman.h>
 
-#ifdef __NetBSD__
-#define SLJIT_PROT_WX PROT_MPROTECT(PROT_EXEC)
-#define check_se_protected(ptr, size) (0)
-#else /* POSIX */
+#define SLJIT_UPDATE_WX_FLAGS(from, to, enable_exec) \
+	sljit_update_wx_flags((from), (to), (enable_exec))
+
 #if !(defined SLJIT_SINGLE_THREADED && SLJIT_SINGLE_THREADED)
 #include <pthread.h>
 #define SLJIT_SE_LOCK()		pthread_mutex_lock(&se_lock)
 #define SLJIT_SE_UNLOCK()	pthread_mutex_unlock(&se_lock)
+#else
+#define SLJIT_SE_LOCK()
+#define SLJIT_SE_UNLOCK()
 #endif /* !SLJIT_SINGLE_THREADED */
 
-#define check_se_protected(ptr, size) generic_se_protected(ptr, size)
+#define SLJIT_WX_IS_BLOCK(ptr, size) generic_check_is_wx_block(ptr, size)
 
-static SLJIT_INLINE int generic_se_protected(void *ptr, sljit_uw size)
+static SLJIT_INLINE int generic_check_is_wx_block(void *ptr, sljit_uw size)
 {
 	if (SLJIT_LIKELY(!mprotect(ptr, size, PROT_EXEC)))
-		return mprotect(ptr, size, PROT_READ | PROT_WRITE);
+		return !!mprotect(ptr, size, PROT_READ | PROT_WRITE);
 
-	return -1;
+	return 1;
 }
-#endif /* NetBSD */
-
-#ifndef SLJIT_SE_LOCK
-#define SLJIT_SE_LOCK()
-#endif
-#ifndef SLJIT_SE_UNLOCK
-#define SLJIT_SE_UNLOCK()
-#endif
-#ifndef SLJIT_PROT_WX
-#define SLJIT_PROT_WX 0
-#endif
 
 SLJIT_API_FUNC_ATTRIBUTE void* sljit_malloc_exec(sljit_uw size)
 {
-#if !(defined SLJIT_SINGLE_THREADED && SLJIT_SINGLE_THREADED) \
-	&& !defined(__NetBSD__)
+#if !(defined SLJIT_SINGLE_THREADED && SLJIT_SINGLE_THREADED)
 	static pthread_mutex_t se_lock = PTHREAD_MUTEX_INITIALIZER;
 #endif
-	static int se_protected = !SLJIT_PROT_WX;
-	int prot = PROT_READ | PROT_WRITE | SLJIT_PROT_WX;
+	static int wx_block = -1;
+	int prot = PROT_READ | PROT_WRITE;
 	sljit_uw* ptr;
 
-	if (SLJIT_UNLIKELY(se_protected < 0))
+	if (SLJIT_UNLIKELY(wx_block > 0))
 		return NULL;
 
 #ifdef PROT_MAX
@@ -112,11 +97,11 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_malloc_exec(sljit_uw size)
 	if (ptr == MAP_FAILED)
 		return NULL;
 
-	if (SLJIT_UNLIKELY(se_protected > 0)) {
+	if (SLJIT_UNLIKELY(wx_block < 0)) {
 		SLJIT_SE_LOCK();
-		se_protected = check_se_protected(ptr, size);
+		wx_block = SLJIT_WX_IS_BLOCK(ptr, size);
 		SLJIT_SE_UNLOCK();
-		if (SLJIT_UNLIKELY(se_protected < 0)) {
+		if (SLJIT_UNLIKELY(wx_block)) {
 			munmap((void *)ptr, size);
 			return NULL;
 		}
@@ -126,7 +111,6 @@ SLJIT_API_FUNC_ATTRIBUTE void* sljit_malloc_exec(sljit_uw size)
 	return ptr;
 }
 
-#undef SLJIT_PROT_WX
 #undef SLJIT_SE_UNLOCK
 #undef SLJIT_SE_LOCK
 
@@ -136,7 +120,7 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_free_exec(void* ptr)
 	munmap((void*)start_ptr, *start_ptr);
 }
 
-static void sljit_update_wx_flags(void *from, void *to, sljit_s32 enable_exec)
+static void sljit_update_wx_flags(void *from, void *to, int enable_exec)
 {
 	sljit_uw page_mask = (sljit_uw)get_page_alignment();
 	sljit_uw start = (sljit_uw)from;
@@ -150,53 +134,6 @@ static void sljit_update_wx_flags(void *from, void *to, sljit_s32 enable_exec)
 
 	mprotect((void*)start, end - start, prot);
 }
-
-#else /* windows */
-
-SLJIT_API_FUNC_ATTRIBUTE void* sljit_malloc_exec(sljit_uw size)
-{
-	sljit_uw *ptr;
-
-	size += sizeof(sljit_uw);
-	ptr = (sljit_uw*)VirtualAlloc(NULL, size,
-				MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-
-	if (!ptr)
-		return NULL;
-
-	*ptr++ = size;
-
-	return ptr;
-}
-
-SLJIT_API_FUNC_ATTRIBUTE void sljit_free_exec(void* ptr)
-{
-	sljit_uw start = (sljit_uw)ptr - sizeof(sljit_uw);
-#if defined(SLJIT_DEBUG) && SLJIT_DEBUG
-	sljit_uw page_mask = (sljit_uw)get_page_alignment();
-
-	SLJIT_ASSERT(!(start & page_mask));
-#endif
-	VirtualFree((void*)start, 0, MEM_RELEASE);
-}
-
-static void sljit_update_wx_flags(void *from, void *to, sljit_s32 enable_exec)
-{
-	DWORD oldprot;
-	sljit_uw page_mask = (sljit_uw)get_page_alignment();
-	sljit_uw start = (sljit_uw)from;
-	sljit_uw end = (sljit_uw)to;
-	DWORD prot = enable_exec ? PAGE_EXECUTE : PAGE_READWRITE;
-
-	SLJIT_ASSERT(start < end);
-
-	start &= ~page_mask;
-	end = (end + page_mask) & ~page_mask;
-
-	VirtualProtect((void*)start, end - start, prot, &oldprot);
-}
-
-#endif /* !windows */
 
 SLJIT_API_FUNC_ATTRIBUTE void sljit_free_unused_memory_exec(void)
 {

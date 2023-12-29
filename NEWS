@@ -84,6 +84,9 @@ PHP                                                                        NEWS
 - Output:
   . Clear output handler status flags during handler initialization. (haszi)
 
+- PCRE:
+  . Upgrade bundled pcre2lib to version 10.43. (nielsdos)
+
 - PDO:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Implemented PDO driver-specific subclasses RFC. (danack, kocsismate)

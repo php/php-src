@@ -26,7 +26,7 @@
 
 /* Define to any value to enable support for Just-In-Time compiling. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-#define SUPPORT_JIT
+#define SUPPORT_JIT 1
 #endif
 
 /* This limits the amount of memory that pcre2_match() may use while matching
@@ -98,3 +98,13 @@
 #define LINK_SIZE 2
 #endif
 
+/* The value of MAX_VARLOOKBEHIND specifies the default maximum length, in
+  characters, for a variable-length lookbehind assertion. */
+#ifndef MAX_VARLOOKBEHIND
+#define MAX_VARLOOKBEHIND 255
+#endif
+
+/* to make a symbol visible */
+#ifndef PCRE2_EXPORT
+#define PCRE2_EXPORT
+#endif
