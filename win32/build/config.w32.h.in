@@ -88,7 +88,6 @@
 #define HAVE_GETPID 1
 #define HAVE_LIBM 1
 #undef HAVE_RINT
-#define SIZEOF_SHORT 2
 /* int and long are still 32bit in 64bit compiles */
 #define SIZEOF_INT 4
 #define SIZEOF_LONG 4
