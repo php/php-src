@@ -827,7 +827,7 @@ void ir_save(const ir_ctx *ctx, FILE *f);
 
 /* IR debug dump API (implementation in ir_dump.c) */
 void ir_dump(const ir_ctx *ctx, FILE *f);
-void ir_dump_dot(const ir_ctx *ctx, FILE *f);
+void ir_dump_dot(const ir_ctx *ctx, const char *name, FILE *f);
 void ir_dump_use_lists(const ir_ctx *ctx, FILE *f);
 void ir_dump_cfg(ir_ctx *ctx, FILE *f);
 void ir_dump_cfg_map(const ir_ctx *ctx, FILE *f);

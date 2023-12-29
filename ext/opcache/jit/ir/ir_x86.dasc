@@ -9673,45 +9673,6 @@ next_block:;
 			while (str[i]) {
 				char c = str[i];
 
-				if (c == '\\') {
-					if (str[i+1] == '\\') {
-						i++;
-						c = '\\';
-					} else if (str[i+1] == '\'') {
-						i++;
-						c = '\'';
-					} else if (str[i+1] == '"') {
-						i++;
-						c = '"';
-					} else if (str[i+1] == 'a') {
-						i++;
-						c = '\a';
-					} else if (str[i+1] == 'b') {
-						i++;
-						c = '\b';
-					} else if (str[i+1] == 'e') {
-						i++;
-						c = 27; /* '\e'; */
-					} else if (str[i+1] == 'f') {
-						i++;
-						c = '\f';
-					} else if (str[i+1] == 'n') {
-						i++;
-						c = '\n';
-					} else if (str[i+1] == 'r') {
-						i++;
-						c = '\r';
-					} else if (str[i+1] == 't') {
-						i++;
-						c = '\t';
-					} else if (str[i+1] == 'v') {
-						i++;
-						c = '\v';
-					} else if (str[i+1] == '?') {
-						i++;
-						c = 0x3f;
-					}
-				}
 				|.byte c
 				i++;
 			}
