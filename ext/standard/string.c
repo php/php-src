@@ -5953,7 +5953,7 @@ PHP_FUNCTION(str_rot13)
 /* }}} */
 
 /* {{{ php_binary_string_shuffle */
-PHPAPI bool php_binary_string_shuffle(const php_random_algo *algo, php_random_status *status, char *str, zend_long len) /* {{{ */
+PHPAPI bool php_binary_string_shuffle(const php_random_algo *algo, void *status, char *str, zend_long len) /* {{{ */
 {
 	int64_t n_elems, rnd_idx, n_left;
 	char temp;

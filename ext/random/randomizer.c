@@ -38,7 +38,7 @@ static inline void randomizer_common_init(php_random_randomizer *randomizer, zen
 	} else {
 		/* Self allocation */
 		randomizer->status = php_random_status_alloc(&php_random_algo_user, false);
-		php_random_status_state_user *state = randomizer->status->state;
+		php_random_status_state_user *state = randomizer->status;
 		zend_string *mname;
 		zend_function *generate_method;
 
@@ -243,7 +243,7 @@ PHP_METHOD(Random_Randomizer, getInt)
 
 	if (UNEXPECTED(
 		randomizer->algo->range == php_random_algo_mt19937.range
-		&& ((php_random_status_state_mt19937 *) randomizer->status->state)->mode != MT_RAND_MT19937
+		&& ((php_random_status_state_mt19937 *) randomizer->status)->mode != MT_RAND_MT19937
 	)) {
 		uint64_t r = php_random_algo_mt19937.generate(randomizer->status).result >> 1;
 

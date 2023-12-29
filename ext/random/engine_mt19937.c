@@ -139,14 +139,14 @@ static inline void mt19937_seed_state(php_random_status_state_mt19937 *state, ui
 	mt19937_reload(state);
 }
 
-static void seed(php_random_status *status, uint64_t seed)
+static void seed(void *status, uint64_t seed)
 {
-	mt19937_seed_state(status->state, seed);
+	mt19937_seed_state(status, seed);
 }
 
-static php_random_result generate(php_random_status *status)
+static php_random_result generate(void *status)
 {
-	php_random_status_state_mt19937 *s = status->state;
+	php_random_status_state_mt19937 *s = status;
 	uint32_t s1;
 
 	if (s->count >= MT_N) {
@@ -164,14 +164,14 @@ static php_random_result generate(php_random_status *status)
 	};
 }
 
-static zend_long range(php_random_status *status, zend_long min, zend_long max)
+static zend_long range(void *status, zend_long min, zend_long max)
 {
 	return php_random_range(&php_random_algo_mt19937, status, min, max);
 }
 
-static bool serialize(php_random_status *status, HashTable *data)
+static bool serialize(void *status, HashTable *data)
 {
-	php_random_status_state_mt19937 *s = status->state;
+	php_random_status_state_mt19937 *s = status;
 	zval t;
 
 	for (uint32_t i = 0; i < MT_N; i++) {
@@ -186,9 +186,9 @@ static bool serialize(php_random_status *status, HashTable *data)
 	return true;
 }
 
-static bool unserialize(php_random_status *status, HashTable *data)
+static bool unserialize(void *status, HashTable *data)
 {
-	php_random_status_state_mt19937 *s = status->state;
+	php_random_status_state_mt19937 *s = status;
 	zval *t;
 
 	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */
@@ -252,7 +252,7 @@ PHPAPI void php_random_mt19937_seed_default(php_random_status_state_mt19937 *sta
 PHP_METHOD(Random_Engine_Mt19937, __construct)
 {
 	php_random_engine *engine = Z_RANDOM_ENGINE_P(ZEND_THIS);
-	php_random_status_state_mt19937 *state = engine->status->state;
+	php_random_status_state_mt19937 *state = engine->status;
 	zend_long seed, mode = MT_RAND_MT19937;
 	bool seed_is_null = true;
 

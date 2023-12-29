@@ -86,6 +86,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      the new php_random_result struct, replacing the last_generated_size
      member of the php_random_status struct and the generate_size member of
      the php_random_algo struct.
+   - The php_random_status struct has been removed, since the previous change
+     reduced it to a single void* member containing the actual state, resulting
+     in needless indirection. Any user of the php_random_status struct should
+     directly use (e.g. access or pass) what previously was the state member
+     of the php_random_status struct.
    - The CSPRNG API (php_random_(bytes|int)_*) is now provided by the new
      and much smaller php_random_csprng.h header. The new header is included
      in php_random.h for compatibility with existing users.

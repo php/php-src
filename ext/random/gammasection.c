@@ -71,7 +71,7 @@ static uint64_t ceilint(double a, double b, double g)
 	return (s != si) ? (uint64_t)si : (uint64_t)si + (e > 0);
 }
 
-PHPAPI double php_random_gammasection_closed_open(const php_random_algo *algo, php_random_status *status, double min, double max)
+PHPAPI double php_random_gammasection_closed_open(const php_random_algo *algo, void *status, double min, double max)
 {
 	double g = gamma_max(min, max);
 	uint64_t hi = ceilint(min, max, g);
@@ -99,7 +99,7 @@ PHPAPI double php_random_gammasection_closed_open(const php_random_algo *algo, p
 	}
 }
 
-PHPAPI double php_random_gammasection_closed_closed(const php_random_algo *algo, php_random_status *status, double min, double max)
+PHPAPI double php_random_gammasection_closed_closed(const php_random_algo *algo, void *status, double min, double max)
 {
 	double g = gamma_max(min, max);
 	uint64_t hi = ceilint(min, max, g);
@@ -131,7 +131,7 @@ PHPAPI double php_random_gammasection_closed_closed(const php_random_algo *algo,
 	}
 }
 
-PHPAPI double php_random_gammasection_open_closed(const php_random_algo *algo, php_random_status *status, double min, double max)
+PHPAPI double php_random_gammasection_open_closed(const php_random_algo *algo, void *status, double min, double max)
 {
 	double g = gamma_max(min, max);
 	uint64_t hi = ceilint(min, max, g);
@@ -159,7 +159,7 @@ PHPAPI double php_random_gammasection_open_closed(const php_random_algo *algo, p
 	}
 }
 
-PHPAPI double php_random_gammasection_open_open(const php_random_algo *algo, php_random_status *status, double min, double max)
+PHPAPI double php_random_gammasection_open_open(const php_random_algo *algo, void *status, double min, double max)
 {
 	double g = gamma_max(min, max);
 	uint64_t hi = ceilint(min, max, g);
