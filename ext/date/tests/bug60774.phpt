@@ -8,7 +8,7 @@ echo $i->format("%d"), "\n";
 echo $i->format("%a"), "\n";
 ?>
 --EXPECTF--
-object(DateInterval)#1 (%d) {
+object(DateTimeStringInterval)#1 (%d) {
   ["from_string"]=>
   bool(true)
   ["date_string"]=>

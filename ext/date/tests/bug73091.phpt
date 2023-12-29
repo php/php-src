@@ -13,6 +13,8 @@ var_dump(unserialize('O:12:"DateInterval":1:{s:4:"days";O:3:"foo":0:{}}'));
 ?>
 --EXPECTF--
 object(DateInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(-1)
   ["m"]=>
@@ -31,6 +33,4 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["days"]=>
   int(-1)
-  ["from_string"]=>
-  bool(false)
 }

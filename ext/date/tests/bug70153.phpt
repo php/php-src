@@ -16,13 +16,13 @@ print_r($i2);
 var_dump($i1->days, $i2->days);
 ?>
 --EXPECT--
-DateInterval Object
+DateTimeStringInterval Object
 (
     [from_string] => 1
     [date_string] => +1 month
 )
-O:12:"DateInterval":2:{s:11:"from_string";b:1;s:11:"date_string";s:8:"+1 month";}
-DateInterval Object
+O:22:"DateTimeStringInterval":2:{s:11:"from_string";b:1;s:11:"date_string";s:8:"+1 month";}
+DateTimeStringInterval Object
 (
     [from_string] => 1
     [date_string] => +1 month

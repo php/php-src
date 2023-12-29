@@ -247,8 +247,7 @@ function timezone_abbreviations_list(): array {}
 /** @refcount 1 */
 function timezone_version_get(): string {}
 
-/** @refcount 1 */
-function date_interval_create_from_date_string(string $datetime): DateInterval|false {}
+function date_interval_create_from_date_string(string $datetime): DateTimeStringInterval|false {}
 
 /** @refcount 1 */
 function date_interval_format(DateInterval $object, string $format): string {}
@@ -668,12 +667,14 @@ class DateTimeZone
 
 class DateInterval
 {
+    public readonly bool $from_string;
+
     public function __construct(string $duration) {}
 
     /**
      * @tentative-return-type
      */
-    public static function createFromDateString(string $datetime): DateInterval|false {}
+    public static function createFromDateString(string $datetime): DateTimeStringInterval|false {}
 
     /**
      * @tentative-return-type
@@ -690,6 +691,26 @@ class DateInterval
 
     /** @tentative-return-type */
     public static function __set_state(array $array): DateInterval {}
+}
+
+final class DateTimeStringInterval extends DateInterval
+{
+    public readonly ?string $date_string;
+
+    public function __construct(string $datetime) {}
+}
+
+final class DateTimeInterval extends DateInterval
+{
+    public readonly int $y;
+    public readonly int $m;
+    public readonly int $d;
+    public readonly int $h;
+    public readonly int $i;
+    public readonly int $s;
+    public readonly float $f;
+    public readonly int $invert;
+    public readonly int|false $days;
 }
 
 class DatePeriod implements IteratorAggregate

@@ -40,7 +40,7 @@ try {
 ?>
 --EXPECTF--
 Original object:
-object(DateInterval)#1 (%d) {
+object(DateTimeStringInterval)#1 (%d) {
   ["from_string"]=>
   bool(true)
   ["date_string"]=>
@@ -49,11 +49,11 @@ object(DateInterval)#1 (%d) {
 
 
 Serialised object:
-string(%d) "O:12:"DateInterval":2:{s:11:"from_string";b:1;s:11:"date_string";s:%d:"next weekday";}"
+string(96) "O:22:"DateTimeStringInterval":2:{s:11:"from_string";b:1;s:11:"date_string";s:12:"next weekday";}"
 
 
 Unserialised object:
-object(DateInterval)#2 (2) {
+object(DateTimeStringInterval)#2 (%d) {
   ["from_string"]=>
   bool(true)
   ["date_string"]=>
@@ -62,7 +62,7 @@ object(DateInterval)#2 (2) {
 
 
 Calling __serialize manually:
-array(2) {
+array(%d) {
   ["from_string"]=>
   bool(true)
   ["date_string"]=>
@@ -71,7 +71,7 @@ array(2) {
 
 
 Calling __unserialize manually:
-object(DateInterval)#3 (2) {
+object(DateInterval)#3 (%d) {
   ["from_string"]=>
   bool(true)
   ["date_string"]=>
@@ -80,7 +80,7 @@ object(DateInterval)#3 (2) {
 
 
 Used serialised interval:
-object(DateTimeImmutable)#4 (3) {
+object(DateTimeImmutable)#4 (%d) {
   ["date"]=>
   string(26) "2022-04-25 16:25:11.000000"
   ["timezone_type"]=>

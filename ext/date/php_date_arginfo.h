@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1445f6053da5ca9dc7bb618f2eadc4a8ea56a15f */
+ * Stub hash: f24ce09b1f759e78f9cc2002252751cb92d5630e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -193,7 +193,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_timezone_version_get, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_date_interval_create_from_date_string, 0, 1, DateInterval, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_date_interval_create_from_date_string, 0, 1, DateTimeStringInterval, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -451,7 +451,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateInterval___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, duration, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DateInterval_createFromDateString, 0, 1, DateInterval, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DateInterval_createFromDateString, 0, 1, DateTimeStringInterval, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -465,6 +465,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateInterval___set_state, 0, 1, DateInterval, 0)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeStringInterval___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DatePeriod_createFromISO8601String, 0, 1, IS_STATIC, 0)
@@ -590,6 +594,7 @@ ZEND_METHOD(DateInterval, __serialize);
 ZEND_METHOD(DateInterval, __unserialize);
 ZEND_METHOD(DateInterval, __wakeup);
 ZEND_METHOD(DateInterval, __set_state);
+ZEND_METHOD(DateTimeStringInterval, __construct);
 ZEND_METHOD(DatePeriod, createFromISO8601String);
 ZEND_METHOD(DatePeriod, __construct);
 ZEND_METHOD(DatePeriod, getStartDate);
@@ -749,6 +754,17 @@ static const zend_function_entry class_DateInterval_methods[] = {
 	ZEND_ME(DateInterval, __unserialize, arginfo_class_DateInterval___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateInterval, __wakeup, arginfo_class_DateInterval___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateInterval, __set_state, arginfo_class_DateInterval___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_DateTimeStringInterval_methods[] = {
+	ZEND_ME(DateTimeStringInterval, __construct, arginfo_class_DateTimeStringInterval___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_DateTimeInterval_methods[] = {
 	ZEND_FE_END
 };
 
@@ -1076,6 +1092,94 @@ static zend_class_entry *register_class_DateInterval(void)
 
 	INIT_CLASS_ENTRY(ce, "DateInterval", class_DateInterval_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval property_from_string_default_value;
+	ZVAL_UNDEF(&property_from_string_default_value);
+	zend_string *property_from_string_name = zend_string_init("from_string", sizeof("from_string") - 1, 1);
+	zend_declare_typed_property(class_entry, property_from_string_name, &property_from_string_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_from_string_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DateTimeStringInterval(zend_class_entry *class_entry_DateInterval)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DateTimeStringInterval", class_DateTimeStringInterval_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateInterval);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	zval property_date_string_default_value;
+	ZVAL_UNDEF(&property_date_string_default_value);
+	zend_string *property_date_string_name = zend_string_init("date_string", sizeof("date_string") - 1, 1);
+	zend_declare_typed_property(class_entry, property_date_string_name, &property_date_string_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_date_string_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_DateTimeInterval(zend_class_entry *class_entry_DateInterval)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "DateTimeInterval", class_DateTimeInterval_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DateInterval);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	zval property_y_default_value;
+	ZVAL_UNDEF(&property_y_default_value);
+	zend_string *property_y_name = zend_string_init("y", sizeof("y") - 1, 1);
+	zend_declare_typed_property(class_entry, property_y_name, &property_y_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_y_name);
+
+	zval property_m_default_value;
+	ZVAL_UNDEF(&property_m_default_value);
+	zend_string *property_m_name = zend_string_init("m", sizeof("m") - 1, 1);
+	zend_declare_typed_property(class_entry, property_m_name, &property_m_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_m_name);
+
+	zval property_d_default_value;
+	ZVAL_UNDEF(&property_d_default_value);
+	zend_string *property_d_name = zend_string_init("d", sizeof("d") - 1, 1);
+	zend_declare_typed_property(class_entry, property_d_name, &property_d_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_d_name);
+
+	zval property_h_default_value;
+	ZVAL_UNDEF(&property_h_default_value);
+	zend_string *property_h_name = zend_string_init("h", sizeof("h") - 1, 1);
+	zend_declare_typed_property(class_entry, property_h_name, &property_h_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_h_name);
+
+	zval property_i_default_value;
+	ZVAL_UNDEF(&property_i_default_value);
+	zend_string *property_i_name = zend_string_init("i", sizeof("i") - 1, 1);
+	zend_declare_typed_property(class_entry, property_i_name, &property_i_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_i_name);
+
+	zval property_s_default_value;
+	ZVAL_UNDEF(&property_s_default_value);
+	zend_string *property_s_name = zend_string_init("s", sizeof("s") - 1, 1);
+	zend_declare_typed_property(class_entry, property_s_name, &property_s_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_s_name);
+
+	zval property_f_default_value;
+	ZVAL_UNDEF(&property_f_default_value);
+	zend_string *property_f_name = zend_string_init("f", sizeof("f") - 1, 1);
+	zend_declare_typed_property(class_entry, property_f_name, &property_f_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_DOUBLE));
+	zend_string_release(property_f_name);
+
+	zval property_invert_default_value;
+	ZVAL_UNDEF(&property_invert_default_value);
+	zend_string *property_invert_name = zend_string_init("invert", sizeof("invert") - 1, 1);
+	zend_declare_typed_property(class_entry, property_invert_name, &property_invert_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_invert_name);
+
+	zval property_days_default_value;
+	ZVAL_UNDEF(&property_days_default_value);
+	zend_string *property_days_name = zend_string_init("days", sizeof("days") - 1, 1);
+	zend_declare_typed_property(class_entry, property_days_name, &property_days_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_FALSE));
+	zend_string_release(property_days_name);
 
 	return class_entry;
 }

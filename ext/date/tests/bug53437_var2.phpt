@@ -13,6 +13,8 @@ var_dump($di0, $di1);
 ?>
 --EXPECTF--
 object(DateInterval)#1 (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(2)
   ["m"]=>
@@ -30,11 +32,11 @@ object(DateInterval)#1 (%d) {
   ["invert"]=>
   int(0)
   ["days"]=>
-  bool(false)
-  ["from_string"]=>
   bool(false)
 }
 object(DateInterval)#2 (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(2)
   ["m"]=>
@@ -52,7 +54,5 @@ object(DateInterval)#2 (%d) {
   ["invert"]=>
   int(0)
   ["days"]=>
-  bool(false)
-  ["from_string"]=>
   bool(false)
 }

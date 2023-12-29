@@ -28,7 +28,9 @@ object(DateTime)#2 (3) {
   ["timezone"]=>
   string(3) "EDT"
 }
-object(DateInterval)#%d (%d) {
+object(DateTimeInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(0)
   ["m"]=>
@@ -47,6 +49,4 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["days"]=>
   int(33)
-  ["from_string"]=>
-  bool(false)
 }

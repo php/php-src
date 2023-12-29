@@ -8,7 +8,9 @@ $date2 = new \DateTime('2019-08-21 12:47:24');
 var_dump($date1->diff($date2));
 ?>
 --EXPECTF--
-object(DateInterval)#3 (%d) {
+object(DateTimeInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(0)
   ["m"]=>
@@ -27,6 +29,4 @@ object(DateInterval)#3 (%d) {
   int(1)
   ["days"]=>
   int(33)
-  ["from_string"]=>
-  bool(false)
 }

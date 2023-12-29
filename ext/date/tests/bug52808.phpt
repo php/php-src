@@ -28,6 +28,8 @@ echo "==DONE==\n";
 ?>
 --EXPECTF--
 object(DateInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(1)
   ["m"]=>
@@ -46,10 +48,10 @@ object(DateInterval)#%d (%d) {
   int(1)
   ["days"]=>
   int(437)
-  ["from_string"]=>
-  bool(false)
 }
 object(DateInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(0)
   ["m"]=>
@@ -68,10 +70,10 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["days"]=>
   int(294)
-  ["from_string"]=>
-  bool(false)
 }
 object(DateInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(0)
   ["m"]=>
@@ -90,8 +92,6 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["days"]=>
   int(294)
-  ["from_string"]=>
-  bool(false)
 }
 DateMalformedIntervalStringException: Failed to parse interval (2007-05-11T15:30:00Z/)
 DateMalformedIntervalStringException: Failed to parse interval (2007-05-11T15:30:00Z)

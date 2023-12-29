@@ -6,6 +6,7 @@ date.timezone=UTC
 <?php
 $now = new DateTimeImmutable();
 $simpleInterval = new DateInterval("P2D");
+$simpleDateTimeInterval = new DateTimeInterval("P2D");
 
 $date = (new ReflectionClass(DateTime::class))->newInstanceWithoutConstructor();
 try {
@@ -57,6 +58,16 @@ try {
 } catch (Error $e) {
 	echo get_class($e), ': ', $e->getMessage(), "\n";
 }
+
+try {
+	$dateperiod->__unserialize([
+		'start' => $now, 'end' => $now, 'current' => $now, 'interval' => $simpleDateTimeInterval,
+		'recurrences' => 2, 'include_start_date' => true, 'include_end_date' => true,
+	]);
+	echo "DatePeriod::__unserialize: SUCCESS\n";
+} catch (Error $e) {
+	echo get_class($e), ': ', $e->getMessage(), "\n";
+}
 echo "OK\n";
 ?>
 --EXPECT--
@@ -66,5 +77,6 @@ Error: Invalid serialization data for DatePeriod object
 Error: Invalid serialization data for DatePeriod object
 Error: Invalid serialization data for DatePeriod object
 Error: Invalid serialization data for DatePeriod object
+DatePeriod::__unserialize: SUCCESS
 DatePeriod::__unserialize: SUCCESS
 OK

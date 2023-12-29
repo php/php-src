@@ -9,6 +9,8 @@ echo $i->format("%a"), "\n";
 ?>
 --EXPECTF--
 object(DateInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(0)
   ["m"]=>
@@ -26,8 +28,6 @@ object(DateInterval)#%d (%d) {
   ["invert"]=>
   int(0)
   ["days"]=>
-  bool(false)
-  ["from_string"]=>
   bool(false)
 }
 7

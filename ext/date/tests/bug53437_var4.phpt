@@ -21,7 +21,9 @@ var_dump($df,
 
 ?>
 --EXPECTF--
-object(DateInterval)#%d (%d) {
+object(DateTimeInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(0)
   ["m"]=>
@@ -40,8 +42,6 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["days"]=>
   int(2)
-  ["from_string"]=>
-  bool(false)
 }
 int(0)
 int(0)

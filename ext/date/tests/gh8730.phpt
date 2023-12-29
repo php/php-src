@@ -4,19 +4,28 @@ Bug GH-8730 (DateTime::diff miscalculation is same time zone of different type)
 <?php
 $foo = new DateTime('2022-06-08 09:15:00', new DateTimeZone('-04:00'));
 $bar = new DateTime('2022-06-08 09:15:00', new DateTimeZone('US/Eastern'));
-print_r($foo->diff($bar));
+var_dump($foo->diff($bar));
 ?>
---EXPECT--
-DateInterval Object
-(
-    [y] => 0
-    [m] => 0
-    [d] => 0
-    [h] => 0
-    [i] => 0
-    [s] => 0
-    [f] => 0
-    [invert] => 0
-    [days] => 0
-    [from_string] => 
-)
+--EXPECTF--
+object(DateTimeInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
+  ["y"]=>
+  int(0)
+  ["m"]=>
+  int(0)
+  ["d"]=>
+  int(0)
+  ["h"]=>
+  int(0)
+  ["i"]=>
+  int(0)
+  ["s"]=>
+  int(0)
+  ["f"]=>
+  float(0)
+  ["invert"]=>
+  int(0)
+  ["days"]=>
+  int(0)
+}

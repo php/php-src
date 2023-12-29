@@ -26,7 +26,9 @@ var_dump($now->sub($e));
 ?>
 --EXPECTF--
 Original object:
-object(DateInterval)#1 (10) {
+object(DateInterval)#1 (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(2)
   ["m"]=>
@@ -44,18 +46,18 @@ object(DateInterval)#1 (10) {
   ["invert"]=>
   int(0)
   ["days"]=>
-  bool(false)
-  ["from_string"]=>
   bool(false)
 }
 
 
 Serialised object:
-string(164) "O:12:"DateInterval":10:{s:1:"y";i:2;s:1:"m";i:0;s:1:"d";i:4;s:1:"h";i:6;s:1:"i";i:8;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";b:0;s:11:"from_string";b:0;}"
+string(164) "O:12:"DateInterval":10:{s:11:"from_string";b:0;s:1:"y";i:2;s:1:"m";i:0;s:1:"d";i:4;s:1:"h";i:6;s:1:"i";i:8;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";b:0;}"
 
 
 Unserialised object:
-object(DateInterval)#2 (10) {
+object(DateInterval)#2 (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(2)
   ["m"]=>
@@ -73,14 +75,14 @@ object(DateInterval)#2 (10) {
   ["invert"]=>
   int(0)
   ["days"]=>
-  bool(false)
-  ["from_string"]=>
   bool(false)
 }
 
 
 Calling __serialize manually:
 array(%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(2)
   ["m"]=>
@@ -99,13 +101,11 @@ array(%d) {
   int(0)
   ["days"]=>
   bool(false)
-  ["from_string"]=>
-  bool(false)
 }
 
 
 Used serialised interval:
-object(DateTimeImmutable)#4 (3) {
+object(DateTimeImmutable)#4 (%d) {
   ["date"]=>
   string(26) "2024-04-26 22:33:11.000000"
   ["timezone_type"]=>
@@ -113,7 +113,7 @@ object(DateTimeImmutable)#4 (3) {
   ["timezone"]=>
   string(3) "BST"
 }
-object(DateTimeImmutable)#4 (3) {
+object(DateTimeImmutable)#4 (%d) {
   ["date"]=>
   string(26) "2020-04-18 10:17:11.000000"
   ["timezone_type"]=>
