@@ -124,7 +124,7 @@ AC_DEFUN([PHP_CANONICAL_HOST_TARGET],[
     host_alias=$host
   fi
   if test -z "$host_alias"; then
-    AC_MSG_ERROR([host_alias is not set!])
+    AC_MSG_ERROR([host_alias is not set! Make sure to run config.guess])
   fi
 ])
 
