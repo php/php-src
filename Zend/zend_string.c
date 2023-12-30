@@ -386,11 +386,13 @@ ZEND_API void zend_interned_strings_switch_storage(bool request)
 
 /* See GH-9068 */
 #if defined(__GNUC__) && (__GNUC__ >= 11 || defined(__clang__)) && __has_attribute(no_caller_saved_registers)
-# define NO_CALLER_SAVED_REGISTERS __attribute__((no_caller_saved_registers))
 # ifndef __clang__
+#  define NO_CALLER_SAVED_REGISTERS __attribute__((no_caller_saved_registers))
 #  pragma GCC push_options
 #  pragma GCC target ("general-regs-only")
 #  define POP_OPTIONS
+# else
+#  define NO_CALLER_SAVED_REGISTERS __attribute__((no_caller_saved_registers, no_instrument_function, target("general-regs-only")))
 # endif
 #else
 # define NO_CALLER_SAVED_REGISTERS
