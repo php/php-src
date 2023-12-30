@@ -4,7 +4,6 @@ Bug #24155 (gdImageRotate270 rotation problem).
 gd
 --SKIPIF--
 <?php
-    if (!function_exists("imagerotate")) die("skip requires imagerotate function");
     if (!(imagetypes() & IMG_PNG)) {
         die("skip No PNG support");
     }
