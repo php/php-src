@@ -317,7 +317,7 @@ const mbfl_encoding *mbfl_name2encoding_ex(const char *name, size_t name_len)
 
 	/* Sanity check perfect hash for name.
 	 * Never enable this in production, this is only a development-time sanity check! */
-#if 1
+#if ZEND_DEBUG && 0
 	for (encoding = mbfl_encoding_ptr_list; *encoding; encoding++) {
 		size_t name_length = strlen((*encoding)->name);
 		if (!(name_length <= NAME_HASH_MAX_NAME_LENGTH && name_length >= NAME_HASH_MIN_NAME_LENGTH)) {
