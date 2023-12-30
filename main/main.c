@@ -1369,10 +1369,6 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 				error_type_str = "Notice";
 				syslog_type_int = LOG_NOTICE;
 				break;
-			case E_STRICT:
-				error_type_str = "Strict Standards";
-				syslog_type_int = LOG_INFO;
-				break;
 			case E_DEPRECATED:
 			case E_USER_DEPRECATED:
 				error_type_str = "Deprecated";

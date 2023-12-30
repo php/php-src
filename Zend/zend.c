@@ -1604,7 +1604,6 @@ static ZEND_COLD void get_filename_lineno(int type, zend_string **filename, uint
 		case E_COMPILE_WARNING:
 		case E_ERROR:
 		case E_NOTICE:
-		case E_STRICT:
 		case E_DEPRECATED:
 		case E_WARNING:
 		case E_USER_ERROR:

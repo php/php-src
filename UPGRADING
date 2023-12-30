@@ -44,6 +44,9 @@ PHP 8.4 UPGRADE NOTES
     As such, passing invalid types to exit/die may now result in a TypeError
     being thrown.
     RFC: https://wiki.php.net/rfc/exit-as-function
+  . The E_STRICT constant was deprecated and its corresponding error level was
+    removed.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#remove_e_strict_error_level_and_deprecate_e_strict_constant
 
 - DBA:
   . dba_open() and dba_popen() will now return a Dba\Connection
