@@ -70,12 +70,6 @@ const E_USER_NOTICE = UNKNOWN;
 
 /**
  * @var int
- * @cvalue E_STRICT
- */
-const E_STRICT = UNKNOWN;
-
-/**
- * @var int
  * @cvalue E_RECOVERABLE_ERROR
  */
 const E_RECOVERABLE_ERROR = UNKNOWN;
