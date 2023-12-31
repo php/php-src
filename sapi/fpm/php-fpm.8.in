@@ -1,4 +1,4 @@
-.TH PHP-FPM 8 "2022" "The PHP Group" "Scripting Language"
+.TH PHP-FPM 8 "2024" "The PHP Group" "Scripting Language"
 .SH NAME
 .TP 15
 php-fpm \- PHP FastCGI Process Manager 'PHP-FPM'
