@@ -84,7 +84,7 @@ static void ir_print_escaped_str(const char *s, size_t len, FILE *f)
 			case '\"': fputs("\\\"", f); break;
 			case '\a': fputs("\\a", f); break;
 			case '\b': fputs("\\b", f); break;
-			case '\e': fputs("\\e", f); break;
+			case '\033': fputs("\\e", f); break;
 			case '\f': fputs("\\f", f); break;
 			case '\n': fputs("\\n", f); break;
 			case '\r': fputs("\\r", f); break;
