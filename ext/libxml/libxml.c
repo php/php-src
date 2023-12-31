@@ -208,7 +208,33 @@ static void php_libxml_node_free(xmlNodePtr node)
 				xmlEntityPtr entity = (xmlEntityPtr) node;
 				if (entity->etype != XML_INTERNAL_PREDEFINED_ENTITY) {
 					php_libxml_unlink_entity_decl(entity);
+#if LIBXML_VERSION >= 21200
 					xmlFreeEntity(entity);
+#else
+					if (entity->children != NULL && entity->owner && entity == (xmlEntityPtr) entity->children->parent) {
+						xmlFreeNodeList(entity->children);
+					}
+					xmlDictPtr dict = entity->doc != NULL ? entity->doc->dict : NULL;
+					if (dict == NULL || !xmlDictOwns(dict, entity->name)) {
+						xmlFree((xmlChar *) entity->name);
+					}
+					if (dict == NULL || !xmlDictOwns(dict, entity->ExternalID)) {
+						xmlFree((xmlChar *) entity->ExternalID);
+					}
+					if (dict == NULL || !xmlDictOwns(dict, entity->SystemID)) {
+						xmlFree((xmlChar *) entity->SystemID);
+					}
+					if (dict == NULL || !xmlDictOwns(dict, entity->URI)) {
+						xmlFree((xmlChar *) entity->URI);
+					}
+					if (dict == NULL || !xmlDictOwns(dict, entity->content)) {
+						xmlFree(entity->content);
+					}
+					if (dict == NULL || !xmlDictOwns(dict, entity->orig)) {
+						xmlFree(entity->orig);
+					}
+					xmlFree(entity);
+#endif
 				}
 				break;
 			}

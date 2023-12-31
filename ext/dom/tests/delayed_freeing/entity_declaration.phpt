@@ -16,8 +16,12 @@ XML);
 $ref1 = $doc->createEntityReference("test");
 $ref2 = $doc->createEntityReference("myimage");
 $entity1 = $doc->doctype->entities[0];
-var_dump($entity1->nodeName, $entity1->parentNode->nodeName);
 $entity2 = $doc->doctype->entities[1];
+if (strcmp($entity1->nodeName, $entity2->nodeName) < 0) {
+    // Entity ordering depends on the addresses
+    [$entity1, $entity2] = [$entity2, $entity1];
+}
+var_dump($entity1->nodeName, $entity1->parentNode->nodeName);
 var_dump($entity2->nodeName, $entity2->parentNode->nodeName);
 $doc->removeChild($doc->doctype);
 var_dump($entity1->nodeName, $entity1->parentNode);
