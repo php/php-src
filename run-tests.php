@@ -733,7 +733,7 @@ function main(): void
 
         $start_timestamp = time();
         $start_time = hrtime(true);
-        show_start($start_time);
+        show_start($start_timestamp);
 
         $test_cnt = count($test_files);
         $test_idx = 0;
