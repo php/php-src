@@ -43,4 +43,4 @@ hello world
 
 Warning: include(%sbug77432.phar): Failed to open stream: phar error: could not reopen phar "%sbug77432.phar" in %s on line %d
 
-Warning: include(): Failed opening '%sbug77432.phar' for inclusion (include_path='.:') in %s on line %d
+Warning: include(): Failed opening '%sbug77432.phar' for inclusion (include_path=%s) in %s on line %d
