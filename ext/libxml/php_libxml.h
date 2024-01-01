@@ -79,7 +79,6 @@ typedef struct _php_libxml_node_ptr {
 typedef struct _php_libxml_node_object {
 	php_libxml_node_ptr *node;
 	php_libxml_ref_obj *document;
-	HashTable *properties;
 	zend_object  std;
 } php_libxml_node_object;
 
