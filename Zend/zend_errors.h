@@ -31,6 +31,7 @@
 #define E_USER_ERROR		(1<<8L)
 #define E_USER_WARNING		(1<<9L)
 #define E_USER_NOTICE		(1<<10L)
+#define E_STRICT			(1<<11L)
 #define E_RECOVERABLE_ERROR	(1<<12L)
 #define E_DEPRECATED		(1<<13L)
 #define E_USER_DEPRECATED	(1<<14L)
