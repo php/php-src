@@ -63,6 +63,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-12974 (Apache crashes on shutdown when using pg_pconnect()).
     (nielsdos)
 
+- Phar:
+  . Fixed bug #77432 (Segmentation fault on including phar file). (nielsdos)
+
 - PHPDBG:
   . Fixed bug GH-12962 (Double free of init_file in phpdbg_prompt.c). (nielsdos)
 
