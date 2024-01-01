@@ -1,5 +1,11 @@
 --TEST--
 Bug #77432 (Segmentation fault on including phar file)
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY === "Windows") {
+    die('skip not for Windows');
+}
+?>
 --EXTENSIONS--
 phar
 --INI--
@@ -36,7 +42,8 @@ include("phar://" . $filename);
 --- Include 1 ---
 hello world
 --- Include 2 ---
-%A
+
+Warning: Constant  already defined in %s on line %d
 hello world
 --- After unlink ---
 
