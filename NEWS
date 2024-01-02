@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.15
+04 Jan 2024, PHP 8.2.15RC1
 
 - Core:
   . Fixed bug GH-12953 (false positive SSA integrity verification failed when
