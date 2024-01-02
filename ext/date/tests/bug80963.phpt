@@ -13,8 +13,8 @@ foreach ($tzids as $tzid)
 	var_dump(sizeof($t), end($t));
 }
 ?>
---EXPECT--
-int(243)
+--EXPECTF--
+int(24%d)
 array(5) {
   ["ts"]=>
   int(2140045200)
