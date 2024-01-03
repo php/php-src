@@ -4,17 +4,23 @@ Test preg_match() function : error conditions - bad regular expressions
 <?php
 /* Function is implemented in ext/pcre/php_pcre.c */
 /*
-* Testing how preg_match reacts to being passed the wrong type of regex argument
-*/
+ * Testing how preg_match reacts to being passed the wrong type of regex argument
+ */
 echo "*** Testing preg_match() : error conditions ***\n";
-$regex_array = array('abcdef', //Regex without delimiter
-'/[a-zA-Z]', //Regex without closing delimiter
-'[a-zA-Z]/', //Regex without opening delimiter
-'/[a-zA-Z]/F', array('[a-z]', //Array of Regexes
-'[A-Z]', '[0-9]'), '/[a-zA-Z]/', //Regex string
-);
+$regex_array = [
+    'abcdef', //Regex without delimiter
+    '/[a-zA-Z]', //Regex without closing delimiter
+    '[a-zA-Z]/', //Regex without opening delimiter
+    '/[a-zA-Z]/F',
+    [
+        '[a-z]', //Array of Regexes
+        '[A-Z]',
+        '[0-9]',
+    ],
+    '/[a-zA-Z]/', //Regex string
+];
 $subject = 'this is a test';
-foreach($regex_array as $regex_value) {
+foreach ($regex_array as $regex_value) {
     @print "\nArg value is $regex_value\n";
     try {
         var_dump(preg_match($regex_value, $subject));
@@ -28,13 +34,14 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
+
 ?>
 --EXPECTF--
 *** Testing preg_match() : error conditions ***
 
 Arg value is abcdef
 
-Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_match_error1.php on line %d
+Warning: preg_match(): Delimiter must not be alphanumeric, backslash, or NUL byte in %spreg_match_error1.php on line %d
 bool(false)
 
 Arg value is /[a-zA-Z]

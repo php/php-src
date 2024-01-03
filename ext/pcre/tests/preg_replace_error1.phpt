@@ -3,21 +3,27 @@ Test preg_replace() function : error - bad regular expressions
 --FILE--
 <?php
 /*
-* Function is implemented in ext/pcre/php_pcre.c
-*/
+ * Function is implemented in ext/pcre/php_pcre.c
+ */
 /*
-* Testing how preg_replace reacts to being passed the wrong type of regex argument
-*/
+ * Testing how preg_replace reacts to being passed the wrong type of regex argument
+ */
 echo "*** Testing preg_replace() : error conditions***\n";
-$regex_array = array('abcdef', //Regex without delimiter
-'/[a-zA-Z]', //Regex without closing delimiter
-'[a-zA-Z]/', //Regex without opening delimiter
-'/[a-zA-Z]/F', array('[a-z]', //Array of Regexes
-'[A-Z]', '[0-9]'), '/[a-zA-Z]/', //Regex string
-);
+$regex_array = [
+    'abcdef', //Regex without delimiter
+    '/[a-zA-Z]', //Regex without closing delimiter
+    '[a-zA-Z]/', //Regex without opening delimiter
+    '/[a-zA-Z]/F',
+    [
+        '[a-z]', //Array of Regexes
+        '[A-Z]',
+        '[0-9]',
+    ],
+    '/[a-zA-Z]/', //Regex string
+];
 $replace = 1;
 $subject = 'a';
-foreach($regex_array as $regex_value) {
+foreach ($regex_array as $regex_value) {
     @print "\nArg value is $regex_value\n";
     var_dump(preg_replace($regex_value, $replace, $subject));
 }
@@ -33,7 +39,7 @@ try {
 
 Arg value is abcdef
 
-Warning: preg_replace(): Delimiter must not be alphanumeric, backslash, or NUL in %spreg_replace_error1.php on line %d
+Warning: preg_replace(): Delimiter must not be alphanumeric, backslash, or NUL byte in %spreg_replace_error1.php on line %d
 NULL
 
 Arg value is /[a-zA-Z]
