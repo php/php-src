@@ -5,6 +5,7 @@ mbstring
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+if (PHP_INT_SIZE == 4 && !extension_loaded("ctype")) die("skip needs ctype extension on 32-bit");
 ?>
 --FILE--
 <?php
@@ -211,7 +212,7 @@ function readGB18030_2022_ConversionTable($path, &$from, &$to, $utf32 = false) {
                 // We may be on a 32-bit machine and testing a text encoding with 4-byte codes
                 // (which can't be represented in a PHP integer)
                 $char = "";
-                for ($i = 2; $i < strlen($line); $i += 2) {
+                for ($i = strpos($line, "\t") + 1; $i < strlen($line); $i += 2) {
                     $substr = substr($line, $i, 2);
                     if (ctype_xdigit($substr))
                         $char .= chr(hexdec($substr));
