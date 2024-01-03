@@ -19,9 +19,14 @@ if (!$db instanceof PdoPgsql) {
     echo "Wrong class type. Should be PdoPgsql but is " . get_class($db) . "\n";
 }
 
-$result = $db->escapeIdentifier("This is a quote\"");
+echo $db->escapeIdentifier("This is a quote\"") . "\n";
 
-// TODO - ask someone who knows about postgresql if this is correct:
-echo "Result is [$result]\n";
+try {
+    $db->escapeIdentifier("aa\xC3\xC3\xC3");
+} catch (PDOException $e) {
+    echo $e->getMessage() . "\n";
+}
+
 --EXPECT--
-Result is ["This is a quote"""]
+"This is a quote"""
+SQLSTATE[HY000]: General error: 7 incomplete multibyte character

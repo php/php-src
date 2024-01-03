@@ -82,7 +82,8 @@ PHP_METHOD(PdoPgsql, escapeIdentifier)
 
 	tmp = PQescapeIdentifier(H->server, ZSTR_VAL(from), ZSTR_LEN(from));
 	if (!tmp) {
-		zend_throw_error(NULL, "Failed to escape identifier");
+		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
+		PDO_HANDLE_DBH_ERR();
 		RETURN_THROWS();
 	}
 
