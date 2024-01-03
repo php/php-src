@@ -19,8 +19,8 @@ $regex_array = [
         '[A-Z]',
         '[0-9]',
     ],
-    '/[0-9]/',
-]; //Regex string
+    '/[0-9]/', //Regex string
+];
 $replacement = [
     'zero',
     'one',
