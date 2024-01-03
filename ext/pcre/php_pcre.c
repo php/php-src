@@ -649,7 +649,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 		if (key != regex) {
 			zend_string_release_ex(key, 0);
 		}
-		php_error_docref(NULL, E_WARNING, "Delimiter must not be alphanumeric, backslash, or NUL");
+		php_error_docref(NULL, E_WARNING, "Delimiter must not be alphanumeric, backslash, or NUL byte");
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
 	}
@@ -745,7 +745,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 				if (pp[-1]) {
 					php_error_docref(NULL, E_WARNING, "Unknown modifier '%c'", pp[-1]);
 				} else {
-					php_error_docref(NULL, E_WARNING, "NUL is not a valid modifier");
+					php_error_docref(NULL, E_WARNING, "NUL byte is not a valid modifier");
 				}
 				pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 				efree(pattern);
