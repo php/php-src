@@ -1,4 +1,4 @@
-.TH @program_prefix@phpize 1 "2022" "The PHP Group" "Scripting Language"
+.TH @program_prefix@phpize 1 "2024" "The PHP Group" "Scripting Language"
 .SH NAME
 @program_prefix@phpize \- prepare a PHP extension for compiling
 .SH SYNOPSIS
