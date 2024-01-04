@@ -1,4 +1,4 @@
-.TH PHAR 1 "2023" "The PHP Group" "User Commands"
+.TH PHAR 1 "2024" "The PHP Group" "User Commands"
 .SH NAME
 phar, phar.phar \- PHAR (PHP archive) command line tool
 .SH SYNOPSIS

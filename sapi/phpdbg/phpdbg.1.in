@@ -1,4 +1,4 @@
-.TH @program_prefix@phpdbg 1 "2023" "The PHP Group" "Scripting Language"
+.TH @program_prefix@phpdbg 1 "2024" "The PHP Group" "Scripting Language"
 .SH NAME
 @program_prefix@phpdbg \- The interactive PHP debugger
 .SH SYNOPSIS
