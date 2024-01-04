@@ -643,7 +643,7 @@ memrchr \
 mempcpy \
 )
 
-AC_CHECK_FUNCS(inet_ntop,[],[
+AC_CHECK_FUNC(inet_ntop,[],[
     AC_MSG_ERROR([Cannot find inet_ntop which is required])
 ]
 )
