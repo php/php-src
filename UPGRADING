@@ -325,6 +325,9 @@ PHP 8.4 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- Core:
+  . PHP_OUTPUT_HANDLER_PROCESSED.
+
 - Intl:
   . The IntlDateFormatter class exposes now the new PATTERN constant
     reflecting udat api's UDAT_PATTERN.
