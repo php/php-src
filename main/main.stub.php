@@ -35,12 +35,12 @@ const PHP_EXTRA_VERSION = UNKNOWN;
  */
 const PHP_VERSION_ID = UNKNOWN;
 /**
- * @var int
+ * @var bool
  * @cvalue PHP_ZTS
  */
 const PHP_ZTS = UNKNOWN;
 /**
- * @var int
+ * @var bool
  * @cvalue PHP_DEBUG
  */
 const PHP_DEBUG = UNKNOWN;
