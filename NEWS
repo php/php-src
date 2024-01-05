@@ -26,6 +26,8 @@ DOM:
 FPM:
   . Implement GH-12385 (flush headers without body when calling flush()).
     (nielsdos)
+  . Added DragonFlyBSD system to the list which set FPM_BACKLOG_DEFAULT
+    to SOMAXCONN. (David Carlier)
 
 FTP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
