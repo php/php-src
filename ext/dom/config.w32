@@ -27,6 +27,11 @@ if (PHP_DOM == "yes") {
 		ADD_SOURCES("ext/dom/lexbor/lexbor/html", "encoding.c interface.c parser.c token.c token_attr.c tokenizer.c tree.c", "dom");
 		ADD_SOURCES("ext/dom/lexbor/lexbor/encoding", "big5.c decode.c encode.c encoding.c euc_kr.c gb18030.c iso_2022_jp_katakana.c jis0208.c jis0212.c range.c res.c single.c", "dom");
 		ADD_SOURCES("ext/dom/lexbor/lexbor/html/interfaces", "anchor_element.c area_element.c audio_element.c base_element.c body_element.c br_element.c button_element.c canvas_element.c data_element.c data_list_element.c details_element.c dialog_element.c directory_element.c div_element.c d_list_element.c document.c element.c embed_element.c field_set_element.c font_element.c form_element.c frame_element.c frame_set_element.c head_element.c heading_element.c hr_element.c html_element.c iframe_element.c image_element.c input_element.c label_element.c legend_element.c li_element.c link_element.c map_element.c marquee_element.c media_element.c menu_element.c meta_element.c meter_element.c mod_element.c object_element.c o_list_element.c opt_group_element.c option_element.c output_element.c paragraph_element.c param_element.c picture_element.c pre_element.c progress_element.c quote_element.c script_element.c select_element.c slot_element.c source_element.c span_element.c style_element.c table_caption_element.c table_cell_element.c table_col_element.c table_element.c table_row_element.c table_section_element.c template_element.c text_area_element.c time_element.c title_element.c track_element.c u_list_element.c unknown_element.c video_element.c window.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/selectors-adapted", "selectors.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/css", "state.c log.c parser.c css.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/css/selectors", "state.c selectors.c selector.c pseudo_state.c pseudo.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/css/syntax", "state.c parser.c syntax.c anb.c tokenizer.c token.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/css/syntax/tokenizer", "error.c", "dom");
 		ADD_SOURCES("ext/dom/lexbor/lexbor/ns", "ns.c", "dom");
 		ADD_SOURCES("ext/dom/lexbor/lexbor/tag", "tag.c", "dom");
 		ADD_FLAG("CFLAGS_DOM", "/D LEXBOR_STATIC ");

@@ -1714,4 +1714,34 @@ out:
 }
 /* }}} end DOMElement::prepend */
 
+static void php_dom_dispatch_query_selector(INTERNAL_FUNCTION_PARAMETERS, bool all)
+{
+	zend_string *selectors_str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(selectors_str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	xmlNodePtr thisp;
+	dom_object *intern;
+	zval *id;
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
+
+	if (all) {
+		dom_parent_node_query_selector_all(thisp, intern, return_value, selectors_str);
+	} else {
+		dom_parent_node_query_selector(thisp, intern, return_value, selectors_str);
+	}
+}
+
+PHP_METHOD(DOMElement, querySelector)
+{
+	php_dom_dispatch_query_selector(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
+
+PHP_METHOD(DOMElement, querySelectorAll)
+{
+	php_dom_dispatch_query_selector(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
 #endif

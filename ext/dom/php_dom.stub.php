@@ -280,6 +280,10 @@ namespace
 
         /** @param DOMNode|string $nodes */
         public function replaceChildren(...$nodes): void;
+
+        public function querySelector(string $selectors): ?DOMElement {}
+
+        public function querySelectorAll(string $selectors): DOMNodeList {}
     }
 
     interface DOMChildNode
@@ -507,6 +511,12 @@ namespace
          * @implementation-alias DOMDocument::replaceChildren
          */
         public function replaceChildren(...$nodes): void {}
+
+        /** @implementation-alias DOMElement::querySelector */
+        public function querySelector(string $selectors): ?DOMElement {}
+
+        /** @implementation-alias DOMElement::querySelectorAll */
+        public function querySelectorAll(string $selectors): DOMNodeList {}
     }
 
     class DOMNodeList implements IteratorAggregate, Countable
@@ -701,6 +711,12 @@ namespace
 
         /** @param DOMNode|string $nodes */
         public function replaceChildren(...$nodes): void {}
+
+        /** @implementation-alias DOMElement::querySelector */
+        public function querySelector(string $selectors): ?DOMElement {}
+
+        /** @implementation-alias DOMElement::querySelectorAll */
+        public function querySelectorAll(string $selectors): DOMNodeList {}
 
         public function insertAdjacentElement(string $where, DOMElement $element): ?DOMElement {}
 
@@ -1583,6 +1599,12 @@ namespace DOM
         public function replaceChildren(Node|string ...$nodes): void {}
 
         public function importLegacyNode(\DOMNode $node, bool $deep = false): Node {}
+
+        /** @implementation-alias DOMElement::querySelector */
+        public function querySelector(string $selectors): ?Element {}
+
+        /** @implementation-alias DOMElement::querySelectorAll */
+        public function querySelectorAll(string $selectors): NodeList {}
     }
 
     final class HTMLDocument extends Document

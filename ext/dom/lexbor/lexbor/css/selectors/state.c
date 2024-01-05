@@ -742,11 +742,13 @@ again:
             goto unexpected;
     }
 
+    if (status == LXB_STATUS_OK) {
+        return true;
+    }
+
     if (status == LXB_STATUS_ERROR_MEMORY_ALLOCATION) {
         return lxb_css_parser_memory_fail(parser);
     }
-
-    return true;
 
 unexpected:
 
@@ -827,11 +829,15 @@ lxb_css_selectors_state_compound_sub(lxb_css_parser_t *parser,
             return lxb_css_parser_states_set_back(parser);
     }
 
+    if (status == LXB_STATUS_OK) {
+        return true;
+    }
+
     if (status == LXB_STATUS_ERROR_MEMORY_ALLOCATION) {
         return lxb_css_parser_memory_fail(parser);
     }
 
-    return true;
+    return lxb_css_parser_unexpected(parser);
 }
 
 static bool
@@ -874,11 +880,15 @@ lxb_css_selectors_state_compound_pseudo(lxb_css_parser_t *parser,
                                        lxb_css_selectors_state_compound_pseudo);
     }
 
+    if (status == LXB_STATUS_OK) {
+        return true;
+    }
+
     if (status == LXB_STATUS_ERROR_MEMORY_ALLOCATION) {
         return lxb_css_parser_memory_fail(parser);
     }
 
-    return true;
+    return lxb_css_parser_unexpected(parser);
 }
 
 /*
@@ -1015,11 +1025,13 @@ again:
             goto unexpected;
     }
 
+    if (status == LXB_STATUS_OK) {
+        return true;
+    }
+
     if (status == LXB_STATUS_ERROR_MEMORY_ALLOCATION) {
         return lxb_css_parser_memory_fail(parser);
     }
-
-    return true;
 
 unexpected:
 
@@ -1224,7 +1236,10 @@ lxb_css_selectors_state_attribute(lxb_css_parser_t *parser)
             lxb_css_parser_token_status_m(parser, token);
 
             if (token->type != LXB_CSS_SYNTAX_TOKEN_IDENT) {
-                goto failed;
+                attribute = &selector->u.attribute;
+                attribute->match = LXB_CSS_SELECTOR_MATCH_DASH;
+
+                goto assignment;
             }
 
             selector->ns = selector->name;
@@ -1282,19 +1297,22 @@ lxb_css_selectors_state_attribute(lxb_css_parser_t *parser)
             lxb_css_syntax_parser_consume(parser);
             lxb_css_parser_token_status_m(parser, token);
 
-            if (token->type != LXB_CSS_SYNTAX_TOKEN_DELIM
-                || lxb_css_syntax_token_delim_char(token) != '=')
-            {
-                goto failed;
-            }
-
-            lxb_css_syntax_parser_consume(parser);
-            lxb_css_parser_token_status_wo_ws_m(parser, token);
             break;
 
         default:
             goto failed;
     }
+
+assignment:
+
+    if (token->type != LXB_CSS_SYNTAX_TOKEN_DELIM
+        || lxb_css_syntax_token_delim_char(token) != '=')
+    {
+        goto failed;
+    }
+
+    lxb_css_syntax_parser_consume(parser);
+    lxb_css_parser_token_status_wo_ws_m(parser, token);
 
 string_or_ident:
 
@@ -1861,17 +1879,16 @@ lxb_css_selectors_state_list_end(lxb_css_parser_t *parser,
     lxb_css_parser_state_t *states;
     lxb_css_selectors_t *selectors = parser->selectors;
 
-    if (token->type == LXB_CSS_SYNTAX_TOKEN_WHITESPACE) {
-        lxb_css_syntax_parser_consume(parser);
-        lxb_css_parser_token_status_m(parser, token);
-    }
-
     if (lxb_css_parser_is_failed(parser)) {
         token = lxb_css_selectors_state_function_error(parser, token);
         if (token == NULL) {
             return lxb_css_parser_fail(parser,
                                        LXB_STATUS_ERROR_MEMORY_ALLOCATION);
         }
+    }
+    else if (token->type == LXB_CSS_SYNTAX_TOKEN_WHITESPACE) {
+        lxb_css_syntax_parser_consume(parser);
+        lxb_css_parser_token_status_m(parser, token);
     }
 
     if (selectors->parent != NULL && selectors->list_last &&
