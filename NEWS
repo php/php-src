@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.3
 
+- Core:
+  . Fixed timer leak in zend-max-execution-timers builds. (withinboredom)
 - Phar:
   . Fixed bug #71465 (PHAR doesn't know about litespeed). (nielsdos)
 
