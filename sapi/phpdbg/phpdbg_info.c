@@ -402,13 +402,11 @@ PHPDBG_INFO(classes) /* {{{ */
 	ZEND_HASH_PACKED_FOREACH_PTR(&classes, ce) {
 		phpdbg_print_class_name(ce);
 
-		if (ce->parent) {
-			zend_class_entry *pce;
-			pce = ce->parent;
-			do {
+		if (ce->num_parents) {
+			for (uint32_t i = 0; i < ce->num_parents; i++) {
 				phpdbg_out("|-------- ");
-				phpdbg_print_class_name(pce);
-			} while ((pce = pce->parent));
+				phpdbg_print_class_name(ce->parents[i]->ce);
+			}
 		}
 
 		if (ce->info.user.filename) {

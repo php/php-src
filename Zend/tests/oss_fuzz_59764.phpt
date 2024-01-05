@@ -5,4 +5,4 @@ oss-fuzz #59764: Test
 const B = []::{A};
 ?>
 --EXPECTF--
-Fatal error: Class name must be a valid object or a string in %s on line %d
+Fatal error: Dynamic class names are not allowed in compile-time class constant references in %s on line %d

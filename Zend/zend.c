@@ -1050,7 +1050,6 @@ void zend_register_standard_ini_entries(void) /* {{{ */
 }
 /* }}} */
 
-
 /* Unlink the global (r/o) copies of the class, function and constant tables,
  * and use a fresh r/w copy for the startup thread
  */

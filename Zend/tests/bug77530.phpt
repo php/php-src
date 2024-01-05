@@ -7,4 +7,4 @@ echo (2)::class;
 
 ?>
 --EXPECTF--
-Fatal error: Illegal class name in %s on line %d
+Fatal error: Cannot use "::class" on int in %s on line %d

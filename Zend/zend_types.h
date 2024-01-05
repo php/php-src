@@ -142,16 +142,19 @@ typedef struct {
 	zend_type types[1] ZEND_ELEMENT_COUNT(num_types);
 } zend_type_list;
 
-#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
-#define _ZEND_TYPE_MASK ((1u << 25) - 1)
+#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 26
+#define _ZEND_TYPE_MASK ((1u << 26) - 1)
+
 /* Only one of these bits may be set. */
-#define _ZEND_TYPE_NAME_BIT (1u << 24)
-// Used to signify that type.ptr is not a `zend_string*` but a `const char*`,
-#define _ZEND_TYPE_LITERAL_NAME_BIT (1u << 23)
-#define _ZEND_TYPE_LIST_BIT (1u << 22)
-#define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_NAME_BIT|_ZEND_TYPE_LITERAL_NAME_BIT)
+#define _ZEND_TYPE_PNR_BIT (1u << 25)
+#define _ZEND_TYPE_CLASS_REF_BIT (1u << 24)
+#define _ZEND_TYPE_LIST_BIT (1u << 23)
 /* For BC behaviour with iterable type */
-#define _ZEND_TYPE_ITERABLE_BIT (1u << 21)
+#define _ZEND_TYPE_ITERABLE_BIT (1u << 22)
+#define _ZEND_TYPE_GENERIC_PARAM_BIT (1u << 21)
+#define _ZEND_TYPE_CLASS_MASK \
+	(_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_CLASS_REF_BIT|_ZEND_TYPE_PNR_BIT)
+#define _ZEND_TYPE_COMPLEX_MASK (_ZEND_TYPE_CLASS_MASK|_ZEND_TYPE_GENERIC_PARAM_BIT)
 /* Whether the type list is arena allocated */
 #define _ZEND_TYPE_ARENA_BIT (1u << 20)
 /* Whether the type list is an intersection type */
@@ -163,19 +166,35 @@ typedef struct {
 /* Must have same value as MAY_BE_NULL */
 #define _ZEND_TYPE_NULLABLE_BIT 0x2u
 
+/* Both tag 0 and 1 represent a PNR, as it internally tags with the low bit. */
+#define _ZEND_TYPE_LIST_CLASS_REF_TAG ((uintptr_t) 2)
+#define _ZEND_TYPE_LIST_GENERIC_PARAM_TAG ((uintptr_t) 3)
+#define _ZEND_TYPE_LIST_TAG_MASK ((uintptr_t) 3)
+
 #define ZEND_TYPE_IS_SET(t) \
 	(((t).type_mask & _ZEND_TYPE_MASK) != 0)
 
-/* If a type is complex it means it's either a list with a union or intersection,
- * or the void pointer is a class name */
+#define ZEND_TYPE_HAS_CLASS(t) \
+	((((t).type_mask) & _ZEND_TYPE_CLASS_MASK) != 0)
+
 #define ZEND_TYPE_IS_COMPLEX(t) \
-	((((t).type_mask) & _ZEND_TYPE_KIND_MASK) != 0)
+	((((t).type_mask) & _ZEND_TYPE_COMPLEX_MASK) != 0)
 
-#define ZEND_TYPE_HAS_NAME(t) \
-	((((t).type_mask) & _ZEND_TYPE_NAME_BIT) != 0)
+#define ZEND_TYPE_HAS_CLASS_REF(t) \
+	((((t).type_mask) & _ZEND_TYPE_CLASS_REF_BIT) != 0)
 
+#define ZEND_TYPE_HAS_PNR(t) \
+	((((t).type_mask) & _ZEND_TYPE_PNR_BIT) != 0)
+
+/* Only used for arginfo, reuse bit. */
 #define ZEND_TYPE_HAS_LITERAL_NAME(t) \
-	((((t).type_mask) & _ZEND_TYPE_LITERAL_NAME_BIT) != 0)
+	ZEND_TYPE_HAS_PNR(t)
+
+#define ZEND_TYPE_HAS_SIMPLE_PNR(t) \
+	(ZEND_TYPE_HAS_PNR(t) && ZEND_PNR_IS_SIMPLE(ZEND_TYPE_PNR(t)))
+
+#define ZEND_TYPE_HAS_COMPLEX_PNR(t) \
+	(ZEND_TYPE_HAS_PNR(t) && ZEND_PNR_IS_COMPLEX(ZEND_TYPE_PNR(t)))
 
 #define ZEND_TYPE_HAS_LIST(t) \
 	((((t).type_mask) & _ZEND_TYPE_LIST_BIT) != 0)
@@ -189,20 +208,38 @@ typedef struct {
 #define ZEND_TYPE_IS_UNION(t) \
 	((((t).type_mask) & _ZEND_TYPE_UNION_BIT) != 0)
 
+#define ZEND_TYPE_HAS_GENERIC_PARAM(t) \
+	((((t).type_mask) & _ZEND_TYPE_GENERIC_PARAM_BIT) != 0)
+
 #define ZEND_TYPE_USES_ARENA(t) \
 	((((t).type_mask) & _ZEND_TYPE_ARENA_BIT) != 0)
 
 #define ZEND_TYPE_IS_ONLY_MASK(t) \
 	(ZEND_TYPE_IS_SET(t) && (t).ptr == NULL)
 
-#define ZEND_TYPE_NAME(t) \
-	((zend_string *) (t).ptr)
+#define ZEND_TYPE_PNR(t) \
+	((zend_packed_name_reference) (t).ptr)
+
+#define ZEND_TYPE_PNR_SIMPLE_NAME(t) \
+	ZEND_PNR_SIMPLE_GET_NAME(ZEND_TYPE_PNR(t))
+
+#define ZEND_TYPE_PNR_NAME(t) \
+	ZEND_PNR_GET_NAME(ZEND_TYPE_PNR(t))
 
 #define ZEND_TYPE_LITERAL_NAME(t) \
 	((const char *) (t).ptr)
 
+#define ZEND_TYPE_CLASS_REF(t) \
+	((zend_class_reference *) (t).ptr)
+
+#define ZEND_TYPE_PNR(t) \
+	((zend_packed_name_reference) (t).ptr)
+
 #define ZEND_TYPE_LIST(t) \
 	((zend_type_list *) (t).ptr)
+
+#define ZEND_TYPE_GENERIC_PARAM_ID(t) \
+	((uint32_t) (uintptr_t) (t).ptr)
 
 #define ZEND_TYPE_LIST_SIZE(num_types) \
 	(sizeof(zend_type_list) + ((num_types) - 1) * sizeof(zend_type))
@@ -217,6 +254,17 @@ typedef struct {
 #define ZEND_TYPE_LIST_FOREACH_END() \
 	} \
 } while (0)
+
+#define ZEND_TYPE_LIST_FOREACH_CONST(list, type_ptr) do { \
+	const zend_type *_list = (list)->types; \
+	const zend_type *_end = _list + (list)->num_types; \
+	for (; _list < _end; _list++) { \
+		type_ptr = _list;
+
+#define ZEND_TYPE_LIST_FOREACH_CONST_END() \
+	} \
+} while (0)
+
 
 /* This iterates over any zend_type. If it's a type list, all list elements will
  * be visited. If it's a single type, only the single type is visited. */
@@ -240,11 +288,17 @@ typedef struct {
 #define ZEND_TYPE_SET_PTR(t, _ptr) \
 	((t).ptr = (_ptr))
 
+#define ZEND_TYPE_SET_GENERIC_PARAM_ID(t, _id) \
+	((t).ptr = (void *) (uintptr_t) (_id))
+
 #define ZEND_TYPE_SET_PTR_AND_KIND(t, _ptr, kind_bit) do { \
 	(t).ptr = (_ptr); \
-	(t).type_mask &= ~_ZEND_TYPE_KIND_MASK; \
+	(t).type_mask &= ~_ZEND_TYPE_COMPLEX_MASK; \
 	(t).type_mask |= (kind_bit); \
 } while (0)
+
+#define ZEND_TYPE_SET_CLASS_REF(t, ce_ref) \
+	ZEND_TYPE_SET_PTR_AND_KIND(t, ce_ref, _ZEND_TYPE_CLASS_REF_BIT)
 
 #define ZEND_TYPE_SET_LIST(t, list) \
 	ZEND_TYPE_SET_PTR_AND_KIND(t, list, _ZEND_TYPE_LIST_BIT)
@@ -300,17 +354,79 @@ typedef struct {
 #define ZEND_TYPE_INIT_INTERSECTION(ptr, extra_flags) \
 	_ZEND_TYPE_PREFIX { (void *) (ptr), (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_INTERSECTION_BIT) | (extra_flags) }
 
-#define ZEND_TYPE_INIT_CLASS(class_name, allow_null, extra_flags) \
-	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_NAME_BIT, allow_null, extra_flags)
+#define ZEND_TYPE_INIT_CLASS_REF(ce_ref, allow_null, extra_flags) \
+	ZEND_TYPE_INIT_PTR(ce_ref, _ZEND_TYPE_CLASS_REF_BIT, allow_null, extra_flags)
+
+#define ZEND_TYPE_INIT_PNR(pnr, allow_null, extra_flags) \
+	ZEND_TYPE_INIT_PTR((void *) pnr, _ZEND_TYPE_PNR_BIT, allow_null, extra_flags)
 
 #define ZEND_TYPE_INIT_CLASS_MASK(class_name, type_mask) \
-	ZEND_TYPE_INIT_PTR_MASK(class_name, _ZEND_TYPE_NAME_BIT | (type_mask))
+	ZEND_TYPE_INIT_PTR_MASK(class_name, _ZEND_TYPE_PNR_BIT | (type_mask))
 
 #define ZEND_TYPE_INIT_CLASS_CONST(class_name, allow_null, extra_flags) \
-	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_LITERAL_NAME_BIT, allow_null, extra_flags)
+	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_PNR_BIT, allow_null, extra_flags)
 
 #define ZEND_TYPE_INIT_CLASS_CONST_MASK(class_name, type_mask) \
-	ZEND_TYPE_INIT_PTR_MASK(class_name, (_ZEND_TYPE_LITERAL_NAME_BIT | (type_mask)))
+	ZEND_TYPE_INIT_PTR_MASK(class_name, (_ZEND_TYPE_PNR_BIT | (type_mask)))
+
+#define ZEND_TYPE_INIT_GENERIC_PARAM(param_id, extra_flags) \
+	{ (void *) (uintptr_t) param_id, _ZEND_TYPE_GENERIC_PARAM_BIT | (extra_flags) }
+
+/* Represents a class entry together with bound generic type arguments. Normal class entries
+ * are prefixed with a compatible header, such that any class can be cheaply reinterpreted as
+ * a zero-argument reference to itself. */
+typedef struct _zend_class_reference {
+	zend_class_entry *ce;
+	zend_type_list args;
+} zend_class_reference;
+
+/* The same, but for unresolved cases where we only have the name available.
+ * This should be structurally the same zend_class_reference to permit in-place resolution. */
+typedef struct _zend_name_reference {
+	zend_string *name;
+	zend_type_list args;
+} zend_name_reference;
+
+#define ZEND_CLASS_ENTRY_HEADER_SIZE (2 * sizeof(void*))
+
+#define ZEND_CE_TO_REF(ce) \
+	((zend_class_reference *) ((char *) (ce) - ZEND_CLASS_ENTRY_HEADER_SIZE))
+
+#define ZEND_REF_IS_TRIVIAL(ref) \
+	((ref)->ce == (zend_class_entry *) ((char *) (ref) + ZEND_CLASS_ENTRY_HEADER_SIZE))
+
+#define ZEND_CLASS_REF_SIZE(num_types) \
+	(sizeof(zend_class_reference) - sizeof(zend_type) + (num_types) * sizeof(zend_type))
+
+/* A packed name reference is used to either store a simple name string,
+ * or a full zend_name_reference structure. The low bit is reserved for the tag. */
+typedef uintptr_t zend_packed_name_reference;
+
+// TODO: Make this non-static?
+static const zend_type_list zend_empty_type_list = {0};
+
+#define ZEND_PNR_IS_COMPLEX(pnr) ((pnr) & 1)
+#define ZEND_PNR_IS_SIMPLE(pnr) !ZEND_PNR_IS_COMPLEX(pnr)
+#define ZEND_PNR_SIMPLE_GET_NAME(pnr) ((zend_string *) (pnr))
+#define ZEND_PNR_COMPLEX_GET_REF(pnr) ((zend_name_reference *) (pnr - 1))
+#define ZEND_PNR_COMPLEX_GET_NAME(pnr) ZEND_PNR_COMPLEX_GET_REF(pnr)->name
+
+#define ZEND_PNR_ENCODE_NAME(name) ((uintptr_t) (name))
+#define ZEND_PNR_ENCODE_REF(ref) ((uintptr_t) (ref) + 1)
+
+#define ZEND_PNR_GET_NAME(pnr) \
+	(ZEND_PNR_IS_COMPLEX(pnr) ? ZEND_PNR_COMPLEX_GET_NAME(pnr) : ZEND_PNR_SIMPLE_GET_NAME(pnr))
+
+#define ZEND_PNR_UNPACK(pnr, name_var, args_var) do { \
+	if (ZEND_PNR_IS_COMPLEX(pnr)) { \
+		zend_name_reference *__ref = ZEND_PNR_COMPLEX_GET_REF(pnr); \
+		(name_var) = __ref->name; \
+		(args_var) = &__ref->args; \
+	} else { \
+		(name_var) = ZEND_PNR_SIMPLE_GET_NAME(pnr); \
+		(args_var) = &zend_empty_type_list; \
+	} \
+} while (0)
 
 typedef union _zend_value {
 	zend_long         lval;				/* long value */

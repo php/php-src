@@ -254,9 +254,8 @@ static void spl_object_storage_addall(spl_SplObjectStorage *intern, spl_SplObjec
 static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zend_object *orig) /* {{{ */
 {
 	spl_SplObjectStorage *intern;
-	zend_class_entry *parent = class_type;
 
-	intern = emalloc(sizeof(spl_SplObjectStorage) + zend_object_properties_size(parent));
+	intern = emalloc(sizeof(spl_SplObjectStorage) + zend_object_properties_size(class_type));
 	memset(intern, 0, sizeof(spl_SplObjectStorage) - sizeof(zval));
 	intern->pos = 0;
 
@@ -265,35 +264,29 @@ static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zend
 
 	zend_hash_init(&intern->storage, 0, NULL, spl_object_storage_dtor, 0);
 
-	while (parent) {
-		if (parent == spl_ce_SplObjectStorage) {
-			/* Possible optimization: Cache these results with a map from class entry to IS_NULL/IS_PTR.
-			 * Or maybe just a single item with the result for the most recently loaded subclass. */
-			if (class_type != spl_ce_SplObjectStorage) {
-				zend_function *get_hash = zend_hash_str_find_ptr(&class_type->function_table, "gethash", sizeof("gethash") - 1);
-				if (get_hash->common.scope != spl_ce_SplObjectStorage) {
-					intern->fptr_get_hash = get_hash;
-				}
-				if (intern->fptr_get_hash != NULL ||
-					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetget) ||
-					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetexists)) {
-					intern->flags |= SOS_OVERRIDDEN_READ_DIMENSION;
-				}
-
-				if (intern->fptr_get_hash != NULL ||
-					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetset)) {
-					intern->flags |= SOS_OVERRIDDEN_WRITE_DIMENSION;
-				}
-
-				if (intern->fptr_get_hash != NULL ||
-					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetunset)) {
-					intern->flags |= SOS_OVERRIDDEN_UNSET_DIMENSION;
-				}
-			}
-			break;
+	if (class_type != spl_ce_SplObjectStorage
+			&& zend_class_entry_get_root(class_type) == spl_ce_SplObjectStorage) {
+		/* Possible optimization: Cache these results with a map from class entry to IS_NULL/IS_PTR.
+		 * Or maybe just a single item with the result for the most recently loaded subclass. */
+		zend_function *get_hash = zend_hash_str_find_ptr(&class_type->function_table, "gethash", sizeof("gethash") - 1);
+		if (get_hash->common.scope != spl_ce_SplObjectStorage) {
+			intern->fptr_get_hash = get_hash;
+		}
+		if (intern->fptr_get_hash != NULL ||
+			SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetget) ||
+			SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetexists)) {
+			intern->flags |= SOS_OVERRIDDEN_READ_DIMENSION;
 		}
 
-		parent = parent->parent;
+		if (intern->fptr_get_hash != NULL ||
+			SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetset)) {
+			intern->flags |= SOS_OVERRIDDEN_WRITE_DIMENSION;
+		}
+
+		if (intern->fptr_get_hash != NULL ||
+			SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetunset)) {
+			intern->flags |= SOS_OVERRIDDEN_UNSET_DIMENSION;
+		}
 	}
 
 	if (orig) {

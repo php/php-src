@@ -2476,18 +2476,60 @@ ZEND_API bool ZEND_FASTCALL instanceof_function_slow(const zend_class_entry *ins
 		}
 		return 0;
 	} else {
-		while (1) {
-			instance_ce = instance_ce->parent;
-			if (instance_ce == ce) {
-				return 1;
-			}
-			if (instance_ce == NULL) {
-				return 0;
+		if (instance_ce->num_parents) {
+			for (uint32_t i = 0; i < instance_ce->num_parents; i++) {
+				zend_class_reference *parent_ref = instance_ce->parents[i];
+				if (parent_ref->ce == ce) {
+					return 1;
+				}
 			}
 		}
+		return 0;
 	}
 }
 /* }}} */
+
+static zend_always_inline bool zend_type_lists_compatible(
+		const zend_type_list *list1, const zend_type_list *list2, const zend_class_entry *ce) {
+	/* list1 is complete, while list2 may have defaulted arguments. */
+	uint32_t i = 0;
+	for (; i < list2->num_types; i++) {
+		const zend_type *type1 = &list1->types[i];
+		const zend_type *type2 = &list2->types[i];
+		// TODO: Implement proper type comparison.
+		if (type1->type_mask != type2->type_mask || type1->ptr != type2->ptr) {
+			return 0;
+		}
+	}
+	for (; i < list1->num_types; i++) {
+		const zend_type *type1 = &list1->types[i];
+		const zend_type *type2 = &ce->generic_params[i].default_type;
+		// TODO: Implement proper type comparison.
+		if (type1->type_mask != type2->type_mask || type1->ptr != type2->ptr) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+ZEND_API bool ZEND_FASTCALL instanceof_unpacked_slow(
+		const zend_class_reference *instance_ref, const zend_class_entry *ce, const zend_type_list *args) {
+	zend_class_entry *instance_ce = instance_ref->ce;
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		return instanceof_function(instance_ce, ce);
+	} else {
+		if (instance_ce == ce && zend_type_lists_compatible(&instance_ref->args, args, ce)) {
+			return 1;
+		}
+		for (uint32_t i = 0; i < instance_ce->num_parents; i++) {
+			zend_class_reference *parent_ref = instance_ce->parents[i];
+			if (parent_ref->ce == ce && zend_type_lists_compatible(&parent_ref->args, args, ce)) {
+				return 1;
+			}
+		}
+		return 0;
+	}
+}
 
 #define LOWER_CASE 1
 #define UPPER_CASE 2

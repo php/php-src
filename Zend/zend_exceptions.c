@@ -59,8 +59,8 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 	/* zend_ce_exception and zend_ce_error may not be initialized yet when this is called (e.g when
 	 * implementing Throwable for Exception itself). Perform a manual inheritance check. */
 	zend_class_entry *root = class_type;
-	while (root->parent) {
-		root = root->parent;
+	if (root->num_parents) {
+		root = root->parents[root->num_parents-1]->ce;
 	}
 	if (zend_string_equals_literal(root->name, "Exception")
 			|| zend_string_equals_literal(root->name, "Error")) {

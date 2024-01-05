@@ -314,10 +314,7 @@ static void date_throw_uninitialized_error(zend_class_entry *ce)
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 		zend_throw_error(date_ce_date_object_error, "Object of type %s has not been correctly initialized by calling parent::__construct() in its constructor", ZSTR_VAL(ce->name));
 	} else {
-		zend_class_entry *ce_ptr = ce;
-		while (ce_ptr && ce_ptr->parent && ce_ptr->type == ZEND_USER_CLASS) {
-			ce_ptr = ce_ptr->parent;
-		}
+		zend_class_entry *ce_ptr = zend_class_entry_get_root(ce);
 		if (ce_ptr->type != ZEND_INTERNAL_CLASS) {
 			zend_throw_error(date_ce_date_object_error, "Object of type %s not been correctly initialized by calling parent::__construct() in its constructor", ZSTR_VAL(ce->name));
 		}
@@ -1596,8 +1593,8 @@ static zend_class_entry *get_base_date_class(zend_class_entry *start_ce)
 {
 	zend_class_entry *tmp = start_ce;
 
-	while (tmp != date_ce_date && tmp != date_ce_immutable && tmp->parent) {
-		tmp = tmp->parent;
+	while (tmp != date_ce_date && tmp != date_ce_immutable && tmp->num_parents) {
+		tmp = tmp->parents[0]->ce;
 	}
 
 	return tmp;

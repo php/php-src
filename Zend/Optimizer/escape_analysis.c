@@ -164,7 +164,7 @@ static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, i
 					/* These flags will always cause an exception */
 					ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS
 					| ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT;
-				if (ce && !ce->parent && !ce->create_object && !ce->constructor &&
+				if (ce && !ce->num_parents && !ce->create_object && !ce->constructor &&
 					!ce->destructor && !ce->__get && !ce->__set &&
 					!(ce->ce_flags & forbidden_flags) &&
 					(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
@@ -228,7 +228,7 @@ static bool is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int va
 				zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
 					script, op_array, opline);
 				if (ce && !ce->create_object && !ce->constructor &&
-					!ce->destructor && !ce->__get && !ce->__set && !ce->parent) {
+					!ce->destructor && !ce->__get && !ce->__set && !ce->num_parents) {
 					return 1;
 				}
 				break;

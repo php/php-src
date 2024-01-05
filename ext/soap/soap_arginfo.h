@@ -489,7 +489,7 @@ static zend_class_entry *register_class_SoapServer(void)
 	ZVAL_NULL(&property___soap_fault_default_value);
 	zend_string *property___soap_fault_name = zend_string_init("__soap_fault", sizeof("__soap_fault") - 1, 1);
 	zend_string *property___soap_fault_class_SoapFault = zend_string_init("SoapFault", sizeof("SoapFault")-1, 1);
-	zend_declare_typed_property(class_entry, property___soap_fault_name, &property___soap_fault_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property___soap_fault_class_SoapFault, 0, MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property___soap_fault_name, &property___soap_fault_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS_CONST(property___soap_fault_class_SoapFault, 0, MAY_BE_NULL));
 	zend_string_release(property___soap_fault_name);
 
 	return class_entry;
@@ -692,7 +692,7 @@ static zend_class_entry *register_class_SoapClient(void)
 	ZVAL_NULL(&property___soap_fault_default_value);
 	zend_string *property___soap_fault_name = zend_string_init("__soap_fault", sizeof("__soap_fault") - 1, 1);
 	zend_string *property___soap_fault_class_SoapFault = zend_string_init("SoapFault", sizeof("SoapFault")-1, 1);
-	zend_declare_typed_property(class_entry, property___soap_fault_name, &property___soap_fault_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property___soap_fault_class_SoapFault, 0, MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property___soap_fault_name, &property___soap_fault_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS_CONST(property___soap_fault_class_SoapFault, 0, MAY_BE_NULL));
 	zend_string_release(property___soap_fault_name);
 
 	zval property___last_request_default_value;

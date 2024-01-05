@@ -144,16 +144,28 @@ struct _zend_inheritance_cache_entry {
 	zend_class_entry             *traits_and_interfaces[1];
 };
 
+typedef struct _zend_generic_param {
+	zend_string *name;
+	zend_type bound_type;
+	zend_type default_type;
+} zend_generic_param;
+
 struct _zend_class_entry {
 	char type;
 	zend_string *name;
-	/* class_entry or string depending on ZEND_ACC_LINKED */
-	union {
-		zend_class_entry *parent;
-		zend_string *parent_name;
-	};
 	int refcount;
 	uint32_t ce_flags;
+
+	/* Before inheritance, this is either zero or one.
+	 * After inheritance it includes grandparents as well. */
+	uint32_t num_parents;
+	union {
+		/* List of parents. The direct parent is parents[0],
+		 * below that are inherited grandparents. */
+		zend_class_reference **parents;
+		/* Before linking, only the name of the direct parent is stored. */
+		zend_packed_name_reference parent_name;
+	};
 
 	int default_properties_count;
 	int default_static_members_count;
@@ -218,6 +230,14 @@ struct _zend_class_entry {
 
 	uint32_t enum_backing_type;
 	HashTable *backed_enum_table;
+
+	/* generic_params are the free generic parameters on this class.
+	 * bound_generic_args are the bound generic parameters of parent classes. */
+	uint32_t num_generic_params;
+	uint32_t num_required_generic_params;
+	uint32_t num_bound_generic_args;
+	zend_generic_param *generic_params;
+	zend_type *bound_generic_args;
 
 	union {
 		struct {

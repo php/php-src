@@ -468,6 +468,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **p
 
 static ZEND_COLD bool zend_null_arg_deprecated(const char *fallback_type, uint32_t arg_num) {
 	zend_function *func = EG(current_execute_data)->func;
+	zend_class_entry *scope = EG(current_execute_data)->func->common.scope;
 	ZEND_ASSERT(arg_num > 0);
 	uint32_t arg_offset = arg_num - 1;
 	if (arg_offset >= func->common.num_args) {
@@ -481,7 +482,7 @@ static ZEND_COLD bool zend_null_arg_deprecated(const char *fallback_type, uint32
 
 	/* If no type is specified in arginfo, use the specified fallback_type determined through
 	 * zend_parse_parameters instead. */
-	zend_string *type_str = zend_type_to_string(arg_info->type);
+	zend_string *type_str = zend_type_to_string(arg_info->type, scope);
 	const char *type = type_str ? ZSTR_VAL(type_str) : fallback_type;
 	zend_error(E_DEPRECATED,
 		"%s(): Passing null to parameter #%" PRIu32 "%s%s%s of type %s is deprecated",
@@ -1424,7 +1425,7 @@ static zend_result update_property(zval *val, zend_property_info *prop_info) {
 			return FAILURE;
 		}
 		/* property initializers must always be evaluated with strict types */;
-		if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, /* strict */ 1))) {
+		if (UNEXPECTED(!zend_verify_property_type(NULL, prop_info, &tmp, /* strict */ 1))) {
 			zval_ptr_dtor(&tmp);
 			return FAILURE;
 		}
@@ -1491,8 +1492,8 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 		}
 	}
 
-	if (class_type->parent) {
-		if (UNEXPECTED(zend_update_class_constants(class_type->parent) != SUCCESS)) {
+	if (class_type->num_parents) {
+		if (UNEXPECTED(zend_update_class_constants(class_type->parents[0]->ce) != SUCCESS)) {
 			return FAILURE;
 		}
 	}
@@ -1655,7 +1656,7 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 					zval tmp;
 
 					ZVAL_COPY_VALUE(&tmp, prop);
-					if (UNEXPECTED(!zend_verify_property_type(property_info, &tmp, 0))) {
+					if (UNEXPECTED(!zend_verify_property_type(object, property_info, &tmp, 0))) {
 						continue;
 					}
 					ZVAL_COPY_VALUE(slot, &tmp);
@@ -2564,7 +2565,7 @@ static void zend_check_magic_method_arg_type(uint32_t arg_num, const zend_class_
 			zend_error(error_type, "%s::%s(): Parameter #%d ($%s) must be of type %s when declared",
 				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name),
 				arg_num + 1, ZSTR_VAL(fptr->common.arg_info[arg_num].name),
-				ZSTR_VAL(zend_type_to_string((zend_type) ZEND_TYPE_INIT_MASK(arg_type))));
+				ZSTR_VAL(zend_type_to_string((zend_type) ZEND_TYPE_INIT_MASK(arg_type), ce)));
 		}
 }
 
@@ -2590,7 +2591,7 @@ static void zend_check_magic_method_return_type(const zend_class_entry *ce, cons
 	if (extra_types || (is_complex_type && return_type != MAY_BE_OBJECT)) {
 		zend_error(error_type, "%s::%s(): Return type must be %s when declared",
 			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name),
-			ZSTR_VAL(zend_type_to_string((zend_type) ZEND_TYPE_INIT_MASK(return_type))));
+			ZSTR_VAL(zend_type_to_string((zend_type) ZEND_TYPE_INIT_MASK(return_type), ce)));
 	}
 }
 
@@ -2771,19 +2772,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arg_info_toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 static zend_always_inline void zend_normalize_internal_type(zend_type *type) {
-	ZEND_ASSERT(!ZEND_TYPE_HAS_LITERAL_NAME(*type));
 	zend_type *current;
 	ZEND_TYPE_FOREACH(*type, current) {
-		if (ZEND_TYPE_HAS_NAME(*current)) {
-			zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*current));
+		if (ZEND_TYPE_HAS_PNR(*current)) {
+			zend_string *name = zend_new_interned_string(ZEND_TYPE_PNR_NAME(*current));
 			zend_alloc_ce_cache(name);
 			ZEND_TYPE_SET_PTR(*current, name);
 		} else if (ZEND_TYPE_HAS_LIST(*current)) {
 			zend_type *inner;
 			ZEND_TYPE_FOREACH(*current, inner) {
-				ZEND_ASSERT(!ZEND_TYPE_HAS_LITERAL_NAME(*inner) && !ZEND_TYPE_HAS_LIST(*inner));
-				if (ZEND_TYPE_HAS_NAME(*inner)) {
-					zend_string *name = zend_new_interned_string(ZEND_TYPE_NAME(*inner));
+				ZEND_ASSERT(!ZEND_TYPE_HAS_LIST(*inner));
+				if (ZEND_TYPE_HAS_PNR(*inner)) {
+					zend_string *name = zend_new_interned_string(ZEND_TYPE_PNR_NAME(*inner));
 					zend_alloc_ce_cache(name);
 					ZEND_TYPE_SET_PTR(*inner, name);
 				}
@@ -2862,7 +2862,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 				internal_function->num_args--;
 			}
 			if (ZEND_TYPE_IS_SET(info->type)) {
-				if (ZEND_TYPE_HAS_NAME(info->type)) {
+				if (ZEND_TYPE_HAS_LITERAL_NAME(info->type)) {
 					const char *type_name = ZEND_TYPE_LITERAL_NAME(info->type);
 					if (!scope && (!strcasecmp(type_name, "self") || !strcasecmp(type_name, "parent"))) {
 						zend_error_noreturn(E_CORE_ERROR, "Cannot declare a return type of %s outside of a class scope", type_name);
@@ -2975,7 +2975,6 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 					// As a temporary workaround, we split the type name on `|` characters,
 					// converting it to an union type if necessary.
 					const char *class_name = ZEND_TYPE_LITERAL_NAME(new_arg_info[i].type);
-					new_arg_info[i].type.type_mask &= ~_ZEND_TYPE_LITERAL_NAME_BIT;
 
 					size_t num_types = 1;
 					const char *p = class_name;
@@ -2989,7 +2988,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 						zend_string *str = zend_string_init_interned(class_name, strlen(class_name), 1);
 						zend_alloc_ce_cache(str);
 						ZEND_TYPE_SET_PTR(new_arg_info[i].type, str);
-						new_arg_info[i].type.type_mask |= _ZEND_TYPE_NAME_BIT;
+						new_arg_info[i].type.type_mask |= _ZEND_TYPE_PNR_BIT;
 					} else {
 						/* Union type */
 						zend_type_list *list = malloc(ZEND_TYPE_LIST_SIZE(num_types));
@@ -3003,7 +3002,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 							const char *end = strchr(start, '|');
 							zend_string *str = zend_string_init_interned(start, end ? end - start : strlen(start), 1);
 							zend_alloc_ce_cache(str);
-							list->types[j] = (zend_type) ZEND_TYPE_INIT_CLASS(str, 0, 0);
+							list->types[j] = (zend_type) ZEND_TYPE_INIT_PNR(ZEND_PNR_ENCODE_NAME(str), 0, 0);
 							if (!end) {
 								break;
 							}
@@ -3287,7 +3286,8 @@ ZEND_API int zend_next_free_module(void) /* {{{ */
 
 static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class_entry, uint32_t ce_flags) /* {{{ */
 {
-	zend_class_entry *class_entry = malloc(sizeof(zend_class_entry));
+	void *ref = malloc(sizeof(zend_class_entry) + ZEND_CLASS_ENTRY_HEADER_SIZE);
+	zend_class_entry *class_entry = zend_init_class_entry_header(ref);
 	zend_string *lowercase_name;
 	*class_entry = *orig_class_entry;
 
@@ -3586,17 +3586,17 @@ static bool zend_is_callable_check_class(zend_string *name, zend_class_entry *sc
 	} else if (zend_string_equals_literal(lcname, "parent")) {
 		if (!scope) {
 			if (error) *error = estrdup("cannot access \"parent\" when no class scope is active");
-		} else if (!scope->parent) {
+		} else if (!scope->num_parents) {
 			if (error) *error = estrdup("cannot access \"parent\" when current class scope has no parent");
 		} else {
 			if (!suppress_deprecation) {
 				zend_error(E_DEPRECATED, "Use of \"parent\" in callables is deprecated");
 			}
 			fcc->called_scope = zend_get_called_scope(frame);
-			if (!fcc->called_scope || !instanceof_function(fcc->called_scope, scope->parent)) {
-				fcc->called_scope = scope->parent;
+			if (!fcc->called_scope || !instanceof_function(fcc->called_scope, scope->parents[0]->ce)) {
+				fcc->called_scope = scope->parents[0]->ce;
 			}
-			fcc->calling_scope = scope->parent;
+			fcc->calling_scope = scope->parents[0]->ce;
 			if (!fcc->object) {
 				fcc->object = zend_get_this_object(frame);
 			}
@@ -4869,7 +4869,7 @@ ZEND_API zend_result zend_update_static_property_ex(zend_class_entry *scope, zen
 	Z_TRY_ADDREF_P(value);
 	if (ZEND_TYPE_IS_SET(prop_info->type)) {
 		ZVAL_COPY_VALUE(&tmp, value);
-		if (!zend_verify_property_type(prop_info, &tmp, /* strict */ 0)) {
+		if (!zend_verify_property_type(NULL, prop_info, &tmp, /* strict */ 0)) {
 			Z_TRY_DELREF_P(value);
 			return FAILURE;
 		}

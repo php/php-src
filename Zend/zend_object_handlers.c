@@ -225,14 +225,11 @@ static void zend_std_call_issetter(zend_object *zobj, zend_string *prop_name, zv
 
 static zend_always_inline bool is_derived_class(const zend_class_entry *child_class, const zend_class_entry *parent_class) /* {{{ */
 {
-	child_class = child_class->parent;
-	while (child_class) {
-		if (child_class == parent_class) {
+	for (uint32_t i = 0; i < child_class->num_parents; i++) {
+		if (child_class->parents[i]->ce == parent_class) {
 			return 1;
 		}
-		child_class = child_class->parent;
 	}
-
 	return 0;
 }
 /* }}} */
@@ -742,7 +739,7 @@ call_getter:
 			}
 
 			if (UNEXPECTED(prop_info)) {
-				zend_verify_prop_assignable_by_ref_ex(prop_info, retval, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0, ZEND_VERIFY_PROP_ASSIGNABLE_BY_REF_CONTEXT_MAGIC_GET);
+				zend_verify_prop_assignable_by_ref_ex(zobj, prop_info, retval, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0, ZEND_VERIFY_PROP_ASSIGNABLE_BY_REF_CONTEXT_MAGIC_GET);
 			}
 
 			OBJ_RELEASE(zobj);
@@ -837,7 +834,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 				ZVAL_COPY_VALUE(&tmp, value);
 				// Increase refcount to prevent object from being released in __toString()
 				GC_ADDREF(zobj);
-				bool type_matched = zend_verify_property_type(prop_info, &tmp, property_uses_strict_types());
+				bool type_matched = zend_verify_property_type(zobj, prop_info, &tmp, property_uses_strict_types());
 				if (UNEXPECTED(GC_DELREF(zobj) == 0)) {
 					zend_object_released_while_assigning_to_property_error(prop_info);
 					zend_objects_store_del(zobj);
@@ -940,7 +937,7 @@ write_std_property:
 				ZVAL_COPY_VALUE(&tmp, value);
 				// Increase refcount to prevent object from being released in __toString()
 				GC_ADDREF(zobj);
-				bool type_matched = zend_verify_property_type(prop_info, &tmp, property_uses_strict_types());
+				bool type_matched = zend_verify_property_type(zobj, prop_info, &tmp, property_uses_strict_types());
 				if (UNEXPECTED(GC_DELREF(zobj) == 0)) {
 					zend_object_released_while_assigning_to_property_error(prop_info);
 					zend_objects_store_del(zobj);
@@ -1296,27 +1293,32 @@ static zend_never_inline zend_function *zend_get_parent_private_method(zend_clas
  */
 ZEND_API bool zend_check_protected(const zend_class_entry *ce, const zend_class_entry *scope) /* {{{ */
 {
-	const zend_class_entry *fbc_scope = ce;
+	if (ce == scope) {
+		return 1;
+	}
+
+	if (scope == NULL) {
+		return 0;
+	}
 
 	/* Is the context that's calling the function, the same as one of
 	 * the function's parents?
 	 */
-	while (fbc_scope) {
-		if (fbc_scope==scope) {
+	for (uint32_t i = 0; i < ce->num_parents; i++) {
+		if (ce->parents[i]->ce == scope) {
 			return 1;
 		}
-		fbc_scope = fbc_scope->parent;
 	}
 
 	/* Is the function's scope the same as our current object context,
 	 * or any of the parents of our context?
 	 */
-	while (scope) {
-		if (scope==ce) {
+	for (uint32_t i = 0; i < scope->num_parents; i++) {
+		if (scope->parents[i]->ce == ce) {
 			return 1;
 		}
-		scope = scope->parent;
 	}
+
 	return 0;
 }
 /* }}} */
@@ -1558,15 +1560,15 @@ ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
 	zval *p;
 
 	if (class_type->default_static_members_count && !CE_STATIC_MEMBERS(class_type)) {
-		if (class_type->parent) {
-			zend_class_init_statics(class_type->parent);
+		if (class_type->num_parents) {
+			zend_class_init_statics(class_type->parents[0]->ce);
 		}
 
 		ZEND_MAP_PTR_SET(class_type->static_members_table, emalloc(sizeof(zval) * class_type->default_static_members_count));
 		for (i = 0; i < class_type->default_static_members_count; i++) {
 			p = &class_type->default_static_members_table[i];
 			if (Z_TYPE_P(p) == IS_INDIRECT) {
-				zval *q = &CE_STATIC_MEMBERS(class_type->parent)[i];
+				zval *q = &CE_STATIC_MEMBERS(class_type->parents[0]->ce)[i];
 				ZVAL_DEINDIRECT(q);
 				ZVAL_INDIRECT(&CE_STATIC_MEMBERS(class_type)[i], q);
 			} else {

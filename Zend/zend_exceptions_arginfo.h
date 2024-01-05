@@ -246,7 +246,7 @@ static zend_class_entry *register_class_Exception(zend_class_entry *class_entry_
 	ZVAL_NULL(&property_previous_default_value);
 	zend_string *property_previous_name = zend_string_init("previous", sizeof("previous") - 1, 1);
 	zend_string *property_previous_class_Throwable = zend_string_init("Throwable", sizeof("Throwable")-1, 1);
-	zend_declare_typed_property(class_entry, property_previous_name, &property_previous_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_previous_class_Throwable, 0, MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_previous_name, &property_previous_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS_CONST(property_previous_class_Throwable, 0, MAY_BE_NULL));
 	zend_string_release(property_previous_name);
 
 	return class_entry;
@@ -316,7 +316,7 @@ static zend_class_entry *register_class_Error(zend_class_entry *class_entry_Thro
 	ZVAL_NULL(&property_previous_default_value);
 	zend_string *property_previous_name = zend_string_init("previous", sizeof("previous") - 1, 1);
 	zend_string *property_previous_class_Throwable = zend_string_init("Throwable", sizeof("Throwable")-1, 1);
-	zend_declare_typed_property(class_entry, property_previous_name, &property_previous_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_previous_class_Throwable, 0, MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_previous_name, &property_previous_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS_CONST(property_previous_class_Throwable, 0, MAY_BE_NULL));
 	zend_string_release(property_previous_name);
 
 	return class_entry;

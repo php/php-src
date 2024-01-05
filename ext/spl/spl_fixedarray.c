@@ -277,10 +277,9 @@ static void spl_fixedarray_object_free_storage(zend_object *object)
 static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, zend_object *orig, bool clone_orig)
 {
 	spl_fixedarray_object *intern;
-	zend_class_entry      *parent = class_type;
 	bool                   inherited = false;
 
-	intern = zend_object_alloc(sizeof(spl_fixedarray_object), parent);
+	intern = zend_object_alloc(sizeof(spl_fixedarray_object), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -290,21 +289,12 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 		spl_fixedarray_copy_ctor(&intern->array, &other->array);
 	}
 
-	while (parent) {
-		if (parent == spl_ce_SplFixedArray) {
-			break;
-		}
-
-		parent = parent->parent;
-		inherited = true;
-	}
-
-	ZEND_ASSERT(parent);
+	inherited = class_type != spl_ce_SplFixedArray;
 
 	if (UNEXPECTED(inherited)) {
 		/* Find count() method */
 		zend_function *fptr_count = zend_hash_find_ptr(&class_type->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
-		if (fptr_count->common.scope == parent) {
+		if (fptr_count->common.scope == spl_ce_SplFixedArray) {
 			fptr_count = NULL;
 		}
 		intern->fptr_count = fptr_count;

@@ -689,7 +689,7 @@ second_try:
 		}
 
 		if (UNEXPECTED(info)) {
-			if (!zend_verify_prop_assignable_by_ref(info, data, /* strict */ 1)) {
+			if (!zend_verify_prop_assignable_by_ref(obj, info, data, /* strict */ 1)) {
 				zval_ptr_dtor(data);
 				ZVAL_UNDEF(data);
 				goto failure;

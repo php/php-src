@@ -2385,8 +2385,8 @@ static uint32_t zend_convert_type(const zend_script *script, zend_type type, zen
 		if (pce) {
 			/* As we only have space to store one CE,
 			 * we use a plain object type for class unions. */
-			if (ZEND_TYPE_HAS_NAME(type)) {
-				zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(type));
+			if (ZEND_TYPE_HAS_PNR(type)) {
+				zend_string *lcname = zend_string_tolower(ZEND_TYPE_PNR_NAME(type));
 				// TODO: Pass through op_array.
 				*pce = zend_optimizer_get_class_entry(script, NULL, lcname);
 				zend_string_release_ex(lcname, 0);
@@ -2470,7 +2470,7 @@ static const zend_property_info *zend_fetch_static_prop_info(const zend_script *
 					break;
 				case ZEND_FETCH_CLASS_PARENT:
 					if (op_array->scope && (op_array->scope->ce_flags & ZEND_ACC_LINKED)) {
-						ce = op_array->scope->parent;
+						ce = op_array->scope->parents[0]->ce;
 					}
 					break;
 			}
@@ -3341,8 +3341,8 @@ static zend_always_inline zend_result _zend_update_type_info(
 						}
 						break;
 					case ZEND_FETCH_CLASS_PARENT:
-						if (op_array->scope && op_array->scope->parent && (op_array->scope->ce_flags & ZEND_ACC_LINKED)) {
-							UPDATE_SSA_OBJ_TYPE(op_array->scope->parent, 0, ssa_op->result_def);
+						if (op_array->scope && op_array->scope->parents[0]->ce && (op_array->scope->ce_flags & ZEND_ACC_LINKED)) {
+							UPDATE_SSA_OBJ_TYPE(op_array->scope->parents[0]->ce, 0, ssa_op->result_def);
 						} else {
 							UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_op->result_def);
 						}
@@ -3992,17 +3992,6 @@ ZEND_API zend_result zend_update_type_info(
 	return _zend_update_type_info(op_array, ssa, script, NULL, opline, ssa_op, ssa_opcodes, optimization_level, 0);
 }
 
-static uint32_t get_class_entry_rank(zend_class_entry *ce) {
-	uint32_t rank = 0;
-	if (ce->ce_flags & ZEND_ACC_LINKED) {
-		while (ce->parent) {
-			rank++;
-			ce = ce->parent;
-		}
-	}
-	return rank;
-}
-
 /* Compute least common ancestor on class inheritance tree only */
 static zend_class_entry *join_class_entries(
 		zend_class_entry *ce1, zend_class_entry *ce2, int *is_instanceof) {
@@ -4014,22 +4003,20 @@ static zend_class_entry *join_class_entries(
 		return NULL;
 	}
 
-	rank1 = get_class_entry_rank(ce1);
-	rank2 = get_class_entry_rank(ce2);
-
-	while (rank1 != rank2) {
-		if (rank1 > rank2) {
-			ce1 = !(ce1->ce_flags & ZEND_ACC_LINKED) ? NULL : ce1->parent;
-			rank1--;
-		} else {
-			ce2 = !(ce2->ce_flags & ZEND_ACC_LINKED) ? NULL : ce2->parent;
-			rank2--;
-		}
+	if (ce1->num_parents > ce2->num_parents) {
+		rank1 = ce1->num_parents - ce2->num_parents;
+		rank2 = 0;
+	} else {
+		rank1 = 0;
+		rank2 = ce2->num_parents - ce1->num_parents;
 	}
 
+	ce1 = rank1 > 0 ? ce1->parents[rank1-1]->ce : ce1;
+	ce2 = rank2 > 0 ? ce2->parents[rank2-1]->ce : ce2;
+
 	while (ce1 != ce2) {
-		ce1 = !(ce1->ce_flags & ZEND_ACC_LINKED) ? NULL : ce1->parent;
-		ce2 = !(ce2->ce_flags & ZEND_ACC_LINKED) ? NULL : ce2->parent;
+		ce1 = !(ce1->ce_flags & ZEND_ACC_LINKED) || !ce1->num_parents ? NULL : ce1->parents[0]->ce;
+		ce2 = !(ce2->ce_flags & ZEND_ACC_LINKED) || !ce2->num_parents ? NULL : ce2->parents[0]->ce;
 	}
 
 	if (ce1) {
@@ -5070,7 +5057,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				const zend_class_entry *ce = var_info->ce;
 
 				if (var_info->is_instanceof ||
-				    !ce || ce->create_object || ce->__get || ce->__set || ce->parent) {
+				    !ce || ce->create_object || ce->__get || ce->__set || ce->num_parents) {
 					return 1;
 				}
 

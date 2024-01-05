@@ -71,7 +71,7 @@ static zend_class_entry * spl_find_ce_by_name(zend_string *name, bool autoload)
 PHP_FUNCTION(class_parents)
 {
 	zval *obj;
-	zend_class_entry *parent_class, *ce;
+	zend_class_entry *ce;
 	bool autoload = 1;
 
 	/* We do not use Z_PARAM_OBJ_OR_STR here to be able to exclude int, float, and bool which are bogus class names */
@@ -93,10 +93,8 @@ PHP_FUNCTION(class_parents)
 	}
 
 	array_init(return_value);
-	parent_class = ce->parent;
-	while (parent_class) {
-		spl_add_class_name(return_value, parent_class, 0, 0);
-		parent_class = parent_class->parent;
+	for (uint32_t i = 0; i < ce->num_parents; i++) {
+		spl_add_class_name(return_value, ce->parents[i]->ce, 0, 0);
 	}
 }
 /* }}} */

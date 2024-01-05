@@ -278,8 +278,8 @@ static inline bool can_elide_list_type(
 			ZEND_ASSERT(!is_intersection);
 			return can_elide_list_type(script, op_array, use_info, *single_type);
 		}
-		if (ZEND_TYPE_HAS_NAME(*single_type)) {
-			zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(*single_type));
+		if (ZEND_TYPE_HAS_PNR(*single_type)) {
+			zend_string *lcname = zend_string_tolower(ZEND_TYPE_PNR_NAME(*single_type));
 			zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, lcname);
 			zend_string_release(lcname);
 			bool result = ce && safe_instanceof(use_info->ce, ce);

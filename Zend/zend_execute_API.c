@@ -1660,10 +1660,11 @@ check_fetch_type:
 				zend_throw_or_error(fetch_type, NULL, "Cannot access \"parent\" when no class scope is active");
 				return NULL;
 			}
-			if (UNEXPECTED(!scope->parent)) {
+			if (UNEXPECTED(!scope->num_parents)) {
 				zend_throw_or_error(fetch_type, NULL, "Cannot access \"parent\" when current class scope has no parent");
+				return NULL;
 			}
-			return scope->parent;
+			return scope->parents[0]->ce;
 		case ZEND_FETCH_CLASS_STATIC:
 			ce = zend_get_called_scope(EG(current_execute_data));
 			if (UNEXPECTED(!ce)) {
@@ -1704,10 +1705,11 @@ zend_class_entry *zend_fetch_class_with_scope(
 				zend_throw_or_error(fetch_type, NULL, "Cannot access \"parent\" when no class scope is active");
 				return NULL;
 			}
-			if (UNEXPECTED(!scope->parent)) {
+			if (UNEXPECTED(!scope->num_parents)) {
 				zend_throw_or_error(fetch_type, NULL, "Cannot access \"parent\" when current class scope has no parent");
+				return NULL;
 			}
-			return scope->parent;
+			return scope->parents[0]->ce;
 		case 0:
 			break;
 		/* Other fetch types are not supported by this function. */

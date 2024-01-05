@@ -306,7 +306,7 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 
 	if (class_type->get_iterator && class_type->get_iterator != zend_user_it_get_new_iterator) {
 		/* get_iterator was explicitly assigned for an internal class. */
-		if (!class_type->parent || class_type->parent->get_iterator != class_type->get_iterator) {
+		if (!class_type->num_parents || class_type->parents[0]->ce->get_iterator != class_type->get_iterator) {
 			ZEND_ASSERT(class_type->type == ZEND_INTERNAL_CLASS);
 			return SUCCESS;
 		}
@@ -352,7 +352,7 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 		&class_type->function_table, "next", sizeof("next") - 1);
 
 	if (class_type->get_iterator && class_type->get_iterator != zend_user_it_get_iterator) {
-		if (!class_type->parent || class_type->parent->get_iterator != class_type->get_iterator) {
+		if (!class_type->num_parents || class_type->parents[0]->ce->get_iterator != class_type->get_iterator) {
 			/* get_iterator was explicitly assigned for an internal class. */
 			ZEND_ASSERT(class_type->type == ZEND_INTERNAL_CLASS);
 			return SUCCESS;
@@ -460,9 +460,9 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 /* {{{ zend_implement_serializable */
 static int zend_implement_serializable(zend_class_entry *interface, zend_class_entry *class_type)
 {
-	if (class_type->parent
-		&& (class_type->parent->serialize || class_type->parent->unserialize)
-		&& !zend_class_implements_interface(class_type->parent, zend_ce_serializable)) {
+	if (class_type->num_parents
+		&& (class_type->parents[0]->ce->serialize || class_type->parents[0]->ce->unserialize)
+		&& !zend_class_implements_interface(class_type->parents[0]->ce, zend_ce_serializable)) {
 		return FAILURE;
 	}
 	if (!class_type->serialize) {

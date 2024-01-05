@@ -42,11 +42,15 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 #include "zend_compile.h"
 }
 
+/* The conflicts are caused by generics syntax.
+ * foo(new Bar<T1, T2>(42)) is ambiguous and resolved in favor of generics. */
+%glr-parser
 %define api.prefix {zend}
-%define api.pure full
+%define api.pure true
 %define api.value.type {zend_parser_stack_elem}
 %define parse.error verbose
-%expect 0
+%expect 1
+%expect-rr 1
 
 %destructor { zend_ast_destroy($$); } <ast>
 %destructor { if ($$) zend_string_release_ex($$, 0); } <str>
@@ -256,7 +260,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
 %type <ast> new_expr anonymous_class class_name class_name_reference simple_variable
-%type <ast> internal_functions_in_yacc
+%type <ast> internal_functions_in_yacc simple_class_name generic_arg_list
 %type <ast> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
 %type <ast> variable_class_name dereferenceable_scalar constant class_constant
 %type <ast> fully_dereferenceable array_object_dereferenceable
@@ -279,6 +283,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 %type <ast> function_name non_empty_member_modifiers
+%type <ast> optional_generic_params generic_params generic_param
 
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
@@ -586,13 +591,34 @@ is_variadic:
 	|	T_ELLIPSIS  { $$ = ZEND_PARAM_VARIADIC; }
 ;
 
+optional_generic_params:
+		%empty					{ $$ = NULL; }
+	|	'<' generic_params '>'	{ $$ = $2; }
+;
+
+generic_params:
+		generic_param
+			{ $$ = zend_ast_create_list(1, ZEND_AST_GENERIC_PARAM_LIST, $1); }
+	|	generic_params ',' generic_param
+			{ $$ = zend_ast_list_add($1, $3); }
+;
+
+/* TODO: in/out indicator */
+generic_param:
+		T_STRING				{ $$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $1, NULL, NULL); }
+	|	T_STRING ':' type_expr	{ $$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $1, $3, NULL); }
+	|	T_STRING '=' type_expr	{ $$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $1, NULL, $3); }
+	|	T_STRING ':' type_expr '=' type_expr
+			{ $$ = zend_ast_create(ZEND_AST_GENERIC_PARAM, $1, $3, $5); }
+;
+
 class_declaration_statement:
 		class_modifiers T_CLASS { $<num>$ = CG(zend_lineno); }
-		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $7, zend_ast_get_str($4), $5, $6, $9, NULL, NULL); }
+		T_STRING optional_generic_params extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $8, zend_ast_get_str($4), $6, $7, $10, NULL, $5); }
 	|	T_CLASS { $<num>$ = CG(zend_lineno); }
-		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, NULL, NULL); }
+		T_STRING optional_generic_params extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $7, zend_ast_get_str($3), $5, $6, $9, NULL, $4); }
 ;
 
 class_modifiers:
@@ -621,14 +647,14 @@ class_modifier:
 
 trait_declaration_statement:
 		T_TRAIT { $<num>$ = CG(zend_lineno); }
-		T_STRING backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_TRAIT, $<num>2, $4, zend_ast_get_str($3), NULL, NULL, $6, NULL, NULL); }
+		T_STRING optional_generic_params backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_TRAIT, $<num>2, $5, zend_ast_get_str($3), NULL, NULL, $7, NULL, $4); }
 ;
 
 interface_declaration_statement:
 		T_INTERFACE { $<num>$ = CG(zend_lineno); }
-		T_STRING interface_extends_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $<num>2, $5, zend_ast_get_str($3), NULL, $4, $7, NULL, NULL); }
+		T_STRING optional_generic_params interface_extends_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $<num>2, $6, zend_ast_get_str($3), NULL, $5, $8, NULL, $4); }
 ;
 
 enum_declaration_statement:
@@ -859,7 +885,9 @@ type_expr_without_static:
 type_without_static:
 		T_ARRAY		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
 	|	T_CALLABLE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
-	|	name		{ $$ = $1; }
+	|	name		{ $$ = zend_ast_create(ZEND_AST_CLASS_REF, $1, NULL); }
+	|	name '<' generic_arg_list '>'
+					{ $$ = zend_ast_create(ZEND_AST_CLASS_REF, $1, $3); }
 ;
 
 union_type_without_static_element:
@@ -892,10 +920,14 @@ argument_list:
 	|	'(' T_ELLIPSIS ')' { $$ = zend_ast_create(ZEND_AST_CALLABLE_CONVERT); }
 ;
 
+/* The %dprec's resolve the foo(new Bar<T1, T2>(42)) ambiguity in a somewhat indirect way:
+ * We give precedence to the interpretation that has fewer function call arguments, which
+ * implies that there will be more generic arguments, thus favoring generics. It is necessary
+ * to place the %dprec's here, as this is where the diverging parses will ultimately merge. */
 non_empty_argument_list:
-		argument
+		argument %dprec 2
 			{ $$ = zend_ast_create_list(1, ZEND_AST_ARG_LIST, $1); }
-	|	non_empty_argument_list ',' argument
+	|	non_empty_argument_list ',' argument %dprec 1
 			{ $$ = zend_ast_list_add($1, $3); }
 ;
 
@@ -1330,11 +1362,25 @@ function_call:
 		}
 ;
 
-class_name:
+simple_class_name:
 		T_STATIC
 			{ zval zv; ZVAL_INTERNED_STR(&zv, ZSTR_KNOWN(ZEND_STR_STATIC));
 			  $$ = zend_ast_create_zval_ex(&zv, ZEND_NAME_NOT_FQ); }
 	|	name { $$ = $1; }
+;
+
+class_name:
+		simple_class_name
+			{ $$ = zend_ast_create(ZEND_AST_CLASS_REF, $1, NULL); }
+	|	simple_class_name '<' generic_arg_list '>'
+			{ $$ = zend_ast_create(ZEND_AST_CLASS_REF, $1, $3); }
+;
+
+generic_arg_list:
+		type_expr
+			{ $$ = zend_ast_create_list(1, ZEND_AST_GENERIC_ARG_LIST, $1); }
+	|	generic_arg_list ',' type_expr
+			{ $$ = zend_ast_list_add($1, $3); }
 ;
 
 class_name_reference:

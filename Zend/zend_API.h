@@ -303,7 +303,7 @@ typedef struct _zend_fcall_info_cache {
 		class_container.__debugInfo = NULL;						\
 		class_container.__serialize = NULL;						\
 		class_container.__unserialize = NULL;					\
-		class_container.parent = NULL;							\
+		class_container.num_parents = 0;						\
 		class_container.num_interfaces = 0;						\
 		class_container.trait_names = NULL;						\
 		class_container.num_traits = 0;							\
@@ -2537,6 +2537,11 @@ static zend_always_inline bool zend_parse_arg_obj_or_str(
 
 	*destination_object = NULL;
 	return zend_parse_arg_str(arg, destination_string, allow_null, arg_num);
+}
+
+/* Get root class at start of "extends" chain. */
+static zend_always_inline zend_class_entry *zend_class_entry_get_root(zend_class_entry *ce) {
+	return ce->num_parents ? ce->parents[ce->num_parents - 1]->ce : ce;
 }
 
 END_EXTERN_C()

@@ -144,10 +144,10 @@ static void spl_array_object_free_storage(zend_object *object)
 static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_object *orig, int clone_orig)
 {
 	spl_array_object *intern;
-	zend_class_entry *parent = class_type;
+	zend_class_entry *parent;
 	int inherited = 0;
 
-	intern = zend_object_alloc(sizeof(spl_array_object), parent);
+	intern = zend_object_alloc(sizeof(spl_array_object), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -181,13 +181,11 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 		array_init(&intern->array);
 	}
 
-	while (parent) {
-		if (parent == spl_ce_ArrayIterator || parent == spl_ce_RecursiveArrayIterator || parent == spl_ce_ArrayObject) {
-			break;
-		}
-		parent = parent->parent;
-		inherited = 1;
-	}
+	parent = zend_class_entry_get_root(class_type);
+
+	inherited = class_type != spl_ce_ArrayIterator
+		&& class_type != spl_ce_ArrayObject
+		&& class_type != spl_ce_RecursiveArrayIterator;
 
 	ZEND_ASSERT(parent);
 

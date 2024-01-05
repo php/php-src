@@ -72,8 +72,9 @@ typedef enum {
 	ZEND_VERIFY_PROP_ASSIGNABLE_BY_REF_CONTEXT_ASSIGNMENT,
 	ZEND_VERIFY_PROP_ASSIGNABLE_BY_REF_CONTEXT_MAGIC_GET,
 } zend_verify_prop_assignable_by_ref_context;
-ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref_ex(const zend_property_info *prop_info, zval *orig_val, bool strict, zend_verify_prop_assignable_by_ref_context context);
-ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(const zend_property_info *prop_info, zval *orig_val, bool strict);
+ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref_ex(const zend_object *obj, const zend_property_info *prop_info, zval *orig_val, bool strict, zend_verify_prop_assignable_by_ref_context context);
+ZEND_API bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(
+		const zend_object *obj, const zend_property_info *prop_info, zval *orig_val, bool strict);
 
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_zval(const zend_property_info *prop, const zval *zv);
 ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(const zend_property_info *prop1, const zend_property_info *prop2, const zval *zv);
@@ -99,7 +100,8 @@ ZEND_API ZEND_COLD void zend_verify_never_error(
 		const zend_function *zf);
 ZEND_API bool zend_verify_ref_array_assignable(zend_reference *ref);
 ZEND_API bool zend_check_user_type_slow(
-		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot, bool is_return_type);
+		zend_type *type, zval *arg, zend_reference *ref, void **cache_slot,
+		zend_class_entry *scope, bool is_return_type);
 
 #if ZEND_DEBUG
 ZEND_API bool zend_internal_call_should_throw(zend_function *fbc, zend_execute_data *call);
@@ -486,11 +488,10 @@ ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *cal
 #define ZEND_CLASS_HAS_TYPE_HINTS(ce) ((ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) == ZEND_ACC_HAS_TYPE_HINTS)
 #define ZEND_CLASS_HAS_READONLY_PROPS(ce) ((ce->ce_flags & ZEND_ACC_HAS_READONLY_PROPS) == ZEND_ACC_HAS_READONLY_PROPS)
 
-
 ZEND_API bool zend_verify_class_constant_type(zend_class_constant *c, const zend_string *name, zval *constant);
 ZEND_COLD void zend_verify_class_constant_type_error(const zend_class_constant *c, const zend_string *name, const zval *constant);
 
-ZEND_API bool zend_verify_property_type(const zend_property_info *info, zval *property, bool strict);
+ZEND_API bool zend_verify_property_type(zend_object *obj, const zend_property_info *info, zval *property, bool strict);
 ZEND_COLD void zend_verify_property_type_error(const zend_property_info *info, const zval *property);
 ZEND_COLD void zend_magic_get_property_type_inconsistency_error(const zend_property_info *info, const zval *property);
 

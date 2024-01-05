@@ -233,8 +233,8 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 		case REF_TYPE_TYPE:
 		{
 			type_reference *type_ref = intern->ptr;
-			if (ZEND_TYPE_HAS_NAME(type_ref->type)) {
-				zend_string_release(ZEND_TYPE_NAME(type_ref->type));
+			if (ZEND_TYPE_HAS_SIMPLE_PNR(type_ref->type)) {
+				zend_string_release(ZEND_TYPE_PNR_SIMPLE_NAME(type_ref->type));
 			}
 			efree(type_ref);
 			break;
@@ -350,8 +350,8 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 		smart_str_append_printf(str, "class ");
 	}
 	smart_str_append_printf(str, "%s", ZSTR_VAL(ce->name));
-	if (ce->parent) {
-		smart_str_append_printf(str, " extends %s", ZSTR_VAL(ce->parent->name));
+	if (ce->num_parents) {
+		smart_str_append_printf(str, " extends %s", ZSTR_VAL(ce->parents[0]->ce->name));
 	}
 
 	if (ce->num_interfaces) {
@@ -564,7 +564,7 @@ static void _class_const_string(smart_str *str, zend_string *name, zend_class_co
 
 	const char *visibility = zend_visibility_string(ZEND_CLASS_CONST_FLAGS(c));
 	const char *final = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_FINAL ? "final " : "";
-	zend_string *type_str = ZEND_TYPE_IS_SET(c->type) ? zend_type_to_string(c->type) : NULL;
+	zend_string *type_str = ZEND_TYPE_IS_SET(c->type) ? zend_type_to_string(c->type, NULL) : NULL;
 	const char *type = type_str ? ZSTR_VAL(type_str) : zend_zval_type_name(&c->value);
 	smart_str_append_printf(str, "%sConstant [ %s%s %s %s ] { ",
 		indent, final, visibility, type, ZSTR_VAL(name));
@@ -674,7 +674,7 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 		smart_str_append_printf(str, "<required> ");
 	}
 	if (ZEND_TYPE_IS_SET(arg_info->type)) {
-		zend_string *type_str = zend_type_to_string(arg_info->type);
+		zend_string *type_str = zend_type_to_string(arg_info->type, fptr->common.scope);
 		smart_str_append(str, type_str);
 		smart_str_appendc(str, ' ');
 		zend_string_release(type_str);
@@ -795,9 +795,9 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	if (scope && fptr->common.scope) {
 		if (fptr->common.scope != scope) {
 			smart_str_append_printf(str, ", inherits %s", ZSTR_VAL(fptr->common.scope->name));
-		} else if (fptr->common.scope->parent) {
+		} else if (fptr->common.scope->num_parents) {
 			lc_name = zend_string_tolower(fptr->common.function_name);
-			if ((overwrites = zend_hash_find_ptr(&fptr->common.scope->parent->function_table, lc_name)) != NULL) {
+			if ((overwrites = zend_hash_find_ptr(&fptr->common.scope->parents[0]->ce->function_table, lc_name)) != NULL) {
 				if (fptr->common.scope != overwrites->common.scope && !(overwrites->common.fn_flags & ZEND_ACC_PRIVATE)) {
 					smart_str_append_printf(str, ", overwrites %s", ZSTR_VAL(overwrites->common.scope->name));
 				}
@@ -865,7 +865,8 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	if ((fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 		smart_str_append_printf(str, "  %s- %s [ ", indent, ZEND_ARG_TYPE_IS_TENTATIVE(&fptr->common.arg_info[-1]) ? "Tentative return" : "Return");
 		if (ZEND_TYPE_IS_SET(fptr->common.arg_info[-1].type)) {
-			zend_string *type_str = zend_type_to_string(fptr->common.arg_info[-1].type);
+			zend_string *type_str =
+				zend_type_to_string(fptr->common.arg_info[-1].type, fptr->common.scope);
 			smart_str_append_printf(str, "%s ", ZSTR_VAL(type_str));
 			zend_string_release(type_str);
 		}
@@ -912,7 +913,7 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 			smart_str_appends(str, "readonly ");
 		}
 		if (ZEND_TYPE_IS_SET(prop->type)) {
-			zend_string *type_str = zend_type_to_string(prop->type);
+			zend_string *type_str = zend_type_to_string(prop->type, prop->ce);
 			smart_str_append(str, type_str);
 			smart_str_appendc(str, ' ');
 			zend_string_release(type_str);
@@ -1400,8 +1401,8 @@ static void reflection_type_factory(zend_type type, zval *object, bool legacy_be
 	 * do this for the top-level type, as resolutions inside type lists will be
 	 * fully visible to us (we'd have to do a fully copy of the type if we wanted
 	 * to prevent that). */
-	if (ZEND_TYPE_HAS_NAME(type)) {
-		zend_string_addref(ZEND_TYPE_NAME(type));
+	if (ZEND_TYPE_HAS_SIMPLE_PNR(type)) {
+		zend_string_addref(ZEND_TYPE_PNR_SIMPLE_NAME(type));
 	}
 }
 /* }}} */
@@ -2639,7 +2640,7 @@ ZEND_METHOD(ReflectionParameter, getClass)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	// TODO: This is going to return null for union types, which is rather odd.
-	if (ZEND_TYPE_HAS_NAME(param->arg_info->type)) {
+	if (ZEND_TYPE_HAS_SIMPLE_PNR(param->arg_info->type)) {
 		/* Class name is stored as a string, we might also get "self" or "parent"
 		 * - For "self", simply use the function scope. If scope is NULL then
 		 *   the function is global and thus self does not make any sense
@@ -2654,7 +2655,7 @@ ZEND_METHOD(ReflectionParameter, getClass)
 		 */
 		zend_string *class_name;
 
-		class_name = ZEND_TYPE_NAME(param->arg_info->type);
+		class_name = ZEND_TYPE_PNR_SIMPLE_NAME(param->arg_info->type);
 		if (zend_string_equals_literal_ci(class_name, "self")) {
 			ce = param->fptr->common.scope;
 			if (!ce) {
@@ -2669,12 +2670,12 @@ ZEND_METHOD(ReflectionParameter, getClass)
 					"Parameter uses \"parent\" as type but function is not a class member");
 				RETURN_THROWS();
 			}
-			if (!ce->parent) {
+			if (!ce->num_parents) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter uses \"parent\" as type although class does not have a parent");
 				RETURN_THROWS();
 			}
-			ce = ce->parent;
+			ce = ce->parents[0]->ce;
 		} else {
 			ce = zend_lookup_class(class_name);
 			if (!ce) {
@@ -2961,7 +2962,9 @@ ZEND_METHOD(ReflectionParameter, getDefaultValueConstantName)
 	} else if (ast->kind == ZEND_AST_CONSTANT_CLASS) {
 		RETVAL_STRINGL("__CLASS__", sizeof("__CLASS__")-1);
 	} else if (ast->kind == ZEND_AST_CLASS_CONST) {
-		zend_string *class_name = zend_ast_get_str(ast->child[0]);
+		zend_ast *class_ast = ast->child[0];
+		ZEND_ASSERT(class_ast->child[1] == NULL && "Generic params not supported yet");
+		zend_string *class_name = zend_ast_get_str(class_ast->child[0]);
 		zend_string *const_name = zend_ast_get_str(ast->child[1]);
 		RETVAL_NEW_STR(zend_string_concat3(
 			ZSTR_VAL(class_name), ZSTR_LEN(class_name),
@@ -3019,7 +3022,7 @@ ZEND_METHOD(ReflectionType, allowsNull)
 /* }}} */
 
 /* For BC with iterable for named types */
-static zend_string *zend_named_reflection_type_to_string(zend_type type) {
+static zend_string *zend_named_reflection_type_to_string(zend_type type, const zend_class_entry *scope) {
 	if (ZEND_TYPE_IS_ITERABLE_FALLBACK(type)) {
 		zend_string *iterable = ZSTR_KNOWN(ZEND_STR_ITERABLE);
 		if (ZEND_TYPE_FULL_MASK(type) & MAY_BE_NULL) {
@@ -3027,12 +3030,12 @@ static zend_string *zend_named_reflection_type_to_string(zend_type type) {
 		}
 		return iterable;
 	}
-	return zend_type_to_string(type);
+	return zend_type_to_string(type, scope);
 }
 
 static zend_string *zend_type_to_string_without_null(zend_type type) {
 	ZEND_TYPE_FULL_MASK(type) &= ~MAY_BE_NULL;
-	return zend_named_reflection_type_to_string(type);
+	return zend_named_reflection_type_to_string(type, NULL);
 }
 
 /* {{{ Return the text of the type hint */
@@ -3046,7 +3049,7 @@ ZEND_METHOD(ReflectionType, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETURN_STR(zend_named_reflection_type_to_string(param->type));
+	RETURN_STR(zend_named_reflection_type_to_string(param->type, NULL));
 }
 /* }}} */
 
@@ -3064,7 +3067,7 @@ ZEND_METHOD(ReflectionNamedType, getName)
 	if (param->legacy_behavior) {
 		RETURN_STR(zend_type_to_string_without_null(param->type));
 	}
-	RETURN_STR(zend_named_reflection_type_to_string(param->type));
+	RETURN_STR(zend_named_reflection_type_to_string(param->type, NULL));
 }
 /* }}} */
 
@@ -3117,14 +3120,17 @@ ZEND_METHOD(ReflectionUnionType, getTypes)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	array_init(return_value);
-	if (ZEND_TYPE_HAS_LIST(param->type)) {
-		zend_type *list_type;
-		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), list_type) {
-			append_type(return_value, *list_type);
-		} ZEND_TYPE_LIST_FOREACH_END();
-	} else if (ZEND_TYPE_HAS_NAME(param->type)) {
-		zend_string *name = ZEND_TYPE_NAME(param->type);
-		append_type(return_value, (zend_type) ZEND_TYPE_INIT_CLASS(name, 0, 0));
+	if (ZEND_TYPE_IS_COMPLEX(param->type)) {
+		if (ZEND_TYPE_HAS_LIST(param->type)) {
+			zend_type *list_type;
+			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), list_type) {
+				append_type(return_value, *list_type);
+			} ZEND_TYPE_LIST_FOREACH_END();
+		} else {
+			zend_type type = param->type;
+			ZEND_TYPE_FULL_MASK(type) &= ~_ZEND_TYPE_MAY_BE_MASK;
+			append_type(return_value, type);
+		}
 	}
 
 	type_mask = ZEND_TYPE_PURE_MASK(param->type);
@@ -4232,7 +4238,8 @@ ZEND_METHOD(ReflectionClass, setStaticPropertyValue)
 		}
 	}
 
-	if (ZEND_TYPE_IS_SET(prop_info->type) && !zend_verify_property_type(prop_info, value, 0)) {
+	if (ZEND_TYPE_IS_SET(prop_info->type)
+			&& !zend_verify_property_type(NULL, prop_info, value, 0)) {
 		return;
 	}
 
@@ -5284,8 +5291,8 @@ ZEND_METHOD(ReflectionClass, getParentClass)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	if (ce->parent) {
-		zend_reflection_class_factory(ce->parent, return_value);
+	if (ce->num_parents) {
+		zend_reflection_class_factory(ce->parents[0]->ce, return_value);
 	} else {
 		RETURN_FALSE;
 	}
