@@ -488,6 +488,8 @@ spaces_state:
         return data;
     }
 
+    data += 1;
+
 value_state:
 
     data = lxb_html_encoding_skip_spaces(data, end);
