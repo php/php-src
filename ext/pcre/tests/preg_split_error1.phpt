@@ -8,7 +8,6 @@ Test preg_split() function : error conditions - bad regular expressions
 /*
  * Testing how preg_split reacts to being passed the wrong type of regex argument
  */
-echo "*** Testing preg_split() : error conditions ***\n";
 $regex_array = [
     'abcdef', //Regex without delimiter
     '/[a-zA-Z]', //Regex without closing delimiter
@@ -23,7 +22,6 @@ $regex_array = [
 ];
 $subject = '1 2 a 3 4 b 5 6';
 foreach ($regex_array as $regex_value) {
-    @print "\nArg value is $regex_value\n";
     try {
         var_dump(preg_split($regex_value, $subject));
     } catch (TypeError $e) {
@@ -38,32 +36,19 @@ try {
 }
 ?>
 --EXPECTF--
-*** Testing preg_split() : error conditions ***
-
-Arg value is abcdef
 
 Warning: preg_split(): Delimiter must not be alphanumeric, backslash, or NUL byte in %spreg_split_error1.php on line %d
 bool(false)
 
-Arg value is /[a-zA-Z]
-
 Warning: preg_split(): No ending delimiter '/' found in %spreg_split_error1.php on line %d
 bool(false)
-
-Arg value is [a-zA-Z]/
 
 Warning: preg_split(): Unknown modifier '/' in %spreg_split_error1.php on line %d
 bool(false)
 
-Arg value is /[a-zA-Z]/F
-
 Warning: preg_split(): Unknown modifier 'F' in %spreg_split_error1.php on line %d
 bool(false)
-
-Arg value is Array
 preg_split(): Argument #1 ($pattern) must be of type string, array given
-
-Arg value is /[a-zA-Z]/
 array(3) {
   [0]=>
   string(4) "1 2 "

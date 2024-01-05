@@ -8,7 +8,6 @@ Test preg_match_all() function : error conditions - bad regular expressions
 /*
  * Testing how preg_match_all reacts to being passed the wrong type of regex argument
  */
-echo "*** Testing preg_match_all() : error conditions ***\n";
 $regex_array = [
     'abcdef', //Regex without delimiter
     '/[a-zA-Z]', //Regex without closing delimiter
@@ -23,7 +22,6 @@ $regex_array = [
 ];
 $subject = 'test';
 foreach ($regex_array as $regex_value) {
-    @print "\nArg value is $regex_value\n";
     try {
         var_dump(preg_match_all($regex_value, $subject, $matches1));
     } catch (TypeError $e) {
@@ -40,37 +38,24 @@ try {
 var_dump($matches);
 ?>
 --EXPECTF--
-*** Testing preg_match_all() : error conditions ***
-
-Arg value is abcdef
 
 Warning: preg_match_all(): Delimiter must not be alphanumeric, backslash, or NUL byte in %spreg_match_all_error1.php on line %d
 bool(false)
 NULL
 
-Arg value is /[a-zA-Z]
-
 Warning: preg_match_all(): No ending delimiter '/' found in %spreg_match_all_error1.php on line %d
 bool(false)
 NULL
-
-Arg value is [a-zA-Z]/
 
 Warning: preg_match_all(): Unknown modifier '/' in %spreg_match_all_error1.php on line %d
 bool(false)
 NULL
 
-Arg value is /[a-zA-Z]/F
-
 Warning: preg_match_all(): Unknown modifier 'F' in %spreg_match_all_error1.php on line %d
 bool(false)
 NULL
-
-Arg value is Array
 preg_match_all(): Argument #1 ($pattern) must be of type string, array given
 NULL
-
-Arg value is /[a-zA-Z]/
 int(4)
 array(1) {
   [0]=>

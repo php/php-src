@@ -8,7 +8,6 @@ Test preg_replace_callback() function : error
 /*
  * Testing how preg_replace_callback reacts to being passed the wrong type of regex argument
  */
-echo "*** Testing preg_replace_callback() : error conditions ***\n";
 $regex_array = [
     'abcdef', //Regex without delimiters
     '/[a-zA-Z]', //Regex without closing delimiter
@@ -39,35 +38,21 @@ function integer_word($matches) {
 }
 $subject = 'number 1.';
 foreach ($regex_array as $regex_value) {
-    @print "\nArg value is $regex_value\n";
     var_dump(preg_replace_callback($regex_value, 'integer_word', $subject));
 }
 ?>
 --EXPECTF--
-*** Testing preg_replace_callback() : error conditions ***
-
-Arg value is abcdef
 
 Warning: preg_replace_callback(): Delimiter must not be alphanumeric, backslash, or NUL byte in %s on line %d
 NULL
 
-Arg value is /[a-zA-Z]
-
 Warning: preg_replace_callback(): No ending delimiter '/' found in %s on line %d
 NULL
-
-Arg value is [a-zA-Z]/
 
 Warning: preg_replace_callback(): Unknown modifier '/' in %s on line %d
 NULL
 
-Arg value is /[a-zA-Z]/F
-
 Warning: preg_replace_callback(): Unknown modifier 'F' in %s on line %d
 NULL
-
-Arg value is Array
 string(9) "number 1."
-
-Arg value is /[0-9]/
 string(11) "number one."
