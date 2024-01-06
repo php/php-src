@@ -34,7 +34,7 @@ zend_class_entry *pdosqlite_ce;
 typedef struct {
 	zval val;
 	zend_long row;
-} pdopgsql_aggregate_context;
+} pdopsqlite_aggregate_context;
 
 /* {{{ pdo_sqlite_deps */
 static const zend_module_dep pdo_sqlite_deps[] = {
@@ -72,7 +72,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	int i;
 	int ret;
 	int fake_argc;
-	pdopgsql_aggregate_context *agg_context = NULL;
+	pdopsqlite_aggregate_context *agg_context = NULL;
 
 	if (is_agg) {
 		is_agg = 2;
@@ -93,7 +93,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	}
 
 	if (is_agg) {
-		agg_context = sqlite3_aggregate_context(context, sizeof(pdopgsql_aggregate_context));
+		agg_context = sqlite3_aggregate_context(context, sizeof(pdopsqlite_aggregate_context));
 		if (!agg_context) {
 			efree(zargs);
 			return FAILURE;
@@ -198,7 +198,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	return ret;
 }
 
-void php_pgsql_func_callback(sqlite3_context *context, int argc,
+void php_sqlite_func_callback(sqlite3_context *context, int argc,
 							 sqlite3_value **argv)
 {
 	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
@@ -206,7 +206,7 @@ void php_pgsql_func_callback(sqlite3_context *context, int argc,
 	do_callback(&func->afunc, &func->func, argc, argv, context, 0);
 }
 
-static void php_pgsql_func_step_callback(sqlite3_context *context, int argc,
+static void php_sqlite_func_step_callback(sqlite3_context *context, int argc,
 										 sqlite3_value **argv)
 {
 	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
@@ -214,7 +214,7 @@ static void php_pgsql_func_step_callback(sqlite3_context *context, int argc,
 	do_callback(&func->astep, &func->step, argc, argv, context, 1);
 }
 
-static void php_pgsql_func_final_callback(sqlite3_context *context)
+static void php_sqlite_func_final_callback(sqlite3_context *context)
 {
 	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
 
@@ -254,7 +254,7 @@ PHP_METHOD(PdoSqlite, createFunction)
 	func = (struct pdo_sqlite_func*)ecalloc(1, sizeof(*func));
 
 	ret = sqlite3_create_function(H->db, func_name, argc, flags | SQLITE_UTF8,
-								  func, php_pgsql_func_callback, NULL, NULL);
+								  func, php_sqlite_func_callback, NULL, NULL);
 	if (ret == SQLITE_OK) {
 		func->funcname = estrdup(func_name);
 
@@ -610,7 +610,7 @@ PHP_METHOD(PdoSqlite, createAggregate)
 	func = (struct pdo_sqlite_func*)ecalloc(1, sizeof(*func));
 
 	ret = sqlite3_create_function(H->db, func_name, argc, SQLITE_UTF8,
-		func, NULL, php_pgsql_func_step_callback, php_pgsql_func_final_callback);
+		func, NULL, php_sqlite_func_step_callback, php_sqlite_func_final_callback);
 	if (ret == SQLITE_OK) {
 		func->funcname = estrdup(func_name);
 
