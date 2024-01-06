@@ -19,7 +19,7 @@ PHP_ARG_ENABLE([phpdbg-readline],
   [no],
   [no])
 
-if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
+if test "$PHP_PHPDBG" != "no"; then
   AC_HEADER_TIOCGWINSZ
   AC_DEFINE(HAVE_PHPDBG, 1, [ ])
 
@@ -75,8 +75,6 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
     fi
   fi
 
-  PHP_SUBST(PHP_PHPDBG_CFLAGS)
-  PHP_SUBST(PHP_PHPDBG_FILES)
   PHP_SUBST(PHPDBG_EXTRA_LIBS)
 
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/phpdbg/Makefile.frag], [$abs_srcdir/sapi/phpdbg], [$abs_builddir/sapi/phpdbg])
