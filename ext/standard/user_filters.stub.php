@@ -55,3 +55,11 @@ class php_user_filter
     /** @tentative-return-type */
     public function onClose(): void {}
 }
+
+final class StreamBucket
+{
+    /** @var resource */
+    public $bucket;
+    public string $data;
+    public int $datalen;
+}
