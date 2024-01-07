@@ -19,6 +19,9 @@ PHP 8.4 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  . The type of PHP_DEBUG and PHP_ZTS constants changed to bool.
+
 - DOM:
   . New methods and constants were added to some DOM classes. If you inherit
     from these and you happen to have a method or property with the same name,
