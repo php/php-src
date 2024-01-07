@@ -17,8 +17,8 @@ if (!$db instanceof PdoDblib) {
     echo "Wrong class type. Should be PdoDblib but is " . get_class($db) . "\n";
 }
 
-$db->query("CREATE TABLE #pdo_dblib_002(name varchar(32))");
-$db->query("INSERT INTO #pdo_dblib_002 values('PHP'), ('PHP6')");
+$db->query("CREATE TABLE #pdo_dblib_002(name VARCHAR(32))");
+$db->query("INSERT INTO #pdo_dblib_002 VALUES('PHP'), ('PHP6')");
 
 foreach ($db->query('SELECT name FROM #pdo_dblib_002') as $row) {
     var_dump($row);

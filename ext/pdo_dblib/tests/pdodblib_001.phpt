@@ -13,8 +13,8 @@ getDbConnection();
 require __DIR__ . '/config.inc';
 $db = getDbConnection(PdoDblib::class);
 
-$db->query("CREATE TABLE #pdo_dblib_001(name varchar(32)); ");
-$db->query("INSERT INTO #pdo_dblib_001 values('PHP'), ('PHP6');");
+$db->query("CREATE TABLE #pdo_dblib_001(name VARCHAR(32)); ");
+$db->query("INSERT INTO #pdo_dblib_001 VALUES('PHP'), ('PHP6');");
 
 foreach ($db->query('SELECT name FROM #pdo_dblib_001') as $row) {
     var_dump($row);

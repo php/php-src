@@ -27,7 +27,7 @@
 #include "php_pdo_odbc_int.h"
 #include "pdo_odbc_arginfo.h"
 
-zend_class_entry *pdo_odbc_ce;
+static zend_class_entry *pdo_odbc_ce;
 
 /* {{{ pdo_odbc_deps[] */
 static const zend_module_dep pdo_odbc_deps[] = {

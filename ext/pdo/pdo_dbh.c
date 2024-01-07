@@ -1410,7 +1410,6 @@ static HashTable *dbh_get_gc(zend_object *object, zval **gc_data, int *gc_count)
 }
 
 static zend_object_handlers pdo_dbh_object_handlers;
-static zend_object_handlers pdosqlite_dbh_object_handlers;
 
 static void pdo_dbh_free_storage(zend_object *std);
 
@@ -1427,13 +1426,6 @@ void pdo_dbh_init(int module_number)
 	pdo_dbh_object_handlers.get_method = dbh_method_get;
 	pdo_dbh_object_handlers.compare = zend_objects_not_comparable;
 	pdo_dbh_object_handlers.get_gc = dbh_get_gc;
-
-	memcpy(&pdosqlite_dbh_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	pdosqlite_dbh_object_handlers.offset = XtOffsetOf(pdo_dbh_object_t, std);
-	pdosqlite_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
-	pdosqlite_dbh_object_handlers.get_method = dbh_method_get;
-	pdosqlite_dbh_object_handlers.compare = zend_objects_not_comparable;
-	pdosqlite_dbh_object_handlers.get_gc = dbh_get_gc;
 }
 
 static void dbh_free(pdo_dbh_t *dbh, bool free_persistent)

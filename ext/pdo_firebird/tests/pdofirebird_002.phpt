@@ -14,7 +14,7 @@ if (!$db instanceof PdoFirebird) {
     echo "Wrong class type. Should be PdoFirebird but is " . get_class($db) . "\n";
 }
 
-$db->query('CREATE TABLE pdofirebird_002 (idx int NOT NULL PRIMARY KEY, name VARCHAR(20))');
+$db->query('CREATE TABLE pdofirebird_002 (idx INT NOT NULL PRIMARY KEY, name VARCHAR(20))');
 
 $db->exec("INSERT INTO pdofirebird_002 VALUES(1, 'A')");
 $db->exec("INSERT INTO pdofirebird_002 VALUES(2, 'B')");

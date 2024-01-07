@@ -19,7 +19,7 @@ if (!$db instanceof PdoPgsql) {
     echo "Wrong class type. Should be PdoPgsql but is " . get_class($db) . "\n";
 }
 
-$db->exec('CREATE TABLE pdopgsql_002(id int NOT NULL PRIMARY KEY, name VARCHAR(10))');
+$db->exec('CREATE TABLE pdopgsql_002(id INT NOT NULL PRIMARY KEY, name VARCHAR(10))');
 $db->exec("INSERT INTO pdopgsql_002 VALUES(1, 'A'), (2, 'B'), (3, 'C')");
 
 foreach ($db->query('SELECT name FROM pdopgsql_002') as $row) {

@@ -11,7 +11,7 @@ require_once __DIR__ . "/testdb.inc";
 
 $db = getDbConnection();
 
-$db->query('CREATE TABLE pdofirebird_001 (idx int NOT NULL PRIMARY KEY, name VARCHAR(20))');
+$db->query('CREATE TABLE pdofirebird_001 (idx INT NOT NULL PRIMARY KEY, name VARCHAR(20))');
 $db->query("INSERT INTO pdofirebird_001 VALUES (1, 'PHP')");
 $db->query("INSERT INTO pdofirebird_001 VALUES (2, 'PHP6')");
 

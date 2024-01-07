@@ -25,7 +25,7 @@ require __DIR__ . "/config.inc";
 
 $db = Pdo::connect('sqlite::memory:');
 if (!$db instanceof PdoSqlite) {
-    echo "Wrong class type. Should be PdoSqlite but is " .get_class($db) . "\n";
+    echo "Wrong class type. Should be PdoSqlite but is " . get_class($db) . "\n";
 }
 
 $result = $db->loadExtension(getSpatialiteExtensionLocation(););

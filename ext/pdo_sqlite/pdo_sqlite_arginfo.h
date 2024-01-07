@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0431d72c529b897acadb1db04d5049bcd46cac0e */
+ * Stub hash: 167d0e30af99bd31c46ea1649c661b6aa38eaccb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoSqlite_createAggregate, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -21,7 +21,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoSqlite_createFunction, 
 ZEND_END_ARG_INFO()
 
 #if !defined(PDO_SQLITE_OMIT_LOAD_EXTENSION)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoSqlite_loadExtension, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoSqlite_loadExtension, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif

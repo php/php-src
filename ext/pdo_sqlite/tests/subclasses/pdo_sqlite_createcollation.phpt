@@ -9,7 +9,7 @@ pdo_sqlite
 $db = new PdoSqlite('sqlite::memory:');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$db->query('CREATE TABLE IF NOT EXISTS test_pdo_sqlite_createcollation (id INT AUTO INCREMENT, name TEXT)');
+$db->query('CREATE TABLE test_pdo_sqlite_createcollation (id INT AUTO INCREMENT, name TEXT)');
 
 $db->query('INSERT INTO test_pdo_sqlite_createcollation VALUES (NULL, "1"), (NULL, "2"), (NULL, "10")');
 

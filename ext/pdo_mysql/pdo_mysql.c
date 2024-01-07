@@ -28,7 +28,7 @@
 #include "php_pdo_mysql_int.h"
 #include "pdo_mysql_arginfo.h"
 
-zend_class_entry *pdo_mysql_ce;
+static zend_class_entry *pdo_mysql_ce;
 
 #ifdef COMPILE_DL_PDO_MYSQL
 #ifdef ZTS
@@ -91,6 +91,8 @@ PHP_METHOD(PdoMysql, getWarningCount)
 {
 	pdo_dbh_t *dbh;
 	pdo_mysql_db_handle *H;
+
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;

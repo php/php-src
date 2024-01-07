@@ -309,9 +309,7 @@ typedef struct {
 	zend_long row;
 } aggregate_context;
 
-static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
-		int argc, sqlite3_value **argv, sqlite3_context *context,
-		int is_agg)
+static int do_callback(struct pdo_sqlite_fci *fc, zval *cb, int argc, sqlite3_value **argv, sqlite3_context *context, int is_agg)
 {
 	zval *zargs = NULL;
 	zval retval;
@@ -444,16 +442,14 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 	return ret;
 }
 
-static void php_sqlite3_func_callback(sqlite3_context *context, int argc,
-	sqlite3_value **argv)
+static void php_sqlite3_func_callback(sqlite3_context *context, int argc, sqlite3_value **argv)
 {
 	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
 
 	do_callback(&func->afunc, &func->func, argc, argv, context, 0);
 }
 
-static void php_sqlite3_func_step_callback(sqlite3_context *context, int argc,
-	sqlite3_value **argv)
+static void php_sqlite3_func_step_callback(sqlite3_context *context, int argc, sqlite3_value **argv)
 {
 	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
 
@@ -467,9 +463,7 @@ static void php_sqlite3_func_final_callback(sqlite3_context *context)
 	do_callback(&func->afini, &func->fini, 0, NULL, context, 1);
 }
 
-static int php_sqlite3_collation_callback(void *context,
-	int string1_len, const void *string1,
-	int string2_len, const void *string2)
+static int php_sqlite3_collation_callback(void *context, int string1_len, const void *string1, int string2_len, const void *string2)
 {
 	int ret;
 	zval zargs[2];
@@ -481,7 +475,7 @@ static int php_sqlite3_collation_callback(void *context,
 	collation->fc.fci.object = NULL;
 	collation->fc.fci.retval = &retval;
 
-	// Prepare the arguments.
+	/* Prepare the arguments. */
 	ZVAL_STRINGL(&zargs[0], (char *) string1, string1_len);
 	ZVAL_STRINGL(&zargs[1], (char *) string2, string2_len);
 	collation->fc.fci.param_count = 2;
@@ -508,9 +502,7 @@ static int php_sqlite3_collation_callback(void *context,
 	return ret;
 }
 
-/* {{{ bool SQLite::sqliteCreateFunction(string name, callable callback [, int argcount, int flags])
-   Registers a UDF with the sqlite db handle */
-PHP_METHOD(PDO_SQLite_Ext, sqliteCreateFunction)
+void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqlite_func_callback callback)
 {
 	struct pdo_sqlite_func *func;
 	zend_fcall_info fci;
@@ -538,8 +530,7 @@ PHP_METHOD(PDO_SQLite_Ext, sqliteCreateFunction)
 
 	func = (struct pdo_sqlite_func*)ecalloc(1, sizeof(*func));
 
-	ret = sqlite3_create_function(H->db, func_name, argc, flags | SQLITE_UTF8,
-			func, php_sqlite3_func_callback, NULL, NULL);
+	ret = sqlite3_create_function(H->db, func_name, argc, flags | SQLITE_UTF8, func, callback, NULL, NULL);
 	if (ret == SQLITE_OK) {
 		func->funcname = estrdup(func_name);
 
@@ -556,29 +547,18 @@ PHP_METHOD(PDO_SQLite_Ext, sqliteCreateFunction)
 	efree(func);
 	RETURN_FALSE;
 }
+
+/* {{{ bool SQLite::sqliteCreateFunction(string name, callable callback [, int argcount, int flags])
+   Registers a UDF with the sqlite db handle */
+PHP_METHOD(PDO_SQLite_Ext, sqliteCreateFunction)
+{
+	pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_sqlite3_func_callback);
+}
 /* }}} */
 
-/* {{{ bool SQLite::sqliteCreateAggregate(string name, callable step, callable fini [, int argcount])
-   Registers a UDF with the sqlite db handle */
-
-/* The step function should have the prototype:
-   mixed step(mixed $context, int $rownumber, $value [, $value2 [, ...]])
-
-   $context will be null for the first row; on subsequent rows it will have
-   the value that was previously returned from the step function; you should
-   use this to maintain state for the aggregate.
-
-   The fini function should have the prototype:
-   mixed fini(mixed $context, int $rownumber)
-
-   $context will hold the return value from the very last call to the step function.
-   rownumber will hold the number of rows over which the aggregate was performed.
-   The return value of this function will be used as the return value for this
-   aggregate UDF.
-*/
-
-PHP_METHOD(PDO_SQLite_Ext, sqliteCreateAggregate)
-{
+void pdo_sqlite_create_aggregate_internal(
+	INTERNAL_FUNCTION_PARAMETERS, pdo_sqlite_func_step_callback step_callback, pdo_sqlite_func_final_callback final_callback
+) {
 	struct pdo_sqlite_func *func;
 	zend_fcall_info step_fci, fini_fci;
 	zend_fcall_info_cache step_fcc, fini_fcc;
@@ -604,8 +584,7 @@ PHP_METHOD(PDO_SQLite_Ext, sqliteCreateAggregate)
 
 	func = (struct pdo_sqlite_func*)ecalloc(1, sizeof(*func));
 
-	ret = sqlite3_create_function(H->db, func_name, argc, SQLITE_UTF8,
-			func, NULL, php_sqlite3_func_step_callback, php_sqlite3_func_final_callback);
+	ret = sqlite3_create_function(H->db, func_name, argc, SQLITE_UTF8, func, NULL, step_callback, final_callback);
 	if (ret == SQLITE_OK) {
 		func->funcname = estrdup(func_name);
 
@@ -624,11 +603,33 @@ PHP_METHOD(PDO_SQLite_Ext, sqliteCreateAggregate)
 	efree(func);
 	RETURN_FALSE;
 }
+
+/* {{{ bool SQLite::sqliteCreateAggregate(string name, callable step, callable fini [, int argcount])
+   Registers a UDF with the sqlite db handle */
+
+/* The step function should have the prototype:
+   mixed step(mixed $context, int $rownumber, $value [, $value2 [, ...]])
+
+   $context will be null for the first row; on subsequent rows it will have
+   the value that was previously returned from the step function; you should
+   use this to maintain state for the aggregate.
+
+   The fini function should have the prototype:
+   mixed fini(mixed $context, int $rownumber)
+
+   $context will hold the return value from the very last call to the step function.
+   rownumber will hold the number of rows over which the aggregate was performed.
+   The return value of this function will be used as the return value for this
+   aggregate UDF.
+*/
+
+PHP_METHOD(PDO_SQLite_Ext, sqliteCreateAggregate)
+{
+	pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_sqlite3_func_step_callback, php_sqlite3_func_final_callback);
+}
 /* }}} */
 
-/* {{{ bool SQLite::sqliteCreateCollation(string name, callable callback)
-   Registers a collation with the sqlite db handle */
-PHP_METHOD(PDO_SQLite_Ext, sqliteCreateCollation)
+void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqlite_create_collation_callback callback)
 {
 	struct pdo_sqlite_collation *collation;
 	zend_fcall_info fci;
@@ -651,7 +652,7 @@ PHP_METHOD(PDO_SQLite_Ext, sqliteCreateCollation)
 
 	collation = (struct pdo_sqlite_collation*)ecalloc(1, sizeof(*collation));
 
-	ret = sqlite3_create_collation(H->db, collation_name, SQLITE_UTF8, collation, php_sqlite3_collation_callback);
+	ret = sqlite3_create_collation(H->db, collation_name, SQLITE_UTF8, collation, callback);
 	if (ret == SQLITE_OK) {
 		collation->name = estrdup(collation_name);
 
@@ -663,8 +664,19 @@ PHP_METHOD(PDO_SQLite_Ext, sqliteCreateCollation)
 		RETURN_TRUE;
 	}
 
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
+	}
+
 	efree(collation);
 	RETURN_FALSE;
+}
+
+/* {{{ bool SQLite::sqliteCreateCollation(string name, callable callback)
+   Registers a collation with the sqlite db handle */
+PHP_METHOD(PDO_SQLite_Ext, sqliteCreateCollation)
+{
+	pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_sqlite3_collation_callback);
 }
 /* }}} */
 

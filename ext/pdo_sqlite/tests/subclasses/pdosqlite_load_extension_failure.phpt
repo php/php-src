@@ -13,7 +13,7 @@ if (!method_exists(PdoSqlite::class, "loadExtension")) {
 
 $db = PdoSqlite::connect('sqlite::memory:');
 if (!$db instanceof PdoSqlite) {
-    echo "Wrong class type. Should be PdoSqlite but is " .get_class($db) . "\n";
+    echo "Wrong class type. Should be PdoSqlite but is " . get_class($db) . "\n";
 }
 
 try {

@@ -17,7 +17,7 @@ if (!$db instanceof PdoOdbc) {
     echo "Wrong class type. Should be PdoOdbc but is " . get_class($db) . "\n";
 }
 
-$db->exec('CREATE TABLE pdoodbc_002(id int NOT NULL PRIMARY KEY, name VARCHAR(10))');
+$db->exec('CREATE TABLE pdoodbc_002(id INT NOT NULL PRIMARY KEY, name VARCHAR(10))');
 $db->exec("INSERT INTO pdoodbc_002 VALUES(1, 'A'), (2, 'B'), (3, 'C')");
 
 foreach ($db->query('SELECT name FROM pdoodbc_002') as $row) {
