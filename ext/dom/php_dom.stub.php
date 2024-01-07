@@ -718,6 +718,8 @@ namespace
         /** @implementation-alias DOMElement::querySelectorAll */
         public function querySelectorAll(string $selectors): DOMNodeList {}
 
+        public function matches(string $selectors): bool {}
+
         public function insertAdjacentElement(string $where, DOMElement $element): ?DOMElement {}
 
         public function insertAdjacentText(string $where, string $data): void {}

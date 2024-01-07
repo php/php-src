@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5b3a7114145bdafefeec9c7e7ec63c7afe034a55 */
+ * Stub hash: 5999c0b9a7356a6f5ad7c215104b2187028c6379 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -332,6 +332,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOMElement_querySelector arginfo_class_DOMParentNode_querySelector
 
 #define arginfo_class_DOMElement_querySelectorAll arginfo_class_DOMParentNode_querySelectorAll
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_matches, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, selectors, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOMElement_insertAdjacentElement, 0, 2, DOMElement, 1)
 	ZEND_ARG_TYPE_INFO(0, where, IS_STRING, 0)
@@ -1188,6 +1192,7 @@ ZEND_METHOD(DOMElement, setIdAttributeNS);
 ZEND_METHOD(DOMElement, setIdAttributeNode);
 ZEND_METHOD(DOMElement, toggleAttribute);
 ZEND_METHOD(DOMElement, replaceChildren);
+ZEND_METHOD(DOMElement, matches);
 ZEND_METHOD(DOMElement, insertAdjacentElement);
 ZEND_METHOD(DOMElement, insertAdjacentText);
 ZEND_METHOD(DOMDocument, __construct);
@@ -1465,6 +1470,7 @@ static const zend_function_entry class_DOMElement_methods[] = {
 	ZEND_ME(DOMElement, replaceChildren, arginfo_class_DOMElement_replaceChildren, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("querySelector", zim_DOMElement_querySelector, arginfo_class_DOMElement_querySelector, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("querySelectorAll", zim_DOMElement_querySelectorAll, arginfo_class_DOMElement_querySelectorAll, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(DOMElement, matches, arginfo_class_DOMElement_matches, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, insertAdjacentElement, arginfo_class_DOMElement_insertAdjacentElement, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, insertAdjacentText, arginfo_class_DOMElement_insertAdjacentText, ZEND_ACC_PUBLIC)
 	ZEND_FE_END

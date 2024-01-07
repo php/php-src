@@ -11,12 +11,26 @@ function test_helper(DOM\ParentNode $dom, string $selector, bool $only_name = fa
         throw new Exception('Mismatch in querySelector and querySelectorAll');
     }
 
+    $list = [];
     foreach ($all as $node) {
+        $list[] = $node;
+
         if ($only_name) {
             echo $node->nodeName, "\n";
             continue;
         }
+
         echo $dom->saveXML($node), "\n";
+    }
+
+    // If the element is in the list, then it must match, otherwise it must not
+    // This loops over all the elements in the document and checks them
+    foreach ($dom->querySelectorAll('*') as $node) {
+        if (in_array($node, $list, true) !== $node->matches($selector)) {
+            var_dump($node, $selector, in_array($node, $list, true), $node->matches($selector));
+            echo $dom->saveXML($node), "\n";
+            throw new Exception('Bug in Element::matches()');
+        }
     }
 }
 

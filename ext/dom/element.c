@@ -1744,4 +1744,20 @@ PHP_METHOD(DOMElement, querySelectorAll)
 	php_dom_dispatch_query_selector(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 
+PHP_METHOD(DOMElement, matches)
+{
+	zend_string *selectors_str;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(selectors_str)
+	ZEND_PARSE_PARAMETERS_END();
+
+	xmlNodePtr thisp;
+	dom_object *intern;
+	zval *id;
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
+
+	dom_element_matches(thisp, intern, return_value, selectors_str);
+}
+
 #endif

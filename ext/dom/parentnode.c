@@ -815,10 +815,17 @@ void dom_parent_node_replace_children(dom_object *context, zval *nodes, uint32_t
  * CSS selector implementation below
  */
 
+// TODO: probably best if this is all moved to another file???
+
 typedef struct {
 	HashTable *list;
 	dom_object *intern;
 } dom_query_selector_all_ctx;
+
+typedef struct {
+	const xmlNode *reference;
+	bool result;
+} dom_query_selector_matches_ctx;
 
 lxb_status_t php_dom_query_selector_find_single_callback(const xmlNode *node, lxb_css_selector_specificity_t spec, void *ctx)
 {
@@ -835,6 +842,16 @@ lxb_status_t php_dom_query_selector_find_array_callback(const xmlNode *node, lxb
 	zval object;
 	php_dom_create_object((xmlNodePtr) node, &object, qsa_ctx->intern);
 	zend_hash_next_index_insert_new(qsa_ctx->list, &object);
+	return LXB_STATUS_OK;
+}
+
+lxb_status_t php_dom_query_selector_find_matches_callback(const xmlNode *node, lxb_css_selector_specificity_t spec, void *ctx)
+{
+	dom_query_selector_matches_ctx *matches_ctx = (dom_query_selector_matches_ctx *) ctx;
+	if (node == matches_ctx->reference) {
+		matches_ctx->result = true;
+		return LXB_STATUS_STOP;
+	}
 	return LXB_STATUS_OK;
 }
 
@@ -920,6 +937,30 @@ void dom_parent_node_query_selector_all(xmlNodePtr thisp, dom_object *intern, zv
 		dom_nnodemap_object *mapptr = (dom_nnodemap_object *) ret_obj->ptr;
 		ZVAL_ARR(&mapptr->baseobj_zv, list);
 		mapptr->nodetype = DOM_NODESET;
+	}
+}
+
+/* https://dom.spec.whatwg.org/#dom-element-matches */
+void dom_element_matches(xmlNodePtr thisp, dom_object *intern, zval *return_value, zend_string *selectors_str)
+{
+	dom_query_selector_matches_ctx ctx = { thisp, false };
+
+	const xmlNode *root = thisp;
+	while (root->parent != NULL) {
+		root = root->parent;
+	}
+
+	if (php_dom_query_selector_common(
+		return_value,
+		intern,
+		root,
+		selectors_str,
+		php_dom_query_selector_find_matches_callback,
+		&ctx
+	) != LXB_STATUS_OK) {
+		RETURN_THROWS();
+	} else {
+		RETURN_BOOL(ctx.result);
 	}
 }
 
