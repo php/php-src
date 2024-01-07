@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1c03251b4e0b22056da43bf86087d6996454d2a0 */
+ * Stub hash: d0658405953ef28aefd50aa52c106913aca18892 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_filter, 0, 4, IS_LONG, 0)
 	ZEND_ARG_INFO(0, in)
@@ -22,6 +22,10 @@ static const zend_function_entry class_php_user_filter_methods[] = {
 	ZEND_ME(php_user_filter, filter, arginfo_class_php_user_filter_filter, ZEND_ACC_PUBLIC)
 	ZEND_ME(php_user_filter, onCreate, arginfo_class_php_user_filter_onCreate, ZEND_ACC_PUBLIC)
 	ZEND_ME(php_user_filter, onClose, arginfo_class_php_user_filter_onClose, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_StreamBucket_methods[] = {
 	ZEND_FE_END
 };
 
@@ -59,6 +63,35 @@ static zend_class_entry *register_class_php_user_filter(void)
 	zend_string *property_stream_name = zend_string_init("stream", sizeof("stream") - 1, 1);
 	zend_declare_typed_property(class_entry, property_stream_name, &property_stream_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	zend_string_release(property_stream_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_StreamBucket(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "StreamBucket", class_StreamBucket_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	zval property_bucket_default_value;
+	ZVAL_NULL(&property_bucket_default_value);
+	zend_string *property_bucket_name = zend_string_init("bucket", sizeof("bucket") - 1, 1);
+	zend_declare_typed_property(class_entry, property_bucket_name, &property_bucket_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
+	zend_string_release(property_bucket_name);
+
+	zval property_data_default_value;
+	ZVAL_UNDEF(&property_data_default_value);
+	zend_string *property_data_name = zend_string_init("data", sizeof("data") - 1, 1);
+	zend_declare_typed_property(class_entry, property_data_name, &property_data_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_data_name);
+
+	zval property_datalen_default_value;
+	ZVAL_UNDEF(&property_datalen_default_value);
+	zend_string *property_datalen_name = zend_string_init("datalen", sizeof("datalen") - 1, 1);
+	zend_declare_typed_property(class_entry, property_datalen_name, &property_datalen_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_datalen_name);
 
 	return class_entry;
 }
