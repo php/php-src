@@ -73,6 +73,9 @@ PHP                                                                        NEWS
   . Added X509_PURPOSE_OCSP_HELPER and X509_PURPOSE_TIMESTAMP_SIGN constants.
     (Vincent Jardin)
 
+- Output:
+  . Clear output handler status flags during handler initialization. (haszi)
+
 - PDO:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Implemented PDO driver-specific subclasses RFC. (danack, kocsismate)
