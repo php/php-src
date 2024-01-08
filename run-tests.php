@@ -4050,7 +4050,7 @@ final class Differ
         if ($cFrom === 1) {
             foreach ($to as $toV) {
                 if (($this->isEqual)($from[0], $toV)) {
-                    return [$from[0]];
+                    return [$toV];
                 }
             }
 
