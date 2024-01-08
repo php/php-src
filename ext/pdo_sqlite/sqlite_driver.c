@@ -442,13 +442,6 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb, int argc, sqlite3_va
 	return ret;
 }
 
-static void php_sqlite3_func_callback(sqlite3_context *context, int argc, sqlite3_value **argv)
-{
-	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
-
-	do_callback(&func->afunc, &func->func, argc, argv, context, 0);
-}
-
 static void php_sqlite3_func_step_callback(sqlite3_context *context, int argc, sqlite3_value **argv)
 {
 	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
@@ -502,7 +495,14 @@ static int php_sqlite3_collation_callback(void *context, int string1_len, const 
 	return ret;
 }
 
-void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqlite_func_callback callback)
+static void php_sqlite3_func_callback(sqlite3_context *context, int argc, sqlite3_value **argv)
+{
+	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
+
+	do_callback(&func->afunc, &func->func, argc, argv, context, 0);
+}
+
+void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	struct pdo_sqlite_func *func;
 	zend_fcall_info fci;
@@ -530,7 +530,7 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqlit
 
 	func = (struct pdo_sqlite_func*)ecalloc(1, sizeof(*func));
 
-	ret = sqlite3_create_function(H->db, func_name, argc, flags | SQLITE_UTF8, func, callback, NULL, NULL);
+	ret = sqlite3_create_function(H->db, func_name, argc, flags | SQLITE_UTF8, func, php_sqlite3_func_callback, NULL, NULL);
 	if (ret == SQLITE_OK) {
 		func->funcname = estrdup(func_name);
 
@@ -552,13 +552,12 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqlit
    Registers a UDF with the sqlite db handle */
 PHP_METHOD(PDO_SQLite_Ext, sqliteCreateFunction)
 {
-	pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_sqlite3_func_callback);
+	pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-void pdo_sqlite_create_aggregate_internal(
-	INTERNAL_FUNCTION_PARAMETERS, pdo_sqlite_func_step_callback step_callback, pdo_sqlite_func_final_callback final_callback
-) {
+void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
+{
 	struct pdo_sqlite_func *func;
 	zend_fcall_info step_fci, fini_fci;
 	zend_fcall_info_cache step_fcc, fini_fcc;
@@ -584,7 +583,8 @@ void pdo_sqlite_create_aggregate_internal(
 
 	func = (struct pdo_sqlite_func*)ecalloc(1, sizeof(*func));
 
-	ret = sqlite3_create_function(H->db, func_name, argc, SQLITE_UTF8, func, NULL, step_callback, final_callback);
+	ret = sqlite3_create_function(H->db, func_name, argc, SQLITE_UTF8, func, NULL,
+		php_sqlite3_func_step_callback, php_sqlite3_func_final_callback);
 	if (ret == SQLITE_OK) {
 		func->funcname = estrdup(func_name);
 
@@ -625,7 +625,7 @@ void pdo_sqlite_create_aggregate_internal(
 
 PHP_METHOD(PDO_SQLite_Ext, sqliteCreateAggregate)
 {
-	pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_sqlite3_func_step_callback, php_sqlite3_func_final_callback);
+	pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 

@@ -31,11 +31,6 @@
 
 static zend_class_entry *pdosqlite_ce;
 
-typedef struct {
-	zval val;
-	zend_long row;
-} pdopsqlite_aggregate_context;
-
 /* {{{ pdo_sqlite_deps */
 static const zend_module_dep pdo_sqlite_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
@@ -63,166 +58,12 @@ zend_module_entry pdo_sqlite_module_entry = {
 ZEND_GET_MODULE(pdo_sqlite)
 #endif
 
-static int do_callback(struct pdo_sqlite_fci *fc, zval *cb, int argc, sqlite3_value **argv, sqlite3_context *context, int is_agg)
-{
-	zval *zargs = NULL;
-	zval retval;
-	int i;
-	int ret;
-	int fake_argc;
-	pdopsqlite_aggregate_context *agg_context = NULL;
-
-	if (is_agg) {
-		is_agg = 2;
-	}
-
-	fake_argc = argc + is_agg;
-
-	fc->fci.size = sizeof(fc->fci);
-	ZVAL_COPY_VALUE(&fc->fci.function_name, cb);
-	fc->fci.object = NULL;
-	fc->fci.retval = &retval;
-	fc->fci.param_count = fake_argc;
-
-	/* build up the params */
-
-	if (fake_argc) {
-		zargs = safe_emalloc(fake_argc, sizeof(zval), 0);
-	}
-
-	if (is_agg) {
-		agg_context = sqlite3_aggregate_context(context, sizeof(pdopsqlite_aggregate_context));
-		if (!agg_context) {
-			efree(zargs);
-			return FAILURE;
-		}
-		if (Z_ISUNDEF(agg_context->val)) {
-			ZVAL_NEW_REF(&agg_context->val, &EG(uninitialized_zval));
-		}
-		ZVAL_COPY_VALUE(&zargs[0], &agg_context->val);
-		ZVAL_LONG(&zargs[1], ++agg_context->row);
-	}
-
-	for (i = 0; i < argc; i++) {
-		/* get the value */
-		switch (sqlite3_value_type(argv[i])) {
-			case SQLITE_INTEGER:
-				ZVAL_LONG(&zargs[i + is_agg], sqlite3_value_int(argv[i]));
-				break;
-
-			case SQLITE_FLOAT:
-				ZVAL_DOUBLE(&zargs[i + is_agg], sqlite3_value_double(argv[i]));
-				break;
-
-			case SQLITE_NULL:
-				ZVAL_NULL(&zargs[i + is_agg]);
-				break;
-
-			case SQLITE_BLOB:
-			case SQLITE3_TEXT:
-			default:
-				ZVAL_STRINGL(&zargs[i + is_agg], (char*)sqlite3_value_text(argv[i]), sqlite3_value_bytes(argv[i]));
-				break;
-		}
-	}
-
-	fc->fci.params = zargs;
-
-	if ((ret = zend_call_function(&fc->fci, &fc->fcc)) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the callback");
-	}
-
-	/* clean up the params */
-	if (zargs) {
-		for (i = is_agg; i < fake_argc; i++) {
-			zval_ptr_dtor(&zargs[i]);
-		}
-		if (is_agg) {
-			zval_ptr_dtor(&zargs[1]);
-		}
-		efree(zargs);
-	}
-
-	if (!is_agg || !argv) {
-		/* only set the sqlite return value if we are a scalar function,
-		 * or if we are finalizing an aggregate */
-		if (!Z_ISUNDEF(retval)) {
-			switch (Z_TYPE(retval)) {
-				case IS_LONG:
-					sqlite3_result_int(context, Z_LVAL(retval));
-					break;
-
-				case IS_NULL:
-					sqlite3_result_null(context);
-					break;
-
-				case IS_DOUBLE:
-					sqlite3_result_double(context, Z_DVAL(retval));
-					break;
-
-				default:
-					if (!try_convert_to_string(&retval)) {
-						ret = FAILURE;
-						break;
-					}
-					sqlite3_result_text(context, Z_STRVAL(retval), Z_STRLEN(retval), SQLITE_TRANSIENT);
-					break;
-			}
-		} else {
-			sqlite3_result_error(context, "failed to invoke callback", 0);
-		}
-
-		if (agg_context) {
-			zval_ptr_dtor(&agg_context->val);
-		}
-	} else {
-		/* we're stepping in an aggregate; the return value goes into
-		 * the context */
-		if (agg_context) {
-			if (Z_ISUNDEF(retval)) {
-				zval_ptr_dtor(&agg_context->val);
-				return FAILURE;
-			}
-			zval_ptr_dtor(Z_REFVAL(agg_context->val));
-			ZVAL_COPY_VALUE(Z_REFVAL(agg_context->val), &retval);
-			ZVAL_UNDEF(&retval);
-		}
-	}
-
-	if (!Z_ISUNDEF(retval)) {
-		zval_ptr_dtor(&retval);
-	}
-
-	return ret;
-}
-
-static void php_sqlite_func_callback(sqlite3_context *context, int argc, sqlite3_value **argv)
-{
-	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
-
-	do_callback(&func->afunc, &func->func, argc, argv, context, 0);
-}
-
-static void php_sqlite_func_step_callback(sqlite3_context *context, int argc, sqlite3_value **argv)
-{
-	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
-
-	do_callback(&func->astep, &func->step, argc, argv, context, 1);
-}
-
-static void php_sqlite_func_final_callback(sqlite3_context *context)
-{
-	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
-
-	do_callback(&func->afini, &func->fini, 0, NULL, context, 1);
-}
-
 /* proto bool PdoSqlite::createFunction(string $function_name, callable $callback, int $num_args = -1, int $flags = 0)
     Creates a function that can be used in a query
 */
 PHP_METHOD(PdoSqlite, createFunction)
 {
-	pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_sqlite_func_callback);
+	pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 #ifndef PDO_SQLITE_OMIT_LOAD_EXTENSION
@@ -537,7 +378,7 @@ static int php_sqlite_collation_callback(void *context, int string1_len, const v
 
 PHP_METHOD(PdoSqlite, createAggregate)
 {
-	pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, php_sqlite_func_step_callback, php_sqlite_func_final_callback);
+	pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 PHP_METHOD(PdoSqlite, createCollation)

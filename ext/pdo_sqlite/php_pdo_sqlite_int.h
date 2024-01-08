@@ -78,14 +78,10 @@ enum {
 	PDO_SQLITE_ATTR_EXTENDED_RESULT_CODES
 };
 
-typedef void pdo_sqlite_func_callback(sqlite3_context*, int, sqlite3_value**);
-typedef void pdo_sqlite_func_step_callback(sqlite3_context*, int, sqlite3_value **);
-typedef void pdo_sqlite_func_final_callback(sqlite3_context*);
 typedef int pdo_sqlite_create_collation_callback(void*, int, const void*, int, const void*);
 
-void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqlite_func_callback callback);
-void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqlite_func_step_callback step_callback,
-	pdo_sqlite_func_final_callback final_callback);
+void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS);
 void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqlite_create_collation_callback callback);
 
 #endif
