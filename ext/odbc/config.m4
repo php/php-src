@@ -325,7 +325,6 @@ PHP_ARG_WITH([iodbc],,
     PHP_EVAL_INCLINE($ODBC_CFLAGS)
     ODBC_TYPE=iodbc
     AC_DEFINE(HAVE_IODBC,1,[ ])
-    AC_DEFINE(HAVE_ODBC2,1,[ ])
   else
     AC_MSG_RESULT(no)
   fi
