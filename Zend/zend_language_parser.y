@@ -1526,12 +1526,6 @@ array_pair:
 			{ $$ = zend_ast_create_ex(ZEND_AST_ARRAY_ELEM, 1, $2, NULL); }
 	|	T_ELLIPSIS expr
 			{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
-	|	expr T_DOUBLE_ARROW T_LIST '(' array_pair_list ')'
-			{ $5->attr = ZEND_ARRAY_SYNTAX_LIST;
-			  $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $5, $1); }
-	|	T_LIST '(' array_pair_list ')'
-			{ $3->attr = ZEND_ARRAY_SYNTAX_LIST;
-			  $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, NULL); }
 ;
 
 encaps_list:
