@@ -1332,6 +1332,26 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 				}
 				break;
 		}
+#ifdef ZEND_VERIFY_TYPE_INFERENCE
+		if (ssa_op->op1_use >= 0) {
+			opline->op1_use_type = ssa->var_info[ssa_op->op1_use].type;
+		}
+		if (ssa_op->op2_use >= 0) {
+			opline->op2_use_type = ssa->var_info[ssa_op->op2_use].type;
+		}
+		if (ssa_op->result_use >= 0) {
+			opline->result_use_type = ssa->var_info[ssa_op->result_use].type;
+		}
+		if (ssa_op->op1_def >= 0) {
+			opline->op1_def_type = ssa->var_info[ssa_op->op1_def].type;
+		}
+		if (ssa_op->op2_def >= 0) {
+			opline->op2_def_type = ssa->var_info[ssa_op->op2_def].type;
+		}
+		if (ssa_op->result_def >= 0) {
+			opline->result_def_type = ssa->var_info[ssa_op->result_def].type;
+		}
+#endif
 		zend_vm_set_opcode_handler_ex(opline, op1_info, op2_info, res_info);
 		opline++;
 	}

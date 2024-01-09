@@ -63,7 +63,7 @@ function get_matrix_include(array $branches) {
             'branch' => $branch,
             'debug' => true,
             'zts' => true,
-            'configuration_parameters' => "CFLAGS='-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1'",
+            'configuration_parameters' => "CFLAGS='-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE'",
             'timeout_minutes' => 360,
             'test_function_jit' => true,
             'asan' => false,

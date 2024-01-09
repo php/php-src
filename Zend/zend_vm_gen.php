@@ -1057,7 +1057,8 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
                 $code =
                       "\t\t\tHYBRID_CASE({$spec_name}):\n"
                     . "\t\t\t\tVM_TRACE($spec_name)\n"
-                    . stream_get_contents($out);
+                    . stream_get_contents($out)
+                    . "\t\t\t\tVM_TRACE_OP_END($spec_name)\n";
                 fclose($out);
             } else {
                 $inline =
@@ -1068,6 +1069,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
                       "\t\t\tHYBRID_CASE({$spec_name}):\n"
                     . "\t\t\t\tVM_TRACE($spec_name)\n"
                     . "\t\t\t\t{$spec_name}{$inline}_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n"
+                    . "\t\t\t\tVM_TRACE_OP_END($spec_name)\n"
                     . "\t\t\t\tHYBRID_BREAK();\n";
             }
             if (is_array($gen_order)) {
@@ -1768,6 +1770,7 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
             out($f,"\t\t\tHYBRID_DEFAULT:\n");
             out($f,"\t\t\t\tVM_TRACE(ZEND_NULL)\n");
             out($f,"\t\t\t\tZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
+            out($f,"\t\t\t\tVM_TRACE_OP_END(ZEND_NULL)\n");
             out($f,"\t\t\t\tHYBRID_BREAK(); /* Never reached */\n");
             break;
     }
@@ -1834,6 +1837,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                     } else {
                         out($f,"# define VM_TRACE(op)\n");
                     }
+                    out($f,"#endif\n");
+                    out($f,"#ifndef VM_TRACE_OP_END\n");
+                    out($f,"# define VM_TRACE_OP_END(op)\n");
                     out($f,"#endif\n");
                     out($f,"#ifndef VM_TRACE_START\n");
                     out($f,"# define VM_TRACE_START()\n");
