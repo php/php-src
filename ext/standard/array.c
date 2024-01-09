@@ -2924,8 +2924,8 @@ PHP_FUNCTION(range)
 
 	/* If the range is given as strings, generate an array of characters. */
 	if (start_type >= IS_STRING || end_type >= IS_STRING) {
-		/* If one of the inputs is NOT a string */
-		if (UNEXPECTED(start_type + end_type < 2*IS_STRING)) {
+		/* If one of the inputs is NOT a string nor single-byte string */
+		if (UNEXPECTED(start_type < IS_STRING || end_type < IS_STRING)) {
 			if (start_type < IS_STRING) {
 				if (end_type != IS_ARRAY) {
 					php_error_docref(NULL, E_WARNING, "Argument #1 ($start) must be a single byte string if"
