@@ -30,6 +30,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   int(*)(zend_object_iterator *) to zend_result(*)(zend_object_iterator *) to
   be more in line with what callbacks are returning.
 
+* The backwards compatibility headers ext/standard/{php_lcg.h,php_mt_rand.h,
+  php_rand.h,php_random.h} have been removed. Include ext/random/php_random.h
+  directly.
+
 ========================
 2. Build system changes
 ========================
