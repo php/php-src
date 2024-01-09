@@ -9,7 +9,6 @@ The release schedule for each version is published on the
 - [PHP 8.3](https://wiki.php.net/todo/php83)
 - [PHP 8.2](https://wiki.php.net/todo/php82)
 - [PHP 8.1](https://wiki.php.net/todo/php81)
-- [PHP 8.0](https://wiki.php.net/todo/php80)
 
 The PHP project publishes builds every two weeks.
 
