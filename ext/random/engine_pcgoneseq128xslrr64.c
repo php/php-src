@@ -146,8 +146,6 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 	zend_string *str_seed = NULL;
 	zend_long int_seed = 0;
 	bool seed_is_null = true;
-	uint32_t i, j;
-	uint64_t t[2];
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL;
@@ -163,13 +161,16 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 		if (str_seed) {
 			/* char (byte: 8 bit) * 16 = 128 bits */
 			if (ZSTR_LEN(str_seed) == 16) {
+				uint64_t t[2];
+
 				/* Endianness safe copy */
-				for (i = 0; i < 2; i++) {
+				for (uint32_t i = 0; i < 2; i++) {
 					t[i] = 0;
-					for (j = 0; j < 8; j++) {
+					for (uint32_t j = 0; j < 8; j++) {
 						t[i] += ((uint64_t) (unsigned char) ZSTR_VAL(str_seed)[(i * 8) + j]) << (j * 8);
 					}
 				}
+
 				seed128(engine->status, php_random_uint128_constant(t[0], t[1]));
 			} else {
 				zend_argument_value_error(1, "must be a 16 byte (128 bit) string");
