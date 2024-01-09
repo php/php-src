@@ -364,6 +364,7 @@ ZEND_API void zend_interned_strings_switch_storage(bool request)
 	}
 }
 
+#if defined(__GNUC__) && (defined(__i386__) || (defined(__x86_64__) && !defined(__ILP32__)))
 /* Even if we don't build with valgrind support, include the symbol so that valgrind available
  * only at runtime will not result in false positives. */
 #ifndef I_REPLACE_SONAME_FNNAME_ZU
@@ -371,29 +372,20 @@ ZEND_API void zend_interned_strings_switch_storage(bool request)
 #endif
 
 /* See GH-9068 */
-#if defined(__GNUC__) && (__GNUC__ >= 11 || defined(__clang__)) && __has_attribute(no_caller_saved_registers)
-# define NO_CALLER_SAVED_REGISTERS __attribute__((no_caller_saved_registers))
-# ifndef __clang__
-#  pragma GCC push_options
-#  pragma GCC target ("general-regs-only")
-#  define POP_OPTIONS
-# endif
+#if __has_attribute(noipa)
+# define NOIPA __attribute__((noipa))
 #else
-# define NO_CALLER_SAVED_REGISTERS
+# define NOIPA
 #endif
 
-ZEND_API bool ZEND_FASTCALL NO_CALLER_SAVED_REGISTERS I_REPLACE_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(const zend_string *s1, const zend_string *s2)
+ZEND_API bool ZEND_FASTCALL I_REPLACE_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(const zend_string *s1, const zend_string *s2)
 {
 	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
 }
-
-#ifdef POP_OPTIONS
-# pragma GCC pop_options
-# undef POP_OPTIONS
 #endif
 
 #if defined(__GNUC__) && defined(__i386__)
-ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
+ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	const char *ptr = ZSTR_VAL(s1);
 	size_t delta = (const char*)s2 - (const char*)s1;
@@ -431,7 +423,7 @@ ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const z
 }
 
 #elif defined(__GNUC__) && defined(__x86_64__) && !defined(__ILP32__)
-ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
+ZEND_API zend_never_inline NOIPA bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	const char *ptr = ZSTR_VAL(s1);
 	size_t delta = (const char*)s2 - (const char*)s1;
