@@ -5,7 +5,6 @@ const BRANCHES = [
     ['name' => 'PHP-8.3', 'ref' => 'PHP-8.3', 'version' => ['major' => 8, 'minor' => 3]],
     ['name' => 'PHP-8.2', 'ref' => 'PHP-8.2', 'version' => ['major' => 8, 'minor' => 2]],
     ['name' => 'PHP-8.1', 'ref' => 'PHP-8.1', 'version' => ['major' => 8, 'minor' => 1]],
-    ['name' => 'PHP-8.0', 'ref' => 'PHP-8.0', 'version' => ['major' => 8, 'minor' => 0]],
 ];
 
 function get_branch_commit_cache_file_path(): string {
@@ -49,28 +48,26 @@ function get_matrix_include(array $branches) {
             'test_function_jit' => false,
             'asan' => true,
         ];
-        if ($branch['ref'] !== 'PHP-8.0') {
-            $jobs[] = [
-                'name' => '_REPEAT',
-                'branch' => $branch,
-                'debug' => true,
-                'zts' => false,
-                'run_tests_parameters' => '--repeat 2',
-                'timeout_minutes' => 360,
-                'test_function_jit' => true,
-                'asan' => false,
-            ];
-            $jobs[] = [
-                'name' => '_VARIATION',
-                'branch' => $branch,
-                'debug' => true,
-                'zts' => true,
-                'configuration_parameters' => "CFLAGS='-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1'",
-                'timeout_minutes' => 360,
-                'test_function_jit' => true,
-                'asan' => false,
-            ];
-        }
+        $jobs[] = [
+            'name' => '_REPEAT',
+            'branch' => $branch,
+            'debug' => true,
+            'zts' => false,
+            'run_tests_parameters' => '--repeat 2',
+            'timeout_minutes' => 360,
+            'test_function_jit' => true,
+            'asan' => false,
+        ];
+        $jobs[] = [
+            'name' => '_VARIATION',
+            'branch' => $branch,
+            'debug' => true,
+            'zts' => true,
+            'configuration_parameters' => "CFLAGS='-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1'",
+            'timeout_minutes' => 360,
+            'test_function_jit' => true,
+            'asan' => false,
+        ];
     }
     return $jobs;
 }

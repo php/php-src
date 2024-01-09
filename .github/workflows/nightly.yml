@@ -401,7 +401,6 @@ jobs:
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
           php -v
       - name: Test AMPHP
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
           X=0
@@ -420,7 +419,6 @@ jobs:
           done
           exit $X
       - name: Test Laravel
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           git clone https://github.com/laravel/framework.git --branch=master --depth=1
           cd framework
@@ -434,7 +432,6 @@ jobs:
             exit 1
           fi
       - name: Test ReactPHP
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           repositories="async cache child-process datagram dns event-loop promise promise-stream promise-timer stream"
           X=0
@@ -453,7 +450,6 @@ jobs:
           done
           exit $X
       - name: Test Revolt PHP
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           git clone https://github.com/revoltphp/event-loop.git --depth=1
           cd event-loop
@@ -465,7 +461,6 @@ jobs:
             exit 1
           fi
       - name: Test Symfony
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           git clone https://github.com/symfony/symfony.git --depth=1
           cd symfony
@@ -499,7 +494,6 @@ jobs:
             exit 1
           fi
       - name: 'Symfony Preloading'
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-reqs
           cd symfony_demo
@@ -680,7 +674,7 @@ jobs:
             --enable-memory-sanitizer \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d \
-            ${{ matrix.branch.ref != 'PHP-8.0' && '--enable-dl-test=shared' || '' }}
+            --enable-dl-test=shared
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
@@ -724,8 +718,6 @@ jobs:
       fail-fast: false
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
-        exclude:
-          - branch: { name: 'PHP-80', ref: 'PHP-8.0', major: 8, minor: 0 }
     name: "${{ matrix.branch.name }}_LIBMYSQLCLIENT"
     runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     steps:
