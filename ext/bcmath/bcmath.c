@@ -643,6 +643,96 @@ PHP_FUNCTION(bccomp)
 }
 /* }}} */
 
+/* {{{ floor or ceil */
+static void bcfloor_or_bcceil(INTERNAL_FUNCTION_PARAMETERS, bool is_floor)
+{
+	zend_string *numstr;
+	bc_num num, result;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(numstr)
+	ZEND_PARSE_PARAMETERS_END();
+
+	bc_init_num(&num);
+	bc_init_num(&result);
+
+	if (php_str2num(&num, ZSTR_VAL(numstr)) == FAILURE) {
+		zend_argument_value_error(1, "is not well-formed");
+		goto cleanup;
+	}
+
+	bc_floor_or_ceil(num, is_floor, &result);
+	RETVAL_STR(bc_num2str_ex(result, 0));
+
+	cleanup: {
+		bc_free_num(&num);
+		bc_free_num(&result);
+	};
+}
+/* }}} */
+
+/* {{{ Returns floor of num */
+PHP_FUNCTION(bcfloor)
+{
+	bcfloor_or_bcceil(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+/* }}} */
+
+/* {{{ Returns ceil of num */
+PHP_FUNCTION(bcceil)
+{
+	bcfloor_or_bcceil(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
+/* }}} */
+
+/* {{{ Returns num rounded to the digits specified by precision. */
+PHP_FUNCTION(bcround)
+{
+	zend_string *numstr;
+	zend_long precision = 0;
+	zend_long mode = PHP_ROUND_HALF_UP;
+	bc_num num, result;
+
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STR(numstr)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(precision)
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
+
+	switch (mode) {
+		case PHP_ROUND_HALF_UP:
+		case PHP_ROUND_HALF_DOWN:
+		case PHP_ROUND_HALF_EVEN:
+		case PHP_ROUND_HALF_ODD:
+		case PHP_ROUND_CEILING:
+		case PHP_ROUND_FLOOR:
+		case PHP_ROUND_TOWARD_ZERO:
+		case PHP_ROUND_AWAY_FROM_ZERO:
+			break;
+		default:
+			zend_argument_value_error(3, "must be a valid rounding mode (PHP_ROUND_*)");
+			return;
+	}
+
+	bc_init_num(&num);
+	bc_init_num(&result);
+
+	if (php_str2num(&num, ZSTR_VAL(numstr)) == FAILURE) {
+		zend_argument_value_error(1, "is not well-formed");
+		goto cleanup;
+	}
+
+	bc_round(num, precision, mode, &result);
+	RETVAL_STR(bc_num2str_ex(result, result->n_scale));
+
+	cleanup: {
+		bc_free_num(&num);
+		bc_free_num(&result);
+	};
+}
+/* }}} */
+
 /* {{{ Sets default scale parameter for all bc math functions */
 PHP_FUNCTION(bcscale)
 {
