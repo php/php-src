@@ -2065,6 +2065,7 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 			goto fail;
 		}
 		append_essential_headers(&buffer, client, 1, NULL);
+		smart_str_appends_ex(&buffer, SAPI_PHP_VERSION_HEADER "\r\n", 1);
 		smart_str_appends_ex(&buffer, "Content-Type: text/html; charset=UTF-8\r\n", 1);
 		smart_str_appends_ex(&buffer, "Content-Length: ", 1);
 		smart_str_append_unsigned_ex(&buffer, php_cli_server_buffer_size(&client->content_sender.buffer), 1);
