@@ -213,7 +213,7 @@ PHP_METHOD(Random_Engine_Xoshiro256StarStar, __construct)
 
 	if (seed_is_null) {
 		do {
-			if (php_random_bytes_throw(&state->state, 32) == FAILURE) {
+			if (php_random_bytes_throw(&state->state, sizeof(state->state)) == FAILURE) {
 				zend_throw_exception(random_ce_Random_RandomException, "Failed to generate a random seed", 0);
 				RETURN_THROWS();
 			}
