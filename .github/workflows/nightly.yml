@@ -349,9 +349,16 @@ jobs:
       fail-fast: false
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
-    name: "${{ matrix.branch.name }}_COMMUNITY"
+        type: ['asan', 'verify_type_inference']
+        # These branches don't include type verification
+        exclude:
+          - { branch: { name: 'PHP-8.1', ref: 'PHP-8.1', major: 8, minor: 1 }, type: 'verify_type_inference' }
+          - { branch: { name: 'PHP-8.2', ref: 'PHP-8.2', major: 8, minor: 2 }, type: 'verify_type_inference' }
+          - { branch: { name: 'PHP-8.3', ref: 'PHP-8.3', major: 8, minor: 3 }, type: 'verify_type_inference' }
+    name: "${{ matrix.branch.name }}_COMMUNITY_${{ matrix.type }}"
     runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     env:
+      ASAN_OPTIONS: exitcode=139
       UBSAN_OPTIONS: print_stacktrace=1
       USE_ZEND_ALLOC: 0
       USE_TRACKED_ALLOC: 1
@@ -365,11 +372,11 @@ jobs:
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
+          # CFLAGS removes O2, so we have to add it again...
           configurationParameters: >-
-            --enable-debug
             --enable-zts
-            CFLAGS='-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC'
-            LDFLAGS='-fsanitize=undefined,address'
+            ${{ matrix.type == 'asan' && '--enable-debug CFLAGS="-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address"' || '' }}
+            ${{ matrix.type == 'verify_type_inference' && 'CFLAGS="-DZEND_VERIFY_TYPE_INFERENCE -O2"' || '' }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
@@ -379,12 +386,20 @@ jobs:
           sudo service mysql start
           mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
           mysql -uroot -proot -e "SET GLOBAL local_infile = true"
-      - name: Enable Opcache and JIT
+      - name: Enable Opcache
         run: |
+          echo memory_limit=-1 >> /etc/php.d/opcache.ini
           echo zend_extension=opcache.so > /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
           echo opcache.enable=1 >> /etc/php.d/opcache.ini
           echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
+          echo opcache.memory_consumption=256M >> /etc/php.d/opcache.ini
+          echo opcache.file_update_protection=0 >> /etc/php.d/opcache.ini
+          echo opcache.interned_strings_buffer=64 >> /etc/php.d/opcache.ini
+          echo opcache.max_accelerated_files=100000 >> /etc/php.d/opcache.ini
+      - name: Enable JIT
+        if: matrix.type != 'verify_type_inference'
+        run: |
           echo opcache.jit=tracing >> /etc/php.d/opcache.ini
           echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
           echo opcache.jit_max_root_traces=100000 >> /etc/php.d/opcache.ini
@@ -394,11 +409,6 @@ jobs:
           echo opcache.jit_hot_func=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_return=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
-          echo opcache.file_update_protection=0 >> /etc/php.d/opcache.ini
-          echo opcache.memory_consumption=256M >> /etc/php.d/opcache.ini
-          echo opcache.interned_strings_buffer=64 >> /etc/php.d/opcache.ini
-          echo opcache.max_accelerated_files=100000 >> /etc/php.d/opcache.ini
-          echo memory_limit=-1 >> /etc/php.d/opcache.ini
           php -v
       - name: Test AMPHP
         run: |
@@ -410,7 +420,6 @@ jobs:
             cd "amphp-$repository"
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-reqs
-            export ASAN_OPTIONS=exitcode=139
             vendor/bin/phpunit || EXIT_CODE=$?
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
@@ -426,7 +435,6 @@ jobs:
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           # Hack to disable a test that hangs
           php -r '$c = file_get_contents("tests/Filesystem/FilesystemTest.php"); $c = str_replace("public function testSharedGet()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testSharedGet()", $c); file_put_contents("tests/Filesystem/FilesystemTest.php", $c);'
-          export ASAN_OPTIONS=exitcode=139
           php vendor/bin/phpunit --exclude-group skip || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
@@ -441,7 +449,6 @@ jobs:
             cd "reactphp-$repository"
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-reqs
-            export ASAN_OPTIONS=exitcode=139
             vendor/bin/phpunit || EXIT_CODE=$?
             if [ $[EXIT_CODE:-0} -gt 128 ]; then
               X=1;
@@ -455,7 +462,6 @@ jobs:
           cd event-loop
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          export ASAN_OPTIONS=exitcode=139
           vendor/bin/phpunit || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
@@ -471,7 +477,6 @@ jobs:
           php -r '$c = file_get_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php"); $c = str_replace("public function testSanitizeDeepNestedString()", "/** @group skip */\n    public function testSanitizeDeepNestedString()", $c); file_put_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php", $c);'
           # Buggy FFI test in Symfony, see https://github.com/symfony/symfony/issues/47668
           php -r '$c = file_get_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php"); $c = str_replace("*/\n    public function testCastNonTrailingCharPointer()", "* @group skip\n     */\n    public function testCastNonTrailingCharPointer()", $c); file_put_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php", $c);'
-          export ASAN_OPTIONS=exitcode=139
           export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
           X=0
           for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
@@ -487,7 +492,6 @@ jobs:
           git clone https://github.com/sebastianbergmann/phpunit.git --branch=main --depth=1
           cd phpunit
           git rev-parse HEAD
-          export ASAN_OPTIONS=exitcode=139
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           php ./phpunit || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
@@ -506,7 +510,6 @@ jobs:
           git clone https://github.com/WordPress/wordpress-develop.git wordpress --depth=1
           cd wordpress
           git rev-parse HEAD
-          export ASAN_OPTIONS=exitcode=139
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           cp wp-tests-config-sample.php wp-tests-config.php
           sed -i 's/youremptytestdbnamehere/test/g' wp-tests-config.php
