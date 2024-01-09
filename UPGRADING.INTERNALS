@@ -47,6 +47,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The macro RAND_RANGE_BADSCALING() has been removed. The implementation
      should either be inlined and undefined behavior fixed or it should be
      replaced by a non-biased scaler.
+   - The generate member of a php_random_algo is now expected to return
+     the new php_random_result struct, replacing the last_generated_size
+     member of the php_random_status struct and the generate_size member of
+     the php_random_algo struct.
 
  c. ext/xsl
    - The function php_xsl_create_object() was removed as it was not used

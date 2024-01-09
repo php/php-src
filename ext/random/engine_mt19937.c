@@ -143,7 +143,7 @@ static void seed(php_random_status *status, uint64_t seed)
 	mt19937_seed_state(status->state, seed);
 }
 
-static uint64_t generate(php_random_status *status)
+static php_random_result generate(php_random_status *status)
 {
 	php_random_status_state_mt19937 *s = status->state;
 	uint32_t s1;
@@ -157,7 +157,10 @@ static uint64_t generate(php_random_status *status)
 	s1 ^= (s1 << 7) & 0x9d2c5680U;
 	s1 ^= (s1 << 15) & 0xefc60000U;
 
-	return (uint64_t) (s1 ^ (s1 >> 18));
+	return (php_random_result){
+		.size = sizeof(uint32_t),
+		.result = (uint64_t) (s1 ^ (s1 >> 18)),
+	};
 }
 
 static zend_long range(php_random_status *status, zend_long min, zend_long max)
@@ -223,7 +226,6 @@ static bool unserialize(php_random_status *status, HashTable *data)
 }
 
 const php_random_algo php_random_algo_mt19937 = {
-	sizeof(uint32_t),
 	sizeof(php_random_status_state_mt19937),
 	seed,
 	generate,
@@ -288,25 +290,22 @@ PHP_METHOD(Random_Engine_Mt19937, __construct)
 PHP_METHOD(Random_Engine_Mt19937, generate)
 {
 	php_random_engine *engine = Z_RANDOM_ENGINE_P(ZEND_THIS);
-	uint64_t generated;
-	size_t size;
 	zend_string *bytes;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	generated = engine->algo->generate(engine->status);
-	size = engine->status->last_generated_size;
+	php_random_result generated = engine->algo->generate(engine->status);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
 
-	bytes = zend_string_alloc(size, false);
+	bytes = zend_string_alloc(generated.size, false);
 
 	/* Endianness safe copy */
-	for (size_t i = 0; i < size; i++) {
-		ZSTR_VAL(bytes)[i] = (generated >> (i * 8)) & 0xff;
+	for (size_t i = 0; i < generated.size; i++) {
+		ZSTR_VAL(bytes)[i] = (generated.result >> (i * 8)) & 0xff;
 	}
-	ZSTR_VAL(bytes)[size] = '\0';
+	ZSTR_VAL(bytes)[generated.size] = '\0';
 
 	RETURN_STR(bytes);
 }

@@ -82,9 +82,9 @@ PHPAPI uint32_t php_random_range32(const php_random_algo *algo, php_random_statu
 	result = 0;
 	total_size = 0;
 	do {
-		uint32_t r = algo->generate(status);
-		result = result | (r << (total_size * 8));
-		total_size += status->last_generated_size;
+		php_random_result r = algo->generate(status);
+		result = result | (((uint32_t) r.result) << (total_size * 8));
+		total_size += r.size;
 		if (EG(exception)) {
 			return 0;
 		}
@@ -117,9 +117,9 @@ PHPAPI uint32_t php_random_range32(const php_random_algo *algo, php_random_statu
 		result = 0;
 		total_size = 0;
 		do {
-			uint32_t r = algo->generate(status);
-			result = result | (r << (total_size * 8));
-			total_size += status->last_generated_size;
+			php_random_result r = algo->generate(status);
+			result = result | (((uint32_t) r.result) << (total_size * 8));
+			total_size += r.size;
 			if (EG(exception)) {
 				return 0;
 			}
@@ -138,9 +138,9 @@ PHPAPI uint64_t php_random_range64(const php_random_algo *algo, php_random_statu
 	result = 0;
 	total_size = 0;
 	do {
-		uint64_t r = algo->generate(status);
-		result = result | (r << (total_size * 8));
-		total_size += status->last_generated_size;
+		php_random_result r = algo->generate(status);
+		result = result | (r.result << (total_size * 8));
+		total_size += r.size;
 		if (EG(exception)) {
 			return 0;
 		}
@@ -173,9 +173,9 @@ PHPAPI uint64_t php_random_range64(const php_random_algo *algo, php_random_statu
 		result = 0;
 		total_size = 0;
 		do {
-			uint64_t r = algo->generate(status);
-			result = result | (r << (total_size * 8));
-			total_size += status->last_generated_size;
+			php_random_result r = algo->generate(status);
+			result = result | (r.result << (total_size * 8));
+			total_size += r.size;
 			if (EG(exception)) {
 				return 0;
 			}
@@ -229,7 +229,6 @@ PHPAPI php_random_status *php_random_status_alloc(const php_random_algo *algo, c
 {
 	php_random_status *status = pecalloc(1, sizeof(php_random_status), persistent);
 
-	status->last_generated_size = algo->generate_size;
 	status->state = algo->state_size > 0 ? pecalloc(1, algo->state_size, persistent) : NULL;
 
 	return status;
@@ -237,7 +236,6 @@ PHPAPI php_random_status *php_random_status_alloc(const php_random_algo *algo, c
 
 PHPAPI php_random_status *php_random_status_copy(const php_random_algo *algo, php_random_status *old_status, php_random_status *new_status)
 {
-	new_status->last_generated_size = old_status->last_generated_size;
 	new_status->state = memcpy(new_status->state, old_status->state, algo->state_size);
 
 	return new_status;
@@ -400,7 +398,7 @@ PHPAPI double php_combined_lcg(void)
 		RANDOM_G(combined_lcg_seeded) = true;
 	}
 
-	return php_random_algo_combinedlcg.generate(status) * 4.656613e-10;
+	return php_random_algo_combinedlcg.generate(status).result * 4.656613e-10;
 }
 /* }}} */
 
@@ -415,7 +413,7 @@ PHPAPI void php_mt_srand(uint32_t seed)
 /* {{{ php_mt_rand */
 PHPAPI uint32_t php_mt_rand(void)
 {
-	return (uint32_t) php_random_algo_mt19937.generate(php_random_default_status());
+	return (uint32_t) php_random_algo_mt19937.generate(php_random_default_status()).result;
 }
 /* }}} */
 
@@ -437,7 +435,7 @@ PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 		return php_mt_rand_range(min, max);
 	}
 
-	uint64_t r = php_random_algo_mt19937.generate(php_random_default_status()) >> 1;
+	uint64_t r = php_random_algo_mt19937.generate(php_random_default_status()).result >> 1;
 
 	/* This is an inlined version of the RAND_RANGE_BADSCALING macro that does not invoke UB when encountering
 	 * (max - min) > ZEND_LONG_MAX.

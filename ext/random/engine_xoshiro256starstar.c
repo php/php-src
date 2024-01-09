@@ -103,9 +103,12 @@ static void seed(php_random_status *status, uint64_t seed)
 	seed256(status, s[0], s[1], s[2], s[3]);
 }
 
-static uint64_t generate(php_random_status *status)
+static php_random_result generate(php_random_status *status)
 {
-	return generate_state(status->state);
+	return (php_random_result){
+		.size = sizeof(uint64_t),
+		.result = generate_state(status->state),
+	};
 }
 
 static zend_long range(php_random_status *status, zend_long min, zend_long max)
@@ -150,7 +153,6 @@ static bool unserialize(php_random_status *status, HashTable *data)
 }
 
 const php_random_algo php_random_algo_xoshiro256starstar = {
-	sizeof(uint64_t),
 	sizeof(php_random_status_state_xoshiro256starstar),
 	seed,
 	generate,
