@@ -32,7 +32,7 @@
 ZEND_DECLARE_MODULE_GLOBALS(dblib)
 static PHP_GINIT_FUNCTION(dblib);
 
-zend_class_entry *PdoDblib_ce;
+static zend_class_entry *PdoDblib_ce;
 
 static const zend_module_dep pdo_dblib_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")

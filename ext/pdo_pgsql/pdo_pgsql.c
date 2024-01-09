@@ -28,7 +28,7 @@
 #include "php_pdo_pgsql_int.h"
 #include "pdo_pgsql_arginfo.h"
 
-zend_class_entry *PdoPgsql_ce;
+static zend_class_entry *PdoPgsql_ce;
 
 /* {{{ pdo_sqlite_deps */
 static const zend_module_dep pdo_pgsql_deps[] = {
