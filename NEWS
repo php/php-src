@@ -40,6 +40,10 @@ PHP                                                                        NEWS
     (Jakub Zelenka)
   . Fixed bug GH-12905 (FFI::new interacts badly with observers). (nielsdos)
 
+- GD:
+  . Fixed GH-13082 undefined behavior with GdFont instances handling with
+    imageload* and imagechar*. (David Carlier)
+
 - Intl:
   . Fixed GH-12943 (IntlDateFormatter::__construct accepts 'C' as valid locale).
     (David Carlier)

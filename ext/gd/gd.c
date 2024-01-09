@@ -2677,8 +2677,8 @@ static gdFontPtr php_find_gd_font(zend_object *font_obj, zend_long font_int)
  */
 static void php_imagefontsize(INTERNAL_FUNCTION_PARAMETERS, int arg)
 {
-	zend_object *font_obj;
-	zend_long font_int;
+	zend_object *font_obj = NULL;
+	zend_long font_int = 0;
 	gdFontPtr font;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -2746,8 +2746,8 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	int ch = 0, col, x, y, i, l = 0;
 	unsigned char *str = NULL;
 	zend_object *font_obj;
-	zend_long font_int;
-	gdFontPtr font;
+	zend_long font_int = 0;
+	gdFontPtr font = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(6, 6)
 		Z_PARAM_OBJECT_OF_CLASS(IM, gd_image_ce)
