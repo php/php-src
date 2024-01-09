@@ -1,0 +1,70 @@
+/* floor_or_ceil.c: bcmath library file. */
+/*
+    Copyright (C) 1991, 1992, 1993, 1994, 1997 Free Software Foundation, Inc.
+    Copyright (C) 2000 Philip A. Nelson
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.  (LICENSE)
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to:
+
+      The Free Software Foundation, Inc.
+      59 Temple Place, Suite 330
+      Boston, MA 02111-1307 USA.
+
+    You may contact the author by:
+       e-mail:  philnelson@acm.org
+      us-mail:  Philip A. Nelson
+                Computer Science Department, 9062
+                Western Washington University
+                Bellingham, WA 98226-9062
+
+*************************************************************************/
+
+#include "bcmath.h"
+#include "private.h"
+#include <stddef.h>
+
+void bc_floor_or_ceil(bc_num num, bool is_floor, bc_num *result)
+{
+	bc_num fractional;
+
+	/* clear result */
+	bc_free_num(result);
+
+	/*  Initialize result */
+	*result = bc_new_num(num->n_len, 0);
+	(*result)->n_sign = num->n_sign;
+
+	/* copy integer part */
+	memcpy((*result)->n_value, num->n_value, num->n_len);
+
+	if (num->n_scale == 0 || (*result)->n_sign == (is_floor ? PLUS : MINUS)) {
+		return;
+	}
+
+	/* copy fractional part */
+	fractional = bc_new_num(0, num->n_scale);
+	memcpy(fractional->n_value, num->n_value + num->n_len, num->n_scale);
+
+	if (bc_is_zero(fractional)) {
+		goto cleanup;
+	}
+
+	/* add/sub 1 to/from result */
+	bc_num tmp = _bc_do_add(*result, BCG(_one_), 0);
+	tmp->n_sign = (*result)->n_sign;
+	bc_free_num(result);
+	*result = tmp;
+
+cleanup:
+	bc_free_num(&fractional);
+}
