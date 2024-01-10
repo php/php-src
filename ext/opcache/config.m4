@@ -300,11 +300,11 @@ int main(void) {
   return 0;
 }
 ]])],[have_shm_mmap_posix=yes],[have_shm_mmap_posix=no],[have_shm_mmap_posix=no])
+  AC_MSG_RESULT([$have_shm_mmap_posix])
   if test "$have_shm_mmap_posix" = "yes"; then
     AC_DEFINE(HAVE_SHM_MMAP_POSIX, 1, [Define if you have POSIX mmap() SHM support])
     PHP_CHECK_LIBRARY(rt, shm_unlink, [PHP_ADD_LIBRARY(rt,1,OPCACHE_SHARED_LIBADD)])
   fi
-  AC_MSG_RESULT([$have_shm_mmap_posix])
 
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \

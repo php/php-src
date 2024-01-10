@@ -575,7 +575,6 @@ if test "$PHP_FPM" != "no"; then
   fi
 
   if test "$PHP_FPM_ACL" != "no" ; then
-    AC_MSG_CHECKING([for acl user/group permissions support])
     AC_CHECK_HEADERS([sys/acl.h])
 
     AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <sys/acl.h>
@@ -595,7 +594,6 @@ if test "$PHP_FPM" != "no"; then
       AC_CHECK_LIB(acl, acl_free,
         [PHP_ADD_LIBRARY(acl)
           have_fpm_acl=yes
-          AC_MSG_RESULT([yes])
         ],[
           AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <sys/acl.h>
             int main(void)
@@ -610,21 +608,18 @@ if test "$PHP_FPM" != "no"; then
               acl_free(acl);
               return 0;
             }
-          ]])], [
-            have_fpm_acl=yes
-            AC_MSG_RESULT([yes])
-          ], [
-            have_fpm_acl=no
-            AC_MSG_RESULT([no])
-          ], [AC_MSG_RESULT([skipped (cross-compiling)])])
+          ]])],[have_fpm_acl=yes],[have_fpm_acl=no],[have_fpm_acl=no])
         ])
     ], [
       have_fpm_acl=no
-      AC_MSG_RESULT([no])
     ])
 
+    AC_MSG_CHECKING([for acl user/group permissions support])
     if test "$have_fpm_acl" = "yes"; then
+      AC_MSG_RESULT([yes])
       AC_DEFINE([HAVE_FPM_ACL], 1, [do we have acl support?])
+    else
+      AC_MSG_RESULT([no])
     fi
   fi
 
