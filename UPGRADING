@@ -177,6 +177,9 @@ PHP 8.4 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Curl:
+  . The CURLOPT_BINARYTRANSFER constant is deprecated.
+
 - Date:
   . Calling DatePeriod::__construct(string $isostr, int $options = 0) is
     deprecated. Use DatePeriod::createFromISO8601String() instead.

@@ -8,6 +8,9 @@ Core:
   . Enabled ifunc checks on FreeBSD from the 12.x releases. (Freaky)
   . Changed the type of PHP_DEBUG and PHP_ZTS constants to bool. (haszi)
 
+Curl:
+  . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
+
 Date:
   . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
 
