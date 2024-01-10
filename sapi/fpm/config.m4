@@ -230,7 +230,9 @@ AC_DEFUN([AC_FPM_TRACE],
     AC_MSG_CHECKING([for proc mem file])
 
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
+      #ifndef _GNU_SOURCE
       #define _GNU_SOURCE
+      #endif
       #define _FILE_OFFSET_BITS 64
       #include <stdint.h>
       #include <unistd.h>

@@ -1411,14 +1411,18 @@ AC_DEFUN([PHP_FOPENCOOKIE], [
   if test "$have_glibc_fopencookie" = "yes"; then
 dnl glibcs (since 2.1.2?) have a type called cookie_io_functions_t.
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdio.h>
 ]], [[cookie_io_functions_t cookie;]])],[have_cookie_io_functions_t=yes],[])
 
     if test "$have_cookie_io_functions_t" = "yes"; then
 dnl Newer glibcs have a different seeker definition.
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -2211,7 +2215,9 @@ crypt_r("passwd", "hash", &buffer);
     if test "$php_cv_crypt_r_style" = "none"; then
       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #define _REENTRANT 1
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <crypt.h>
 ]],[[
 struct crypt_data buffer;

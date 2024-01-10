@@ -38,7 +38,9 @@ int main(int argc, char *argv[])
 
   AC_CACHE_CHECK([for utsname.domainname], ac_cv_have_utsname_domainname, [
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+      #ifndef _GNU_SOURCE
       #define _GNU_SOURCE
+      #endif
       #include <sys/utsname.h>
     ]],[[
       return sizeof(((struct utsname *)0)->domainname);
