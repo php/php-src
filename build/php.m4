@@ -1841,7 +1841,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
   case $php_re2c_check in
     ""|invalid[)]
       if test ! -f "$abs_srcdir/Zend/zend_language_scanner.c"; then
-        AC_MSG_ERROR([re2c $php_re2c_required_version is required to generate PHP lexers.])
+        AC_MSG_ERROR([re2c $php_re2c_required_version or newer is required to generate PHP lexers.])
       fi
 
       RE2C="exit 0;"
