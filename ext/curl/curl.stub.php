@@ -13,6 +13,7 @@
 const CURLOPT_AUTOREFERER = UNKNOWN;
 /**
  * @var int
+ * @deprecated has no effect since 5.1.2
  * @cvalue CURLOPT_BINARYTRANSFER
  */
 const CURLOPT_BINARYTRANSFER = UNKNOWN;
