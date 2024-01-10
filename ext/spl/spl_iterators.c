@@ -210,7 +210,7 @@ static void spl_recursive_it_dtor(zend_object_iterator *_iter)
 	zval_ptr_dtor(&iter->intern.data);
 }
 
-static int spl_recursive_it_valid_ex(spl_recursive_it_object *object, zval *zthis)
+static zend_result spl_recursive_it_valid_ex(spl_recursive_it_object *object, zval *zthis)
 {
 	zend_object_iterator      *sub_iter;
 	int                       level = object->level;
@@ -232,7 +232,7 @@ static int spl_recursive_it_valid_ex(spl_recursive_it_object *object, zval *zthi
 	return FAILURE;
 }
 
-static int spl_recursive_it_valid(zend_object_iterator *iter)
+static zend_result spl_recursive_it_valid(zend_object_iterator *iter)
 {
 	return spl_recursive_it_valid_ex(Z_SPLRECURSIVE_IT_P(&iter->data), &iter->data);
 }
@@ -1525,7 +1525,7 @@ static inline void spl_dual_it_rewind(spl_dual_it_object *intern)
 	}
 }
 
-static inline int spl_dual_it_valid(spl_dual_it_object *intern)
+static inline zend_result spl_dual_it_valid(spl_dual_it_object *intern)
 {
 	if (!intern->inner.iterator) {
 		return FAILURE;
@@ -2184,7 +2184,7 @@ static zend_object *spl_dual_it_new(zend_class_entry *class_type)
 }
 /* }}} */
 
-static inline int spl_limit_it_valid(spl_dual_it_object *intern)
+static inline zend_result spl_limit_it_valid(spl_dual_it_object *intern)
 {
 	/* FAILURE / SUCCESS */
 	if (intern->u.limit.count != -1 && intern->current.pos >= intern->u.limit.offset + intern->u.limit.count) {

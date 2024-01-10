@@ -1575,7 +1575,7 @@ static void date_period_it_dtor(zend_object_iterator *iter)
 /* }}} */
 
 /* {{{ date_period_it_has_more */
-static int date_period_it_has_more(zend_object_iterator *iter)
+static zend_result date_period_it_has_more(zend_object_iterator *iter)
 {
 	date_period_it *iterator = (date_period_it *)iter;
 	php_period_obj *object   = Z_PHPPERIOD_P(&iterator->intern.data);

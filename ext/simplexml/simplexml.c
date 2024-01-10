@@ -47,7 +47,7 @@ static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data);
 static xmlNodePtr php_sxe_reset_iterator_no_clear_iter_data(php_sxe_object *sxe, int use_data);
 static xmlNodePtr php_sxe_iterator_fetch(php_sxe_object *sxe, xmlNodePtr node, int use_data);
 static void php_sxe_iterator_dtor(zend_object_iterator *iter);
-static int php_sxe_iterator_valid(zend_object_iterator *iter);
+static zend_result php_sxe_iterator_valid(zend_object_iterator *iter);
 static zval *php_sxe_iterator_current_data(zend_object_iterator *iter);
 static void php_sxe_iterator_current_key(zend_object_iterator *iter, zval *key);
 static void php_sxe_iterator_move_forward(zend_object_iterator *iter);
@@ -2462,7 +2462,7 @@ static void php_sxe_iterator_dtor(zend_object_iterator *iter) /* {{{ */
 }
 /* }}} */
 
-static int php_sxe_iterator_valid(zend_object_iterator *iter) /* {{{ */
+static zend_result php_sxe_iterator_valid(zend_object_iterator *iter) /* {{{ */
 {
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 
