@@ -25,7 +25,6 @@
 #include "namespace_compat.h"
 #include "xml_serializer.h"
 #include <libxml/SAX.h>
-// #include <libxml/xmlsave.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
