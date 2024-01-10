@@ -217,7 +217,7 @@ BEGIN_EXTERN_C()
 
 ZEND_API void zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa);
 ZEND_API void zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa);
-ZEND_API int zend_ssa_inference(zend_arena **raena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level);
+ZEND_API zend_result zend_ssa_inference(zend_arena **raena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level);
 
 ZEND_API uint32_t zend_array_element_type(uint32_t t1, zend_uchar op_type, int write, int insert);
 

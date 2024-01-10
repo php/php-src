@@ -411,7 +411,7 @@ ZEND_API bool zend_is_callable_ex(zval *callable, zend_object *object, uint32_t 
 ZEND_API bool zend_is_callable(zval *callable, uint32_t check_flags, zend_string **callable_name);
 ZEND_API bool zend_make_callable(zval *callable, zend_string **callable_name);
 ZEND_API const char *zend_get_module_version(const char *module_name);
-ZEND_API int zend_get_module_started(const char *module_name);
+ZEND_API zend_result zend_get_module_started(const char *module_name);
 
 ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_type type);
 

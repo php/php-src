@@ -373,7 +373,7 @@ ZEND_API bool zend_gcc_global_regs(void);
 
 #define ZEND_USER_OPCODE_DISPATCH_TO 0x100 /* call original handler of returned opcode */
 
-ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler_t handler);
+ZEND_API zend_result zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler_t handler);
 ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode);
 
 ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode_op *node, const zend_execute_data *execute_data);
@@ -388,7 +388,7 @@ ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_d
 zval * ZEND_FASTCALL zend_handle_named_arg(
 		zend_execute_data **call_ptr, zend_string *arg_name,
 		uint32_t *arg_num_ptr, void **cache_slot);
-ZEND_API int ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call);
+ZEND_API zend_result ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call);
 
 #define CACHE_ADDR(num) \
 	((void**)((char*)EX(run_time_cache) + (num)))

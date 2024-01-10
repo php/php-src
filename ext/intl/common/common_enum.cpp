@@ -56,7 +56,7 @@ void zoi_with_current_dtor(zend_object_iterator *iter)
 	}
 }
 
-U_CFUNC int zoi_with_current_valid(zend_object_iterator *iter)
+U_CFUNC zend_result zoi_with_current_valid(zend_object_iterator *iter)
 {
 	return Z_ISUNDEF(((zoi_with_current*)iter)->current)? FAILURE : SUCCESS;
 }

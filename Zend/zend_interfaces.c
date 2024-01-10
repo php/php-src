@@ -118,7 +118,7 @@ static void zend_user_it_dtor(zend_object_iterator *_iter)
 /* }}} */
 
 /* {{{ zend_user_it_valid */
-ZEND_API int zend_user_it_valid(zend_object_iterator *_iter)
+ZEND_API zend_result zend_user_it_valid(zend_object_iterator *_iter)
 {
 	if (_iter) {
 		zend_user_iterator *iter = (zend_user_iterator*)_iter;
