@@ -4058,7 +4058,7 @@ static gdIOCtx *create_stream_context(php_stream *stream, int close_stream) {
 	return ctx;
 }
 
-static gdIOCtx *create_output_context() {
+static gdIOCtx *create_output_context(void) {
 	gdIOCtx *ctx = ecalloc(1, sizeof(gdIOCtx));
 
 	ctx->putC = _php_image_output_putc;
