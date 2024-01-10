@@ -176,12 +176,17 @@ xmlNsPtr dom_ns_fast_get_html_ns(xmlDocPtr docp)
 	if (root != NULL) {
 		/* Fast path: if the root element itself is in the HTML namespace, return its namespace.
 		 * This is the most common case. */
-		if (dom_ns_is_fast(root, dom_ns_is_html_magic_token)) {
+		if (dom_ns_is_fast(root, dom_ns_is_html_magic_token) && EXPECTED(root->ns->prefix == NULL)) {
 			return root->ns;
 		}
 
 		/* Otherwise, we search all the namespaces that the root declares to avoid creating duplicates. */
-		nsptr = xmlSearchNsByHref(docp, root, BAD_CAST DOM_XHTML_NS_URI);
+		for (xmlNsPtr ns = root->nsDef; ns != NULL; ns = ns->next) {
+			if (ns->prefix == NULL && dom_ns_is_fast_ex(ns, dom_ns_is_html_magic_token)) {
+				nsptr = ns;
+				break;
+			}
+		}
 		if (nsptr == NULL) {
 			nsptr = dom_ns_create_local_as_is_unchecked(docp, root, DOM_XHTML_NS_URI, NULL);
 			if (UNEXPECTED(nsptr == NULL)) {
@@ -189,15 +194,15 @@ xmlNsPtr dom_ns_fast_get_html_ns(xmlDocPtr docp)
 				php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 				return NULL;
 			}
+			nsptr->_private = (void *) dom_ns_is_html_magic_token;
 		}
-		nsptr->_private = (void *) dom_ns_is_html_magic_token;
 	} else {
 		/* If there is no root we fall back to the old namespace list. */
 		if (docp->oldNs != NULL) {
 			/* Can already start at the second child because the first child is always the xml namespace. */
 			xmlNsPtr tmp = docp->oldNs->next;
 			while (tmp != NULL) {
-				if (dom_ns_is_fast_ex(tmp, dom_ns_is_html_magic_token)) {
+				if (tmp->prefix == NULL && dom_ns_is_fast_ex(tmp, dom_ns_is_html_magic_token)) {
 					nsptr = tmp;
 					break;
 				}
