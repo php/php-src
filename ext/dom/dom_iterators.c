@@ -132,7 +132,7 @@ static void php_dom_iterator_dtor(zend_object_iterator *iter) /* {{{ */
 }
 /* }}} */
 
-static int php_dom_iterator_valid(zend_object_iterator *iter) /* {{{ */
+static zend_result php_dom_iterator_valid(zend_object_iterator *iter) /* {{{ */
 {
 
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;

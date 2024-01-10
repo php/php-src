@@ -1627,7 +1627,7 @@ PHP_METHOD(GlobIterator, count)
 
 /* {{{ forward declarations to the iterator handlers */
 static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter);
-static int spl_filesystem_dir_it_valid(zend_object_iterator *iter);
+static zend_result spl_filesystem_dir_it_valid(zend_object_iterator *iter);
 static zval *spl_filesystem_dir_it_current_data(zend_object_iterator *iter);
 static void spl_filesystem_dir_it_current_key(zend_object_iterator *iter, zval *key);
 static void spl_filesystem_dir_it_move_forward(zend_object_iterator *iter);
@@ -1677,7 +1677,7 @@ static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter)
 /* }}} */
 
 /* {{{ spl_filesystem_dir_it_valid */
-static int spl_filesystem_dir_it_valid(zend_object_iterator *iter)
+static zend_result spl_filesystem_dir_it_valid(zend_object_iterator *iter)
 {
 	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
 

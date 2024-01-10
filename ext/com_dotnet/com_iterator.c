@@ -49,7 +49,7 @@ static void com_iter_dtor(zend_object_iterator *iter)
 	zval_ptr_dtor(&I->zdata);
 }
 
-static int com_iter_valid(zend_object_iterator *iter)
+static zend_result com_iter_valid(zend_object_iterator *iter)
 {
 	struct php_com_iterator *I = (struct php_com_iterator*)Z_PTR(iter->data);
 

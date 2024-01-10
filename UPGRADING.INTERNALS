@@ -26,6 +26,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   Z_PARAM_FUNC_EX2 was added as well with the same arguments as Z_PARAM_FUNC_EX
   plus an additional argument free_trampoline.
 
+* The zend_object_iterator_funcs valid member has changed its signature from
+  int(*)(zend_object_iterator *) to zend_result(*)(zend_object_iterator *) to
+  be more in line with what callbacks are returning.
+
 ========================
 2. Build system changes
 ========================
