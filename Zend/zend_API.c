@@ -2772,6 +2772,9 @@ ZEND_END_ARG_INFO()
 
 static zend_always_inline void zend_normalize_internal_type(zend_type *type) {
 	ZEND_ASSERT(!ZEND_TYPE_HAS_LITERAL_NAME(*type));
+	if (ZEND_TYPE_PURE_MASK(*type) != MAY_BE_ANY) {
+		ZEND_ASSERT(!ZEND_TYPE_CONTAINS_CODE(*type, IS_RESOURCE) && "resource is not allowed in a zend_type");
+	}
 	zend_type *current;
 	ZEND_TYPE_FOREACH(*type, current) {
 		if (ZEND_TYPE_HAS_NAME(*current)) {
@@ -4642,6 +4645,9 @@ ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 		c = pemalloc(sizeof(zend_class_constant), 1);
+		if (ZEND_TYPE_PURE_MASK(type) != MAY_BE_ANY) {
+			ZEND_ASSERT(!ZEND_TYPE_CONTAINS_CODE(type, IS_RESOURCE) && "resource is not allowed in a zend_type");
+		}
 	} else {
 		c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 	}
