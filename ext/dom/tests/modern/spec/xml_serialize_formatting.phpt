@@ -12,6 +12,13 @@ $tests = [
     '<root><child>text</child><!-- comment --><foo>&amp;</foo></root>',
     '<root><child>text</child><![CDATA[x]]><foo><bar/></foo></root>',
     '<root><a/><foo><bar><?foo <x><y/></x> ?><baz/></bar></foo></root>',
+    <<<XML
+    <root>
+      <child>
+        <child/>
+      </child>
+    </root>
+    XML,
 ];
 
 foreach ($tests as $test) {
@@ -55,4 +62,11 @@ foreach ($tests as $test) {
       <baz/>
     </bar>
   </foo>
+</root>
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <child>
+    <child/>
+  </child>
 </root>
