@@ -8,7 +8,6 @@
 # For more information, see the GitHub CODEOWNERS documentation:
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
-*.stub.php @kocsismate
 /.github @iluuu1994 @TimWolla
 /build/gen_stub.php @kocsismate
 /ext/bcmath @Girgias
@@ -54,3 +53,4 @@
 /Zend/zend_type*.h @dstogov
 /Zend/zend_variables.* @dstogov
 /Zend/zend_vm* @dstogov
+*.stub.php @kocsismate
