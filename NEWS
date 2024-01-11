@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed timer leak in zend-max-execution-timers builds. (withinboredom)
   . Fixed bug GH-12349 (linking failure on ARM with mold). (Jan Palus)
 
+- FPM:
+  . Fixed bug GH-12996 (Incorrect SCRIPT_NAME with Apache ProxyPassMatch when
+    plus in path). (Jakub Zelenka)
+
 - Phar:
   . Fixed bug #71465 (PHAR doesn't know about litespeed). (nielsdos)
 

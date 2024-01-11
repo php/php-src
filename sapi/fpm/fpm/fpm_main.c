@@ -1165,7 +1165,7 @@ static void init_request_info(void)
 									size_t decoded_path_info_len = 0;
 									if (strchr(path_info, '%')) {
 										decoded_path_info = estrdup(path_info);
-										decoded_path_info_len = php_url_decode(decoded_path_info, strlen(path_info));
+										decoded_path_info_len = php_raw_url_decode(decoded_path_info, strlen(path_info));
 									}
 									size_t snlen = strlen(env_script_name);
 									size_t env_script_file_info_start = 0;
