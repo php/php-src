@@ -1,5 +1,7 @@
 --TEST--
 Converting undefined index/offset notice to exception
+--INI--
+opcache.jit=0
 --FILE--
 <?php
 
@@ -37,10 +39,14 @@ try {
 ?>
 --EXPECT--
 Undefined array key 0
-array(0) {
+array(1) {
+  [0]=>
+  string(3) "xyz"
 }
 Undefined array key "key"
-array(0) {
+array(1) {
+  [0]=>
+  string(3) "xyz"
 }
 Undefined global variable $test
 Undefined variable $test

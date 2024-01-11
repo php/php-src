@@ -1,5 +1,7 @@
 --TEST--
 Bug #52041 (Memory leak when writing on uninitialized variable returned from function)
+--INI--
+opcache.jit=0
 --FILE--
 <?php
 function foo() {

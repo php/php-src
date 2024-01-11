@@ -672,6 +672,18 @@ static void zend_init_exception_op(void) /* {{{ */
 }
 /* }}} */
 
+static void zend_init_delayed_error_op(void) /* {{{ */
+{
+	memset(EG(delayed_error_op), 0, sizeof(EG(delayed_error_op)));
+	EG(delayed_error_op)[0].opcode = ZEND_HANDLE_DELAYED_ERROR;
+	ZEND_VM_SET_OPCODE_HANDLER(EG(delayed_error_op));
+	EG(delayed_error_op)[1].opcode = ZEND_HANDLE_DELAYED_ERROR;
+	ZEND_VM_SET_OPCODE_HANDLER(EG(delayed_error_op)+1);
+	EG(delayed_error_op)[2].opcode = ZEND_HANDLE_DELAYED_ERROR;
+	ZEND_VM_SET_OPCODE_HANDLER(EG(delayed_error_op)+2);
+}
+/* }}} */
+
 static void zend_init_call_trampoline_op(void) /* {{{ */
 {
 	memset(&EG(call_trampoline_op), 0, sizeof(EG(call_trampoline_op)));
@@ -786,6 +798,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	zend_copy_constants(executor_globals->zend_constants, GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist();
 	zend_init_exception_op();
+	zend_init_delayed_error_op();
 	zend_init_call_trampoline_op();
 	memset(&executor_globals->trampoline, 0, sizeof(zend_op_array));
 	executor_globals->capture_warnings_during_sccp = 0;
@@ -1025,6 +1038,7 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #ifndef ZTS
 	zend_init_rsrc_plist();
 	zend_init_exception_op();
+	zend_init_delayed_error_op();
 	zend_init_call_trampoline_op();
 #endif
 
@@ -1707,6 +1721,30 @@ ZEND_API void zend_free_recorded_errors(void)
 	efree(EG(errors));
 	EG(errors) = NULL;
 	EG(num_errors) = 0;
+}
+
+ZEND_API ZEND_COLD void zend_error_delayed(int type, const char *format, ...)
+{
+	ZEND_ASSERT(!(type & E_FATAL_ERRORS) && "Cannot delay fatal error");
+	zend_error_info *info = emalloc(sizeof(zend_error_info));
+	info->type = type;
+	get_filename_lineno(type, &info->filename, &info->lineno);
+	zend_string_addref(info->filename);
+
+	va_list args;
+	va_start(args, format);
+	info->message = zend_vstrpprintf(0, format, args);
+	va_end(args);
+
+	zend_hash_next_index_insert_ptr(&EG(delayed_errors), info);
+
+	if (EG(current_execute_data)->opline != EG(delayed_error_op)) {
+		EG(opline_before_exception) = EG(current_execute_data)->opline;
+		EG(current_execute_data)->opline = EG(delayed_error_op);
+		/* Reset to ZEND_HANDLE_DELAYED_ERROR */
+		EG(delayed_error_op)[0] = EG(delayed_error_op)[2];
+		EG(delayed_error_op)[1] = EG(delayed_error_op)[2];
+	}
 }
 
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) /* {{{ */

@@ -22,7 +22,7 @@
 #include <zend.h>
 #include <zend_vm_opcodes.h>
 
-static const char *zend_vm_opcodes_names[204] = {
+static const char *zend_vm_opcodes_names[205] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
 	"ZEND_SUB",
@@ -227,9 +227,10 @@ static const char *zend_vm_opcodes_names[204] = {
 	"ZEND_VERIFY_NEVER_TYPE",
 	"ZEND_CALLABLE_CONVERT",
 	"ZEND_BIND_INIT_STATIC_OR_JMP",
+	"ZEND_HANDLE_DELAYED_ERROR",
 };
 
-static uint32_t zend_vm_opcodes_flags[204] = {
+static uint32_t zend_vm_opcodes_flags[205] = {
 	0x00000000,
 	0x00000b0b,
 	0x00000b0b,
@@ -434,6 +435,7 @@ static uint32_t zend_vm_opcodes_flags[204] = {
 	0x00000101,
 	0x00000101,
 	0x00002001,
+	0x00000000,
 };
 
 ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(uint8_t opcode) {
