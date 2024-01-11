@@ -54,7 +54,7 @@ HashTable *dom_xpath_get_gc(zend_object *object, zval **table, int *n)
 
 static void dom_xpath_proxy_factory(xmlNodePtr node, zval *child, dom_object *intern, xmlXPathParserContextPtr ctxt)
 {
-	(void) ctxt;
+	ZEND_IGNORE_VALUE(ctxt);
 
 	ZEND_ASSERT(node->type != XML_NAMESPACE_DECL);
 
@@ -63,19 +63,20 @@ static void dom_xpath_proxy_factory(xmlNodePtr node, zval *child, dom_object *in
 
 static dom_xpath_object *dom_xpath_ext_fetch_intern(xmlXPathParserContextPtr ctxt)
 {
-	if (!zend_is_executing()) {
+	if (UNEXPECTED(!zend_is_executing())) {
 		xmlGenericError(xmlGenericErrorContext,
 		"xmlExtFunctionTest: Function called from outside of PHP\n");
-	} else {
-		dom_xpath_object *intern = (dom_xpath_object *) ctxt->context->userData;
-		if (intern == NULL) {
-			xmlGenericError(xmlGenericErrorContext,
-			"xmlExtFunctionTest: failed to get the internal object\n");
-			return NULL;
-		}
-		return intern;
+		return NULL;
 	}
-	return NULL;
+
+	dom_xpath_object *intern = (dom_xpath_object *) ctxt->context->userData;
+	if (UNEXPECTED(intern == NULL)) {
+		xmlGenericError(xmlGenericErrorContext,
+		"xmlExtFunctionTest: failed to get the internal object\n");
+		return NULL;
+	}
+
+	return intern;
 }
 
 static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, php_dom_xpath_nodeset_evaluation_mode evaluation_mode) /* {{{ */
@@ -430,7 +431,7 @@ PHP_METHOD(DOMXPath, registerPhpFunctionNS)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_string_equals_literal(namespace, "http://php.net/xpath")) {
-		zend_argument_value_error(1, "must not be \"http://php.net/xpath\" because it is reserved for PHP");
+		zend_argument_value_error(1, "must not be \"http://php.net/xpath\" because it is reserved by PHP");
 		RETURN_THROWS();
 	}
 

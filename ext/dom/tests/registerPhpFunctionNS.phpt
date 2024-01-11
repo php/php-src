@@ -90,7 +90,7 @@ var_dump($xpath->query('//a[bar:test(string(@href)) = "https://php.net"]'));
 ?>
 --EXPECT--
 --- Error cases ---
-DOMXPath::registerPhpFunctionNS(): Argument #1 ($namespaceURI) must not be "http://php.net/xpath" because it is reserved for PHP
+DOMXPath::registerPhpFunctionNS(): Argument #1 ($namespaceURI) must not be "http://php.net/xpath" because it is reserved by PHP
 DOMXPath::registerPhpFunctionNS(): Argument #2 ($name) must be a valid callback name
 DOMXPath::registerPhpFunctionNS(): Argument #2 ($name) must not contain any null bytes
 DOMXPath::registerPhpFunctionNS(): Argument #1 ($namespaceURI) must not contain any null bytes

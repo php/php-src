@@ -173,7 +173,15 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_delayed_lib_registration(const php_d
 	}
 }
 
-static zend_result php_dom_xpath_callback_ns_update_method_handler(php_dom_xpath_callback_ns* ns, xmlXPathContextPtr ctxt, const zend_string *namespace, zend_string *name, const HashTable *callable_ht, php_dom_xpath_callback_name_validation name_validation, php_dom_xpath_callbacks_register_func_ctx register_func)
+static zend_result php_dom_xpath_callback_ns_update_method_handler(
+	php_dom_xpath_callback_ns* ns,
+	xmlXPathContextPtr ctxt,
+	const zend_string *namespace,
+	zend_string *name,
+	const HashTable *callable_ht,
+	php_dom_xpath_callback_name_validation name_validation,
+	php_dom_xpath_callbacks_register_func_ctx register_func
+)
 {
 	zval *entry, registered_value;
 
@@ -392,9 +400,9 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 		fci.named_params = NULL;
 		ZVAL_STRINGL(&fci.function_name, function_name, function_name_length);
 
-		zend_result result = zend_call_function(&fci, NULL);
+		zend_call_function(&fci, NULL);
 		zend_string_release_ex(Z_STR(fci.function_name), false);
-		if (UNEXPECTED(result == FAILURE)) {
+		if (UNEXPECTED(EG(exception))) {
 			return FAILURE;
 		}
 	} else {
@@ -452,7 +460,7 @@ PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call_php_ns(php_dom_xpath_cal
 
 	/* Last element of the stack is the function name */
 	xmlXPathObjectPtr obj = valuePop(ctxt);
-	if (obj->stringval == NULL) {
+	if (UNEXPECTED(obj->stringval == NULL)) {
 		zend_type_error("Handler name must be a string");
 		goto cleanup;
 	}

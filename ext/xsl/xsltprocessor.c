@@ -67,26 +67,26 @@ static void xsl_proxy_factory(xmlNodePtr node, zval *child, dom_object *intern, 
 
 static xsl_object *xsl_ext_fetch_intern(xmlXPathParserContextPtr ctxt)
 {
-	if (!zend_is_executing()) {
+	if (UNEXPECTED(!zend_is_executing())) {
 		xsltGenericError(xsltGenericErrorContext,
 		"xsltExtFunctionTest: Function called from outside of PHP\n");
-	} else {
-		xsltTransformContextPtr tctxt = xsltXPathGetTransformContext(ctxt);
-		if (tctxt == NULL) {
-			xsltGenericError(xsltGenericErrorContext,
-			"xsltExtFunctionTest: failed to get the transformation context\n");
-		} else {
-			xsl_object *intern = (xsl_object *) tctxt->_private;
-			if (intern == NULL) {
-				xsltGenericError(xsltGenericErrorContext,
-				"xsltExtFunctionTest: failed to get the internal object\n");
-				return NULL;
-			}
-			return intern;
-		}
+		return NULL;
 	}
 
-	return NULL;
+	xsltTransformContextPtr tctxt = xsltXPathGetTransformContext(ctxt);
+	if (UNEXPECTED(tctxt == NULL)) {
+		xsltGenericError(xsltGenericErrorContext,
+		"xsltExtFunctionTest: failed to get the transformation context\n");
+		return NULL;
+	}
+
+	xsl_object *intern = (xsl_object *) tctxt->_private;
+	if (UNEXPECTED(intern == NULL)) {
+		xsltGenericError(xsltGenericErrorContext,
+		"xsltExtFunctionTest: failed to get the internal object\n");
+		return NULL;
+	}
+	return intern;
 }
 
 static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, php_dom_xpath_nodeset_evaluation_mode evaluation_mode) /* {{{ */
@@ -627,7 +627,7 @@ PHP_METHOD(XSLTProcessor, registerPHPFunctionNS)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_string_equals_literal(namespace, "http://php.net/xsl")) {
-		zend_argument_value_error(1, "must not be \"http://php.net/xsl\" because it is reserved for PHP");
+		zend_argument_value_error(1, "must not be \"http://php.net/xsl\" because it is reserved by PHP");
 		RETURN_THROWS();
 	}
 
