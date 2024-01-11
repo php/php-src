@@ -1,14 +1,10 @@
 --TEST--
 Bug #77432 (Segmentation fault on including phar file)
---SKIPIF--
-<?php
-if (PHP_OS_FAMILY === "Windows") {
-    die('skip not for Windows');
-}
-?>
 --EXTENSIONS--
 phar
 --INI--
+opcache.enable=0
+error_reporting=-1
 phar.readonly=0
 --FILE--
 <?php
