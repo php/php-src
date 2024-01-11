@@ -8,7 +8,7 @@ foreach ($env as $k => $v) {
 
 class MySQLPDOTest extends PDOTest {
 
-    static function factory($classname = 'PDO', $mydsn = null, $myAttr = null) {
+    static function factory($classname = PDO::class, $mydsn = null, $myAttr = null) {
         $dsn 	= self::getDSN($mydsn);
         $user	= PDO_MYSQL_TEST_USER;
         $pass	= PDO_MYSQL_TEST_PASS;

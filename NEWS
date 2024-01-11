@@ -60,22 +60,33 @@ OpenSSL:
 
 PDO:
   . Fixed setAttribute and getAttribute (SakiTakamachi)
+  . Implement PDO driver-specific subclasses RFC (danack, kocsismate)
 
 PDO_DBLIB:
   . Fixed setAttribute and getAttribute (SakiTakamachi)
+  . Added class PdoDbLib (danack, kocsismate)
 
 PDO_FIREBIRD:
   . Fixed setAttribute and getAttribute (SakiTakamachi)
   . Feature: Add transaction isolation level and mode settings to pdo_firebird
     (SakiTakamachi)
+  . Added class PdoFirebird. (danack, kocsismate)
 
 PDO_MYSQL:
   . Fixed setAttribute and getAttribute (SakiTakamachi)
+  . Added class PdoMysql. (danack, kocsismate)
+
+PDO_ODBC:
+  . Added class PdoOdbc. (danack, kocsismate)
 
 PDO_PGSQL:
   . Fixed GH-12423, DSN credentials being prioritized over the user/password
     PDO constructor arguments. (SakiTakamachi)
   . Fixed native float support with pdo_pgsql query results. (Yurunsoft)
+  . Added class PdoPgsql. (danack, kocsismate)
+
+PDO_SQLITE:
+  . Added class PdoSqlite. (danack, kocsismate)
 
 PGSQL:
   . Added the possibility to have no conditions for pg_select. (OmarEmaraDev)

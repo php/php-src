@@ -12,6 +12,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 
 require("testdb.inc");
 
+$dbh = getDbConnection();
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 @$dbh->exec('DROP TABLE test_ddl');
 @$dbh->exec('DROP GENERATOR gen_test_ddl_id');

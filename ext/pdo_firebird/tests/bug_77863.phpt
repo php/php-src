@@ -24,6 +24,7 @@ select trim(s) as s from t where b is not distinct from :p
 SQL;
 
 try {
+  $dbh = getDbConnection();
   $query = $dbh->prepare($sql);
 
   // PDO::PARAM_BOOL

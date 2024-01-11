@@ -26,6 +26,12 @@ if test "$PHP_PDO_SQLITE" != "no"; then
     AC_DEFINE(HAVE_SQLITE3_COLUMN_TABLE_NAME, 1, [have sqlite3_column_table_name])
   ], [], [$PDO_SQLITE_SHARED_LIBADD])
 
+  PHP_CHECK_LIBRARY(sqlite3, sqlite3_load_extension,
+    [],
+    [AC_DEFINE(PDO_SQLITE_OMIT_LOAD_EXTENSION, 1, [have sqlite3 with extension support])],
+    [$PDO_SQLITE_SHARED_LIBADD]
+  )
+
   PHP_SUBST(PDO_SQLITE_SHARED_LIBADD)
   PHP_NEW_EXTENSION(pdo_sqlite, pdo_sqlite.c sqlite_driver.c sqlite_statement.c,
     $ext_shared,,-I$pdo_cv_inc_path)

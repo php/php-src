@@ -11,6 +11,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 <?php
 
 require("testdb.inc");
+$dbh = getDbConnection();
 unset($dbh);
 
 $table = 'transaction_access_mode';
@@ -130,6 +131,7 @@ unset($dbh);
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec('DROP TABLE transaction_access_mode');
 unset($dbh);
 ?>

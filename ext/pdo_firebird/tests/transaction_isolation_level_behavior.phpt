@@ -11,6 +11,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 <?php
 
 require("testdb.inc");
+$dbh = getDbConnection();
 unset($dbh);
 
 $table = 'txn_isolation_level_behavior';
@@ -127,6 +128,7 @@ echo "done!";
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec('DROP TABLE txn_isolation_level_behavior');
 unset($dbh);
 ?>

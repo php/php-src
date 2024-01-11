@@ -25,6 +25,9 @@
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
+#include "pdo_firebird_arginfo.h"
+
+static zend_class_entry *PdoFirebird_ce;
 
 /* {{{ pdo_firebird_deps */
 static const zend_module_dep pdo_firebird_deps[] = {
@@ -67,12 +70,15 @@ PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 		return FAILURE;
 	}
 
+	PdoFirebird_ce = register_class_PdoFirebird(pdo_dbh_ce);
+	PdoFirebird_ce->create_object = pdo_dbh_new;
+
 #ifdef ZEND_SIGNALS
 	/* firebird replaces some signals at runtime, suppress warnings. */
 	SIGG(check) = 0;
 #endif
 
-	return SUCCESS;
+	return php_pdo_register_driver_specific_ce(&pdo_firebird_driver, PdoFirebird_ce);
 }
 /* }}} */
 

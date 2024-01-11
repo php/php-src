@@ -17,6 +17,7 @@ $table = "autocommit_pdo_firebird";
 
 echo "========== in auto commit mode ==========\n";
 echo "auto commit mode ON\n";
+$dbh = getDbConnection();
 $dbh->setAttribute(PDO::ATTR_AUTOCOMMIT, true);
 
 echo "create table and insert\n";
@@ -53,6 +54,7 @@ echo "done!";
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec("DROP TABLE autocommit_pdo_firebird");
 ?>
 --EXPECTF--

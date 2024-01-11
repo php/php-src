@@ -11,6 +11,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 <?php
     require("testdb.inc");
 
+    $dbh = getDbConnection();
     unset($dbh);
     echo "done\n";
 
