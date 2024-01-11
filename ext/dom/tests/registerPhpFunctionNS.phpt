@@ -1,5 +1,5 @@
 --TEST--
-registerPhpFunctionNS() function
+registerPhpFunctionNS() function - legit cases
 --EXTENSIONS--
 dom
 --FILE--
@@ -25,32 +25,6 @@ $doc = new DOMDocument();
 $doc->loadHTML('<a href="https://PHP.net">hello</a>');
 
 $xpath = new DOMXPath($doc);
-
-echo "--- Error cases ---\n";
-
-try {
-    $xpath->registerPhpFunctionNS('http://php.net/xpath', 'strtolower', strtolower(...));
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    $xpath->registerPhpFunctionNS('urn:foo', 'x:a', strtolower(...));
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    $xpath->registerPhpFunctionNS("urn:foo", "\0", strtolower(...));
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    $xpath->registerPhpFunctionNS("\0", 'strtolower', strtolower(...));
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
-}
 
 $xpath->registerNamespace('foo', 'urn:foo');
 
@@ -89,18 +63,13 @@ var_dump($xpath->query('//a[bar:test(string(@href)) = "https://php.net"]'));
 
 ?>
 --EXPECT--
---- Error cases ---
-DOMXPath::registerPhpFunctionNS(): Argument #1 ($namespaceURI) must not be "http://php.net/xpath" because it is reserved by PHP
-DOMXPath::registerPhpFunctionNS(): Argument #2 ($name) must be a valid callback name
-DOMXPath::registerPhpFunctionNS(): Argument #2 ($name) must not contain any null bytes
-DOMXPath::registerPhpFunctionNS(): Argument #1 ($namespaceURI) must not contain any null bytes
 --- Legit cases: global function callable ---
-object(DOMNodeList)#7 (1) {
+object(DOMNodeList)#5 (1) {
   ["length"]=>
   int(1)
 }
 --- Legit cases: string callable ---
-object(DOMNodeList)#7 (1) {
+object(DOMNodeList)#5 (1) {
   ["length"]=>
   int(1)
 }
@@ -115,7 +84,7 @@ object(DOMNodeList)#3 (1) {
   int(0)
 }
 --- Legit cases: instance class method callable ---
-object(DOMNodeList)#8 (1) {
+object(DOMNodeList)#6 (1) {
   ["length"]=>
   int(1)
 }
@@ -131,7 +100,7 @@ array(1) {
 --- Legit cases: global function callable that returns nothing ---
 string(15) "https://PHP.net"
 --- Legit cases: multiple namespaces ---
-object(DOMNodeList)#7 (1) {
+object(DOMNodeList)#5 (1) {
   ["length"]=>
   int(1)
 }

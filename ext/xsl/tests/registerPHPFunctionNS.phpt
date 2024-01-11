@@ -1,5 +1,5 @@
 --TEST--
-registerPHPFunctionNS() function
+registerPHPFunctionNS() function - legit cases
 --EXTENSIONS--
 xsl
 --FILE--
@@ -83,32 +83,6 @@ $proc->registerPHPFunctionNS('urn:foo', 'test', strrev(...));
 $proc->registerPHPFunctionNS('urn:bar', 'test', strtoupper(...));
 var_dump($proc->transformToXml($inputdom));
 
-echo "--- Error cases ---\n";
-
-try {
-    createProcessor([])->registerPhpFunctionNS('http://php.net/xsl', 'strtolower', strtolower(...));
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    createProcessor([])->registerPhpFunctionNS('urn:foo', 'x:a', strtolower(...));
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    createProcessor([])->registerPhpFunctionNS("urn:foo", "\0", strtolower(...));
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    createProcessor([])->registerPhpFunctionNS("\0", 'strtolower', strtolower(...));
-} catch (ValueError $e) {
-    echo $e->getMessage(), "\n";
-}
-
 ?>
 --EXPECTF--
 --- Legit cases: none ---
@@ -150,8 +124,3 @@ array(1) {
 string(53) "<?xml version="1.0"?>
 ten.php//:sptthHTTPS://PHP.NET
 "
---- Error cases ---
-XSLTProcessor::registerPHPFunctionNS(): Argument #1 ($namespaceURI) must not be "http://php.net/xsl" because it is reserved by PHP
-XSLTProcessor::registerPHPFunctionNS(): Argument #2 ($name) must be a valid callback name
-XSLTProcessor::registerPHPFunctionNS(): Argument #2 ($name) must not contain any null bytes
-XSLTProcessor::registerPHPFunctionNS(): Argument #1 ($namespaceURI) must not contain any null bytes
