@@ -121,7 +121,7 @@ jobs:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
-            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=pointer-overflow -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=pointer-overflow" CC=clang-16 CXX=clang++-16' || '' }}
+            ${{ matrix.asan && 'CFLAGS="-Wconditional-uninitialized -fsanitize=undefined,address -fno-sanitize=pointer-overflow -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-Wconditional-uninitialized -fsanitize=undefined,address -fno-sanitize=pointer-overflow" CC=clang-16 CXX=clang++-16' || '' }}
           skipSlow: ${{ matrix.asan }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
