@@ -356,11 +356,11 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 	if (brigade->head && (bucket = php_stream_bucket_make_writeable(brigade->head))) {
 		ZVAL_RES(&zbucket, zend_register_resource(bucket, le_bucket));
 		object_init_ex(return_value, stream_bucket_class_entry);
-		add_property_zval(return_value, "bucket", &zbucket);
+		zend_update_property(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("bucket"), &zbucket);
 		/* add_property_zval increments the refcount which is unwanted here */
 		zval_ptr_dtor(&zbucket);
-		add_property_stringl(return_value, "data", bucket->buf, bucket->buflen);
-		add_property_long(return_value, "datalen", bucket->buflen);
+		zend_update_property_stringl(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("data"), bucket->buf, bucket->buflen);
+		zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("datalen"), bucket->buflen);
 	} else {
 		ZVAL_NULL(return_value);
 	}
@@ -461,11 +461,11 @@ PHP_FUNCTION(stream_bucket_new)
 
 	ZVAL_RES(&zbucket, zend_register_resource(bucket, le_bucket));
 	object_init_ex(return_value, stream_bucket_class_entry);
-	add_property_zval(return_value, "bucket", &zbucket);
+	zend_update_property(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("bucket"), &zbucket);
 	/* add_property_zval increments the refcount which is unwanted here */
 	zval_ptr_dtor(&zbucket);
-	add_property_stringl(return_value, "data", bucket->buf, bucket->buflen);
-	add_property_long(return_value, "datalen", bucket->buflen);
+	zend_update_property_stringl(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("data"), bucket->buf, bucket->buflen);
+	zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("datalen"), bucket->buflen);
 }
 /* }}} */
 
