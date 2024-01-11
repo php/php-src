@@ -1,42 +1,11 @@
 --TEST--
-registerPhpFunctions() with callables
+registerPhpFunctions() with callables - legit cases
 --EXTENSIONS--
 xsl
 --FILE--
 <?php
 
-class MyClass {
-    public static function dump(string $var) {
-        var_dump($var);
-        return "dump: $var";
-    }
-}
-
-class MyXSLTProcessor extends XSLTProcessor {
-    public function registerCycle() {
-        $this->registerPhpFunctions(["cycle" => array($this, "dummy")]);
-    }
-
-    public function dummy(string $var) {
-        return "dummy: $var";
-    }
-}
-
-function createProcessor($inputs, $class = "XSLTProcessor") {
-    $xsl = new DomDocument();
-    $xsl->loadXML('<?xml version="1.0" encoding="iso-8859-1" ?>
-    <xsl:stylesheet version="1.0"
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:php="http://php.net/xsl">
-    <xsl:template match="//a">'
-    . implode('', array_map(fn($input) => '<xsl:value-of select="php:function(' . $input . ')" />', $inputs)) .
-    '</xsl:template>
-    </xsl:stylesheet>');
-
-    $proc = new $class();
-    $proc->importStylesheet($xsl);
-    return $proc;
-}
+require __DIR__ . '/xpath_callables.inc';
 
 $inputdom = new DomDocument();
 $inputdom->loadXML('<?xml version="1.0" encoding="iso-8859-1"?><a href="https://php.net">hello</a>');
@@ -80,57 +49,6 @@ $proc = createProcessor(["'cycle', string(@href)"], 'MyXSLTProcessor');
 $proc->registerCycle();
 var_dump($proc->transformToXml($inputdom));
 
-echo "--- Error cases ---\n";
-
-$proc = createProcessor([]);
-try {
-    $proc->registerPhpFunctions("nonexistent");
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    $proc->registerPhpFunctions(function () {});
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    $proc->registerPhpFunctions([function () {}]);
-} catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    $proc->registerPhpFunctions([var_dump(...)]);
-} catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    $proc->registerPhpFunctions(["nonexistent"]);
-} catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    $proc->registerPhpFunctions(["" => var_dump(...)]);
-} catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    $proc->registerPhpFunctions(["\0" => var_dump(...)]);
-} catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
-    $proc->registerPhpFunctions("");
-} catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
-}
-
 ?>
 --EXPECT--
 --- Legit cases: none ---
@@ -153,12 +71,3 @@ No callback handler "notinset" registered
 string(45) "<?xml version="1.0"?>
 dummy: https://php.net
 "
---- Error cases ---
-XSLTProcessor::registerPHPFunctions(): Argument #1 ($functions) must be a callable, function "nonexistent" not found or invalid function name
-XSLTProcessor::registerPHPFunctions(): Argument #1 ($functions) must be of type array|string|null, Closure given
-Object of class Closure could not be converted to string
-Object of class Closure could not be converted to string
-XSLTProcessor::registerPHPFunctions(): Argument #1 ($functions) must be an array with valid callbacks as values, function "nonexistent" not found or invalid function name
-XSLTProcessor::registerPHPFunctions(): Argument #1 ($functions) must be an array containing valid callback names
-XSLTProcessor::registerPHPFunctions(): Argument #1 ($functions) must be an array containing valid callback names
-XSLTProcessor::registerPHPFunctions(): Argument #1 ($functions) must be a valid callback name
