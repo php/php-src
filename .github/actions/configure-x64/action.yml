@@ -81,5 +81,4 @@ runs:
           --with-config-file-scan-dir=/etc/php.d \
           ${{ inputs.skipSlow == 'false' && '--with-pdo-firebird' || '' }} \
           ${{ inputs.skipSlow == 'false' && '--with-pdo-dblib' || '' }} \
-          --enable-werror \
           ${{ inputs.configurationParameters }}
