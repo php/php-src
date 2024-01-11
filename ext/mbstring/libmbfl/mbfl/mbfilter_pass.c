@@ -27,12 +27,24 @@
  *
  */
 
-#include <stddef.h>
-
 #include "mbfilter.h"
 #include "mbfilter_pass.h"
 
 static const char *mbfl_encoding_pass_aliases[] = {"none", NULL};
+
+static size_t mb_pass_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	unsigned char *p = *in, *e = p + *in_len;
+	uint32_t *out = buf, *limit = buf + bufsize;
+
+	while (p < e && out < limit) {
+		*out++ = *p++;
+	}
+
+	*in_len = e - p;
+	*in = p;
+	return out - buf;
+}
 
 const mbfl_encoding mbfl_encoding_pass = {
 	mbfl_no_encoding_pass,
@@ -43,11 +55,16 @@ const mbfl_encoding mbfl_encoding_pass = {
 	0,
 	NULL,
 	NULL,
-	NULL,
+	mb_pass_to_wchar,
 	NULL,
 	NULL,
 	NULL,
 };
+
+static int mbfl_filt_conv_pass(int c, mbfl_convert_filter *filter)
+{
+	return (*filter->output_function)(c, filter->data);
+}
 
 const struct mbfl_convert_vtbl vtbl_pass = {
 	mbfl_no_encoding_pass,
@@ -58,8 +75,3 @@ const struct mbfl_convert_vtbl vtbl_pass = {
 	mbfl_filt_conv_common_flush,
 	NULL,
 };
-
-int mbfl_filt_conv_pass(int c, mbfl_convert_filter *filter)
-{
-	return (*filter->output_function)(c, filter->data);
-}
