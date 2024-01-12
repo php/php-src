@@ -1133,8 +1133,15 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 		stream->ops->seek(stream, stream->position, SEEK_SET, &stream->position);
 	}
 
+	/* See GH-13071: userspace stream is subject to the memory limit. */
+	size_t chunk_size = count;
+	if (php_stream_is(stream, PHP_STREAM_IS_USERSPACE)) {
+		/* If the stream is unbuffered, we can only write one byte at a time. */
+		chunk_size = stream->chunk_size;
+	}
+
 	while (count > 0) {
-		ssize_t justwrote = stream->ops->write(stream, buf, count);
+		ssize_t justwrote = stream->ops->write(stream, buf, MIN(chunk_size, count));
 		if (justwrote <= 0) {
 			/* If we already successfully wrote some bytes and a write error occurred
 			 * later, report the successfully written bytes. */

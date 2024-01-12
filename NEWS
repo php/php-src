@@ -30,6 +30,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13138 (Randomizer::pickArrayKeys() does not detect broken
     engines). (timwolla)
 
+- Streams:
+  . Fixed bug GH-13071 (Copying large files using mmap-able source streams may
+    exhaust available memory and fail). (nielsdos)
+
 18 Jan 2024, PHP 8.2.15
 
 - Core:
