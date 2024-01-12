@@ -376,6 +376,12 @@ PDO_SQLITE:
   . The IntlDateFormatter class exposes now the new PATTERN constant
     reflecting udat api's UDAT_PATTERN.
 
+- Standard:
+  . PHP_ROUND_CEILING.
+  . PHP_ROUND_FLOOR.
+  . PHP_ROUND_TOWARD_ZERO.
+  . PHP_ROUND_AWAY_FROM_ZERO.
+
 - Sockets:
   . SO_EXCLUSIVEADDRUSE (Windows only).
 
