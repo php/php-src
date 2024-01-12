@@ -32,6 +32,7 @@
 # define PHP_RANDOM_H
 
 # include "php.h"
+# include "php_random_uint128.h"
 
 PHPAPI double php_combined_lcg(void);
 
@@ -63,109 +64,6 @@ PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max);
 
 PHPAPI void php_srand(zend_long seed);
 PHPAPI zend_long php_rand(void);
-
-# if !defined(__SIZEOF_INT128__) || defined(PHP_RANDOM_FORCE_EMULATE_128)
-typedef struct _php_random_uint128_t {
-	uint64_t hi;
-	uint64_t lo;
-} php_random_uint128_t;
-
-static inline uint64_t php_random_uint128_hi(php_random_uint128_t num)
-{
-	return num.hi;
-}
-
-static inline uint64_t php_random_uint128_lo(php_random_uint128_t num)
-{
-	return num.lo;
-}
-
-static inline php_random_uint128_t php_random_uint128_constant(uint64_t hi, uint64_t lo)
-{
-	php_random_uint128_t r;
-
-	r.hi = hi;
-	r.lo = lo;
-
-	return r;
-}
-
-static inline php_random_uint128_t php_random_uint128_add(php_random_uint128_t num1, php_random_uint128_t num2)
-{
-	php_random_uint128_t r;
-
-	r.lo = (num1.lo + num2.lo);
-	r.hi = (num1.hi + num2.hi + (r.lo < num1.lo));
-
-	return r;
-}
-
-static inline php_random_uint128_t php_random_uint128_multiply(php_random_uint128_t num1, php_random_uint128_t num2)
-{
-	php_random_uint128_t r;
-	const uint64_t
-		x0 = num1.lo & 0xffffffffULL,
-		x1 = num1.lo >> 32,
-		y0 = num2.lo & 0xffffffffULL,
-		y1 = num2.lo >> 32,
-		z0 = (((x1 * y0) + (x0 * y0 >> 32)) & 0xffffffffULL) + x0 * y1;
-
-	r.hi = num1.hi * num2.lo + num1.lo * num2.hi;
-	r.lo = num1.lo * num2.lo;
-	r.hi += x1 * y1 + ((x1 * y0 + (x0 * y0 >> 32)) >> 32) + (z0 >> 32);
-
-	return r;
-}
-
-static inline uint64_t php_random_pcgoneseq128xslrr64_rotr64(php_random_uint128_t num)
-{
-	const uint64_t
-		v = (num.hi ^ num.lo),
-		s = num.hi >> 58U;
-
-	return (v >> s) | (v << ((-s) & 63));
-}
-# else
-typedef __uint128_t php_random_uint128_t;
-
-static inline uint64_t php_random_uint128_hi(php_random_uint128_t num)
-{
-	return (uint64_t) (num >> 64);
-}
-
-static inline uint64_t php_random_uint128_lo(php_random_uint128_t num)
-{
-	return (uint64_t) num;
-}
-
-static inline php_random_uint128_t php_random_uint128_constant(uint64_t hi, uint64_t lo)
-{
-	php_random_uint128_t r;
-
-	r = ((php_random_uint128_t) hi << 64) + lo;
-
-	return r;
-}
-
-static inline php_random_uint128_t php_random_uint128_add(php_random_uint128_t num1, php_random_uint128_t num2)
-{
-	return num1 + num2;
-}
-
-static inline php_random_uint128_t php_random_uint128_multiply(php_random_uint128_t num1, php_random_uint128_t num2)
-{
-	return num1 * num2;
-}
-
-static inline uint64_t php_random_pcgoneseq128xslrr64_rotr64(php_random_uint128_t num)
-{
-	const uint64_t
-		v = ((uint64_t) (num >> 64U)) ^ (uint64_t) num,
-		s = num >> 122U;
-
-	return (v >> s) | (v << ((-s) & 63));
-}
-# endif
 
 PHPAPI zend_result php_random_bytes(void *bytes, size_t size, bool should_throw);
 PHPAPI zend_result php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw);

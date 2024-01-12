@@ -22,6 +22,7 @@
 
 #include "php.h"
 #include "php_random.h"
+#include "php_random_uint128.h"
 
 #include "Zend/zend_exceptions.h"
 
