@@ -59,21 +59,21 @@ OpenSSL:
     Florian Sowade)
 
 PDO:
-  . Fixed setAttribute and getAttribute (SakiTakamachi)
-  . Implement PDO driver-specific subclasses RFC (danack, kocsismate)
+  . Fixed setAttribute and getAttribute. (SakiTakamachi)
+  . Implemented PDO driver-specific subclasses RFC. (danack, kocsismate)
 
 PDO_DBLIB:
-  . Fixed setAttribute and getAttribute (SakiTakamachi)
+  . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Added class PdoDbLib (danack, kocsismate)
 
 PDO_FIREBIRD:
-  . Fixed setAttribute and getAttribute (SakiTakamachi)
-  . Feature: Add transaction isolation level and mode settings to pdo_firebird
+  . Fixed setAttribute and getAttribute. (SakiTakamachi)
+  . Feature: Add transaction isolation level and mode settings to pdo_firebird.
     (SakiTakamachi)
   . Added class PdoFirebird. (danack, kocsismate)
 
 PDO_MYSQL:
-  . Fixed setAttribute and getAttribute (SakiTakamachi)
+  . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Added class PdoMysql. (danack, kocsismate)
 
 PDO_ODBC:
