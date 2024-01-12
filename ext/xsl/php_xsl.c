@@ -53,6 +53,12 @@ zend_module_entry xsl_module_entry = {
 ZEND_GET_MODULE(xsl)
 #endif
 
+static HashTable *xsl_objects_get_gc(zend_object *object, zval **table, int *n)
+{
+	xsl_object *intern = php_xsl_fetch_object(object);
+	return php_dom_xpath_callbacks_get_gc_for_whole_object(&intern->xpath_callbacks, object, table, n);
+}
+
 /* {{{ xsl_objects_free_storage */
 void xsl_objects_free_storage(zend_object *object)
 {
@@ -65,15 +71,7 @@ void xsl_objects_free_storage(zend_object *object)
 		FREE_HASHTABLE(intern->parameter);
 	}
 
-	if (intern->registered_phpfunctions) {
-		zend_hash_destroy(intern->registered_phpfunctions);
-		FREE_HASHTABLE(intern->registered_phpfunctions);
-	}
-
-	if (intern->node_list) {
-		zend_hash_destroy(intern->node_list);
-		FREE_HASHTABLE(intern->node_list);
-	}
+	php_dom_xpath_callbacks_dtor(&intern->xpath_callbacks);
 
 	if (intern->doc) {
 		php_libxml_decrement_doc_ref(intern->doc);
@@ -106,7 +104,7 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
 	intern->parameter = zend_new_array(0);
-	intern->registered_phpfunctions = zend_new_array(0);
+	php_dom_xpath_callbacks_ctor(&intern->xpath_callbacks);
 
 	return &intern->std;
 }
@@ -119,6 +117,7 @@ PHP_MINIT_FUNCTION(xsl)
 	xsl_object_handlers.offset = XtOffsetOf(xsl_object, std);
 	xsl_object_handlers.clone_obj = NULL;
 	xsl_object_handlers.free_obj = xsl_objects_free_storage;
+	xsl_object_handlers.get_gc = xsl_objects_get_gc;
 
 	xsl_xsltprocessor_class_entry = register_class_XSLTProcessor();
 	xsl_xsltprocessor_class_entry->create_object = xsl_objects_new;

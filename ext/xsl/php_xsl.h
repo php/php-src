@@ -38,6 +38,7 @@ extern zend_module_entry xsl_module_entry;
 #endif
 
 #include "../dom/xml_common.h"
+#include "../dom/xpath_callbacks.h"
 
 #include <libxslt/extensions.h>
 #include <libxml/xpathInternals.h>
@@ -53,18 +54,14 @@ extern zend_module_entry xsl_module_entry;
 
 typedef struct _xsl_object {
 	void *ptr;
-	HashTable *prop_handler;
-	zval handle;
 	HashTable *parameter;
 	int hasKeys;
-	int registerPhpFunctions;
-	HashTable *registered_phpfunctions;
-	HashTable *node_list;
+	int securityPrefsSet;
+	zend_long securityPrefs;
+	php_dom_xpath_callbacks xpath_callbacks;
 	php_libxml_node_object *doc;
 	char *profiling;
-	zend_long securityPrefs;
-	int securityPrefsSet;
-	zend_object  std;
+	zend_object std;
 } xsl_object;
 
 static inline xsl_object *php_xsl_fetch_object(zend_object *obj) {

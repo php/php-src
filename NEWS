@@ -22,6 +22,7 @@ DOM:
   . Implement DOM HTML5 parsing and serialization RFC. (nielsdos)
   . Fix DOMElement->prefix with empty string creates bogus prefix. (nielsdos)
   . Handle OOM more consistently. (nielsdos)
+  . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
 
 FPM:
   . Implement GH-12385 (flush headers without body when calling flush()).
@@ -147,5 +148,6 @@ XML:
 XSL:
   . Implement request #64137 (XSLTProcessor::setParameter() should allow both
     quotes to be used). (nielsdos)
+  . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

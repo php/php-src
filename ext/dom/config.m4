@@ -35,7 +35,7 @@ if test "$PHP_DOM" != "no"; then
                             nodelist.c text.c comment.c \
                             entityreference.c \
                             notation.c xpath.c dom_iterators.c \
-                            namednodemap.c \
+                            namednodemap.c xpath_callbacks.c \
                             $LEXBOR_SOURCES],
                             $ext_shared,,$PHP_LEXBOR_CFLAGS)
     PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/ports/posix/lexbor/core)
@@ -49,7 +49,7 @@ if test "$PHP_DOM" != "no"; then
     PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/ns)
     PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/tag)
     PHP_SUBST(DOM_SHARED_LIBADD)
-    PHP_INSTALL_HEADERS([ext/dom/xml_common.h])
+    PHP_INSTALL_HEADERS([ext/dom/xml_common.h ext/dom/xpath_callbacks.h])
     PHP_ADD_EXTENSION_DEP(dom, libxml)
   ])
 fi
