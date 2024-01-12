@@ -39,7 +39,6 @@
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_assert.h"
 #include "ext/reflection/php_reflection.h"
-#include "ext/random/php_random.h"
 #if HAVE_BCMATH
 #include "ext/bcmath/php_bcmath.h"
 #endif
