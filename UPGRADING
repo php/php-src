@@ -113,6 +113,9 @@ PHP 8.4 UPGRADE NOTES
   . XSLTProcessor::setParameter() will now throw a ValueError when its arguments
     contain null bytes. This never actually worked correctly in the first place,
     which is why it throws an exception nowadays.
+  . Failure to call a PHP function callback during evaluation now throw
+    instead of emitting a warning.
+    RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
 
 ========================================
 2. New Features
@@ -137,6 +140,8 @@ PHP 8.4 UPGRADE NOTES
     These classes provide a cleaner API to handle HTML and XML documents.
     Furthermore, the DOM\HTMLDocument class implements spec-compliant HTML5
     parsing and serialization.
+  . It is now possible to pass any callable to registerPhpFunctions().
+    RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
 
 - FPM:
   . Flushing headers without a body will now succeed. See GH-12785.
@@ -160,6 +165,8 @@ PHP 8.4 UPGRADE NOTES
 - XSL:
   . It is now possible to use parameters that contain both single and double
     quotes.
+  . It is now possible to pass any callable to registerPhpFunctions().
+    RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
 
 ========================================
 3. Changes in SAPI modules
@@ -279,6 +286,8 @@ PHP 8.4 UPGRADE NOTES
 
 - DOM:
   . Added DOMNode::compareDocumentPosition().
+  . Added DOMXPath::registerPhpFunctionNS().
+    RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
 
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim functions.
@@ -294,6 +303,10 @@ PHP 8.4 UPGRADE NOTES
     that was introduced in libsodium 1.0.19.
   . sodium_crypto_aead_aes256gcm_*() functions are now enabled on aarch64 CPUs
     with the ARM cryptographic extensions.
+
+- XSL:
+  . Added XSLTProcessor::registerPhpFunctionNS().
+    RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
 
 ========================================
 7. New Classes and Interfaces
