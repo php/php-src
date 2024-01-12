@@ -237,6 +237,10 @@ PHP 8.4 UPGRADE NOTES
   . New serial_hex parameter added to openssl_csr_sign to allow setting serial
     number in the hexadecimal format.
 
+- Output Buffering Control:
+  . Output handler status flags passed to the flags parameter of ob_start
+    are now cleared.
+
 - PDO:
   . getAttribute, enabled to get the value of ATTR_STRINGIFY_FETCHES.
 
