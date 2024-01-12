@@ -310,6 +310,7 @@ PDO_SQLITE:
     PHP_ROUND_FLOOR, PHP_ROUND_TOWARD_ZERO, PHP_ROUND_AWAY_FROM_ZERO.
 
     RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
+  . debug_zval_dump() now indicates whether an array is packed.
 
 ========================================
 6. New Functions
