@@ -33,7 +33,7 @@
 /* libxml2 reserves 2 pointer-sized words for interned strings */
 #define LXML_INTERNED_STRINGS_SIZE (sizeof(void *) * 2)
 
-typedef struct {
+typedef struct _work_list_item {
     lxb_dom_node_t *node;
     uintptr_t current_active_namespace;
     xmlNodePtr lxml_parent;
