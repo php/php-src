@@ -2677,7 +2677,7 @@ static void ZEND_FASTCALL zend_jit_assign_obj_op_helper(zend_object *zobj, zend_
 //???				} else {
 //???					prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(object), orig_zptr);
 //???				}
-				if (UNEXPECTED(prop_info)) {
+				if (prop_info) {
 					/* special case for typed properties */
 					zend_jit_assign_op_to_typed_prop(zptr, prop_info, value, binary_op);
 				} else {
@@ -2880,7 +2880,7 @@ static void ZEND_FASTCALL zend_jit_pre_inc_obj_helper(zend_object *zobj, zend_st
 
 			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 				fast_long_increment_function(prop);
-				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
 						&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 					zend_long val = _zend_jit_throw_inc_prop_error(prop_info);
 					ZVAL_LONG(prop, val);
@@ -2896,7 +2896,7 @@ static void ZEND_FASTCALL zend_jit_pre_inc_obj_helper(zend_object *zobj, zend_st
 						}
 					}
 
-					if (UNEXPECTED(prop_info)) {
+					if (prop_info) {
 						zend_jit_inc_typed_prop(prop, prop_info);
 					} else {
 						increment_function(prop);
@@ -2950,7 +2950,7 @@ static void ZEND_FASTCALL zend_jit_pre_dec_obj_helper(zend_object *zobj, zend_st
 
 			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 				fast_long_decrement_function(prop);
-				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
 						&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 					zend_long val = _zend_jit_throw_dec_prop_error(prop_info);
 					ZVAL_LONG(prop, val);
@@ -2966,7 +2966,7 @@ static void ZEND_FASTCALL zend_jit_pre_dec_obj_helper(zend_object *zobj, zend_st
 						}
 					}
 
-					if (UNEXPECTED(prop_info)) {
+					if (prop_info) {
 						zend_jit_dec_typed_prop(prop, prop_info);
 					} else {
 						decrement_function(prop);
@@ -3019,7 +3019,7 @@ static void ZEND_FASTCALL zend_jit_post_inc_obj_helper(zend_object *zobj, zend_s
 			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 				ZVAL_LONG(result, Z_LVAL_P(prop));
 				fast_long_increment_function(prop);
-				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
 						&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 					zend_long val = _zend_jit_throw_inc_prop_error(prop_info);
 					ZVAL_LONG(prop, val);
@@ -3034,7 +3034,7 @@ static void ZEND_FASTCALL zend_jit_post_inc_obj_helper(zend_object *zobj, zend_s
 					}
 				}
 
-				if (UNEXPECTED(prop_info)) {
+				if (prop_info) {
 					zend_jit_post_inc_typed_prop(prop, prop_info, result);
 				} else {
 					ZVAL_COPY(result, prop);
@@ -3080,7 +3080,7 @@ static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_s
 			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 				ZVAL_LONG(result, Z_LVAL_P(prop));
 				fast_long_decrement_function(prop);
-				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
 						&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 					zend_long val = _zend_jit_throw_dec_prop_error(prop_info);
 					ZVAL_LONG(prop, val);
@@ -3095,7 +3095,7 @@ static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_s
 					}
 				}
 
-				if (UNEXPECTED(prop_info)) {
+				if (prop_info) {
 					zend_jit_post_dec_typed_prop(prop, prop_info, result);
 				} else {
 					ZVAL_COPY(result, prop);

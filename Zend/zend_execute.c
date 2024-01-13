@@ -2000,7 +2000,7 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 		} else {
 			fast_long_decrement_function(prop);
 		}
-		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
 				&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 			zend_long val = zend_throw_incdec_prop_error(prop_info OPLINE_CC);
 			ZVAL_LONG(prop, val);
@@ -2016,7 +2016,7 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 				}
 			}
 
-			if (UNEXPECTED(prop_info)) {
+			if (prop_info) {
 				zend_incdec_typed_prop(prop_info, prop, NULL OPLINE_CC EXECUTE_DATA_CC);
 			} else if (ZEND_IS_INCREMENT(opline->opcode)) {
 				increment_function(prop);
@@ -2039,7 +2039,7 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 		} else {
 			fast_long_decrement_function(prop);
 		}
-		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
 				&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 			zend_long val = zend_throw_incdec_prop_error(prop_info OPLINE_CC);
 			ZVAL_LONG(prop, val);
@@ -2054,7 +2054,7 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 			}
 		}
 
-		if (UNEXPECTED(prop_info)) {
+		if (prop_info) {
 			zend_incdec_typed_prop(prop_info, prop, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
 		} else {
 			ZVAL_COPY(EX_VAR(opline->result.var), prop);
@@ -3310,7 +3310,7 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 				prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(container), variable_ptr);
 			}
 
-			if (UNEXPECTED(prop_info)) {
+			if (prop_info) {
 				variable_ptr = zend_assign_to_typed_property_reference(prop_info, variable_ptr, value_ptr, &garbage EXECUTE_DATA_CC);
 			} else {
 				zend_assign_to_variable_reference(variable_ptr, value_ptr, &garbage);
@@ -3442,7 +3442,7 @@ static zend_always_inline zend_result zend_fetch_static_property_address(zval **
 
 		if ((fetch_type == BP_VAR_R || fetch_type == BP_VAR_RW)
 				&& UNEXPECTED(Z_TYPE_P(*retval) == IS_UNDEF)
-				&& UNEXPECTED(ZEND_TYPE_IS_SET(property_info->type))) {
+				&& ZEND_TYPE_IS_SET(property_info->type)) {
 			zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",
 				ZSTR_VAL(property_info->ce->name),
 				zend_get_unmangled_property_name(property_info->name));

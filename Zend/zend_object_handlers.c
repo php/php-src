@@ -741,7 +741,7 @@ call_getter:
 				retval = &EG(uninitialized_zval);
 			}
 
-			if (UNEXPECTED(prop_info)) {
+			if (prop_info) {
 				zend_verify_prop_assignable_by_ref_ex(prop_info, retval, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0, ZEND_VERIFY_PROP_ASSIGNABLE_BY_REF_CONTEXT_MAGIC_GET);
 			}
 
@@ -758,7 +758,7 @@ call_getter:
 
 uninit_error:
 	if (type != BP_VAR_IS) {
-		if (UNEXPECTED(prop_info)) {
+		if (prop_info) {
 			zend_throw_error(NULL, "Typed property %s::$%s must not be accessed before initialization",
 				ZSTR_VAL(prop_info->ce->name),
 				ZSTR_VAL(name));
@@ -826,7 +826,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
 			Z_TRY_ADDREF_P(value);
 
-			if (UNEXPECTED(prop_info)) {
+			if (prop_info) {
 				if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE))) {
 					Z_TRY_DELREF_P(value);
 					zend_readonly_property_modification_error(prop_info);
@@ -929,7 +929,7 @@ write_std_property:
 			variable_ptr = OBJ_PROP(zobj, property_offset);
 
 			Z_TRY_ADDREF_P(value);
-			if (UNEXPECTED(prop_info)) {
+			if (prop_info) {
 				if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY)
 						&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "initialize"))) {
 					Z_TRY_DELREF_P(value);
@@ -1110,7 +1110,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 			    UNEXPECTED((*zend_get_property_guard(zobj, name)) & IN_GET) ||
 			    UNEXPECTED(prop_info && (Z_PROP_FLAG_P(retval) & IS_PROP_UNINIT))) {
 				if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
-					if (UNEXPECTED(prop_info)) {
+					if (prop_info) {
 						zend_throw_error(NULL,
 							"Typed property %s::$%s must not be accessed before initialization",
 							ZSTR_VAL(prop_info->ce->name),
