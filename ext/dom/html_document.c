@@ -32,13 +32,13 @@
 #define DOM_FALLBACK_ENCODING_NAME "UTF-8"
 #define DOM_FALLBACK_ENCODING_ID LXB_ENCODING_UTF_8
 
-typedef struct {
+typedef struct _dom_line_column_cache {
 	size_t last_line;
 	size_t last_column;
 	size_t last_offset;
 } dom_line_column_cache;
 
-typedef struct {
+typedef struct _dom_lexbor_libxml2_bridge_application_data {
 	const char *input_name;
 	const lxb_codepoint_t *current_input_codepoints;
 	const char *current_input_characters;
@@ -48,14 +48,14 @@ typedef struct {
 	bool html_no_implied;
 } dom_lexbor_libxml2_bridge_application_data;
 
-typedef struct {
+typedef struct _dom_character_encoding_data {
 	const lxb_encoding_data_t *encoding_data;
 	size_t bom_shift;
 } dom_character_encoding_data;
 
 typedef zend_result (*dom_write_output)(void*, const char *, size_t);
 
-typedef struct {
+typedef struct _dom_output_ctx {
 	const lxb_encoding_data_t *encoding_data;
 	const lxb_encoding_data_t *decoding_data;
 	lxb_encoding_encode_t *encode;
@@ -66,7 +66,7 @@ typedef struct {
 	dom_write_output write_output;
 } dom_output_ctx;
 
-typedef struct {
+typedef struct _dom_decoding_encoding_ctx {
 	/* We can skip some conversion if the input and output encoding are both UTF-8,
 	 * we only have to validate and substitute replacement characters */
 	bool fast_path; /* Put first, near the encode & decode structures, for cache locality */

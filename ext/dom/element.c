@@ -418,7 +418,7 @@ PHP_METHOD(DOMElement, setAttribute)
 }
 /* }}} end dom_element_set_attribute */
 
-typedef struct {
+typedef struct _dom_deep_ns_redef_item {
 	xmlNodePtr current_node;
 	xmlNsPtr defined_ns;
 } dom_deep_ns_redef_item;
