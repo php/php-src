@@ -51,6 +51,11 @@ static zend_always_inline double get_double_from_sqldata(const ISC_SCHAR *sqldat
 	READ_AND_RETURN_USING_MEMCPY(double, sqldata);
 }
 
+static zend_always_inline float get_float_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	READ_AND_RETURN_USING_MEMCPY(float, sqldata);
+}
+
 static zend_always_inline ISC_TIMESTAMP get_isc_timestamp_from_sqldata(const ISC_SCHAR *sqldata)
 {
 	READ_AND_RETURN_USING_MEMCPY(ISC_TIMESTAMP, sqldata);
@@ -459,11 +464,19 @@ static int firebird_stmt_get_col(
 					break;
 				case SQL_FLOAT:
 					/* TODO: Why is this not returned as the native type? */
-					ZVAL_STR(result, zend_strpprintf(0, "%F", *(float*)var->sqldata));
+					{
+						char f_buf[256];
+						zend_gcvt((double) get_float_from_sqldata(var->sqldata), 8, '.', 'E', f_buf);
+						ZVAL_STRINGL_FAST(result, f_buf, strlen(f_buf));
+					}
 					break;
 				case SQL_DOUBLE:
 					/* TODO: Why is this not returned as the native type? */
-					ZVAL_STR(result, zend_strpprintf(0, "%F", get_double_from_sqldata(var->sqldata)));
+					{
+						char d_buf[256];
+						zend_gcvt(get_double_from_sqldata(var->sqldata), 16, '.', 'E', d_buf);
+						ZVAL_STRINGL_FAST(result, d_buf, strlen(d_buf));
+					}
 					break;
 #ifdef SQL_BOOLEAN
 				case SQL_BOOLEAN:
