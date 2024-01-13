@@ -170,6 +170,19 @@ foreach ($modes as $mode) {
     }
     echo "\n";
 }
+
+echo "========== value error ==========\n";
+try {
+    bcround('hoge');
+} catch (Throwable $e) {
+    echo $e->getMessage()."\n";
+}
+
+try {
+    bcround('0.00.1');
+} catch (Throwable $e) {
+    echo $e->getMessage()."\n";
+}
 ?>
 --EXPECT--
 ========== early return ==========
@@ -825,3 +838,7 @@ foreach ($modes as $mode) {
 [-0.0005, 3]        => -0.001
 [-0.000500, 3]      => -0.001
 [-0.000501, 3]      => -0.001
+
+========== value error ==========
+bcround(): Argument #1 ($num) is not well-formed
+bcround(): Argument #1 ($num) is not well-formed
