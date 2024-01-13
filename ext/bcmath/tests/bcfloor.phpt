@@ -27,6 +27,19 @@ foreach ($nums as $num) {
     echo $num."\n";
     echo '=> '.bcfloor($num)."\n\n";
 }
+
+echo "========== value error ==========\n";
+try {
+    bcfloor('hoge');
+} catch (Throwable $e) {
+    echo $e->getMessage()."\n";
+}
+
+try {
+    bcfloor('0.00.1');
+} catch (Throwable $e) {
+    echo $e->getMessage()."\n";
+}
 ?>
 --EXPECT--
 0
@@ -76,3 +89,7 @@ foreach ($nums as $num) {
 
 -100000.000000000000000000000000000000000000000001
 => -100001
+
+========== value error ==========
+bcfloor(): Argument #1 ($num) is not well-formed
+bcfloor(): Argument #1 ($num) is not well-formed

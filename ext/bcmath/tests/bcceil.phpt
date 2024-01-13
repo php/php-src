@@ -27,6 +27,19 @@ foreach ($nums as $num) {
     echo $num."\n";
     echo '=> '.bcceil($num)."\n\n";
 }
+
+echo "========== value error ==========\n";
+try {
+    bcceil('hoge');
+} catch (Throwable $e) {
+    echo $e->getMessage()."\n";
+}
+
+try {
+    bcceil('0.00.1');
+} catch (Throwable $e) {
+    echo $e->getMessage()."\n";
+}
 ?>
 --EXPECT--
 0
@@ -76,3 +89,7 @@ foreach ($nums as $num) {
 
 -100000.000000000000000000000000000000000000000001
 => -100000
+
+========== value error ==========
+bcceil(): Argument #1 ($num) is not well-formed
+bcceil(): Argument #1 ($num) is not well-formed
