@@ -1680,9 +1680,7 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 		return 0;
 	}
 
-	if (param->param_number >= 1) {
-		zend_hash_index_del(hash, param->param_number);
-	}
+	zend_hash_index_del(hash, param->param_number);
 
 	if (param->name) {
 		zend_hash_update_mem(hash, param->name, param, sizeof(struct php_sqlite3_bound_param));
