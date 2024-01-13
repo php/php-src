@@ -2571,10 +2571,12 @@ static void zend_emit_return_type_check(
 			if (expr) {
 				if (expr->op_type == IS_CONST && Z_TYPE(expr->u.constant) == IS_NULL) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-						"A void function must not return a value "
-						"(did you mean \"return;\" instead of \"return null;\"?)");
+						"A void %s must not return a value "
+						"(did you mean \"return;\" instead of \"return null;\"?)",
+						CG(active_class_entry) != NULL ? "method" : "function");
 				} else {
-					zend_error_noreturn(E_COMPILE_ERROR, "A void function must not return a value");
+					zend_error_noreturn(E_COMPILE_ERROR, "A void %s must not return a value",
+					CG(active_class_entry) != NULL ? "method" : "function");
 				}
 			}
 			/* we don't need run-time check */
@@ -2585,18 +2587,21 @@ static void zend_emit_return_type_check(
 		if (ZEND_TYPE_CONTAINS_CODE(type, IS_NEVER)) {
 			/* Implicit case handled separately using VERIFY_NEVER_TYPE opcode. */
 			ZEND_ASSERT(!implicit);
-			zend_error_noreturn(E_COMPILE_ERROR, "A never-returning function must not return");
+			zend_error_noreturn(E_COMPILE_ERROR, "A never-returning %s must not return",
+				CG(active_class_entry) != NULL ? "method" : "function");
 			return;
 		}
 
 		if (!expr && !implicit) {
 			if (ZEND_TYPE_ALLOW_NULL(type)) {
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"A function with return type must return a value "
-					"(did you mean \"return null;\" instead of \"return;\"?)");
+					"A %s with return type must return a value "
+					"(did you mean \"return null;\" instead of \"return;\"?)",
+					CG(active_class_entry) != NULL ? "method" : "function");
 			} else {
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"A function with return type must return a value");
+					"A %s with return type must return a value",
+					CG(active_class_entry) != NULL ? "method" : "function");
 			}
 		}
 

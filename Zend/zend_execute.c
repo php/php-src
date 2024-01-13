@@ -1411,8 +1411,8 @@ ZEND_API ZEND_COLD void zend_verify_never_error(const zend_function *zf)
 {
 	zend_string *func_name = get_function_or_method_name(zf);
 
-	zend_type_error("%s(): never-returning function must not implicitly return",
-		ZSTR_VAL(func_name));
+	zend_type_error("%s(): never-returning %s must not implicitly return",
+		ZSTR_VAL(func_name), zf->common.scope ? "method" : "function");
 
 	zend_string_release(func_name);
 }
