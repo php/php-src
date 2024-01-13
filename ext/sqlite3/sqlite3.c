@@ -1427,9 +1427,7 @@ PHP_METHOD(SQLite3Stmt, close)
 
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
 
-	if(stmt_obj->db_obj) {
-		zend_llist_del_element(&(stmt_obj->db_obj->free_list), object, (int (*)(void *, void *)) php_sqlite3_compare_stmt_zval_free);
-	}
+	zend_llist_del_element(&(stmt_obj->db_obj->free_list), object, (int (*)(void *, void *)) php_sqlite3_compare_stmt_zval_free);
 
 	RETURN_TRUE;
 }
@@ -1682,9 +1680,7 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 		return 0;
 	}
 
-	if (param->param_number >= 1) {
-		zend_hash_index_del(hash, param->param_number);
-	}
+	zend_hash_index_del(hash, param->param_number);
 
 	if (param->name) {
 		zend_hash_update_mem(hash, param->name, param, sizeof(struct php_sqlite3_bound_param));
