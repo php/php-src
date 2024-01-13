@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed LibreSSL undefined reference when OPENSSL_NO_ENGINE not set.
    (David Carlier).
 
+- PDO_Firebird:
+  . Fix GH-13119 (Changed to convert float and double values ​​into strings using
+    `H` format). (SakiTakamachi)
+
 - Phar:
   . Fixed bug #71465 (PHAR doesn't know about litespeed). (nielsdos)
 
