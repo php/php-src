@@ -474,7 +474,7 @@ static zend_result php_mb_zend_encoding_list_parser(const char *encoding_list, s
 	return php_mb_parse_encoding_list(
 		encoding_list, encoding_list_len,
 		(const mbfl_encoding ***)return_list, return_size,
-		persistent, /* arg_num */ 0, /* allow_pass_encoding */ 1);
+		persistent, /* arg_num */ 0, /* allow_pass_encoding */ 0);
 }
 
 static const zend_encoding *php_mb_zend_internal_encoding_getter(void)
