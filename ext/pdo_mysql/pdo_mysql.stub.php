@@ -62,10 +62,10 @@ class PdoMysql extends PDO
 
     /** @cvalue PDO_MYSQL_ATTR_MULTI_STATEMENTS */
     public const int ATTR_MULTI_STATEMENTS = UNKNOWN;
-
+#ifdef PDO_USE_MYSQLND
     /** @cvalue PDO_MYSQL_ATTR_SSL_VERIFY_SERVER_CERT */
     public const int ATTR_SSL_VERIFY_SERVER_CERT = UNKNOWN;
-
+#endif
 #if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
     /** @cvalue PDO_MYSQL_ATTR_LOCAL_INFILE_DIRECTORY */
     public const int ATTR_LOCAL_INFILE_DIRECTORY = UNKNOWN;

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3e797a44fc026ab43bf4bec26cf6fe492116cb25 */
+ * Stub hash: 015ebac642032d22ee5a8793993f84092bb6bf86 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoMysql_getWarningCount, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -130,12 +130,14 @@ static zend_class_entry *register_class_PdoMysql(zend_class_entry *class_entry_P
 	zend_string *const_ATTR_MULTI_STATEMENTS_name = zend_string_init_interned("ATTR_MULTI_STATEMENTS", sizeof("ATTR_MULTI_STATEMENTS") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_MULTI_STATEMENTS_name, &const_ATTR_MULTI_STATEMENTS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_MULTI_STATEMENTS_name);
+#if defined(PDO_USE_MYSQLND)
 
 	zval const_ATTR_SSL_VERIFY_SERVER_CERT_value;
 	ZVAL_LONG(&const_ATTR_SSL_VERIFY_SERVER_CERT_value, PDO_MYSQL_ATTR_SSL_VERIFY_SERVER_CERT);
 	zend_string *const_ATTR_SSL_VERIFY_SERVER_CERT_name = zend_string_init_interned("ATTR_SSL_VERIFY_SERVER_CERT", sizeof("ATTR_SSL_VERIFY_SERVER_CERT") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_SSL_VERIFY_SERVER_CERT_name, &const_ATTR_SSL_VERIFY_SERVER_CERT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_SSL_VERIFY_SERVER_CERT_name);
+#endif
 #if MYSQL_VERSION_ID >= 80021 || defined(PDO_USE_MYSQLND)
 
 	zval const_ATTR_LOCAL_INFILE_DIRECTORY_value;
