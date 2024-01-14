@@ -35,8 +35,6 @@
 
 void bc_floor_or_ceil(bc_num num, bool is_floor, bc_num *result)
 {
-	bc_num fractional;
-
 	/* clear result */
 	bc_free_num(result);
 
@@ -51,12 +49,13 @@ void bc_floor_or_ceil(bc_num num, bool is_floor, bc_num *result)
 		return;
 	}
 
-	/* copy fractional part */
-	fractional = bc_new_num(0, num->n_scale);
-	memcpy(fractional->n_value, num->n_value + num->n_len, num->n_scale);
+	/* check fractional part. */
+	size_t count = num->n_scale;
+	char *nptr = num->n_value + num->n_len;
+	while ((count > 0) && (*nptr++ == 0)) count--;
 
-	if (bc_is_zero(fractional)) {
-		goto cleanup;
+	if (count == 0) {
+		return;
 	}
 
 	/* add/sub 1 to/from result */
@@ -64,7 +63,4 @@ void bc_floor_or_ceil(bc_num num, bool is_floor, bc_num *result)
 	tmp->n_sign = (*result)->n_sign;
 	bc_free_num(result);
 	*result = tmp;
-
-cleanup:
-	bc_free_num(&fractional);
 }

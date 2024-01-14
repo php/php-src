@@ -49,7 +49,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 	*    end, the 0's are omitted and the number of digits in num is reduced.
 	*    In that case, may end up in the same situation as 2.
 	*/
-	if ((int) num->n_len + precision <= 0) {
+	if (precision < 0 && num->n_len <= labs(precision)) {
 		*result = bc_copy_num(BCG(_zero_));
 		return;
 	}
