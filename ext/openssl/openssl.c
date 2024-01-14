@@ -1512,7 +1512,7 @@ static X509 *php_openssl_x509_from_zval(
 PHP_FUNCTION(openssl_x509_export_to_file)
 {
 	X509 *cert;
-	zend_object *cert_obj;
+	zend_object *cert_obj = NULL;
 	zend_string *cert_str;
 
 	bool notext = 1;
@@ -1819,7 +1819,7 @@ cleanup:
 PHP_FUNCTION(openssl_x509_export)
 {
 	X509 *cert;
-	zend_object *cert_obj;
+	zend_object *cert_obj = NULL;
 	zend_string *cert_str;
 	zval *zout;
 	bool notext = 1;
@@ -1898,7 +1898,7 @@ zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, bool r
 PHP_FUNCTION(openssl_x509_fingerprint)
 {
 	X509 *cert;
-	zend_object *cert_obj;
+	zend_object *cert_obj = NULL;
 	zend_string *cert_str;
 	bool raw_output = 0;
 	char *method = "sha1";
@@ -1934,7 +1934,7 @@ PHP_FUNCTION(openssl_x509_fingerprint)
 PHP_FUNCTION(openssl_x509_check_private_key)
 {
 	X509 *cert;
-	zend_object *cert_obj;
+	zend_object *cert_obj = NULL;
 	zend_string *cert_str;
 	zval *zkey;
 	EVP_PKEY * key = NULL;
@@ -1967,7 +1967,7 @@ PHP_FUNCTION(openssl_x509_check_private_key)
 PHP_FUNCTION(openssl_x509_verify)
 {
 	X509 *cert;
-	zend_object *cert_obj;
+	zend_object *cert_obj = NULL;
 	zend_string *cert_str;
 	zval *zkey;
 	EVP_PKEY * key = NULL;
@@ -2076,7 +2076,7 @@ static int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
 PHP_FUNCTION(openssl_x509_parse)
 {
 	X509 *cert;
-	zend_object *cert_obj;
+	zend_object *cert_obj = NULL;
 	zend_string *cert_str;
 	int i, sig_nid;
 	bool useshortnames = 1;
@@ -2332,7 +2332,7 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, 
 PHP_FUNCTION(openssl_x509_checkpurpose)
 {
 	X509 *cert;
-	zend_object *cert_obj;
+	zend_object *cert_obj = NULL;
 	zend_string *cert_str;
 	zval *zcainfo = NULL;
 	X509_STORE *cainfo = NULL;
@@ -2468,7 +2468,7 @@ PHP_FUNCTION(openssl_x509_read)
 {
 	X509 *cert;
 	php_openssl_certificate_object *x509_cert_obj;
-	zend_object *cert_obj;
+	zend_object *cert_obj = NULL;
 	zend_string *cert_str;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -2569,7 +2569,7 @@ clean_exit:
 PHP_FUNCTION(openssl_pkcs12_export_to_file)
 {
 	X509 *cert;
-	zend_object *cert_obj;
+	zend_object *cert_obj = NULL;
 	zend_string *cert_str;
 	BIO * bio_out = NULL;
 	PKCS12 * p12 = NULL;
@@ -2672,7 +2672,7 @@ cleanup:
 PHP_FUNCTION(openssl_pkcs12_export)
 {
 	X509 *cert;
-	zend_object *cert_obj;
+	zend_object *cert_obj = NULL;
 	zend_string *cert_str;
 	BIO * bio_out;
 	PKCS12 * p12 = NULL;
@@ -3089,7 +3089,7 @@ static X509_REQ *php_openssl_csr_from_param(
 PHP_FUNCTION(openssl_csr_export_to_file)
 {
 	X509_REQ *csr;
-	zend_object *csr_obj;
+	zend_object *csr_obj = NULL;
 	zend_string *csr_str;
 	bool notext = 1;
 	char * filename = NULL;
@@ -3143,7 +3143,7 @@ PHP_FUNCTION(openssl_csr_export_to_file)
 PHP_FUNCTION(openssl_csr_export)
 {
 	X509_REQ *csr;
-	zend_object *csr_obj;
+	zend_object *csr_obj = NULL;
 	zend_string *csr_str;
 	zval *zout;
 	bool notext = 1;
@@ -3199,11 +3199,11 @@ PHP_FUNCTION(openssl_csr_export)
 PHP_FUNCTION(openssl_csr_sign)
 {
 	X509_REQ *csr;
-	zend_object *csr_obj;
+	zend_object *csr_obj = NULL;
 	zend_string *csr_str;
 
 	php_openssl_certificate_object *cert_object;
-	zend_object *cert_obj;
+	zend_object *cert_obj = NULL;
 	zend_string *cert_str;
 	zval *zpkey, *args = NULL;
 	zend_long num_days;
@@ -3458,7 +3458,7 @@ PHP_FUNCTION(openssl_csr_new)
 PHP_FUNCTION(openssl_csr_get_subject)
 {
 	X509_REQ *csr;
-	zend_object *csr_obj;
+	zend_object *csr_obj = NULL;
 	zend_string *csr_str;
 	bool use_shortnames = 1;
 	X509_NAME *subject;
@@ -3502,7 +3502,7 @@ static EVP_PKEY *php_openssl_extract_public_key(EVP_PKEY *priv_key)
 /* {{{ Returns the subject of a CERT or FALSE on error */
 PHP_FUNCTION(openssl_csr_get_public_key)
 {
-	zend_object *csr_obj;
+	zend_object *csr_obj = NULL;
 	zend_string *csr_str;
 	bool use_shortnames = 1;
 
@@ -5791,7 +5791,7 @@ clean_exit:
 PHP_FUNCTION(openssl_pkcs7_sign)
 {
 	X509 *cert = NULL;
-	zend_object *cert_obj;
+	zend_object *cert_obj = NULL;
 	zend_string *cert_str;
 	zval *zprivkey, * zheaders;
 	zval * hval;
@@ -6437,7 +6437,7 @@ clean_exit:
 PHP_FUNCTION(openssl_cms_sign)
 {
 	X509 *cert = NULL;
-	zend_object *cert_obj;
+	zend_object *cert_obj = NULL;
 	zend_string *cert_str;
 	zval *zprivkey, *zheaders;
 	zval * hval;
