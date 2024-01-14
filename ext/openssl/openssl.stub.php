@@ -44,13 +44,11 @@ const X509_PURPOSE_SMIME_ENCRYPT = UNKNOWN;
  * @cvalue X509_PURPOSE_CRL_SIGN
  */
 const X509_PURPOSE_CRL_SIGN = UNKNOWN;
-#ifdef X509_PURPOSE_ANY
 /**
  * @var int
  * @cvalue X509_PURPOSE_ANY
  */
 const X509_PURPOSE_ANY = UNKNOWN;
-#endif
 
 /* digest algorithm constants */
 
