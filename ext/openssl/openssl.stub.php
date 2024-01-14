@@ -49,6 +49,16 @@ const X509_PURPOSE_CRL_SIGN = UNKNOWN;
  * @cvalue X509_PURPOSE_ANY
  */
 const X509_PURPOSE_ANY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_OCSP_HELPER
+ */
+const X509_PURPOSE_OCSP_HELPER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_TIMESTAMP_SIGN
+ */
+const X509_PURPOSE_TIMESTAMP_SIGN = UNKNOWN;
 
 /* digest algorithm constants */
 
