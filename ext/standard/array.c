@@ -6179,10 +6179,9 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 			goto fail;
 		}
 		if (zend_bitset_in(bitset, randval)) {
-			/* Use PHP_RANDOM_RANGE_ATTEMPTS instead of the hardcoded 50 for 8.3+. */
-			if (++failures > 50) {
+			if (++failures > PHP_RANDOM_RANGE_ATTEMPTS) {
 				if (!silent) {
-					zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", 50);
+					zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", PHP_RANDOM_RANGE_ATTEMPTS);
 				}
 
 				goto fail;

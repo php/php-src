@@ -61,6 +61,18 @@ try {
     echo $e->getMessage(), PHP_EOL;
 }
 
+try {
+    var_dump(randomizer()->getBytesFromString('123', 10));
+} catch (Random\BrokenRandomEngineError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+try {
+    var_dump(randomizer()->getBytesFromString(str_repeat('a', 500), 10));
+} catch (Random\BrokenRandomEngineError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
 ?>
 --EXPECTF--
 int(0)
@@ -320,3 +332,5 @@ array(1) {
 }
 Failed to generate an acceptable random number in 50 attempts
 string(6) "oobarf"
+string(10) "1111111111"
+string(10) "aaaaaaaaaa"
