@@ -418,6 +418,10 @@ PDO_SQLITE:
   . The IntlDateFormatter class exposes now the new PATTERN constant
     reflecting udat api's UDAT_PATTERN.
 
+- OpenSSL:
+  . X509_PURPOSE_OCSP_HELPER.
+  . X509_PURPOSE_TIMESTAMP_SIGN.
+
 - Standard:
   . PHP_ROUND_CEILING.
   . PHP_ROUND_FLOOR.

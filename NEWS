@@ -59,6 +59,8 @@ OpenSSL:
     (Jakub Zelenka)
   . Introduced new serial_hex parameter to openssl_csr_sign. (Jakub Zelenka,
     Florian Sowade)
+  . Added X509_PURPOSE_OCSP_HELPER and X509_PURPOSE_TIMESTAMP_SIGN constants.
+    (Vincent Jardin)
 
 PDO:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)

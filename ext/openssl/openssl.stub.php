@@ -44,13 +44,21 @@ const X509_PURPOSE_SMIME_ENCRYPT = UNKNOWN;
  * @cvalue X509_PURPOSE_CRL_SIGN
  */
 const X509_PURPOSE_CRL_SIGN = UNKNOWN;
-#ifdef X509_PURPOSE_ANY
 /**
  * @var int
  * @cvalue X509_PURPOSE_ANY
  */
 const X509_PURPOSE_ANY = UNKNOWN;
-#endif
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_OCSP_HELPER
+ */
+const X509_PURPOSE_OCSP_HELPER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_TIMESTAMP_SIGN
+ */
+const X509_PURPOSE_TIMESTAMP_SIGN = UNKNOWN;
 
 /* digest algorithm constants */
 
