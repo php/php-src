@@ -6102,6 +6102,9 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 			 * specific offset using linear scan. */
 			i = 0;
 			randval = algo->range(status, 0, num_avail - 1);
+			if (EG(exception)) {
+				return false;
+			}
 			ZEND_HASH_FOREACH_KEY(ht, num_key, string_key) {
 				if (i == randval) {
 					if (string_key) {
@@ -6122,6 +6125,9 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 		if (HT_IS_PACKED(ht)) {
 			do {
 				randval = algo->range(status, 0, ht->nNumUsed - 1);
+				if (EG(exception)) {
+					return false;
+				}
 				zv = &ht->arPacked[randval];
 				if (!Z_ISUNDEF_P(zv)) {
 					ZVAL_LONG(retval, randval);
@@ -6131,6 +6137,9 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 		} else {
 			do {
 				randval = algo->range(status, 0, ht->nNumUsed - 1);
+				if (EG(exception)) {
+					return false;
+				}
 				b = &ht->arData[randval];
 				if (!Z_ISUNDEF(b->val)) {
 					if (b->key) {
@@ -6163,11 +6172,24 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 	zend_bitset_clear(bitset, bitset_len);
 
 	i = num_req;
+	int failures = 0;
 	while (i) {
 		randval = algo->range(status, 0, num_avail - 1);
-		if (!zend_bitset_in(bitset, randval)) {
+		if (EG(exception)) {
+			goto fail;
+		}
+		if (zend_bitset_in(bitset, randval)) {
+			if (++failures > PHP_RANDOM_RANGE_ATTEMPTS) {
+				if (!silent) {
+					zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", PHP_RANDOM_RANGE_ATTEMPTS);
+				}
+
+				goto fail;
+			}
+		} else {
 			zend_bitset_incl(bitset, randval);
 			i--;
+			failures = 0;
 		}
 	}
 
@@ -6191,6 +6213,11 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 	free_alloca(bitset, use_heap);
 
 	return true;
+
+ fail:
+	free_alloca(bitset, use_heap);
+
+	return false;
 }
 /* }}} */
 
