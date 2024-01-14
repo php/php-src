@@ -464,19 +464,11 @@ static int firebird_stmt_get_col(
 					break;
 				case SQL_FLOAT:
 					/* TODO: Why is this not returned as the native type? */
-					{
-						char f_buf[256];
-						zend_gcvt((double) get_float_from_sqldata(var->sqldata), 8, '.', 'E', f_buf);
-						ZVAL_STRINGL_FAST(result, f_buf, strlen(f_buf));
-					}
+					ZVAL_STR(result, zend_strpprintf_unchecked(0, "%.*H", get_float_from_sqldata(var->sqldata), 8));
 					break;
 				case SQL_DOUBLE:
 					/* TODO: Why is this not returned as the native type? */
-					{
-						char d_buf[256];
-						zend_gcvt(get_double_from_sqldata(var->sqldata), 16, '.', 'E', d_buf);
-						ZVAL_STRINGL_FAST(result, d_buf, strlen(d_buf));
-					}
+					ZVAL_STR(result, zend_strpprintf_unchecked(0, "%.*H", get_double_from_sqldata(var->sqldata), 16));
 					break;
 #ifdef SQL_BOOLEAN
 				case SQL_BOOLEAN:
