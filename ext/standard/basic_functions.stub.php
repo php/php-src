@@ -2355,7 +2355,6 @@ function implode(string|array $separator, ?array $array = null): string {}
 function join(string|array $separator, ?array $array = null): string {}
 
 /**
- * @compile-time-eval
  * @refcount 1
  */
 function strtok(string $string, ?string $token = null): string|false {}
