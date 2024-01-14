@@ -13,6 +13,10 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #71465 (PHAR doesn't know about litespeed). (nielsdos)
 
+- Random:
+  . Fixed bug GH-13138 (Randomizer::pickArrayKeys() does not detect broken
+    engines). (timwolla)
+
 - Standard:
   . Fixed bug GH-13094 (range(9.9, '0') causes segmentation fault). (nielsdos)
 
