@@ -44,6 +44,18 @@ try {
 }
 
 try {
+    var_dump(randomizer()->pickArrayKeys(range(1, 1234), 1));
+} catch (Random\BrokenRandomEngineError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+try {
+    var_dump(randomizer()->pickArrayKeys(range(1, 1234), 10));
+} catch (Random\BrokenRandomEngineError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+try {
     var_dump(randomizer()->shuffleBytes('foobar'));
 } catch (Random\BrokenRandomEngineError $e) {
     echo $e->getMessage(), PHP_EOL;
@@ -51,6 +63,8 @@ try {
 
 ?>
 --EXPECT--
+A random engine must return a non-empty string
+A random engine must return a non-empty string
 A random engine must return a non-empty string
 A random engine must return a non-empty string
 A random engine must return a non-empty string
