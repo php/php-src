@@ -343,8 +343,8 @@ AC_DEFUN([AC_FPM_LQ],
       AC_MSG_RESULT([no])
     ])
 
-    if test "$have_lq" = "tcp_info"; then
-      AC_DEFINE([HAVE_LQ_SO_LISTENQ], 1, [do we have SO_LISTENQxxx?])
+    if test "$have_lq" = "so_listenq"; then
+      AC_DEFINE([HAVE_LQ_SO_LISTENQ], 1, [do we have SO_LISTENQ?])
     fi
   fi
 ])
