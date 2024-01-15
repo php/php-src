@@ -1357,9 +1357,7 @@ static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint3
 }
 
 static zend_always_inline uint32_t zval_refcount_p(const zval* pz) {
-#if ZEND_DEBUG
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz) || Z_TYPE_P(pz) == IS_ARRAY);
-#endif
 	return GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
