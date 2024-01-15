@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed timer leak in zend-max-execution-timers builds. (withinboredom)
   . Fixed bug GH-12349 (linking failure on ARM with mold). (Jan Palus)
 
+- Curl:
+  . Fix missing error check in curl_multi_init(). (divinity76)
+
 - FPM:
   . Fixed bug GH-12996 (Incorrect SCRIPT_NAME with Apache ProxyPassMatch when
     plus in path). (Jakub Zelenka)
