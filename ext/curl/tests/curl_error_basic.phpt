@@ -7,7 +7,8 @@ Mattijs Hoitink mattijshoitink@gmail.com
 curl
 --SKIPIF--
 <?php
-
+if(getenv("SKIP_ONLINE_TESTS")) die("SKIP_ONLINE_TESTS");
+if(getenv("SKIP_SLOW_TESTS")) die("SKIP_SLOW_TESTS");
 $url = "fakeURL";
 $ip = gethostbyname($url);
 if ($ip != $url) die("skip 'fakeURL' resolves to $ip\n");
