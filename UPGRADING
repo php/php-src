@@ -311,6 +311,12 @@ PDO_SQLITE:
 - PGSQL:
   . pg_select, the conditions arguments accepts an empty array and is optional.
 
+- SPL:
+  . SplPriorityQueue::insert() and SplPriorityQueue::recoverFromCorruption()
+    now has a tentative return type of true
+  . SplHeap::insert() and SplHeap::recoverFromCorruption()
+    now has a tentative return type of true instead of bool
+
 - Standard:
   . The internal implementation for rounding to integers has been rewritten
     to be easier to verify for correctness and to be easier to maintain.
