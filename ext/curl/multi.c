@@ -60,12 +60,18 @@ static inline php_curlm *curl_multi_from_obj(zend_object *obj) {
 PHP_FUNCTION(curl_multi_init)
 {
 	php_curlm *mh;
+	CURLM *multi;
 
 	ZEND_PARSE_PARAMETERS_NONE();
-
+	multi = curl_multi_init();
+	if(multi == NULL) {
+		// todo: should it throw or return false? (curl_init returns false)
+		php_error_docref(NULL, E_WARNING, "Could not initialize a new cURL multi handle");
+		RETURN_FALSE;
+	}
 	object_init_ex(return_value, curl_multi_ce);
 	mh = Z_CURL_MULTI_P(return_value);
-	mh->multi = curl_multi_init();
+	mh->multi = multi;
 
 	zend_llist_init(&mh->easyh, sizeof(zval), _php_curl_multi_cleanup_list, 0);
 }
