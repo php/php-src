@@ -123,16 +123,23 @@ function runValgrindPhpCgiCommand(
         '-d opcache.validate_timestamps=0',
         ...$args,
     ]);
-    $instructions = extractInstructionsFromValgrindOutput($process->stderr);
+    $valgrindMetrics = extractMetricsFromValgrindOutput($process->stderr);
+    $instructions = $valgrindMetrics['Ir'];
     if ($repeat > 1) {
         $instructions = gmp_strval(gmp_div_q($instructions, $repeat));
     }
     return ['instructions' => $instructions];
 }
 
-function extractInstructionsFromValgrindOutput(string $output): string {
-    preg_match("(==[0-9]+== Events    : Ir\n==[0-9]+== Collected : (?<instructions>[0-9]+))", $output, $matches);
-    return $matches['instructions'] ?? throw new \Exception('Unexpected valgrind output');
+/**
+ * @return array<non-empty-string, numeric-string>
+ */
+function extractMetricsFromValgrindOutput(string $output): array {
+    if (!preg_match('/==\d+== Events *:((?: +\w+)+)\n==\d+== Collected :((?: +\d+)+)\n/', $output, $matches)) {
+        throw new \Exception('Unexpected valgrind output: ' . $output);
+    }
+
+    return array_combine(explode(' ', ltrim($matches[1], ' ')), explode(' ', ltrim($matches[2], ' ')));
 }
 
 main();
