@@ -65,9 +65,8 @@ PHP_FUNCTION(curl_multi_init)
 	ZEND_PARSE_PARAMETERS_NONE();
 	multi = curl_multi_init();
 	if(UNEXPECTED(multi == NULL)) {
-		// todo: should it throw or return false? (curl_init returns false)
-		php_error_docref(NULL, E_WARNING, "Could not initialize a new cURL multi handle");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Could not initialize a new cURL multi handle");
+		RETURN_THROWS();
 	}
 	object_init_ex(return_value, curl_multi_ce);
 	mh = Z_CURL_MULTI_P(return_value);
