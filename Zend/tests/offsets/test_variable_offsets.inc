@@ -12,7 +12,7 @@ try {
 // Write
 try {
     echo "Write:\n";
-    $container[$dimension] = 'v';
+    $container[$dimension] = 5;
 } catch (\Throwable $e) {
     echo $e->getMessage(), "\n";
 }
@@ -26,7 +26,7 @@ try {
 // Read-Write
 try {
     echo "Read-Write:\n";
-    $container[$dimension] .= 'append';
+    $container[$dimension] += 20;
 } catch (\Throwable $e) {
     echo $e->getMessage(), "\n";
 }

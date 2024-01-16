@@ -30,7 +30,7 @@ try {
 // Write
 try {
     echo "Write:\\n";
-    \$container[$offset_p] = 'v';
+    \$container[$offset_p] = 5;
 } catch (\Throwable \$e) {
     echo \$e->getMessage(), "\\n";
 }
@@ -44,7 +44,7 @@ try {
 // Read-Write
 try {
     echo "Read-Write:\\n";
-    \$container[$offset_p] .= 'append';
+    \$container[$offset_p] += 20;
 } catch (\Throwable \$e) {
     echo \$e->getMessage(), "\\n";
 }

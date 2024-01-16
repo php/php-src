@@ -12,7 +12,7 @@ Warning: Uninitialized string offset %d in %s on line %d
 string(0) ""
 Write:
 Read:
-string(1) "v"
+string(1) "5"
 Read-Write:
 Cannot use assign-op operators with string offsets
 isset():
@@ -20,7 +20,7 @@ bool(true)
 empty():
 bool(false)
 null coalesce:
-string(1) "v"
+string(1) "5"
 unset():
 Cannot unset string offsets
 
@@ -68,7 +68,7 @@ Warning: String offset cast occurred in %s on line 15
 Read:
 
 Warning: String offset cast occurred in %s on line 22
-string(1) "v"
+string(1) "5"
 Read-Write:
 
 Warning: String offset cast occurred in %s on line 29
@@ -78,7 +78,7 @@ bool(true)
 empty():
 bool(false)
 null coalesce:
-string(1) "v"
+string(1) "5"
 unset():
 Cannot unset string offsets
 
@@ -134,7 +134,7 @@ Warning: String offset cast occurred in %s on line 15
 Read:
 
 Warning: String offset cast occurred in %s on line 22
-string(1) "v"
+string(1) "5"
 Read-Write:
 
 Warning: String offset cast occurred in %s on line 29
@@ -148,7 +148,7 @@ empty():
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line 42
 bool(false)
 null coalesce:
-string(1) "v"
+string(1) "5"
 unset():
 Cannot unset string offsets
 
@@ -250,7 +250,7 @@ Warning: Illegal string offset %s in %s on line 15
 Read:
 
 Warning: Illegal string offset %s in %s on line 22
-string(1) "v"
+string(1) "5"
 Read-Write:
 
 Warning: Illegal string offset %s in %s on line 29
@@ -262,7 +262,7 @@ bool(true)
 null coalesce:
 
 Warning: Illegal string offset %s in %s on line 48
-string(1) "v"
+string(1) "5"
 unset():
 Cannot unset string offsets
 

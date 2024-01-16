@@ -12,14 +12,14 @@ Warning: Trying to access array offset on null in %s on line 8
 NULL
 Write:
 Read:
-string(1) "v"
+int(5)
 Read-Write:
 isset():
 bool(true)
 empty():
 bool(false)
 null coalesce:
-string(7) "vappend"
+int(25)
 unset():
 
 OUTPUT;
@@ -35,7 +35,7 @@ Deprecated: Implicit conversion from float %F to int loses precision in %s on li
 Read:
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line 22
-string(1) "v"
+int(5)
 Read-Write:
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line 29
@@ -50,7 +50,7 @@ bool(false)
 null coalesce:
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line 48
-string(7) "vappend"
+int(25)
 unset():
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line 55
@@ -94,7 +94,7 @@ Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 15
 Read:
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 22
-string(1) "v"
+int(5)
 Read-Write:
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 29
@@ -109,7 +109,7 @@ bool(false)
 null coalesce:
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 48
-string(7) "vappend"
+int(25)
 unset():
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 55
