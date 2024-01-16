@@ -18,7 +18,7 @@ isset():
 Cannot use object of type stdClass as array
 empty():
 Cannot use object of type stdClass as array
-Coalesce():
+null coalesce:
 Cannot use object of type stdClass as array
 unset():
 Cannot use object of type stdClass as array

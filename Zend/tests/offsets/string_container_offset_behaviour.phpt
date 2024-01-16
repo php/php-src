@@ -19,7 +19,7 @@ isset():
 bool(true)
 empty():
 bool(false)
-Coalesce():
+null coalesce:
 string(1) "v"
 unset():
 Cannot unset string offsets
@@ -46,7 +46,7 @@ isset():
 bool(false)
 empty():
 bool(true)
-Coalesce():
+null coalesce:
 string(7) "default"
 unset():
 Cannot unset string offsets
@@ -77,7 +77,7 @@ isset():
 bool(true)
 empty():
 bool(false)
-Coalesce():
+null coalesce:
 string(1) "v"
 unset():
 Cannot unset string offsets
@@ -112,7 +112,7 @@ isset():
 bool(false)
 empty():
 bool(true)
-Coalesce():
+null coalesce:
 string(7) "default"
 unset():
 Cannot unset string offsets
@@ -147,7 +147,7 @@ empty():
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line 42
 bool(false)
-Coalesce():
+null coalesce:
 string(1) "v"
 unset():
 Cannot unset string offsets
@@ -186,7 +186,7 @@ empty():
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line 42
 bool(true)
-Coalesce():
+null coalesce:
 string(7) "default"
 unset():
 Cannot unset string offsets
@@ -208,7 +208,7 @@ isset():
 bool(false)
 empty():
 bool(true)
-Coalesce():
+null coalesce:
 Cannot access offset of type %s on string
 unset():
 Cannot unset string offsets
@@ -230,7 +230,7 @@ isset():
 bool(false)
 empty():
 bool(true)
-Coalesce():
+null coalesce:
 string(7) "default"
 unset():
 Cannot unset string offsets
@@ -259,7 +259,7 @@ isset():
 bool(false)
 empty():
 bool(true)
-Coalesce():
+null coalesce:
 
 Warning: Illegal string offset %s in %s on line 48
 string(1) "v"

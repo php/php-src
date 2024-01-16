@@ -34,7 +34,7 @@ isset():
 bool(false)
 empty():
 bool(true)
-Coalesce():
+null coalesce:
 string(7) "default"
 unset():
 Cannot unset offset in a non-array variable

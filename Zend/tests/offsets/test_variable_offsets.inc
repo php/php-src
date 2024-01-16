@@ -44,11 +44,12 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-    echo "Coalesce():\n";
+    echo "null coalesce:\n";
     var_dump($container[$dimension] ?? 'default');
 } catch (\Throwable $e) {
     echo $e->getMessage(), "\n";
 }
+// Unset
 try {
     echo "unset():\n";
     unset($container[$dimension]);
