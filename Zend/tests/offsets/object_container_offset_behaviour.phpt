@@ -22,6 +22,20 @@ null coalesce:
 Cannot use object of type stdClass as array
 unset():
 Cannot use object of type stdClass as array
+Nested read:
+Cannot use object of type stdClass as array
+Nested write:
+Cannot use object of type stdClass as array
+Nested Read-Write:
+Cannot use object of type stdClass as array
+Nested isset():
+Cannot use object of type stdClass as array
+Nested empty():
+Cannot use object of type stdClass as array
+Nested null coalesce:
+Cannot use object of type stdClass as array
+Nested unset():
+Cannot use object of type stdClass as array
 
 OUTPUT;
 

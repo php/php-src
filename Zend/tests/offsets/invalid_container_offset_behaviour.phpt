@@ -38,6 +38,24 @@ null coalesce:
 string(7) "default"
 unset():
 Cannot unset offset in a non-array variable
+Nested read:
+
+Warning: Trying to access array offset on $containerStr in %s on line 62
+
+Warning: Trying to access array offset on null in %s on line 62
+NULL
+Nested write:
+Cannot use a scalar value as an array
+Nested Read-Write:
+Cannot use a scalar value as an array
+Nested isset():
+bool(false)
+Nested empty():
+bool(true)
+Nested null coalesce:
+string(7) "default"
+Nested unset():
+Cannot unset offset in a non-array variable
 
 OUTPUT;
 

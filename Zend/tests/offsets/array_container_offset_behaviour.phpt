@@ -21,7 +21,21 @@ bool(false)
 null coalesce:
 int(25)
 unset():
+Nested read:
 
+Warning: Undefined array key %s in %s on line 62
+
+Warning: Trying to access array offset on null in %s on line 62
+NULL
+Nested write:
+Nested Read-Write:
+Nested isset():
+bool(true)
+Nested empty():
+bool(false)
+Nested null coalesce:
+int(30)
+Nested unset():
 OUTPUT;
 
 $EXPECTED_OUTPUT_VALID_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_VALID_OFFSETS) . '$/s';
@@ -58,6 +72,47 @@ int(35)
 unset():
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line 55
+Nested read:
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line 62
+
+Warning: Undefined array key 0 in %s on line 62
+
+Warning: Trying to access array offset on null in %s on line 62
+NULL
+Nested write:
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line 69
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line 69
+Nested Read-Write:
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line 76
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line 76
+Nested isset():
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line 83
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line 83
+bool(true)
+Nested empty():
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line 89
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line 89
+bool(false)
+Nested null coalesce:
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line 95
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line 95
+int(25)
+Nested unset():
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line 102
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line 102
 
 OUTPUT;
 
@@ -80,6 +135,20 @@ null coalesce:
 Cannot access offset of type %s on array
 unset():
 Cannot unset offset of type %s on array
+Nested read:
+Cannot access offset of type %s on array
+Nested write:
+Cannot access offset of type %s on array
+Nested Read-Write:
+Cannot access offset of type %s on array
+Nested isset():
+Cannot access offset of type %s on array
+Nested empty():
+Cannot access offset of type %s on array
+Nested null coalesce:
+Cannot access offset of type %s on array
+Nested unset():
+Cannot access offset of type %s on array
 
 OUTPUT;
 
@@ -117,6 +186,47 @@ int(25)
 unset():
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 55
+Nested read:
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 62
+
+Warning: Undefined array key 3 in %s on line 62
+
+Warning: Trying to access array offset on null in %s on line 62
+NULL
+Nested write:
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 69
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 69
+Nested Read-Write:
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 76
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 76
+Nested isset():
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 83
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 83
+bool(true)
+Nested empty():
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 89
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 89
+bool(false)
+Nested null coalesce:
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 95
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 95
+int(30)
+Nested unset():
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 102
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 102
 
 OUTPUT;
 

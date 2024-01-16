@@ -56,3 +56,50 @@ try {
 } catch (\Throwable $e) {
     echo $e->getMessage(), "\n";
 }
+// Nested read
+try {
+    echo "Nested read:\n";
+    var_dump($container[$dimension][$dimension]);
+} catch (\Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
+// Nested write
+try {
+    echo "Nested write:\n";
+    $container[$dimension][$dimension] = 5;
+} catch (\Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
+// Nested Read-Write
+try {
+    echo "Nested Read-Write:\n";
+    $container[$dimension][$dimension] += 25;
+} catch (\Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
+// Nested Is
+try {
+    echo "Nested isset():\n";
+    var_dump(isset($container[$dimension][$dimension]));
+} catch (\Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    echo "Nested empty():\n";
+    var_dump(empty($container[$dimension][$dimension]));
+} catch (\Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    echo "Nested null coalesce:\n";
+    var_dump($container[$dimension][$dimension] ?? 'default');
+} catch (\Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
+// Nested unset
+try {
+    echo "Nested unset():\n";
+    unset($container[$dimension][$dimension]);
+} catch (\Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
