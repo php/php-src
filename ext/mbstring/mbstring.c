@@ -2953,6 +2953,72 @@ PHP_FUNCTION(mb_strtolower)
 	RETURN_STR(mbstring_convert_case(PHP_UNICODE_CASE_LOWER, ZSTR_VAL(str), ZSTR_LEN(str), enc));
 }
 
+static zend_string* php_mb_ucfirst(zend_string *str, const mbfl_encoding *enc)
+{
+	zend_string *first, *second, *head;
+	first = mb_get_substr(str, 0, 1, enc);
+	second = mb_get_substr(str, 1, MBFL_SUBSTR_UNTIL_END, enc);
+	head = mbstring_convert_case(PHP_UNICODE_CASE_UPPER, ZSTR_VAL(first), ZSTR_LEN(first), enc);
+	zend_string_release(first);
+
+	zend_string *retval = zend_string_concat2(ZSTR_VAL(head), ZSTR_LEN(head), ZSTR_VAL(second), ZSTR_LEN(second));
+	zend_string_release(head);
+	zend_string_release(second);
+
+	return retval;
+}
+
+PHP_FUNCTION(mb_ucfirst)
+{
+	zend_string *str, *from_encoding = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(from_encoding)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const mbfl_encoding *enc = php_mb_get_encoding(from_encoding, 2);
+	if (!enc) {
+		RETURN_THROWS();
+	}
+
+	RETVAL_STR(php_mb_ucfirst(str, enc));
+}
+
+static zend_string* php_mb_lcfirst(zend_string *str, const mbfl_encoding *enc)
+{
+	zend_string *first, *second, *head;
+	first = mb_get_substr(str, 0, 1, enc);
+	second = mb_get_substr(str, 1, MBFL_SUBSTR_UNTIL_END, enc);
+	head = mbstring_convert_case(PHP_UNICODE_CASE_LOWER, ZSTR_VAL(first), ZSTR_LEN(first), enc);
+	zend_string_release(first);
+
+	zend_string *retval = zend_string_concat2(ZSTR_VAL(head), ZSTR_LEN(head), ZSTR_VAL(second), ZSTR_LEN(second));
+	zend_string_release(head);
+	zend_string_release(second);
+
+	return retval;
+}
+
+PHP_FUNCTION(mb_lcfirst)
+{
+	zend_string *str, *from_encoding = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(from_encoding)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const mbfl_encoding *enc = php_mb_get_encoding(from_encoding, 2);
+	if (!enc) {
+		RETURN_THROWS();
+	}
+
+	RETVAL_STR(php_mb_lcfirst(str, enc));
+}
+
 typedef enum {
 	MB_LTRIM = 1,
 	MB_RTRIM = 2,

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0fe7418224f3a0ab65a06bf215ebcb09ce632488 */
+ * Stub hash: ea642b9010bc38a3b13710662fef48663d4385e1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_language, 0, 0, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, language, IS_STRING, 1, "null")
@@ -117,6 +117,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_strtoupper, 0, 1, IS_STRING, 
 ZEND_END_ARG_INFO()
 
 #define arginfo_mb_strtolower arginfo_mb_strtoupper
+
+#define arginfo_mb_ucfirst arginfo_mb_strtoupper
+
+#define arginfo_mb_lcfirst arginfo_mb_strtoupper
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_trim, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -349,6 +353,8 @@ ZEND_FUNCTION(mb_convert_encoding);
 ZEND_FUNCTION(mb_convert_case);
 ZEND_FUNCTION(mb_strtoupper);
 ZEND_FUNCTION(mb_strtolower);
+ZEND_FUNCTION(mb_ucfirst);
+ZEND_FUNCTION(mb_lcfirst);
 ZEND_FUNCTION(mb_trim);
 ZEND_FUNCTION(mb_ltrim);
 ZEND_FUNCTION(mb_rtrim);
@@ -447,6 +453,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mb_convert_case, arginfo_mb_convert_case)
 	ZEND_FE(mb_strtoupper, arginfo_mb_strtoupper)
 	ZEND_FE(mb_strtolower, arginfo_mb_strtolower)
+	ZEND_FE(mb_ucfirst, arginfo_mb_ucfirst)
+	ZEND_FE(mb_lcfirst, arginfo_mb_lcfirst)
 	ZEND_FE(mb_trim, arginfo_mb_trim)
 	ZEND_FE(mb_ltrim, arginfo_mb_ltrim)
 	ZEND_FE(mb_rtrim, arginfo_mb_rtrim)
