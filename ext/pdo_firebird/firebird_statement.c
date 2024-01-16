@@ -463,11 +463,11 @@ static int pdo_firebird_stmt_get_col(
 					break;
 				case SQL_FLOAT:
 					/* TODO: Why is this not returned as the native type? */
-					ZVAL_STR(result, zend_strpprintf(0, "%F", php_get_float_from_sqldata(var->sqldata)));
+					ZVAL_STR(result, zend_strpprintf_unchecked(0, "%.8H", php_get_float_from_sqldata(var->sqldata)));
 					break;
 				case SQL_DOUBLE:
 					/* TODO: Why is this not returned as the native type? */
-					ZVAL_STR(result, zend_strpprintf(0, "%F", php_get_double_from_sqldata(var->sqldata)));
+					ZVAL_STR(result, zend_strpprintf_unchecked(0, "%.16H", php_get_double_from_sqldata(var->sqldata)));
 					break;
 #ifdef SQL_BOOLEAN
 				case SQL_BOOLEAN:

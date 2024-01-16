@@ -72,6 +72,8 @@ PDO_FIREBIRD:
   . Feature: Add transaction isolation level and mode settings to pdo_firebird.
     (SakiTakamachi)
   . Added class PdoFirebird. (danack, kocsismate)
+  . Fix GH-13119 (Changed to convert float and double values ​​into strings using
+    `H` format). (SakiTakamachi)
 
 PDO_MYSQL:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
