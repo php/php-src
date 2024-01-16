@@ -951,9 +951,10 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 		file = zval_get_string(GET_PROPERTY_SILENT(&exception, ZEND_STR_FILE));
 		line = zval_get_long(GET_PROPERTY_SILENT(&exception, ZEND_STR_LINE));
 
+		ZVAL_STR(&tmp, str);
 		zend_error_va(severity | E_DONT_BAIL,
 			(file && ZSTR_LEN(file) > 0) ? file : NULL, line,
-			"Uncaught %s\n  thrown", ZSTR_VAL(str));
+			"Uncaught %Z\n  thrown", &tmp);
 
 		zend_string_release_ex(str, 0);
 		zend_string_release_ex(file, 0);

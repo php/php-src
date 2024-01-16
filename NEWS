@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed timer leak in zend-max-execution-timers builds. (withinboredom)
   . Fixed bug GH-12349 (linking failure on ARM with mold). (Jan Palus)
+  . Fixed bug GH-13097 (Anonymous class reference in trigger_error / thrown
+    Exception). (nielsdos)
 
 - Curl:
   . Fix missing error check in curl_multi_init(). (divinity76)
