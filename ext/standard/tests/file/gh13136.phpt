@@ -46,5 +46,10 @@ ini_set("memory_limit", $old_limit);
 echo "Done ", CustomStream::$writes, " writes\n";
 
 ?>
+--CLEAN--
+<?php
+@unlink(__DIR__ . "/gh13071.tmp");
+@unlink(__DIR__ . "/gh13071.out.tmp");
+?>
 --EXPECT--
 Done 1024 writes
