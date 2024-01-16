@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug GH-13145 (strtok() is not comptime). (ilutov)
+  . Fixed type inference of range(). (ilutov)
 
 - OpenSSL:
   . Fixed LibreSSL undefined reference when OPENSSL_NO_ENGINE not set.
