@@ -36,6 +36,10 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-13094 (range(9.9, '0') causes segmentation fault). (nielsdos)
 
+- Streams:
+  . Fixed bug GH-13071 (Copying large files using mmap-able source streams may
+    exhaust available memory and fail). (nielsdos)
+
 18 Jan 2024, PHP 8.3.2
 
 - Core:
