@@ -137,7 +137,7 @@ function runValgrindPhpCgiCommand(
     }
 
     // print all collected metrics
-    print_r($metricsArr);
+    print_r(array_map(fn ($metrics) => array_map(fn ($v) => number_format($v, 0, '.', '_'), $metrics), $metricsArr));
 
     // find the fastest benchmark run
     $bestRunIndex = 0;
