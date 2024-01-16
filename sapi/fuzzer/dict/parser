@@ -59,6 +59,7 @@
 "boolean"
 "true"
 "false"
+"null"
 "unset"
 "eval"
 "include"
