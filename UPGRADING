@@ -267,6 +267,10 @@ PDO_SQLITE:
 5. Changed Functions
 ========================================
 
+- Core:
+  . trigger_error() and user_error() now have a return type of true instead of
+    bool.
+
 - DOM:
   . DOMDocument::registerNodeClass() now has a tentative return type of true.
     Previously, the return type was bool but only true could be returned in practice.
