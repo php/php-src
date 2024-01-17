@@ -1949,7 +1949,7 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 	zend_function *new_fn;
 	bool check_inheritance = false;
 
-	if ((fn->common.fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) == (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) {
+	if ((fn->common.fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) == (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL) && !zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");
 	}
 
