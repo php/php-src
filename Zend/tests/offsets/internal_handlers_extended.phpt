@@ -42,5 +42,5 @@ exportObject($do);
 
 ?>
 --EXPECT--
-NoImplement, read: true, write: false, has: false, unset: false, readType: 0, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
-DoImplement, read: true, write: false, has: false, unset: false, readType: 0, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+NoImplement, read: true, write: false, has: false, unset: false, readType: BP_VAR_R, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DoImplement, read: true, write: false, has: false, unset: false, readType: BP_VAR_R, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'

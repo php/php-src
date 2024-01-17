@@ -45,7 +45,18 @@ function exportProp(object $o, string $p) {
 
     echo ', ', $p, ': ';
     if ($rp->isInitialized($o)) {
-        echo zend_test_var_export($o->$p);
+        if ($p === 'readType') {
+            echo match($o->$p) {
+                0 => 'BP_VAR_R',
+                1 => 'BP_VAR_W',
+                2 => 'BP_VAR_RW',
+                3 => 'BP_VAR_IS',
+                4 => 'BP_VAR_FUNC_ARG',
+                5 => 'BP_VAR_UNSET',
+            };
+        } else {
+            echo zend_test_var_export($o->$p);
+        }
     } else {
         echo 'uninitialized';
     }
