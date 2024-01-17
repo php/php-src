@@ -23,6 +23,7 @@ static uint32_t ir_str_hash(const char *str, size_t len)
 
     for (i = 0; i < len; i++) {
         h = ((h << 5) + h) + *str;
+        str++;
     }
     return h | 0x10000000;
 }

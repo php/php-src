@@ -594,30 +594,40 @@ static void ir_sccp_remove_unfeasible_merge_inputs(ir_ctx *ctx, ir_insn *_values
 			if (input && IR_IS_FEASIBLE(input)) {
 				ir_insn *input_insn = &ctx->ir_base[input];
 
-				IR_ASSERT(input_insn->op == IR_END || input_insn->op == IR_IJMP || input_insn->op == IR_UNREACHABLE);
-				if (input_insn->op == IR_END) {
-					ir_ref prev, next = IR_UNUSED;
-					ir_insn *next_insn = NULL;
+				IR_ASSERT(input_insn->op == IR_END || input_insn->op == IR_LOOP_END||
+					input_insn->op == IR_IJMP || input_insn->op == IR_UNREACHABLE);
+				if (input_insn->op == IR_END || input_insn->op == IR_LOOP_END) {
+					if (input < ref) {
+						ir_ref prev, next = IR_UNUSED;
+						ir_insn *next_insn = NULL;
 
-					prev = input_insn->op1;
-					use_list = &ctx->use_lists[ref];
-					for (k = 0, p = &ctx->use_edges[use_list->refs]; k < use_list->count; k++, p++) {
-						use = *p;
-						use_insn = &ctx->ir_base[use];
-						IR_ASSERT((use_insn->op != IR_PHI) && "PHI must be already removed");
-						if (ir_op_flags[use_insn->op] & IR_OP_FLAG_CONTROL) {
-							next = use;
-							next_insn = use_insn;
-							break;
+						prev = input_insn->op1;
+						use_list = &ctx->use_lists[ref];
+						for (k = 0, p = &ctx->use_edges[use_list->refs]; k < use_list->count; k++, p++) {
+							use = *p;
+							use_insn = &ctx->ir_base[use];
+							IR_ASSERT((use_insn->op != IR_PHI) && "PHI must be already removed");
+							if (ir_op_flags[use_insn->op] & IR_OP_FLAG_CONTROL) {
+								next = use;
+								next_insn = use_insn;
+								break;
+							}
 						}
+						IR_ASSERT(prev && next);
+						/* remove MERGE and input END from double linked control list */
+						next_insn->op1 = prev;
+						ir_sccp_replace_use(ctx, prev, input, next);
+						/* remove MERGE and input END instructions */
+						ir_sccp_make_nop(ctx, ref);
+						ir_sccp_make_nop(ctx, input);
+					} else {
+						for (i = 2; i <= n; i++) {
+							ir_insn_set_op(insn, i, IR_UNUSED);
+						}
+						insn->op = IR_BEGIN;
+						insn->op1 = input;
+						input_insn->op = IR_END;
 					}
-					IR_ASSERT(prev && next);
-					/* remove MERGE and input END from double linked control list */
-					next_insn->op1 = prev;
-					ir_sccp_replace_use(ctx, prev, input, next);
-					/* remove MERGE and input END instructions */
-					ir_sccp_make_nop(ctx, ref);
-					ir_sccp_make_nop(ctx, input);
 					break;
 				} else {
 					for (i = 2; i <= n; i++) {

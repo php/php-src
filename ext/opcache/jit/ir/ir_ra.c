@@ -3174,7 +3174,6 @@ try_next_available_register:
 
 	/* split any inactive interval for reg at the end of its lifetime hole */
 	other = *inactive;
-	prev = NULL;
 	while (other) {
 		/* freeUntilPos[it.reg] = next intersection of it with current */
 		if (reg == other->reg) {
@@ -3187,17 +3186,12 @@ try_next_available_register:
 				IR_LOG_LSRA_CONFLICT("      ---- Conflict with inactive", other, overlap);
 				// TODO: optimal split position (this case is not tested)
 				child = ir_split_interval_at(ctx, other, overlap);
-				if (prev) {
-					prev->list_next = other = other->list_next;
-				} else {
-					*inactive = other = other->list_next;
-				}
+				/* reset range cache */
+				other->current_range = &other->range;
 				ir_add_to_unhandled(unhandled, child);
 				IR_LOG_LSRA("      ---- Queue", child, "");
-				continue;
 			}
 		}
-		prev = other;
 		other = other->list_next;
 	}
 
@@ -3277,6 +3271,7 @@ static bool ir_ival_spill_for_fuse_load(ir_ctx *ctx, ir_live_interval *ival, ir_
 	} else if (ival->flags & IR_LIVE_INTERVAL_MEM_LOAD) {
 		insn = &ctx->ir_base[IR_LIVE_POS_TO_REF(use_pos->pos)];
 		IR_ASSERT(insn->op == IR_VLOAD);
+		IR_ASSERT(ctx->ir_base[insn->op2].op == IR_VAR);
 		use_pos = use_pos->next;
 		if (use_pos && (use_pos->next || (use_pos->flags & IR_USE_MUST_BE_IN_REG))) {
 			return 0;
@@ -3287,9 +3282,21 @@ static bool ir_ival_spill_for_fuse_load(ir_ctx *ctx, ir_live_interval *ival, ir_
 			if (bb->loop_depth && bb != ir_block_from_live_pos(ctx, ival->use_pos->pos)) {
 				return 0;
 			}
+			/* check if VAR may be clobbered between VLOAD and use */
+			ir_use_list *use_list = &ctx->use_lists[insn->op2];
+			ir_ref n = use_list->count;
+			ir_ref *p = &ctx->use_edges[use_list->refs];
+			for (; n > 0; p++, n--) {
+				ir_ref use = *p;
+				if (ctx->ir_base[use].op == IR_VSTORE) {
+					if (use > IR_LIVE_POS_TO_REF(ival->use_pos->pos) && use < IR_LIVE_POS_TO_REF(use_pos->pos)) {
+						return 0;
+					}
+				} else if (ctx->ir_base[use].op == IR_VADDR) {
+					return 0;
+				}
+			}
 		}
-
-		IR_ASSERT(ctx->ir_base[insn->op2].op == IR_VAR);
 		ival->stack_spill_pos = ctx->ir_base[insn->op2].op3;
 
 		return 1;
