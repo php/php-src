@@ -2959,11 +2959,11 @@ static zend_string* php_mb_ulcfirst(zend_string *str, php_case_mode mode, const 
 	first = mb_get_substr(str, 0, 1, enc);
 	second = mb_get_substr(str, 1, MBFL_SUBSTR_UNTIL_END, enc);
 	head = mbstring_convert_case(mode, ZSTR_VAL(first), ZSTR_LEN(first), enc);
-	zend_string_release(first);
+	zend_string_release_ex(first, false);
 
 	zend_string *retval = zend_string_concat2(ZSTR_VAL(head), ZSTR_LEN(head), ZSTR_VAL(second), ZSTR_LEN(second));
-	zend_string_release(head);
-	zend_string_release(second);
+	zend_string_release_ex(head, false);
+	zend_string_release_ex(second, false);
 
 	return retval;
 }
