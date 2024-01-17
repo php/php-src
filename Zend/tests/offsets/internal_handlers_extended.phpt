@@ -5,6 +5,8 @@ zend_test
 --FILE--
 <?php
 
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'test_offset_helpers.inc';
+
 class NoImplement extends DimensionHandlersNoArrayAccess {}
 
 class DoImplement extends DimensionHandlersNoArrayAccess implements ArrayAccess {
@@ -33,46 +35,12 @@ $no = new NoImplement();
 $do = new DoImplement();
 
 $no['foo'];
-var_dump($no);
+exportObject($no);
 
 $do['foo'];
-var_dump($do);
+exportObject($do);
 
 ?>
---EXPECTF--
-object(NoImplement)#1 (7) {
-  ["read"]=>
-  bool(true)
-  ["write"]=>
-  bool(false)
-  ["has"]=>
-  bool(false)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  int(0)
-  ["hasOffset"]=>
-  bool(true)
-  ["checkEmpty"]=>
-  uninitialized(int)
-  ["offset"]=>
-  string(3) "foo"
-}
-object(DoImplement)#2 (7) {
-  ["read"]=>
-  bool(true)
-  ["write"]=>
-  bool(false)
-  ["has"]=>
-  bool(false)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  int(0)
-  ["hasOffset"]=>
-  bool(true)
-  ["checkEmpty"]=>
-  uninitialized(int)
-  ["offset"]=>
-  string(3) "foo"
-}
+--EXPECT--
+NoImplement, read: true, write: false, has: false, unset: false, readType: 0, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DoImplement, read: true, write: false, has: false, unset: false, readType: 0, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'

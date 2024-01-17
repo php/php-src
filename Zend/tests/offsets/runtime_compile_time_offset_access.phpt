@@ -5,7 +5,7 @@ memory_limit=256M
 opcache.file_update_protection=1
 --SKIPIF--
 <?php
-//if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
+if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
 ?>
 --FILE--
 <?php
@@ -15,114 +15,9 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'test_offset_helpers.inc';
 function makeTestFile($container, $offset) {
     $offset_p = zend_test_var_export($offset);
     $container_p = zend_test_var_export($container);
-    $fileContent = <<<test
-<?php
-
-\$container = $container_p;
-
-// Read before write
-try {
-    echo "Read before write:\\n";
-    var_dump(\$container[$offset_p]);
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-// Write
-try {
-    echo "Write:\\n";
-    \$container[$offset_p] = 5;
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-// Read
-try {
-    echo "Read:\\n";
-    var_dump(\$container[$offset_p]);
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-// Read-Write
-try {
-    echo "Read-Write:\\n";
-    \$container[$offset_p] += 20;
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-// Is
-try {
-    echo "isset():\\n";
-    var_dump(isset(\$container[$offset_p]));
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-try {
-    echo "empty():\\n";
-    var_dump(empty(\$container[$offset_p]));
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-try {
-    echo "null coalesce:\\n";
-    var_dump(\$container[$offset_p] ?? 'default');
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-// Unset
-try {
-    echo "unset():\\n";
-    unset(\$container[$offset_p]);
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-// Nested read
-try {
-    echo "Nested read:\\n";
-    var_dump(\$container[$offset_p][$offset_p]);
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-// Nested write
-try {
-    echo "Nested write:\\n";
-    \$container[$offset_p][$offset_p] = 5;
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-// Nested Read-Write
-try {
-    echo "Nested Read-Write:\\n";
-    \$container[$offset_p][$offset_p] += 25;
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-// Nested Is
-try {
-    echo "Nested isset():\\n";
-    var_dump(isset(\$container[$offset_p][$offset_p]));
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-try {
-    echo "Nested empty():\\n";
-    var_dump(empty(\$container[$offset_p][$offset_p]));
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-try {
-    echo "Nested null coalesce:\\n";
-    var_dump(\$container[$offset_p][$offset_p] ?? 'default');
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-// Nested unset
-try {
-    echo "Nested unset():\\n";
-    unset(\$container[$offset_p][$offset_p]);
-} catch (\Throwable \$e) {
-    echo \$e->getMessage(), "\\n";
-}
-test;
-    return $fileContent;
+    $fileContent = file_get_contents(__DIR__ . '/test_variable_offsets.inc');
+    $fileContent = str_replace('$dimension', $offset_p, $fileContent);
+    return str_replace('//$container var declaration in const generated file', "\$container = $container_p;", $fileContent);
 }
 
 function normalize_output(string $output, string $filename): string {

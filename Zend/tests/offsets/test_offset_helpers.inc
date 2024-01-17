@@ -40,6 +40,25 @@ function zend_test_var_export($value) {
     return var_export($value, true);
 }
 
+function exportProp(object $o, string $p) {
+    $rp = new ReflectionProperty($o, $p);
+
+    echo ', ', $p, ': ';
+    if ($rp->isInitialized($o)) {
+        echo zend_test_var_export($o->$p);
+    } else {
+        echo 'uninitialized';
+    }
+}
+
+function exportObject(object $o) {
+    echo $o::class;
+    foreach (get_class_vars($o::class) as $p => $v) {
+        exportProp($o, $p);
+    }
+    echo "\n";
+}
+
 /* Taken from run-tests.php */
 function expectf_to_regex(string $wanted): string
 {

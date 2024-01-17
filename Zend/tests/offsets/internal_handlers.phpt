@@ -5,42 +5,42 @@ zend_test
 --FILE--
 <?php
 
-// require_once __DIR__ . DIRECTORY_SEPARATOR . 'test_offset_helpers.inc';
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'test_offset_helpers.inc';
 
 echo 'read op', PHP_EOL;
 $o = new DimensionHandlersNoArrayAccess();
 $r = $o['foo'];
-var_dump($o);
+exportObject($o);
 
 echo 'write op', PHP_EOL;
 $o = new DimensionHandlersNoArrayAccess();
 $o['foo'] = true;
-var_dump($o);
+exportObject($o);
 
 echo 'isset op', PHP_EOL;
 $o = new DimensionHandlersNoArrayAccess();
 $r = isset($o['foo']);
-var_dump($o);
+exportObject($o);
 
 echo 'empty op', PHP_EOL;
 $o = new DimensionHandlersNoArrayAccess();
 $r = empty($o['foo']);
-var_dump($o);
+exportObject($o);
 
 echo 'null coalescing op', PHP_EOL;
 $o = new DimensionHandlersNoArrayAccess();
 $r = $o['foo'] ?? 'default';
-var_dump($o);
+exportObject($o);
 
 echo 'appending op', PHP_EOL;
 $o = new DimensionHandlersNoArrayAccess();
 $o[] = true;
-var_dump($o);
+exportObject($o);
 
 echo 'nested read', PHP_EOL;
 $o = new DimensionHandlersNoArrayAccess();
 $r = $o['foo']['bar'];
-var_dump($o);
+exportObject($o);
 
 // Illegal
 //echo 'nested read: appending then read', PHP_EOL;
@@ -55,7 +55,7 @@ try {
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
-var_dump($o);
+exportObject($o);
 
 echo 'nested write: appending then write', PHP_EOL;
 try {
@@ -64,7 +64,7 @@ try {
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
-var_dump($o);
+exportObject($o);
 
 echo 'nested isset', PHP_EOL;
 try {
@@ -73,7 +73,7 @@ try {
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
-var_dump($o);
+exportObject($o);
 
 // Illegal
 //echo 'nested isset: appending then read', PHP_EOL;
@@ -92,7 +92,7 @@ try {
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
-var_dump($o);
+exportObject($o);
 
 // Illegal
 //echo 'nested empty: appending then read', PHP_EOL;
@@ -111,7 +111,7 @@ try {
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
-var_dump($o);
+exportObject($o);
 
 // Illegal
 //echo 'nested null coalescing: appending then read', PHP_EOL;
@@ -130,7 +130,7 @@ try {
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
-var_dump($o);
+exportObject($o);
 
 echo 'nested appending: appending then append', PHP_EOL;
 try {
@@ -139,287 +139,49 @@ try {
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
-var_dump($o);
+exportObject($o);
 
 ?>
 --EXPECTF--
 read op
-object(DimensionHandlersNoArrayAccess)#%d (7) {
-  ["read"]=>
-  bool(true)
-  ["write"]=>
-  bool(false)
-  ["has"]=>
-  bool(false)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  int(0)
-  ["hasOffset"]=>
-  bool(true)
-  ["checkEmpty"]=>
-  uninitialized(int)
-  ["offset"]=>
-  string(3) "foo"
-}
+DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: 0, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 write op
-object(DimensionHandlersNoArrayAccess)#%d (6) {
-  ["read"]=>
-  bool(false)
-  ["write"]=>
-  bool(true)
-  ["has"]=>
-  bool(false)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  uninitialized(int)
-  ["hasOffset"]=>
-  bool(true)
-  ["checkEmpty"]=>
-  uninitialized(int)
-  ["offset"]=>
-  string(3) "foo"
-}
+DimensionHandlersNoArrayAccess, read: false, write: true, has: false, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 isset op
-object(DimensionHandlersNoArrayAccess)#%d (7) {
-  ["read"]=>
-  bool(false)
-  ["write"]=>
-  bool(false)
-  ["has"]=>
-  bool(true)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  uninitialized(int)
-  ["hasOffset"]=>
-  bool(true)
-  ["checkEmpty"]=>
-  int(0)
-  ["offset"]=>
-  string(3) "foo"
-}
+DimensionHandlersNoArrayAccess, read: false, write: false, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: 0, offset: 'foo'
 empty op
-object(DimensionHandlersNoArrayAccess)#%d (7) {
-  ["read"]=>
-  bool(false)
-  ["write"]=>
-  bool(false)
-  ["has"]=>
-  bool(true)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  uninitialized(int)
-  ["hasOffset"]=>
-  bool(true)
-  ["checkEmpty"]=>
-  int(1)
-  ["offset"]=>
-  string(3) "foo"
-}
+DimensionHandlersNoArrayAccess, read: false, write: false, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: 1, offset: 'foo'
 null coalescing op
-object(DimensionHandlersNoArrayAccess)#%d (7) {
-  ["read"]=>
-  bool(true)
-  ["write"]=>
-  bool(false)
-  ["has"]=>
-  bool(false)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  int(3)
-  ["hasOffset"]=>
-  bool(true)
-  ["checkEmpty"]=>
-  uninitialized(int)
-  ["offset"]=>
-  string(3) "foo"
-}
+DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: 3, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 appending op
-object(DimensionHandlersNoArrayAccess)#%d (5) {
-  ["read"]=>
-  bool(false)
-  ["write"]=>
-  bool(true)
-  ["has"]=>
-  bool(false)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  uninitialized(int)
-  ["hasOffset"]=>
-  bool(false)
-  ["checkEmpty"]=>
-  uninitialized(int)
-  ["offset"]=>
-  uninitialized(mixed)
-}
+DimensionHandlersNoArrayAccess, read: false, write: true, has: false, unset: false, readType: uninitialized, hasOffset: false, checkEmpty: uninitialized, offset: uninitialized
 nested read
 
 Warning: Trying to access array offset on true in %s on line %d
-object(DimensionHandlersNoArrayAccess)#%d (7) {
-  ["read"]=>
-  bool(true)
-  ["write"]=>
-  bool(false)
-  ["has"]=>
-  bool(false)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  int(0)
-  ["hasOffset"]=>
-  bool(true)
-  ["checkEmpty"]=>
-  uninitialized(int)
-  ["offset"]=>
-  string(3) "foo"
-}
+DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: 0, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 nested write
 
 Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
 Error: Cannot use a scalar value as an array
-object(DimensionHandlersNoArrayAccess)#%d (7) {
-  ["read"]=>
-  bool(true)
-  ["write"]=>
-  bool(false)
-  ["has"]=>
-  bool(false)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  int(1)
-  ["hasOffset"]=>
-  bool(true)
-  ["checkEmpty"]=>
-  uninitialized(int)
-  ["offset"]=>
-  string(3) "foo"
-}
+DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: 1, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 nested write: appending then write
 
 Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
 Error: Cannot use a scalar value as an array
-object(DimensionHandlersNoArrayAccess)#%d (6) {
-  ["read"]=>
-  bool(true)
-  ["write"]=>
-  bool(false)
-  ["has"]=>
-  bool(false)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  int(1)
-  ["hasOffset"]=>
-  bool(false)
-  ["checkEmpty"]=>
-  uninitialized(int)
-  ["offset"]=>
-  uninitialized(mixed)
-}
+DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: 1, hasOffset: false, checkEmpty: uninitialized, offset: uninitialized
 nested isset
-object(DimensionHandlersNoArrayAccess)#%d (7) {
-  ["read"]=>
-  bool(true)
-  ["write"]=>
-  bool(false)
-  ["has"]=>
-  bool(false)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  int(3)
-  ["hasOffset"]=>
-  bool(true)
-  ["checkEmpty"]=>
-  uninitialized(int)
-  ["offset"]=>
-  string(3) "foo"
-}
+DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: 3, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 nested empty
-object(DimensionHandlersNoArrayAccess)#%d (7) {
-  ["read"]=>
-  bool(true)
-  ["write"]=>
-  bool(false)
-  ["has"]=>
-  bool(false)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  int(3)
-  ["hasOffset"]=>
-  bool(true)
-  ["checkEmpty"]=>
-  uninitialized(int)
-  ["offset"]=>
-  string(3) "foo"
-}
+DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: 3, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 nested null coalescing
-object(DimensionHandlersNoArrayAccess)#%d (7) {
-  ["read"]=>
-  bool(true)
-  ["write"]=>
-  bool(false)
-  ["has"]=>
-  bool(false)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  int(3)
-  ["hasOffset"]=>
-  bool(true)
-  ["checkEmpty"]=>
-  uninitialized(int)
-  ["offset"]=>
-  string(3) "foo"
-}
+DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: 3, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 nested appending
 
 Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
 Error: Cannot use a scalar value as an array
-object(DimensionHandlersNoArrayAccess)#%d (7) {
-  ["read"]=>
-  bool(true)
-  ["write"]=>
-  bool(false)
-  ["has"]=>
-  bool(false)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  int(1)
-  ["hasOffset"]=>
-  bool(true)
-  ["checkEmpty"]=>
-  uninitialized(int)
-  ["offset"]=>
-  string(3) "foo"
-}
+DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: 1, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 nested appending: appending then append
 
 Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
 Error: Cannot use a scalar value as an array
-object(DimensionHandlersNoArrayAccess)#%d (6) {
-  ["read"]=>
-  bool(true)
-  ["write"]=>
-  bool(false)
-  ["has"]=>
-  bool(false)
-  ["unset"]=>
-  bool(false)
-  ["readType"]=>
-  int(1)
-  ["hasOffset"]=>
-  bool(false)
-  ["checkEmpty"]=>
-  uninitialized(int)
-  ["offset"]=>
-  uninitialized(mixed)
-}
+DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: 1, hasOffset: false, checkEmpty: uninitialized, offset: uninitialized
