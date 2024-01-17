@@ -181,9 +181,8 @@ static void zend_verify_inference_def(zend_execute_data *execute_data, const zen
 	 && opline->opcode != ZEND_ASSERT_CHECK
 	 /* Smart branches may not declare result. */
 	 && !zend_is_smart_branch(opline)
-	 /* Calls only initialize result when returning from the called function. */
+	 /* User calls only initialize result when returning from the called function. */
 	 && opline->opcode != ZEND_DO_FCALL
-	 && opline->opcode != ZEND_DO_ICALL
 	 && opline->opcode != ZEND_DO_UCALL
 	 && opline->opcode != ZEND_DO_FCALL_BY_NAME
 	 /* ZEND_FE_FETCH_R[W] does not define a result in the last iteration. */

@@ -392,6 +392,7 @@ jobs:
           echo zend_extension=opcache.so > /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
           echo opcache.enable=1 >> /etc/php.d/opcache.ini
+          echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
           echo opcache.memory_consumption=256M >> /etc/php.d/opcache.ini
           echo opcache.file_update_protection=0 >> /etc/php.d/opcache.ini
           echo opcache.interned_strings_buffer=64 >> /etc/php.d/opcache.ini
