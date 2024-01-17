@@ -2,7 +2,7 @@
 proc_open() with output socketpairs
 --SKIPIF--
 <?php
-if (getenv("SKIP_SLOW_TESTS")) die("SKIP_SLOW_TESTS");
+if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
