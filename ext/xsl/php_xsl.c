@@ -141,15 +141,6 @@ PHP_MINIT_FUNCTION(xsl)
 }
 /* }}} */
 
-/* {{{ xsl_object_get_data */
-zval *xsl_object_get_data(void *obj)
-{
-	zval *dom_wrapper;
-	dom_wrapper = ((xsltStylesheetPtr) obj)->_private;
-	return dom_wrapper;
-}
-/* }}} */
-
 /* {{{ xsl_object_set_data */
 static void xsl_object_set_data(void *obj, zval *wrapper)
 {
