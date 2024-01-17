@@ -181,14 +181,14 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 		if (nodep && (nodep = nodep->children)) {
 			while (nodep) {
 				if (nodep->type == XML_ELEMENT_NODE && xmlStrEqual(nodep->name, (const xmlChar *) "key") && xmlStrEqual(nodep->ns->href, XSLT_NAMESPACE)) {
-					intern->hasKeys = 1;
+					intern->hasKeys = true;
 					break;
 				}
 				nodep = nodep->next;
 			}
 		}
 	} else {
-		intern->hasKeys = clone_docu;
+		intern->hasKeys = true;
 	}
 
 	if ((oldsheetp = (xsltStylesheetPtr)intern->ptr)) {
@@ -257,7 +257,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	intern->doc = emalloc(sizeof(php_libxml_node_object));
 	memset(intern->doc, 0, sizeof(php_libxml_node_object));
 
-	if (intern->hasKeys == 1) {
+	if (intern->hasKeys) {
 		doc = xmlCopyDoc(doc, 1);
 	} else {
 		object = Z_LIBXML_NODE_P(docp);
@@ -681,8 +681,6 @@ PHP_METHOD(XSLTProcessor, setSecurityPrefs)
 	intern = Z_XSL_P(id);
 	oldSecurityPrefs = intern->securityPrefs;
 	intern->securityPrefs = securityPrefs;
-	/* set this to 1 so that we know, it was set through this method. Can be removed, when we remove the ini setting */
-	intern->securityPrefsSet = 1;
 	RETURN_LONG(oldSecurityPrefs);
 }
 /* }}} end XSLTProcessor::setSecurityPrefs */

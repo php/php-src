@@ -49,14 +49,13 @@ extern zend_module_entry xsl_module_entry;
 #define XSL_SECPREF_CREATE_DIRECTORY 8
 #define XSL_SECPREF_READ_NETWORK 16
 #define XSL_SECPREF_WRITE_NETWORK 32
-/* Default == disable all write access ==  XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_FILE */
-#define XSL_SECPREF_DEFAULT 44
+/* Default == disable all write access */
+#define XSL_SECPREF_DEFAULT (XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_FILE)
 
 typedef struct _xsl_object {
 	void *ptr;
 	HashTable *parameter;
-	int hasKeys;
-	int securityPrefsSet;
+	bool hasKeys;
 	zend_long securityPrefs;
 	php_dom_xpath_callbacks xpath_callbacks;
 	php_libxml_node_object *doc;
