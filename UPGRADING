@@ -102,6 +102,8 @@ PHP 8.4 UPGRADE NOTES
     cause an infinite loop because it destroyed the current iterator data.
     This is no longer the case as a consequence of the bugfixes for GH-12192,
     GH-12208, #55098.
+  . Calling simplexml_import_dom() with a non-XML object now throws a TypeError
+    instead of a ValueError.
 
 - SPL:
   . Out of bounds accesses in SplFixedArray now throw an exception of type
@@ -134,6 +136,8 @@ PHP 8.4 UPGRADE NOTES
   . Failure to call a PHP function callback during evaluation now throws
     instead of emitting a warning.
     RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
+  . Calling XSLTProcessor::importStyleSheet() with a non-XML object now throws
+    a TypeError instead of a ValueError.
 
 ========================================
 2. New Features

@@ -9,7 +9,7 @@ $xslt = new XSLTProcessor();
 $dummy = new stdClass();
 try {
     var_dump($xslt->importStylesheet($dummy));
-} catch (ValueError $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
