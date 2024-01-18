@@ -9,6 +9,8 @@ Core:
   . Changed the type of PHP_DEBUG and PHP_ZTS constants to bool. (haszi)
   . Fixed bug GH-13142 (Undefined variable name is shortened when contains \0).
     (nielsdos)
+  . Fixed bug GH-13178 (Iterator positions incorrect when converting packed
+    array to hashed). (ilutov)
 
 Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
