@@ -1424,6 +1424,20 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 	}
 }
 
+static zend_always_inline void zend_hash_iterators_clamp_max(HashTable *ht, uint32_t max)
+{
+	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
+		HashTableIterator *iter = EG(ht_iterators);
+		HashTableIterator *end  = iter + EG(ht_iterators_used);
+		while (iter != end) {
+			if (iter->ht == ht) {
+				iter->pos = MIN(iter->pos, max);
+			}
+			iter++;
+		}
+	}
+}
+
 static zend_always_inline void _zend_hash_packed_del_val(HashTable *ht, uint32_t idx, zval *zv)
 {
 	idx = HT_HASH_TO_IDX(idx);
@@ -1433,16 +1447,7 @@ static zend_always_inline void _zend_hash_packed_del_val(HashTable *ht, uint32_t
 			ht->nNumUsed--;
 		} while (ht->nNumUsed > 0 && (UNEXPECTED(Z_TYPE(ht->arPacked[ht->nNumUsed-1]) == IS_UNDEF)));
 		ht->nInternalPointer = MIN(ht->nInternalPointer, ht->nNumUsed);
-		if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
-			HashTableIterator *iter = EG(ht_iterators);
-			HashTableIterator *end  = iter + EG(ht_iterators_used);
-			while (iter != end) {
-				if (iter->ht == ht) {
-					iter->pos = MIN(iter->pos, ht->nNumUsed);
-				}
-				iter++;
-			}
-		}
+		zend_hash_iterators_clamp_max(ht, ht->nNumUsed);
 	}
 	if (ht->pDestructor) {
 		zval tmp;
@@ -1468,16 +1473,7 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx,
 			ht->nNumUsed--;
 		} while (ht->nNumUsed > 0 && (UNEXPECTED(Z_TYPE(ht->arData[ht->nNumUsed-1].val) == IS_UNDEF)));
 		ht->nInternalPointer = MIN(ht->nInternalPointer, ht->nNumUsed);
-		if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
-			HashTableIterator *iter = EG(ht_iterators);
-			HashTableIterator *end  = iter + EG(ht_iterators_used);
-			while (iter != end) {
-				if (iter->ht == ht) {
-					iter->pos = MIN(iter->pos, ht->nNumUsed);
-				}
-				iter++;
-			}
-		}
+		zend_hash_iterators_clamp_max(ht, ht->nNumUsed);
 	}
 	if (ht->pDestructor) {
 		zval tmp;
