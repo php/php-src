@@ -23,17 +23,26 @@ class Foo3 {
     }
 }
 
-for ($i = 1; $i <= 3; $i++) {
+trait TraitNonConstructor {
+    private final function test() {}
+}
+
+class Foo4 {
+    use TraitNonConstructor { test as __construct; }
+}
+
+for ($i = 1; $i <= 4; $i++) {
     $rc = new ReflectionClass("Foo$i");
     echo $rc->getMethod("__construct"), "\n";
 }
 
-class Foo4 extends Foo3 {
+class Foo5 extends Foo3 {
     private function __construct() {}
 }
 
 ?>
 --EXPECTF--
+Warning: Private methods cannot be final as they are never overridden by other classes in %s on line %d
 Method [ <user, ctor> final private method __construct ] {
   @@ %sgh13177.php 4 - 4
 }
@@ -44,6 +53,10 @@ Method [ <user, ctor> final private method __construct ] {
 
 Method [ <user, ctor> final private method __construct ] {
   @@ %sgh13177.php 4 - 4
+}
+
+Method [ <user, ctor> final private method __construct ] {
+  @@ %sgh13177.php 24 - 24
 }
 
 
