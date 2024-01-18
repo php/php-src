@@ -794,8 +794,6 @@ jobs:
           repository: phpredis/phpredis
           path: redis
       - name: git checkout xdebug
-        # Currently breaks due to a PHP <=8.3 version check
-        if: false
         uses: actions/checkout@v4
         with:
           repository: xdebug/xdebug
@@ -856,7 +854,6 @@ jobs:
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
       - name: build xdebug
-        if: false
         run: |
           cd xdebug
           /opt/php/bin/phpize
