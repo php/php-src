@@ -1115,12 +1115,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	}
 
 	/* {{{ Get the session pool that suits this connection request from the persistent list. This
-	 * step is only for non-persistent connections as persistent connections have private session
-	 * pools. Non-persistent conns use shared session pool to allow for optimizations such as
+	 * step is only for non-persistent connections as persistent connections have a private session
+	 * pools. Non-persistent conns use a shared session pool to allow for optimizations such as
 	 * caching the physical connection (for DRCP) even when the non-persistent php connection is
 	 * destroyed.
 	 *
-	 * TODO: Unconditionally do this once OCI provides extended OCISessionGet capability
 	 */
 	if (use_spool && !connection->is_persistent) {
 		if ((session_pool = php_oci_get_spool(username, username_len, password, password_len, dbname, dbname_len, charsetid ? charsetid:charsetid_nls_lang, session_mode))==NULL)
@@ -1895,7 +1894,7 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
    */
   if (mode & PHP_OCI_CRED_EXT)
     poolmode = OCI_DEFAULT;
-	else {
+  else {
     /* Disable RLB as we mostly have single-connection pools */
     poolmode = OCI_SPC_NO_RLB | OCI_SPC_HOMOGENEOUS;
   }
@@ -1943,7 +1942,7 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 
 	/* Create the homogeneous session pool - We have different session pools for every different
 	 * username, password, charset and dbname. 
-   * Except for OCI_CRED_EXT mode
+     * Except for OCI_CRED_EXT mode
 	 */
 	PHP_OCI_CALL_RETURN(errstatus, OCISessionPoolCreate,(session_pool->env, OCI_G(err), session_pool->poolh, (OraText **)&session_pool->poolname, &session_pool->poolname_len, (OraText *)dbname, (ub4)dbname_len, 0, UB4MAXVAL, 1,(OraText *)username, (ub4)username_len, (OraText *)password,(ub4)password_len, poolmode));
 
@@ -2275,7 +2274,7 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 	ub4 purity = -2;				/* Illegal value to initialize */
 	time_t timestamp = time(NULL);
 	ub4 statement_cache_size = 0;
-  int mode = OCI_DEFAULT;
+    int mode = OCI_DEFAULT;
 
 	if (OCI_G(statement_cache_size) > 0) {
 		if (OCI_G(statement_cache_size) > SB4MAXVAL)
