@@ -1331,6 +1331,17 @@ ZEND_API void ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 		if (!(HT_FLAGS(ht) & HASH_FLAG_UNINITIALIZED)) {
 			ht->nNumUsed = 0;
 			HT_HASH_RESET(ht);
+			/* Even if the array is empty, we still need to reset the iterator positions. */
+			if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
+				HashTableIterator *iter = EG(ht_iterators);
+				HashTableIterator *end  = iter + EG(ht_iterators_used);
+				while (iter != end) {
+					if (iter->ht == ht) {
+						iter->pos = 0;
+					}
+					iter++;
+				}
+			}
 		}
 		return;
 	}
@@ -1458,28 +1469,21 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx,
 	}
 	idx = HT_HASH_TO_IDX(idx);
 	ht->nNumOfElements--;
-	if (ht->nInternalPointer == idx || UNEXPECTED(HT_HAS_ITERATORS(ht))) {
-		uint32_t new_idx;
-
-		new_idx = idx;
-		while (1) {
-			new_idx++;
-			if (new_idx >= ht->nNumUsed) {
-				break;
-			} else if (Z_TYPE(ht->arData[new_idx].val) != IS_UNDEF) {
-				break;
-			}
-		}
-		if (ht->nInternalPointer == idx) {
-			ht->nInternalPointer = new_idx;
-		}
-		zend_hash_iterators_update(ht, idx, new_idx);
-	}
 	if (ht->nNumUsed - 1 == idx) {
 		do {
 			ht->nNumUsed--;
 		} while (ht->nNumUsed > 0 && (UNEXPECTED(Z_TYPE(ht->arData[ht->nNumUsed-1].val) == IS_UNDEF)));
 		ht->nInternalPointer = MIN(ht->nInternalPointer, ht->nNumUsed);
+		if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
+			HashTableIterator *iter = EG(ht_iterators);
+			HashTableIterator *end  = iter + EG(ht_iterators_used);
+			while (iter != end) {
+				if (iter->ht == ht) {
+					iter->pos = MIN(iter->pos, ht->nNumUsed);
+				}
+				iter++;
+			}
+		}
 	}
 	if (ht->pDestructor) {
 		zval tmp;
