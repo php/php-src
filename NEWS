@@ -109,6 +109,7 @@ SimpleXML:
   . Fixed bug GH-12208 (SimpleXML infinite loop when a cast is used inside a
     foreach). (nielsdos)
   . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
+  . Fix signature of simplexml_import_dom(). (nielsdos)
 
 SNMP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)

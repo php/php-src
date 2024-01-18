@@ -2567,7 +2567,7 @@ PHP_FUNCTION(simplexml_import_dom)
 	nodep = php_libxml_import_node(node);
 
 	if (!nodep) {
-		zend_argument_type_error(1, "must be of type SimpleXMLElement|DOMNode, %s given", zend_zval_value_name(node));
+		zend_argument_type_error(1, "must be a valid XML node");
 		RETURN_THROWS();
 	}
 

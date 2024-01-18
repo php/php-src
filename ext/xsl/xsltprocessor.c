@@ -147,7 +147,7 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 		doc = nodep->doc;
 	}
 	if (doc == NULL) {
-		zend_argument_value_error(1, "must be a valid XML node");
+		zend_argument_type_error(1, "must be a valid XML node");
 		RETURN_THROWS();
 	}
 
@@ -232,7 +232,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	}
 
 	if (doc == NULL) {
-		zend_argument_value_error(1, "must be a valid XML node");
+		zend_argument_type_error(1, "must be a valid XML node");
 		return NULL;
 	}
 
