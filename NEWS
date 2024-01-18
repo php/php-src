@@ -42,6 +42,7 @@ Intl:
     throws an exception. (David Carlier)
   . Added NumberFormatter::ROUND_TOWARD_ZERO and ::ROUND_AWAY_FROM_ZERO as
     aliases for ::ROUND_DOWN and ::ROUND_UP. (Jorg Sowa)
+  . Added NumberFormatter::ROUND_HALFODD. (Ayesh Karunaratne)
 
 MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)

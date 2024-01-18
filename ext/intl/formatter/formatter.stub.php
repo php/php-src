@@ -50,6 +50,8 @@ class NumberFormatter
     public const int ROUND_AWAY_FROM_ZERO = UNKNOWN;
     /** @cvalue UNUM_ROUND_HALFEVEN */
     public const int ROUND_HALFEVEN = UNKNOWN;
+    /** @cvalue UNUM_ROUND_HALF_ODD */
+    public const int ROUND_HALFODD = UNKNOWN;
     /** @cvalue UNUM_ROUND_HALFDOWN */
     public const int ROUND_HALFDOWN = UNKNOWN;
     /** @cvalue UNUM_ROUND_HALFUP */

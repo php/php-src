@@ -281,8 +281,9 @@ PDO_SQLITE:
   . NumberFormatter::ROUND_TOWARD_ZERO and NumberFormatter::ROUND_AWAY_FROM_ZERO
     have been added as aliases for NumberFormatter::ROUND_DOWN and
     NumberFormatter::ROUND_UP to be consistent with the new PHP_ROUND_* modes.
-
     RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
+  . NumberFormatter::ROUND_HALFODD added to complement existing
+    NumberFormatter::ROUND_HALFEVEN functionality.
 
 - MBString:
   . The behavior of mb_strcut is more consistent now on invalid UTF-8 and UTF-16
