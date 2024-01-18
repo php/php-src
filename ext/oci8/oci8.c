@@ -851,8 +851,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	}
 
 	/* We cannot use the new session create logic (OCISessionGet from
-	 * client-side session pool) when privileged connect or password
-	 * change is attempted is specified.
+	 * client-side session pool) when privileged connect or password change is attempted.
 	 * TODO: Re-enable this when OCI provides support.
 	 */
 	if ((session_mode & (OCI_SYSOPER | OCI_SYSDBA)) || (new_password_len)) {
@@ -1116,7 +1115,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 	/* {{{ Get the session pool that suits this connection request from the persistent list. This
 	 * step is only for non-persistent connections as persistent connections have a private session
-	 * pools. Non-persistent conns use a shared session pool to allow for optimizations such as
+	 * pool. Non-persistent conns use a shared session pool to allow for optimizations such as
 	 * caching the physical connection (for DRCP) even when the non-persistent php connection is
 	 * destroyed.
 	 *
@@ -1892,11 +1891,12 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 
   /* if CRED_EXT mode poolcreate set to hetero(OCI_DEFAULT) 
    */
-  if (mode & PHP_OCI_CRED_EXT)
-    poolmode = OCI_DEFAULT;
+  if (mode & PHP_OCI_CRED_EXT) {
+      poolmode = OCI_DEFAULT;
+  }
   else {
-    /* Disable RLB as we mostly have single-connection pools */
-    poolmode = OCI_SPC_NO_RLB | OCI_SPC_HOMOGENEOUS;
+      /* Disable RLB as we mostly have single-connection pools */
+      poolmode = OCI_SPC_NO_RLB | OCI_SPC_HOMOGENEOUS;
   }
 	/* {{{ Allocate auth handle for session pool */
 	PHP_OCI_CALL_RETURN(errstatus, OCIHandleAlloc, (session_pool->env, (dvoid **)&(spoolAuth), OCI_HTYPE_AUTHINFO, 0, NULL));
@@ -2371,11 +2371,10 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 		/* Continue to use the global error handle as the connection is closed when an error occurs */
     
   if (session_mode & PHP_OCI_CRED_EXT) {
-    mode = OCI_SESSGET_SPOOL|OCI_SESSGET_CREDEXT; 
+      mode = OCI_SESSGET_SPOOL|OCI_SESSGET_CREDEXT; 
+  }  else {
+      mode = OCI_SESSGET_SPOOL;
   }
-  else 
-    mode = OCI_SESSGET_SPOOL;
-
 		PHP_OCI_CALL_RETURN(OCI_G(errcode),OCISessionGet, (connection->env, OCI_G(err), &(connection->svc), (OCIAuthInfo *)connection->authinfo, (OraText *)actual_spool->poolname, (ub4)actual_spool->poolname_len, NULL, 0, NULL, NULL, NULL, mode));
 
 		if (OCI_G(errcode) != OCI_SUCCESS) {
