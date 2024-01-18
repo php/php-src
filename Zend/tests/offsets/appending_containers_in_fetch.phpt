@@ -72,10 +72,7 @@ string(12) "A::offsetGet"
 NULL
 
 Notice: Indirect modification of overloaded element of A has no effect in %s on line %d
-
-Warning: Only the first byte will be assigned to the string offset in %s on line %d
-object(A)#3 (0) {
-}
+Error: Cannot use a scalar value as an array
 new B() container:
 
 Notice: Indirect modification of overloaded element of B has no effect in %s on line %d

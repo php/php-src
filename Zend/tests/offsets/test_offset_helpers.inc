@@ -100,7 +100,7 @@ class A implements ArrayAccess {
     public function offsetGet($offset): mixed {
         var_dump(__METHOD__);
         var_dump($offset);
-        return "dummy";
+        return 5;
     }
     public function offsetUnset($offset): void {
         var_dump(__METHOD__);
@@ -109,7 +109,7 @@ class A implements ArrayAccess {
     public function offsetExists($offset): bool {
         var_dump(__METHOD__);
         var_dump($offset);
-        return false;
+        return true;
     }
 }
 
@@ -122,7 +122,7 @@ class B extends ArrayObject {
     public function offsetGet($offset): mixed {
         var_dump(__METHOD__);
         var_dump($offset);
-        return "dummy";
+        return 5;
     }
     public function offsetUnset($offset): void {
         var_dump(__METHOD__);
@@ -131,7 +131,7 @@ class B extends ArrayObject {
     public function offsetExists($offset): bool {
         var_dump(__METHOD__);
         var_dump($offset);
-        return false;
+        return true;
     }
     public function append(mixed $value) : void{
         var_dump(__METHOD__);
