@@ -123,8 +123,8 @@ static void php_oci_spool_close(php_oci_spool *session_pool);
 static OCIEnv *php_oci_create_env(ub2 charsetid);
 static int php_oci_create_session(php_oci_connection *connection, php_oci_spool *session_pool, char *dbname, int dbname_len, char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, int session_mode);
 static int php_oci_old_create_session(php_oci_connection *connection, char *dbname, int dbname_len, char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, int session_mode);
-static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, int charsetid);
-static php_oci_spool *php_oci_create_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, zend_string *hash_key, int charsetid);
+static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, int charsetid, int mode);
+static php_oci_spool *php_oci_create_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, zend_string *hash_key, int charsetid, int mode);
 static sword php_oci_ping_init(php_oci_connection *connection, OCIError *errh);
 /* }}} */
 
@@ -852,10 +852,10 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 	/* We cannot use the new session create logic (OCISessionGet from
 	 * client-side session pool) when privileged connect or password
-	 * change is attempted or OCI_CRED_EXT mode is specified.
+	 * change is attempted is specified.
 	 * TODO: Re-enable this when OCI provides support.
 	 */
-	if ((session_mode & (OCI_SYSOPER | OCI_SYSDBA | PHP_OCI_CRED_EXT)) || (new_password_len)) {
+	if ((session_mode & (OCI_SYSOPER | OCI_SYSDBA)) || (new_password_len)) {
 		use_spool = 0;
 	}
 
@@ -1123,7 +1123,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	 * TODO: Unconditionally do this once OCI provides extended OCISessionGet capability
 	 */
 	if (use_spool && !connection->is_persistent) {
-		if ((session_pool = php_oci_get_spool(username, username_len, password, password_len, dbname, dbname_len, charsetid ? charsetid:charsetid_nls_lang))==NULL)
+		if ((session_pool = php_oci_get_spool(username, username_len, password, password_len, dbname, dbname_len, charsetid ? charsetid:charsetid_nls_lang, session_mode))==NULL)
 		{
 			php_oci_connection_close(connection);
 			smart_str_free(&hashed_details);
@@ -1840,7 +1840,7 @@ static int php_oci_persistent_helper(zval *zv)
  *
  *	 Create(alloc + Init) Session pool for the given dbname and charsetid
  */
-static php_oci_spool *php_oci_create_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, zend_string *hash_key, int charsetid)
+static php_oci_spool *php_oci_create_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, zend_string *hash_key, int charsetid, int mode)
 {
 	php_oci_spool *session_pool = NULL;
 	bool iserror = 0;
@@ -1891,9 +1891,14 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 		goto exit_create_spool;
 	}
 
-/* Disable RLB as we mostly have single-connection pools */
-	poolmode = OCI_SPC_NO_RLB | OCI_SPC_HOMOGENEOUS;
-
+  /* if CRED_EXT mode poolcreate set to hetero(OCI_DEFAULT) 
+   */
+  if (mode & PHP_OCI_CRED_EXT)
+    poolmode = OCI_DEFAULT;
+	else {
+    /* Disable RLB as we mostly have single-connection pools */
+    poolmode = OCI_SPC_NO_RLB | OCI_SPC_HOMOGENEOUS;
+  }
 	/* {{{ Allocate auth handle for session pool */
 	PHP_OCI_CALL_RETURN(errstatus, OCIHandleAlloc, (session_pool->env, (dvoid **)&(spoolAuth), OCI_HTYPE_AUTHINFO, 0, NULL));
 
@@ -1937,7 +1942,8 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 	/* }}} */
 
 	/* Create the homogeneous session pool - We have different session pools for every different
-	 * username, password, charset and dbname.
+	 * username, password, charset and dbname. 
+   * Except for OCI_CRED_EXT mode
 	 */
 	PHP_OCI_CALL_RETURN(errstatus, OCISessionPoolCreate,(session_pool->env, OCI_G(err), session_pool->poolh, (OraText **)&session_pool->poolname, &session_pool->poolname_len, (OraText *)dbname, (ub4)dbname_len, 0, UB4MAXVAL, 1,(OraText *)username, (ub4)username_len, (OraText *)password,(ub4)password_len, poolmode));
 
@@ -1971,7 +1977,7 @@ exit_create_spool:
  * Get Session pool for the given dbname and charsetid from the persistent list. Function called for
  * non-persistent connections.
  */
-static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, int charsetid)
+static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, int charsetid, int mode)
 {
 	smart_str spool_hashed_details = {0};
 	php_oci_spool *session_pool = NULL;
@@ -2015,7 +2021,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 
 	if (spool_out_le == NULL) {
 
-		session_pool = php_oci_create_spool(username, username_len, password, password_len, dbname, dbname_len, spool_hashed_details.s, charsetid);
+		session_pool = php_oci_create_spool(username, username_len, password, password_len, dbname, dbname_len, spool_hashed_details.s, charsetid, mode);
 
 		if (session_pool == NULL) {
 			iserror = 1;
@@ -2269,6 +2275,7 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 	ub4 purity = -2;				/* Illegal value to initialize */
 	time_t timestamp = time(NULL);
 	ub4 statement_cache_size = 0;
+  int mode = OCI_DEFAULT;
 
 	if (OCI_G(statement_cache_size) > 0) {
 		if (OCI_G(statement_cache_size) > SB4MAXVAL)
@@ -2277,9 +2284,9 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 			statement_cache_size = (ub4) OCI_G(statement_cache_size);
 	}
 
-	/* Persistent connections have private session pools */
+ 	/* Persistent connections have private session pools */
 	if (connection->is_persistent && !connection->private_spool &&
-		!(connection->private_spool = php_oci_create_spool(username, username_len, password, password_len, dbname, dbname_len, NULL, connection->charset))) {
+		!(connection->private_spool = php_oci_create_spool(username, username_len, password, password_len, dbname, dbname_len, NULL, connection->charset, session_mode))) {
 			return 1;
 	}
 	actual_spool = (connection->is_persistent) ? (connection->private_spool) : (session_pool);
@@ -2363,7 +2370,14 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 		 */
 	do {
 		/* Continue to use the global error handle as the connection is closed when an error occurs */
-		PHP_OCI_CALL_RETURN(OCI_G(errcode),OCISessionGet, (connection->env, OCI_G(err), &(connection->svc), (OCIAuthInfo *)connection->authinfo, (OraText *)actual_spool->poolname, (ub4)actual_spool->poolname_len, NULL, 0, NULL, NULL, NULL, OCI_SESSGET_SPOOL));
+    
+  if (session_mode & PHP_OCI_CRED_EXT) {
+    mode = OCI_SESSGET_SPOOL|OCI_SESSGET_CREDEXT; 
+  }
+  else 
+    mode = OCI_SESSGET_SPOOL;
+
+		PHP_OCI_CALL_RETURN(OCI_G(errcode),OCISessionGet, (connection->env, OCI_G(err), &(connection->svc), (OCIAuthInfo *)connection->authinfo, (OraText *)actual_spool->poolname, (ub4)actual_spool->poolname_len, NULL, 0, NULL, NULL, NULL, mode));
 
 		if (OCI_G(errcode) != OCI_SUCCESS) {
 			php_oci_error(OCI_G(err), OCI_G(errcode));
