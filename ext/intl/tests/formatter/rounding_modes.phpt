@@ -13,6 +13,7 @@ var_dump(NumberFormatter::ROUND_TOWARD_ZERO);
 var_dump(NumberFormatter::ROUND_UP);
 var_dump(NumberFormatter::ROUND_AWAY_FROM_ZERO);
 var_dump(NumberFormatter::ROUND_HALFEVEN);
+var_dump(NumberFormatter::ROUND_HALFODD);
 var_dump(NumberFormatter::ROUND_HALFDOWN);
 var_dump(NumberFormatter::ROUND_HALFUP);
 
@@ -27,6 +28,7 @@ int(2)
 int(3)
 int(3)
 int(4)
+int(8)
 int(5)
 int(6)
 bool(true)

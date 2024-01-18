@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5d5421c72894a77894872efdf060ec058d275c13 */
+ * Stub hash: dcd5c897c37ec1e0729736dedada2a6aac4cb673 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -243,6 +243,12 @@ static zend_class_entry *register_class_NumberFormatter(void)
 	zend_string *const_ROUND_HALFEVEN_name = zend_string_init_interned("ROUND_HALFEVEN", sizeof("ROUND_HALFEVEN") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ROUND_HALFEVEN_name, &const_ROUND_HALFEVEN_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ROUND_HALFEVEN_name);
+
+	zval const_ROUND_HALFODD_value;
+	ZVAL_LONG(&const_ROUND_HALFODD_value, UNUM_ROUND_HALF_ODD);
+	zend_string *const_ROUND_HALFODD_name = zend_string_init_interned("ROUND_HALFODD", sizeof("ROUND_HALFODD") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ROUND_HALFODD_name, &const_ROUND_HALFODD_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ROUND_HALFODD_name);
 
 	zval const_ROUND_HALFDOWN_value;
 	ZVAL_LONG(&const_ROUND_HALFDOWN_value, UNUM_ROUND_HALFDOWN);
