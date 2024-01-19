@@ -375,6 +375,10 @@ PDO_SQLITE:
 8. Removed Extensions and SAPIs
 ========================================
 
+- IMAP:
+  . The IMAP extension has been unbundled and moved to PECL.
+    RFC: https://wiki.php.net/rfc/unbundle_imap_pspell_oci8
+
 - PSpell:
   . The pspell extension has been unbundled and moved to PECL.
     RFC: https://wiki.php.net/rfc/unbundle_imap_pspell_oci8
