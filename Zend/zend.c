@@ -1597,26 +1597,22 @@ ZEND_API ZEND_COLD void zend_error_at(
 	va_end(args);
 }
 
-ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) {
-	zend_string *filename;
-	uint32_t lineno;
-	va_list args;
+#define zend_error_impl(type, format) do { \
+		zend_string *filename; \
+		uint32_t lineno; \
+		va_list args; \
+		get_filename_lineno(type, &filename, &lineno); \
+		va_start(args, format); \
+		zend_error_va_list(type, filename, lineno, format, args); \
+		va_end(args); \
+	} while (0)
 
-	get_filename_lineno(type, &filename, &lineno);
-	va_start(args, format);
-	zend_error_va_list(type, filename, lineno, format, args);
-	va_end(args);
+ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) {
+	zend_error_impl(type, format);
 }
 
 ZEND_API ZEND_COLD void zend_error_unchecked(int type, const char *format, ...) {
-	zend_string *filename;
-	uint32_t lineno;
-	va_list args;
-
-	get_filename_lineno(type, &filename, &lineno);
-	va_start(args, format);
-	zend_error_va_list(type, filename, lineno, format, args);
-	va_end(args);
+	zend_error_impl(type, format);
 }
 
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
@@ -1636,18 +1632,26 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
 	abort();
 }
 
+#define zend_error_noreturn_impl(type, format) do { \
+		zend_string *filename; \
+		uint32_t lineno; \
+		va_list args; \
+		get_filename_lineno(type, &filename, &lineno); \
+		va_start(args, format); \
+		zend_error_va_list(type, filename, lineno, format, args); \
+		va_end(args); \
+		/* Should never reach this. */ \
+		abort(); \
+	} while (0)
+
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...)
 {
-	zend_string *filename;
-	uint32_t lineno;
-	va_list args;
+	zend_error_noreturn_impl(type, format);
+}
 
-	get_filename_lineno(type, &filename, &lineno);
-	va_start(args, format);
-	zend_error_va_list(type, filename, lineno, format, args);
-	va_end(args);
-	/* Should never reach this. */
-	abort();
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn_unchecked(int type, const char *format, ...)
+{
+	zend_error_noreturn_impl(type, format);
 }
 
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn, const char *message)

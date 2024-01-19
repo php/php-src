@@ -7,6 +7,8 @@ Core:
     Solaris and Haiku. (David Carlier)
   . Enabled ifunc checks on FreeBSD from the 12.x releases. (Freaky)
   . Changed the type of PHP_DEBUG and PHP_ZTS constants to bool. (haszi)
+  . Fixed bug GH-13142 (Undefined variable name is shortened when contains \0).
+    (nielsdos)
 
 Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
