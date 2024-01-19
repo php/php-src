@@ -944,11 +944,10 @@ static zend_string *escape_html(const char *buffer, size_t buffer_len) {
  */
 PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)
 {
-	zend_string *replace_buffer = NULL, *replace_origin = NULL;
-	char *buffer = NULL, *docref_buf = NULL, *target = NULL;
+	zend_string *replace_origin = NULL;
+	char *docref_buf = NULL, *target = NULL;
 	char *docref_target = "", *docref_root = "";
 	char *p;
-	int buffer_len = 0;
 	const char *space = "";
 	const char *class_name = "";
 	const char *function;
@@ -958,18 +957,16 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	int is_function = 0;
 
 	/* get error text into buffer and escape for html if necessary */
-	buffer_len = (int)vspprintf(&buffer, 0, format, args);
+	zend_string *buffer = vstrpprintf(0, format, args);
 
 	if (PG(html_errors)) {
-		replace_buffer = escape_html(buffer, buffer_len);
-		efree(buffer);
+		zend_string *replace_buffer = escape_html(ZSTR_VAL(buffer), ZSTR_LEN(buffer));
+		zend_string_free(buffer);
 
 		if (replace_buffer) {
-			buffer = ZSTR_VAL(replace_buffer);
-			buffer_len = (int)ZSTR_LEN(replace_buffer);
+			buffer = replace_buffer;
 		} else {
-			buffer = "";
-			buffer_len = 0;
+			buffer = zend_empty_string;
 		}
 	}
 
@@ -1091,15 +1088,15 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		}
 		/* display html formatted or only show the additional links */
 		if (PG(html_errors)) {
-			message = zend_strpprintf(0, "%s [<a href='%s%s%s'>%s</a>]: %s", origin, docref_root, docref, docref_target, docref, buffer);
+			message = zend_strpprintf_unchecked(0, "%s [<a href='%s%s%s'>%s</a>]: %S", origin, docref_root, docref, docref_target, docref, buffer);
 		} else {
-			message = zend_strpprintf(0, "%s [%s%s%s]: %s", origin, docref_root, docref, docref_target, buffer);
+			message = zend_strpprintf_unchecked(0, "%s [%s%s%s]: %S", origin, docref_root, docref, docref_target, buffer);
 		}
 		if (target) {
 			efree(target);
 		}
 	} else {
-		message = zend_strpprintf(0, "%s: %s", origin, buffer);
+		message = zend_strpprintf_unchecked(0, "%s: %S", origin, buffer);
 	}
 	if (replace_origin) {
 		zend_string_free(replace_origin);
@@ -1110,11 +1107,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		efree(docref_buf);
 	}
 
-	if (replace_buffer) {
-		zend_string_free(replace_buffer);
-	} else {
-		efree(buffer);
-	}
+	zend_string_free(buffer);
 
 	zend_error_zstr(type, message);
 	zend_string_release(message);
