@@ -342,6 +342,10 @@ PHP_C_BIGENDIAN
 dnl Check if we're targeting x86 / x86_64
 PHP_CHECK_X86_TARGET
 
+dnl Check if we're targeting ARM Neon CPUs
+PHP_CHECK_ARM_NEON_SUPPORT
+
+
 dnl Check if we're targeting Windows
 PHP_CHECK_WINDOWS_TARGET
 
