@@ -12,7 +12,7 @@
 //#define PHP_BLAKE3_SPEC "b8b8qb64bbbbb1760"
 #define PHP_BLAKE3_SPEC "L8L8Qa64CCCCL8Ca1760"
 
-PHP_HASH_API void PHP_BLAKE3Init(PHP_BLAKE3_CTX *context);
+PHP_HASH_API void PHP_BLAKE3Init(PHP_BLAKE3_CTX *context, HashTable *args);
 PHP_HASH_API void PHP_BLAKE3Update(PHP_BLAKE3_CTX *context, const unsigned char *input, size_t len);
 PHP_HASH_API void PHP_BLAKE3Final(unsigned char digest[BLAKE3_OUT_LEN/*32*/], PHP_BLAKE3_CTX *context);
 PHP_HASH_API int PHP_BLAKE3Copy(const php_hash_ops *ops, PHP_BLAKE3_CTX *orig_context, PHP_BLAKE3_CTX *copy_context);
