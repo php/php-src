@@ -516,7 +516,21 @@ static void cgi_php_load_env_var(const char *var, unsigned int var_len, char *va
 }
 /* }}} */
 
-void cgi_php_import_environment_variables(zval *array_ptr) /* {{{ */
+static void cgi_php_load_env_var_unfilterd(const char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg)
+{
+	zval *array_ptr = (zval *) arg;
+	php_register_variable_safe(var, val, val_len, array_ptr);
+}
+
+static void cgi_php_load_environment_variables(zval *array_ptr)
+{
+	php_php_import_environment_variables(array_ptr);
+
+	fcgi_request *request = (fcgi_request*) SG(server_context);
+	fcgi_loadenv(request, cgi_php_load_env_var_unfilterd, array_ptr);
+}
+
+static void cgi_php_import_environment_variables(zval *array_ptr)
 {
 	fcgi_request *request = NULL;
 
@@ -542,7 +556,6 @@ void cgi_php_import_environment_variables(zval *array_ptr) /* {{{ */
 	request = (fcgi_request*) SG(server_context);
 	fcgi_loadenv(request, cgi_php_load_env_var, array_ptr);
 }
-/* }}} */
 
 static void sapi_cgi_register_variables(zval *track_vars_array) /* {{{ */
 {
@@ -1840,6 +1853,7 @@ consult the installation file that came with this distribution, or visit \n\
 	/* make php call us to get _ENV vars */
 	php_php_import_environment_variables = php_import_environment_variables;
 	php_import_environment_variables = cgi_php_import_environment_variables;
+	php_load_environment_variables = cgi_php_load_environment_variables;
 
 	/* library is already initialized, now init our request */
 	request = fpm_init_request(fcgi_fd);
