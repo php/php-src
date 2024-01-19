@@ -1952,10 +1952,6 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 	zend_function *new_fn;
 	bool check_inheritance = false;
 
-	if ((fn->common.fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) == (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) {
-		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");
-	}
-
 	if ((existing_fn = zend_hash_find_ptr(&ce->function_table, key)) != NULL) {
 		/* if it is the same function with the same visibility and has not been assigned a class scope yet, regardless
 		 * of where it is coming from there is no conflict and we do not need to add it again */
@@ -2036,6 +2032,17 @@ static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* 
 }
 /* }}} */
 
+static void zend_traits_check_private_final_inheritance(uint32_t original_fn_flags, zend_function *fn_copy, zend_string *name)
+{
+	/* If the function was originally already private+final, then it will have already been warned about.
+	 * If the function became private+final only after applying modifiers, we need to emit the same warning. */
+	if ((original_fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) != (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)
+		&& (fn_copy->common.fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) == (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)
+		&& !zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME)) {
+		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");
+	}
+}
+
 static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, zend_class_entry *ce, HashTable *exclude_table, zend_class_entry **aliases) /* {{{ */
 {
 	zend_trait_alias  *alias, **alias_ptr;
@@ -2060,6 +2067,8 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 				} else {
 					fn_copy.common.fn_flags = alias->modifiers | fn->common.fn_flags;
 				}
+
+				zend_traits_check_private_final_inheritance(fn->common.fn_flags, &fn_copy, alias->alias);
 
 				lcname = zend_string_tolower(alias->alias);
 				zend_add_trait_method(ce, alias->alias, lcname, &fn_copy);
@@ -2097,6 +2106,8 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 				i++;
 			}
 		}
+
+		zend_traits_check_private_final_inheritance(fn->common.fn_flags, &fn_copy, fnname);
 
 		zend_add_trait_method(ce, fn->common.function_name, fnname, &fn_copy);
 	}
