@@ -1124,6 +1124,15 @@ PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char 
 	php_verror(docref, "", type, format, args);
 	va_end(args);
 }
+
+PHPAPI ZEND_COLD void php_error_docref_unchecked(const char *docref, int type, const char *format, ...)
+{
+	va_list args;
+
+	va_start(args, format);
+	php_verror(docref, "", type, format, args);
+	va_end(args);
+}
 /* }}} */
 
 /* {{{ php_error_docref1 */
