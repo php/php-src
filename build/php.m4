@@ -2848,6 +2848,28 @@ AC_DEFUN([PHP_CHECK_AVX512_VBMI_SUPPORTS], [
 ])
 
 
+dnl PHP_CHECK_ARM_NEON_SUPPORT
+dnl check if we're compiling for ARM NEON
+AC_DEFUN([PHP_CHECK_ARM_NEON_SUPPORT], [
+  AC_CACHE_CHECK([for ARM NEON support],ac_cv_target_arm_neon,[
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+int main(void) {
+#if defined(__ARM_NEON__) || defined(__ARM_NEON)
+    return 0;
+#else
+    return 1;
+#endif
+}
+]])],[
+  ac_cv_target_arm_neon=yes
+],[
+  ac_cv_target_arm_neon=no
+],[
+  ac_cv_target_arm_neon=no
+])])
+])
+
+
 dnl
 dnl PHP_CHECK_X86_TARGET
 dnl

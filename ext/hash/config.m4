@@ -10,6 +10,13 @@ fi
 
 EXT_HASH_BLAKE3_SOURCES="hash_blake3.c blake3/upstream_blake3/c/blake3.c blake3/upstream_blake3/c/blake3_dispatch.c blake3/upstream_blake3/c/blake3_portable.c"
 
+dnl if test $ac_cv_target_arm_neon = yes; then
+dnl   EXT_HASH_BLAKE3_SOURCES="$EXT_HASH_BLAKE3_SOURCES blake3/upstream_blake3/c/blake3_neon.c"
+dnl   EXT_HASH_BLAKE3_HEADERS="$EXT_HASH_BLAKE3_HEADERS ext/hash/blake3/upstream_blake3/c/blake3_impl.h"
+dnl fi
+PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -DBLAKE3_USE_NEON=0"
+
+
 if test $ac_cv_c_bigendian_php = yes; then
   EXT_HASH_SHA3_SOURCES="hash_sha3.c"
   AC_DEFINE(HAVE_SLOW_HASH3, 1, [Define if hash3 algo is available])
