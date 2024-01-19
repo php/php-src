@@ -15,7 +15,7 @@ EXTENSION('hash',	'hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c ' +
 					'hash_sha3.c hash_murmur.c hash_xxhash.c hash_blake3.c', false);
 
 // todo: add sse2/avx2/avx512/etc optimized versions of blake3
-ADD_SOURCES('ext/hash/blake3/blake3_upstream/c', 'blake3.c blake3_dispatch.c blake3_portable.c');
+ADD_SOURCES('ext/hash/blake3/upstream_blake3/c', 'blake3.c blake3_dispatch.c blake3_portable.c');
 
 var hash_sha3_dir = 'ext/hash/sha3/generic' + (X64 ? '64' : '32') + 'lc';
 
