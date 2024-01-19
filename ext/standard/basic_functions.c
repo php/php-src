@@ -743,7 +743,7 @@ PHP_FUNCTION(getenv)
 
 	if (!str) {
 		array_init(return_value);
-		php_import_environment_variables(return_value);
+		php_load_environment_variables(return_value);
 		return;
 	}
 
