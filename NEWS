@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - LibXML:
   . Fix crashes with entity references and predefined entities. (nielsdos)
 
+- MySQLnd:
+  . Fixed bug GH-12107 (When running a stored procedure (that returns a result
+    set) twice, PHP crashes). (nielsdos)
+
 - Opcache:
   . Fixed bug GH-13145 (strtok() is not comptime). (ilutov)
   . Fixed type inference of range(). (ilutov)
