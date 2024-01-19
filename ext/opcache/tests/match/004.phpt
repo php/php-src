@@ -36,19 +36,19 @@ $_main:
      ; (lines=22, args=0, vars=1, tmps=2)
      ; (after optimizer)
      ; %s.php:1-25
-0000 INIT_FCALL 2 %d string("range")
+0000 INIT_%s %d %d %s
 0001 SEND_VAL int(0) 1
 0002 SEND_VAL int(6) 2
 0003 V2 = DO_ICALL
 0004 V1 = FE_RESET_R V2 0020
 0005 FE_FETCH_R V1 CV0($number) 0020
-0006 INIT_FCALL 1 %d string("var_dump")
+0006 INIT_%s %d %d %s
 0007 INIT_FCALL 1 %d string("test")
 0008 SEND_VAR CV0($number) 1
 0009 V2 = DO_UCALL
 0010 SEND_VAR V2 1
 0011 DO_ICALL
-0012 INIT_FCALL 1 %d string("var_dump")
+0012 INIT_%s %d %d %s
 0013 INIT_FCALL 1 %d string("test")
 0014 T2 = CAST (string) CV0($number)
 0015 SEND_VAL T2 1

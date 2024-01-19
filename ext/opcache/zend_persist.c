@@ -265,6 +265,9 @@ static void zend_persist_zval(zval *z)
 				efree(old_ref);
 			}
 			break;
+		case IS_PTR:
+			/* No data. */
+			break;
 		default:
 			ZEND_ASSERT(Z_TYPE_P(z) < IS_STRING);
 			break;

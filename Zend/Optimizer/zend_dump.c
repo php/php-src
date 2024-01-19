@@ -679,6 +679,9 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 				}
 			} ZEND_HASH_FOREACH_END();
 			fprintf(stderr, " default:");
+		} else if (opline->opcode == ZEND_INIT_ICALL) {
+			zend_function *func = Z_PTR_P(CRT_CONSTANT(opline->op2));
+			fprintf(stderr, " (%s)", ZSTR_VAL(func->common.function_name));
 		} else {
 			zend_dump_const(op);
 		}

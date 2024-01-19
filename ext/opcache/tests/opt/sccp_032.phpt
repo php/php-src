@@ -32,7 +32,7 @@ $_main:
 0001 V2 = DO_UCALL
 0002 V1 = FE_RESET_R V2 0009
 0003 FE_FETCH_R V1 CV0($x) 0009
-0004 INIT_FCALL 1 %d string("var_export")
+0004 INIT_%s %d %d %s
 0005 SEND_VAR CV0($x) 1
 0006 DO_ICALL
 0007 ECHO string("

@@ -98,7 +98,13 @@ static ZEND_COLD void ZEND_FASTCALL zend_jit_invalid_method_call(zval *object)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *opline = EX(opline);
-	zval *function_name = function_name = RT_CONSTANT(opline, opline->op2);;
+	zend_string *function_name;
+	if (opline->opcode == ZEND_INIT_ICALL) {
+		zend_function *func = Z_PTR_P(RT_CONSTANT(opline, opline->op2));
+		function_name = func->common.function_name;
+	} else {
+		function_name = Z_STR_P(RT_CONSTANT(opline, opline->op2));
+	}
 
 	if (Z_TYPE_P(object) == IS_UNDEF && opline->op1_type == IS_CV) {
 		zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(opline->op1.var)];
@@ -110,7 +116,7 @@ static ZEND_COLD void ZEND_FASTCALL zend_jit_invalid_method_call(zval *object)
 		object = &EG(uninitialized_zval);
 	}
 	zend_throw_error(NULL, "Call to a member function %s() on %s",
-		Z_STRVAL_P(function_name), zend_zval_value_name(object));
+		ZSTR_VAL(function_name), zend_zval_value_name(object));
 }
 
 static ZEND_COLD void ZEND_FASTCALL zend_jit_invalid_method_call_tmp(zval *object)

@@ -22,14 +22,14 @@ foo:
      ; (lines=8, args=1, vars=1, tmps=2)
      ; %s:14-16
 L0014 0000 CV0($baz) = RECV 1
-L0015 0001 INIT_FCALL %d %d string("var_dump")
-L0015 0002 INIT_FCALL %d %d string("strrev")
+L0015 0001 INIT_%s %d %d %s
+L0015 0002 INIT_%s %d %d %s
 L0015 0003 SEND_VAR CV0($baz) 1
 L0015 0004 V1 = DO_ICALL
 L0015 0005 SEND_VAR V1 1
 L0015 0006 DO_ICALL
 L0016 0007 RETURN null
-prompt> L0015 0001 INIT_FCALL %d %d string("var_dump")
+prompt> L0015 0001 INIT_%s %d %d %s
 prompt> 
 --FILE--
 <?php

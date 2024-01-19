@@ -41,7 +41,7 @@ BB0:
      ; level=0
      ; children=(BB1, BB2)
 0000 #1.CV0($test) [null, object (instanceof Test)] = RECV 1
-0001 INIT_FCALL 1 %d string("var_dump")
+0001 INIT_%s %d %d %s
 0002 #2.T1 [null] = JMP_NULL #1.CV0($test) [null, object (instanceof Test)] BB2
 
 BB1:

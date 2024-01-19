@@ -291,7 +291,8 @@ END_EXTERN_C()
 #define ZEND_FRAMELESS_ICALL_2          206
 #define ZEND_FRAMELESS_ICALL_3          207
 #define ZEND_JMP_FRAMELESS              208
+#define ZEND_INIT_ICALL                 209
 
-#define ZEND_VM_LAST_OPCODE             208
+#define ZEND_VM_LAST_OPCODE             209
 
 #endif

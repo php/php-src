@@ -771,6 +771,7 @@ static void emit_live_range(
 				start++;
 				switch (def_opline->opcode) {
 					case ZEND_INIT_FCALL:
+					case ZEND_INIT_ICALL:
 					case ZEND_INIT_FCALL_BY_NAME:
 					case ZEND_INIT_NS_FCALL_BY_NAME:
 					case ZEND_INIT_DYNAMIC_CALL:

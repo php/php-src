@@ -346,6 +346,10 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 					}
 				}
 				break;
+			case ZEND_INIT_ICALL:
+				fn = Z_PTR_P(CRT_CONSTANT(opline->op2));
+				flags |= zend_optimizer_classify_function(fn->common.function_name, opline->extended_value);
+				break;
 			case ZEND_FAST_CALL:
 				BB_START(OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes);
 				BB_START(i + 1);

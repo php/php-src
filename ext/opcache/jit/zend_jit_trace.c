@@ -1074,6 +1074,7 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 		while (1) {
 			if (p->op == ZEND_JIT_TRACE_VM) {
 				if (p->opline->opcode == ZEND_INIT_FCALL
+				 || p->opline->opcode == ZEND_INIT_ICALL
 				 || p->opline->opcode == ZEND_INIT_FCALL_BY_NAME
 				 || p->opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME
 				 || p->opline->opcode == ZEND_INIT_DYNAMIC_CALL
@@ -1113,6 +1114,7 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 				opline--;
 				switch (opline->opcode) {
 					case ZEND_INIT_FCALL:
+					case ZEND_INIT_ICALL:
 					case ZEND_INIT_FCALL_BY_NAME:
 					case ZEND_INIT_NS_FCALL_BY_NAME:
 					case ZEND_INIT_METHOD_CALL:
@@ -2541,6 +2543,7 @@ propagate_arg:
 
 					switch (opline->opcode) {
 						case ZEND_INIT_FCALL:
+						case ZEND_INIT_ICALL:
 						case ZEND_INIT_FCALL_BY_NAME:
 						case ZEND_INIT_NS_FCALL_BY_NAME:
 						case ZEND_INIT_METHOD_CALL:
@@ -4311,6 +4314,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 
 			switch (opline->opcode) {
 				case ZEND_INIT_FCALL:
+				case ZEND_INIT_ICALL:
 				case ZEND_INIT_FCALL_BY_NAME:
 				case ZEND_INIT_NS_FCALL_BY_NAME:
 				case ZEND_INIT_METHOD_CALL:
@@ -5114,6 +5118,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						goto done;
 					case ZEND_INIT_FCALL:
+					case ZEND_INIT_ICALL:
 					case ZEND_INIT_FCALL_BY_NAME:
 					case ZEND_INIT_NS_FCALL_BY_NAME:
 						frame_flags = TRACE_FRAME_MASK_NESTED;
@@ -6931,6 +6936,7 @@ done:
 				}
 				switch (init_opline->opcode) {
 					case ZEND_INIT_FCALL:
+					case ZEND_INIT_ICALL:
 					case ZEND_INIT_FCALL_BY_NAME:
 					case ZEND_INIT_NS_FCALL_BY_NAME:
 					case ZEND_INIT_METHOD_CALL:

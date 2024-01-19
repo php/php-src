@@ -59,7 +59,7 @@ BB0:
      ; start exit lines=[0-9]
      ; level=0
 0000 #1.CV0($test) [object (instanceof Test)] = RECV 1
-0001 INIT_FCALL 3 %d string("var_dump")
+0001 INIT_%s %d %d %s
 0002 #2.T1 [bool] = FETCH_OBJ_R #1.CV0($test) [object (instanceof Test)] string("public")
 0003 SEND_VAL #2.T1 [bool] 1
 0004 #3.T2 [any] = FETCH_OBJ_R #1.CV0($test) [object (instanceof Test)] string("protected")
@@ -77,7 +77,7 @@ Test::inTest:
 BB0:
      ; start exit lines=[0-8]
      ; level=0
-0000 INIT_FCALL 3 %d string("var_dump")
+0000 INIT_%s %d %d %s
 0001 #0.T0 [bool] = FETCH_OBJ_R THIS string("public")
 0002 SEND_VAL #0.T0 [bool] 1
 0003 #1.T1 [long] = FETCH_OBJ_R THIS string("protected")
@@ -97,7 +97,7 @@ BB0:
      ; start exit lines=[0-9]
      ; level=0
 0000 #1.CV0($test2) [object (instanceof Test2)] = RECV 1
-0001 INIT_FCALL 3 %d string("var_dump")
+0001 INIT_%s %d %d %s
 0002 #2.T1 [bool] = FETCH_OBJ_R #1.CV0($test2) [object (instanceof Test2)] string("public")
 0003 SEND_VAL #2.T1 [bool] 1
 0004 #3.T2 [long] = FETCH_OBJ_R #1.CV0($test2) [object (instanceof Test2)] string("protected")
@@ -115,7 +115,7 @@ Test2::inTest2:
 BB0:
      ; start exit lines=[0-8]
      ; level=0
-0000 INIT_FCALL 3 %d string("var_dump")
+0000 INIT_%s %d %d %s
 0001 #0.T0 [bool] = FETCH_OBJ_R THIS string("public")
 0002 SEND_VAL #0.T0 [bool] 1
 0003 #1.T1 [long] = FETCH_OBJ_R THIS string("protected")

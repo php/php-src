@@ -8236,7 +8236,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 #ifdef _WIN32
 			if (0) {
 #else
-			if (opline->opcode == ZEND_INIT_FCALL && func && func->type == ZEND_INTERNAL_FUNCTION) {
+			if ((opline->opcode == ZEND_INIT_FCALL || opline->opcode == ZEND_INIT_ICALL) && func && func->type == ZEND_INTERNAL_FUNCTION) {
 #endif
 				jit_SET_EX_OPLINE(jit, opline);
 				ref = ir_CALL_1(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_int_extend_stack_helper), used_stack_ref);
@@ -8285,7 +8285,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 #ifdef _WIN32
 	if (0) {
 #else
-	if (opline->opcode == ZEND_INIT_FCALL && func && func->type == ZEND_INTERNAL_FUNCTION) {
+	if ((opline->opcode == ZEND_INIT_FCALL || opline->opcode == ZEND_INIT_ICALL) && func && func->type == ZEND_INTERNAL_FUNCTION) {
 #endif
 		if (cold_path) {
 			ir_MERGE_WITH(cold_path);
@@ -8488,7 +8488,7 @@ static int zend_jit_init_fcall(zend_jit_ctx *jit, const zend_op *opline, uint32_
 #ifdef _WIN32
 	if (0) {
 #else
-	if (opline->opcode == ZEND_INIT_FCALL
+	if ((opline->opcode == ZEND_INIT_FCALL || opline->opcode == ZEND_INIT_ICALL)
 	 && func
 	 && func->type == ZEND_INTERNAL_FUNCTION) {
 #endif

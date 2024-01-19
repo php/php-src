@@ -48,6 +48,7 @@ static void zend_delete_call_instructions(zend_op_array *op_array, zend_op *opli
 			case ZEND_INIT_STATIC_METHOD_CALL:
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_FCALL:
+			case ZEND_INIT_ICALL:
 				if (call == 0) {
 					MAKE_NOP(opline);
 					return;
@@ -168,6 +169,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_INIT_STATIC_METHOD_CALL:
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_FCALL:
+			case ZEND_INIT_ICALL:
 			case ZEND_NEW:
 				/* The argument passing optimizations are valid for prototypes as well,
 				 * as inheritance cannot change between ref <-> non-ref arguments. */
@@ -191,7 +193,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				if (call_stack[call].func && call_stack[call].opline) {
 					zend_op *fcall = call_stack[call].opline;
 
-					if (fcall->opcode == ZEND_INIT_FCALL) {
+					if (fcall->opcode == ZEND_INIT_FCALL || fcall->opcode == ZEND_INIT_ICALL) {
 						/* nothing to do */
 					} else if (fcall->opcode == ZEND_INIT_FCALL_BY_NAME) {
 						fcall->opcode = ZEND_INIT_FCALL;

@@ -3857,7 +3857,7 @@ ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc) /*
 	if (fbc) {
 		ZEND_ASSERT(!(fbc->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE));
 		if (fbc->type == ZEND_INTERNAL_FUNCTION && !(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS)) {
-			if (init_op->opcode == ZEND_INIT_FCALL && !zend_execute_internal) {
+			if ((init_op->opcode == ZEND_INIT_FCALL || init_op->opcode == ZEND_INIT_ICALL) && !zend_execute_internal) {
 				if (!(fbc->common.fn_flags & ZEND_ACC_DEPRECATED)) {
 					return ZEND_DO_ICALL;
 				} else {
@@ -3892,7 +3892,7 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_fun
 		    zend_error_noreturn(E_COMPILE_ERROR, "Cannot create Closure for new expression");
 		}
 
-		if (opline->opcode == ZEND_INIT_FCALL) {
+		if (opline->opcode == ZEND_INIT_FCALL || opline->opcode == ZEND_INIT_ICALL) {
 			opline->op1.num = zend_vm_calc_used_stack(0, fbc);
 		}
 
@@ -3908,7 +3908,7 @@ static bool zend_compile_call_common(znode *result, zend_ast *args_ast, zend_fun
 	opline = &CG(active_op_array)->opcodes[opnum_init];
 	opline->extended_value = arg_count;
 
-	if (opline->opcode == ZEND_INIT_FCALL) {
+	if (opline->opcode == ZEND_INIT_FCALL || opline->opcode == ZEND_INIT_ICALL) {
 		opline->op1.num = zend_vm_calc_used_stack(arg_count, fbc);
 	}
 
@@ -4837,11 +4837,24 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 			return;
 		}
 
-		zval_ptr_dtor(&name_node.u.constant);
-		ZVAL_NEW_STR(&name_node.u.constant, lcname);
-
-		opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
-		opline->result.num = zend_alloc_cache_slot();
+#ifdef PHP_WIN32
+		/* May not use INIT_ICALL on Windows due to ASLR. */
+		bool use_init_icall = false;
+#else
+		bool use_init_icall = fbc->type == ZEND_INTERNAL_FUNCTION
+			&& !(CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE);
+#endif
+		if (use_init_icall) {
+			zend_string_release_ex(lcname, 0);
+			zval_ptr_dtor(&name_node.u.constant);
+			ZVAL_PTR(&name_node.u.constant, fbc);
+			opline = zend_emit_op(NULL, ZEND_INIT_ICALL, NULL, &name_node);
+		} else {
+			zval_ptr_dtor(&name_node.u.constant);
+			ZVAL_NEW_STR(&name_node.u.constant, lcname);
+			opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
+			opline->result.num = zend_alloc_cache_slot();
+		}
 
 		zend_compile_call_common(result, args_ast, fbc, ast->lineno);
 	}

@@ -691,6 +691,7 @@ static inline bool zend_jit_may_be_modified(const zend_function *func, const zen
 static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *opline)
 {
 	if (opline->opcode == ZEND_INIT_FCALL
+	 || opline->opcode == ZEND_INIT_ICALL
 	 || opline->opcode == ZEND_INIT_FCALL_BY_NAME
 	 || opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 		return 0;

@@ -853,6 +853,8 @@ zend_function *zend_optimizer_get_called_func(
 			}
 			break;
 		}
+		case ZEND_INIT_ICALL:
+			return Z_PTR_P(CRT_CONSTANT(opline->op2));
 		case ZEND_INIT_FCALL_BY_NAME:
 		case ZEND_INIT_NS_FCALL_BY_NAME:
 			if (opline->op2_type == IS_CONST && Z_TYPE_P(CRT_CONSTANT(opline->op2)) == IS_STRING) {
@@ -1390,6 +1392,7 @@ static void zend_adjust_fcall_stack_size(zend_op_array *op_array, zend_optimizer
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
+		/* INIT_ICALL stack size will never change. */
 		if (opline->opcode == ZEND_INIT_FCALL) {
 			func = zend_hash_find_ptr(
 				&ctx->script->function_table,
@@ -1412,6 +1415,7 @@ static void zend_adjust_fcall_stack_size_graph(zend_op_array *op_array)
 		while (call_info) {
 			zend_op *opline = call_info->caller_init_opline;
 
+			/* INIT_ICALL stack size will never change. */
 			if (opline && call_info->callee_func && opline->opcode == ZEND_INIT_FCALL) {
 				ZEND_ASSERT(!call_info->is_prototype);
 				opline->op1.num = zend_vm_calc_used_stack(opline->extended_value, call_info->callee_func);

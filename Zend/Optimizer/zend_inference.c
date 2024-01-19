@@ -5032,6 +5032,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 			/* May throw for named params. */
 			return opline->op2_type == IS_CONST;
 		case ZEND_INIT_FCALL:
+		case ZEND_INIT_ICALL:
 			/* can't throw, because call is resolved at compile time */
 			return 0;
 		case ZEND_BIND_GLOBAL:

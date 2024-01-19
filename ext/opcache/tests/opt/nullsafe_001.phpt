@@ -35,13 +35,13 @@ test:
      ; (lines=10, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 INIT_FCALL 1 %d string("var_dump")
+0000 INIT_%s %d %d %s
 0001 SEND_VAL null 1
 0002 DO_ICALL
-0003 INIT_FCALL 1 %d string("var_dump")
+0003 INIT_%s %d %d %s
 0004 SEND_VAL bool(false) 1
 0005 DO_ICALL
-0006 INIT_FCALL 1 %d string("var_dump")
+0006 INIT_%s %d %d %s
 0007 SEND_VAL bool(true) 1
 0008 DO_ICALL
 0009 RETURN null
@@ -51,17 +51,17 @@ test2:
      ; (after optimizer)
      ; %s
 0000 CV0($obj) = RECV 1
-0001 INIT_FCALL 1 %d string("var_dump")
+0001 INIT_%s %d %d %s
 0002 T1 = JMP_NULL CV0($obj) 0004
 0003 T1 = FETCH_OBJ_R CV0($obj) string("foo")
 0004 SEND_VAL T1 1
 0005 DO_ICALL
-0006 INIT_FCALL 1 %d string("var_dump")
+0006 INIT_%s %d %d %s
 0007 T1 = JMP_NULL CV0($obj) 0009
 0008 T1 = ISSET_ISEMPTY_PROP_OBJ (isset) CV0($obj) string("foo")
 0009 SEND_VAL T1 1
 0010 DO_ICALL
-0011 INIT_FCALL 1 %d string("var_dump")
+0011 INIT_%s %d %d %s
 0012 T1 = JMP_NULL CV0($obj) 0014
 0013 T1 = ISSET_ISEMPTY_PROP_OBJ (empty) CV0($obj) string("foo")
 0014 SEND_VAL T1 1

@@ -258,6 +258,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 					case ZEND_SEND_USER:
 					case ZEND_SEND_UNPACK:
 					case ZEND_INIT_FCALL:
+					case ZEND_INIT_ICALL:
 					case ZEND_INIT_METHOD_CALL:
 					case ZEND_INIT_STATIC_METHOD_CALL:
 					case ZEND_INIT_FCALL_BY_NAME:
@@ -342,6 +343,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 				case ZEND_SEND_USER:
 				case ZEND_SEND_UNPACK:
 				case ZEND_INIT_FCALL:
+				case ZEND_INIT_ICALL:
 				case ZEND_INIT_METHOD_CALL:
 				case ZEND_INIT_STATIC_METHOD_CALL:
 				case ZEND_INIT_FCALL_BY_NAME:
@@ -1451,6 +1453,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 			opline = op_array->opcodes + i;
 			switch (opline->opcode) {
 				case ZEND_INIT_FCALL:
+				case ZEND_INIT_ICALL:
 				case ZEND_INIT_FCALL_BY_NAME:
 				case ZEND_INIT_NS_FCALL_BY_NAME:
 				case ZEND_INIT_METHOD_CALL:
@@ -1898,6 +1901,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					case ZEND_INIT_FCALL:
+					case ZEND_INIT_ICALL:
 					case ZEND_INIT_FCALL_BY_NAME:
 					case ZEND_INIT_NS_FCALL_BY_NAME:
 						if (!zend_jit_init_fcall(&ctx, opline, b, op_array, ssa, ssa_op, call_level, NULL, 0)) {

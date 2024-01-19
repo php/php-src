@@ -214,7 +214,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			while (init_opline->opcode == ZEND_NOP) {
 				init_opline--;
 			}
-			if (init_opline->opcode != ZEND_INIT_FCALL ||
+			if ((init_opline->opcode != ZEND_INIT_FCALL && init_opline->opcode != ZEND_INIT_ICALL) ||
 			    init_opline->op2_type != IS_CONST ||
 			    Z_TYPE(ZEND_OP2_LITERAL(init_opline)) != IS_STRING) {
 				/* don't collect constants after unknown function call */
