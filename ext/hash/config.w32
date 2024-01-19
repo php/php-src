@@ -12,7 +12,10 @@ PHP_HASH = 'yes';
 EXTENSION('hash',	'hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c ' +
 					'hash_tiger.c hash_gost.c hash_snefru.c hash_whirlpool.c ' +
 					'hash_adler32.c hash_crc32.c hash_joaat.c hash_fnv.c ' +
-					'hash_sha3.c hash_murmur.c hash_xxhash.c', false);
+					'hash_sha3.c hash_murmur.c hash_xxhash.c hash_blake3.c', false);
+
+// todo: add sse2/avx2/avx512/etc optimized versions of blake3
+ADD_SOURCES('ext/hash/blake3', 'blake3.c blake3_dispatch.c blake3_portable.c');
 
 var hash_sha3_dir = 'ext/hash/sha3/generic' + (X64 ? '64' : '32') + 'lc';
 
@@ -27,7 +30,8 @@ if (!CHECK_HEADER_ADD_INCLUDE('KeccakHash.h', 'CFLAGS_HASH', hash_sha3_dir)) {
 	ERROR('Unable to locate SHA3 headers');
 }
 
-ADD_FLAG('CFLAGS_HASH', '/DKeccakP200_excluded /DKeccakP400_excluded /DKeccakP800_excluded /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+ADD_FLAG('CFLAGS_HASH', '/DKeccakP200_excluded /DKeccakP400_excluded /DKeccakP800_excluded /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 ' +
+ '/DBLAKE3_NO_SSE2 /DBLAKE3_NO_SSE41 /DBLAKE3_NO_AVX2 /DBLAKE3_NO_AVX512');
 
 var hash_murmur_dir = 'ext/hash/murmur';
 if (!CHECK_HEADER_ADD_INCLUDE('PMurHash.h', 'CFLAGS_HASH', hash_murmur_dir)) {
@@ -44,4 +48,4 @@ PHP_INSTALL_HEADERS('ext/hash/',	'php_hash.h php_hash_md.h php_hash_sha.h ' +
 									'php_hash_ripemd.h php_hash_haval.h php_hash_tiger.h ' +
 									'php_hash_gost.h php_hash_snefru.h php_hash_whirlpool.h ' +
 									'php_hash_adler32.h php_hash_crc32.h php_hash_sha3.h ' +
-									'php_hash_murmur.h php_hash_xxhash.h');
+									'php_hash_murmur.h php_hash_xxhash.h php_hash_blake3.h');

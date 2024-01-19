@@ -1611,6 +1611,7 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("xxh64",		&php_hash_xxh64_ops);
 	php_hash_register_algo("xxh3",		&php_hash_xxh3_64_ops);
 	php_hash_register_algo("xxh128",		&php_hash_xxh3_128_ops);
+	php_hash_register_algo("blake3",		&php_hash_blake3_ops);
 
 	PHP_HASH_HAVAL_REGISTER(3,128);
 	PHP_HASH_HAVAL_REGISTER(3,160);

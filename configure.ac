@@ -339,6 +339,15 @@ PHP_EBCDIC
 dnl Check whether the system byte ordering is bigendian.
 PHP_C_BIGENDIAN
 
+dnl Check if we're targeting x86 / x86_64
+PHP_CHECK_X86_TARGET
+
+dnl Check if we're targeting Windows
+PHP_CHECK_WINDOWS_TARGET
+
+dnl Check whether we're targeting a unix-ish system
+PHP_CHECK_UNIX_TARGET
+
 dnl Check whether writing to stdout works.
 PHP_TEST_WRITE_STDOUT
 

@@ -112,6 +112,7 @@ extern const php_hash_ops php_hash_xxh32_ops;
 extern const php_hash_ops php_hash_xxh64_ops;
 extern const php_hash_ops php_hash_xxh3_64_ops;
 extern const php_hash_ops php_hash_xxh3_128_ops;
+extern const php_hash_ops php_hash_blake3_ops;
 
 #define PHP_HASH_HAVAL_OPS(p,b)	extern const php_hash_ops php_hash_##p##haval##b##_ops;
 

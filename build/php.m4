@@ -2846,3 +2846,76 @@ AC_DEFUN([PHP_CHECK_AVX512_VBMI_SUPPORTS], [
   AC_DEFINE_UNQUOTED([PHP_HAVE_AVX512_VBMI_SUPPORTS],
    [$have_avx512_vbmi_supports], [Whether the compiler supports AVX512 VBMI])
 ])
+
+
+dnl
+dnl PHP_CHECK_X86_TARGET
+dnl
+dnl check if we're compiling for x86/x86_64
+dnl
+AC_DEFUN([PHP_CHECK_X86_TARGET], [
+  AC_CACHE_CHECK([for x86 target],ac_cv_target_x86,[
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+int main(void) {
+#if defined(__x86_64__) || defined(__i386__)
+    return 0;
+#else
+    return 1;
+#endif
+}
+]])],[
+  ac_cv_target_x86=yes
+],[
+  ac_cv_target_x86=no
+],[
+  ac_cv_target_x86=no
+])])
+])
+
+dnl
+dnl PHP_CHECK_WINDOWS_TARGET
+dnl
+dnl check if we're compiling for windows
+dnl
+AC_DEFUN([PHP_CHECK_WINDOWS_TARGET], [
+  AC_CACHE_CHECK([for windows target],ac_cv_target_windows,[
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+int main(void) {
+#if defined(_WIN32)
+    return 0;
+#else
+    return 1;
+#endif
+}
+]])],[
+  ac_cv_target_windows=yes
+],[
+  ac_cv_target_windows=no
+],[
+  ac_cv_target_windows=no
+])])
+])
+
+dnl
+dnl PHP_CHECK_UNIX_TARGET
+dnl
+dnl check if we're compiling for a unix-ish target
+dnl
+AC_DEFUN([PHP_CHECK_UNIX_TARGET], [
+  AC_CACHE_CHECK([for unix-ish target],ac_cv_target_unix,[
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+int main(void) {
+#if defined(unix) || defined(__unix) || defined(__unix__)
+    return 0;
+#else
+    return 1;
+#endif
+}
+]])],[
+  ac_cv_target_unix=yes
+],[
+  ac_cv_target_unix=no
+],[
+  ac_cv_target_unix=no
+])])
+])
