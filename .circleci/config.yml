@@ -70,6 +70,9 @@ jobs:
               freetds-dev \
               `#unixodbc-dev` \
               libc-client-dev \
+              dovecot-core \
+              dovecot-pop3d \
+              dovecot-imapd \
               sendmail \
               firebird-dev \
               liblmdb-dev \
@@ -145,7 +148,9 @@ jobs:
               --with-qdbm \
               --with-snmp \
               `#--with-unixODBC` \
+              --with-imap \
               --with-kerberos \
+              --with-imap-ssl \
               `#--with-pdo-odbc=unixODBC,/usr` \
               `#--with-pdo-oci=shared,instantclient,/opt/oracle/instantclient` \
               `#--with-oci8=shared,instantclient,/opt/oracle/instantclient` \
