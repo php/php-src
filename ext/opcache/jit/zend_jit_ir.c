@@ -4646,7 +4646,7 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 				if_def = jit_if_not_Z_TYPE(jit, op1_addr, IS_UNDEF);
 				ir_IF_FALSE_cold(if_def);
 
-				// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+				// zend_error_unchecked(E_WARNING, "Undefined variable $%S", CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var)));
 				ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(opline->op1.var));
 
 				jit_set_Z_TYPE_INFO(jit, op1_def_addr, IS_NULL);
@@ -5588,7 +5588,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 			if_def = jit_if_not_Z_TYPE(jit, op1_addr, IS_UNDEF);
 			ir_IF_FALSE_cold(if_def);
 
-			// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+			// zend_error_unchecked(E_WARNING, "Undefined variable $%S", CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var)));
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(opline->op1.var));
 
 			ref2 = jit_EG(uninitialized_zval);
@@ -5604,7 +5604,7 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 			if_def = jit_if_not_Z_TYPE(jit, op2_addr, IS_UNDEF);
 			ir_IF_FALSE_cold(if_def);
 
-			// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op2.var))));
+			// zend_error_unchecked(E_WARNING, "Undefined variable $%S", CV_DEF_OF(EX_VAR_TO_NUM(opline->op2.var)));
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(opline->op2.var));
 
 			ref2 = jit_EG(uninitialized_zval);
@@ -5980,7 +5980,7 @@ static int zend_jit_simple_assign(zend_jit_ctx   *jit,
 			jit_SET_EX_OPLINE(jit, opline);
 
 			ZEND_ASSERT(Z_MODE(val_addr) == IS_MEM_ZVAL);
-			// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+			// zend_error_unchecked(E_WARNING, "Undefined variable $%S", CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var)));
 			ret = ir_CALL_1(IR_I32, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(Z_OFFSET(val_addr)));
 
 			if (check_exception) {

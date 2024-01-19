@@ -10109,8 +10109,8 @@ fetch_this:
 				/* Keep name alive in case an error handler tries to free it. */
 				zend_string_addref(name);
 			}
-			zend_error(E_WARNING, "Undefined %svariable $%s",
-				(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), ZSTR_VAL(name));
+			zend_error_unchecked(E_WARNING, "Undefined %svariable $%S",
+				(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), name);
 			if (type == BP_VAR_RW && !EG(exception)) {
 				retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
 			} else {
@@ -10132,8 +10132,8 @@ fetch_this:
 			} else if (type == BP_VAR_IS || type == BP_VAR_UNSET) {
 				retval = &EG(uninitialized_zval);
 			} else {
-				zend_error(E_WARNING, "Undefined %svariable $%s",
-					(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), ZSTR_VAL(name));
+				zend_error_unchecked(E_WARNING, "Undefined %svariable $%S",
+					(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), name);
 				if (type == BP_VAR_RW && !EG(exception)) {
 					ZVAL_NULL(retval);
 				} else {
@@ -17954,8 +17954,8 @@ fetch_this:
 				/* Keep name alive in case an error handler tries to free it. */
 				zend_string_addref(name);
 			}
-			zend_error(E_WARNING, "Undefined %svariable $%s",
-				(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), ZSTR_VAL(name));
+			zend_error_unchecked(E_WARNING, "Undefined %svariable $%S",
+				(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), name);
 			if (type == BP_VAR_RW && !EG(exception)) {
 				retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
 			} else {
@@ -17977,8 +17977,8 @@ fetch_this:
 			} else if (type == BP_VAR_IS || type == BP_VAR_UNSET) {
 				retval = &EG(uninitialized_zval);
 			} else {
-				zend_error(E_WARNING, "Undefined %svariable $%s",
-					(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), ZSTR_VAL(name));
+				zend_error_unchecked(E_WARNING, "Undefined %svariable $%S",
+					(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), name);
 				if (type == BP_VAR_RW && !EG(exception)) {
 					ZVAL_NULL(retval);
 				} else {
@@ -48342,8 +48342,8 @@ fetch_this:
 				/* Keep name alive in case an error handler tries to free it. */
 				zend_string_addref(name);
 			}
-			zend_error(E_WARNING, "Undefined %svariable $%s",
-				(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), ZSTR_VAL(name));
+			zend_error_unchecked(E_WARNING, "Undefined %svariable $%S",
+				(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), name);
 			if (type == BP_VAR_RW && !EG(exception)) {
 				retval = zend_hash_update(target_symbol_table, name, &EG(uninitialized_zval));
 			} else {
@@ -48365,8 +48365,8 @@ fetch_this:
 			} else if (type == BP_VAR_IS || type == BP_VAR_UNSET) {
 				retval = &EG(uninitialized_zval);
 			} else {
-				zend_error(E_WARNING, "Undefined %svariable $%s",
-					(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), ZSTR_VAL(name));
+				zend_error_unchecked(E_WARNING, "Undefined %svariable $%S",
+					(opline->extended_value & ZEND_FETCH_GLOBAL ? "global " : ""), name);
 				if (type == BP_VAR_RW && !EG(exception)) {
 					ZVAL_NULL(retval);
 				} else {

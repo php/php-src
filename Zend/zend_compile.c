@@ -4970,7 +4970,7 @@ static void zend_compile_static_var(zend_ast *ast) /* {{{ */
 	}
 
 	if (zend_hash_exists(CG(active_op_array)->static_variables, var_name)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Duplicate declaration of static variable $%s", ZSTR_VAL(var_name));
+		zend_error_noreturn_unchecked(E_COMPILE_ERROR, "Duplicate declaration of static variable $%S", var_name);
 	}
 
 	zend_eval_const_expr(&ast->child[1]);
@@ -7245,8 +7245,8 @@ static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array
 
 		value = zend_hash_add(op_array->static_variables, var_name, &EG(uninitialized_zval));
 		if (!value) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use variable $%s twice", ZSTR_VAL(var_name));
+			zend_error_noreturn_unchecked(E_COMPILE_ERROR,
+				"Cannot use variable $%S twice", var_name);
 		}
 
 		CG(zend_lineno) = zend_ast_get_lineno(var_name_ast);
@@ -7378,8 +7378,8 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 			int i;
 			for (i = 0; i < op_array->last_var; i++) {
 				if (zend_string_equals(op_array->vars[i], var_name)) {
-					zend_error_noreturn(E_COMPILE_ERROR,
-						"Cannot use lexical variable $%s as a parameter name", ZSTR_VAL(var_name));
+					zend_error_noreturn_unchecked(E_COMPILE_ERROR,
+						"Cannot use lexical variable $%S as a parameter name", var_name);
 				}
 			}
 		}

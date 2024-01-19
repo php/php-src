@@ -272,7 +272,7 @@ static zend_never_inline ZEND_COLD zval* zval_undefined_cv(uint32_t var EXECUTE_
 {
 	if (EXPECTED(EG(exception) == NULL)) {
 		zend_string *cv = CV_DEF_OF(EX_VAR_TO_NUM(var));
-		zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
+		zend_error_unchecked(E_WARNING, "Undefined variable $%S", cv);
 	}
 	return &EG(uninitialized_zval);
 }
@@ -3788,7 +3788,7 @@ static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DAT
 				Z_ADDREF_P(result);
 			} else {
 				ZVAL_NULL(result);
-				zend_error(E_WARNING, "Undefined variable $this");
+				zend_error_unchecked(E_WARNING, "Undefined variable $this");
 			}
 			break;
 		case BP_VAR_IS:

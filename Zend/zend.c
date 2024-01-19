@@ -1650,6 +1650,20 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *
 	abort();
 }
 
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn_unchecked(int type, const char *format, ...)
+{
+	zend_string *filename;
+	uint32_t lineno;
+	va_list args;
+
+	get_filename_lineno(type, &filename, &lineno);
+	va_start(args, format);
+	zend_error_va_list(type, filename, lineno, format, args);
+	va_end(args);
+	/* Should never reach this. */
+	abort();
+}
+
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn, const char *message)
 {
 #ifdef HAVE_STRERROR_R
