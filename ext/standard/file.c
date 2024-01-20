@@ -455,132 +455,121 @@ PHP_FUNCTION(file_get_contents)
 /* {{{ Write/Create a file with contents data and return the number of bytes written */
 PHP_FUNCTION(file_put_contents)
 {
-	php_stream *stream;
-	char *filename;
-	size_t filename_len;
-	zval *data;
+	php_stream *stream = NULL;
 	ssize_t numbytes = 0;
+	zend_string *filename;
+	zval *data;
 	zend_long flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
-	php_stream *srcstream = NULL;
+	php_stream *data_stream = NULL;
+	zend_string *data_str = NULL;
 	char mode[3] = "wb";
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
-		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_PATH_STR(filename)
 		Z_PARAM_ZVAL(data)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
+	/* Type checks for data */
 	if (Z_TYPE_P(data) == IS_RESOURCE) {
-		php_stream_from_zval(srcstream, data);
+		/* This throws AND returns if resource is not a stream */
+		php_stream_from_zval(data_stream, data);
+	} else if (Z_TYPE_P(data) == IS_ARRAY) {
+		/* Check array is an array of strings */
+		if (zend_hash_num_elements(Z_ARRVAL_P(data))) {
+			smart_str smart_str = {0};
+			zval *tmp;
+
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), tmp) {
+				zend_string *tmp_entry_str = NULL;
+				zend_string *entry_str = zval_try_get_tmp_string(tmp, &tmp_entry_str);
+
+				if (UNEXPECTED(entry_str == NULL)) {
+					smart_str_free(&smart_str);
+					RETURN_THROWS();
+				}
+				if (ZSTR_LEN(entry_str)) {
+					// Append to smart string
+					smart_str_append(&smart_str, entry_str);
+				}
+				zend_tmp_string_release(tmp_entry_str);
+			} ZEND_HASH_FOREACH_END();
+
+			data_str = smart_str_extract(&smart_str);
+		} else {
+			data_str = ZSTR_EMPTY_ALLOC();
+		}
+	} else {
+		if (UNEXPECTED(Z_TYPE_P(data) == IS_NULL)) {
+			zend_error(E_DEPRECATED, "file_put_contents(): Passing null to parameter #2 ($data) of type string|array|resource is deprecated");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+		data_str = zval_try_get_string(data);
+		if (UNEXPECTED(!data_str)) {
+			RETURN_THROWS();
+		}
 	}
 
+	/* This throws BUT DOES NOT RETURN if resource is not a stream context */
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
+	if (UNEXPECTED(EG(exception))) {
+		goto cleanup;
+	}
 
 	if (flags & PHP_FILE_APPEND) {
 		mode[0] = 'a';
 	} else if (flags & LOCK_EX) {
 		/* check to make sure we are dealing with a regular file */
-		if (php_memnstr(filename, "://", sizeof("://") - 1, filename + filename_len)) {
-			if (strncasecmp(filename, "file://", sizeof("file://") - 1)) {
+		if (php_memnstr(ZSTR_VAL(filename), "://", sizeof("://") - 1, ZSTR_VAL(filename) + ZSTR_LEN(filename))) {
+			if (!zend_string_starts_with_literal_ci(filename, "file://")) {
 				php_error_docref(NULL, E_WARNING, "Exclusive locks may only be set for regular files");
-				RETURN_FALSE;
+				goto cleanup;
 			}
 		}
 		mode[0] = 'c';
 	}
 	mode[2] = '\0';
 
-	stream = php_stream_open_wrapper_ex(filename, mode, ((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
+	stream = php_stream_open_wrapper_ex(ZSTR_VAL(filename), mode, ((flags & PHP_FILE_USE_INCLUDE_PATH) ? USE_PATH : 0) | REPORT_ERRORS, NULL, context);
 	if (stream == NULL) {
-		RETURN_FALSE;
+		goto cleanup;
 	}
 
 	if ((flags & LOCK_EX) && (!php_stream_supports_lock(stream) || php_stream_lock(stream, LOCK_EX))) {
-		php_stream_close(stream);
 		php_error_docref(NULL, E_WARNING, "Exclusive locks are not supported for this stream");
-		RETURN_FALSE;
+		goto cleanup;
 	}
 
 	if (mode[0] == 'c') {
 		php_stream_truncate_set_size(stream, 0);
 	}
 
-	switch (Z_TYPE_P(data)) {
-		case IS_RESOURCE: {
-			size_t len;
-			if (php_stream_copy_to_stream_ex(srcstream, stream, PHP_STREAM_COPY_ALL, &len) != SUCCESS) {
-				numbytes = -1;
-			} else {
-				if (len > ZEND_LONG_MAX) {
-					php_error_docref(NULL, E_WARNING, "content truncated from %zu to " ZEND_LONG_FMT " bytes", len, ZEND_LONG_MAX);
-					len = ZEND_LONG_MAX;
-				}
-				numbytes = len;
-			}
-			break;
-		}
-		case IS_NULL:
-		case IS_LONG:
-		case IS_DOUBLE:
-		case IS_FALSE:
-		case IS_TRUE:
-			convert_to_string(data);
-			ZEND_FALLTHROUGH;
-		case IS_STRING:
-			if (Z_STRLEN_P(data)) {
-				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
-				if (numbytes != -1 && numbytes != Z_STRLEN_P(data)) {
-					php_error_docref(NULL, E_WARNING, "Only %zd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
-					numbytes = -1;
-				}
-			}
-			break;
-
-		case IS_ARRAY:
-			if (zend_hash_num_elements(Z_ARRVAL_P(data))) {
-				ssize_t bytes_written;
-				zval *tmp;
-
-				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), tmp) {
-					zend_string *t;
-					zend_string *str = zval_get_tmp_string(tmp, &t);
-					if (ZSTR_LEN(str)) {
-						numbytes += ZSTR_LEN(str);
-						bytes_written = php_stream_write(stream, ZSTR_VAL(str), ZSTR_LEN(str));
-						if (bytes_written != ZSTR_LEN(str)) {
-							php_error_docref(NULL, E_WARNING, "Failed to write %zd bytes to %s", ZSTR_LEN(str), filename);
-							zend_tmp_string_release(t);
-							numbytes = -1;
-							break;
-						}
-					}
-					zend_tmp_string_release(t);
-				} ZEND_HASH_FOREACH_END();
-			}
-			break;
-
-		case IS_OBJECT:
-			if (Z_OBJ_HT_P(data) != NULL) {
-				zval out;
-
-				if (zend_std_cast_object_tostring(Z_OBJ_P(data), &out, IS_STRING) == SUCCESS) {
-					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRLEN(out));
-					if (numbytes != -1 && numbytes != Z_STRLEN(out)) {
-						php_error_docref(NULL, E_WARNING, "Only %zd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
-						numbytes = -1;
-					}
-					zval_ptr_dtor_str(&out);
-					break;
-				}
-			}
-			ZEND_FALLTHROUGH;
-		default:
+	if (data_stream) {
+		size_t len;
+		if (php_stream_copy_to_stream_ex(data_stream, stream, PHP_STREAM_COPY_ALL, &len) != SUCCESS) {
 			numbytes = -1;
-			break;
+		} else {
+			if (len > ZEND_LONG_MAX) {
+				php_error_docref(NULL, E_WARNING, "content truncated from %zu to " ZEND_LONG_FMT " bytes", len, ZEND_LONG_MAX);
+				len = ZEND_LONG_MAX;
+			}
+			numbytes = len;
+		}
+	} else {
+		if (ZSTR_LEN(data_str)) {
+			numbytes = php_stream_write(stream, ZSTR_VAL(data_str), ZSTR_LEN(data_str));
+			if (numbytes != -1 && numbytes != ZSTR_LEN(data_str)) {
+				php_error_docref(NULL, E_WARNING, "Only %zd of %zd bytes written, possibly out of free disk space", numbytes, ZSTR_LEN(data_str));
+				numbytes = -1;
+			}
+		}
+		zend_string_release(data_str);
 	}
 	php_stream_close(stream);
 
@@ -589,6 +578,15 @@ PHP_FUNCTION(file_put_contents)
 	}
 
 	RETURN_LONG(numbytes);
+
+	cleanup:
+	if (stream) {
+		php_stream_close(stream);
+	}
+	if (data_str) {
+		zend_string_release(data_str);
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 

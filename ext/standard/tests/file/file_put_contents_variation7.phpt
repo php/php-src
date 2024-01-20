@@ -8,9 +8,9 @@ echo "*** Testing file_put_contents() : usage variation ***\n";
 
 $mainDir = "filePutContentsVar7.dir";
 $subDir = "filePutContentsVar7Sub";
-$absMainDir = __DIR__."/".$mainDir;
+$absMainDir = __DIR__.DIRECTORY_SEPARATOR.$mainDir;
 mkdir($absMainDir);
-$absSubDir = $absMainDir."/".$subDir;
+$absSubDir = $absMainDir.DIRECTORY_SEPARATOR.$subDir;
 mkdir($absSubDir);
 
 $old_dir_path = getcwd();
@@ -19,7 +19,7 @@ chdir(__DIR__);
 
 // Note invalid dirs in p8 result in (The system cannot find the path specified.)
 // rather than No Such File or Directory in php.net
-$allDirs = array(
+$allDirs = [
   // absolute paths
   "$absSubDir/",
   "$absSubDir/../".$subDir,
@@ -34,32 +34,34 @@ $allDirs = array(
    $mainDir."///".$subDir,
   "./".$mainDir."/../".$mainDir."/".$subDir,
   "BADDIR",
+];
 
-);
+$allDirs = str_replace('/', DIRECTORY_SEPARATOR, $allDirs);
+
+$unixifiedDir = '/'. substr(str_replace(DIRECTORY_SEPARATOR, '/', $absSubDir), 3);
+$allDirs[] = $unixifiedDir;
 
 $filename = 'FileGetContentsVar7.tmp';
-$absFile = $absSubDir.'/'.$filename;
+$absFile = $absSubDir. DIRECTORY_SEPARATOR .$filename;
 $data = "This was the written data";
 
-for($i = 0; $i<count($allDirs); $i++) {
-  $j = $i+1;
-  $dir = $allDirs[$i];
-  echo "\n-- Iteration $j --\n";
-  $res = file_put_contents($dir."/".$filename, ($data . $i));
-  if ($res !== false) {
-      $in = file_get_contents($absFile);
-      if ($in == ($data . $i)) {
-         echo "Data written correctly\n";
-      }
-      else {
-         echo "Data not written correctly or to correct place\n";
-      }
-      unlink($dir."/".$filename);
-  }
-  else {
-     echo "No data written\n";
-  }
-
+$i = 0;
+foreach ($allDirs as $dir) {
+    $res = file_put_contents($dir.DIRECTORY_SEPARATOR.$filename, ($data . $i));
+    if ($res !== false) {
+        $in = file_get_contents($absFile);
+        if ($in == ($data . $i)) {
+           echo "Data written correctly\n";
+        }
+        else {
+           echo "Data not written correctly or to correct place\n";
+        }
+        unlink($dir.DIRECTORY_SEPARATOR.$filename);
+    }
+    else {
+       echo "No data written\n";
+    }
+    ++$i;
 }
 
 chdir($old_dir_path);
@@ -70,54 +72,35 @@ echo "\n*** Done ***\n";
 <?php
 $mainDir = "filePutContentsVar7.dir";
 $subDir = "filePutContentsVar7Sub";
-$absMainDir = __DIR__."/".$mainDir;
-$absSubDir = $absMainDir."/".$subDir;
+$absMainDir = __DIR__.DIRECTORY_SEPARATOR.$mainDir;
+$absSubDir = $absMainDir.DIRECTORY_SEPARATOR.$subDir;
 $filename = 'FileGetContentsVar7.tmp';
-$absFile = $absSubDir.'/'.$filename;
+$absFile = $absSubDir. DIRECTORY_SEPARATOR .$filename;
 @unlink($absFile);
 rmdir($absSubDir);
 rmdir($absMainDir);
 ?>
 --EXPECTF--
 *** Testing file_put_contents() : usage variation ***
-
--- Iteration 1 --
+Data written correctly
+Data written correctly
+Data written correctly
 Data written correctly
 
--- Iteration 2 --
-Data written correctly
-
--- Iteration 3 --
-Data written correctly
-
--- Iteration 4 --
-Data written correctly
-
--- Iteration 5 --
-
-Warning: file_put_contents(%sfilePutContentsVar7.dir/filePutContentsVar7Sub/..///filePutContentsVar7Sub//..//../filePutContentsVar7Sub/FileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
+Warning: file_put_contents(%sfilePutContentsVar7.dir%efilePutContentsVar7Sub%e..%e%e%efilePutContentsVar7Sub%e%e..%e%e..%efilePutContentsVar7Sub%eFileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
 No data written
 
--- Iteration 6 --
+Warning: file_put_contents(%sfilePutContentsVar7.dir%efilePutContentsVar7Sub%eBADDIR%eFileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
+No data written
+Data written correctly
+Data written correctly
+Data written correctly
+Data written correctly
 
-Warning: file_put_contents(%sfilePutContentsVar7.dir/filePutContentsVar7Sub/BADDIR/FileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
+Warning: file_put_contents(BADDIR%eFileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
 No data written
 
--- Iteration 7 --
-Data written correctly
-
--- Iteration 8 --
-Data written correctly
-
--- Iteration 9 --
-Data written correctly
-
--- Iteration 10 --
-Data written correctly
-
--- Iteration 11 --
-
-Warning: file_put_contents(BADDIR/FileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
+Warning: file_put_contents(%sfilePutContentsVar7.dir%efilePutContentsVar7Sub%eFileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 No data written
 
 *** Done ***
