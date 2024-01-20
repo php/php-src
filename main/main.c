@@ -1116,22 +1116,21 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 
 /* {{{ php_error_docref */
 /* Generate an error which links to docref or the php.net documentation if docref is NULL */
+#define php_error_docref_impl(docref, type, format) do {\
+		va_list args; \
+		va_start(args, format); \
+		php_verror(docref, "", type, format, args); \
+		va_end(args); \
+	} while (0)
+
 PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char *format, ...)
 {
-	va_list args;
-
-	va_start(args, format);
-	php_verror(docref, "", type, format, args);
-	va_end(args);
+	php_error_docref_impl(docref, type, format);
 }
 
 PHPAPI ZEND_COLD void php_error_docref_unchecked(const char *docref, int type, const char *format, ...)
 {
-	va_list args;
-
-	va_start(args, format);
-	php_verror(docref, "", type, format, args);
-	va_end(args);
+	php_error_docref_impl(docref, type, format);
 }
 /* }}} */
 
