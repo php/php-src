@@ -10,7 +10,7 @@ function get_system_memory(): int|float|false
 {
     if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
         // Windows-based memory check
-        @exec('wmic ComputerSystem get AvailablePhysicalMemory', $output);
+        @exec('wmic OS get FreePhysicalMemory', $output);
         if (isset($output[1])) {
             return (int)trim($output[1]);
         }
