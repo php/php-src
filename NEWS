@@ -35,6 +35,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13138 (Randomizer::pickArrayKeys() does not detect broken
     engines). (timwolla)
 
+- Session:
+  . Fixed bug GH-12504 (Corrupted session written when there's a fatal error
+    in autoloader). (nielsdos)
+
 - Streams:
   . Fixed bug GH-13071 (Copying large files using mmap-able source streams may
     exhaust available memory and fail). (nielsdos)
