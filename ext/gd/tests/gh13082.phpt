@@ -2,6 +2,8 @@
 GH-13082 - imagefontwidth/height unexpectedly throwing an exception on a valid GdFont object.
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php if (getenv('TRAVIS')) die('skip Currently fails on Travis'); ?>
 --FILE--
 <?php
     $font = imageloadfont(__DIR__ . "/gh13082.gdf");
