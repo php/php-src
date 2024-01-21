@@ -1,77 +1,75 @@
 --TEST--
 Bug #72964 (White space not unfolded for CC/Bcc headers)
 --EXTENSIONS--
-imap
---CONFLICTS--
-imap
+curl
 --SKIPIF--
 <?php
-if (PHP_OS_FAMILY !== 'Windows') die('skip Windows only test');
 if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
-require_once __DIR__ . '/mail_skipif.inc';
+require_once __DIR__.'/mail_windows_skipif.inc';
 ?>
 --INI--
 SMTP=localhost
-smtp_port=25
+smtp_port=1025
+sendmail_from=from@example.com
 --FILE--
 <?php
-require_once __DIR__ . '/mail_include.inc';
 
-function find_and_delete_message($username, $subject) {
-    global $default_mailbox, $password;
+require_once __DIR__.'/mailhog_utils.inc';
 
-    $imap_stream = imap_open($default_mailbox, $username, $password);
-    if ($imap_stream === false) {
-        die("Cannot connect to IMAP server $server: " . imap_last_error() . "\n");
-    }
-
-    $found = false;
-    $repeat_count = 20; // we will repeat a max of 20 times
-    while (!$found && $repeat_count > 0) {
-        // sleep for a while to allow msg to be delivered
-        sleep(1);
-    
-        $num_messages = imap_check($imap_stream)->Nmsgs;
-        for ($i = $num_messages; $i > 0; $i--) {
-            $info = imap_headerinfo($imap_stream, $i);
-            if ($info->subject === $subject) {
-                imap_delete($imap_stream, $i);
-                $found = true;
-                break;
-            }
-        }
-        $repeat_count--;
-    }
-
-    imap_close($imap_stream, CL_EXPUNGE);
-    return $found;
-}
-
-$to = "{$users[2]}@$domain";
+$to = 'bug72964_to@example.com';
+$from = ini_get('sendmail_from');
+$cc = ['bug72964_cc_1@example.com', 'bug72964_cc_2@example.com'];
+$bcc = ['bug72964_bcc_1@example.com', 'bug72964_bcc_2@example.com'];
 $subject = bin2hex(random_bytes(16));
 $message = 'hello';
-$headers = "From: webmaster@example.com\r\n"
-    . "Cc: {$users[0]}@$domain,\r\n\t{$users[1]}@$domain\r\n"
-    . "Bcc: {$users[2]}@$domain,\r\n {$users[3]}@$domain\r\n";
+$headers = "From: {$from}\r\n"
+    . "Cc: {$cc[0]},\r\n\t{$cc[1]}\r\n"
+    . "Bcc: {$bcc[0]},\r\n {$bcc[1]}\r\n";
 
 $res = mail($to, $subject, $message, $headers);
+
 if ($res !== true) {
-	die("TEST FAILED : Unable to send test email\n");
+    exit("Unable to send the email.\n");
 } else {
-	echo "Message sent OK\n";
+    echo "Sent the email.\n";
 }
 
-foreach ($users as $user) {
-    if (!find_and_delete_message("$user@$domain", $subject)) {
-        echo "TEST FAILED: email not delivered\n";
-    } else {
-        echo "TEST PASSED: Message sent and deleted OK\n";
+$res = searchEmailByToAddress($to);
+
+if (
+    $res &&
+    getFromAddress($res) === $from &&
+    getToAddresses($res)[0] === $to &&
+    getSubject($res) === $subject &&
+    getBody($res) === "\r\n".$message // The last newline in the header goes in first.
+) {
+    echo "Received the email.\n";
+
+    $recipients = getRecipientAddresses($res);
+
+    if (in_array($cc[0], $recipients, true)) {
+        echo "cc1 Received the email.\n";
     }
+
+    if (in_array($cc[1], $recipients, true)) {
+        echo "cc2 Received the email.\n";
+    }
+
+    if (in_array($bcc[0], $recipients, true)) {
+        echo "bcc1 Received the email.\n";
+    }
+
+    if (in_array($bcc[1], $recipients, true)) {
+        echo "bcc2 Received the email.";
+    }
+
+    deleteEmail($res);
 }
 ?>
 --EXPECT--
-Message sent OK
-TEST PASSED: Message sent and deleted OK
-TEST PASSED: Message sent and deleted OK
-TEST PASSED: Message sent and deleted OK
-TEST PASSED: Message sent and deleted OK
+Sent the email.
+Received the email.
+cc1 Received the email.
+cc2 Received the email.
+bcc1 Received the email.
+bcc2 Received the email.
