@@ -3,8 +3,8 @@ if /i "%GITHUB_ACTIONS%" neq "True" (
     exit /b 3
 )
 
-set SDK_REMOTE=https://github.com/php/php-sdk-binary-tools.git
-set SDK_BRANCH=%PHP_BUILD_SDK_BRANCH%
+set SDK_REMOTE=https://github.com/SakiTakamachi/php-sdk-binary-tools.git
+set SDK_BRANCH=test
 set SDK_RUNNER=%PHP_BUILD_CACHE_SDK_DIR%\phpsdk-%PHP_BUILD_CRT%-%PLATFORM%.bat
 
 if not exist "%PHP_BUILD_CACHE_BASE_DIR%" (
