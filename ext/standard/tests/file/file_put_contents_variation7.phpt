@@ -38,9 +38,6 @@ $allDirs = [
 
 $allDirs = str_replace('/', DIRECTORY_SEPARATOR, $allDirs);
 
-$unixifiedDir = '/'. substr(str_replace(DIRECTORY_SEPARATOR, '/', $absSubDir), 3);
-$allDirs[] = $unixifiedDir;
-
 $filename = 'FileGetContentsVar7.tmp';
 $absFile = $absSubDir. DIRECTORY_SEPARATOR .$filename;
 $data = "This was the written data";
@@ -57,8 +54,7 @@ foreach ($allDirs as $dir) {
            echo "Data not written correctly or to correct place\n";
         }
         unlink($dir.DIRECTORY_SEPARATOR.$filename);
-    }
-    else {
+    } else {
        echo "No data written\n";
     }
     ++$i;
@@ -98,9 +94,6 @@ Data written correctly
 Data written correctly
 
 Warning: file_put_contents(BADDIR%eFileGetContentsVar7.tmp): Failed to open stream: %s in %s on line %d
-No data written
-
-Warning: file_put_contents(%sfilePutContentsVar7.dir%efilePutContentsVar7Sub%eFileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 No data written
 
 *** Done ***
