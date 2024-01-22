@@ -1519,6 +1519,27 @@ static int get_parameter_default(zval *result, parameter_reference *param) {
 	}
 }
 
+static zend_long get_parameter_position(zend_function *func, zend_string* arg_name, _zend_arg_info* arg_info, int num_args) {
+    uint32_t i;
+    bool internal = has_internal_arg_info(func);
+
+    for (i = 0; i < num_args; i++) {
+        if (arg_info[i].name) {
+            if (internal) {
+                if (strcmp(((zend_internal_arg_info*)arg_info)[i].name, ZSTR_VAL(arg_name)) == 0) {
+                    return i;
+                }
+            } else {
+                if (zend_string_equals(arg_name, arg_info[i].name)) {
+                    return i;
+                }
+            }
+        }
+    }
+
+    return -1;
+}
+
 /* {{{ Preventing __clone from being called */
 ZEND_METHOD(ReflectionClass, __clone)
 {
