@@ -23,7 +23,7 @@
 	((__GNUC__ == (x) && __GNUC_MINOR__ >= (y)) || (__GNUC__ > (x)))
 
 /* Builtins are used to avoid library linkage */
-#if __has_feature(c_atomic)
+#if __has_feature(c_atomic) && defined(__clang__)
 #define	HAVE_C11_ATOMICS 1
 #elif ZEND_GCC_PREREQ(4, 7)
 #define	HAVE_GNUC_ATOMICS 1
