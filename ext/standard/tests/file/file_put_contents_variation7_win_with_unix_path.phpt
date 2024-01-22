@@ -32,7 +32,7 @@ if ($res !== false) {
     else {
        echo "Data not written correctly or to correct place\n";
     }
-    unlink($dir.DIRECTORY_SEPARATOR.$filename);
+    unlink($unixifiedDir.DIRECTORY_SEPARATOR.$filename);
 } else {
    echo "No data written\n";
 }
@@ -52,4 +52,4 @@ rmdir($absSubDir);
 rmdir($absMainDir);
 ?>
 --EXPECT--
-No data written
+Data written correctly
