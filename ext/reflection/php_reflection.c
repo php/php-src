@@ -1519,7 +1519,7 @@ static int get_parameter_default(zval *result, parameter_reference *param) {
 	}
 }
 
-static zend_long get_parameter_position(zend_function *func, zend_string* arg_name, _zend_arg_info* arg_info, int num_args) {
+static zend_long get_parameter_position(zend_function *func, zend_string* arg_name, struct _zend_arg_info* arg_info, int num_args) {
     uint32_t i;
     bool internal = has_internal_arg_info(func);
 
@@ -2132,6 +2132,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
     reflection_object *intern;
     zend_function *fptr;
     zend_string *arg_name = NULL;
+    zend_long position;
     struct _zend_arg_info *arg_info;
     uint32_t num_args;
 
