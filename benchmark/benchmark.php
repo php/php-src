@@ -170,7 +170,12 @@ function runValgrindPhpCgiCommand(
         ]);
     }
 
-    return ['instructions' => $metricsArr[$medianRunIndex]['Ir']];
+    $instructions = $metricsArr[$medianRunIndex]['Ir'];
+    if ($repeat === 1) { // return the same data as before https://github.com/php/php-src/pull/13162
+        $instructions += $metricsArr['startup']['Ir'];
+    }
+
+    return ['instructions' => $instructions];
 }
 
 /**
