@@ -1519,7 +1519,8 @@ static int get_parameter_default(zval *result, parameter_reference *param) {
 	}
 }
 
-static zend_long get_parameter_position(zend_function *func, zend_string* arg_name, struct _zend_arg_info* arg_info, int num_args) {
+static zend_long get_parameter_position(zend_function *func, zend_string* arg_name, int num_args) {
+    struct _zend_arg_info *arg_info = func->common.arg_info;
     uint32_t i;
     bool internal = has_internal_arg_info(func);
 
@@ -2133,7 +2134,6 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
     zend_function *fptr;
     zend_string *arg_name = NULL;
     zend_long position;
-    struct _zend_arg_info *arg_info;
     uint32_t num_args;
 
     ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -2143,7 +2143,6 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
     GET_REFLECTION_OBJECT_PTR(fptr);
 
     num_args = fptr->common.num_args;
-    arg_info = fptr->common.arg_info;
 
     if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
         num_args++;
@@ -2154,7 +2153,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
     }
 
     if (arg_name != NULL) {
-        if (get_parameter_position(fptr, arg_name, arg_info, num_args) > -1) {
+        if (get_parameter_position(fptr, arg_name, num_args) > -1) {
             RETURN_TRUE;
         }
 
@@ -2199,7 +2198,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
     }
 
     if (arg_name != NULL) {
-        position = get_parameter_position(fptr, arg_name, arg_info, num_args);
+        position = get_parameter_position(fptr, arg_name, num_args);
 
         if (position == -1) {
             _DO_THROW("The parameter specified by its name could not be found");
