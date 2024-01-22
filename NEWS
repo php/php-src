@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     Exception). (nielsdos)
   . Fixed bug GH-13177 (PHP 8.3.2: final private constructor not allowed
     when used in trait). (nielsdos)
+  . Fixed bug GH-13215 (GCC 14 build failure). (Remi)
 
 - Curl:
   . Fix missing error check in curl_multi_init(). (divinity76)
