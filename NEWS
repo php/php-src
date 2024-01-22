@@ -44,6 +44,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13138 (Randomizer::pickArrayKeys() does not detect broken
     engines). (timwolla)
 
+- Session:
+  . Fixed bug GH-12504 (Corrupted session written when there's a fatal error
+    in autoloader). (nielsdos)
+
 - Standard:
   . Fixed bug GH-13094 (range(9.9, '0') causes segmentation fault). (nielsdos)
 
