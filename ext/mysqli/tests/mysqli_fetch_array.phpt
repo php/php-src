@@ -4,13 +4,11 @@ mysqli_fetch_array() - all datatypes but BIT
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    require('table.inc');
+    require 'table.inc';
     if (!$res = mysqli_query($link, "SELECT * FROM test ORDER BY id LIMIT 5")) {
         printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }

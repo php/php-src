@@ -2,6 +2,10 @@
 oci_execute() and invalid execute mode
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --FILE--
 <?php
 

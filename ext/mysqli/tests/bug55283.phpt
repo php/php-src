@@ -4,7 +4,7 @@ Bug #55283 (SSL options set by mysqli_ssl_set ignored for MySQLi persistent conn
 mysqli
 --SKIPIF--
 <?php
-require_once "connect.inc";
+require_once 'connect.inc';
 
 if (!defined('MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT'))
     die("skip Requires MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT");
@@ -42,7 +42,7 @@ $link->close();
 ?>
 --FILE--
 <?php
-    require_once "connect.inc";
+    require_once 'connect.inc';
     $db1 = new mysqli();
 
 

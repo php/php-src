@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: decfa1e3d862d81880ea18150e2ba239bf15b8af */
+ * Stub hash: afccfc7a2e1a52e73f3c05e4f7f3a994f86eb881 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -720,11 +720,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_syslog, 0, 2, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_INET_NTOP)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_inet_ntop, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, ip, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-#endif
+#define arginfo_inet_ntop arginfo_gethostbyaddr
 
 #if defined(HAVE_INET_PTON)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_inet_pton, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
@@ -913,10 +909,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_strripos arginfo_strpos
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strrchr, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_strrchr arginfo_stristr
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_contains, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
@@ -1833,7 +1826,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_create, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, params, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_params, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_params, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_TYPE_INFO(0, params, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -1842,14 +1835,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_get_params, 0, 1,
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_option, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_option, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_TYPE_MASK(0, wrapper_or_options, MAY_BE_ARRAY|MAY_BE_STRING, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, option_name, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_options, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_options, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_INFO(0, context)
 	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -2418,9 +2411,7 @@ ZEND_FUNCTION(closelog);
 #if defined(HAVE_SYSLOG_H)
 ZEND_FUNCTION(syslog);
 #endif
-#if defined(HAVE_INET_NTOP)
 ZEND_FUNCTION(inet_ntop);
-#endif
 #if defined(HAVE_INET_PTON)
 ZEND_FUNCTION(inet_pton);
 #endif
@@ -3053,9 +3044,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_SYSLOG_H)
 	ZEND_FE(syslog, arginfo_syslog)
 #endif
-#if defined(HAVE_INET_NTOP)
 	ZEND_FE(inet_ntop, arginfo_inet_ntop)
-#endif
 #if defined(HAVE_INET_PTON)
 	ZEND_FE(inet_pton, arginfo_inet_pton)
 #endif
@@ -3090,7 +3079,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(explode, arginfo_explode)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(implode, arginfo_implode)
 	ZEND_FALIAS(join, implode, arginfo_join)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strtok, arginfo_strtok)
+	ZEND_FE(strtok, arginfo_strtok)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strtoupper, arginfo_strtoupper)
 	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strtolower, arginfo_strtolower)
 	ZEND_FE(str_increment, arginfo_str_increment)
@@ -3580,6 +3569,10 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_DOWN", PHP_ROUND_HALF_DOWN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_EVEN", PHP_ROUND_HALF_EVEN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_ODD", PHP_ROUND_HALF_ODD, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHP_ROUND_CEILING", PHP_ROUND_CEILING, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHP_ROUND_FLOOR", PHP_ROUND_FLOOR, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHP_ROUND_TOWARD_ZERO", PHP_ROUND_TOWARD_ZERO, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHP_ROUND_AWAY_FROM_ZERO", PHP_ROUND_AWAY_FROM_ZERO, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_SALT_LENGTH", PHP_MAX_SALT_LEN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_STD_DES", 1, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_EXT_DES", 1, CONST_PERSISTENT);
@@ -4008,9 +4001,9 @@ static zend_class_entry *register_class___PHP_Incomplete_Class(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 
-	zend_string *attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
-	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class, 0);
-	zend_string_release(attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class);
+	zend_string *attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0 = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
+	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0, 0);
+	zend_string_release(attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0);
 
 	return class_entry;
 }

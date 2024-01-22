@@ -11,7 +11,7 @@ ob_start();
 
 echo "*** Testing session_set_save_handler() function: create_sid ***\n";
 
-class MySession2 {
+class MySession2 implements SessionHandlerInterface, SessionIdInterface {
     public $path;
 
     public function open($path, $name): bool {
@@ -54,9 +54,7 @@ class MySession2 {
     }
 }
 
-$handler = new MySession2;
-session_set_save_handler(array($handler, 'open'), array($handler, 'close'),
-    array($handler, 'read'), array($handler, 'write'), array($handler, 'destroy'), array($handler, 'gc'), array($handler, 'create_sid'));
+session_set_save_handler(new MySession2());
 session_start();
 
 $_SESSION['foo'] = "hello";

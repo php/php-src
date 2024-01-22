@@ -884,6 +884,8 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 
 	ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
+
+	ce->inheritance_cache = NULL;
 }
 
 static void zend_file_cache_serialize_warnings(
@@ -1118,9 +1120,6 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 
 	zend_string *const s = (zend_string*)ZCG(mem);
 
-	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
-	info.checksum = zend_adler32(info.checksum, (unsigned char*)ZSTR_VAL(s), info.str_size);
-
 #if __has_feature(memory_sanitizer)
 	/* The buffer may contain uninitialized regions. However, the uninitialized parts will not be
 	 * used when reading the cache. We should probably still try to get things fully initialized
@@ -1128,6 +1127,9 @@ int zend_file_cache_script_store(zend_persistent_script *script, bool in_shm)
 	__msan_unpoison(&info, sizeof(info));
 	__msan_unpoison(buf, script->size);
 #endif
+
+	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
+	info.checksum = zend_adler32(info.checksum, (unsigned char*)ZSTR_VAL(s), info.str_size);
 
 	if (!zend_file_cache_script_write(fd, script, &info, buf, s)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s': %s\n", filename, strerror(errno));
@@ -1868,6 +1870,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 
 	if (!file_cache_only &&
 	    !ZCSG(restart_in_progress) &&
+	    !ZCSG(restart_pending) &&
 		!ZSMMG(memory_exhausted) &&
 	    accelerator_shm_read_lock() == SUCCESS) {
 		/* exclusive lock */
@@ -1935,7 +1938,6 @@ use_process_mem:
 
 	if (cache_it) {
 		ZCSG(map_ptr_last) = CG(map_ptr_last);
-		script->dynamic_members.checksum = zend_accel_script_checksum(script);
 		script->dynamic_members.last_used = ZCG(request_time);
 
 		zend_accel_hash_update(&ZCSG(hash), script->script.filename, 0, script);

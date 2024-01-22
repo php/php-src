@@ -97,7 +97,7 @@ PHP_METHOD(DOMElement, __construct)
 	intern = Z_DOMOBJ_P(ZEND_THIS);
 	oldnode = dom_object_get_node(intern);
 	if (oldnode != NULL) {
-		php_libxml_node_free_resource(oldnode );
+		php_libxml_node_decrement_resource((php_libxml_node_object *)intern);
 	}
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern);
 }
@@ -108,7 +108,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-104682815
 Since:
 */
-int dom_element_tag_name_read(dom_object *obj, zval *retval)
+zend_result dom_element_tag_name_read(dom_object *obj, zval *retval)
 {
 	xmlNodePtr nodep;
 	xmlNsPtr ns;
@@ -137,7 +137,7 @@ int dom_element_tag_name_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-static int dom_element_reflected_attribute_read(dom_object *obj, zval *retval, const char *name)
+static zend_result dom_element_reflected_attribute_read(dom_object *obj, zval *retval, const char *name)
 {
 	xmlNodePtr nodep = dom_object_get_node(obj);
 
@@ -176,12 +176,12 @@ static xmlAttrPtr dom_element_reflected_attribute_write(dom_object *obj, zval *n
 URL: https://dom.spec.whatwg.org/#dom-element-classname
 Since:
 */
-int dom_element_class_name_read(dom_object *obj, zval *retval)
+zend_result dom_element_class_name_read(dom_object *obj, zval *retval)
 {
 	return dom_element_reflected_attribute_read(obj, retval, "class");
 }
 
-int dom_element_class_name_write(dom_object *obj, zval *newval)
+zend_result dom_element_class_name_write(dom_object *obj, zval *newval)
 {
 	if (dom_element_reflected_attribute_write(obj, newval, "class")) {
 		return SUCCESS;
@@ -194,14 +194,14 @@ int dom_element_class_name_write(dom_object *obj, zval *newval)
 URL: https://dom.spec.whatwg.org/#dom-element-id
 Since:
 */
-int dom_element_id_read(dom_object *obj, zval *retval)
+zend_result dom_element_id_read(dom_object *obj, zval *retval)
 {
 	return dom_element_reflected_attribute_read(obj, retval, "id");
 }
 
 static void php_set_attribute_id(xmlAttrPtr attrp, bool is_id);
 
-int dom_element_id_write(dom_object *obj, zval *newval)
+zend_result dom_element_id_write(dom_object *obj, zval *newval)
 {
 	xmlAttrPtr attr = dom_element_reflected_attribute_write(obj, newval, "id");
 	if (!attr) {
@@ -217,7 +217,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Element-schemaTypeInfo
 Since: DOM Level 3
 */
-int dom_element_schema_type_info_read(dom_object *obj, zval *retval)
+zend_result dom_element_schema_type_info_read(dom_object *obj, zval *retval)
 {
 	ZVAL_NULL(retval);
 	return SUCCESS;
@@ -418,9 +418,68 @@ PHP_METHOD(DOMElement, setAttribute)
 }
 /* }}} end dom_element_set_attribute */
 
-static bool dom_remove_attribute(xmlNodePtr attrp)
+typedef struct _dom_deep_ns_redef_item {
+	xmlNodePtr current_node;
+	xmlNsPtr defined_ns;
+} dom_deep_ns_redef_item;
+
+/* Reconciliation for a *single* namespace, but reconciles *closest* to the subtree needing it. */
+static void dom_deep_ns_redef(xmlNodePtr node, xmlNsPtr ns_to_redefine)
 {
+	size_t worklist_capacity = 128;
+	dom_deep_ns_redef_item *worklist = emalloc(sizeof(dom_deep_ns_redef_item) * worklist_capacity);
+	worklist[0].current_node = node;
+	worklist[0].defined_ns = NULL;
+	size_t worklist_size = 1;
+
+	while (worklist_size > 0) {
+		worklist_size--;
+		dom_deep_ns_redef_item *current_worklist_item = &worklist[worklist_size];
+		ZEND_ASSERT(current_worklist_item->current_node->type == XML_ELEMENT_NODE);
+		xmlNsPtr defined_ns = current_worklist_item->defined_ns;
+
+		if (current_worklist_item->current_node->ns == ns_to_redefine) {
+			if (defined_ns == NULL) {
+				defined_ns = xmlNewNs(current_worklist_item->current_node, ns_to_redefine->href, ns_to_redefine->prefix);
+			}
+			current_worklist_item->current_node->ns = defined_ns;
+		}
+
+		for (xmlAttrPtr attr = current_worklist_item->current_node->properties; attr; attr = attr->next) {
+			if (attr->ns == ns_to_redefine) {
+				if (defined_ns == NULL) {
+					defined_ns = xmlNewNs(current_worklist_item->current_node, ns_to_redefine->href, ns_to_redefine->prefix);
+				}
+				attr->ns = defined_ns;
+			}
+		}
+
+		for (xmlNodePtr child = current_worklist_item->current_node->children; child; child = child->next) {
+			if (child->type != XML_ELEMENT_NODE) {
+				continue;
+			}
+			if (worklist_size == worklist_capacity) {
+				if (UNEXPECTED(worklist_capacity >= SIZE_MAX / 3 * 2 / sizeof(dom_deep_ns_redef_item))) {
+					/* Shouldn't be possible to hit, but checked for safety anyway */
+					return;
+				}
+				worklist_capacity = worklist_capacity * 3 / 2;
+				worklist = erealloc(worklist, sizeof(dom_deep_ns_redef_item) * worklist_capacity);
+			}
+			worklist[worklist_size].current_node = child;
+			worklist[worklist_size].defined_ns = defined_ns;
+			worklist_size++;
+		}
+	}
+
+	efree(worklist);
+}
+
+static bool dom_remove_attribute(xmlNodePtr thisp, xmlNodePtr attrp)
+{
+	ZEND_ASSERT(thisp != NULL);
 	ZEND_ASSERT(attrp != NULL);
+
 	switch (attrp->type) {
 		case XML_ATTRIBUTE_NODE:
 			if (php_dom_object_get_data(attrp) == NULL) {
@@ -431,8 +490,42 @@ static bool dom_remove_attribute(xmlNodePtr attrp)
 				xmlUnlinkNode(attrp);
 			}
 			break;
-		case XML_NAMESPACE_DECL:
-			return false;
+		case XML_NAMESPACE_DECL: {
+			/* They will always be removed, but can be re-added.
+			 *
+			 * If any reference was left to the namespace, the only effect is that
+			 * the definition is potentially moved closer to the element using it.
+			 * If no reference was left, it is actually removed. */
+			xmlNsPtr ns = (xmlNsPtr) attrp;
+			if (thisp->nsDef == ns) {
+				thisp->nsDef = ns->next;
+			} else if (thisp->nsDef != NULL) {
+				xmlNsPtr prev = thisp->nsDef;
+				xmlNsPtr cur = prev->next;
+				while (cur) {
+					if (cur == ns) {
+						prev->next = cur->next;
+						break;
+					}
+					prev = cur;
+					cur = cur->next;
+				}
+			} else {
+				/* defensive: attrp not defined in thisp ??? */
+#if ZEND_DEBUG
+				ZEND_UNREACHABLE();
+#endif
+				break; /* defensive */
+			}
+
+			ns->next = NULL;
+			php_libxml_set_old_ns(thisp->doc, ns); /* note: can't deallocate as it might be referenced by a "fake namespace node" */
+			/* xmlReconciliateNs() redefines at the top of the tree instead of closest to the child, own reconciliation here.
+			 * Similarly, the DOM version has other issues too (see dom_libxml_reconcile_ensure_namespaces_are_declared). */
+			dom_deep_ns_redef(thisp, ns);
+
+			break;
+		}
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 	return true;
@@ -461,7 +554,7 @@ PHP_METHOD(DOMElement, removeAttribute)
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL(dom_remove_attribute(attrp));
+	RETURN_BOOL(dom_remove_attribute(nodep, attrp));
 }
 /* }}} end dom_element_remove_attribute */
 
@@ -520,10 +613,7 @@ PHP_METHOD(DOMElement, setAttributeNode)
 
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
-	if (attrp->type != XML_ATTRIBUTE_NODE) {
-		zend_argument_value_error(1, "must have the node attribute");
-		RETURN_THROWS();
-	}
+	ZEND_ASSERT(attrp->type == XML_ATTRIBUTE_NODE);
 
 	if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
 		php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));
@@ -550,6 +640,7 @@ PHP_METHOD(DOMElement, setAttributeNode)
 	}
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);
+	php_dom_reconcile_attribute_namespace_after_insertion(attrp);
 
 	/* Returns old property if removed otherwise NULL */
 	if (existattrp != NULL) {
@@ -581,7 +672,9 @@ PHP_METHOD(DOMElement, removeAttributeNode)
 
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
-	if (attrp->type != XML_ATTRIBUTE_NODE || attrp->parent != nodep) {
+	ZEND_ASSERT(attrp->type == XML_ATTRIBUTE_NODE);
+
+	if (attrp->parent != nodep) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
@@ -655,45 +748,6 @@ PHP_METHOD(DOMElement, getAttributeNS)
 }
 /* }}} end dom_element_get_attribute_ns */
 
-static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) /* {{{ */
-{
-	xmlNsPtr def;
-	xmlChar prefix[50];
-	int counter = 1;
-
-	if ((tree == NULL) || (ns == NULL) || (ns->type != XML_NAMESPACE_DECL)) {
-		return NULL;
-	}
-
-	/* Code taken from libxml2 (2.6.20) xmlNewReconciliedNs
-	 *
-	 * Find a close prefix which is not already in use.
-	 * Let's strip namespace prefixes longer than 20 chars !
-	 */
-	if (ns->prefix == NULL)
-		snprintf((char *) prefix, sizeof(prefix), "default");
-	else
-		snprintf((char *) prefix, sizeof(prefix), "%.20s", (char *)ns->prefix);
-
-	def = xmlSearchNs(doc, tree, prefix);
-	while (def != NULL) {
-		if (counter > 1000) return(NULL);
-		if (ns->prefix == NULL)
-			snprintf((char *) prefix, sizeof(prefix), "default%d", counter++);
-		else
-			snprintf((char *) prefix, sizeof(prefix), "%.20s%d",
-			(char *)ns->prefix, counter++);
-		def = xmlSearchNs(doc, tree, prefix);
-	}
-
-	/*
-	 * OK, now we are ready to create a new one.
-	 */
-	def = xmlNewNs(tree, ns->href, prefix);
-	return(def);
-}
-/* }}} */
-
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAttrNS
 Since: DOM Level 2
 */
@@ -756,27 +810,18 @@ PHP_METHOD(DOMElement, setAttributeNS)
 						tmpnsptr = tmpnsptr->next;
 					}
 					if (tmpnsptr == NULL) {
-						nsptr = _dom_new_reconNs(elemp->doc, elemp, nsptr);
+						nsptr = dom_get_ns_resolve_prefix_conflict(elemp, (const char *) nsptr->href);
 					}
 				}
 			}
 
 			if (nsptr == NULL) {
-				if (prefix == NULL) {
-					if (is_xmlns == 1) {
-						xmlNewNs(elemp, (xmlChar *)value, NULL);
-						xmlReconciliateNs(elemp->doc, elemp);
-					} else {
-						errorcode = NAMESPACE_ERR;
-					}
+				if (is_xmlns == 1) {
+					xmlNewNs(elemp, (xmlChar *)value, prefix == NULL ? NULL : (xmlChar *)localname);
 				} else {
-					if (is_xmlns == 1) {
-						xmlNewNs(elemp, (xmlChar *)value, (xmlChar *)localname);
-					} else {
-						nsptr = dom_get_ns(elemp, uri, &errorcode, prefix);
-					}
-					xmlReconciliateNs(elemp->doc, elemp);
+					nsptr = dom_get_ns(elemp, uri, &errorcode, prefix);
 				}
+				xmlReconciliateNs(elemp->doc, elemp);
 			} else {
 				if (is_xmlns == 1) {
 					if (nsptr->href) {
@@ -817,6 +862,83 @@ PHP_METHOD(DOMElement, setAttributeNS)
 }
 /* }}} end dom_element_set_attribute_ns */
 
+static void dom_remove_eliminated_ns_single_element(xmlNodePtr node, xmlNsPtr eliminatedNs)
+{
+	ZEND_ASSERT(node->type == XML_ELEMENT_NODE);
+	if (node->ns == eliminatedNs) {
+		node->ns = NULL;
+	}
+
+	for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
+		if (attr->ns == eliminatedNs) {
+			attr->ns = NULL;
+		}
+	}
+}
+
+static void dom_remove_eliminated_ns(xmlNodePtr node, xmlNsPtr eliminatedNs)
+{
+	dom_remove_eliminated_ns_single_element(node, eliminatedNs);
+
+	xmlNodePtr base = node;
+	node = node->children;
+	while (node != NULL) {
+		ZEND_ASSERT(node != base);
+
+		if (node->type == XML_ELEMENT_NODE) {
+			dom_remove_eliminated_ns_single_element(node, eliminatedNs);
+
+			if (node->children) {
+				node = node->children;
+				continue;
+			}
+		}
+
+		if (node->next) {
+			node = node->next;
+		} else {
+			/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
+			do {
+				node = node->parent;
+				if (node == base) {
+					return;
+				}
+			} while (node->next == NULL);
+			node = node->next;
+		}
+	}
+}
+
+static void dom_eliminate_ns(xmlNodePtr nodep, xmlNsPtr nsptr)
+{
+	if (nsptr->href != NULL) {
+		xmlFree((char *) nsptr->href);
+		nsptr->href = NULL;
+	}
+	if (nsptr->prefix != NULL) {
+		xmlFree((char *) nsptr->prefix);
+		nsptr->prefix = NULL;
+	}
+
+	/* Remove it from the list and move it to the old ns list */
+	xmlNsPtr current_ns = nodep->nsDef;
+	if (current_ns == nsptr) {
+		nodep->nsDef = nsptr->next;
+	} else {
+		do {
+			if (current_ns->next == nsptr) {
+				current_ns->next = nsptr->next;
+				break;
+			}
+			current_ns = current_ns->next;
+		} while (current_ns != NULL);
+	}
+	nsptr->next = NULL;
+	php_libxml_set_old_ns(nodep->doc, nsptr);
+
+	dom_remove_eliminated_ns(nodep, nsptr);
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElRemAtNS
 Since: DOM Level 2
 */
@@ -842,14 +964,7 @@ PHP_METHOD(DOMElement, removeAttributeNS)
 	nsptr = dom_get_nsdecl(nodep, (xmlChar *)name);
 	if (nsptr != NULL) {
 		if (xmlStrEqual((xmlChar *)uri, nsptr->href)) {
-			if (nsptr->href != NULL) {
-				xmlFree((char *) nsptr->href);
-				nsptr->href = NULL;
-			}
-			if (nsptr->prefix != NULL) {
-				xmlFree((char *) nsptr->prefix);
-				nsptr->prefix = NULL;
-			}
+			dom_eliminate_ns(nodep, nsptr);
 		} else {
 			RETURN_NULL();
 		}
@@ -968,6 +1083,7 @@ PHP_METHOD(DOMElement, setAttributeNodeNS)
 	}
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);
+	php_dom_reconcile_attribute_namespace_after_insertion(attrp);
 
 	/* Returns old property if removed otherwise NULL */
 	if (existattrp != NULL) {
@@ -1439,7 +1555,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 	}
 
 	/* Step 2 */
-	if (thisp->doc->type == XML_HTML_DOCUMENT_NODE && (thisp->ns == NULL || xmlStrEqual(thisp->ns->href, (const xmlChar *) "http://www.w3.org/1999/xhtml"))) {
+	if (thisp->doc != NULL && thisp->doc->type == XML_HTML_DOCUMENT_NODE && (thisp->ns == NULL || xmlStrEqual(thisp->ns->href, (const xmlChar *) "http://www.w3.org/1999/xhtml"))) {
 		qname_tmp = zend_str_tolower_dup_ex(qname, qname_length);
 		if (qname_tmp != NULL) {
 			qname = qname_tmp;
@@ -1474,37 +1590,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 
 	/* Step 5 */
 	if (force_is_null || !force) {
-		if (attribute->type == XML_NAMESPACE_DECL) {
-			/* The behaviour isn't defined by spec, but by observing browsers I found
-			 * that you can remove the nodes, but they'll get reconciled.
-			 * So if any reference was left to the namespace, the only effect is that
-			 * the definition is potentially moved closer to the element using it.
-			 * If no reference was left, it is actually removed. */
-			xmlNsPtr ns = (xmlNsPtr) attribute;
-			if (thisp->nsDef == ns) {
-				thisp->nsDef = ns->next;
-			} else if (thisp->nsDef != NULL) {
-				xmlNsPtr prev = thisp->nsDef;
-				xmlNsPtr cur = prev->next;
-				while (cur) {
-					if (cur == ns) {
-						prev->next = cur->next;
-						break;
-					}
-					prev = cur;
-					cur = cur->next;
-				}
-			}
-
-			ns->next = NULL;
-			dom_set_old_ns(thisp->doc, ns);
-			dom_reconcile_ns(thisp->doc, thisp);
-		} else {
-			/* TODO: in the future when namespace bugs are fixed,
-			 * the above if-branch should be merged into this called function
-			 * such that the removal will work properly with all APIs. */
-			dom_remove_attribute(attribute);
-		}
+		dom_remove_attribute(thisp, attribute);
 		retval = false;
 		goto out;
 	}

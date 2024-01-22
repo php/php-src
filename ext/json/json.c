@@ -37,10 +37,17 @@ PHP_JSON_API zend_class_entry *php_json_exception_ce;
 
 PHP_JSON_API ZEND_DECLARE_MODULE_GLOBALS(json)
 
+static int php_json_implement_json_serializable(zend_class_entry *interface, zend_class_entry *class_type)
+{
+	class_type->ce_flags |= ZEND_ACC_USE_GUARDS;
+	return SUCCESS;
+}
+
 /* {{{ MINIT */
 static PHP_MINIT_FUNCTION(json)
 {
 	php_json_serializable_ce = register_class_JsonSerializable();
+	php_json_serializable_ce->interface_gets_implemented = php_json_implement_json_serializable;
 
 	php_json_exception_ce = register_class_JsonException(zend_ce_exception);
 

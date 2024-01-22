@@ -278,10 +278,6 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 		execute_only = H->disable_prepares;
 	}
 
-	if (!emulate && PQprotocolVersion(H->server) <= 2) {
-		emulate = 1;
-	}
-
 	if (emulate) {
 		stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 	} else {
@@ -445,19 +441,7 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 		}
 
 		case PDO_ATTR_SERVER_VERSION:
-			if (PQprotocolVersion(H->server) >= 3) { /* PostgreSQL 7.4 or later */
-				ZVAL_STRING(return_value, (char*)PQparameterStatus(H->server, "server_version"));
-			} else /* emulate above via a query */
-			{
-				PGresult *res = PQexec(H->server, "SELECT VERSION()");
-				if (res && PQresultStatus(res) == PGRES_TUPLES_OK) {
-					ZVAL_STRING(return_value, (char *)PQgetvalue(res, 0, 0));
-				}
-
-				if (res) {
-					PQclear(res);
-				}
-			}
+			ZVAL_STRING(return_value, (char*)PQparameterStatus(H->server, "server_version"));
 			break;
 
 		case PDO_ATTR_CONNECTION_STATUS:
@@ -604,8 +588,7 @@ static bool pgsql_handle_rollback(pdo_dbh_t *dbh)
 	return ret;
 }
 
-/* {{{ Returns true if the copy worked fine or false if error */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray)
+void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -620,8 +603,8 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray)
 	ExecStatusType status;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|sss!",
-					&table_name, &table_name_len, &pg_rows,
-					&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
+		&table_name, &table_name_len, &pg_rows,
+		&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -675,8 +658,8 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray)
 				buffer_len = Z_STRLEN_P(tmp);
 				query = erealloc(query, buffer_len + 2); /* room for \n\0 */
 			}
-			memcpy(query, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 			query_len = Z_STRLEN_P(tmp);
+			memcpy(query, Z_STRVAL_P(tmp), query_len);
 			if (query[query_len - 1] != '\n') {
 				query[query_len++] = '\n';
 			}
@@ -715,10 +698,15 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* {{{ Returns true if the copy worked fine or false if error */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromFile)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray)
+{
+	pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+void pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -731,8 +719,8 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromFile)
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp|sss!",
-				&table_name, &table_name_len, &filename, &filename_len,
-				&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
+		&table_name, &table_name_len, &filename, &filename_len,
+		&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -812,11 +800,15 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromFile)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
-
 
 /* {{{ Returns true if the copy worked fine or false if error */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToFile)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyFromFile)
+{
+	pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+void pgsqlCopyToFile_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -907,10 +899,16 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToFile)
 		RETURN_FALSE;
 	}
 }
-/* }}} */
 
 /* {{{ Returns true if the copy worked fine or false if error */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToArray)
+PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToFile)
+{
+	pgsqlCopyToFile_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+
+}
+/* }}} */
+
+void pgsqlCopyToArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -982,11 +980,15 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToArray)
 		RETURN_FALSE;
 	}
 }
+
+/* {{{ Returns true if the copy worked fine or false if error */
+PHP_METHOD(PDO_PGSql_Ext, pgsqlCopyToArray)
+{
+	pgsqlCopyToArray_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 /* }}} */
 
-
-/* {{{ Creates a new large object, returning its identifier.  Must be called inside a transaction. */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBCreate)
+void pgsqlLOBCreate_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -1011,10 +1013,15 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBCreate)
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
+
+/* {{{ Creates a new large object, returning its identifier.  Must be called inside a transaction. */
+PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBCreate)
+{
+	pgsqlLOBCreate_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 /* }}} */
 
-/* {{{ Opens an existing large object stream.  Must be called inside a transaction. */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBOpen)
+void pgsqlLOBOpen_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -1062,10 +1069,15 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBOpen)
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
+
+/* {{{ Opens an existing large object stream.  Must be called inside a transaction. */
+PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBOpen)
+{
+	pgsqlLOBOpen_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 /* }}} */
 
-/* {{{ Deletes the large object identified by oid.  Must be called inside a transaction. */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBUnlink)
+void pgsqlLOBUnlink_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -1097,10 +1109,15 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBUnlink)
 	PDO_HANDLE_DBH_ERR();
 	RETURN_FALSE;
 }
+
+/* {{{ Deletes the large object identified by oid.  Must be called inside a transaction. */
+PHP_METHOD(PDO_PGSql_Ext, pgsqlLOBUnlink)
+{
+	pgsqlLOBUnlink_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 /* }}} */
 
-/* {{{ Get asynchronous notification */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlGetNotify)
+void pgsqlGetNotify_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -1177,10 +1194,15 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlGetNotify)
 
 	PQfreemem(pgsql_notify);
 }
+
+/* {{{ Get asynchronous notification */
+PHP_METHOD(PDO_PGSql_Ext, pgsqlGetNotify)
+{
+	pgsqlGetNotify_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 /* }}} */
 
-/* {{{ Get backend(server) pid */
-PHP_METHOD(PDO_PGSql_Ext, pgsqlGetPid)
+void pgsqlGetPid_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
@@ -1193,6 +1215,12 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlGetPid)
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
 	RETURN_LONG(PQbackendPID(H->server));
+}
+
+/* {{{ Get backend(server) pid */
+PHP_METHOD(PDO_PGSql_Ext, pgsqlGetPid)
+{
+	pgsqlGetPid_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -1281,8 +1309,8 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 	}
 
 	/* escape username and password, if provided */
-	tmp_user = _pdo_pgsql_escape_credentials(dbh->username);
-	tmp_pass = _pdo_pgsql_escape_credentials(dbh->password);
+	tmp_user = !strstr((char *) dbh->data_source, "user=") ? _pdo_pgsql_escape_credentials(dbh->username) : NULL;
+	tmp_pass = !strstr((char *) dbh->data_source, "password=") ? _pdo_pgsql_escape_credentials(dbh->password) : NULL;
 
 	/* support both full connection string & connection string + login and/or password */
 	if (tmp_user && tmp_pass) {

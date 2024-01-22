@@ -175,6 +175,9 @@ static void mb_wchar_to_utf16le_default(uint32_t *in, size_t len, mb_convert_buf
 
 static int mbfl_filt_conv_utf16_wchar_flush(mbfl_convert_filter *filter);
 static size_t mb_utf16_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static zend_string* mb_cut_utf16(unsigned char *str, size_t from, size_t len, unsigned char *end);
+static zend_string* mb_cut_utf16be(unsigned char *str, size_t from, size_t len, unsigned char *end);
+static zend_string* mb_cut_utf16le(unsigned char *str, size_t from, size_t len, unsigned char *end);
 
 static const char *mbfl_encoding_utf16_aliases[] = {"utf16", NULL};
 
@@ -189,7 +192,8 @@ const mbfl_encoding mbfl_encoding_utf16 = {
 	&vtbl_wchar_utf16,
 	mb_utf16_to_wchar,
 	mb_wchar_to_utf16be,
-	NULL
+	NULL,
+	mb_cut_utf16
 };
 
 const mbfl_encoding mbfl_encoding_utf16be = {
@@ -203,7 +207,8 @@ const mbfl_encoding mbfl_encoding_utf16be = {
 	&vtbl_wchar_utf16be,
 	mb_utf16be_to_wchar,
 	mb_wchar_to_utf16be,
-	NULL
+	NULL,
+	mb_cut_utf16be
 };
 
 const mbfl_encoding mbfl_encoding_utf16le = {
@@ -217,7 +222,8 @@ const mbfl_encoding mbfl_encoding_utf16le = {
 	&vtbl_wchar_utf16le,
 	mb_utf16le_to_wchar,
 	mb_wchar_to_utf16le,
-	NULL
+	NULL,
+	mb_cut_utf16le
 };
 
 const struct mbfl_convert_vtbl vtbl_utf16_wchar = {
@@ -746,7 +752,7 @@ static size_t mb_utf16be_to_wchar_avx2(unsigned char **in, size_t *in_len, uint3
 						*out++ = (((n & 0x3FF) << 10) | (n2 & 0x3FF)) + 0x10000;
 						bufsize--;
 						len -= 4;
-#ifdef PHP_HAVE_BUILTIN_USUB_OVERFLOW
+#if defined(PHP_HAVE_BUILTIN_USUB_OVERFLOW) && PHP_HAVE_BUILTIN_USUB_OVERFLOW
 						/* Subtracting 2 from `n_chars` will automatically set the CPU's flags;
 						 * branch directly off the appropriate flag (CF on x86) rather than using
 						 * another instruction (CMP on x86) to check for underflow */
@@ -932,7 +938,7 @@ static size_t mb_utf16le_to_wchar_avx2(unsigned char **in, size_t *in_len, uint3
 						*out++ = (((n & 0x3FF) << 10) | (n2 & 0x3FF)) + 0x10000;
 						bufsize--;
 						len -= 4;
-#ifdef PHP_HAVE_BUILTIN_USUB_OVERFLOW
+#if defined(PHP_HAVE_BUILTIN_USUB_OVERFLOW) && PHP_HAVE_BUILTIN_USUB_OVERFLOW
 						if (__builtin_usub_overflow(n_chars, 2, &n_chars)) {
 							break;
 						}
@@ -1040,3 +1046,89 @@ static void mb_wchar_to_utf16le_avx2(uint32_t *in, size_t len, mb_convert_buf *b
 }
 
 #endif /* defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_AVX2_RESOLVER) */
+
+static zend_string* mb_cut_utf16be(unsigned char *str, size_t from, size_t len, unsigned char *end)
+{
+	if (len > end - (str + from)) {
+		len = end - (str + from);
+	}
+	from &= ~1;
+	len &= ~1;
+	unsigned char *start = str + from;
+	if (len < 2 || (end - start) < 2) {
+		return zend_empty_string;
+	}
+	/* Check if 1st codepoint is 2nd part of surrogate pair */
+	if (from > 0) {
+		uint32_t start_cp = (*start << 8) + *(start + 1);
+		if (start_cp >= 0xDC00 && start_cp <= 0xDFFF) {
+			uint32_t preceding_cp = (*(start - 2) << 8) + *(start - 1);
+			if (preceding_cp >= 0xD800 && preceding_cp <= 0xDBFF) {
+				from -= 2;
+			}
+		}
+	}
+	/* Same for ending cut point */
+	unsigned char *_end = start + len;
+	if (_end > end) {
+		_end = end;
+	}
+	uint32_t ending_cp = (*(_end - 2) << 8) + *(_end - 1);
+	if (ending_cp >= 0xD800 && ending_cp <= 0xDBFF) {
+		_end -= 2;
+	}
+	return zend_string_init_fast((char*)start, _end - start);
+}
+
+static zend_string* mb_cut_utf16le(unsigned char *str, size_t from, size_t len, unsigned char *end)
+{
+	if (len > end - (str + from)) {
+		len = end - (str + from);
+	}
+	from &= ~1;
+	len &= ~1;
+	unsigned char *start = str + from;
+	if (len < 2 || (end - start) < 2) {
+		return zend_empty_string;
+	}
+	/* Check if 1st codepoint is 2nd part of surrogate pair */
+	if (from > 0) {
+		uint32_t start_cp = (*(start + 1) << 8) + *start;
+		if (start_cp >= 0xDC00 && start_cp <= 0xDFFF) {
+			uint32_t preceding_cp = (*(start - 1) << 8) + *(start - 2);
+			if (preceding_cp >= 0xD800 && preceding_cp <= 0xDBFF) {
+				from -= 2;
+			}
+		}
+	}
+	/* Same for ending cut point */
+	unsigned char *_end = start + len;
+	if (_end > end) {
+		_end = end;
+	}
+	uint32_t ending_cp = (*(_end - 1) << 8) + *(_end - 2);
+	if (ending_cp >= 0xD800 && ending_cp <= 0xDBFF) {
+		_end -= 2;
+	}
+	return zend_string_init_fast((char*)start, _end - start);
+}
+
+static zend_string* mb_cut_utf16(unsigned char *str, size_t from, size_t len, unsigned char *end)
+{
+	if (len < 2 || (end - str) < 2) {
+		return zend_empty_string;
+	}
+	uint32_t cp = (*str << 8) + *(str + 1);
+	if (cp == 0xFFFE) {
+		/* Little-endian BOM */
+		if (from < 2) {
+			from = 2;
+		}
+		return mb_cut_utf16le(str, from, len, end);
+	} else {
+		if (cp == 0xFEFF && from < 2) {
+			from = 2;
+		}
+		return mb_cut_utf16be(str, from, len, end);
+	}
+}

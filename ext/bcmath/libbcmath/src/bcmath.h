@@ -61,7 +61,7 @@ typedef struct bc_struct {
 #include "../../php_bcmath.h" /* Needed for BCG() macro */
 
 /* The base used in storing the numbers in n_value above.
-   Currently this MUST be 10. */
+   Currently, this MUST be 10. */
 
 #define BASE 10
 

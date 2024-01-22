@@ -29,6 +29,7 @@ static zend_object_handlers xsl_object_handlers;
 
 static const zend_module_dep xsl_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
+	ZEND_MOD_REQUIRED("dom")
 	ZEND_MOD_END
 };
 
@@ -52,6 +53,12 @@ zend_module_entry xsl_module_entry = {
 ZEND_GET_MODULE(xsl)
 #endif
 
+static HashTable *xsl_objects_get_gc(zend_object *object, zval **table, int *n)
+{
+	xsl_object *intern = php_xsl_fetch_object(object);
+	return php_dom_xpath_callbacks_get_gc_for_whole_object(&intern->xpath_callbacks, object, table, n);
+}
+
 /* {{{ xsl_objects_free_storage */
 void xsl_objects_free_storage(zend_object *object)
 {
@@ -59,16 +66,12 @@ void xsl_objects_free_storage(zend_object *object)
 
 	zend_object_std_dtor(&intern->std);
 
-	zend_hash_destroy(intern->parameter);
-	FREE_HASHTABLE(intern->parameter);
-
-	zend_hash_destroy(intern->registered_phpfunctions);
-	FREE_HASHTABLE(intern->registered_phpfunctions);
-
-	if (intern->node_list) {
-		zend_hash_destroy(intern->node_list);
-		FREE_HASHTABLE(intern->node_list);
+	if (intern->parameter) {
+		zend_hash_destroy(intern->parameter);
+		FREE_HASHTABLE(intern->parameter);
 	}
+
+	php_dom_xpath_callbacks_dtor(&intern->xpath_callbacks);
 
 	if (intern->doc) {
 		php_libxml_decrement_doc_ref(intern->doc);
@@ -101,7 +104,7 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
 	intern->parameter = zend_new_array(0);
-	intern->registered_phpfunctions = zend_new_array(0);
+	php_dom_xpath_callbacks_ctor(&intern->xpath_callbacks);
 
 	return &intern->std;
 }
@@ -114,6 +117,7 @@ PHP_MINIT_FUNCTION(xsl)
 	xsl_object_handlers.offset = XtOffsetOf(xsl_object, std);
 	xsl_object_handlers.clone_obj = NULL;
 	xsl_object_handlers.free_obj = xsl_objects_free_storage;
+	xsl_object_handlers.get_gc = xsl_objects_get_gc;
 
 	xsl_xsltprocessor_class_entry = register_class_XSLTProcessor();
 	xsl_xsltprocessor_class_entry->create_object = xsl_objects_new;
@@ -137,15 +141,6 @@ PHP_MINIT_FUNCTION(xsl)
 }
 /* }}} */
 
-/* {{{ xsl_object_get_data */
-zval *xsl_object_get_data(void *obj)
-{
-	zval *dom_wrapper;
-	dom_wrapper = ((xsltStylesheetPtr) obj)->_private;
-	return dom_wrapper;
-}
-/* }}} */
-
 /* {{{ xsl_object_set_data */
 static void xsl_object_set_data(void *obj, zval *wrapper)
 {
@@ -161,41 +156,6 @@ void php_xsl_set_object(zval *wrapper, void *obj)
 	object = Z_XSL_P(wrapper);
 	object->ptr = obj;
 	xsl_object_set_data(obj, wrapper);
-}
-/* }}} */
-
-/* {{{ php_xsl_create_object */
-void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return_value )
-{
-	zval *wrapper;
-	zend_class_entry *ce;
-
-	if (!obj) {
-		wrapper = wrapper_in;
-		ZVAL_NULL(wrapper);
-		return;
-	}
-
-	if ((wrapper = xsl_object_get_data((void *) obj))) {
-		ZVAL_COPY(wrapper, wrapper_in);
-		return;
-	}
-
-	if (!wrapper_in) {
-		wrapper = return_value;
-	} else {
-		wrapper = wrapper_in;
-	}
-
-
-	ce = xsl_xsltprocessor_class_entry;
-
-	if (!wrapper_in) {
-		object_init_ex(wrapper, ce);
-	}
-	php_xsl_set_object(wrapper, (void *) obj);
-
-	return;
 }
 /* }}} */
 

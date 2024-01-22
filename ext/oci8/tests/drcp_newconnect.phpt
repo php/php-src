@@ -2,6 +2,10 @@
 DRCP: oci_new_connect()
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --INI--
 oci8.connection_class=test
 oci8.old_oci_close_semantics=0

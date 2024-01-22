@@ -234,18 +234,6 @@ static ssize_t exif_read_from_stream_file_looped(php_stream *stream, char *buf, 
 	return total_read;
 }
 
-/* {{{ php_strnlen
- * get length of string if buffer if less than buffer size or buffer size */
-static size_t php_strnlen(char* str, size_t maxlen) {
-	size_t len = 0;
-
-	if (str && maxlen && *str) {
-		do {
-			len++;
-		} while (--maxlen && *(++str));
-	}
-	return len;
-}
 /* }}} */
 
 /* {{{ error messages */
@@ -2223,7 +2211,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 				value = NULL;
 			}
 			if (value) {
-				length = (int)php_strnlen(value, length);
+				length = (int)zend_strnlen(value, length);
 				info_value->s = estrndup(value, length);
 				info_data->length = length;
 			} else {
@@ -2254,7 +2242,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			}
 			if (value) {
 				if (tag == TAG_MAKER_NOTE) {
-					length = (int) php_strnlen(value, length);
+					length = (int) zend_strnlen(value, length);
 				}
 
 				/* do not recompute length here */
@@ -3034,11 +3022,11 @@ static int exif_process_string(char **result, char *value, size_t byte_count) {
 	/* we cannot use strlcpy - here the problem is that we cannot use strlen to
 	 * determine length of string and we cannot use strlcpy with len=byte_count+1
 	 * because then we might get into an EXCEPTION if we exceed an allocated
-	 * memory page...so we use php_strnlen in conjunction with memcpy and add the NUL
+	 * memory page...so we use zend_strnlen in conjunction with memcpy and add the NUL
 	 * char.
 	 * estrdup would sometimes allocate more memory and does not return length
 	 */
-	if ((byte_count=php_strnlen(value, byte_count)) > 0) {
+	if ((byte_count=zend_strnlen(value, byte_count)) > 0) {
 		return exif_process_undefined(result, value, byte_count);
 	}
 	(*result) = estrndup("", 1); /* force empty string */
@@ -3412,7 +3400,7 @@ static bool exif_process_IFD_TAG_impl(image_info_type *ImageInfo, char *dir_entr
 		switch(tag) {
 			case TAG_COPYRIGHT:
 				/* check for "<photographer> NUL <editor> NUL" */
-				if (byte_count>1 && (length=php_strnlen(value_ptr, byte_count)) > 0) {
+				if (byte_count>1 && (length=zend_strnlen(value_ptr, byte_count)) > 0) {
 					if (length<byte_count-1) {
 						/* When there are any characters after the first NUL */
 						EFREE_IF(ImageInfo->CopyrightPhotographer);
@@ -3776,10 +3764,10 @@ static void exif_process_APP12(image_info_type *ImageInfo, char *buffer, size_t 
 {
 	size_t l1, l2=0;
 
-	if ((l1 = php_strnlen(buffer+2, length-2)) > 0) {
+	if ((l1 = zend_strnlen(buffer+2, length-2)) > 0) {
 		exif_iif_add_tag(ImageInfo, SECTION_APP12, "Company", TAG_NONE, TAG_FMT_STRING, l1, buffer+2, l1);
 		if (length > 2+l1+1) {
-			l2 = php_strnlen(buffer+2+l1+1, length-2-l1-1);
+			l2 = zend_strnlen(buffer+2+l1+1, length-2-l1-1);
 			exif_iif_add_tag(ImageInfo, SECTION_APP12, "Info", TAG_NONE, TAG_FMT_STRING, l2, buffer+2+l1+1, l2);
 		}
 	}

@@ -4,20 +4,14 @@ mysqli_store_result()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 if (!defined('MYSQLI_STORE_RESULT_COPY_DATA')) {
     die("skip Requires MYSQLI_STORE_RESULT_COPY_DATA");
 }
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-
-    $tmp    = NULL;
-    $link   = NULL;
-
-
-    require('table.inc');
+    require 'table.inc';
 
     if (!$res = mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id"))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -36,7 +30,7 @@ if (!defined('MYSQLI_STORE_RESULT_COPY_DATA')) {
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+	require_once 'clean_table.inc';
 ?>
 --EXPECT--
 done!

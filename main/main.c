@@ -96,6 +96,16 @@ PHPAPI size_t core_globals_offset;
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
+PHPAPI const char *php_version(void)
+{
+	return PHP_VERSION;
+}
+
+PHPAPI unsigned int php_version_id(void)
+{
+	return PHP_VERSION_ID;
+}
+
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetFacility)
 {
@@ -934,11 +944,10 @@ static zend_string *escape_html(const char *buffer, size_t buffer_len) {
  */
 PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int type, const char *format, va_list args)
 {
-	zend_string *replace_buffer = NULL, *replace_origin = NULL;
-	char *buffer = NULL, *docref_buf = NULL, *target = NULL;
+	zend_string *replace_origin = NULL;
+	char *docref_buf = NULL, *target = NULL;
 	char *docref_target = "", *docref_root = "";
 	char *p;
-	int buffer_len = 0;
 	const char *space = "";
 	const char *class_name = "";
 	const char *function;
@@ -948,18 +957,16 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	int is_function = 0;
 
 	/* get error text into buffer and escape for html if necessary */
-	buffer_len = (int)vspprintf(&buffer, 0, format, args);
+	zend_string *buffer = vstrpprintf(0, format, args);
 
 	if (PG(html_errors)) {
-		replace_buffer = escape_html(buffer, buffer_len);
-		efree(buffer);
+		zend_string *replace_buffer = escape_html(ZSTR_VAL(buffer), ZSTR_LEN(buffer));
+		zend_string_free(buffer);
 
 		if (replace_buffer) {
-			buffer = ZSTR_VAL(replace_buffer);
-			buffer_len = (int)ZSTR_LEN(replace_buffer);
+			buffer = replace_buffer;
 		} else {
-			buffer = "";
-			buffer_len = 0;
+			buffer = zend_empty_string;
 		}
 	}
 
@@ -1081,15 +1088,15 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		}
 		/* display html formatted or only show the additional links */
 		if (PG(html_errors)) {
-			message = zend_strpprintf(0, "%s [<a href='%s%s%s'>%s</a>]: %s", origin, docref_root, docref, docref_target, docref, buffer);
+			message = zend_strpprintf_unchecked(0, "%s [<a href='%s%s%s'>%s</a>]: %S", origin, docref_root, docref, docref_target, docref, buffer);
 		} else {
-			message = zend_strpprintf(0, "%s [%s%s%s]: %s", origin, docref_root, docref, docref_target, buffer);
+			message = zend_strpprintf_unchecked(0, "%s [%s%s%s]: %S", origin, docref_root, docref, docref_target, buffer);
 		}
 		if (target) {
 			efree(target);
 		}
 	} else {
-		message = zend_strpprintf(0, "%s: %s", origin, buffer);
+		message = zend_strpprintf_unchecked(0, "%s: %S", origin, buffer);
 	}
 	if (replace_origin) {
 		zend_string_free(replace_origin);
@@ -1100,11 +1107,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		efree(docref_buf);
 	}
 
-	if (replace_buffer) {
-		zend_string_free(replace_buffer);
-	} else {
-		efree(buffer);
-	}
+	zend_string_free(buffer);
 
 	zend_error_zstr(type, message);
 	zend_string_release(message);
@@ -1113,13 +1116,21 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 
 /* {{{ php_error_docref */
 /* Generate an error which links to docref or the php.net documentation if docref is NULL */
+#define php_error_docref_impl(docref, type, format) do {\
+		va_list args; \
+		va_start(args, format); \
+		php_verror(docref, "", type, format, args); \
+		va_end(args); \
+	} while (0)
+
 PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char *format, ...)
 {
-	va_list args;
+	php_error_docref_impl(docref, type, format);
+}
 
-	va_start(args, format);
-	php_verror(docref, "", type, format, args);
-	va_end(args);
+PHPAPI ZEND_COLD void php_error_docref_unchecked(const char *docref, int type, const char *format, ...)
+{
+	php_error_docref_impl(docref, type, format);
 }
 /* }}} */
 
@@ -1351,19 +1362,21 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(buf), ZSTR_VAL(error_filename), error_lineno, STR_PRINT(append_string));
 						zend_string_free(buf);
 					} else {
-						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno, STR_PRINT(append_string));
+						php_printf_unchecked("%s<br />\n<b>%s</b>:  %S in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, message, ZSTR_VAL(error_filename), error_lineno, STR_PRINT(append_string));
 					}
 				} else {
 					/* Write CLI/CGI errors to stderr if display_errors = "stderr" */
 					if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi") || !strcmp(sapi_module.name, "phpdbg")) &&
 						PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
 					) {
-						fprintf(stderr, "%s: %s in %s on line %" PRIu32 "\n", error_type_str, ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno);
+						fprintf(stderr, "%s: ", error_type_str);
+						fwrite(ZSTR_VAL(message), sizeof(char), ZSTR_LEN(message), stderr);
+						fprintf(stderr, " in %s on line %" PRIu32 "\n", ZSTR_VAL(error_filename), error_lineno);
 #ifdef PHP_WIN32
 						fflush(stderr);
 #endif
 					} else {
-						php_printf("%s\n%s: %s in %s on line %" PRIu32 "\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(message), ZSTR_VAL(error_filename), error_lineno, STR_PRINT(append_string));
+						php_printf_unchecked("%s\n%s: %S in %s on line %" PRIu32 "\n%s", STR_PRINT(prepend_string), error_type_str, message, ZSTR_VAL(error_filename), error_lineno, STR_PRINT(append_string));
 					}
 				}
 			}
@@ -1601,15 +1614,24 @@ static void php_free_request_globals(void)
 static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void *data)
 {
 	switch (message) {
-		case ZMSG_FAILED_INCLUDE_FOPEN:
-			php_error_docref("function.include", E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
+		case ZMSG_FAILED_INCLUDE_FOPEN: {
+			char *tmp = estrdup((char *) data);
+			php_error_docref("function.include", E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php_strip_url_passwd(tmp), STR_PRINT(PG(include_path)));
+			efree(tmp);
 			break;
-		case ZMSG_FAILED_REQUIRE_FOPEN:
-			zend_throw_error(NULL, "Failed opening required '%s' (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
+		}
+		case ZMSG_FAILED_REQUIRE_FOPEN: {
+			char *tmp = estrdup((char *) data);
+			zend_throw_error(NULL, "Failed opening required '%s' (include_path='%s')", php_strip_url_passwd(tmp), STR_PRINT(PG(include_path)));
+			efree(tmp);
 			break;
-		case ZMSG_FAILED_HIGHLIGHT_FOPEN:
-			php_error_docref(NULL, E_WARNING, "Failed opening '%s' for highlighting", php_strip_url_passwd((char *) data));
+		}
+		case ZMSG_FAILED_HIGHLIGHT_FOPEN: {
+			char *tmp = estrdup((char *) data);
+			php_error_docref(NULL, E_WARNING, "Failed opening '%s' for highlighting", php_strip_url_passwd(tmp));
+			efree(tmp);
 			break;
+		}
 		case ZMSG_MEMORY_LEAK_DETECTED:
 		case ZMSG_MEMORY_LEAK_REPEATED:
 #if ZEND_DEBUG

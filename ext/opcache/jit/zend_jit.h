@@ -47,7 +47,7 @@
 #define ZEND_JIT_REG_ALLOC_GLOBAL (1<<1) /* global linear scan register allocation */
 #define ZEND_JIT_CPU_AVX          (1<<2) /* use AVX instructions, if available */
 
-#define ZEND_JIT_DEFAULT_BUFFER_SIZE  "0"
+#define ZEND_JIT_DEFAULT_BUFFER_SIZE  "64M"
 
 #define ZEND_JIT_COUNTER_INIT         32531
 
@@ -73,6 +73,16 @@
 #define ZEND_JIT_DEBUG_TRACE_BYTECODE  (1<<18)
 #define ZEND_JIT_DEBUG_TRACE_TSSA      (1<<19)
 #define ZEND_JIT_DEBUG_TRACE_EXIT_INFO (1<<20)
+
+#define ZEND_JIT_DEBUG_IR_SRC            (1<<24)
+#define ZEND_JIT_DEBUG_IR_FINAL          (1<<25)
+#define ZEND_JIT_DEBUG_IR_CFG            (1<<26)
+#define ZEND_JIT_DEBUG_IR_REGS           (1<<27)
+
+#define ZEND_JIT_DEBUG_IR_AFTER_SCCP     (1<<28)
+#define ZEND_JIT_DEBUG_IR_AFTER_SCHEDULE (1<<29)
+#define ZEND_JIT_DEBUG_IR_AFTER_REGS     (1<<30)
+#define ZEND_JIT_DEBUG_IR_CODEGEN        (1U<<31)
 
 #define ZEND_JIT_DEBUG_PERSISTENT      0x1f0 /* profile and debugger flags can't be changed at run-time */
 
@@ -148,44 +158,29 @@ ZEND_EXT_API void zend_jit_init(void);
 ZEND_EXT_API int  zend_jit_config(zend_string *jit_options, int stage);
 ZEND_EXT_API int  zend_jit_debug_config(zend_long old_val, zend_long new_val, int stage);
 ZEND_EXT_API int  zend_jit_check_support(void);
-ZEND_EXT_API int  zend_jit_startup(void *jit_buffer, size_t size, bool reattached);
+ZEND_EXT_API void zend_jit_startup(void *jit_buffer, size_t size, bool reattached);
 ZEND_EXT_API void zend_jit_shutdown(void);
 ZEND_EXT_API void zend_jit_activate(void);
 ZEND_EXT_API void zend_jit_deactivate(void);
 ZEND_EXT_API void zend_jit_status(zval *ret);
 ZEND_EXT_API void zend_jit_restart(void);
 
-typedef struct _zend_lifetime_interval zend_lifetime_interval;
-typedef struct _zend_life_range zend_life_range;
-
-struct _zend_life_range {
-	uint32_t         start;
-	uint32_t         end;
-	zend_life_range *next;
-};
-
-#define ZREG_FLAGS_SHIFT    8
-
-#define ZREG_STORE          (1<<0)
-#define ZREG_LOAD           (1<<1)
+#define ZREG_LOAD           (1<<0)
+#define ZREG_STORE          (1<<1)
 #define ZREG_LAST_USE       (1<<2)
-#define ZREG_SPLIT          (1<<3)
 
-struct _zend_lifetime_interval {
-	int                     ssa_var;
-	union {
-		struct {
-		ZEND_ENDIAN_LOHI_3(
-			int8_t          reg,
-			uint8_t         flags,
-			uint16_t        reserved
-		)};
-		uint32_t            reg_flags;
-	};
-	zend_life_range         range;
-	zend_lifetime_interval *hint;
-	zend_lifetime_interval *used_as_hint;
-	zend_lifetime_interval *list_next;
-};
+#define ZREG_PI             (1<<3)
+#define ZREG_PHI            (1<<4)
+#define ZREG_FORWARD        (1<<5)
+
+#define ZREG_SPILL_SLOT     (1<<3)
+
+#define ZREG_CONST          (1<<4)
+#define ZREG_ZVAL_COPY      (2<<4)
+#define ZREG_TYPE_ONLY      (3<<4)
+#define ZREG_ZVAL_ADDREF    (4<<4)
+#define ZREG_THIS           (5<<4)
+
+#define ZREG_NONE           -1
 
 #endif /* HAVE_JIT_H */

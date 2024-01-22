@@ -2528,13 +2528,10 @@ static bool ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 
 	if (UNEXPECTED(!zend_string_only_has_ascii_alphanumeric(Z_STR_P(str)))) {
 		zend_string *zstr = Z_STR_P(str);
-		GC_TRY_ADDREF(zstr);
+		zend_string_addref(zstr);
 		zend_error(E_DEPRECATED, "Increment on non-alphanumeric string is deprecated");
 		if (EG(exception)) {
-			GC_TRY_DELREF(zstr);
-			if (!GC_REFCOUNT(zstr)) {
-				efree(zstr);
-			}
+			zend_string_release(zstr);
 			return false;
 		}
 		zval_ptr_dtor(str);
@@ -2657,9 +2654,18 @@ try_again:
 			}
 			break;
 		case IS_FALSE:
-		case IS_TRUE:
+		case IS_TRUE: {
+			/* Error handler can undef/change type of op1, save it and reset it in case those cases */
+			zval copy;
+			ZVAL_COPY_VALUE(&copy, op1);
 			zend_error(E_WARNING, "Increment on type bool has no effect, this will change in the next major version of PHP");
+			zval_ptr_dtor(op1);
+			ZVAL_COPY_VALUE(op1, &copy);
+			if (EG(exception)) {
+				return FAILURE;
+			}
 			break;
+		}
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
 			goto try_again;
@@ -2728,26 +2734,45 @@ try_again:
 					zval_ptr_dtor_str(op1);
 					ZVAL_DOUBLE(op1, dval - 1);
 					break;
-				default:
+				default: {
+					/* Error handler can unset the variable */
+					zend_string *zstr = Z_STR_P(op1);
+					zend_string_addref(zstr);
 					zend_error(E_DEPRECATED, "Decrement on non-numeric string has no effect and is deprecated");
 					if (EG(exception)) {
+						zend_string_release(zstr);
 						return FAILURE;
 					}
+					zval_ptr_dtor(op1);
+					ZVAL_STR(op1, zstr);
+				}
 			}
 			break;
-		case IS_NULL:
+		case IS_NULL: {
+			/* Error handler can undef/change type of op1, save it and reset it in case those cases */
+			zval copy;
+			ZVAL_COPY_VALUE(&copy, op1);
 			zend_error(E_WARNING, "Decrement on type null has no effect, this will change in the next major version of PHP");
+			zval_ptr_dtor(op1);
+			ZVAL_COPY_VALUE(op1, &copy);
 			if (EG(exception)) {
 				return FAILURE;
 			}
 			break;
+		}
 		case IS_FALSE:
-		case IS_TRUE:
+		case IS_TRUE: {
+			/* Error handler can undef/change type of op1, save it and reset it in case those cases */
+			zval copy;
+			ZVAL_COPY_VALUE(&copy, op1);
 			zend_error(E_WARNING, "Decrement on type bool has no effect, this will change in the next major version of PHP");
+			zval_ptr_dtor(op1);
+			ZVAL_COPY_VALUE(op1, &copy);
 			if (EG(exception)) {
 				return FAILURE;
 			}
 			break;
+		}
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
 			goto try_again;

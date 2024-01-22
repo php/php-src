@@ -36,7 +36,7 @@ try {
 
 ?>
 --EXPECT--
-Serialization of 'DOMDocument' is not allowed
-Serialization of 'DOMElement' is not allowed
+Serialization of 'DOMDocument' is not allowed, unless serialization methods are implemented in a subclass
+Serialization of 'DOMElement' is not allowed, unless serialization methods are implemented in a subclass
 Serialization of 'DOMXPath' is not allowed
-Serialization of 'DOMNameSpaceNode' is not allowed
+Serialization of 'DOMNameSpaceNode' is not allowed, unless serialization methods are implemented in a subclass

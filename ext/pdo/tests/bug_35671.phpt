@@ -15,10 +15,10 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE test (field1 VARCHAR(32), field2 VARCHAR(32), field3 VARCHAR(32))');
+$db->exec('CREATE TABLE test35671 (field1 VARCHAR(32), field2 VARCHAR(32), field3 VARCHAR(32))');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$insert = $db->prepare("insert into test (field1, field2, field3) values (:value1, :value2, :value3)");
+$insert = $db->prepare("insert into test35671 (field1, field2, field3) values (:value1, :value2, :value3)");
 
 $parm = array(
     ":value1" => 15,
@@ -29,8 +29,14 @@ $parm = array(
 $insert->execute($parm);
 $insert = null;
 
-var_dump($db->query("SELECT * from test")->fetchAll(PDO::FETCH_ASSOC));
+var_dump($db->query("SELECT * from test35671")->fetchAll(PDO::FETCH_ASSOC));
 
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test35671");
 ?>
 --EXPECT--
 array(1) {

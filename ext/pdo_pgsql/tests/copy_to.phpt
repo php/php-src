@@ -16,12 +16,12 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
-$db->exec('CREATE TABLE test (a integer not null primary key, b text, c integer)');
+$db->exec('CREATE TABLE test_copy_to (a integer not null primary key, b text, c integer)');
 
 $db->beginTransaction();
 
 echo "Preparing test table for CopyTo tests\n";
-$stmt = $db->prepare("INSERT INTO test (a, b, c) values (?, ?, ?)");
+$stmt = $db->prepare("INSERT INTO test_copy_to (a, b, c) values (?, ?, ?)");
 
 for($i=0;$i<3;$i++) {
     $firstParameter = $i;
@@ -36,11 +36,11 @@ for($i=0;$i<3;$i++) {
 $db->commit();
 
 echo "Testing pgsqlCopyToArray() with default parameters\n";
-var_dump($db->pgsqlCopyToArray('test'));
+var_dump($db->pgsqlCopyToArray('test_copy_to'));
 echo "Testing pgsqlCopyToArray() with different field separator and not null indicator\n";
-var_dump($db->pgsqlCopyToArray('test',";","NULL"));
+var_dump($db->pgsqlCopyToArray('test_copy_to',";","NULL"));
 echo "Testing pgsqlCopyToArray() with only selected fields\n";
-var_dump($db->pgsqlCopyToArray('test',";","NULL",'a,c'));
+var_dump($db->pgsqlCopyToArray('test_copy_to',";","NULL",'a,c'));
 
 echo "Testing pgsqlCopyToArray() with error\n";
 try {
@@ -52,13 +52,13 @@ try {
 echo "Testing pgsqlCopyToFile() with default parameters\n";
 
 $filename="test_pgsqlCopyToFile.csv";
-var_dump($db->pgsqlCopyToFile('test',$filename));
+var_dump($db->pgsqlCopyToFile('test_copy_to',$filename));
 echo file_get_contents($filename);
 echo "Testing pgsqlCopyToFile() with different field separator and not null indicator\n";
-var_dump($db->pgsqlCopyToFile('test',$filename,";","NULL"));
+var_dump($db->pgsqlCopyToFile('test_copy_to',$filename,";","NULL"));
 echo file_get_contents($filename);
 echo "Testing pgsqlCopyToFile() with only selected fields\n";
-var_dump($db->pgsqlCopyToFile('test',$filename,";","NULL",'a,c'));
+var_dump($db->pgsqlCopyToFile('test_copy_to',$filename,";","NULL",'a,c'));
 echo file_get_contents($filename);
 
 echo "Testing pgsqlCopyToFile() with error\n";
@@ -70,7 +70,7 @@ try {
 
 echo "Testing pgsqlCopyToFile() to unwritable file\n";
 try {
-    var_dump($db->pgsqlCopyToFile('test', 'nonexistent/foo.csv'));
+    var_dump($db->pgsqlCopyToFile('test_copy_to', 'nonexistent/foo.csv'));
 } catch (Exception $e) {
     echo "Exception: {$e->getMessage()}\n";
 }
@@ -78,6 +78,12 @@ try {
 if(isset($filename)) {
     @unlink($filename);
 }
+?>
+--CLEAN--
+<?php
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
+$db->exec('DROP TABLE test_copy_to');
 ?>
 --EXPECTF--
 Preparing test table for CopyTo tests

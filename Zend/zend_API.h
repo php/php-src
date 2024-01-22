@@ -375,7 +375,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 ZEND_API void zend_unregister_functions(const zend_function_entry *functions, int count, HashTable *function_table);
 ZEND_API zend_result zend_startup_module(zend_module_entry *module_entry);
 ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *module_entry);
-ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module);
+ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module, int module_type);
 ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module);
 ZEND_API void zend_startup_modules(void);
 ZEND_API void zend_collect_module_handlers(void);
@@ -1794,9 +1794,9 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	Z_PARAM_DOUBLE_EX(dest, is_null, 1, 0)
 
 /* old "f" */
-#define Z_PARAM_FUNC_EX(dest_fci, dest_fcc, check_null, deref) \
+#define Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, deref, free_trampoline) \
 		Z_PARAM_PROLOGUE(deref, 0); \
-		if (UNEXPECTED(!zend_parse_arg_func(_arg, &dest_fci, &dest_fcc, check_null, &_error))) { \
+		if (UNEXPECTED(!zend_parse_arg_func(_arg, &dest_fci, &dest_fcc, check_null, &_error, free_trampoline))) { \
 			if (!_error) { \
 				_expected_type = check_null ? Z_EXPECTED_FUNC_OR_NULL : Z_EXPECTED_FUNC; \
 				_error_code = ZPP_ERROR_WRONG_ARG; \
@@ -1806,14 +1806,22 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 			break; \
 		} \
 
+#define Z_PARAM_FUNC_EX(dest_fci, dest_fcc, check_null, deref) Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, check_null, deref, true)
+
 #define Z_PARAM_FUNC(dest_fci, dest_fcc) \
-	Z_PARAM_FUNC_EX(dest_fci, dest_fcc, 0, 0)
+	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, 0, 0, true)
+
+#define Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(dest_fci, dest_fcc) \
+	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, 0, 0, false)
 
 #define Z_PARAM_FUNC_OR_NULL(dest_fci, dest_fcc) \
-	Z_PARAM_FUNC_EX(dest_fci, dest_fcc, 1, 0)
+	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, 1, 0, true)
+
+#define Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(dest_fci, dest_fcc) \
+	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, 1, 0, false)
 
 #define Z_PARAM_FUNC_OR_NULL_WITH_ZVAL(dest_fci, dest_fcc, dest_zp) \
-	Z_PARAM_FUNC_EX(dest_fci, dest_fcc, 1, 0) \
+	Z_PARAM_FUNC_EX2(dest_fci, dest_fcc, 1, 0, true) \
 	Z_PARAM_GET_PREV_ZVAL(dest_zp)
 
 /* old "h" */
@@ -2428,7 +2436,7 @@ static zend_always_inline bool zend_parse_arg_resource(zval *arg, zval **dest, b
 	return 1;
 }
 
-static zend_always_inline bool zend_parse_arg_func(zval *arg, zend_fcall_info *dest_fci, zend_fcall_info_cache *dest_fcc, bool check_null, char **error)
+static zend_always_inline bool zend_parse_arg_func(zval *arg, zend_fcall_info *dest_fci, zend_fcall_info_cache *dest_fcc, bool check_null, char **error, bool free_trampoline)
 {
 	if (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		dest_fci->size = 0;
@@ -2437,10 +2445,12 @@ static zend_always_inline bool zend_parse_arg_func(zval *arg, zend_fcall_info *d
 	} else if (UNEXPECTED(zend_fcall_info_init(arg, 0, dest_fci, dest_fcc, NULL, error) != SUCCESS)) {
 		return 0;
 	}
-	/* Release call trampolines: The function may not get called, in which case
-	 * the trampoline will leak. Force it to be refetched during
-	 * zend_call_function instead. */
-	zend_release_fcall_info_cache(dest_fcc);
+	if (free_trampoline) {
+		/* Release call trampolines: The function may not get called, in which case
+		 * the trampoline will leak. Force it to be refetched during
+		 * zend_call_function instead. */
+		zend_release_fcall_info_cache(dest_fcc);
+	}
 	return 1;
 }
 

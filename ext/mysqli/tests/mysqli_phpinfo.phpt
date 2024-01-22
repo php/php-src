@@ -4,11 +4,11 @@ phpinfo() mysqli section
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    include("connect.inc");
+    include 'connect.inc';
 
     @ob_clean();
     ob_start();

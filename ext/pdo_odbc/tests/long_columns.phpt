@@ -46,9 +46,9 @@ require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory('ext/pdo_odbc/tests/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data CLOB)')) {
-    if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data longtext)')) {
-        if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data varchar(4000))')) {
+if (false === $db->exec('CREATE TABLE test_long_columns (id INT NOT NULL PRIMARY KEY, data CLOB)')) {
+    if (false === $db->exec('CREATE TABLE test_long_columns (id INT NOT NULL PRIMARY KEY, data longtext)')) {
+        if (false === $db->exec('CREATE TABLE test_long_columns (id INT NOT NULL PRIMARY KEY, data varchar(4000))')) {
             die("BORK: don't know how to create a long column here:\n" . implode(", ", $db->errorInfo()));
         }
     }
@@ -74,11 +74,11 @@ function alpha_repeat($len) {
 // this test does - nice to be able to test using MS SQL server
 foreach ($sizes as $num) {
     $text = alpha_repeat($num);
-    $db->exec("INSERT INTO TEST VALUES($num, '$text')");
+    $db->exec("INSERT INTO test_long_columns VALUES($num, '$text')");
 }
 
 // verify data
-foreach ($db->query('SELECT id, data from TEST ORDER BY LEN(data) ASC') as $row) {
+foreach ($db->query('SELECT id, data from test_long_columns ORDER BY LEN(data) ASC') as $row) {
     $expect = alpha_repeat($row[0]);
     if (strcmp($expect, $row[1])) {
         echo "Failed on size $row[id]:\n";
@@ -91,6 +91,12 @@ foreach ($db->query('SELECT id, data from TEST ORDER BY LEN(data) ASC') as $row)
 }
 
 echo "Finished\n";
+?>
+--CLEAN--
+<?php
+require 'ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+$db->exec("DROP TABLE IF EXISTS test_long_columns");
 ?>
 --EXPECT--
 Passed on size 32

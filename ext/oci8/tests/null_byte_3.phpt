@@ -2,13 +2,17 @@
 Null bytes in SQL statements
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --INI--
 display_errors = On
 error_reporting = E_WARNING
 --FILE--
 <?php
 
-require(__DIR__.'/connect.inc');
+require __DIR__.'/connect.inc';
 
 // Run Test
 

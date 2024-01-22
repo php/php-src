@@ -50,7 +50,7 @@ void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 	/* Special case if exponent is a zero. */
 	if (exponent == 0) {
 		bc_free_num (result);
-		*result = bc_copy_num (BCG(_one_));
+		*result = bc_copy_num(BCG(_one_));
 		return;
 	}
 
@@ -61,35 +61,35 @@ void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 		rscale = scale;
 	} else {
 		is_neg = false;
-		rscale = MIN (num1->n_scale*exponent, MAX(scale, num1->n_scale));
+		rscale = MIN (num1->n_scale * exponent, MAX(scale, num1->n_scale));
 	}
 
 	/* Set initial value of temp. */
-	power = bc_copy_num (num1);
+	power = bc_copy_num(num1);
 	pwrscale = num1->n_scale;
 	while ((exponent & 1) == 0) {
-		pwrscale = 2*pwrscale;
-		bc_multiply (power, power, &power, pwrscale);
+		pwrscale = 2 * pwrscale;
+		bc_multiply(power, power, &power, pwrscale);
 		exponent = exponent >> 1;
 	}
-	temp = bc_copy_num (power);
+	temp = bc_copy_num(power);
 	calcscale = pwrscale;
 	exponent = exponent >> 1;
 
 	/* Do the calculation. */
 	while (exponent > 0) {
-		pwrscale = 2*pwrscale;
-		bc_multiply (power, power, &power, pwrscale);
+		pwrscale = 2 * pwrscale;
+		bc_multiply(power, power, &power, pwrscale);
 		if ((exponent & 1) == 1) {
 			calcscale = pwrscale + calcscale;
-			bc_multiply (temp, power, &temp, calcscale);
+			bc_multiply(temp, power, &temp, calcscale);
 		}
 		exponent = exponent >> 1;
 	}
 
 	/* Assign the value. */
 	if (is_neg) {
-		bc_divide (BCG(_one_), temp, result, rscale);
+		bc_divide(BCG(_one_), temp, result, rscale);
 		bc_free_num (&temp);
 	} else {
 		bc_free_num (result);

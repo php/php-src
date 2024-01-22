@@ -2,12 +2,16 @@
 Check oci_pconnect try/catch end-of-scope with old_oci_close_semantics On
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --INI--
 oci8.old_oci_close_semantics=1
 --FILE--
 <?php
 
-require(__DIR__.'/details.inc');
+require __DIR__.'/details.inc';
 
 // Initialization
 

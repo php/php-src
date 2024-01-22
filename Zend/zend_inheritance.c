@@ -60,20 +60,33 @@ static void ZEND_COLD emit_incompatible_method_error(
 		const zend_function *parent, zend_class_entry *parent_scope,
 		inheritance_status status);
 
-static void zend_type_copy_ctor(zend_type *type, bool persistent) {
-	if (ZEND_TYPE_HAS_LIST(*type)) {
-		zend_type_list *old_list = ZEND_TYPE_LIST(*type);
-		size_t size = ZEND_TYPE_LIST_SIZE(old_list->num_types);
-		zend_type_list *new_list = ZEND_TYPE_USES_ARENA(*type)
-			? zend_arena_alloc(&CG(arena), size) : pemalloc(size, persistent);
-		memcpy(new_list, old_list, ZEND_TYPE_LIST_SIZE(old_list->num_types));
-		ZEND_TYPE_SET_PTR(*type, new_list);
+static void zend_type_copy_ctor(zend_type *const type, bool use_arena, bool persistent);
 
-		zend_type *list_type;
-		ZEND_TYPE_LIST_FOREACH(new_list, list_type) {
-			ZEND_ASSERT(ZEND_TYPE_HAS_NAME(*list_type));
-			zend_string_addref(ZEND_TYPE_NAME(*list_type));
-		} ZEND_TYPE_LIST_FOREACH_END();
+static void zend_type_list_copy_ctor(
+	zend_type *const parent_type,
+	bool use_arena,
+	bool persistent
+) {
+	const zend_type_list *const old_list = ZEND_TYPE_LIST(*parent_type);
+	size_t size = ZEND_TYPE_LIST_SIZE(old_list->num_types);
+	zend_type_list *new_list = use_arena
+		? zend_arena_alloc(&CG(arena), size) : pemalloc(size, persistent);
+
+	memcpy(new_list, old_list, size);
+	ZEND_TYPE_SET_LIST(*parent_type, new_list);
+	if (use_arena) {
+		ZEND_TYPE_FULL_MASK(*parent_type) |= _ZEND_TYPE_ARENA_BIT;
+	}
+
+	zend_type *list_type;
+	ZEND_TYPE_LIST_FOREACH(new_list, list_type) {
+		zend_type_copy_ctor(list_type, use_arena, persistent);
+	} ZEND_TYPE_LIST_FOREACH_END();
+}
+
+static void zend_type_copy_ctor(zend_type *const type, bool use_arena, bool persistent) {
+	if (ZEND_TYPE_HAS_LIST(*type)) {
+		zend_type_list_copy_ctor(type, use_arena, persistent);
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
 		zend_string_addref(ZEND_TYPE_NAME(*type));
 	}
@@ -1068,12 +1081,13 @@ static void perform_delayable_implementation_check(
 /**
  * @param check_only Set to false to throw compile errors on incompatible methods, or true to return INHERITANCE_ERROR.
  * @param checked Whether the compatibility check has already succeeded in zend_can_early_bind().
+ * @param force_mutable Whether we know that child may be modified, i.e. doesn't live in shm.
  */
 static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		zend_function *child, zend_class_entry *child_scope,
 		zend_function *parent, zend_class_entry *parent_scope,
 		zend_class_entry *ce, zval *child_zv,
-		bool check_visibility, bool check_only, bool checked) /* {{{ */
+		bool check_visibility, bool check_only, bool checked, bool force_mutable) /* {{{ */
 {
 	uint32_t child_flags;
 	uint32_t parent_flags = parent->common.fn_flags;
@@ -1175,7 +1189,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		perform_delayable_implementation_check(ce, child, child_scope, parent, parent_scope);
 	}
 
-	if (!check_only && child->common.scope == ce) {
+	if (!check_only && (child->common.scope == ce || force_mutable)) {
 		child->common.fn_flags &= ~ZEND_ACC_OVERRIDE;
 	}
 
@@ -1188,7 +1202,7 @@ static zend_never_inline void do_inheritance_check_on_method(
 		zend_function *parent, zend_class_entry *parent_scope,
 		zend_class_entry *ce, zval *child_zv, bool check_visibility)
 {
-	do_inheritance_check_on_method_ex(child, child_scope, parent, parent_scope, ce, child_zv, check_visibility, 0, 0);
+	do_inheritance_check_on_method_ex(child, child_scope, parent, parent_scope, ce, child_zv, check_visibility, 0, 0, /* force_mutable */ false);
 }
 
 static zend_always_inline void do_inherit_method(zend_string *key, zend_function *parent, zend_class_entry *ce, bool is_interface, bool checked) /* {{{ */
@@ -1206,7 +1220,7 @@ static zend_always_inline void do_inherit_method(zend_string *key, zend_function
 		if (checked) {
 			do_inheritance_check_on_method_ex(
 				func, func->common.scope, parent, parent->common.scope, ce, child,
-				/* check_visibility */ 1, 0, checked);
+				/* check_visibility */ 1, 0, checked, /* force_mutable */ false);
 		} else {
 			do_inheritance_check_on_method(
 				func, func->common.scope, parent, parent->common.scope, ce, child,
@@ -1533,7 +1547,10 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 			do {
 				dst--;
 				src--;
-				ZVAL_COPY_OR_DUP_PROP(dst, src);
+				/* We don't have to account for refcounting because
+				 * zend_declare_typed_property() disallows refcounted defaults for internal classes. */
+				ZEND_ASSERT(!Z_REFCOUNTED_P(src));
+				ZVAL_COPY_VALUE_PROP(dst, src);
 				if (Z_OPT_TYPE_P(dst) == IS_CONSTANT_AST) {
 					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 					ce->ce_flags |= ZEND_ACC_HAS_AST_PROPERTIES;
@@ -1933,6 +1950,7 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 {
 	zend_function *existing_fn = NULL;
 	zend_function *new_fn;
+	bool check_inheritance = false;
 
 	if ((existing_fn = zend_hash_find_ptr(&ce->function_table, key)) != NULL) {
 		/* if it is the same function with the same visibility and has not been assigned a class scope yet, regardless
@@ -1967,11 +1985,7 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 				ZSTR_VAL(ce->name), ZSTR_VAL(name),
 				ZSTR_VAL(existing_fn->common.scope->name), ZSTR_VAL(existing_fn->common.function_name));
 		} else {
-			/* Inherited members are overridden by members inserted by traits.
-			 * Check whether the trait method fulfills the inheritance requirements. */
-			do_inheritance_check_on_method(
-				fn, fixup_trait_scope(fn, ce), existing_fn, fixup_trait_scope(existing_fn, ce),
-				ce, NULL, /* check_visibility */ 1);
+			check_inheritance = true;
 		}
 	}
 
@@ -1991,6 +2005,14 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 	function_add_ref(new_fn);
 	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
 	zend_add_magic_method(ce, fn, key);
+
+	if (check_inheritance) {
+		/* Inherited members are overridden by members inserted by traits.
+		 * Check whether the trait method fulfills the inheritance requirements. */
+		do_inheritance_check_on_method_ex(
+			fn, fixup_trait_scope(fn, ce), existing_fn, fixup_trait_scope(existing_fn, ce),
+			ce, NULL, /* check_visibility */ 1, false, false, /* force_mutable */ true);
+	}
 }
 /* }}} */
 
@@ -2009,6 +2031,17 @@ static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* 
 	}
 }
 /* }}} */
+
+static void zend_traits_check_private_final_inheritance(uint32_t original_fn_flags, zend_function *fn_copy, zend_string *name)
+{
+	/* If the function was originally already private+final, then it will have already been warned about.
+	 * If the function became private+final only after applying modifiers, we need to emit the same warning. */
+	if ((original_fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) != (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)
+		&& (fn_copy->common.fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) == (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)
+		&& !zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME)) {
+		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");
+	}
+}
 
 static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, zend_class_entry *ce, HashTable *exclude_table, zend_class_entry **aliases) /* {{{ */
 {
@@ -2029,11 +2062,13 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 				&& zend_string_equals_ci(alias->trait_method.method_name, fnname)
 			) {
 				fn_copy = *fn;
-
-				/* if it is 0, no modifiers have been changed */
-				if (alias->modifiers) {
+				if (alias->modifiers & ZEND_ACC_PPP_MASK) {
 					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
+				} else {
+					fn_copy.common.fn_flags = alias->modifiers | fn->common.fn_flags;
 				}
+
+				zend_traits_check_private_final_inheritance(fn->common.fn_flags, &fn_copy, alias->alias);
 
 				lcname = zend_string_tolower(alias->alias);
 				zend_add_trait_method(ce, alias->alias, lcname, &fn_copy);
@@ -2060,13 +2095,19 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 					&& fn->common.scope == aliases[i]
 					&& zend_string_equals_ci(alias->trait_method.method_name, fnname)
 				) {
-					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
+					if (alias->modifiers & ZEND_ACC_PPP_MASK) {
+						fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
+					} else {
+						fn_copy.common.fn_flags = alias->modifiers | fn->common.fn_flags;
+					}
 				}
 				alias_ptr++;
 				alias = *alias_ptr;
 				i++;
 			}
 		}
+
+		zend_traits_check_private_final_inheritance(fn->common.fn_flags, &fn_copy, fnname);
 
 		zend_add_trait_method(ce, fn->common.function_name, fnname, &fn_copy);
 	}
@@ -2506,7 +2547,8 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 			doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
 
 			zend_type type = property_info->type;
-			zend_type_copy_ctor(&type, /* persistent */ 0);
+			/* Assumption: only userland classes can use traits, as such the type must be arena allocated */
+			zend_type_copy_ctor(&type, /* use arena */ true, /* persistent */ false);
 			new_prop = zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, type);
 
 			if (property_info->attributes) {
@@ -2920,15 +2962,8 @@ static zend_class_entry *zend_lazy_class_load(zend_class_entry *pce)
 			Z_PTR(p->val) = new_prop_info;
 			memcpy(new_prop_info, prop_info, sizeof(zend_property_info));
 			new_prop_info->ce = ce;
-			if (ZEND_TYPE_HAS_LIST(new_prop_info->type)) {
-				zend_type_list *new_list;
-				zend_type_list *list = ZEND_TYPE_LIST(new_prop_info->type);
-
-				new_list = zend_arena_alloc(&CG(arena), ZEND_TYPE_LIST_SIZE(list->num_types));
-				memcpy(new_list, list, ZEND_TYPE_LIST_SIZE(list->num_types));
-				ZEND_TYPE_SET_PTR(new_prop_info->type, list);
-				ZEND_TYPE_FULL_MASK(new_prop_info->type) |= _ZEND_TYPE_ARENA_BIT;
-			}
+			/* Deep copy the type information */
+			zend_type_copy_ctor(&new_prop_info->type, /* use_arena */ true, /* persistent */ false);
 		}
 	}
 
@@ -3232,7 +3267,7 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 				do_inheritance_check_on_method_ex(
 					child_func, child_func->common.scope,
 					parent_func, parent_func->common.scope,
-					ce, NULL, /* check_visibility */ 1, 1, 0);
+					ce, NULL, /* check_visibility */ 1, 1, 0, /* force_mutable */ false);
 			if (UNEXPECTED(status == INHERITANCE_WARNING)) {
 				overall_status = INHERITANCE_WARNING;
 			} else if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {

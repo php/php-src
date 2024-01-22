@@ -38,6 +38,7 @@ struct _notationIterator {
 	xmlNotation *notation;
 };
 
+/* Function pointer typedef changed in 2.9.8, see https://github.com/GNOME/libxml2/commit/e03f0a199a67017b2f8052354cf732b2b4cae787 */
 #if LIBXML_VERSION >= 20908
 static void itemHashScanner (void *payload, void *data, const xmlChar *name) /* {{{ */
 #else
@@ -131,7 +132,7 @@ static void php_dom_iterator_dtor(zend_object_iterator *iter) /* {{{ */
 }
 /* }}} */
 
-static int php_dom_iterator_valid(zend_object_iterator *iter) /* {{{ */
+static zend_result php_dom_iterator_valid(zend_object_iterator *iter) /* {{{ */
 {
 
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;

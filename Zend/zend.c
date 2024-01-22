@@ -230,7 +230,12 @@ static ZEND_INI_MH(OnUpdateReservedStackSize) /* {{{ */
 static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 {
 	if (new_value) {
-		EG(fiber_stack_size) = zend_ini_parse_uquantity_warn(new_value, entry->name);
+		zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
+		if (tmp < 0) {
+			zend_error(E_WARNING, "fiber.stack_size must be a positive number");
+			return FAILURE;
+		}
+		EG(fiber_stack_size) = tmp;
 	} else {
 		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_C_STACK_SIZE;
 	}
@@ -546,6 +551,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				HashTable *properties;
 
 				zend_object *zobj = Z_OBJ_P(expr);
+				uint32_t *guard = zend_get_recursion_guard(zobj);
 				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(zobj);
 				smart_str_appends(buf, ZSTR_VAL(class_name));
 				zend_string_release_ex(class_name, 0);
@@ -561,7 +567,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 					smart_str_appendc(buf, '\n');
 				}
 
-				if (GC_IS_RECURSIVE(Z_OBJ_P(expr))) {
+				if (ZEND_GUARD_OR_GC_IS_RECURSIVE(guard, DEBUG, zobj)) {
 					smart_str_appends(buf, " *RECURSION*");
 					return;
 				}
@@ -571,9 +577,9 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 					break;
 				}
 
-				GC_PROTECT_RECURSION(Z_OBJ_P(expr));
+				ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
 				print_hash(buf, properties, indent, 1);
-				GC_UNPROTECT_RECURSION(Z_OBJ_P(expr));
+				ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, DEBUG, zobj);
 
 				zend_release_properties(properties);
 				break;
@@ -1271,28 +1277,10 @@ void zend_call_destructors(void) /* {{{ */
 }
 /* }}} */
 
-static void zend_release_open_basedir(void)
-{
-	/* Release custom open_basedir config, this needs to happen before ini shutdown */
-	if (PG(open_basedir)) {
-		zend_ini_entry *ini_entry = zend_hash_str_find_ptr(EG(ini_directives), "open_basedir", strlen("open_basedir"));
-		/* ini_entry->modified is unreliable, it might also be set when on_update has failed. */
-		if (ini_entry
-		 && ini_entry->modified
-		 && ini_entry->value != ini_entry->orig_value) {
-			efree(PG(open_basedir));
-			PG(open_basedir) = NULL;
-		}
-	}
-}
-
 ZEND_API void zend_deactivate(void) /* {{{ */
 {
 	/* we're no longer executing anything */
 	EG(current_execute_data) = NULL;
-
-	/* Needs to run before zend_ini_deactivate(). */
-	zend_release_open_basedir();
 
 	zend_try {
 		shutdown_scanner();
@@ -1609,26 +1597,22 @@ ZEND_API ZEND_COLD void zend_error_at(
 	va_end(args);
 }
 
-ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) {
-	zend_string *filename;
-	uint32_t lineno;
-	va_list args;
+#define zend_error_impl(type, format) do { \
+		zend_string *filename; \
+		uint32_t lineno; \
+		va_list args; \
+		get_filename_lineno(type, &filename, &lineno); \
+		va_start(args, format); \
+		zend_error_va_list(type, filename, lineno, format, args); \
+		va_end(args); \
+	} while (0)
 
-	get_filename_lineno(type, &filename, &lineno);
-	va_start(args, format);
-	zend_error_va_list(type, filename, lineno, format, args);
-	va_end(args);
+ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) {
+	zend_error_impl(type, format);
 }
 
 ZEND_API ZEND_COLD void zend_error_unchecked(int type, const char *format, ...) {
-	zend_string *filename;
-	uint32_t lineno;
-	va_list args;
-
-	get_filename_lineno(type, &filename, &lineno);
-	va_start(args, format);
-	zend_error_va_list(type, filename, lineno, format, args);
-	va_end(args);
+	zend_error_impl(type, format);
 }
 
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
@@ -1648,25 +1632,39 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
 	abort();
 }
 
+#define zend_error_noreturn_impl(type, format) do { \
+		zend_string *filename; \
+		uint32_t lineno; \
+		va_list args; \
+		get_filename_lineno(type, &filename, &lineno); \
+		va_start(args, format); \
+		zend_error_va_list(type, filename, lineno, format, args); \
+		va_end(args); \
+		/* Should never reach this. */ \
+		abort(); \
+	} while (0)
+
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...)
 {
-	zend_string *filename;
-	uint32_t lineno;
-	va_list args;
+	zend_error_noreturn_impl(type, format);
+}
 
-	get_filename_lineno(type, &filename, &lineno);
-	va_start(args, format);
-	zend_error_va_list(type, filename, lineno, format, args);
-	va_end(args);
-	/* Should never reach this. */
-	abort();
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn_unchecked(int type, const char *format, ...)
+{
+	zend_error_noreturn_impl(type, format);
 }
 
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn, const char *message)
 {
-#ifdef HAVE_STR_ERROR_R
-	char buf[1024];
-	strerror_r(errn, buf, sizeof(buf));
+#ifdef HAVE_STRERROR_R
+	char b[1024];
+
+# ifdef STRERROR_R_CHAR_P
+	char *buf = strerror_r(errn, b, sizeof(b));
+# else
+	strerror_r(errn, b, sizeof(b));
+	char *buf = b;
+# endif
 #else
 	char *buf = strerror(errn);
 #endif
@@ -1736,7 +1734,7 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 	if (EG(current_execute_data) && !CG(in_compilation)) {
 		zend_throw_exception(exception_ce, message, 0);
 	} else {
-		zend_error(E_ERROR, "%s", message);
+		zend_error_noreturn(E_ERROR, "%s", message);
 	}
 
 	efree(message);

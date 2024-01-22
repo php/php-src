@@ -4,6 +4,7 @@ oci_connect() without ORACLE_HOME set (OCIServerAttach() segfaults)
 oci8
 --SKIPIF--
 <?php
+require_once 'skipifconnectfailure.inc';
 ob_start();
 phpinfo(INFO_MODULES);
 $phpinfo = ob_get_clean();

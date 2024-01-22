@@ -5,7 +5,7 @@ mysqli
 posix
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
     die("skip cannot connect");
@@ -25,7 +25,7 @@ if (!function_exists('posix_setrlimit') || !posix_setrlimit(POSIX_RLIMIT_NOFILE,
         $fds[] = @fopen(__DIR__ . "/GH-9590-tmpfile.$i", 'w');
     }
 
-    require_once('connect.inc');
+    require_once 'connect.inc';
 
     function get_connection() {
         global $host, $user, $passwd, $db, $port, $socket;

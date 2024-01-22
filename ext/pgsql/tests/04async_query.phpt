@@ -3,13 +3,16 @@ PostgreSQL async query
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 
-include('config.inc');
+include('inc/config.inc');
+$table_name = "table_04async_query";
 
 $db = pg_connect($conn_str);
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} DEFAULT VALUES");
 
 if (!pg_send_query($db, "SELECT * FROM ".$table_name.";")) {
     echo "pg_send_query() error\n";
@@ -46,7 +49,7 @@ for ($i=0; $i < $rows; $i++)
 pg_num_rows(pg_query($db, "SELECT * FROM ".$table_name.";"));
 pg_num_fields(pg_query($db, "SELECT * FROM ".$table_name.";"));
 pg_field_name($result, 0);
-pg_field_num($result, $field_name);
+pg_field_num($result, "num");
 pg_field_size($result, 0);
 pg_field_type($result, 0);
 pg_field_prtlen($result, 0);
@@ -63,5 +66,16 @@ pg_free_result($result);
 
 echo "OK";
 ?>
---EXPECT--
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_04async_query";
+
+$db = pg_connect($conn_str);
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
+?>
+--EXPECTF--
+Deprecated: Calling pg_field_prtlen() with 2 arguments is deprecated, use the 3-parameter signature with a null $row parameter instead in %s on line %d
+
+Deprecated: Calling pg_field_is_null() with 2 arguments is deprecated, use the 3-parameter signature with a null $row parameter instead in %s on line %d
 OK

@@ -53,16 +53,16 @@ bool bc_divmod(bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, size_t scale
 	}
 
 	/* Calculate final scale. */
-	rscale = MAX (num1->n_scale, num2->n_scale+scale);
+	rscale = MAX (num1->n_scale, num2->n_scale + scale);
 	bc_init_num(&temp);
 
 	/* Calculate it. */
-	bc_divide (num1, num2, &temp, 0);
+	bc_divide(num1, num2, &temp, 0);
 	if (quot) {
 		quotient = bc_copy_num(temp);
 	}
-	bc_multiply (temp, num2, &temp, rscale);
-	bc_sub (num1, temp, rem, rscale);
+	bc_multiply(temp, num2, &temp, rscale);
+	bc_sub(num1, temp, rem, rscale);
 	bc_free_num (&temp);
 
 	if (quot) {

@@ -333,8 +333,10 @@ void *phpdbg_watchpoint_userfaultfd_thread(void *phpdbg_globals) {
 
 /* ### REGISTER WATCHPOINT ### To be used only by watch element and collision managers ### */
 static inline void phpdbg_store_watchpoint_btree(phpdbg_watchpoint_t *watch) {
-	phpdbg_btree_result *res;
-	ZEND_ASSERT((res = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), (zend_ulong) watch->addr.ptr)) == NULL || res->ptr == watch);
+#if ZEND_DEBUG
+	phpdbg_btree_result *res = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), (zend_ulong) watch->addr.ptr);
+	ZEND_ASSERT(res == NULL || res->ptr == watch);
+#endif
 	phpdbg_btree_insert(&PHPDBG_G(watchpoint_tree), (zend_ulong) watch->addr.ptr, watch);
 }
 

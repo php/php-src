@@ -16,4 +16,4 @@ if (!function_exists('pcntl_getpriority')) {
 var_dump(pcntl_getpriority());
 ?>
 --EXPECTF--
-int(%d)
+int(%i)

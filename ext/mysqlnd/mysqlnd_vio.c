@@ -569,7 +569,6 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 	    php_stream_xport_crypto_enable(net_stream, 1) < 0)
 	{
 		DBG_ERR("Cannot connect to MySQL by using SSL");
-		php_error_docref(NULL, E_WARNING, "Cannot connect to MySQL by using SSL");
 		DBG_RETURN(FAIL);
 	}
 	net->data->ssl = TRUE;

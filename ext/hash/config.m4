@@ -4,6 +4,7 @@ PHP_ARG_WITH([mhash],
     [Include mhash support])])
 
 if test "$PHP_MHASH" != "no"; then
+  AC_MSG_WARN([The --with-mhash option and mhash* functions are deprecated as of PHP 8.1.0])
   AC_DEFINE(PHP_MHASH_BC, 1, [ ])
 fi
 

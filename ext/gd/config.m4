@@ -138,15 +138,60 @@ AC_DEFUN([PHP_GD_JISX0208],[
   fi
 ])
 
+dnl Build and run a program to determine if GD has support for the given
+dnl format. The first argument is the proper-noun-capitalized name of the
+dnl format -- basically the word Foo in gdImageCreateFromFoo -- such as
+dnl Png. If support for format Foo exists, the second argument (the name
+dnl of a constant) will be defined to 1. The reason for this charade is
+dnl that gd defines "junk" versions of each gdImageCreateFromFoo function
+dnl even when it does not support the Foo format. Those junk functions
+dnl display a warning but eventually return normally, making a simple link
+dnl or run test insufficient.
+AC_DEFUN([PHP_GD_CHECK_FORMAT],[
+  old_LIBS="${LIBS}"
+  LIBS="${LIBS} ${GD_SHARED_LIBADD}"
+  AC_MSG_CHECKING([for working gdImageCreateFrom$1 in libgd])
+  AC_LANG_PUSH([C])
+  AC_RUN_IFELSE([AC_LANG_SOURCE([
+#include <stdio.h>
+#include <unistd.h>
+#include <gd.h>
+
+/* A custom gdErrorMethod */
+void exit1(int priority, const char *format, va_list args) {
+  _exit(1);
+}
+
+/* Override the default gd_error_method with one that
+   actually causes the program to return an error. */
+int main(int argc, char** argv) {
+  m4_if([$1],[Xpm],
+  [char* f = "test.xpm"],
+  [FILE* f = NULL]);
+  gdSetErrorMethod(exit1);
+  gdImagePtr p = gdImageCreateFrom$1(f);
+  return 0;
+}])],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE($2, 1, [Does gdImageCreateFrom$1 work?])
+  ],[
+    AC_MSG_RESULT([no])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
+  AC_LANG_POP([C])
+  LIBS="${old_LIBS}"
+])
+
 AC_DEFUN([PHP_GD_CHECK_VERSION],[
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromPng,          [AC_DEFINE(HAVE_GD_PNG,               1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromAvif,         [AC_DEFINE(HAVE_GD_AVIF,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromWebp,         [AC_DEFINE(HAVE_GD_WEBP,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpeg,         [AC_DEFINE(HAVE_GD_JPG,               1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromXpm,          [AC_DEFINE(HAVE_GD_XPM,               1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromBmp,          [AC_DEFINE(HAVE_GD_BMP,               1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromTga,          [AC_DEFINE(HAVE_GD_TGA,               1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageStringFT,               [AC_DEFINE(HAVE_GD_FREETYPE,          1, [ ])], [], [ $GD_SHARED_LIBADD ])
+  PHP_GD_CHECK_FORMAT([Png],  [HAVE_GD_PNG])
+  PHP_GD_CHECK_FORMAT([Avif], [HAVE_GD_AVIF])
+  PHP_GD_CHECK_FORMAT([Webp], [HAVE_GD_WEBP])
+  PHP_GD_CHECK_FORMAT([Jpeg], [HAVE_GD_JPG])
+  PHP_GD_CHECK_FORMAT([Xpm],  [HAVE_GD_XPM])
+  PHP_GD_CHECK_FORMAT([Bmp],  [HAVE_GD_BMP])
+  PHP_GD_CHECK_FORMAT([Tga],  [HAVE_GD_TGA])
+  PHP_CHECK_LIBRARY(gd, gdFontCacheShutdown,           [AC_DEFINE(HAVE_GD_FREETYPE,          1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdVersionString,               [AC_DEFINE(HAVE_GD_LIBVERSION,        1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageGetInterpolationMethod, [AC_DEFINE(HAVE_GD_GET_INTERPOLATION, 1, [ ])], [], [ $GD_SHARED_LIBADD ])
 ])
@@ -194,7 +239,7 @@ dnl Various checks for GD features
 
     PHP_TEST_BUILD(foobar, [], [
       AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
-    ], [ $GD_SHARED_LIBADD ], [char foobar () {}])
+    ], [ $GD_SHARED_LIBADD ], [char foobar(void) { return '\0'; }])
 
   else
     extra_sources="gd_compat.c"

@@ -865,6 +865,9 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 		php_info_print_table_row(2, "Zend Extension Build", ZEND_EXTENSION_BUILD_ID);
 		php_info_print_table_row(2, "PHP Extension Build", ZEND_MODULE_BUILD_ID);
 
+		snprintf(temp_api, sizeof(temp_api), "%d bits", SIZEOF_ZEND_LONG * 8);
+		php_info_print_table_row(2, "PHP Integer Size", temp_api);
+
 #if ZEND_DEBUG
 		php_info_print_table_row(2, "Debug Build", "yes" );
 #else

@@ -4,8 +4,9 @@ Bug #43492 (Nested cursor leaks after related bug #44206 fixed)
 oci8
 --SKIPIF--
 <?php
+require_once 'skipifconnectfailure.inc';
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(__DIR__.'/skipif.inc');
+require __DIR__.'/skipif.inc';
 ?>
 --FILE--
 <?php

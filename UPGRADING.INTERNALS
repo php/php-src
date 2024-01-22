@@ -1,4 +1,4 @@
-PHP 8.3 INTERNALS UPGRADE NOTES
+PHP 8.4 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
 
@@ -14,144 +14,92 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
-* zend_class_entry now possesses a default_object_handlers field, which
-  provides a default object handler when create_object() is not overriding it.
-* Custom Fiber implementations have to initialize EG(stack_limit) and
-  EG(stack_base).
-* EG(opline_before_exception) may now be null if the VM throws an exception
-  before executing any opline.
-* Many C header files have been cleaned up and include dependencies
-  have been reduced.  Many headers which used to be always included by
-  Zend headers (e.g. "errno.h") are no longer implied, and this may
-  break the build of third-party extensions which relied on this
-  implementation detail.  Those extensions may need to add the missing
-  #include lines.
-* Since version 8, PHP requires a C99 compiler.  Configure-time checks
-  for C99 features have been removed and therefore macro definitions
-  from php_config.h have disappeared.  Do not use those feature
-  macros.
-* Internal class aliases created during request time can now exist in
-  the class table. zend_register_class_alias_ex() will not increase
-  the refcount for class aliases and the cleanup function takes this
-  into account.
-* The return types of the following functions have been changed from
-  `bool` to `zend_result`:
-  - zend_fiber_init_context()
-* The fast_add_function() has been removed, use add_function() that will
-  call the static inline add_function_fast() instead.
-* The order of members of zend_op_array, zend_ssa_var, zend_ssa_var_info,
-  zend_executor_globals and php_core_globals have changed to improve
-  struct packing which reduces their size.
-* Many calls to zend_assign_to_variable have been replaced with
-  zend_assign_to_variable_ex which allows delaying the releasing of the old
-  variable value. This avoids side-effects through destructors between the
-  assignment of the variable and the assignment to the result zval in the VM
-  (i.e. it may free the new value). See GH-10168 for details.
-* The return types of the following functions were changed from int to
-  zend_result:
-  - open_file_for_scanning
-  - php_rfc1867_callback
-  - virtual_chdir
-  - zend_execute_scripts
-  - zend_get_module_started
-  - zend_handle_undef_args
-  - zend_list_delete
-  - zend_multibyte_parse_encoding_list
-  - zend_multibyte_set_internal_encoding
-  - zend_parse_ini_file
-  - zend_parse_ini_string
-  - zend_set_user_opcode_handler
-  - zend_ssa_inference
-* Removed unused macros PHP_FNV1_32A_INIT and PHP_FNV1A_64_INIT. See GH-11114.
-* ext/standard/hrtime.h was moved to Zend/zend_hrtime.h
-  * The prefix of the PHP_HRTIME_ macros was changed to ZEND_HRTIME_
-  * The HRTIME_AVAILABLE macro was renamed to ZEND_HRTIME_AVAILABLE
-  * The php_hrtime_current() function was renamed to zend_hrtime()
-* _php_stream_dirent now has an extra d_type field that is used to store the
-  directory entry type. This can be used to avoid additional stat calls for
-  types when the type is already known.
+* zend_register_module_ex() now takes an additional int module_type argument.
+  This function will also assign the module number and type, there is no need
+  to do this at the call site anymore. Writing the handle should happen after
+  successful registration.
+
+* ZPP now accepts a F or Z_PARAM_FUNC_NO_TRAMPOLINE_FREE type check.
+  This is identical to the 'f' or Z_PARAM_FUNC type check, except the FCC is
+  always initialized because it doesn't free trampolines.
+  Trampolines MUST be freed using zend_release_fcall_info_cache() or consumed.
+  Z_PARAM_FUNC_EX2 was added as well with the same arguments as Z_PARAM_FUNC_EX
+  plus an additional argument free_trampoline.
+
+* The zend_object_iterator_funcs valid member has changed its signature from
+  int(*)(zend_object_iterator *) to zend_result(*)(zend_object_iterator *) to
+  be more in line with what callbacks are returning.
+
+* The backwards compatibility headers ext/standard/{php_lcg.h,php_mt_rand.h,
+  php_rand.h,php_random.h} have been removed. Include ext/random/php_random.h
+  directly.
 
 ========================
 2. Build system changes
 ========================
 
-* PHP_EXTRA_VERSION can be passed to configure script to control custom PHP
-  build versions: ./configure PHP_EXTRA_VERSION="-acme"
+ a. Abstract
+   - SIZEOF_SHORT symbol removed (size of 2 on 32-bit and 64-bit platforms).
+   - DBA_CDB_MAKE symbol removed in ext/dba.
+   - The configure option --with-mhash emits deprecation warning.
+   - The configure option --with-pspell has been removed.
 
-* LDFLAGS are not unset anymore allowing them to be adjusted e.g.
-  LDFLAGS="..." ./configure
+ b. Unix build system changes
+   - The configure option --with-zlib-dir has been removed.
+   - COOKIE_IO_FUNCTIONS_T symbol has been removed (use cookie_io_functions_t).
+   - HAVE_SOCKADDR_UN_SUN_LEN symbol renamed to HAVE_STRUCT_SOCKADDR_UN_SUN_LEN.
+   - PHP_CHECK_IN_ADDR_T M4 macro and 'in_addr_t' fallback definition to 'u_int'
+     removed (use AC_CHECK_TYPES Autoconf macro instead).
+   - HAVE_ODBC2 symbol has been removed in ext/odbc.
+   - Removed linking with obsolete dnet_stub library in ext/pdo_dblib.
+   - Removed checking and linking with obsolete libbind for some functions.
 
-* Removed the HAVE_DEV_URANDOM compile time check.  HAVE_DEV_URANDOM will
-  now never be defined. Any checks relying on HAVE_DEV_URANDOM should be
-  removed.  Even with HAVE_DEV_URANDOM it was not guaranteed that
-  /dev/urandom is actually available at run time and thus a runtime
-  check needs to happen in all cases.
+ c. Windows build system changes
+   - Added Bison flag '-Wall' when generating lexer files as done in *nix build
+     system.
+   - HAVE_WIN32_NATIVE_THREAD, USE_WIN32_NATIVE_THREAD, ENABLE_THREADS symbols
+     in ext/mbstring/libmbfl removed.
 
 ========================
 3. Module changes
 ========================
 
- a. ext/json
-   - A new function php_json_validate_ex has been added to check if the
-     provided C string is valid for the given depth and options.
+ a. ext/dom
+   - dom_read_t and dom_write_t now expect the function to return zend_result
+     instead of int.
+   - The macros DOM_NO_ARGS() and DOM_NOT_IMPLEMENTED() have been removed.
+   - New public APIs are available to handle callbacks from XPath, see
+     xpath_callbacks.h.
 
- b. ext/standard
-   - The PHPAPI php_url_encode_hash_ex() function has had its signature change
-     from:
-     PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
-     				const char *num_prefix, size_t num_prefix_len,
-     				const char *key_prefix, size_t key_prefix_len,
-     				const char *key_suffix, size_t key_suffix_len,
-     				zval *type, const char *arg_sep, int enc_type);
-     to:
-     PHPAPI void php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
-     				const char *num_prefix, size_t num_prefix_len,
-     				const zend_string *key_prefix,
-     				zval *type, const zend_string *arg_sep, int enc_type);
-     The change to use zend_string prevent the computation of the arg_sep
-     length at each call. The key_suffix parameter was dropped as it was a
-     constant value and depended on the key_prefix parameter to not be NULL.
+ b. ext/random
+   - The macro RAND_RANGE_BADSCALING() has been removed. The implementation
+     should either be inlined and undefined behavior fixed or it should be
+     replaced by a non-biased scaler.
+   - The generate member of a php_random_algo is now expected to return
+     the new php_random_result struct, replacing the last_generated_size
+     member of the php_random_status struct and the generate_size member of
+     the php_random_algo struct.
 
- c. ext/mysqlnd
-   - The function mysqlnd_shutdown and its corresponding internal methods
-   mysqlnd_command::shutdown & mysqlnd_conn_data::shutdown have been removed.
-   These functions are deprecated by MySQL in favour of SHUTDOWN SQL statement.
+ c. ext/xsl
+   - The function php_xsl_create_object() was removed as it was not used
+     nor exported.
+
+ d. ext/libxml
+   - Added php_libxml_pretend_ctx_error_ex() to emit errors as if they had come
+     from libxml.
+   - Removed the "properties" HashTable field from php_libxml_node_object.
+
+ e. ext/date
+   - Added the php_format_date_ex() API to format instances of php_date_obj.
+   - Added the php_date_initialize_from_ts_long() and
+     php_date_initialize_from_ts_double() to initialize a php_date_obj with
+     the given unix timestamp using GMT +00:00.
 
  d. ext/pcre
-   - The function pcre_get_compiled_regex_ex has been removed.
-   Use pcre_get_compiled_regex instead.
-
- e. ext/spl
-   - The PHPAPI spl_iterator_apply() function now returns zend_result instead of int.
-     There are no functional changes.
-   - The field _spl_filesystem_object->is_recursive has been removed.
-
- f. ext/dom
-   - A new function dom_get_doc_props_read_only() is added to gather the document
-     properties in a read-only way. This function avoids allocation when there are
-     no document properties changed yet.
-   - The node list returned by DOMNode::getElementsByTagName() and
-	   DOMNode::getElementsByTagNameNS() now caches the length and the last requested item.
-	   This means that the length and the last requested item are not recalculated
-	   when the node list is iterated over multiple times.
-	   If you do not use the internal PHP dom APIs to modify the document, you need to
-	   manually invalidate the cache using php_libxml_invalidate_node_list_cache_from_doc().
-	   Furthermore, the following internal APIs were added to handle the cache:
-	     . php_dom_is_cache_tag_stale_from_doc_ptr()
-	     . php_dom_is_cache_tag_stale_from_node()
-	     . php_dom_mark_cache_tag_up_to_date_from_node()
-   - The function dom_get_elements_by_tag_name_ns_raw() has an additional parameter to indicate
-     the base node of the node list. This function also no longer accepts -1 as the index argument.
-   - The function dom_namednode_iter() has additional arguments to avoid recomputing the length of
-     the strings.
-   - The functions dom_parent_node_prepend(), dom_parent_node_append(), dom_parent_node_after(), and
-     dom_parent_node_before() now use an uint32_t argument for the number of nodes instead of int.
-   - There is now a helper function php_dom_get_content_into_zval() to get the contents of a node.
-     This avoids allocation if possible.
-
- g. ext/libxml
-   - Two new functions: php_libxml_invalidate_node_list_cache_from_doc() and
-     php_libxml_invalidate_node_list_cache() were added to invalidate the cache of a node list.
+   - php_pcre_match_impl() now no longer has a use_flags argument.
+     When flags should be ignored, pass 0 to the flags argument.
+   - php_pcre_match_impl() and pcre_get_compiled_regex_cache_ex() now use
+     proper boolean argument types instead of integer types.
 
 ========================
 4. OpCode changes
@@ -160,6 +108,3 @@ PHP 8.3 INTERNALS UPGRADE NOTES
 ========================
 5. SAPI changes
 ========================
-
-* SAPIs that may execute in alternative stacks have to set EG(stack_limit) and
-  EG(stack_base)

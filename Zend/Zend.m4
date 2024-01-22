@@ -146,7 +146,13 @@ _LT_AC_TRY_DLOPEN_SELF([
 ])
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(getpid kill sigsetjmp pthread_getattr_np pthread_attr_get_np pthread_get_stackaddr_np pthread_attr_getstack pthread_stackseg_np gettid)
+AC_CHECK_FUNCS(getpid kill pthread_getattr_np pthread_attr_get_np pthread_get_stackaddr_np pthread_attr_getstack pthread_stackseg_np gettid)
+
+dnl Check for sigsetjmp. If it's defined as a macro, AC_CHECK_FUNCS won't work.
+AC_CHECK_FUNCS([sigsetjmp],,
+  [AC_CHECK_DECL([sigsetjmp],
+    [AC_DEFINE([HAVE_SIGSETJMP],[1],[Define to 1 if you have the 'sigsetjmp' function.])],,
+    [#include <setjmp.h>])])
 
 dnl Test whether the stack grows downwards
 dnl Assumes contiguous stack
@@ -381,8 +387,6 @@ int emu(const opcode_handler_t *ip, void *fp) {
 fi
 if test "$ZEND_GCC_GLOBAL_REGS" = "yes"; then
   AC_DEFINE([HAVE_GCC_GLOBAL_REGS], 1, [Define if the target system has support for global register variables])
-else
-  HAVE_GCC_GLOBAL_REGS=no
 fi
 AC_MSG_RESULT($ZEND_GCC_GLOBAL_REGS)
 

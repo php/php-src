@@ -295,12 +295,13 @@ static void spl_dllist_object_free_storage(zend_object *object) /* {{{ */
 
 	zend_object_std_dtor(&intern->std);
 
-	while (intern->llist->count > 0) {
-		spl_ptr_llist_pop(intern->llist, &tmp);
-		zval_ptr_dtor(&tmp);
+	if (intern->llist) {
+		while (intern->llist->count > 0) {
+			spl_ptr_llist_pop(intern->llist, &tmp);
+			zval_ptr_dtor(&tmp);
+		}
+		spl_ptr_llist_destroy(intern->llist);
 	}
-
-	spl_ptr_llist_destroy(intern->llist);
 	SPL_LLIST_CHECK_DELREF(intern->traverse_pointer);
 }
 /* }}} */
@@ -874,7 +875,7 @@ static void spl_dllist_it_rewind(zend_object_iterator *iter) /* {{{ */
 }
 /* }}} */
 
-static int spl_dllist_it_valid(zend_object_iterator *iter) /* {{{ */
+static zend_result spl_dllist_it_valid(zend_object_iterator *iter) /* {{{ */
 {
 	spl_dllist_it         *iterator = (spl_dllist_it *)iter;
 	spl_ptr_llist_element *element  = iterator->traverse_pointer;

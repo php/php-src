@@ -4,25 +4,25 @@ PDO::MYSQL_ATTR_MULTI_STATEMENTS
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --INI--
 error_reporting=E_ALL
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
     $dsn = MySQLPDOTest::getDSN();
     $user = PDO_MYSQL_TEST_USER;
     $pass = PDO_MYSQL_TEST_PASS;
 
-    $table = sprintf("test_%s", md5(mt_rand(0, PHP_INT_MAX)));
+    $table = 'pdo_mysql_attr_multi_statements';
+
     $db = new PDO($dsn, $user, $pass);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
-    $db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
+
     $create = sprintf('CREATE TABLE %s(id INT)', $table);
     $db->exec($create);
     $db->exec(sprintf('INSERT INTO %s(id) VALUES (1)', $table));
@@ -51,8 +51,13 @@ error_reporting=E_ALL
         $stmt = $db->query('SELECT 1 AS value;');
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
-    $db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
     print "done!";
+?>
+--CLEAN--
+<?php
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->query('DROP TABLE IF EXISTS pdo_mysql_attr_multi_statements');
 ?>
 --EXPECTF--
 string(5) "00000"

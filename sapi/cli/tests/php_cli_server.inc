@@ -17,7 +17,7 @@ function php_cli_server_start(
     $error = null;
 
     // Create dedicated doc root to avoid index.php clashes between tests.
-    $doc_root = __DIR__ . '/' . basename($_SERVER['PHP_SELF'], '.php');
+    $doc_root = __DIR__ . DIRECTORY_SEPARATOR . basename($_SERVER['PHP_SELF'], '.php');
     @mkdir($doc_root);
 
     if ($code) {
@@ -103,7 +103,7 @@ function php_cli_server_start(
                 printf("Server output:\n%s\n", file_get_contents($output_file));
             }
             @unlink(__DIR__ . "/{$router}");
-            @rmdir($doc_root);
+            remove_directory($doc_root);
         },
         $handle
     );
@@ -124,6 +124,21 @@ function php_cli_server_connect() {
         die("connect failed");
     }
     return $fp;
+}
+
+function remove_directory($dir) {
+    if (is_dir($dir) === false) {
+        return;
+    }
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($files as $fileinfo) {
+        $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+        $todo($fileinfo->getRealPath());
+    }
+    @rmdir($dir);
 }
 
 ?>

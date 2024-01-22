@@ -278,6 +278,12 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 		add_property_null(object, "context");
 	}
 
+	if (EG(exception) != NULL) {
+		zval_ptr_dtor(object);
+		ZVAL_UNDEF(object);
+		return;
+	}
+
 	if (uwrap->ce->constructor) {
 		zend_call_known_instance_method_with_0_params(
 			uwrap->ce->constructor, Z_OBJ_P(object), NULL);
@@ -1384,6 +1390,8 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 	php_stream * intstream = NULL;
 	int call_result;
 	int ret = FAILURE;
+	/* If we are checking if the stream can cast, no return pointer is provided, so do not emit errors */
+	bool report_errors = retptr;
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_CAST, sizeof(USERSTREAM_CAST)-1);
 
@@ -1400,8 +1408,10 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 
 	do {
 		if (call_result == FAILURE) {
-			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " is not implemented!",
-					ZSTR_VAL(us->wrapper->ce->name));
+			if (report_errors) {
+				php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " is not implemented!",
+						ZSTR_VAL(us->wrapper->ce->name));
+			}
 			break;
 		}
 		if (!zend_is_true(&retval)) {
@@ -1409,13 +1419,17 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 		}
 		php_stream_from_zval_no_verify(intstream, &retval);
 		if (!intstream) {
-			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " must return a stream resource",
-					ZSTR_VAL(us->wrapper->ce->name));
+			if (report_errors) {
+				php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " must return a stream resource",
+						ZSTR_VAL(us->wrapper->ce->name));
+			}
 			break;
 		}
 		if (intstream == stream) {
-			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " must not return itself",
-					ZSTR_VAL(us->wrapper->ce->name));
+			if (report_errors) {
+				php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_CAST " must not return itself",
+						ZSTR_VAL(us->wrapper->ce->name));
+			}
 			intstream = NULL;
 			break;
 		}

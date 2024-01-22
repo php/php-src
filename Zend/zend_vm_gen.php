@@ -232,9 +232,9 @@ $op2_get_zval_ptr = array(
 
 $op1_get_zval_ptr_ptr = array(
     "ANY"      => "get_zval_ptr_ptr(opline->op1_type, opline->op1, \\1)",
-    "TMP"      => "NULL",
+    "TMP"      => "zend_get_bad_ptr()",
     "VAR"      => "_get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC)",
-    "CONST"    => "NULL",
+    "CONST"    => "zend_get_bad_ptr()",
     "UNUSED"   => "NULL",
     "CV"       => "_get_zval_ptr_cv_\\1(opline->op1.var EXECUTE_DATA_CC)",
     "TMPVAR"   => "???",
@@ -243,9 +243,9 @@ $op1_get_zval_ptr_ptr = array(
 
 $op2_get_zval_ptr_ptr = array(
     "ANY"      => "get_zval_ptr_ptr(opline->op2_type, opline->op2, \\1)",
-    "TMP"      => "NULL",
+    "TMP"      => "zend_get_bad_ptr()",
     "VAR"      => "_get_zval_ptr_ptr_var(opline->op2.var EXECUTE_DATA_CC)",
-    "CONST"    => "NULL",
+    "CONST"    => "zend_get_bad_ptr()",
     "UNUSED"   => "NULL",
     "CV"       => "_get_zval_ptr_cv_\\1(opline->op2.var EXECUTE_DATA_CC)",
     "TMPVAR"   => "???",
@@ -298,9 +298,9 @@ $op2_get_zval_ptr_undef = array(
 
 $op1_get_zval_ptr_ptr_undef = array(
     "ANY"      => "get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, \\1)",
-    "TMP"      => "NULL",
+    "TMP"      => "zend_get_bad_ptr()",
     "VAR"      => "_get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC)",
-    "CONST"    => "NULL",
+    "CONST"    => "zend_get_bad_ptr()",
     "UNUSED"   => "NULL",
     "CV"       => "EX_VAR(opline->op1.var)",
     "TMPVAR"   => "???",
@@ -309,9 +309,9 @@ $op1_get_zval_ptr_ptr_undef = array(
 
 $op2_get_zval_ptr_ptr_undef = array(
     "ANY"      => "get_zval_ptr_ptr_undef(opline->op2_type, opline->op2, \\1)",
-    "TMP"      => "NULL",
+    "TMP"      => "zend_get_bad_ptr()",
     "VAR"      => "_get_zval_ptr_ptr_var(opline->op2.var EXECUTE_DATA_CC)",
-    "CONST"    => "NULL",
+    "CONST"    => "zend_get_bad_ptr()",
     "UNUSED"   => "NULL",
     "CV"       => "EX_VAR(opline->op2.var)",
     "TMPVAR"   => "???",
@@ -386,9 +386,9 @@ $op2_get_obj_zval_ptr_deref = array(
 
 $op1_get_obj_zval_ptr_ptr = array(
     "ANY"      => "get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, \\1)",
-    "TMP"      => "NULL",
+    "TMP"      => "zend_get_bad_ptr()",
     "VAR"      => "_get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC)",
-    "CONST"    => "NULL",
+    "CONST"    => "zend_get_bad_ptr()",
     "UNUSED"   => "&EX(This)",
     "CV"       => "_get_zval_ptr_cv_\\1(opline->op1.var EXECUTE_DATA_CC)",
     "TMPVAR"   => "???",
@@ -397,9 +397,9 @@ $op1_get_obj_zval_ptr_ptr = array(
 
 $op2_get_obj_zval_ptr_ptr = array(
     "ANY"      => "get_obj_zval_ptr_ptr(opline->op2_type, opline->op2, \\1)",
-    "TMP"      => "NULL",
+    "TMP"      => "zend_get_bad_ptr()",
     "VAR"      => "_get_zval_ptr_ptr_var(opline->op2.var EXECUTE_DATA_CC)",
-    "CONST"    => "NULL",
+    "CONST"    => "zend_get_bad_ptr()",
     "UNUSED"   => "&EX(This)",
     "CV"       => "_get_zval_ptr_cv_\\1(opline->op2.var EXECUTE_DATA_CC)",
     "TMPVAR"   => "???",
@@ -408,9 +408,9 @@ $op2_get_obj_zval_ptr_ptr = array(
 
 $op1_get_obj_zval_ptr_ptr_undef = array(
     "ANY"      => "get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, \\1)",
-    "TMP"      => "NULL",
+    "TMP"      => "zend_get_bad_ptr()",
     "VAR"      => "_get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC)",
-    "CONST"    => "NULL",
+    "CONST"    => "zend_get_bad_ptr()",
     "UNUSED"   => "&EX(This)",
     "CV"       => "EX_VAR(opline->op1.var)",
     "TMPVAR"   => "???",
@@ -419,9 +419,9 @@ $op1_get_obj_zval_ptr_ptr_undef = array(
 
 $op2_get_obj_zval_ptr_ptr_undef = array(
     "ANY"      => "get_obj_zval_ptr_ptr(opline->op2_type, opline->op2, \\1)",
-    "TMP"      => "NULL",
+    "TMP"      => "zend_get_bad_ptr()",
     "VAR"      => "_get_zval_ptr_ptr_var(opline->op2.var EXECUTE_DATA_CC)",
-    "CONST"    => "NULL",
+    "CONST"    => "zend_get_bad_ptr()",
     "UNUSED"   => "&EX(This)",
     "CV"       => "EX_VAR(opline->op2.var)",
     "TMPVAR"   => "???",
@@ -518,9 +518,9 @@ $op_data_get_zval_ptr_deref = array(
 
 $op_data_get_zval_ptr_ptr = array(
     "ANY"      => "get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, \\1)",
-    "TMP"      => "NULL",
+    "TMP"      => "zend_get_bad_ptr()",
     "VAR"      => "_get_zval_ptr_ptr_var((opline+1)->op1.var EXECUTE_DATA_CC)",
-    "CONST"    => "NULL",
+    "CONST"    => "zend_get_bad_ptr()",
     "UNUSED"   => "NULL",
     "CV"       => "_get_zval_ptr_cv_\\1((opline+1)->op1.var EXECUTE_DATA_CC)",
     "TMPVAR"   => "???",
@@ -1057,7 +1057,8 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
                 $code =
                       "\t\t\tHYBRID_CASE({$spec_name}):\n"
                     . "\t\t\t\tVM_TRACE($spec_name)\n"
-                    . stream_get_contents($out);
+                    . stream_get_contents($out)
+                    . "\t\t\t\tVM_TRACE_OP_END($spec_name)\n";
                 fclose($out);
             } else {
                 $inline =
@@ -1068,6 +1069,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
                       "\t\t\tHYBRID_CASE({$spec_name}):\n"
                     . "\t\t\t\tVM_TRACE($spec_name)\n"
                     . "\t\t\t\t{$spec_name}{$inline}_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n"
+                    . "\t\t\t\tVM_TRACE_OP_END($spec_name)\n"
                     . "\t\t\t\tHYBRID_BREAK();\n";
             }
             if (is_array($gen_order)) {
@@ -1768,6 +1770,7 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
             out($f,"\t\t\tHYBRID_DEFAULT:\n");
             out($f,"\t\t\t\tVM_TRACE(ZEND_NULL)\n");
             out($f,"\t\t\t\tZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
+            out($f,"\t\t\t\tVM_TRACE_OP_END(ZEND_NULL)\n");
             out($f,"\t\t\t\tHYBRID_BREAK(); /* Never reached */\n");
             break;
     }
@@ -1835,6 +1838,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                         out($f,"# define VM_TRACE(op)\n");
                     }
                     out($f,"#endif\n");
+                    out($f,"#ifndef VM_TRACE_OP_END\n");
+                    out($f,"# define VM_TRACE_OP_END(op)\n");
+                    out($f,"#endif\n");
                     out($f,"#ifndef VM_TRACE_START\n");
                     out($f,"# define VM_TRACE_START()\n");
                     out($f,"#endif\n");
@@ -1844,7 +1850,16 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                     switch ($kind) {
                         case ZEND_VM_KIND_HYBRID:
                             out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
-                            out($f,"#define HYBRID_NEXT()     goto *(void**)(OPLINE->handler)\n");
+                            out($f,"# if defined(__GNUC__) && defined(__i386__)\n");
+                            out($f,"#  define HYBRID_JIT_GUARD() __asm__ __volatile__ (\"\"::: \"ebx\")\n");
+                            out($f,"# elif defined(__GNUC__) && defined(__x86_64__)\n");
+                            out($f,"#  define HYBRID_JIT_GUARD() __asm__ __volatile__ (\"\"::: \"rbx\",\"r12\",\"r13\")\n");
+                            out($f,"# elif defined(__GNUC__) && defined(__aarch64__)\n");
+                            out($f,"#  define HYBRID_JIT_GUARD() __asm__ __volatile__ (\"\"::: \"x19\",\"x20\",\"x21\",\"x22\",\"x23\",\"x24\",\"x25\",\"x26\")\n");
+                            out($f,"# else\n");
+                            out($f,"#  define HYBRID_JIT_GUARD()\n");
+                            out($f,"# endif\n");
+                            out($f,"#define HYBRID_NEXT()     HYBRID_JIT_GUARD(); goto *(void**)(OPLINE->handler)\n");
                             out($f,"#define HYBRID_SWITCH()   HYBRID_NEXT();\n");
                             out($f,"#define HYBRID_CASE(op)   op ## _LABEL\n");
                             out($f,"#define HYBRID_BREAK()    HYBRID_NEXT()\n");
@@ -2046,14 +2061,14 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                     } else {
                         out($f,"#if defined(ZEND_VM_IP_GLOBAL_REG) || defined(ZEND_VM_FP_GLOBAL_REG)\n");
                         out($f,$m[1]."struct {\n");
+                        out($f,"#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE\n");
+                        out($f,$m[1]."\tchar hybrid_jit_red_zone[ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE];\n");
+                        out($f,"#endif\n");
                         out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
                         out($f,$m[1]."\tconst zend_op *orig_opline;\n");
                         out($f,"#endif\n");
                         out($f,"#ifdef ZEND_VM_FP_GLOBAL_REG\n");
                         out($f,$m[1]."\tzend_execute_data *orig_execute_data;\n");
-                        out($f,"#ifdef ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE\n");
-                        out($f,$m[1]."\tchar hybrid_jit_red_zone[ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE];\n");
-                        out($f,"#endif\n");
                         out($f,"#endif\n");
                         out($f,$m[1]."} vm_stack_data;\n");
                         out($f,"#endif\n");
@@ -2339,7 +2354,7 @@ function gen_vm_opcodes_header(
     $str .= "\n";
     $str .= "#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) && !defined(__SANITIZE_ADDRESS__)\n";
     $str .= "# if ((defined(i386) && !defined(__PIC__)) || defined(__x86_64__) || defined(_M_X64))\n";
-    $str .= "#  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 16\n";
+    $str .= "#  define ZEND_VM_HYBRID_JIT_RED_ZONE_SIZE 48\n";
     $str .= "# endif\n";
     $str .= "#endif\n";
     $str .= "\n";
@@ -2414,7 +2429,16 @@ function gen_vm($def, $skel) {
             strpos($line,"ZEND_VM_COLD_CONSTCONST_HANDLER(") === 0) {
           // Parsing opcode handler's definition
             if (preg_match(
-                    "/^ZEND_VM_(HOT_|INLINE_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_|HOT_NOCONSTCONST_|COLD_|COLD_CONST_|COLD_CONSTCONST_)?HANDLER\(\s*([0-9]+)\s*,\s*([A-Z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
+                    "/^
+                        ZEND_VM_(HOT_|INLINE_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_|HOT_NOCONSTCONST_|COLD_|COLD_CONST_|COLD_CONSTCONST_)?HANDLER\(
+                            \s*([0-9]+)\s*,
+                            \s*([A-Z_]+)\s*,
+                            \s*([A-Z_|]+)\s*,
+                            \s*([A-Z_|]+)\s*
+                            (,\s*([A-Z_|]+)\s*)?
+                            (,\s*SPEC\(([A-Z_|=,]+)\)\s*)?
+                        \)
+                    $/x",
                     $line,
                     $m) == 0) {
                 die("ERROR ($def:$lineno): Invalid ZEND_VM_HANDLER definition.\n");
@@ -2465,7 +2489,17 @@ function gen_vm($def, $skel) {
                    strpos($line,"ZEND_VM_HOT_OBJ_TYPE_SPEC_HANDLER(") === 0) {
           // Parsing opcode handler's definition
             if (preg_match(
-                    "/^ZEND_VM_(HOT_|INLINE_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_|HOT_NOCONSTCONST_)?TYPE_SPEC_HANDLER\(\s*([A-Z_|]+)\s*,\s*((?:[^(,]|\([^()]*|(?R)*\))*),\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
+                    "/^
+                        ZEND_VM_(HOT_|INLINE_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_|HOT_NOCONSTCONST_)?TYPE_SPEC_HANDLER\(
+                            \s*([A-Z_|]+)\s*,
+                            \s*((?:[^(,]|\([^()]*|(?R)*\))*),
+                            \s*([A-Za-z_]+)\s*,
+                            \s*([A-Z_|]+)\s*,
+                            \s*([A-Z_|]+)\s*
+                            (,\s*([A-Z_|]+)\s*)?
+                            (,\s*SPEC\(([A-Z_|=,]+)\)\s*)?
+                        \)
+                    $/x",
                     $line,
                     $m) == 0) {
                 die("ERROR ($def:$lineno): Invalid ZEND_VM_TYPE_HANDLER_HANDLER definition.\n");
@@ -2513,7 +2547,15 @@ function gen_vm($def, $skel) {
                    strpos($line,"ZEND_VM_HOT_HELPER(") === 0) {
           // Parsing helper's definition
             if (preg_match(
-                    "/^ZEND_VM(_INLINE|_COLD|_HOT)?_HELPER\(\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(?:,\s*SPEC\(([A-Z_|=,]+)\)\s*)?(?:,\s*([^)]*)\s*)?\)/",
+                    "/^
+                        ZEND_VM(_INLINE|_COLD|_HOT)?_HELPER\(
+                            \s*([A-Za-z_]+)\s*,
+                            \s*([A-Z_|]+)\s*,
+                            \s*([A-Z_|]+)\s*
+                            (?:,\s*SPEC\(([A-Z_|=,]+)\)\s*)?
+                            (?:,\s*([^)]*)\s*)?
+                        \)
+                    $/x",
                     $line,
                     $m) == 0) {
                 die("ERROR ($def:$lineno): Invalid ZEND_VM_HELPER definition.\n");

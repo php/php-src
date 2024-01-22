@@ -209,7 +209,7 @@ static zend_class_entry *register_class_Exception(zend_class_entry *class_entry_
 	zval property_message_default_value;
 	ZVAL_EMPTY_STRING(&property_message_default_value);
 	zend_string *property_message_name = zend_string_init("message", sizeof("message") - 1, 1);
-	zend_declare_property_ex(class_entry, property_message_name, &property_message_default_value, ZEND_ACC_PROTECTED, NULL);
+	zend_declare_typed_property(class_entry, property_message_name, &property_message_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	zend_string_release(property_message_name);
 
 	zval property_string_default_value;
@@ -221,7 +221,7 @@ static zend_class_entry *register_class_Exception(zend_class_entry *class_entry_
 	zval property_code_default_value;
 	ZVAL_LONG(&property_code_default_value, 0);
 	zend_string *property_code_name = zend_string_init("code", sizeof("code") - 1, 1);
-	zend_declare_property_ex(class_entry, property_code_name, &property_code_default_value, ZEND_ACC_PROTECTED, NULL);
+	zend_declare_typed_property(class_entry, property_code_name, &property_code_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	zend_string_release(property_code_name);
 
 	zval property_file_default_value;
@@ -279,7 +279,7 @@ static zend_class_entry *register_class_Error(zend_class_entry *class_entry_Thro
 	zval property_message_default_value;
 	ZVAL_EMPTY_STRING(&property_message_default_value);
 	zend_string *property_message_name = zend_string_init("message", sizeof("message") - 1, 1);
-	zend_declare_property_ex(class_entry, property_message_name, &property_message_default_value, ZEND_ACC_PROTECTED, NULL);
+	zend_declare_typed_property(class_entry, property_message_name, &property_message_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	zend_string_release(property_message_name);
 
 	zval property_string_default_value;
@@ -291,7 +291,7 @@ static zend_class_entry *register_class_Error(zend_class_entry *class_entry_Thro
 	zval property_code_default_value;
 	ZVAL_LONG(&property_code_default_value, 0);
 	zend_string *property_code_name = zend_string_init("code", sizeof("code") - 1, 1);
-	zend_declare_property_ex(class_entry, property_code_name, &property_code_default_value, ZEND_ACC_PROTECTED, NULL);
+	zend_declare_typed_property(class_entry, property_code_name, &property_code_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	zend_string_release(property_code_name);
 
 	zval property_file_default_value;

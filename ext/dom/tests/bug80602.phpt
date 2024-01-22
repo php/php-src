@@ -1,5 +1,7 @@
 --TEST--
 Bug #80602 (Segfault when using DOMChildNode::before())
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 declare(strict_types=1);

@@ -12,7 +12,7 @@
  */
 
 if (file_exists(dirname(__FILE__)."/details_local.inc")) {
-    include(dirname(__FILE__)."/details_local.inc");   // this file is not part of the source distribution; make it your own local variant of details.inc
+    include dirname(__FILE__)."/details_local.inc";   // this file is not part of the source distribution; make it your own local variant of details.inc
 } else {
     if (false !== getenv('PHP_OCI8_TEST_DB')) {
         $user		= getenv('PHP_OCI8_TEST_USER');	  // Database username for tests

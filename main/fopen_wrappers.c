@@ -77,8 +77,12 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 	char *pathbuf, *ptr, *end;
 
 	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN || stage == PHP_INI_STAGE_ACTIVATE || stage == PHP_INI_STAGE_DEACTIVATE) {
+		if (PG(open_basedir_modified)) {
+			efree(*p);
+		}
 		/* We're in a PHP_INI_SYSTEM context, no restrictions */
 		*p = new_value ? ZSTR_VAL(new_value) : NULL;
+		PG(open_basedir_modified) = false;
 		return SUCCESS;
 	}
 
@@ -117,15 +121,13 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 	efree(pathbuf);
 
 	/* Everything checks out, set it */
-	if (*p) {
-		/* Unfortunately entry->modified has already been set to true so we compare entry->value
-		 * against entry->orig_value. */
-		if (entry->modified && entry->value != entry->orig_value) {
-			efree(*p);
-		}
-	}
 	zend_string *tmp = smart_str_extract(&buf);
-	*p = estrdup(ZSTR_VAL(tmp));
+	char *result = estrdup(ZSTR_VAL(tmp));
+	if (PG(open_basedir_modified)) {
+		efree(*p);
+	}
+	*p = result;
+	PG(open_basedir_modified) = true;
 	zend_string_release(tmp);
 
 	return SUCCESS;

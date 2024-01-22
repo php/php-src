@@ -1,4 +1,4 @@
-.TH @program_prefix@php 1 "2023" "The PHP Group" "Scripting Language"
+.TH @program_prefix@php 1 "2024" "The PHP Group" "Scripting Language"
 .SH NAME
 @program_prefix@php \- PHP Command Line Interface 'CLI'
 .P
@@ -91,6 +91,15 @@ PHP also contains an built-in web server for application development purpose. By
 point to a local address and port PHP will listen to HTTP requests on that address and port and serve files from the current working directory or the
 .B docroot
 passed by the \-t option.
+.LP
+If a PHP file is provided to the command line when the
+built-in web server is used, it will be used as the router script. This script
+will be started at each HTTP request. The script output is returned to the
+browser, unless the router script returns the
+.B false
+value. If so, the built-in server falls back to the default behaviour, returning
+the requested resource as-is by looking up the files relative to the document
+root specified by the \-t option, if provided.
 .LP
 If none of \-r \-f \-B \-R \-F \-E or \-S is present but a single parameter is given
 then this parameter is taken as the filename to parse and execute (same as

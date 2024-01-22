@@ -86,7 +86,7 @@ print "done!";
 ?>
 --CLEAN--
 <?php
-require_once "clean_table.inc";
+require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 [005] [1064] You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'some random gibberish' at line 1

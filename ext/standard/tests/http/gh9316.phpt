@@ -23,6 +23,7 @@ for ($i = 0; $i < count($responses); ++$i) {
 
 http_server_kill($pid);
 
+?>
 --EXPECT--
 array(2) {
   [0]=>

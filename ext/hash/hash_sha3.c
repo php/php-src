@@ -190,8 +190,7 @@ static void PHP_SHA3_Final(unsigned char* digest,
 	// Square output for digest
 	for(;;) {
 		int bs = (len < block_size) ? len : block_size;
-		memcpy(digest, ctx->state, bs);
-		digest += bs;
+		digest = zend_mempcpy(digest, ctx->state, bs);
 		len -= bs;
 		if (!len) break;
 		permute(ctx);

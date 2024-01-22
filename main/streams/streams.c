@@ -1153,8 +1153,15 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 
 	bool old_eof = stream->eof;
 
+	/* See GH-13071: userspace stream is subject to the memory limit. */
+	size_t chunk_size = count;
+	if (php_stream_is(stream, PHP_STREAM_IS_USERSPACE)) {
+		/* If the stream is unbuffered, we can only write one byte at a time. */
+		chunk_size = stream->chunk_size;
+	}
+
 	while (count > 0) {
-		ssize_t justwrote = stream->ops->write(stream, buf, count);
+		ssize_t justwrote = stream->ops->write(stream, buf, MIN(chunk_size, count));
 		if (justwrote <= 0) {
 			/* If we already successfully wrote some bytes and a write error occurred
 			 * later, report the successfully written bytes. */
@@ -1322,8 +1329,13 @@ PHPAPI zend_off_t _php_stream_tell(php_stream *stream)
 PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 {
 	if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
-		/* flush to commit data written to the fopencookie FILE* */
-		fflush(stream->stdiocast);
+		/* flush can call seek internally so we need to prevent an infinite loop */
+		if (!stream->fclose_stdiocast_flush_in_progress) {
+			stream->fclose_stdiocast_flush_in_progress = 1;
+			/* flush to commit data written to the fopencookie FILE* */
+			fflush(stream->stdiocast);
+			stream->fclose_stdiocast_flush_in_progress = 0;
+		}
 	}
 
 	/* handle the case where we are in the buffer */
@@ -1602,12 +1614,10 @@ PHPAPI zend_result _php_stream_copy_to_stream_ex(php_stream *src, php_stream *de
 		 * read buffer is empty: we can use copy_file_range() */
 		int src_fd, dest_fd, dest_open_flags = 0;
 
-		/* get dest open flags to check if the stream is open in append mode */
-		php_stream_parse_fopen_modes(dest->mode, &dest_open_flags);
-
 		/* copy_file_range does not work with O_APPEND */
 		if (php_stream_cast(src, PHP_STREAM_AS_FD, (void*)&src_fd, 0) == SUCCESS &&
 				php_stream_cast(dest, PHP_STREAM_AS_FD, (void*)&dest_fd, 0) == SUCCESS &&
+				/* get dest open flags to check if the stream is open in append mode */
 				php_stream_parse_fopen_modes(dest->mode, &dest_open_flags) == SUCCESS &&
 				!(dest_open_flags & O_APPEND)) {
 

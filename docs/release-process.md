@@ -9,7 +9,6 @@ The release schedule for each version is published on the
 - [PHP 8.3](https://wiki.php.net/todo/php83)
 - [PHP 8.2](https://wiki.php.net/todo/php82)
 - [PHP 8.1](https://wiki.php.net/todo/php81)
-- [PHP 8.0](https://wiki.php.net/todo/php80)
 
 The PHP project publishes builds every two weeks.
 
@@ -462,7 +461,8 @@ slightly different steps. We'll call attention where the steps differ.
 
    > 💬 **Hint** \
    > You should have created this branch when packaging the non-stable release
-   > candidate for this version.
+   > candidate for this version. If it is for a PHP-X.Y.0 version, then just
+   > create and push this branch.
 
 2. If a CVE commit needs to be merged to the release, have it committed to
    the base branches and [merged upwards as usual][] (e.g. commit the CVE fix
@@ -642,7 +642,9 @@ slightly different steps. We'll call attention where the steps differ.
 
 ## Announcing a stable release
 
-1. Switch to your local clone of `web-php` and add the information for the
+1. This steps applies only for releases after PHP-X.Y.0.
+
+   Switch to your local clone of `web-php` and add the information for the
    previous release to `include/releases.inc`.
 
    For example, if you are preparing to announce version 8.2.2, then the
@@ -662,17 +664,18 @@ slightly different steps. We'll call attention where the steps differ.
    > for the previous release from `include/version.inc` into
    > `include/releases.inc`.
 
-2. Update the version information for the new release in `include/version.inc`.
+3. Update the version information for the new release in `include/version.inc`.
 
    Find the part of the `$data` array that is related to your version (e.g.,
-   `$data['8.2']` for 8.2.x releases), and make the following edits:
+   `$data['8.2']` for 8.2.x releases) or create a new section if releasing
+   PHP-X.Y.0 version, and make the following edits / additions:
 
    * Set `version` to the full version number (e.g. '8.2.1')
    * Set `date` to the release date in `j M Y` format (e.g. '5 Jan 2021')
    * Update the `tags` array to include `'security'` if this is a security release
-   * Update the `sha256` array with the hashes for each of the release tarballs
+   * Set the `sha256` array with the hashes for each of the release tarballs
 
-3. Create the release file and news entry for the new version.
+5. Create the release file and news entry for the new version.
 
    ```shell
    ./bin/createReleaseEntry -v X.Y.Z -r # --security for security releases
@@ -685,13 +688,21 @@ slightly different steps. We'll call attention where the steps differ.
    Within these files, it will generate standard messages for the new version.
    You may edit the generated files to expand on the base message, if needed.
 
-4. Update the ChangeLog file for the given major version (e.g., `ChangeLog-8.php`).
+   The edits are necessary for PHP-X.Y.0 version where the format is different.
+   See for example [PHP-8.2 announcement](https://github.com/php/web-php/commit/c966868202caafa880213055f4e3e97c0483119b)
+
+7. Update the ChangeLog file for the given major version (e.g., `ChangeLog-8.php`).
+
+   If PHP-X.Y.0 is released, modify the `ChangeLog-X.php` (where `X` is the major
+   version) file manually first. The `$MINOR_VERSIONS` field needs to be extended
+   with the new version and initial anchor (e.g. `<a id="PHP_8_4"></a>` if added
+   for PHP 8.4) added above the first anchor of the previous version.
 
    ```shell
    ./bin/news2html 'https://github.com/php/php-src/raw/php-X.Y.Z/NEWS' 'X.Y.Z' 'ChangeLog-X.php'
    ```
 
-5. Review all the changes in `web-php`, commit, and push them.
+9. Review all the changes in `web-php`, commit, and push them.
 
    ```shell
    git add -p
@@ -702,7 +713,7 @@ slightly different steps. We'll call attention where the steps differ.
 
    See [Announce PHP 8.1.6][] for an example commit.
 
-6. Switch to your local clone of the `web-qa` repository and update the
+10. Switch to your local clone of the `web-qa` repository and update the
    information in the `$QA_RELEASES` array in `include/release-qa.php`.
 
    The array probably contains information about the RC released two weeks ago
@@ -722,7 +733,7 @@ slightly different steps. We'll call attention where the steps differ.
    git push upstream master
    ```
 
-7. 🚨 **Before sending announcement emails, check to make sure the websites have
+11. 🚨 **Before sending announcement emails, check to make sure the websites have
    synced.**
 
    * Make sure the tarballs are available from, e.g.,
@@ -739,10 +750,10 @@ slightly different steps. We'll call attention where the steps differ.
 
    Keep in mind it may take up to an hour for the websites to sync.
 
-8. Please note down the sha256 and the PGP signature (.asc). These *must* be
+11. Please note down the sha256 and the PGP signature (.asc). These *must* be
    included in the release mail.
 
-9. Send *separate* announcement emails to:
+12. Send *separate* announcement emails to:
 
    * `php-announce@lists.php.net`
    * `php-general@lists.php.net`
@@ -766,7 +777,7 @@ slightly different steps. We'll call attention where the steps differ.
    > want their email client to automatically send the reply to each list, as
    > often occurs.
 
-10. Coordinate with the social media team (i.e., Derick) to post a tweet with
+11. Coordinate with the social media team (i.e., Derick) to post a tweet with
     the release announcement and link to the news entry on php.net.
     ([@official_php](https://twitter.com/official_php))
 
@@ -904,6 +915,36 @@ feature development that cannot go into the new version.
    there is only a single section about PHP X.Y.0, instead of individual
    sections for each pre-release.
 
+   All the changes that are already present in the previous version NEWS should be
+   removed. It means all bug fixes that went to the previous version as well should
+   have their entries removed. It is possible to use `grep` to compare the changes.
+   For exampe if `82/NEWS` is NEWS for PHP 8.2 and `83/NEWS` is NEWS file for PHP 8.3,
+   then following command will show changes present in both files:
+
+   ```sh
+   grep -Fxf 82/NEWS 83/NEWS
+   ```
+    
+
+5. On the announcement day for the initial stable version (or shortly before),
+   update the `Expires` field in the <https://www.php.net/.well-known/security.txt>
+   file. The `Expires` field should be set to the expected date of the next X.Y.0
+   release (following the one currently being prepared), which is usually the
+   fourth Thursday of November in the next year.
+
+   Following the recommendation of [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116),
+   we maintain an `Expires` time of about a year for our security policies. This
+   provides security researchers with confidence they are using our most
+   up-to-date reporting policies.
+
+   The `security.txt` file is located in the [web-php repository](https://github.com/php/web-php)
+   under the `.well-known/` directory. We may make changes to this file at other
+   times, as needed, but we will always advance the `Expires` timestamp on a
+   yearly cadence, coinciding with our X.Y.0 releases.
+
+   Please see the instructions for
+   [making changes to security.txt](security-policies.md#making-changes-to-securitytxt).
+
 
 ## Prime the selection of release managers for the next version
 
@@ -992,7 +1033,7 @@ volunteers to begin the selection process for the next release managers.
    ```shell
    cd /path/to/repos/php/web-php
    git submodule update
-   cd distributions           # This is the submodule refering to web-php-distributions
+   cd distributions           # This is the submodule referring to web-php-distributions
    git pull origin master
    cd ..
    git add distributions

@@ -1,12 +1,12 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4045035ec5bee0f951fa31df75c3f42c31bd8be2 */
+ * Stub hash: 47273e114c9c7089bf708a2f18f2e9e522abceb6 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplPriorityQueue_compare, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, priority1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, priority2, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplPriorityQueue_insert, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplPriorityQueue_insert, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, priority, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
@@ -37,7 +37,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplPriorityQueue_valid arginfo_class_SplPriorityQueue_isEmpty
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplPriorityQueue_recoverFromCorruption, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplPriorityQueue_recoverFromCorruption, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplPriorityQueue_isCorrupted arginfo_class_SplPriorityQueue_isEmpty
@@ -49,7 +49,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplHeap_extract arginfo_class_SplPriorityQueue_top
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplHeap_insert, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplHeap_insert, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
@@ -69,7 +69,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplHeap_valid arginfo_class_SplPriorityQueue_isEmpty
 
-#define arginfo_class_SplHeap_recoverFromCorruption arginfo_class_SplPriorityQueue_isEmpty
+#define arginfo_class_SplHeap_recoverFromCorruption arginfo_class_SplPriorityQueue_recoverFromCorruption
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplHeap_compare, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value1, IS_MIXED, 0)
@@ -172,19 +172,19 @@ static zend_class_entry *register_class_SplPriorityQueue(zend_class_entry *class
 	zval const_EXTR_BOTH_value;
 	ZVAL_LONG(&const_EXTR_BOTH_value, SPL_PQUEUE_EXTR_BOTH);
 	zend_string *const_EXTR_BOTH_name = zend_string_init_interned("EXTR_BOTH", sizeof("EXTR_BOTH") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_EXTR_BOTH_name, &const_EXTR_BOTH_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_EXTR_BOTH_name, &const_EXTR_BOTH_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_EXTR_BOTH_name);
 
 	zval const_EXTR_PRIORITY_value;
 	ZVAL_LONG(&const_EXTR_PRIORITY_value, SPL_PQUEUE_EXTR_PRIORITY);
 	zend_string *const_EXTR_PRIORITY_name = zend_string_init_interned("EXTR_PRIORITY", sizeof("EXTR_PRIORITY") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_EXTR_PRIORITY_name, &const_EXTR_PRIORITY_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_EXTR_PRIORITY_name, &const_EXTR_PRIORITY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_EXTR_PRIORITY_name);
 
 	zval const_EXTR_DATA_value;
 	ZVAL_LONG(&const_EXTR_DATA_value, SPL_PQUEUE_EXTR_DATA);
 	zend_string *const_EXTR_DATA_name = zend_string_init_interned("EXTR_DATA", sizeof("EXTR_DATA") - 1, 1);
-	zend_declare_class_constant_ex(class_entry, const_EXTR_DATA_name, &const_EXTR_DATA_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_class_constant(class_entry, const_EXTR_DATA_name, &const_EXTR_DATA_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_EXTR_DATA_name);
 
 	return class_entry;

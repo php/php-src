@@ -674,7 +674,8 @@ static void timelib_eat_spaces(const char **ptr)
 			*ptr += 2;
 			continue;
 		}
-	} while (false);
+		break;
+	} while (true);
 }
 
 static void timelib_eat_until_separator(const char **ptr)
@@ -710,6 +711,17 @@ static const timelib_relunit* timelib_lookup_relunit(const char **ptr)
 	return value;
 }
 
+static void add_with_overflow(Scanner *s, timelib_sll *e, timelib_sll amount, int multiplier)
+{
+#if defined(__has_builtin) && __has_builtin(__builtin_saddll_overflow)
+	if (__builtin_saddll_overflow(*e, amount * multiplier, e)) {
+		add_error(s, TIMELIB_ERR_NUMBER_OUT_OF_RANGE, "Number out of range");
+	}
+#else
+	*e += (amount * multiplier);
+#endif
+}
+
 /**
  * The time_part parameter is a flag. It can be TIMELIB_TIME_PART_KEEP in case
  * the time portion should not be reset to midnight, or
@@ -725,13 +737,13 @@ static void timelib_set_relative(const char **ptr, timelib_sll amount, int behav
 	}
 
 	switch (relunit->unit) {
-		case TIMELIB_MICROSEC: s->time->relative.us += amount * relunit->multiplier; break;
-		case TIMELIB_SECOND:   s->time->relative.s += amount * relunit->multiplier; break;
-		case TIMELIB_MINUTE:   s->time->relative.i += amount * relunit->multiplier; break;
-		case TIMELIB_HOUR:     s->time->relative.h += amount * relunit->multiplier; break;
-		case TIMELIB_DAY:      s->time->relative.d += amount * relunit->multiplier; break;
-		case TIMELIB_MONTH:    s->time->relative.m += amount * relunit->multiplier; break;
-		case TIMELIB_YEAR:     s->time->relative.y += amount * relunit->multiplier; break;
+		case TIMELIB_MICROSEC: add_with_overflow(s, &s->time->relative.us, amount, relunit->multiplier); break;
+		case TIMELIB_SECOND:   add_with_overflow(s, &s->time->relative.s, amount, relunit->multiplier); break;
+		case TIMELIB_MINUTE:   add_with_overflow(s, &s->time->relative.i, amount, relunit->multiplier); break;
+		case TIMELIB_HOUR:     add_with_overflow(s, &s->time->relative.h, amount, relunit->multiplier); break;
+		case TIMELIB_DAY:      add_with_overflow(s, &s->time->relative.d, amount, relunit->multiplier); break;
+		case TIMELIB_MONTH:    add_with_overflow(s, &s->time->relative.m, amount, relunit->multiplier); break;
+		case TIMELIB_YEAR:     add_with_overflow(s, &s->time->relative.y, amount, relunit->multiplier); break;
 
 		case TIMELIB_WEEKDAY:
 			TIMELIB_HAVE_WEEKDAY_RELATIVE();

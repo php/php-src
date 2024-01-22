@@ -21,7 +21,7 @@
 #ifndef ZEND_AST_H
 #define ZEND_AST_H
 
-#include "zend.h"
+#include "zend_types.h"
 
 #ifndef ZEND_AST_SPEC
 # define ZEND_AST_SPEC 1
@@ -191,7 +191,7 @@ typedef struct _zend_ast_list {
 	zend_ast_attr attr;
 	uint32_t lineno;
 	uint32_t children;
-	zend_ast *child[1];
+	zend_ast *child[1] ZEND_ELEMENT_COUNT(children);
 } zend_ast_list;
 
 /* Lineno is stored in val.u2.lineno */
@@ -313,7 +313,7 @@ typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr, void *context);
 ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn, void *context);
 
 static zend_always_inline size_t zend_ast_size(uint32_t children) {
-	return sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children;
+	return XtOffsetOf(zend_ast, child) + (sizeof(zend_ast *) * children);
 }
 
 static zend_always_inline bool zend_ast_is_special(zend_ast *ast) {

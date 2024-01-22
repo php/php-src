@@ -3,6 +3,9 @@ inputs:
   configurationParameters:
     default: ''
     required: false
+  skipSlow:
+    default: false
+    required: false
 runs:
   using: composite
   steps:
@@ -17,9 +20,9 @@ runs:
           --enable-fpm \
           --with-pdo-mysql=mysqlnd \
           --with-mysqli=mysqlnd \
-          --with-pgsql \
-          --with-pdo-pgsql \
-          --with-pdo-sqlite \
+          ${{ inputs.skipSlow == 'false' && '--with-pgsql' || '' }} \
+          ${{ inputs.skipSlow == 'false' && '--with-pdo-pgsql' || '' }} \
+          ${{ inputs.skipSlow == 'false' && '--with-pdo-sqlite' || '' }} \
           --enable-intl \
           --without-pear \
           --enable-gd \
@@ -30,11 +33,10 @@ runs:
           --enable-exif \
           --with-zip \
           --with-zlib \
-          --with-zlib-dir=/usr \
           --enable-soap \
           --enable-xmlreader \
           --with-xsl \
-          --with-tidy \
+          ${{ inputs.skipSlow == 'false' && '--with-tidy' || '' }} \
           --enable-sysvsem \
           --enable-sysvshm \
           --enable-shmop \
@@ -50,15 +52,14 @@ runs:
           --enable-bcmath \
           --enable-calendar \
           --enable-ftp \
-          --with-pspell=/usr \
-          --with-enchant=/usr \
+          ${{ inputs.skipSlow == 'false' && '--with-enchant=/usr' || '' }} \
           --with-kerberos \
           --enable-sysvmsg \
           --with-ffi \
           --enable-zend-test \
-          --enable-dl-test=shared \
-          --with-ldap \
-          --with-ldap-sasl \
+          ${{ inputs.skipSlow == 'false' && '--enable-dl-test=shared' || '' }} \
+          ${{ inputs.skipSlow == 'false' && '--with-ldap' || '' }} \
+          ${{ inputs.skipSlow == 'false' && '--with-ldap-sasl' || '' }} \
           --with-password-argon2 \
           --with-mhash \
           --with-sodium \
@@ -69,16 +70,14 @@ runs:
           --with-tcadb \
           --with-lmdb \
           --with-qdbm \
-          --with-snmp \
-          --with-unixODBC \
-          --with-imap \
-          --with-imap-ssl \
-          --with-pdo-odbc=unixODBC,/usr \
-          --with-pdo-oci=shared,instantclient,/opt/oracle/instantclient \
-          --with-oci8=shared,instantclient,/opt/oracle/instantclient \
+          ${{ inputs.skipSlow == 'false' && '--with-snmp' || '' }} \
+          ${{ inputs.skipSlow == 'false' && '--with-unixODBC' || '' }} \
+          ${{ inputs.skipSlow == 'false' && '--with-pdo-odbc=unixODBC,/usr' || '' }} \
+          $([ -d "/opt/oracle/instantclient" ] && echo '--with-pdo-oci=shared,instantclient,/opt/oracle/instantclient') \
+          $([ -d "/opt/oracle/instantclient" ] && echo '--with-oci8=shared,instantclient,/opt/oracle/instantclient') \
           --with-config-file-path=/etc \
           --with-config-file-scan-dir=/etc/php.d \
-          --with-pdo-firebird \
-          --with-pdo-dblib \
+          ${{ inputs.skipSlow == 'false' && '--with-pdo-firebird' || '' }} \
+          ${{ inputs.skipSlow == 'false' && '--with-pdo-dblib' || '' }} \
           --enable-werror \
           ${{ inputs.configurationParameters }}

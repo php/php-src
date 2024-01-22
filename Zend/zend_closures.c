@@ -58,9 +58,14 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	/* destruct the function also, then - we have allocated it in get_method */
 	zend_string_release_ex(func->internal_function.function_name, 0);
 	efree(func);
-#if ZEND_DEBUG
+
+	/* Set the func pointer to NULL. Prior to PHP 8.3, this was only done for debug builds,
+	 * because debug builds check certain properties after the call and needed to know this
+	 * had been freed.
+	 * However, extensions can proxy zend_execute_internal, and it's a bit surprising to have
+	 * an invalid func pointer sitting on there, so this was changed in PHP 8.3.
+	 */
 	execute_data->func = NULL;
-#endif
 }
 /* }}} */
 
@@ -732,6 +737,11 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 		closure->func.common.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 
+		zend_string_addref(closure->func.op_array.function_name);
+		if (closure->func.op_array.refcount) {
+			(*closure->func.op_array.refcount)++;
+		}
+
 		/* For fake closures, we want to reuse the static variables of the original function. */
 		if (!is_fake) {
 			if (closure->func.op_array.static_variables) {
@@ -765,22 +775,17 @@ static void zend_create_closure_ex(zval *res, zend_function *func, zend_class_en
 				if (func->common.scope != scope) {
 					func->common.scope = scope;
 				}
-				closure->func.op_array.fn_flags &= ~ZEND_ACC_HEAP_RT_CACHE;
 				ptr = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
 				ZEND_MAP_PTR_SET(func->op_array.run_time_cache, ptr);
+				closure->func.op_array.fn_flags &= ~ZEND_ACC_HEAP_RT_CACHE;
 			} else {
 				/* Otherwise, we use a non-shared runtime cache */
-				closure->func.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
 				ptr = emalloc(func->op_array.cache_size);
+				closure->func.op_array.fn_flags |= ZEND_ACC_HEAP_RT_CACHE;
 			}
 			memset(ptr, 0, func->op_array.cache_size);
 		}
 		ZEND_MAP_PTR_INIT(closure->func.op_array.run_time_cache, ptr);
-
-		zend_string_addref(closure->func.op_array.function_name);
-		if (closure->func.op_array.refcount) {
-			(*closure->func.op_array.refcount)++;
-		}
 	} else {
 		memcpy(&closure->func, func, sizeof(zend_internal_function));
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;

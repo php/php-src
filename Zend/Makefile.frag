@@ -20,14 +20,10 @@ $(srcdir)/zend_language_parser.c: $(srcdir)/zend_language_parser.y
 	@$(SED) -e 's,^int zendparse\(.*\),ZEND_API int zendparse\1,g' < $(srcdir)/zend_language_parser.h \
 	> $(srcdir)/zend_language_parser.h.tmp && \
 	mv $(srcdir)/zend_language_parser.h.tmp $(srcdir)/zend_language_parser.h
-	@nlinit=`echo 'nl="'; echo '"'`; eval "$$nlinit"; \
-	$(SED) -e "s/^#ifndef YYTOKENTYPE/#include \"zend.h\"\\$${nl}#ifndef YYTOKENTYPE/" < $(srcdir)/zend_language_parser.h \
-	> $(srcdir)/zend_language_parser.h.tmp && \
-	mv $(srcdir)/zend_language_parser.h.tmp $(srcdir)/zend_language_parser.h
 
 $(srcdir)/zend_ini_parser.h: $(srcdir)/zend_ini_parser.c
 $(srcdir)/zend_ini_parser.c: $(srcdir)/zend_ini_parser.y
-	$(YACC) $(YFLAGS) -v -d $(srcdir)/zend_ini_parser.y -o $@
+	@$(YACC) $(YFLAGS) -v -d $(srcdir)/zend_ini_parser.y -o $@
 
 $(srcdir)/zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
 	@(cd $(top_srcdir); $(RE2C) $(RE2C_FLAGS) --no-generation-date --case-inverted -cbdFt Zend/zend_ini_scanner_defs.h -oZend/zend_ini_scanner.c Zend/zend_ini_scanner.l)

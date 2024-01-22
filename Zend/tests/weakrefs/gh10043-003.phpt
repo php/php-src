@@ -26,6 +26,7 @@ gc_collect_cycles();
 
 var_dump($ref->get());
 
+?>
 --EXPECTF--
 object(WeakMap)#%d (1) {
   [0]=>

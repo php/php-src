@@ -721,31 +721,38 @@ PHPAPI void php_stat(zend_string *filename, int type, zval *return_value)
 		}
 
 		if ((wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(filename), &local, 0)) == &php_plain_files_wrapper
-		 && php_check_open_basedir(local)) {
+				&& php_check_open_basedir(local)) {
 			RETURN_FALSE;
 		}
 
 		if (wrapper == &php_plain_files_wrapper) {
-
+			char realpath[MAXPATHLEN];
+			const char *file_path_to_check;
+			/* if the wrapper is not found, we need to expand path to match open behavior */
+			if (EXPECTED(!php_is_stream_path(local) || expand_filepath(local, realpath) == NULL)) {
+				file_path_to_check = local;
+			} else {
+				file_path_to_check = realpath;
+			}
 			switch (type) {
 #ifdef F_OK
 				case FS_EXISTS:
-					RETURN_BOOL(VCWD_ACCESS(local, F_OK) == 0);
+					RETURN_BOOL(VCWD_ACCESS(file_path_to_check, F_OK) == 0);
 					break;
 #endif
 #ifdef W_OK
 				case FS_IS_W:
-					RETURN_BOOL(VCWD_ACCESS(local, W_OK) == 0);
+					RETURN_BOOL(VCWD_ACCESS(file_path_to_check, W_OK) == 0);
 					break;
 #endif
 #ifdef R_OK
 				case FS_IS_R:
-					RETURN_BOOL(VCWD_ACCESS(local, R_OK) == 0);
+					RETURN_BOOL(VCWD_ACCESS(file_path_to_check, R_OK) == 0);
 					break;
 #endif
 #ifdef X_OK
 				case FS_IS_X:
-					RETURN_BOOL(VCWD_ACCESS(local, X_OK) == 0);
+					RETURN_BOOL(VCWD_ACCESS(file_path_to_check, X_OK) == 0);
 					break;
 #endif
 			}

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 12899073f3791c5da31aa555c0e612ee1faadf55 */
+ * Stub hash: bd3226bdeb5585333f97659a0a3b01504d830a15 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -127,7 +127,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_get_required_files arginfo_func_get_args
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_trigger_error, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_trigger_error, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, error_level, IS_LONG, 0, "E_USER_NOTICE")
 ZEND_END_ARG_INFO()
@@ -355,9 +355,9 @@ static zend_class_entry *register_class_stdClass(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 
-	zend_string *attribute_name_AllowDynamicProperties_class_stdClass = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
-	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_stdClass, 0);
-	zend_string_release(attribute_name_AllowDynamicProperties_class_stdClass);
+	zend_string *attribute_name_AllowDynamicProperties_class_stdClass_0 = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
+	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_stdClass_0, 0);
+	zend_string_release(attribute_name_AllowDynamicProperties_class_stdClass_0);
 
 	return class_entry;
 }

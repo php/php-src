@@ -54,11 +54,25 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : error functionality ***
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 session_set_save_handler(): Argument #2 ($close) must be a valid callback, function "echo" not found or invalid function name
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 session_set_save_handler(): Argument #3 ($read) must be a valid callback, function "echo" not found or invalid function name
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 session_set_save_handler(): Argument #4 ($write) must be a valid callback, function "echo" not found or invalid function name
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 session_set_save_handler(): Argument #5 ($destroy) must be a valid callback, function "echo" not found or invalid function name
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 session_set_save_handler(): Argument #6 ($gc) must be a valid callback, function "echo" not found or invalid function name
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 
 Warning: session_start(): Failed to read session data: user (%s) in %s on line %d
 bool(false)

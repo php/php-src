@@ -23,7 +23,7 @@ try {
 --EXPECT--
 object(MyDatePeriod)#1 (7) {
   ["start"]=>
-  object(DateTime)#2 (3) {
+  object(DateTimeImmutable)#2 (3) {
     ["date"]=>
     string(26) "2012-07-01 00:00:00.000000"
     ["timezone_type"]=>

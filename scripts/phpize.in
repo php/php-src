@@ -59,6 +59,8 @@ phpize_check_configm4()
 phpize_get_api_numbers()
 {
   # extracting API NOs:
+  PHP_MINOR_VERSION=`grep '#define PHP_MINOR_VERSION' $includedir/main/php_version.h|$SED 's/#define PHP_MINOR_VERSION //'`
+  PHP_MAJOR_VERSION=`grep '#define PHP_MAJOR_VERSION' $includedir/main/php_version.h|$SED 's/#define PHP_MAJOR_VERSION//'`
   PHP_API_VERSION=`grep '#define PHP_API_VERSION' $includedir/main/php.h|$SED 's/#define PHP_API_VERSION//'`
   ZEND_MODULE_API_NO=`grep '#define ZEND_MODULE_API_NO' $includedir/Zend/zend_modules.h|$SED 's/#define ZEND_MODULE_API_NO//'`
   ZEND_EXTENSION_API_NO=`grep '#define ZEND_EXTENSION_API_NO' $includedir/Zend/zend_extensions.h|$SED 's/#define ZEND_EXTENSION_API_NO//'`
@@ -68,6 +70,7 @@ phpize_print_api_numbers()
 {
   phpize_get_api_numbers
   echo "Configuring for:"
+  echo "PHP Version:            ${PHP_MAJOR_VERSION}.${PHP_MINOR_VERSION}"
   echo "PHP Api Version:        "$PHP_API_VERSION
   echo "Zend Module Api No:     "$ZEND_MODULE_API_NO
   echo "Zend Extension Api No:  "$ZEND_EXTENSION_API_NO

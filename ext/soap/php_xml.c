@@ -91,6 +91,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 	if (ctxt) {
 		bool old;
 
+		php_libxml_sanitize_parse_ctxt_options(ctxt);
 		ctxt->keepBlanks = 0;
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
 		ctxt->sax->comment = soap_Comment;
@@ -139,6 +140,7 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 	if (ctxt) {
 		bool old;
 
+		php_libxml_sanitize_parse_ctxt_options(ctxt);
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
 		ctxt->sax->comment = soap_Comment;
 		ctxt->sax->warning = NULL;

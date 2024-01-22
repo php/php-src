@@ -84,6 +84,7 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_2022jp_kddi,
 	mbfl_no_encoding_2022jpms,
 	mbfl_no_encoding_gb18030,
+	mbfl_no_encoding_gb18030_2022,
 	mbfl_no_encoding_cp1252,
 	mbfl_no_encoding_cp1254,
 	mbfl_no_encoding_8859_1,
@@ -145,6 +146,7 @@ typedef struct {
 typedef size_t (*mb_to_wchar_fn)(unsigned char **in, size_t *in_len, uint32_t *out, size_t out_len, unsigned int *state);
 typedef void (*mb_from_wchar_fn)(uint32_t *in, size_t in_len, mb_convert_buf *out, bool end);
 typedef bool (*mb_check_fn)(unsigned char *in, size_t in_len);
+typedef zend_string* (*mb_cut_fn)(unsigned char *str, size_t from, size_t len, unsigned char *end);
 
 /* When converting encoded text to a buffer of wchars (Unicode codepoints) using `mb_to_wchar_fn`,
  * the buffer must be at least this size (to work with all supported text encodings) */
@@ -251,6 +253,7 @@ typedef struct {
 	mb_to_wchar_fn to_wchar;
 	mb_from_wchar_fn from_wchar;
 	mb_check_fn check;
+	mb_cut_fn cut;
 } mbfl_encoding;
 
 extern const mbfl_encoding mbfl_encoding_utf8;
@@ -283,6 +286,7 @@ static inline void mb_convert_buf_reset(mb_convert_buf *buf, size_t len)
 }
 
 MBFLAPI extern const mbfl_encoding *mbfl_name2encoding(const char *name);
+MBFLAPI extern const mbfl_encoding *mbfl_name2encoding_ex(const char *name, size_t name_len);
 MBFLAPI extern const mbfl_encoding *mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
 MBFLAPI extern const mbfl_encoding **mbfl_get_supported_encodings(void);
 MBFLAPI extern const char *mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding);

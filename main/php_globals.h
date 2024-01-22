@@ -80,6 +80,7 @@ struct _php_core_globals {
 	char *user_dir;
 	char *include_path;
 	char *open_basedir;
+	bool open_basedir_modified;
 	char *extension_dir;
 	char *php_binary;
 	char *sys_temp_dir;

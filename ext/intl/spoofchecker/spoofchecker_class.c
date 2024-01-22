@@ -77,7 +77,7 @@ static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
 		/* set up error in case error handler is interested */
 		intl_error_set( NULL, SPOOFCHECKER_ERROR_CODE(new_sfo), "Failed to clone SpoofChecker object", 0 );
 		Spoofchecker_objects_free(&new_sfo->zo); /* free new object */
-		zend_error(E_ERROR, "Failed to clone SpoofChecker object");
+		zend_error_noreturn(E_ERROR, "Failed to clone SpoofChecker object");
 	}
 	return new_obj_val;
 }

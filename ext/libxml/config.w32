@@ -9,7 +9,7 @@ if (PHP_LIBXML == "yes") {
 			CHECK_HEADER_ADD_INCLUDE("libxml/tree.h", "CFLAGS_LIBXML", PHP_PHP_BUILD + "\\include\\libxml2") &&
 			ADD_EXTENSION_DEP('libxml', 'iconv')) {
 
-		EXTENSION("libxml", "libxml.c", false /* never shared */, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+		EXTENSION("libxml", "libxml.c mime_sniff.c", false /* never shared */, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		AC_DEFINE("HAVE_LIBXML", 1, "LibXML support");
 		ADD_FLAG("CFLAGS_LIBXML", "/D LIBXML_STATIC /D LIBXML_STATIC_FOR_DLL /D HAVE_WIN32_THREADS ");
 		if (!PHP_LIBXML_SHARED) {

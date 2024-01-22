@@ -2,6 +2,10 @@
 oci8.old_oci_close_semantics On
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --INI--
 oci8.old_oci_close_semantics=1
 --FILE--

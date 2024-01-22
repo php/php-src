@@ -43,6 +43,6 @@ string(7) "some:ns"
 <span xmlns:test="some:ns2" xmlns="some:ns" id="1">
         
     </span>
-<span xmlns="some:ns" id="2">Test <test:test xmlns:test="some:ns2"/></span>
+<default:span xmlns:default="some:ns" xmlns:test="some:ns2" id="2">Test <test:test/></default:span>
 string(1) "2"
 string(7) "some:ns"

@@ -297,8 +297,7 @@ static php_conv_err_t php_conv_base64_encode_flush(php_conv_base64_encode *inst,
 				if (ocnt < inst->lbchars_len) {
 					return PHP_CONV_ERR_TOO_BIG;
 				}
-				memcpy(pd, inst->lbchars, inst->lbchars_len);
-				pd += inst->lbchars_len;
+				pd = zend_mempcpy(pd, inst->lbchars, inst->lbchars_len);
 				ocnt -= inst->lbchars_len;
 				line_ccnt = inst->line_len;
 			}
@@ -352,8 +351,7 @@ static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *ins
 					if (ocnt < inst->lbchars_len) {
 						return PHP_CONV_ERR_TOO_BIG;
 					}
-					memcpy(pd, inst->lbchars, inst->lbchars_len);
-					pd += inst->lbchars_len;
+					pd = zend_mempcpy(pd, inst->lbchars, inst->lbchars_len);
 					ocnt -= inst->lbchars_len;
 					line_ccnt = inst->line_len;
 				}
@@ -379,8 +377,7 @@ static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *ins
 					if (ocnt < inst->lbchars_len) {
 						return PHP_CONV_ERR_TOO_BIG;
 					}
-					memcpy(pd, inst->lbchars, inst->lbchars_len);
-					pd += inst->lbchars_len;
+					pd = zend_mempcpy(pd, inst->lbchars, inst->lbchars_len);
 					ocnt -= inst->lbchars_len;
 					line_ccnt = inst->line_len;
 				}
@@ -407,8 +404,7 @@ static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *ins
 				err = PHP_CONV_ERR_TOO_BIG;
 				goto out;
 			}
-			memcpy(pd, inst->lbchars, inst->lbchars_len);
-			pd += inst->lbchars_len;
+			pd = zend_mempcpy(pd, inst->lbchars, inst->lbchars_len);
 			ocnt -= inst->lbchars_len;
 			line_ccnt = inst->line_len;
 		}
@@ -721,8 +717,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 				ocnt--;
 				line_ccnt--;
 
-				memcpy(pd, inst->lbchars, inst->lbchars_len);
-				pd += inst->lbchars_len;
+				pd = zend_mempcpy(pd, inst->lbchars, inst->lbchars_len);
 				ocnt -= inst->lbchars_len;
 				line_ccnt = inst->line_len;
 			} else {
@@ -778,8 +773,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 				ocnt--;
 				line_ccnt--;
 
-				memcpy(pd, inst->lbchars, inst->lbchars_len);
-				pd += inst->lbchars_len;
+				pd = zend_mempcpy(pd, inst->lbchars, inst->lbchars_len);
 				ocnt -= inst->lbchars_len;
 				line_ccnt = inst->line_len;
 			}
@@ -801,8 +795,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 				ocnt--;
 				line_ccnt--;
 
-				memcpy(pd, inst->lbchars, inst->lbchars_len);
-				pd += inst->lbchars_len;
+				pd = zend_mempcpy(pd, inst->lbchars, inst->lbchars_len);
 				ocnt -= inst->lbchars_len;
 				line_ccnt = inst->line_len;
 			}
@@ -1188,9 +1181,7 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 			retval = pemalloc(sizeof(php_conv_base64_encode), persistent);
 			if (lbchars != NULL) {
 				if (php_conv_base64_encode_ctor((php_conv_base64_encode *)retval, line_len, lbchars, lbchars_len, 1, persistent) != PHP_CONV_ERR_SUCCESS) {
-					if (lbchars != NULL) {
-						pefree(lbchars, 0);
-					}
+					pefree(lbchars, 0);
 					goto out_failure;
 				}
 				pefree(lbchars, 0);

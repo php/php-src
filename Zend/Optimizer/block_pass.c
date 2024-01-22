@@ -172,9 +172,11 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					 && opline->opcode != ZEND_SWITCH_LONG
 					 && opline->opcode != ZEND_SWITCH_STRING
 					 && opline->opcode != ZEND_MATCH
+					 && opline->opcode != ZEND_MATCH_ERROR
 					 && zend_optimizer_update_op1_const(op_array, opline, &c)) {
 						VAR_SOURCE(op1) = NULL;
-						if (!zend_bitset_in(used_ext, VAR_NUM(src->result.var))) {
+						if (opline->opcode != ZEND_JMP_NULL
+						 && !zend_bitset_in(used_ext, VAR_NUM(src->result.var))) {
 							literal_dtor(&ZEND_OP1_LITERAL(src));
 							MAKE_NOP(src);
 						}

@@ -74,9 +74,6 @@
 "Extension: iconv":
 - ext/iconv/**/*
 
-"Extension: imap":
-- ext/imap/**/*
-
 "Extension: intl":
 - ext/intl/**/*
 
@@ -148,9 +145,6 @@
 
 "Extension: posix":
 - ext/posix/**/*
-
-"Extension: pspell":
-- ext/pspell/**/*
 
 "Extension: random":
 - ext/random/**/*

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ada00ea99d91d7e48e9965c5891227f97fd779a6 */
+ * Stub hash: 449ae0af39f24f3e5696b88a30d2a440628c409b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmpget, 0, 3, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
@@ -46,9 +46,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_oid_output_format, 0, 1
 	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_snmp_set_oid_numeric_print, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_snmp_set_oid_numeric_print arginfo_snmp_set_oid_output_format
 
 #define arginfo_snmp2_get arginfo_snmpget
 

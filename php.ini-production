@@ -944,7 +944,6 @@ default_socket_timeout = 60
 ;extension=gettext
 ;extension=gmp
 ;extension=intl
-;extension=imap
 ;extension=mbstring
 ;extension=exif      ; Must be after mbstring as it depends on it
 ;extension=mysqli
@@ -1024,13 +1023,6 @@ cli_server.color = On
 ; To use an output encoding conversion, iconv's output handler must be set
 ; otherwise output encoding conversion cannot be performed.
 ;iconv.output_encoding =
-
-[imap]
-; rsh/ssh logins are disabled by default. Use this INI entry if you want to
-; enable them. Note that the IMAP library does not filter mailbox names before
-; passing them to rsh/ssh command, thus passing untrusted data to this function
-; with rsh/ssh enabled is insecure.
-;imap.enable_insecure_rsh=0
 
 [intl]
 ;intl.default_locale =
@@ -1212,9 +1204,6 @@ mysqli.default_user =
 ; file will be able to reveal the password as well.
 ; https://php.net/mysqli.default-pw
 mysqli.default_pw =
-
-; Allow or prevent reconnect
-mysqli.reconnect = Off
 
 ; If this option is enabled, closing a persistent connection will rollback
 ; any pending transactions of this connection, before it is put back
@@ -1842,10 +1831,6 @@ ldap.max_links = -1
 ; Allows exclusion of large files from being cached. By default all files
 ; are cached.
 ;opcache.max_file_size=0
-
-; Check the cache checksum each N requests.
-; The default value of "0" means that the checks are disabled.
-;opcache.consistency_checks=0
 
 ; How long to wait (in seconds) for a scheduled restart to begin if the cache
 ; is not being accessed.

@@ -19,6 +19,7 @@
 #include <windows.h>
 #include <Winbase.h >
 #include <Windns.h>
+#include <Ws2tcpip.h>
 
 #include "php_dns.h"
 
@@ -174,9 +175,14 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, bool raw
 	switch (type) {
 		case DNS_TYPE_A: {
 			IN_ADDR ipaddr;
+			char ip[INET_ADDRSTRLEN];
 			ipaddr.S_un.S_addr = (pRec->Data.A.IpAddress);
-			add_assoc_string(subarray, "type", "A");
-			add_assoc_string(subarray, "ip", inet_ntoa(ipaddr));
+			if (!inet_ntop(AF_INET, &ipaddr, ip, INET_ADDRSTRLEN)) {
+				ZVAL_UNDEF(subarray);
+			} else {
+				add_assoc_string(subarray, "type", "A");
+				add_assoc_string(subarray, "ip", ip);
+			}
 			break;
 		}
 

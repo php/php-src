@@ -40,7 +40,7 @@ static void seed(php_random_status *status, uint64_t seed)
 	s->state[1] = seed >> 32;
 }
 
-static uint64_t generate(php_random_status *status)
+static php_random_result generate(php_random_status *status)
 {
 	php_random_status_state_combinedlcg *s = status->state;
 	int32_t q, z;
@@ -53,7 +53,10 @@ static uint64_t generate(php_random_status *status)
 		z += 2147483562;
 	}
 
-	return (uint64_t) z;
+	return (php_random_result){
+		.size = sizeof(uint32_t),
+		.result = (uint64_t) z,
+	};
 }
 
 static zend_long range(php_random_status *status, zend_long min, zend_long max)
@@ -93,7 +96,6 @@ static bool unserialize(php_random_status *status, HashTable *data)
 }
 
 const php_random_algo php_random_algo_combinedlcg = {
-	sizeof(uint32_t),
 	sizeof(php_random_status_state_combinedlcg),
 	seed,
 	generate,

@@ -4,11 +4,11 @@ Bug #50772 (mysqli constructor without parameters does not return a working mysq
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    include "connect.inc";
+    include 'connect.inc';
     $db1 = new mysqli();
 
     // These calls fail

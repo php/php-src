@@ -21,108 +21,18 @@
 #ifndef ZEND_JIT_INTERNAL_H
 #define ZEND_JIT_INTERNAL_H
 
-#include "zend_bitset.h"
-
-/* Register Set */
-#define ZEND_REGSET_EMPTY 0
-
-#define ZEND_REGSET_IS_EMPTY(regset) \
-	(regset == ZEND_REGSET_EMPTY)
-
-#define ZEND_REGSET_IS_SINGLETON(regset) \
-	(regset && !(regset & (regset - 1)))
-
-#if (!ZEND_REGSET_64BIT)
-#define ZEND_REGSET(reg) \
-	(1u << (reg))
-#else
-#define ZEND_REGSET(reg) \
-	(1ull << (reg))
-#endif
-
-#if (!ZEND_REGSET_64BIT)
-#define ZEND_REGSET_INTERVAL(reg1, reg2) \
-	(((1u << ((reg2) - (reg1) + 1)) - 1) << (reg1))
-#else
-#define ZEND_REGSET_INTERVAL(reg1, reg2) \
-	(((1ull << ((reg2) - (reg1) + 1)) - 1) << (reg1))
-#endif
-
-#define ZEND_REGSET_IN(regset, reg) \
-	(((regset) & ZEND_REGSET(reg)) != 0)
-
-#define ZEND_REGSET_INCL(regset, reg) \
-	(regset) |= ZEND_REGSET(reg)
-
-#define ZEND_REGSET_EXCL(regset, reg) \
-	(regset) &= ~ZEND_REGSET(reg)
-
-#define ZEND_REGSET_UNION(set1, set2) \
-	((set1) | (set2))
-
-#define ZEND_REGSET_INTERSECTION(set1, set2) \
-	((set1) & (set2))
-
-#define ZEND_REGSET_DIFFERENCE(set1, set2) \
-	((set1) & ~(set2))
-
-#if !defined(_WIN32)
-# if (!ZEND_REGSET_64BIT)
-#  define ZEND_REGSET_FIRST(set) ((zend_reg)__builtin_ctz(set))
-#  define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clz(set)^31))
-# else
-#  define ZEND_REGSET_FIRST(set) ((zend_reg)__builtin_ctzll(set))
-#  define ZEND_REGSET_LAST(set)  ((zend_reg)(__builtin_clzll(set)^63))
-# endif
-#else
-# include <intrin.h>
-uint32_t __inline __zend_jit_ctz(uint32_t value) {
-	DWORD trailing_zero = 0;
-	if (_BitScanForward(&trailing_zero, value)) {
-		return trailing_zero;
-	}
-	return 32;
-}
-uint32_t __inline __zend_jit_clz(uint32_t value) {
-	DWORD leading_zero = 0;
-	if (_BitScanReverse(&leading_zero, value)) {
-		return 31 - leading_zero;
-	}
-	return 32;
-}
-# define ZEND_REGSET_FIRST(set) ((zend_reg)__zend_jit_ctz(set))
-# define ZEND_REGSET_LAST(set)  ((zend_reg)(__zend_jit_clz(set)^31))
-#endif
-
-#define ZEND_REGSET_FOREACH(set, reg) \
-	do { \
-		zend_regset _tmp = (set); \
-		while (!ZEND_REGSET_IS_EMPTY(_tmp)) { \
-			zend_reg _reg = ZEND_REGSET_FIRST(_tmp); \
-			ZEND_REGSET_EXCL(_tmp, _reg); \
-			reg = _reg; \
-
-#define ZEND_REGSET_FOREACH_END() \
-		} \
-	} while (0)
-
-/* Register Names */
-extern const char *zend_reg_name[];
-
 /* Address Encoding */
 typedef uintptr_t zend_jit_addr;
 
 #define IS_CONST_ZVAL                  0
 #define IS_MEM_ZVAL                    1
-#define IS_REG                         2
+#define IS_REG                         2 /* CPU register or PHP SSA variable number (for IR JIT) */
+#define IS_REF_ZVAL                    3 /* IR reference */
 
 #define _ZEND_ADDR_MODE_MASK         0x3
 #define _ZEND_ADDR_REG_SHIFT           2
 #define _ZEND_ADDR_REG_MASK         0x3f /* no more than 64 registers */
 #define _ZEND_ADDR_OFFSET_SHIFT        8
-#define _ZEND_ADDR_REG_STORE_BIT       8
-#define _ZEND_ADDR_REG_LOAD_BIT        9
-#define _ZEND_ADDR_REG_LAST_USE_BIT   10
 
 #define ZEND_ADDR_CONST_ZVAL(zv) \
 	(((zend_jit_addr)(uintptr_t)(zv)) | IS_CONST_ZVAL)
@@ -138,45 +48,39 @@ typedef uintptr_t zend_jit_addr;
 #define Z_ZV(addr)       ((zval*)(addr))
 #define Z_OFFSET(addr)   ((uint32_t)((addr)>>_ZEND_ADDR_OFFSET_SHIFT))
 #define Z_REG(addr)      ((zend_reg)(((addr)>>_ZEND_ADDR_REG_SHIFT) & _ZEND_ADDR_REG_MASK))
-#define Z_STORE(addr)    ((zend_reg)(((addr)>>_ZEND_ADDR_REG_STORE_BIT) & 1))
-#define Z_LOAD(addr)     ((zend_reg)(((addr)>>_ZEND_ADDR_REG_LOAD_BIT) & 1))
-#define Z_LAST_USE(addr) ((zend_reg)(((addr)>>_ZEND_ADDR_REG_LAST_USE_BIT) & 1))
 
-#define OP_REG_EX(reg, store, load, last_use) \
-	((reg) | \
-	 ((store) ? (1 << (_ZEND_ADDR_REG_STORE_BIT-_ZEND_ADDR_REG_SHIFT)) : 0) | \
-	 ((load) ? (1 << (_ZEND_ADDR_REG_LOAD_BIT-_ZEND_ADDR_REG_SHIFT)) : 0) | \
-	 ((last_use) ? (1 << (_ZEND_ADDR_REG_LAST_USE_BIT-_ZEND_ADDR_REG_SHIFT)) : 0) \
-	)
+#define ZEND_ADDR_REF_ZVAL(ref) \
+	((((zend_jit_addr)(uintptr_t)(ref)) << _ZEND_ADDR_REG_SHIFT) | \
+	IS_REF_ZVAL)
 
-#define OP_REG(ssa_op, op) \
-	(ra && ssa_op->op >= 0 && ra[ssa_op->op] ? \
-		OP_REG_EX(ra[ssa_op->op]->reg, \
-			(ra[ssa_op->op]->flags & ZREG_STORE), \
-			(ra[ssa_op->op]->flags & ZREG_LOAD), \
-			zend_ival_is_last_use(ra[ssa_op->op], ssa_op - ssa->ops) \
-		) : ZREG_NONE)
+#define Z_SSA_VAR(addr)  ((addr)>>_ZEND_ADDR_REG_SHIFT)
+#define Z_IR_REF(addr)   ((addr)>>_ZEND_ADDR_REG_SHIFT)
 
-static zend_always_inline zend_jit_addr _zend_jit_decode_op(uint8_t op_type, znode_op op, const zend_op *opline, zend_reg reg)
-{
-	if (op_type == IS_CONST) {
+#define Z_STORE(addr) \
+	((jit->ra && jit->ra[Z_SSA_VAR(addr)].ref) ? \
+		(jit->ra[Z_SSA_VAR(addr)].flags & ZREG_STORE) : \
+		0)
+#define Z_LOAD(addr) \
+	((jit->ra && jit->ra[Z_SSA_VAR(addr)].ref) ? \
+		(jit->ra[Z_SSA_VAR(addr)].flags & ZREG_LOAD) : \
+		0)
+
 #if ZEND_USE_ABS_CONST_ADDR
-		return ZEND_ADDR_CONST_ZVAL(op.zv);
+# define OP_ADDR(opline, type, op) \
+	(((opline)->type == IS_CONST) ? \
+		ZEND_ADDR_CONST_ZVAL((opline)->op.zv) : \
+		ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline)->op.var))
 #else
-		return ZEND_ADDR_CONST_ZVAL(RT_CONSTANT(opline, op));
+# define OP_ADDR(opline, type, op) \
+	(((opline)->type == IS_CONST) ? \
+		ZEND_ADDR_CONST_ZVAL(RT_CONSTANT(opline, (opline)->op)) : \
+		ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline)->op.var))
 #endif
-	} else {
-		ZEND_ASSERT(op_type & (IS_CV|IS_TMP_VAR|IS_VAR));
-		if (reg != ZREG_NONE) {
-			return ZEND_ADDR_REG(reg);
-		} else {
-			return ZEND_ADDR_MEM_ZVAL(ZREG_FP, op.var);
-		}
-	}
-}
 
-#define OP_ADDR(opline, type, op) \
-	_zend_jit_decode_op((opline)->type, (opline)->op, opline, ZREG_NONE)
+#define OP_REG_ADDR(opline, type, op, _ssa_op) \
+	((ctx.ra && ssa_op->_ssa_op >= 0 && ctx.ra[ssa_op->_ssa_op].ref) ? \
+		ZEND_ADDR_REG(ssa_op->_ssa_op) : \
+		OP_ADDR(opline, type, op))
 
 #define OP1_ADDR() \
 	OP_ADDR(opline, op1_type, op1)
@@ -186,10 +90,6 @@ static zend_always_inline zend_jit_addr _zend_jit_decode_op(uint8_t op_type, zno
 	OP_ADDR(opline, result_type, result)
 #define OP1_DATA_ADDR() \
 	OP_ADDR(opline + 1, op1_type, op1)
-
-#define OP_REG_ADDR(opline, type, _op, _ssa_op) \
-	_zend_jit_decode_op((opline)->type, (opline)->_op, opline, \
-		OP_REG(ssa_op, _ssa_op))
 
 #define OP1_REG_ADDR() \
 	OP_REG_ADDR(opline, op1_type, op1, op1_use)
@@ -214,7 +114,9 @@ static zend_always_inline bool zend_jit_same_addr(zend_jit_addr addr1, zend_jit_
 	if (addr1 == addr2) {
 		return 1;
 	} else if (Z_MODE(addr1) == IS_REG && Z_MODE(addr2) == IS_REG) {
-		return Z_REG(addr1) == Z_REG(addr2);
+		return Z_SSA_VAR(addr1) == Z_SSA_VAR(addr2);
+	} else if (Z_MODE(addr1) == IS_REF_ZVAL && Z_MODE(addr2) == IS_REF_ZVAL) {
+		return Z_IR_REF(addr1) == Z_IR_REF(addr2);
 	}
 	return 0;
 }
@@ -328,6 +230,8 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_counter_helper(ZEND_OPCODE_H
 
 void ZEND_FASTCALL zend_jit_copy_extra_args_helper(EXECUTE_DATA_D);
 bool ZEND_FASTCALL zend_jit_deprecated_helper(OPLINE_D);
+void ZEND_FASTCALL zend_jit_undefined_long_key(EXECUTE_DATA_D);
+void ZEND_FASTCALL zend_jit_undefined_string_key(EXECUTE_DATA_D);
 
 zend_constant* ZEND_FASTCALL zend_jit_get_constant(const zval *key, uint32_t flags);
 zend_constant* ZEND_FASTCALL zend_jit_check_constant(const zval *key);
@@ -413,6 +317,8 @@ typedef enum _zend_jit_trace_stop {
 #define ZEND_JIT_EXIT_CLOSURE_CALL  (1<<8) /* exit because of polymorphic INIT_DYNAMIC_CALL call */
 #define ZEND_JIT_EXIT_METHOD_CALL   (1<<9) /* exit because of polymorphic INIT_METHOD_CALL call */
 #define ZEND_JIT_EXIT_INVALIDATE    (1<<10) /* invalidate current trace */
+
+#define ZEND_JIT_EXIT_FIXED         (1U<<31) /* the exit_info can't be changed by zend_jit_snapshot_handler() */
 
 typedef union _zend_op_trace_info {
 	zend_op dummy; /* the size of this structure must be the same as zend_op */
@@ -515,21 +421,46 @@ typedef struct _zend_jit_trace_exit_info {
 	uint32_t             flags;      /* set of ZEND_JIT_EXIT_... */
 	uint32_t             stack_size;
 	uint32_t             stack_offset;
+	int32_t              poly_func_ref;
+	int32_t              poly_this_ref;
+	int8_t               poly_func_reg;
+	int8_t               poly_this_reg;
 } zend_jit_trace_exit_info;
 
-typedef union _zend_jit_trace_stack {
-	int32_t      ssa_var;
-	uint32_t     info;
-	struct {
-		uint8_t type;     /* variable type (for type inference) */
-		uint8_t mem_type; /* stack slot type  (for eliminate dead type store) */
-		int8_t  reg;
-		uint8_t flags;
+typedef struct _zend_jit_trace_stack {
+	union {
+		uint32_t    info;
+		struct {
+			uint8_t type;     /* variable type (for type inference) */
+			uint8_t mem_type; /* stack slot type  (for eliminate dead type store) */
+			int8_t  reg;
+			uint8_t flags;
+		};
 	};
+	int32_t         ref;
 } zend_jit_trace_stack;
 
 #define STACK_VAR(_stack, _slot) \
-	(_stack)[_slot].ssa_var
+	((int32_t*)(_stack))[_slot]
+#define SET_STACK_VAR(_stack, _slot, _ssa_var) do { \
+		((int32_t*)(_stack))[_slot] = _ssa_var; \
+	} while (0)
+
+#define CLEAR_STACK_REF(_stack, _slot) do { \
+		(_stack)[_slot].ref = IR_UNUSED; \
+		(_stack)[_slot].flags = 0; \
+	} while (0)
+#define STACK_REF(_stack, _slot) \
+	(_stack)[_slot].ref
+#define SET_STACK_REF(_stack, _slot, _ref) do { \
+		(_stack)[_slot].ref = (_ref); \
+		(_stack)[_slot].flags = 0; \
+	} while (0)
+#define SET_STACK_REF_EX(_stack, _slot, _ref, _flags) do { \
+		(_stack)[_slot].ref = (_ref); \
+		(_stack)[_slot].flags = _flags; \
+	} while (0)
+
 #define STACK_INFO(_stack, _slot) \
 	(_stack)[_slot].info
 #define STACK_TYPE(_stack, _slot) \
@@ -540,9 +471,6 @@ typedef union _zend_jit_trace_stack {
 	(_stack)[_slot].reg
 #define STACK_FLAGS(_stack, _slot) \
 	(_stack)[_slot].flags
-#define SET_STACK_VAR(_stack, _slot, _ssa_var) do { \
-		(_stack)[_slot].ssa_var = _ssa_var; \
-	} while (0)
 #define SET_STACK_INFO(_stack, _slot, _info) do { \
 		(_stack)[_slot].info = _info; \
 	} while (0)
@@ -554,6 +482,7 @@ typedef union _zend_jit_trace_stack {
 		} \
 		(_stack)[_slot].reg = ZREG_NONE; \
 		(_stack)[_slot].flags = 0; \
+		CLEAR_STACK_REF(_stack, _slot); \
 	} while (0)
 #define SET_STACK_REG(_stack, _slot, _reg) do { \
 		(_stack)[_slot].reg = _reg; \
@@ -571,6 +500,11 @@ typedef union _zend_jit_trace_stack {
 #define ZEND_JIT_TRACE_CHECK_INTERRUPT (1<<0)
 #define ZEND_JIT_TRACE_LOOP            (1<<1)
 #define ZEND_JIT_TRACE_USES_INITIAL_IP (1<<2)
+
+typedef union _zend_jit_exit_const {
+	int64_t   i;
+	double    d;
+} zend_jit_exit_const;
 
 typedef struct _zend_jit_trace_info {
 	uint32_t                  id;            /* trace id */
@@ -591,6 +525,8 @@ typedef struct _zend_jit_trace_info {
 	zend_jit_trace_exit_info *exit_info;     /* info about side exits */
 	zend_jit_trace_stack     *stack_map;
 	//uint32_t    loop_offset;
+	uint32_t                  consts_count;  /* number of side exits */
+	zend_jit_exit_const      *constants;
 } zend_jit_trace_info;
 
 struct _zend_jit_trace_stack_frame {
@@ -604,7 +540,7 @@ struct _zend_jit_trace_stack_frame {
 	int                         used_stack;
 	int                         old_checked_stack;
 	int                         old_peek_checked_stack;
-	zend_jit_trace_stack        stack[1];
+	zend_jit_trace_stack        stack[1] ZEND_ELEMENT_COUNT(used_stack);
 };
 
 #define TRACE_FRAME_SHIFT_NUM_ARGS            16
@@ -709,7 +645,6 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_ret_trace_helper(ZEND_OPCODE_HAND
 ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_loop_trace_helper(ZEND_OPCODE_HANDLER_ARGS);
 
 int ZEND_FASTCALL zend_jit_trace_hot_root(zend_execute_data *execute_data, const zend_op *opline);
-int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs);
 zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *execute_data, const zend_op *opline, zend_jit_trace_rec *trace_buffer, uint8_t start, uint32_t is_megamorphc);
 
 static zend_always_inline const zend_op* zend_jit_trace_get_exit_opline(zend_jit_trace_rec *trace, const zend_op *opline, bool *exit_if_true)
@@ -792,12 +727,6 @@ static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *o
 static zend_always_inline bool zend_long_is_power_of_two(zend_long x)
 {
 	return (x > 0) && !(x & (x - 1));
-}
-
-static zend_always_inline uint32_t zend_long_floor_log2(zend_long x)
-{
-	ZEND_ASSERT(zend_long_is_power_of_two(x));
-	return zend_ulong_ntz(x);
 }
 
 /* from http://aggregate.org/MAGIC/ */

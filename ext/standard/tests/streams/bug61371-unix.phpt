@@ -5,6 +5,7 @@ Bug #61371: stream_context_create() causes memory leaks on use streams_socket_cr
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
     die('skip non windows test');
 }
+?>
 --FILE--
 <?php
 function test($doFclose) {

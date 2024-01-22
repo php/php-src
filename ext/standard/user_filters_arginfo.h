@@ -59,7 +59,7 @@ static zend_class_entry *register_class_php_user_filter(void)
 	zval property_stream_default_value;
 	ZVAL_NULL(&property_stream_default_value);
 	zend_string *property_stream_name = zend_string_init("stream", sizeof("stream") - 1, 1);
-	zend_declare_property_ex(class_entry, property_stream_name, &property_stream_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_stream_name, &property_stream_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	zend_string_release(property_stream_name);
 
 	return class_entry;

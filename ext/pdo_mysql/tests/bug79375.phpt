@@ -1,17 +1,16 @@
 --TEST--
 Bug #79375: mysqli_store_result does not report error from lock wait timeout
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
 function createDB(): PDO {
     $db = MySQLPDOTest::factory();
@@ -22,14 +21,13 @@ function createDB(): PDO {
 
 $db = createDB();
 $db2 = createDB();
-$db->query('DROP TABLE IF EXISTS test');
-$db->query('CREATE TABLE test (first int) ENGINE = InnoDB');
-$db->query('INSERT INTO test VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9)');
+$db->query('CREATE TABLE test_79375 (first INT) ENGINE = InnoDB');
+$db->query('INSERT INTO test_79375 VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9)');
 
 function testNormalQuery(PDO $db, string $name) {
     $db->exec("SET innodb_lock_wait_timeout = 1");
     $db->exec("START TRANSACTION");
-    $query = "SELECT first FROM test WHERE first = 1 FOR UPDATE";
+    $query = "SELECT first FROM test_79375 WHERE first = 1 FOR UPDATE";
     echo "Running query on $name\n";
     try {
         $stmt = $db->query($query);
@@ -42,7 +40,7 @@ function testNormalQuery(PDO $db, string $name) {
 function testPrepareExecute(PDO $db, string $name) {
     $db->exec("SET innodb_lock_wait_timeout = 1");
     $db->exec("START TRANSACTION");
-    $query = "SELECT first FROM test WHERE first = 1 FOR UPDATE";
+    $query = "SELECT first FROM test_79375 WHERE first = 1 FOR UPDATE";
     echo "Running query on $name\n";
     $stmt = $db->prepare($query);
     try {
@@ -57,7 +55,7 @@ function testUnbuffered(PDO $db, string $name) {
     $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
     $db->exec("SET innodb_lock_wait_timeout = 1");
     $db->exec("START TRANSACTION");
-    $query = "SELECT first FROM test WHERE first = 1 FOR UPDATE";
+    $query = "SELECT first FROM test_79375 WHERE first = 1 FOR UPDATE";
     echo "Running query on $name\n";
     $stmt = $db->prepare($query);
     $stmt->execute();
@@ -95,8 +93,9 @@ echo "\n";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_79375');
 ?>
 --EXPECT--
 Running query on first connection

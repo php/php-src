@@ -643,6 +643,7 @@ static int format_default_value(smart_str *str, zval *value) {
 		} ZEND_HASH_FOREACH_END();
 		smart_str_appendc(str, ']');
 	} else if (Z_TYPE_P(value) == IS_OBJECT) {
+		/* This branch may only be reached for default properties, which don't support arbitrary objects. */
 		zend_object *obj = Z_OBJ_P(value);
 		zend_class_entry *class = obj->ce;
 		ZEND_ASSERT(class->ce_flags & ZEND_ACC_ENUM);
@@ -3341,6 +3342,14 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 	zend_function *mptr;
 
 	if (is_constructor) {
+		if (ZEND_NUM_ARGS() == 1) {
+			zend_error(E_DEPRECATED, "Calling ReflectionMethod::__construct() with 1 argument is deprecated, "
+				"use ReflectionMethod::createFromMethodName() instead");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+
 		ZEND_PARSE_PARAMETERS_START(1, 2)
 			Z_PARAM_OBJ_OR_STR(arg1_obj, arg1_str)
 			Z_PARAM_OPTIONAL
@@ -3409,9 +3418,7 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 		&& (mptr = zend_get_closure_invoke_method(orig_obj)) != NULL)
 	{
 		/* do nothing, mptr already set */
-	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, method_name_len)) == NULL
-		|| ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) && mptr->common.scope != ce))
-	{
+	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, method_name_len)) == NULL) {
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Method %s::%s() does not exist", ZSTR_VAL(ce->name), method_name);

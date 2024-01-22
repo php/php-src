@@ -4,30 +4,29 @@ PDO->beginTransaction()
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
-if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
-    die("skip Transactional engine not found");
-?>
+MySQLPDOTest::skipNotTransactionalEngine();
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
-    MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
+    $table = 'pdo_mysql_begintransaction';
 
-    if (1 !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
+    MySQLPDOTest::createTestTable($table, $db, MySQLPDOTest::detect_transactional_mysql_engine($db));
+
+    if (true !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
         printf("[001] Autocommit should be on by default\n");
 
     if (false == $db->beginTransaction())
         printf("[002] Cannot start a transaction, [%s] [%s]\n",
             $db->errorCode(), implode(' ', $db->errorInfo()));
 
-    if (1 !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
+    if (true !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
         printf("[003] Autocommit should be on by default, beginTransaction() shall not impact it\n");
 
-    if (0 == $db->exec('DELETE FROM test'))
+    if (0 == $db->exec("DELETE FROM {$table}"))
         printf("[004] No rows deleted, can't be true.\n");
 
     /* This is the PDO way to close a connection */
@@ -36,7 +35,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
     /* Autocommit was off - by definition. Commit was not issued. DELETE should have been rolled back. */
-    if (!($stmt = $db->query('SELECT id, label FROM test ORDER BY id ASC')))
+    if (!($stmt = $db->query("SELECT id, label FROM {$table} ORDER BY id ASC")))
         printf("[005] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -45,16 +44,16 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
     if (!$db->beginTransaction())
         printf("[006] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
-    if (1 !== $db->exec(sprintf('DELETE FROM test WHERE id = %d', $row['id'])))
+    if (1 !== $db->exec(sprintf('DELETE FROM %s WHERE id = %d', $table, $row['id'])))
         printf("[007] DELETE should have indicated 1 deleted row, [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
     if (!$db->commit())
         printf("[008] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
-    if (1 !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
+    if (true !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
         printf("[009] Autocommit should be on after commit()\n");
 
-    if (!($stmt = $db->query(sprintf('SELECT id, label FROM test WHERE id = %d', $row['id']))))
+    if (!($stmt = $db->query(sprintf('SELECT id, label FROM %s WHERE id = %d', $table, $row['id']))))
         printf("[010] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
     var_dump($stmt->fetch(PDO::FETCH_ASSOC));
@@ -62,9 +61,9 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
     if (!$db->beginTransaction())
         printf("[011] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
-    $db->exec(sprintf("INSERT INTO test(id, label) VALUES (%d, 'z')", $row['id']));
+    $db->exec(sprintf("INSERT INTO %s (id, label) VALUES (%d, 'z')", $table, $row['id']));
 
-    if (!($stmt = $db->query(sprintf('SELECT id, label FROM test WHERE id = %d', $row['id']))))
+    if (!($stmt = $db->query(sprintf('SELECT id, label FROM %s WHERE id = %d', $table, $row['id']))))
         printf("[012] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
     $new_row1 = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -73,7 +72,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
     if (!$db->commit())
         printf("[013] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
-    if (!($stmt = $db->query(sprintf('SELECT id, label FROM test WHERE id = %d', $row['id']))))
+    if (!($stmt = $db->query(sprintf('SELECT id, label FROM %s WHERE id = %d', $table, $row['id']))))
         printf("[014] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
     $new_row2 = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -86,16 +85,16 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
     if (!$db->beginTransaction())
         printf("[016] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
-    if (1 !== $db->exec(sprintf('DELETE FROM test WHERE id = %d', $row['id'])))
+    if (1 !== $db->exec(sprintf('DELETE FROM %s WHERE id = %d', $table, $row['id'])))
         printf("[017] DELETE should have indicated 1 deleted row, [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
     if (!$db->rollback())
         printf("[018] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
-    if (1 !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
+    if (true !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
         printf("[019] Autocommit should be on after rollback\n");
 
-    if (!($stmt = $db->query(sprintf('SELECT id, label FROM test WHERE id = %d', $row['id']))))
+    if (!($stmt = $db->query(sprintf('SELECT id, label FROM %s WHERE id = %d', $table, $row['id']))))
         printf("[020] [%s] %s\n", $db->errorCode(), implode(' ', $db->errorInfo()));
 
     $new_row2 = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -133,7 +132,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 
     // Turn off autocommit using a server variable
     $db->exec('SET @@autocommit = 0');
-    if (1 === $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
+    if (true === $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
         printf("[028] I'm confused, how can autocommit be on? Didn't I say I want to manually control transactions?\n");
 
     if (!$db->beginTransaction())
@@ -150,16 +149,16 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 
     // TODO: What about an engine that does not support transactions?
     $db = MySQLPDOTest::factory();
-    MySQLPDOTest::createTestTable($db, 'MyISAM');
+    MySQLPDOTest::createTestTable($table, $db, 'MyISAM');
 
     if (false == $db->beginTransaction())
         printf("[031] Cannot start a transaction, [%s] [%s]\n",
             $db->errorCode(), implode(' ', $db->errorInfo()));
 
-    if (1 !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
+    if (true !== $db->getAttribute(PDO::ATTR_AUTOCOMMIT))
         printf("[032] Autocommit should be on my default, beginTransaction() should not change that\n");
 
-    if (0 == $db->exec('DELETE FROM test'))
+    if (0 == $db->exec("DELETE FROM {$table}"))
         printf("[033] No rows deleted, can't be true.\n");
 
     if (!$db->commit())
@@ -169,7 +168,7 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
         printf("[035] Cannot start a transaction, [%s] [%s]\n",
             $db->errorCode(), implode(' ', $db->errorInfo()));
 
-    if (0 == $db->exec("INSERT INTO test(id, label) VALUES (1, 'a')"))
+    if (0 == $db->exec("INSERT INTO {$table} (id, label) VALUES (1, 'a')"))
         printf("[036] Cannot insert data, [%s] [%s]\n",
             $db->errorCode(), implode(' ', $db->errorInfo()));
 
@@ -179,15 +178,16 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 
     var_dump($db->errorCode());
 
-    if (1 != $db->exec('DELETE FROM test'))
+    if (1 != $db->exec("DELETE FROM {$table}"))
         printf("[038] No rows deleted, can't be true.\n");
 
     print "done!";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->query('DROP TABLE IF EXISTS pdo_mysql_begintransaction');
 ?>
 --EXPECT--
 array(2) {

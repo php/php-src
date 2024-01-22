@@ -4,7 +4,7 @@ Multiple result set with PS
 mysqli
 --SKIPIF--
 <?php
-require_once "skipifconnectfailure.inc";
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php

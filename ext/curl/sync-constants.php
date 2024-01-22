@@ -3,12 +3,12 @@
 
 /**
  * This script checks the constants defined in the curl PHP extension, against those documented on the cURL website:
- * https://curl.haxx.se/libcurl/c/symbols-in-versions.html
+ * https://curl.se/libcurl/c/symbols-in-versions.html
  *
  * See the discussion at: https://github.com/php/php-src/pull/2961
  */
 
-const CURL_DOC_FILE = 'https://curl.haxx.se/libcurl/c/symbols-in-versions.html';
+const CURL_DOC_FILE = 'https://curl.se/libcurl/c/symbols-in-versions.html';
 
 const SOURCE_FILE = __DIR__ . '/curl_arginfo.h';
 
@@ -25,7 +25,7 @@ const IGNORED_PHP_CONSTANTS = [
     'CURLOPT_SAFE_UPLOAD',
 ];
 
-const CONSTANTS_REGEX_PATTERN = '~^CURL(?:OPT|_VERSION)_[A-Z0-9_]+$~';
+const CONSTANTS_REGEX_PATTERN = '~^CURL(?:OPT|_VERSION|_HTTP)_[A-Z0-9_]+$~';
 
 /**
  * A simple helper to create ASCII tables.
@@ -208,7 +208,7 @@ function getCurlConstants() : array
     $html = file_get_contents(CURL_DOC_FILE);
 
     // Extract the constant list from the HTML file (located in the only <pre> tag in the page)
-    preg_match('~<pre>([^<]+)</pre>~', $html, $matches);
+    preg_match('~<table>(.*?)</table>~s', $html, $matches);
     $constantList = $matches[1];
 
     /**
@@ -220,16 +220,16 @@ function getCurlConstants() : array
      * CURLOPT_FTPASCII                7.1           7.11.1      7.15.5
      * CURLOPT_HTTPREQUEST             7.1           -           7.15.5
      */
-    $regexp = '/^([A-Za-z0-9_]+) +([0-9\.]+)(?: +([0-9\.\-]+))?(?: +([0-9\.]+))?/m';
+    $regexp = '@<tr><td>(?:<a href=".*?">)?(?<const>[A-Za-z0-9_]+)(?:</a>)?</td><td>(?:<a href=".*?">)?(?<added>[\d\.]+)(?:</a>)?</td><td>(?:<a href=".*?">)?(?<deprecated>[\d\.]+)?(?:</a>)?</td><td>(<a href=".*?">)?(?<removed>[\d\.]+)?(</a>)?</td></tr>@m';
     preg_match_all($regexp, $constantList, $matches, PREG_SET_ORDER);
 
     $constants = [];
 
     foreach ($matches as $match) {
-        $name       = $match[1];
-        $introduced = $match[2];
-        $deprecated = $match[3] ?? null;
-        $removed    = $match[4] ?? null;
+        $name       = $match['const'];
+        $introduced = $match['added'];
+        $deprecated = $match['deprecated'] ?? null;
+        $removed    = $match['removed'] ?? null;
 
         if (in_array($name, IGNORED_CURL_CONSTANTS, true) || !preg_match(CONSTANTS_REGEX_PATTERN, $name)) {
             // not a wanted constant

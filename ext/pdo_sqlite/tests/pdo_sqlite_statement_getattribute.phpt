@@ -11,7 +11,7 @@ $st = $db->prepare('SELECT 1;');
 
 var_dump($st->getAttribute(PDO::SQLITE_ATTR_READONLY_STATEMENT));
 
-$st = $db->prepare('CREATE TABLE test (a TEXT);');
+$st = $db->prepare('CREATE TABLE test_sqlite_stmt_getattribute (a TEXT);');
 
 var_dump($st->getAttribute(PDO::SQLITE_ATTR_READONLY_STATEMENT));
 ?>

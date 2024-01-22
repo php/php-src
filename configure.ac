@@ -17,7 +17,7 @@ dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
 
 AC_PREREQ([2.68])
-AC_INIT([PHP],[8.3.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
+AC_INIT([PHP],[8.4.0-dev],[https://github.com/php/php-src/issues],[php],[https://www.php.net])
 AC_CONFIG_SRCDIR([main/php_version.h])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
@@ -229,12 +229,6 @@ case $host_alias in
   *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
     ;;
-  *dgux*)
-    CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR"
-    ;;
-  *mips*)
-    CPPFLAGS="$CPPFLAGS -D_XPG_IV"
-    ;;
   *hpux*)
     if test "$GCC" = "yes"; then
       CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
@@ -368,8 +362,8 @@ PHP_CHECK_FUNC(socketpair, socket, network)
 PHP_CHECK_FUNC(htonl, socket, network)
 PHP_CHECK_FUNC(gethostname, nsl, network)
 PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
-PHP_CHECK_FUNC(dlopen, dl, root)
-PHP_CHECK_FUNC(dlsym, dl, root)
+PHP_CHECK_FUNC(dlopen, dl)
+PHP_CHECK_FUNC(dlsym, dl)
 if test "$ac_cv_func_dlopen" = "yes"; then
   AC_DEFINE(HAVE_LIBDL, 1, [ ])
 fi
@@ -377,16 +371,12 @@ AC_CHECK_LIB(m, sin)
 
 case $host_alias in
   riscv64*)
-    AC_CHECK_LIB(atomic, __atomic_exchange_1, [
-      PHP_ADD_LIBRARY(atomic)
-    ], [
-      AC_MSG_ERROR([Problem with enabling atomic. Please check config.log for details.])
-    ])
+    PHP_CHECK_FUNC(__atomic_exchange_1, atomic)
     ;;
 esac
 
-dnl Check for inet_aton in -lc, -lbind and -lresolv.
-PHP_CHECK_FUNC(inet_aton, resolv, bind)
+dnl Check for inet_aton in -lc and -lresolv.
+PHP_CHECK_FUNC(inet_aton, resolv)
 
 dnl Then headers.
 dnl ----------------------------------------------------------------------------
@@ -402,13 +392,11 @@ netinet/in.h \
 alloca.h \
 arpa/inet.h \
 arpa/nameser.h \
-crypt.h \
 dns.h \
 fcntl.h \
 grp.h \
 ieeefp.h \
 langinfo.h \
-linux/filter.h \
 linux/sock_diag.h \
 malloc.h \
 os/signpost.h \
@@ -498,6 +486,8 @@ PHP_CHECK_STDINT_TYPES
 
 dnl Check __builtin_expect
 PHP_CHECK_BUILTIN_EXPECT
+dnl Check __builtin_unreachable
+PHP_CHECK_BUILTIN_UNREACHABLE
 dnl Check __builtin_clz
 PHP_CHECK_BUILTIN_CLZ
 dnl Check __builtin_clzl
@@ -560,7 +550,6 @@ if test "`uname -s 2>/dev/null`" != "QNX"; then
 fi
 
 dnl Checks for types.
-AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 
 dnl Checks for sockaddr_storage and sockaddr.sa_len.
@@ -570,10 +559,12 @@ dnl Checks for GCC function attributes on all systems except ones without glibc
 dnl Fix for these systems is already included in GCC 7, but not on GCC 6.
 dnl
 dnl At least some versions of FreeBSD seem to have buggy ifunc support, see
-dnl bug #77284. Conservatively don't use ifuncs on FreeBSD.
-AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*freebsd*|*openbsd*], [true], [
-  AX_GCC_FUNC_ATTRIBUTE([ifunc])
-  AX_GCC_FUNC_ATTRIBUTE([target])
+dnl bug #77284. Conservatively don't use ifuncs on FreeBSD prior to version 12.
+AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*openbsd*], [true], [
+  if test "`uname -s 2>/dev/null`" != "FreeBSD" || test "`uname -U 2>/dev/null`" -ge 1200000; then
+    AX_GCC_FUNC_ATTRIBUTE([ifunc])
+    AX_GCC_FUNC_ATTRIBUTE([target])
+  fi
 ])
 
 dnl Check for IPv6 support.
@@ -612,8 +603,6 @@ getgrnam_r \
 getpwuid_r \
 getwd \
 glob \
-inet_ntoa \
-inet_ntop \
 inet_pton \
 localtime_r \
 lchown \
@@ -648,8 +637,16 @@ asprintf \
 nanosleep \
 memmem \
 memrchr \
-strerror_r \
+mempcpy \
 )
+
+AC_CHECK_FUNC(inet_ntop,[],[
+    AC_MSG_ERROR([Cannot find inet_ntop which is required])
+]
+)
+
+dnl Check for strerror_r, and if its a POSIX-compatible or a GNU specific version.
+AC_FUNC_STRERROR_R
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R
 
@@ -659,12 +656,14 @@ PHP_CHECK_FUNC_LIB(nanosleep, rt)
 dnl Haiku does not have network api in libc.
 PHP_CHECK_FUNC_LIB(setsockopt, network)
 
+dnl Solaris/Illumos for process mapping.
+PHP_CHECK_FUNC_LIB(Pgrab, proc)
+
 dnl Check for getaddrinfo, should be a better way, but... Also check for working
 dnl getaddrinfo.
 AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <netdb.h>]],
   [[struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);]])],[AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <string.h>
 #include <netdb.h>
 #include <sys/types.h>
 #include <string.h>
@@ -750,7 +749,6 @@ fi
 AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
 AC_FUNC_ALLOCA
 PHP_TIME_R_TYPE
-PHP_CHECK_IN_ADDR_T
 
 AC_CACHE_CHECK([for aarch64 CRC32 API], ac_cv_func___crc32d,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <arm_acle.h>]],[[__crc32d(0, 0);]])],[ac_cv_func___crc32d=yes],[ac_cv_func___crc32d="no"])])
@@ -1255,13 +1253,13 @@ fi
 dnl Configuring Zend and TSRM.
 dnl ----------------------------------------------------------------------------
 
+PHP_HELP_SEPARATOR([Zend:])
+PHP_CONFIGURE_PART(Configuring Zend)
+
 AC_ARG_ENABLE([fiber-asm],
   [AS_HELP_STRING([--disable-fiber-asm],
     [Disable the use of boost fiber assembly files])],
   [fiber_asm=$enableval], [fiber_asm='yes'])
-
-PHP_HELP_SEPARATOR([Zend:])
-PHP_CONFIGURE_PART(Configuring Zend)
 
 AS_CASE([$host_cpu],
   [x86_64*|amd64*], [fiber_cpu="x86_64"],
@@ -1375,7 +1373,6 @@ fi
 ZEND_EXTRA_LIBS="$LIBS"
 unset LIBS
 
-PHP_HELP_SEPARATOR([TSRM:])
 PHP_CONFIGURE_PART(Configuring TSRM)
 if test "$PHP_THREAD_SAFETY" = "yes"; then
   TSRM_CHECK_PTHREADS
@@ -1521,8 +1518,6 @@ PHP_SUBST(PHP_BINARIES)
 PHP_SUBST(PHP_MODULES)
 PHP_SUBST(PHP_ZEND_EX)
 
-PHP_SUBST(EXT_LIBS)
-
 PHP_SUBST_OLD(abs_builddir)
 PHP_SUBST_OLD(abs_srcdir)
 
@@ -1560,22 +1555,18 @@ PHP_SUBST_OLD(EXTRA_LIBS)
 PHP_SUBST_OLD(ZEND_EXTRA_LIBS)
 PHP_SUBST_OLD(INCLUDES)
 PHP_SUBST_OLD(EXTRA_INCLUDES)
-PHP_SUBST_OLD(INCLUDE_PATH)
 PHP_SUBST_OLD(INSTALL_IT)
-PHP_SUBST(LFLAGS)
 PHP_SUBST(LIBTOOL)
 PHP_SUBST(LN_S)
 PHP_SUBST_OLD(NATIVE_RPATHS)
 PHP_SUBST_OLD(PEAR_INSTALLDIR)
 PHP_SUBST_OLD(PHP_LDFLAGS)
-PHP_SUBST_OLD(PHP_LIBS)
 PHP_SUBST(OVERALL_TARGET)
 PHP_SUBST(PHP_RPATHS)
 PHP_SUBST(PHP_SAPI)
 PHP_SUBST_OLD(PHP_VERSION)
 PHP_SUBST_OLD(PHP_VERSION_ID)
 PHP_SUBST(SHELL)
-PHP_SUBST(SHARED_LIBTOOL)
 PHP_SUBST(PHP_FRAMEWORKS)
 PHP_SUBST(PHP_FRAMEWORKPATH)
 PHP_SUBST(INSTALL_HEADERS)
@@ -1623,6 +1614,24 @@ if test "$PHP_UNDEFINED_SANITIZER" = "yes"; then
       CFLAGS="$CFLAGS -fno-sanitize=object-size"
       CXXFLAGS="$CFLAGS -fno-sanitize=object-size"
     ])
+
+    dnl Clang 17 adds stricter function pointer compatibility checks where pointer args cannot be
+    dnl cast to void*. In that case, set -fno-sanitize=function.
+    OLD_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -fno-sanitize-recover=undefined"
+    AC_CACHE_CHECK([whether to add -fno-sanitize=function],[php_cv_ubsan_no_function],[
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+void foo(char *string) {}
+int main(void) {
+  void (*f)(void *) = (void (*)(void *))foo;
+  f("foo");
+}
+    ]])],[php_cv_ubsan_no_function=no],[php_cv_ubsan_no_function=yes],[php_cv_ubsan_no_function=no])])
+    CFLAGS="$OLD_CFLAGS"
+    if test "$php_cv_ubsan_no_function" = yes; then
+      CFLAGS="$CFLAGS -fno-sanitize=function"
+      CXXFLAGS="$CFLAGS -fno-sanitize=function"
+    fi
   ], [AC_MSG_ERROR([UndefinedBehaviorSanitizer is not available])])
 fi
 
@@ -1660,13 +1669,6 @@ PHP_SET_LIBTOOL_VARIABLE([--silent])
 dnl libtool 1.4.3 needs this.
 PHP_SET_LIBTOOL_VARIABLE([--preserve-dup-deps])
 
-dnl This needs to be passed explicitly to allow scan-build compiler overrides.
-PHP_SET_LIBTOOL_VARIABLE([--tag CC])
-
-test -z "$PHP_COMPILE" && PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
-test -z "$CXX_PHP_COMPILE" && CXX_PHP_COMPILE='$(LIBTOOL) --mode=compile $(CXX_COMPILE) -c $<'
-SHARED_LIBTOOL='$(LIBTOOL)'
-
 CC=$old_CC
 
 PHP_CONFIGURE_PART(Generating files)
@@ -1684,7 +1686,7 @@ else
   pharcmd_install=
 fi;
 
-all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
+all_targets="\$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
 install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $pharcmd_install"
 
 PHP_SUBST(all_targets)
@@ -1700,7 +1702,8 @@ PHP_INSTALL_HEADERS([Zend/Optimizer], [ \
     zend_func_info.h \
     zend_inference.h \
     zend_optimizer.h \
-    zend_ssa.h])
+    zend_ssa.h \
+    zend_worklist.h])
 
 PHP_ADD_SOURCES(TSRM, TSRM.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 

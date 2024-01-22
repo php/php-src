@@ -4,15 +4,15 @@ MySQL PDOStatement->closeCursor()
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
+    $table = 'pdo_mysql_stmt_closecursor_empty';
 
     try {
 
@@ -21,9 +21,9 @@ $db = MySQLPDOTest::factory();
             printf("[002] Unable to turn off emulated prepared statements\n");
 
         $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
-        MySQLPDOTest::createTestTable($db);
+        MySQLPDOTest::createTestTable($table, $db);
 
-        $stmt = $db->prepare('SELECT id, label FROM test WHERE id > ? ORDER BY id ASC LIMIT 2');
+        $stmt = $db->prepare("SELECT id, label FROM {$table} WHERE id > ? ORDER BY id ASC LIMIT 2");
         $in = 0;
         if (!$stmt->bindParam(1, $in))
             printf("[003] Cannot bind parameter, %s %s\n",
@@ -59,13 +59,13 @@ $db = MySQLPDOTest::factory();
             $e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));
     }
 
-    $db->exec('DROP TABLE IF EXISTS test');
     print "done!";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_stmt_closecursor_empty');
 ?>
 --EXPECT--
 in = 0 -> id = 1 (integer) / label = 'a' (string)

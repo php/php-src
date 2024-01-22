@@ -43,13 +43,23 @@ $adopted = $doc1->adoptNode($doc1->firstChild->firstChild);
 var_dump($adopted->textContent);
 var_dump($doc1->saveXML());
 
-echo "-- Adopt a document --\n";
+echo "-- Adopt a document (strict error on) --\n";
 
 try {
     $doc1->adoptNode($doc1);
 } catch (\DOMException $e) {
     echo $e->getMessage(), "\n";
 }
+
+echo "-- Adopt a document (strict error off) --\n";
+
+$doc1->strictErrorChecking = false;
+try {
+    $doc1->adoptNode($doc1);
+} catch (\DOMException $e) {
+    echo $e->getMessage(), "\n";
+}
+$doc1->strictErrorChecking = true;
 
 echo "-- Adopt an attribute --\n";
 
@@ -102,7 +112,7 @@ unset($doc1);
 var_dump($child->nodeName);
 
 ?>
---EXPECT--
+--EXPECTF--
 -- Owner document check before adopting --
 bool(true)
 bool(false)
@@ -127,8 +137,11 @@ string(5) "world"
 string(27) "<?xml version="1.0"?>
 <p/>
 "
--- Adopt a document --
+-- Adopt a document (strict error on) --
 Not Supported Error
+-- Adopt a document (strict error off) --
+
+Warning: DOM\Document::adoptNode(): Not Supported Error in %s on line %d
 -- Adopt an attribute --
 bool(true)
 bool(true)

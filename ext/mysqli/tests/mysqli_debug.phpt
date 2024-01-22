@@ -4,7 +4,7 @@ mysqli_debug()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 
 if (!function_exists('mysqli_debug'))
     die("skip: mysqli_debug() not available");
@@ -17,7 +17,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
+    require_once 'connect.inc';
 
     // NOTE: documentation is not clear on this: function always return NULL or TRUE
     if (true !== ($tmp = mysqli_debug(sprintf('d:t:O,%s/mysqli_debug_phpt.trace', sys_get_temp_dir()))))
@@ -25,7 +25,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 
     // table.inc will create a database connection and run some SQL queries, therefore
     // the debug file should have entries
-    require_once('table.inc');
+    require_once 'table.inc';
 
     clearstatcache();
     $trace_file = sprintf('%s/mysqli_debug_phpt.trace', sys_get_temp_dir());
@@ -56,7 +56,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECTF--
 done%s

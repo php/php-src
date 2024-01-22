@@ -181,6 +181,7 @@ struct _encodeType {
 	int type;
 	char *type_str;
 	char *ns;
+	zend_string *clark_notation;
 	sdlTypePtr sdl_type;
 	soapMappingPtr map;
 };
@@ -214,7 +215,7 @@ encodePtr get_conversion(int encode);
 void delete_encoder(zval *zv);
 void delete_encoder_persistent(zval *zv);
 
-extern const encode defaultEncoding[];
+extern encode defaultEncoding[];
 extern int numDefaultEncodings;
 
 #endif

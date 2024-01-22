@@ -2,10 +2,14 @@
 Bug #41917 (invalid scale and precision)
 --EXTENSIONS--
 oci8
+--SKIPIF--
+<?php
+require_once 'skipifconnectfailure.inc';
+?>
 --FILE--
 <?php
 
-require(__DIR__."/connect.inc");
+require __DIR__.'/connect.inc';
 
 $s = oci_parse($c, 'drop table field_funcs2_tab');
 @oci_execute($s);

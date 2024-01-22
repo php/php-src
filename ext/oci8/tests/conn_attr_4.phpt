@@ -4,8 +4,9 @@ Set and get of connection attributes with errors.
 oci8
 --SKIPIF--
 <?php
+require_once 'skipifconnectfailure.inc';
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(__DIR__.'/skipif.inc');
+require __DIR__.'/skipif.inc';
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
@@ -28,7 +29,7 @@ error_reporting(E_ALL ^ E_DEPRECATED);
 $testuser     = 'testuser_attr_4';  // Used in conn_attr.inc
 $testpassword = 'testuser';
 
-require(__DIR__."/conn_attr.inc");
+require __DIR__."/conn_attr.inc";
 
 $attr_array = array('MODULE','ACTION','CLIENT_INFO','CLIENT_IDENTIFIER');
 

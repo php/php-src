@@ -4,12 +4,11 @@ mysqli_result->data_seek()
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
-    require('table.inc');
+    require 'table.inc';
 
     if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
     printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -71,9 +70,10 @@ require_once('skipifconnectfailure.inc');
     $mysqli->close();
 
     print "done!";
+?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+    require_once 'clean_table.inc';
 ?>
 --EXPECT--
 mysqli_result object is already closed

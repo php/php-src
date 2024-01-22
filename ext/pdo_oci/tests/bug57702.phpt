@@ -17,18 +17,14 @@ $db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
 // Note the PDO test setup sets PDO::ATTR_STRINGIFY_FETCHES to true
 // (and sets PDO::ATTR_CASE to PDO::CASE_LOWER)
 
-$query = "begin execute immediate 'drop table bug57702'; exception when others then if sqlcode <> -942 then raise; end if; end;";
-$stmt = $db->prepare($query);
-$stmt->execute();
-
-$query = "create table bug57702 (id number, data1 blob, data2 blob)";
+$query = "create table test57702 (id number, data1 blob, data2 blob)";
 $stmt = $db->prepare($query);
 $stmt->execute();
 
 function do_insert($db, $id, $data1, $data2)
 {
     $db->beginTransaction();
-    $stmt = $db->prepare("insert into bug57702 (id, data1, data2) values (:id, empty_blob(), empty_blob()) returning data1, data2 into :blob1, :blob2");
+    $stmt = $db->prepare("insert into test57702 (id, data1, data2) values (:id, empty_blob(), empty_blob()) returning data1, data2 into :blob1, :blob2");
     $stmt->bindParam(':id', $id);
     $stmt->bindParam(':blob1', $blob1, PDO::PARAM_LOB);
     $stmt->bindParam(':blob2', $blob2, PDO::PARAM_LOB);
@@ -51,7 +47,7 @@ do_insert($db, 2, "row 2 col 1", "row 2 col 2");
 echo "First Query\n";
 
 // Fetch it back
-$stmt = $db->prepare('select data1, data2 from bug57702 order by id');
+$stmt = $db->prepare('select data1, data2 from test57702 order by id');
 $stmt->execute();
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 var_dump($row['data1']);
@@ -64,7 +60,7 @@ var_dump($row['data2']);
 
 echo "\nSecond Query\n";
 
-foreach($db->query("select data1 as d1, data2 as d2 from bug57702 order by id") as $row) {
+foreach($db->query("select data1 as d1, data2 as d2 from test57702 order by id") as $row) {
     var_dump($row['d1']);
     var_dump($row['d2']);
 }
@@ -73,7 +69,7 @@ foreach($db->query("select data1 as d1, data2 as d2 from bug57702 order by id") 
 
 echo "\nThird Query\n";
 
-$stmt = $db->prepare('select data1 as d3_1, data2 as d3_2 from bug57702 order by id');
+$stmt = $db->prepare('select data1 as d3_1, data2 as d3_2 from test57702 order by id');
 
 $rs = $stmt->execute();
 $stmt->bindColumn('d3_1' , $clob1, PDO::PARAM_LOB);
@@ -90,7 +86,7 @@ echo "\nFourth Query\n";
 
 $a = array();
 $i = 0;
-foreach($db->query("select data1 as d4_1, data2 as d4_2 from bug57702 order by id") as $row) {
+foreach($db->query("select data1 as d4_1, data2 as d4_2 from test57702 order by id") as $row) {
     $a[$i][0] = $row['d4_1'];
     $a[$i][1] = $row['d4_2'];
     $i++;
@@ -113,7 +109,7 @@ $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);  // Let's use streams
 
 $a = array();
 $i = 0;
-foreach($db->query("select data1 as d4_1, data2 as d4_2 from bug57702 order by id") as $row) {
+foreach($db->query("select data1 as d4_1, data2 as d4_2 from test57702 order by id") as $row) {
     $a[$i][0] = $row['d4_1'];
     $a[$i][1] = $row['d4_2'];
     $i++;
@@ -132,7 +128,7 @@ $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);  // Let's use streams
 
 $a = array();
 $i = 0;
-foreach($db->query("select data1 as d4_1, data2 as d4_2 from bug57702 order by id") as $row) {
+foreach($db->query("select data1 as d4_1, data2 as d4_2 from test57702 order by id") as $row) {
     $a[$i][0] = $row['d4_1'];
     $a[$i][1] = $row['d4_2'];
     var_dump(stream_get_contents($a[$i][0]));
@@ -140,13 +136,14 @@ foreach($db->query("select data1 as d4_1, data2 as d4_2 from bug57702 order by i
     $i++;
 }
 
-// Cleanup
-$query = "drop table bug57702";
-$stmt = $db->prepare($query);
-$stmt->execute();
-
 print "done\n";
 
+?>
+--CLEAN--
+<?php
+require 'ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory('ext/pdo_oci/tests/common.phpt');
+PDOTest::dropTableIfExists($db, "test57702");
 ?>
 --EXPECT--
 First Query

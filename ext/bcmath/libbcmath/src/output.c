@@ -31,6 +31,7 @@
 
 #include "bcmath.h"
 #include <stdbool.h>
+#include <string.h>
 #include "zend_alloc.h"
 
 
@@ -39,7 +40,7 @@
 
 /* This structure is used for saving digits in the conversion process. */
 typedef struct stk_rec {
-	long  digit;
+	long digit;
 	struct stk_rec *next;
 } stk_rec;
 
@@ -52,93 +53,93 @@ static const char ref_str[] = "0123456789ABCDEF";
    non-zero, we must output one space before the number.  OUT_CHAR
    is the actual routine for writing the characters. */
 
-void bc_out_long (long val, size_t size, bool space, void (*out_char)(char) )
+void bc_out_long(long val, size_t size, bool space, void (*out_char)(char))
 {
 	char digits[40];
 	size_t len, ix;
 
-	if (space) (*out_char) (' ');
+	if (space) (*out_char)(' ');
 	snprintf(digits, sizeof(digits), "%ld", val);
 	len = strlen(digits);
 	while (size > len) {
-		(*out_char) ('0');
+		(*out_char)('0');
 		size--;
 	}
-	for (ix=0; ix < len; ix++) {
-		(*out_char) (digits[ix]);
+	for (ix = 0; ix < len; ix++) {
+		(*out_char)(digits[ix]);
 	}
 }
 
 /* Output of a bcd number.  NUM is written in base O_BASE using OUT_CHAR
    as the routine to do the actual output of the characters. */
 
-void bc_out_num (bc_num num, int o_base, void (*out_char)(char), bool leading_zero)
+void bc_out_num(bc_num num, int o_base, void (*out_char)(char), bool leading_zero)
 {
 	char *nptr;
-	int  index, fdigit;
+	int index, fdigit;
 	bool pre_space;
 	stk_rec *digits, *temp;
 	bc_num int_part, frac_part, base, cur_dig, t_num, max_o_digit;
 
 	/* The negative sign if needed. */
-	if (num->n_sign == MINUS) (*out_char) ('-');
+	if (num->n_sign == MINUS) (*out_char)('-');
 
 	/* Output the number. */
-	if (bc_is_zero (num)) {
-		(*out_char) ('0');
+	if (bc_is_zero(num)) {
+		(*out_char)('0');
 	} else {
 		if (o_base == 10) {
 			/* The number is in base 10, do it the fast way. */
 			nptr = num->n_value;
 			if (num->n_len > 1 || *nptr != 0) {
-				for (index=num->n_len; index>0; index--) {
-					(*out_char) (BCD_CHAR(*nptr++));
+				for (index = num->n_len; index > 0; index--) {
+					(*out_char)(BCD_CHAR(*nptr++));
 				}
 			} else {
 				nptr++;
 			}
 
 			if (leading_zero && bc_is_zero(num)) {
-				(*out_char) ('0');
+				(*out_char)('0');
 			}
 
 			/* Now the fraction. */
 			if (num->n_scale > 0) {
-				(*out_char) ('.');
-				for (index=0; index<num->n_scale; index++) {
-					(*out_char) (BCD_CHAR(*nptr++));
+				(*out_char)('.');
+				for (index = 0; index < num->n_scale; index++) {
+					(*out_char)(BCD_CHAR(*nptr++));
 				}
 			}
 		} else {
 			/* special case ... */
-			if (leading_zero && bc_is_zero (num)) {
-				(*out_char) ('0');
+			if (leading_zero && bc_is_zero(num)) {
+				(*out_char)('0');
 			}
 
 			/* The number is some other base. */
 			digits = NULL;
-			bc_init_num (&int_part);
-			bc_divide (num, BCG(_one_), &int_part, 0);
-			bc_init_num (&frac_part);
-			bc_init_num (&cur_dig);
-			bc_init_num (&base);
-			bc_sub (num, int_part, &frac_part, 0);
+			bc_init_num(&int_part);
+			bc_divide(num, BCG(_one_), &int_part, 0);
+			bc_init_num(&frac_part);
+			bc_init_num(&cur_dig);
+			bc_init_num(&base);
+			bc_sub(num, int_part, &frac_part, 0);
 			/* Make the INT_PART and FRAC_PART positive. */
 			int_part->n_sign = PLUS;
 			frac_part->n_sign = PLUS;
-			bc_int2num (&base, o_base);
-			bc_init_num (&max_o_digit);
-			bc_int2num (&max_o_digit, o_base-1);
+			bc_int2num(&base, o_base);
+			bc_init_num(&max_o_digit);
+			bc_int2num(&max_o_digit, o_base - 1);
 
 			/* Get the digits of the integer part and push them on a stack. */
 			while (!bc_is_zero(int_part)) {
-				bc_modulo (int_part, base, &cur_dig, 0);
+				bc_modulo(int_part, base, &cur_dig, 0);
 				/* PHP Change: malloc() -> emalloc() */
-				temp = (stk_rec *) emalloc (sizeof(stk_rec));
-				temp->digit = bc_num2long (cur_dig);
+				temp = (stk_rec *) emalloc(sizeof(stk_rec));
+				temp->digit = bc_num2long(cur_dig);
 				temp->next = digits;
 				digits = temp;
-				bc_divide (int_part, base, &int_part, 0);
+				bc_divide(int_part, base, &int_part, 0);
 			}
 
 			/* Print the digits on the stack. */
@@ -148,9 +149,9 @@ void bc_out_num (bc_num num, int o_base, void (*out_char)(char), bool leading_ze
 					temp = digits;
 					digits = digits->next;
 					if (o_base <= 16) {
-						(*out_char) (ref_str[ (int) temp->digit]);
+						(*out_char)(ref_str[(int) temp->digit]);
 					} else {
-						bc_out_long (temp->digit, max_o_digit->n_len, 1, out_char);
+						bc_out_long(temp->digit, max_o_digit->n_len, 1, out_char);
 					}
 					efree(temp);
 				}
@@ -158,21 +159,21 @@ void bc_out_num (bc_num num, int o_base, void (*out_char)(char), bool leading_ze
 
 			/* Get and print the digits of the fraction part. */
 			if (num->n_scale > 0) {
-				(*out_char) ('.');
+				(*out_char)('.');
 				pre_space = false;
-				t_num = bc_copy_num (BCG(_one_));
+				t_num = bc_copy_num(BCG(_one_));
 				while (t_num->n_len <= num->n_scale) {
-					bc_multiply (frac_part, base, &frac_part, num->n_scale);
-					fdigit = bc_num2long (frac_part);
-					bc_int2num (&int_part, fdigit);
-					bc_sub (frac_part, int_part, &frac_part, 0);
+					bc_multiply(frac_part, base, &frac_part, num->n_scale);
+					fdigit = bc_num2long(frac_part);
+					bc_int2num(&int_part, fdigit);
+					bc_sub(frac_part, int_part, &frac_part, 0);
 					if (o_base <= 16) {
-						(*out_char) (ref_str[fdigit]);
+						(*out_char)(ref_str[fdigit]);
 					} else {
-						bc_out_long (fdigit, max_o_digit->n_len, pre_space, out_char);
+						bc_out_long(fdigit, max_o_digit->n_len, pre_space, out_char);
 						pre_space = true;
 					}
-					bc_multiply (t_num, base, &t_num, 0);
+					bc_multiply(t_num, base, &t_num, 0);
 				}
 				bc_free_num (&t_num);
 			}

@@ -41,7 +41,6 @@ $S390X_CONFIG \
 --enable-exif \
 --with-zip \
 --with-zlib \
---with-zlib-dir=/usr \
 --enable-soap \
 --enable-xmlreader \
 --with-xsl \
@@ -61,7 +60,6 @@ $S390X_CONFIG \
 --enable-bcmath \
 --enable-calendar \
 --enable-ftp \
---with-pspell=/usr \
 --with-enchant=/usr \
 --with-kerberos \
 --enable-sysvmsg \

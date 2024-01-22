@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0d6ef9904082180bf9205d61c2f45c0752be8f7b */
+ * Stub hash: a37b9df0c3b172d1160b1a7ef953cbd5a0a811b6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -444,33 +444,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_delete, 0, 3, MAY_BE_STRING|M
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "PGSQL_DML_EXEC")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_select, 0, 3, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_select, 0, 2, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, table_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, conditions, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, conditions, IS_ARRAY, 0, "[]")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "PGSQL_DML_EXEC")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PGSQL_ASSOC")
 ZEND_END_ARG_INFO()
-
-#if defined(LIBPQ_HAS_PIPELINING)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_enter_pipeline_mode, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
-ZEND_END_ARG_INFO()
-#endif
-
-#if defined(LIBPQ_HAS_PIPELINING)
-#define arginfo_pg_exit_pipeline_mode arginfo_pg_enter_pipeline_mode
-#endif
-
-#if defined(LIBPQ_HAS_PIPELINING)
-#define arginfo_pg_pipeline_sync arginfo_pg_enter_pipeline_mode
-#endif
-
-#if defined(LIBPQ_HAS_PIPELINING)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_pipeline_status, 0, 1, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
-ZEND_END_ARG_INFO()
-#endif
 
 #if defined(HAVE_PG_CONTEXT_VISIBILITY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_set_error_context_visibility, 0, 2, IS_LONG, 0)
@@ -571,18 +551,6 @@ ZEND_FUNCTION(pg_insert);
 ZEND_FUNCTION(pg_update);
 ZEND_FUNCTION(pg_delete);
 ZEND_FUNCTION(pg_select);
-#if defined(LIBPQ_HAS_PIPELINING)
-ZEND_FUNCTION(pg_enter_pipeline_mode);
-#endif
-#if defined(LIBPQ_HAS_PIPELINING)
-ZEND_FUNCTION(pg_exit_pipeline_mode);
-#endif
-#if defined(LIBPQ_HAS_PIPELINING)
-ZEND_FUNCTION(pg_pipeline_sync);
-#endif
-#if defined(LIBPQ_HAS_PIPELINING)
-ZEND_FUNCTION(pg_pipeline_status);
-#endif
 #if defined(HAVE_PG_CONTEXT_VISIBILITY)
 ZEND_FUNCTION(pg_set_error_context_visibility);
 #endif
@@ -703,18 +671,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_update, arginfo_pg_update)
 	ZEND_FE(pg_delete, arginfo_pg_delete)
 	ZEND_FE(pg_select, arginfo_pg_select)
-#if defined(LIBPQ_HAS_PIPELINING)
-	ZEND_FE(pg_enter_pipeline_mode, arginfo_pg_enter_pipeline_mode)
-#endif
-#if defined(LIBPQ_HAS_PIPELINING)
-	ZEND_FE(pg_exit_pipeline_mode, arginfo_pg_exit_pipeline_mode)
-#endif
-#if defined(LIBPQ_HAS_PIPELINING)
-	ZEND_FE(pg_pipeline_sync, arginfo_pg_pipeline_sync)
-#endif
-#if defined(LIBPQ_HAS_PIPELINING)
-	ZEND_FE(pg_pipeline_status, arginfo_pg_pipeline_status)
-#endif
 #if defined(HAVE_PG_CONTEXT_VISIBILITY)
 	ZEND_FE(pg_set_error_context_visibility, arginfo_pg_set_error_context_visibility)
 #endif
@@ -837,18 +793,6 @@ static void register_pgsql_symbols(int module_number)
 #endif
 #if defined(PQTRACE_REGRESS_MODE)
 	REGISTER_LONG_CONSTANT("PGSQL_TRACE_REGRESS_MODE", PQTRACE_REGRESS_MODE, CONST_PERSISTENT);
-#endif
-#if defined(LIBPQ_HAS_PIPELINING)
-	REGISTER_LONG_CONSTANT("PGSQL_PIPELINE_SYNC", PGRES_PIPELINE_SYNC, CONST_PERSISTENT);
-#endif
-#if defined(LIBPQ_HAS_PIPELINING)
-	REGISTER_LONG_CONSTANT("PGSQL_PIPELINE_ON", PQ_PIPELINE_ON, CONST_PERSISTENT);
-#endif
-#if defined(LIBPQ_HAS_PIPELINING)
-	REGISTER_LONG_CONSTANT("PGSQL_PIPELINE_OFF", PQ_PIPELINE_OFF, CONST_PERSISTENT);
-#endif
-#if defined(LIBPQ_HAS_PIPELINING)
-	REGISTER_LONG_CONSTANT("PGSQL_PIPELINE_ABORTED", PQ_PIPELINE_ABORTED, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_PG_CONTEXT_VISIBILITY)
 	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_NEVER", PQSHOW_CONTEXT_NEVER, CONST_PERSISTENT);

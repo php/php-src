@@ -542,6 +542,8 @@ MYSQLND_METHOD(mysqlnd_command, enable_ssl)(MYSQLND_CONN_DATA * const conn, cons
 			conn->vio->data->m.set_client_option(conn->vio, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify);
 
 			if (FAIL == conn->vio->data->m.enable_ssl(conn->vio)) {
+				SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
+				SET_CLIENT_ERROR(conn->error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Cannot connect to MySQL using SSL");
 				goto end;
 			}
 		}

@@ -87,7 +87,7 @@ static void zend_persist_ast_calc(zend_ast *ast)
 		}
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
-		ADD_SIZE(sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children);
+		ADD_SIZE(zend_ast_size(children));
 		for (i = 0; i < children; i++) {
 			if (ast->child[i]) {
 				zend_persist_ast_calc(ast->child[i]);

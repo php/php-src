@@ -4,12 +4,12 @@ Bug (Incorrectly decoding bit values / Malformed server packet. Field length poi
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
 
-require_once("connect.inc");
+require_once 'connect.inc';
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 }
@@ -47,7 +47,7 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once 'connect.inc';
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
     printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

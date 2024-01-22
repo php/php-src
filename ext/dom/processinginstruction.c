@@ -59,7 +59,7 @@ PHP_METHOD(DOMProcessingInstruction, __construct)
 	intern = Z_DOMOBJ_P(ZEND_THIS);
 	oldnode = dom_object_get_node(intern);
 	if (oldnode != NULL) {
-		php_libxml_node_free_resource(oldnode );
+		php_libxml_node_decrement_resource((php_libxml_node_object *)intern);
 	}
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern);
 }
@@ -70,7 +70,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1478689192
 Since:
 */
-int dom_processinginstruction_target_read(dom_object *obj, zval *retval)
+zend_result dom_processinginstruction_target_read(dom_object *obj, zval *retval)
 {
 	xmlNodePtr nodep = dom_object_get_node(obj);
 
@@ -91,7 +91,7 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-837822393
 Since:
 */
-int dom_processinginstruction_data_read(dom_object *obj, zval *retval)
+zend_result dom_processinginstruction_data_read(dom_object *obj, zval *retval)
 {
 	xmlNodePtr nodep = dom_object_get_node(obj);
 
@@ -105,7 +105,7 @@ int dom_processinginstruction_data_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-int dom_processinginstruction_data_write(dom_object *obj, zval *newval)
+zend_result dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 {
 	xmlNode *nodep = dom_object_get_node(obj);
 
@@ -117,8 +117,6 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 	/* Typed property, this is already a string */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
 	zend_string *str = Z_STR_P(newval);
-
-	php_libxml_invalidate_node_list_cache_from_doc(nodep->doc);
 
 	xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
 
