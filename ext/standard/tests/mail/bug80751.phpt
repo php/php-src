@@ -1,97 +1,84 @@
 --TEST--
 Bug #80751 (Comma in recipient name breaks email delivery)
---EXTENSIONS--
-imap
---CONFLICTS--
-imap
 --SKIPIF--
 <?php
-if (PHP_OS_FAMILY !== 'Windows') die('skip Windows only test');
 if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
-require_once __DIR__ . '/mail_skipif.inc';
+require_once __DIR__.'/mail_windows_skipif.inc';
 ?>
 --INI--
 SMTP=localhost
-smtp_port=25
+smtp_port=1025
 --FILE--
 <?php
-require_once __DIR__ . '/mail_include.inc';
 
-function find_and_delete_message($username, $subject) {
-    global $default_mailbox, $password, $users, $domain;
+require_once __DIR__.'/mailpit_utils.inc';
 
-    $imap_stream = imap_open($default_mailbox, $username, $password);
-    if ($imap_stream === false) {
-        die("Cannot connect to IMAP server $server: " . imap_last_error() . "\n");
-    }
+$to = 'bug80751_to@example.com';
+$toLine = "\"<bug80751_to_name@example.com>\" <{$to}>";
 
-    $found = false;
-    $repeat_count = 20; // we will repeat a max of 20 times
-    while (!$found && $repeat_count > 0) {
-        // sleep for a while to allow msg to be delivered
-        sleep(1);
-    
-        $num_messages = imap_check($imap_stream)->Nmsgs;
-        for ($i = $num_messages; $i > 0; $i--) {
-            $info = imap_headerinfo($imap_stream, $i);
-            if ($info->subject === $subject) {
-                $header = imap_fetchheader($imap_stream, $i);
-                echo "Return-Path header found: ";
-                var_dump(strpos($header, 'Return-Path: joe@example.com') !== false);
-                echo "To header found: ";
-                var_dump(strpos($header, "To: \"<bob@example.com>\" <{$users[1]}@$domain>") !== false);
-                echo "From header found: ";
-                var_dump(strpos($header, 'From: "<bob@example.com>" <joe@example.com>') !== false);
-                echo "Cc header found: ";
-                var_dump(strpos($header, "Cc: \"Lastname, Firstname\\\\\" <{$users[2]}@$domain>") !== false);
-                imap_delete($imap_stream, $i);
-                $found = true;
-                break;
-            }
-        }
-        $repeat_count--;
-    }
+$from = 'bug80751_from@example.com';
+$fromLine = "\"<bug80751_from_name@example.com>\" <{$from}>";
 
-    imap_close($imap_stream, CL_EXPUNGE);
-    return $found;
-}
+$cc = 'bug80751_cc@example.com';
+$ccLine = "\"Lastname, Firstname\\\\\" <{$cc}>";
 
-$to = "\"<bob@example.com>\" <{$users[1]}@$domain>";
+$bcc = 'bug80751_bcc@example.com';
 $subject = bin2hex(random_bytes(16));
 $message = 'hello';
-$headers = "From: \"<bob@example.com>\" <joe@example.com>\r\n"
-    . "Cc: \"Lastname, Firstname\\\\\" <{$users[2]}@$domain>\r\n"
-    . "Bcc: \"Firstname \\\"Ni,ck\\\" Lastname\" <{$users[3]}@$domain>\r\n";
 
-$res = mail($to, $subject, $message, $headers);
+$headers = "From: {$fromLine}\r\n"
+    . "Cc: {$ccLine}\r\n"
+    . "Bcc: \"Firstname \\\"Ni,ck\\\" Lastname\" <{$bcc}>\r\n";
+
+$res = mail($toLine, $subject, $message, $headers);
+
 if ($res !== true) {
-	die("TEST FAILED : Unable to send test email\n");
+    exit("Unable to send the email.\n");
 } else {
-	echo "Message sent OK\n";
+    echo "Sent the email.\n";
 }
 
-foreach ([$users[1], $users[2], $users[3]] as $user) {
-    if (!find_and_delete_message("$user@$domain", $subject)) {
-        echo "TEST FAILED: email not delivered\n";
-    } else {
-        echo "TEST PASSED: Message sent and deleted OK\n";
+$res = searchEmailByToAddress($to);
+
+if (mailCheckResponse($res, $from, $to, $subject, $message)) {
+    echo "Received the email.\n";
+
+    $ccAddresses = getCcAddresses($res);
+    if (in_array($cc, $ccAddresses, true)) {
+        echo "cc Received the email.\n";
     }
+
+    $bccAddresses = getBccAddresses($res);
+    if (in_array($bcc, $bccAddresses, true)) {
+        echo "bcc Receive the email.\n";
+    }
+
+    if ($res['ReturnPath'] === $from) {
+        echo "Return-Path is as expected.\n";
+    }
+
+    $headers = getHeaders($res);
+    if ($headers['To'][0] === $toLine) {
+        echo "To header is as expected.\n";
+    }
+
+    if ($headers['From'][0] === $fromLine) {
+        echo "From header is as expected.\n";
+    }
+
+    if ($headers['Cc'][0] === $ccLine) {
+        echo "Cc header is as expected.";
+    }
+
+    deleteEmail($res);
 }
 ?>
 --EXPECT--
-Message sent OK
-Return-Path header found: bool(true)
-To header found: bool(true)
-From header found: bool(true)
-Cc header found: bool(true)
-TEST PASSED: Message sent and deleted OK
-Return-Path header found: bool(true)
-To header found: bool(true)
-From header found: bool(true)
-Cc header found: bool(true)
-TEST PASSED: Message sent and deleted OK
-Return-Path header found: bool(true)
-To header found: bool(true)
-From header found: bool(true)
-Cc header found: bool(true)
-TEST PASSED: Message sent and deleted OK
+Sent the email.
+Received the email.
+cc Received the email.
+bcc Receive the email.
+Return-Path is as expected.
+To header is as expected.
+From header is as expected.
+Cc header is as expected.
