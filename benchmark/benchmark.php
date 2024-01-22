@@ -139,25 +139,24 @@ function runValgrindPhpCgiCommand(
     // print all collected metrics
     print_r(array_map(fn ($metrics) => array_map(fn ($v) => number_format($v, 0, '.', '_'), $metrics), $metricsArr));
 
-    // find the fastest benchmark run
-    $bestRunIndex = 0;
-    foreach (range(0, $repeat - 1) as $k) {
-        if ($metricsArr[$k]['Ir'] < $metricsArr[$bestRunIndex]['Ir']) {
-            $bestRunIndex = $k;
-        }
-    }
+    // find median benchmark run
+    $metricsForMedianArr = $metricsArr;
+    unset($metricsForMedianArr['startup']);
+    unset($metricsForMedianArr['shutdown']);
+    uasort($metricsForMedianArr, fn ($a, $b) => $a['Ir'] <=> $b['Ir']);
+    $medianRunIndex = array_keys($metricsForMedianArr)[max(0, floor((count($metricsForMedianArr) - 3 /* -1 for count to index, -1 for first slow run due compliation, -1 for second run which is a little slower too */) / 2.0))];
 
-    // remove non-fastest profiles from artifacts
+    // remove non-median profiles from artifacts
     foreach (range(0, $repeat - 1) as $k) {
         $profileOutSpecific = $profileOut . '.' . $k;
 
-        if ($k !== $bestRunIndex) {
+        if ($k !== $medianRunIndex) {
             unlink($profileOutSpecific);
         }
     }
 
     // annotate profiles for artifacts
-    foreach (['startup', $bestRunIndex, 'shutdown'] as $k) {
+    foreach (['startup', $medianRunIndex, 'shutdown'] as $k) {
         $profileOutSpecific = $profileOut . '.' . $k;
 
         runCommand([
@@ -171,7 +170,7 @@ function runValgrindPhpCgiCommand(
         ]);
     }
 
-    return ['instructions' => $metricsArr[$bestRunIndex]['Ir']];
+    return ['instructions' => $metricsArr[$medianRunIndex]['Ir']];
 }
 
 /**
