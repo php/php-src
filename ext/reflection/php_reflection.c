@@ -2132,7 +2132,6 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
     reflection_object *intern;
     zend_function *fptr;
     zend_string *arg_name = NULL;
-    zend_long position;
     struct _zend_arg_info *arg_info;
     uint32_t num_args;
 
@@ -2154,25 +2153,8 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
     }
 
     if (arg_name != NULL) {
-        uint32_t i;
-        position = -1;
-
-        for (i = 0; i < num_args; i++) {
-            for (i = 0; i < num_args; i++) {
-                if (has_internal_arg_info(fptr)) {
-                    if (arg_info[i].name) {
-                        if (strcmp(((zend_internal_arg_info*)arg_info)[i].name, ZSTR_VAL(arg_name)) == 0) {
-                            RETURN_TRUE;
-                        }
-                    }
-                } else {
-                    if (arg_info[i].name) {
-                        if (zend_string_equals(arg_name, arg_info[i].name)) {
-                            RETURN_TRUE;
-                        }
-                    }
-                }
-            }
+        if (get_parameter_position(fptr, arg_name, arg_info, num_args) > -1) {
+            RETURN_TRUE;
         }
 
         RETURN_FALSE;
@@ -2215,26 +2197,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
     }
 
     if (arg_name != NULL) {
-        uint32_t i;
-        position = -1;
-
-        for (i = 0; i < num_args; i++) {
-            if (has_internal_arg_info(fptr)) {
-                if (arg_info[i].name) {
-                    if (strcmp(((zend_internal_arg_info*)arg_info)[i].name, ZSTR_VAL(arg_name)) == 0) {
-                        position = i;
-                        break;
-                    }
-                }
-            } else {
-                if (arg_info[i].name) {
-                    if (zend_string_equals(arg_name, arg_info[i].name)) {
-                        position = i;
-                        break;
-                    }
-                }
-            }
-        }
+        position = get_parameter_position(fptr, arg_name, arg_info, num_args);
 
         if (position == -1) {
             _DO_THROW("The parameter specified by its name could not be found");
