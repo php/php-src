@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-12349 (linking failure on ARM with mold). (Jan Palus)
   . Fixed bug GH-13097 (Anonymous class reference in trigger_error / thrown
     Exception). (nielsdos)
+  . Fixed bug GH-13215 (GCC 14 build failure). (Remi)
 
 - Curl:
   . Fix missing error check in curl_multi_init(). (divinity76)
