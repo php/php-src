@@ -280,7 +280,9 @@ int fuzzer_do_request_from_buffer(
 
 	CG(compiled_filename) = NULL; /* ??? */
 	if (before_shutdown) {
-		before_shutdown();
+		zend_try {
+			before_shutdown();
+		} zend_end_try();
 	}
 	fuzzer_request_shutdown();
 
