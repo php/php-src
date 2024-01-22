@@ -2161,6 +2161,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
     } else {
         if (position < 0) {
             zend_argument_value_error(1, "must be greater than or equal to 0");
+            RETURN_THROWS();
         }
 
         RETURN_BOOL(position < num_args);
