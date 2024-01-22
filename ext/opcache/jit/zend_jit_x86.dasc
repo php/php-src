@@ -4426,8 +4426,14 @@ static int zend_jit_math_long_long(dasm_State    **Dst,
 		} else {
 			zend_reg tmp_reg;
 
-			if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
-				tmp_reg = ZREG_R1;
+			if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+				if (Z_REG(res_addr) != ZREG_R0 && result_reg != ZREG_R0) {
+					tmp_reg = ZREG_R0;
+				} else if (Z_REG(res_addr) != ZREG_R1 && result_reg != ZREG_R1) {
+					tmp_reg = ZREG_R1;
+				} else {
+					tmp_reg = ZREG_R2;
+				}
 			} else if (result_reg != ZREG_R0) {
 				tmp_reg = ZREG_R0;
 			} else {
@@ -5295,8 +5301,16 @@ static int zend_jit_long_math_helper(dasm_State    **Dst,
 	} else {
 		zend_reg tmp_reg;
 
-		if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R0) {
-			tmp_reg = ZREG_R1;
+		if (Z_MODE(res_addr) == IS_MEM_ZVAL) {
+			if (Z_REG(res_addr) != ZREG_R0 && result_reg != ZREG_R0) {
+				tmp_reg = ZREG_R0;
+			} else if (Z_REG(res_addr) != ZREG_R1 && result_reg != ZREG_R1) {
+				tmp_reg = ZREG_R1;
+			} else {
+				tmp_reg = ZREG_R2;
+			}
+		} else if (Z_MODE(res_addr) == IS_MEM_ZVAL && Z_REG(res_addr) == ZREG_R1) {
+			tmp_reg = ZREG_R0;
 		} else if (result_reg != ZREG_R0) {
 			tmp_reg = ZREG_R0;
 		} else {
