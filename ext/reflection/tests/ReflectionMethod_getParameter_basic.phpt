@@ -8,11 +8,11 @@ class C {
 
 $method = new ReflectionMethod('WeakReference', 'create');
 var_dump($method->getParameter('object'));
-var_dump($method->getParameter(0));
+var_dump($method->getParameter(1));
 
 $method = new ReflectionMethod('C', 'foo');
 var_dump($method->getParameter('bar'));
-var_dump($method->getParameter(0));
+var_dump($method->getParameter(1));
 ?>
 --EXPECT--
 object(ReflectionParameter)#2 (1) {

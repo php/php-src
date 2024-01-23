@@ -2152,20 +2152,22 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
         RETURN_FALSE;
     }
 
-    if (ZSTR_LEN(arg_name) != 0) {
-        zend_argument_value_error(1, "must not be an empty string");
-        RETURN_THROWS();
-    }
-
     if (arg_name != NULL) {
+        if (ZSTR_LEN(arg_name) == 0) {
+            zend_argument_value_error(1, "must not be an empty string");
+            RETURN_THROWS();
+        }
+
         if (get_parameter_position(fptr, arg_name, num_args) > -1) {
             RETURN_TRUE;
         }
 
         RETURN_FALSE;
     } else {
+        position -= 1;
+
         if (position < 0) {
-            zend_argument_value_error(1, "must be greater than or equal to 0");
+            zend_argument_value_error(1, "must be greater than or equal to 1");
             RETURN_THROWS();
         }
 
@@ -2202,12 +2204,12 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
         RETURN_THROWS();
     }
 
-    if (ZSTR_LEN(arg_name) != 0) {
-        zend_argument_value_error(1, "must not be an empty string");
-        RETURN_THROWS();
-    }
-
     if (arg_name != NULL) {
+        if (ZSTR_LEN(arg_name) == 0) {
+            zend_argument_value_error(1, "must not be an empty string");
+            RETURN_THROWS();
+        }
+
         position = get_parameter_position(fptr, arg_name, num_args);
 
         if (position == -1) {
@@ -2215,8 +2217,10 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
             RETURN_THROWS();
         }
     } else {
+        position -= 1;
+
         if (position < 0) {
-            zend_argument_value_error(1, "must be greater than or equal to 0");
+            zend_argument_value_error(1, "must be greater than or equal to 1");
             RETURN_THROWS();
         }
         if (position >= num_args) {
