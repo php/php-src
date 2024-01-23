@@ -2152,6 +2152,11 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
         RETURN_FALSE;
     }
 
+    if (ZSTR_LEN(arg_name) != 0) {
+        zend_argument_value_error(1, "must not be an empty string");
+        RETURN_THROWS();
+    }
+
     if (arg_name != NULL) {
         if (get_parameter_position(fptr, arg_name, num_args) > -1) {
             RETURN_TRUE;
@@ -2194,6 +2199,11 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
     }
 
     if (!num_args) {
+        RETURN_THROWS();
+    }
+
+    if (ZSTR_LEN(arg_name) != 0) {
+        zend_argument_value_error(1, "must not be an empty string");
         RETURN_THROWS();
     }
 
