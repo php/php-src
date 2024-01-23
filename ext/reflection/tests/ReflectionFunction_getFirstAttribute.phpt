@@ -1,5 +1,5 @@
 --TEST--
-ReflectionFunction::getAttribute()
+ReflectionFunction::getFirstAttribute()
 --FILE--
 <?php
 #[Attribute(Attribute::TARGET_FUNCTION | Attribute::IS_REPEATABLE)]
