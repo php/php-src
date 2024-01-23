@@ -28,30 +28,33 @@ $res = mail($to, $subject, $message, $headers);
 
 if ($res !== true) {
     exit("Unable to send the email.\n");
-} else {
-    echo "Sent the email.\n";
 }
+
+echo "Email sent.\n";
 
 $res = searchEmailByToAddress($to);
 
 if (mailCheckResponse($res, $from, $to, $subject, $message)) {
-    echo "Received the email.\n";
+    echo "Found the email sent.\n";
 
     $bccAddresses = getBccAddresses($res);
     if (in_array($bcc, $bccAddresses, true)) {
-        echo "bcc Received the email.\n";
+        echo "bcc is set.\n";
     }
 
     $headers = getHeaders($res);
     if ($headers['X-Mailer'][0] === $xMailer) {
         echo "The specified x-Mailer exists.";
     }
-
-    deleteEmail($res);
 }
 ?>
+--CLEAN--
+<?php
+require_once __DIR__.'/mailpit_utils.inc';
+deleteEmailByToAddress('bug72964_to@example.com');
+?>
 --EXPECT--
-Sent the email.
-Received the email.
-bcc Received the email.
+Email sent.
+Found the email sent.
+bcc is set.
 The specified x-Mailer exists.

@@ -34,23 +34,23 @@ $res = mail($toLine, $subject, $message, $headers);
 
 if ($res !== true) {
     exit("Unable to send the email.\n");
-} else {
-    echo "Sent the email.\n";
 }
+
+echo "Email sent.\n";
 
 $res = searchEmailByToAddress($to);
 
 if (mailCheckResponse($res, $from, $to, $subject, $message)) {
-    echo "Received the email.\n";
+    echo "Found the email sent.\n";
 
     $ccAddresses = getCcAddresses($res);
     if (in_array($cc, $ccAddresses, true)) {
-        echo "cc Received the email.\n";
+        echo "cc is set.\n";
     }
 
     $bccAddresses = getBccAddresses($res);
     if (in_array($bcc, $bccAddresses, true)) {
-        echo "bcc Receive the email.\n";
+        echo "bcc is set.\n";
     }
 
     if ($res['ReturnPath'] === $from) {
@@ -69,15 +69,18 @@ if (mailCheckResponse($res, $from, $to, $subject, $message)) {
     if ($headers['Cc'][0] === $ccLine) {
         echo "Cc header is as expected.";
     }
-
-    deleteEmail($res);
 }
 ?>
+--CLEAN--
+<?php
+require_once __DIR__.'/mailpit_utils.inc';
+deleteEmailByToAddress('bug72964_to@example.com');
+?>
 --EXPECT--
-Sent the email.
-Received the email.
-cc Received the email.
-bcc Receive the email.
+Email sent.
+Found the email sent.
+cc is set.
+bcc is set.
 Return-Path is as expected.
 To header is as expected.
 From header is as expected.

@@ -60,31 +60,38 @@ HERE;
 
     if ($res !== true) {
         exit("Unable to send the email.\n");
-    } else {
-        echo "Sent the email.\n";
     }
+
+    echo "Email sent.\n";
 
     $res = searchEmailByToAddress($to);
 
     if (mailCheckResponse($res, $from, $to, $subject, $message)) {
-        echo "Received the email.\n\n";
-        deleteEmail($res);
+        echo "Found the email sent.\n\n";
     }
 }
 ?>
+--CLEAN--
+<?php
+require_once __DIR__.'/mailpit_utils.inc';
+deleteEmailByToAddress('mail_basic_win_0@example.com');
+deleteEmailByToAddress('mail_basic_win_1@example.com');
+deleteEmailByToAddress('mail_basic_win_2@example.com');
+deleteEmailByToAddress('mail_basic_win_3@example.com');
+?>
 --EXPECT--
 ========== Case 0 ==========
-Sent the email.
-Received the email.
+Email sent.
+Found the email sent.
 
 ========== Case 1 ==========
-Sent the email.
-Received the email.
+Email sent.
+Found the email sent.
 
 ========== Case 2 ==========
-Sent the email.
-Received the email.
+Email sent.
+Found the email sent.
 
 ========== Case 3 ==========
-Sent the email.
-Received the email.
+Email sent.
+Found the email sent.

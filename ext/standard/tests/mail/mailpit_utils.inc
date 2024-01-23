@@ -40,17 +40,13 @@ function getBccAddresses($res): array
     return array_column($res['Bcc'], 'Address');
 }
 
-function deleteEmail($res)
+function deleteEmailByToAddress(string $to)
 {
-    $id = $res['ID'] ?? null;
-
-    if ($id) {
-        $query = urlencode("message-id:{$id}");
-        file_get_contents("http://localhost:8025/api/v1/search?query={$query}", false, stream_context_create([
-            'http' => [
-                'method' => 'DELETE',
-            ],
-        ]));
-    }
+    $query = urlencode("to:{$to}");
+    file_get_contents("http://localhost:8025/api/v1/search?query={$query}", false, stream_context_create([
+        'http' => [
+            'method' => 'DELETE',
+        ],
+    ]));
 }
 ?>

@@ -28,40 +28,43 @@ $res = mail($to, $subject, $message, $headers);
 
 if ($res !== true) {
     exit("Unable to send the email.\n");
-} else {
-    echo "Sent the email.\n";
 }
+
+echo "Email sent.\n";
 
 $res = searchEmailByToAddress($to);
 
 if (mailCheckResponse($res, $from, $to, $subject, $message)) {
-    echo "Received the email.\n";
+    echo "Found the email sent.\n";
 
     $ccAddresses = getCcAddresses($res);
     if (in_array($cc[0], $ccAddresses, true)) {
-        echo "cc1 Received the email.\n";
+        echo "cc1 is set.\n";
     }
 
     if (in_array($cc[1], $ccAddresses, true)) {
-        echo "cc2 Received the email.\n";
+        echo "cc2 is set.\n";
     }
 
     $bccAddresses = getBccAddresses($res);
     if (in_array($bcc[0], $bccAddresses, true)) {
-        echo "bcc1 Received the email.\n";
+        echo "bcc1 is set.\n";
     }
 
     if (in_array($bcc[1], $bccAddresses, true)) {
-        echo "bcc2 Received the email.";
+        echo "bcc2 is set.";
     }
-
-    deleteEmail($res);
 }
 ?>
+--CLEAN--
+<?php
+require_once __DIR__.'/mailpit_utils.inc';
+deleteEmailByToAddress('bug72964_to@example.com');
+?>
 --EXPECT--
-Sent the email.
-Received the email.
-cc1 Received the email.
-cc2 Received the email.
-bcc1 Received the email.
-bcc2 Received the email.
+Email sent.
+Found the email sent.
+cc1 is set.
+cc2 is set.
+bcc1 is set.
+bcc2 is set.

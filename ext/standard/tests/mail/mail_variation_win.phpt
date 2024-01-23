@@ -54,16 +54,22 @@ HERE;
     $res = mail($to, $subject, $message);
 
     if ($res === true) {
-        echo "Sent the email.\n";
+        echo "Email sent.\n";
     }
 
     $res = searchEmailByToAddress($to);
 
     if (mailCheckResponse($res, $from, $to, $subject, $message)) {
-        echo "Received the email.\n\n";
-        deleteEmail($res);
+        echo "Found the email sent.\n\n";
     }
 }
+?>
+--CLEAN--
+<?php
+require_once __DIR__.'/mailpit_utils.inc';
+deleteEmailByToAddress('mail_variation_win_0@example.com');
+deleteEmailByToAddress('mail_variation_win_1@example.com');
+deleteEmailByToAddress('mail_variation_win_2@example.com');
 ?>
 --EXPECTF--
 ========== From is not set ==========
