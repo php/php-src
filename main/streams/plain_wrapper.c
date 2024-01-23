@@ -355,10 +355,7 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 	if (data->fd >= 0) {
 #ifdef PHP_WIN32
 		ssize_t bytes_written;
-		if (ZEND_SIZE_T_UINT_OVFL(count)) {
-			count = UINT_MAX;
-		}
-		bytes_written = _write(data->fd, buf, PLAIN_WRAP_BUF_SIZE(count));
+		bytes_written = _write(data->fd, buf, (int)(count > INT_MAX ? INT_MAX : count));
 #else
 		ssize_t bytes_written = write(data->fd, buf, count);
 #endif
