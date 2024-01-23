@@ -45,6 +45,14 @@ try {
 } catch (ReflectionException $e) {
     print($e->getMessage() . PHP_EOL);
 }
+
+$method = new ReflectionMethod('WeakReference', 'get');
+
+try {
+    var_dump($method->getParameter(1));
+} catch (ReflectionException $e) {
+    print($e->getMessage() . PHP_EOL);
+}
 ?>
 --EXPECT--
 The parameter specified by its name could not be found
@@ -53,3 +61,4 @@ The parameter specified by its offset could not be found
 The parameter specified by its name could not be found
 ReflectionFunctionAbstract::getParameter(): Argument #1 ($parameter) must be greater than or equal to 0
 The parameter specified by its offset could not be found
+Method has no parameters

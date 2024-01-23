@@ -2198,7 +2198,12 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
         num_args++;
     }
 
-    if (!num_args) {
+    if (num_args < 1) {
+        if (fptr->common.scope) {
+            _DO_THROW("Method has no parameters");
+        } else {
+            _DO_THROW("Function has no parameters");
+        }
         RETURN_THROWS();
     }
 
