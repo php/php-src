@@ -40,11 +40,6 @@ function getBccAddresses($res): array
     return array_column($res['Bcc'], 'Address');
 }
 
-function makeNameAndAddressLine(array $data): string
-{
-    return "\"{$data['Name']}\" <{$data['Address']}>";
-}
-
 function deleteEmail($res)
 {
     $id = $res['ID'] ?? null;
