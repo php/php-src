@@ -19,6 +19,8 @@ interface Reflector extends Stringable
 interface ReflectorWithAttributes
 {
     public function getAttributes(?string $name = null, int $flags = 0): array;
+
+    public function getFirstAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute;
 }
 
 /** @not-serializable */
@@ -116,9 +118,9 @@ abstract class ReflectionFunctionAbstract implements Reflector, ReflectorWithAtt
 
     public function getTentativeReturnType(): ?ReflectionType {}
 
-    public function getAttributes(?string $name = null, int $flags = 0): array {}
+    public function getAttributes(?string $name = null, int $flags = 0): array;
 
-    public function getAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute {}
+    public function getFirstAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute;
 }
 
 class ReflectionFunction extends ReflectionFunctionAbstract
@@ -421,6 +423,8 @@ class ReflectionClass implements Reflector, ReflectorWithAttributes
     public function getShortName(): string {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function getFirstAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute;
 }
 
 class ReflectionObject extends ReflectionClass
@@ -507,6 +511,8 @@ class ReflectionProperty implements Reflector, ReflectorWithAttributes
     public function getDefaultValue(): mixed {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function getFirstAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute;
 }
 
 /** @not-serializable */
@@ -564,6 +570,8 @@ class ReflectionClassConstant implements Reflector
     public function getType(): ?ReflectionType {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function getFirstAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute;
 }
 
 /** @not-serializable */
@@ -645,6 +653,8 @@ class ReflectionParameter implements Reflector, ReflectorWithAttributes
     public function isPromoted(): bool {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function getFirstAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute;
 }
 
 /** @not-serializable */

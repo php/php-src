@@ -1967,8 +1967,8 @@ ZEND_METHOD(ReflectionFunctionAbstract, getAttributes)
 /* }}} */
 
 
-/* {{{ Returns the attribute of this function if there's only one */
-ZEND_METHOD(ReflectionFunctionAbstract, getAttribute)
+/* {{{ Returns the first attribute of this function */
+ZEND_METHOD(ReflectionFunctionAbstract, getFirstAttribute)
 {
     reflection_object *intern;
     zend_function *fptr;
@@ -2872,6 +2872,24 @@ ZEND_METHOD(ReflectionParameter, getAttributes)
 		attributes, param->offset + 1, scope, ZEND_ATTRIBUTE_TARGET_PARAMETER,
 		param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL, false);
 }
+/* }}} */
+
+/* {{{ Get the first parameter attribute. */
+ZEND_METHOD(ReflectionParameter, getFirstAttribute)
+{
+    reflection_object *intern;
+    parameter_reference *param;
+
+    GET_REFLECTION_OBJECT_PTR(param);
+
+    HashTable *attributes = param->fptr->common.attributes;
+    zend_class_entry *scope = param->fptr->common.scope;
+
+    reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+                       attributes, param->offset + 1, scope, ZEND_ATTRIBUTE_TARGET_PARAMETER,
+                       param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL, true);
+}
+/* }}} */
 
 /* {{{ Returns whether this parameter is an optional parameter */
 ZEND_METHOD(ReflectionParameter, getPosition)
@@ -4058,6 +4076,20 @@ ZEND_METHOD(ReflectionClassConstant, getAttributes)
 }
 /* }}} */
 
+/* {{{ Returns the first attribute of this constant */
+ZEND_METHOD(ReflectionClassConstant, getFirstAttribute)
+{
+    reflection_object *intern;
+    zend_class_constant *ref;
+
+    GET_REFLECTION_OBJECT_PTR(ref);
+
+    reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+                       ref->attributes, 0, ref->ce, ZEND_ATTRIBUTE_TARGET_CLASS_CONST,
+                       ref->ce->type == ZEND_USER_CLASS ? ref->ce->info.user.filename : NULL, true);
+}
+/* }}} */
+
 ZEND_METHOD(ReflectionClassConstant, isEnumCase)
 {
 	reflection_object *intern;
@@ -4463,6 +4495,20 @@ ZEND_METHOD(ReflectionClass, getAttributes)
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ce->attributes, 0, ce, ZEND_ATTRIBUTE_TARGET_CLASS,
 		ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL, false);
+}
+/* }}} */
+
+/* {{{ Returns the first attribute for this class */
+ZEND_METHOD(ReflectionClass, getFirstAttribute)
+{
+    reflection_object *intern;
+    zend_class_entry *ce;
+
+    GET_REFLECTION_OBJECT_PTR(ce);
+
+    reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+                       ce->attributes, 0, ce, ZEND_ATTRIBUTE_TARGET_CLASS,
+                       ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL, true);
 }
 /* }}} */
 
@@ -5900,6 +5946,24 @@ ZEND_METHOD(ReflectionProperty, getAttributes)
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ref->prop->attributes, 0, ref->prop->ce, ZEND_ATTRIBUTE_TARGET_PROPERTY,
 		ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL, false);
+}
+/* }}} */
+
+/* {{{ Returns the first attribute of this property */
+ZEND_METHOD(ReflectionProperty, getFirstAttribute)
+{
+    reflection_object *intern;
+    property_reference *ref;
+
+    GET_REFLECTION_OBJECT_PTR(ref);
+
+    if (ref->prop == NULL) {
+        RETURN_EMPTY_ARRAY();
+    }
+
+    reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+                       ref->prop->attributes, 0, ref->prop->ce, ZEND_ATTRIBUTE_TARGET_PROPERTY,
+                       ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL, true);
 }
 /* }}} */
 
