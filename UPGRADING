@@ -186,6 +186,12 @@ PHP 8.4 UPGRADE NOTES
   . curl_version() returns an additional feature_list value, which is an
     associative array of all known Curl features, and whether they are
     supported (true) or not (false).
+  . Added CURLOPT_PREREQFUNCTION option which accepts a callable that gets
+    called after a connection is established (including TLS handshake), but
+    before the request is made. The function is called with the CurlHandle
+    object, primary IP, local IP, primary port, and the local port, and it
+    must return CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT to allow or abort
+    the request.
 
 - Date:
   . Added static methods
@@ -587,6 +593,11 @@ PHP 8.4 UPGRADE NOTES
 
 - Core:
   . PHP_OUTPUT_HANDLER_PROCESSED.
+
+- Curl:
+  . CURLOPT_PREREQFUNCTION.
+  . CURL_PREREQFUNC_OK.
+  . CURL_PREREQFUNC_ABORT.
 
 - Intl:
   . The IntlDateFormatter class exposes now the new PATTERN constant
