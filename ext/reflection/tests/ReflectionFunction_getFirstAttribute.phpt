@@ -11,12 +11,12 @@ class AnAttribute {
 function foo() {}
 
 $function = new ReflectionFunction('foo');
-$attribute = $function->getAttribute(AnAttribute::class);
+$attribute = $function->getFirstAttribute(AnAttribute::class);
 var_dump($attribute);
 var_dump($attribute->newInstance()->value);
 
 $function = new ReflectionFunction('foo');
-var_dump($function->getAttribute(Stringable::class));
+var_dump($function->getFirstAttribute(Stringable::class));
 ?>
 --EXPECT--
 object(ReflectionAttribute)#2 (0) {
