@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-12107 (When running a stored procedure (that returns a result
     set) twice, PHP crashes). (nielsdos)
 
+- Opcache:
+  . Fixed bug GH-13232 (Segmentation fault will be reported when JIT is off but
+    JIT_debug is still on). (nielsdos)
+
 - OpenSSL:
   . Fixed LibreSSL undefined reference when OPENSSL_NO_ENGINE not set.
    (David Carlier).
