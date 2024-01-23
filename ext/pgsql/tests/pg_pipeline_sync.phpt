@@ -4,7 +4,7 @@ PostgreSQL pipeline mode
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 if (!defined('PGSQL_PIPELINE_SYNC') || !function_exists('pg_send_query_params')) {
     die('skip pipeline mode not available');
 }
@@ -12,8 +12,8 @@ if (!defined('PGSQL_PIPELINE_SYNC') || !function_exists('pg_send_query_params'))
 --FILE--
 <?php
 
-include('config.inc');
-include('nonblocking.inc');
+include('inc/config.inc');
+include('inc/nonblocking.inc');
 
 if (!$db = pg_connect($conn_str, PGSQL_CONNECT_ASYNC)) {
     die("pg_connect() error");
