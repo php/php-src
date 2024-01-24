@@ -10,6 +10,10 @@ $$a;
 $a = "test\0";
 $$a;
 
+$GLOBALS["test\0test"];
+$GLOBALS["\0test"];
+$GLOBALS["test\0"];
+
 compact("a\0b");
 compact("\0ab");
 compact("ab\0");
@@ -21,6 +25,12 @@ Warning: Undefined variable $test%0test in %s on line %d
 Warning: Undefined variable $%0test in %s on line %d
 
 Warning: Undefined variable $test%0 in %s on line %d
+
+Warning: Undefined global variable $test%0test in %s on line %d
+
+Warning: Undefined global variable $%0test in %s on line %d
+
+Warning: Undefined global variable $test%0 in %s on line %d
 
 Warning: compact(): Undefined variable $a%0b in %s on line %d
 
