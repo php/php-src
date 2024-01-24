@@ -277,14 +277,6 @@ static const mbfl_encoding *php_mb_get_encoding_or_pass(const char *encoding_nam
 	return mbfl_name2encoding(encoding_name);
 }
 
-static const mbfl_encoding *php_mb_get_encoding_or_pass_ex(const char *encoding_name, size_t encoding_name_len) {
-	if (strncmp(encoding_name, "pass", encoding_name_len) == 0) {
-		return &mbfl_encoding_pass;
-	}
-
-	return mbfl_name2encoding_ex(encoding_name, encoding_name_len);
-}
-
 static size_t count_commas(const char *p, const char *end) {
 	size_t count = 0;
 	while ((p = memchr(p, ',', end - p))) {
