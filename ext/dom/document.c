@@ -1687,8 +1687,9 @@ PHP_METHOD(DOMDocument, saveXML)
 				status = dom_xml_serialize(ctxt, out, (xmlNodePtr) docp, format);
 				status |= xmlOutputBufferFlush(out);
 				status |= xmlOutputBufferClose(out);
+			} else {
+				xmlCharEncCloseFunc(handler);
 			}
-			xmlCharEncCloseFunc(handler);
 		} else {
 			status = xmlSaveDoc(ctxt, docp);
 		}
