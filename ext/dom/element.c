@@ -684,7 +684,9 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 	}
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);
-	php_dom_reconcile_attribute_namespace_after_insertion(attrp, !follow_spec);
+	if (!follow_spec) {
+		php_dom_reconcile_attribute_namespace_after_insertion(attrp);
+	}
 
 	/* Returns old property if removed otherwise NULL */
 	if (existattrp != NULL) {
@@ -921,7 +923,8 @@ static void dom_set_attribute_ns_modern(dom_object *intern, xmlNodePtr elemp, ze
 	int errorcode = dom_validate_and_extract(uri, name, &localname, &prefix);
 
 	if (errorcode == 0) {
-		xmlNsPtr ns = dom_ns_create_local_as_is(elemp->doc, elemp, elemp, uri ? ZSTR_VAL(uri) : NULL, prefix);
+		dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
+		xmlNsPtr ns = dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
 		if (UNEXPECTED(xmlSetNsProp(elemp, ns, localname, BAD_CAST value) == NULL)) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		}

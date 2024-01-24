@@ -505,8 +505,9 @@ PHP_METHOD(DOM_Document, createElement)
 	}
 
 	if (docp->type == XML_HTML_DOCUMENT_NODE && php_dom_follow_spec_intern(intern)) {
+		dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
 		char *lower = zend_str_tolower_dup_ex(ZSTR_VAL(name), ZSTR_LEN(name));
-		node = xmlNewDocRawNode(docp, dom_ns_fast_get_html_ns(docp), BAD_CAST (lower ? lower : ZSTR_VAL(name)), BAD_CAST value);
+		node = xmlNewDocRawNode(docp, dom_libxml_ns_mapper_ensure_html_ns(ns_mapper), BAD_CAST (lower ? lower : ZSTR_VAL(name)), BAD_CAST value);
 		if (lower) {
 			efree(lower);
 		}
@@ -834,7 +835,7 @@ PHP_METHOD(DOM_Document, importNode)
 	if (nodep->doc == docp) {
 		retnodep = nodep;
 	} else {
-		retnodep = dom_clone_node(nodep, docp, recursive);
+		retnodep = dom_clone_node(php_dom_follow_spec_intern(intern) ? php_dom_get_ns_mapper(intern) : NULL, nodep, docp, recursive, php_dom_follow_spec_intern(intern));
 		if (!retnodep) {
 			RETURN_FALSE;
 		}
@@ -896,7 +897,8 @@ PHP_METHOD(DOM_Document, createElementNS)
 		if (errorcode == 0) {
 			nodep = xmlNewDocRawNode(docp, NULL, localname, BAD_CAST value);
 			if (EXPECTED(nodep != NULL)) {
-				nodep->ns = dom_ns_create_local_as_is(docp, nodep, xmlDocGetRootElement(docp), uri ? ZSTR_VAL(uri) : NULL, prefix);
+				dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
+				nodep->ns = dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
 			}
 		}
 
@@ -982,7 +984,8 @@ PHP_METHOD(DOM_Document, createAttributeNS)
 
 		if (uri != NULL && ZSTR_LEN(uri) > 0) {
 			if (php_dom_follow_spec_intern(intern)) {
-				nsptr = dom_ns_create_local_as_is(docp, root, root, ZSTR_VAL(uri), prefix);
+				dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
+				nsptr = dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
 			} else {
 				nsptr = xmlSearchNsByHref(docp, root, BAD_CAST ZSTR_VAL(uri));
 
@@ -1160,8 +1163,8 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 		if (php_dom_follow_spec_intern(dom_object_new_document)) {
 			xmlUnlinkNode(nodep);
 			xmlSetTreeDoc(nodep, new_document);
-			dom_libxml_reconcile_modern(nodep);
-
+			dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(dom_object_new_document);
+			dom_libxml_reconcile_modern(ns_mapper, nodep);
 #if LIBXML_VERSION < 21000
 			libxml_fixup_name_and_content_element(original_document, new_document, nodep);
 #endif
@@ -1471,7 +1474,6 @@ static void php_dom_finish_loading_document(zval *this, zval *return_value, xmlD
 	size_t old_modification_nr = 0;
 	if (intern != NULL) {
 		bool is_modern_api_class = false;
-		php_libxml_node_detach_reconcile_func reconcile_func = NULL;
 		xmlDocPtr docp = (xmlDocPtr) dom_object_get_node(intern);
 		dom_doc_propsptr doc_prop = NULL;
 		if (docp != NULL) {
@@ -1479,7 +1481,6 @@ static void php_dom_finish_loading_document(zval *this, zval *return_value, xmlD
 			ZEND_ASSERT(doc_ptr != NULL); /* Must exist, we have a document */
 			is_modern_api_class = doc_ptr->is_modern_api_class;
 			old_modification_nr = doc_ptr->cache_tag.modification_nr;
-			reconcile_func = doc_ptr->node_detach_reconcile_func;
 			php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
 			doc_prop = intern->document->doc_props;
 			intern->document->doc_props = NULL;
@@ -1494,7 +1495,6 @@ static void php_dom_finish_loading_document(zval *this, zval *return_value, xmlD
 		}
 		intern->document->doc_props = doc_prop;
 		intern->document->is_modern_api_class = is_modern_api_class;
-		intern->document->node_detach_reconcile_func = reconcile_func;
 	}
 
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)newdoc, (void *)intern);

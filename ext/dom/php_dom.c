@@ -208,7 +208,6 @@ static void dom_copy_document_ref(php_libxml_ref_obj *source_doc, php_libxml_ref
 		}
 
 		dest_doc->is_modern_api_class = source_doc->is_modern_api_class;
-		dest_doc->node_detach_reconcile_func = source_doc->node_detach_reconcile_func;
 	}
 }
 
@@ -517,10 +516,18 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 	if (instanceof_function(intern->std.ce, dom_node_class_entry)) {
 		xmlNodePtr node = (xmlNodePtr)dom_object_get_node(intern);
 		if (node != NULL) {
-			xmlNodePtr cloned_node = dom_clone_node(node, node->doc, true);
+			dom_libxml_ns_mapper *ns_mapper;
+			if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE) {
+				ns_mapper = dom_libxml_ns_mapper_create();
+			} else {
+				ns_mapper = php_dom_get_ns_mapper(intern);
+			}
+
+			xmlNodePtr cloned_node = dom_clone_node(ns_mapper, node, node->doc, true, php_dom_follow_spec_intern(intern));
 			if (cloned_node != NULL) {
 				dom_update_refcount_after_clone(intern, node, clone, cloned_node);
 			}
+			clone->document->private_data = dom_libxml_ns_mapper_header(ns_mapper);
 		}
 	}
 
@@ -1574,15 +1581,6 @@ static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePt
 	}
 }
 
-static zend_always_inline void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep)
-{
-	if (php_dom_follow_spec_node(nodep)) {
-		dom_libxml_reconcile_modern(nodep);
-	} else {
-		xmlReconciliateNs(nodep->doc, nodep);
-	}
-}
-
 void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
 {
 	ZEND_ASSERT(nodep->type != XML_ATTRIBUTE_NODE);
@@ -1591,7 +1589,7 @@ void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
 	 * we still want to do the internal reconciliation conditionally. */
 	if (nodep->type == XML_ELEMENT_NODE) {
 		dom_reconcile_ns_internal(doc, nodep, nodep->parent);
-		dom_libxml_reconcile_ensure_namespaces_are_declared(nodep);
+		xmlReconciliateNs(doc, nodep);
 	}
 }
 /* }}} */
@@ -1620,7 +1618,7 @@ void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last)
 	 * dom_libxml_reconcile_ensure_namespaces_are_declared() performs its own recursion. */
 	while (true) {
 		/* The internal libxml2 call will already check the node type, no need for us to do it here. */
-		dom_libxml_reconcile_ensure_namespaces_are_declared(nodep);
+		xmlReconciliateNs(doc, nodep);
 		if (nodep == last) {
 			break;
 		}
@@ -2081,7 +2079,7 @@ static xmlNodePtr dom_clone_helper(xmlNodePtr src_node, xmlDocPtr dst_doc, bool 
 	return outer_clone;
 }
 
-xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, bool recursive)
+xmlNodePtr dom_clone_node(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive, bool follow_spec)
 {
 	if (node->type == XML_DTD_NODE) {
 		/* The behaviour w.r.t. the internal subset is implementation-defined according to DOM 3.
@@ -2092,17 +2090,15 @@ xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, bool recursive)
 		return (xmlNodePtr) dtd;
 	}
 
-	if (php_dom_follow_spec_node(node)) {
+	if (follow_spec) {
 		xmlNodePtr clone = dom_clone_helper(node, doc, recursive);
 		if (EXPECTED(clone != NULL)) {
 			if (clone->type == XML_DOCUMENT_NODE || clone->type == XML_HTML_DOCUMENT_NODE || clone->type == XML_DOCUMENT_FRAG_NODE) {
 				for (xmlNodePtr child = clone->children; child != NULL; child = child->next) {
-					dom_libxml_reconcile_modern(child);
+					dom_libxml_reconcile_modern(ns_mapper, child);
 				}
-			} else if (clone->type == XML_ATTRIBUTE_NODE) {
-				php_dom_reconcile_attribute_namespace_after_insertion((xmlAttrPtr) clone, false);
 			} else {
-				dom_libxml_reconcile_modern(clone);
+				dom_libxml_reconcile_modern(ns_mapper, clone);
 			}
 		}
 		return clone;

@@ -1282,7 +1282,7 @@ PHP_METHOD(DOMNode, replaceChild)
 
 		xmlNodePtr last = newchild->last;
 		newchild = _php_dom_insert_fragment(nodep, prevsib, nextsib, newchild, intern);
-		if (newchild) {
+		if (newchild && !php_dom_follow_spec_intern(intern)) {
 			dom_reconcile_ns_list(nodep->doc, newchild, last);
 		}
 	} else if (oldchild != newchild) {
@@ -1295,7 +1295,9 @@ PHP_METHOD(DOMNode, replaceChild)
 			php_libxml_increment_doc_ref((php_libxml_node_object *)newchildobj, NULL);
 		}
 		xmlReplaceNode(oldchild, newchild);
-		dom_reconcile_ns(nodep->doc, newchild);
+		if (!php_dom_follow_spec_intern(intern)) {
+			dom_reconcile_ns(nodep->doc, newchild);
+		}
 
 		if (replacedoctype) {
 			nodep->doc->intSubset = (xmlDtd *) newchild;
@@ -1426,7 +1428,7 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 		if (UNEXPECTED(new_child == NULL)) {
 			goto cannot_add;
 		}
-		php_dom_reconcile_attribute_namespace_after_insertion((xmlAttrPtr) new_child, false);
+		php_dom_reconcile_attribute_namespace_after_insertion((xmlAttrPtr) new_child);
 	} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
 		xmlNodePtr last = child->last;
 		new_child = _php_dom_insert_fragment(nodep, nodep->last, NULL, child, intern);
@@ -1535,7 +1537,15 @@ PHP_METHOD(DOMNode, cloneNode)
 
 	DOM_GET_OBJ(n, id, xmlNodePtr, intern);
 
-	node = dom_clone_node(n, n->doc, recursive);
+	dom_libxml_ns_mapper *ns_mapper;
+	bool clone_document = n->type == XML_DOCUMENT_NODE || n->type == XML_HTML_DOCUMENT_NODE;
+	if (clone_document) {
+		ns_mapper = dom_libxml_ns_mapper_create();
+	} else {
+		ns_mapper = php_dom_follow_spec_intern(intern) ? php_dom_get_ns_mapper(intern) : NULL;
+	}
+
+	node = dom_clone_node(ns_mapper, n, n->doc, recursive, php_dom_follow_spec_intern(intern));
 
 	if (!node) {
 		RETURN_FALSE;
@@ -1549,10 +1559,12 @@ PHP_METHOD(DOMNode, cloneNode)
 	}
 
 	/* If document cloned we want a new document proxy */
-	if (node->doc != n->doc) {
+	if (clone_document) {
 		DOM_RET_OBJ(node, &ret, NULL);
 		dom_object *new_intern = Z_DOMOBJ_P(return_value);
 		php_dom_update_document_after_clone(intern, n, new_intern, node);
+		ZEND_ASSERT(new_intern->document->private_data == NULL);
+		new_intern->document->private_data = dom_libxml_ns_mapper_header(ns_mapper);
 	} else {
 		DOM_RET_OBJ(node, &ret, intern);
 	}

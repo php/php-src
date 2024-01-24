@@ -24,6 +24,7 @@
 #include "xml_serializer.h"
 #include "namespace_compat.h"
 #include "serialize_common.h"
+#include "internal_macros.h"
 
 // TODO: implement iterative approach instead of recursive?
 
@@ -47,11 +48,6 @@
 
 #define TRY(x) do { if (UNEXPECTED(x < 0)) { return -1; } } while (0)
 #define TRY_OR_CLEANUP(x) do { if (UNEXPECTED(x < 0)) { goto cleanup; } } while (0)
-
-/* We're using the type flags of the zval to store an extra flag. */
-#define DOM_Z_OWNED(z, v)	ZVAL_PTR(z, v)
-#define DOM_Z_UNOWNED(z, v)	ZVAL_INDIRECT(z, v)
-#define DOM_Z_IS_OWNED(z)	(Z_TYPE_P(z) == IS_PTR)
 
 /* https://w3c.github.io/DOM-Parsing/#dfn-namespace-prefix-map
  * This associates a namespace uri with a list of possible prefixes. */
@@ -245,9 +241,9 @@ static void dom_xml_ns_prefix_map_add(
 	/* 3. (Otherwise), append prefix to the end of candidates list. */
 	zval tmp;
 	if (prefix_owned) {
-		DOM_Z_OWNED(&tmp, (void *) prefix);
+		DOM_Z_OWNED(&tmp, prefix);
 	} else {
-		DOM_Z_UNOWNED(&tmp, (void *) prefix);
+		DOM_Z_UNOWNED(&tmp, prefix);
 	}
 	zend_hash_next_index_insert_new(list, &tmp);
 }

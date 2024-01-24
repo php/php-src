@@ -17,6 +17,7 @@
 #ifndef HTML5_PARSER_H
 #define HTML5_PARSER_H
 
+#include "namespace_compat.h"
 #include <lexbor/html/parser.h>
 #include <libxml/tree.h>
 #include <Zend/zend_portability.h>
@@ -68,7 +69,8 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
     lxb_html_document_t *document,
     xmlDocPtr *doc_out,
     bool compact_text_nodes,
-    bool create_default_ns
+    bool create_default_ns,
+    dom_libxml_ns_mapper *ns_mapper
 );
 void lexbor_libxml2_bridge_report_errors(
     const lexbor_libxml2_bridge_parse_context *ctx,

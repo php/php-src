@@ -30,6 +30,9 @@
 struct dom_ns_magic_token;
 typedef struct dom_ns_magic_token dom_ns_magic_token;
 
+struct _dom_libxml_ns_mapper;
+typedef struct _dom_libxml_ns_mapper dom_libxml_ns_mapper;
+
 extern const dom_ns_magic_token *dom_ns_is_html_magic_token;
 extern const dom_ns_magic_token *dom_ns_is_mathml_magic_token;
 extern const dom_ns_magic_token *dom_ns_is_svg_magic_token;
@@ -40,12 +43,22 @@ extern const dom_ns_magic_token *dom_ns_is_xmlns_magic_token;
 /* These functions make it possible to make a namespace declaration also visible as an attribute by
  * creating an equivalent attribute node. */
 
-void dom_ns_compat_mark_attribute_list(xmlNodePtr node);
+typedef struct _php_libxml_private_data_header php_libxml_private_data_header;
+struct _php_libxml_private_data_header;
+
+dom_libxml_ns_mapper *dom_libxml_ns_mapper_create(void);
+void dom_libxml_ns_mapper_destroy(dom_libxml_ns_mapper *mapper);
+xmlNsPtr dom_libxml_ns_mapper_ensure_html_ns(dom_libxml_ns_mapper *mapper);
+xmlNsPtr dom_libxml_ns_mapper_ensure_prefixless_xmlns_ns(dom_libxml_ns_mapper *mapper);
+xmlNsPtr dom_libxml_ns_mapper_get_ns(dom_libxml_ns_mapper *mapper, zend_string *prefix, zend_string *uri);
+xmlNsPtr dom_libxml_ns_mapper_get_ns_raw_prefix_string(dom_libxml_ns_mapper *mapper, const xmlChar *prefix, size_t prefix_len, zend_string *uri);
+xmlNsPtr dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(dom_libxml_ns_mapper *mapper, const char *prefix, const char *uri);
+php_libxml_private_data_header *dom_libxml_ns_mapper_header(dom_libxml_ns_mapper *mapper);
+
+void dom_ns_compat_mark_attribute_list(dom_libxml_ns_mapper *mapper, xmlNodePtr node);
 bool dom_ns_is_fast(const xmlNode *nodep, const dom_ns_magic_token *magic_token);
 bool dom_ns_is_html_and_document_is_html(const xmlNode *nodep);
-xmlNsPtr dom_ns_create_local_as_is(xmlDocPtr doc, xmlNodePtr ns_holder, xmlNodePtr parent, const char *uri, const xmlChar *prefix);
-xmlNsPtr dom_ns_fast_get_html_ns(xmlDocPtr docp);
-void dom_libxml_reconcile_modern(xmlNodePtr node);
-void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp, bool resolve_prefix_conflict);
+void dom_libxml_reconcile_modern(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node);
+void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp);
 
 #endif

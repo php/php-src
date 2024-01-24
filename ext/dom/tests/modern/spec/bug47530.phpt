@@ -26,6 +26,8 @@ function test_document_fragment_without_import() {
     unset($doc);
     var_dump($element->firstChild->tagName);
     var_dump($element->firstChild->namespaceURI);
+    var_dump($element->firstChild->nextSibling->tagName);
+    var_dump($element->firstChild->nextSibling->namespaceURI);
 }
 
 function test_document_import() {
@@ -114,8 +116,10 @@ test_appendChild_with_shadowing();
 -- Test document fragment without import --
 <?xml version="1.0" encoding="UTF-8"?>
 <html xmlns=""><element xmlns:foo="https://php.net/bar"><foo:bar/><bar/></element></html>
-string(7) "foo:bar"
+string(3) "bar"
 string(19) "https://php.net/bar"
+string(3) "bar"
+NULL
 -- Test document import --
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">

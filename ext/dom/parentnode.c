@@ -291,7 +291,7 @@ static bool dom_is_pre_insert_valid_without_step_1(php_libxml_ref_obj *document,
 		dom_hierarchy(parentNode, node) != SUCCESS
 		/* 4. If node is not a DocumentFragment, DocumentType, Element, or CharacterData node, then throw a "HierarchyRequestError" DOMException. */
 		|| node->type == XML_ATTRIBUTE_NODE
-		|| (document != NULL && php_dom_follow_spec_doc_ref(document) && (
+		|| (php_dom_follow_spec_doc_ref(document) && (
 			node->type == XML_ENTITY_REF_NODE
 			|| node->type == XML_ENTITY_NODE
 			|| node->type == XML_NOTATION_NODE
@@ -302,7 +302,7 @@ static bool dom_is_pre_insert_valid_without_step_1(php_libxml_ref_obj *document,
 		return false;
 	}
 
-	if (document != NULL && php_dom_follow_spec_doc_ref(document)) {
+	if (php_dom_follow_spec_doc_ref(document)) {
 		/* 5. If either node is a Text node and parent is a document... */
 		if (parent_is_document && (node->type == XML_TEXT_NODE || node->type == XML_CDATA_SECTION_NODE)) {
 			php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Cannot insert text as a child of a document", /* strict */ true);
@@ -530,7 +530,9 @@ static void dom_insert_node_list_unchecked(php_libxml_ref_obj *document, xmlNode
 			xmlNodePtr last = node->last;
 			php_dom_pre_insert_helper(insertion_point, parent, newchild, last);
 			dom_fragment_assign_parent_node(parent, node);
-			dom_reconcile_ns_list(parent->doc, newchild, last);
+			if (!php_dom_follow_spec_doc_ref(document)) {
+				dom_reconcile_ns_list(parent->doc, newchild, last);
+			}
 			if (parent->doc && newchild->type == XML_DTD_NODE) {
 				parent->doc->intSubset = (xmlDtdPtr) newchild;
 				newchild->parent = (xmlNodePtr) parent->doc;
@@ -558,7 +560,9 @@ static void dom_insert_node_list_unchecked(php_libxml_ref_obj *document, xmlNode
 			parent->doc->intSubset = (xmlDtdPtr) node;
 			node->parent = (xmlNodePtr) parent->doc;
 		} else {
-			dom_reconcile_ns(parent->doc, node);
+			if (!php_dom_follow_spec_doc_ref(document)) {
+				dom_reconcile_ns(parent->doc, node);
+			}
 		}
 	}
 }

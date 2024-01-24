@@ -69,12 +69,12 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
  * So in principle we could just ignore them outright.
  * However, step 10 in https://html.spec.whatwg.org/multipage/parsing.html#create-an-element-for-the-token (Date 2023-12-15)
  * requires us to have the declaration as an attribute available */
-static void dom_mark_namespaces_as_attributes_too(xmlDocPtr doc)
+static void dom_mark_namespaces_as_attributes_too(dom_libxml_ns_mapper *ns_mapper, xmlDocPtr doc)
 {
 	xmlNodePtr node = doc->children;
 	while (node != NULL) {
 		if (node->type == XML_ELEMENT_NODE) {
-			dom_ns_compat_mark_attribute_list(node);
+			dom_ns_compat_mark_attribute_list(ns_mapper, node);
 
 			if (node->children) {
 				node = node->children;
@@ -119,7 +119,7 @@ PHP_METHOD(DOM_XMLDocument, createEmpty)
 		NULL
 	);
 	intern->document->is_modern_api_class = true;
-	intern->document->node_detach_reconcile_func = dom_libxml_reconcile_modern;
+	intern->document->private_data = dom_libxml_ns_mapper_header(dom_libxml_ns_mapper_create());
 	return;
 
 oom:
@@ -228,8 +228,9 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		NULL
 	);
 	intern->document->is_modern_api_class = true;
-	intern->document->node_detach_reconcile_func = dom_libxml_reconcile_modern;
-	dom_mark_namespaces_as_attributes_too(lxml_doc);
+	dom_libxml_ns_mapper *ns_mapper = dom_libxml_ns_mapper_create();
+	intern->document->private_data = dom_libxml_ns_mapper_header(ns_mapper);
+	dom_mark_namespaces_as_attributes_too(ns_mapper, lxml_doc);
 }
 
 PHP_METHOD(DOM_XMLDocument, createFromString)

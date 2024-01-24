@@ -107,6 +107,9 @@ typedef struct {
 	dom_object dom;
 } dom_object_namespace_node;
 
+struct _dom_libxml_ns_mapper;
+typedef struct _dom_libxml_ns_mapper dom_libxml_ns_mapper;
+
 static inline dom_object_namespace_node *php_dom_namespace_node_obj_from_obj(zend_object *obj) {
 	return (dom_object_namespace_node*)((char*)(obj) - XtOffsetOf(dom_object_namespace_node, dom.std));
 }
@@ -221,7 +224,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 int php_dom_get_namednodemap_length(dom_object *obj);
 int php_dom_get_nodelist_length(dom_object *obj);
 
-xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, bool recursive);
+xmlNodePtr dom_clone_node(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive, bool follow_spec);
 
 #define DOM_GET_INTERN(__id, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
@@ -281,14 +284,13 @@ static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_node(php_l
 
 static zend_always_inline bool php_dom_follow_spec_doc_ref(const php_libxml_ref_obj *document)
 {
-	ZEND_ASSERT(document != NULL);
-	return document->is_modern_api_class;
+	return document != NULL && document->is_modern_api_class;
 }
 
 static zend_always_inline bool php_dom_follow_spec_intern(const dom_object *intern)
 {
 	ZEND_ASSERT(intern != NULL);
-	return intern->document && php_dom_follow_spec_doc_ref(intern->document);
+	return php_dom_follow_spec_doc_ref(intern->document);
 }
 
 static zend_always_inline bool php_dom_follow_spec_node(const xmlNode *node)
@@ -302,6 +304,12 @@ static zend_always_inline bool php_dom_follow_spec_node(const xmlNode *node)
 		}
 	}
 	return false;
+}
+
+static zend_always_inline dom_libxml_ns_mapper *php_dom_get_ns_mapper(dom_object *intern)
+{
+	ZEND_ASSERT(intern->document != NULL);
+	return (dom_libxml_ns_mapper *) intern->document->private_data;
 }
 
 PHP_MINIT_FUNCTION(dom);

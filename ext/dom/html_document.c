@@ -350,23 +350,7 @@ static void dom_post_process_html5_loading(
 			dom_place_remove_element_and_hoist_children(html_node, "body");
 		}
 		if (!observations->has_explicit_html_tag) {
-			/* The HTML node has a single namespace declaration, that we must preserve after removing the node.
-			 * However, it's possible the namespace is NULL if DOM\HTML_NO_DEFAULT_NS was set. */
-			if (!(options & DOM_HTML_NO_DEFAULT_NS)) {
-				php_libxml_set_old_ns(lxml_doc, html_node->nsDef);
-				html_node->nsDef = NULL;
-			}
 			dom_place_remove_element_and_hoist_children((xmlNodePtr) lxml_doc, "html");
-			if (!(options & DOM_HTML_NO_DEFAULT_NS) && EXPECTED(lxml_doc->children != NULL)) {
-				xmlNodePtr node = lxml_doc->children;
-				while (node) {
-					/* Fine to use the DOM wrap reconciliation here because it's the "modern" world of DOM,
-					 * and no user manipulation happened yet. */
-					xmlDOMWrapCtxt dummy_ctxt = {0};
-					xmlDOMWrapReconcileNamespaces(&dummy_ctxt, node, /* options */ 0);
-					node = node->next;
-				}
-			}
 		}
 	}
 }
@@ -742,7 +726,7 @@ PHP_METHOD(DOM_HTMLDocument, createEmpty)
 		NULL
 	);
 	intern->document->is_modern_api_class = true;
-	intern->document->node_detach_reconcile_func = dom_libxml_reconcile_modern;
+	intern->document->private_data = dom_libxml_ns_mapper_header(dom_libxml_ns_mapper_create());
 	return;
 
 oom:
@@ -853,15 +837,19 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 		goto fail_oom;
 	}
 
+	dom_libxml_ns_mapper *ns_mapper = dom_libxml_ns_mapper_create();
+
 	xmlDocPtr lxml_doc;
 	lexbor_libxml2_bridge_status bridge_status = lexbor_libxml2_bridge_convert_document(
 		document,
 		&lxml_doc,
 		options & XML_PARSE_COMPACT,
-		!(options & DOM_HTML_NO_DEFAULT_NS)
+		!(options & DOM_HTML_NO_DEFAULT_NS),
+		ns_mapper
 	);
 	lexbor_libxml2_bridge_copy_observations(parser->tree, &ctx.observations);
 	if (UNEXPECTED(bridge_status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
+		dom_libxml_ns_mapper_destroy(ns_mapper);
 		php_libxml_ctx_error(
 			NULL,
 			"%s in %s",
@@ -888,7 +876,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 		NULL
 	);
 	intern->document->is_modern_api_class = true;
-	intern->document->node_detach_reconcile_func = dom_libxml_reconcile_modern;
+	intern->document->private_data = dom_libxml_ns_mapper_header(ns_mapper);
 	return;
 
 fail_oom:
@@ -900,6 +888,7 @@ fail_oom:
 PHP_METHOD(DOM_HTMLDocument, createFromFile)
 {
 	const char *filename, *override_encoding = NULL;
+	dom_libxml_ns_mapper *ns_mapper = NULL;
 	size_t filename_len, override_encoding_len;
 	zend_long options = 0;
 	php_stream *stream = NULL;
@@ -1038,12 +1027,15 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		goto fail_oom;
 	}
 
+	ns_mapper = dom_libxml_ns_mapper_create();
+
 	xmlDocPtr lxml_doc;
 	lexbor_libxml2_bridge_status bridge_status = lexbor_libxml2_bridge_convert_document(
 		document,
 		&lxml_doc,
 		options & XML_PARSE_COMPACT,
-		!(options & DOM_HTML_NO_DEFAULT_NS)
+		!(options & DOM_HTML_NO_DEFAULT_NS),
+		ns_mapper
 	);
 	lexbor_libxml2_bridge_copy_observations(parser->tree, &ctx.observations);
 	if (UNEXPECTED(bridge_status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
@@ -1104,12 +1096,15 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		NULL
 	);
 	intern->document->is_modern_api_class = true;
-	intern->document->node_detach_reconcile_func = dom_libxml_reconcile_modern;
+	intern->document->private_data = dom_libxml_ns_mapper_header(ns_mapper);
 	return;
 
 fail_oom:
 	php_dom_throw_error(INVALID_STATE_ERR, 1);
 fail_general:
+	if (ns_mapper != NULL) {
+		dom_libxml_ns_mapper_destroy(ns_mapper);
+	}
 	lxb_html_document_destroy(document);
 	php_stream_close(stream);
 	if (opened_path != NULL) {
