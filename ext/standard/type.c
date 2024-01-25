@@ -156,8 +156,7 @@ PHP_FUNCTION(intval)
 		return;
 	}
 
-
-	if (base == 0 || base == 2) {
+	if (base == 0 || base == 2 || base == 8 || base == 16 ) {
 		char *strval = Z_STRVAL_P(num);
 		size_t strlen = Z_STRLEN_P(num);
 
@@ -173,27 +172,46 @@ PHP_FUNCTION(intval)
 				offset = 1;
 			}
 
-			if (strval[offset] == '0' && (strval[offset + 1] == 'b' || strval[offset + 1] == 'B')) {
-				char *tmpval;
-				strlen -= 2; /* Removing "0b" */
-				tmpval = emalloc(strlen + 1);
-
-				/* Place the unary symbol at pos 0 if there was one */
-				if (offset) {
-					tmpval[0] = strval[0];
-				}
-
-				/* Copy the data from after "0b" to the end of the buffer */
-				memcpy(tmpval + offset, strval + offset + 2, strlen - offset);
-				tmpval[strlen] = 0;
-
-				RETVAL_LONG(ZEND_STRTOL(tmpval, NULL, 2));
-				efree(tmpval);
-				return;
+			if (strval[offset] != '0') {
+				goto basic_strtol;
 			}
+			switch (strval[offset + 1]) {
+				case 'b':
+				case 'B':
+					base = 2;
+					break;
+				case 'o':
+				case 'O':
+					base = 8;
+					break;
+				case 'x':
+				case 'X':
+					base = 16;
+					break;
+				default:
+					goto basic_strtol;
+			}
+
+			char *tmpval;
+			strlen -= 2; /* Removing "0b"/"0x"/"0o" */
+			tmpval = emalloc(strlen + 1);
+
+			/* Place the unary symbol at pos 0 if there was one */
+			if (offset) {
+				tmpval[0] = strval[0];
+			}
+
+			/* Copy the data from after "0b" to the end of the buffer */
+			memcpy(tmpval + offset, strval + offset + 2, strlen - offset);
+			tmpval[strlen] = 0;
+
+			RETVAL_LONG(ZEND_STRTOL(tmpval, NULL, base));
+			efree(tmpval);
+			return;
 		}
 	}
 
+	basic_strtol:
 	RETVAL_LONG(ZEND_STRTOL(Z_STRVAL_P(num), NULL, base));
 }
 /* }}} */

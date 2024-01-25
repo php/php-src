@@ -343,6 +343,9 @@ PDO_SQLITE:
 
     RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
   . debug_zval_dump() now indicates whether an array is packed.
+  . intval() now supports explicit octal integer prefixes ("0o"/"0O") in strings
+    when the base is 8 or 0.
+    This is a follow-up to https://wiki.php.net/rfc/explicit_octal_notation
 
 ========================================
 6. New Functions
