@@ -52,10 +52,11 @@ IR_ALWAYS_INLINE ir_mem IR_MEM(ir_reg base, int32_t offset, ir_reg index, int32_
 	return mem;
 }
 
-#define IR_IS_SIGNED_32BIT(val)   ((((intptr_t)(val)) <= 0x7fffffff) && (((intptr_t)(val)) >= (-2147483647 - 1)))
-#define IR_IS_UNSIGNED_32BIT(val) (((uintptr_t)(val)) <= 0xffffffff)
-#define IR_IS_32BIT(type, val)    (IR_IS_TYPE_SIGNED(type) ? IR_IS_SIGNED_32BIT((val).i64) : IR_IS_UNSIGNED_32BIT((val).u64))
-#define IR_IS_FP_ZERO(insn)       ((insn.type == IR_DOUBLE) ? (insn.val.u64 == 0) : (insn.val.u32 == 0))
+#define IR_IS_SIGNED_32BIT(val)     ((((intptr_t)(val)) <= 0x7fffffff) && (((intptr_t)(val)) >= (-2147483647 - 1)))
+#define IR_IS_SIGNED_NEG_32BIT(val) ((((intptr_t)(val)) <= 0x7fffffff) && (((intptr_t)(val)) >= -2147483647))
+#define IR_IS_UNSIGNED_32BIT(val)   (((uintptr_t)(val)) <= 0xffffffff)
+#define IR_IS_32BIT(type, val)      (IR_IS_TYPE_SIGNED(type) ? IR_IS_SIGNED_32BIT((val).i64) : IR_IS_UNSIGNED_32BIT((val).u64))
+#define IR_IS_FP_ZERO(insn)         ((insn.type == IR_DOUBLE) ? (insn.val.u64 == 0) : (insn.val.u32 == 0))
 #define IR_MAY_USE_32BIT_ADDR(code_buffer, addr) \
 	((code_buffer) && \
 	IR_IS_SIGNED_32BIT((char*)(addr) - (char*)(code_buffer)->start) && \
@@ -1656,7 +1657,7 @@ static uint32_t ir_match_insn(ir_ctx *ctx, ir_ref ref)
 					} else if (op2_insn->val.i64 == 0) {
 						return IR_COPY_INT;
 					} else if ((ir_type_size[insn->type] >= 4 && insn->op == IR_ADD && IR_IS_SIGNED_32BIT(op2_insn->val.i64)) ||
-							(ir_type_size[insn->type] >= 4 && insn->op == IR_SUB && IR_IS_SIGNED_32BIT(-op2_insn->val.i64))) {
+							(ir_type_size[insn->type] >= 4 && insn->op == IR_SUB && IR_IS_SIGNED_NEG_32BIT(op2_insn->val.i64))) {
 						if (ir_in_same_block(ctx, insn->op1) && ctx->use_lists[insn->op1].count == 1) {
 							uint32_t rule = ctx->rules[insn->op1];
 
