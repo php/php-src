@@ -102,6 +102,9 @@ PHPAPI zend_class_entry *reflection_fiber_ptr;
 #define _DO_THROW(msg) \
 	zend_throw_exception(reflection_exception_ptr, msg, 0);
 
+#define _DO_THROW_EX(msg, ...) \
+    zend_throw_exception_ex(reflection_exception_ptr, 0, msg, __VA_ARGS__);
+
 #define GET_REFLECTION_OBJECT() do { \
 	intern = Z_REFLECTION_P(ZEND_THIS); \
 	if (intern->ptr == NULL) { \
@@ -2199,15 +2202,12 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
     }
 
     if (num_args < 1) {
-        char *message;
-
         if (fptr->common.scope) {
-            zend_spprintf(&message, 0, "Method %s::%s() has no parameters", ZSTR_VAL(fptr->common.scope->name), ZSTR_VAL(fptr->common.function_name));
+            _DO_THROW_EX("Method %s::%s() has no parameters", ZSTR_VAL(fptr->common.scope->name), ZSTR_VAL(fptr->common.function_name));
         } else {
-            zend_spprintf(&message, 0, "Function %s() has no parameters", ZSTR_VAL(fptr->common.function_name));
+            _DO_THROW_EX("Function %s() has no parameters", ZSTR_VAL(fptr->common.function_name));
         }
 
-        _DO_THROW(message);
         RETURN_THROWS();
     }
 
