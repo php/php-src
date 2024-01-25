@@ -61,4 +61,4 @@ The parameter specified by its offset could not be found
 The parameter specified by its name could not be found
 ReflectionFunctionAbstract::getParameter(): Argument #1 ($parameter) must be greater than or equal to 0
 The parameter specified by its offset could not be found
-Method has no parameters
+Method WeakReference::get() has no parameters

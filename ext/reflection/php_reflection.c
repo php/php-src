@@ -2199,11 +2199,15 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
     }
 
     if (num_args < 1) {
+        char *message;
+
         if (fptr->common.scope) {
-            _DO_THROW("Method has no parameters");
+            zend_spprintf(&message, 0, "Method %s::%s() has no parameters", ZSTR_VAL(fptr->common.scope->name), ZSTR_VAL(fptr->common.function_name));
         } else {
-            _DO_THROW("Function has no parameters");
+            zend_spprintf(&message, 0, "Function %s() has no parameters", ZSTR_VAL(fptr->common.function_name));
         }
+
+        _DO_THROW(message);
         RETURN_THROWS();
     }
 
