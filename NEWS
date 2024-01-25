@@ -19,6 +19,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug GH-10344 (imagettfbbox(): Could not find/open font UNC path).
     (nielsdos)
+  . Fixed bug GH-10614 (imagerotate will turn the picture all black, when
+    rotated 90). (nielsdos)
 
 - MySQLnd:
   . Fixed bug GH-12107 (When running a stored procedure (that returns a result
