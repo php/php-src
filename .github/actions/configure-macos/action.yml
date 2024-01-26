@@ -45,7 +45,7 @@ runs:
           --enable-sysvshm \
           --enable-shmop \
           --enable-pcntl \
-          --with-readline=/usr/local/opt/readline \
+          --with-readline \
           --enable-mbstring \
           --with-curl \
           --with-gettext=/usr/local/opt/gettext \

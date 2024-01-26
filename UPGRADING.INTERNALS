@@ -46,6 +46,13 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 
  b. Unix build system changes
    - The configure option --with-zlib-dir has been removed.
+   - The configure option --enable-phpdbg-readline has been removed. Readline
+     support in sapi/phpdbg is determined automatically whether ext/readline has
+     been enabled during the build.
+   - The configure option --with-libedit has been removed (use --with-readline).
+   - The configure option --with-readline now requires libedit library instead
+     of Readline library and doesn't accept directory argument anymore. To
+     customize libedit, use Pkgconf's EDIT_CFLAGS and EDIT_LIBS variables.
    - COOKIE_IO_FUNCTIONS_T symbol has been removed (use cookie_io_functions_t).
    - HAVE_SOCKADDR_UN_SUN_LEN symbol renamed to HAVE_STRUCT_SOCKADDR_UN_SUN_LEN.
    - PHP_CHECK_IN_ADDR_T M4 macro and 'in_addr_t' fallback definition to 'u_int'

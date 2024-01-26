@@ -2023,6 +2023,25 @@ AC_DEFUN([PHP_SETUP_EXPAT], [
   AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
 ])
 
+dnl
+dnl
+dnl PHP_SETUP_EDIT([shared-add],[action-if-found],[action-if-not-found])
+dnl
+dnl Common setup macro for linking libedit library.
+dnl
+AC_DEFUN([PHP_SETUP_EDIT], [
+  found_libedit=no
+
+  PKG_CHECK_MODULES([EDIT],[libedit],[found_libedit=yes],[found_libedit=no])
+
+  if test "$found_libedit" = "yes"; then
+    PHP_EVAL_LIBLINE($EDIT_LIBS, $1)
+    PHP_EVAL_INCLINE($EDIT_CFLAGS)
+ifelse([$2],[],:,[$2])
+ifelse([$3],[],,[else $3])
+  fi
+])
+
 dnl ----------------------------------------------------------------------------
 dnl Misc. macros
 dnl ----------------------------------------------------------------------------

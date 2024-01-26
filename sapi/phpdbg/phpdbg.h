@@ -78,10 +78,6 @@
 #endif
 
 #ifdef HAVE_PHPDBG_READLINE
-# ifdef HAVE_LIBREADLINE
-#	 include <readline/readline.h>
-#	 include <readline/history.h>
-# endif
 # ifdef HAVE_LIBEDIT
 #	 include <editline/readline.h>
 # endif
