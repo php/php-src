@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug GH-10344 (imagettfbbox(): Could not find/open font UNC path).
     (nielsdos)
+  . Fixed bug GH-10614 (imagerotate will turn the picture all black, when
+    rotated 90). (nielsdos)
 
 - LibXML:
   . Fix crashes with entity references and predefined entities. (nielsdos)
