@@ -147,17 +147,17 @@ function runValgrindPhpCgiCommand(
     uasort($metricsForMedianArr, fn ($a, $b) => $a['Ir'] <=> $b['Ir']);
     $medianRunIndex = array_keys($metricsForMedianArr)[max(0, floor((count($metricsForMedianArr) - 3 /* -1 for count to index, -1 for first slow run due compliation, -1 for second run which is a little slower too */) / 2.0))];
 
-    // remove non-median profiles from artifacts
+    // remove non-first-non-median profiles from artifacts
     foreach (range(0, $repeat - 1) as $k) {
         $profileOutSpecific = $profileOut . '.' . $k;
 
-        if ($k !== $medianRunIndex) {
+        if ($k !== 0 && $k !== $medianRunIndex) {
             unlink($profileOutSpecific);
         }
     }
 
     // annotate profiles for artifacts
-    foreach (['startup', $medianRunIndex, 'shutdown'] as $k) {
+    foreach (['startup', 0, $medianRunIndex, 'shutdown'] as $k) {
         $profileOutSpecific = $profileOut . '.' . $k;
 
         runCommand([
