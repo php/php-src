@@ -35,7 +35,7 @@
 #define ZEND_VERIFY_TYPE_INFERENCE_ERROR(msg, ...) \
 	do { \
 		fprintf(stderr, "Inference verification failed at %04d %s (" msg ")\n", (int)(opline - EX(func)->op_array.opcodes), operand, __VA_ARGS__); \
-		exit(139); \
+		_exit(139); \
 	} while (0)
 
 static void zend_verify_type_inference(zval *value, uint32_t type_mask, uint8_t op_type, zend_execute_data *execute_data, const zend_op *opline, const char *operand)
