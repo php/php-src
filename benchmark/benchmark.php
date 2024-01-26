@@ -114,6 +114,7 @@ function runValgrindPhpCgiCommand(
         '--tool=callgrind',
         '--dump-instr=yes',
         '--collect-jumps=yes',
+        '--trace-children=yes',
         "--callgrind-out-file=$profileOut",
         '--verbose',
         '--',
