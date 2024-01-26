@@ -17,8 +17,11 @@
 #ifndef PHP_HASH_XXHASH_H
 #define PHP_HASH_XXHASH_H
 
+/* Undefined, if xxhash namespace was already set elsewhere. */
+#undef XXH_NAMESPACE
+#define XXH_NAMESPACE PHP_NAMESPACE
 #define XXH_INLINE_ALL 1
-#include "xxhash.h"
+#include "xxhash/xxhash.h"
 
 typedef struct {
 	XXH32_state_t s;
