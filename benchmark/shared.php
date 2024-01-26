@@ -13,7 +13,7 @@ readonly class UnescapedArg {
     ) {}
 }
 
-function runCommand(array $args, ?string $cwd = null): ProcessResult {
+function runCommand(array $args, ?string $cwd = null, ?array $envVars = null): ProcessResult {
     $cmd = implode(' ', array_map(function (string|UnescapedArg $v): string {
         return $v instanceof UnescapedArg
             ? $v->arg
@@ -22,7 +22,7 @@ function runCommand(array $args, ?string $cwd = null): ProcessResult {
     $pipes = null;
     $descriptorSpec = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
     fwrite(STDOUT, "> $cmd\n");
-    $processHandle = proc_open($cmd, $descriptorSpec, $pipes, $cwd ?? getcwd(), null);
+    $processHandle = proc_open($cmd, $descriptorSpec, $pipes, $cwd ?? getcwd(), $envVars);
 
     $stdin = $pipes[0];
     $stdout = $pipes[1];
@@ -60,7 +60,7 @@ function runCommand(array $args, ?string $cwd = null): ProcessResult {
 
     fclose($stdout);
     fclose($stderr);
-    
+
     $result = new ProcessResult($stdoutStr, $stderrStr);
 
     $statusCode = proc_close($processHandle);

@@ -1696,6 +1696,16 @@ PHP_FUNCTION(apache_response_headers) /* {{{ */
 }
 /* }}} */
 
+#ifdef HAVE_VALGRIND
+static inline void callgrind_dump_stats(void)
+{
+	char *tmp = getenv("BENCHMARK_DUMP_SEPARATE_PROFILES");
+	if (tmp && ZEND_ATOL(tmp)) {
+		CALLGRIND_DUMP_STATS;
+	}
+}
+#endif
+
 static zend_module_entry cgi_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"cgi-fcgi",
@@ -2260,7 +2270,7 @@ parent_loop_end:
 #ifdef HAVE_VALGRIND
 			if (benchmark) {
 				/* measure startup and each benchmark run separately */
-				CALLGRIND_DUMP_STATS;
+				callgrind_dump_stats();
 			}
 #endif
 
@@ -2578,7 +2588,7 @@ fastcgi_request_done:
 
 #ifdef HAVE_VALGRIND
 				/* measure shutdown separately */
-				CALLGRIND_DUMP_STATS;
+				callgrind_dump_stats();
 #endif
 
 				break;
