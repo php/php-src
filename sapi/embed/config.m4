@@ -26,7 +26,7 @@ if test "$PHP_EMBED" != "no"; then
   if test "$PHP_EMBED_TYPE" != "no"; then
     PHP_SUBST(LIBPHP_CFLAGS)
     PHP_SELECT_SAPI(embed, $PHP_EMBED_TYPE, php_embed.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-    PHP_INSTALL_HEADERS([sapi/embed/php_embed.h])
+    PHP_INSTALL_HEADERS([sapi/embed], [php_embed.h])
   fi
   AC_MSG_RESULT([$PHP_EMBED_TYPE])
 else
