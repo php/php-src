@@ -392,6 +392,9 @@ PDO_SQLITE:
 9. Other Changes to Extensions
 ========================================
 
+- Curl:
+  . The Curl extension now requires at least libcurl 7.61.0.
+
 - Intl:
   . The class constants are typed now.
 

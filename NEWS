@@ -14,6 +14,7 @@ Core:
 
 Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
+  . Bumped required libcurl version to 7.61.0. (Ayesh)
 
 Date:
   . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
