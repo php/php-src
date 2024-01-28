@@ -105,6 +105,11 @@ PHP                                                                        NEWS
   . Fixed bug GH-12936 (hash() function hangs endlessly if using sha512 on
     strings >= 4GiB). (nielsdos)
 
+- MBString:
+  . When operating on a string with invalid encoding, mb_substr (as well
+    as mb_strstr and its variants) defines character indices in the same
+    way as other mbstring functions such as mb_strpos. (Alex Dowad)
+
 - ODBC:
   . Fix crash on Apache shutdown with persistent connections. (nielsdos)
 
