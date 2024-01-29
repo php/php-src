@@ -48,15 +48,15 @@ static inline double php_intpow10(int power) {
 
 /* {{{ php_round_helper
        Actually performs the rounding of a value to integer in a certain mode */
-static inline double php_round_helper(double adjusted_value, double value, double coefficient, int mode) {
+static inline double php_round_helper(double adjusted_value, double value, double exponent, int mode) {
 	double integral = adjusted_value >= 0.0 ? floor(adjusted_value) : ceil(adjusted_value);
 	double value_abs = fabs(value);
 	double edge_case;
 
 	if (fabs(adjusted_value) >= value_abs) {
-		edge_case = fabs((integral + copysign(0.5, integral)) / coefficient);
+		edge_case = fabs((integral + copysign(0.5, integral)) / exponent);
 	} else {
-		edge_case = fabs((integral + copysign(0.5, integral)) * coefficient);
+		edge_case = fabs((integral + copysign(0.5, integral)) * exponent);
 	}
 
 	switch (mode) {
@@ -148,7 +148,7 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
  * mode. For the specifics of the algorithm, see http://wiki.php.net/rfc/rounding
  */
 PHPAPI double _php_math_round(double value, int places, int mode) {
-	double f1;
+	double exponent;
 	double tmp_value;
 
 	if (!zend_finite(value) || value == 0.0) {
@@ -157,13 +157,13 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 
 	places = places < INT_MIN+1 ? INT_MIN+1 : places;
 
-	f1 = php_intpow10(abs(places));
+	exponent = php_intpow10(abs(places));
 
 	/* adjust the value */
 	if (places >= 0) {
-		tmp_value = value * f1;
+		tmp_value = value * exponent;
 	} else {
-		tmp_value = value / f1;
+		tmp_value = value / exponent;
 	}
 	/* This value is beyond our precision, so rounding it is pointless */
 	if (fabs(tmp_value) >= 1e15) {
@@ -171,14 +171,14 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	}
 
 	/* round the temp value */
-	tmp_value = php_round_helper(tmp_value, value, f1, mode);
+	tmp_value = php_round_helper(tmp_value, value, exponent, mode);
 
 	/* see if it makes sense to use simple division to round the value */
 	if (abs(places) < 23) {
 		if (places > 0) {
-			tmp_value = tmp_value / f1;
+			tmp_value = tmp_value / exponent;
 		} else {
-			tmp_value = tmp_value * f1;
+			tmp_value = tmp_value * exponent;
 		}
 	} else {
 		/* Simple division can't be used since that will cause wrong results.
