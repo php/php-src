@@ -15,7 +15,7 @@ if (PHP_LIBXML == "yes") {
 		if (!PHP_LIBXML_SHARED) {
 			ADD_DEF_FILE("ext\\libxml\\php_libxml2.def");
 		}
-		PHP_INSTALL_HEADERS("ext/libxml/", "php_libxml.h");
+		PHP_INSTALL_HEADERS("ext/libxml", "php_libxml.h");
 	} else {
 		WARNING("libxml support can't be enabled, iconv or libxml are missing")
 		PHP_LIBXML = "no"

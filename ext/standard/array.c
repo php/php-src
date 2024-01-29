@@ -2608,7 +2608,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 				zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 			}
 		} else {
-			php_error_docref(NULL, E_WARNING, "Undefined variable $%s", ZSTR_VAL(Z_STR_P(entry)));
+			php_error_docref_unchecked(NULL, E_WARNING, "Undefined variable $%S", Z_STR_P(entry));
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		if (Z_REFCOUNTED_P(entry)) {
@@ -3262,6 +3262,11 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 				Z_TRY_ADDREF_P(entry);
 				zend_hash_next_index_insert_new(removed, entry);
 				zend_hash_packed_del_val(in_hash, entry);
+				/* Bump iterator positions to the element after replacement. */
+				if (idx == iter_pos) {
+					zend_hash_iterators_update(in_hash, idx, offset + length);
+					iter_pos = zend_hash_iterators_lower_pos(in_hash, iter_pos + 1);
+				}
 			}
 		} else { /* otherwise just skip those entries */
 			int pos2 = pos;
@@ -3270,9 +3275,13 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 				if (Z_TYPE_P(entry) == IS_UNDEF) continue;
 				pos2++;
 				zend_hash_packed_del_val(in_hash, entry);
+				/* Bump iterator positions to the element after replacement. */
+				if (idx == iter_pos) {
+					zend_hash_iterators_update(in_hash, idx, offset + length);
+					iter_pos = zend_hash_iterators_lower_pos(in_hash, iter_pos + 1);
+				}
 			}
 		}
-		iter_pos = zend_hash_iterators_lower_pos(in_hash, iter_pos);
 
 		/* If there are entries to insert.. */
 		if (replace) {

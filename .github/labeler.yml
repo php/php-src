@@ -74,9 +74,6 @@
 "Extension: iconv":
 - ext/iconv/**/*
 
-"Extension: imap":
-- ext/imap/**/*
-
 "Extension: intl":
 - ext/intl/**/*
 

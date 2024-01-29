@@ -24,6 +24,10 @@
 # include <psapi.h>
 #endif
 
+#if defined(__linux__) || defined(__sun)
+# include <alloca.h>
+#endif
+
 #define DASM_M_GROW(ctx, t, p, sz, need) \
   do { \
     size_t _sz = (sz), _need = (need); \
@@ -351,22 +355,21 @@ static void *ir_jmp_addr(ir_ctx *ctx, ir_insn *insn, ir_insn *addr_insn)
 	return addr;
 }
 
-static int8_t ir_get_fused_reg(ir_ctx *ctx, ir_ref root, ir_ref ref, uint8_t op_num)
+static int8_t ir_get_fused_reg(ir_ctx *ctx, ir_ref root, ir_ref ref_and_op)
 {
 	if (ctx->fused_regs) {
 		char key[10];
 		ir_ref val;
 
 		memcpy(key, &root, sizeof(ir_ref));
-		memcpy(key + 4, &ref, sizeof(ir_ref));
-		memcpy(key + 8, &op_num, sizeof(uint8_t));
+		memcpy(key + 4, &ref_and_op, sizeof(ir_ref));
 
-		val = ir_strtab_find(ctx->fused_regs, key, 9);
+		val = ir_strtab_find(ctx->fused_regs, key, 8);
 		if (val) {
 			return val;
 		}
 	}
-	return ctx->regs[ref][op_num];
+	return ((int8_t*)ctx->regs)[ref_and_op];
 }
 
 #if defined(__GNUC__)
@@ -393,6 +396,7 @@ static int ir_add_veneer(dasm_State *Dst, void *buffer, uint32_t ins, int *b, ui
 
 /* Forward Declarations */
 static void ir_emit_osr_entry_loads(ir_ctx *ctx, int b, ir_block *bb);
+static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_reg, ir_reg tmp_fp_reg);
 static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb);
 
 typedef struct _ir_common_backend_data {
@@ -452,15 +456,198 @@ static IR_NEVER_INLINE void ir_emit_osr_entry_loads(ir_ctx *ctx, int b, ir_block
 			int32_t offset = -ir_binding_find(ctx, ref);
 
 			IR_ASSERT(offset > 0);
-			if (IR_IS_TYPE_INT(type)) {
-				ir_emit_load_mem_int(ctx, type, reg, ctx->spill_base, offset);
-			} else {
-				ir_emit_load_mem_fp(ctx, type, reg, ctx->spill_base, offset);
-			}
+			ir_emit_load_mem(ctx, type, reg, IR_MEM_BO(ctx->spill_base, offset));
 		} else {
 			IR_ASSERT(ctx->live_intervals[ctx->vregs[ref]]->flags & IR_LIVE_INTERVAL_SPILL_SPECIAL);
 		}
 	}
+}
+
+/*
+ * Parallel copy sequentialization algorithm
+ *
+ * The implementation is based on algorithm 1 desriebed in
+ * "Revisiting Out-of-SSA Translation for Correctness, Code Quality and Efficiency",
+ * Benoit Boissinot, Alain Darte, Fabrice Rastello, Benoit Dupont de Dinechin, Christophe Guillon.
+ * 2009 International Symposium on Code Generation and Optimization, Seattle, WA, USA, 2009,
+ * pp. 114-125, doi: 10.1109/CGO.2009.19.
+ */
+static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_reg, ir_reg tmp_fp_reg)
+{
+	int i;
+	int8_t *pred, *loc, *types;
+	ir_reg to, from;
+	ir_type type;
+	ir_regset todo, ready, srcs;
+	ir_reg last_reg, last_fp_reg;
+
+	if (count == 1) {
+		to = copies[0].to;
+		from = copies[0].from;
+		IR_ASSERT(from != to);
+		type = copies[0].type;
+		if (IR_IS_TYPE_INT(type)) {
+			ir_emit_mov(ctx, type, to, from);
+		} else {
+			ir_emit_fp_mov(ctx, type, to, from);
+		}
+		return 1;
+	}
+
+	loc = alloca(IR_REG_NUM * 3 * sizeof(int8_t));
+	pred = loc + IR_REG_NUM;
+	types = pred + IR_REG_NUM;
+	todo = IR_REGSET_EMPTY;
+	srcs = IR_REGSET_EMPTY;
+
+	for (i = 0; i < count; i++) {
+		from = copies[i].from;
+		to = copies[i].to;
+		IR_ASSERT(from != to);
+		IR_REGSET_INCL(srcs, from);
+		loc[from] = from;
+		pred[to] = from;
+		types[from] = copies[i].type;
+		IR_ASSERT(!IR_REGSET_IN(todo, to));
+		IR_REGSET_INCL(todo, to);
+	}
+
+	ready = IR_REGSET_DIFFERENCE(todo, srcs);
+
+	if (ready == todo) {
+		for (i = 0; i < count; i++) {
+			from = copies[i].from;
+			to = copies[i].to;
+			IR_ASSERT(from != to);
+			type = copies[i].type;
+			if (IR_IS_TYPE_INT(type)) {
+				ir_emit_mov(ctx, type, to, from);
+			} else {
+				ir_emit_fp_mov(ctx, type, to, from);
+			}
+		}
+		return 1;
+	}
+
+	while (ready != IR_REGSET_EMPTY) {
+		ir_reg r;
+
+		to = ir_regset_pop_first(&ready);
+		from = pred[to];
+		r = loc[from];
+		type = types[from];
+		if (IR_IS_TYPE_INT(type)) {
+			ir_emit_mov_ext(ctx, type, to, r);
+		} else {
+			ir_emit_fp_mov(ctx, type, to, r);
+		}
+		IR_REGSET_EXCL(todo, to);
+		loc[from] = to;
+		if (from == r && IR_REGSET_IN(todo, from)) {
+			IR_REGSET_INCL(ready, from);
+		}
+	}
+	if (todo == IR_REGSET_EMPTY) {
+		return 1;
+	}
+
+	/* temporary registers may be the same as some of the destinations */
+	last_reg = IR_REG_NONE;
+	if (tmp_reg != IR_REG_NONE) {
+		IR_ASSERT(!IR_REGSET_IN(srcs, tmp_reg));
+		if (IR_REGSET_IN(todo, tmp_reg)) {
+			last_reg = tmp_reg;
+			IR_REGSET_EXCL(todo, tmp_reg);
+		}
+	}
+
+	last_fp_reg = IR_REG_NONE;
+	if (tmp_fp_reg != IR_REG_NONE) {
+		IR_ASSERT(!IR_REGSET_IN(srcs, tmp_fp_reg));
+		if (IR_REGSET_IN(todo, tmp_fp_reg)) {
+			last_fp_reg = tmp_fp_reg;
+			IR_REGSET_EXCL(todo, tmp_fp_reg);
+		}
+	}
+
+	while (todo != IR_REGSET_EMPTY) {
+		to = ir_regset_pop_first(&todo);
+		from = pred[to];
+		IR_ASSERT(to != loc[from]);
+		type = types[from];
+		if (IR_IS_TYPE_INT(type)) {
+#ifdef IR_HAVE_SWAP_INT
+			if (pred[from] == to) {
+				ir_emit_swap(ctx, type, to, from);
+				IR_REGSET_EXCL(todo, from);
+				loc[to] = from;
+				loc[from] = to;
+				continue;
+			}
+#endif
+			IR_ASSERT(tmp_reg != IR_REG_NONE);
+			IR_ASSERT(tmp_reg >= IR_REG_GP_FIRST && tmp_reg <= IR_REG_GP_LAST);
+			ir_emit_mov(ctx, type, tmp_reg, to);
+			loc[to] = tmp_reg;
+		} else {
+#ifdef IR_HAVE_SWAP_FP
+			if (pred[from] == to) {
+				ir_emit_swap_fp(ctx, type, to, from);
+				IR_REGSET_EXCL(todo, from);
+				loc[to] = from;
+				loc[from] = to;
+				continue;
+			}
+#endif
+			IR_ASSERT(tmp_fp_reg != IR_REG_NONE);
+			IR_ASSERT(tmp_fp_reg >= IR_REG_FP_FIRST && tmp_fp_reg <= IR_REG_FP_LAST);
+			ir_emit_fp_mov(ctx, type, tmp_fp_reg, to);
+			loc[to] = tmp_fp_reg;
+		}
+		while (1) {
+			ir_reg r;
+
+			from = pred[to];
+			r = loc[from];
+			type = types[from];
+			if (IR_IS_TYPE_INT(type)) {
+				ir_emit_mov_ext(ctx, type, to, r);
+			} else {
+				ir_emit_fp_mov(ctx, type, to, r);
+			}
+			IR_REGSET_EXCL(todo, to);
+			loc[from] = to;
+			if (from == r && IR_REGSET_IN(todo, from)) {
+				to = from;
+			} else {
+				break;
+			}
+		}
+	}
+
+	if (last_reg != IR_REG_NONE) {
+		to = last_reg;
+		from = pred[to];
+		type = types[from];
+		from = loc[from];
+		if (to != from) {
+			IR_ASSERT(IR_IS_TYPE_INT(type));
+			ir_emit_mov_ext(ctx, type, to, from);
+		}
+	}
+
+	if (last_fp_reg != IR_REG_NONE) {
+		to = last_fp_reg;
+		from = pred[to];
+		type = types[from];
+		from = loc[from];
+		if (to != from) {
+			IR_ASSERT(!IR_IS_TYPE_INT(type));
+			ir_emit_fp_mov(ctx, type, to, from);
+		}
+	}
+
+	return 1;
 }
 
 static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)

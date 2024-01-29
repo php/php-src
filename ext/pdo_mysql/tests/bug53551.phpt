@@ -1,5 +1,5 @@
 --TEST--
-Bug #44327 (PDORow::queryString property & numeric offsets / Crash)
+Bug #53551 (PDOStatement execute segfaults for pdo_mysql driver)
 --EXTENSIONS--
 pdo_mysql
 --SKIPIF--

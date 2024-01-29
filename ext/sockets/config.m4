@@ -103,5 +103,5 @@ if test "$PHP_SOCKETS" != "no"; then
     [sockets.c multicast.c conversions.c sockaddr_conv.c sendrecvmsg.c],
     [$ext_shared],,
     $PHP_SOCKETS_CFLAGS)
-  PHP_INSTALL_HEADERS([ext/sockets/], [php_sockets.h])
+  PHP_INSTALL_HEADERS([ext/sockets], [php_sockets.h])
 fi

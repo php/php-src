@@ -56,6 +56,6 @@ if test "$PHP_CLI" != "no"; then
 
   PHP_OUTPUT(sapi/cli/php.1)
 
-  PHP_INSTALL_HEADERS([sapi/cli/cli.h])
+  PHP_INSTALL_HEADERS([sapi/cli], [cli.h])
 fi
 AC_MSG_RESULT($PHP_CLI)

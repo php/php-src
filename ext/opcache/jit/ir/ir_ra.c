@@ -1596,48 +1596,41 @@ static void ir_vregs_join(ir_ctx *ctx, uint32_t r1, uint32_t r2)
 	//ir_mem_free(ival);
 }
 
-static bool ir_try_coalesce(ir_ctx *ctx, ir_ref from, ir_ref to)
+static void ir_vregs_coalesce(ir_ctx *ctx, uint32_t v1, uint32_t v2, ir_ref from, ir_ref to)
 {
 	ir_ref i;
-	uint32_t v1 = ctx->vregs[from];
-	uint32_t v2 = ctx->vregs[to];
+	uint16_t f1 = ctx->live_intervals[v1]->flags;
+	uint16_t f2 = ctx->live_intervals[v2]->flags;
 
-	if (v1 != v2 && !ir_vregs_overlap(ctx, v1, v2)) {
-		uint16_t f1 = ctx->live_intervals[v1]->flags;
-		uint16_t f2 = ctx->live_intervals[v2]->flags;
-
-		if ((f1 & IR_LIVE_INTERVAL_COALESCED) && !(f2 & IR_LIVE_INTERVAL_COALESCED)) {
-			ir_vregs_join(ctx, v1, v2);
-			ctx->vregs[to] = v1;
-		} else if ((f2 & IR_LIVE_INTERVAL_COALESCED) && !(f1 & IR_LIVE_INTERVAL_COALESCED)) {
-			ir_vregs_join(ctx, v2, v1);
-			ctx->vregs[from] = v2;
-		} else if (from < to) {
-			ir_vregs_join(ctx, v1, v2);
-			if (f2 & IR_LIVE_INTERVAL_COALESCED) {
-				for (i = 1; i < ctx->insns_count; i++) {
-					if (ctx->vregs[i] == v2) {
-						ctx->vregs[i] = v1;
-					}
+	if ((f1 & IR_LIVE_INTERVAL_COALESCED) && !(f2 & IR_LIVE_INTERVAL_COALESCED)) {
+		ir_vregs_join(ctx, v1, v2);
+		ctx->vregs[to] = v1;
+	} else if ((f2 & IR_LIVE_INTERVAL_COALESCED) && !(f1 & IR_LIVE_INTERVAL_COALESCED)) {
+		ir_vregs_join(ctx, v2, v1);
+		ctx->vregs[from] = v2;
+	} else if (from < to) {
+		ir_vregs_join(ctx, v1, v2);
+		if (f2 & IR_LIVE_INTERVAL_COALESCED) {
+			for (i = 1; i < ctx->insns_count; i++) {
+				if (ctx->vregs[i] == v2) {
+					ctx->vregs[i] = v1;
 				}
-			} else {
-				ctx->vregs[to] = v1;
 			}
 		} else {
-			ir_vregs_join(ctx, v2, v1);
-			if (f1 & IR_LIVE_INTERVAL_COALESCED) {
-				for (i = 1; i < ctx->insns_count; i++) {
-					if (ctx->vregs[i] == v1) {
-						ctx->vregs[i] = v2;
-					}
-				}
-			} else {
-				ctx->vregs[from] = v2;
-			}
+			ctx->vregs[to] = v1;
 		}
-		return 1;
+	} else {
+		ir_vregs_join(ctx, v2, v1);
+		if (f1 & IR_LIVE_INTERVAL_COALESCED) {
+			for (i = 1; i < ctx->insns_count; i++) {
+				if (ctx->vregs[i] == v1) {
+					ctx->vregs[i] = v2;
+				}
+			}
+		} else {
+			ctx->vregs[from] = v2;
+		}
 	}
-	return 0;
 }
 
 static void ir_add_phi_move(ir_ctx *ctx, uint32_t b, ir_ref from, ir_ref to)
@@ -1879,10 +1872,40 @@ int ir_coalesce(ir_ctx *ctx)
 			if (insn->op == IR_PHI) {
 				input = ir_insn_op(insn, k);
 				if (input > 0) {
-					if (!ir_try_coalesce(ctx, input, use)) {
-						ir_add_phi_move(ctx, b, input, use);
+					uint32_t v1 = ctx->vregs[input];
+					uint32_t v2 = ctx->vregs[use];
+
+					if (v1 == v2) {
+						/* already coalesced */
 					} else {
-						compact = 1;
+						if (!ir_vregs_overlap(ctx, v1, v2)) {
+							ir_vregs_coalesce(ctx, v1, v2, input, use);
+							compact = 1;
+						} else {
+#if 1
+							ir_insn *input_insn = &ctx->ir_base[input];
+
+							if ((ir_op_flags[input_insn->op] & IR_OP_FLAG_COMMUTATIVE)
+							 && input_insn->op2 == use
+							 && input_insn->op1 != use
+							 && (ctx->live_intervals[v1]->use_pos->flags & IR_DEF_REUSES_OP1_REG)
+							 && ctx->live_intervals[v2]->end == IR_USE_LIVE_POS_FROM_REF(input)) {
+								ir_live_range *r = &ctx->live_intervals[v2]->range;
+
+								while (r->next) {
+									r = r->next;
+								}
+								r->end = IR_LOAD_LIVE_POS_FROM_REF(input);
+								ctx->live_intervals[v2]->end = IR_LOAD_LIVE_POS_FROM_REF(input);
+								ir_swap_operands(ctx, input, input_insn);
+								IR_ASSERT(!ir_vregs_overlap(ctx, v1, v2));
+								ir_vregs_coalesce(ctx, v1, v2, input, use);
+								compact = 1;
+								continue;
+							}
+#endif
+							ir_add_phi_move(ctx, b, input, use);
+						}
 					}
 				} else {
 					/* Move for constant input */
@@ -3676,7 +3699,7 @@ static bool needs_spill_load(ir_ctx *ctx, ir_live_interval *ival, ir_use_pos *us
 	return use_pos->next && use_pos->next->op_num != 0;
 }
 
-static void ir_set_fused_reg(ir_ctx *ctx, ir_ref root, ir_ref ref, uint8_t op_num, int8_t reg)
+static void ir_set_fused_reg(ir_ctx *ctx, ir_ref root, ir_ref ref_and_op, int8_t reg)
 {
 	char key[10];
 
@@ -3686,9 +3709,8 @@ static void ir_set_fused_reg(ir_ctx *ctx, ir_ref root, ir_ref ref, uint8_t op_nu
 		ir_strtab_init(ctx->fused_regs, 8, 128);
 	}
 	memcpy(key, &root, sizeof(ir_ref));
-	memcpy(key + 4, &ref, sizeof(ir_ref));
-	memcpy(key + 8, &op_num, sizeof(uint8_t));
-	ir_strtab_lookup(ctx->fused_regs, key, 9, 0x10000000 | reg);
+	memcpy(key + 4, &ref_and_op, sizeof(ir_ref));
+	ir_strtab_lookup(ctx->fused_regs, key, 8, 0x10000000 | reg);
 }
 
 static void assign_regs(ir_ctx *ctx)
@@ -3830,7 +3852,7 @@ static void assign_regs(ir_ctx *ctx)
 										if (reg != old_reg) {
 											IR_ASSERT(ctx->rules[-use_pos->hint_ref] & IR_FUSED);
 											ctx->rules[-use_pos->hint_ref] |= IR_FUSED_REG;
-											ir_set_fused_reg(ctx, ref, -use_pos->hint_ref, use_pos->op_num, reg);
+											ir_set_fused_reg(ctx, ref, -use_pos->hint_ref * sizeof(ir_ref) + use_pos->op_num, reg);
 											use_pos = use_pos->next;
 											continue;
 										}
@@ -3849,7 +3871,7 @@ static void assign_regs(ir_ctx *ctx)
 									if (reg != old_reg) {
 										IR_ASSERT(ctx->rules[-use_pos->hint_ref] & IR_FUSED);
 										ctx->rules[-use_pos->hint_ref] |= IR_FUSED_REG;
-										ir_set_fused_reg(ctx, ref, -use_pos->hint_ref, use_pos->op_num, reg);
+										ir_set_fused_reg(ctx, ref, -use_pos->hint_ref * sizeof(ir_ref) + use_pos->op_num, reg);
 										use_pos = use_pos->next;
 										continue;
 									}
