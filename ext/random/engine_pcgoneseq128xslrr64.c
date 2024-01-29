@@ -177,7 +177,7 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 				RETURN_THROWS();
 			}
 		} else {
-			engine->algo->seed(engine->status, int_seed);
+			seed128(state, php_random_uint128_constant(0ULL, (uint64_t) int_seed));
 		}
 	}
 }

@@ -282,7 +282,7 @@ PHP_METHOD(Random_Engine_Mt19937, __construct)
 		}
 	}
 
-	engine->algo->seed(engine->status, seed);
+	mt19937_seed_state(state, seed);
 }
 /* }}} */
 
