@@ -1474,7 +1474,9 @@ ZEND_API int zend_gc_collect_cycles(void)
 	bool should_rerun_gc = 0;
 	bool did_rerun_gc = 0;
 
-	zend_gc_remove_root_tmpvars();
+	if (GC_G(num_roots) && GC_G(gc_active)) {
+		zend_gc_remove_root_tmpvars();
+	}
 
 rerun_gc:
 	if (GC_G(num_roots)) {
