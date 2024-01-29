@@ -27,26 +27,29 @@ function get_system_memory(): int|float|false
 if (get_system_memory() < 10 * 1024 * 1024 * 1024) {
     die('skip Reason: Insufficient RAM (less than 10GB)');
 }
-$tmpfileh = tmpfile();
+$tmpfile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "test_file_put_contents_5gb.bin";
+$tmpfileh = fopen($tmpfile, "wb");
 if ($tmpfileh === false) {
     die('skip Reason: Unable to create temporary file');
 }
-$tmpfile = stream_get_meta_data($tmpfileh)['uri'];
+fclose($tmpfileh);
+unlink($tmpfile);
 if (disk_free_space(dirname($tmpfile)) < 10 * 1024 * 1024 * 1024) {
     die('skip Reason: Insufficient disk space (less than 10GB)');
 }
-fclose($tmpfileh);
 
 ?>
 
 --INI--
 memory_limit=6G
-
+--CLEAN--
+<?php
+@unlink(sys_get_temp_dir() . DIRECTORY_SEPARATOR . "test_file_put_contents_5gb.bin");
+?>
 --FILE--
 <?php
 
-$tmpfileh = tmpfile();
-$tmpfile = stream_get_meta_data($tmpfileh)['uri'];
+$tmpfile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "test_file_put_contents_5gb.bin";
 $large_string = str_repeat('a', 5 * 1024 * 1024 * 1024);
 
 $result = file_put_contents($tmpfile, $large_string);
@@ -56,7 +59,6 @@ if ($result !== strlen($large_string)) {
 } else {
     echo "File written successfully.";
 }
-fclose($tmpfileh);
 ?>
 
 --EXPECT--
