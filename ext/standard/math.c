@@ -46,6 +46,22 @@ static inline double php_intpow10(int power) {
 }
 /* }}} */
 
+#define PHP_ROUND_GET_EDGE_CASE(adjusted_value, value_abs, integral, exponent) do {\
+	if (fabs(adjusted_value) >= value_abs) {\
+		edge_case = fabs((integral + copysign(0.5, integral)) / exponent);\
+	} else {\
+		edge_case = fabs((integral + copysign(0.5, integral)) * exponent);\
+	}\
+} while(0);
+
+#define PHP_ROUND_GET_ZERO_EDGE_CASE(adjusted_value, value_abs, integral, exponent) do {\
+	if (fabs(adjusted_value) >= value_abs) {\
+		edge_case = fabs((integral) / exponent);\
+	} else {\
+		edge_case = fabs((integral) * exponent);\
+	}\
+} while(0);
+
 /* {{{ php_round_helper
        Actually performs the rounding of a value to integer in a certain mode */
 static inline double php_round_helper(double adjusted_value, double value, double exponent, int mode) {
@@ -53,14 +69,9 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
 	double value_abs = fabs(value);
 	double edge_case;
 
-	if (fabs(adjusted_value) >= value_abs) {
-		edge_case = fabs((integral + copysign(0.5, integral)) / exponent);
-	} else {
-		edge_case = fabs((integral + copysign(0.5, integral)) * exponent);
-	}
-
 	switch (mode) {
 		case PHP_ROUND_HALF_UP:
+			PHP_ROUND_GET_EDGE_CASE(adjusted_value, value_abs, integral, exponent);
 			if (value_abs >= edge_case) {
 				/* We must increase the magnitude of the integral part
 				 * (rounding up / towards infinity). copysign(1.0, integral)
@@ -76,6 +87,7 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
 			return integral;
 
 		case PHP_ROUND_HALF_DOWN:
+			PHP_ROUND_GET_EDGE_CASE(adjusted_value, value_abs, integral, exponent);
 			if (value_abs > edge_case) {
 				return integral + copysign(1.0, integral);
 			}
@@ -83,14 +95,16 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
 			return integral;
 
 		case PHP_ROUND_CEILING:
-			if (value > 0.0 && fractional > 0.0) {
+			PHP_ROUND_GET_ZERO_EDGE_CASE(adjusted_value, value_abs, integral, exponent);
+			if (value > 0.0 && value_abs > edge_case) {
 				return integral + 1.0;
 			}
 
 			return integral;
 
 		case PHP_ROUND_FLOOR:
-			if (value < 0.0 && fractional > 0.0) {
+			PHP_ROUND_GET_ZERO_EDGE_CASE(adjusted_value, value_abs, integral, exponent);
+			if (value < 0.0 && value_abs > edge_case) {
 				return integral - 1.0;
 			}
 
@@ -100,13 +114,15 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
 			return integral;
 
 		case PHP_ROUND_AWAY_FROM_ZERO:
-			if (fractional > 0.0) {
+			PHP_ROUND_GET_ZERO_EDGE_CASE(adjusted_value, value_abs, integral, exponent);
+			if (value_abs > edge_case) {
 				return integral + copysign(1.0, integral);
 			}
 
 			return integral;
 
 		case PHP_ROUND_HALF_EVEN:
+			PHP_ROUND_GET_EDGE_CASE(adjusted_value, value_abs, integral, exponent);
 			if (value_abs > edge_case) {
 				return integral + copysign(1.0, integral);
 			} else if (UNEXPECTED(value_abs == edge_case)) {
@@ -123,6 +139,7 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
 			return integral;
 
 		case PHP_ROUND_HALF_ODD:
+			PHP_ROUND_GET_EDGE_CASE(adjusted_value, value_abs, integral, exponent);
 			if (value_abs > edge_case) {
 				return integral + copysign(1.0, integral);
 			} else if (UNEXPECTED(value_abs == edge_case)) {
