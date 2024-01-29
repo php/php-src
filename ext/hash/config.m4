@@ -73,7 +73,7 @@ EXT_HASH_HEADERS="php_hash.h php_hash_md.h php_hash_sha.h php_hash_ripemd.h \
   php_hash_haval.h php_hash_tiger.h php_hash_gost.h php_hash_snefru.h \
   php_hash_whirlpool.h php_hash_adler32.h php_hash_crc32.h \
   php_hash_fnv.h php_hash_joaat.h php_hash_sha3.h php_hash_murmur.h \
-  php_hash_xxhash.h xxhash/xxhash.h php_hash_blake3.h"
+  php_hash_xxhash.h xxhash/xxhash.h php_hash_blake3.h blake3/upstream_blake3/c/blake3.h"
 
 
 PHP_NEW_EXTENSION(hash, $EXT_HASH_SOURCES, 0,,$PHP_HASH_CFLAGS)
