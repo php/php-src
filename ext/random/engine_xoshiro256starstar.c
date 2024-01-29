@@ -89,7 +89,7 @@ static inline void seed256(php_random_status_state_xoshiro256starstar *s, uint64
 	s->state[3] = s3;
 }
 
-static void seed(php_random_status *status, uint64_t seed)
+static inline void seed64(php_random_status_state_xoshiro256starstar *state, uint64_t seed)
 {
 	uint64_t s[4];
 
@@ -98,7 +98,12 @@ static void seed(php_random_status *status, uint64_t seed)
 	s[2] = splitmix64(&seed);
 	s[3] = splitmix64(&seed);
 
-	seed256(status->state, s[0], s[1], s[2], s[3]);
+	seed256(state, s[0], s[1], s[2], s[3]);
+}
+
+static void seed(php_random_status *status, uint64_t seed)
+{
+	seed64(status->state, seed);
 }
 
 static php_random_result generate(php_random_status *status)
