@@ -25,7 +25,7 @@
 #include "base64.h"
 #include "zend_interfaces.h"
 #include "info.h"
-#include "ext/random/php_random.h"
+#include "ext/random/php_random_csprng.h"
 #ifdef HAVE_ARGON2LIB
 #include "argon2.h"
 #endif
