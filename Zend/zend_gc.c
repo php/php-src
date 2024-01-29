@@ -1465,13 +1465,16 @@ next:
 }
 
 static void zend_get_gc_buffer_release(void);
-static void zend_gc_root_tmpvars(void);
+static void zend_gc_check_root_tmpvars(void);
+static void zend_gc_remove_root_tmpvars(void);
 
 ZEND_API int zend_gc_collect_cycles(void)
 {
 	int total_count = 0;
 	bool should_rerun_gc = 0;
 	bool did_rerun_gc = 0;
+
+	zend_gc_remove_root_tmpvars();
 
 rerun_gc:
 	if (GC_G(num_roots)) {
@@ -1669,7 +1672,7 @@ rerun_gc:
 
 finish:
 	zend_get_gc_buffer_release();
-	zend_gc_root_tmpvars();
+	zend_gc_check_root_tmpvars();
 	return total_count;
 }
 
@@ -1707,7 +1710,7 @@ static void zend_get_gc_buffer_release(void) {
  * cycles. However, there are some rare exceptions where this is possible, in which case we rely
  * on the producing code to root the value. If a GC run occurs between the rooting and consumption
  * of the value, we would end up leaking it. To avoid this, root all live TMPVAR values here. */
-static void zend_gc_root_tmpvars(void) {
+static void zend_gc_check_root_tmpvars(void) {
 	zend_execute_data *ex = EG(current_execute_data);
 	for (; ex; ex = ex->prev_execute_data) {
 		zend_function *func = ex->func;
@@ -1731,6 +1734,36 @@ static void zend_gc_root_tmpvars(void) {
 				zval *var = ZEND_CALL_VAR(ex, var_num);
 				if (Z_REFCOUNTED_P(var)) {
 					gc_check_possible_root(Z_COUNTED_P(var));
+				}
+			}
+		}
+	}
+}
+
+static void zend_gc_remove_root_tmpvars(void) {
+	zend_execute_data *ex = EG(current_execute_data);
+	for (; ex; ex = ex->prev_execute_data) {
+		zend_function *func = ex->func;
+		if (!func || !ZEND_USER_CODE(func->type)) {
+			continue;
+		}
+
+		uint32_t op_num = ex->opline - ex->func->op_array.opcodes;
+		for (uint32_t i = 0; i < func->op_array.last_live_range; i++) {
+			const zend_live_range *range = &func->op_array.live_range[i];
+			if (range->start > op_num) {
+				break;
+			}
+			if (range->end <= op_num) {
+				continue;
+			}
+
+			uint32_t kind = range->var & ZEND_LIVE_MASK;
+			if (kind == ZEND_LIVE_TMPVAR || kind == ZEND_LIVE_LOOP) {
+				uint32_t var_num = range->var & ~ZEND_LIVE_MASK;
+				zval *var = ZEND_CALL_VAR(ex, var_num);
+				if (Z_REFCOUNTED_P(var)) {
+					GC_REMOVE_FROM_BUFFER(Z_COUNTED_P(var));
 				}
 			}
 		}
