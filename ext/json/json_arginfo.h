@@ -36,16 +36,16 @@ ZEND_FUNCTION(json_last_error);
 ZEND_FUNCTION(json_last_error_msg);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(json_encode, arginfo_json_encode)
-	ZEND_FE(json_decode, arginfo_json_decode)
-	ZEND_FE(json_validate, arginfo_json_validate)
-	ZEND_FE(json_last_error, arginfo_json_last_error)
-	ZEND_FE(json_last_error_msg, arginfo_json_last_error_msg)
+	ZEND_RAW_FENTRY("json_encode", zif_json_encode, arginfo_json_encode, 0, NULL)
+	ZEND_RAW_FENTRY("json_decode", zif_json_decode, arginfo_json_decode, 0, NULL)
+	ZEND_RAW_FENTRY("json_validate", zif_json_validate, arginfo_json_validate, 0, NULL)
+	ZEND_RAW_FENTRY("json_last_error", zif_json_last_error, arginfo_json_last_error, 0, NULL)
+	ZEND_RAW_FENTRY("json_last_error_msg", zif_json_last_error_msg, arginfo_json_last_error_msg, 0, NULL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_JsonSerializable_methods[] = {
-	ZEND_ABSTRACT_ME_WITH_FLAGS(JsonSerializable, jsonSerialize, arginfo_class_JsonSerializable_jsonSerialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_RAW_FENTRY("jsonSerialize", NULL, arginfo_class_JsonSerializable_jsonSerialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
 	ZEND_FE_END
 };
 

@@ -37,17 +37,17 @@ ZEND_METHOD(CURLFile, setPostFilename);
 ZEND_METHOD(CURLStringFile, __construct);
 
 static const zend_function_entry class_CURLFile_methods[] = {
-	ZEND_ME(CURLFile, __construct, arginfo_class_CURLFile___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME(CURLFile, getFilename, arginfo_class_CURLFile_getFilename, ZEND_ACC_PUBLIC)
-	ZEND_ME(CURLFile, getMimeType, arginfo_class_CURLFile_getMimeType, ZEND_ACC_PUBLIC)
-	ZEND_ME(CURLFile, getPostFilename, arginfo_class_CURLFile_getPostFilename, ZEND_ACC_PUBLIC)
-	ZEND_ME(CURLFile, setMimeType, arginfo_class_CURLFile_setMimeType, ZEND_ACC_PUBLIC)
-	ZEND_ME(CURLFile, setPostFilename, arginfo_class_CURLFile_setPostFilename, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__construct", zim_CURLFile___construct, arginfo_class_CURLFile___construct, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("getFilename", zim_CURLFile_getFilename, arginfo_class_CURLFile_getFilename, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("getMimeType", zim_CURLFile_getMimeType, arginfo_class_CURLFile_getMimeType, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("getPostFilename", zim_CURLFile_getPostFilename, arginfo_class_CURLFile_getPostFilename, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("setMimeType", zim_CURLFile_setMimeType, arginfo_class_CURLFile_setMimeType, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("setPostFilename", zim_CURLFile_setPostFilename, arginfo_class_CURLFile_setPostFilename, ZEND_ACC_PUBLIC, NULL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_CURLStringFile_methods[] = {
-	ZEND_ME(CURLStringFile, __construct, arginfo_class_CURLStringFile___construct, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__construct", zim_CURLStringFile___construct, arginfo_class_CURLStringFile___construct, ZEND_ACC_PUBLIC, NULL)
 	ZEND_FE_END
 };
 

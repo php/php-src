@@ -85,30 +85,30 @@ ZEND_FUNCTION(readline_on_new_line);
 #endif
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(readline, arginfo_readline)
-	ZEND_FE(readline_info, arginfo_readline_info)
-	ZEND_FE(readline_add_history, arginfo_readline_add_history)
-	ZEND_FE(readline_clear_history, arginfo_readline_clear_history)
+	ZEND_RAW_FENTRY("readline", zif_readline, arginfo_readline, 0, NULL)
+	ZEND_RAW_FENTRY("readline_info", zif_readline_info, arginfo_readline_info, 0, NULL)
+	ZEND_RAW_FENTRY("readline_add_history", zif_readline_add_history, arginfo_readline_add_history, 0, NULL)
+	ZEND_RAW_FENTRY("readline_clear_history", zif_readline_clear_history, arginfo_readline_clear_history, 0, NULL)
 #if defined(HAVE_HISTORY_LIST)
-	ZEND_FE(readline_list_history, arginfo_readline_list_history)
+	ZEND_RAW_FENTRY("readline_list_history", zif_readline_list_history, arginfo_readline_list_history, 0, NULL)
 #endif
-	ZEND_FE(readline_read_history, arginfo_readline_read_history)
-	ZEND_FE(readline_write_history, arginfo_readline_write_history)
-	ZEND_FE(readline_completion_function, arginfo_readline_completion_function)
+	ZEND_RAW_FENTRY("readline_read_history", zif_readline_read_history, arginfo_readline_read_history, 0, NULL)
+	ZEND_RAW_FENTRY("readline_write_history", zif_readline_write_history, arginfo_readline_write_history, 0, NULL)
+	ZEND_RAW_FENTRY("readline_completion_function", zif_readline_completion_function, arginfo_readline_completion_function, 0, NULL)
 #if HAVE_RL_CALLBACK_READ_CHAR
-	ZEND_FE(readline_callback_handler_install, arginfo_readline_callback_handler_install)
-#endif
-#if HAVE_RL_CALLBACK_READ_CHAR
-	ZEND_FE(readline_callback_read_char, arginfo_readline_callback_read_char)
+	ZEND_RAW_FENTRY("readline_callback_handler_install", zif_readline_callback_handler_install, arginfo_readline_callback_handler_install, 0, NULL)
 #endif
 #if HAVE_RL_CALLBACK_READ_CHAR
-	ZEND_FE(readline_callback_handler_remove, arginfo_readline_callback_handler_remove)
+	ZEND_RAW_FENTRY("readline_callback_read_char", zif_readline_callback_read_char, arginfo_readline_callback_read_char, 0, NULL)
 #endif
 #if HAVE_RL_CALLBACK_READ_CHAR
-	ZEND_FE(readline_redisplay, arginfo_readline_redisplay)
+	ZEND_RAW_FENTRY("readline_callback_handler_remove", zif_readline_callback_handler_remove, arginfo_readline_callback_handler_remove, 0, NULL)
+#endif
+#if HAVE_RL_CALLBACK_READ_CHAR
+	ZEND_RAW_FENTRY("readline_redisplay", zif_readline_redisplay, arginfo_readline_redisplay, 0, NULL)
 #endif
 #if HAVE_RL_CALLBACK_READ_CHAR && HAVE_RL_ON_NEW_LINE
-	ZEND_FE(readline_on_new_line, arginfo_readline_on_new_line)
+	ZEND_RAW_FENTRY("readline_on_new_line", zif_readline_on_new_line, arginfo_readline_on_new_line, 0, NULL)
 #endif
 	ZEND_FE_END
 };

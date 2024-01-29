@@ -25,10 +25,10 @@ ZEND_FUNCTION(sem_release);
 ZEND_FUNCTION(sem_remove);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(sem_get, arginfo_sem_get)
-	ZEND_FE(sem_acquire, arginfo_sem_acquire)
-	ZEND_FE(sem_release, arginfo_sem_release)
-	ZEND_FE(sem_remove, arginfo_sem_remove)
+	ZEND_RAW_FENTRY("sem_get", zif_sem_get, arginfo_sem_get, 0, NULL)
+	ZEND_RAW_FENTRY("sem_acquire", zif_sem_acquire, arginfo_sem_acquire, 0, NULL)
+	ZEND_RAW_FENTRY("sem_release", zif_sem_release, arginfo_sem_release, 0, NULL)
+	ZEND_RAW_FENTRY("sem_remove", zif_sem_remove, arginfo_sem_remove, 0, NULL)
 	ZEND_FE_END
 };
 

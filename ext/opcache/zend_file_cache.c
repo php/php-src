@@ -751,7 +751,7 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	}
 	zend_file_cache_serialize_hash(&ce->constants_table, script, info, buf, zend_file_cache_serialize_class_constant);
 	SERIALIZE_STR(ce->info.user.filename);
-	SERIALIZE_STR(ce->info.user.doc_comment);
+	SERIALIZE_STR(ce->doc_comment);
 	SERIALIZE_ATTRIBUTES(ce->attributes);
 	zend_file_cache_serialize_hash(&ce->properties_info, script, info, buf, zend_file_cache_serialize_prop_info);
 
@@ -1592,7 +1592,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	zend_file_cache_unserialize_hash(&ce->constants_table,
 			script, buf, zend_file_cache_unserialize_class_constant, NULL);
 	UNSERIALIZE_STR(ce->info.user.filename);
-	UNSERIALIZE_STR(ce->info.user.doc_comment);
+	UNSERIALIZE_STR(ce->doc_comment);
 	UNSERIALIZE_ATTRIBUTES(ce->attributes);
 	zend_file_cache_unserialize_hash(&ce->properties_info,
 			script, buf, zend_file_cache_unserialize_prop_info, NULL);

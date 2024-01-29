@@ -77,21 +77,21 @@ ZEND_FUNCTION(dba_handlers);
 ZEND_FUNCTION(dba_list);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(dba_popen, arginfo_dba_popen)
-	ZEND_FE(dba_open, arginfo_dba_open)
-	ZEND_FE(dba_close, arginfo_dba_close)
-	ZEND_FE(dba_exists, arginfo_dba_exists)
-	ZEND_FE(dba_fetch, arginfo_dba_fetch)
-	ZEND_FE(dba_key_split, arginfo_dba_key_split)
-	ZEND_FE(dba_firstkey, arginfo_dba_firstkey)
-	ZEND_FE(dba_nextkey, arginfo_dba_nextkey)
-	ZEND_FE(dba_delete, arginfo_dba_delete)
-	ZEND_FE(dba_insert, arginfo_dba_insert)
-	ZEND_FE(dba_replace, arginfo_dba_replace)
-	ZEND_FE(dba_optimize, arginfo_dba_optimize)
-	ZEND_FE(dba_sync, arginfo_dba_sync)
-	ZEND_FE(dba_handlers, arginfo_dba_handlers)
-	ZEND_FE(dba_list, arginfo_dba_list)
+	ZEND_RAW_FENTRY("dba_popen", zif_dba_popen, arginfo_dba_popen, 0, NULL)
+	ZEND_RAW_FENTRY("dba_open", zif_dba_open, arginfo_dba_open, 0, NULL)
+	ZEND_RAW_FENTRY("dba_close", zif_dba_close, arginfo_dba_close, 0, NULL)
+	ZEND_RAW_FENTRY("dba_exists", zif_dba_exists, arginfo_dba_exists, 0, NULL)
+	ZEND_RAW_FENTRY("dba_fetch", zif_dba_fetch, arginfo_dba_fetch, 0, NULL)
+	ZEND_RAW_FENTRY("dba_key_split", zif_dba_key_split, arginfo_dba_key_split, 0, NULL)
+	ZEND_RAW_FENTRY("dba_firstkey", zif_dba_firstkey, arginfo_dba_firstkey, 0, NULL)
+	ZEND_RAW_FENTRY("dba_nextkey", zif_dba_nextkey, arginfo_dba_nextkey, 0, NULL)
+	ZEND_RAW_FENTRY("dba_delete", zif_dba_delete, arginfo_dba_delete, 0, NULL)
+	ZEND_RAW_FENTRY("dba_insert", zif_dba_insert, arginfo_dba_insert, 0, NULL)
+	ZEND_RAW_FENTRY("dba_replace", zif_dba_replace, arginfo_dba_replace, 0, NULL)
+	ZEND_RAW_FENTRY("dba_optimize", zif_dba_optimize, arginfo_dba_optimize, 0, NULL)
+	ZEND_RAW_FENTRY("dba_sync", zif_dba_sync, arginfo_dba_sync, 0, NULL)
+	ZEND_RAW_FENTRY("dba_handlers", zif_dba_handlers, arginfo_dba_handlers, 0, NULL)
+	ZEND_RAW_FENTRY("dba_list", zif_dba_list, arginfo_dba_list, 0, NULL)
 	ZEND_FE_END
 };
 

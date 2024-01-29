@@ -71,16 +71,16 @@ ZEND_FUNCTION(iconv_set_encoding);
 ZEND_FUNCTION(iconv_get_encoding);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(iconv_strlen, arginfo_iconv_strlen)
-	ZEND_FE(iconv_substr, arginfo_iconv_substr)
-	ZEND_FE(iconv_strpos, arginfo_iconv_strpos)
-	ZEND_FE(iconv_strrpos, arginfo_iconv_strrpos)
-	ZEND_FE(iconv_mime_encode, arginfo_iconv_mime_encode)
-	ZEND_FE(iconv_mime_decode, arginfo_iconv_mime_decode)
-	ZEND_FE(iconv_mime_decode_headers, arginfo_iconv_mime_decode_headers)
-	ZEND_FE(iconv, arginfo_iconv)
-	ZEND_FE(iconv_set_encoding, arginfo_iconv_set_encoding)
-	ZEND_FE(iconv_get_encoding, arginfo_iconv_get_encoding)
+	ZEND_RAW_FENTRY("iconv_strlen", zif_iconv_strlen, arginfo_iconv_strlen, 0, NULL)
+	ZEND_RAW_FENTRY("iconv_substr", zif_iconv_substr, arginfo_iconv_substr, 0, NULL)
+	ZEND_RAW_FENTRY("iconv_strpos", zif_iconv_strpos, arginfo_iconv_strpos, 0, NULL)
+	ZEND_RAW_FENTRY("iconv_strrpos", zif_iconv_strrpos, arginfo_iconv_strrpos, 0, NULL)
+	ZEND_RAW_FENTRY("iconv_mime_encode", zif_iconv_mime_encode, arginfo_iconv_mime_encode, 0, NULL)
+	ZEND_RAW_FENTRY("iconv_mime_decode", zif_iconv_mime_decode, arginfo_iconv_mime_decode, 0, NULL)
+	ZEND_RAW_FENTRY("iconv_mime_decode_headers", zif_iconv_mime_decode_headers, arginfo_iconv_mime_decode_headers, 0, NULL)
+	ZEND_RAW_FENTRY("iconv", zif_iconv, arginfo_iconv, 0, NULL)
+	ZEND_RAW_FENTRY("iconv_set_encoding", zif_iconv_set_encoding, arginfo_iconv_set_encoding, 0, NULL)
+	ZEND_RAW_FENTRY("iconv_get_encoding", zif_iconv_get_encoding, arginfo_iconv_get_encoding, 0, NULL)
 	ZEND_FE_END
 };
 

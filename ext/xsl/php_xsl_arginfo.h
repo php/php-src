@@ -74,19 +74,19 @@ ZEND_METHOD(XSLTProcessor, setSecurityPrefs);
 ZEND_METHOD(XSLTProcessor, getSecurityPrefs);
 
 static const zend_function_entry class_XSLTProcessor_methods[] = {
-	ZEND_ME(XSLTProcessor, importStylesheet, arginfo_class_XSLTProcessor_importStylesheet, ZEND_ACC_PUBLIC)
-	ZEND_ME(XSLTProcessor, transformToDoc, arginfo_class_XSLTProcessor_transformToDoc, ZEND_ACC_PUBLIC)
-	ZEND_ME(XSLTProcessor, transformToUri, arginfo_class_XSLTProcessor_transformToUri, ZEND_ACC_PUBLIC)
-	ZEND_ME(XSLTProcessor, transformToXml, arginfo_class_XSLTProcessor_transformToXml, ZEND_ACC_PUBLIC)
-	ZEND_ME(XSLTProcessor, setParameter, arginfo_class_XSLTProcessor_setParameter, ZEND_ACC_PUBLIC)
-	ZEND_ME(XSLTProcessor, getParameter, arginfo_class_XSLTProcessor_getParameter, ZEND_ACC_PUBLIC)
-	ZEND_ME(XSLTProcessor, removeParameter, arginfo_class_XSLTProcessor_removeParameter, ZEND_ACC_PUBLIC)
-	ZEND_ME(XSLTProcessor, hasExsltSupport, arginfo_class_XSLTProcessor_hasExsltSupport, ZEND_ACC_PUBLIC)
-	ZEND_ME(XSLTProcessor, registerPHPFunctions, arginfo_class_XSLTProcessor_registerPHPFunctions, ZEND_ACC_PUBLIC)
-	ZEND_ME(XSLTProcessor, registerPHPFunctionNS, arginfo_class_XSLTProcessor_registerPHPFunctionNS, ZEND_ACC_PUBLIC)
-	ZEND_ME(XSLTProcessor, setProfiling, arginfo_class_XSLTProcessor_setProfiling, ZEND_ACC_PUBLIC)
-	ZEND_ME(XSLTProcessor, setSecurityPrefs, arginfo_class_XSLTProcessor_setSecurityPrefs, ZEND_ACC_PUBLIC)
-	ZEND_ME(XSLTProcessor, getSecurityPrefs, arginfo_class_XSLTProcessor_getSecurityPrefs, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("importStylesheet", zim_XSLTProcessor_importStylesheet, arginfo_class_XSLTProcessor_importStylesheet, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("transformToDoc", zim_XSLTProcessor_transformToDoc, arginfo_class_XSLTProcessor_transformToDoc, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("transformToUri", zim_XSLTProcessor_transformToUri, arginfo_class_XSLTProcessor_transformToUri, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("transformToXml", zim_XSLTProcessor_transformToXml, arginfo_class_XSLTProcessor_transformToXml, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("setParameter", zim_XSLTProcessor_setParameter, arginfo_class_XSLTProcessor_setParameter, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("getParameter", zim_XSLTProcessor_getParameter, arginfo_class_XSLTProcessor_getParameter, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("removeParameter", zim_XSLTProcessor_removeParameter, arginfo_class_XSLTProcessor_removeParameter, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("hasExsltSupport", zim_XSLTProcessor_hasExsltSupport, arginfo_class_XSLTProcessor_hasExsltSupport, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("registerPHPFunctions", zim_XSLTProcessor_registerPHPFunctions, arginfo_class_XSLTProcessor_registerPHPFunctions, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("registerPHPFunctionNS", zim_XSLTProcessor_registerPHPFunctionNS, arginfo_class_XSLTProcessor_registerPHPFunctionNS, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("setProfiling", zim_XSLTProcessor_setProfiling, arginfo_class_XSLTProcessor_setProfiling, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("setSecurityPrefs", zim_XSLTProcessor_setSecurityPrefs, arginfo_class_XSLTProcessor_setSecurityPrefs, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("getSecurityPrefs", zim_XSLTProcessor_getSecurityPrefs, arginfo_class_XSLTProcessor_getSecurityPrefs, ZEND_ACC_PUBLIC, NULL)
 	ZEND_FE_END
 };
 

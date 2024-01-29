@@ -64,7 +64,7 @@ PHP_FUNCTION(dl_test_use_register_functions_directly)
 }
 
 static const zend_function_entry php_dl_test_use_register_functions_directly_functions[] = {
-	ZEND_FENTRY(dl_test_use_register_functions_directly, ZEND_FN(dl_test_use_register_functions_directly), arginfo_dl_test_use_register_functions_directly,  0)
+	ZEND_FENTRY(dl_test_use_register_functions_directly, ZEND_FN(dl_test_use_register_functions_directly), arginfo_dl_test_use_register_functions_directly,  0, NULL)
 	ZEND_FE_END
 };
 /* }}} */

@@ -94,6 +94,8 @@ static ZEND_FUNCTION(zend_test_array_return)
 static ZEND_FUNCTION(zend_test_nullable_array_return)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_NULL();
 }
 
 static ZEND_FUNCTION(zend_test_void_return)

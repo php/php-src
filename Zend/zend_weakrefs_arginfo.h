@@ -45,19 +45,19 @@ ZEND_METHOD(WeakMap, count);
 ZEND_METHOD(WeakMap, getIterator);
 
 static const zend_function_entry class_WeakReference_methods[] = {
-	ZEND_ME(WeakReference, __construct, arginfo_class_WeakReference___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME(WeakReference, create, arginfo_class_WeakReference_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(WeakReference, get, arginfo_class_WeakReference_get, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__construct", zim_WeakReference___construct, arginfo_class_WeakReference___construct, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("create", zim_WeakReference_create, arginfo_class_WeakReference_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
+	ZEND_RAW_FENTRY("get", zim_WeakReference_get, arginfo_class_WeakReference_get, ZEND_ACC_PUBLIC, NULL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_WeakMap_methods[] = {
-	ZEND_ME(WeakMap, offsetGet, arginfo_class_WeakMap_offsetGet, ZEND_ACC_PUBLIC)
-	ZEND_ME(WeakMap, offsetSet, arginfo_class_WeakMap_offsetSet, ZEND_ACC_PUBLIC)
-	ZEND_ME(WeakMap, offsetExists, arginfo_class_WeakMap_offsetExists, ZEND_ACC_PUBLIC)
-	ZEND_ME(WeakMap, offsetUnset, arginfo_class_WeakMap_offsetUnset, ZEND_ACC_PUBLIC)
-	ZEND_ME(WeakMap, count, arginfo_class_WeakMap_count, ZEND_ACC_PUBLIC)
-	ZEND_ME(WeakMap, getIterator, arginfo_class_WeakMap_getIterator, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("offsetGet", zim_WeakMap_offsetGet, arginfo_class_WeakMap_offsetGet, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("offsetSet", zim_WeakMap_offsetSet, arginfo_class_WeakMap_offsetSet, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("offsetExists", zim_WeakMap_offsetExists, arginfo_class_WeakMap_offsetExists, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("offsetUnset", zim_WeakMap_offsetUnset, arginfo_class_WeakMap_offsetUnset, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("count", zim_WeakMap_count, arginfo_class_WeakMap_count, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("getIterator", zim_WeakMap_getIterator, arginfo_class_WeakMap_getIterator, ZEND_ACC_PUBLIC, NULL)
 	ZEND_FE_END
 };
 

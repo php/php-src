@@ -7,7 +7,7 @@ ZEND_END_ARG_INFO()
 ZEND_FUNCTION(pdo_drivers);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(pdo_drivers, arginfo_pdo_drivers)
+	ZEND_RAW_FENTRY("pdo_drivers", zif_pdo_drivers, arginfo_pdo_drivers, 0, NULL)
 	ZEND_FE_END
 };
 

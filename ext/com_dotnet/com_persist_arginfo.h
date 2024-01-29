@@ -40,14 +40,14 @@ ZEND_METHOD(COMPersistHelper, LoadFromStream);
 ZEND_METHOD(COMPersistHelper, SaveToStream);
 
 static const zend_function_entry class_COMPersistHelper_methods[] = {
-	ZEND_ME(COMPersistHelper, __construct, arginfo_class_COMPersistHelper___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME(COMPersistHelper, GetCurFileName, arginfo_class_COMPersistHelper_GetCurFileName, ZEND_ACC_PUBLIC)
-	ZEND_ME(COMPersistHelper, SaveToFile, arginfo_class_COMPersistHelper_SaveToFile, ZEND_ACC_PUBLIC)
-	ZEND_ME(COMPersistHelper, LoadFromFile, arginfo_class_COMPersistHelper_LoadFromFile, ZEND_ACC_PUBLIC)
-	ZEND_ME(COMPersistHelper, GetMaxStreamSize, arginfo_class_COMPersistHelper_GetMaxStreamSize, ZEND_ACC_PUBLIC)
-	ZEND_ME(COMPersistHelper, InitNew, arginfo_class_COMPersistHelper_InitNew, ZEND_ACC_PUBLIC)
-	ZEND_ME(COMPersistHelper, LoadFromStream, arginfo_class_COMPersistHelper_LoadFromStream, ZEND_ACC_PUBLIC)
-	ZEND_ME(COMPersistHelper, SaveToStream, arginfo_class_COMPersistHelper_SaveToStream, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__construct", zim_COMPersistHelper___construct, arginfo_class_COMPersistHelper___construct, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("GetCurFileName", zim_COMPersistHelper_GetCurFileName, arginfo_class_COMPersistHelper_GetCurFileName, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("SaveToFile", zim_COMPersistHelper_SaveToFile, arginfo_class_COMPersistHelper_SaveToFile, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("LoadFromFile", zim_COMPersistHelper_LoadFromFile, arginfo_class_COMPersistHelper_LoadFromFile, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("GetMaxStreamSize", zim_COMPersistHelper_GetMaxStreamSize, arginfo_class_COMPersistHelper_GetMaxStreamSize, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("InitNew", zim_COMPersistHelper_InitNew, arginfo_class_COMPersistHelper_InitNew, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("LoadFromStream", zim_COMPersistHelper_LoadFromStream, arginfo_class_COMPersistHelper_LoadFromStream, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("SaveToStream", zim_COMPersistHelper_SaveToStream, arginfo_class_COMPersistHelper_SaveToStream, ZEND_ACC_PUBLIC, NULL)
 	ZEND_FE_END
 };
 

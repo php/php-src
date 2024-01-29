@@ -12,7 +12,7 @@ ZEND_FUNCTION(dl_test_test1);
 ZEND_FUNCTION(dl_test_test2);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(dl_test_test1, arginfo_dl_test_test1)
-	ZEND_FE(dl_test_test2, arginfo_dl_test_test2)
+	ZEND_RAW_FENTRY("dl_test_test1", zif_dl_test_test1, arginfo_dl_test_test1, 0, NULL)
+	ZEND_RAW_FENTRY("dl_test_test2", zif_dl_test_test2, arginfo_dl_test_test2, 0, NULL)
 	ZEND_FE_END
 };

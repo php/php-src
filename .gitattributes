@@ -20,7 +20,7 @@
 *.[ch] diff=cpp
 
 # Collapse generated files within git and pull request diff.
-**/*_arginfo.h linguist-generated -diff
+#**/*_arginfo.h linguist-generated -diff
 /Zend/zend_vm_execute.h linguist-generated -diff
 /Zend/zend_vm_handlers.h linguist-generated -diff
 /Zend/zend_vm_opcodes.[ch] linguist-generated -diff

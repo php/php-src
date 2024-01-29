@@ -11,8 +11,8 @@ ZEND_METHOD(IntlPartsIterator, getBreakIterator);
 ZEND_METHOD(IntlPartsIterator, getRuleStatus);
 
 static const zend_function_entry class_IntlPartsIterator_methods[] = {
-	ZEND_ME(IntlPartsIterator, getBreakIterator, arginfo_class_IntlPartsIterator_getBreakIterator, ZEND_ACC_PUBLIC)
-	ZEND_ME(IntlPartsIterator, getRuleStatus, arginfo_class_IntlPartsIterator_getRuleStatus, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("getBreakIterator", zim_IntlPartsIterator_getBreakIterator, arginfo_class_IntlPartsIterator_getBreakIterator, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("getRuleStatus", zim_IntlPartsIterator_getRuleStatus, arginfo_class_IntlPartsIterator_getRuleStatus, ZEND_ACC_PUBLIC, NULL)
 	ZEND_FE_END
 };
 

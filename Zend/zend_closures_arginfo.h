@@ -31,11 +31,11 @@ ZEND_METHOD(Closure, call);
 ZEND_METHOD(Closure, fromCallable);
 
 static const zend_function_entry class_Closure_methods[] = {
-	ZEND_ME(Closure, __construct, arginfo_class_Closure___construct, ZEND_ACC_PRIVATE)
-	ZEND_ME(Closure, bind, arginfo_class_Closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(Closure, bindTo, arginfo_class_Closure_bindTo, ZEND_ACC_PUBLIC)
-	ZEND_ME(Closure, call, arginfo_class_Closure_call, ZEND_ACC_PUBLIC)
-	ZEND_ME(Closure, fromCallable, arginfo_class_Closure_fromCallable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_RAW_FENTRY("__construct", zim_Closure___construct, arginfo_class_Closure___construct, ZEND_ACC_PRIVATE, NULL)
+	ZEND_RAW_FENTRY("bind", zim_Closure_bind, arginfo_class_Closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
+	ZEND_RAW_FENTRY("bindTo", zim_Closure_bindTo, arginfo_class_Closure_bindTo, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("call", zim_Closure_call, arginfo_class_Closure_call, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("fromCallable", zim_Closure_fromCallable, arginfo_class_Closure_fromCallable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
 	ZEND_FE_END
 };
 

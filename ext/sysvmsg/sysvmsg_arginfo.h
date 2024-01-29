@@ -52,13 +52,13 @@ ZEND_FUNCTION(msg_set_queue);
 ZEND_FUNCTION(msg_queue_exists);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(msg_get_queue, arginfo_msg_get_queue)
-	ZEND_FE(msg_send, arginfo_msg_send)
-	ZEND_FE(msg_receive, arginfo_msg_receive)
-	ZEND_FE(msg_remove_queue, arginfo_msg_remove_queue)
-	ZEND_FE(msg_stat_queue, arginfo_msg_stat_queue)
-	ZEND_FE(msg_set_queue, arginfo_msg_set_queue)
-	ZEND_FE(msg_queue_exists, arginfo_msg_queue_exists)
+	ZEND_RAW_FENTRY("msg_get_queue", zif_msg_get_queue, arginfo_msg_get_queue, 0, NULL)
+	ZEND_RAW_FENTRY("msg_send", zif_msg_send, arginfo_msg_send, 0, NULL)
+	ZEND_RAW_FENTRY("msg_receive", zif_msg_receive, arginfo_msg_receive, 0, NULL)
+	ZEND_RAW_FENTRY("msg_remove_queue", zif_msg_remove_queue, arginfo_msg_remove_queue, 0, NULL)
+	ZEND_RAW_FENTRY("msg_stat_queue", zif_msg_stat_queue, arginfo_msg_stat_queue, 0, NULL)
+	ZEND_RAW_FENTRY("msg_set_queue", zif_msg_set_queue, arginfo_msg_set_queue, 0, NULL)
+	ZEND_RAW_FENTRY("msg_queue_exists", zif_msg_queue_exists, arginfo_msg_queue_exists, 0, NULL)
 	ZEND_FE_END
 };
 

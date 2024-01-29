@@ -19,9 +19,9 @@ ZEND_METHOD(php_user_filter, onCreate);
 ZEND_METHOD(php_user_filter, onClose);
 
 static const zend_function_entry class_php_user_filter_methods[] = {
-	ZEND_ME(php_user_filter, filter, arginfo_class_php_user_filter_filter, ZEND_ACC_PUBLIC)
-	ZEND_ME(php_user_filter, onCreate, arginfo_class_php_user_filter_onCreate, ZEND_ACC_PUBLIC)
-	ZEND_ME(php_user_filter, onClose, arginfo_class_php_user_filter_onClose, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("filter", zim_php_user_filter_filter, arginfo_class_php_user_filter_filter, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("onCreate", zim_php_user_filter_onCreate, arginfo_class_php_user_filter_onCreate, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("onClose", zim_php_user_filter_onClose, arginfo_class_php_user_filter_onClose, ZEND_ACC_PUBLIC, NULL)
 	ZEND_FE_END
 };
 

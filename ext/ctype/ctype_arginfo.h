@@ -38,16 +38,16 @@ ZEND_FUNCTION(ctype_upper);
 ZEND_FUNCTION(ctype_xdigit);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(ctype_alnum, arginfo_ctype_alnum)
-	ZEND_FE(ctype_alpha, arginfo_ctype_alpha)
-	ZEND_FE(ctype_cntrl, arginfo_ctype_cntrl)
-	ZEND_FE(ctype_digit, arginfo_ctype_digit)
-	ZEND_FE(ctype_lower, arginfo_ctype_lower)
-	ZEND_FE(ctype_graph, arginfo_ctype_graph)
-	ZEND_FE(ctype_print, arginfo_ctype_print)
-	ZEND_FE(ctype_punct, arginfo_ctype_punct)
-	ZEND_FE(ctype_space, arginfo_ctype_space)
-	ZEND_FE(ctype_upper, arginfo_ctype_upper)
-	ZEND_FE(ctype_xdigit, arginfo_ctype_xdigit)
+	ZEND_RAW_FENTRY("ctype_alnum", zif_ctype_alnum, arginfo_ctype_alnum, 0, NULL)
+	ZEND_RAW_FENTRY("ctype_alpha", zif_ctype_alpha, arginfo_ctype_alpha, 0, NULL)
+	ZEND_RAW_FENTRY("ctype_cntrl", zif_ctype_cntrl, arginfo_ctype_cntrl, 0, NULL)
+	ZEND_RAW_FENTRY("ctype_digit", zif_ctype_digit, arginfo_ctype_digit, 0, NULL)
+	ZEND_RAW_FENTRY("ctype_lower", zif_ctype_lower, arginfo_ctype_lower, 0, NULL)
+	ZEND_RAW_FENTRY("ctype_graph", zif_ctype_graph, arginfo_ctype_graph, 0, NULL)
+	ZEND_RAW_FENTRY("ctype_print", zif_ctype_print, arginfo_ctype_print, 0, NULL)
+	ZEND_RAW_FENTRY("ctype_punct", zif_ctype_punct, arginfo_ctype_punct, 0, NULL)
+	ZEND_RAW_FENTRY("ctype_space", zif_ctype_space, arginfo_ctype_space, 0, NULL)
+	ZEND_RAW_FENTRY("ctype_upper", zif_ctype_upper, arginfo_ctype_upper, 0, NULL)
+	ZEND_RAW_FENTRY("ctype_xdigit", zif_ctype_xdigit, arginfo_ctype_xdigit, 0, NULL)
 	ZEND_FE_END
 };

@@ -170,54 +170,54 @@ ZEND_METHOD(dotnet, __construct);
 #endif
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(variant_set, arginfo_variant_set)
-	ZEND_FE(variant_add, arginfo_variant_add)
-	ZEND_FE(variant_cat, arginfo_variant_cat)
-	ZEND_FE(variant_sub, arginfo_variant_sub)
-	ZEND_FE(variant_mul, arginfo_variant_mul)
-	ZEND_FE(variant_and, arginfo_variant_and)
-	ZEND_FE(variant_div, arginfo_variant_div)
-	ZEND_FE(variant_eqv, arginfo_variant_eqv)
-	ZEND_FE(variant_idiv, arginfo_variant_idiv)
-	ZEND_FE(variant_imp, arginfo_variant_imp)
-	ZEND_FE(variant_mod, arginfo_variant_mod)
-	ZEND_FE(variant_or, arginfo_variant_or)
-	ZEND_FE(variant_pow, arginfo_variant_pow)
-	ZEND_FE(variant_xor, arginfo_variant_xor)
-	ZEND_FE(variant_abs, arginfo_variant_abs)
-	ZEND_FE(variant_fix, arginfo_variant_fix)
-	ZEND_FE(variant_int, arginfo_variant_int)
-	ZEND_FE(variant_neg, arginfo_variant_neg)
-	ZEND_FE(variant_not, arginfo_variant_not)
-	ZEND_FE(variant_round, arginfo_variant_round)
-	ZEND_FE(variant_cmp, arginfo_variant_cmp)
-	ZEND_FE(variant_date_to_timestamp, arginfo_variant_date_to_timestamp)
-	ZEND_FE(variant_date_from_timestamp, arginfo_variant_date_from_timestamp)
-	ZEND_FE(variant_get_type, arginfo_variant_get_type)
-	ZEND_FE(variant_set_type, arginfo_variant_set_type)
-	ZEND_FE(variant_cast, arginfo_variant_cast)
-	ZEND_FE(com_get_active_object, arginfo_com_get_active_object)
-	ZEND_FE(com_create_guid, arginfo_com_create_guid)
-	ZEND_FE(com_event_sink, arginfo_com_event_sink)
-	ZEND_FE(com_print_typeinfo, arginfo_com_print_typeinfo)
-	ZEND_FE(com_message_pump, arginfo_com_message_pump)
-	ZEND_FE(com_load_typelib, arginfo_com_load_typelib)
+	ZEND_RAW_FENTRY("variant_set", zif_variant_set, arginfo_variant_set, 0, NULL)
+	ZEND_RAW_FENTRY("variant_add", zif_variant_add, arginfo_variant_add, 0, NULL)
+	ZEND_RAW_FENTRY("variant_cat", zif_variant_cat, arginfo_variant_cat, 0, NULL)
+	ZEND_RAW_FENTRY("variant_sub", zif_variant_sub, arginfo_variant_sub, 0, NULL)
+	ZEND_RAW_FENTRY("variant_mul", zif_variant_mul, arginfo_variant_mul, 0, NULL)
+	ZEND_RAW_FENTRY("variant_and", zif_variant_and, arginfo_variant_and, 0, NULL)
+	ZEND_RAW_FENTRY("variant_div", zif_variant_div, arginfo_variant_div, 0, NULL)
+	ZEND_RAW_FENTRY("variant_eqv", zif_variant_eqv, arginfo_variant_eqv, 0, NULL)
+	ZEND_RAW_FENTRY("variant_idiv", zif_variant_idiv, arginfo_variant_idiv, 0, NULL)
+	ZEND_RAW_FENTRY("variant_imp", zif_variant_imp, arginfo_variant_imp, 0, NULL)
+	ZEND_RAW_FENTRY("variant_mod", zif_variant_mod, arginfo_variant_mod, 0, NULL)
+	ZEND_RAW_FENTRY("variant_or", zif_variant_or, arginfo_variant_or, 0, NULL)
+	ZEND_RAW_FENTRY("variant_pow", zif_variant_pow, arginfo_variant_pow, 0, NULL)
+	ZEND_RAW_FENTRY("variant_xor", zif_variant_xor, arginfo_variant_xor, 0, NULL)
+	ZEND_RAW_FENTRY("variant_abs", zif_variant_abs, arginfo_variant_abs, 0, NULL)
+	ZEND_RAW_FENTRY("variant_fix", zif_variant_fix, arginfo_variant_fix, 0, NULL)
+	ZEND_RAW_FENTRY("variant_int", zif_variant_int, arginfo_variant_int, 0, NULL)
+	ZEND_RAW_FENTRY("variant_neg", zif_variant_neg, arginfo_variant_neg, 0, NULL)
+	ZEND_RAW_FENTRY("variant_not", zif_variant_not, arginfo_variant_not, 0, NULL)
+	ZEND_RAW_FENTRY("variant_round", zif_variant_round, arginfo_variant_round, 0, NULL)
+	ZEND_RAW_FENTRY("variant_cmp", zif_variant_cmp, arginfo_variant_cmp, 0, NULL)
+	ZEND_RAW_FENTRY("variant_date_to_timestamp", zif_variant_date_to_timestamp, arginfo_variant_date_to_timestamp, 0, NULL)
+	ZEND_RAW_FENTRY("variant_date_from_timestamp", zif_variant_date_from_timestamp, arginfo_variant_date_from_timestamp, 0, NULL)
+	ZEND_RAW_FENTRY("variant_get_type", zif_variant_get_type, arginfo_variant_get_type, 0, NULL)
+	ZEND_RAW_FENTRY("variant_set_type", zif_variant_set_type, arginfo_variant_set_type, 0, NULL)
+	ZEND_RAW_FENTRY("variant_cast", zif_variant_cast, arginfo_variant_cast, 0, NULL)
+	ZEND_RAW_FENTRY("com_get_active_object", zif_com_get_active_object, arginfo_com_get_active_object, 0, NULL)
+	ZEND_RAW_FENTRY("com_create_guid", zif_com_create_guid, arginfo_com_create_guid, 0, NULL)
+	ZEND_RAW_FENTRY("com_event_sink", zif_com_event_sink, arginfo_com_event_sink, 0, NULL)
+	ZEND_RAW_FENTRY("com_print_typeinfo", zif_com_print_typeinfo, arginfo_com_print_typeinfo, 0, NULL)
+	ZEND_RAW_FENTRY("com_message_pump", zif_com_message_pump, arginfo_com_message_pump, 0, NULL)
+	ZEND_RAW_FENTRY("com_load_typelib", zif_com_load_typelib, arginfo_com_load_typelib, 0, NULL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_variant_methods[] = {
-	ZEND_ME(variant, __construct, arginfo_class_variant___construct, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__construct", zim_variant___construct, arginfo_class_variant___construct, ZEND_ACC_PUBLIC, NULL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_com_methods[] = {
-	ZEND_ME(com, __construct, arginfo_class_com___construct, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__construct", zim_com___construct, arginfo_class_com___construct, ZEND_ACC_PUBLIC, NULL)
 	ZEND_FE_END
 };
 
 #if HAVE_MSCOREE_H
 static const zend_function_entry class_dotnet_methods[] = {
-	ZEND_ME(dotnet, __construct, arginfo_class_dotnet___construct, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__construct", zim_dotnet___construct, arginfo_class_dotnet___construct, ZEND_ACC_PUBLIC, NULL)
 	ZEND_FE_END
 };
 #endif

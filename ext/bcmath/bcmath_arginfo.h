@@ -55,15 +55,15 @@ ZEND_FUNCTION(bccomp);
 ZEND_FUNCTION(bcscale);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(bcadd, arginfo_bcadd)
-	ZEND_FE(bcsub, arginfo_bcsub)
-	ZEND_FE(bcmul, arginfo_bcmul)
-	ZEND_FE(bcdiv, arginfo_bcdiv)
-	ZEND_FE(bcmod, arginfo_bcmod)
-	ZEND_FE(bcpowmod, arginfo_bcpowmod)
-	ZEND_FE(bcpow, arginfo_bcpow)
-	ZEND_FE(bcsqrt, arginfo_bcsqrt)
-	ZEND_FE(bccomp, arginfo_bccomp)
-	ZEND_FE(bcscale, arginfo_bcscale)
+	ZEND_RAW_FENTRY("bcadd", zif_bcadd, arginfo_bcadd, 0, NULL)
+	ZEND_RAW_FENTRY("bcsub", zif_bcsub, arginfo_bcsub, 0, NULL)
+	ZEND_RAW_FENTRY("bcmul", zif_bcmul, arginfo_bcmul, 0, NULL)
+	ZEND_RAW_FENTRY("bcdiv", zif_bcdiv, arginfo_bcdiv, 0, NULL)
+	ZEND_RAW_FENTRY("bcmod", zif_bcmod, arginfo_bcmod, 0, NULL)
+	ZEND_RAW_FENTRY("bcpowmod", zif_bcpowmod, arginfo_bcpowmod, 0, NULL)
+	ZEND_RAW_FENTRY("bcpow", zif_bcpow, arginfo_bcpow, 0, NULL)
+	ZEND_RAW_FENTRY("bcsqrt", zif_bcsqrt, arginfo_bcsqrt, 0, NULL)
+	ZEND_RAW_FENTRY("bccomp", zif_bccomp, arginfo_bccomp, 0, NULL)
+	ZEND_RAW_FENTRY("bcscale", zif_bcscale, arginfo_bcscale, 0, NULL)
 	ZEND_FE_END
 };
