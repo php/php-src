@@ -246,7 +246,7 @@ PHP_METHOD(Random_Engine_Xoshiro256StarStar, __construct)
 				RETURN_THROWS();
 			}
 		} else {
-			engine->algo->seed(engine->status, (uint64_t) int_seed);
+			seed64(state, (uint64_t) int_seed);
 		}
 	}
 }
