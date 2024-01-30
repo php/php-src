@@ -2431,8 +2431,7 @@ void php_module_shutdown(void)
 }
 /* }}} */
 
-/* {{{ php_execute_script */
-PHPAPI bool php_execute_script(zend_file_handle *primary_file)
+PHPAPI bool php_execute_script_ex(zend_file_handle *primary_file, zval *retval)
 {
 	zend_file_handle *prepend_file_p = NULL, *append_file_p = NULL;
 	zend_file_handle prepend_file, append_file;
@@ -2442,7 +2441,7 @@ PHPAPI bool php_execute_script(zend_file_handle *primary_file)
 	char *old_cwd;
 	ALLOCA_FLAG(use_heap)
 #endif
-	bool retval = false;
+	bool result = true;
 
 #ifndef HAVE_BROKEN_GETCWD
 # define OLD_CWD_SIZE 4096
@@ -2501,7 +2500,17 @@ PHPAPI bool php_execute_script(zend_file_handle *primary_file)
 			zend_set_timeout(INI_INT("max_execution_time"), 0);
 		}
 
-		retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
+		if (prepend_file_p && result) {
+			result = zend_execute_script(ZEND_REQUIRE, NULL, prepend_file_p) == SUCCESS;
+		}
+		if (result) {
+			result = zend_execute_script(ZEND_REQUIRE, retval, primary_file) == SUCCESS;
+		}
+		if (append_file_p && result) {
+			result = zend_execute_script(ZEND_REQUIRE, NULL, append_file_p) == SUCCESS;
+		}
+	} zend_catch {
+		result = false;
 	} zend_end_try();
 
 	if (prepend_file_p) {
@@ -2529,7 +2538,13 @@ PHPAPI bool php_execute_script(zend_file_handle *primary_file)
 	}
 	free_alloca(old_cwd, use_heap);
 #endif
-	return retval;
+	return result;
+}
+
+/* {{{ php_execute_script */
+PHPAPI bool php_execute_script(zend_file_handle *primary_file)
+{
+	return php_execute_script_ex(primary_file, NULL);
 }
 /* }}} */
 
