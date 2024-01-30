@@ -10,4 +10,4 @@ git checkout
 rm -rf .git
 cd c
 # some stuff we don't need
-rm -rf blake3_c_rust_bindings test.py example.c main.c Makefile.testing CMakeLists.txt blake3-config.cmake.in README.md .gitignore
+rm -rf blake3_c_rust_bindings test.py example.c main.c Makefile.testing CMakeLists.txt blake3-config.cmake.in README.md .gitignore libblake3.pc.in
