@@ -13,19 +13,28 @@ $d2 = new DateTime('now',new DateTimeZone('Europe/Paris'));
 $d1->setTimestamp($debut);
 $d2->setTimestamp($fin);
 $diff = $d1->diff($d2);
-print_r($diff);
+var_dump($diff);
 ?>
 --EXPECT--
-DateInterval Object
-(
-    [y] => 0
-    [m] => 0
-    [d] => 14
-    [h] => 23
-    [i] => 59
-    [s] => 59
-    [f] => 0
-    [invert] => 0
-    [days] => 14
-    [from_string] => 
-)
+object(DateTimeInterval)#3 (10) {
+  ["from_string"]=>
+  bool(false)
+  ["y"]=>
+  int(0)
+  ["m"]=>
+  int(0)
+  ["d"]=>
+  int(14)
+  ["h"]=>
+  int(23)
+  ["i"]=>
+  int(59)
+  ["s"]=>
+  int(59)
+  ["f"]=>
+  float(0)
+  ["invert"]=>
+  int(0)
+  ["days"]=>
+  int(14)
+}

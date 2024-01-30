@@ -9,19 +9,28 @@ $date3 = DateTime::createFromFormat('Y-m-d H:i:s', '2019-04-01 00:00:00'); //  2
 $date4 = clone $date3;
 $date4->modify('+5 week'); // 2019-05-06 00:00:00.0 Europe/London (+01:00)
 $differenceDateInterval2 = $date3->diff($date4); // interval: + 1m 4d; days 35
-print_r($differenceDateInterval2);
+var_dump($differenceDateInterval2);
 ?>
---EXPECT--
-DateInterval Object
-(
-    [y] => 0
-    [m] => 1
-    [d] => 5
-    [h] => 0
-    [i] => 0
-    [s] => 0
-    [f] => 0
-    [invert] => 0
-    [days] => 35
-    [from_string] => 
-)
+--EXPECTF--
+object(DateTimeInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
+  ["y"]=>
+  int(0)
+  ["m"]=>
+  int(1)
+  ["d"]=>
+  int(5)
+  ["h"]=>
+  int(0)
+  ["i"]=>
+  int(0)
+  ["s"]=>
+  int(0)
+  ["f"]=>
+  float(0)
+  ["invert"]=>
+  int(0)
+  ["days"]=>
+  int(35)
+}

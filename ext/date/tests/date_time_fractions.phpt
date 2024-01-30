@@ -58,7 +58,9 @@ microseconds = true
 2016-10-02 00:00:00.000000
 2016-10-03 12:00:00.000000
 2016-10-17 12:47:18.081921
-object(DateInterval)#%d (%d) {
+object(DateTimeInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(0)
   ["m"]=>
@@ -77,8 +79,6 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["days"]=>
   int(0)
-  ["from_string"]=>
-  bool(false)
 }
 2016-10-03 13:20:06.724934
 2016-10-03 13:20:07.103123

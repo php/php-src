@@ -20,10 +20,10 @@ try {
 }
 
 ?>
---EXPECT--
-object(MyDatePeriod)#1 (7) {
+--EXPECTF--
+object(MyDatePeriod)#1 (%d) {
   ["start"]=>
-  object(DateTimeImmutable)#2 (3) {
+  object(DateTimeImmutable)#2 (%d) {
     ["date"]=>
     string(26) "2012-07-01 00:00:00.000000"
     ["timezone_type"]=>
@@ -36,7 +36,9 @@ object(MyDatePeriod)#1 (7) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#3 (10) {
+  object(DateTimeInterval)#3 (%d) {
+    ["from_string"]=>
+    bool(false)
     ["y"]=>
     int(0)
     ["m"]=>
@@ -54,8 +56,6 @@ object(MyDatePeriod)#1 (7) {
     ["invert"]=>
     int(0)
     ["days"]=>
-    bool(false)
-    ["from_string"]=>
     bool(false)
   }
   ["recurrences"]=>

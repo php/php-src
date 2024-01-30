@@ -27,6 +27,8 @@ int(1)
 array(2) {
   [0]=>
   object(DateInterval)#1 (%d) {
+    ["from_string"]=>
+    bool(false)
     ["y"]=>
     int(-1)
     ["m"]=>
@@ -45,8 +47,6 @@ array(2) {
     int(0)
     ["days"]=>
     int(-1)
-    ["from_string"]=>
-    bool(false)
   }
   [1]=>
   int(2)

@@ -50,7 +50,9 @@ object(DatePeriod)#%d (%d) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#%d (%d) {
+  object(DateTimeInterval)#%d (%d) {
+    ["from_string"]=>
+    bool(false)
     ["y"]=>
     int(0)
     ["m"]=>
@@ -68,8 +70,6 @@ object(DatePeriod)#%d (%d) {
     ["invert"]=>
     int(0)
     ["days"]=>
-    bool(false)
-    ["from_string"]=>
     bool(false)
   }
   ["recurrences"]=>
@@ -101,7 +101,9 @@ object(DatePeriod)#%d (%d) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#%d (%d) {
+  object(DateTimeInterval)#%d (%d) {
+    ["from_string"]=>
+    bool(false)
     ["y"]=>
     int(0)
     ["m"]=>
@@ -119,8 +121,6 @@ object(DatePeriod)#%d (%d) {
     ["invert"]=>
     int(0)
     ["days"]=>
-    bool(false)
-    ["from_string"]=>
     bool(false)
   }
   ["recurrences"]=>

@@ -47,9 +47,10 @@ function examine_diff($end_date, $start_date, $expect_spec, $expect_days, $absol
     }
     $end_date = $end->format('Y-m-d H:i:s T');
 
+    $invert = false;
     $expect_interval = new DateInterval('P' . substr($expect_spec, 2));
     if (substr($expect_spec, 1, 1) == '-') {
-        $expect_interval->invert = true;
+        $invert = true;
     }
 
     if (PHPT_DATETIME_SHOW == PHPT_DATETIME_SHOW_DIFF) {
@@ -65,12 +66,12 @@ function examine_diff($end_date, $start_date, $expect_spec, $expect_days, $absol
         // echo "DAYS: **$expect_days**\n";
     }
     if (PHPT_DATETIME_SHOW == PHPT_DATETIME_SHOW_ADD) {
-        $start->add($expect_interval);
+        $invert ? $start->sub($expect_interval) : $start->add($expect_interval);
         $result_end_date = $start->format('Y-m-d H:i:s T');
         echo "ADD: $start_date + $expect_spec = **$result_end_date**\n";
     }
     if (PHPT_DATETIME_SHOW == PHPT_DATETIME_SHOW_SUB) {
-        $end->sub($expect_interval);
+        $invert ? $end->add($expect_interval) : $end->sub($expect_interval);
         $result_start_date = $end->format('Y-m-d H:i:s T');
         echo "SUB: $end_date - $expect_spec = **$result_start_date**\n";
         // echo "SUB: $end_date - $expect_spec = **$start_date**\n";

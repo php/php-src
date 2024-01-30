@@ -135,6 +135,8 @@ PHPAPI zend_class_entry *php_date_get_immutable_ce(void);
 PHPAPI zend_class_entry *php_date_get_interface_ce(void);
 PHPAPI zend_class_entry *php_date_get_timezone_ce(void);
 PHPAPI zend_class_entry *php_date_get_interval_ce(void);
+PHPAPI zend_class_entry *php_date_get_date_time_interval_ce(void);
+PHPAPI zend_class_entry *php_date_get_date_time_string_interval_ce(void);
 PHPAPI zend_class_entry *php_date_get_period_ce(void);
 
 /* Functions for creating DateTime objects, and initializing them from a string */

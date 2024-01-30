@@ -11,6 +11,7 @@ $p = new DatePeriod($start, $diff, 2);
 $diff_s = serialize($diff);
 var_dump($diff, $diff_s);
 var_export($diff);
+echo "\n";
 
 $diff_un = unserialize($diff_s);
 $p = new DatePeriod($start, $diff_un, 2);
@@ -33,7 +34,9 @@ var_dump($unser, $p);
 
 ?>
 --EXPECTF--
-object(DateInterval)#%d (%d) {
+object(DateTimeInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(0)
   ["m"]=>
@@ -52,11 +55,10 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["days"]=>
   int(0)
-  ["from_string"]=>
-  bool(false)
 }
-string(164) "O:12:"DateInterval":10:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:4;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";i:0;s:11:"from_string";b:0;}"
-\DateInterval::__set_state(array(
+string(168) "O:16:"DateTimeInterval":10:{s:11:"from_string";b:0;s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:4;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:6:"invert";i:0;s:4:"days";i:0;}"
+\DateTimeInterval::__set_state(array(
+   'from_string' => false,
    'y' => 0,
    'm' => 0,
    'd' => 0,
@@ -66,8 +68,10 @@ string(164) "O:12:"DateInterval":10:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h"
    'f' => 0.0,
    'invert' => 0,
    'days' => 0,
-   'from_string' => false,
-))object(DateInterval)#%d (%d) {
+))
+object(DateTimeInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(0)
   ["m"]=>
@@ -86,8 +90,6 @@ string(164) "O:12:"DateInterval":10:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h"
   int(0)
   ["days"]=>
   int(0)
-  ["from_string"]=>
-  bool(false)
 }
 object(DatePeriod)#%d (%d) {
   ["start"]=>
@@ -104,7 +106,9 @@ object(DatePeriod)#%d (%d) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#%d (%d) {
+  object(DateTimeInterval)#%d (%d) {
+    ["from_string"]=>
+    bool(false)
     ["y"]=>
     int(0)
     ["m"]=>
@@ -123,8 +127,6 @@ object(DatePeriod)#%d (%d) {
     int(0)
     ["days"]=>
     int(0)
-    ["from_string"]=>
-    bool(false)
   }
   ["recurrences"]=>
   int(3)
@@ -134,6 +136,8 @@ object(DatePeriod)#%d (%d) {
   bool(false)
 }
 object(DateInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(7)
   ["m"]=>
@@ -152,8 +156,6 @@ object(DateInterval)#%d (%d) {
   int(1)
   ["days"]=>
   int(2400)
-  ["from_string"]=>
-  bool(false)
 }
 object(DatePeriod)#%d (%d) {
   ["start"]=>
@@ -170,7 +172,9 @@ object(DatePeriod)#%d (%d) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#%d (%d) {
+  object(DateTimeInterval)#%d (%d) {
+    ["from_string"]=>
+    bool(false)
     ["y"]=>
     int(0)
     ["m"]=>
@@ -189,8 +193,6 @@ object(DatePeriod)#%d (%d) {
     int(0)
     ["days"]=>
     int(0)
-    ["from_string"]=>
-    bool(false)
   }
   ["recurrences"]=>
   int(3)

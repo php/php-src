@@ -13,7 +13,9 @@ $diff = date_diff($date, $other);
 var_dump($diff);
 ?>
 --EXPECTF--
-object(DateInterval)#%d (%d) {
+object(DateTimeInterval)#%d (%d) {
+  ["from_string"]=>
+  bool(false)
   ["y"]=>
   int(0)
   ["m"]=>
@@ -32,6 +34,4 @@ object(DateInterval)#%d (%d) {
   int(0)
   ["days"]=>
   int(3)
-  ["from_string"]=>
-  bool(false)
 }
