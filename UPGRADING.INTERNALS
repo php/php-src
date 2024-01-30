@@ -59,6 +59,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      system.
    - HAVE_WIN32_NATIVE_THREAD, USE_WIN32_NATIVE_THREAD, ENABLE_THREADS symbols
      in ext/mbstring/libmbfl removed.
+   - FIBER_ASSEMBLER and FIBER_ASM_ARCH Makefile variables removed in favor of
+     PHP_ASSEMBLER and FIBER_ASM_ABI.
 
 ========================
 3. Module changes

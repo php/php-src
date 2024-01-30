@@ -252,14 +252,6 @@ if (!PHP_ASSEMBLER) {
 	ERROR("No assembler found, fiber cannot be built");
 }
 DEFINE('PHP_ASSEMBLER', PHP_ASSEMBLER);
-DEFINE('FIBER_ASSEMBLER', PHP_ASSEMBLER);// for compatible
-
-var FIBER_ASM_ARCH = {
-	'x64': 'x86_64',
-	'x86': 'i386',
-	'arm64': 'arm64'
-}[TARGET_ARCH];
-DEFINE('FIBER_ASM_ARCH', FIBER_ASM_ARCH); // for compatible only
 
 var FIBER_ASM_ABI = {
 	'x64': 'x86_64_ms_pe_masm',
