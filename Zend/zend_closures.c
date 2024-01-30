@@ -365,6 +365,7 @@ static zend_result zend_create_closure_from_callable(zval *return_value, zval *c
 		call.handler = zend_closure_call_magic;
 		call.function_name = mptr->common.function_name;
 		call.scope = mptr->common.scope;
+		call.doc_comment = NULL;
 
 		zend_free_trampoline(mptr);
 		mptr = (zend_function *) &call;

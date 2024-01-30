@@ -566,6 +566,10 @@ static void _class_const_string(smart_str *str, zend_string *name, zend_class_co
 	const char *final = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_FINAL ? "final " : "";
 	zend_string *type_str = ZEND_TYPE_IS_SET(c->type) ? zend_type_to_string(c->type) : NULL;
 	const char *type = type_str ? ZSTR_VAL(type_str) : zend_zval_type_name(&c->value);
+
+	if (c->doc_comment) {
+		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(c->doc_comment));
+	}
 	smart_str_append_printf(str, "%sConstant [ %s%s %s %s ] { ",
 		indent, final, visibility, type, ZSTR_VAL(name));
 	if (Z_TYPE(c->value) == IS_ARRAY) {
@@ -780,6 +784,8 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	 */
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
 		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(fptr->op_array.doc_comment));
+	} else if (fptr->type == ZEND_INTERNAL_FUNCTION && fptr->internal_function.doc_comment) {
+		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(fptr->internal_function.doc_comment));
 	}
 
 	smart_str_appendl(str, indent, strlen(indent));
@@ -889,6 +895,9 @@ static zval *property_get_default(zend_property_info *prop_info) {
 /* {{{ _property_string */
 static void _property_string(smart_str *str, zend_property_info *prop, const char *prop_name, char* indent)
 {
+	if (prop->doc_comment) {
+		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(prop->doc_comment));
+	}
 	smart_str_append_printf(str, "%sProperty [ ", indent);
 	if (!prop) {
 		smart_str_append_printf(str, "<dynamic> public $%s", prop_name);

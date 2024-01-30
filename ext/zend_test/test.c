@@ -763,7 +763,8 @@ static zend_function *zend_test_class_method_get(zend_object **object, zend_stri
 	    fptr->scope = (*object)->ce;
 	    fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 	    fptr->function_name = zend_string_copy(name);
-	    fptr->handler = ZEND_FN(zend_test_func);
+		fptr->handler = ZEND_FN(zend_test_func);
+		fptr->doc_comment = NULL;
 
 	    return (zend_function*)fptr;
 	}
@@ -787,6 +788,7 @@ static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, ze
 		fptr->fn_flags = ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_STATIC;
 		fptr->function_name = zend_string_copy(name);
 		fptr->handler = ZEND_FN(zend_test_func);
+		fptr->doc_comment = NULL;
 
 		return (zend_function*)fptr;
 	}

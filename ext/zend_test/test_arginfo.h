@@ -761,7 +761,7 @@ static zend_class_entry *register_class__ZendTestInterface(void)
 	zval const_DUMMY_value;
 	ZVAL_LONG(&const_DUMMY_value, 0);
 	zend_string *const_DUMMY_name = zend_string_init_interned("DUMMY", sizeof("DUMMY") - 1, 1);
-	zend_string *const_DUMMY_comment = zend_string_init("/**\n         * \"Lorem ipsum\"\n         * @see https://www.php.net\n         * @since 8.2\n         */", 98, 1);
+	zend_string *const_DUMMY_comment = zend_string_init_interned("/**\n         * \"Lorem ipsum\"\n         * @see https://www.php.net\n         * @since 8.2\n         */", 98, 1);
 	zend_declare_class_constant_ex(class_entry, const_DUMMY_name, &const_DUMMY_value, ZEND_ACC_PUBLIC, const_DUMMY_comment);
 	zend_string_release(const_DUMMY_name);
 
@@ -1038,13 +1038,13 @@ static zend_class_entry *register_class_ZendTestPropertyAttribute(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 #if (PHP_VERSION_ID >= 80400)
-	class_entry->doc_comment = zend_string_init("/**\n     * \"Lorem ipsum\"\n     * @see https://www.php.net\n     * @since 8.1\n     */", 82, 1);
+	class_entry->doc_comment = zend_string_init_interned("/**\n     * \"Lorem ipsum\"\n     * @see https://www.php.net\n     * @since 8.1\n     */", 82, 1);
 #endif
 
 	zval property_parameter_default_value;
 	ZVAL_UNDEF(&property_parameter_default_value);
 	zend_string *property_parameter_name = zend_string_init("parameter", sizeof("parameter") - 1, 1);
-	zend_string *property_parameter_comment = zend_string_init("/**\n         * \"Lorem ipsum\"\n         * @see https://www.php.net\n         * @since 8.4\n         */", 98, 1);
+	zend_string *property_parameter_comment = zend_string_init_interned("/**\n         * \"Lorem ipsum\"\n         * @see https://www.php.net\n         * @since 8.4\n         */", 98, 1);
 	zend_declare_typed_property(class_entry, property_parameter_name, &property_parameter_default_value, ZEND_ACC_PUBLIC, property_parameter_comment, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_parameter_name);
 
