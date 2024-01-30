@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.16
+01 Feb 2024, PHP 8.2.16RC1
 
 - Core:
   . Fixed timer leak in zend-max-execution-timers builds. (withinboredom)
