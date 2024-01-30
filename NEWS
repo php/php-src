@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.3
+?? ??? ????, PHP 8.3.4
+
+
+15 Feb 2024, PHP 8.3.3
 
 - Core:
   . Fixed timer leak in zend-max-execution-timers builds. (withinboredom)
