@@ -1,0 +1,29 @@
+name: Docs
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - docs/*
+  pull_request:
+    paths:
+      - docs/*
+jobs:
+  pages:
+    runs-on: ubuntu-22.04
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pip install sphinx-design sphinxawesome-theme rstfmt
+      - name: Check formatting
+        run: rstfmt --check -w 100 docs/source
+      - name: Publish
+        if: github.event_name == 'push'
+        uses: sphinx-notes/pages@v3
+        with:
+          checkout: false
+          documentation_path: docs/source
