@@ -2003,10 +2003,15 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 #define UPDATE_SSA_OBJ_TYPE(_ce, _is_instanceof, var)				    \
 	do {                                                                \
 		if (var >= 0) {													\
-			if (ssa_var_info[var].ce != (_ce) ||                        \
-			    ssa_var_info[var].is_instanceof != (_is_instanceof)) {  \
-				ssa_var_info[var].ce = (_ce);						    \
-				ssa_var_info[var].is_instanceof = (_is_instanceof);     \
+			zend_class_entry *__ce = (_ce);								\
+			bool __is_instanceof = (_is_instanceof);					\
+			if (__ce && (__ce->ce_flags & ZEND_ACC_FINAL)) {			\
+				__is_instanceof = false;								\
+			}															\
+			if (ssa_var_info[var].ce != __ce ||							\
+			    ssa_var_info[var].is_instanceof != __is_instanceof) {	\
+				ssa_var_info[var].ce = __ce;							\
+				ssa_var_info[var].is_instanceof = __is_instanceof;		\
 				if (update_worklist) { 									\
 					add_usages(op_array, ssa, worklist, var);			\
 				}														\
@@ -3776,6 +3781,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 						/* Unset properties will resort back to __get/__set */
 						if (ce
 						 && !ce->create_object
+						 && ce->default_object_handlers->read_property == zend_std_read_property
 						 && !ce->__get
 						 && !result_may_be_separated(ssa, ssa_op)) {
 							tmp &= ~MAY_BE_RC1;
@@ -5069,8 +5075,14 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				const zend_ssa_var_info *var_info = ssa->var_info + ssa_op->op1_use;
 				const zend_class_entry *ce = var_info->ce;
 
-				if (var_info->is_instanceof ||
-				    !ce || ce->create_object || ce->__get || ce->__set || ce->parent) {
+				if (var_info->is_instanceof
+				 || !ce
+				 || ce->create_object
+				 || ce->default_object_handlers->write_property != zend_std_write_property
+				 || ce->default_object_handlers->get_property_ptr_ptr != zend_std_get_property_ptr_ptr
+				 || ce->__get
+				 || ce->__set
+				 || ce->parent) {
 					return 1;
 				}
 
