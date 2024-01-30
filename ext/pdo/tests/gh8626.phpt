@@ -1,8 +1,9 @@
 --TEST--
 GH-8626: PDOStatement->execute() failed, then execute successfully, errorInfo() information is incorrect
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
