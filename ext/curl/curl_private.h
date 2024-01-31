@@ -114,7 +114,7 @@ typedef struct {
 #define CURLOPT_SAFE_UPLOAD -1
 
 typedef struct {
-	php_curl_callback	*server_push;
+	zend_fcall_info_cache server_push;
 } php_curlm_handlers;
 
 typedef struct {
