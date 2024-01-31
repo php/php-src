@@ -343,6 +343,11 @@ PDO_SQLITE:
 
     RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
   . debug_zval_dump() now indicates whether an array is packed.
+  . Fixed a bug caused by "pre-rounding" of the round() function. Previously, using
+    "pre-rounding" to treat a value like 0.285 (actually 0.28499999999999998) as a
+    decimal number and round it to 0.29. However, "pre-rounding" incorrectly rounds
+    certain numbers, so this fix removes "pre-rounding" and changes the way numbers
+    are compared, so that the values ​​are correctly rounded as decimal numbers.
 
 ========================================
 6. New Functions
