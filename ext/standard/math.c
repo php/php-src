@@ -27,6 +27,7 @@
 #include <float.h>
 #include <math.h>
 #include <stdlib.h>
+#include <fenv.h>
 
 #include "basic_functions.h"
 
@@ -46,32 +47,30 @@ static inline double php_intpow10(int power) {
 }
 /* }}} */
 
-#define PHP_ROUND_GET_EDGE_CASE(adjusted_value, value_abs, integral, exponent) do {\
-	if (fabs(adjusted_value) >= value_abs) {\
-		edge_case = fabs((integral + copysign(0.5, integral)) / exponent);\
-	} else {\
-		edge_case = fabs((integral + copysign(0.5, integral)) * exponent);\
-	}\
-} while(0);
-
-#define PHP_ROUND_GET_ZERO_EDGE_CASE(adjusted_value, value_abs, integral, exponent) do {\
-	if (fabs(adjusted_value) >= value_abs) {\
-		edge_case = fabs((integral) / exponent);\
-	} else {\
-		edge_case = fabs((integral) * exponent);\
-	}\
-} while(0);
+#define PHP_ROUND_BASIC_EDGE_CASE() do {\
+		if (places > 0) {\
+			edge_case = fabs((integral + copysign(0.5, integral)) / exponent);\
+		} else {\
+			edge_case = fabs((integral + copysign(0.5, integral)) * exponent);\
+		}\
+	} while (0)
+#define PHP_ROUND_ZERO_EDGE_CASE() do {\
+		if (places > 0) {\
+			edge_case = fabs((integral) / exponent);\
+		} else {\
+			edge_case = fabs((integral) * exponent);\
+		}\
+	} while (0)
 
 /* {{{ php_round_helper
-       Actually performs the rounding of a value to integer in a certain mode */
-static inline double php_round_helper(double adjusted_value, double value, double exponent, int mode) {
-	double integral = adjusted_value >= 0.0 ? floor(adjusted_value) : ceil(adjusted_value);
+	   Actually performs the rounding of a value to integer in a certain mode */
+static inline double php_round_helper(double integral, double value, double exponent, int places, int mode) {
 	double value_abs = fabs(value);
 	double edge_case;
 
 	switch (mode) {
 		case PHP_ROUND_HALF_UP:
-			PHP_ROUND_GET_EDGE_CASE(adjusted_value, value_abs, integral, exponent);
+			PHP_ROUND_BASIC_EDGE_CASE();
 			if (value_abs >= edge_case) {
 				/* We must increase the magnitude of the integral part
 				 * (rounding up / towards infinity). copysign(1.0, integral)
@@ -87,7 +86,7 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
 			return integral;
 
 		case PHP_ROUND_HALF_DOWN:
-			PHP_ROUND_GET_EDGE_CASE(adjusted_value, value_abs, integral, exponent);
+			PHP_ROUND_BASIC_EDGE_CASE();
 			if (value_abs > edge_case) {
 				return integral + copysign(1.0, integral);
 			}
@@ -95,7 +94,7 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
 			return integral;
 
 		case PHP_ROUND_CEILING:
-			PHP_ROUND_GET_ZERO_EDGE_CASE(adjusted_value, value_abs, integral, exponent);
+			PHP_ROUND_ZERO_EDGE_CASE();
 			if (value > 0.0 && value_abs > edge_case) {
 				return integral + 1.0;
 			}
@@ -103,7 +102,7 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
 			return integral;
 
 		case PHP_ROUND_FLOOR:
-			PHP_ROUND_GET_ZERO_EDGE_CASE(adjusted_value, value_abs, integral, exponent);
+			PHP_ROUND_ZERO_EDGE_CASE();
 			if (value < 0.0 && value_abs > edge_case) {
 				return integral - 1.0;
 			}
@@ -114,7 +113,7 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
 			return integral;
 
 		case PHP_ROUND_AWAY_FROM_ZERO:
-			PHP_ROUND_GET_ZERO_EDGE_CASE(adjusted_value, value_abs, integral, exponent);
+			PHP_ROUND_ZERO_EDGE_CASE();
 			if (value_abs > edge_case) {
 				return integral + copysign(1.0, integral);
 			}
@@ -122,7 +121,7 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
 			return integral;
 
 		case PHP_ROUND_HALF_EVEN:
-			PHP_ROUND_GET_EDGE_CASE(adjusted_value, value_abs, integral, exponent);
+			PHP_ROUND_BASIC_EDGE_CASE();
 			if (value_abs > edge_case) {
 				return integral + copysign(1.0, integral);
 			} else if (UNEXPECTED(value_abs == edge_case)) {
@@ -139,7 +138,7 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
 			return integral;
 
 		case PHP_ROUND_HALF_ODD:
-			PHP_ROUND_GET_EDGE_CASE(adjusted_value, value_abs, integral, exponent);
+			PHP_ROUND_BASIC_EDGE_CASE();
 			if (value_abs > edge_case) {
 				return integral + copysign(1.0, integral);
 			} else if (UNEXPECTED(value_abs == edge_case)) {
@@ -167,6 +166,7 @@ static inline double php_round_helper(double adjusted_value, double value, doubl
 PHPAPI double _php_math_round(double value, int places, int mode) {
 	double exponent;
 	double tmp_value;
+	int cpu_round_mode;
 
 	if (!zend_finite(value) || value == 0.0) {
 		return value;
@@ -176,19 +176,36 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 
 	exponent = php_intpow10(abs(places));
 
-	/* adjust the value */
-	if (places >= 0) {
-		tmp_value = value * exponent;
+	/**
+	 * When extracting the integer part, the result may be incorrect as a decimal
+	 * number due to floating point errors.
+	 * e.g.
+	 * 0.285 * 10000000000 => 2849999999.9999995
+	 * floor(0.285 * 10000000000) => 2849999999
+	 *
+	 * Therefore, change the CPU rounding mode to away from 0 only from
+	 * fegetround to fesetround.
+	 * e.g.
+	 * 0.285 * 10000000000 => 2850000000.0
+	 * floor(0.285 * 10000000000) => 2850000000
+	 */
+	cpu_round_mode = fegetround();
+	if (value >= 0.0) {
+		fesetround(FE_UPWARD);
+		tmp_value = floor(places > 0  ? value * exponent : value / exponent);
 	} else {
-		tmp_value = value / exponent;
+		fesetround(FE_DOWNWARD);
+		tmp_value = ceil(places > 0  ? value * exponent : value / exponent);
 	}
+	fesetround(cpu_round_mode);
+
 	/* This value is beyond our precision, so rounding it is pointless */
 	if (fabs(tmp_value) >= 1e15) {
 		return value;
 	}
 
 	/* round the temp value */
-	tmp_value = php_round_helper(tmp_value, value, exponent, mode);
+	tmp_value = php_round_helper(tmp_value, value, exponent, places, mode);
 
 	/* see if it makes sense to use simple division to round the value */
 	if (abs(places) < 23) {
@@ -215,7 +232,6 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 			tmp_value = value;
 		}
 	}
-
 	return tmp_value;
 }
 /* }}} */
