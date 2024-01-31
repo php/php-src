@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.17
 
+- Curl:
+  . Fix failing tests due to string changes in libcurl 8.6.0. (Ayesh)
 
 15 Feb 2024, PHP 8.2.16
 
