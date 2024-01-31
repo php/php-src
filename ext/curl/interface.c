@@ -479,12 +479,16 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 	}
 
 	if (curl->handlers.write) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.write->func_name);
+		if (ZEND_FCC_INITIALIZED(curl->handlers.write->fcc)) {
+			zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.write->fcc);
+		}
 		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.write->stream);
 	}
 
 	if (curl->handlers.write_header) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.write_header->func_name);
+		if (ZEND_FCC_INITIALIZED(curl->handlers.write_header->fcc)) {
+			zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.write_header->fcc);
+		}
 		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.write_header->stream);
 	}
 
@@ -563,7 +567,7 @@ static size_t curl_write_nothing(char *data, size_t size, size_t nmemb, void *ct
 static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 {
 	php_curl *ch = (php_curl *) ctx;
-	php_curl_write *t = ch->handlers.write;
+	php_curl_write *write_handler = ch->handlers.write;
 	size_t length = size * nmemb;
 
 #if PHP_CURL_DEBUG
@@ -571,43 +575,31 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 	fprintf(stderr, "data = %s, size = %d, nmemb = %d, ctx = %x\n", data, size, nmemb, ctx);
 #endif
 
-	switch (t->method) {
+	switch (write_handler->method) {
 		case PHP_CURL_STDOUT:
 			PHPWRITE(data, length);
 			break;
 		case PHP_CURL_FILE:
-			return fwrite(data, size, nmemb, t->fp);
+			return fwrite(data, size, nmemb, write_handler->fp);
 		case PHP_CURL_RETURN:
 			if (length > 0) {
-				smart_str_appendl(&t->buf, data, (int) length);
+				smart_str_appendl(&write_handler->buf, data, (int) length);
 			}
 			break;
 		case PHP_CURL_USER: {
 			zval argv[2];
 			zval retval;
-			int  error;
-			zend_fcall_info fci;
 
 			GC_ADDREF(&ch->std);
 			ZVAL_OBJ(&argv[0], &ch->std);
 			ZVAL_STRINGL(&argv[1], data, length);
 
-			fci.size = sizeof(fci);
-			fci.object = NULL;
-			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
-			fci.retval = &retval;
-			fci.param_count = 2;
-			fci.params = argv;
-			fci.named_params = NULL;
-
-			ch->in_callback = 1;
-			error = zend_call_function(&fci, &t->fci_cache);
-			ch->in_callback = 0;
-			if (error == FAILURE) {
-				php_error_docref(NULL, E_WARNING, "Could not call the CURLOPT_WRITEFUNCTION");
-				length = -1;
-			} else if (!Z_ISUNDEF(retval)) {
+			ch->in_callback = true;
+			zend_call_known_fcc(&write_handler->fcc, &retval, /* param_count */ 2, argv, /* named_params */ NULL);
+			ch->in_callback = false;
+			if (!Z_ISUNDEF(retval)) {
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
+    			/* TODO Check callback returns an int or something castable to int */
 				length = zval_get_long(&retval);
 			}
 
@@ -838,10 +830,10 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx)
 {
 	php_curl *ch = (php_curl *) ctx;
-	php_curl_write *t = ch->handlers.write_header;
+	php_curl_write *write_handler = ch->handlers.write_header;
 	size_t length = size * nmemb;
 
-	switch (t->method) {
+	switch (write_handler->method) {
 		case PHP_CURL_STDOUT:
 			/* Handle special case write when we're returning the entire transfer
 			 */
@@ -852,32 +844,20 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			}
 			break;
 		case PHP_CURL_FILE:
-			return fwrite(data, size, nmemb, t->fp);
+			return fwrite(data, size, nmemb, write_handler->fp);
 		case PHP_CURL_USER: {
 			zval argv[2];
 			zval retval;
-			zend_result error;
-			zend_fcall_info fci;
 
 			GC_ADDREF(&ch->std);
 			ZVAL_OBJ(&argv[0], &ch->std);
 			ZVAL_STRINGL(&argv[1], data, length);
 
-			fci.size = sizeof(fci);
-			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
-			fci.object = NULL;
-			fci.retval = &retval;
-			fci.param_count = 2;
-			fci.params = argv;
-			fci.named_params = NULL;
-
-			ch->in_callback = 1;
-			error = zend_call_function(&fci, &t->fci_cache);
-			ch->in_callback = 0;
-			if (error == FAILURE) {
-				php_error_docref(NULL, E_WARNING, "Could not call the CURLOPT_HEADERFUNCTION");
-				length = -1;
-			} else if (!Z_ISUNDEF(retval)) {
+			ch->in_callback = true;
+			zend_call_known_fcc(&write_handler->fcc, &retval, /* param_count */ 2, argv, /* named_params */ NULL);
+			ch->in_callback = false;
+			if (!Z_ISUNDEF(retval)) {
+				// TODO: Check for valid int type for return value
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
 				length = zval_get_long(&retval);
 			}
@@ -1232,15 +1212,17 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	ch->handlers.read->fp = source->handlers.read->fp;
 	ch->handlers.read->res = source->handlers.read->res;
 
-	if (!Z_ISUNDEF(source->handlers.write->func_name)) {
-		ZVAL_COPY(&ch->handlers.write->func_name, &source->handlers.write->func_name);
-	}
 	if (!Z_ISUNDEF(source->handlers.read->func_name)) {
 		ZVAL_COPY(&ch->handlers.read->func_name, &source->handlers.read->func_name);
 	}
-	if (!Z_ISUNDEF(source->handlers.write_header->func_name)) {
-		ZVAL_COPY(&ch->handlers.write_header->func_name, &source->handlers.write_header->func_name);
+	if (ZEND_FCC_INITIALIZED(source->handlers.write->fcc)) {
+		zend_fcc_dup(&source->handlers.write->fcc, &source->handlers.write->fcc);
 	}
+	if (ZEND_FCC_INITIALIZED(source->handlers.write_header->fcc)) {
+		zend_fcc_dup(&source->handlers.write_header->fcc, &source->handlers.write_header->fcc);
+	}
+	php_curl_copy_fcc_with_option(ch, CURLOPT_XFERINFODATA, &ch->handlers.xferinfo, &source->handlers.xferinfo);
+	php_curl_copy_fcc_with_option(ch, CURLOPT_XFERINFODATA, &ch->handlers.xferinfo, &source->handlers.xferinfo);
 
 	curl_easy_setopt(ch->cp, CURLOPT_ERRORBUFFER,       ch->err.str);
 	curl_easy_setopt(ch->cp, CURLOPT_FILE,              (void *) ch);
@@ -2087,15 +2069,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			error = curl_easy_setopt(ch->cp, option, lval);
 			break;
 
-		case CURLOPT_HEADERFUNCTION:
-			if (!Z_ISUNDEF(ch->handlers.write_header->func_name)) {
-				zval_ptr_dtor(&ch->handlers.write_header->func_name);
-				ch->handlers.write_header->fci_cache = empty_fcall_info_cache;
-			}
-			ZVAL_COPY(&ch->handlers.write_header->func_name, zvalue);
-			ch->handlers.write_header->method = PHP_CURL_USER;
-			break;
-
 		case CURLOPT_POSTFIELDS:
 			if (Z_TYPE_P(zvalue) == IS_ARRAY) {
 				if (zend_hash_num_elements(HASH_OF(zvalue)) == 0) {
@@ -2115,6 +2088,28 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 				zend_tmp_string_release(tmp_str);
 			}
 			break;
+
+		case CURLOPT_WRITEFUNCTION: {
+			/* Check value is actually a callable and set it */
+			const char option_name[] = "CURLOPT_WRITEFUNCTION";
+			bool result = php_curl_set_callable_handler(&ch->handlers.write->fcc, zvalue, is_array_config, option_name);
+			if (!result) {
+				return FAILURE;
+			}
+			ch->handlers.write->method = PHP_CURL_USER;
+			break;
+		}
+
+		case CURLOPT_HEADERFUNCTION: {
+			/* Check value is actually a callable and set it */
+			const char option_name[] = "CURLOPT_HEADERFUNCTION";
+			bool result = php_curl_set_callable_handler(&ch->handlers.write_header->fcc, zvalue, is_array_config, option_name);
+			if (!result) {
+				return FAILURE;
+			}
+			ch->handlers.write_header->method = PHP_CURL_USER;
+			break;
+		}
 
 		case CURLOPT_PROGRESSFUNCTION: {
 			/* Check value is actually a callable and set it */
@@ -2181,15 +2176,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			} else {
 				ch->handlers.write->method = PHP_CURL_STDOUT;
 			}
-			break;
-
-		case CURLOPT_WRITEFUNCTION:
-			if (!Z_ISUNDEF(ch->handlers.write->func_name)) {
-				zval_ptr_dtor(&ch->handlers.write->func_name);
-				ch->handlers.write->fci_cache = empty_fcall_info_cache;
-			}
-			ZVAL_COPY(&ch->handlers.write->func_name, zvalue);
-			ch->handlers.write->method = PHP_CURL_USER;
 			break;
 
 		/* Curl off_t options */
@@ -2793,9 +2779,13 @@ static void curl_free_obj(zend_object *object)
 	}
 
 	smart_str_free(&ch->handlers.write->buf);
-	zval_ptr_dtor(&ch->handlers.write->func_name);
 	zval_ptr_dtor(&ch->handlers.read->func_name);
-	zval_ptr_dtor(&ch->handlers.write_header->func_name);
+	if (ZEND_FCC_INITIALIZED(ch->handlers.write->fcc)) {
+		zend_fcc_dtor(&ch->handlers.write->fcc);
+	}
+	if (ZEND_FCC_INITIALIZED(ch->handlers.write_header->fcc)) {
+		zend_fcc_dtor(&ch->handlers.write_header->fcc);
+	}
 	zval_ptr_dtor(&ch->handlers.std_err);
 	if (ch->header.str) {
 		zend_string_release_ex(ch->header.str, 0);

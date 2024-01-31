@@ -27,6 +27,8 @@ testOption($ch, CURLOPT_PROGRESSFUNCTION);
 testOption($ch, CURLOPT_SSH_HOSTKEYFUNCTION);
 testOption($ch, CURLOPT_XFERINFOFUNCTION);
 testOption($ch, CURLOPT_FNMATCH_FUNCTION);
+testOption($ch, CURLOPT_WRITEFUNCTION);
+testOption($ch, CURLOPT_HEADERFUNCTION);
 
 ?>
 --EXPECT--
@@ -38,3 +40,7 @@ TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for opti
 TypeError: curl_setopt_array(): Argument #2 ($options) must be a valid callback for option CURLOPT_XFERINFOFUNCTION, function "undefined" not found or invalid function name
 TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_FNMATCH_FUNCTION, function "undefined" not found or invalid function name
 TypeError: curl_setopt_array(): Argument #2 ($options) must be a valid callback for option CURLOPT_FNMATCH_FUNCTION, function "undefined" not found or invalid function name
+TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_WRITEFUNCTION, function "undefined" not found or invalid function name
+TypeError: curl_setopt_array(): Argument #2 ($options) must be a valid callback for option CURLOPT_WRITEFUNCTION, function "undefined" not found or invalid function name
+TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_HEADERFUNCTION, function "undefined" not found or invalid function name
+TypeError: curl_setopt_array(): Argument #2 ($options) must be a valid callback for option CURLOPT_HEADERFUNCTION, function "undefined" not found or invalid function name
