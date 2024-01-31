@@ -73,7 +73,7 @@ typedef struct {
 	php_curl_read     *read;
 	zval               std_err;
 	zend_fcall_info_cache progress;
-	php_curl_callback  *xferinfo;
+	zend_fcall_info_cache xferinfo;
 	php_curl_callback  *fnmatch;
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	zend_fcall_info_cache sshhostkey;

@@ -25,6 +25,7 @@ $url = "{$host}/get.inc";
 $ch = curl_init($url);
 testOption($ch, CURLOPT_PROGRESSFUNCTION);
 testOption($ch, CURLOPT_SSH_HOSTKEYFUNCTION);
+testOption($ch, CURLOPT_XFERINFOFUNCTION);
 
 ?>
 --EXPECT--
@@ -32,3 +33,5 @@ TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for opti
 TypeError: curl_setopt_array(): Argument #2 ($options) must be a valid callback for option CURLOPT_PROGRESSFUNCTION, function "undefined" not found or invalid function name
 TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_SSH_HOSTKEYFUNCTION, function "undefined" not found or invalid function name
 TypeError: curl_setopt_array(): Argument #2 ($options) must be a valid callback for option CURLOPT_SSH_HOSTKEYFUNCTION, function "undefined" not found or invalid function name
+TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_XFERINFOFUNCTION, function "undefined" not found or invalid function name
+TypeError: curl_setopt_array(): Argument #2 ($options) must be a valid callback for option CURLOPT_XFERINFOFUNCTION, function "undefined" not found or invalid function name
