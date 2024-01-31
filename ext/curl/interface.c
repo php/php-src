@@ -488,8 +488,8 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.write_header->stream);
 	}
 
-	if (curl->handlers.progress) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.progress->func_name);
+	if (ZEND_FCC_INITIALIZED(curl->handlers.progress)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.progress);
 	}
 
 	if (curl->handlers.xferinfo) {
@@ -665,7 +665,6 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 static size_t curl_progress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 {
 	php_curl *ch = (php_curl *)clientp;
-	php_curl_callback *t = ch->handlers.progress;
 	size_t	rval = 0;
 
 #if PHP_CURL_DEBUG
@@ -673,38 +672,29 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 	fprintf(stderr, "clientp = %x, dltotal = %f, dlnow = %f, ultotal = %f, ulnow = %f\n", clientp, dltotal, dlnow, ultotal, ulnow);
 #endif
 
-	zval argv[5];
+	zval args[5];
 	zval retval;
-	zend_result error;
-	zend_fcall_info fci;
 
 	GC_ADDREF(&ch->std);
-	ZVAL_OBJ(&argv[0], &ch->std);
-	ZVAL_LONG(&argv[1], (zend_long)dltotal);
-	ZVAL_LONG(&argv[2], (zend_long)dlnow);
-	ZVAL_LONG(&argv[3], (zend_long)ultotal);
-	ZVAL_LONG(&argv[4], (zend_long)ulnow);
+	ZVAL_OBJ(&args[0], &ch->std);
+	ZVAL_LONG(&args[1], (zend_long)dltotal);
+	ZVAL_LONG(&args[2], (zend_long)dlnow);
+	ZVAL_LONG(&args[3], (zend_long)ultotal);
+	ZVAL_LONG(&args[4], (zend_long)ulnow);
 
-	fci.size = sizeof(fci);
-	ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
-	fci.object = NULL;
-	fci.retval = &retval;
-	fci.param_count = 5;
-	fci.params = argv;
-	fci.named_params = NULL;
+	ch->in_callback = true;
+	zend_call_known_fcc(&ch->handlers.progress, &retval, /* param_count */ 5, args, /* named_params */ NULL);
+	ch->in_callback = false;
 
-	ch->in_callback = 1;
-	error = zend_call_function(&fci, &t->fci_cache);
-	ch->in_callback = 0;
-	if (error == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_PROGRESSFUNCTION");
-	} else if (!Z_ISUNDEF(retval)) {
-		_php_curl_verify_handlers(ch, /* reporterror */ true);
-		if (0 != zval_get_long(&retval)) {
-			rval = 1;
-		}
-	}
-	zval_ptr_dtor(&argv[0]);
+	if (!Z_ISUNDEF(retval)) {
+    	_php_curl_verify_handlers(ch, /* reporterror */ true);
+    	/* TODO Check callback returns an int or something castable to int */
+    	if (0 != zval_get_long(&retval)) {
+    		rval = 1;
+    	}
+    }
+
+	zval_ptr_dtor(&args[0]);
 	return rval;
 }
 /* }}} */
@@ -1117,7 +1107,7 @@ void init_curl_handle(php_curl *ch)
 	ch->handlers.write = ecalloc(1, sizeof(php_curl_write));
 	ch->handlers.write_header = ecalloc(1, sizeof(php_curl_write));
 	ch->handlers.read = ecalloc(1, sizeof(php_curl_read));
-	ch->handlers.progress = NULL;
+	ch->handlers.progress = empty_fcall_info_cache;
 	ch->handlers.xferinfo = NULL;
 	ch->handlers.fnmatch = NULL;
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
@@ -1254,6 +1244,14 @@ static void _php_copy_callback(php_curl *ch, php_curl_callback **new_callback, p
 	}
 }
 
+static void php_curl_copy_fcc_with_option(php_curl *ch, CURLoption option, zend_fcall_info_cache *target_fcc, zend_fcall_info_cache *source_fcc)
+{
+	if (ZEND_FCC_INITIALIZED(*source_fcc)) {
+		zend_fcc_dup(target_fcc, source_fcc);
+		curl_easy_setopt(ch->cp, option, (void *) ch);
+	}
+}
+
 void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 {
 	if (!Z_ISUNDEF(source->handlers.write->stream)) {
@@ -1293,7 +1291,7 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_DEBUGDATA,         (void *) ch);
 
-	_php_copy_callback(ch, &ch->handlers.progress, source->handlers.progress, CURLOPT_PROGRESSDATA);
+	php_curl_copy_fcc_with_option(ch, CURLOPT_PROGRESSDATA, &ch->handlers.progress, &source->handlers.progress);
 	_php_copy_callback(ch, &ch->handlers.xferinfo, source->handlers.xferinfo, CURLOPT_XFERINFODATA);
 	_php_copy_callback(ch, &ch->handlers.fnmatch, source->handlers.fnmatch, CURLOPT_FNMATCH_DATA);
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
@@ -1597,6 +1595,25 @@ PHP_FUNCTION(curl_copy_handle)
 	}
 }
 /* }}} */
+
+static bool php_curl_set_callable_handler(zend_fcall_info_cache *const handler_fcc, zval *callable, bool is_array_config, const char *option_name)
+{
+	if (ZEND_FCC_INITIALIZED(*handler_fcc)) {
+		zend_fcc_dtor(handler_fcc);
+		handler_fcc->function_handler = NULL;
+	}
+
+	char *error = NULL;
+	if (UNEXPECTED(!zend_is_callable_ex(callable, /* object */ NULL, /* check_flags */ 0, /* callable_name */ NULL, handler_fcc, /* error */ &error))) {
+		if (!EG(exception)) {
+			zend_argument_type_error(2 + !is_array_config, "must be a valid callback for option %s, %s", option_name, error);
+		}
+		efree(error);
+		return false;
+	}
+	zend_fcc_addref(handler_fcc);
+	return true;
+}
 
 static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool is_array_config) /* {{{ */
 {
@@ -2142,17 +2159,17 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			}
 			break;
 
-		case CURLOPT_PROGRESSFUNCTION:
+		case CURLOPT_PROGRESSFUNCTION: {
+			/* Check value is actually a callable and set it */
+			const char option_name[] = "CURLOPT_PROGRESSFUNCTION";
+			bool result = php_curl_set_callable_handler(&ch->handlers.progress, zvalue, is_array_config, option_name);
+			if (!result) {
+				return FAILURE;
+			}
 			curl_easy_setopt(ch->cp, CURLOPT_PROGRESSFUNCTION,	curl_progress);
 			curl_easy_setopt(ch->cp, CURLOPT_PROGRESSDATA, ch);
-			if (ch->handlers.progress == NULL) {
-				ch->handlers.progress = ecalloc(1, sizeof(php_curl_callback));
-			} else if (!Z_ISUNDEF(ch->handlers.progress->func_name)) {
-				zval_ptr_dtor(&ch->handlers.progress->func_name);
-				ch->handlers.progress->fci_cache = empty_fcall_info_cache;
-			}
-			ZVAL_COPY(&ch->handlers.progress->func_name, zvalue);
 			break;
+		}
 
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 		case CURLOPT_SSH_HOSTKEYFUNCTION:
@@ -2843,7 +2860,9 @@ static void curl_free_obj(zend_object *object)
 	efree(ch->handlers.write_header);
 	efree(ch->handlers.read);
 
-	_php_curl_free_callback(ch->handlers.progress);
+	if (ZEND_FCC_INITIALIZED(ch->handlers.progress)) {
+		zend_fcc_dtor(&ch->handlers.progress);
+	}
 	_php_curl_free_callback(ch->handlers.xferinfo);
 	_php_curl_free_callback(ch->handlers.fnmatch);
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
@@ -2911,10 +2930,8 @@ static void _php_curl_reset_handlers(php_curl *ch)
 		ZVAL_UNDEF(&ch->handlers.std_err);
 	}
 
-	if (ch->handlers.progress) {
-		zval_ptr_dtor(&ch->handlers.progress->func_name);
-		efree(ch->handlers.progress);
-		ch->handlers.progress = NULL;
+	if (ZEND_FCC_INITIALIZED(ch->handlers.progress)) {
+		zend_fcc_dtor(&ch->handlers.progress);
 	}
 
 	if (ch->handlers.xferinfo) {
