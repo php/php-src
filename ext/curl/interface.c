@@ -492,8 +492,8 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.progress);
 	}
 
-	if (curl->handlers.xferinfo) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.xferinfo->func_name);
+	if (ZEND_FCC_INITIALIZED(curl->handlers.xferinfo)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.xferinfo);
 	}
 
 	if (curl->handlers.fnmatch) {
@@ -703,7 +703,6 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 static size_t curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
 {
 	php_curl *ch = (php_curl *)clientp;
-	php_curl_callback *t = ch->handlers.xferinfo;
 	size_t rval = 0;
 
 #if PHP_CURL_DEBUG
@@ -713,8 +712,6 @@ static size_t curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
 
 	zval argv[5];
 	zval retval;
-	zend_result error;
-	zend_fcall_info fci;
 
 	GC_ADDREF(&ch->std);
 	ZVAL_OBJ(&argv[0], &ch->std);
@@ -723,25 +720,18 @@ static size_t curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
 	ZVAL_LONG(&argv[3], ultotal);
 	ZVAL_LONG(&argv[4], ulnow);
 
-	fci.size = sizeof(fci);
-	ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
-	fci.object = NULL;
-	fci.retval = &retval;
-	fci.param_count = 5;
-	fci.params = argv;
-	fci.named_params = NULL;
+	ch->in_callback = true;
+	zend_call_known_fcc(&ch->handlers.xferinfo, &retval, /* param_count */ 5, argv, /* named_params */ NULL);
+	ch->in_callback = false;
 
-	ch->in_callback = 1;
-	error = zend_call_function(&fci, &t->fci_cache);
-	ch->in_callback = 0;
-	if (error == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_XFERINFOFUNCTION");
-	} else if (!Z_ISUNDEF(retval)) {
-		_php_curl_verify_handlers(ch, /* reporterror */ true);
-		if (0 != zval_get_long(&retval)) {
-			rval = 1;
-		}
-	}
+	if (!Z_ISUNDEF(retval)) {
+    	_php_curl_verify_handlers(ch, /* reporterror */ true);
+    	/* TODO Check callback returns an int or something castable to int */
+    	if (0 != zval_get_long(&retval)) {
+    		rval = 1;
+    	}
+    }
+
 	zval_ptr_dtor(&argv[0]);
 	return rval;
 }
@@ -1097,7 +1087,7 @@ void init_curl_handle(php_curl *ch)
 	ch->handlers.write_header = ecalloc(1, sizeof(php_curl_write));
 	ch->handlers.read = ecalloc(1, sizeof(php_curl_read));
 	ch->handlers.progress = empty_fcall_info_cache;
-	ch->handlers.xferinfo = NULL;
+	ch->handlers.xferinfo = empty_fcall_info_cache;
 	ch->handlers.fnmatch = NULL;
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	ch->handlers.sshhostkey = empty_fcall_info_cache;
@@ -1281,7 +1271,7 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	curl_easy_setopt(ch->cp, CURLOPT_DEBUGDATA,         (void *) ch);
 
 	php_curl_copy_fcc_with_option(ch, CURLOPT_PROGRESSDATA, &ch->handlers.progress, &source->handlers.progress);
-	_php_copy_callback(ch, &ch->handlers.xferinfo, source->handlers.xferinfo, CURLOPT_XFERINFODATA);
+	php_curl_copy_fcc_with_option(ch, CURLOPT_XFERINFODATA, &ch->handlers.xferinfo, &source->handlers.xferinfo);
 	_php_copy_callback(ch, &ch->handlers.fnmatch, source->handlers.fnmatch, CURLOPT_FNMATCH_DATA);
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	php_curl_copy_fcc_with_option(ch, CURLOPT_SSH_HOSTKEYDATA, &ch->handlers.sshhostkey, &source->handlers.sshhostkey);
@@ -2160,6 +2150,18 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			break;
 		}
 
+		case CURLOPT_XFERINFOFUNCTION: {
+			/* Check value is actually a callable and set it */
+			const char option_name[] = "CURLOPT_XFERINFOFUNCTION";
+			bool result = php_curl_set_callable_handler(&ch->handlers.xferinfo, zvalue, is_array_config, option_name);
+			if (!result) {
+				return FAILURE;
+			}
+			curl_easy_setopt(ch->cp, CURLOPT_XFERINFOFUNCTION,	curl_xferinfo);
+			curl_easy_setopt(ch->cp, CURLOPT_XFERINFODATA, ch);
+			break;
+		}
+
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 		case CURLOPT_SSH_HOSTKEYFUNCTION: {
 			/* Check value is actually a callable and set it */
@@ -2198,18 +2200,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			}
 			ZVAL_COPY(&ch->handlers.write->func_name, zvalue);
 			ch->handlers.write->method = PHP_CURL_USER;
-			break;
-
-		case CURLOPT_XFERINFOFUNCTION:
-			curl_easy_setopt(ch->cp, CURLOPT_XFERINFOFUNCTION,	curl_xferinfo);
-			curl_easy_setopt(ch->cp, CURLOPT_XFERINFODATA, ch);
-			if (ch->handlers.xferinfo == NULL) {
-				ch->handlers.xferinfo = ecalloc(1, sizeof(php_curl_callback));
-			} else if (!Z_ISUNDEF(ch->handlers.xferinfo->func_name)) {
-				zval_ptr_dtor(&ch->handlers.xferinfo->func_name);
-				ch->handlers.xferinfo->fci_cache = empty_fcall_info_cache;
-			}
-			ZVAL_COPY(&ch->handlers.xferinfo->func_name, zvalue);
 			break;
 
 		/* Curl off_t options */
@@ -2852,7 +2842,9 @@ static void curl_free_obj(zend_object *object)
 	if (ZEND_FCC_INITIALIZED(ch->handlers.progress)) {
 		zend_fcc_dtor(&ch->handlers.progress);
 	}
-	_php_curl_free_callback(ch->handlers.xferinfo);
+	if (ZEND_FCC_INITIALIZED(ch->handlers.xferinfo)) {
+		zend_fcc_dtor(&ch->handlers.xferinfo);
+	}
 	_php_curl_free_callback(ch->handlers.fnmatch);
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	if (ZEND_FCC_INITIALIZED(ch->handlers.sshhostkey)) {
@@ -2925,10 +2917,9 @@ static void _php_curl_reset_handlers(php_curl *ch)
 		zend_fcc_dtor(&ch->handlers.progress);
 	}
 
-	if (ch->handlers.xferinfo) {
-		zval_ptr_dtor(&ch->handlers.xferinfo->func_name);
-		efree(ch->handlers.xferinfo);
-		ch->handlers.xferinfo = NULL;
+	if (ZEND_FCC_INITIALIZED(ch->handlers.xferinfo)) {
+		zend_fcc_dtor(&ch->handlers.xferinfo);
+		ch->handlers.xferinfo.function_handler = NULL;
 	}
 
 	if (ch->handlers.fnmatch) {
