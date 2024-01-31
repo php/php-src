@@ -2560,21 +2560,27 @@ static int32_t ir_ref_spill_slot_offset(ir_ctx *ctx, ir_ref ref, ir_reg *reg)
 	return IR_SPILL_POS_TO_OFFSET(offset);
 }
 
-static ir_mem ir_ref_spill_slot(ir_ctx *ctx, ir_ref ref)
+static ir_mem ir_vreg_spill_slot(ir_ctx *ctx, ir_ref v)
 {
 	int32_t offset;
 	ir_reg base;
 
-	IR_ASSERT(ref >= 0 && ctx->vregs[ref] && ctx->live_intervals[ctx->vregs[ref]]);
-	offset = ctx->live_intervals[ctx->vregs[ref]]->stack_spill_pos;
+	IR_ASSERT(v > 0 && v <= ctx->vregs_count && ctx->live_intervals[v]);
+	offset = ctx->live_intervals[v]->stack_spill_pos;
 	IR_ASSERT(offset != -1);
-	if (ctx->live_intervals[ctx->vregs[ref]]->flags & IR_LIVE_INTERVAL_SPILL_SPECIAL) {
+	if (ctx->live_intervals[v]->flags & IR_LIVE_INTERVAL_SPILL_SPECIAL) {
 		IR_ASSERT(ctx->spill_base != IR_REG_NONE);
 		return IR_MEM_BO(ctx->spill_base, offset);
 	}
 	base = (ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FRAME_POINTER : IR_REG_STACK_POINTER;
 	offset = IR_SPILL_POS_TO_OFFSET(offset);
 	return IR_MEM_BO(base, offset);
+}
+
+static ir_mem ir_ref_spill_slot(ir_ctx *ctx, ir_ref ref)
+{
+	IR_ASSERT(!IR_IS_CONST_REF(ref));
+	return ir_vreg_spill_slot(ctx, ctx->vregs[ref]);
 }
 
 static bool ir_is_same_spill_slot(ir_ctx *ctx, ir_ref ref, ir_mem mem)
@@ -2812,13 +2818,6 @@ static void ir_emit_store(ir_ctx *ctx, ir_type type, ir_ref dst, ir_reg reg)
 {
 	IR_ASSERT(dst >= 0);
 	ir_emit_store_mem(ctx, type, ir_ref_spill_slot(ctx, dst), reg);
-}
-
-static void ir_emit_store_imm(ir_ctx *ctx, ir_type type, ir_ref dst, int32_t imm)
-{
-	IR_ASSERT(dst >= 0);
-	IR_ASSERT(IR_IS_TYPE_INT(type));
-	ir_emit_store_mem_imm(ctx, type, ir_ref_spill_slot(ctx, dst), imm);
 }
 
 static void ir_emit_mov(ir_ctx *ctx, ir_type type, ir_reg dst, ir_reg src)
