@@ -2242,7 +2242,12 @@ static bool php_cli_server_dispatch_router(php_cli_server *server, php_cli_serve
 	zend_try {
 		zval retval;
 		ZVAL_UNDEF(&retval);
-		if (php_execute_script_ex(&zfd, &retval)) {
+		int sg_options_back = SG(options);
+		/* Don't chdir to the router script because the file path may be relative. */
+		SG(options) |= SAPI_OPTION_NO_CHDIR;
+		bool result = php_execute_script_ex(&zfd, &retval);
+		SG(options) = sg_options_back;
+		if (result) {
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				decline = Z_TYPE(retval) == IS_FALSE;
 				zval_ptr_dtor(&retval);
