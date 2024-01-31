@@ -72,7 +72,7 @@ typedef struct {
 	php_curl_write    *write_header;
 	php_curl_read     *read;
 	zval               std_err;
-	php_curl_callback *progress;
+	zend_fcall_info_cache progress;
 	php_curl_callback  *xferinfo;
 	php_curl_callback  *fnmatch;
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
