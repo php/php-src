@@ -114,6 +114,8 @@ PHP                                                                        NEWS
 
 - Output:
   . Clear output handler status flags during handler initialization. (haszi)
+  . Fixed bug with url_rewriter.hosts not used by output_add_rewrite_var().
+    (haszi)
 
 - PCRE:
   . Upgrade bundled pcre2lib to version 10.43. (nielsdos)

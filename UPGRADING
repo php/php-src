@@ -412,6 +412,8 @@ PHP 8.4 UPGRADE NOTES
   . long2ip() now returns string instead of string|false.
   . The maximum precision that can be handled by round() has been extended by
     one digit.
+  . output_add_rewrite_var() now uses url_rewriter.hosts instead of
+    session.trans_sid_hosts for selecting hosts that will be rewritten.
 
 ========================================
 6. New Functions
