@@ -46,7 +46,7 @@ runs:
           --show-diff \
           --show-slow 1000 \
           --set-timeout 120
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: always() && inputs.testArtifacts != null
       with:
         name: ${{ github.job }}_${{ inputs.testArtifacts }}
