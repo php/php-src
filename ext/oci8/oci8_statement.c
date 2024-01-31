@@ -1504,6 +1504,10 @@ sb4 php_oci_bind_out_callback(
 
 		/* XXX we assume that zend-zval len has 4 bytes */
 		*alenpp = (ub4*) &Z_STRLEN_P(val);
+#ifdef WORDS_BIGENDIAN
+		// on bigendian machines ub4-length must be stored into last 4 bytes of zend_string-length
+		if(sizeof(size_t)==2*sizeof(ub4)) ++*alenpp;
+#endif
 		*bufpp = Z_STRVAL_P(val);
 		*piecep = OCI_ONE_PIECE;
 		*rcodepp = &phpbind->retcode;
