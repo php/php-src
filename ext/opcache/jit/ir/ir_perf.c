@@ -105,7 +105,7 @@ int ir_perf_jitdump_open(void)
 	ir_elf_header elf_hdr;
 	ir_perf_jitdump_header jit_hdr;
 
-	sprintf(filename, "/tmp/jit-%d.dump", getpid());
+	snprintf(filename, sizeof(filename), "/tmp/jit-%d.dump", getpid());
 	if (!ir_perf_timestamp()) {
 		return 0;
 	}
@@ -256,7 +256,7 @@ void ir_perf_map_register(const char *name, const void *start, size_t size)
 	if (!fp) {
 		char filename[64];
 
-		sprintf(filename, "/tmp/perf-%d.map", getpid());
+		snprintf(filename, sizeof(filename), "/tmp/perf-%d.map", getpid());
 		fp = fopen(filename, "w");
 		if (!fp) {
 			return;

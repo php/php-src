@@ -187,9 +187,9 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 			if (isnan(insn->val.d)) {
 				fprintf(f, "nan");
 			} else {
-				sprintf(buf, "%g", insn->val.d);
+				snprintf(buf, sizeof(buf), "%g", insn->val.d);
 				if (strtod(buf, NULL) != insn->val.d) {
-					sprintf(buf, "%.53e", insn->val.d);
+					snprintf(buf, sizeof(buf), "%.53e", insn->val.d);
 					if (strtod(buf, NULL) != insn->val.d) {
 						IR_ASSERT(0 && "can't format double");
 					}
@@ -201,9 +201,9 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 			if (isnan(insn->val.f)) {
 				fprintf(f, "nan");
 			} else {
-				sprintf(buf, "%g", insn->val.f);
+				snprintf(buf, sizeof(buf), "%g", insn->val.f);
 				if (strtod(buf, NULL) != insn->val.f) {
-					sprintf(buf, "%.24e", insn->val.f);
+					snprintf(buf, sizeof(buf), "%.24e", insn->val.f);
 					if (strtod(buf, NULL) != insn->val.f) {
 						IR_ASSERT(0 && "can't format float");
 					}
