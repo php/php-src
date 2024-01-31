@@ -20,6 +20,7 @@
 #include "phar_internal.h"
 #include "func_interceptors.h"
 #include "phar_object_arginfo.h"
+#include "zend_interfaces_dimension.h"
 
 static zend_class_entry *phar_ce_archive;
 static zend_class_entry *phar_ce_data;

@@ -22,6 +22,7 @@
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
+#include "zend_interfaces_dimension.h"
 #include "zend_exceptions.h"
 
 #include "spl_iterators.h"

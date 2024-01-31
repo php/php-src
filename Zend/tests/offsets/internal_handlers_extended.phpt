@@ -34,13 +34,24 @@ class DoImplement extends DimensionHandlersNoArrayAccess implements ArrayAccess 
 $no = new NoImplement();
 $do = new DoImplement();
 
-$no['foo'];
+try {
+    $no['foo'];
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 exportObject($no);
 
-$do['foo'];
+try {
+    $do['foo'];
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 exportObject($do);
 
 ?>
 --EXPECT--
-NoImplement, read: true, write: false, has: false, unset: false, readType: BP_VAR_R, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
-DoImplement, read: true, write: false, has: false, unset: false, readType: BP_VAR_R, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+Error: Cannot use object of type NoImplement as array
+NoImplement, read: false, write: false, has: false, unset: false, readType: uninitialized, hasOffset: false, checkEmpty: uninitialized, offset: uninitialized
+string(22) "DoImplement::offsetGet"
+string(3) "foo"
+DoImplement, read: false, write: false, has: false, unset: false, readType: uninitialized, hasOffset: false, checkEmpty: uninitialized, offset: uninitialized

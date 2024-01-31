@@ -17,6 +17,7 @@
 #include "object_handlers.h"
 #include "zend_API.h"
 #include "object_handlers_arginfo.h"
+// #include "zend_dimension_handlers.h"
 
 /* donc refers to DoOperationNoCast */
 static zend_class_entry *donc_ce;
@@ -261,8 +262,14 @@ static zval* dimension_handlers_no_ArrayAccess_read_dimension(zend_object *objec
 	return rv;
 }
 
-static void dimension_handlers_no_ArrayAccess_write_dimension(zend_object *object, zval *offset, zval *value) {
-	dimension_common_helper(object, offset, 1);
+static zval* dimension_handlers_no_ArrayAccess_ce_handler_read_dimension(zend_object *object, zval *offset, zval *rv) {
+	dimension_common_helper(object, offset, 0);
+	/* ReadType */
+	//ZVAL_LONG(OBJ_PROP_NUM(object, 4), );
+
+	/* Normal logic */
+	ZVAL_BOOL(rv, true);
+	return rv;
 }
 
 static int dimension_handlers_no_ArrayAccess_has_dimension(zend_object *object, zval *offset, int check_empty) {
@@ -274,9 +281,62 @@ static int dimension_handlers_no_ArrayAccess_has_dimension(zend_object *object, 
 	return 1;
 }
 
+static bool dimension_handlers_no_ArrayAccess_ce_handler_has_dimension(zend_object *object, zval *offset) {
+	dimension_common_helper(object, offset, 2);
+
+	/* Normal logic */
+	return true;
+}
+
+static void dimension_handlers_no_ArrayAccess_write_dimension(zend_object *object, zval *offset, zval *value) {
+	dimension_common_helper(object, offset, 1);
+}
+
 static void dimension_handlers_no_ArrayAccess_unset_dimension(zend_object *object, zval *offset) {
 	dimension_common_helper(object, offset, 3);
 }
+
+static void dimension_handlers_no_ArrayAccess_append_dimension(zend_object *object, zval *value) {
+	// TODO FIX ME AND USE dimension_common_helper() when I added the append and fetch properties
+	/* hasOffset */
+	ZVAL_BOOL(OBJ_PROP_NUM(object, 5), false);
+}
+
+static zval *dimension_handlers_no_ArrayAccess_fetch_dimension(zend_object *object, zval *offset, zval *rv) {
+	// TODO FIX ME AND USE dimension_common_helper() when I added the append and fetch properties
+	/* hasOffset */
+	ZVAL_BOOL(OBJ_PROP_NUM(object, 5), offset != NULL);
+	if (offset) {
+		ZVAL_COPY(OBJ_PROP_NUM(object, 7), offset);
+	}
+	/* Normal logic */
+	// TODO Return a ref?
+	//ZVAL_COPY_VALUE(rv, value);
+	GC_ADDREF(object);
+	ZVAL_OBJ(rv, object);
+	return rv;
+}
+
+static zval *dimension_handlers_no_ArrayAccess_fetch_append(zend_object *object, zval *rv) {
+	// TODO FIX ME AND USE dimension_common_helper() when I added the append and fetch properties
+	/* hasOffset */
+	ZVAL_BOOL(OBJ_PROP_NUM(object, 5), false);
+	/* Normal logic */
+	// TODO Return a ref?
+	GC_ADDREF(object);
+	ZVAL_OBJ(rv, object);
+	return rv;
+}
+
+static const zend_class_dimensions_functions dimension_handlers_no_ArrayAccess_dimension_functions = {
+	dimension_handlers_no_ArrayAccess_ce_handler_read_dimension,
+	dimension_handlers_no_ArrayAccess_ce_handler_has_dimension,
+	dimension_handlers_no_ArrayAccess_fetch_dimension,
+	dimension_handlers_no_ArrayAccess_write_dimension,
+	dimension_handlers_no_ArrayAccess_append_dimension,
+	dimension_handlers_no_ArrayAccess_fetch_append,
+	dimension_handlers_no_ArrayAccess_unset_dimension
+};
 
 void zend_test_object_handlers_init(void)
 {
@@ -309,4 +369,7 @@ void zend_test_object_handlers_init(void)
 	dimension_handlers_no_ArrayAccess_object_handlers.write_dimension = dimension_handlers_no_ArrayAccess_write_dimension;
 	dimension_handlers_no_ArrayAccess_object_handlers.has_dimension = dimension_handlers_no_ArrayAccess_has_dimension;
 	dimension_handlers_no_ArrayAccess_object_handlers.unset_dimension = dimension_handlers_no_ArrayAccess_unset_dimension;
+
+	dimension_handlers_no_ArrayAccess_ce->dimension_handlers = malloc(sizeof(zend_class_dimensions_functions));
+	memcpy(dimension_handlers_no_ArrayAccess_ce->dimension_handlers, &dimension_handlers_no_ArrayAccess_dimension_functions, sizeof(zend_class_dimensions_functions));
 }

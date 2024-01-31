@@ -28,6 +28,7 @@
 #include "zend_constants.h"
 #include "zend_operators.h"
 #include "zend_interfaces.h"
+#include "zend_interfaces_dimension.h"
 #include "zend_attributes.h"
 
 #ifdef HAVE_JIT

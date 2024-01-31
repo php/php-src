@@ -16,6 +16,7 @@
 
 #include "zend.h"
 #include "zend_interfaces.h"
+#include "zend_interfaces_dimension.h"
 #include "zend_objects_API.h"
 #include "zend_types.h"
 #include "zend_weakrefs.h"

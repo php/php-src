@@ -27,7 +27,6 @@ BEGIN_EXTERN_C()
 extern ZEND_API zend_class_entry *zend_ce_traversable;
 extern ZEND_API zend_class_entry *zend_ce_aggregate;
 extern ZEND_API zend_class_entry *zend_ce_iterator;
-extern ZEND_API zend_class_entry *zend_ce_arrayaccess;
 extern ZEND_API zend_class_entry *zend_ce_serializable;
 extern ZEND_API zend_class_entry *zend_ce_countable;
 extern ZEND_API zend_class_entry *zend_ce_stringable;

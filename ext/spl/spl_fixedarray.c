@@ -22,6 +22,7 @@
 #include "php.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces_dimension.h"
 
 #include "spl_fixedarray_arginfo.h"
 #include "spl_fixedarray.h"

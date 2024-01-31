@@ -33,6 +33,7 @@
 #include "zend_ini.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "zend_interfaces_dimension.h"
 #include "zend_closures.h"
 #include "zend_generators.h"
 #include "zend_vm.h"
@@ -1509,6 +1510,38 @@ ZEND_API bool zend_never_inline zend_verify_class_constant_type(zend_class_const
 	return 1;
 }
 
+static zend_never_inline ZEND_COLD void zend_invalid_use_of_object_as_array(const zend_object *object, bool has_offset, int type)
+{
+	switch (type) {
+		case BP_VAR_R:
+		case BP_VAR_IS:
+			zend_throw_error(NULL, "Cannot read offset of object of type %s", ZSTR_VAL(object->ce->name));
+			break;
+		case BP_VAR_W:
+			if (has_offset) {
+				zend_throw_error(NULL, "Cannot write to offset of object of type %s", ZSTR_VAL(object->ce->name));
+			} else {
+				zend_throw_error(NULL, "Cannot append to object of type %s", ZSTR_VAL(object->ce->name));
+			}
+			break;
+		case BP_VAR_RW:
+			zend_throw_error(NULL, "Cannot read-write offset of object of type %s", ZSTR_VAL(object->ce->name));
+			break;
+		case BP_VAR_UNSET:
+			// TODO: Cannot unset offset of object of type %s which does not implement INTERFACE_NAME
+			zend_throw_error(NULL, "Cannot unset offset of object of type %s", ZSTR_VAL(object->ce->name));
+			break;
+		case BP_VAR_FETCH:
+			if (has_offset) {
+				zend_throw_error(NULL, "Cannot fetch offset of object of type %s", ZSTR_VAL(object->ce->name));
+			} else {
+				zend_throw_error(NULL, "Cannot fetch append object of type %s", ZSTR_VAL(object->ce->name));
+			}
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(const zend_object *object)
 {
 	zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(object->ce->name));
@@ -1534,10 +1567,39 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_string_offset
 	zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), offset, type);
 }
 
-static zend_never_inline void zend_assign_to_object_dim(zend_object *obj, zval *dim, zval *value OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline void zend_unset_object_dim(zend_object *obj, zval *offset)
 {
-	obj->handlers->write_dimension(obj, dim, value);
+	ZEND_ASSERT(offset && "Offset cannot be NULL for unset");
+	if (EXPECTED(obj->ce->dimension_handlers)) {
+		if (EXPECTED(obj->ce->dimension_handlers->unset_dimension)) {
+			obj->ce->dimension_handlers->unset_dimension(obj, offset);
+		} else {
+			zend_invalid_use_of_object_as_array(obj, /* has_offset */ true, BP_VAR_UNSET);
+		}
+	} else {
+		zend_use_object_as_array(obj);
+	}
+}
 
+static zend_never_inline void zend_assign_to_object_dim(zend_object *obj, zval *offset, zval *value OPLINE_DC EXECUTE_DATA_DC)
+{
+	if (EXPECTED(obj->ce->dimension_handlers)) {
+		if (
+			offset
+			&& obj->ce->dimension_handlers->write_dimension
+		) {
+			obj->ce->dimension_handlers->write_dimension(obj, offset, value);
+		} else if (
+			!offset
+			&& obj->ce->dimension_handlers->append
+		) {
+			obj->ce->dimension_handlers->append(obj, value);
+		} else {
+			zend_invalid_use_of_object_as_array(obj, /* has_offset */ offset, BP_VAR_W);
+		}
+	} else {
+		zend_use_object_as_array(obj);
+	}
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
@@ -1613,35 +1675,57 @@ static zend_always_inline int zend_binary_op(zval *ret, zval *op1, zval *op2 OPL
 	return zend_binary_ops[opcode - ZEND_ADD](ret, op1, op2);
 }
 
-static zend_never_inline void zend_binary_assign_op_obj_dim(zend_object *obj, zval *property OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline void zend_binary_assign_op_obj_dim(zend_object *obj, zval *dim OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *value;
 	zval *z;
 	zval rv, res;
 
+	ZEND_ASSERT(dim && "Offset is NULL for Read-Write operation");
 	GC_ADDREF(obj);
-	if (property && UNEXPECTED(Z_ISUNDEF_P(property))) {
-		property = ZVAL_UNDEFINED_OP2();
+	if (UNEXPECTED(Z_ISUNDEF_P(dim))) {
+		dim = ZVAL_UNDEFINED_OP2();
 	}
 	value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
-	if ((z = obj->handlers->read_dimension(obj, property, BP_VAR_R, &rv)) != NULL) {
+	if (EXPECTED(obj->ce->dimension_handlers)) {
+		if (
+			obj->ce->dimension_handlers->read_dimension
+			&& obj->ce->dimension_handlers->write_dimension
+		) {
+			// TODO: Read Write dimension instanceof_function to check CE
+			z = obj->ce->dimension_handlers->read_dimension(obj, dim, &rv);
+			if (UNEXPECTED(z == NULL)) {
+				ZEND_ASSERT(EG(exception) && "returned NULL without exception");
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
+				goto clean_up;
+			} else {
+				if (zend_binary_op(&res, z, value OPLINE_CC) == SUCCESS) {
+					obj->ce->dimension_handlers->write_dimension(obj, dim, &res);
+				}
+			}
 
-		if (zend_binary_op(&res, z, value OPLINE_CC) == SUCCESS) {
-			obj->handlers->write_dimension(obj, property, &res);
+			if (z == &rv) {
+				zval_ptr_dtor(&rv);
+			}
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_COPY(EX_VAR(opline->result.var), &res);
+			}
+			zval_ptr_dtor(&res);
+		} else {
+			zend_invalid_use_of_object_as_array(obj, /* has_offset */ true, BP_VAR_RW);
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
 		}
-		if (z == &rv) {
-			zval_ptr_dtor(&rv);
-		}
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), &res);
-		}
-		zval_ptr_dtor(&res);
 	} else {
 		zend_use_object_as_array(obj);
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 	}
+	clean_up:
 	FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
 	if (UNEXPECTED(GC_DELREF(obj) == 0)) {
 		zend_objects_store_del(obj);
@@ -2761,6 +2845,63 @@ static zend_never_inline zval* ZEND_FASTCALL zend_fetch_dimension_address_inner_
 	return zend_fetch_dimension_address_inner(ht, dim, IS_CONST, BP_VAR_RW EXECUTE_DATA_CC);
 }
 
+// TODO Check object implements interface?
+static zend_never_inline void zend_fetch_object_dimension_address(zval *result, zend_object *obj, zval *offset, int offset_type, int type EXECUTE_DATA_DC)
+{
+	zval *retval;
+
+	GC_ADDREF(obj);
+	if (ZEND_CONST_COND(offset_type == IS_CV, offset != NULL) && UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {
+		offset = ZVAL_UNDEFINED_OP2();
+	} else if (offset_type == IS_CONST && Z_EXTRA_P(offset) == ZEND_EXTRA_VALUE) {
+		offset++;
+	}
+
+	if (EXPECTED(obj->ce->dimension_handlers)) {
+		if (EXPECTED(offset && obj->ce->dimension_handlers->fetch_dimension)) {
+			/* For null coalesce we first check if the offset exist,
+			 * if it does we call the fetch_dimension() handler,
+			 * otherwise just return an undef result */
+			if (UNEXPECTED(type == BP_VAR_IS)) {
+				ZEND_ASSERT(offset && "BP_VAR_IS with append operation is compile time failure");
+				ZEND_ASSERT(obj->ce->dimension_handlers->has_dimension);
+				/* The key does not exist */
+				if (!obj->ce->dimension_handlers->has_dimension(obj, offset)) {
+					ZVAL_UNDEF(result);
+					goto clean_up;
+				}
+			}
+			retval = obj->ce->dimension_handlers->fetch_dimension(obj, offset, result);
+		} else if (!offset && obj->ce->dimension_handlers->fetch_append) {
+			ZEND_ASSERT(type != BP_VAR_IS);
+			retval = obj->ce->dimension_handlers->fetch_append(obj, result);
+		} else {
+			zend_invalid_use_of_object_as_array(obj, /* has_offset */ offset, BP_VAR_FETCH);
+			ZVAL_UNDEF(result);
+			goto clean_up;
+		}
+		if (UNEXPECTED(!retval)) {
+			ZEND_ASSERT(EG(exception) && "fetch/append_dimension() returned NULL without exception");
+			ZVAL_UNDEF(result);
+			goto clean_up;
+		}
+		if (!Z_ISREF_P(retval) && Z_TYPE_P(retval) != IS_OBJECT) {
+			zend_class_entry *ce = obj->ce;
+			zend_throw_error(NULL, "%s::%s() must return a reference type",
+				ZSTR_VAL(ce->name), offset ? "offsetFetch" : "fetchAppend");
+			ZVAL_UNDEF(result);
+			goto clean_up;
+		}
+	} else {
+		zend_use_object_as_array(obj);
+		ZVAL_UNDEF(result);
+	}
+	clean_up:
+	if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+		zend_objects_store_del(obj);
+	}
+}
+
 static zend_always_inline void zend_fetch_dimension_address(zval *result, zval *container, zval *dim, int dim_type, int type EXECUTE_DATA_DC)
 {
 	zval *retval;
@@ -2816,42 +2957,9 @@ fetch_from_array:
 		}
 		ZVAL_UNDEF(result);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-		zend_object *obj = Z_OBJ_P(container);
-		GC_ADDREF(obj);
-		if (ZEND_CONST_COND(dim_type == IS_CV, dim != NULL) && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
-			dim = ZVAL_UNDEFINED_OP2();
-		} else if (dim_type == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
-			dim++;
-		}
-		retval = obj->handlers->read_dimension(obj, dim, type, result);
-
-		if (UNEXPECTED(retval == &EG(uninitialized_zval))) {
-			zend_class_entry *ce = obj->ce;
-
-			ZVAL_NULL(result);
-			zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
-		} else if (EXPECTED(retval && Z_TYPE_P(retval) != IS_UNDEF)) {
-			if (!Z_ISREF_P(retval)) {
-				if (result != retval) {
-					ZVAL_COPY(result, retval);
-					retval = result;
-				}
-				if (Z_TYPE_P(retval) != IS_OBJECT) {
-					zend_class_entry *ce = obj->ce;
-					zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
-				}
-			} else if (UNEXPECTED(Z_REFCOUNT_P(retval) == 1)) {
-				ZVAL_UNREF(retval);
-			}
-			if (result != retval) {
-				ZVAL_INDIRECT(result, retval);
-			}
-		} else {
-			ZEND_ASSERT(EG(exception) && "read_dimension() returned NULL without exception");
+		zend_fetch_object_dimension_address(result, Z_OBJ_P(container), dim, dim_type, type EXECUTE_DATA_CC);
+		if (UNEXPECTED(EG(exception))) {
 			ZVAL_UNDEF(result);
-		}
-		if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-			zend_objects_store_del(obj);
 		}
 	} else {
 		if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
@@ -2913,7 +3021,57 @@ static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_UNSET(z
 	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_UNSET EXECUTE_DATA_CC);
 }
 
-static zend_always_inline void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type, bool is_list, int slow EXECUTE_DATA_DC)
+/* Handle Read operations and the null coalesce operation in which case is_bp_var_is is true */
+static zend_never_inline void zend_fetch_object_dimension_address_read(zval *result, zend_object *obj, zval *offset, int offset_type, bool is_bp_var_is EXECUTE_DATA_DC)
+{
+	zval *retval;
+
+	ZEND_ASSERT(offset && "Read cannot have NULL offset");
+	GC_ADDREF(obj);
+	if (ZEND_CONST_COND(offset_type == IS_CV, 1) && UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {
+		offset = ZVAL_UNDEFINED_OP2();
+	}
+	if (offset_type == IS_CONST && Z_EXTRA_P(offset) == ZEND_EXTRA_VALUE) {
+		offset++;
+	}
+	if (EXPECTED(obj->ce->dimension_handlers)) {
+		if (EXPECTED(obj->ce->dimension_handlers->read_dimension)) {
+			// TODO Check object implements interface
+			if (UNEXPECTED(
+				is_bp_var_is
+				&& !obj->ce->dimension_handlers->has_dimension(obj, offset)
+			)) {
+				ZVAL_NULL(result);
+				goto end;
+			}
+
+			retval = obj->ce->dimension_handlers->read_dimension(obj, offset, result);
+
+			ZEND_ASSERT(result != NULL);
+			if (EXPECTED(retval)) {
+				if (result != retval) {
+					ZVAL_COPY_DEREF(result, retval);
+				} else if (UNEXPECTED(Z_ISREF_P(retval))) {
+					zend_unwrap_reference(result);
+				}
+			} else {
+				ZEND_ASSERT(EG(exception) && "read_dimension() returned NULL without exception");
+				ZVAL_NULL(result);
+			}
+		} else {
+			zend_invalid_use_of_object_as_array(obj, /* has_offset */ true, is_bp_var_is ? BP_VAR_IS : BP_VAR_R);
+		}
+	} else {
+		zend_use_object_as_array(obj);
+		ZVAL_NULL(result);
+	}
+	end:
+	if (UNEXPECTED(GC_DELREF(obj) == 0)) {
+		zend_objects_store_del(obj);
+	}
+}
+
+static zend_always_inline void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type, bool is_list, bool slow EXECUTE_DATA_DC)
 {
 	zval *retval;
 
@@ -2974,29 +3132,9 @@ try_array:
 			ZVAL_CHAR(result, c);
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-		zend_object *obj = Z_OBJ_P(container);
-
-		GC_ADDREF(obj);
-		if (ZEND_CONST_COND(dim_type == IS_CV, 1) && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
-			dim = ZVAL_UNDEFINED_OP2();
-		}
-		if (dim_type == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {
-			dim++;
-		}
-		retval = obj->handlers->read_dimension(obj, dim, type, result);
-
-		ZEND_ASSERT(result != NULL);
-		if (retval) {
-			if (result != retval) {
-				ZVAL_COPY_DEREF(result, retval);
-			} else if (UNEXPECTED(Z_ISREF_P(retval))) {
-				zend_unwrap_reference(result);
-			}
-		} else {
-			ZVAL_NULL(result);
-		}
-		if (UNEXPECTED(GC_DELREF(obj) == 0)) {
-			zend_objects_store_del(obj);
+		zend_fetch_object_dimension_address_read(result, Z_OBJ_P(container), dim, dim_type, type == BP_VAR_IS EXECUTE_DATA_CC);
+		if (UNEXPECTED(EG(exception))) {
+			ZVAL_UNDEF(result);
 		}
 	} else {
 		if (type != BP_VAR_IS && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
@@ -3074,12 +3212,25 @@ str_idx:
 
 static zend_never_inline bool ZEND_FASTCALL zend_isset_dim_slow(zval *container, zval *offset EXECUTE_DATA_DC)
 {
+	ZEND_ASSERT(offset && "isset() cannot have NULL offset");
 	if (/*OP2_TYPE == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {
 		offset = ZVAL_UNDEFINED_OP2();
 	}
 
 	if (/*OP1_TYPE != IS_CONST &&*/ EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-		return Z_OBJ_HT_P(container)->has_dimension(Z_OBJ_P(container), offset, 0);
+		zend_object *obj = Z_OBJ_P(container);
+		if (EXPECTED(obj->ce->dimension_handlers)) {
+			if (EXPECTED(obj->ce->dimension_handlers->has_dimension)) {
+				// TODO Check object implements interface
+				return obj->ce->dimension_handlers->has_dimension(obj, offset);
+			} else {
+				zend_invalid_use_of_object_as_array(obj, /* has_offset */ true, BP_VAR_IS);
+				return false;
+			}
+		} else {
+			zend_use_object_as_array(obj);
+			return false;
+		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
 		zend_long lval;
 
@@ -3109,12 +3260,43 @@ str_offset:
 
 static zend_never_inline bool ZEND_FASTCALL zend_isempty_dim_slow(zval *container, zval *offset EXECUTE_DATA_DC)
 {
+	ZEND_ASSERT(offset && "empty() cannot have NULL offset");
 	if (/*OP2_TYPE == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {
 		offset = ZVAL_UNDEFINED_OP2();
 	}
 
 	if (/*OP1_TYPE != IS_CONST &&*/ EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-		return !Z_OBJ_HT_P(container)->has_dimension(Z_OBJ_P(container), offset, 1);
+		zend_object *obj = Z_OBJ_P(container);
+		if (EXPECTED(obj->ce->dimension_handlers)) {
+			if (EXPECTED(obj->ce->dimension_handlers->has_dimension)) {
+				// TODO Check object implements interface
+
+				bool exists = obj->ce->dimension_handlers->has_dimension(obj, offset);
+				if (!exists) {
+					return true;
+				}
+
+				zval *retval;
+                zval slot;
+				retval = obj->ce->dimension_handlers->read_dimension(obj, offset, &slot);
+
+				if (UNEXPECTED(!retval)) {
+					ZEND_ASSERT(EG(exception) && "read_dimension() returned NULL without exception");
+					return true;
+				}
+				ZEND_ASSERT(Z_TYPE_P(retval) != IS_UNDEF);
+				/* Check if value is empty, which it is when it is falsy, i.e. not truthy */
+				bool result = !i_zend_is_true(retval);
+				zval_ptr_dtor(retval);
+				return result;
+			} else {
+				zend_invalid_use_of_object_as_array(obj, /* has_offset */ true, BP_VAR_IS);
+				return true;
+			}
+		} else {
+			zend_use_object_as_array(obj);
+			return true;
+		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
 		zend_long lval;
 

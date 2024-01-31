@@ -35,6 +35,7 @@
 #include "zend_gc.h"
 #include "zend_variables.h"
 #include "zend_iterators.h"
+#include "zend_dimension_handlers.h"
 #include "zend_stream.h"
 #include "zend_smart_str_public.h"
 #include "zend_smart_string_public.h"
@@ -201,6 +202,9 @@ struct _zend_class_entry {
 	/* serializer callbacks */
 	int (*serialize)(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data);
 	int (*unserialize)(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data);
+
+	/* dimension handler callbacks */
+	zend_class_dimensions_functions *dimension_handlers;
 
 	uint32_t num_interfaces;
 	uint32_t num_traits;
