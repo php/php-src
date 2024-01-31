@@ -45,8 +45,7 @@ PHP_MSHUTDOWN_FUNCTION(curl);
 PHP_MINFO_FUNCTION(curl);
 
 typedef struct {
-	zval                  func_name;
-	zend_fcall_info_cache fci_cache;
+	zend_fcall_info_cache fcc;
 	FILE                 *fp;
 	smart_str             buf;
 	int                   method;
