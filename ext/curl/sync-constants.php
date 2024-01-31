@@ -25,7 +25,7 @@ const IGNORED_PHP_CONSTANTS = [
     'CURLOPT_SAFE_UPLOAD',
 ];
 
-const CONSTANTS_REGEX_PATTERN = '~^CURL(?:OPT|_VERSION|_HTTP)_[A-Z0-9_]+$~';
+const CONSTANTS_REGEX_PATTERN = '~^CURL(?:E|INFO|OPT|_VERSION|_HTTP)_[A-Z0-9_]+$~';
 
 /**
  * A simple helper to create ASCII tables.
