@@ -53,18 +53,12 @@ typedef struct {
 } php_curl_write;
 
 typedef struct {
-	zval                  func_name;
-	zend_fcall_info_cache fci_cache;
+	zend_fcall_info_cache fcc;
 	FILE                 *fp;
 	zend_resource        *res;
 	int                   method;
 	zval                  stream;
 } php_curl_read;
-
-typedef struct {
-	zval                  func_name;
-	zend_fcall_info_cache fci_cache;
-} php_curl_callback;
 
 typedef struct {
 	php_curl_write    *write;
