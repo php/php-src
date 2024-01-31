@@ -372,22 +372,13 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	php_curl 				*parent;
 	php_curlm 				*mh 			= (php_curlm *)userp;
 	size_t 					rval 			= CURL_PUSH_DENY;
-	php_curl_callback 		*t 				= mh->handlers.server_push;
 	zval					*pz_parent_ch 	= NULL;
 	zval 					pz_ch;
 	zval 					headers;
 	zval 					retval;
-	char 					*header;
-	zend_result				error;
-	zend_fcall_info 		fci 			= empty_fcall_info;
 
 	pz_parent_ch = _php_curl_multi_find_easy_handle(mh, parent_ch);
 	if (pz_parent_ch == NULL) {
-		return rval;
-	}
-
-	if (UNEXPECTED(zend_fcall_info_init(&t->func_name, 0, &fci, &t->fci_cache, NULL, NULL) == FAILURE)) {
-		php_error_docref(NULL, E_WARNING, "Cannot call the CURLMOPT_PUSHFUNCTION");
 		return rval;
 	}
 
@@ -397,9 +388,9 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	ch->cp = easy;
 	_php_setup_easy_copy_handlers(ch, parent);
 
-	size_t i;
 	array_init(&headers);
-	for(i=0; i<num_headers; i++) {
+	for (size_t i = 0; i < num_headers; i++) {
+		char *header;
 		header = curl_pushheader_bynum(push_headers, i);
 		add_next_index_string(&headers, header);
 	}
@@ -407,16 +398,10 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	ZEND_ASSERT(pz_parent_ch);
 	zval call_args[3] = {*pz_parent_ch, pz_ch, headers};
 
-	fci.param_count = 3;
-	fci.params = call_args;
-	fci.retval = &retval;
-
-	error = zend_call_function(&fci, &t->fci_cache);
+	zend_call_known_fcc(&mh->handlers.server_push, &retval, /* param_count */ 3, call_args, /* named_params */ NULL);
 	zval_ptr_dtor_nogc(&headers);
 
-	if (error == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Cannot call the CURLMOPT_PUSHFUNCTION");
-	} else if (!Z_ISUNDEF(retval)) {
+	if (!Z_ISUNDEF(retval)) {
 		if (CURL_PUSH_DENY != zval_get_long(&retval)) {
 		    rval = CURL_PUSH_OK;
 			zend_llist_add_element(&mh->easyh, &pz_ch);
@@ -458,21 +443,29 @@ static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue
 			error = curl_multi_setopt(mh->multi, option, lval);
 			break;
 		}
-		case CURLMOPT_PUSHFUNCTION:
-			if (mh->handlers.server_push == NULL) {
-				mh->handlers.server_push = ecalloc(1, sizeof(php_curl_callback));
-			} else if (!Z_ISUNDEF(mh->handlers.server_push->func_name)) {
-				zval_ptr_dtor(&mh->handlers.server_push->func_name);
-				mh->handlers.server_push->fci_cache = empty_fcall_info_cache;
+		case CURLMOPT_PUSHFUNCTION: {
+			/* See php_curl_set_callable_handler */
+			if (ZEND_FCC_INITIALIZED(mh->handlers.server_push)) {
+				zend_fcc_dtor(&mh->handlers.server_push);
 			}
 
-			ZVAL_COPY(&mh->handlers.server_push->func_name, zvalue);
+			char *error_str = NULL;
+			if (UNEXPECTED(!zend_is_callable_ex(zvalue, /* object */ NULL, /* check_flags */ 0, /* callable_name */ NULL, &mh->handlers.server_push, /* error */ &error_str))) {
+				if (!EG(exception)) {
+					zend_argument_type_error(2, "must be a valid callback for option CURLMOPT_PUSHFUNCTION, %s", error_str);
+				}
+				efree(error_str);
+				return false;
+			}
+			zend_fcc_addref(&mh->handlers.server_push);
+
 			error = curl_multi_setopt(mh->multi, CURLMOPT_PUSHFUNCTION, _php_server_push_callback);
 			if (error != CURLM_OK) {
 				return false;
 			}
 			error = curl_multi_setopt(mh->multi, CURLMOPT_PUSHDATA, mh);
 			break;
+		}
 		default:
 			zend_argument_value_error(2, "is not a valid cURL multi option");
 			error = CURLM_UNKNOWN_OPTION;
@@ -548,9 +541,9 @@ static void curl_multi_free_obj(zend_object *object)
 
 	curl_multi_cleanup(mh->multi);
 	zend_llist_clean(&mh->easyh);
-	if (mh->handlers.server_push) {
-		zval_ptr_dtor(&mh->handlers.server_push->func_name);
-		efree(mh->handlers.server_push);
+
+	if (ZEND_FCC_INITIALIZED(mh->handlers.server_push)) {
+		zend_fcc_dtor(&mh->handlers.server_push);
 	}
 
 	zend_object_std_dtor(&mh->std);
@@ -562,8 +555,8 @@ static HashTable *curl_multi_get_gc(zend_object *object, zval **table, int *n)
 
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
 
-	if (curl_multi->handlers.server_push) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &curl_multi->handlers.server_push->func_name);
+	if (ZEND_FCC_INITIALIZED(curl_multi->handlers.server_push)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl_multi->handlers.server_push);
 	}
 
 	zend_llist_position pos;
