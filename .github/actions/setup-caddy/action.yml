@@ -5,6 +5,6 @@ runs:
     - shell: bash
       run: |
         set -x
-        sudo curl 'https://caddyserver.com/api/download?os=linux&arch=amd64' -o /usr/bin/caddy
+        sudo curl 'https://caddyserver.com/api/download?os=linux&arch=amd64' --max-time 120 --retry-delay 10 --retry 3 -o /usr/bin/caddy
         sudo chmod +x /usr/bin/caddy
         sudo caddy start --config ext/curl/tests/Caddyfile
