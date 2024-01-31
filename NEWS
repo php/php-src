@@ -117,6 +117,9 @@ SimpleXML:
   . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
   . Fix signature of simplexml_import_dom(). (nielsdos)
 
+Sockets:
+  . Added multicast group support for ipv4 on FreeBSD. (jonathan@tangential.ca)
+
 SNMP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
 
