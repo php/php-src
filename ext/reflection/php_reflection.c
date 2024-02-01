@@ -2157,7 +2157,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, hasParameter)
 
     if (arg_name != NULL) {
         if (ZSTR_LEN(arg_name) == 0) {
-            zend_argument_value_error(1, "must not be an empty string");
+            zend_argument_value_error(1, "must not be empty");
             RETURN_THROWS();
         }
 
@@ -2213,7 +2213,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
 
     if (arg_name != NULL) {
         if (ZSTR_LEN(arg_name) == 0) {
-            zend_argument_value_error(1, "must not be an empty string");
+            zend_argument_value_error(1, "must not be empty");
             RETURN_THROWS();
         }
 
