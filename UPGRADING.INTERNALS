@@ -83,6 +83,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      the new php_random_result struct, replacing the last_generated_size
      member of the php_random_status struct and the generate_size member of
      the php_random_algo struct.
+   - The CSPRNG API (php_random_(bytes|int)_*) is now provided by the new
+     and much smaller php_random_csprng.h header. The new header is included
+     in php_random.h for compatibility with existing users.
 
  c. ext/xsl
    - The function php_xsl_create_object() was removed as it was not used
