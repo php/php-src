@@ -32,7 +32,7 @@ jobs:
             nightly-
       - name: Generate Matrix
         id: set-matrix
-        run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}"
+        run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.head_ref || github.ref_name }}"
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
@@ -48,6 +48,15 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
     strategy:
       fail-fast: false
       matrix:
@@ -60,7 +69,7 @@ jobs:
         zts: [true, false]
         include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.matrix-include) }}
     name: "${{ matrix.branch.name }}_LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: ubuntu-${{ ((matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && !matrix.asan) && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ (matrix.branch.version.minor >= 3 && !matrix.asan) && '22.04' || '20.04' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -99,6 +108,7 @@ jobs:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
+          idleCpu: ${{ matrix.asan && 'true' || 'false' }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
@@ -147,7 +157,7 @@ jobs:
     name: "${{ matrix.branch.name }}_LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
+      image: ubuntu:${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     services:
       mysql:
         image: mysql:8
@@ -224,7 +234,7 @@ jobs:
         debug: [true, false]
         zts: [true, false]
     name: "${{ matrix.branch.name }}_MACOS_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: macos-12
+    runs-on: macos-${{ matrix.branch.version.minor >= 4 && '13' || '12' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -287,6 +297,15 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
@@ -330,9 +349,16 @@ jobs:
       fail-fast: false
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
-    name: "${{ matrix.branch.name }}_COMMUNITY"
-    runs-on: ubuntu-${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
+        type: ['asan', 'verify_type_inference']
+        # These branches don't include type verification
+        exclude:
+          - { branch: { name: 'PHP-8.1', ref: 'PHP-8.1', major: 8, minor: 1 }, type: 'verify_type_inference' }
+          - { branch: { name: 'PHP-8.2', ref: 'PHP-8.2', major: 8, minor: 2 }, type: 'verify_type_inference' }
+          - { branch: { name: 'PHP-8.3', ref: 'PHP-8.3', major: 8, minor: 3 }, type: 'verify_type_inference' }
+    name: "${{ matrix.branch.name }}_COMMUNITY_${{ matrix.type }}"
+    runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     env:
+      ASAN_OPTIONS: exitcode=139
       UBSAN_OPTIONS: print_stacktrace=1
       USE_ZEND_ALLOC: 0
       USE_TRACKED_ALLOC: 1
@@ -346,11 +372,11 @@ jobs:
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
+          # CFLAGS removes O2, so we have to add it again...
           configurationParameters: >-
-            --enable-debug
             --enable-zts
-            CFLAGS='-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC'
-            LDFLAGS='-fsanitize=undefined,address'
+            ${{ matrix.type == 'asan' && '--enable-debug CFLAGS="-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address"' || '' }}
+            ${{ matrix.type == 'verify_type_inference' && 'CFLAGS="-DZEND_VERIFY_TYPE_INFERENCE -O2"' || '' }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
@@ -360,12 +386,20 @@ jobs:
           sudo service mysql start
           mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
           mysql -uroot -proot -e "SET GLOBAL local_infile = true"
-      - name: Enable Opcache and JIT
+      - name: Enable Opcache
         run: |
+          echo memory_limit=-1 >> /etc/php.d/opcache.ini
           echo zend_extension=opcache.so > /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
           echo opcache.enable=1 >> /etc/php.d/opcache.ini
           echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
+          echo opcache.memory_consumption=256M >> /etc/php.d/opcache.ini
+          echo opcache.file_update_protection=0 >> /etc/php.d/opcache.ini
+          echo opcache.interned_strings_buffer=64 >> /etc/php.d/opcache.ini
+          echo opcache.max_accelerated_files=100000 >> /etc/php.d/opcache.ini
+      - name: Enable JIT
+        if: matrix.type != 'verify_type_inference'
+        run: |
           echo opcache.jit=tracing >> /etc/php.d/opcache.ini
           echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
           echo opcache.jit_max_root_traces=100000 >> /etc/php.d/opcache.ini
@@ -375,47 +409,8 @@ jobs:
           echo opcache.jit_hot_func=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_return=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
-          echo opcache.jit_blacklist_root_trace=255 >> /etc/php.d/opcache.ini
-          echo opcache.jit_blacklist_side_trace=255 >> /etc/php.d/opcache.ini
-          echo opcache.file_update_protection=0 >> /etc/php.d/opcache.ini
-          echo opcache.memory_consumption=256M >> /etc/php.d/opcache.ini
-          echo opcache.interned_strings_buffer=64 >> /etc/php.d/opcache.ini
-          echo opcache.max_accelerated_files=100000 >> /etc/php.d/opcache.ini
-          echo memory_limit=-1 >> /etc/php.d/opcache.ini
           php -v
-      - name: Test Infection
-        if: matrix.branch.ref != 'PHP-8.0'
-        run: |
-          git clone https://github.com/infection/infection --branch=master --depth 1
-          cd infection
-          git rev-parse HEAD
-          export ASAN_OPTIONS=exitcode=139
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit || exit $?
-      - name: Test Psalm
-        if: matrix.branch.ref != 'PHP-8.0'
-        run: |
-          git clone https://github.com/vimeo/psalm --branch=master --depth 1
-          cd psalm
-          git rev-parse HEAD
-          export ASAN_OPTIONS=exitcode=139
-          # Needed to avoid overwriting JIT config
-          export PSALM_ALLOW_XDEBUG=1
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php $GITHUB_WORKSPACE/.github/jit_check.php ./psalm --no-cache || exit $?
-      - name: Test PHPStan
-        if: matrix.branch.ref != 'PHP-8.0'
-        run: |
-          git clone https://github.com/phpstan/phpstan-src --depth 1
-          cd phpstan-src
-          git rev-parse HEAD
-          sed -E 's/phpVersion(.*)max[^)]+/phpVersion\1max(89999/g' conf/parametersSchema.neon -i
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          export ASAN_OPTIONS=exitcode=139
-          php $GITHUB_WORKSPACE/.github/jit_check.php bin/phpstan clear-result-cache
-          php $GITHUB_WORKSPACE/.github/jit_check.php bin/phpstan || exit $?
       - name: Test AMPHP
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
           X=0
@@ -425,8 +420,7 @@ jobs:
             cd "amphp-$repository"
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-reqs
-            export ASAN_OPTIONS=exitcode=139
-            php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit || EXIT_CODE=$?
+            vendor/bin/phpunit || EXIT_CODE=$?
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
             fi
@@ -434,21 +428,18 @@ jobs:
           done
           exit $X
       - name: Test Laravel
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           git clone https://github.com/laravel/framework.git --branch=master --depth=1
           cd framework
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           # Hack to disable a test that hangs
-          php -r '$c = file_get_contents("tests/Filesystem/FilesystemTest.php"); $c = str_replace("*/\n    public function testSharedGet()", "* @group skip\n     */\n    public function testSharedGet()", $c); file_put_contents("tests/Filesystem/FilesystemTest.php", $c);'
-          export ASAN_OPTIONS=exitcode=139
-          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit --exclude-group skip || EXIT_CODE=$?
+          php -r '$c = file_get_contents("tests/Filesystem/FilesystemTest.php"); $c = str_replace("public function testSharedGet()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testSharedGet()", $c); file_put_contents("tests/Filesystem/FilesystemTest.php", $c);'
+          php vendor/bin/phpunit --exclude-group skip || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
       - name: Test ReactPHP
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           repositories="async cache child-process datagram dns event-loop promise promise-stream promise-timer stream"
           X=0
@@ -458,8 +449,7 @@ jobs:
             cd "reactphp-$repository"
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-reqs
-            export ASAN_OPTIONS=exitcode=139
-            php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit || EXIT_CODE=$?
+            vendor/bin/phpunit || EXIT_CODE=$?
             if [ $[EXIT_CODE:-0} -gt 128 ]; then
               X=1;
             fi
@@ -467,19 +457,16 @@ jobs:
           done
           exit $X
       - name: Test Revolt PHP
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           git clone https://github.com/revoltphp/event-loop.git --depth=1
           cd event-loop
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          export ASAN_OPTIONS=exitcode=139
-          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit || EXIT_CODE=$?
+          vendor/bin/phpunit || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
       - name: Test Symfony
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           git clone https://github.com/symfony/symfony.git --depth=1
           cd symfony
@@ -490,40 +477,27 @@ jobs:
           php -r '$c = file_get_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php"); $c = str_replace("public function testSanitizeDeepNestedString()", "/** @group skip */\n    public function testSanitizeDeepNestedString()", $c); file_put_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php", $c);'
           # Buggy FFI test in Symfony, see https://github.com/symfony/symfony/issues/47668
           php -r '$c = file_get_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php"); $c = str_replace("*/\n    public function testCastNonTrailingCharPointer()", "* @group skip\n     */\n    public function testCastNonTrailingCharPointer()", $c); file_put_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php", $c);'
-          export ASAN_OPTIONS=exitcode=139
           export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
           X=0
           for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
-            php $GITHUB_WORKSPACE/.github/jit_check.php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient --exclude-group skip || EXIT_CODE=$?
+            php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient --exclude-group skip || EXIT_CODE=$?
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
             fi
           done
           exit $X
-      - name: Test PHPSeclib
-        if: always()
-        run: |
-          git clone https://github.com/phpseclib/phpseclib --depth 1
-          cd phpseclib
-          git rev-parse HEAD
-          export ASAN_OPTIONS=exitcode=139
-          export PHPSECLIB_ALLOW_JIT=1
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
       - name: Test PHPUnit
         if: always()
         run: |
           git clone https://github.com/sebastianbergmann/phpunit.git --branch=main --depth=1
           cd phpunit
           git rev-parse HEAD
-          export ASAN_OPTIONS=exitcode=139
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php $GITHUB_WORKSPACE/.github/jit_check.php ./phpunit || EXIT_CODE=$?
+          php ./phpunit || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
       - name: 'Symfony Preloading'
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-reqs
           cd symfony_demo
@@ -536,13 +510,12 @@ jobs:
           git clone https://github.com/WordPress/wordpress-develop.git wordpress --depth=1
           cd wordpress
           git rev-parse HEAD
-          export ASAN_OPTIONS=exitcode=139
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           cp wp-tests-config-sample.php wp-tests-config.php
           sed -i 's/youremptytestdbnamehere/test/g' wp-tests-config.php
           sed -i 's/yourusernamehere/root/g' wp-tests-config.php
           sed -i 's/yourpasswordhere/root/g' wp-tests-config.php
-          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/phpunit || EXIT_CODE=$?
+          php vendor/bin/phpunit || EXIT_CODE=$?
           if [ $EXIT_CODE -gt 128 ]; then
             exit 1
           fi
@@ -561,12 +534,21 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
     strategy:
       fail-fast: false
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     name: "${{ matrix.branch.name }}_OPCACHE_VARIATION"
-    runs-on: ubuntu-${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -642,7 +624,7 @@ jobs:
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     name: "${{ matrix.branch.name }}_MSAN"
-    runs-on: ubuntu-${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -695,7 +677,7 @@ jobs:
             --enable-memory-sanitizer \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d \
-            ${{ matrix.branch.ref != 'PHP-8.0' && '--enable-dl-test=shared' || '' }}
+            --enable-dl-test=shared
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
@@ -739,10 +721,8 @@ jobs:
       fail-fast: false
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
-        exclude:
-          - branch: { name: 'PHP-80', ref: 'PHP-8.0' }
     name: "${{ matrix.branch.name }}_LIBMYSQLCLIENT"
-    runs-on: ubuntu-${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -758,30 +738,23 @@ jobs:
           mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
           # Ensure local_infile tests can run.
           mysql -uroot -proot -e "SET GLOBAL local_infile = true"
-      # Does not support caching_sha2_auth :(
-      # - name: Build mysql-5.6
-      #  uses: ./.github/actions/build-libmysqlclient
-      #  with:
-      #    libmysql: mysql-5.6.49-linux-glibc2.12-x86_64.tar.gz
-      # - name: Test mysql-5.6
-      #   uses: ./.github/actions/test-libmysqlclient
-      - name: Build mysql-5.7
-        uses: ./.github/actions/build-libmysqlclient
-        with:
-          libmysql: mysql-5.7.41-linux-glibc2.12-x86_64.tar.gz
-          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
-      - name: Test mysql-5.7
-        uses: ./.github/actions/test-libmysqlclient
-        with:
-          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Build mysql-8.0
         uses: ./.github/actions/build-libmysqlclient
         with:
-          # FIXME: There are new warnings
-          # configurationParameters: --enable-werror
-          libmysql: mysql-8.0.33-linux-glibc2.12-x86_64.tar.xz
+          configurationParameters: --enable-werror
+          libmysql: mysql-8.0.35-linux-glibc2.28-x86_64.tar.xz
           withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Test mysql-8.0
+        uses: ./.github/actions/test-libmysqlclient
+        with:
+          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
+      - name: Build mysql-8.2
+        uses: ./.github/actions/build-libmysqlclient
+        with:
+          configurationParameters: --enable-werror
+          libmysql: mysql-8.2.0-linux-glibc2.28-x86_64.tar.xz
+          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
+      - name: Test mysql-8.2
         uses: ./.github/actions/test-libmysqlclient
         with:
           withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
@@ -819,13 +792,13 @@ jobs:
           repository: php-memcached-dev/php-memcached
           path: memcached
       - name: git checkout redis
+        # Currently fails to build
+        if: false
         uses: actions/checkout@v4
         with:
           repository: phpredis/phpredis
           path: redis
       - name: git checkout xdebug
-        # Currently breaks due to a PHP <=8.3 version check
-        if: false
         uses: actions/checkout@v4
         with:
           repository: xdebug/xdebug
@@ -880,13 +853,14 @@ jobs:
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
       - name: build redis
+        # Currently fails to build
+        if: false
         run: |
           cd redis
           /opt/php/bin/phpize
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
       - name: build xdebug
-        if: false
         run: |
           cd xdebug
           /opt/php/bin/phpize
