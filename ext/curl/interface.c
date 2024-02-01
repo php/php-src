@@ -1535,12 +1535,46 @@ static bool php_curl_set_callable_handler(zend_fcall_info_cache *const handler_f
 	return true;
 }
 
+
+#define HANDLE_CURL_OPTION_CALLABLE_PHP_CURL_USER(curl_ptr, constant_no_function, handler_type) \
+	case constant_no_function##FUNCTION: { \
+		bool result = php_curl_set_callable_handler(&curl_ptr->handlers.handler_type->fcc, zvalue, is_array_config, #constant_no_function "FUNCTION"); \
+		if (!result) { \
+			return FAILURE; \
+		} \
+		curl_ptr->handlers.handler_type->method = PHP_CURL_USER; \
+		break; \
+	}
+
+#define HANDLE_CURL_OPTION_CALLABLE(curl_ptr, constant_no_function, handler_fcc, c_callback) \
+	case constant_no_function##FUNCTION: { \
+		bool result = php_curl_set_callable_handler(&curl_ptr->handler_fcc, zvalue, is_array_config, #constant_no_function "FUNCTION"); \
+		if (!result) { \
+			return FAILURE; \
+		} \
+		curl_easy_setopt(curl_ptr->cp, constant_no_function##FUNCTION, (c_callback)); \
+		curl_easy_setopt(curl_ptr->cp, constant_no_function##DATA, curl_ptr); \
+		break; \
+	}
+
 static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool is_array_config) /* {{{ */
 {
 	CURLcode error = CURLE_OK;
 	zend_long lval;
 
 	switch (option) {
+		/* Callable options */
+		HANDLE_CURL_OPTION_CALLABLE_PHP_CURL_USER(ch, CURLOPT_WRITE, write);
+		HANDLE_CURL_OPTION_CALLABLE_PHP_CURL_USER(ch, CURLOPT_HEADER, write_header);
+		HANDLE_CURL_OPTION_CALLABLE_PHP_CURL_USER(ch, CURLOPT_READ, read);
+
+		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_PROGRESS, handlers.progress, curl_progress);
+		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_XFERINFO, handlers.xferinfo, curl_xferinfo);
+		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_FNMATCH_, handlers.fnmatch, curl_fnmatch);
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_SSH_HOSTKEY, handlers.sshhostkey, curl_ssh_hostkeyfunction);
+#endif
+
 		/* Long options */
 		case CURLOPT_SSL_VERIFYHOST:
 			lval = zval_get_long(zvalue);
@@ -2069,88 +2103,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 				zend_tmp_string_release(tmp_str);
 			}
 			break;
-
-		case CURLOPT_WRITEFUNCTION: {
-			/* Check value is actually a callable and set it */
-			const char option_name[] = "CURLOPT_WRITEFUNCTION";
-			bool result = php_curl_set_callable_handler(&ch->handlers.write->fcc, zvalue, is_array_config, option_name);
-			if (!result) {
-				return FAILURE;
-			}
-			ch->handlers.write->method = PHP_CURL_USER;
-			break;
-		}
-
-		case CURLOPT_HEADERFUNCTION: {
-			/* Check value is actually a callable and set it */
-			const char option_name[] = "CURLOPT_HEADERFUNCTION";
-			bool result = php_curl_set_callable_handler(&ch->handlers.write_header->fcc, zvalue, is_array_config, option_name);
-			if (!result) {
-				return FAILURE;
-			}
-			ch->handlers.write_header->method = PHP_CURL_USER;
-			break;
-		}
-
-		case CURLOPT_READFUNCTION:
-			/* Check value is actually a callable and set it */
-			const char option_name[] = "CURLOPT_READFUNCTION";
-			bool result = php_curl_set_callable_handler(&ch->handlers.read->fcc, zvalue, is_array_config, option_name);
-			if (!result) {
-				return FAILURE;
-			}
-			ch->handlers.read->method = PHP_CURL_USER;
-			break;
-
-		case CURLOPT_PROGRESSFUNCTION: {
-			/* Check value is actually a callable and set it */
-			const char option_name[] = "CURLOPT_PROGRESSFUNCTION";
-			bool result = php_curl_set_callable_handler(&ch->handlers.progress, zvalue, is_array_config, option_name);
-			if (!result) {
-				return FAILURE;
-			}
-			curl_easy_setopt(ch->cp, CURLOPT_PROGRESSFUNCTION,	curl_progress);
-			curl_easy_setopt(ch->cp, CURLOPT_PROGRESSDATA, ch);
-			break;
-		}
-
-		case CURLOPT_XFERINFOFUNCTION: {
-			/* Check value is actually a callable and set it */
-			const char option_name[] = "CURLOPT_XFERINFOFUNCTION";
-			bool result = php_curl_set_callable_handler(&ch->handlers.xferinfo, zvalue, is_array_config, option_name);
-			if (!result) {
-				return FAILURE;
-			}
-			curl_easy_setopt(ch->cp, CURLOPT_XFERINFOFUNCTION,	curl_xferinfo);
-			curl_easy_setopt(ch->cp, CURLOPT_XFERINFODATA, ch);
-			break;
-		}
-
-		case CURLOPT_FNMATCH_FUNCTION: {
-			/* Check value is actually a callable and set it */
-			const char option_name[] = "CURLOPT_FNMATCH_FUNCTION";
-			bool result = php_curl_set_callable_handler(&ch->handlers.fnmatch, zvalue, is_array_config, option_name);
-			if (!result) {
-				return FAILURE;
-			}
-			curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_FUNCTION, curl_fnmatch);
-			curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_DATA, ch);
-			break;
-		}
-
-#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
-		case CURLOPT_SSH_HOSTKEYFUNCTION: {
-			/* Check value is actually a callable and set it */
-			const char option_name[] = "CURLOPT_SSH_HOSTKEYFUNCTION";
-			bool result = php_curl_set_callable_handler(&ch->handlers.sshhostkey, zvalue, is_array_config, option_name);
-			if (!result) {
-				return FAILURE;
-			}
-			curl_easy_setopt(ch->cp, CURLOPT_SSH_HOSTKEYFUNCTION, curl_ssh_hostkeyfunction);
-			curl_easy_setopt(ch->cp, CURLOPT_SSH_HOSTKEYDATA, ch);
-			break;
-		}
-#endif
 
 		case CURLOPT_RETURNTRANSFER:
 			if (zend_is_true(zvalue)) {
