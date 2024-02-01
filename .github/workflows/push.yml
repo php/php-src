@@ -181,7 +181,7 @@ jobs:
       - name: Test Tracing JIT
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+          testArtifacts: ${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
           jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
