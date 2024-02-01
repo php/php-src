@@ -53,6 +53,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - HAVE_ODBC2 symbol has been removed in ext/odbc.
    - Removed linking with obsolete dnet_stub library in ext/pdo_dblib.
    - Removed checking and linking with obsolete libbind for some functions.
+   - Symbol HAVE_JSON has been removed (ext/json is always available since PHP
+     8.0).
 
  c. Windows build system changes
    - Added Bison flag '-Wall' when generating lexer files as done in *nix build
