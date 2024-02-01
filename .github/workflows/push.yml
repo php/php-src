@@ -149,6 +149,7 @@ jobs:
         uses: ./.github/actions/verify-generated-files
   MACOS_DEBUG_NTS:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: 13
