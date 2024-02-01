@@ -113,9 +113,9 @@ abstract class ReflectionFunctionAbstract implements Reflector
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
 
-    public function hasParameter(int|string $parameter): bool;
+    public function hasParameter(int|string $param): bool;
 
-    public function getParameter(int|string $parameter): ReflectionParameter;
+    public function getParameter(int|string $param): ReflectionParameter;
 }
 
 class ReflectionFunction extends ReflectionFunctionAbstract
