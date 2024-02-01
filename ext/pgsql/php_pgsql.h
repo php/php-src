@@ -184,9 +184,10 @@ static const php_stream_ops php_stream_pgsql_fd_ops = {
 ZEND_BEGIN_MODULE_GLOBALS(pgsql)
 	zend_long num_links,num_persistent;
 	zend_long max_links,max_persistent;
-	zend_long allow_persistent;
+	bool allow_persistent;
+    int ignore_notices;
 	zend_long auto_reset_persistent;
-	int ignore_notices,log_notices;
+	int log_notices;
 	zend_object *default_link; /* default link when connection is omitted */
 	HashTable field_oids;
 	HashTable table_oids;

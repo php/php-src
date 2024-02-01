@@ -29,7 +29,7 @@ typedef struct _php_com_dotnet_object {
 	zend_object zo;
 
 	VARIANT v;
-	int modified;
+	bool modified;
 
 	int code_page;
 
@@ -48,7 +48,7 @@ typedef struct _php_com_dotnet_object {
 	HashTable *id_of_name_cache;
 } php_com_dotnet_object;
 
-static inline int php_com_is_valid_object(zval *zv)
+static inline bool php_com_is_valid_object(zval *zv)
 {
 	zend_class_entry *ce = Z_OBJCE_P(zv);
 	return zend_string_equals_literal(ce->name, "com") ||
@@ -73,15 +73,14 @@ zend_object* php_com_object_new(zend_class_entry *ce);
 zend_object* php_com_object_clone(zend_object *object);
 void php_com_object_free_storage(zend_object *object);
 extern zend_object_handlers php_com_object_handlers;
-void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable);
+void php_com_object_enable_event_sink(php_com_dotnet_object *obj, bool enable);
 
 /* com_saproxy.c */
 zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *object, int by_ref);
-int php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index);
+void php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index);
 
 /* com_olechar.c */
-PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring,
-		size_t *string_len, int codepage);
+PHP_COM_DOTNET_API zend_string *php_com_olestring_to_string(OLECHAR *olestring, int codepage);
 PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(const char *string,
 		size_t string_len, int codepage);
 BSTR php_com_string_to_bstr(zend_string *string, int codepage);
@@ -92,14 +91,14 @@ zend_string *php_com_bstr_to_string(BSTR bstr, int codepage);
 PHP_METHOD(com, __construct);
 
 HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
-		WORD flags, DISPPARAMS *disp_params, VARIANT *v, int silent, int allow_noarg);
-HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
-		size_t namelen, DISPID *dispid);
-int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
-		WORD flags,	VARIANT *v, int nargs, zval *args, int silent, int allow_noarg);
-int php_com_do_invoke(php_com_dotnet_object *obj, char *name, size_t namelen,
-		WORD flags,	VARIANT *v, int nargs, zval *args, int allow_noarg);
-int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *f,
+		WORD flags, DISPPARAMS *disp_params, VARIANT *v, bool silent, bool allow_noarg);
+HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, zend_string *name,
+		DISPID *dispid);
+zend_result php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
+		WORD flags,	VARIANT *v, int nargs, zval *args, bool silent, bool allow_noarg);
+zend_result php_com_do_invoke(php_com_dotnet_object *obj, zend_string *name,
+		WORD flags,	VARIANT *v, int nargs, zval *args, bool allow_noarg);
+zend_result php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *f,
 		WORD flags,	VARIANT *v, int nargs, zval *args);
 
 /* com_wrapper.c */
@@ -108,15 +107,15 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *si
 PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val);
 
 /* com_persist.c */
-int php_com_persist_minit(INIT_FUNC_ARGS);
+void php_com_persist_minit(INIT_FUNC_ARGS);
 
 /* com_variant.c */
 PHP_METHOD(variant, __construct);
 
 PHP_COM_DOTNET_API void php_com_variant_from_zval_with_type(VARIANT *v, zval *z, VARTYPE type, int codepage);
 PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage);
-PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage);
-PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dst, VARIANT *src);
+PHP_COM_DOTNET_API zend_result php_com_zval_from_variant(zval *z, VARIANT *v, int codepage);
+PHP_COM_DOTNET_API zend_result php_com_copy_variant(VARIANT *dst, VARIANT *src);
 
 /* com_dotnet.c */
 PHP_METHOD(dotnet, __construct);
@@ -129,16 +128,16 @@ PHP_COM_DOTNET_API void php_com_wrap_dispatch(zval *z, IDispatch *disp,
 		int codepage);
 PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 		int codepage);
-PHP_COM_DOTNET_API int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1);
+PHP_COM_DOTNET_API bool php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1);
 
 /* com_typeinfo.c */
 PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(const char *search_string, int codepage);
 PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codepage);
-PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode,
-		int codepage);
+PHP_COM_DOTNET_API zend_result php_com_import_typelib(ITypeLib *TL, int mode, int codepage);
 void php_com_typelibrary_dtor(zval *pDest);
-ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj, char *dispname, int sink);
-int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int printdef, GUID *guid, int codepage);
+ITypeInfo *php_com_locate_typeinfo(zend_string *type_lib_name, php_com_dotnet_object *obj,
+		zend_string *dispatch_name, bool sink);
+bool php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, bool printdef, GUID *guid, int codepage);
 ITypeLib *php_com_cache_typelib(ITypeLib* TL, char *cache_key, zend_long cache_key_len);
 PHP_MINIT_FUNCTION(com_typeinfo);
 PHP_MSHUTDOWN_FUNCTION(com_typeinfo);

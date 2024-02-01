@@ -67,8 +67,13 @@ static int zend_implement_throwable(zend_class_entry *interface, zend_class_entr
 		return SUCCESS;
 	}
 
+	bool can_extend = (class_type->ce_flags & ZEND_ACC_ENUM) == 0;
+
 	zend_error_noreturn(E_ERROR,
-		"Class %s cannot implement interface %s, extend Exception or Error instead",
+		can_extend
+			? "%s %s cannot implement interface %s, extend Exception or Error instead"
+			: "%s %s cannot implement interface %s",
+		zend_get_object_type_uc(class_type),
 		ZSTR_VAL(class_type->name),
 		ZSTR_VAL(interface->name));
 	return FAILURE;
@@ -761,11 +766,6 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_ce_error_exception = register_class_ErrorException(zend_ce_exception);
 	zend_ce_error_exception->create_object = zend_error_exception_new;
 
-	/* Declared manually because it uses constant E_ERROR. */
-	zval severity_default_value;
-	ZVAL_LONG(&severity_default_value, E_ERROR);
-	zend_declare_typed_property(zend_ce_error_exception, ZSTR_KNOWN(ZEND_STR_SEVERITY), &severity_default_value, ZEND_ACC_PROTECTED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-
 	zend_ce_error = register_class_Error(zend_ce_throwable);
 	zend_ce_error->create_object = zend_default_exception_new;
 
@@ -950,9 +950,10 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 		file = zval_get_string(GET_PROPERTY_SILENT(&exception, ZEND_STR_FILE));
 		line = zval_get_long(GET_PROPERTY_SILENT(&exception, ZEND_STR_LINE));
 
+		ZVAL_STR(&tmp, str);
 		zend_error_va(severity | E_DONT_BAIL,
 			(file && ZSTR_LEN(file) > 0) ? file : NULL, line,
-			"Uncaught %s\n  thrown", ZSTR_VAL(str));
+			"Uncaught %Z\n  thrown", &tmp);
 
 		zend_string_release_ex(str, 0);
 		zend_string_release_ex(file, 0);

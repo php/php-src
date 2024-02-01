@@ -1,4 +1,4 @@
-.TH @program_prefix@php 1 "2021" "The PHP Group" "Scripting Language"
+.TH @program_prefix@php 1 "2024" "The PHP Group" "Scripting Language"
 .SH NAME
 @program_prefix@php \- PHP Command Line Interface 'CLI'
 .P
@@ -445,7 +445,7 @@ You can view the list of known bugs or report any new bug you
 found at:
 .PD 0
 .P
-.B http://bugs.php.net
+.B https://github.com/php/php-src/issues
 .PD 1
 .SH AUTHORS
 The PHP Group: Thies C. Arntzen, Stig Bakken, Andi Gutmans, Rasmus Lerdorf, Sam Ruby, Sascha Schumann, Zeev Suraski, Jim Winstead, Andrei Zmievski.

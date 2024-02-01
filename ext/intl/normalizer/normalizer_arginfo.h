@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 71dd44d3b839789639c16a4b6d5b2e4f40703a74 */
+ * Stub hash: 451d8875edd23e737c147fb9aab37aa8220d731d */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Normalizer_normalize, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -41,6 +41,70 @@ static zend_class_entry *register_class_Normalizer(void)
 
 	INIT_CLASS_ENTRY(ce, "Normalizer", class_Normalizer_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	zval const_FORM_D_value;
+	ZVAL_LONG(&const_FORM_D_value, NORMALIZER_FORM_D);
+	zend_string *const_FORM_D_name = zend_string_init_interned("FORM_D", sizeof("FORM_D") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_FORM_D_name, &const_FORM_D_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_FORM_D_name);
+
+	zval const_NFD_value;
+	ZVAL_LONG(&const_NFD_value, NORMALIZER_NFD);
+	zend_string *const_NFD_name = zend_string_init_interned("NFD", sizeof("NFD") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_NFD_name, &const_NFD_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_NFD_name);
+
+	zval const_FORM_KD_value;
+	ZVAL_LONG(&const_FORM_KD_value, NORMALIZER_FORM_KD);
+	zend_string *const_FORM_KD_name = zend_string_init_interned("FORM_KD", sizeof("FORM_KD") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_FORM_KD_name, &const_FORM_KD_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_FORM_KD_name);
+
+	zval const_NFKD_value;
+	ZVAL_LONG(&const_NFKD_value, NORMALIZER_NFKD);
+	zend_string *const_NFKD_name = zend_string_init_interned("NFKD", sizeof("NFKD") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_NFKD_name, &const_NFKD_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_NFKD_name);
+
+	zval const_FORM_C_value;
+	ZVAL_LONG(&const_FORM_C_value, NORMALIZER_FORM_C);
+	zend_string *const_FORM_C_name = zend_string_init_interned("FORM_C", sizeof("FORM_C") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_FORM_C_name, &const_FORM_C_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_FORM_C_name);
+
+	zval const_NFC_value;
+	ZVAL_LONG(&const_NFC_value, NORMALIZER_NFC);
+	zend_string *const_NFC_name = zend_string_init_interned("NFC", sizeof("NFC") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_NFC_name, &const_NFC_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_NFC_name);
+
+	zval const_FORM_KC_value;
+	ZVAL_LONG(&const_FORM_KC_value, NORMALIZER_FORM_KC);
+	zend_string *const_FORM_KC_name = zend_string_init_interned("FORM_KC", sizeof("FORM_KC") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_FORM_KC_name, &const_FORM_KC_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_FORM_KC_name);
+
+	zval const_NFKC_value;
+	ZVAL_LONG(&const_NFKC_value, NORMALIZER_NFKC);
+	zend_string *const_NFKC_name = zend_string_init_interned("NFKC", sizeof("NFKC") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_NFKC_name, &const_NFKC_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_NFKC_name);
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+
+	zval const_FORM_KC_CF_value;
+	ZVAL_LONG(&const_FORM_KC_CF_value, NORMALIZER_FORM_KC_CF);
+	zend_string *const_FORM_KC_CF_name = zend_string_init_interned("FORM_KC_CF", sizeof("FORM_KC_CF") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_FORM_KC_CF_name, &const_FORM_KC_CF_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_FORM_KC_CF_name);
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+
+	zval const_NFKC_CF_value;
+	ZVAL_LONG(&const_NFKC_CF_value, NORMALIZER_NFKC_CF);
+	zend_string *const_NFKC_CF_name = zend_string_init_interned("NFKC_CF", sizeof("NFKC_CF") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_NFKC_CF_name, &const_NFKC_CF_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_NFKC_CF_name);
+#endif
 
 	return class_entry;
 }

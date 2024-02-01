@@ -33,32 +33,87 @@ function doSomething() {
 echo doSomething() . PHP_EOL;
 ?>
 --EXPECTF--
-<!-- init '%s%eobserver_generator_%d.php' -->
-<file '%s%eobserver_generator_%d.php'>
+<!-- init '%s' -->
+<file '%s'>
   <!-- init doSomething() -->
   <doSomething>
-    <!-- init fooResults() -->
-    <fooResults>
+    <!-- init Generator::current() -->
+    <Generator::current>
+      <!-- init fooResults() -->
+      <fooResults>
 Starting generator
-    </fooResults:0>
+      </fooResults:0>
+    </Generator::current:0>
+    <Generator::current>
+    </Generator::current:0>
 0
-    <fooResults>
-    </fooResults:1>
+    <Generator::current>
+    </Generator::current:0>
+    <!-- init Generator::next() -->
+    <Generator::next>
+      <fooResults>
+      </fooResults:1>
+    </Generator::next:NULL>
+    <Generator::current>
+    </Generator::current:1>
+    <Generator::current>
+    </Generator::current:1>
 1
-    <fooResults>
-    </fooResults:2>
+    <Generator::current>
+    </Generator::current:1>
+    <Generator::next>
+      <fooResults>
+      </fooResults:2>
+    </Generator::next:NULL>
+    <Generator::current>
+    </Generator::current:2>
+    <Generator::current>
+    </Generator::current:2>
 2
-    <fooResults>
-    </fooResults:3>
+    <Generator::current>
+    </Generator::current:2>
+    <Generator::next>
+      <fooResults>
+      </fooResults:3>
+    </Generator::next:NULL>
+    <Generator::current>
+    </Generator::current:3>
+    <Generator::current>
+    </Generator::current:3>
 3
-    <fooResults>
-    </fooResults:4>
+    <Generator::current>
+    </Generator::current:3>
+    <Generator::next>
+      <fooResults>
+      </fooResults:4>
+    </Generator::next:NULL>
+    <Generator::current>
+    </Generator::current:4>
+    <Generator::current>
+    </Generator::current:4>
 4
-    <fooResults>
-    </fooResults:5>
+    <Generator::current>
+    </Generator::current:4>
+    <Generator::next>
+      <fooResults>
+      </fooResults:5>
+    </Generator::next:NULL>
+    <Generator::current>
+    </Generator::current:5>
+    <Generator::current>
+    </Generator::current:5>
 5
-    <fooResults>
-    </fooResults:NULL>
+    <Generator::current>
+    </Generator::current:5>
+    <!-- init Generator::send() -->
+    <Generator::send>
+      <fooResults>
+      </fooResults:NULL>
+    </Generator::send:NULL>
+    <Generator::next>
+    </Generator::next:NULL>
+    <Generator::current>
+    </Generator::current:NULL>
   </doSomething:'Done'>
 Done
-</file '%s%eobserver_generator_%d.php'>
+</file '%s'>

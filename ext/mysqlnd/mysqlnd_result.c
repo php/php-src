@@ -346,8 +346,8 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 					}
 					MYSQLND_INC_CONN_STATISTIC(conn->stats, statistic);
 				}
+				PACKET_FREE(&fields_eof);
 			} while (0);
-			PACKET_FREE(&fields_eof);
 			break; /* switch break */
 		}
 	} while (0);
@@ -735,8 +735,8 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 				UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 free_end:
 	PACKET_FREE(&row_packet);
+	DBG_INF_FMT("rows=%llu", (unsigned long long)set->row_count);
 end:
-	DBG_INF_FMT("rows=%llu", (unsigned long long)result->stored_data->row_count);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -785,7 +785,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 
 
 /* {{{ mysqlnd_res::skip_result */
-static enum_func_status
+static void
 MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result)
 {
 	bool fetched_anything;
@@ -810,7 +810,7 @@ MYSQLND_METHOD(mysqlnd_res, skip_result)(MYSQLND_RES * const result)
 					? STAT_ROWS_SKIPPED_NORMAL : STAT_ROWS_SKIPPED_PS);
 		}
 	}
-	DBG_RETURN(PASS);
+	DBG_VOID_RETURN;
 }
 /* }}} */
 

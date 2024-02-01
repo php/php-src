@@ -269,7 +269,7 @@ stdio_read:
 			zlog_stream_finish(log_stream);
 		}
 		if (read_fail < 0) {
-			zlog(ZLOG_SYSERROR, "unable to read what child say");
+			zlog(ZLOG_SYSERROR, "unable to read what child %d said into %s", (int) child->pid, is_stdout ? "stdout" : "stderr");
 		}
 
 		fpm_event_del(event);

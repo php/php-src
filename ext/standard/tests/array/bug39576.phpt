@@ -4,10 +4,10 @@ Bug #39576 (array_walk() doesn't separate userdata zval)
 <?php
 
 class Test {
-
     public $_table = '';
     public $_columns = array ();
     public $_primary = array ();
+    public $name;
 
 }
 

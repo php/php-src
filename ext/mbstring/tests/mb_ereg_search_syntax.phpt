@@ -4,7 +4,7 @@ Specifying non-default syntax in mb_ereg_search()
 mbstring
 --SKIPIF--
 <?php
-if (!function_exists("mb_regex_search")) die("skip mb_regex_search() is not defined");
+if (!function_exists("mb_ereg_search")) die("skip mb_ereg_search() is not defined");
 ?>
 --FILE--
 <?php

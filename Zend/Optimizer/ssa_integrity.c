@@ -89,6 +89,11 @@ static inline bool is_var_type(zend_uchar type) {
 	return (type & (IS_CV|IS_VAR|IS_TMP_VAR)) != 0;
 }
 
+static inline bool is_defined(const zend_ssa *ssa, const zend_op_array *op_array, int var) {
+	const zend_ssa_var *ssa_var = &ssa->vars[var];
+	return ssa_var->definition >= 0 || ssa_var->definition_phi || var < op_array->last_var;
+}
+
 #define FAIL(...) do { \
 	if (status == SUCCESS) { \
 		fprintf(stderr, "\nIn function %s::%s (%s):\n", \
@@ -108,15 +113,16 @@ static inline bool is_var_type(zend_uchar type) {
 #define INSTR(i) \
 	(i), (zend_get_opcode_name(op_array->opcodes[i].opcode))
 
-int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *extra) {
+void ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *extra) {
 	zend_cfg *cfg = &ssa->cfg;
 	zend_ssa_phi *phi;
-	int i, status = SUCCESS;
+	int i;
+	zend_result status = SUCCESS;
 
 	/* Vars */
 	for (i = 0; i < ssa->vars_count; i++) {
 		zend_ssa_var *var = &ssa->vars[i];
-		int use, c;
+		int use;
 		uint32_t type = ssa->var_info[i].type;
 
 		if (var->definition < 0 && !var->definition_phi && i > op_array->last_var) {
@@ -142,33 +148,58 @@ int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ext
 			}
 		}
 
-		c = 0;
-		FOREACH_USE(var, use) {
-			if (++c > 10000) {
-				FAIL("cycle in uses of " VARFMT "\n", VAR(i));
-				return status;
+		/* Floyd's cycle detection algorithm, applied for use chain. */
+		use = var->use_chain;
+		int second_use = use;
+		while (use >= 0 && second_use >= 0) {
+			use = zend_ssa_next_use(ssa->ops, var - ssa->vars, use);
+			second_use = zend_ssa_next_use(ssa->ops, var - ssa->vars, second_use);
+			if (second_use < 0) {
+				break;
 			}
+			second_use = zend_ssa_next_use(ssa->ops, var - ssa->vars, second_use);
+			if (use == second_use) {
+				FAIL("cycle in uses of " VARFMT "\n", VAR(i));
+				goto finish;
+			}
+		}
+
+		FOREACH_USE(var, use) {
 			if (!is_used_by_op(ssa, use, i)) {
 				fprintf(stderr, "var " VARFMT " not in uses of op %d\n", VAR(i), use);
 			}
 		} FOREACH_USE_END();
 
-		c = 0;
-		FOREACH_PHI_USE(var, phi) {
-			if (++c > 10000) {
-				FAIL("cycle in phi uses of " VARFMT "\n", VAR(i));
-				return status;
+		/* Floyd's cycle detection algorithm, applied for phi nodes. */
+		phi = var->phi_use_chain;
+		zend_ssa_phi *second_phi = phi;
+		while (phi && second_phi) {
+			phi = zend_ssa_next_use_phi(ssa, var - ssa->vars, phi);
+			second_phi = zend_ssa_next_use_phi(ssa, var - ssa->vars, second_phi);
+			if (!second_phi) {
+				break;
 			}
+			second_phi = zend_ssa_next_use_phi(ssa, var - ssa->vars, second_phi);
+			if (phi == second_phi) {
+				FAIL("cycle in phi uses of " VARFMT "\n", VAR(i));
+				goto finish;
+			}
+		}
+
+		FOREACH_PHI_USE(var, phi) {
 			if (!is_in_phi_sources(ssa, phi, i)) {
 				FAIL("var " VARFMT " not in phi sources of %d\n", VAR(i), phi->ssa_var);
 			}
 		} FOREACH_PHI_USE_END();
 
-		if ((type & MAY_BE_ARRAY_KEY_ANY) && !(type & MAY_BE_ARRAY_OF_ANY)) {
+		if ((type & (MAY_BE_ARRAY_KEY_ANY-MAY_BE_ARRAY_EMPTY)) && !(type & MAY_BE_ARRAY_OF_ANY)) {
 			FAIL("var " VARFMT " has array key type but not value type\n", VAR(i));
 		}
-		if ((type & MAY_BE_ARRAY_OF_ANY) && !(type & MAY_BE_ARRAY_KEY_ANY)) {
+		if ((type & MAY_BE_ARRAY_OF_ANY) && !(type & (MAY_BE_ARRAY_KEY_ANY-MAY_BE_ARRAY_EMPTY))) {
 			FAIL("var " VARFMT " has array value type but not key type\n", VAR(i));
+		}
+		if ((type & MAY_BE_REF) && ssa->var_info[i].ce) {
+			FAIL("var " VARFMT " may be ref but has ce\n", VAR(i));
 		}
 	}
 
@@ -208,6 +239,10 @@ int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ext
 			if (ssa_op->op1_use >= ssa->vars_count) {
 				FAIL("op1 use %d out of range\n", ssa_op->op1_use);
 			}
+			if (!is_defined(ssa, op_array, ssa_op->op1_use)) {
+				FAIL("op1 use of " VARFMT " in " INSTRFMT " is not defined\n",
+						VAR(ssa_op->op1_use), INSTR(i));
+			}
 			if (!is_in_use_chain(ssa, ssa_op->op1_use, i)) {
 				FAIL("op1 use of " VARFMT " in " INSTRFMT " not in use chain\n",
 						VAR(ssa_op->op1_use), INSTR(i));
@@ -221,6 +256,10 @@ int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ext
 			if (ssa_op->op2_use >= ssa->vars_count) {
 				FAIL("op2 use %d out of range\n", ssa_op->op2_use);
 			}
+			if (!is_defined(ssa, op_array, ssa_op->op2_use)) {
+				FAIL("op2 use of " VARFMT " in " INSTRFMT " is not defined\n",
+						VAR(ssa_op->op2_use), INSTR(i));
+			}
 			if (!is_in_use_chain(ssa, ssa_op->op2_use, i)) {
 				FAIL("op2 use of " VARFMT " in " INSTRFMT " not in use chain\n",
 						VAR(ssa_op->op2_use), INSTR(i));
@@ -233,6 +272,10 @@ int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ext
 		if (ssa_op->result_use >= 0) {
 			if (ssa_op->result_use >= ssa->vars_count) {
 				FAIL("result use %d out of range\n", ssa_op->result_use);
+			}
+			if (!is_defined(ssa, op_array, ssa_op->result_use)) {
+				FAIL("result use of " VARFMT " in " INSTRFMT " is not defined\n",
+						VAR(ssa_op->result_use), INSTR(i));
 			}
 			if (!is_in_use_chain(ssa, ssa_op->result_use, i)) {
 				FAIL("result use of " VARFMT " in " INSTRFMT " not in use chain\n",
@@ -374,5 +417,9 @@ int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ext
 		}
 	}
 
-	return status;
+finish:
+	if (status == FAILURE) {
+		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "at SSA integrity verification", ssa);
+		ZEND_ASSERT(0 && "SSA integrity verification failed");
+	}
 }

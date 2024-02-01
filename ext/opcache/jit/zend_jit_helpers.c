@@ -37,7 +37,7 @@ static ZEND_COLD void zend_jit_illegal_string_offset(zval *offset)
 	zend_type_error("Cannot access offset of type %s on string", zend_zval_type_name(offset));
 }
 
-static zend_never_inline zend_function* ZEND_FASTCALL _zend_jit_init_func_run_time_cache(const zend_op_array *op_array) /* {{{ */
+static zend_never_inline zend_function* ZEND_FASTCALL _zend_jit_init_func_run_time_cache(zend_op_array *op_array) /* {{{ */
 {
 	void **run_time_cache;
 
@@ -1106,6 +1106,9 @@ static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zend_string *s
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		return ZSTR_EMPTY_ALLOC();
+	}
 	return zend_jit_fetch_dim_str_offset(str, offset);
 }
 
@@ -1135,7 +1138,8 @@ try_string_offset:
 				goto try_string_offset;
 			default:
 				zend_jit_illegal_string_offset(dim);
-				break;
+				ZVAL_NULL(result);
+				return;
 		}
 
 		offset = zval_get_long_func(dim, /* is_strict */ false);
@@ -1587,7 +1591,9 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 			}
 			zval_ptr_dtor(&res);
 		} else {
-			zend_error(E_WARNING, "Attempt to assign property of non-object");
+			/* Exception is thrown in this case */
+			GC_DELREF(obj);
+			return;
 		}
 		if (UNEXPECTED(GC_DELREF(obj) == 0)) {
 			zend_objects_store_del(obj);
@@ -1765,11 +1771,10 @@ static zend_reference* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_string *v
 	if (EXPECTED(idx < EG(symbol_table).nNumUsed * sizeof(Bucket))) {
 		Bucket *p = (Bucket*)((char*)EG(symbol_table).arData + idx);
 
-		if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-	        (EXPECTED(p->key == varname) ||
-	         (EXPECTED(p->h == ZSTR_H(varname)) &&
-	          EXPECTED(p->key != NULL) &&
-	          EXPECTED(zend_string_equal_content(p->key, varname))))) {
+		if (EXPECTED(p->key == varname) ||
+	        (EXPECTED(p->h == ZSTR_H(varname)) &&
+	         EXPECTED(p->key != NULL) &&
+	         EXPECTED(zend_string_equal_content(p->key, varname)))) {
 
 			value = (zval*)p; /* value = &p->val; */
 			goto check_indirect;
@@ -1862,12 +1867,10 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_r_dynamic(zend_object *zobj, intptr
 			if (EXPECTED(idx < zobj->properties->nNumUsed * sizeof(Bucket))) {
 				Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
-				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-			        (EXPECTED(p->key == name) ||
-			         (EXPECTED(p->h == ZSTR_H(name)) &&
-			          EXPECTED(p->key != NULL) &&
-			          EXPECTED(ZSTR_LEN(p->key) == ZSTR_LEN(name)) &&
-			          EXPECTED(memcmp(ZSTR_VAL(p->key), ZSTR_VAL(name), ZSTR_LEN(name)) == 0)))) {
+				if (EXPECTED(p->key == name) ||
+			        (EXPECTED(p->h == ZSTR_H(name)) &&
+			         EXPECTED(p->key != NULL) &&
+			         EXPECTED(zend_string_equal_content(p->key, name)))) {
 					ZVAL_COPY_DEREF(result, &p->val);
 					return;
 				}
@@ -1920,12 +1923,10 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, intpt
 			if (EXPECTED(idx < zobj->properties->nNumUsed * sizeof(Bucket))) {
 				Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
-				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
-			        (EXPECTED(p->key == name) ||
-			         (EXPECTED(p->h == ZSTR_H(name)) &&
-			          EXPECTED(p->key != NULL) &&
-			          EXPECTED(ZSTR_LEN(p->key) == ZSTR_LEN(name)) &&
-			          EXPECTED(memcmp(ZSTR_VAL(p->key), ZSTR_VAL(name), ZSTR_LEN(name)) == 0)))) {
+				if (EXPECTED(p->key == name) ||
+			        (EXPECTED(p->h == ZSTR_H(name)) &&
+			         EXPECTED(p->key != NULL) &&
+			         EXPECTED(zend_string_equal_content(p->key, name)))) {
 					ZVAL_COPY_DEREF(result, &p->val);
 					return;
 				}
@@ -1954,7 +1955,7 @@ static zend_always_inline bool check_type_array_assignable(zend_type type) {
 	if (!ZEND_TYPE_IS_SET(type)) {
 		return 1;
 	}
-	return (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_ITERABLE|MAY_BE_ARRAY)) != 0;
+	return (ZEND_TYPE_FULL_MASK(type) & MAY_BE_ARRAY) != 0;
 }
 
 static zend_property_info *zend_object_fetch_property_type_info(
@@ -2099,7 +2100,7 @@ static void ZEND_FASTCALL zend_jit_check_array_promotion(zval *val, zend_propert
 	if ((Z_TYPE_P(val) <= IS_FALSE
 		|| (Z_ISREF_P(val) && Z_TYPE_P(Z_REFVAL_P(val)) <= IS_FALSE))
 		&& ZEND_TYPE_IS_SET(prop->type)
-		&& (ZEND_TYPE_FULL_MASK(prop->type) & (MAY_BE_ITERABLE|MAY_BE_ARRAY)) == 0) {
+		&& (ZEND_TYPE_FULL_MASK(prop->type) & MAY_BE_ARRAY) == 0) {
 		zend_string *type_str = zend_type_to_string(prop->type);
 		zend_type_error(
 			"Cannot auto-initialize an array inside property %s::$%s of type %s",

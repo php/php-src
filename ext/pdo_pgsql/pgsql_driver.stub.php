@@ -2,7 +2,10 @@
 
 /** @generate-function-entries */
 
-// These are extension methods for PDO. This is not a real class.
+/**
+ * These are extension methods for PDO. This is not a real class.
+ * @undocumentable
+ */
 class PDO_PGSql_Ext {
     /** @tentative-return-type */
     public function pgsqlCopyFromArray(string $tableName, array $rows, string $separator = "\t", string $nullAs = "\\\\N", ?string $fields = null): bool {}
@@ -26,7 +29,7 @@ class PDO_PGSql_Ext {
     public function pgsqlLOBUnlink(string $oid): bool {}
 
     /** @tentative-return-type */
-    public function pgsqlGetNotify(int $fetchMode = PDO::FETCH_USE_DEFAULT, int $timeoutMilliseconds = 0): array|false {}
+    public function pgsqlGetNotify(int $fetchMode = PDO::FETCH_DEFAULT, int $timeoutMilliseconds = 0): array|false {}
 
     /** @tentative-return-type */
     public function pgsqlGetPid(): int {}

@@ -32,6 +32,9 @@
 #include "mbfilter_htmlent.h"
 #include "html_entities.h"
 
+static size_t mb_htmlent_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_htmlent(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+
 static const int htmlentitifieds[256] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -62,6 +65,8 @@ const mbfl_encoding mbfl_encoding_html_ent = {
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_html_wchar,
 	&vtbl_wchar_html,
+	mb_htmlent_to_wchar,
+	mb_wchar_to_htmlent,
 	NULL
 };
 
@@ -173,9 +178,10 @@ void mbfl_filt_conv_html_dec_dtor(mbfl_convert_filter *filter)
 
 int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 {
-	int  pos, ent = 0;
+	int pos;
+	unsigned int ent = 0;
 	mbfl_html_entity_entry *entity;
-	char *buffer = (char*)filter->opaque;
+	unsigned char *buffer = (unsigned char*)filter->opaque;
 
 	if (!filter->status) {
 		if (c == '&' ) {
@@ -191,7 +197,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					if (filter->status > 3) {
 						/* numeric entity */
 						for (pos=3; pos<filter->status; pos++) {
-							int v =  buffer[pos];
+							int v = buffer[pos];
 							if (v >= '0' && v <= '9') {
 								v = v - '0';
 							} else if (v >= 'A' && v <= 'F') {
@@ -211,6 +217,10 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					/* numeric entity */
 					if (filter->status > 2) {
 						for (pos=2; pos<filter->status; pos++) {
+							if (ent > 0x19999999) {
+								ent = -1;
+								break;
+							}
 							int v = buffer[pos];
 							if (v >= '0' && v <= '9') {
 								v = v - '0';
@@ -224,7 +234,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 						ent = -1;
 					}
 				}
-				if (ent >= 0 && ent < 0x110000) {
+				if (ent < 0x110000) {
 					CK((*filter->output_function)(ent, filter->data));
 				} else {
 					for (pos = 0; pos < filter->status; pos++) {
@@ -233,13 +243,12 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					CK((*filter->output_function)(c, filter->data));
 				}
 				filter->status = 0;
-				/*php_error_docref("ref.mbstring", E_NOTICE, "mbstring decoded '%s'=%d", buffer, ent);*/
 			} else {
 				/* named entity */
 				buffer[filter->status] = 0;
 				entity = (mbfl_html_entity_entry *)mbfl_html_entity_list;
 				while (entity->name) {
-					if (!strcmp(buffer+1, entity->name))	{
+					if (!strcmp((const char*)buffer+1, entity->name)) {
 						ent = entity->code;
 						break;
 					}
@@ -249,13 +258,20 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					/* decoded */
 					CK((*filter->output_function)(ent, filter->data));
 					filter->status = 0;
-					/*php_error_docref("ref.mbstring", E_NOTICE,"mbstring decoded '%s'=%d", buffer, ent);*/
+
 				} else {
 					/* failure */
 					buffer[filter->status++] = ';';
 					buffer[filter->status] = 0;
-					/* php_error_docref("ref.mbstring", E_WARNING, "mbstring cannot decode '%s'", buffer); */
-					mbfl_filt_conv_html_dec_flush(filter);
+
+					/* flush fragments */
+					pos = 0;
+					while (filter->status--) {
+						int e = (*filter->output_function)(buffer[pos++], filter->data);
+						if (e != 0)
+							return e;
+					}
+					filter->status = 0;
 				}
 			}
 		} else {
@@ -268,8 +284,15 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 				if (c=='&')
 					filter->status--;
 				buffer[filter->status] = 0;
-				/* php_error_docref("ref.mbstring", E_WARNING, "mbstring cannot decode '%s'", buffer)l */
-				mbfl_filt_conv_html_dec_flush(filter);
+
+				pos = 0;
+				while (filter->status--) {
+					int e = (*filter->output_function)(buffer[pos++], filter->data);
+					if (e != 0)
+						return e;
+				}
+				filter->status = 0;
+
 				if (c=='&')
 				{
 					buffer[filter->status++] = '&';
@@ -309,4 +332,155 @@ void mbfl_filt_conv_html_dec_copy(mbfl_convert_filter *src, mbfl_convert_filter 
 	*dest = *src;
 	dest->opaque = emalloc(html_enc_buffer_size+1);
 	memcpy(dest->opaque, src->opaque, html_enc_buffer_size+1);
+}
+
+static bool is_html_entity_char(unsigned char c)
+{
+	return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '#';
+}
+
+static size_t mb_htmlent_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	unsigned char *p = *in, *e = p + *in_len;
+	uint32_t *out = buf, *limit = buf + bufsize;
+
+	while (p < e && out < limit) {
+		unsigned char c = *p++;
+
+		if (c == '&') {
+			/* Find terminating ; for HTML entity */
+			unsigned char *terminator = p;
+			while (terminator < e && is_html_entity_char(*terminator))
+				terminator++;
+			if (terminator < e && *terminator == ';') {
+				if (*p == '#' && (e - p) >= 2) {
+					/* Numeric entity */
+					unsigned int value = 0;
+					unsigned char *digits = p + 1;
+					if (*digits == 'x' || *digits == 'X') {
+						/* Hexadecimal */
+						digits++;
+						if (digits == terminator) {
+							goto bad_entity;
+						}
+						while (digits < terminator) {
+							unsigned char digit = *digits++;
+							if (digit >= '0' && digit <= '9') {
+								value = (value * 16) + (digit - '0');
+							} else if (digit >= 'A' && digit <= 'F') {
+								value = (value * 16) + (digit - 'A' + 10);
+							} else if (digit >= 'a' && digit <= 'f') {
+								value = (value * 16) + (digit - 'a' + 10);
+							} else {
+								goto bad_entity;
+							}
+						}
+					} else {
+						/* Decimal */
+						if (digits == terminator) {
+							goto bad_entity;
+						}
+						while (digits < terminator) {
+							unsigned char digit = *digits++;
+							if (digit >= '0' && digit <= '9') {
+								value = (value * 10) + (digit - '0');
+							} else {
+								goto bad_entity;
+							}
+						}
+					}
+					if (value > 0x10FFFF) {
+						goto bad_entity;
+					}
+					*out++ = value;
+					p = terminator + 1;
+					goto next_iteration;
+				} else if (terminator > p && terminator < e) {
+					/* Named entity */
+					mbfl_html_entity_entry *entity = (mbfl_html_entity_entry*)mbfl_html_entity_list;
+					while (entity->name) {
+						if (!strncmp((char*)p, entity->name, terminator - p) && strlen(entity->name) == terminator - p) {
+							*out++ = entity->code;
+							p = terminator + 1;
+							goto next_iteration;
+						}
+						entity++;
+					}
+				}
+			}
+			/* Either we didn't find ;, or the name of the entity was not recognized */
+bad_entity:
+			*out++ = '&';
+			while (p < terminator && out < limit) {
+				*out++ = *p++;
+			}
+			if (terminator < e && *terminator == ';' && out < limit) {
+				*out++ = *p++;
+			}
+		} else {
+			*out++ = c;
+		}
+
+next_iteration: ;
+	}
+
+	*in_len = e - p;
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_htmlent(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+
+	while (len--) {
+		uint32_t w = *in++;
+
+		if (w < sizeof(htmlentitifieds) / sizeof(htmlentitifieds[0]) && htmlentitifieds[w] != 1) {
+			/* Fast path for most ASCII characters */
+			out = mb_convert_buf_add(out, w);
+		} else {
+			out = mb_convert_buf_add(out, '&');
+
+			/* See if there is a matching named entity */
+			mbfl_html_entity_entry *entity = (mbfl_html_entity_entry*)mbfl_html_entity_list;
+			while (entity->name) {
+				if (w == entity->code) {
+					MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 1 + strlen(entity->name));
+					for (char *str = entity->name; *str; str++) {
+						out = mb_convert_buf_add(out, *str);
+					}
+					out = mb_convert_buf_add(out, ';');
+					goto next_iteration;
+				}
+				entity++;
+			}
+
+			/* There is no matching named entity; emit a numeric entity instead */
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 12);
+			out = mb_convert_buf_add(out, '#');
+
+			if (!w) {
+				out = mb_convert_buf_add(out, '0');
+			} else {
+				unsigned char buf[12];
+				unsigned char *converted = buf + sizeof(buf);
+				while (w) {
+					*(--converted) = "0123456789"[w % 10];
+					w /= 10;
+				}
+				while (converted < buf + sizeof(buf)) {
+					out = mb_convert_buf_add(out, *converted++);
+				}
+			}
+
+			out = mb_convert_buf_add(out, ';');
+		}
+
+next_iteration: ;
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }

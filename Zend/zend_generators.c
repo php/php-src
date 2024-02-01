@@ -612,28 +612,46 @@ static zend_result zend_generator_get_next_delegated_value(zend_generator *gener
 		HashTable *ht = Z_ARR(generator->values);
 		HashPosition pos = Z_FE_POS(generator->values);
 
-		Bucket *p;
-		do {
-			if (UNEXPECTED(pos >= ht->nNumUsed)) {
-				/* Reached end of array */
-				goto failure;
-			}
+		if (HT_IS_PACKED(ht)) {
+			do {
+				if (UNEXPECTED(pos >= ht->nNumUsed)) {
+					/* Reached end of array */
+					goto failure;
+				}
 
-			p = &ht->arData[pos];
-			value = &p->val;
-			pos++;
-		} while (Z_ISUNDEF_P(value));
+				value = &ht->arPacked[pos];
+				pos++;
+			} while (Z_ISUNDEF_P(value));
 
-		zval_ptr_dtor(&generator->value);
-		ZVAL_COPY(&generator->value, value);
+			zval_ptr_dtor(&generator->value);
+			ZVAL_COPY(&generator->value, value);
 
-		zval_ptr_dtor(&generator->key);
-		if (p->key) {
-			ZVAL_STR_COPY(&generator->key, p->key);
+			zval_ptr_dtor(&generator->key);
+			ZVAL_LONG(&generator->key, pos - 1);
 		} else {
-			ZVAL_LONG(&generator->key, p->h);
-		}
+			Bucket *p;
 
+			do {
+				if (UNEXPECTED(pos >= ht->nNumUsed)) {
+					/* Reached end of array */
+					goto failure;
+				}
+
+				p = &ht->arData[pos];
+				value = &p->val;
+				pos++;
+			} while (Z_ISUNDEF_P(value));
+
+			zval_ptr_dtor(&generator->value);
+			ZVAL_COPY(&generator->value, value);
+
+			zval_ptr_dtor(&generator->key);
+			if (p->key) {
+				ZVAL_STR_COPY(&generator->key, p->key);
+			} else {
+				ZVAL_LONG(&generator->key, p->h);
+			}
+		}
 		Z_FE_POS(generator->values) = pos;
 	} else {
 		zend_object_iterator *iter = (zend_object_iterator *) Z_OBJ(generator->values);

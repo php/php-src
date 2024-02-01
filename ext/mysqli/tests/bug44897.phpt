@@ -4,14 +4,10 @@ Bug #44879 (failed to prepare statement)
 mysqli
 --SKIPIF--
 <?php
-if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
-    die("skip: only available in mysqlnd");
+require_once 'connect.inc';
 
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
-
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-    die(sprintf('skip Cannot connect to MySQL, [%d] %s.', mysqli_connect_errno(), mysqli_connect_error()));
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 }
 if (mysqli_get_server_version($link) <= 50000) {
     die(sprintf('skip Needs MySQL 5.0+, found version %d.', mysqli_get_server_version($link)));

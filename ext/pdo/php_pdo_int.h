@@ -25,7 +25,7 @@ extern HashTable pdo_driver_hash;
 extern zend_class_entry *pdo_exception_ce;
 int php_pdo_list_entry(void);
 
-void pdo_dbh_init(void);
+void pdo_dbh_init(int module_number);
 void pdo_stmt_init(void);
 
 extern zend_object *pdo_dbh_new(zend_class_entry *ce);

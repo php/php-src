@@ -16,7 +16,6 @@ function chk_enc($str, $n, $enc = "UTF-8") {
 
 mb_substitute_character(0xfffd);
 
-
 echo "UTF-8 redundancy\n";
 var_dump(chk_enc("\x31\x32\x33", 0));
 var_dump(chk_enc("\x41\x42\x43", 0));

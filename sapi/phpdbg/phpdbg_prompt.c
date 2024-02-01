@@ -306,7 +306,7 @@ void phpdbg_string_init(char *buffer) {
 
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, bool free_init) /* {{{ */
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 
 	if (init_file && VCWD_STAT(init_file, &sb) != -1) {
 		FILE *fp = fopen(init_file, "r");
@@ -364,7 +364,7 @@ void phpdbg_init(char *init_file, size_t init_file_len, bool use_default) /* {{{
 			}
 
 			ZEND_IGNORE_VALUE(asprintf(&init_file, "%s/%s", scan_dir, PHPDBG_INIT_FILENAME));
-			phpdbg_try_file_init(init_file, strlen(init_file), 1);
+			phpdbg_try_file_init(init_file, strlen(init_file), 0);
 			free(init_file);
 			if (i == -1) {
 				break;
@@ -398,7 +398,7 @@ void phpdbg_clean(bool full, bool resubmit) /* {{{ */
 
 PHPDBG_COMMAND(exec) /* {{{ */
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 
 	if (VCWD_STAT(param->str, &sb) != FAILURE) {
 		if (sb.st_mode & (S_IFREG|S_IFLNK)) {
@@ -408,6 +408,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 			if ((res_len != PHPDBG_G(exec_len)) || (memcmp(res, PHPDBG_G(exec), res_len) != SUCCESS)) {
 				if (PHPDBG_G(in_execution)) {
 					if (phpdbg_ask_user_permission("Do you really want to stop execution to set a new execution context?") == FAILURE) {
+						free(res);
 						return FAILURE;
 					}
 				}
@@ -441,6 +442,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 				phpdbg_compile();
 			} else {
+				free(res);
 				phpdbg_notice("Execution context not changed");
 			}
 		} else {
@@ -514,7 +516,7 @@ exec_code:
 } /* }}} */
 
 int phpdbg_compile_stdin(zend_string *code) {
-	PHPDBG_G(ops) = zend_compile_string(code, "Standard input code");
+	PHPDBG_G(ops) = zend_compile_string(code, "Standard input code", ZEND_COMPILE_POSITION_AFTER_OPEN_TAG);
 	zend_string_release(code);
 
 	if (EG(exception)) {
@@ -1390,7 +1392,7 @@ PHPDBG_COMMAND(dl) /* {{{ */
 
 PHPDBG_COMMAND(source) /* {{{ */
 {
-	zend_stat_t sb;
+	zend_stat_t sb = {0};
 
 	if (VCWD_STAT(param->str, &sb) != -1) {
 		phpdbg_try_file_init(param->str, param->len, 0);
@@ -1663,7 +1665,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
 		}
 
 #ifdef ZEND_WIN32
-		if (EG(timed_out)) {
+		if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 			zend_timeout();
 		}
 #endif

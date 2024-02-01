@@ -4,14 +4,12 @@ Bug #68077 (LOAD DATA LOCAL INFILE / open_basedir restriction)
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-if (!$IS_MYSQLND) {
-    die("skip: test applies only to mysqlnd");
+require_once 'connect.inc';
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 }
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-    die("skip Cannot connect to MySQL");
 
-include_once("local_infile_tools.inc");
+include_once "local_infile_tools.inc";
 if ($msg = check_local_infile_support($link, $engine))
     die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
 

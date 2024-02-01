@@ -43,7 +43,7 @@ const HEADER_TEXT = <<< DATA
 DATA;
 
 /*
-    This script creates zend_vm_execute.h and zend_vm_opcodes.h
+    This script creates zend_vm_execute.h and zend_vm_opcodes.{h,c}
     from existing zend_vm_def.h and zend_vm_execute.skl
 */
 
@@ -472,28 +472,6 @@ $op2_free_op_if_var = array(
     "TMPVARCV" => "???",
 );
 
-$op1_free_op_var_ptr = array(
-    "ANY"      => "if (opline->op1_type == IS_VAR) {zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));}",
-    "TMP"      => "",
-    "VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
-    "CONST"    => "",
-    "UNUSED"   => "",
-    "CV"       => "",
-    "TMPVAR"   => "???",
-    "TMPVARCV" => "???",
-);
-
-$op2_free_op_var_ptr = array(
-    "ANY"      => "if (opline->op2_type == IS_VAR) {zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));}",
-    "TMP"      => "",
-    "VAR"      => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
-    "CONST"    => "",
-    "UNUSED"   => "",
-    "CV"       => "",
-    "TMPVAR"   => "???",
-    "TMPVARCV" => "???",
-);
-
 $op_data_type = array(
     "ANY"      => "(opline+1)->op1_type",
     "TMP"      => "IS_TMP_VAR",
@@ -557,17 +535,6 @@ $op_data_free_op = array(
     "UNUSED"   => "",
     "CV"       => "",
     "TMPVAR"   => "zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var))",
-    "TMPVARCV" => "???",
-);
-
-$op_data_free_op_var_ptr = array(
-    "ANY"      => "if ((opline+1)->op1_type == IS_VAR) {zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));}",
-    "TMP"      => "",
-    "VAR"      => "zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));",
-    "CONST"    => "",
-    "UNUSED"   => "",
-    "CV"       => "",
-    "TMPVAR"   => "???",
     "TMPVARCV" => "???",
 );
 
@@ -729,12 +696,11 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         $op1_get_obj_zval_ptr_deref, $op2_get_obj_zval_ptr_deref,
         $op1_get_obj_zval_ptr_ptr, $op2_get_obj_zval_ptr_ptr,
         $op1_get_obj_zval_ptr_ptr_undef, $op2_get_obj_zval_ptr_ptr_undef,
-        $op1_free_unfetched, $op2_free_unfetched,
         $op1_free_op, $op2_free_op, $op1_free_op_if_var, $op2_free_op_if_var,
-        $op1_free_op_var_ptr, $op2_free_op_var_ptr, $prefix,
+        $prefix,
         $op_data_type, $op_data_get_zval_ptr, $op_data_get_zval_ptr_undef,
         $op_data_get_zval_ptr_deref, $op_data_get_zval_ptr_ptr,
-        $op_data_free_op, $op_data_free_op_var_ptr, $op_data_free_unfetched;
+        $op_data_free_op;
 
     // Specializing
     $specialized_replacements = array(
@@ -764,8 +730,6 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/FREE_OP2\(\)/" => $op2_free_op[$op2],
         "/FREE_OP1_IF_VAR\(\)/" => $op1_free_op_if_var[$op1],
         "/FREE_OP2_IF_VAR\(\)/" => $op2_free_op_if_var[$op2],
-        "/FREE_OP1_VAR_PTR\(\)/" => $op1_free_op_var_ptr[$op1],
-        "/FREE_OP2_VAR_PTR\(\)/" => $op2_free_op_var_ptr[$op2],
         "/\!ZEND_VM_SPEC/m" => ($op1!="ANY"||$op2!="ANY")?"0":"1",
         "/ZEND_VM_SPEC/m" => ($op1!="ANY"||$op2!="ANY")?"1":"0",
         "/ZEND_VM_C_LABEL\(\s*([A-Za-z_]*)\s*\)/m" => "\\1".(($spec && $kind != ZEND_VM_KIND_CALL)?("_SPEC".$prefix[$op1].$prefix[$op2].extra_spec_name($extra_spec)):""),
@@ -780,7 +744,6 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/GET_OP_DATA_ZVAL_PTR_DEREF\(([^)]*)\)/" => $op_data_get_zval_ptr_deref[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/GET_OP_DATA_ZVAL_PTR_PTR\(([^)]*)\)/" => $op_data_get_zval_ptr_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/FREE_OP_DATA\(\)/" => $op_data_free_op[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
-        "/FREE_OP_DATA_VAR_PTR\(\)/" => $op_data_free_op_var_ptr[isset($extra_spec['OP_DATA']) ? $extra_spec['OP_DATA'] : "ANY"],
         "/RETURN_VALUE_USED\(opline\)/" => isset($extra_spec['RETVAL']) ? $extra_spec['RETVAL'] : "RETURN_VALUE_USED(opline)",
         "/arg_num <= MAX_ARG_FLAG_NUM/" => isset($extra_spec['QUICK_ARG']) ? $extra_spec['QUICK_ARG'] : "arg_num <= MAX_ARG_FLAG_NUM",
         "/ZEND_VM_SMART_BRANCH\(\s*([^,)]*)\s*,\s*([^)]*)\s*\)/" => isset($extra_spec['SMART_BRANCH']) ?
@@ -1562,7 +1525,9 @@ function gen_specs($f, $prolog, $specs) {
         $last = $num;
         out($f, "$prolog$def,\n");
     }
-    out($f, "$prolog$lastdef\n");
+    while ($last++ < 255) {
+        out($f, "$prolog$lastdef,\n");
+    }
 }
 
 // Generates handler for undefined opcodes (CALL threading model)
@@ -2415,7 +2380,7 @@ function gen_vm($def, $skel) {
     // Load definition file
     $in = @file($def);
     if (!$in) {
-        die("ERROR: Can not open definition file '$def'\n");
+        die("ERROR: Cannot open definition file '$def'\n");
     }
     // We need absolute path to definition file to use it in #line directives
     $definition_file = realpath($def);
@@ -2423,7 +2388,7 @@ function gen_vm($def, $skel) {
     // Load skeleton file
     $skl = @file($skel);
     if (!$skl) {
-        die("ERROR: Can not open skeleton file '$skel'\n");
+        die("ERROR: Cannot open skeleton file '$skel'\n");
     }
     // We need absolute path to skeleton file to use it in #line directives
     $skeleton_file = realpath($skel);
@@ -2902,7 +2867,7 @@ function gen_vm($def, $skel) {
                             out($f, "\t\t\t\t\tbreak;\n");
                             out($f, "\t\t\t\t}\n");
                         }
-                        out($f, "\t\t\t\tspec = ${spec_dsc['spec_code']};\n");
+                        out($f, "\t\t\t\tspec = {$spec_dsc['spec_code']};\n");
                         if (isset($spec_dsc["spec"]["COMMUTATIVE"]) && !isset($dsc["spec"]["COMMUTATIVE"])) {
                             out($f, "\t\t\t\tif (op->op1_type < op->op2_type) {\n");
                             out($f, "\t\t\t\t\tzend_swap_operands(op);\n");

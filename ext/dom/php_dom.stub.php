@@ -2,6 +2,241 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var int
+ * @cvalue XML_ELEMENT_NODE
+ */
+const XML_ELEMENT_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ATTRIBUTE_NODE
+ */
+const XML_ATTRIBUTE_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_TEXT_NODE
+ */
+const XML_TEXT_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_CDATA_SECTION_NODE
+ */
+const XML_CDATA_SECTION_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ENTITY_REF_NODE
+ */
+const XML_ENTITY_REF_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ENTITY_NODE
+ */
+const XML_ENTITY_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_PI_NODE
+ */
+const XML_PI_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_COMMENT_NODE
+ */
+const XML_COMMENT_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_DOCUMENT_NODE
+ */
+const XML_DOCUMENT_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_DOCUMENT_TYPE_NODE
+ */
+const XML_DOCUMENT_TYPE_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_DOCUMENT_FRAG_NODE
+ */
+const XML_DOCUMENT_FRAG_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_NOTATION_NODE
+ */
+const XML_NOTATION_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_HTML_DOCUMENT_NODE
+ */
+const XML_HTML_DOCUMENT_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_DTD_NODE
+ */
+const XML_DTD_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ELEMENT_DECL
+ */
+const XML_ELEMENT_DECL_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ATTRIBUTE_DECL
+ */
+const XML_ATTRIBUTE_DECL_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ENTITY_DECL
+ */
+const XML_ENTITY_DECL_NODE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_NAMESPACE_DECL
+ */
+const XML_NAMESPACE_DECL_NODE = UNKNOWN;
+#ifdef XML_GLOBAL_NAMESPACE
+/**
+ * @var int
+ * @cvalue XML_GLOBAL_NAMESPACE
+ */
+const XML_GLOBAL_NAMESPACE = UNKNOWN;
+#endif
+
+/**
+ * @var int
+ * @cvalue XML_LOCAL_NAMESPACE
+ */
+const XML_LOCAL_NAMESPACE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ATTRIBUTE_CDATA
+ */
+const XML_ATTRIBUTE_CDATA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ATTRIBUTE_ID
+ */
+const XML_ATTRIBUTE_ID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ATTRIBUTE_IDREF
+ */
+const XML_ATTRIBUTE_IDREF = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ATTRIBUTE_IDREFS
+ */
+const XML_ATTRIBUTE_IDREFS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ATTRIBUTE_ENTITIES
+ */
+const XML_ATTRIBUTE_ENTITY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ATTRIBUTE_NMTOKEN
+ */
+const XML_ATTRIBUTE_NMTOKEN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ATTRIBUTE_NMTOKENS
+ */
+const XML_ATTRIBUTE_NMTOKENS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ATTRIBUTE_ENUMERATION
+ */
+const XML_ATTRIBUTE_ENUMERATION = UNKNOWN;
+/**
+ * @var int
+ * @cvalue XML_ATTRIBUTE_NOTATION
+ */
+const XML_ATTRIBUTE_NOTATION = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue PHP_ERR
+ */
+const DOM_PHP_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue INDEX_SIZE_ERR
+ */
+const DOM_INDEX_SIZE_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue DOMSTRING_SIZE_ERR
+ */
+const DOMSTRING_SIZE_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue HIERARCHY_REQUEST_ERR
+ */
+const DOM_HIERARCHY_REQUEST_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue WRONG_DOCUMENT_ERR
+ */
+const DOM_WRONG_DOCUMENT_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue INVALID_CHARACTER_ERR
+ */
+const DOM_INVALID_CHARACTER_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NO_DATA_ALLOWED_ERR
+ */
+const DOM_NO_DATA_ALLOWED_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NO_MODIFICATION_ALLOWED_ERR
+ */
+const DOM_NO_MODIFICATION_ALLOWED_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NOT_FOUND_ERR
+ */
+const DOM_NOT_FOUND_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NOT_SUPPORTED_ERR
+ */
+const DOM_NOT_SUPPORTED_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue INUSE_ATTRIBUTE_ERR
+ */
+const DOM_INUSE_ATTRIBUTE_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue INVALID_STATE_ERR
+ */
+const DOM_INVALID_STATE_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue SYNTAX_ERR
+ */
+const DOM_SYNTAX_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue INVALID_MODIFICATION_ERR
+ */
+const DOM_INVALID_MODIFICATION_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue NAMESPACE_ERR
+ */
+const DOM_NAMESPACE_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue INVALID_ACCESS_ERR
+ */
+const DOM_INVALID_ACCESS_ERR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue VALIDATION_ERR
+ */
+const DOM_VALIDATION_ERR = UNKNOWN;
+
 class DOMDocumentType extends DOMNode
 {
     /** @readonly */
@@ -576,7 +811,7 @@ final class DOMException extends Exception
      * Intentionally left untyped for BC reasons
      * @var int
      */
-    public $code = 0;
+    public $code = 0; // TODO add proper type (i.e. int|string)
 }
 
 class DOMText extends DOMCharacterData

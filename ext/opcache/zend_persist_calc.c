@@ -54,7 +54,9 @@ static void zend_hash_persist_calc(HashTable *ht)
 		return;
 	}
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_PACKED) && ht->nNumUsed > HT_MIN_SIZE && ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 4) {
+	if (HT_IS_PACKED(ht)) {
+		ADD_SIZE(HT_PACKED_USED_SIZE(ht));
+	} else if (ht->nNumUsed > HT_MIN_SIZE && ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 4) {
 		/* compact table */
 		uint32_t hash_size;
 
@@ -112,16 +114,26 @@ static void zend_persist_zval_calc(zval *z)
 			}
 			size = zend_shared_memdup_size(Z_ARR_P(z), sizeof(zend_array));
 			if (size) {
-				Bucket *p;
+				HashTable *ht = Z_ARRVAL_P(z);
 
 				ADD_SIZE(size);
-				zend_hash_persist_calc(Z_ARRVAL_P(z));
-				ZEND_HASH_FOREACH_BUCKET(Z_ARRVAL_P(z), p) {
-					if (p->key) {
-						ADD_INTERNED_STRING(p->key);
-					}
-					zend_persist_zval_calc(&p->val);
-				} ZEND_HASH_FOREACH_END();
+				zend_hash_persist_calc(ht);
+				if (HT_IS_PACKED(ht)) {
+					zval *zv;
+
+					ZEND_HASH_PACKED_FOREACH_VAL(Z_ARRVAL_P(z), zv) {
+						zend_persist_zval_calc(zv);
+					} ZEND_HASH_FOREACH_END();
+				} else {
+					Bucket *p;
+
+					ZEND_HASH_MAP_FOREACH_BUCKET(Z_ARRVAL_P(z), p) {
+						if (p->key) {
+							ADD_INTERNED_STRING(p->key);
+						}
+						zend_persist_zval_calc(&p->val);
+					} ZEND_HASH_FOREACH_END();
+				}
 			}
 			break;
 		case IS_CONSTANT_AST:
@@ -152,7 +164,7 @@ static void zend_persist_attributes_calc(HashTable *attributes)
 		ADD_SIZE(sizeof(HashTable));
 		zend_hash_persist_calc(attributes);
 
-		ZEND_HASH_FOREACH_PTR(attributes, attr) {
+		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
 			ADD_SIZE(ZEND_ATTRIBUTE_SIZE(attr->argc));
 			ADD_INTERNED_STRING(attr->name);
 			ADD_INTERNED_STRING(attr->lcname);
@@ -175,6 +187,10 @@ static void zend_persist_type_calc(zend_type *type)
 
 	zend_type *single_type;
 	ZEND_TYPE_FOREACH(*type, single_type) {
+		if (ZEND_TYPE_HAS_LIST(*single_type)) {
+			zend_persist_type_calc(single_type);
+			continue;
+		}
 		if (ZEND_TYPE_HAS_NAME(*single_type)) {
 			zend_string *type_name = ZEND_TYPE_NAME(*single_type);
 			ADD_INTERNED_STRING(type_name);
@@ -216,7 +232,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			zend_shared_alloc_register_xlat_entry(op_array->static_variables, op_array->static_variables);
 			ADD_SIZE(sizeof(HashTable));
 			zend_hash_persist_calc(op_array->static_variables);
-			ZEND_HASH_FOREACH_BUCKET(op_array->static_variables, p) {
+			ZEND_HASH_MAP_FOREACH_BUCKET(op_array->static_variables, p) {
 				ZEND_ASSERT(p->key != NULL);
 				ADD_INTERNED_STRING(p->key);
 				zend_persist_zval_calc(&p->val);
@@ -407,7 +423,7 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 		}
 
 		zend_hash_persist_calc(&ce->function_table);
-		ZEND_HASH_FOREACH_BUCKET(&ce->function_table, p) {
+		ZEND_HASH_MAP_FOREACH_BUCKET(&ce->function_table, p) {
 			ZEND_ASSERT(p->key != NULL);
 			ADD_INTERNED_STRING(p->key);
 			zend_persist_class_method_calc(&p->val);
@@ -431,14 +447,14 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 			}
 		}
 		zend_hash_persist_calc(&ce->constants_table);
-		ZEND_HASH_FOREACH_BUCKET(&ce->constants_table, p) {
+		ZEND_HASH_MAP_FOREACH_BUCKET(&ce->constants_table, p) {
 			ZEND_ASSERT(p->key != NULL);
 			ADD_INTERNED_STRING(p->key);
 			zend_persist_class_constant_calc(&p->val);
 		} ZEND_HASH_FOREACH_END();
 
 		zend_hash_persist_calc(&ce->properties_info);
-		ZEND_HASH_FOREACH_BUCKET(&ce->properties_info, p) {
+		ZEND_HASH_MAP_FOREACH_BUCKET(&ce->properties_info, p) {
 			zend_property_info *prop = Z_PTR(p->val);
 			ZEND_ASSERT(p->key != NULL);
 			ADD_INTERNED_STRING(p->key);
@@ -457,6 +473,9 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 
 		if (ce->iterator_funcs_ptr) {
 			ADD_SIZE(sizeof(zend_class_iterator_funcs));
+		}
+		if (ce->arrayaccess_funcs_ptr) {
+			ADD_SIZE(sizeof(zend_class_arrayaccess_funcs));
 		}
 
 		if (ce->ce_flags & ZEND_ACC_CACHED) {
@@ -532,18 +551,6 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 				ADD_SIZE(sizeof(zend_trait_precedence*) * (i + 1));
 			}
 		}
-
-		if (ce->backed_enum_table) {
-			Bucket *p;
-			ADD_SIZE(sizeof(HashTable));
-			zend_hash_persist_calc(ce->backed_enum_table);
-			ZEND_HASH_FOREACH_BUCKET(ce->backed_enum_table, p) {
-				if (p->key != NULL) {
-					ADD_INTERNED_STRING(p->key);
-				}
-				zend_persist_zval_calc(&p->val);
-			} ZEND_HASH_FOREACH_END();
-		}
 	}
 }
 
@@ -552,7 +559,7 @@ static void zend_accel_persist_class_table_calc(HashTable *class_table)
 	Bucket *p;
 
 	zend_hash_persist_calc(class_table);
-	ZEND_HASH_FOREACH_BUCKET(class_table, p) {
+	ZEND_HASH_MAP_FOREACH_BUCKET(class_table, p) {
 		ZEND_ASSERT(p->key != NULL);
 		ADD_INTERNED_STRING(p->key);
 		zend_persist_class_entry_calc(Z_CE(p->val));
@@ -568,18 +575,30 @@ void zend_persist_warnings_calc(uint32_t num_warnings, zend_error_info **warning
 	}
 }
 
+static void zend_persist_early_bindings_calc(
+	uint32_t num_early_bindings, zend_early_binding *early_bindings)
+{
+	ADD_SIZE(sizeof(zend_early_binding) * num_early_bindings);
+	for (uint32_t i = 0; i < num_early_bindings; i++) {
+		zend_early_binding *early_binding = &early_bindings[i];
+		ADD_INTERNED_STRING(early_binding->lcname);
+		ADD_INTERNED_STRING(early_binding->rtd_key);
+		ADD_INTERNED_STRING(early_binding->lc_parent_name);
+	}
+}
+
 uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, int for_shm)
 {
 	Bucket *p;
 
 	new_persistent_script->mem = NULL;
 	new_persistent_script->size = 0;
-	new_persistent_script->corrupted = 0;
+	new_persistent_script->corrupted = false;
 	ZCG(current_persistent_script) = new_persistent_script;
 
 	if (!for_shm) {
 		/* script is not going to be saved in SHM */
-		new_persistent_script->corrupted = 1;
+		new_persistent_script->corrupted = true;
 	}
 
 	ADD_SIZE(sizeof(zend_persistent_script));
@@ -598,7 +617,7 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 		zend_hash_rehash(&new_persistent_script->script.function_table);
 	}
 	zend_hash_persist_calc(&new_persistent_script->script.function_table);
-	ZEND_HASH_FOREACH_BUCKET(&new_persistent_script->script.function_table, p) {
+	ZEND_HASH_MAP_FOREACH_BUCKET(&new_persistent_script->script.function_table, p) {
 		ZEND_ASSERT(p->key != NULL);
 		ADD_INTERNED_STRING(p->key);
 		zend_persist_op_array_calc(&p->val);
@@ -606,8 +625,10 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 	zend_persist_op_array_calc_ex(&new_persistent_script->script.main_op_array);
 	zend_persist_warnings_calc(
 		new_persistent_script->num_warnings, new_persistent_script->warnings);
+	zend_persist_early_bindings_calc(
+		new_persistent_script->num_early_bindings, new_persistent_script->early_bindings);
 
-	new_persistent_script->corrupted = 0;
+	new_persistent_script->corrupted = false;
 
 	ZCG(current_persistent_script) = NULL;
 

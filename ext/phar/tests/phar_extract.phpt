@@ -105,30 +105,27 @@ try {
 ?>
 --CLEAN--
 <?php
-@rmdir(__DIR__ . '/whatever');
-@unlink(__DIR__ . '/oops');
-@rmdir(__DIR__ . '/oops1');
-@unlink(__DIR__ . '/tempmanifest1.phar.php');
+unlink(__DIR__ . '/oops');
+rmdir(__DIR__ . '/oops1');
+unlink(__DIR__ . '/tempmanifest1.phar.php');
 $e = __DIR__ . '/extract/';
-@unlink($e . 'file1.txt');
-@unlink($e . 'file2.txt');
-@unlink($e . 'subdir/ectory/file.txt');
-@rmdir($e . 'subdir/ectory');
-@rmdir($e . 'subdir');
-@rmdir($e . 'one/level');
-@rmdir($e . 'one');
-@rmdir($e);
+unlink($e . 'file1.txt');
+unlink($e . 'file2.txt');
+unlink($e . 'subdir/ectory/file.txt');
+rmdir($e . 'subdir/ectory');
+rmdir($e . 'subdir');
+rmdir($e . 'one');
+rmdir($e);
 $e = __DIR__ . '/extract1/';
-@unlink($e . 'file1.txt');
-@unlink($e . 'subdir/ectory/file.txt');
-@rmdir($e . 'subdir/ectory');
-@rmdir($e . 'subdir');
-@rmdir($e);
+unlink($e . 'file1.txt');
+unlink($e . 'subdir/ectory/file.txt');
+rmdir($e . 'subdir/ectory');
+rmdir($e . 'subdir');
+rmdir($e);
 $e = __DIR__ . '/extract1-2/';
-@unlink($e . 'file2.txt');
-@rmdir($e . 'one/level');
-@rmdir($e . 'one');
-@rmdir($e);
+unlink($e . 'file2.txt');
+rmdir($e . 'one');
+rmdir($e);
 ?>
 --EXPECTF--
 %sextract%cfile1.txt

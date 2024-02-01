@@ -88,17 +88,16 @@ typedef struct _zend_script {
 	zend_op_array  main_op_array;
 	HashTable      function_table;
 	HashTable      class_table;
-	uint32_t       first_early_binding_opline; /* the linked list of delayed declarations */
 } zend_script;
 
 typedef void (*zend_optimizer_pass_t)(zend_script *, void *context);
 
 BEGIN_EXTERN_C()
-ZEND_API int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level);
+ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level);
 ZEND_API int zend_optimizer_register_pass(zend_optimizer_pass_t pass);
 ZEND_API void zend_optimizer_unregister_pass(int idx);
-int zend_optimizer_startup(void);
-int zend_optimizer_shutdown(void);
+zend_result zend_optimizer_startup(void);
+zend_result zend_optimizer_shutdown(void);
 END_EXTERN_C()
 
 #endif

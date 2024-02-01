@@ -14,8 +14,8 @@ echo str_replace(" \n", "\n", var_export([Foo::Bar], true));
 
 ?>
 --EXPECT--
-Foo::Bar
+\Foo::Bar
 array (
   0 =>
-  Foo::Bar,
+  \Foo::Bar,
 )

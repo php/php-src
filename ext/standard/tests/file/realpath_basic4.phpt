@@ -12,8 +12,13 @@ echo "2. " . realpath("$file_path/realpath_basic4/link2/test") . "\n";
 --CLEAN--
 <?php
 $file_path = __DIR__;
-unlink("$file_path/realpath_basic4/link2");
-unlink("$file_path/realpath_basic4/link1");
+if (PHP_OS_FAMILY == 'Windows') {
+    rmdir("$file_path/realpath_basic4/link2");
+    rmdir("$file_path/realpath_basic4/link1");
+} else {
+    unlink("$file_path/realpath_basic4/link2");
+    unlink("$file_path/realpath_basic4/link1");
+}
 rmdir("$file_path/realpath_basic4/home/test");
 rmdir("$file_path/realpath_basic4/home");
 rmdir("$file_path/realpath_basic4");

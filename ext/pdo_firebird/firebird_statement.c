@@ -51,6 +51,11 @@ static zend_always_inline double get_double_from_sqldata(const ISC_SCHAR *sqldat
 	READ_AND_RETURN_USING_MEMCPY(double, sqldata);
 }
 
+static zend_always_inline float get_float_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	READ_AND_RETURN_USING_MEMCPY(float, sqldata);
+}
+
 static zend_always_inline ISC_TIMESTAMP get_isc_timestamp_from_sqldata(const ISC_SCHAR *sqldata)
 {
 	READ_AND_RETURN_USING_MEMCPY(ISC_TIMESTAMP, sqldata);
@@ -235,6 +240,9 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	int colname_len;
 	char *cp;
 
+	if ((var->sqltype & ~1) == SQL_TEXT) {
+		var->sqltype = SQL_VARYING | (var->sqltype & 1);
+	}
 	colname_len = (S->H->fetch_table_names && var->relname_length)
 					? (var->aliasname_length + var->relname_length + 1)
 					: (var->aliasname_length);
@@ -456,11 +464,11 @@ static int firebird_stmt_get_col(
 					break;
 				case SQL_FLOAT:
 					/* TODO: Why is this not returned as the native type? */
-					ZVAL_STR(result, zend_strpprintf(0, "%F", *(float*)var->sqldata));
+					ZVAL_STR(result, zend_strpprintf_unchecked(0, "%.8H", get_float_from_sqldata(var->sqldata)));
 					break;
 				case SQL_DOUBLE:
 					/* TODO: Why is this not returned as the native type? */
-					ZVAL_STR(result, zend_strpprintf(0, "%F", get_double_from_sqldata(var->sqldata)));
+					ZVAL_STR(result, zend_strpprintf_unchecked(0, "%.16H", get_double_from_sqldata(var->sqldata)));
 					break;
 #ifdef SQL_BOOLEAN
 				case SQL_BOOLEAN:
@@ -667,7 +675,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 							zend_long lval;
 							double dval;
 
-							if ((Z_STRLEN_P(parameter) == 0)) {
+							if (Z_STRLEN_P(parameter) == 0) {
 								*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
 								break;
 							}

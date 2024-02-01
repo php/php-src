@@ -9,6 +9,7 @@ opcache.jit_buffer_size=1M
 opcache
 --FILE--
 <?php
+#[ALlowDynamicProperties]
 class C {
     var $a = 0;
 }

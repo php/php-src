@@ -13,7 +13,9 @@ var_dump($x);
 
 ?>
 --EXPECT--
-object(Closure)#1 (1) {
+object(Closure)#1 (2) {
+  ["function"]=>
+  string(4) "func"
   ["static"]=>
   array(1) {
     ["i"]=>

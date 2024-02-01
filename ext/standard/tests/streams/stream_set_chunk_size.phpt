@@ -3,6 +3,7 @@ stream_set_chunk_size basic tests
 --FILE--
 <?php
 class test_wrapper {
+    public $context;
     function stream_open($path, $mode, $openedpath) {
         return true;
     }
@@ -34,7 +35,7 @@ echo "should return previous chunk size (8192)\n";
 var_dump(stream_set_chunk_size($f, 1));
 echo "should be read without buffer (\$count == 10000)\n";
 var_dump(strlen(fread($f, 10000)));
-echo "should have no effect on writes\n";
+echo "should elicit 3 writes\n";
 var_dump(fwrite($f, str_repeat('b', 3)));
 
 echo "should return previous chunk size (1)\n";
@@ -45,7 +46,7 @@ echo "should elicit one read of size 100 (chunk size)\n";
 var_dump(strlen(fread($f, 50)));
 echo "should elicit no read because there is sufficient cached data\n";
 var_dump(strlen(fread($f, 50)));
-echo "should have no effect on writes\n";
+echo "should elicit 3 writes\n";
 var_dump(strlen(fwrite($f, str_repeat('b', 250))));
 
 echo "\nerror conditions\n";
@@ -67,8 +68,10 @@ int(8192)
 should be read without buffer ($count == 10000)
 read with size: 10000
 int(10000)
-should have no effect on writes
-write with size: 3
+should elicit 3 writes
+write with size: 1
+write with size: 1
+write with size: 1
 int(3)
 should return previous chunk size (1)
 int(1)
@@ -80,8 +83,10 @@ read with size: 100
 int(50)
 should elicit no read because there is sufficient cached data
 int(50)
-should have no effect on writes
-write with size: 250
+should elicit 3 writes
+write with size: 100
+write with size: 100
+write with size: 50
 int(3)
 
 error conditions

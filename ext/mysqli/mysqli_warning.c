@@ -48,53 +48,6 @@ void php_clear_warnings(MYSQLI_WARNING *w)
 }
 /* }}} */
 
-#ifndef MYSQLI_USE_MYSQLND
-/* {{{ MYSQLI_WARNING *php_new_warning */
-static
-MYSQLI_WARNING *php_new_warning(const char *reason, int errorno)
-{
-	MYSQLI_WARNING *w;
-
-	w = (MYSQLI_WARNING *)ecalloc(1, sizeof(MYSQLI_WARNING));
-
-	ZVAL_UTF8_STRING(&(w->reason), reason, ZSTR_DUPLICATE);
-
-	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  ZSTR_DUPLICATE);
-
-	w->errorno = errorno;
-
-	return w;
-}
-/* }}} */
-
-/* {{{ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql) */
-MYSQLI_WARNING *php_get_warnings(MYSQL *mysql)
-{
-	MYSQLI_WARNING *w, *first = NULL, *prev = NULL;
-	MYSQL_RES		*result;
-	MYSQL_ROW 		row;
-
-	if (mysql_real_query(mysql, "SHOW WARNINGS", 13)) {
-		return NULL;
-	}
-
-	result = mysql_store_result(mysql);
-
-	while ((row = mysql_fetch_row(result))) {
-		w = php_new_warning(row[2], atoi(row[1]));
-		if (!first) {
-			first = w;
-		}
-		if (prev) {
-			prev->next = w;
-		}
-		prev = w;
-	}
-	mysql_free_result(result);
-	return first;
-}
-/* }}} */
-#else
 /* {{{ MYSQLI_WARNING *php_new_warning */
 static
 MYSQLI_WARNING *php_new_warning(zval * reason, int errorno)
@@ -169,7 +122,6 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 	return first;
 }
 /* }}} */
-#endif
 
 /* {{{ bool mysqli_warning::next() */
 PHP_METHOD(mysqli_warning, next)

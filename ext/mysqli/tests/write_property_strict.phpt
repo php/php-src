@@ -16,12 +16,6 @@ try {
 }
 
 try {
-    $driver->reconnect = 0;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
-
-try {
     $driver->report_mode = "1";
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
@@ -30,5 +24,4 @@ try {
 ?>
 --EXPECT--
 Cannot write read-only property mysqli_driver::$client_info
-Cannot assign int to property mysqli_driver::$reconnect of type bool
 Cannot assign string to property mysqli_driver::$report_mode of type int

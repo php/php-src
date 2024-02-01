@@ -19,6 +19,7 @@ MySQLPDOTest::skip();
     $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
     class HelloWrapper {
+        public $context;
         public function stream_open() { return true; }
         public function stream_eof() { return true; }
         public function stream_read() { return NULL; }

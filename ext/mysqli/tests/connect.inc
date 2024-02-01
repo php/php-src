@@ -23,11 +23,7 @@
     }
 
     /* Development setting: test experimental features and/or feature requests that never worked before? */
-    $TEST_EXPERIMENTAL = (in_array(getenv("MYSQL_TEST_EXPERIMENTAL"), array(0, 1))) ?
-                ((1 == getenv("MYSQL_TEST_EXPERIMENTAL")) ? true : false) :
-                false;
-
-    $IS_MYSQLND = stristr(mysqli_get_client_info(), "mysqlnd");
+    $TEST_EXPERIMENTAL = 1 == getenv("MYSQL_TEST_EXPERIMENTAL");
 
     if (!function_exists('sys_get_temp_dir')) {
         function sys_get_temp_dir() {
@@ -54,7 +50,7 @@
         /**
         * Whenever possible, please use this wrapper to make testing of MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
         *
-        * @param enable_env_flags Enable setting of connection flags through 	env(MYSQL_TEST_CONNECT_FLAGS)?
+        * @param bool $enable_env_flags Enable setting of connection flags through 	env(MYSQL_TEST_CONNECT_FLAGS)?
         */
         function my_mysqli_connect($host, $user, $passwd, $db, $port, $socket, $enable_env_flags = true) {
             global $connect_flags;
@@ -74,7 +70,7 @@
         /**
         * Whenever possible, please use this wrapper to make testing of MYSQLI_CLIENT_COMPRESS (and potentially SSL) possible
         *
-        * @param enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)
+        * @param bool $enable_env_flags Enable setting of connection flags through env(MYSQL_TEST_CONNECT_FLAGS)
         */
         function my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket, $flags = 0, $enable_env_flags = true) {
             global $connect_flags;
@@ -91,7 +87,7 @@
 
                 $flags = ($enable_env_flags) ? $connect_flags : 0;
 
-                if ($flags !== false) {
+                if ($flags !== 0) {
                     parent::__construct();
                     $this->real_connect($host, $user, $passwd, $db, $port, $socket, $flags);
                 } else {
@@ -101,32 +97,27 @@
         }
 
         function have_innodb($link) {
-          if (($res = $link->query("SHOW VARIABLES LIKE 'have_innodb'")) &&
-                ($row = $res->fetch_row()) &&
-                !empty($row)) {
-                if ($row[1] == "DISABLED" || $row[1] == "NO") {
-                    return false;
-                }
-                return true;
-          } else {
-                /* MySQL 5.6.1+ */
-                if ($res = $link->query("SHOW ENGINES")) {
-                    while ($row = $res->fetch_assoc()) {
-                        if (!isset($row['Engine']) || !isset($row['Support']))
-                            return false;
-
-                        if (('InnoDB' == $row['Engine']) &&
-                            (('YES' == $row['Support']) || ('DEFAULT' == $row['Support']))
-                            ) {
-                            return true;
-                        }
+            if (($res = $link->query("SHOW VARIABLES LIKE 'have_innodb'"))
+                && ($row = $res->fetch_row())
+                && !empty($row)
+            ) {
+                return !($row[1] == 'DISABLED' || $row[1] == 'NO');
+            }
+            // MySQL 5.6.1+
+            if ($res = $link->query('SHOW ENGINES')) {
+                while ($row = $res->fetch_assoc()) {
+                    if (!isset($row['Engine']) || !isset($row['Support'])) {
+                        return false;
                     }
-                    return false;
-                } else {
-                    return false;
+
+                    if (($row['Engine'] == 'InnoDB')
+                        && (($row['Support'] == 'YES') || ($row['Support'] == 'DEFAULT'))
+                    ) {
+                        return true;
+                    }
                 }
-          }
-          return false;
+            }
+            return false;
         }
 
     } else {

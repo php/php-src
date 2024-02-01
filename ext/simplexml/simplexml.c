@@ -53,7 +53,7 @@ static zval *php_sxe_iterator_current_data(zend_object_iterator *iter);
 static void php_sxe_iterator_current_key(zend_object_iterator *iter, zval *key);
 static void php_sxe_iterator_move_forward(zend_object_iterator *iter);
 static void php_sxe_iterator_rewind(zend_object_iterator *iter);
-static int sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type);
+static zend_result sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type);
 
 /* {{{ _node_as_zval() */
 static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE_ITER itertype, char *name, const xmlChar *nsprefix, int isprefix)
@@ -636,6 +636,9 @@ static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int f
 
 	sxe = php_sxe_fetch_object(object);
 	GET_NODE(sxe, node);
+	if (UNEXPECTED(!node)) {
+		return &EG(error_zval);
+	}
 	name = ZSTR_VAL(zname);
 	node = sxe_get_element_by_name(sxe, node, &name, &type);
 	if (node) {
@@ -1799,7 +1802,7 @@ PHP_METHOD(SimpleXMLElement, addAttribute)
 /* }}} */
 
 /* {{{ cast_object() */
-static int cast_object(zval *object, int type, char *contents)
+static zend_result cast_object(zval *object, int type, char *contents)
 {
 	if (contents) {
 		ZVAL_STRINGL(object, contents, strlen(contents));
@@ -1831,13 +1834,13 @@ static int cast_object(zval *object, int type, char *contents)
 /* }}} */
 
 /* {{{ sxe_object_cast() */
-static int sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type)
+static zend_result sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type)
 {
 	php_sxe_object *sxe;
 	xmlChar        *contents = NULL;
 	bool            free_contents = true;
 	xmlNodePtr	    node;
-	int rv;
+	zend_result rv;
 
 	sxe = php_sxe_fetch_object(readobj);
 
@@ -1884,7 +1887,7 @@ static int sxe_object_cast_ex(zend_object *readobj, zval *writeobj, int type)
 /* }}} */
 
 /*  {{{ Variant of sxe_object_cast_ex that handles overwritten __toString() method */
-static int sxe_object_cast(zend_object *readobj, zval *writeobj, int type)
+static zend_result sxe_object_cast(zend_object *readobj, zval *writeobj, int type)
 {
 	if (type == IS_STRING
 		&& zend_std_cast_object_tostring(readobj, writeobj, IS_STRING) == SUCCESS
@@ -1910,7 +1913,7 @@ PHP_METHOD(SimpleXMLElement, __toString)
 }
 /* }}} */
 
-static int php_sxe_count_elements_helper(php_sxe_object *sxe, zend_long *count) /* {{{ */
+static zend_result php_sxe_count_elements_helper(php_sxe_object *sxe, zend_long *count) /* {{{ */
 {
 	xmlNodePtr      node;
 	zval            data;
@@ -1937,7 +1940,7 @@ static int php_sxe_count_elements_helper(php_sxe_object *sxe, zend_long *count) 
 }
 /* }}} */
 
-static int sxe_count_elements(zend_object *object, zend_long *count) /* {{{ */
+static zend_result sxe_count_elements(zend_object *object, zend_long *count) /* {{{ */
 {
 	php_sxe_object  *intern;
 	intern = php_sxe_fetch_object(object);

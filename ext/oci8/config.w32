@@ -1,30 +1,9 @@
 // vim:ft=javascript
 
-if (PHP_OCI8 != "no" && PHP_OCI8_11G != "no") {
-	if (!PHP_OCI8_SHARED && !PHP_OCI8_11G_SHARED) {
-		WARNING("oci8 and oci8-11g provide the same extension and cannot both be built statically");
-		PHP_OCI8 = "no"
-	}
-}
-
-if (PHP_OCI8 != "no" && PHP_OCI8_12C != "no") {
-	if (!PHP_OCI8_SHARED && !PHP_OCI8_12C_SHARED) {
-		WARNING("oci8 and oci8-12c provide the same extension and cannot both be built statically");
-		PHP_OCI8 = "no"
-	}
-}
-
 if (PHP_OCI8_11G != "no" && PHP_OCI8_12C != "no") {
 	if (!PHP_OCI8_11G_SHARED && !PHP_OCI8_12C_SHARED) {
 		WARNING("oci8-11g and oci8-12c provide the same extension and cannot both be built statically");
 		PHP_OCI8_11G = "no"
-	}
-}
-
-if (PHP_OCI8 != "no" && PHP_OCI8_19 != "no") {
-	if (!PHP_OCI8_SHARED && !PHP_OCI8_19_SHARED) {
-		WARNING("oci8 and oci8-19 provide the same extension and cannot both be built statically");
-		PHP_OCI8 = "no"
 	}
 }
 
@@ -39,41 +18,6 @@ if (PHP_OCI8_12C != "no" && PHP_OCI8_19 != "no") {
 	if (!PHP_OCI8_12C_SHARED && !PHP_OCI8_19_SHARED) {
 		WARNING("oci8-12c and oci8-19 provide the same extension and cannot both be built statically");
 		PHP_OCI8_12C = "no"
-	}
-}
-
-ARG_WITH("oci8", "OCI8 support", "no");
-
-if (PHP_OCI8 != "no") {
-
-	oci8_dirs = new Array(
-		PHP_OCI8
-	);
-
-	oci8_lib_paths = "";
-	oci8_inc_paths = "";
-
-	// find the Oracle install
-	for (i = 0; i < oci8_dirs.length; i++) {
-		oci8_lib_paths += oci8_dirs[i] + "\\lib;";
-		oci8_lib_paths += oci8_dirs[i] + "\\lib\\msvc;";
-		oci8_inc_paths += oci8_dirs[i] + "\\include;";
-	}
-
-	oci8_inc_paths += PHP_PHP_BUILD + "\\include\\instantclient;"
-	oci8_lib_paths += PHP_PHP_BUILD + "\\lib\\instantclient;";
-
-	if (CHECK_HEADER_ADD_INCLUDE("oci.h", "CFLAGS_OCI8", oci8_inc_paths) &&
-			CHECK_LIB("oci.lib", "oci8", oci8_lib_paths))
-	{
-		EXTENSION('oci8', 'oci8.c oci8_lob.c oci8_statement.c oci8_collection.c oci8_interface.c oci8_failover.c');
-
-		AC_DEFINE('HAVE_OCI8', 1);
-		AC_DEFINE('HAVE_OCI_INSTANT_CLIENT', 1);
-
-	} else {
-		WARNING("oci8 not enabled: Oracle Database client libraries or Oracle 10g Instant Client not found");
-		PHP_OCI8 = "no"
 	}
 }
 
@@ -164,8 +108,8 @@ if (PHP_OCI8_19 != "no") {
 		oci8_19_inc_paths += oci8_19_dirs[i] + "\\include;";
 	}
 
-	oci8_19_inc_paths += PHP_PHP_BUILD + "\\include\\instantclient_12;"
-	oci8_19_lib_paths += PHP_PHP_BUILD + "\\lib\\instantclient_12;";
+	oci8_19_inc_paths += PHP_PHP_BUILD + "\\include\\instantclient_19;"
+	oci8_19_lib_paths += PHP_PHP_BUILD + "\\lib\\instantclient_19;";
 
 	if (CHECK_HEADER_ADD_INCLUDE("oci.h", "CFLAGS_OCI8_19", oci8_19_inc_paths) &&
 			CHECK_LIB("oci.lib", "oci8_19", oci8_19_lib_paths))

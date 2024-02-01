@@ -157,7 +157,7 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 	n = create_php_config(p, "merge_php_config");
 	/* copy old config */
 #ifdef ZTS
-	ZEND_HASH_FOREACH_STR_KEY_VAL(&d->config, str, data) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(&d->config, str, data) {
 		zend_string *key;
 		zval *new_entry;
 
@@ -195,7 +195,7 @@ void apply_config(void *dummy)
 	zend_string *str;
 	php_dir_entry *data;
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&d->config, str, data) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&d->config, str, data) {
 		phpapdebug((stderr, "APPLYING (%s)(%s)\n", ZSTR_VAL(str), data->value));
 		if (zend_alter_ini_entry_chars(str, data->value, data->value_len, data->status, data->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE) == FAILURE) {
 			phpapdebug((stderr, "..FAILED\n"));

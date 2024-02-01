@@ -341,23 +341,28 @@ static zend_always_inline void zend_string_release_ex(zend_string *s, bool persi
 	}
 }
 
+static zend_always_inline bool zend_string_equals_cstr(const zend_string *s1, const char *s2, size_t s2_length)
+{
+	return ZSTR_LEN(s1) == s2_length && !memcmp(ZSTR_VAL(s1), s2, s2_length);
+}
+
 #if defined(__GNUC__) && (defined(__i386__) || (defined(__x86_64__) && !defined(__ILP32__)))
 BEGIN_EXTERN_C()
-ZEND_API bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2);
+ZEND_API bool ZEND_FASTCALL zend_string_equal_val(const zend_string *s1, const zend_string *s2);
 END_EXTERN_C()
 #else
-static zend_always_inline bool zend_string_equal_val(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equal_val(const zend_string *s1, const zend_string *s2)
 {
 	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
 }
 #endif
 
-static zend_always_inline bool zend_string_equal_content(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equal_content(const zend_string *s1, const zend_string *s2)
 {
 	return ZSTR_LEN(s1) == ZSTR_LEN(s2) && zend_string_equal_val(s1, s2);
 }
 
-static zend_always_inline bool zend_string_equals(zend_string *s1, zend_string *s2)
+static zend_always_inline bool zend_string_equals(const zend_string *s1, const zend_string *s2)
 {
 	return s1 == s2 || zend_string_equal_content(s1, s2);
 }
@@ -369,7 +374,20 @@ static zend_always_inline bool zend_string_equals(zend_string *s1, zend_string *
 	(ZSTR_LEN(str) == sizeof(c) - 1 && !zend_binary_strcasecmp(ZSTR_VAL(str), ZSTR_LEN(str), (c), sizeof(c) - 1))
 
 #define zend_string_equals_literal(str, literal) \
-	(ZSTR_LEN(str) == sizeof(literal)-1 && !memcmp(ZSTR_VAL(str), literal, sizeof(literal) - 1))
+	zend_string_equals_cstr(str, literal, strlen(literal))
+
+static zend_always_inline bool zend_string_starts_with_cstr(const zend_string *str, const char *prefix, size_t prefix_length)
+{
+	return ZSTR_LEN(str) >= prefix_length && !memcmp(ZSTR_VAL(str), prefix, prefix_length);
+}
+
+static zend_always_inline bool zend_string_starts_with(const zend_string *str, const zend_string *prefix)
+{
+	return zend_string_starts_with_cstr(str, ZSTR_VAL(prefix), ZSTR_LEN(prefix));
+}
+
+#define zend_string_starts_with_literal(str, prefix) \
+	zend_string_starts_with_cstr(str, prefix, strlen(prefix))
 
 /*
  * DJBX33A (Daniel J. Bernstein, Times 33 with Addition)
@@ -431,25 +449,25 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 			((chunk >> (8 * 7)) & 0xff);
 # else
 		hash =
-			hash   * 33 * 33 * 33 * 33 +
-			str[0] * 33 * 33 * 33 +
-			str[1] * 33 * 33 +
-			str[2] * 33 +
+			hash   * Z_L(33 * 33 * 33 * 33) +
+			str[0] * Z_L(33 * 33 * 33) +
+			str[1] * Z_L(33 * 33) +
+			str[2] * Z_L(33) +
 			str[3];
 		hash =
-			hash   * 33 * 33 * 33 * 33 +
-			str[4] * 33 * 33 * 33 +
-			str[5] * 33 * 33 +
-			str[6] * 33 +
+			hash   * Z_L(33 * 33 * 33 * 33) +
+			str[4] * Z_L(33 * 33 * 33) +
+			str[5] * Z_L(33 * 33) +
+			str[6] * Z_L(33) +
 			str[7];
 # endif
 	}
 	if (len >= 4) {
 		hash =
-			hash   * 33 * 33 * 33 * 33 +
-			str[0] * 33 * 33 * 33 +
-			str[1] * 33 * 33 +
-			str[2] * 33 +
+			hash   * Z_L(33 * 33 * 33 * 33) +
+			str[0] * Z_L(33 * 33 * 33) +
+			str[1] * Z_L(33 * 33) +
+			str[2] * Z_L(33) +
 			str[3];
 		len -= 4;
 		str += 4;
@@ -457,18 +475,18 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 	if (len >= 2) {
 		if (len > 2) {
 			hash =
-				hash   * 33 * 33 * 33 +
-				str[0] * 33 * 33 +
-				str[1] * 33 +
+				hash   * Z_L(33 * 33 * 33) +
+				str[0] * Z_L(33 * 33) +
+				str[1] * Z_L(33) +
 				str[2];
 		} else {
 			hash =
-				hash   * 33 * 33 +
-				str[0] * 33 +
+				hash   * Z_L(33 * 33) +
+				str[0] * Z_L(33) +
 				str[1];
 		}
 	} else if (len != 0) {
-		hash = hash * 33 + *str;
+		hash = hash * Z_L(33) + *str;
 	}
 #else
 	/* variant with the hash unrolled eight times */
@@ -562,8 +580,10 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_VOID,                   "void") \
 	_(ZEND_STR_NEVER,                  "never") \
 	_(ZEND_STR_FALSE,                  "false") \
+	_(ZEND_STR_TRUE,                   "true") \
 	_(ZEND_STR_NULL_LOWERCASE,         "null") \
 	_(ZEND_STR_MIXED,                  "mixed") \
+	_(ZEND_STR_TRAVERSABLE,            "Traversable") \
 	_(ZEND_STR_SLEEP,                  "__sleep") \
 	_(ZEND_STR_WAKEUP,                 "__wakeup") \
 	_(ZEND_STR_CASES,                  "cases") \
@@ -573,6 +593,8 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	_(ZEND_STR_AUTOGLOBAL_SERVER,      "_SERVER") \
 	_(ZEND_STR_AUTOGLOBAL_ENV,         "_ENV") \
 	_(ZEND_STR_AUTOGLOBAL_REQUEST,     "_REQUEST") \
+	_(ZEND_STR_COUNT,                  "count") \
+	_(ZEND_STR_SENSITIVEPARAMETER,     "SensitiveParameter") \
 
 
 typedef enum _zend_known_string_id {

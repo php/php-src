@@ -97,11 +97,10 @@ void timelib_update_from_sse(timelib_time *tm)
 		}
 
 		case TIMELIB_ZONETYPE_ID: {
-			timelib_time_offset *gmt_offset;
+			int32_t  offset = 0;
 
-			gmt_offset = timelib_get_time_zone_info(tm->sse, tm->tz_info);
-			timelib_unixtime2gmt(tm, tm->sse + gmt_offset->offset);
-			timelib_time_offset_dtor(gmt_offset);
+			timelib_get_time_zone_offset_info(tm->sse, tm->tz_info, &offset, NULL, NULL);
+			timelib_unixtime2gmt(tm, tm->sse + offset);
 
 			goto cleanup;
 		}

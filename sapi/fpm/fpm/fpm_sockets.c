@@ -39,6 +39,10 @@ static struct fpm_array_s sockets_list;
 
 enum { FPM_GET_USE_SOCKET = 1, FPM_STORE_SOCKET = 2, FPM_STORE_USE_SOCKET = 3 };
 
+#ifdef SO_SETFIB
+static int routemax = -1;
+#endif
+
 static inline void fpm_sockets_get_env_name(char *envname, unsigned idx) /* {{{ */
 {
 	if (!idx) {
@@ -250,6 +254,20 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 		return -1;
 	}
 
+#ifdef SO_SETFIB
+	if (-1 < wp->config->listen_setfib) {
+		if (routemax < wp->config->listen_setfib) {
+			zlog(ZLOG_ERROR, "Invalid routing table id %d, max is %d", wp->config->listen_setfib, routemax);
+			close(sock);
+			return -1;
+		}
+
+		if (0 > setsockopt(sock, SOL_SOCKET, SO_SETFIB, &wp->config->listen_setfib, sizeof(wp->config->listen_setfib))) {
+			zlog(ZLOG_WARNING, "failed to change socket SO_SETFIB attribute");
+		}
+	}
+#endif
+
 	return sock;
 }
 /* }}} */
@@ -342,7 +360,7 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 		port_str = dup_address;
 	}
 
-	if (port == 0) {
+	if (port < 1 || port > 65535) {
 		zlog(ZLOG_ERROR, "invalid port value '%s'", port_str);
 		free(dup_address);
 		return -1;
@@ -386,6 +404,20 @@ static int fpm_socket_af_unix_listening_socket(struct fpm_worker_pool_s *wp) /* 
 }
 /* }}} */
 
+#ifdef SO_SETFIB
+static zend_result fpm_socket_setfib_init(void)
+{
+	/* potentially up to 65536 but needs to check the actual cap beforehand */
+	size_t len = sizeof(routemax);
+	if (sysctlbyname("net.fibs", &routemax, &len, NULL, 0) < 0) {
+		zlog(ZLOG_ERROR, "failed to get max routing table");
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+#endif
+
 int fpm_sockets_init_main(void)
 {
 	unsigned i, lq_len;
@@ -398,6 +430,12 @@ int fpm_sockets_init_main(void)
 	if (0 == fpm_array_init(&sockets_list, sizeof(struct listening_socket_s), 10)) {
 		return -1;
 	}
+
+#ifdef SO_SETFIB
+	if (fpm_socket_setfib_init() == FAILURE) {
+		return -1;
+	}
+#endif
 
 	/* import inherited sockets */
 	for (i = 0; i < FPM_ENV_SOCKET_SET_MAX; i++) {
@@ -531,6 +569,30 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 	return 0;
 }
 
+#elif defined(HAVE_LQ_TCP_CONNECTION_INFO)
+
+#include <netinet/tcp.h>
+
+int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
+{
+	struct tcp_connection_info info;
+	socklen_t len = sizeof(info);
+
+	if (0 > getsockopt(sock, IPPROTO_TCP, TCP_CONNECTION_INFO, &info, &len)) {
+		zlog(ZLOG_SYSERROR, "failed to retrieve TCP_CONNECTION_INFO for socket");
+		return -1;
+	}
+
+	if (cur_lq) {
+		*cur_lq = info.tcpi_tfo_syn_data_acked;
+	}
+
+	if (max_lq) {
+		*max_lq = 0;
+	}
+
+	return 0;
+}
 #endif
 
 #ifdef HAVE_LQ_SO_LISTENQ

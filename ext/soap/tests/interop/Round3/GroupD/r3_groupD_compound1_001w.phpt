@@ -8,12 +8,7 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class Person {
-    function __construct($a=NULL, $i=NULL, $n=NULL, $m=NULL) {
-        $this->Age = $a;
-        $this->ID = $i;
-        $this->Name = $n;
-        $this->Male = $m;
-    }
+    function __construct(public $Age, public $ID, public $Name, public $Male) {}
 }
 $person = new Person(32,12345,'Shane',TRUE);
 $client = new SoapClient(__DIR__."/round3_groupD_compound1.wsdl",array("trace"=>1,"exceptions"=>0));

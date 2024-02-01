@@ -250,7 +250,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           com_dotnet
 PRIMARY MAINTAINER:  Wez Furlong <wez@php.net> (2003 - 2005)
-                     Christoph M. Becker <cmb@php.net> (2018 - 2020)
+                     Christoph M. Becker <cmb@php.net> (2018 - 2022)
 MAINTENANCE:         Maintained
 STATUS:              Windows
 SINCE:               5.0
@@ -313,7 +313,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           gd
 PRIMARY MAINTAINER:  Pierre-Alain Joye <pajoye@php.net> (2002 - 2016)
-                     Christoph M. Becker <cmb@php.net> (2015 - 2020)
+                     Christoph M. Becker <cmb@php.net> (2015 - 2022)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -375,6 +375,7 @@ STATUS:              Working
 EXTENSION:           mbstring
 PRIMARY MAINTAINER:  Rui Hirokawa <hirokawa@php.net> (2001 - 2013)
                      Nikita Popov <nikic@php.net> (2017 - 2020)
+                     Alex Dowad <alexinbeijing@gmail.com> (2021 - 2022)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -424,6 +425,13 @@ PRIMARY MAINTAINER:  Vlad Krupin <phpdevel@echospace.com> (2000 - 2004)
 MAINTENANCE:         Unknown
 STATUS:              Working
 SINCE:               4.0.2
+-------------------------------------------------------------------------------
+EXTENSION:           random
+PRIMARY MAINTAINER   Go Kudo <zeriyoshi@php.net> (2022 - 2022)
+                     Tim Düsterhus <timwolla@php.net> (2022 - 2022)
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               8.2.0
 -------------------------------------------------------------------------------
 EXTENSION:           readline
 PRIMARY MAINTAINER:  Unknown

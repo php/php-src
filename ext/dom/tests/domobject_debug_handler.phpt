@@ -15,6 +15,7 @@ $d->loadXML($xml);
 var_dump($d);
 ?>
 --EXPECTF--
+Deprecated: Creation of dynamic property DOMDocument::$dynamicProperty is deprecated in %s on line %d
 object(DOMDocument)#1 (39) {
   ["dynamicProperty"]=>
   object(stdClass)#2 (0) {

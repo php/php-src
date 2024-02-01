@@ -3,6 +3,7 @@ Bug #36424 - Serializable interface breaks object references
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class a implements Serializable {
     function serialize() {
         return serialize(get_object_vars($this));

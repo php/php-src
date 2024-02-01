@@ -39,4 +39,11 @@ extern zend_module_entry xml_module_entry;
 
 #define phpext_xml_ptr xml_module_ptr
 
+enum php_xml_option {
+	PHP_XML_OPTION_CASE_FOLDING = 1,
+	PHP_XML_OPTION_TARGET_ENCODING,
+	PHP_XML_OPTION_SKIP_TAGSTART,
+	PHP_XML_OPTION_SKIP_WHITE
+};
+
 #endif /* PHP_XML_H */

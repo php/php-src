@@ -4,8 +4,7 @@ mysqli_debug() - mysqlnd only control strings
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
+require_once 'skipifconnectfailure.inc';
 
 if (!function_exists('mysqli_debug'))
     die("skip mysqli_debug() not available");
@@ -15,14 +14,10 @@ if (!defined('MYSQLI_DEBUG_TRACE_ENABLED'))
 
 if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
     die("skip: debug functionality not enabled");
-
-if (!$IS_MYSQLND)
-    die("skip mysqlnd only test");
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
-    require_once('table.inc');
+    require_once 'table.inc';
 
     function try_control_string($link, $control_string, $trace_file, $offset) {
 
@@ -126,7 +121,7 @@ if (!$IS_MYSQLND)
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 done!

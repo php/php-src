@@ -13,7 +13,7 @@ if (getenv('GITHUB_ACTIONS')) die('skip on GitHub actions');
 <?php
 
 $v1=100;
-$v2=0x4fffffff + 0x1337;
+$v2=0x3fffffff + 0x1337;
 shm_attach($v1,$v2);
 
 ?>

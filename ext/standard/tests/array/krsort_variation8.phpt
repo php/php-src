@@ -41,10 +41,6 @@ echo "Done\n";
 -- Testing krsort() by supplying mixed value array, 'flag' value is default --
 bool(true)
 array(13) {
-  [5]=>
-  string(1) "5"
-  [4]=>
-  float(4.01)
   ["b"]=>
   string(1) "b"
   ["array2"]=>
@@ -85,23 +81,23 @@ array(13) {
   string(2) "ab"
   ["True"]=>
   string(4) "True"
+  [5]=>
+  string(1) "5"
+  [4]=>
+  float(4.01)
   [0]=>
   float(0.001)
   ["-.9"]=>
   string(3) "-.9"
-  [""]=>
-  string(0) ""
   [-2]=>
   float(-2.98989)
+  [""]=>
+  string(0) ""
 }
 
 -- Testing krsort() by supplying mixed value array, 'flag' value is SORT_REGULAR --
 bool(true)
 array(13) {
-  [5]=>
-  string(1) "5"
-  [4]=>
-  float(4.01)
   ["b"]=>
   string(1) "b"
   ["array2"]=>
@@ -142,13 +138,17 @@ array(13) {
   string(2) "ab"
   ["True"]=>
   string(4) "True"
+  [5]=>
+  string(1) "5"
+  [4]=>
+  float(4.01)
   [0]=>
   float(0.001)
   ["-.9"]=>
   string(3) "-.9"
-  [""]=>
-  string(0) ""
   [-2]=>
   float(-2.98989)
+  [""]=>
+  string(0) ""
 }
 Done

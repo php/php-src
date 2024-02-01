@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 60b4c809624eb4c1ef610e5c5820acfc87f6b07f */
+ * Stub hash: a89f03303f8a7d254509ae2bc46a36bb79a3c900 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_token_get_all, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
@@ -59,6 +59,11 @@ static const zend_function_entry class_PhpToken_methods[] = {
 	ZEND_ME(PhpToken, __toString, arginfo_class_PhpToken___toString, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
+
+static void register_tokenizer_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("TOKEN_PARSE", TOKEN_PARSE, CONST_PERSISTENT);
+}
 
 static zend_class_entry *register_class_PhpToken(zend_class_entry *class_entry_Stringable)
 {

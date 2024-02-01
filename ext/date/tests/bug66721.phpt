@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #66721: __wakeup of DateTime segfaults when invalid object data is supplied
+Test for bug #66721: __unserialize of DateTime segfaults when invalid object data is supplied
 --CREDITS--
 Boro Sitnikovski <buritomath@yahoo.com>
 --FILE--
@@ -10,7 +10,7 @@ var_dump(unserialize($y));
 --EXPECTF--
 Fatal error: Uncaught Error: Invalid serialization data for DateTime object in %sbug66721.php:%d
 Stack trace:
-#0 [internal function]: DateTime->__wakeup()
+#0 [internal function]: DateTime->__unserialize(Array)
 #1 %sbug66721.php(%d): unserialize('O:8:"DateTime":...')
 #2 {main}
   thrown in %sbug66721.php on line %d

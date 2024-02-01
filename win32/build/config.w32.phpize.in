@@ -14,8 +14,10 @@ var PHP_CYGWIN="notset";
 
 toolset_setup_compiler();
 
-// do we use x64 or 80x86 version of compiler?
-X64 = toolset_is_64();
+HOST_ARCH = toolset_host_arch();
+TARGET_ARCH = toolset_target_arch();
+// for compatible only
+X64 = TARGET_ARCH != 'x86';
 toolset_setup_arch();
 
 toolset_setup_linker();
@@ -127,6 +129,12 @@ DEFINE("PHP_DIR", PHP_DIR);
 
 ARG_WITH("codegen-arch", "Architecture for code generation", "no");
 toolset_setup_codegen_arch();
+
+ARG_ENABLE("test-ini", "Enable automatic php.ini generation. The test.ini will be put \
+		into the build dir and used to automatically load the shared extensions.", "no");
+
+ARG_WITH("test-ini-ext-exclude", "Comma separated list of shared extensions to \
+		be excluded from the test.ini", "no");
 
 ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations to enable. \
 	Available optimization names are sse, sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2. \

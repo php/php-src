@@ -1631,11 +1631,11 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		ctxp->node = nodep;
 
 		tmp = zend_hash_str_find(ht, "namespaces", sizeof("namespaces")-1);
-		if (tmp && Z_TYPE_P(tmp) == IS_ARRAY) {
+		if (tmp && Z_TYPE_P(tmp) == IS_ARRAY && !HT_IS_PACKED(Z_ARRVAL_P(tmp))) {
 			zval *tmpns;
 			zend_string *prefix;
 
-			ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), prefix, tmpns) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), prefix, tmpns) {
 				if (Z_TYPE_P(tmpns) == IS_STRING) {
 					if (prefix) {
 						xmlXPathRegisterNs(ctxp, (xmlChar *) ZSTR_VAL(prefix), (xmlChar *) Z_STRVAL_P(tmpns));

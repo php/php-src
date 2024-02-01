@@ -599,7 +599,8 @@ PHP_METHOD(Phar, webPhar)
 
 	if ((sapi_mod_name_len == sizeof("cgi-fcgi") - 1 && !strncmp(sapi_module.name, "cgi-fcgi", sizeof("cgi-fcgi") - 1))
 		|| (sapi_mod_name_len == sizeof("fpm-fcgi") - 1 && !strncmp(sapi_module.name, "fpm-fcgi", sizeof("fpm-fcgi") - 1))
-		|| (sapi_mod_name_len == sizeof("cgi") - 1 && !strncmp(sapi_module.name, "cgi", sizeof("cgi") - 1))) {
+		|| (sapi_mod_name_len == sizeof("cgi") - 1 && !strncmp(sapi_module.name, "cgi", sizeof("cgi") - 1))
+		|| (sapi_mod_name_len == sizeof("litespeed") - 1 && !strncmp(sapi_module.name, "litespeed", sizeof("litespeed") - 1))) {
 
 		if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) != IS_UNDEF) {
 			HashTable *_server = Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]);
@@ -1448,9 +1449,10 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 				}
 
 				switch (intern->type) {
-					case SPL_FS_DIR:
-						test = spl_filesystem_object_get_path(intern, NULL);
-						fname_len = spprintf(&fname, 0, "%s%c%s", test, DEFAULT_SLASH, intern->u.dir.entry.d_name);
+					case SPL_FS_DIR: {
+						zend_string *test_str = spl_filesystem_object_get_path(intern);
+						fname_len = spprintf(&fname, 0, "%s%c%s", ZSTR_VAL(test_str), DEFAULT_SLASH, intern->u.dir.entry.d_name);
+						zend_string_release_ex(test_str, /* persistent */ false);
 						if (php_stream_stat_path(fname, &ssb) == 0 && S_ISDIR(ssb.sb.st_mode)) {
 							/* ignore directories */
 							efree(fname);
@@ -1470,6 +1472,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 
 						save = fname;
 						goto phar_spl_fileinfo;
+					}
 					case SPL_FS_INFO:
 					case SPL_FS_FILE:
 						fname = expand_filepath(ZSTR_VAL(intern->file_name), NULL);
@@ -2250,7 +2253,7 @@ static zend_object *phar_convert_to_other(phar_archive_data *source, int convert
 	phar_metadata_tracker_copy(&phar->metadata_tracker, &source->metadata_tracker, phar->is_persistent);
 
 	/* first copy each file's uncompressed contents to a temporary file and set per-file flags */
-	ZEND_HASH_FOREACH_PTR(&source->manifest, entry) {
+	ZEND_HASH_MAP_FOREACH_PTR(&source->manifest, entry) {
 
 		newentry = *entry;
 
@@ -4269,13 +4272,13 @@ static int extract_helper(phar_archive_data *archive, zend_string *search, char 
 
 	if (!search) {
 		/* nothing to match -- extract all files */
-		ZEND_HASH_FOREACH_PTR(&archive->manifest, entry) {
+		ZEND_HASH_MAP_FOREACH_PTR(&archive->manifest, entry) {
 			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, error)) return -1;
 			extracted++;
 		} ZEND_HASH_FOREACH_END();
 	} else if ('/' == ZSTR_VAL(search)[ZSTR_LEN(search) - 1]) {
 		/* ends in "/" -- extract all entries having that prefix */
-		ZEND_HASH_FOREACH_PTR(&archive->manifest, entry) {
+		ZEND_HASH_MAP_FOREACH_PTR(&archive->manifest, entry) {
 			if (0 != strncmp(ZSTR_VAL(search), entry->filename, ZSTR_LEN(search))) continue;
 			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, error)) return -1;
 			extracted++;
@@ -5053,9 +5056,6 @@ PHP_METHOD(PharFileInfo, decompress)
 
 /* {{{ phar methods */
 
-#define REGISTER_PHAR_CLASS_CONST_LONG(class_name, const_name, value) \
-	zend_declare_class_constant_long(class_name, const_name, sizeof(const_name)-1, (zend_long)value);
-
 void phar_object_init(void) /* {{{ */
 {
 	phar_ce_PharException = register_class_PharException(zend_ce_exception);
@@ -5065,22 +5065,5 @@ void phar_object_init(void) /* {{{ */
 	phar_ce_data = register_class_PharData(spl_ce_RecursiveDirectoryIterator, zend_ce_countable, zend_ce_arrayaccess);
 
 	phar_ce_entry = register_class_PharFileInfo(spl_ce_SplFileInfo);
-
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "BZ2", PHAR_ENT_COMPRESSED_BZ2)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "GZ", PHAR_ENT_COMPRESSED_GZ)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "NONE", PHAR_ENT_COMPRESSED_NONE)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHAR", PHAR_FORMAT_PHAR)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "TAR", PHAR_FORMAT_TAR)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "ZIP", PHAR_FORMAT_ZIP)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "COMPRESSED", PHAR_ENT_COMPRESSION_MASK)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHP", PHAR_MIME_PHP)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHPS", PHAR_MIME_PHPS)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "MD5", PHAR_SIG_MD5)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "OPENSSL", PHAR_SIG_OPENSSL)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "OPENSSL_SHA256", PHAR_SIG_OPENSSL_SHA256)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "OPENSSL_SHA512", PHAR_SIG_OPENSSL_SHA512)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA1", PHAR_SIG_SHA1)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA256", PHAR_SIG_SHA256)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA512", PHAR_SIG_SHA512)
 }
 /* }}} */

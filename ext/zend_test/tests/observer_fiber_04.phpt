@@ -26,12 +26,16 @@ $fiber->resume();
 
 ?>
 --EXPECTF--
-<!-- init '%sobserver_fiber_04.php' -->
+<!-- init '%s' -->
+<!-- init Fiber::__construct() -->
+<!-- init Fiber::start() -->
 <!-- switching from fiber %s to %s -->
 <init '%s'>
 <!-- init {closure}() -->
+<!-- init Fiber::suspend() -->
 <!-- switching from fiber %s to %s -->
 <suspend '%s'>
+<!-- init Fiber::resume() -->
 <!-- switching from fiber %s to %s -->
 <resume '%s'>
 <!-- switching from fiber %s to %s -->

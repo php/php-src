@@ -47,7 +47,7 @@ const char HARDCODED_INI[] =
 	"open_basedir=/tmp\n"
 	"disable_functions=dl,mail,mb_send_mail"
 	",shell_exec,exec,system,proc_open,popen,passthru,pcntl_exec"
-	",chgrp,chmod,chown,copy,file_put_contents,lchgrp,lchown,link,mkdir"
+	",chdir,chgrp,chmod,chown,copy,file_put_contents,lchgrp,lchown,link,mkdir"
 	",move_uploaded_file,rename,rmdir,symlink,tempname,touch,unlink,fopen"
 	/* Networking code likes to wait and wait. */
 	",fsockopen,pfsockopen"
@@ -62,10 +62,7 @@ const char HARDCODED_INI[] =
 
 static int startup(sapi_module_struct *sapi_module)
 {
-	if (php_module_startup(sapi_module, NULL, 0)==FAILURE) {
-		return FAILURE;
-	}
-	return SUCCESS;
+	return php_module_startup(sapi_module, NULL);
 }
 
 static size_t ub_write(const char *str, size_t str_length)
@@ -131,7 +128,7 @@ static sapi_module_struct fuzzer_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-int fuzzer_init_php()
+int fuzzer_init_php(const char *extra_ini)
 {
 #ifdef __SANITIZE_ADDRESS__
 	/* We're going to leak all the memory allocated during startup,
@@ -142,8 +139,20 @@ int fuzzer_init_php()
 	sapi_startup(&fuzzer_module);
 	fuzzer_module.phpinfo_as_text = 1;
 
-	fuzzer_module.ini_entries = malloc(sizeof(HARDCODED_INI));
-	memcpy(fuzzer_module.ini_entries, HARDCODED_INI, sizeof(HARDCODED_INI));
+	size_t ini_len = sizeof(HARDCODED_INI);
+	size_t extra_ini_len = extra_ini ? strlen(extra_ini) : 0;
+	if (extra_ini) {
+		ini_len += extra_ini_len + 1;
+	}
+	char *p = fuzzer_module.ini_entries = malloc(ini_len + 1);
+	memcpy(p, HARDCODED_INI, sizeof(HARDCODED_INI) - 1);
+	p += sizeof(HARDCODED_INI) - 1;
+	if (extra_ini) {
+		*p++ = '\n';
+		memcpy(p, extra_ini, extra_ini_len);
+		p += extra_ini_len;
+	}
+	*p = '\0';
 
 	/*
 	 * TODO: we might want to test both Zend and malloc MM, but testing with malloc
@@ -230,7 +239,8 @@ int fuzzer_shutdown_php(void)
 }
 
 int fuzzer_do_request_from_buffer(
-		char *filename, const char *data, size_t data_len, bool execute)
+		char *filename, const char *data, size_t data_len, bool execute,
+		void (*before_shutdown)(void))
 {
 	int retval = FAILURE; /* failure by default */
 
@@ -253,6 +263,8 @@ int fuzzer_do_request_from_buffer(
 		file_handle.primary_script = 1;
 		file_handle.buf = estrndup(data, data_len);
 		file_handle.len = data_len;
+		/* Avoid ZEND_HANDLE_FILENAME for opcache. */
+		file_handle.type = ZEND_HANDLE_STREAM;
 
 		zend_op_array *op_array = zend_compile_file(&file_handle, ZEND_REQUIRE);
 		zend_destroy_file_handle(&file_handle);
@@ -267,6 +279,11 @@ int fuzzer_do_request_from_buffer(
 	} zend_end_try();
 
 	CG(compiled_filename) = NULL; /* ??? */
+	if (before_shutdown) {
+		zend_try {
+			before_shutdown();
+		} zend_end_try();
+	}
 	fuzzer_request_shutdown();
 
 	return (retval == SUCCESS) ? SUCCESS : FAILURE;

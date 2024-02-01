@@ -3,6 +3,7 @@ User-space streams: set_options returns "not implemented" for unhandled option t
 --FILE--
 <?php
 class test_wrapper {
+    public $context;
     function stream_open($path, $mode, $openedpath) {
         return true;
     }
@@ -33,5 +34,6 @@ bool(true)
 option: 3, 2, 50
 int(-1)
 int(8192)
-size: 70
+size: 42
+size: 28
 int(70)

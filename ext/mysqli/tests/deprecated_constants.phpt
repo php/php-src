@@ -16,6 +16,7 @@ if (stristr(mysqli_get_client_info(), 'mysqlnd')) {
     print("\nDeprecated: Constant MYSQLI_SERVER_QUERY_WAS_SLOW is deprecated in dummy\n-1\n");
     print("\nDeprecated: Constant MYSQLI_SERVER_PS_OUT_PARAMS is deprecated in dummy\n-1\n");
 }
+echo constant('MYSQLI_IS_MARIADB')."\n";
 
 ?>
 --EXPECTF--
@@ -37,3 +38,5 @@ Deprecated: Constant MYSQLI_SERVER_QUERY_WAS_SLOW is deprecated in %s
 
 Deprecated: Constant MYSQLI_SERVER_PS_OUT_PARAMS is deprecated in %s
 %i
+
+Deprecated: Constant MYSQLI_IS_MARIADB is deprecated in %s

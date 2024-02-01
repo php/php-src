@@ -2,11 +2,8 @@
 mb_substr()
 --EXTENSIONS--
 mbstring
---INI--
-output_handler=
 --FILE--
 <?php
-// TODO: Add more encodings
 ini_set('include_path','.');
 include_once('common.inc');
 
@@ -27,12 +24,12 @@ $utf32 = mb_convert_encoding($utf8, 'UTF-32', 'UTF-8');
 // UTF-7
 $utf7 = mb_convert_encoding($utf8, 'UTF-7', 'UTF-8');
 
-print  "1: ". bin2hex(mb_substr($euc_jp,  10,  10,'EUC-JP')) . "\n";
-print  "2: ". bin2hex(mb_substr($euc_jp,   0, 100,'EUC-JP')) . "\n";
+echo "EUC-JP:\n";
+print "1: ". bin2hex(mb_substr($euc_jp, 10,  10, 'EUC-JP')) . "\n";
+print "2: ". bin2hex(mb_substr($euc_jp,  0, 100, 'EUC-JP')) . "\n";
 
-$str = mb_substr($euc_jp, 100, 10,'EUC-JP');
-// Note: returns last character
-($str === "") ? print "3 OK\n" : print "NG: ".bin2hex($str)."\n";
+$str = mb_substr($euc_jp, 100, 10, 'EUC-JP');
+print ($str === "") ? "3 OK\n" : "BAD: " . bin2hex($str) . "\n";
 
 $str = mb_substr($euc_jp, -100, 10, 'EUC-JP');
 print ($str !== "") ? "4 OK: " . bin2hex($str) . "\n" : "BAD: " . bin2hex($str) . "\n";
@@ -113,6 +110,7 @@ print "5:" . mb_convert_encoding(mb_substr($utf7, 10, 0, 'UTF-7'), 'UTF-8', 'UTF
 
 ?>
 --EXPECT--
+EUC-JP:
 1: c6fccbdcb8eca4c7a4b9a1a34555432d
 2: 30313233a4b3a4cecab8bbfacef3a4cfc6fccbdcb8eca4c7a4b9a1a34555432d4a50a4f2bbc8a4c3a4c6a4a4a4dea4b9a1a3c6fccbdcb8eca4cfccccc5ddbdada4a4a1a3
 3 OK

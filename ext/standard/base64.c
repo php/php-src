@@ -51,7 +51,7 @@ static const short base64_reverse_table[256] = {
 };
 /* }}} */
 
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
 #include <arm_neon.h>
 
 static zend_always_inline uint8x16_t encode_toascii(const uint8x16_t input, const uint8x16x2_t shift_LUT)
@@ -118,11 +118,11 @@ static zend_always_inline unsigned char *neon_base64_encode(const unsigned char 
 	*left = inl;
 	return out;
 }
-#endif /* __aarch64__ */
+#endif /* defined(__aarch64__) || defined(_M_ARM64) */
 
 static zend_always_inline unsigned char *php_base64_encode_impl(const unsigned char *in, size_t inl, unsigned char *out) /* {{{ */
 {
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
 	if (inl >= 16 * 3) {
 		size_t left = 0;
 		out = neon_base64_encode(in, inl, out, &left);
@@ -161,7 +161,7 @@ static zend_always_inline unsigned char *php_base64_encode_impl(const unsigned c
 }
 /* }}} */
 
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
 static zend_always_inline uint8x16_t decode_fromascii(const uint8x16_t input, uint8x16_t *error, const uint8x16x2_t shiftLUT, const uint8x16x2_t maskLUT, const uint8x16x2_t bitposLUT) {
 	const uint8x16_t higher_nibble = vshrq_n_u8(input, 4);
 	const uint8x16_t lower_nibble = vandq_u8(input, vdupq_n_u8(0x0f));
@@ -241,14 +241,14 @@ static zend_always_inline size_t neon_base64_decode(const unsigned char *in, siz
 	*left = inl;
 	return out - out_orig;
 }
-#endif /* __aarch64__ */
+#endif /* defined(__aarch64__) || defined(_M_ARM64) */
 
 static zend_always_inline int php_base64_decode_impl(const unsigned char *in, size_t inl, unsigned char *out, size_t *outl, bool strict) /* {{{ */
 {
 	int ch;
 	size_t i = 0, padding = 0, j = *outl;
 
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
 	if (inl >= 16 * 4) {
 		size_t left = 0;
 		j += neon_base64_decode(in, inl, out, &left);

@@ -5,7 +5,7 @@
 class PDOException extends RuntimeException
 {
     /** @var int|string */
-    protected $code = 0;
+    protected $code = 0; // TODO add proper type
     public ?array $errorInfo = null;
 }
 

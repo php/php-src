@@ -4,16 +4,11 @@ mysqli_change_user() - LAST_INSERT_ID() - http://bugs.mysql.com/bug.php?id=45184
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
-
-if (!$IS_MYSQLND) {
-    die("skip Might hit known and open bugs http://bugs.mysql.com/bug.php?id=30472, http://bugs.mysql.com/bug.php?id=45184");
-}
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
+    require_once 'connect.inc';
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
         printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
@@ -59,7 +54,7 @@ if (!$IS_MYSQLND) {
 ?>
 --CLEAN--
 <?php
-    require_once("clean_table.inc");
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 done!

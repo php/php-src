@@ -2,24 +2,416 @@
 
 /** @generate-class-entries */
 
-namespace IMAP {
+namespace {
+    /**
+     * @var int
+     * @cvalue NIL
+     * @deprecated
+     */
+    const NIL = UNKNOWN;
 
     /**
-     * @strict-properties
-     * @not-serializable
+     * @var int
+     * @cvalue PHP_IMAP_OPENTIMEOUT
      */
-    final class Connection {
-    }
+    const IMAP_OPENTIMEOUT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_IMAP_READTIMEOUT
+     */
+    const IMAP_READTIMEOUT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_IMAP_WRITETIMEOUT
+     */
+    const IMAP_WRITETIMEOUT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_IMAP_CLOSETIMEOUT
+     */
+    const IMAP_CLOSETIMEOUT = UNKNOWN;
 
-}
+    /**
+     * debug protocol negotiations
+     * @var int
+     * @cvalue OP_DEBUG
+     */
+    const OP_DEBUG = UNKNOWN;
+    /**
+     * read-only open
+     * @var int
+     * @cvalue OP_READONLY
+     */
+    const OP_READONLY = UNKNOWN;
+    /**
+     * anonymous open of newsgroup
+     * @var int
+     * @cvalue OP_ANONYMOUS
+     */
+    const OP_ANONYMOUS = UNKNOWN;
+    /**
+     * short (elt-only) caching
+     * @var int
+     * @cvalue OP_SHORTCACHE
+     */
+    const OP_SHORTCACHE = UNKNOWN;
+    /**
+     * don't pass up events (internal use)
+     * @var int
+     * @cvalue OP_SILENT
+     */
+    const OP_SILENT = UNKNOWN;
+    /**
+     * return driver prototype
+     * @var int
+     * @cvalue OP_PROTOTYPE
+     */
+    const OP_PROTOTYPE = UNKNOWN;
+    /**
+     * half-open (IMAP connect but no select)
+     * @var int
+     * @cvalue OP_HALFOPEN
+     */
+    const OP_HALFOPEN = UNKNOWN;
+    /**
+     * silently expunge recycle stream
+     * @var int
+     * @cvalue OP_EXPUNGE
+     */
+    const OP_EXPUNGE = UNKNOWN;
+    /**
+     * don't do non-secure authentication
+     * @var int
+     * @cvalue OP_SECURE
+     */
+    const OP_SECURE = UNKNOWN;
 
-namespace {
+    /**
+     * @var int
+     * @cvalue PHP_EXPUNGE
+     */
+    const CL_EXPUNGE = UNKNOWN;
 
-    function imap_open(string $mailbox, string $user, string $password, int $flags = 0, int $retries = 0, array $options = []): IMAP\Connection|false {}
+    /**
+     * argument is a UID
+     * @var int
+     * @cvalue FT_UID
+     */
+    const FT_UID = UNKNOWN;
+    /**
+     * peek at data
+     * @var int
+     * @cvalue FT_PEEK
+     */
+    const FT_PEEK = UNKNOWN;
+    /**
+     * NOT flag for header lines fetch
+     * @var int
+     * @cvalue FT_NOT
+     */
+    const FT_NOT = UNKNOWN;
+    /**
+     * text can be internal strings
+     * @var int
+     * @cvalue FT_INTERNAL
+     */
+    const FT_INTERNAL = UNKNOWN;
+    /**
+     * IMAP prefetch text when fetching header
+     * @var int
+     * @cvalue FT_PREFETCHTEXT
+     */
+    const FT_PREFETCHTEXT = UNKNOWN;
+
+    /**
+     * argument is a UID sequence
+     * @var int
+     * @cvalue ST_UID
+     */
+    const ST_UID = UNKNOWN;
+    /**
+     * don't return results
+     * @var int
+     * @cvalue ST_SILENT
+     */
+    const ST_SILENT = UNKNOWN;
+    /**
+     * set vs. clear
+     * @var int
+     * @cvalue ST_SET
+     */
+    const ST_SET = UNKNOWN;
+
+    /**
+     * argument is a UID sequence
+     * @var int
+     * @cvalue CP_UID
+     */
+    const CP_UID = UNKNOWN;
+    /**
+     * delete from source after copying
+     * @var int
+     * @cvalue CP_MOVE
+     */
+    const CP_MOVE = UNKNOWN;
+
+    /**
+     * return UID
+     * @var int
+     * @cvalue SE_UID
+     */
+    const SE_UID = UNKNOWN;
+    /**
+     * free search program after finished
+     * @var int
+     * @cvalue SE_FREE
+     */
+    const SE_FREE = UNKNOWN;
+    /**
+     * no search prefetchin
+     * @var int
+     * @cvalue SE_NOPREFETCH
+     */
+    const SE_NOPREFETCH = UNKNOWN;
+    /**
+     * free sort program after finished
+     * @var int
+     * @cvalue SO_FREE
+     */
+    const SO_FREE = UNKNOWN;
+    /**
+     * don't do server-based sort
+     * @var int
+     * @cvalue SO_FREE
+     */
+    const SO_NOSERVER = UNKNOWN;
+
+    /**
+     * number of messages
+     * @var int
+     * @cvalue SA_MESSAGES
+     */
+    const SA_MESSAGES = UNKNOWN;
+    /**
+     * number of recent messages
+     * @var int
+     * @cvalue SA_RECENT
+     */
+    const SA_RECENT = UNKNOWN;
+    /**
+     * number of unseen messages
+     * @var int
+     * @cvalue SA_UNSEEN
+     */
+    const SA_UNSEEN = UNKNOWN;
+    /**
+     * next UID to be assigned
+     * @var int
+     * @cvalue SA_UIDNEXT
+     */
+    const SA_UIDNEXT = UNKNOWN;
+    /**
+     * UID validity value
+     * @var int
+     * @cvalue SA_UIDVALIDITY
+     */
+    const SA_UIDVALIDITY = UNKNOWN;
+    /**
+     * get all status information
+     * @var int
+     * @cvalue SA_ALL
+     */
+    const SA_ALL = UNKNOWN;
+
+    /**
+     * @var int
+     * @cvalue LATT_NOINFERIORS
+     */
+    const LATT_NOINFERIORS = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue LATT_NOSELECT
+     */
+    const LATT_NOSELECT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue LATT_MARKED
+     */
+    const LATT_MARKED = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue LATT_UNMARKED
+     */
+    const LATT_UNMARKED = UNKNOWN;
+
+#ifdef LATT_REFERRAL
+    /**
+     * @var int
+     * @cvalue LATT_REFERRAL
+     */
+    const LATT_REFERRAL = UNKNOWN;
+#endif
+#ifdef LATT_HASCHILDREN
+    /**
+     * @var int
+     * @cvalue LATT_HASCHILDREN
+     */
+    const LATT_HASCHILDREN = UNKNOWN;
+#endif
+#ifdef LATT_HASNOCHILDREN
+    /**
+     * @var int
+     * @cvalue LATT_HASNOCHILDREN
+     */
+    const LATT_HASNOCHILDREN = UNKNOWN;
+#endif
+
+    /**
+     * date
+     * @var int
+     * @cvalue SORTDATE
+     */
+    const SORTDATE = UNKNOWN;
+    /**
+     * arrival date
+     * @var int
+     * @cvalue SORTARRIVAL
+     */
+    const SORTARRIVAL = UNKNOWN;
+    /**
+     * from
+     * @var int
+     * @cvalue SORTFROM
+     */
+    const SORTFROM = UNKNOWN;
+    /**
+     * subject
+     * @var int
+     * @cvalue SORTSUBJECT
+     */
+    const SORTSUBJECT = UNKNOWN;
+    /**
+     * to
+     * @var int
+     * @cvalue SORTTO
+     */
+    const SORTTO = UNKNOWN;
+    /**
+     * cc
+     * @var int
+     * @cvalue SORTCC
+     */
+    const SORTCC = UNKNOWN;
+    /**
+     * size
+     * @var int
+     * @cvalue SORTSIZE
+     */
+    const SORTSIZE = UNKNOWN;
+
+    /**
+     * @var int
+     * @cvalue TYPETEXT
+     */
+    const TYPETEXT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TYPEMULTIPART
+     */
+    const TYPEMULTIPART = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TYPEMESSAGE
+     */
+    const TYPEMESSAGE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TYPEAPPLICATION
+     */
+    const TYPEAPPLICATION = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TYPEAUDIO
+     */
+    const TYPEAUDIO = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TYPEIMAGE
+     */
+    const TYPEIMAGE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TYPEVIDEO
+     */
+    const TYPEVIDEO = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TYPEMODEL
+     */
+    const TYPEMODEL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue TYPEOTHER
+     */
+    const TYPEOTHER = UNKNOWN;
+
+    /**
+     * @var int
+     * @cvalue ENC7BIT
+     */
+    const ENC7BIT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue ENC8BIT
+     */
+    const ENC8BIT = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue ENCBINARY
+     */
+    const ENCBINARY = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue ENCBASE64
+     */
+    const ENCBASE64 = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue ENCQUOTEDPRINTABLE
+     */
+    const ENCQUOTEDPRINTABLE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue ENCOTHER
+     */
+    const ENCOTHER = UNKNOWN;
+
+    /**
+     * message cache elements
+     * @var int
+     * @cvalue GC_ELT
+     */
+    const IMAP_GC_ELT = UNKNOWN;
+    /**
+     * ENVELOPEs and BODYs
+     * @var int
+     * @cvalue GC_ENV
+     */
+    const IMAP_GC_ENV = UNKNOWN;
+    /**
+     * texts
+     * @var int
+     * @cvalue GC_TEXTS
+     */
+    const IMAP_GC_TEXTS = UNKNOWN;
+
+    function imap_open(string $mailbox, string $user, #[\SensitiveParameter] string $password, int $flags = 0, int $retries = 0, array $options = []): IMAP\Connection|false {}
 
     function imap_reopen(IMAP\Connection $imap, string $mailbox, int $flags = 0, int $retries = 0): bool {}
 
     function imap_close(IMAP\Connection $imap, int $flags = 0): bool {}
+
+    function imap_is_open(IMAP\Connection $imap): bool {}
 
     function imap_num_msg(IMAP\Connection $imap): int|false {}
 
@@ -161,7 +553,7 @@ namespace {
 
     function imap_timeout(int $timeout_type, int $timeout = -1): int|bool {}
 
-    #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+    #if (defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001))
     function imap_get_quota(IMAP\Connection $imap, string $quota_root): array|false {}
 
     function imap_get_quotaroot(IMAP\Connection $imap, string $mailbox): array|false {}
@@ -174,5 +566,13 @@ namespace {
     #endif
 
     function imap_mail(string $to, string $subject, string $message, ?string $additional_headers = null, ?string $cc = null, ?string $bcc = null, ?string $return_path = null): bool {}
+}
 
+namespace IMAP {
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Connection {
+    }
 }

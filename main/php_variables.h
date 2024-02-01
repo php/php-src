@@ -36,6 +36,7 @@ PHPAPI void php_register_variable(const char *var, const char *val, zval *track_
 /* binary-safe version */
 PHPAPI void php_register_variable_safe(const char *var, const char *val, size_t val_len, zval *track_vars_array);
 PHPAPI void php_register_variable_ex(const char *var, zval *val, zval *track_vars_array);
+PHPAPI void php_register_known_variable(const char *var, size_t var_len, zval *value, zval *track_vars_array);
 
 PHPAPI void php_build_argv(const char *s, zval *track_vars_array);
 PHPAPI int php_hash_environment(void);

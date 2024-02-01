@@ -1,10 +1,16 @@
 name: Test
 inputs:
+  testArtifacts:
+    default: null
+    required: false
   runTestsParameters:
     default: ''
     required: false
   jitType:
     default: 'disable'
+    required: false
+  idleCpu:
+    default: 'false'
     required: false
 runs:
   using: composite
@@ -29,12 +35,20 @@ runs:
         export PDO_OCI_TEST_PASS="pass"
         export PDO_OCI_TEST_DSN="oci:dbname=localhost/XEPDB1;charset=AL32UTF8"
         export SKIP_IO_CAPTURE_TESTS=1
+        export TEST_PHP_JUNIT=junit.out.xml
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           -d opcache.jit=${{ inputs.jitType }} \
           -d opcache.jit_buffer_size=16M \
-          -j$(/usr/bin/nproc) \
-          -g FAIL,XFAIL,BORK,WARN,LEAK,XLEAK,SKIP \
+          ${{ inputs.idleCpu == 'true' && '-j$(($(/usr/bin/nproc) - 1))' || '-j$(/usr/bin/nproc)' }} \
+          -g FAIL,BORK,LEAK,XLEAK \
+          --no-progress \
           --offline \
           --show-diff \
           --show-slow 1000 \
           --set-timeout 120
+    - uses: actions/upload-artifact@v4
+      if: always() && inputs.testArtifacts != null
+      with:
+        name: ${{ github.job }}_${{ inputs.testArtifacts }}
+        path: ${{ github.workspace }}/junit.out.xml
+        retention-days: 5

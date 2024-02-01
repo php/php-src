@@ -786,10 +786,10 @@ dnl
 dnl PHP_BUILD_PROGRAM
 dnl
 AC_DEFUN([PHP_BUILD_PROGRAM],[
-  php_c_pre='$(LIBTOOL) --mode=compile $(CC)'
+  php_c_pre='$(LIBTOOL) --tag=CC --mode=compile $(CC)'
   php_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)'
   php_c_post=
-  php_cxx_pre='$(LIBTOOL) --mode=compile $(CXX)'
+  php_cxx_pre='$(LIBTOOL) --tag=CXX --mode=compile $(CXX)'
   php_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)'
   php_cxx_post=
   php_lo=lo
@@ -799,10 +799,10 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
     no)  pic_setting='-prefer-non-pic';;
   esac
 
-  shared_c_pre='$(LIBTOOL) --mode=compile $(CC)'
+  shared_c_pre='$(LIBTOOL) --tag=CC --mode=compile $(CC)'
   shared_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) '$pic_setting
   shared_c_post=
-  shared_cxx_pre='$(LIBTOOL) --mode=compile $(CXX)'
+  shared_cxx_pre='$(LIBTOOL) --tag=CXX --mode=compile $(CXX)'
   shared_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS) '$pic_setting
   shared_cxx_post=
   shared_lo=lo
@@ -832,10 +832,10 @@ AC_DEFUN([PHP_SHARED_MODULE],[
   PHP_SUBST($2)
   cat >>Makefile.objects<<EOF
 \$(phplibdir)/$1.$suffix: $3/$1.$suffix
-	\$(LIBTOOL) --mode=install cp $3/$1.$suffix \$(phplibdir)
+	\$(LIBTOOL) --tag=ifelse($4,,CC,CXX) --mode=install cp $3/$1.$suffix \$(phplibdir)
 
 $3/$1.$suffix: \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_DEPENDENCIES)
-	\$(LIBTOOL) --mode=link ifelse($4,,[\$(CC)],[\$(CXX)]) -shared \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) $additional_flags -o [\$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)
+	\$(LIBTOOL) --tag=ifelse($4,,CC,CXX) --mode=link ifelse($4,,[\$(CC)],[\$(CXX)]) -shared \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) $additional_flags -o [\$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)
 
 EOF
 ])
@@ -1900,8 +1900,8 @@ AC_DEFUN([PHP_PROG_PHP],[
     set $php_version
     IFS=$ac_IFS
     php_version_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
-    dnl Minimum supported version for gen_stubs.php is PHP 7.1.
-    if test "$php_version_num" -lt 70100; then
+    dnl Minimum supported version for gen_stub.php is PHP 7.4.
+    if test "$php_version_num" -lt 70400; then
       AC_MSG_RESULT([$php_version (too old)])
       unset PHP
     else
@@ -2030,7 +2030,7 @@ ifelse([$3],[],,[else $3])
 ])
 
 dnl
-dnl PHP_SETUP_LIBXML(shared-add [, action-found [, action-not-found]])
+dnl PHP_SETUP_LIBXML(shared-add [, action-found])
 dnl
 dnl Common setup macro for libxml.
 dnl

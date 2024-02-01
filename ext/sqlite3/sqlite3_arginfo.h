@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c14e6403cfd75718156b409dc476f088aa0b5540 */
+ * Stub hash: 61f4a2611ed8cef37003610991e357b0f227bec9 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -270,6 +270,24 @@ static const zend_function_entry class_SQLite3Result_methods[] = {
 	ZEND_FE_END
 };
 
+static void register_sqlite3_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("SQLITE3_ASSOC", PHP_SQLITE3_ASSOC, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SQLITE3_NUM", PHP_SQLITE3_NUM, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SQLITE3_BOTH", PHP_SQLITE3_BOTH, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SQLITE3_INTEGER", SQLITE_INTEGER, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SQLITE3_FLOAT", SQLITE_FLOAT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SQLITE3_TEXT", SQLITE3_TEXT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SQLITE3_BLOB", SQLITE_BLOB, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SQLITE3_NULL", SQLITE_NULL, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SQLITE3_OPEN_READONLY", SQLITE_OPEN_READONLY, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SQLITE3_OPEN_READWRITE", SQLITE_OPEN_READWRITE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SQLITE3_OPEN_CREATE", SQLITE_OPEN_CREATE, CONST_PERSISTENT);
+#if defined(SQLITE_DETERMINISTIC)
+	REGISTER_LONG_CONSTANT("SQLITE3_DETERMINISTIC", SQLITE_DETERMINISTIC, CONST_PERSISTENT);
+#endif
+}
+
 static zend_class_entry *register_class_SQLite3(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -277,6 +295,230 @@ static zend_class_entry *register_class_SQLite3(void)
 	INIT_CLASS_ENTRY(ce, "SQLite3", class_SQLite3_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+
+	zval const_OK_value;
+	ZVAL_LONG(&const_OK_value, SQLITE_OK);
+	zend_string *const_OK_name = zend_string_init_interned("OK", sizeof("OK") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_OK_name, &const_OK_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_OK_name);
+
+	zval const_DENY_value;
+	ZVAL_LONG(&const_DENY_value, SQLITE_DENY);
+	zend_string *const_DENY_name = zend_string_init_interned("DENY", sizeof("DENY") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_DENY_name, &const_DENY_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_DENY_name);
+
+	zval const_IGNORE_value;
+	ZVAL_LONG(&const_IGNORE_value, SQLITE_IGNORE);
+	zend_string *const_IGNORE_name = zend_string_init_interned("IGNORE", sizeof("IGNORE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_IGNORE_name, &const_IGNORE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_IGNORE_name);
+
+	zval const_CREATE_INDEX_value;
+	ZVAL_LONG(&const_CREATE_INDEX_value, SQLITE_CREATE_INDEX);
+	zend_string *const_CREATE_INDEX_name = zend_string_init_interned("CREATE_INDEX", sizeof("CREATE_INDEX") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_CREATE_INDEX_name, &const_CREATE_INDEX_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_CREATE_INDEX_name);
+
+	zval const_CREATE_TABLE_value;
+	ZVAL_LONG(&const_CREATE_TABLE_value, SQLITE_CREATE_TABLE);
+	zend_string *const_CREATE_TABLE_name = zend_string_init_interned("CREATE_TABLE", sizeof("CREATE_TABLE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_CREATE_TABLE_name, &const_CREATE_TABLE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_CREATE_TABLE_name);
+
+	zval const_CREATE_TEMP_INDEX_value;
+	ZVAL_LONG(&const_CREATE_TEMP_INDEX_value, SQLITE_CREATE_TEMP_INDEX);
+	zend_string *const_CREATE_TEMP_INDEX_name = zend_string_init_interned("CREATE_TEMP_INDEX", sizeof("CREATE_TEMP_INDEX") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_CREATE_TEMP_INDEX_name, &const_CREATE_TEMP_INDEX_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_CREATE_TEMP_INDEX_name);
+
+	zval const_CREATE_TEMP_TABLE_value;
+	ZVAL_LONG(&const_CREATE_TEMP_TABLE_value, SQLITE_CREATE_TEMP_TABLE);
+	zend_string *const_CREATE_TEMP_TABLE_name = zend_string_init_interned("CREATE_TEMP_TABLE", sizeof("CREATE_TEMP_TABLE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_CREATE_TEMP_TABLE_name, &const_CREATE_TEMP_TABLE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_CREATE_TEMP_TABLE_name);
+
+	zval const_CREATE_TEMP_TRIGGER_value;
+	ZVAL_LONG(&const_CREATE_TEMP_TRIGGER_value, SQLITE_CREATE_TEMP_TRIGGER);
+	zend_string *const_CREATE_TEMP_TRIGGER_name = zend_string_init_interned("CREATE_TEMP_TRIGGER", sizeof("CREATE_TEMP_TRIGGER") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_CREATE_TEMP_TRIGGER_name, &const_CREATE_TEMP_TRIGGER_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_CREATE_TEMP_TRIGGER_name);
+
+	zval const_CREATE_TEMP_VIEW_value;
+	ZVAL_LONG(&const_CREATE_TEMP_VIEW_value, SQLITE_CREATE_TEMP_VIEW);
+	zend_string *const_CREATE_TEMP_VIEW_name = zend_string_init_interned("CREATE_TEMP_VIEW", sizeof("CREATE_TEMP_VIEW") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_CREATE_TEMP_VIEW_name, &const_CREATE_TEMP_VIEW_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_CREATE_TEMP_VIEW_name);
+
+	zval const_CREATE_TRIGGER_value;
+	ZVAL_LONG(&const_CREATE_TRIGGER_value, SQLITE_CREATE_TRIGGER);
+	zend_string *const_CREATE_TRIGGER_name = zend_string_init_interned("CREATE_TRIGGER", sizeof("CREATE_TRIGGER") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_CREATE_TRIGGER_name, &const_CREATE_TRIGGER_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_CREATE_TRIGGER_name);
+
+	zval const_CREATE_VIEW_value;
+	ZVAL_LONG(&const_CREATE_VIEW_value, SQLITE_CREATE_VIEW);
+	zend_string *const_CREATE_VIEW_name = zend_string_init_interned("CREATE_VIEW", sizeof("CREATE_VIEW") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_CREATE_VIEW_name, &const_CREATE_VIEW_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_CREATE_VIEW_name);
+
+	zval const_DELETE_value;
+	ZVAL_LONG(&const_DELETE_value, SQLITE_DELETE);
+	zend_string *const_DELETE_name = zend_string_init_interned("DELETE", sizeof("DELETE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_DELETE_name, &const_DELETE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_DELETE_name);
+
+	zval const_DROP_INDEX_value;
+	ZVAL_LONG(&const_DROP_INDEX_value, SQLITE_DROP_INDEX);
+	zend_string *const_DROP_INDEX_name = zend_string_init_interned("DROP_INDEX", sizeof("DROP_INDEX") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_DROP_INDEX_name, &const_DROP_INDEX_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_DROP_INDEX_name);
+
+	zval const_DROP_TABLE_value;
+	ZVAL_LONG(&const_DROP_TABLE_value, SQLITE_DROP_TABLE);
+	zend_string *const_DROP_TABLE_name = zend_string_init_interned("DROP_TABLE", sizeof("DROP_TABLE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_DROP_TABLE_name, &const_DROP_TABLE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_DROP_TABLE_name);
+
+	zval const_DROP_TEMP_INDEX_value;
+	ZVAL_LONG(&const_DROP_TEMP_INDEX_value, SQLITE_DROP_TEMP_INDEX);
+	zend_string *const_DROP_TEMP_INDEX_name = zend_string_init_interned("DROP_TEMP_INDEX", sizeof("DROP_TEMP_INDEX") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_DROP_TEMP_INDEX_name, &const_DROP_TEMP_INDEX_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_DROP_TEMP_INDEX_name);
+
+	zval const_DROP_TEMP_TABLE_value;
+	ZVAL_LONG(&const_DROP_TEMP_TABLE_value, SQLITE_DROP_TEMP_TABLE);
+	zend_string *const_DROP_TEMP_TABLE_name = zend_string_init_interned("DROP_TEMP_TABLE", sizeof("DROP_TEMP_TABLE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_DROP_TEMP_TABLE_name, &const_DROP_TEMP_TABLE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_DROP_TEMP_TABLE_name);
+
+	zval const_DROP_TEMP_TRIGGER_value;
+	ZVAL_LONG(&const_DROP_TEMP_TRIGGER_value, SQLITE_DROP_TEMP_TRIGGER);
+	zend_string *const_DROP_TEMP_TRIGGER_name = zend_string_init_interned("DROP_TEMP_TRIGGER", sizeof("DROP_TEMP_TRIGGER") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_DROP_TEMP_TRIGGER_name, &const_DROP_TEMP_TRIGGER_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_DROP_TEMP_TRIGGER_name);
+
+	zval const_DROP_TEMP_VIEW_value;
+	ZVAL_LONG(&const_DROP_TEMP_VIEW_value, SQLITE_DROP_TEMP_VIEW);
+	zend_string *const_DROP_TEMP_VIEW_name = zend_string_init_interned("DROP_TEMP_VIEW", sizeof("DROP_TEMP_VIEW") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_DROP_TEMP_VIEW_name, &const_DROP_TEMP_VIEW_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_DROP_TEMP_VIEW_name);
+
+	zval const_DROP_TRIGGER_value;
+	ZVAL_LONG(&const_DROP_TRIGGER_value, SQLITE_DROP_TRIGGER);
+	zend_string *const_DROP_TRIGGER_name = zend_string_init_interned("DROP_TRIGGER", sizeof("DROP_TRIGGER") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_DROP_TRIGGER_name, &const_DROP_TRIGGER_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_DROP_TRIGGER_name);
+
+	zval const_DROP_VIEW_value;
+	ZVAL_LONG(&const_DROP_VIEW_value, SQLITE_DROP_VIEW);
+	zend_string *const_DROP_VIEW_name = zend_string_init_interned("DROP_VIEW", sizeof("DROP_VIEW") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_DROP_VIEW_name, &const_DROP_VIEW_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_DROP_VIEW_name);
+
+	zval const_INSERT_value;
+	ZVAL_LONG(&const_INSERT_value, SQLITE_INSERT);
+	zend_string *const_INSERT_name = zend_string_init_interned("INSERT", sizeof("INSERT") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_INSERT_name, &const_INSERT_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_INSERT_name);
+
+	zval const_PRAGMA_value;
+	ZVAL_LONG(&const_PRAGMA_value, SQLITE_PRAGMA);
+	zend_string *const_PRAGMA_name = zend_string_init_interned("PRAGMA", sizeof("PRAGMA") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_PRAGMA_name, &const_PRAGMA_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_PRAGMA_name);
+
+	zval const_READ_value;
+	ZVAL_LONG(&const_READ_value, SQLITE_READ);
+	zend_string *const_READ_name = zend_string_init_interned("READ", sizeof("READ") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_READ_name, &const_READ_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_READ_name);
+
+	zval const_SELECT_value;
+	ZVAL_LONG(&const_SELECT_value, SQLITE_SELECT);
+	zend_string *const_SELECT_name = zend_string_init_interned("SELECT", sizeof("SELECT") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_SELECT_name, &const_SELECT_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_SELECT_name);
+
+	zval const_TRANSACTION_value;
+	ZVAL_LONG(&const_TRANSACTION_value, SQLITE_TRANSACTION);
+	zend_string *const_TRANSACTION_name = zend_string_init_interned("TRANSACTION", sizeof("TRANSACTION") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TRANSACTION_name, &const_TRANSACTION_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TRANSACTION_name);
+
+	zval const_UPDATE_value;
+	ZVAL_LONG(&const_UPDATE_value, SQLITE_UPDATE);
+	zend_string *const_UPDATE_name = zend_string_init_interned("UPDATE", sizeof("UPDATE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_UPDATE_name, &const_UPDATE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_UPDATE_name);
+
+	zval const_ATTACH_value;
+	ZVAL_LONG(&const_ATTACH_value, SQLITE_ATTACH);
+	zend_string *const_ATTACH_name = zend_string_init_interned("ATTACH", sizeof("ATTACH") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_ATTACH_name, &const_ATTACH_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_ATTACH_name);
+
+	zval const_DETACH_value;
+	ZVAL_LONG(&const_DETACH_value, SQLITE_DETACH);
+	zend_string *const_DETACH_name = zend_string_init_interned("DETACH", sizeof("DETACH") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_DETACH_name, &const_DETACH_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_DETACH_name);
+
+	zval const_ALTER_TABLE_value;
+	ZVAL_LONG(&const_ALTER_TABLE_value, SQLITE_ALTER_TABLE);
+	zend_string *const_ALTER_TABLE_name = zend_string_init_interned("ALTER_TABLE", sizeof("ALTER_TABLE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_ALTER_TABLE_name, &const_ALTER_TABLE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_ALTER_TABLE_name);
+
+	zval const_REINDEX_value;
+	ZVAL_LONG(&const_REINDEX_value, SQLITE_REINDEX);
+	zend_string *const_REINDEX_name = zend_string_init_interned("REINDEX", sizeof("REINDEX") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_REINDEX_name, &const_REINDEX_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_REINDEX_name);
+
+	zval const_ANALYZE_value;
+	ZVAL_LONG(&const_ANALYZE_value, SQLITE_ANALYZE);
+	zend_string *const_ANALYZE_name = zend_string_init_interned("ANALYZE", sizeof("ANALYZE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_ANALYZE_name, &const_ANALYZE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_ANALYZE_name);
+
+	zval const_CREATE_VTABLE_value;
+	ZVAL_LONG(&const_CREATE_VTABLE_value, SQLITE_CREATE_VTABLE);
+	zend_string *const_CREATE_VTABLE_name = zend_string_init_interned("CREATE_VTABLE", sizeof("CREATE_VTABLE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_CREATE_VTABLE_name, &const_CREATE_VTABLE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_CREATE_VTABLE_name);
+
+	zval const_DROP_VTABLE_value;
+	ZVAL_LONG(&const_DROP_VTABLE_value, SQLITE_DROP_VTABLE);
+	zend_string *const_DROP_VTABLE_name = zend_string_init_interned("DROP_VTABLE", sizeof("DROP_VTABLE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_DROP_VTABLE_name, &const_DROP_VTABLE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_DROP_VTABLE_name);
+
+	zval const_FUNCTION_value;
+	ZVAL_LONG(&const_FUNCTION_value, SQLITE_FUNCTION);
+	zend_string *const_FUNCTION_name = zend_string_init_interned("FUNCTION", sizeof("FUNCTION") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_FUNCTION_name, &const_FUNCTION_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_FUNCTION_name);
+
+	zval const_SAVEPOINT_value;
+	ZVAL_LONG(&const_SAVEPOINT_value, SQLITE_SAVEPOINT);
+	zend_string *const_SAVEPOINT_name = zend_string_init_interned("SAVEPOINT", sizeof("SAVEPOINT") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_SAVEPOINT_name, &const_SAVEPOINT_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_SAVEPOINT_name);
+
+	zval const_COPY_value;
+	ZVAL_LONG(&const_COPY_value, SQLITE_COPY);
+	zend_string *const_COPY_name = zend_string_init_interned("COPY", sizeof("COPY") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_COPY_name, &const_COPY_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_COPY_name);
+#if defined(SQLITE_RECURSIVE)
+
+	zval const_RECURSIVE_value;
+	ZVAL_LONG(&const_RECURSIVE_value, SQLITE_RECURSIVE);
+	zend_string *const_RECURSIVE_name = zend_string_init_interned("RECURSIVE", sizeof("RECURSIVE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_RECURSIVE_name, &const_RECURSIVE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_RECURSIVE_name);
+#endif
 
 	return class_entry;
 }

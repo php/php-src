@@ -2,6 +2,7 @@
 Typed properties in internal classes
 --EXTENSIONS--
 zend_test
+spl
 --FILE--
 <?php
 
@@ -70,6 +71,8 @@ object(_ZendTestClass)#1 (3) {
   }
   ["classUnionProp"]=>
   NULL
+  ["classIntersectionProp"]=>
+  uninitialized(Traversable&Countable)
   ["readonlyProp"]=>
   uninitialized(int)
 }
@@ -84,6 +87,8 @@ object(Test)#4 (3) {
   }
   ["classUnionProp"]=>
   NULL
+  ["classIntersectionProp"]=>
+  uninitialized(Traversable&Countable)
   ["readonlyProp"]=>
   uninitialized(int)
 }

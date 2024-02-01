@@ -14,7 +14,7 @@ echo 'done';
 --EXPECTF--
 Warning: Illegal string offset "2bbb" in %s on line %d
 
-Fatal error: Uncaught Error: Cannot iterate on string offsets by reference in %sbug73792.php:4
+Fatal error: Uncaught Error: Cannot create references to/from string offsets in %s:%d
 Stack trace:
 #0 {main}
   thrown in %sbug73792.php on line 4

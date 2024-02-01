@@ -2,6 +2,102 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var string
+ * @cvalue DATE_FORMAT_RFC3339
+ */
+const DATE_ATOM = "Y-m-d\\TH:i:sP";
+
+/**
+ * @var string
+ * @cvalue DATE_FORMAT_COOKIE
+ */
+const DATE_COOKIE = "l, d-M-Y H:i:s T";
+
+/**
+ * @var string
+ * @cvalue DATE_FORMAT_ISO8601
+ */
+const DATE_ISO8601 = "Y-m-d\\TH:i:sO";
+
+/**
+ * @var string
+ * @cvalue DATE_FORMAT_ISO8601_EXPANDED
+ */
+const DATE_ISO8601_EXPANDED = "X-m-d\\TH:i:sP";
+
+/**
+ * @var string
+ * @cvalue DATE_FORMAT_RFC822
+ */
+const DATE_RFC822 = "D, d M y H:i:s O";
+
+/**
+ * @var string
+ * @cvalue DATE_FORMAT_RFC850
+ */
+const DATE_RFC850 = "l, d-M-y H:i:s T";
+
+/**
+ * @var string
+ * @cvalue DATE_FORMAT_RFC1036
+ */
+const DATE_RFC1036 = "D, d M y H:i:s O";
+
+/**
+ * @var string
+ * @cvalue DATE_FORMAT_RFC1123
+ */
+const DATE_RFC1123 = "D, d M Y H:i:s O";
+
+/**
+ * @var string
+ * @cvalue DATE_FORMAT_RFC7231
+ */
+const DATE_RFC7231 = "D, d M Y H:i:s \\G\\M\\T";
+
+/**
+ * @var string
+ * @cvalue DATE_FORMAT_RFC2822
+ */
+const DATE_RFC2822 = "D, d M Y H:i:s O";
+
+/**
+ * @var string
+ * @cvalue DATE_FORMAT_RFC3339
+ */
+const DATE_RFC3339 = "Y-m-d\\TH:i:sP";
+
+/**
+ * @var string
+ * @cvalue DATE_FORMAT_RFC3339_EXTENDED
+ */
+const DATE_RFC3339_EXTENDED = "Y-m-d\\TH:i:s.vP";
+
+/** @var string */
+const DATE_RSS = DATE_RFC1123;
+
+/** @var string */
+const DATE_W3C = DATE_RFC3339;
+
+/**
+ * @var int
+ * @cvalue SUNFUNCS_RET_TIMESTAMP
+ */
+const SUNFUNCS_RET_TIMESTAMP = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue SUNFUNCS_RET_STRING
+ */
+const SUNFUNCS_RET_STRING = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue SUNFUNCS_RET_DOUBLE
+ */
+const SUNFUNCS_RET_DOUBLE = UNKNOWN;
+
 function strtotime(string $datetime, ?int $baseTimestamp = null): int|false {}
 
 /** @refcount 1 */
@@ -188,6 +284,35 @@ function date_sun_info(int $timestamp, float $latitude, float $longitude): array
 
 interface DateTimeInterface
 {
+    /** @var string */
+    public const ATOM = DATE_ATOM;
+    /** @var string */
+    public const COOKIE = DATE_COOKIE;
+    /** @var string */
+    public const ISO8601 = DATE_ISO8601;
+    /** @var string */
+    public const ISO8601_EXPANDED = DATE_ISO8601_EXPANDED;
+    /** @var string */
+    public const RFC822 = DATE_RFC822;
+    /** @var string */
+    public const RFC850 = DATE_RFC850;
+    /** @var string */
+    public const RFC1036 = DATE_RFC1036;
+    /** @var string */
+    public const RFC1123 = DATE_RFC1123;
+    /** @var string */
+    public const RFC7231 = DATE_RFC7231;
+    /** @var string */
+    public const RFC2822 = DATE_RFC2822;
+    /** @var string */
+    public const RFC3339 = DATE_RFC3339;
+    /** @var string */
+    public const RFC3339_EXTENDED = DATE_RFC3339_EXTENDED;
+    /** @var string */
+    public const RSS = DATE_RSS;
+    /** @var string */
+    public const W3C = DATE_W3C;
+
     /** @tentative-return-type */
     public function format(string $format): string;
 
@@ -205,11 +330,19 @@ interface DateTimeInterface
 
     /** @tentative-return-type */
     public function __wakeup(): void;
+
+    public function __serialize(): array;
+
+    public function __unserialize(array $data): void;
 }
 
 class DateTime implements DateTimeInterface
 {
     public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null) {}
+
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
 
     /** @tentative-return-type */
     public function __wakeup(): void {}
@@ -218,9 +351,10 @@ class DateTime implements DateTimeInterface
     public static function __set_state(array $array): DateTime {}
 
     /** @tentative-return-type */
-    public static function createFromImmutable(DateTimeImmutable $object): DateTime {}
+    public static function createFromImmutable(DateTimeImmutable $object): static {}
 
-    public static function createFromInterface(DateTimeInterface $object): DateTime {}
+    /** @return static */
+    public static function createFromInterface(DateTimeInterface $object): DateTime {} // TODO return type should be static
 
     /**
      * @tentative-return-type
@@ -318,6 +452,10 @@ class DateTimeImmutable implements DateTimeInterface
 {
     public function __construct(string $datetime = "now", ?DateTimeZone $timezone = null) {}
 
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
+
     /** @tentative-return-type */
     public function __wakeup(): void {}
 
@@ -392,13 +530,85 @@ class DateTimeImmutable implements DateTimeInterface
     public function setTimestamp(int $timestamp): DateTimeImmutable {}
 
     /** @tentative-return-type */
-    public static function createFromMutable(DateTime $object): DateTimeImmutable {}
+    public static function createFromMutable(DateTime $object): static {}
 
-    public static function createFromInterface(DateTimeInterface $object): DateTimeImmutable {}
+    /** @return static */
+    public static function createFromInterface(DateTimeInterface $object): DateTimeImmutable {} // TODO return type should be static
 }
 
 class DateTimeZone
 {
+    /**
+     * @var int
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_AFRICA
+     */
+    public const AFRICA = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_AMERICA
+     */
+    public const AMERICA = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_ANTARCTICA
+     */
+    public const ANTARCTICA = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_ARCTIC
+     */
+    public const ARCTIC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_ASIA
+     */
+    public const ASIA = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_ATLANTIC
+     */
+    public const ATLANTIC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_AUSTRALIA
+     */
+    public const AUSTRALIA = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_EUROPE
+     */
+    public const EUROPE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_INDIAN
+     */
+    public const INDIAN = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_PACIFIC
+     */
+    public const PACIFIC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_UTC
+     */
+    public const UTC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_ALL
+     */
+    public const ALL = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_DATE_TIMEZONE_GROUP_ALL_W_BC
+     */
+    public const ALL_WITH_BC = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_DATE_TIMEZONE_PER_COUNTRY
+     */
+    public const PER_COUNTRY = UNKNOWN;
+
     public function __construct(string $timezone) {}
 
     /**
@@ -441,6 +651,10 @@ class DateTimeZone
      */
     public static function listIdentifiers(int $timezoneGroup = DateTimeZone::ALL, ?string $countryCode = null): array {}
 
+    public function __serialize(): array {}
+
+    public function __unserialize(array $data): void {}
+
     /** @tentative-return-type */
     public function __wakeup(): void {}
 
@@ -464,6 +678,10 @@ class DateInterval
      */
     public function format(string $format): string {}
 
+    public function __serialize(): array;
+
+    public function __unserialize(array $data): void;
+
     /** @tentative-return-type */
     public function __wakeup(): void {}
 
@@ -473,6 +691,32 @@ class DateInterval
 
 class DatePeriod implements IteratorAggregate
 {
+    /**
+     * @var int
+     * @cvalue PHP_DATE_PERIOD_EXCLUDE_START_DATE
+     */
+    public const EXCLUDE_START_DATE = UNKNOWN;
+    /**
+     * @var int
+     * @cvalue PHP_DATE_PERIOD_INCLUDE_END_DATE
+     */
+    public const INCLUDE_END_DATE = UNKNOWN;
+
+    /** @readonly */
+    public ?DateTimeInterface $start;
+    /** @readonly */
+    public ?DateTimeInterface $current;
+    /** @readonly */
+    public ?DateTimeInterface $end;
+    /** @readonly */
+    public ?DateInterval $interval;
+    /** @readonly */
+    public int $recurrences;
+    /** @readonly */
+    public bool $include_start_date;
+    /** @readonly */
+    public bool $include_end_date;
+
     /**
      * @param DateTimeInterface|string $start
      * @param DateInterval|int $interval
@@ -492,6 +736,10 @@ class DatePeriod implements IteratorAggregate
 
     /** @tentative-return-type */
     public function getRecurrences(): ?int {}
+
+    public function __serialize(): array;
+
+    public function __unserialize(array $data): void;
 
     /** @tentative-return-type */
     public function __wakeup(): void {}

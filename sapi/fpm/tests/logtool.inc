@@ -513,7 +513,11 @@ class LogTool
         }
         $this->trace("Matching EXPECTED: $expectedMessage");
 
-        $pattern = sprintf('/^(?:%s )?%s: %s(%s)$/', self::P_TIME, $type, self::P_DEBUG, $expectedMessage);
+        // Allow expected message to contain %s and %s for any string or number as in run-tests.php
+        $expectRe = str_replace('%s', '[^\r\n]+', $expectedMessage);
+        $expectRe = str_replace('%d', '\d+', $expectRe);
+
+        $pattern = sprintf('/^(?:%s )?%s: %s(%s)$/', self::P_TIME, $type, self::P_DEBUG, $expectRe);
         $this->trace("PATTERN: $pattern");
 
         return function ($line) use ($expectedMessage, $pattern, $type, $ignoreErrorFor) {

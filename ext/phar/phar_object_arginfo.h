@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cce88c2e27bd0b0fc7f68defdb0556b053e7dc81 */
+ * Stub hash: 799b653b10dbdfa58747e41715700cfd5300fa4f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -621,6 +621,102 @@ static zend_class_entry *register_class_Phar(zend_class_entry *class_entry_Recur
 	INIT_CLASS_ENTRY(ce, "Phar", class_Phar_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_RecursiveDirectoryIterator);
 	zend_class_implements(class_entry, 2, class_entry_Countable, class_entry_ArrayAccess);
+
+	zval const_BZ2_value;
+	ZVAL_LONG(&const_BZ2_value, PHAR_ENT_COMPRESSED_BZ2);
+	zend_string *const_BZ2_name = zend_string_init_interned("BZ2", sizeof("BZ2") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_BZ2_name, &const_BZ2_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_BZ2_name);
+
+	zval const_GZ_value;
+	ZVAL_LONG(&const_GZ_value, PHAR_ENT_COMPRESSED_GZ);
+	zend_string *const_GZ_name = zend_string_init_interned("GZ", sizeof("GZ") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_GZ_name, &const_GZ_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_GZ_name);
+
+	zval const_NONE_value;
+	ZVAL_LONG(&const_NONE_value, PHAR_ENT_COMPRESSED_NONE);
+	zend_string *const_NONE_name = zend_string_init_interned("NONE", sizeof("NONE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_NONE_name, &const_NONE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_NONE_name);
+
+	zval const_PHAR_value;
+	ZVAL_LONG(&const_PHAR_value, PHAR_FORMAT_PHAR);
+	zend_string *const_PHAR_name = zend_string_init_interned("PHAR", sizeof("PHAR") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_PHAR_name, &const_PHAR_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_PHAR_name);
+
+	zval const_TAR_value;
+	ZVAL_LONG(&const_TAR_value, PHAR_FORMAT_TAR);
+	zend_string *const_TAR_name = zend_string_init_interned("TAR", sizeof("TAR") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_TAR_name, &const_TAR_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_TAR_name);
+
+	zval const_ZIP_value;
+	ZVAL_LONG(&const_ZIP_value, PHAR_FORMAT_ZIP);
+	zend_string *const_ZIP_name = zend_string_init_interned("ZIP", sizeof("ZIP") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_ZIP_name, &const_ZIP_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_ZIP_name);
+
+	zval const_COMPRESSED_value;
+	ZVAL_LONG(&const_COMPRESSED_value, PHAR_ENT_COMPRESSION_MASK);
+	zend_string *const_COMPRESSED_name = zend_string_init_interned("COMPRESSED", sizeof("COMPRESSED") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_COMPRESSED_name, &const_COMPRESSED_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_COMPRESSED_name);
+
+	zval const_PHP_value;
+	ZVAL_LONG(&const_PHP_value, PHAR_MIME_PHP);
+	zend_string *const_PHP_name = zend_string_init_interned("PHP", sizeof("PHP") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_PHP_name, &const_PHP_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_PHP_name);
+
+	zval const_PHPS_value;
+	ZVAL_LONG(&const_PHPS_value, PHAR_MIME_PHPS);
+	zend_string *const_PHPS_name = zend_string_init_interned("PHPS", sizeof("PHPS") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_PHPS_name, &const_PHPS_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_PHPS_name);
+
+	zval const_MD5_value;
+	ZVAL_LONG(&const_MD5_value, PHAR_SIG_MD5);
+	zend_string *const_MD5_name = zend_string_init_interned("MD5", sizeof("MD5") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_MD5_name, &const_MD5_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_MD5_name);
+
+	zval const_OPENSSL_value;
+	ZVAL_LONG(&const_OPENSSL_value, PHAR_SIG_OPENSSL);
+	zend_string *const_OPENSSL_name = zend_string_init_interned("OPENSSL", sizeof("OPENSSL") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_OPENSSL_name, &const_OPENSSL_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_OPENSSL_name);
+
+	zval const_OPENSSL_SHA256_value;
+	ZVAL_LONG(&const_OPENSSL_SHA256_value, PHAR_SIG_OPENSSL_SHA256);
+	zend_string *const_OPENSSL_SHA256_name = zend_string_init_interned("OPENSSL_SHA256", sizeof("OPENSSL_SHA256") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_OPENSSL_SHA256_name, &const_OPENSSL_SHA256_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_OPENSSL_SHA256_name);
+
+	zval const_OPENSSL_SHA512_value;
+	ZVAL_LONG(&const_OPENSSL_SHA512_value, PHAR_SIG_OPENSSL_SHA512);
+	zend_string *const_OPENSSL_SHA512_name = zend_string_init_interned("OPENSSL_SHA512", sizeof("OPENSSL_SHA512") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_OPENSSL_SHA512_name, &const_OPENSSL_SHA512_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_OPENSSL_SHA512_name);
+
+	zval const_SHA1_value;
+	ZVAL_LONG(&const_SHA1_value, PHAR_SIG_SHA1);
+	zend_string *const_SHA1_name = zend_string_init_interned("SHA1", sizeof("SHA1") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_SHA1_name, &const_SHA1_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_SHA1_name);
+
+	zval const_SHA256_value;
+	ZVAL_LONG(&const_SHA256_value, PHAR_SIG_SHA256);
+	zend_string *const_SHA256_name = zend_string_init_interned("SHA256", sizeof("SHA256") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_SHA256_name, &const_SHA256_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_SHA256_name);
+
+	zval const_SHA512_value;
+	ZVAL_LONG(&const_SHA512_value, PHAR_SIG_SHA512);
+	zend_string *const_SHA512_name = zend_string_init_interned("SHA512", sizeof("SHA512") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_SHA512_name, &const_SHA512_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_SHA512_name);
 
 	return class_entry;
 }

@@ -23,24 +23,23 @@
 #include "SAPI.h"
 
 BEGIN_EXTERN_C()
-PHPAPI int php_request_startup(void);
+PHPAPI zend_result php_request_startup(void);
 PHPAPI void php_request_shutdown(void *dummy);
-PHPAPI int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint32_t num_additional_modules);
+PHPAPI zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module);
 PHPAPI void php_module_shutdown(void);
 PHPAPI int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
 
-PHPAPI int php_register_extensions(zend_module_entry * const * ptr, int count);
+PHPAPI zend_result php_register_extensions(zend_module_entry * const * ptr, int count);
 
-PHPAPI int php_execute_script(zend_file_handle *primary_file);
+PHPAPI bool php_execute_script(zend_file_handle *primary_file);
 PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret);
-PHPAPI int php_handle_special_queries(void);
-PHPAPI int php_lint_script(zend_file_handle *file);
+PHPAPI zend_result php_lint_script(zend_file_handle *file);
 
 PHPAPI void php_handle_aborted_connection(void);
 PHPAPI int php_handle_auth_data(const char *auth);
 
 PHPAPI void php_html_puts(const char *str, size_t siz);
-PHPAPI int php_stream_open_for_zend_ex(zend_file_handle *handle, int mode);
+PHPAPI zend_result php_stream_open_for_zend_ex(zend_file_handle *handle, int mode);
 
 /* environment module */
 extern int php_init_environ(void);
@@ -48,7 +47,7 @@ extern int php_shutdown_environ(void);
 
 #ifdef ZTS
 PHPAPI void php_reserve_tsrm_memory(void);
-PHPAPI int php_tsrm_startup(void);
+PHPAPI bool php_tsrm_startup(void);
 #endif
 
 END_EXTERN_C()

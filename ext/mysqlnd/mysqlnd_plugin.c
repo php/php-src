@@ -167,7 +167,7 @@ PHPAPI void mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void
 	zval *val;
 	int result;
 
-	ZEND_HASH_FOREACH_VAL(&mysqlnd_registered_plugins, val) {
+	ZEND_HASH_MAP_FOREACH_VAL(&mysqlnd_registered_plugins, val) {
 		result = apply_func(val, argument);
 		if (result & ZEND_HASH_APPLY_REMOVE) {
 			php_error_docref(NULL, E_WARNING, "mysqlnd_plugin_apply_with_argument must not remove table entries");

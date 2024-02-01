@@ -26,7 +26,7 @@ PHPAPI int flock(int fd, int operation)
 #endif /* !defined(HAVE_FLOCK) */
 
 PHPAPI int php_flock(int fd, int operation)
-#if HAVE_STRUCT_FLOCK /* {{{ */
+#ifdef HAVE_STRUCT_FLOCK /* {{{ */
 {
 	struct flock flck;
 	int ret;
@@ -151,7 +151,7 @@ PHPAPI int php_flock(int fd, int operation)
 #endif
 
 #ifndef PHP_WIN32
-#if !(HAVE_INET_ATON)
+#ifndef HAVE_INET_ATON
 /* {{{ inet_aton
  * Check whether "cp" is a valid ascii representation
  * of an Internet address and convert to a binary address.

@@ -1,4 +1,4 @@
-.TH PHP-FPM 8 "2021" "The PHP Group" "Scripting Language"
+.TH PHP-FPM 8 "2024" "The PHP Group" "Scripting Language"
 .SH NAME
 .TP 15
 php-fpm \- PHP FastCGI Process Manager 'PHP-FPM'
@@ -77,6 +77,8 @@ Show compiled in modules
 .PD 1
 .B \-v
 Version number
+.TP
+.PD 0
 .B \-\-prefix \fIpath\fP
 .TP
 .PD 1
@@ -195,7 +197,7 @@ You can view the list of known bugs or report any new bug you
 found at:
 .PD 0
 .P
-.B http://bugs.php.net
+.B https://github.com/php/php-src/issues
 .PD 1
 .SH AUTHORS
 PHP-FPM SAPI was written by Andrei Nigmatulin. The mailing-lists are highload-php-en (English) and highload-php-ru (Russian).

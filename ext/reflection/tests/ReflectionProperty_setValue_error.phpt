@@ -11,6 +11,7 @@ class TestClass {
     private $priv = "keepOut";
 }
 
+#[AllowDynamicProperties]
 class AnotherClass {
 }
 

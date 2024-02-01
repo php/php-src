@@ -430,7 +430,7 @@ MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 
 			self->m->log_va(self, __LINE__, __FILE__, 0, "info : ",
 					"number of functions: %d", zend_hash_num_elements(&self->function_profiles));
-			ZEND_HASH_FOREACH_STR_KEY_PTR(&self->function_profiles, string_key, f_profile) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&self->function_profiles, string_key, f_profile) {
 				self->m->log_va(self, __LINE__, __FILE__, -1, "info : ",
 						"%-40s\tcalls=%5" PRIu64
 						"  own_slow=%5" PRIu64

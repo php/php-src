@@ -26,6 +26,13 @@
 #include "../spl/spl_exceptions.h"
 #include <enchant.h>
 #include "php_enchant.h"
+
+#define PHP_ENCHANT_MYSPELL 1
+#define PHP_ENCHANT_ISPELL 2
+#ifdef HAVE_ENCHANT_GET_VERSION
+#define PHP_ENCHANT_GET_VERSION enchant_get_version()
+#endif
+
 #include "enchant_arginfo.h"
 
 typedef struct _broker_struct {
@@ -77,9 +84,6 @@ static zend_object *enchant_dict_create_object(zend_class_entry *class_type) {
 
 	return &intern->std;
 }
-
-#define PHP_ENCHANT_MYSPELL 1
-#define PHP_ENCHANT_ISPELL 2
 
 /* {{{ enchant_module_entry */
 zend_module_entry enchant_module_entry = {
@@ -203,11 +207,8 @@ PHP_MINIT_FUNCTION(enchant)
 	enchant_dict_handlers.clone_obj = NULL;
 	enchant_dict_handlers.compare = zend_objects_not_comparable;
 
-	REGISTER_LONG_CONSTANT("ENCHANT_MYSPELL", PHP_ENCHANT_MYSPELL, CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
-	REGISTER_LONG_CONSTANT("ENCHANT_ISPELL",  PHP_ENCHANT_ISPELL,  CONST_CS | CONST_PERSISTENT | CONST_DEPRECATED);
-#ifdef HAVE_ENCHANT_GET_VERSION
-	REGISTER_STRING_CONSTANT("LIBENCHANT_VERSION", enchant_get_version(), CONST_CS | CONST_PERSISTENT);
-#endif
+	register_enchant_symbols(module_number);
+
 	return SUCCESS;
 }
 /* }}} */

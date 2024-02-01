@@ -19,10 +19,12 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_attributes.h"
 #include "zend_gc.h"
 #include "zend_builtin_functions.h"
 #include "zend_constants.h"
 #include "zend_ini.h"
+#include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_extensions.h"
 #include "zend_closures.h"
@@ -33,9 +35,9 @@
 /* }}} */
 
 ZEND_MINIT_FUNCTION(core) { /* {{{ */
-	zend_standard_class_def = register_class_stdClass();
-
 	zend_register_default_classes();
+
+	zend_standard_class_def = register_class_stdClass();
 
 	return SUCCESS;
 }
@@ -152,12 +154,12 @@ ZEND_FUNCTION(func_num_args)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
+	if (ex && (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE)) {
 		zend_throw_error(NULL, "func_num_args() must be called from a function context");
 		RETURN_THROWS();
 	}
 
-	if (zend_forbid_dynamic_call("func_num_args()") == FAILURE) {
+	if (zend_forbid_dynamic_call() == FAILURE) {
 		RETURN_LONG(-1);
 	}
 
@@ -183,12 +185,12 @@ ZEND_FUNCTION(func_get_arg)
 	}
 
 	ex = EX(prev_execute_data);
-	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
+	if (ex && (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE)) {
 		zend_throw_error(NULL, "func_get_arg() cannot be called from the global scope");
 		RETURN_THROWS();
 	}
 
-	if (zend_forbid_dynamic_call("func_get_arg()") == FAILURE) {
+	if (zend_forbid_dynamic_call() == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -221,12 +223,12 @@ ZEND_FUNCTION(func_get_args)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
+	if (ex && (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE)) {
 		zend_throw_error(NULL, "func_get_args() cannot be called from the global scope");
 		RETURN_THROWS();
 	}
 
-	if (zend_forbid_dynamic_call("func_get_args()") == FAILURE) {
+	if (zend_forbid_dynamic_call() == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -669,7 +671,7 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, bool s
 	zend_string *key;
 	zval *default_properties_table = CE_DEFAULT_PROPERTIES_TABLE(ce);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_PROTECTED) &&
 			 !zend_check_protected(prop_info->ce, scope)) ||
 			((prop_info->flags & ZEND_ACC_PRIVATE) &&
@@ -838,7 +840,7 @@ ZEND_FUNCTION(get_class_methods)
 	array_init(return_value);
 	scope = zend_get_executed_scope();
 
-	ZEND_HASH_FOREACH_PTR(&ce->function_table, mptr) {
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, mptr) {
 		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC)
 		 || (scope &&
 			 (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
@@ -1094,7 +1096,7 @@ ZEND_FUNCTION(get_included_files)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_STR_KEY(&EG(included_files), entry) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY(&EG(included_files), entry) {
 		if (entry) {
 			add_next_index_str(return_value, zend_string_copy(entry));
 		}
@@ -1106,10 +1108,9 @@ ZEND_FUNCTION(get_included_files)
 ZEND_FUNCTION(trigger_error)
 {
 	zend_long error_type = E_USER_NOTICE;
-	char *message;
-	size_t message_len;
+	zend_string *message;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &message, &message_len, &error_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|l", &message, &error_type) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1126,7 +1127,7 @@ ZEND_FUNCTION(trigger_error)
 			break;
 	}
 
-	zend_error((int)error_type, "%s", message);
+	zend_error_zstr_at(error_type, zend_get_executed_filename_ex(), zend_get_executed_lineno(), message);
 	// TODO Change to void
 	RETURN_TRUE;
 }
@@ -1248,7 +1249,7 @@ static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int fla
 	array_init(return_value);
 	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-		ZEND_HASH_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
 			ce = Z_PTR_P(zv);
 			if ((ce->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT)) == flags
 			 && key
@@ -1309,7 +1310,7 @@ ZEND_FUNCTION(get_defined_functions)
 	array_init(&user);
 	array_init(return_value);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(EG(function_table), key, func) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(EG(function_table), key, func) {
 		if (key && ZSTR_VAL(key)[0] != 0) {
 			if (func->type == ZEND_INTERNAL_FUNCTION) {
 				add_next_index_str(&internal, zend_string_copy(key));
@@ -1331,7 +1332,7 @@ ZEND_FUNCTION(get_defined_vars)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (zend_forbid_dynamic_call("get_defined_vars()") == FAILURE) {
+	if (zend_forbid_dynamic_call() == FAILURE) {
 		return;
 	}
 
@@ -1455,7 +1456,7 @@ ZEND_FUNCTION(get_loaded_extensions)
 	} else {
 		zend_module_entry *module;
 
-		ZEND_HASH_FOREACH_PTR(&module_registry, module) {
+		ZEND_HASH_MAP_FOREACH_PTR(&module_registry, module) {
 			add_next_index_string(return_value, module->name);
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -1485,13 +1486,13 @@ ZEND_FUNCTION(get_defined_constants)
 		module_names = emalloc((zend_hash_num_elements(&module_registry) + 2) * sizeof(char *));
 
 		module_names[0] = "internal";
-		ZEND_HASH_FOREACH_PTR(&module_registry, module) {
+		ZEND_HASH_MAP_FOREACH_PTR(&module_registry, module) {
 			module_names[module->module_number] = (char *)module->name;
 			i++;
 		} ZEND_HASH_FOREACH_END();
 		module_names[i] = "user";
 
-		ZEND_HASH_FOREACH_PTR(EG(zend_constants), val) {
+		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), val) {
 			if (!val->name) {
 				/* skip special constants */
 				continue;
@@ -1521,7 +1522,7 @@ ZEND_FUNCTION(get_defined_constants)
 		zend_constant *constant;
 		zval const_val;
 
-		ZEND_HASH_FOREACH_PTR(EG(zend_constants), constant) {
+		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), constant) {
 			if (!constant->name) {
 				/* skip special constants */
 				continue;
@@ -1554,27 +1555,66 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 					 */
 					while (i < first_extra_arg) {
 						zend_string *arg_name = call->func->op_array.vars[i];
+						zval original_arg;
 						zval *arg = zend_hash_find_ex_ind(call->symbol_table, arg_name, 1);
+						zend_attribute *attribute = zend_get_parameter_attribute_str(
+							call->func->common.attributes,
+							"sensitiveparameter",
+							sizeof("sensitiveparameter") - 1,
+							i
+						);
+
+						bool is_sensitive = attribute != NULL;
+
 						if (arg) {
 							ZVAL_DEREF(arg);
-							Z_TRY_ADDREF_P(arg);
-							ZEND_HASH_FILL_SET(arg);
+							ZVAL_COPY_VALUE(&original_arg, arg);
 						} else {
-							ZEND_HASH_FILL_SET_NULL();
+							ZVAL_NULL(&original_arg);
 						}
+
+						if (is_sensitive) {
+							zval redacted_arg;
+							object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
+							zend_call_method_with_1_params(Z_OBJ_P(&redacted_arg), zend_ce_sensitive_parameter_value, &zend_ce_sensitive_parameter_value->constructor, "__construct", NULL, &original_arg);
+							ZEND_HASH_FILL_SET(&redacted_arg);
+						} else {
+							Z_TRY_ADDREF_P(&original_arg);
+							ZEND_HASH_FILL_SET(&original_arg);
+						}
+
 						ZEND_HASH_FILL_NEXT();
 						i++;
 					}
 				} else {
 					while (i < first_extra_arg) {
+						zval original_arg;
+						zend_attribute *attribute = zend_get_parameter_attribute_str(
+							call->func->common.attributes,
+							"sensitiveparameter",
+							sizeof("sensitiveparameter") - 1,
+							i
+						);
+						bool is_sensitive = attribute != NULL;
+
 						if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
 							zval *arg = p;
 							ZVAL_DEREF(arg);
-							Z_TRY_ADDREF_P(arg);
-							ZEND_HASH_FILL_SET(arg);
+							ZVAL_COPY_VALUE(&original_arg, arg);
 						} else {
-							ZEND_HASH_FILL_SET_NULL();
+							ZVAL_NULL(&original_arg);
 						}
+
+						if (is_sensitive) {
+							zval redacted_arg;
+							object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
+							zend_call_method_with_1_params(Z_OBJ_P(&redacted_arg), zend_ce_sensitive_parameter_value, &zend_ce_sensitive_parameter_value->constructor, "__construct", NULL, &original_arg);
+							ZEND_HASH_FILL_SET(&redacted_arg);
+						} else {
+							Z_TRY_ADDREF_P(&original_arg);
+							ZEND_HASH_FILL_SET(&original_arg);
+						}
+
 						ZEND_HASH_FILL_NEXT();
 						p++;
 						i++;
@@ -1584,14 +1624,37 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 			}
 
 			while (i < num_args) {
+				zval original_arg;
+				bool is_sensitive = 0;
+
+				if (i < call->func->common.num_args || call->func->common.fn_flags & ZEND_ACC_VARIADIC) {
+					zend_attribute *attribute = zend_get_parameter_attribute_str(
+						call->func->common.attributes,
+						"sensitiveparameter",
+						sizeof("sensitiveparameter") - 1,
+						MIN(i, call->func->common.num_args)
+					);
+					is_sensitive = attribute != NULL;
+				}
+
 				if (EXPECTED(Z_TYPE_INFO_P(p) != IS_UNDEF)) {
 					zval *arg = p;
 					ZVAL_DEREF(arg);
-					Z_TRY_ADDREF_P(arg);
-					ZEND_HASH_FILL_SET(arg);
+					ZVAL_COPY_VALUE(&original_arg, arg);
 				} else {
-					ZEND_HASH_FILL_SET_NULL();
+					ZVAL_NULL(&original_arg);
 				}
+
+				if (is_sensitive) {
+					zval redacted_arg;
+					object_init_ex(&redacted_arg, zend_ce_sensitive_parameter_value);
+					zend_call_method_with_1_params(Z_OBJ_P(&redacted_arg), zend_ce_sensitive_parameter_value, &zend_ce_sensitive_parameter_value->constructor, "__construct", NULL, &original_arg);
+					ZEND_HASH_FILL_SET(&redacted_arg);
+				} else {
+					Z_TRY_ADDREF_P(&original_arg);
+					ZEND_HASH_FILL_SET(&original_arg);
+				}
+
 				ZEND_HASH_FILL_NEXT();
 				p++;
 				i++;
@@ -1606,7 +1669,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		zend_string *name;
 		zval *arg;
 		SEPARATE_ARRAY(arg_array);
-		ZEND_HASH_FOREACH_STR_KEY_VAL(call->extra_named_params, name, arg) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(call->extra_named_params, name, arg) {
 			ZVAL_DEREF(arg);
 			Z_TRY_ADDREF_P(arg);
 			zend_hash_add_new(Z_ARRVAL_P(arg_array), name, arg);
@@ -1902,7 +1965,7 @@ ZEND_FUNCTION(get_extension_funcs)
 		array = 0;
 	}
 
-	ZEND_HASH_FOREACH_PTR(CG(function_table), zif) {
+	ZEND_HASH_MAP_FOREACH_PTR(CG(function_table), zif) {
 		if (zif->common.type == ZEND_INTERNAL_FUNCTION
 			&& zif->internal_function.module == module) {
 			if (!array) {

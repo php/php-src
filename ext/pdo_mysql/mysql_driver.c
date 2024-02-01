@@ -355,7 +355,7 @@ static bool mysql_handle_begin(pdo_dbh_t *dbh)
 	zend_long return_value;
 	zend_string *command;
 
-	PDO_DBG_ENTER("mysql_handle_quoter");
+	PDO_DBG_ENTER("mysql_handle_begin");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 
 	command = zend_string_init("START TRANSACTION", strlen("START TRANSACTION"), 0);

@@ -2024,7 +2024,7 @@ woohoo:
 		} else {
 			zend_string *str_key;
 
-			ZEND_HASH_FOREACH_STR_KEY_PTR(&PHAR_G(phar_fname_map), str_key, pphar) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&PHAR_G(phar_fname_map), str_key, pphar) {
 				if (ZSTR_LEN(str_key) > (uint32_t) filename_len) {
 					continue;
 				}
@@ -2037,7 +2037,7 @@ woohoo:
 			} ZEND_HASH_FOREACH_END();
 
 			if (PHAR_G(manifest_cached)) {
-				ZEND_HASH_FOREACH_STR_KEY_PTR(&cached_phars, str_key, pphar) {
+				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&cached_phars, str_key, pphar) {
 					if (ZSTR_LEN(str_key) > (uint32_t) filename_len) {
 						continue;
 					}
@@ -2540,7 +2540,6 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 {
 	char halt_stub[] = "__HALT_COMPILER();";
 	zend_string *newstub;
-	char *tmp;
 	phar_entry_info *entry, *newentry;
 	size_t halt_offset;
 	int restore_alias_len, global_flags = 0, closeoldfile;
@@ -2644,9 +2643,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 		} else {
 			free_user_stub = 0;
 		}
-		tmp = estrndup(user_stub, len);
-		if ((pos = php_stristr(tmp, halt_stub, len, sizeof(halt_stub) - 1)) == NULL) {
-			efree(tmp);
+		if ((pos = php_stristr(user_stub, halt_stub, len, sizeof(halt_stub) - 1)) == NULL) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
@@ -2659,8 +2656,6 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			}
 			return EOF;
 		}
-		pos = user_stub + (pos - tmp);
-		efree(tmp);
 		len = pos - user_stub + 18;
 		if ((size_t)len != php_stream_write(newfile, user_stub, len)
 		||			  5 != php_stream_write(newfile, " ?>\r\n", 5)) {
@@ -2732,7 +2727,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 	}
 	new_manifest_count = 0;
 	offset = 0;
-	ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
+	ZEND_HASH_MAP_FOREACH_PTR(&phar->manifest, entry) {
 		if (entry->cfp) {
 			/* did we forget to get rid of cfp last time? */
 			php_stream_close(entry->cfp);
@@ -2964,7 +2959,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 	manifest_ftell = php_stream_tell(newfile);
 
 	/* now write the manifest */
-	ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
+	ZEND_HASH_MAP_FOREACH_PTR(&phar->manifest, entry) {
 		const zend_string *metadata_str;
 		if (entry->is_deleted || entry->is_mounted) {
 			/* remove this from the new phar if deleted, ignore if mounted */
@@ -3048,7 +3043,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 
 	/* now copy the actual file data to the new phar */
 	offset = php_stream_tell(newfile);
-	ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
+	ZEND_HASH_MAP_FOREACH_PTR(&phar->manifest, entry) {
 		if (entry->is_deleted || entry->is_dir || entry->is_mounted) {
 			continue;
 		}
@@ -3260,7 +3255,7 @@ cleanup:
 	if (shared_cfp != NULL) {
 		php_stream_close(shared_cfp);
 	}
-	ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
+	ZEND_HASH_MAP_FOREACH_PTR(&phar->manifest, entry) {
 		if (entry->cfp) {
 			entry->cfp = NULL;
 			entry->header_offset = 0;
@@ -3513,7 +3508,7 @@ void phar_request_initialize(void) /* {{{ */
 			phar_archive_data *pphar;
 			phar_entry_fp *stuff = (phar_entry_fp *) ecalloc(zend_hash_num_elements(&cached_phars), sizeof(phar_entry_fp));
 
-			ZEND_HASH_FOREACH_PTR(&cached_phars, pphar) {
+			ZEND_HASH_MAP_FOREACH_PTR(&cached_phars, pphar) {
 				stuff[pphar->phar_pos].manifest = (phar_entry_fp_info *) ecalloc( zend_hash_num_elements(&(pphar->manifest)), sizeof(phar_entry_fp_info));
 			} ZEND_HASH_FOREACH_END();
 

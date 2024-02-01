@@ -256,10 +256,10 @@ static uint32_t cleanup_loop_var_free_block(scdf_ctx *scdf, zend_basic_block *bl
 /* Removes unreachable blocks. This will remove both the instructions (and phis) in the
  * blocks, as well as remove them from the successor / predecessor lists and mark them
  * unreachable. Blocks already marked unreachable are not removed. */
-int scdf_remove_unreachable_blocks(scdf_ctx *scdf) {
+uint32_t scdf_remove_unreachable_blocks(scdf_ctx *scdf) {
 	zend_ssa *ssa = scdf->ssa;
 	int i;
-	int removed_ops = 0;
+	uint32_t removed_ops = 0;
 	for (i = 0; i < ssa->cfg.blocks_count; i++) {
 		zend_basic_block *block = &ssa->cfg.blocks[i];
 		if (!zend_bitset_in(scdf->executable_blocks, i) && (block->flags & ZEND_BB_REACHABLE)) {

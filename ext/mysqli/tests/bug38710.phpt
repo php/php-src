@@ -16,7 +16,7 @@ $qry->prepare("SELECT REPEAT('a',100000)");
 $qry->execute();
 $qry->bind_result($text);
 $qry->fetch();
-if ($text !== str_repeat('a', ($IS_MYSQLND || mysqli_get_server_version($db) > 50110)? 100000:(mysqli_get_server_version($db)>=50000? 8193:8191))) {
+if ($text !== str_repeat('a', 100000)) {
     var_dump(strlen($text));
 }
 echo "Done";

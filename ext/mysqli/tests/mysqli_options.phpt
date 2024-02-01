@@ -91,9 +91,6 @@ $link = mysqli_init();
 // test for error reporting - only mysqlnd reports errors
 try {
     mysqli_options($link, MYSQLI_SET_CHARSET_NAME, "foobar");
-    if (!$IS_MYSQLND) {
-        print "Unknown character set\n";
-    }
 } catch (mysqli_sql_exception $e) {
     echo $e->getMessage() . "\n";
 }

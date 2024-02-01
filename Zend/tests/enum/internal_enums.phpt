@@ -30,6 +30,22 @@ var_dump($s = serialize($foo));
 var_dump(unserialize($s));
 var_dump(unserialize($s) === $foo);
 
+function test_int_enum(int|string $case) {
+    try {
+        var_dump(ZendTestIntEnum::from($case));
+    } catch (\Error $e) {
+        echo get_class($e) . ': ' . $e->getMessage() . "\n";
+    }
+    var_dump(ZendTestIntEnum::tryFrom($case));
+}
+
+test_int_enum(1);
+test_int_enum('1');
+test_int_enum(2);
+test_int_enum('2');
+test_int_enum(-1);
+test_int_enum('-1');
+
 ?>
 --EXPECT--
 enum(ZendTestUnitEnum::Bar)
@@ -66,3 +82,15 @@ array(4) {
 string(30) "E:22:"ZendTestStringEnum:Foo";"
 enum(ZendTestStringEnum::Foo)
 bool(true)
+enum(ZendTestIntEnum::Foo)
+enum(ZendTestIntEnum::Foo)
+enum(ZendTestIntEnum::Foo)
+enum(ZendTestIntEnum::Foo)
+ValueError: 2 is not a valid backing value for enum ZendTestIntEnum
+NULL
+ValueError: 2 is not a valid backing value for enum ZendTestIntEnum
+NULL
+enum(ZendTestIntEnum::Baz)
+enum(ZendTestIntEnum::Baz)
+enum(ZendTestIntEnum::Baz)
+enum(ZendTestIntEnum::Baz)

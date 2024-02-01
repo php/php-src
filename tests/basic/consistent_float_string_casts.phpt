@@ -2,6 +2,7 @@
 Test that float to string and string to float casts are consistent
 --SKIPIF--
 <?php
+if (setlocale(LC_ALL, 'invalid') === 'invalid') { die('skip setlocale() is broken /w musl'); }
 if (!setlocale(
     LC_ALL,
     "german", "de", "de_DE", "de_DE.ISO8859-1", "de_DE.ISO_8859-1", "de_DE.UTF-8",

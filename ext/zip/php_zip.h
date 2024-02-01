@@ -31,7 +31,13 @@ extern zend_module_entry zip_module_entry;
 #define ZIP_OVERWRITE ZIP_TRUNCATE
 #endif
 
-#define PHP_ZIP_VERSION "1.19.5"
+#define PHP_ZIP_VERSION "1.21.1"
+
+#ifdef HAVE_LIBZIP_VERSION
+#define LIBZIP_VERSION_STR zip_libzip_version()
+#else
+#define LIBZIP_VERSION_STR LIBZIP_VERSION
+#endif
 
 #define ZIP_OPENBASEDIR_CHECKPATH(filename) php_check_open_basedir(filename)
 
@@ -75,8 +81,10 @@ static inline ze_zip_object *php_zip_fetch_object(zend_object *obj) {
 #define Z_ZIP_P(zv) php_zip_fetch_object(Z_OBJ_P((zv)))
 
 php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
-php_stream *php_stream_zip_open(struct zip *arch, const char *path, const char *mode STREAMS_DC);
+php_stream *php_stream_zip_open(struct zip *arch, struct zip_stat *sb, const char *mode, zip_flags_t flags STREAMS_DC);
 
 extern const php_stream_wrapper php_stream_zip_wrapper;
+
+#define LIBZIP_ATLEAST(m,n,p) (((m<<16) + (n<<8) + p) <= ((LIBZIP_VERSION_MAJOR<<16) + (LIBZIP_VERSION_MINOR<<8) + LIBZIP_VERSION_MICRO))
 
 #endif	/* PHP_ZIP_H */

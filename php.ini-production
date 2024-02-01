@@ -9,8 +9,8 @@
 ; PHP attempts to find and load this configuration from a number of locations.
 ; The following is a summary of its search order:
 ; 1. SAPI module specific location.
-; 2. The PHPRC environment variable. (As of PHP 5.2.0)
-; 3. A number of predefined registry keys on Windows (As of PHP 5.2.0)
+; 2. The PHPRC environment variable.
+; 3. A number of predefined registry keys on Windows
 ; 4. Current working directory (except CLI)
 ; 5. The web server's directory (for SAPI modules), or directory of PHP
 ; (otherwise in Windows)
@@ -454,7 +454,7 @@ memory_limit = 128M
 ; development and early testing.
 ;
 ; Error Level Constants:
-; E_ALL             - All errors and warnings (includes E_STRICT as of PHP 5.4.0)
+; E_ALL             - All errors and warnings
 ; E_ERROR           - fatal run-time errors
 ; E_RECOVERABLE_ERROR  - almost fatal run-time errors
 ; E_WARNING         - run-time warnings (non-fatal errors)
@@ -915,8 +915,8 @@ default_socket_timeout = 60
 ;
 ; Notes for Windows environments :
 ;
-; - Many DLL files are located in the extensions/ (PHP 4) or ext/ (PHP 5+)
-;   extension folders as well as the separate PECL DLL download (PHP 5+).
+; - Many DLL files are located in the ext/
+;   extension folders as well as the separate PECL DLL download.
 ;   Be sure to appropriately set the extension_dir directive.
 ;
 ;extension=bz2
@@ -961,6 +961,7 @@ default_socket_timeout = 60
 ;extension=sqlite3
 ;extension=tidy
 ;extension=xsl
+;extension=zip
 
 ;zend_extension=opcache
 
@@ -1101,6 +1102,10 @@ smtp_port = 25
 ; Add X-PHP-Originating-Script: that will include uid of the script followed by the filename
 mail.add_x_header = Off
 
+; Use mixed LF and CRLF line separators to keep compatibility with some
+; RFC 2822 non conformant MTA.
+mail.mixed_lf_and_crlf = Off
+
 ; The path to a log file that will log all mail() calls. Log entries include
 ; the full path of the script, line number, To address and headers.
 ;mail.log =
@@ -1198,9 +1203,6 @@ mysqli.default_user =
 ; https://php.net/mysqli.default-pw
 mysqli.default_pw =
 
-; Allow or prevent reconnect
-mysqli.reconnect = Off
-
 ; If this option is enabled, closing a persistent connection will rollback
 ; any pending transactions of this connection, before it is put back
 ; into the persistent connection pool.
@@ -1266,7 +1268,7 @@ mysqlnd.collect_memory_statistics = Off
 ;oci8.ping_interval = 60
 
 ; Connection: Set this to a user chosen connection class to be used
-; for all pooled server requests with Oracle 11g Database Resident
+; for all pooled server requests with Oracle Database Resident
 ; Connection Pooling (DRCP).  To use DRCP, this value should be set to
 ; the same string for all web servers running the same application,
 ; the database pool must be configured, and the connection string must
@@ -1283,10 +1285,17 @@ mysqlnd.collect_memory_statistics = Off
 ; https://php.net/oci8.statement-cache-size
 ;oci8.statement_cache_size = 20
 
-; Tuning: Enables statement prefetching and sets the default number of
+; Tuning: Enables row prefetching and sets the default number of
 ; rows that will be fetched automatically after statement execution.
 ; https://php.net/oci8.default-prefetch
 ;oci8.default_prefetch = 100
+
+; Tuning: Sets the amount of LOB data that is internally returned from
+; Oracle Database when an Oracle LOB locator is initially retrieved as
+; part of a query. Setting this can improve performance by reducing
+; round-trips.
+; https://php.net/oci8.prefetch-lob-size
+; oci8.prefetch_lob_size = 0
 
 ; Compatibility. Using On means oci_close() will not close
 ; oci_connect() and oci_new_connect() connections.

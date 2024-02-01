@@ -81,6 +81,8 @@
 
 static int mbfl_filt_conv_wchar_utf7imap_flush(mbfl_convert_filter *filter);
 static int mbfl_filt_conv_utf7imap_wchar_flush(mbfl_convert_filter *filter);
+static size_t mb_utf7imap_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_utf7imap(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 static bool mb_check_utf7imap(unsigned char *in, size_t in_len);
 
 static const char *mbfl_encoding_utf7imap_aliases[] = {"mUTF-7", NULL};
@@ -94,6 +96,8 @@ const mbfl_encoding mbfl_encoding_utf7imap = {
 	0,
 	&vtbl_utf7imap_wchar,
 	&vtbl_wchar_utf7imap,
+	mb_utf7imap_to_wchar,
+	mb_wchar_to_utf7imap,
 	mb_check_utf7imap
 };
 
@@ -139,16 +143,21 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 		if (n < 0 || n > 63) {
 			if (c == '-') {
 				if (filter->status == 1) { /* "&-" -> "&" */
+					filter->cache = filter->status = 0;
 					CK((*filter->output_function)('&', filter->data));
 				} else if (filter->cache) {
 					/* Base64-encoded section ended abruptly, with partially encoded characters,
 					 * or it could be that it ended on the first half of a surrogate pair */
+					filter->cache = filter->status = 0;
 					CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
+				} else {
+					/* Base64-encoded section properly terminated by - */
+					filter->cache = filter->status = 0;
 				}
 			} else { /* illegal character */
+				filter->cache = filter->status = 0;
 				CK((*filter->output_function)(MBFL_BAD_INPUT, filter->data));
 			}
-			filter->cache = filter->status = 0;
 			return 0;
 		}
 	}
@@ -272,9 +281,7 @@ int mbfl_filt_conv_utf7imap_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;
@@ -401,9 +408,7 @@ int mbfl_filt_conv_wchar_utf7imap(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;
@@ -438,7 +443,13 @@ static int mbfl_filt_conv_wchar_utf7imap_flush(mbfl_convert_filter *filter)
 		CK((*filter->output_function)('-', filter->data));
 		break;
 	}
+
 	return 0;
+}
+
+static inline bool is_base64_end(unsigned char c)
+{
+	return c >= DASH;
 }
 
 static unsigned char decode_base64(unsigned char c)
@@ -457,6 +468,268 @@ static unsigned char decode_base64(unsigned char c)
 		return DASH;
 	}
 	return ILLEGAL;
+}
+
+static uint32_t* handle_utf16_cp(uint16_t cp, uint32_t *out, uint16_t *surrogate1)
+{
+retry:
+	if (*surrogate1) {
+		if (cp >= 0xDC00 && cp <= 0xDFFF) {
+			*out++ = ((*surrogate1 & 0x3FF) << 10) + (cp & 0x3FF) + 0x10000;
+			*surrogate1 = 0;
+		} else {
+			*out++ = MBFL_BAD_INPUT;
+			*surrogate1 = 0;
+			goto retry;
+		}
+	} else if (cp >= 0xD800 && cp <= 0xDBFF) {
+		*surrogate1 = cp;
+	} else if (cp >= 0xDC00 && cp <= 0xDFFF) {
+		/* 2nd part of surrogate pair came unexpectedly */
+		*out++ = MBFL_BAD_INPUT;
+	} else if (cp >= 0x20 && cp <= 0x7E && cp != '&') {
+		*out++ = MBFL_BAD_INPUT;
+	} else {
+		*out++ = cp;
+	}
+	return out;
+}
+
+static uint32_t* handle_base64_end(unsigned char n, uint32_t *out, bool *base64, bool abrupt, uint16_t *surrogate1)
+{
+	if (abrupt || n == ILLEGAL || *surrogate1) {
+		*out++ = MBFL_BAD_INPUT;
+		*surrogate1 = 0;
+	}
+
+	*base64 = false;
+	return out;
+}
+
+static size_t mb_utf7imap_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	ZEND_ASSERT(bufsize >= 5); /* This function will infinite-loop if called with a tiny output buffer */
+
+	/* Why does this require a minimum output buffer size of 5?
+	 * See comment in mb_utf7_to_wchar; the worst case for this function is similar,
+	 * though not exactly the same. */
+
+	unsigned char *p = *in, *e = p + *in_len;
+	/* Always leave one empty space in output buffer in case the string ends while
+	 * in Base64 mode and we need to emit an error marker */
+	uint32_t *out = buf, *limit = buf + bufsize - 1;
+
+	bool base64 = *state & 1;
+	uint16_t surrogate1 = (*state >> 1); /* First half of a surrogate pair */
+
+	while (p < e && out < limit) {
+		if (base64) {
+			/* Base64 section */
+			if ((limit - out) < 4) {
+				break;
+			}
+
+			unsigned char n1 = decode_base64(*p++);
+			if (is_base64_end(n1)) {
+				out = handle_base64_end(n1, out, &base64, false, &surrogate1);
+				continue;
+			} else if (p == e) {
+				out = handle_base64_end(n1, out, &base64, true, &surrogate1);
+				continue;
+			}
+			unsigned char n2 = decode_base64(*p++);
+			if (is_base64_end(n2) || p == e) {
+				out = handle_base64_end(n2, out, &base64, true, &surrogate1);
+				continue;
+			}
+			unsigned char n3 = decode_base64(*p++);
+			if (is_base64_end(n3)) {
+				out = handle_base64_end(n3, out, &base64, true, &surrogate1);
+				continue;
+			}
+			out = handle_utf16_cp((n1 << 10) | (n2 << 4) | ((n3 & 0x3C) >> 2), out, &surrogate1);
+			if (p == e) {
+				/* It is an error if trailing padding bits are not zeroes or if we were
+				 * expecting the 2nd part of a surrogate pair when Base64 section ends */
+				if ((n3 & 0x3) || surrogate1)
+					*out++ = MBFL_BAD_INPUT;
+				break;
+			}
+
+			unsigned char n4 = decode_base64(*p++);
+			if (is_base64_end(n4)) {
+				out = handle_base64_end(n4, out, &base64, n3 & 0x3, &surrogate1);
+				continue;
+			} else if (p == e) {
+				out = handle_base64_end(n4, out, &base64, true, &surrogate1);
+				continue;
+			}
+			unsigned char n5 = decode_base64(*p++);
+			if (is_base64_end(n5) || p == e) {
+				out = handle_base64_end(n5, out, &base64, true, &surrogate1);
+				continue;
+			}
+			unsigned char n6 = decode_base64(*p++);
+			if (is_base64_end(n6)) {
+				out = handle_base64_end(n6, out, &base64, true, &surrogate1);
+				continue;
+			}
+			out = handle_utf16_cp((n3 << 14) | (n4 << 8) | (n5 << 2) | ((n6 & 0x30) >> 4), out, &surrogate1);
+			if (p == e) {
+				if ((n6 & 0xF) || surrogate1)
+					*out++ = MBFL_BAD_INPUT;
+				break;
+			}
+
+			unsigned char n7 = decode_base64(*p++);
+			if (is_base64_end(n7)) {
+				out = handle_base64_end(n7, out, &base64, n6 & 0xF, &surrogate1);
+				continue;
+			} else if (p == e) {
+				out = handle_base64_end(n7, out, &base64, true, &surrogate1);
+				continue;
+			}
+			unsigned char n8 = decode_base64(*p++);
+			if (is_base64_end(n8)) {
+				out = handle_base64_end(n8, out, &base64, true, &surrogate1);
+				continue;
+			}
+			out = handle_utf16_cp((n6 << 12) | (n7 << 6) | n8, out, &surrogate1);
+		} else {
+			unsigned char c = *p++;
+
+			if (c == '&') {
+				if (p < e && *p == '-') {
+					*out++ = '&';
+					p++;
+				} else {
+					base64 = true;
+				}
+			} else if (c >= 0x20 && c <= 0x7E) {
+				*out++ = c;
+			} else {
+				*out++ = MBFL_BAD_INPUT;
+			}
+		}
+	}
+
+	if (p == e && base64) {
+		/* UTF7-IMAP doesn't allow strings to end in Base64 mode
+		 * One space in output buffer was reserved just for this */
+		*out++ = MBFL_BAD_INPUT;
+	}
+
+	*state = (surrogate1 << 1) | base64;
+	*in_len = e - p;
+	*in = p;
+	return out - buf;
+}
+
+#define SAVE_CONVERSION_STATE() buf->state = (cache << 4) | (nbits << 1) | base64
+#define RESTORE_CONVERSION_STATE() base64 = (buf->state & 1); nbits = (buf->state >> 1) & 0x7; cache = (buf->state >> 4)
+
+static const unsigned char mbfl_base64_table[] = {
+ /* 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', */
+   0x41,0x42,0x43,0x44,0x45,0x46,0x47,0x48,0x49,0x4a,0x4b,0x4c,0x4d,
+ /* 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', */
+   0x4e,0x4f,0x50,0x51,0x52,0x53,0x54,0x55,0x56,0x57,0x58,0x59,0x5a,
+ /* 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', */
+   0x61,0x62,0x63,0x64,0x65,0x66,0x67,0x68,0x69,0x6a,0x6b,0x6c,0x6d,
+ /* 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', */
+   0x6e,0x6f,0x70,0x71,0x72,0x73,0x74,0x75,0x76,0x77,0x78,0x79,0x7a,
+ /* '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', ',', '\0' */
+   0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x2b,0x2c,0x00
+};
+
+static void mb_wchar_to_utf7imap(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+
+	bool base64;
+	unsigned char nbits, cache; /* `nbits` is the number of cached bits; either 0, 2, or 4 */
+	RESTORE_CONVERSION_STATE();
+
+	while (len--) {
+		uint32_t w = *in++;
+		if (base64) {
+			if (w >= 0x20 && w <= 0x7E) {
+				/* End of Base64 section. Drain buffered bits (if any), close Base64 section
+				 * Leave enough space in the output buffer such that even if the remainder of
+				 * the input string is ASCII, we can output the whole thing without having to
+				 * check for output buffer space again */
+				base64 = false;
+				in--; len++; /* Unconsume codepoint; it will be handled by 'ASCII section' code below */
+				MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 2);
+				if (nbits) {
+					out = mb_convert_buf_add(out, mbfl_base64_table[(cache << (6 - nbits)) & 0x3F]);
+				}
+				nbits = cache = 0;
+				out = mb_convert_buf_add(out, '-');
+			} else if (w >= MBFL_WCSPLANE_UTF32MAX) {
+				/* Make recursive call to add an error marker character */
+				SAVE_CONVERSION_STATE();
+				MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_utf7imap);
+				MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+				RESTORE_CONVERSION_STATE();
+			} else {
+				/* Encode codepoint, preceded by any cached bits, as Base64
+				 * Make enough space in the output buffer to hold both any bytes that
+				 * we emit right here, plus any finishing byte which might need to
+				 * be emitted if the input string ends abruptly */
+				uint64_t bits;
+				if (w >= MBFL_WCSPLANE_SUPMIN) {
+					/* Must use surrogate pair */
+					MB_CONVERT_BUF_ENSURE(buf, out, limit, 7);
+					w -= 0x10000;
+					bits = ((uint64_t)cache << 32) | 0xD800DC00L | ((w & 0xFFC00) << 6) | (w & 0x3FF);
+					nbits += 32;
+				} else {
+					MB_CONVERT_BUF_ENSURE(buf, out, limit, 4);
+					bits = (cache << 16) | w;
+					nbits += 16;
+				}
+
+				while (nbits >= 6) {
+					out = mb_convert_buf_add(out, mbfl_base64_table[(bits >> (nbits - 6)) & 0x3F]);
+					nbits -= 6;
+				}
+				cache = bits;
+			}
+		} else {
+			/* ASCII section */
+			if (w == '&') {
+				MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 2);
+				out = mb_convert_buf_add2(out, '&', '-');
+			} else if (w >= 0x20 && w <= 0x7E) {
+				out = mb_convert_buf_add(out, w);
+			} else if (w >= MBFL_WCSPLANE_UTF32MAX) {
+				buf->state = 0;
+				MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_utf7imap);
+				MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+				RESTORE_CONVERSION_STATE();
+			} else {
+				out = mb_convert_buf_add(out, '&');
+				base64 = true;
+				in--; len++; /* Unconsume codepoint; it will be handled by Base64 code above */
+			}
+		}
+	}
+
+	if (end) {
+		if (nbits) {
+			out = mb_convert_buf_add(out, mbfl_base64_table[(cache << (6 - nbits)) & 0x3F]);
+		}
+		if (base64) {
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, 1);
+			out = mb_convert_buf_add(out, '-');
+		}
+	} else {
+		SAVE_CONVERSION_STATE();
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }
 
 static bool is_utf16_cp_valid(uint16_t cp, bool is_surrogate)

@@ -5,7 +5,7 @@ mbstring
 --FILE--
 <?php
 echo "*** Testing mb_substitute_character() : variation ***\n";
-//japenese utf-8
+//japanese utf-8
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI');
 
 //output the default which is ? in ISO-8859-1, x3f

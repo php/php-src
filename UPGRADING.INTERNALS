@@ -1,134 +1,113 @@
-PHP 8.1 INTERNALS UPGRADE NOTES
+PHP 8.2 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
-  a. Removed Zend APIs
-  b. Zend Stream API
-  c. zend_get_opcode_id()
-  d. Removed support for "p" printf format specifier
-  e. ZEND_ATOL() changes
-  f. Non-serializable classes should use ZEND_ACC_NOT_SERIALIZABLE
-  g. _zend_hash_find_known_hash renamed to zend_hash_find_known_hash
-  h. Renaming of ZEND_TYPE_HAS_CLASS() into ZEND_TYPE_IS_COMPLEX()
-  i. zend_resource handle is now zend_long
 
 2. Build system changes
-  a. New compiler flags
 
 3. Module changes
-  a. ext/hash
-  b. ext/pdo
-  c. ext/standard
-  d. ext/pgsql
-  e. ext/pcre
+
+4. OpCode changes
+
+5. SAPI changes
 
 ========================
 1. Internal API changes
 ========================
-  a. The following APIs have been removed from the Zend Engine:
-     - The spl_ce_Aggregate, spl_ce_ArrayAccess, spl_ce_Countable, spl_ce_Iterator, spl_ce_Serializable,
-       spl_ce_Stringable, spl_ce_Traversable alias class entries have been removed in favor of zend_ce_aggregate,
-       zend_ce_arrayaccess, zend_ce_countable, zend_ce_iterator, zend_ce_serializable, zend_ce_stringable,
-       zend_ce_traversable.
-     - The ZVAL_NEW_ARR() macro has been removed. Use array_init() or ZVAL_ARR
-       with zend_new_array() instead.
-     - The IGNORE_URL_WIN macro has been removed; it had no effect as of PHP 5.0.0.
-     - TsHashTable has been removed, it was not used in php-src and was not useful outside of php-src.
-  b. Zend Stream API has been changed to use "zend_string*" instead of "char*"
-      - zend_file_handle.filename now is zend_string*
-      - zend_file_handle.free_filename is removed. Now zend_file_handle.filename is always released.
-      - added zend_file_handle.primary_script flag. SAPIs should set it for main executed script.
-      - added zend_file_handle.in_list flag, which is set when a file_handle is added into CG(open_files)
-      - added zend_stream_init_filename_ex() function, that takes filename as zend_string*
-      - the "filename" parameter of functons zend_stream_open(), php_stream_open_for_zend_ex() and
-        callback zend_stream_open_function() has been removed (it's now passed as a "filename" field of the
-        file_handle parameter)
-      - in zend_fopen() and zend_resolve_path() callbacks filename now passed as zend_string*
-      - file_handles should be destroyed by zend_destroy_file_handle() function (usually in the same function
-        the same function where they were created by zend_stream_init_*()). Previously there were two different
-        destructors zend_destroy_file_handle() and zend_file_handle_dtor().
-      - zend_ini_scanner_globals.filename now is zend_string*
-  c. Added the zend_get_opcode_id() function, which is intended to get opcode id from name.
-  d. Removed support for "p" modifier (%pd, %pu, etc) in PHP's printf
-     implementations. Use ZEND_LONG_FMT and ZEND_ULONG_FMT instead.
-  e. ZEND_ATOL() now returns the integer instead of assigning it as part of the
-     macro. Replace ZEND_ATOL(i, s) with i = ZEND_ATOL(s).
-  f. Non-serializable classes should be indicated using the
-     ZEND_ACC_NOT_SERIALIZABLE (@not-serializable in stubs) rather than the
-     zend_class_(un)serialize_deny handlers which are removed.
-  g. _zend_hash_find_known_hash has been renamed to zend_hash_find_known_hash.
-  h. ZEND_TYPE_HAS_CLASS() has been renamed to ZEND_TYPE_IS_COMPLEX() for clarity.
-     A zend_type element can contain a zend_type_list which might be either a union or an intersection,
-     or a single class stored as either a zend_string* or a zend_class_entry*.
-  i. The handle member of zend_resource (the resource ID) now has type zend_long
-     rather than int. This should be transparent to most code, but uses in
-     printf may need to switch from "%d" to ZEND_LONG_FMT.
+
+* Removed zend_binary_zval_str(n)casecmp() APIs. These were thin wrappers
+  around zend_binary_str(n)casecmp_l() -- rather than
+  zend_binary_str(n)casecmp() as one would expect. Call the appropriate
+  wrapped function directly instead.
+* Removed the (ZEND_)WRONG_PARAM_COUNT_WITH_RETVAL() macros.
+* php_stristr() no longer lowercases the haystack and needle as a side effect.
+  Call zend_str_tolower() yourself if necessary. You no longer need to copy
+  the haystack and needle before passing them to php_stristr().
+* zend_register_module_ex() no longer copies the module entry.
+* The main/php_stdint.h header has been removed.
+  Include the standard <inttypes.h> and/or <stdint.h> headers instead.
+  Replace usage of u_char by the standard C99 uint8_t type.
+* A new ZEND_THREEWAY_COMPARE() macro has been introduced which does a
+  three-way comparison of two integers and returns -1, 0 or 1 if the LHS is
+  smaller, equal or larger than the RHS
+* Deprecated zend_atoi() and zend_atol(). Use ZEND_STRTOL() for general purpose
+  string to long conversion, or a variant of zend_ini_parse_quantity() for
+  parsing ini quantities.
+* The return types of the following object handlers has changed from int to zend_result
+  - zend_object_cast_t
+  - zend_object_count_elements_t
+  - zend_object_get_closure_t
+  - zend_object_do_operation_t
+* Added a new zero_position argument to php_stream_fopen_from_fd_rel to reflect
+  if this a newly created file so the current file offset needs not to be checked.
+* Added smart_str_trim_to_size(). The function trims the memory allocated for the
+  string. This can considerably reduce the memory footprint of strings smaller
+  than approximately 4096 bytes.
+* smart_str_extract() and the spprintf family of functions now use
+  smart_str_trim_to_size() before returning the string.
+* It is recommended to use smart_str_extract() or smart_str_trim_to_size() when
+  using the smart_str API.
+* zend_is_callable_ex, and functions which call it such as zend_is_callable and
+  zend_fcall_info_init, will issue deprecation notices if passed values which
+  are deprecated (see main UPGRADING notes). To suppress the notice, e.g. to
+  avoid duplicates when processing the same value multiple times, pass or add
+  IS_CALLABLE_SUPPRESS_DEPRECATIONS to the check_flags parameter.
+* Registered zend_observer_fcall_init handlers are now also called for internal functions.
+* The pestrdup and pestrndup macros and zend_strndup function are now also infallible
+  for persistent strings, so checking for NULL is no longer necessary.
+* The CHECK_NULL_PATH and CHECK_ZVAL_NULL_PATH macros are now wrappers using
+  the new inline functions: bool zend_str_has_nul_byte(const zend_string *str)
+  and zend_char_has_nul_byte(const char *s, size_t known_length)
+* Added zend_enum_get_case_by_value() function, which provides an internal API
+  similiar to BackedEnum::from() and BackedEnum::tryFrom().
 
 ========================
 2. Build system changes
 ========================
-  a. New compiler flags
-     - [-Wimplicit-fallthrough=1] is now enabled by default.
-       It is possible to use the new ZEND_FALLTHROUGH macro keyword to suppress the warning.
+
+* The build system now requires PHP 7.4.0 at least. Previously PHP 7.1 was
+  required.
+* Unsupported libxml2 2.10.0 symbols are no longer exported on Windows.
+* Identifier names for namespaced functions generated from stub files through
+  gen_stub.php have been changed. This requires that namespaced functions
+  should be declared via the PHP_FUNCTION macro by using the fully qualified
+  function name (whereas each part is separated by "_") instead of just the
+  function name itself.
+
 ========================
 3. Module changes
 ========================
 
-  a. ext/hash
-    - The init signatures are extended with an additional `HashTable*`
-      argument. The passed HT is to contain the algorithm specific
-      configuration. If an algorithm doesn't make use of any additional
-      configuration, the argument is to be marked with ZEND_ATTRIBUTE_UNUSED.
-
+  a. ext/standard
+    - The PHP APIs string_natural_compare_function_ex(),
+      string_natural_case_compare_function(), and string_natural_compare_function()
+      have been removed. They always returned SUCCESS and were a wrapper around
+      strnatcmp_ex(). Use strnatcmp_ex() directly instead.
+    - The PHP API php_fgetcsv() now returns a HashTable* instead of having an in-out
+      zval parameter.
+      It now returns NULL on an empty line instead of [null].
+      A new function php_bc_fgetcsv_empty_line() has been added to get a HashTable* which
+      represents [null].
   b. ext/pdo
-    - The "preparer" callback now accepts a zend_string* instead of
-      char* + size_t pair the query string. Similarly, the query_string and
-      active_query_string members of pdo_stmt_t are now zend_string*.
-    - The way in which drivers provide results has changed: Previously,
-      the "describer" callback populated the "pdo_type" member in the
-      pdo_column_data structure, and the "get_col" callback then had to return
-      pointers to data of appropriate type.
+    - pdo_raise_impl_error()'s parameter sqlstate has been changed from
+      const char * to pdo_error_type (aka char [6]).
 
-      In PHP 8.1, the "describer" callback no longer determines the pdo_type
-      (and this member has been removed from pdo_column_data). Instead, the
-      "get_col" callback accepts a zval pointer that may be populated with a
-      value of arbitrary type. This gives drivers more flexibility in
-      determining result types (e.g. based on whether a specific integer fits
-      the PHP integer type) and avoid awkward juggling of temporary buffers.
+========================
+4. OpCode changes
+========================
 
-      As the "describer" no longer determines pdo_type, the "get_column_meta"
-      function is now responsible for providing this information for use by
-      getColumnMeta(). The type provided here does not need to match the type
-      returned by get_col (in fact no corresponding type might exist, e.g. for
-      floats). It should be the closest logical equivalent for the column type.
-    - The transaction, set_attribute, and preparer handler's return type
-      has been formalized to bool instead of int.
-    - The check_liveness handler's return type has been formalized to zend_return
-      instead of int.
-    - The closer, and fetch_error handlers have been voidified.
-    - The quoter handler now returns the quoted string as zend_string* instead
-      of returning a boolean, and the quoted string as a pair of out params.
-      Similarly the unquoted string is now a zend_string* instead of a pair of
-      char* and size_t length.
-    - The doer handler now accepts a zend_string* instead of char* + size_t
-      pair for the SQL statement.
-    - The last_id handler now returns a zend_string* instead of returning a
-      char* and the length as an out param, and accepts a zend_string* instead
-      of char* for the optional sequence/table name.
-    - The php_pdo_str_tolower_dup() PDO_API has been removed use zend_str_tolower_dup()
-      or zend_string_tolower_ex().
+* The ZEND_INIT_FCALL opcode now asserts that the function exists in the symbol
+  table as the function's existence is checked at compile time.
+  For extensions modifying the function symbol table, setting
+  CG(compiler_options) |= ZEND_COMPILE_IGNORE_USER_FUNCTIONS | ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS;
+  will produce ZEND_INIT_FCALL_BY_NAME opcodes instead which check for the
+  existence of the function at runtime.
 
-  c. ext/standard
-    - The PHP API php_fputcsv() now takes an extra zend_string* argument at the end
-      for a custom EOL sequence, passing NULL provides the old default of "\n".
+========================
+5. SAPI changes
+========================
 
-  d. ext/pgsql
-    - The functions php_pgsql_meta_data(), php_pgsql_convert(), php_pgsql_insert(),
-      php_pgsql_update(), php_pgsql_delete(), and php_pgsql_select() have had
-      their return type formalized to zend_result.
-    - The functions php_pgsql_meta_data(), php_pgsql_convert(), php_pgsql_insert(),
-      php_pgsql_update(), php_pgsql_delete(), and php_pgsql_select() now accept a
-      zend_string* instead of a char* for the table name.
-
-  e. ext/pcre
-    - Bundled PCRE2 is at version 10.37. The most important diff to the previous
-      version is the JIT support on the S390 platform.
+ * The signature of php_module_startup() has changed from
+   int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint32_t num_additional_modules)
+   to
+   zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module)
+   as only one additional module was ever provided.

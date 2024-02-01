@@ -13,6 +13,7 @@
  */
 
 #include <unicode/rbbi.h>
+#include <memory>
 
 extern "C" {
 #define USE_BREAKITERATOR_POINTER 1
@@ -163,11 +164,10 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec)
 	ZEND_ASSERT(BREAKITER_ERROR_CODE(bio) == U_BUFFER_OVERFLOW_ERROR);
 	BREAKITER_ERROR_CODE(bio) = U_ZERO_ERROR;
 
-	int32_t *rules = new int32_t[num_rules];
-	num_rules = fetch_rbbi(bio)->getRuleStatusVec(rules, num_rules,
+	std::unique_ptr<int32_t[]> rules = std::unique_ptr<int32_t[]>(new int32_t[num_rules]);
+	num_rules = fetch_rbbi(bio)->getRuleStatusVec(rules.get(), num_rules,
 			BREAKITER_ERROR_CODE(bio));
 	if (U_FAILURE(BREAKITER_ERROR_CODE(bio))) {
-		delete[] rules;
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
 				"rbbi_get_rule_status_vec: failed obtaining the status values",
 				0);
@@ -178,7 +178,6 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec)
 	for (int32_t i = 0; i < num_rules; i++) {
 		add_next_index_long(return_value, rules[i]);
 	}
-	delete[] rules;
 }
 
 U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getBinaryRules)

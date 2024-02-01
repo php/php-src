@@ -28,11 +28,11 @@
 #include "main/php_network.h"
 #include "zend_smart_str.h"
 
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
 
-#if HAVE_FCNTL_H
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 
@@ -42,8 +42,8 @@
  * around the alternate code. */
 #ifdef PHP_CAN_SUPPORT_PROC_OPEN
 
-#if HAVE_OPENPTY
-# if HAVE_PTY_H
+#ifdef HAVE_OPENPTY
+# ifdef HAVE_PTY_H
 #  include <pty.h>
 # elif defined(__FreeBSD__)
 /* FreeBSD defines `openpty` in <libutil.h> */
@@ -680,7 +680,7 @@ static zend_result set_proc_descriptor_to_blackhole(descriptorspec_item *desc)
 
 static zend_result set_proc_descriptor_to_pty(descriptorspec_item *desc, int *master_fd, int *slave_fd)
 {
-#if HAVE_OPENPTY
+#ifdef HAVE_OPENPTY
 	/* All FDs set to PTY in the child process will go to the slave end of the same PTY.
 	 * Likewise, all the corresponding entries in `$pipes` in the parent will all go to the master
 	 * end of the same PTY.
@@ -728,7 +728,7 @@ static zend_result set_proc_descriptor_to_pipe(descriptorspec_item *desc, zend_s
 
 	desc->type = DESCRIPTOR_TYPE_PIPE;
 
-	if (strncmp(ZSTR_VAL(zmode), "w", 1) != 0) {
+	if (!zend_string_starts_with_literal(zmode, "w")) {
 		desc->parentend = newpipe[1];
 		desc->childend = newpipe[0];
 		desc->mode_flags = O_WRONLY;
@@ -1096,6 +1096,7 @@ PHP_FUNCTION(proc_open)
 
 		descriptors[ndesc].index = (int)nindex;
 
+		ZVAL_DEREF(descitem);
 		if (Z_TYPE_P(descitem) == IS_RESOURCE) {
 			if (set_proc_descriptor_from_resource(descitem, &descriptors[ndesc], ndesc) == FAILURE) {
 				goto exit_fail;
@@ -1318,7 +1319,7 @@ exit_fail:
 #else
 	efree_argv(argv);
 #endif
-#if HAVE_OPENPTY
+#ifdef HAVE_OPENPTY
 	if (pty_master_fd != -1) {
 		close(pty_master_fd);
 	}

@@ -4,13 +4,9 @@ mysqlnd.net_read_timeout > default_socket_timeout
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once "connect.inc";
 
-if (!$IS_MYSQLND) {
-    die("skip: test applies only to mysqlnd");
-}
-
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     die(sprintf('skip Cannot connect to MySQL, [%d] %s.', mysqli_connect_errno(), mysqli_connect_error()));
 }
 if (mysqli_get_server_version($link) <= 50011) {
@@ -24,7 +20,7 @@ max_execution_time=12
 --FILE--
 <?php
     set_time_limit(12);
-    include ("connect.inc");
+    require_once "connect.inc";
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
         printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());

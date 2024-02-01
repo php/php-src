@@ -1,5 +1,5 @@
 --TEST--
-Ensure a interface can not have protected constants
+Ensure an interface cannot have protected constants
 --FILE--
 <?php
 interface A {

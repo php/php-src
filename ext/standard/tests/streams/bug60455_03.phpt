@@ -3,6 +3,7 @@ Bug #60455: stream_get_line and 2 lines, one possibly empty
 --FILE--
 <?php
 class TestStream {
+    public $context;
     private $lines = array();
     private $s = 0;
     private $eofth = 3;

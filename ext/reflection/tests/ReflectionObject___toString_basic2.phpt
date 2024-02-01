@@ -3,6 +3,7 @@ ReflectionObject::__toString() : very basic test with dynamic properties
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class Foo  {
     public $bar = 1;
 }
@@ -14,7 +15,7 @@ echo new ReflectionObject($f);
 ?>
 --EXPECTF--
 Object of class [ <user> class Foo ] {
-  @@ %s 3-5
+  @@ %s
 
   - Constants [0] {
   }

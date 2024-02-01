@@ -448,7 +448,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 			zval *tmp;
 			zend_string *type_name;
 
-			ZEND_HASH_FOREACH_STR_KEY_VAL(SOAP_GLOBAL(class_map), type_name, tmp) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(SOAP_GLOBAL(class_map), type_name, tmp) {
 				ZVAL_DEREF(tmp);
 				if (Z_TYPE_P(tmp) == IS_STRING &&
 				    ZSTR_LEN(ce->name) == Z_STRLEN_P(tmp) &&

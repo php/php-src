@@ -34,10 +34,14 @@ call_user_func(array(B::class, 'parent::who'));
 C::test();
 
 ?>
---EXPECT--
+--EXPECTF--
 string(1) "B"
 string(1) "A"
+
+Deprecated: Callables of the form ["B", "parent::who"] are deprecated in %s on line %d
 string(1) "A"
 string(1) "B"
 string(1) "A"
+
+Deprecated: Callables of the form ["B", "parent::who"] are deprecated in %s on line %d
 string(1) "A"

@@ -15,64 +15,52 @@
  */
 
 
+#include "zend.h"
 #include "fuzzer.h"
-
-#include "Zend/zend.h"
-#include "main/php_config.h"
-#include "main/php_main.h"
-#include "oniguruma.h"
-
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-
 #include "fuzzer-sapi.h"
+#include "ext/mbstring/mbstring.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
-#ifdef HAVE_MBREGEX
-	char *args[2];
-	char *data = malloc(Size+1);
-	memcpy(data, Data, Size);
-	data[Size] = '\0';
-
-	if (fuzzer_request_startup() == FAILURE) {
+	const uint8_t *Comma1 = memchr(Data, ',', Size);
+	if (!Comma1) {
 		return 0;
 	}
 
-	fuzzer_setup_dummy_frame();
+	size_t ToEncodingNameLen = Comma1 - Data;
+	char *ToEncodingName = estrndup((char *) Data, ToEncodingNameLen);
+	Data = Comma1 + 1;
+	Size -= ToEncodingNameLen + 1;
 
-	args[0] = data;
-	args[1] = "test123";
-	fuzzer_call_php_func("mb_ereg", 2, args);
+	const uint8_t *Comma2 = memchr(Data, ',', Size);
+	if (!Comma2) {
+		efree(ToEncodingName);
+		return 0;
+	}
 
-	args[0] = data;
-	args[1] = "test123";
-	fuzzer_call_php_func("mb_eregi", 2, args);
+	size_t FromEncodingNameLen = Comma2 - Data;
+	char *FromEncodingName = estrndup((char *) Data, FromEncodingNameLen);
+	Data = Comma2 + 1;
+	Size -= FromEncodingNameLen + 1;
 
-	args[0] = data;
-	args[1] = data;
-	fuzzer_call_php_func("mb_ereg", 2, args);
+	const mbfl_encoding *ToEncoding = mbfl_name2encoding(ToEncodingName);
+	const mbfl_encoding *FromEncoding = mbfl_name2encoding(FromEncodingName);
 
-	args[0] = data;
-	args[1] = data;
-	fuzzer_call_php_func("mb_eregi", 2, args);
+	if (!ToEncoding || !FromEncoding || fuzzer_request_startup() == FAILURE) {
+		efree(ToEncodingName);
+		efree(FromEncodingName);
+		return 0;
+	}
+
+	zend_string *Result = php_mb_convert_encoding_ex((char *) Data, Size, ToEncoding, FromEncoding);
+	zend_string_release(Result);
+	efree(ToEncodingName);
+	efree(FromEncodingName);
 
 	fuzzer_request_shutdown();
-
-	free(data);
-#else
-	fprintf(stderr, "\n\nERROR:\nPHP built without mbstring, recompile with --enable-mbstring to use this fuzzer\n");
-	exit(1);
-#endif
 	return 0;
 }
 
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
-	fuzzer_init_php();
-
-	/* The default parse depth limit allows stack overflows under asan. */
-	onig_set_parse_depth_limit(512);
-
-	/* fuzzer_shutdown_php(); */
+	fuzzer_init_php(NULL);
 	return 0;
 }

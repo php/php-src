@@ -18,6 +18,7 @@
 #define ZEND_SMART_STR_PUBLIC_H
 
 typedef struct {
+	/** See smart_str_extract() */
 	zend_string *s;
 	size_t a;
 } smart_str;

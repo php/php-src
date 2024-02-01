@@ -105,6 +105,8 @@ object(SelfArray)#9 (1) {
   string(3) "bar"
 }
 string(77) "O:9:"SelfArray":4:{i:0;i:16777216;i:1;N;i:2;a:1:{s:3:"foo";s:3:"bar";}i:3;N;}"
+
+Deprecated: Creation of dynamic property SelfArray::$foo is deprecated in %s on line %d
 object(SelfArray)#9 (1) {
   ["foo"]=>
   string(3) "bar"

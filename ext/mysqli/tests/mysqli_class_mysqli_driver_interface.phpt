@@ -69,8 +69,6 @@ printf("driver->report_mode = '%s'\n", $driver->report_mode);
 $driver->report_mode = MYSQLI_REPORT_STRICT;
 assert($driver->report_mode === MYSQLI_REPORT_STRICT);
 
-printf("driver->reconnect = '%s'\n", $driver->reconnect);
-
 printf("\nAccess to undefined properties:\n");
 printf("driver->unknown = '%s'\n", @$driver->unknown);
 
@@ -87,11 +85,9 @@ Class variables:
 client_info
 client_version
 driver_version
-reconnect
 report_mode
 
 Object variables:
-reconnect
 report_mode
 
 Magic, magic properties:
@@ -101,7 +97,6 @@ driver->client_version = '%d'
 Deprecated: The driver_version property is deprecated in %s on line %d
 driver->driver_version = '%d'
 driver->report_mode = '%d'
-driver->reconnect = ''
 
 Access to undefined properties:
 driver->unknown = ''

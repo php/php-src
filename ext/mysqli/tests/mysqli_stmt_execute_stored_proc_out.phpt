@@ -4,23 +4,17 @@ mysqli_stmt_execute() - OUT
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-    die(sprintf('skip Cannot connect to MySQL, [%d] %s.', mysqli_connect_errno(), mysqli_connect_error()));
+require_once 'connect.inc';
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 }
 if (mysqli_get_server_version($link) < 50503) {
     die(sprintf('skip Needs MySQL 5.5.3+, found version %d.', mysqli_get_server_version($link)));
 }
-/*
-if ($IS_MYSQLND) {
-    die(sprintf("skip WHY ?!"));
-}
-*/
 ?>
 --FILE--
 <?php
-    require_once('connect.inc');
+    require_once 'connect.inc';
 
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
         printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -70,7 +64,7 @@ if ($IS_MYSQLND) {
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once "connect.inc";
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

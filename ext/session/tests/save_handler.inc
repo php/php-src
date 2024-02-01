@@ -27,7 +27,7 @@ function open($save_path, $session_name) {
     global $session_save_path, $name;
     $session_save_path = $save_path;
     $name = $session_name;
-    echo "Open [${session_save_path},${session_name}]\n";
+    echo "Open [{$session_save_path},{$session_name}]\n";
 
     // MUST return bool. Return TRUE for success.
     return true;
@@ -39,7 +39,7 @@ function close() {
     // NOTE: This function should unlock session data, if write() does not unlock it.
 
     global $session_save_path, $name;
-    echo "Close [${session_save_path},${name}]\n";
+    echo "Close [{$session_save_path},{$name}]\n";
 
     // MUST return bool. Return TRUE for success.
     return true;
@@ -54,7 +54,7 @@ function read($id) {
 
     global $session_save_path, $name, $session_id;
     $session_id = $id;
-    echo "Read [${session_save_path},${id}]\n";
+    echo "Read [{$session_save_path},{$id}]\n";
     $session_file = "$session_save_path/".SESSION_FILE_PREFIX.$id;
     // read MUST create file. Otherwise, strict mode will not work
     touch($session_file);
@@ -74,7 +74,7 @@ function write($id, $session_data) {
 
     global $session_save_path, $name, $session_id;
     $session_id = $id;
-    echo "Write [${session_save_path},${id},${session_data}]\n";
+    echo "Write [{$session_save_path},{$id},{$session_data}]\n";
     $session_file = "$session_save_path/".SESSION_FILE_PREFIX.$id;
     if ($fp = fopen($session_file, "w")) {
         $return = fwrite($fp, $session_data);
@@ -91,7 +91,7 @@ function destroy($id) {
     // string $id - Session ID string
 
     global $session_save_path, $name;
-    echo "Destroy [${session_save_path},${id}]\n";
+    echo "Destroy [{$session_save_path},{$id}]\n";
     $session_file = "$session_save_path/".SESSION_FILE_PREFIX.$id;
     unlink($session_file);
 
@@ -136,7 +136,7 @@ function create_sid() {
     //       e.g. hash('sha2', random_bytes(64)) or use /dev/urandom
 
     $id = ('PHPT-'.time());
-    echo "CreateID [${id}]\n";
+    echo "CreateID [{$id}]\n";
 
     // MUST return session ID string.
     // Return FALSE for error.
@@ -148,7 +148,7 @@ function validate_sid($id) {
     // string $id - Session ID string
 
     global $session_save_path, $name;
-    echo "ValidateID [${session_save_path},${id}]\n";
+    echo "ValidateID [{$session_save_path},{$id}]\n";
     $session_file = "$session_save_path/".SESSION_FILE_PREFIX.$id;
     $ret = file_exists($session_file);
 
@@ -168,7 +168,7 @@ function update($id, $session_data) {
     //       support time stamp updating, you must not define this.
 
     global $session_save_path, $name;
-    echo "Update [${session_save_path},${id}]\n";
+    echo "Update [{$session_save_path},{$id}]\n";
     $session_file = "$session_save_path/".SESSION_FILE_PREFIX.$id;
     $ret = touch($session_file);
 

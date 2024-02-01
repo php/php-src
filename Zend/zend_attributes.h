@@ -40,6 +40,9 @@
 BEGIN_EXTERN_C()
 
 extern ZEND_API zend_class_entry *zend_ce_attribute;
+extern ZEND_API zend_class_entry *zend_ce_allow_dynamic_properties;
+extern ZEND_API zend_class_entry *zend_ce_sensitive_parameter;
+extern ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
 
 typedef struct {
 	zend_string *name;
@@ -74,6 +77,7 @@ ZEND_API zend_result zend_get_attribute_value(zval *ret, zend_attribute *attr, u
 ZEND_API zend_string *zend_get_attribute_target_names(uint32_t targets);
 ZEND_API bool zend_is_attribute_repeated(HashTable *attributes, zend_attribute *attr);
 
+ZEND_API zend_internal_attribute *zend_mark_internal_attribute(zend_class_entry *ce);
 ZEND_API zend_internal_attribute *zend_internal_attribute_register(zend_class_entry *ce, uint32_t flags);
 ZEND_API zend_internal_attribute *zend_internal_attribute_get(zend_string *lcname);
 

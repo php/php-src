@@ -32,8 +32,8 @@ PHPAPI php_stream *_php_stream_fopen_with_path(const char *filename, const char 
 PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STREAMS_DC);
 #define php_stream_fopen_from_file(file, mode)	_php_stream_fopen_from_file((file), (mode) STREAMS_CC)
 
-PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const char *persistent_id STREAMS_DC);
-#define php_stream_fopen_from_fd(fd, mode, persistent_id)	_php_stream_fopen_from_fd((fd), (mode), (persistent_id) STREAMS_CC)
+PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const char *persistent_id, bool zero_position STREAMS_DC);
+#define php_stream_fopen_from_fd(fd, mode, persistent_id)	_php_stream_fopen_from_fd((fd), (mode), (persistent_id), false STREAMS_CC)
 
 PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STREAMS_DC);
 #define php_stream_fopen_from_pipe(file, mode)	_php_stream_fopen_from_pipe((file), (mode) STREAMS_CC)

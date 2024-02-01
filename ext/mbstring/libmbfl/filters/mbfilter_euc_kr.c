@@ -32,6 +32,8 @@
 #include "unicode_table_uhc.h"
 
 static int mbfl_filt_conv_euckr_wchar_flush(mbfl_convert_filter *filter);
+static size_t mb_euckr_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_euckr(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 
 static const unsigned char mblen_table_euckr[] = { /* 0xA1-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -63,6 +65,8 @@ const mbfl_encoding mbfl_encoding_euc_kr = {
 	0,
 	&vtbl_euckr_wchar,
 	&vtbl_wchar_euckr,
+	mb_euckr_to_wchar,
+	mb_wchar_to_euckr,
 	NULL
 };
 
@@ -115,19 +119,13 @@ int mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 		}
 		if (flag > 0 && c >= 0xa1 && c <= 0xfe) {
 			if (flag == 1) { /* 1st: 0xa1..0xc6, 2nd: 0x41..0x7a, 0x81..0xfe */
-				w = (c1 - 0xa1)*190 + (c - 0x41);
-				if (w >= 0 && w < uhc2_ucs_table_size) {
-					w = uhc2_ucs_table[w];
-				} else {
-					w = 0;
-				}
+				w = (c1 - 0xa1)*190 + c - 0x41;
+				ZEND_ASSERT(w < uhc2_ucs_table_size);
+				w = uhc2_ucs_table[w];
 			} else { /* 1st: 0xc7..0xc8,0xca..0xfe, 2nd: 0xa1..0xfe */
-				w = (c1 - 0xc7)*94 + (c - 0xa1);
-				if (w >= 0 && w < uhc3_ucs_table_size) {
-					w = uhc3_ucs_table[w];
-				} else {
-					w = 0;
-				}
+				w = (c1 - 0xc7)*94 + c - 0xa1;
+				ZEND_ASSERT(w < uhc3_ucs_table_size);
+				w = uhc3_ucs_table[w];
 			}
 
 			if (w <= 0) {
@@ -139,9 +137,7 @@ int mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;
@@ -207,4 +203,93 @@ static int mbfl_filt_conv_euckr_wchar_flush(mbfl_convert_filter *filter)
 	}
 
 	return 0;
+}
+
+static size_t mb_euckr_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	unsigned char *p = *in, *e = p + *in_len;
+	uint32_t *out = buf, *limit = buf + bufsize;
+
+	while (p < e && out < limit) {
+		unsigned char c = *p++;
+
+		if (c < 0x80) {
+			*out++ = c;
+		} else if (((c >= 0xA1 && c <= 0xAC) || (c >= 0xB0 && c <= 0xFD)) && c != 0xC9 && p < e) {
+			unsigned char c2 = *p++;
+
+			if (c >= 0xA1 && c <= 0xC6 && c2 >= 0xA1 && c2 <= 0xFE) {
+				unsigned int w = (c - 0xA1)*190 + c2 - 0x41;
+				ZEND_ASSERT(w < uhc2_ucs_table_size);
+				w = uhc2_ucs_table[w];
+				if (!w)
+					w = MBFL_BAD_INPUT;
+				*out++ = w;
+			} else if (c >= 0xC7 && c <= 0xFE && c != 0xC9 && c2 >= 0xA1 && c2 <= 0xFE) {
+				unsigned int w = (c - 0xC7)*94 + c2 - 0xA1;
+				ZEND_ASSERT(w < uhc3_ucs_table_size);
+				w = uhc3_ucs_table[w];
+				if (!w)
+					w = MBFL_BAD_INPUT;
+				*out++ = w;
+			} else {
+				*out++ = MBFL_BAD_INPUT;
+			}
+		} else {
+			*out++ = MBFL_BAD_INPUT;
+		}
+	}
+
+	*in_len = e - p;
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_euckr(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+
+	while (len--) {
+		uint32_t w = *in++;
+		unsigned int s = 0;
+
+		if (w >= ucs_a1_uhc_table_min && w < ucs_a1_uhc_table_max) {
+			s = ucs_a1_uhc_table[w - ucs_a1_uhc_table_min];
+		} else if (w >= ucs_a2_uhc_table_min && w < ucs_a2_uhc_table_max) {
+			s = ucs_a2_uhc_table[w - ucs_a2_uhc_table_min];
+		} else if (w >= ucs_a3_uhc_table_min && w < ucs_a3_uhc_table_max) {
+			s = ucs_a3_uhc_table[w - ucs_a3_uhc_table_min];
+		} else if (w >= ucs_i_uhc_table_min && w < ucs_i_uhc_table_max) {
+			s = ucs_i_uhc_table[w - ucs_i_uhc_table_min];
+		} else if (w >= ucs_s_uhc_table_min && w < ucs_s_uhc_table_max) {
+			s = ucs_s_uhc_table[w - ucs_s_uhc_table_min];
+		} else if (w >= ucs_r1_uhc_table_min && w < ucs_r1_uhc_table_max) {
+			s = ucs_r1_uhc_table[w - ucs_r1_uhc_table_min];
+		} else if (w >= ucs_r2_uhc_table_min && w < ucs_r2_uhc_table_max) {
+			s = ucs_r2_uhc_table[w - ucs_r2_uhc_table_min];
+		}
+
+		/* Exclude UHC extension area (although we are using the UHC conversion tables) */
+		if (((s >> 8) & 0xFF) < 0xA1 || (s & 0xFF) < 0xA1) {
+			s = 0;
+		}
+
+		if (!s) {
+			if (w < 0x80) {
+				out = mb_convert_buf_add(out, w);
+			} else {
+				MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_euckr);
+				MB_CONVERT_BUF_ENSURE(buf, out, limit, len);
+			}
+		} else if (s < 0x80) {
+			out = mb_convert_buf_add(out, s);
+		} else {
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len + 2);
+			out = mb_convert_buf_add2(out, (s >> 8) & 0xFF, s & 0xFF);
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }

@@ -257,7 +257,6 @@ static void place_essa_pis(
 		 */
 		switch (opline->opcode) {
 			case ZEND_JMPZ:
-			case ZEND_JMPZNZ:
 				bf = blocks[j].successors[0];
 				bt = blocks[j].successors[1];
 				break;
@@ -527,7 +526,7 @@ static void place_essa_pis(
 				   (opline-1)->op2_type == IS_CONST) {
 			int var = EX_VAR_TO_NUM((opline-1)->op1.var);
 			zend_string *lcname = Z_STR_P(CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2) + 1);
-			zend_class_entry *ce = zend_optimizer_get_class_entry(script, lcname);
+			zend_class_entry *ce = zend_optimizer_get_class_entry(script, op_array, lcname);
 			if (!ce) {
 				continue;
 			}
@@ -589,12 +588,6 @@ add_op1_def:
 			break;
 		case ZEND_ASSIGN_DIM:
 		case ZEND_ASSIGN_OBJ:
-			if (opline->op1_type == IS_CV) {
-				ssa_ops[k].op1_def = ssa_vars_count;
-				var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
-				ssa_vars_count++;
-				//NEW_SSA_VAR(opline->op1.var)
-			}
 			next = opline + 1;
 			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 				ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
@@ -605,6 +598,12 @@ add_op1_def:
 					ssa_vars_count++;
 					//NEW_SSA_VAR(next->op1.var)
 				}
+			}
+			if (opline->op1_type == IS_CV) {
+				ssa_ops[k].op1_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op1.var)
 			}
 			break;
 		case ZEND_ASSIGN_OBJ_REF:
@@ -787,7 +786,7 @@ ZEND_API int zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *op
 }
 /* }}} */
 
-static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, int *var, int n) /* {{{ */
+static zend_result zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, int *var, int n) /* {{{ */
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_block *ssa_blocks = ssa->blocks;
@@ -891,7 +890,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 	j = blocks[n].children;
 	while (j >= 0) {
 		// FIXME: Tail call optimization?
-		if (zend_ssa_rename(op_array, build_flags, ssa, var, j) != SUCCESS)
+		if (zend_ssa_rename(op_array, build_flags, ssa, var, j) == FAILURE)
 			return FAILURE;
 		j = blocks[j].next_child;
 	}
@@ -904,7 +903,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 }
 /* }}} */
 
-ZEND_API int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa) /* {{{ */
+ZEND_API zend_result zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa) /* {{{ */
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_block *ssa_blocks;
@@ -935,10 +934,7 @@ ZEND_API int zend_build_ssa(zend_arena **arena, const zend_script *script, const
 	dfg.in  = dfg.use + set_size * blocks_count;
 	dfg.out = dfg.in  + set_size * blocks_count;
 
-	if (zend_build_dfg(op_array, &ssa->cfg, &dfg, build_flags) != SUCCESS) {
-		free_alloca(dfg.tmp, dfg_use_heap);
-		return FAILURE;
-	}
+	zend_build_dfg(op_array, &ssa->cfg, &dfg, build_flags);
 
 	if (build_flags & ZEND_SSA_DEBUG_LIVENESS) {
 		zend_dump_dfg(op_array, &ssa->cfg, &dfg);
@@ -1042,7 +1038,7 @@ ZEND_API int zend_build_ssa(zend_arena **arena, const zend_script *script, const
 		var[j] = j;
 	}
 	ssa->vars_count = op_array->last_var;
-	if (zend_ssa_rename(op_array, build_flags, ssa, var, 0) != SUCCESS) {
+	if (zend_ssa_rename(op_array, build_flags, ssa, var, 0) == FAILURE) {
 		free_alloca(var, var_use_heap);
 		free_alloca(dfg.tmp, dfg_use_heap);
 		return FAILURE;
@@ -1055,7 +1051,7 @@ ZEND_API int zend_build_ssa(zend_arena **arena, const zend_script *script, const
 }
 /* }}} */
 
-ZEND_API int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
+ZEND_API void zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa) /* {{{ */
 {
 	zend_ssa_var *ssa_vars;
 	int i;
@@ -1170,38 +1166,75 @@ ZEND_API int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_a
 			ssa_vars[i].alias = ssa_vars[ssa_vars[i].var].alias;
 		}
 	}
-
-	return SUCCESS;
 }
 /* }}} */
 
-int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var) /* {{{ */
+void zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var) /* {{{ */
 {
 	if (ssa->vars[var].use_chain == op) {
 		ssa->vars[var].use_chain = zend_ssa_next_use(ssa->ops, var, op);
-		return 1;
+		return;
+	}
+	int use = ssa->vars[var].use_chain;
+
+	while (use >= 0) {
+		if (ssa->ops[use].result_use == var) {
+			if (ssa->ops[use].res_use_chain == op) {
+				ssa->ops[use].res_use_chain = zend_ssa_next_use(ssa->ops, var, op);
+				return;
+			} else {
+				use = ssa->ops[use].res_use_chain;
+			}
+		} else if (ssa->ops[use].op1_use == var) {
+			if (ssa->ops[use].op1_use_chain == op) {
+				ssa->ops[use].op1_use_chain = zend_ssa_next_use(ssa->ops, var, op);
+				return;
+			} else {
+				use = ssa->ops[use].op1_use_chain;
+			}
+		} else if (ssa->ops[use].op2_use == var) {
+			if (ssa->ops[use].op2_use_chain == op) {
+				ssa->ops[use].op2_use_chain = zend_ssa_next_use(ssa->ops, var, op);
+				return;
+			} else {
+				use = ssa->ops[use].op2_use_chain;
+			}
+		} else {
+			break;
+		}
+	}
+	/* something wrong */
+	ZEND_UNREACHABLE();
+}
+/* }}} */
+
+void zend_ssa_replace_use_chain(zend_ssa *ssa, int op, int new_op, int var) /* {{{ */
+{
+	if (ssa->vars[var].use_chain == op) {
+		ssa->vars[var].use_chain = new_op;
+		return;
 	} else {
 		int use = ssa->vars[var].use_chain;
 
 		while (use >= 0) {
 			if (ssa->ops[use].result_use == var) {
 				if (ssa->ops[use].res_use_chain == op) {
-					ssa->ops[use].res_use_chain = zend_ssa_next_use(ssa->ops, var, op);
-					return 1;
+					ssa->ops[use].res_use_chain = new_op;
+					return;
 				} else {
 					use = ssa->ops[use].res_use_chain;
 				}
 			} else if (ssa->ops[use].op1_use == var) {
 				if (ssa->ops[use].op1_use_chain == op) {
-					ssa->ops[use].op1_use_chain = zend_ssa_next_use(ssa->ops, var, op);
-					return 1;
+					ssa->ops[use].op1_use_chain = new_op;
+					return;
 				} else {
 					use = ssa->ops[use].op1_use_chain;
 				}
 			} else if (ssa->ops[use].op2_use == var) {
 				if (ssa->ops[use].op2_use_chain == op) {
-					ssa->ops[use].op2_use_chain = zend_ssa_next_use(ssa->ops, var, op);
-					return 1;
+					ssa->ops[use].op2_use_chain = new_op;
+					return;
 				} else {
 					use = ssa->ops[use].op2_use_chain;
 				}
@@ -1209,10 +1242,9 @@ int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var) /* {{{ */
 				break;
 			}
 		}
-		/* something wrong */
-		ZEND_UNREACHABLE();
-		return 0;
 	}
+	/* something wrong */
+	ZEND_UNREACHABLE();
 }
 /* }}} */
 

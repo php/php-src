@@ -2,6 +2,8 @@
 SPL: Cloning an instance of ArrayObject which wraps an object.
 --FILE--
 <?php
+
+#[AllowDynamicProperties]
 class C { }
 
 $c = new C;

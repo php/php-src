@@ -415,7 +415,7 @@ static int zend_jit_disasm(const char    *name,
 
 	/* label numbering */
 	n = 0; m = 0;
-	ZEND_HASH_FOREACH_VAL(&labels, z) {
+	ZEND_HASH_MAP_FOREACH_VAL(&labels, z) {
 		if (Z_TYPE_P(z) == IS_FALSE) {
 			m--;
 			ZVAL_LONG(z, m);
@@ -655,6 +655,8 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_vm_stack_free_args_helper);
 	REGISTER_HELPER(zend_jit_copy_extra_args_helper);
 	REGISTER_HELPER(zend_jit_deprecated_helper);
+	REGISTER_HELPER(zend_jit_undefined_long_key);
+	REGISTER_HELPER(zend_jit_undefined_string_key);
 	REGISTER_HELPER(zend_jit_assign_const_to_typed_ref);
 	REGISTER_HELPER(zend_jit_assign_tmp_to_typed_ref);
 	REGISTER_HELPER(zend_jit_assign_var_to_typed_ref);

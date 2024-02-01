@@ -1,5 +1,9 @@
 --TEST--
 Test mail() function : basic functionality
+--EXTENSIONS--
+imap
+--CONFLICTS--
+imap
 --SKIPIF--
 <?php
 if( substr(PHP_OS, 0, 3) != 'WIN' ) {

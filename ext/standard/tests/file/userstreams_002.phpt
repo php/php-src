@@ -3,6 +3,7 @@ User-space streams: stream_cast()
 --FILE--
 <?php
 class test_wrapper_base {
+    public $context;
     public $return_value;
     function stream_open($path, $mode, $openedpath) {
         return true;

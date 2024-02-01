@@ -672,7 +672,7 @@ PDO_API zend_class_entry *php_pdo_get_exception(void);
 PDO_API int pdo_parse_params(pdo_stmt_t *stmt, zend_string *inquery, zend_string **outquery);
 
 PDO_API void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt,
-	const char *sqlstate, const char *supp);
+	pdo_error_type sqlstate, const char *supp);
 
 PDO_API void php_pdo_dbh_addref(pdo_dbh_t *dbh);
 PDO_API void php_pdo_dbh_delref(pdo_dbh_t *dbh);

@@ -301,7 +301,7 @@ void lsapi_perror(const char * pMessage, int err_no)
 }
 
 
-static int lsapi_parent_dead()
+static int lsapi_parent_dead(void)
 {
     // Return non-zero if the parent is dead.  0 if still alive.
     if (!s_ppid) {
@@ -921,6 +921,7 @@ static int LSAPI_perror_r( LSAPI_Request * pReq, const char * pErr1, const char 
 }
 
 
+#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
 static int lsapi_lve_error( LSAPI_Request * pReq )
 {
     static const char * headers[] =
@@ -944,10 +945,8 @@ static int lsapi_lve_error( LSAPI_Request * pReq )
     return 0;
 }
 
-
 static int lsapi_enterLVE( LSAPI_Request * pReq, uid_t uid )
 {
-#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
     if ( s_lve && uid ) //root user should not do that
     {
         uint32_t cookie;
@@ -961,16 +960,13 @@ static int lsapi_enterLVE( LSAPI_Request * pReq, uid_t uid )
             return -1;
         }
     }
-#endif
 
     return 0;
 }
 
-
 static int lsapi_jailLVE( LSAPI_Request * pReq, uid_t uid, struct passwd * pw )
 {
     int ret = 0;
-#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
     char  error_msg[1024] = "";
     ret = (*fp_lve_jail)( pw, error_msg );
     if ( ret < 0 )
@@ -980,12 +976,10 @@ static int lsapi_jailLVE( LSAPI_Request * pReq, uid_t uid, struct passwd * pw )
         LSAPI_perror_r( pReq, "LSAPI: jail() failure.", NULL );
         return -1;
     }
-#endif
     return ret;
 }
 
 
-#if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
 static int lsapi_initLVE(void)
 {
     const char * pEnv;
@@ -1364,30 +1358,6 @@ static inline int lsapi_notify_pid( int fd )
         return -1;
     return 0;
 }
-
-
-static char s_conn_key_packet[16];
-static inline int init_conn_key( int fd )
-{
-    struct lsapi_packet_header * pHeader = (struct lsapi_packet_header *)s_conn_key_packet;
-    struct timeval tv;
-    int i;
-    gettimeofday( &tv, NULL );
-    srand( (tv.tv_sec % 0x1000 + tv.tv_usec) ^ rand() );
-    for( i = 8; i < 16; ++i )
-    {
-        s_conn_key_packet[i]=(int) (256.0*rand()/(RAND_MAX+1.0));
-    }
-    lsapi_buildPacketHeader( pHeader, LSAPI_REQ_RECEIVED,
-                        8 + LSAPI_PACKET_HEADER_LEN );
-    if ( write( fd, s_conn_key_packet, LSAPI_PACKET_HEADER_LEN+8 )
-                < LSAPI_PACKET_HEADER_LEN+8 )
-        return -1;
-    return 0;
-
-
-}
-
 
 static int readReq( LSAPI_Request * pReq )
 {
@@ -3159,11 +3129,11 @@ static void lsapi_check_child_status( long tmCur )
 //}
 
 
-void set_skip_write()
+void set_skip_write(void)
 {   s_skip_write = 1;   }
 
 
-int is_enough_free_mem()
+int is_enough_free_mem(void)
 {
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
     //minimum 1GB or 10% available free memory
@@ -3831,7 +3801,7 @@ void LSAPI_No_Check_ppid(void)
 }
 
 
-int LSAPI_Get_ppid()
+int LSAPI_Get_ppid(void)
 {
     return(s_ppid);
 }

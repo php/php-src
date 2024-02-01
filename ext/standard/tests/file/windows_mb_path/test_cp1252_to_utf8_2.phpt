@@ -21,8 +21,8 @@ dir_cp1252
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = iconv('cp1252', 'utf-8', "tschüß"); // cp1252 string
-$prefix = create_data("dir_cp1252", "${item}3");
-$fn = $prefix . DIRECTORY_SEPARATOR . "${item}7";
+$prefix = create_data("dir_cp1252", "{$item}3");
+$fn = $prefix . DIRECTORY_SEPARATOR . "{$item}7";
 
 $f = fopen($fn, 'w');
 if ($f) {

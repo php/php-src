@@ -4,6 +4,8 @@ A generator iterator wrapper involved in a cycle should not leak
 <?php
 
 class Test {
+    private $gen1;
+    private $gen2;
     public function method() {
         $this->gen1 = (function () {
             yield 1;

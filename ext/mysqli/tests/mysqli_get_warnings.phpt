@@ -4,14 +4,13 @@ mysqli_get_warnings() - TODO
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once('connect.inc');
+require_once 'skipifconnectfailure.inc';
 if (!$TEST_EXPERIMENTAL)
     die("skip - experimental (= unsupported) feature");
 ?>
 --FILE--
 <?php
-    require_once("connect.inc");
+    require_once "connect.inc";
 
     $tmp    = NULL;
     $link   = NULL;
@@ -93,8 +92,7 @@ if (!$TEST_EXPERIMENTAL)
     if (!$mysqli->query("CREATE TABLE t1 (a smallint)"))
         printf("[023] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!is_object($warning = new mysqli_warning($mysqli)))
-        printf("[024] Expecting object/mysqli_warning, got %s/%s", gettype($warning), $warning);
+    $warning = new mysqli_warning($mysqli);
 
     if (!is_string($warning->message) || ('' == $warning->message))
         printf("[025] Expecting string, got %s/%s", gettype($warning->message), $warning->message);
@@ -142,7 +140,7 @@ if (!$TEST_EXPERIMENTAL)
     print "done!";
 ?>
 <?php
-require_once("connect.inc");
+require_once "connect.inc";
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
    printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 

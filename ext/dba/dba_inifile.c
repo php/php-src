@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if DBA_INIFILE
+#ifdef DBA_INIFILE
 #include "php_inifile.h"
 
 #include "libinifile/inifile.h"
@@ -32,20 +32,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define INIFILE_DATA \
-	inifile *dba = info->dbf
-
-#define INIFILE_GKEY \
-	key_type ini_key; \
-	if (!key) { \
-		php_error_docref(NULL, E_WARNING, "No key specified"); \
-		return 0; \
-	} \
-	ini_key = inifile_key_split((char*)key) /* keylen not needed here */
-
-#define INIFILE_DONE \
-	inifile_key_free(&ini_key)
-
 DBA_OPEN_FUNC(inifile)
 {
 	info->dbf = inifile_alloc(info->fp, info->mode == DBA_READER, info->flags&DBA_PERSISTENT);
@@ -55,43 +41,58 @@ DBA_OPEN_FUNC(inifile)
 
 DBA_CLOSE_FUNC(inifile)
 {
-	INIFILE_DATA;
+	inifile *dba = info->dbf;
 
 	inifile_free(dba, info->flags&DBA_PERSISTENT);
 }
 
 DBA_FETCH_FUNC(inifile)
 {
+	inifile *dba = info->dbf;
 	val_type ini_val;
+	key_type ini_key;
+	zend_string *fetched_val = NULL;
 
-	INIFILE_DATA;
-	INIFILE_GKEY;
+	if (!key) {
+		php_error_docref(NULL, E_WARNING, "No key specified");
+		return 0;
+	}
+	ini_key = inifile_key_split(ZSTR_VAL(key)); /* keylen not needed here */
 
 	ini_val = inifile_fetch(dba, &ini_key, skip);
-	*newlen = ini_val.value ? strlen(ini_val.value) : 0;
-	INIFILE_DONE;
-	return ini_val.value;
+	inifile_key_free(&ini_key);
+	if (ini_val.value) {
+		fetched_val = zend_string_init(ini_val.value, strlen(ini_val.value), /* persistent */ false);
+		inifile_val_free(&ini_val);
+	}
+	return fetched_val;
 }
 
 DBA_UPDATE_FUNC(inifile)
 {
+	inifile *dba = info->dbf;
 	val_type ini_val;
 	int res;
+	key_type ini_key;
 
-	INIFILE_DATA;
-	INIFILE_GKEY;
+	if (!key) {
+		php_error_docref(NULL, E_WARNING, "No key specified");
+		return 0;
+	}
+	ini_key = inifile_key_split(ZSTR_VAL(key)); /* keylen not needed here */
 
-	ini_val.value = val;
+	ini_val.value = ZSTR_VAL(val);
 
 	if (mode == 1) {
 		res = inifile_append(dba, &ini_key, &ini_val);
 	} else {
 		res = inifile_replace(dba, &ini_key, &ini_val);
 	}
-	INIFILE_DONE;
+	inifile_key_free(&ini_key);
 	switch(res) {
 	case -1:
-		php_error_docref1(NULL, key, E_WARNING, "Operation not possible");
+		// TODO Check when this happens and confirm this can even happen
+		php_error_docref(NULL, E_WARNING, "Operation not possible");
 		return FAILURE;
 	default:
 	case 0:
@@ -103,13 +104,18 @@ DBA_UPDATE_FUNC(inifile)
 
 DBA_EXISTS_FUNC(inifile)
 {
+	inifile *dba = info->dbf;
 	val_type ini_val;
+	key_type ini_key;
 
-	INIFILE_DATA;
-	INIFILE_GKEY;
+	if (!key) {
+		php_error_docref(NULL, E_WARNING, "No key specified");
+		return 0;
+	}
+	ini_key = inifile_key_split(ZSTR_VAL(key)); /* keylen not needed here */
 
 	ini_val = inifile_fetch(dba, &ini_key, 0);
-	INIFILE_DONE;
+	inifile_key_free(&ini_key);
 	if (ini_val.value) {
 		inifile_val_free(&ini_val);
 		return SUCCESS;
@@ -119,26 +125,32 @@ DBA_EXISTS_FUNC(inifile)
 
 DBA_DELETE_FUNC(inifile)
 {
+	inifile *dba = info->dbf;
 	int res;
 	bool found = 0;
+	key_type ini_key;
 
-	INIFILE_DATA;
-	INIFILE_GKEY;
+	if (!key) {
+		php_error_docref(NULL, E_WARNING, "No key specified");
+		return 0;
+	}
+	ini_key = inifile_key_split(ZSTR_VAL(key)); /* keylen not needed here */
 
 	res =  inifile_delete_ex(dba, &ini_key, &found);
 
-	INIFILE_DONE;
+	inifile_key_free(&ini_key);
 	return (res == -1 || !found ? FAILURE : SUCCESS);
 }
 
 DBA_FIRSTKEY_FUNC(inifile)
 {
-	INIFILE_DATA;
+	inifile *dba = info->dbf;
 
 	if (inifile_firstkey(dba)) {
 		char *result = inifile_key_string(&dba->curr.key);
-		*newlen = strlen(result);
-		return result;
+		zend_string *key = zend_string_init(result, strlen(result), /* persistent */ false);
+		efree(result);
+		return key;
 	} else {
 		return NULL;
 	}
@@ -146,7 +158,7 @@ DBA_FIRSTKEY_FUNC(inifile)
 
 DBA_NEXTKEY_FUNC(inifile)
 {
-	INIFILE_DATA;
+	inifile *dba = info->dbf;
 
 	if (!dba->curr.key.group && !dba->curr.key.name) {
 		return NULL;
@@ -154,8 +166,9 @@ DBA_NEXTKEY_FUNC(inifile)
 
 	if (inifile_nextkey(dba)) {
 		char *result = inifile_key_string(&dba->curr.key);
-		*newlen = strlen(result);
-		return result;
+		zend_string *key = zend_string_init(result, strlen(result), /* persistent */ false);
+		efree(result);
+		return key;
 	} else {
 		return NULL;
 	}

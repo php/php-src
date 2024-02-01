@@ -136,6 +136,7 @@ var_dump( strstr("a", "b", "c") );  // args > expected
 
 DONE
 --EXPECTF--
+Deprecated: Using ${var} in strings is deprecated, use {$var} instead in %s on line %d
 *** Testing basic functionality of strstr() ***
 string(11) "test string"
 string(6) "string"

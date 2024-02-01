@@ -42,7 +42,7 @@ string(47) "Sunday, January 1, 2012 at 5:12:00 AM GMT+05:12"
 string(47) "Sunday, January 1, 2012 at 5:12:00 AM GMT+05:12"
 string(44) "Sunday, 6 Tevet 5772 at 5:12:00 AM GMT+05:12"
 
-Fatal error: Uncaught IntlException: IntlDateFormatter::__construct(): datefmt_create: Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object in %sdateformat_calendars_variant3.php:27
+Fatal error: Uncaught IntlException: IntlDateFormatter::__construct(): datefmt_create: Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object in %sdateformat_calendars_variant3.php:%d
 Stack trace:
 #0 %sdateformat_calendars_variant3.php(%d): IntlDateFormatter->__construct('en_US@calendar=...', 0, 0, 'GMT+05:12', -1)
 #1 {main}

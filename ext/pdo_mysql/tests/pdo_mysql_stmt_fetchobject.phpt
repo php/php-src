@@ -30,6 +30,7 @@ try {
     $query = "SELECT id, '', NULL, \"\" FROM test ORDER BY id ASC LIMIT 3";
     $stmt = $db->prepare($query);
 
+    #[AllowDynamicProperties]
     class myclass {
 
         private $set_calls = 0;

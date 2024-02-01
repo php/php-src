@@ -52,6 +52,7 @@ $hnd = new handler;
 
 class foo {
     public $bar = "ok";
+    public $yes;
     function method() { $this->yes++; }
 }
 

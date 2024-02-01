@@ -15,4 +15,4 @@ class Test2 extends Test {
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of Test2::method(): X&Y must be compatible with Test::method(): iterable in %s on line %d
+Fatal error: Declaration of Test2::method(): X&Y must be compatible with Test::method(): Traversable|array in %s on line %d

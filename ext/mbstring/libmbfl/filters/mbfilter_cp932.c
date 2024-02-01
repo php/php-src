@@ -64,6 +64,9 @@
 #include "unicode_table_jis.h"
 
 static int mbfl_filt_conv_cp932_wchar_flush(mbfl_convert_filter *filter);
+static size_t mb_cp932_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_cp932(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+static void mb_wchar_to_sjiswin(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 
 static const unsigned char mblen_table_sjis[] = { /* 0x81-0x9f,0xE0-0xFF */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -96,6 +99,8 @@ const mbfl_encoding mbfl_encoding_cp932 = {
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_cp932_wchar,
 	&vtbl_wchar_cp932,
+	mb_cp932_to_wchar,
+	mb_wchar_to_cp932,
 	NULL
 };
 
@@ -128,6 +133,8 @@ const mbfl_encoding mbfl_encoding_sjiswin = {
 	MBFL_ENCTYPE_GL_UNSAFE,
 	&vtbl_sjiswin_wchar,
 	&vtbl_wchar_sjiswin,
+	mb_cp932_to_wchar,
+	mb_wchar_to_sjiswin,
 	NULL
 };
 
@@ -262,9 +269,7 @@ int mbfl_filt_conv_cp932_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;
@@ -381,4 +386,233 @@ int mbfl_filt_conv_wchar_sjiswin(int c, mbfl_convert_filter *filter)
 		return mbfl_filt_conv_wchar_cp932(c, filter);
 	}
 	return 0;
+}
+
+static size_t mb_cp932_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	unsigned char *p = *in, *e = p + *in_len;
+	uint32_t *out = buf, *limit = buf + bufsize;
+
+	while (p < e && out < limit) {
+		unsigned char c = *p++;
+
+		if (c < 0x80) {
+			*out++ = c;
+		} else if (c > 0xA0 && c < 0xE0) {
+			/* Kana */
+			*out++ = 0xFEC0 + c;
+		} else if (c > 0x80 && c < 0xFD && c != 0xA0 && p < e) {
+			unsigned char c2 = *p++;
+
+			if (c2 >= 0x40 && c2 <= 0xFC && c2 != 0x7F) {
+				unsigned int s1, s2, w = 0;
+				SJIS_DECODE(c, c2, s1, s2);
+				unsigned int s = (s1 - 0x21)*94 + s2 - 0x21;
+
+				if (s <= 137) {
+					if (s == 31) {
+						w = 0xFF3C; /* FULLWIDTH REVERSE SOLIDUS */
+					} else if (s == 32) {
+						w = 0xFF5E; /* FULLWIDTH TILDE */
+					} else if (s == 33) {
+						w = 0x2225; /* PARALLEL TO */
+					} else if (s == 60) {
+						w = 0xFF0D; /* FULLWIDTH HYPHEN-MINUS */
+					} else if (s == 80) {
+						w = 0xFFE0; /* FULLWIDTH CENT SIGN */
+					} else if (s == 81) {
+						w = 0xFFE1; /* FULLWIDTH POUND SIGN */
+					} else if (s == 137) {
+						w = 0xFFE2; /* FULLWIDTH NOT SIGN */
+					}
+				}
+
+				if (w == 0) {
+					if (s >= cp932ext1_ucs_table_min && s < cp932ext1_ucs_table_max) {
+						w = cp932ext1_ucs_table[s - cp932ext1_ucs_table_min];
+					} else if (s < jisx0208_ucs_table_size) {
+						w = jisx0208_ucs_table[s];
+					} else if (s >= cp932ext2_ucs_table_min && s < cp932ext2_ucs_table_max) {
+						w = cp932ext2_ucs_table[s - cp932ext2_ucs_table_min];
+					} else if (s >= cp932ext3_ucs_table_min && s < cp932ext3_ucs_table_max) {
+						w = cp932ext3_ucs_table[s - cp932ext3_ucs_table_min];
+					} else if (s >= (94*94) && s < (114*94)) {
+						w = s - (94*94) + 0xE000;
+					}
+				}
+
+				if (!w)
+					w = MBFL_BAD_INPUT;
+				*out++ = w;
+			} else {
+				*out++ = MBFL_BAD_INPUT;
+			}
+		} else {
+			*out++ = MBFL_BAD_INPUT;
+		}
+	}
+
+	*in_len = e - p;
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_cp932(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+
+	while (len--) {
+		uint32_t w = *in++;
+		unsigned int s1 = 0, s2 = 0, c1, c2;
+
+		if (w >= ucs_a1_jis_table_min && w < ucs_a1_jis_table_max) {
+			s1 = ucs_a1_jis_table[w - ucs_a1_jis_table_min];
+		} else if (w == 0x203E) {
+			s1 = 0x7E;
+		} else if (w >= ucs_a2_jis_table_min && w < ucs_a2_jis_table_max) {
+			s1 = ucs_a2_jis_table[w - ucs_a2_jis_table_min];
+		} else if (w >= ucs_i_jis_table_min && w < ucs_i_jis_table_max) {
+			s1 = ucs_i_jis_table[w - ucs_i_jis_table_min];
+		} else if (w >= ucs_r_jis_table_min && w < ucs_r_jis_table_max) {
+			s1 = ucs_r_jis_table[w - ucs_r_jis_table_min];
+		} else if (w >= 0xE000 && w < (0xE000 + 20*94)) {
+			s1 = w - 0xE000;
+			c1 = s1/94 + 0x7F;
+			c2 = s1%94 + 0x21;
+			s1 = (c1 << 8) | c2;
+			s2 = 1;
+		}
+
+		if (w == 0xA5) { /* YEN SIGN */
+			s1 = 0x5C;
+		} else if (w == 0xFF3C) { /* FULLWIDTH REVERSE SOLIDUS */
+			s1 = 0x2140;
+		} else if (w == 0x2225) { /* PARALLEL TO */
+			s1 = 0x2142;
+		} else if (w == 0xFF0D) { /* FULLWIDTH HYPHEN-MINUS */
+			s1 = 0x215D;
+		} else if (w == 0xFFE0) { /* FULLWIDTH CENT SIGN */
+			s1 = 0x2171;
+		} else if (w == 0xFFE1) { /* FULLWIDTH POUND SIGN */
+			s1 = 0x2172;
+		} else if (w == 0xFFE2) { /* FULLWIDTH NOT SIGN */
+			s1 = 0x224C;
+		} else if (w == 0) {
+			out = mb_convert_buf_add(out, 0);
+			continue;
+		}
+
+		if (!s1 || (s1 >= 0x8080 && !s2)) { /* not found or X 0212 */
+			for (unsigned int i = 0; i < cp932ext1_ucs_table_max - cp932ext1_ucs_table_min; i++) {
+				if (cp932ext1_ucs_table[i] == w) {
+					s1 = ((i/94 + 0x2D) << 8) + (i%94 + 0x21);
+					goto emit_output;
+				}
+			}
+
+			for (unsigned int i = 0; i < cp932ext3_ucs_table_max - cp932ext3_ucs_table_min; i++) {
+				if (cp932ext3_ucs_table[i] == w) {
+					s1 = ((i/94 + 0x93) << 8) + (i%94 + 0x21);
+					goto emit_output;
+				}
+			}
+
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_cp932);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+			continue;
+		}
+
+emit_output:
+		if (s1 < 0x100) {
+			out = mb_convert_buf_add(out, s1);
+		} else {
+			c1 = (s1 >> 8) & 0xFF;
+			c2 = s1 & 0xFF;
+			SJIS_ENCODE(c1, c2, s1, s2);
+			out = mb_convert_buf_add2(out, s1, s2);
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
+}
+
+static void mb_wchar_to_sjiswin(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+
+	while (len--) {
+		uint32_t w = *in++;
+		unsigned int s1 = 0, s2 = 0, c1, c2;
+
+		if (w >= ucs_a1_jis_table_min && w < ucs_a1_jis_table_max) {
+			s1 = ucs_a1_jis_table[w - ucs_a1_jis_table_min];
+		} else if (w >= ucs_a2_jis_table_min && w < ucs_a2_jis_table_max) {
+			s1 = ucs_a2_jis_table[w - ucs_a2_jis_table_min];
+		} else if (w >= ucs_i_jis_table_min && w < ucs_i_jis_table_max) {
+			s1 = ucs_i_jis_table[w - ucs_i_jis_table_min];
+		} else if (w >= ucs_r_jis_table_min && w < ucs_r_jis_table_max) {
+			s1 = ucs_r_jis_table[w - ucs_r_jis_table_min];
+		} else if (w >= 0xE000 && w < (0xE000 + 20*94)) {
+			s1 = w - 0xE000;
+			c1 = s1/94 + 0x7F;
+			c2 = s1%94 + 0x21;
+			s1 = (c1 << 8) | c2;
+			s2 = 1;
+		}
+
+		if (w == 0xA5) { /* YEN SIGN */
+			s1 = 0x216F; /* FULLWIDTH YEN SIGN */
+		} else if (w == 0xFF3C) { /* FULLWIDTH REVERSE SOLIDUS */
+			s1 = 0x2140;
+		} else if (w == 0x2225) { /* PARALLEL TO */
+			s1 = 0x2142;
+		} else if (w == 0xFF0D) { /* FULLWIDTH HYPHEN-MINUS */
+			s1 = 0x215D;
+		} else if (w == 0xFFE0) { /* FULLWIDTH CENT SIGN */
+			s1 = 0x2171;
+		} else if (w == 0xFFE1) { /* FULLWIDTH POUND SIGN */
+			s1 = 0x2172;
+		} else if (w == 0xFFE2) { /* FULLWIDTH NOT SIGN */
+			s1 = 0x224C;
+		} else if (w == 0) {
+			out = mb_convert_buf_add(out, 0);
+			continue;
+		}
+
+		if (!s1 || (s1 >= 0x8080 && !s2)) { /* not found or X 0212 */
+			for (unsigned int i = 0; i < cp932ext1_ucs_table_max - cp932ext1_ucs_table_min; i++) {
+				if (cp932ext1_ucs_table[i] == w) {
+					s1 = ((i/94 + 0x2D) << 8) + (i%94 + 0x21);
+					goto emit_output;
+				}
+			}
+
+			for (unsigned int i = 0; i < cp932ext3_ucs_table_max - cp932ext3_ucs_table_min; i++) {
+				if (cp932ext3_ucs_table[i] == w) {
+					s1 = ((i/94 + 0x93) << 8) + (i%94 + 0x21);
+					goto emit_output;
+				}
+			}
+
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_cp932);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+			continue;
+		}
+
+emit_output:
+		if (s1 < 0x100) {
+			out = mb_convert_buf_add(out, s1);
+		} else {
+			c1 = (s1 >> 8) & 0xFF;
+			c2 = s1 & 0xFF;
+			SJIS_ENCODE(c1, c2, s1, s2);
+			out = mb_convert_buf_add2(out, s1, s2);
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }

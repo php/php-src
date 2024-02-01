@@ -27,6 +27,7 @@
 #include "zend_API.h"
 #include "zend_sort.h"
 #include "zend_constants.h"
+#include "zend_observer.h"
 
 #include "zend_vm.h"
 
@@ -111,9 +112,7 @@ ZEND_API void zend_type_release(zend_type type, bool persistent) {
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
-			if (ZEND_TYPE_HAS_NAME(*list_type)) {
-				zend_string_release(ZEND_TYPE_NAME(*list_type));
-			}
+			zend_type_release(*list_type, persistent);
 		} ZEND_TYPE_LIST_FOREACH_END();
 		if (!ZEND_TYPE_USES_ARENA(type)) {
 			pefree(ZEND_TYPE_LIST(type), persistent);
@@ -255,7 +254,7 @@ ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce)
 		if (constants_table && constants_table != &ce->constants_table) {
 			zend_class_constant *c;
 
-			ZEND_HASH_FOREACH_PTR(constants_table, c) {
+			ZEND_HASH_MAP_FOREACH_PTR(constants_table, c) {
 				if (c->ce == ce || (Z_CONSTANT_FLAGS(c->value) & CONST_OWNED)) {
 					zval_ptr_dtor_nogc(&c->value);
 				}
@@ -273,6 +272,11 @@ ZEND_API void zend_cleanup_mutable_class_data(zend_class_entry *ce)
 				p++;
 			}
 			mutable_data->default_properties_table = NULL;
+		}
+
+		if (mutable_data->backed_enum_table) {
+			zend_hash_release(mutable_data->backed_enum_table);
+			mutable_data->backed_enum_table = NULL;
 		}
 
 		ZEND_MAP_PTR_SET_IMM(ce->mutable_data, NULL);
@@ -293,18 +297,20 @@ ZEND_API void destroy_zend_class(zval *zv)
 		zend_class_constant *c;
 		zval *p, *end;
 
-		ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+		ZEND_HASH_MAP_FOREACH_PTR(&ce->constants_table, c) {
 			if (c->ce == ce) {
 				zval_ptr_dtor_nogc(&c->value);
 			}
 		} ZEND_HASH_FOREACH_END();
 
-		p = ce->default_properties_table;
-		end = p + ce->default_properties_count;
+		if (ce->default_properties_table) {
+			p = ce->default_properties_table;
+			end = p + ce->default_properties_count;
 
-		while (p < end) {
-			zval_ptr_dtor_nogc(p);
-			p++;
+			while (p < end) {
+				zval_ptr_dtor_nogc(p);
+				p++;
+			}
 		}
 		return;
 	}
@@ -329,9 +335,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 
 				if (ce->attributes) {
 					zend_hash_release(ce->attributes);
-				}
-				if (ce->backed_enum_table) {
-					zend_hash_release(ce->backed_enum_table);
 				}
 
 				if (ce->num_interfaces > 0 && !(ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
@@ -370,7 +373,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				}
 				efree(ce->default_static_members_table);
 			}
-			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (prop_info->ce == ce) {
 					zend_string_release_ex(prop_info->name, 0);
 					if (prop_info->doc_comment) {
@@ -387,7 +390,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			if (zend_hash_num_elements(&ce->constants_table)) {
 				zend_class_constant *c;
 
-				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+				ZEND_HASH_MAP_FOREACH_PTR(&ce->constants_table, c) {
 					if (c->ce == ce || (Z_CONSTANT_FLAGS(c->value) & CONST_OWNED)) {
 						zval_ptr_dtor_nogc(&c->value);
 						if (c->doc_comment) {
@@ -402,6 +405,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && (ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES)) {
 				efree(ce->interfaces);
+			}
+			if (ce->backed_enum_table) {
+				zend_hash_release(ce->backed_enum_table);
 			}
 			break;
 		case ZEND_INTERNAL_CLASS:
@@ -429,7 +435,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				free(ce->default_static_members_table);
 			}
 
-			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (prop_info->ce == ce) {
 					zend_string_release(prop_info->name);
 					zend_type_release(prop_info->type, /* persistent */ 1);
@@ -440,7 +446,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			zend_string_release_ex(ce->name, 1);
 
 			/* TODO: eliminate this loop for classes without functions with arg_info / attributes */
-			ZEND_HASH_FOREACH_PTR(&ce->function_table, fn) {
+			ZEND_HASH_MAP_FOREACH_PTR(&ce->function_table, fn) {
 				if (fn->common.scope == ce) {
 					if (fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) {
 						zend_free_internal_arg_info(&fn->internal_function);
@@ -457,7 +463,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			if (zend_hash_num_elements(&ce->constants_table)) {
 				zend_class_constant *c;
 
-				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
+				ZEND_HASH_MAP_FOREACH_PTR(&ce->constants_table, c) {
 					if (c->ce == ce) {
 						if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
 							/* We marked this as IMMUTABLE, but do need to free it when the
@@ -480,6 +486,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->iterator_funcs_ptr) {
 				free(ce->iterator_funcs_ptr);
+			}
+			if (ce->arrayaccess_funcs_ptr) {
+				free(ce->arrayaccess_funcs_ptr);
 			}
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
@@ -749,31 +758,29 @@ static void emit_live_range(
 			while (def_opline + 1 < use_opline) {
 				def_opline++;
 				start++;
-				if (def_opline->opcode == ZEND_DO_FCALL) {
-					if (level == 0) {
+				switch (def_opline->opcode) {
+					case ZEND_INIT_FCALL:
+					case ZEND_INIT_FCALL_BY_NAME:
+					case ZEND_INIT_NS_FCALL_BY_NAME:
+					case ZEND_INIT_DYNAMIC_CALL:
+					case ZEND_INIT_USER_CALL:
+					case ZEND_INIT_METHOD_CALL:
+					case ZEND_INIT_STATIC_METHOD_CALL:
+					case ZEND_NEW:
+						level++;
 						break;
-					}
-					level--;
-				} else {
-					switch (def_opline->opcode) {
-						case ZEND_INIT_FCALL:
-						case ZEND_INIT_FCALL_BY_NAME:
-						case ZEND_INIT_NS_FCALL_BY_NAME:
-						case ZEND_INIT_DYNAMIC_CALL:
-						case ZEND_INIT_USER_CALL:
-						case ZEND_INIT_METHOD_CALL:
-						case ZEND_INIT_STATIC_METHOD_CALL:
-						case ZEND_NEW:
-							level++;
-							break;
-						case ZEND_DO_ICALL:
-						case ZEND_DO_UCALL:
-						case ZEND_DO_FCALL_BY_NAME:
-							level--;
-							break;
-					}
+					case ZEND_DO_FCALL:
+					case ZEND_DO_FCALL_BY_NAME:
+					case ZEND_DO_ICALL:
+					case ZEND_DO_UCALL:
+						if (level == 0) {
+							goto done;
+						}
+						level--;
+						break;
 				}
 			}
+done:
 			emit_live_range_raw(op_array, var_num, ZEND_LIVE_NEW, orig_start + 1, start + 1);
 			if (start + 1 == end) {
 				/* Trivial live-range, no need to store it. */
@@ -825,6 +832,8 @@ static void emit_live_range(
 				/* The use might have been optimized away, in which case we will hit the def
 				 * instead. */
 				if (use_opline->opcode == ZEND_COPY_TMP && use_opline->result.var == rt_var_num) {
+					start = def_opline + 1 - op_array->opcodes;
+					emit_live_range_raw(op_array, var_num, kind, start, end);
 					return;
 				}
 			} while (!(
@@ -858,12 +867,12 @@ static bool keeps_op1_alive(zend_op *opline) {
 	 || opline->opcode == ZEND_SWITCH_STRING
 	 || opline->opcode == ZEND_MATCH
 	 || opline->opcode == ZEND_FETCH_LIST_R
+	 || opline->opcode == ZEND_FETCH_LIST_W
 	 || opline->opcode == ZEND_COPY_TMP) {
 		return 1;
 	}
 	ZEND_ASSERT(opline->opcode != ZEND_FE_FETCH_R
 		&& opline->opcode != ZEND_FE_FETCH_RW
-		&& opline->opcode != ZEND_FETCH_LIST_W
 		&& opline->opcode != ZEND_VERIFY_RETURN_TYPE
 		&& opline->opcode != ZEND_BIND_LEXICAL
 		&& opline->opcode != ZEND_ROPE_ADD);
@@ -1041,6 +1050,8 @@ ZEND_API void pass_two(zend_op_array *op_array)
 	CG(context).literals_size = op_array->last_literal;
 #endif
 
+    op_array->T += ZEND_OBSERVER_ENABLED; // reserve last temporary for observers if enabled
+
 	/* Needs to be set directly after the opcode/literal reallocation, to ensure destruction
 	 * happens correctly if any of the following fixups generate a fatal error. */
 	op_array->fn_flags |= ZEND_ACC_DONE_PASS_TWO;
@@ -1086,10 +1097,6 @@ ZEND_API void pass_two(zend_op_array *op_array)
 			case ZEND_JMP:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
 				break;
-			case ZEND_JMPZNZ:
-				/* absolute index to relative offset */
-				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
-				ZEND_FALLTHROUGH;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:

@@ -41,7 +41,7 @@ group = @php_fpm_group@
 listen = 127.0.0.1:9000
 
 ; Set listen(2) backlog.
-; Default Value: 511 (-1 on FreeBSD and OpenBSD)
+; Default Value: 511 (-1 on Linux, FreeBSD and OpenBSD)
 ;listen.backlog = 511
 
 ; Set permissions for unix socket, if one is used. In Linux, read/write
@@ -68,6 +68,10 @@ listen = 127.0.0.1:9000
 ; Default Value: any
 ;listen.allowed_clients = 127.0.0.1
 
+; Set the associated the route table (FIB). FreeBSD only
+; Default Value: -1
+;listen.setfib = 1
+
 ; Specify the nice(2) priority to apply to the pool processes (only if set)
 ; The value can vary from -19 (highest priority) to 20 (lower priority)
 ; Note: - It will only work if the FPM master process is launched as root
@@ -76,7 +80,8 @@ listen = 127.0.0.1:9000
 ; Default Value: no set
 ; process.priority = -19
 
-; Set the process dumpable flag (PR_SET_DUMPABLE prctl) even if the process user
+; Set the process dumpable flag (PR_SET_DUMPABLE prctl for Linux or
+; PROC_TRACE_CTL procctl for FreeBSD) even if the process user
 ; or group is different than the master process user. It allows to create process
 ; core dump and ptrace the process for the pool user.
 ; Default Value: no
@@ -347,6 +352,22 @@ pm.max_spare_servers = 3
 ;
 ; Default: "%R - %u %t \"%m %r\" %s"
 ;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{milli}d %{kilo}M %C%%"
+
+; A list of request_uri values which should be filtered from the access log.
+;
+; As a security precuation, this setting will be ignored if:
+;     - the request method is not GET or HEAD; or
+;     - there is a request body; or
+;     - there are query parameters; or
+;     - the response code is outwith the successful range of 200 to 299
+;
+; Note: The paths are matched against the output of the access.format tag "%r".
+;       On common configurations, this may look more like SCRIPT_NAME than the
+;       expected pre-rewrite URI.
+;
+; Default Value: not set
+;access.suppress_path[] = /ping
+;access.suppress_path[] = /health_check.php
 
 ; The log file for slow requests
 ; Default Value: not set

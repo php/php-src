@@ -1,0 +1,18 @@
+name: Close old issues that need feedback
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  build:
+    if: github.repository_owner == 'php'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close old issues that need feedback
+        uses: dwieeb/needs-reply@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-label: "Status: Needs Feedback"
+          days-before-close: 14
+          close-message: "No feedback was provided. The issue is being suspended because we assume that you are no longer experiencing the problem. If this is not the case and you are able to provide the information that was requested earlier, please do so. Thank you."

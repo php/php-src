@@ -4,16 +4,14 @@ Killing a persistent connection.
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once("connect.inc");
+require_once 'skipifconnectfailure.inc';
 ?>
 --INI--
 mysqli.allow_persistent=1
 mysqli.max_persistent=2
 --FILE--
 <?php
-    require_once("connect.inc");
-    require_once("table.inc");
+    require_once "table.inc";
 
     $host = 'p:' . $host;
     if (!$plink = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
@@ -93,7 +91,7 @@ mysqli.max_persistent=2
 ?>
 --CLEAN--
 <?php
-	require_once("clean_table.inc");
+require_once "clean_table.inc";
 ?>
 --EXPECT--
 mysqli object is already closed

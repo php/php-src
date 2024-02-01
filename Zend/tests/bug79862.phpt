@@ -3,6 +3,7 @@ Bug #79862: Public non-static property in child should take priority over privat
 --FILE--
 <?php
 
+#[AllowDynamicProperties]
 class a {
     private static $prop1;
     private static $prop2;

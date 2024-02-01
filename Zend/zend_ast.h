@@ -355,6 +355,9 @@ static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 static zend_always_inline zend_ast *zend_ast_create_binary_op(uint32_t opcode, zend_ast *op0, zend_ast *op1) {
 	return zend_ast_create_ex(ZEND_AST_BINARY_OP, opcode, op0, op1);
 }
+
+zend_ast *zend_ast_create_concat_op(zend_ast *op0, zend_ast *op1);
+
 static zend_always_inline zend_ast *zend_ast_create_assign_op(uint32_t opcode, zend_ast *op0, zend_ast *op1) {
 	return zend_ast_create_ex(ZEND_AST_ASSIGN_OP, opcode, op0, op1);
 }

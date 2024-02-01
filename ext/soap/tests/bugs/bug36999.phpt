@@ -12,6 +12,7 @@ function echoLong($num) {
 }
 
 class LocalSoapClient extends SoapClient {
+  private $server;
 
   function __construct($wsdl) {
     parent::__construct($wsdl);

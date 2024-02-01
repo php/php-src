@@ -4,15 +4,11 @@ Bug #71863 Segfault when EXPLAIN with "Unknown Column" Error
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once("connect.inc");
-if (!$IS_MYSQLND) {
-    die("skip mysqlnd only test");
-}
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
-require_once("connect.inc");
+require_once "connect.inc";
 
 $req = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
@@ -26,7 +22,7 @@ mysqli_query($req, "EXPLAIN SELECT `id` FROM `test_bug_71863` WHERE `owner_id` =
 ?>
 --CLEAN--
 <?php
-require_once("connect.inc");
+require_once "connect.inc";
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
     printf("[c001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bug_71863"))

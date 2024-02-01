@@ -1,5 +1,9 @@
 --TEST--
 Bug #72964 (White space not unfolded for CC/Bcc headers)
+--EXTENSIONS--
+imap
+--CONFLICTS--
+imap
 --SKIPIF--
 <?php
 if (PHP_OS_FAMILY !== 'Windows') die('skip Windows only test');

@@ -22,6 +22,9 @@ $SELECT = 'SELECT val, grp FROM test';
 
 class Test
 {
+    public $val;
+    public $grp;
+
     function __construct($name = 'N/A')
     {
         echo __METHOD__ . "($name)\n";

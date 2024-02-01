@@ -51,7 +51,11 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(2) "42"
 }
+
+Deprecated: Creation of dynamic property GMP::$foo is deprecated in %s on line %d
 string(56) "O:3:"GMP":2:{i:0;s:1:"d";i:1;a:1:{s:3:"foo";s:3:"bar";}}"
+
+Deprecated: Creation of dynamic property GMP::$foo is deprecated in %s on line %d
 object(GMP)#%d (2) {
   ["foo"]=>
   string(3) "bar"

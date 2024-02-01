@@ -30,17 +30,23 @@ foreach ($properties as $property) {
     }
 }
 
+try {
+    $period->start->modify("+1 hour");
+} catch (Error $e) {
+    echo $e->getMessage() . "\n";
+}
+
 ?>
 --EXPECT--
-Writing to DatePeriod->recurrences is unsupported
-Retrieval of DatePeriod->recurrences for modification is unsupported
-Writing to DatePeriod->include_start_date is unsupported
-Retrieval of DatePeriod->include_start_date for modification is unsupported
-Writing to DatePeriod->start is unsupported
-Retrieval of DatePeriod->start for modification is unsupported
-Writing to DatePeriod->current is unsupported
-Retrieval of DatePeriod->current for modification is unsupported
-Writing to DatePeriod->end is unsupported
-Retrieval of DatePeriod->end for modification is unsupported
-Writing to DatePeriod->interval is unsupported
-Retrieval of DatePeriod->interval for modification is unsupported
+Cannot modify readonly property DatePeriod::$recurrences
+Cannot modify readonly property DatePeriod::$recurrences
+Cannot modify readonly property DatePeriod::$include_start_date
+Cannot modify readonly property DatePeriod::$include_start_date
+Cannot modify readonly property DatePeriod::$start
+Cannot modify readonly property DatePeriod::$start
+Cannot modify readonly property DatePeriod::$current
+Cannot modify readonly property DatePeriod::$current
+Cannot modify readonly property DatePeriod::$end
+Cannot modify readonly property DatePeriod::$end
+Cannot modify readonly property DatePeriod::$interval
+Cannot modify readonly property DatePeriod::$interval

@@ -13,13 +13,13 @@ foreach ($tzids as $tzid)
 	var_dump(sizeof($t), end($t));
 }
 ?>
---EXPECT--
-int(243)
+--EXPECTF--
+int(24%d)
 array(5) {
   ["ts"]=>
   int(2140045200)
   ["time"]=>
-  string(24) "2037-10-25T01:00:00+0000"
+  string(25) "2037-10-25T01:00:00+00:00"
   ["offset"]=>
   int(0)
   ["isdst"]=>
@@ -32,7 +32,7 @@ array(5) {
   ["ts"]=>
   int(2140668000)
   ["time"]=>
-  string(24) "2037-11-01T06:00:00+0000"
+  string(25) "2037-11-01T06:00:00+00:00"
   ["offset"]=>
   int(-18000)
   ["isdst"]=>
@@ -45,7 +45,7 @@ array(5) {
   ["ts"]=>
   int(2140045200)
   ["time"]=>
-  string(24) "2037-10-25T01:00:00+0000"
+  string(25) "2037-10-25T01:00:00+00:00"
   ["offset"]=>
   int(3600)
   ["isdst"]=>

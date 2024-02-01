@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 #ifdef PHP_WIN32
 #include "win32/pwd.h"
 #else
@@ -36,7 +36,7 @@
 #define getgid() 1
 #define getuid() 1
 #endif
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <sys/stat.h>
@@ -50,7 +50,7 @@
 /* {{{ php_statpage */
 PHPAPI void php_statpage(void)
 {
-	zend_stat_t *pstat;
+	zend_stat_t *pstat = NULL;
 
 	pstat = sapi_get_stat();
 

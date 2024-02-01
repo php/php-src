@@ -4,6 +4,7 @@ read with EOL indication
 --FILE--
 <?php
 class TestStream {
+    public $context;
     private $s = 0;
     function stream_open($path, $mode, $options, &$opened_path) {
             return true;

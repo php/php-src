@@ -185,7 +185,7 @@ sdlBindingPtr get_binding_from_type(sdlPtr sdl, sdlBindingType type)
 		return NULL;
 	}
 
-	ZEND_HASH_FOREACH_PTR(sdl->bindings, binding) {
+	ZEND_HASH_MAP_FOREACH_PTR(sdl->bindings, binding) {
 		if (binding->bindingType == type) {
 			return binding;
 		}
@@ -332,7 +332,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 	sdl_restore_uri_credentials(ctx);
 
 	if (!wsdl) {
-		xmlErrorPtr xmlErrorPtr = xmlGetLastError();
+		const xmlError *xmlErrorPtr = xmlGetLastError();
 
 		if (xmlErrorPtr) {
 			soap_error2(E_ERROR, "Parsing WSDL: Couldn't load from '%s' : %s", struri, xmlErrorPtr->message);
@@ -1861,7 +1861,7 @@ static void sdl_serialize_attribute(sdlAttributePtr attr, HashTable *tmp_encoder
 		sdlExtraAttributePtr tmp;
 		zend_string *key;
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(attr->extraAttributes, key, tmp) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(attr->extraAttributes, key, tmp) {
 			sdl_serialize_key(key, out);
 			sdl_serialize_string(tmp->ns, out);
 			sdl_serialize_string(tmp->val, out);
@@ -1961,7 +1961,7 @@ static void sdl_serialize_type(sdlTypePtr type, HashTable *tmp_encoders, HashTab
 			sdlRestrictionCharPtr tmp;
 			zend_string *key;
 
-			ZEND_HASH_FOREACH_STR_KEY_PTR(type->restrictions->enumeration, key, tmp) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(type->restrictions->enumeration, key, tmp) {
 				sdl_serialize_resriction_char(tmp, out);
 				sdl_serialize_key(key, out);
 			} ZEND_HASH_FOREACH_END();
@@ -2070,7 +2070,7 @@ static void sdl_serialize_soap_body(sdlSoapBindingFunctionBodyPtr body, HashTabl
 		sdlSoapBindingFunctionHeaderPtr tmp;
 		zend_string *key;
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(body->headers, key, tmp) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(body->headers, key, tmp) {
 			sdl_serialize_key(key, out);
 			WSDL_CACHE_PUT_1(tmp->use, out);
 			if (tmp->use == SOAP_ENCODED) {
@@ -2090,7 +2090,7 @@ static void sdl_serialize_soap_body(sdlSoapBindingFunctionBodyPtr body, HashTabl
 				sdlSoapBindingFunctionHeaderPtr tmp2;
 				zend_string *key;
 
-				ZEND_HASH_FOREACH_STR_KEY_PTR(body->headers, key, tmp2) {
+				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(body->headers, key, tmp2) {
 					sdl_serialize_key(key, out);
 					WSDL_CACHE_PUT_1(tmp2->use, out);
 					if (tmp2->use == SOAP_ENCODED) {
@@ -2151,7 +2151,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		sdlTypePtr tmp;
 		zval zv;
 
-		ZEND_HASH_FOREACH_PTR(sdl->groups, tmp) {
+		ZEND_HASH_MAP_FOREACH_PTR(sdl->groups, tmp) {
 			ZVAL_LONG(&zv, type_num);
 			zend_hash_str_add(&tmp_types, (char*)&tmp, sizeof(tmp), &zv);
 			++type_num;
@@ -2185,7 +2185,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		sdlTypePtr tmp;
 		zval zv;
 
-		ZEND_HASH_FOREACH_PTR(sdl->elements, tmp) {
+		ZEND_HASH_MAP_FOREACH_PTR(sdl->elements, tmp) {
 			ZVAL_LONG(&zv, type_num);
 			zend_hash_str_add(&tmp_types, (char*)&tmp, sizeof(tmp), &zv);
 			++type_num;
@@ -2222,7 +2222,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		sdlTypePtr tmp;
 		zend_string *key;
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->groups, key, tmp) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(sdl->groups, key, tmp) {
 			sdl_serialize_key(key, out);
 			sdl_serialize_type(tmp, &tmp_encoders, &tmp_types, out);
 		} ZEND_HASH_FOREACH_END();
@@ -2242,7 +2242,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		sdlTypePtr tmp;
 		zend_string *key;
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->elements, key, tmp) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(sdl->elements, key, tmp) {
 			sdl_serialize_key(key, out);
 			sdl_serialize_type(tmp, &tmp_encoders, &tmp_types, out);
 		} ZEND_HASH_FOREACH_END();
@@ -2271,7 +2271,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		zval zv;
 		zend_string *key;
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->bindings, key, tmp) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(sdl->bindings, key, tmp) {
 			sdl_serialize_key(key, out);
 			sdl_serialize_string(tmp->name, out);
 			sdl_serialize_string(tmp->location, out);
@@ -2299,7 +2299,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		int function_num = 1;
 		zend_string *key;
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(&sdl->functions, key, tmp) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&sdl->functions, key, tmp) {
 			sdl_serialize_key(key, out);
 			sdl_serialize_string(tmp->functionName, out);
 			sdl_serialize_string(tmp->requestName, out);
@@ -2331,7 +2331,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 
 				WSDL_CACHE_PUT_INT(zend_hash_num_elements(tmp->faults), out);
 
-				ZEND_HASH_FOREACH_STR_KEY_PTR(tmp->faults, key, fault) {
+				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(tmp->faults, key, fault) {
 					sdl_serialize_key(key, out);
 					sdl_serialize_string(fault->name, out);
 					sdl_serialize_parameters(fault->details, &tmp_encoders, &tmp_types, out);
@@ -2368,7 +2368,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		zval *function_num;
 		zend_string *key;
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->requests, key, tmp) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(sdl->requests, key, tmp) {
 			function_num = zend_hash_str_find(&tmp_functions, (char*)&tmp, sizeof(tmp));
 			WSDL_CACHE_PUT_INT(Z_LVAL_P(function_num), out);
 			sdl_serialize_key(key, out);
@@ -2381,7 +2381,9 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	/* Make sure that incomplete files (e.g. due to disk space issues, see bug #66150) are not utilised. */
 	if (valid_file) {
 		/* This is allowed to fail, this means that another process was raced to create the file. */
-		(void) VCWD_RENAME(ZSTR_VAL(temp_file_path), fn);
+		if (VCWD_RENAME(ZSTR_VAL(temp_file_path), fn) < 0) {
+			VCWD_UNLINK(ZSTR_VAL(temp_file_path));
+		}
 	}
 
 	smart_str_free(&buf);
@@ -2456,7 +2458,7 @@ static HashTable* make_persistent_sdl_function_headers(HashTable *headers, HashT
 	pheaders = malloc(sizeof(HashTable));
 	zend_hash_init(pheaders, zend_hash_num_elements(headers), NULL, delete_header_persistent, 1);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(headers, key, tmp) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(headers, key, tmp) {
 		pheader = malloc(sizeof(sdlSoapBindingFunctionHeader));
 		memset(pheader, 0, sizeof(sdlSoapBindingFunctionHeader));
 		*pheader = *tmp;
@@ -2562,7 +2564,7 @@ static HashTable* make_persistent_sdl_function_faults(sdlFunctionPtr func, HashT
 	pfaults = malloc(sizeof(HashTable));
 	zend_hash_init(pfaults, zend_hash_num_elements(faults), NULL, delete_fault_persistent, 1);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(faults, key, tmp) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(faults, key, tmp) {
 		pfault = malloc(sizeof(sdlFault));
 		memset(pfault, 0, sizeof(sdlFault));
 		*pfault = *tmp;
@@ -2636,7 +2638,7 @@ static sdlAttributePtr make_persistent_sdl_attribute(sdlAttributePtr attr, HashT
 		pattr->extraAttributes = malloc(sizeof(HashTable));
 		zend_hash_init(pattr->extraAttributes, zend_hash_num_elements(attr->extraAttributes), NULL, delete_extra_attribute_persistent, 1);
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(attr->extraAttributes, key, tmp) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(attr->extraAttributes, key, tmp) {
 			if (key) {
 				pextra = malloc(sizeof(sdlExtraAttribute));
 				memset(pextra, 0, sizeof(sdlExtraAttribute));
@@ -2780,7 +2782,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 			sdlRestrictionCharPtr tmp, penum;
 			ptype->restrictions->enumeration = malloc(sizeof(HashTable));
 			zend_hash_init(ptype->restrictions->enumeration, zend_hash_num_elements(type->restrictions->enumeration), NULL, delete_restriction_var_char_persistent, 1);
-			ZEND_HASH_FOREACH_STR_KEY_PTR(type->restrictions->enumeration, key, tmp) {
+			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(type->restrictions->enumeration, key, tmp) {
 				penum = tmp;
 				make_persistent_restriction_char_int(&penum);
 				/* We have to duplicate key emalloc->malloc */
@@ -2965,7 +2967,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 		psdl->groups = malloc(sizeof(HashTable));
 		zend_hash_init(psdl->groups, zend_hash_num_elements(sdl->groups), NULL, delete_type_persistent, 1);
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->groups, key, tmp) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(sdl->groups, key, tmp) {
 			ptype = make_persistent_sdl_type(tmp, &ptr_map, &bp_types, &bp_encoders);
 			if (key) {
 				/* We have to duplicate key emalloc->malloc */
@@ -3003,7 +3005,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 		psdl->elements = malloc(sizeof(HashTable));
 		zend_hash_init(psdl->elements, zend_hash_num_elements(sdl->elements), NULL, delete_type_persistent, 1);
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->elements, key, tmp) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(sdl->elements, key, tmp) {
 			ptype = make_persistent_sdl_type(tmp, &ptr_map, &bp_types, &bp_encoders);
 			if (key) {
 				/* We have to duplicate key emalloc->malloc */
@@ -3064,7 +3066,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 		psdl->bindings = malloc(sizeof(HashTable));
 		zend_hash_init(psdl->bindings, zend_hash_num_elements(sdl->bindings), NULL, delete_binding_persistent, 1);
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->bindings, key, tmp) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(sdl->bindings, key, tmp) {
 			pbind = make_persistent_sdl_binding(tmp, &ptr_map);
 			if (key) {
 				/* We have to duplicate key emalloc->malloc */
@@ -3081,7 +3083,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 		sdlFunctionPtr tmp;
 		sdlFunctionPtr pfunc;
 
-		ZEND_HASH_FOREACH_STR_KEY_PTR(&sdl->functions, key, tmp) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&sdl->functions, key, tmp) {
 			pfunc = make_persistent_sdl_function(tmp, &ptr_map);
 			if (key) {
 				/* We have to duplicate key emalloc->malloc */
@@ -3101,7 +3103,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl)
 		psdl->requests = malloc(sizeof(HashTable));
 		zend_hash_init(psdl->requests, zend_hash_num_elements(sdl->requests), NULL, NULL, 1);
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(sdl->requests, key, zv) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(sdl->requests, key, zv) {
 			tmp = Z_PTR_P(zv);
 			if ((preq = zend_hash_str_find_ptr(&ptr_map, (char*)&tmp, sizeof(tmp))) == NULL) {
 				assert(0);
@@ -3276,8 +3278,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 			smart_str_appends(&proxy,Z_STRVAL_P(proxy_host));
 			smart_str_appends(&proxy,":");
 			smart_str_append_long(&proxy,Z_LVAL_P(proxy_port));
-			smart_str_0(&proxy);
-			ZVAL_NEW_STR(&str_proxy, proxy.s);
+			ZVAL_STR(&str_proxy, smart_str_extract(&proxy));
 
 			if (!context) {
 				context = php_stream_context_alloc();
@@ -3319,8 +3320,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 			http_context_headers(context, has_authorization, has_proxy_authorization, 0, &headers);
 		}
 
-		smart_str_0(&headers);
-		ZVAL_NEW_STR(&str_headers, headers.s);
+		ZVAL_STR(&str_headers, smart_str_extract(&headers));
 		php_stream_context_set_option(context, "http", "header", &str_headers);
 		zval_ptr_dtor(&str_headers);
 	}
@@ -3367,7 +3367,7 @@ cache_in_memory:
 				time_t latest = t;
 				zend_string *latest_key = NULL, *key;
 
-				ZEND_HASH_FOREACH_STR_KEY_PTR(SOAP_GLOBAL(mem_cache), key, q) {
+				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(SOAP_GLOBAL(mem_cache), key, q) {
 					if (q->time < latest) {
 						latest = q->time;
 						latest_key = key;

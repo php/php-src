@@ -2,6 +2,7 @@
 Sort with SORT_LOCALE_STRING
 --SKIPIF--
 <?php
+if (setlocale(LC_ALL, 'invalid') === 'invalid') { die('skip setlocale() is broken /w musl'); }
 if (substr(PHP_OS, 0, 3) == 'WIN') {
   die("skip Unix locale name only, not available on windows (and crashes with VC6)\n");
 }

@@ -20,7 +20,7 @@ $arch->close();
 ?>
 --CLEAN--
 <?php
-unlink($dirname.'foo.zip');
+@unlink(__DIR__.'/foo.zip');
 ?>
 --EXPECT--
 string(8) "No error"

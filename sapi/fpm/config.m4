@@ -25,6 +25,30 @@ AC_DEFUN([AC_FPM_PRCTL],
   ])
 ])
 
+AC_DEFUN([AC_FPM_PROCCTL],
+[
+  AC_MSG_CHECKING([for procctl])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/procctl.h>]], [[procctl(0, 0, 0, 0);]])], [
+    AC_DEFINE([HAVE_PROCCTL], 1, [do we have procctl?])
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_RESULT([no])
+  ])
+])
+
+AC_DEFUN([AC_FPM_SETPFLAGS],
+[
+  AC_MSG_CHECKING([for setpflags])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <priv.h>]], [[setpflags(0, 0);]])], [
+    AC_DEFINE([HAVE_SETPFLAGS], 1, [do we have setpflags?])
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_RESULT([no])
+  ])
+])
+
 AC_DEFUN([AC_FPM_CLOCK],
 [
   have_clock_gettime=no
@@ -319,6 +343,19 @@ AC_DEFUN([AC_FPM_LQ],
     AC_DEFINE([HAVE_LQ_TCP_INFO], 1, [do we have TCP_INFO?])
   fi
 
+  AC_MSG_CHECKING([for TCP_CONNECTION_INFO])
+
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <netinet/tcp.h>]], [[struct tcp_connection_info ti; int x = TCP_CONNECTION_INFO;]])], [
+    have_lq=tcp_connection_info
+    AC_MSG_RESULT([yes])
+  ], [
+    AC_MSG_RESULT([no])
+  ])
+
+  if test "$have_lq" = "tcp_connection_info"; then
+    AC_DEFINE([HAVE_LQ_TCP_CONNECTION_INFO], 1, [do we have TCP_CONNECTION_INFO?])
+  fi
+
   if test "$have_lq" = "no" ; then
     AC_MSG_CHECKING([for SO_LISTENQLEN])
 
@@ -494,6 +531,8 @@ if test "$PHP_FPM" != "no"; then
 
   AC_FPM_STDLIBS
   AC_FPM_PRCTL
+  AC_FPM_PROCCTL
+  AC_FPM_SETPFLAGS
   AC_FPM_CLOCK
   AC_FPM_TRACE
   AC_FPM_BUILTIN_ATOMIC
@@ -534,6 +573,12 @@ if test "$PHP_FPM" != "no"; then
   PHP_ARG_WITH([fpm-apparmor],,
     [AS_HELP_STRING([--with-fpm-apparmor],
       [Support AppArmor confinement through libapparmor])],
+    [no],
+    [no])
+
+  PHP_ARG_WITH([fpm-selinux],,
+    [AS_HELP_STRING([--with-fpm-selinux],
+      [Support SELinux policy library])],
     [no],
     [no])
 
@@ -618,6 +663,14 @@ if test "$PHP_FPM" != "no"; then
     ])
   fi
 
+  if test "x$PHP_FPM_SELINUX" != "xno" ; then
+    AC_CHECK_HEADERS([selinux/selinux.h])
+    AC_CHECK_LIB(selinux, security_setenforce, [
+      PHP_ADD_LIBRARY(selinux)
+      AC_DEFINE(HAVE_SELINUX, 1, [ SElinux available ])
+    ],[])
+  fi
+
   PHP_SUBST_OLD(php_fpm_systemd)
   AC_DEFINE_UNQUOTED(PHP_FPM_SYSTEMD, "$php_fpm_systemd", [fpm systemd service type])
 
@@ -692,13 +745,13 @@ if test "$PHP_FPM" != "no"; then
 
   case $host_alias in
       *aix*)
-        BUILD_FPM="echo '\#! .' > php.sym && echo >>php.sym && nm -BCpg \`echo \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FPM_OBJS) | sed 's/\([A-Za-z0-9_]*\)\.lo/\1.o/g'\` | \$(AWK) '{ if (((\$\$2 == \"T\") || (\$\$2 == \"D\") || (\$\$2 == \"B\")) && (substr(\$\$3,1,1) != \".\")) { print \$\$3 } }' | sort -u >> php.sym && \$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) -Wl,-brtl -Wl,-bE:php.sym \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FASTCGI_OBJS) \$(PHP_FPM_OBJS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
+        BUILD_FPM="echo '\#! .' > php.sym && echo >>php.sym && nm -BCpg \`echo \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FPM_OBJS) | sed 's/\([A-Za-z0-9_]*\)\.lo/\1.o/g'\` | \$(AWK) '{ if (((\$\$2 == \"T\") || (\$\$2 == \"D\") || (\$\$2 == \"B\")) && (substr(\$\$3,1,1) != \".\")) { print \$\$3 } }' | sort -u >> php.sym && \$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) -Wl,-brtl -Wl,-bE:php.sym \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FASTCGI_OBJS) \$(PHP_FPM_OBJS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
         ;;
       *darwin*)
         BUILD_FPM="\$(CC) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(NATIVE_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(PHP_FRAMEWORKS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
       ;;
       *)
-        BUILD_FPM="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
+        BUILD_FPM="\$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
       ;;
   esac
 

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f87d92c002674c431827895a8d8b3a5da3b95482 */
+ * Stub hash: 80355bb52d643177e3a661a515d9ea915bd1e2fc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -139,7 +139,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_set_error_handler, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, error_levels, IS_LONG, 0, "E_ALL")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_restore_error_handler, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_restore_error_handler, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_set_exception_handler, 0, 0, 1)
@@ -207,7 +207,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gc_collect_cycles arginfo_func_num_args
 
-#define arginfo_gc_enabled arginfo_restore_error_handler
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gc_enabled, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gc_enable, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -283,10 +284,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(func_get_arg, arginfo_func_get_arg)
 	ZEND_FE(func_get_args, arginfo_func_get_args)
 	ZEND_FE(strlen, arginfo_strlen)
-	ZEND_FE(strcmp, arginfo_strcmp)
-	ZEND_FE(strncmp, arginfo_strncmp)
-	ZEND_FE(strcasecmp, arginfo_strcasecmp)
-	ZEND_FE(strncasecmp, arginfo_strncasecmp)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strcmp, arginfo_strcmp)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strncmp, arginfo_strncmp)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strcasecmp, arginfo_strcasecmp)
+	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strncasecmp, arginfo_strncasecmp)
 	ZEND_FE(error_reporting, arginfo_error_reporting)
 	ZEND_FE(define, arginfo_define)
 	ZEND_FE(defined, arginfo_defined)
@@ -352,6 +353,11 @@ static zend_class_entry *register_class_stdClass(void)
 
 	INIT_CLASS_ENTRY(ce, "stdClass", class_stdClass_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+
+	zend_string *attribute_name_AllowDynamicProperties_class_stdClass = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
+	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class_stdClass, 0);
+	zend_string_release(attribute_name_AllowDynamicProperties_class_stdClass);
 
 	return class_entry;
 }

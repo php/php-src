@@ -8,7 +8,7 @@ ini_set('unserialize_callback_func','mycallback');
 
 function mycallback($classname) {
     unserialize("i:4;");
-    eval ("class $classname {} ");
+    eval ("#[AllowDynamicProperties] class $classname {} ");
 }
 
 print_r(unserialize($serialized_object));

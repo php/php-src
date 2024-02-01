@@ -10,17 +10,17 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <description>
 The OCI8 extension lets you access Oracle Database.
 
-Use 'pecl install oci8' to install for PHP 8.
+Use 'pecl install oci8' to install for PHP 8.2.
+
+Use 'pecl install oci8-3.2.1' to install for PHP 8.1.
+
+Use 'pecl install oci8-3.0.1' to install for PHP 8.0.
 
 Use 'pecl install oci8-2.2.0' to install for PHP 7.
 
-Use 'pecl install oci8-2.0.12' to install for PHP 5.2 - PHP 5.6.
+The current OCI8 extension can be linked with Oracle Client libraries from Oracle Database 11.2 or later.  (OCI8 3.0 and earlier can be linked with 10g or later).  The Oracle Client libraries are in the free Oracle Instant Client from https://www.oracle.com/database/technologies/instant-client.html.  They are also included in your database installation.
 
-Use 'pecl install oci8-1.4.10' to install for PHP 4.3.9 - PHP 5.1.
-
-The OCI8 extension can be linked with Oracle client libraries from Oracle Database 10.2 or later.  These libraries are found in your database installation, or in the free Oracle Instant Client from https://www.oracle.com/database/technologies/instant-client.html.
-
-Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 linked with Instant Client 19c can connect to Oracle Database 11.2 onward.  See Oracle's note "Oracle Client / Server Interoperability Support" (ID 207303.1) for details.
+Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 linked with Oracle Client 19c can connect to Oracle Database 11.2 onward.  See Oracle's note "Oracle Client / Server Interoperability Support" (ID 207303.1) for details.
  </description>
  <lead>
   <name>Christopher Jones</name>
@@ -53,12 +53,12 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   <active>no</active>
  </lead>
 
- <date>2021-08-02</date>
+ <date>2023-04-22</date>
  <time>12:00:00</time>
 
   <version>
-   <release>3.1.0</release>
-   <api>3.1.0</api>
+   <release>3.3.0</release>
+   <api>3.3.0</api>
   </version>
   <stability>
    <release>stable</release>
@@ -66,9 +66,9 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-    This version is for PHP 8 only.
+    This version is for PHP 8.2 only.
 
-    Deprecated directive oci8.old_oci_close_semantics
+    Requires Oracle Client libraries from 11.2 or later.
   </notes>
  <contents>
   <dir name="/">
@@ -89,54 +89,46 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
     <file name="array_bind_014.phpt" role="test" />
     <file name="array_bind_bdouble.phpt" role="test" />
     <file name="array_bind_bfloat.phpt" role="test" />
-    <file name="array_bind_date.phpt" role="test" />
     <file name="array_bind_date1.phpt" role="test" />
-    <file name="array_bind_float.phpt" role="test" />
+    <file name="array_bind_date.phpt" role="test" />
     <file name="array_bind_float1.phpt" role="test" />
-    <file name="array_bind_int.phpt" role="test" />
+    <file name="array_bind_float.phpt" role="test" />
     <file name="array_bind_int1.phpt" role="test" />
-    <file name="array_bind_str.phpt" role="test" />
+    <file name="array_bind_int.phpt" role="test" />
     <file name="array_bind_str1.phpt" role="test" />
+    <file name="array_bind_str.phpt" role="test" />
     <file name="array_bind_uin.phpt" role="test" />
     <file name="b47243_1.phpt" role="test" />
     <file name="b47243_2.phpt" role="test" />
     <file name="b47243_3.phpt" role="test" />
     <file name="bind_boolean_1.phpt" role="test" />
     <file name="bind_char_1.phpt" role="test" />
-    <file name="bind_char_1_11gR1.phpt" role="test" />
     <file name="bind_char_2.phpt" role="test" />
-    <file name="bind_char_2_11gR1.phpt" role="test" />
     <file name="bind_char_3.phpt" role="test" />
-    <file name="bind_char_3_11gR1.phpt" role="test" />
     <file name="bind_char_4.phpt" role="test" />
-    <file name="bind_char_4_11gR1.phpt" role="test" />
     <file name="bind_empty.phpt" role="test" />
     <file name="bind_long.phpt" role="test" />
     <file name="bind_long_raw.phpt" role="test" />
-    <file name="bind_misccoltypes.phpt" role="test" />
     <file name="bind_misccoltypes_errs.phpt" role="test" />
+    <file name="bind_misccoltypes.phpt" role="test" />
     <file name="bind_number.phpt" role="test" />
     <file name="bind_query.phpt" role="test" />
-    <file name="bind_raw.phpt" role="test" />
     <file name="bind_raw_2.phpt" role="test" />
+    <file name="bind_raw.phpt" role="test" />
     <file name="bind_rowid.phpt" role="test" />
     <file name="bind_sqltafc.phpt" role="test" />
     <file name="bind_sqltchr_1.phpt" role="test" />
     <file name="bind_sqltchr_2.phpt" role="test" />
     <file name="bind_sqltint.phpt" role="test" />
     <file name="bind_sqltnum.phpt" role="test" />
-    <file name="bind_sqltnum_11g.phpt" role="test" />
     <file name="bind_unsupported_1.phpt" role="test" />
     <file name="bind_unsupported_2.phpt" role="test" />
     <file name="bind_unsupported_3.phpt" role="test" />
     <file name="bug26133.phpt" role="test" />
     <file name="bug27303_1.phpt" role="test" />
-    <file name="bug27303_1_11gR1.phpt" role="test" />
     <file name="bug27303_2.phpt" role="test" />
-    <file name="bug27303_2_11gR1.phpt" role="test" />
     <file name="bug27303_3.phpt" role="test" />
     <file name="bug27303_4.phpt" role="test" />
-    <file name="bug27303_4_11gR1.phpt" role="test" />
     <file name="bug32325.phpt" role="test" />
     <file name="bug35973.phpt" role="test" />
     <file name="bug36010.phpt" role="test" />
@@ -154,8 +146,8 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
     <file name="bug42496_1.phpt" role="test" />
     <file name="bug42496_2.phpt" role="test" />
     <file name="bug42841.phpt" role="test" />
-    <file name="bug43492.phpt" role="test" />
     <file name="bug43492_2.phpt" role="test" />
+    <file name="bug43492.phpt" role="test" />
     <file name="bug43497.phpt" role="test" />
     <file name="bug44008.phpt" role="test" />
     <file name="bug44113.phpt" role="test" />
@@ -179,43 +171,44 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
     <file name="clientversion.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
-    <file name="coll_002.phpt" role="test" />
     <file name="coll_002_func.phpt" role="test" />
-    <file name="coll_003.phpt" role="test" />
+    <file name="coll_002.phpt" role="test" />
     <file name="coll_003_func.phpt" role="test" />
-    <file name="coll_004.phpt" role="test" />
+    <file name="coll_003.phpt" role="test" />
     <file name="coll_004_func.phpt" role="test" />
-    <file name="coll_009.phpt" role="test" />
+    <file name="coll_004.phpt" role="test" />
     <file name="coll_009_func.phpt" role="test" />
-    <file name="coll_010.phpt" role="test" />
+    <file name="coll_009.phpt" role="test" />
     <file name="coll_010_func.phpt" role="test" />
-    <file name="coll_011.phpt" role="test" />
+    <file name="coll_010.phpt" role="test" />
     <file name="coll_011_func.phpt" role="test" />
-    <file name="coll_012.phpt" role="test" />
+    <file name="coll_011.phpt" role="test" />
     <file name="coll_012_func.phpt" role="test" />
-    <file name="coll_013.phpt" role="test" />
+    <file name="coll_012.phpt" role="test" />
     <file name="coll_013_func.phpt" role="test" />
-    <file name="coll_014.phpt" role="test" />
+    <file name="coll_013.phpt" role="test" />
     <file name="coll_014_func.phpt" role="test" />
-    <file name="coll_015.phpt" role="test" />
+    <file name="coll_014.phpt" role="test" />
     <file name="coll_015_func.phpt" role="test" />
-    <file name="coll_016.phpt" role="test" />
+    <file name="coll_015.phpt" role="test" />
     <file name="coll_016_func.phpt" role="test" />
-    <file name="coll_017.phpt" role="test" />
+    <file name="coll_016.phpt" role="test" />
     <file name="coll_017_func.phpt" role="test" />
+    <file name="coll_017.phpt" role="test" />
     <file name="coll_018.phpt" role="test" />
     <file name="coll_019.phpt" role="test" />
     <file name="commit_001.phpt" role="test" />
     <file name="commit_002.phpt" role="test" />
-    <file name="conn_attr.inc" role="test" />
+    <file name="CONFLICTS" role="test" />
     <file name="conn_attr_1.phpt" role="test" />
     <file name="conn_attr_2.phpt" role="test" />
     <file name="conn_attr_3.phpt" role="test" />
     <file name="conn_attr_4.phpt" role="test" />
     <file name="conn_attr_5.phpt" role="test" />
+    <file name="conn_attr.inc" role="test" />
+    <file name="connect_1.phpt" role="test" />
     <file name="connect.inc" role="test" />
     <file name="connect.phpt" role="test" />
-    <file name="connect_1.phpt" role="test" />
     <file name="connect_scope1.phpt" role="test" />
     <file name="connect_scope2.phpt" role="test" />
     <file name="connect_scope_try1.phpt" role="test" />
@@ -225,20 +218,19 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
     <file name="connect_scope_try5.phpt" role="test" />
     <file name="connect_scope_try6.phpt" role="test" />
     <file name="connect_with_charset_001.phpt" role="test" />
-    <file name="connect_without_oracle_home.phpt" role="test" />
     <file name="connect_without_oracle_home_11.phpt" role="test" />
+    <file name="connect_without_oracle_home.phpt" role="test" />
     <file name="create_table.inc" role="test" />
     <file name="create_type.inc" role="test" />
-    <file name="cursor_bind.phpt" role="test" />
     <file name="cursor_bind_err.phpt" role="test" />
+    <file name="cursor_bind.phpt" role="test" />
     <file name="cursors.phpt" role="test" />
+    <file name="dbmsoutput.phpt" role="test" />
     <file name="db_op_1.phpt" role="test" />
     <file name="db_op_2.phpt" role="test" />
-    <file name="dbmsoutput.phpt" role="test" />
     <file name="default_prefetch0.phpt" role="test" />
     <file name="default_prefetch1.phpt" role="test" />
     <file name="default_prefetch2.phpt" role="test" />
-    <file name="define.phpt" role="test" />
     <file name="define0.phpt" role="test" />
     <file name="define1.phpt" role="test" />
     <file name="define2.phpt" role="test" />
@@ -246,6 +238,7 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
     <file name="define4.phpt" role="test" />
     <file name="define5.phpt" role="test" />
     <file name="define6.phpt" role="test" />
+    <file name="define.phpt" role="test" />
     <file name="descriptors.phpt" role="test" />
     <file name="details.inc" role="test" />
     <file name="drcp_cclass1.phpt" role="test" />
@@ -264,21 +257,21 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
     <file name="drcp_scope3.phpt" role="test" />
     <file name="drcp_scope4.phpt" role="test" />
     <file name="drcp_scope5.phpt" role="test" />
-    <file name="driver_name.phpt" role="test" />
     <file name="driver_name_11gR2.phpt" role="test" />
+    <file name="driver_name.phpt" role="test" />
     <file name="drop_table.inc" role="test" />
     <file name="drop_type.inc" role="test" />
     <file name="dupcolnames.phpt" role="test" />
     <file name="edition_1.phpt" role="test" />
     <file name="edition_2.phpt" role="test" />
-    <file name="error.phpt" role="test" />
     <file name="error1.phpt" role="test" />
     <file name="error2.phpt" role="test" />
     <file name="error3.phpt" role="test" />
-    <file name="error_bind.phpt" role="test" />
     <file name="error_bind_2.phpt" role="test" />
     <file name="error_bind_3.phpt" role="test" />
+    <file name="error_bind.phpt" role="test" />
     <file name="error_parse.phpt" role="test" />
+    <file name="error.phpt" role="test" />
     <file name="error_set.phpt" role="test" />
     <file name="exec_fetch.phpt" role="test" />
     <file name="execute_mode.phpt" role="test" />
@@ -287,7 +280,6 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
     <file name="extauth_02.phpt" role="test" />
     <file name="extauth_03.phpt" role="test" />
     <file name="extauth_04.phpt" role="test" />
-    <file name="fetch.phpt" role="test" />
     <file name="fetch_all1.phpt" role="test" />
     <file name="fetch_all2.phpt" role="test" />
     <file name="fetch_all3.phpt" role="test" />
@@ -295,14 +287,15 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
     <file name="fetch_all5.phpt" role="test" />
     <file name="fetch_array.phpt" role="test" />
     <file name="fetch_assoc.phpt" role="test" />
-    <file name="fetch_object.phpt" role="test" />
     <file name="fetch_object_1.phpt" role="test" />
     <file name="fetch_object_2.phpt" role="test" />
+    <file name="fetch_object.phpt" role="test" />
+    <file name="fetch.phpt" role="test" />
     <file name="fetch_row.phpt" role="test" />
-    <file name="field_funcs.phpt" role="test" />
     <file name="field_funcs1.phpt" role="test" />
     <file name="field_funcs2.phpt" role="test" />
     <file name="field_funcs3.phpt" role="test" />
+    <file name="field_funcs.phpt" role="test" />
     <file name="imp_res_1.phpt" role="test" />
     <file name="imp_res_2.phpt" role="test" />
     <file name="imp_res_3.phpt" role="test" />
@@ -381,31 +374,33 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
     <file name="lob_044.phpt" role="test" />
     <file name="lob_aliases.phpt" role="test" />
     <file name="lob_null.phpt" role="test" />
-    <file name="lob_temp.phpt" role="test" />
+    <file name="lob_prefetch_ini.phpt" role="test" />
+    <file name="lob_prefetch.phpt" role="test" />
     <file name="lob_temp1.phpt" role="test" />
     <file name="lob_temp2.phpt" role="test" />
+    <file name="lob_temp.phpt" role="test" />
     <file name="minfo.phpt" role="test" />
     <file name="null_byte_1.phpt" role="test" />
     <file name="null_byte_2.phpt" role="test" />
     <file name="null_byte_3.phpt" role="test" />
     <file name="num.phpt" role="test" />
     <file name="oci_execute_segfault.phpt" role="test" />
-    <file name="old_oci_close.phpt" role="test" />
     <file name="old_oci_close1.phpt" role="test" />
-    <file name="password.phpt" role="test" />
+    <file name="old_oci_close.phpt" role="test" />
     <file name="password_2.phpt" role="test" />
     <file name="password_new.phpt" role="test" />
-    <file name="pecl_bug10194.phpt" role="test" />
-    <file name="pecl_bug10194_blob.phpt" role="test" />
+    <file name="password.phpt" role="test" />
     <file name="pecl_bug10194_blob_64.phpt" role="test" />
+    <file name="pecl_bug10194_blob.phpt" role="test" />
+    <file name="pecl_bug10194.phpt" role="test" />
     <file name="pecl_bug16035.phpt" role="test" />
     <file name="pecl_bug16842.phpt" role="test" />
     <file name="pecl_bug6109.phpt" role="test" />
     <file name="pecl_bug8816.phpt" role="test" />
     <file name="persistent.phpt" role="test" />
     <file name="prefetch.phpt" role="test" />
-    <file name="privileged_connect.phpt" role="test" />
     <file name="privileged_connect1.phpt" role="test" />
+    <file name="privileged_connect.phpt" role="test" />
     <file name="refcur_prefetch_1.phpt" role="test" />
     <file name="refcur_prefetch_2.phpt" role="test" />
     <file name="refcur_prefetch_3.phpt" role="test" />
@@ -416,8 +411,8 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
     <file name="statement_cache.phpt" role="test" />
     <file name="statement_type.phpt" role="test" />
     <file name="test.gif" role="test" />
-    <file name="test.txt" role="test" />
     <file name="testping.phpt" role="test" />
+    <file name="test.txt" role="test" />
     <file name="uncommitted.phpt" role="test" />
     <file name="xmltype_01.phpt" role="test" />
     <file name="xmltype_02.phpt" role="test" />
@@ -443,7 +438,7 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
  <dependencies>
   <required>
    <php>
-    <min>8.0.0</min>
+    <min>8.1.0</min>
    </php>
    <pearinstaller>
     <min>1.4.0b1</min>
@@ -458,6 +453,57 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
 
 <release>
   <version>
+   <release>3.2.1</release>
+   <api>3.2.1</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+    This version is for PHP 8.1 only.
+
+    Requires Oracle Client libraries from 11.2 or later.
+  </notes>
+</release>
+   
+<release>
+  <version>
+   <release>3.2.0</release>
+   <api>3.2.0</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+    This version is for PHP 8.1 only.
+
+    Added oci8.prefetch_lob_size directive and oci_set_prefetch_lob() function to improve LOB query performance.
+  </notes>
+</release>
+   
+<release>
+  <version>
+   <release>3.1.0</release>
+   <api>3.1.0</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+    This version is for PHP 8.0 only.
+
+    Deprecated directive oci8.old_oci_close_semantics
+  </notes>
+</release>
+
+<release>
+  <version>
    <release>3.0.1</release>
    <api>3.0.1</api>
   </version>
@@ -467,12 +513,37 @@ Oracle's standard cross-version connectivity applies.  For example, PHP OCI8 lin
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-    This version is for PHP 8 only.
+    This version is for PHP 8.0 only.
 
     Updated Windows build environment to build with newer Oracle Client libraries. (cmb)
   </notes>
 </release>
    
+<release>
+  <version>
+   <release>3.0.0</release>
+   <api>3.0.0</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+    This version is for PHP 8.0 only.
+
+    Deprecated old OCI8 function aliases. (Jens de Nies)
+
+    Removed obsolete no-op function oci_internal_debug(). (Jens de Nies)
+
+    The OCI-Lob class is now called OCILob for standards compliance.
+
+    The OCI-Collection class is now called OCICollection for standards compliance.
+
+    Generate arginfo from function stubs. (Jens de Nies)
+  </notes>
+</release>
+
 <release>
   <version>
    <release>2.2.0</release>
@@ -490,31 +561,6 @@ Added oci_set_db_operation() for the Oracle Database 'DBOP' end-to-end-tracing a
 Fixed bug #76804 (oci_pconnect with OCI_CRED_EXT not working). (KoenigsKind)
 Fixed installation on PHP 7.3.
 Internal change: Convert some parameter parsing to the Fast Parameter Parsing API.
-  </notes>
-</release>
-
-<release>
-  <version>
-   <release>3.0.0</release>
-   <api>3.0.0</api>
-  </version>
-  <stability>
-   <release>stable</release>
-   <api>stable</api>
-  </stability>
-  <license uri="http://www.php.net/license">PHP</license>
-  <notes>
-    This version is for PHP 8 only.
-
-    Deprecated old OCI8 function aliases. (Jens de Nies)
-
-    Removed obsolete no-op function oci_internal_debug(). (Jens de Nies)
-
-    The OCI-Lob class is now called OCILob for standards compliance.
-
-    The OCI-Collection class is now called OCICollection for standards compliance.
-
-    Generate arginfo from function stubs. (Jens de Nies)
   </notes>
 </release>
 

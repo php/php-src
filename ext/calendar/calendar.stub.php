@@ -2,6 +2,116 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var int
+ * @cvalue CAL_GREGORIAN
+ */
+const CAL_GREGORIAN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_JULIAN
+ */
+const CAL_JULIAN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_JEWISH
+ */
+const CAL_JEWISH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_FRENCH
+ */
+const CAL_FRENCH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_NUM_CALS
+ */
+const CAL_NUM_CALS = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CAL_DOW_DAYNO
+ */
+const CAL_DOW_DAYNO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_DOW_SHORT
+ */
+const CAL_DOW_SHORT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_DOW_LONG
+ */
+const CAL_DOW_LONG = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CAL_MONTH_GREGORIAN_SHORT
+ */
+const CAL_MONTH_GREGORIAN_SHORT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_MONTH_GREGORIAN_LONG
+ */
+const CAL_MONTH_GREGORIAN_LONG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_MONTH_JULIAN_SHORT
+ */
+const CAL_MONTH_JULIAN_SHORT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_MONTH_JULIAN_LONG
+ */
+const CAL_MONTH_JULIAN_LONG = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_MONTH_JEWISH
+ */
+const CAL_MONTH_JEWISH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_MONTH_FRENCH
+ */
+const CAL_MONTH_FRENCH = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CAL_EASTER_DEFAULT
+ */
+const CAL_EASTER_DEFAULT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_EASTER_ROMAN
+ */
+const CAL_EASTER_ROMAN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_EASTER_ALWAYS_GREGORIAN
+ */
+const CAL_EASTER_ALWAYS_GREGORIAN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_EASTER_ALWAYS_JULIAN
+ */
+const CAL_EASTER_ALWAYS_JULIAN = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CAL_JEWISH_ADD_ALAFIM_GERESH
+ */
+const CAL_JEWISH_ADD_ALAFIM_GERESH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_JEWISH_ADD_ALAFIM
+ */
+const CAL_JEWISH_ADD_ALAFIM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CAL_JEWISH_ADD_GERESHAYIM
+ */
+const CAL_JEWISH_ADD_GERESHAYIM = UNKNOWN;
+
 function cal_days_in_month(int $calendar, int $month, int $year): int {}
 
 /**

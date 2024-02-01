@@ -12,9 +12,6 @@ file_put_contents('phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.pha
     'brand new!');
 include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php/a.php';
 ?>
-
---CLEAN--
-<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 Warning: file_put_contents(phar://%screate_new_phar_b.phar.php/a.php): Failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %screate_new_phar_b.php on line %d
 

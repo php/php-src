@@ -4,17 +4,17 @@ mysqli.local_infile_directory vs access allowed
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
+require_once 'connect.inc';
 
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-	die("skip Cannot connect to MySQL");
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+    die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+}
 
-include_once("local_infile_tools.inc");
+include_once "local_infile_tools.inc";
 if ($msg = check_local_infile_allowed_by_server($link))
-	die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
+    die(sprintf("skip %s, [%d] %s", $msg, $link->errno, $link->error));
 
 mysqli_close($link);
-
 ?>
 --INI--
 open_basedir={PWD}
@@ -22,7 +22,7 @@ mysqli.allow_local_infile=0
 mysqli.local_infile_directory={PWD}/foo
 --FILE--
 <?php
-	require_once("connect.inc");
+	require_once 'connect.inc';
 
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
@@ -64,14 +64,14 @@ mysqli.local_infile_directory={PWD}/foo
 ?>
 --CLEAN--
 <?php
-require_once('connect.inc');
+require_once 'connect.inc';
 
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 	printf("[clean] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 		$host, $user, $db, $port, $socket);
 }
 
-if (!$link->query($link, 'DROP TABLE IF EXISTS test')) {
+if (!$link->query('DROP TABLE IF EXISTS test')) {
 	printf("[clean] Failed to drop old test table: [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 }
 

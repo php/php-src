@@ -68,4 +68,4 @@ array (
      'host' => '.SYNTAX-ERROR.',
   ),
 )
-Notice: Unknown: Unexpected characters at end of address: @two (errflg=3) in Unknown on line 0
+Notice: PHP Request Shutdown: Unexpected characters at end of address: @two (errflg=3) in Unknown on line 0

@@ -15,7 +15,8 @@
 15. ext/phar/zip.c portion extracted from libzip
 16. libbcmath (ext/bcmath) see ext/bcmath/libbcmath/LICENSE
 17. ext/mbstring/ucgendat portions based on the ucgendat.c from the OpenLDAP
-18. xxHash (ext/hash/xxhash)
+18. avifinfo (ext/standard/libavifinfo) see ext/standard/libavifinfo/LICENSE
+19. xxHash (ext/hash/xxhash)
 
 
 3. pcre2lib (ext/pcre)
@@ -592,7 +593,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-16. ext/mbstring/ucgendat portions based on the ucgendat.c from the OpenLDAP
+17. ext/mbstring/ucgendat portions based on the ucgendat.c from the OpenLDAP
 
 The OpenLDAP Public License
   Version 2.8, 17 August 2003
@@ -643,7 +644,7 @@ California, USA.  All Rights Reserved.  Permission to copy and
 distribute verbatim copies of this document is granted.
 
 
-18. xxHash
+19. xxHash
 
 xxHash - Extremely Fast Hash algorithm
 Header File

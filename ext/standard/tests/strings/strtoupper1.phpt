@@ -1,27 +1,9 @@
 --TEST--
 Test strtoupper() function
---SKIPIF--
-<?php
-if( substr(PHP_OS, 0, 3) == 'WIN') {
-  if (!setlocale(LC_ALL, 'C')) {
-    die('skip need "C" locale (this windows is broken)');
-  }
-} else {
-  if (!setlocale(LC_ALL, 'en_US.UTF-8', 'en')) {
-    die('skip need "en_US.UTF-8" locale');
-  }
-}
-?>
 --FILE--
 <?php
-if( substr(PHP_OS, 0, 3) == 'WIN') {
-  setlocale(LC_ALL, 'C');
-} else {
-  setlocale(LC_ALL, 'en_US.UTF-8');
-}
-
-echo "*** Testing strtoupper() with 128 chars ***\n";
-for ($i=0; $i<=127; $i++){
+echo "*** Testing strtoupper() with 256 chars ***\n";
+for ($i=0; $i<=255; $i++){
   $char = chr($i);
   print(bin2hex($char))." => ".(bin2hex(strtoupper("$char")))."\n";
 }
@@ -41,6 +23,11 @@ $strings = array (
   "ABCD\0abcdABCD",
   TRUE,
   FALSE,
+  /* Check for off-by-one errors in the SSE implementation */
+  "aaaaaaaaaaaaaaaaaaaa",
+  "zzzzzzzzzzzzzzzzzzzz",
+  "````````````````````",
+  "{{{{{{{{{{{{{{{{{{{{",
 );
 
 $count = 0;
@@ -60,7 +47,7 @@ else
 echo "*** Done ***";
 ?>
 --EXPECTF--
-*** Testing strtoupper() with 128 chars ***
+*** Testing strtoupper() with 256 chars ***
 00 => 00
 01 => 01
 02 => 02
@@ -189,6 +176,134 @@ echo "*** Done ***";
 7d => 7d
 7e => 7e
 7f => 7f
+80 => 80
+81 => 81
+82 => 82
+83 => 83
+84 => 84
+85 => 85
+86 => 86
+87 => 87
+88 => 88
+89 => 89
+8a => 8a
+8b => 8b
+8c => 8c
+8d => 8d
+8e => 8e
+8f => 8f
+90 => 90
+91 => 91
+92 => 92
+93 => 93
+94 => 94
+95 => 95
+96 => 96
+97 => 97
+98 => 98
+99 => 99
+9a => 9a
+9b => 9b
+9c => 9c
+9d => 9d
+9e => 9e
+9f => 9f
+a0 => a0
+a1 => a1
+a2 => a2
+a3 => a3
+a4 => a4
+a5 => a5
+a6 => a6
+a7 => a7
+a8 => a8
+a9 => a9
+aa => aa
+ab => ab
+ac => ac
+ad => ad
+ae => ae
+af => af
+b0 => b0
+b1 => b1
+b2 => b2
+b3 => b3
+b4 => b4
+b5 => b5
+b6 => b6
+b7 => b7
+b8 => b8
+b9 => b9
+ba => ba
+bb => bb
+bc => bc
+bd => bd
+be => be
+bf => bf
+c0 => c0
+c1 => c1
+c2 => c2
+c3 => c3
+c4 => c4
+c5 => c5
+c6 => c6
+c7 => c7
+c8 => c8
+c9 => c9
+ca => ca
+cb => cb
+cc => cc
+cd => cd
+ce => ce
+cf => cf
+d0 => d0
+d1 => d1
+d2 => d2
+d3 => d3
+d4 => d4
+d5 => d5
+d6 => d6
+d7 => d7
+d8 => d8
+d9 => d9
+da => da
+db => db
+dc => dc
+dd => dd
+de => de
+df => df
+e0 => e0
+e1 => e1
+e2 => e2
+e3 => e3
+e4 => e4
+e5 => e5
+e6 => e6
+e7 => e7
+e8 => e8
+e9 => e9
+ea => ea
+eb => eb
+ec => ec
+ed => ed
+ee => ee
+ef => ef
+f0 => f0
+f1 => f1
+f2 => f2
+f3 => f3
+f4 => f4
+f5 => f5
+f6 => f6
+f7 => f7
+f8 => f8
+f9 => f9
+fa => fa
+fb => fb
+fc => fc
+fd => fd
+fe => fe
+ff => ff
 
 *** Testing strtoupper() with basic strings ***
 string(43) "MARY HAD A LITTLE LAMB AND SHE LOVED IT SO
@@ -218,6 +333,18 @@ string(1) "1"
 
 -- Iteration 7 --
 string(0) ""
+
+-- Iteration 8 --
+string(20) "AAAAAAAAAAAAAAAAAAAA"
+
+-- Iteration 9 --
+string(20) "ZZZZZZZZZZZZZZZZZZZZ"
+
+-- Iteration 10 --
+string(20) "````````````````````"
+
+-- Iteration 11 --
+string(20) "{{{{{{{{{{{{{{{{{{{{"
 
 *** Testing strtoupper() with two different case strings ***
 strings are same, with Case Insensitive

@@ -31,6 +31,11 @@
 #include "mbfilter_ucs2.h"
 
 static int mbfl_filt_conv_ucs2_wchar_flush(mbfl_convert_filter *filter);
+static size_t mb_ucs2_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static size_t mb_ucs2be_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_ucs2be(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
+static size_t mb_ucs2le_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_ucs2le(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 
 static const char *mbfl_encoding_ucs2_aliases[] = {"ISO-10646-UCS-2", "UCS2" , "UNICODE", NULL};
 
@@ -50,6 +55,8 @@ const mbfl_encoding mbfl_encoding_ucs2 = {
 	MBFL_ENCTYPE_WCS2,
 	&vtbl_ucs2_wchar,
 	&vtbl_wchar_ucs2,
+	mb_ucs2_to_wchar,
+	mb_wchar_to_ucs2be,
 	NULL
 };
 
@@ -62,6 +69,8 @@ const mbfl_encoding mbfl_encoding_ucs2be = {
 	MBFL_ENCTYPE_WCS2,
 	&vtbl_ucs2be_wchar,
 	&vtbl_wchar_ucs2be,
+	mb_ucs2be_to_wchar,
+	mb_wchar_to_ucs2be,
 	NULL
 };
 
@@ -74,6 +83,8 @@ const mbfl_encoding mbfl_encoding_ucs2le = {
 	MBFL_ENCTYPE_WCS2,
 	&vtbl_ucs2le_wchar,
 	&vtbl_wchar_ucs2le,
+	mb_ucs2le_to_wchar,
+	mb_wchar_to_ucs2le,
 	NULL
 };
 
@@ -219,4 +230,120 @@ static int mbfl_filt_conv_ucs2_wchar_flush(mbfl_convert_filter *filter)
 	}
 
 	return 0;
+}
+
+#define DETECTED_BE 1
+#define DETECTED_LE 2
+
+static size_t mb_ucs2_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	if (*state == DETECTED_BE) {
+		return mb_ucs2be_to_wchar(in, in_len, buf, bufsize, NULL);
+	} else if (*state == DETECTED_LE) {
+		return mb_ucs2le_to_wchar(in, in_len, buf, bufsize, NULL);
+	} else if (*in_len >= 2) {
+		unsigned char *p = *in;
+		unsigned char c1 = *p++;
+		unsigned char c2 = *p++;
+		uint32_t w = (c1 << 8) | c2;
+
+		if (w == 0xFFFE) {
+			/* Little-endian BOM */
+			*in = p;
+			*in_len -= 2;
+			*state = DETECTED_LE;
+			return mb_ucs2le_to_wchar(in, in_len, buf, bufsize, NULL);
+		} else if (w == 0xFEFF) {
+			/* Big-endian BOM; don't send it to output */
+			*in = p;
+			*in_len -= 2;
+		}
+	}
+
+	*state = DETECTED_BE;
+	return mb_ucs2be_to_wchar(in, in_len, buf, bufsize, NULL);
+}
+
+static size_t mb_ucs2be_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	unsigned char *p = *in, *e = p + (*in_len & ~1);
+	uint32_t *out = buf, *limit = buf + bufsize;
+
+	while (p < e && out < limit) {
+		unsigned char c1 = *p++;
+		unsigned char c2 = *p++;
+		uint32_t w = (c1 << 8) | c2;
+		*out++ = w;
+	}
+
+	if (p == e && (*in_len & 0x1) && out < limit) {
+		/* There is 1 trailing byte, which shouldn't be there */
+		*out++ = MBFL_BAD_INPUT;
+		p++;
+	}
+
+	*in_len -= (p - *in);
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_ucs2be(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+
+	while (len--) {
+		uint32_t w = *in++;
+		if (w < MBFL_WCSPLANE_UCS2MAX) {
+			out = mb_convert_buf_add2(out, (w >> 8) & 0xFF, w & 0xFF);
+		} else {
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_ucs2be);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
+}
+
+static size_t mb_ucs2le_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	unsigned char *p = *in, *e = p + (*in_len & ~1);
+	uint32_t *out = buf, *limit = buf + bufsize;
+
+	while (p < e && out < limit) {
+		unsigned char c1 = *p++;
+		unsigned char c2 = *p++;
+		uint32_t w = (c2 << 8) | c1;
+		*out++ = w;
+	}
+
+	if (p == e && (*in_len & 0x1) && out < limit) {
+		/* There is 1 trailing byte, which shouldn't be there */
+		*out++ = MBFL_BAD_INPUT;
+		p++;
+	}
+
+	*in_len -= (p - *in);
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_ucs2le(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+
+	while (len--) {
+		uint32_t w = *in++;
+		if (w < MBFL_WCSPLANE_UCS2MAX) {
+			out = mb_convert_buf_add2(out, w & 0xFF, (w >> 8) & 0xFF);
+		} else {
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_ucs2le);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }

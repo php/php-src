@@ -149,6 +149,8 @@ closedir($resource2);
 
 ?>
 --EXPECTF--
+Deprecated: Using ${var} in strings is deprecated, use {$var} instead in %s on line %d
+
 *** Testing Miscellaneous input data ***
 string(3) "qqq"
 int(5)

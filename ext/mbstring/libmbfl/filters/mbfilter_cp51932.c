@@ -35,6 +35,8 @@
 #include "cp932_table.h"
 
 static int mbfl_filt_conv_cp51932_wchar_flush(mbfl_convert_filter *filter);
+static size_t mb_cp51932_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
+static void mb_wchar_to_cp51932(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);
 
 static const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -66,6 +68,8 @@ const mbfl_encoding mbfl_encoding_cp51932 = {
 	0,
 	&vtbl_cp51932_wchar,
 	&vtbl_wchar_cp51932,
+	mb_cp51932_to_wchar,
+	mb_wchar_to_cp51932,
 	NULL
 };
 
@@ -164,9 +168,7 @@ mbfl_filt_conv_cp51932_wchar(int c, mbfl_convert_filter *filter)
 		}
 		break;
 
-	default:
-		filter->status = 0;
-		break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 
 	return 0;
@@ -268,4 +270,143 @@ mbfl_filt_conv_wchar_cp51932(int c, mbfl_convert_filter *filter)
 	}
 
 	return 0;
+}
+
+static size_t mb_cp51932_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state)
+{
+	unsigned char *p = *in, *e = p + *in_len;
+	uint32_t *out = buf, *limit = buf + bufsize;
+
+	while (p < e && out < limit) {
+		unsigned char c = *p++;
+
+		if (c < 0x80) {
+			*out++ = c;
+		} else if (c >= 0xA1 && c <= 0xFE && p < e) {
+			unsigned char c2 = *p++;
+			if (c2 >= 0xA1 && c2 <= 0xFE) {
+				unsigned int s = (c - 0xA1)*94 + c2 - 0xA1, w = 0;
+
+				if (s <= 137) {
+					if (s == 31) {
+						w = 0xFF3C; /* FULLWIDTH REVERSE SOLIDUS */
+					} else if (s == 32) {
+						w = 0xFF5E; /* FULLWIDTH TILDE */
+					} else if (s == 33) {
+						w = 0x2225; /* PARALLEL TO */
+					} else if (s == 60) {
+						w = 0xFF0D; /* FULLWIDTH HYPHEN-MINUS */
+					} else if (s == 80) {
+						w = 0xFFE0; /* FULLWIDTH CENT SIGN */
+					} else if (s == 81) {
+						w = 0xFFE1; /* FULLWIDTH POUND SIGN */
+					} else if (s == 137) {
+						w = 0xFFE2; /* FULLWIDTH NOT SIGN */
+					}
+				}
+
+				if (w == 0) {
+					if (s >= cp932ext1_ucs_table_min && s < cp932ext1_ucs_table_max) {
+						w = cp932ext1_ucs_table[s - cp932ext1_ucs_table_min];
+					} else if (s < jisx0208_ucs_table_size) {
+						w = jisx0208_ucs_table[s];
+					} else if (s >= cp932ext2_ucs_table_min && s < cp932ext2_ucs_table_max) {
+						w = cp932ext2_ucs_table[s - cp932ext2_ucs_table_min];
+					}
+				}
+
+				if (!w)
+					w = MBFL_BAD_INPUT;
+				*out++ = w;
+			} else {
+				*out++ = MBFL_BAD_INPUT;
+			}
+		} else if (c == 0x8E && p < e) {
+			unsigned char c2 = *p++;
+			if (c2 >= 0xA1 && c2 <= 0xDF) {
+				*out++ = 0xFEC0 + c2;
+			} else {
+				*out++ = MBFL_BAD_INPUT;
+			}
+		} else {
+			*out++ = MBFL_BAD_INPUT;
+		}
+	}
+
+	*in_len = e - p;
+	*in = p;
+	return out - buf;
+}
+
+static void mb_wchar_to_cp51932(uint32_t *in, size_t len, mb_convert_buf *buf, bool end)
+{
+	unsigned char *out, *limit;
+	MB_CONVERT_BUF_LOAD(buf, out, limit);
+	MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+
+	while (len--) {
+		uint32_t w = *in++;
+		unsigned int s = 0;
+
+		if (w == 0) {
+			out = mb_convert_buf_add(out, 0);
+			continue;
+		} else if (w >= ucs_a1_jis_table_min && w < ucs_a1_jis_table_max) {
+			s = ucs_a1_jis_table[w - ucs_a1_jis_table_min];
+		} else if (w >= ucs_a2_jis_table_min && w < ucs_a2_jis_table_max) {
+			s = ucs_a2_jis_table[w - ucs_a2_jis_table_min];
+		} else if (w >= ucs_i_jis_table_min && w < ucs_i_jis_table_max) {
+			s = ucs_i_jis_table[w - ucs_i_jis_table_min];
+		} else if (w >= ucs_r_jis_table_min && w < ucs_r_jis_table_max) {
+			s = ucs_r_jis_table[w - ucs_r_jis_table_min];
+		}
+
+		if (s >= 0x8080) s = 0; /* We don't support JIS X0213 */
+
+		if (s == 0) {
+			if (w == 0xA5) { /* YEN SIGN */
+				s = 0x216F; /* FULLWIDTH YEN SIGN */
+			} else if (w == 0xFF3C) { /* FULLWIDTH REVERSE SOLIDUS */
+				s = 0x2140;
+			} else if (w == 0x2225) { /* PARALLEL TO */
+				s = 0x2142;
+			} else if (w == 0xFF0D) { /* FULLWIDTH HYPHEN-MINUS */
+				s = 0x215D;
+			} else if (w == 0xFFE0) { /* FULLWIDTH CENT SIGN */
+				s = 0x2171;
+			} else if (w == 0xFFE1) { /* FULLWIDTH POUND SIGN */
+				s = 0x2172;
+			} else if (w == 0xFFE2) { /* FULLWIDTH NOT SIGN */
+				s = 0x224C;
+			} else {
+				for (int i = 0; i < cp932ext1_ucs_table_max - cp932ext1_ucs_table_min; i++) {
+					if (cp932ext1_ucs_table[i] == w) {
+						s = ((i/94 + 0x2D) << 8) + (i%94) + 0x21;
+						goto found_it;
+					}
+				}
+
+				for (int i = 0; i < cp932ext2_ucs_table_max - cp932ext2_ucs_table_min; i++) {
+					if (cp932ext2_ucs_table[i] == w) {
+						s = ((i/94 + 0x79) << 8) + (i%94) + 0x21;
+						goto found_it;
+					}
+				}
+			}
+found_it: ;
+		}
+
+		if (!s || s >= 0x8080) {
+			MB_CONVERT_ERROR(buf, out, limit, w, mb_wchar_to_cp51932);
+			MB_CONVERT_BUF_ENSURE(buf, out, limit, len * 2);
+		} else if (s < 0x80) {
+			out = mb_convert_buf_add(out, s);
+		} else if (s < 0x100) {
+			out = mb_convert_buf_add2(out, 0x8E, s);
+		} else {
+			out = mb_convert_buf_add2(out, ((s >> 8) & 0xFF) | 0x80, (s & 0xFF) | 0x80);
+		}
+	}
+
+	MB_CONVERT_BUF_STORE(buf, out, limit);
 }

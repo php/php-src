@@ -99,13 +99,13 @@ mbfl_name2language(const char *name)
 		}
 	}
 
-	/* serch aliases */
+	/* search aliases */
 	i = 0;
 	while ((language = mbfl_language_ptr_table[i++]) != NULL) {
 		if (language->aliases != NULL) {
 			j = 0;
-			while ((*language->aliases)[j] != NULL) {
-				if (strcasecmp((*language->aliases)[j], name) == 0) {
+			while (language->aliases[j]) {
+				if (strcasecmp(language->aliases[j], name) == 0) {
 					return language;
 				}
 				j++;

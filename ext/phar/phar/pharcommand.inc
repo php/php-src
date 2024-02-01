@@ -1598,7 +1598,7 @@ class PharCommand extends CLICommand
             if (is_bool($v)) {
                 $v = $v ? 'enabled' : 'disabled';
             }
-            printf("%-${klen}s  %s\n", $k.':', $v);
+            printf("%-{$klen}s  %s\n", $k.':', $v);
         }
     }
     // }}}

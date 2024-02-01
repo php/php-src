@@ -41,5 +41,7 @@ const mbfl_encoding mbfl_encoding_wchar = {
 	MBFL_ENCTYPE_WCS4,
 	NULL,
 	NULL,
+	NULL,
+	NULL,
 	NULL
 };

@@ -167,6 +167,11 @@ ftp_close(ftpbuf_t *ftp)
 	if (ftp == NULL) {
 		return NULL;
 	}
+#ifdef HAVE_FTP_SSL
+	if (ftp->last_ssl_session) {
+		SSL_SESSION_free(ftp->last_ssl_session);
+	}
+#endif
 	if (ftp->data) {
 		data_close(ftp, ftp->data);
 	}
@@ -229,6 +234,22 @@ ftp_quit(ftpbuf_t *ftp)
 }
 /* }}} */
 
+#ifdef HAVE_FTP_SSL
+static int ftp_ssl_new_session_cb(SSL *ssl, SSL_SESSION *sess)
+{
+	ftpbuf_t *ftp = SSL_get_app_data(ssl);
+
+	/* Technically there can be multiple sessions per connection, but we only care about the most recent one. */
+	if (ftp->last_ssl_session) {
+		SSL_SESSION_free(ftp->last_ssl_session);
+	}
+	ftp->last_ssl_session = SSL_get1_session(ssl);
+
+	/* Return 0 as we are not using OpenSSL's session cache. */
+	return 0;
+}
+#endif
+
 /* {{{ ftp_login */
 int
 ftp_login(ftpbuf_t *ftp, const char *user, const size_t user_len, const char *pass, const size_t pass_len)
@@ -279,10 +300,13 @@ ftp_login(ftpbuf_t *ftp, const char *user, const size_t user_len, const char *pa
 #endif
 		SSL_CTX_set_options(ctx, ssl_ctx_options);
 
-		/* allow SSL to re-use sessions */
-		SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_BOTH);
+		/* Allow SSL to re-use sessions.
+		 * We're relying on our own session storage as only at most one session will ever be active per FTP connection. */
+		SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_BOTH | SSL_SESS_CACHE_NO_INTERNAL);
+		SSL_CTX_sess_set_new_cb(ctx, ftp_ssl_new_session_cb);
 
 		ftp->ssl_handle = SSL_new(ctx);
+		SSL_set_app_data(ftp->ssl_handle, ftp); /* Needed for ftp_ssl_new_session_cb */
 		SSL_CTX_free(ctx);
 
 		if (ftp->ssl_handle == NULL) {
@@ -1145,7 +1169,7 @@ ftp_mdtm(ftpbuf_t *ftp, const char *path, const size_t path_len)
 	}
 	/* parse out the timestamp */
 	for (ptr = ftp->inbuf; *ptr && !isdigit(*ptr); ptr++);
-	n = sscanf(ptr, "%4u%2u%2u%2u%2u%2u", &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec);
+	n = sscanf(ptr, "%4d%2d%2d%2d%2d%2d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour, &tm.tm_min, &tm.tm_sec);
 	if (n != 6) {
 		return -1;
 	}
@@ -1789,7 +1813,7 @@ data_accepted:
 		}
 
 		/* get the session from the control connection so we can re-use it */
-		session = SSL_get_session(ftp->ssl_handle);
+		session = ftp->last_ssl_session;
 		if (session == NULL) {
 			php_error_docref(NULL, E_WARNING, "data_accept: failed to retrieve the existing SSL session");
 			SSL_free(data->ssl_handle);
@@ -1797,6 +1821,7 @@ data_accepted:
 		}
 
 		/* and set it on the data connection */
+		SSL_set_app_data(data->ssl_handle, ftp); /* Needed for ftp_ssl_new_session_cb */
 		res = SSL_set_session(data->ssl_handle, session);
 		if (res == 0) {
 			php_error_docref(NULL, E_WARNING, "data_accept: failed to set the existing SSL session");

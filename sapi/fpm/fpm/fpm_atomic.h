@@ -133,7 +133,7 @@ static inline atomic_uint_t atomic_cmp_set(atomic_t *lock, atomic_uint_t old, at
 
 #else
 
-#error Unsupported processor. Please open a bug report (bugs.php.net).
+#error Unsupported processor. Please open a bug report (https://github.com/php/php-src/issues).
 
 #endif
 

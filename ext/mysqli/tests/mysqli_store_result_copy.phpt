@@ -5,9 +5,6 @@ mysqli
 --SKIPIF--
 <?php
 require_once('skipifconnectfailure.inc');
-if (!$IS_MYSQLND) {
-    die("SKIP mysqlnd only test");
-}
 ?>
 --INI--
 mysqlnd.debug="d:t:O,{TMP}/mysqlnd.trace"

@@ -4,6 +4,7 @@ Bug #41421 (Uncaught exception from a stream wrapper segfaults)
 <?php
 
 class wrapper {
+    public $context;
     function stream_open() {
         return true;
     }

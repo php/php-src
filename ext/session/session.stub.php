@@ -2,6 +2,22 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var int
+ * @cvalue php_session_disabled
+ */
+const PHP_SESSION_DISABLED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue php_session_none
+ */
+const PHP_SESSION_NONE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue php_session_active
+ */
+const PHP_SESSION_ACTIVE = UNKNOWN;
+
 /** @refcount 1 */
 function session_name(?string $name = null): string|false {}
 

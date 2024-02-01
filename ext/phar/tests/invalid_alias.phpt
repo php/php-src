@@ -32,10 +32,6 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
-?>
 --EXPECTF--
 Invalid alias "hi/" specified for phar "%sinvalid_alias.phar"
 Invalid alias "hi\l" specified for phar "%sinvalid_alias.phar"

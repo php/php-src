@@ -16,11 +16,6 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
---CLEAN--
-<?php
-unlink(__DIR__ . '/buildfromdirectory1.phar');
-__HALT_COMPILER();
-?>
 --EXPECTF--
 %s(24) "UnexpectedValueException"
 Cannot write to archive - write operations restricted by INI setting

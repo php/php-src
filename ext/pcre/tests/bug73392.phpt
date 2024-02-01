@@ -21,5 +21,5 @@ var_dump(preg_replace_callback_array(
     ), 'a'));
 ?>
 --EXPECTF--
-Warning: preg_replace_callback_array(): Delimiter must not be alphanumeric or backslash in %sbug73392.php on line %d
+Warning: preg_replace_callback_array(): Delimiter must not be alphanumeric, backslash, or NUL in %sbug73392.php on line %d
 NULL

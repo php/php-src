@@ -18,4 +18,4 @@ try {
 
 ?>
 --EXPECT--
-"A" is not a valid backing value for enum "Suit"
+"A" is not a valid backing value for enum Suit

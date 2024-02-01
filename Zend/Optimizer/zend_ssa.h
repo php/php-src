@@ -145,10 +145,11 @@ typedef struct _zend_ssa {
 
 BEGIN_EXTERN_C()
 
-ZEND_API int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa);
-ZEND_API int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa);
+ZEND_API zend_result zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa);
+ZEND_API void zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa);
 ZEND_API int zend_ssa_rename_op(const zend_op_array *op_array, const zend_op *opline, uint32_t k, uint32_t build_flags, int ssa_vars_count, zend_ssa_op *ssa_ops, int *var);
-int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
+void zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
+void zend_ssa_replace_use_chain(zend_ssa *ssa, int op, int new_op, int var);
 
 void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to);
 void zend_ssa_remove_defs_of_instr(zend_ssa *ssa, zend_ssa_op *ssa_op);

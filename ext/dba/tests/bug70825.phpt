@@ -66,5 +66,5 @@ string(4) "1337"
 --CLEAN--
 <?php
 $filename = __DIR__ . DIRECTORY_SEPARATOR . 'bug70825.ini';
-unlink($filename);
+@unlink($filename);
 ?>

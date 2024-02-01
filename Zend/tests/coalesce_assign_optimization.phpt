@@ -1,5 +1,5 @@
 --TEST--
-Live range construction should not break if colesce assign branch is optimized away
+Live range construction should not break if coalesce assign branch is optimized away
 --FILE--
 <?php
 function test() {

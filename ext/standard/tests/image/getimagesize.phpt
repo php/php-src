@@ -70,15 +70,19 @@ array(17) {
     string(9) "image/bmp"
   }
   ["test1pix.avif"]=>
-  array(5) {
+  array(7) {
     [0]=>
-    int(0)
+    int(102)
     [1]=>
-    int(0)
+    int(121)
     [2]=>
     int(19)
     [3]=>
-    string(20) "width="0" height="0""
+    string(24) "width="102" height="121""
+    ["bits"]=>
+    int(8)
+    ["channels"]=>
+    int(4)
     ["mime"]=>
     string(10) "image/avif"
   }

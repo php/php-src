@@ -171,12 +171,10 @@ require_once('skipifconnectfailure.inc');
     func_mysqli_fetch_array($mysqli, $engine, "INTEGER UNSIGNED", "4294967295", "4294967295", 230);
     func_mysqli_fetch_array($mysqli, $engine, "INTEGER UNSIGNED", NULL, NULL, 240);
 
-    if ($IS_MYSQLND || mysqli_get_server_version($link) >= 51000) {
-        func_mysqli_fetch_array($mysqli, $engine, "BIGINT", "-9223372036854775808", "-9223372036854775808", 250);
-        func_mysqli_fetch_array($mysqli, $engine, "BIGINT", NULL, NULL, 260);
-        func_mysqli_fetch_array($mysqli, $engine, "BIGINT UNSIGNED", "18446744073709551615", "18446744073709551615", 270);
-        func_mysqli_fetch_array($mysqli, $engine, "BIGINT UNSIGNED", NULL, NULL, 280);
-    }
+    func_mysqli_fetch_array($mysqli, $engine, "BIGINT", "-9223372036854775808", "-9223372036854775808", 250);
+    func_mysqli_fetch_array($mysqli, $engine, "BIGINT", NULL, NULL, 260);
+    func_mysqli_fetch_array($mysqli, $engine, "BIGINT UNSIGNED", "18446744073709551615", "18446744073709551615", 270);
+    func_mysqli_fetch_array($mysqli, $engine, "BIGINT UNSIGNED", NULL, NULL, 280);
 
     func_mysqli_fetch_array($mysqli, $engine, "FLOAT", (string)(-9223372036854775808 - 1.1), "-9.22337e+18", 290, "/-9\.22337e\+?[0]?18/iu");
     func_mysqli_fetch_array($mysqli, $engine, "FLOAT", NULL, NULL, 300);

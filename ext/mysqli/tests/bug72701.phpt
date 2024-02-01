@@ -4,8 +4,7 @@ Bug #72701 mysqli_get_host_info() wrong output
 mysqli
 --SKIPIF--
 <?php
-require_once('skipifconnectfailure.inc');
-require_once("connect.inc");
+require_once 'skipifconnectfailure.inc';
 
 if ("127.0.0.1" != $host && "localhost" != $host) {
     die("skip require 127.0.0.1 connection");
@@ -15,7 +14,7 @@ if ("127.0.0.1" != $host && "localhost" != $host) {
 --FILE--
 <?php
 
-require_once("connect.inc");
+require_once "connect.inc";
 
 $con = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 

@@ -27,13 +27,7 @@
 #include "zend.h"
 
 #ifndef ZEND_MM_ALIGNMENT
-# define ZEND_MM_ALIGNMENT Z_UL(8)
-# define ZEND_MM_ALIGNMENT_LOG2 Z_L(3)
-#elif ZEND_MM_ALIGNMENT < 4
-# undef ZEND_MM_ALIGNMENT
-# undef ZEND_MM_ALIGNMENT_LOG2
-# define ZEND_MM_ALIGNMENT Z_UL(4)
-# define ZEND_MM_ALIGNMENT_LOG2 Z_L(2)
+# error "ZEND_MM_ALIGNMENT was not defined during configure"
 #endif
 
 #define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT - 1)
@@ -68,19 +62,19 @@ typedef struct _zend_mm_debug_info {
 
 BEGIN_EXTERN_C()
 
-ZEND_API char*  ZEND_FASTCALL zend_strndup(const char *s, size_t length) ZEND_ATTRIBUTE_MALLOC;
+ZEND_API ZEND_ATTRIBUTE_MALLOC char*  ZEND_FASTCALL zend_strndup(const char *s, size_t length);
 
-ZEND_API void*  ZEND_FASTCALL _emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE(1);
-ZEND_API void*  ZEND_FASTCALL _safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
-ZEND_API void*  ZEND_FASTCALL _safe_malloc(size_t nmemb, size_t size, size_t offset) ZEND_ATTRIBUTE_MALLOC;
+ZEND_API ZEND_ATTRIBUTE_MALLOC void*  ZEND_FASTCALL _emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE(1);
+ZEND_API ZEND_ATTRIBUTE_MALLOC void*  ZEND_FASTCALL _safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+ZEND_API ZEND_ATTRIBUTE_MALLOC void*  ZEND_FASTCALL _safe_malloc(size_t nmemb, size_t size, size_t offset);
 ZEND_API void   ZEND_FASTCALL _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-ZEND_API void*  ZEND_FASTCALL _ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE2(1,2);
+ZEND_API ZEND_ATTRIBUTE_MALLOC void*  ZEND_FASTCALL _ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE2(1,2);
 ZEND_API void*  ZEND_FASTCALL _erealloc(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE(2);
 ZEND_API void*  ZEND_FASTCALL _erealloc2(void *ptr, size_t size, size_t copy_size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE(2);
 ZEND_API void*  ZEND_FASTCALL _safe_erealloc(void *ptr, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API void*  ZEND_FASTCALL _safe_realloc(void *ptr, size_t nmemb, size_t size, size_t offset);
-ZEND_API char*  ZEND_FASTCALL _estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
-ZEND_API char*  ZEND_FASTCALL _estrndup(const char *s, size_t length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
+ZEND_API ZEND_ATTRIBUTE_MALLOC char*  ZEND_FASTCALL _estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+ZEND_API ZEND_ATTRIBUTE_MALLOC char*  ZEND_FASTCALL _estrndup(const char *s, size_t length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API size_t ZEND_FASTCALL _zend_mem_block_size(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 
 #include "zend_alloc_sizes.h"
@@ -89,12 +83,12 @@ ZEND_API size_t ZEND_FASTCALL _zend_mem_block_size(void *ptr ZEND_FILE_LINE_DC Z
 #if !ZEND_DEBUG && defined(HAVE_BUILTIN_CONSTANT_P)
 
 # define _ZEND_BIN_ALLOCATOR_DEF(_num, _size, _elements, _pages, x, y) \
-	ZEND_API void* ZEND_FASTCALL _emalloc_  ## _size(void) ZEND_ATTRIBUTE_MALLOC;
+	ZEND_API ZEND_ATTRIBUTE_MALLOC void* ZEND_FASTCALL _emalloc_  ## _size(void);
 
 ZEND_MM_BINS_INFO(_ZEND_BIN_ALLOCATOR_DEF, x, y)
 
-ZEND_API void* ZEND_FASTCALL _emalloc_large(size_t size) ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE(1);
-ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size) ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE(1);
+ZEND_API ZEND_ATTRIBUTE_MALLOC void* ZEND_FASTCALL _emalloc_large(size_t size) ZEND_ATTRIBUTE_ALLOC_SIZE(1);
+ZEND_API ZEND_ATTRIBUTE_MALLOC void* ZEND_FASTCALL _emalloc_huge(size_t size) ZEND_ATTRIBUTE_ALLOC_SIZE(1);
 
 # define _ZEND_BIN_ALLOCATOR_SELECTOR_START(_num, _size, _elements, _pages, size, y) \
 	((size <= _size) ? _emalloc_ ## _size() :
@@ -185,9 +179,10 @@ ZEND_API void ZEND_FASTCALL _efree_huge(void *, size_t size);
 #define estrndup_rel(s, length)					_estrndup((s), (length) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define zend_mem_block_size_rel(ptr)			_zend_mem_block_size((ptr) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 
-ZEND_API void * __zend_malloc(size_t len) ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE(1);
-ZEND_API void * __zend_calloc(size_t nmemb, size_t len) ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE2(1,2);
+ZEND_API ZEND_ATTRIBUTE_MALLOC void * __zend_malloc(size_t len) ZEND_ATTRIBUTE_ALLOC_SIZE(1);
+ZEND_API ZEND_ATTRIBUTE_MALLOC void * __zend_calloc(size_t nmemb, size_t len) ZEND_ATTRIBUTE_ALLOC_SIZE2(1,2);
 ZEND_API void * __zend_realloc(void *p, size_t len) ZEND_ATTRIBUTE_ALLOC_SIZE(2);
+ZEND_API ZEND_ATTRIBUTE_MALLOC char * __zend_strdup(const char *s);
 
 /* Selective persistent/non persistent allocation macros */
 #define pemalloc(size, persistent) ((persistent)?__zend_malloc(size):emalloc(size))
@@ -207,7 +202,7 @@ ZEND_API void * __zend_realloc(void *p, size_t len) ZEND_ATTRIBUTE_ALLOC_SIZE(2)
 #define safe_perealloc(ptr, nmemb, size, offset, persistent)	((persistent)?_safe_realloc((ptr), (nmemb), (size), (offset)):safe_erealloc((ptr), (nmemb), (size), (offset)))
 #define perealloc_recoverable(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc_recoverable((ptr), (size)))
 #define perealloc2_recoverable(ptr, size, persistent) ((persistent)?realloc((ptr), (size)):erealloc2_recoverable((ptr), (size), (copy_size)))
-#define pestrdup(s, persistent) ((persistent)?strdup(s):estrdup(s))
+#define pestrdup(s, persistent) ((persistent)?__zend_strdup(s):estrdup(s))
 #define pestrndup(s, length, persistent) ((persistent)?zend_strndup((s),(length)):estrndup((s),(length)))
 
 #define pemalloc_rel(size, persistent) ((persistent)?__zend_malloc(size):emalloc_rel(size))
@@ -229,6 +224,7 @@ ZEND_API bool is_zend_ptr(const void *ptr);
 
 ZEND_API size_t zend_memory_usage(bool real_usage);
 ZEND_API size_t zend_memory_peak_usage(bool real_usage);
+ZEND_API void zend_memory_reset_peak_usage(void);
 
 /* fast cache for HashTables */
 #define ALLOC_HASHTABLE(ht)	\
@@ -248,7 +244,7 @@ typedef struct _zend_mm_heap zend_mm_heap;
 
 ZEND_API zend_mm_heap *zend_mm_startup(void);
 ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full_shutdown, bool silent);
-ZEND_API void*  ZEND_FASTCALL _zend_mm_alloc(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
+ZEND_API ZEND_ATTRIBUTE_MALLOC void*  ZEND_FASTCALL _zend_mm_alloc(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE(2);
 ZEND_API void   ZEND_FASTCALL _zend_mm_free(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API void*  ZEND_FASTCALL _zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API void*  ZEND_FASTCALL _zend_mm_realloc2(zend_mm_heap *heap, void *p, size_t size, size_t copy_size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);

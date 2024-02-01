@@ -21,7 +21,8 @@ var_dump($ao);
 $ao = new MyArrayObject(array(1,2,3), ArrayObject::STD_PROP_LIST);
 var_dump($ao);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property ArrayObject::$p is deprecated in %s on line %d
 object(ArrayObject)#1 (2) {
   ["p"]=>
   int(1)
@@ -35,6 +36,8 @@ object(ArrayObject)#1 (2) {
     int(3)
   }
 }
+
+Deprecated: Creation of dynamic property ArrayObject::$p is deprecated in %s on line %d
 object(ArrayObject)#2 (2) {
   ["p"]=>
   int(1)

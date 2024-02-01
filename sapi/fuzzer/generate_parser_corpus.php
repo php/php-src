@@ -9,7 +9,7 @@ $it = new RecursiveIteratorIterator(
 $corpusDir = __DIR__ . '/corpus/parser';
 @mkdir($corpusDir);
 
-$maxLen = 32 * 1024;
+$maxLen = 6 * 1024;
 foreach ($it as $file) {
     if (!preg_match('/\.phpt$/', $file)) continue;
     $code = file_get_contents($file);

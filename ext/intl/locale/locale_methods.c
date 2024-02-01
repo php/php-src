@@ -55,31 +55,125 @@ ZEND_EXTERN_MODULE_GLOBALS( intl )
 #define EXTLANG_KEYNAME_LEN  10
 #define PRIVATE_KEYNAME_LEN  11
 
-/* Based on IANA registry at the time of writing this code
-*
-*/
+/* Based on the IANA language subtag registry (File-Date: 2021-08-06)
+ * https://www.iana.org/assignments/language-subtag-registry
+ *
+ * This list includes all grandfathered tags, as well as redundant
+ * tags that have a Preferred-Value.
+ */
 static const char * const LOC_GRANDFATHERED[] = {
-	"art-lojban",		"i-klingon",		"i-lux",			"i-navajo",		"no-bok",		"no-nyn",
-	"cel-gaulish",		"en-GB-oed",		"i-ami",
-	"i-bnn",		"i-default",		"i-enochian",
-	"i-mingo",		"i-pwn", 		"i-tao",
-	"i-tay",		"i-tsu",		"sgn-BE-fr",
-	"sgn-BE-nl",		"sgn-CH-de", 		"zh-cmn",
- 	"zh-cmn-Hans", 		"zh-cmn-Hant",		"zh-gan" ,
-	"zh-guoyu", 		"zh-hakka", 		"zh-min",
-	"zh-min-nan", 		"zh-wuu", 		"zh-xiang",
-	"zh-yue",		NULL
+	"art-lojban",
+	"cel-gaulish",
+	"en-GB-oed",
+	"i-ami",
+	"i-bnn",
+	"i-default",
+	"i-enochian",
+	"i-hak",
+	"i-klingon",
+	"i-lux",
+	"i-mingo",
+	"i-navajo",
+	"i-pwn",
+	"i-tao",
+	"i-tay",
+	"i-tsu",
+	"no-bok",
+	"no-nyn",
+	"sgn-BE-FR",
+	"sgn-BE-NL",
+	"sgn-BR",
+	"sgn-CH-DE",
+	"sgn-CO",
+	"sgn-DE",
+	"sgn-DK",
+	"sgn-ES",
+	"sgn-FR",
+	"sgn-GB",
+	"sgn-GR",
+	"sgn-IE",
+	"sgn-IT",
+	"sgn-JP",
+	"sgn-MX",
+	"sgn-NI",
+	"sgn-NL",
+	"sgn-NO",
+	"sgn-PT",
+	"sgn-SE",
+	"sgn-US",
+	"sgn-ZA",
+	"zh-cmn",
+	"zh-cmn-Hans",
+	"zh-cmn-Hant",
+	"zh-gan",
+	"zh-guoyu",
+	"zh-hakka",
+	"zh-min",
+	"zh-min-nan",
+	"zh-wuu",
+	"zh-xiang",
+	NULL
 };
 
-/* Based on IANA registry at the time of writing this code
-*  This array lists the preferred values for the grandfathered tags if applicable
-*  This is in sync with the array LOC_GRANDFATHERED
-*  e.g. the offsets of the grandfathered tags match the offset of the preferred  value
-*/
-static const int 		LOC_PREFERRED_GRANDFATHERED_LEN = 6;
-static const char * const 	LOC_PREFERRED_GRANDFATHERED[]  = {
-	"jbo",			"tlh",			"lb",
-	"nv", 			"nb",			"nn",
+/* Based on the IANA language subtag registry (File-Date: 2021-08-06)
+ *
+ * This array lists the preferred values for the grandfathered and redundant
+ * tags listed in LOC_GRANDFATHERED. This is in sync with the array
+ * LOC_GRANDFATHERED, i.e., the offsets of the grandfathered tags match the
+ * offsets of the preferred value. If a value in LOC_PREFERRED_GRANDFATHERED is
+ * NULL, then the matching offset in LOC_GRANDFATHERED has no preferred value.
+ */
+static const char * const LOC_PREFERRED_GRANDFATHERED[] = {
+	"jbo",
+	NULL,
+	"en-GB-oxendict",
+	"ami",
+	"bnn",
+	NULL,
+	NULL,
+	"hak",
+	"tlh",
+	"lb",
+	NULL,
+	"nv",
+	"pwn",
+	"tao",
+	"tay",
+	"tsu",
+	"nb",
+	"nn",
+	"sfb",
+	"vgt",
+	"bzs",
+	"sgg",
+	"csn",
+	"gsg",
+	"dsl",
+	"ssp",
+	"fsl",
+	"bfi",
+	"gss",
+	"isg",
+	"ise",
+	"jsl",
+	"mfs",
+	"ncs",
+	"dse",
+	"nsl",
+	"psr",
+	"swl",
+	"ase",
+	"sfs",
+	"cmn",
+	"cmn-Hans",
+	"cmn-Hant",
+	"gan",
+	"cmn",
+	"hak",
+	NULL,
+	"nan",
+	"wuu",
+	"hsn",
 	NULL
 };
 
@@ -105,7 +199,7 @@ static int16_t findOffset(const char* const* list, const char* key)
 {
 	const char* const* anchor = list;
 	while (*list != NULL) {
-		if (strcmp(key, *list) == 0) {
+		if (strcasecmp(key, *list) == 0) {
 			return (int16_t)(list - anchor);
 		}
 		list++;
@@ -125,7 +219,7 @@ static char* getPreferredTag(const char* gf_tag)
 	if(grOffset < 0) {
 		return NULL;
 	}
-	if( grOffset < LOC_PREFERRED_GRANDFATHERED_LEN ){
+	if( LOC_PREFERRED_GRANDFATHERED[grOffset] != NULL ){
 		/* return preferred tag */
 		result = estrdup( LOC_PREFERRED_GRANDFATHERED[grOffset] );
 	} else {
@@ -503,7 +597,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 			if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
 				mod_loc_name = getPreferredTag( loc_name );
 			} else {
-				/* Since Grandfathered, no value, do nothing, retutn NULL */
+				/* Since Grandfathered, no value, do nothing, return NULL */
 				RETURN_FALSE;
 			}
 		}

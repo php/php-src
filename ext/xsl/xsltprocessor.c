@@ -65,7 +65,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 	params = (char **)safe_emalloc((2 * zend_hash_num_elements(parht) + 1), sizeof(char *), 0);
 	memset((char *)params, 0, parsize);
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(parht, string_key, value) {
+	ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(parht, string_key, value) {
 		ZEND_ASSERT(string_key != NULL);
 		if (Z_TYPE_P(value) != IS_STRING) {
 			if (!try_convert_to_string(value)) {
@@ -96,7 +96,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	xsltTransformContextPtr tctxt;
 	zval *args = NULL;
 	zval retval;
-	int result, i;
+	int i;
 	int error = 0;
 	zend_fcall_info fci;
 	zval handler;
@@ -256,37 +256,30 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 		/* Push an empty string, so that we at least have an xslt result... */
 		valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
 	} else {
-		result = zend_call_function(&fci, NULL);
-		if (result == FAILURE) {
-			if (Z_TYPE(handler) == IS_STRING) {
-				php_error_docref(NULL, E_WARNING, "Unable to call handler %s()", Z_STRVAL(handler));
-				valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
+		zend_call_function(&fci, NULL);
+		if (Z_ISUNDEF(retval)) {
+			/* Exception thrown, don't do anything further. */
+		} else if (Z_TYPE(retval) == IS_OBJECT && instanceof_function(Z_OBJCE(retval), dom_node_class_entry)) {
+			xmlNode *nodep;
+			dom_object *obj;
+			if (intern->node_list == NULL) {
+				intern->node_list = zend_new_array(0);
 			}
-		/* retval is == NULL, when an exception occurred, don't report anything, because PHP itself will handle that */
-		} else if (Z_ISUNDEF(retval)) {
+			Z_ADDREF(retval);
+			zend_hash_next_index_insert(intern->node_list, &retval);
+			obj = Z_DOMOBJ_P(&retval);
+			nodep = dom_object_get_node(obj);
+			valuePush(ctxt, xmlXPathNewNodeSet(nodep));
+		} else if (Z_TYPE(retval) == IS_TRUE || Z_TYPE(retval) == IS_FALSE) {
+			valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(retval) == IS_TRUE));
+		} else if (Z_TYPE(retval) == IS_OBJECT) {
+			php_error_docref(NULL, E_WARNING, "A PHP Object cannot be converted to a XPath-string");
+			valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
 		} else {
-			if (Z_TYPE(retval) == IS_OBJECT && instanceof_function(Z_OBJCE(retval), dom_node_class_entry)) {
-				xmlNode *nodep;
-				dom_object *obj;
-				if (intern->node_list == NULL) {
-					intern->node_list = zend_new_array(0);
-				}
-				Z_ADDREF(retval);
-				zend_hash_next_index_insert(intern->node_list, &retval);
-				obj = Z_DOMOBJ_P(&retval);
-				nodep = dom_object_get_node(obj);
-				valuePush(ctxt, xmlXPathNewNodeSet(nodep));
-			} else if (Z_TYPE(retval) == IS_TRUE || Z_TYPE(retval) == IS_FALSE) {
-				valuePush(ctxt, xmlXPathNewBoolean(Z_TYPE(retval) == IS_TRUE));
-			} else if (Z_TYPE(retval) == IS_OBJECT) {
-				php_error_docref(NULL, E_WARNING, "A PHP Object cannot be converted to a XPath-string");
-				valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
-			} else {
-				convert_to_string(&retval);
-				valuePush(ctxt, xmlXPathNewString((xmlChar *) Z_STRVAL(retval)));
-			}
-			zval_ptr_dtor(&retval);
+			convert_to_string(&retval);
+			valuePush(ctxt, xmlXPathNewString((xmlChar *) Z_STRVAL(retval)));
 		}
+		zval_ptr_dtor(&retval);
 	}
 	zend_string_release_ex(callable, 0);
 	zval_ptr_dtor(&handler);
@@ -345,8 +338,10 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	newdoc = xmlCopyDoc(doc, 1);
 	xmlNodeSetBase((xmlNodePtr) newdoc, (xmlChar *)doc->URL);
 	PHP_LIBXML_SANITIZE_GLOBALS(parse);
+	PHP_LIBXML_IGNORE_DEPRECATIONS_START
 	xmlSubstituteEntitiesDefault(1);
 	xmlLoadExtDtdDefaultValue = XML_DETECT_IDS | XML_COMPLETE_ATTRS;
+	PHP_LIBXML_IGNORE_DEPRECATIONS_END
 
 	sheetp = xsltParseStylesheetDoc(newdoc);
 	PHP_LIBXML_RESTORE_GLOBALS(parse);

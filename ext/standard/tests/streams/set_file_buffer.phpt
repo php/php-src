@@ -6,6 +6,7 @@ marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao p
 <?php
 
 class test_wrapper {
+  public $context;
 
   function stream_open($path, $mode, $openedpath) {
     return true;
@@ -32,15 +33,11 @@ var_dump(set_file_buffer($fd, 50));
 var_dump(stream_set_chunk_size($fd, 42));
 var_dump(fwrite($fd, str_repeat('0', 70)));
 ?>
---CLEAN--
-<?php
-fclose($fd);
-unset($fd);
-?>
 --EXPECTF--
 bool(true)
 option: %d, %d, %d
 int(%i)
 int(%d)
 size: %d
+size: 28
 int(%d)

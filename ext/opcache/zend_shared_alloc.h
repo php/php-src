@@ -125,12 +125,27 @@ extern zend_smm_shared_globals *smm_shared_globals;
 
 #define SHARED_ALLOC_REATTACHED		(SUCCESS+1)
 
+BEGIN_EXTERN_C()
+
 int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size);
 void zend_shared_alloc_shutdown(void);
 
 /* allocate shared memory block */
-void *zend_shared_alloc_pages(size_t requested_size);
 void *zend_shared_alloc(size_t size);
+
+/**
+ * Wrapper for zend_shared_alloc() which aligns at 64-byte boundary if
+ * AVX or SSE2 are used.
+ */
+static inline void *zend_shared_alloc_aligned(size_t size) {
+#if defined(__AVX__) || defined(__SSE2__)
+	/* Align to 64-byte boundary */
+	void *p = zend_shared_alloc(size + 64);
+	return (void *)(((zend_uintptr_t)p + 63L) & ~63L);
+#else
+	return zend_shared_alloc(size);
+#endif
+}
 
 /* copy into shared memory */
 void *zend_shared_memdup_get_put_free(void *source, size_t size);
@@ -199,5 +214,7 @@ void zend_shared_alloc_create_lock(void);
 void zend_shared_alloc_lock_win32(void);
 void zend_shared_alloc_unlock_win32(void);
 #endif
+
+END_EXTERN_C()
 
 #endif /* ZEND_SHARED_ALLOC_H */

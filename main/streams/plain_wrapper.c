@@ -274,7 +274,7 @@ static void detect_is_seekable(php_stdio_stream_data *self) {
 #endif
 }
 
-PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const char *persistent_id STREAMS_DC)
+PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const char *persistent_id, bool zero_position STREAMS_DC)
 {
 	php_stream *stream = php_stream_fopen_from_fd_int_rel(fd, mode, persistent_id);
 
@@ -285,6 +285,9 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 		if (!self->is_seekable) {
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 			stream->position = -1;
+		} else if (zero_position) {
+			ZEND_ASSERT(zend_lseek(self->fd, 0, SEEK_CUR) == 0);
+			stream->position = 0;
 		} else {
 			stream->position = zend_lseek(self->fd, 0, SEEK_CUR);
 #ifdef ESPIPE
@@ -879,7 +882,11 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 							size_t rounded_offset = (range->offset / gran) * gran;
 							delta = range->offset - rounded_offset;
 							loffs = (DWORD)rounded_offset;
+#ifdef _WIN64
 							hoffs = (DWORD)(rounded_offset >> 32);
+#else
+							hoffs = 0;
+#endif
 						}
 
 						/* MapViewOfFile()ing zero bytes would map to the end of the file; match *nix behavior instead */
@@ -1137,7 +1144,12 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 		if (options & STREAM_OPEN_FOR_INCLUDE) {
 			ret = php_stream_fopen_from_fd_int_rel(fd, mode, persistent_id);
 		} else {
-			ret = php_stream_fopen_from_fd_rel(fd, mode, persistent_id);
+			/* skip the lseek(SEEK_CUR) system call to
+			 * determine the current offset because we
+			 * know newly opened files are at offset zero
+			 * (unless the file has been opened in
+			 * O_APPEND mode) */
+			ret = php_stream_fopen_from_fd_rel(fd, mode, persistent_id, (open_flags & O_APPEND) == 0);
 		}
 
 		if (ret)	{

@@ -582,7 +582,7 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 			{
 				zend_string * key;
 				zval * entry_value;
-				ZEND_HASH_FOREACH_STR_KEY_VAL(packet->connect_attr, key, entry_value) {
+				ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(packet->connect_attr, key, entry_value) {
 					if (key) { /* HASH_KEY_IS_STRING */
 						size_t value_len = Z_STRLEN_P(entry_value);
 
@@ -600,7 +600,7 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 				{
 					zend_string * key;
 					zval * entry_value;
-					ZEND_HASH_FOREACH_STR_KEY_VAL(packet->connect_attr, key, entry_value) {
+					ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(packet->connect_attr, key, entry_value) {
 						if (key) { /* HASH_KEY_IS_STRING */
 							size_t value_len = Z_STRLEN_P(entry_value);
 

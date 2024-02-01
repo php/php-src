@@ -191,7 +191,7 @@ PHPAPI void destroy_uploaded_files_hash(void) /* {{{ */
 {
 	zval *el;
 
-	ZEND_HASH_FOREACH_VAL(SG(rfc1867_uploaded_files), el) {
+	ZEND_HASH_MAP_FOREACH_VAL(SG(rfc1867_uploaded_files), el) {
 		zend_string *filename = Z_STR_P(el);
 		VCWD_UNLINK(ZSTR_VAL(filename));
 	} ZEND_HASH_FOREACH_END();

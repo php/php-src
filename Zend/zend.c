@@ -147,7 +147,7 @@ static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 {
 	zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
 
-	zend_long val = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	zend_long val = zend_ini_parse_quantity_warn(new_value, entry->name);
 
 	if (stage != ZEND_INI_STAGE_STARTUP &&
 	    stage != ZEND_INI_STAGE_SHUTDOWN &&
@@ -177,7 +177,7 @@ static ZEND_INI_MH(OnSetExceptionStringParamMaxLen) /* {{{ */
 static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 {
 	if (new_value) {
-		zend_long tmp = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+		zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
 		if (tmp < 0) {
 			zend_error(E_WARNING, "fiber.stack_size must be a positive number");
 			return FAILURE;
@@ -278,8 +278,7 @@ ZEND_API zend_string *zend_vstrpprintf(size_t max_len, const char *format, va_li
 		ZSTR_LEN(buf.s) = max_len;
 	}
 
-	smart_str_0(&buf);
-	return buf.s;
+	return smart_str_extract(&buf);
 }
 /* }}} */
 
@@ -676,7 +675,7 @@ static void function_copy_ctor(zval *zv) /* {{{ */
 
 		func->common.attributes = NULL;
 
-		ZEND_HASH_FOREACH_PTR(old_func->common.attributes, old_attr) {
+		ZEND_HASH_PACKED_FOREACH_PTR(old_func->common.attributes, old_attr) {
 			uint32_t i;
 			zend_attribute *attr;
 
@@ -724,7 +723,6 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	compiler_globals->script_encoding_list = NULL;
 	compiler_globals->current_linking_class = NULL;
 
-#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 	/* Map region is going to be created and resized at run-time. */
 	compiler_globals->map_ptr_real_base = NULL;
 	compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
@@ -738,9 +736,6 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 		compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(base);
 		memset(base, 0, compiler_globals->map_ptr_last * sizeof(void*));
 	}
-#else
-# error "Unknown ZEND_MAP_PTR_KIND"
-#endif
 }
 /* }}} */
 
@@ -856,9 +851,7 @@ static void php_scanner_globals_ctor(zend_php_scanner_globals *scanner_globals_p
 static void module_destructor_zval(zval *zv) /* {{{ */
 {
 	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(zv);
-
 	module_destructor(module);
-	free(module);
 }
 /* }}} */
 
@@ -994,24 +987,11 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #ifdef ZEND_WIN32
 	zend_get_windows_version_info(&EG(windows_version_info));
 #endif
-# if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
-		/* Create a map region, used for indirect pointers from shared to
-		 * process memory. It's allocated once and never resized.
-		 * All processes must map it into the same address space.
-		 */
-		CG(map_ptr_size) = 1024 * 1024; // TODO: initial size ???
-		CG(map_ptr_last) = 0;
-		CG(map_ptr_real_base) = pemalloc(CG(map_ptr_size) * sizeof(void*), 1);
-		CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(CG(map_ptr_real_base));
-# elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
-		/* Map region is going to be created and resized at run-time. */
-		CG(map_ptr_real_base) = NULL;
-		CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(NULL);
-		CG(map_ptr_size) = 0;
-		CG(map_ptr_last) = 0;
-# else
-#  error "Unknown ZEND_MAP_PTR_KIND"
-# endif
+	/* Map region is going to be created and resized at run-time. */
+	CG(map_ptr_real_base) = NULL;
+	CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(NULL);
+	CG(map_ptr_size) = 0;
+	CG(map_ptr_last) = 0;
 #endif
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
@@ -1258,6 +1238,7 @@ ZEND_API void zend_activate(void) /* {{{ */
 	if (CG(map_ptr_last)) {
 		memset(CG(map_ptr_real_base), 0, CG(map_ptr_last) * sizeof(void*));
 	}
+	zend_init_internal_run_time_cache();
 	zend_observer_activate();
 }
 /* }}} */
@@ -1404,7 +1385,7 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 		/* This is very inefficient for a large number of errors.
 		 * Use pow2 realloc if it becomes a problem. */
 		EG(num_errors)++;
-		EG(errors) = erealloc(EG(errors), sizeof(zend_error_info) * EG(num_errors));
+		EG(errors) = erealloc(EG(errors), sizeof(zend_error_info*) * EG(num_errors));
 		EG(errors)[EG(num_errors)-1] = info;
 	}
 
@@ -1917,28 +1898,15 @@ ZEND_API void *zend_map_ptr_new(void)
 	void **ptr;
 
 	if (CG(map_ptr_last) >= CG(map_ptr_size)) {
-#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
-		// TODO: error ???
-		ZEND_UNREACHABLE();
-#elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 		/* Grow map_ptr table */
 		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last) + 1, 4096);
 		CG(map_ptr_real_base) = perealloc(CG(map_ptr_real_base), CG(map_ptr_size) * sizeof(void*), 1);
 		CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(CG(map_ptr_real_base));
-#else
-# error "Unknown ZEND_MAP_PTR_KIND"
-#endif
 	}
 	ptr = (void**)CG(map_ptr_real_base) + CG(map_ptr_last);
 	*ptr = NULL;
 	CG(map_ptr_last)++;
-#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
-	return ptr;
-#elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 	return ZEND_MAP_PTR_PTR2OFFSET(ptr);
-#else
-# error "Unknown ZEND_MAP_PTR_KIND"
-#endif
 }
 
 ZEND_API void zend_map_ptr_extend(size_t last)
@@ -1947,17 +1915,10 @@ ZEND_API void zend_map_ptr_extend(size_t last)
 		void **ptr;
 
 		if (last >= CG(map_ptr_size)) {
-#if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
-			/* This may never happen */
-			ZEND_UNREACHABLE();
-#elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 			/* Grow map_ptr table */
 			CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(last, 4096);
 			CG(map_ptr_real_base) = perealloc(CG(map_ptr_real_base), CG(map_ptr_size) * sizeof(void*), 1);
 			CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(CG(map_ptr_real_base));
-#else
-# error "Unknown ZEND_MAP_PTR_KIND"
-#endif
 		}
 		ptr = (void**)CG(map_ptr_real_base) + CG(map_ptr_last);
 		memset(ptr, 0, (last - CG(map_ptr_last)) * sizeof(void*));

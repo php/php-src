@@ -55,6 +55,7 @@ CREDIT_LINE("Posix", "Kristian Koehntopp");
 CREDIT_LINE("PostgreSQL driver for PDO", "Edin Kadribasic, Ilia Alshanetsky");
 CREDIT_LINE("PostgreSQL", "Jouni Ahto, Zeev Suraski, Yasuo Ohgaki, Chris Kings-Lynne");
 CREDIT_LINE("Pspell", "Vlad Krupin");
+CREDIT_LINE("random", "Go Kudo, Tim Düsterhus, Guilliam Xavier, Christoph M. Becker, Jakub Zelenka, Bob Weinand, Máté Kocsis, and Original RNG implementators");
 CREDIT_LINE("Readline", "Thies C. Arntzen");
 CREDIT_LINE("Reflection", "Marcus Boerger, Timm Friebe, George Schlossnagle, Andrei Zmievski, Johannes Schlueter");
 CREDIT_LINE("Sessions", "Sascha Schumann, Andrei Zmievski");

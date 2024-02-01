@@ -6,6 +6,7 @@ zip
 <?php
 
 class TestStream {
+    public $context;
     function url_stat($path, $flags) {
         if (!($flags & STREAM_URL_STAT_QUIET))
             trigger_error("not quiet");
