@@ -3960,7 +3960,69 @@ static zend_always_inline zend_result _zend_update_type_info(
 			/* Forbidden opcodes */
 			ZEND_UNREACHABLE();
 			break;
+		case ZEND_FETCH_CLASS_NAME:
+			UPDATE_SSA_TYPE(MAY_BE_STRING|MAY_BE_RCN, ssa_op->result_def);
+			break;
+		case ZEND_ISSET_ISEMPTY_THIS:
+			UPDATE_SSA_TYPE(MAY_BE_BOOL, ssa_op->result_def);
+			break;
+		case ZEND_DECLARE_LAMBDA_FUNCTION:
+			UPDATE_SSA_TYPE(MAY_BE_OBJECT|MAY_BE_RC1, ssa_op->result_def);
+			UPDATE_SSA_OBJ_TYPE(zend_ce_closure, /* is_instanceof */ false, ssa_op->result_def);
+			break;
+		case ZEND_PRE_DEC_STATIC_PROP:
+		case ZEND_PRE_INC_STATIC_PROP:
+		case ZEND_POST_DEC_STATIC_PROP:
+		case ZEND_POST_INC_STATIC_PROP: {
+			if (ssa_op->result_def >= 0) {
+				const zend_property_info *prop_info = zend_fetch_static_prop_info(script, op_array, ssa, opline);
+				zend_class_entry *prop_ce;
+				tmp = zend_fetch_prop_type(script, prop_info, &prop_ce);
+				/* Internal objects may result in essentially anything. */
+				if (tmp & MAY_BE_OBJECT) {
+					goto unknown_opcode;
+				}
+				tmp &= MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING|MAY_BE_BOOL|MAY_BE_NULL;
+				if (tmp & MAY_BE_STRING) {
+					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
+				}
+				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
+			}
+			break;
+		}
+		case ZEND_SPACESHIP:
+			UPDATE_SSA_TYPE(MAY_BE_LONG, ssa_op->result_def);
+			break;
+		case ZEND_SEPARATE:
+			UPDATE_SSA_TYPE(t1, ssa_op->result_def);
+			COPY_SSA_OBJ_TYPE(ssa_op->op1_use, ssa_op->result_def);
+			break;
+		case ZEND_FETCH_GLOBALS:
+			UPDATE_SSA_TYPE(MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF|MAY_BE_RC1|MAY_BE_RCN, ssa_op->result_def);
+			break;
 		default:
+#ifdef ZEND_DEBUG_TYPE_INFERENCE
+			if (ssa_op->result_def >= 0) {
+				switch (opline->opcode) {
+					case ZEND_FETCH_R:
+					case ZEND_FETCH_W:
+					case ZEND_FETCH_RW:
+					case ZEND_FETCH_IS:
+					case ZEND_FETCH_UNSET:
+					case ZEND_YIELD_FROM:
+						break;
+					default:
+						fprintf(stderr, "Missing result type inference for opcode %s, line %d\n", zend_get_opcode_name(opline->opcode), opline->lineno);
+						break;
+				}
+			}
+			if (ssa_op->op1_def >= 0) {
+				fprintf(stderr, "Missing op1 type inference for opcode %s, line %d\n", zend_get_opcode_name(opline->opcode), opline->lineno);
+			}
+			if (ssa_op->op2_def >= 0) {
+				fprintf(stderr, "Missing op2 type inference for opcode %s, line %d\n", zend_get_opcode_name(opline->opcode), opline->lineno);
+			}
+#endif
 unknown_opcode:
 			if (ssa_op->op1_def >= 0) {
 				tmp = MAY_BE_ANY | MAY_BE_REF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
