@@ -91,6 +91,33 @@ function get_windows_matrix_include(array $branches) {
     return $jobs;
 }
 
+function get_macos_matrix_include(array $branches) {
+    $jobs = [];
+    foreach ($branches as $branch) {
+        foreach([true, false] as $debug) {
+            foreach([true, false] as $zts) {
+                $jobs[] = [
+                    'branch' => $branch,
+                    'debug' => $debug,
+                    'zts' => $zts,
+                    'os' => $branch === 'master' ? '13' : '12',
+                    'arch' => 'X32',
+                ];
+                if($branch['name'] === 'master') {
+                    $jobs[] = [
+                        'branch' => $branch,
+                        'debug' => $debug,
+                        'zts' => $zts,
+                        'os' => '14',
+                        'arch' => 'ARM64',
+                    ];
+                }
+            }
+        }
+    }
+    return $jobs;
+}
+
 function get_current_version(): array {
     $file = dirname(__DIR__) . '/main/php_version.h';
     $content = file_get_contents($file);
@@ -114,9 +141,11 @@ $branches = $branch === 'master'
     : [['name' => strtoupper($branch), 'ref' => $branch, 'version' => get_current_version()]];
 $matrix_include = get_matrix_include($branches);
 $windows_matrix_include = get_windows_matrix_include($branches);
+$macos_matrix_include = get_macos_matrix_include($branches);
 
 $f = fopen(getenv('GITHUB_OUTPUT'), 'a');
 fwrite($f, 'branches=' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n");
 fwrite($f, 'matrix-include=' . json_encode($matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
 fwrite($f, 'windows-matrix-include=' . json_encode($windows_matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
+fwrite($f, 'macos-matrix-include=' . json_encode($macos_matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
 fclose($f);

@@ -14,6 +14,7 @@ jobs:
       branches: ${{ steps.set-matrix.outputs.branches }}
       matrix-include: ${{ steps.set-matrix.outputs.matrix-include }}
       windows-matrix-include: ${{ steps.set-matrix.outputs.windows-matrix-include }}
+      macos-matrix-include: ${{ steps.set-matrix.outputs.macos-matrix-include }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -230,11 +231,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
-        debug: [true, false]
-        zts: [true, false]
-    name: "${{ matrix.branch.name }}_MACOS_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: macos-${{ matrix.branch.version.minor >= 4 && '13' || '12' }}
+        include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.macos-matrix-include) }}
+    name: "${{ matrix.branch.name }}_MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: macos-${{ matrix.os }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
