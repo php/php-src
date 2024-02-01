@@ -15,6 +15,17 @@
    +----------------------------------------------------------------------+
 */
 
+#include "SAPI.h"
+#include "php.h"
+#include "php_ini.h"
+#include "php_main.h"
+#include "php_globals.h"
+#include "php_variables.h"
+#include "zend_hash.h"
+#include "zend_modules.h"
+#include "fopen_wrappers.h"
+#include "http_status_codes.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -48,17 +59,6 @@
 #if HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif
-
-#include "SAPI.h"
-#include "php.h"
-#include "php_ini.h"
-#include "php_main.h"
-#include "php_globals.h"
-#include "php_variables.h"
-#include "zend_hash.h"
-#include "zend_modules.h"
-#include "fopen_wrappers.h"
-#include "http_status_codes.h"
 
 #include "zend_compile.h"
 #include "zend_execute.h"
