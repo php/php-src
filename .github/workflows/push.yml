@@ -165,7 +165,7 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
+          key: "${{github.job}}-${{matrix.os}}-${{hashFiles('main/php_version.h')}}"
           append-timestamp: false
       - name: ./configure
         uses: ./.github/actions/configure-macos
