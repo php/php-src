@@ -150,8 +150,12 @@ jobs:
   MACOS_DEBUG_NTS:
     strategy:
       matrix:
-        os: [13, 14]
-    name: MACOS_DEBUG_NTS_${{ matrix.os }}
+        include:
+          - os: 13
+            arch: X32
+          - os: 14
+            arch: ARM64
+    name: MACOS_${{ matrix.arch }}_DEBUG_NTS
     runs-on: macos-${{ matrix.os }}
     steps:
       - name: git checkout
