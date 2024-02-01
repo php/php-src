@@ -47,14 +47,14 @@ static inline double php_intpow10(int power) {
 }
 /* }}} */
 
-static zend_always_inline double php_round_get_basic_edge_case(const double integral, const double exponent, const int places)
+static zend_always_inline double php_round_get_basic_edge_case(double integral, double exponent, int places)
 {
 	return (places > 0)
 		? fabs((integral + copysign(0.5, integral)) / exponent)
 		: fabs((integral + copysign(0.5, integral)) * exponent);
 }
 
-static zend_always_inline double php_round_get_zero_edge_case(const double integral, const double exponent, const int places)
+static zend_always_inline double php_round_get_zero_edge_case(double integral, double exponent, int places)
 {
 	return (places > 0)
 		? fabs((integral) / exponent)
@@ -63,7 +63,7 @@ static zend_always_inline double php_round_get_zero_edge_case(const double integ
 
 /* {{{ php_round_helper
 	   Actually performs the rounding of a value to integer in a certain mode */
-static inline double php_round_helper(double integral, const double value, const double exponent, const int places, const int mode) {
+static inline double php_round_helper(double integral, double value, double exponent, int places, int mode) {
 	double value_abs = fabs(value);
 	double edge_case;
 
