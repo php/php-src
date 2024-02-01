@@ -2220,7 +2220,13 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
         position = get_parameter_position(fptr, arg_name, num_args);
 
         if (position == -1) {
-            _DO_THROW("The parameter specified by its name could not be found");
+            if (fptr->common.scope) {
+                _DO_THROW_EX("Method %s::%s() has no parameter named \"%s\"",
+                             ZSTR_VAL(fptr->common.scope->name), ZSTR_VAL(fptr->common.function_name), ZSTR_VAL(arg_name));
+            } else {
+                _DO_THROW_EX("Function %s() has no parameter named \"%s\"",
+                             ZSTR_VAL(fptr->common.function_name), ZSTR_VAL(arg_name));
+            }
             RETURN_THROWS();
         }
     } else {
@@ -2229,7 +2235,13 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
             RETURN_THROWS();
         }
         if (position >= num_args) {
-            _DO_THROW("The parameter specified by its offset could not be found");
+            if (fptr->common.scope) {
+                _DO_THROW_EX("Method %s::%s() has no parameter at offset %lld",
+                             ZSTR_VAL(fptr->common.scope->name), ZSTR_VAL(fptr->common.function_name), position);
+            } else {
+                _DO_THROW_EX("Function %s() has no parameter at offset %lld",
+                             ZSTR_VAL(fptr->common.function_name), position);
+            }
             RETURN_THROWS();
         }
     }

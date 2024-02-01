@@ -55,10 +55,10 @@ try {
 }
 ?>
 --EXPECT--
-The parameter specified by its name could not be found
-ReflectionFunctionAbstract::getParameter(): Argument #1 ($parameter) must be greater than or equal to 0
-The parameter specified by its offset could not be found
-The parameter specified by its name could not be found
-ReflectionFunctionAbstract::getParameter(): Argument #1 ($parameter) must be greater than or equal to 0
-The parameter specified by its offset could not be found
+Method WeakReference::create() has no parameter named "Object"
+ReflectionFunctionAbstract::getParameter(): Argument #1 ($param) must be greater than or equal to 0
+Method WeakReference::create() has no parameter at offset 3
+Method C::foo() has no parameter named "Bar"
+ReflectionFunctionAbstract::getParameter(): Argument #1 ($param) must be greater than or equal to 0
+Method C::foo() has no parameter at offset 1
 Method WeakReference::get() has no parameters

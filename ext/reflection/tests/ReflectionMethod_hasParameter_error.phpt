@@ -23,5 +23,5 @@ try {
 }
 ?>
 --EXPECT--
-ReflectionFunctionAbstract::hasParameter(): Argument #1 ($parameter) must be greater than or equal to 0
-ReflectionFunctionAbstract::hasParameter(): Argument #1 ($parameter) must be greater than or equal to 0
+ReflectionFunctionAbstract::hasParameter(): Argument #1 ($param) must be greater than or equal to 0
+ReflectionFunctionAbstract::hasParameter(): Argument #1 ($param) must be greater than or equal to 0

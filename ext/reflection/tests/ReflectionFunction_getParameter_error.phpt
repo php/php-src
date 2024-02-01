@@ -54,10 +54,10 @@ try {
 
 ?>
 --EXPECT--
-The parameter specified by its name could not be found
-ReflectionFunctionAbstract::getParameter(): Argument #1 ($parameter) must be greater than or equal to 0
-The parameter specified by its offset could not be found
-The parameter specified by its name could not be found
-ReflectionFunctionAbstract::getParameter(): Argument #1 ($parameter) must be greater than or equal to 0
-The parameter specified by its offset could not be found
+Function sort() has no parameter named "Array"
+ReflectionFunctionAbstract::getParameter(): Argument #1 ($param) must be greater than or equal to 0
+Function sort() has no parameter at offset 3
+Function foo() has no parameter named "Bar"
+ReflectionFunctionAbstract::getParameter(): Argument #1 ($param) must be greater than or equal to 0
+Function foo() has no parameter at offset 1
 Function noParams() has no parameters
