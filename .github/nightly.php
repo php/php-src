@@ -34,6 +34,14 @@ $repos["phpunit"] = [
     1
 ];
 
+$repos["infection"] = [
+    "https://github.com/infection/infection",
+    "master",
+    null,
+    ["vendor/bin/phpunit"],
+    1
+];
+
 $repos["wordpress"] = [
     "https://github.com/WordPress/wordpress-develop.git",
     "",
