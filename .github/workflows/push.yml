@@ -148,7 +148,11 @@ jobs:
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/verify-generated-files
   MACOS_DEBUG_NTS:
-    runs-on: macos-13
+    strategy:
+      matrix:
+        os: [13, 14]
+    name: MACOS_DEBUG_NTS_${{ matrix.os }}
+    runs-on: macos-${{ matrix.os }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
