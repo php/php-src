@@ -2236,10 +2236,10 @@ ZEND_METHOD(ReflectionFunctionAbstract, getParameter)
         }
         if (position >= num_args) {
             if (fptr->common.scope) {
-                _DO_THROW_EX("Method %s::%s() has no parameter at offset %lld",
+                _DO_THROW_EX("Method %s::%s() has no parameter at offset " ZEND_LONG_FMT,
                              ZSTR_VAL(fptr->common.scope->name), ZSTR_VAL(fptr->common.function_name), position);
             } else {
-                _DO_THROW_EX("Function %s() has no parameter at offset %lld",
+                _DO_THROW_EX("Function %s() has no parameter at offset " ZEND_LONG_FMT,
                              ZSTR_VAL(fptr->common.function_name), position);
             }
             RETURN_THROWS();
