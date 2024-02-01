@@ -4,22 +4,21 @@ PDO_Firebird: rowCount
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
---ENV--
-LSAN_OPTIONS=detect_leaks=0
+--XLEAK--
+A bug in firebird causes a memory leak when calling `isc_attach_database()`.
+See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 
 require("testdb.inc");
 
-$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-@$dbh->exec('DROP TABLE testz');
-$dbh->exec('CREATE TABLE testz (A VARCHAR(10))');
-$dbh->exec("INSERT INTO testz VALUES ('A')");
-$dbh->exec("INSERT INTO testz VALUES ('A')");
-$dbh->exec("INSERT INTO testz VALUES ('B')");
-$dbh->commit();
+$dbh = getDbConnection();
+$dbh->exec('CREATE TABLE test_rowcount (A VARCHAR(10))');
+$dbh->exec("INSERT INTO test_rowcount VALUES ('A')");
+$dbh->exec("INSERT INTO test_rowcount VALUES ('A')");
+$dbh->exec("INSERT INTO test_rowcount VALUES ('B')");
 
-$query = "SELECT * FROM testz WHERE A = ?";
+$query = "SELECT * FROM test_rowcount WHERE A = ?";
 
 $stmt = $dbh->prepare($query);
 $stmt->execute(array('A'));
@@ -28,23 +27,24 @@ $rows = $stmt->fetch();
 var_dump($stmt->fetch());
 var_dump($stmt->rowCount());
 
-$stmt = $dbh->prepare('UPDATE testZ SET A="A" WHERE A != ?');
+$stmt = $dbh->prepare('UPDATE test_rowcount SET A="A" WHERE A != ?');
 $stmt->execute(array('A'));
 var_dump($stmt->rowCount());
-$dbh->commit();
 
-$stmt = $dbh->prepare('DELETE FROM testz');
+$stmt = $dbh->prepare('DELETE FROM test_rowcount');
 $stmt->execute();
 var_dump($stmt->rowCount());
-
-$dbh->commit();
-
-$dbh->exec('DROP TABLE testz');
 
 unset($stmt);
 unset($dbh);
 
 ?>
+--CLEAN--
+<?php
+require 'testdb.inc';
+$dbh = getDbConnection();
+@$dbh->exec('DROP TABLE test_rowcount');
+unset($dbh);
 --EXPECT--
 bool(false)
 int(2)

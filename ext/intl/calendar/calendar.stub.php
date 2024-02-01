@@ -5,204 +5,87 @@
 /** @not-serializable */
 class IntlCalendar
 {
-    /**
-     * @var int
-     * @cvalue UCAL_ERA
-     */
-    public const FIELD_ERA = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_YEAR
-     */
-    public const FIELD_YEAR = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_MONTH
-     */
-    public const FIELD_MONTH = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_WEEK_OF_YEAR
-     */
-    public const FIELD_WEEK_OF_YEAR = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_WEEK_OF_MONTH
-     */
-    public const FIELD_WEEK_OF_MONTH = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_DATE
-     */
-    public const FIELD_DATE = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_DAY_OF_YEAR
-     */
-    public const FIELD_DAY_OF_YEAR = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_DAY_OF_WEEK
-     */
-    public const FIELD_DAY_OF_WEEK = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_DAY_OF_WEEK_IN_MONTH
-     */
-    public const FIELD_DAY_OF_WEEK_IN_MONTH = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_AM_PM
-     */
-    public const FIELD_AM_PM = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_HOUR
-     */
-    public const FIELD_HOUR = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_HOUR_OF_DAY
-     */
-    public const FIELD_HOUR_OF_DAY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_MINUTE
-     */
-    public const FIELD_MINUTE = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_SECOND
-     */
-    public const FIELD_SECOND = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_MILLISECOND
-     */
-    public const FIELD_MILLISECOND = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_ZONE_OFFSET
-     */
-    public const FIELD_ZONE_OFFSET = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_DST_OFFSET
-     */
-    public const FIELD_DST_OFFSET = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_YEAR_WOY
-     */
-    public const FIELD_YEAR_WOY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_DOW_LOCAL
-     */
-    public const FIELD_DOW_LOCAL = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_EXTENDED_YEAR
-     */
-    public const FIELD_EXTENDED_YEAR = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_JULIAN_DAY
-     */
-    public const FIELD_JULIAN_DAY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_MILLISECONDS_IN_DAY
-     */
-    public const FIELD_MILLISECONDS_IN_DAY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_IS_LEAP_MONTH
-     */
-    public const FIELD_IS_LEAP_MONTH = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_FIELD_COUNT
-     */
-    public const FIELD_FIELD_COUNT = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_DAY_OF_MONTH
-     */
-    public const FIELD_DAY_OF_MONTH = UNKNOWN;
+    /** @cvalue UCAL_ERA */
+    public const int FIELD_ERA = UNKNOWN;
+    /** @cvalue UCAL_YEAR */
+    public const int FIELD_YEAR = UNKNOWN;
+    /** @cvalue UCAL_MONTH */
+    public const int FIELD_MONTH = UNKNOWN;
+    /** @cvalue UCAL_WEEK_OF_YEAR */
+    public const int FIELD_WEEK_OF_YEAR = UNKNOWN;
+    /** @cvalue UCAL_WEEK_OF_MONTH */
+    public const int FIELD_WEEK_OF_MONTH = UNKNOWN;
+    /** @cvalue UCAL_DATE */
+    public const int FIELD_DATE = UNKNOWN;
+    /** @cvalue UCAL_DAY_OF_YEAR */
+    public const int FIELD_DAY_OF_YEAR = UNKNOWN;
+    /** @cvalue UCAL_DAY_OF_WEEK */
+    public const int FIELD_DAY_OF_WEEK = UNKNOWN;
+    /** @cvalue UCAL_DAY_OF_WEEK_IN_MONTH */
+    public const int FIELD_DAY_OF_WEEK_IN_MONTH = UNKNOWN;
+    /** @cvalue UCAL_AM_PM */
+    public const int FIELD_AM_PM = UNKNOWN;
+    /** @cvalue UCAL_HOUR */
+    public const int FIELD_HOUR = UNKNOWN;
+    /** @cvalue UCAL_HOUR_OF_DAY */
+    public const int FIELD_HOUR_OF_DAY = UNKNOWN;
+    /** @cvalue UCAL_MINUTE */
+    public const int FIELD_MINUTE = UNKNOWN;
+    /** @cvalue UCAL_SECOND */
+    public const int FIELD_SECOND = UNKNOWN;
+    /** @cvalue UCAL_MILLISECOND */
+    public const int FIELD_MILLISECOND = UNKNOWN;
+    /** @cvalue UCAL_ZONE_OFFSET */
+    public const int FIELD_ZONE_OFFSET = UNKNOWN;
+    /** @cvalue UCAL_DST_OFFSET */
+    public const int FIELD_DST_OFFSET = UNKNOWN;
+    /** @cvalue UCAL_YEAR_WOY */
+    public const int FIELD_YEAR_WOY = UNKNOWN;
+    /** @cvalue UCAL_DOW_LOCAL */
+    public const int FIELD_DOW_LOCAL = UNKNOWN;
+    /** @cvalue UCAL_EXTENDED_YEAR */
+    public const int FIELD_EXTENDED_YEAR = UNKNOWN;
+    /** @cvalue UCAL_JULIAN_DAY */
+    public const int FIELD_JULIAN_DAY = UNKNOWN;
+    /** @cvalue UCAL_MILLISECONDS_IN_DAY */
+    public const int FIELD_MILLISECONDS_IN_DAY = UNKNOWN;
+    /** @cvalue UCAL_IS_LEAP_MONTH */
+    public const int FIELD_IS_LEAP_MONTH = UNKNOWN;
+    /** @cvalue UCAL_FIELD_COUNT */
+    public const int FIELD_FIELD_COUNT = UNKNOWN;
+    /** @cvalue UCAL_DAY_OF_MONTH */
+    public const int FIELD_DAY_OF_MONTH = UNKNOWN;
 
-    /**
-     * @var int
-     * @cvalue UCAL_SUNDAY
-     */
-    public const DOW_SUNDAY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_MONDAY
-     */
-    public const DOW_MONDAY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_TUESDAY
-     */
-    public const DOW_TUESDAY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_WEDNESDAY
-     */
-    public const DOW_WEDNESDAY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_THURSDAY
-     */
-    public const DOW_THURSDAY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_FRIDAY
-     */
-    public const DOW_FRIDAY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_SATURDAY
-     */
-    public const DOW_SATURDAY = UNKNOWN;
+    /** @cvalue UCAL_SUNDAY */
+    public const int DOW_SUNDAY = UNKNOWN;
+    /** @cvalue UCAL_MONDAY */
+    public const int DOW_MONDAY = UNKNOWN;
+    /** @cvalue UCAL_TUESDAY */
+    public const int DOW_TUESDAY = UNKNOWN;
+    /** @cvalue UCAL_WEDNESDAY */
+    public const int DOW_WEDNESDAY = UNKNOWN;
+    /** @cvalue UCAL_THURSDAY */
+    public const int DOW_THURSDAY = UNKNOWN;
+    /** @cvalue UCAL_FRIDAY */
+    public const int DOW_FRIDAY = UNKNOWN;
+    /** @cvalue UCAL_SATURDAY */
+    public const int DOW_SATURDAY = UNKNOWN;
 
-    /**
-     * @var int
-     * @cvalue UCAL_WEEKDAY
-     */
-    public const DOW_TYPE_WEEKDAY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_WEEKEND
-     */
-    public const DOW_TYPE_WEEKEND = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_WEEKEND_ONSET
-     */
-    public const DOW_TYPE_WEEKEND_OFFSET = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_WEEKEND_CEASE
-     */
-    public const DOW_TYPE_WEEKEND_CEASE = UNKNOWN;
+    /** @cvalue UCAL_WEEKDAY */
+    public const int DOW_TYPE_WEEKDAY = UNKNOWN;
+    /** @cvalue UCAL_WEEKEND */
+    public const int DOW_TYPE_WEEKEND = UNKNOWN;
+    /** @cvalue UCAL_WEEKEND_ONSET */
+    public const int DOW_TYPE_WEEKEND_OFFSET = UNKNOWN;
+    /** @cvalue UCAL_WEEKEND_CEASE */
+    public const int DOW_TYPE_WEEKEND_CEASE = UNKNOWN;
 
-    /**
-     * @var int
-     * @cvalue UCAL_WALLTIME_FIRST
-     */
-    public const WALLTIME_FIRST = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_WALLTIME_LAST
-     */
-    public const WALLTIME_LAST = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCAL_WALLTIME_NEXT_VALID
-     */
-    public const WALLTIME_NEXT_VALID = UNKNOWN;
+    /** @cvalue UCAL_WALLTIME_FIRST */
+    public const int WALLTIME_FIRST = UNKNOWN;
+    /** @cvalue UCAL_WALLTIME_LAST */
+    public const int WALLTIME_LAST = UNKNOWN;
+    /** @cvalue UCAL_WALLTIME_NEXT_VALID */
+    public const int WALLTIME_NEXT_VALID = UNKNOWN;
 
     private function __construct() {}
 
@@ -433,7 +316,7 @@ class IntlCalendar
 
     /**
      * @return true
-     * @alias intlcal_set
+     * @implementation-alias intlcal_set
      */
     public function set(int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN) {} // TODO make return type void
 

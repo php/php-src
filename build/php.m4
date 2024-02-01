@@ -124,7 +124,7 @@ AC_DEFUN([PHP_CANONICAL_HOST_TARGET],[
     host_alias=$host
   fi
   if test -z "$host_alias"; then
-    AC_MSG_ERROR([host_alias is not set!])
+    AC_MSG_ERROR([host_alias is not set! Make sure to run config.guess])
   fi
 ])
 
@@ -786,10 +786,10 @@ dnl
 dnl PHP_BUILD_PROGRAM
 dnl
 AC_DEFUN([PHP_BUILD_PROGRAM],[
-  php_c_pre='$(LIBTOOL) --mode=compile $(CC)'
+  php_c_pre='$(LIBTOOL) --tag=CC --mode=compile $(CC)'
   php_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)'
   php_c_post=
-  php_cxx_pre='$(LIBTOOL) --mode=compile $(CXX)'
+  php_cxx_pre='$(LIBTOOL) --tag=CXX --mode=compile $(CXX)'
   php_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)'
   php_cxx_post=
   php_lo=lo
@@ -799,10 +799,10 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
     no)  pic_setting='-prefer-non-pic';;
   esac
 
-  shared_c_pre='$(LIBTOOL) --mode=compile $(CC)'
+  shared_c_pre='$(LIBTOOL) --tag=CC --mode=compile $(CC)'
   shared_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) '$pic_setting
   shared_c_post=
-  shared_cxx_pre='$(LIBTOOL) --mode=compile $(CXX)'
+  shared_cxx_pre='$(LIBTOOL) --tag=CXX --mode=compile $(CXX)'
   shared_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS) '$pic_setting
   shared_cxx_post=
   shared_lo=lo
@@ -832,10 +832,10 @@ AC_DEFUN([PHP_SHARED_MODULE],[
   PHP_SUBST($2)
   cat >>Makefile.objects<<EOF
 \$(phplibdir)/$1.$suffix: $3/$1.$suffix
-	\$(LIBTOOL) --mode=install cp $3/$1.$suffix \$(phplibdir)
+	\$(LIBTOOL) --tag=ifelse($4,,CC,CXX) --mode=install cp $3/$1.$suffix \$(phplibdir)
 
 $3/$1.$suffix: \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_DEPENDENCIES)
-	\$(LIBTOOL) --mode=link ifelse($4,,[\$(CC)],[\$(CXX)]) -shared \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) $additional_flags -o [\$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)
+	\$(LIBTOOL) --tag=ifelse($4,,CC,CXX) --mode=link ifelse($4,,[\$(CC)],[\$(CXX)]) -shared \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) $additional_flags -o [\$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)
 
 EOF
 ])
@@ -1067,28 +1067,6 @@ AC_DEFUN([PHP_CHECK_SIZEOF], [
     AC_DEFINE_UNQUOTED([HAVE_]translit($1,a-z,A-Z_), 1, [Whether $1 is available])
   ])
   AC_MSG_RESULT([[$][php_cv_sizeof_]translit($1, ,_)])
-])
-
-dnl
-dnl PHP_CHECK_IN_ADDR_T
-dnl
-AC_DEFUN([PHP_CHECK_IN_ADDR_T], [
-dnl AIX keeps in_addr_t in /usr/include/netinet/in.h
-AC_MSG_CHECKING([for in_addr_t])
-AC_CACHE_VAL(ac_cv_type_in_addr_t,
-[AC_EGREP_CPP(dnl
-changequote(<<,>>)dnl
-<<in_addr_t[^a-zA-Z_0-9]>>dnl
-changequote([,]), [#include <sys/types.h>
-#include <stdlib.h>
-#include <stddef.h>
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif], ac_cv_type_in_addr_t=yes, ac_cv_type_in_addr_t=no)])dnl
-AC_MSG_RESULT([$ac_cv_type_in_addr_t])
-if test $ac_cv_type_in_addr_t = no; then
-  AC_DEFINE(in_addr_t, u_int, [ ])
-fi
 ])
 
 dnl
@@ -1433,14 +1411,18 @@ AC_DEFUN([PHP_FOPENCOOKIE], [
   if test "$have_glibc_fopencookie" = "yes"; then
 dnl glibcs (since 2.1.2?) have a type called cookie_io_functions_t.
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdio.h>
 ]], [[cookie_io_functions_t cookie;]])],[have_cookie_io_functions_t=yes],[])
 
     if test "$have_cookie_io_functions_t" = "yes"; then
 dnl Newer glibcs have a different seeker definition.
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -1801,7 +1783,7 @@ AC_DEFUN([PHP_PROG_BISON], [
   case $php_bison_check in
     ""|invalid[)]
       if test ! -f "$abs_srcdir/Zend/zend_language_parser.h" || test ! -f "$abs_srcdir/Zend/zend_language_parser.c"; then
-        AC_MSG_ERROR([bison $php_bison_required_version is required to generate PHP parsers (excluded versions: $php_bison_excluded_versions).])
+        AC_MSG_ERROR([bison $php_bison_required_version or newer is required to generate PHP parsers (excluded versions: $php_bison_excluded_versions).])
       fi
 
       YACC="exit 0;"
@@ -1859,7 +1841,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
   case $php_re2c_check in
     ""|invalid[)]
       if test ! -f "$abs_srcdir/Zend/zend_language_scanner.c"; then
-        AC_MSG_ERROR([re2c $php_re2c_required_version is required to generate PHP lexers.])
+        AC_MSG_ERROR([re2c $php_re2c_required_version or newer is required to generate PHP lexers.])
       fi
 
       RE2C="exit 0;"
@@ -2233,7 +2215,9 @@ crypt_r("passwd", "hash", &buffer);
     if test "$php_cv_crypt_r_style" = "none"; then
       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #define _REENTRANT 1
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <crypt.h>
 ]],[[
 struct crypt_data buffer;
@@ -2419,7 +2403,6 @@ dnl
 dnl PHP_CHECK_STDINT_TYPES
 dnl
 AC_DEFUN([PHP_CHECK_STDINT_TYPES], [
-  AC_CHECK_SIZEOF([short])
   AC_CHECK_SIZEOF([int])
   AC_CHECK_SIZEOF([long])
   AC_CHECK_SIZEOF([long long])

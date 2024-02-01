@@ -58,7 +58,8 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 		"zend_extension=%s\n"
 		"opcache.validate_timestamps=0\n"
 		"opcache.file_update_protection=0\n"
-		"opcache.jit_buffer_size=256M",
+		"opcache.jit_buffer_size=128M\n"
+		"opcache.protect_memory=1\n",
 		opcache_path);
 	free(opcache_path);
 

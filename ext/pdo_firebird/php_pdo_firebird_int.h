@@ -60,7 +60,12 @@ typedef void (*info_func_t)(char*);
 #endif
 
 typedef struct {
+	int sqlcode;
+	char *errmsg;
+	size_t errmsg_length;
+} pdo_firebird_error_info;
 
+typedef struct {
 	/* the result of the last API call */
 	ISC_STATUS isc_status[20];
 
@@ -69,9 +74,9 @@ typedef struct {
 
 	/* the transaction handle */
 	isc_tr_handle tr;
-
-	/* the last error that didn't come from the API */
-	char const *last_app_error;
+	bool in_manually_txn;
+	bool is_writable_txn;
+	zend_ulong txn_isolation_level;
 
 	/* date and time format strings, can be set by the set_attribute method */
 	char *date_format;
@@ -85,11 +90,11 @@ typedef struct {
 
 	unsigned _reserved:29;
 
+	pdo_firebird_error_info einfo;
 } pdo_firebird_db_handle;
 
 
 typedef struct {
-
 	/* the link that owns this statement */
 	pdo_firebird_db_handle *H;
 
@@ -118,19 +123,37 @@ typedef struct {
 
 	/* the output SQLDA */
 	XSQLDA out_sqlda; /* last member */
-
 } pdo_firebird_stmt;
 
 extern const pdo_driver_t pdo_firebird_driver;
 
 extern const struct pdo_stmt_methods firebird_stmt_methods;
 
-void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_long line);
+extern void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state, const size_t state_len,
+	const char *msg, const size_t msg_len);
+#define php_firebird_error(d) php_firebird_set_error(d, NULL, NULL, 0, NULL, 0)
+#define php_firebird_error_stmt(s) php_firebird_set_error(s->dbh, s, NULL, 0, NULL, 0)
+#define php_firebird_error_with_info(d,e,el,m,ml) php_firebird_set_error(d, NULL, e, el, m, ml)
+#define php_firebird_error_stmt_with_info(s,e,el,m,ml) php_firebird_set_error(s->dbh, s, e, el, m, ml)
+
+extern bool php_firebird_commit_transaction(pdo_dbh_t *dbh, bool retain);
 
 enum {
 	PDO_FB_ATTR_DATE_FORMAT = PDO_ATTR_DRIVER_SPECIFIC,
 	PDO_FB_ATTR_TIME_FORMAT,
 	PDO_FB_ATTR_TIMESTAMP_FORMAT,
+
+	/*
+	 * transaction isolation level
+	 * firebird does not have a level equivalent to read uncommited.
+	 */
+	PDO_FB_TRANSACTION_ISOLATION_LEVEL,
+	PDO_FB_READ_COMMITTED,
+	PDO_FB_REPEATABLE_READ,
+	PDO_FB_SERIALIZABLE,
+
+	/* transaction access mode */
+	PDO_FB_WRITABLE_TRANSACTION,
 };
 
 #endif	/* PHP_PDO_FIREBIRD_INT_H */

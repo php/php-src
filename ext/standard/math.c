@@ -126,6 +126,30 @@ static inline double php_round_helper(double value, int mode) {
 
 			return integral;
 
+		case PHP_ROUND_CEILING:
+			if (value > 0.0 && fractional > 0.0) {
+				return integral + 1.0;
+			}
+
+			return integral;
+
+		case PHP_ROUND_FLOOR:
+			if (value < 0.0 && fractional > 0.0) {
+				return integral - 1.0;
+			}
+
+			return integral;
+
+		case PHP_ROUND_TOWARD_ZERO:
+			return integral;
+
+		case PHP_ROUND_AWAY_FROM_ZERO:
+			if (fractional > 0.0) {
+				return integral + copysign(1.0, integral);
+			}
+
+			return integral;
+
 		case PHP_ROUND_HALF_EVEN:
 			if (fractional > 0.5) {
 				return integral + copysign(1.0, integral);
@@ -143,6 +167,7 @@ static inline double php_round_helper(double value, int mode) {
 			}
 
 			return integral;
+
 		case PHP_ROUND_HALF_ODD:
 			if (fractional > 0.5) {
 				return integral + copysign(1.0, integral);
@@ -157,6 +182,7 @@ static inline double php_round_helper(double value, int mode) {
 			}
 
 			return integral;
+
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 	// FIXME: GCC bug, branch is considered reachable.
@@ -340,6 +366,10 @@ PHP_FUNCTION(round)
 		case PHP_ROUND_HALF_DOWN:
 		case PHP_ROUND_HALF_EVEN:
 		case PHP_ROUND_HALF_ODD:
+		case PHP_ROUND_AWAY_FROM_ZERO:
+		case PHP_ROUND_TOWARD_ZERO:
+		case PHP_ROUND_CEILING:
+		case PHP_ROUND_FLOOR:
 			break;
 		default:
 			zend_argument_value_error(3, "must be a valid rounding mode (PHP_ROUND_*)");
@@ -1330,6 +1360,16 @@ PHP_FUNCTION(number_format)
 			break;
 
 		case IS_DOUBLE:
+			// double values of >= 2^52 can not have fractional digits anymore
+			// Casting to long on 64bit will not loose precision on rounding
+			if (UNEXPECTED(
+				(Z_DVAL_P(num) >= 4503599627370496.0 || Z_DVAL_P(num) <= -4503599627370496.0)
+				&& ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(num))
+			)) {
+				RETURN_STR(_php_math_number_format_long((zend_long)Z_DVAL_P(num), dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len));
+                break;
+			}
+
 			if (dec >= 0) {
 				dec_int = ZEND_LONG_INT_OVFL(dec) ? INT_MAX : (int)dec;
 			} else {

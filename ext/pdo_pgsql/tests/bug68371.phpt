@@ -95,6 +95,6 @@ array(1) {
 ERR
 ERR
 string(5) "pgsql"
-ERR
+bool(true)
 ERR
 int(4)

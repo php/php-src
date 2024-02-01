@@ -84,6 +84,7 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_2022jp_kddi,
 	mbfl_no_encoding_2022jpms,
 	mbfl_no_encoding_gb18030,
+	mbfl_no_encoding_gb18030_2022,
 	mbfl_no_encoding_cp1252,
 	mbfl_no_encoding_cp1254,
 	mbfl_no_encoding_8859_1,
@@ -285,6 +286,7 @@ static inline void mb_convert_buf_reset(mb_convert_buf *buf, size_t len)
 }
 
 MBFLAPI extern const mbfl_encoding *mbfl_name2encoding(const char *name);
+MBFLAPI extern const mbfl_encoding *mbfl_name2encoding_ex(const char *name, size_t name_len);
 MBFLAPI extern const mbfl_encoding *mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
 MBFLAPI extern const mbfl_encoding **mbfl_get_supported_encodings(void);
 MBFLAPI extern const char *mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding);

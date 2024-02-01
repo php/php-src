@@ -768,6 +768,7 @@ extern const char *ir_op_name[IR_LAST_OP];
 
 #define IR_IS_CONST_OP(op)       ((op) > IR_NOP && (op) <= IR_C_FLOAT)
 #define IR_IS_FOLDABLE_OP(op)    ((op) <= IR_LAST_FOLDABLE_OP)
+#define IR_IS_SYM_CONST(op)      ((op) == IR_STR || (op) == IR_SYM || (op) == IR_FUNC)
 
 IR_ALWAYS_INLINE bool ir_const_is_true(const ir_insn *v)
 {
@@ -828,6 +829,7 @@ IR_ALWAYS_INLINE bool ir_ref_is_true(ir_ctx *ctx, ir_ref ref)
 #define IR_OPND_STR               0x5
 #define IR_OPND_NUM               0x6
 #define IR_OPND_PROB              0x7
+#define IR_OPND_PROTO             0x8
 
 #define IR_OP_FLAGS(op_flags, op1_flags, op2_flags, op3_flags) \
 	((op_flags) | ((op1_flags) << 20) | ((op2_flags) << 24) | ((op3_flags) << 28))
@@ -875,6 +877,34 @@ IR_ALWAYS_INLINE uint32_t ir_insn_len(const ir_insn *insn)
 {
 	return ir_insn_inputs_to_len(insn->inputs_count);
 }
+
+/*** IR Context Private Flags (ir_ctx->flags2) ***/
+#define IR_CFG_HAS_LOOPS       (1<<0)
+#define IR_IRREDUCIBLE_CFG     (1<<1)
+#define IR_HAS_ALLOCA          (1<<2)
+#define IR_HAS_CALLS           (1<<3)
+#define IR_OPT_IN_SCCP         (1<<4)
+#define IR_LINEAR              (1<<5)
+#define IR_HAS_VA_START        (1<<6)
+#define IR_HAS_VA_COPY         (1<<7)
+#define IR_HAS_VA_ARG_GP       (1<<8)
+#define IR_HAS_VA_ARG_FP       (1<<9)
+#define IR_HAS_FP_RET_SLOT     (1<<10)
+
+/* Temporary: SCCP -> CFG */
+#define IR_SCCP_DONE           (1<<25)
+
+/* Temporary: Dominators -> Loops */
+#define IR_NO_LOOPS            (1<<25)
+
+/* Temporary: Live Ranges */
+#define IR_LR_HAVE_DESSA_MOVES (1<<25)
+
+/* Temporary: Register Allocator */
+#define IR_RA_HAVE_SPLITS      (1<<25)
+#define IR_RA_HAVE_SPILLS      (1<<26)
+
+#define IR_RESERVED_FLAG_1     (1U<<31)
 
 /*** IR Binding ***/
 IR_ALWAYS_INLINE ir_ref ir_binding_find(const ir_ctx *ctx, ir_ref ref)
@@ -1180,6 +1210,7 @@ IR_ALWAYS_INLINE int8_t ir_get_alocated_reg(const ir_ctx *ctx, ir_ref ref, int o
 #define IR_FUSED     (1U<<31) /* Insn is fused into others (code is generated as part of the fusion root) */
 #define IR_SKIPPED   (1U<<30) /* Insn is skipped (code is not generated) */
 #define IR_SIMPLE    (1U<<29) /* Insn doesn't have any target constraints */
+#define IR_FUSED_REG (1U<<28) /* Register assignemnt may be stored in ctx->fused_regs instead of ctx->regs */
 
 #define IR_RULE_MASK 0xff
 

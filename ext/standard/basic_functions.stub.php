@@ -375,6 +375,26 @@ const PHP_ROUND_HALF_EVEN = UNKNOWN;
  * @cvalue PHP_ROUND_HALF_ODD
  */
 const PHP_ROUND_HALF_ODD = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_CEILING
+ */
+const PHP_ROUND_CEILING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_FLOOR
+ */
+const PHP_ROUND_FLOOR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_TOWARD_ZERO
+ */
+const PHP_ROUND_TOWARD_ZERO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_AWAY_FROM_ZERO
+ */
+const PHP_ROUND_AWAY_FROM_ZERO = UNKNOWN;
 
 /* crypt.c */
 
@@ -1513,7 +1533,7 @@ function header_register_callback(callable $callback): bool {}
 
 /* main/output.c */
 
-/** @param callable $callback */
+/** @param callable|null $callback */
 function ob_start($callback = null, int $chunk_size = 0, int $flags = PHP_OUTPUT_HANDLER_STDFLAGS): bool {}
 
 function ob_flush(): bool {}
@@ -2207,10 +2227,8 @@ function closelog(): true {}
 function syslog(int $priority, string $message): true {} // TODO make return type void
 #endif
 
-#ifdef HAVE_INET_NTOP
 /** @refcount 1 */
 function inet_ntop(string $ip): string|false {}
-#endif
 
 #ifdef HAVE_INET_PTON
 /** @refcount 1 */
@@ -2337,7 +2355,6 @@ function implode(string|array $separator, ?array $array = null): string {}
 function join(string|array $separator, ?array $array = null): string {}
 
 /**
- * @compile-time-eval
  * @refcount 1
  */
 function strtok(string $string, ?string $token = null): string|false {}
@@ -3322,7 +3339,7 @@ function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $sec
 function stream_context_create(?array $options = null, ?array $params = null) {}
 
 /** @param resource $context */
-function stream_context_set_params($context, array $params): bool {}
+function stream_context_set_params($context, array $params): true {}
 
 /**
  * @param resource $context
@@ -3332,10 +3349,10 @@ function stream_context_set_params($context, array $params): bool {}
 function stream_context_get_params($context): array {}
 
 /** @param resource $context */
-function stream_context_set_option($context, array|string $wrapper_or_options, ?string $option_name = null, mixed $value = UNKNOWN): bool {}
+function stream_context_set_option($context, array|string $wrapper_or_options, ?string $option_name = null, mixed $value = UNKNOWN): true {}
 
 /** @param resource $context */
-function stream_context_set_options($context, array $options): bool {}
+function stream_context_set_options($context, array $options): true {}
 
 /**
  * @param resource $stream_or_context

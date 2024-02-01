@@ -81,17 +81,15 @@ static inline void jump(php_random_status_state_xoshiro256starstar *state, const
 	state->state[3] = s3;
 }
 
-static inline void seed256(php_random_status *status, uint64_t s0, uint64_t s1, uint64_t s2, uint64_t s3)
+static inline void seed256(php_random_status_state_xoshiro256starstar *s, uint64_t s0, uint64_t s1, uint64_t s2, uint64_t s3)
 {
-	php_random_status_state_xoshiro256starstar *s = status->state;
-
 	s->state[0] = s0;
 	s->state[1] = s1;
 	s->state[2] = s2;
 	s->state[3] = s3;
 }
 
-static void seed(php_random_status *status, uint64_t seed)
+static inline void seed64(php_random_status_state_xoshiro256starstar *state, uint64_t seed)
 {
 	uint64_t s[4];
 
@@ -100,12 +98,20 @@ static void seed(php_random_status *status, uint64_t seed)
 	s[2] = splitmix64(&seed);
 	s[3] = splitmix64(&seed);
 
-	seed256(status, s[0], s[1], s[2], s[3]);
+	seed256(state, s[0], s[1], s[2], s[3]);
 }
 
-static uint64_t generate(php_random_status *status)
+static void seed(php_random_status *status, uint64_t seed)
 {
-	return generate_state(status->state);
+	seed64(status->state, seed);
+}
+
+static php_random_result generate(php_random_status *status)
+{
+	return (php_random_result){
+		.size = sizeof(uint64_t),
+		.result = generate_state(status->state),
+	};
 }
 
 static zend_long range(php_random_status *status, zend_long min, zend_long max)
@@ -150,7 +156,6 @@ static bool unserialize(php_random_status *status, HashTable *data)
 }
 
 const php_random_algo php_random_algo_xoshiro256starstar = {
-	sizeof(uint64_t),
 	sizeof(php_random_status_state_xoshiro256starstar),
 	seed,
 	generate,
@@ -211,7 +216,7 @@ PHP_METHOD(Random_Engine_Xoshiro256StarStar, __construct)
 
 	if (seed_is_null) {
 		do {
-			if (php_random_bytes_throw(&state->state, 32) == FAILURE) {
+			if (php_random_bytes_throw(&state->state, sizeof(state->state)) == FAILURE) {
 				zend_throw_exception(random_ce_Random_RandomException, "Failed to generate a random seed", 0);
 				RETURN_THROWS();
 			}
@@ -235,13 +240,13 @@ PHP_METHOD(Random_Engine_Xoshiro256StarStar, __construct)
 					RETURN_THROWS();
 				}
 
-				seed256(engine->status, t[0], t[1], t[2], t[3]);
+				seed256(state, t[0], t[1], t[2], t[3]);
 			} else {
 				zend_argument_value_error(1, "must be a 32 byte (256 bit) string");
 				RETURN_THROWS();
 			}
 		} else {
-			engine->algo->seed(engine->status, (uint64_t) int_seed);
+			seed64(state, (uint64_t) int_seed);
 		}
 	}
 }

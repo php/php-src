@@ -4,6 +4,7 @@ PHP_ARG_WITH([mhash],
     [Include mhash support])])
 
 if test "$PHP_MHASH" != "no"; then
+  AC_MSG_WARN([The --with-mhash option and mhash* functions are deprecated as of PHP 8.1.0])
   AC_DEFINE(PHP_MHASH_BC, 1, [ ])
 fi
 
@@ -31,7 +32,6 @@ else
 fi
 
 PHP_ADD_BUILD_DIR(ext/hash/murmur, 1)
-PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -I@ext_srcdir@/xxhash"
 
 EXT_HASH_SOURCES="hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c \
   hash_tiger.c hash_gost.c hash_snefru.c hash_whirlpool.c hash_adler32.c \
@@ -41,7 +41,7 @@ EXT_HASH_HEADERS="php_hash.h php_hash_md.h php_hash_sha.h php_hash_ripemd.h \
   php_hash_haval.h php_hash_tiger.h php_hash_gost.h php_hash_snefru.h \
   php_hash_whirlpool.h php_hash_adler32.h php_hash_crc32.h \
   php_hash_fnv.h php_hash_joaat.h php_hash_sha3.h php_hash_murmur.h \
-  php_hash_xxhash.h"
+  php_hash_xxhash.h xxhash/xxhash.h"
 
 PHP_NEW_EXTENSION(hash, $EXT_HASH_SOURCES, 0,,$PHP_HASH_CFLAGS)
 PHP_INSTALL_HEADERS(ext/hash, $EXT_HASH_HEADERS)

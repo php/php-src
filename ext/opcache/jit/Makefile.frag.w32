@@ -1,6 +1,3 @@
-!if "$(IR_TARGET)" != ""
-# New IR based JIT
-
 $(BUILD_DIR)\\minilua.exe: ext\opcache\jit\ir\dynasm\minilua.c
 	@if exist $(BUILD_DIR)\\minilua.exe del $(BUILD_DIR)\\minilua.exe
 	$(PHP_CL) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\minilua.exe ext\opcache\jit\ir\dynasm\minilua.c
@@ -39,24 +36,3 @@ $(BUILD_DIR)\ext\opcache\jit\zend_jit.obj: \
 	ext\opcache\jit\zend_jit_helpers.c \
 	ext\opcache\jit\ir\ir.h \
 	ext\opcache\jit\ir\ir_builder.h
-
-!else
-# Old DynAsm based JIT
-
-$(BUILD_DIR)\\minilua.exe: ext\opcache\jit\dynasm\minilua.c
-	@if exist $(BUILD_DIR)\\minilua.exe del $(BUILD_DIR)\\minilua.exe
-	$(PHP_CL) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\minilua.exe ext\opcache\jit\dynasm\minilua.c
-
-ext\opcache\jit\zend_jit_x86.c: ext\opcache\jit\zend_jit_x86.dasc $(BUILD_DIR)\\minilua.exe
-	@if exist ext\opcache\jit\zend_jit_x86.c del ext\opcache\jit\zend_jit_x86.c
-	$(BUILD_DIR)\\minilua.exe ext/opcache/jit/dynasm/dynasm.lua $(DASM_FLAGS) -o $@ ext/opcache/jit/zend_jit_x86.dasc
-
-$(BUILD_DIR)\ext\opcache\jit\zend_jit.obj: \
-	ext/opcache/jit/zend_jit_x86.c \
-	ext/opcache/jit/zend_jit_helpers.c \
-	ext/opcache/jit/zend_jit_disasm.c \
-	ext/opcache/jit/zend_jit_gdb.c \
-	ext/opcache/jit/zend_jit_perf_dump.c \
-	ext/opcache/jit/zend_jit_trace.c \
-	ext/opcache/jit/zend_jit_vtune.c
-!endif

@@ -32,9 +32,7 @@ runs:
           libicu-dev \
           libtidy-dev \
           libenchant-2-dev \
-          libaspell-dev \
           libbz2-dev \
-          libpspell-dev \
           libsasl2-dev \
           libxpm-dev \
           libzip-dev \

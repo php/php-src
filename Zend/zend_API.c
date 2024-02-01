@@ -2389,7 +2389,8 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 			post_deactivate_count++;
 		}
 	} ZEND_HASH_FOREACH_END();
-	module_request_startup_handlers = (zend_module_entry**)malloc(
+	module_request_startup_handlers = (zend_module_entry**)realloc(
+		module_request_startup_handlers,
 	    sizeof(zend_module_entry*) *
 		(startup_count + 1 +
 		 shutdown_count + 1 +
@@ -2421,7 +2422,8 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	class_cleanup_handlers = (zend_class_entry**)malloc(
+	class_cleanup_handlers = (zend_class_entry**)realloc(
+		class_cleanup_handlers,
 		sizeof(zend_class_entry*) *
 		(class_count + 1));
 	class_cleanup_handlers[class_count] = NULL;
@@ -2447,7 +2449,9 @@ ZEND_API void zend_startup_modules(void) /* {{{ */
 ZEND_API void zend_destroy_modules(void) /* {{{ */
 {
 	free(class_cleanup_handlers);
+	class_cleanup_handlers = NULL;
 	free(module_request_startup_handlers);
+	module_request_startup_handlers = NULL;
 	zend_hash_graceful_reverse_destroy(&module_registry);
 }
 /* }}} */
@@ -2768,6 +2772,9 @@ ZEND_END_ARG_INFO()
 
 static zend_always_inline void zend_normalize_internal_type(zend_type *type) {
 	ZEND_ASSERT(!ZEND_TYPE_HAS_LITERAL_NAME(*type));
+	if (ZEND_TYPE_PURE_MASK(*type) != MAY_BE_ANY) {
+		ZEND_ASSERT(!ZEND_TYPE_CONTAINS_CODE(*type, IS_RESOURCE) && "resource is not allowed in a zend_type");
+	}
 	zend_type *current;
 	ZEND_TYPE_FOREACH(*type, current) {
 		if (ZEND_TYPE_HAS_NAME(*current)) {
@@ -4638,6 +4645,9 @@ ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 		c = pemalloc(sizeof(zend_class_constant), 1);
+		if (ZEND_TYPE_PURE_MASK(type) != MAY_BE_ANY) {
+			ZEND_ASSERT(!ZEND_TYPE_CONTAINS_CODE(type, IS_RESOURCE) && "resource is not allowed in a zend_type");
+		}
 	} else {
 		c = zend_arena_alloc(&CG(arena), sizeof(zend_class_constant));
 	}

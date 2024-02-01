@@ -6,6 +6,9 @@ gd
 <?php
     if(!function_exists('imagefttext')) die('skip imagefttext() not available');
     if (substr(PHP_OS, 0, 3) == 'WIN') die('skip UTF-8 font file names not yet supported on Windows');
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
+    }
 ?>
 --FILE--
 <?php

@@ -19,5 +19,5 @@ var_dump($result);
 
 ?>
 --EXPECTF--
-Warning: DOMDocument::schemaValidateSource(): Element 'books': No matching global declaration available for the validation root. in %s.php on line %d
+Warning: DOM\Document::schemaValidateSource(): Element 'books': No matching global declaration available for the validation root. in %s on line %d
 bool(false)

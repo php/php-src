@@ -73,7 +73,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 		return FAILURE;
 	}
 	if (UNEXPECTED(memsize > ZEND_LONG_MAX / (1024 * 1024))) {
-		*p = ZEND_LONG_MAX;
+		*p = ZEND_LONG_MAX & ~(1024 * 1024 - 1);
 	} else {
 		*p = memsize * (1024 * 1024);
 	}
@@ -317,7 +317,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.cache_id"                      , ""    , PHP_INI_SYSTEM, OnUpdateString,           accel_directives.cache_id,               zend_accel_globals, accel_globals)
 #endif
 #ifdef HAVE_JIT
-	STD_PHP_INI_ENTRY("opcache.jit"                           , "tracing",                    PHP_INI_ALL,    OnUpdateJit,      options,               zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit"                           , "disable",                    PHP_INI_ALL,    OnUpdateJit,      options,               zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_buffer_size"               , ZEND_JIT_DEFAULT_BUFFER_SIZE, PHP_INI_SYSTEM, OnUpdateLong,     buffer_size,           zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_debug"                     , "0",                          PHP_INI_ALL,    OnUpdateJitDebug, debug,                 zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_bisect_limit"              , "0",                          PHP_INI_ALL,    OnUpdateLong,     bisect_limit,          zend_jit_globals, jit_globals)

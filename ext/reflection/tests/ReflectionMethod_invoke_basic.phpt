@@ -40,9 +40,9 @@ abstract class AbstractClass {
 
 $foo = new ReflectionMethod('TestClass', 'foo');
 $methodWithArgs = new ReflectionMethod('TestClass', 'methodWithArgs');
-$staticMethod = new ReflectionMethod('TestClass::staticMethod');
-$privateMethod = new ReflectionMethod("TestClass::privateMethod");
-$methodThatThrows = new ReflectionMethod("TestClass::willThrow");
+$staticMethod = new ReflectionMethod('TestClass', 'staticMethod');
+$privateMethod = new ReflectionMethod('TestClass', 'privateMethod');
+$methodThatThrows = new ReflectionMethod('TestClass', 'willThrow');
 
 $testClassInstance = new TestClass();
 $testClassInstance->prop = "Hello";

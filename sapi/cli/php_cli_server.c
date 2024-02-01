@@ -1437,14 +1437,13 @@ static void php_cli_server_request_dtor(php_cli_server_request *req) /* {{{ */
 	}
 } /* }}} */
 
-static void php_cli_server_request_translate_vpath(php_cli_server_request *request, const char *document_root, size_t document_root_len) /* {{{ */
+static void php_cli_server_request_translate_vpath(const php_cli_server *server, php_cli_server_request *request, const char *document_root, size_t document_root_len) /* {{{ */
 {
 	zend_stat_t sb = {0};
 	static const char *index_files[] = { "index.php", "index.html", NULL };
 	char *buf = safe_pemalloc(1, request->vpath_len, 1 + document_root_len + 1 + sizeof("index.html"), 1);
 	char *p = buf, *prev_path = NULL, *q, *vpath;
 	size_t prev_path_len = 0;
-	int  is_static_file = 0;
 
 	memmove(p, document_root, document_root_len);
 	p += document_root_len;
@@ -1452,13 +1451,6 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	if (request->vpath_len != 0) {
 		if (request->vpath[0] != '/') {
 			*p++ = DEFAULT_SLASH;
-		}
-		q = request->vpath + request->vpath_len;
-		while (q > request->vpath) {
-			if (*q-- == '.') {
-				is_static_file = 1;
-				break;
-			}
 		}
 		memmove(p, request->vpath, request->vpath_len);
 #ifdef PHP_WIN32
@@ -1489,7 +1481,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 					}
 					file++;
 				}
-				if (!*file || is_static_file) {
+				if (!*file) {
 					if (prev_path) {
 						pefree(prev_path, 1);
 					}
@@ -1801,7 +1793,7 @@ static int php_cli_server_client_read_request_on_message_complete(php_http_parse
 {
 	php_cli_server_client *client = parser->data;
 	client->request.protocol_version = parser->http_major * 100 + parser->http_minor;
-	php_cli_server_request_translate_vpath(&client->request, client->server->document_root, client->server->document_root_len);
+	php_cli_server_request_translate_vpath(client->server, &client->request, client->server->document_root, client->server->document_root_len);
 	if (client->request.vpath) {
 		const char *vpath = client->request.vpath;
 		const char *end = vpath + client->request.vpath_len;
@@ -2065,6 +2057,7 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 			goto fail;
 		}
 		append_essential_headers(&buffer, client, 1, NULL);
+		smart_str_appends_ex(&buffer, SAPI_PHP_VERSION_HEADER "\r\n", 1);
 		smart_str_appends_ex(&buffer, "Content-Type: text/html; charset=UTF-8\r\n", 1);
 		smart_str_appends_ex(&buffer, "Content-Length: ", 1);
 		smart_str_append_unsigned_ex(&buffer, php_cli_server_buffer_size(&client->content_sender.buffer), 1);
@@ -2248,6 +2241,17 @@ static bool php_cli_server_dispatch_router(php_cli_server *server, php_cli_serve
 
 	zend_try {
 		zval retval;
+
+		/* Normally php_execute_script restarts the timer with max_execution_time if it has
+		 * previously been initialized with max_input_time. We're not using php_execute_script here
+		 * because it does not provide a way to get the return value of the main script, so we need
+		 * to restart the timer manually. */
+		if (PG(max_input_time) != -1) {
+#ifdef PHP_WIN32
+			zend_unset_timeout();
+#endif
+			zend_set_timeout(INI_INT("max_execution_time"), 0);
+		}
 
 		ZVAL_UNDEF(&retval);
 		if (SUCCESS == zend_execute_scripts(ZEND_REQUIRE, &retval, 1, &zfd)) {

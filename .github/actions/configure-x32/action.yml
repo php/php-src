@@ -54,7 +54,6 @@ runs:
             --enable-bcmath \
             --enable-calendar \
             --enable-ftp \
-            --with-pspell=/usr \
             --with-kerberos \
             --enable-sysvmsg \
             --with-ffi \

@@ -230,7 +230,12 @@ static ZEND_INI_MH(OnUpdateReservedStackSize) /* {{{ */
 static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 {
 	if (new_value) {
-		EG(fiber_stack_size) = zend_ini_parse_uquantity_warn(new_value, entry->name);
+		zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
+		if (tmp < 0) {
+			zend_error(E_WARNING, "fiber.stack_size must be a positive number");
+			return FAILURE;
+		}
+		EG(fiber_stack_size) = tmp;
 	} else {
 		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_C_STACK_SIZE;
 	}
@@ -1592,26 +1597,22 @@ ZEND_API ZEND_COLD void zend_error_at(
 	va_end(args);
 }
 
-ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) {
-	zend_string *filename;
-	uint32_t lineno;
-	va_list args;
+#define zend_error_impl(type, format) do { \
+		zend_string *filename; \
+		uint32_t lineno; \
+		va_list args; \
+		get_filename_lineno(type, &filename, &lineno); \
+		va_start(args, format); \
+		zend_error_va_list(type, filename, lineno, format, args); \
+		va_end(args); \
+	} while (0)
 
-	get_filename_lineno(type, &filename, &lineno);
-	va_start(args, format);
-	zend_error_va_list(type, filename, lineno, format, args);
-	va_end(args);
+ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) {
+	zend_error_impl(type, format);
 }
 
 ZEND_API ZEND_COLD void zend_error_unchecked(int type, const char *format, ...) {
-	zend_string *filename;
-	uint32_t lineno;
-	va_list args;
-
-	get_filename_lineno(type, &filename, &lineno);
-	va_start(args, format);
-	zend_error_va_list(type, filename, lineno, format, args);
-	va_end(args);
+	zend_error_impl(type, format);
 }
 
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
@@ -1631,18 +1632,26 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
 	abort();
 }
 
+#define zend_error_noreturn_impl(type, format) do { \
+		zend_string *filename; \
+		uint32_t lineno; \
+		va_list args; \
+		get_filename_lineno(type, &filename, &lineno); \
+		va_start(args, format); \
+		zend_error_va_list(type, filename, lineno, format, args); \
+		va_end(args); \
+		/* Should never reach this. */ \
+		abort(); \
+	} while (0)
+
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...)
 {
-	zend_string *filename;
-	uint32_t lineno;
-	va_list args;
+	zend_error_noreturn_impl(type, format);
+}
 
-	get_filename_lineno(type, &filename, &lineno);
-	va_start(args, format);
-	zend_error_va_list(type, filename, lineno, format, args);
-	va_end(args);
-	/* Should never reach this. */
-	abort();
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn_unchecked(int type, const char *format, ...)
+{
+	zend_error_noreturn_impl(type, format);
 }
 
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn, const char *message)

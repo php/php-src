@@ -35,6 +35,8 @@
 #include <libxml/uri.h>
 #include <libxml/xmlerror.h>
 #include <libxml/xmlsave.h>
+#include <libxml/xmlerror.h>
+#include <libxml/entities.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
@@ -150,15 +152,6 @@ static void php_libxml_unlink_entity(void *data, void *table, xmlChar *name)
 }
 
 /* {{{ internal functions for interoperability */
-static int php_libxml_clear_object(php_libxml_node_object *object)
-{
-	if (object->properties) {
-		object->properties = NULL;
-	}
-	php_libxml_decrement_node_ptr(object);
-	return php_libxml_decrement_doc_ref(object);
-}
-
 static void php_libxml_unregister_node(xmlNodePtr nodep)
 {
 	php_libxml_node_object *wrapper;
@@ -168,7 +161,8 @@ static void php_libxml_unregister_node(xmlNodePtr nodep)
 	if (nodeptr != NULL) {
 		wrapper = nodeptr->_private;
 		if (wrapper) {
-			php_libxml_clear_object(wrapper);
+			php_libxml_decrement_node_ptr(wrapper);
+			php_libxml_decrement_doc_ref(wrapper);
 		} else {
 			if (nodeptr->node != NULL && nodeptr->node->type != XML_DOCUMENT_NODE) {
 				nodeptr->node->_private = NULL;
@@ -206,12 +200,36 @@ static void php_libxml_node_free(xmlNodePtr node)
 			 * dtd is attached to the document. This works around the issue by inspecting the parent directly. */
 			case XML_ENTITY_DECL: {
 				xmlEntityPtr entity = (xmlEntityPtr) node;
-				php_libxml_unlink_entity_decl(entity);
-				if (entity->orig != NULL) {
-					xmlFree((char *) entity->orig);
-					entity->orig = NULL;
+				if (entity->etype != XML_INTERNAL_PREDEFINED_ENTITY) {
+					php_libxml_unlink_entity_decl(entity);
+#if LIBXML_VERSION >= 21200
+					xmlFreeEntity(entity);
+#else
+					if (entity->children != NULL && entity->owner && entity == (xmlEntityPtr) entity->children->parent) {
+						xmlFreeNodeList(entity->children);
+					}
+					xmlDictPtr dict = entity->doc != NULL ? entity->doc->dict : NULL;
+					if (dict == NULL || !xmlDictOwns(dict, entity->name)) {
+						xmlFree((xmlChar *) entity->name);
+					}
+					if (dict == NULL || !xmlDictOwns(dict, entity->ExternalID)) {
+						xmlFree((xmlChar *) entity->ExternalID);
+					}
+					if (dict == NULL || !xmlDictOwns(dict, entity->SystemID)) {
+						xmlFree((xmlChar *) entity->SystemID);
+					}
+					if (dict == NULL || !xmlDictOwns(dict, entity->URI)) {
+						xmlFree((xmlChar *) entity->URI);
+					}
+					if (dict == NULL || !xmlDictOwns(dict, entity->content)) {
+						xmlFree(entity->content);
+					}
+					if (dict == NULL || !xmlDictOwns(dict, entity->orig)) {
+						xmlFree(entity->orig);
+					}
+					xmlFree(entity);
+#endif
 				}
-				xmlFreeNode(node);
 				break;
 			}
 			case XML_NOTATION_NODE: {
@@ -369,6 +387,11 @@ static PHP_GINIT_FUNCTION(libxml)
 	libxml_globals->entity_loader_callback = empty_fcall_info_cache;
 }
 
+PHP_LIBXML_API php_stream_context *php_libxml_get_stream_context(void)
+{
+	return php_stream_context_from_zval(Z_ISUNDEF(LIBXML(stream_context)) ? NULL : &LIBXML(stream_context), false);
+}
+
 /* Channel libxml file io layer through the PHP streams subsystem.
  * This allows use of ftps:// and https:// urls */
 
@@ -436,7 +459,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 		}
 	}
 
-	context = php_stream_context_from_zval(Z_ISUNDEF(LIBXML(stream_context))? NULL : &LIBXML(stream_context), 0);
+	context = php_libxml_get_stream_context();
 
 	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, REPORT_ERRORS, NULL, context);
 	if (ret_val) {
@@ -496,47 +519,13 @@ php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 	/* Check if there's been an external transport protocol with an encoding information */
 	if (enc == XML_CHAR_ENCODING_NONE) {
 		php_stream *s  = (php_stream *) context;
-
-		if (Z_TYPE(s->wrapperdata) == IS_ARRAY) {
-			zval *header;
-
-			ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(s->wrapperdata), header) {
-				const char buf[] = "Content-Type:";
-				if (Z_TYPE_P(header) == IS_STRING &&
-						!zend_binary_strncasecmp(Z_STRVAL_P(header), Z_STRLEN_P(header), buf, sizeof(buf)-1, sizeof(buf)-1)) {
-					char needle[] = "charset=";
-					char *haystack = estrndup(Z_STRVAL_P(header), Z_STRLEN_P(header));
-					char *encoding = php_stristr(haystack, needle, Z_STRLEN_P(header), strlen(needle));
-
-					if (encoding) {
-						char *end;
-
-						encoding += sizeof("charset=")-1;
-						if (*encoding == '"') {
-							encoding++;
-						}
-						end = strchr(encoding, ';');
-						if (end == NULL) {
-							end = encoding + strlen(encoding);
-						}
-						end--; /* end == encoding-1 isn't a buffer underrun */
-						while (*end == ' ' || *end == '\t') {
-							end--;
-						}
-						if (*end == '"') {
-							end--;
-						}
-						if (encoding >= end) continue;
-						*(end+1) = '\0';
-						enc = xmlParseCharEncoding(encoding);
-						if (enc <= XML_CHAR_ENCODING_NONE) {
-							enc = XML_CHAR_ENCODING_NONE;
-						}
-					}
-					efree(haystack);
-					break; /* found content-type */
-				}
-			} ZEND_HASH_FOREACH_END();
+		zend_string *charset = php_libxml_sniff_charset_from_stream(s);
+		if (charset != NULL) {
+			enc = xmlParseCharEncoding(ZSTR_VAL(charset));
+			if (enc <= XML_CHAR_ENCODING_NONE) {
+				enc = XML_CHAR_ENCODING_NONE;
+			}
+			zend_string_release_ex(charset, false);
 		}
 	}
 
@@ -608,7 +597,11 @@ static void _php_libxml_free_error(void *ptr)
 	xmlResetError((xmlErrorPtr) ptr);
 }
 
-static void _php_list_set_error_structure(xmlErrorPtr error, const char *msg)
+#if LIBXML_VERSION >= 21200
+static void _php_list_set_error_structure(const xmlError *error, const char *msg, int line, int column)
+#else
+static void _php_list_set_error_structure(xmlError *error, const char *msg, int line, int column)
+#endif
 {
 	xmlError error_copy;
 	int ret;
@@ -621,6 +614,8 @@ static void _php_list_set_error_structure(xmlErrorPtr error, const char *msg)
 	} else {
 		error_copy.code = XML_ERR_INTERNAL_ERROR;
 		error_copy.level = XML_ERR_ERROR;
+		error_copy.line = line;
+		error_copy.int2 = column;
 		error_copy.message = (char*)xmlStrdup((const xmlChar*)msg);
 		ret = 0;
 	}
@@ -630,7 +625,7 @@ static void _php_list_set_error_structure(xmlErrorPtr error, const char *msg)
 	}
 }
 
-static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg)
+static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg, int line)
 {
 	xmlParserCtxtPtr parser;
 
@@ -638,9 +633,9 @@ static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg)
 
 	if (parser != NULL && parser->input != NULL) {
 		if (parser->input->filename) {
-			php_error_docref(NULL, level, "%s in %s, line: %d", msg, parser->input->filename, parser->input->line);
+			php_error_docref(NULL, level, "%s in %s, line: %d", msg, parser->input->filename, line);
 		} else {
-			php_error_docref(NULL, level, "%s in Entity, line: %d", msg, parser->input->line);
+			php_error_docref(NULL, level, "%s in Entity, line: %d", msg, line);
 		}
 	} else {
 		php_error_docref(NULL, E_WARNING, "%s", msg);
@@ -650,13 +645,13 @@ static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg)
 void php_libxml_issue_error(int level, const char *msg)
 {
 	if (LIBXML(error_list)) {
-		_php_list_set_error_structure(NULL, msg);
+		_php_list_set_error_structure(NULL, msg, 0, 0);
 	} else {
 		php_error_docref(NULL, level, "%s", msg);
 	}
 }
 
-static void php_libxml_internal_error_handler(int error_type, void *ctx, const char **msg, va_list ap)
+static void php_libxml_internal_error_handler_ex(int error_type, void *ctx, const char **msg, va_list ap, int line, int column)
 {
 	char *buf;
 	int len, len_iter, output = 0;
@@ -676,15 +671,15 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx, const c
 
 	if (output == 1) {
 		if (LIBXML(error_list)) {
-			_php_list_set_error_structure(NULL, ZSTR_VAL(LIBXML(error_buffer).s));
+			_php_list_set_error_structure(NULL, ZSTR_VAL(LIBXML(error_buffer).s), line, column);
 		} else if (!EG(exception)) {
 			/* Don't throw additional notices/warnings if an exception has already been thrown. */
 			switch (error_type) {
 				case PHP_LIBXML_CTX_ERROR:
-					php_libxml_ctx_error_level(E_WARNING, ctx, ZSTR_VAL(LIBXML(error_buffer).s));
+					php_libxml_ctx_error_level(E_WARNING, ctx, ZSTR_VAL(LIBXML(error_buffer).s), line);
 					break;
 				case PHP_LIBXML_CTX_WARNING:
-					php_libxml_ctx_error_level(E_NOTICE, ctx, ZSTR_VAL(LIBXML(error_buffer).s));
+					php_libxml_ctx_error_level(E_NOTICE, ctx, ZSTR_VAL(LIBXML(error_buffer).s), line);
 					break;
 				default:
 					php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(LIBXML(error_buffer).s));
@@ -692,6 +687,19 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx, const c
 		}
 		smart_str_free(&LIBXML(error_buffer));
 	}
+}
+
+static void php_libxml_internal_error_handler(int error_type, void *ctx, const char **msg, va_list ap)
+{
+	int line = 0;
+	int column = 0;
+	xmlParserCtxtPtr parser = (xmlParserCtxtPtr) ctx;
+	/* Context is not valid for PHP_LIBXML_ERROR, don't dereference it in that case */
+	if (error_type != PHP_LIBXML_ERROR && parser != NULL && parser->input != NULL) {
+		line = parser->input->line;
+		column = parser->input->col;
+	}
+	php_libxml_internal_error_handler_ex(error_type, ctx, msg, ap, line, column);
 }
 
 static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
@@ -823,6 +831,28 @@ static xmlParserInputPtr _php_libxml_pre_ext_ent_loader(const char *URL,
 	}
 }
 
+PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(const char *file, int line, int column, const char *msg,...)
+{
+	va_list args;
+	va_start(args, msg);
+	php_libxml_internal_error_handler_ex(PHP_LIBXML_CTX_ERROR, NULL, &msg, args, line, column);
+	va_end(args);
+
+	/* Propagate back into libxml */
+	if (LIBXML(error_list)) {
+		xmlErrorPtr last = zend_llist_get_last(LIBXML(error_list));
+		if (last) {
+			if (!last->file) {
+				last->file = strdup(file);
+			}
+			/* Until there is a replacement */
+			ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
+			xmlCopyError(last, &xmlLastError);
+			ZEND_DIAGNOSTIC_IGNORED_END
+		}
+	}
+}
+
 PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...)
 {
 	va_list args;
@@ -839,11 +869,13 @@ PHP_LIBXML_API void php_libxml_ctx_warning(void *ctx, const char *msg, ...)
 	va_end(args);
 }
 
+#if LIBXML_VERSION >= 21200
+static void php_libxml_structured_error_handler(void *userData, const xmlError *error)
+#else
 static void php_libxml_structured_error_handler(void *userData, xmlErrorPtr error)
+#endif
 {
-	_php_list_set_error_structure(error, NULL);
-
-	return;
+	_php_list_set_error_structure(error, NULL, 0, 0);
 }
 
 PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...)
@@ -1071,11 +1103,9 @@ PHP_FUNCTION(libxml_use_internal_errors)
 /* {{{ Retrieve last error from libxml */
 PHP_FUNCTION(libxml_get_last_error)
 {
-	xmlErrorPtr error;
-
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	error = xmlGetLastError();
+	const xmlError *error = xmlGetLastError();
 
 	if (error) {
 		object_init_ex(return_value, libxmlerror_class_entry);
@@ -1102,7 +1132,6 @@ PHP_FUNCTION(libxml_get_last_error)
 /* {{{ Retrieve array of errors */
 PHP_FUNCTION(libxml_get_errors)
 {
-
 	xmlErrorPtr error;
 
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1201,10 +1230,7 @@ PHP_FUNCTION(libxml_get_external_entity_loader)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (ZEND_FCC_INITIALIZED(LIBXML(entity_loader_callback))) {
-		zval tmp;
-		zend_get_callable_zval_from_fcc(&LIBXML(entity_loader_callback), &tmp);
-		RETVAL_COPY(&tmp);
-		zval_ptr_dtor(&tmp);
+		zend_get_callable_zval_from_fcc(&LIBXML(entity_loader_callback), return_value);
 		return;
 	}
 	RETURN_NULL();
@@ -1333,6 +1359,7 @@ PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, 
 		object->document->refcount = ret_refcount;
 		object->document->doc_props = NULL;
 		object->document->cache_tag.modification_nr = 1; /* iterators start at 0, such that they will start in an uninitialised state */
+		object->document->is_modern_api_class = false;
 	}
 
 	return ret_refcount;
@@ -1372,6 +1399,15 @@ PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node)
 	switch (node->type) {
 		case XML_DOCUMENT_NODE:
 		case XML_HTML_DOCUMENT_NODE:
+			break;
+		case XML_ENTITY_REF_NODE:
+			/* Entity reference nodes are special: their children point to entity declarations,
+			 * but they don't own the declarations and therefore shouldn't free the children.
+			 * Moreover, there can be more than one reference node for a single entity declarations. */
+			php_libxml_unregister_node(node);
+			if (node->parent == NULL) {
+				php_libxml_node_free(node);
+			}
 			break;
 		default:
 			if (node->parent == NULL || node->type == XML_NAMESPACE_DECL) {

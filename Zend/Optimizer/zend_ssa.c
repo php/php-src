@@ -607,7 +607,7 @@ add_op1_def:
 			}
 			break;
 		case ZEND_ASSIGN_OBJ_REF:
-			if (opline->op1_type == IS_CV) {
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
 				ssa_ops[k].op1_def = ssa_vars_count;
 				var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
 				ssa_vars_count++;

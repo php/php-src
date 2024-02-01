@@ -222,7 +222,8 @@ PHP_HASH_API void PHP_SHA224InitArgs(PHP_SHA224_CTX * context, ZEND_ATTRIBUTE_UN
  */
 PHP_HASH_API void PHP_SHA224Update(PHP_SHA224_CTX * context, const unsigned char *input, size_t inputLen)
 {
-	unsigned int i, index, partLen;
+	unsigned int index, partLen;
+	size_t i;
 
 	/* Compute number of bytes mod 64 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
@@ -231,7 +232,7 @@ PHP_HASH_API void PHP_SHA224Update(PHP_SHA224_CTX * context, const unsigned char
 	if ((context->count[0] += ((uint32_t) inputLen << 3)) < ((uint32_t) inputLen << 3)) {
 		context->count[1]++;
 	}
-	context->count[1] += ((uint32_t) inputLen >> 29);
+	context->count[1] += (uint32_t) (inputLen >> 29);
 
 	partLen = 64 - index;
 
@@ -299,7 +300,8 @@ PHP_HASH_API void PHP_SHA224Final(unsigned char digest[28], PHP_SHA224_CTX * con
  */
 PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX * context, const unsigned char *input, size_t inputLen)
 {
-	unsigned int i, index, partLen;
+	unsigned int index, partLen;
+	size_t i;
 
 	/* Compute number of bytes mod 64 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
@@ -308,7 +310,7 @@ PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX * context, const unsigned char
 	if ((context->count[0] += ((uint32_t) inputLen << 3)) < ((uint32_t) inputLen << 3)) {
 		context->count[1]++;
 	}
-	context->count[1] += ((uint32_t) inputLen >> 29);
+	context->count[1] += (uint32_t) (inputLen >> 29);
 
 	partLen = 64 - index;
 
@@ -513,7 +515,8 @@ static void SHA512Transform(uint64_t state[8], const unsigned char block[128])
  */
 PHP_HASH_API void PHP_SHA384Update(PHP_SHA384_CTX * context, const unsigned char *input, size_t inputLen)
 {
-	unsigned int i = 0, index, partLen;
+	unsigned int index, partLen;
+	size_t i = 0;
 
 	/* Compute number of bytes mod 128 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x7F);
@@ -522,7 +525,8 @@ PHP_HASH_API void PHP_SHA384Update(PHP_SHA384_CTX * context, const unsigned char
 	if ((context->count[0] += ((uint64_t) inputLen << 3)) < ((uint64_t) inputLen << 3)) {
 		context->count[1]++;
 	}
-	context->count[1] += ((uint64_t) inputLen >> 61);
+	/* The cast may seem unnecessary, but on 32-bit this makes sure the result is 0 without invoking undefined behaviour. */
+	context->count[1] += (uint64_t) inputLen >> 61;
 
 	partLen = 128 - index;
 
@@ -666,7 +670,8 @@ PHP_HASH_API void PHP_SHA512_224InitArgs(PHP_SHA512_CTX * context, ZEND_ATTRIBUT
  */
 PHP_HASH_API void PHP_SHA512Update(PHP_SHA512_CTX * context, const unsigned char *input, size_t inputLen)
 {
-	unsigned int i, index, partLen;
+	unsigned int index, partLen;
+	size_t i;
 
 	/* Compute number of bytes mod 128 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x7F);
@@ -675,7 +680,8 @@ PHP_HASH_API void PHP_SHA512Update(PHP_SHA512_CTX * context, const unsigned char
 	if ((context->count[0] += ((uint64_t) inputLen << 3)) < ((uint64_t) inputLen << 3)) {
 		context->count[1]++;
 	}
-	context->count[1] += ((uint64_t) inputLen >> 61);
+	/* The cast may seem unnecessary, but on 32-bit this makes sure the result is 0 without invoking undefined behaviour. */
+	context->count[1] += (uint64_t) inputLen >> 61;
 
 	partLen = 128 - index;
 

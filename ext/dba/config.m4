@@ -640,7 +640,6 @@ PHP_ARG_ENABLE([flatfile],,
 dnl CDB
 if test "$PHP_CDB" = "yes"; then
   AC_DEFINE(DBA_CDB_BUILTIN, 1, [ ])
-  AC_DEFINE(DBA_CDB_MAKE, 1, [ ])
   AC_DEFINE(DBA_CDB, 1, [ ])
   cdb_sources="libcdb/cdb.c libcdb/cdb_make.c libcdb/uint32.c"
   THIS_RESULT="builtin"

@@ -258,18 +258,28 @@ static zend_string *php_session_encode(void) /* {{{ */
 }
 /* }}} */
 
+static ZEND_COLD void php_session_cancel_decode(void)
+{
+	php_session_destroy();
+	php_session_track_init();
+	php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");
+}
+
 static zend_result php_session_decode(zend_string *data) /* {{{ */
 {
 	if (!PS(serializer)) {
 		php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to decode session object");
 		return FAILURE;
 	}
-	if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
-		php_session_destroy();
-		php_session_track_init();
-		php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");
-		return FAILURE;
-	}
+	zend_try {
+		if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
+			php_session_cancel_decode();
+			return FAILURE;
+		}
+	} zend_catch {
+		php_session_cancel_decode();
+		zend_bailout();
+	} zend_end_try();
 	return SUCCESS;
 }
 /* }}} */
@@ -2090,6 +2100,11 @@ PHP_FUNCTION(session_set_save_handler)
 		}
 
 		RETURN_TRUE;
+	}
+
+	zend_error(E_DEPRECATED, "Calling session_set_save_handler() with more than 2 arguments is deprecated");
+	if (UNEXPECTED(EG(exception))) {
+		RETURN_THROWS();
 	}
 
 	/* Procedural version */

@@ -61,7 +61,7 @@
 #include <openssl/param_build.h>
 #endif
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L && !defined(OPENSSL_NO_ENGINE)
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)) && !defined(OPENSSL_NO_ENGINE)
 #include <openssl/engine.h>
 #endif
 
@@ -2863,8 +2863,29 @@ cleanup:
 
 /* {{{ x509 CSR functions */
 
-/* {{{ php_openssl_make_REQ */
-static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, zval * dn, zval * attribs)
+static zend_result php_openssl_csr_add_subj_entry(zval *item, X509_NAME *subj, int nid)
+{
+	zend_string *str_item = zval_try_get_string(item);
+	if (UNEXPECTED(!str_item)) {
+		return FAILURE;
+	}
+	if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_UTF8,
+				(unsigned char*)ZSTR_VAL(str_item), -1, -1, 0))
+	{
+		php_openssl_store_errors();
+		php_error_docref(NULL, E_WARNING,
+			"dn: add_entry_by_NID %d -> %s (failed; check error"
+			" queue and value of string_mask OpenSSL option "
+			"if illegal characters are reported)",
+			nid, ZSTR_VAL(str_item));
+		zend_string_release(str_item);
+		return FAILURE;
+	}
+	zend_string_release(str_item);
+	return SUCCESS;
+}
+
+static zend_result php_openssl_csr_make(struct php_x509_request * req, X509_REQ * csr, zval * dn, zval * attribs)
 {
 	STACK_OF(CONF_VALUE) * dn_sk, *attr_sk = NULL;
 	char * str, *dn_sect, *attr_sect;
@@ -2892,11 +2913,11 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 	/* setup the version number: version 1 */
 	if (X509_REQ_set_version(csr, 0L)) {
 		int i, nid;
-		char * type;
-		CONF_VALUE * v;
-		X509_NAME * subj;
-		zval * item;
-		zend_string * strindex = NULL;
+		char *type;
+		CONF_VALUE *v;
+		X509_NAME *subj;
+		zval *item, *subitem;
+		zend_string *strindex = NULL;
 
 		subj = X509_REQ_get_subject_name(csr);
 		/* apply values from the dn hash */
@@ -2904,23 +2925,15 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 			if (strindex) {
 				int nid = OBJ_txt2nid(ZSTR_VAL(strindex));
 				if (nid != NID_undef) {
-					zend_string *str_item = zval_try_get_string(item);
-					if (UNEXPECTED(!str_item)) {
+					if (Z_TYPE_P(item) == IS_ARRAY) {
+						ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(item), i, subitem) {
+							if (php_openssl_csr_add_subj_entry(subitem, subj, nid) == FAILURE) {
+								return FAILURE;
+							}
+						} ZEND_HASH_FOREACH_END();
+					} else if (php_openssl_csr_add_subj_entry(item, subj, nid) == FAILURE) {
 						return FAILURE;
 					}
-					if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_UTF8,
-								(unsigned char*)ZSTR_VAL(str_item), -1, -1, 0))
-					{
-						php_openssl_store_errors();
-						php_error_docref(NULL, E_WARNING,
-							"dn: add_entry_by_NID %d -> %s (failed; check error"
-							" queue and value of string_mask OpenSSL option "
-							"if illegal characters are reported)",
-							nid, ZSTR_VAL(str_item));
-						zend_string_release(str_item);
-						return FAILURE;
-					}
-					zend_string_release(str_item);
 				} else {
 					php_error_docref(NULL, E_WARNING, "dn: %s is not a recognized name", ZSTR_VAL(strindex));
 				}
@@ -2981,7 +2994,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 				int nid;
 
 				if (NULL == strindex) {
-					php_error_docref(NULL, E_WARNING, "dn: numeric fild names are not supported");
+					php_error_docref(NULL, E_WARNING, "attributes: numeric fild names are not supported");
 					continue;
 				}
 
@@ -2991,15 +3004,15 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 					if (UNEXPECTED(!str_item)) {
 						return FAILURE;
 					}
-					if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_UTF8, (unsigned char*)ZSTR_VAL(str_item), -1, -1, 0)) {
+					if (!X509_REQ_add1_attr_by_NID(csr, nid, MBSTRING_UTF8, (unsigned char*)ZSTR_VAL(str_item), (int)ZSTR_LEN(str_item))) {
 						php_openssl_store_errors();
-						php_error_docref(NULL, E_WARNING, "attribs: add_entry_by_NID %d -> %s (failed)", nid, ZSTR_VAL(str_item));
+						php_error_docref(NULL, E_WARNING, "attributes: add_attr_by_NID %d -> %s (failed)", nid, ZSTR_VAL(str_item));
 						zend_string_release(str_item);
 						return FAILURE;
 					}
 					zend_string_release(str_item);
 				} else {
-					php_error_docref(NULL, E_WARNING, "dn: %s is not a recognized name", ZSTR_VAL(strindex));
+					php_error_docref(NULL, E_WARNING, "attributes: %s is not a recognized attribute name", ZSTR_VAL(strindex));
 				}
 			} ZEND_HASH_FOREACH_END();
 			for (i = 0; i < sk_CONF_VALUE_num(attr_sk); i++) {
@@ -3029,8 +3042,6 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 	}
 	return SUCCESS;
 }
-/* }}} */
-
 
 static X509_REQ *php_openssl_csr_from_str(zend_string *csr_str, uint32_t arg_num)
 {
@@ -3178,6 +3189,12 @@ PHP_FUNCTION(openssl_csr_export)
 }
 /* }}} */
 
+#if PHP_OPENSSL_API_VERSION >= 0x10100 && !defined (LIBRESSL_VERSION_NUMBER)
+#define PHP_OPENSSL_ASN1_INTEGER_set ASN1_INTEGER_set_int64
+#else
+#define PHP_OPENSSL_ASN1_INTEGER_set ASN1_INTEGER_set
+#endif
+
 /* {{{ Signs a cert with another CERT */
 PHP_FUNCTION(openssl_csr_sign)
 {
@@ -3191,12 +3208,14 @@ PHP_FUNCTION(openssl_csr_sign)
 	zval *zpkey, *args = NULL;
 	zend_long num_days;
 	zend_long serial = Z_L(0);
+	zend_string *serial_hex = NULL;
 	X509 *cert = NULL, *new_cert = NULL;
 	EVP_PKEY * key = NULL, *priv_key = NULL;
 	int i;
+	bool new_cert_used = false;
 	struct php_x509_request req;
 
-	ZEND_PARSE_PARAMETERS_START(4, 6)
+	ZEND_PARSE_PARAMETERS_START(4, 7)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(csr_obj, php_openssl_request_ce, csr_str)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL(cert_obj, php_openssl_certificate_ce, cert_str)
 		Z_PARAM_ZVAL(zpkey)
@@ -3204,6 +3223,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_OR_NULL(args)
 		Z_PARAM_LONG(serial)
+		Z_PARAM_STR_OR_NULL(serial_hex)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETVAL_FALSE;
@@ -3272,11 +3292,28 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 
-#if PHP_OPENSSL_API_VERSION >= 0x10100 && !defined (LIBRESSL_VERSION_NUMBER)
-	ASN1_INTEGER_set_int64(X509_get_serialNumber(new_cert), serial);
-#else
-	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
-#endif
+	if (serial_hex != NULL) {
+		char buffer[256];
+		if (ZSTR_LEN(serial_hex) > 200) {
+			php_error_docref(NULL, E_WARNING, "Error parsing serial number because it is too long");
+			goto cleanup;
+		}
+		BIO *in = BIO_new_mem_buf(ZSTR_VAL(serial_hex), ZSTR_LEN(serial_hex));
+		if (in == NULL) {
+			php_openssl_store_errors();
+			php_error_docref(NULL, E_WARNING, "Error parsing serial number because memory allocation failed");
+			goto cleanup;
+		}
+		int success = a2i_ASN1_INTEGER(in, X509_get_serialNumber(new_cert), buffer, sizeof(buffer));
+		BIO_free(in);
+		if (!success) {
+			php_openssl_store_errors();
+			php_error_docref(NULL, E_WARNING, "Error parsing serial number");
+			goto cleanup;
+		}
+	} else {
+		PHP_OPENSSL_ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
+	}
 
 	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
 
@@ -3315,11 +3352,12 @@ PHP_FUNCTION(openssl_csr_sign)
 	object_init_ex(return_value, php_openssl_certificate_ce);
 	cert_object = Z_OPENSSL_CERTIFICATE_P(return_value);
 	cert_object->x509 = new_cert;
+	new_cert_used = true;
 
 cleanup:
 
-	if (cert == new_cert) {
-		cert = NULL;
+	if (!new_cert_used && new_cert) {
+		X509_free(new_cert);
 	}
 
 	PHP_SSL_REQ_DISPOSE(&req);
@@ -3328,7 +3366,7 @@ cleanup:
 	if (csr_str) {
 		X509_REQ_free(csr);
 	}
-	if (cert_str && cert) {
+	if (cert_str && cert && cert != new_cert) {
 		X509_free(cert);
 	}
 }
@@ -3368,7 +3406,7 @@ PHP_FUNCTION(openssl_csr_new)
 		} else {
 			csr = X509_REQ_new();
 			if (csr) {
-				if (php_openssl_make_REQ(&req, csr, dn, attribs) == SUCCESS) {
+				if (php_openssl_csr_make(&req, csr, dn, attribs) == SUCCESS) {
 					X509V3_CTX ext_ctx;
 
 					X509V3_set_ctx(&ext_ctx, NULL, NULL, csr, NULL, 0);
@@ -5468,7 +5506,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 					signersfilename, signersfilename_len, 3, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 			if (certout) {
 				int i;
-				signers = PKCS7_get0_signers(p7, NULL, (int)flags);
+				signers = PKCS7_get0_signers(p7, others, (int)flags);
 				if (signers != NULL) {
 
 					for (i = 0; i < sk_X509_num(signers); i++) {

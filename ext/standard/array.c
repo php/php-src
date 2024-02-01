@@ -901,18 +901,10 @@ static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compar
 		RETURN_TRUE;
 	}
 
-	/* Copy array, so the in-place modifications will not be visible to the callback function.
-	 * Unless there are no other references since we know for sure it won't be visible. */
-	bool in_place = zend_may_modify_arg_in_place(array);
-	if (!in_place) {
-		arr = zend_array_dup(arr);
-	}
+	/* Copy array, so the in-place modifications will not be visible to the callback function */
+	arr = zend_array_dup(arr);
 
 	zend_hash_sort(arr, compare_func, renumber);
-
-	if (in_place) {
-		GC_ADDREF(arr);
-	}
 
 	zval garbage;
 	ZVAL_COPY_VALUE(&garbage, array);
@@ -2608,7 +2600,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 				zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 			}
 		} else {
-			php_error_docref(NULL, E_WARNING, "Undefined variable $%s", ZSTR_VAL(Z_STR_P(entry)));
+			php_error_docref_unchecked(NULL, E_WARNING, "Undefined variable $%S", Z_STR_P(entry));
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		if (Z_REFCOUNTED_P(entry)) {
@@ -2924,8 +2916,8 @@ PHP_FUNCTION(range)
 
 	/* If the range is given as strings, generate an array of characters. */
 	if (start_type >= IS_STRING || end_type >= IS_STRING) {
-		/* If one of the inputs is NOT a string */
-		if (UNEXPECTED(start_type + end_type < 2*IS_STRING)) {
+		/* If one of the inputs is NOT a string nor single-byte string */
+		if (UNEXPECTED(start_type < IS_STRING || end_type < IS_STRING)) {
 			if (start_type < IS_STRING) {
 				if (end_type != IS_ARRAY) {
 					php_error_docref(NULL, E_WARNING, "Argument #1 ($start) must be a single byte string if"
@@ -3262,6 +3254,11 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 				Z_TRY_ADDREF_P(entry);
 				zend_hash_next_index_insert_new(removed, entry);
 				zend_hash_packed_del_val(in_hash, entry);
+				/* Bump iterator positions to the element after replacement. */
+				if (idx == iter_pos) {
+					zend_hash_iterators_update(in_hash, idx, offset + length);
+					iter_pos = zend_hash_iterators_lower_pos(in_hash, iter_pos + 1);
+				}
 			}
 		} else { /* otherwise just skip those entries */
 			int pos2 = pos;
@@ -3270,9 +3267,13 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 				if (Z_TYPE_P(entry) == IS_UNDEF) continue;
 				pos2++;
 				zend_hash_packed_del_val(in_hash, entry);
+				/* Bump iterator positions to the element after replacement. */
+				if (idx == iter_pos) {
+					zend_hash_iterators_update(in_hash, idx, offset + length);
+					iter_pos = zend_hash_iterators_lower_pos(in_hash, iter_pos + 1);
+				}
 			}
 		}
-		iter_pos = zend_hash_iterators_lower_pos(in_hash, iter_pos);
 
 		/* If there are entries to insert.. */
 		if (replace) {
@@ -6102,6 +6103,9 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 			 * specific offset using linear scan. */
 			i = 0;
 			randval = algo->range(status, 0, num_avail - 1);
+			if (EG(exception)) {
+				return false;
+			}
 			ZEND_HASH_FOREACH_KEY(ht, num_key, string_key) {
 				if (i == randval) {
 					if (string_key) {
@@ -6122,6 +6126,9 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 		if (HT_IS_PACKED(ht)) {
 			do {
 				randval = algo->range(status, 0, ht->nNumUsed - 1);
+				if (EG(exception)) {
+					return false;
+				}
 				zv = &ht->arPacked[randval];
 				if (!Z_ISUNDEF_P(zv)) {
 					ZVAL_LONG(retval, randval);
@@ -6131,6 +6138,9 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 		} else {
 			do {
 				randval = algo->range(status, 0, ht->nNumUsed - 1);
+				if (EG(exception)) {
+					return false;
+				}
 				b = &ht->arData[randval];
 				if (!Z_ISUNDEF(b->val)) {
 					if (b->key) {
@@ -6163,11 +6173,24 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 	zend_bitset_clear(bitset, bitset_len);
 
 	i = num_req;
+	int failures = 0;
 	while (i) {
 		randval = algo->range(status, 0, num_avail - 1);
-		if (!zend_bitset_in(bitset, randval)) {
+		if (EG(exception)) {
+			goto fail;
+		}
+		if (zend_bitset_in(bitset, randval)) {
+			if (++failures > PHP_RANDOM_RANGE_ATTEMPTS) {
+				if (!silent) {
+					zend_throw_error(random_ce_Random_BrokenRandomEngineError, "Failed to generate an acceptable random number in %d attempts", PHP_RANDOM_RANGE_ATTEMPTS);
+				}
+
+				goto fail;
+			}
+		} else {
 			zend_bitset_incl(bitset, randval);
 			i--;
+			failures = 0;
 		}
 	}
 
@@ -6191,6 +6214,11 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 	free_alloca(bitset, use_heap);
 
 	return true;
+
+ fail:
+	free_alloca(bitset, use_heap);
+
+	return false;
 }
 /* }}} */
 

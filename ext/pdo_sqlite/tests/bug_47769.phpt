@@ -5,7 +5,7 @@ pdo_sqlite
 --FILE--
 <?php
 
-class test extends PDO
+class TestClass extends PDO
 {
     protected function isProtected() {
         echo "this is a protected method.\n";
@@ -23,7 +23,7 @@ class test extends PDO
     }
 }
 
-$test = new test('sqlite::memory:');
+$test = new TestClass('sqlite::memory:');
 $test->quote('foo');
 $test->isProtected();
 
@@ -33,7 +33,7 @@ this is a protected method.
 this is a private method.
 foo
 
-Fatal error: Uncaught Error: Call to protected method test::isProtected() from global scope in %s:%d
+Fatal error: Uncaught Error: Call to protected method TestClass::isProtected() from global scope in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

@@ -597,7 +597,7 @@ static void zend_weakmap_iterator_dtor(zend_object_iterator *obj_iter)
 	zval_ptr_dtor(&iter->it.data);
 }
 
-static int zend_weakmap_iterator_valid(zend_object_iterator *obj_iter)
+static zend_result zend_weakmap_iterator_valid(zend_object_iterator *obj_iter)
 {
 	zend_weakmap_iterator *iter = (zend_weakmap_iterator *) obj_iter;
 	zend_weakmap *wm = zend_weakmap_fetch(&iter->it.data);

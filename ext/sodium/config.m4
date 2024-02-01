@@ -15,5 +15,6 @@ if test "$PHP_SODIUM" != "no"; then
   SODIUM_COMPILER_FLAGS="$LIBSODIUM_CFLAGS -Wno-type-limits"
   AX_CHECK_COMPILE_FLAG([-Wno-logical-op], SODIUM_COMPILER_FLAGS="$SODIUM_COMPILER_FLAGS -Wno-logical-op", , [-Werror])
   PHP_NEW_EXTENSION(sodium, libsodium.c sodium_pwhash.c, $ext_shared, , $SODIUM_COMPILER_FLAGS)
+  PHP_INSTALL_HEADERS([ext/sodium], [php_libsodium.h])
   PHP_SUBST(SODIUM_SHARED_LIBADD)
 fi

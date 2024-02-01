@@ -79,6 +79,9 @@
 #include <limits.h>
 #include <fcntl.h>
 #include <errno.h>
+#ifdef __SANITIZE_ADDRESS__
+# include <sanitizer/asan_interface.h>
+#endif
 
 #ifndef _WIN32
 # include <sys/mman.h>
@@ -724,6 +727,9 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 		if (zend_mm_use_huge_pages) {
 			zend_mm_hugepage(ptr, size);
 		}
+#ifdef __SANITIZE_ADDRESS__
+		ASAN_UNPOISON_MEMORY_REGION(ptr, size);
+#endif
 		return ptr;
 	} else {
 		size_t offset;
@@ -763,6 +769,9 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 		if (zend_mm_use_huge_pages) {
 			zend_mm_hugepage(ptr, size);
 		}
+# ifdef __SANITIZE_ADDRESS__
+		ASAN_UNPOISON_MEMORY_REGION(ptr, size);
+# endif
 #endif
 		return ptr;
 	}
@@ -1933,7 +1942,7 @@ static zend_mm_heap *zend_mm_init(void)
 	heap->peak = 0;
 #endif
 #if ZEND_MM_LIMIT
-	heap->limit = ((size_t)Z_L(-1) >> (size_t)Z_L(1));
+	heap->limit = (size_t)Z_L(-1) >> 1;
 	heap->overflow = 0;
 #endif
 #if ZEND_MM_CUSTOM
@@ -2907,7 +2916,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 		zend_mm_heap *mm_heap = alloc_globals->mm_heap = malloc(sizeof(zend_mm_heap));
 		memset(mm_heap, 0, sizeof(zend_mm_heap));
 		mm_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
-		mm_heap->limit = ((size_t)Z_L(-1) >> (size_t)Z_L(1));
+		mm_heap->limit = (size_t)Z_L(-1) >> 1;
 		mm_heap->overflow = 0;
 
 		if (!tracked) {
@@ -3096,7 +3105,7 @@ ZEND_API zend_mm_heap *zend_mm_startup_ex(const zend_mm_handlers *handlers, void
 	heap->peak = 0;
 #endif
 #if ZEND_MM_LIMIT
-	heap->limit = (Z_L(-1) >> Z_L(1));
+	heap->limit = (size_t)Z_L(-1) >> 1;
 	heap->overflow = 0;
 #endif
 #if ZEND_MM_CUSTOM

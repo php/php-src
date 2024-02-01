@@ -4,13 +4,12 @@ PDO::ATTR_CONNECTION_STATUS
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
-MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+    MySQLPDOTest::skip();
 ?>
 --FILE--
-<?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    <?php
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
     $status = $db->getAttribute(PDO::ATTR_CONNECTION_STATUS);

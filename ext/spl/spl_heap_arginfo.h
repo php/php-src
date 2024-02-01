@@ -1,12 +1,12 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 627bf1f09cfb444f90e0dba6d2b7341312d723cf */
+ * Stub hash: 47273e114c9c7089bf708a2f18f2e9e522abceb6 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplPriorityQueue_compare, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, priority1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, priority2, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplPriorityQueue_insert, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplPriorityQueue_insert, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, priority, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
@@ -37,7 +37,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplPriorityQueue_valid arginfo_class_SplPriorityQueue_isEmpty
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplPriorityQueue_recoverFromCorruption, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplPriorityQueue_recoverFromCorruption, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplPriorityQueue_isCorrupted arginfo_class_SplPriorityQueue_isEmpty
@@ -49,7 +49,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplHeap_extract arginfo_class_SplPriorityQueue_top
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplHeap_insert, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplHeap_insert, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
@@ -69,7 +69,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplHeap_valid arginfo_class_SplPriorityQueue_isEmpty
 
-#define arginfo_class_SplHeap_recoverFromCorruption arginfo_class_SplPriorityQueue_isEmpty
+#define arginfo_class_SplHeap_recoverFromCorruption arginfo_class_SplPriorityQueue_recoverFromCorruption
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplHeap_compare, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value1, IS_MIXED, 0)

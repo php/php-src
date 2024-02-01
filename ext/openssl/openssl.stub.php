@@ -44,13 +44,21 @@ const X509_PURPOSE_SMIME_ENCRYPT = UNKNOWN;
  * @cvalue X509_PURPOSE_CRL_SIGN
  */
 const X509_PURPOSE_CRL_SIGN = UNKNOWN;
-#ifdef X509_PURPOSE_ANY
 /**
  * @var int
  * @cvalue X509_PURPOSE_ANY
  */
 const X509_PURPOSE_ANY = UNKNOWN;
-#endif
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_OCSP_HELPER
+ */
+const X509_PURPOSE_OCSP_HELPER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue X509_PURPOSE_TIMESTAMP_SIGN
+ */
+const X509_PURPOSE_TIMESTAMP_SIGN = UNKNOWN;
 
 /* digest algorithm constants */
 
@@ -440,7 +448,7 @@ function openssl_csr_export(OpenSSLCertificateSigningRequest|string $csr, &$outp
 /**
  * @param OpenSSLAsymmetricKey|OpenSSLCertificate|array|string $private_key
  */
-function openssl_csr_sign(OpenSSLCertificateSigningRequest|string $csr, OpenSSLCertificate|string|null $ca_certificate, #[\SensitiveParameter] $private_key, int $days, ?array $options = null, int $serial = 0): OpenSSLCertificate|false {}
+function openssl_csr_sign(OpenSSLCertificateSigningRequest|string $csr, OpenSSLCertificate|string|null $ca_certificate, #[\SensitiveParameter] $private_key, int $days, ?array $options = null, int $serial = 0, ?string $serial_hex = null): OpenSSLCertificate|false {}
 
 /**
  * @param OpenSSLAsymmetricKey $private_key

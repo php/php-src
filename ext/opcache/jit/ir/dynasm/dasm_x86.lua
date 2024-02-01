@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 -- DynASM x86/x64 module.
 --
--- Copyright (C) 2005-2021 Mike Pall. All rights reserved.
+-- Copyright (C) 2005-2023 Mike Pall. All rights reserved.
 -- See dynasm.lua for full copyright notice.
 ------------------------------------------------------------------------------
 
@@ -627,7 +627,11 @@ local function wputmrmsib(t, imark, s, vsreg, psz, sk)
 	werror("NYI: rip-relative displacement followed by immediate")
       end
       -- The previous byte in the action buffer cannot be 0xe9 or 0x80-0x8f.
-      wputlabel("REL_", disp[1], 2)
+      if disp[2] == "iPJ" then
+	waction("REL_A", disp[1])
+      else
+	wputlabel("REL_", disp[1], 2)
+      end
     else
       wputdarg(disp)
     end
@@ -744,9 +748,9 @@ local function dispexpr(expr)
     return imm*map_opsizenum[ops]
   end
   local mode, iexpr = immexpr(dispt)
-  if mode == "iJ" then
+  if mode == "iJ" or mode == "iPJ" then
     if c == "-" then werror("cannot invert label reference") end
-    return { iexpr }
+    return { iexpr, mode }
   end
   return expr -- Need to return original signed expression.
 end

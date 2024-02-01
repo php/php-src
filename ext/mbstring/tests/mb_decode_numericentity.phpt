@@ -61,13 +61,6 @@ echo "12: " . bin2hex(mb_decode_numericentity(mb_convert_encoding('&#12345678;',
 $convmap = [];
 echo "13: " . mb_decode_numericentity('f&ouml;o', $convmap, "UTF-8") . "\n";
 
-$convmap = array(0x0, 0x2FFFF, 0); // 3 elements
-try {
-    echo "14: " . mb_decode_numericentity($str3, $convmap, "UTF-8") . "\n";
-} catch (ValueError $ex) {
-    echo "14: " . $ex->getMessage()."\n";
-}
-
 echo "15: " . bin2hex(mb_decode_numericentity('&#0;', [0, 1, 0, 0xFFFF], 'UTF-8')) . "\n";
 echo "16: " . bin2hex(mb_decode_numericentity('&#x0;', [0, 1, 0, 0xFFFF], 'UTF-8')) . "\n";
 
@@ -110,28 +103,8 @@ test("Successive hex entities", "&#x32&#x32;", "22", [0, 0xFFFF, 0, 0xFFFF], 'AS
 test("Starting entity immediately after decimal entity which is too long", "&#10000000000&#65;", "&#10000000000A", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
 test("Starting entity immediately after hex entity which is too long", "&#x111111111&#65;", "&#x111111111A", [0, 0xFFFF, 0, 0xFFFF], 'ASCII');
 
-$ucs4_test1 = mb_convert_encoding("&#1000000000&#65;", 'UCS-4BE', 'ASCII');
-testNonAscii("Starting entity immediately after valid decimal entity which is just within maximum length", $ucs4_test1, "\x3B\x9A\xCA\x00\x00\x00\x00A", [0, 0xFFFFFFFF, 0, 0xFFFFFFFF], 'UCS-4BE');
-$ucs4_test2 = mb_convert_encoding("&#x11111111&#65;", 'UCS-4BE', 'ASCII');
-testNonAscii("Starting entity immediately after valid hex entity which is just within maximum length",  $ucs4_test2, "\x11\x11\x11\x11\x00\x00\x00A", [0, 0xFFFFFFFF, 0, 0xFFFFFFFF], 'UCS-4BE');
-
 test("Starting entity immediately after invalid decimal entity", "&#0&#65;", "&#0A", [0x1, 0xFFFF, 0, 0xFFFF], 'ASCII');
 test("Starting entity immediately after invalid hex entity", "&#x0&#65;", "&#x0A", [0x1, 0xFFFF, 0, 0xFFFF], 'ASCII');
-
-test("Starting entity immediately after too-big decimal entity", "&#7001492542&#65;", "&#7001492542A", [0, 0xFFFFFFFF, 0, 0xFFFFFFFF], 'ASCII');
-
-// If the numeric entity decodes to 0xFFFFFFFF, that should be passed through
-// Originally, the new implementation of mb_decode_numericentity used -1 as a marker indicating
-// that the entity could not be successfully decoded, so if the entity decoded successfully to
-// 0xFFFFFFFF (-1), it would be treated as an invalid entity
-test("Regression test (entity which decodes to 0xFFFFFFFF)", "&#xe;", "?", [0xFFFFFF86, 0xFFFFFFFF, 0xF, 0xFC015448], 'HZ');
-
-// With the legacy conversion filters, a trailing & could be truncated by mb_decode_numericentity,
-// because some text encodings did not properly invoke the next flush function in the chain
-test("Regression test (truncation of successive & with JIS encoding)", "&&&", "&&&", [0x20FF37FF, 0x7202F569, 0xC4090023, 0xF160], "JIS");
-
-// Previously, signed arithmetic was used on convmap entries
-test("Regression test (convmap entries are now treated as unsigned)", "&#7,", "?,", [0x22FFFF11, 0xBF111189, 0x67726511, 0x1161E719], "ASCII");
 
 // Try with '&', '&#', or '&#' at the end of a buffer of wchars, with more input
 // still left to process in the next buffer
@@ -182,7 +155,6 @@ for ($i = 12; $i < 256; $i++) {
 11e: &#x000000000
 12: 00bc614e
 13: f&ouml;o
-14: mb_decode_numericentity(): Argument #2 ($map) must have a multiple of 4 elements
 15: 00
 16: 00
 17: föo
@@ -202,11 +174,5 @@ Successive &#65: string(9) "&#65&#65;" => string(2) "AA" (Good)
 Successive hex entities: string(11) "&#x32&#x32;" => string(2) "22" (Good)
 Starting entity immediately after decimal entity which is too long: string(18) "&#10000000000&#65;" => string(14) "&#10000000000A" (Good)
 Starting entity immediately after hex entity which is too long: string(17) "&#x111111111&#65;" => string(13) "&#x111111111A" (Good)
-Starting entity immediately after valid decimal entity which is just within maximum length: 000000260000002300000031000000300000003000000030000000300000003000000030000000300000003000000030000000260000002300000036000000350000003b => 3b9aca0000000041 (Good)
-Starting entity immediately after valid hex entity which is just within maximum length: 0000002600000023000000780000003100000031000000310000003100000031000000310000003100000031000000260000002300000036000000350000003b => 1111111100000041 (Good)
 Starting entity immediately after invalid decimal entity: string(8) "&#0&#65;" => string(4) "&#0A" (Good)
 Starting entity immediately after invalid hex entity: string(9) "&#x0&#65;" => string(5) "&#x0A" (Good)
-Starting entity immediately after too-big decimal entity: string(17) "&#7001492542&#65;" => string(13) "&#7001492542A" (Good)
-Regression test (entity which decodes to 0xFFFFFFFF): string(5) "&#xe;" => string(1) "?" (Good)
-Regression test (truncation of successive & with JIS encoding): string(3) "&&&" => string(3) "&&&" (Good)
-Regression test (convmap entries are now treated as unsigned): string(4) "&#7," => string(2) "?," (Good)

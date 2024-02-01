@@ -7,16 +7,23 @@ intl
 
 try {
     new IntlDateFormatter(
-	'xx',
-	IntlDateFormatter::FULL,
-	IntlDateFormatter::FULL,
-	null,
-	null,
-	'w'
+	    'xx',
+	    IntlDateFormatter::FULL,
+	    IntlDateFormatter::FULL,
+	    null,
+	    null,
+	    'w'
     );
-} catch (\IntlException $e) {
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
+}
+
+Locale::setDefault('xx');
+try {
+    new IntlDateFormatter(Locale::getDefault());
+} catch (\ValueError $e) {
     echo $e->getMessage();
 }
-?>
 --EXPECT--
-datefmt_create: invalid locale: U_ILLEGAL_ARGUMENT_ERROR
+IntlDateFormatter::__construct(): Argument #1 ($locale) "xx" is invalid
+IntlDateFormatter::__construct(): Argument #1 ($locale) "xx" is invalid

@@ -46,8 +46,6 @@ jobs:
               libicu-dev \
               libtidy-dev \
               libenchant-2-dev \
-              libaspell-dev \
-              libpspell-dev \
               libsasl2-dev \
               libxpm-dev \
               libzip-dev \
@@ -130,7 +128,6 @@ jobs:
               --enable-bcmath \
               --enable-calendar \
               --enable-ftp \
-              --with-pspell=/usr \
               --with-enchant=/usr \
               --with-kerberos \
               --enable-sysvmsg \
@@ -151,9 +148,6 @@ jobs:
               --with-qdbm \
               --with-snmp \
               `#--with-unixODBC` \
-              --with-imap \
-              --with-kerberos \
-              --with-imap-ssl \
               `#--with-pdo-odbc=unixODBC,/usr` \
               `#--with-pdo-oci=shared,instantclient,/opt/oracle/instantclient` \
               `#--with-oci8=shared,instantclient,/opt/oracle/instantclient` \
@@ -182,9 +176,6 @@ jobs:
               -d zend_extension=opcache.so \
               -d opcache.enable_cli=1 \
               -d opcache.jit_buffer_size=64M \
-              -d opcache.jit_max_root_traces=100000 \
-              -d opcache.jit_max_side_traces=100000 \
-              -d opcache.jit_max_exit_counters=100000 \
               -d opcache.jit=tracing \
               -P -q -x -j2 \
               -g FAIL,BORK,LEAK,XLEAK \

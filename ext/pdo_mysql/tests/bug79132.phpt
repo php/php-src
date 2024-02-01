@@ -4,12 +4,12 @@ Bug #79132: PDO re-uses parameter values from earlier calls to execute()
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
 $pdo = MySQLPDOTest::factory();
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -21,7 +21,7 @@ $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 test($pdo);
 
 function test($pdo) {
-    $stmt = $pdo->prepare('select ? a, ? b');
+    $stmt = $pdo->prepare('SELECT ? a, ? b');
 
     $set = [
         ['a', 'b'],

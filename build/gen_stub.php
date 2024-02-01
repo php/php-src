@@ -3,6 +3,7 @@
 
 use PhpParser\Comment\Doc as DocComment;
 use PhpParser\ConstExprEvaluator;
+use PhpParser\Modifiers;
 use PhpParser\Node;
 use PhpParser\Node\AttributeGroup;
 use PhpParser\Node\Expr;
@@ -524,10 +525,10 @@ class SimpleType {
     }
 
     public function toEscapedName(): string {
-        // Escape backslashes, and also encode \u and \U to avoid compilation errors in generated macros
+        // Escape backslashes, and also encode \u, \U, and \N to avoid compilation errors in generated macros
         return str_replace(
-            ['\\', '\\u', '\\U'],
-            ['\\\\', '\\\\165', '\\\\125'],
+            ['\\', '\\u', '\\U', '\\N'],
+            ['\\\\', '\\\\165', '\\\\125', '\\\\116'],
             $this->name
         );
     }
@@ -1060,7 +1061,7 @@ class FunctionName implements FunctionOrMethodName {
     }
 
     public function getMethodSynopsisFilename(): string {
-        return implode('_', $this->name->getParts());
+        return 'functions/' . implode('/', str_replace('_', '-', $this->name->getParts()));
     }
 
     public function getNameForAttributes(): string {
@@ -1105,8 +1106,11 @@ class MethodName implements FunctionOrMethodName {
         return "arginfo_class_{$this->getDeclarationClassName()}_{$this->methodName}";
     }
 
-    public function getMethodSynopsisFilename(): string {
-        return $this->getDeclarationClassName() . "_{$this->methodName}";
+    public function getMethodSynopsisFilename(): string
+    {
+        $parts = [...$this->className->getParts(), ltrim($this->methodName, '_')];
+        /* File paths are in lowercase */
+        return strtolower(implode('/', $parts));
     }
 
     public function getNameForAttributes(): string {
@@ -1257,12 +1261,12 @@ class FuncInfo {
 
     public function isFinalMethod(): bool
     {
-        return ($this->flags & Class_::MODIFIER_FINAL) || ($this->classFlags & Class_::MODIFIER_FINAL);
+        return ($this->flags & Modifiers::FINAL) || ($this->classFlags & Modifiers::FINAL);
     }
 
     public function isInstanceMethod(): bool
     {
-        return !($this->flags & Class_::MODIFIER_STATIC) && $this->isMethod() && !$this->name->isConstructor();
+        return !($this->flags & Modifiers::STATIC) && $this->isMethod() && !$this->name->isConstructor();
     }
 
     /** @return string[] */
@@ -1274,21 +1278,21 @@ class FuncInfo {
 
         $result = [];
 
-        if ($this->flags & Class_::MODIFIER_FINAL) {
+        if ($this->flags & Modifiers::FINAL) {
             $result[] = "final";
-        } elseif ($this->flags & Class_::MODIFIER_ABSTRACT && $this->classFlags & ~Class_::MODIFIER_ABSTRACT) {
+        } elseif ($this->flags & Modifiers::ABSTRACT && $this->classFlags & ~Modifiers::ABSTRACT) {
             $result[] = "abstract";
         }
 
-        if ($this->flags & Class_::MODIFIER_PROTECTED) {
+        if ($this->flags & Modifiers::PROTECTED) {
             $result[] = "protected";
-        } elseif ($this->flags & Class_::MODIFIER_PRIVATE) {
+        } elseif ($this->flags & Modifiers::PRIVATE) {
             $result[] = "private";
         } else {
             $result[] = "public";
         }
 
-        if ($this->flags & Class_::MODIFIER_STATIC) {
+        if ($this->flags & Modifiers::STATIC) {
             $result[] = "static";
         }
 
@@ -1335,7 +1339,7 @@ class FuncInfo {
 
     public function getDeclaration(): ?string
     {
-        if ($this->flags & Class_::MODIFIER_ABSTRACT) {
+        if ($this->flags & Modifiers::ABSTRACT) {
             return null;
         }
 
@@ -1364,7 +1368,7 @@ class FuncInfo {
                 }
             } else {
                 $declarationClassName = $this->name->getDeclarationClassName();
-                if ($this->flags & Class_::MODIFIER_ABSTRACT) {
+                if ($this->flags & Modifiers::ABSTRACT) {
                     return sprintf(
                         "\tZEND_ABSTRACT_ME_WITH_FLAGS(%s, %s, %s, %s)\n",
                         $declarationClassName, $this->name->methodName, $this->getArgInfoName(),
@@ -1455,21 +1459,21 @@ class FuncInfo {
     private function getFlagsAsArginfoString(): string
     {
         $flags = "ZEND_ACC_PUBLIC";
-        if ($this->flags & Class_::MODIFIER_PROTECTED) {
+        if ($this->flags & Modifiers::PROTECTED) {
             $flags = "ZEND_ACC_PROTECTED";
-        } elseif ($this->flags & Class_::MODIFIER_PRIVATE) {
+        } elseif ($this->flags & Modifiers::PRIVATE) {
             $flags = "ZEND_ACC_PRIVATE";
         }
 
-        if ($this->flags & Class_::MODIFIER_STATIC) {
+        if ($this->flags & Modifiers::STATIC) {
             $flags .= "|ZEND_ACC_STATIC";
         }
 
-        if ($this->flags & Class_::MODIFIER_FINAL) {
+        if ($this->flags & Modifiers::FINAL) {
             $flags .= "|ZEND_ACC_FINAL";
         }
 
-        if ($this->flags & Class_::MODIFIER_ABSTRACT) {
+        if ($this->flags & Modifiers::ABSTRACT) {
             $flags .= "|ZEND_ACC_ABSTRACT";
         }
 
@@ -1480,23 +1484,445 @@ class FuncInfo {
         return $flags;
     }
 
+    private function generateRefSect1(DOMDocument $doc, string $role): DOMElement {
+        $refSec = $doc->createElement('refsect1');
+        $refSec->setAttribute('role', $role);
+        $refSec->append(
+            "\n  ",
+            $doc->createEntityReference('reftitle.' . $role),
+            "\n  "
+        );
+        return $refSec;
+    }
+
     /**
      * @param array<string, FuncInfo> $funcMap
      * @param array<string, FuncInfo> $aliasMap
      * @throws Exception
      */
     public function getMethodSynopsisDocument(array $funcMap, array $aliasMap): ?string {
+        $REFSEC1_SEPERATOR = "\n\n ";
 
-        $doc = new DOMDocument();
+        $doc = new DOMDocument("1.0", "utf-8");
         $doc->formatOutput = true;
+
+        $refentry = $doc->createElement('refentry');
+        $doc->appendChild($refentry);
+
+        if ($this->isMethod()) {
+            assert($this->name instanceof MethodName);
+            /* Namespaces are seperated by '-', '_' must be converted to '-' too.
+             * Trim away the __ for magic methods */
+            $id = strtolower(
+                str_replace('\\', '-', $this->name->className->__toString())
+                . '.'
+                . str_replace('_', '-', ltrim($this->name->methodName, '_'))
+            );
+        } else {
+            $id = 'function.' . strtolower(str_replace('_', '-', $this->name->__toString()));
+        }
+        $refentry->setAttribute("xml:id", $id);
+        /* We create an attribute for xmlns, as libxml otherwise force it to be the first one */
+        //$refentry->setAttribute("xmlns", "http://docbook.org/ns/docbook");
+        $namespace = $doc->createAttribute('xmlns');
+        $namespace->value = "http://docbook.org/ns/docbook";
+        $refentry->setAttributeNode($namespace);
+        $refentry->setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+        $refentry->appendChild(new DOMText("\n "));
+
+        /* Creation of <refnamediv> */
+        $refnamediv = $doc->createElement('refnamediv');
+        $refnamediv->appendChild(new DOMText("\n  "));
+        $refname = $doc->createElement('refname', $this->name->__toString());
+        $refnamediv->appendChild($refname);
+        $refnamediv->appendChild(new DOMText("\n  "));
+        $refpurpose = $doc->createElement('refpurpose', 'Description');
+        $refnamediv->appendChild($refpurpose);
+
+        $refnamediv->appendChild(new DOMText("\n "));
+        $refentry->append($refnamediv, $REFSEC1_SEPERATOR);
+
+        /* Creation of <refsect1 role="description"> */
+        $descriptionRefSec = $this->generateRefSect1($doc, 'description');
+
         $methodSynopsis = $this->getMethodSynopsisElement($funcMap, $aliasMap, $doc);
         if (!$methodSynopsis) {
             return null;
         }
+        $descriptionRefSec->appendChild($methodSynopsis);
+        $descriptionRefSec->appendChild(new DOMText("\n  "));
+        $undocumentedEntity = $doc->createEntityReference('warn.undocumented.func');
+        $descriptionRefSec->appendChild($undocumentedEntity);
+        $descriptionRefSec->appendChild(new DOMText("\n  "));
+        $returnDescriptionPara = $doc->createElement('para');
+        $returnDescriptionPara->appendChild(new DOMText("\n   Description.\n  "));
+        $descriptionRefSec->appendChild($returnDescriptionPara);
 
-        $doc->appendChild($methodSynopsis);
+        $descriptionRefSec->appendChild(new DOMText("\n "));
+        $refentry->append($descriptionRefSec, $REFSEC1_SEPERATOR);
 
+        /* Creation of <refsect1 role="parameters"> */
+        $parametersRefSec = $this->getParameterSection($doc);
+        $refentry->append($parametersRefSec, $REFSEC1_SEPERATOR);
+
+        /* Creation of <refsect1 role="returnvalues"> */
+        if (!$this->name->isConstructor() && !$this->name->isDestructor()) {
+            $returnRefSec = $this->getReturnValueSection($doc);
+            $refentry->append($returnRefSec, $REFSEC1_SEPERATOR);
+        }
+
+        /* Creation of <refsect1 role="errors"> */
+        $errorsRefSec = $this->generateRefSect1($doc, 'errors');
+        $errorsDescriptionParaConstantTag = $doc->createElement('constant');
+        $errorsDescriptionParaConstantTag->append('E_*');
+        $errorsDescriptionParaExceptionTag = $doc->createElement('exceptionname');
+        $errorsDescriptionParaExceptionTag->append('Exception');
+        $errorsDescriptionPara = $doc->createElement('para');
+        $errorsDescriptionPara->append(
+            "\n   When does this function issue ",
+            $errorsDescriptionParaConstantTag,
+            " level errors,\n   and/or throw ",
+            $errorsDescriptionParaExceptionTag,
+            "s.\n  "
+        );
+        $errorsRefSec->appendChild($errorsDescriptionPara);
+        $errorsRefSec->appendChild(new DOMText("\n "));
+
+        $refentry->append($errorsRefSec, $REFSEC1_SEPERATOR);
+
+        /* Creation of <refsect1 role="changelog"> */
+        $changelogRefSec = $this->getChangelogSection($doc);
+        $refentry->append($changelogRefSec, $REFSEC1_SEPERATOR);
+
+        $exampleRefSec = $this->getExampleSection($doc, $id);
+        $refentry->append($exampleRefSec, $REFSEC1_SEPERATOR);
+
+        /* Creation of <refsect1 role="notes"> */
+        $notesRefSec = $this->generateRefSect1($doc, 'notes');
+
+        $noteTagSimara = $doc->createElement('simpara');
+        $noteTagSimara->append(
+            "\n    Any notes that don't fit anywhere else should go here.\n   "
+        );
+        $noteTag = $doc->createElement('note');
+        $noteTag->append("\n   ", $noteTagSimara, "\n  ");
+        $notesRefSec->append($noteTag, "\n ");
+
+        $refentry->append($notesRefSec, $REFSEC1_SEPERATOR);
+
+        /* Creation of <refsect1 role="seealso"> */
+        $seeAlsoRefSec = $this->generateRefSect1($doc, 'seealso');
+
+        $seeAlsoMemberClassMethod = $doc->createElement('member');
+        $seeAlsoMemberClassMethodTag = $doc->createElement('methodname');
+        $seeAlsoMemberClassMethodTag->appendChild(new DOMText("ClassName::otherMethodName"));
+        $seeAlsoMemberClassMethod->appendChild($seeAlsoMemberClassMethodTag);
+
+        $seeAlsoMemberFunction = $doc->createElement('member');
+        $seeAlsoMemberFunctionTag = $doc->createElement('function');
+        $seeAlsoMemberFunctionTag->appendChild(new DOMText("some_function"));
+        $seeAlsoMemberFunction->appendChild($seeAlsoMemberFunctionTag);
+
+        $seeAlsoMemberLink = $doc->createElement('member');
+        $seeAlsoMemberLinkTag = $doc->createElement('link');
+        $seeAlsoMemberLinkTag->setAttribute('linkend', 'some.id.chunk.to.link');
+        $seeAlsoMemberLinkTag->appendChild(new DOMText('something appendix'));
+        $seeAlsoMemberLink->appendChild($seeAlsoMemberLinkTag);
+
+        $seeAlsoList = $doc->createElement('simplelist');
+        $seeAlsoList->append(
+            "\n   ",
+            $seeAlsoMemberClassMethod,
+            "\n   ",
+            $seeAlsoMemberFunction,
+            "\n   ",
+            $seeAlsoMemberLink,
+            "\n  "
+        );
+
+        $seeAlsoRefSec->appendChild($seeAlsoList);
+        $seeAlsoRefSec->appendChild(new DOMText("\n "));
+
+        $refentry->appendChild($seeAlsoRefSec);
+
+        $refentry->appendChild(new DOMText("\n\n"));
+
+        $doc->appendChild(new DOMComment(
+            <<<ENDCOMMENT
+ Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-omittag:t
+sgml-shorttag:t
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:1
+sgml-indent-data:t
+indent-tabs-mode:nil
+sgml-parent-document:nil
+sgml-default-dtd-file:"~/.phpdoc/manual.ced"
+sgml-exposed-tags:nil
+sgml-local-catalogs:nil
+sgml-local-ecat-files:nil
+End:
+vim600: syn=xml fen fdm=syntax fdl=2 si
+vim: et tw=78 syn=sgml
+vi: ts=1 sw=1
+
+ENDCOMMENT
+        ));
         return $doc->saveXML();
+    }
+
+    private function getParameterSection(DOMDocument $doc): DOMElement {
+        $parametersRefSec = $this->generateRefSect1($doc, 'parameters');
+        if (empty($this->args)) {
+            $noParamEntity = $doc->createEntityReference('no.function.parameters');
+            $parametersRefSec->appendChild($noParamEntity);
+            return $parametersRefSec;
+        } else {
+            $parametersPara = $doc->createElement('para');
+            $parametersRefSec->appendChild($parametersPara);
+
+            $parametersPara->appendChild(new DOMText("\n   "));
+            $parametersList = $doc->createElement('variablelist');
+            $parametersPara->appendChild($parametersList);
+
+            /*
+            <varlistentry>
+             <term><parameter>name</parameter></term>
+             <listitem>
+              <para>
+               Description.
+              </para>
+             </listitem>
+            </varlistentry>
+            */
+            foreach ($this->args as $arg) {
+                $parameter = $doc->createElement('parameter', $arg->name);
+                $parameterTerm = $doc->createElement('term');
+                $parameterTerm->appendChild($parameter);
+
+                $listItemPara = $doc->createElement('para');
+                $listItemPara->append(
+                    "\n       ",
+                    "Description.",
+                    "\n      ",
+                );
+
+                $parameterEntryListItem = $doc->createElement('listitem');
+                $parameterEntryListItem->append(
+                    "\n      ",
+                    $listItemPara,
+                    "\n     ",
+                );
+
+                $parameterEntry = $doc->createElement('varlistentry');
+                $parameterEntry->append(
+                    "\n     ",
+                    $parameterTerm,
+                    "\n     ",
+                    $parameterEntryListItem,
+                    "\n    ",
+                );
+
+                $parametersList->appendChild(new DOMText("\n    "));
+                $parametersList->appendChild($parameterEntry);
+            }
+            $parametersList->appendChild(new DOMText("\n   "));
+        }
+        $parametersPara->appendChild(new DOMText("\n  "));
+        $parametersRefSec->appendChild(new DOMText("\n "));
+        return $parametersRefSec;
+    }
+
+    private function getReturnValueSection(DOMDocument $doc): DOMElement {
+        $returnRefSec = $this->generateRefSect1($doc, 'returnvalues');
+
+        $returnDescriptionPara = $doc->createElement('para');
+        $returnDescriptionPara->appendChild(new DOMText("\n   "));
+
+        $returnType = $this->return->getMethodSynopsisType();
+        if ($returnType === null) {
+            $returnDescriptionPara->appendChild(new DOMText("Description."));
+        } else if (count($returnType->types) === 1) {
+            $type = $returnType->types[0];
+            $name = $type->name;
+
+            switch ($name) {
+                case 'void':
+                    $descriptionNode = $doc->createEntityReference('return.void');
+                    break;
+                case 'true':
+                    $descriptionNode = $doc->createEntityReference('return.true.always');
+                    break;
+                case 'bool':
+                    $descriptionNode = $doc->createEntityReference('return.success');
+                    break;
+                default:
+                    $descriptionNode = new DOMText("Description.");
+                    break;
+            }
+            $returnDescriptionPara->appendChild($descriptionNode);
+        } else {
+            $returnDescriptionPara->appendChild(new DOMText("Description."));
+        }
+        $returnDescriptionPara->appendChild(new DOMText("\n  "));
+        $returnRefSec->appendChild($returnDescriptionPara);
+        $returnRefSec->appendChild(new DOMText("\n "));
+        return $returnRefSec;
+    }
+
+    /**
+     * @param array<DOMNode> $headers [count($headers) === $columns]
+     * @param array<array<DOMNode>> $rows [count($rows[$i]) === $columns]
+     */
+    private function generateDocbookInformalTable(
+        DOMDocument $doc,
+        int $indent,
+        int $columns,
+        array $headers,
+        array $rows
+    ): DOMElement {
+        $strIndent = str_repeat(' ', $indent);
+
+        $headerRow = $doc->createElement('row');
+        foreach ($headers as $header) {
+            $headerEntry = $doc->createElement('entry');
+            $headerEntry->appendChild($header);
+
+            $headerRow->append("\n$strIndent    ", $headerEntry);
+        }
+        $headerRow->append("\n$strIndent   ");
+
+        $thead = $doc->createElement('thead');
+        $thead->append(
+            "\n$strIndent   ",
+            $headerRow,
+            "\n$strIndent  ",
+        );
+
+        $tbody = $doc->createElement('tbody');
+        foreach ($rows as $row) {
+            $bodyRow = $doc->createElement('row');
+            foreach ($row as $cell) {
+                $entry = $doc->createElement('entry');
+                $entry->appendChild($cell);
+
+                $bodyRow->appendChild(new DOMText("\n$strIndent    "));
+                $bodyRow->appendChild($entry);
+            }
+            $bodyRow->appendChild(new DOMText("\n$strIndent   "));
+
+            $tbody->append(
+                "\n$strIndent   ",
+                $bodyRow,
+                "\n$strIndent  ",
+            );
+        }
+
+        $tgroup = $doc->createElement('tgroup');
+        $tgroup->setAttribute('cols', (string) $columns);
+        $tgroup->append(
+            "\n$strIndent  ",
+            $thead,
+            "\n$strIndent  ",
+            $tbody,
+            "\n$strIndent ",
+        );
+
+        $table = $doc->createElement('informaltable');
+        $table->append(
+            "\n$strIndent ",
+            $tgroup,
+            "\n$strIndent",
+        );
+
+        return $table;
+    }
+
+    private function getChangelogSection(DOMDocument $doc): DOMElement {
+        $refSec = $this->generateRefSect1($doc, 'changelog');
+        $headers = [
+            $doc->createEntityReference('Version'),
+            $doc->createEntityReference('Description'),
+        ];
+        $rows = [[
+            new DOMText('8.X.0'),
+            new DOMText("\n       Description\n      "),
+        ]];
+        $table = $this->generateDocbookInformalTable(
+            $doc,
+            /* indent: */ 2,
+            /* columns: */ 2,
+            /* headers: */ $headers,
+            /* rows: */ $rows
+        );
+        $refSec->appendChild($table);
+
+        $refSec->appendChild(new DOMText("\n "));
+        return $refSec;
+    }
+
+    private function getExampleSection(DOMDocument $doc, string $id): DOMElement {
+        $refSec = $this->generateRefSect1($doc, 'examples');
+
+        $example = $doc->createElement('example');
+        $fnName = $this->name->__toString();
+        $example->setAttribute('xml:id', $id . '.example.basic');
+
+        $title = $doc->createElement('title');
+        $fn = $doc->createElement($this->isMethod() ? 'methodname' : 'function');
+        $fn->append($fnName);
+        $title->append($fn, ' example');
+
+        $example->append("\n   ", $title);
+
+        $para = $doc->createElement('para');
+        $para->append("\n    ", "Description.", "\n   ");
+        $example->append("\n   ", $para);
+
+        $prog = $doc->createElement('programlisting');
+        $prog->setAttribute('role', 'php');
+        $code = new DOMCdataSection(
+            <<<CODE_EXAMPLE
+
+<?php
+echo "Code example";
+?>
+
+CODE_EXAMPLE
+        );
+        $prog->append("\n");
+        $prog->appendChild($code);
+        $prog->append("\n   ");
+
+        $example->append("\n   ", $prog);
+        $example->append("\n   ", $doc->createEntityReference('example.outputs'));
+
+        $output = new DOMCdataSection(
+            <<<OUPUT_EXAMPLE
+
+Code example
+
+OUPUT_EXAMPLE
+        );
+        $screen = $doc->createElement('screen');
+        $screen->append("\n");
+        $screen->appendChild($output);
+        $screen->append("\n   ");
+
+        $example->append(
+            "\n   ",
+            $screen,
+            "\n  ",
+        );
+
+        $refSec->append(
+            $example,
+            "\n ",
+        );
+        return $refSec;
     }
 
     /**
@@ -1833,9 +2259,9 @@ abstract class VariableLike
     protected function getFlagsByPhpVersion(): array
     {
         $flags = "ZEND_ACC_PUBLIC";
-        if ($this->flags & Class_::MODIFIER_PROTECTED) {
+        if ($this->flags & Modifiers::PROTECTED) {
             $flags = "ZEND_ACC_PROTECTED";
-        } elseif ($this->flags & Class_::MODIFIER_PRIVATE) {
+        } elseif ($this->flags & Modifiers::PRIVATE) {
             $flags = "ZEND_ACC_PRIVATE";
         }
 
@@ -1930,13 +2356,13 @@ abstract class VariableLike
 
     protected function addModifiersToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement): void
     {
-        if ($this->flags & Class_::MODIFIER_PUBLIC) {
+        if ($this->flags & Modifiers::PUBLIC) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "public"));
-        } elseif ($this->flags & Class_::MODIFIER_PROTECTED) {
+        } elseif ($this->flags & Modifiers::PROTECTED) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "protected"));
-        } elseif ($this->flags & Class_::MODIFIER_PRIVATE) {
+        } elseif ($this->flags & Modifiers::PRIVATE) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "private"));
         }
@@ -2088,7 +2514,7 @@ class ConstInfo extends VariableLike
 
     public function discardInfoForOldPhpVersions(): void {
         $this->type = null;
-        $this->flags &= ~Class_::MODIFIER_FINAL;
+        $this->flags &= ~Modifiers::FINAL;
         $this->isDeprecated = false;
         $this->attributes = [];
     }
@@ -2279,7 +2705,7 @@ class ConstInfo extends VariableLike
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_DEPRECATED", PHP_80_VERSION_ID);
         }
 
-        if ($this->flags & Class_::MODIFIER_FINAL) {
+        if ($this->flags & Modifiers::FINAL) {
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_FINAL", PHP_81_VERSION_ID);
         }
 
@@ -2290,7 +2716,7 @@ class ConstInfo extends VariableLike
     {
         parent::addModifiersToFieldSynopsis($doc, $fieldsynopsisElement);
 
-        if ($this->flags & Class_::MODIFIER_FINAL) {
+        if ($this->flags & Modifiers::FINAL) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "final"));
         }
@@ -2359,7 +2785,7 @@ class PropertyInfo extends VariableLike
 
     public function discardInfoForOldPhpVersions(): void {
         $this->type = null;
-        $this->flags &= ~Class_::MODIFIER_READONLY;
+        $this->flags &= ~Modifiers::READONLY;
         $this->attributes = [];
     }
 
@@ -2415,11 +2841,11 @@ class PropertyInfo extends VariableLike
     {
         $flags = parent::getFlagsByPhpVersion();
 
-        if ($this->flags & Class_::MODIFIER_STATIC) {
+        if ($this->flags & Modifiers::STATIC) {
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_STATIC", PHP_70_VERSION_ID);
         }
 
-        if ($this->flags & Class_::MODIFIER_READONLY) {
+        if ($this->flags & Modifiers::READONLY) {
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_READONLY", PHP_81_VERSION_ID);
         }
 
@@ -2430,12 +2856,12 @@ class PropertyInfo extends VariableLike
     {
         parent::addModifiersToFieldSynopsis($doc, $fieldsynopsisElement);
 
-        if ($this->flags & Class_::MODIFIER_STATIC) {
+        if ($this->flags & Modifiers::STATIC) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "static"));
         }
 
-        if ($this->flags & Class_::MODIFIER_READONLY || $this->isDocReadonly) {
+        if ($this->flags & Modifiers::READONLY || $this->isDocReadonly) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "readonly"));
         }
@@ -2756,11 +3182,11 @@ class ClassInfo {
             $php70Flags[] = "ZEND_ACC_TRAIT";
         }
 
-        if ($this->flags & Class_::MODIFIER_FINAL) {
+        if ($this->flags & Modifiers::FINAL) {
             $php70Flags[] = "ZEND_ACC_FINAL";
         }
 
-        if ($this->flags & Class_::MODIFIER_ABSTRACT) {
+        if ($this->flags & Modifiers::ABSTRACT) {
             $php70Flags[] = "ZEND_ACC_ABSTRACT";
         }
 
@@ -2782,7 +3208,7 @@ class ClassInfo {
 
         $php82Flags = $php81Flags;
 
-        if ($this->flags & Class_::MODIFIER_READONLY) {
+        if ($this->flags & Modifiers::READONLY) {
             $php82Flags[] = "ZEND_ACC_READONLY_CLASS";
         }
 
@@ -3023,15 +3449,15 @@ class ClassInfo {
             $ooElement->appendChild($doc->createElement('modifier', $modifierOverride));
             $ooElement->appendChild(new DOMText("\n$indentation "));
         } elseif ($withModifiers) {
-            if ($classInfo->flags & Class_::MODIFIER_FINAL) {
+            if ($classInfo->flags & Modifiers::FINAL) {
                 $ooElement->appendChild($doc->createElement('modifier', 'final'));
                 $ooElement->appendChild(new DOMText("\n$indentation "));
             }
-            if ($classInfo->flags & Class_::MODIFIER_ABSTRACT) {
+            if ($classInfo->flags & Modifiers::ABSTRACT) {
                 $ooElement->appendChild($doc->createElement('modifier', 'abstract'));
                 $ooElement->appendChild(new DOMText("\n$indentation "));
             }
-            if ($classInfo->flags & Class_::MODIFIER_READONLY) {
+            if ($classInfo->flags & Modifiers::READONLY) {
                 $ooElement->appendChild($doc->createElement('modifier', 'readonly'));
                 $ooElement->appendChild(new DOMText("\n$indentation "));
             }
@@ -3176,7 +3602,7 @@ class ClassInfo {
     private function hasNonPrivateConstructor(): bool
     {
         foreach ($this->funcInfos as $funcInfo) {
-            if ($funcInfo->name->isConstructor() && !($funcInfo->flags & Class_::MODIFIER_PRIVATE)) {
+            if ($funcInfo->name->isConstructor() && !($funcInfo->flags & Modifiers::PRIVATE)) {
                 return true;
             }
         }
@@ -3914,7 +4340,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                 }
 
                 $classFlags = $stmt instanceof Class_ ? $stmt->flags : 0;
-                $abstractFlag = $stmt instanceof Stmt\Interface_ ? Class_::MODIFIER_ABSTRACT : 0;
+                $abstractFlag = $stmt instanceof Stmt\Interface_ ? Modifiers::ABSTRACT : 0;
 
                 if ($classStmt instanceof Stmt\ClassConst) {
                     foreach ($classStmt->consts as $const) {
@@ -5105,7 +5531,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "5.0.0alpha3";
+    $version = "5.0.0";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);
@@ -5143,23 +5569,36 @@ $generateOptimizerInfo = isset($options["generate-optimizer-info"]);
 $context->forceRegeneration = isset($options["f"]) || isset($options["force-regeneration"]);
 $context->forceParse = $context->forceRegeneration || $printParameterStats || $verify || $verifyManual || $replacePredefinedConstants || $generateClassSynopses || $generateOptimizerInfo || $replaceClassSynopses || $generateMethodSynopses || $replaceMethodSynopses;
 
-$manualTarget = $argv[$argc - 1] ?? null;
-if (($replacePredefinedConstants || $verifyManual) && $manualTarget === null) {
-    die("A target manual directory must be provided.\n");
-}
-if (($replaceClassSynopses || $verifyManual) && $manualTarget === null) {
-    die("A target manual directory must be provided.\n");
-}
-if (($replaceMethodSynopses || $verifyManual) && $manualTarget === null) {
-    die("A target manual directory must be provided.\n");
-}
-
 if (isset($options["h"]) || isset($options["help"])) {
     die("\nUsage: gen_stub.php [ -f | --force-regeneration ] [ --replace-predefined-constants ] [ --generate-classsynopses ] [ --replace-classsynopses ] [ --generate-methodsynopses ] [ --replace-methodsynopses ] [ --parameter-stats ] [ --verify ]  [ --verify-manual ] [ --generate-optimizer-info ] [ -h | --help ] [ name.stub.php | directory ] [ directory ]\n\n");
 }
 
+$locations = array_slice($argv, $optind);
+$locationCount = count($locations);
+if ($replacePredefinedConstants && $locationCount < 2) {
+    die("At least one source stub path and a target manual directory has to be provided:\n./build/gen_stub.php --replace-predefined-constants ./ ../doc-en/\n");
+}
+if ($replaceClassSynopses && $locationCount < 2) {
+    die("At least one source stub path and a target manual directory has to be provided:\n./build/gen_stub.php --replace-classsynopses ./ ../doc-en/\n");
+}
+if ($generateMethodSynopses && $locationCount < 2) {
+    die("At least one source stub path and a target manual directory has to be provided:\n./build/gen_stub.php --generate-methodsynopses ./ ../doc-en/\n");
+}
+if ($replaceMethodSynopses && $locationCount < 2) {
+    die("At least one source stub path and a target manual directory has to be provided:\n./build/gen_stub.php --replace-methodsynopses ./ ../doc-en/\n");
+}
+if ($verifyManual && $locationCount < 2) {
+    die("At least one source stub path and a target manual directory has to be provided:\n./build/gen_stub.php --verify-manual ./ ../doc-en/\n");
+}
+$manualTarget = null;
+if ($replacePredefinedConstants || $replaceClassSynopses || $generateMethodSynopses || $replaceMethodSynopses || $verifyManual) {
+    $manualTarget = array_pop($locations);
+}
+if ($locations === []) {
+    $locations = ['.'];
+}
+
 $fileInfos = [];
-$locations = array_slice($argv, $optind) ?: ['.'];
 foreach (array_unique($locations) as $location) {
     if (is_file($location)) {
         // Generate single file.
@@ -5221,6 +5660,10 @@ foreach ($fileInfos as $fileInfo) {
 
     foreach ($fileInfo->classInfos as $classInfo) {
         $classMap[$classInfo->name->__toString()] = $classInfo;
+
+        if ($classInfo->alias !== null) {
+            $classMap[$classInfo->alias] = $classInfo;
+        }
     }
 }
 
@@ -5351,16 +5794,14 @@ if ($replaceClassSynopses || $verifyManual) {
 }
 
 if ($generateMethodSynopses) {
-    $methodSynopsesDirectory = getcwd() . "/methodsynopses";
-
     $methodSynopses = generateMethodSynopses($funcMap, $aliasMap);
-    if (!empty($methodSynopses)) {
-        if (!file_exists($methodSynopsesDirectory)) {
-            mkdir($methodSynopsesDirectory);
-        }
+    if (!file_exists($manualTarget)) {
+        mkdir($manualTarget);
+    }
 
-        foreach ($methodSynopses as $filename => $content) {
-            if (file_put_contents("$methodSynopsesDirectory/$filename", $content)) {
+    foreach ($methodSynopses as $filename => $content) {
+        if (!file_exists("$manualTarget/$filename")) {
+            if (file_put_contents("$manualTarget/$filename", $content)) {
                 echo "Saved $filename\n";
             }
         }

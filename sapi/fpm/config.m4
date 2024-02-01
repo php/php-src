@@ -9,7 +9,6 @@ AC_DEFUN([AC_FPM_STDLIBS],
 [
   AC_CHECK_FUNCS(clearenv setproctitle setproctitle_fast)
 
-  AC_SEARCH_LIBS(socket, socket)
   AC_SEARCH_LIBS(inet_addr, nsl)
 ])
 
@@ -231,7 +230,9 @@ AC_DEFUN([AC_FPM_TRACE],
     AC_MSG_CHECKING([for proc mem file])
 
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
+      #ifndef _GNU_SOURCE
       #define _GNU_SOURCE
+      #endif
       #define _FILE_OFFSET_BITS 64
       #include <stdint.h>
       #include <unistd.h>
@@ -342,8 +343,8 @@ AC_DEFUN([AC_FPM_LQ],
       AC_MSG_RESULT([no])
     ])
 
-    if test "$have_lq" = "tcp_info"; then
-      AC_DEFINE([HAVE_LQ_SO_LISTENQ], 1, [do we have SO_LISTENQxxx?])
+    if test "$have_lq" = "so_listenq"; then
+      AC_DEFINE([HAVE_LQ_SO_LISTENQ], 1, [do we have SO_LISTENQ?])
     fi
   fi
 ])
@@ -574,7 +575,6 @@ if test "$PHP_FPM" != "no"; then
   fi
 
   if test "$PHP_FPM_ACL" != "no" ; then
-    AC_MSG_CHECKING([for acl user/group permissions support])
     AC_CHECK_HEADERS([sys/acl.h])
 
     AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <sys/acl.h>
@@ -594,7 +594,6 @@ if test "$PHP_FPM" != "no"; then
       AC_CHECK_LIB(acl, acl_free,
         [PHP_ADD_LIBRARY(acl)
           have_fpm_acl=yes
-          AC_MSG_RESULT([yes])
         ],[
           AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <sys/acl.h>
             int main(void)
@@ -609,21 +608,18 @@ if test "$PHP_FPM" != "no"; then
               acl_free(acl);
               return 0;
             }
-          ]])], [
-            have_fpm_acl=yes
-            AC_MSG_RESULT([yes])
-          ], [
-            have_fpm_acl=no
-            AC_MSG_RESULT([no])
-          ], [AC_MSG_RESULT([skipped (cross-compiling)])])
+          ]])],[have_fpm_acl=yes],[have_fpm_acl=no],[have_fpm_acl=no])
         ])
     ], [
       have_fpm_acl=no
-      AC_MSG_RESULT([no])
     ])
 
+    AC_MSG_CHECKING([for acl user/group permissions support])
     if test "$have_fpm_acl" = "yes"; then
+      AC_MSG_RESULT([yes])
       AC_DEFINE([HAVE_FPM_ACL], 1, [do we have acl support?])
+    else
+      AC_MSG_RESULT([no])
     fi
   fi
 
@@ -719,13 +715,13 @@ if test "$PHP_FPM" != "no"; then
 
   case $host_alias in
       *aix*)
-        BUILD_FPM="echo '\#! .' > php.sym && echo >>php.sym && nm -BCpg \`echo \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FPM_OBJS) | sed 's/\([A-Za-z0-9_]*\)\.lo/\1.o/g'\` | \$(AWK) '{ if (((\$\$2 == \"T\") || (\$\$2 == \"D\") || (\$\$2 == \"B\")) && (substr(\$\$3,1,1) != \".\")) { print \$\$3 } }' | sort -u >> php.sym && \$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) -Wl,-brtl -Wl,-bE:php.sym \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FASTCGI_OBJS) \$(PHP_FPM_OBJS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
+        BUILD_FPM="echo '\#! .' > php.sym && echo >>php.sym && nm -BCpg \`echo \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FPM_OBJS) | sed 's/\([A-Za-z0-9_]*\)\.lo/\1.o/g'\` | \$(AWK) '{ if (((\$\$2 == \"T\") || (\$\$2 == \"D\") || (\$\$2 == \"B\")) && (substr(\$\$3,1,1) != \".\")) { print \$\$3 } }' | sort -u >> php.sym && \$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) -Wl,-brtl -Wl,-bE:php.sym \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FASTCGI_OBJS) \$(PHP_FPM_OBJS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
         ;;
       *darwin*)
         BUILD_FPM="\$(CC) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(NATIVE_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(PHP_FRAMEWORKS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
       ;;
       *)
-        BUILD_FPM="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
+        BUILD_FPM="\$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
       ;;
   esac
 

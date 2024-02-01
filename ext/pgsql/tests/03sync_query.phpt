@@ -3,13 +3,16 @@ PostgreSQL sync query
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 
-include('config.inc');
+include('inc/config.inc');
+$table_name = "table_03sync_query";
 
 $db = pg_connect($conn_str);
+pg_query($db, "CREATE TABLE {$table_name} (num int, str text, bin bytea)");
+pg_query($db, "INSERT INTO {$table_name} DEFAULT VALUES");
 
 $result = pg_query($db, "SELECT * FROM ".$table_name.";");
 if (!($rows   = pg_num_rows($result)))
@@ -83,24 +86,24 @@ if (function_exists('pg_result_error_field')) {
 pg_num_rows(pg_query($db, "SELECT * FROM ".$table_name.";"));
 pg_num_fields(pg_query($db, "SELECT * FROM ".$table_name.";"));
 pg_field_name($result, 0);
-pg_field_num($result, $field_name);
+pg_field_num($result, "num");
 pg_field_size($result, 0);
 pg_field_type($result, 0);
-pg_field_prtlen($result, 0);
-pg_field_is_null($result, 0);
+pg_field_prtlen($result, null, 0);
+pg_field_is_null($result, null, 0);
 
 try {
-    pg_field_is_null($result, -1);
+    pg_field_is_null($result, null, -1);
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    pg_field_is_null($result, 3);
+    pg_field_is_null($result, null, 3);
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    pg_field_is_null($result, "unknown");
+    pg_field_is_null($result, null, "unknown");
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -134,15 +137,23 @@ pg_close($db);
 
 echo "OK";
 ?>
+--CLEAN--
+<?php
+include('inc/config.inc');
+$table_name = "table_03sync_query";
+
+$db = pg_connect($conn_str);
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
+?>
 --EXPECT--
 Argument #3 must be greater than or equal to 0
 Argument #3 must be less than the number of fields for this result set
 Argument #3 must be a field name from this result set
 pg_fetch_all_columns(): Argument #2 ($field) must be greater than or equal to 0
 pg_fetch_all_columns(): Argument #2 ($field) must be less than the number of fields for this result set
-Argument #2 must be greater than or equal to 0
-Argument #2 must be less than the number of fields for this result set
-Argument #2 must be a field name from this result set
+Argument #3 must be greater than or equal to 0
+Argument #3 must be less than the number of fields for this result set
+Argument #3 must be a field name from this result set
 pg_field_name(): Argument #2 ($field) must be greater than or equal to 0
 pg_field_name(): Argument #2 ($field) must be less than the number of fields for this result set
 pg_field_table(): Argument #2 ($field) must be greater than or equal to 0

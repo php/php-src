@@ -3,6 +3,7 @@
 ARG_WITH('mhash', 'mhash support (BC via hash)', 'no');
 
 if (PHP_MHASH != 'no') {
+	WARNING("mhash* functions are deprecated as of PHP 8.1.0");
 	AC_DEFINE('PHP_MHASH_BC', 1);
 }
 
@@ -34,13 +35,9 @@ if (!CHECK_HEADER_ADD_INCLUDE('PMurHash.h', 'CFLAGS_HASH', hash_murmur_dir)) {
 }
 ADD_SOURCES(hash_murmur_dir, 'PMurHash.c PMurHash128.c', 'hash');
 
-var hash_xxhash_dir = 'ext/hash/xxhash';
-if (!CHECK_HEADER_ADD_INCLUDE('xxhash.h', 'CFLAGS_HASH', hash_xxhash_dir)) {
-	ERROR('Unable to locate xxhash headers');
-}
-
-PHP_INSTALL_HEADERS('ext/hash/',	'php_hash.h php_hash_md.h php_hash_sha.h ' +
+PHP_INSTALL_HEADERS('ext/hash',	'php_hash.h php_hash_md.h php_hash_sha.h ' +
 									'php_hash_ripemd.h php_hash_haval.h php_hash_tiger.h ' +
 									'php_hash_gost.h php_hash_snefru.h php_hash_whirlpool.h ' +
 									'php_hash_adler32.h php_hash_crc32.h php_hash_sha3.h ' +
-									'php_hash_murmur.h php_hash_xxhash.h');
+									'php_hash_murmur.h php_hash_xxhash.h php_hash_fnv.h ' +
+									'php_hash_joaat.h xxhash/xxhash.h');

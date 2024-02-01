@@ -110,7 +110,7 @@ static SLJIT_INLINE void free_chunk(void *chunk, sljit_uw size)
 
 #define SLJIT_MAP_JIT	(get_map_jit_flag())
 
-static SLJIT_INLINE int get_map_jit_flag()
+static SLJIT_INLINE int get_map_jit_flag(void)
 {
 	size_t page_size;
 	void *ptr;

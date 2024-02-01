@@ -284,6 +284,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 	zend_string *key;
 	zval *val;
 	uint32_t count;
+	char *packed;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -325,11 +326,12 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 			GC_PROTECT_RECURSION(myht);
 		}
 		count = zend_hash_num_elements(myht);
+		packed = HT_IS_PACKED(myht) ? "packed " : "";
 		if (Z_REFCOUNTED_P(struc)) {
 			/* -1 because of ADDREF above. */
-			php_printf("array(%d) refcount(%u){\n", count, Z_REFCOUNT_P(struc) - 1);
+			php_printf("array(%d) %srefcount(%u){\n", count, packed, Z_REFCOUNT_P(struc) - 1);
 		} else {
-			php_printf("array(%d) interned {\n", count);
+			php_printf("array(%d) %sinterned {\n", count, packed);
 		}
 		ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
 			zval_array_element_dump(val, index, key, level);
@@ -725,8 +727,7 @@ static inline void php_var_serialize_long(smart_str *buf, zend_long val) /* {{{ 
 	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, val);
 	size_t l = b + sizeof(b) - 1 - s;
 	char *res = smart_str_extend(buf, 2 + l + 1);
-	memcpy(res, "i:", 2);
-	res += 2;
+	res = zend_mempcpy(res, "i:", 2);
 	memcpy(res, s, l);
 	res[l] = ';';
 }
@@ -738,14 +739,10 @@ static inline void php_var_serialize_string(smart_str *buf, char *str, size_t le
 	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, len);
 	size_t l = b + sizeof(b) - 1 - s;
 	char *res = smart_str_extend(buf, 2 + l + 2 + len + 2);
-	memcpy(res, "s:", 2);
-	res += 2;
-	memcpy(res, s, l);
-	res += l;
-	memcpy(res, ":\"", 2);
-	res += 2;
-	memcpy(res, str, len);
-	res += len;
+	res = zend_mempcpy(res, "s:", 2);
+	res = zend_mempcpy(res, s, l);
+	res = zend_mempcpy(res, ":\"", 2);
+	res = zend_mempcpy(res, str, len);
 	memcpy(res, "\";", 2);
 }
 /* }}} */
@@ -760,14 +757,10 @@ static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* 
 	char *s = zend_print_long_to_buf(b + sizeof(b) - 1, class_name_len);
 	size_t l = b + sizeof(b) - 1 - s;
 	char *res = smart_str_extend(buf, 2 + l + 2 + class_name_len + 2);
-	memcpy(res, "O:", 2);
-	res += 2;
-	memcpy(res, s, l);
-	res += l;
-	memcpy(res, ":\"", 2);
-	res += 2;
-	memcpy(res, ZSTR_VAL(class_name), class_name_len);
-	res += class_name_len;
+	res = zend_mempcpy(res, "O:", 2);
+	res = zend_mempcpy(res, s, l);
+	res = zend_mempcpy(res, ":\"", 2);
+	res = zend_mempcpy(res, ZSTR_VAL(class_name), class_name_len);
 	memcpy(res, "\":", 2);
 	PHP_CLEANUP_CLASS_ATTRIBUTES();
 	return incomplete_class;
@@ -1037,8 +1030,7 @@ again:
 
 			size_t len = strlen(tmp_str);
 			char *res = smart_str_extend(buf, 2 + len + 1);
-			memcpy(res, "d:", 2);
-			res += 2;
+			res = zend_mempcpy(res, "d:", 2);
 			memcpy(res, tmp_str, len);
 			res[len] = ';';
 			return;
@@ -1125,21 +1117,13 @@ again:
 						char *s2 = zend_print_long_to_buf(b2 + sizeof(b2) - 1, serialized_length);
 						size_t l2 = b2 + sizeof(b2) - 1 - s2;
 						char *res = smart_str_extend(buf, 2 + l1 + 2 + ZSTR_LEN(Z_OBJCE_P(struc)->name) + 2 + l2 + 2 + serialized_length + 1);
-						memcpy(res, "C:", 2);
-						res += 2;
-						memcpy(res, s1, l1);
-						res += l1;
-						memcpy(res, ":\"", 2);
-						res += 2;
-						memcpy(res, ZSTR_VAL(Z_OBJCE_P(struc)->name), ZSTR_LEN(Z_OBJCE_P(struc)->name));
-						res += ZSTR_LEN(Z_OBJCE_P(struc)->name);
-						memcpy(res, "\":", 2);
-						res += 2;
-
-						memcpy(res, s2, l2);
-						res += l2;
-						memcpy(res, ":{", 2);
-						res += 2;
+						res = zend_mempcpy(res, "C:", 2);
+						res = zend_mempcpy(res, s1, l1);
+						res = zend_mempcpy(res, ":\"", 2);
+						res = zend_mempcpy(res, ZSTR_VAL(Z_OBJCE_P(struc)->name), ZSTR_LEN(Z_OBJCE_P(struc)->name));
+						res = zend_mempcpy(res, "\":", 2);
+						res = zend_mempcpy(res, s2, l2);
+						res = zend_mempcpy(res, ":{", 2);
 						memcpy(res, (char *) serialized_data, serialized_length);
 						res[serialized_length] = '}';
 					} else {

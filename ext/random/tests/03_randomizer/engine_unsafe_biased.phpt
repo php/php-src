@@ -44,6 +44,18 @@ try {
 }
 
 try {
+    var_dump(randomizer()->pickArrayKeys(range(1, 1234), 1));
+} catch (Random\BrokenRandomEngineError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+try {
+    var_dump(randomizer()->pickArrayKeys(range(1, 1234), 10));
+} catch (Random\BrokenRandomEngineError $e) {
+    echo $e->getMessage(), PHP_EOL;
+}
+
+try {
     var_dump(randomizer()->shuffleBytes('foobar'));
 } catch (Random\BrokenRandomEngineError $e) {
     echo $e->getMessage(), PHP_EOL;
@@ -66,6 +78,8 @@ try {
 Failed to generate an acceptable random number in 50 attempts
 int(%d)
 string(2) "ff"
+Failed to generate an acceptable random number in 50 attempts
+Failed to generate an acceptable random number in 50 attempts
 Failed to generate an acceptable random number in 50 attempts
 Failed to generate an acceptable random number in 50 attempts
 Failed to generate an acceptable random number in 50 attempts

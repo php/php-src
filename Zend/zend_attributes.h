@@ -58,7 +58,7 @@ typedef struct _zend_attribute {
 	/* Parameter offsets start at 1, everything else uses 0. */
 	uint32_t offset;
 	uint32_t argc;
-	zend_attribute_arg args[1];
+	zend_attribute_arg args[1] ZEND_ELEMENT_COUNT(argc);
 } zend_attribute;
 
 typedef struct _zend_internal_attribute {

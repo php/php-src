@@ -674,14 +674,21 @@ zend_result dom_node_prefix_write(dom_object *obj, zval *newval)
 			prefix_str = Z_STR_P(newval);
 
 			prefix = ZSTR_VAL(prefix_str);
+			if (*prefix == '\0') {
+				/* The empty string namespace prefix does not exist.
+				 * We should fall back to the default namespace in this case. */
+				prefix = NULL;
+			}
 			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
 				strURI = (char *) nodep->ns->href;
+				/* Validate namespace naming constraints */
 				if (strURI == NULL ||
 					(zend_string_equals_literal(prefix_str, "xml") && strcmp(strURI, (char *) XML_XML_NAMESPACE)) ||
 					(nodep->type == XML_ATTRIBUTE_NODE && zend_string_equals_literal(prefix_str, "xmlns") &&
 					 strcmp(strURI, (char *) DOM_XMLNS_NAMESPACE)) ||
 					(nodep->type == XML_ATTRIBUTE_NODE && !strcmp((char *) nodep->name, "xmlns"))) {
-					ns = NULL;
+					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document));
+					return FAILURE;
 				} else {
 					curns = nsnode->nsDef;
 					while (curns != NULL) {
@@ -693,12 +700,13 @@ zend_result dom_node_prefix_write(dom_object *obj, zval *newval)
 					}
 					if (ns == NULL) {
 						ns = xmlNewNs(nsnode, nodep->ns->href, (xmlChar *)prefix);
+						/* Sadly, we cannot distinguish between OOM and namespace conflict.
+						 * But OOM will almost never happen. */
+						if (UNEXPECTED(ns == NULL)) {
+							php_dom_throw_error(NAMESPACE_ERR, /* strict */ true);
+							return FAILURE;
+						}
 					}
-				}
-
-				if (ns == NULL) {
-					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document));
-					return FAILURE;
 				}
 
 				xmlSetNs(nodep, ns);
@@ -820,7 +828,7 @@ zend_result dom_node_text_content_write(dom_object *obj, zval *newval)
 
 /* }}} */
 
-static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlNodePtr nextsib, xmlNodePtr fragment, dom_object *intern, dom_object *childobj) /* {{{ */
+static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlNodePtr nextsib, xmlNodePtr fragment, dom_object *intern) /* {{{ */
 {
 	xmlNodePtr newchild, node;
 
@@ -845,8 +853,8 @@ static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib,
 			node->parent = nodep;
 			if (node->doc != nodep->doc) {
 				xmlSetTreeDoc(node, nodep->doc);
-				if (node->_private != NULL) {
-					childobj = node->_private;
+				dom_object *childobj = node->_private;
+				if (childobj != NULL) {
 					childobj->document = intern->document;
 					php_libxml_increment_doc_ref((php_libxml_node_object *)childobj, NULL);
 				}
@@ -973,7 +981,7 @@ PHP_METHOD(DOMNode, insertBefore)
 			}
 		} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
 			xmlNodePtr last = child->last;
-			new_child = _php_dom_insert_fragment(parentp, refp->prev, refp, child, intern, childobj);
+			new_child = _php_dom_insert_fragment(parentp, refp->prev, refp, child, intern);
 			dom_reconcile_ns_list(parentp->doc, new_child, last);
 		} else {
 			new_child = xmlAddPrevSibling(refp, child);
@@ -1023,7 +1031,7 @@ PHP_METHOD(DOMNode, insertBefore)
 			}
 		} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
 			xmlNodePtr last = child->last;
-			new_child = _php_dom_insert_fragment(parentp, parentp->last, NULL, child, intern, childobj);
+			new_child = _php_dom_insert_fragment(parentp, parentp->last, NULL, child, intern);
 			dom_reconcile_ns_list(parentp->doc, new_child, last);
 		} else {
 			new_child = xmlAddChild(parentp, child);
@@ -1104,7 +1112,7 @@ PHP_METHOD(DOMNode, replaceChild)
 		xmlUnlinkNode(oldchild);
 
 		xmlNodePtr last = newchild->last;
-		newchild = _php_dom_insert_fragment(nodep, prevsib, nextsib, newchild, intern, newchildobj);
+		newchild = _php_dom_insert_fragment(nodep, prevsib, nextsib, newchild, intern);
 		if (newchild) {
 			dom_reconcile_ns_list(nodep->doc, newchild, last);
 		}
@@ -1259,9 +1267,10 @@ PHP_METHOD(DOMNode, appendChild)
 		if (UNEXPECTED(new_child == NULL)) {
 			goto cannot_add;
 		}
+		php_dom_reconcile_attribute_namespace_after_insertion((xmlAttrPtr) new_child);
 	} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
 		xmlNodePtr last = child->last;
-		new_child = _php_dom_insert_fragment(nodep, nodep->last, NULL, child, intern, childobj);
+		new_child = _php_dom_insert_fragment(nodep, nodep->last, NULL, child, intern);
 		dom_reconcile_ns_list(nodep->doc, new_child, last);
 	} else {
 		new_child = xmlAddChild(nodep, child);
@@ -1328,38 +1337,17 @@ PHP_METHOD(DOMNode, cloneNode)
 
 	DOM_GET_OBJ(n, id, xmlNodePtr, intern);
 
-	node = xmlDocCopyNode(n, n->doc, recursive);
+	node = dom_clone_node(n, n->doc, intern, recursive);
 
 	if (!node) {
 		RETURN_FALSE;
 	}
 
-	/* When deep is false Element nodes still require the attributes
-	Following taken from libxml as xmlDocCopyNode doesn't do this */
-	if (n->type == XML_ELEMENT_NODE && recursive == 0) {
-		if (n->nsDef != NULL) {
-			node->nsDef = xmlCopyNamespaceList(n->nsDef);
-		}
-		if (n->ns != NULL) {
-			xmlNsPtr ns;
-			ns = xmlSearchNs(n->doc, node, n->ns->prefix);
-			if (ns == NULL) {
-				ns = xmlSearchNs(n->doc, n, n->ns->prefix);
-				if (ns != NULL) {
-					xmlNodePtr root = node;
-
-					while (root->parent != NULL) {
-						root = root->parent;
-					}
-					node->ns = xmlNewNs(root, ns->href, ns->prefix);
-				}
-			} else {
-				node->ns = ns;
-			}
-		}
-		if (n->properties != NULL) {
-			node->properties = xmlCopyPropList(node, n->properties);
-		}
+	if (node->type == XML_ATTRIBUTE_NODE && n->ns != NULL && node->ns == NULL) {
+		/* Let reconciliation deal with this. The lifetime of the namespace poses no problem
+		 * because we're increasing the refcount of the document proxy at the return.
+		 * libxml2 doesn't set the ns because it can't know that this is safe. */
+		node->ns = n->ns;
 	}
 
 	/* If document cloned we want a new document proxy */
@@ -1490,33 +1478,58 @@ static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other
 
 #define PHP_DOM_FUNC_CAT(prefix, suffix) prefix##_##suffix
 /* xmlNode and xmlNs have incompatible struct layouts, i.e. the next field is in a different offset */
-#define PHP_DOM_DEFINE_LIST_EQUALITY_HELPER(type)																\
-	static size_t PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(const type *node)						\
-	{																											\
-		size_t counter = 0;																						\
-		while (node) {																							\
-			counter++;																							\
-			node = node->next;																					\
-		}																										\
-		return counter;																							\
-	}																											\
-	static bool PHP_DOM_FUNC_CAT(php_dom_node_list_equality_check, type)(const type *list1, const type *list2)	\
-	{																											\
-		size_t count = PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list1);								\
-		if (count != PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list2)) {								\
-			return false;																						\
-		}																										\
-		for (size_t i = 0; i < count; i++) {																	\
-			if (!php_dom_node_is_equal_node((const xmlNode *) list1, (const xmlNode *) list2)) {				\
-				return false;																					\
-			}																									\
-			list1 = list1->next;																				\
-			list2 = list2->next;																				\
-		}																										\
-		return true;																							\
+#define PHP_DOM_DEFINE_LIST_COUNTER_HELPER(type)																		\
+	static size_t PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(const type *node)								\
+	{																													\
+		size_t counter = 0;																								\
+		while (node) {																									\
+			counter++;																									\
+			node = node->next;																							\
+		}																												\
+		return counter;																									\
 	}
-PHP_DOM_DEFINE_LIST_EQUALITY_HELPER(xmlNode)
-PHP_DOM_DEFINE_LIST_EQUALITY_HELPER(xmlNs)
+#define PHP_DOM_DEFINE_LIST_EQUALITY_ORDERED_HELPER(type)																\
+	static bool PHP_DOM_FUNC_CAT(php_dom_node_list_equality_check_ordered, type)(const type *list1, const type *list2)	\
+	{																													\
+		size_t count = PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list1);										\
+		if (count != PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list2)) {										\
+			return false;																								\
+		}																												\
+		for (size_t i = 0; i < count; i++) {																			\
+			if (!php_dom_node_is_equal_node((const xmlNode *) list1, (const xmlNode *) list2)) {						\
+				return false;																							\
+			}																											\
+			list1 = list1->next;																						\
+			list2 = list2->next;																						\
+		}																												\
+		return true;																									\
+	}
+#define PHP_DOM_DEFINE_LIST_EQUALITY_UNORDERED_HELPER(type)																\
+	static bool PHP_DOM_FUNC_CAT(php_dom_node_list_equality_check_unordered, type)(const type *list1, const type *list2)\
+	{																													\
+		size_t count = PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list1);										\
+		if (count != PHP_DOM_FUNC_CAT(php_dom_node_count_list_size, type)(list2)) {										\
+			return false;																								\
+		}																												\
+		for (const type *n1 = list1; n1 != NULL; n1 = n1->next) {														\
+			bool found = false;																							\
+			for (const type *n2 = list2; n2 != NULL && !found; n2 = n2->next) {											\
+				if (php_dom_node_is_equal_node((const xmlNode *) n1, (const xmlNode *) n2)) {							\
+					found = true;																						\
+				}																										\
+			}																											\
+			if (!found) {																								\
+				return false;																							\
+			}																											\
+		}																												\
+		return true;																									\
+	}
+
+PHP_DOM_DEFINE_LIST_COUNTER_HELPER(xmlNode)
+PHP_DOM_DEFINE_LIST_COUNTER_HELPER(xmlNs)
+PHP_DOM_DEFINE_LIST_EQUALITY_ORDERED_HELPER(xmlNode)
+PHP_DOM_DEFINE_LIST_EQUALITY_UNORDERED_HELPER(xmlNode)
+PHP_DOM_DEFINE_LIST_EQUALITY_UNORDERED_HELPER(xmlNs)
 
 static bool php_dom_is_equal_attr(const xmlAttr *this_attr, const xmlAttr *other_attr)
 {
@@ -1544,9 +1557,9 @@ static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other
 			&& php_dom_node_is_ns_prefix_equal(this, other)
 			&& php_dom_node_is_ns_uri_equal(this, other)
 			/* Check attributes first, then namespace declarations, then children */
-			&& php_dom_node_list_equality_check_xmlNode((const xmlNode *) this->properties, (const xmlNode *) other->properties)
-			&& php_dom_node_list_equality_check_xmlNs(this->nsDef, other->nsDef)
-			&& php_dom_node_list_equality_check_xmlNode(this->children, other->children);
+			&& php_dom_node_list_equality_check_unordered_xmlNode((const xmlNode *) this->properties, (const xmlNode *) other->properties)
+			&& php_dom_node_list_equality_check_unordered_xmlNs(this->nsDef, other->nsDef)
+			&& php_dom_node_list_equality_check_ordered_xmlNode(this->children, other->children);
 	} else if (this->type == XML_DTD_NODE) {
 		/* Note: in the living spec entity declarations and notations are no longer compared because they're considered obsolete. */
 		const xmlDtd *this_dtd = (const xmlDtd *) this;
@@ -1577,7 +1590,7 @@ static bool php_dom_node_is_equal_node(const xmlNode *this, const xmlNode *other
 		const xmlNs *other_ns = (const xmlNs *) other;
 		return xmlStrEqual(this_ns->prefix, other_ns->prefix) && xmlStrEqual(this_ns->href, other_ns->href);
 	} else if (this->type == XML_DOCUMENT_FRAG_NODE || this->type == XML_HTML_DOCUMENT_NODE || this->type == XML_DOCUMENT_NODE) {
-		return php_dom_node_list_equality_check_xmlNode(this->children, other->children);
+		return php_dom_node_list_equality_check_ordered_xmlNode(this->children, other->children);
 	}
 
 	return false;

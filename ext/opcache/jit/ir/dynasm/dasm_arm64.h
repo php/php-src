@@ -1,6 +1,6 @@
 /*
 ** DynASM ARM64 encoding engine.
-** Copyright (C) 2005-2021 Mike Pall. All rights reserved.
+** Copyright (C) 2005-2023 Mike Pall. All rights reserved.
 ** Released under the MIT license. See dynasm.lua for full copyright notice.
 */
 
@@ -72,7 +72,7 @@ struct dasm_State {
   size_t lgsize;
   int *pclabels;		/* PC label chains/pos ptrs. */
   size_t pcsize;
-  void **globals;		/* Array of globals (bias -10). */
+  void **globals;		/* Array of globals. */
   dasm_Section *section;	/* Pointer to active section. */
   size_t codesize;		/* Total size of all code sections. */
   int maxsection;		/* 0 <= sectionidx < maxsection. */
@@ -83,13 +83,15 @@ struct dasm_State {
 /* The size of the core structure depends on the max. number of sections. */
 #define DASM_PSZ(ms)	(sizeof(dasm_State)+(ms-1)*sizeof(dasm_Section))
 
+/* Perform potentially overflowing pointer operations in a way that avoids UB. */
+#define DASM_PTR_SUB(p1, off) ((void *) ((uintptr_t) (p1) - sizeof(*p1) * (uintptr_t) (off)))
+#define DASM_PTR_ADD(p1, off) ((void *) ((uintptr_t) (p1) + sizeof(*p1) * (uintptr_t) (off)))
 
 /* Initialize DynASM state. */
 void dasm_init(Dst_DECL, int maxsection)
 {
   dasm_State *D;
   size_t psz = 0;
-  int i;
   Dst_REF = NULL;
   DASM_M_GROW(Dst, struct dasm_State, Dst_REF, psz, DASM_PSZ(maxsection));
   D = Dst_REF;
@@ -100,12 +102,7 @@ void dasm_init(Dst_DECL, int maxsection)
   D->pcsize = 0;
   D->globals = NULL;
   D->maxsection = maxsection;
-  for (i = 0; i < maxsection; i++) {
-    D->sections[i].buf = NULL;  /* Need this for pass3. */
-    D->sections[i].rbuf = D->sections[i].buf - DASM_SEC2POS(i);
-    D->sections[i].bsize = 0;
-    D->sections[i].epos = 0;  /* Wrong, but is recalculated after resize. */
-  }
+  memset((void *)D->sections, 0, maxsection * sizeof(dasm_Section));
 }
 
 /* Free DynASM state. */
@@ -125,7 +122,7 @@ void dasm_free(Dst_DECL)
 void dasm_setupglobal(Dst_DECL, void **gl, unsigned int maxgl)
 {
   dasm_State *D = Dst_REF;
-  D->globals = gl - 10;  /* Negative bias to compensate for locals. */
+  D->globals = gl;
   DASM_M_GROW(Dst, int, D->lglabels, D->lgsize, (10+maxgl)*sizeof(int));
 }
 
@@ -150,6 +147,7 @@ void dasm_setup(Dst_DECL, const void *actionlist)
   if (D->pclabels) memset((void *)D->pclabels, 0, D->pcsize);
   for (i = 0; i < D->maxsection; i++) {
     D->sections[i].pos = DASM_SEC2POS(i);
+    D->sections[i].rbuf = DASM_PTR_SUB(D->sections[i].buf, D->sections[i].pos);
     D->sections[i].ofs = 0;
   }
 }
@@ -158,10 +156,10 @@ void dasm_setup(Dst_DECL, const void *actionlist)
 #ifdef DASM_CHECKS
 #define CK(x, st) \
   do { if (!(x)) { \
-    D->status = DASM_S_##st|(p-D->actionlist-1); return; } } while (0)
+    D->status = DASM_S_##st|(int)(p-D->actionlist-1); return; } } while (0)
 #define CKPL(kind, st) \
   do { if ((size_t)((char *)pl-(char *)D->kind##labels) >= D->kind##size) { \
-    D->status = DASM_S_RANGE_##st|(p-D->actionlist-1); return; } } while (0)
+    D->status = DASM_S_RANGE_##st|(int)(p-D->actionlist-1); return; } } while (0)
 #else
 #define CK(x, st)	((void)0)
 #define CKPL(kind, st)	((void)0)
@@ -190,7 +188,9 @@ static int dasm_imm13(int lo, int hi)
   unsigned long long n = (((unsigned long long)hi) << 32) | (unsigned int)lo;
   unsigned long long m = 1ULL, a, b, c;
   if (n & 1) { n = ~n; inv = 1; }
-  a = n & -n; b = (n+a)&-(n+a); c = (n+a-b)&-(n+a-b);
+  a = n & (unsigned long long)-(long long)n;
+  b = (n+a)&(unsigned long long)-(long long)(n+a);
+  c = (n+a-b)&(unsigned long long)-(long long)(n+a-b);
   xa = dasm_ffs(a); xb = dasm_ffs(b);
   if (c) {
     w = dasm_ffs(c) - xa;
@@ -415,7 +415,7 @@ int dasm_link(Dst_DECL, size_t *szp)
 
 #ifdef DASM_CHECKS
 #define CK(x, st) \
-  do { if (!(x)) return DASM_S_##st|(p-D->actionlist-1); } while (0)
+  do { if (!(x)) return DASM_S_##st|(int)(p-D->actionlist-1); } while (0)
 #else
 #define CK(x, st)	((void)0)
 #endif
@@ -432,7 +432,7 @@ int dasm_encode(Dst_DECL, void *buffer)
   for (secnum = 0; secnum < D->maxsection; secnum++) {
     dasm_Section *sec = D->sections + secnum;
     int *b = sec->buf;
-    int *endb = sec->rbuf + sec->pos;
+    int *endb = DASM_PTR_ADD(sec->rbuf, sec->pos);
 
     while (b != endb) {
       dasm_ActList p = D->actionlist + *b++;
@@ -451,7 +451,7 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  break;
 	case DASM_REL_LG:
 	  if (n < 0) {
-	    ptrdiff_t na = (ptrdiff_t)D->globals[-n] - (ptrdiff_t)cp + 4;
+	    ptrdiff_t na = (ptrdiff_t)D->globals[-n-10] - (ptrdiff_t)cp + 4;
 	    n = (int)na;
 	    CK_REL((ptrdiff_t)n == na, na);
 	    goto patchrel;
@@ -466,15 +466,15 @@ int dasm_encode(Dst_DECL, void *buffer)
 	    cp[-1] |= ((n >> 2) & 0x03ffffff);
 	  } else if ((ins & 0x800)) {  /* B.cond, CBZ, CBNZ, LDR* literal */
 	    CK_REL((n & 3) == 0 && ((n+0x00100000) >> 21) == 0, n);
-	    cp[-1] |= ((n << 3) & 0x00ffffe0);
+	    cp[-1] |= (((unsigned)n << 3) & 0x00ffffe0);
 	  } else if ((ins & 0x3000) == 0x2000) {  /* ADR */
 	    CK_REL(((n+0x00100000) >> 21) == 0, n);
-	    cp[-1] |= ((n << 3) & 0x00ffffe0) | ((n & 3) << 29);
+	    cp[-1] |= (((unsigned)n << 3) & 0x00ffffe0) | ((n & 3) << 29);
 	  } else if ((ins & 0x3000) == 0x3000) {  /* ADRP */
 	    cp[-1] |= ((n >> 9) & 0x00ffffe0) | (((n >> 12) & 3) << 29);
 	  } else if ((ins & 0x1000)) {  /* TBZ, TBNZ */
 	    CK_REL((n & 3) == 0 && ((n+0x00008000) >> 16) == 0, n);
-	    cp[-1] |= ((n << 3) & 0x0007ffe0);
+	    cp[-1] |= (((unsigned)n << 3) & 0x0007ffe0);
 	  } else if ((ins & 0x8000)) {  /* absolute */
 	    cp[0] = (unsigned int)((ptrdiff_t)cp - 4 + n);
 	    cp[1] = (unsigned int)(((ptrdiff_t)cp - 4 + n) >> 32);
@@ -494,7 +494,7 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  goto patchrel;
 	}
 	case DASM_LABEL_LG:
-	  ins &= 2047; if (ins >= 20) D->globals[ins-10] = (void *)(base + n);
+	  ins &= 2047; if (ins >= 20) D->globals[ins-20] = (void *)(base + n);
 	  break;
 	case DASM_LABEL_PC: break;
 	case DASM_IMM:
@@ -563,7 +563,7 @@ int dasm_checkstep(Dst_DECL, int secmatch)
   }
   if (D->status == DASM_S_OK && secmatch >= 0 &&
       D->section != &D->sections[secmatch])
-    D->status = DASM_S_MATCH_SEC|(D->section-D->sections);
+    D->status = DASM_S_MATCH_SEC|(int)(D->section-D->sections);
   return D->status;
 }
 #endif

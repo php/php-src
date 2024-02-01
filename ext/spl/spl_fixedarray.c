@@ -740,7 +740,7 @@ PHP_METHOD(SplFixedArray, fromArray)
 		}
 		spl_fixedarray_init(&array, tmp);
 
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_index, str_index, element) {
+		ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(data), num_index, element) {
 			ZVAL_COPY_DEREF(&array.elements[num_index], element);
 		} ZEND_HASH_FOREACH_END();
 
@@ -895,7 +895,7 @@ static void spl_fixedarray_it_rewind(zend_object_iterator *iter)
 	((spl_fixedarray_it*)iter)->current = 0;
 }
 
-static int spl_fixedarray_it_valid(zend_object_iterator *iter)
+static zend_result spl_fixedarray_it_valid(zend_object_iterator *iter)
 {
 	spl_fixedarray_it     *iterator = (spl_fixedarray_it*)iter;
 	spl_fixedarray_object *object   = Z_SPLFIXEDARRAY_P(&iter->data);

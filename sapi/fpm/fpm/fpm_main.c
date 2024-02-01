@@ -291,8 +291,11 @@ static void sapi_cgibin_flush(void *server_context) /* {{{ */
 	/* fpm has started, let use fcgi instead of stdout */
 	if (fpm_is_running) {
 		fcgi_request *request = (fcgi_request*) server_context;
-		if (!parent && request && !fcgi_flush(request, 0)) {
-			php_handle_aborted_connection();
+		if (!parent && request) {
+			sapi_send_headers();
+			if (!fcgi_flush(request, 0)) {
+				php_handle_aborted_connection();
+			}
 		}
 		return;
 	}
@@ -1165,7 +1168,7 @@ static void init_request_info(void)
 									size_t decoded_path_info_len = 0;
 									if (strchr(path_info, '%')) {
 										decoded_path_info = estrdup(path_info);
-										decoded_path_info_len = php_url_decode(decoded_path_info, strlen(path_info));
+										decoded_path_info_len = php_raw_url_decode(decoded_path_info, strlen(path_info));
 									}
 									size_t snlen = strlen(env_script_name);
 									size_t env_script_file_info_start = 0;

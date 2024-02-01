@@ -35,6 +35,7 @@ extern zend_module_entry libxml_module_entry;
 
 #include "zend_smart_str.h"
 #include <libxml/tree.h>
+#include <libxml/parser.h>
 
 #define LIBXML_SAVE_NOEMPTYTAG 1<<2
 
@@ -63,9 +64,10 @@ typedef struct {
 
 typedef struct _php_libxml_ref_obj {
 	void *ptr;
-	int   refcount;
 	libxml_doc_props *doc_props;
 	php_libxml_cache_tag cache_tag;
+	int refcount;
+	bool is_modern_api_class;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {
@@ -77,7 +79,6 @@ typedef struct _php_libxml_node_ptr {
 typedef struct _php_libxml_node_object {
 	php_libxml_node_ptr *node;
 	php_libxml_ref_obj *document;
-	HashTable *properties;
 	zend_object  std;
 } php_libxml_node_object;
 
@@ -131,12 +132,17 @@ PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node);
 PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *object);
 PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...);
 PHP_LIBXML_API void php_libxml_ctx_warning(void *ctx, const char *msg, ...);
+PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(const char *file, int line, int column, const char *msg,...);
 PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...);
 PHP_LIBXML_API int php_libxml_xmlCheckUTF8(const unsigned char *s);
 PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext);
 PHP_LIBXML_API void php_libxml_issue_error(int level, const char *msg);
 PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable);
 PHP_LIBXML_API void php_libxml_set_old_ns(xmlDocPtr doc, xmlNsPtr ns);
+PHP_LIBXML_API php_stream_context *php_libxml_get_stream_context(void);
+
+PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_string(const char *start, const char *end);
+PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_stream(const php_stream *s);
 
 /* Init/shutdown functions*/
 PHP_LIBXML_API void php_libxml_initialize(void);
@@ -153,7 +159,8 @@ ZEND_TSRMLS_CACHE_EXTERN()
  * See libxml2 globals.c and parserInternals.c.
  * The unique_name argument allows multiple sanitizes and restores within the
  * same function, even nested is necessary. */
-#define PHP_LIBXML_SANITIZE_GLOBALS(unique_name) \
+# define PHP_LIBXML_SANITIZE_GLOBALS(unique_name) \
+	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations") \
 	int xml_old_loadsubset_##unique_name = xmlLoadExtDtdDefaultValue; \
 	xmlLoadExtDtdDefaultValue = 0; \
 	int xml_old_validate_##unique_name = xmlDoValidityCheckingDefaultValue; \
@@ -161,15 +168,18 @@ ZEND_TSRMLS_CACHE_EXTERN()
 	int xml_old_pedantic_##unique_name = xmlPedanticParserDefault(0); \
 	int xml_old_substitute_##unique_name = xmlSubstituteEntitiesDefault(0); \
 	int xml_old_linenrs_##unique_name = xmlLineNumbersDefault(0); \
-	int xml_old_blanks_##unique_name = xmlKeepBlanksDefault(1);
+	int xml_old_blanks_##unique_name = xmlKeepBlanksDefault(1); \
+	ZEND_DIAGNOSTIC_IGNORED_END
 
-#define PHP_LIBXML_RESTORE_GLOBALS(unique_name) \
+# define PHP_LIBXML_RESTORE_GLOBALS(unique_name) \
+	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations") \
 	xmlLoadExtDtdDefaultValue = xml_old_loadsubset_##unique_name; \
 	xmlDoValidityCheckingDefaultValue = xml_old_validate_##unique_name; \
 	(void) xmlPedanticParserDefault(xml_old_pedantic_##unique_name); \
 	(void) xmlSubstituteEntitiesDefault(xml_old_substitute_##unique_name); \
 	(void) xmlLineNumbersDefault(xml_old_linenrs_##unique_name); \
-	(void) xmlKeepBlanksDefault(xml_old_blanks_##unique_name);
+	(void) xmlKeepBlanksDefault(xml_old_blanks_##unique_name); \
+	ZEND_DIAGNOSTIC_IGNORED_END
 
 /* Alternative for above, working directly on the context and not setting globals.
  * Generally faster because no locking is involved, and this has the advantage that it sets the options to a known good value. */

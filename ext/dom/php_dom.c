@@ -22,11 +22,12 @@
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
-#include "ext/random/php_random.h"
 #include "php_dom.h"
 #include "php_dom_arginfo.h"
 #include "dom_properties.h"
 #include "zend_interfaces.h"
+#include "lexbor/lexbor/core/types.h"
+#include "lexbor/lexbor/core/lexbor.h"
 
 #include "ext/standard/info.h"
 #define PHP_XPATH 1
@@ -40,6 +41,8 @@ PHP_DOM_EXPORT zend_class_entry *dom_childnode_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_domimplementation_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_documentfragment_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_document_class_entry;
+PHP_DOM_EXPORT zend_class_entry *dom_html_document_class_entry;
+PHP_DOM_EXPORT zend_class_entry *dom_xml_document_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_nodelist_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_namednodemap_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_characterdata_class_entry;
@@ -53,6 +56,7 @@ PHP_DOM_EXPORT zend_class_entry *dom_notation_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_entity_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_entityreference_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_processinginstruction_class_entry;
+PHP_DOM_EXPORT zend_class_entry *dom_abstract_base_document_class_entry;
 #ifdef LIBXML_XPATH_ENABLED
 PHP_DOM_EXPORT zend_class_entry *dom_xpath_class_entry;
 #endif
@@ -70,6 +74,8 @@ zend_object_handlers dom_xpath_object_handlers;
 static HashTable classes;
 /* {{{ prop handler tables */
 static HashTable dom_document_prop_handlers;
+static HashTable dom_xml_document_prop_handlers;
+static HashTable dom_html_document_prop_handlers;
 static HashTable dom_documentfragment_prop_handlers;
 static HashTable dom_node_prop_handlers;
 static HashTable dom_nodelist_prop_handlers;
@@ -206,6 +212,7 @@ static void dom_copy_doc_props(php_libxml_ref_obj *source_doc, php_libxml_ref_ob
 			zend_hash_copy(dest->classmap, source->classmap, NULL);
 		}
 
+		dest_doc->is_modern_api_class = source_doc->is_modern_api_class;
 	}
 }
 
@@ -282,7 +289,7 @@ static void dom_register_prop_handler(HashTable *prop_handler, char *name, size_
 	hnd.read_func = read_func;
 	hnd.write_func = write_func;
 	str = zend_string_init_interned(name, name_len, 1);
-	zend_hash_add_mem(prop_handler, str, &hnd, sizeof(dom_prop_handler));
+	zend_hash_add_new_mem(prop_handler, str, &hnd, sizeof(dom_prop_handler));
 	zend_string_release_ex(str, 1);
 }
 
@@ -490,6 +497,12 @@ static void dom_update_refcount_after_clone(dom_object *original, xmlNodePtr ori
 	php_libxml_increment_node_ptr((php_libxml_node_object *)clone, cloned_node, (void *)clone);
 	if (original->document != clone->document) {
 		dom_copy_doc_props(original->document, clone->document);
+		/* Workaround libxml2 bug, see https://gitlab.gnome.org/GNOME/libxml2/-/commit/07920b4381873187c02df53fa9b5d44aff3a7041 */
+#if LIBXML_VERSION < 20911
+		if (original_node->type == XML_HTML_DOCUMENT_NODE) {
+			cloned_node->type = XML_HTML_DOCUMENT_NODE;
+		}
+#endif
 	}
 }
 
@@ -582,9 +595,43 @@ static int dom_nodelist_has_dimension(zend_object *object, zval *member, int che
 static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
 static int dom_nodemap_has_dimension(zend_object *object, zval *member, int check_empty);
 static zend_object *dom_objects_store_clone_obj(zend_object *zobject);
+
 #ifdef LIBXML_XPATH_ENABLED
 void dom_xpath_objects_free_storage(zend_object *object);
+HashTable *dom_xpath_get_gc(zend_object *object, zval **table, int *n);
 #endif
+
+static void *dom_malloc(size_t size) {
+	return emalloc(size);
+}
+
+static void *dom_realloc(void *dst, size_t size) {
+	return erealloc(dst, size);
+}
+
+static void *dom_calloc(size_t num, size_t size) {
+	return ecalloc(num, size);
+}
+
+static void dom_free(void *ptr) {
+	efree(ptr);
+}
+
+static void register_nondeprecated_xml_props(HashTable *table)
+{
+	dom_register_prop_handler(table, "encoding", sizeof("encoding")-1, dom_document_encoding_read, dom_document_encoding_write);
+	dom_register_prop_handler(table, "xmlEncoding", sizeof("xmlEncoding")-1, dom_document_encoding_read, NULL);
+	dom_register_prop_handler(table, "standalone", sizeof("standalone")-1, dom_document_standalone_read, dom_document_standalone_write);
+	dom_register_prop_handler(table, "xmlStandalone", sizeof("xmlStandalone")-1, dom_document_standalone_read, dom_document_standalone_write);
+	dom_register_prop_handler(table, "version", sizeof("version")-1, dom_document_version_read, dom_document_version_write);
+	dom_register_prop_handler(table, "xmlVersion", sizeof("xmlVersion")-1, dom_document_version_read, dom_document_version_write);
+	dom_register_prop_handler(table, "formatOutput", sizeof("formatOutput")-1, dom_document_format_output_read, dom_document_format_output_write);
+	dom_register_prop_handler(table, "validateOnParse", sizeof("validateOnParse")-1, dom_document_validate_on_parse_read, dom_document_validate_on_parse_write);
+	dom_register_prop_handler(table, "resolveExternals", sizeof("resolveExternals")-1, dom_document_resolve_externals_read, dom_document_resolve_externals_write);
+	dom_register_prop_handler(table, "preserveWhiteSpace", sizeof("preserveWhitespace")-1, dom_document_preserve_whitespace_read, dom_document_preserve_whitespace_write);
+	dom_register_prop_handler(table, "recover", sizeof("recover")-1, dom_document_recover_read, dom_document_recover_write);
+	dom_register_prop_handler(table, "substituteEntities", sizeof("substituteEntities")-1, dom_document_substitue_entities_read, dom_document_substitue_entities_write);
+}
 
 /* {{{ PHP_MINIT_FUNCTION(dom) */
 PHP_MINIT_FUNCTION(dom)
@@ -646,7 +693,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_node_prop_handlers, "localName", sizeof("localName")-1, dom_node_local_name_read, NULL);
 	dom_register_prop_handler(&dom_node_prop_handlers, "baseURI", sizeof("baseURI")-1, dom_node_base_uri_read, NULL);
 	dom_register_prop_handler(&dom_node_prop_handlers, "textContent", sizeof("textContent")-1, dom_node_text_content_read, dom_node_text_content_write);
-	zend_hash_add_ptr(&classes, dom_node_class_entry->name, &dom_node_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_node_class_entry->name, &dom_node_prop_handlers);
 
 	dom_namespace_node_class_entry = register_class_DOMNameSpaceNode();
 	dom_namespace_node_class_entry->create_object = dom_objects_namespace_node_new;
@@ -662,7 +709,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "ownerDocument", sizeof("ownerDocument")-1, dom_node_owner_document_read, NULL);
 	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "parentNode", sizeof("parentNode")-1, dom_node_parent_node_read, NULL);
 	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "parentElement", sizeof("parentElement")-1, dom_node_parent_element_read, NULL);
-	zend_hash_add_ptr(&classes, dom_namespace_node_class_entry->name, &dom_namespace_node_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_namespace_node_class_entry->name, &dom_namespace_node_prop_handlers);
 
 	dom_documentfragment_class_entry = register_class_DOMDocumentFragment(dom_node_class_entry, dom_parentnode_class_entry);
 	dom_documentfragment_class_entry->create_object = dom_objects_new;
@@ -673,37 +720,50 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_documentfragment_prop_handlers, "childElementCount", sizeof("childElementCount")-1, dom_parent_node_child_element_count, NULL);
 
 	zend_hash_merge(&dom_documentfragment_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
-	zend_hash_add_ptr(&classes, dom_documentfragment_class_entry->name, &dom_documentfragment_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_documentfragment_class_entry->name, &dom_documentfragment_prop_handlers);
 
-	dom_document_class_entry = register_class_DOMDocument(dom_node_class_entry, dom_parentnode_class_entry);
+	dom_abstract_base_document_class_entry = register_class_DOM_Document(dom_node_class_entry, dom_parentnode_class_entry);
+	/* No need to set create_object as it's abstract. */
+	HashTable dom_abstract_base_document_prop_handlers;
+	zend_hash_init(&dom_abstract_base_document_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
+	dom_register_prop_handler(&dom_abstract_base_document_prop_handlers, "doctype", sizeof("doctype")-1, dom_document_doctype_read, NULL);
+	dom_register_prop_handler(&dom_abstract_base_document_prop_handlers, "documentElement", sizeof("documentElement")-1, dom_document_document_element_read, NULL);
+	dom_register_prop_handler(&dom_abstract_base_document_prop_handlers, "strictErrorChecking", sizeof("strictErrorChecking")-1, dom_document_strict_error_checking_read, dom_document_strict_error_checking_write);
+	dom_register_prop_handler(&dom_abstract_base_document_prop_handlers, "documentURI", sizeof("documentURI")-1, dom_document_document_uri_read, dom_document_document_uri_write);
+	dom_register_prop_handler(&dom_abstract_base_document_prop_handlers, "firstElementChild", sizeof("firstElementChild")-1, dom_parent_node_first_element_child_read, NULL);
+	dom_register_prop_handler(&dom_abstract_base_document_prop_handlers, "lastElementChild", sizeof("lastElementChild")-1, dom_parent_node_last_element_child_read, NULL);
+	dom_register_prop_handler(&dom_abstract_base_document_prop_handlers, "childElementCount", sizeof("childElementCount")-1, dom_parent_node_child_element_count, NULL);
+	zend_hash_merge(&dom_abstract_base_document_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
+	/* No need to register in &classes, because this is only used for merging. This is destroyed down below. */
+
+	dom_document_class_entry = register_class_DOMDocument(dom_abstract_base_document_class_entry);
 	dom_document_class_entry->create_object = dom_objects_new;
 	zend_hash_init(&dom_document_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
-	dom_register_prop_handler(&dom_document_prop_handlers, "doctype", sizeof("doctype")-1, dom_document_doctype_read, NULL);
 	dom_register_prop_handler(&dom_document_prop_handlers, "implementation", sizeof("implementation")-1, dom_document_implementation_read, NULL);
-	dom_register_prop_handler(&dom_document_prop_handlers, "documentElement", sizeof("documentElement")-1, dom_document_document_element_read, NULL);
 	dom_register_prop_handler(&dom_document_prop_handlers, "actualEncoding", sizeof("actualEncoding")-1, dom_document_encoding_read, NULL);
-	dom_register_prop_handler(&dom_document_prop_handlers, "encoding", sizeof("encoding")-1, dom_document_encoding_read, dom_document_encoding_write);
-	dom_register_prop_handler(&dom_document_prop_handlers, "xmlEncoding", sizeof("xmlEncoding")-1, dom_document_encoding_read, NULL);
-	dom_register_prop_handler(&dom_document_prop_handlers, "standalone", sizeof("standalone")-1, dom_document_standalone_read, dom_document_standalone_write);
-	dom_register_prop_handler(&dom_document_prop_handlers, "xmlStandalone", sizeof("xmlStandalone")-1, dom_document_standalone_read, dom_document_standalone_write);
-	dom_register_prop_handler(&dom_document_prop_handlers, "version", sizeof("version")-1, dom_document_version_read, dom_document_version_write);
-	dom_register_prop_handler(&dom_document_prop_handlers, "xmlVersion", sizeof("xmlVersion")-1, dom_document_version_read, dom_document_version_write);
-	dom_register_prop_handler(&dom_document_prop_handlers, "strictErrorChecking", sizeof("strictErrorChecking")-1, dom_document_strict_error_checking_read, dom_document_strict_error_checking_write);
-	dom_register_prop_handler(&dom_document_prop_handlers, "documentURI", sizeof("documentURI")-1, dom_document_document_uri_read, dom_document_document_uri_write);
 	dom_register_prop_handler(&dom_document_prop_handlers, "config", sizeof("config")-1, dom_document_config_read, NULL);
-	dom_register_prop_handler(&dom_document_prop_handlers, "formatOutput", sizeof("formatOutput")-1, dom_document_format_output_read, dom_document_format_output_write);
-	dom_register_prop_handler(&dom_document_prop_handlers, "validateOnParse", sizeof("validateOnParse")-1, dom_document_validate_on_parse_read, dom_document_validate_on_parse_write);
-	dom_register_prop_handler(&dom_document_prop_handlers, "resolveExternals", sizeof("resolveExternals")-1, dom_document_resolve_externals_read, dom_document_resolve_externals_write);
-	dom_register_prop_handler(&dom_document_prop_handlers, "preserveWhiteSpace", sizeof("preserveWhitespace")-1, dom_document_preserve_whitespace_read, dom_document_preserve_whitespace_write);
-	dom_register_prop_handler(&dom_document_prop_handlers, "recover", sizeof("recover")-1, dom_document_recover_read, dom_document_recover_write);
-	dom_register_prop_handler(&dom_document_prop_handlers, "substituteEntities", sizeof("substituteEntities")-1, dom_document_substitue_entities_read, dom_document_substitue_entities_write);
+	register_nondeprecated_xml_props(&dom_document_prop_handlers);
 
-	dom_register_prop_handler(&dom_document_prop_handlers, "firstElementChild", sizeof("firstElementChild")-1, dom_parent_node_first_element_child_read, NULL);
-	dom_register_prop_handler(&dom_document_prop_handlers, "lastElementChild", sizeof("lastElementChild")-1, dom_parent_node_last_element_child_read, NULL);
-	dom_register_prop_handler(&dom_document_prop_handlers, "childElementCount", sizeof("childElementCount")-1, dom_parent_node_child_element_count, NULL);
+	zend_hash_merge(&dom_document_prop_handlers, &dom_abstract_base_document_prop_handlers, dom_copy_prop_handler, 0);
+	zend_hash_add_new_ptr(&classes, dom_document_class_entry->name, &dom_document_prop_handlers);
 
-	zend_hash_merge(&dom_document_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
-	zend_hash_add_ptr(&classes, dom_document_class_entry->name, &dom_document_prop_handlers);
+	dom_html_document_class_entry = register_class_DOM_HTMLDocument(dom_abstract_base_document_class_entry);
+	dom_document_class_entry->create_object = dom_objects_new;
+	zend_hash_init(&dom_html_document_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
+	dom_register_prop_handler(&dom_html_document_prop_handlers, "encoding", sizeof("encoding")-1, dom_document_encoding_read, dom_html_document_encoding_write);
+
+	zend_hash_merge(&dom_html_document_prop_handlers, &dom_abstract_base_document_prop_handlers, dom_copy_prop_handler, 0);
+	zend_hash_add_new_ptr(&classes, dom_html_document_class_entry->name, &dom_html_document_prop_handlers);
+
+	dom_xml_document_class_entry = register_class_DOM_XMLDocument(dom_abstract_base_document_class_entry);
+	dom_xml_document_class_entry->create_object = dom_objects_new;
+	zend_hash_init(&dom_xml_document_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
+	register_nondeprecated_xml_props(&dom_xml_document_prop_handlers);
+
+	zend_hash_merge(&dom_xml_document_prop_handlers, &dom_abstract_base_document_prop_handlers, dom_copy_prop_handler, 0);
+	zend_hash_add_new_ptr(&classes, dom_xml_document_class_entry->name, &dom_xml_document_prop_handlers);
+
+	zend_hash_destroy(&dom_abstract_base_document_prop_handlers);
 
 	dom_nodelist_class_entry = register_class_DOMNodeList(zend_ce_aggregate, zend_ce_countable);
 	dom_nodelist_class_entry->create_object = dom_nnodemap_objects_new;
@@ -712,7 +772,7 @@ PHP_MINIT_FUNCTION(dom)
 
 	zend_hash_init(&dom_nodelist_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_nodelist_prop_handlers, "length", sizeof("length")-1, dom_nodelist_length_read, NULL);
-	zend_hash_add_ptr(&classes, dom_nodelist_class_entry->name, &dom_nodelist_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_nodelist_class_entry->name, &dom_nodelist_prop_handlers);
 
 	dom_namednodemap_class_entry = register_class_DOMNamedNodeMap(zend_ce_aggregate, zend_ce_countable);
 	dom_namednodemap_class_entry->create_object = dom_nnodemap_objects_new;
@@ -721,7 +781,7 @@ PHP_MINIT_FUNCTION(dom)
 
 	zend_hash_init(&dom_namednodemap_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_namednodemap_prop_handlers, "length", sizeof("length")-1, dom_namednodemap_length_read, NULL);
-	zend_hash_add_ptr(&classes, dom_namednodemap_class_entry->name, &dom_namednodemap_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_namednodemap_class_entry->name, &dom_namednodemap_prop_handlers);
 
 	dom_characterdata_class_entry = register_class_DOMCharacterData(dom_node_class_entry, dom_childnode_class_entry);
 	dom_characterdata_class_entry->create_object = dom_objects_new;
@@ -732,7 +792,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_characterdata_prop_handlers, "previousElementSibling", sizeof("previousElementSibling")-1, dom_node_previous_element_sibling_read, NULL);
 	dom_register_prop_handler(&dom_characterdata_prop_handlers, "nextElementSibling", sizeof("nextElementSibling")-1, dom_node_next_element_sibling_read, NULL);
 	zend_hash_merge(&dom_characterdata_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
-	zend_hash_add_ptr(&classes, dom_characterdata_class_entry->name, &dom_characterdata_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_characterdata_class_entry->name, &dom_characterdata_prop_handlers);
 
 	dom_attr_class_entry = register_class_DOMAttr(dom_node_class_entry);
 	dom_attr_class_entry->create_object = dom_objects_new;
@@ -744,7 +804,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_attr_prop_handlers, "ownerElement", sizeof("ownerElement")-1, dom_attr_owner_element_read, NULL);
 	dom_register_prop_handler(&dom_attr_prop_handlers, "schemaTypeInfo", sizeof("schemaTypeInfo")-1, dom_attr_schema_type_info_read, NULL);
 	zend_hash_merge(&dom_attr_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
-	zend_hash_add_ptr(&classes, dom_attr_class_entry->name, &dom_attr_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_attr_class_entry->name, &dom_attr_prop_handlers);
 
 	dom_element_class_entry = register_class_DOMElement(dom_node_class_entry, dom_parentnode_class_entry, dom_childnode_class_entry);
 	dom_element_class_entry->create_object = dom_objects_new;
@@ -760,7 +820,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_element_prop_handlers, "previousElementSibling", sizeof("previousElementSibling")-1, dom_node_previous_element_sibling_read, NULL);
 	dom_register_prop_handler(&dom_element_prop_handlers, "nextElementSibling", sizeof("nextElementSibling")-1, dom_node_next_element_sibling_read, NULL);
 	zend_hash_merge(&dom_element_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
-	zend_hash_add_ptr(&classes, dom_element_class_entry->name, &dom_element_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_element_class_entry->name, &dom_element_prop_handlers);
 
 	dom_text_class_entry = register_class_DOMText(dom_characterdata_class_entry);
 	dom_text_class_entry->create_object = dom_objects_new;
@@ -768,15 +828,15 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_init(&dom_text_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_text_prop_handlers, "wholeText", sizeof("wholeText")-1, dom_text_whole_text_read, NULL);
 	zend_hash_merge(&dom_text_prop_handlers, &dom_characterdata_prop_handlers, dom_copy_prop_handler, 0);
-	zend_hash_add_ptr(&classes, dom_text_class_entry->name, &dom_text_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_text_class_entry->name, &dom_text_prop_handlers);
 
 	dom_comment_class_entry = register_class_DOMComment(dom_characterdata_class_entry);
 	dom_comment_class_entry->create_object = dom_objects_new;
-	zend_hash_add_ptr(&classes, dom_comment_class_entry->name, &dom_characterdata_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_comment_class_entry->name, &dom_characterdata_prop_handlers);
 
 	dom_cdatasection_class_entry = register_class_DOMCdataSection(dom_text_class_entry);
 	dom_cdatasection_class_entry->create_object = dom_objects_new;
-	zend_hash_add_ptr(&classes, dom_cdatasection_class_entry->name, &dom_text_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_cdatasection_class_entry->name, &dom_text_prop_handlers);
 
 	dom_documenttype_class_entry = register_class_DOMDocumentType(dom_node_class_entry);
 	dom_documenttype_class_entry->create_object = dom_objects_new;
@@ -789,7 +849,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_documenttype_prop_handlers, "systemId", sizeof("systemId")-1, dom_documenttype_system_id_read, NULL);
 	dom_register_prop_handler(&dom_documenttype_prop_handlers, "internalSubset", sizeof("internalSubset")-1, dom_documenttype_internal_subset_read, NULL);
 	zend_hash_merge(&dom_documenttype_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
-	zend_hash_add_ptr(&classes, dom_documenttype_class_entry->name, &dom_documenttype_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_documenttype_class_entry->name, &dom_documenttype_prop_handlers);
 
 	dom_notation_class_entry = register_class_DOMNotation(dom_node_class_entry);
 	dom_notation_class_entry->create_object = dom_objects_new;
@@ -798,7 +858,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_notation_prop_handlers, "publicId", sizeof("publicId")-1, dom_notation_public_id_read, NULL);
 	dom_register_prop_handler(&dom_notation_prop_handlers, "systemId", sizeof("systemId")-1, dom_notation_system_id_read, NULL);
 	zend_hash_merge(&dom_notation_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
-	zend_hash_add_ptr(&classes, dom_notation_class_entry->name, &dom_notation_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_notation_class_entry->name, &dom_notation_prop_handlers);
 
 	dom_entity_class_entry = register_class_DOMEntity(dom_node_class_entry);
 	dom_entity_class_entry->create_object = dom_objects_new;
@@ -811,11 +871,11 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_entity_prop_handlers, "encoding", sizeof("encoding")-1, dom_entity_encoding_read, NULL);
 	dom_register_prop_handler(&dom_entity_prop_handlers, "version", sizeof("version")-1, dom_entity_version_read, NULL);
 	zend_hash_merge(&dom_entity_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
-	zend_hash_add_ptr(&classes, dom_entity_class_entry->name, &dom_entity_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_entity_class_entry->name, &dom_entity_prop_handlers);
 
 	dom_entityreference_class_entry = register_class_DOMEntityReference(dom_node_class_entry);
 	dom_entityreference_class_entry->create_object = dom_objects_new;
-	zend_hash_add_ptr(&classes, dom_entityreference_class_entry->name, &dom_node_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_entityreference_class_entry->name, &dom_node_prop_handlers);
 
 	dom_processinginstruction_class_entry = register_class_DOMProcessingInstruction(dom_node_class_entry);
 	dom_processinginstruction_class_entry->create_object = dom_objects_new;
@@ -824,12 +884,13 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_processinginstruction_prop_handlers, "target", sizeof("target")-1, dom_processinginstruction_target_read, NULL);
 	dom_register_prop_handler(&dom_processinginstruction_prop_handlers, "data", sizeof("data")-1, dom_processinginstruction_data_read, dom_processinginstruction_data_write);
 	zend_hash_merge(&dom_processinginstruction_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
-	zend_hash_add_ptr(&classes, dom_processinginstruction_class_entry->name, &dom_processinginstruction_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_processinginstruction_class_entry->name, &dom_processinginstruction_prop_handlers);
 
 #ifdef LIBXML_XPATH_ENABLED
 	memcpy(&dom_xpath_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_xpath_object_handlers.offset = XtOffsetOf(dom_xpath_object, dom) + XtOffsetOf(dom_object, std);
 	dom_xpath_object_handlers.free_obj = dom_xpath_objects_free_storage;
+	dom_xpath_object_handlers.get_gc = dom_xpath_get_gc;
 
 	dom_xpath_class_entry = register_class_DOMXPath();
 	dom_xpath_class_entry->create_object = dom_xpath_objects_new;
@@ -838,12 +899,14 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_init(&dom_xpath_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_xpath_prop_handlers, "document", sizeof("document")-1, dom_xpath_document_read, NULL);
 	dom_register_prop_handler(&dom_xpath_prop_handlers, "registerNodeNamespaces", sizeof("registerNodeNamespaces")-1, dom_xpath_register_node_ns_read, dom_xpath_register_node_ns_write);
-	zend_hash_add_ptr(&classes, dom_xpath_class_entry->name, &dom_xpath_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_xpath_class_entry->name, &dom_xpath_prop_handlers);
 #endif
 
 	register_php_dom_symbols(module_number);
 
 	php_libxml_register_export(dom_node_class_entry, php_dom_export_node);
+
+	lexbor_memory_setup(dom_malloc, dom_realloc, dom_calloc, dom_free);
 
 	return SUCCESS;
 }
@@ -876,6 +939,8 @@ PHP_MINFO_FUNCTION(dom)
 PHP_MSHUTDOWN_FUNCTION(dom) /* {{{ */
 {
 	zend_hash_destroy(&dom_document_prop_handlers);
+	zend_hash_destroy(&dom_html_document_prop_handlers);
+	zend_hash_destroy(&dom_xml_document_prop_handlers);
 	zend_hash_destroy(&dom_documentfragment_prop_handlers);
 	zend_hash_destroy(&dom_node_prop_handlers);
 	zend_hash_destroy(&dom_namespace_node_prop_handlers);
@@ -937,32 +1002,6 @@ void node_list_unlink(xmlNodePtr node)
 	}
 }
 /* }}} end node_list_unlink */
-
-#ifdef LIBXML_XPATH_ENABLED
-/* {{{ dom_xpath_objects_free_storage */
-void dom_xpath_objects_free_storage(zend_object *object)
-{
-	dom_xpath_object *intern = php_xpath_obj_from_obj(object);
-
-	zend_object_std_dtor(&intern->dom.std);
-
-	if (intern->dom.ptr != NULL) {
-		xmlXPathFreeContext((xmlXPathContextPtr) intern->dom.ptr);
-		php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom);
-	}
-
-	if (intern->registered_phpfunctions) {
-		zend_hash_destroy(intern->registered_phpfunctions);
-		FREE_HASHTABLE(intern->registered_phpfunctions);
-	}
-
-	if (intern->node_list) {
-		zend_hash_destroy(intern->node_list);
-		FREE_HASHTABLE(intern->node_list);
-	}
-}
-/* }}} */
-#endif
 
 /* {{{ dom_objects_free_storage */
 void dom_objects_free_storage(zend_object *object)
@@ -1070,12 +1109,13 @@ static void dom_object_namespace_node_free_storage(zend_object *object)
 }
 
 #ifdef LIBXML_XPATH_ENABLED
+
 /* {{{ zend_object dom_xpath_objects_new(zend_class_entry *class_type) */
 zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 {
 	dom_xpath_object *intern = zend_object_alloc(sizeof(dom_xpath_object), class_type);
 
-	intern->registered_phpfunctions = zend_new_array(0);
+	php_dom_xpath_callbacks_ctor(&intern->xpath_callbacks);
 	intern->register_node_ns = 1;
 
 	intern->dom.prop_handler = &dom_xpath_prop_handlers;
@@ -1086,6 +1126,7 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 	return &intern->dom.std;
 }
 /* }}} */
+
 #endif
 
 void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
@@ -1172,9 +1213,21 @@ PHP_DOM_EXPORT bool php_dom_create_object(xmlNodePtr obj, zval *return_value, do
 
 	switch (obj->type) {
 		case XML_DOCUMENT_NODE:
+		{
+			if (domobj && domobj->document->is_modern_api_class) {
+				ce = dom_xml_document_class_entry;
+			} else {
+				ce = dom_document_class_entry;
+			}
+			break;
+		}
 		case XML_HTML_DOCUMENT_NODE:
 		{
-			ce = dom_document_class_entry;
+			if (domobj && domobj->document->is_modern_api_class) {
+				ce = dom_html_document_class_entry;
+			} else {
+				ce = dom_document_class_entry;
+			}
 			break;
 		}
 		case XML_DTD_NODE:
@@ -1249,20 +1302,27 @@ PHP_DOM_EXPORT bool php_dom_create_object(xmlNodePtr obj, zval *return_value, do
 	if (domobj && domobj->document) {
 		ce = dom_get_doc_classmap(domobj->document, ce);
 	}
+	php_dom_instantiate_object_helper(return_value, ce, obj, domobj);
+	return 0;
+}
+/* }}} end php_domobject_new */
+
+dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_entry *ce, xmlNodePtr obj, dom_object *parent)
+{
 	object_init_ex(return_value, ce);
 
-	intern = Z_DOMOBJ_P(return_value);
+	dom_object *intern = Z_DOMOBJ_P(return_value);
 	if (obj->doc != NULL) {
-		if (domobj != NULL) {
-			intern->document = domobj->document;
+		if (parent != NULL) {
+			intern->document = parent->document;
 		}
 		php_libxml_increment_doc_ref((php_libxml_node_object *)intern, obj->doc);
 	}
 
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, obj, (void *)intern);
-	return 0;
+
+	return intern;
 }
-/* }}} end php_domobject_new */
 
 void php_dom_create_implementation(zval *retval) {
 	object_init_ex(retval, dom_domimplementation_class_entry);
@@ -1458,6 +1518,24 @@ static void dom_reconcile_ns_internal(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePt
 	}
 }
 
+void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp)
+{
+	ZEND_ASSERT(attrp != NULL);
+
+	if (attrp->ns != NULL) {
+		/* Try to link to an existing namespace. If that won't work, reconcile. */
+		xmlNodePtr nodep = attrp->parent;
+		xmlNsPtr matching_ns = xmlSearchNs(nodep->doc, nodep, attrp->ns->prefix);
+		if (matching_ns && xmlStrEqual(matching_ns->href, attrp->ns->href)) {
+			attrp->ns = matching_ns;
+		} else {
+			if (attrp->ns->prefix != NULL) {
+				xmlReconciliateNs(nodep->doc, nodep);
+			}
+		}
+	}
+}
+
 static void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep)
 {
 	/* Ideally we'd use the DOM-wrapped version, but we cannot: https://github.com/php/php-src/pull/12308. */
@@ -1474,6 +1552,8 @@ static void dom_libxml_reconcile_ensure_namespaces_are_declared(xmlNodePtr nodep
 
 void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
 {
+	ZEND_ASSERT(nodep->type != XML_ATTRIBUTE_NODE);
+
 	/* Although the node type will be checked by the libxml2 API,
 	 * we still want to do the internal reconciliation conditionally. */
 	if (nodep->type == XML_ELEMENT_NODE) {
@@ -1591,6 +1671,20 @@ NAMESPACE_ERR: Raised if
 5. the namespaceURI is "http://www.w3.org/2000/xmlns/" and neither the	qualifiedName nor its prefix is "xmlns".
 */
 
+xmlNsPtr dom_get_ns_unchecked(xmlNodePtr nodep, char *uri, char *prefix)
+{
+	xmlNsPtr nsptr = xmlNewNs(nodep, (xmlChar *)uri, (xmlChar *)prefix);
+	if (UNEXPECTED(nsptr == NULL)) {
+		/* Either memory allocation failure, or it's because of a prefix conflict.
+		 * We'll assume a conflict and try again. If it was a memory allocation failure we'll just fail again, whatever.
+		 * This isn't needed for every caller (such as createElementNS & DOMElement::__construct), but isn't harmful and simplifies the mental model "when do I use which function?".
+		 * This branch will also be taken unlikely anyway as in those cases it'll be for allocation failure. */
+		return dom_get_ns_resolve_prefix_conflict(nodep, uri);
+	}
+
+	return nsptr;
+}
+
 /* {{{ xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) */
 xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) {
 	xmlNsPtr nsptr;
@@ -1598,16 +1692,9 @@ xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) {
 	if (! ((prefix && !strcmp (prefix, "xml") && strcmp(uri, (char *)XML_XML_NAMESPACE)) ||
 		   (prefix && !strcmp (prefix, "xmlns") && strcmp(uri, (char *)DOM_XMLNS_NAMESPACE)) ||
 		   (prefix && !strcmp(uri, (char *)DOM_XMLNS_NAMESPACE) && strcmp (prefix, "xmlns")))) {
-		nsptr = xmlNewNs(nodep, (xmlChar *)uri, (xmlChar *)prefix);
+		nsptr = dom_get_ns_unchecked(nodep, uri, prefix);
 		if (UNEXPECTED(nsptr == NULL)) {
-			/* Either memory allocation failure, or it's because of a prefix conflict.
-			 * We'll assume a conflict and try again. If it was a memory allocation failure we'll just fail again, whatever.
-			 * This isn't needed for every caller (such as createElementNS & DOMElement::__construct), but isn't harmful and simplifies the mental model "when do I use which function?".
-			 * This branch will also be taken unlikely anyway as in those cases it'll be for allocation failure. */
-			nsptr = dom_get_ns_resolve_prefix_conflict(nodep, uri);
-			if (UNEXPECTED(nsptr == NULL)) {
-				goto err;
-			}
+			goto err;
 		}
 	} else {
 		goto err;
@@ -1800,5 +1887,24 @@ static int dom_nodemap_has_dimension(zend_object *object, zval *member, int chec
 
 	return offset >= 0 && offset < php_dom_get_namednodemap_length(php_dom_obj_from_obj(object));
 } /* }}} end dom_nodemap_has_dimension */
+
+xmlNodePtr dom_clone_node(xmlNodePtr node, xmlDocPtr doc, const dom_object *intern, bool recursive)
+{
+	/* See http://www.xmlsoft.org/html/libxml-tree.html#xmlDocCopyNode for meaning of values */
+	int extended_recursive = recursive;
+	if (!recursive && node->type == XML_ELEMENT_NODE) {
+		extended_recursive = 2;
+	}
+	xmlNodePtr copy = xmlDocCopyNode(node, doc, extended_recursive);
+	if (UNEXPECTED(!copy)) {
+		return NULL;
+	}
+
+	if (intern->document && intern->document->is_modern_api_class) {
+		dom_mark_namespaces_for_copy_based_on_copy(copy, node);
+	}
+
+	return copy;
+}
 
 #endif /* HAVE_DOM */

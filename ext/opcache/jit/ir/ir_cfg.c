@@ -231,7 +231,7 @@ next_successor:
 	bb = blocks + 1;
 	count = 0;
 	/* SCCP already removed UNREACHABKE blocks, otherwise all blocks are marked as UNREACHABLE first */
-	bb_init_falgs = (ctx->flags & IR_SCCP_DONE) ? 0 : IR_BB_UNREACHABLE;
+	bb_init_falgs = (ctx->flags2 & IR_SCCP_DONE) ? 0 : IR_BB_UNREACHABLE;
 	IR_BITSET_FOREACH(bb_starts, len, start) {
 		end = _blocks[start];
 		_blocks[start] = b;
@@ -313,7 +313,7 @@ next_successor:
 	ctx->cfg_edges = edges;
 	ctx->cfg_map = _blocks;
 
-	if (!(ctx->flags & IR_SCCP_DONE)) {
+	if (!(ctx->flags2 & IR_SCCP_DONE)) {
 		uint32_t reachable_count = 0;
 
 		/* Mark reachable blocks */
@@ -600,7 +600,7 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 	uint32_t *edges;
 	bool changed;
 
-	ctx->flags &= ~IR_NO_LOOPS;
+	ctx->flags2 &= ~IR_NO_LOOPS;
 
 	postnum = 1;
 	compute_postnum(ctx, &postnum, 1);
@@ -706,7 +706,7 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 	ir_block *blocks, *bb;
 	uint32_t *edges;
 
-	ctx->flags |= IR_NO_LOOPS;
+	ctx->flags2 |= IR_NO_LOOPS;
 
 	/* Find immediate dominators */
 	blocks = ctx->cfg_blocks;
@@ -726,7 +726,7 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 
 		if (UNEXPECTED(idom > b)) {
 			/* In rare cases, LOOP_BEGIN.op1 may be a back-edge. Skip back-edges. */
-			ctx->flags &= ~IR_NO_LOOPS;
+			ctx->flags2 &= ~IR_NO_LOOPS;
 			while (1) {
 				k--;
 				p++;
@@ -753,7 +753,7 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 					}
 				}
 			} else {
-				ctx->flags &= ~IR_NO_LOOPS;
+				ctx->flags2 &= ~IR_NO_LOOPS;
 			}
 		}
 		bb->idom = idom;
@@ -805,7 +805,7 @@ int ir_find_loops(ir_ctx *ctx)
 	uint32_t *edges = ctx->cfg_edges;
 	ir_worklist work;
 
-	if (ctx->flags & IR_NO_LOOPS) {
+	if (ctx->flags2 & IR_NO_LOOPS) {
 		return 1;
 	}
 
@@ -908,13 +908,13 @@ next:
 			if (UNEXPECTED(irreducible)) {
 				// TODO: Support for irreducible loops ???
 				bb->flags |= IR_BB_IRREDUCIBLE_LOOP;
-				ctx->flags |= IR_IRREDUCIBLE_CFG;
+				ctx->flags2 |= IR_IRREDUCIBLE_CFG;
 				while (ir_worklist_len(&work)) {
 					ir_worklist_pop(&work);
 				}
 			} else if (ir_worklist_len(&work)) {
 				bb->flags |= IR_BB_LOOP_HEADER;
-				ctx->flags |= IR_CFG_HAS_LOOPS;
+				ctx->flags2 |= IR_CFG_HAS_LOOPS;
 				bb->loop_depth = 1;
 				while (ir_worklist_len(&work)) {
 					j = ir_worklist_pop(&work);
@@ -942,7 +942,7 @@ next:
 		}
 	}
 
-	if (ctx->flags & IR_CFG_HAS_LOOPS) {
+	if (ctx->flags2 & IR_CFG_HAS_LOOPS) {
 		for (n = 1; n < count; n++) {
 			i = sorted_blocks[n];
 			ir_block *bb = &blocks[i];

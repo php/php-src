@@ -103,7 +103,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base);
 #endif
 
 #ifndef PHP_ROUND_HALF_DOWN
-#define PHP_ROUND_HALF_DOWN      0x02    /* Down == towards zero */
+#define PHP_ROUND_HALF_DOWN      0x02    /* Arithmetic rounding, down == towards zero */
 #endif
 
 #ifndef PHP_ROUND_HALF_EVEN
@@ -112,6 +112,22 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base);
 
 #ifndef PHP_ROUND_HALF_ODD
 #define PHP_ROUND_HALF_ODD       0x04
+#endif
+
+#ifndef PHP_ROUND_CEILING
+#define PHP_ROUND_CEILING        0x05
+#endif
+
+#ifndef PHP_ROUND_FLOOR
+#define PHP_ROUND_FLOOR          0x06
+#endif
+
+#ifndef PHP_ROUND_TOWARD_ZERO
+#define PHP_ROUND_TOWARD_ZERO    0x07
+#endif
+
+#ifndef PHP_ROUND_AWAY_FROM_ZERO
+#define PHP_ROUND_AWAY_FROM_ZERO 0x08
 #endif
 
 #endif /* PHP_MATH_H */

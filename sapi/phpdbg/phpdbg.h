@@ -90,7 +90,7 @@
 /* {{{ strings */
 #define PHPDBG_NAME "phpdbg"
 #define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
-#define PHPDBG_ISSUES "http://bugs.php.net/report.php"
+#define PHPDBG_ISSUES "https://github.com/php/php-src/issues"
 #define PHPDBG_VERSION PHP_VERSION
 #define PHPDBG_INIT_FILENAME ".phpdbginit"
 #define PHPDBG_DEFAULT_PROMPT "prompt>"

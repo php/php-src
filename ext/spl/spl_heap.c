@@ -896,7 +896,7 @@ static void spl_heap_it_rewind(zend_object_iterator *iter) /* {{{ */
 }
 /* }}} */
 
-static int spl_heap_it_valid(zend_object_iterator *iter) /* {{{ */
+static zend_result spl_heap_it_valid(zend_object_iterator *iter) /* {{{ */
 {
 	return ((Z_SPLHEAP_P(&iter->data))->heap->count != 0 ? SUCCESS : FAILURE);
 }

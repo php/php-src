@@ -58,7 +58,8 @@ foreach ($period as $i => $notDate) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Calling DatePeriod::__construct(string $isostr, int $options = 0) is deprecated, use DatePeriod::createFromISO8601String() instead in %s on line %d
 0: 2012-07-01
 1: 2012-07-08
 2: 2012-07-15
@@ -79,10 +80,14 @@ foreach ($period as $i => $notDate) {
 1: 2012-07-08
 2: 2012-07-15
 
+
+Deprecated: Calling DatePeriod::__construct(string $isostr, int $options = 0) is deprecated, use DatePeriod::createFromISO8601String() instead in %s on line %d
 0: 2012-07-01
 1: 2012-07-08
 2: 2012-07-15
 
+
+Deprecated: Calling DatePeriod::__construct(string $isostr, int $options = 0) is deprecated, use DatePeriod::createFromISO8601String() instead in %s on line %d
 0: 1
 1: 2
 2: 3

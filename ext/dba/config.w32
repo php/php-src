@@ -11,7 +11,7 @@ if (PHP_DBA != "no") {
 	ADD_SOURCES("ext/dba/libflatfile", "flatfile.c", "dba");
 	ADD_SOURCES("ext/dba/libinifile", "inifile.c", "dba");
 	AC_DEFINE('HAVE_DBA', 1, 'DBA support');
-	ADD_FLAG("CFLAGS_DBA", "/D DBA_FLATFILE=1 /D DBA_CDB=1 /D DBA_CDB_MAKE=1 /D DBA_CDB_BUILTIN=1 /D DBA_INIFILE=1");
+	ADD_FLAG("CFLAGS_DBA", "/D DBA_FLATFILE=1 /D DBA_CDB=1 /D DBA_CDB_BUILTIN=1 /D DBA_INIFILE=1");
 
 	if (PHP_DB != "no") {
 		if (CHECK_LIB("libdb31s.lib;libdb61.lib", "dba", PHP_DBA) &&

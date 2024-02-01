@@ -1018,7 +1018,7 @@ static void zend_generator_iterator_dtor(zend_object_iterator *iterator) /* {{{ 
 }
 /* }}} */
 
-static int zend_generator_iterator_valid(zend_object_iterator *iterator) /* {{{ */
+static zend_result zend_generator_iterator_valid(zend_object_iterator *iterator) /* {{{ */
 {
 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
 

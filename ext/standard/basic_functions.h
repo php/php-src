@@ -27,9 +27,6 @@
 
 #include "url_scanner_ex.h"
 
-/* for MT_N */
-#include "ext/random/php_random.h"
-
 #if defined(_WIN32) && !defined(__clang__)
 #include <intrin.h>
 #endif

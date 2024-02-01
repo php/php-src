@@ -17,7 +17,6 @@ runs:
           g++-multilib \
           gcc-multilib \
           language-pack-de \
-          libaspell-dev:i386 \
           libbz2-dev:i386 \
           libc6:i386 \
           libcurl4-openssl-dev:i386 \
@@ -31,7 +30,6 @@ runs:
           libonig-dev:i386 \
           libpng-dev:i386 \
           libpq-dev:i386 \
-          libpspell-dev:i386 \
           libreadline-dev:i386 \
           libsasl2-dev:i386 \
           libsodium-dev:i386 \
