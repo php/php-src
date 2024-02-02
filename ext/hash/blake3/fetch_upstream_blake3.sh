@@ -5,7 +5,7 @@ rm -rf upstream_blake3
 # fancy way of just fetching the "c" folder (the only thing we want)
 git clone --branch '1.5.0' -n --depth=1 --filter=tree:0 'https://github.com/BLAKE3-team/BLAKE3.git' 'upstream_blake3'
 cd upstream_blake3
-git sparse-checkout set --no-cone c
+git sparse-checkout set --no-cone c LICENSE
 git checkout
 rm -rf .git
 cd c
