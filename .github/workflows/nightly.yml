@@ -134,7 +134,6 @@ jobs:
           php $GITHUB_WORKSPACE/.github/jit_check.php ./psalm --no-cache || exit $?
 
       - name: Test PHPStan
-        if: always()
         if: matrix.branch.ref != 'PHP-8.2'
         run: |
           git clone https://github.com/phpstan/phpstan-src --depth 1
