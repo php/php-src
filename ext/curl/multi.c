@@ -365,7 +365,6 @@ PHP_FUNCTION(curl_multi_strerror)
 }
 /* }}} */
 
-#if LIBCURL_VERSION_NUM >= 0x072C00 /* Available since 7.44.0 */
 
 static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_headers, struct curl_pushheaders *push_headers, void *userp) /* {{{ */
 {
@@ -431,8 +430,6 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 }
 /* }}} */
 
-#endif
-
 static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
 {
 	CURLMcode error = CURLM_OK;
@@ -440,13 +437,11 @@ static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue
 	switch (option) {
 		case CURLMOPT_PIPELINING:
 		case CURLMOPT_MAXCONNECTS:
-#if LIBCURL_VERSION_NUM >= 0x071e00 /* 7.30.0 */
 		case CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE:
 		case CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE:
 		case CURLMOPT_MAX_HOST_CONNECTIONS:
 		case CURLMOPT_MAX_PIPELINE_LENGTH:
 		case CURLMOPT_MAX_TOTAL_CONNECTIONS:
-#endif
 #if LIBCURL_VERSION_NUM >= 0x074300 /* Available since 7.67.0 */
 		case CURLMOPT_MAX_CONCURRENT_STREAMS:
 #endif
@@ -454,7 +449,7 @@ static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue
 			zend_long lval = zval_get_long(zvalue);
 
 			if (option == CURLMOPT_PIPELINING && (lval & 1)) {
-#if LIBCURL_VERSION_NUM >= 0x073e00 /* 7.62.0 */
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
 				php_error_docref(NULL, E_WARNING, "CURLPIPE_HTTP1 is no longer supported");
 #else
 				php_error_docref(NULL, E_DEPRECATED, "CURLPIPE_HTTP1 is deprecated");
@@ -463,7 +458,6 @@ static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue
 			error = curl_multi_setopt(mh->multi, option, lval);
 			break;
 		}
-#if LIBCURL_VERSION_NUM > 0x072D00 /* Available since 7.45.0 */
 		case CURLMOPT_PUSHFUNCTION:
 			if (mh->handlers.server_push == NULL) {
 				mh->handlers.server_push = ecalloc(1, sizeof(php_curl_callback));
@@ -479,7 +473,6 @@ static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue
 			}
 			error = curl_multi_setopt(mh->multi, CURLMOPT_PUSHDATA, mh);
 			break;
-#endif
 		default:
 			zend_argument_value_error(2, "is not a valid cURL multi option");
 			error = CURLM_UNKNOWN_OPTION;

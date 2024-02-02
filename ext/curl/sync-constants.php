@@ -12,7 +12,7 @@ const CURL_DOC_FILE = 'https://curl.se/libcurl/c/symbols-in-versions.html';
 
 const SOURCE_FILE = __DIR__ . '/curl_arginfo.h';
 
-const MIN_SUPPORTED_CURL_VERSION = '7.29.0';
+const MIN_SUPPORTED_CURL_VERSION = '7.61.0';
 
 const IGNORED_CURL_CONSTANTS = [
     'CURLOPT_PROGRESSDATA',
@@ -25,7 +25,7 @@ const IGNORED_PHP_CONSTANTS = [
     'CURLOPT_SAFE_UPLOAD',
 ];
 
-const CONSTANTS_REGEX_PATTERN = '~^CURL(?:OPT|_VERSION|_HTTP)_[A-Z0-9_]+$~';
+const CONSTANTS_REGEX_PATTERN = '~^CURL(?:E|INFO|OPT|_VERSION|_HTTP)_[A-Z0-9_]+$~';
 
 /**
  * A simple helper to create ASCII tables.

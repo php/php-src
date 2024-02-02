@@ -235,7 +235,7 @@ dnl Various checks for GD features
     PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared,, \\$(GD_CFLAGS))
     PHP_ADD_BUILD_DIR($ext_builddir/libgd)
     GD_CFLAGS="-Wno-strict-prototypes -I$ext_srcdir/libgd $GD_CFLAGS"
-    GD_HEADER_DIRS="ext/gd/ ext/gd/libgd/"
+    PHP_INSTALL_HEADERS([ext/gd], [php_gd.h libgd/])
 
     PHP_TEST_BUILD(foobar, [], [
       AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
@@ -250,13 +250,12 @@ dnl Various checks for GD features
     PHP_GD_CHECK_VERSION
 
     PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared)
-    GD_HEADER_DIRS="ext/gd/"
+    PHP_INSTALL_HEADERS([ext/gd], [php_gd.h])
     PHP_CHECK_LIBRARY(gd, gdImageCreate, [], [
       AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
     ], [ $GD_SHARED_LIBADD ])
   fi
 
-  PHP_INSTALL_HEADERS([$GD_HEADER_DIRS])
   PHP_SUBST(GD_CFLAGS)
   PHP_SUBST(GDLIB_CFLAGS)
   PHP_SUBST(GDLIB_LIBS)

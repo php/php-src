@@ -10,47 +10,37 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Sammy Kaye Powers <me@sammyk.me>                            |
+   | Authors: Tim Düsterhus <timwolla@php.net>                            |
    |          Go Kudo <zeriyoshi@php.net>                                 |
    +----------------------------------------------------------------------+
 */
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
+#ifndef PHP_RANDOM_CSPRNG_H
+# define PHP_RANDOM_CSPRNG_H
 
-#include "php.h"
-#include "php_random.h"
-#include "php_random_csprng.h"
+# include "php.h"
 
-#include "Zend/zend_exceptions.h"
+PHPAPI zend_result php_random_bytes(void *bytes, size_t size, bool should_throw);
+PHPAPI zend_result php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw);
 
-static php_random_result generate(php_random_status *status)
+static inline zend_result php_random_bytes_throw(void *bytes, size_t size)
 {
-	zend_ulong r = 0;
-
-	php_random_bytes_throw(&r, sizeof(zend_ulong));
-
-	return (php_random_result){
-		.size = sizeof(zend_ulong),
-		.result = r,
-	};
+	return php_random_bytes(bytes, size, true);
 }
 
-static zend_long range(php_random_status *status, zend_long min, zend_long max)
+static inline zend_result php_random_bytes_silent(void *bytes, size_t size)
 {
-	zend_long result = 0;
-
-	php_random_int_throw(min, max, &result);
-
-	return result;
+	return php_random_bytes(bytes, size, false);
 }
 
-const php_random_algo php_random_algo_secure = {
-	0,
-	NULL,
-	generate,
-	range,
-	NULL,
-	NULL
-};
+static inline zend_result php_random_int_throw(zend_long min, zend_long max, zend_long *result)
+{
+	return php_random_int(min, max, result, true);
+}
+
+static inline zend_result php_random_int_silent(zend_long min, zend_long max, zend_long *result)
+{
+	return php_random_int(min, max, result, false);
+}
+
+#endif	/* PHP_RANDOM_CSPRNG_H */

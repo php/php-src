@@ -53,12 +53,16 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - HAVE_ODBC2 symbol has been removed in ext/odbc.
    - Removed linking with obsolete dnet_stub library in ext/pdo_dblib.
    - Removed checking and linking with obsolete libbind for some functions.
+   - Symbol HAVE_JSON has been removed (ext/json is always available since PHP
+     8.0).
 
  c. Windows build system changes
    - Added Bison flag '-Wall' when generating lexer files as done in *nix build
      system.
    - HAVE_WIN32_NATIVE_THREAD, USE_WIN32_NATIVE_THREAD, ENABLE_THREADS symbols
      in ext/mbstring/libmbfl removed.
+   - FIBER_ASSEMBLER and FIBER_ASM_ARCH Makefile variables removed in favor of
+     PHP_ASSEMBLER and FIBER_ASM_ABI.
 
 ========================
 3. Module changes
@@ -79,6 +83,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      the new php_random_result struct, replacing the last_generated_size
      member of the php_random_status struct and the generate_size member of
      the php_random_algo struct.
+   - The CSPRNG API (php_random_(bytes|int)_*) is now provided by the new
+     and much smaller php_random_csprng.h header. The new header is included
+     in php_random.h for compatibility with existing users.
 
  c. ext/xsl
    - The function php_xsl_create_object() was removed as it was not used

@@ -27,7 +27,7 @@
 #include "php_reflection.h"
 #include "ext/standard/info.h"
 #include "ext/standard/sha1.h"
-#include "ext/random/php_random.h"
+#include "ext/random/php_random_csprng.h"
 
 #include "zend.h"
 #include "zend_API.h"

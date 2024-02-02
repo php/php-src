@@ -6,7 +6,7 @@ if (PHP_SODIUM != "no") {
 	if (CHECK_LIB("libsodium.lib", "sodium", PHP_SODIUM) && CHECK_HEADER_ADD_INCLUDE("sodium.h", "CFLAGS_SODIUM")) {
 		EXTENSION("sodium", "libsodium.c sodium_pwhash.c");
 		AC_DEFINE('HAVE_LIBSODIUMLIB', 1 , 'Have the Sodium library');
-		PHP_INSTALL_HEADERS("ext/sodium/", "php_libsodium.h");
+		PHP_INSTALL_HEADERS("ext/sodium", "php_libsodium.h");
 	} else {
 		WARNING("libsodium not enabled; libraries and headers not found");
 	}

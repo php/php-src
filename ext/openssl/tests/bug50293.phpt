@@ -1,9 +1,7 @@
 --TEST--
 Bug #50293 (Several openssl functions ignore the VCWD)
---SKIPIF--
-<?php
-if (!extension_loaded("openssl")) die("skip openssl not loaded");
-?>
+--EXTENSIONS--
+openssl
 --FILE--
 <?php
 $cert = "file://" . __DIR__ . "/cert.crt";
