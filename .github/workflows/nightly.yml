@@ -84,7 +84,7 @@ jobs:
           mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
           mysql -uroot -proot -e "SET GLOBAL local_infile = true"
           git fetch origin
-          git checkout master .github/jit_check.php .github/nightly.php
+          git checkout origin/master .github/jit_check.php .github/nightly.php
       - name: Enable Opcache
         run: |
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
