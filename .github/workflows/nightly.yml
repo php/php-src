@@ -409,93 +409,49 @@ jobs:
           echo opcache.jit_hot_return=1 >> /etc/php.d/opcache.ini
           echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
           php -v
-      - name: Test AMPHP
+
+      - name: Test multiple libraries and frameworks in parallel
+        if: matrix.branch.ref != 'PHP-8.0'
         run: |
-          repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
-          X=0
-          for repository in $repositories; do
-            printf "Testing amp/%s\n" "$repository"
-            git clone "https://github.com/amphp/$repository.git" "amphp-$repository" --depth 1
-            cd "amphp-$repository"
-            git rev-parse HEAD
-            php /usr/bin/composer install --no-progress --ignore-platform-reqs
-            vendor/bin/phpunit || EXIT_CODE=$?
-            if [ ${EXIT_CODE:-0} -gt 128 ]; then
-              X=1;
-            fi
-            cd ..
-          done
-          exit $X
-      - name: Test Laravel
-        run: |
-          git clone https://github.com/laravel/framework.git --branch=master --depth=1
-          cd framework
-          git rev-parse HEAD
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          # Hack to disable a test that hangs
-          php -r '$c = file_get_contents("tests/Filesystem/FilesystemTest.php"); $c = str_replace("public function testSharedGet()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testSharedGet()", $c); file_put_contents("tests/Filesystem/FilesystemTest.php", $c);'
-          php vendor/bin/phpunit --exclude-group skip || EXIT_CODE=$?
-          if [ ${EXIT_CODE:-0} -gt 128 ]; then
-            exit 1
-          fi
-      - name: Test ReactPHP
-        run: |
-          repositories="async cache child-process datagram dns event-loop promise promise-stream promise-timer stream"
-          X=0
-          for repository in $repositories; do
-            printf "Testing reactphp/%s\n" "$repository"
-            git clone "https://github.com/reactphp/$repository.git" "reactphp-$repository" --depth 1
-            cd "reactphp-$repository"
-            git rev-parse HEAD
-            php /usr/bin/composer install --no-progress --ignore-platform-reqs
-            vendor/bin/phpunit || EXIT_CODE=$?
-            if [ $[EXIT_CODE:-0} -gt 128 ]; then
-              X=1;
-            fi
-            cd ..
-          done
-          exit $X
-      - name: Test Revolt PHP
-        run: |
-          git clone https://github.com/revoltphp/event-loop.git --depth=1
-          cd event-loop
-          git rev-parse HEAD
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          vendor/bin/phpunit || EXIT_CODE=$?
-          if [ ${EXIT_CODE:-0} -gt 128 ]; then
-            exit 1
-          fi
-      - name: Test Symfony
-        run: |
-          git clone https://github.com/symfony/symfony.git --depth=1
-          cd symfony
-          git rev-parse HEAD
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php ./phpunit install
-          # Test causes a heap-buffer-overflow but I cannot reproduce it locally...
-          php -r '$c = file_get_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php"); $c = str_replace("public function testSanitizeDeepNestedString()", "/** @group skip */\n    public function testSanitizeDeepNestedString()", $c); file_put_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php", $c);'
-          # Buggy FFI test in Symfony, see https://github.com/symfony/symfony/issues/47668
-          php -r '$c = file_get_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php"); $c = str_replace("*/\n    public function testCastNonTrailingCharPointer()", "* @group skip\n     */\n    public function testCastNonTrailingCharPointer()", $c); file_put_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php", $c);'
-          export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
-          X=0
-          for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
-            php ./phpunit $component --exclude-group tty,benchmark,intl-data,transient --exclude-group skip || EXIT_CODE=$?
-            if [ ${EXIT_CODE:-0} -gt 128 ]; then
-              X=1;
-            fi
-          done
-          exit $X
-      - name: Test PHPUnit
+          sudo prlimit --pid $$ --nofile=1048576:1048576
+          
+          php $GITHUB_WORKSPACE/.github/nightly.php || exit $?
+
+      - name: Test PHPSeclib
         if: always()
         run: |
-          git clone https://github.com/sebastianbergmann/phpunit.git --branch=main --depth=1
-          cd phpunit
-          git rev-parse HEAD
+          git clone https://github.com/phpseclib/phpseclib --branch=master
+          cd phpseclib
+          git checkout 259bd9f1e8af11726ed74acf527c2c046549061b
+          export ASAN_OPTIONS=exitcode=139
+          export PHPSECLIB_ALLOW_JIT=1
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          php ./phpunit || EXIT_CODE=$?
-          if [ ${EXIT_CODE:-0} -gt 128 ]; then
-            exit 1
-          fi
+          php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
+
+      - name: Test Psalm
+        run: |
+          git clone https://github.com/vimeo/psalm --depth 1
+          cd psalm
+          git rev-parse HEAD
+          export ASAN_OPTIONS=exitcode=139
+          # Needed to avoid overwriting JIT config
+          export PSALM_ALLOW_XDEBUG=1
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          php $GITHUB_WORKSPACE/.github/jit_check.php ./psalm --no-cache || exit $?
+
+      - name: Test PHPStan
+        if: matrix.branch.ref != 'PHP-8.2'
+        run: |
+          git clone https://github.com/phpstan/phpstan-src --depth 1
+          cd phpstan-src
+          git rev-parse HEAD
+          sed -E 's/phpVersion(.*)max[^)]+/phpVersion\1max(89999/g' conf/parametersSchema.neon -i
+          php /usr/bin/composer install --no-progress --ignore-platform-reqs
+          sed -i 's/public const IS/public const int IS/g' vendor/ondrejmirtes/better-reflection/src/Reflection/Adapter/*php
+          export ASAN_OPTIONS=exitcode=139
+          php $GITHUB_WORKSPACE/.github/jit_check.php bin/phpstan clear-result-cache
+          php $GITHUB_WORKSPACE/.github/jit_check.php bin/phpstan || exit $?
+          
       - name: 'Symfony Preloading'
         run: |
           php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-reqs
@@ -503,21 +459,7 @@ jobs:
           git rev-parse HEAD
           sed -i 's/PHP_SAPI/"cli-server"/g' var/cache/dev/App_KernelDevDebugContainer.preload.php
           php -d opcache.preload=var/cache/dev/App_KernelDevDebugContainer.preload.php public/index.php
-      - name: Test Wordpress
-        if: always()
-        run: |
-          git clone https://github.com/WordPress/wordpress-develop.git wordpress --depth=1
-          cd wordpress
-          git rev-parse HEAD
-          php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          cp wp-tests-config-sample.php wp-tests-config.php
-          sed -i 's/youremptytestdbnamehere/test/g' wp-tests-config.php
-          sed -i 's/yourusernamehere/root/g' wp-tests-config.php
-          sed -i 's/yourpasswordhere/root/g' wp-tests-config.php
-          php vendor/bin/phpunit || EXIT_CODE=$?
-          if [ $EXIT_CODE -gt 128 ]; then
-            exit 1
-          fi
+
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
