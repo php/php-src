@@ -304,17 +304,36 @@ void *ir_resolve_sym_name(const char *name)
 	IR_SNAPSHOT_HANDLER_DCL();
 #endif
 
+#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
+static void* ir_sym_addr(ir_ctx *ctx, const ir_insn *addr_insn)
+{
+	const char *name = ir_get_str(ctx, addr_insn->val.name);
+	void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
+		ctx->loader->resolve_sym_name(ctx->loader, name, 0) :
+		ir_resolve_sym_name(name);
+
+	return addr;
+}
+#endif
+
+static void* ir_sym_val(ir_ctx *ctx, const ir_insn *addr_insn)
+{
+	const char *name = ir_get_str(ctx, addr_insn->val.name);
+	void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
+		ctx->loader->resolve_sym_name(ctx->loader, name, addr_insn->op == IR_FUNC) :
+		ir_resolve_sym_name(name);
+
+	IR_ASSERT(addr);
+	return addr;
+}
+
 static void *ir_call_addr(ir_ctx *ctx, ir_insn *insn, ir_insn *addr_insn)
 {
 	void *addr;
 
 	IR_ASSERT(addr_insn->type == IR_ADDR);
 	if (addr_insn->op == IR_FUNC) {
-		const char* name = ir_get_str(ctx, addr_insn->val.name);
-		addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
-			ctx->loader->resolve_sym_name(ctx->loader, name, 1) :
-			ir_resolve_sym_name(name);
-		IR_ASSERT(addr);
+		addr = ir_sym_val(ctx, addr_insn);
 	} else {
 		IR_ASSERT(addr_insn->op == IR_ADDR || addr_insn->op == IR_FUNC_ADDR);
 		addr = (void*)addr_insn->val.addr;
@@ -891,6 +910,14 @@ static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)
 			to = (dst != IR_REG_NONE) ?
 				(ir_ref)dst : (ir_ref)(IR_REG_NUM + ctx->vregs[ref]);
 			if (to != from) {
+				if (to >= IR_REG_NUM
+				 && from >= IR_REG_NUM
+				 && IR_MEM_VAL(ir_vreg_spill_slot(ctx, from - IR_REG_NUM)) ==
+						IR_MEM_VAL(ir_vreg_spill_slot(ctx, to - IR_REG_NUM))) {
+					/* It's possible that different virtual registers share the same special spill slot */
+					// TODO: See ext/opcache/tests/jit/gh11917.phpt failure on Linux 32-bit
+					continue;
+				}
 				copies[n].type = insn->type;
 				copies[n].from = from;
 				copies[n].to = to;
