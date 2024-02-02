@@ -23,7 +23,6 @@
 #include "php_string.h"
 #include "php_scandir.h"
 #include "basic_functions.h"
-#include "dir_arginfo.h"
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -43,6 +42,8 @@
 #include "win32/glob.h"
 #endif
 #endif
+
+#include "dir_arginfo.h"
 
 typedef struct {
 	zend_resource *default_dir;
@@ -117,6 +118,8 @@ PHP_MINIT_FUNCTION(dir)
 {
 	static char dirsep_str[2], pathsep_str[2];
 
+	register_dir_symbols(module_number);
+
 	dir_class_entry_ptr = register_class_Directory();
 
 #ifdef ZTS
@@ -131,46 +134,30 @@ PHP_MINIT_FUNCTION(dir)
 	pathsep_str[1] = '\0';
 	REGISTER_STRING_CONSTANT("PATH_SEPARATOR", pathsep_str, CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("SCANDIR_SORT_ASCENDING",  PHP_SCANDIR_SORT_ASCENDING,  CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SCANDIR_SORT_DESCENDING", PHP_SCANDIR_SORT_DESCENDING, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SCANDIR_SORT_NONE",       PHP_SCANDIR_SORT_NONE,       CONST_PERSISTENT);
-
 #ifdef HAVE_GLOB
 
-#ifdef GLOB_BRACE
-	REGISTER_LONG_CONSTANT("GLOB_BRACE", GLOB_BRACE, CONST_PERSISTENT);
-#else
+#ifndef GLOB_BRACE
 # define GLOB_BRACE 0
 #endif
 
-#ifdef GLOB_MARK
-	REGISTER_LONG_CONSTANT("GLOB_MARK", GLOB_MARK, CONST_PERSISTENT);
-#else
+#ifndef GLOB_ERR
+# define GLOB_ERR 0
+#endif
+
+#ifndef GLOB_MARK
 # define GLOB_MARK 0
 #endif
 
-#ifdef GLOB_NOSORT
-	REGISTER_LONG_CONSTANT("GLOB_NOSORT", GLOB_NOSORT, CONST_PERSISTENT);
-#else
-# define GLOB_NOSORT 0
-#endif
-
-#ifdef GLOB_NOCHECK
-	REGISTER_LONG_CONSTANT("GLOB_NOCHECK", GLOB_NOCHECK, CONST_PERSISTENT);
-#else
+#ifndef GLOB_NOCHECK
 # define GLOB_NOCHECK 0
 #endif
 
-#ifdef GLOB_NOESCAPE
-	REGISTER_LONG_CONSTANT("GLOB_NOESCAPE", GLOB_NOESCAPE, CONST_PERSISTENT);
-#else
+#ifndef GLOB_NOESCAPE
 # define GLOB_NOESCAPE 0
 #endif
 
-#ifdef GLOB_ERR
-	REGISTER_LONG_CONSTANT("GLOB_ERR", GLOB_ERR, CONST_PERSISTENT);
-#else
-# define GLOB_ERR 0
+#ifndef GLOB_NOSORT
+# define GLOB_NOSORT 0
 #endif
 
 #ifndef GLOB_ONLYDIR
