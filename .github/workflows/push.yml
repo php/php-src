@@ -148,7 +148,16 @@ jobs:
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/verify-generated-files
   MACOS_DEBUG_NTS:
-    runs-on: macos-13
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: 13
+            arch: X64
+          - os: 14
+            arch: ARM64
+    name: MACOS_${{ matrix.arch }}_DEBUG_NTS
+    runs-on: macos-${{ matrix.os }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -157,7 +166,7 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
+          key: "${{github.job}}-${{matrix.os}}-${{hashFiles('main/php_version.h')}}"
           append-timestamp: false
       - name: ./configure
         uses: ./.github/actions/configure-macos
@@ -165,14 +174,14 @@ jobs:
           configurationParameters: --enable-debug --disable-zts
       - name: make
         run: |-
-          export PATH="/usr/local/opt/bison/bin:$PATH"
+          export PATH="$(brew --prefix)/opt/bison/bin:$PATH"
           make -j$(sysctl -n hw.logicalcpu) >/dev/null
       - name: make install
         run: sudo make install
       - name: Test Tracing JIT
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+          testArtifacts: ${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
           jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
