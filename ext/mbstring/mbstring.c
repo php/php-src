@@ -2983,7 +2983,7 @@ PHP_FUNCTION(mb_ucfirst)
 		RETURN_THROWS();
 	}
 
-	RETVAL_STR(php_mb_ulcfirst(str, PHP_UNICODE_CASE_UPPER, enc));
+	RETVAL_STR(php_mb_ulcfirst(str, PHP_UNICODE_CASE_TITLE, enc));
 }
 
 PHP_FUNCTION(mb_lcfirst)
