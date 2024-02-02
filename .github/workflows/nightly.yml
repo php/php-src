@@ -14,6 +14,7 @@ jobs:
       branches: ${{ steps.set-matrix.outputs.branches }}
       matrix-include: ${{ steps.set-matrix.outputs.matrix-include }}
       windows-matrix-include: ${{ steps.set-matrix.outputs.windows-matrix-include }}
+      macos-matrix-include: ${{ steps.set-matrix.outputs.macos-matrix-include }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -230,11 +231,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
-        debug: [true, false]
-        zts: [true, false]
-    name: "${{ matrix.branch.name }}_MACOS_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: macos-${{ matrix.branch.version.minor >= 4 && '13' || '12' }}
+        include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.macos-matrix-include) }}
+    name: "${{ matrix.branch.name }}_MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: macos-${{ matrix.os }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -250,18 +249,18 @@ jobs:
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
       - name: make
         run: |-
-          export PATH="/usr/local/opt/bison/bin:$PATH"
+          export PATH="$(brew --prefix)/opt/bison/bin:$PATH"
           make -j$(sysctl -n hw.logicalcpu) >/dev/null
       - name: make install
         run: sudo make install
       - name: Test
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
           jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
@@ -269,14 +268,14 @@ jobs:
       - name: Test OpCache
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} OpCache
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} OpCache
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test Function JIT
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
           jitType: function
           runTestsParameters: >-
             -d zend_extension=opcache.so
@@ -792,13 +791,13 @@ jobs:
           repository: php-memcached-dev/php-memcached
           path: memcached
       - name: git checkout redis
+        # Currently fails to build
+        if: false
         uses: actions/checkout@v4
         with:
           repository: phpredis/phpredis
           path: redis
       - name: git checkout xdebug
-        # Currently breaks due to a PHP <=8.3 version check
-        if: false
         uses: actions/checkout@v4
         with:
           repository: xdebug/xdebug
@@ -853,13 +852,14 @@ jobs:
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
       - name: build redis
+        # Currently fails to build
+        if: false
         run: |
           cd redis
           /opt/php/bin/phpize
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
       - name: build xdebug
-        if: false
         run: |
           cd xdebug
           /opt/php/bin/phpize

@@ -22,3 +22,14 @@ final class NumericCastableNoOperations {
     private int|float $val;
     public function __construct(int|float $val) {}
 }
+
+class DimensionHandlersNoArrayAccess {
+    public bool $read = false;
+    public bool $write = false;
+    public bool $has = false;
+    public bool $unset = false;
+    public int $readType;
+    public bool $hasOffset = false;
+    public int $checkEmpty;
+    public mixed $offset;
+}

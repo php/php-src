@@ -22,6 +22,6 @@ if (PHP_MYSQLI != "no") {
 	if (PHP_MYSQLI != "no") {
 		EXTENSION("mysqli", mysqli_source, PHP_MYSQLI_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		ADD_EXTENSION_DEP('mysqli', 'mysqlnd', true);
-		PHP_INSTALL_HEADERS("ext/mysqli", "php_mysqli_structs.h");
+		PHP_INSTALL_HEADERS("ext/mysqli", "php_mysqli_structs.h mysqli_mysqlnd.h");
 	}
 }

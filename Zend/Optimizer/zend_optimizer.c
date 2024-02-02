@@ -821,7 +821,9 @@ zend_class_entry *zend_optimizer_get_class_entry_from_op1(
 		}
 	} else if (opline->op1_type == IS_UNUSED && op_array->scope
 			&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
-			&& (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+			&& ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF
+				|| ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_STATIC
+					&& (op_array->scope->ce_flags & ZEND_ACC_FINAL)))) {
 		return op_array->scope;
 	}
 	return NULL;

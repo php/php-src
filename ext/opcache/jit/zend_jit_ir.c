@@ -382,7 +382,6 @@ static const void *zend_jit_get_veneer(ir_ctx *ctx, const void *addr)
 static bool zend_jit_set_veneer(ir_ctx *ctx, const void *addr, const void *veneer)
 {
 	int i, count = sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0]);
-	int64_t offset;
 	uint32_t exit_point = zend_jit_exit_point_by_addr(addr);
 
 	if (exit_point != (uint32_t)-1) {
@@ -394,6 +393,7 @@ static bool zend_jit_set_veneer(ir_ctx *ctx, const void *addr, const void *venee
 			*ptr = veneer;
 			ctx->flags2 |= IR_HAS_VENEERS;
 #ifdef HAVE_CAPSTONE
+			int64_t offset;
 		    if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM) {
 				const char *name = ir_disasm_find_symbol((uint64_t)(uintptr_t)addr, &offset);
 

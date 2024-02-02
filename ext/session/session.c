@@ -46,6 +46,7 @@
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/head.h"
 #include "ext/random/php_random.h"
+#include "ext/random/php_random_csprng.h"
 
 #include "mod_files.h"
 #include "mod_user.h"
@@ -258,18 +259,28 @@ static zend_string *php_session_encode(void) /* {{{ */
 }
 /* }}} */
 
+static ZEND_COLD void php_session_cancel_decode(void)
+{
+	php_session_destroy();
+	php_session_track_init();
+	php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");
+}
+
 static zend_result php_session_decode(zend_string *data) /* {{{ */
 {
 	if (!PS(serializer)) {
 		php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to decode session object");
 		return FAILURE;
 	}
-	if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
-		php_session_destroy();
-		php_session_track_init();
-		php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");
-		return FAILURE;
-	}
+	zend_try {
+		if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
+			php_session_cancel_decode();
+			return FAILURE;
+		}
+	} zend_catch {
+		php_session_cancel_decode();
+		zend_bailout();
+	} zend_end_try();
 	return SUCCESS;
 }
 /* }}} */

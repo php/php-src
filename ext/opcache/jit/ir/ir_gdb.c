@@ -600,7 +600,7 @@ bool ir_gdb_present(void)
 				pid = atoi(s);
 				if (pid) {
 					char out[1024];
-					sprintf(buf, "/proc/%d/exe", (int)pid);
+					snprintf(buf, sizeof(buf), "/proc/%d/exe", (int)pid);
 					if (readlink(buf, out, sizeof(out) - 1) > 0) {
 						if (strstr(out, "gdb")) {
 							ret = 1;

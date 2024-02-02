@@ -14,6 +14,7 @@ Core:
 
 Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
+  . Bumped required libcurl version to 7.61.0. (Ayesh)
 
 Date:
   . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
@@ -116,6 +117,9 @@ SimpleXML:
     foreach). (nielsdos)
   . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
   . Fix signature of simplexml_import_dom(). (nielsdos)
+
+Sockets:
+  . Added multicast group support for ipv4 on FreeBSD. (jonathan@tangential.ca)
 
 SNMP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)

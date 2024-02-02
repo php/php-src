@@ -8,6 +8,7 @@ if (PHP_CLI == "yes") {
 	ADD_FLAG("LIBS_CLI", "ws2_32.lib");
 	ADD_FLAG("LIBS_CLI", "shell32.lib");
 	ADD_FLAG("LDFLAGS_CLI", "/stack:67108864");
+	PHP_INSTALL_HEADERS("sapi/cli", "cli.h");
 
 	if (CHECK_LIB("edit_a.lib;edit.lib", "cli", PHP_CLI) &&
 		CHECK_HEADER_ADD_INCLUDE("editline/readline.h", "CFLAGS_CLI")) {
