@@ -83,6 +83,8 @@ jobs:
           sudo service mysql start
           mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
           mysql -uroot -proot -e "SET GLOBAL local_infile = true"
+          git fetch origin
+          git checkout master .github/jit_check.php .github/nightly.php
       - name: Enable Opcache
         run: |
           echo memory_limit=-1 >> /etc/php.d/opcache.ini
@@ -108,13 +110,6 @@ jobs:
           echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
           php -v
 
-      - name: Test multiple libraries and frameworks in parallel
-        if: matrix.branch.ref != 'PHP-8.0'
-        run: |
-          sudo prlimit --pid $$ --nofile=1048576:1048576
-          
-          php $GITHUB_WORKSPACE/.github/nightly.php || exit $?
-
       - name: Test PHPSeclib
         if: always()
         run: |
@@ -127,6 +122,7 @@ jobs:
           php $GITHUB_WORKSPACE/.github/jit_check.php vendor/bin/paratest --verbose --configuration=tests/phpunit.xml --runner=WrapperRunner || exit $?
 
       - name: Test Psalm
+        if: always()
         run: |
           git clone https://github.com/vimeo/psalm --depth 1
           cd psalm
@@ -138,6 +134,7 @@ jobs:
           php $GITHUB_WORKSPACE/.github/jit_check.php ./psalm --no-cache || exit $?
 
       - name: Test PHPStan
+        if: always()
         if: matrix.branch.ref != 'PHP-8.2'
         run: |
           git clone https://github.com/phpstan/phpstan-src --depth 1
@@ -150,6 +147,13 @@ jobs:
           php $GITHUB_WORKSPACE/.github/jit_check.php bin/phpstan clear-result-cache
           php $GITHUB_WORKSPACE/.github/jit_check.php bin/phpstan || exit $?
           
+      - name: Test multiple libraries and frameworks in parallel
+        if: matrix.branch.ref != 'PHP-8.0'
+        run: |
+          sudo prlimit --pid $$ --nofile=1048576:1048576
+          
+          php $GITHUB_WORKSPACE/.github/nightly.php || exit $?
+
       - name: 'Symfony Preloading'
         run: |
           php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-reqs
