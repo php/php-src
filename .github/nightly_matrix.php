@@ -103,7 +103,7 @@ function get_macos_matrix_include(array $branches) {
                     'os' => $branch === 'master' ? '13' : '12',
                     'arch' => 'X64',
                 ];
-                if($branch['version']['minor'] === 4) {
+                if ($branch['version']['minor'] >= 4 || $branch['version']['major'] >= 9) {
                     $jobs[] = [
                         'branch' => $branch,
                         'debug' => $debug,
