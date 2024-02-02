@@ -97,7 +97,6 @@ jobs:
           echo opcache.interned_strings_buffer=64 >> /etc/php.d/opcache.ini
           echo opcache.max_accelerated_files=100000 >> /etc/php.d/opcache.ini
       - name: Enable JIT
-        if: matrix.type != 'verify_type_inference'
         run: |
           echo opcache.jit=tracing >> /etc/php.d/opcache.ini
           echo opcache.jit_buffer_size=128M >> /etc/php.d/opcache.ini
