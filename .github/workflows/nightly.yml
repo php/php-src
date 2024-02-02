@@ -400,7 +400,7 @@ jobs:
         if: matrix.type != 'verify_type_inference'
         run: |
           echo opcache.jit=tracing >> /etc/php.d/opcache.ini
-          echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
+          echo opcache.jit_buffer_size=128M >> /etc/php.d/opcache.ini
           echo opcache.jit_max_root_traces=100000 >> /etc/php.d/opcache.ini
           echo opcache.jit_max_side_traces=100000 >> /etc/php.d/opcache.ini
           echo opcache.jit_max_exit_counters=100000 >> /etc/php.d/opcache.ini
