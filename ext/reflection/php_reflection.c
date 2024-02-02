@@ -1140,12 +1140,13 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 
 		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
 			if (attr->offset == offset && zend_string_equals(attr->lcname, filter)) {
-				reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
-				add_next_index_zval(ret, &tmp);
+				reflection_attribute_factory(first ? ret : &tmp, attributes, attr, scope, target, filename);
 
                 if (first) {
                     break;
                 }
+
+				add_next_index_zval(ret, &tmp);
 			}
 		} ZEND_HASH_FOREACH_END();
 
@@ -1176,12 +1177,13 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 			}
 		}
 
-		reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
-		add_next_index_zval(ret, &tmp);
+		reflection_attribute_factory(first ? ret : &tmp, attributes, attr, scope, target, filename);
 
         if (first) {
             break;
         }
+
+		add_next_index_zval(ret, &tmp);
 	} ZEND_HASH_FOREACH_END();
 
 	return SUCCESS;
@@ -1224,20 +1226,12 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
         }
 	}
 
-	array_init(return_value);
+    if (! first) {
+        array_init(return_value);
+    }
 
-	if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base, filename, first)) {
-		RETURN_THROWS();
-	}
-
-    if (first) {
-        zend_array *ret_attributes = Z_ARRVAL_P(return_value);
-
-        if(ret_attributes->nNumOfElements == 0) {
-            RETURN_NULL();
-        }
-
-        RETURN_COPY_VALUE(zend_hash_index_lookup(ret_attributes, 0));
+    if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base, filename, first)) {
+        RETURN_THROWS();
     }
 }
 /* }}} */
