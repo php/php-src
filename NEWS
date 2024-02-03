@@ -37,6 +37,8 @@ PHP                                                                        NEWS
 - PDO_PGSQL:
   . Fixed GH-15986 (Double-free due to Pdo\Pgsql::setNoticeCallback()). (cmb,
     nielsdos)
+  . Fixed GH-12940 (Using PQclosePrepared when available instead of
+    the DEALLOCATE command to free statements resources). (David Carlier)
 
 - Reflection:
   . Add missing ReflectionProperty::hasHook[s]() methods. (ilutov)
