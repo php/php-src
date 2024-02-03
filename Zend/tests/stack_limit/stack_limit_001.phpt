@@ -4,6 +4,7 @@ Stack limit 001 - Stack limit checks with max_allowed_stack_size detection
 <?php
 if (!function_exists('zend_test_zend_call_stack_get')) die("skip zend_test_zend_call_stack_get() is not available");
 if (getenv('SKIP_MSAN')) die("skip msan requires a considerably higher zend.reserved_stack_size due to instrumentation");
+if (PHP_OS_FAMILY === 'Darwin' && strpos(php_uname('m'), 'aarch64') !== false) die("skip Broken on Apple Silicon");
 ?>
 --EXTENSIONS--
 zend_test

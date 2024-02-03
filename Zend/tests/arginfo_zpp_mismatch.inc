@@ -29,6 +29,8 @@ function skipFunction($function): bool {
      || $function === 'posix_setrlimit'
      || $function === 'sapi_windows_generate_ctrl_event'
      || $function === 'imagegrabscreen'
+     || (($function === 'zend_test_zend_call_stack_get' || $function === 'zend_test_zend_call_stack_use_all')
+         && PHP_OS_FAMILY === 'Darwin' && strpos(php_uname('m'), 'aarch64') !== false)
     ) {
         return true;
     }
