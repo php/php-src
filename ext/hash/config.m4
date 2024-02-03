@@ -35,7 +35,7 @@ else
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-inplace32BI.c"
   ],[
     AC_MSG_RESULT([yes])
-    if test $ac_cv_target_x86 = yes; then 
+    AS_CASE([$host_cpu],[x86_64*|amd64*], [
       if test $ac_cv_target_windows = yes; then
         dnl x86_64 windows gnuc
         EXT_HASH_BLAKE3_SOURCES="$EXT_HASH_BLAKE3_SOURCES blake3/upstream_blake3/c/blake3_avx512_x86-64_windows_gnu.S blake3/upstream_blake3/c/blake3_avx2_x86-64_windows_gnu.S blake3/upstream_blake3/c/blake3_sse41_x86-64_windows_gnu.S blake3/upstream_blake3/c/blake3_sse2_x86-64_windows_gnu.S"
@@ -50,7 +50,7 @@ else
           PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -DBLAKE3_NO_SSE2 -DBLAKE3_NO_SSE41 -DBLAKE3_NO_AVX2 -DBLAKE3_NO_AVX512"
         fi
       fi
-    fi
+    ])
     SHA3_DIR="sha3/generic64lc"
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-opt64.c"
   ])
