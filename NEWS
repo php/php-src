@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.4
 
+- Core:
+  . Fixed array key as string (case insensitive) comparison typo
+    for the second operand buffer size. (A. Slepykh)
+
 - Curl:
   . Fix failing tests due to string changes in libcurl 8.6.0. (Ayesh)
 
