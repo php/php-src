@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-13178 (Iterator positions incorrect when converting packed
     array to hashed). (ilutov)
   . Fixed zend fiber build for solaris default mode (32 bits). (David Carlier)
+  . Fixed zend call stack size for macOs/arm64. (David Carlier)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)

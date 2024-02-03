@@ -427,7 +427,9 @@ static bool zend_call_stack_get_macos(zend_call_stack *stack)
 	void *base = pthread_get_stackaddr_np(pthread_self());
 	size_t max_size;
 
-	if (pthread_main_np()) {
+#if !defined(__aarch64__)
+	if (pthread_main_np())
+	{
 		/* pthread_get_stacksize_np() returns a too low value for the main
 		 * thread in OSX 10.9, 10.10:
 		 * https://mail.openjdk.org/pipermail/hotspot-dev/2013-October/011353.html
@@ -437,7 +439,10 @@ static bool zend_call_stack_get_macos(zend_call_stack *stack)
 		/* Stack size is 8MiB by default for main threads
 		 * https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/CreatingThreads/CreatingThreads.html */
 		max_size = 8 * 1024 * 1024;
-	} else {
+	}
+	else
+#endif
+	{
 		max_size = pthread_get_stacksize_np(pthread_self());
 	}
 
