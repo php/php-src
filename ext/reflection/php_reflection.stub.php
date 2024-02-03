@@ -180,6 +180,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     /** @cvalue ZEND_ACC_FINAL */
     public const int IS_FINAL = UNKNOWN;
 
+    public string $name;
     public string $class;
 
     public function __construct(object|string $objectOrMethod, ?string $method = null) {}
