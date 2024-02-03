@@ -68,6 +68,8 @@ if test "$PHP_PDO_PGSQL" != "no"; then
 
   AC_CHECK_LIB(pq, PQlibVersion,, AC_MSG_ERROR([Unable to build the PDO PostgreSQL driver: at least libpq 9.1 is required]))
 
+  PHP_CHECK_FUNC(PQclosePrepared, pq)
+
   LIBS=$old_LIBS
   LDFLAGS=$old_LDFLAGS
 
