@@ -238,7 +238,7 @@ static int php_array_key_compare_string_natural_general(Bucket *f, Bucket *s, in
 		l2 = s->key->len;
 	} else {
 		s2 = zend_print_long_to_buf(buf2 + sizeof(buf2) - 1, s->h);
-		l2 = buf2 + sizeof(buf2) - 1 - s1;
+		l2 = buf2 + sizeof(buf2) - 1 - s2;
 	}
 	return strnatcmp_ex(s1, l1, s2, l2, fold_case);
 }
