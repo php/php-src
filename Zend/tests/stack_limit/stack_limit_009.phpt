@@ -11,6 +11,9 @@ zend_test
 --FILE--
 <?php
 
+var_dump(PHP_OS_FAMILY);
+var_dump(php_uname('m'));
+
 var_dump(zend_test_zend_call_stack_get());
 
 var_dump(zend_test_zend_call_stack_use_all());
