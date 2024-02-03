@@ -427,6 +427,13 @@ static bool zend_call_stack_get_macos(zend_call_stack *stack)
 	void *base = pthread_get_stackaddr_np(pthread_self());
 	size_t max_size;
 
+#if defined(__aarch64__)
+	/*
+	 * 8 mb for the main thread triggers a stack overflow.
+	 * instead we derive it from pthread_get_stacksize_np.
+	 */
+	max_size = pthread_get_stacksize_np(pthread_self());
+#else
 	if (pthread_main_np()) {
 		/* pthread_get_stacksize_np() returns a too low value for the main
 		 * thread in OSX 10.9, 10.10:
@@ -440,6 +447,7 @@ static bool zend_call_stack_get_macos(zend_call_stack *stack)
 	} else {
 		max_size = pthread_get_stacksize_np(pthread_self());
 	}
+#endif
 
 	stack->base = base;
 	stack->max_size = max_size;
