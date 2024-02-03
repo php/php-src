@@ -895,7 +895,7 @@ static zval *property_get_default(zend_property_info *prop_info) {
 /* {{{ _property_string */
 static void _property_string(smart_str *str, zend_property_info *prop, const char *prop_name, char* indent)
 {
-	if (prop->doc_comment) {
+	if (prop && prop->doc_comment) {
 		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(prop->doc_comment));
 	}
 	smart_str_append_printf(str, "%sProperty [ ", indent);
@@ -1929,7 +1929,9 @@ ZEND_METHOD(ReflectionFunctionAbstract, getDocComment)
 
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
 		RETURN_STR_COPY(fptr->op_array.doc_comment);
-	} else if (fptr->type == ZEND_INTERNAL_FUNCTION && ((zend_internal_function *) fptr)->doc_comment) {
+	}
+
+	if (fptr->type == ZEND_INTERNAL_FUNCTION && ((zend_internal_function *) fptr)->doc_comment) {
 		RETURN_STR_COPY(((zend_internal_function *) fptr)->doc_comment);
 	}
 

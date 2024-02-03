@@ -525,8 +525,8 @@ typedef struct _zend_internal_function {
 	uint32_t T;         /* number of temporary variables */
 	/* END of common elements */
 
-	zend_string *doc_comment;
 	zif_handler handler;
+	zend_string *doc_comment;
 	struct _zend_module_entry *module;
 	const zend_frameless_function_info *frameless_function_infos;
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
