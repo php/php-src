@@ -26,11 +26,11 @@ else
   AC_MSG_CHECKING([if we're at 64-bit platform])
   AS_IF([test "$ac_cv_sizeof_long" -eq 4],[
     AC_MSG_RESULT([no])
-    if test $ac_cv_target_x86 = yes; then 
+    AS_CASE([$host_cpu],[x86*|amd*|i?86*|pentium],[
       dnl there are some early Pentium4 32bit CPUs with SSE2 support, but don't waste effort optimizing musem-CPUs
       dnl (the majority of 32bit CPUs does not have SSE2)
       PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -DBLAKE3_NO_SSE2 -DBLAKE3_NO_SSE41 -DBLAKE3_NO_AVX2 -DBLAKE3_NO_AVX512"
-    fi
+])
     SHA3_DIR="sha3/generic32lc"
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-inplace32BI.c"
   ],[
