@@ -18,6 +18,7 @@
 18. avifinfo (ext/standard/libavifinfo) see ext/standard/libavifinfo/LICENSE
 19. xxHash (ext/hash/xxhash)
 20. Lexbor (ext/dom/lexbor/lexbor) see ext/dom/lexbor/LICENSE
+21. BLAKE3 (ext/hash/blake3) see ext/hash/blake3/upstream_blake3/LICENSE
 
 
 3. pcre2lib (ext/pcre)
