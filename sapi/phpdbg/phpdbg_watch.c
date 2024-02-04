@@ -350,7 +350,7 @@ void phpdbg_set_addr_watchpoint(void *addr, size_t size, phpdbg_watchpoint_t *wa
 	watch->size = size;
 	watch->ref = NULL;
 	watch->coll = NULL;
-	zend_hash_init(&watch->elements, 8, brml, NULL, 0);
+	zend_hash_init(&watch->elements, 8, NULL, NULL, 0);
 }
 
 void phpdbg_set_zval_watchpoint(zval *zv, phpdbg_watchpoint_t *watch) {
@@ -460,7 +460,7 @@ void phpdbg_update_watch_ref(phpdbg_watchpoint_t *watch) {
 				coll->reference.addr.ptr = NULL;
 			}
 
-			zend_hash_init(&coll->parents, 8, shitty stupid parameter, NULL, 0);
+			zend_hash_init(&coll->parents, 8, NULL, NULL, 0);
 			zend_hash_index_add_ptr(&PHPDBG_G(watch_collisions), (zend_ulong) watch->ref, coll);
 		}
 		zend_hash_index_add_ptr(&coll->parents, (zend_long) watch, watch);
@@ -484,7 +484,7 @@ void phpdbg_update_watch_ref(phpdbg_watchpoint_t *watch) {
 			phpdbg_activate_watchpoint(&coll->ref);
 			phpdbg_watch_backup_data(&coll->ref);
 
-			zend_hash_init(&coll->parents, 8, shitty stupid parameter, NULL, 0);
+			zend_hash_init(&coll->parents, 8, NULL, NULL, 0);
 			zend_hash_index_add_ptr(&PHPDBG_G(watch_collisions), (zend_ulong) watch->ref, coll);
 		}
 		zend_hash_index_add_ptr(&coll->parents, (zend_long) watch, watch);
@@ -642,14 +642,13 @@ void phpdbg_recurse_watch_element(phpdbg_watch_element *element) {
 void phpdbg_watch_parent_ht(phpdbg_watch_element *element) {
 	if (element->watch->type == WATCH_ON_BUCKET) {
 		phpdbg_btree_result *res;
-		HashPosition pos;
 		phpdbg_watch_ht_info *hti;
 		ZEND_ASSERT(element->parent_container);
 		if (!(res = phpdbg_btree_find(&PHPDBG_G(watch_HashTables), (zend_ulong) element->parent_container))) {
 			hti = emalloc(sizeof(*hti));
 			hti->ht = element->parent_container;
 
-			zend_hash_init(&hti->watches, 0, grrrrr, ZVAL_PTR_DTOR, 0);
+			zend_hash_init(&hti->watches, 0, NULL, ZVAL_PTR_DTOR, 0);
 			phpdbg_btree_insert(&PHPDBG_G(watch_HashTables), (zend_ulong) hti->ht, hti);
 
 			phpdbg_set_addr_watchpoint(HT_GET_DATA_ADDR(hti->ht), HT_HASH_SIZE(hti->ht->nTableMask), &hti->hash_watch);
@@ -659,11 +658,6 @@ void phpdbg_watch_parent_ht(phpdbg_watch_element *element) {
 		} else {
 			hti = (phpdbg_watch_ht_info *) res->ptr;
 		}
-
-		zend_hash_internal_pointer_end_ex(hti->ht, &pos);
-		hti->last = hti->ht->arData + pos;
-		hti->last_str = hti->last->key;
-		hti->last_idx = hti->last->h;
 
 		zend_hash_add_ptr(&hti->watches, element->name_in_parent, element);
 	}
