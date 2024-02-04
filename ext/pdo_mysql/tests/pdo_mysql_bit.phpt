@@ -4,7 +4,7 @@ MySQL PDO->exec(), BIT columns - remove after fix!
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 if (MySQLPDOTest::isPDOMySQLnd())
     die("skip Known bug - mysqlnd handles BIT incorrectly!");
@@ -12,10 +12,9 @@ if (MySQLPDOTest::isPDOMySQLnd())
 --FILE--
 <?php
     /* TODO: remove this test after fix and enable the BIT test in pdo_mysql_types.phpt again */
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
     function test_type(&$db, $offset, $sql_type, $value, $ret_value = NULL, $pattern = NULL) {
-
         $sql = sprintf('CREATE TABLE test_mysql_bit(id INT, label %s) ENGINE=%s', $sql_type, MySQLPDOTest::getTableEngine());
         @$db->exec($sql);
         if ($db->errorCode() != 0) {
@@ -49,7 +48,7 @@ if (MySQLPDOTest::isPDOMySQLnd())
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_mysql_bit');
 ?>

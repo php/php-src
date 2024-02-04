@@ -375,6 +375,26 @@ const PHP_ROUND_HALF_EVEN = UNKNOWN;
  * @cvalue PHP_ROUND_HALF_ODD
  */
 const PHP_ROUND_HALF_ODD = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_CEILING
+ */
+const PHP_ROUND_CEILING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_FLOOR
+ */
+const PHP_ROUND_FLOOR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_TOWARD_ZERO
+ */
+const PHP_ROUND_TOWARD_ZERO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_AWAY_FROM_ZERO
+ */
+const PHP_ROUND_AWAY_FROM_ZERO = UNKNOWN;
 
 /* crypt.c */
 
@@ -1513,7 +1533,7 @@ function header_register_callback(callable $callback): bool {}
 
 /* main/output.c */
 
-/** @param callable $callback */
+/** @param callable|null $callback */
 function ob_start($callback = null, int $chunk_size = 0, int $flags = PHP_OUTPUT_HANDLER_STDFLAGS): bool {}
 
 function ob_flush(): bool {}
@@ -2335,7 +2355,6 @@ function implode(string|array $separator, ?array $array = null): string {}
 function join(string|array $separator, ?array $array = null): string {}
 
 /**
- * @compile-time-eval
  * @refcount 1
  */
 function strtok(string $string, ?string $token = null): string|false {}

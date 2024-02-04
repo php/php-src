@@ -10,7 +10,9 @@ include "skipif.inc";
 --FILE--
 <?php
 include "php_cli_server.inc";
-php_cli_server_start(<<<'PHP'
+$info = php_cli_server_start(null, 'router.php');
+file_put_contents($info->docRoot . '/router.php', <<<'PHP'
+<?php
 if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"]))
         return false; // serve the requested resource as-is.
 else {

@@ -57,6 +57,11 @@ namespace {
         public function takesUnionType(stdclass|Iterator $arg): void {}
     }
 
+    class _ZendTestMagicCall
+    {
+        public function __call(string $name, array $args): mixed {}
+    }
+
     class _ZendTestChildClass extends _ZendTestClass
     {
         public function returnsThrowable(): Exception {}

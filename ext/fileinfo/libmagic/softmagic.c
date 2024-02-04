@@ -2266,7 +2266,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			haystack = zend_string_init(ms->search.s, ms->search.s_len, 0);
 
 			/* match v = 0, no match v = 1 */
-			php_pcre_match_impl(pce, haystack, &retval, &subpats, 0, 1, PREG_OFFSET_CAPTURE, 0);
+			php_pcre_match_impl(pce, haystack, &retval, &subpats, 0, PREG_OFFSET_CAPTURE, 0);
 			/* Free haystack */
 			zend_string_release(haystack);
 

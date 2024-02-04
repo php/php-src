@@ -3,6 +3,7 @@
 
 use PhpParser\Comment\Doc as DocComment;
 use PhpParser\ConstExprEvaluator;
+use PhpParser\Modifiers;
 use PhpParser\Node;
 use PhpParser\Node\AttributeGroup;
 use PhpParser\Node\Expr;
@@ -1260,12 +1261,12 @@ class FuncInfo {
 
     public function isFinalMethod(): bool
     {
-        return ($this->flags & Class_::MODIFIER_FINAL) || ($this->classFlags & Class_::MODIFIER_FINAL);
+        return ($this->flags & Modifiers::FINAL) || ($this->classFlags & Modifiers::FINAL);
     }
 
     public function isInstanceMethod(): bool
     {
-        return !($this->flags & Class_::MODIFIER_STATIC) && $this->isMethod() && !$this->name->isConstructor();
+        return !($this->flags & Modifiers::STATIC) && $this->isMethod() && !$this->name->isConstructor();
     }
 
     /** @return string[] */
@@ -1277,21 +1278,21 @@ class FuncInfo {
 
         $result = [];
 
-        if ($this->flags & Class_::MODIFIER_FINAL) {
+        if ($this->flags & Modifiers::FINAL) {
             $result[] = "final";
-        } elseif ($this->flags & Class_::MODIFIER_ABSTRACT && $this->classFlags & ~Class_::MODIFIER_ABSTRACT) {
+        } elseif ($this->flags & Modifiers::ABSTRACT && $this->classFlags & ~Modifiers::ABSTRACT) {
             $result[] = "abstract";
         }
 
-        if ($this->flags & Class_::MODIFIER_PROTECTED) {
+        if ($this->flags & Modifiers::PROTECTED) {
             $result[] = "protected";
-        } elseif ($this->flags & Class_::MODIFIER_PRIVATE) {
+        } elseif ($this->flags & Modifiers::PRIVATE) {
             $result[] = "private";
         } else {
             $result[] = "public";
         }
 
-        if ($this->flags & Class_::MODIFIER_STATIC) {
+        if ($this->flags & Modifiers::STATIC) {
             $result[] = "static";
         }
 
@@ -1338,7 +1339,7 @@ class FuncInfo {
 
     public function getDeclaration(): ?string
     {
-        if ($this->flags & Class_::MODIFIER_ABSTRACT) {
+        if ($this->flags & Modifiers::ABSTRACT) {
             return null;
         }
 
@@ -1367,7 +1368,7 @@ class FuncInfo {
                 }
             } else {
                 $declarationClassName = $this->name->getDeclarationClassName();
-                if ($this->flags & Class_::MODIFIER_ABSTRACT) {
+                if ($this->flags & Modifiers::ABSTRACT) {
                     return sprintf(
                         "\tZEND_ABSTRACT_ME_WITH_FLAGS(%s, %s, %s, %s)\n",
                         $declarationClassName, $this->name->methodName, $this->getArgInfoName(),
@@ -1458,21 +1459,21 @@ class FuncInfo {
     private function getFlagsAsArginfoString(): string
     {
         $flags = "ZEND_ACC_PUBLIC";
-        if ($this->flags & Class_::MODIFIER_PROTECTED) {
+        if ($this->flags & Modifiers::PROTECTED) {
             $flags = "ZEND_ACC_PROTECTED";
-        } elseif ($this->flags & Class_::MODIFIER_PRIVATE) {
+        } elseif ($this->flags & Modifiers::PRIVATE) {
             $flags = "ZEND_ACC_PRIVATE";
         }
 
-        if ($this->flags & Class_::MODIFIER_STATIC) {
+        if ($this->flags & Modifiers::STATIC) {
             $flags .= "|ZEND_ACC_STATIC";
         }
 
-        if ($this->flags & Class_::MODIFIER_FINAL) {
+        if ($this->flags & Modifiers::FINAL) {
             $flags .= "|ZEND_ACC_FINAL";
         }
 
-        if ($this->flags & Class_::MODIFIER_ABSTRACT) {
+        if ($this->flags & Modifiers::ABSTRACT) {
             $flags .= "|ZEND_ACC_ABSTRACT";
         }
 
@@ -2258,9 +2259,9 @@ abstract class VariableLike
     protected function getFlagsByPhpVersion(): array
     {
         $flags = "ZEND_ACC_PUBLIC";
-        if ($this->flags & Class_::MODIFIER_PROTECTED) {
+        if ($this->flags & Modifiers::PROTECTED) {
             $flags = "ZEND_ACC_PROTECTED";
-        } elseif ($this->flags & Class_::MODIFIER_PRIVATE) {
+        } elseif ($this->flags & Modifiers::PRIVATE) {
             $flags = "ZEND_ACC_PRIVATE";
         }
 
@@ -2355,13 +2356,13 @@ abstract class VariableLike
 
     protected function addModifiersToFieldSynopsis(DOMDocument $doc, DOMElement $fieldsynopsisElement): void
     {
-        if ($this->flags & Class_::MODIFIER_PUBLIC) {
+        if ($this->flags & Modifiers::PUBLIC) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "public"));
-        } elseif ($this->flags & Class_::MODIFIER_PROTECTED) {
+        } elseif ($this->flags & Modifiers::PROTECTED) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "protected"));
-        } elseif ($this->flags & Class_::MODIFIER_PRIVATE) {
+        } elseif ($this->flags & Modifiers::PRIVATE) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "private"));
         }
@@ -2513,7 +2514,7 @@ class ConstInfo extends VariableLike
 
     public function discardInfoForOldPhpVersions(): void {
         $this->type = null;
-        $this->flags &= ~Class_::MODIFIER_FINAL;
+        $this->flags &= ~Modifiers::FINAL;
         $this->isDeprecated = false;
         $this->attributes = [];
     }
@@ -2704,7 +2705,7 @@ class ConstInfo extends VariableLike
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_DEPRECATED", PHP_80_VERSION_ID);
         }
 
-        if ($this->flags & Class_::MODIFIER_FINAL) {
+        if ($this->flags & Modifiers::FINAL) {
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_FINAL", PHP_81_VERSION_ID);
         }
 
@@ -2715,7 +2716,7 @@ class ConstInfo extends VariableLike
     {
         parent::addModifiersToFieldSynopsis($doc, $fieldsynopsisElement);
 
-        if ($this->flags & Class_::MODIFIER_FINAL) {
+        if ($this->flags & Modifiers::FINAL) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "final"));
         }
@@ -2784,7 +2785,7 @@ class PropertyInfo extends VariableLike
 
     public function discardInfoForOldPhpVersions(): void {
         $this->type = null;
-        $this->flags &= ~Class_::MODIFIER_READONLY;
+        $this->flags &= ~Modifiers::READONLY;
         $this->attributes = [];
     }
 
@@ -2840,11 +2841,11 @@ class PropertyInfo extends VariableLike
     {
         $flags = parent::getFlagsByPhpVersion();
 
-        if ($this->flags & Class_::MODIFIER_STATIC) {
+        if ($this->flags & Modifiers::STATIC) {
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_STATIC", PHP_70_VERSION_ID);
         }
 
-        if ($this->flags & Class_::MODIFIER_READONLY) {
+        if ($this->flags & Modifiers::READONLY) {
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_READONLY", PHP_81_VERSION_ID);
         }
 
@@ -2855,12 +2856,12 @@ class PropertyInfo extends VariableLike
     {
         parent::addModifiersToFieldSynopsis($doc, $fieldsynopsisElement);
 
-        if ($this->flags & Class_::MODIFIER_STATIC) {
+        if ($this->flags & Modifiers::STATIC) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "static"));
         }
 
-        if ($this->flags & Class_::MODIFIER_READONLY || $this->isDocReadonly) {
+        if ($this->flags & Modifiers::READONLY || $this->isDocReadonly) {
             $fieldsynopsisElement->appendChild(new DOMText("\n     "));
             $fieldsynopsisElement->appendChild($doc->createElement("modifier", "readonly"));
         }
@@ -3181,11 +3182,11 @@ class ClassInfo {
             $php70Flags[] = "ZEND_ACC_TRAIT";
         }
 
-        if ($this->flags & Class_::MODIFIER_FINAL) {
+        if ($this->flags & Modifiers::FINAL) {
             $php70Flags[] = "ZEND_ACC_FINAL";
         }
 
-        if ($this->flags & Class_::MODIFIER_ABSTRACT) {
+        if ($this->flags & Modifiers::ABSTRACT) {
             $php70Flags[] = "ZEND_ACC_ABSTRACT";
         }
 
@@ -3207,7 +3208,7 @@ class ClassInfo {
 
         $php82Flags = $php81Flags;
 
-        if ($this->flags & Class_::MODIFIER_READONLY) {
+        if ($this->flags & Modifiers::READONLY) {
             $php82Flags[] = "ZEND_ACC_READONLY_CLASS";
         }
 
@@ -3448,15 +3449,15 @@ class ClassInfo {
             $ooElement->appendChild($doc->createElement('modifier', $modifierOverride));
             $ooElement->appendChild(new DOMText("\n$indentation "));
         } elseif ($withModifiers) {
-            if ($classInfo->flags & Class_::MODIFIER_FINAL) {
+            if ($classInfo->flags & Modifiers::FINAL) {
                 $ooElement->appendChild($doc->createElement('modifier', 'final'));
                 $ooElement->appendChild(new DOMText("\n$indentation "));
             }
-            if ($classInfo->flags & Class_::MODIFIER_ABSTRACT) {
+            if ($classInfo->flags & Modifiers::ABSTRACT) {
                 $ooElement->appendChild($doc->createElement('modifier', 'abstract'));
                 $ooElement->appendChild(new DOMText("\n$indentation "));
             }
-            if ($classInfo->flags & Class_::MODIFIER_READONLY) {
+            if ($classInfo->flags & Modifiers::READONLY) {
                 $ooElement->appendChild($doc->createElement('modifier', 'readonly'));
                 $ooElement->appendChild(new DOMText("\n$indentation "));
             }
@@ -3601,7 +3602,7 @@ class ClassInfo {
     private function hasNonPrivateConstructor(): bool
     {
         foreach ($this->funcInfos as $funcInfo) {
-            if ($funcInfo->name->isConstructor() && !($funcInfo->flags & Class_::MODIFIER_PRIVATE)) {
+            if ($funcInfo->name->isConstructor() && !($funcInfo->flags & Modifiers::PRIVATE)) {
                 return true;
             }
         }
@@ -4339,7 +4340,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                 }
 
                 $classFlags = $stmt instanceof Class_ ? $stmt->flags : 0;
-                $abstractFlag = $stmt instanceof Stmt\Interface_ ? Class_::MODIFIER_ABSTRACT : 0;
+                $abstractFlag = $stmt instanceof Stmt\Interface_ ? Modifiers::ABSTRACT : 0;
 
                 if ($classStmt instanceof Stmt\ClassConst) {
                     foreach ($classStmt->consts as $const) {
@@ -5530,7 +5531,7 @@ function initPhpParser() {
     }
 
     $isInitialized = true;
-    $version = "5.0.0alpha3";
+    $version = "5.0.0";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         installPhpParser($version, $phpParserDir);
@@ -5659,6 +5660,10 @@ foreach ($fileInfos as $fileInfo) {
 
     foreach ($fileInfo->classInfos as $classInfo) {
         $classMap[$classInfo->name->__toString()] = $classInfo;
+
+        if ($classInfo->alias !== null) {
+            $classMap[$classInfo->alias] = $classInfo;
+        }
     }
 }
 

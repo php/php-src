@@ -1,17 +1,16 @@
 --TEST--
 Bug #79375: mysqli_store_result does not report error from lock wait timeout
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
 function createDB(): PDO {
     $db = MySQLPDOTest::factory();
@@ -22,7 +21,7 @@ function createDB(): PDO {
 
 $db = createDB();
 $db2 = createDB();
-$db->query('CREATE TABLE test_79375 (first int) ENGINE = InnoDB');
+$db->query('CREATE TABLE test_79375 (first INT) ENGINE = InnoDB');
 $db->query('INSERT INTO test_79375 VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9)');
 
 function testNormalQuery(PDO $db, string $name) {
@@ -94,7 +93,7 @@ echo "\n";
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_79375');
 ?>

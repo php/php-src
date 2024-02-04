@@ -477,8 +477,8 @@ namespace
         /** @return DOMDocumentType|false */
         public function createDocumentType(string $qualifiedName, string $publicId = "", string $systemId = "") {}
 
-        /** @return DOMDocument|false */
-        public function createDocument(?string $namespace = null, string $qualifiedName = "", ?DOMDocumentType $doctype = null) {}
+        /** @tentative-return-type */
+        public function createDocument(?string $namespace = null, string $qualifiedName = "", ?DOMDocumentType $doctype = null): DOMDocument {}
     }
 
     /** @alias DOM\DocumentFragment */
@@ -607,7 +607,7 @@ namespace
     }
 
     /** @alias DOM\Element */
-    class DOMElement extends DOMNode implements DOMParentNode, DOMChildNode
+    class DOMElement extends DOMNode implements \DOMParentNode, \DOMChildNode
     {
         /** @readonly */
         public string $tagName;
@@ -932,6 +932,8 @@ namespace
 
         /** @tentative-return-type */
         public function registerPhpFunctions(string|array|null $restrict = null): void {}
+
+        public function registerPhpFunctionNS(string $namespaceURI, string $name, callable $callable): void {}
     }
 #endif
 
@@ -1032,7 +1034,7 @@ namespace DOM
      */
     const HTML_NO_DEFAULT_NS = UNKNOWN;
 
-    abstract class Document extends DOMNode implements DOMParentNode
+    abstract class Document extends \DOMNode implements \DOMParentNode
     {
         /** @readonly */
         public ?DocumentType $doctype;
@@ -1098,7 +1100,7 @@ namespace DOM
         public function normalizeDocument(): void {}
 
         /** @tentative-return-type */
-        public function registerNodeClass(string $baseClass, ?string $extendedClass): bool {}
+        public function registerNodeClass(string $baseClass, ?string $extendedClass): true {}
 
 #ifdef LIBXML_SCHEMAS_ENABLED
         /** @tentative-return-type */
@@ -1134,7 +1136,7 @@ namespace DOM
     }
 
     /** @strict-properties */
-    final class HTMLDocument extends DOM\Document
+    final class HTMLDocument extends Document
     {
         private function __construct() {}
 
@@ -1156,7 +1158,7 @@ namespace DOM
     }
 
     /** @strict-properties */
-    final class XMLDocument extends DOM\Document
+    final class XMLDocument extends Document
     {
         /** @implementation-alias DOM\HTMLDocument::__construct */
         private function __construct() {}

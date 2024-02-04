@@ -1681,8 +1681,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 	dir = CWDG(cwd).cwd;
 
 	ptr = command_line = (char *) emalloc(command_length + sizeof("cd '' ; ") + dir_length + extra+1+1);
-	memcpy(ptr, "cd ", sizeof("cd ")-1);
-	ptr += sizeof("cd ")-1;
+	ptr = zend_mempcpy(ptr, "cd ", sizeof("cd ") - 1);
 
 	if (CWDG(cwd).cwd_length == 0) {
 		*ptr++ = DEFAULT_SLASH;

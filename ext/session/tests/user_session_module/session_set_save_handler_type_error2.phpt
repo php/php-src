@@ -27,6 +27,9 @@ try {
 ob_end_flush();
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 Session callback must have a return value of type bool, null returned
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 Session callback must have a return value of type bool, int returned

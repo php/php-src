@@ -92,6 +92,9 @@ static inline size_t zend_call_stack_default_size(void)
 #ifdef __HAIKU__
 	return 64 * 4096;
 #endif
+#ifdef __sun
+	return 8 * 4096;
+#endif
 
 	return 2 * 1024 * 1024;
 }

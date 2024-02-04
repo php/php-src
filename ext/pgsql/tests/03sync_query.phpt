@@ -89,21 +89,21 @@ pg_field_name($result, 0);
 pg_field_num($result, "num");
 pg_field_size($result, 0);
 pg_field_type($result, 0);
-pg_field_prtlen($result, 0);
-pg_field_is_null($result, 0);
+pg_field_prtlen($result, null, 0);
+pg_field_is_null($result, null, 0);
 
 try {
-    pg_field_is_null($result, -1);
+    pg_field_is_null($result, null, -1);
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    pg_field_is_null($result, 3);
+    pg_field_is_null($result, null, 3);
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    pg_field_is_null($result, "unknown");
+    pg_field_is_null($result, null, "unknown");
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -151,9 +151,9 @@ Argument #3 must be less than the number of fields for this result set
 Argument #3 must be a field name from this result set
 pg_fetch_all_columns(): Argument #2 ($field) must be greater than or equal to 0
 pg_fetch_all_columns(): Argument #2 ($field) must be less than the number of fields for this result set
-Argument #2 must be greater than or equal to 0
-Argument #2 must be less than the number of fields for this result set
-Argument #2 must be a field name from this result set
+Argument #3 must be greater than or equal to 0
+Argument #3 must be less than the number of fields for this result set
+Argument #3 must be a field name from this result set
 pg_field_name(): Argument #2 ($field) must be greater than or equal to 0
 pg_field_name(): Argument #2 ($field) must be less than the number of fields for this result set
 pg_field_table(): Argument #2 ($field) must be greater than or equal to 0

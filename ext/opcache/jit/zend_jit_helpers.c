@@ -95,7 +95,7 @@ static ZEND_COLD void ZEND_FASTCALL zend_jit_invalid_method_call(zval *object)
 	if (Z_TYPE_P(object) == IS_UNDEF && opline->op1_type == IS_CV) {
 		zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(opline->op1.var)];
 
-		zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
+		zend_error_unchecked(E_WARNING, "Undefined variable $%S", cv);
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			return;
 		}
@@ -340,7 +340,7 @@ static int ZEND_FASTCALL zend_jit_undefined_op_helper(uint32_t var)
 	const zend_execute_data *execute_data = EG(current_execute_data);
 	zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(var)];
 
-	zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
+	zend_error_unchecked(E_WARNING, "Undefined variable $%S", cv);
 	return EG(exception) == NULL;
 }
 
@@ -354,7 +354,7 @@ static int ZEND_FASTCALL zend_jit_undefined_op_helper_write(HashTable *ht, uint3
 	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
 		GC_ADDREF(ht);
 	}
-	zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
+	zend_error_unchecked(E_WARNING, "Undefined variable $%S", cv);
 	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
 		if (!GC_REFCOUNT(ht)) {
 			zend_array_destroy(ht);
@@ -1100,6 +1100,9 @@ static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zend_string *s
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		return ZSTR_EMPTY_ALLOC();
+	}
 	return zend_jit_fetch_dim_str_offset(str, offset);
 }
 
@@ -1584,7 +1587,9 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 			}
 			zval_ptr_dtor(&res);
 		} else {
-			zend_error(E_WARNING, "Attempt to assign property of non-object");
+			/* Exception is thrown in this case */
+			GC_DELREF(obj);
+			return;
 		}
 		if (UNEXPECTED(GC_DELREF(obj) == 0)) {
 			zend_objects_store_del(obj);
@@ -2413,7 +2418,7 @@ static void ZEND_FASTCALL zend_jit_invalid_property_incdec(zval *container, cons
 	if (Z_TYPE_P(container) == IS_UNDEF && opline->op1_type == IS_CV) {
 		zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(opline->op1.var)];
 
-		zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
+		zend_error_unchecked(E_WARNING, "Undefined variable $%S", cv);
 	}
 	if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -3155,8 +3160,7 @@ static zend_string* ZEND_FASTCALL zend_jit_rope_end(zend_string **rope, uint32_t
 
 	char *target = ZSTR_VAL(ret);
 	for (i = 0; i <= count; i++) {
-		memcpy(target, ZSTR_VAL(rope[i]), ZSTR_LEN(rope[i]));
-		target += ZSTR_LEN(rope[i]);
+		target = zend_mempcpy(target, ZSTR_VAL(rope[i]), ZSTR_LEN(rope[i]));
 		zend_string_release_ex(rope[i], 0);
 	}
 	*target = '\0';

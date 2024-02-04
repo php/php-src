@@ -842,7 +842,12 @@ PHP_METHOD(DOM_Document, createElementNS)
 	if (errorcode == 0) {
 		if (xmlValidateName((xmlChar *) localname, 0) == 0) {
 			nodep = xmlNewDocNode(docp, NULL, (xmlChar *) localname, (xmlChar *) value);
-			if (nodep != NULL && uri != NULL) {
+			if (UNEXPECTED(nodep == NULL)) {
+				php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+				RETURN_THROWS();
+			}
+
+			if (uri != NULL) {
 				xmlNsPtr nsptr = xmlSearchNsByHref(nodep->doc, nodep, (xmlChar *) uri);
 				if (nsptr == NULL) {
 					nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
@@ -860,14 +865,8 @@ PHP_METHOD(DOM_Document, createElementNS)
 	}
 
 	if (errorcode != 0) {
-		if (nodep != NULL) {
-			xmlFreeNode(nodep);
-		}
+		xmlFreeNode(nodep);
 		php_dom_throw_error(errorcode, dom_get_strict_error(intern->document));
-		RETURN_FALSE;
-	}
-
-	if (nodep == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -885,55 +884,87 @@ PHP_METHOD(DOM_Document, createAttributeNS)
 	xmlNodePtr nodep = NULL, root;
 	xmlNsPtr nsptr;
 	int ret;
-	size_t uri_len = 0, name_len = 0;
-	char *uri, *name;
+	zend_string *name, *uri;
 	char *localname = NULL, *prefix = NULL;
 	dom_object *intern;
 	int errorcode;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S!S", &uri, &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
+	if (UNEXPECTED(uri == NULL)) {
+		uri = zend_empty_string;
+	}
+	size_t uri_len = ZSTR_LEN(uri);
+
 	root = xmlDocGetRootElement(docp);
 	if (root != NULL) {
-		errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
-		if (errorcode == 0) {
-			if (xmlValidateName((xmlChar *) localname, 0) == 0) {
-				nodep = (xmlNodePtr) xmlNewDocProp(docp, (xmlChar *) localname, NULL);
-				if (nodep != NULL && uri_len > 0) {
-					nsptr = xmlSearchNsByHref(nodep->doc, root, (xmlChar *) uri);
-					if (nsptr == NULL || nsptr->prefix == NULL) {
-						nsptr = dom_get_ns(root, uri, &errorcode, prefix ? prefix : "default");
-					}
-					xmlSetNs(nodep, nsptr);
+		errorcode = dom_check_qname(ZSTR_VAL(name), &localname, &prefix, uri_len, ZSTR_LEN(name));
+		if (UNEXPECTED(errorcode != 0)) {
+			goto error;
+		}
+		if (UNEXPECTED(xmlValidateName((xmlChar *) localname, 0) != 0)) {
+			errorcode = INVALID_CHARACTER_ERR;
+			goto error;
+		}
+		/* If prefix is "xml" and namespace is not the XML namespace, then throw a "NamespaceError" DOMException. */
+		if (UNEXPECTED(!zend_string_equals_literal(uri, "http://www.w3.org/XML/1998/namespace") && xmlStrEqual(BAD_CAST prefix, BAD_CAST "xml"))) {
+			errorcode = NAMESPACE_ERR;
+			goto error;
+		}
+		/* If either qualifiedName or prefix is "xmlns" and namespace is not the XMLNS namespace, then throw a "NamespaceError" DOMException. */
+		if (UNEXPECTED((zend_string_equals_literal(name, "xmlns") || xmlStrEqual(BAD_CAST prefix, BAD_CAST "xmlns")) && !zend_string_equals_literal(uri, "http://www.w3.org/2000/xmlns/"))) {
+			errorcode = NAMESPACE_ERR;
+			goto error;
+		}
+		/* If namespace is the XMLNS namespace and neither qualifiedName nor prefix is "xmlns", then throw a "NamespaceError" DOMException. */
+		if (UNEXPECTED(zend_string_equals_literal(uri, "http://www.w3.org/2000/xmlns/") && !zend_string_equals_literal(name, "xmlns") && !xmlStrEqual(BAD_CAST prefix, BAD_CAST "xmlns"))) {
+			errorcode = NAMESPACE_ERR;
+			goto error;
+		}
+
+		nodep = (xmlNodePtr) xmlNewDocProp(docp, (xmlChar *) localname, NULL);
+		if (UNEXPECTED(nodep == NULL)) {
+			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+			RETURN_THROWS();
+		}
+
+		if (uri_len > 0) {
+			nsptr = xmlSearchNsByHref(docp, root, BAD_CAST ZSTR_VAL(uri));
+
+			if (zend_string_equals_literal(name, "xmlns") || xmlStrEqual(BAD_CAST prefix, BAD_CAST "xml")) {
+				if (nsptr == NULL) {
+					nsptr = xmlNewNs(NULL, BAD_CAST ZSTR_VAL(uri), BAD_CAST prefix);
+					php_libxml_set_old_ns(docp, nsptr);
 				}
 			} else {
-				errorcode = INVALID_CHARACTER_ERR;
+				if (nsptr == NULL || nsptr->prefix == NULL) {
+					nsptr = dom_get_ns_unchecked(root, ZSTR_VAL(uri), prefix ? prefix : "default");
+					if (UNEXPECTED(nsptr == NULL)) {
+						errorcode = NAMESPACE_ERR;
+					}
+				}
 			}
+			xmlSetNs(nodep, nsptr);
 		}
 	} else {
 		php_error_docref(NULL, E_WARNING, "Document Missing Root Element");
 		RETURN_FALSE;
 	}
 
+error:
 	xmlFree(localname);
 	if (prefix != NULL) {
 		xmlFree(prefix);
 	}
 
 	if (errorcode != 0) {
-		if (nodep != NULL) {
-			xmlFreeProp((xmlAttrPtr) nodep);
-		}
+		xmlFreeProp((xmlAttrPtr) nodep);
 		php_dom_throw_error(errorcode, dom_get_strict_error(intern->document));
-		RETURN_FALSE;
-	}
-
-	if (nodep == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -999,21 +1030,33 @@ PHP_METHOD(DOM_Document, getElementById)
 }
 /* }}} end dom_document_get_element_by_id */
 
-static void php_dom_transfer_document_ref(xmlNodePtr node, dom_object *dom_object_document, xmlDocPtr document)
+static zend_always_inline void php_dom_transfer_document_ref_single_node(xmlNodePtr node, php_libxml_ref_obj *new_document)
+{
+	php_libxml_node_ptr *iteration_object_ptr = node->_private;
+	if (iteration_object_ptr) {
+		php_libxml_node_object *iteration_object = iteration_object_ptr->_private;
+		ZEND_ASSERT(iteration_object != NULL);
+		/* Must increase refcount first because we could be the last reference holder, and the document may be equal. */
+		new_document->refcount++;
+		php_libxml_decrement_doc_ref(iteration_object);
+		iteration_object->document = new_document;
+	}
+}
+
+static void php_dom_transfer_document_ref(xmlNodePtr node, php_libxml_ref_obj *new_document)
 {
 	if (node->children) {
-		php_dom_transfer_document_ref(node->children, dom_object_document, document);
+		php_dom_transfer_document_ref(node->children, new_document);
 	}
+
 	while (node) {
-		php_libxml_node_ptr *iteration_object_ptr = node->_private;
-		if (iteration_object_ptr) {
-			php_libxml_node_object *iteration_object = iteration_object_ptr->_private;
-			ZEND_ASSERT(iteration_object != NULL);
-			/* Must increase refcount first because we could be the last reference holder, and the document may be equal. */
-			dom_object_document->document->refcount++;
-			php_libxml_decrement_doc_ref(iteration_object);
-			iteration_object->document = dom_object_document->document;
+		if (node->type == XML_ELEMENT_NODE) {
+			for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
+				php_dom_transfer_document_ref_single_node((xmlNodePtr) attr, new_document);
+			}
 		}
+
+		php_dom_transfer_document_ref_single_node(node, new_document);
 		node = node->next;
 	}
 }
@@ -1031,7 +1074,7 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 			return false;
 		}
 
-		php_dom_transfer_document_ref(nodep, dom_object_new_document, new_document);
+		php_dom_transfer_document_ref(nodep, dom_object_new_document->document);
 	} else {
 		xmlUnlinkNode(nodep);
 	}
@@ -1240,7 +1283,10 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 		return(NULL);
 	}
 
-	(void) xmlSwitchToEncoding(ctxt, encoding);
+	if (encoding != NULL) {
+		/* Note: libxml 2.12+ doesn't handle NULL encoding well. */
+		(void) xmlSwitchToEncoding(ctxt, encoding);
+	}
 
 	/* If loading from memory, we need to set the base directory for the document */
 	if (mode != DOM_LOAD_FILE) {

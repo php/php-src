@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c32e74bddb55455f69083a302bcaf52f654b1293 */
+ * Stub hash: 893419f59d38566a8f6a766829250c18663e339c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -987,7 +987,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(intlcal_set_time_zone, arginfo_intlcal_set_time_zone)
 	ZEND_FE(intlcal_after, arginfo_intlcal_after)
 	ZEND_FE(intlcal_before, arginfo_intlcal_before)
-	ZEND_FE(intlcal_set, arginfo_intlcal_set)
+	ZEND_DEP_FE(intlcal_set, arginfo_intlcal_set)
 	ZEND_FE(intlcal_roll, arginfo_intlcal_roll)
 	ZEND_FE(intlcal_clear, arginfo_intlcal_clear)
 	ZEND_FE(intlcal_field_difference, arginfo_intlcal_field_difference)
@@ -1021,7 +1021,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(intlcal_to_date_time, arginfo_intlcal_to_date_time)
 	ZEND_FE(intlcal_get_error_code, arginfo_intlcal_get_error_code)
 	ZEND_FE(intlcal_get_error_message, arginfo_intlcal_get_error_message)
-	ZEND_FE(intlgregcal_create_instance, arginfo_intlgregcal_create_instance)
+	ZEND_DEP_FE(intlgregcal_create_instance, arginfo_intlgregcal_create_instance)
 	ZEND_FE(intlgregcal_set_gregorian_change, arginfo_intlgregcal_set_gregorian_change)
 	ZEND_FE(intlgregcal_get_gregorian_change, arginfo_intlgregcal_get_gregorian_change)
 	ZEND_FE(intlgregcal_is_leap_year, arginfo_intlgregcal_is_leap_year)

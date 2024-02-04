@@ -43,7 +43,6 @@
 #endif
 
 #include "php_crypt.h"
-#include "ext/random/php_random.h"
 
 /* Used to check DES salts to ensure that they contain only valid characters */
 #define IS_VALID_SALT_CHARACTER(c) (((c) >= '.' && (c) <= '9') || ((c) >= 'A' && (c) <= 'Z') || ((c) >= 'a' && (c) <= 'z'))

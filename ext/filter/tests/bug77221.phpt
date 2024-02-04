@@ -1,9 +1,7 @@
 --TEST--
 Bug #77221 (Request IP address filter flag to exclude non-global IP addresses)
---SKIPIF--
-<?php
-if (!extension_loaded('filter')) die("skip filter extension not available");
-?>
+--EXTENSIONS--
+filter
 --FILE--
 <?php
 

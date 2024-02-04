@@ -9,15 +9,16 @@ runs:
     - shell: bash
       run: |
         set -x
-        export PATH="/usr/local/opt/bison/bin:$PATH"
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/openssl@1.1/lib/pkgconfig"
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/curl/lib/pkgconfig"
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/krb5/lib/pkgconfig"
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libffi/lib/pkgconfig"
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libxml2/lib/pkgconfig"
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/libxslt/lib/pkgconfig"
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/zlib/lib/pkgconfig"
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/icu4c/lib/pkgconfig"
+        BREW_OPT="$(brew --prefix)"/opt
+        export PATH="$BREW_OPT/bison/bin:$PATH"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/openssl@1.1/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/curl/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/krb5/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/libffi/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/libxml2/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/libxslt/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/zlib/lib/pkgconfig"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$BREW_OPT/icu4c/lib/pkgconfig"
         ./buildconf --force
         ./configure \
           --enable-option-checking=fatal \
@@ -25,8 +26,8 @@ runs:
           --enable-fpm \
           --with-pdo-mysql=mysqlnd \
           --with-mysqli=mysqlnd \
-          --with-pgsql=/usr/local/opt/libpq \
-          --with-pdo-pgsql=/usr/local/opt/libpq \
+          --with-pgsql="$BREW_OPT"/libpq \
+          --with-pdo-pgsql="$BREW_OPT"/libpq \
           --with-pdo-sqlite \
           --without-pear \
           --enable-gd \
@@ -39,21 +40,21 @@ runs:
           --enable-soap \
           --enable-xmlreader \
           --with-xsl \
-          --with-tidy=/usr/local/opt/tidy-html5 \
+          --with-tidy="$BREW_OPT"/tidy-html5 \
           --with-libxml \
           --enable-sysvsem \
           --enable-sysvshm \
           --enable-shmop \
           --enable-pcntl \
-          --with-readline=/usr/local/opt/readline \
+          --with-readline="$BREW_OPT"/readline \
           --enable-mbstring \
           --with-curl \
-          --with-gettext=/usr/local/opt/gettext \
+          --with-gettext="$BREW_OPT"/gettext \
           --enable-sockets \
-          --with-bz2=/usr/local/opt/bzip2 \
+          --with-bz2="$BREW_OPT"/bzip2 \
           --with-openssl \
-          --with-gmp=/usr/local/opt/gmp \
-          --with-iconv=/usr/local/opt/libiconv \
+          --with-gmp="$BREW_OPT"/gmp \
+          --with-iconv="$BREW_OPT"/libiconv \
           --enable-bcmath \
           --enable-calendar \
           --enable-ftp \

@@ -5,7 +5,6 @@ const BRANCHES = [
     ['name' => 'PHP-8.3', 'ref' => 'PHP-8.3', 'version' => ['major' => 8, 'minor' => 3]],
     ['name' => 'PHP-8.2', 'ref' => 'PHP-8.2', 'version' => ['major' => 8, 'minor' => 2]],
     ['name' => 'PHP-8.1', 'ref' => 'PHP-8.1', 'version' => ['major' => 8, 'minor' => 1]],
-    ['name' => 'PHP-8.0', 'ref' => 'PHP-8.0', 'version' => ['major' => 8, 'minor' => 0]],
 ];
 
 function get_branch_commit_cache_file_path(): string {
@@ -49,28 +48,26 @@ function get_matrix_include(array $branches) {
             'test_function_jit' => false,
             'asan' => true,
         ];
-        if ($branch['ref'] !== 'PHP-8.0') {
-            $jobs[] = [
-                'name' => '_REPEAT',
-                'branch' => $branch,
-                'debug' => true,
-                'zts' => false,
-                'run_tests_parameters' => '--repeat 2',
-                'timeout_minutes' => 360,
-                'test_function_jit' => true,
-                'asan' => false,
-            ];
-            $jobs[] = [
-                'name' => '_VARIATION',
-                'branch' => $branch,
-                'debug' => true,
-                'zts' => true,
-                'configuration_parameters' => "CFLAGS='-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1'",
-                'timeout_minutes' => 360,
-                'test_function_jit' => true,
-                'asan' => false,
-            ];
-        }
+        $jobs[] = [
+            'name' => '_REPEAT',
+            'branch' => $branch,
+            'debug' => true,
+            'zts' => false,
+            'run_tests_parameters' => '--repeat 2',
+            'timeout_minutes' => 360,
+            'test_function_jit' => true,
+            'asan' => false,
+        ];
+        $jobs[] = [
+            'name' => '_VARIATION',
+            'branch' => $branch,
+            'debug' => true,
+            'zts' => true,
+            'configuration_parameters' => "CFLAGS='-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE'",
+            'timeout_minutes' => 360,
+            'test_function_jit' => true,
+            'asan' => false,
+        ];
     }
     return $jobs;
 }
@@ -90,6 +87,33 @@ function get_windows_matrix_include(array $branches) {
             'zts' => false,
             'opcache' => false,
         ];
+    }
+    return $jobs;
+}
+
+function get_macos_matrix_include(array $branches) {
+    $jobs = [];
+    foreach ($branches as $branch) {
+        foreach([true, false] as $debug) {
+            foreach([true, false] as $zts) {
+                $jobs[] = [
+                    'branch' => $branch,
+                    'debug' => $debug,
+                    'zts' => $zts,
+                    'os' => $branch === 'master' ? '13' : '12',
+                    'arch' => 'X64',
+                ];
+                if ($branch['version']['minor'] >= 4 || $branch['version']['major'] >= 9) {
+                    $jobs[] = [
+                        'branch' => $branch,
+                        'debug' => $debug,
+                        'zts' => $zts,
+                        'os' => '14',
+                        'arch' => 'ARM64',
+                    ];
+                }
+            }
+        }
     }
     return $jobs;
 }
@@ -117,9 +141,11 @@ $branches = $branch === 'master'
     : [['name' => strtoupper($branch), 'ref' => $branch, 'version' => get_current_version()]];
 $matrix_include = get_matrix_include($branches);
 $windows_matrix_include = get_windows_matrix_include($branches);
+$macos_matrix_include = get_macos_matrix_include($branches);
 
 $f = fopen(getenv('GITHUB_OUTPUT'), 'a');
 fwrite($f, 'branches=' . json_encode($branches, JSON_UNESCAPED_SLASHES) . "\n");
 fwrite($f, 'matrix-include=' . json_encode($matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
 fwrite($f, 'windows-matrix-include=' . json_encode($windows_matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
+fwrite($f, 'macos-matrix-include=' . json_encode($macos_matrix_include, JSON_UNESCAPED_SLASHES) . "\n");
 fclose($f);

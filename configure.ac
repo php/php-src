@@ -229,9 +229,6 @@ case $host_alias in
   *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
     ;;
-  *mips*)
-    CPPFLAGS="$CPPFLAGS -D_XPG_IV"
-    ;;
   *hpux*)
     if test "$GCC" = "yes"; then
       CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
@@ -365,8 +362,8 @@ PHP_CHECK_FUNC(socketpair, socket, network)
 PHP_CHECK_FUNC(htonl, socket, network)
 PHP_CHECK_FUNC(gethostname, nsl, network)
 PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
-PHP_CHECK_FUNC(dlopen, dl, root)
-PHP_CHECK_FUNC(dlsym, dl, root)
+PHP_CHECK_FUNC(dlopen, dl)
+PHP_CHECK_FUNC(dlsym, dl)
 if test "$ac_cv_func_dlopen" = "yes"; then
   AC_DEFINE(HAVE_LIBDL, 1, [ ])
 fi
@@ -378,8 +375,8 @@ case $host_alias in
     ;;
 esac
 
-dnl Check for inet_aton in -lc, -lbind and -lresolv.
-PHP_CHECK_FUNC(inet_aton, resolv, bind)
+dnl Check for inet_aton in -lc and -lresolv.
+PHP_CHECK_FUNC(inet_aton, resolv)
 
 dnl Then headers.
 dnl ----------------------------------------------------------------------------
@@ -562,10 +559,12 @@ dnl Checks for GCC function attributes on all systems except ones without glibc
 dnl Fix for these systems is already included in GCC 7, but not on GCC 6.
 dnl
 dnl At least some versions of FreeBSD seem to have buggy ifunc support, see
-dnl bug #77284. Conservatively don't use ifuncs on FreeBSD.
-AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*freebsd*|*openbsd*], [true], [
-  AX_GCC_FUNC_ATTRIBUTE([ifunc])
-  AX_GCC_FUNC_ATTRIBUTE([target])
+dnl bug #77284. Conservatively don't use ifuncs on FreeBSD prior to version 12.
+AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*openbsd*], [true], [
+  if test "`uname -s 2>/dev/null`" != "FreeBSD" || test "`uname -U 2>/dev/null`" -ge 1200000; then
+    AX_GCC_FUNC_ATTRIBUTE([ifunc])
+    AX_GCC_FUNC_ATTRIBUTE([target])
+  fi
 ])
 
 dnl Check for IPv6 support.
@@ -638,9 +637,10 @@ asprintf \
 nanosleep \
 memmem \
 memrchr \
+mempcpy \
 )
 
-AC_CHECK_FUNCS(inet_ntop,[],[
+AC_CHECK_FUNC(inet_ntop,[],[
     AC_MSG_ERROR([Cannot find inet_ntop which is required])
 ]
 )
@@ -655,6 +655,9 @@ PHP_CHECK_FUNC_LIB(nanosleep, rt)
 
 dnl Haiku does not have network api in libc.
 PHP_CHECK_FUNC_LIB(setsockopt, network)
+
+dnl Solaris/Illumos for process mapping.
+PHP_CHECK_FUNC_LIB(Pgrab, proc)
 
 dnl Check for getaddrinfo, should be a better way, but... Also check for working
 dnl getaddrinfo.
@@ -746,7 +749,6 @@ fi
 AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
 AC_FUNC_ALLOCA
 PHP_TIME_R_TYPE
-PHP_CHECK_IN_ADDR_T
 
 AC_CACHE_CHECK([for aarch64 CRC32 API], ac_cv_func___crc32d,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <arm_acle.h>]],[[__crc32d(0, 0);]])],[ac_cv_func___crc32d=yes],[ac_cv_func___crc32d="no"])])
@@ -1617,15 +1619,16 @@ if test "$PHP_UNDEFINED_SANITIZER" = "yes"; then
     dnl cast to void*. In that case, set -fno-sanitize=function.
     OLD_CFLAGS="$CFLAGS"
     CFLAGS="$CFLAGS -fno-sanitize-recover=undefined"
+    AC_CACHE_CHECK([whether to add -fno-sanitize=function],[php_cv_ubsan_no_function],[
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
 void foo(char *string) {}
 int main(void) {
   void (*f)(void *) = (void (*)(void *))foo;
   f("foo");
 }
-    ]])],,[ubsan_needs_no_function=yes],)
+    ]])],[php_cv_ubsan_no_function=no],[php_cv_ubsan_no_function=yes],[php_cv_ubsan_no_function=no])])
     CFLAGS="$OLD_CFLAGS"
-    if test "$ubsan_needs_no_function" = yes; then
+    if test "$php_cv_ubsan_no_function" = yes; then
       CFLAGS="$CFLAGS -fno-sanitize=function"
       CXXFLAGS="$CFLAGS -fno-sanitize=function"
     fi
@@ -1666,12 +1669,6 @@ PHP_SET_LIBTOOL_VARIABLE([--silent])
 dnl libtool 1.4.3 needs this.
 PHP_SET_LIBTOOL_VARIABLE([--preserve-dup-deps])
 
-dnl This needs to be passed explicitly to allow scan-build compiler overrides.
-PHP_SET_LIBTOOL_VARIABLE([--tag CC])
-
-test -z "$PHP_COMPILE" && PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
-test -z "$CXX_PHP_COMPILE" && CXX_PHP_COMPILE='$(LIBTOOL) --mode=compile $(CXX_COMPILE) -c $<'
-
 CC=$old_CC
 
 PHP_CONFIGURE_PART(Generating files)
@@ -1689,7 +1686,7 @@ else
   pharcmd_install=
 fi;
 
-all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
+all_targets="\$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
 install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $pharcmd_install"
 
 PHP_SUBST(all_targets)

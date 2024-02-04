@@ -46,16 +46,16 @@ static zend_always_inline const char *zend_jit_trace_star_desc(uint8_t trace_fla
 	}
 }
 
-static int zend_jit_trace_startup(bool reattached)
+static void zend_jit_trace_startup(bool reattached)
 {
 	if (!reattached) {
 		zend_jit_traces = (zend_jit_trace_info*)zend_shared_alloc(sizeof(zend_jit_trace_info) * JIT_G(max_root_traces));
 		if (!zend_jit_traces) {
-			return FAILURE;
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not allocate JIT root traces buffer!");
 		}
 		zend_jit_exit_groups = (const void**)zend_shared_alloc(sizeof(void*) * (ZEND_JIT_TRACE_MAX_EXITS/ZEND_JIT_EXIT_POINTS_PER_GROUP));
 		if (!zend_jit_exit_groups) {
-			return FAILURE;
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not allocate JIT exit groups buffer!");
 		}
 		ZEND_JIT_TRACE_NUM = 1;
 		ZEND_JIT_COUNTER_NUM = 0;
@@ -67,11 +67,11 @@ static int zend_jit_trace_startup(bool reattached)
 	} else {
 		zend_jit_traces = ZCSG(jit_traces);
 		if (!zend_jit_traces) {
-			return FAILURE;
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not obtain JIT traces buffer!");
 		}
 		zend_jit_exit_groups = ZCSG(jit_exit_groups);
 		if (!zend_jit_exit_groups) {
-			return FAILURE;
+			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not obtain JIT exit groups buffer!");
 		}
 	}
 
@@ -80,10 +80,8 @@ static int zend_jit_trace_startup(bool reattached)
 
 	JIT_G(exit_counters) = calloc(JIT_G(max_exit_counters), 1);
 	if (JIT_G(exit_counters) == NULL) {
-		return FAILURE;
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not allocate JIT exit counters buffer!");
 	}
-
-	return SUCCESS;
 }
 
 static const void *zend_jit_trace_allocate_exit_point(uint32_t n)
@@ -1862,6 +1860,14 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						ADD_OP1_TRACE_GUARD();
 					}
 					break;
+				case ZEND_ADD:
+				case ZEND_SUB:
+				case ZEND_MUL:
+//				case ZEND_DIV: // TODO: check for division by zero ???
+					if (orig_op1_type == IS_UNDEF || orig_op2_type == IS_UNDEF) {
+						break;
+					}
+					ZEND_FALLTHROUGH;
 				case ZEND_IS_EQUAL:
 				case ZEND_IS_NOT_EQUAL:
 				case ZEND_IS_SMALLER:
@@ -1876,10 +1882,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_SL:
 				case ZEND_SR:
 				case ZEND_MOD:
-				case ZEND_ADD:
-				case ZEND_SUB:
-				case ZEND_MUL:
-//				case ZEND_DIV: // TODO: check for division by zero ???
 					ADD_OP2_TRACE_GUARD();
 					ZEND_FALLTHROUGH;
 				case ZEND_ECHO:
@@ -4513,7 +4515,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (((res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_LONG|MAY_BE_GUARD)
 							  || (res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_DOUBLE|MAY_BE_GUARD))
 							 && has_concrete_type(op1_info)
-							 && has_concrete_type(op2_info)) {
+							 && (op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE))
+							 && has_concrete_type(op2_info)
+							 && (op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
 								ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
 							}
 						}

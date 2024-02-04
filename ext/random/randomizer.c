@@ -101,9 +101,9 @@ PHP_METHOD(Random_Randomizer, nextFloat)
 	result = 0;
 	total_size = 0;
 	do {
-		uint64_t r = randomizer->algo->generate(randomizer->status);
-		result = result | (r << (total_size * 8));
-		total_size += randomizer->status->last_generated_size;
+		php_random_result r = randomizer->algo->generate(randomizer->status);
+		result = result | (r.result << (total_size * 8));
+		total_size += r.size;
 		if (EG(exception)) {
 			RETURN_THROWS();
 		}
@@ -208,20 +208,19 @@ PHP_METHOD(Random_Randomizer, getFloat)
 PHP_METHOD(Random_Randomizer, nextInt)
 {
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
-	uint64_t result;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	result = randomizer->algo->generate(randomizer->status);
+	php_random_result result = randomizer->algo->generate(randomizer->status);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
-	if (randomizer->status->last_generated_size > sizeof(zend_long)) {
+	if (result.size > sizeof(zend_long)) {
 		zend_throw_exception(random_ce_Random_RandomException, "Generated value exceeds size of int", 0);
 		RETURN_THROWS();
 	}
 
-	RETURN_LONG((zend_long) (result >> 1));
+	RETURN_LONG((zend_long) (result.result >> 1));
 }
 /* }}} */
 
@@ -246,7 +245,7 @@ PHP_METHOD(Random_Randomizer, getInt)
 		randomizer->algo->range == php_random_algo_mt19937.range
 		&& ((php_random_status_state_mt19937 *) randomizer->status->state)->mode != MT_RAND_MT19937
 	)) {
-		uint64_t r = php_random_algo_mt19937.generate(randomizer->status) >> 1;
+		uint64_t r = php_random_algo_mt19937.generate(randomizer->status).result >> 1;
 
 		/* This is an inlined version of the RAND_RANGE_BADSCALING macro that does not invoke UB when encountering
 		 * (max - min) > ZEND_LONG_MAX.
@@ -286,13 +285,13 @@ PHP_METHOD(Random_Randomizer, getBytes)
 	retval = zend_string_alloc(length, 0);
 
 	while (total_size < length) {
-		uint64_t result = randomizer->algo->generate(randomizer->status);
+		php_random_result result = randomizer->algo->generate(randomizer->status);
 		if (EG(exception)) {
 			zend_string_free(retval);
 			RETURN_THROWS();
 		}
-		for (size_t i = 0; i < randomizer->status->last_generated_size; i++) {
-			ZSTR_VAL(retval)[total_size++] = (result >> (i * 8)) & 0xff;
+		for (size_t i = 0; i < result.size; i++) {
+			ZSTR_VAL(retval)[total_size++] = (result.result >> (i * 8)) & 0xff;
 			if (total_size >= length) {
 				break;
 			}
@@ -425,14 +424,14 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 
 		int failures = 0;
 		while (total_size < length) {
-			uint64_t result = randomizer->algo->generate(randomizer->status);
+			php_random_result result = randomizer->algo->generate(randomizer->status);
 			if (EG(exception)) {
 				zend_string_free(retval);
 				RETURN_THROWS();
 			}
 
-			for (size_t i = 0; i < randomizer->status->last_generated_size; i++) {
-				uint64_t offset = (result >> (i * 8)) & mask;
+			for (size_t i = 0; i < result.size; i++) {
+				uint64_t offset = (result.result >> (i * 8)) & mask;
 
 				if (offset > max_offset) {
 					if (++failures > PHP_RANDOM_RANGE_ATTEMPTS) {

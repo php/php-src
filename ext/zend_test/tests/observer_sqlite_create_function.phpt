@@ -2,7 +2,7 @@
 Observer: PDO::sqliteCreateFunction() can be observed
 --EXTENSIONS--
 zend_test
-PDO
+pdo
 pdo_sqlite
 --INI--
 zend_test.observer.enabled=1

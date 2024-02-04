@@ -180,8 +180,7 @@ static int pdo_firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 				;
 		}
 
-		/* commit? */
-		if (stmt->dbh->auto_commit && isc_commit_retaining(H->isc_status, &H->tr)) {
+		if (stmt->dbh->auto_commit && !S->H->in_manually_txn && !php_firebird_commit_transaction(stmt->dbh, /* retain */ true)) {
 			break;
 		}
 
@@ -464,11 +463,11 @@ static int pdo_firebird_stmt_get_col(
 					break;
 				case SQL_FLOAT:
 					/* TODO: Why is this not returned as the native type? */
-					ZVAL_STR(result, zend_strpprintf(0, "%F", php_get_float_from_sqldata(var->sqldata)));
+					ZVAL_STR(result, zend_strpprintf_unchecked(0, "%.8H", php_get_float_from_sqldata(var->sqldata)));
 					break;
 				case SQL_DOUBLE:
 					/* TODO: Why is this not returned as the native type? */
-					ZVAL_STR(result, zend_strpprintf(0, "%F", php_get_double_from_sqldata(var->sqldata)));
+					ZVAL_STR(result, zend_strpprintf_unchecked(0, "%.16H", php_get_double_from_sqldata(var->sqldata)));
 					break;
 #ifdef SQL_BOOLEAN
 				case SQL_BOOLEAN:

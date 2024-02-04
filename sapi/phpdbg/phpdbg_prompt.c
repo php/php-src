@@ -343,8 +343,8 @@ void phpdbg_init(char *init_file, size_t init_file_len, bool use_default) /* {{{
 		char *sys_ini;
 		int i;
 
-		ZEND_IGNORE_VALUE(asprintf(&sys_ini, "%s/" PHPDBG_INIT_FILENAME, PHP_CONFIG_FILE_PATH));
-		phpdbg_try_file_init(sys_ini, strlen(sys_ini), 0);
+		size_t sys_ini_length = asprintf(&sys_ini, "%s/" PHPDBG_INIT_FILENAME, PHP_CONFIG_FILE_PATH);
+		phpdbg_try_file_init(sys_ini, sys_ini_length, 0);
 		free(sys_ini);
 
 		if (!scan_dir) {
@@ -363,7 +363,7 @@ void phpdbg_init(char *init_file, size_t init_file_len, bool use_default) /* {{{
 			}
 
 			ZEND_IGNORE_VALUE(asprintf(&init_file, "%s/%s", scan_dir, PHPDBG_INIT_FILENAME));
-			phpdbg_try_file_init(init_file, strlen(init_file), 1);
+			phpdbg_try_file_init(init_file, init_file_len, 0);
 			free(init_file);
 			if (i == -1) {
 				break;
@@ -1417,7 +1417,7 @@ PHPDBG_COMMAND(register) /* {{{ */
 {
 	zend_function *function;
 	char *lcname = zend_str_tolower_dup(param->str, param->len);
-	size_t lcname_len = strlen(lcname);
+	size_t lcname_len = param->len;
 
 	if (!zend_hash_str_exists(&PHPDBG_G(registered), lcname, lcname_len)) {
 		if ((function = zend_hash_str_find_ptr(EG(function_table), lcname, lcname_len))) {

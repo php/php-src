@@ -17,6 +17,7 @@
 #endif
 
 #include <unicode/ustring.h>
+#include <unicode/uloc.h>
 
 #include "php_intl.h"
 #include "formatter_class.h"
@@ -63,6 +64,11 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_
 		locale = intl_locale_get_default();
 	}
 
+	if (strlen(uloc_getISO3Language(locale)) == 0) {
+		zend_argument_value_error(1, "\"%s\" is invalid", locale);
+		return FAILURE;
+	}
+    
 	/* Create an ICU number formatter. */
 	FORMATTER_OBJECT(nfo) = unum_open(style, spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(nfo));
 

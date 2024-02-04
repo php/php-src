@@ -152,8 +152,8 @@ PHP_METHOD(DOMText, splitText)
 	xmlFree(second);
 
 	if (nnode == NULL) {
-		/* TODO Add warning? */
-		RETURN_FALSE;
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		RETURN_THROWS();
 	}
 
 	if (node->parent != NULL) {

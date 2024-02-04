@@ -186,6 +186,7 @@ typedef enum _ir_type {
  * num - number: argument number (PARAM)
  * prb - branch probability 1-99 (0 - unspecified): (IF_TRUE, IF_FALSE, CASE_VAL, CASE_DEFAULT)
  * opt - optional number
+ * pro - function prototype
  *
  * The order of IR opcodes is carefully selected for efficient folding.
  * - foldable instruction go first
@@ -246,6 +247,7 @@ typedef enum _ir_type {
 	_(INT2FP,       d1,   def, ___, ___) /* int to float conversion     */ \
 	_(FP2INT,       d1,   def, ___, ___) /* float to int conversion     */ \
 	_(FP2FP,        d1,   def, ___, ___) /* float to float conversion   */ \
+	_(PROTO,        d1X1, def, pro, ___) /* apply function prototype    */ \
 	\
 	/* overflow-check                                                   */ \
 	_(ADD_OV,       d2C,  def, def, ___) /* addition                    */ \
@@ -376,7 +378,6 @@ typedef int32_t ir_ref;
 #define IR_CONSTS_LIMIT_MIN (-(IR_TRUE - 1))
 #define IR_INSNS_LIMIT_MIN (IR_UNUSED + 1)
 
-
 #ifndef IR_64
 # define ADDR_MEMBER            uintptr_t                  addr;
 #else
@@ -395,6 +396,8 @@ typedef union _ir_val {
 			int32_t                    i32;
 			float                      f;
 			ADDR_MEMBER
+			ir_ref                     name;
+			ir_ref                     str;
 			IR_STRUCT_LOHI(
 				union {
 					uint16_t           u16;
@@ -417,12 +420,6 @@ typedef union _ir_val {
 } ir_val;
 #undef ADDR_MEMBER
 
-/* IR constant flags */
-#define IR_CONST_EMIT          (1<<0)
-#define IR_CONST_FASTCALL_FUNC (1<<1)
-#define IR_CONST_VARARG_FUNC   (1<<2)
-#define IR_CONST_BUILTIN_FUNC  (1<<3)
-
 /* IR Instruction */
 typedef struct _ir_insn {
 	IR_STRUCT_LOHI(
@@ -438,7 +435,7 @@ typedef struct _ir_insn {
 				union {
 					uint16_t           inputs_count;       /* number of input control edges for MERGE, PHI, CALL, TAILCALL */
 					uint16_t           prev_insn_offset;   /* 16-bit backward offset from current instruction for CSE */
-					uint16_t           const_flags;        /* flag to emit constant in rodat section */
+					uint16_t           proto;
 				}
 			);
 			uint32_t                   optx;
@@ -482,6 +479,7 @@ ir_ref ir_strtab_lookup(ir_strtab *strtab, const char *str, uint32_t len, ir_ref
 ir_ref ir_strtab_find(const ir_strtab *strtab, const char *str, uint32_t len);
 ir_ref ir_strtab_update(ir_strtab *strtab, const char *str, uint32_t len, ir_ref val);
 const char *ir_strtab_str(const ir_strtab *strtab, ir_ref idx);
+const char *ir_strtab_strl(const ir_strtab *strtab, ir_ref idx, size_t *len);
 void ir_strtab_apply(const ir_strtab *strtab, ir_strtab_apply_t func);
 void ir_strtab_free(ir_strtab *strtab);
 
@@ -489,31 +487,34 @@ void ir_strtab_free(ir_strtab *strtab);
 #define IR_FUNCTION            (1<<0) /* Generate a function. */
 #define IR_FASTCALL_FUNC       (1<<1) /* Generate a function with fastcall calling convention, x86 32-bit only. */
 #define IR_VARARG_FUNC         (1<<2)
-#define IR_STATIC              (1<<3)
-#define IR_EXTERN              (1<<4)
-#define IR_CONST               (1<<5)
+#define IR_BUILTIN_FUNC        (1<<3)
+#define IR_STATIC              (1<<4)
+#define IR_EXTERN              (1<<5)
+#define IR_CONST               (1<<6)
 
-#define IR_SKIP_PROLOGUE       (1<<6) /* Don't generate function prologue. */
-#define IR_USE_FRAME_POINTER   (1<<7)
-#define IR_PREALLOCATED_STACK  (1<<8)
-#define IR_NO_STACK_COMBINE    (1<<9)
-#define IR_START_BR_TARGET     (1<<10)
-#define IR_ENTRY_BR_TARGET     (1<<11)
-#define IR_GEN_ENDBR           (1<<12)
-#define IR_MERGE_EMPTY_ENTRIES (1<<13)
+#define IR_SKIP_PROLOGUE       (1<<8) /* Don't generate function prologue. */
+#define IR_USE_FRAME_POINTER   (1<<9)
+#define IR_PREALLOCATED_STACK  (1<<10)
+#define IR_NO_STACK_COMBINE    (1<<11)
+#define IR_START_BR_TARGET     (1<<12)
+#define IR_ENTRY_BR_TARGET     (1<<13)
+#define IR_GEN_ENDBR           (1<<14)
+#define IR_MERGE_EMPTY_ENTRIES (1<<15)
 
-#define IR_OPT_FOLDING         (1<<18)
-#define IR_OPT_CFG             (1<<19) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
-#define IR_OPT_CODEGEN         (1<<20)
-#define IR_GEN_NATIVE          (1<<23)
-#define IR_GEN_CODE            (1<<24) /* C or LLVM */
+#define IR_OPT_FOLDING         (1<<16)
+#define IR_OPT_CFG             (1<<17) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
+#define IR_OPT_CODEGEN         (1<<18)
+#define IR_GEN_NATIVE          (1<<19)
+#define IR_GEN_CODE            (1<<20) /* C or LLVM */
+
+#define IR_GEN_CACHE_DEMOTE    (1<<21) /* Demote the generated code from closest CPU caches */
 
 /* debug related */
 #ifdef IR_DEBUG
-# define IR_DEBUG_SCCP        (1<<27)
-# define IR_DEBUG_GCM         (1<<28)
-# define IR_DEBUG_SCHEDULE    (1<<29)
-# define IR_DEBUG_RA          (1<<30)
+# define IR_DEBUG_SCCP         (1<<27)
+# define IR_DEBUG_GCM          (1<<28)
+# define IR_DEBUG_SCHEDULE     (1<<29)
+# define IR_DEBUG_RA           (1<<30)
 #endif
 
 typedef struct _ir_ctx           ir_ctx;
@@ -533,6 +534,12 @@ typedef const void *(*ir_get_veneer_t)(ir_ctx *ctx, const void *addr);
 typedef bool (*ir_set_veneer_t)(ir_ctx *ctx, const void *addr, const void *veneer);
 #endif
 
+typedef struct _ir_code_buffer {
+	void *start;
+	void *end;
+	void *pos;
+} ir_code_buffer;
+
 struct _ir_ctx {
 	ir_insn           *ir_base;                 /* two directional array - instructions grow down, constants grow up */
 	ir_ref             insns_count;             /* number of instructions stored in instructions buffer */
@@ -540,7 +547,7 @@ struct _ir_ctx {
 	ir_ref             consts_count;            /* number of constants stored in constants buffer */
 	ir_ref             consts_limit;            /* size of allocated constants buffer (it's extended when overflow) */
 	uint32_t           flags;                   /* IR context flags (see IR_* defines above) */
-	uint32_t           flags2;                  /* IR context provate flags (see IR_* defines in ir_private.h) */
+	uint32_t           flags2;                  /* IR context private flags (see IR_* defines in ir_private.h) */
 	ir_type            ret_type;                /* Function return type */
 	uint32_t           mflags;                  /* CPU specific flags (see IR_X86_... macros below) */
 	int32_t            status;                  /* non-zero error code (see IR_ERROR_... macros), app may use negative codes */
@@ -564,10 +571,15 @@ struct _ir_ctx {
 	int32_t            fixed_stack_frame_size;  /* fixed stack allocated by generated code for spills and registers save/restore */
 	int32_t            fixed_call_stack_size;   /* fixed preallocated stack for parameter passing (default 0) */
 	uint64_t           fixed_save_regset;       /* registers that always saved/restored in prologue/epilogue */
+	uint32_t           locals_area_size;
+	uint32_t           gp_reg_params;
+	uint32_t           fp_reg_params;
+	int32_t            param_stack_size;
 	ir_live_interval **live_intervals;
 	ir_arena          *arena;
 	ir_live_range     *unused_ranges;
 	ir_regs           *regs;
+	ir_strtab         *fused_regs;
 	ir_ref            *prev_ref;
 	union {
 		void          *data;
@@ -581,7 +593,6 @@ struct _ir_ctx {
 	int32_t            call_stack_size;         /* stack for parameter passing (used by register allocator and code generator) */
 	uint64_t           used_preserved_regs;
 #ifdef IR_TARGET_X86
-	int32_t            param_stack_size;
 	int32_t            ret_slot;
 #endif
 	uint32_t           rodata_offset;
@@ -589,12 +600,10 @@ struct _ir_ctx {
 	uint32_t           entries_count;
 	uint32_t          *entries;                /* array of ENTRY blocks */
 	void              *osr_entry_loads;
-	void              *code_buffer;
-	size_t             code_buffer_size;
+	ir_code_buffer    *code_buffer;
 #if defined(IR_TARGET_AARCH64)
 	int32_t            deoptimization_exits;
-	int32_t            veneers_size;
-	uint32_t           code_size;
+	const void        *deoptimization_exits_base;
 	ir_get_exit_addr_t get_exit_addr;
 	ir_get_veneer_t    get_veneer;
 	ir_set_veneer_t    set_veneer;
@@ -624,9 +633,9 @@ ir_ref ir_const_char(ir_ctx *ctx, char c);
 ir_ref ir_const_float(ir_ctx *ctx, float c);
 ir_ref ir_const_double(ir_ctx *ctx, double c);
 ir_ref ir_const_addr(ir_ctx *ctx, uintptr_t c);
-ir_ref ir_const_func_addr(ir_ctx *ctx, uintptr_t c, uint16_t flags);
 
-ir_ref ir_const_func(ir_ctx *ctx, ir_ref str, uint16_t flags);
+ir_ref ir_const_func_addr(ir_ctx *ctx, uintptr_t c, ir_ref proto);
+ir_ref ir_const_func(ir_ctx *ctx, ir_ref str, ir_ref proto);
 ir_ref ir_const_sym(ir_ctx *ctx, ir_ref str);
 ir_ref ir_const_str(ir_ctx *ctx, ir_ref str);
 
@@ -637,6 +646,26 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 ir_ref ir_str(ir_ctx *ctx, const char *s);
 ir_ref ir_strl(ir_ctx *ctx, const char *s, size_t len);
 const char *ir_get_str(const ir_ctx *ctx, ir_ref idx);
+const char *ir_get_strl(const ir_ctx *ctx, ir_ref idx, size_t *len);
+
+#define IR_MAX_PROTO_PARAMS 255
+
+typedef struct _ir_proto_t {
+	uint8_t flags;
+	uint8_t ret_type;
+	uint8_t params_count;
+	uint8_t param_types[5];
+} ir_proto_t;
+
+ir_ref ir_proto_0(ir_ctx *ctx, uint8_t flags, ir_type ret_type);
+ir_ref ir_proto_1(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1);
+ir_ref ir_proto_2(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2);
+ir_ref ir_proto_3(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2, ir_type t3);
+ir_ref ir_proto_4(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2, ir_type t3,
+                                                                ir_type t4);
+ir_ref ir_proto_5(ir_ctx *ctx, uint8_t flags, ir_type ret_type, ir_type t1, ir_type t2, ir_type t3,
+                                                                ir_type t4, ir_type t5);
+ir_ref ir_proto(ir_ctx *ctx, uint8_t flags, ir_type ret_type, uint32_t params_counts, uint8_t *param_types);
 
 ir_ref ir_emit(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir_ref op3);
 
@@ -729,6 +758,10 @@ int32_t ir_get_spill_slot_offset(ir_ctx *ctx, ir_ref ref);
 int ir_match(ir_ctx *ctx);
 void *ir_emit_code(ir_ctx *ctx, size_t *size);
 
+bool ir_needs_thunk(ir_code_buffer *code_buffer, void *addr);
+void *ir_emit_thunk(ir_code_buffer *code_buffer, void *addr, size_t *size_ptr);
+void ir_fix_thunk(void *thunk_entry, void *addr);
+
 /* Target address resolution (implementation in ir_emit.c) */
 void *ir_resolve_sym_name(const char *name);
 
@@ -765,16 +798,19 @@ struct _ir_loader {
 	bool (*init_module)       (ir_loader *loader, const char *name, const char *filename, const char *target);
 	bool (*external_sym_dcl)  (ir_loader *loader, const char *name, uint32_t flags);
 	bool (*external_func_dcl) (ir_loader *loader, const char *name,
-                               uint32_t flags, ir_type ret_type, uint32_t params_count, ir_type *param_types);
+                               uint32_t flags, ir_type ret_type, uint32_t params_count, const uint8_t *param_types);
 	bool (*forward_func_dcl)  (ir_loader *loader, const char *name,
-                               uint32_t flags, ir_type ret_type, uint32_t params_count, ir_type *param_types);
+                               uint32_t flags, ir_type ret_type, uint32_t params_count, const uint8_t *param_types);
 	bool (*sym_dcl)           (ir_loader *loader, const char *name, uint32_t flags, size_t size, bool has_data);
 	bool (*sym_data)          (ir_loader *loader, ir_type type, uint32_t count, const void *data);
-	bool (*sym_data_ref)      (ir_loader *loader, ir_op op, const char *ref);
+	bool (*sym_data_pad)      (ir_loader *loader, size_t offset);
+	bool (*sym_data_ref)      (ir_loader *loader, ir_op op, const char *ref, uintptr_t offset);
 	bool (*sym_data_end)      (ir_loader *loader);
 	bool (*func_init)         (ir_loader *loader, ir_ctx *ctx, const char *name);
 	bool (*func_process)      (ir_loader *loader, ir_ctx *ctx, const char *name);
-	void*(*resolve_sym_name)  (ir_loader *loader, const char *name);
+	void*(*resolve_sym_name)  (ir_loader *loader, const char *name, bool add_thunk);
+	bool (*has_sym)           (ir_loader *loader, const char *name);
+	bool (*add_sym)           (ir_loader *loader, const char *name, void *addr);
 };
 
 void ir_loader_init(void);
@@ -786,11 +822,12 @@ int ir_load_llvm_bitcode(ir_loader *loader, const char *filename);
 int ir_load_llvm_asm(ir_loader *loader, const char *filename);
 
 /* IR save API (implementation in ir_save.c) */
+void ir_print_proto(const ir_ctx *ctx, ir_ref proto, FILE *f);
 void ir_save(const ir_ctx *ctx, FILE *f);
 
 /* IR debug dump API (implementation in ir_dump.c) */
 void ir_dump(const ir_ctx *ctx, FILE *f);
-void ir_dump_dot(const ir_ctx *ctx, FILE *f);
+void ir_dump_dot(const ir_ctx *ctx, const char *name, FILE *f);
 void ir_dump_use_lists(const ir_ctx *ctx, FILE *f);
 void ir_dump_cfg(ir_ctx *ctx, FILE *f);
 void ir_dump_cfg_map(const ir_ctx *ctx, FILE *f);
@@ -799,11 +836,13 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f);
 
 /* IR to C conversion (implementation in ir_emit_c.c) */
 int ir_emit_c(ir_ctx *ctx, const char *name, FILE *f);
-void ir_emit_c_func_decl(const char *name, uint32_t flags, ir_type ret_type, uint32_t params_count, ir_type *param_types, FILE *f);
+void ir_emit_c_func_decl(const char *name, uint32_t flags, ir_type ret_type, uint32_t params_count, const uint8_t *param_types, FILE *f);
+void ir_emit_c_sym_decl(const char *name, uint32_t flags, bool has_data, FILE *f);
 
 /* IR to LLVM conversion (implementation in ir_emit_llvm.c) */
 int ir_emit_llvm(ir_ctx *ctx, const char *name, FILE *f);
-void ir_emit_llvm_func_decl(const char *name, uint32_t flags, ir_type ret_type, uint32_t params_count, ir_type *param_types, FILE *f);
+void ir_emit_llvm_func_decl(const char *name, uint32_t flags, ir_type ret_type, uint32_t params_count, const uint8_t *param_types, FILE *f);
+void ir_emit_llvm_sym_decl(const char *name, uint32_t flags, bool has_data, FILE *f);
 
 /* IR verification API (implementation in ir_check.c) */
 bool ir_check(const ir_ctx *ctx);
@@ -814,20 +853,21 @@ int ir_patch(const void *code, size_t size, uint32_t jmp_table_size, const void 
 
 /* CPU information (implementation in ir_cpuinfo.c) */
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
-# define IR_X86_SSE2  (1<<0)
-# define IR_X86_SSE3  (1<<1)
-# define IR_X86_SSSE3 (1<<2)
-# define IR_X86_SSE41 (1<<3)
-# define IR_X86_SSE42 (1<<4)
-# define IR_X86_AVX   (1<<5)
-# define IR_X86_AVX2  (1<<6)
-# define IR_X86_BMI1  (1<<7)
+# define IR_X86_SSE2     (1<<0)
+# define IR_X86_SSE3     (1<<1)
+# define IR_X86_SSSE3    (1<<2)
+# define IR_X86_SSE41    (1<<3)
+# define IR_X86_SSE42    (1<<4)
+# define IR_X86_AVX      (1<<5)
+# define IR_X86_AVX2     (1<<6)
+# define IR_X86_BMI1     (1<<7)
+# define IR_X86_CLDEMOTE (1<<8)
 #endif
 
 uint32_t ir_cpuinfo(void);
 
 /* Deoptimization helpers */
-const void *ir_emit_exitgroup(uint32_t first_exit_point, uint32_t exit_points_per_group, const void *exit_addr, void *code_buffer, size_t code_buffer_size, size_t *size_ptr);
+const void *ir_emit_exitgroup(uint32_t first_exit_point, uint32_t exit_points_per_group, const void *exit_addr, ir_code_buffer *code_buffer, size_t *size_ptr);
 
 /* A reference IR JIT compiler */
 IR_ALWAYS_INLINE void *ir_jit_compile(ir_ctx *ctx, int opt_level, size_t *size)

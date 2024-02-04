@@ -66,7 +66,6 @@ typedef struct {
 } pdo_firebird_error_info;
 
 typedef struct {
-
 	/* the result of the last API call */
 	ISC_STATUS isc_status[20];
 
@@ -75,6 +74,9 @@ typedef struct {
 
 	/* the transaction handle */
 	isc_tr_handle tr;
+	bool in_manually_txn;
+	bool is_writable_txn;
+	zend_ulong txn_isolation_level;
 
 	/* date and time format strings, can be set by the set_attribute method */
 	char *date_format;
@@ -93,7 +95,6 @@ typedef struct {
 
 
 typedef struct {
-
 	/* the link that owns this statement */
 	pdo_firebird_db_handle *H;
 
@@ -122,7 +123,6 @@ typedef struct {
 
 	/* the output SQLDA */
 	XSQLDA out_sqlda; /* last member */
-
 } pdo_firebird_stmt;
 
 extern const pdo_driver_t pdo_firebird_driver;
@@ -136,10 +136,24 @@ extern void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char 
 #define php_firebird_error_with_info(d,e,el,m,ml) php_firebird_set_error(d, NULL, e, el, m, ml)
 #define php_firebird_error_stmt_with_info(s,e,el,m,ml) php_firebird_set_error(s->dbh, s, e, el, m, ml)
 
+extern bool php_firebird_commit_transaction(pdo_dbh_t *dbh, bool retain);
+
 enum {
 	PDO_FB_ATTR_DATE_FORMAT = PDO_ATTR_DRIVER_SPECIFIC,
 	PDO_FB_ATTR_TIME_FORMAT,
 	PDO_FB_ATTR_TIMESTAMP_FORMAT,
+
+	/*
+	 * transaction isolation level
+	 * firebird does not have a level equivalent to read uncommited.
+	 */
+	PDO_FB_TRANSACTION_ISOLATION_LEVEL,
+	PDO_FB_READ_COMMITTED,
+	PDO_FB_REPEATABLE_READ,
+	PDO_FB_SERIALIZABLE,
+
+	/* transaction access mode */
+	PDO_FB_WRITABLE_TRANSACTION,
 };
 
 #endif	/* PHP_PDO_FIREBIRD_INT_H */

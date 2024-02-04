@@ -22,7 +22,6 @@
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
-#include "ext/random/php_random.h"
 #include "php_dom.h"
 #include "php_dom_arginfo.h"
 #include "dom_properties.h"
@@ -596,8 +595,10 @@ static int dom_nodelist_has_dimension(zend_object *object, zval *member, int che
 static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
 static int dom_nodemap_has_dimension(zend_object *object, zval *member, int check_empty);
 static zend_object *dom_objects_store_clone_obj(zend_object *zobject);
+
 #ifdef LIBXML_XPATH_ENABLED
 void dom_xpath_objects_free_storage(zend_object *object);
+HashTable *dom_xpath_get_gc(zend_object *object, zval **table, int *n);
 #endif
 
 static void *dom_malloc(size_t size) {
@@ -889,6 +890,7 @@ PHP_MINIT_FUNCTION(dom)
 	memcpy(&dom_xpath_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_xpath_object_handlers.offset = XtOffsetOf(dom_xpath_object, dom) + XtOffsetOf(dom_object, std);
 	dom_xpath_object_handlers.free_obj = dom_xpath_objects_free_storage;
+	dom_xpath_object_handlers.get_gc = dom_xpath_get_gc;
 
 	dom_xpath_class_entry = register_class_DOMXPath();
 	dom_xpath_class_entry->create_object = dom_xpath_objects_new;
@@ -1001,32 +1003,6 @@ void node_list_unlink(xmlNodePtr node)
 }
 /* }}} end node_list_unlink */
 
-#ifdef LIBXML_XPATH_ENABLED
-/* {{{ dom_xpath_objects_free_storage */
-void dom_xpath_objects_free_storage(zend_object *object)
-{
-	dom_xpath_object *intern = php_xpath_obj_from_obj(object);
-
-	zend_object_std_dtor(&intern->dom.std);
-
-	if (intern->dom.ptr != NULL) {
-		xmlXPathFreeContext((xmlXPathContextPtr) intern->dom.ptr);
-		php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom);
-	}
-
-	if (intern->registered_phpfunctions) {
-		zend_hash_destroy(intern->registered_phpfunctions);
-		FREE_HASHTABLE(intern->registered_phpfunctions);
-	}
-
-	if (intern->node_list) {
-		zend_hash_destroy(intern->node_list);
-		FREE_HASHTABLE(intern->node_list);
-	}
-}
-/* }}} */
-#endif
-
 /* {{{ dom_objects_free_storage */
 void dom_objects_free_storage(zend_object *object)
 {
@@ -1133,12 +1109,13 @@ static void dom_object_namespace_node_free_storage(zend_object *object)
 }
 
 #ifdef LIBXML_XPATH_ENABLED
+
 /* {{{ zend_object dom_xpath_objects_new(zend_class_entry *class_type) */
 zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 {
 	dom_xpath_object *intern = zend_object_alloc(sizeof(dom_xpath_object), class_type);
 
-	intern->registered_phpfunctions = zend_new_array(0);
+	php_dom_xpath_callbacks_ctor(&intern->xpath_callbacks);
 	intern->register_node_ns = 1;
 
 	intern->dom.prop_handler = &dom_xpath_prop_handlers;
@@ -1149,6 +1126,7 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 	return &intern->dom.std;
 }
 /* }}} */
+
 #endif
 
 void dom_nnodemap_objects_free_storage(zend_object *object) /* {{{ */
@@ -1551,7 +1529,9 @@ void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp)
 		if (matching_ns && xmlStrEqual(matching_ns->href, attrp->ns->href)) {
 			attrp->ns = matching_ns;
 		} else {
-			xmlReconciliateNs(nodep->doc, nodep);
+			if (attrp->ns->prefix != NULL) {
+				xmlReconciliateNs(nodep->doc, nodep);
+			}
 		}
 	}
 }
@@ -1691,6 +1671,20 @@ NAMESPACE_ERR: Raised if
 5. the namespaceURI is "http://www.w3.org/2000/xmlns/" and neither the	qualifiedName nor its prefix is "xmlns".
 */
 
+xmlNsPtr dom_get_ns_unchecked(xmlNodePtr nodep, char *uri, char *prefix)
+{
+	xmlNsPtr nsptr = xmlNewNs(nodep, (xmlChar *)uri, (xmlChar *)prefix);
+	if (UNEXPECTED(nsptr == NULL)) {
+		/* Either memory allocation failure, or it's because of a prefix conflict.
+		 * We'll assume a conflict and try again. If it was a memory allocation failure we'll just fail again, whatever.
+		 * This isn't needed for every caller (such as createElementNS & DOMElement::__construct), but isn't harmful and simplifies the mental model "when do I use which function?".
+		 * This branch will also be taken unlikely anyway as in those cases it'll be for allocation failure. */
+		return dom_get_ns_resolve_prefix_conflict(nodep, uri);
+	}
+
+	return nsptr;
+}
+
 /* {{{ xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) */
 xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) {
 	xmlNsPtr nsptr;
@@ -1698,16 +1692,9 @@ xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) {
 	if (! ((prefix && !strcmp (prefix, "xml") && strcmp(uri, (char *)XML_XML_NAMESPACE)) ||
 		   (prefix && !strcmp (prefix, "xmlns") && strcmp(uri, (char *)DOM_XMLNS_NAMESPACE)) ||
 		   (prefix && !strcmp(uri, (char *)DOM_XMLNS_NAMESPACE) && strcmp (prefix, "xmlns")))) {
-		nsptr = xmlNewNs(nodep, (xmlChar *)uri, (xmlChar *)prefix);
+		nsptr = dom_get_ns_unchecked(nodep, uri, prefix);
 		if (UNEXPECTED(nsptr == NULL)) {
-			/* Either memory allocation failure, or it's because of a prefix conflict.
-			 * We'll assume a conflict and try again. If it was a memory allocation failure we'll just fail again, whatever.
-			 * This isn't needed for every caller (such as createElementNS & DOMElement::__construct), but isn't harmful and simplifies the mental model "when do I use which function?".
-			 * This branch will also be taken unlikely anyway as in those cases it'll be for allocation failure. */
-			nsptr = dom_get_ns_resolve_prefix_conflict(nodep, uri);
-			if (UNEXPECTED(nsptr == NULL)) {
-				goto err;
-			}
+			goto err;
 		}
 	} else {
 		goto err;

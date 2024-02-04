@@ -12,10 +12,9 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 
 require("testdb.inc");
 
+$dbh = getDbConnection();
 $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 $dbh->exec("CREATE TABLE test62024 (ID INTEGER NOT NULL, TEXT VARCHAR(10))");
-
-$dbh->commit();
 
 //start actual test
 
@@ -31,14 +30,10 @@ var_dump($res);
 $res = $sttmt->execute($args_err);
 var_dump($res);
 
-$dbh->commit();
-
 
 //teardown test data
 $sttmt = $dbh->prepare('DELETE FROM test62024');
 $sttmt->execute();
-
-$dbh->commit();
 
 unset($sttmt);
 unset($dbh);
@@ -47,6 +42,7 @@ unset($dbh);
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec("DROP TABLE test62024");
 unset($dbh);
 ?>

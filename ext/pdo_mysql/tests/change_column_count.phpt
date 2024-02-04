@@ -1,16 +1,15 @@
 --TEST--
 Change column count after statement has been prepared
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
 $db = MySQLPDOTest::factory();
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -31,11 +30,10 @@ var_dump($stmt->fetchAll(\PDO::FETCH_ASSOC));
 $db->exec('ALTER TABLE test_change_column_count ADD new_col VARCHAR(255)');
 $stmt->execute(['id' => 10]);
 var_dump($stmt->fetchAll(\PDO::FETCH_ASSOC));
-
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_change_column_count');
 ?>

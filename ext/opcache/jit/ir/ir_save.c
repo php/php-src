@@ -8,6 +8,36 @@
 #include "ir.h"
 #include "ir_private.h"
 
+void ir_print_proto(const ir_ctx *ctx, ir_ref func_proto, FILE *f)
+{
+	ir_ref j;
+
+	if (func_proto) {
+		const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, func_proto);
+
+		fprintf(f, "(");
+		if (proto->params_count > 0) {
+			fprintf(f, "%s", ir_type_cname[proto->param_types[0]]);
+			for (j = 1; j < proto->params_count; j++) {
+				fprintf(f, ", %s", ir_type_cname[proto->param_types[j]]);
+			}
+			if (proto->flags & IR_VARARG_FUNC) {
+				fprintf(f, ", ...");
+			}
+		} else if (proto->flags & IR_VARARG_FUNC) {
+			fprintf(f, "...");
+		}
+		fprintf(f, "): %s", ir_type_cname[proto->ret_type]);
+		if (proto->flags & IR_FASTCALL_FUNC) {
+			fprintf(f, " __fastcall");
+		} else if (proto->flags & IR_BUILTIN_FUNC) {
+			fprintf(f, " __builtin");
+		}
+	} else {
+		fprintf(f, "(): int32_t");
+	}
+}
+
 void ir_save(const ir_ctx *ctx, FILE *f)
 {
 	ir_ref i, j, n, ref, *p;
@@ -19,20 +49,14 @@ void ir_save(const ir_ctx *ctx, FILE *f)
 	for (i = IR_UNUSED + 1, insn = ctx->ir_base - i; i < ctx->consts_count; i++, insn--) {
 		fprintf(f, "\t%s c_%d = ", ir_type_cname[insn->type], i);
 		if (insn->op == IR_FUNC) {
-			if (!insn->const_flags) {
-				fprintf(f, "func(%s)", ir_get_str(ctx, insn->val.i32));
-			} else {
-				fprintf(f, "func(%s, %d)", ir_get_str(ctx, insn->val.i32), insn->const_flags);
-			}
+			fprintf(f, "func %s", ir_get_str(ctx, insn->val.name));
+			ir_print_proto(ctx, insn->proto, f);
 		} else if (insn->op == IR_SYM) {
-			fprintf(f, "sym(%s)", ir_get_str(ctx, insn->val.i32));
+			fprintf(f, "sym(%s)", ir_get_str(ctx, insn->val.name));
 		} else if (insn->op == IR_FUNC_ADDR) {
-			fprintf(f, "func_addr(");
+			fprintf(f, "func *");
 			ir_print_const(ctx, insn, f, true);
-			if (insn->const_flags) {
-				fprintf(f, ", %d", insn->const_flags);
-			}
-			fprintf(f, ")");
+			ir_print_proto(ctx, insn->proto, f);
 		} else {
 			ir_print_const(ctx, insn, f, true);
 		}
@@ -88,6 +112,10 @@ void ir_save(const ir_ctx *ctx, FILE *f)
 					case IR_OPND_STR:
 						fprintf(f, "%s\"%s\"", first ? "(" : ", ", ir_get_str(ctx, ref));
 						first = 0;
+						break;
+					case IR_OPND_PROTO:
+						fprintf(f, "%sfunc ", first ? "(" : ", ");
+						ir_print_proto(ctx, ref, f);
 						break;
 					case IR_OPND_PROB:
 						if (ref == 0) {

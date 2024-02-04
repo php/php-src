@@ -35,6 +35,12 @@
 
 ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 {
+	pid_t pid = getpid();
+
+	if (EG(pid) == pid) {
+		return;
+	}
+
 	struct sigevent sev;
 	sev.sigev_notify = SIGEV_THREAD_ID;
 	sev.sigev_value.sival_ptr = &EG(max_execution_timer_timer);
@@ -48,9 +54,9 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 
 	EG(pid) = getpid();
 
-#  ifdef MAX_EXECUTION_TIMERS_DEBUG
+# ifdef MAX_EXECUTION_TIMERS_DEBUG
 		fprintf(stderr, "Timer %#jx created on thread %d\n", (uintmax_t) EG(max_execution_timer_timer), sev.sigev_notify_thread_id);
-#  endif
+# endif
 
 	sigaction(sev.sigev_signo, NULL, &EG(oldact));
 }

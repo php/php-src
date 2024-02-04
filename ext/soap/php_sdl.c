@@ -341,7 +341,7 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 	sdl_restore_uri_credentials(ctx);
 
 	if (!wsdl) {
-		xmlErrorPtr xmlErrorPtr = xmlGetLastError();
+		const xmlError *xmlErrorPtr = xmlGetLastError();
 
 		if (xmlErrorPtr) {
 			soap_error2(E_ERROR, "Parsing WSDL: Couldn't load from '%s' : %s", struri, xmlErrorPtr->message);
@@ -2393,7 +2393,9 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	/* Make sure that incomplete files (e.g. due to disk space issues, see bug #66150) are not utilised. */
 	if (valid_file) {
 		/* This is allowed to fail, this means that another process was raced to create the file. */
-		(void) VCWD_RENAME(ZSTR_VAL(temp_file_path), fn);
+		if (VCWD_RENAME(ZSTR_VAL(temp_file_path), fn) < 0) {
+			VCWD_UNLINK(ZSTR_VAL(temp_file_path));
+		}
 	}
 
 	smart_str_free(&buf);

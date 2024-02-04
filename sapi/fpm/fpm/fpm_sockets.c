@@ -609,9 +609,8 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 
 	return 0;
 }
-#endif
 
-#ifdef HAVE_LQ_SO_LISTENQ
+#elif defined(HAVE_LQ_SO_LISTENQ)
 
 int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 {

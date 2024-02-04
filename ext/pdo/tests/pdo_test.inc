@@ -18,7 +18,7 @@ if (getenv('PDOTEST_DSN') === false) {
 class PDOTest {
     // create an instance of the PDO driver, based on
     // the current environment
-    static function factory($classname = 'PDO') {
+    static function factory($classname = PDO::class) {
         $dsn = getenv('PDOTEST_DSN');
         $user = getenv('PDOTEST_USER');
         $pass = getenv('PDOTEST_PASS');
@@ -54,12 +54,12 @@ class PDOTest {
         }
     }
 
-    static function test_factory($file) {
+    static function test_factory($file, $classname = PDO::class) {
         $config = self::get_config($file);
         foreach ($config['ENV'] as $k => $v) {
             putenv("$k=$v");
         }
-        return self::factory();
+        return self::factory($classname);
     }
 
     static function get_config($file) {

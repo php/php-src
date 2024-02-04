@@ -33,7 +33,7 @@
 /* libxml2 reserves 2 pointer-sized words for interned strings */
 #define LXML_INTERNED_STRINGS_SIZE (sizeof(void *) * 2)
 
-typedef struct {
+typedef struct _work_list_item {
     lxb_dom_node_t *node;
     uintptr_t current_active_namespace;
     xmlNodePtr lxml_parent;
@@ -71,6 +71,26 @@ static const xmlChar *get_libxml_namespace_href(uintptr_t lexbor_namespace)
         return (const xmlChar *) DOM_MATHML_NS_URI;
     } else {
         return (const xmlChar *) DOM_XHTML_NS_URI;
+    }
+}
+
+static xmlNodePtr lexbor_libxml2_bridge_new_text_node_fast(xmlDocPtr lxml_doc, const lxb_char_t *data, size_t data_length, bool compact_text_nodes)
+{
+    if (compact_text_nodes && data_length < LXML_INTERNED_STRINGS_SIZE) {
+        /* See xmlSAX2TextNode() in libxml2 */
+        xmlNodePtr lxml_text = xmlMalloc(sizeof(*lxml_text));
+        if (UNEXPECTED(lxml_text == NULL)) {
+            return NULL;
+        }
+        memset(lxml_text, 0, sizeof(*lxml_text));
+        lxml_text->name = xmlStringText;
+        lxml_text->type = XML_TEXT_NODE;
+        lxml_text->doc = lxml_doc;
+        lxml_text->content = (xmlChar *) &lxml_text->properties;
+        memcpy(lxml_text->content, data, data_length);
+        return lxml_text;
+    } else {
+        return xmlNewDocTextLen(lxml_doc, (const xmlChar *) data, data_length);
     }
 }
 
@@ -130,14 +150,52 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 );
             }
 
-            for (lxb_dom_attr_t *attr = element->last_attr; attr != NULL; attr = attr->prev) {
-                lexbor_libxml2_bridge_work_list_item_push(
-                    &work_list,
-                    (lxb_dom_node_t *) attr,
-                    entering_namespace,
-                    lxml_element,
-                    current_lxml_ns
-                );
+            xmlAttrPtr last_added_attr = NULL;
+            for (lxb_dom_attr_t *attr = element->first_attr; attr != NULL; attr = attr->next) {
+                /* Same namespace remark as for elements */
+                size_t local_name_length, value_length;
+                const lxb_char_t *local_name = lxb_dom_attr_local_name(attr, &local_name_length);
+                const lxb_char_t *value = lxb_dom_attr_value(attr, &value_length);
+
+                if (UNEXPECTED(local_name_length >= INT_MAX || value_length >= INT_MAX)) {
+                    retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OVERFLOW;
+                    goto out;
+                }
+
+                xmlAttrPtr lxml_attr = xmlMalloc(sizeof(xmlAttr));
+                if (UNEXPECTED(lxml_attr == NULL)) {
+                    retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
+                    goto out;
+                }
+
+                memset(lxml_attr, 0, sizeof(xmlAttr));
+                lxml_attr->type = XML_ATTRIBUTE_NODE;
+                lxml_attr->parent = lxml_element;
+                lxml_attr->name = xmlDictLookup(lxml_doc->dict, local_name, local_name_length);
+                lxml_attr->doc = lxml_doc;
+                xmlNodePtr lxml_text = lexbor_libxml2_bridge_new_text_node_fast(lxml_doc, value, value_length, true /* Always true for optimization purposes */);
+                if (UNEXPECTED(lxml_text == NULL)) {
+                    xmlFreeProp(lxml_attr);
+                    retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
+                    goto out;
+                }
+
+                lxml_attr->children = lxml_attr->last = lxml_text;
+
+                if (last_added_attr == NULL) {
+                    lxml_element->properties = lxml_attr;
+                } else {
+                    last_added_attr->next = lxml_attr;
+                    lxml_attr->prev = last_added_attr;
+                }
+                last_added_attr = lxml_attr;
+
+                /* xmlIsID does some other stuff too that is irrelevant here. */
+                if (local_name_length == 2 && local_name[0] == 'i' && local_name[1] == 'd') {
+                    xmlAddID(NULL, lxml_doc, value, lxml_attr);
+                }
+
+                /* libxml2 doesn't support line numbers on this anyway, it derives them instead, so don't bother */
             }
         } else if (node->type == LXB_DOM_NODE_TYPE_TEXT) {
             lxb_dom_text_t *text = lxb_dom_interface_text(node);
@@ -147,26 +205,10 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OVERFLOW;
                 goto out;
             }
-            xmlNodePtr lxml_text;
-            if (compact_text_nodes && data_length < LXML_INTERNED_STRINGS_SIZE) {
-                /* See xmlSAX2TextNode() in libxml2 */
-                lxml_text = xmlMalloc(sizeof(*lxml_text));
-                if (UNEXPECTED(lxml_text == NULL)) {
-                    retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
-                    goto out;
-                }
-                memset(lxml_text, 0, sizeof(*lxml_text));
-                lxml_text->name = xmlStringText;
-                lxml_text->type = XML_TEXT_NODE;
-                lxml_text->doc = lxml_doc;
-                lxml_text->content = (xmlChar *) &lxml_text->properties;
-                memcpy(lxml_text->content, data, data_length + 1 /* include '\0' */);
-            } else {
-                lxml_text = xmlNewDocTextLen(lxml_doc, (const xmlChar *) data, data_length);
-                if (UNEXPECTED(lxml_text == NULL)) {
-                    retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
-                    goto out;
-                }
+            xmlNodePtr lxml_text = lexbor_libxml2_bridge_new_text_node_fast(lxml_doc, data, data_length, compact_text_nodes);
+            if (UNEXPECTED(lxml_text == NULL)) {
+                retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
+                goto out;
             }
             xmlAddChild(lxml_parent, lxml_text);
             if (node->line >= USHRT_MAX) {
@@ -192,20 +234,6 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 goto out;
             }
             /* libxml2 doesn't support line numbers on this anyway, it returns -1 instead, so don't bother */
-        } else if (node->type == LXB_DOM_NODE_TYPE_ATTRIBUTE) {
-            lxb_dom_attr_t *attr = lxb_dom_interface_attr(node);
-            do {
-                /* Same namespace remark as for elements */
-                const lxb_char_t *local_name = lxb_dom_attr_local_name(attr, NULL);
-                const lxb_char_t *value = lxb_dom_attr_value(attr, NULL);
-                xmlAttrPtr lxml_attr = xmlSetNsProp(lxml_parent, NULL, local_name, value);
-                if (UNEXPECTED(lxml_attr == NULL)) {
-                    retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
-                    goto out;
-                }
-                attr = attr->next;
-                /* libxml2 doesn't support line numbers on this anyway, it derives them instead, so don't bother */
-            } while (attr);
         } else if (node->type == LXB_DOM_NODE_TYPE_COMMENT) {
             lxb_dom_comment_t *comment = lxb_dom_interface_comment(node);
             xmlNodePtr lxml_comment = xmlNewDocComment(lxml_doc, comment->char_data.data.data);
@@ -247,15 +275,19 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
 {
 #ifdef LIBXML_HTML_ENABLED
     xmlDocPtr lxml_doc = htmlNewDocNoDtD(NULL, NULL);
+    if (UNEXPECTED(!lxml_doc)) {
+        return LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
+    }
 #else
     /* If HTML support is not enabled, then htmlNewDocNoDtD() is not available.
      * This code mimics the behaviour. */
     xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) "1.0");
-    lxml_doc->type = XML_HTML_DOCUMENT_NODE;
-#endif
-    if (!lxml_doc) {
+    if (UNEXPECTED(!lxml_doc)) {
         return LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
     }
+    lxml_doc->type = XML_HTML_DOCUMENT_NODE;
+#endif
+    lxml_doc->dict = xmlDictCreate();
     lexbor_libxml2_bridge_status status = lexbor_libxml2_bridge_convert(
         lxb_dom_interface_node(document)->last_child,
         lxml_doc,

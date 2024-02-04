@@ -1,7 +1,14 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: acd95f74c8b95515d3177f55682f9ee50dd779e9 */
+ * Stub hash: 006be61b2c519e7d9ca997a7f12135eb3e0f3500 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, username, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, password, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDO_connect, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_TYPE_INFO(0, dsn, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, username, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, password, IS_STRING, 1, "null")
@@ -60,6 +67,7 @@ ZEND_END_ARG_INFO()
 
 
 ZEND_METHOD(PDO, __construct);
+ZEND_METHOD(PDO, connect);
 ZEND_METHOD(PDO, beginTransaction);
 ZEND_METHOD(PDO, commit);
 ZEND_METHOD(PDO, errorCode);
@@ -78,6 +86,7 @@ ZEND_METHOD(PDO, setAttribute);
 
 static const zend_function_entry class_PDO_methods[] = {
 	ZEND_ME(PDO, __construct, arginfo_class_PDO___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, connect, arginfo_class_PDO_connect, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(PDO, beginTransaction, arginfo_class_PDO_beginTransaction, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, commit, arginfo_class_PDO_commit, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, errorCode, arginfo_class_PDO_errorCode, ZEND_ACC_PUBLIC)
@@ -556,6 +565,8 @@ static zend_class_entry *register_class_PDO(void)
 
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__construct", sizeof("__construct") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "connect", sizeof("connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	return class_entry;
 }

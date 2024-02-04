@@ -143,6 +143,14 @@ struct _zend_op {
 	uint8_t op1_type;     /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
 	uint8_t op2_type;     /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
 	uint8_t result_type;  /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
+#ifdef ZEND_VERIFY_TYPE_INFERENCE
+	uint32_t op1_use_type;
+	uint32_t op2_use_type;
+	uint32_t result_use_type;
+	uint32_t op1_def_type;
+	uint32_t op2_def_type;
+	uint32_t result_def_type;
+#endif
 };
 
 

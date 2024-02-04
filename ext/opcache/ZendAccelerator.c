@@ -3019,11 +3019,16 @@ static void accel_move_code_to_huge_pages(void)
 		long unsigned int  start, end, offset, inode;
 		char perm[5], dev[10], name[MAXPATHLEN];
 		int ret;
+		extern char *__progname;
+		char buffer[MAXPATHLEN];
 
-		while (1) {
-			ret = fscanf(f, "%lx-%lx %4s %lx %9s %lu %s\n", &start, &end, perm, &offset, dev, &inode, name);
-			if (ret == 7) {
-				if (perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/') {
+		while (fgets(buffer, MAXPATHLEN, f)) {
+			ret = sscanf(buffer, "%lx-%lx %4s %lx %9s %lu %s\n", &start, &end, perm, &offset, dev, &inode, name);
+			if (ret >= 6) {
+				/* try to find the php text segment and map it into huge pages
+				   Lines without 'name' are going to be skipped */
+				if (ret > 6 && perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/' \
+					&& strstr(name, __progname)) {
 					long unsigned int  seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
 					long unsigned int  seg_end = (end & ~(huge_page_size-1L));
 					long unsigned int  real_end;
@@ -3042,8 +3047,6 @@ static void accel_move_code_to_huge_pages(void)
 					}
 					break;
 				}
-			} else {
-				break;
 			}
 		}
 		fclose(f);
@@ -3248,16 +3251,13 @@ static zend_result accel_post_startup(void)
 		zend_shared_alloc_lock();
 #ifdef HAVE_JIT
 		if (JIT_G(enabled)) {
-			if (JIT_G(buffer_size) == 0
-		     || !ZSMMG(reserved)
-			 || zend_jit_startup(ZSMMG(reserved), jit_size, reattached) != SUCCESS) {
+			if (JIT_G(buffer_size) == 0) {
 				JIT_G(enabled) = false;
 				JIT_G(on) = false;
-				/* The JIT is implicitly disabled with opcache.jit_buffer_size=0, so we don't want to
-				 * emit a warning here. */
-				if (JIT_G(buffer_size) != 0) {
-					zend_accel_error(ACCEL_LOG_WARNING, "Could not enable JIT!");
-				}
+			} else if (!ZSMMG(reserved)) {
+				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: could not use reserved buffer!");
+			} else {
+				zend_jit_startup(ZSMMG(reserved), jit_size, reattached);
 			}
 		}
 #endif

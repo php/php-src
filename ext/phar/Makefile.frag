@@ -46,7 +46,7 @@ $(builddir)/phar.phar: $(builddir)/phar.php $(builddir)/phar/phar.inc $(srcdir)/
 	if [ "$(TEST_PHP_EXECUTABLE_RES)" != 1 ]; then \
 		rm -f $(builddir)/phar.phar; \
 		rm -f $(srcdir)/phar.phar; \
-		$(PHP_PHARCMD_EXECUTABLE) $(PHP_PHARCMD_SETTINGS) $(builddir)/phar.php pack -f $(builddir)/phar.phar -a pharcommand -c auto -x \\.svn -p 0 -s $(srcdir)/phar/phar.php -h sha1 -b "$(PHP_PHARCMD_BANG)"  $(srcdir)/phar/; \
+		$(PHP_PHARCMD_EXECUTABLE) $(PHP_PHARCMD_SETTINGS) $(builddir)/phar.php pack -f $(builddir)/phar.phar -a pharcommand -c auto -p 0 -s $(srcdir)/phar/phar.php -h sha1 -b "$(PHP_PHARCMD_BANG)"  $(srcdir)/phar/; \
 		chmod +x $(builddir)/phar.phar; \
 	else \
 		echo "Skipping phar.phar generating during cross compilation"; \

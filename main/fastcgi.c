@@ -31,8 +31,6 @@
 
 #include <windows.h>
 
-typedef unsigned int in_addr_t;
-
 struct sockaddr_un {
 	short   sun_family;
 	char    sun_path[MAXPATHLEN];
@@ -745,7 +743,7 @@ int fcgi_listen(const char *path, int backlog)
 		sa.sa_unix.sun_family = AF_UNIX;
 		memcpy(sa.sa_unix.sun_path, path, path_len + 1);
 		sock_len = (size_t)(((struct sockaddr_un *)0)->sun_path)	+ path_len;
-#ifdef HAVE_SOCKADDR_UN_SUN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_UN_SUN_LEN
 		sa.sa_unix.sun_len = sock_len;
 #endif
 		unlink(path);
@@ -1190,10 +1188,8 @@ static int fcgi_read_request(fcgi_request *req)
 				*p++ = (zlen >> 8) & 0xff;
 				*p++ = zlen & 0xff;
 			}
-			memcpy(p, q->var, q->var_len);
-			p += q->var_len;
-			memcpy(p, Z_STRVAL_P(value), zlen);
-			p += zlen;
+			p = zend_mempcpy(p, q->var, q->var_len);
+			p = zend_mempcpy(p, Z_STRVAL_P(value), zlen);
 			q = q->list_next;
 		}
 		len = (int)(p - buf - sizeof(fcgi_header));
@@ -1598,23 +1594,20 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 		if (!req->out_hdr) {
 			open_packet(req, type);
 		}
-		memcpy(req->out_pos, str, len);
-		req->out_pos += len;
+		req->out_pos = zend_mempcpy(req->out_pos, str, len);
 	} else if (len - limit < (int)(sizeof(req->out_buf) - sizeof(fcgi_header))) {
 		if (limit > 0) {
 			if (!req->out_hdr) {
 				open_packet(req, type);
 			}
-			memcpy(req->out_pos, str, limit);
-			req->out_pos += limit;
+			req->out_pos = zend_mempcpy(req->out_pos, str, limit);
 		}
 		if (!fcgi_flush(req, 0)) {
 			return -1;
 		}
 		if (len > limit) {
 			open_packet(req, type);
-			memcpy(req->out_pos, str + limit, len - limit);
-			req->out_pos += len - limit;
+			req->out_pos = zend_mempcpy(req->out_pos, str + limit, len - limit);
 		}
 	} else {
 		int pos = 0;
@@ -1650,8 +1643,7 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 		}
 		if (pad) {
 			open_packet(req, type);
-			memcpy(req->out_pos, str + len - rest,  rest);
-			req->out_pos += rest;
+			req->out_pos = zend_mempcpy(req->out_pos, str + len - rest, rest);
 		}
 	}
 #endif

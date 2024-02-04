@@ -14,11 +14,11 @@ require("testdb.inc");
 
 $value = '2';
 
+$dbh = getDbConnection();
 $dbh->exec('CREATE TABLE test48877 (A integer)');
 $dbh->exec("INSERT INTO test48877 VALUES ('1')");
 $dbh->exec("INSERT INTO test48877 VALUES ('2')");
 $dbh->exec("INSERT INTO test48877 VALUES ('3')");
-$dbh->commit();
 
 $query = "SELECT * FROM test48877 WHERE A = :paramno";
 
@@ -33,7 +33,6 @@ var_dump($stmt->rowCount());
 $stmt = $dbh->prepare('DELETE FROM test48877');
 $stmt->execute();
 
-$dbh->commit();
 unset($stmt);
 unset($dbh);
 
@@ -41,6 +40,7 @@ unset($dbh);
 --CLEAN--
 <?php
 require 'testdb.inc';
+$dbh = getDbConnection();
 @$dbh->exec("DROP TABLE test48877");
 unset($dbh);
 ?>

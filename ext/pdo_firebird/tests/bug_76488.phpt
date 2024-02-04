@@ -22,15 +22,17 @@ select n,
 from r
 ';
 
-    for ($i = 0; $i < 10; $i++) {
-        $sth = $dbh->prepare($sql);
-        $sth->execute();
-        $rows = $sth->fetchAll();
-        unset($rows);
-        unset($sth);
-    }
-    unset($dbh);
-    echo "OK";
+$dbh = getDbConnection();
+
+for ($i = 0; $i < 10; $i++) {
+    $sth = $dbh->prepare($sql);
+    $sth->execute();
+    $rows = $sth->fetchAll();
+    unset($rows);
+    unset($sth);
+}
+unset($dbh);
+echo "OK";
 ?>
 --EXPECT--
 OK

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fbdcec5b706fe7dc0e757edfa262d96b44bd510f */
+ * Stub hash: 184308dfd1a133145d170c467e7600a12b14e327 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -144,7 +144,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMImplementation_createDocumentType, 0, 0,
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, systemId, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMImplementation_createDocument, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DOMImplementation_createDocument, 0, 0, DOMDocument, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, namespace, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, qualifiedName, IS_STRING, 0, "\"\"")
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, doctype, DOMDocumentType, 1, "null")
@@ -451,6 +451,14 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMXPath_registe
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(LIBXML_XPATH_ENABLED)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMXPath_registerPhpFunctionNS, 0, 3, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, namespaceURI, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, callable, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOM_Document_createAttribute, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -509,7 +517,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_Document_normalizeDocument arginfo_class_DOMNode_normalize
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOM_Document_registerNodeClass, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOM_Document_registerNodeClass, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, baseClass, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, extendedClass, IS_STRING, 1)
 ZEND_END_ARG_INFO()
@@ -737,6 +745,9 @@ ZEND_METHOD(DOMXPath, registerNamespace);
 #endif
 #if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(DOMXPath, registerPhpFunctions);
+#endif
+#if defined(LIBXML_XPATH_ENABLED)
+ZEND_METHOD(DOMXPath, registerPhpFunctionNS);
 #endif
 ZEND_METHOD(DOM_Document, createAttribute);
 ZEND_METHOD(DOM_Document, createAttributeNS);
@@ -1014,6 +1025,7 @@ static const zend_function_entry class_DOMXPath_methods[] = {
 	ZEND_ME(DOMXPath, query, arginfo_class_DOMXPath_query, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMXPath, registerNamespace, arginfo_class_DOMXPath_registerNamespace, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMXPath, registerPhpFunctions, arginfo_class_DOMXPath_registerPhpFunctions, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMXPath, registerPhpFunctionNS, arginfo_class_DOMXPath_registerPhpFunctionNS, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 #endif
@@ -1971,14 +1983,14 @@ static zend_class_entry *register_class_DOMXPath(void)
 }
 #endif
 
-static zend_class_entry *register_class_DOM_Document(zend_class_entry *class_entry_DOM_DOMNode, zend_class_entry *class_entry_DOM_DOMParentNode)
+static zend_class_entry *register_class_DOM_Document(zend_class_entry *class_entry_DOMNode, zend_class_entry *class_entry_DOMParentNode)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "DOM", "Document", class_DOM_Document_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOM_DOMNode);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOMNode);
 	class_entry->ce_flags |= ZEND_ACC_ABSTRACT;
-	zend_class_implements(class_entry, 1, class_entry_DOM_DOMParentNode);
+	zend_class_implements(class_entry, 1, class_entry_DOMParentNode);
 
 	zval property_doctype_default_value;
 	ZVAL_UNDEF(&property_doctype_default_value);
@@ -2035,23 +2047,23 @@ static zend_class_entry *register_class_DOM_Document(zend_class_entry *class_ent
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DOM_HTMLDocument(zend_class_entry *class_entry_DOM_DOM_Document)
+static zend_class_entry *register_class_DOM_HTMLDocument(zend_class_entry *class_entry_DOM_Document)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "DOM", "HTMLDocument", class_DOM_HTMLDocument_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOM_DOM_Document);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOM_Document);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DOM_XMLDocument(zend_class_entry *class_entry_DOM_DOM_Document)
+static zend_class_entry *register_class_DOM_XMLDocument(zend_class_entry *class_entry_DOM_Document)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "DOM", "XMLDocument", class_DOM_XMLDocument_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOM_DOM_Document);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOM_Document);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
 	zval property_xmlEncoding_default_value;

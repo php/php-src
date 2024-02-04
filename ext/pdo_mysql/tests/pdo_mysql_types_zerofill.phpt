@@ -4,18 +4,18 @@ MySQL PDO->exec(), native types - ZEROFILL
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
     function test_type(&$db, $offset, $sql_type, $value, $ret_value = NULL, $pattern = NULL) {
 
         $db->exec('DROP TABLE IF EXISTS test_mysql_types_zerofill');
         $sql = sprintf('CREATE TABLE test_mysql_types_zerofill(id INT, label %s) ENGINE=%s', $sql_type, MySQLPDOTest::getTableEngine());
-        @$db->exec($sql);
+        $db->exec($sql);
         if ($db->errorCode() != 0) {
             // not all MySQL Server versions and/or engines might support the type
             return true;
@@ -121,7 +121,7 @@ MySQLPDOTest::skip();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_mysql_types_zerofill');
 ?>

@@ -3,7 +3,18 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.4.0alpha1
 
 Core:
-  . Added zend_call_stack_get implementation for NetBSD. (David Carlier)
+  . Added zend_call_stack_get implementation for NetBSD, DragonFlyBSD,
+    Solaris and Haiku. (David Carlier)
+  . Enabled ifunc checks on FreeBSD from the 12.x releases. (Freaky)
+  . Changed the type of PHP_DEBUG and PHP_ZTS constants to bool. (haszi)
+  . Fixed bug GH-13142 (Undefined variable name is shortened when contains \0).
+    (nielsdos)
+  . Fixed bug GH-13178 (Iterator positions incorrect when converting packed
+    array to hashed). (ilutov)
+
+Curl:
+  . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
+  . Bumped required libcurl version to 7.61.0. (Ayesh)
 
 Date:
   . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
@@ -14,20 +25,77 @@ DOM:
     (nielsdos)
   . Fix cloning attribute with namespace disappearing namespace. (nielsdos)
   . Implement DOM HTML5 parsing and serialization RFC. (nielsdos)
+  . Fix DOMElement->prefix with empty string creates bogus prefix. (nielsdos)
+  . Handle OOM more consistently. (nielsdos)
+  . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
+
+FPM:
+  . Implement GH-12385 (flush headers without body when calling flush()).
+    (nielsdos)
+  . Added DragonFlyBSD system to the list which set FPM_BACKLOG_DEFAULT
+    to SOMAXCONN. (David Carlier)
 
 FTP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
 
+GD:
+  . Fixed detection of image formats in system gd library. (Michael Orlitzky)
+
 Intl:
   . Added IntlDateFormatter::PATTERN constant. (David Carlier)
+  . Fixed Numberformatter::__construct when the locale is invalid, now
+    throws an exception. (David Carlier)
+  . Added NumberFormatter::ROUND_TOWARD_ZERO and ::ROUND_AWAY_FROM_ZERO as
+    aliases for ::ROUND_DOWN and ::ROUND_UP. (Jorg Sowa)
+  . Added NumberFormatter::ROUND_HALFODD. (Ayesh Karunaratne)
+
+MBString:
+  . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
 
 Opcache:
   . Added large shared segments support for FreeBSD. (David Carlier)
+  . If JIT is enabled, PHP will now exit with a fatal error on startup in case
+    of JIT startup initialization issues. (danog)
+
+OpenSSL:
+  . Fixed bug #80269 (OpenSSL sets Subject wrong with extraattribs parameter).
+    (Jakub Zelenka)
+  . Implement request #48520 (openssl_csr_new - allow multiple values in DN).
+    (Jakub Zelenka)
+  . Introduced new serial_hex parameter to openssl_csr_sign. (Jakub Zelenka,
+    Florian Sowade)
+  . Added X509_PURPOSE_OCSP_HELPER and X509_PURPOSE_TIMESTAMP_SIGN constants.
+    (Vincent Jardin)
+
+PDO:
+  . Fixed setAttribute and getAttribute. (SakiTakamachi)
+  . Implemented PDO driver-specific subclasses RFC. (danack, kocsismate)
+
+PDO_DBLIB:
+  . Fixed setAttribute and getAttribute. (SakiTakamachi)
+  . Added class PdoDbLib (danack, kocsismate)
+
+PDO_FIREBIRD:
+  . Fixed setAttribute and getAttribute. (SakiTakamachi)
+  . Feature: Add transaction isolation level and mode settings to pdo_firebird.
+    (SakiTakamachi)
+  . Added class PdoFirebird. (danack, kocsismate)
+
+PDO_MYSQL:
+  . Fixed setAttribute and getAttribute. (SakiTakamachi)
+  . Added class PdoMysql. (danack, kocsismate)
+
+PDO_ODBC:
+  . Added class PdoOdbc. (danack, kocsismate)
 
 PDO_PGSQL:
   . Fixed GH-12423, DSN credentials being prioritized over the user/password
     PDO constructor arguments. (SakiTakamachi)
   . Fixed native float support with pdo_pgsql query results. (Yurunsoft)
+  . Added class PdoPgsql. (danack, kocsismate)
+
+PDO_SQLITE:
+  . Added class PdoSqlite. (danack, kocsismate)
 
 PGSQL:
   . Added the possibility to have no conditions for pg_select. (OmarEmaraDev)
@@ -48,6 +116,10 @@ SimpleXML:
   . Fixed bug GH-12208 (SimpleXML infinite loop when a cast is used inside a
     foreach). (nielsdos)
   . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
+  . Fix signature of simplexml_import_dom(). (nielsdos)
+
+Sockets:
+  . Added multicast group support for ipv4 on FreeBSD. (jonathan@tangential.ca)
 
 SNMP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
@@ -58,9 +130,15 @@ SOAP:
     lost the setPersistence()). (nielsdos)
   . Fixed bug #49278 (SoapClient::__getLastResponseHeaders returns NULL if
     wsdl operation !has output). (nielsdos)
+  . Fixed bug #44383 (PHP DateTime not converted to xsd:datetime). (nielsdos)
 
 Sockets:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
+  . Added the SO_EXECLUSIVEADDRUSE windows constant. (David Carlier)
+
+Sodium:
+  . Add support for AEGIS-128L and AEGIS-256 (jedisct1)
+  . Enable AES-GCM on aarch64 with the ARM crypto extensions (jedisct1)
 
 Standard:
   . Implement GH-12188 (Indication for the int size in phpinfo()). (timwolla)
@@ -71,6 +149,11 @@ Standard:
   . Fixed bug GH-12592 (strcspn() odd behaviour with NUL bytes and empty mask).
     (nielsdos)
   . Removed the deprecated inet_ntoa call support. (David Carlier)
+  . Cast large floats that are within int range to int in number_format so
+    the precision is not lost. (Marc Bennewitz)
+  . Add support for 4 new rounding modes to the round() function. (Jorg Sowa)
+  . debug_zval_dump() now indicates whether an array is packed. (Max Semenik)
+  . Fix GH-12143 (Optimize round). (SakiTakamachi)
 
 XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)
@@ -78,5 +161,6 @@ XML:
 XSL:
   . Implement request #64137 (XSLTProcessor::setParameter() should allow both
     quotes to be used). (nielsdos)
+  . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

@@ -47,7 +47,7 @@ static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data);
 static xmlNodePtr php_sxe_reset_iterator_no_clear_iter_data(php_sxe_object *sxe, int use_data);
 static xmlNodePtr php_sxe_iterator_fetch(php_sxe_object *sxe, xmlNodePtr node, int use_data);
 static void php_sxe_iterator_dtor(zend_object_iterator *iter);
-static int php_sxe_iterator_valid(zend_object_iterator *iter);
+static zend_result php_sxe_iterator_valid(zend_object_iterator *iter);
 static zval *php_sxe_iterator_current_data(zend_object_iterator *iter);
 static void php_sxe_iterator_current_key(zend_object_iterator *iter, zval *key);
 static void php_sxe_iterator_move_forward(zend_object_iterator *iter);
@@ -415,8 +415,6 @@ long_dim:
 
 	GET_NODE(sxe, node);
 
-	php_libxml_invalidate_node_list_cache_from_doc(node->doc);
-
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		attribs = 1;
 		elements = 0;
@@ -477,6 +475,8 @@ long_dim:
 	}
 
 	if (node) {
+		php_libxml_invalidate_node_list_cache_from_doc(node->doc);
+
 		if (attribs) {
 			if (Z_TYPE_P(member) == IS_LONG) {
 				while (attr && nodendx <= Z_LVAL_P(member)) {
@@ -619,6 +619,9 @@ static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int f
 
 	sxe = php_sxe_fetch_object(object);
 	GET_NODE(sxe, node);
+	if (UNEXPECTED(!node)) {
+		return &EG(error_zval);
+	}
 	name = ZSTR_VAL(zname);
 	node = sxe_get_element_by_name(sxe, node, name, &type);
 	if (node) {
@@ -788,8 +791,6 @@ static void sxe_prop_dim_delete(zend_object *object, zval *member, bool elements
 
 	GET_NODE(sxe, node);
 
-	php_libxml_invalidate_node_list_cache_from_doc(node->doc);
-
 	if (Z_TYPE_P(member) == IS_LONG) {
 		if (sxe->iter.type != SXE_ITER_ATTRLIST) {
 			attribs = 0;
@@ -813,6 +814,8 @@ static void sxe_prop_dim_delete(zend_object *object, zval *member, bool elements
 	}
 
 	if (node) {
+		php_libxml_invalidate_node_list_cache_from_doc(node->doc);
+
 		if (attribs) {
 			if (Z_TYPE_P(member) == IS_LONG) {
 				int	nodendx = 0;
@@ -1639,8 +1642,6 @@ PHP_METHOD(SimpleXMLElement, addChild)
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
 	GET_NODE(sxe, node);
 
-	php_libxml_invalidate_node_list_cache_from_doc(node->doc);
-
 	if (sxe->iter.type == SXE_ITER_ATTRLIST) {
 		php_error_docref(NULL, E_WARNING, "Cannot add element to attributes");
 		return;
@@ -1652,6 +1653,8 @@ PHP_METHOD(SimpleXMLElement, addChild)
 		php_error_docref(NULL, E_WARNING, "Cannot add child. Parent is not a permanent member of the XML tree");
 		return;
 	}
+
+	php_libxml_invalidate_node_list_cache_from_doc(node->doc);
 
 	localname = xmlSplitQName2((xmlChar *)qname, &prefix);
 	if (localname == NULL) {
@@ -2459,7 +2462,7 @@ static void php_sxe_iterator_dtor(zend_object_iterator *iter) /* {{{ */
 }
 /* }}} */
 
-static int php_sxe_iterator_valid(zend_object_iterator *iter) /* {{{ */
+static zend_result php_sxe_iterator_valid(zend_object_iterator *iter) /* {{{ */
 {
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 
@@ -2564,7 +2567,7 @@ PHP_FUNCTION(simplexml_import_dom)
 	nodep = php_libxml_import_node(node);
 
 	if (!nodep) {
-		zend_argument_type_error(1, "must be of type SimpleXMLElement|DOMNode, %s given", zend_zval_value_name(node));
+		zend_argument_type_error(1, "must be a valid XML node");
 		RETURN_THROWS();
 	}
 

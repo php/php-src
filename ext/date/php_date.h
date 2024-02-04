@@ -123,6 +123,7 @@ PHPAPI int php_idate(char format, time_t ts, bool localtime);
 
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, bool gm);
 PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_t ts, bool localtime);
+PHPAPI zend_string *php_format_date_obj(const char *format, size_t format_len, php_date_obj *date_obj);
 
 /* Mechanism to set new TZ database */
 PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb);

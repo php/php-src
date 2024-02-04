@@ -13,6 +13,10 @@
 # include <dlfcn.h>
 # include <unistd.h>
 # include <fcntl.h>
+# include <limits.h>
+# if defined(__FreeBSD__) || defined(__DragonFly__)
+#  include <sys/sysctl.h>
+# endif
 #endif
 
 #include "ir.h"

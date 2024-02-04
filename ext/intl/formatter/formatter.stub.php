@@ -44,8 +44,16 @@ class NumberFormatter
     public const int ROUND_DOWN = UNKNOWN;
     /** @cvalue UNUM_ROUND_UP */
     public const int ROUND_UP = UNKNOWN;
+    /** @cvalue UNUM_ROUND_DOWN */
+    public const int ROUND_TOWARD_ZERO = UNKNOWN;
+    /** @cvalue UNUM_ROUND_UP */
+    public const int ROUND_AWAY_FROM_ZERO = UNKNOWN;
     /** @cvalue UNUM_ROUND_HALFEVEN */
     public const int ROUND_HALFEVEN = UNKNOWN;
+#if U_ICU_VERSION_MAJOR_NUM >= 69
+    /** @cvalue UNUM_ROUND_HALF_ODD */
+    public const int ROUND_HALFODD = UNKNOWN;
+#endif
     /** @cvalue UNUM_ROUND_HALFDOWN */
     public const int ROUND_HALFDOWN = UNKNOWN;
     /** @cvalue UNUM_ROUND_HALFUP */

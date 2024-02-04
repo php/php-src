@@ -252,14 +252,6 @@ if (!PHP_ASSEMBLER) {
 	ERROR("No assembler found, fiber cannot be built");
 }
 DEFINE('PHP_ASSEMBLER', PHP_ASSEMBLER);
-DEFINE('FIBER_ASSEMBLER', PHP_ASSEMBLER);// for compatible
-
-var FIBER_ASM_ARCH = {
-	'x64': 'x86_64',
-	'x86': 'i386',
-	'arm64': 'arm64'
-}[TARGET_ARCH];
-DEFINE('FIBER_ASM_ARCH', FIBER_ASM_ARCH); // for compatible only
 
 var FIBER_ASM_ABI = {
 	'x64': 'x86_64_ms_pe_masm',
@@ -323,7 +315,7 @@ if (VS_TOOLSET && VCVERS >= 1914) {
 }
 
 PHP_INSTALL_HEADERS("", "Zend/ TSRM/ main/ main/streams/ win32/");
-PHP_INSTALL_HEADERS("Zend/Optimizer", "zend_call_graph.h zend_cfg.h zend_dump.h zend_func_info.h zend_inference.h zend_optimizer.h zend_ssa.h zend_worklist.h");
+PHP_INSTALL_HEADERS("Zend/Optimizer", "zend_call_graph.h zend_cfg.h zend_dfg.h zend_dump.h zend_func_info.h zend_inference.h zend_optimizer.h zend_ssa.h zend_worklist.h");
 
 STDOUT.WriteBlankLines(1);
 

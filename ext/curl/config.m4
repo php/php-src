@@ -4,7 +4,7 @@ PHP_ARG_WITH([curl],
     [Include cURL support])])
 
 if test "$PHP_CURL" != "no"; then
-  PKG_CHECK_MODULES([CURL], [libcurl >= 7.29.0])
+  PKG_CHECK_MODULES([CURL], [libcurl >= 7.61.0])
   PKG_CHECK_VAR([CURL_FEATURES], [libcurl], [supported_features])
 
   PHP_EVAL_LIBLINE($CURL_LIBS, CURL_SHARED_LIBADD)

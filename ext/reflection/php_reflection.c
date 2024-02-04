@@ -27,7 +27,7 @@
 #include "php_reflection.h"
 #include "ext/standard/info.h"
 #include "ext/standard/sha1.h"
-#include "ext/random/php_random.h"
+#include "ext/random/php_random_csprng.h"
 
 #include "zend.h"
 #include "zend_API.h"
@@ -3204,6 +3204,14 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 	zend_function *mptr;
 
 	if (is_constructor) {
+		if (ZEND_NUM_ARGS() == 1) {
+			zend_error(E_DEPRECATED, "Calling ReflectionMethod::__construct() with 1 argument is deprecated, "
+				"use ReflectionMethod::createFromMethodName() instead");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+
 		ZEND_PARSE_PARAMETERS_START(1, 2)
 			Z_PARAM_OBJ_OR_STR(arg1_obj, arg1_str)
 			Z_PARAM_OPTIONAL

@@ -92,6 +92,7 @@ lxb_tag_data_by_name(lexbor_hash_t *hash, const lxb_char_t *name, size_t len)
                                            lexbor_hash_search_lower, name, len);
 }
 
+#if 0
 const lxb_tag_data_t *
 lxb_tag_data_by_name_upper(lexbor_hash_t *hash,
                            const lxb_char_t *name, size_t len)
@@ -114,6 +115,7 @@ lxb_tag_data_by_name_upper(lexbor_hash_t *hash,
     return (const lxb_tag_data_t *) lexbor_hash_search(hash,
                                            lexbor_hash_search_upper, name, len);
 }
+#endif
 
 /*
  * No inline functions for ABI.

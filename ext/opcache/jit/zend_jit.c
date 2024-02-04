@@ -3414,19 +3414,22 @@ ZEND_EXT_API int zend_jit_check_support(void)
 		JIT_G(on) = 0;
 		return FAILURE;
 	}
+#elif defined(IR_TARGET_X64)
+	if (JIT_G(buffer_size) > 2 * Z_L(1024*1024*1024)) {
+		zend_error(E_WARNING, "JIT on x86_64 doesn't support opcache.jit_buffer_size above 2G.");
+		JIT_G(enabled) = 0;
+		JIT_G(on) = 0;
+		return FAILURE;
+	}
 #endif
 
 	return SUCCESS;
 }
 
-ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
+ZEND_EXT_API void zend_jit_startup(void *buf, size_t size, bool reattached)
 {
 	zend_jit_halt_op = zend_get_halt_op();
 	zend_jit_profile_counter_rid = zend_get_op_array_extension_handle(ACCELERATOR_PRODUCT_NAME);
-
-#if ZEND_JIT_SUPPORT_CLDEMOTE
-	cpu_support_cldemote = zend_cpu_supports_cldemote();
-#endif
 
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 	zend_write_protect = pthread_jit_write_protect_supported_np();
@@ -3494,29 +3497,21 @@ ZEND_EXT_API int zend_jit_startup(void *buf, size_t size, bool reattached)
 	}
 
 	zend_jit_unprotect();
-	if (zend_jit_setup() != SUCCESS) {
-		zend_jit_protect();
-		// TODO: error reporting and cleanup ???
-		return FAILURE;
-	}
+	zend_jit_setup();
 	zend_jit_protect();
 	zend_jit_init_handlers();
 
-	if (zend_jit_trace_startup(reattached) != SUCCESS) {
-		return FAILURE;
-	}
+	zend_jit_trace_startup(reattached);
 
 	zend_jit_unprotect();
 	/* save JIT buffer pos */
 	dasm_ptr[1] = dasm_ptr[0];
 	zend_jit_protect();
-
-	return SUCCESS;
 }
 
 ZEND_EXT_API void zend_jit_shutdown(void)
 {
-	if (JIT_G(debug) & ZEND_JIT_DEBUG_SIZE) {
+	if (JIT_G(debug) & ZEND_JIT_DEBUG_SIZE && dasm_ptr != NULL) {
 		fprintf(stderr, "\nJIT memory usage: %td\n", (ptrdiff_t)((char*)*dasm_ptr - (char*)dasm_buf));
 	}
 

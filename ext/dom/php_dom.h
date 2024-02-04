@@ -53,6 +53,7 @@ extern zend_module_entry dom_module_entry;
 
 #include "xml_common.h"
 #include "ext/libxml/php_libxml.h"
+#include "xpath_callbacks.h"
 #include "zend_exceptions.h"
 #include "dom_ce.h"
 /* DOM API_VERSION, please bump it up, if you change anything in the API
@@ -64,10 +65,8 @@ extern zend_module_entry dom_module_entry;
 #define DOM_NODESET XML_XINCLUDE_START
 
 typedef struct _dom_xpath_object {
-	int registerPhpFunctions;
+	php_dom_xpath_callbacks xpath_callbacks;
 	int register_node_ns;
-	HashTable *registered_phpfunctions;
-	HashTable *node_list;
 	dom_object dom;
 } dom_xpath_object;
 
@@ -130,6 +129,7 @@ void php_dom_throw_error_with_message(int error_code, char *error_message, int s
 void node_list_unlink(xmlNodePtr node);
 int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len);
 xmlNsPtr dom_get_ns(xmlNodePtr node, char *uri, int *errorcode, char *prefix);
+xmlNsPtr dom_get_ns_unchecked(xmlNodePtr nodep, char *uri, char *prefix);
 void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep);
 void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);

@@ -48,7 +48,7 @@
 # define MAP_HUGETLB MAP_ALIGNED_SUPER
 #endif
 
-#if (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__))
+#if (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
 static void *find_prefered_mmap_base(size_t requested_size)
 {
 	size_t huge_page_size = 2 * 1024 * 1024;
@@ -65,6 +65,18 @@ static void *find_prefered_mmap_base(size_t requested_size)
 	}
 
 	while (fgets(buffer, MAXPATHLEN, f) && sscanf(buffer, "%lx-%lx", &start, &end) == 2) {
+		/* Don't place the segment directly before or after the heap segment. Due to an selinux bug,
+		 * a segment directly preceding or following the heap is interpreted as heap memory, which
+		 * will result in an execheap violation for the JIT.
+		 * See https://bugzilla.kernel.org/show_bug.cgi?id=218258. */
+		bool heap_segment = strstr(buffer, "[heap]") != NULL;
+		if (heap_segment) {
+			uintptr_t start_base = start & ~(huge_page_size - 1);
+			if (last_free_addr + requested_size >= start_base) {
+				last_free_addr = ZEND_MM_ALIGNED_SIZE_EX(end + huge_page_size, huge_page_size);
+				continue;
+			}
+		}
 		if ((uintptr_t)execute_ex >= start) {
 			/* the current segment lays before PHP .text segment or PHP .text segment itself */
 			/*Search for candidates at the end of the free segment near the .text segment
@@ -98,7 +110,9 @@ static void *find_prefered_mmap_base(size_t requested_size)
 			}
 		}
 		last_free_addr = ZEND_MM_ALIGNED_SIZE_EX(end, huge_page_size);
-
+		if (heap_segment) {
+			last_free_addr += huge_page_size;
+		}
 	}
 	fclose(f);
 #elif defined(__FreeBSD__)
@@ -186,7 +200,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 #ifdef MAP_JIT
 	flags |= MAP_JIT;
 #endif
-#if (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__))
+#if (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
 	void *hint = find_prefered_mmap_base(requested_size);
 	if (hint != MAP_FAILED) {
 # ifdef MAP_HUGETLB

@@ -42,6 +42,7 @@ session_start();
 
 ?>
 --EXPECTF--
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 write: goodbye cruel world
 
 Fatal error: Uncaught Error: Call to undefined function undefined_function() in %s:%d

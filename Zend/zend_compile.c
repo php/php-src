@@ -103,7 +103,7 @@ static void zend_compile_assign(znode *result, zend_ast *ast);
 zend_never_inline static void zend_stack_limit_error(void)
 {
 	zend_error_noreturn(E_COMPILE_ERROR,
-		"Maximum call stack size of %zu bytes reached during compilation. Try splitting expression",
+		"Maximum call stack size of %zu bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached during compilation. Try splitting expression",
 		(size_t) ((uintptr_t) EG(stack_base) - (uintptr_t) EG(stack_limit)));
 }
 
@@ -124,6 +124,14 @@ static void init_op(zend_op *op)
 	MAKE_NOP(op);
 	op->extended_value = 0;
 	op->lineno = CG(zend_lineno);
+#ifdef ZEND_VERIFY_TYPE_INFERENCE
+	op->op1_use_type = 0;
+	op->op2_use_type = 0;
+	op->result_use_type = 0;
+	op->op1_def_type = 0;
+	op->op2_def_type = 0;
+	op->result_def_type = 0;
+#endif
 }
 
 static zend_always_inline uint32_t get_next_op_number(void)
@@ -2571,10 +2579,12 @@ static void zend_emit_return_type_check(
 			if (expr) {
 				if (expr->op_type == IS_CONST && Z_TYPE(expr->u.constant) == IS_NULL) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-						"A void function must not return a value "
-						"(did you mean \"return;\" instead of \"return null;\"?)");
+						"A void %s must not return a value "
+						"(did you mean \"return;\" instead of \"return null;\"?)",
+						CG(active_class_entry) != NULL ? "method" : "function");
 				} else {
-					zend_error_noreturn(E_COMPILE_ERROR, "A void function must not return a value");
+					zend_error_noreturn(E_COMPILE_ERROR, "A void %s must not return a value",
+					CG(active_class_entry) != NULL ? "method" : "function");
 				}
 			}
 			/* we don't need run-time check */
@@ -2585,18 +2595,21 @@ static void zend_emit_return_type_check(
 		if (ZEND_TYPE_CONTAINS_CODE(type, IS_NEVER)) {
 			/* Implicit case handled separately using VERIFY_NEVER_TYPE opcode. */
 			ZEND_ASSERT(!implicit);
-			zend_error_noreturn(E_COMPILE_ERROR, "A never-returning function must not return");
+			zend_error_noreturn(E_COMPILE_ERROR, "A never-returning %s must not return",
+				CG(active_class_entry) != NULL ? "method" : "function");
 			return;
 		}
 
 		if (!expr && !implicit) {
 			if (ZEND_TYPE_ALLOW_NULL(type)) {
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"A function with return type must return a value "
-					"(did you mean \"return null;\" instead of \"return;\"?)");
+					"A %s with return type must return a value "
+					"(did you mean \"return null;\" instead of \"return;\"?)",
+					CG(active_class_entry) != NULL ? "method" : "function");
 			} else {
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"A function with return type must return a value");
+					"A %s with return type must return a value",
+					CG(active_class_entry) != NULL ? "method" : "function");
 			}
 		}
 
@@ -4957,7 +4970,7 @@ static void zend_compile_static_var(zend_ast *ast) /* {{{ */
 	}
 
 	if (zend_hash_exists(CG(active_op_array)->static_variables, var_name)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Duplicate declaration of static variable $%s", ZSTR_VAL(var_name));
+		zend_error_noreturn_unchecked(E_COMPILE_ERROR, "Duplicate declaration of static variable $%S", var_name);
 	}
 
 	zend_eval_const_expr(&ast->child[1]);
@@ -6560,7 +6573,7 @@ static void zend_is_type_list_redundant_by_single_type(zend_type_list *type_list
 	}
 }
 
-static zend_type zend_compile_typename(zend_ast *ast, bool force_allow_null);
+static zend_type zend_compile_typename(zend_ast *ast);
 
 static zend_type zend_compile_typename_ex(
 		zend_ast *ast, bool force_allow_null, bool *forced_allow_null) /* {{{ */
@@ -6601,7 +6614,7 @@ static zend_type zend_compile_typename_ex(
 				/* Mark type as list type */
 				ZEND_TYPE_SET_LIST(type, type_list);
 
-				single_type = zend_compile_typename(type_ast, false);
+				single_type = zend_compile_typename(type_ast);
 				ZEND_ASSERT(ZEND_TYPE_IS_INTERSECTION(single_type));
 
 				type_list->types[type_list->num_types++] = single_type;
@@ -6788,10 +6801,10 @@ static zend_type zend_compile_typename_ex(
 }
 /* }}} */
 
-static zend_type zend_compile_typename(zend_ast *ast, bool force_allow_null)
+static zend_type zend_compile_typename(zend_ast *ast)
 {
 	bool forced_allow_null;
-	return zend_compile_typename_ex(ast, force_allow_null, &forced_allow_null);
+	return zend_compile_typename_ex(ast, false, &forced_allow_null);
 }
 
 /* May convert value from int to float. */
@@ -6937,8 +6950,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children + 1, 0);
 		arg_infos->name = NULL;
 		if (return_type_ast) {
-			arg_infos->type = zend_compile_typename(
-				return_type_ast, /* force_allow_null */ 0);
+			arg_infos->type = zend_compile_typename(return_type_ast);
 			ZEND_TYPE_FULL_MASK(arg_infos->type) |= _ZEND_ARG_INFO_FLAGS(
 				(op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0, /* is_variadic */ 0, /* is_tentative */ 0);
 		} else {
@@ -7141,7 +7153,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 			/* Recompile the type, as it has different memory management requirements. */
 			zend_type type = ZEND_TYPE_INIT_NONE(0);
 			if (type_ast) {
-				type = zend_compile_typename(type_ast, /* force_allow_null */ 0);
+				type = zend_compile_typename(type_ast);
 			}
 
 			/* Don't give the property an explicit default value. For typed properties this means
@@ -7233,8 +7245,8 @@ static void zend_compile_closure_binding(znode *closure, zend_op_array *op_array
 
 		value = zend_hash_add(op_array->static_variables, var_name, &EG(uninitialized_zval));
 		if (!value) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use variable $%s twice", ZSTR_VAL(var_name));
+			zend_error_noreturn_unchecked(E_COMPILE_ERROR,
+				"Cannot use variable $%S twice", var_name);
 		}
 
 		CG(zend_lineno) = zend_ast_get_lineno(var_name_ast);
@@ -7366,8 +7378,8 @@ static void zend_compile_closure_uses(zend_ast *ast) /* {{{ */
 			int i;
 			for (i = 0; i < op_array->last_var; i++) {
 				if (zend_string_equals(op_array->vars[i], var_name)) {
-					zend_error_noreturn(E_COMPILE_ERROR,
-						"Cannot use lexical variable $%s as a parameter name", ZSTR_VAL(var_name));
+					zend_error_noreturn_unchecked(E_COMPILE_ERROR,
+						"Cannot use lexical variable $%S as a parameter name", var_name);
 				}
 			}
 		}
@@ -7715,7 +7727,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		zend_type type = ZEND_TYPE_INIT_NONE(0);
 
 		if (type_ast) {
-			type = zend_compile_typename(type_ast, /* force_allow_null */ 0);
+			type = zend_compile_typename(type_ast);
 
 			if (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_VOID|MAY_BE_NEVER|MAY_BE_CALLABLE)) {
 				zend_string *str = zend_type_to_string(type);
@@ -7830,7 +7842,7 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 		zend_type type = ZEND_TYPE_INIT_NONE(0);
 
 		if (type_ast) {
-			type = zend_compile_typename(type_ast, /* force_allow_null */ 0);
+			type = zend_compile_typename(type_ast);
 
 			uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
 
@@ -8023,7 +8035,7 @@ static zend_string *zend_generate_anon_class_name(zend_ast_decl *decl)
 static void zend_compile_enum_backing_type(zend_class_entry *ce, zend_ast *enum_backing_type_ast)
 {
 	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_ENUM);
-	zend_type type = zend_compile_typename(enum_backing_type_ast, 0);
+	zend_type type = zend_compile_typename(enum_backing_type_ast);
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
 	if (ZEND_TYPE_IS_COMPLEX(type) || (type_mask != MAY_BE_LONG && type_mask != MAY_BE_STRING)) {
 		zend_string *type_string = zend_type_to_string(type);
