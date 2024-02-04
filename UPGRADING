@@ -179,23 +179,23 @@ PHP 8.4 UPGRADE NOTES
     instantiatable either via calling the PDO::connect() method
     or by invoking their constructor directly.
 
-PDO_DBLIB:
+- PDO_DBLIB:
   . Fixed setAttribute and getAttribute (SakiTakamachi)
   . Added PdoDbLib class (danack, kocsismate)
 
-PDO_FIREBIRD:
+- PDO_FIREBIRD:
   . Added class PdoFirebird.
 
-PDO_MYSQL:
+- PDO_MYSQL:
   . Added class PdoMysql.
 
-PDO_ODBC:
+- PDO_ODBC:
   . Added class PdoOdbc.
 
-PDO_PGSQL:
+- PDO_PGSQL:
   . Added class PdoPgsql.
 
-PDO_SQLITE:
+- PDO_SQLITE:
   . Added class PdoSqlite.
 
 - POSIX:
