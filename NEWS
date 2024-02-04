@@ -2,10 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.4
 
-- Core:
-  . Fixed array key as string (case insensitive) comparison typo
-    for the second operand buffer size. (A. Slepykh)
-
 - Curl:
   . Fix failing tests due to string changes in libcurl 8.6.0. (Ayesh)
 
@@ -16,8 +12,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug GH-13279 (Instable array during in-place modification in uksort).
     (ilutov)
-
-15 Feb 2024, PHP 8.3.3
+  . Fixed array key as hash to string (case insensitive) comparison typo
+    for the second operand buffer size (albeit unused for now). (A. Slepykh)
 
 - Core:
   . Fixed timer leak in zend-max-execution-timers builds. (withinboredom)
