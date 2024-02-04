@@ -432,7 +432,7 @@ PHP_FUNCTION(debug_zval_dump)
 		efree(tmp_spaces); \
 	} while(0);
 
-static void php_array_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
+static void php_array_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf, bool short_array) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
 		buffer_append_spaces(buf, level+1);
@@ -453,14 +453,14 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 		zend_string_free(ckey);
 		zend_string_free(tmp_str);
 	}
-	php_var_export_ex(zv, level + 2, buf);
+	php_var_export_options(zv, level + 2, buf, short_array);
 
 	smart_str_appendc(buf, ',');
 	smart_str_appendc(buf, '\n');
 }
 /* }}} */
 
-static void php_object_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
+static void php_object_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf, bool short_array) /* {{{ */
 {
 	buffer_append_spaces(buf, level + 2);
 	if (key != NULL) {
@@ -479,13 +479,18 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 		smart_str_append_long(buf, (zend_long) index);
 	}
 	smart_str_appendl(buf, " => ", 4);
-	php_var_export_ex(zv, level + 2, buf);
+	php_var_export_options(zv, level + 2, buf, short_array);
 	smart_str_appendc(buf, ',');
 	smart_str_appendc(buf, '\n');
 }
 /* }}} */
 
 PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
+{
+	php_var_export_options(struc, level, buf, false);
+}
+
+PHPAPI void php_var_export_options(zval *struc, int level, smart_str *buf, bool short_array) /* {{{ */
 {
 	HashTable *myht;
 	zend_string *ztmp, *ztmp2;
@@ -540,13 +545,17 @@ again:
 				GC_ADDREF(myht);
 				GC_PROTECT_RECURSION(myht);
 			}
-			if (level > 1) {
+			if(level > 1 && !short_array) {
 				smart_str_appendc(buf, '\n');
 				buffer_append_spaces(buf, level - 1);
 			}
-			smart_str_appendl(buf, "array (\n", 8);
+			if(short_array) {
+				smart_str_appendl(buf, "[\n", 2);
+			} else {
+				smart_str_appendl(buf, "array (\n", 8);
+			}
 			ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
-				php_array_element_export(val, index, key, level, buf);
+				php_array_element_export(val, index, key, level, buf, short_array);
 			} ZEND_HASH_FOREACH_END();
 			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 				GC_UNPROTECT_RECURSION(myht);
@@ -555,7 +564,11 @@ again:
 			if (level > 1) {
 				buffer_append_spaces(buf, level - 1);
 			}
-			smart_str_appendc(buf, ')');
+			if(short_array) {
+				smart_str_appendc(buf, ']');
+			} else {
+				smart_str_appendc(buf, ')');
+			}
 
 			break;
 
@@ -583,7 +596,11 @@ again:
 
 			/* stdClass has no __set_state method, but can be casted to */
 			if (ce == zend_standard_class_def) {
-				smart_str_appendl(buf, "(object) array(\n", 16);
+				if(short_array) {
+					smart_str_appendl(buf, "(object) [\n", 11);
+				} else {
+					smart_str_appendl(buf, "(object) array(\n", 16);
+				}
 			} else {
 				smart_str_appendc(buf, '\\');
 				smart_str_append(buf, ce->name);
@@ -593,14 +610,18 @@ again:
 					smart_str_appendl(buf, "::", 2);
 					smart_str_append(buf, Z_STR_P(case_name_zval));
 				} else {
-					smart_str_appendl(buf, "::__set_state(array(\n", 21);
+					if (short_array) {
+						smart_str_appendl(buf, "::__set_state([\n", 16);
+					} else {
+						smart_str_appendl(buf, "::__set_state(array(\n", 21);
+					}
 				}
 			}
 
 			if (myht) {
 				if (!is_enum) {
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
-						php_object_element_export(val, index, key, level, buf);
+						php_object_element_export(val, index, key, level, buf, short_array);
 					} ZEND_HASH_FOREACH_END();
 				}
 				zend_release_properties(myht);
@@ -610,9 +631,17 @@ again:
 				buffer_append_spaces(buf, level - 1);
 			}
 			if (ce == zend_standard_class_def) {
-				smart_str_appendc(buf, ')');
+				if(short_array) {
+					smart_str_appendc(buf, ']');
+				} else {
+					smart_str_appendc(buf, ')');
+				}
 			} else if (!is_enum) {
-				smart_str_appendl(buf, "))", 2);
+				if(short_array) {
+					smart_str_appendl(buf, "])", 2);
+				} else {
+					smart_str_appendl(buf, "))", 2);
+				}
 			}
 
 			break;
@@ -643,16 +672,18 @@ PHPAPI void php_var_export(zval *struc, int level) /* {{{ */
 PHP_FUNCTION(var_export)
 {
 	zval *var;
-	bool return_output = 0;
+	bool return_output = false;
+	bool short_array = false;
 	smart_str buf = {0};
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_ZVAL(var)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(return_output)
+		Z_PARAM_BOOL(short_array)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_var_export_ex(var, 1, &buf);
+	php_var_export_options(var, 1, &buf, short_array);
 	smart_str_0 (&buf);
 
 	if (return_output) {
