@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - Curl:
   . Fix failing tests due to string changes in libcurl 8.6.0. (Ayesh)
 
+- FPM:
+  . Fixed bug #75712 (getenv in php-fpm should not read $_ENV, $_SERVER).
+    (Jakub Zelenka)
+
 - Standard:
   . Fixed bug GH-13279 (Instable array during in-place modification in uksort).
     (ilutov)
