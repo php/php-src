@@ -86,7 +86,6 @@ static void cpuidex(uint32_t out[4], uint32_t id, uint32_t sid) {
 #endif
 }
 
-#endif
 
 enum cpu_feature {
   SSE2 = 1 << 0,
@@ -161,6 +160,8 @@ static
 #endif
   }
 }
+// https://github.com/BLAKE3-team/BLAKE3/pull/382
+#endif
 
 void blake3_compress_in_place(uint32_t cv[8],
                               const uint8_t block[BLAKE3_BLOCK_LEN],
