@@ -39,7 +39,7 @@ struct _zend_call_info {
 	bool               named_args;   /* Function has named arguments */
 	bool               is_prototype; /* An overridden child method may be called */
 	int                     num_args;	/* Number of arguments, excluding named and variadic arguments */
-	zend_send_arg_info      arg_info[1] ZEND_ELEMENT_COUNT(num_args);
+	zend_send_arg_info      arg_info[1];
 };
 
 struct _zend_func_info {
