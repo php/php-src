@@ -9,7 +9,7 @@ $rc = new ReflectionClass("ReflectionClass");
 echo $rc;
 ?>
 --EXPECT--
-Class [ <internal:Reflection> class ReflectionClass implements Stringable, Reflector ] {
+Class [ <internal:Reflection> class ReflectionClass implements Stringable, Reflector, ReflectorWithAttributes ] {
 
   - Constants [4] {
     Constant [ public int IS_IMPLICIT_ABSTRACT ] { 16 }
@@ -28,7 +28,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
     Property [ public string $name ]
   }
 
-  - Methods [56] {
+  - Methods [57] {
     Method [ <internal:Reflection> private method __clone ] {
 
       - Parameters [0] {
@@ -434,13 +434,22 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
       - Tentative return [ string ]
     }
 
-    Method [ <internal:Reflection> public method getAttributes ] {
+    Method [ <internal:Reflection, prototype ReflectorWithAttributes> public method getAttributes ] {
 
       - Parameters [2] {
         Parameter #0 [ <optional> ?string $name = null ]
         Parameter #1 [ <optional> int $flags = 0 ]
       }
       - Return [ array ]
+    }
+
+    Method [ <internal:Reflection, prototype ReflectorWithAttributes> public method getFirstAttribute ] {
+
+      - Parameters [2] {
+        Parameter #0 [ <optional> ?string $name = null ]
+        Parameter #1 [ <optional> int $flags = 0 ]
+      }
+      - Return [ ?ReflectionAttribute ]
     }
   }
 }
