@@ -639,6 +639,11 @@ const T_NULLSAFE_OBJECT_OPERATOR = UNKNOWN;
 const T_DOUBLE_ARROW = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_THIN_ARROW_LEFT
+ */
+const T_THIN_ARROW_LEFT = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_COMMENT
  */
 const T_COMMENT = UNKNOWN;

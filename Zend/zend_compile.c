@@ -687,7 +687,7 @@ void zend_stop_lexing(void)
 }
 
 static inline void zend_begin_loop(
-		uint8_t free_opcode, const znode *loop_var, bool is_switch) /* {{{ */
+		uint8_t free_opcode, const znode *loop_var, zend_brk_cont_kind kind) /* {{{ */
 {
 	zend_brk_cont_element *brk_cont_element;
 	int parent = CG(context).current_brk_cont;
@@ -696,7 +696,7 @@ static inline void zend_begin_loop(
 	CG(context).current_brk_cont = CG(context).last_brk_cont;
 	brk_cont_element = get_next_brk_cont_element();
 	brk_cont_element->parent = parent;
-	brk_cont_element->is_switch = is_switch;
+	brk_cont_element->kind = kind;
 
 	if (loop_var && (loop_var->op_type & (IS_VAR|IS_TMP_VAR))) {
 		uint32_t start = get_next_op_number();
@@ -5068,8 +5068,18 @@ static bool zend_handle_loops_and_finally_ex(zend_long depth, znode *return_valu
 	if (!loop_var) {
 		return 1;
 	}
+
+	zend_brk_cont_element *brk_ctrl_element = CG(context).current_brk_cont != -1
+		? &CG(context).brk_cont_array[CG(context).current_brk_cont]
+		: NULL;
+	if (brk_ctrl_element && brk_ctrl_element->kind == ZEND_BRK_CONT_KIND_MATCH_EXPR) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Match expression whose result is used must not contain return, break, continue or goto");
+	}
+
 	base = zend_stack_base(&CG(loop_var_stack));
 	for (; loop_var >= base; loop_var--) {
+		bool decrement_depth = false;
+
 		if (loop_var->opcode == ZEND_FAST_CALL) {
 			zend_op *opline = get_next_op();
 
@@ -5092,7 +5102,7 @@ static bool zend_handle_loops_and_finally_ex(zend_long depth, znode *return_valu
 			return 1;
 		} else if (loop_var->opcode == ZEND_NOP) {
 			/* Loop doesn't have freeable variable */
-			depth--;
+			decrement_depth = true;
 		} else {
 			zend_op *opline;
 
@@ -5102,8 +5112,21 @@ static bool zend_handle_loops_and_finally_ex(zend_long depth, znode *return_valu
 			opline->op1_type = loop_var->var_type;
 			opline->op1.var = loop_var->var_num;
 			opline->extended_value = ZEND_FREE_ON_RETURN;
+			decrement_depth = true;
+		}
+		if (decrement_depth) {
 			depth--;
-	    }
+			if (brk_ctrl_element) {
+				if (brk_ctrl_element->parent != -1) {
+					brk_ctrl_element = &CG(context).brk_cont_array[brk_ctrl_element->parent];
+					if (brk_ctrl_element->kind == ZEND_BRK_CONT_KIND_MATCH_EXPR) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Match expression whose result is used must not contain return, break, continue or goto");
+					}
+				} else {
+					brk_ctrl_element = NULL;
+				}
+			}
+		}
 	}
 	return (depth == 0);
 }
@@ -5227,11 +5250,13 @@ static void zend_compile_throw(znode *result, zend_ast *ast) /* {{{ */
 	zend_compile_expr(&expr_node, expr_ast);
 
 	zend_op *opline = zend_emit_op(NULL, ZEND_THROW, &expr_node, NULL);
-	if (result) {
+	if (result || CG(context).in_block_expr) {
 		/* Mark this as an "expression throw" for opcache. */
 		opline->extended_value = ZEND_THROW_IS_EXPR;
-		result->op_type = IS_CONST;
-		ZVAL_TRUE(&result->u.constant);
+		if (result) {
+			result->op_type = IS_CONST;
+			ZVAL_TRUE(&result->u.constant);
+		}
 	}
 }
 /* }}} */
@@ -5281,7 +5306,8 @@ static void zend_compile_break_continue(zend_ast *ast) /* {{{ */
 			ZEND_ASSERT(cur != -1);
 		}
 
-		if (CG(context).brk_cont_array[cur].is_switch) {
+		if (CG(context).brk_cont_array[cur].kind == ZEND_BRK_CONT_KIND_SWITCH_MATCH_STMT
+		 || CG(context).brk_cont_array[cur].kind == ZEND_BRK_CONT_KIND_MATCH_EXPR) {
 			if (depth == 1) {
 				if (CG(context).brk_cont_array[cur].parent == -1) {
 					zend_error(E_WARNING,
@@ -5419,7 +5445,7 @@ static void zend_compile_while(zend_ast *ast) /* {{{ */
 
 	opnum_jmp = zend_emit_jump(0);
 
-	zend_begin_loop(ZEND_NOP, NULL, 0);
+	zend_begin_loop(ZEND_NOP, NULL, ZEND_BRK_CONT_KIND_LOOP);
 
 	opnum_start = get_next_op_number();
 	zend_compile_stmt(stmt_ast);
@@ -5442,7 +5468,7 @@ static void zend_compile_do_while(zend_ast *ast) /* {{{ */
 	znode cond_node;
 	uint32_t opnum_start, opnum_cond;
 
-	zend_begin_loop(ZEND_NOP, NULL, 0);
+	zend_begin_loop(ZEND_NOP, NULL, ZEND_BRK_CONT_KIND_LOOP);
 
 	opnum_start = get_next_op_number();
 	zend_compile_stmt(stmt_ast);
@@ -5493,7 +5519,7 @@ static void zend_compile_for(zend_ast *ast) /* {{{ */
 
 	opnum_jmp = zend_emit_jump(0);
 
-	zend_begin_loop(ZEND_NOP, NULL, 0);
+	zend_begin_loop(ZEND_NOP, NULL, ZEND_BRK_CONT_KIND_LOOP);
 
 	opnum_start = get_next_op_number();
 	zend_compile_stmt(stmt_ast);
@@ -5555,7 +5581,7 @@ static void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	opnum_reset = get_next_op_number();
 	opline = zend_emit_op(&reset_node, by_ref ? ZEND_FE_RESET_RW : ZEND_FE_RESET_R, &expr_node, NULL);
 
-	zend_begin_loop(ZEND_FE_FREE, &reset_node, 0);
+	zend_begin_loop(ZEND_FE_FREE, &reset_node, ZEND_BRK_CONT_KIND_LOOP);
 
 	opnum_fetch = get_next_op_number();
 	opline = zend_emit_op(NULL, by_ref ? ZEND_FE_FETCH_RW : ZEND_FE_FETCH_R, &reset_node, NULL);
@@ -5728,7 +5754,7 @@ static void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&expr_node, expr_ast);
 
-	zend_begin_loop(ZEND_FREE, &expr_node, 1);
+	zend_begin_loop(ZEND_FREE, &expr_node, ZEND_BRK_CONT_KIND_SWITCH_MATCH_STMT);
 
 	case_node.op_type = IS_TMP_VAR;
 	case_node.u.op.var = get_temporary_variable();
@@ -5890,6 +5916,8 @@ static bool can_match_use_jumptable(zend_ast_list *arms) {
 	return 1;
 }
 
+static void zend_compile_stmt_list(zend_ast *ast);
+
 static void zend_compile_match(znode *result, zend_ast *ast)
 {
 	zend_ast *expr_ast = ast->child[0];
@@ -5899,6 +5927,8 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 
 	znode expr_node;
 	zend_compile_expr(&expr_node, expr_ast);
+
+	zend_begin_loop(ZEND_FREE, &expr_node, result ? ZEND_BRK_CONT_KIND_MATCH_EXPR : ZEND_BRK_CONT_KIND_SWITCH_MATCH_STMT);
 
 	znode case_node;
 	case_node.op_type = IS_TMP_VAR;
@@ -6041,20 +6071,23 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 
 		znode body_node;
 		zend_compile_expr(&body_node, body_ast);
-
-		if (is_first_case) {
-			zend_emit_op_tmp(result, ZEND_QM_ASSIGN, &body_node, NULL);
-			is_first_case = 0;
+		if (result) {
+			if (is_first_case) {
+				zend_emit_op_tmp(result, ZEND_QM_ASSIGN, &body_node, NULL);
+				is_first_case = 0;
+			} else {
+				zend_op *opline_qm_assign = zend_emit_op(NULL, ZEND_QM_ASSIGN, &body_node, NULL);
+				SET_NODE(opline_qm_assign->result, result);
+			}
 		} else {
-			zend_op *opline_qm_assign = zend_emit_op(NULL, ZEND_QM_ASSIGN, &body_node, NULL);
-			SET_NODE(opline_qm_assign->result, result);
+			zend_do_free(&body_node);
 		}
 
 		jmp_end_opnums[i] = zend_emit_jump(0);
 	}
 
 	// Initialize result in case there is no arm
-	if (arms->children == 0) {
+	if (result && arms->children == 0) {
 		result->op_type = IS_CONST;
 		ZVAL_NULL(&result->u.constant);
 	}
@@ -6062,6 +6095,8 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 	for (uint32_t i = 0; i < arms->children; ++i) {
 		zend_update_jump_target_to_next(jmp_end_opnums[i]);
 	}
+
+	zend_end_loop(get_next_op_number(), &expr_node);
 
 	if (expr_node.op_type & (IS_VAR|IS_TMP_VAR)) {
 		zend_op *opline = zend_emit_op(NULL, ZEND_FREE, &expr_node, NULL);
@@ -9477,11 +9512,13 @@ static void zend_compile_exit(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	zend_op *opline = zend_emit_op(NULL, ZEND_EXIT, &expr_node, NULL);
-	if (result) {
+	if (result || CG(context).in_block_expr) {
 		/* Mark this as an "expression throw" for opcache. */
 		opline->extended_value = ZEND_THROW_IS_EXPR;
-		result->op_type = IS_CONST;
-		ZVAL_TRUE(&result->u.constant);
+		if (result) {
+			result->op_type = IS_CONST;
+			ZVAL_TRUE(&result->u.constant);
+		}
 	}
 }
 /* }}} */
@@ -10450,6 +10487,10 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 		case ZEND_AST_EXIT:
 			zend_compile_expr(NULL, ast);
 			break;
+		case ZEND_AST_MATCH: {
+			zend_compile_match(NULL, ast);
+			break;
+		}
 		default:
 		{
 			znode result;
@@ -10463,6 +10504,21 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 	}
 }
 /* }}} */
+
+static void zend_compile_block_expr(znode *result, zend_ast *ast)
+{
+	bool prev_in_block_expr = CG(context).in_block_expr;
+	CG(context).in_block_expr = true;
+	zend_compile_stmt_list(ast->child[0]);
+	zend_ast *result_expr_ast = ast->child[1];
+	if (result_expr_ast) {
+		zend_compile_expr(result, result_expr_ast);
+	} else {
+		result->op_type = IS_CONST;
+		ZVAL_NULL(&result->u.constant);
+	}
+	CG(context).in_block_expr = prev_in_block_expr;
+}
 
 static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 {
@@ -10601,6 +10657,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_MATCH:
 			zend_compile_match(result, ast);
+			return;
+		case ZEND_AST_BLOCK_EXPR:
+			zend_compile_block_expr(result, ast);
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);

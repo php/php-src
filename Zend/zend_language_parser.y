@@ -70,7 +70,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left '^'
 %left T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
 %nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL T_SPACESHIP
-%nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
+%nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL T_THIN_ARROW_LEFT
 %left '.'
 %left T_SL T_SR
 %left '+' '-'
@@ -216,6 +216,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_OBJECT_OPERATOR "'->'"
 %token T_NULLSAFE_OBJECT_OPERATOR "'?->'"
 %token T_DOUBLE_ARROW    "'=>'"
+%token T_THIN_ARROW_LEFT "'<-'"
 %token T_COMMENT         "comment"
 %token T_DOC_COMMENT     "doc comment"
 %token T_OPEN_TAG        "open tag"
@@ -276,7 +277,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> inline_function union_type_element union_type intersection_type
 %type <ast> attributed_statement attributed_class_statement attributed_parameter
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
-%type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
+%type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list match_arm_body block_expr
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
 %type <ast> function_name non_empty_member_modifiers
 
@@ -726,9 +727,9 @@ non_empty_match_arm_list:
 ;
 
 match_arm:
-		match_arm_cond_list possible_comma T_DOUBLE_ARROW expr
+		match_arm_cond_list possible_comma T_DOUBLE_ARROW match_arm_body
 			{ $$ = zend_ast_create(ZEND_AST_MATCH_ARM, $1, $4); }
-	|	T_DEFAULT possible_comma T_DOUBLE_ARROW expr
+	|	T_DEFAULT possible_comma T_DOUBLE_ARROW match_arm_body
 			{ $$ = zend_ast_create(ZEND_AST_MATCH_ARM, NULL, $4); }
 ;
 
@@ -737,6 +738,14 @@ match_arm_cond_list:
 	|	match_arm_cond_list ',' expr { $$ = zend_ast_list_add($1, $3); }
 ;
 
+match_arm_body:
+		expr { $$ = $1; }
+	|	block_expr { $$ = $1; }
+;
+
+block_expr:
+		'{' inner_statement_list optional_expr '}' { $$ = zend_ast_create(ZEND_AST_BLOCK_EXPR, $2, $3); }
+;
 
 while_statement:
 		statement { $$ = $1; }
@@ -1170,6 +1179,8 @@ expr:
 			{ $$ = zend_ast_create_assign_op(ZEND_SR, $1, $3); }
 	|	variable T_COALESCE_EQUAL expr
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_COALESCE, $1, $3); }
+	|	variable T_COALESCE_EQUAL block_expr
+			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_COALESCE, $1, $3); }
 	|	variable T_INC { $$ = zend_ast_create(ZEND_AST_POST_INC, $1); }
 	|	T_INC variable { $$ = zend_ast_create(ZEND_AST_PRE_INC, $2); }
 	|	variable T_DEC { $$ = zend_ast_create(ZEND_AST_POST_DEC, $1); }
@@ -1211,6 +1222,9 @@ expr:
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_NOT_EQUAL, $1, $3); }
 	|	expr '<' expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_SMALLER, $1, $3); }
+	/* BC for $foo<-$bar */
+	|	expr T_THIN_ARROW_LEFT expr
+			{ $$ = zend_ast_create_binary_op(ZEND_IS_SMALLER, $1, zend_ast_create(ZEND_AST_UNARY_MINUS, $3)); }
 	|	expr T_IS_SMALLER_OR_EQUAL expr
 			{ $$ = zend_ast_create_binary_op(ZEND_IS_SMALLER_OR_EQUAL, $1, $3); }
 	|	expr '>' expr
@@ -1231,6 +1245,8 @@ expr:
 	|	expr '?' ':' expr
 			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, NULL, $4); }
 	|	expr T_COALESCE expr
+			{ $$ = zend_ast_create(ZEND_AST_COALESCE, $1, $3); }
+	|	expr T_COALESCE block_expr
 			{ $$ = zend_ast_create(ZEND_AST_COALESCE, $1, $3); }
 	|	internal_functions_in_yacc { $$ = $1; }
 	|	T_INT_CAST expr		{ $$ = zend_ast_create_cast(IS_LONG, $2); }

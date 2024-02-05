@@ -154,6 +154,7 @@ char *get_token_type_name(int token_type)
 		case T_OBJECT_OPERATOR: return "T_OBJECT_OPERATOR";
 		case T_NULLSAFE_OBJECT_OPERATOR: return "T_NULLSAFE_OBJECT_OPERATOR";
 		case T_DOUBLE_ARROW: return "T_DOUBLE_ARROW";
+		case T_THIN_ARROW_LEFT: return "T_THIN_ARROW_LEFT";
 		case T_COMMENT: return "T_COMMENT";
 		case T_DOC_COMMENT: return "T_DOC_COMMENT";
 		case T_OPEN_TAG: return "T_OPEN_TAG";
