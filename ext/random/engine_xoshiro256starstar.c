@@ -216,12 +216,16 @@ PHP_METHOD(Random_Engine_Xoshiro256StarStar, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (seed_is_null) {
+		uint64_t t[4];
+
 		do {
-			if (php_random_bytes_throw(&state->state, sizeof(state->state)) == FAILURE) {
+			if (php_random_bytes_throw(&t, sizeof(t)) == FAILURE) {
 				zend_throw_exception(random_ce_Random_RandomException, "Failed to generate a random seed", 0);
 				RETURN_THROWS();
 			}
-		} while (UNEXPECTED(state->state[0] == 0 && state->state[1] == 0 && state->state[2] == 0 && state->state[3] == 0));
+		} while (UNEXPECTED(t[0] == 0 && t[1] == 0 && t[2] == 0 && t[3] == 0));
+
+		seed256(state, t[0], t[1], t[2], t[3]);
 	} else {
 		if (str_seed) {
 			/* char (byte: 8 bit) * 32 = 256 bits */
