@@ -768,6 +768,8 @@ class ReflectionAttribute implements Reflector
     /** @cvalue REFLECTION_ATTRIBUTE_IS_INSTANCEOF */
     public const int IS_INSTANCEOF = UNKNOWN;
 
+    public string $name;
+
     public function getName(): string {}
     public function getTarget(): int {}
     public function isRepeated(): bool {}

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c57095496424abb858f025f64bcf2db49cbb342e */
+ * Stub hash: 0adb92be59fadce74bb12017fe64ffbccab2a060 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -1624,6 +1624,12 @@ static zend_class_entry *register_class_ReflectionAttribute(zend_class_entry *cl
 	zend_string *const_IS_INSTANCEOF_name = zend_string_init_interned("IS_INSTANCEOF", sizeof("IS_INSTANCEOF") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_IS_INSTANCEOF_name, &const_IS_INSTANCEOF_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_IS_INSTANCEOF_name);
+
+	zval property_name_default_value;
+	ZVAL_UNDEF(&property_name_default_value);
+	zend_string *property_name_name = zend_string_init("name", sizeof("name") - 1, 1);
+	zend_declare_typed_property(class_entry, property_name_name, &property_name_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_name_name);
 
 	return class_entry;
 }
