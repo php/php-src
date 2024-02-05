@@ -19,7 +19,7 @@ PHP                                                                        NEWS
   . Fixed array key as hash to string (case insensitive) comparison typo
     for the second operand buffer size (albeit unused for now). (A. Slepykh)
 
-5 Feb 2024, PHP 8.3.3
+15 Feb 2024, PHP 8.3.3
 
 - Core:
   . Fixed timer leak in zend-max-execution-timers builds. (withinboredom)
