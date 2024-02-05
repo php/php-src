@@ -325,6 +325,7 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 	CG(context).last_brk_cont = 0;
 	CG(context).brk_cont_array = NULL;
 	CG(context).labels = NULL;
+	CG(context).in_jmp_frameless_branch = false;
 }
 /* }}} */
 
@@ -4630,7 +4631,9 @@ static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args
 	/* Find frameless function with same name. */
 	zend_function *frameless_function = NULL;
 	if (args_ast->kind != ZEND_AST_CALLABLE_CONVERT
-	 && !zend_args_contain_unpack_or_named(zend_ast_get_list(args_ast))) {
+	 && !zend_args_contain_unpack_or_named(zend_ast_get_list(args_ast))
+	 /* Avoid blowing up op count with nested frameless branches. */
+	 && !CG(context).in_jmp_frameless_branch) {
 		zend_string *lc_func_name = Z_STR_P(CT_CONSTANT_EX(CG(active_op_array), name_constants + 2));
 		frameless_function = zend_hash_find_ptr(CG(function_table), lc_func_name);
 	}
@@ -4641,6 +4644,7 @@ static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args
 	if (frameless_function) {
 		frameless_function_info = find_frameless_function_info(zend_ast_get_list(args_ast), frameless_function, type);
 		if (frameless_function_info) {
+			CG(context).in_jmp_frameless_branch = true;
 			znode op1;
 			op1.op_type = IS_CONST;
 			ZVAL_COPY(&op1.u.constant, CT_CONSTANT_EX(CG(active_op_array), name_constants + 1));
@@ -4670,6 +4674,8 @@ static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args
 		zend_op *flf_icall = &CG(active_op_array)->opcodes[flf_icall_opnum];
 		SET_NODE(flf_icall->result, result);
 		zend_update_jump_target_to_next(jmp_end_opnum);
+
+		CG(context).in_jmp_frameless_branch = false;
 	}
 }
 /* }}} */
