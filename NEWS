@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Curl:
   . Fix failing tests due to string changes in libcurl 8.6.0. (Ayesh)
 
+- DOM:
+  . Fix unlikely memory leak in case of namespace removal with extremely deep
+    trees. (nielsdos)
+
 - FPM:
   . Fixed bug #75712 (getenv in php-fpm should not read $_ENV, $_SERVER).
     (Jakub Zelenka)
@@ -14,6 +18,8 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed array key as hash to string (case insensitive) comparison typo
     for the second operand buffer size (albeit unused for now). (A. Slepykh)
+
+5 Feb 2024, PHP 8.3.3
 
 - Core:
   . Fixed timer leak in zend-max-execution-timers builds. (withinboredom)
