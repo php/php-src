@@ -3967,7 +3967,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			UPDATE_SSA_TYPE(MAY_BE_BOOL, ssa_op->result_def);
 			break;
 		case ZEND_DECLARE_LAMBDA_FUNCTION:
-			UPDATE_SSA_TYPE(MAY_BE_OBJECT|MAY_BE_RC1, ssa_op->result_def);
+			UPDATE_SSA_TYPE(MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN, ssa_op->result_def);
 			UPDATE_SSA_OBJ_TYPE(zend_ce_closure, /* is_instanceof */ false, ssa_op->result_def);
 			break;
 		case ZEND_PRE_DEC_STATIC_PROP:
