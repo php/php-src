@@ -3697,7 +3697,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_2_SPEC_HANDLER
 	zend_frameless_function_2 function = (zend_frameless_function_2)ZEND_FLF_HANDLER(opline);
 	ZVAL_NULL(EX_VAR(opline->result.var));
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
-	zval *arg2 = get_zval_ptr_deref(opline->op2_type, opline->op2, opline->op2.var EXECUTE_DATA_CC);
+	zval *arg2 = get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R);
 	if (EG(exception)) {
 		FREE_OP(opline->op1_type, opline->op1.var);
 		FREE_OP(opline->op2_type, opline->op2.var);
