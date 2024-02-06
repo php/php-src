@@ -57,7 +57,7 @@ extern char** environ;
 #include <machine/vmparam.h> /* for old BSD */
 #include <sys/exec.h>
 #endif
-#if defined(DARWIN)
+#if defined(__APPLE__)
 #include <crt_externs.h>
 #endif
 
@@ -91,9 +91,9 @@ extern char** environ;
 #define PS_USE_PSTAT
 #elif defined(HAVE_PS_STRINGS)
 #define PS_USE_PS_STRINGS
-#elif defined(BSD) && !defined(DARWIN)
+#elif defined(BSD) && !defined(__APPLE__)
 #define PS_USE_CHANGE_ARGV
-#elif defined(__linux__) || defined(_AIX) || defined(__sgi) || (defined(sun) && !defined(BSD)) || defined(ultrix) || defined(__osf__) || defined(DARWIN)
+#elif defined(__linux__) || defined(_AIX) || defined(__sgi) || (defined(sun) && !defined(BSD)) || defined(ultrix) || defined(__osf__) || defined(__APPLE__)
 #define PS_USE_CLOBBER_ARGV
 #elif defined(PHP_WIN32)
 #define PS_USE_WIN32
@@ -102,7 +102,7 @@ extern char** environ;
 #endif
 
 /* Different systems want the buffer padded differently */
-#if defined(_AIX) || defined(__linux__) || defined(DARWIN)
+#if defined(_AIX) || defined(__linux__) || defined(__APPLE__)
 #define PS_PADDING '\0'
 #else
 #define PS_PADDING ' '
@@ -235,7 +235,7 @@ char** save_ps_args(int argc, char** argv)
         }
         new_argv[argc] = NULL;
 
-#if defined(DARWIN)
+#if defined(__APPLE__)
         /*
          * Darwin (and perhaps other NeXT-derived platforms?) has a static
          * copy of the argv pointer, which we may fix like so:

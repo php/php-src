@@ -58,6 +58,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Removed checking and linking with obsolete libbind for some functions.
    - Symbol HAVE_JSON has been removed (ext/json is always available since PHP
      8.0).
+   - Symbol DARWIN has been removed (use __APPLE__ to target Darwin systems).
 
  c. Windows build system changes
    - Added Bison flag '-Wall' when generating lexer files as done in *nix build
