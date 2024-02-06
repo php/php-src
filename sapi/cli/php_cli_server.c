@@ -2473,7 +2473,7 @@ static void php_cli_server_worker_install_pdeathsig(void)
 
 	// Check if parent has exited just after the fork
 	if (getppid() != php_cli_server_master) {
-		exit(1);
+		_exit(1);
 	}
 }
 #endif

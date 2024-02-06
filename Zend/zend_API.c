@@ -3276,7 +3276,7 @@ ZEND_API void zend_activate_modules(void) /* {{{ */
 
 		if (module->request_startup_func(module->type, module->module_number)==FAILURE) {
 			zend_error(E_WARNING, "request_startup() for %s module failed", module->name);
-			exit(1);
+			_exit(1);
 		}
 		p++;
 	}

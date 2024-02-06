@@ -1388,7 +1388,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 		case E_CORE_ERROR:
 			if(!module_initialized) {
 				/* bad error in module startup - no way we can live with this */
-				exit(-2);
+				_exit(-2);
 			}
 		ZEND_FALLTHROUGH;
 		case E_ERROR:

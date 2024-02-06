@@ -200,7 +200,7 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 	    0 > fpm_child_cloexec()) {
 
 		zlog(ZLOG_ERROR, "[pool %s] child failed to initialize", wp->config->name);
-		exit(FPM_EXIT_SOFTWARE);
+		_exit(FPM_EXIT_SOFTWARE);
 	}
 }
 /* }}} */

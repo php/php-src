@@ -4716,15 +4716,15 @@ static zend_result accel_finish_startup_preload_subprocess(pid_t *pid)
 	if (*pid == 0) { /* children */
 		if (setgid(pw->pw_gid) < 0) {
 			zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setgid(%d)", pw->pw_gid);
-			exit(1);
+			_exit(1);
 		}
 		if (initgroups(pw->pw_name, pw->pw_gid) < 0) {
 			zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to initgroups(\"%s\", %d)", pw->pw_name, pw->pw_uid);
-			exit(1);
+			_exit(1);
 		}
 		if (setuid(pw->pw_uid) < 0) {
 			zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setuid(%d)", pw->pw_uid);
-			exit(1);
+			_exit(1);
 		}
 	}
 
@@ -4775,7 +4775,7 @@ static zend_result accel_finish_startup(void)
 	} else if (pid == 0) { /* subprocess */
 		const zend_result ret = accel_finish_startup_preload(true);
 
-		exit(ret == SUCCESS ? 0 : 1);
+		_exit(ret == SUCCESS ? 0 : 1);
 	} else { /* parent */
 		int status;
 

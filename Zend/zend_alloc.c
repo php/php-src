@@ -388,7 +388,7 @@ static ZEND_COLD ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
 	}  zend_end_try();
 	heap->overflow = 0;
 	zend_bailout();
-	exit(1);
+	_exit(1);
 }
 
 #ifdef _WIN32
@@ -2770,7 +2770,7 @@ ZEND_API void shutdown_memory_manager(bool silent, bool full_shutdown)
 static ZEND_COLD ZEND_NORETURN void zend_out_of_memory(void)
 {
 	fprintf(stderr, "Out of memory\n");
-	exit(1);
+	_exit(1);
 }
 
 #if ZEND_MM_CUSTOM

@@ -3008,7 +3008,7 @@ static ir_reg ir_allocate_blocked_reg(ir_ctx *ctx, ir_live_interval *ival, ir_li
 	if (IR_REGSET_IS_EMPTY(available)) {
 		fprintf(stderr, "LSRA Internal Error: No registers available. Allocation is not possible\n");
 		IR_ASSERT(0);
-		exit(-1);
+		_exit(-1);
 	}
 
 	/* for each interval it in active */
@@ -3160,7 +3160,7 @@ try_next_available_register:
 			if (IR_REGSET_IS_EMPTY(available)) {
 				fprintf(stderr, "LSRA Internal Error: Unsolvable conflict. Allocation is not possible\n");
 				IR_ASSERT(0);
-				exit(-1);
+				_exit(-1);
 			}
 			IR_LOG_LSRA("      ---- Restart", ival, "");
 			goto select_register;

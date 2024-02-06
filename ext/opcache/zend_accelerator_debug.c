@@ -90,7 +90,7 @@ static void zend_accel_error_va_args(int type, const char *format, va_list args)
 			zend_bailout();
 			break;
 		case ACCEL_LOG_FATAL:
-			exit(-2);
+			_exit(-2);
 			break;
 	}
 

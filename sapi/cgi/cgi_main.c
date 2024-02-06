@@ -2002,7 +2002,7 @@ consult the installation file that came with this distribution, or visit \n\
 				sigaction(SIGQUIT, &act, &old_quit)
 			) {
 				perror("Can't set signals");
-				exit(1);
+				_exit(1);
 			}
 
 			if (fcgi_in_shutdown()) {
@@ -2031,7 +2031,7 @@ consult the installation file that came with this distribution, or visit \n\
 						break;
 					case -1:
 						perror("php (pre-forking)");
-						exit(1);
+						_exit(1);
 						break;
 					default:
 						/* Fine */

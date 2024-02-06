@@ -105,7 +105,7 @@ static void fpm_pctl_exec(void)
 
 	execvp(saved_argv[0], saved_argv);
 	zlog(ZLOG_SYSERROR, "failed to reload: execvp() failed");
-	exit(FPM_EXIT_SOFTWARE);
+	_exit(FPM_EXIT_SOFTWARE);
 }
 
 static void fpm_pctl_action_last(void)

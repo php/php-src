@@ -643,34 +643,34 @@ int fpm_unix_init_main(void)
 				ret = select(fpm_globals.send_config_pipe[0] + 1, &rfds, NULL, NULL, &tv);
 				if (ret == -1) {
 					zlog(ZLOG_SYSERROR, "failed to select");
-					exit(FPM_EXIT_SOFTWARE);
+					_exit(FPM_EXIT_SOFTWARE);
 				}
 				if (ret) { /* data available */
 					int readval;
 					ret = read(fpm_globals.send_config_pipe[0], &readval, sizeof(readval));
 					if (ret == -1) {
 						zlog(ZLOG_SYSERROR, "failed to read from pipe");
-						exit(FPM_EXIT_SOFTWARE);
+						_exit(FPM_EXIT_SOFTWARE);
 					}
 
 					if (ret == 0) {
 						zlog(ZLOG_ERROR, "no data have been read from pipe");
-						exit(FPM_EXIT_SOFTWARE);
+						_exit(FPM_EXIT_SOFTWARE);
 					} else {
 						if (readval == 1) {
 							zlog(ZLOG_DEBUG, "I received a valid acknowledge from the master process, I can exit without error");
 							fpm_cleanups_run(FPM_CLEANUP_PARENT_EXIT);
-							exit(FPM_EXIT_OK);
+							_exit(FPM_EXIT_OK);
 						} else {
 							zlog(ZLOG_DEBUG, "The master process returned an error !");
-							exit(FPM_EXIT_SOFTWARE);
+							_exit(FPM_EXIT_SOFTWARE);
 						}
 					}
 				} else { /* no date sent ! */
 					zlog(ZLOG_ERROR, "the master process didn't send back its status (via the pipe to the calling process)");
-				  exit(FPM_EXIT_SOFTWARE);
+				  _exit(FPM_EXIT_SOFTWARE);
 				}
-				exit(FPM_EXIT_SOFTWARE);
+				_exit(FPM_EXIT_SOFTWARE);
 		}
 	}
 

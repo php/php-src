@@ -33,7 +33,7 @@
       if (_sz < 16) _sz = 16; \
       while (_sz < _need) _sz += _sz; \
       (p) = (t *)realloc((p), _sz); \
-      if ((p) == NULL) exit(1); \
+      if ((p) == NULL) _exit(1); \
       (sz) = _sz; \
     } \
   } while(0)
