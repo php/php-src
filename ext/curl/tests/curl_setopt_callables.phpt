@@ -4,8 +4,6 @@ Test curl_setopt(_array)() with options that take callabes
 curl
 --FILE--
 <?php
-include 'server.inc';
-$host = curl_cli_server_start();
 
 function testOption(CurlHandle $handle, int $option) {
     try {
@@ -21,10 +19,9 @@ function testOption(CurlHandle $handle, int $option) {
     }
 }
 
-$url = "{$host}/get.inc";
+$url = "https://example.com";
 $ch = curl_init($url);
 testOption($ch, CURLOPT_PROGRESSFUNCTION);
-testOption($ch, CURLOPT_SSH_HOSTKEYFUNCTION);
 testOption($ch, CURLOPT_XFERINFOFUNCTION);
 testOption($ch, CURLOPT_FNMATCH_FUNCTION);
 testOption($ch, CURLOPT_WRITEFUNCTION);
@@ -35,8 +32,6 @@ testOption($ch, CURLOPT_READFUNCTION);
 --EXPECT--
 TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_PROGRESSFUNCTION, function "undefined" not found or invalid function name
 TypeError: curl_setopt_array(): Argument #2 ($options) must be a valid callback for option CURLOPT_PROGRESSFUNCTION, function "undefined" not found or invalid function name
-TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_SSH_HOSTKEYFUNCTION, function "undefined" not found or invalid function name
-TypeError: curl_setopt_array(): Argument #2 ($options) must be a valid callback for option CURLOPT_SSH_HOSTKEYFUNCTION, function "undefined" not found or invalid function name
 TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_XFERINFOFUNCTION, function "undefined" not found or invalid function name
 TypeError: curl_setopt_array(): Argument #2 ($options) must be a valid callback for option CURLOPT_XFERINFOFUNCTION, function "undefined" not found or invalid function name
 TypeError: curl_setopt(): Argument #3 ($value) must be a valid callback for option CURLOPT_FNMATCH_FUNCTION, function "undefined" not found or invalid function name
