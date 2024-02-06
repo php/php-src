@@ -73,6 +73,7 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 					call_info->num_args = opline->extended_value;
 					call_info->next_callee = func_info->callee_info;
 					call_info->is_prototype = is_prototype;
+					call_info->is_frameless = false;
 					func_info->callee_info = call_info;
 
 					if (build_flags & ZEND_CALL_TREE) {
@@ -102,6 +103,24 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 				call_info = NULL;
 				call++;
 				break;
+			case ZEND_FRAMELESS_ICALL_0:
+			case ZEND_FRAMELESS_ICALL_1:
+			case ZEND_FRAMELESS_ICALL_2:
+			case ZEND_FRAMELESS_ICALL_3: {
+				func = ZEND_FLF_FUNC(opline);
+				zend_call_info *call_info = zend_arena_calloc(arena, 1, sizeof(zend_call_info));
+				call_info->caller_op_array = op_array;
+				call_info->caller_init_opline = opline;
+				call_info->caller_call_opline = NULL;
+				call_info->callee_func = func;
+				call_info->num_args = ZEND_FLF_NUM_ARGS(opline->opcode);
+				call_info->next_callee = func_info->callee_info;
+				call_info->is_prototype = false;
+				call_info->is_frameless = true;
+				call_info->next_caller = NULL;
+				func_info->callee_info = call_info;
+				break;
+			}
 			case ZEND_DO_FCALL:
 			case ZEND_DO_ICALL:
 			case ZEND_DO_UCALL:
@@ -260,9 +279,11 @@ ZEND_API zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info
 		if (call->caller_call_opline) {
 			map[call->caller_call_opline - op_array->opcodes] = call;
 		}
-		for (i = 0; i < call->num_args; i++) {
-			if (call->arg_info[i].opline) {
-				map[call->arg_info[i].opline - op_array->opcodes] = call;
+		if (!call->is_frameless) {
+			for (i = 0; i < call->num_args; i++) {
+				if (call->arg_info[i].opline) {
+					map[call->arg_info[i].opline - op_array->opcodes] = call;
+				}
 			}
 		}
 	}

@@ -115,6 +115,7 @@ PHPAPI php_basic_globals basic_globals;
 
 #include "php_fopen_wrappers.h"
 #include "streamsfuncs.h"
+#include "zend_frameless_function.h"
 #include "basic_functions_arginfo.h"
 
 typedef struct _user_tick_function_entry {

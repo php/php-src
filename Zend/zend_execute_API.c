@@ -38,6 +38,7 @@
 #include "zend_inheritance.h"
 #include "zend_observer.h"
 #include "zend_call_stack.h"
+#include "zend_frameless_function.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -536,7 +537,7 @@ ZEND_API const char *get_active_function_name(void) /* {{{ */
 		return NULL;
 	}
 
-	func = EG(current_execute_data)->func;
+	func = zend_active_function();
 
 	switch (func->type) {
 		case ZEND_USER_FUNCTION: {
@@ -558,11 +559,26 @@ ZEND_API const char *get_active_function_name(void) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_function *zend_active_function_ex(zend_execute_data *execute_data)
+{
+	zend_function *func = EX(func);
+
+	/* Resolve function if op is a frameless call. */
+	if (ZEND_USER_CODE(func->type)) {
+		const zend_op *op = EX(opline);
+		if (ZEND_OP_IS_FRAMELESS_ICALL(op->opcode)) {
+			func = ZEND_FLF_FUNC(op);
+		}
+	}
+
+	return func;
+}
+
 ZEND_API zend_string *get_active_function_or_method_name(void) /* {{{ */
 {
 	ZEND_ASSERT(zend_is_executing());
 
-	return get_function_or_method_name(EG(current_execute_data)->func);
+	return get_function_or_method_name(zend_active_function());
 }
 /* }}} */
 
@@ -578,13 +594,11 @@ ZEND_API zend_string *get_function_or_method_name(const zend_function *func) /* 
 
 ZEND_API const char *get_active_function_arg_name(uint32_t arg_num) /* {{{ */
 {
-	zend_function *func;
-
 	if (!zend_is_executing()) {
 		return NULL;
 	}
 
-	func = EG(current_execute_data)->func;
+	zend_function *func = zend_active_function();
 
 	return get_function_arg_name(func, arg_num);
 }

@@ -114,6 +114,12 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 4. OpCode changes
 ========================
 
+* New FRAMELESS_ICALL_[0,3] opcodes for faster internal function calls have been
+  added. These opcodes don't create a stack frame, but pass arguments via opcode
+  operands. They only work for functions that are known at compile-time, and
+  that provide a frameless handler (search for usages of the
+  ZEND_FRAMELESS_FUNCTION macro).
+
 ========================
 5. SAPI changes
 ========================

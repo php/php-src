@@ -29,6 +29,7 @@
 #include <stdint.h>
 
 #include "zend_llist.h"
+#include "zend_frameless_function.h"
 
 #define SET_UNUSED(op) do { \
 	op ## _type = IS_UNUSED; \
@@ -198,6 +199,7 @@ typedef struct _zend_oparray_context {
 	int        last_brk_cont;
 	zend_brk_cont_element *brk_cont_array;
 	HashTable *labels;
+	bool       in_jmp_frameless_branch;
 } zend_oparray_context;
 
 /* Class, property and method flags                  class|meth.|prop.|const*/
@@ -525,6 +527,7 @@ typedef struct _zend_internal_function {
 
 	zif_handler handler;
 	struct _zend_module_entry *module;
+	const zend_frameless_function_info *frameless_function_infos;
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 } zend_internal_function;
 
@@ -654,6 +657,11 @@ ZEND_STATIC_ASSERT(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
 	(EG(current_execute_data)->prev_execute_data && \
 	 EG(current_execute_data)->prev_execute_data->func && \
 	 ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)->prev_execute_data))
+
+#define ZEND_FLF_ARG_USES_STRICT_TYPES() \
+	(EG(current_execute_data) && \
+	 EG(current_execute_data)->func && \
+	 ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))
 
 #define ZEND_RET_USES_STRICT_TYPES() \
 	ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))

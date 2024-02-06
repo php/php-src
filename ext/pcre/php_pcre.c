@@ -1462,6 +1462,30 @@ PHP_FUNCTION(preg_match)
 }
 /* }}} */
 
+ZEND_FRAMELESS_FUNCTION(preg_match, 2)
+{
+	zval regex_tmp, subject_tmp;
+	zend_string *regex, *subject;
+
+	Z_FLF_PARAM_STR(1, regex, regex_tmp);
+	Z_FLF_PARAM_STR(2, subject, subject_tmp);
+
+	/* Compile regex or get it from cache. */
+	pcre_cache_entry *pce;
+	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	pce->refcount++;
+	php_pcre_match_impl(pce, subject, return_value, /* subpats */ NULL,
+		/* global */ false, /* flags */ 0, /* start_offset */ 0);
+	pce->refcount--;
+
+flf_clean:
+	Z_FLF_PARAM_FREE_STR(1, regex_tmp);
+	Z_FLF_PARAM_FREE_STR(2, subject_tmp);
+}
+
 /* {{{ Perform a Perl-style global regular expression match */
 PHP_FUNCTION(preg_match_all)
 {
@@ -2237,30 +2261,18 @@ static size_t preg_replace_func_impl(zval *return_value,
 }
 /* }}} */
 
-/* {{{ preg_replace_common */
-static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, bool is_filter)
-{
-	zval *zcount = NULL;
-	zend_string *regex_str;
-	HashTable *regex_ht;
-	zend_string *replace_str;
-	HashTable *replace_ht;
-	zend_string *subject_str;
-	HashTable *subject_ht;
-	zend_long limit = -1;
+static void _preg_replace_common(
+	zval *return_value,
+	HashTable *regex_ht, zend_string *regex_str,
+	HashTable *replace_ht, zend_string *replace_str,
+	HashTable *subject_ht, zend_string *subject_str,
+	zend_long limit,
+	zval *zcount,
+	bool is_filter
+) {
 	size_t replace_count = 0;
 	zend_string	*result;
 	size_t old_replace_count;
-
-	/* Get function parameters and do error-checking. */
-	ZEND_PARSE_PARAMETERS_START(3, 5)
-		Z_PARAM_ARRAY_HT_OR_STR(regex_ht, regex_str)
-		Z_PARAM_ARRAY_HT_OR_STR(replace_ht, replace_str)
-		Z_PARAM_ARRAY_HT_OR_STR(subject_ht, subject_str)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(limit)
-		Z_PARAM_ZVAL(zcount)
-	ZEND_PARSE_PARAMETERS_END();
 
 	/* If replace is an array then the regex argument needs to also be an array */
 	if (replace_ht && !regex_ht) {
@@ -2323,6 +2335,32 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, bool is_filter)
 		ZEND_TRY_ASSIGN_REF_LONG(zcount, replace_count);
 	}
 }
+
+/* {{{ preg_replace_common */
+static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, bool is_filter)
+{
+	zend_string *regex_str, *replace_str, *subject_str;
+	HashTable *regex_ht, *replace_ht, *subject_ht;
+	zend_long limit = -1;
+	zval *zcount = NULL;
+
+	/* Get function parameters and do error-checking. */
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_ARRAY_HT_OR_STR(regex_ht, regex_str)
+		Z_PARAM_ARRAY_HT_OR_STR(replace_ht, replace_str)
+		Z_PARAM_ARRAY_HT_OR_STR(subject_ht, subject_str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(limit)
+		Z_PARAM_ZVAL(zcount)
+	ZEND_PARSE_PARAMETERS_END();
+
+	_preg_replace_common(
+		return_value,
+		regex_ht, regex_str,
+		replace_ht, replace_str,
+		subject_ht, subject_str,
+		limit, zcount, is_filter);
+}
 /* }}} */
 
 /* {{{ Perform Perl-style regular expression replacement. */
@@ -2331,6 +2369,29 @@ PHP_FUNCTION(preg_replace)
 	preg_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} */
+
+ZEND_FRAMELESS_FUNCTION(preg_replace, 3)
+{
+	zend_string *regex_str, *replace_str, *subject_str;
+	HashTable *regex_ht, *replace_ht, *subject_ht;
+	zval regex_tmp, replace_tmp, subject_tmp;
+
+	Z_FLF_PARAM_ARRAY_HT_OR_STR(1, regex_ht, regex_str, regex_tmp);
+	Z_FLF_PARAM_ARRAY_HT_OR_STR(2, replace_ht, replace_str, replace_tmp);
+	Z_FLF_PARAM_ARRAY_HT_OR_STR(3, subject_ht, subject_str, subject_tmp);
+
+	_preg_replace_common(
+		return_value,
+		regex_ht, regex_str,
+		replace_ht, replace_str,
+		subject_ht, subject_str,
+		/* limit */ -1, /* zcount */ NULL, /* is_filter */ false);
+
+flf_clean:;
+	Z_FLF_PARAM_FREE_STR(1, regex_tmp);
+	Z_FLF_PARAM_FREE_STR(2, replace_tmp);
+	Z_FLF_PARAM_FREE_STR(3, subject_tmp);
+}
 
 /* {{{ Perform Perl-style regular expression replacement using replacement callback. */
 PHP_FUNCTION(preg_replace_callback)

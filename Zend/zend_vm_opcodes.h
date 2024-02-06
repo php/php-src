@@ -286,7 +286,12 @@ END_EXTERN_C()
 #define ZEND_VERIFY_NEVER_TYPE          201
 #define ZEND_CALLABLE_CONVERT           202
 #define ZEND_BIND_INIT_STATIC_OR_JMP    203
+#define ZEND_FRAMELESS_ICALL_0          204
+#define ZEND_FRAMELESS_ICALL_1          205
+#define ZEND_FRAMELESS_ICALL_2          206
+#define ZEND_FRAMELESS_ICALL_3          207
+#define ZEND_JMP_FRAMELESS              208
 
-#define ZEND_VM_LAST_OPCODE             203
+#define ZEND_VM_LAST_OPCODE             208
 
 #endif

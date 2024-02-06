@@ -67,6 +67,14 @@ static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name,
 	return fbc;
 }
 
+static uint32_t ZEND_FASTCALL zend_jit_jmp_frameless_helper(zval *func_name, void **cache_slot)
+{
+	zval *func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name));
+	zend_jmp_fl_result result = (func == NULL) + 1;
+	*cache_slot = (void *)(uintptr_t)result;
+	return result;
+}
+
 static zend_function* ZEND_FASTCALL zend_jit_find_ns_func_helper(zval *func_name, void **cache_slot)
 {
 	zval *func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 1));
