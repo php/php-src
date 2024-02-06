@@ -23,6 +23,7 @@
 #include "php_string.h"
 #include "php_scandir.h"
 #include "basic_functions.h"
+#include "dir_arginfo.h"
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -33,17 +34,6 @@
 #ifdef PHP_WIN32
 #include "win32/readdir.h"
 #endif
-
-
-#ifdef HAVE_GLOB
-#ifndef PHP_WIN32
-#include <glob.h>
-#else
-#include "win32/glob.h"
-#endif
-#endif
-
-#include "dir_arginfo.h"
 
 typedef struct {
 	zend_resource *default_dir;
@@ -133,48 +123,6 @@ PHP_MINIT_FUNCTION(dir)
 	pathsep_str[0] = ZEND_PATHS_SEPARATOR;
 	pathsep_str[1] = '\0';
 	REGISTER_STRING_CONSTANT("PATH_SEPARATOR", pathsep_str, CONST_PERSISTENT);
-
-#ifdef HAVE_GLOB
-
-#ifndef GLOB_BRACE
-# define GLOB_BRACE 0
-#endif
-
-#ifndef GLOB_ERR
-# define GLOB_ERR 0
-#endif
-
-#ifndef GLOB_MARK
-# define GLOB_MARK 0
-#endif
-
-#ifndef GLOB_NOCHECK
-# define GLOB_NOCHECK 0
-#endif
-
-#ifndef GLOB_NOESCAPE
-# define GLOB_NOESCAPE 0
-#endif
-
-#ifndef GLOB_NOSORT
-# define GLOB_NOSORT 0
-#endif
-
-#ifndef GLOB_ONLYDIR
-# define GLOB_ONLYDIR (1<<30)
-# define GLOB_EMULATE_ONLYDIR
-# define GLOB_FLAGMASK (~GLOB_ONLYDIR)
-#else
-# define GLOB_FLAGMASK (~0)
-#endif
-
-/* This is used for checking validity of passed flags (passing invalid flags causes segfault in glob()!! */
-#define GLOB_AVAILABLE_FLAGS (0 | GLOB_BRACE | GLOB_MARK | GLOB_NOSORT | GLOB_NOCHECK | GLOB_NOESCAPE | GLOB_ERR | GLOB_ONLYDIR)
-
-	REGISTER_LONG_CONSTANT("GLOB_ONLYDIR", GLOB_ONLYDIR, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("GLOB_AVAILABLE_FLAGS", GLOB_AVAILABLE_FLAGS, CONST_PERSISTENT);
-
-#endif /* HAVE_GLOB */
 
 	return SUCCESS;
 }

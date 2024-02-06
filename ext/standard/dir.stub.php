@@ -2,47 +2,63 @@
 
 /** @generate-class-entries */
 
-#if (defined(HAVE_GLOB) && defined(GLOB_BRACE))
+#ifdef HAVE_GLOB
+#ifdef GLOB_BRACE
 /**
  * @var int
  * @cvalue GLOB_BRACE
  */
 const GLOB_BRACE = UNKNOWN;
 #endif
-#if (defined(HAVE_GLOB) && defined(GLOB_ERR))
+#ifdef GLOB_ERR
 /**
  * @var int
  * @cvalue GLOB_ERR
  */
 const GLOB_ERR = UNKNOWN;
 #endif
-#if (defined(HAVE_GLOB) && defined(GLOB_MARK))
+#ifdef GLOB_MARK
 /**
  * @var int
  * @cvalue GLOB_MARK
  */
 const GLOB_MARK = UNKNOWN;
 #endif
-#if (defined(HAVE_GLOB) && defined(GLOB_NOCHECK))
+#ifdef GLOB_NOCHECK
 /**
  * @var int
  * @cvalue GLOB_NOCHECK
  */
 const GLOB_NOCHECK = UNKNOWN;
 #endif
-#if (defined(HAVE_GLOB) && defined(GLOB_NOESCAPE))
+#ifdef GLOB_NOESCAPE
 /**
  * @var int
  * @cvalue GLOB_NOESCAPE
  */
 const GLOB_NOESCAPE = UNKNOWN;
 #endif
-#if (defined(HAVE_GLOB) && defined(GLOB_NOSORT))
+#ifdef GLOB_NOSORT
 /**
  * @var int
  * @cvalue GLOB_NOSORT
  */
 const GLOB_NOSORT = UNKNOWN;
+#endif
+#ifdef GLOB_ONLYDIR
+/**
+ * @var int
+ * @cvalue GLOB_ONLYDIR
+ */
+const GLOB_ONLYDIR = UNKNOWN;
+#endif
+#ifdef GLOB_AVAILABLE_FLAGS
+/**
+ * @var int
+ * @cvalue GLOB_AVAILABLE_FLAGS
+ */
+const GLOB_AVAILABLE_FLAGS = UNKNOWN;
+#endif
 #endif
 /**
  * @var int
