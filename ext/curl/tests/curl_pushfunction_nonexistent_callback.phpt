@@ -25,7 +25,7 @@ curl_multi_setopt($mh, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 curl_multi_setopt($mh, CURLMOPT_PUSHFUNCTION, "nonexistent");
 
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "https://localhost/serverpush");
+curl_setopt($ch, CURLOPT_URL, (getenv('SERVER_NAME') ?: 'https://localhost') . '/serverpush');
 curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
