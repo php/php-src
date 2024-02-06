@@ -3737,7 +3737,7 @@ function convert_uudecode(string $string): string|false {}
 function var_dump(mixed $value, mixed ...$values): void {}
 
 /** @refcount 1 */
-function var_export(mixed $value, bool $return = false): ?string {}
+function var_export(mixed $value, bool $return = false, bool $short_array = false): ?string {}
 
 function debug_zval_dump(mixed $value, mixed ...$values): void {}
 
