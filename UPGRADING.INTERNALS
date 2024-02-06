@@ -50,6 +50,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The configure option --with-zlib-dir has been removed.
    - COOKIE_IO_FUNCTIONS_T symbol has been removed (use cookie_io_functions_t).
    - HAVE_SOCKADDR_UN_SUN_LEN symbol renamed to HAVE_STRUCT_SOCKADDR_UN_SUN_LEN.
+   - HAVE_UTSNAME_DOMAINNAME symbol renamed to HAVE_STRUCT_UTSNAME_DOMAINNAME.
    - PHP_CHECK_IN_ADDR_T M4 macro and 'in_addr_t' fallback definition to 'u_int'
      removed (use AC_CHECK_TYPES Autoconf macro instead).
    - HAVE_ODBC2 symbol has been removed in ext/odbc.
