@@ -330,13 +330,13 @@ PHP_FUNCTION(request_parse_body)
 	}
 
 	if (!SG(request_info).content_type) {
-		zend_throw_error(spl_ce_InvalidArgumentException, "Request does not provide a content type");
+		zend_throw_error(zend_ce_request_parse_body_exception, "Request does not provide a content type");
 		goto exit;
 	}
 
 	sapi_read_post_data();
 	if (!SG(request_info).post_entry) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Content-Type \"%s\" is not supported", SG(request_info).content_type);
+		zend_throw_error(spl_ce_InvalidArgumentException, "Content-Type \"%s\" is not supported", SG(request_info).content_type);
 		goto exit;
 	}
 

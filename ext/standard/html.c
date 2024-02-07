@@ -1559,4 +1559,3 @@ PHP_FUNCTION(get_html_translation_table)
 	}
 }
 /* }}} */
-

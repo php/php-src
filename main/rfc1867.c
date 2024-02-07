@@ -227,6 +227,7 @@ static int fill_buffer(multipart_buffer *self)
 	while (bytes_to_read > 0) {
 
 		char *buf = self->buffer + self->bytes_in_buffer;
+
 		actual_read = (int)sapi_module.read_post(buf, bytes_to_read);
 
 		/* update the buffer length */

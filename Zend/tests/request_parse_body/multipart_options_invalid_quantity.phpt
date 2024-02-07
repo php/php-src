@@ -14,4 +14,4 @@ try {
 ?>
 --EXPECTF--
 Warning: Invalid quantity "1GB": unknown multiplier "B", interpreting as "1" for backwards compatibility in %s on line %d
-InvalidArgumentException: Request does not provide a content type
+RequestParseBodyException: Request does not provide a content type
