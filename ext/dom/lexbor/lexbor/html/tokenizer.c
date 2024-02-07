@@ -315,12 +315,13 @@ lxb_html_tokenizer_chunk(lxb_html_tokenizer_t *tkz, const lxb_char_t *data,
     tkz->last = end;
 
     while (data < end) {
+        size_t current_column = tkz->current_column;
         const lxb_char_t *new_data = tkz->state(tkz, data, end);
         while (data < new_data) {
             /* Codepoints < 0x80 are encoded the same as their ASCII counterpart, so '\n' will uniquely identify a newline. */
             if (*data == '\n') {
                 tkz->current_line++;
-                tkz->current_column = 0;
+                current_column = 0;
             } else {
                 /* Other characters can be mapped back to the unicode codepoint offset because UTF-8 is a prefix code.
                  * Continuation bytes start with 0b10XXXXXX so we can skip those to only get the start of an encoded code point. */
@@ -328,11 +329,12 @@ lxb_html_tokenizer_chunk(lxb_html_tokenizer_t *tkz, const lxb_char_t *data,
                     /* Continuation byte, do nothing */
                 } else {
                     /* First byte for a codepoint */
-                    tkz->current_column++;
+                    current_column++;
                 }
             }
             data++;
         }
+        tkz->current_column = current_column;
     }
 
     return tkz->status;
