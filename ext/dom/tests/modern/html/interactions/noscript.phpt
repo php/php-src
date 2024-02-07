@@ -14,7 +14,7 @@ echo $dom->saveXML(), "\n";
 
 echo "--- Modifying the text content: tag ---\n";
 
-$xpath = new DOMXPath($dom);
+$xpath = new DOM\XPath($dom);
 $noscript = $xpath->query("//noscript")[0];
 $noscript->textContent = "<p>bye</p>";
 echo $dom->saveHTML(), "\n";

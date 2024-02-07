@@ -22,7 +22,7 @@ $dom = DOM\HTMLDocument::createFromString(<<<HTML
 </html>
 HTML);
 
-$xpath = new DOMXPath($dom);
+$xpath = new DOM\XPath($dom);
 
 foreach ($xpath->query("//*") as $element) {
     echo "Element: '", $element->tagName, "', ", $element->getLineNo(), "\n";

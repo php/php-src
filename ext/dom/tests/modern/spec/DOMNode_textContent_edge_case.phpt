@@ -21,8 +21,8 @@ echo $dom->saveHTML(), "\n";
 
 ?>
 --EXPECT--
-string(0) ""
-string(0) ""
+NULL
+NULL
 <html><head></head><body>foobarbaz</body></html>
 string(9) "foobarbaz"
 string(1) "y"

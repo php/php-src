@@ -22,7 +22,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
-#include "internal_macros.h"
+#include "internal_helpers.h"
 
 const dom_ns_magic_token *dom_ns_is_html_magic_token = (const dom_ns_magic_token *) DOM_XHTML_NS_URI;
 const dom_ns_magic_token *dom_ns_is_mathml_magic_token = (const dom_ns_magic_token *) DOM_MATHML_NS_URI;

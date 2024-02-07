@@ -118,7 +118,7 @@ PHP_METHOD(DOM_XMLDocument, createEmpty)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->is_modern_api_class = true;
+	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
 	intern->document->private_data = dom_libxml_ns_mapper_header(dom_libxml_ns_mapper_create());
 	return;
 
@@ -227,9 +227,14 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->is_modern_api_class = true;
+	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	dom_document_convert_to_modern(intern->document, lxml_doc);
+}
+
+void dom_document_convert_to_modern(php_libxml_ref_obj *document, xmlDocPtr lxml_doc)
+{
 	dom_libxml_ns_mapper *ns_mapper = dom_libxml_ns_mapper_create();
-	intern->document->private_data = dom_libxml_ns_mapper_header(ns_mapper);
+	document->private_data = dom_libxml_ns_mapper_header(ns_mapper);
 	dom_mark_namespaces_as_attributes_too(ns_mapper, lxml_doc);
 }
 

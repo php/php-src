@@ -102,6 +102,7 @@ Since:
 */
 zend_result dom_attr_specified_read(dom_object *obj, zval *retval)
 {
+	/* From spec: "useless; always returns true" */
 	ZVAL_TRUE(retval);
 	return SUCCESS;
 }

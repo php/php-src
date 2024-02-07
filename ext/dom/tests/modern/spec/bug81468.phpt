@@ -13,7 +13,7 @@ $dom
   ->appendChild($dom->createElement('bar'));
 echo ($xml = $dom->saveXML()), "\n";
 
-$xpath = new \DOMXPath($dom);
+$xpath = new DOM\XPath($dom);
 $xpath->registerNamespace('n', 'some:namespace');
 echo "/n:foo/bar -> ", count($xpath->query('/n:foo/bar')), "\n";
 echo "/n:foo/n:bar -> ", count($xpath->query('/n:foo/n:bar')), "\n";
@@ -23,7 +23,7 @@ echo "/n:foo/n:bar -> ", count($xpath->query('/n:foo/n:bar')), "\n";
 $dom = DOM\XMLDocument::createFromString($xml);
 echo ($xml = $dom->saveXML()), "\n";
 
-$xpath = new \DOMXPath($dom);
+$xpath = new DOM\XPath($dom);
 $xpath->registerNamespace('n', 'some:namespace');
 echo "/n:foo/bar -> ", count($xpath->query('/n:foo/bar')), "\n";
 echo "/n:foo/n:bar -> ", count($xpath->query('/n:foo/n:bar')), "\n";

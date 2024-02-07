@@ -10,7 +10,8 @@ require __DIR__ . "/element_dump.inc";
 echo "--- Into rootless document ---\n";
 
 $dom = DOM\HTMLDocument::createEmpty();
-$element = $dom->createElement("HTML", "&hello");
+$element = $dom->createElement("HTML");
+$element->textContent = "&hello";
 dumpElement($element);
 
 $element = $dom->createElement("HEad");
@@ -19,7 +20,8 @@ dumpElement($element);
 echo "--- Into document with HTML root ---\n";
 
 $dom = DOM\HTMLDocument::createEmpty();
-$element = $dom->createElement("HTML", "&hello");
+$element = $dom->createElement("HTML");
+$element->textContent = "&hello";
 $dom->appendChild($element);
 $element = $dom->createElement("HEad");
 dumpElement($element);
@@ -38,14 +40,14 @@ dumpElement($element);
 tagName: string(4) "HTML"
 nodeName: string(4) "HTML"
 textContent: string(6) "&hello"
-prefix: string(0) ""
+prefix: NULL
 namespaceURI: string(28) "http://www.w3.org/1999/xhtml"
 <html>&amp;hello</html>
 
 tagName: string(4) "HEAD"
 nodeName: string(4) "HEAD"
 textContent: string(0) ""
-prefix: string(0) ""
+prefix: NULL
 namespaceURI: string(28) "http://www.w3.org/1999/xhtml"
 <head></head>
 
@@ -53,7 +55,7 @@ namespaceURI: string(28) "http://www.w3.org/1999/xhtml"
 tagName: string(4) "HEAD"
 nodeName: string(4) "HEAD"
 textContent: string(0) ""
-prefix: string(0) ""
+prefix: NULL
 namespaceURI: string(28) "http://www.w3.org/1999/xhtml"
 <head></head>
 
@@ -61,6 +63,6 @@ namespaceURI: string(28) "http://www.w3.org/1999/xhtml"
 tagName: string(4) "HEAD"
 nodeName: string(4) "HEAD"
 textContent: string(0) ""
-prefix: string(0) ""
+prefix: NULL
 namespaceURI: string(28) "http://www.w3.org/1999/xhtml"
 <head></head>

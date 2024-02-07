@@ -14,12 +14,12 @@ try {
 // The override encoding matches with the document encoding attribute
 $dom = DOM\HTMLDocument::createFromString(file_get_contents(__DIR__ . '/gb18030_without_charset.html'), overrideEncoding: 'GB18030');
 var_dump($dom->documentElement->lastChild->textContent);
-var_dump($dom->encoding);
+var_dump($dom->charset);
 
 // The override encoding mismatches with the document encoding attribute
 $dom = DOM\HTMLDocument::createFromString(file_get_contents(__DIR__ . '/fallback_encoding.html'), overrideEncoding: 'Windows-1252');
 var_dump($dom->documentElement->lastChild->textContent);
-var_dump($dom->encoding);
+var_dump($dom->charset);
 
 ?>
 --EXPECT--

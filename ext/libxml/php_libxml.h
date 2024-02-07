@@ -67,13 +67,29 @@ typedef struct _php_libxml_private_data_header {
 	/* extra fields */
 } php_libxml_private_data_header;
 
+/**
+ * Multiple representations are possible of the same underlying node data.
+ * This is the case for example when a SimpleXML node is imported into DOM.
+ * It must not be possible to obtain both a legacy and a modern representation
+ * of the same node, as they have different assumptions. The class_type field
+ * allows us to pin the representation to one of the two. If it is unset, no
+ * representation has been forced upon the node yet, and thus no assumptions
+ * have yet been made. This is the case for example when a SimpleXML node is
+ * created by SimpleXML itself and never leaves SimpleXML.
+ */
+typedef enum _php_libxml_class_type {
+	PHP_LIBXML_CLASS_UNSET = 0,
+	PHP_LIBXML_CLASS_LEGACY = 1,
+	PHP_LIBXML_CLASS_MODERN = 2,
+} php_libxml_class_type;
+
 typedef struct _php_libxml_ref_obj {
 	void *ptr;
 	libxml_doc_props *doc_props;
 	php_libxml_cache_tag cache_tag;
 	php_libxml_private_data_header *private_data;
 	int refcount;
-	bool is_modern_api_class;
+	php_libxml_class_type class_type;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {

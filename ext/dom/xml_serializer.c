@@ -24,7 +24,7 @@
 #include "xml_serializer.h"
 #include "namespace_compat.h"
 #include "serialize_common.h"
-#include "internal_macros.h"
+#include "internal_helpers.h"
 
 // TODO: implement iterative approach instead of recursive?
 

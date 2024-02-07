@@ -11,21 +11,27 @@ $dom = DOM\HTMLDocument::createEmpty();
 $container = $dom->appendChild($dom->createElementNS("urn:a", "container"));
 
 $attrs = [];
-$attrs[] = $container->setAttribute("foo:bar", "&hello1");
+
+function setAttribute($container, string $name, string $value): DOM\Attr {
+    $container->setAttribute($name, $value);
+    return $container->getAttributeNode($name);
+}
+
+$attrs[] = setAttribute($container, "foo:bar", "&hello1");
 echo $dom->saveHTML($container), "\n";
-$attrs[] = $container->setAttribute("foo:bar", "&hello2");
+$attrs[] = setAttribute($container, "foo:bar", "&hello2");
 echo $dom->saveHTML($container), "\n";
-$attrs[] = $container->setAttribute("bar", "&hello3");
+$attrs[] = setAttribute($container, "bar", "&hello3");
 echo $dom->saveHTML($container), "\n";
-$attrs[] = $container->setAttribute("xmlns", "&hello4");
+$attrs[] = setAttribute($container, "xmlns", "&hello4");
 echo $dom->saveHTML($container), "\n";
-$attrs[] = $container->setAttribute("XMLns", "&hello5");
+$attrs[] = setAttribute($container, "XMLns", "&hello5");
 echo $dom->saveHTML($container), "\n";
-$attrs[] = $container->setAttribute("BAR", "&hello6");
+$attrs[] = setAttribute($container, "BAR", "&hello6");
 echo $dom->saveHTML($container), "\n";
 
 $container->setAttributeNode($dom->createAttributeNS("urn:b", "in:ns"));
-$attrs[] = $container->setAttribute("in:ns", "&hello7");
+$attrs[] = setAttribute($container, "in:ns", "&hello7");
 echo $dom->saveHTML($container), "\n";
 
 // Dump at the end to check whether they influenced each other

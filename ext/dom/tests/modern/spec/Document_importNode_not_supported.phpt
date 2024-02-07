@@ -19,6 +19,6 @@ try {
 
 ?>
 --EXPECTF--
-Warning: DOM\Document::importNode(): Cannot import: Node Type Not Supported in %s on line %d
+Warning: DOMDocument::importNode(): Cannot import: Node Type Not Supported in %s on line %d
 bool(false)
 Not Supported Error

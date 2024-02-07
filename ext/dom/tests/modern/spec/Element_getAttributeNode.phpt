@@ -47,5 +47,5 @@ string(1) "B"
 string(1) "B"
 --- Get after creating with namespace case sensitive ---
 string(1) "C"
-bool(false)
-bool(false)
+NULL
+NULL

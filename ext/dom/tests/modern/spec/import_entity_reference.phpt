@@ -22,13 +22,17 @@ var_dump($imported->firstChild);
 ?>
 --EXPECT--
 <root>&foo;</root>
-object(DOMEntityReference)#3 (18) {
-  ["nodeName"]=>
-  string(3) "foo"
-  ["nodeValue"]=>
-  NULL
+object(DOM\EntityReference)#3 (14) {
   ["nodeType"]=>
   int(5)
+  ["nodeName"]=>
+  string(3) "foo"
+  ["baseURI"]=>
+  NULL
+  ["isConnected"]=>
+  bool(false)
+  ["ownerDocument"]=>
+  string(22) "(object value omitted)"
   ["parentNode"]=>
   string(22) "(object value omitted)"
   ["parentElement"]=>
@@ -43,20 +47,8 @@ object(DOMEntityReference)#3 (18) {
   NULL
   ["nextSibling"]=>
   NULL
-  ["attributes"]=>
-  NULL
-  ["isConnected"]=>
-  bool(false)
-  ["ownerDocument"]=>
-  string(22) "(object value omitted)"
-  ["namespaceURI"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["localName"]=>
-  NULL
-  ["baseURI"]=>
+  ["nodeValue"]=>
   NULL
   ["textContent"]=>
-  string(0) ""
+  NULL
 }

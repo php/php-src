@@ -5,6 +5,8 @@ dom
 --FILE--
 <?php
 
+require __DIR__ . '/create_element_util.inc';
+
 $dom = DOM\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE html>
 <html>
@@ -18,9 +20,9 @@ $dom = DOM\HTMLDocument::createFromString(<<<HTML
 HTML);
 
 $body = $dom->getElementsByTagName('body')->item(0);
-$body->appendChild($dom->createElementNS(NULL, "p", "content 1"));
-$body->appendChild($dom->createElementNS("", "p", "content 2"));
-$body->appendChild($dom->createElementNS("http://www.w3.org/2000/svg", "svg:svg", "content 3"));
+$body->appendChild(createElementNS($dom, NULL, "p", "content 1"));
+$body->appendChild(createElementNS($dom, "", "p", "content 2"));
+$body->appendChild(createElementNS($dom, "http://www.w3.org/2000/svg", "svg:svg", "content 3"));
 
 function dump($dom, $uri, $local) {
     $list = $dom->getElementsByTagNameNS($uri, $local);

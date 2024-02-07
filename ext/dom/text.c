@@ -126,15 +126,10 @@ PHP_METHOD(DOMText, splitText)
 		RETURN_THROWS();
 	}
 
-	if (node->type != XML_TEXT_NODE && node->type != XML_CDATA_SECTION_NODE) {
-		/* TODO Add warning? */
-		RETURN_FALSE;
-	}
-
 	cur = node->content;
 	if (cur == NULL) {
-		/* TODO Add warning? */
-		RETURN_FALSE;
+		/* TODO: is this even possible? */
+		cur = BAD_CAST "";
 	}
 	length = xmlUTF8Strlen(cur);
 

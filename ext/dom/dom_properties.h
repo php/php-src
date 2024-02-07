@@ -115,6 +115,7 @@ zend_result dom_node_is_connected_read(dom_object *obj, zval *retval);
 zend_result dom_node_owner_document_read(dom_object *obj, zval *retval);
 zend_result dom_node_namespace_uri_read(dom_object *obj, zval *retval);
 zend_result dom_node_prefix_read(dom_object *obj, zval *retval);
+zend_result dom_modern_node_prefix_read(dom_object *obj, zval *retval);
 zend_result dom_node_prefix_write(dom_object *obj, zval *newval);
 zend_result dom_node_local_name_read(dom_object *obj, zval *retval);
 zend_result dom_node_base_uri_read(dom_object *obj, zval *retval);

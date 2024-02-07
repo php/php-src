@@ -43,17 +43,17 @@ var_dump($body->getAttributeNS("urn:a", "LOCAL2"));
 --- After parsing, i.e. without namespace ---
 string(3) "foo"
 string(3) "foo"
-string(0) ""
-string(0) ""
+NULL
+NULL
 string(3) "baz"
 string(3) "baz"
-string(0) ""
-string(0) ""
+NULL
+NULL
 --- Special legacy case ---
-string(0) ""
+NULL
 --- Get after creating without namespace ---
 string(1) "A"
-string(0) ""
+NULL
 --- Get after creating with namespace ---
 string(1) "B"
-string(0) ""
+NULL

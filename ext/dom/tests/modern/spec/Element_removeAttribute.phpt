@@ -45,19 +45,19 @@ echo $dom->saveHTML($body), "\n";
 ?>
 --EXPECT--
 --- Remove after parsing ---
-bool(true)
-bool(true)
+NULL
+NULL
 <body></body>
 --- Remove after creating without namespace ---
-bool(true)
+NULL
 <body></body>
 --- Remove after creating with namespace ---
-bool(true)
+NULL
 <body></body>
-bool(true)
+NULL
 <body></body>
 --- Remove after creating with namespace case sensitive ---
-bool(true)
-bool(false)
-bool(false)
+NULL
+NULL
+NULL
 <body></body>

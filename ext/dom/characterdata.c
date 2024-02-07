@@ -137,7 +137,8 @@ PHP_METHOD(DOMCharacterData, substringData)
 
 	cur = node->content;
 	if (cur == NULL) {
-		RETURN_FALSE;
+		/* TODO: is this even possible? */
+		cur = BAD_CAST "";
 	}
 
 	length = xmlUTF8Strlen(cur);
@@ -174,7 +175,7 @@ PHP_METHOD(DOMCharacterData, substringData)
 Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-appenddata
 Since:
 */
-PHP_METHOD(DOMCharacterData, appendData)
+static void dom_character_data_append_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -189,7 +190,19 @@ PHP_METHOD(DOMCharacterData, appendData)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 	xmlTextConcat(nodep, (xmlChar *) arg, arg_len);
-	RETURN_TRUE;
+	if (return_true) {
+		RETURN_TRUE;
+	}
+}
+
+PHP_METHOD(DOMCharacterData, appendData)
+{
+	dom_character_data_append_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
+PHP_METHOD(DOM_CharacterData, appendData)
+{
+	dom_character_data_append_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} end dom_characterdata_append_data */
 
@@ -197,7 +210,7 @@ PHP_METHOD(DOMCharacterData, appendData)
 Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-insertdata
 Since:
 */
-PHP_METHOD(DOMCharacterData, insertData)
+static void dom_character_data_insert_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
 {
 	zval *id;
 	xmlChar		*cur, *first, *second;
@@ -218,7 +231,8 @@ PHP_METHOD(DOMCharacterData, insertData)
 
 	cur = node->content;
 	if (cur == NULL) {
-		RETURN_FALSE;
+		/* TODO: is this even possible? */
+		cur = BAD_CAST "";
 	}
 
 	length = xmlUTF8Strlen(cur);
@@ -247,7 +261,19 @@ PHP_METHOD(DOMCharacterData, insertData)
 	xmlFree(first);
 	xmlFree(second);
 
-	RETURN_TRUE;
+	if (return_true) {
+		RETURN_TRUE;
+	}
+}
+
+PHP_METHOD(DOMCharacterData, insertData)
+{
+	dom_character_data_insert_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
+PHP_METHOD(DOM_CharacterData, insertData)
+{
+	dom_character_data_insert_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} end dom_characterdata_insert_data */
 
@@ -255,7 +281,7 @@ PHP_METHOD(DOMCharacterData, insertData)
 Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-deletedata
 Since:
 */
-PHP_METHOD(DOMCharacterData, deleteData)
+static void dom_character_data_delete_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
 {
 	zval *id;
 	xmlChar    *cur, *substring, *second;
@@ -274,7 +300,8 @@ PHP_METHOD(DOMCharacterData, deleteData)
 
 	cur = node->content;
 	if (cur == NULL) {
-		RETURN_FALSE;
+		/* TODO: is this even possible? */
+		cur = BAD_CAST "";
 	}
 
 	length = xmlUTF8Strlen(cur);
@@ -306,7 +333,19 @@ PHP_METHOD(DOMCharacterData, deleteData)
 	xmlFree(second);
 	xmlFree(substring);
 
-	RETURN_TRUE;
+	if (return_true) {
+		RETURN_TRUE;
+	}
+}
+
+PHP_METHOD(DOMCharacterData, deleteData)
+{
+	dom_character_data_delete_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
+PHP_METHOD(DOM_CharacterData, deleteData)
+{
+	dom_character_data_delete_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} end dom_characterdata_delete_data */
 
@@ -314,7 +353,7 @@ PHP_METHOD(DOMCharacterData, deleteData)
 Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-replacedata
 Since:
 */
-PHP_METHOD(DOMCharacterData, replaceData)
+static void dom_character_data_replace_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
 {
 	zval *id;
 	xmlChar		*cur, *substring, *second = NULL;
@@ -335,7 +374,8 @@ PHP_METHOD(DOMCharacterData, replaceData)
 
 	cur = node->content;
 	if (cur == NULL) {
-		RETURN_FALSE;
+		/* TODO: is this even possible? */
+		cur = BAD_CAST "";
 	}
 
 	length = xmlUTF8Strlen(cur);
@@ -373,7 +413,19 @@ PHP_METHOD(DOMCharacterData, replaceData)
 	}
 	xmlFree(substring);
 
-	RETURN_TRUE;
+	if (return_true) {
+		RETURN_TRUE;
+	}
+}
+
+PHP_METHOD(DOMCharacterData, replaceData)
+{
+	dom_character_data_replace_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
+PHP_METHOD(DOM_CharacterData, replaceData)
+{
+	dom_character_data_replace_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} end dom_characterdata_replace_data */
 

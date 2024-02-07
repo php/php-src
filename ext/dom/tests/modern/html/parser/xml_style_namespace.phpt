@@ -18,7 +18,7 @@ $dom = DOM\HTMLDocument::createFromString(<<<HTML
 HTML);
 
 echo "--- Namespaces ---\n";
-$xpath = new DOMXPath($dom);
+$xpath = new DOM\XPath($dom);
 foreach ($xpath->query("//*[name()='body']//*") as $node) {
     echo $node->nodeName, " ", $node->namespaceURI ?? "(NONE)", "\n";
     echo "prefix: \"", $node->prefix, "\"\n";

@@ -20,5 +20,5 @@ try {
 ?>
 --EXPECT--
 string(7) " World!"
-DOMText::splitText(): Argument #1 ($offset) must be greater than or equal to 0
+DOM\Text::splitText(): Argument #1 ($offset) must be greater than or equal to 0
 Index Size Error

@@ -6,7 +6,7 @@ dom
 <?php
 $dom = DOM\HTMLDocument::createEmpty();
 try {
-    $dom->createProcessingInstruction("?>");
+    $dom->createProcessingInstruction("?>", "");
 } catch (DOMException $e) {
     var_dump($e->getCode());
     echo $e->getMessage(), "\n";
@@ -23,7 +23,7 @@ try {
     var_dump($e->getCode());
     echo $e->getMessage(), "\n";
 }
-$dom->appendChild($dom->createProcessingInstruction("foo"));
+$dom->appendChild($dom->createProcessingInstruction("foo", ""));
 $dom->appendChild($dom->createProcessingInstruction("foo", "bar"));
 echo $dom->saveHTML();
 ?>

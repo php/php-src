@@ -35,11 +35,11 @@ var_dump($dom->documentElement->nextSibling->prefix);
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <p xmlns="http://www.w3.org/1999/xhtml">foo</p>
 string(28) "http://www.w3.org/1999/xhtml"
-string(0) ""
+NULL
 --- Multiple elements ---
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <p xmlns="http://www.w3.org/1999/xhtml">foo</p><strong xmlns="http://www.w3.org/1999/xhtml">bar</strong>
 string(28) "http://www.w3.org/1999/xhtml"
-string(0) ""
+NULL
 string(28) "http://www.w3.org/1999/xhtml"
-string(0) ""
+NULL

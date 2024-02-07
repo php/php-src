@@ -8,14 +8,14 @@ dom
 class MyElement extends DOM\Element {}
 
 $dom = DOM\HTMLDocument::createFromString("<p>foo</p>", LIBXML_NOERROR);
-$dom->registerNodeClass("DOMElement", "MyElement");
+$dom->registerNodeClass("DOM\\Element", "MyElement");
 
 // Destroy reference to the DOM
 $child = $dom->documentElement;
 unset($dom);
 
 // Regain reference using the ownerDocument property
-// Should be a DOM\HTML5Document
+// Should be a DOM\HTMLDocument
 $dom = $child->ownerDocument;
 var_dump($dom);
 // Test if property is preserved (any random doc_props property will do)
@@ -23,27 +23,37 @@ var_dump(get_class($dom->getElementsByTagName("p")->item(0)));
 
 ?>
 --EXPECT--
-object(DOM\HTMLDocument)#1 (25) {
-  ["encoding"]=>
+object(DOM\HTMLDocument)#1 (24) {
+  ["URL"]=>
+  string(11) "about:blank"
+  ["documentURI"]=>
+  string(11) "about:blank"
+  ["characterSet"]=>
+  string(5) "UTF-8"
+  ["charset"]=>
+  string(5) "UTF-8"
+  ["inputEncoding"]=>
   string(5) "UTF-8"
   ["doctype"]=>
   NULL
   ["documentElement"]=>
   string(22) "(object value omitted)"
-  ["documentURI"]=>
-  NULL
   ["firstElementChild"]=>
   string(22) "(object value omitted)"
   ["lastElementChild"]=>
   string(22) "(object value omitted)"
   ["childElementCount"]=>
   int(1)
-  ["nodeName"]=>
-  string(9) "#document"
-  ["nodeValue"]=>
-  NULL
   ["nodeType"]=>
   int(13)
+  ["nodeName"]=>
+  string(9) "#document"
+  ["baseURI"]=>
+  NULL
+  ["isConnected"]=>
+  bool(true)
+  ["ownerDocument"]=>
+  NULL
   ["parentNode"]=>
   NULL
   ["parentElement"]=>
@@ -58,21 +68,9 @@ object(DOM\HTMLDocument)#1 (25) {
   NULL
   ["nextSibling"]=>
   NULL
-  ["attributes"]=>
-  NULL
-  ["isConnected"]=>
-  bool(true)
-  ["ownerDocument"]=>
-  NULL
-  ["namespaceURI"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["localName"]=>
-  NULL
-  ["baseURI"]=>
+  ["nodeValue"]=>
   NULL
   ["textContent"]=>
-  string(0) ""
+  NULL
 }
 string(9) "MyElement"

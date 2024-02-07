@@ -725,7 +725,7 @@ PHP_METHOD(DOM_HTMLDocument, createEmpty)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->is_modern_api_class = true;
+	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
 	intern->document->private_data = dom_libxml_ns_mapper_header(dom_libxml_ns_mapper_create());
 	return;
 
@@ -875,7 +875,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->is_modern_api_class = true;
+	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
 	intern->document->private_data = dom_libxml_ns_mapper_header(ns_mapper);
 	return;
 
@@ -1095,7 +1095,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->is_modern_api_class = true;
+	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
 	intern->document->private_data = dom_libxml_ns_mapper_header(ns_mapper);
 	return;
 
@@ -1270,7 +1270,7 @@ PHP_METHOD(DOM_HTMLDocument, saveHTML)
 	const xmlNode *node;
 	dom_object *intern, *nodeobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O!", &nodep, dom_node_class_entry) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O!", &nodep, dom_modern_node_class_entry) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1295,12 +1295,6 @@ PHP_METHOD(DOM_HTMLDocument, saveHTML)
 	ZEND_ASSERT(result == SUCCESS);
 
 	RETURN_STR(smart_str_extract(&buf));
-}
-
-PHP_METHOD(DOM_HTMLDocument, __construct)
-{
-	/* Private constructor cannot be called. */
-	ZEND_UNREACHABLE();
 }
 
 zend_result dom_html_document_encoding_write(dom_object *obj, zval *newval)

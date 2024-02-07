@@ -12,7 +12,7 @@ $container->appendChild($doc->createTextNode(""));
 $middle = $container->appendChild($doc->createTextNode("foo"));
 $container->appendChild($doc->createTextNode(""));
 
-$doc->normalizeDocument();
+$doc->normalize();
 
 echo $doc->saveXML(), "\n";
 

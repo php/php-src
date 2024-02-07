@@ -113,14 +113,14 @@ static void dom_xpath_ext_function_trampoline(xmlXPathParserContextPtr ctxt, int
 }
 
 /* {{{ */
-PHP_METHOD(DOMXPath, __construct)
+static void dom_xpath_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *document_ce)
 {
 	zval *doc;
 	bool register_node_ns = true;
 	xmlDocPtr docp = NULL;
 	dom_object *docobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &doc, dom_abstract_base_document_class_entry, &register_node_ns) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &doc, document_ce, &register_node_ns) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -153,6 +153,16 @@ PHP_METHOD(DOMXPath, __construct)
 	intern->dom.document = docobj->document;
 	intern->register_node_ns = register_node_ns;
 	php_libxml_increment_doc_ref((php_libxml_node_object *) &intern->dom, docp);
+}
+
+PHP_METHOD(DOMXPath, __construct)
+{
+	dom_xpath_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_document_class_entry);
+}
+
+PHP_METHOD(DOM_XPath, __construct)
+{
+	dom_xpath_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_abstract_base_document_class_entry);
 }
 /* }}} end DOMXPath::__construct */
 
@@ -225,7 +235,7 @@ static void dom_xpath_iter(zval *baseobj, dom_object *intern) /* {{{ */
 }
 /* }}} */
 
-static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
+static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) /* {{{ */
 {
 	zval *context = NULL;
 	xmlNodePtr nodep = NULL;
@@ -237,7 +247,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
 	bool register_node_ns = intern->register_node_ns;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|O!b", &expr, &expr_len, &context, dom_node_class_entry, &register_node_ns) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|O!b", &expr, &expr_len, &context, modern ? dom_modern_node_class_entry : dom_node_class_entry, &register_node_ns) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -334,7 +344,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			} else {
 				ZVAL_EMPTY_ARRAY(&retval);
 			}
-			php_dom_create_iterator(return_value, DOM_NODELIST);
+			php_dom_create_iterator(return_value, DOM_NODELIST, modern);
 			nodeobj = Z_DOMOBJ_P(return_value);
 			dom_xpath_iter(&retval, nodeobj);
 			break;
@@ -364,14 +374,24 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 /* {{{ */
 PHP_METHOD(DOMXPath, query)
 {
-	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY);
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY, false);
+}
+
+PHP_METHOD(DOM_XPath, query)
+{
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY, true);
 }
 /* }}} end dom_xpath_query */
 
 /* {{{ */
 PHP_METHOD(DOMXPath, evaluate)
 {
-	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE);
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE, false);
+}
+
+PHP_METHOD(DOM_XPath, evaluate)
+{
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE, true);
 }
 /* }}} end dom_xpath_evaluate */
 

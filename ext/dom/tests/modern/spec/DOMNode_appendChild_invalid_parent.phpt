@@ -9,7 +9,7 @@ $dom = DOM\XMLDocument::createEmpty();
 
 $text = $dom->createTextNode('Hello World');
 $cdata = $dom->createCDATASection('Hello World');
-$pi = $dom->createProcessingInstruction('Hello');
+$pi = $dom->createProcessingInstruction('Hello', '');
 $attr = $dom->createAttribute('Hello');
 
 try {

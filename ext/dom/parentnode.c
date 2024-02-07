@@ -24,6 +24,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "internal_helpers.h"
 
 /* {{{ firstElementChild DomParentNode
 readonly=yes
@@ -450,19 +451,19 @@ err:
 	return NULL;
 }
 
-static zend_result dom_sanity_check_node_list_types(zval *nodes, int nodesc)
+static zend_result dom_sanity_check_node_list_types(zval *nodes, int nodesc, zend_class_entry *node_ce)
 {
 	for (uint32_t i = 0; i < nodesc; i++) {
 		zend_uchar type = Z_TYPE(nodes[i]);
 		if (type == IS_OBJECT) {
 			const zend_class_entry *ce = Z_OBJCE(nodes[i]);
 
-			if (!instanceof_function(ce, dom_node_class_entry)) {
-				zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_type_name(&nodes[i]));
+			if (!instanceof_function(ce, node_ce)) {
+				zend_argument_type_error(i + 1, "must be of type %s|string, %s given", ZSTR_VAL(node_ce->name), zend_zval_type_name(&nodes[i]));
 				return FAILURE;
 			}
 		} else if (type != IS_STRING) {
-			zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_type_name(&nodes[i]));
+			zend_argument_type_error(i + 1, "must be of type %s|string, %s given", ZSTR_VAL(node_ce->name), zend_zval_type_name(&nodes[i]));
 			return FAILURE;
 		}
 	}
@@ -593,7 +594,7 @@ void php_dom_node_append(php_libxml_ref_obj *document, xmlNodePtr node, xmlNodeP
 /* https://dom.spec.whatwg.org/#dom-parentnode-append */
 void dom_parent_node_append(dom_object *context, zval *nodes, uint32_t nodesc)
 {
-	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc) != SUCCESS)) {
+	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc, dom_get_node_ce(php_dom_follow_spec_doc_ref(context->document))) != SUCCESS)) {
 		return;
 	}
 
@@ -621,7 +622,7 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc)
 		return;
 	}
 
-	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc) != SUCCESS)) {
+	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc, dom_get_node_ce(php_dom_follow_spec_doc_ref(context->document))) != SUCCESS)) {
 		return;
 	}
 
@@ -640,7 +641,7 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, uint32_t nodesc)
 /* https://dom.spec.whatwg.org/#dom-childnode-after */
 void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 {
-	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc) != SUCCESS)) {
+	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc, dom_get_node_ce(php_dom_follow_spec_doc_ref(context->document))) != SUCCESS)) {
 		return;
 	}
 
@@ -672,7 +673,7 @@ void dom_parent_node_after(dom_object *context, zval *nodes, uint32_t nodesc)
 /* https://dom.spec.whatwg.org/#dom-childnode-before */
 void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 {
-	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc) != SUCCESS)) {
+	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc, dom_get_node_ce(php_dom_follow_spec_doc_ref(context->document))) != SUCCESS)) {
 		return;
 	}
 
@@ -753,7 +754,7 @@ void dom_child_node_remove(dom_object *context)
 /* https://dom.spec.whatwg.org/#dom-childnode-replacewith */
 void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 {
-	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc) != SUCCESS)) {
+	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc, dom_get_node_ce(php_dom_follow_spec_doc_ref(context->document))) != SUCCESS)) {
 		return;
 	}
 
@@ -803,7 +804,7 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 /* https://dom.spec.whatwg.org/#dom-parentnode-replacechildren */
 void dom_parent_node_replace_children(dom_object *context, zval *nodes, uint32_t nodesc)
 {
-	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc) != SUCCESS)) {
+	if (UNEXPECTED(dom_sanity_check_node_list_types(nodes, nodesc, dom_get_node_ce(php_dom_follow_spec_doc_ref(context->document))) != SUCCESS)) {
 		return;
 	}
 

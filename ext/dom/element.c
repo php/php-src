@@ -23,6 +23,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "internal_helpers.h"
 
 /*
 * class DOMElement extends DOMNode
@@ -303,6 +304,9 @@ PHP_METHOD(DOMElement, getAttribute)
 	}
 
 	if (value == NULL) {
+		if (php_dom_follow_spec_intern(intern)) {
+			RETURN_NULL();
+		}
 		RETURN_EMPTY_STRING();
 	} else {
 		RETVAL_STRING((char *)value);
@@ -433,9 +437,9 @@ PHP_METHOD(DOMElement, setAttribute)
 		if (attr->type == XML_NAMESPACE_DECL) {
 			RETURN_TRUE;
 		}
-	}
 
-	DOM_RET_OBJ(attr, &ret, intern);
+		DOM_RET_OBJ(attr, &ret, intern);
+	}
 }
 /* }}} end dom_element_set_attribute */
 
@@ -559,18 +563,16 @@ Since:
 */
 PHP_METHOD(DOMElement, removeAttribute)
 {
-	zval *id;
 	xmlNodePtr nodep, attrp;
 	dom_object *intern;
 	size_t name_len;
 	char *name;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
 	attrp = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attrp == NULL) {
@@ -578,6 +580,25 @@ PHP_METHOD(DOMElement, removeAttribute)
 	}
 
 	RETURN_BOOL(dom_remove_attribute(nodep, attrp));
+}
+
+PHP_METHOD(DOM_Element, removeAttribute)
+{
+	xmlNodePtr nodep, attrp;
+	dom_object *intern;
+	size_t name_len;
+	char *name;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
+
+	attrp = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
+	if (attrp != NULL) {
+		dom_remove_attribute(nodep, attrp);
+	}
 }
 /* }}} end dom_element_remove_attribute */
 
@@ -603,6 +624,9 @@ PHP_METHOD(DOMElement, getAttributeNode)
 
 	attrp = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 	if (attrp == NULL) {
+		if (php_dom_follow_spec_intern(intern)) {
+			RETURN_NULL();
+		}
 		RETURN_FALSE;
 	}
 
@@ -617,7 +641,7 @@ PHP_METHOD(DOMElement, getAttributeNode)
 }
 /* }}} end dom_element_get_attribute_node */
 
-static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, bool use_ns)
+static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, bool use_ns, bool modern)
 {
 	zval *id, *node;
 	xmlNode *nodep;
@@ -627,7 +651,7 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 	int ret;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_attr_class_entry) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_get_node_ce(modern)) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -639,8 +663,7 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 	 * if it is not of type XML_ATTRIBUTE_NODE it indicates a bug somewhere */
 	ZEND_ASSERT(attrp->type == XML_ATTRIBUTE_NODE);
 
-	bool follow_spec;
-	if (php_dom_follow_spec_intern(intern)) {
+	if (modern) {
 		if (attrp->parent != NULL && attrp->parent != nodep) {
 			php_dom_throw_error(INUSE_ATTRIBUTE_ERR, /* strict */ true);
 			RETURN_THROWS();
@@ -648,14 +671,11 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 		if (attrp->doc != NULL && attrp->doc != nodep->doc) {
 			php_dom_adopt_node((xmlNodePtr) attrp, intern, nodep->doc);
 		}
-		use_ns = true; /* In modern-day DOM setAttributeNode is an alias for setAttributeNodeNS. */
-		follow_spec = true;
 	} else {
 		if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
 			php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));
 			RETURN_FALSE;
 		}
-		follow_spec = false;
 	}
 
 	nsp = attrp->ns;
@@ -684,7 +704,7 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 	}
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);
-	if (!follow_spec) {
+	if (!modern) {
 		php_dom_reconcile_attribute_namespace_after_insertion(attrp);
 	}
 
@@ -702,27 +722,26 @@ Since:
 */
 PHP_METHOD(DOMElement, setAttributeNode)
 {
-	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, false, false);
 }
 /* }}} end dom_element_set_attribute_node */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D589198
 Since:
 */
-PHP_METHOD(DOMElement, removeAttributeNode)
+static void dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *node_ce)
 {
-	zval *id, *node;
+	zval *node;
 	xmlNode *nodep;
 	xmlAttr *attrp;
 	dom_object *intern, *attrobj;
 	int ret;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_attr_class_entry) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, node_ce) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
 	DOM_GET_OBJ(attrp, node, xmlAttrPtr, attrobj);
 
@@ -736,14 +755,24 @@ PHP_METHOD(DOMElement, removeAttributeNode)
 	xmlUnlinkNode((xmlNodePtr) attrp);
 
 	DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
+}
 
+PHP_METHOD(DOMElement, removeAttributeNode)
+{
+	dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_node_class_entry);
+}
+
+PHP_METHOD(DOM_Element, removeAttributeNode)
+{
+	dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_node_class_entry);
 }
 /* }}} end dom_element_remove_attribute_node */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1938918D
+Modern spec URL: https://dom.spec.whatwg.org/#concept-getelementsbytagname
 Since:
 */
-PHP_METHOD(DOMElement, getElementsByTagName)
+static void dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 {
 	size_t name_len;
 	dom_object *intern, *namednode;
@@ -755,9 +784,23 @@ PHP_METHOD(DOMElement, getElementsByTagName)
 
 	DOM_GET_THIS_INTERN(intern);
 
-	php_dom_create_iterator(return_value, DOM_NODELIST);
+	if (modern) {
+		php_dom_create_iterator(return_value, DOM_HTMLCOLLECTION, true);
+	} else {
+		php_dom_create_iterator(return_value, DOM_NODELIST, false);
+	}
 	namednode = Z_DOMOBJ_P(return_value);
 	dom_namednode_iter(intern, 0, namednode, NULL, name, name_len, NULL, 0);
+}
+
+PHP_METHOD(DOMElement, getElementsByTagName)
+{
+	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
+
+PHP_METHOD(DOM_Element, getElementsByTagName)
+{
+	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} end dom_element_get_elements_by_tag_name */
 
@@ -810,6 +853,9 @@ PHP_METHOD(DOMElement, getAttributeNS)
 	bool should_free_result;
 	const xmlChar *result = dom_get_attribute_ns(intern, elemp, uri, uri_len, name, &should_free_result);
 	if (result == NULL) {
+		if (php_dom_follow_spec_intern(intern)) {
+			RETURN_NULL();
+		}
 		RETURN_EMPTY_STRING();
 	} else {
 		RETVAL_STRING((const char *) result);
@@ -1137,14 +1183,20 @@ Since: DOM Level 2
 */
 PHP_METHOD(DOMElement, setAttributeNodeNS)
 {
-	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, true, false);
+}
+
+PHP_METHOD(DOM_Element, setAttributeNodeNS)
+{
+	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, true, true);
 }
 /* }}} end dom_element_set_attribute_node_ns */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-A6C90942
+Modern spec URL: https://dom.spec.whatwg.org/#concept-getelementsbytagnamens
 Since: DOM Level 2
 */
-PHP_METHOD(DOMElement, getElementsByTagNameNS)
+static void dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 {
 	size_t uri_len, name_len;
 	dom_object *intern, *namednode;
@@ -1156,10 +1208,23 @@ PHP_METHOD(DOMElement, getElementsByTagNameNS)
 
 	DOM_GET_THIS_INTERN(intern);
 
-	php_dom_create_iterator(return_value, DOM_NODELIST);
+	if (modern) {
+		php_dom_create_iterator(return_value, DOM_HTMLCOLLECTION, true);
+	} else {
+		php_dom_create_iterator(return_value, DOM_NODELIST, false);
+	}
 	namednode = Z_DOMOBJ_P(return_value);
 	dom_namednode_iter(intern, 0, namednode, NULL, name, name_len, uri ? uri : "", uri_len);
+}
 
+PHP_METHOD(DOMElement, getElementsByTagNameNS)
+{
+	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
+
+PHP_METHOD(DOM_Element, getElementsByTagNameNS)
+{
+	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} end dom_element_get_elements_by_tag_name_ns */
 
@@ -1306,7 +1371,7 @@ PHP_METHOD(DOMElement, setIdAttributeNS)
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttrNode
 Since: DOM Level 3
 */
-PHP_METHOD(DOMElement, setIdAttributeNode)
+static void dom_element_set_id_attribute_node(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *attr_ce)
 {
 	zval *id, *node;
 	xmlNode *nodep;
@@ -1315,7 +1380,7 @@ PHP_METHOD(DOMElement, setIdAttributeNode)
 	bool is_id;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &node, dom_attr_class_entry, &is_id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ob", &node, attr_ce, &is_id) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -1329,6 +1394,16 @@ PHP_METHOD(DOMElement, setIdAttributeNode)
 	}
 
 	RETURN_NULL();
+}
+
+PHP_METHOD(DOMElement, setIdAttributeNode)
+{
+	dom_element_set_id_attribute_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_attr_class_entry);
+}
+
+PHP_METHOD(DOM_Element, setIdAttributeNode)
+{
+	dom_element_set_id_attribute_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_attr_class_entry);
 }
 /* }}} end dom_element_set_id_attribute_node */
 
@@ -1505,7 +1580,7 @@ static xmlNodePtr dom_insert_adjacent(const zend_string *where, xmlNodePtr thisp
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-element-insertadjacentelement
 Since:
 */
-PHP_METHOD(DOMElement, insertAdjacentElement)
+static void dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *element_ce)
 {
 	zend_string *where;
 	zval *element_zval, *id;
@@ -1513,7 +1588,7 @@ PHP_METHOD(DOMElement, insertAdjacentElement)
 	dom_object *this_intern, *other_intern;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SO", &where, &element_zval, dom_element_class_entry) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SO", &where, &element_zval, element_ce) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -1528,6 +1603,16 @@ PHP_METHOD(DOMElement, insertAdjacentElement)
 	} else {
 		RETURN_THROWS();
 	}
+}
+
+PHP_METHOD(DOMElement, insertAdjacentElement)
+{
+	dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_element_class_entry);
+}
+
+PHP_METHOD(DOM_Element, insertAdjacentElement)
+{
+	dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_element_class_entry);
 }
 /* }}} end DOMElement::insertAdjacentElement */
 

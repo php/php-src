@@ -107,6 +107,12 @@ typedef struct {
 	dom_object dom;
 } dom_object_namespace_node;
 
+typedef enum _dom_iterator_type {
+	DOM_NODELIST,
+	DOM_NAMEDNODEMAP,
+	DOM_HTMLCOLLECTION,
+} dom_iterator_type;
+
 struct _dom_libxml_ns_mapper;
 typedef struct _dom_libxml_ns_mapper dom_libxml_ns_mapper;
 
@@ -144,7 +150,7 @@ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 bool dom_has_feature(zend_string *feature, zend_string *version);
 int dom_node_is_read_only(xmlNodePtr node);
 int dom_node_children_valid(xmlNodePtr node);
-void php_dom_create_iterator(zval *return_value, int ce_type);
+void php_dom_create_iterator(zval *return_value, dom_iterator_type iterator_type, bool modern);
 void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, const char *local, size_t local_len, const char *ns, size_t ns_len);
 xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
 xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index);
@@ -167,7 +173,7 @@ void php_dom_update_document_after_clone(dom_object *original, xmlNodePtr origin
 void php_dom_document_constructor(INTERNAL_FUNCTION_PARAMETERS);
 xmlAttrPtr php_dom_get_attribute_node(xmlNodePtr elem, const xmlChar *name, size_t name_len);
 xmlChar *php_dom_libxml_fix_file_path(xmlChar *path);
-
+void dom_document_convert_to_modern(php_libxml_ref_obj *document, xmlDocPtr lxml_doc);
 dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_entry *ce, xmlNodePtr obj, dom_object *parent);
 
 static zend_always_inline xmlNodePtr php_dom_next_in_tree_order(xmlNodePtr nodep, xmlNodePtr basep)
@@ -241,9 +247,6 @@ xmlNodePtr dom_clone_node(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlD
 	__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node; \
 }
 
-#define DOM_NODELIST 0
-#define DOM_NAMEDNODEMAP 1
-
 static zend_always_inline bool php_dom_is_cache_tag_stale_from_doc_ptr(const php_libxml_cache_tag *cache_tag, const php_libxml_ref_obj *doc_ptr)
 {
 	ZEND_ASSERT(cache_tag != NULL);
@@ -284,7 +287,7 @@ static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_node(php_l
 
 static zend_always_inline bool php_dom_follow_spec_doc_ref(const php_libxml_ref_obj *document)
 {
-	return document != NULL && document->is_modern_api_class;
+	return document != NULL && document->class_type == PHP_LIBXML_CLASS_MODERN;
 }
 
 static zend_always_inline bool php_dom_follow_spec_intern(const dom_object *intern)

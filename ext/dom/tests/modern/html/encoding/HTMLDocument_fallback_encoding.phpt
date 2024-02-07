@@ -6,7 +6,7 @@ dom
 <?php
 
 $dom = DOM\HTMLDocument::createFromFile(__DIR__ . "/fallback_encoding.html");
-var_dump($dom->encoding);
+var_dump($dom->inputEncoding);
 echo $dom->saveHTML();
 
 ?>

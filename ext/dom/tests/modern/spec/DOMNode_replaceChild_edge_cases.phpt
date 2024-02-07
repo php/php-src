@@ -46,7 +46,8 @@ try {
 echo "--- Invalid child to replace with ---\n";
 
 try {
-    $parent->replaceChild(new DOMEntityReference("foo"), $child);
+    $entityReference = $dom->importNode(DOM\XMLDocument::createEmpty()->createEntityReference("foo"));
+    $parent->replaceChild($entityReference, $child);
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
@@ -54,7 +55,7 @@ try {
 echo "--- Replace element with text in document root ---\n";
 
 try {
-    $dom->replaceChild(new DOMText("text"), $parent);
+    $dom->replaceChild($dom->createTextNode("text"), $parent);
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }

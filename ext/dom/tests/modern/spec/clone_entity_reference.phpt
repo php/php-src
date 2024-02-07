@@ -21,25 +21,23 @@ var_dump($clone->firstChild->firstChild);
 ?>
 --EXPECT--
 <root>&foo;</root>
-object(DOMEntity)#4 (24) {
-  ["actualEncoding"]=>
-  NULL
-  ["encoding"]=>
-  NULL
-  ["version"]=>
-  NULL
+object(DOM\Entity)#4 (17) {
   ["publicId"]=>
   NULL
   ["systemId"]=>
   NULL
   ["notationName"]=>
   NULL
-  ["nodeName"]=>
-  string(3) "foo"
-  ["nodeValue"]=>
-  NULL
   ["nodeType"]=>
   int(17)
+  ["nodeName"]=>
+  string(3) "foo"
+  ["baseURI"]=>
+  NULL
+  ["isConnected"]=>
+  bool(true)
+  ["ownerDocument"]=>
+  string(22) "(object value omitted)"
   ["parentNode"]=>
   string(22) "(object value omitted)"
   ["parentElement"]=>
@@ -54,20 +52,8 @@ object(DOMEntity)#4 (24) {
   NULL
   ["nextSibling"]=>
   NULL
-  ["attributes"]=>
-  NULL
-  ["isConnected"]=>
-  bool(true)
-  ["ownerDocument"]=>
-  string(22) "(object value omitted)"
-  ["namespaceURI"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["localName"]=>
-  NULL
-  ["baseURI"]=>
+  ["nodeValue"]=>
   NULL
   ["textContent"]=>
-  string(0) ""
+  NULL
 }

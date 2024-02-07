@@ -13,6 +13,6 @@ $container->append($dom);
 --EXPECTF--
 Fatal error: Uncaught DOMException: Hierarchy Request Error in %s:%d
 Stack trace:
-#0 %s(%d): DOMElement->append(Object(DOM\HTMLDocument))
+#0 %s(%d): DOM\Element->append(Object(DOM\HTMLDocument))
 #1 {main}
   thrown in %s on line %d

@@ -18,19 +18,23 @@ var_dump($element->parentNode);
 ?>
 --EXPECT--
 Exception: Cannot have more than one element child in a document
-object(DOMDocumentFragment)#2 (21) {
+object(DOM\DocumentFragment)#2 (17) {
   ["firstElementChild"]=>
   string(22) "(object value omitted)"
   ["lastElementChild"]=>
   string(22) "(object value omitted)"
   ["childElementCount"]=>
   int(2)
-  ["nodeName"]=>
-  string(18) "#document-fragment"
-  ["nodeValue"]=>
-  NULL
   ["nodeType"]=>
   int(11)
+  ["nodeName"]=>
+  string(18) "#document-fragment"
+  ["baseURI"]=>
+  NULL
+  ["isConnected"]=>
+  bool(false)
+  ["ownerDocument"]=>
+  string(22) "(object value omitted)"
   ["parentNode"]=>
   NULL
   ["parentElement"]=>
@@ -45,19 +49,7 @@ object(DOMDocumentFragment)#2 (21) {
   NULL
   ["nextSibling"]=>
   NULL
-  ["attributes"]=>
-  NULL
-  ["isConnected"]=>
-  bool(false)
-  ["ownerDocument"]=>
-  string(22) "(object value omitted)"
-  ["namespaceURI"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["localName"]=>
-  NULL
-  ["baseURI"]=>
+  ["nodeValue"]=>
   NULL
   ["textContent"]=>
   string(0) ""
