@@ -1,0 +1,11 @@
+/* This is a generated file, edit the .stub.php file instead.
+ * Stub hash: ed51811e21653356e3c576496e978eb487d6187f */
+
+
+
+static void register_password_symbols(int module_number)
+{
+	REGISTER_STRING_CONSTANT("PASSWORD_DEFAULT", "2y", CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("PASSWORD_BCRYPT", "2y", CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_PERSISTENT);
+}
