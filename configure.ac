@@ -1753,6 +1753,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c zend_atomic.c \
     zend_max_execution_timer.c \
     zend_hrtime.c \
+    zend_frameless_function.c \
 	Optimizer/zend_optimizer.c \
 	Optimizer/pass1.c \
 	Optimizer/pass3.c \

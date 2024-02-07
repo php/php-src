@@ -467,7 +467,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **p
 /* }}} */
 
 static ZEND_COLD bool zend_null_arg_deprecated(const char *fallback_type, uint32_t arg_num) {
-	zend_function *func = EG(current_execute_data)->func;
+	zend_function *func = zend_active_function();
 	ZEND_ASSERT(arg_num > 0);
 	uint32_t arg_offset = arg_num - 1;
 	if (arg_offset >= func->common.num_args) {
@@ -517,6 +517,14 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_slow(const zval *arg, bool *dest
 	return zend_parse_arg_bool_weak(arg, dest, arg_num);
 }
 /* }}} */
+
+ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_bool_slow(const zval *arg, bool *dest, uint32_t arg_num)
+{
+	if (UNEXPECTED(ZEND_FLF_ARG_USES_STRICT_TYPES())) {
+		return 0;
+	}
+	return zend_parse_arg_bool_weak(arg, dest, arg_num);
+}
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(const zval *arg, zend_long *dest, uint32_t arg_num) /* {{{ */
 {
@@ -596,6 +604,14 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_slow(const zval *arg, zend_long 
 	return zend_parse_arg_long_weak(arg, dest, arg_num);
 }
 /* }}} */
+
+ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_long_slow(const zval *arg, zend_long *dest, uint32_t arg_num)
+{
+	if (UNEXPECTED(ZEND_FLF_ARG_USES_STRICT_TYPES())) {
+		return 0;
+	}
+	return zend_parse_arg_long_weak(arg, dest, arg_num);
+}
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, double *dest, uint32_t arg_num) /* {{{ */
 {
@@ -737,6 +753,14 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **des
 	return zend_parse_arg_str_weak(arg, dest, arg_num);
 }
 /* }}} */
+
+ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_str_slow(zval *arg, zend_string **dest, uint32_t arg_num)
+{
+	if (UNEXPECTED(ZEND_FLF_ARG_USES_STRICT_TYPES())) {
+		return 0;
+	}
+	return zend_parse_arg_str_weak(arg, dest, arg_num);
+}
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_string **dest_str, zend_long *dest_long, uint32_t arg_num) /* {{{ */
 {
@@ -2828,6 +2852,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		internal_function->scope = scope;
 		internal_function->prototype = NULL;
 		internal_function->attributes = NULL;
+		internal_function->frameless_function_infos = ptr->frameless_function_infos;
 		if (EG(active)) { // at run-time: this ought to only happen if registered with dl() or somehow temporarily at runtime
 			ZEND_MAP_PTR_INIT(internal_function->run_time_cache, zend_arena_calloc(&CG(arena), 1, zend_internal_run_time_cache_reserved_size()));
 		} else {
@@ -2930,6 +2955,27 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			free(reg_function);
 			zend_string_release(lowercase_name);
 			break;
+		}
+		if (reg_function->frameless_function_infos) {
+			const zend_frameless_function_info *flf_info = reg_function->frameless_function_infos;
+			while (flf_info->handler) {
+				if (zend_flf_count == zend_flf_capacity) {
+					if (!zend_flf_capacity) {
+						zend_flf_capacity = 8;
+					} else {
+						zend_flf_capacity *= 2;
+					}
+					/* +1 for NULL terminator */
+					zend_flf_handlers = realloc(zend_flf_handlers, (zend_flf_capacity + 1) * sizeof(void *));
+					zend_flf_functions = realloc(zend_flf_functions, (zend_flf_capacity + 1) * sizeof(zend_function *));
+				}
+				zend_flf_handlers[zend_flf_count] = flf_info->handler;
+				zend_flf_functions[zend_flf_count] = (zend_function *)reg_function;
+				zend_flf_count++;
+				flf_info++;
+			}
+			zend_flf_handlers[zend_flf_count] = NULL;
+			zend_flf_functions[zend_flf_count] = NULL;
 		}
 
 		/* Get parameter count including variadic parameter. */

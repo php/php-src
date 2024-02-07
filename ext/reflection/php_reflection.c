@@ -27,7 +27,7 @@
 #include "php_reflection.h"
 #include "ext/standard/info.h"
 #include "ext/standard/sha1.h"
-#include "ext/random/php_random.h"
+#include "ext/random/php_random_csprng.h"
 
 #include "zend.h"
 #include "zend_API.h"
@@ -1122,6 +1122,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 	reference->target = target;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_ATTRIBUTE;
+	ZVAL_STR_COPY(reflection_prop_name(object), data->name);
 }
 /* }}} */
 

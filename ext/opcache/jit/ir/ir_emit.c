@@ -51,13 +51,11 @@ typedef struct _ir_copy {
 	ir_reg  to;
 } ir_copy;
 
-typedef struct _ir_delayed_copy {
-	ir_ref  input;
-	ir_ref  output;
+typedef struct _ir_dessa_copy {
 	ir_type type;
-	ir_reg  from;
-	ir_reg  to;
-} ir_delayed_copy;
+	int32_t from; /* negative - constant ref, [0..IR_REG_NUM) - CPU reg, [IR_REG_NUM...) - virtual reg */
+	int32_t to;   /* [0..IR_REG_NUM) - CPU reg, [IR_REG_NUM...) - virtual reg  */
+} ir_dessa_copy;
 
 #if IR_REG_INT_ARGS
 static const int8_t _ir_int_reg_params[IR_REG_INT_ARGS];
@@ -255,25 +253,6 @@ static int ir_get_args_regs(const ir_ctx *ctx, const ir_insn *insn, int8_t *regs
 	return count;
 }
 
-static bool ir_is_same_mem(const ir_ctx *ctx, ir_ref r1, ir_ref r2)
-{
-	ir_live_interval *ival1, *ival2;
-	int32_t o1, o2;
-
-	if (IR_IS_CONST_REF(r1) || IR_IS_CONST_REF(r2)) {
-		return 0;
-	}
-
-	IR_ASSERT(ctx->vregs[r1] && ctx->vregs[r2]);
-	ival1 = ctx->live_intervals[ctx->vregs[r1]];
-	ival2 = ctx->live_intervals[ctx->vregs[r2]];
-	IR_ASSERT(ival1 && ival2);
-	o1 = ival1->stack_spill_pos;
-	o2 = ival2->stack_spill_pos;
-	IR_ASSERT(o1 != -1 && o2 != -1);
-	return o1 == o2;
-}
-
 static bool ir_is_same_mem_var(const ir_ctx *ctx, ir_ref r1, int32_t offset)
 {
 	ir_live_interval *ival1;
@@ -325,17 +304,36 @@ void *ir_resolve_sym_name(const char *name)
 	IR_SNAPSHOT_HANDLER_DCL();
 #endif
 
+#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
+static void* ir_sym_addr(ir_ctx *ctx, const ir_insn *addr_insn)
+{
+	const char *name = ir_get_str(ctx, addr_insn->val.name);
+	void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
+		ctx->loader->resolve_sym_name(ctx->loader, name, 0) :
+		ir_resolve_sym_name(name);
+
+	return addr;
+}
+#endif
+
+static void* ir_sym_val(ir_ctx *ctx, const ir_insn *addr_insn)
+{
+	const char *name = ir_get_str(ctx, addr_insn->val.name);
+	void *addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
+		ctx->loader->resolve_sym_name(ctx->loader, name, addr_insn->op == IR_FUNC) :
+		ir_resolve_sym_name(name);
+
+	IR_ASSERT(addr);
+	return addr;
+}
+
 static void *ir_call_addr(ir_ctx *ctx, ir_insn *insn, ir_insn *addr_insn)
 {
 	void *addr;
 
 	IR_ASSERT(addr_insn->type == IR_ADDR);
 	if (addr_insn->op == IR_FUNC) {
-		const char* name = ir_get_str(ctx, addr_insn->val.name);
-		addr = (ctx->loader && ctx->loader->resolve_sym_name) ?
-			ctx->loader->resolve_sym_name(ctx->loader, name, 1) :
-			ir_resolve_sym_name(name);
-		IR_ASSERT(addr);
+		addr = ir_sym_val(ctx, addr_insn);
 	} else {
 		IR_ASSERT(addr_insn->op == IR_ADDR || addr_insn->op == IR_FUNC_ADDR);
 		addr = (void*)addr_insn->val.addr;
@@ -479,7 +477,6 @@ static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_
 	ir_reg to, from;
 	ir_type type;
 	ir_regset todo, ready, srcs;
-	ir_reg last_reg, last_fp_reg;
 
 	if (count == 1) {
 		to = copies[0].to;
@@ -529,6 +526,11 @@ static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_
 		return 1;
 	}
 
+	/* temporary registers can't be the same as some of the destinations */
+	IR_ASSERT(tmp_reg == IR_REG_NONE || !IR_REGSET_IN(todo, tmp_reg));
+	IR_ASSERT(tmp_fp_reg == IR_REG_NONE || !IR_REGSET_IN(todo, tmp_fp_reg));
+
+	/* first we resolve all "windmill blades" - trees (this doesn't requre temporary registers) */
 	while (ready != IR_REGSET_EMPTY) {
 		ir_reg r;
 
@@ -551,25 +553,11 @@ static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_
 		return 1;
 	}
 
-	/* temporary registers may be the same as some of the destinations */
-	last_reg = IR_REG_NONE;
-	if (tmp_reg != IR_REG_NONE) {
-		IR_ASSERT(!IR_REGSET_IN(srcs, tmp_reg));
-		if (IR_REGSET_IN(todo, tmp_reg)) {
-			last_reg = tmp_reg;
-			IR_REGSET_EXCL(todo, tmp_reg);
-		}
-	}
+	/* at this point the sources that are the same as temoraries are already moved */
+	IR_ASSERT(tmp_reg == IR_REG_NONE || !IR_REGSET_IN(srcs, tmp_reg) || pred[loc[tmp_reg]] == tmp_reg);
+	IR_ASSERT(tmp_fp_reg == IR_REG_NONE || !IR_REGSET_IN(srcs, tmp_fp_reg) || pred[loc[tmp_fp_reg]] == tmp_fp_reg);
 
-	last_fp_reg = IR_REG_NONE;
-	if (tmp_fp_reg != IR_REG_NONE) {
-		IR_ASSERT(!IR_REGSET_IN(srcs, tmp_fp_reg));
-		if (IR_REGSET_IN(todo, tmp_fp_reg)) {
-			last_fp_reg = tmp_fp_reg;
-			IR_REGSET_EXCL(todo, tmp_fp_reg);
-		}
-	}
-
+	/* now we resolve all "windmill axles" - cycles (this reuires temporary registers) */
 	while (todo != IR_REGSET_EMPTY) {
 		to = ir_regset_pop_first(&todo);
 		from = pred[to];
@@ -625,39 +613,271 @@ static int ir_parallel_copy(ir_ctx *ctx, ir_copy *copies, int count, ir_reg tmp_
 		}
 	}
 
-	if (last_reg != IR_REG_NONE) {
-		to = last_reg;
-		from = pred[to];
-		type = types[from];
-		from = loc[from];
-		if (to != from) {
-			IR_ASSERT(IR_IS_TYPE_INT(type));
-			ir_emit_mov_ext(ctx, type, to, from);
+	return 1;
+}
+
+static void ir_emit_dessa_move(ir_ctx *ctx, ir_type type, ir_ref to, ir_ref from, ir_reg tmp_reg, ir_reg tmp_fp_reg)
+{
+	ir_mem mem_from, mem_to;
+
+	IR_ASSERT(from != to);
+	if (to < IR_REG_NUM) {
+		if (IR_IS_CONST_REF(from)) {
+			ir_emit_load(ctx, type, to, from);
+		} else if (from < IR_REG_NUM) {
+			if (IR_IS_TYPE_INT(type)) {
+				ir_emit_mov(ctx, type, to, from);
+			} else {
+				ir_emit_fp_mov(ctx, type, to, from);
+			}
+		} else {
+			mem_from = ir_vreg_spill_slot(ctx, from - IR_REG_NUM);
+			ir_emit_load_mem(ctx, type, to, mem_from);
+		}
+	} else {
+		mem_to = ir_vreg_spill_slot(ctx, to - IR_REG_NUM);
+		if (IR_IS_CONST_REF(from)) {
+#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
+			if (IR_IS_TYPE_INT(type)
+			 && !IR_IS_SYM_CONST(ctx->ir_base[from].op)
+			 && (ir_type_size[type] != 8 || IR_IS_SIGNED_32BIT(ctx->ir_base[from].val.i64))) {
+				ir_emit_store_mem_imm(ctx, type, mem_to, ctx->ir_base[from].val.i32);
+				return;
+			}
+#endif
+			ir_reg tmp = IR_IS_TYPE_INT(type) ?  tmp_reg : tmp_fp_reg;
+			IR_ASSERT(tmp != IR_REG_NONE);
+			ir_emit_load(ctx, type, tmp, from);
+			ir_emit_store_mem(ctx, type, mem_to, tmp);
+		} else if (from < IR_REG_NUM) {
+			ir_emit_store_mem(ctx, type, mem_to, from);
+		} else {
+			mem_from = ir_vreg_spill_slot(ctx, from - IR_REG_NUM);
+			IR_ASSERT(IR_MEM_VAL(mem_to) != IR_MEM_VAL(mem_from));
+			ir_reg tmp = IR_IS_TYPE_INT(type) ?  tmp_reg : tmp_fp_reg;
+			IR_ASSERT(tmp != IR_REG_NONE);
+			ir_emit_load_mem(ctx, type, tmp, mem_from);
+			ir_emit_store_mem(ctx, type, mem_to, tmp);
+		}
+	}
+}
+
+IR_ALWAYS_INLINE void ir_dessa_resolve_cycle(ir_ctx *ctx, int32_t *pred, int32_t *loc, ir_bitset todo, ir_type type, int32_t to, ir_reg tmp_reg, ir_reg tmp_fp_reg)
+{
+	ir_reg from;
+	ir_mem tmp_spill_slot;
+
+	IR_MEM_VAL(tmp_spill_slot) = 0;
+	IR_ASSERT(!IR_IS_CONST_REF(to));
+	from = pred[to];
+	IR_ASSERT(!IR_IS_CONST_REF(from));
+	IR_ASSERT(from != to);
+	IR_ASSERT(loc[from] == from);
+
+	if (IR_IS_TYPE_INT(type)) {
+#ifdef IR_HAVE_SWAP_INT
+		if (pred[from] == to && to < IR_REG_NUM && from < IR_REG_NUM) {
+			/* a simple cycle from 2 elements */
+			ir_emit_swap(ctx, type, to, from);
+			ir_bitset_excl(todo, from);
+			ir_bitset_excl(todo, to);
+			loc[to] = from;
+			loc[from] = to;
+			return;
+		}
+#endif
+		IR_ASSERT(tmp_reg != IR_REG_NONE);
+		IR_ASSERT(tmp_reg >= IR_REG_GP_FIRST && tmp_reg <= IR_REG_GP_LAST);
+		loc[to] = tmp_reg;
+		if (to < IR_REG_NUM) {
+			ir_emit_mov(ctx, type, tmp_reg, to);
+		} else {
+			ir_emit_load_mem_int(ctx, type, tmp_reg, ir_vreg_spill_slot(ctx, to - IR_REG_NUM));
+		}
+	} else {
+#ifdef IR_HAVE_SWAP_FP
+		if (pred[from] == to && to < IR_REG_NUM && from < IR_REG_NUM) {
+			/* a simple cycle from 2 elements */
+			ir_emit_swap_fp(ctx, type, to, from);
+			IR_REGSET_EXCL(todo, from);
+			IR_REGSET_EXCL(todo, to);
+			loc[to] = from;
+			loc[from] = to;
+			return;
+		}
+#endif
+		IR_ASSERT(tmp_fp_reg != IR_REG_NONE);
+		IR_ASSERT(tmp_fp_reg >= IR_REG_FP_FIRST && tmp_fp_reg <= IR_REG_FP_LAST);
+		loc[to] = tmp_fp_reg;
+		if (to < IR_REG_NUM) {
+			ir_emit_fp_mov(ctx, type, tmp_fp_reg, to);
+		} else {
+			ir_emit_load_mem_fp(ctx, type, tmp_fp_reg, ir_vreg_spill_slot(ctx, to - IR_REG_NUM));
 		}
 	}
 
-	if (last_fp_reg != IR_REG_NONE) {
-		to = last_fp_reg;
+	while (1) {
+		int32_t r;
+
 		from = pred[to];
-		type = types[from];
-		from = loc[from];
-		if (to != from) {
-			IR_ASSERT(!IR_IS_TYPE_INT(type));
-			ir_emit_fp_mov(ctx, type, to, from);
+		r = loc[from];
+
+		if (from == r && ir_bitset_in(todo, from)) {
+			/* Memory to memory move inside an isolated or "blocked" cycle requres an additional temporary register */
+			if (to >= IR_REG_NUM && r >= IR_REG_NUM) {
+				ir_reg tmp = IR_IS_TYPE_INT(type) ?  tmp_reg : tmp_fp_reg;
+
+				if (!IR_MEM_VAL(tmp_spill_slot)) {
+					/* Free a register, saving it in a temporary spill slot */
+					tmp_spill_slot = IR_MEM_BO(IR_REG_STACK_POINTER, -16);
+					ir_emit_store_mem(ctx, type, tmp_spill_slot, tmp);
+				}
+				ir_emit_dessa_move(ctx, type, to, r, tmp_reg, tmp_fp_reg);
+			} else {
+				ir_emit_dessa_move(ctx, type, to, r, IR_REG_NONE, IR_REG_NONE);
+			}
+			ir_bitset_excl(todo, to);
+			loc[from] = to;
+			to = from;
+		} else {
+			break;
+		}
+	}
+	if (IR_MEM_VAL(tmp_spill_slot)) {
+		ir_emit_load_mem(ctx, type, IR_IS_TYPE_INT(type) ? tmp_reg : tmp_fp_reg, tmp_spill_slot);
+	}
+	ir_emit_dessa_move(ctx, type, to, loc[from], IR_REG_NONE, IR_REG_NONE);
+	ir_bitset_excl(todo, to);
+	loc[from] = to;
+}
+
+static int ir_dessa_parallel_copy(ir_ctx *ctx, ir_dessa_copy *copies, int count, ir_reg tmp_reg, ir_reg tmp_fp_reg)
+{
+	int i;
+	int32_t *pred, *loc, to, from;
+	int8_t *types;
+	ir_type type;
+	uint32_t len;
+	ir_bitset todo, ready, srcs, visited;
+
+	if (count == 1) {
+		to = copies[0].to;
+		from = copies[0].from;
+		IR_ASSERT(from != to);
+		type = copies[0].type;
+		ir_emit_dessa_move(ctx, type, to, from, tmp_reg, tmp_fp_reg);
+		return 1;
+	}
+
+	len = IR_REG_NUM + ctx->vregs_count + 1;
+	todo = ir_bitset_malloc(len);
+	srcs = ir_bitset_malloc(len);
+	loc = ir_mem_malloc(len * 2 * sizeof(int32_t) + len * sizeof(int8_t));
+	pred = loc + len;
+	types = (int8_t*)(pred + len);
+
+	for (i = 0; i < count; i++) {
+		from = copies[i].from;
+		to = copies[i].to;
+		IR_ASSERT(from != to);
+		if (!IR_IS_CONST_REF(from)) {
+			ir_bitset_incl(srcs, from);
+			loc[from] = from;
+		}
+		pred[to] = from;
+		types[to] = copies[i].type;
+		IR_ASSERT(!ir_bitset_in(todo, to));
+		ir_bitset_incl(todo, to);
+	}
+
+	/* temporary registers can't be the same as some of the sources */
+	IR_ASSERT(tmp_reg == IR_REG_NONE || !ir_bitset_in(srcs, tmp_reg));
+	IR_ASSERT(tmp_fp_reg == IR_REG_NONE || !ir_bitset_in(srcs, tmp_fp_reg));
+
+	/* first we resolve all "windmill blades" - trees, that don't set temporary registers */
+	ready = ir_bitset_malloc(len);
+	ir_bitset_copy(ready, todo, ir_bitset_len(len));
+	ir_bitset_difference(ready, srcs, ir_bitset_len(len));
+	if (tmp_reg != IR_REG_NONE) {
+		ir_bitset_excl(ready, tmp_reg);
+	}
+	if (tmp_fp_reg != IR_REG_NONE) {
+		ir_bitset_excl(ready, tmp_fp_reg);
+	}
+	while ((to = ir_bitset_pop_first(ready, ir_bitset_len(len))) >= 0) {
+		ir_bitset_excl(todo, to);
+		type = types[to];
+		from = pred[to];
+		if (IR_IS_CONST_REF(from)) {
+			ir_emit_dessa_move(ctx, type, to, from, tmp_reg, tmp_fp_reg);
+		} else {
+			int32_t r = loc[from];
+			ir_emit_dessa_move(ctx, type, to, r, tmp_reg, tmp_fp_reg);
+			loc[from] = to;
+			if (from == r && ir_bitset_in(todo, from) && from != tmp_reg && from != tmp_fp_reg) {
+				ir_bitset_incl(ready, from);
+			}
 		}
 	}
 
+	/* then we resolve all "windmill axles" - cycles (this requres temporary registers) */
+	visited = ir_bitset_malloc(len);
+	ir_bitset_copy(ready, todo, ir_bitset_len(len));
+	ir_bitset_intersection(ready, srcs, ir_bitset_len(len));
+	while ((to = ir_bitset_first(ready, ir_bitset_len(len))) >= 0) {
+		ir_bitset_clear(visited, ir_bitset_len(len));
+		ir_bitset_incl(visited, to);
+		to = pred[to];
+		while (!IR_IS_CONST_REF(to) && ir_bitset_in(ready, to)) {
+			to = pred[to];
+			if (!IR_IS_CONST_REF(to) && ir_bitset_in(visited, to)) {
+				/* We found a cycle. Resolve it. */
+				ir_bitset_incl(visited, to);
+				type = types[to];
+				ir_dessa_resolve_cycle(ctx, pred, loc, todo, type, to, tmp_reg, tmp_fp_reg);
+				break;
+			}
+			ir_bitset_incl(visited, to);
+		}
+		ir_bitset_difference(ready, visited, ir_bitset_len(len));
+	}
+
+	/* finally we resolve remaining "windmill blades" - trees that set temporary registers */
+	ir_bitset_copy(ready, todo, ir_bitset_len(len));
+	ir_bitset_difference(ready, srcs, ir_bitset_len(len));
+	while ((to = ir_bitset_pop_first(ready, ir_bitset_len(len))) >= 0) {
+		ir_bitset_excl(todo, to);
+		type = types[to];
+		from = pred[to];
+		if (IR_IS_CONST_REF(from)) {
+			ir_emit_dessa_move(ctx, type, to, from, tmp_reg, tmp_fp_reg);
+		} else {
+			int32_t r = loc[from];
+			ir_emit_dessa_move(ctx, type, to, r, tmp_reg, tmp_fp_reg);
+			loc[from] = to;
+			if (from == r && ir_bitset_in(todo, from)) {
+				ir_bitset_incl(ready, from);
+			}
+		}
+	}
+
+	IR_ASSERT(ir_bitset_empty(todo, ir_bitset_len(len)));
+
+	ir_mem_free(visited);
+	ir_mem_free(ready);
+	ir_mem_free(loc);
+	ir_mem_free(srcs);
+	ir_mem_free(todo);
 	return 1;
 }
 
 static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)
 {
-	uint32_t succ, k, n = 0, n2 = 0;
+	uint32_t succ, k, n = 0;
 	ir_block *succ_bb;
 	ir_use_list *use_list;
 	ir_ref i, *p;
-	ir_copy *copies;
-	ir_delayed_copy *copies2;
+	ir_dessa_copy *copies;
 	ir_reg tmp_reg = ctx->regs[bb->end][0];
 	ir_reg tmp_fp_reg = ctx->regs[bb->end][1];
 
@@ -668,8 +888,7 @@ static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)
 	use_list = &ctx->use_lists[succ_bb->start];
 	k = ir_phi_input_number(ctx, succ_bb, b);
 
-	copies = ir_mem_malloc(use_list->count * sizeof(ir_copy) + use_list->count * sizeof(ir_delayed_copy));
-	copies2 = (ir_delayed_copy*)(copies + use_list->count);
+	copies = alloca(use_list->count * sizeof(ir_dessa_copy));
 
 	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < use_list->count; i++, p++) {
 		ir_ref ref = *p;
@@ -679,96 +898,37 @@ static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)
 			ir_ref input = ir_insn_op(insn, k);
 			ir_reg src = ir_get_alocated_reg(ctx, ref, k);
 			ir_reg dst = ctx->regs[ref][0];
+			ir_ref from, to;
 
-			if (dst == IR_REG_NONE) {
-				/* STORE to memory cannot clobber any input register (do it right now) */
-				if (IR_IS_CONST_REF(input)) {
-					IR_ASSERT(src == IR_REG_NONE);
-#if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
-					if (IR_IS_TYPE_INT(insn->type)
-					 && !IR_IS_SYM_CONST(ctx->ir_base[input].op)
-					 && (ir_type_size[insn->type] != 8 || IR_IS_SIGNED_32BIT(ctx->ir_base[input].val.i64))) {
-						ir_emit_store_imm(ctx, insn->type, ref, ctx->ir_base[input].val.i32);
-						continue;
-					}
-#endif
-					ir_reg tmp = IR_IS_TYPE_INT(insn->type) ?  tmp_reg : tmp_fp_reg;
-
-					IR_ASSERT(tmp != IR_REG_NONE);
-					ir_emit_load(ctx, insn->type, tmp, input);
-					ir_emit_store(ctx, insn->type, ref, tmp);
-				} else if (src == IR_REG_NONE) {
-					if (!ir_is_same_mem(ctx, input, ref)) {
-						ir_reg tmp = IR_IS_TYPE_INT(insn->type) ?  tmp_reg : tmp_fp_reg;
-
-						IR_ASSERT(tmp != IR_REG_NONE);
-						ir_emit_load(ctx, insn->type, tmp, input);
-						ir_emit_store(ctx, insn->type, ref, tmp);
-					}
-				} else {
-					if (IR_REG_SPILLED(src)) {
-						src = IR_REG_NUM(src);
-						ir_emit_load(ctx, insn->type, src, input);
-						if (ir_is_same_mem(ctx, input, ref)) {
-							continue;
-						}
-					}
-					ir_emit_store(ctx, insn->type, ref, src);
-				}
-			} else if (src == IR_REG_NONE) {
-				/* STORE of constant or memory can't be clobbered by parallel reg->reg copies (delay it) */
-				copies2[n2].input = input;
-				copies2[n2].output = ref;
-				copies2[n2].type = insn->type;
-				copies2[n2].from = src;
-				copies2[n2].to = dst;
-				n2++;
+			IR_ASSERT(dst == IR_REG_NONE || !IR_REG_SPILLED(dst));
+			if (IR_IS_CONST_REF(input)) {
+				from = input;
 			} else {
-				IR_ASSERT(!IR_IS_CONST_REF(input));
-				if (IR_REG_SPILLED(src)) {
-					ir_emit_load(ctx, insn->type, IR_REG_NUM(src), input);
+				from = (src != IR_REG_NONE && !IR_REG_SPILLED(src)) ?
+					(ir_ref)src : (ir_ref)(IR_REG_NUM + ctx->vregs[input]);
+			}
+			to = (dst != IR_REG_NONE) ?
+				(ir_ref)dst : (ir_ref)(IR_REG_NUM + ctx->vregs[ref]);
+			if (to != from) {
+				if (to >= IR_REG_NUM
+				 && from >= IR_REG_NUM
+				 && IR_MEM_VAL(ir_vreg_spill_slot(ctx, from - IR_REG_NUM)) ==
+						IR_MEM_VAL(ir_vreg_spill_slot(ctx, to - IR_REG_NUM))) {
+					/* It's possible that different virtual registers share the same special spill slot */
+					// TODO: See ext/opcache/tests/jit/gh11917.phpt failure on Linux 32-bit
+					continue;
 				}
-				if (IR_REG_SPILLED(dst) && (!IR_REG_SPILLED(src) || !ir_is_same_mem(ctx, input, ref))) {
-					ir_emit_store(ctx, insn->type, ref, IR_REG_NUM(src));
-				}
-				if (IR_REG_NUM(src) != IR_REG_NUM(dst)) {
-					/* Schedule parallel reg->reg copy */
-					copies[n].type = insn->type;
-					copies[n].from = IR_REG_NUM(src);
-					copies[n].to = IR_REG_NUM(dst);
-					n++;
-				}
+				copies[n].type = insn->type;
+				copies[n].from = from;
+				copies[n].to = to;
+				n++;
 			}
 		}
 	}
 
 	if (n > 0) {
-		ir_parallel_copy(ctx, copies, n, tmp_reg, tmp_fp_reg);
+		ir_dessa_parallel_copy(ctx, copies, n, tmp_reg, tmp_fp_reg);
 	}
-
-	for (n = 0; n < n2; n++) {
-		ir_ref input = copies2[n].input;
-		ir_ref ref = copies2[n].output;
-		ir_type type = copies2[n].type;
-		ir_reg dst = copies2[n].to;
-
-		IR_ASSERT(dst != IR_REG_NONE);
-		if (IR_IS_CONST_REF(input)) {
-			ir_emit_load(ctx, type, IR_REG_NUM(dst), input);
-		} else {
-			IR_ASSERT(copies2[n].from == IR_REG_NONE);
-			if (IR_REG_SPILLED(dst) && ir_is_same_mem(ctx, input, ref)) {
-				/* avoid LOAD and STORE to the same memory */
-				continue;
-			}
-			ir_emit_load(ctx, type, IR_REG_NUM(dst), input);
-		}
-		if (IR_REG_SPILLED(dst)) {
-			ir_emit_store(ctx, type, ref, IR_REG_NUM(dst));
-		}
-	}
-
-	ir_mem_free(copies);
 }
 
 int ir_match(ir_ctx *ctx)

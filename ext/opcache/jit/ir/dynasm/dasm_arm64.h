@@ -83,6 +83,9 @@ struct dasm_State {
 /* The size of the core structure depends on the max. number of sections. */
 #define DASM_PSZ(ms)	(sizeof(dasm_State)+(ms-1)*sizeof(dasm_Section))
 
+/* Perform potentially overflowing pointer operations in a way that avoids UB. */
+#define DASM_PTR_SUB(p1, off) ((void *) ((uintptr_t) (p1) - sizeof(*p1) * (uintptr_t) (off)))
+#define DASM_PTR_ADD(p1, off) ((void *) ((uintptr_t) (p1) + sizeof(*p1) * (uintptr_t) (off)))
 
 /* Initialize DynASM state. */
 void dasm_init(Dst_DECL, int maxsection)
@@ -144,7 +147,7 @@ void dasm_setup(Dst_DECL, const void *actionlist)
   if (D->pclabels) memset((void *)D->pclabels, 0, D->pcsize);
   for (i = 0; i < D->maxsection; i++) {
     D->sections[i].pos = DASM_SEC2POS(i);
-    D->sections[i].rbuf = D->sections[i].buf - D->sections[i].pos;
+    D->sections[i].rbuf = DASM_PTR_SUB(D->sections[i].buf, D->sections[i].pos);
     D->sections[i].ofs = 0;
   }
 }
@@ -429,7 +432,7 @@ int dasm_encode(Dst_DECL, void *buffer)
   for (secnum = 0; secnum < D->maxsection; secnum++) {
     dasm_Section *sec = D->sections + secnum;
     int *b = sec->buf;
-    int *endb = sec->rbuf + sec->pos;
+    int *endb = DASM_PTR_ADD(sec->rbuf, sec->pos);
 
     while (b != endb) {
       dasm_ActList p = D->actionlist + *b++;
@@ -463,15 +466,15 @@ int dasm_encode(Dst_DECL, void *buffer)
 	    cp[-1] |= ((n >> 2) & 0x03ffffff);
 	  } else if ((ins & 0x800)) {  /* B.cond, CBZ, CBNZ, LDR* literal */
 	    CK_REL((n & 3) == 0 && ((n+0x00100000) >> 21) == 0, n);
-	    cp[-1] |= ((n << 3) & 0x00ffffe0);
+	    cp[-1] |= (((unsigned)n << 3) & 0x00ffffe0);
 	  } else if ((ins & 0x3000) == 0x2000) {  /* ADR */
 	    CK_REL(((n+0x00100000) >> 21) == 0, n);
-	    cp[-1] |= ((n << 3) & 0x00ffffe0) | ((n & 3) << 29);
+	    cp[-1] |= (((unsigned)n << 3) & 0x00ffffe0) | ((n & 3) << 29);
 	  } else if ((ins & 0x3000) == 0x3000) {  /* ADRP */
 	    cp[-1] |= ((n >> 9) & 0x00ffffe0) | (((n >> 12) & 3) << 29);
 	  } else if ((ins & 0x1000)) {  /* TBZ, TBNZ */
 	    CK_REL((n & 3) == 0 && ((n+0x00008000) >> 16) == 0, n);
-	    cp[-1] |= ((n << 3) & 0x0007ffe0);
+	    cp[-1] |= (((unsigned)n << 3) & 0x0007ffe0);
 	  } else if ((ins & 0x8000)) {  /* absolute */
 	    cp[0] = (unsigned int)((ptrdiff_t)cp - 4 + n);
 	    cp[1] = (unsigned int)(((ptrdiff_t)cp - 4 + n) >> 32);

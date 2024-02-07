@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bd3226bdeb5585333f97659a0a3b01504d830a15 */
+ * Stub hash: c3bec3b17079456ef17e5c992995dcfbe62c6fe0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_version, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -217,6 +217,20 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gc_status arginfo_func_get_args
 
+ZEND_FRAMELESS_FUNCTION(property_exists, 2);
+static const zend_frameless_function_info frameless_function_infos_property_exists[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(property_exists, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(class_exists, 1);
+ZEND_FRAMELESS_FUNCTION(class_exists, 2);
+static const zend_frameless_function_info frameless_function_infos_class_exists[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(class_exists, 1), 1 },
+	{ ZEND_FRAMELESS_FUNCTION_NAME(class_exists, 2), 2 },
+	{ 0 },
+};
+
 
 ZEND_FUNCTION(zend_version);
 ZEND_FUNCTION(func_num_args);
@@ -301,8 +315,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(get_mangled_object_vars, arginfo_get_mangled_object_vars)
 	ZEND_FE(get_class_methods, arginfo_get_class_methods)
 	ZEND_FE(method_exists, arginfo_method_exists)
-	ZEND_FE(property_exists, arginfo_property_exists)
-	ZEND_FE(class_exists, arginfo_class_exists)
+	ZEND_FRAMELESS_FE(property_exists, arginfo_property_exists, 0, frameless_function_infos_property_exists)
+	ZEND_FRAMELESS_FE(class_exists, arginfo_class_exists, 0, frameless_function_infos_class_exists)
 	ZEND_FE(interface_exists, arginfo_interface_exists)
 	ZEND_FE(trait_exists, arginfo_trait_exists)
 	ZEND_FE(enum_exists, arginfo_enum_exists)

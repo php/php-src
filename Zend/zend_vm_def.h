@@ -9556,6 +9556,107 @@ ZEND_VM_HANDLER(202, ZEND_CALLABLE_CONVERT, UNUSED, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(208, ZEND_JMP_FRAMELESS, CONST, JMP_ADDR, NUM|CACHE_SLOT)
+{
+	USE_OPLINE
+	zend_jmp_fl_result result = (uintptr_t)CACHED_PTR(opline->extended_value);
+ZEND_VM_C_LABEL(try_again):
+	if (EXPECTED(result == ZEND_JMP_FL_HIT)) {
+		OPLINE = OP_JMP_ADDR(opline, opline->op2);
+		ZEND_VM_CONTINUE();
+	} else if (EXPECTED(result == ZEND_JMP_FL_MISS)) {
+		ZEND_VM_NEXT_OPCODE();
+	} else {
+		ZEND_ASSERT(result == ZEND_JMP_FL_UNPRIMED);
+		/* func_name refers to the function in the local namespace, e.g. foo\substr. */
+		zval *func_name = (zval *)RT_CONSTANT(opline, opline->op1);
+		/* If it cannot be found locally, we must be referring to the global function. */
+		zval *func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name));
+		/* ZEND_JMP_FL_MISS = 1, ZEND_JMP_FL_HIT = 2 */
+		result = (func == NULL) + 1;
+		CACHE_PTR(opline->extended_value, (void *)result);
+		ZEND_VM_C_GOTO(try_again);
+	}
+}
+
+ZEND_VM_HANDLER(204, ZEND_FRAMELESS_ICALL_0, UNUSED, UNUSED)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+	zend_frameless_function_0 function = (zend_frameless_function_0)ZEND_FLF_HANDLER(opline);
+	ZVAL_NULL(EX_VAR(opline->result.var));
+	function(EX_VAR(opline->result.var));
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+ZEND_VM_HANDLER(205, ZEND_FRAMELESS_ICALL_1, ANY, UNUSED)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+	zend_frameless_function_1 function = (zend_frameless_function_1)ZEND_FLF_HANDLER(opline);
+	ZVAL_NULL(EX_VAR(opline->result.var));
+	zval *arg1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	if (EG(exception)) {
+		FREE_OP1();
+		HANDLE_EXCEPTION();
+	}
+	function(EX_VAR(opline->result.var), arg1);
+	FREE_OP1();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+ZEND_VM_HANDLER(206, ZEND_FRAMELESS_ICALL_2, ANY, ANY)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+	zend_frameless_function_2 function = (zend_frameless_function_2)ZEND_FLF_HANDLER(opline);
+	ZVAL_NULL(EX_VAR(opline->result.var));
+	zval *arg1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	zval *arg2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
+	if (EG(exception)) {
+		FREE_OP1();
+		FREE_OP2();
+		HANDLE_EXCEPTION();
+	}
+	function(EX_VAR(opline->result.var), arg1, arg2);
+	FREE_OP1();
+	/* Set OP1 to UNDEF in case FREE_OP2() throws. */
+	if (OP1_TYPE & (IS_VAR|IS_TMP_VAR)) {
+		ZVAL_UNDEF(EX_VAR(opline->op1.var));
+	}
+	FREE_OP2();
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+ZEND_VM_HANDLER(207, ZEND_FRAMELESS_ICALL_3, ANY, ANY)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+	zend_frameless_function_3 function = (zend_frameless_function_3)ZEND_FLF_HANDLER(opline);
+	ZVAL_NULL(EX_VAR(opline->result.var));
+	zval *arg1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	zval *arg2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
+	zval *arg3 = GET_OP_DATA_ZVAL_PTR_DEREF(BP_VAR_R);
+	if (EG(exception)) {
+		FREE_OP1();
+		FREE_OP2();
+		FREE_OP_DATA();
+		HANDLE_EXCEPTION();
+	}
+	function(EX_VAR(opline->result.var), arg1, arg2, arg3);
+	FREE_OP1();
+	/* Set to UNDEF in case FREE_OP2() throws. */
+	if (OP1_TYPE & (IS_VAR|IS_TMP_VAR)) {
+		ZVAL_UNDEF(EX_VAR(opline->op1.var));
+	}
+	FREE_OP2();
+	if (OP2_TYPE & (IS_VAR|IS_TMP_VAR)) {
+		ZVAL_UNDEF(EX_VAR(opline->op2.var));
+	}
+	FREE_OP_DATA();
+	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+}
+
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_JMP, (OP_JMP_ADDR(op, op->op1) > op), ZEND_JMP_FORWARD, JMP_ADDR, ANY)
 {
 	USE_OPLINE

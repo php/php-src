@@ -41,18 +41,23 @@ PHP 8.4 INTERNALS UPGRADE NOTES
  a. Abstract
    - SIZEOF_SHORT symbol removed (size of 2 on 32-bit and 64-bit platforms).
    - DBA_CDB_MAKE symbol removed in ext/dba.
+   - The configure option --with-imap has been removed.
    - The configure option --with-mhash emits deprecation warning.
    - The configure option --with-pspell has been removed.
 
  b. Unix build system changes
+   - The configure option --with-imap-ssl has been removed.
    - The configure option --with-zlib-dir has been removed.
    - COOKIE_IO_FUNCTIONS_T symbol has been removed (use cookie_io_functions_t).
    - HAVE_SOCKADDR_UN_SUN_LEN symbol renamed to HAVE_STRUCT_SOCKADDR_UN_SUN_LEN.
+   - HAVE_UTSNAME_DOMAINNAME symbol renamed to HAVE_STRUCT_UTSNAME_DOMAINNAME.
    - PHP_CHECK_IN_ADDR_T M4 macro and 'in_addr_t' fallback definition to 'u_int'
      removed (use AC_CHECK_TYPES Autoconf macro instead).
    - HAVE_ODBC2 symbol has been removed in ext/odbc.
    - Removed linking with obsolete dnet_stub library in ext/pdo_dblib.
    - Removed checking and linking with obsolete libbind for some functions.
+   - Symbol HAVE_JSON has been removed (ext/json is always available since PHP
+     8.0).
 
  c. Windows build system changes
    - Added Bison flag '-Wall' when generating lexer files as done in *nix build
@@ -81,6 +86,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      the new php_random_result struct, replacing the last_generated_size
      member of the php_random_status struct and the generate_size member of
      the php_random_algo struct.
+   - The CSPRNG API (php_random_(bytes|int)_*) is now provided by the new
+     and much smaller php_random_csprng.h header. The new header is included
+     in php_random.h for compatibility with existing users.
 
  c. ext/xsl
    - The function php_xsl_create_object() was removed as it was not used
@@ -106,6 +114,12 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 ========================
 4. OpCode changes
 ========================
+
+* New FRAMELESS_ICALL_[0,3] opcodes for faster internal function calls have been
+  added. These opcodes don't create a stack frame, but pass arguments via opcode
+  operands. They only work for functions that are known at compile-time, and
+  that provide a frameless handler (search for usages of the
+  ZEND_FRAMELESS_FUNCTION macro).
 
 ========================
 5. SAPI changes

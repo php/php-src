@@ -5,7 +5,7 @@ runs:
     - shell: bash
       run: |
         set -x
-        [[ "$OSTYPE" == "darwin"* ]] && export PATH="/usr/local/opt/bison/bin:$PATH"
+        [[ "$OSTYPE" == "darwin"* ]] && export PATH="$(brew --prefix)/opt/bison/bin:$PATH"
         scripts/dev/credits
         scripts/dev/genfiles
         Zend/zend_vm_gen.php

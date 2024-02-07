@@ -461,7 +461,7 @@ static void dom_deep_ns_redef(xmlNodePtr node, xmlNsPtr ns_to_redefine)
 			if (worklist_size == worklist_capacity) {
 				if (UNEXPECTED(worklist_capacity >= SIZE_MAX / 3 * 2 / sizeof(dom_deep_ns_redef_item))) {
 					/* Shouldn't be possible to hit, but checked for safety anyway */
-					return;
+					goto out;
 				}
 				worklist_capacity = worklist_capacity * 3 / 2;
 				worklist = erealloc(worklist, sizeof(dom_deep_ns_redef_item) * worklist_capacity);
@@ -472,6 +472,7 @@ static void dom_deep_ns_redef(xmlNodePtr node, xmlNsPtr ns_to_redefine)
 		}
 	}
 
+out:
 	efree(worklist);
 }
 

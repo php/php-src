@@ -29,6 +29,7 @@
 
 #include "php.h"
 #include "php_random.h"
+#include "php_random_csprng.h"
 
 #include "Zend/zend_exceptions.h"
 
@@ -239,7 +240,7 @@ PHPAPI void php_random_mt19937_seed_default(php_random_status_state_mt19937 *sta
 {
 	zend_long seed = 0;
 
-	if (php_random_bytes_silent(&seed, sizeof(zend_long)) == FAILURE) {
+	if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
 		seed = GENERATE_SEED();
 	}
 
@@ -276,13 +277,13 @@ PHP_METHOD(Random_Engine_Mt19937, __construct)
 
 	if (seed_is_null) {
 		/* MT19937 has a very large state, uses CSPRNG for seeding only */
-		if (php_random_bytes_throw(&seed, sizeof(zend_long)) == FAILURE) {
+		if (php_random_bytes_throw(&seed, sizeof(seed)) == FAILURE) {
 			zend_throw_exception(random_ce_Random_RandomException, "Failed to generate a random seed", 0);
 			RETURN_THROWS();
 		}
 	}
 
-	engine->algo->seed(engine->status, seed);
+	mt19937_seed_state(state, seed);
 }
 /* }}} */
 

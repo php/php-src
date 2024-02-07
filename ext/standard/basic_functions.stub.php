@@ -1632,10 +1632,16 @@ function pos(array|object $array): mixed {}
 
 function key(array|object $array): int|string|null {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ */
 function min(mixed $value, mixed ...$values): mixed {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ */
 function max(mixed $value, mixed ...$values): mixed {}
 
 function array_walk(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
@@ -1644,6 +1650,8 @@ function array_walk_recursive(array|object &$array, callable $callback, mixed $a
 
 /**
  * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ * @frameless-function {"arity": 3}
  */
 function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
 
@@ -2321,7 +2329,11 @@ function nl_langinfo(int $item): string|false {}
 
 function strcoll(string $string1, string $string2): int {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ * @frameless-function {"arity": 2}
+ */
 function trim(string $string, string $characters = " \n\r\t\v\0"): string {}
 
 /** @compile-time-eval */
@@ -2348,6 +2360,8 @@ function explode(string $separator, string $string, int $limit = PHP_INT_MAX): a
 
 /**
  * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ * @frameless-function {"arity": 2}
  */
 function implode(string|array $separator, ?array $array = null): string {}
 
@@ -2372,7 +2386,11 @@ function str_decrement(string $string): string {}
 /** @refcount 1 */
 function basename(string $path, string $suffix = ""): string {}
 
-/** @refcount 1 */
+/**
+ * @refcount 1
+ * @frameless-function {"arity": 1}
+ * @frameless-function {"arity": 2}
+ */
 function dirname(string $path, int $levels = 1): string {}
 
 /**
@@ -2390,13 +2408,19 @@ function stristr(string $haystack, string $needle, bool $before_needle = false):
 /**
  * @compile-time-eval
  * @refcount 1
+ * @frameless-function {"arity": 2}
+ * @frameless-function {"arity": 3}
  */
 function strstr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
 /** @alias strstr */
 function strchr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ * @frameless-function {"arity": 3}
+ */
 function strpos(string $haystack, string $needle, int $offset = 0): int|false {}
 
 /** @compile-time-eval */
@@ -2414,10 +2438,16 @@ function strripos(string $haystack, string $needle, int $offset = 0): int|false 
  */
 function strrchr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ */
 function str_contains(string $haystack, string $needle): bool {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ */
 function str_starts_with(string $haystack, string $needle): bool {}
 
 /** @compile-time-eval */
@@ -2429,7 +2459,11 @@ function str_ends_with(string $haystack, string $needle): bool {}
  */
 function chunk_split(string $string, int $length = 76, string $separator = "\r\n"): string {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ * @frameless-function {"arity": 3}
+ */
 function substr(string $string, int $offset, ?int $length = null): string {}
 
 /**
@@ -2467,6 +2501,8 @@ function ucwords(string $string, string $separators = " \t\r\n\f\v"): string {}
 
 /**
  * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ * @frameless-function {"arity": 3}
  */
 function strtr(string $string, string|array $from, ?string $to = null): string {}
 
@@ -2505,6 +2541,7 @@ function stripslashes(string $string): string {}
  * @param int $count
  * @return string|array<int|string, string>
  * @compile-time-eval
+ * @frameless-function {"arity": 3}
  */
 function str_replace(array|string $search, array|string $replace, string|array $subject, &$count = null): string|array {}
 
@@ -3202,6 +3239,7 @@ function decoct(int $num): string {}
 /**
  * @compile-time-eval
  * @refcount 1
+ * @frameless-function {"arity": 1}
  */
 function dechex(int $num): string {}
 
@@ -3607,6 +3645,7 @@ function is_double(mixed $value): bool {}
 
 /**
  * @compile-time-eval
+ * @frameless-function {"arity": 1}
  */
 function is_numeric(mixed $value): bool {}
 

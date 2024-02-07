@@ -21,6 +21,7 @@
 
 #include "php.h"
 #include "php_random.h"
+#include "php_random_csprng.h"
 
 #include "Zend/zend_exceptions.h"
 
@@ -28,7 +29,7 @@ static php_random_result generate(php_random_status *status)
 {
 	zend_ulong r = 0;
 
-	php_random_bytes_throw(&r, sizeof(zend_ulong));
+	php_random_bytes_throw(&r, sizeof(r));
 
 	return (php_random_result){
 		.size = sizeof(zend_ulong),

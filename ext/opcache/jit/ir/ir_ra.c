@@ -2021,12 +2021,22 @@ int ir_compute_dessa_moves(ir_ctx *ctx)
 	return 1;
 }
 
+/*
+ * Parallel copy sequentialization algorithm
+ *
+ * The implementation is based on algorithm 1 desriebed in
+ * "Revisiting Out-of-SSA Translation for Correctness, Code Quality and Efficiency",
+ * Benoit Boissinot, Alain Darte, Fabrice Rastello, Benoit Dupont de Dinechin, Christophe Guillon.
+ * 2009 International Symposium on Code Generation and Optimization, Seattle, WA, USA, 2009,
+ * pp. 114-125, doi: 10.1109/CGO.2009.19.
+ */
 int ir_gen_dessa_moves(ir_ctx *ctx, uint32_t b, emit_copy_t emit_copy)
 {
 	uint32_t succ, k, n = 0;
 	ir_block *bb, *succ_bb;
 	ir_use_list *use_list;
-	ir_ref *loc, *pred, i, *p, ref, input;
+	ir_ref *loc, *pred, *src, *dst, i, *p, ref, input;
+	ir_ref s, d;
 	ir_insn *insn;
 	uint32_t len;
 	ir_bitset todo, ready;
@@ -2044,10 +2054,12 @@ int ir_gen_dessa_moves(ir_ctx *ctx, uint32_t b, emit_copy_t emit_copy)
 
 	k = ir_phi_input_number(ctx, succ_bb, b);
 
-	loc = ir_mem_malloc(ctx->insns_count * 2 * sizeof(ir_ref));
-	pred = loc + ctx->insns_count;
-	len = ir_bitset_len(ctx->insns_count);
-	todo = ir_bitset_malloc(ctx->insns_count);
+	loc = ir_mem_malloc((ctx->vregs_count + 1) * 4 * sizeof(ir_ref));
+	pred = loc + ctx->vregs_count + 1;
+	src = pred + ctx->vregs_count + 1;
+	dst = src + ctx->vregs_count + 1;
+	len = ir_bitset_len(ctx->vregs_count + 1);
+	todo = ir_bitset_malloc(ctx->vregs_count + 1);
 
 	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < use_list->count; i++, p++) {
 		ref = *p;
@@ -2057,21 +2069,28 @@ int ir_gen_dessa_moves(ir_ctx *ctx, uint32_t b, emit_copy_t emit_copy)
 			if (IR_IS_CONST_REF(input)) {
 				have_constants = 1;
 			} else if (ctx->vregs[input] != ctx->vregs[ref]) {
-				loc[ref] = pred[input] = 0;
-				ir_bitset_incl(todo, ref);
+				s = ctx->vregs[input];
+				d = ctx->vregs[ref];
+				src[s] = input;
+				dst[d] = ref;
+				loc[d] = pred[s] = 0;
+				ir_bitset_incl(todo, d);
 				n++;
 			}
 		}
 	}
 
 	if (n > 0) {
-		ready = ir_bitset_malloc(ctx->insns_count);
-		IR_BITSET_FOREACH(todo, len, ref) {
+		src[0] = dst[0] = 0;
+		ready = ir_bitset_malloc(ctx->vregs_count + 1);
+		IR_BITSET_FOREACH(todo, len, d) {
+			ref = dst[d];
 			insn = &ctx->ir_base[ref];
 			IR_ASSERT(insn->op == IR_PHI);
 			input = ir_insn_op(insn, k);
-			loc[input] = input;
-			pred[ref] = input;
+			s = ctx->vregs[input];
+			loc[s] = s;
+			pred[d] = s;
 		} IR_BITSET_FOREACH_END();
 
 		IR_BITSET_FOREACH(todo, len, i) {
@@ -2086,9 +2105,10 @@ int ir_gen_dessa_moves(ir_ctx *ctx, uint32_t b, emit_copy_t emit_copy)
 			while ((b = ir_bitset_pop_first(ready, len)) >= 0) {
 				a = pred[b];
 				c = loc[a];
-				emit_copy(ctx, ctx->ir_base[b].type, c, b);
+				emit_copy(ctx, ctx->ir_base[dst[b]].type, src[c], dst[b]);
 				ir_bitset_excl(todo, b);
 				loc[a] = b;
+				src[b] = dst[b];
 				if (a == c && pred[a]) {
 					ir_bitset_incl(ready, a);
 				}
@@ -2098,7 +2118,7 @@ int ir_gen_dessa_moves(ir_ctx *ctx, uint32_t b, emit_copy_t emit_copy)
 				break;
 			}
 			IR_ASSERT(b != loc[pred[b]]);
-			emit_copy(ctx, ctx->ir_base[b].type, b, 0);
+			emit_copy(ctx, ctx->ir_base[src[b]].type, src[b], 0);
 			loc[b] = 0;
 			ir_bitset_incl(ready, b);
 		}

@@ -46,6 +46,7 @@
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/head.h"
 #include "ext/random/php_random.h"
+#include "ext/random/php_random_csprng.h"
 
 #include "mod_files.h"
 #include "mod_user.h"

@@ -1223,7 +1223,7 @@ typedef struct _ir_target_constraints ir_target_constraints;
 #define IR_SCRATCH_REG(_reg, _start, _end) \
 	(ir_tmp_reg){.reg=(_reg), .type=IR_VOID, .start=(_start), .end=(_end)}
 
-int ir_get_target_constraints(const ir_ctx *ctx, ir_ref ref, ir_target_constraints *constraints);
+int ir_get_target_constraints(ir_ctx *ctx, ir_ref ref, ir_target_constraints *constraints);
 
 void ir_fix_stack_frame(ir_ctx *ctx);
 

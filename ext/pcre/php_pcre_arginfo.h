@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7f27807e45df9c9b5011aa20263c9789896acfbc */
+ * Stub hash: 63de1d37ab303e1d6af7c96eaeeba09d7f35d116 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_preg_match, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
@@ -62,6 +62,18 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_preg_last_error_msg, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_FRAMELESS_FUNCTION(preg_match, 2);
+static const zend_frameless_function_info frameless_function_infos_preg_match[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(preg_match, 2), 2 },
+	{ 0 },
+};
+
+ZEND_FRAMELESS_FUNCTION(preg_replace, 3);
+static const zend_frameless_function_info frameless_function_infos_preg_replace[] = {
+	{ ZEND_FRAMELESS_FUNCTION_NAME(preg_replace, 3), 3 },
+	{ 0 },
+};
+
 
 ZEND_FUNCTION(preg_match);
 ZEND_FUNCTION(preg_match_all);
@@ -77,9 +89,9 @@ ZEND_FUNCTION(preg_last_error_msg);
 
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(preg_match, arginfo_preg_match)
+	ZEND_FRAMELESS_FE(preg_match, arginfo_preg_match, 0, frameless_function_infos_preg_match)
 	ZEND_FE(preg_match_all, arginfo_preg_match_all)
-	ZEND_FE(preg_replace, arginfo_preg_replace)
+	ZEND_FRAMELESS_FE(preg_replace, arginfo_preg_replace, 0, frameless_function_infos_preg_replace)
 	ZEND_FE(preg_filter, arginfo_preg_filter)
 	ZEND_FE(preg_replace_callback, arginfo_preg_replace_callback)
 	ZEND_FE(preg_replace_callback_array, arginfo_preg_replace_callback_array)

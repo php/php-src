@@ -95,7 +95,7 @@ typedef struct _zend_trait_method_reference {
 typedef struct _zend_trait_precedence {
 	zend_trait_method_reference trait_method;
 	uint32_t num_excludes;
-	zend_string *exclude_class_names[1] ZEND_ELEMENT_COUNT(num_excludes);
+	zend_string *exclude_class_names[1];
 } zend_trait_precedence;
 
 typedef struct _zend_trait_alias {

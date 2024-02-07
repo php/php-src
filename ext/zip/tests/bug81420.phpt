@@ -1,9 +1,7 @@
 --TEST--
 Bug #81420 (ZipArchive::extractTo extracts outside of destination)
---SKIPIF--
-<?php
-if (!extension_loaded("zip")) die("skip zip extension not available");
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $zip = new ZipArchive();
