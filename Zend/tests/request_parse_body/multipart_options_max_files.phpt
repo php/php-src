@@ -24,7 +24,7 @@ try {
     [$_POST, $_FILES] = request_parse_body([
         'max_file_uploads' => 1,
     ]);
-} catch (Exception $e) {
+} catch (Throwable $e) {
     echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 

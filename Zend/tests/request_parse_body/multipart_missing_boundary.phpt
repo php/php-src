@@ -12,7 +12,7 @@ $stream = fopen('php://memory','r+');
 
 try {
     [$_POST, $_FILES] = request_parse_body();
-} catch (Exception $e) {
+} catch (Throwable $e) {
     echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 

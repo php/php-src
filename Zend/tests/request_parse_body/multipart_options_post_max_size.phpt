@@ -22,7 +22,7 @@ try {
     [$_POST, $_FILES] = request_parse_body([
         'post_max_size' => '302',
     ]);
-} catch (Exception $e) {
+} catch (Throwable $e) {
     echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 

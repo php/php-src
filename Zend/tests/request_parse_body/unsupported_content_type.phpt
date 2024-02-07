@@ -12,7 +12,7 @@ Content-Type: application/json
 
 try {
     [$_POST, $_FILES] = request_parse_body();
-} catch (Exception $e) {
+} catch (Throwable $e) {
     echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 
@@ -20,7 +20,7 @@ var_dump($_POST, $_FILES);
 
 ?>
 --EXPECT--
-Exception: Content-Type "application/json" is not supported
+InvalidArgumentException: Content-Type "application/json" is not supported
 array(0) {
 }
 array(0) {

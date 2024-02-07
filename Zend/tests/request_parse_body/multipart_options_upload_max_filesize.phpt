@@ -18,7 +18,7 @@ try {
     [$_POST, $_FILES] = request_parse_body([
         'upload_max_filesize' => '128',
     ]);
-} catch (Exception $e) {
+} catch (Throwable $e) {
     echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 

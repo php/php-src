@@ -19,6 +19,7 @@
 #include "url.h"
 #include "SAPI.h"
 #include "zend_exceptions.h"
+#include "ext/spl/spl_exceptions.h"
 
 static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 	int encoding_type, zend_ulong index_int,
@@ -329,13 +330,13 @@ PHP_FUNCTION(request_parse_body)
 	}
 
 	if (!SG(request_info).content_type) {
-		zend_throw_error(NULL, "Request does not provide a content type");
+		zend_throw_error(spl_ce_InvalidArgumentException, "Request does not provide a content type");
 		goto exit;
 	}
 
 	sapi_read_post_data();
 	if (!SG(request_info).post_entry) {
-		zend_throw_exception_ex(NULL, 0, "Content-Type \"%s\" is not supported", SG(request_info).content_type);
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Content-Type \"%s\" is not supported", SG(request_info).content_type);
 		goto exit;
 	}
 

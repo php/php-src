@@ -8,7 +8,7 @@ try {
         'max_input_vars' => [],
     ]);
 } catch (Error $e) {
-    echo get_class($e) . ': ' . $e->getMessage(), "\n";
+    echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 
 ?>

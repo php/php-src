@@ -22,7 +22,7 @@ try {
     [$_POST, $_FILES] = request_parse_body([
         'max_input_vars' => 1,
     ]);
-} catch (Exception $e) {
+} catch (Throwable $e) {
     echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 
