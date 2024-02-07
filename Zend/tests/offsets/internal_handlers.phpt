@@ -191,6 +191,24 @@ exportObject($o);
 //}
 //exportObject($o);
 
+echo 'reference fetching', PHP_EOL;
+$o = new DimensionHandlersNoArrayAccess();
+try {
+    $r = &$o['foo'];
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+exportObject($o);
+
+echo 'nested reference fetching', PHP_EOL;
+$o = new DimensionHandlersNoArrayAccess();
+try {
+    $r = &$o['foo']['bar'];
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+exportObject($o);
+
 ?>
 --EXPECTF--
 read op
@@ -254,3 +272,12 @@ nested unset
 Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
 Error: Cannot unset offset in a non-array variable
 DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_UNSET, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+reference fetching
+
+Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
+DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_W, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+nested reference fetching
+
+Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
+Error: Cannot use a scalar value as an array
+DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_W, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
