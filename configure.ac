@@ -178,7 +178,7 @@ if test "$PHP_RE2C_CGOTO" = "no"; then
   RE2C_FLAGS=""
 else
   AC_MSG_CHECKING([whether re2c -g works])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
 int main(int argc, const char **argv)
 {
   argc = argc;
@@ -190,11 +190,11 @@ label2:
   return 0;
 }
   ]])],[
-    RE2C_FLAGS=""
-    AC_MSG_RESULT([no])
-  ],[
     RE2C_FLAGS="-g"
     AC_MSG_RESULT([yes])
+  ],[
+    RE2C_FLAGS=""
+    AC_MSG_RESULT([no])
   ])
 fi
 PHP_SUBST(RE2C_FLAGS)
