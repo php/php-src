@@ -29,9 +29,21 @@ PHP_MSHUTDOWN_FUNCTION(password);
  * When updating these values, synchronize ext/sodium/sodium_pwhash.c values.
  * Note that libargon expresses memlimit in KB, while libsoidum uses bytes.
  */
+#if defined(PHP_SODIUM_PWHASH_MEMLIMIT)
+#define PHP_PASSWORD_ARGON2_MEMORY_COST PHP_SODIUM_PWHASH_MEMLIMIT
+#else
 #define PHP_PASSWORD_ARGON2_MEMORY_COST (64 << 10)
+#endif
+#if defined(PHP_SODIUM_PWHASH_OPSLIMIT)
+#define PHP_PASSWORD_ARGON2_TIME_COST PHP_SODIUM_PWHASH_OPSLIMIT
+#else
 #define PHP_PASSWORD_ARGON2_TIME_COST 4
+#endif
+#if defined(PHP_SODIUM_PWHASH_THREADS)
+#define PHP_PASSWORD_ARGON2_THREADS PHP_SODIUM_PWHASH_THREADS
+#else
 #define PHP_PASSWORD_ARGON2_THREADS 1
+#endif
 #endif
 
 typedef struct _php_password_algo {

@@ -34,9 +34,21 @@
  *
  * When updating these values, synchronize ext/standard/php_password.h values.
  */
+#if defined(PHP_PASSWORD_ARGON2_MEMORY_COST)
+#define PHP_SODIUM_PWHASH_MEMLIMIT PHP_PASSWORD_ARGON2_MEMORY_COST
+#else
 #define PHP_SODIUM_PWHASH_MEMLIMIT (64 << 10)
+#endif
+#if defined(PHP_PASSWORD_ARGON2_TIME_COST)
+#define PHP_SODIUM_PWHASH_OPSLIMIT PHP_PASSWORD_ARGON2_TIME_COST
+#else
 #define PHP_SODIUM_PWHASH_OPSLIMIT 4
+#endif
+#if defined(PHP_SODIUM_PWHASH_THREADS)
+#define PHP_SODIUM_PWHASH_THREADS PHP_SODIUM_PWHASH_THREADS
+#else
 #define PHP_SODIUM_PWHASH_THREADS 1
+#endif
 
 static inline int get_options(zend_array *options, size_t *memlimit, size_t *opslimit) {
 	zval *opt;
