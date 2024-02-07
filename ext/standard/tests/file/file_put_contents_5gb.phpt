@@ -37,9 +37,7 @@ unlink($tmpfile);
 if (disk_free_space(dirname($tmpfile)) < 10 * 1024 * 1024 * 1024) {
     die('skip Reason: Insufficient disk space (less than 10GB)');
 }
-
 ?>
-
 --INI--
 memory_limit=6G
 --CLEAN--
@@ -60,6 +58,5 @@ if ($result !== strlen($large_string)) {
     echo "File written successfully.";
 }
 ?>
-
 --EXPECT--
 File written successfully.
