@@ -40,7 +40,7 @@
 #undef T_UNSPEC
 #endif
 #ifdef HAVE_ARPA_NAMESER_H
-#ifdef DARWIN
+#ifdef __APPLE__
 # define BIND_8_COMPAT 1
 #endif
 #include <arpa/nameser.h>
