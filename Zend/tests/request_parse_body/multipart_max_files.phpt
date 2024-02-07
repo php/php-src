@@ -30,7 +30,7 @@ var_dump($_POST, $_FILES);
 
 ?>
 --EXPECT--
-Exception: Maximum number of allowable file uploads has been exceeded
+RequestParseBodyException: Maximum number of allowable file uploads has been exceeded
 array(0) {
 }
 array(0) {

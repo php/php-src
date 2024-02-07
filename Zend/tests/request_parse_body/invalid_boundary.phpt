@@ -18,7 +18,7 @@ var_dump($_POST, $_FILES);
 
 ?>
 --EXPECT--
-Exception: Invalid boundary in multipart/form-data POST data
+RequestParseBodyException: Invalid boundary in multipart/form-data POST data
 array(0) {
 }
 array(0) {

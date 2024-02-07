@@ -29,7 +29,7 @@ var_dump($_POST, $_FILES);
 
 ?>
 --EXPECT--
-Exception: Multipart body parts limit exceeded 1. To increase the limit change max_multipart_body_parts in php.ini.
+RequestParseBodyException: Multipart body parts limit exceeded 1. To increase the limit change max_multipart_body_parts in php.ini.
 array(0) {
 }
 array(0) {

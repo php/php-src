@@ -30,7 +30,7 @@ var_dump($_POST, $_FILES);
 
 ?>
 --EXPECT--
-Exception: Input variables exceeded 1. To increase the limit change max_input_vars in php.ini.
+RequestParseBodyException: Input variables exceeded 1. To increase the limit change max_input_vars in php.ini.
 array(0) {
 }
 array(0) {

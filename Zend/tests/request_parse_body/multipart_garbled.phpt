@@ -25,7 +25,7 @@ var_dump($_POST, $_FILES);
 
 ?>
 --EXPECT--
-Exception: File Upload Mime headers garbled
+RequestParseBodyException: File Upload Mime headers garbled
 array(0) {
 }
 array(0) {

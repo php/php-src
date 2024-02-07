@@ -30,7 +30,7 @@ var_dump($_POST, $_FILES);
 
 ?>
 --EXPECT--
-Exception: POST Content-Length of 303 bytes exceeds the limit of 302 bytes
+RequestParseBodyException: POST Content-Length of 303 bytes exceeds the limit of 302 bytes
 array(0) {
 }
 array(0) {
