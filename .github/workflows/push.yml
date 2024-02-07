@@ -103,9 +103,6 @@ jobs:
       - name: Create MSSQL container
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/setup-mssql
-      - name: Create Oracle container
-        if: ${{ !matrix.asan }}
-        uses: ./.github/actions/setup-oracle
       - name: Setup Caddy server
         uses: ./.github/actions/setup-caddy
       - name: ccache

@@ -95,9 +95,6 @@
 "Extension: mysqlnd":
 - ext/mysqlnd/**/*
 
-"Extension: oci8":
-- ext/oci8/**/*
-
 "Extension: odbc":
 - ext/odbc/**/*
 
@@ -124,9 +121,6 @@
 
 "Extension: pdo_mysql":
 - ext/pdo_mysql/**/*
-
-"Extension: pdo_oci":
-- ext/pdo_oci/**/*
 
 "Extension: pdo_odbc":
 - ext/pdo_odbc/**/*
