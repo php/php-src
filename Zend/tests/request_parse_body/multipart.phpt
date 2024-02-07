@@ -1,5 +1,5 @@
 --TEST--
-request_parse_body() with multipart stream
+request_parse_body() with multipart
 --ENV--
 REQUEST_METHOD=PUT
 --POST_RAW--

@@ -1,5 +1,5 @@
 --TEST--
-request_parse_body() with urlencoded stream
+request_parse_body() with urlencoded
 --ENV--
 REQUEST_METHOD=PUT
 --POST_RAW--

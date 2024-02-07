@@ -252,7 +252,7 @@ static zend_result cache_request_parse_body_option(HashTable *options, zval *opt
 		} else if (Z_TYPE_P(option) == IS_LONG) {
 			result = Z_LVAL_P(option);
 		} else {
-			zend_value_error("Invalid %s value in $options argument", zend_get_type_by_const(Z_TYPE_P(option)));
+			zend_value_error("Invalid %s value in $options argument", zend_zval_value_name(option));
 			return FAILURE;
 		}
 		SG(request_parse_body_context).options_cache[cache_offset].set = true;
