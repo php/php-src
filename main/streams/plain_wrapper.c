@@ -40,7 +40,7 @@
 # include "win32/time.h"
 # include "win32/ioutil.h"
 # include "win32/readdir.h"
-#include <limits.h>
+# include <limits.h>
 #endif
 
 #define php_stream_fopen_from_fd_int(fd, mode, persistent_id)	_php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_CC)
