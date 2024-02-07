@@ -525,7 +525,6 @@ static const func_info_t func_infos[] = {
 	F1("htmlspecialchars", MAY_BE_STRING),
 	F1("htmlentities", MAY_BE_STRING),
 	F1("get_html_translation_table", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING),
-	F1("request_parse_body", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY),
 	F1("bin2hex", MAY_BE_STRING),
 	F1("hex2bin", MAY_BE_STRING|MAY_BE_FALSE),
 #if defined(HAVE_NL_LANGINFO)
@@ -600,6 +599,7 @@ static const func_info_t func_infos[] = {
 	F1("fsockopen", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	FN("pfsockopen", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	F1("http_build_query", MAY_BE_STRING),
+	F1("request_parse_body", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY),
 	F1("image_type_to_mime_type", MAY_BE_STRING),
 	F1("image_type_to_extension", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("getimagesize", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),

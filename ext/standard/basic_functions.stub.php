@@ -2289,13 +2289,6 @@ function htmlentities(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE |
  */
 function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, string $encoding = "UTF-8"): array {}
 
-/**
- * @param array|null $options
- * @return array<int, array>
- * @refcount 1
- */
-function request_parse_body(?array $options = null): array {}
-
 /* }}} */
 
 /* assert.c */
@@ -3033,6 +3026,13 @@ function pfsockopen(string $hostname, int $port = -1, &$error_code = null, &$err
 
 /** @refcount 1 */
 function http_build_query(array|object $data, string $numeric_prefix = "", ?string $arg_separator = null, int $encoding_type = PHP_QUERY_RFC1738): string {}
+
+/**
+ * @param array|null $options
+ * @return array<int, array>
+ * @refcount 1
+ */
+function request_parse_body(?array $options = null): array {}
 
 /* image.c */
 
