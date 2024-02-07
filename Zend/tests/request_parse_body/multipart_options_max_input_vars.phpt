@@ -23,14 +23,14 @@ try {
         'max_input_vars' => 1,
     ]);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 
 var_dump($_POST, $_FILES);
 
 ?>
 --EXPECT--
-Input variables exceeded 1. To increase the limit change max_input_vars in php.ini.
+Exception: Input variables exceeded 1. To increase the limit change max_input_vars in php.ini.
 array(0) {
 }
 array(0) {

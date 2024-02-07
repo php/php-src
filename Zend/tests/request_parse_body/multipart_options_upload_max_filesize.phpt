@@ -19,7 +19,7 @@ try {
         'upload_max_filesize' => '128',
     ]);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 
 var_dump($_POST, $_FILES);

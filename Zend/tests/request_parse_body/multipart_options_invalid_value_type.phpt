@@ -8,9 +8,9 @@ try {
         'max_input_vars' => [],
     ]);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo get_class($) $e->getMessage(), "\n";
 }
 
 ?>
---EXPECT--
-Invalid array value in $options argument
+--EXPECTF--
+Parse error: syntax error, unexpected token ")", expecting variable or "{" or "$" in %s on line %d

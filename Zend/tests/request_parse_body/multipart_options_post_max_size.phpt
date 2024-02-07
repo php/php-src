@@ -23,14 +23,14 @@ try {
         'post_max_size' => '302',
     ]);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 
 var_dump($_POST, $_FILES);
 
 ?>
 --EXPECT--
-POST Content-Length of 303 bytes exceeds the limit of 302 bytes
+Exception: POST Content-Length of 303 bytes exceeds the limit of 302 bytes
 array(0) {
 }
 array(0) {

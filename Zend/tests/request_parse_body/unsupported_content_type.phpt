@@ -13,14 +13,14 @@ Content-Type: application/json
 try {
     [$_POST, $_FILES] = request_parse_body();
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 
 var_dump($_POST, $_FILES);
 
 ?>
---EXPECTF--
-Content-Type "application/json" is not supported
+--EXPECT--
+Exception: Content-Type "application/json" is not supported
 array(0) {
 }
 array(0) {

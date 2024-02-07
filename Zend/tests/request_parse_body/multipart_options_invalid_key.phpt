@@ -6,16 +6,16 @@ request_parse_body() invalid key
 try {
     request_parse_body(options: ['foo' => 1]);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 
 try {
-    request_parse_body(options: ['moo' => 1]);
+    request_parse_body(options: [42 => 1]);
 } catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Invalid key "foo" in $options argument
-Invalid key "moo" in $options argument
+ValueError: Invalid key "foo" in $options argument
+ValueError: Invalid integer key in $options argument

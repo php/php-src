@@ -24,14 +24,14 @@ try {
         'max_multipart_body_parts' => 1,
     ]);
 } catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+    echo get_class($e), ': ', $e->getMessage(), "\n";
 }
 
 var_dump($_POST, $_FILES);
 
 ?>
 --EXPECT--
-Multipart body parts limit exceeded 1. To increase the limit change max_multipart_body_parts in php.ini.
+Exception: Multipart body parts limit exceeded 1. To increase the limit change max_multipart_body_parts in php.ini.
 array(0) {
 }
 array(0) {
