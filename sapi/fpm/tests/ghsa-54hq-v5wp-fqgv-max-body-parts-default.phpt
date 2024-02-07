@@ -45,9 +45,9 @@ $tester->close();
 
 ?>
 --EXPECT--
-Warning: Input variables exceeded 20. To increase the limit change max_input_vars in php.ini. in Unknown on line 0
+Warning: PHP Request Startup: Input variables exceeded 20. To increase the limit change max_input_vars in php.ini. in Unknown on line 0
 
-Warning: Multipart body parts limit exceeded 25. To increase the limit change max_multipart_body_parts in php.ini. in Unknown on line 0
+Warning: PHP Request Startup: Multipart body parts limit exceeded 25. To increase the limit change max_multipart_body_parts in php.ini. in Unknown on line 0
 int(20)
 --CLEAN--
 <?php

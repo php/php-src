@@ -678,7 +678,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 		if (throw_exceptions) { \
 			zend_throw_exception_ex(zend_ce_request_parse_body_exception, 0, __VA_ARGS__); \
 		} else { \
-			sapi_module.sapi_error(E_WARNING, __VA_ARGS__); \
+			php_error_docref(NULL, E_WARNING, __VA_ARGS__); \
 		} \
 	} while (0)
 
