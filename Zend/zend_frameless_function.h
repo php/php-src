@@ -26,7 +26,7 @@
 # include <php_config.h>
 #endif
 
-#include "zend_portability.h"
+#include "zend_types.h"
 
 #define ZEND_FRAMELESS_FUNCTION_PARAMETERS_0 zval *return_value
 #define ZEND_FRAMELESS_FUNCTION_PARAMETERS_1 zval *return_value, zval *arg1
@@ -102,10 +102,6 @@
 	}
 
 BEGIN_EXTERN_C()
-
-typedef struct _zval_struct zval;
-typedef struct _zend_op zend_op;
-typedef union _zend_function zend_function;
 
 typedef void (*zend_frameless_function_0)(zval *return_value);
 typedef void (*zend_frameless_function_1)(zval *return_value, zval *op1);
