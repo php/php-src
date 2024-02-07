@@ -511,7 +511,8 @@ static bool dom_decode_encode_fast_path(
 	const lxb_char_t *last_output = buf_ref;
 	while (buf_ref != buf_end) {
 		const lxb_char_t *buf_ref_backup = buf_ref;
-		lxb_codepoint_t codepoint = decoding_encoding_ctx->decode_data->decode_single(&decoding_encoding_ctx->decode, &buf_ref, buf_end);
+		/* Fast path converts non-validated UTF-8 -> validated UTF-8 */
+		lxb_codepoint_t codepoint = lxb_encoding_decode_utf_8_single(&decoding_encoding_ctx->decode, &buf_ref, buf_end);
 		if (UNEXPECTED(codepoint > LXB_ENCODING_MAX_CODEPOINT)) {
 			size_t skip = buf_ref - buf_ref_backup; /* Skip invalid data, it's replaced by the UTF-8 replacement bytes */
 			if (!dom_process_parse_chunk(
