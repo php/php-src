@@ -678,7 +678,6 @@ static int mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_a
 	MYSQLND **p = in_array;
 	zval dest_array;
 	zval *elem, *dest_elem;
-	int ret = 0;
 
 	array_init_size(&dest_array, zend_hash_num_elements(Z_ARRVAL_P(out_array)));
 
@@ -701,7 +700,6 @@ static int mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_a
 				if (dest_elem) {
 					zval_add_ref(dest_elem);
 				}
-				ret++;
 				p++;
 			}
 		}
@@ -720,7 +718,6 @@ static int mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, z
 {
 	MYSQLND **p = in_array;
 	zval proxy, *elem, *dest_elem;
-	int ret = 0;
 
 	array_init(&proxy);
 	if (in_array) {
@@ -733,7 +730,6 @@ static int mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, z
 				if (dest_elem) {
 					zval_add_ref(dest_elem);
 				}
-				ret++;
 				p++;
 			}
 		} ZEND_HASH_FOREACH_END();
