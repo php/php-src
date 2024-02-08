@@ -1981,7 +1981,7 @@ MYSQLND_CLASS_METHODS_END;
 
 
 /* {{{ _mysqlnd_init_ps_subsystem */
-void _mysqlnd_init_ps_subsystem()
+void _mysqlnd_init_ps_subsystem(void)
 {
 	mysqlnd_stmt_set_methods(&MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_stmt));
 	_mysqlnd_init_ps_fetch_subsystem();
