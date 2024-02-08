@@ -106,7 +106,7 @@ static void fatal_jpeg_error (j_common_ptr cinfo)
 	exit (99);
 }
 
-const char * gdJpegGetVersionString()
+const char * gdJpegGetVersionString(void)
 {
 	switch(JPEG_LIB_VERSION) {
 		case 62:

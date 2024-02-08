@@ -37,7 +37,7 @@
 
   ---------------------------------------------------------------------------*/
 
-const char * gdPngGetVersionString()
+const char * gdPngGetVersionString(void)
 {
 	return PNG_LIBPNG_VER_STRING;
 }

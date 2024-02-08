@@ -771,7 +771,7 @@ gdroundupdown (FT_F26Dot6 v1, int roundup)
 	return (!roundup) ? v1 >> 6 : (v1 + 63) >> 6;
 }
 
-void gdFontCacheShutdown()
+void gdFontCacheShutdown(void)
 {
 	gdMutexLock(gdFontCacheMutex);
 
@@ -789,12 +789,12 @@ void gdFreeFontCache(void)
 	gdFontCacheShutdown();
 }
 
-void gdFontCacheMutexSetup()
+void gdFontCacheMutexSetup(void)
 {
 	gdMutexSetup(gdFontCacheMutex);
 }
 
-void gdFontCacheMutexShutdown()
+void gdFontCacheMutexShutdown(void)
 {
 	gdMutexShutdown(gdFontCacheMutex);
 }
