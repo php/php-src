@@ -440,12 +440,22 @@ class Tester
      * @return null|array
      * @throws \Exception
      */
-    public function testConfig($silent = false, array|string|null $expectedPattern = null): ?array
-    {
-        $configFile = $this->createConfig();
-        $cmd        = self::findExecutable() . ' -n -tt -y ' . $configFile . ' 2>&1';
+    public function testConfig(
+        $silent = false,
+        array|string|null $expectedPattern = null,
+        $dumpConfig = true,
+        $printOutput = false
+    ): ?array {
+        $configFile    = $this->createConfig();
+        $configTestArg = $dumpConfig ? '-tt' : '-t';
+        $cmd           = self::findExecutable() . " -n $configTestArg -y $configFile 2>&1";
         $this->trace('Testing config using command', $cmd, true);
         exec($cmd, $output, $code);
+        if ($printOutput) {
+            foreach ($output as $outputLine) {
+                echo $outputLine . "\n";
+            }
+        }
         $found = 0;
         if ($expectedPattern !== null) {
             $expectedPatterns = is_array($expectedPattern) ? $expectedPattern : [$expectedPattern];

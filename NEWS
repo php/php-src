@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13612 (Corrupted memory in destructor with weak references).
     (nielsdos)
 
+- FPM:
+  . Fixed GH-11086 (FPM: config test runs twice in daemonised mode).
+    (Jakub Zelenka)
+
 - Gettext:
   . Fixed sigabrt raised with dcgettext/dcngettext calls with gettext 0.22.5
     with category set to LC_ALL. (David Carlier)
