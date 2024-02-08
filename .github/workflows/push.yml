@@ -98,7 +98,28 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   MACOS_DEBUG_NTS:
-    runs-on: macos-12
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: 12
+            arch: X64
+            debug: true
+            zts: false
+          - os: 12
+            arch: X64
+            debug: false
+            zts: true
+          - os: 14
+            arch: ARM64
+            debug: true
+            zts: false
+          - os: 14
+            arch: ARM64
+            debug: false
+            zts: true
+    name: "MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: macos-${{ matrix.os }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -107,22 +128,24 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
+          key: "${{github.job}}-${{matrix.os}}-{{ matrix.debug && 'DEBUG' || 'RELEASE' }}-${{ matrix.zts && 'ZTS' || 'NTS' }}-${{hashFiles('main/php_version.h')}}"
           append-timestamp: false
       - name: ./configure
         uses: ./.github/actions/configure-macos
         with:
-          configurationParameters: --enable-debug --disable-zts
+          configurationParameters: >-
+            --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            --${{ matrix.zts && 'enable' || 'disable' }}-zts
       - name: make
         run: |-
-          export PATH="/usr/local/opt/bison/bin:$PATH"
+          export PATH="$(brew --prefix bison)/bin:$PATH"
           make -j$(sysctl -n hw.logicalcpu) >/dev/null
       - name: make install
         run: sudo make install
       - name: Test Tracing JIT
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+          testArtifacts: ${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
           jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
