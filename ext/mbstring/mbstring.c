@@ -3988,8 +3988,8 @@ PHP_FUNCTION(mb_send_mail)
 	char *to_r = NULL;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	struct {
-		int cnt_type:1;
-		int cnt_trans_enc:1;
+		unsigned int cnt_type:1;
+		unsigned int cnt_trans_enc:1;
 	} suppressed_hdrs = { 0, 0 };
 
 	char *message_buf = NULL, *subject_buf = NULL, *p;
