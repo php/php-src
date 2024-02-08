@@ -123,7 +123,7 @@ rem work-around for some spawned PHP processes requiring OpenSSL
 echo extension=php_openssl.dll >> %PHP_BUILD_DIR%\php.ini
 
 rem remove ext dlls for which tests are not supported
-for %%i in (ldap oci8_12c pdo_oci) do (
+for %%i in (ldap) do (
 	del %PHP_BUILD_DIR%\php_%%i.dll
 )
 

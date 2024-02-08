@@ -553,8 +553,6 @@ jobs:
           ref: ${{ matrix.branch.ref }}
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
-      - name: Create Oracle container
-        uses: ./.github/actions/setup-oracle
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: ./configure
