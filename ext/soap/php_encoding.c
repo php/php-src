@@ -3416,7 +3416,7 @@ static void set_xsi_type(xmlNodePtr node, char *type)
 	set_ns_prop(node, XSI_NAMESPACE, "type", type);
 }
 
-void encode_reset_ns()
+void encode_reset_ns(void)
 {
 	SOAP_GLOBAL(cur_uniq_ns) = 0;
 	SOAP_GLOBAL(cur_uniq_ref) = 0;
@@ -3428,7 +3428,7 @@ void encode_reset_ns()
 	zend_hash_init(SOAP_GLOBAL(ref_map), 0, NULL, NULL, 0);
 }
 
-void encode_finish()
+void encode_finish(void)
 {
 	SOAP_GLOBAL(cur_uniq_ns) = 0;
 	SOAP_GLOBAL(cur_uniq_ref) = 0;
