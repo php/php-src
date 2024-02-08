@@ -128,7 +128,7 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{github.job}}-${{matrix.os}}-{{ matrix.debug && 'DEBUG' || 'RELEASE' }}-${{ matrix.zts && 'ZTS' || 'NTS' }}-${{hashFiles('main/php_version.h')}}"
+          key: "${{github.job}}-${{ matrix.arch }}_${{matrix.os}}-${{ matrix.debug && 'DEBUG' || 'RELEASE' }}-${{ matrix.zts && 'ZTS' || 'NTS' }}-${{hashFiles('main/php_version.h')}}"
           append-timestamp: false
       - name: ./configure
         uses: ./.github/actions/configure-macos
