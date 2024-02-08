@@ -12,6 +12,8 @@ echo "== mb_ucfirst ==\n";
 var_dump(mb_ucfirst("ａｂ"));
 var_dump(mb_ucfirst("ＡＢＳ"));
 var_dump(mb_ucfirst("đắt quá!"));
+var_dump(mb_ucfirst("აბგ"));
+var_dump(mb_ucfirst("ǉ"));
 echo "== mb_lcfirst ==\n";
 var_dump(mb_lcfirst("ＡＢＳ"));
 var_dump(mb_lcfirst("Xin chào"));
@@ -25,6 +27,8 @@ string(0) ""
 string(6) "Ａｂ"
 string(9) "ＡＢＳ"
 string(12) "Đắt quá!"
+string(9) "აბგ"
+string(2) "ǈ"
 == mb_lcfirst ==
 string(9) "ａＢＳ"
 string(9) "xin chào"
