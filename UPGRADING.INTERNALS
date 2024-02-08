@@ -39,14 +39,16 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 ========================
 
  a. Abstract
-   - SIZEOF_SHORT symbol removed (size of 2 on 32-bit and 64-bit platforms).
-   - DBA_CDB_MAKE symbol removed in ext/dba.
    - The configure option --with-imap has been removed.
    - The configure option --with-mhash emits deprecation warning.
+   - The configure option --with-pdo-oci has been removed.
    - The configure option --with-pspell has been removed.
+   - Symbol SIZEOF_SHORT removed (size of 2 on 32-bit and 64-bit platforms).
+   - Symbol DBA_CDB_MAKE removed in ext/dba.
 
  b. Unix build system changes
    - The configure option --with-imap-ssl has been removed.
+   - The configure option --with-oci8 has been removed.
    - The configure option --with-zlib-dir has been removed.
    - COOKIE_IO_FUNCTIONS_T symbol has been removed (use cookie_io_functions_t).
    - HAVE_SOCKADDR_UN_SUN_LEN symbol renamed to HAVE_STRUCT_SOCKADDR_UN_SUN_LEN.
@@ -58,8 +60,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Removed checking and linking with obsolete libbind for some functions.
    - Symbol HAVE_JSON has been removed (ext/json is always available since PHP
      8.0).
+   - Symbol DARWIN has been removed (use __APPLE__ to target Darwin systems).
 
  c. Windows build system changes
+   - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19 have
+     been removed.
    - Added Bison flag '-Wall' when generating lexer files as done in *nix build
      system.
    - HAVE_WIN32_NATIVE_THREAD, USE_WIN32_NATIVE_THREAD, ENABLE_THREADS symbols

@@ -300,6 +300,7 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 		case ZEND_SWITCH_STRING:
 		case ZEND_MATCH:
 		case ZEND_BIND_INIT_STATIC_OR_JMP:
+		case ZEND_JMP_FRAMELESS:
 			/* branch opcodes */
 			return 1;
 		case ZEND_NEW:

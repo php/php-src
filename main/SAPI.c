@@ -169,7 +169,7 @@ SAPI_API void sapi_handle_post(void *arg)
 	}
 }
 
-static void sapi_read_post_data(void)
+SAPI_API void sapi_read_post_data(void)
 {
 	sapi_post_entry *post_entry;
 	uint32_t content_type_length = (uint32_t)strlen(SG(request_info).content_type);
@@ -255,9 +255,11 @@ SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen)
 
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
-	if ((SG(post_max_size) > 0) && (SG(request_info).content_length > SG(post_max_size))) {
+	zend_long post_max_size = REQUEST_PARSE_BODY_OPTION_GET(post_max_size, SG(post_max_size));
+
+	if (post_max_size > 0 && SG(request_info).content_length > post_max_size) {
 		php_error_docref(NULL, E_WARNING, "POST Content-Length of " ZEND_LONG_FMT " bytes exceeds the limit of " ZEND_LONG_FMT " bytes",
-					SG(request_info).content_length, SG(post_max_size));
+					SG(request_info).content_length, post_max_size);
 		return;
 	}
 
@@ -281,8 +283,8 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 				}
 			}
 
-			if ((SG(post_max_size) > 0) && (SG(read_post_bytes) > SG(post_max_size))) {
-				php_error_docref(NULL, E_WARNING, "Actual POST length does not match Content-Length, and exceeds " ZEND_LONG_FMT " bytes", SG(post_max_size));
+			if (post_max_size > 0 && SG(read_post_bytes) > post_max_size) {
+				php_error_docref(NULL, E_WARNING, "Actual POST length does not match Content-Length, and exceeds " ZEND_LONG_FMT " bytes", post_max_size);
 				break;
 			}
 
@@ -455,6 +457,8 @@ SAPI_API void sapi_activate(void)
 		SG(request_info).headers_only = 0;
 	}
 	SG(rfc1867_uploaded_files) = NULL;
+	SG(request_parse_body_context).throw_exceptions = false;
+	memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
 
 	/* Handle request method */
 	if (SG(server_context)) {
@@ -1018,7 +1022,7 @@ SAPI_API zend_stat_t *sapi_get_stat(void)
 SAPI_API char *sapi_getenv(const char *name, size_t name_len)
 {
 	char *value, *tmp;
-	
+
 	if (!sapi_module.getenv) {
 		return NULL;
 	}

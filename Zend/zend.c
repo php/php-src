@@ -1865,12 +1865,40 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 	zval_ptr_dtor(&orig_user_exception_handler);
 } /* }}} */
 
+ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handle *file_handle)
+{
+	zend_op_array *op_array = zend_compile_file(file_handle, type);
+	if (file_handle->opened_path) {
+		zend_hash_add_empty_element(&EG(included_files), file_handle->opened_path);
+	}
+
+	zend_result ret = SUCCESS;
+	if (op_array) {
+		zend_execute(op_array, retval);
+		zend_exception_restore();
+		if (UNEXPECTED(EG(exception))) {
+			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
+				zend_user_exception_handler();
+			}
+			if (EG(exception)) {
+				ret = zend_exception_error(EG(exception), E_ERROR);
+			}
+		}
+		zend_destroy_static_vars(op_array);
+		destroy_op_array(op_array);
+		efree_size(op_array, sizeof(zend_op_array));
+	} else if (type == ZEND_REQUIRE) {
+		ret = FAILURE;
+	}
+
+	return ret;
+}
+
 ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...) /* {{{ */
 {
 	va_list files;
 	int i;
 	zend_file_handle *file_handle;
-	zend_op_array *op_array;
 	zend_result ret = SUCCESS;
 
 	va_start(files, file_count);
@@ -1879,32 +1907,10 @@ ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count
 		if (!file_handle) {
 			continue;
 		}
-
 		if (ret == FAILURE) {
 			continue;
 		}
-
-		op_array = zend_compile_file(file_handle, type);
-		if (file_handle->opened_path) {
-			zend_hash_add_empty_element(&EG(included_files), file_handle->opened_path);
-		}
-		if (op_array) {
-			zend_execute(op_array, retval);
-			zend_exception_restore();
-			if (UNEXPECTED(EG(exception))) {
-				if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
-					zend_user_exception_handler();
-				}
-				if (EG(exception)) {
-					ret = zend_exception_error(EG(exception), E_ERROR);
-				}
-			}
-			zend_destroy_static_vars(op_array);
-			destroy_op_array(op_array);
-			efree_size(op_array, sizeof(zend_op_array));
-		} else if (type==ZEND_REQUIRE) {
-			ret = FAILURE;
-		}
+		ret = zend_execute_script(type, retval, file_handle);
 	}
 	va_end(files);
 

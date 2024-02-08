@@ -89,9 +89,6 @@
 
 #if defined(ZEND_WIN32) && !defined(__clang__)
 # define ZEND_ASSUME(c)	__assume(c)
-#elif defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 13
-/* GCC emits a warning when __attribute__ appears directly after a label, so we need a do-while loop. */
-# define ZEND_ASSUME(c)	do { __attribute__((assume(c))); } while (0)
 #elif defined(__clang__) && __has_builtin(__builtin_assume)
 # pragma clang diagnostic ignored "-Wassume"
 # define ZEND_ASSUME(c)	__builtin_assume(c)
@@ -205,7 +202,7 @@ char *alloca();
 # endif
 #endif
 
-#if !ZEND_DEBUG && (defined(HAVE_ALLOCA) || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
+#if !ZEND_DEBUG && (defined(HAVE_ALLOCA) || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(__APPLE__)
 # define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
 # define ALLOCA_FLAG(name) \
 	bool name;
@@ -305,7 +302,7 @@ char *alloca();
 # define ZEND_FASTCALL
 #endif
 
-#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
+#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
 # define HAVE_NORETURN
 # define ZEND_NORETURN __attribute__((noreturn))
 #elif defined(ZEND_WIN32)
@@ -321,7 +318,7 @@ char *alloca();
 # define ZEND_STACK_ALIGNED
 #endif
 
-#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
+#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
 # define HAVE_NORETURN_ALIAS
 # define HAVE_ATTRIBUTE_WEAK
 #endif

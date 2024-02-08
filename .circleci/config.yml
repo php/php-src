@@ -149,8 +149,6 @@ jobs:
               --with-snmp \
               `#--with-unixODBC` \
               `#--with-pdo-odbc=unixODBC,/usr` \
-              `#--with-pdo-oci=shared,instantclient,/opt/oracle/instantclient` \
-              `#--with-oci8=shared,instantclient,/opt/oracle/instantclient` \
               --with-config-file-path=/etc \
               --with-config-file-scan-dir=/etc/php.d \
               --with-pdo-firebird \

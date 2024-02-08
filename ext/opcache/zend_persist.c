@@ -579,6 +579,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_ASSERT_CHECK:
 					case ZEND_JMP_NULL:
 					case ZEND_BIND_INIT_STATIC_OR_JMP:
+					case ZEND_JMP_FRAMELESS:
 						opline->op2.jmp_addr = &new_opcodes[opline->op2.jmp_addr - op_array->opcodes];
 						break;
 					case ZEND_CATCH:
