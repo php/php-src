@@ -3798,14 +3798,14 @@ static void exif_process_APP12(image_info_type *ImageInfo, char *buffer, size_t 
  * Parse the marker stream until SOS or EOI is seen; */
 static bool exif_scan_JPEG_header(image_info_type *ImageInfo)
 {
-	int section, sn;
+	int sn;
 	int marker = 0, last_marker = M_PSEUDO, comment_correction=1;
 	unsigned int ll, lh;
 	uchar *Data;
 	size_t fpos, size, got, itemlen;
 	jpeg_sof_info sof_info;
 
-	for(section=0;;section++) {
+        while(1) {
 #ifdef EXIF_DEBUG
 		fpos = php_stream_tell(ImageInfo->infile);
 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Needing section %d @ 0x%08X", ImageInfo->file.count, fpos);
