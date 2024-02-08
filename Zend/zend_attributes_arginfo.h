@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 32f0458c20f04099e353a8300ffb19e40bc38f69 */
+ * Stub hash: a041b2f959b641a44e4c3957262de795fba2496a */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Attribute___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "Attribute::TARGET_ALL")
@@ -24,6 +24,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Override___construct arginfo_class_ReturnTypeWillChange___construct
 
+#define arginfo_class_NotSerializable___construct arginfo_class_ReturnTypeWillChange___construct
+
 
 ZEND_METHOD(Attribute, __construct);
 ZEND_METHOD(ReturnTypeWillChange, __construct);
@@ -33,6 +35,7 @@ ZEND_METHOD(SensitiveParameterValue, __construct);
 ZEND_METHOD(SensitiveParameterValue, getValue);
 ZEND_METHOD(SensitiveParameterValue, __debugInfo);
 ZEND_METHOD(Override, __construct);
+ZEND_METHOD(NotSerializable, __construct);
 
 
 static const zend_function_entry class_Attribute_methods[] = {
@@ -69,6 +72,12 @@ static const zend_function_entry class_SensitiveParameterValue_methods[] = {
 
 static const zend_function_entry class_Override_methods[] = {
 	ZEND_ME(Override, __construct, arginfo_class_Override___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_NotSerializable_methods[] = {
+	ZEND_ME(NotSerializable, __construct, arginfo_class_NotSerializable___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -229,6 +238,24 @@ static zend_class_entry *register_class_Override(void)
 	zval attribute_Attribute_class_Override_0_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_Override_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_Override_0->args[0].value, &attribute_Attribute_class_Override_0_arg0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_NotSerializable(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "NotSerializable", class_NotSerializable_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	zend_string *attribute_name_Attribute_class_NotSerializable_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_NotSerializable_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_NotSerializable_0, 1);
+	zend_string_release(attribute_name_Attribute_class_NotSerializable_0);
+	zval attribute_Attribute_class_NotSerializable_0_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_NotSerializable_0_arg0, ZEND_ATTRIBUTE_TARGET_CLASS);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_NotSerializable_0->args[0].value, &attribute_Attribute_class_NotSerializable_0_arg0);
 
 	return class_entry;
 }

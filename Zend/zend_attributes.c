@@ -30,6 +30,7 @@ ZEND_API zend_class_entry *zend_ce_allow_dynamic_properties;
 ZEND_API zend_class_entry *zend_ce_sensitive_parameter;
 ZEND_API zend_class_entry *zend_ce_sensitive_parameter_value;
 ZEND_API zend_class_entry *zend_ce_override;
+ZEND_API zend_class_entry *zend_ce_not_serializable;
 
 static zend_object_handlers attributes_object_handlers_sensitive_parameter_value;
 
@@ -78,6 +79,19 @@ static void validate_allow_dynamic_properties(
 		);
 	}
 	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+}
+
+static void validate_not_serializable(
+		zend_attribute *attr, uint32_t target, zend_class_entry *scope)
+{
+	if (scope->ce_flags & ZEND_ACC_TRAIT) {
+		zend_error_noreturn(E_ERROR, "Cannot apply #[NotSerializable] to trait");
+	}
+	if (scope->ce_flags & ZEND_ACC_INTERFACE) {
+		zend_error_noreturn(E_ERROR, "Cannot apply #[NotSerializable] to interface");
+	}
+
+	scope->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 }
 
 ZEND_METHOD(Attribute, __construct)
@@ -130,6 +144,11 @@ ZEND_METHOD(SensitiveParameterValue, __debugInfo)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_EMPTY_ARRAY();
+}
+
+ZEND_METHOD(NotSerializable, __construct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
 }
 
 static HashTable *attributes_sensitive_parameter_value_get_properties_for(zend_object *zobj, zend_prop_purpose purpose)
@@ -380,6 +399,10 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_override = register_class_Override();
 	zend_mark_internal_attribute(zend_ce_override);
+
+	zend_ce_not_serializable = register_class_NotSerializable();
+	attr = zend_mark_internal_attribute(zend_ce_not_serializable);
+	attr->validator = validate_not_serializable;
 }
 
 void zend_attributes_shutdown(void)
