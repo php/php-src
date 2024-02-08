@@ -1653,6 +1653,5 @@ namespace DOM
     }
 #endif
 
-    /* TODO: test reverse import */
     function import_simplexml(object $node): Element {}
 }

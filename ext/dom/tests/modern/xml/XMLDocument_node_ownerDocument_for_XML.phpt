@@ -47,7 +47,7 @@ object(DOM\XMLDocument)#1 (28) {
   ["nodeName"]=>
   string(9) "#document"
   ["baseURI"]=>
-  string(20) "/home/niels/php-src/"
+  string(%d) "%s"
   ["isConnected"]=>
   bool(true)
   ["ownerDocument"]=>
