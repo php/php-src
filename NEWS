@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #75712 (getenv in php-fpm should not read $_ENV, $_SERVER).
     (Jakub Zelenka)
 
+- PGSQL:
+  . Fixed bug GH-13354 (pg_execute/pg_send_query_params/pg_send_execute
+    with null value passed by reference). (George Barbarosie)
+
 - Standard:
   . Fixed array key as hash to string (case insensitive) comparison typo
     for the second operand buffer size (albeit unused for now). (A. Slepykh)
