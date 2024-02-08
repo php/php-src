@@ -89,9 +89,6 @@
 
 #if defined(ZEND_WIN32) && !defined(__clang__)
 # define ZEND_ASSUME(c)	__assume(c)
-#elif defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 13
-/* GCC emits a warning when __attribute__ appears directly after a label, so we need a do-while loop. */
-# define ZEND_ASSUME(c)	do { __attribute__((assume(c))); } while (0)
 #elif defined(__clang__) && __has_builtin(__builtin_assume)
 # pragma clang diagnostic ignored "-Wassume"
 # define ZEND_ASSUME(c)	__builtin_assume(c)
