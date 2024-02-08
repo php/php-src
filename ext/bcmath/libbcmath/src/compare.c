@@ -43,10 +43,7 @@
    compare the magnitudes. */
 
  int
-_bc_do_compare (n1, n2, use_sign, ignore_last)
-     bc_num n1, n2;
-     int use_sign;
-     int ignore_last;
+_bc_do_compare (bc_num n1, bc_num n2, int use_sign, int ignore_last)
 {
   char *n1ptr, *n2ptr;
   int  count;
@@ -152,8 +149,7 @@ _bc_do_compare (n1, n2, use_sign, ignore_last)
 /* This is the "user callable" routine to compare numbers N1 and N2. */
 
 int
-bc_compare (n1, n2)
-     bc_num n1, n2;
+bc_compare (bc_num n1, bc_num n2)
 {
   return _bc_do_compare (n1, n2, TRUE, FALSE);
 }

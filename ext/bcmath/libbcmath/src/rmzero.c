@@ -42,8 +42,7 @@
    correct place and adjusts the length. */
 
  void
-_bc_rm_leading_zeros (num)
-     bc_num num;
+_bc_rm_leading_zeros (bc_num num)
 {
   /* We can move n_value to point to the first non zero digit! */
   while (*num->n_value == 0 && num->n_len > 1) {

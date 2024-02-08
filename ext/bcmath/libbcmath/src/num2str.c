@@ -40,9 +40,7 @@
 /* Convert a numbers to a string.  Base 10 only.*/
 
 zend_string
-*bc_num2str_ex (num, scale)
-      bc_num num;
-	  int scale;
+*bc_num2str_ex (bc_num num, int scale)
 {
 	zend_string *str;
 	char *sptr;

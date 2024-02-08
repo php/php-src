@@ -43,9 +43,7 @@
    is the minimum scale for the result. */
 
 void
-bc_add (n1, n2, result, scale_min)
-     bc_num n1, n2, *result;
-     int scale_min;
+bc_add (bc_num n1, bc_num n2, bc_num *result, int scale_min)
 {
   bc_num sum = NULL;
   int cmp_res;

@@ -43,8 +43,7 @@
    the NUM for zero after having a zero returned. */
 
 long
-bc_num2long (num)
-     bc_num num;
+bc_num2long (bc_num num)
 {
   long val;
   char *nptr;
