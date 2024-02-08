@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #75712 (getenv in php-fpm should not read $_ENV, $_SERVER).
     (Jakub Zelenka)
 
+- PGSQL:
+  . Fixed bug GH-13354 (pg_execute/pg_send_query_params/pg_send_execute
+    with null value passed by reference). (George Barbarosie)
+
 - Standard:
   . Fixed bug GH-13279 (Instable array during in-place modification in uksort).
     (ilutov)
