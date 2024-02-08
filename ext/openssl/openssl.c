@@ -453,7 +453,7 @@ static int X509_get_signature_nid(const X509 *x)
 	PHP_OPENSSL_CHECK_NUMBER_CONVERSION_NULL_RETURN(ZEND_LONG_EXCEEDS_INT(_var), _name)
 
 /* {{{ php_openssl_store_errors */
-void php_openssl_store_errors()
+void php_openssl_store_errors(void)
 {
 	struct php_openssl_errors *errors;
 	int error_code = ERR_get_error();
