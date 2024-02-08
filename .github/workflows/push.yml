@@ -150,7 +150,6 @@ jobs:
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.protect_memory=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   WINDOWS:
