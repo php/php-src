@@ -3,42 +3,42 @@
 /** @generate-class-entries */
 
 #ifdef HAVE_GLOB
-#ifdef GLOB_BRACE
+#if defined(GLOB_BRACE) && GLOB_BRACE != 0
 /**
  * @var int
  * @cvalue GLOB_BRACE
  */
 const GLOB_BRACE = UNKNOWN;
 #endif
-#ifdef GLOB_ERR
+#if defined(GLOB_ERR) && GLOB_ERR != 0
 /**
  * @var int
  * @cvalue GLOB_ERR
  */
 const GLOB_ERR = UNKNOWN;
 #endif
-#ifdef GLOB_MARK
+#if defined(GLOB_MARK) && GLOB_MARK != 0
 /**
  * @var int
  * @cvalue GLOB_MARK
  */
 const GLOB_MARK = UNKNOWN;
 #endif
-#ifdef GLOB_NOCHECK
+#if defined(GLOB_NOCHECK) && GLOB_NOCHECK != 0
 /**
  * @var int
  * @cvalue GLOB_NOCHECK
  */
 const GLOB_NOCHECK = UNKNOWN;
 #endif
-#ifdef GLOB_NOESCAPE
+#if defined(GLOB_NOESCAPE) && GLOB_NOESCAPE != 0
 /**
  * @var int
  * @cvalue GLOB_NOESCAPE
  */
 const GLOB_NOESCAPE = UNKNOWN;
 #endif
-#ifdef GLOB_NOSORT
+#if defined(GLOB_NOSORT) && GLOB_NOSORT != 0
 /**
  * @var int
  * @cvalue GLOB_NOSORT
