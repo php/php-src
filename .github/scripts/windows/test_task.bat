@@ -112,7 +112,7 @@ rem prepare for mail
 curl -sLo hMailServer.exe https://www.hmailserver.com/download_file/?downloadid=271
 hMailServer.exe /verysilent
 cd %APPVEYOR_BUILD_FOLDER%
-%PHP_BUILD_DIR%\php.exe -dextension_dir=%PHP_BUILD_DIR% -dextension=com_dotnet appveyor\setup_hmailserver.php
+%PHP_BUILD_DIR%\php.exe -dextension_dir=%PHP_BUILD_DIR% -dextension=com_dotnet .github\setup_hmailserver.php
 
 mkdir %PHP_BUILD_DIR%\test_file_cache
 rem generate php.ini
