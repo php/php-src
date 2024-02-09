@@ -20,12 +20,13 @@
 
 #include "php.h"
 #include "ext/standard/php_password.h"
-#include "php_libsodium.h"
-#include "sodium_pwhash_arginfo.h"
 
 #include <sodium.h>
 
-#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
+#include "php_libsodium.h"
+#include "sodium_pwhash_arginfo.h"
+
+#if !defined(HAVE_ARGON2LIB) && (SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6))
 
 static inline int get_options(zend_array *options, size_t *memlimit, size_t *opslimit) {
 	zval *opt;
@@ -160,24 +161,15 @@ static const php_password_algo sodium_algo_argon2id = {
 };
 
 PHP_MINIT_FUNCTION(sodium_password_hash) /* {{{ */ {
-	zend_string *argon2i = ZSTR_INIT_LITERAL("argon2i", 1);
 
-	if (php_password_algo_find(argon2i)) {
-		/* Nothing to do. Core has registered these algorithms for us. */
-		zend_string_release(argon2i);
-		return SUCCESS;
-	}
-	zend_string_release(argon2i);
+	register_sodium_pwhash_symbols(module_number);
 
 	if (FAILURE == php_password_algo_register("argon2i", &sodium_algo_argon2i)) {
 		return FAILURE;
 	}
-	register_sodium_pwhash_symbols(module_number);
-
 	if (FAILURE == php_password_algo_register("argon2id", &sodium_algo_argon2id)) {
 		return FAILURE;
 	}
-	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2ID", "argon2id", CONST_PERSISTENT);
 
 	return SUCCESS;
 }

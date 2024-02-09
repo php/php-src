@@ -164,7 +164,7 @@ PHP_MINIT_FUNCTION(sodium)
 	sodium_exception_ce = register_class_SodiumException(zend_ce_exception);
 	sodium_exception_ce->create_object = sodium_exception_create_object;
 
-#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
+#if !defined(HAVE_ARGON2LIB) && (SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6))
 	if (FAILURE == PHP_MINIT(sodium_password_hash)(INIT_FUNC_ARGS_PASSTHRU)) {
 		return FAILURE;
 	}
