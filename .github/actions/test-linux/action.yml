@@ -28,12 +28,6 @@ runs:
         export PDO_DBLIB_TEST_DSN="dblib:host=127.0.0.1;dbname=master;version=7.0"
         export PDO_DBLIB_TEST_USER="pdo_test"
         export PDO_DBLIB_TEST_PASS="password"
-        export PHP_OCI8_TEST_USER="system"
-        export PHP_OCI8_TEST_PASS="pass"
-        export PHP_OCI8_TEST_DB="localhost/XEPDB1"
-        export PDO_OCI_TEST_USER="system"
-        export PDO_OCI_TEST_PASS="pass"
-        export PDO_OCI_TEST_DSN="oci:dbname=localhost/XEPDB1;charset=AL32UTF8"
         export PGSQL_TEST_CONNSTR="host=localhost dbname=test port=5432 user=postgres password=postgres"
         if [[ -z "$PDO_PGSQL_TEST_DSN" ]]; then
           export PDO_PGSQL_TEST_DSN="pgsql:host=localhost port=5432 dbname=test user=postgres password=postgres"

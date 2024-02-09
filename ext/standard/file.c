@@ -86,10 +86,6 @@
 # include <sys/file.h>
 #endif
 
-#if MISSING_FCLOSE_DECL
-extern int fclose(FILE *);
-#endif
-
 #ifdef HAVE_SYS_MMAN_H
 # include <sys/mman.h>
 #endif

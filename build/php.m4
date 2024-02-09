@@ -1287,22 +1287,6 @@ fi
 ])
 
 dnl
-dnl PHP_MISSING_FCLOSE_DECL
-dnl
-dnl See if we have broken header files like SunOS has.
-dnl
-AC_DEFUN([PHP_MISSING_FCLOSE_DECL],[
-  AC_MSG_CHECKING([for fclose declaration])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[int (*func)() = fclose]])],[
-    AC_DEFINE(MISSING_FCLOSE_DECL,0,[ ])
-    AC_MSG_RESULT([ok])
-  ],[
-    AC_DEFINE(MISSING_FCLOSE_DECL,1,[ ])
-    AC_MSG_RESULT([missing])
-  ])
-])
-
-dnl
 dnl PHP_SOCKADDR_CHECKS
 dnl
 AC_DEFUN([PHP_SOCKADDR_CHECKS], [

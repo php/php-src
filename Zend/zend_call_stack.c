@@ -664,6 +664,7 @@ static bool zend_call_stack_get_netbsd(zend_call_stack *stack)
 #endif /* defined(__NetBSD__) */
 
 #if defined(__sun)
+# if defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK)
 static bool zend_call_stack_get_solaris_pthread(zend_call_stack *stack)
 {
 	pthread_attr_t attr;
@@ -694,6 +695,12 @@ static bool zend_call_stack_get_solaris_pthread(zend_call_stack *stack)
 
 	return true;
 }
+# else /* defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK) */
+static bool zend_call_stack_get_solaris_pthread(zend_call_stack *stack)
+{
+	return false;
+}
+# endif /* defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK) */
 
 static bool zend_call_stack_get_solaris_proc_maps(zend_call_stack *stack)
 {

@@ -43,6 +43,8 @@
 #define PHP_OUTPUT_HANDLER_DISABLED		0x2000
 #define PHP_OUTPUT_HANDLER_PROCESSED	0x4000
 
+#define PHP_OUTPUT_HANDLER_ABILITY_FLAGS(bitmask) ((bitmask) & ~0xf00f)
+
 /* handler op return values */
 typedef enum _php_output_handler_status_t {
 	PHP_OUTPUT_HANDLER_FAILURE,
