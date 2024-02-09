@@ -9,15 +9,13 @@
 #endif
 
 INLINE uint32x4_t loadu_128(const uint8_t src[16]) {
-  // vld1q_u32 has alignment requirements. Don't use it.
-  uint32x4_t x;
-  memcpy(&x, src, 16);
-  return x;
+    // https://github.com/BLAKE3-team/BLAKE3/pull/384
+    return vreinterpretq_u32_u8(vld1q_u8(src));
 }
 
 INLINE void storeu_128(uint32x4_t src, uint8_t dest[16]) {
-  // vst1q_u32 has alignment requirements. Don't use it.
-  memcpy(dest, &src, 16);
+    // https://github.com/BLAKE3-team/BLAKE3/pull/384
+    vst1q_u8(dest, vreinterpretq_u8_u32(src));
 }
 
 INLINE uint32x4_t add_128(uint32x4_t a, uint32x4_t b) {
