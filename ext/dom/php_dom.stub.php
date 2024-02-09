@@ -1029,11 +1029,6 @@ namespace DOM
 {
     /**
      * @var int
-     * @cvalue PHP_ERR
-     */
-    const PHP_ERR = UNKNOWN;
-    /**
-     * @var int
      * @cvalue INDEX_SIZE_ERR
      */
     const INDEX_SIZE_ERR = UNKNOWN;
