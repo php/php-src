@@ -34,7 +34,7 @@ extern zend_module_entry sodium_module_entry;
 
 #define SODIUM_CRYPTO_SIGN_KEYPAIRBYTES() crypto_sign_SECRETKEYBYTES + crypto_sign_PUBLICKEYBYTES
 
-#if !defined(HAVE_ARGON2LIB) && (SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6))
+#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
 
 /**
  * MEMLIMIT is normalized to KB even though sodium uses Bytes in order to
@@ -63,7 +63,7 @@ extern zend_module_entry sodium_module_entry;
 #endif
 
 PHP_MINIT_FUNCTION(sodium);
-#if !defined(HAVE_ARGON2LIB) && (SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6))
+#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
 PHP_MINIT_FUNCTION(sodium_password_hash);
 #endif
 PHP_MSHUTDOWN_FUNCTION(sodium);

@@ -26,7 +26,7 @@
 #include "php_libsodium.h"
 #include "sodium_pwhash_arginfo.h"
 
-#if !defined(HAVE_ARGON2LIB) && (SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6))
+#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
 
 static inline int get_options(zend_array *options, size_t *memlimit, size_t *opslimit) {
 	zval *opt;
@@ -161,6 +161,14 @@ static const php_password_algo sodium_algo_argon2id = {
 };
 
 PHP_MINIT_FUNCTION(sodium_password_hash) /* {{{ */ {
+	zend_string *argon2i = ZSTR_INIT_LITERAL("argon2i", 1);
+
+	if (php_password_algo_find(argon2i)) {
+		/* Nothing to do. Core has registered these algorithms for us. */
+		zend_string_release(argon2i);
+		return SUCCESS;
+	}
+	zend_string_release(argon2i);
 
 	register_sodium_pwhash_symbols(module_number);
 
