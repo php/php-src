@@ -441,6 +441,7 @@ PHP 8.4 UPGRADE NOTES
 
 - Core:
   . PHP_OUTPUT_HANDLER_PROCESSED.
+  . PHP_SBINDIR.
 
 - Intl:
   . The IntlDateFormatter class exposes now the new PATTERN constant
