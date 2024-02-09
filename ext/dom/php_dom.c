@@ -30,8 +30,6 @@
 #include "lexbor/lexbor/core/lexbor.h"
 
 #include "ext/standard/info.h"
-#define PHP_XPATH 1
-#define PHP_XPTR 2
 
 /* {{{ class entries */
 PHP_DOM_EXPORT zend_class_entry *dom_node_class_entry;
@@ -105,10 +103,6 @@ typedef struct _dom_prop_handler {
 	dom_read_t read_func;
 	dom_write_t write_func;
 } dom_prop_handler;
-
-static zend_object_handlers* dom_get_obj_handlers(void) {
-	return &dom_object_handlers;
-}
 
 /* {{{ int dom_node_is_read_only(xmlNodePtr node) */
 int dom_node_is_read_only(xmlNodePtr node) {
@@ -511,7 +505,7 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 	dom_object *intern = php_dom_obj_from_obj(zobject);
 	dom_object *clone = dom_objects_set_class(intern->std.ce);
 
-	clone->std.handlers = dom_get_obj_handlers();
+	clone->std.handlers = &dom_object_handlers;
 
 	if (instanceof_function(intern->std.ce, dom_node_class_entry)) {
 		xmlNodePtr node = (xmlNodePtr)dom_object_get_node(intern);
@@ -1084,7 +1078,7 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type)
 zend_object *dom_objects_new(zend_class_entry *class_type)
 {
 	dom_object *intern = dom_objects_set_class(class_type);
-	intern->std.handlers = dom_get_obj_handlers();
+	intern->std.handlers = &dom_object_handlers;
 	return &intern->std;
 }
 /* }}} */
