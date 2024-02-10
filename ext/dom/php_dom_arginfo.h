@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bb56cbafa2da145e1d02e33164a8d46735ba13e7 */
+ * Stub hash: 35fffb84ef21540c3f2552ed334d311c14e6e0a1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1038,15 +1038,19 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_XPATH_ENABLED)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOM_XPath_evaluate, 0, 1, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOM_XPath_evaluate, 0, 1, DOM\\\116odeList, MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_DOUBLE|MAY_BE_STRING)
 	ZEND_ARG_TYPE_INFO(0, expression, IS_STRING, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, contextNode, DOM\\DOM\\\116ode, 1, "null")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, contextNode, DOM\\\116ode, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, registerNodeNS, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_XPATH_ENABLED)
-#define arginfo_class_DOM_XPath_query arginfo_class_DOM_XPath_evaluate
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_XPath_query, 0, 1, DOM\\\116odeList, 0)
+	ZEND_ARG_TYPE_INFO(0, expression, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, contextNode, DOM\\\116ode, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, registerNodeNS, _IS_BOOL, 0, "true")
+ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_XPATH_ENABLED)
@@ -3412,8 +3416,8 @@ static zend_class_entry *register_class_DOM_XPath(void)
 	zval property_document_default_value;
 	ZVAL_UNDEF(&property_document_default_value);
 	zend_string *property_document_name = zend_string_init("document", sizeof("document") - 1, 1);
-	zend_string *property_document_class_DOM_DOM_Document = zend_string_init("DOM\\DOM\\Document", sizeof("DOM\\DOM\\Document")-1, 1);
-	zend_declare_typed_property(class_entry, property_document_name, &property_document_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_document_class_DOM_DOM_Document, 0, 0));
+	zend_string *property_document_class_DOM_Document = zend_string_init("DOM\\Document", sizeof("DOM\\Document")-1, 1);
+	zend_declare_typed_property(class_entry, property_document_name, &property_document_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_document_class_DOM_Document, 0, 0));
 	zend_string_release(property_document_name);
 
 	zval property_registerNodeNamespaces_default_value;

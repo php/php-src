@@ -1643,20 +1643,16 @@ namespace DOM
     /** @not-serializable */
     final class XPath
     {
-        /* TODO: return type of evaluated/query can return dom namespace node??? */
-        /* TODO: get rid of mixed pls... */
-        /* TODO: double check return types (e.g. nodelist) */
-
         /** @readonly */
-        public DOM\Document $document;
+        public Document $document;
 
         public bool $registerNodeNamespaces;
 
         public function __construct(Document $document, bool $registerNodeNS = true) {}
 
-        public function evaluate(string $expression, ?DOM\Node $contextNode = null, bool $registerNodeNS = true): mixed {}
+        public function evaluate(string $expression, ?Node $contextNode = null, bool $registerNodeNS = true): null|bool|float|string|NodeList {}
 
-        public function query(string $expression, ?DOM\Node $contextNode = null, bool $registerNodeNS = true): mixed {}
+        public function query(string $expression, ?Node $contextNode = null, bool $registerNodeNS = true): NodeList {}
 
         /** @implementation-alias DOMXPath::registerNamespace */
         public function registerNamespace(string $prefix, string $namespace): bool {}
