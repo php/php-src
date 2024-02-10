@@ -861,8 +861,6 @@ zend_result dom_node_text_content_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	// TODO: mark the inherited nodevalue&textContent as readonly/non-readonly where necessary
-
 	php_libxml_invalidate_node_list_cache(obj->document);
 
 	/* Typed property, this is already a string */
