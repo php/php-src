@@ -51,6 +51,7 @@ PHP_DOM_EXPORT zend_class_entry *dom_nodelist_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_modern_nodelist_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_namednodemap_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_modern_namednodemap_class_entry;
+PHP_DOM_EXPORT zend_class_entry *dom_modern_dtd_namednodemap_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_html_collection_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_characterdata_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_modern_characterdata_class_entry;
@@ -891,6 +892,13 @@ PHP_MINIT_FUNCTION(dom)
 
 	zend_hash_add_new_ptr(&classes, dom_modern_namednodemap_class_entry->name, &dom_namednodemap_prop_handlers);
 
+	dom_modern_dtd_namednodemap_class_entry = register_class_DOM_DTDNamedNodeMap(zend_ce_aggregate, zend_ce_countable);
+	dom_modern_dtd_namednodemap_class_entry->create_object = dom_nnodemap_objects_new;
+	dom_modern_dtd_namednodemap_class_entry->default_object_handlers = &dom_nnodemap_object_handlers;
+	dom_modern_dtd_namednodemap_class_entry->get_iterator = php_dom_get_iterator;
+
+	zend_hash_add_new_ptr(&classes, dom_modern_dtd_namednodemap_class_entry->name, &dom_namednodemap_prop_handlers);
+
 	dom_html_collection_class_entry = register_class_DOM_HTMLCollection(zend_ce_aggregate, zend_ce_countable);
 	dom_html_collection_class_entry->create_object = dom_nnodemap_objects_new;
 	dom_html_collection_class_entry->default_object_handlers = &dom_nodelist_object_handlers;
@@ -1060,7 +1068,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_notation_prop_handlers, "publicId", dom_notation_public_id_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_notation_prop_handlers, "systemId", dom_notation_system_id_read, NULL);
 	zend_hash_merge(&dom_modern_notation_prop_handlers, &dom_modern_node_prop_handlers, NULL, false);
-	zend_hash_add_new_ptr(&classes, dom_modern_notation_class_entry->name, &dom_notation_prop_handlers);
+	zend_hash_add_new_ptr(&classes, dom_modern_notation_class_entry->name, &dom_modern_node_prop_handlers);
 
 	dom_entity_class_entry = register_class_DOMEntity(dom_node_class_entry);
 	dom_entity_class_entry->create_object = dom_objects_new;
@@ -1444,6 +1452,8 @@ void php_dom_create_iterator(zval *return_value, dom_iterator_type iterator_type
 		/* This only exists in modern DOM. */
 		ZEND_ASSERT(modern);
 		ce = dom_html_collection_class_entry;
+	} else if (iterator_type == DOM_DTD_NAMEDNODEMAP) {
+		ce = dom_get_dtd_namednodemap_ce(modern);
 	} else {
 		ZEND_ASSERT(iterator_type == DOM_NODELIST);
 		ce = dom_get_nodelist_ce(modern);

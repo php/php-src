@@ -35,6 +35,7 @@ extern PHP_DOM_EXPORT zend_class_entry *dom_nodelist_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_modern_nodelist_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_namednodemap_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_modern_namednodemap_class_entry;
+extern PHP_DOM_EXPORT zend_class_entry *dom_modern_dtd_namednodemap_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_html_collection_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_characterdata_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_modern_characterdata_class_entry;

@@ -110,6 +110,7 @@ typedef struct {
 typedef enum _dom_iterator_type {
 	DOM_NODELIST,
 	DOM_NAMEDNODEMAP,
+	DOM_DTD_NAMEDNODEMAP,
 	DOM_HTMLCOLLECTION,
 } dom_iterator_type;
 

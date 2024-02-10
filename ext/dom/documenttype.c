@@ -60,8 +60,7 @@ zend_result dom_documenttype_entities_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	// TODO
-	php_dom_create_iterator(retval, DOM_NAMEDNODEMAP, false);
+	php_dom_create_iterator(retval, DOM_DTD_NAMEDNODEMAP, php_dom_follow_spec_intern(obj));
 
 	entityht = (xmlHashTable *) doctypep->entities;
 
@@ -89,8 +88,7 @@ zend_result dom_documenttype_notations_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	// TODO
-	php_dom_create_iterator(retval, DOM_NAMEDNODEMAP, false);
+	php_dom_create_iterator(retval, DOM_DTD_NAMEDNODEMAP, php_dom_follow_spec_intern(obj));
 
 	notationht = (xmlHashTable *) doctypep->notations;
 

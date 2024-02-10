@@ -1251,6 +1251,28 @@ namespace DOM
         public function getIterator(): \Iterator {}
     }
 
+    class DTDNamedNodeMap implements IteratorAggregate, Countable
+    {
+        /** @readonly */
+        public int $length;
+
+        /** @implementation-alias DOMNamedNodeMap::item */
+        public function item(int $index): Entity|Notation|null {}
+        /** @implementation-alias DOMNamedNodeMap::getNamedItem */
+        public function getNamedItem(string $qualifiedName): Entity|Notation|null {}
+        /** @implementation-alias DOMNamedNodeMap::getNamedItemNS */
+        public function getNamedItemNS(?string $namespace, string $localName): Entity|Notation|null {}
+
+        /**
+         * @tentative-return-type
+         * @implementation-alias DOMNamedNodeMap::count
+         */
+        public function count(): int {}
+
+        /** @implementation-alias DOMNamedNodeMap::getIterator */
+        public function getIterator(): \Iterator {}
+    }
+
     class HTMLCollection implements IteratorAggregate, Countable
     {
         /** @readonly */
@@ -1434,11 +1456,10 @@ namespace DOM
     {
         /** @readonly */
         public string $name;
-        /* TODO :( these are not the same "NamedNodeMap"!!! */
         /** @readonly */
-        public NamedNodeMap $entities;
+        public DTDNamedNodeMap $entities;
         /** @readonly */
-        public NamedNodeMap $notations;
+        public DTDNamedNodeMap $notations;
         /** @readonly */
         public string $publicId;
         /** @readonly */

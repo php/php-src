@@ -40,6 +40,11 @@ static zend_always_inline zend_class_entry *dom_get_xml_document_ce(bool modern)
 	return modern ? dom_xml_document_class_entry : dom_document_class_entry;
 }
 
+static zend_always_inline zend_class_entry *dom_get_dtd_namednodemap_ce(bool modern)
+{
+	return modern ? dom_modern_dtd_namednodemap_class_entry : dom_namednodemap_class_entry;
+}
+
 DOM_DEF_GET_CE_FUNC(node)
 DOM_DEF_GET_CE_FUNC(documenttype)
 DOM_DEF_GET_CE_FUNC(element)

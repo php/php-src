@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3bb57fcd094499449e803de113db744705457fc1 */
+ * Stub hash: bb56cbafa2da145e1d02e33164a8d46735ba13e7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -683,6 +683,23 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOM_NamedNodeMap_count arginfo_class_DOMNode_getLineNo
 
 #define arginfo_class_DOM_NamedNodeMap_getIterator arginfo_class_DOMNodeList_getIterator
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOM_DTDNamedNodeMap_item, 0, 1, DOM\\Entity|DOM\\\116otation, MAY_BE_NULL)
+	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOM_DTDNamedNodeMap_getNamedItem, 0, 1, DOM\\Entity|DOM\\\116otation, MAY_BE_NULL)
+	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOM_DTDNamedNodeMap_getNamedItemNS, 0, 2, DOM\\Entity|DOM\\\116otation, MAY_BE_NULL)
+	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_DOM_DTDNamedNodeMap_count arginfo_class_DOMNode_getLineNo
+
+#define arginfo_class_DOM_DTDNamedNodeMap_getIterator arginfo_class_DOMNodeList_getIterator
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_HTMLCollection_item, 0, 1, DOM\\Element, 1)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
@@ -1555,6 +1572,15 @@ static const zend_function_entry class_DOM_NamedNodeMap_methods[] = {
 	ZEND_RAW_FENTRY("getNamedItemNS", zim_DOMNamedNodeMap_getNamedItemNS, arginfo_class_DOM_NamedNodeMap_getNamedItemNS, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("count", zim_DOMNamedNodeMap_count, arginfo_class_DOM_NamedNodeMap_count, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getIterator", zim_DOMNamedNodeMap_getIterator, arginfo_class_DOM_NamedNodeMap_getIterator, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_DOM_DTDNamedNodeMap_methods[] = {
+	ZEND_MALIAS(DOMNamedNodeMap, item, item, arginfo_class_DOM_DTDNamedNodeMap_item, ZEND_ACC_PUBLIC)
+	ZEND_MALIAS(DOMNamedNodeMap, getNamedItem, getNamedItem, arginfo_class_DOM_DTDNamedNodeMap_getNamedItem, ZEND_ACC_PUBLIC)
+	ZEND_MALIAS(DOMNamedNodeMap, getNamedItemNS, getNamedItemNS, arginfo_class_DOM_DTDNamedNodeMap_getNamedItemNS, ZEND_ACC_PUBLIC)
+	ZEND_MALIAS(DOMNamedNodeMap, count, count, arginfo_class_DOM_DTDNamedNodeMap_count, ZEND_ACC_PUBLIC)
+	ZEND_MALIAS(DOMNamedNodeMap, getIterator, getIterator, arginfo_class_DOM_DTDNamedNodeMap_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -2848,6 +2874,23 @@ static zend_class_entry *register_class_DOM_NamedNodeMap(zend_class_entry *class
 	return class_entry;
 }
 
+static zend_class_entry *register_class_DOM_DTDNamedNodeMap(zend_class_entry *class_entry_DOM_IteratorAggregate, zend_class_entry *class_entry_DOM_Countable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "DOM", "DTDNamedNodeMap", class_DOM_DTDNamedNodeMap_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	zend_class_implements(class_entry, 2, class_entry_DOM_IteratorAggregate, class_entry_DOM_Countable);
+
+	zval property_length_default_value;
+	ZVAL_UNDEF(&property_length_default_value);
+	zend_string *property_length_name = zend_string_init("length", sizeof("length") - 1, 1);
+	zend_declare_typed_property(class_entry, property_length_name, &property_length_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_length_name);
+
+	return class_entry;
+}
+
 static zend_class_entry *register_class_DOM_HTMLCollection(zend_class_entry *class_entry_DOM_IteratorAggregate, zend_class_entry *class_entry_DOM_Countable)
 {
 	zend_class_entry ce, *class_entry;
@@ -3112,15 +3155,15 @@ static zend_class_entry *register_class_DOM_DocumentType(zend_class_entry *class
 	zval property_entities_default_value;
 	ZVAL_UNDEF(&property_entities_default_value);
 	zend_string *property_entities_name = zend_string_init("entities", sizeof("entities") - 1, 1);
-	zend_string *property_entities_class_DOM_NamedNodeMap = zend_string_init("DOM\\\116amedNodeMap", sizeof("DOM\\\116amedNodeMap")-1, 1);
-	zend_declare_typed_property(class_entry, property_entities_name, &property_entities_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_entities_class_DOM_NamedNodeMap, 0, 0));
+	zend_string *property_entities_class_DOM_DTDNamedNodeMap = zend_string_init("DOM\\DTDNamedNodeMap", sizeof("DOM\\DTDNamedNodeMap")-1, 1);
+	zend_declare_typed_property(class_entry, property_entities_name, &property_entities_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_entities_class_DOM_DTDNamedNodeMap, 0, 0));
 	zend_string_release(property_entities_name);
 
 	zval property_notations_default_value;
 	ZVAL_UNDEF(&property_notations_default_value);
 	zend_string *property_notations_name = zend_string_init("notations", sizeof("notations") - 1, 1);
-	zend_string *property_notations_class_DOM_NamedNodeMap = zend_string_init("DOM\\\116amedNodeMap", sizeof("DOM\\\116amedNodeMap")-1, 1);
-	zend_declare_typed_property(class_entry, property_notations_name, &property_notations_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_notations_class_DOM_NamedNodeMap, 0, 0));
+	zend_string *property_notations_class_DOM_DTDNamedNodeMap = zend_string_init("DOM\\DTDNamedNodeMap", sizeof("DOM\\DTDNamedNodeMap")-1, 1);
+	zend_declare_typed_property(class_entry, property_notations_name, &property_notations_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_notations_class_DOM_DTDNamedNodeMap, 0, 0));
 	zend_string_release(property_notations_name);
 
 	zval property_publicId_default_value;
