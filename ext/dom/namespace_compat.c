@@ -233,7 +233,7 @@ typedef struct {
 	dom_libxml_ns_mapper *ns_mapper;
 } dom_libxml_reconcile_ctx;
 
-static xmlAttrPtr dom_ns_compat_mark_attribute(dom_libxml_ns_mapper *mapper, xmlNodePtr node, xmlNsPtr ns)
+xmlAttrPtr dom_ns_compat_mark_attribute(dom_libxml_ns_mapper *mapper, xmlNodePtr node, xmlNsPtr ns)
 {
 	xmlNsPtr xmlns_ns;
 	const xmlChar *name;

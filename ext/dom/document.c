@@ -868,10 +868,10 @@ PHP_METHOD(DOMDocument, importNode)
 		}
 	}
 
-	DOM_RET_OBJ((xmlNodePtr) retnodep, &ret, intern);
+	DOM_RET_OBJ(retnodep, &ret, intern);
 }
 
-PHP_METHOD(DOM_Document, importNode)
+static void dom_modern_document_import_node(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *node_ce)
 {
 	zval *node;
 	xmlDocPtr docp;
@@ -880,7 +880,7 @@ PHP_METHOD(DOM_Document, importNode)
 	int ret;
 	bool recursive = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &node, dom_modern_node_class_entry, &recursive) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &node, node_ce, &recursive) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -903,9 +903,19 @@ PHP_METHOD(DOM_Document, importNode)
 		}
 	}
 
-	DOM_RET_OBJ((xmlNodePtr) retnodep, &ret, intern);
+	DOM_RET_OBJ(retnodep, &ret, intern);
+}
+
+PHP_METHOD(DOM_Document, importNode)
+{
+	dom_modern_document_import_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_node_class_entry);
 }
 /* }}} end dom_document_import_node */
+
+PHP_METHOD(DOM_Document, importLegacyNode)
+{
+	dom_modern_document_import_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_node_class_entry);
+}
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-DocCrElNS
 Modern spec URL: https://dom.spec.whatwg.org/#internal-createelementns-steps

@@ -60,5 +60,6 @@ bool dom_ns_is_fast(const xmlNode *nodep, const dom_ns_magic_token *magic_token)
 bool dom_ns_is_html_and_document_is_html(const xmlNode *nodep);
 void dom_libxml_reconcile_modern(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node);
 void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp);
+xmlAttrPtr dom_ns_compat_mark_attribute(dom_libxml_ns_mapper *mapper, xmlNodePtr node, xmlNsPtr ns);
 
 #endif

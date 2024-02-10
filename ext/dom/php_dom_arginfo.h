@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0ca751c6e5ffbe432208649cfd2ff20aadda5275 */
+ * Stub hash: 444090548262bcb4d49d66e147747a17ee296d2c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -943,6 +943,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_Document_replaceChildren arginfo_class_DOM_ParentNode_append
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Document_importLegacyNode, 0, 1, DOM\\\116ode, 0)
+	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, deep, _IS_BOOL, 0, "false")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_HTMLDocument_createEmpty, 0, 0, DOM\\HTMLDocument, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 0, "\"UTF-8\"")
 ZEND_END_ARG_INFO()
@@ -1224,6 +1229,7 @@ ZEND_METHOD(DOM_Document, createProcessingInstruction);
 ZEND_METHOD(DOM_Document, importNode);
 ZEND_METHOD(DOM_Document, adoptNode);
 ZEND_METHOD(DOM_Document, registerNodeClass);
+ZEND_METHOD(DOM_Document, importLegacyNode);
 ZEND_METHOD(DOM_HTMLDocument, createEmpty);
 ZEND_METHOD(DOM_HTMLDocument, createFromFile);
 ZEND_METHOD(DOM_HTMLDocument, createFromString);
@@ -1687,6 +1693,7 @@ static const zend_function_entry class_DOM_Document_methods[] = {
 	ZEND_RAW_FENTRY("append", zim_DOMElement_append, arginfo_class_DOM_Document_append, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("prepend", zim_DOMElement_prepend, arginfo_class_DOM_Document_prepend, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("replaceChildren", zim_DOMDocument_replaceChildren, arginfo_class_DOM_Document_replaceChildren, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(DOM_Document, importLegacyNode, arginfo_class_DOM_Document_importLegacyNode, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

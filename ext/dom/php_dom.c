@@ -2218,7 +2218,7 @@ static int dom_nodemap_has_dimension(zend_object *object, zval *member, int chec
 	return offset >= 0 && offset < php_dom_get_namednodemap_length(php_dom_obj_from_obj(object));
 } /* }}} end dom_nodemap_has_dimension */
 
-static xmlNodePtr dom_clone_container_helper(xmlNodePtr src_node, xmlDocPtr dst_doc)
+static xmlNodePtr dom_clone_container_helper(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr src_node, xmlDocPtr dst_doc)
 {
 	xmlNodePtr clone = xmlDocCopyNode(src_node, dst_doc, 0);
 	if (EXPECTED(clone != NULL)) {
@@ -2226,8 +2226,21 @@ static xmlNodePtr dom_clone_container_helper(xmlNodePtr src_node, xmlDocPtr dst_
 		clone->ns = src_node->ns;
 
 		if (src_node->type == XML_ELEMENT_NODE) {
-			/* Attribute cloning logic. */
 			xmlAttrPtr last_added_attr = NULL;
+
+			if (src_node->nsDef != NULL) {
+				xmlNsPtr current_ns = src_node->nsDef;
+				do {
+					dom_ns_compat_mark_attribute(ns_mapper, clone, current_ns);
+				} while ((current_ns = current_ns->next) != NULL);
+
+				last_added_attr = clone->properties;
+				while (last_added_attr->next != NULL) {
+					last_added_attr = last_added_attr->next;
+				}
+			}
+
+			/* Attribute cloning logic. */
 			for (xmlAttrPtr attr = src_node->properties; attr != NULL; attr = attr->next) {
 				xmlAttrPtr new_attr = (xmlAttrPtr) xmlDocCopyNode((xmlNodePtr) attr, dst_doc, 0);
 				if (UNEXPECTED(new_attr == NULL)) {
@@ -2251,9 +2264,9 @@ static xmlNodePtr dom_clone_container_helper(xmlNodePtr src_node, xmlDocPtr dst_
 	return clone;
 }
 
-static xmlNodePtr dom_clone_helper(xmlNodePtr src_node, xmlDocPtr dst_doc, bool recursive)
+static xmlNodePtr dom_clone_helper(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr src_node, xmlDocPtr dst_doc, bool recursive)
 {
-	xmlNodePtr outer_clone = dom_clone_container_helper(src_node, dst_doc);
+	xmlNodePtr outer_clone = dom_clone_container_helper(ns_mapper, src_node, dst_doc);
 
 	if (!recursive || (src_node->type != XML_ELEMENT_NODE && src_node->type != XML_DOCUMENT_FRAG_NODE && src_node->type != XML_DOCUMENT_NODE && src_node->type != XML_HTML_DOCUMENT_NODE)) {
 		return outer_clone;
@@ -2284,7 +2297,7 @@ static xmlNodePtr dom_clone_helper(xmlNodePtr src_node, xmlDocPtr dst_doc, bool 
 
 		xmlNodePtr cloned;
 		if (src_node->type == XML_ELEMENT_NODE) {
-			cloned = dom_clone_container_helper(src_node, dst_doc);
+			cloned = dom_clone_container_helper(ns_mapper, src_node, dst_doc);
 		} else if (src_node->type == XML_DTD_NODE) {
 			/* Already handled. */
 			cloned = NULL;
@@ -2336,7 +2349,7 @@ xmlNodePtr dom_clone_node(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlD
 	}
 
 	if (follow_spec) {
-		xmlNodePtr clone = dom_clone_helper(node, doc, recursive);
+		xmlNodePtr clone = dom_clone_helper(ns_mapper, node, doc, recursive);
 		if (EXPECTED(clone != NULL)) {
 			if (clone->type == XML_DOCUMENT_NODE || clone->type == XML_HTML_DOCUMENT_NODE || clone->type == XML_DOCUMENT_FRAG_NODE) {
 				for (xmlNodePtr child = clone->children; child != NULL; child = child->next) {
