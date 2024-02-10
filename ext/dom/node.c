@@ -341,7 +341,7 @@ zend_result dom_node_first_child_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	if (dom_node_children_valid(nodep) == SUCCESS) {
+	if (dom_node_children_valid(nodep)) {
 		first = nodep->children;
 	}
 
@@ -372,7 +372,7 @@ zend_result dom_node_last_child_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	if (dom_node_children_valid(nodep) == SUCCESS) {
+	if (dom_node_children_valid(nodep)) {
 		last = nodep->last;
 	}
 
@@ -948,7 +948,7 @@ Since:
 */
 static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_object *intern, dom_object *childobj, xmlNodePtr parentp, xmlNodePtr child)
 {
-	if (dom_node_children_valid(parentp) == FAILURE) {
+	if (!dom_node_children_valid(parentp)) {
 		RETURN_FALSE;
 	}
 
@@ -1277,7 +1277,7 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 			RETURN_THROWS();
 		}
 	} else {
-		if (dom_node_children_valid(nodep) == FAILURE) {
+		if (!dom_node_children_valid(nodep)) {
 			RETURN_FALSE;
 		}
 
@@ -1364,7 +1364,7 @@ static void dom_node_remove_child(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	if (dom_node_children_valid(nodep) == FAILURE) {
+	if (!dom_node_children_valid(nodep)) {
 		RETURN_FALSE;
 	}
 
@@ -1408,7 +1408,7 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 	xmlNodePtr new_child = NULL;
 	int ret, stricterror;
 
-	if (dom_node_children_valid(nodep) == FAILURE) {
+	if (!dom_node_children_valid(nodep)) {
 		RETURN_FALSE;
 	}
 
@@ -1568,7 +1568,7 @@ PHP_METHOD(DOMNode, hasChildNodes)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	if (dom_node_children_valid(nodep) == FAILURE) {
+	if (!dom_node_children_valid(nodep)) {
 		RETURN_FALSE;
 	}
 

@@ -41,7 +41,7 @@ zend_result dom_parent_node_first_element_child_read(dom_object *obj, zval *retv
 		return FAILURE;
 	}
 
-	if (dom_node_children_valid(nodep) == SUCCESS) {
+	if (dom_node_children_valid(nodep)) {
 		first = nodep->children;
 
 		while (first && first->type != XML_ELEMENT_NODE) {
@@ -74,7 +74,7 @@ zend_result dom_parent_node_last_element_child_read(dom_object *obj, zval *retva
 		return FAILURE;
 	}
 
-	if (dom_node_children_valid(nodep) == SUCCESS) {
+	if (dom_node_children_valid(nodep)) {
 		last = nodep->last;
 
 		while (last && last->type != XML_ELEMENT_NODE) {
@@ -108,7 +108,7 @@ zend_result dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	if (dom_node_children_valid(nodep) == SUCCESS) {
+	if (dom_node_children_valid(nodep)) {
 		first = nodep->children;
 
 		while (first != NULL) {
@@ -722,7 +722,7 @@ static zend_result dom_child_removal_preconditions(const xmlNodePtr child, int s
 		return FAILURE;
 	}
 
-	if (dom_node_children_valid(child->parent) == FAILURE) {
+	if (!dom_node_children_valid(child->parent)) {
 		return FAILURE;
 	}
 

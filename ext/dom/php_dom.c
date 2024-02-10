@@ -160,8 +160,7 @@ int dom_node_is_read_only(xmlNodePtr node) {
 }
 /* }}} end dom_node_is_read_only */
 
-/* {{{ int dom_node_children_valid(xmlNodePtr node) */
-int dom_node_children_valid(xmlNodePtr node) {
+bool dom_node_children_valid(xmlNodePtr node) {
 	switch (node->type) {
 		case XML_DOCUMENT_TYPE_NODE:
 		case XML_DTD_NODE:
@@ -170,13 +169,11 @@ int dom_node_children_valid(xmlNodePtr node) {
 		case XML_TEXT_NODE:
 		case XML_CDATA_SECTION_NODE:
 		case XML_NOTATION_NODE:
-			return FAILURE;
-			break;
+			return false;
 		default:
-			return SUCCESS;
+			return true;
 	}
 }
-/* }}} end dom_node_children_valid */
 
 static const libxml_doc_props default_doc_props = {
 	.formatoutput = false,
