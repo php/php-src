@@ -199,7 +199,7 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	fesetround(cpu_round_mode);
 
 	/* This value is beyond our precision, so rounding it is pointless */
-	if (fabs(tmp_value) >= 1e15) {
+	if (fabs(tmp_value) >= 1e16) {
 		return value;
 	}
 
