@@ -513,7 +513,8 @@ static void dom_import_simplexml_common(INTERNAL_FUNCTION_PARAMETERS, php_libxml
 	nodep = php_libxml_import_node(node);
 
 	if (nodep && nodeobj && nodeobj->document && (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE)) {
-		if (nodeobj->document->class_type != PHP_LIBXML_CLASS_UNSET && nodeobj->document->class_type != new_class) {
+		php_libxml_class_type old_class_type = nodeobj->document->class_type;
+		if (old_class_type != PHP_LIBXML_CLASS_UNSET && old_class_type != new_class) {
 			if (new_class == PHP_LIBXML_CLASS_MODERN) {
 				zend_argument_type_error(1, "must not be already imported as a DOMNode");
 			} else {
@@ -525,7 +526,7 @@ static void dom_import_simplexml_common(INTERNAL_FUNCTION_PARAMETERS, php_libxml
 		/* Lock the node class type to prevent creating multiple representations of the same node. */
 		nodeobj->document->class_type = new_class;
 
-		if (new_class == PHP_LIBXML_CLASS_MODERN && nodep->doc != NULL) {
+		if (old_class_type != PHP_LIBXML_CLASS_MODERN && new_class == PHP_LIBXML_CLASS_MODERN && nodep->doc != NULL) {
 			dom_document_convert_to_modern(nodeobj->document, nodep->doc);
 		}
 

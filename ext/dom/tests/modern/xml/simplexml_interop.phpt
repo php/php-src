@@ -25,6 +25,9 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+// Import again and compare
+var_dump(DOM\import_simplexml($sxe) === $element);
+
 ?>
 --EXPECT--
 object(DOM\NamedNodeMap)#3 (1) {
@@ -35,3 +38,4 @@ object(DOM\NamedNodeMap)#3 (1) {
 <container xmlns="urn:a">foo<child/></container>
 <container xmlns="urn:a">foo<child/><name>value</name></container>
 dom_import_simplexml(): Argument #1 ($node) must not be already imported as a DOM\Node
+bool(true)
