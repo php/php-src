@@ -1595,8 +1595,7 @@ namespace DOM
         public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): XMLDocument {}
 
         /** @readonly */
-        /* TODO: is this even nullable in practice??? */
-        public ?string $xmlEncoding;
+        public string $xmlEncoding;
 
         public bool $xmlStandalone;
 
