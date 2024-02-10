@@ -9,7 +9,7 @@ $dom = DOM\XMLDocument::createFromString(<<<XML
 <?xml version="1.0"?>
 <root>
     <p>hi</p>
-    <element xmlns:a="urn:a">
+    <element xmlns="urn:e" xmlns:a="urn:a">
         <?target data?>
         <!-- comment -->
     </element>
@@ -42,10 +42,8 @@ foreach ($result as $item) {
 
 echo "--- Get a namespace node ---\n";
 
-// TODO: broken
-$ns = $xpath->evaluate("/*/namespace::*");
-var_dump($ns);
-var_dump($ns->item(0));
+// Namespace nodes don't exist in modern day DOM.
+var_dump($xpath->evaluate("//*/namespace::*"));
 
 ?>
 --EXPECT--
@@ -69,3 +67,7 @@ string(4) "data"
 string(11) "DOM\Comment"
 string(9) " comment "
 --- Get a namespace node ---
+object(DOM\NodeList)#5 (1) {
+  ["length"]=>
+  int(0)
+}

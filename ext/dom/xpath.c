@@ -339,6 +339,10 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 					zval child;
 
 					if (node->type == XML_NAMESPACE_DECL) {
+						if (modern) {
+							continue;
+						}
+
 						xmlNodePtr nsparent = node->_private;
 						xmlNsPtr original = (xmlNsPtr) node;
 
