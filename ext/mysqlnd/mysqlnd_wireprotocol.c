@@ -2467,8 +2467,10 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_OK)(
 	payload_decoder_factory->m.init_ok_packet(&ok_response);
 	DBG_ENTER("mysqlnd_protocol::send_command_handle_OK");
 	if (FAIL == (ret = PACKET_READ(payload_decoder_factory->conn, &ok_response))) {
-		DBG_INF("Error while reading OK packet");
-		SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
+		if (error_info->error_no != CR_SERVER_GONE_ERROR) {
+			DBG_INF("Error while reading OK packet");
+			SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
+		}
 		goto end;
 	}
 	DBG_INF_FMT("OK from server");
