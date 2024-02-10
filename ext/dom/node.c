@@ -1596,18 +1596,20 @@ PHP_METHOD(DOMNode, cloneNode)
 
 	DOM_GET_OBJ(n, id, xmlNodePtr, intern);
 
-	dom_libxml_ns_mapper *ns_mapper;
+	dom_libxml_ns_mapper *ns_mapper = NULL;
 	bool clone_document = n->type == XML_DOCUMENT_NODE || n->type == XML_HTML_DOCUMENT_NODE;
-	if (clone_document) {
-		ns_mapper = dom_libxml_ns_mapper_create();
-	} else {
-		ns_mapper = php_dom_follow_spec_intern(intern) ? php_dom_get_ns_mapper(intern) : NULL;
+	if (php_dom_follow_spec_intern(intern)) {
+		if (clone_document) {
+			ns_mapper = dom_libxml_ns_mapper_create();
+		} else {
+			ns_mapper = php_dom_get_ns_mapper(intern);
+		}
 	}
 
-	node = dom_clone_node(ns_mapper, n, n->doc, recursive, php_dom_follow_spec_intern(intern));
+	node = dom_clone_node(ns_mapper, n, n->doc, recursive);
 
 	if (!node) {
-		if (clone_document) {
+		if (clone_document && ns_mapper != NULL) {
 			dom_libxml_ns_mapper_destroy(ns_mapper);
 		}
 		RETURN_FALSE;

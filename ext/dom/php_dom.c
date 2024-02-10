@@ -582,14 +582,16 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 	if (instanceof_function(intern->std.ce, dom_node_class_entry) || instanceof_function(intern->std.ce, dom_modern_node_class_entry)) {
 		xmlNodePtr node = (xmlNodePtr)dom_object_get_node(intern);
 		if (node != NULL) {
-			dom_libxml_ns_mapper *ns_mapper;
-			if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE) {
-				ns_mapper = dom_libxml_ns_mapper_create();
-			} else {
-				ns_mapper = php_dom_get_ns_mapper(intern);
+			dom_libxml_ns_mapper *ns_mapper = NULL;
+			if (php_dom_follow_spec_intern(intern)) {
+				if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE) {
+					ns_mapper = dom_libxml_ns_mapper_create();
+				} else {
+					ns_mapper = php_dom_get_ns_mapper(intern);
+				}
 			}
 
-			xmlNodePtr cloned_node = dom_clone_node(ns_mapper, node, node->doc, true, php_dom_follow_spec_intern(intern));
+			xmlNodePtr cloned_node = dom_clone_node(ns_mapper, node, node->doc, true);
 			if (cloned_node != NULL) {
 				dom_update_refcount_after_clone(intern, node, clone, cloned_node);
 			}
@@ -2337,7 +2339,7 @@ static xmlNodePtr dom_clone_helper(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr s
 	return outer_clone;
 }
 
-xmlNodePtr dom_clone_node(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive, bool follow_spec)
+xmlNodePtr dom_clone_node(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive)
 {
 	if (node->type == XML_DTD_NODE) {
 		/* The behaviour w.r.t. the internal subset is implementation-defined according to DOM 3.
@@ -2348,7 +2350,7 @@ xmlNodePtr dom_clone_node(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlD
 		return (xmlNodePtr) dtd;
 	}
 
-	if (follow_spec) {
+	if (ns_mapper != NULL) {
 		xmlNodePtr clone = dom_clone_helper(ns_mapper, node, doc, recursive);
 		if (EXPECTED(clone != NULL)) {
 			if (clone->type == XML_DOCUMENT_NODE || clone->type == XML_HTML_DOCUMENT_NODE || clone->type == XML_DOCUMENT_FRAG_NODE) {
