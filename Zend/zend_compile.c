@@ -3022,7 +3022,8 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 	zend_separate_if_call_and_write(&var_node, var_ast, type);
 
 	if (dim_ast == NULL) {
-		if (type == BP_VAR_R || type == BP_VAR_IS) {
+		/* Allow BP_VAR_R  to support auto-vivification in custom object handlers. */
+		if (type == BP_VAR_IS) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for reading");
 		}
 		if (type == BP_VAR_UNSET) {
@@ -3053,6 +3054,29 @@ static zend_op *zend_compile_dim(znode *result, zend_ast *ast, uint32_t type, bo
 }
 /* }}} */
 
+/* Linear backwards search for OBJ_R/DIM_R fetches, adding the ZEND_FETCH_OBJ_W_CONTAINER flag to them. */
+static void mark_as_obj_w_contaner(zend_op *op)
+{
+	zend_op *start_op = zend_stack_base(&CG(delayed_oplines_stack));
+
+	while (true) {
+		if ((op->opcode != ZEND_FETCH_OBJ_R && op->opcode != ZEND_FETCH_DIM_R)) {
+			break;
+		}
+		op->extended_value |= ZEND_FETCH_OBJ_W_CONTAINER;
+		if (!(op->op1_type & (IS_VAR|IS_TMP_VAR))) {
+			break;
+		}
+		uint32_t var = op->op1.var;
+		op--;
+		if (op < start_op
+		 || !(op->result_type & (IS_VAR|IS_TMP_VAR))
+		 || op->result.var != var) {
+			break;
+		}
+	}
+}
+
 static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 {
 	zend_ast *obj_ast = ast->child[0];
@@ -3074,7 +3098,17 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		 * check for a nullsafe access. */
 	} else {
 		zend_short_circuiting_mark_inner(obj_ast);
-		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
+		int fetch_mode = type;
+		/* In $a->b->c = $d, fetch $a->b for read and only ->c for write.
+		 * We will never modify $a->b itself, only the object it holds. */
+		bool change_fetch_mode = (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_FUNC_ARG);
+		if (change_fetch_mode) {
+			fetch_mode = BP_VAR_R;
+		}
+		opline = zend_delayed_compile_var(&obj_node, obj_ast, fetch_mode, 0);
+		if (opline && change_fetch_mode) {
+			mark_as_obj_w_contaner(opline);
+		}
 		if (opline && (opline->opcode == ZEND_FETCH_DIM_W
 				|| opline->opcode == ZEND_FETCH_DIM_RW
 				|| opline->opcode == ZEND_FETCH_DIM_FUNC_ARG

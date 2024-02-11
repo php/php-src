@@ -52,12 +52,12 @@ try {
 
 ?>
 --EXPECT--
-Cannot use string offset as an object
-Cannot use string offset as an object
-Cannot use string offset as an object
-Cannot use string offset as an object
-Cannot use string offset as an object
-Cannot use string offset as an object
-Cannot use string offset as an object
-Cannot use string offset as an object
+Attempt to assign property "bar" on string
+Attempt to modify property "bar" on string
+Attempt to assign property "bar" on string
+Attempt to modify property "bar" on string
+Attempt to increment/decrement property "bar" on string
+Attempt to increment/decrement property "bar" on string
+Attempt to increment/decrement property "bar" on string
+Attempt to increment/decrement property "bar" on string
 Cannot use string offset as an object

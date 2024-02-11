@@ -185,6 +185,8 @@ static xmlNodePtr sxe_get_element_by_name(php_sxe_object *sxe, xmlNodePtr node, 
 }
 /* }}} */
 
+static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int fetch_type, void **cache_slot);
+
 /* {{{ sxe_prop_dim_read() */
 static zval *sxe_prop_dim_read(zend_object *object, zval *member, bool elements, bool attribs, int type, zval *rv)
 {
@@ -195,6 +197,16 @@ static zval *sxe_prop_dim_read(zend_object *object, zval *member, bool elements,
 	zval            tmp_zv;
 	int             nodendx = 0;
 	int             test = 0;
+
+	/* BC layer: The lhs of -> is fetched by R. However, SimpleXML still supports auto-vivification.
+	 * Switch to W on the fly. */
+	zend_execute_data *execute_data = EG(current_execute_data);
+	bool switch_to_w = type == BP_VAR_R
+		&& (EX(opline)->opcode == ZEND_FETCH_OBJ_R || EX(opline)->opcode == ZEND_FETCH_DIM_R)
+		&& (EX(opline)->extended_value & ZEND_FETCH_OBJ_FLAGS) == ZEND_FETCH_OBJ_W_CONTAINER;
+	if (switch_to_w) {
+		type = BP_VAR_W;
+	}
 
 	sxe = php_sxe_fetch_object(object);
 
@@ -222,6 +234,12 @@ long_dim:
 				}
 				ZVAL_STR(&tmp_zv, str);
 				member = &tmp_zv;
+			}
+			if (switch_to_w) {
+				zval *result = sxe_property_get_adr(object, Z_STR_P(member), BP_VAR_W, NULL);
+				if (result) {
+					return result;
+				}
 			}
 			name = Z_STRVAL_P(member);
 		}

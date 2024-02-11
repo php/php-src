@@ -78,6 +78,7 @@ $vm_op_flags = array(
     "ZEND_VM_EXT_REF"         => 1<<20,
     "ZEND_VM_EXT_FETCH_REF"   => 1<<21,
     "ZEND_VM_EXT_DIM_WRITE"    => 1<<22,
+    "ZEND_VM_EXT_OBJ_W_CONTAINER" => 1<<23,
     "ZEND_VM_EXT_MASK"        => 0x0f000000,
     "ZEND_VM_EXT_NUM"         => 0x01000000,
     "ZEND_VM_EXT_LAST_CATCH"  => 0x02000000,
@@ -135,6 +136,7 @@ $vm_ext_decode = array(
     "SRC"                  => ZEND_VM_EXT_SRC,
     "CACHE_SLOT"           => ZEND_VM_EXT_CACHE_SLOT,
     "DIM_WRITE"            => ZEND_VM_EXT_DIM_WRITE,
+    "OBJ_W_CONTAINER"      => ZEND_VM_EXT_OBJ_W_CONTAINER,
 );
 
 $vm_kind_name = array(

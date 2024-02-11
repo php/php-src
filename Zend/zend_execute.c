@@ -2749,7 +2749,7 @@ try_array:
 		zend_long offset;
 
 try_string_offset:
-		if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
+		if (dim_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 			switch (Z_TYPE_P(dim)) {
 				case IS_STRING:
 				{
@@ -2837,7 +2837,7 @@ try_string_offset:
 		zend_object *obj = Z_OBJ_P(container);
 
 		GC_ADDREF(obj);
-		if (ZEND_CONST_COND(dim_type == IS_CV, 1) && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
+		if (dim_type == IS_CV && UNEXPECTED(Z_TYPE_P(dim) == IS_UNDEF)) {
 			dim = ZVAL_UNDEFINED_OP2();
 		}
 		if (dim_type == IS_CONST && Z_EXTRA_P(dim) == ZEND_EXTRA_VALUE) {

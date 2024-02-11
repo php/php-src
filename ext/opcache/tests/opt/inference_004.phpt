@@ -14,5 +14,5 @@ function y() {
 }
 ?>
 DONE
---EXPECT--
-DONE
+--EXPECTF--
+Fatal error: Cannot use [] for reading in %s on line %d

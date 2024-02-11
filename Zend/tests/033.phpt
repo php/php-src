@@ -62,5 +62,17 @@ Warning: Trying to access array offset on null in %s on line %d
 Warning: Trying to access array offset on null in %s on line %d
 
 Warning: Attempt to read property "foo" on null in %s on line %d
+
+Warning: Undefined variable $arr in %s on line %d
+
+Warning: Trying to access array offset on null in %s on line %d
+
+Warning: Trying to access array offset on null in %s on line %d
+
+Warning: Trying to access array offset on null in %s on line %d
+
+Warning: Trying to access array offset on null in %s on line %d
+
+Warning: Trying to access array offset on null in %s on line %d
 Attempt to assign property "foo" on null
-Attempt to assign property "bar" on null
+Cannot use [] for reading

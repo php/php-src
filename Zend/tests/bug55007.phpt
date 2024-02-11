@@ -4,7 +4,7 @@ Bug #55007 (compiler fail after previous fail)
 <?php
 
 spl_autoload_register(function ($classname) {
-  if ('CompileErrorClass'==$classname) eval('class CompileErrorClass { function foo() { $a[]; } }');
+  if ('CompileErrorClass'==$classname) eval('class int {}');
   if ('MyErrorHandler'==$classname) eval('class MyErrorHandler { function __construct() { print "My error handler runs.\n"; } }');
 });
 
@@ -19,5 +19,5 @@ new CompileErrorClass();
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use [] for reading in %s(%d) : eval()'d code on line %d
+Fatal error: Cannot use 'int' as class name as it is reserved in %s on line %d
 My error handler runs.

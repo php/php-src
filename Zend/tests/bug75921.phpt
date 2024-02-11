@@ -53,15 +53,29 @@ Attempt to modify property "a" on null
 
 Warning: Undefined variable $null in %s on line %d
 NULL
-Attempt to modify property "a" on null
+
+Warning: Undefined variable $null in %s on line %d
+
+Warning: Attempt to read property "a" on null in %s on line %d
+Attempt to assign property "b" on null
 
 Warning: Undefined variable $null in %s on line %d
 NULL
-Attempt to modify property "a" on null
+
+Warning: Undefined variable $null in %s on line %d
+
+Warning: Attempt to read property "a" on null in %s on line %d
+
+Warning: Trying to access array offset on null in %s on line %d
+Attempt to assign property "b" on null
 
 Warning: Undefined variable $null in %s on line %d
 NULL
-Attempt to modify property "a" on null
+
+Warning: Undefined variable $null in %s on line %d
+
+Warning: Attempt to read property "a" on null in %s on line %d
+Attempt to modify property "b" on null
 
 Warning: Undefined variable $null in %s on line %d
 NULL
