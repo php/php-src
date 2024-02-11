@@ -1692,7 +1692,7 @@ PHP_SUBST(all_targets)
 PHP_SUBST(install_targets)
 PHP_SUBST(install_binary_targets)
 
-PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
+PHP_INSTALL_HEADERS([Zend/ TSRM/ main/ main/streams/])
 PHP_INSTALL_HEADERS([Zend/Optimizer], [ \
     zend_call_graph.h \
     zend_cfg.h \

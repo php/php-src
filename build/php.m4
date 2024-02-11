@@ -70,15 +70,6 @@ AC_DEFUN([PHP_EXPAND_PATH],[
 ])
 
 dnl
-dnl PHP_DEFINE(WHAT [, value[, directory]])
-dnl
-dnl Creates builddir/include/what.h and in there #define WHAT value.
-dnl
-AC_DEFUN([PHP_DEFINE],[
-  [echo "#define ]$1[]ifelse([$2],,[ 1],[ $2])[" > ]ifelse([$3],,[include],[$3])[/php_]translit($1,A-Z,a-z)[.h]
-])
-
-dnl
 dnl PHP_SUBST(varname)
 dnl
 dnl Adds variable with its value into Makefile, e.g.:
@@ -135,12 +126,8 @@ dnl Creates build directories and Makefile placeholders.
 dnl
 AC_DEFUN([PHP_INIT_BUILD_SYSTEM],[
 AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
-test -d include || $php_shtool mkdir include
 > Makefile.objects
 > Makefile.fragments
-dnl We need to play tricks here to avoid matching the grep line itself.
-pattern=define
-$EGREP $pattern'.*include/php' $srcdir/configure|$SED 's/.*>//'|xargs touch 2>/dev/null
 ])
 
 dnl
@@ -2115,9 +2102,7 @@ dnl PHP_CHECK_PDO_INCLUDES([found [, not-found]])
 dnl
 AC_DEFUN([PHP_CHECK_PDO_INCLUDES],[
   AC_CACHE_CHECK([for PDO includes], pdo_cv_inc_path, [
-    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
+    if test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
       pdo_cv_inc_path=$abs_srcdir/ext
     elif test -f $phpincludedir/ext/pdo/php_pdo_driver.h; then
       pdo_cv_inc_path=$phpincludedir/ext

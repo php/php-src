@@ -7,8 +7,6 @@
   especially noticeable on slower systems
 * slow recursive make replaced with one global Makefile
 * eases integration of proper dependencies
-* adds PHP_DEFINE(what[, value]) which creates a single include-file per what.
-  This will allow more fine-grained dependencies.
 * abandoning the "one library per directory" concept
 * improved integration of the CLI
 * several new targets:
