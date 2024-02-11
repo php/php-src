@@ -939,7 +939,7 @@ ZEND_INI_DISP(zend_ini_color_displayer_cb) /* {{{ */
 	}
 	if (value) {
 		if (zend_uv.html_errors) {
-			zend_printf("<font style=\"color: %s\">%s</font>", value, value);
+			zend_printf("<span style=\"color: %s\">%s</span>", value, value);
 		} else {
 			ZEND_PUTS(value);
 		}
