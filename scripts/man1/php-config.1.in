@@ -51,6 +51,14 @@ Show all SAPI modules available
 Configure options to recreate configuration of current PHP installation
 .TP
 .PD 0
+.B \-\-ini-path
+Directory from which PHP reads its INI configuration file (php.ini)
+.TP
+.PD 0
+.B \-\-ini-dir
+Directory from which PHP scans for additional INI configuration files
+.TP
+.PD 0
 .B \-\-version
 PHP version
 .TP
