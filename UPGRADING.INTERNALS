@@ -63,6 +63,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol DARWIN has been removed (use __APPLE__ to target Darwin systems).
    - Symbol MISSING_FCLOSE_DECL and M4 macro PHP_MISSING_FCLOSE_DECL removed.
    - Symbol HAVE_BSD_ICONV has been removed.
+   - M4 macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and config.h).
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19 have
