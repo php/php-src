@@ -1,6 +1,6 @@
 diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
---- libmagic.orig/apprentice.c	2021-02-22 17:51:11.000000000 -0700
-+++ libmagic/apprentice.c	2022-06-06 00:36:46.758464267 -0600
+--- libmagic.orig/apprentice.c	2021-02-23 01:51:11.000000000 +0100
++++ libmagic/apprentice.c	2023-12-09 11:51:31.700896278 +0100
 @@ -29,6 +29,8 @@
   * apprentice - make one pass through /etc/magic, learning its secrets.
   */
@@ -944,8 +944,8 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		m->str_flags = swap4(m->str_flags);
  	}
 diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
---- libmagic.orig/ascmagic.c	2021-02-22 17:49:06.000000000 -0700
-+++ libmagic/ascmagic.c	2021-10-24 17:03:48.529884451 -0600
+--- libmagic.orig/ascmagic.c	2021-02-23 01:49:06.000000000 +0100
++++ libmagic/ascmagic.c	2024-02-11 00:59:23.954358532 +0100
 @@ -96,7 +96,7 @@
  		rv = file_ascmagic_with_encoding(ms, &bb,
  		    ubuf, ulen, code, type, text);
@@ -955,7 +955,7 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  
  	return rv;
  }
-@@ -143,7 +143,7 @@
+@@ -143,13 +143,15 @@
  		/* malloc size is a conservative overestimate; could be
  		   improved, or at least realloced after conversion. */
  		mlen = ulen * 6;
@@ -964,7 +964,16 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  			file_oomem(ms, mlen);
  			goto done;
  		}
-@@ -330,7 +330,8 @@
+ 		if ((utf8_end = encode_utf8(utf8_buf, mlen, ubuf, ulen))
+-		    == NULL)
++		    == NULL) {
++			rv = 0;
+ 			goto done;
++		}
+ 		buffer_init(&bb, b->fd, &b->st, utf8_buf,
+ 		    CAST(size_t, utf8_end - utf8_buf));
+ 
+@@ -330,7 +332,8 @@
  	}
  	rv = 1;
  done:
@@ -975,8 +984,8 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  	return rv;
  }
 diff -u libmagic.orig/buffer.c libmagic/buffer.c
---- libmagic.orig/buffer.c	2021-02-22 17:49:26.000000000 -0700
-+++ libmagic/buffer.c	2021-10-24 17:03:45.681791493 -0600
+--- libmagic.orig/buffer.c	2021-02-23 01:49:26.000000000 +0100
++++ libmagic/buffer.c	2023-12-09 11:51:31.700896278 +0100
 @@ -31,19 +31,23 @@
  #endif	/* lint */
  
@@ -1031,8 +1040,8 @@ diff -u libmagic.orig/buffer.c libmagic/buffer.c
  		goto out;
  	}
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
---- libmagic.orig/cdf.c	2021-02-22 17:49:06.000000000 -0700
-+++ libmagic/cdf.c	2021-10-24 17:03:45.681791493 -0600
+--- libmagic.orig/cdf.c	2021-02-23 01:49:06.000000000 +0100
++++ libmagic/cdf.c	2023-12-09 11:51:31.704229532 +0100
 @@ -43,7 +43,17 @@
  #include <err.h>
  #endif
@@ -1266,8 +1275,8 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  
  #endif
 diff -u libmagic.orig/cdf.h libmagic/cdf.h
---- libmagic.orig/cdf.h	2021-02-22 17:49:06.000000000 -0700
-+++ libmagic/cdf.h	2021-10-24 17:03:40.741632734 -0600
+--- libmagic.orig/cdf.h	2021-02-23 01:49:06.000000000 +0100
++++ libmagic/cdf.h	2023-12-09 11:51:31.704229532 +0100
 @@ -35,10 +35,10 @@
  #ifndef _H_CDF_
  #define _H_CDF_
@@ -1283,8 +1292,8 @@ diff -u libmagic.orig/cdf.h libmagic/cdf.h
  #ifdef __DJGPP__
  #define timespec timeval
 diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
---- libmagic.orig/cdf_time.c	2021-02-22 17:49:06.000000000 -0700
-+++ libmagic/cdf_time.c	2021-10-24 17:03:40.741632734 -0600
+--- libmagic.orig/cdf_time.c	2021-02-23 01:49:06.000000000 +0100
++++ libmagic/cdf_time.c	2023-12-09 11:51:31.704229532 +0100
 @@ -23,6 +23,7 @@
   * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   * POSSIBILITY OF SUCH DAMAGE.
@@ -1312,8 +1321,8 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
  		return buf;
  	(void)snprintf(buf, 26, "*Bad* %#16.16" INT64_T_FORMAT "x\n",
 diff -u libmagic.orig/compress.c libmagic/compress.c
---- libmagic.orig/compress.c	2021-02-22 17:49:07.000000000 -0700
-+++ libmagic/compress.c	2021-10-24 17:03:48.529884451 -0600
+--- libmagic.orig/compress.c	2021-02-23 01:49:07.000000000 +0100
++++ libmagic/compress.c	2023-12-09 11:51:31.704229532 +0100
 @@ -51,7 +51,7 @@
  #ifndef HAVE_SIG_T
  typedef void (*sig_t)(int);
@@ -1449,8 +1458,8 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  #endif
 +#endif
 diff -u libmagic.orig/der.c libmagic/der.c
---- libmagic.orig/der.c	2021-02-22 17:49:06.000000000 -0700
-+++ libmagic/der.c	2021-10-24 17:03:48.529884451 -0600
+--- libmagic.orig/der.c	2021-02-23 01:49:06.000000000 +0100
++++ libmagic/der.c	2023-12-09 11:51:31.704229532 +0100
 @@ -54,7 +54,9 @@
  #include "magic.h"
  #include "der.h"
@@ -1462,8 +1471,8 @@ diff -u libmagic.orig/der.c libmagic/der.c
  #include <err.h>
  #endif
 diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
---- libmagic.orig/elfclass.h	2021-02-22 17:49:06.000000000 -0700
-+++ libmagic/elfclass.h	2021-10-24 17:03:40.741632734 -0600
+--- libmagic.orig/elfclass.h	2021-02-23 01:49:06.000000000 +0100
++++ libmagic/elfclass.h	2023-12-09 11:51:31.704229532 +0100
 @@ -41,7 +41,7 @@
  			return toomany(ms, "program headers", phnum);
  		flags |= FLAGS_IS_CORE;
@@ -1492,8 +1501,8 @@ diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
  		    fsize, elf_getu16(swap, elfhdr.e_machine),
  		    CAST(int, elf_getu16(swap, elfhdr.e_shstrndx)),
 diff -u libmagic.orig/encoding.c libmagic/encoding.c
---- libmagic.orig/encoding.c	2021-02-22 17:49:06.000000000 -0700
-+++ libmagic/encoding.c	2021-10-24 17:03:48.529884451 -0600
+--- libmagic.orig/encoding.c	2021-02-23 01:49:06.000000000 +0100
++++ libmagic/encoding.c	2023-12-09 11:51:31.704229532 +0100
 @@ -98,14 +98,14 @@
  		nbytes = ms->encoding_max;
  
@@ -1533,8 +1542,8 @@ diff -u libmagic.orig/encoding.c libmagic/encoding.c
  	if (u < 3) \
  		return 0; \
 diff -u libmagic.orig/file.h libmagic/file.h
---- libmagic.orig/file.h	2021-02-22 17:49:06.000000000 -0700
-+++ libmagic/file.h	2021-10-24 17:03:48.529884451 -0600
+--- libmagic.orig/file.h	2021-02-23 01:49:06.000000000 +0100
++++ libmagic/file.h	2023-12-09 11:51:31.704229532 +0100
 @@ -33,17 +33,14 @@
  #ifndef __file_h__
  #define __file_h__
@@ -1794,8 +1803,8 @@ diff -u libmagic.orig/file.h libmagic/file.h
 +
  #endif /* __file_h__ */
 diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
---- libmagic.orig/fsmagic.c	2021-02-22 17:49:06.000000000 -0700
-+++ libmagic/fsmagic.c	2021-10-24 17:03:45.681791493 -0600
+--- libmagic.orig/fsmagic.c	2021-02-23 01:49:06.000000000 +0100
++++ libmagic/fsmagic.c	2023-12-09 11:51:31.704229532 +0100
 @@ -66,26 +66,10 @@
  # define minor(dev)  ((dev) & 0xff)
  #endif
@@ -2087,8 +2096,8 @@ diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
  #ifndef __COHERENT__
  	case S_IFSOCK:
 diff -u libmagic.orig/funcs.c libmagic/funcs.c
---- libmagic.orig/funcs.c	2021-02-22 17:49:06.000000000 -0700
-+++ libmagic/funcs.c	2021-10-24 17:03:48.529884451 -0600
+--- libmagic.orig/funcs.c	2021-02-23 01:49:06.000000000 +0100
++++ libmagic/funcs.c	2023-12-09 11:51:31.704229532 +0100
 @@ -51,6 +51,13 @@
  #define SIZE_MAX	((size_t)~0)
  #endif
@@ -2407,8 +2416,8 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  protected char *
  file_strtrim(char *str)
 diff -u libmagic.orig/magic.c libmagic/magic.c
---- libmagic.orig/magic.c	2021-02-22 17:49:06.000000000 -0700
-+++ libmagic/magic.c	2022-06-06 00:36:46.758464267 -0600
+--- libmagic.orig/magic.c	2021-02-23 01:49:06.000000000 +0100
++++ libmagic/magic.c	2023-12-09 11:51:31.704229532 +0100
 @@ -25,11 +25,6 @@
   * SUCH DAMAGE.
   */
@@ -2886,8 +2895,8 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  	}
  	return file_getbuffer(ms);
 diff -u libmagic.orig/magic.h libmagic/magic.h
---- libmagic.orig/magic.h	2022-07-05 00:56:31.213294537 -0600
-+++ libmagic/magic.h	2021-10-24 17:03:48.529884451 -0600
+--- libmagic.orig/magic.h	2024-02-11 01:00:54.982008274 +0100
++++ libmagic/magic.h	2023-12-09 11:51:31.704229532 +0100
 @@ -126,6 +126,7 @@
  
  const char *magic_getpath(const char *, int);
@@ -2897,8 +2906,8 @@ diff -u libmagic.orig/magic.h libmagic/magic.h
  const char *magic_buffer(magic_t, const void *, size_t);
  
 diff -u libmagic.orig/print.c libmagic/print.c
---- libmagic.orig/print.c	2021-02-22 17:49:07.000000000 -0700
-+++ libmagic/print.c	2021-10-24 17:03:45.681791493 -0600
+--- libmagic.orig/print.c	2021-02-23 01:49:07.000000000 +0100
++++ libmagic/print.c	2023-12-09 11:51:31.704229532 +0100
 @@ -28,6 +28,7 @@
  /*
   * print.c - debugging printout routines
@@ -2962,8 +2971,8 @@ diff -u libmagic.orig/print.c libmagic/print.c
  	if (pp == NULL)
  		goto out;
 diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
---- libmagic.orig/readcdf.c	2021-02-22 17:49:08.000000000 -0700
-+++ libmagic/readcdf.c	2021-10-24 17:03:45.681791493 -0600
+--- libmagic.orig/readcdf.c	2021-02-23 01:49:08.000000000 +0100
++++ libmagic/readcdf.c	2023-12-09 11:51:31.704229532 +0100
 @@ -31,7 +31,11 @@
  
  #include <assert.h>
@@ -3086,8 +3095,8 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  	/* If we handled it already, return */
  	if (i != -1)
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
---- libmagic.orig/softmagic.c	2021-02-22 17:49:06.000000000 -0700
-+++ libmagic/softmagic.c	2022-07-05 00:49:26.658974406 -0600
+--- libmagic.orig/softmagic.c	2021-02-23 01:49:06.000000000 +0100
++++ libmagic/softmagic.c	2023-12-09 11:51:31.704229532 +0100
 @@ -43,6 +43,10 @@
  #include <time.h>
  #include "der.h"
@@ -3537,8 +3546,8 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  	}
  	case FILE_USE:
 diff -u libmagic.orig/strcasestr.c libmagic/strcasestr.c
---- libmagic.orig/strcasestr.c	2021-02-22 17:49:12.000000000 -0700
-+++ libmagic/strcasestr.c	2022-06-06 00:36:46.758464267 -0600
+--- libmagic.orig/strcasestr.c	2021-02-23 01:49:12.000000000 +0100
++++ libmagic/strcasestr.c	2023-12-09 11:51:31.704229532 +0100
 @@ -39,6 +39,8 @@
  
  #include "file.h"
