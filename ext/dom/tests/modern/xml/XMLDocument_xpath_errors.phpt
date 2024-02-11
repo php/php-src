@@ -18,4 +18,4 @@ try {
 ?>
 --EXPECTF--
 Warning: DOM\XPath::evaluate(): Invalid expression in %s on line %d
-string(24) "Invalid XPath Expression"
+string(35) "Could not evaluate XPath expression"

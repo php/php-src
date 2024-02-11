@@ -309,7 +309,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 	if (! xpathobjp) {
 		if (modern) {
 			if (!EG(exception)) {
-				zend_throw_error(NULL, "Invalid XPath Expression");
+				zend_throw_error(NULL, "Could not evaluate XPath expression");
 			}
 			RETURN_THROWS();
 		} else {
