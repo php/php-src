@@ -113,6 +113,23 @@ xmlNsPtr dom_libxml_ns_mapper_ensure_prefixless_xmlns_ns(dom_libxml_ns_mapper *m
 	return dom_libxml_ns_mapper_ensure_cached_ns(mapper, &mapper->prefixless_xmlns_ns, DOM_XMLNS_NS_URI, sizeof(DOM_XMLNS_NS_URI) - 1, dom_ns_is_xmlns_magic_token);
 }
 
+static xmlNsPtr dom_create_owned_ns(zend_string *prefix, zend_string *uri)
+{
+	ZEND_ASSERT(prefix != NULL);
+	ZEND_ASSERT(uri != NULL);
+
+	xmlNsPtr ns = emalloc(sizeof(*ns));
+	memset(ns, 0, sizeof(*ns));
+	ns->type = XML_LOCAL_NAMESPACE;
+	/* These two strings are kept alive because they're the hash table keys that lead to this entry. */
+	ns->prefix = ZSTR_LEN(prefix) == 0 ? NULL : BAD_CAST ZSTR_VAL(prefix);
+	ns->href = BAD_CAST ZSTR_VAL(uri);
+	/* Note ns->context is unused in libxml2 at the moment, and if it were used it would be for
+	 * LIBXML_NAMESPACE_DICT which is opt-in anyway. */
+
+	return ns;
+}
+
 xmlNsPtr dom_libxml_ns_mapper_get_ns(dom_libxml_ns_mapper *mapper, zend_string *prefix, zend_string *uri)
 {
 	if (uri == NULL) {
@@ -133,14 +150,7 @@ xmlNsPtr dom_libxml_ns_mapper_get_ns(dom_libxml_ns_mapper *mapper, zend_string *
 		return found;
 	}
 
-	xmlNsPtr ns = emalloc(sizeof(*ns));
-	memset(ns, 0, sizeof(*ns));
-	ns->type = XML_LOCAL_NAMESPACE;
-	/* These two strings are kept alive because they're the hash table keys that lead to this entry. */
-	ns->prefix = ZSTR_LEN(prefix) == 0 ? NULL : BAD_CAST ZSTR_VAL(prefix);
-	ns->href = BAD_CAST ZSTR_VAL(uri);
-	/* Note ns->context is unused in libxml2 at the moment, and if it were used it would be for
-	 * LIBXML_NAMESPACE_DICT which is opt-in anyway. */
+	xmlNsPtr ns = dom_create_owned_ns(prefix, uri);
 
 	zval new_zv;
 	DOM_Z_OWNED(&new_zv, ns);
