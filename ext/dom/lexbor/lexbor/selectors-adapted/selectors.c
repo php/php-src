@@ -31,6 +31,7 @@
 /* Note: assumes a != b */
 static zend_always_inline bool lxb_selectors_adapted_cmp_nullable_string_a_neq_b(const char *a, const char *b)
 {
+	ZEND_ASSERT(a != b);
 	if (a == NULL || b == NULL) {
 		return false; /* We know that they can't be both NULL because a != b. */
 	}
