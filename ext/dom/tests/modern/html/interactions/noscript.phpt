@@ -9,6 +9,7 @@ echo "--- Parsing ---\n";
 
 $dom = DOM\HTMLDocument::createFromString("<!doctype html><html><body><noscript><p>hi</p></noscript></body></html>", DOM\HTML_NO_DEFAULT_NS);
 var_dump($dom->documentElement->textContent);
+var_dump($dom->documentElement->namespaceURI);
 echo $dom->saveHTML(), "\n";
 echo $dom->saveXML(), "\n";
 
@@ -30,6 +31,7 @@ echo $dom->saveXML(), "\n";
 --EXPECT--
 --- Parsing ---
 string(2) "hi"
+NULL
 <!DOCTYPE html><html><head></head><body><noscript><p>hi</p></noscript></body></html>
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!DOCTYPE html>
