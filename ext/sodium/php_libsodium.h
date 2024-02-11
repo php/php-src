@@ -63,9 +63,7 @@ extern zend_module_entry sodium_module_entry;
 #endif
 
 PHP_MINIT_FUNCTION(sodium);
-#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
 PHP_MINIT_FUNCTION(sodium_password_hash);
-#endif
 PHP_MSHUTDOWN_FUNCTION(sodium);
 PHP_RINIT_FUNCTION(sodium);
 PHP_RSHUTDOWN_FUNCTION(sodium);
