@@ -3191,17 +3191,17 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 {
 #ifdef HAVE_MPROTECT
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
-		int opts = PROT_READ | PROT_WRITE;
-#ifdef ZTS
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 		if (zend_write_protect) {
 			pthread_jit_write_protect_np(0);
 			return;
 		}
 #endif
+#if !defined(ZTS) || !defined(__APPLE__) || !defined(__aarch64__)
+		int opts = PROT_READ | PROT_WRITE;
+#ifdef ZTS
 		opts |= PROT_EXEC;
 #endif
-#if !defined(ZTS) || !defined(__APPLE__) || !defined(__aarch64__)
 		if (mprotect(dasm_buf, dasm_size, opts) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
