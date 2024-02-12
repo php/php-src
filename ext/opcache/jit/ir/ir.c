@@ -878,6 +878,7 @@ static ir_ref _ir_fold_cse(ir_ctx *ctx, uint32_t opt, ir_ref op1, ir_ref op2, ir
 
 #define IR_FOLD_CONST_F(_val) do { \
 		val.f = (_val); \
+		val.u32_hi = 0; \
 		goto ir_fold_const; \
 	} while (0)
 
@@ -1756,7 +1757,7 @@ static ir_ref ir_find_aliasing_load(ir_ctx *ctx, ir_ref ref, ir_type type, ir_re
 			}
 		} else if (insn->op == IR_RSTORE) {
 			modified_regset |= (1 << insn->op3);
-		} else if (insn->op >= IR_START || insn->op == IR_CALL || insn->op == IR_VSTORE) {
+		} else if (insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN || insn->op == IR_CALL || insn->op == IR_VSTORE) {
 			return IR_UNUSED;
 		}
 		ref = insn->op1;
@@ -2322,7 +2323,7 @@ void _ir_GUARD(ir_ctx *ctx, ir_ref condition, ir_ref addr)
 					condition = IR_FALSE;
 					break;
 				}
-			} else if (insn->op >= IR_START) {
+			} else if (insn->op == IR_START || insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN) {
 				break;
 			}
 			ref = insn->op1;
@@ -2354,7 +2355,7 @@ void _ir_GUARD_NOT(ir_ctx *ctx, ir_ref condition, ir_ref addr)
 					condition = IR_TRUE;
 					break;
 				}
-			} else if (insn->op >= IR_START) {
+			} else if (insn->op == IR_START || insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN) {
 				break;
 			}
 			ref = insn->op1;

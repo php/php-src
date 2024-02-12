@@ -1992,6 +1992,104 @@ IR_FOLD(GE(ABS, C_DOUBLE))
 }
 
 // TODO: conversions
+IR_FOLD(FP2FP(FP2FP))
+{
+	if (IR_OPT_TYPE(opt) == IR_FLOAT) {
+		/* (float)(double)f => f */
+		IR_ASSERT(op1_insn->type == IR_DOUBLE);
+		IR_ASSERT(ctx->ir_base[op1_insn->op1].type == IR_FLOAT);
+		IR_FOLD_COPY(op1_insn->op1);
+	}
+	IR_FOLD_NEXT;
+}
+
+IR_FOLD(FP2INT(INT2FP))
+{
+	ir_type dst_type = IR_OPT_TYPE(opt);
+	ir_type src_type = ctx->ir_base[op1_insn->op1].type;
+
+	if (ir_type_size[src_type] >= ir_type_size[op1_insn->type]) {
+		/* source integer type can not fit into intermediate floating point */
+		IR_FOLD_NEXT;
+	}
+	/* (int)(double)i => i */
+	if (src_type == dst_type) {
+		IR_FOLD_COPY(op1_insn->op1);
+	}
+	IR_FOLD_NEXT;
+}
+
+IR_FOLD(TRUNC(ZEXT))
+IR_FOLD(TRUNC(SEXT))
+{
+	ir_type dst_type = IR_OPT_TYPE(opt);
+	ir_type src_type = ctx->ir_base[op1_insn->op1].type;
+
+	/* (int32_t)(int64_t)i => i */
+	if (src_type == dst_type) {
+		IR_FOLD_COPY(op1_insn->op1);
+	} else if (ir_type_size[src_type] == ir_type_size[dst_type]) {
+		opt = IR_OPT(IR_BITCAST, dst_type);
+		op1 = op1_insn->op1;
+		IR_FOLD_RESTART;
+	} else if (ir_type_size[src_type] > ir_type_size[dst_type]) {
+		opt = IR_OPT(IR_TRUNC, dst_type);
+		op1 = op1_insn->op1;
+		IR_FOLD_RESTART;
+	} else {
+		opt = IR_OPT(op1_insn->op, dst_type);
+		op1 = op1_insn->op1;
+		IR_FOLD_RESTART;
+	}
+	IR_FOLD_NEXT;
+}
+
+IR_FOLD(TRUNC(AND))
+{
+	if (IR_IS_CONST_REF(op1_insn->op2)) {
+		size_t size = ir_type_size[IR_OPT_TYPE(opt)];
+		uint64_t mask = ctx->ir_base[op1_insn->op2].val.u64;
+
+		if (size == 1) {
+			if (mask == 0xff) {
+				op1 = op1_insn->op1;
+				IR_FOLD_RESTART;
+			}
+		} else if (size == 2) {
+			if (mask == 0xffff) {
+				op1 = op1_insn->op1;
+				IR_FOLD_RESTART;
+			}
+		} else if (size == 4) {
+			if (mask == 0xffffffff) {
+				op1 = op1_insn->op1;
+				IR_FOLD_RESTART;
+			}
+		}
+	}
+	IR_FOLD_NEXT;
+}
+
+IR_FOLD(EQ(FP2FP, C_DOUBLE))
+IR_FOLD(NE(FP2FP, C_DOUBLE))
+IR_FOLD(LT(FP2FP, C_DOUBLE))
+IR_FOLD(GE(FP2FP, C_DOUBLE))
+IR_FOLD(LE(FP2FP, C_DOUBLE))
+IR_FOLD(GT(FP2FP, C_DOUBLE))
+IR_FOLD(ULT(FP2FP, C_DOUBLE))
+IR_FOLD(UGE(FP2FP, C_DOUBLE))
+IR_FOLD(ULE(FP2FP, C_DOUBLE))
+IR_FOLD(UGT(FP2FP, C_DOUBLE))
+{
+	IR_ASSERT(op1_insn->type == IR_DOUBLE);
+	IR_ASSERT(ctx->ir_base[op1_insn->op1].type == IR_FLOAT);
+	if (op2_insn->val.d == (double)(float)op2_insn->val.d) {
+		op1 = op1_insn->op1;
+		op2 = ir_const_float(ctx, (float)op2_insn->val.d);
+		IR_FOLD_RESTART;
+	}
+	IR_FOLD_NEXT;
+}
 
 // TODO: Reassociation
 IR_FOLD(ADD(ADD, C_U8))
