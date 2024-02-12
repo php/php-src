@@ -1608,6 +1608,22 @@ IR_FOLD(DIV(_, C_I64))
 	IR_FOLD_NEXT;
 }
 
+IR_FOLD(MOD(_, C_U8))
+IR_FOLD(MOD(_, C_U16))
+IR_FOLD(MOD(_, C_U32))
+IR_FOLD(MOD(_, C_U64))
+IR_FOLD(MOD(_, C_I8))
+IR_FOLD(MOD(_, C_I16))
+IR_FOLD(MOD(_, C_I32))
+IR_FOLD(MOD(_, C_I64))
+{
+	if (op2_insn->val.i64 == 1) {
+		/* a % 1 => 0 */
+		IR_FOLD_CONST_U(0);
+	}
+	IR_FOLD_NEXT;
+}
+
 IR_FOLD(DIV(_, C_DOUBLE))
 {
 	if (op2_insn->val.d == 1.0) {

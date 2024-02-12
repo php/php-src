@@ -3787,6 +3787,7 @@ static void ir_emit_sdiv_pwr2(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	uint32_t shift = IR_LOG2(ctx->ir_base[insn->op2].val.u64);
 	int64_t offset = ctx->ir_base[insn->op2].val.u64 - 1;
 
+	IR_ASSERT(shift != 0);
 	IR_ASSERT(IR_IS_CONST_REF(insn->op2));
 	IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op));
 	IR_ASSERT(op1_reg != IR_REG_NONE && def_reg != IR_REG_NONE && op1_reg != def_reg);
@@ -3849,6 +3850,7 @@ static void ir_emit_smod_pwr2(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	uint32_t shift = IR_LOG2(ctx->ir_base[insn->op2].val.u64);
 	uint64_t mask = ctx->ir_base[insn->op2].val.u64 - 1;
 
+	IR_ASSERT(shift != 0);
 	IR_ASSERT(IR_IS_CONST_REF(insn->op2));
 	IR_ASSERT(!IR_IS_SYM_CONST(ctx->ir_base[insn->op2].op));
 	IR_ASSERT(def_reg != IR_REG_NONE && tmp_reg != IR_REG_NONE && def_reg != tmp_reg);
@@ -3868,8 +3870,13 @@ static void ir_emit_smod_pwr2(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		ir_emit_mov(ctx, type, tmp_reg, def_reg);
 	}
 
-	|	ASM_REG_IMM_OP sar, type, tmp_reg, (ir_type_size[type]*8-1)
-	|	ASM_REG_IMM_OP shr, type, tmp_reg, (ir_type_size[type]*8-shift)
+
+	if (shift == 1) {
+		|	ASM_REG_IMM_OP shr, type, tmp_reg, (ir_type_size[type]*8-1)
+	} else {
+		|	ASM_REG_IMM_OP sar, type, tmp_reg, (ir_type_size[type]*8-1)
+		|	ASM_REG_IMM_OP shr, type, tmp_reg, (ir_type_size[type]*8-shift)
+	}
 	|	ASM_REG_REG_OP add, type, def_reg, tmp_reg
 
 |.if X64
