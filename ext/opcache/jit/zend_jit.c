@@ -3465,10 +3465,12 @@ ZEND_EXT_API void zend_jit_startup(void *buf, size_t size, bool reattached)
 	dasm_size = size;
 	dasm_ptr = dasm_end = (void*)(((char*)dasm_buf) + size - sizeof(*dasm_ptr) * 2);
 
+	do {
 #ifdef HAVE_MPROTECT
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 	if (zend_write_protect) {
 		pthread_jit_write_protect_np(1);
+		break;
 	}
 #endif
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
@@ -3501,6 +3503,7 @@ ZEND_EXT_API void zend_jit_startup(void *buf, size_t size, bool reattached)
 		}
 	}
 #endif
+	} while (0);
 
 	if (!reattached) {
 		zend_jit_unprotect();
