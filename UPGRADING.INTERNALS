@@ -34,6 +34,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   php_rand.h,php_random.h} have been removed. Include ext/random/php_random.h
   directly.
 
+* The zend_*printf family of functions now supports the "%S" modifier to print
+  out zend_string*. This won't cut off the string if it embeds a NUL byte.
+
 ========================
 2. Build system changes
 ========================
