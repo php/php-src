@@ -3202,9 +3202,7 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 		opts |= PROT_EXEC;
 #endif
 		if (mprotect(dasm_buf, dasm_size, opts) != 0) {
-#ifndef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
-#endif
 		}
 	}
 #elif _WIN32
@@ -3236,9 +3234,7 @@ ZEND_EXT_API void zend_jit_protect(void)
 		}
 #endif
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
-#ifndef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
-#endif
 		}
 	}
 #elif _WIN32
@@ -3462,7 +3458,7 @@ ZEND_EXT_API void zend_jit_startup(void *buf, size_t size, bool reattached)
 	zend_jit_profile_counter_rid = zend_get_op_array_extension_handle(ACCELERATOR_PRODUCT_NAME);
 
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
-	zend_write_protect = 0;//pthread_jit_write_protect_supported_np();
+	zend_write_protect = pthread_jit_write_protect_supported_np();
 #endif
 
 	dasm_buf = buf;
@@ -3479,15 +3475,11 @@ ZEND_EXT_API void zend_jit_startup(void *buf, size_t size, bool reattached)
 #endif
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
-#ifndef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
-#endif
 		}
 	} else {
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
-#ifndef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
-#endif
 		}
 	}
 #elif _WIN32
