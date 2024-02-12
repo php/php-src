@@ -3196,6 +3196,7 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 		if (zend_write_protect) {
 			pthread_jit_write_protect_np(0);
+			return;
 		}
 #endif
 		opts |= PROT_EXEC;
@@ -3229,6 +3230,7 @@ ZEND_EXT_API void zend_jit_protect(void)
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 		if (zend_write_protect) {
 			pthread_jit_write_protect_np(1);
+			return;
 		}
 #endif
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
