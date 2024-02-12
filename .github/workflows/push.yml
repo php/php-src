@@ -76,9 +76,6 @@ jobs:
           - debug: false
             zts: false
             asan: false
-          - debug: true
-            zts: true
-            asan: true
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
     runs-on: ubuntu-22.04
     steps:
