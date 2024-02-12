@@ -29,10 +29,10 @@ ZEND_FUNCTION(exif_thumbnail);
 ZEND_FUNCTION(exif_imagetype);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_RAW_FENTRY("exif_tagname", zif_exif_tagname, arginfo_exif_tagname, 0, NULL)
-	ZEND_RAW_FENTRY("exif_read_data", zif_exif_read_data, arginfo_exif_read_data, 0, NULL)
-	ZEND_RAW_FENTRY("exif_thumbnail", zif_exif_thumbnail, arginfo_exif_thumbnail, 0, NULL)
-	ZEND_RAW_FENTRY("exif_imagetype", zif_exif_imagetype, arginfo_exif_imagetype, 0, NULL)
+	ZEND_FE(exif_tagname, arginfo_exif_tagname)
+	ZEND_FE(exif_read_data, arginfo_exif_read_data)
+	ZEND_FE(exif_thumbnail, arginfo_exif_thumbnail)
+	ZEND_FE(exif_imagetype, arginfo_exif_imagetype)
 	ZEND_FE_END
 };
 

@@ -168,43 +168,43 @@ ZEND_METHOD(HashContext, __serialize);
 ZEND_METHOD(HashContext, __unserialize);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_RAW_FENTRY("hash", zif_hash, arginfo_hash, 0, NULL)
-	ZEND_RAW_FENTRY("hash_file", zif_hash_file, arginfo_hash_file, 0, NULL)
-	ZEND_RAW_FENTRY("hash_hmac", zif_hash_hmac, arginfo_hash_hmac, 0, NULL)
-	ZEND_RAW_FENTRY("hash_hmac_file", zif_hash_hmac_file, arginfo_hash_hmac_file, 0, NULL)
-	ZEND_RAW_FENTRY("hash_init", zif_hash_init, arginfo_hash_init, 0, NULL)
-	ZEND_RAW_FENTRY("hash_update", zif_hash_update, arginfo_hash_update, 0, NULL)
-	ZEND_RAW_FENTRY("hash_update_stream", zif_hash_update_stream, arginfo_hash_update_stream, 0, NULL)
-	ZEND_RAW_FENTRY("hash_update_file", zif_hash_update_file, arginfo_hash_update_file, 0, NULL)
-	ZEND_RAW_FENTRY("hash_final", zif_hash_final, arginfo_hash_final, 0, NULL)
-	ZEND_RAW_FENTRY("hash_copy", zif_hash_copy, arginfo_hash_copy, 0, NULL)
-	ZEND_RAW_FENTRY("hash_algos", zif_hash_algos, arginfo_hash_algos, ZEND_ACC_COMPILE_TIME_EVAL, NULL)
-	ZEND_RAW_FENTRY("hash_hmac_algos", zif_hash_hmac_algos, arginfo_hash_hmac_algos, ZEND_ACC_COMPILE_TIME_EVAL, NULL)
-	ZEND_RAW_FENTRY("hash_pbkdf2", zif_hash_pbkdf2, arginfo_hash_pbkdf2, 0, NULL)
-	ZEND_RAW_FENTRY("hash_equals", zif_hash_equals, arginfo_hash_equals, 0, NULL)
-	ZEND_RAW_FENTRY("hash_hkdf", zif_hash_hkdf, arginfo_hash_hkdf, 0, NULL)
+	ZEND_FE(hash, arginfo_hash)
+	ZEND_FE(hash_file, arginfo_hash_file)
+	ZEND_FE(hash_hmac, arginfo_hash_hmac)
+	ZEND_FE(hash_hmac_file, arginfo_hash_hmac_file)
+	ZEND_FE(hash_init, arginfo_hash_init)
+	ZEND_FE(hash_update, arginfo_hash_update)
+	ZEND_FE(hash_update_stream, arginfo_hash_update_stream)
+	ZEND_FE(hash_update_file, arginfo_hash_update_file)
+	ZEND_FE(hash_final, arginfo_hash_final)
+	ZEND_FE(hash_copy, arginfo_hash_copy)
+	ZEND_RAW_FENTRY("hash_algos", zif_hash_algos, arginfo_hash_algos, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("hash_hmac_algos", zif_hash_hmac_algos, arginfo_hash_hmac_algos, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_FE(hash_pbkdf2, arginfo_hash_pbkdf2)
+	ZEND_FE(hash_equals, arginfo_hash_equals)
+	ZEND_FE(hash_hkdf, arginfo_hash_hkdf)
 #if defined(PHP_MHASH_BC)
-	ZEND_RAW_FENTRY("mhash_get_block_size", zif_mhash_get_block_size, arginfo_mhash_get_block_size, ZEND_ACC_DEPRECATED, NULL)
+	ZEND_RAW_FENTRY("mhash_get_block_size", zif_mhash_get_block_size, arginfo_mhash_get_block_size, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_RAW_FENTRY("mhash_get_hash_name", zif_mhash_get_hash_name, arginfo_mhash_get_hash_name, ZEND_ACC_DEPRECATED, NULL)
+	ZEND_RAW_FENTRY("mhash_get_hash_name", zif_mhash_get_hash_name, arginfo_mhash_get_hash_name, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_RAW_FENTRY("mhash_keygen_s2k", zif_mhash_keygen_s2k, arginfo_mhash_keygen_s2k, ZEND_ACC_DEPRECATED, NULL)
+	ZEND_RAW_FENTRY("mhash_keygen_s2k", zif_mhash_keygen_s2k, arginfo_mhash_keygen_s2k, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_RAW_FENTRY("mhash_count", zif_mhash_count, arginfo_mhash_count, ZEND_ACC_DEPRECATED, NULL)
+	ZEND_RAW_FENTRY("mhash_count", zif_mhash_count, arginfo_mhash_count, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_RAW_FENTRY("mhash", zif_mhash, arginfo_mhash, ZEND_ACC_DEPRECATED, NULL)
+	ZEND_RAW_FENTRY("mhash", zif_mhash, arginfo_mhash, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_HashContext_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_HashContext___construct, arginfo_class_HashContext___construct, ZEND_ACC_PRIVATE, NULL)
-	ZEND_RAW_FENTRY("__serialize", zim_HashContext___serialize, arginfo_class_HashContext___serialize, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("__unserialize", zim_HashContext___unserialize, arginfo_class_HashContext___unserialize, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(HashContext, __construct, arginfo_class_HashContext___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(HashContext, __serialize, arginfo_class_HashContext___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(HashContext, __unserialize, arginfo_class_HashContext___unserialize, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

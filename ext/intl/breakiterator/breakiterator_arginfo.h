@@ -112,42 +112,42 @@ ZEND_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec);
 ZEND_METHOD(IntlCodePointBreakIterator, getLastCodePoint);
 
 static const zend_function_entry class_IntlBreakIterator_methods[] = {
-	ZEND_RAW_FENTRY("createCharacterInstance", zim_IntlBreakIterator_createCharacterInstance, arginfo_class_IntlBreakIterator_createCharacterInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-	ZEND_RAW_FENTRY("createCodePointInstance", zim_IntlBreakIterator_createCodePointInstance, arginfo_class_IntlBreakIterator_createCodePointInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-	ZEND_RAW_FENTRY("createLineInstance", zim_IntlBreakIterator_createLineInstance, arginfo_class_IntlBreakIterator_createLineInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-	ZEND_RAW_FENTRY("createSentenceInstance", zim_IntlBreakIterator_createSentenceInstance, arginfo_class_IntlBreakIterator_createSentenceInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-	ZEND_RAW_FENTRY("createTitleInstance", zim_IntlBreakIterator_createTitleInstance, arginfo_class_IntlBreakIterator_createTitleInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-	ZEND_RAW_FENTRY("createWordInstance", zim_IntlBreakIterator_createWordInstance, arginfo_class_IntlBreakIterator_createWordInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-	ZEND_RAW_FENTRY("__construct", zim_IntlBreakIterator___construct, arginfo_class_IntlBreakIterator___construct, ZEND_ACC_PRIVATE, NULL)
-	ZEND_RAW_FENTRY("current", zim_IntlBreakIterator_current, arginfo_class_IntlBreakIterator_current, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("first", zim_IntlBreakIterator_first, arginfo_class_IntlBreakIterator_first, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("following", zim_IntlBreakIterator_following, arginfo_class_IntlBreakIterator_following, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getErrorCode", zim_IntlBreakIterator_getErrorCode, arginfo_class_IntlBreakIterator_getErrorCode, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getErrorMessage", zim_IntlBreakIterator_getErrorMessage, arginfo_class_IntlBreakIterator_getErrorMessage, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getLocale", zim_IntlBreakIterator_getLocale, arginfo_class_IntlBreakIterator_getLocale, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getPartsIterator", zim_IntlBreakIterator_getPartsIterator, arginfo_class_IntlBreakIterator_getPartsIterator, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getText", zim_IntlBreakIterator_getText, arginfo_class_IntlBreakIterator_getText, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("isBoundary", zim_IntlBreakIterator_isBoundary, arginfo_class_IntlBreakIterator_isBoundary, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("last", zim_IntlBreakIterator_last, arginfo_class_IntlBreakIterator_last, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("next", zim_IntlBreakIterator_next, arginfo_class_IntlBreakIterator_next, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("preceding", zim_IntlBreakIterator_preceding, arginfo_class_IntlBreakIterator_preceding, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("previous", zim_IntlBreakIterator_previous, arginfo_class_IntlBreakIterator_previous, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("setText", zim_IntlBreakIterator_setText, arginfo_class_IntlBreakIterator_setText, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getIterator", zim_IntlBreakIterator_getIterator, arginfo_class_IntlBreakIterator_getIterator, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(IntlBreakIterator, createCharacterInstance, arginfo_class_IntlBreakIterator_createCharacterInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(IntlBreakIterator, createCodePointInstance, arginfo_class_IntlBreakIterator_createCodePointInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(IntlBreakIterator, createLineInstance, arginfo_class_IntlBreakIterator_createLineInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(IntlBreakIterator, createSentenceInstance, arginfo_class_IntlBreakIterator_createSentenceInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(IntlBreakIterator, createTitleInstance, arginfo_class_IntlBreakIterator_createTitleInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(IntlBreakIterator, createWordInstance, arginfo_class_IntlBreakIterator_createWordInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(IntlBreakIterator, __construct, arginfo_class_IntlBreakIterator___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(IntlBreakIterator, current, arginfo_class_IntlBreakIterator_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, first, arginfo_class_IntlBreakIterator_first, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, following, arginfo_class_IntlBreakIterator_following, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, getErrorCode, arginfo_class_IntlBreakIterator_getErrorCode, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, getErrorMessage, arginfo_class_IntlBreakIterator_getErrorMessage, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, getLocale, arginfo_class_IntlBreakIterator_getLocale, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, getPartsIterator, arginfo_class_IntlBreakIterator_getPartsIterator, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, getText, arginfo_class_IntlBreakIterator_getText, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, isBoundary, arginfo_class_IntlBreakIterator_isBoundary, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, last, arginfo_class_IntlBreakIterator_last, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, next, arginfo_class_IntlBreakIterator_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, preceding, arginfo_class_IntlBreakIterator_preceding, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, previous, arginfo_class_IntlBreakIterator_previous, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, setText, arginfo_class_IntlBreakIterator_setText, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, getIterator, arginfo_class_IntlBreakIterator_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_IntlRuleBasedBreakIterator_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_IntlRuleBasedBreakIterator___construct, arginfo_class_IntlRuleBasedBreakIterator___construct, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getBinaryRules", zim_IntlRuleBasedBreakIterator_getBinaryRules, arginfo_class_IntlRuleBasedBreakIterator_getBinaryRules, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getRules", zim_IntlRuleBasedBreakIterator_getRules, arginfo_class_IntlRuleBasedBreakIterator_getRules, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getRuleStatus", zim_IntlRuleBasedBreakIterator_getRuleStatus, arginfo_class_IntlRuleBasedBreakIterator_getRuleStatus, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getRuleStatusVec", zim_IntlRuleBasedBreakIterator_getRuleStatusVec, arginfo_class_IntlRuleBasedBreakIterator_getRuleStatusVec, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(IntlRuleBasedBreakIterator, __construct, arginfo_class_IntlRuleBasedBreakIterator___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlRuleBasedBreakIterator, getBinaryRules, arginfo_class_IntlRuleBasedBreakIterator_getBinaryRules, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlRuleBasedBreakIterator, getRules, arginfo_class_IntlRuleBasedBreakIterator_getRules, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlRuleBasedBreakIterator, getRuleStatus, arginfo_class_IntlRuleBasedBreakIterator_getRuleStatus, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlRuleBasedBreakIterator, getRuleStatusVec, arginfo_class_IntlRuleBasedBreakIterator_getRuleStatusVec, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_IntlCodePointBreakIterator_methods[] = {
-	ZEND_RAW_FENTRY("getLastCodePoint", zim_IntlCodePointBreakIterator_getLastCodePoint, arginfo_class_IntlCodePointBreakIterator_getLastCodePoint, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(IntlCodePointBreakIterator, getLastCodePoint, arginfo_class_IntlCodePointBreakIterator_getLastCodePoint, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

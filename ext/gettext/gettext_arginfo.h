@@ -80,23 +80,23 @@ ZEND_FUNCTION(bind_textdomain_codeset);
 #endif
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_RAW_FENTRY("textdomain", zif_textdomain, arginfo_textdomain, 0, NULL)
-	ZEND_RAW_FENTRY("gettext", zif_gettext, arginfo_gettext, 0, NULL)
-	ZEND_RAW_FENTRY("_", zif_gettext, arginfo__, 0, NULL)
-	ZEND_RAW_FENTRY("dgettext", zif_dgettext, arginfo_dgettext, 0, NULL)
-	ZEND_RAW_FENTRY("dcgettext", zif_dcgettext, arginfo_dcgettext, 0, NULL)
-	ZEND_RAW_FENTRY("bindtextdomain", zif_bindtextdomain, arginfo_bindtextdomain, 0, NULL)
+	ZEND_FE(textdomain, arginfo_textdomain)
+	ZEND_FE(gettext, arginfo_gettext)
+	ZEND_RAW_FENTRY("_", zif_gettext, arginfo__, 0, NULL, NULL)
+	ZEND_FE(dgettext, arginfo_dgettext)
+	ZEND_FE(dcgettext, arginfo_dcgettext)
+	ZEND_FE(bindtextdomain, arginfo_bindtextdomain)
 #if defined(HAVE_NGETTEXT)
-	ZEND_RAW_FENTRY("ngettext", zif_ngettext, arginfo_ngettext, 0, NULL)
+	ZEND_FE(ngettext, arginfo_ngettext)
 #endif
 #if defined(HAVE_DNGETTEXT)
-	ZEND_RAW_FENTRY("dngettext", zif_dngettext, arginfo_dngettext, 0, NULL)
+	ZEND_FE(dngettext, arginfo_dngettext)
 #endif
 #if defined(HAVE_DCNGETTEXT)
-	ZEND_RAW_FENTRY("dcngettext", zif_dcngettext, arginfo_dcngettext, 0, NULL)
+	ZEND_FE(dcngettext, arginfo_dcngettext)
 #endif
 #if defined(HAVE_BIND_TEXTDOMAIN_CODESET)
-	ZEND_RAW_FENTRY("bind_textdomain_codeset", zif_bind_textdomain_codeset, arginfo_bind_textdomain_codeset, 0, NULL)
+	ZEND_FE(bind_textdomain_codeset, arginfo_bind_textdomain_codeset)
 #endif
 	ZEND_FE_END
 };

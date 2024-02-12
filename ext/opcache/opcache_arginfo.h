@@ -30,11 +30,11 @@ ZEND_FUNCTION(opcache_get_configuration);
 ZEND_FUNCTION(opcache_is_script_cached);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_RAW_FENTRY("opcache_reset", zif_opcache_reset, arginfo_opcache_reset, 0, NULL)
-	ZEND_RAW_FENTRY("opcache_get_status", zif_opcache_get_status, arginfo_opcache_get_status, 0, NULL)
-	ZEND_RAW_FENTRY("opcache_compile_file", zif_opcache_compile_file, arginfo_opcache_compile_file, 0, NULL)
-	ZEND_RAW_FENTRY("opcache_invalidate", zif_opcache_invalidate, arginfo_opcache_invalidate, 0, NULL)
-	ZEND_RAW_FENTRY("opcache_get_configuration", zif_opcache_get_configuration, arginfo_opcache_get_configuration, 0, NULL)
-	ZEND_RAW_FENTRY("opcache_is_script_cached", zif_opcache_is_script_cached, arginfo_opcache_is_script_cached, 0, NULL)
+	ZEND_FE(opcache_reset, arginfo_opcache_reset)
+	ZEND_FE(opcache_get_status, arginfo_opcache_get_status)
+	ZEND_FE(opcache_compile_file, arginfo_opcache_compile_file)
+	ZEND_FE(opcache_invalidate, arginfo_opcache_invalidate)
+	ZEND_FE(opcache_get_configuration, arginfo_opcache_get_configuration)
+	ZEND_FE(opcache_is_script_cached, arginfo_opcache_is_script_cached)
 	ZEND_FE_END
 };

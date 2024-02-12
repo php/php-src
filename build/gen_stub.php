@@ -1399,12 +1399,27 @@ class FuncInfo {
         $code = "";
 
         $php84MinimumCompatibility = $this->minimumPhpVersionIdCompatibility === null || $this->minimumPhpVersionIdCompatibility >= PHP_84_VERSION_ID;
+        $isVanillaEntry = $this->alias === null && !$this->supportsCompileTimeEval && $this->exposedDocComment === null && empty($this->framelessFunctionInfos);
+        $argInfoName = $this->getArgInfoName();
+        $flagsByPhpVersions = $this->getArginfoFlagsByPhpVersions();
+        $functionEntryCode = null;
+
+        if (!empty($this->framelessFunctionInfos)) {
+            if ($this->isMethod()) {
+                throw new Exception('Frameless methods are not supported yet');
+            }
+            if ($this->name->getNamespace()) {
+                throw new Exception('Namespaced direct calls to frameless functions are not supported yet');
+            }
+            if ($this->alias) {
+                throw new Exception('Aliased direct calls to frameless functions are not supported yet');
+            }
+        }
 
         if ($this->isMethod()) {
             $zendName = '"' . $this->name->methodName . '"';
             if ($this->alias) {
                 if ($this->alias instanceof MethodName) {
-
                     $name = "zim_" . $this->alias->getDeclarationClassName() . "_" . $this->alias->methodName;
                 } else if ($this->alias instanceof FunctionName) {
                     $name = "zif_" . $this->alias->getNonNamespacedName();
@@ -1416,25 +1431,15 @@ class FuncInfo {
                     $name = "NULL";
                 } else {
                     $name = "zim_" . $this->name->getDeclarationClassName() . "_" . $this->name->methodName;
+
+                    if ($isVanillaEntry) {
+                        $functionEntryCode = "\tZEND_ME(" . $this->name->getDeclarationClassName() . ", " . $this->name->methodName . ", $argInfoName, " . implode("|", reset($flagsByPhpVersions)) . ")";
+                    }
                 }
             }
         } else if ($this->name instanceof FunctionName) {
             $functionName = $this->name->getFunctionName();
             $declarationName = $this->alias ? $this->alias->getNonNamespacedName() : $this->name->getDeclarationName();
-
-            if (!empty($this->framelessFunctionInfos)) {
-                if ($namespace) {
-                    throw new Exception('Namespaced direct calls are not supported yet');
-                }
-                if ($this->alias) {
-                    throw new Exception('Aliased direct calls are not supported yet');
-                }
-                $flags = $this->supportsCompileTimeEval ? 'ZEND_ACC_COMPILE_TIME_EVAL' : '0';
-                return sprintf(
-                    "\tZEND_FRAMELESS_FE(%s, %s, %s, %s)\n",
-                    $functionName, $this->getArgInfoName(), $flags, $this->getFramelessFunctionInfosName()
-                );
-            }
 
             if ($this->name->getNamespace()) {
                 $namespace = addslashes($this->name->getNamespace());
@@ -1443,46 +1448,52 @@ class FuncInfo {
             } else {
                 $zendName = '"' . $functionName . '"';
                 $name = "zif_$declarationName";
+
+                if ($isVanillaEntry && reset($flagsByPhpVersions) === ["0"]) {
+                    $functionEntryCode = "\tZEND_FE($declarationName, $argInfoName)";
+                }
             }
         } else {
             throw new Error("Cannot happen");
         }
 
-        $flagsByPhpVersions = $this->getArginfoFlagsByPhpVersions();
-        $argInfoName = $this->getArgInfoName();
+        if ($functionEntryCode !== null) {
+            $code .= "$functionEntryCode\n";
+        } else {
+            if (!$php84MinimumCompatibility) {
+                $code .= "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n";
+            }
 
-        if (!$php84MinimumCompatibility) {
-            $code .= "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n";
-        }
+            $php84AndAboveFlags = array_slice($flagsByPhpVersions, 5, null, true);
+            $docComment = $this->exposedDocComment ? '"' . $this->exposedDocComment->escape() . '"' : "NULL";
+            $framelessFuncInfosName = !empty($this->framelessFunctionInfos) ? $this->getFramelessFunctionInfosName() : "NULL";
 
-        $php84AndAboveFlags = array_slice($flagsByPhpVersions, 5, null, true);
-        $docComment = $this->exposedDocComment ? '"' . $this->exposedDocComment->escape() . '"' : "NULL";
-
-        $template = "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s, $docComment)\n";
-        $flagsCode = generateVersionDependentFlagCode(
-            $template,
-            $php84AndAboveFlags,
-            PHP_84_VERSION_ID
-        );
-        $code .= implode("", $flagsCode);
-
-        if (!$php84MinimumCompatibility) {
-            $code .= "#else\n";
-        }
-
-        if (!$php84MinimumCompatibility) {
-            $flags = array_slice($flagsByPhpVersions, 0, 4, true);
-            $template = "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s)\n";
+            $template = "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s, $framelessFuncInfosName, $docComment)\n";
             $flagsCode = generateVersionDependentFlagCode(
                 $template,
-                $flags,
-                $this->minimumPhpVersionIdCompatibility
+                $php84AndAboveFlags,
+                PHP_84_VERSION_ID
             );
             $code .= implode("", $flagsCode);
-        }
 
-        if (!$php84MinimumCompatibility) {
-            $code .= "#endif\n";
+            if (!$php84MinimumCompatibility) {
+                $code .= "#else\n";
+            }
+
+            if (!$php84MinimumCompatibility) {
+                $flags = array_slice($flagsByPhpVersions, 0, 4, true);
+                $template = "\tZEND_RAW_FENTRY($zendName, $name, $argInfoName, %s)\n";
+                $flagsCode = generateVersionDependentFlagCode(
+                    $template,
+                    $flags,
+                    $this->minimumPhpVersionIdCompatibility
+                );
+                $code .= implode("", $flagsCode);
+            }
+
+            if (!$php84MinimumCompatibility) {
+                $code .= "#endif\n";
+            }
         }
 
         return $code;

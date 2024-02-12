@@ -178,50 +178,50 @@ ZEND_FUNCTION(pcntl_forkx);
 #endif
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_RAW_FENTRY("pcntl_fork", zif_pcntl_fork, arginfo_pcntl_fork, 0, NULL)
-	ZEND_RAW_FENTRY("pcntl_waitpid", zif_pcntl_waitpid, arginfo_pcntl_waitpid, 0, NULL)
-	ZEND_RAW_FENTRY("pcntl_wait", zif_pcntl_wait, arginfo_pcntl_wait, 0, NULL)
-	ZEND_RAW_FENTRY("pcntl_signal", zif_pcntl_signal, arginfo_pcntl_signal, 0, NULL)
-	ZEND_RAW_FENTRY("pcntl_signal_get_handler", zif_pcntl_signal_get_handler, arginfo_pcntl_signal_get_handler, 0, NULL)
-	ZEND_RAW_FENTRY("pcntl_signal_dispatch", zif_pcntl_signal_dispatch, arginfo_pcntl_signal_dispatch, 0, NULL)
+	ZEND_FE(pcntl_fork, arginfo_pcntl_fork)
+	ZEND_FE(pcntl_waitpid, arginfo_pcntl_waitpid)
+	ZEND_FE(pcntl_wait, arginfo_pcntl_wait)
+	ZEND_FE(pcntl_signal, arginfo_pcntl_signal)
+	ZEND_FE(pcntl_signal_get_handler, arginfo_pcntl_signal_get_handler)
+	ZEND_FE(pcntl_signal_dispatch, arginfo_pcntl_signal_dispatch)
 #if defined(HAVE_SIGPROCMASK)
-	ZEND_RAW_FENTRY("pcntl_sigprocmask", zif_pcntl_sigprocmask, arginfo_pcntl_sigprocmask, 0, NULL)
+	ZEND_FE(pcntl_sigprocmask, arginfo_pcntl_sigprocmask)
 #endif
 #if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
-	ZEND_RAW_FENTRY("pcntl_sigwaitinfo", zif_pcntl_sigwaitinfo, arginfo_pcntl_sigwaitinfo, 0, NULL)
+	ZEND_FE(pcntl_sigwaitinfo, arginfo_pcntl_sigwaitinfo)
 #endif
 #if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
-	ZEND_RAW_FENTRY("pcntl_sigtimedwait", zif_pcntl_sigtimedwait, arginfo_pcntl_sigtimedwait, 0, NULL)
+	ZEND_FE(pcntl_sigtimedwait, arginfo_pcntl_sigtimedwait)
 #endif
-	ZEND_RAW_FENTRY("pcntl_wifexited", zif_pcntl_wifexited, arginfo_pcntl_wifexited, 0, NULL)
-	ZEND_RAW_FENTRY("pcntl_wifstopped", zif_pcntl_wifstopped, arginfo_pcntl_wifstopped, 0, NULL)
+	ZEND_FE(pcntl_wifexited, arginfo_pcntl_wifexited)
+	ZEND_FE(pcntl_wifstopped, arginfo_pcntl_wifstopped)
 #if defined(HAVE_WCONTINUED)
-	ZEND_RAW_FENTRY("pcntl_wifcontinued", zif_pcntl_wifcontinued, arginfo_pcntl_wifcontinued, 0, NULL)
+	ZEND_FE(pcntl_wifcontinued, arginfo_pcntl_wifcontinued)
 #endif
-	ZEND_RAW_FENTRY("pcntl_wifsignaled", zif_pcntl_wifsignaled, arginfo_pcntl_wifsignaled, 0, NULL)
-	ZEND_RAW_FENTRY("pcntl_wexitstatus", zif_pcntl_wexitstatus, arginfo_pcntl_wexitstatus, 0, NULL)
-	ZEND_RAW_FENTRY("pcntl_wtermsig", zif_pcntl_wtermsig, arginfo_pcntl_wtermsig, 0, NULL)
-	ZEND_RAW_FENTRY("pcntl_wstopsig", zif_pcntl_wstopsig, arginfo_pcntl_wstopsig, 0, NULL)
-	ZEND_RAW_FENTRY("pcntl_exec", zif_pcntl_exec, arginfo_pcntl_exec, 0, NULL)
-	ZEND_RAW_FENTRY("pcntl_alarm", zif_pcntl_alarm, arginfo_pcntl_alarm, 0, NULL)
-	ZEND_RAW_FENTRY("pcntl_get_last_error", zif_pcntl_get_last_error, arginfo_pcntl_get_last_error, 0, NULL)
-	ZEND_RAW_FENTRY("pcntl_errno", zif_pcntl_get_last_error, arginfo_pcntl_errno, 0, NULL)
+	ZEND_FE(pcntl_wifsignaled, arginfo_pcntl_wifsignaled)
+	ZEND_FE(pcntl_wexitstatus, arginfo_pcntl_wexitstatus)
+	ZEND_FE(pcntl_wtermsig, arginfo_pcntl_wtermsig)
+	ZEND_FE(pcntl_wstopsig, arginfo_pcntl_wstopsig)
+	ZEND_FE(pcntl_exec, arginfo_pcntl_exec)
+	ZEND_FE(pcntl_alarm, arginfo_pcntl_alarm)
+	ZEND_FE(pcntl_get_last_error, arginfo_pcntl_get_last_error)
+	ZEND_RAW_FENTRY("pcntl_errno", zif_pcntl_get_last_error, arginfo_pcntl_errno, 0, NULL, NULL)
 #if defined(HAVE_GETPRIORITY)
-	ZEND_RAW_FENTRY("pcntl_getpriority", zif_pcntl_getpriority, arginfo_pcntl_getpriority, 0, NULL)
+	ZEND_FE(pcntl_getpriority, arginfo_pcntl_getpriority)
 #endif
 #if defined(HAVE_SETPRIORITY)
-	ZEND_RAW_FENTRY("pcntl_setpriority", zif_pcntl_setpriority, arginfo_pcntl_setpriority, 0, NULL)
+	ZEND_FE(pcntl_setpriority, arginfo_pcntl_setpriority)
 #endif
-	ZEND_RAW_FENTRY("pcntl_strerror", zif_pcntl_strerror, arginfo_pcntl_strerror, 0, NULL)
-	ZEND_RAW_FENTRY("pcntl_async_signals", zif_pcntl_async_signals, arginfo_pcntl_async_signals, 0, NULL)
+	ZEND_FE(pcntl_strerror, arginfo_pcntl_strerror)
+	ZEND_FE(pcntl_async_signals, arginfo_pcntl_async_signals)
 #if defined(HAVE_UNSHARE)
-	ZEND_RAW_FENTRY("pcntl_unshare", zif_pcntl_unshare, arginfo_pcntl_unshare, 0, NULL)
+	ZEND_FE(pcntl_unshare, arginfo_pcntl_unshare)
 #endif
 #if defined(HAVE_RFORK)
-	ZEND_RAW_FENTRY("pcntl_rfork", zif_pcntl_rfork, arginfo_pcntl_rfork, 0, NULL)
+	ZEND_FE(pcntl_rfork, arginfo_pcntl_rfork)
 #endif
 #if defined(HAVE_FORKX)
-	ZEND_RAW_FENTRY("pcntl_forkx", zif_pcntl_forkx, arginfo_pcntl_forkx, 0, NULL)
+	ZEND_FE(pcntl_forkx, arginfo_pcntl_forkx)
 #endif
 	ZEND_FE_END
 };

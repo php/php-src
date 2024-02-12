@@ -58,15 +58,15 @@ ZEND_FUNCTION(bzcompress);
 ZEND_FUNCTION(bzdecompress);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_RAW_FENTRY("bzopen", zif_bzopen, arginfo_bzopen, 0, NULL)
-	ZEND_RAW_FENTRY("bzread", zif_bzread, arginfo_bzread, 0, NULL)
-	ZEND_RAW_FENTRY("bzwrite", zif_fwrite, arginfo_bzwrite, 0, NULL)
-	ZEND_RAW_FENTRY("bzflush", zif_fflush, arginfo_bzflush, 0, NULL)
-	ZEND_RAW_FENTRY("bzclose", zif_fclose, arginfo_bzclose, 0, NULL)
-	ZEND_RAW_FENTRY("bzerrno", zif_bzerrno, arginfo_bzerrno, 0, NULL)
-	ZEND_RAW_FENTRY("bzerrstr", zif_bzerrstr, arginfo_bzerrstr, 0, NULL)
-	ZEND_RAW_FENTRY("bzerror", zif_bzerror, arginfo_bzerror, 0, NULL)
-	ZEND_RAW_FENTRY("bzcompress", zif_bzcompress, arginfo_bzcompress, 0, NULL)
-	ZEND_RAW_FENTRY("bzdecompress", zif_bzdecompress, arginfo_bzdecompress, 0, NULL)
+	ZEND_FE(bzopen, arginfo_bzopen)
+	ZEND_FE(bzread, arginfo_bzread)
+	ZEND_RAW_FENTRY("bzwrite", zif_fwrite, arginfo_bzwrite, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("bzflush", zif_fflush, arginfo_bzflush, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("bzclose", zif_fclose, arginfo_bzclose, 0, NULL, NULL)
+	ZEND_FE(bzerrno, arginfo_bzerrno)
+	ZEND_FE(bzerrstr, arginfo_bzerrstr)
+	ZEND_FE(bzerror, arginfo_bzerror)
+	ZEND_FE(bzcompress, arginfo_bzcompress)
+	ZEND_FE(bzdecompress, arginfo_bzdecompress)
 	ZEND_FE_END
 };

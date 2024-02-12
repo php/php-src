@@ -62,20 +62,20 @@ ZEND_FUNCTION(finfo_buffer);
 ZEND_FUNCTION(mime_content_type);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_RAW_FENTRY("finfo_open", zif_finfo_open, arginfo_finfo_open, 0, NULL)
-	ZEND_RAW_FENTRY("finfo_close", zif_finfo_close, arginfo_finfo_close, 0, NULL)
-	ZEND_RAW_FENTRY("finfo_set_flags", zif_finfo_set_flags, arginfo_finfo_set_flags, 0, NULL)
-	ZEND_RAW_FENTRY("finfo_file", zif_finfo_file, arginfo_finfo_file, 0, NULL)
-	ZEND_RAW_FENTRY("finfo_buffer", zif_finfo_buffer, arginfo_finfo_buffer, 0, NULL)
-	ZEND_RAW_FENTRY("mime_content_type", zif_mime_content_type, arginfo_mime_content_type, 0, NULL)
+	ZEND_FE(finfo_open, arginfo_finfo_open)
+	ZEND_FE(finfo_close, arginfo_finfo_close)
+	ZEND_FE(finfo_set_flags, arginfo_finfo_set_flags)
+	ZEND_FE(finfo_file, arginfo_finfo_file)
+	ZEND_FE(finfo_buffer, arginfo_finfo_buffer)
+	ZEND_FE(mime_content_type, arginfo_mime_content_type)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_finfo_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zif_finfo_open, arginfo_class_finfo___construct, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("file", zif_finfo_file, arginfo_class_finfo_file, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("buffer", zif_finfo_buffer, arginfo_class_finfo_buffer, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("set_flags", zif_finfo_set_flags, arginfo_class_finfo_set_flags, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("__construct", zif_finfo_open, arginfo_class_finfo___construct, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("file", zif_finfo_file, arginfo_class_finfo_file, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("buffer", zif_finfo_buffer, arginfo_class_finfo_buffer, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("set_flags", zif_finfo_set_flags, arginfo_class_finfo_set_flags, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 

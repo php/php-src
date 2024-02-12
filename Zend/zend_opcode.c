@@ -163,6 +163,11 @@ ZEND_API void zend_function_dtor(zval *zv)
 			}
 		}
 
+		if (function->common.doc_comment) {
+			zend_string_release_ex(function->common.doc_comment, 1);
+			function->common.doc_comment = NULL;
+		}
+
 		if (!(function->common.fn_flags & ZEND_ACC_ARENA_ALLOCATED)) {
 			pefree(function, 1);
 		}

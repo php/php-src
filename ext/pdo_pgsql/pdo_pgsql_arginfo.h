@@ -62,16 +62,16 @@ ZEND_METHOD(PdoPgsql, getNotify);
 ZEND_METHOD(PdoPgsql, getPid);
 
 static const zend_function_entry class_PdoPgsql_methods[] = {
-	ZEND_RAW_FENTRY("escapeIdentifier", zim_PdoPgsql_escapeIdentifier, arginfo_class_PdoPgsql_escapeIdentifier, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("copyFromArray", zim_PdoPgsql_copyFromArray, arginfo_class_PdoPgsql_copyFromArray, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("copyFromFile", zim_PdoPgsql_copyFromFile, arginfo_class_PdoPgsql_copyFromFile, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("copyToArray", zim_PdoPgsql_copyToArray, arginfo_class_PdoPgsql_copyToArray, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("copyToFile", zim_PdoPgsql_copyToFile, arginfo_class_PdoPgsql_copyToFile, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("lobCreate", zim_PdoPgsql_lobCreate, arginfo_class_PdoPgsql_lobCreate, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("lobOpen", zim_PdoPgsql_lobOpen, arginfo_class_PdoPgsql_lobOpen, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("lobUnlink", zim_PdoPgsql_lobUnlink, arginfo_class_PdoPgsql_lobUnlink, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getNotify", zim_PdoPgsql_getNotify, arginfo_class_PdoPgsql_getNotify, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getPid", zim_PdoPgsql_getPid, arginfo_class_PdoPgsql_getPid, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(PdoPgsql, escapeIdentifier, arginfo_class_PdoPgsql_escapeIdentifier, ZEND_ACC_PUBLIC)
+	ZEND_ME(PdoPgsql, copyFromArray, arginfo_class_PdoPgsql_copyFromArray, ZEND_ACC_PUBLIC)
+	ZEND_ME(PdoPgsql, copyFromFile, arginfo_class_PdoPgsql_copyFromFile, ZEND_ACC_PUBLIC)
+	ZEND_ME(PdoPgsql, copyToArray, arginfo_class_PdoPgsql_copyToArray, ZEND_ACC_PUBLIC)
+	ZEND_ME(PdoPgsql, copyToFile, arginfo_class_PdoPgsql_copyToFile, ZEND_ACC_PUBLIC)
+	ZEND_ME(PdoPgsql, lobCreate, arginfo_class_PdoPgsql_lobCreate, ZEND_ACC_PUBLIC)
+	ZEND_ME(PdoPgsql, lobOpen, arginfo_class_PdoPgsql_lobOpen, ZEND_ACC_PUBLIC)
+	ZEND_ME(PdoPgsql, lobUnlink, arginfo_class_PdoPgsql_lobUnlink, ZEND_ACC_PUBLIC)
+	ZEND_ME(PdoPgsql, getNotify, arginfo_class_PdoPgsql_getNotify, ZEND_ACC_PUBLIC)
+	ZEND_ME(PdoPgsql, getPid, arginfo_class_PdoPgsql_getPid, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

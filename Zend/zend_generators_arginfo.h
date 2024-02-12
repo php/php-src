@@ -34,14 +34,14 @@ ZEND_METHOD(Generator, throw);
 ZEND_METHOD(Generator, getReturn);
 
 static const zend_function_entry class_Generator_methods[] = {
-	ZEND_RAW_FENTRY("rewind", zim_Generator_rewind, arginfo_class_Generator_rewind, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("valid", zim_Generator_valid, arginfo_class_Generator_valid, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("current", zim_Generator_current, arginfo_class_Generator_current, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("key", zim_Generator_key, arginfo_class_Generator_key, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("next", zim_Generator_next, arginfo_class_Generator_next, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("send", zim_Generator_send, arginfo_class_Generator_send, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("throw", zim_Generator_throw, arginfo_class_Generator_throw, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getReturn", zim_Generator_getReturn, arginfo_class_Generator_getReturn, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(Generator, rewind, arginfo_class_Generator_rewind, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, valid, arginfo_class_Generator_valid, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, current, arginfo_class_Generator_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, key, arginfo_class_Generator_key, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, next, arginfo_class_Generator_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, send, arginfo_class_Generator_send, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, throw, arginfo_class_Generator_throw, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, getReturn, arginfo_class_Generator_getReturn, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

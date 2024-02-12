@@ -40,12 +40,12 @@ ZEND_FUNCTION(shmop_write);
 ZEND_FUNCTION(shmop_delete);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_RAW_FENTRY("shmop_open", zif_shmop_open, arginfo_shmop_open, 0, NULL)
-	ZEND_RAW_FENTRY("shmop_read", zif_shmop_read, arginfo_shmop_read, 0, NULL)
-	ZEND_RAW_FENTRY("shmop_close", zif_shmop_close, arginfo_shmop_close, ZEND_ACC_DEPRECATED, NULL)
-	ZEND_RAW_FENTRY("shmop_size", zif_shmop_size, arginfo_shmop_size, 0, NULL)
-	ZEND_RAW_FENTRY("shmop_write", zif_shmop_write, arginfo_shmop_write, 0, NULL)
-	ZEND_RAW_FENTRY("shmop_delete", zif_shmop_delete, arginfo_shmop_delete, 0, NULL)
+	ZEND_FE(shmop_open, arginfo_shmop_open)
+	ZEND_FE(shmop_read, arginfo_shmop_read)
+	ZEND_RAW_FENTRY("shmop_close", zif_shmop_close, arginfo_shmop_close, ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_FE(shmop_size, arginfo_shmop_size)
+	ZEND_FE(shmop_write, arginfo_shmop_write)
+	ZEND_FE(shmop_delete, arginfo_shmop_delete)
 	ZEND_FE_END
 };
 

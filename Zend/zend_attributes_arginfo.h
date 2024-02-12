@@ -34,34 +34,34 @@ ZEND_METHOD(SensitiveParameterValue, __debugInfo);
 ZEND_METHOD(Override, __construct);
 
 static const zend_function_entry class_Attribute_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_Attribute___construct, arginfo_class_Attribute___construct, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(Attribute, __construct, arginfo_class_Attribute___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_ReturnTypeWillChange_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_ReturnTypeWillChange___construct, arginfo_class_ReturnTypeWillChange___construct, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(ReturnTypeWillChange, __construct, arginfo_class_ReturnTypeWillChange___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_AllowDynamicProperties_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_AllowDynamicProperties___construct, arginfo_class_AllowDynamicProperties___construct, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(AllowDynamicProperties, __construct, arginfo_class_AllowDynamicProperties___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_SensitiveParameter_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_SensitiveParameter___construct, arginfo_class_SensitiveParameter___construct, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(SensitiveParameter, __construct, arginfo_class_SensitiveParameter___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_SensitiveParameterValue_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_SensitiveParameterValue___construct, arginfo_class_SensitiveParameterValue___construct, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getValue", zim_SensitiveParameterValue_getValue, arginfo_class_SensitiveParameterValue_getValue, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("__debugInfo", zim_SensitiveParameterValue___debugInfo, arginfo_class_SensitiveParameterValue___debugInfo, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(SensitiveParameterValue, __construct, arginfo_class_SensitiveParameterValue___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(SensitiveParameterValue, getValue, arginfo_class_SensitiveParameterValue_getValue, ZEND_ACC_PUBLIC)
+	ZEND_ME(SensitiveParameterValue, __debugInfo, arginfo_class_SensitiveParameterValue___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_Override_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_Override___construct, arginfo_class_Override___construct, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(Override, __construct, arginfo_class_Override___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

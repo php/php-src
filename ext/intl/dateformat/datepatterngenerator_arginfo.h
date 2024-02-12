@@ -18,9 +18,9 @@ ZEND_METHOD(IntlDatePatternGenerator, create);
 ZEND_METHOD(IntlDatePatternGenerator, getBestPattern);
 
 static const zend_function_entry class_IntlDatePatternGenerator_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_IntlDatePatternGenerator___construct, arginfo_class_IntlDatePatternGenerator___construct, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("create", zim_IntlDatePatternGenerator_create, arginfo_class_IntlDatePatternGenerator_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-	ZEND_RAW_FENTRY("getBestPattern", zim_IntlDatePatternGenerator_getBestPattern, arginfo_class_IntlDatePatternGenerator_getBestPattern, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(IntlDatePatternGenerator, __construct, arginfo_class_IntlDatePatternGenerator___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlDatePatternGenerator, create, arginfo_class_IntlDatePatternGenerator_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(IntlDatePatternGenerator, getBestPattern, arginfo_class_IntlDatePatternGenerator_getBestPattern, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

@@ -26,11 +26,11 @@ static ZEND_METHOD(_ZendTestFiber, pipeTo);
 static ZEND_METHOD(_ZendTestFiber, suspend);
 
 static const zend_function_entry class__ZendTestFiber_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim__ZendTestFiber___construct, arginfo_class__ZendTestFiber___construct, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("start", zim__ZendTestFiber_start, arginfo_class__ZendTestFiber_start, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("resume", zim__ZendTestFiber_resume, arginfo_class__ZendTestFiber_resume, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("pipeTo", zim__ZendTestFiber_pipeTo, arginfo_class__ZendTestFiber_pipeTo, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("suspend", zim__ZendTestFiber_suspend, arginfo_class__ZendTestFiber_suspend, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
+	ZEND_ME(_ZendTestFiber, __construct, arginfo_class__ZendTestFiber___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(_ZendTestFiber, start, arginfo_class__ZendTestFiber_start, ZEND_ACC_PUBLIC)
+	ZEND_ME(_ZendTestFiber, resume, arginfo_class__ZendTestFiber_resume, ZEND_ACC_PUBLIC)
+	ZEND_ME(_ZendTestFiber, pipeTo, arginfo_class__ZendTestFiber_pipeTo, ZEND_ACC_PUBLIC)
+	ZEND_ME(_ZendTestFiber, suspend, arginfo_class__ZendTestFiber_suspend, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 

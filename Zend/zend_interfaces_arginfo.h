@@ -74,50 +74,50 @@ static const zend_function_entry class_Traversable_methods[] = {
 };
 
 static const zend_function_entry class_IteratorAggregate_methods[] = {
-	ZEND_RAW_FENTRY("getIterator", NULL, arginfo_class_IteratorAggregate_getIterator, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
+	ZEND_RAW_FENTRY("getIterator", NULL, arginfo_class_IteratorAggregate_getIterator, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_Iterator_methods[] = {
-	ZEND_RAW_FENTRY("current", NULL, arginfo_class_Iterator_current, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("next", NULL, arginfo_class_Iterator_next, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("key", NULL, arginfo_class_Iterator_key, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("valid", NULL, arginfo_class_Iterator_valid, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("rewind", NULL, arginfo_class_Iterator_rewind, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
+	ZEND_RAW_FENTRY("current", NULL, arginfo_class_Iterator_current, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("next", NULL, arginfo_class_Iterator_next, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("key", NULL, arginfo_class_Iterator_key, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("valid", NULL, arginfo_class_Iterator_valid, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("rewind", NULL, arginfo_class_Iterator_rewind, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_ArrayAccess_methods[] = {
-	ZEND_RAW_FENTRY("offsetExists", NULL, arginfo_class_ArrayAccess_offsetExists, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("offsetGet", NULL, arginfo_class_ArrayAccess_offsetGet, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("offsetSet", NULL, arginfo_class_ArrayAccess_offsetSet, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("offsetUnset", NULL, arginfo_class_ArrayAccess_offsetUnset, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
+	ZEND_RAW_FENTRY("offsetExists", NULL, arginfo_class_ArrayAccess_offsetExists, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetGet", NULL, arginfo_class_ArrayAccess_offsetGet, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetSet", NULL, arginfo_class_ArrayAccess_offsetSet, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetUnset", NULL, arginfo_class_ArrayAccess_offsetUnset, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_Serializable_methods[] = {
-	ZEND_RAW_FENTRY("serialize", NULL, arginfo_class_Serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("unserialize", NULL, arginfo_class_Serializable_unserialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
+	ZEND_RAW_FENTRY("serialize", NULL, arginfo_class_Serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("unserialize", NULL, arginfo_class_Serializable_unserialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_Countable_methods[] = {
-	ZEND_RAW_FENTRY("count", NULL, arginfo_class_Countable_count, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
+	ZEND_RAW_FENTRY("count", NULL, arginfo_class_Countable_count, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_Stringable_methods[] = {
-	ZEND_RAW_FENTRY("__toString", NULL, arginfo_class_Stringable___toString, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
+	ZEND_RAW_FENTRY("__toString", NULL, arginfo_class_Stringable___toString, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_InternalIterator_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_InternalIterator___construct, arginfo_class_InternalIterator___construct, ZEND_ACC_PRIVATE, NULL)
-	ZEND_RAW_FENTRY("current", zim_InternalIterator_current, arginfo_class_InternalIterator_current, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("key", zim_InternalIterator_key, arginfo_class_InternalIterator_key, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("next", zim_InternalIterator_next, arginfo_class_InternalIterator_next, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("valid", zim_InternalIterator_valid, arginfo_class_InternalIterator_valid, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("rewind", zim_InternalIterator_rewind, arginfo_class_InternalIterator_rewind, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(InternalIterator, __construct, arginfo_class_InternalIterator___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(InternalIterator, current, arginfo_class_InternalIterator_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(InternalIterator, key, arginfo_class_InternalIterator_key, ZEND_ACC_PUBLIC)
+	ZEND_ME(InternalIterator, next, arginfo_class_InternalIterator_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(InternalIterator, valid, arginfo_class_InternalIterator_valid, ZEND_ACC_PUBLIC)
+	ZEND_ME(InternalIterator, rewind, arginfo_class_InternalIterator_rewind, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

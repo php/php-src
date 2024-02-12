@@ -71,21 +71,21 @@ ZEND_METHOD(SplFixedArray, getIterator);
 ZEND_METHOD(SplFixedArray, jsonSerialize);
 
 static const zend_function_entry class_SplFixedArray_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_SplFixedArray___construct, arginfo_class_SplFixedArray___construct, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("__wakeup", zim_SplFixedArray___wakeup, arginfo_class_SplFixedArray___wakeup, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("__serialize", zim_SplFixedArray___serialize, arginfo_class_SplFixedArray___serialize, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("__unserialize", zim_SplFixedArray___unserialize, arginfo_class_SplFixedArray___unserialize, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("count", zim_SplFixedArray_count, arginfo_class_SplFixedArray_count, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("toArray", zim_SplFixedArray_toArray, arginfo_class_SplFixedArray_toArray, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("fromArray", zim_SplFixedArray_fromArray, arginfo_class_SplFixedArray_fromArray, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-	ZEND_RAW_FENTRY("getSize", zim_SplFixedArray_getSize, arginfo_class_SplFixedArray_getSize, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("setSize", zim_SplFixedArray_setSize, arginfo_class_SplFixedArray_setSize, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("offsetExists", zim_SplFixedArray_offsetExists, arginfo_class_SplFixedArray_offsetExists, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("offsetGet", zim_SplFixedArray_offsetGet, arginfo_class_SplFixedArray_offsetGet, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("offsetSet", zim_SplFixedArray_offsetSet, arginfo_class_SplFixedArray_offsetSet, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("offsetUnset", zim_SplFixedArray_offsetUnset, arginfo_class_SplFixedArray_offsetUnset, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getIterator", zim_SplFixedArray_getIterator, arginfo_class_SplFixedArray_getIterator, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("jsonSerialize", zim_SplFixedArray_jsonSerialize, arginfo_class_SplFixedArray_jsonSerialize, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(SplFixedArray, __construct, arginfo_class_SplFixedArray___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, __wakeup, arginfo_class_SplFixedArray___wakeup, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, __serialize, arginfo_class_SplFixedArray___serialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, __unserialize, arginfo_class_SplFixedArray___unserialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, count, arginfo_class_SplFixedArray_count, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, toArray, arginfo_class_SplFixedArray_toArray, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, fromArray, arginfo_class_SplFixedArray_fromArray, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(SplFixedArray, getSize, arginfo_class_SplFixedArray_getSize, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, setSize, arginfo_class_SplFixedArray_setSize, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, offsetExists, arginfo_class_SplFixedArray_offsetExists, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, offsetGet, arginfo_class_SplFixedArray_offsetGet, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, offsetSet, arginfo_class_SplFixedArray_offsetSet, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, offsetUnset, arginfo_class_SplFixedArray_offsetUnset, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, getIterator, arginfo_class_SplFixedArray_getIterator, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, jsonSerialize, arginfo_class_SplFixedArray_jsonSerialize, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

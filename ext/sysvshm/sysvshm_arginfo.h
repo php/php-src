@@ -40,13 +40,13 @@ ZEND_FUNCTION(shm_get_var);
 ZEND_FUNCTION(shm_remove_var);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_RAW_FENTRY("shm_attach", zif_shm_attach, arginfo_shm_attach, 0, NULL)
-	ZEND_RAW_FENTRY("shm_detach", zif_shm_detach, arginfo_shm_detach, 0, NULL)
-	ZEND_RAW_FENTRY("shm_has_var", zif_shm_has_var, arginfo_shm_has_var, 0, NULL)
-	ZEND_RAW_FENTRY("shm_remove", zif_shm_remove, arginfo_shm_remove, 0, NULL)
-	ZEND_RAW_FENTRY("shm_put_var", zif_shm_put_var, arginfo_shm_put_var, 0, NULL)
-	ZEND_RAW_FENTRY("shm_get_var", zif_shm_get_var, arginfo_shm_get_var, 0, NULL)
-	ZEND_RAW_FENTRY("shm_remove_var", zif_shm_remove_var, arginfo_shm_remove_var, 0, NULL)
+	ZEND_FE(shm_attach, arginfo_shm_attach)
+	ZEND_FE(shm_detach, arginfo_shm_detach)
+	ZEND_FE(shm_has_var, arginfo_shm_has_var)
+	ZEND_FE(shm_remove, arginfo_shm_remove)
+	ZEND_FE(shm_put_var, arginfo_shm_put_var)
+	ZEND_FE(shm_get_var, arginfo_shm_get_var)
+	ZEND_FE(shm_remove_var, arginfo_shm_remove_var)
 	ZEND_FE_END
 };
 

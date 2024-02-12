@@ -96,49 +96,49 @@ ZEND_METHOD(ErrorException, __construct);
 ZEND_METHOD(ErrorException, getSeverity);
 
 static const zend_function_entry class_Throwable_methods[] = {
-	ZEND_RAW_FENTRY("getMessage", NULL, arginfo_class_Throwable_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("getCode", NULL, arginfo_class_Throwable_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("getFile", NULL, arginfo_class_Throwable_getFile, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("getLine", NULL, arginfo_class_Throwable_getLine, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("getTrace", NULL, arginfo_class_Throwable_getTrace, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("getPrevious", NULL, arginfo_class_Throwable_getPrevious, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("getTraceAsString", NULL, arginfo_class_Throwable_getTraceAsString, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL)
+	ZEND_RAW_FENTRY("getMessage", NULL, arginfo_class_Throwable_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("getCode", NULL, arginfo_class_Throwable_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("getFile", NULL, arginfo_class_Throwable_getFile, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("getLine", NULL, arginfo_class_Throwable_getLine, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("getTrace", NULL, arginfo_class_Throwable_getTrace, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("getPrevious", NULL, arginfo_class_Throwable_getPrevious, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("getTraceAsString", NULL, arginfo_class_Throwable_getTraceAsString, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_Exception_methods[] = {
-	ZEND_RAW_FENTRY("__clone", zim_Exception___clone, arginfo_class_Exception___clone, ZEND_ACC_PRIVATE, NULL)
-	ZEND_RAW_FENTRY("__construct", zim_Exception___construct, arginfo_class_Exception___construct, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("__wakeup", zim_Exception___wakeup, arginfo_class_Exception___wakeup, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getMessage", zim_Exception_getMessage, arginfo_class_Exception_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("getCode", zim_Exception_getCode, arginfo_class_Exception_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("getFile", zim_Exception_getFile, arginfo_class_Exception_getFile, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("getLine", zim_Exception_getLine, arginfo_class_Exception_getLine, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("getTrace", zim_Exception_getTrace, arginfo_class_Exception_getTrace, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("getPrevious", zim_Exception_getPrevious, arginfo_class_Exception_getPrevious, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("getTraceAsString", zim_Exception_getTraceAsString, arginfo_class_Exception_getTraceAsString, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("__toString", zim_Exception___toString, arginfo_class_Exception___toString, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(Exception, __clone, arginfo_class_Exception___clone, ZEND_ACC_PRIVATE)
+	ZEND_ME(Exception, __construct, arginfo_class_Exception___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Exception, __wakeup, arginfo_class_Exception___wakeup, ZEND_ACC_PUBLIC)
+	ZEND_ME(Exception, getMessage, arginfo_class_Exception_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(Exception, getCode, arginfo_class_Exception_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(Exception, getFile, arginfo_class_Exception_getFile, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(Exception, getLine, arginfo_class_Exception_getLine, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(Exception, getTrace, arginfo_class_Exception_getTrace, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(Exception, getPrevious, arginfo_class_Exception_getPrevious, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(Exception, getTraceAsString, arginfo_class_Exception_getTraceAsString, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(Exception, __toString, arginfo_class_Exception___toString, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_ErrorException_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_ErrorException___construct, arginfo_class_ErrorException___construct, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getSeverity", zim_ErrorException_getSeverity, arginfo_class_ErrorException_getSeverity, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
+	ZEND_ME(ErrorException, __construct, arginfo_class_ErrorException___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(ErrorException, getSeverity, arginfo_class_ErrorException_getSeverity, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_Error_methods[] = {
-	ZEND_RAW_FENTRY("__clone", zim_Exception___clone, arginfo_class_Error___clone, ZEND_ACC_PRIVATE, NULL)
-	ZEND_RAW_FENTRY("__construct", zim_Exception___construct, arginfo_class_Error___construct, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("__wakeup", zim_Exception___wakeup, arginfo_class_Error___wakeup, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getMessage", zim_Exception_getMessage, arginfo_class_Error_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("getCode", zim_Exception_getCode, arginfo_class_Error_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("getFile", zim_Exception_getFile, arginfo_class_Error_getFile, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("getLine", zim_Exception_getLine, arginfo_class_Error_getLine, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("getTrace", zim_Exception_getTrace, arginfo_class_Error_getTrace, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("getPrevious", zim_Exception_getPrevious, arginfo_class_Error_getPrevious, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("getTraceAsString", zim_Exception_getTraceAsString, arginfo_class_Error_getTraceAsString, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("__toString", zim_Exception___toString, arginfo_class_Error___toString, ZEND_ACC_PUBLIC, NULL)
+	ZEND_RAW_FENTRY("__clone", zim_Exception___clone, arginfo_class_Error___clone, ZEND_ACC_PRIVATE, NULL, NULL)
+	ZEND_RAW_FENTRY("__construct", zim_Exception___construct, arginfo_class_Error___construct, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("__wakeup", zim_Exception___wakeup, arginfo_class_Error___wakeup, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getMessage", zim_Exception_getMessage, arginfo_class_Error_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getCode", zim_Exception_getCode, arginfo_class_Error_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getFile", zim_Exception_getFile, arginfo_class_Error_getFile, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getLine", zim_Exception_getLine, arginfo_class_Error_getLine, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getTrace", zim_Exception_getTrace, arginfo_class_Error_getTrace, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getPrevious", zim_Exception_getPrevious, arginfo_class_Error_getPrevious, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("getTraceAsString", zim_Exception_getTraceAsString, arginfo_class_Error_getTraceAsString, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL, NULL)
+	ZEND_RAW_FENTRY("__toString", zim_Exception___toString, arginfo_class_Error___toString, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 

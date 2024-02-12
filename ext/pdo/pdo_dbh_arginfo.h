@@ -83,22 +83,22 @@ ZEND_METHOD(PDO, rollBack);
 ZEND_METHOD(PDO, setAttribute);
 
 static const zend_function_entry class_PDO_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_PDO___construct, arginfo_class_PDO___construct, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("connect", zim_PDO_connect, arginfo_class_PDO_connect, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-	ZEND_RAW_FENTRY("beginTransaction", zim_PDO_beginTransaction, arginfo_class_PDO_beginTransaction, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("commit", zim_PDO_commit, arginfo_class_PDO_commit, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("errorCode", zim_PDO_errorCode, arginfo_class_PDO_errorCode, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("errorInfo", zim_PDO_errorInfo, arginfo_class_PDO_errorInfo, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("exec", zim_PDO_exec, arginfo_class_PDO_exec, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getAttribute", zim_PDO_getAttribute, arginfo_class_PDO_getAttribute, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getAvailableDrivers", zim_PDO_getAvailableDrivers, arginfo_class_PDO_getAvailableDrivers, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-	ZEND_RAW_FENTRY("inTransaction", zim_PDO_inTransaction, arginfo_class_PDO_inTransaction, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("lastInsertId", zim_PDO_lastInsertId, arginfo_class_PDO_lastInsertId, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("prepare", zim_PDO_prepare, arginfo_class_PDO_prepare, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("query", zim_PDO_query, arginfo_class_PDO_query, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("quote", zim_PDO_quote, arginfo_class_PDO_quote, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("rollBack", zim_PDO_rollBack, arginfo_class_PDO_rollBack, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("setAttribute", zim_PDO_setAttribute, arginfo_class_PDO_setAttribute, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(PDO, __construct, arginfo_class_PDO___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, connect, arginfo_class_PDO_connect, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(PDO, beginTransaction, arginfo_class_PDO_beginTransaction, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, commit, arginfo_class_PDO_commit, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, errorCode, arginfo_class_PDO_errorCode, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, errorInfo, arginfo_class_PDO_errorInfo, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, exec, arginfo_class_PDO_exec, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, getAttribute, arginfo_class_PDO_getAttribute, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, getAvailableDrivers, arginfo_class_PDO_getAvailableDrivers, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(PDO, inTransaction, arginfo_class_PDO_inTransaction, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, lastInsertId, arginfo_class_PDO_lastInsertId, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, prepare, arginfo_class_PDO_prepare, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, query, arginfo_class_PDO_query, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, quote, arginfo_class_PDO_quote, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, rollBack, arginfo_class_PDO_rollBack, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, setAttribute, arginfo_class_PDO_setAttribute, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

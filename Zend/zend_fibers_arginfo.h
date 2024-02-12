@@ -51,22 +51,22 @@ ZEND_METHOD(Fiber, suspend);
 ZEND_METHOD(FiberError, __construct);
 
 static const zend_function_entry class_Fiber_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_Fiber___construct, arginfo_class_Fiber___construct, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("start", zim_Fiber_start, arginfo_class_Fiber_start, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("resume", zim_Fiber_resume, arginfo_class_Fiber_resume, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("throw", zim_Fiber_throw, arginfo_class_Fiber_throw, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("isStarted", zim_Fiber_isStarted, arginfo_class_Fiber_isStarted, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("isSuspended", zim_Fiber_isSuspended, arginfo_class_Fiber_isSuspended, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("isRunning", zim_Fiber_isRunning, arginfo_class_Fiber_isRunning, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("isTerminated", zim_Fiber_isTerminated, arginfo_class_Fiber_isTerminated, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getReturn", zim_Fiber_getReturn, arginfo_class_Fiber_getReturn, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getCurrent", zim_Fiber_getCurrent, arginfo_class_Fiber_getCurrent, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-	ZEND_RAW_FENTRY("suspend", zim_Fiber_suspend, arginfo_class_Fiber_suspend, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
+	ZEND_ME(Fiber, __construct, arginfo_class_Fiber___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Fiber, start, arginfo_class_Fiber_start, ZEND_ACC_PUBLIC)
+	ZEND_ME(Fiber, resume, arginfo_class_Fiber_resume, ZEND_ACC_PUBLIC)
+	ZEND_ME(Fiber, throw, arginfo_class_Fiber_throw, ZEND_ACC_PUBLIC)
+	ZEND_ME(Fiber, isStarted, arginfo_class_Fiber_isStarted, ZEND_ACC_PUBLIC)
+	ZEND_ME(Fiber, isSuspended, arginfo_class_Fiber_isSuspended, ZEND_ACC_PUBLIC)
+	ZEND_ME(Fiber, isRunning, arginfo_class_Fiber_isRunning, ZEND_ACC_PUBLIC)
+	ZEND_ME(Fiber, isTerminated, arginfo_class_Fiber_isTerminated, ZEND_ACC_PUBLIC)
+	ZEND_ME(Fiber, getReturn, arginfo_class_Fiber_getReturn, ZEND_ACC_PUBLIC)
+	ZEND_ME(Fiber, getCurrent, arginfo_class_Fiber_getCurrent, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Fiber, suspend, arginfo_class_Fiber_suspend, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_FiberError_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_FiberError___construct, arginfo_class_FiberError___construct, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(FiberError, __construct, arginfo_class_FiberError___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

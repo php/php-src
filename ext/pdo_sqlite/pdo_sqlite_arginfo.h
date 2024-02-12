@@ -43,13 +43,13 @@ ZEND_METHOD(PdoSqlite, loadExtension);
 ZEND_METHOD(PdoSqlite, openBlob);
 
 static const zend_function_entry class_PdoSqlite_methods[] = {
-	ZEND_RAW_FENTRY("createAggregate", zim_PdoSqlite_createAggregate, arginfo_class_PdoSqlite_createAggregate, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("createCollation", zim_PdoSqlite_createCollation, arginfo_class_PdoSqlite_createCollation, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("createFunction", zim_PdoSqlite_createFunction, arginfo_class_PdoSqlite_createFunction, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(PdoSqlite, createAggregate, arginfo_class_PdoSqlite_createAggregate, ZEND_ACC_PUBLIC)
+	ZEND_ME(PdoSqlite, createCollation, arginfo_class_PdoSqlite_createCollation, ZEND_ACC_PUBLIC)
+	ZEND_ME(PdoSqlite, createFunction, arginfo_class_PdoSqlite_createFunction, ZEND_ACC_PUBLIC)
 #if !defined(PDO_SQLITE_OMIT_LOAD_EXTENSION)
-	ZEND_RAW_FENTRY("loadExtension", zim_PdoSqlite_loadExtension, arginfo_class_PdoSqlite_loadExtension, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(PdoSqlite, loadExtension, arginfo_class_PdoSqlite_loadExtension, ZEND_ACC_PUBLIC)
 #endif
-	ZEND_RAW_FENTRY("openBlob", zim_PdoSqlite_openBlob, arginfo_class_PdoSqlite_openBlob, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(PdoSqlite, openBlob, arginfo_class_PdoSqlite_openBlob, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

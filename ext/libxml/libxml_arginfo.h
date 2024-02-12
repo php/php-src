@@ -39,14 +39,14 @@ ZEND_FUNCTION(libxml_set_external_entity_loader);
 ZEND_FUNCTION(libxml_get_external_entity_loader);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_RAW_FENTRY("libxml_set_streams_context", zif_libxml_set_streams_context, arginfo_libxml_set_streams_context, 0, NULL)
-	ZEND_RAW_FENTRY("libxml_use_internal_errors", zif_libxml_use_internal_errors, arginfo_libxml_use_internal_errors, 0, NULL)
-	ZEND_RAW_FENTRY("libxml_get_last_error", zif_libxml_get_last_error, arginfo_libxml_get_last_error, 0, NULL)
-	ZEND_RAW_FENTRY("libxml_get_errors", zif_libxml_get_errors, arginfo_libxml_get_errors, 0, NULL)
-	ZEND_RAW_FENTRY("libxml_clear_errors", zif_libxml_clear_errors, arginfo_libxml_clear_errors, 0, NULL)
-	ZEND_RAW_FENTRY("libxml_disable_entity_loader", zif_libxml_disable_entity_loader, arginfo_libxml_disable_entity_loader, ZEND_ACC_DEPRECATED, NULL)
-	ZEND_RAW_FENTRY("libxml_set_external_entity_loader", zif_libxml_set_external_entity_loader, arginfo_libxml_set_external_entity_loader, 0, NULL)
-	ZEND_RAW_FENTRY("libxml_get_external_entity_loader", zif_libxml_get_external_entity_loader, arginfo_libxml_get_external_entity_loader, 0, NULL)
+	ZEND_FE(libxml_set_streams_context, arginfo_libxml_set_streams_context)
+	ZEND_FE(libxml_use_internal_errors, arginfo_libxml_use_internal_errors)
+	ZEND_FE(libxml_get_last_error, arginfo_libxml_get_last_error)
+	ZEND_FE(libxml_get_errors, arginfo_libxml_get_errors)
+	ZEND_FE(libxml_clear_errors, arginfo_libxml_clear_errors)
+	ZEND_RAW_FENTRY("libxml_disable_entity_loader", zif_libxml_disable_entity_loader, arginfo_libxml_disable_entity_loader, ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_FE(libxml_set_external_entity_loader, arginfo_libxml_set_external_entity_loader)
+	ZEND_FE(libxml_get_external_entity_loader, arginfo_libxml_get_external_entity_loader)
 	ZEND_FE_END
 };
 

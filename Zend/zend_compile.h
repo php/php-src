@@ -464,6 +464,7 @@ struct _zend_op_array {
 	zend_arg_info *arg_info;
 	HashTable *attributes;
 	ZEND_MAP_PTR_DEF(void **, run_time_cache);
+	zend_string *doc_comment;
 	uint32_t T;         /* number of temporary variables */
 	/* END of common elements */
 
@@ -486,7 +487,6 @@ struct _zend_op_array {
 	zend_string *filename;
 	uint32_t line_start;
 	uint32_t line_end;
-	zend_string *doc_comment;
 
 	int last_literal;
 	uint32_t num_dynamic_func_defs;
@@ -522,11 +522,11 @@ typedef struct _zend_internal_function {
 	zend_internal_arg_info *arg_info;
 	HashTable *attributes;
 	ZEND_MAP_PTR_DEF(void **, run_time_cache);
+	zend_string *doc_comment;
 	uint32_t T;         /* number of temporary variables */
 	/* END of common elements */
 
 	zif_handler handler;
-	zend_string *doc_comment;
 	struct _zend_module_entry *module;
 	const zend_frameless_function_info *frameless_function_infos;
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
@@ -550,6 +550,7 @@ union _zend_function {
 		zend_arg_info *arg_info;  /* index -1 represents the return value info, if any */
 		HashTable   *attributes;
 		ZEND_MAP_PTR_DEF(void **, run_time_cache);
+		zend_string *doc_comment;
 		uint32_t T;         /* number of temporary variables */
 	} common;
 

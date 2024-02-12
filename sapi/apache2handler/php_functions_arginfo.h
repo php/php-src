@@ -48,15 +48,15 @@ ZEND_FUNCTION(apache_get_version);
 ZEND_FUNCTION(apache_get_modules);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_RAW_FENTRY("apache_lookup_uri", zif_apache_lookup_uri, arginfo_apache_lookup_uri, 0, NULL)
-	ZEND_RAW_FENTRY("virtual", zif_virtual, arginfo_virtual, 0, NULL)
-	ZEND_RAW_FENTRY("apache_request_headers", zif_apache_request_headers, arginfo_apache_request_headers, 0, NULL)
-	ZEND_RAW_FENTRY("getallheaders", zif_apache_request_headers, arginfo_getallheaders, 0, NULL)
-	ZEND_RAW_FENTRY("apache_response_headers", zif_apache_response_headers, arginfo_apache_response_headers, 0, NULL)
-	ZEND_RAW_FENTRY("apache_note", zif_apache_note, arginfo_apache_note, 0, NULL)
-	ZEND_RAW_FENTRY("apache_setenv", zif_apache_setenv, arginfo_apache_setenv, 0, NULL)
-	ZEND_RAW_FENTRY("apache_getenv", zif_apache_getenv, arginfo_apache_getenv, 0, NULL)
-	ZEND_RAW_FENTRY("apache_get_version", zif_apache_get_version, arginfo_apache_get_version, 0, NULL)
-	ZEND_RAW_FENTRY("apache_get_modules", zif_apache_get_modules, arginfo_apache_get_modules, 0, NULL)
+	ZEND_FE(apache_lookup_uri, arginfo_apache_lookup_uri)
+	ZEND_FE(virtual, arginfo_virtual)
+	ZEND_FE(apache_request_headers, arginfo_apache_request_headers)
+	ZEND_RAW_FENTRY("getallheaders", zif_apache_request_headers, arginfo_getallheaders, 0, NULL, NULL)
+	ZEND_FE(apache_response_headers, arginfo_apache_response_headers)
+	ZEND_FE(apache_note, arginfo_apache_note)
+	ZEND_FE(apache_setenv, arginfo_apache_setenv)
+	ZEND_FE(apache_getenv, arginfo_apache_getenv)
+	ZEND_FE(apache_get_version, arginfo_apache_get_version)
+	ZEND_FE(apache_get_modules, arginfo_apache_get_modules)
 	ZEND_FE_END
 };

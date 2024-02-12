@@ -21,11 +21,11 @@ ZEND_METHOD(IntlIterator, rewind);
 ZEND_METHOD(IntlIterator, valid);
 
 static const zend_function_entry class_IntlIterator_methods[] = {
-	ZEND_RAW_FENTRY("current", zim_IntlIterator_current, arginfo_class_IntlIterator_current, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("key", zim_IntlIterator_key, arginfo_class_IntlIterator_key, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("next", zim_IntlIterator_next, arginfo_class_IntlIterator_next, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("rewind", zim_IntlIterator_rewind, arginfo_class_IntlIterator_rewind, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("valid", zim_IntlIterator_valid, arginfo_class_IntlIterator_valid, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(IntlIterator, current, arginfo_class_IntlIterator_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlIterator, key, arginfo_class_IntlIterator_key, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlIterator, next, arginfo_class_IntlIterator_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlIterator, rewind, arginfo_class_IntlIterator_rewind, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlIterator, valid, arginfo_class_IntlIterator_valid, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

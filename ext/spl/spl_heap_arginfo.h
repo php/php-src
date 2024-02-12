@@ -109,50 +109,50 @@ ZEND_METHOD(SplMinHeap, compare);
 ZEND_METHOD(SplMaxHeap, compare);
 
 static const zend_function_entry class_SplPriorityQueue_methods[] = {
-	ZEND_RAW_FENTRY("compare", zim_SplPriorityQueue_compare, arginfo_class_SplPriorityQueue_compare, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("insert", zim_SplPriorityQueue_insert, arginfo_class_SplPriorityQueue_insert, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("setExtractFlags", zim_SplPriorityQueue_setExtractFlags, arginfo_class_SplPriorityQueue_setExtractFlags, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("top", zim_SplPriorityQueue_top, arginfo_class_SplPriorityQueue_top, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("extract", zim_SplPriorityQueue_extract, arginfo_class_SplPriorityQueue_extract, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("count", zim_SplHeap_count, arginfo_class_SplPriorityQueue_count, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("isEmpty", zim_SplHeap_isEmpty, arginfo_class_SplPriorityQueue_isEmpty, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("rewind", zim_SplHeap_rewind, arginfo_class_SplPriorityQueue_rewind, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("current", zim_SplPriorityQueue_current, arginfo_class_SplPriorityQueue_current, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("key", zim_SplHeap_key, arginfo_class_SplPriorityQueue_key, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("next", zim_SplHeap_next, arginfo_class_SplPriorityQueue_next, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("valid", zim_SplHeap_valid, arginfo_class_SplPriorityQueue_valid, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("recoverFromCorruption", zim_SplHeap_recoverFromCorruption, arginfo_class_SplPriorityQueue_recoverFromCorruption, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("isCorrupted", zim_SplHeap_isCorrupted, arginfo_class_SplPriorityQueue_isCorrupted, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getExtractFlags", zim_SplPriorityQueue_getExtractFlags, arginfo_class_SplPriorityQueue_getExtractFlags, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("__debugInfo", zim_SplPriorityQueue___debugInfo, arginfo_class_SplPriorityQueue___debugInfo, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(SplPriorityQueue, compare, arginfo_class_SplPriorityQueue_compare, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplPriorityQueue, insert, arginfo_class_SplPriorityQueue_insert, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplPriorityQueue, setExtractFlags, arginfo_class_SplPriorityQueue_setExtractFlags, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplPriorityQueue, top, arginfo_class_SplPriorityQueue_top, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplPriorityQueue, extract, arginfo_class_SplPriorityQueue_extract, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("count", zim_SplHeap_count, arginfo_class_SplPriorityQueue_count, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("isEmpty", zim_SplHeap_isEmpty, arginfo_class_SplPriorityQueue_isEmpty, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("rewind", zim_SplHeap_rewind, arginfo_class_SplPriorityQueue_rewind, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(SplPriorityQueue, current, arginfo_class_SplPriorityQueue_current, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("key", zim_SplHeap_key, arginfo_class_SplPriorityQueue_key, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("next", zim_SplHeap_next, arginfo_class_SplPriorityQueue_next, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("valid", zim_SplHeap_valid, arginfo_class_SplPriorityQueue_valid, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("recoverFromCorruption", zim_SplHeap_recoverFromCorruption, arginfo_class_SplPriorityQueue_recoverFromCorruption, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("isCorrupted", zim_SplHeap_isCorrupted, arginfo_class_SplPriorityQueue_isCorrupted, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(SplPriorityQueue, getExtractFlags, arginfo_class_SplPriorityQueue_getExtractFlags, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplPriorityQueue, __debugInfo, arginfo_class_SplPriorityQueue___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_SplHeap_methods[] = {
-	ZEND_RAW_FENTRY("extract", zim_SplHeap_extract, arginfo_class_SplHeap_extract, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("insert", zim_SplHeap_insert, arginfo_class_SplHeap_insert, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("top", zim_SplHeap_top, arginfo_class_SplHeap_top, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("count", zim_SplHeap_count, arginfo_class_SplHeap_count, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("isEmpty", zim_SplHeap_isEmpty, arginfo_class_SplHeap_isEmpty, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("rewind", zim_SplHeap_rewind, arginfo_class_SplHeap_rewind, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("current", zim_SplHeap_current, arginfo_class_SplHeap_current, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("key", zim_SplHeap_key, arginfo_class_SplHeap_key, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("next", zim_SplHeap_next, arginfo_class_SplHeap_next, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("valid", zim_SplHeap_valid, arginfo_class_SplHeap_valid, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("recoverFromCorruption", zim_SplHeap_recoverFromCorruption, arginfo_class_SplHeap_recoverFromCorruption, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("compare", NULL, arginfo_class_SplHeap_compare, ZEND_ACC_PROTECTED|ZEND_ACC_ABSTRACT, NULL)
-	ZEND_RAW_FENTRY("isCorrupted", zim_SplHeap_isCorrupted, arginfo_class_SplHeap_isCorrupted, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("__debugInfo", zim_SplHeap___debugInfo, arginfo_class_SplHeap___debugInfo, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(SplHeap, extract, arginfo_class_SplHeap_extract, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplHeap, insert, arginfo_class_SplHeap_insert, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplHeap, top, arginfo_class_SplHeap_top, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplHeap, count, arginfo_class_SplHeap_count, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplHeap, isEmpty, arginfo_class_SplHeap_isEmpty, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplHeap, rewind, arginfo_class_SplHeap_rewind, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplHeap, current, arginfo_class_SplHeap_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplHeap, key, arginfo_class_SplHeap_key, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplHeap, next, arginfo_class_SplHeap_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplHeap, valid, arginfo_class_SplHeap_valid, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplHeap, recoverFromCorruption, arginfo_class_SplHeap_recoverFromCorruption, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("compare", NULL, arginfo_class_SplHeap_compare, ZEND_ACC_PROTECTED|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_ME(SplHeap, isCorrupted, arginfo_class_SplHeap_isCorrupted, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplHeap, __debugInfo, arginfo_class_SplHeap___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_SplMinHeap_methods[] = {
-	ZEND_RAW_FENTRY("compare", zim_SplMinHeap_compare, arginfo_class_SplMinHeap_compare, ZEND_ACC_PROTECTED, NULL)
+	ZEND_ME(SplMinHeap, compare, arginfo_class_SplMinHeap_compare, ZEND_ACC_PROTECTED)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_SplMaxHeap_methods[] = {
-	ZEND_RAW_FENTRY("compare", zim_SplMaxHeap_compare, arginfo_class_SplMaxHeap_compare, ZEND_ACC_PROTECTED, NULL)
+	ZEND_ME(SplMaxHeap, compare, arginfo_class_SplMaxHeap_compare, ZEND_ACC_PROTECTED)
 	ZEND_FE_END
 };
 

@@ -56,17 +56,17 @@ ZEND_FUNCTION(phpdbg_end_oplog);
 ZEND_FUNCTION(phpdbg_get_executable);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_RAW_FENTRY("phpdbg_break_next", zif_phpdbg_break_next, arginfo_phpdbg_break_next, 0, NULL)
-	ZEND_RAW_FENTRY("phpdbg_break_file", zif_phpdbg_break_file, arginfo_phpdbg_break_file, 0, NULL)
-	ZEND_RAW_FENTRY("phpdbg_break_method", zif_phpdbg_break_method, arginfo_phpdbg_break_method, 0, NULL)
-	ZEND_RAW_FENTRY("phpdbg_break_function", zif_phpdbg_break_function, arginfo_phpdbg_break_function, 0, NULL)
-	ZEND_RAW_FENTRY("phpdbg_color", zif_phpdbg_color, arginfo_phpdbg_color, 0, NULL)
-	ZEND_RAW_FENTRY("phpdbg_prompt", zif_phpdbg_prompt, arginfo_phpdbg_prompt, 0, NULL)
-	ZEND_RAW_FENTRY("phpdbg_exec", zif_phpdbg_exec, arginfo_phpdbg_exec, 0, NULL)
-	ZEND_RAW_FENTRY("phpdbg_clear", zif_phpdbg_clear, arginfo_phpdbg_clear, 0, NULL)
-	ZEND_RAW_FENTRY("phpdbg_start_oplog", zif_phpdbg_start_oplog, arginfo_phpdbg_start_oplog, 0, NULL)
-	ZEND_RAW_FENTRY("phpdbg_end_oplog", zif_phpdbg_end_oplog, arginfo_phpdbg_end_oplog, 0, NULL)
-	ZEND_RAW_FENTRY("phpdbg_get_executable", zif_phpdbg_get_executable, arginfo_phpdbg_get_executable, 0, NULL)
+	ZEND_FE(phpdbg_break_next, arginfo_phpdbg_break_next)
+	ZEND_FE(phpdbg_break_file, arginfo_phpdbg_break_file)
+	ZEND_FE(phpdbg_break_method, arginfo_phpdbg_break_method)
+	ZEND_FE(phpdbg_break_function, arginfo_phpdbg_break_function)
+	ZEND_FE(phpdbg_color, arginfo_phpdbg_color)
+	ZEND_FE(phpdbg_prompt, arginfo_phpdbg_prompt)
+	ZEND_FE(phpdbg_exec, arginfo_phpdbg_exec)
+	ZEND_FE(phpdbg_clear, arginfo_phpdbg_clear)
+	ZEND_FE(phpdbg_start_oplog, arginfo_phpdbg_start_oplog)
+	ZEND_FE(phpdbg_end_oplog, arginfo_phpdbg_end_oplog)
+	ZEND_FE(phpdbg_get_executable, arginfo_phpdbg_get_executable)
 	ZEND_FE_END
 };
 

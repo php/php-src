@@ -57,14 +57,14 @@ ZEND_METHOD(PDO_PGSql_Ext, pgsqlGetNotify);
 ZEND_METHOD(PDO_PGSql_Ext, pgsqlGetPid);
 
 static const zend_function_entry class_PDO_PGSql_Ext_methods[] = {
-	ZEND_RAW_FENTRY("pgsqlCopyFromArray", zim_PDO_PGSql_Ext_pgsqlCopyFromArray, arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromArray, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("pgsqlCopyFromFile", zim_PDO_PGSql_Ext_pgsqlCopyFromFile, arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromFile, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("pgsqlCopyToArray", zim_PDO_PGSql_Ext_pgsqlCopyToArray, arginfo_class_PDO_PGSql_Ext_pgsqlCopyToArray, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("pgsqlCopyToFile", zim_PDO_PGSql_Ext_pgsqlCopyToFile, arginfo_class_PDO_PGSql_Ext_pgsqlCopyToFile, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("pgsqlLOBCreate", zim_PDO_PGSql_Ext_pgsqlLOBCreate, arginfo_class_PDO_PGSql_Ext_pgsqlLOBCreate, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("pgsqlLOBOpen", zim_PDO_PGSql_Ext_pgsqlLOBOpen, arginfo_class_PDO_PGSql_Ext_pgsqlLOBOpen, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("pgsqlLOBUnlink", zim_PDO_PGSql_Ext_pgsqlLOBUnlink, arginfo_class_PDO_PGSql_Ext_pgsqlLOBUnlink, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("pgsqlGetNotify", zim_PDO_PGSql_Ext_pgsqlGetNotify, arginfo_class_PDO_PGSql_Ext_pgsqlGetNotify, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("pgsqlGetPid", zim_PDO_PGSql_Ext_pgsqlGetPid, arginfo_class_PDO_PGSql_Ext_pgsqlGetPid, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(PDO_PGSql_Ext, pgsqlCopyFromArray, arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromArray, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO_PGSql_Ext, pgsqlCopyFromFile, arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromFile, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO_PGSql_Ext, pgsqlCopyToArray, arginfo_class_PDO_PGSql_Ext_pgsqlCopyToArray, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO_PGSql_Ext, pgsqlCopyToFile, arginfo_class_PDO_PGSql_Ext_pgsqlCopyToFile, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO_PGSql_Ext, pgsqlLOBCreate, arginfo_class_PDO_PGSql_Ext_pgsqlLOBCreate, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO_PGSql_Ext, pgsqlLOBOpen, arginfo_class_PDO_PGSql_Ext_pgsqlLOBOpen, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO_PGSql_Ext, pgsqlLOBUnlink, arginfo_class_PDO_PGSql_Ext_pgsqlLOBUnlink, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO_PGSql_Ext, pgsqlGetNotify, arginfo_class_PDO_PGSql_Ext_pgsqlGetNotify, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO_PGSql_Ext, pgsqlGetPid, arginfo_class_PDO_PGSql_Ext_pgsqlGetPid, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

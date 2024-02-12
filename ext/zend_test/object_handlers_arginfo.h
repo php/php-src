@@ -21,22 +21,22 @@ static ZEND_METHOD(FloatCastableNoOperations, __construct);
 static ZEND_METHOD(NumericCastableNoOperations, __construct);
 
 static const zend_function_entry class_DoOperationNoCast_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_DoOperationNoCast___construct, arginfo_class_DoOperationNoCast___construct, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(DoOperationNoCast, __construct, arginfo_class_DoOperationNoCast___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_LongCastableNoOperations_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_LongCastableNoOperations___construct, arginfo_class_LongCastableNoOperations___construct, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(LongCastableNoOperations, __construct, arginfo_class_LongCastableNoOperations___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_FloatCastableNoOperations_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_FloatCastableNoOperations___construct, arginfo_class_FloatCastableNoOperations___construct, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(FloatCastableNoOperations, __construct, arginfo_class_FloatCastableNoOperations___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_NumericCastableNoOperations_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_NumericCastableNoOperations___construct, arginfo_class_NumericCastableNoOperations___construct, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(NumericCastableNoOperations, __construct, arginfo_class_NumericCastableNoOperations___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

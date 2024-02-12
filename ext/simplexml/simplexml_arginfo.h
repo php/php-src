@@ -125,34 +125,34 @@ ZEND_METHOD(SimpleXMLElement, hasChildren);
 ZEND_METHOD(SimpleXMLElement, getChildren);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_RAW_FENTRY("simplexml_load_file", zif_simplexml_load_file, arginfo_simplexml_load_file, 0, NULL)
-	ZEND_RAW_FENTRY("simplexml_load_string", zif_simplexml_load_string, arginfo_simplexml_load_string, 0, NULL)
-	ZEND_RAW_FENTRY("simplexml_import_dom", zif_simplexml_import_dom, arginfo_simplexml_import_dom, 0, NULL)
+	ZEND_FE(simplexml_load_file, arginfo_simplexml_load_file)
+	ZEND_FE(simplexml_load_string, arginfo_simplexml_load_string)
+	ZEND_FE(simplexml_import_dom, arginfo_simplexml_import_dom)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_SimpleXMLElement_methods[] = {
-	ZEND_RAW_FENTRY("xpath", zim_SimpleXMLElement_xpath, arginfo_class_SimpleXMLElement_xpath, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("registerXPathNamespace", zim_SimpleXMLElement_registerXPathNamespace, arginfo_class_SimpleXMLElement_registerXPathNamespace, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("asXML", zim_SimpleXMLElement_asXML, arginfo_class_SimpleXMLElement_asXML, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("saveXML", zim_SimpleXMLElement_asXML, arginfo_class_SimpleXMLElement_saveXML, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getNamespaces", zim_SimpleXMLElement_getNamespaces, arginfo_class_SimpleXMLElement_getNamespaces, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getDocNamespaces", zim_SimpleXMLElement_getDocNamespaces, arginfo_class_SimpleXMLElement_getDocNamespaces, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("children", zim_SimpleXMLElement_children, arginfo_class_SimpleXMLElement_children, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("attributes", zim_SimpleXMLElement_attributes, arginfo_class_SimpleXMLElement_attributes, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("__construct", zim_SimpleXMLElement___construct, arginfo_class_SimpleXMLElement___construct, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("addChild", zim_SimpleXMLElement_addChild, arginfo_class_SimpleXMLElement_addChild, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("addAttribute", zim_SimpleXMLElement_addAttribute, arginfo_class_SimpleXMLElement_addAttribute, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getName", zim_SimpleXMLElement_getName, arginfo_class_SimpleXMLElement_getName, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("__toString", zim_SimpleXMLElement___toString, arginfo_class_SimpleXMLElement___toString, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("count", zim_SimpleXMLElement_count, arginfo_class_SimpleXMLElement_count, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("rewind", zim_SimpleXMLElement_rewind, arginfo_class_SimpleXMLElement_rewind, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("valid", zim_SimpleXMLElement_valid, arginfo_class_SimpleXMLElement_valid, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("current", zim_SimpleXMLElement_current, arginfo_class_SimpleXMLElement_current, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("key", zim_SimpleXMLElement_key, arginfo_class_SimpleXMLElement_key, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("next", zim_SimpleXMLElement_next, arginfo_class_SimpleXMLElement_next, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("hasChildren", zim_SimpleXMLElement_hasChildren, arginfo_class_SimpleXMLElement_hasChildren, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getChildren", zim_SimpleXMLElement_getChildren, arginfo_class_SimpleXMLElement_getChildren, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(SimpleXMLElement, xpath, arginfo_class_SimpleXMLElement_xpath, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, registerXPathNamespace, arginfo_class_SimpleXMLElement_registerXPathNamespace, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, asXML, arginfo_class_SimpleXMLElement_asXML, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("saveXML", zim_SimpleXMLElement_asXML, arginfo_class_SimpleXMLElement_saveXML, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(SimpleXMLElement, getNamespaces, arginfo_class_SimpleXMLElement_getNamespaces, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, getDocNamespaces, arginfo_class_SimpleXMLElement_getDocNamespaces, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, children, arginfo_class_SimpleXMLElement_children, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, attributes, arginfo_class_SimpleXMLElement_attributes, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, __construct, arginfo_class_SimpleXMLElement___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, addChild, arginfo_class_SimpleXMLElement_addChild, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, addAttribute, arginfo_class_SimpleXMLElement_addAttribute, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, getName, arginfo_class_SimpleXMLElement_getName, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, __toString, arginfo_class_SimpleXMLElement___toString, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, count, arginfo_class_SimpleXMLElement_count, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, rewind, arginfo_class_SimpleXMLElement_rewind, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, valid, arginfo_class_SimpleXMLElement_valid, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, current, arginfo_class_SimpleXMLElement_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, key, arginfo_class_SimpleXMLElement_key, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, next, arginfo_class_SimpleXMLElement_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, hasChildren, arginfo_class_SimpleXMLElement_hasChildren, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, getChildren, arginfo_class_SimpleXMLElement_getChildren, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

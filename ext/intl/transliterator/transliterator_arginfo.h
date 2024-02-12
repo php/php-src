@@ -42,14 +42,14 @@ ZEND_FUNCTION(transliterator_get_error_code);
 ZEND_FUNCTION(transliterator_get_error_message);
 
 static const zend_function_entry class_Transliterator_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_Transliterator___construct, arginfo_class_Transliterator___construct, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL, NULL)
-	ZEND_RAW_FENTRY("create", zif_transliterator_create, arginfo_class_Transliterator_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-	ZEND_RAW_FENTRY("createFromRules", zif_transliterator_create_from_rules, arginfo_class_Transliterator_createFromRules, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-	ZEND_RAW_FENTRY("createInverse", zif_transliterator_create_inverse, arginfo_class_Transliterator_createInverse, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("listIDs", zif_transliterator_list_ids, arginfo_class_Transliterator_listIDs, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-	ZEND_RAW_FENTRY("transliterate", zif_transliterator_transliterate, arginfo_class_Transliterator_transliterate, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getErrorCode", zif_transliterator_get_error_code, arginfo_class_Transliterator_getErrorCode, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("getErrorMessage", zif_transliterator_get_error_message, arginfo_class_Transliterator_getErrorMessage, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(Transliterator, __construct, arginfo_class_Transliterator___construct, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_RAW_FENTRY("create", zif_transliterator_create, arginfo_class_Transliterator_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("createFromRules", zif_transliterator_create_from_rules, arginfo_class_Transliterator_createFromRules, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("createInverse", zif_transliterator_create_inverse, arginfo_class_Transliterator_createInverse, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("listIDs", zif_transliterator_list_ids, arginfo_class_Transliterator_listIDs, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("transliterate", zif_transliterator_transliterate, arginfo_class_Transliterator_transliterate, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getErrorCode", zif_transliterator_get_error_code, arginfo_class_Transliterator_getErrorCode, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getErrorMessage", zif_transliterator_get_error_message, arginfo_class_Transliterator_getErrorMessage, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 

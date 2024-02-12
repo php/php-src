@@ -39,13 +39,13 @@ ZEND_METHOD(Spoofchecker, setRestrictionLevel);
 #endif
 
 static const zend_function_entry class_Spoofchecker_methods[] = {
-	ZEND_RAW_FENTRY("__construct", zim_Spoofchecker___construct, arginfo_class_Spoofchecker___construct, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("isSuspicious", zim_Spoofchecker_isSuspicious, arginfo_class_Spoofchecker_isSuspicious, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("areConfusable", zim_Spoofchecker_areConfusable, arginfo_class_Spoofchecker_areConfusable, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("setAllowedLocales", zim_Spoofchecker_setAllowedLocales, arginfo_class_Spoofchecker_setAllowedLocales, ZEND_ACC_PUBLIC, NULL)
-	ZEND_RAW_FENTRY("setChecks", zim_Spoofchecker_setChecks, arginfo_class_Spoofchecker_setChecks, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(Spoofchecker, __construct, arginfo_class_Spoofchecker___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spoofchecker, isSuspicious, arginfo_class_Spoofchecker_isSuspicious, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spoofchecker, areConfusable, arginfo_class_Spoofchecker_areConfusable, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spoofchecker, setAllowedLocales, arginfo_class_Spoofchecker_setAllowedLocales, ZEND_ACC_PUBLIC)
+	ZEND_ME(Spoofchecker, setChecks, arginfo_class_Spoofchecker_setChecks, ZEND_ACC_PUBLIC)
 #if U_ICU_VERSION_MAJOR_NUM >= 58
-	ZEND_RAW_FENTRY("setRestrictionLevel", zim_Spoofchecker_setRestrictionLevel, arginfo_class_Spoofchecker_setRestrictionLevel, ZEND_ACC_PUBLIC, NULL)
+	ZEND_ME(Spoofchecker, setRestrictionLevel, arginfo_class_Spoofchecker_setRestrictionLevel, ZEND_ACC_PUBLIC)
 #endif
 	ZEND_FE_END
 };

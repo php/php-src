@@ -47,13 +47,13 @@ ZEND_FUNCTION(filter_list);
 ZEND_FUNCTION(filter_id);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_RAW_FENTRY("filter_has_var", zif_filter_has_var, arginfo_filter_has_var, 0, NULL)
-	ZEND_RAW_FENTRY("filter_input", zif_filter_input, arginfo_filter_input, 0, NULL)
-	ZEND_RAW_FENTRY("filter_var", zif_filter_var, arginfo_filter_var, 0, NULL)
-	ZEND_RAW_FENTRY("filter_input_array", zif_filter_input_array, arginfo_filter_input_array, 0, NULL)
-	ZEND_RAW_FENTRY("filter_var_array", zif_filter_var_array, arginfo_filter_var_array, 0, NULL)
-	ZEND_RAW_FENTRY("filter_list", zif_filter_list, arginfo_filter_list, 0, NULL)
-	ZEND_RAW_FENTRY("filter_id", zif_filter_id, arginfo_filter_id, 0, NULL)
+	ZEND_FE(filter_has_var, arginfo_filter_has_var)
+	ZEND_FE(filter_input, arginfo_filter_input)
+	ZEND_FE(filter_var, arginfo_filter_var)
+	ZEND_FE(filter_input_array, arginfo_filter_input_array)
+	ZEND_FE(filter_var_array, arginfo_filter_var_array)
+	ZEND_FE(filter_list, arginfo_filter_list)
+	ZEND_FE(filter_id, arginfo_filter_id)
 	ZEND_FE_END
 };
 

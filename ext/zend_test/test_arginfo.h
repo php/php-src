@@ -293,13 +293,9 @@ static ZEND_METHOD(ZendTestNS2_Foo, method);
 static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method);
 
 static const zend_function_entry ext_functions[] = {
+	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 #if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_array_return", zif_zend_test_array_return, arginfo_zend_test_array_return, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_array_return", zif_zend_test_array_return, arginfo_zend_test_array_return, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_nullable_array_return", zif_zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return, ZEND_ACC_COMPILE_TIME_EVAL, "/**\n     * \"Lorem ipsum\"\n     * @see https://www.php.net\n     * @since 8.3\n     */")
+	ZEND_RAW_FENTRY("zend_test_nullable_array_return", zif_zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return, ZEND_ACC_COMPILE_TIME_EVAL, NULL, "/**\n     * \"Lorem ipsum\"\n     * @see https://www.php.net\n     * @since 8.3\n     */")
 #else
 #if (PHP_VERSION_ID >= 80200)
 	ZEND_RAW_FENTRY("zend_test_nullable_array_return", zif_zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return, ZEND_ACC_COMPILE_TIME_EVAL)
@@ -307,229 +303,97 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("zend_test_nullable_array_return", zif_zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return, 0)
 #endif
 #endif
+	ZEND_FE(zend_test_void_return, arginfo_zend_test_void_return)
+	ZEND_FE(zend_test_compile_string, arginfo_zend_test_compile_string)
 #if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_void_return", zif_zend_test_void_return, arginfo_zend_test_void_return, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_void_return", zif_zend_test_void_return, arginfo_zend_test_void_return, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_compile_string", zif_zend_test_compile_string, arginfo_zend_test_compile_string, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_compile_string", zif_zend_test_compile_string, arginfo_zend_test_compile_string, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_deprecated", zif_zend_test_deprecated, arginfo_zend_test_deprecated, ZEND_ACC_DEPRECATED, NULL)
+	ZEND_RAW_FENTRY("zend_test_deprecated", zif_zend_test_deprecated, arginfo_zend_test_deprecated, ZEND_ACC_DEPRECATED, NULL, NULL)
 #else
 	ZEND_RAW_FENTRY("zend_test_deprecated", zif_zend_test_deprecated, arginfo_zend_test_deprecated, ZEND_ACC_DEPRECATED)
 #endif
 #if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_aliased", zif_zend_test_void_return, arginfo_zend_test_aliased, 0, NULL)
+	ZEND_RAW_FENTRY("zend_test_aliased", zif_zend_test_void_return, arginfo_zend_test_aliased, 0, NULL, NULL)
 #else
 	ZEND_RAW_FENTRY("zend_test_aliased", zif_zend_test_void_return, arginfo_zend_test_aliased, 0)
 #endif
 #if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_deprecated_aliased", zif_zend_test_void_return, arginfo_zend_test_deprecated_aliased, ZEND_ACC_DEPRECATED, NULL)
+	ZEND_RAW_FENTRY("zend_test_deprecated_aliased", zif_zend_test_void_return, arginfo_zend_test_deprecated_aliased, ZEND_ACC_DEPRECATED, NULL, NULL)
 #else
 	ZEND_RAW_FENTRY("zend_test_deprecated_aliased", zif_zend_test_void_return, arginfo_zend_test_deprecated_aliased, ZEND_ACC_DEPRECATED)
 #endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_create_unterminated_string", zif_zend_create_unterminated_string, arginfo_zend_create_unterminated_string, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_create_unterminated_string", zif_zend_create_unterminated_string, arginfo_zend_create_unterminated_string, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_terminate_string", zif_zend_terminate_string, arginfo_zend_terminate_string, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_terminate_string", zif_zend_terminate_string, arginfo_zend_terminate_string, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_leak_variable", zif_zend_leak_variable, arginfo_zend_leak_variable, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_leak_variable", zif_zend_leak_variable, arginfo_zend_leak_variable, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_leak_bytes", zif_zend_leak_bytes, arginfo_zend_leak_bytes, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_leak_bytes", zif_zend_leak_bytes, arginfo_zend_leak_bytes, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_string_or_object", zif_zend_string_or_object, arginfo_zend_string_or_object, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_string_or_object", zif_zend_string_or_object, arginfo_zend_string_or_object, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_string_or_object_or_null", zif_zend_string_or_object_or_null, arginfo_zend_string_or_object_or_null, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_string_or_object_or_null", zif_zend_string_or_object_or_null, arginfo_zend_string_or_object_or_null, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_string_or_stdclass", zif_zend_string_or_stdclass, arginfo_zend_string_or_stdclass, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_string_or_stdclass", zif_zend_string_or_stdclass, arginfo_zend_string_or_stdclass, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_string_or_stdclass_or_null", zif_zend_string_or_stdclass_or_null, arginfo_zend_string_or_stdclass_or_null, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_string_or_stdclass_or_null", zif_zend_string_or_stdclass_or_null, arginfo_zend_string_or_stdclass_or_null, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_number_or_string", zif_zend_number_or_string, arginfo_zend_number_or_string, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_number_or_string", zif_zend_number_or_string, arginfo_zend_number_or_string, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_number_or_string_or_null", zif_zend_number_or_string_or_null, arginfo_zend_number_or_string_or_null, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_number_or_string_or_null", zif_zend_number_or_string_or_null, arginfo_zend_number_or_string_or_null, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_iterable", zif_zend_iterable, arginfo_zend_iterable, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_iterable", zif_zend_iterable, arginfo_zend_iterable, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_weakmap_attach", zif_zend_weakmap_attach, arginfo_zend_weakmap_attach, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_weakmap_attach", zif_zend_weakmap_attach, arginfo_zend_weakmap_attach, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_weakmap_remove", zif_zend_weakmap_remove, arginfo_zend_weakmap_remove, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_weakmap_remove", zif_zend_weakmap_remove, arginfo_zend_weakmap_remove, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_weakmap_dump", zif_zend_weakmap_dump, arginfo_zend_weakmap_dump, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_weakmap_dump", zif_zend_weakmap_dump, arginfo_zend_weakmap_dump, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_get_unit_enum", zif_zend_get_unit_enum, arginfo_zend_get_unit_enum, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_get_unit_enum", zif_zend_get_unit_enum, arginfo_zend_get_unit_enum, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_parameter_with_attribute", zif_zend_test_parameter_with_attribute, arginfo_zend_test_parameter_with_attribute, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_parameter_with_attribute", zif_zend_test_parameter_with_attribute, arginfo_zend_test_parameter_with_attribute, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_get_current_func_name", zif_zend_get_current_func_name, arginfo_zend_get_current_func_name, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_get_current_func_name", zif_zend_get_current_func_name, arginfo_zend_get_current_func_name, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_call_method", zif_zend_call_method, arginfo_zend_call_method, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_call_method", zif_zend_call_method, arginfo_zend_call_method, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_zend_ini_parse_quantity", zif_zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_zend_ini_parse_quantity", zif_zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_zend_ini_parse_uquantity", zif_zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_zend_ini_parse_uquantity", zif_zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_zend_ini_str", zif_zend_test_zend_ini_str, arginfo_zend_test_zend_ini_str, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_zend_ini_str", zif_zend_test_zend_ini_str, arginfo_zend_test_zend_ini_str, 0)
+	ZEND_FE(zend_create_unterminated_string, arginfo_zend_create_unterminated_string)
+	ZEND_FE(zend_terminate_string, arginfo_zend_terminate_string)
+	ZEND_FE(zend_leak_variable, arginfo_zend_leak_variable)
+	ZEND_FE(zend_leak_bytes, arginfo_zend_leak_bytes)
+	ZEND_FE(zend_string_or_object, arginfo_zend_string_or_object)
+	ZEND_FE(zend_string_or_object_or_null, arginfo_zend_string_or_object_or_null)
+	ZEND_FE(zend_string_or_stdclass, arginfo_zend_string_or_stdclass)
+	ZEND_FE(zend_string_or_stdclass_or_null, arginfo_zend_string_or_stdclass_or_null)
+	ZEND_FE(zend_number_or_string, arginfo_zend_number_or_string)
+	ZEND_FE(zend_number_or_string_or_null, arginfo_zend_number_or_string_or_null)
+	ZEND_FE(zend_iterable, arginfo_zend_iterable)
+	ZEND_FE(zend_weakmap_attach, arginfo_zend_weakmap_attach)
+	ZEND_FE(zend_weakmap_remove, arginfo_zend_weakmap_remove)
+	ZEND_FE(zend_weakmap_dump, arginfo_zend_weakmap_dump)
+	ZEND_FE(zend_get_unit_enum, arginfo_zend_get_unit_enum)
+	ZEND_FE(zend_test_parameter_with_attribute, arginfo_zend_test_parameter_with_attribute)
+	ZEND_FE(zend_get_current_func_name, arginfo_zend_get_current_func_name)
+	ZEND_FE(zend_call_method, arginfo_zend_call_method)
+	ZEND_FE(zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity)
+	ZEND_FE(zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity)
+	ZEND_FE(zend_test_zend_ini_str, arginfo_zend_test_zend_ini_str)
+#if defined(ZEND_CHECK_STACK_LIMIT)
+	ZEND_FE(zend_test_zend_call_stack_get, arginfo_zend_test_zend_call_stack_get)
 #endif
 #if defined(ZEND_CHECK_STACK_LIMIT)
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_zend_call_stack_get", zif_zend_test_zend_call_stack_get, arginfo_zend_test_zend_call_stack_get, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_zend_call_stack_get", zif_zend_test_zend_call_stack_get, arginfo_zend_test_zend_call_stack_get, 0)
+	ZEND_FE(zend_test_zend_call_stack_use_all, arginfo_zend_test_zend_call_stack_use_all)
 #endif
-#endif
-#if defined(ZEND_CHECK_STACK_LIMIT)
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_zend_call_stack_use_all", zif_zend_test_zend_call_stack_use_all, arginfo_zend_test_zend_call_stack_use_all, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_zend_call_stack_use_all", zif_zend_test_zend_call_stack_use_all, arginfo_zend_test_zend_call_stack_use_all, 0)
-#endif
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_is_string_marked_as_valid_utf8", zif_zend_test_is_string_marked_as_valid_utf8, arginfo_zend_test_is_string_marked_as_valid_utf8, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_is_string_marked_as_valid_utf8", zif_zend_test_is_string_marked_as_valid_utf8, arginfo_zend_test_is_string_marked_as_valid_utf8, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_get_map_ptr_last", zif_zend_get_map_ptr_last, arginfo_zend_get_map_ptr_last, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_get_map_ptr_last", zif_zend_get_map_ptr_last, arginfo_zend_get_map_ptr_last, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_crash", zif_zend_test_crash, arginfo_zend_test_crash, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_crash", zif_zend_test_crash, arginfo_zend_test_crash, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_fill_packed_array", zif_zend_test_fill_packed_array, arginfo_zend_test_fill_packed_array, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_fill_packed_array", zif_zend_test_fill_packed_array, arginfo_zend_test_fill_packed_array, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_create_throwing_resource", zif_zend_test_create_throwing_resource, arginfo_zend_test_create_throwing_resource, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_create_throwing_resource", zif_zend_test_create_throwing_resource, arginfo_zend_test_create_throwing_resource, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("get_open_basedir", zif_get_open_basedir, arginfo_get_open_basedir, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("get_open_basedir", zif_get_open_basedir, arginfo_get_open_basedir, 0)
-#endif
+	ZEND_FE(zend_test_is_string_marked_as_valid_utf8, arginfo_zend_test_is_string_marked_as_valid_utf8)
+	ZEND_FE(zend_get_map_ptr_last, arginfo_zend_get_map_ptr_last)
+	ZEND_FE(zend_test_crash, arginfo_zend_test_crash)
+	ZEND_FE(zend_test_fill_packed_array, arginfo_zend_test_fill_packed_array)
+	ZEND_FE(zend_test_create_throwing_resource, arginfo_zend_test_create_throwing_resource)
+	ZEND_FE(get_open_basedir, arginfo_get_open_basedir)
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_override_libxml_global_state", zif_zend_test_override_libxml_global_state, arginfo_zend_test_override_libxml_global_state, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_override_libxml_global_state", zif_zend_test_override_libxml_global_state, arginfo_zend_test_override_libxml_global_state, 0)
+	ZEND_FE(zend_test_override_libxml_global_state, arginfo_zend_test_override_libxml_global_state)
 #endif
-#endif
+	ZEND_FE(zend_test_is_pcre_bundled, arginfo_zend_test_is_pcre_bundled)
 #if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("zend_test_is_pcre_bundled", zif_zend_test_is_pcre_bundled, arginfo_zend_test_is_pcre_bundled, 0, NULL)
-#else
-	ZEND_RAW_FENTRY("zend_test_is_pcre_bundled", zif_zend_test_is_pcre_bundled, arginfo_zend_test_is_pcre_bundled, 0)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL)
+	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0)
 #endif
 #if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_deprecated_func"), zif_ZendTestNS2_namespaced_deprecated_func, arginfo_ZendTestNS2_namespaced_deprecated_func, ZEND_ACC_DEPRECATED, NULL)
+	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_deprecated_func"), zif_ZendTestNS2_namespaced_deprecated_func, arginfo_ZendTestNS2_namespaced_deprecated_func, ZEND_ACC_DEPRECATED, NULL, NULL)
 #else
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_deprecated_func"), zif_ZendTestNS2_namespaced_deprecated_func, arginfo_ZendTestNS2_namespaced_deprecated_func, ZEND_ACC_DEPRECATED)
 #endif
 #if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_aliased_func"), zif_zend_test_void_return, arginfo_ZendTestNS2_namespaced_aliased_func, 0, NULL)
+	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_aliased_func"), zif_zend_test_void_return, arginfo_ZendTestNS2_namespaced_aliased_func, 0, NULL, NULL)
 #else
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_aliased_func"), zif_zend_test_void_return, arginfo_ZendTestNS2_namespaced_aliased_func, 0)
 #endif
 #if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_deprecated_aliased_func"), zif_zend_test_void_return, arginfo_ZendTestNS2_namespaced_deprecated_aliased_func, ZEND_ACC_DEPRECATED, NULL)
+	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_deprecated_aliased_func"), zif_zend_test_void_return, arginfo_ZendTestNS2_namespaced_deprecated_aliased_func, ZEND_ACC_DEPRECATED, NULL, NULL)
 #else
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_deprecated_aliased_func"), zif_zend_test_void_return, arginfo_ZendTestNS2_namespaced_deprecated_aliased_func, ZEND_ACC_DEPRECATED)
 #endif
 #if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2\\ZendSubNS", "namespaced_func"), zif_ZendTestNS2_ZendSubNS_namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0, NULL)
+	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2\\ZendSubNS", "namespaced_func"), zif_ZendTestNS2_ZendSubNS_namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0, NULL, NULL)
 #else
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2\\ZendSubNS", "namespaced_func"), zif_ZendTestNS2_ZendSubNS_namespaced_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_func, 0)
 #endif
 #if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2\\ZendSubNS", "namespaced_deprecated_func"), zif_ZendTestNS2_ZendSubNS_namespaced_deprecated_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_func, ZEND_ACC_DEPRECATED, NULL)
+	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2\\ZendSubNS", "namespaced_deprecated_func"), zif_ZendTestNS2_ZendSubNS_namespaced_deprecated_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_func, ZEND_ACC_DEPRECATED, NULL, NULL)
 #else
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2\\ZendSubNS", "namespaced_deprecated_func"), zif_ZendTestNS2_ZendSubNS_namespaced_deprecated_func, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_func, ZEND_ACC_DEPRECATED)
 #endif
 #if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2\\ZendSubNS", "namespaced_aliased_func"), zif_zend_test_void_return, arginfo_ZendTestNS2_ZendSubNS_namespaced_aliased_func, 0, NULL)
+	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2\\ZendSubNS", "namespaced_aliased_func"), zif_zend_test_void_return, arginfo_ZendTestNS2_ZendSubNS_namespaced_aliased_func, 0, NULL, NULL)
 #else
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2\\ZendSubNS", "namespaced_aliased_func"), zif_zend_test_void_return, arginfo_ZendTestNS2_ZendSubNS_namespaced_aliased_func, 0)
 #endif
 #if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2\\ZendSubNS", "namespaced_deprecated_aliased_func"), zif_zend_test_void_return, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func, ZEND_ACC_DEPRECATED, NULL)
+	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2\\ZendSubNS", "namespaced_deprecated_aliased_func"), zif_zend_test_void_return, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func, ZEND_ACC_DEPRECATED, NULL, NULL)
 #else
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2\\ZendSubNS", "namespaced_deprecated_aliased_func"), zif_zend_test_void_return, arginfo_ZendTestNS2_ZendSubNS_namespaced_deprecated_aliased_func, ZEND_ACC_DEPRECATED)
 #endif
@@ -541,72 +405,32 @@ static const zend_function_entry class__ZendTestInterface_methods[] = {
 };
 
 static const zend_function_entry class__ZendTestClass_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("is_object", zim__ZendTestClass_is_object, arginfo_class__ZendTestClass_is_object, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-#else
-	ZEND_RAW_FENTRY("is_object", zim__ZendTestClass_is_object, arginfo_class__ZendTestClass_is_object, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("__toString", zim__ZendTestClass___toString, arginfo_class__ZendTestClass___toString, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL)
-#else
-	ZEND_RAW_FENTRY("__toString", zim__ZendTestClass___toString, arginfo_class__ZendTestClass___toString, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("returnsStatic", zim__ZendTestClass_returnsStatic, arginfo_class__ZendTestClass_returnsStatic, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("returnsStatic", zim__ZendTestClass_returnsStatic, arginfo_class__ZendTestClass_returnsStatic, ZEND_ACC_PUBLIC)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("returnsThrowable", zim__ZendTestClass_returnsThrowable, arginfo_class__ZendTestClass_returnsThrowable, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("returnsThrowable", zim__ZendTestClass_returnsThrowable, arginfo_class__ZendTestClass_returnsThrowable, ZEND_ACC_PUBLIC)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("variadicTest", zim__ZendTestClass_variadicTest, arginfo_class__ZendTestClass_variadicTest, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-#else
-	ZEND_RAW_FENTRY("variadicTest", zim__ZendTestClass_variadicTest, arginfo_class__ZendTestClass_variadicTest, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("takesUnionType", zim__ZendTestClass_takesUnionType, arginfo_class__ZendTestClass_takesUnionType, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("takesUnionType", zim__ZendTestClass_takesUnionType, arginfo_class__ZendTestClass_takesUnionType, ZEND_ACC_PUBLIC)
-#endif
+	ZEND_ME(_ZendTestClass, is_object, arginfo_class__ZendTestClass_is_object, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(_ZendTestClass, __toString, arginfo_class__ZendTestClass___toString, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_ME(_ZendTestClass, returnsStatic, arginfo_class__ZendTestClass_returnsStatic, ZEND_ACC_PUBLIC)
+	ZEND_ME(_ZendTestClass, returnsThrowable, arginfo_class__ZendTestClass_returnsThrowable, ZEND_ACC_PUBLIC)
+	ZEND_ME(_ZendTestClass, variadicTest, arginfo_class__ZendTestClass_variadicTest, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(_ZendTestClass, takesUnionType, arginfo_class__ZendTestClass_takesUnionType, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class__ZendTestMagicCall_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("__call", zim__ZendTestMagicCall___call, arginfo_class__ZendTestMagicCall___call, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("__call", zim__ZendTestMagicCall___call, arginfo_class__ZendTestMagicCall___call, ZEND_ACC_PUBLIC)
-#endif
+	ZEND_ME(_ZendTestMagicCall, __call, arginfo_class__ZendTestMagicCall___call, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class__ZendTestChildClass_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("returnsThrowable", zim__ZendTestChildClass_returnsThrowable, arginfo_class__ZendTestChildClass_returnsThrowable, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("returnsThrowable", zim__ZendTestChildClass_returnsThrowable, arginfo_class__ZendTestChildClass_returnsThrowable, ZEND_ACC_PUBLIC)
-#endif
+	ZEND_ME(_ZendTestChildClass, returnsThrowable, arginfo_class__ZendTestChildClass_returnsThrowable, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_ZendAttributeTest_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("testMethod", zim_ZendAttributeTest_testMethod, arginfo_class_ZendAttributeTest_testMethod, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("testMethod", zim_ZendAttributeTest_testMethod, arginfo_class_ZendAttributeTest_testMethod, ZEND_ACC_PUBLIC)
-#endif
+	ZEND_ME(ZendAttributeTest, testMethod, arginfo_class_ZendAttributeTest_testMethod, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class__ZendTestTrait_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("testMethod", zim__ZendTestTrait_testMethod, arginfo_class__ZendTestTrait_testMethod, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("testMethod", zim__ZendTestTrait_testMethod, arginfo_class__ZendTestTrait_testMethod, ZEND_ACC_PUBLIC)
-#endif
+	ZEND_ME(_ZendTestTrait, testMethod, arginfo_class__ZendTestTrait_testMethod, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -619,43 +443,23 @@ static const zend_function_entry class_ZendTestRepeatableAttribute_methods[] = {
 };
 
 static const zend_function_entry class_ZendTestParameterAttribute_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("__construct", zim_ZendTestParameterAttribute___construct, arginfo_class_ZendTestParameterAttribute___construct, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("__construct", zim_ZendTestParameterAttribute___construct, arginfo_class_ZendTestParameterAttribute___construct, ZEND_ACC_PUBLIC)
-#endif
+	ZEND_ME(ZendTestParameterAttribute, __construct, arginfo_class_ZendTestParameterAttribute___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_ZendTestPropertyAttribute_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("__construct", zim_ZendTestPropertyAttribute___construct, arginfo_class_ZendTestPropertyAttribute___construct, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("__construct", zim_ZendTestPropertyAttribute___construct, arginfo_class_ZendTestPropertyAttribute___construct, ZEND_ACC_PUBLIC)
-#endif
+	ZEND_ME(ZendTestPropertyAttribute, __construct, arginfo_class_ZendTestPropertyAttribute___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_ZendTestClassWithMethodWithParameterAttribute_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("no_override", zim_ZendTestClassWithMethodWithParameterAttribute_no_override, arginfo_class_ZendTestClassWithMethodWithParameterAttribute_no_override, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL, NULL)
-#else
-	ZEND_RAW_FENTRY("no_override", zim_ZendTestClassWithMethodWithParameterAttribute_no_override, arginfo_class_ZendTestClassWithMethodWithParameterAttribute_no_override, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("override", zim_ZendTestClassWithMethodWithParameterAttribute_override, arginfo_class_ZendTestClassWithMethodWithParameterAttribute_override, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("override", zim_ZendTestClassWithMethodWithParameterAttribute_override, arginfo_class_ZendTestClassWithMethodWithParameterAttribute_override, ZEND_ACC_PUBLIC)
-#endif
+	ZEND_ME(ZendTestClassWithMethodWithParameterAttribute, no_override, arginfo_class_ZendTestClassWithMethodWithParameterAttribute_no_override, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(ZendTestClassWithMethodWithParameterAttribute, override, arginfo_class_ZendTestClassWithMethodWithParameterAttribute_override, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_ZendTestChildClassWithMethodWithParameterAttribute_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("override", zim_ZendTestChildClassWithMethodWithParameterAttribute_override, arginfo_class_ZendTestChildClassWithMethodWithParameterAttribute_override, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("override", zim_ZendTestChildClassWithMethodWithParameterAttribute_override, arginfo_class_ZendTestChildClassWithMethodWithParameterAttribute_override, ZEND_ACC_PUBLIC)
-#endif
+	ZEND_ME(ZendTestChildClassWithMethodWithParameterAttribute, override, arginfo_class_ZendTestChildClassWithMethodWithParameterAttribute_override, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -664,16 +468,8 @@ static const zend_function_entry class_ZendTestClassWithPropertyAttribute_method
 };
 
 static const zend_function_entry class_ZendTestForbidDynamicCall_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("call", zim_ZendTestForbidDynamicCall_call, arginfo_class_ZendTestForbidDynamicCall_call, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("call", zim_ZendTestForbidDynamicCall_call, arginfo_class_ZendTestForbidDynamicCall_call, ZEND_ACC_PUBLIC)
-#endif
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("callStatic", zim_ZendTestForbidDynamicCall_callStatic, arginfo_class_ZendTestForbidDynamicCall_callStatic, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL)
-#else
-	ZEND_RAW_FENTRY("callStatic", zim_ZendTestForbidDynamicCall_callStatic, arginfo_class_ZendTestForbidDynamicCall_callStatic, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-#endif
+	ZEND_ME(ZendTestForbidDynamicCall, call, arginfo_class_ZendTestForbidDynamicCall_call, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZendTestForbidDynamicCall, callStatic, arginfo_class_ZendTestForbidDynamicCall_callStatic, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -690,47 +486,27 @@ static const zend_function_entry class_ZendTestIntEnum_methods[] = {
 };
 
 static const zend_function_entry class_ZendTestNS_Foo_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("method", zim_ZendTestNS_Foo_method, arginfo_class_ZendTestNS_Foo_method, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("method", zim_ZendTestNS_Foo_method, arginfo_class_ZendTestNS_Foo_method, ZEND_ACC_PUBLIC)
-#endif
+	ZEND_ME(ZendTestNS_Foo, method, arginfo_class_ZendTestNS_Foo_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_ZendTestNS_UnlikelyCompileError_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("method", zim_ZendTestNS_UnlikelyCompileError_method, arginfo_class_ZendTestNS_UnlikelyCompileError_method, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("method", zim_ZendTestNS_UnlikelyCompileError_method, arginfo_class_ZendTestNS_UnlikelyCompileError_method, ZEND_ACC_PUBLIC)
-#endif
+	ZEND_ME(ZendTestNS_UnlikelyCompileError, method, arginfo_class_ZendTestNS_UnlikelyCompileError_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_ZendTestNS_NotUnlikelyCompileError_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("method", zim_ZendTestNS_NotUnlikelyCompileError_method, arginfo_class_ZendTestNS_NotUnlikelyCompileError_method, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("method", zim_ZendTestNS_NotUnlikelyCompileError_method, arginfo_class_ZendTestNS_NotUnlikelyCompileError_method, ZEND_ACC_PUBLIC)
-#endif
+	ZEND_ME(ZendTestNS_NotUnlikelyCompileError, method, arginfo_class_ZendTestNS_NotUnlikelyCompileError_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_ZendTestNS2_Foo_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("method", zim_ZendTestNS2_Foo_method, arginfo_class_ZendTestNS2_Foo_method, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("method", zim_ZendTestNS2_Foo_method, arginfo_class_ZendTestNS2_Foo_method, ZEND_ACC_PUBLIC)
-#endif
+	ZEND_ME(ZendTestNS2_Foo, method, arginfo_class_ZendTestNS2_Foo_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_ZendTestNS2_ZendSubNS_Foo_methods[] = {
-#if (PHP_VERSION_ID >= 80400)
-	ZEND_RAW_FENTRY("method", zim_ZendTestNS2_ZendSubNS_Foo_method, arginfo_class_ZendTestNS2_ZendSubNS_Foo_method, ZEND_ACC_PUBLIC, NULL)
-#else
-	ZEND_RAW_FENTRY("method", zim_ZendTestNS2_ZendSubNS_Foo_method, arginfo_class_ZendTestNS2_ZendSubNS_Foo_method, ZEND_ACC_PUBLIC)
-#endif
+	ZEND_ME(ZendTestNS2_ZendSubNS_Foo, method, arginfo_class_ZendTestNS2_ZendSubNS_Foo_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
