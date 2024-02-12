@@ -48,6 +48,10 @@
 # define MAP_HUGETLB MAP_ALIGNED_SUPER
 #endif
 
+#ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+#include <pthread.h>
+#endif
+
 #if (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
 static void *find_prefered_mmap_base(size_t requested_size)
 {
@@ -198,11 +202,18 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 #ifdef PROT_MAX
 	flags |= PROT_MAX(PROT_READ | PROT_WRITE | PROT_EXEC);
 #endif
-#if defined(ZTS) && defined(__APPLE__) && defined(__aarch64__)
-	flags |= PROT_EXEC;
-#endif
 #ifdef MAP_JIT
+# ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
+	if (pthread_jit_write_protect_supported_np()) {
+		mmap_flags |= MAP_JIT;
+	} else {
+#if defined(ZTS) && defined(__APPLE__) && defined(__aarch64__)
+		flags |= PROT_EXEC;
+#endif
+	}
+# else
 	mmap_flags |= MAP_JIT;
+# endif
 #endif
 #if (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
 	void *hint = find_prefered_mmap_base(requested_size);
