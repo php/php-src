@@ -784,11 +784,27 @@ TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 	asm("adrp %0, #__tsrm_ls_cache@TLVPPAGE\n\t"
 	    "ldr %0, [%0, #__tsrm_ls_cache@TLVPPAGEOFF]"
 	     : "=r" (ret));
-# else
+# elif defined(TSRM_TLS_MODEL_DEFAULT)
+	asm("stp x29, x30, [sp, #-16]!\n\t"
+		"adrp x0, :tlsdesc:_tsrm_ls_cache\n\t"
+		"ldr x8, [x0, #:tlsdesc_lo12:_tsrm_ls_cache]\n\t"
+		"add x0, x0, #:tlsdesc_lo12:_tsrm_ls_cache\n\t"
+		".tlsdesccall _tsrm_ls_cache\n\t"
+		"blr x8\n\t"
+		"mov %0, x0\n\t"
+		"ldp x29, x30, [sp], #16"
+		 : "=r" (ret) : : "x0", "x8");
+# elif defined(TSRM_TLS_MODEL_INITIAL_EXEC)
+	asm("adrp %0, :gottprel:_tsrm_ls_cache\n\t"
+		"ldr %0, [%0, #:gottprel_lo12:_tsrm_ls_cache]"
+		: "=r" (ret));
+# elif defined(TSRM_TLS_MODEL_LOCAL_EXEC)
 	asm("mov %0, xzr\n\t"
 	    "add %0, %0, #:tprel_hi12:_tsrm_ls_cache, lsl #12\n\t"
 	    "add %0, %0, #:tprel_lo12_nc:_tsrm_ls_cache"
 	     : "=r" (ret));
+# else
+#  error "TSRM TLS model not set"
 # endif
 	return ret;
 #else
