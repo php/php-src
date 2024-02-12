@@ -3206,6 +3206,9 @@ static zend_result accel_post_startup(void)
 		switch (zend_shared_alloc_startup(shm_size, 0)) {
 #endif
 			case ALLOC_SUCCESS:
+#if defined(ZTS) && defined(__APPLE__) && defined(__aarch64__)
+				zend_accel_shared_protect(0);
+#endif
 				if (zend_accel_init_shm() == FAILURE) {
 					accel_startup_ok = false;
 					return FAILURE;

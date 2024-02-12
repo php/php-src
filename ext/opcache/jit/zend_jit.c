@@ -3201,9 +3201,11 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 #endif
 		opts |= PROT_EXEC;
 #endif
+#if !defined(ZTS) || !defined(__APPLE__) || !defined(__aarch64__)
 		if (mprotect(dasm_buf, dasm_size, opts) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
+#endif
 	}
 #elif _WIN32
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
@@ -3233,9 +3235,11 @@ ZEND_EXT_API void zend_jit_protect(void)
 			return;
 		}
 #endif
+#if !defined(ZTS) || !defined(__APPLE__) || !defined(__aarch64__)
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_EXEC) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
+#endif
 	}
 #elif _WIN32
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
@@ -3473,6 +3477,7 @@ ZEND_EXT_API void zend_jit_startup(void *buf, size_t size, bool reattached)
 		break;
 	}
 #endif
+#if !defined(ZTS) || !defined(__APPLE__) || !defined(__aarch64__)
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		if (mprotect(dasm_buf, dasm_size, PROT_READ | PROT_WRITE | PROT_EXEC) != 0) {
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
@@ -3482,6 +3487,7 @@ ZEND_EXT_API void zend_jit_startup(void *buf, size_t size, bool reattached)
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
+#endif
 #elif _WIN32
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		DWORD old;
