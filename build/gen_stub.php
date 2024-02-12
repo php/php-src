@@ -3947,6 +3947,10 @@ function parseFunctionLike(
         $numRequiredArgs = 0;
         $foundVariadic = false;
         foreach ($func->getParams() as $i => $param) {
+            if ($param->isPromoted()) {
+                throw new Exception("Promoted properties are not supported");
+            }
+
             $varName = $param->var->name;
             $preferRef = !empty($paramMeta[$varName]['prefer-ref']);
             unset($paramMeta[$varName]);
