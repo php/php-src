@@ -180,6 +180,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 {
 	zend_shared_segment *shared_segment;
 	int flags = PROT_READ | PROT_WRITE, fd = -1;
+	int mmap_flags = MAP_SHARED | MAP_ANONYMOUS;
 	void *p;
 #if defined(HAVE_PROCCTL) && defined(PROC_WXMAP_CTL)
 	int enable_wxmap = PROC_WX_MAPPINGS_PERMIT;
@@ -198,7 +199,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	flags |= PROT_MAX(PROT_READ | PROT_WRITE | PROT_EXEC);
 #endif
 #ifdef MAP_JIT
-	flags |= MAP_JIT;
+	mmap_flags |= MAP_JIT;
 #endif
 #if (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
 	void *hint = find_prefered_mmap_base(requested_size);
@@ -206,13 +207,13 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 # ifdef MAP_HUGETLB
 		size_t huge_page_size = 2 * 1024 * 1024;
 		if (requested_size >= huge_page_size && requested_size % huge_page_size == 0) {
-			p = mmap(hint, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB|MAP_FIXED, -1, 0);
+			p = mmap(hint, requested_size, flags, mmap_flags|MAP_HUGETLB|MAP_FIXED, -1, 0);
 			if (p != MAP_FAILED) {
 				goto success;
 			}
 		}
 #endif
-		p = mmap(hint, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
+		p = mmap(hint, requested_size, flags, mmap_flags|MAP_FIXED, -1, 0);
 		if (p != MAP_FAILED) {
 			goto success;
 		}
@@ -236,34 +237,34 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		/* to got HUGE PAGES in low 32-bit address we have to reserve address
 		   space and then remap it using MAP_HUGETLB */
 
-		p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
+		p = mmap(NULL, requested_size, flags, mmap_flags|MAP_32BIT, fd, 0);
 		if (p != MAP_FAILED) {
 			munmap(p, requested_size);
 			p = (void*)(ZEND_MM_ALIGNED_SIZE_EX((ptrdiff_t)p, huge_page_size));
-			p = mmap(p, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT|MAP_HUGETLB|MAP_FIXED, -1, 0);
+			p = mmap(p, requested_size, flags, mmap_flags|MAP_32BIT|MAP_HUGETLB|MAP_FIXED, -1, 0);
 			if (p != MAP_FAILED) {
 				goto success;
 			} else {
-				p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
+				p = mmap(NULL, requested_size, flags, mmap_flags|MAP_32BIT, fd, 0);
 				if (p != MAP_FAILED) {
 					goto success;
 				}
 			}
 		}
 # endif
-		p = mmap(0, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_HUGETLB, fd, 0);
+		p = mmap(0, requested_size, flags, mmap_flags|MAP_HUGETLB, fd, 0);
 		if (p != MAP_FAILED) {
 			goto success;
 		}
 	}
 #elif defined(PREFER_MAP_32BIT) && defined(__x86_64__) && defined(MAP_32BIT)
-	p = mmap(NULL, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS|MAP_32BIT, fd, 0);
+	p = mmap(NULL, requested_size, flags, mmap_flags|MAP_32BIT, fd, 0);
 	if (p != MAP_FAILED) {
 		goto success;
 	}
 #endif
 
-	p = mmap(0, requested_size, flags, MAP_SHARED|MAP_ANONYMOUS, fd, 0);
+	p = mmap(0, requested_size, flags, mmap_flags, fd, 0);
 	if (p == MAP_FAILED) {
 		*error_in = "mmap";
 		return ALLOC_FAILURE;
