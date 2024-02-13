@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 92f4985790d0dad4216be837571e41c86711b6f8 */
+ * Stub hash: 74c365fa1f233a4b089c28e94b2b304262848de9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -65,6 +65,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_close, 0, 1, IS_VOID,
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_errno, 0, 1, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, multi_handle, CurlMultiHandle, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_error, 0, 1, IS_STRING, 1)
 	ZEND_ARG_OBJ_INFO(0, multi_handle, CurlMultiHandle, 0)
 ZEND_END_ARG_INFO()
 
@@ -138,6 +142,97 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_curl_version, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CurlHandle___construct, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, uri, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlHandle_errno, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlHandle_error, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlHandle_strerror, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, code, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlHandle_escape, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_CurlHandle_unescape arginfo_class_CurlHandle_escape
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_CurlHandle_exec, 0, 0, MAY_BE_STRING|MAY_BE_BOOL)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlHandle_pause, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlHandle_reset, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlHandle_getInfo, 0, 0, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, option, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
+
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlHandle_upkeep, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CurlHandle_setOpt, 0, 2, CurlHandle, 0)
+	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CurlHandle_setOptArray, 0, 1, CurlHandle, 0)
+	ZEND_ARG_TYPE_INFO(0, option, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CurlMultiHandle_addHandle, 0, 1, CurlMultiHandle, 0)
+	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_CurlMultiHandle_removeHandle arginfo_class_CurlMultiHandle_addHandle
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CurlMultiHandle_setOpt, 0, 2, CurlMultiHandle, 0)
+	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_CurlMultiHandle_errno arginfo_class_CurlHandle_errno
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlMultiHandle_error, 0, 0, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_CurlMultiHandle_strerror arginfo_curl_multi_strerror
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlMultiHandle_exec, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_INFO(1, still_running)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_CurlMultiHandle_getContent arginfo_curl_multi_getcontent
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_CurlMultiHandle_infoRead, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, queued_messages, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlMultiHandle_select, 0, 0, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeout, IS_DOUBLE, 0, "1.0")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_CurlShareHandle_errno arginfo_class_CurlHandle_errno
+
+#define arginfo_class_CurlShareHandle_error arginfo_class_CurlMultiHandle_error
+
+#define arginfo_class_CurlShareHandle_strerror arginfo_class_CurlMultiHandle_error
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_CurlShareHandle_setOpt, 0, 2, CurlShareHandle, 0)
+	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_FUNCTION(curl_close);
 ZEND_FUNCTION(curl_copy_handle);
@@ -156,6 +251,7 @@ ZEND_FUNCTION(curl_upkeep);
 ZEND_FUNCTION(curl_multi_add_handle);
 ZEND_FUNCTION(curl_multi_close);
 ZEND_FUNCTION(curl_multi_errno);
+ZEND_FUNCTION(curl_multi_error);
 ZEND_FUNCTION(curl_multi_exec);
 ZEND_FUNCTION(curl_multi_getcontent);
 ZEND_FUNCTION(curl_multi_info_read);
@@ -174,6 +270,15 @@ ZEND_FUNCTION(curl_share_setopt);
 ZEND_FUNCTION(curl_share_strerror);
 ZEND_FUNCTION(curl_strerror);
 ZEND_FUNCTION(curl_version);
+ZEND_METHOD(CurlHandle, __construct);
+ZEND_METHOD(CurlHandle, setOpt);
+ZEND_METHOD(CurlHandle, setOptArray);
+ZEND_METHOD(CurlMultiHandle, addHandle);
+ZEND_METHOD(CurlMultiHandle, removeHandle);
+ZEND_METHOD(CurlMultiHandle, setOpt);
+ZEND_METHOD(CurlMultiHandle, exec);
+ZEND_FUNCTION(curl_share_error);
+ZEND_METHOD(CurlShareHandle, setOpt);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -194,6 +299,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_multi_add_handle, arginfo_curl_multi_add_handle)
 	ZEND_FE(curl_multi_close, arginfo_curl_multi_close)
 	ZEND_FE(curl_multi_errno, arginfo_curl_multi_errno)
+	ZEND_FE(curl_multi_error, arginfo_curl_multi_error)
 	ZEND_FE(curl_multi_exec, arginfo_curl_multi_exec)
 	ZEND_FE(curl_multi_getcontent, arginfo_curl_multi_getcontent)
 	ZEND_FE(curl_multi_info_read, arginfo_curl_multi_info_read)
@@ -216,17 +322,66 @@ static const zend_function_entry ext_functions[] = {
 };
 
 
+static const zend_function_entry class_CurlException_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_CurlHandleException_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_CurlMultiException_methods[] = {
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_CurlShareException_methods[] = {
+	ZEND_FE_END
+};
+
+
 static const zend_function_entry class_CurlHandle_methods[] = {
+	ZEND_ME(CurlHandle, __construct, arginfo_class_CurlHandle___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(errno, curl_errno, arginfo_class_CurlHandle_errno, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(error, curl_error, arginfo_class_CurlHandle_error, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(strerror, curl_strerror, arginfo_class_CurlHandle_strerror, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(escape, curl_escape, arginfo_class_CurlHandle_escape, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(unescape, curl_unescape, arginfo_class_CurlHandle_unescape, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(exec, curl_exec, arginfo_class_CurlHandle_exec, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(pause, curl_pause, arginfo_class_CurlHandle_pause, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(reset, curl_reset, arginfo_class_CurlHandle_reset, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getInfo, curl_getinfo, arginfo_class_CurlHandle_getInfo, ZEND_ACC_PUBLIC)
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+	ZEND_ME_MAPPING(upkeep, curl_upkeep, arginfo_class_CurlHandle_upkeep, ZEND_ACC_PUBLIC)
+#endif
+	ZEND_ME(CurlHandle, setOpt, arginfo_class_CurlHandle_setOpt, ZEND_ACC_PUBLIC)
+	ZEND_ME(CurlHandle, setOptArray, arginfo_class_CurlHandle_setOptArray, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 
 static const zend_function_entry class_CurlMultiHandle_methods[] = {
+	ZEND_ME(CurlMultiHandle, addHandle, arginfo_class_CurlMultiHandle_addHandle, ZEND_ACC_PUBLIC)
+	ZEND_ME(CurlMultiHandle, removeHandle, arginfo_class_CurlMultiHandle_removeHandle, ZEND_ACC_PUBLIC)
+	ZEND_ME(CurlMultiHandle, setOpt, arginfo_class_CurlMultiHandle_setOpt, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(errno, curl_multi_errno, arginfo_class_CurlMultiHandle_errno, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(error, curl_multi_error, arginfo_class_CurlMultiHandle_error, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(strerror, curl_multi_strerror, arginfo_class_CurlMultiHandle_strerror, ZEND_ACC_PUBLIC)
+	ZEND_ME(CurlMultiHandle, exec, arginfo_class_CurlMultiHandle_exec, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getContent, curl_multi_getcontent, arginfo_class_CurlMultiHandle_getContent, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(infoRead, curl_multi_info_read, arginfo_class_CurlMultiHandle_infoRead, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(select, curl_multi_select, arginfo_class_CurlMultiHandle_select, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
 
 static const zend_function_entry class_CurlShareHandle_methods[] = {
+	ZEND_ME_MAPPING(errno, curl_share_errno, arginfo_class_CurlShareHandle_errno, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(error, curl_share_error, arginfo_class_CurlShareHandle_error, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(strerror, curl_share_strerror, arginfo_class_CurlShareHandle_strerror, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(CurlShareHandle, setOpt, arginfo_class_CurlShareHandle_setOpt, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1088,6 +1243,50 @@ static void register_curl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("CURLOPT_QUICK_EXIT", CURLOPT_QUICK_EXIT, CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("CURLOPT_SAFE_UPLOAD", CURLOPT_SAFE_UPLOAD, CONST_PERSISTENT);
+}
+
+static zend_class_entry *register_class_CurlException(zend_class_entry *class_entry_Exception)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "CurlException", class_CurlException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_CurlHandleException(zend_class_entry *class_entry_CurlException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "CurlHandleException", class_CurlHandleException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_CurlException);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_CurlMultiException(zend_class_entry *class_entry_CurlException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "CurlMultiException", class_CurlMultiException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_CurlException);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_CurlShareException(zend_class_entry *class_entry_CurlException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "CurlShareException", class_CurlShareException_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_CurlException);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+
+	return class_entry;
 }
 
 static zend_class_entry *register_class_CurlHandle(void)

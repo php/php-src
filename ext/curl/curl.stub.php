@@ -3555,10 +3555,74 @@ const CURLOPT_SAFE_UPLOAD = UNKNOWN;
 
 /**
  * @strict-properties
+ */
+class CurlException extends \Exception {};
+
+/**
+ * @strict-properties
+ */
+class CurlHandleException extends \CurlException {};
+
+/**
+ * @strict-properties
+ */
+class CurlMultiException extends \CurlException {};
+
+/**
+ * @strict-properties
+ */
+class CurlShareException extends \CurlException {};
+
+/**
+ * @strict-properties
  * @not-serializable
  */
 final class CurlHandle
 {
+	public function __construct(?string $uri = null) {}
+
+	/** @alias curl_errno */
+	public function errno(): int {}
+
+	/** @alias curl_error */
+	public function error(): string {}
+
+	/** @alias curl_strerror */
+	static public function strerror(int $code): string {}
+
+	/** @alias curl_escape */
+	public function escape(string $str): string {}
+
+	/** @alias curl_unescape */
+	public function unescape(string $str): string {}
+
+	/** @alias curl_exec */
+	public function exec(): string|bool {}
+
+	/** @alias curl_pause */
+	public function pause(int $flags): int {}
+
+	/** @alias curl_reset */
+	public function reset(): void {}
+
+	/** @alias curl_getinfo */
+	public function getInfo(?int $option = null): mixed {}
+
+#if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
+	/** @alias curl_upkeep */
+	public function upkeep(): bool {}
+#endif
+
+	/**
+	 * Varies from curl_setopt() to allow fluent chaining.
+	 * @throws CurlHandleException
+	 */
+	public function setOpt(int $option, mixed $value): \CurlHandle {}
+	/**
+	 * Returns self to match setOpt() behavior.
+	 * @throws CurlHandleException
+	 */
+	public function setOptArray(array $option): \CurlHandle {}
 }
 
 /**
@@ -3567,6 +3631,53 @@ final class CurlHandle
  */
 final class CurlMultiHandle
 {
+	/**
+	 * Returns self for fluent calling.
+	 * @throws CurlException.
+	 */
+	public function addHandle(\CurlHandle $handle): \CurlMultiHandle {}
+
+	/**
+	 * Returns self for fluent calling.
+	 * @throws CurlException.
+	 */
+	public function removeHandle(\CurlHandle $handle): \CurlMultiHandle {}
+
+	/**
+	 * Returns self for fluent calling.
+	 * @throws CurlException.
+	 */
+	public function setOpt(int $option, mixed $value): \CurlMultiHandle {}
+
+	/** @alias curl_multi_errno */
+	public function errno(): int {}
+
+	/** @alias curl_multi_error */
+	public function error(): ?string {}
+
+	/** @alias curl_multi_strerror */
+	public function strerror(int $error_code): ?string {}
+
+	/**
+	 * Returns TRUE if still running, FALSE otherwise.
+	 * @param int $still_running
+	 * @throws CurlException.
+	 */
+	public function exec(&$still_running): bool {}
+
+	/** @alias curl_multi_getcontent */
+	static public function getContent(\CurlHandle $handle): ?string {}
+
+	/**
+	 * @alias curl_multi_info_read
+	 * @param int $queued_messages
+	 * @return array<string, int|object>|false
+	 * @refcount 1
+	 */
+	public function infoRead(&$queued_messages = null): array|false {}
+
+	/** @alias curl_multi_select */
+	public function select(float $timeout = 1.0): int {}
 }
 
 /**
@@ -3575,6 +3686,17 @@ final class CurlMultiHandle
  */
 final class CurlShareHandle
 {
+
+	/** @alias curl_share_errno */
+	public function errno(): int {}
+
+	/** @alias curl_share_error */
+	public function error(): ?string {}
+
+	/** @alias curl_share_strerror */
+	static public function strerror(): ?string {}
+
+	public function setOpt(int $option, mixed $value): \CurlShareHandle {}
 }
 
 function curl_close(CurlHandle $handle): void {}
@@ -3614,6 +3736,8 @@ function curl_multi_add_handle(CurlMultiHandle $multi_handle, CurlHandle $handle
 function curl_multi_close(CurlMultiHandle $multi_handle): void {}
 
 function curl_multi_errno(CurlMultiHandle $multi_handle): int {}
+
+function curl_multi_error(CurlMultiHandle $multi_handle): ?string {}
 
 /** @param int $still_running */
 function curl_multi_exec(CurlMultiHandle $multi_handle, &$still_running): int {}
