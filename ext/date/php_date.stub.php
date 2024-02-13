@@ -204,7 +204,7 @@ function date_date_set(DateTime $object, int $year, int $month, int $day): DateT
 
 function date_isodate_set(DateTime $object, int $year, int $week, int $dayOfWeek = 1): DateTime {}
 
-function date_timestamp_set(DateTime $object, int $timestamp): DateTime {}
+function date_timestamp_set(DateTime $object, int|float $timestamp): DateTime {}
 
 function date_timestamp_get(DateTimeInterface $object): int {}
 
@@ -437,7 +437,7 @@ class DateTime implements DateTimeInterface
      * @tentative-return-type
      * @alias date_timestamp_set
      */
-    public function setTimestamp(int $timestamp): DateTime {}
+    public function setTimestamp(int|float $timestamp): DateTime {}
 
     /** @tentative-return-type */
     public function setMicroseconds(int $microseconds): static {}
@@ -543,7 +543,7 @@ class DateTimeImmutable implements DateTimeInterface
     public function setISODate(int $year, int $week, int $dayOfWeek = 1): DateTimeImmutable {}
 
     /** @tentative-return-type */
-    public function setTimestamp(int $timestamp): DateTimeImmutable {}
+    public function setTimestamp(int|float $timestamp): DateTimeImmutable {}
 
     /** @tentative-return-type */
     public function setMicroseconds(int $microseconds): static {}

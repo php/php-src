@@ -3799,50 +3799,63 @@ PHP_METHOD(DateTimeImmutable, setISODate)
 }
 /* }}} */
 
-static void php_date_timestamp_set(zval *object, zend_long timestamp, zval *return_value) /* {{{ */
+static void php_date_timestamp_set(zval *object, zval *timestamp, zval *return_value) /* {{{ */
 {
-	php_date_obj *dateobj;
+    php_date_obj *dateobj;
+    timelib_sll ts;
 
-	dateobj = Z_PHPDATE_P(object);
-	DATE_CHECK_INITIALIZED(dateobj->time, Z_OBJCE_P(object));
-	timelib_unixtime2local(dateobj->time, (timelib_sll)timestamp);
-	timelib_update_ts(dateobj->time, NULL);
-	php_date_set_time_fraction(dateobj->time, 0);
+    dateobj = Z_PHPDATE_P(object);
+    DATE_CHECK_INITIALIZED(dateobj->time, Z_OBJCE_P(object));
+
+    if (Z_TYPE_P(timestamp) == IS_LONG) {
+        ts = (timelib_sll)Z_LVAL_P(timestamp);
+    } else {
+		ZEND_ASSERT(Z_TYPE_P(timestamp) == IS_DOUBLE); // zend_parse_parameters() should guarantee this.
+        ts = (timelib_sll)Z_DVAL_P(timestamp);
+    }
+
+    timelib_unixtime2local(dateobj->time, ts);
+    timelib_update_ts(dateobj->time, NULL);
+    if (Z_TYPE_P(timestamp) == IS_DOUBLE) {
+		const int fraction_microseconds = (int)((Z_DVAL_P(timestamp) - (double)ts) * 1000000);
+        php_date_set_time_fraction(dateobj->time, fraction_microseconds);
+    } else {
+        php_date_set_time_fraction(dateobj->time, 0);
+    }
 } /* }}} */
 
 /* {{{ Sets the date and time based on an Unix timestamp. */
 PHP_FUNCTION(date_timestamp_set)
 {
-	zval *object;
-	zend_long  timestamp;
+    zval *object, *timestamp_zval;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ol", &object, date_ce_date, &timestamp) == FAILURE) {
-		RETURN_THROWS();
-	}
+    if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "On", &object, date_ce_date, &timestamp_zval) == FAILURE) {
+        RETURN_THROWS();
+    }
 
-	php_date_timestamp_set(object, timestamp, return_value);
+    php_date_timestamp_set(object, timestamp_zval, return_value);
 
-	RETURN_OBJ_COPY(Z_OBJ_P(object));
+    RETURN_OBJ_COPY(Z_OBJ_P(object));
 }
 /* }}} */
 
 /* {{{ */
 PHP_METHOD(DateTimeImmutable, setTimestamp)
 {
-	zval *object, new_object;
-	zend_long  timestamp;
+    zval *object, new_object, *timestamp_zval;
 
-	object = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &timestamp) == FAILURE) {
-		RETURN_THROWS();
-	}
+    object = ZEND_THIS;
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "n", &timestamp_zval) == FAILURE) {
+        RETURN_THROWS();
+    }
 
-	date_clone_immutable(object, &new_object);
-	php_date_timestamp_set(&new_object, timestamp, return_value);
+    date_clone_immutable(object, &new_object);
+    php_date_timestamp_set(&new_object, timestamp_zval, return_value);
 
-	RETURN_OBJ(Z_OBJ(new_object));
+    RETURN_OBJ(Z_OBJ(new_object));
 }
 /* }}} */
+
 
 /* {{{ */
 PHP_METHOD(DateTimeImmutable, setMicroseconds)
