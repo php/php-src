@@ -953,18 +953,6 @@ dnl ---------------------------
 ])
 
 dnl
-dnl PHP_WITH_SHARED
-dnl
-dnl Checks whether $withval is "shared" or starts with "shared,XXX" and sets
-dnl $shared to "yes" or "no", and removes "shared,?" stuff from $withval.
-dnl
-AC_DEFUN([PHP_WITH_SHARED],[
-  PHP_ARG_ANALYZE_EX(withval)
-  shared=$ext_shared
-  unset ext_shared ext_output
-])
-
-dnl
 dnl PHP_ADD_EXTENSION_DEP(extname, depends [, depconf])
 dnl
 dnl This macro is scanned by genif.sh when it builds the internal functions
