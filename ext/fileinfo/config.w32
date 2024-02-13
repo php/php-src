@@ -6,7 +6,7 @@ if (PHP_FILEINFO != 'no') {
 	LIBMAGIC_SOURCES=" apprentice.c apptype.c ascmagic.c \
 			cdf.c cdf_time.c compress.c \
 			encoding.c fsmagic.c funcs.c \
-			is_json.c is_tar.c magic.c print.c \
+			is_json.c is_tar.c is_simh.c magic.c print.c \
 			readcdf.c softmagic.c der.c \
 			strcasestr.c buffer.c is_csv.c";
 
