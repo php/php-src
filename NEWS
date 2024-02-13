@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Handle OOM more consistently. (nielsdos)
   . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
 
+- Fileinfo:
+  . Update to libmagic 5.45. (nielsdos)
+
 - FPM:
   . Implement GH-12385 (flush headers without body when calling flush()).
     (nielsdos)
