@@ -1141,6 +1141,8 @@ void zend_shutdown(void) /* {{{ */
 #endif
 	zend_destroy_rsrc_list_dtors();
 
+	zend_unload_modules();
+
 	zend_optimizer_shutdown();
 	startup_done = false;
 }

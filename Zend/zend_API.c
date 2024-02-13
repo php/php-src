@@ -41,6 +41,7 @@ ZEND_API HashTable module_registry;
 static zend_module_entry **module_request_startup_handlers;
 static zend_module_entry **module_request_shutdown_handlers;
 static zend_module_entry **module_post_deactivate_handlers;
+static zend_module_entry **modules_dl_loaded;
 
 static zend_class_entry  **class_cleanup_handlers;
 
@@ -2292,6 +2293,7 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	int startup_count = 0;
 	int shutdown_count = 0;
 	int post_deactivate_count = 0;
+	int dl_loaded_count = 0;
 	zend_class_entry *ce;
 	int class_count = 0;
 
@@ -2306,6 +2308,9 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 		if (module->post_deactivate_func) {
 			post_deactivate_count++;
 		}
+		if (module->handle) {
+			dl_loaded_count++;
+		}
 	} ZEND_HASH_FOREACH_END();
 	module_request_startup_handlers = (zend_module_entry**)realloc(
 		module_request_startup_handlers,
@@ -2318,6 +2323,9 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	module_request_shutdown_handlers[shutdown_count] = NULL;
 	module_post_deactivate_handlers = module_request_shutdown_handlers + shutdown_count + 1;
 	module_post_deactivate_handlers[post_deactivate_count] = NULL;
+	/* Cannot reuse module_request_startup_handlers because it is freed in zend_destroy_modules, which happens before zend_unload_modules. */
+	modules_dl_loaded = realloc(modules_dl_loaded, sizeof(zend_module_entry*) * (dl_loaded_count + 1));
+	modules_dl_loaded[dl_loaded_count] = NULL;
 	startup_count = 0;
 
 	ZEND_HASH_MAP_FOREACH_PTR(&module_registry, module) {
@@ -2329,6 +2337,9 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 		}
 		if (module->post_deactivate_func) {
 			module_post_deactivate_handlers[--post_deactivate_count] = module;
+		}
+		if (module->handle) {
+			modules_dl_loaded[--dl_loaded_count] = module;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -3073,17 +3084,22 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 		clean_module_functions(module);
 	}
 
-#if HAVE_LIBDL
-	if (module->handle && !getenv("ZEND_DONT_UNLOAD_MODULES")) {
-		DL_UNLOAD(module->handle);
-	}
-#endif
-
 #if ZEND_RC_DEBUG
 	zend_rc_debug = orig_rc_debug;
 #endif
 }
 /* }}} */
+
+void module_registry_unload(const zend_module_entry *module)
+{
+#if HAVE_LIBDL
+	if (!getenv("ZEND_DONT_UNLOAD_MODULES")) {
+		DL_UNLOAD(module->handle);
+	}
+#else
+	ZEND_IGNORE_VALUE(module);
+#endif
+}
 
 ZEND_API void zend_activate_modules(void) /* {{{ */
 {
@@ -3129,6 +3145,18 @@ ZEND_API void zend_deactivate_modules(void) /* {{{ */
 }
 /* }}} */
 
+void zend_unload_modules(void) /* {{{ */
+{
+	zend_module_entry **modules = modules_dl_loaded;
+	while (*modules) {
+		module_registry_unload(*modules);
+		modules++;
+	}
+	free(modules_dl_loaded);
+	modules_dl_loaded = NULL;
+}
+/* }}} */
+
 ZEND_API void zend_post_deactivate_modules(void) /* {{{ */
 {
 	if (EG(full_tables_cleanup)) {
@@ -3147,6 +3175,9 @@ ZEND_API void zend_post_deactivate_modules(void) /* {{{ */
 				break;
 			}
 			module_destructor(module);
+			if (module->handle) {
+				module_registry_unload(module);
+			}
 			zend_string_release_ex(key, 0);
 		} ZEND_HASH_MAP_FOREACH_END_DEL();
 	} else {
