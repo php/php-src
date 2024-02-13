@@ -16,6 +16,7 @@ PHP                                                                        NEWS
   . Added support for Zend Max Execution Timers on FreeBSD. (Kévin Dunglas)
   . Ensure fiber stack is not backed by THP. (crrodriguez)
   . Implement GH-13609 (Dump wrapped object in WeakReference class). (nielsdos)
+  . Added sparc64 arch assembly support for zend fiber. (Claudio Jeker)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
