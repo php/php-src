@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fix unlikely memory leak in case of namespace removal with extremely deep
     trees. (nielsdos)
 
+- Fileinfo:
+  . Fixed bug GH-13344 (finfo::buffer(): Failed identify data 0:(null),
+    backport). (nielsdos)
+
 - FPM:
   . Fixed bug #75712 (getenv in php-fpm should not read $_ENV, $_SERVER).
     (Jakub Zelenka)

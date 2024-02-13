@@ -148,8 +148,10 @@ file_ascmagic_with_encoding(struct magic_set *ms, const struct buffer *b,
 			goto done;
 		}
 		if ((utf8_end = encode_utf8(utf8_buf, mlen, ubuf, ulen))
-		    == NULL)
+		    == NULL) {
+			rv = 0;
 			goto done;
+		}
 		buffer_init(&bb, b->fd, &b->st, utf8_buf,
 		    CAST(size_t, utf8_end - utf8_buf));
 
