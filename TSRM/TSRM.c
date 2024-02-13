@@ -576,7 +576,7 @@ void ts_free_id(ts_rsrc_id id)
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully freed resource id %d", id));
 }/*}}}*/
 
-TSRM_API void ts_callback_id(ts_rsrc_id id, void (*cb)(void *))
+TSRM_API void ts_apply_for_id(ts_rsrc_id id, void (*cb)(void *))
 {
 	int rsrc_id = TSRM_UNSHUFFLE_RSRC_ID(id);
 

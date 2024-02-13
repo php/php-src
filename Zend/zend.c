@@ -1129,7 +1129,7 @@ void zend_shutdown(void) /* {{{ */
 
 	zend_destroy_rsrc_list(&EG(persistent_list));
 #ifdef ZTS
-	ts_callback_id(executor_globals_id, executor_globals_persistent_list_dtor);
+	ts_apply_for_id(executor_globals_id, executor_globals_persistent_list_dtor);
 #endif
 	zend_destroy_modules();
 
