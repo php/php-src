@@ -104,6 +104,9 @@ TSRM_API void ts_free_thread(void);
 /* deallocates all occurrences of a given id */
 TSRM_API void ts_free_id(ts_rsrc_id id);
 
+/* Runs a callback on all resources of the given id.
+ * The caller is responsible for ensuring the underlying resources don't data-race. */
+TSRM_API void ts_apply_for_id(ts_rsrc_id id, void (*cb)(void *));
 
 /* Debug support */
 #define TSRM_ERROR_LEVEL_ERROR	1

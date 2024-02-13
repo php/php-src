@@ -315,14 +315,8 @@ static void _close_pgsql_plink(zend_resource *rsrc)
 		PQclear(res);
 	}
 	PQfinish(link);
-	/* See https://github.com/php/php-src/issues/12974 why we need to check the if */
-#ifdef ZTS
-	if (pgsql_module_entry.module_started)
-#endif
-	{
-		PGG(num_persistent)--;
-		PGG(num_links)--;
-	}
+	PGG(num_persistent)--;
+	PGG(num_links)--;
 	rsrc->ptr = NULL;
 }
 
