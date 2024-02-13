@@ -1091,8 +1091,33 @@ zend_result zend_post_startup(void) /* {{{ */
 }
 /* }}} */
 
+/* Returns a NULL-terminated array of module entries that were dynamically loaded. */
+static zend_module_entry **zend_collect_dl_loaded_module_entries(void)
+{
+	zend_module_entry **modules = malloc(sizeof(zend_module_entry *) * (zend_hash_num_elements(&module_registry) + 1));
+	zend_module_entry *module;
+	unsigned int index = 0;
+	ZEND_HASH_MAP_REVERSE_FOREACH_PTR(&module_registry, module) {
+		if (module->handle) {
+			modules[index++] = module;
+		}
+	} ZEND_HASH_FOREACH_END();
+	modules[index] = NULL;
+	return modules;
+}
+
+static void zend_unload_modules(zend_module_entry **modules)
+{
+	while (*modules) {
+		module_registry_unload(*modules);
+		modules++;
+	}
+}
+
 void zend_shutdown(void) /* {{{ */
 {
+	zend_module_entry **modules = zend_collect_dl_loaded_module_entries();
+
 	zend_vm_dtor();
 
 	zend_destroy_rsrc_list(&EG(persistent_list));
@@ -1140,6 +1165,9 @@ void zend_shutdown(void) /* {{{ */
 	}
 #endif
 	zend_destroy_rsrc_list_dtors();
+
+	zend_unload_modules(modules);
+	free(modules);
 
 	zend_optimizer_shutdown();
 	startup_done = false;

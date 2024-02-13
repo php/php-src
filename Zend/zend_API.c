@@ -3073,17 +3073,22 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 		clean_module_functions(module);
 	}
 
-#if HAVE_LIBDL
-	if (module->handle && !getenv("ZEND_DONT_UNLOAD_MODULES")) {
-		DL_UNLOAD(module->handle);
-	}
-#endif
-
 #if ZEND_RC_DEBUG
 	zend_rc_debug = orig_rc_debug;
 #endif
 }
 /* }}} */
+
+void module_registry_unload(const zend_module_entry *module)
+{
+#if HAVE_LIBDL
+	if (module->handle && !getenv("ZEND_DONT_UNLOAD_MODULES")) {
+		DL_UNLOAD(module->handle);
+	}
+#else
+	ZEND_IGNORE_VALUE(module);
+#endif
+}
 
 ZEND_API void zend_activate_modules(void) /* {{{ */
 {
@@ -3147,6 +3152,7 @@ ZEND_API void zend_post_deactivate_modules(void) /* {{{ */
 				break;
 			}
 			module_destructor(module);
+			module_registry_unload(module);
 			zend_string_release_ex(key, 0);
 		} ZEND_HASH_MAP_FOREACH_END_DEL();
 	} else {
