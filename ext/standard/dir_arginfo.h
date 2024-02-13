@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 614659d3db7010c8408da704ef40a65879ae6d26 */
+ * Stub hash: f2571fbbcff57095abcb846f148644e10b2db2e8 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Directory_close, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -24,22 +24,22 @@ static const zend_function_entry class_Directory_methods[] = {
 
 static void register_dir_symbols(int module_number)
 {
-#if defined(HAVE_GLOB) && defined(GLOB_BRACE) && (GLOB_BRACE != 0)
+#if defined(HAVE_GLOB) && (defined(GLOB_BRACE) && GLOB_BRACE != 0)
 	REGISTER_LONG_CONSTANT("GLOB_BRACE", GLOB_BRACE, CONST_PERSISTENT);
 #endif
-#if defined(HAVE_GLOB) && defined(GLOB_ERR) && (GLOB_ERR != 0)
+#if defined(HAVE_GLOB) && (defined(GLOB_ERR) && GLOB_ERR != 0)
 	REGISTER_LONG_CONSTANT("GLOB_ERR", GLOB_ERR, CONST_PERSISTENT);
 #endif
-#if defined(HAVE_GLOB) && defined(GLOB_MARK) && (GLOB_MARK != 0)
+#if defined(HAVE_GLOB) && (defined(GLOB_MARK) && GLOB_MARK != 0)
 	REGISTER_LONG_CONSTANT("GLOB_MARK", GLOB_MARK, CONST_PERSISTENT);
 #endif
-#if defined(HAVE_GLOB) && defined(GLOB_NOCHECK) && (GLOB_NOCHECK != 0)
+#if defined(HAVE_GLOB) && (defined(GLOB_NOCHECK) && GLOB_NOCHECK != 0)
 	REGISTER_LONG_CONSTANT("GLOB_NOCHECK", GLOB_NOCHECK, CONST_PERSISTENT);
 #endif
-#if defined(HAVE_GLOB) && defined(GLOB_NOESCAPE) && (GLOB_NOESCAPE != 0)
+#if defined(HAVE_GLOB) && (defined(GLOB_NOESCAPE) && GLOB_NOESCAPE != 0)
 	REGISTER_LONG_CONSTANT("GLOB_NOESCAPE", GLOB_NOESCAPE, CONST_PERSISTENT);
 #endif
-#if defined(HAVE_GLOB) && defined(GLOB_NOSORT) && (GLOB_NOSORT != 0)
+#if defined(HAVE_GLOB) && (defined(GLOB_NOSORT) && GLOB_NOSORT != 0)
 	REGISTER_LONG_CONSTANT("GLOB_NOSORT", GLOB_NOSORT, CONST_PERSISTENT);
 #endif
 #if defined(HAVE_GLOB) && defined(GLOB_ONLYDIR)
