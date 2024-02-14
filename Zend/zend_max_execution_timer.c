@@ -23,6 +23,9 @@
 #include <errno.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
+# ifdef __FreeBSD__
+# include <pthread_np.h>
+# endif
 
 #include "zend.h"
 #include "zend_globals.h"
@@ -45,7 +48,11 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 	sev.sigev_notify = SIGEV_THREAD_ID;
 	sev.sigev_value.sival_ptr = &EG(max_execution_timer_timer);
 	sev.sigev_signo = SIGRTMIN;
+# ifdef __FreeBSD__
+	sev.sigev_notify_thread_id = pthread_getthreadid_np();
+# else
 	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
+# endif
 
 	// Measure wall time instead of CPU time as originally planned now that it is possible https://github.com/php/php-src/pull/6504#issuecomment-1370303727
 	if (timer_create(CLOCK_BOOTTIME, &sev, &EG(max_execution_timer_timer)) != 0) {

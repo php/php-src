@@ -279,7 +279,7 @@ AC_ARG_ENABLE([zend-max-execution-timers],
     [ZEND_MAX_EXECUTION_TIMERS=$enableval],
     [ZEND_MAX_EXECUTION_TIMERS='no'])
 
-AS_CASE(["$host_alias"], [*linux*], [], [ZEND_MAX_EXECUTION_TIMERS='no'])
+AS_CASE(["$host_alias"], [*linux*|*freebsd*], [], [ZEND_MAX_EXECUTION_TIMERS='no'])
 
 PHP_CHECK_FUNC(timer_create, rt)
 if test "$ac_cv_func_timer_create" != "yes"; then
