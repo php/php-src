@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "namespace_compat.h"
 
 #define PHP_DOM_XPATH_QUERY 0
 #define PHP_DOM_XPATH_EVALUATE 1
@@ -283,25 +284,23 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 
 	ctxp->node = nodep;
 
-	if (register_node_ns) {
-		/* Register namespaces in the node */
-		ns = xmlGetNsList(docp, nodep);
-
-		if (ns != NULL) {
-			while (ns[nsnbr] != NULL) {
-				nsnbr++;
-			}
+	dom_in_scope_ns in_scope_ns;
+	if (register_node_ns && nodep != NULL) {
+		if (modern) {
+			dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(&intern->dom);
+			in_scope_ns = dom_get_in_scope_ns(ns_mapper, nodep);
+		} else {
+			in_scope_ns = dom_get_in_scope_ns_legacy(nodep);
 		}
+		ctxp->namespaces = in_scope_ns.list;
+		ctxp->nsNr = in_scope_ns.count;
 	}
-
-	ctxp->namespaces = ns;
-	ctxp->nsNr = nsnbr;
 
 	xmlXPathObjectPtr xpathobjp = xmlXPathEvalExpression((xmlChar *) expr, ctxp);
 	ctxp->node = NULL;
 
-	if (ns != NULL) {
-		xmlFree(ns);
+	if (register_node_ns && nodep != NULL) {
+		dom_in_scope_ns_destroy(&in_scope_ns);
 		ctxp->namespaces = NULL;
 		ctxp->nsNr = 0;
 	}

@@ -457,4 +457,82 @@ void dom_libxml_reconcile_modern(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr nod
 	zend_hash_destroy(&ctx.old_ns_to_new_ns_ptr);
 }
 
+dom_in_scope_ns dom_get_in_scope_ns(dom_libxml_ns_mapper *ns_mapper, const xmlNode *node)
+{
+	ZEND_ASSERT(node != NULL);
+
+	dom_in_scope_ns in_scope_ns;
+	in_scope_ns.origin_is_ns_compat = true;
+
+	/* libxml fetches all nsDef items from bottom to top - left to right, ignoring prefixes already in the list.
+	 * We don't have nsDef, but we can use the ns pointer (as that is necessarily in scope),
+	 * and check the xmlns attributes. */
+	HashTable tmp_prefix_to_ns_table;
+	zend_hash_init(&tmp_prefix_to_ns_table, 0, NULL, NULL, false);
+	zend_hash_real_init_mixed(&tmp_prefix_to_ns_table);
+
+	for (const xmlNode *cur = node; cur != NULL; cur = cur->parent) {
+		if (cur->type == XML_ELEMENT_NODE) {
+			/* Register namespace of element */
+			if (cur->ns != NULL && cur->ns->prefix != NULL) {
+				const char *prefix = (const char *) cur->ns->prefix;
+				zend_hash_str_add_ptr(&tmp_prefix_to_ns_table, prefix, strlen(prefix), cur->ns);
+			}
+
+			/* Register xmlns attributes */
+			for (xmlAttr *attr = cur->properties; attr != NULL; attr = attr->next) {
+				if (attr->ns != NULL && attr->ns->prefix != NULL && dom_ns_is_fast_ex(attr->ns, dom_ns_is_xmlns_magic_token)
+					&& attr->children != NULL && attr->children->content != NULL) {
+					/* This attribute declares a namespace, get the relevant instance.
+					 * The declared namespace is not the same as the namespace of this attribute (which is xmlns). */
+					const char *prefix = (const char *) attr->name;
+					xmlNsPtr ns = dom_libxml_ns_mapper_get_ns_raw_strings(ns_mapper, prefix, (const char *) attr->children->content);
+					zend_hash_str_add_ptr(&tmp_prefix_to_ns_table, prefix, strlen(prefix), ns);
+				}
+			}
+		}
+	}
+
+	in_scope_ns.count = zend_hash_num_elements(&tmp_prefix_to_ns_table);
+	in_scope_ns.list = safe_emalloc(in_scope_ns.count, sizeof(xmlNsPtr), 0);
+
+	size_t index = 0;
+	xmlNsPtr ns;
+	ZEND_HASH_MAP_FOREACH_PTR(&tmp_prefix_to_ns_table, ns) {
+		in_scope_ns.list[index++] = ns;
+	} ZEND_HASH_FOREACH_END();
+
+	zend_hash_destroy(&tmp_prefix_to_ns_table);
+
+	return in_scope_ns;
+}
+
+dom_in_scope_ns dom_get_in_scope_ns_legacy(const xmlNode *node)
+{
+	ZEND_ASSERT(node != NULL);
+
+	dom_in_scope_ns in_scope_ns;
+	in_scope_ns.origin_is_ns_compat = false;
+	in_scope_ns.list = xmlGetNsList(node->doc, node);
+	in_scope_ns.count = 0;
+
+	if (in_scope_ns.list != NULL) {
+		while (in_scope_ns.list[in_scope_ns.count] != NULL) {
+			in_scope_ns.count++;
+		}
+	}
+
+	return in_scope_ns;
+}
+
+void dom_in_scope_ns_destroy(dom_in_scope_ns *in_scope_ns)
+{
+	ZEND_ASSERT(in_scope_ns != NULL);
+	if (in_scope_ns->origin_is_ns_compat) {
+		efree(in_scope_ns->list);
+	} else {
+		xmlFree(in_scope_ns->list);
+	}
+}
+
 #endif  /* HAVE_LIBXML && HAVE_DOM */

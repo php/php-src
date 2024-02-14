@@ -63,4 +63,14 @@ void dom_libxml_reconcile_modern(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr nod
 void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp);
 xmlAttrPtr dom_ns_compat_mark_attribute(dom_libxml_ns_mapper *mapper, xmlNodePtr node, xmlNsPtr ns);
 
+typedef struct _dom_in_scope_ns {
+   xmlNsPtr *list;
+   size_t count;
+   bool origin_is_ns_compat;
+} dom_in_scope_ns;
+
+dom_in_scope_ns dom_get_in_scope_ns(dom_libxml_ns_mapper *ns_mapper, const xmlNode *node);
+dom_in_scope_ns dom_get_in_scope_ns_legacy(const xmlNode *node);
+void dom_in_scope_ns_destroy(dom_in_scope_ns *in_scope_ns);
+
 #endif
