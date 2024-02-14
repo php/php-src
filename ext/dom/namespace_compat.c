@@ -296,7 +296,7 @@ void dom_ns_compat_mark_attribute_list(dom_libxml_ns_mapper *mapper, xmlNodePtr 
 	node->nsDef = NULL;
 }
 
-static bool dom_ns_is_fast_ex(xmlNsPtr ns, const dom_ns_magic_token *magic_token)
+bool dom_ns_is_fast_ex(xmlNsPtr ns, const dom_ns_magic_token *magic_token)
 {
 	ZEND_ASSERT(ns != NULL);
 	/* cached for fast checking */

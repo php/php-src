@@ -2072,7 +2072,7 @@ static const char *dom_locate_a_namespace(xmlNodePtr node, const zend_string *pr
 			*     or if prefix is null and it has an attribute whose namespace is the XMLNS namespace, namespace prefix is null, and local name is "xmlns",
 			*     then return its value if it is not the empty string, and null otherwise. */
 			for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
-				if (attr->ns == NULL || !xmlStrEqual(attr->ns->href, BAD_CAST DOM_XMLNS_NS_URI)) {
+				if (attr->ns == NULL || !dom_ns_is_fast_ex(attr->ns, dom_ns_is_xmlns_magic_token)) {
 					continue;
 				}
 				if ((prefix != NULL && xmlStrEqual(attr->ns->prefix, BAD_CAST "xmlns") && xmlStrEqual(attr->name, BAD_CAST ZSTR_VAL(prefix)))
