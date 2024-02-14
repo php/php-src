@@ -26,6 +26,8 @@ var_dump(ip2long("777.777.777.777"));
 var_dump(ip2long("111.111.111.111"));
 
 var_dump(long2ip(-110000));
+var_dump(long2ip(PHP_INT_MAX));
+var_dump(long2ip(PHP_INT_MIN));
 
 echo "Done\n";
 ?>
@@ -46,4 +48,6 @@ bool(false)
 bool(false)
 int(1869573999)
 string(13) "255.254.82.80"
+string(15) "255.255.255.255"
+string(7) "0.0.0.0"
 Done
