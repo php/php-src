@@ -2412,20 +2412,11 @@ void _php_curl_cleanup_handle(php_curl *ch)
 /* }}} */
 
 /* {{{ Perform a cURL session */
-PHP_FUNCTION(curl_exec)
+static zend_result php_curl_exec(zval *return_value, php_curl *ch)
 {
 	CURLcode	error;
-	zval		*zid;
-	php_curl	*ch;
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &zid, curl_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	ch = Z_CURL_P(zid);
 
 	_php_curl_verify_handlers(ch, /* reporterror */ true);
-
 	_php_curl_cleanup_handle(ch);
 
 	error = curl_easy_perform(ch->cp);
@@ -2433,7 +2424,7 @@ PHP_FUNCTION(curl_exec)
 
 	if (error != CURLE_OK) {
 		smart_str_free(&ch->handlers.write->buf);
-		RETURN_FALSE;
+		return FAILURE;
 	}
 
 	if (!Z_ISUNDEF(ch->handlers.std_err)) {
@@ -2446,7 +2437,8 @@ PHP_FUNCTION(curl_exec)
 
 	if (ch->handlers.write->method == PHP_CURL_RETURN && ch->handlers.write->buf.s) {
 		smart_str_0(&ch->handlers.write->buf);
-		RETURN_STR_COPY(ch->handlers.write->buf.s);
+		RETVAL_STR_COPY(ch->handlers.write->buf.s);
+		return SUCCESS;
 	}
 
 	/* flush the file handle, so any remaining data is synched to disk */
@@ -2458,9 +2450,36 @@ PHP_FUNCTION(curl_exec)
 	}
 
 	if (ch->handlers.write->method == PHP_CURL_RETURN) {
-		RETURN_EMPTY_STRING();
+		RETVAL_EMPTY_STRING();
 	} else {
-		RETURN_TRUE;
+		RETVAL_TRUE;
+	}
+
+	return SUCCESS;
+}
+
+PHP_FUNCTION(curl_exec)
+{
+	zval *zid;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(zid, curl_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (php_curl_exec(return_value, Z_CURL_P(zid)) == FAILURE) {
+		RETURN_FALSE;
+	}
+}
+
+PHP_METHOD(CurlHandle, exec)
+{
+	php_curl *ch = Z_CURL_P(getThis());
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (php_curl_exec(return_value, ch) == FAILURE) {
+		curl_throw_last_error(ch, "Failed executing cURL request");
+		RETURN_THROWS();
 	}
 }
 /* }}} */

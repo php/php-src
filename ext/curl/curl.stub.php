@@ -3596,8 +3596,12 @@ final class CurlHandle
 	/** @alias curl_unescape */
 	public function unescape(string $str): string {}
 
-	/** @alias curl_exec */
-	public function exec(): string|bool {}
+	/**
+	 * If CURLOPT_RETURNTRANSFER is True, returns the result on success,
+	 * otherwise returns True, and the result will be output.
+	 * @throws CurlHandleException on failure.
+	 */
+	public function exec(): string|true {}
 
 	/** @alias curl_pause */
 	public function pause(int $flags): int {}
@@ -3781,7 +3785,7 @@ function curl_share_setopt(CurlShareHandle $share_handle, int $option, mixed $va
 /** @refcount 1 */
 function curl_share_strerror(int $error_code): ?string {}
 
-function curl_share_error(CurlShareHandle $share_handle): int {}
+function curl_share_error(CurlShareHandle $share_handle): ?string {}
 
 /** @refcount 1 */
 function curl_strerror(int $error_code): ?string {}

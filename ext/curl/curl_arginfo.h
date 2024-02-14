@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 74c365fa1f233a4b089c28e94b2b304262848de9 */
+ * Stub hash: e92e5f32d30d2c1df16025b97f2fb6d648bec932 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -137,6 +137,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_curl_share_strerror arginfo_curl_multi_strerror
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_share_error, 0, 1, IS_STRING, 1)
+	ZEND_ARG_OBJ_INFO(0, share_handle, CurlShareHandle, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_curl_strerror arginfo_curl_multi_strerror
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_curl_version, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -162,7 +166,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_CurlHandle_unescape arginfo_class_CurlHandle_escape
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_CurlHandle_exec, 0, 0, MAY_BE_STRING|MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_CurlHandle_exec, 0, 0, MAY_BE_STRING|MAY_BE_TRUE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_CurlHandle_pause, 0, 1, IS_LONG, 0)
@@ -268,16 +272,17 @@ ZEND_FUNCTION(curl_share_errno);
 ZEND_FUNCTION(curl_share_init);
 ZEND_FUNCTION(curl_share_setopt);
 ZEND_FUNCTION(curl_share_strerror);
+ZEND_FUNCTION(curl_share_error);
 ZEND_FUNCTION(curl_strerror);
 ZEND_FUNCTION(curl_version);
 ZEND_METHOD(CurlHandle, __construct);
+ZEND_METHOD(CurlHandle, exec);
 ZEND_METHOD(CurlHandle, setOpt);
 ZEND_METHOD(CurlHandle, setOptArray);
 ZEND_METHOD(CurlMultiHandle, addHandle);
 ZEND_METHOD(CurlMultiHandle, removeHandle);
 ZEND_METHOD(CurlMultiHandle, setOpt);
 ZEND_METHOD(CurlMultiHandle, exec);
-ZEND_FUNCTION(curl_share_error);
 ZEND_METHOD(CurlShareHandle, setOpt);
 
 
@@ -316,6 +321,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_share_init, arginfo_curl_share_init)
 	ZEND_FE(curl_share_setopt, arginfo_curl_share_setopt)
 	ZEND_FE(curl_share_strerror, arginfo_curl_share_strerror)
+	ZEND_FE(curl_share_error, arginfo_curl_share_error)
 	ZEND_FE(curl_strerror, arginfo_curl_strerror)
 	ZEND_FE(curl_version, arginfo_curl_version)
 	ZEND_FE_END
@@ -349,7 +355,7 @@ static const zend_function_entry class_CurlHandle_methods[] = {
 	ZEND_ME_MAPPING(strerror, curl_strerror, arginfo_class_CurlHandle_strerror, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME_MAPPING(escape, curl_escape, arginfo_class_CurlHandle_escape, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(unescape, curl_unescape, arginfo_class_CurlHandle_unescape, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(exec, curl_exec, arginfo_class_CurlHandle_exec, ZEND_ACC_PUBLIC)
+	ZEND_ME(CurlHandle, exec, arginfo_class_CurlHandle_exec, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(pause, curl_pause, arginfo_class_CurlHandle_pause, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(reset, curl_reset, arginfo_class_CurlHandle_reset, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getInfo, curl_getinfo, arginfo_class_CurlHandle_getInfo, ZEND_ACC_PUBLIC)
