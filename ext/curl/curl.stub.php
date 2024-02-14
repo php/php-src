@@ -3781,6 +3781,8 @@ function curl_share_setopt(CurlShareHandle $share_handle, int $option, mixed $va
 /** @refcount 1 */
 function curl_share_strerror(int $error_code): ?string {}
 
+function curl_share_error(CurlShareHandle $share_handle): int {}
+
 /** @refcount 1 */
 function curl_strerror(int $error_code): ?string {}
 
