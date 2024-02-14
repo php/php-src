@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 
 - Curl:
   . Fix memory leak when setting a list via curl_setopt fails. (nielsdos)
+  . Fix incorrect OpenSSL version detection. (Peter Kokot)
 
 - Date:
   . Fix leaks with multiple calls to DatePeriod iterator current(). (nielsdos)
