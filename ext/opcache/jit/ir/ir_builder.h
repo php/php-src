@@ -614,6 +614,9 @@ extern "C" {
 #define ir_END_list(_list)                do { _list = _ir_END_LIST(_ir_CTX, _list); } while (0)
 #define ir_MERGE_list(_list)              _ir_MERGE_LIST(_ir_CTX, (_list))
 
+#define ir_END_PHI_list(_list, _val)      do { _list = _ir_END_PHI_LIST(_ir_CTX, _list, _val); } while (0)
+#define ir_PHI_list(_list)                _ir_PHI_LIST(_ir_CTX, (_list))
+
 #define ir_MERGE_WITH(_src2)              do {ir_ref end = ir_END(); ir_MERGE_2(end, _src2);} while (0)
 #define ir_MERGE_WITH_EMPTY_TRUE(_if)     do {ir_ref end = ir_END(); ir_IF_TRUE(_if); ir_MERGE_2(end, ir_END());} while (0)
 #define ir_MERGE_WITH_EMPTY_FALSE(_if)    do {ir_ref end = ir_END(); ir_IF_FALSE(_if); ir_MERGE_2(end, ir_END());} while (0)
@@ -655,6 +658,7 @@ void   _ir_ENTRY(ir_ctx *ctx, ir_ref src, ir_ref num);
 void   _ir_BEGIN(ir_ctx *ctx, ir_ref src);
 ir_ref _ir_END(ir_ctx *ctx);
 ir_ref _ir_END_LIST(ir_ctx *ctx, ir_ref list);
+ir_ref _ir_END_PHI_LIST(ir_ctx *ctx, ir_ref list, ir_ref val);
 ir_ref _ir_IF(ir_ctx *ctx, ir_ref condition);
 void   _ir_IF_TRUE(ir_ctx *ctx, ir_ref if_ref);
 void   _ir_IF_TRUE_cold(ir_ctx *ctx, ir_ref if_ref);
@@ -664,6 +668,7 @@ void   _ir_MERGE_2(ir_ctx *ctx, ir_ref src1, ir_ref src2);
 void   _ir_MERGE_N(ir_ctx *ctx, ir_ref n, ir_ref *inputs);
 void   _ir_MERGE_SET_OP(ir_ctx *ctx, ir_ref merge, ir_ref pos, ir_ref src);
 void   _ir_MERGE_LIST(ir_ctx *ctx, ir_ref list);
+ir_ref _ir_PHI_LIST(ir_ctx *ctx, ir_ref list);
 ir_ref _ir_LOOP_BEGIN(ir_ctx *ctx, ir_ref src1);
 ir_ref _ir_LOOP_END(ir_ctx *ctx);
 ir_ref _ir_TLS(ir_ctx *ctx, ir_ref index, ir_ref offset);

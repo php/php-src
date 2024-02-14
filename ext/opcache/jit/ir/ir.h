@@ -501,13 +501,14 @@ void ir_strtab_free(ir_strtab *strtab);
 #define IR_GEN_ENDBR           (1<<14)
 #define IR_MERGE_EMPTY_ENTRIES (1<<15)
 
-#define IR_OPT_FOLDING         (1<<16)
-#define IR_OPT_CFG             (1<<17) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
-#define IR_OPT_CODEGEN         (1<<18)
-#define IR_GEN_NATIVE          (1<<19)
-#define IR_GEN_CODE            (1<<20) /* C or LLVM */
+#define IR_OPT_INLINE          (1<<16)
+#define IR_OPT_FOLDING         (1<<17)
+#define IR_OPT_CFG             (1<<18) /* merge BBs, by remove END->BEGIN nodes during CFG construction */
+#define IR_OPT_CODEGEN         (1<<19)
+#define IR_GEN_NATIVE          (1<<20)
+#define IR_GEN_CODE            (1<<21) /* C or LLVM */
 
-#define IR_GEN_CACHE_DEMOTE    (1<<21) /* Demote the generated code from closest CPU caches */
+#define IR_GEN_CACHE_DEMOTE    (1<<22) /* Demote the generated code from closest CPU caches */
 
 /* debug related */
 #ifdef IR_DEBUG

@@ -664,7 +664,7 @@ static void ir_emit_dessa_move(ir_ctx *ctx, ir_type type, ir_ref to, ir_ref from
 
 IR_ALWAYS_INLINE void ir_dessa_resolve_cycle(ir_ctx *ctx, int32_t *pred, int32_t *loc, ir_bitset todo, ir_type type, int32_t to, ir_reg tmp_reg, ir_reg tmp_fp_reg)
 {
-	ir_reg from;
+	ir_ref from;
 	ir_mem tmp_spill_slot;
 
 	IR_MEM_VAL(tmp_spill_slot) = 0;

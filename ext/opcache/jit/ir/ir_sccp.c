@@ -603,14 +603,24 @@ static void ir_sccp_remove_unfeasible_merge_inputs(ir_ctx *ctx, ir_insn *_values
 
 						prev = input_insn->op1;
 						use_list = &ctx->use_lists[ref];
-						for (k = 0, p = &ctx->use_edges[use_list->refs]; k < use_list->count; k++, p++) {
-							use = *p;
-							use_insn = &ctx->ir_base[use];
-							IR_ASSERT((use_insn->op != IR_PHI) && "PHI must be already removed");
-							if (ir_op_flags[use_insn->op] & IR_OP_FLAG_CONTROL) {
-								next = use;
-								next_insn = use_insn;
-								break;
+						if (use_list->count == 1) {
+							next = ctx->use_edges[use_list->refs];
+							next_insn = &ctx->ir_base[next];
+						} else {
+							for (k = 0, p = &ctx->use_edges[use_list->refs]; k < use_list->count; k++, p++) {
+								use = *p;
+								use_insn = &ctx->ir_base[use];
+								IR_ASSERT((use_insn->op != IR_PHI) && "PHI must be already removed");
+								if (ir_op_flags[use_insn->op] & IR_OP_FLAG_CONTROL) {
+									IR_ASSERT(!next);
+									next = use;
+									next_insn = use_insn;
+								} else {
+									IR_ASSERT(use_insn->op1 == ref);
+									use_insn->op1 = prev;
+									ir_sccp_add_to_use_list(ctx, prev, use);
+									p = &ctx->use_edges[use_list->refs + k];
+								}
 							}
 						}
 						IR_ASSERT(prev && next);
@@ -878,7 +888,8 @@ int ir_sccp(ir_ctx *ctx)
 					}
 				}
 				IR_MAKE_BOTTOM(i);
-			} else if ((flags & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)
+			} else if (((flags & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)
+						|| insn->op == IR_ALLOCA)
 					&& ctx->use_lists[i].count == 1) {
 				/* dead load */
 				_values[i].optx = IR_LOAD;
@@ -928,7 +939,7 @@ int ir_sccp(ir_ctx *ctx)
 #ifdef IR_DEBUG
 	if (ctx->flags & IR_DEBUG_SCCP) {
 		for (i = 1; i < ctx->insns_count; i++) {
-			if (IR_IS_CONST_OP(_values[i].op)) {
+			if (IR_IS_CONST_OP(_values[i].op) || IR_IS_SYM_CONST(_values[i].op)) {
 				fprintf(stderr, "%d. CONST(", i);
 				ir_print_const(ctx, &_values[i], stderr, true);
 				fprintf(stderr, ")\n");
@@ -955,6 +966,10 @@ int ir_sccp(ir_ctx *ctx)
 		} else if (IR_IS_CONST_OP(value->op)) {
 			/* replace instruction by constant */
 			j = ir_const(ctx, value->val, value->type);
+			ir_sccp_replace_insn(ctx, _values, i, j, &worklist);
+		} else if (IR_IS_SYM_CONST(value->op)) {
+			/* replace instruction by constant */
+			j = ir_const_ex(ctx, value->val, value->type, value->optx);
 			ir_sccp_replace_insn(ctx, _values, i, j, &worklist);
 #if IR_COMBO_COPY_PROPAGATION
 		} else if (value->op == IR_COPY) {
@@ -1008,7 +1023,8 @@ int ir_sccp(ir_ctx *ctx)
 				} else {
 					ir_sccp_fold2(ctx, _values, i, &worklist);
 				}
-			} else if ((ir_op_flags[insn->op] & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)
+			} else if (((ir_op_flags[insn->op] & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)
+						|| insn->op == IR_ALLOCA)
 					&& ctx->use_lists[i].count == 1) {
 				/* dead load */
 				ir_ref next = ctx->use_edges[ctx->use_lists[i].refs];

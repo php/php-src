@@ -561,7 +561,7 @@ int ir_get_target_constraints(ir_ctx *ctx, ir_ref ref, ir_target_constraints *co
 					n++;
 				}
 			}
-			flags = IR_USE_SHOULD_BE_IN_REG | IR_OP2_SHOULD_BE_IN_REG | IR_OP3_SHOULD_BE_IN_REG;
+			flags = IR_USE_SHOULD_BE_IN_REG | IR_OP2_MUST_BE_IN_REG | IR_OP3_SHOULD_BE_IN_REG;
 			break;
 		case IR_COND:
 			insn = &ctx->ir_base[ref];
@@ -3953,6 +3953,10 @@ static void ir_emit_alloca(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	dasm_State **Dst = &data->dasm_state;
 	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
 
+	if (ctx->use_lists[def].count == 1) {
+		/* dead alloca */
+		return;
+	}
 	if (IR_IS_CONST_REF(insn->op2)) {
 		ir_insn *val = &ctx->ir_base[insn->op2];
 		int32_t size = val->val.i32;
@@ -4314,16 +4318,18 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 			}
 		}
 
-		if (aarch64_may_encode_imm12(max.i64)) {
-			|	ASM_REG_IMM_OP cmp, type, op2_reg, max.i64
-		} else {
-			ir_emit_load_imm_int(ctx, type, tmp_reg, max.i64);
-			|	ASM_REG_REG_OP cmp, type, op2_reg, tmp_reg
-		}
-		if (IR_IS_TYPE_SIGNED(type)) {
-			|	bgt =>default_label
-		} else {
-			|	bhi =>default_label
+		if (default_label) {
+			if (aarch64_may_encode_imm12(max.i64)) {
+				|	ASM_REG_IMM_OP cmp, type, op2_reg, max.i64
+			} else {
+				ir_emit_load_imm_int(ctx, type, tmp_reg, max.i64);
+				|	ASM_REG_REG_OP cmp, type, op2_reg, tmp_reg
+			}
+			if (IR_IS_TYPE_SIGNED(type)) {
+				|	bgt =>default_label
+			} else {
+				|	bhi =>default_label
+			}
 		}
 
 		if (op1_reg == IR_REG_NONE) {
@@ -4335,11 +4341,15 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 			ir_emit_load_imm_int(ctx, type, tmp_reg, min.i64);
 			|	ASM_REG_REG_REG_OP subs, type, op1_reg, op2_reg, tmp_reg
 		}
-		if (IR_IS_TYPE_SIGNED(type)) {
-			|	blt =>default_label
-		} else {
-			|	blo =>default_label
+
+		if (default_label) {
+			if (IR_IS_TYPE_SIGNED(type)) {
+				|	blt =>default_label
+			} else {
+				|	blo =>default_label
+			}
 		}
+
 		|	adr Rx(tmp_reg), >1
 		|	ldr Rx(tmp_reg), [Rx(tmp_reg), Rx(op1_reg), lsl #3]
 		|	br Rx(tmp_reg)
@@ -4352,25 +4362,29 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 		|1:
 		for (i = 0; i <= (max.i64 - min.i64); i++) {
 			int b = labels[i];
-			ir_block *bb = &ctx->cfg_blocks[b];
-			ir_insn *insn = &ctx->ir_base[bb->end];
+			if (b) {
+				ir_block *bb = &ctx->cfg_blocks[b];
+				ir_insn *insn = &ctx->ir_base[bb->end];
 
-			if (insn->op == IR_IJMP && IR_IS_CONST_REF(insn->op2)) {
-				ir_ref prev = ctx->prev_ref[bb->end];
-				if (prev != bb->start && ctx->ir_base[prev].op == IR_SNAPSHOT) {
-					prev = ctx->prev_ref[prev];
-				}
-				if (prev == bb->start) {
-					void *addr = ir_jmp_addr(ctx, insn, &ctx->ir_base[insn->op2]);
-
-					|	.addr &addr
-					if (ctx->ir_base[bb->start].op != IR_CASE_DEFAULT) {
-						bb->flags |= IR_BB_EMPTY;
+				if (insn->op == IR_IJMP && IR_IS_CONST_REF(insn->op2)) {
+					ir_ref prev = ctx->prev_ref[bb->end];
+					if (prev != bb->start && ctx->ir_base[prev].op == IR_SNAPSHOT) {
+						prev = ctx->prev_ref[prev];
 					}
-					continue;
+					if (prev == bb->start) {
+						void *addr = ir_jmp_addr(ctx, insn, &ctx->ir_base[insn->op2]);
+
+						|	.addr &addr
+						if (ctx->ir_base[bb->start].op != IR_CASE_DEFAULT) {
+							bb->flags |= IR_BB_EMPTY;
+						}
+						continue;
+					}
 				}
+				|	.addr =>b
+			} else {
+				|	.addr 0
 			}
-			|	.addr =>b
 		}
 		|.code
 		ir_mem_free(labels);
@@ -5187,7 +5201,9 @@ static void ir_emit_load_params(ir_ctx *ctx)
 				dst_reg = IR_REG_NUM(ctx->regs[use][0]);
 				IR_ASSERT(src_reg != IR_REG_NONE || dst_reg != IR_REG_NONE ||
 					stack_offset == ctx->live_intervals[ctx->vregs[use]]->stack_spill_pos +
-						((ctx->flags & IR_USE_FRAME_POINTER) ? -ctx->stack_frame_size : ctx->call_stack_size));
+						((ctx->flags & IR_USE_FRAME_POINTER) ?
+							-(ctx->stack_frame_size - ctx->stack_frame_alignment) :
+							ctx->call_stack_size));
 				if (src_reg != dst_reg) {
 					ir_emit_param_move(ctx, insn->type, src_reg, dst_reg, use, stack_offset);
 				}

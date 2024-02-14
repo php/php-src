@@ -756,7 +756,7 @@ typedef struct _ir_addrtab_bucket {
 void ir_addrtab_init(ir_hashtab *tab, uint32_t size);
 void ir_addrtab_free(ir_hashtab *tab);
 ir_ref ir_addrtab_find(const ir_hashtab *tab, uint64_t key);
-bool ir_addrtab_add(ir_hashtab *tab, uint64_t key, ir_ref val);
+void ir_addrtab_set(ir_hashtab *tab, uint64_t key, ir_ref val);
 
 /*** IR OP info ***/
 extern const uint8_t ir_type_flags[IR_LAST_TYPE];
@@ -769,6 +769,8 @@ extern const char *ir_op_name[IR_LAST_OP];
 #define IR_IS_CONST_OP(op)       ((op) > IR_NOP && (op) <= IR_C_FLOAT)
 #define IR_IS_FOLDABLE_OP(op)    ((op) <= IR_LAST_FOLDABLE_OP)
 #define IR_IS_SYM_CONST(op)      ((op) == IR_STR || (op) == IR_SYM || (op) == IR_FUNC)
+
+ir_ref ir_const_ex(ir_ctx *ctx, ir_val val, uint8_t type, uint32_t optx);
 
 IR_ALWAYS_INLINE bool ir_const_is_true(const ir_insn *v)
 {

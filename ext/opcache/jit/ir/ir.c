@@ -488,7 +488,7 @@ ir_ref ir_unique_const_addr(ir_ctx *ctx, uintptr_t addr)
 	return ref;
 }
 
-static IR_NEVER_INLINE ir_ref ir_const_ex(ir_ctx *ctx, ir_val val, uint8_t type, uint32_t optx)
+ir_ref ir_const_ex(ir_ctx *ctx, ir_val val, uint8_t type, uint32_t optx)
 {
 	ir_insn *insn, *prev_insn;
 	ir_ref ref, prev;
@@ -1499,7 +1499,7 @@ ir_ref ir_addrtab_find(const ir_hashtab *tab, uint64_t key)
 	return IR_INVALID_VAL;
 }
 
-bool ir_addrtab_add(ir_hashtab *tab, uint64_t key, ir_ref val)
+void ir_addrtab_set(ir_hashtab *tab, uint64_t key, ir_ref val)
 {
 	char *data = (char*)tab->data;
 	uint32_t pos = ((uint32_t*)data)[(int32_t)(key | tab->mask)];
@@ -1508,7 +1508,8 @@ bool ir_addrtab_add(ir_hashtab *tab, uint64_t key, ir_ref val)
 	while (pos != IR_INVALID_IDX) {
 		p = (ir_addrtab_bucket*)(data + pos);
 		if (p->key == key) {
-			return p->val == val;
+			p->val = val;
+			return;
 		}
 		pos = p->next;
 	}
@@ -1527,7 +1528,6 @@ bool ir_addrtab_add(ir_hashtab *tab, uint64_t key, ir_ref val)
 	key |= tab->mask;
 	p->next = ((uint32_t*)data)[(int32_t)key];
 	((uint32_t*)data)[(int32_t)key] = pos;
-	return 1;
 }
 
 /* Memory API */
@@ -1977,6 +1977,18 @@ ir_ref _ir_END_LIST(ir_ctx *ctx, ir_ref list)
 	return ref;
 }
 
+ir_ref _ir_END_PHI_LIST(ir_ctx *ctx, ir_ref list, ir_ref val)
+{
+	ir_ref ref;
+
+	IR_ASSERT(ctx->control);
+	IR_ASSERT(!list || ctx->ir_base[list].op == IR_END);
+	/* create a liked list of END nodes with the same destination through END.op2 */
+	ref = ir_emit3(ctx, IR_END, ctx->control, list, val);
+	ctx->control = IR_UNUSED;
+	return ref;
+}
+
 void _ir_MERGE_LIST(ir_ctx *ctx, ir_ref list)
 {
 	ir_ref ref = list;
@@ -2014,6 +2026,41 @@ void _ir_MERGE_LIST(ir_ctx *ctx, ir_ref list)
 			}
 		}
 	}
+}
+
+ir_ref _ir_PHI_LIST(ir_ctx *ctx, ir_ref list)
+{
+	ir_insn *merge, *end;
+	ir_ref phi, *ops, i;
+	ir_type type;
+
+	if (list == IR_UNUSED) {
+		return IR_UNUSED;
+	}
+	end = &ctx->ir_base[list];
+	if (!end->op2) {
+		phi = end->op3;
+		end->op3 = IR_UNUSED;
+		_ir_BEGIN(ctx, list);
+	} else if (!end->op3) {
+		_ir_MERGE_LIST(ctx, list);
+		phi = IR_UNUSED;
+	} else {
+		type = ctx->ir_base[end->op3].type;
+		_ir_MERGE_LIST(ctx, list);
+		merge = &ctx->ir_base[ctx->control];
+		IR_ASSERT(merge->op == IR_MERGE);
+		phi = ir_emit_N(ctx, IR_OPT(IR_PHI, type), merge->inputs_count + 1);
+		merge = &ctx->ir_base[ctx->control];
+		ops = merge->ops;
+		ir_set_op(ctx, phi, 1, ctx->control);
+		for (i = 0; i < merge->inputs_count; i++) {
+			end = &ctx->ir_base[ops[i + 1]];
+			ir_set_op(ctx, phi, i + 2, end->op3);
+			end->op3 = IR_END;
+		}
+	}
+	return phi;
 }
 
 ir_ref _ir_LOOP_BEGIN(ir_ctx *ctx, ir_ref src1)
