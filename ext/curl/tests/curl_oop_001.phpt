@@ -18,18 +18,16 @@ curl
   $ch = new CurlHandle();
 
   ob_start(); // start output buffering
-  $ok = $ch->setOpt(CURLOPT_URL, $url)->exec();
+  $returned_content = $ch->setOpt(CURLOPT_URL, $url)->exec();
   unset($ch);
-  $curl_content = ob_get_contents();
+  $echoed_content = ob_get_contents();
   ob_end_clean();
 
-  if($ok) {
-    var_dump( $curl_content );
-  } else {
-    echo "CurlHandle::exec() returned false";
-  }
+  var_dump($echoed_content);
+  var_dump($returned_content);
 ?>
 --EXPECT--
 *** Testing CurlHandle::exec() : basic functionality ***
+string(0) ""
 string(25) "Hello World!
 Hello World!"

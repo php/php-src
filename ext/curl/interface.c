@@ -1194,6 +1194,10 @@ PHP_METHOD(CurlHandle, __construct)
 		zend_throw_exception(curl_handle_exception_ce, err, 0);
 		RETURN_THROWS();
 	}
+
+	// Unlike the instance produced by curl_init(),
+	// (new CurlHandle) returns the transfer by default.
+	Z_CURL_P(getThis())->handlers.write->method = PHP_CURL_RETURN;
 }
 /* }}} */
 
