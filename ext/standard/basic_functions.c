@@ -643,7 +643,8 @@ PHP_FUNCTION(long2ip)
 	ip = (zend_ulong)sip;
 
 	myaddr.s_addr = htonl(ip);
-	inet_ntop(AF_INET, &myaddr, str, sizeof(str));
+	const char* result = inet_ntop(AF_INET, &myaddr, str, sizeof(str));
+	ZEND_ASSERT(result != NULL);
 
 	RETURN_STRING(str);
 }
