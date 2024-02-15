@@ -41,7 +41,7 @@ if ($time >= $sleeplow) {
 } else {
     echo "TEST FAILED - time is {$time} secs and sleep was {$sleeptime} secs\n";
 }
-if(!have_usleep()) {
+if (!have_usleep()) {
     // ¯\_(ツ)_/¯
     echo "FRACTIONAL SLEEP TEST PASSED\n";
 } else {

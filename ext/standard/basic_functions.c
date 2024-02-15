@@ -1129,36 +1129,34 @@ PHP_FUNCTION(flush)
 /* }}} */
 
 /* {{{ Delay for a given number of seconds */
-PHP_FUNCTION(sleep)
-{
-	zval *num;
+PHP_FUNCTION(sleep) {
+  zval *num;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_NUMBER(num)
-	ZEND_PARSE_PARAMETERS_END();
-    if (Z_TYPE_P(num) == IS_DOUBLE) {
-		const double seconds = Z_DVAL_P(num);
-		if (UNEXPECTED(seconds < 0)) {
-			zend_argument_value_error(1, "must be greater than or equal to 0");
-			RETURN_THROWS();
-		}
-#ifdef HAVE_USLEEP
-		const unsigned int fraction_microseconds = (unsigned int)((seconds - (unsigned int)seconds) * 1000000);
-		if(fraction_microseconds > 0) {
-			usleep(fraction_microseconds);
-		}
-#endif
-		RETURN_LONG(php_sleep((unsigned int)seconds));
-	} else {
-		ZEND_ASSERT(Z_TYPE_P(num) == IS_LONG);
-		zend_long seconds = Z_LVAL_P(num);
-		if (UNEXPECTED(seconds < 0)) {
-			zend_argument_value_error(1, "must be greater than or equal to 0");
-			RETURN_THROWS();
-		}
-		RETURN_LONG(php_sleep((unsigned int)seconds));
+  ZEND_PARSE_PARAMETERS_START(1, 1)
+  Z_PARAM_NUMBER(num)
+  ZEND_PARSE_PARAMETERS_END();
+  if (Z_TYPE_P(num) == IS_DOUBLE) {
+    const double seconds = Z_DVAL_P(num);
+    if (UNEXPECTED(seconds < 0)) {
+      zend_argument_value_error(1, "must be greater than or equal to 0");
+      RETURN_THROWS();
     }
-	ZEND_UNREACHABLE();
+#ifdef HAVE_USLEEP
+    const unsigned int fraction_microseconds =
+        (unsigned int)((seconds - (unsigned int)seconds) * 1000000);
+    if (fraction_microseconds > 0) {
+      usleep(fraction_microseconds);
+    }
+#endif
+    RETURN_LONG(php_sleep((unsigned int)seconds));
+  }
+  ZEND_ASSERT(Z_TYPE_P(num) == IS_LONG); // Z_PARAM_NUMBER(num) above guarantee that it's double or float or throw :)
+  zend_long seconds = Z_LVAL_P(num);
+  if (UNEXPECTED(seconds < 0)) {
+    zend_argument_value_error(1, "must be greater than or equal to 0");
+    RETURN_THROWS();
+  }
+  RETURN_LONG(php_sleep((unsigned int)seconds));
 }
 /* }}} */
 
