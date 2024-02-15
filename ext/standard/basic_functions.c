@@ -1158,6 +1158,7 @@ PHP_FUNCTION(sleep)
 		}
 		RETURN_LONG(php_sleep((unsigned int)seconds));
     }
+	ZEND_UNREACHABLE();
 }
 /* }}} */
 
