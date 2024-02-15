@@ -358,6 +358,20 @@ namespace {
      */
     const LDAP_OPT_X_TLS_PROTOCOL_TLS1_2 = UNKNOWN;
 #endif
+#ifdef LDAP_OPT_X_TLS_PROTOCOL_TLS1_3
+    /**
+     * @var int
+     * @cvalue LDAP_OPT_X_TLS_PROTOCOL_TLS1_3
+     */
+    const LDAP_OPT_X_TLS_PROTOCOL_TLS1_3 = UNKNOWN;
+#endif
+#ifdef LDAP_OPT_X_TLS_PROTOCOL_MAX
+    /**
+     * @var int
+     * @cvalue LDAP_OPT_X_TLS_PROTOCOL_MAX
+     */
+    const LDAP_OPT_X_TLS_PROTOCOL_MAX = UNKNOWN;
+#endif
 
 #ifdef LDAP_OPT_X_TLS_PACKAGE
     /**

@@ -58,6 +58,10 @@ PHP                                                                        NEWS
     aliases for ::ROUND_DOWN and ::ROUND_UP. (Jorg Sowa)
   . Added NumberFormatter::ROUND_HALFODD. (Ayesh Karunaratne)
 
+- LDAP:
+  . Added LDAP_OPT_X_TLS_PROTOCOL_MAX/LDAP_OPT_X_TLS_PROTOCOL_TLS1_3
+    constants. (StephenWall)
+
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
 
