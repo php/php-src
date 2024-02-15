@@ -1243,25 +1243,6 @@ AC_DEFUN([PHP_MISSING_TIME_R_DECL],[
 ])
 
 dnl
-dnl PHP_STRUCT_FLOCK
-dnl
-AC_DEFUN([PHP_STRUCT_FLOCK],[
-AC_CACHE_CHECK(for struct flock,ac_cv_struct_flock,
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <unistd.h>
-#include <fcntl.h>
-        ]], [[struct flock x;]])],[
-          ac_cv_struct_flock=yes
-        ],[
-          ac_cv_struct_flock=no
-        ])
-)
-if test "$ac_cv_struct_flock" = "yes" ; then
-    AC_DEFINE(HAVE_STRUCT_FLOCK, 1,[whether you have struct flock])
-fi
-])
-
-dnl
 dnl PHP_SOCKADDR_CHECKS
 dnl
 AC_DEFUN([PHP_SOCKADDR_CHECKS], [

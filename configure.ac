@@ -464,8 +464,8 @@ dnl ----------------------------------------------------------------------------
 AC_STRUCT_TIMEZONE
 
 PHP_MISSING_TIME_R_DECL
-PHP_STRUCT_FLOCK
 
+AC_CHECK_TYPES([struct flock],,,[#include <fcntl.h>])
 AC_CHECK_TYPES(socklen_t, [], [], [
   #ifdef HAVE_SYS_TYPES_H
   # include <sys/types.h>
