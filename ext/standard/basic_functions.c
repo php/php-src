@@ -1138,7 +1138,7 @@ PHP_FUNCTION(sleep)
 	ZEND_PARSE_PARAMETERS_END();
     if (Z_TYPE_P(num) == IS_DOUBLE) {
 		const double seconds = Z_DVAL_P(num);
-		if (seconds < 0) {
+		if (UNEXPECTED(seconds < 0)) {
 			zend_argument_value_error(1, "must be greater than or equal to 0");
 			RETURN_THROWS();
 		}
@@ -1152,7 +1152,7 @@ PHP_FUNCTION(sleep)
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(num) == IS_LONG);
 		zend_long seconds = Z_LVAL_P(num);
-		if (seconds < 0) {
+		if (UNEXPECTED(seconds < 0)) {
 			zend_argument_value_error(1, "must be greater than or equal to 0");
 			RETURN_THROWS();
 		}
