@@ -603,7 +603,6 @@ getgrnam_r \
 getpwuid_r \
 getwd \
 glob \
-inet_pton \
 localtime_r \
 lchown \
 memcntl \
