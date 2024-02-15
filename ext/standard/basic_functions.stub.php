@@ -1966,7 +1966,7 @@ function getopt(string $short_options, array $long_options = [], &$rest_index = 
 
 function flush(): void {}
 
-function sleep(int $seconds): int {}
+function sleep(int|float $seconds): int {}
 
 function usleep(int $microseconds): void {}
 
