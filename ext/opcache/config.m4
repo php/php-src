@@ -42,7 +42,7 @@ if test "$PHP_OPCACHE" != "no"; then
         PHP_OPCACHE_JIT=no
         ;;
     esac
-    if test "$host_vendor" = "apple" -a "$host_cpu" = "aarch64" -a "$ZEND_ZTS" = "yes"; then
+    if test "$host_vendor" = "apple" && test "$host_cpu" = "aarch64" && test "$PHP_THREAD_SAFETY" = "yes"; then
       AC_MSG_WARN([JIT not supported on Apple Silicon with ZTS])
       PHP_OPCACHE_JIT=no
     fi
