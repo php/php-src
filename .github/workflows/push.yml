@@ -170,7 +170,7 @@ jobs:
       - name: ./configure
         uses: ./.github/actions/configure-macos
         with:
-          configurationParameters: --enable-debug --disable-zts
+          configurationParameters: --enable-debug --enable-zts
       - name: make
         run: |-
           export PATH="$(brew --prefix)/opt/bison/bin:$PATH"
