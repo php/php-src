@@ -36,6 +36,13 @@
 # define sigev_notify_thread_id _sigev_un._tid
 # endif
 
+// FreeBSD doesn't support CLOCK_BOOTTIME
+# ifdef __FreeBSD__
+# define ZEND_MAX_EXECUTION_TIMERS_CLOCK CLOCK_MONOTONIC
+# else
+# define ZEND_MAX_EXECUTION_TIMERS_CLOCK CLOCK_BOOTTIME
+# endif
+
 ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 {
 	pid_t pid = getpid();
@@ -55,7 +62,7 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 # endif
 
 	// Measure wall time instead of CPU time as originally planned now that it is possible https://github.com/php/php-src/pull/6504#issuecomment-1370303727
-	if (timer_create(CLOCK_BOOTTIME, &sev, &EG(max_execution_timer_timer)) != 0) {
+	if (timer_create(ZEND_MAX_EXECUTION_TIMERS_CLOCK, &sev, &EG(max_execution_timer_timer)) != 0) {
 		zend_strerror_noreturn(E_ERROR, errno, "Could not create timer");
 	}
 
