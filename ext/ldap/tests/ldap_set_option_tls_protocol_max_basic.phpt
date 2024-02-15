@@ -1,5 +1,5 @@
 --TEST--
-ldap_set_option() - Basic test for TLS protocol min ldap option
+ldap_set_option() - Basic test for TLS protocol max ldap option
 --CREDITS--
 Chad Sikorra <Chad.Sikorra@gmail.com>
 --EXTENSIONS--
@@ -17,10 +17,10 @@ foreach([
     LDAP_OPT_X_TLS_PROTOCOL_TLS1_2,
     LDAP_OPT_X_TLS_PROTOCOL_TLS1_3,
 ] as $option) {
-    $result = ldap_set_option($link, LDAP_OPT_X_TLS_PROTOCOL_MIN, $option);
+    $result = ldap_set_option($link, LDAP_OPT_X_TLS_PROTOCOL_MAX, $option);
     var_dump($result);
 
-    ldap_get_option($link, LDAP_OPT_X_TLS_PROTOCOL_MIN, $optionval);
+    ldap_get_option($link, LDAP_OPT_X_TLS_PROTOCOL_MAX, $optionval);
     var_dump($optionval);
 }
 ?>
