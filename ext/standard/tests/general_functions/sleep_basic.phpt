@@ -48,7 +48,7 @@ if (!have_usleep()) {
     $time = microtime(true);
     sleep(0.1);
     $time = microtime(true) - $time;
-    if($time >= 0.09) {
+    if ($time >= 0.09) {
         echo "FRACTIONAL SLEEP TEST PASSED\n";
     } else {
         echo "FRACTIONAL SLEEP TEST FAILED\n";
