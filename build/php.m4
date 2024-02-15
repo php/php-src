@@ -1243,31 +1243,6 @@ AC_DEFUN([PHP_MISSING_TIME_R_DECL],[
 ])
 
 dnl
-dnl PHP_SOCKADDR_CHECKS
-dnl
-AC_DEFUN([PHP_SOCKADDR_CHECKS], [
-  dnl Check for struct sockaddr_storage exists.
-  AC_CACHE_CHECK([for struct sockaddr_storage], ac_cv_sockaddr_storage,
-    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <sys/socket.h>]],
-    [[struct sockaddr_storage s; s]])],
-    [ac_cv_sockaddr_storage=yes], [ac_cv_sockaddr_storage=no])
-  ])
-  if test "$ac_cv_sockaddr_storage" = "yes"; then
-    AC_DEFINE(HAVE_SOCKADDR_STORAGE, 1, [Whether you have struct sockaddr_storage])
-  fi
-  dnl Check if field sa_len exists in struct sockaddr.
-  AC_CACHE_CHECK([for field sa_len in struct sockaddr],ac_cv_sockaddr_sa_len,[
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <sys/socket.h>]], [[static struct sockaddr sa; int n = (int) sa.sa_len; return n;]])],
-    [ac_cv_sockaddr_sa_len=yes], [ac_cv_sockaddr_sa_len=no])
-  ])
-  if test "$ac_cv_sockaddr_sa_len" = "yes"; then
-    AC_DEFINE(HAVE_SOCKADDR_SA_LEN, 1, [Whether struct sockaddr has field sa_len])
-  fi
-])
-
-dnl
 dnl PHP_EBCDIC
 dnl
 AC_DEFUN([PHP_EBCDIC], [
