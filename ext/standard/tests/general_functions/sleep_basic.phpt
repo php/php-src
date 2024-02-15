@@ -46,8 +46,9 @@ if (!have_usleep()) {
     echo "FRACTIONAL SLEEP TEST PASSED\n";
 } else {
     $time = microtime(true);
-    sleep(0.1);
+    $result = sleep(0.1);
     $time = microtime(true) - $time;
+    echo "Fractional sleep return value: " . $result . "\n";
     if ($time >= 0.09) {
         echo "FRACTIONAL SLEEP TEST PASSED\n";
     } else {
@@ -60,4 +61,5 @@ if (!have_usleep()) {
 Thread slept for %f seconds
 Return value: 0
 TEST PASSED
+Fractional sleep return value: 0
 FRACTIONAL SLEEP TEST PASSED
