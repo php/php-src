@@ -237,11 +237,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 
 	freeaddrinfo(res);
 #else
-#ifdef HAVE_INET_PTON
 	if (!inet_pton(AF_INET, host, &in)) {
-#else
-	if (!inet_aton(host, &in)) {
-#endif
 		if(strlen(host) > MAXFQDNLEN) {
 			host_info = NULL;
 			errno = E2BIG;
@@ -545,7 +541,7 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_lo
 
 	/* first, try interpreting the address as a numeric address */
 
-#if HAVE_IPV6 && HAVE_INET_PTON
+#if HAVE_IPV6
 	if (inet_pton(AF_INET6, tmp, &in6->sin6_addr) > 0) {
 		in6->sin6_port = htons(port);
 		in6->sin6_family = AF_INET6;
@@ -554,11 +550,7 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_lo
 		goto out;
 	}
 #endif
-#ifdef HAVE_INET_PTON
 	if (inet_pton(AF_INET, tmp, &in4->sin_addr) > 0) {
-#else
-	if (inet_aton(tmp, &in4->sin_addr) > 0) {
-#endif
 		in4->sin_port = htons(port);
 		in4->sin_family = AF_INET;
 		*sl = sizeof(struct sockaddr_in);
@@ -852,25 +844,21 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 			union {
 				struct sockaddr common;
 				struct sockaddr_in in4;
-#if HAVE_IPV6 && HAVE_INET_PTON
+#if HAVE_IPV6
 				struct sockaddr_in6 in6;
 #endif
 			} local_address;
 			int local_address_len = 0;
 
 			if (sa->sa_family == AF_INET) {
-#ifdef HAVE_INET_PTON
 				if (inet_pton(AF_INET, bindto, &local_address.in4.sin_addr) == 1) {
-#else
-				if (inet_aton(bindto, &local_address.in4.sin_addr)) {
-#endif
 					local_address_len = sizeof(struct sockaddr_in);
 					local_address.in4.sin_family = sa->sa_family;
 					local_address.in4.sin_port = htons(bindport);
 					memset(&(local_address.in4.sin_zero), 0, sizeof(local_address.in4.sin_zero));
 				}
 			}
-#if HAVE_IPV6 && HAVE_INET_PTON
+#if HAVE_IPV6
 			else { /* IPV6 */
 				if (inet_pton(AF_INET6, bindto, &local_address.in6.sin6_addr) == 1) {
 					local_address_len = sizeof(struct sockaddr_in6);

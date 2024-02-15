@@ -2238,10 +2238,8 @@ function syslog(int $priority, string $message): true {} // TODO make return typ
 /** @refcount 1 */
 function inet_ntop(string $ip): string|false {}
 
-#ifdef HAVE_INET_PTON
 /** @refcount 1 */
 function inet_pton(string $ip): string|false {}
-#endif
 
 /* metaphone.c */
 

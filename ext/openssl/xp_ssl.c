@@ -130,7 +130,7 @@
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) \
 	ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
 
-#if defined(HAVE_IPV6) && defined(HAVE_INET_PTON)
+#if defined(HAVE_IPV6)
 /* Used for IPv6 Address peer verification */
 #define EXPAND_IPV6_ADDRESS(_str, _bytes) \
 	do { \

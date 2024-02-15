@@ -722,11 +722,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_inet_ntop arginfo_gethostbyaddr
 
-#if defined(HAVE_INET_PTON)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_inet_pton, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, ip, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_metaphone, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -2522,9 +2520,7 @@ ZEND_FUNCTION(closelog);
 ZEND_FUNCTION(syslog);
 #endif
 ZEND_FUNCTION(inet_ntop);
-#if defined(HAVE_INET_PTON)
 ZEND_FUNCTION(inet_pton);
-#endif
 ZEND_FUNCTION(metaphone);
 ZEND_FUNCTION(header);
 ZEND_FUNCTION(header_remove);
@@ -3156,9 +3152,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(syslog, arginfo_syslog)
 #endif
 	ZEND_FE(inet_ntop, arginfo_inet_ntop)
-#if defined(HAVE_INET_PTON)
 	ZEND_FE(inet_pton, arginfo_inet_pton)
-#endif
 	ZEND_FE(metaphone, arginfo_metaphone)
 	ZEND_FE(header, arginfo_header)
 	ZEND_FE(header_remove, arginfo_header_remove)

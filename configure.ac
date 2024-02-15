@@ -645,6 +645,11 @@ AC_CHECK_FUNC(inet_ntop,[],[
 ]
 )
 
+AC_CHECK_FUNC(inet_pton,[],[
+    AC_MSG_ERROR([Cannot find inet_pton which is required])
+]
+)
+
 dnl Check for strerror_r, and if its a POSIX-compatible or a GNU specific version.
 AC_FUNC_STRERROR_R
 

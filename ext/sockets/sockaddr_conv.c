@@ -89,11 +89,7 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 	struct in_addr tmp;
 	struct hostent *host_entry;
 
-#ifdef HAVE_INET_PTON
 	if (inet_pton(AF_INET, string, &tmp)) {
-#else
-	if (inet_aton(string, &tmp)) {
-#endif
 		sin->sin_addr.s_addr = tmp.s_addr;
 	} else {
 		if (strlen(string) > MAXFQDNLEN || ! (host_entry = php_network_gethostbyname(string))) {
