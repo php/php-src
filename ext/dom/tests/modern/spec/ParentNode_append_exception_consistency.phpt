@@ -30,7 +30,7 @@ object(DOM\DocumentFragment)#2 (17) {
   ["nodeName"]=>
   string(18) "#document-fragment"
   ["baseURI"]=>
-  NULL
+  string(11) "about:blank"
   ["isConnected"]=>
   bool(false)
   ["ownerDocument"]=>

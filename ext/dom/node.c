@@ -1668,8 +1668,6 @@ PHP_METHOD(DOMNode, normalize)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	php_libxml_invalidate_node_list_cache(intern->document);
-
 	if (php_dom_follow_spec_intern(intern)) {
 		php_dom_normalize_modern(nodep);
 	} else {
@@ -2442,7 +2440,8 @@ static void dom_node_get_node_path(INTERNAL_FUNCTION_PARAMETERS, bool throw)
 
 	value = (char *) xmlGetNodePath(nodep);
 	if (value == NULL) {
-		/* This is only possible when an invalid argument is passed (e.g. namespace declaration), or on allocation failure. */
+		/* This is only possible when an invalid argument is passed (e.g. namespace declaration, but that's not the case for this call site),
+		 * or on allocation failure. So in other words, this only happens on allocation failure. */
 		if (throw) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 			RETURN_THROWS();

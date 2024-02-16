@@ -28,7 +28,7 @@ object(DOM\EntityReference)#3 (14) {
   ["nodeName"]=>
   string(3) "foo"
   ["baseURI"]=>
-  NULL
+  string(11) "about:blank"
   ["isConnected"]=>
   bool(false)
   ["ownerDocument"]=>

@@ -1296,13 +1296,7 @@ PHP_METHOD(DOMDocument, normalizeDocument)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	php_libxml_invalidate_node_list_cache(intern->document);
-
-	if (php_dom_follow_spec_intern(intern)) {
-		php_dom_normalize_modern(xmlDocGetRootElement(docp));
-	} else {
-		php_dom_normalize_legacy((xmlNodePtr) docp);
-	}
+	php_dom_normalize_legacy((xmlNodePtr) docp);
 }
 /* }}} end dom_document_normalize_document */
 

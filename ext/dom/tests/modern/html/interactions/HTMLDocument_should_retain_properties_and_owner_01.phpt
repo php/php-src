@@ -49,7 +49,7 @@ object(DOM\HTMLDocument)#1 (24) {
   ["nodeName"]=>
   string(9) "#document"
   ["baseURI"]=>
-  NULL
+  string(11) "about:blank"
   ["isConnected"]=>
   bool(true)
   ["ownerDocument"]=>

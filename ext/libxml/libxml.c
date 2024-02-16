@@ -201,9 +201,9 @@ static void php_libxml_node_free(xmlNodePtr node)
 			xmlEntityPtr entity = (xmlEntityPtr) node;
 			if (entity->etype != XML_INTERNAL_PREDEFINED_ENTITY) {
 				php_libxml_unlink_entity_decl(entity);
-	#if LIBXML_VERSION >= 21200
+#if LIBXML_VERSION >= 21200
 				xmlFreeEntity(entity);
-	#else
+#else
 				if (entity->children != NULL && entity->owner && entity == (xmlEntityPtr) entity->children->parent) {
 					xmlFreeNodeList(entity->children);
 				}
@@ -227,7 +227,7 @@ static void php_libxml_node_free(xmlNodePtr node)
 					xmlFree(entity->orig);
 				}
 				xmlFree(entity);
-	#endif
+#endif
 			}
 			break;
 		}
@@ -261,7 +261,7 @@ static void php_libxml_node_free(xmlNodePtr node)
 			xmlDtdPtr dtd = (xmlDtdPtr) node;
 			if (dtd->_private == NULL) {
 				/* There's no userland reference to the dtd,
-					* but there might be entities referenced from userland. Unlink those. */
+				 * but there might be entities referenced from userland. Unlink those. */
 				xmlHashScan(dtd->entities, php_libxml_unlink_entity, dtd->entities);
 				xmlHashScan(dtd->pentities, php_libxml_unlink_entity, dtd->pentities);
 				/* No unlinking of notations, see remark above at case XML_NOTATION_NODE. */
@@ -272,25 +272,25 @@ static void php_libxml_node_free(xmlNodePtr node)
 		case XML_ELEMENT_NODE:
 			if (node->nsDef && node->doc) {
 				/* Make the namespace declaration survive the destruction of the holding element.
-					* This prevents a use-after-free on the namespace declaration.
-					*
-					* The main problem is that libxml2 doesn't have a reference count on the namespace declaration.
-					* We don't actually need to save the namespace declaration if we know the subtree it belongs to
-					* has no references from userland. However, we can't know that without traversing the whole subtree
-					* (=> slow), or without adding some subtree metadata (=> also slow).
-					* So we have to assume we need to save everything.
-					*
-					* However, namespace declarations are quite rare in comparison to other node types.
-					* Most node types are either elements, text or attributes.
-					* And you only need one namespace declaration per namespace (in principle).
-					* So I expect the number of namespace declarations to be low for an average XML document.
-					*
-					* In the worst possible case we have to save all namespace declarations when we for example remove
-					* the whole document. But given the above reasoning this likely won't be a lot of declarations even
-					* in the worst case.
-					* A single declaration only takes about 48 bytes of memory, and I don't expect the worst case to occur
-					* very often (why would you remove the whole document?).
-					*/
+				 * This prevents a use-after-free on the namespace declaration.
+				 *
+				 * The main problem is that libxml2 doesn't have a reference count on the namespace declaration.
+				 * We don't actually need to save the namespace declaration if we know the subtree it belongs to
+				 * has no references from userland. However, we can't know that without traversing the whole subtree
+				 * (=> slow), or without adding some subtree metadata (=> also slow).
+				 * So we have to assume we need to save everything.
+				 *
+				 * However, namespace declarations are quite rare in comparison to other node types.
+				 * Most node types are either elements, text or attributes.
+				 * And you only need one namespace declaration per namespace (in principle).
+				 * So I expect the number of namespace declarations to be low for an average XML document.
+				 *
+				 * In the worst possible case we have to save all namespace declarations when we for example remove
+				 * the whole document. But given the above reasoning this likely won't be a lot of declarations even
+				 * in the worst case.
+				 * A single declaration only takes about 48 bytes of memory, and I don't expect the worst case to occur
+				 * very often (why would you remove the whole document?).
+				 */
 				xmlNsPtr ns = node->nsDef;
 				xmlNsPtr last = ns;
 				while (last->next) {
@@ -324,7 +324,7 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 					 * otherwise a use-after-free would be possible when the original namespace holder gets freed. */
 					php_libxml_node_ptr *ptr = curnode->_private;
 					php_libxml_node_object *obj = ptr->_private;
-					if (!obj->document || obj->document->class_type <= PHP_LIBXML_CLASS_MODERN) {
+					if (!obj->document || obj->document->class_type < PHP_LIBXML_CLASS_MODERN) {
 						xmlReconciliateNs(curnode->doc, curnode);
 					}
 				}
