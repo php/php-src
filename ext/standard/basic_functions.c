@@ -1159,7 +1159,7 @@ PHP_FUNCTION(sleep) {
 	  if(UNEXPECTED(result == -1)) {
 		ZEND_ASSERT(errno != EINVAL); // this should be impossible, we carefully checked the input above
 		// it's probably EINTR
-		RETURN_DOUBLE(php_rem.tv_sec + (double)php_rem.tv_nsec / 1000000000.0);
+		RETURN_DOUBLE(php_rem.tv_sec + (((double)php_rem.tv_nsec) / 1000000000.0));
 	  }
 	  RETURN_LONG(0);
 #elif defined(HAVE_USLEEP)
