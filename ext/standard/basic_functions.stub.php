@@ -1945,7 +1945,7 @@ function constant(string $name): mixed {}
 function ip2long(string $ip): int|false {}
 
 /** @refcount 1 */
-function long2ip(int $ip): string|false {}
+function long2ip(int $ip): string {}
 
 /**
  * @return string|array<string, string>|false
