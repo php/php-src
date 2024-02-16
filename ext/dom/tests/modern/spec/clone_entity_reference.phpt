@@ -19,7 +19,7 @@ echo $dom->saveXML($clone), "\n";
 var_dump($clone->firstChild->firstChild);
 
 ?>
---EXPECT--
+--EXPECTF--
 <root>&foo;</root>
 object(DOM\Entity)#4 (17) {
   ["publicId"]=>
@@ -33,7 +33,7 @@ object(DOM\Entity)#4 (17) {
   ["nodeName"]=>
   string(3) "foo"
   ["baseURI"]=>
-  NULL
+  string(%d) "%s"
   ["isConnected"]=>
   bool(true)
   ["ownerDocument"]=>

@@ -90,7 +90,7 @@ object(DOM\Entity)#4 (17) {
   ["nodeName"]=>
   string(4) "test"
   ["baseURI"]=>
-  NULL
+  string(%d) "%s"
   ["isConnected"]=>
   bool(true)
   ["ownerDocument"]=>

@@ -1140,7 +1140,7 @@ namespace DOM
         public string $nodeName;
 
         /** @readonly */
-        public ?string $baseURI;
+        public string $baseURI;
 
         /** @readonly */
         public bool $isConnected;

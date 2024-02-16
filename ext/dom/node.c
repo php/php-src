@@ -803,10 +803,18 @@ zend_result dom_node_base_uri_read(dom_object *obj, zval *retval)
 
 	baseuri = xmlNodeGetBase(nodep->doc, nodep);
 	if (baseuri) {
-		ZVAL_STRING(retval, (char *) (baseuri));
+		ZVAL_STRING(retval, (const char *) baseuri);
 		xmlFree(baseuri);
 	} else {
-		ZVAL_NULL(retval);
+		if (php_dom_follow_spec_intern(obj)) {
+			if (nodep->doc->URL) {
+				ZVAL_STRING(retval, (const char *) nodep->doc->URL);
+			} else {
+				ZVAL_STRING(retval, "about:blank");
+			}
+		} else {
+			ZVAL_NULL(retval);
+		}
 	}
 
 	return SUCCESS;
