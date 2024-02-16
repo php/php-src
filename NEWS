@@ -13,6 +13,7 @@ PHP                                                                        NEWS
     array to hashed). (ilutov)
   . Fixed zend fiber build for solaris default mode (32 bits). (David Carlier)
   . Fixed zend call stack size for macOs/arm64. (David Carlier)
+  . Added support for Zend Max Execution Timers on FreeBSD (Kévin Dunglas)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
@@ -57,6 +58,10 @@ PHP                                                                        NEWS
   . Added NumberFormatter::ROUND_TOWARD_ZERO and ::ROUND_AWAY_FROM_ZERO as
     aliases for ::ROUND_DOWN and ::ROUND_UP. (Jorg Sowa)
   . Added NumberFormatter::ROUND_HALFODD. (Ayesh Karunaratne)
+
+- LDAP:
+  . Added LDAP_OPT_X_TLS_PROTOCOL_MAX/LDAP_OPT_X_TLS_PROTOCOL_TLS1_3
+    constants. (StephenWall)
 
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
@@ -170,6 +175,7 @@ PHP                                                                        NEWS
   . Add support for 4 new rounding modes to the round() function. (Jorg Sowa)
   . debug_zval_dump() now indicates whether an array is packed. (Max Semenik)
   . Fix GH-12143 (Optimize round). (SakiTakamachi)
+  . Changed return type of long2ip to string from string|false. (Jorg Sowa)
 
 - XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)

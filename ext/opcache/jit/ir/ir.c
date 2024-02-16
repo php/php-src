@@ -1882,6 +1882,42 @@ ir_ref _ir_IF(ir_ctx *ctx, ir_ref condition)
 	ir_ref if_ref;
 
 	IR_ASSERT(ctx->control);
+	if (IR_IS_CONST_REF(condition)) {
+		condition = ir_ref_is_true(ctx, condition) ? IR_TRUE : IR_FALSE;
+	} else {
+		ir_insn *prev = NULL;
+		ir_ref ref = ctx->control;
+		ir_insn *insn;
+
+		while (ref > condition) {
+			insn = &ctx->ir_base[ref];
+			if (insn->op == IR_GUARD_NOT) {
+				if (insn->op2 == condition) {
+					condition = IR_FALSE;
+					break;
+				}
+			} else if (insn->op == IR_GUARD) {
+				if (insn->op2 == condition) {
+					condition = IR_TRUE;
+					break;
+				}
+			} else if (insn->op == IR_IF) {
+				if (insn->op2 == condition) {
+					if (prev->op == IR_IF_TRUE) {
+						condition = IR_TRUE;
+						break;
+					} else if (prev->op == IR_IF_FALSE) {
+						condition = IR_FALSE;
+						break;
+					}
+				}
+			} else if (insn->op == IR_START || insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN) {
+				break;
+			}
+			prev = insn;
+			ref = insn->op1;
+		}
+	}
 	if_ref = ir_emit2(ctx, IR_IF, ctx->control, condition);
 	ctx->control = IR_UNUSED;
 	return if_ref;
@@ -2353,9 +2389,13 @@ ir_ref _ir_ADD_OFFSET(ir_ctx *ctx, ir_ref addr, uintptr_t offset)
 void _ir_GUARD(ir_ctx *ctx, ir_ref condition, ir_ref addr)
 {
 	IR_ASSERT(ctx->control);
-	if (condition == IR_TRUE) {
-		return;
+	if (IR_IS_CONST_REF(condition)) {
+		if (ir_ref_is_true(ctx, condition)) {
+			return;
+		}
+		condition = IR_FALSE;
 	} else {
+		ir_insn *prev = NULL;
 		ir_ref ref = ctx->control;
 		ir_insn *insn;
 
@@ -2370,9 +2410,19 @@ void _ir_GUARD(ir_ctx *ctx, ir_ref condition, ir_ref addr)
 					condition = IR_FALSE;
 					break;
 				}
+			} else if (insn->op == IR_IF) {
+				if (insn->op2 == condition) {
+					if (prev->op == IR_IF_TRUE) {
+						return;
+					} else if (prev->op == IR_IF_FALSE) {
+						condition = IR_FALSE;
+						break;
+					}
+				}
 			} else if (insn->op == IR_START || insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN) {
 				break;
 			}
+			prev = insn;
 			ref = insn->op1;
 		}
 	}
@@ -2385,9 +2435,13 @@ void _ir_GUARD(ir_ctx *ctx, ir_ref condition, ir_ref addr)
 void _ir_GUARD_NOT(ir_ctx *ctx, ir_ref condition, ir_ref addr)
 {
 	IR_ASSERT(ctx->control);
-	if (condition == IR_FALSE) {
-		return;
+	if (IR_IS_CONST_REF(condition)) {
+		if (!ir_ref_is_true(ctx, condition)) {
+			return;
+		}
+		condition = IR_TRUE;
 	} else {
+		ir_insn *prev = NULL;
 		ir_ref ref = ctx->control;
 		ir_insn *insn;
 
@@ -2402,9 +2456,19 @@ void _ir_GUARD_NOT(ir_ctx *ctx, ir_ref condition, ir_ref addr)
 					condition = IR_TRUE;
 					break;
 				}
+			} else if (insn->op == IR_IF) {
+				if (insn->op2 == condition) {
+					if (prev->op == IR_IF_TRUE) {
+						condition = IR_TRUE;
+						break;
+					} else if (prev->op == IR_IF_FALSE) {
+						return;
+					}
+				}
 			} else if (insn->op == IR_START || insn->op == IR_MERGE || insn->op == IR_LOOP_BEGIN) {
 				break;
 			}
+			prev = insn;
 			ref = insn->op1;
 		}
 	}

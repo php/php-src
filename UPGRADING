@@ -364,6 +364,7 @@ PHP 8.4 UPGRADE NOTES
     decimal number and round it to 0.29. However, "pre-rounding" incorrectly rounds
     certain numbers, so this fix removes "pre-rounding" and changes the way numbers
     are compared, so that the values ​​are correctly rounded as decimal numbers.
+  . long2ip() now returns string instead of string|false.
 
 ========================================
 6. New Functions
@@ -445,6 +446,10 @@ PHP 8.4 UPGRADE NOTES
 - Intl:
   . The IntlDateFormatter class exposes now the new PATTERN constant
     reflecting udat api's UDAT_PATTERN.
+
+- LDAP:
+  . LDAP_OPT_X_TLS_PROTOCOL_MAX.
+  . LDAP_OPT_X_TLS_PROTOCOL_TLS1_3.
 
 - OpenSSL:
   . X509_PURPOSE_OCSP_HELPER.

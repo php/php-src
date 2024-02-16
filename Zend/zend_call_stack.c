@@ -68,6 +68,7 @@ typedef int boolean_t;
 #include <sys/lwp.h>
 #include <sys/procfs.h>
 #include <libproc.h>
+#include <thread.h>
 #endif
 
 #ifdef ZEND_CHECK_STACK_LIMIT
@@ -664,43 +665,17 @@ static bool zend_call_stack_get_netbsd(zend_call_stack *stack)
 #endif /* defined(__NetBSD__) */
 
 #if defined(__sun)
-# if defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK)
 static bool zend_call_stack_get_solaris_pthread(zend_call_stack *stack)
 {
-	pthread_attr_t attr;
-	int error;
-	void *addr;
-	size_t max_size, guard_size;
-
-	error = pthread_attr_get_np(pthread_self(), &attr);
-	if (error) {
+	stack_t s;
+	if (thr_stksegment(&s) < 0) {
 		return false;
 	}
 
-	error = pthread_attr_getstack(&attr, &addr, &max_size);
-	if (error) {
-		return false;
-	}
-
-	error = pthread_attr_getguardsize(&attr, &guard_size);
-	if (error) {
-		return false;
-	}
-
-	addr = (char *)addr + guard_size;
-	max_size -= guard_size;
-
-	stack->base = (char *)addr + max_size;
-	stack->max_size = max_size;
-
+	stack->max_size = s.ss_size;
+	stack->base = s.ss_sp;
 	return true;
 }
-# else /* defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK) */
-static bool zend_call_stack_get_solaris_pthread(zend_call_stack *stack)
-{
-	return false;
-}
-# endif /* defined(HAVE_PTHREAD_ATTR_GET_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK) */
 
 static bool zend_call_stack_get_solaris_proc_maps(zend_call_stack *stack)
 {
@@ -723,7 +698,7 @@ static bool zend_call_stack_get_solaris_proc_maps(zend_call_stack *stack)
 	}
 
 	size = (1 << 20);
-	snprintf(path, sizeof(path), "/proc/%d/map", pid);
+	snprintf(path, sizeof(path), "/proc/%d/map", (int)pid);
 
 	if ((fd = open(path, O_RDONLY)) == -1) {
 		Prelease(proc, 0);

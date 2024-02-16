@@ -409,8 +409,8 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 	}
 	i--;
 	if (i == 1) {
-	    insn->op = IR_BEGIN;
-		insn->inputs_count = 0;
+		insn->op = IR_BEGIN;
+		insn->inputs_count = 1;
 		use_list = &ctx->use_lists[merge];
 		if (use_list->count > 1) {
 			for (k = 0, p = &ctx->use_edges[use_list->refs]; k < use_list->count; k++, p++) {

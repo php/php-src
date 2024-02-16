@@ -464,8 +464,8 @@ dnl ----------------------------------------------------------------------------
 AC_STRUCT_TIMEZONE
 
 PHP_MISSING_TIME_R_DECL
-PHP_STRUCT_FLOCK
 
+AC_CHECK_TYPES([struct flock],,,[#include <fcntl.h>])
 AC_CHECK_TYPES(socklen_t, [], [], [
   #ifdef HAVE_SYS_TYPES_H
   # include <sys/types.h>
@@ -552,7 +552,8 @@ dnl Checks for types.
 AC_TYPE_UID_T
 
 dnl Checks for sockaddr_storage and sockaddr.sa_len.
-PHP_SOCKADDR_CHECKS
+AC_CHECK_TYPES([struct sockaddr_storage],,,[#include <sys/socket.h>])
+AC_CHECK_MEMBERS([struct sockaddr.sa_len],,,[#include <sys/socket.h>])
 
 dnl Checks for GCC function attributes on all systems except ones without glibc
 dnl Fix for these systems is already included in GCC 7, but not on GCC 6.

@@ -643,11 +643,10 @@ PHP_FUNCTION(long2ip)
 	ip = (zend_ulong)sip;
 
 	myaddr.s_addr = htonl(ip);
-	if (inet_ntop(AF_INET, &myaddr, str, sizeof(str))) {
-		RETURN_STRING(str);
-	} else {
-		RETURN_FALSE;
-	}
+	const char* result = inet_ntop(AF_INET, &myaddr, str, sizeof(str));
+	ZEND_ASSERT(result != NULL);
+
+	RETURN_STRING(str);
 }
 /* }}} */
 
