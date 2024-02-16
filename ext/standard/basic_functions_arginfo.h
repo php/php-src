@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8f5af1b9f31974b817496ca514374167cf798703 */
+ * Stub hash: b8ea4527467c70a6f665129cd5d5f34ea2386a70 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -722,9 +722,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_inet_ntop arginfo_gethostbyaddr
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_inet_pton, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, ip, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_inet_pton arginfo_gethostbyaddr
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_metaphone, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
