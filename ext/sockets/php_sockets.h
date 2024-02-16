@@ -132,7 +132,7 @@ PHP_SOCKETS_API bool socket_import_file_descriptor(PHP_SOCKET socket, php_socket
 #define phpext_sockets_ptr NULL
 #endif
 
-#if defined(_AIX) && !defined(HAVE_SA_SS_FAMILY)
+#if defined(_AIX) && !defined(HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY)
 # define ss_family __ss_family
 #endif
 
