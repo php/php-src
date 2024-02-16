@@ -9,7 +9,7 @@ if test "$PHP_SOCKETS" != "no"; then
   AC_CHECK_HEADERS([sys/sockio.h linux/filter.h])
   AC_DEFINE([HAVE_SOCKETS], 1, [ ])
 
-  dnl Check for fied ss_family in sockaddr_storage (missing in AIX until 5.3)
+  dnl Check for field ss_family in sockaddr_storage (missing in AIX until 5.3)
   AC_CHECK_MEMBERS([struct sockaddr_storage.ss_family],,,[#include <sys/socket.h>])
 
   dnl Check for AI_V4MAPPED flag
