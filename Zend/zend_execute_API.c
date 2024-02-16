@@ -1205,9 +1205,15 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		autoload_name = zend_string_copy(name);
 	}
 
+	zend_string *previous_filename = EG(filename_override);
+	zend_long previous_lineno = EG(lineno_override);
+	EG(filename_override) = NULL;
+	EG(lineno_override) = -1;
 	zend_exception_save();
 	ce = zend_autoload(autoload_name, lc_name);
 	zend_exception_restore();
+	EG(filename_override) = previous_filename;
+	EG(lineno_override) = previous_lineno;
 
 	zend_string_release_ex(autoload_name, 0);
 	zend_hash_del(EG(in_autoload), lc_name);

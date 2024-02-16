@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-14003 (Broken cleanup of unfinished calls with callable convert
     parameters). (ilutov)
   . Fixed bug GH-14013 (Erroneous dnl appended in configure). (Peter Kokot)
+  . Fixed bug GH-10232 (If autoloading occurs during constant resolution
+    filename and lineno are identified incorrectly). (ranvis)
 
 - Fibers:
   . Fixed bug GH-13903 (ASAN false positive underflow when executing copy()).
