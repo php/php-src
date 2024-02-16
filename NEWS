@@ -170,7 +170,7 @@ PHP                                                                        NEWS
   . Add support for 4 new rounding modes to the round() function. (Jorg Sowa)
   . debug_zval_dump() now indicates whether an array is packed. (Max Semenik)
   . Fix GH-12143 (Optimize round). (SakiTakamachi)
-  . Changed return type of long2ip to false. (Jorg Sowa)
+  . Changed return type of long2ip to string from string|false. (Jorg Sowa)
 
 - XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)
