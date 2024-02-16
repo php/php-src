@@ -27,6 +27,7 @@ $expectedMaxSize = match(php_uname('s')) {
         'true' => 16*1024*1024, // https://github.com/actions/runner-images/pull/3328
         default => 8*1024*1024,
     },
+    'SunOS' => 10 * 1024 * 1024,
     'Windows NT' => 67108864 - 4*4096, // Set by sapi/cli/config.w32
 };
 
