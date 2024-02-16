@@ -325,12 +325,12 @@ fail:
 
 /* {{{ php_base64_encode */
 
-#if ZEND_INTRIN_AVX2_NATIVE
+#ifdef ZEND_INTRIN_AVX2_NATIVE
 # undef ZEND_INTRIN_SSSE3_NATIVE
 # undef ZEND_INTRIN_SSSE3_RESOLVER
 # undef ZEND_INTRIN_SSSE3_FUNC_PROTO
 # undef ZEND_INTRIN_SSSE3_FUNC_PTR
-#elif ZEND_INTRIN_AVX2_FUNC_PROTO && ZEND_INTRIN_SSSE3_NATIVE
+#elif defined(ZEND_INTRIN_AVX2_FUNC_PROTO) && defined(ZEND_INTRIN_SSSE3_NATIVE)
 # undef ZEND_INTRIN_SSSE3_NATIVE
 # undef ZEND_INTRIN_SSSE3_RESOLVER
 # define ZEND_INTRIN_SSSE3_RESOLVER 1
@@ -341,7 +341,7 @@ fail:
 # else
 #  define ZEND_INTRIN_SSSE3_FUNC_DECL(func) ZEND_API func
 # endif
-#elif ZEND_INTRIN_AVX2_FUNC_PTR && ZEND_INTRIN_SSSE3_NATIVE
+#elif defined(ZEND_INTRIN_AVX2_FUNC_PTR) && defined(ZEND_INTRIN_SSSE3_NATIVE)
 # undef ZEND_INTRIN_SSSE3_NATIVE
 # undef ZEND_INTRIN_SSSE3_RESOLVER
 # define ZEND_INTRIN_SSSE3_RESOLVER 1
@@ -355,46 +355,46 @@ fail:
 #endif
 
 /* Only enable avx512 resolver if avx2 use resolver also */
-#if ZEND_INTRIN_AVX2_FUNC_PROTO && ZEND_INTRIN_AVX512_FUNC_PROTO
+#if defined(ZEND_INTRIN_AVX2_FUNC_PROTO) && defined(ZEND_INTRIN_AVX512_FUNC_PROTO)
 #define BASE64_INTRIN_AVX512_FUNC_PROTO 1
 #endif
-#if ZEND_INTRIN_AVX2_FUNC_PTR && ZEND_INTRIN_AVX512_FUNC_PTR
+#if defined(ZEND_INTRIN_AVX2_FUNC_PTR) && defined(ZEND_INTRIN_AVX512_FUNC_PTR)
 #define BASE64_INTRIN_AVX512_FUNC_PTR 1
 #endif
-#if ZEND_INTRIN_AVX2_FUNC_PROTO && ZEND_INTRIN_AVX512_VBMI_FUNC_PROTO
+#if defined(ZEND_INTRIN_AVX2_FUNC_PROTO) && defined(ZEND_INTRIN_AVX512_VBMI_FUNC_PROTO)
 #define BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO 1
 #endif
-#if ZEND_INTRIN_AVX2_FUNC_PTR && ZEND_INTRIN_AVX512_VBMI_FUNC_PTR
+#if defined(ZEND_INTRIN_AVX2_FUNC_PTR) && defined(ZEND_INTRIN_AVX512_VBMI_FUNC_PTR)
 #define BASE64_INTRIN_AVX512_VBMI_FUNC_PTR 1
 #endif
 
-#if ZEND_INTRIN_AVX2_NATIVE
+#ifdef ZEND_INTRIN_AVX2_NATIVE
 # include <immintrin.h>
-#elif ZEND_INTRIN_SSSE3_NATIVE
+#elif defined(ZEND_INTRIN_SSSE3_NATIVE)
 # include <tmmintrin.h>
-#elif (ZEND_INTRIN_SSSE3_RESOLVER || ZEND_INTRIN_AVX2_RESOLVER)
-# if ZEND_INTRIN_AVX2_RESOLVER
+#elif defined(ZEND_INTRIN_SSSE3_RESOLVER) || defined(ZEND_INTRIN_AVX2_RESOLVER)
+# ifdef ZEND_INTRIN_AVX2_RESOLVER
 #  include <immintrin.h>
 # else
 #  include <tmmintrin.h>
 # endif /* (ZEND_INTRIN_SSSE3_RESOLVER || ZEND_INTRIN_AVX2_RESOLVER) */
 # include "Zend/zend_cpuinfo.h"
 
-# if BASE64_INTRIN_AVX512_FUNC_PROTO || BASE64_INTRIN_AVX512_FUNC_PTR
+# if defined(BASE64_INTRIN_AVX512_FUNC_PROTO) || defined(BASE64_INTRIN_AVX512_FUNC_PTR)
 ZEND_INTRIN_AVX512_FUNC_DECL(zend_string *php_base64_encode_avx512(const unsigned char *str, size_t length));
 ZEND_INTRIN_AVX512_FUNC_DECL(zend_string *php_base64_decode_ex_avx512(const unsigned char *str, size_t length, bool strict));
 # endif
-# if BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO || BASE64_INTRIN_AVX512_VBMI_FUNC_PTR
+# if defined(BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO) || defined(BASE64_INTRIN_AVX512_VBMI_FUNC_PTR)
 ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t length));
 ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(zend_string *php_base64_decode_ex_avx512_vbmi(const unsigned char *str, size_t length, bool strict));
 # endif
 
-# if ZEND_INTRIN_AVX2_RESOLVER
+# ifdef ZEND_INTRIN_AVX2_RESOLVER
 ZEND_INTRIN_AVX2_FUNC_DECL(zend_string *php_base64_encode_avx2(const unsigned char *str, size_t length));
 ZEND_INTRIN_AVX2_FUNC_DECL(zend_string *php_base64_decode_ex_avx2(const unsigned char *str, size_t length, bool strict));
 # endif
 
-# if ZEND_INTRIN_SSSE3_RESOLVER
+# ifdef ZEND_INTRIN_SSSE3_RESOLVER
 ZEND_INTRIN_SSSE3_FUNC_DECL(zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length));
 ZEND_INTRIN_SSSE3_FUNC_DECL(zend_string *php_base64_decode_ex_ssse3(const unsigned char *str, size_t length, bool strict));
 # endif
@@ -402,7 +402,7 @@ ZEND_INTRIN_SSSE3_FUNC_DECL(zend_string *php_base64_decode_ex_ssse3(const unsign
 zend_string *php_base64_encode_default(const unsigned char *str, size_t length);
 zend_string *php_base64_decode_ex_default(const unsigned char *str, size_t length, bool strict);
 
-# if (ZEND_INTRIN_AVX2_FUNC_PROTO || ZEND_INTRIN_SSSE3_FUNC_PROTO || BASE64_INTRIN_AVX512_FUNC_PROTO || BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO)
+# if (defined(ZEND_INTRIN_AVX2_FUNC_PROTO) || defined(ZEND_INTRIN_SSSE3_FUNC_PROTO) || defined(BASE64_INTRIN_AVX512_FUNC_PROTO) || defined(BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO))
 PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length) __attribute__((ifunc("resolve_base64_encode")));
 PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length, bool strict) __attribute__((ifunc("resolve_base64_decode")));
 
@@ -412,22 +412,22 @@ typedef zend_string *(*base64_decode_func_t)(const unsigned char *, size_t, bool
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
 static base64_encode_func_t resolve_base64_encode(void) {
-# if BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO
+# ifdef BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO
 	if (zend_cpu_supports_avx512_vbmi()) {
 		return php_base64_encode_avx512_vbmi;
 	} else
 # endif
-# if BASE64_INTRIN_AVX512_FUNC_PROTO
+# ifdef BASE64_INTRIN_AVX512_FUNC_PROTO
 	if (zend_cpu_supports_avx512()) {
 		return php_base64_encode_avx512;
 	} else
 # endif
-# if ZEND_INTRIN_AVX2_FUNC_PROTO
+# ifdef ZEND_INTRIN_AVX2_FUNC_PROTO
 	if (zend_cpu_supports_avx2()) {
 		return php_base64_encode_avx2;
 	} else
 # endif
-#if ZEND_INTRIN_SSSE3_FUNC_PROTO
+#ifdef ZEND_INTRIN_SSSE3_FUNC_PROTO
 	if (zend_cpu_supports_ssse3()) {
 		return php_base64_encode_ssse3;
 	}
@@ -438,22 +438,22 @@ static base64_encode_func_t resolve_base64_encode(void) {
 ZEND_NO_SANITIZE_ADDRESS
 ZEND_ATTRIBUTE_UNUSED /* clang mistakenly warns about this */
 static base64_decode_func_t resolve_base64_decode(void) {
-# if BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO
+# ifdef BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO
 	if (zend_cpu_supports_avx512_vbmi()) {
 		return php_base64_decode_ex_avx512_vbmi;
 	} else
 # endif
-# if BASE64_INTRIN_AVX512_FUNC_PROTO
+# ifdef BASE64_INTRIN_AVX512_FUNC_PROTO
 	if (zend_cpu_supports_avx512()) {
 		return php_base64_decode_ex_avx512;
 	} else
 # endif
-# if ZEND_INTRIN_AVX2_FUNC_PROTO
+# ifdef ZEND_INTRIN_AVX2_FUNC_PROTO
 	if (zend_cpu_supports_avx2()) {
 		return php_base64_decode_ex_avx2;
 	} else
 # endif
-#if ZEND_INTRIN_SSSE3_FUNC_PROTO
+#ifdef ZEND_INTRIN_SSSE3_FUNC_PROTO
 	if (zend_cpu_supports_ssse3()) {
 		return php_base64_decode_ex_ssse3;
 	}
@@ -474,25 +474,25 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 
 PHP_MINIT_FUNCTION(base64_intrin)
 {
-# if BASE64_INTRIN_AVX512_VBMI_FUNC_PTR
+# ifdef BASE64_INTRIN_AVX512_VBMI_FUNC_PTR
 	if (zend_cpu_supports_avx512_vbmi()) {
 		php_base64_encode_ptr = php_base64_encode_avx512_vbmi;
 		php_base64_decode_ex_ptr = php_base64_decode_ex_avx512_vbmi;
 	} else
 # endif
-# if BASE64_INTRIN_AVX512_FUNC_PTR
+# ifdef BASE64_INTRIN_AVX512_FUNC_PTR
 	if (zend_cpu_supports_avx512()) {
 		php_base64_encode_ptr = php_base64_encode_avx512;
 		php_base64_decode_ex_ptr = php_base64_decode_ex_avx512;
 	} else
 # endif
-# if ZEND_INTRIN_AVX2_FUNC_PTR
+# ifdef ZEND_INTRIN_AVX2_FUNC_PTR
 	if (zend_cpu_supports_avx2()) {
 		php_base64_encode_ptr = php_base64_encode_avx2;
 		php_base64_decode_ex_ptr = php_base64_decode_ex_avx2;
 	} else
 # endif
-#if ZEND_INTRIN_SSSE3_FUNC_PTR
+#ifdef ZEND_INTRIN_SSSE3_FUNC_PTR
 	if (zend_cpu_supports_ssse3()) {
 		php_base64_encode_ptr = php_base64_encode_ssse3;
 		php_base64_decode_ex_ptr = php_base64_decode_ex_ssse3;
@@ -507,7 +507,7 @@ PHP_MINIT_FUNCTION(base64_intrin)
 # endif /* (ZEND_INTRIN_AVX2_FUNC_PROTO || ZEND_INTRIN_SSSE3_FUNC_PROTO) */
 #endif /* ZEND_INTRIN_AVX2_NATIVE */
 
-#if BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO || BASE64_INTRIN_AVX512_VBMI_FUNC_PTR
+#if defined(BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO) || defined(BASE64_INTRIN_AVX512_VBMI_FUNC_PTR)
 zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t length)
 {
 	const unsigned char *c = str;
@@ -617,7 +617,7 @@ zend_string *php_base64_decode_ex_avx512_vbmi(const unsigned char *str, size_t l
 }
 #endif
 
-#if BASE64_INTRIN_AVX512_FUNC_PROTO || BASE64_INTRIN_AVX512_FUNC_PTR
+#if defined(BASE64_INTRIN_AVX512_FUNC_PROTO) || defined(BASE64_INTRIN_AVX512_FUNC_PTR)
 zend_string *php_base64_encode_avx512(const unsigned char *str, size_t length)
 {
 	const unsigned char *c = str;
@@ -750,8 +750,8 @@ zend_string *php_base64_decode_ex_avx512(const unsigned char *str, size_t length
 }
 #endif
 
-#if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER
-# if ZEND_INTRIN_AVX2_RESOLVER && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#if defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_AVX2_RESOLVER)
+# if defined(ZEND_INTRIN_AVX2_RESOLVER) && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
 static __m256i php_base64_encode_avx2_reshuffle(__m256i in) __attribute__((target("avx2")));
 static __m256i php_base64_encode_avx2_translate(__m256i in) __attribute__((target("avx2")));
 # endif
@@ -815,9 +815,9 @@ static __m256i php_base64_encode_avx2_translate(__m256i in)
 }
 #endif /* ZEND_INTRIN_AVX2_NATIVE || (ZEND_INTRIN_AVX2_RESOLVER && !ZEND_INTRIN_SSSE3_NATIVE) */
 
-#if ZEND_INTRIN_SSSE3_NATIVE || ZEND_INTRIN_SSSE3_RESOLVER
+#if defined(ZEND_INTRIN_SSSE3_NATIVE) || defined(ZEND_INTRIN_SSSE3_RESOLVER)
 
-# if ZEND_INTRIN_SSSE3_RESOLVER && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+# if defined(ZEND_INTRIN_SSSE3_RESOLVER) && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
 static __m128i php_base64_encode_ssse3_reshuffle(__m128i in) __attribute__((target("ssse3")));
 static __m128i php_base64_encode_ssse3_translate(__m128i in) __attribute__((target("ssse3")));
 # endif
@@ -898,10 +898,10 @@ static __m128i php_base64_encode_ssse3_translate(__m128i in)
 
 #endif /* ZEND_INTRIN_SSSE3_NATIVE || (ZEND_INTRIN_SSSE3_RESOLVER && !ZEND_INTRIN_AVX2_NATIVE) */
 
-#if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER || ZEND_INTRIN_SSSE3_NATIVE || ZEND_INTRIN_SSSE3_RESOLVER
-# if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_SSSE3_NATIVE
+#if defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_AVX2_RESOLVER) || defined(ZEND_INTRIN_SSSE3_NATIVE) || defined(ZEND_INTRIN_SSSE3_RESOLVER)
+# if defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_SSSE3_NATIVE)
 PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length)
-# elif ZEND_INTRIN_AVX2_RESOLVER
+# elif defined(ZEND_INTRIN_AVX2_RESOLVER)
 zend_string *php_base64_encode_avx2(const unsigned char *str, size_t length)
 # else /* ZEND_INTRIN_SSSE3_RESOLVER */
 zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length)
@@ -913,7 +913,7 @@ zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length)
 
 	result = zend_string_safe_alloc(((length + 2) / 3), 4 * sizeof(char), 0, 0);
 	o = (unsigned char *)ZSTR_VAL(result);
-# if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER
+# if defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_AVX2_RESOLVER)
 	if (length > 31) {
 		__m256i s = _mm256_loadu_si256((__m256i *)c);
 
@@ -945,7 +945,7 @@ zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length)
 	return result;
 }
 
-# if ZEND_INTRIN_SSSE3_RESOLVER && ZEND_INTRIN_AVX2_RESOLVER
+# if defined(ZEND_INTRIN_SSSE3_RESOLVER) && defined(ZEND_INTRIN_AVX2_RESOLVER)
 zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length)
 {
 	const unsigned char *c = str;
@@ -968,8 +968,8 @@ zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length)
 
 /* }}} */
 
-#if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER
-# if ZEND_INTRIN_AVX2_RESOLVER && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#if defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_AVX2_RESOLVER)
+# if defined(ZEND_INTRIN_AVX2_RESOLVER) && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
 static __m256i php_base64_decode_avx2_reshuffle(__m256i in) __attribute__((target("avx2")));
 # endif
 
@@ -989,8 +989,8 @@ static __m256i php_base64_decode_avx2_reshuffle(__m256i in)
 }
 #endif
 
-#if ZEND_INTRIN_SSSE3_NATIVE || ZEND_INTRIN_SSSE3_RESOLVER
-# if ZEND_INTRIN_SSSE3_RESOLVER && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#if defined(ZEND_INTRIN_SSSE3_NATIVE) || defined(ZEND_INTRIN_SSSE3_RESOLVER)
+# if defined(ZEND_INTRIN_SSSE3_RESOLVER) && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
 static __m128i php_base64_decode_ssse3_reshuffle(__m128i in) __attribute__((target("ssse3")));
 # endif
 
@@ -1071,10 +1071,10 @@ static __m128i php_base64_decode_ssse3_reshuffle(__m128i in)
 
 #endif
 
-#if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER || ZEND_INTRIN_SSSE3_NATIVE || ZEND_INTRIN_SSSE3_RESOLVER
-# if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_SSSE3_NATIVE
+#if defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_AVX2_RESOLVER) || defined(ZEND_INTRIN_SSSE3_NATIVE) || defined(ZEND_INTRIN_SSSE3_RESOLVER)
+# if defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_SSSE3_NATIVE)
 PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length, bool strict)
-# elif ZEND_INTRIN_AVX2_RESOLVER
+# elif defined(ZEND_INTRIN_AVX2_RESOLVER)
 zend_string *php_base64_decode_ex_avx2(const unsigned char *str, size_t length, bool strict)
 # else
 zend_string *php_base64_decode_ex_ssse3(const unsigned char *str, size_t length, bool strict)
@@ -1090,7 +1090,7 @@ zend_string *php_base64_decode_ex_ssse3(const unsigned char *str, size_t length,
 
 	/* See: "Faster Base64 Encoding and Decoding using AVX2 Instructions"
 	* https://arxiv.org/pdf/1704.00605.pdf */
-# if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER
+# if defined(ZEND_INTRIN_AVX2_NATIVE) || defined(ZEND_INTRIN_AVX2_RESOLVER)
 	while (length > 31 + 11 + 2) {
 		__m256i lut_lo, lut_hi, lut_roll;
 		__m256i hi_nibbles, lo_nibbles, hi, lo;
@@ -1153,7 +1153,7 @@ zend_string *php_base64_decode_ex_ssse3(const unsigned char *str, size_t length,
 	return result;
 }
 
-# if ZEND_INTRIN_SSSE3_RESOLVER && ZEND_INTRIN_AVX2_RESOLVER
+# if defined(ZEND_INTRIN_SSSE3_RESOLVER) && defined(ZEND_INTRIN_AVX2_RESOLVER)
 zend_string *php_base64_decode_ex_ssse3(const unsigned char *str, size_t length, bool strict)
 {
 	const unsigned char *c = str;
@@ -1178,8 +1178,8 @@ zend_string *php_base64_decode_ex_ssse3(const unsigned char *str, size_t length,
 # endif
 #endif /* ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER || ZEND_INTRIN_SSSE3_NATIVE || ZEND_INTRIN_SSSE3_RESOLVER */
 
-#if !ZEND_INTRIN_AVX2_NATIVE && !ZEND_INTRIN_SSSE3_NATIVE
-#if ZEND_INTRIN_AVX2_RESOLVER || ZEND_INTRIN_SSSE3_RESOLVER
+#if !defined(ZEND_INTRIN_AVX2_NATIVE) && !defined(ZEND_INTRIN_SSSE3_NATIVE)
+#if defined(ZEND_INTRIN_AVX2_RESOLVER) || defined(ZEND_INTRIN_SSSE3_RESOLVER)
 zend_string *php_base64_encode_default(const unsigned char *str, size_t length)
 #else
 PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length)
@@ -1199,8 +1199,8 @@ PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length)
 }
 #endif
 
-#if !ZEND_INTRIN_AVX2_NATIVE && !ZEND_INTRIN_SSSE3_NATIVE
-#if ZEND_INTRIN_AVX2_RESOLVER || ZEND_INTRIN_SSSE3_RESOLVER
+#if !defined(ZEND_INTRIN_AVX2_NATIVE) && !defined(ZEND_INTRIN_SSSE3_NATIVE)
+#if defined(ZEND_INTRIN_AVX2_RESOLVER) || defined(ZEND_INTRIN_SSSE3_RESOLVER)
 zend_string *php_base64_decode_ex_default(const unsigned char *str, size_t length, bool strict)
 #else
 PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length, bool strict)
