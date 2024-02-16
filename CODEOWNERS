@@ -39,12 +39,14 @@
 /Zend/zend.* @dstogov
 /Zend/zend_alloc.* @dstogov
 /Zend/zend_API.* @dstogov
+/Zend/zend_call_stack.* @arnaud-lb
 /Zend/zend_closures.* @dstogov
 /Zend/zend_execute.* @dstogov
 /Zend/zend_execute_API.c @dstogov
-/Zend/zend_gc.* @dstogov
+/Zend/zend_gc.* @dstogov @arnaud-lb
 /Zend/zend_hash.* @dstogov
 /Zend/zend_inheritance.* @dstogov
+/Zend/zend_max_execution_timer.* @arnaud-lb
 /Zend/zend_object_handlers.* @dstogov
 /Zend/zend_objects.* @dstogov
 /Zend/zend_objects_API.* @dstogov
