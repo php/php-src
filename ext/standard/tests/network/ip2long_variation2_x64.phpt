@@ -7,6 +7,7 @@ Test ip2long() function : usage variation 2, 64 bit
      in the C language (i.e., a leading 0x or 0X implies hexadecimal; otherwise, a leading 0 implies octal;
      otherwise, the number is interpreted as decimal).
 */
+if(PHP_OS == 'Darwin') die("skip - inet_pton behaves differently on Darwin");
 if(PHP_INT_SIZE != 8) {die('skip 64 bit only');}
 ?>
 --FILE--
