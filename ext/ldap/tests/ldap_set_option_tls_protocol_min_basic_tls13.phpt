@@ -1,9 +1,15 @@
 --TEST--
-ldap_set_option() - Basic test for TLS protocol max ldap option
+ldap_set_option() - Basic test for TLS protocol min ldap option
 --CREDITS--
 Chad Sikorra <Chad.Sikorra@gmail.com>
 --EXTENSIONS--
 ldap
+--SKIPIF--
+<?php
+
+if (!defined("LDAP_OPT_X_TLS_PROTOCOL_TLS1_3")) {
+    die('LDAP_OPT_X_TLS_PROTOCOL_TLS1_3 unsupported.');
+}
 --FILE--
 <?php
 require "connect.inc";
@@ -15,11 +21,12 @@ foreach([
     LDAP_OPT_X_TLS_PROTOCOL_TLS1_0,
     LDAP_OPT_X_TLS_PROTOCOL_TLS1_1,
     LDAP_OPT_X_TLS_PROTOCOL_TLS1_2,
+    LDAP_OPT_X_TLS_PROTOCOL_TLS1_3,
 ] as $option) {
-    $result = ldap_set_option($link, LDAP_OPT_X_TLS_PROTOCOL_MAX, $option);
+    $result = ldap_set_option($link, LDAP_OPT_X_TLS_PROTOCOL_MIN, $option);
     var_dump($result);
 
-    ldap_get_option($link, LDAP_OPT_X_TLS_PROTOCOL_MAX, $optionval);
+    ldap_get_option($link, LDAP_OPT_X_TLS_PROTOCOL_MIN, $optionval);
     var_dump($optionval);
 }
 ?>
@@ -34,3 +41,5 @@ bool(true)
 int(770)
 bool(true)
 int(771)
+bool(true)
+int(772)
