@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.17
 
+- Core:
+  . Fixed bug GH-10232 (if autoloading occurs during constant resolution
+    filename and lineno are identified incorrectly). (ranvis)
+
 - Curl:
   . Fix failing tests due to string changes in libcurl 8.6.0. (Ayesh)
 
