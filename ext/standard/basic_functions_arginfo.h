@@ -722,9 +722,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_inet_ntop arginfo_gethostbyaddr
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_inet_pton, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, ip, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_inet_pton arginfo_gethostbyaddr
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_metaphone, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
