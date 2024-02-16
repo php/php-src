@@ -364,6 +364,7 @@ PHP 8.4 UPGRADE NOTES
     decimal number and round it to 0.29. However, "pre-rounding" incorrectly rounds
     certain numbers, so this fix removes "pre-rounding" and changes the way numbers
     are compared, so that the values ​​are correctly rounded as decimal numbers.
+  . long2ip() now returns string instead of string|false.
 
 ========================================
 6. New Functions
