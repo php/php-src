@@ -247,11 +247,11 @@ static inline bool _php_check_fd_setsize(php_socket_t *max_fd, int setsize)
 
 #define PHP_SOCK_CHUNK_SIZE	8192
 
-#ifdef HAVE_SOCKADDR_STORAGE
+#ifdef HAVE_STRUCT_SOCKADDR_STORAGE
 typedef struct sockaddr_storage php_sockaddr_storage;
 #else
 typedef struct {
-#ifdef HAVE_SOCKADDR_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
 		unsigned char ss_len;
 		unsigned char ss_family;
 #else
