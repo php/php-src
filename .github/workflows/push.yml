@@ -63,10 +63,8 @@ jobs:
       - name: check code formatting
         run: |
           set -x
-          echo "Checking code formatting"
           git fetch origin master
           git diff origin/master > ../master.diff
-          cat ../master.diff | head
           if [ -f scripts/dev/format_pull_request.php ]; then
             cp scripts/dev/format_pull_request.php ..
           fi
