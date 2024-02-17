@@ -67,7 +67,7 @@ jobs:
           echo "Generating diff against master"
           git fetch origin master
           git diff origin/master > ../master.diff
-          cat ../master.diff
+          cat ../master.diff | head
           echo 1 check if scripts/dev/format_pull_request.php exists
           if [ -f scripts/dev/format_pull_request.php ]; then
             echo 1 cp scripts/dev/format_pull_request.php ..
