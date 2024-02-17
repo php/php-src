@@ -59,7 +59,7 @@ jobs:
             git \
             clang-format \
             php-cli
-            netcat
+            netcat-openbsd
       - name: check code formatting
         run: |
           set -x
