@@ -76,6 +76,7 @@ jobs:
             echo "error: format_pull_request.php does not exist" 1>&2
             exit 1
           fi
+          git reset --hard origin/master
           php ../format_pull_request.php ../master.diff > ../formatted.diff
           cat ../formatted.diff
           cat ../master.diff
