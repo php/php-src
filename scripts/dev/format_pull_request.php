@@ -62,7 +62,7 @@ passthru($cmd, $ret);
 if($ret !== 0){
     fwrite(STDERR, "Error: clang-format-diff failed with exit code {$ret}\n");
     fwrite(STDERR, "cmd:\n{$cmd}\n");
-    //passthru("git reset --hard");
+    passthru("git reset --hard");
     exit(1);
 }
 shell_exec("git reset --hard");
