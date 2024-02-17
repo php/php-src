@@ -51,7 +51,7 @@ if ($ret !== 0) {
     exit(1);
 }
 // commit
-passthru('git commit -a --message=clangformat --author='.escapeshellarg('clangformat <clangformat@example.com>').' --quiet', $ret);
+passthru('git -c user.email="clangformat@example.com" -c user.name=clangformat commit -a --message=clangformat --quiet', $ret);
 if ($ret !== 0) {
     fwrite(STDERR, "Error: git commit failed with exit code {$ret}\n");
     if (!$force) {
