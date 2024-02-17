@@ -156,9 +156,9 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 	struct sockaddr **sap;
 	int n;
 #if HAVE_GETADDRINFO
-#ifdef HAVE_IPV6
+# ifdef HAVE_IPV6
 	static int ipv6_borked = -1; /* the way this is used *is* thread safe */
-#endif
+# endif
 	struct addrinfo hints, *res, *sai;
 #else
 	struct hostent *host_info;
@@ -174,7 +174,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 	hints.ai_family = AF_INET; /* default to regular inet (see below) */
 	hints.ai_socktype = socktype;
 
-#ifdef HAVE_IPV6
+# ifdef HAVE_IPV6
 	/* probe for a working IPv6 stack; even if detected as having v6 at compile
 	 * time, at runtime some stacks are slow to resolve or have other issues
 	 * if they are not correctly configured.
@@ -193,7 +193,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 		}
 	}
 	hints.ai_family = ipv6_borked ? AF_INET : AF_UNSPEC;
-#endif
+# endif
 
 	if ((n = getaddrinfo(host, NULL, &hints, &res))) {
 		if (error_string) {
