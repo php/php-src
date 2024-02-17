@@ -64,6 +64,13 @@ PHP 8.4 UPGRADE NOTES
     exclusively, without also specifying a JIT mode using opcache.jit. To enable
     JIT, set the opcache.jit config value accordingly.
 
+- PCRE:
+  . The bundled pcre2lib has been updated to version 10.43.
+    As a consequence, this means {,3} is now recognized as a quantifier instead
+    of as text. Furthermore, the meaning of some character classes in UCP mode
+    has changed. Consult https://github.com/PCRE2Project/pcre2/blob/master/NEWS
+    for a full changelog.
+
 - PDO_DBLIB:
   . setAttribute, DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER and DBLIB_ATTR_DATETIME_CONVERT
     have been changed to set value as a bool.
@@ -178,6 +185,12 @@ PHP 8.4 UPGRADE NOTES
 
 - Phar:
   . Added support for the unix timestamp extension for zip archives.
+
+- PCRE:
+  . The bundled pcre2lib has been updated to version 10.43.
+    As a consequence, LoongArch JIT support has been added, spaces
+    are now allowed between braces in Perl-compatible items, and
+    variable-length lookbehind assertions are now supported.
 
 - PDO:
   . Added support for driver-specific subclasses.
