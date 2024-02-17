@@ -2,8 +2,8 @@
 Test ip2long() function : usage variation 2, 32 bit
 --SKIPIF--
 <?php
-if(PHP_INT_SIZE != 4) { die('skip 32 bit only'); }
-if(strtolower(substr(PHP_OS, 0, 3)) == 'aix') { die('skip not for AIX'); }
+if (PHP_INT_SIZE != 4) { die('skip 32 bit only'); }
+if (strtolower(substr(PHP_OS, 0, 3)) == 'aix') { die('skip not for AIX'); }
 ?>
 --FILE--
 <?php
