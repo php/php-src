@@ -42,6 +42,67 @@ env:
   CC: ccache gcc
   CXX: ccache g++
 jobs:
+  CODE_FORMATTING_CHECK:
+    name: CODE_FORMATTING_CHECK
+    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+    runs-on: ubuntu
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: apt
+        run: |
+          set -x
+          sudo apt-get update
+          sudo apt-get install \
+            git \
+            clang-format \
+            php-cli
+            netcat
+      - name: check code formatting
+        run: |
+          set -x
+          echo "Checking code formatting"
+          echo "Generating diff against master"
+          git fetch origin master
+          git diff origin/master > ../master.diff
+          cat ../master.diff
+          echo 1 check if scripts/dev/format_pull_request.php exists
+          if [ -f scripts/dev/format_pull_request.php ]; then
+            echo 1 cp scripts/dev/format_pull_request.php ..
+            cp scripts/dev/format_pull_request.php ..
+          else
+            echo "1 scripts/dev/format_pull_request.php does not exist"
+          fi
+          echo "checkout master"
+          git checkout master
+          echo 2 check if scripts/dev/format_pull_request.php exists
+          if [ -f scripts/dev/format_pull_request.php ]; then
+            echo 2 cp scripts/dev/format_pull_request.php ..
+            cp scripts/dev/format_pull_request.php ..
+          else
+            echo "2 scripts/dev/format_pull_request.php does not exist"
+          fi
+          echo "sanity check"
+          if [ ! -f ../format_pull_request.php ]; then
+            echo "error: format_pull_request.php does not exist" 1>&2
+            exit 1
+          fi
+          echo "run ../format_pull_request.php"
+          php ../format_pull_request.php ../master.diff > ../formatted.diff
+          cat ../formatted.diff
+          echo "check if formatted.diff is empty"
+          if [ -s ../formatted.diff ]; then
+            echo "code formatting check succeeded :)"
+            exit 0
+          else
+            echo "code formatting check failed :("
+            patch_url=$(cat ../formatted.diff | nc termbin.com 9999)
+            echo "Please run"
+            echo "curl $patch_url | git apply -v"
+            exit 1
+          fi
   LINUX_X64:
     if: github.repository_owner == 'php' || github.event_name == 'pull_request'
     services:
@@ -314,64 +375,3 @@ jobs:
           name: profiles
           path: ${{ github.workspace }}/benchmark/profiles
           retention-days: 30
-  CODE_FORMATTING_CHECK:
-    name: CODE_FORMATTING_CHECK
-    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
-    runs-on: ubuntu
-    steps:
-      - name: git checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: apt
-        run: |
-          set -x
-          sudo apt-get update
-          sudo apt-get install \
-            git \
-            clang-format \
-            php-cli
-            netcat
-      - name: check code formatting
-        run: |
-          set -x
-          echo "Checking code formatting"
-          echo "Generating diff against master"
-          git fetch origin master
-          git diff origin/master > ../master.diff
-          cat ../master.diff
-          echo 1 check if scripts/dev/format_pull_request.php exists
-          if [ -f scripts/dev/format_pull_request.php ]; then
-            echo 1 cp scripts/dev/format_pull_request.php ..
-            cp scripts/dev/format_pull_request.php ..
-          else
-            echo "1 scripts/dev/format_pull_request.php does not exist"
-          fi
-          echo "checkout master"
-          git checkout master
-          echo 2 check if scripts/dev/format_pull_request.php exists
-          if [ -f scripts/dev/format_pull_request.php ]; then
-            echo 2 cp scripts/dev/format_pull_request.php ..
-            cp scripts/dev/format_pull_request.php ..
-          else
-            echo "2 scripts/dev/format_pull_request.php does not exist"
-          fi
-          echo "sanity check"
-          if [ ! -f ../format_pull_request.php ]; then
-            echo "error: format_pull_request.php does not exist" 1>&2
-            exit 1
-          fi
-          echo "run ../format_pull_request.php"
-          php ../format_pull_request.php ../master.diff > ../formatted.diff
-          cat ../formatted.diff
-          echo "check if formatted.diff is empty"
-          if [ -s ../formatted.diff ]; then
-            echo "code formatting check succeeded :)"
-            exit 0
-          else
-            echo "code formatting check failed :("
-            patch_url=$(cat ../formatted.diff | nc termbin.com 9999)
-            echo "Please run"
-            echo "curl $patch_url | git apply -v"
-            exit 1
-          fi
