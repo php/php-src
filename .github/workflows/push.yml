@@ -100,14 +100,14 @@ jobs:
           cat ../formatted.diff
           echo "check if formatted.diff is empty"
           if [ -s ../formatted.diff ]; then
-            echo "code formatting check succeeded :)"
-            exit 0
-          else
             echo "code formatting check failed :("
             patch_url=$(cat ../formatted.diff | nc termbin.com 9999)
             echo "Please run"
             echo "curl $patch_url | git apply -v"
             exit 1
+          else
+            echo "code formatting check succeeded :)"
+            exit 0
           fi
   # LINUX_X64:
   #   if: github.repository_owner == 'php' || github.event_name == 'pull_request'
