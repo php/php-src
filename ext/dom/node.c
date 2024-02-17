@@ -93,13 +93,13 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 			uppercase = php_dom_follow_spec_intern(obj) && dom_ns_is_html_and_document_is_html(nodep);
 			ZEND_FALLTHROUGH;
 		case XML_ATTRIBUTE_NODE:
-			ZVAL_STR(retval, dom_node_get_node_name_attribute_or_element(nodep, uppercase));
+			ZVAL_NEW_STR(retval, dom_node_get_node_name_attribute_or_element(nodep, uppercase));
 			break;
 		case XML_NAMESPACE_DECL: {
 			xmlNsPtr ns = nodep->ns;
 			if (ns != NULL && ns->prefix) {
 				zend_string *str = dom_node_concatenated_name_helper(strlen((const char *) ns->prefix), (const char *) ns->prefix, strlen("xmlns"), "xmlns");
-				ZVAL_STR(retval, str);
+				ZVAL_NEW_STR(retval, str);
 			} else {
 				ZVAL_STRING(retval, (const char *) nodep->name);
 			}

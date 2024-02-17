@@ -184,7 +184,7 @@ zend_result dom_documenttype_internal_subset_read(dom_object *obj, zval *retval)
 		}
 
 		if (ret_buf.s) {
-			ZVAL_STR(retval, smart_str_extract(&ret_buf));
+			ZVAL_NEW_STR(retval, smart_str_extract(&ret_buf));
 			return SUCCESS;
 		}
 	}

@@ -123,7 +123,7 @@ zend_result dom_element_tag_name_read(dom_object *obj, zval *retval)
 	bool uppercase = php_dom_follow_spec_intern(obj) && dom_ns_is_html_and_document_is_html(nodep);
 
 	zend_string *result = dom_node_get_node_name_attribute_or_element((const xmlNode *) nodep, uppercase);
-	ZVAL_STR(retval, result);
+	ZVAL_NEW_STR(retval, result);
 
 	return SUCCESS;
 }
@@ -340,13 +340,13 @@ PHP_METHOD(DOMElement, getAttributeNames)
 	if (!php_dom_follow_spec_intern(intern)) {
 		for (xmlNsPtr nsptr = nodep->nsDef; nsptr; nsptr = nsptr->next) {
 			const char *prefix = (const char *) nsptr->prefix;
-			ZVAL_STR(&tmp, dom_node_concatenated_name_helper(strlen(prefix), prefix, strlen("xmlns"), (const char *) "xmlns"));
+			ZVAL_NEW_STR(&tmp, dom_node_concatenated_name_helper(strlen(prefix), prefix, strlen("xmlns"), (const char *) "xmlns"));
 			zend_hash_next_index_insert(ht, &tmp);
 		}
 	}
 
 	for (xmlAttrPtr attr = nodep->properties; attr; attr = attr->next) {
-		ZVAL_STR(&tmp, dom_node_get_node_name_attribute_or_element((const xmlNode *) attr, false));
+		ZVAL_NEW_STR(&tmp, dom_node_get_node_name_attribute_or_element((const xmlNode *) attr, false));
 		zend_hash_next_index_insert(ht, &tmp);
 	}
 }
