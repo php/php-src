@@ -1128,58 +1128,58 @@ PHP_FUNCTION(flush)
 /* }}} */
 
 /* {{{ Delay for a given number of seconds */
-PHP_FUNCTION(sleep) {
-  zval *num;
+PHP_FUNCTION(sleep)
+{
+	zval* num;
 
-  ZEND_PARSE_PARAMETERS_START(1, 1)
-  Z_PARAM_NUMBER(num)
-  ZEND_PARSE_PARAMETERS_END();
-  if (Z_TYPE_P(num) == IS_DOUBLE) {
-    const double seconds = Z_DVAL_P(num);
-    if (UNEXPECTED(seconds < 0)) {
-      zend_argument_value_error(1, "must be greater than or equal to 0");
-      RETURN_THROWS();
-    }
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+	Z_PARAM_NUMBER(num)
+	ZEND_PARSE_PARAMETERS_END();
+	if (Z_TYPE_P(num) == IS_DOUBLE) {
+		const double seconds = Z_DVAL_P(num);
+		if (UNEXPECTED(seconds < 0)) {
+			zend_argument_value_error(1, "must be greater than or equal to 0");
+			RETURN_THROWS();
+		}
 #ifdef HAVE_NANOSLEEP
-	time_t seconds_long = (time_t)seconds;
-	zend_long fraction_nanoseconds = (zend_long)((seconds - seconds_long) * 1000000000);
-	if(fraction_nanoseconds > 999999999) {
-		// for this to happen, you have to request to sleep for longer than
-		// 0.999999999 seconds and yet less than 1 second..
-		// nanosleep() has a documented limit of 999999999 nanoseconds, so let's just round it up to 1 second.
-		// that means we'll be off by <=0.9 nanoseconds in this edge-case, probably close enough.
-		fraction_nanoseconds = 0;
-		seconds_long += 1;
-	}
-	  struct timespec php_req, php_rem;
-	  php_req.tv_sec = (time_t)seconds_long;
-	  php_req.tv_nsec = fraction_nanoseconds;
-	  const int result = nanosleep(&php_req, &php_rem);
-	  if(UNEXPECTED(result == -1)) {
-		ZEND_ASSERT(errno != EINVAL); // this should be impossible, we carefully checked the input above
-		// it's probably EINTR
-		RETURN_DOUBLE(php_rem.tv_sec + (((double)php_rem.tv_nsec) / 1000000000.0));
-	  }
-	  RETURN_LONG(0);
+		time_t seconds_long = (time_t)seconds;
+		zend_long fraction_nanoseconds = (zend_long)((seconds - seconds_long) * 1000000000);
+		if (fraction_nanoseconds > 999999999) {
+			// for this to happen, you have to request to sleep for longer than
+			// 0.999999999 seconds and yet less than 1 second..
+			// nanosleep() has a documented limit of 999999999 nanoseconds, so let's just round it up to 1 second.
+			// that means we'll be off by <=0.9 nanoseconds in this edge-case, probably close enough.
+			fraction_nanoseconds = 0;
+			seconds_long += 1;
+		}
+		struct timespec php_req, php_rem;
+		php_req.tv_sec = (time_t)seconds_long;
+		php_req.tv_nsec = fraction_nanoseconds;
+		const int result = nanosleep(&php_req, &php_rem);
+		if (UNEXPECTED(result == -1)) {
+			ZEND_ASSERT(errno != EINVAL); // this should be impossible, we carefully checked the input above
+			// it's probably EINTR
+			RETURN_DOUBLE(php_rem.tv_sec + (((double)php_rem.tv_nsec) / 1000000000.0));
+		}
+		RETURN_LONG(0);
 #elif defined(HAVE_USLEEP)
-    const unsigned int fraction_microseconds =
-        (unsigned int)((seconds - (unsigned int)seconds) * 1000000);
-    if (fraction_microseconds > 0) {
-      usleep(fraction_microseconds);
-    }
-    RETURN_LONG(php_sleep((unsigned int)seconds));
+		const unsigned int fraction_microseconds = (unsigned int)((seconds - (unsigned int)seconds) * 1000000);
+		if (fraction_microseconds > 0) {
+			usleep(fraction_microseconds);
+		}
+		RETURN_LONG(php_sleep((unsigned int)seconds));
 #else
-	// avoid -Werror=unreachable-code
-    RETURN_LONG(php_sleep((unsigned int)seconds));
+		// avoid -Werror=unreachable-code
+		RETURN_LONG(php_sleep((unsigned int)seconds));
 #endif
-  }
-  ZEND_ASSERT(Z_TYPE_P(num) == IS_LONG); // Z_PARAM_NUMBER(num) above guarantee that it's double or float or throw :)
-  zend_long seconds = Z_LVAL_P(num);
-  if (UNEXPECTED(seconds < 0)) {
-    zend_argument_value_error(1, "must be greater than or equal to 0");
-    RETURN_THROWS();
-  }
-  RETURN_LONG(php_sleep((unsigned int)seconds));
+	}
+	ZEND_ASSERT(Z_TYPE_P(num) == IS_LONG); // Z_PARAM_NUMBER(num) above guarantee that it's double or float or throw :)
+	zend_long seconds = Z_LVAL_P(num);
+	if (UNEXPECTED(seconds < 0)) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
+	}
+	RETURN_LONG(php_sleep((unsigned int)seconds));
 }
 /* }}} */
 
