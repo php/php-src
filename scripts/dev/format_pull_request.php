@@ -50,7 +50,7 @@ if ($ret !== 0) {
     }
     exit(1);
 }
-// commit
+passthru('git add .');
 passthru('git -c user.email="clangformat@example.com" -c user.name=clangformat commit -a --message=clangformat --quiet', $ret);
 if ($ret !== 0) {
     fwrite(STDERR, "Error: git commit failed with exit code {$ret}\n");
