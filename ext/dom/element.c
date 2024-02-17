@@ -1168,7 +1168,7 @@ PHP_METHOD(DOMElement, getAttributeNodeNS)
 				RETURN_NULL();
 			}
 		} else {
-		   RETURN_NULL();
+			RETURN_NULL();
 		}
 	} else {
 		DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
