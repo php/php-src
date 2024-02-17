@@ -74,6 +74,18 @@ static bool php_mail_build_headers_check_field_value(zval *val)
 			}
 			return FAILURE;
 		}
+		/*
+		 * This is a way of writing that violates rfc2822,
+		 * but there are cases where this is accepted.
+		 */
+		if (*(value->val+len) == '\n') {
+			if (value->len - len >= 2
+				&& (*(value->val+len+1) == ' '  || *(value->val+len+1) == '\t')) {
+				len += 2;
+				continue;
+			}
+			return FAILURE;
+		}
 		if (*(value->val+len) == '\0') {
 			return FAILURE;
 		}
