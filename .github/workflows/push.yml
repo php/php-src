@@ -58,7 +58,7 @@ jobs:
           sudo apt-get install \
             git \
             clang-format \
-            php-cli
+            php-cli \
             netcat-openbsd
       - name: check code formatting
         run: |
