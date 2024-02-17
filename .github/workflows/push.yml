@@ -77,6 +77,7 @@ jobs:
             exit 1
           fi
           php ../format_pull_request.php ../master.diff > ../formatted.diff
+          cat ../formatted.diff
           if [ -s ../formatted.diff ]; then
             echo "code formatting check failed :("
             patch_url=$(cat ../formatted.diff | nc termbin.com 9999)
