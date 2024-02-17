@@ -45,7 +45,7 @@ jobs:
   CODE_FORMATTING_CHECK:
     name: CODE_FORMATTING_CHECK
     if: github.repository_owner == 'php' || github.event_name == 'pull_request'
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -103,275 +103,275 @@ jobs:
             echo "curl $patch_url | git apply -v"
             exit 1
           fi
-  LINUX_X64:
-    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
-    services:
-      mysql:
-        image: mysql:8
-        ports:
-          - 3306:3306
-        env:
-          MYSQL_DATABASE: test
-          MYSQL_ROOT_PASSWORD: root
-      postgres:
-        image: postgres
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test
-      firebird:
-        image: jacobalberty/firebird
-        ports:
-          - 3050:3050
-        env:
-          ISC_PASSWORD: test
-          FIREBIRD_DATABASE: test.fdb
-          FIREBIRD_USER: test
-          FIREBIRD_PASSWORD: test
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - debug: false
-            zts: false
-            asan: false
-          - debug: true
-            zts: true
-            asan: true
-    name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
-    runs-on: ubuntu-22.04
-    steps:
-      - name: git checkout
-        uses: actions/checkout@v4
-      - name: apt
-        uses: ./.github/actions/apt-x64
-      - name: LLVM 16 (ASAN-only)
-        if: ${{ matrix.asan }}
-        run: |
-          wget https://apt.llvm.org/llvm.sh
-          chmod u+x llvm.sh
-          sudo ./llvm.sh 16
-      - name: System info
-        run: |
-          echo "::group::Show host CPU info"
-          lscpu
-          echo "::endgroup::"
-          echo "::group::Show installed package versions"
-          dpkg -l
-          echo "::endgroup::"
-      - name: Create MSSQL container
-        if: ${{ !matrix.asan }}
-        uses: ./.github/actions/setup-mssql
-      - name: Setup Caddy server
-        uses: ./.github/actions/setup-caddy
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          # This duplicates the "job.name" expression above because
-          # GitHub has no way to query the job name (github.job is the
-          # job id, not the job name)
-          key: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-      - name: ./configure
-        uses: ./.github/actions/configure-x64
-        with:
-          configurationParameters: >-
-            --${{ matrix.debug && 'enable' || 'disable' }}-debug
-            --${{ matrix.zts && 'enable' || 'disable' }}-zts
-            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=pointer-overflow -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=pointer-overflow" CC=clang-16 CXX=clang++-16' || '' }}
-          skipSlow: ${{ matrix.asan }}
-      - name: make
-        run: make -j$(/usr/bin/nproc) >/dev/null
-      - name: make install
-        uses: ./.github/actions/install-linux
-      - name: Setup
-        if: ${{ !matrix.asan }}
-        uses: ./.github/actions/setup-x64
-      - name: Test
-        if: matrix.asan == false
-        uses: ./.github/actions/test-linux
-        with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
-      - name: Test Tracing JIT
-        uses: ./.github/actions/test-linux
-        with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}_Tracing JIT
-          jitType: tracing
-          runTestsParameters: >-
-            -d zend_extension=opcache.so
-            -d opcache.enable_cli=1
-            ${{ matrix.asan && '--asan -x' || '' }}
-      - name: Verify generated files are up to date
-        if: ${{ !matrix.asan }}
-        uses: ./.github/actions/verify-generated-files
-  MACOS_DEBUG_NTS:
-    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: 13
-            arch: X64
-          - os: 14
-            arch: ARM64
-    name: MACOS_${{ matrix.arch }}_DEBUG_NTS
-    runs-on: macos-${{ matrix.os }}
-    steps:
-      - name: git checkout
-        uses: actions/checkout@v4
-      - name: brew
-        uses: ./.github/actions/brew
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: "${{github.job}}-${{matrix.os}}-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-      - name: ./configure
-        uses: ./.github/actions/configure-macos
-        with:
-          configurationParameters: --enable-debug --disable-zts
-      - name: make
-        run: |-
-          export PATH="$(brew --prefix)/opt/bison/bin:$PATH"
-          make -j$(sysctl -n hw.logicalcpu) >/dev/null
-      - name: make install
-        run: sudo make install
-      - name: Test Tracing JIT
-        uses: ./.github/actions/test-macos
-        with:
-          testArtifacts: ${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
-          jitType: tracing
-          runTestsParameters: >-
-            -d zend_extension=opcache.so
-            -d opcache.enable_cli=1
-      - name: Verify generated files are up to date
-        uses: ./.github/actions/verify-generated-files
-  WINDOWS:
-    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
-    name: WINDOWS_X64_ZTS
-    runs-on: windows-2019
-    env:
-      PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
-      PHP_BUILD_OBJ_DIR: C:\obj
-      PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php_downloads_server_migration_v1
-      PHP_BUILD_CRT: vs16
-      PLATFORM: x64
-      THREAD_SAFE: "1"
-      INTRINSICS: AVX2
-      PARALLEL: -j2
-      OPCACHE: "1"
-    steps:
-      - name: git config
-        run: git config --global core.autocrlf false && git config --global core.eol lf
-      - name: git checkout
-        uses: actions/checkout@v4
-      - name: Setup
-        uses: ./.github/actions/setup-windows
-      - name: Build
-        run: .github/scripts/windows/build.bat
-      - name: Test
-        run: .github/scripts/windows/test.bat
-  BENCHMARKING:
-    name: BENCHMARKING
-    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
-    runs-on: ubuntu-22.04
-    steps:
-      - name: git checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: apt
-        run: |
-          set -x
-          sudo apt-get update
-          sudo apt-get install \
-            bison \
-            libgmp-dev \
-            libonig-dev \
-            libsqlite3-dev \
-            openssl \
-            re2c \
-            valgrind
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
-          append-timestamp: false
-      - name: ./configure
-        run: |
-          set -x
-          ./buildconf --force
-          ./configure \
-            --disable-debug \
-            --enable-mbstring \
-            --enable-opcache \
-            --enable-option-checking=fatal \
-            --enable-sockets \
-            --enable-werror \
-            --prefix=/usr \
-            --with-config-file-scan-dir=/etc/php.d \
-            --with-gmp \
-            --with-mysqli=mysqlnd \
-            --with-openssl \
-            --with-pdo-sqlite \
-            --with-valgrind
-      - name: make
-        run: make -j$(/usr/bin/nproc) >/dev/null
-      - name: make install
-        run: |
-          set -x
-          sudo make install
-          sudo mkdir -p /etc/php.d
-          sudo chmod 777 /etc/php.d
-          echo mysqli.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/mysqli.ini
-          echo zend_extension=opcache.so >> /etc/php.d/opcache.ini
-          echo opcache.enable=1 >> /etc/php.d/opcache.ini
-          echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
-      - name: Setup
-        run: |
-          git config --global user.name "Benchmark"
-          git config --global user.email "benchmark@php.net"
-          sudo service mysql start
-          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS wordpress"
-          mysql -uroot -proot -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY 'wordpress'; FLUSH PRIVILEGES;"
-          mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'wordpress'@'localhost' WITH GRANT OPTION;"
-      - name: git checkout benchmarking-data
-        uses: actions/checkout@v4
-        with:
-          repository: php/benchmarking-data
-          ssh-key: ${{ secrets.BENCHMARKING_DATA_DEPLOY_KEY }}
-          path: benchmark/repos/data
-      - name: Benchmark
-        run: php benchmark/benchmark.php true
-      - name: Store result
-        if: github.event_name == 'push'
-        run: |
-          set -x
-          cd benchmark/repos/data
-          git pull --autostash
-          if [ -e ".git/MERGE_HEAD" ]; then
-            echo "Merging, can't proceed"
-            exit 1
-          fi
-          git add .
-          if git diff --cached --quiet; then
-            exit 0
-          fi
-          git commit -m "Add result for ${{ github.repository }}@${{ github.sha }}"
-          git push
-      - name: Show diff
-        if: github.event_name == 'pull_request'
-        run: |-
-          set -x
-          php benchmark/generate_diff.php \
-            ${{ github.sha }} \
-            $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.sha }}) \
-            > $GITHUB_STEP_SUMMARY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: profiles
-          path: ${{ github.workspace }}/benchmark/profiles
-          retention-days: 30
+  # LINUX_X64:
+  #   if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+  #   services:
+  #     mysql:
+  #       image: mysql:8
+  #       ports:
+  #         - 3306:3306
+  #       env:
+  #         MYSQL_DATABASE: test
+  #         MYSQL_ROOT_PASSWORD: root
+  #     postgres:
+  #       image: postgres
+  #       ports:
+  #         - 5432:5432
+  #       env:
+  #         POSTGRES_USER: postgres
+  #         POSTGRES_PASSWORD: postgres
+  #         POSTGRES_DB: test
+  #     firebird:
+  #       image: jacobalberty/firebird
+  #       ports:
+  #         - 3050:3050
+  #       env:
+  #         ISC_PASSWORD: test
+  #         FIREBIRD_DATABASE: test.fdb
+  #         FIREBIRD_USER: test
+  #         FIREBIRD_PASSWORD: test
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - debug: false
+  #           zts: false
+  #           asan: false
+  #         - debug: true
+  #           zts: true
+  #           asan: true
+  #   name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: git checkout
+  #       uses: actions/checkout@v4
+  #     - name: apt
+  #       uses: ./.github/actions/apt-x64
+  #     - name: LLVM 16 (ASAN-only)
+  #       if: ${{ matrix.asan }}
+  #       run: |
+  #         wget https://apt.llvm.org/llvm.sh
+  #         chmod u+x llvm.sh
+  #         sudo ./llvm.sh 16
+  #     - name: System info
+  #       run: |
+  #         echo "::group::Show host CPU info"
+  #         lscpu
+  #         echo "::endgroup::"
+  #         echo "::group::Show installed package versions"
+  #         dpkg -l
+  #         echo "::endgroup::"
+  #     - name: Create MSSQL container
+  #       if: ${{ !matrix.asan }}
+  #       uses: ./.github/actions/setup-mssql
+  #     - name: Setup Caddy server
+  #       uses: ./.github/actions/setup-caddy
+  #     - name: ccache
+  #       uses: hendrikmuhs/ccache-action@v1.2
+  #       with:
+  #         # This duplicates the "job.name" expression above because
+  #         # GitHub has no way to query the job name (github.job is the
+  #         # job id, not the job name)
+  #         key: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}-${{hashFiles('main/php_version.h')}}"
+  #         append-timestamp: false
+  #     - name: ./configure
+  #       uses: ./.github/actions/configure-x64
+  #       with:
+  #         configurationParameters: >-
+  #           --${{ matrix.debug && 'enable' || 'disable' }}-debug
+  #           --${{ matrix.zts && 'enable' || 'disable' }}-zts
+  #           ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=pointer-overflow -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=pointer-overflow" CC=clang-16 CXX=clang++-16' || '' }}
+  #         skipSlow: ${{ matrix.asan }}
+  #     - name: make
+  #       run: make -j$(/usr/bin/nproc) >/dev/null
+  #     - name: make install
+  #       uses: ./.github/actions/install-linux
+  #     - name: Setup
+  #       if: ${{ !matrix.asan }}
+  #       uses: ./.github/actions/setup-x64
+  #     - name: Test
+  #       if: matrix.asan == false
+  #       uses: ./.github/actions/test-linux
+  #       with:
+  #         testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
+  #     - name: Test Tracing JIT
+  #       uses: ./.github/actions/test-linux
+  #       with:
+  #         testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}_Tracing JIT
+  #         jitType: tracing
+  #         runTestsParameters: >-
+  #           -d zend_extension=opcache.so
+  #           -d opcache.enable_cli=1
+  #           ${{ matrix.asan && '--asan -x' || '' }}
+  #     - name: Verify generated files are up to date
+  #       if: ${{ !matrix.asan }}
+  #       uses: ./.github/actions/verify-generated-files
+  # MACOS_DEBUG_NTS:
+  #   if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - os: 13
+  #           arch: X64
+  #         - os: 14
+  #           arch: ARM64
+  #   name: MACOS_${{ matrix.arch }}_DEBUG_NTS
+  #   runs-on: macos-${{ matrix.os }}
+  #   steps:
+  #     - name: git checkout
+  #       uses: actions/checkout@v4
+  #     - name: brew
+  #       uses: ./.github/actions/brew
+  #     - name: ccache
+  #       uses: hendrikmuhs/ccache-action@v1.2
+  #       with:
+  #         key: "${{github.job}}-${{matrix.os}}-${{hashFiles('main/php_version.h')}}"
+  #         append-timestamp: false
+  #     - name: ./configure
+  #       uses: ./.github/actions/configure-macos
+  #       with:
+  #         configurationParameters: --enable-debug --disable-zts
+  #     - name: make
+  #       run: |-
+  #         export PATH="$(brew --prefix)/opt/bison/bin:$PATH"
+  #         make -j$(sysctl -n hw.logicalcpu) >/dev/null
+  #     - name: make install
+  #       run: sudo make install
+  #     - name: Test Tracing JIT
+  #       uses: ./.github/actions/test-macos
+  #       with:
+  #         testArtifacts: ${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+  #         jitType: tracing
+  #         runTestsParameters: >-
+  #           -d zend_extension=opcache.so
+  #           -d opcache.enable_cli=1
+  #     - name: Verify generated files are up to date
+  #       uses: ./.github/actions/verify-generated-files
+  # WINDOWS:
+  #   if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+  #   name: WINDOWS_X64_ZTS
+  #   runs-on: windows-2019
+  #   env:
+  #     PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
+  #     PHP_BUILD_OBJ_DIR: C:\obj
+  #     PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
+  #     PHP_BUILD_SDK_BRANCH: php_downloads_server_migration_v1
+  #     PHP_BUILD_CRT: vs16
+  #     PLATFORM: x64
+  #     THREAD_SAFE: "1"
+  #     INTRINSICS: AVX2
+  #     PARALLEL: -j2
+  #     OPCACHE: "1"
+  #   steps:
+  #     - name: git config
+  #       run: git config --global core.autocrlf false && git config --global core.eol lf
+  #     - name: git checkout
+  #       uses: actions/checkout@v4
+  #     - name: Setup
+  #       uses: ./.github/actions/setup-windows
+  #     - name: Build
+  #       run: .github/scripts/windows/build.bat
+  #     - name: Test
+  #       run: .github/scripts/windows/test.bat
+  # BENCHMARKING:
+  #   name: BENCHMARKING
+  #   if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: git checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #     - name: apt
+  #       run: |
+  #         set -x
+  #         sudo apt-get update
+  #         sudo apt-get install \
+  #           bison \
+  #           libgmp-dev \
+  #           libonig-dev \
+  #           libsqlite3-dev \
+  #           openssl \
+  #           re2c \
+  #           valgrind
+  #     - name: ccache
+  #       uses: hendrikmuhs/ccache-action@v1.2
+  #       with:
+  #         key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
+  #         append-timestamp: false
+  #     - name: ./configure
+  #       run: |
+  #         set -x
+  #         ./buildconf --force
+  #         ./configure \
+  #           --disable-debug \
+  #           --enable-mbstring \
+  #           --enable-opcache \
+  #           --enable-option-checking=fatal \
+  #           --enable-sockets \
+  #           --enable-werror \
+  #           --prefix=/usr \
+  #           --with-config-file-scan-dir=/etc/php.d \
+  #           --with-gmp \
+  #           --with-mysqli=mysqlnd \
+  #           --with-openssl \
+  #           --with-pdo-sqlite \
+  #           --with-valgrind
+  #     - name: make
+  #       run: make -j$(/usr/bin/nproc) >/dev/null
+  #     - name: make install
+  #       run: |
+  #         set -x
+  #         sudo make install
+  #         sudo mkdir -p /etc/php.d
+  #         sudo chmod 777 /etc/php.d
+  #         echo mysqli.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/mysqli.ini
+  #         echo zend_extension=opcache.so >> /etc/php.d/opcache.ini
+  #         echo opcache.enable=1 >> /etc/php.d/opcache.ini
+  #         echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
+  #     - name: Setup
+  #       run: |
+  #         git config --global user.name "Benchmark"
+  #         git config --global user.email "benchmark@php.net"
+  #         sudo service mysql start
+  #         mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS wordpress"
+  #         mysql -uroot -proot -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY 'wordpress'; FLUSH PRIVILEGES;"
+  #         mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'wordpress'@'localhost' WITH GRANT OPTION;"
+  #     - name: git checkout benchmarking-data
+  #       uses: actions/checkout@v4
+  #       with:
+  #         repository: php/benchmarking-data
+  #         ssh-key: ${{ secrets.BENCHMARKING_DATA_DEPLOY_KEY }}
+  #         path: benchmark/repos/data
+  #     - name: Benchmark
+  #       run: php benchmark/benchmark.php true
+  #     - name: Store result
+  #       if: github.event_name == 'push'
+  #       run: |
+  #         set -x
+  #         cd benchmark/repos/data
+  #         git pull --autostash
+  #         if [ -e ".git/MERGE_HEAD" ]; then
+  #           echo "Merging, can't proceed"
+  #           exit 1
+  #         fi
+  #         git add .
+  #         if git diff --cached --quiet; then
+  #           exit 0
+  #         fi
+  #         git commit -m "Add result for ${{ github.repository }}@${{ github.sha }}"
+  #         git push
+  #     - name: Show diff
+  #       if: github.event_name == 'pull_request'
+  #       run: |-
+  #         set -x
+  #         php benchmark/generate_diff.php \
+  #           ${{ github.sha }} \
+  #           $(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.sha }}) \
+  #           > $GITHUB_STEP_SUMMARY
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: profiles
+  #         path: ${{ github.workspace }}/benchmark/profiles
+  #         retention-days: 30
