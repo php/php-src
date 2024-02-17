@@ -89,12 +89,12 @@ jobs:
             echo "error: format_pull_request.php does not exist" 1>&2
             exit 1
           fi
-          echo find
-          find
+          echo find | head
+          find | head
           echo pwd
           pwd
-          echo git diff..
-          git diff
+          echo git diff | head
+          git diff | head
           echo "run ../format_pull_request.php"
           php ../format_pull_request.php ../master.diff > ../formatted.diff
           cat ../formatted.diff
