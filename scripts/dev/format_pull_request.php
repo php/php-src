@@ -21,7 +21,12 @@ if ($argc !== 2) {
     fwrite(STDERR, ob_get_clean());
     exit(1);
 }
-chdir(__DIR__ . '/../../'); // php-src root
+// check if we're already in php-src
+if (is_dir("Zend")) {
+    // we're in the root of the php-src
+} else {
+    chdir(__DIR__ . '/../../'); // php-src root
+}
 if (!$force) {
     $gitStatus = null;
     system('git diff --quiet --exit-code', $gitStatus);
