@@ -616,6 +616,10 @@ function intltz_to_date_time_zone(IntlTimeZone $timezone): DateTimeZone|false {}
 
 function intltz_use_daylight_time(IntlTimeZone $timezone): bool {}
 
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+function intltz_get_iana_id(string $timezoneId): string|false {}
+#endif
+
 /* transliterator */
 
 function transliterator_create(string $id, int $direction = Transliterator::FORWARD): ?Transliterator {}

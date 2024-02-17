@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 893419f59d38566a8f6a766829250c18663e339c */
+ * Stub hash: 50cc9edef7f40e6885be38be25a71f66d7405a50 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -753,6 +753,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intltz_use_daylight_time, 0, 1, 
 	ZEND_ARG_OBJ_INFO(0, timezone, IntlTimeZone, 0)
 ZEND_END_ARG_INFO()
 
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intltz_get_iana_id, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_transliterator_create, 0, 1, Transliterator, 1)
 	ZEND_ARG_TYPE_INFO(0, id, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, direction, IS_LONG, 0, "Transliterator::FORWARD")
@@ -965,6 +971,9 @@ ZEND_FUNCTION(intltz_get_id_for_windows_id);
 ZEND_FUNCTION(intltz_has_same_rules);
 ZEND_FUNCTION(intltz_to_date_time_zone);
 ZEND_FUNCTION(intltz_use_daylight_time);
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+ZEND_FUNCTION(intltz_get_iana_id);
+#endif
 ZEND_FUNCTION(transliterator_create);
 ZEND_FUNCTION(transliterator_create_from_rules);
 ZEND_FUNCTION(transliterator_list_ids);
@@ -1154,6 +1163,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(intltz_has_same_rules, arginfo_intltz_has_same_rules)
 	ZEND_FE(intltz_to_date_time_zone, arginfo_intltz_to_date_time_zone)
 	ZEND_FE(intltz_use_daylight_time, arginfo_intltz_use_daylight_time)
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+	ZEND_FE(intltz_get_iana_id, arginfo_intltz_get_iana_id)
+#endif
 	ZEND_FE(transliterator_create, arginfo_transliterator_create)
 	ZEND_FE(transliterator_create_from_rules, arginfo_transliterator_create_from_rules)
 	ZEND_FE(transliterator_list_ids, arginfo_transliterator_list_ids)
