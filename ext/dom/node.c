@@ -1285,8 +1285,7 @@ PHP_METHOD(DOMNode, appendChild)
 	DOM_RET_OBJ(new_child, &ret, intern);
 	return;
 cannot_add:
-	// TODO Convert to Error?
-	php_error_docref(NULL, E_WARNING, "Couldn't append node");
+	php_dom_throw_error(INVALID_STATE_ERR, stricterror);
 	RETURN_FALSE;
 }
 /* }}} end dom_node_append_child */
