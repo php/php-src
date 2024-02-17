@@ -79,6 +79,7 @@ jobs:
           git reset --hard origin/master
           php ../format_pull_request.php ../master.diff > ../formatted.diff
           if [ -s ../formatted.diff ]; then
+            cat ../formatted.diff
             echo "code formatting check failed :("
             patch_url=$(cat ../formatted.diff | nc termbin.com 9999)
             echo "Please run"
