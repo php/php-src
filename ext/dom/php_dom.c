@@ -380,18 +380,15 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 		}
 
 		zend_property_info *prop = zend_get_property_info(object->ce, name, /* silent */ true);
-		if (prop && ZEND_TYPE_IS_SET(prop->type)) {
-			zval tmp;
-			ZVAL_COPY(&tmp, value);
-			if (!zend_verify_property_type(prop, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
-				zval_ptr_dtor(&tmp);
-				return &EG(error_zval);
-			}
-			hnd->write_func(obj, &tmp);
+		ZEND_ASSERT(prop && ZEND_TYPE_IS_SET(prop->type));
+		zval tmp;
+		ZVAL_COPY(&tmp, value);
+		if (!zend_verify_property_type(prop, &tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))) {
 			zval_ptr_dtor(&tmp);
-		} else {
-			hnd->write_func(obj, value);
+			return &EG(error_zval);
 		}
+		hnd->write_func(obj, &tmp);
+		zval_ptr_dtor(&tmp);
 
 		return value;
 	}
