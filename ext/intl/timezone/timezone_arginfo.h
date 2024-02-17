@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: be6841ed5e1bc6ef9b3b8d4236d3708b4c74cd2b */
+ * Stub hash: ff6d6bb0789c719625f4271bf9ce1c12eea5c95e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -55,6 +55,12 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_get
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlTimeZone_getGMT arginfo_class_IntlTimeZone_createDefault
+
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_IntlTimeZone_getIanaID, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
 
 #define arginfo_class_IntlTimeZone_getID arginfo_class_IntlTimeZone_getErrorMessage
 
@@ -112,6 +118,9 @@ ZEND_FUNCTION(intltz_get_equivalent_id);
 ZEND_FUNCTION(intltz_get_error_code);
 ZEND_FUNCTION(intltz_get_error_message);
 ZEND_FUNCTION(intltz_get_gmt);
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+ZEND_FUNCTION(intltz_get_iana_id);
+#endif
 ZEND_FUNCTION(intltz_get_id);
 ZEND_FUNCTION(intltz_get_offset);
 ZEND_FUNCTION(intltz_get_raw_offset);
@@ -143,6 +152,9 @@ static const zend_function_entry class_IntlTimeZone_methods[] = {
 	ZEND_ME_MAPPING(getErrorCode, intltz_get_error_code, arginfo_class_IntlTimeZone_getErrorCode, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getErrorMessage, intltz_get_error_message, arginfo_class_IntlTimeZone_getErrorMessage, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getGMT, intltz_get_gmt, arginfo_class_IntlTimeZone_getGMT, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+	ZEND_ME_MAPPING(getIanaID, intltz_get_iana_id, arginfo_class_IntlTimeZone_getIanaID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+#endif
 	ZEND_ME_MAPPING(getID, intltz_get_id, arginfo_class_IntlTimeZone_getID, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getOffset, intltz_get_offset, arginfo_class_IntlTimeZone_getOffset, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getRawOffset, intltz_get_raw_offset, arginfo_class_IntlTimeZone_getRawOffset, ZEND_ACC_PUBLIC)

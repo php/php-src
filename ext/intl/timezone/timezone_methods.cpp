@@ -371,6 +371,37 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 	RETVAL_NEW_STR(u8str);
 }
 
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+U_CFUNC PHP_FUNCTION(intltz_get_iana_id)
+{
+	char	*str_id;
+	size_t	 str_id_len;
+	intl_error_reset(NULL);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
+			&str_id, &str_id_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	UErrorCode status = UErrorCode();
+	UnicodeString id;
+	if (intl_stringFromChar(id, str_id, str_id_len, &status) == FAILURE) {
+		intl_error_set(NULL, status,
+			"could not convert time zone id to UTF-16", 0);
+		RETURN_FALSE;
+	}
+
+	UnicodeString result;
+	TimeZone::getIanaID(id, result, status);
+	INTL_CHECK_STATUS(status, "error obtaining IANA ID");
+
+	zend_string *u8str = intl_convert_utf16_to_utf8(result.getBuffer(), result.length(), &status);
+	INTL_CHECK_STATUS(status,
+		"could not convert time zone id to UTF-16");
+	RETVAL_NEW_STR(u8str);
+}
+#endif
+
 U_CFUNC PHP_FUNCTION(intltz_get_id)
 {
 	TIMEZONE_METHOD_INIT_VARS;
