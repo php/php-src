@@ -1099,11 +1099,6 @@ namespace DOM
     const NAMESPACE_ERR = UNKNOWN;
     /**
      * @var int
-     * @cvalue INVALID_ACCESS_ERR
-     */
-    const INVALID_ACCESS_ERR = UNKNOWN;
-    /**
-     * @var int
      * @cvalue VALIDATION_ERR
      */
     const VALIDATION_ERR = UNKNOWN;
