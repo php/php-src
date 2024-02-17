@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 set_error_handler(function($_, $msg) {
