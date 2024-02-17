@@ -400,10 +400,8 @@ static zend_always_inline void dom_libxml_reconcile_modern_single_element_node(d
 {
 	ZEND_ASSERT(node->type == XML_ELEMENT_NODE);
 
-	/* Add the defined namespaces to the mapper. */
-	for (xmlNsPtr ns = node->nsDef; ns != NULL; ns = ns->next) {
-		zend_hash_index_add_ptr(&ctx->old_ns_to_new_ns_ptr, dom_mangle_pointer_for_key(ns), ns);
-	}
+	/* Since this is modern DOM, the declarations are not on the node and thus there's nothing to add from nsDef. */
+	ZEND_ASSERT(node->nsDef == NULL);
 
 	if (node->ns != NULL) {
 		dom_libxml_reconcile_modern_single_node(ctx, node, node);
