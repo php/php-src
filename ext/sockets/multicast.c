@@ -475,7 +475,7 @@ static int _php_mcast_join_leave(
 				join ? IP_ADD_MEMBERSHIP : IP_DROP_MEMBERSHIP, (char*)&mreq,
 				sizeof(mreq));
 	}
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	else if (sock->type == AF_INET6) {
 		struct ipv6_mreq mreq;
 		memset(&mreq, 0, sizeof(struct ipv6_mreq));
@@ -543,7 +543,7 @@ static int _php_mcast_source_op(
 		return setsockopt(sock->bsd_socket, level,
 				_php_source_op_to_ipv4_op(sop), (char*)&mreqs, sizeof(mreqs));
 	}
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	else if (sock->type == AF_INET6) {
 		php_error_docref(NULL, E_WARNING,
 			"This platform does not support %s for IPv6 sockets",
