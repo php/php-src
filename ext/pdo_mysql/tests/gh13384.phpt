@@ -21,6 +21,19 @@ $stringableObject = new class () implements Stringable {
     }
 };
 
+echo "Stringable object, value set after bindParam:\n";
+try {
+    $stmt = $db->prepare('SELECT ?');
+    $param = 'foo';
+    $stmt->bindParam(1, $param, PDO::PARAM_STR);
+    $param = $stringableObject;
+    $stmt->execute();
+    var_dump(is_object($param), $param === $stringableObject);
+    echo "\n";
+} catch (Throwable $e) {
+    echo $e->getMessage()."\n\n";
+}
+
 echo "Stringable object, bindValue:\n";
 $stmt = $db->prepare('SELECT (?)');
 $stmt->bindValue(1, $stringableObject, PDO::PARAM_INT);
@@ -48,6 +61,10 @@ try {
 }
 ?>
 --EXPECT--
+Stringable object, value set after bindParam:
+bool(true)
+bool(true)
+
 Stringable object, bindValue:
 array(1) {
   [0]=>
