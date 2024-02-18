@@ -2526,6 +2526,7 @@ class ConstInfo extends VariableLike
     public ?string $cond;
     public ?string $cValue;
     public bool $isUndocumentable;
+    public bool $isFileCacheAllowed;
 
     /**
      * @var AttributeInfo[] $attributes
@@ -2544,7 +2545,8 @@ class ConstInfo extends VariableLike
         ?string $link,
         ?int $phpVersionIdMinimumCompatibility,
         array $attributes,
-        ?ExposedDocComment $exposedDocComment
+        ?ExposedDocComment $exposedDocComment,
+        bool $isFileCacheAllowed
     ) {
         $this->name = $name;
         $this->value = $value;
@@ -2553,6 +2555,7 @@ class ConstInfo extends VariableLike
         $this->cond = $cond;
         $this->cValue = $cValue;
         $this->isUndocumentable = $isUndocumentable;
+        $this->isFileCacheAllowed = $isFileCacheAllowed;
         parent::__construct($flags, $type, $phpDocType, $link, $phpVersionIdMinimumCompatibility, $attributes, $exposedDocComment);
     }
 
@@ -2698,6 +2701,9 @@ class ConstInfo extends VariableLike
         $cExpr = $value->getCExpr();
 
         $flags = "CONST_PERSISTENT";
+        if (!$this->isFileCacheAllowed) {
+            $flags .= " | CONST_NO_FILE_CACHE";
+        }
         if ($this->phpVersionIdMinimumCompatibility !== null && $this->phpVersionIdMinimumCompatibility < 80000) {
             $flags .= " | CONST_CS";
         }
@@ -2725,7 +2731,8 @@ class ConstInfo extends VariableLike
             return "\tREGISTER_STRING_CONSTANT(\"$constName\", " . ($cExpr ?: '"' . addslashes($constValue) . '"') . ", $flags);\n";
         }
 
-        throw new Exception("Unimplemented constant type");}
+        throw new Exception("Unimplemented constant type");
+    }
 
     /** @param array<string, ConstInfo> $allConstInfos */
     private function getClassConstDeclaration(EvaluatedValue $value, array $allConstInfos): string
@@ -4304,6 +4311,7 @@ function parseConstLike(
     $deprecated = false;
     $cValue = null;
     $link = null;
+    $isFileCacheAllowed = true;
     if ($comments) {
         $tags = parseDocComments($comments);
         foreach ($tags as $tag) {
@@ -4317,6 +4325,8 @@ function parseConstLike(
                 $isUndocumentable = true;
             } elseif ($tag->name === 'link') {
                 $link = $tag->value;
+            } elseif ($tag->name === 'no-file-cache') {
+                $isFileCacheAllowed = false;
             }
         }
     }
@@ -4339,7 +4349,8 @@ function parseConstLike(
         $link,
         $phpVersionIdMinimumCompatibility,
         $attributes,
-        createExposedDocComment($comments)
+        createExposedDocComment($comments),
+        $isFileCacheAllowed
     );
 }
 

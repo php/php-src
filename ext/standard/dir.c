@@ -107,7 +107,11 @@ PHP_RINIT_FUNCTION(dir)
 
 PHP_MINIT_FUNCTION(dir)
 {
-	static char dirsep_str[2], pathsep_str[2];
+	dirsep_str[0] = DEFAULT_SLASH;
+	dirsep_str[1] = '\0';
+
+	pathsep_str[0] = ZEND_PATHS_SEPARATOR;
+	pathsep_str[1] = '\0';
 
 	register_dir_symbols(module_number);
 
@@ -116,14 +120,6 @@ PHP_MINIT_FUNCTION(dir)
 #ifdef ZTS
 	ts_allocate_id(&dir_globals_id, sizeof(php_dir_globals), NULL, NULL);
 #endif
-
-	dirsep_str[0] = DEFAULT_SLASH;
-	dirsep_str[1] = '\0';
-	REGISTER_STRING_CONSTANT("DIRECTORY_SEPARATOR", dirsep_str, CONST_PERSISTENT);
-
-	pathsep_str[0] = ZEND_PATHS_SEPARATOR;
-	pathsep_str[1] = '\0';
-	REGISTER_STRING_CONSTANT("PATH_SEPARATOR", pathsep_str, CONST_PERSISTENT);
 
 	return SUCCESS;
 }
