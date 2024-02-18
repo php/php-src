@@ -50,6 +50,7 @@ do { \
 } while(0)
 
 typedef enum {
+	NO_HEADER_ERROR,
 	CONTAINS_LF_ONLY,
 	CONTAINS_CR_ONLY,
 	CONTAINS_CRLF,

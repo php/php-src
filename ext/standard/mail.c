@@ -57,7 +57,7 @@
 
 extern zend_long php_getuid(void);
 
-static bool php_mail_build_headers_check_field_value(zval *val, php_mail_header_value_error_type *error_type)
+static php_mail_header_value_error_type php_mail_build_headers_check_field_value(zval *val)
 {
 	size_t len = 0;
 	zend_string *value = Z_STR_P(val);
@@ -67,8 +67,7 @@ static bool php_mail_build_headers_check_field_value(zval *val, php_mail_header_
 	while (len < value->len) {
 		if (*(value->val+len) == '\r') {
 			if (*(value->val+len+1) != '\n') {
-				*error_type = CONTAINS_CR_ONLY;
-				return FAILURE;
+				return CONTAINS_CR_ONLY;
 			}
 
 			if (value->len - len >= 3
@@ -77,8 +76,7 @@ static bool php_mail_build_headers_check_field_value(zval *val, php_mail_header_
 				continue;
 			}
 
-			*error_type = CONTAINS_CRLF;
-			return FAILURE;
+			return CONTAINS_CRLF;
 		}
 		if (*(value->val+len) == '\n') {
 			if (value->len - len >= 2
@@ -86,16 +84,14 @@ static bool php_mail_build_headers_check_field_value(zval *val, php_mail_header_
 				len += 2;
 				continue;
 			}
-			*error_type = CONTAINS_LF_ONLY;
-			return FAILURE;
+			return CONTAINS_LF_ONLY;
 		}
 		if (*(value->val+len) == '\0') {
-			*error_type = CONTAINS_NULL;
-			return FAILURE;
+			return CONTAINS_NULL;
 		}
 		len++;
 	}
-	return SUCCESS;
+	return NO_HEADER_ERROR;
 }
 
 
@@ -125,26 +121,26 @@ static void php_mail_build_headers_elem(smart_str *s, zend_string *key, zval *va
 				return;
 			}
 
-			php_mail_header_value_error_type error_type;
-			if (php_mail_build_headers_check_field_value(val, &error_type) != SUCCESS) {
-				switch (error_type) {
-					case CONTAINS_LF_ONLY:
-						zend_value_error("Header \"%s\" contains LF character that is not allowed in the header", ZSTR_VAL(key));
-						return;
-					case CONTAINS_CR_ONLY:
-						zend_value_error("Header \"%s\" contains CR character that is not allowed in the header", ZSTR_VAL(key));
-						return;
-					case CONTAINS_CRLF:
-						zend_value_error("Header \"%s\" contains CRLF characters that are used as a line separator and are not allowed in the header", ZSTR_VAL(key));
-						return;
-					case CONTAINS_NULL:
-						zend_value_error("Header \"%s\" contains NULL character that is not allowed in the header", ZSTR_VAL(key));
-						return;
-					default:
-						// fallback
-						zend_value_error("Header \"%s\" has invalid format, or contains invalid characters", ZSTR_VAL(key));
-						return;
-				}
+			php_mail_header_value_error_type error_type = php_mail_build_headers_check_field_value(val);
+			switch (error_type) {
+				case NO_HEADER_ERROR:
+					break;
+				case CONTAINS_LF_ONLY:
+					zend_value_error("Header \"%s\" contains LF character that is not allowed in the header", ZSTR_VAL(key));
+					return;
+				case CONTAINS_CR_ONLY:
+					zend_value_error("Header \"%s\" contains CR character that is not allowed in the header", ZSTR_VAL(key));
+					return;
+				case CONTAINS_CRLF:
+					zend_value_error("Header \"%s\" contains CRLF characters that are used as a line separator and are not allowed in the header", ZSTR_VAL(key));
+					return;
+				case CONTAINS_NULL:
+					zend_value_error("Header \"%s\" contains NULL character that is not allowed in the header", ZSTR_VAL(key));
+					return;
+				default:
+					// fallback
+					zend_value_error("Header \"%s\" has invalid format, or contains invalid characters", ZSTR_VAL(key));
+					return;
 			}
 			smart_str_append(s, key);
 			smart_str_appendl(s, ": ", 2);
