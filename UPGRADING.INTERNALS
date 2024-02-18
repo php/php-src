@@ -81,6 +81,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      in ext/mbstring/libmbfl removed.
    - FIBER_ASSEMBLER and FIBER_ASM_ARCH Makefile variables removed in favor of
      PHP_ASSEMBLER and FIBER_ASM_ABI.
+   - HAVE_PHP_SOAP symbol renamed to HAVE_SOAP.
 
 ========================
 3. Module changes
