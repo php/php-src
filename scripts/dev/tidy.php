@@ -22,8 +22,8 @@ $it = new RecursiveIteratorIterator(
 
 $excludes = [
     // Bundled libraries / files.
-    'ext/bcmath/libbcmath/',
     'ext/date/lib/',
+    'ext/dom/lexbor/',
     'ext/fileinfo/data_file.c',
     'ext/fileinfo/libmagic/',
     'ext/gd/libgd/',
@@ -32,9 +32,7 @@ $excludes = [
     'ext/hash/php_hash_whirlpool_tables.h',
     'ext/mbstring/libmbfl/',
     'ext/mbstring/unicode_data.h',
-    'ext/opcache/jit/dynasm',
-    'ext/opcache/jit/libudis86',
-    'ext/opcache/jit/vtune',
+    'ext/opcache/jit/ir',
     'ext/pcre/pcre2lib/',
     'ext/standard/html_tables/html_table_gen.php',
     'sapi/cli/php_http_parser.c',
