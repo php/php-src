@@ -103,6 +103,11 @@ typedef struct _php_random_algo {
 	bool (*unserialize)(void *status, HashTable *data);
 } php_random_algo;
 
+typedef struct _php_random_algo_with_state {
+	const php_random_algo *algo;
+	void *status;
+} php_random_algo_with_state;
+
 extern PHPAPI const php_random_algo php_random_algo_combinedlcg;
 extern PHPAPI const php_random_algo php_random_algo_mt19937;
 extern PHPAPI const php_random_algo php_random_algo_pcgoneseq128xslrr64;
@@ -111,14 +116,12 @@ extern PHPAPI const php_random_algo php_random_algo_secure;
 extern PHPAPI const php_random_algo php_random_algo_user;
 
 typedef struct _php_random_engine {
-	const php_random_algo *algo;
-	void *status;
+	php_random_algo_with_state engine;
 	zend_object std;
 } php_random_engine;
 
 typedef struct _php_random_randomizer {
-	const php_random_algo *algo;
-	void *status;
+	php_random_algo_with_state engine;
 	bool is_userland_algo;
 	zend_object std;
 } php_random_randomizer;
@@ -157,11 +160,19 @@ PHPAPI void php_random_status_free(void *status, const bool persistent);
 PHPAPI php_random_engine *php_random_engine_common_init(zend_class_entry *ce, zend_object_handlers *handlers, const php_random_algo *algo);
 PHPAPI void php_random_engine_common_free_object(zend_object *object);
 PHPAPI zend_object *php_random_engine_common_clone_object(zend_object *object);
-PHPAPI uint32_t php_random_range32(const php_random_algo *algo, void *status, uint32_t umax);
-PHPAPI uint64_t php_random_range64(const php_random_algo *algo, void *status, uint64_t umax);
-PHPAPI zend_long php_random_range(const php_random_algo *algo, void *status, zend_long min, zend_long max);
+PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t umax);
+PHPAPI uint64_t php_random_range64(php_random_algo_with_state engine, uint64_t umax);
+PHPAPI zend_long php_random_range(php_random_algo_with_state engine, zend_long min, zend_long max);
 PHPAPI const php_random_algo *php_random_default_algo(void);
 PHPAPI void *php_random_default_status(void);
+
+static inline php_random_algo_with_state php_random_default_engine(void)
+{
+	return (php_random_algo_with_state){
+		.algo = php_random_default_algo(),
+		.status = php_random_default_status(),
+	};
+}
 
 PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len);
 PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest);
@@ -175,10 +186,10 @@ PHPAPI void php_random_pcgoneseq128xslrr64_advance(php_random_status_state_pcgon
 PHPAPI void php_random_xoshiro256starstar_jump(php_random_status_state_xoshiro256starstar *state);
 PHPAPI void php_random_xoshiro256starstar_jump_long(php_random_status_state_xoshiro256starstar *state);
 
-PHPAPI double php_random_gammasection_closed_open(const php_random_algo *algo, void *status, double min, double max);
-PHPAPI double php_random_gammasection_closed_closed(const php_random_algo *algo, void *status, double min, double max);
-PHPAPI double php_random_gammasection_open_closed(const php_random_algo *algo, void *status, double min, double max);
-PHPAPI double php_random_gammasection_open_open(const php_random_algo *algo, void *status, double min, double max);
+PHPAPI double php_random_gammasection_closed_open(php_random_algo_with_state engine, double min, double max);
+PHPAPI double php_random_gammasection_closed_closed(php_random_algo_with_state engine, double min, double max);
+PHPAPI double php_random_gammasection_open_closed(php_random_algo_with_state engine, double min, double max);
+PHPAPI double php_random_gammasection_open_open(php_random_algo_with_state engine, double min, double max);
 
 extern zend_module_entry random_module_entry;
 # define phpext_random_ptr &random_module_entry

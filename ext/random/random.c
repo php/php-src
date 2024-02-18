@@ -74,8 +74,11 @@ static zend_object_handlers random_engine_xoshiro256starstar_object_handlers;
 static zend_object_handlers random_engine_secure_object_handlers;
 static zend_object_handlers random_randomizer_object_handlers;
 
-PHPAPI uint32_t php_random_range32(const php_random_algo *algo, void *status, uint32_t umax)
+PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t umax)
 {
+	const php_random_algo *algo = engine.algo;
+	void *status = engine.status;
+
 	uint32_t result, limit;
 	size_t total_size = 0;
 	uint32_t count = 0;
@@ -130,8 +133,11 @@ PHPAPI uint32_t php_random_range32(const php_random_algo *algo, void *status, ui
 	return result % umax;
 }
 
-PHPAPI uint64_t php_random_range64(const php_random_algo *algo, void *status, uint64_t umax)
+PHPAPI uint64_t php_random_range64(php_random_algo_with_state engine, uint64_t umax)
 {
+	const php_random_algo *algo = engine.algo;
+	void *status = engine.status;
+
 	uint64_t result, limit;
 	size_t total_size = 0;
 	uint32_t count = 0;
@@ -220,7 +226,7 @@ static void randomizer_free_obj(zend_object *object) {
 	php_random_randomizer *randomizer = php_random_randomizer_from_obj(object);
 
 	if (randomizer->is_userland_algo) {
-		php_random_status_free(randomizer->status, false);
+		php_random_status_free(randomizer->engine.status, false);
 	}
 
 	zend_object_std_dtor(&randomizer->std);
@@ -248,8 +254,10 @@ PHPAPI php_random_engine *php_random_engine_common_init(zend_class_entry *ce, ze
 	zend_object_std_init(&engine->std, ce);
 	object_properties_init(&engine->std, ce);
 
-	engine->algo = algo;
-	engine->status = php_random_status_alloc(engine->algo, false);
+	engine->engine = (php_random_algo_with_state){
+		.algo = algo,
+		.status = php_random_status_alloc(algo, false)
+	};
 	engine->std.handlers = handlers;
 
 	return engine;
@@ -259,7 +267,7 @@ PHPAPI void php_random_engine_common_free_object(zend_object *object)
 {
 	php_random_engine *engine = php_random_engine_from_obj(object);
 
-	php_random_status_free(engine->status, false);
+	php_random_status_free(engine->engine.status, false);
 	zend_object_std_dtor(object);
 }
 
@@ -268,9 +276,9 @@ PHPAPI zend_object *php_random_engine_common_clone_object(zend_object *object)
 	php_random_engine *old_engine = php_random_engine_from_obj(object);
 	php_random_engine *new_engine = php_random_engine_from_obj(old_engine->std.ce->create_object(old_engine->std.ce));
 
-	new_engine->algo = old_engine->algo;
-	if (old_engine->status) {
-		new_engine->status = php_random_status_copy(old_engine->algo, old_engine->status, new_engine->status);
+	new_engine->engine.algo = old_engine->engine.algo;
+	if (old_engine->engine.status) {
+		new_engine->engine.status = php_random_status_copy(old_engine->engine.algo, old_engine->engine.status, new_engine->engine.status);
 	}
 
 	zend_objects_clone_members(&new_engine->std, &old_engine->std);
@@ -279,15 +287,15 @@ PHPAPI zend_object *php_random_engine_common_clone_object(zend_object *object)
 }
 
 /* {{{ php_random_range */
-PHPAPI zend_long php_random_range(const php_random_algo *algo, void *status, zend_long min, zend_long max)
+PHPAPI zend_long php_random_range(php_random_algo_with_state engine, zend_long min, zend_long max)
 {
 	zend_ulong umax = (zend_ulong) max - (zend_ulong) min;
 
 	if (umax > UINT32_MAX) {
-		return (zend_long) (php_random_range64(algo, status, umax) + min);
+		return (zend_long) (php_random_range64(engine, umax) + min);
 	}
 
-	return (zend_long) (php_random_range32(algo, status, umax) + min);
+	return (zend_long) (php_random_range32(engine, umax) + min);
 }
 /* }}} */
 

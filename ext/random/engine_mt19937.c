@@ -166,7 +166,10 @@ static php_random_result generate(void *status)
 
 static zend_long range(void *status, zend_long min, zend_long max)
 {
-	return php_random_range(&php_random_algo_mt19937, status, min, max);
+	return php_random_range((php_random_algo_with_state){
+		.algo = &php_random_algo_mt19937,
+		.status = status,
+	}, min, max);
 }
 
 static bool serialize(void *status, HashTable *data)
@@ -251,8 +254,8 @@ PHPAPI void php_random_mt19937_seed_default(php_random_status_state_mt19937 *sta
 /* {{{ Random\Engine\Mt19937::__construct() */
 PHP_METHOD(Random_Engine_Mt19937, __construct)
 {
-	php_random_engine *engine = Z_RANDOM_ENGINE_P(ZEND_THIS);
-	php_random_status_state_mt19937 *state = engine->status;
+	php_random_algo_with_state engine = Z_RANDOM_ENGINE_P(ZEND_THIS)->engine;
+	php_random_status_state_mt19937 *state = engine.status;
 	zend_long seed, mode = MT_RAND_MT19937;
 	bool seed_is_null = true;
 
@@ -290,12 +293,12 @@ PHP_METHOD(Random_Engine_Mt19937, __construct)
 /* {{{ Random\Engine\Mt19937::generate() */
 PHP_METHOD(Random_Engine_Mt19937, generate)
 {
-	php_random_engine *engine = Z_RANDOM_ENGINE_P(ZEND_THIS);
+	php_random_algo_with_state engine = Z_RANDOM_ENGINE_P(ZEND_THIS)->engine;
 	zend_string *bytes;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	php_random_result generated = engine->algo->generate(engine->status);
+	php_random_result generated = engine.algo->generate(engine.status);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
@@ -329,7 +332,7 @@ PHP_METHOD(Random_Engine_Mt19937, __serialize)
 
 	/* state */
 	array_init(&t);
-	if (!engine->algo->serialize(engine->status, Z_ARRVAL(t))) {
+	if (!engine->engine.algo->serialize(engine->engine.status, Z_ARRVAL(t))) {
 		zend_throw_exception(NULL, "Engine serialize failed", 0);
 		RETURN_THROWS();
 	}
@@ -372,7 +375,7 @@ PHP_METHOD(Random_Engine_Mt19937, __unserialize)
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
 		RETURN_THROWS();
 	}
-	if (!engine->algo->unserialize(engine->status, Z_ARRVAL_P(t))) {
+	if (!engine->engine.algo->unserialize(engine->engine.status, Z_ARRVAL_P(t))) {
 		zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(engine->std.ce->name));
 		RETURN_THROWS();
 	}
@@ -392,9 +395,9 @@ PHP_METHOD(Random_Engine_Mt19937, __debugInfo)
 	}
 	ZVAL_ARR(return_value, zend_array_dup(engine->std.properties));
 
-	if (engine->algo->serialize) {
+	if (engine->engine.algo->serialize) {
 		array_init(&t);
-		if (!engine->algo->serialize(engine->status, Z_ARRVAL(t))) {
+		if (!engine->engine.algo->serialize(engine->engine.status, Z_ARRVAL(t))) {
 			zend_throw_exception(NULL, "Engine serialize failed", 0);
 			RETURN_THROWS();
 		}

@@ -61,7 +61,10 @@ static php_random_result generate(void *status)
 
 static zend_long range(void *status, zend_long min, zend_long max)
 {
-	return php_random_range(&php_random_algo_combinedlcg, status, min, max);
+	return php_random_range((php_random_algo_with_state){
+		.algo = &php_random_algo_combinedlcg,
+		.status = status,
+	}, min, max);
 }
 
 static bool serialize(void *status, HashTable *data)

@@ -67,7 +67,10 @@ static php_random_result generate(void *status)
 
 static zend_long range(void *status, zend_long min, zend_long max)
 {
-	return php_random_range(&php_random_algo_user, status, min, max);
+	return php_random_range((php_random_algo_with_state){
+		.algo = &php_random_algo_user,
+		.status = status,
+	}, min, max);
 }
 
 const php_random_algo php_random_algo_user = {

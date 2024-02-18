@@ -62,7 +62,7 @@ PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2
 PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2);
 PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2);
 
-PHPAPI bool php_binary_string_shuffle(const php_random_algo *algo, void *status, char *str, zend_long len);
+PHPAPI bool php_binary_string_shuffle(php_random_algo_with_state engine, char *str, zend_long len);
 
 #ifdef _REENTRANT
 # ifdef PHP_WIN32
