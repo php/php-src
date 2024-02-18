@@ -44,6 +44,9 @@ if (MySQLPDOTest::isPDOMySQLnd())
                     $offset, $id, substr($val, 0, 10), strlen($val));
             }
 
+            // This is necessary because we will be creating tables several times.
+            $db->query('DROP TABLE test_attr_max_buffer_size');
+
         } catch (PDOException $e) {
             printf("[%03d] %s, [%s] %s\n",
                 $offset,
