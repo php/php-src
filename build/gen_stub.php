@@ -1377,7 +1377,14 @@ class FuncInfo {
             return null;
         }
 
+        $php84MinimumCompatibility = $this->minimumPhpVersionIdCompatibility === null || $this->minimumPhpVersionIdCompatibility >= PHP_84_VERSION_ID;
+
         $code = '';
+
+        if (!$php84MinimumCompatibility) {
+            $code .= "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n";
+        }
+
         foreach ($this->framelessFunctionInfos as $framelessFunctionInfo) {
             $code .= "ZEND_FRAMELESS_FUNCTION({$this->name->getFunctionName()}, {$framelessFunctionInfo->arity});\n";
         }
@@ -1388,6 +1395,11 @@ class FuncInfo {
         }
         $code .= "\t{ 0 },\n";
         $code .= "};\n";
+
+        if (!$php84MinimumCompatibility) {
+            $code .= "#endif\n";
+        }
+
         return $code;
     }
 
