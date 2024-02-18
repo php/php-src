@@ -225,8 +225,6 @@ if test "$ZEND_ZTS" = "yes"; then
   CFLAGS="$CFLAGS -DZTS"
 fi
 
-AC_C_INLINE
-
 dnl Test and set the alignment define for ZEND_MM. This also does the
 dnl logarithmic test for ZEND_MM.
 AC_MSG_CHECKING(for MM alignment and log values)
