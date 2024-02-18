@@ -62,6 +62,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_preg_last_error_msg, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+
 ZEND_FRAMELESS_FUNCTION(preg_match, 2);
 static const zend_frameless_function_info frameless_function_infos_preg_match[] = {
 	{ ZEND_FRAMELESS_FUNCTION_NAME(preg_match, 2), 2 },
@@ -74,7 +75,6 @@ static const zend_frameless_function_info frameless_function_infos_preg_replace[
 	{ 0 },
 };
 
-
 ZEND_FUNCTION(preg_match);
 ZEND_FUNCTION(preg_match_all);
 ZEND_FUNCTION(preg_replace);
@@ -86,7 +86,6 @@ ZEND_FUNCTION(preg_quote);
 ZEND_FUNCTION(preg_grep);
 ZEND_FUNCTION(preg_last_error);
 ZEND_FUNCTION(preg_last_error_msg);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FRAMELESS_FE(preg_match, arginfo_preg_match, 0, frameless_function_infos_preg_match)

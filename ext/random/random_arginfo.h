@@ -124,7 +124,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Random_Randomizer___unserialize arginfo_class_Random_Engine_Mt19937___unserialize
 
-
 ZEND_FUNCTION(lcg_value);
 ZEND_FUNCTION(mt_srand);
 ZEND_FUNCTION(rand);
@@ -155,7 +154,6 @@ ZEND_METHOD(Random_Randomizer, pickArrayKeys);
 ZEND_METHOD(Random_Randomizer, __serialize);
 ZEND_METHOD(Random_Randomizer, __unserialize);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(lcg_value, arginfo_lcg_value)
 	ZEND_FE(mt_srand, arginfo_mt_srand)
@@ -169,7 +167,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_Random_Engine_Mt19937_methods[] = {
 	ZEND_ME(Random_Engine_Mt19937, __construct, arginfo_class_Random_Engine_Mt19937___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Engine_Mt19937, generate, arginfo_class_Random_Engine_Mt19937_generate, ZEND_ACC_PUBLIC)
@@ -178,7 +175,6 @@ static const zend_function_entry class_Random_Engine_Mt19937_methods[] = {
 	ZEND_ME(Random_Engine_Mt19937, __debugInfo, arginfo_class_Random_Engine_Mt19937___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_Random_Engine_PcgOneseq128XslRr64_methods[] = {
 	ZEND_ME(Random_Engine_PcgOneseq128XslRr64, __construct, arginfo_class_Random_Engine_PcgOneseq128XslRr64___construct, ZEND_ACC_PUBLIC)
@@ -189,7 +185,6 @@ static const zend_function_entry class_Random_Engine_PcgOneseq128XslRr64_methods
 	ZEND_MALIAS(Random_Engine_Mt19937, __debugInfo, __debugInfo, arginfo_class_Random_Engine_PcgOneseq128XslRr64___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_Random_Engine_Xoshiro256StarStar_methods[] = {
 	ZEND_ME(Random_Engine_Xoshiro256StarStar, __construct, arginfo_class_Random_Engine_Xoshiro256StarStar___construct, ZEND_ACC_PUBLIC)
@@ -202,23 +197,19 @@ static const zend_function_entry class_Random_Engine_Xoshiro256StarStar_methods[
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_Random_Engine_Secure_methods[] = {
 	ZEND_MALIAS(Random_Engine_Mt19937, generate, generate, arginfo_class_Random_Engine_Secure_generate, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_Random_Engine_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(Random_Engine, generate, arginfo_class_Random_Engine_generate, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_Random_CryptoSafeEngine_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_Random_Randomizer_methods[] = {
 	ZEND_ME(Random_Randomizer, __construct, arginfo_class_Random_Randomizer___construct, ZEND_ACC_PUBLIC)
@@ -236,21 +227,17 @@ static const zend_function_entry class_Random_Randomizer_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_Random_IntervalBoundary_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_Random_RandomError_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_Random_BrokenRandomEngineError_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_Random_RandomException_methods[] = {
 	ZEND_FE_END

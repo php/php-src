@@ -706,7 +706,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_sql_exception_getSqlState, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(mysqli_affected_rows);
 ZEND_FUNCTION(mysqli_autocommit);
 ZEND_FUNCTION(mysqli_begin_transaction);
@@ -819,7 +818,6 @@ ZEND_METHOD(mysqli_warning, __construct);
 ZEND_METHOD(mysqli_warning, next);
 ZEND_METHOD(mysqli_sql_exception, getSqlState);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_affected_rows, arginfo_mysqli_affected_rows)
 	ZEND_FE(mysqli_autocommit, arginfo_mysqli_autocommit)
@@ -930,11 +928,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_mysqli_driver_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_ME(mysqli, __construct, arginfo_class_mysqli___construct, ZEND_ACC_PUBLIC)
@@ -984,7 +980,6 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_mysqli_result_methods[] = {
 	ZEND_ME(mysqli_result, __construct, arginfo_class_mysqli_result___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(close, mysqli_free_result, arginfo_class_mysqli_result_close, ZEND_ACC_PUBLIC)
@@ -1004,7 +999,6 @@ static const zend_function_entry class_mysqli_result_methods[] = {
 	ZEND_ME(mysqli_result, getIterator, arginfo_class_mysqli_result_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_mysqli_stmt_methods[] = {
 	ZEND_ME(mysqli_stmt, __construct, arginfo_class_mysqli_stmt___construct, ZEND_ACC_PUBLIC)
@@ -1030,13 +1024,11 @@ static const zend_function_entry class_mysqli_stmt_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_mysqli_warning_methods[] = {
 	ZEND_ME(mysqli_warning, __construct, arginfo_class_mysqli_warning___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME(mysqli_warning, next, arginfo_class_mysqli_warning_next, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_mysqli_sql_exception_methods[] = {
 	ZEND_ME(mysqli_sql_exception, getSqlState, arginfo_class_mysqli_sql_exception_getSqlState, ZEND_ACC_PUBLIC)

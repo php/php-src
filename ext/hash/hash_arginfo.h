@@ -133,7 +133,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_HashContext___unserialize,
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(hash);
 ZEND_FUNCTION(hash_file);
 ZEND_FUNCTION(hash_hmac);
@@ -168,7 +167,6 @@ ZEND_METHOD(HashContext, __construct);
 ZEND_METHOD(HashContext, __serialize);
 ZEND_METHOD(HashContext, __unserialize);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(hash, arginfo_hash)
 	ZEND_FE(hash_file, arginfo_hash_file)
@@ -202,7 +200,6 @@ static const zend_function_entry ext_functions[] = {
 #endif
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_HashContext_methods[] = {
 	ZEND_ME(HashContext, __construct, arginfo_class_HashContext___construct, ZEND_ACC_PRIVATE)

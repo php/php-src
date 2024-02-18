@@ -86,7 +86,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlDateFormatter_getErrorMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(IntlDateFormatter, __construct);
 ZEND_FUNCTION(datefmt_create);
 ZEND_FUNCTION(datefmt_get_datetype);
@@ -108,7 +107,6 @@ ZEND_FUNCTION(datefmt_parse);
 ZEND_FUNCTION(datefmt_localtime);
 ZEND_FUNCTION(datefmt_get_error_code);
 ZEND_FUNCTION(datefmt_get_error_message);
-
 
 static const zend_function_entry class_IntlDateFormatter_methods[] = {
 	ZEND_ME(IntlDateFormatter, __construct, arginfo_class_IntlDateFormatter___construct, ZEND_ACC_PUBLIC)

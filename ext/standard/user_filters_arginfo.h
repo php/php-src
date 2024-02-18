@@ -14,11 +14,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_onClose, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(php_user_filter, filter);
 ZEND_METHOD(php_user_filter, onCreate);
 ZEND_METHOD(php_user_filter, onClose);
-
 
 static const zend_function_entry class_php_user_filter_methods[] = {
 	ZEND_ME(php_user_filter, filter, arginfo_class_php_user_filter_filter, ZEND_ACC_PUBLIC)

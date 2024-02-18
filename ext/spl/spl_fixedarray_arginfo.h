@@ -54,7 +54,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplFixedArray_jsonSerialize arginfo_class_SplFixedArray___serialize
 
-
 ZEND_METHOD(SplFixedArray, __construct);
 ZEND_METHOD(SplFixedArray, __wakeup);
 ZEND_METHOD(SplFixedArray, __serialize);
@@ -70,7 +69,6 @@ ZEND_METHOD(SplFixedArray, offsetSet);
 ZEND_METHOD(SplFixedArray, offsetUnset);
 ZEND_METHOD(SplFixedArray, getIterator);
 ZEND_METHOD(SplFixedArray, jsonSerialize);
-
 
 static const zend_function_entry class_SplFixedArray_methods[] = {
 	ZEND_ME(SplFixedArray, __construct, arginfo_class_SplFixedArray___construct, ZEND_ACC_PUBLIC)

@@ -91,7 +91,6 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_XMLReader_ex
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, baseNode, DOMNode, 1, "null")
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(XMLReader, close);
 ZEND_METHOD(XMLReader, getAttribute);
 ZEND_METHOD(XMLReader, getAttributeNo);
@@ -117,7 +116,6 @@ ZEND_METHOD(XMLReader, setRelaxNGSchema);
 ZEND_METHOD(XMLReader, setRelaxNGSchemaSource);
 ZEND_METHOD(XMLReader, XML);
 ZEND_METHOD(XMLReader, expand);
-
 
 static const zend_function_entry class_XMLReader_methods[] = {
 	ZEND_ME(XMLReader, close, arginfo_class_XMLReader_close, ZEND_ACC_PUBLIC)

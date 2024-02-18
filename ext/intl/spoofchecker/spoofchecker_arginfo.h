@@ -29,7 +29,6 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Spoofchecker_set
 ZEND_END_ARG_INFO()
 #endif
 
-
 ZEND_METHOD(Spoofchecker, __construct);
 ZEND_METHOD(Spoofchecker, isSuspicious);
 ZEND_METHOD(Spoofchecker, areConfusable);
@@ -38,7 +37,6 @@ ZEND_METHOD(Spoofchecker, setChecks);
 #if U_ICU_VERSION_MAJOR_NUM >= 58
 ZEND_METHOD(Spoofchecker, setRestrictionLevel);
 #endif
-
 
 static const zend_function_entry class_Spoofchecker_methods[] = {
 	ZEND_ME(Spoofchecker, __construct, arginfo_class_Spoofchecker___construct, ZEND_ACC_PUBLIC)

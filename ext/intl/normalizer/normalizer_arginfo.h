@@ -18,13 +18,11 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Normalizer_getRa
 ZEND_END_ARG_INFO()
 #endif
 
-
 ZEND_FUNCTION(normalizer_normalize);
 ZEND_FUNCTION(normalizer_is_normalized);
 #if U_ICU_VERSION_MAJOR_NUM >= 56
 ZEND_FUNCTION(normalizer_get_raw_decomposition);
 #endif
-
 
 static const zend_function_entry class_Normalizer_methods[] = {
 	ZEND_ME_MAPPING(normalize, normalizer_normalize, arginfo_class_Normalizer_normalize, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)

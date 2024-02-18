@@ -74,7 +74,6 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_UConverter_trans
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(UConverter, __construct);
 ZEND_METHOD(UConverter, convert);
 ZEND_METHOD(UConverter, fromUCallback);
@@ -94,7 +93,6 @@ ZEND_METHOD(UConverter, setSourceEncoding);
 ZEND_METHOD(UConverter, setSubstChars);
 ZEND_METHOD(UConverter, toUCallback);
 ZEND_METHOD(UConverter, transcode);
-
 
 static const zend_function_entry class_UConverter_methods[] = {
 	ZEND_ME(UConverter, __construct, arginfo_class_UConverter___construct, ZEND_ACC_PUBLIC)

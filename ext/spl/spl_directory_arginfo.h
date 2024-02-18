@@ -272,7 +272,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplTempFileObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, maxMemory, IS_LONG, 0, "2 * 1024 * 1024")
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(SplFileInfo, __construct);
 ZEND_METHOD(SplFileInfo, getPath);
 ZEND_METHOD(SplFileInfo, getFilename);
@@ -364,7 +363,6 @@ ZEND_METHOD(SplFileObject, seek);
 ZEND_METHOD(SplFileObject, __toString);
 ZEND_METHOD(SplTempFileObject, __construct);
 
-
 static const zend_function_entry class_SplFileInfo_methods[] = {
 	ZEND_ME(SplFileInfo, __construct, arginfo_class_SplFileInfo___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFileInfo, getPath, arginfo_class_SplFileInfo_getPath, ZEND_ACC_PUBLIC)
@@ -400,7 +398,6 @@ static const zend_function_entry class_SplFileInfo_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DirectoryIterator_methods[] = {
 	ZEND_ME(DirectoryIterator, __construct, arginfo_class_DirectoryIterator___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(DirectoryIterator, getFilename, arginfo_class_DirectoryIterator_getFilename, ZEND_ACC_PUBLIC)
@@ -417,7 +414,6 @@ static const zend_function_entry class_DirectoryIterator_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_FilesystemIterator_methods[] = {
 	ZEND_ME(FilesystemIterator, __construct, arginfo_class_FilesystemIterator___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(FilesystemIterator, rewind, arginfo_class_FilesystemIterator_rewind, ZEND_ACC_PUBLIC)
@@ -428,7 +424,6 @@ static const zend_function_entry class_FilesystemIterator_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_RecursiveDirectoryIterator_methods[] = {
 	ZEND_ME(RecursiveDirectoryIterator, __construct, arginfo_class_RecursiveDirectoryIterator___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(RecursiveDirectoryIterator, hasChildren, arginfo_class_RecursiveDirectoryIterator_hasChildren, ZEND_ACC_PUBLIC)
@@ -438,7 +433,6 @@ static const zend_function_entry class_RecursiveDirectoryIterator_methods[] = {
 	ZEND_FE_END
 };
 
-
 #if defined(HAVE_GLOB)
 static const zend_function_entry class_GlobIterator_methods[] = {
 	ZEND_ME(GlobIterator, __construct, arginfo_class_GlobIterator___construct, ZEND_ACC_PUBLIC)
@@ -446,7 +440,6 @@ static const zend_function_entry class_GlobIterator_methods[] = {
 	ZEND_FE_END
 };
 #endif
-
 
 static const zend_function_entry class_SplFileObject_methods[] = {
 	ZEND_ME(SplFileObject, __construct, arginfo_class_SplFileObject___construct, ZEND_ACC_PUBLIC)
@@ -483,7 +476,6 @@ static const zend_function_entry class_SplFileObject_methods[] = {
 	ZEND_ME(SplFileObject, __toString, arginfo_class_SplFileObject___toString, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SplTempFileObject_methods[] = {
 	ZEND_ME(SplTempFileObject, __construct, arginfo_class_SplTempFileObject___construct, ZEND_ACC_PUBLIC)

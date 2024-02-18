@@ -61,7 +61,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_bind_textdomain_codeset, 0, 2, M
 ZEND_END_ARG_INFO()
 #endif
 
-
 ZEND_FUNCTION(textdomain);
 ZEND_FUNCTION(gettext);
 ZEND_FUNCTION(dgettext);
@@ -79,7 +78,6 @@ ZEND_FUNCTION(dcngettext);
 #if defined(HAVE_BIND_TEXTDOMAIN_CODESET)
 ZEND_FUNCTION(bind_textdomain_codeset);
 #endif
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(textdomain, arginfo_textdomain)

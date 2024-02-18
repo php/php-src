@@ -785,7 +785,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_transliterator_get_error_message
 	ZEND_ARG_OBJ_INFO(0, transliterator, Transliterator, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(intlcal_create_instance);
 ZEND_FUNCTION(intlcal_get_keyword_values_for_locale);
 ZEND_FUNCTION(intlcal_get_now);
@@ -973,7 +972,6 @@ ZEND_FUNCTION(transliterator_create_inverse);
 ZEND_FUNCTION(transliterator_transliterate);
 ZEND_FUNCTION(transliterator_get_error_code);
 ZEND_FUNCTION(transliterator_get_error_message);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(intlcal_create_instance, arginfo_intlcal_create_instance)
@@ -1165,7 +1163,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(transliterator_get_error_message, arginfo_transliterator_get_error_message)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_IntlException_methods[] = {
 	ZEND_FE_END

@@ -30,7 +30,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_COMPersistHelper_SaveToStream arginfo_class_COMPersistHelper_LoadFromStream
 
-
 ZEND_METHOD(COMPersistHelper, __construct);
 ZEND_METHOD(COMPersistHelper, GetCurFileName);
 ZEND_METHOD(COMPersistHelper, SaveToFile);
@@ -39,7 +38,6 @@ ZEND_METHOD(COMPersistHelper, GetMaxStreamSize);
 ZEND_METHOD(COMPersistHelper, InitNew);
 ZEND_METHOD(COMPersistHelper, LoadFromStream);
 ZEND_METHOD(COMPersistHelper, SaveToStream);
-
 
 static const zend_function_entry class_COMPersistHelper_methods[] = {
 	ZEND_ME(COMPersistHelper, __construct, arginfo_class_COMPersistHelper___construct, ZEND_ACC_PUBLIC)

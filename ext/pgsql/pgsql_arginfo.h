@@ -459,7 +459,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_set_error_context_visibility,
 ZEND_END_ARG_INFO()
 #endif
 
-
 ZEND_FUNCTION(pg_connect);
 ZEND_FUNCTION(pg_pconnect);
 ZEND_FUNCTION(pg_connect_poll);
@@ -554,7 +553,6 @@ ZEND_FUNCTION(pg_select);
 #if defined(HAVE_PG_CONTEXT_VISIBILITY)
 ZEND_FUNCTION(pg_set_error_context_visibility);
 #endif
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_connect, arginfo_pg_connect)
@@ -677,16 +675,13 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_PgSql_Connection_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_PgSql_Result_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_PgSql_Lob_methods[] = {
 	ZEND_FE_END

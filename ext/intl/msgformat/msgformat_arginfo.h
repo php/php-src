@@ -46,7 +46,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_MessageFormatter_getErrorMessage arginfo_class_MessageFormatter_getLocale
 
-
 ZEND_METHOD(MessageFormatter, __construct);
 ZEND_FUNCTION(msgfmt_create);
 ZEND_FUNCTION(msgfmt_format);
@@ -58,7 +57,6 @@ ZEND_FUNCTION(msgfmt_get_pattern);
 ZEND_FUNCTION(msgfmt_get_locale);
 ZEND_FUNCTION(msgfmt_get_error_code);
 ZEND_FUNCTION(msgfmt_get_error_message);
-
 
 static const zend_function_entry class_MessageFormatter_methods[] = {
 	ZEND_ME(MessageFormatter, __construct, arginfo_class_MessageFormatter___construct, ZEND_ACC_PUBLIC)

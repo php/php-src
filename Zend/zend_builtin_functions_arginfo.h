@@ -217,6 +217,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gc_status arginfo_func_get_args
 
+
 ZEND_FRAMELESS_FUNCTION(property_exists, 2);
 static const zend_frameless_function_info frameless_function_infos_property_exists[] = {
 	{ ZEND_FRAMELESS_FUNCTION_NAME(property_exists, 2), 2 },
@@ -230,7 +231,6 @@ static const zend_frameless_function_info frameless_function_infos_class_exists[
 	{ ZEND_FRAMELESS_FUNCTION_NAME(class_exists, 2), 2 },
 	{ 0 },
 };
-
 
 ZEND_FUNCTION(zend_version);
 ZEND_FUNCTION(func_num_args);
@@ -290,7 +290,6 @@ ZEND_FUNCTION(gc_enabled);
 ZEND_FUNCTION(gc_enable);
 ZEND_FUNCTION(gc_disable);
 ZEND_FUNCTION(gc_status);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_version, arginfo_zend_version)
@@ -355,7 +354,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gc_status, arginfo_gc_status)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_stdClass_methods[] = {
 	ZEND_FE_END

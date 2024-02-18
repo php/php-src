@@ -13,13 +13,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_BackedEnum_tryFrom, 0, 1, 
 ZEND_END_ARG_INFO()
 
 
-
-
 static const zend_function_entry class_UnitEnum_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(UnitEnum, cases, arginfo_class_UnitEnum_cases, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_BackedEnum_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(BackedEnum, from, arginfo_class_BackedEnum_from, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT)

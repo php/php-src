@@ -7,10 +7,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ZendTest_Iterators_TraversableTest_getIterator, 0, 0, Iterator, 0)
 ZEND_END_ARG_INFO()
 
-
 static ZEND_METHOD(ZendTest_Iterators_TraversableTest, __construct);
 static ZEND_METHOD(ZendTest_Iterators_TraversableTest, getIterator);
-
 
 static const zend_function_entry class_ZendTest_Iterators_TraversableTest_methods[] = {
 	ZEND_ME(ZendTest_Iterators_TraversableTest, __construct, arginfo_class_ZendTest_Iterators_TraversableTest___construct, ZEND_ACC_PUBLIC)

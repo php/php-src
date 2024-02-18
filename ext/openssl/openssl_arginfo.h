@@ -388,7 +388,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_get_cert_locations, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(openssl_x509_export_to_file);
 ZEND_FUNCTION(openssl_x509_export);
 ZEND_FUNCTION(openssl_x509_fingerprint);
@@ -452,7 +451,6 @@ ZEND_FUNCTION(openssl_spki_verify);
 ZEND_FUNCTION(openssl_spki_export);
 ZEND_FUNCTION(openssl_spki_export_challenge);
 ZEND_FUNCTION(openssl_get_cert_locations);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_x509_export_to_file, arginfo_openssl_x509_export_to_file)
@@ -524,16 +522,13 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_OpenSSLCertificate_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_OpenSSLCertificateSigningRequest_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_OpenSSLAsymmetricKey_methods[] = {
 	ZEND_FE_END

@@ -50,7 +50,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoPgsql_getPid, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(PdoPgsql, escapeIdentifier);
 ZEND_METHOD(PdoPgsql, copyFromArray);
 ZEND_METHOD(PdoPgsql, copyFromFile);
@@ -61,7 +60,6 @@ ZEND_METHOD(PdoPgsql, lobOpen);
 ZEND_METHOD(PdoPgsql, lobUnlink);
 ZEND_METHOD(PdoPgsql, getNotify);
 ZEND_METHOD(PdoPgsql, getPid);
-
 
 static const zend_function_entry class_PdoPgsql_methods[] = {
 	ZEND_ME(PdoPgsql, escapeIdentifier, arginfo_class_PdoPgsql_escapeIdentifier, ZEND_ACC_PUBLIC)

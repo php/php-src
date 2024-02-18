@@ -132,7 +132,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_forkx, 0, 1, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-
 ZEND_FUNCTION(pcntl_fork);
 ZEND_FUNCTION(pcntl_waitpid);
 ZEND_FUNCTION(pcntl_wait);
@@ -177,7 +176,6 @@ ZEND_FUNCTION(pcntl_rfork);
 #if defined(HAVE_FORKX)
 ZEND_FUNCTION(pcntl_forkx);
 #endif
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pcntl_fork, arginfo_pcntl_fork)

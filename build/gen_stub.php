@@ -1356,6 +1356,25 @@ class FuncInfo {
         return $name->getDeclaration();
     }
 
+    public function getFramelessDeclaration(FuncInfo $funcInfo): ?string {
+        if (empty($this->framelessFunctionInfos)) {
+            return null;
+        }
+
+        $code = '';
+        foreach ($this->framelessFunctionInfos as $framelessFunctionInfo) {
+            $code .= "ZEND_FRAMELESS_FUNCTION({$this->name->getFunctionName()}, {$framelessFunctionInfo->arity});\n";
+        }
+
+        $code .= 'static const zend_frameless_function_info ' . $this->getFramelessFunctionInfosName() . "[] = {\n";
+        foreach ($this->framelessFunctionInfos as $framelessFunctionInfo) {
+            $code .= "\t{ ZEND_FRAMELESS_FUNCTION_NAME({$this->name->getFunctionName()}, {$framelessFunctionInfo->arity}), {$framelessFunctionInfo->arity} },\n";
+        }
+        $code .= "\t{ 0 },\n";
+        $code .= "};\n";
+        return $code;
+    }
+
     public function getFramelessFunctionInfosName(): string {
         return $this->name->getFramelessFunctionInfosName();
     }
@@ -4636,25 +4655,6 @@ function findEquivalentFuncInfo(array $generatedFuncInfos, FuncInfo $funcInfo): 
     return null;
 }
 
-function framelessFunctionInfoToCode(FileInfo $fileInfo, FuncInfo $funcInfo): ?string {
-    if (empty($funcInfo->framelessFunctionInfos)) {
-        return null;
-    }
-
-    $code = '';
-    foreach ($funcInfo->framelessFunctionInfos as $framelessFunctionInfo) {
-        $code .= "ZEND_FRAMELESS_FUNCTION({$funcInfo->name->getFunctionName()}, {$framelessFunctionInfo->arity});\n";
-    }
-
-    $code .= 'static const zend_frameless_function_info ' . $funcInfo->getFramelessFunctionInfosName() . "[] = {\n";
-    foreach ($funcInfo->framelessFunctionInfos as $framelessFunctionInfo) {
-        $code .= "\t{ ZEND_FRAMELESS_FUNCTION_NAME({$funcInfo->name->getFunctionName()}, {$framelessFunctionInfo->arity}), {$framelessFunctionInfo->arity} },\n";
-    }
-    $code .= "\t{ 0 },\n";
-    $code .= "};\n";
-    return $code;
-}
-
 /**
  * @template T
  * @param iterable<T> $infos
@@ -4696,7 +4696,8 @@ function generateArgInfoCode(
           . " * Stub hash: $stubHash */\n";
 
     $generatedFuncInfos = [];
-    $code .= generateCodeWithConditions(
+
+    $argInfoCode = generateCodeWithConditions(
         $fileInfo->getAllFuncInfos(), "\n",
         static function (FuncInfo $funcInfo) use (&$generatedFuncInfos, $fileInfo) {
             /* If there already is an equivalent arginfo structure, only emit a #define */
@@ -4714,16 +4715,22 @@ function generateArgInfoCode(
         }
     );
 
-    $code .= generateCodeWithConditions(
-        $fileInfo->getAllFuncInfos(), "\n",
-        static function (FuncInfo $funcInfo) use ($fileInfo) {
-            $code = framelessFunctionInfoToCode($fileInfo, $funcInfo);
-            return $code;
-        }
-    );
+    if ($argInfoCode !== "") {
+        $code .= "$argInfoCode\n";
+    }
 
     if ($fileInfo->generateFunctionEntries) {
-        $code .= "\n\n";
+        $framelessFunctionCode = generateCodeWithConditions(
+            $fileInfo->getAllFuncInfos(), "\n",
+            static function (FuncInfo $funcInfo) {
+                $code = $funcInfo->getFramelessDeclaration($funcInfo);
+                return $code;
+            }
+        );
+
+        if ($framelessFunctionCode !== "") {
+            $code .= "$framelessFunctionCode\n";
+        }
 
         $generatedFunctionDeclarations = [];
         $code .= generateCodeWithConditions(
@@ -4792,7 +4799,7 @@ function generateClassEntryCode(FileInfo $fileInfo, array $allConstInfos): strin
 
 /** @param FuncInfo[] $funcInfos */
 function generateFunctionEntries(?Name $className, array $funcInfos, ?string $cond = null): string {
-    $code = "\n\n";
+    $code = "\n";
 
     if ($cond) {
         $code .= "#if {$cond}\n";

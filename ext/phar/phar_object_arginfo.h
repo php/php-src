@@ -384,7 +384,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharFileInfo_setMetadata arginfo_class_Phar_setMetadata
 
-
 ZEND_METHOD(Phar, __construct);
 ZEND_METHOD(Phar, __destruct);
 ZEND_METHOD(Phar, addEmptyDir);
@@ -457,11 +456,9 @@ ZEND_METHOD(PharFileInfo, isCompressed);
 ZEND_METHOD(PharFileInfo, isCRCChecked);
 ZEND_METHOD(PharFileInfo, setMetadata);
 
-
 static const zend_function_entry class_PharException_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_Phar_methods[] = {
 	ZEND_ME(Phar, __construct, arginfo_class_Phar___construct, ZEND_ACC_PUBLIC)
@@ -523,7 +520,6 @@ static const zend_function_entry class_Phar_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_PharData_methods[] = {
 	ZEND_MALIAS(Phar, __construct, __construct, arginfo_class_PharData___construct, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(Phar, __destruct, __destruct, arginfo_class_PharData___destruct, ZEND_ACC_PUBLIC)
@@ -583,7 +579,6 @@ static const zend_function_entry class_PharData_methods[] = {
 	ZEND_MALIAS(Phar, webPhar, webPhar, arginfo_class_PharData_webPhar, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_PharFileInfo_methods[] = {
 	ZEND_ME(PharFileInfo, __construct, arginfo_class_PharFileInfo___construct, ZEND_ACC_PUBLIC)

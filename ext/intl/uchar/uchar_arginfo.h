@@ -182,7 +182,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlChar_toupper arginfo_class_IntlChar_charMirror
 
-
 ZEND_METHOD(IntlChar, hasBinaryProperty);
 ZEND_METHOD(IntlChar, charAge);
 ZEND_METHOD(IntlChar, charDigitValue);
@@ -244,7 +243,6 @@ ZEND_METHOD(IntlChar, ord);
 ZEND_METHOD(IntlChar, tolower);
 ZEND_METHOD(IntlChar, totitle);
 ZEND_METHOD(IntlChar, toupper);
-
 
 static const zend_function_entry class_IntlChar_methods[] = {
 	ZEND_ME(IntlChar, hasBinaryProperty, arginfo_class_IntlChar_hasBinaryProperty, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)

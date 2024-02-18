@@ -32,7 +32,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Transliterator_getErrorMessage, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(Transliterator, __construct);
 ZEND_FUNCTION(transliterator_create);
 ZEND_FUNCTION(transliterator_create_from_rules);
@@ -41,7 +40,6 @@ ZEND_FUNCTION(transliterator_list_ids);
 ZEND_FUNCTION(transliterator_transliterate);
 ZEND_FUNCTION(transliterator_get_error_code);
 ZEND_FUNCTION(transliterator_get_error_message);
-
 
 static const zend_function_entry class_Transliterator_methods[] = {
 	ZEND_ME(Transliterator, __construct, arginfo_class_Transliterator___construct, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)

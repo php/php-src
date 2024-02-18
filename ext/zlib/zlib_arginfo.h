@@ -132,7 +132,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_inflate_get_read_len arginfo_inflate_get_status
 
-
 ZEND_FUNCTION(ob_gzhandler);
 ZEND_FUNCTION(zlib_get_coding_type);
 ZEND_FUNCTION(gzfile);
@@ -162,7 +161,6 @@ ZEND_FUNCTION(inflate_init);
 ZEND_FUNCTION(inflate_add);
 ZEND_FUNCTION(inflate_get_status);
 ZEND_FUNCTION(inflate_get_read_len);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ob_gzhandler, arginfo_ob_gzhandler)
@@ -198,11 +196,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_InflateContext_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DeflateContext_methods[] = {
 	ZEND_FE_END

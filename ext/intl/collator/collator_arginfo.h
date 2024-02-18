@@ -55,7 +55,6 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Collator_getSort
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(Collator, __construct);
 ZEND_FUNCTION(collator_create);
 ZEND_FUNCTION(collator_compare);
@@ -70,7 +69,6 @@ ZEND_FUNCTION(collator_get_locale);
 ZEND_FUNCTION(collator_get_error_code);
 ZEND_FUNCTION(collator_get_error_message);
 ZEND_FUNCTION(collator_get_sort_key);
-
 
 static const zend_function_entry class_Collator_methods[] = {
 	ZEND_ME(Collator, __construct, arginfo_class_Collator___construct, ZEND_ACC_PUBLIC)

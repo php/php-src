@@ -360,7 +360,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_parse_exop, 0, 2, _IS_BOOL,
 ZEND_END_ARG_INFO()
 #endif
 
-
 #if defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_connect);
 #endif
@@ -464,7 +463,6 @@ ZEND_FUNCTION(ldap_exop_refresh);
 #if defined(HAVE_LDAP_PARSE_EXTENDED_RESULT)
 ZEND_FUNCTION(ldap_parse_exop);
 #endif
-
 
 static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_ORALDAP)
@@ -576,16 +574,13 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_LDAP_Connection_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_LDAP_Result_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_LDAP_ResultEntry_methods[] = {
 	ZEND_FE_END

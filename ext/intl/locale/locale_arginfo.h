@@ -62,7 +62,6 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_Locale_acceptFro
 	ZEND_ARG_TYPE_INFO(0, header, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(locale_get_default);
 ZEND_FUNCTION(locale_set_default);
 ZEND_FUNCTION(locale_get_primary_language);
@@ -81,7 +80,6 @@ ZEND_FUNCTION(locale_filter_matches);
 ZEND_FUNCTION(locale_lookup);
 ZEND_FUNCTION(locale_canonicalize);
 ZEND_FUNCTION(locale_accept_from_http);
-
 
 static const zend_function_entry class_Locale_methods[] = {
 	ZEND_ME_MAPPING(getDefault, locale_get_default, arginfo_class_Locale_getDefault, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)

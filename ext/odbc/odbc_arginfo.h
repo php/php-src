@@ -255,7 +255,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_connection_string_quote, 0,
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(odbc_close_all);
 ZEND_FUNCTION(odbc_binmode);
 ZEND_FUNCTION(odbc_longreadlen);
@@ -320,7 +319,6 @@ ZEND_FUNCTION(odbc_columnprivileges);
 ZEND_FUNCTION(odbc_connection_string_is_quoted);
 ZEND_FUNCTION(odbc_connection_string_should_quote);
 ZEND_FUNCTION(odbc_connection_string_quote);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(odbc_close_all, arginfo_odbc_close_all)

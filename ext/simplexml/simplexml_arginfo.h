@@ -100,7 +100,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_SimpleXMLElement_getChildren, 0, 0, SimpleXMLElement, 1)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(simplexml_load_file);
 ZEND_FUNCTION(simplexml_load_string);
 ZEND_FUNCTION(simplexml_import_dom);
@@ -125,14 +124,12 @@ ZEND_METHOD(SimpleXMLElement, next);
 ZEND_METHOD(SimpleXMLElement, hasChildren);
 ZEND_METHOD(SimpleXMLElement, getChildren);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(simplexml_load_file, arginfo_simplexml_load_file)
 	ZEND_FE(simplexml_load_string, arginfo_simplexml_load_string)
 	ZEND_FE(simplexml_import_dom, arginfo_simplexml_import_dom)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SimpleXMLElement_methods[] = {
 	ZEND_ME(SimpleXMLElement, xpath, arginfo_class_SimpleXMLElement_xpath, ZEND_ACC_PUBLIC)
@@ -158,7 +155,6 @@ static const zend_function_entry class_SimpleXMLElement_methods[] = {
 	ZEND_ME(SimpleXMLElement, getChildren, arginfo_class_SimpleXMLElement_getChildren, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SimpleXMLIterator_methods[] = {
 	ZEND_FE_END

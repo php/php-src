@@ -193,7 +193,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ftp_get_option, 0, 2, MAY_BE_LON
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(ftp_connect);
 #if defined(HAVE_FTP_SSL)
 ZEND_FUNCTION(ftp_ssl_connect);
@@ -231,7 +230,6 @@ ZEND_FUNCTION(ftp_site);
 ZEND_FUNCTION(ftp_close);
 ZEND_FUNCTION(ftp_set_option);
 ZEND_FUNCTION(ftp_get_option);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ftp_connect, arginfo_ftp_connect)
@@ -274,7 +272,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ftp_get_option, arginfo_ftp_get_option)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_FTP_Connection_methods[] = {
 	ZEND_FE_END

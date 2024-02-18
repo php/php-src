@@ -46,7 +46,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_bzdecompress, 0, 1, MAY_BE_STRIN
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_less_memory, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(bzopen);
 ZEND_FUNCTION(bzread);
 ZEND_FUNCTION(fwrite);
@@ -57,7 +56,6 @@ ZEND_FUNCTION(bzerrstr);
 ZEND_FUNCTION(bzerror);
 ZEND_FUNCTION(bzcompress);
 ZEND_FUNCTION(bzdecompress);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(bzopen, arginfo_bzopen)

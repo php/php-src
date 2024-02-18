@@ -163,7 +163,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SNMP_getError, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(snmpget);
 ZEND_FUNCTION(snmpgetnext);
 ZEND_FUNCTION(snmpwalk);
@@ -196,7 +195,6 @@ ZEND_METHOD(SNMP, set);
 ZEND_METHOD(SNMP, getErrno);
 ZEND_METHOD(SNMP, getError);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(snmpget, arginfo_snmpget)
 	ZEND_FE(snmpgetnext, arginfo_snmpgetnext)
@@ -225,7 +223,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SNMP_methods[] = {
 	ZEND_ME(SNMP, __construct, arginfo_class_SNMP___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(SNMP, close, arginfo_class_SNMP_close, ZEND_ACC_PUBLIC)
@@ -238,7 +235,6 @@ static const zend_function_entry class_SNMP_methods[] = {
 	ZEND_ME(SNMP, getError, arginfo_class_SNMP_getError, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SNMPException_methods[] = {
 	ZEND_FE_END

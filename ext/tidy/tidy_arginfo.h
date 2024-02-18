@@ -183,7 +183,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_tidyNode_getParent, 0, 0, tidyNode, 1)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(tidy_parse_string);
 ZEND_FUNCTION(tidy_get_error_buffer);
 ZEND_FUNCTION(tidy_get_output);
@@ -224,7 +223,6 @@ ZEND_METHOD(tidyNode, isAsp);
 ZEND_METHOD(tidyNode, isPhp);
 ZEND_METHOD(tidyNode, getParent);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(tidy_parse_string, arginfo_tidy_parse_string)
 	ZEND_FE(tidy_get_error_buffer, arginfo_tidy_get_error_buffer)
@@ -255,7 +253,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_tidy_methods[] = {
 	ZEND_ME(tidy, __construct, arginfo_class_tidy___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getOpt, tidy_getopt, arginfo_class_tidy_getOpt, ZEND_ACC_PUBLIC)
@@ -280,7 +277,6 @@ static const zend_function_entry class_tidy_methods[] = {
 	ZEND_ME_MAPPING(body, tidy_get_body, arginfo_class_tidy_body, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_tidyNode_methods[] = {
 	ZEND_ME(tidyNode, __construct, arginfo_class_tidyNode___construct, ZEND_ACC_PRIVATE)

@@ -514,7 +514,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DatePeriod_getIterator, 0, 0, Iterator, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(strtotime);
 ZEND_FUNCTION(date);
 ZEND_FUNCTION(idate);
@@ -615,7 +614,6 @@ ZEND_METHOD(DatePeriod, __wakeup);
 ZEND_METHOD(DatePeriod, __set_state);
 ZEND_METHOD(DatePeriod, getIterator);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(strtotime, arginfo_strtotime)
 	ZEND_FE(date, arginfo_date)
@@ -668,7 +666,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DateTimeInterface_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DateTimeInterface, format, arginfo_class_DateTimeInterface_format, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DateTimeInterface, getTimezone, arginfo_class_DateTimeInterface_getTimezone, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
@@ -680,7 +677,6 @@ static const zend_function_entry class_DateTimeInterface_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DateTimeInterface, __unserialize, arginfo_class_DateTimeInterface___unserialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DateTime_methods[] = {
 	ZEND_ME(DateTime, __construct, arginfo_class_DateTime___construct, ZEND_ACC_PUBLIC)
@@ -711,7 +707,6 @@ static const zend_function_entry class_DateTime_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DateTimeImmutable_methods[] = {
 	ZEND_ME(DateTimeImmutable, __construct, arginfo_class_DateTimeImmutable___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateTimeImmutable, __serialize, arginfo_class_DateTimeImmutable___serialize, ZEND_ACC_PUBLIC)
@@ -741,7 +736,6 @@ static const zend_function_entry class_DateTimeImmutable_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DateTimeZone_methods[] = {
 	ZEND_ME(DateTimeZone, __construct, arginfo_class_DateTimeZone___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(getName, timezone_name_get, arginfo_class_DateTimeZone_getName, ZEND_ACC_PUBLIC)
@@ -757,7 +751,6 @@ static const zend_function_entry class_DateTimeZone_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DateInterval_methods[] = {
 	ZEND_ME(DateInterval, __construct, arginfo_class_DateInterval___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(DateInterval, createFromDateString, arginfo_class_DateInterval_createFromDateString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -768,7 +761,6 @@ static const zend_function_entry class_DateInterval_methods[] = {
 	ZEND_ME(DateInterval, __set_state, arginfo_class_DateInterval___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DatePeriod_methods[] = {
 	ZEND_ME(DatePeriod, createFromISO8601String, arginfo_class_DatePeriod_createFromISO8601String, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -785,46 +777,37 @@ static const zend_function_entry class_DatePeriod_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DateError_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DateObjectError_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DateRangeError_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DateException_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DateInvalidTimeZoneException_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DateInvalidOperationException_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DateMalformedStringException_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DateMalformedIntervalStringException_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DateMalformedPeriodStringException_methods[] = {
 	ZEND_FE_END

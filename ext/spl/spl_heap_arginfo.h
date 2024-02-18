@@ -84,7 +84,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplMaxHeap_compare arginfo_class_SplHeap_compare
 
-
 ZEND_METHOD(SplPriorityQueue, compare);
 ZEND_METHOD(SplPriorityQueue, insert);
 ZEND_METHOD(SplPriorityQueue, setExtractFlags);
@@ -109,7 +108,6 @@ ZEND_METHOD(SplHeap, __debugInfo);
 ZEND_METHOD(SplMinHeap, compare);
 ZEND_METHOD(SplMaxHeap, compare);
 
-
 static const zend_function_entry class_SplPriorityQueue_methods[] = {
 	ZEND_ME(SplPriorityQueue, compare, arginfo_class_SplPriorityQueue_compare, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplPriorityQueue, insert, arginfo_class_SplPriorityQueue_insert, ZEND_ACC_PUBLIC)
@@ -130,7 +128,6 @@ static const zend_function_entry class_SplPriorityQueue_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SplHeap_methods[] = {
 	ZEND_ME(SplHeap, extract, arginfo_class_SplHeap_extract, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplHeap, insert, arginfo_class_SplHeap_insert, ZEND_ACC_PUBLIC)
@@ -149,12 +146,10 @@ static const zend_function_entry class_SplHeap_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SplMinHeap_methods[] = {
 	ZEND_ME(SplMinHeap, compare, arginfo_class_SplMinHeap_compare, ZEND_ACC_PROTECTED)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SplMaxHeap_methods[] = {
 	ZEND_ME(SplMaxHeap, compare, arginfo_class_SplMaxHeap_compare, ZEND_ACC_PROTECTED)

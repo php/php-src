@@ -203,7 +203,6 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlGregorianCal
 	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(IntlCalendar, __construct);
 ZEND_FUNCTION(intlcal_create_instance);
 ZEND_FUNCTION(intlcal_equals);
@@ -259,7 +258,6 @@ ZEND_FUNCTION(intlgregcal_set_gregorian_change);
 ZEND_FUNCTION(intlgregcal_get_gregorian_change);
 ZEND_FUNCTION(intlgregcal_is_leap_year);
 
-
 static const zend_function_entry class_IntlCalendar_methods[] = {
 	ZEND_ME(IntlCalendar, __construct, arginfo_class_IntlCalendar___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME_MAPPING(createInstance, intlcal_create_instance, arginfo_class_IntlCalendar_createInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -311,7 +309,6 @@ static const zend_function_entry class_IntlCalendar_methods[] = {
 	ZEND_ME_MAPPING(toDateTime, intlcal_to_date_time, arginfo_class_IntlCalendar_toDateTime, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_IntlGregorianCalendar_methods[] = {
 	ZEND_ME(IntlGregorianCalendar, createFromDate, arginfo_class_IntlGregorianCalendar_createFromDate, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)

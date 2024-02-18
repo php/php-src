@@ -97,7 +97,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_enchant_dict_describe, 0, 1, IS_
 	ZEND_ARG_OBJ_INFO(0, dictionary, EnchantDictionary, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(enchant_broker_init);
 ZEND_FUNCTION(enchant_broker_free);
 ZEND_FUNCTION(enchant_broker_get_error);
@@ -119,7 +118,6 @@ ZEND_FUNCTION(enchant_dict_is_added);
 ZEND_FUNCTION(enchant_dict_store_replacement);
 ZEND_FUNCTION(enchant_dict_get_error);
 ZEND_FUNCTION(enchant_dict_describe);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(enchant_broker_init, arginfo_enchant_broker_init)
@@ -148,11 +146,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_EnchantBroker_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_EnchantDictionary_methods[] = {
 	ZEND_FE_END

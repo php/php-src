@@ -98,7 +98,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlTimeZone_useDaylightTime, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(IntlTimeZone, __construct);
 ZEND_FUNCTION(intltz_count_equivalent_ids);
 ZEND_FUNCTION(intltz_create_default);
@@ -128,7 +127,6 @@ ZEND_FUNCTION(intltz_get_id_for_windows_id);
 ZEND_FUNCTION(intltz_has_same_rules);
 ZEND_FUNCTION(intltz_to_date_time_zone);
 ZEND_FUNCTION(intltz_use_daylight_time);
-
 
 static const zend_function_entry class_IntlTimeZone_methods[] = {
 	ZEND_ME(IntlTimeZone, __construct, arginfo_class_IntlTimeZone___construct, ZEND_ACC_PRIVATE)

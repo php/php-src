@@ -327,7 +327,6 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_XMLWriter_flush,
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, empty, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(xmlwriter_open_uri);
 ZEND_FUNCTION(xmlwriter_open_memory);
 ZEND_FUNCTION(xmlwriter_set_indent);
@@ -370,7 +369,6 @@ ZEND_FUNCTION(xmlwriter_end_dtd_entity);
 ZEND_FUNCTION(xmlwriter_write_dtd_entity);
 ZEND_FUNCTION(xmlwriter_output_memory);
 ZEND_FUNCTION(xmlwriter_flush);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xmlwriter_open_uri, arginfo_xmlwriter_open_uri)
@@ -417,7 +415,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xmlwriter_flush, arginfo_xmlwriter_flush)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_XMLWriter_methods[] = {
 	ZEND_ME_MAPPING(openUri, xmlwriter_open_uri, arginfo_class_XMLWriter_openUri, ZEND_ACC_PUBLIC)

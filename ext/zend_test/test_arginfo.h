@@ -223,7 +223,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ZendTestNS2_ZendSubNS_Foo_method arginfo_zend_test_void_return
 
-
 static ZEND_FUNCTION(zend_test_array_return);
 static ZEND_FUNCTION(zend_test_nullable_array_return);
 static ZEND_FUNCTION(zend_test_void_return);
@@ -293,7 +292,6 @@ static ZEND_METHOD(ZendTestNS_NotUnlikelyCompileError, method);
 static ZEND_METHOD(ZendTestNS2_Foo, method);
 static ZEND_METHOD(ZendTestNS2_ZendSubNS_Foo, method);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 	ZEND_FE(zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return)
@@ -350,11 +348,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class__ZendTestInterface_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class__ZendTestClass_methods[] = {
 	ZEND_ME(_ZendTestClass, is_object, arginfo_class__ZendTestClass_is_object, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -366,52 +362,43 @@ static const zend_function_entry class__ZendTestClass_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class__ZendTestMagicCall_methods[] = {
 	ZEND_ME(_ZendTestMagicCall, __call, arginfo_class__ZendTestMagicCall___call, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class__ZendTestChildClass_methods[] = {
 	ZEND_ME(_ZendTestChildClass, returnsThrowable, arginfo_class__ZendTestChildClass_returnsThrowable, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ZendAttributeTest_methods[] = {
 	ZEND_ME(ZendAttributeTest, testMethod, arginfo_class_ZendAttributeTest_testMethod, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class__ZendTestTrait_methods[] = {
 	ZEND_ME(_ZendTestTrait, testMethod, arginfo_class__ZendTestTrait_testMethod, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ZendTestAttribute_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ZendTestRepeatableAttribute_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ZendTestParameterAttribute_methods[] = {
 	ZEND_ME(ZendTestParameterAttribute, __construct, arginfo_class_ZendTestParameterAttribute___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ZendTestPropertyAttribute_methods[] = {
 	ZEND_ME(ZendTestPropertyAttribute, __construct, arginfo_class_ZendTestPropertyAttribute___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ZendTestClassWithMethodWithParameterAttribute_methods[] = {
 	ZEND_ME(ZendTestClassWithMethodWithParameterAttribute, no_override, arginfo_class_ZendTestClassWithMethodWithParameterAttribute_no_override, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
@@ -419,17 +406,14 @@ static const zend_function_entry class_ZendTestClassWithMethodWithParameterAttri
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ZendTestChildClassWithMethodWithParameterAttribute_methods[] = {
 	ZEND_ME(ZendTestChildClassWithMethodWithParameterAttribute, override, arginfo_class_ZendTestChildClassWithMethodWithParameterAttribute_override, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ZendTestClassWithPropertyAttribute_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ZendTestForbidDynamicCall_methods[] = {
 	ZEND_ME(ZendTestForbidDynamicCall, call, arginfo_class_ZendTestForbidDynamicCall_call, ZEND_ACC_PUBLIC)
@@ -437,45 +421,37 @@ static const zend_function_entry class_ZendTestForbidDynamicCall_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ZendTestUnitEnum_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ZendTestStringEnum_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ZendTestIntEnum_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ZendTestNS_Foo_methods[] = {
 	ZEND_ME(ZendTestNS_Foo, method, arginfo_class_ZendTestNS_Foo_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ZendTestNS_UnlikelyCompileError_methods[] = {
 	ZEND_ME(ZendTestNS_UnlikelyCompileError, method, arginfo_class_ZendTestNS_UnlikelyCompileError_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ZendTestNS_NotUnlikelyCompileError_methods[] = {
 	ZEND_ME(ZendTestNS_NotUnlikelyCompileError, method, arginfo_class_ZendTestNS_NotUnlikelyCompileError_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ZendTestNS2_Foo_methods[] = {
 	ZEND_ME(ZendTestNS2_Foo, method, arginfo_class_ZendTestNS2_Foo_method, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ZendTestNS2_ZendSubNS_Foo_methods[] = {
 	ZEND_ME(ZendTestNS2_ZendSubNS_Foo, method, arginfo_class_ZendTestNS2_ZendSubNS_Foo_method, ZEND_ACC_PUBLIC)

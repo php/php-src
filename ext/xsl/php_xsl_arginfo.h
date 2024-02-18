@@ -59,7 +59,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_getSecurityPrefs, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(XSLTProcessor, importStylesheet);
 ZEND_METHOD(XSLTProcessor, transformToDoc);
 ZEND_METHOD(XSLTProcessor, transformToUri);
@@ -73,7 +72,6 @@ ZEND_METHOD(XSLTProcessor, registerPHPFunctionNS);
 ZEND_METHOD(XSLTProcessor, setProfiling);
 ZEND_METHOD(XSLTProcessor, setSecurityPrefs);
 ZEND_METHOD(XSLTProcessor, getSecurityPrefs);
-
 
 static const zend_function_entry class_XSLTProcessor_methods[] = {
 	ZEND_ME(XSLTProcessor, importStylesheet, arginfo_class_XSLTProcessor_importStylesheet, ZEND_ACC_PUBLIC)

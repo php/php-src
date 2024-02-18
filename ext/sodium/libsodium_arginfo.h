@@ -551,7 +551,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_crypto_scalarmult_base arginfo_sodium_crypto_box_publickey_from_secretkey
 
-
 ZEND_FUNCTION(sodium_crypto_aead_aes256gcm_is_available);
 #if defined(HAVE_AESGCM)
 ZEND_FUNCTION(sodium_crypto_aead_aes256gcm_decrypt);
@@ -753,7 +752,6 @@ ZEND_FUNCTION(sodium_bin2base64);
 #if defined(sodium_base64_VARIANT_ORIGINAL)
 ZEND_FUNCTION(sodium_base642bin);
 #endif
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(sodium_crypto_aead_aes256gcm_is_available, arginfo_sodium_crypto_aead_aes256gcm_is_available)
@@ -960,7 +958,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FALIAS(sodium_crypto_scalarmult_base, sodium_crypto_box_publickey_from_secretkey, arginfo_sodium_crypto_scalarmult_base)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SodiumException_methods[] = {
 	ZEND_FE_END

@@ -18,12 +18,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_litespeed_finish_request, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(litespeed_request_headers);
 ZEND_FUNCTION(litespeed_response_headers);
 ZEND_FUNCTION(apache_get_modules);
 ZEND_FUNCTION(litespeed_finish_request);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(litespeed_request_headers, arginfo_litespeed_request_headers)

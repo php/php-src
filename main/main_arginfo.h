@@ -1,8 +1,6 @@
 /* This is a generated file, edit the .stub.php file instead.
  * Stub hash: 2542736c885829255e4226783b60db1453342b65 */
 
-
-
 static void register_main_symbols(int module_number)
 {
 	REGISTER_STRING_CONSTANT("PHP_VERSION", PHP_VERSION, CONST_PERSISTENT);

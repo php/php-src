@@ -34,7 +34,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PdoSqlite_openBlob, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "PdoSqlite::OPEN_READONLY")
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(PdoSqlite, createAggregate);
 ZEND_METHOD(PdoSqlite, createCollation);
 ZEND_METHOD(PdoSqlite, createFunction);
@@ -42,7 +41,6 @@ ZEND_METHOD(PdoSqlite, createFunction);
 ZEND_METHOD(PdoSqlite, loadExtension);
 #endif
 ZEND_METHOD(PdoSqlite, openBlob);
-
 
 static const zend_function_entry class_PdoSqlite_methods[] = {
 	ZEND_ME(PdoSqlite, createAggregate, arginfo_class_PdoSqlite_createAggregate, ZEND_ACC_PUBLIC)

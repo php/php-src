@@ -81,7 +81,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Error___toString arginfo_class_Throwable_getMessage
 
-
 ZEND_METHOD(Exception, __clone);
 ZEND_METHOD(Exception, __construct);
 ZEND_METHOD(Exception, __wakeup);
@@ -96,7 +95,6 @@ ZEND_METHOD(Exception, __toString);
 ZEND_METHOD(ErrorException, __construct);
 ZEND_METHOD(ErrorException, getSeverity);
 
-
 static const zend_function_entry class_Throwable_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(Throwable, getMessage, arginfo_class_Throwable_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(Throwable, getCode, arginfo_class_Throwable_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
@@ -107,7 +105,6 @@ static const zend_function_entry class_Throwable_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(Throwable, getTraceAsString, arginfo_class_Throwable_getTraceAsString, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_Exception_methods[] = {
 	ZEND_ME(Exception, __clone, arginfo_class_Exception___clone, ZEND_ACC_PRIVATE)
@@ -124,13 +121,11 @@ static const zend_function_entry class_Exception_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ErrorException_methods[] = {
 	ZEND_ME(ErrorException, __construct, arginfo_class_ErrorException___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ErrorException, getSeverity, arginfo_class_ErrorException_getSeverity, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_Error_methods[] = {
 	ZEND_MALIAS(Exception, __clone, __clone, arginfo_class_Error___clone, ZEND_ACC_PRIVATE)
@@ -147,46 +142,37 @@ static const zend_function_entry class_Error_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_CompileError_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ParseError_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_TypeError_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ArgumentCountError_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ValueError_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ArithmeticError_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DivisionByZeroError_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_UnhandledMatchError_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_RequestParseBodyException_methods[] = {
 	ZEND_FE_END

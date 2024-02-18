@@ -215,7 +215,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_wsaprotocol_info_release,
 ZEND_END_ARG_INFO()
 #endif
 
-
 ZEND_FUNCTION(socket_select);
 ZEND_FUNCTION(socket_create_listen);
 ZEND_FUNCTION(socket_accept);
@@ -266,7 +265,6 @@ ZEND_FUNCTION(socket_wsaprotocol_info_import);
 #if defined(PHP_WIN32)
 ZEND_FUNCTION(socket_wsaprotocol_info_release);
 #endif
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(socket_select, arginfo_socket_select)
@@ -324,11 +322,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_Socket_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_AddressInfo_methods[] = {
 	ZEND_FE_END

@@ -33,7 +33,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ResourceBundle_getIterator, 0, 0, Iterator, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(ResourceBundle, __construct);
 ZEND_FUNCTION(resourcebundle_create);
 ZEND_FUNCTION(resourcebundle_get);
@@ -42,7 +41,6 @@ ZEND_FUNCTION(resourcebundle_locales);
 ZEND_FUNCTION(resourcebundle_get_error_code);
 ZEND_FUNCTION(resourcebundle_get_error_message);
 ZEND_METHOD(ResourceBundle, getIterator);
-
 
 static const zend_function_entry class_ResourceBundle_methods[] = {
 	ZEND_ME(ResourceBundle, __construct, arginfo_class_ResourceBundle___construct, ZEND_ACC_PUBLIC)

@@ -316,7 +316,6 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ZipArchive_isEncryptionMethodSupported arginfo_class_ZipArchive_isCompressionMethodSupported
 #endif
 
-
 ZEND_FUNCTION(zip_open);
 ZEND_FUNCTION(zip_close);
 ZEND_FUNCTION(zip_read);
@@ -404,7 +403,6 @@ ZEND_METHOD(ZipArchive, isCompressionMethodSupported);
 ZEND_METHOD(ZipArchive, isEncryptionMethodSupported);
 #endif
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_DEP_FE(zip_open, arginfo_zip_open)
 	ZEND_DEP_FE(zip_close, arginfo_zip_close)
@@ -418,7 +416,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_DEP_FE(zip_entry_compressionmethod, arginfo_zip_entry_compressionmethod)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ZipArchive_methods[] = {
 	ZEND_ME(ZipArchive, open, arginfo_class_ZipArchive_open, ZEND_ACC_PUBLIC)

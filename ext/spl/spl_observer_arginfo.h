@@ -133,7 +133,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_MultipleIterator___debugInfo arginfo_class_SplObjectStorage___serialize
 
-
 ZEND_METHOD(SplObjectStorage, attach);
 ZEND_METHOD(SplObjectStorage, detach);
 ZEND_METHOD(SplObjectStorage, contains);
@@ -168,12 +167,10 @@ ZEND_METHOD(MultipleIterator, key);
 ZEND_METHOD(MultipleIterator, current);
 ZEND_METHOD(MultipleIterator, next);
 
-
 static const zend_function_entry class_SplObserver_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(SplObserver, update, arginfo_class_SplObserver_update, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SplSubject_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(SplSubject, attach, arginfo_class_SplSubject_attach, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
@@ -181,7 +178,6 @@ static const zend_function_entry class_SplSubject_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(SplSubject, notify, arginfo_class_SplSubject_notify, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SplObjectStorage_methods[] = {
 	ZEND_ME(SplObjectStorage, attach, arginfo_class_SplObjectStorage_attach, ZEND_ACC_PUBLIC)
@@ -210,7 +206,6 @@ static const zend_function_entry class_SplObjectStorage_methods[] = {
 	ZEND_ME(SplObjectStorage, __debugInfo, arginfo_class_SplObjectStorage___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_MultipleIterator_methods[] = {
 	ZEND_ME(MultipleIterator, __construct, arginfo_class_MultipleIterator___construct, ZEND_ACC_PUBLIC)

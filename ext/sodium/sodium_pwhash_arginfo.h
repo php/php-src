@@ -1,8 +1,6 @@
 /* This is a generated file, edit the .stub.php file instead.
  * Stub hash: dd94e709f115ce05df0e25a8cb48c62438bb6d01 */
 
-
-
 static void register_sodium_pwhash_symbols(int module_number)
 {
 #if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)

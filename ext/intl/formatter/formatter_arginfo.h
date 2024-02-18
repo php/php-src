@@ -79,7 +79,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_NumberFormatter_getErrorMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(NumberFormatter, __construct);
 ZEND_FUNCTION(numfmt_create);
 ZEND_FUNCTION(numfmt_format);
@@ -97,7 +96,6 @@ ZEND_FUNCTION(numfmt_get_pattern);
 ZEND_FUNCTION(numfmt_get_locale);
 ZEND_FUNCTION(numfmt_get_error_code);
 ZEND_FUNCTION(numfmt_get_error_message);
-
 
 static const zend_function_entry class_NumberFormatter_methods[] = {
 	ZEND_ME(NumberFormatter, __construct, arginfo_class_NumberFormatter___construct, ZEND_ACC_PUBLIC)

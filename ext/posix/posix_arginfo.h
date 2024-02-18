@@ -185,7 +185,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_fpathconf, 0, 2, MAY_BE_LO
 ZEND_END_ARG_INFO()
 #endif
 
-
 ZEND_FUNCTION(posix_kill);
 ZEND_FUNCTION(posix_getpid);
 ZEND_FUNCTION(posix_getppid);
@@ -258,7 +257,6 @@ ZEND_FUNCTION(posix_pathconf);
 #if defined(HAVE_FPATHCONF)
 ZEND_FUNCTION(posix_fpathconf);
 #endif
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(posix_kill, arginfo_posix_kill)

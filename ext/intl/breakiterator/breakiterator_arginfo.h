@@ -82,7 +82,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlCodePointBreakIterator_getLastCodePoint arginfo_class_IntlBreakIterator_current
 
-
 ZEND_METHOD(IntlBreakIterator, createCharacterInstance);
 ZEND_METHOD(IntlBreakIterator, createCodePointInstance);
 ZEND_METHOD(IntlBreakIterator, createLineInstance);
@@ -112,7 +111,6 @@ ZEND_METHOD(IntlRuleBasedBreakIterator, getRuleStatus);
 ZEND_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec);
 ZEND_METHOD(IntlCodePointBreakIterator, getLastCodePoint);
 
-
 static const zend_function_entry class_IntlBreakIterator_methods[] = {
 	ZEND_ME(IntlBreakIterator, createCharacterInstance, arginfo_class_IntlBreakIterator_createCharacterInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(IntlBreakIterator, createCodePointInstance, arginfo_class_IntlBreakIterator_createCodePointInstance, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -139,7 +137,6 @@ static const zend_function_entry class_IntlBreakIterator_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_IntlRuleBasedBreakIterator_methods[] = {
 	ZEND_ME(IntlRuleBasedBreakIterator, __construct, arginfo_class_IntlRuleBasedBreakIterator___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(IntlRuleBasedBreakIterator, getBinaryRules, arginfo_class_IntlRuleBasedBreakIterator_getBinaryRules, ZEND_ACC_PUBLIC)
@@ -148,7 +145,6 @@ static const zend_function_entry class_IntlRuleBasedBreakIterator_methods[] = {
 	ZEND_ME(IntlRuleBasedBreakIterator, getRuleStatusVec, arginfo_class_IntlRuleBasedBreakIterator_getRuleStatusVec, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_IntlCodePointBreakIterator_methods[] = {
 	ZEND_ME(IntlCodePointBreakIterator, getLastCodePoint, arginfo_class_IntlCodePointBreakIterator_getLastCodePoint, ZEND_ACC_PUBLIC)

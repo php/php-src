@@ -627,7 +627,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_XMLDocument_saveXMLFile arginfo_class_DOMDocument_save
 
-
 ZEND_FUNCTION(dom_import_simplexml);
 ZEND_METHOD(DOMCdataSection, __construct);
 ZEND_METHOD(DOMComment, __construct);
@@ -787,30 +786,25 @@ ZEND_METHOD(DOM_XMLDocument, createEmpty);
 ZEND_METHOD(DOM_XMLDocument, createFromFile);
 ZEND_METHOD(DOM_XMLDocument, createFromString);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(dom_import_simplexml, arginfo_dom_import_simplexml)
 	ZEND_NS_FALIAS("DOM", import_simplexml, dom_import_simplexml, arginfo_DOM_import_simplexml)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DOMDocumentType_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DOMCdataSection_methods[] = {
 	ZEND_ME(DOMCdataSection, __construct, arginfo_class_DOMCdataSection___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DOMComment_methods[] = {
 	ZEND_ME(DOMComment, __construct, arginfo_class_DOMComment___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DOMParentNode_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DOMParentNode, append, arginfo_class_DOMParentNode_append, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
@@ -819,7 +813,6 @@ static const zend_function_entry class_DOMParentNode_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DOMChildNode_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DOMChildNode, remove, arginfo_class_DOMChildNode_remove, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DOMChildNode, before, arginfo_class_DOMChildNode_before, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
@@ -827,7 +820,6 @@ static const zend_function_entry class_DOMChildNode_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(DOMChildNode, replaceWith, arginfo_class_DOMChildNode_replaceWith, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DOMNode_methods[] = {
 	ZEND_ME(DOMNode, appendChild, arginfo_class_DOMNode_appendChild, ZEND_ACC_PUBLIC)
@@ -856,13 +848,11 @@ static const zend_function_entry class_DOMNode_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DOMNameSpaceNode_methods[] = {
 	ZEND_MALIAS(DOMNode, __sleep, __sleep, arginfo_class_DOMNameSpaceNode___sleep, ZEND_ACC_PUBLIC)
 	ZEND_MALIAS(DOMNode, __wakeup, __wakeup, arginfo_class_DOMNameSpaceNode___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DOMImplementation_methods[] = {
 	ZEND_ME(DOMImplementation, getFeature, arginfo_class_DOMImplementation_getFeature, ZEND_ACC_PUBLIC)
@@ -871,7 +861,6 @@ static const zend_function_entry class_DOMImplementation_methods[] = {
 	ZEND_ME(DOMImplementation, createDocument, arginfo_class_DOMImplementation_createDocument, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DOMDocumentFragment_methods[] = {
 	ZEND_ME(DOMDocumentFragment, __construct, arginfo_class_DOMDocumentFragment___construct, ZEND_ACC_PUBLIC)
@@ -882,14 +871,12 @@ static const zend_function_entry class_DOMDocumentFragment_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DOMNodeList_methods[] = {
 	ZEND_ME(DOMNodeList, count, arginfo_class_DOMNodeList_count, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNodeList, getIterator, arginfo_class_DOMNodeList_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNodeList, item, arginfo_class_DOMNodeList_item, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DOMCharacterData_methods[] = {
 	ZEND_ME(DOMCharacterData, appendData, arginfo_class_DOMCharacterData_appendData, ZEND_ACC_PUBLIC)
@@ -904,13 +891,11 @@ static const zend_function_entry class_DOMCharacterData_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DOMAttr_methods[] = {
 	ZEND_ME(DOMAttr, __construct, arginfo_class_DOMAttr___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMAttr, isId, arginfo_class_DOMAttr_isId, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DOMElement_methods[] = {
 	ZEND_ME(DOMElement, __construct, arginfo_class_DOMElement___construct, ZEND_ACC_PUBLIC)
@@ -946,7 +931,6 @@ static const zend_function_entry class_DOMElement_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DOMDocument_methods[] = {
 	ZEND_ME(DOMDocument, __construct, arginfo_class_DOMDocument___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMDocument, createEntityReference, arginfo_class_DOMDocument_createEntityReference, ZEND_ACC_PUBLIC)
@@ -971,11 +955,9 @@ static const zend_function_entry class_DOMDocument_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DOMException_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DOMText_methods[] = {
 	ZEND_ME(DOMText, __construct, arginfo_class_DOMText___construct, ZEND_ACC_PUBLIC)
@@ -984,7 +966,6 @@ static const zend_function_entry class_DOMText_methods[] = {
 	ZEND_ME(DOMText, splitText, arginfo_class_DOMText_splitText, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DOMNamedNodeMap_methods[] = {
 	ZEND_ME(DOMNamedNodeMap, getNamedItem, arginfo_class_DOMNamedNodeMap_getNamedItem, ZEND_ACC_PUBLIC)
@@ -995,28 +976,23 @@ static const zend_function_entry class_DOMNamedNodeMap_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DOMEntity_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DOMEntityReference_methods[] = {
 	ZEND_ME(DOMEntityReference, __construct, arginfo_class_DOMEntityReference___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DOMNotation_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DOMProcessingInstruction_methods[] = {
 	ZEND_ME(DOMProcessingInstruction, __construct, arginfo_class_DOMProcessingInstruction___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 #if defined(LIBXML_XPATH_ENABLED)
 static const zend_function_entry class_DOMXPath_methods[] = {
@@ -1029,7 +1005,6 @@ static const zend_function_entry class_DOMXPath_methods[] = {
 	ZEND_FE_END
 };
 #endif
-
 
 static const zend_function_entry class_DOM_Document_methods[] = {
 	ZEND_ME(DOM_Document, createAttribute, arginfo_class_DOM_Document_createAttribute, ZEND_ACC_PUBLIC)
@@ -1066,7 +1041,6 @@ static const zend_function_entry class_DOM_Document_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_DOM_HTMLDocument_methods[] = {
 	ZEND_ME(DOM_HTMLDocument, __construct, arginfo_class_DOM_HTMLDocument___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME(DOM_HTMLDocument, createEmpty, arginfo_class_DOM_HTMLDocument_createEmpty, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -1078,7 +1052,6 @@ static const zend_function_entry class_DOM_HTMLDocument_methods[] = {
 	ZEND_ME(DOM_HTMLDocument, saveHTMLFile, arginfo_class_DOM_HTMLDocument_saveHTMLFile, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DOM_XMLDocument_methods[] = {
 	ZEND_MALIAS(DOM_HTMLDocument, __construct, __construct, arginfo_class_DOM_XMLDocument___construct, ZEND_ACC_PRIVATE)

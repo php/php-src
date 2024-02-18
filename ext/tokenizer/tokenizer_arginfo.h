@@ -32,7 +32,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PhpToken___toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(token_get_all);
 ZEND_FUNCTION(token_name);
 ZEND_METHOD(PhpToken, tokenize);
@@ -42,13 +41,11 @@ ZEND_METHOD(PhpToken, isIgnorable);
 ZEND_METHOD(PhpToken, getTokenName);
 ZEND_METHOD(PhpToken, __toString);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(token_get_all, arginfo_token_get_all)
 	ZEND_FE(token_name, arginfo_token_name)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_PhpToken_methods[] = {
 	ZEND_ME(PhpToken, tokenize, arginfo_class_PhpToken_tokenize, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)

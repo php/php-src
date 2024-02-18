@@ -196,7 +196,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_GMP___unserialize, 0, 1, I
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(gmp_init);
 ZEND_FUNCTION(gmp_import);
 ZEND_FUNCTION(gmp_export);
@@ -250,7 +249,6 @@ ZEND_FUNCTION(gmp_binomial);
 ZEND_METHOD(GMP, __construct);
 ZEND_METHOD(GMP, __serialize);
 ZEND_METHOD(GMP, __unserialize);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gmp_init, arginfo_gmp_init)
@@ -306,7 +304,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gmp_binomial, arginfo_gmp_binomial)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_GMP_methods[] = {
 	ZEND_ME(GMP, __construct, arginfo_class_GMP___construct, ZEND_ACC_PUBLIC)

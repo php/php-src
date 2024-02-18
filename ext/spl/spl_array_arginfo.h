@@ -153,7 +153,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_RecursiveArrayIterator_getChildren, 0, 0, RecursiveArrayIterator, 1)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(ArrayObject, __construct);
 ZEND_METHOD(ArrayObject, offsetExists);
 ZEND_METHOD(ArrayObject, offsetGet);
@@ -189,7 +188,6 @@ ZEND_METHOD(ArrayIterator, seek);
 ZEND_METHOD(RecursiveArrayIterator, hasChildren);
 ZEND_METHOD(RecursiveArrayIterator, getChildren);
 
-
 static const zend_function_entry class_ArrayObject_methods[] = {
 	ZEND_ME(ArrayObject, __construct, arginfo_class_ArrayObject___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayObject, offsetExists, arginfo_class_ArrayObject_offsetExists, ZEND_ACC_PUBLIC)
@@ -218,7 +216,6 @@ static const zend_function_entry class_ArrayObject_methods[] = {
 	ZEND_ME(ArrayObject, __debugInfo, arginfo_class_ArrayObject___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ArrayIterator_methods[] = {
 	ZEND_ME(ArrayIterator, __construct, arginfo_class_ArrayIterator___construct, ZEND_ACC_PUBLIC)
@@ -250,7 +247,6 @@ static const zend_function_entry class_ArrayIterator_methods[] = {
 	ZEND_MALIAS(ArrayObject, __debugInfo, __debugInfo, arginfo_class_ArrayIterator___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_RecursiveArrayIterator_methods[] = {
 	ZEND_ME(RecursiveArrayIterator, hasChildren, arginfo_class_RecursiveArrayIterator_hasChildren, ZEND_ACC_PUBLIC)

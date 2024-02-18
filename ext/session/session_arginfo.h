@@ -135,7 +135,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SessionHandler_create_sid arginfo_class_SessionIdInterface_create_sid
 
-
 ZEND_FUNCTION(session_name);
 ZEND_FUNCTION(session_module_name);
 ZEND_FUNCTION(session_save_path);
@@ -166,7 +165,6 @@ ZEND_METHOD(SessionHandler, destroy);
 ZEND_METHOD(SessionHandler, gc);
 ZEND_METHOD(SessionHandler, create_sid);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(session_name, arginfo_session_name)
 	ZEND_FE(session_module_name, arginfo_session_module_name)
@@ -194,7 +192,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SessionHandlerInterface_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(SessionHandlerInterface, open, arginfo_class_SessionHandlerInterface_open, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(SessionHandlerInterface, close, arginfo_class_SessionHandlerInterface_close, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
@@ -205,19 +202,16 @@ static const zend_function_entry class_SessionHandlerInterface_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SessionIdInterface_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(SessionIdInterface, create_sid, arginfo_class_SessionIdInterface_create_sid, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SessionUpdateTimestampHandlerInterface_methods[] = {
 	ZEND_ABSTRACT_ME_WITH_FLAGS(SessionUpdateTimestampHandlerInterface, validateId, arginfo_class_SessionUpdateTimestampHandlerInterface_validateId, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_ABSTRACT_ME_WITH_FLAGS(SessionUpdateTimestampHandlerInterface, updateTimestamp, arginfo_class_SessionUpdateTimestampHandlerInterface_updateTimestamp, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SessionHandler_methods[] = {
 	ZEND_ME(SessionHandler, open, arginfo_class_SessionHandler_open, ZEND_ACC_PUBLIC)

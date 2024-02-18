@@ -11,11 +11,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_apache_response_headers arginfo_apache_request_headers
 
-
 ZEND_FUNCTION(apache_child_terminate);
 ZEND_FUNCTION(apache_request_headers);
 ZEND_FUNCTION(apache_response_headers);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(apache_child_terminate, arginfo_apache_child_terminate)

@@ -54,14 +54,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_finfo_set_flags, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(finfo_open);
 ZEND_FUNCTION(finfo_close);
 ZEND_FUNCTION(finfo_set_flags);
 ZEND_FUNCTION(finfo_file);
 ZEND_FUNCTION(finfo_buffer);
 ZEND_FUNCTION(mime_content_type);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(finfo_open, arginfo_finfo_open)
@@ -72,7 +70,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mime_content_type, arginfo_mime_content_type)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_finfo_methods[] = {
 	ZEND_ME_MAPPING(__construct, finfo_open, arginfo_class_finfo___construct, ZEND_ACC_PUBLIC)

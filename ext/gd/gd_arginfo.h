@@ -575,7 +575,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imageresolution, 0, 1, MAY_BE_AR
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, resolution_y, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(gd_info);
 ZEND_FUNCTION(imageloadfont);
 ZEND_FUNCTION(imagesetstyle);
@@ -714,7 +713,6 @@ ZEND_FUNCTION(imageaffinematrixconcat);
 ZEND_FUNCTION(imagegetinterpolation);
 ZEND_FUNCTION(imagesetinterpolation);
 ZEND_FUNCTION(imageresolution);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gd_info, arginfo_gd_info)
@@ -864,11 +862,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_GdImage_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_GdFont_methods[] = {
 	ZEND_FE_END

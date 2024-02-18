@@ -32,14 +32,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shmop_delete, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, shmop, Shmop, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(shmop_open);
 ZEND_FUNCTION(shmop_read);
 ZEND_FUNCTION(shmop_close);
 ZEND_FUNCTION(shmop_size);
 ZEND_FUNCTION(shmop_write);
 ZEND_FUNCTION(shmop_delete);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(shmop_open, arginfo_shmop_open)
@@ -50,7 +48,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(shmop_delete, arginfo_shmop_delete)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_Shmop_methods[] = {
 	ZEND_FE_END
