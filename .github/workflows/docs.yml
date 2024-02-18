@@ -4,10 +4,10 @@ on:
     branches:
       - master
     paths:
-      - docs/*
+      - docs/**
   pull_request:
     paths:
-      - docs/*
+      - docs/**
 jobs:
   pages:
     runs-on: ubuntu-22.04
