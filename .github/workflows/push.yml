@@ -97,6 +97,18 @@ jobs:
             -d opcache.enable_cli=1
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
+      - name: Build mysql-8.2
+        if: contains(github.event.head_commit.message, '[libmysql]')
+        uses: ./.github/actions/build-libmysqlclient
+        with:
+          configurationParameters: --enable-werror
+          libmysql: mysql-8.2.0-linux-glibc2.28-x86_64.tar.xz
+          withMysqli: false
+      - name: Test mysql-8.2
+        if: contains(github.event.head_commit.message, '[libmysql]')
+        uses: ./.github/actions/test-libmysqlclient
+        with:
+          withMysqli: false
   MACOS_DEBUG_NTS:
     runs-on: macos-12
     steps:
