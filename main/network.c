@@ -60,10 +60,6 @@
 #endif
 #endif
 
-#ifndef HAVE_INET_ATON
-int inet_aton(const char *, struct in_addr *);
-#endif
-
 #include "php_network.h"
 
 #if defined(PHP_WIN32) || defined(__riscos__)

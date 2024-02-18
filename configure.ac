@@ -375,8 +375,8 @@ case $host_alias in
     ;;
 esac
 
-dnl Check for inet_aton in -lc and -lresolv.
-PHP_CHECK_FUNC(inet_aton, resolv)
+dnl Check for and -lresolv.
+PHP_CHECK_FUNC(resolv)
 
 dnl Then headers.
 dnl ----------------------------------------------------------------------------
