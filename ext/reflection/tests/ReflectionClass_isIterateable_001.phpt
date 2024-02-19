@@ -49,7 +49,7 @@ Is IteratorImpl iterable? bool(true)
 Is IteratorAggregateImpl iterable? bool(true)
 Is ExtendsIteratorImpl iterable? bool(true)
 Is ExtendsIteratorAggregateImpl iterable? bool(true)
-Is A iterable? bool(false)
+Is A iterable? bool(true)
 
 Test static invocation:
 
