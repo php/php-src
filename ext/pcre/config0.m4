@@ -77,7 +77,7 @@ else
 
     AC_CACHE_CHECK([whether Intel CET is enabled], ac_cv_have_pcre2_intel_cet, [
       AC_COMPILE_IFELSE([
-        AC_LANG_SOURCE([[
+        AC_LANG_PROGRAM([[
           #ifndef __CET__
           # error CET is not enabled
           #endif
@@ -86,10 +86,10 @@ else
         ], [
           ac_cv_have_pcre2_intel_cet=no
         ])
-      if test "$ac_cv_have_pcre2_intel_cet" = yes; then
-        PHP_PCRE_CFLAGS="-mshstk $PHP_PCRE_CFLAGS"
-      fi
     ])
+    if test "$ac_cv_have_pcre2_intel_cet" = yes; then
+      PHP_PCRE_CFLAGS="-mshstk $PHP_PCRE_CFLAGS"
+    fi
 
   else
     AC_MSG_RESULT([no])
