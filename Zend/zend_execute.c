@@ -1510,6 +1510,36 @@ ZEND_API bool zend_never_inline zend_verify_class_constant_type(zend_class_const
 	return 1;
 }
 
+#ifdef ZEND_DEBUG
+static zend_never_inline ZEND_COLD bool zend_check_dimension_interfaces_implemented(const zend_object *object, bool has_offset, int type)
+{
+	switch (type) {
+		case BP_VAR_R:
+		case BP_VAR_IS:
+			return instanceof_function(object->ce, zend_ce_dimension_read);
+		case BP_VAR_W:
+			if (has_offset) {
+				return instanceof_function(object->ce, zend_ce_dimension_write);
+			} else {
+				return instanceof_function(object->ce, zend_ce_appendable);
+			}
+		case BP_VAR_RW:
+			return instanceof_function(object->ce, zend_ce_dimension_read)
+				&& instanceof_function(object->ce, zend_ce_dimension_write);
+		case BP_VAR_UNSET:
+			return instanceof_function(object->ce, zend_ce_dimension_unset);
+		case BP_VAR_FETCH:
+			if (has_offset) {
+				return instanceof_function(object->ce, zend_ce_dimension_fetch);
+			} else {
+				return instanceof_function(object->ce, zend_ce_dimension_fetch_append);
+			}
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+	return false;
+}
+#endif
+
 static zend_never_inline ZEND_COLD void zend_invalid_use_of_object_as_array(const zend_object *object, bool has_offset, int type)
 {
 	switch (type) {
@@ -1692,7 +1722,7 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zend_object *obj, zv
 			obj->ce->dimension_handlers->read_dimension
 			&& obj->ce->dimension_handlers->write_dimension
 		) {
-			// TODO: Read Write dimension instanceof_function to check CE
+			ZEND_ASSERT(zend_check_dimension_interfaces_implemented(obj, /* has_offset */ true, BP_VAR_RW));
 			z = obj->ce->dimension_handlers->read_dimension(obj, dim, &rv);
 			if (UNEXPECTED(z == NULL)) {
 				ZEND_ASSERT(EG(exception) && "returned NULL without exception");
@@ -2845,7 +2875,6 @@ static zend_never_inline zval* ZEND_FASTCALL zend_fetch_dimension_address_inner_
 	return zend_fetch_dimension_address_inner(ht, dim, IS_CONST, BP_VAR_RW EXECUTE_DATA_CC);
 }
 
-// TODO Check object implements interface?
 static zend_never_inline void zend_fetch_object_dimension_address(zval *result, zend_object *obj, zval *offset, int offset_type, int type EXECUTE_DATA_DC)
 {
 	zval *retval;
@@ -2859,6 +2888,7 @@ static zend_never_inline void zend_fetch_object_dimension_address(zval *result, 
 
 	if (EXPECTED(obj->ce->dimension_handlers)) {
 		if (EXPECTED(offset && obj->ce->dimension_handlers->fetch_dimension)) {
+			ZEND_ASSERT(zend_check_dimension_interfaces_implemented(obj, /* has_offset */ true, BP_VAR_FETCH));
 			/* For null coalesce we first check if the offset exist,
 			 * if it does we call the fetch_dimension() handler,
 			 * otherwise just return an undef result */
@@ -2873,6 +2903,7 @@ static zend_never_inline void zend_fetch_object_dimension_address(zval *result, 
 			}
 			retval = obj->ce->dimension_handlers->fetch_dimension(obj, offset, result);
 		} else if (!offset && obj->ce->dimension_handlers->fetch_append) {
+			ZEND_ASSERT(zend_check_dimension_interfaces_implemented(obj, /* has_offset */ false, BP_VAR_FETCH));
 			ZEND_ASSERT(type != BP_VAR_IS);
 			retval = obj->ce->dimension_handlers->fetch_append(obj, result);
 		} else {
@@ -3036,7 +3067,7 @@ static zend_never_inline void zend_fetch_object_dimension_address_read(zval *res
 	}
 	if (EXPECTED(obj->ce->dimension_handlers)) {
 		if (EXPECTED(obj->ce->dimension_handlers->read_dimension)) {
-			// TODO Check object implements interface
+			ZEND_ASSERT(zend_check_dimension_interfaces_implemented(obj, /* has_offset */ true, BP_VAR_R));
 			if (UNEXPECTED(
 				is_bp_var_is
 				&& !obj->ce->dimension_handlers->has_dimension(obj, offset)
@@ -3221,7 +3252,7 @@ static zend_never_inline bool ZEND_FASTCALL zend_isset_dim_slow(zval *container,
 		zend_object *obj = Z_OBJ_P(container);
 		if (EXPECTED(obj->ce->dimension_handlers)) {
 			if (EXPECTED(obj->ce->dimension_handlers->has_dimension)) {
-				// TODO Check object implements interface
+				ZEND_ASSERT(zend_check_dimension_interfaces_implemented(obj, /* has_offset */ true, BP_VAR_IS));
 				return obj->ce->dimension_handlers->has_dimension(obj, offset);
 			} else {
 				zend_invalid_use_of_object_as_array(obj, /* has_offset */ true, BP_VAR_IS);
@@ -3269,8 +3300,7 @@ static zend_never_inline bool ZEND_FASTCALL zend_isempty_dim_slow(zval *containe
 		zend_object *obj = Z_OBJ_P(container);
 		if (EXPECTED(obj->ce->dimension_handlers)) {
 			if (EXPECTED(obj->ce->dimension_handlers->has_dimension)) {
-				// TODO Check object implements interface
-
+				ZEND_ASSERT(zend_check_dimension_interfaces_implemented(obj, /* has_offset */ true, BP_VAR_IS));
 				bool exists = obj->ce->dimension_handlers->has_dimension(obj, offset);
 				if (!exists) {
 					return true;
