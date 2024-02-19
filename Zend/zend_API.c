@@ -3153,6 +3153,7 @@ void zend_unload_modules(void) /* {{{ */
 		modules++;
 	}
 	free(modules_dl_loaded);
+	modules_dl_loaded = NULL;
 }
 /* }}} */
 
