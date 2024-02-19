@@ -2409,6 +2409,11 @@ ZEND_API uint32_t zend_fetch_arg_info_type(const zend_script *script, const zend
 	return zend_convert_type(script, arg_info->type, pce);
 }
 
+static uint32_t zend_fetch_class_const_type(const zend_script *script, const zend_class_constant *class_const, zend_class_entry **pce)
+{
+	return zend_convert_type(script, class_const->type, pce);
+}
+
 static const zend_property_info *lookup_prop_info(const zend_class_entry *ce, zend_string *name, zend_class_entry *scope) {
 	const zend_property_info *prop_info;
 
@@ -3911,9 +3916,36 @@ static zend_always_inline zend_result _zend_update_type_info(
 			UPDATE_SSA_OBJ_TYPE(zend_ce_closure, /* is_instanceof */ false, ssa_op->result_def);
 			break;
 		case ZEND_FETCH_CONSTANT:
-		case ZEND_FETCH_CLASS_CONSTANT:
 			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY, ssa_op->result_def);
 			break;
+		case ZEND_FETCH_CLASS_CONSTANT:
+			{
+				const zend_class_constant *cc = zend_fetch_class_const_info(script, op_array, opline);
+				if (!cc) {
+					goto fetch_class_constant_generic;
+				}
+
+				if (opline->op1_type == IS_UNUSED) {
+					int fetch_mask = (int) (opline->op1.num & ZEND_FETCH_CLASS_MASK);
+
+					if (
+						(fetch_mask == ZEND_FETCH_CLASS_STATIC || fetch_mask == ZEND_FETCH_CLASS_PARENT) &&
+						!ZEND_TYPE_IS_SET(cc->type)
+					) {
+						goto fetch_class_constant_generic;
+					}
+				}
+
+				UPDATE_SSA_TYPE(zend_fetch_class_const_type(script, cc, &ce), ssa_op->result_def);
+				if (ce) {
+					UPDATE_SSA_OBJ_TYPE(ce, 1, ssa_op->result_def);
+				}
+				break;
+
+fetch_class_constant_generic:
+				UPDATE_SSA_TYPE(MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY, ssa_op->result_def);
+				break;
+			}
 		case ZEND_STRLEN:
 		case ZEND_COUNT:
 		case ZEND_FUNC_NUM_ARGS:
