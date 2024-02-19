@@ -178,7 +178,7 @@ PHP_MSHUTDOWN_FUNCTION(exif)
 	UNREGISTER_INI_ENTRIES();
 	if (EXIF_G(tag_table_cache)) {
 		zend_hash_destroy(EXIF_G(tag_table_cache));
-		free(EXIF_G(tag_table_cache));
+		pefree(EXIF_G(tag_table_cache), 1);
 	}
 	return SUCCESS;
 }
@@ -1306,7 +1306,7 @@ static const maker_note_type maker_note_array[] = {
 
 static HashTable *exif_make_tag_ht(tag_info_type *tag_table)
 {
-	HashTable *ht = malloc(sizeof(HashTable));
+	HashTable *ht = pemalloc(sizeof(HashTable), 0);
 	zend_hash_init(ht, 0, NULL, NULL, 1);
 	while (tag_table->Tag != TAG_END_OF_LIST) {
 		if (!zend_hash_index_add_ptr(ht, tag_table->Tag, tag_table->Desc)) {
@@ -1321,7 +1321,7 @@ static void exif_tag_ht_dtor(zval *zv)
 {
 	HashTable *ht = Z_PTR_P(zv);
 	zend_hash_destroy(ht);
-	free(ht);
+	pefree(ht, 0);
 }
 
 static HashTable *exif_get_tag_ht(tag_info_type *tag_table)
@@ -1329,7 +1329,7 @@ static HashTable *exif_get_tag_ht(tag_info_type *tag_table)
 	HashTable *ht;
 
 	if (!EXIF_G(tag_table_cache)) {
-		EXIF_G(tag_table_cache) = malloc(sizeof(HashTable));
+		EXIF_G(tag_table_cache) = pemalloc(sizeof(HashTable), 1);
 		zend_hash_init(EXIF_G(tag_table_cache), 0, NULL, exif_tag_ht_dtor, 1);
 	}
 
