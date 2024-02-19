@@ -4,6 +4,12 @@ ldap_set_option() - Basic test for TLS protocol max ldap option
 Chad Sikorra <Chad.Sikorra@gmail.com>
 --EXTENSIONS--
 ldap
+--SKIPIF--
+<?php
+if (!defined("LDAP_OPT_X_TLS_PROTOCOL_MAX")) {
+    die('skip LDAP_OPT_X_TLS_PROTOCOL_MAX unsupported.');
+}
+?>
 --FILE--
 <?php
 require "connect.inc";

@@ -6,10 +6,10 @@ Chad Sikorra <Chad.Sikorra@gmail.com>
 ldap
 --SKIPIF--
 <?php
-
 if (!defined("LDAP_OPT_X_TLS_PROTOCOL_MAX")) {
-    die('LDAP_OPT_X_TLS_PROTOCOL_MAX unsupported.');
+    die('skip LDAP_OPT_X_TLS_PROTOCOL_MAX unsupported.');
 }
+?>
 --FILE--
 <?php
 require "connect.inc";
