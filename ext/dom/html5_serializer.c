@@ -57,6 +57,13 @@ static zend_result dom_html5_serialize_processing_instruction(dom_html5_serializ
 	return ctx->write_string_len(ctx->application_data, ">", strlen(">"));
 }
 
+static zend_result dom_html5_serialize_entity_ref(dom_html5_serialize_context *ctx, const xmlNode *node)
+{
+	TRY(ctx->write_string_len(ctx->application_data, "&", strlen("&")));
+	TRY(ctx->write_string(ctx->application_data, (const char *) node->name));
+	return ctx->write_string_len(ctx->application_data, ";", strlen(";"));
+}
+
 /* https://html.spec.whatwg.org/multipage/parsing.html#escapingString */
 static zend_result dom_html5_escape_string(dom_html5_serialize_context *ctx, const char *content, bool attribute_mode)
 {
@@ -283,6 +290,12 @@ static zend_result dom_html5_serialize_node(dom_html5_serialize_context *ctx, co
 					/* Not descended, so wouldn't put the closing tag as it's normally only done when going back upwards. */
 					TRY(dom_html5_serialize_element_end(ctx, node));
 				}
+				break;
+			}
+
+			/* Only exists for compatibility with XML and old DOM. */
+			case XML_ENTITY_REF_NODE: {
+				TRY(dom_html5_serialize_entity_ref(ctx, node));
 				break;
 			}
 
