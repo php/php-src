@@ -2115,7 +2115,7 @@ static bool dom_nodemap_or_nodelist_process_offset_as_named(zval *offset, zend_l
 static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv) /* {{{ */
 {
 	if (UNEXPECTED(!offset)) {
-		zend_throw_error(NULL, "Cannot access DOMNodeList without offset");
+		zend_throw_error(NULL, "Cannot access %s without offset", ZSTR_VAL(object->ce->name));
 		return NULL;
 	}
 
