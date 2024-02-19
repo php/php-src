@@ -1725,7 +1725,7 @@ static inline int php_stream_wrapper_scheme_validate(const char *protocol, unsig
 	unsigned int i;
 
 	for(i = 0; i < protocol_len; i++) {
-		if (!isalnum((int)protocol[i]) &&
+		if (!zend_isalnum_ascii(protocol[i]) &&
 			protocol[i] != '+' &&
 			protocol[i] != '-' &&
 			protocol[i] != '.') {
@@ -1805,7 +1805,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 		return (php_stream_wrapper*)((options & STREAM_LOCATE_WRAPPERS_ONLY) ? NULL : &php_plain_files_wrapper);
 	}
 
-	for (p = path; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
+	for (p = path; zend_isalnum_ascii(*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
 		n++;
 	}
 
