@@ -1129,6 +1129,9 @@ PHP_METHOD(DOMNode, removeChild)
 
 	while (children) {
 		if (children == child) {
+			if ((child->properties != NULL) && (child->doc != NULL) && child->properties->atype == XML_ATTRIBUTE_ID) {
+				xmlRemoveID(child->doc, child->properties);
+			}
 			xmlUnlinkNode(child);
 			DOM_RET_OBJ(child, &ret, intern);
 			return;
@@ -1678,7 +1681,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		buf = xmlAllocOutputBuffer(NULL);
 	}
 
-    if (buf != NULL) {
+	if (buf != NULL) {
 		ret = xmlC14NDocSaveTo(docp, nodeset, exclusive, inclusive_ns_prefixes,
 			with_comments, buf);
 	}
@@ -1693,9 +1696,9 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		xmlXPathFreeContext(ctxp);
 	}
 
-    if (buf == NULL || ret < 0) {
-        RETVAL_FALSE;
-    } else {
+	if (buf == NULL || ret < 0) {
+		RETVAL_FALSE;
+	} else {
 		if (mode == 0) {
 #ifdef LIBXML2_NEW_BUFFER
 			ret = xmlOutputBufferGetSize(buf);
@@ -1712,7 +1715,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 				RETVAL_EMPTY_STRING();
 			}
 		}
-    }
+	}
 
 	if (buf) {
 		int bytes;
