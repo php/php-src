@@ -239,7 +239,8 @@ static ir_ref ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_
 						cond->op == IR_ULT || cond->op == IR_ULE || cond->op == IR_UGT || cond->op == IR_UGE);
 				} else if (IR_IS_TYPE_SIGNED(type)) {
 					is_cmp = (cond->op == IR_LT || cond->op == IR_LE || cond->op == IR_GT || cond->op == IR_GE);
-				} else if (IR_IS_TYPE_UNSIGNED(type)) {
+				} else {
+					IR_ASSERT(IR_IS_TYPE_UNSIGNED(type));
 					is_cmp = (cond->op == IR_ULT || cond->op == IR_ULE || cond->op == IR_UGT || cond->op == IR_UGE);
 				}
 
@@ -281,7 +282,8 @@ static ir_ref ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_
 							cond->op == IR_ULT || cond->op == IR_ULE);
 					} else if (IR_IS_TYPE_SIGNED(type)) {
 						is_less = (cond->op == IR_LT || cond->op == IR_LE);
-					} else if (IR_IS_TYPE_UNSIGNED(type)) {
+					} else {
+						IR_ASSERT(IR_IS_TYPE_UNSIGNED(type));
 						is_less = (cond->op == IR_ULT || cond->op == IR_ULE);
 					}
 					insn->op = (
