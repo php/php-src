@@ -7,6 +7,7 @@
    :hidden:
 
    introduction/high-level-overview
+   introduction/ides/index
 
 .. toctree::
    :caption: Core
