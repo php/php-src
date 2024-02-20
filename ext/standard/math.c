@@ -27,7 +27,6 @@
 #include <float.h>
 #include <math.h>
 #include <stdlib.h>
-#include <fenv.h>
 
 #include "basic_functions.h"
 
@@ -163,8 +162,7 @@ static inline double php_round_helper(double integral, double value, double expo
  * mode. For the specifics of the algorithm, see http://wiki.php.net/rfc/rounding
  */
 PHPAPI double _php_math_round(double value, int places, int mode) {
-	double exponent, tmp_value, adjusted_value;
-	int cpu_round_mode;
+	double exponent, tmp_value, tmp_value2;
 
 	if (!zend_finite(value) || value == 0.0) {
 		return value;
@@ -181,30 +179,29 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	 * 0.285 * 10000000000 => 2849999999.9999995
 	 * floor(0.285 * 10000000000) => 2849999999
 	 *
-	 * Therefore, change the CPU rounding mode to away from 0 only from
-	 * fegetround to fesetround.
+	 * Add 1 to the absolute value of the value adjusted by floor or ceil, use the
+	 * exponent to return it to its original precision, and compare it with value.
+	 * If it is equal to value, it is assumed that the absolute value is 1 smaller
+	 * due to error and will be corrected.
 	 * e.g.
-	 * 0.285 * 10000000000 => 2850000000.0
-	 * floor(0.285 * 10000000000) => 2850000000
-	 *
-	 * Using `if` twice to prevent accidental optimization with llvm 15.0.0.
+	 * 0.285 * 10000000000 => 2849999999.9999995
+	 * floor(0.285 * 10000000000) => 2849999999 (tmp_value)
+	 * tmp_value2 = 2849999999 + 1 => 2850000000
+	 * 2850000000 / 10000000000 == 0.285 => true
+	 * tmp_value = tmp_value2
 	 */
-	bool val_is_positive_or_zero = value >= 0.0;
-	cpu_round_mode = fegetround();
-	if (val_is_positive_or_zero) {
-		fesetround(FE_UPWARD);
+
+	if (value >= 0.0) {
+		tmp_value = floor(places > 0 ? value * exponent : value / exponent);
+		tmp_value2 = tmp_value + 1.0;
 	} else {
-		fesetround(FE_DOWNWARD);
+		tmp_value = ceil(places > 0 ? value * exponent : value / exponent);
+		tmp_value2 = tmp_value - 1.0;
 	}
 
-	adjusted_value = places > 0  ? value * exponent : value / exponent;
-
-	if (val_is_positive_or_zero) {
-		tmp_value = floor(adjusted_value);
-	} else {
-		tmp_value = ceil(adjusted_value);
+	if ((places > 0 ? tmp_value2 / exponent : tmp_value2 * exponent) == value) {
+		tmp_value = tmp_value2;
 	}
-	fesetround(cpu_round_mode);
 
 	/* This value is beyond our precision, so rounding it is pointless */
 	if (fabs(tmp_value) >= 1e15) {
