@@ -1404,7 +1404,7 @@ phpdbg_main:
 #endif
 
 		mm_heap = zend_mm_get_heap();
-		zend_mm_get_custom_handlers(mm_heap, &_malloc, &_free, &_realloc);
+		zend_mm_get_custom_handlers(mm_heap, &_malloc, &_free, &_realloc, NULL, NULL);
 
 		use_mm_wrappers = !_malloc && !_realloc && !_free;
 
@@ -1412,9 +1412,9 @@ phpdbg_main:
 		_free = phpdbg_watch_efree;
 
 		if (use_mm_wrappers) {
-			zend_mm_set_custom_handlers(mm_heap, phpdbg_malloc_wrapper, phpdbg_free_wrapper, phpdbg_realloc_wrapper);
+			zend_mm_set_custom_handlers(mm_heap, phpdbg_malloc_wrapper, phpdbg_free_wrapper, phpdbg_realloc_wrapper, NULL, NULL);
 		} else {
-			zend_mm_set_custom_handlers(mm_heap, _malloc, _free, _realloc);
+			zend_mm_set_custom_handlers(mm_heap, _malloc, _free, _realloc, NULL, NULL);
 		}
 
 		_free = PHPDBG_G(original_free_function);
@@ -1759,7 +1759,7 @@ free_and_return:
 #ifdef ZTS
 	/* reset to original handlers - otherwise PHPDBG_G() in phpdbg_watch_efree will be segfaulty (with e.g. USE_ZEND_ALLOC=0) */
 	if (!use_mm_wrappers) {
-		zend_mm_set_custom_handlers(zend_mm_get_heap(), _malloc, _free, _realloc);
+		zend_mm_set_custom_handlers(zend_mm_get_heap(), _malloc, _free, _realloc, NULL, NULL);
 	}
 
 	ts_free_id(phpdbg_globals_id);

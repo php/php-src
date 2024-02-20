@@ -14,6 +14,7 @@
   +----------------------------------------------------------------------+
 */
 
+#include "zend_modules.h"
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -35,6 +36,7 @@
 #include "test_arginfo.h"
 #include "zend_call_stack.h"
 #include "zend_exceptions.h"
+#include "zend_mm_custom_handlers.h"
 
 // `php.h` sets `NDEBUG` when not `PHP_DEBUG` which will make `assert()` from
 // assert.h a no-op. In order to have `assert()` working on NDEBUG builds, we
@@ -707,7 +709,9 @@ static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 			ZT_G(zend_test_heap),
 			zend_test_custom_malloc,
 			zend_test_custom_free,
-			zend_test_custom_realloc
+			zend_test_custom_realloc,
+			NULL,
+			NULL
 		);
 		ZT_G(zend_orig_heap) = zend_mm_get_heap();
 		zend_mm_set_heap(ZT_G(zend_test_heap));
@@ -1260,6 +1264,7 @@ PHP_MINIT_FUNCTION(zend_test)
 	}
 
 	zend_test_observer_init(INIT_FUNC_ARGS_PASSTHRU);
+	zend_test_mm_custom_handlers_minit(INIT_FUNC_ARGS_PASSTHRU);
 	zend_test_fiber_init();
 	zend_test_iterators_init();
 	zend_test_object_handlers_init();
@@ -1288,6 +1293,7 @@ PHP_RINIT_FUNCTION(zend_test)
 {
 	zend_hash_init(&ZT_G(global_weakmap), 8, NULL, ZVAL_PTR_DTOR, 0);
 	ZT_G(observer_nesting_depth) = 0;
+	zend_test_mm_custom_handlers_rinit();
 	return SUCCESS;
 }
 
@@ -1305,6 +1311,7 @@ PHP_RSHUTDOWN_FUNCTION(zend_test)
 		zend_mm_set_heap(ZT_G(zend_orig_heap));
 	}
 
+	zend_test_mm_custom_handlers_rshutdown();
 	return SUCCESS;
 }
 

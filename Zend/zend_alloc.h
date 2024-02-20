@@ -263,6 +263,8 @@ ZEND_API size_t ZEND_FASTCALL _zend_mm_block_size(zend_mm_heap *heap, void *p ZE
 #define zend_mm_realloc2_rel(heap, p, size, copy_size) _zend_mm_realloc2((heap), (p), (size), (copy_size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define zend_mm_block_size_rel(heap, p)		_zend_mm_block_size((heap), (p) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 
+ZEND_API zend_mm_heap *zend_mm_heap_create(void);
+ZEND_API void zend_mm_heap_free(zend_mm_heap* heap);
 ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap);
 ZEND_API zend_mm_heap *zend_mm_get_heap(void);
 
@@ -274,13 +276,17 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap);
 
 ZEND_API bool zend_mm_is_custom_heap(zend_mm_heap *new_heap);
 ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
-                                          void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                          void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                          void* (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC));
+                                          void*  (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          void   (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          void*  (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          size_t (*_gc)(void),
+                                          void   (*_shutdown)(bool, bool));
 ZEND_API void zend_mm_get_custom_handlers(zend_mm_heap *heap,
-                                          void* (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                          void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                          void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC));
+                                          void*  (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          void   (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          void*  (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          size_t (**_gc)(void),
+                                          void   (**_shutdown)(bool, bool));
 
 typedef struct _zend_mm_storage zend_mm_storage;
 
