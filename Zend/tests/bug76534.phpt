@@ -10,8 +10,7 @@ $x = "foo";
 $y = &$x["2bar"];
 ?>
 --EXPECTF--
-Fatal error: Uncaught Exception: Illegal string offset "2bar" in %s:%d
+Fatal error: Uncaught Error: Cannot create references to/from string offsets in %s:%d
 Stack trace:
-#0 %sbug76534.php(%d): {closure}(2, 'Illegal string ...', '%s', %d)
-#1 {main}
-  thrown in %sbug76534.php on line %d
+#0 {main}
+  thrown in %s on line %d

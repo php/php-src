@@ -2323,7 +2323,6 @@ static ZEND_COLD void zend_binary_assign_op_dim_slow(zval *container, zval *dim 
 		if (opline->op2_type == IS_UNUSED) {
 			zend_use_new_element_for_string();
 		} else {
-			zend_check_string_offset(dim, BP_VAR_RW EXECUTE_DATA_CC);
 			zend_wrong_string_offset_error();
 		}
 	} else {
@@ -2625,7 +2624,6 @@ fetch_from_array:
 		if (dim == NULL) {
 			zend_use_new_element_for_string();
 		} else {
-			zend_check_string_offset(dim, type EXECUTE_DATA_CC);
 			zend_wrong_string_offset_error();
 		}
 		ZVAL_UNDEF(result);

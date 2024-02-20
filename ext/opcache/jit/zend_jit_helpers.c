@@ -1419,9 +1419,6 @@ static zend_always_inline void ZEND_FASTCALL zend_jit_fetch_dim_obj_helper(zval 
 		if (!dim) {
 			zend_throw_error(NULL, "[] operator not supported for strings");
 		} else {
-			if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-				zend_check_string_offset(dim, BP_VAR_RW);
-			}
 			zend_wrong_string_offset_error();
 		}
 		ZVAL_UNDEF(result);
@@ -1609,9 +1606,6 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 		if (!dim) {
 			zend_throw_error(NULL, "[] operator not supported for strings");
 		} else {
-			if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-				zend_check_string_offset(dim, BP_VAR_RW);
-			}
 			zend_wrong_string_offset_error();
 		}
 	} else if (Z_TYPE_P(container) == IS_FALSE) {

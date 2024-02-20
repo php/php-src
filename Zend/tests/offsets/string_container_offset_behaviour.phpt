@@ -104,8 +104,6 @@ Read:
 Warning: String offset cast occurred in %s on line 22
 string(1) "5"
 Read-Write:
-
-Warning: String offset cast occurred in %s on line 29
 Cannot use assign-op operators with string offsets
 isset():
 bool(true)
@@ -124,12 +122,8 @@ Warning: String offset cast occurred in %s on line 62
 Warning: Uninitialized string offset %d in %s on line 62
 string(0) ""
 Nested write:
-
-Warning: String offset cast occurred in %s on line 69
 Cannot use string offset as an array
 Nested Read-Write:
-
-Warning: String offset cast occurred in %s on line 76
 Cannot use string offset as an array
 Nested isset():
 bool(false)
@@ -138,8 +132,6 @@ bool(true)
 Nested null coalesce:
 string(7) "default"
 Nested unset():
-
-Warning: String offset cast occurred in %s on line 102
 Cannot use string offset as an array
 
 OUTPUT;
@@ -161,8 +153,6 @@ Read:
 Warning: String offset cast occurred in %s on line 22
 string(1) "5"
 Read-Write:
-
-Warning: String offset cast occurred in %s on line 29
 Cannot use assign-op operators with string offsets
 isset():
 bool(true)
@@ -179,12 +169,8 @@ Warning: String offset cast occurred in %s on line 62
 Warning: String offset cast occurred in %s on line 62
 string(1) "5"
 Nested write:
-
-Warning: String offset cast occurred in %s on line 69
 Cannot use string offset as an array
 Nested Read-Write:
-
-Warning: String offset cast occurred in %s on line 76
 Cannot use string offset as an array
 Nested isset():
 bool(true)
@@ -193,8 +179,6 @@ bool(false)
 Nested null coalesce:
 string(1) "5"
 Nested unset():
-
-Warning: String offset cast occurred in %s on line 102
 Cannot use string offset as an array
 
 OUTPUT;
@@ -220,8 +204,6 @@ Warning: String offset cast occurred in %s on line 22
 Warning: Uninitialized string offset %i in %s on line 22
 string(0) ""
 Read-Write:
-
-Warning: String offset cast occurred in %s on line 29
 Cannot use assign-op operators with string offsets
 isset():
 bool(false)
@@ -242,12 +224,8 @@ Warning: String offset cast occurred in %s on line 62
 Warning: Uninitialized string offset %i in %s on line 62
 string(0) ""
 Nested write:
-
-Warning: String offset cast occurred in %s on line 69
 Cannot use string offset as an array
 Nested Read-Write:
-
-Warning: String offset cast occurred in %s on line 76
 Cannot use string offset as an array
 Nested isset():
 bool(false)
@@ -256,8 +234,6 @@ bool(true)
 Nested null coalesce:
 string(7) "default"
 Nested unset():
-
-Warning: String offset cast occurred in %s on line 102
 Cannot use string offset as an array
 
 OUTPUT;
@@ -283,8 +259,6 @@ Warning: String offset cast occurred in %s on line 22
 Warning: Uninitialized string offset %i in %s on line 22
 string(0) ""
 Read-Write:
-
-Warning: String offset cast occurred in %s on line 29
 Cannot use assign-op operators with string offsets
 isset():
 
@@ -309,12 +283,8 @@ Warning: String offset cast occurred in %s on line 62
 Warning: Uninitialized string offset %i in %s on line 62
 string(0) ""
 Nested write:
-
-Warning: String offset cast occurred in %s on line 69
 Cannot use string offset as an array
 Nested Read-Write:
-
-Warning: String offset cast occurred in %s on line 76
 Cannot use string offset as an array
 Nested isset():
 bool(false)
@@ -323,8 +293,6 @@ bool(true)
 Nested null coalesce:
 string(7) "default"
 Nested unset():
-
-Warning: String offset cast occurred in %s on line 102
 Cannot use string offset as an array
 
 OUTPUT;
@@ -346,8 +314,6 @@ Read:
 Warning: String offset cast occurred in %s on line 22
 string(1) "5"
 Read-Write:
-
-Warning: String offset cast occurred in %s on line 29
 Cannot use assign-op operators with string offsets
 isset():
 
@@ -368,12 +334,8 @@ Warning: String offset cast occurred in %s on line 62
 Warning: String offset cast occurred in %s on line 62
 string(1) "5"
 Nested write:
-
-Warning: String offset cast occurred in %s on line 69
 Cannot use string offset as an array
 Nested Read-Write:
-
-Warning: String offset cast occurred in %s on line 76
 Cannot use string offset as an array
 Nested isset():
 
@@ -386,8 +348,6 @@ bool(false)
 Nested null coalesce:
 string(1) "5"
 Nested unset():
-
-Warning: String offset cast occurred in %s on line 102
 Cannot use string offset as an array
 
 OUTPUT;
@@ -402,7 +362,7 @@ Cannot access offset of type %s on string
 Read:
 Cannot access offset of type %s on string
 Read-Write:
-Cannot access offset of type %s on string
+Cannot use assign-op operators with string offsets
 isset():
 bool(false)
 empty():
@@ -414,9 +374,9 @@ Cannot unset string offsets
 Nested read:
 Cannot access offset of type %s on string
 Nested write:
-Cannot access offset of type %s on string
+Cannot use string offset as an array
 Nested Read-Write:
-Cannot access offset of type %s on string
+Cannot use string offset as an array
 Nested isset():
 Cannot access offset of type %s on string
 Nested empty():
@@ -424,7 +384,7 @@ Cannot access offset of type %s on string
 Nested null coalesce:
 Cannot access offset of type %s on string
 Nested unset():
-Cannot unset string offsets
+Cannot use string offset as an array
 
 OUTPUT;
 
@@ -438,7 +398,7 @@ Cannot access offset of type string on string
 Read:
 Cannot access offset of type string on string
 Read-Write:
-Cannot access offset of type string on string
+Cannot use assign-op operators with string offsets
 isset():
 bool(false)
 empty():
@@ -450,9 +410,9 @@ Cannot unset string offsets
 Nested read:
 Cannot access offset of type string on string
 Nested write:
-Cannot access offset of type string on string
+Cannot use string offset as an array
 Nested Read-Write:
-Cannot access offset of type string on string
+Cannot use string offset as an array
 Nested isset():
 bool(false)
 Nested empty():
@@ -460,7 +420,7 @@ bool(true)
 Nested null coalesce:
 string(7) "default"
 Nested unset():
-Cannot unset string offsets
+Cannot use string offset as an array
 
 OUTPUT;
 
@@ -479,8 +439,6 @@ Read:
 Warning: Illegal string offset %s in %s on line 22
 string(1) "5"
 Read-Write:
-
-Warning: Illegal string offset %s in %s on line 29
 Cannot use assign-op operators with string offsets
 isset():
 bool(false)
@@ -501,12 +459,8 @@ Warning: Illegal string offset %s in %s on line 62
 Warning: Uninitialized string offset %d in %s on line 62
 string(0) ""
 Nested write:
-
-Warning: Illegal string offset %s in %s on line 69
 Cannot use string offset as an array
 Nested Read-Write:
-
-Warning: Illegal string offset %s in %s on line 76
 Cannot use string offset as an array
 Nested isset():
 
@@ -544,8 +498,6 @@ Read:
 Warning: Illegal string offset %s in %s on line 22
 string(1) "5"
 Read-Write:
-
-Warning: Illegal string offset %s in %s on line 29
 Cannot use assign-op operators with string offsets
 isset():
 bool(false)
@@ -564,12 +516,8 @@ Warning: Illegal string offset %s in %s on line 62
 Warning: Illegal string offset %s in %s on line 62
 string(1) "5"
 Nested write:
-
-Warning: Illegal string offset %s in %s on line 69
 Cannot use string offset as an array
 Nested Read-Write:
-
-Warning: Illegal string offset %s in %s on line 76
 Cannot use string offset as an array
 Nested isset():
 
