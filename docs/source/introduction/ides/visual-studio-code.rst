@@ -88,8 +88,8 @@ might want to disable this option in your ``settings.json`` file:
  gdb
 *****
 
-The C/C++ extension provides the ability to Visual Studio Code as a frontend for ``gdb``. Of course,
-you will need ``gdb`` installed on your system. Copy the following into your projects
+The C/C++ extension provides the ability to use Visual Studio Code as a frontend for ``gdb``. Of
+course, you will need ``gdb`` installed on your system. Copy the following into your projects
 ``.vscode/launch.json`` file:
 
 .. code:: json
