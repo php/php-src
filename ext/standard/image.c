@@ -51,6 +51,10 @@ PHPAPI const char php_sig_iff[4] = {'F','O','R','M'};
 PHPAPI const char php_sig_ico[4] = {(char)0x00, (char)0x00, (char)0x01, (char)0x00};
 PHPAPI const char php_sig_riff[4] = {'R', 'I', 'F', 'F'};
 PHPAPI const char php_sig_webp[4] = {'W', 'E', 'B', 'P'};
+PHPAPI const char php_sig_ftyp[4] = {'f', 't', 'y', 'p'};
+PHPAPI const char php_sig_mif1[4] = {'m', 'i', 'f', '1'};
+PHPAPI const char php_sig_heic[4] = {'h', 'e', 'i', 'c'};
+PHPAPI const char php_sig_heix[4] = {'h', 'e', 'i', 'x'};
 
 /* REMEMBER TO ADD MIME-TYPE TO FUNCTION php_image_type_to_mime_type */
 /* PCX must check first 64bytes and byte 0=0x0a and byte2 < 0x06 */
@@ -1249,6 +1253,8 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 			return "image/webp";
 		case IMAGE_FILETYPE_AVIF:
 			return "image/avif";
+		case IMAGE_FILETYPE_HEIF:
+			return "image/heif";
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			return "application/octet-stream"; /* suppose binary format */
@@ -1334,6 +1340,10 @@ PHP_FUNCTION(image_type_to_extension)
 		case IMAGE_FILETYPE_AVIF:
 			imgext = ".avif";
 			break;
+		case IMAGE_FILETYPE_HEIF:
+			imgext = ".heif";
+			break;
+	break;
 	}
 
 	if (imgext) {
@@ -1416,6 +1426,11 @@ PHPAPI int php_getimagetype(php_stream *stream, const char *input, char *filetyp
 /* BYTES READ: 12 */
 	if (twelve_bytes_read && !memcmp(filetype, php_sig_jp2, 12)) {
 		return IMAGE_FILETYPE_JP2;
+	}
+
+	if (twelve_bytes_read && !memcmp(filetype + 4, php_sig_ftyp, 4) &&
+		(!memcmp(filetype + 8, php_sig_mif1, 4) || !memcmp(filetype + 8, php_sig_heic, 4) || !memcmp(filetype + 8, php_sig_heix, 4))) {
+		return IMAGE_FILETYPE_HEIF;
 	}
 
 	if (!php_stream_rewind(stream) && php_is_image_avif(stream)) {
@@ -1509,6 +1524,11 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 			break;
 		case IMAGE_FILETYPE_AVIF:
 			result = php_handle_avif(stream);
+			break;
+		case IMAGE_FILETYPE_HEIF:
+			if (!php_stream_rewind(stream)) {
+				result = php_handle_avif(stream);
+			}
 			break;
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
