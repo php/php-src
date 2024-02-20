@@ -252,6 +252,9 @@ PHP 8.4 UPGRADE NOTES
 
 - Curl:
   . The CURLOPT_BINARYTRANSFER constant is deprecated.
+  . curl_version() returns an additional feature_list value, which is an
+    associative array of all known Curl features, and whether they are
+    supported (true) or not (false).
 
 - Date:
   . Calling DatePeriod::__construct(string $isostr, int $options = 0) is
