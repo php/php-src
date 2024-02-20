@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.4
 
+- Core:
+  . Fix ZTS persistent resource crashes on shutdown. (nielsdos)
+
 - Curl:
   . Fix failing tests due to string changes in libcurl 8.6.0. (Ayesh)
 
