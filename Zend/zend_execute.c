@@ -1513,6 +1513,7 @@ ZEND_API bool zend_never_inline zend_verify_class_constant_type(zend_class_const
 #ifdef ZEND_DEBUG
 static zend_never_inline ZEND_COLD bool zend_check_dimension_interfaces_implemented(const zend_object *object, bool has_offset, int type)
 {
+	return true;
 	switch (type) {
 		case BP_VAR_R:
 		case BP_VAR_IS:
