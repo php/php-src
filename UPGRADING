@@ -245,6 +245,7 @@ PHP 8.5 UPGRADE NOTES
 
 - EXIF:
   . Add OffsetTime* Exif tags.
+  . Added support for HEIF/HEIC.
 
 - Intl:
   . Added class constants NumberFormatter::CURRENCY_ISO,

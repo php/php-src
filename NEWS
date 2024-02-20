@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Destructing non-array values (other than NULL) using [] or list() now
     emits a warning. (Girgias)
 
+- EXIF:
+  . Added support to retrieve Exif from HEIF file. (Benstone Zhang)
+
 - Opcache:
   . Fixed bug GH-19486 (Incorrect opline after deoptimization). (Arnaud)
   . Fixed bug GH-19601 (Wrong JIT stack setup on aarch64/clang). (Arnaud)
