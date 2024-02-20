@@ -398,7 +398,6 @@ grp.h \
 ieeefp.h \
 langinfo.h \
 linux/sock_diag.h \
-malloc.h \
 os/signpost.h \
 poll.h \
 pty.h \
