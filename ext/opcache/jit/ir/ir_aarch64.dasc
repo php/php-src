@@ -5690,7 +5690,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 
 		while (i <= bb->end) {
 			if (!((*rule) & (IR_FUSED|IR_SKIPPED)))
-			switch (*rule) {
+			switch ((*rule) & IR_RULE_MASK) {
 				case IR_VAR:
 				case IR_PARAM:
 				case IR_PI:

@@ -921,6 +921,11 @@ struct _ir_use_list {
 	ir_ref        count;
 };
 
+void ir_use_list_remove_all(ir_ctx *ctx, ir_ref from, ir_ref use);
+void ir_use_list_remove_one(ir_ctx *ctx, ir_ref from, ir_ref use);
+void ir_use_list_replace(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use);
+bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref new_use);
+
 /*** IR Basic Blocks info ***/
 #define IR_IS_BB_START(op) \
 	((ir_op_flags[op] & IR_OP_FLAG_BB_START) != 0)
@@ -1213,6 +1218,7 @@ IR_ALWAYS_INLINE int8_t ir_get_alocated_reg(const ir_ctx *ctx, ir_ref ref, int o
 #define IR_SKIPPED   (1U<<30) /* Insn is skipped (code is not generated) */
 #define IR_SIMPLE    (1U<<29) /* Insn doesn't have any target constraints */
 #define IR_FUSED_REG (1U<<28) /* Register assignemnt may be stored in ctx->fused_regs instead of ctx->regs */
+#define IR_MAY_SWAP  (1U<<27) /* Allow swapping operands for better register allocation */
 
 #define IR_RULE_MASK 0xff
 

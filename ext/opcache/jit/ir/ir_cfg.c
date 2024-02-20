@@ -8,6 +8,48 @@
 #include "ir.h"
 #include "ir_private.h"
 
+#define MAKE_NOP(_insn) do { \
+		ir_insn *__insn = _insn; \
+		__insn->optx = IR_NOP; \
+		__insn->op1 = __insn->op2 = __insn->op3 = IR_UNUSED; \
+	} while (0)
+
+#define CLEAR_USES(_ref) do { \
+		ir_use_list *__use_list = &ctx->use_lists[_ref]; \
+		__use_list->count = 0; \
+		__use_list->refs = 0; \
+	} while (0)
+
+#define SWAP_REFS(_ref1, _ref2) do { \
+		ir_ref _tmp = _ref1; \
+		_ref1 = _ref2; \
+		_ref2 = _tmp; \
+	} while (0)
+
+#define SWAP_INSNS(_insn1, _insn2) do { \
+		ir_insn *_tmp = _insn1; \
+		_insn1 = _insn2; \
+		_insn2 = _tmp; \
+	} while (0)
+
+static void ir_get_true_false_refs(const ir_ctx *ctx, ir_ref if_ref, ir_ref *if_true_ref, ir_ref *if_false_ref)
+{
+	ir_use_list *use_list = &ctx->use_lists[if_ref];
+	ir_ref *p = &ctx->use_edges[use_list->refs];
+
+	IR_ASSERT(use_list->count == 2);
+	if (ctx->ir_base[*p].op == IR_IF_TRUE) {
+		IR_ASSERT(ctx->ir_base[*(p + 1)].op == IR_IF_FALSE);
+		*if_true_ref = *p;
+		*if_false_ref = *(p + 1);
+	} else {
+		IR_ASSERT(ctx->ir_base[*p].op == IR_IF_FALSE);
+		IR_ASSERT(ctx->ir_base[*(p + 1)].op == IR_IF_TRUE);
+		*if_false_ref = *p;
+		*if_true_ref = *(p + 1);
+	}
+}
+
 static ir_ref _ir_merge_blocks(ir_ctx *ctx, ir_ref end, ir_ref begin)
 {
 	ir_ref prev, next;
@@ -44,6 +86,726 @@ static ir_ref _ir_merge_blocks(ir_ctx *ctx, ir_ref end, ir_ref begin)
 	}
 
 	return next;
+}
+
+static ir_ref ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
+{
+	if (insn->inputs_count == 2) {
+		ir_ref end1_ref = insn->op1, end2_ref = insn->op2;
+		ir_insn *end1 = &ctx->ir_base[end1_ref];
+		ir_insn *end2 = &ctx->ir_base[end2_ref];
+
+		if (end1->op != IR_END || end2->op != IR_END) {
+			return IR_UNUSED;
+		}
+
+		ir_ref start1_ref = end1->op1, start2_ref = end2->op1;
+		ir_insn *start1 = &ctx->ir_base[start1_ref];
+		ir_insn *start2 = &ctx->ir_base[start2_ref];
+
+		if (start1->op1 != start2->op1) {
+			return IR_UNUSED;
+		}
+
+		ir_ref root_ref = start1->op1;
+		ir_insn *root = &ctx->ir_base[root_ref];
+
+		if (root->op != IR_IF
+		 && !(root->op == IR_SWITCH && ctx->use_lists[root_ref].count == 2)) {
+			return IR_UNUSED;
+		}
+
+		/* Empty Diamond
+		 *
+		 *    prev                     prev
+		 *    |  condition             |  condition
+		 *    | /                      |
+		 *    IF                       |
+		 *    | \                      |
+		 *    |  +-----+               |
+		 *    |        IF_FALSE        |
+		 *    IF_TRUE  |           =>  |
+		 *    |        END             |
+		 *    END     /                |
+		 *    |  +---+                 |
+		 *    | /                      |
+		 *    MERGE                    |
+		 *    |                        |
+		 *    next                     next
+		 */
+
+		ir_ref next_ref = ctx->use_edges[ctx->use_lists[ref].refs];
+		ir_insn *next = &ctx->ir_base[next_ref];
+
+		IR_ASSERT(ctx->use_lists[start1_ref].count == 1);
+		IR_ASSERT(ctx->use_lists[start2_ref].count == 1);
+
+		next->op1 = root->op1;
+		ir_use_list_replace(ctx, root->op1, root_ref, next_ref);
+		if (!IR_IS_CONST_REF(root->op2)) {
+			ir_use_list_remove_all(ctx, root->op2, root_ref);
+		}
+
+		MAKE_NOP(root);   CLEAR_USES(root_ref);
+		MAKE_NOP(start1); CLEAR_USES(start1_ref);
+		MAKE_NOP(start2); CLEAR_USES(start2_ref);
+		MAKE_NOP(end1);   CLEAR_USES(end1_ref);
+		MAKE_NOP(end2);   CLEAR_USES(end2_ref);
+		MAKE_NOP(insn);   CLEAR_USES(ref);
+
+		return next_ref;
+	} else {
+		ir_ref i, count = insn->inputs_count, *ops = insn->ops + 1;
+		ir_ref root_ref = IR_UNUSED;
+
+		for (i = 0; i < count; i++) {
+			ir_ref end_ref, start_ref;
+			ir_insn *end, *start;
+
+			end_ref = ops[i];
+			end = &ctx->ir_base[end_ref];
+			if (end->op != IR_END) {
+				return IR_UNUSED;
+			}
+			start_ref = end->op1;
+			start = &ctx->ir_base[start_ref];
+			if (start->op != IR_CASE_VAL && start->op != IR_CASE_DEFAULT) {
+				return IR_UNUSED;
+			}
+			IR_ASSERT(ctx->use_lists[start_ref].count == 1);
+			if (!root_ref) {
+				root_ref = start->op1;
+				if (ctx->use_lists[root_ref].count != count) {
+					return IR_UNUSED;
+				}
+			} else if (start->op1 != root_ref) {
+				return IR_UNUSED;
+			}
+		}
+
+		/* Empty N-Diamond */
+		ir_ref next_ref = ctx->use_edges[ctx->use_lists[ref].refs];
+		ir_insn *next = &ctx->ir_base[next_ref];
+		ir_insn *root = &ctx->ir_base[root_ref];
+
+		next->op1 = root->op1;
+		ir_use_list_replace(ctx, root->op1, root_ref, next_ref);
+		ir_use_list_remove_all(ctx, root->op2, root_ref);
+
+		MAKE_NOP(root);   CLEAR_USES(root_ref);
+
+		for (i = 0; i < count; i++) {
+			ir_ref end_ref = ops[i];
+			ir_insn *end = &ctx->ir_base[end_ref];
+			ir_ref start_ref = end->op1;
+			ir_insn *start = &ctx->ir_base[start_ref];
+
+			MAKE_NOP(start); CLEAR_USES(start_ref);
+			MAKE_NOP(end);   CLEAR_USES(end_ref);
+		}
+
+		MAKE_NOP(insn);   CLEAR_USES(ref);
+
+		return next_ref;
+	}
+}
+
+static ir_ref ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_ref ref, ir_insn *insn)
+{
+	IR_ASSERT(insn->inputs_count == 3);
+	IR_ASSERT(ctx->use_lists[merge_ref].count == 2);
+
+	ir_ref end1_ref = merge->op1, end2_ref = merge->op2;
+	ir_insn *end1 = &ctx->ir_base[end1_ref];
+	ir_insn *end2 = &ctx->ir_base[end2_ref];
+
+	if (end1->op == IR_END && end2->op == IR_END) {
+		ir_ref start1_ref = end1->op1, start2_ref = end2->op1;
+		ir_insn *start1 = &ctx->ir_base[start1_ref];
+		ir_insn *start2 = &ctx->ir_base[start2_ref];
+
+		if (start1->op1 == start2->op1) {
+			ir_ref root_ref = start1->op1;
+			ir_insn *root = &ctx->ir_base[root_ref];
+
+			if (root->op == IR_IF && ctx->use_lists[root->op2].count == 1) {
+				ir_ref cond_ref = root->op2;
+				ir_insn *cond = &ctx->ir_base[cond_ref];
+				ir_type type = insn->type;
+				bool is_cmp, is_less;
+
+				if (IR_IS_TYPE_FP(type)) {
+					is_cmp = (cond->op == IR_LT || cond->op == IR_LE || cond->op == IR_GT || cond->op == IR_GE ||
+						cond->op == IR_ULT || cond->op == IR_ULE || cond->op == IR_UGT || cond->op == IR_UGE);
+				} else if (IR_IS_TYPE_SIGNED(type)) {
+					is_cmp = (cond->op == IR_LT || cond->op == IR_LE || cond->op == IR_GT || cond->op == IR_GE);
+				} else if (IR_IS_TYPE_UNSIGNED(type)) {
+					is_cmp = (cond->op == IR_ULT || cond->op == IR_ULE || cond->op == IR_UGT || cond->op == IR_UGE);
+				}
+
+				if (is_cmp
+				 && ((insn->op2 == cond->op1 && insn->op3 == cond->op2)
+				   || (insn->op2 == cond->op2 && insn->op3 == cond->op1))) {
+					/* MAX/MIN
+					 *
+					 *    prev                     prev
+					 *    |  LT(A, B)              |
+					 *    | /                      |
+					 *    IF                       |
+					 *    | \                      |
+					 *    |  +-----+               |
+					 *    |        IF_FALSE        |
+					 *    IF_TRUE  |           =>  |
+					 *    |        END             |
+					 *    END     /                |
+					 *    |  +---+                 |
+					 *    | /                      |
+					 *    MERGE                    |
+					 *    |    \                   |
+					 *    |     PHI(A, B)          |    MIN(A, B)
+					 *    next                     next
+					 */
+					ir_ref next_ref = ctx->use_edges[ctx->use_lists[merge_ref].refs];
+					ir_insn *next;
+
+					if (next_ref == ref) {
+						next_ref = ctx->use_edges[ctx->use_lists[merge_ref].refs + 1];
+					}
+					next = &ctx->ir_base[next_ref];
+
+					IR_ASSERT(ctx->use_lists[start1_ref].count == 1);
+					IR_ASSERT(ctx->use_lists[start2_ref].count == 1);
+
+					if (IR_IS_TYPE_FP(type)) {
+						is_less = (cond->op == IR_LT || cond->op == IR_LE ||
+							cond->op == IR_ULT || cond->op == IR_ULE);
+					} else if (IR_IS_TYPE_SIGNED(type)) {
+						is_less = (cond->op == IR_LT || cond->op == IR_LE);
+					} else if (IR_IS_TYPE_UNSIGNED(type)) {
+						is_less = (cond->op == IR_ULT || cond->op == IR_ULE);
+					}
+					insn->op = (
+						(is_less ? cond->op1 : cond->op2)
+						==
+						((start1->op == IR_IF_TRUE) ? insn->op2 : insn->op3)
+						) ? IR_MIN : IR_MAX;
+					insn->inputs_count = 2;
+					if (insn->op2 > insn->op3) {
+						insn->op1 = insn->op2;
+						insn->op2 = insn->op3;
+					} else {
+						insn->op1 = insn->op3;
+					}
+					insn->op3 = IR_UNUSED;
+
+					next->op1 = root->op1;
+					ir_use_list_replace(ctx, root->op1, root_ref, next_ref);
+					ir_use_list_remove_all(ctx, root->op2, root_ref);
+					if (!IR_IS_CONST_REF(insn->op1)) {
+						ir_use_list_remove_all(ctx, insn->op1, cond_ref);
+					}
+					if (!IR_IS_CONST_REF(insn->op2)) {
+						ir_use_list_remove_all(ctx, insn->op2, cond_ref);
+					}
+
+					MAKE_NOP(cond);   CLEAR_USES(cond_ref);
+					MAKE_NOP(root);   CLEAR_USES(root_ref);
+					MAKE_NOP(start1); CLEAR_USES(start1_ref);
+					MAKE_NOP(start2); CLEAR_USES(start2_ref);
+					MAKE_NOP(end1);   CLEAR_USES(end1_ref);
+					MAKE_NOP(end2);   CLEAR_USES(end2_ref);
+					MAKE_NOP(merge);  CLEAR_USES(merge_ref);
+
+					return next_ref;
+#if 0
+				} else {
+					/* COND
+					 *
+					 *    prev                     prev
+					 *    |  cond                  |
+					 *    | /                      |
+					 *    IF                       |
+					 *    | \                      |
+					 *    |  +-----+               |
+					 *    |        IF_FALSE        |
+					 *    IF_TRUE  |           =>  |
+					 *    |        END             |
+					 *    END     /                |
+					 *    |  +---+                 |
+					 *    | /                      |
+					 *    MERGE                    |
+					 *    |    \                   |
+					 *    |     PHI(A, B)          |    COND(cond, A, B)
+					 *    next                     next
+					 */
+					ir_ref next_ref = ctx->use_edges[ctx->use_lists[merge_ref].refs];
+					ir_insn *next;
+
+					if (next_ref == ref) {
+						next_ref = ctx->use_edges[ctx->use_lists[merge_ref].refs + 1];
+					}
+					next = &ctx->ir_base[next_ref];
+
+					IR_ASSERT(ctx->use_lists[start1_ref].count == 1);
+					IR_ASSERT(ctx->use_lists[start2_ref].count == 1);
+
+					insn->op = IR_COND;
+					insn->inputs_count = 3;
+					insn->op1 = cond_ref;
+					if (start1->op == IR_IF_FALSE) {
+						SWAP_REFS(insn->op2, insn->op3);
+					}
+
+					next->op1 = root->op1;
+					ir_use_list_replace(ctx, cond_ref, root_ref, ref);
+					ir_use_list_replace(ctx, root->op1, root_ref, next_ref);
+					ir_use_list_remove_all(ctx, root->op2, root_ref);
+
+					MAKE_NOP(root);   CLEAR_USES(root_ref);
+					MAKE_NOP(start1); CLEAR_USES(start1_ref);
+					MAKE_NOP(start2); CLEAR_USES(start2_ref);
+					MAKE_NOP(end1);   CLEAR_USES(end1_ref);
+					MAKE_NOP(end2);   CLEAR_USES(end2_ref);
+					MAKE_NOP(merge);  CLEAR_USES(merge_ref);
+
+					return next_ref;
+#endif
+				}
+			}
+		}
+	}
+
+	return IR_UNUSED;
+}
+
+static bool ir_cmp_is_true(ir_op op, ir_insn *op1, ir_insn *op2)
+{
+	IR_ASSERT(op1->type == op2->type);
+	if (IR_IS_TYPE_INT(op1->type)) {
+		if (op == IR_EQ) {
+			return op1->val.u64 == op2->val.u64;
+		} else if (op == IR_NE) {
+			return op1->val.u64 != op2->val.u64;
+		} else if (op == IR_LT) {
+			if (IR_IS_TYPE_SIGNED(op1->type)) {
+				return op1->val.i64 < op2->val.i64;
+			} else {
+				return op1->val.u64 < op2->val.u64;
+			}
+		} else if (op == IR_GE) {
+			if (IR_IS_TYPE_SIGNED(op1->type)) {
+				return op1->val.i64 >= op2->val.i64;
+			} else {
+				return op1->val.u64 >= op2->val.u64;
+			}
+		} else if (op == IR_LE) {
+			if (IR_IS_TYPE_SIGNED(op1->type)) {
+				return op1->val.i64 <= op2->val.i64;
+			} else {
+				return op1->val.u64 <= op2->val.u64;
+			}
+		} else if (op == IR_GT) {
+			if (IR_IS_TYPE_SIGNED(op1->type)) {
+				return op1->val.i64 > op2->val.i64;
+			} else {
+				return op1->val.u64 > op2->val.u64;
+			}
+		} else if (op == IR_ULT) {
+			return op1->val.u64 < op2->val.u64;
+		} else if (op == IR_UGE) {
+			return op1->val.u64 >= op2->val.u64;
+		} else if (op == IR_ULE) {
+			return op1->val.u64 <= op2->val.u64;
+		} else if (op == IR_UGT) {
+			return op1->val.u64 > op2->val.u64;
+		} else {
+			IR_ASSERT(0);
+			return 0;
+		}
+	} else if (op1->type == IR_DOUBLE) {
+		if (op == IR_EQ) {
+			return op1->val.d == op2->val.d;
+		} else if (op == IR_NE) {
+			return op1->val.d != op2->val.d;
+		} else if (op == IR_LT) {
+			return op1->val.d < op2->val.d;
+		} else if (op == IR_GE) {
+			return op1->val.d >= op2->val.d;
+		} else if (op == IR_LE) {
+			return op1->val.d <= op2->val.d;
+		} else if (op == IR_GT) {
+			return op1->val.d > op2->val.d;
+		} else if (op == IR_ULT) {
+			return !(op1->val.d >= op2->val.d);
+		} else if (op == IR_UGE) {
+			return !(op1->val.d < op2->val.d);
+		} else if (op == IR_ULE) {
+			return !(op1->val.d > op2->val.d);
+		} else if (op == IR_UGT) {
+			return !(op1->val.d <= op2->val.d);
+		} else {
+			IR_ASSERT(0);
+			return 0;
+		}
+	} else {
+		IR_ASSERT(op1->type == IR_FLOAT);
+		if (op == IR_EQ) {
+			return op1->val.f == op2->val.f;
+		} else if (op == IR_NE) {
+			return op1->val.f != op2->val.f;
+		} else if (op == IR_LT) {
+			return op1->val.f < op2->val.f;
+		} else if (op == IR_GE) {
+			return op1->val.f >= op2->val.f;
+		} else if (op == IR_LE) {
+			return op1->val.f <= op2->val.f;
+		} else if (op == IR_GT) {
+			return op1->val.f > op2->val.f;
+		} else if (op == IR_ULT) {
+			return !(op1->val.f >= op2->val.f);
+		} else if (op == IR_UGE) {
+			return !(op1->val.f < op2->val.f);
+		} else if (op == IR_ULE) {
+			return !(op1->val.f > op2->val.f);
+		} else if (op == IR_UGT) {
+			return !(op1->val.f <= op2->val.f);
+		} else {
+			IR_ASSERT(0);
+			return 0;
+		}
+	}
+}
+
+static ir_ref ir_try_split_if(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
+{
+	ir_ref cond_ref = insn->op2;
+	ir_insn *cond = &ctx->ir_base[cond_ref];
+
+	if (cond->op == IR_PHI
+	 && cond->inputs_count == 3
+	 && cond->op1 == insn->op1
+	 && ((IR_IS_CONST_REF(cond->op2) && !IR_IS_SYM_CONST(ctx->ir_base[cond->op2].op))
+	  || (IR_IS_CONST_REF(cond->op3) && !IR_IS_SYM_CONST(ctx->ir_base[cond->op3].op)))) {
+		ir_ref merge_ref = insn->op1;
+		ir_insn *merge = &ctx->ir_base[merge_ref];
+
+		if (ctx->use_lists[merge_ref].count == 2) {
+			ir_ref end1_ref = merge->op1, end2_ref = merge->op2;
+			ir_insn *end1 = &ctx->ir_base[end1_ref];
+			ir_insn *end2 = &ctx->ir_base[end2_ref];
+
+			if (end1->op == IR_END && end2->op == IR_END) {
+				ir_ref if_true_ref, if_false_ref;
+				ir_insn *if_true, *if_false;
+				ir_op op = IR_IF_FALSE;
+
+				ir_get_true_false_refs(ctx, ref, &if_true_ref, &if_false_ref);
+
+				if (!IR_IS_CONST_REF(cond->op2) || IR_IS_SYM_CONST(ctx->ir_base[cond->op2].op)) {
+					IR_ASSERT(IR_IS_CONST_REF(cond->op3));
+					SWAP_REFS(cond->op2, cond->op3);
+					SWAP_REFS(merge->op1, merge->op2);
+					SWAP_REFS(end1_ref, end2_ref);
+					SWAP_INSNS(end1, end2);
+				}
+				if (ir_const_is_true(&ctx->ir_base[cond->op2])) {
+					SWAP_REFS(if_true_ref, if_false_ref);
+					op = IR_IF_TRUE;
+				}
+				if_true = &ctx->ir_base[if_true_ref];
+				if_false = &ctx->ir_base[if_false_ref];
+
+				/* Simple IF Split
+				 *
+				 *    |        |               |        |
+				 *    |        END             |        IF(X)
+				 *    END     /                END     / \
+				 *    |  +---+                 |   +--+   +
+				 *    | /                      |  /       |
+				 *    MERGE                    | IF_FALSE |
+				 *    | \                      | |        |
+				 *    |  PHI(false, X)         | |        |
+				 *    | /                      | |        |
+				 *    IF                   =>  | END      |
+				 *    | \                      | |        |
+				 *    |  +------+              | |        |
+				 *    |         IF_TRUE        | |        IF_TRUE
+				 *    IF_FALSE  |              MERGE
+				 *    |                        |
+				 */
+				ir_use_list_remove_all(ctx, merge_ref, cond_ref);
+				ir_use_list_remove_all(ctx, ref, if_true_ref);
+				ir_use_list_replace(ctx, cond->op3, cond_ref, end2_ref);
+				ir_use_list_replace(ctx, end1_ref, merge_ref, if_false_ref);
+				ir_use_list_add(ctx, end2_ref, if_true_ref);
+
+				end2->optx = IR_OPTX(IR_IF, IR_VOID, 2);
+				end2->op2 = cond->op3;
+
+				merge->optx = IR_OPTX(op, IR_VOID, 1);
+				merge->op1 = end2_ref;
+				merge->op2 = IR_UNUSED;
+
+				MAKE_NOP(cond);
+				CLEAR_USES(cond_ref);
+
+				insn->optx = IR_OPTX(IR_END, IR_VOID, 1);
+				insn->op1 = merge_ref;
+				insn->op2 = IR_UNUSED;
+
+				if_true->op1 = end2_ref;
+
+				if_false->optx = IR_OPTX(IR_MERGE, IR_VOID, 2);
+				if_false->op1 = end1_ref;
+				if_false->op2 = ref;
+
+				return ref;
+			}
+		}
+	}
+
+	return IR_UNUSED;
+}
+
+static ir_ref ir_try_split_if_cmp(ir_ctx *ctx, ir_worklist *worklist, ir_ref ref, ir_insn *insn)
+{
+	ir_ref cond_ref = insn->op2;
+	ir_insn *cond = &ctx->ir_base[cond_ref];
+
+	if (cond->op >= IR_EQ && cond->op <= IR_UGT
+	 && IR_IS_CONST_REF(cond->op2)
+	 && !IR_IS_SYM_CONST(ctx->ir_base[cond->op2].op)
+	 && ctx->use_lists[insn->op2].count == 1) {
+		ir_ref phi_ref = cond->op1;
+		ir_insn *phi = &ctx->ir_base[phi_ref];
+
+		if (phi->op == IR_PHI
+		 && phi->inputs_count == 3
+		 && phi->op1 == insn->op1
+		 && ctx->use_lists[phi_ref].count == 1
+		 && ((IR_IS_CONST_REF(phi->op2) && !IR_IS_SYM_CONST(ctx->ir_base[phi->op2].op))
+		  || (IR_IS_CONST_REF(phi->op3) && !IR_IS_SYM_CONST(ctx->ir_base[phi->op3].op)))) {
+			ir_ref merge_ref = insn->op1;
+			ir_insn *merge = &ctx->ir_base[merge_ref];
+
+			if (ctx->use_lists[merge_ref].count == 2) {
+				ir_ref end1_ref = merge->op1, end2_ref = merge->op2;
+				ir_insn *end1 = &ctx->ir_base[end1_ref];
+				ir_insn *end2 = &ctx->ir_base[end2_ref];
+
+				if (end1->op == IR_END && end2->op == IR_END) {
+					ir_ref if_true_ref, if_false_ref;
+					ir_insn *if_true, *if_false;
+					ir_op op = IR_IF_FALSE;
+
+					ir_get_true_false_refs(ctx, ref, &if_true_ref, &if_false_ref);
+
+					if (!IR_IS_CONST_REF(phi->op2) || IR_IS_SYM_CONST(ctx->ir_base[phi->op2].op)) {
+						IR_ASSERT(IR_IS_CONST_REF(phi->op3));
+						SWAP_REFS(phi->op2, phi->op3);
+						SWAP_REFS(merge->op1, merge->op2);
+						SWAP_REFS(end1_ref, end2_ref);
+						SWAP_INSNS(end1, end2);
+					}
+					if (ir_cmp_is_true(cond->op, &ctx->ir_base[phi->op2], &ctx->ir_base[cond->op2])) {
+						SWAP_REFS(if_true_ref, if_false_ref);
+						op = IR_IF_TRUE;
+					}
+					if_true = &ctx->ir_base[if_true_ref];
+					if_false = &ctx->ir_base[if_false_ref];
+
+					if (IR_IS_CONST_REF(phi->op3) && !IR_IS_SYM_CONST(ctx->ir_base[phi->op3].op)) {
+						if (ir_cmp_is_true(cond->op, &ctx->ir_base[phi->op3], &ctx->ir_base[cond->op2]) ^ (op == IR_IF_TRUE)) {
+							/* IF Split
+							 *
+							 *    |        |               |        |
+							 *    |        END             |        END
+							 *    END     /                END      |
+							 *    |  +---+                 |        |
+							 *    | /                      |        |
+							 *    MERGE                    |        |
+							 *    | \                      |        |
+							 *    |  PHI(C1, X)            |        |
+							 *    |  |                     |        |
+							 *    |  CMP(_, C2)            |        |
+							 *    | /                      |        |
+							 *    IF                   =>  |        |
+							 *    | \                      |        |
+							 *    |  +------+              |        |
+							 *    |         IF_TRUE        |        BEGIN
+							 *    IF_FALSE  |              BEGIN    |
+							 *    |                        |
+							 */
+
+							ir_use_list_replace(ctx, end1_ref, merge_ref, if_false_ref);
+							ir_use_list_replace(ctx, end2_ref, merge_ref, if_true_ref);
+
+							MAKE_NOP(merge); CLEAR_USES(merge_ref);
+							MAKE_NOP(phi);   CLEAR_USES(phi_ref);
+							MAKE_NOP(cond);  CLEAR_USES(cond_ref);
+							MAKE_NOP(insn);  CLEAR_USES(ref);
+
+							if_false->optx = IR_OPTX(IR_BEGIN, IR_VOID, 1);
+							if_false->op1 = end1_ref;
+
+							if_true->optx = IR_OPTX(IR_BEGIN, IR_VOID, 1);
+							if_true->op1 = end2_ref;
+
+							ir_worklist_push(worklist, end1_ref);
+							ir_worklist_push(worklist, end2_ref);
+
+							return IR_NULL;
+						} else {
+							/* IF Split
+							 *
+							 *    |        |               |        |
+							 *    |        END             |        END
+							 *    END     /                END      |
+							 *    |  +---+                 |        |
+							 *    | /                      |        |
+							 *    MERGE                    |        |
+							 *    | \                      |        |
+							 *    |  PHI(C1, X)            |        |
+							 *    |  |                     |        +
+							 *    |  CMP(_, C2)            |       /
+							 *    | /                      |      /
+							 *    IF                   =>  |     /
+							 *    | \                      |    /
+							 *    |  +------+              |   /
+							 *    |         IF_TRUE        |  /      BEGIN(unreachable)
+							 *    IF_FALSE  |              MERGE     |
+							 *    |                        |
+							 */
+
+							ir_use_list_replace(ctx, end1_ref, merge_ref, if_false_ref);
+							ir_use_list_replace(ctx, end2_ref, merge_ref, if_false_ref);
+
+							MAKE_NOP(merge); CLEAR_USES(merge_ref);
+							MAKE_NOP(phi);   CLEAR_USES(phi_ref);
+							MAKE_NOP(cond);  CLEAR_USES(cond_ref);
+							MAKE_NOP(insn);  CLEAR_USES(ref);
+
+							if_false->optx = IR_OPTX(IR_MERGE, IR_VOID, 2);
+							if_false->op1 = end1_ref;
+							if_false->op2 = end2_ref;
+
+							if_true->optx = IR_BEGIN;
+							if_true->op1 = IR_UNUSED;
+
+							ctx->flags2 &= ~IR_SCCP_DONE;
+
+							ir_worklist_push(worklist, end1_ref);
+							ir_worklist_push(worklist, end2_ref);
+
+							return IR_NULL;
+						}
+					} else {
+						/* IF Split
+						 *
+						 *    |        |               |        |
+						 *    |        END             |        IF<----+
+						 *    END     /                END     / \     |
+						 *    |  +---+                 |   +--+   +    |
+						 *    | /                      |  /       |    |
+						 *    MERGE                    | IF_FALSE |    |
+						 *    | \                      | |        |    |
+						 *    |  PHI(C1, X)            | |        |    |
+						 *    |  |                     | |        |    |
+						 *    |  CMP(_, C2)            | |        |    CMP(X, C2)
+						 *    | /                      | |        |
+						 *    IF                   =>  | END      |
+						 *    | \                      | |        |
+						 *    |  +------+              | |        |
+						 *    |         IF_TRUE        | |        IF_TRUE
+						 *    IF_FALSE  |              MERGE
+						 *    |                        |
+						 */
+
+						ir_use_list_remove_all(ctx, merge_ref, phi_ref);
+						ir_use_list_remove_all(ctx, ref, if_true_ref);
+						if (!IR_IS_CONST_REF(phi->op3)) {
+							ir_use_list_replace(ctx, phi->op3, phi_ref, insn->op2);
+						}
+						ir_use_list_replace(ctx, end1_ref, merge_ref, if_false_ref);
+						ir_use_list_replace(ctx, cond_ref, ref, end2_ref);
+						ir_use_list_add(ctx, end2_ref, if_true_ref);
+
+						end2->optx = IR_OPTX(IR_IF, IR_VOID, 2);
+						end2->op2 = insn->op2;
+
+						merge->optx = IR_OPTX(op, IR_VOID, 1);
+						merge->op1 = end2_ref;
+						merge->op2 = IR_UNUSED;
+
+						cond->op1 = phi->op3;
+						MAKE_NOP(phi);
+						CLEAR_USES(phi_ref);
+
+						insn->optx = IR_OPTX(IR_END, IR_VOID, 1);
+						insn->op1 = merge_ref;
+						insn->op2 = IR_UNUSED;
+
+						if_true->op1 = end2_ref;
+
+						if_false->optx = IR_OPTX(IR_MERGE, IR_VOID, 2);
+						if_false->op1 = end1_ref;
+						if_false->op2 = ref;
+
+						ir_worklist_push(worklist, end1_ref);
+
+						return ref;
+					}
+				}
+			}
+		}
+	}
+
+	return IR_UNUSED;
+}
+
+static ir_ref ir_optimize_merge(ir_ctx *ctx, ir_worklist *worklist, ir_ref merge_ref, ir_insn *merge)
+{
+	ir_use_list *use_list = &ctx->use_lists[merge_ref];
+
+	if (use_list->count == 1) {
+		return ir_try_remove_empty_diamond(ctx, merge_ref, merge);
+	} else if (use_list->count == 2) {
+		if (merge->inputs_count == 2) {
+			ir_ref phi_ref = ctx->use_edges[use_list->refs];
+			ir_insn *phi = &ctx->ir_base[phi_ref];
+
+			ir_ref next_ref = ctx->use_edges[use_list->refs + 1];
+			ir_insn *next = &ctx->ir_base[next_ref];
+			IR_ASSERT(next->op != IR_PHI);
+
+			if (phi->op == IR_PHI) {
+				if (next->op == IR_IF && next->op1 == merge_ref && ctx->use_lists[phi_ref].count == 1) {
+					if (next->op2 == phi_ref) {
+						ir_ref ref = ir_try_split_if(ctx, next_ref, next);
+						if (ref) {
+							return ref;
+						}
+					} else {
+						ir_insn *cmp = &ctx->ir_base[next->op2];
+
+						if (cmp->op >= IR_EQ && cmp->op <= IR_UGT
+						 && cmp->op1 == phi_ref
+						 && IR_IS_CONST_REF(cmp->op2)
+						 && !IR_IS_SYM_CONST(ctx->ir_base[cmp->op2].op)
+						 && ctx->use_lists[next->op2].count == 1) {
+							ir_ref ref = ir_try_split_if_cmp(ctx, worklist, next_ref, next);
+							if (ref) {
+								return ref;
+							}
+						}
+					}
+				}
+				return ir_optimize_phi(ctx, merge_ref, merge, phi_ref, phi);
+			}
+		}
+	}
+
+	return IR_UNUSED;
 }
 
 IR_ALWAYS_INLINE void _ir_add_successors(const ir_ctx *ctx, ir_ref ref, ir_worklist *worklist)
@@ -122,10 +884,14 @@ int ir_build_cfg(ir_ctx *ctx)
 		ref = ctx->ir_base[ref].op3;
 	}
 
+next:
 	while (ir_worklist_len(&worklist)) {
 		ref = ir_worklist_pop(&worklist);
 		insn = &ctx->ir_base[ref];
 
+		if (insn->op == IR_NOP) {
+			continue;
+		}
 		IR_ASSERT(IR_IS_BB_END(insn->op));
 		/* Remember BB end */
 		end = ref;
@@ -143,13 +909,24 @@ int ir_build_cfg(ir_ctx *ctx)
 		while (1) {
 			insn = &ctx->ir_base[ref];
 			if (IR_IS_BB_START(insn->op)) {
-				if (insn->op == IR_BEGIN
-				 && (ctx->flags & IR_OPT_CFG)
-				 && ctx->ir_base[insn->op1].op == IR_END
-				 && ctx->use_lists[ref].count == 1) {
-					ref = _ir_merge_blocks(ctx, insn->op1, ref);
-					ref = ctx->ir_base[ref].op1;
-					continue;
+				if (ctx->flags & IR_OPT_CFG) {
+					if (insn->op == IR_BEGIN) {
+						if (ctx->ir_base[insn->op1].op == IR_END
+						 && ctx->use_lists[ref].count == 1) {
+							ref = _ir_merge_blocks(ctx, insn->op1, ref);
+							ref = ctx->ir_base[ref].op1;
+							continue;
+						}
+					} else if (insn->op == IR_MERGE) {
+						ir_ref prev = ir_optimize_merge(ctx, &worklist, ref, insn);
+						if (prev) {
+							if (prev == IR_NULL) {
+								goto next;
+							}
+							ref = ctx->ir_base[prev].op1;
+							continue;
+						}
+					}
 				}
 				break;
 			}
@@ -180,6 +957,9 @@ int ir_build_cfg(ir_ctx *ctx)
 			ref = ir_worklist_pop(&worklist);
 			insn = &ctx->ir_base[ref];
 
+			if (insn->op == IR_NOP) {
+				continue;
+			}
 			IR_ASSERT(IR_IS_BB_START(insn->op));
 			/* Remember BB start */
 			start = ref;
@@ -233,10 +1013,14 @@ next_successor:
 	/* SCCP already removed UNREACHABKE blocks, otherwise all blocks are marked as UNREACHABLE first */
 	bb_init_falgs = (ctx->flags2 & IR_SCCP_DONE) ? 0 : IR_BB_UNREACHABLE;
 	IR_BITSET_FOREACH(bb_starts, len, start) {
+		insn = &ctx->ir_base[start];
+		if (insn->op == IR_NOP) {
+			_blocks[start] = 0;
+			continue;
+		}
 		end = _blocks[start];
 		_blocks[start] = b;
 		_blocks[end] = b;
-		insn = &ctx->ir_base[start];
 		IR_ASSERT(IR_IS_BB_START(insn->op));
 		IR_ASSERT(end > start);
 		bb->start = start;
@@ -277,6 +1061,7 @@ next_successor:
 		b++;
 		bb++;
 	} IR_BITSET_FOREACH_END();
+	bb_count = b - 1;
 	IR_ASSERT(count == edges_count * 2);
 	ir_mem_free(bb_starts);
 
@@ -363,27 +1148,6 @@ static void ir_remove_predecessor(ir_ctx *ctx, ir_block *bb, uint32_t from)
 	bb->predecessors_count = n;
 }
 
-static void ir_remove_from_use_list(ir_ctx *ctx, ir_ref from, ir_ref ref)
-{
-	ir_ref j, n, *p, *q, use;
-	ir_use_list *use_list = &ctx->use_lists[from];
-	ir_ref skip = 0;
-
-	n = use_list->count;
-	for (j = 0, p = q = &ctx->use_edges[use_list->refs]; j < n; j++, p++) {
-		use = *p;
-		if (use == ref) {
-			skip++;
-		} else {
-			if (p != q) {
-				*q = use;
-			}
-			q++;
-		}
-	}
-	use_list->count -= skip;
-}
-
 static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 {
 	ir_ref i, j, n, k, *p, use;
@@ -425,13 +1189,13 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 						if (ir_bitset_in(life_inputs, j - 1)) {
 							use_insn->op1 = ir_insn_op(use_insn, j);
 						} else if (input > 0) {
-							ir_remove_from_use_list(ctx, input, use);
+							ir_use_list_remove_all(ctx, input, use);
 						}
 					}
 					use_insn->op = IR_COPY;
 					use_insn->op2 = IR_UNUSED;
 					use_insn->op3 = IR_UNUSED;
-					ir_remove_from_use_list(ctx, merge, use);
+					ir_use_list_remove_all(ctx, merge, use);
 				}
 			}
 		}
@@ -456,7 +1220,7 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 							}
 							i++;
 						} else if (input > 0) {
-							ir_remove_from_use_list(ctx, input, use);
+							ir_use_list_remove_all(ctx, input, use);
 						}
 					}
 				}
@@ -464,7 +1228,7 @@ static void ir_remove_merge_input(ir_ctx *ctx, ir_ref merge, ir_ref from)
 		}
 	}
 	ir_mem_free(life_inputs);
-	ir_remove_from_use_list(ctx, from, merge);
+	ir_use_list_remove_all(ctx, from, merge);
 }
 
 /* CFG constructed after SCCP pass doesn't have unreachable BBs, otherwise they should be removed */
