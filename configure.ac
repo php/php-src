@@ -410,7 +410,6 @@ sys/file.h \
 sys/mman.h \
 sys/mount.h \
 sys/poll.h \
-sys/procctl.h \
 sys/resource.h \
 sys/select.h \
 sys/socket.h \
@@ -515,10 +514,6 @@ dnl Check __builtin_cpu_supports
 PHP_CHECK_BUILTIN_CPU_SUPPORTS
 dnl Check __builtin_frame_address
 PHP_CHECK_BUILTIN_FRAME_ADDRESS
-dnl Check prctl
-PHP_CHECK_PRCTL
-dnl Check procctl
-PHP_CHECK_PROCCTL
 dnl Check AVX512
 PHP_CHECK_AVX512_SUPPORTS
 dnl Check AVX512 VBMI
@@ -642,6 +637,10 @@ AC_CHECK_FUNC([inet_pton],,[AC_MSG_ERROR([Required inet_pton not found.])])
 
 dnl Check for strerror_r, and if its a POSIX-compatible or a GNU specific version.
 AC_FUNC_STRERROR_R
+
+dnl Check for functions inside their belonging headers.
+AC_CHECK_HEADER([sys/prctl.h], [AC_CHECK_FUNCS([prctl])])
+AC_CHECK_HEADER([sys/procctl.h], [AC_CHECK_FUNCS([procctl])])
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R
 

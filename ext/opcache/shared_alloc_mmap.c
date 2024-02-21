@@ -34,7 +34,7 @@
 #endif
 
 #include "zend_execute.h"
-#ifdef HAVE_SYS_PROCCTL_H
+#ifdef HAVE_PROCCTL
 #include <sys/procctl.h>
 #endif
 

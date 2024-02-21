@@ -2679,32 +2679,6 @@ AC_DEFUN([PHP_PATCH_CONFIG_HEADERS], [
     > $srcdir/$1.tmp && mv $srcdir/$1.tmp $srcdir/$1
 ])
 
-dnl Check if we have prctl
-AC_DEFUN([PHP_CHECK_PRCTL],
-[
-  AC_MSG_CHECKING([for prctl])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/prctl.h>]], [[prctl(0, 0, 0, 0, 0);]])], [
-    AC_DEFINE([HAVE_PRCTL], 1, [do we have prctl?])
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-])
-
-dnl Check if we have procctl
-AC_DEFUN([PHP_CHECK_PROCCTL],
-[
-  AC_MSG_CHECKING([for procctl])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/procctl.h>]], [[procctl(0, 0, 0, 0);]])], [
-    AC_DEFINE([HAVE_PROCCTL], 1, [do we have procctl?])
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-])
-
 dnl
 dnl PHP_CHECK_AVX512_SUPPORTS
 dnl
