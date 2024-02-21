@@ -60,7 +60,7 @@ PHP                                                                        NEWS
     aliases for ::ROUND_DOWN and ::ROUND_UP. (Jorg Sowa)
   . Added NumberFormatter::ROUND_HALFODD. (Ayesh Karunaratne)
   . Added PROPERTY_IDS_UNARY_OPERATOR, PROPERTY_ID_COMPAT_MATH_START and
-    PROPERTY_ID_COMPT_MATH_CONTINUE constants. (David Carlier)
+    PROPERTY_ID_COMPAT_MATH_CONTINUE constants. (David Carlier)
   . Added IntlDateFormatter::getIanaID/intltz_get_iana_id method/function.
     (David Carlier)
   . Set to C++17 standard for icu 74 and onwards. (David Carlier)
