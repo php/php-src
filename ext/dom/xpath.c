@@ -467,7 +467,7 @@ PHP_METHOD(DOMXPath, quote) {
 	} else {
 		// need to use the concat() trick published by Robert Rossney at https://stackoverflow.com/a/1352556/1067003
 		smart_str_appends(&output, "concat(");
-		for (size_t i = 0; i < input_len; ++i) {
+		for (size_t i = 0; i < input_len;) {
 			uintptr_t bytesUntilSingleQuote =
 					(uintptr_t)memchr(input + i, '\'', input_len - i);
 			if (bytesUntilSingleQuote == 0) {
@@ -491,7 +491,7 @@ PHP_METHOD(DOMXPath, quote) {
 			smart_str_appendc(&output, quoteMethod);
 			smart_str_appendl(&output, input + i, bytesUntilQuote);
 			smart_str_appendc(&output, quoteMethod);
-			i += bytesUntilQuote - 1;
+			i += bytesUntilQuote;
 			smart_str_appends(&output, ",");
 		}
 		output.s->val[output.s->len -1 ] = ')'; // is there a smart_str function for this? (probably not)
