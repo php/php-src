@@ -777,7 +777,6 @@ PHPAPI zend_ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset,
 	const char 	*newstr_s = newstr;
 	const char 	*newstr_e = newstr + 2 * escapestr_len;
 	const char 	*end = escapestr + escapestr_len;
-	bool	escape_overflow = FALSE;
 
 	DBG_ENTER("mysqlnd_cset_escape_quotes");
 
@@ -786,12 +785,7 @@ PHPAPI zend_ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset,
 		/* check unicode characters */
 
 		if (cset->char_maxlen > 1 && (len = cset->mb_valid(escapestr, end))) {
-
-			/* check possible overflow */
-			if ((newstr + len) > newstr_e) {
-				escape_overflow = TRUE;
-				break;
-			}
+			ZEND_ASSERT(newstr + len <= newstr_e);
 			/* copy mb char without escaping it */
 			while (len--) {
 				*newstr++ = *escapestr++;
@@ -800,25 +794,16 @@ PHPAPI zend_ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset,
 			continue;
 		}
 		if (*escapestr == '\'') {
-			if (newstr + 2 > newstr_e) {
-				escape_overflow = TRUE;
-				break;
-			}
+			ZEND_ASSERT(newstr + 2 <= newstr_e);
 			*newstr++ = '\'';
 			*newstr++ = '\'';
 		} else {
-			if (newstr + 1 > newstr_e) {
-				escape_overflow = TRUE;
-				break;
-			}
+			ZEND_ASSERT(newstr + 1 <= newstr_e);
 			*newstr++ = *escapestr;
 		}
 	}
 	*newstr = '\0';
 
-	if (escape_overflow) {
-		DBG_RETURN((zend_ulong)~0);
-	}
 	DBG_RETURN((zend_ulong)(newstr - newstr_s));
 }
 /* }}} */
@@ -831,7 +816,6 @@ PHPAPI zend_ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset
 	const char 	*newstr_s = newstr;
 	const char 	*newstr_e = newstr + 2 * escapestr_len;
 	const char 	*end = escapestr + escapestr_len;
-	bool	escape_overflow = FALSE;
 
 	DBG_ENTER("mysqlnd_cset_escape_slashes");
 	DBG_INF_FMT("charset=%s", cset->name);
@@ -845,11 +829,7 @@ PHPAPI zend_ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset
 		if (cset->char_maxlen > 1 && (*((zend_uchar *) escapestr) > 0x80 || cset->char_minlen > 1)) {
 			unsigned int len = cset->mb_valid(escapestr, end);
 			if (len) {
-				/* check possible overflow */
-				if ((newstr + len) > newstr_e) {
-					escape_overflow = TRUE;
-					break;
-				}
+				ZEND_ASSERT(newstr + len <= newstr_e);
 				/* copy mb char without escaping it */
 				while (len--) {
 					*newstr++ = *escapestr++;
@@ -882,27 +862,18 @@ PHPAPI zend_ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset
 			}
 		}
 		if (esc) {
-			if (newstr + 2 > newstr_e) {
-				escape_overflow = TRUE;
-				break;
-			}
+			ZEND_ASSERT(newstr + 2 <= newstr_e);
 			/* copy escaped character */
 			*newstr++ = '\\';
 			*newstr++ = esc;
 		} else {
-			if (newstr + 1 > newstr_e) {
-				escape_overflow = TRUE;
-				break;
-			}
+			ZEND_ASSERT(newstr + 1 <= newstr_e);
 			/* copy non escaped character */
 			*newstr++ = *escapestr;
 		}
 	}
 	*newstr = '\0';
 
-	if (escape_overflow) {
-		DBG_RETURN((zend_ulong)~0);
-	}
 	DBG_RETURN((zend_ulong)(newstr - newstr_s));
 }
 /* }}} */
