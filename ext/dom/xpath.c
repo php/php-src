@@ -29,7 +29,7 @@
 /*
 * class DOMXPath
 */
-#define LIBXML_XPATH_ENABLED
+
 #ifdef LIBXML_XPATH_ENABLED
 
 void dom_xpath_objects_free_storage(zend_object *object)
