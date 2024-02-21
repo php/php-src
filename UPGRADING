@@ -467,8 +467,8 @@ PHP 8.4 UPGRADE NOTES
   . The IntlDateFormatter class exposes now the new PATTERN constant
     reflecting udat api's UDAT_PATTERN.
   . The IntlChar class exposes now the new PROPERTY_IDS_UNARY_OPERATOR (new
-    IDS binary operator), PROPERTY_ID_COMPT_MATH_START,
-    PROPERTY_ID_COMPT_MATH_CONTINUE (both for mathematical
+    IDS binary operator), PROPERTY_ID_COMPAT_MATH_START,
+    PROPERTY_ID_COMPAT_MATH_CONTINUE (both for mathematical
     identifier profiling purpose) constants.
 
 - LDAP:

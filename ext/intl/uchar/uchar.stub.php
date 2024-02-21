@@ -59,9 +59,9 @@ class IntlChar
     /** @cvalue UCHAR_IDS_UNARY_OPERATOR */
     public const int PROPERTY_IDS_UNARY_OPERATOR = UNKNOWN;
     /** @cvalue UCHAR_ID_COMPAT_MATH_START */
-    public const int PROPERTY_ID_COMPT_MATH_START = UNKNOWN;
+    public const int PROPERTY_ID_COMPAT_MATH_START = UNKNOWN;
     /** @cvalue UCHAR_ID_COMPAT_MATH_CONTINUE */
-    public const int PROPERTY_ID_COMPT_MATH_CONTINUE = UNKNOWN;
+    public const int PROPERTY_ID_COMPAT_MATH_CONTINUE = UNKNOWN;
 #endif
     /** @cvalue UCHAR_JOIN_CONTROL */
     public const int PROPERTY_JOIN_CONTROL = UNKNOWN;
