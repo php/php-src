@@ -934,6 +934,8 @@ namespace
         public function registerPhpFunctions(string|array|null $restrict = null): void {}
 
         public function registerPhpFunctionNS(string $namespaceURI, string $name, callable $callable): void {}
+
+        public static function quote(string $str): string {}
     }
 #endif
 

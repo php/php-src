@@ -446,6 +446,93 @@ PHP_METHOD(DOMXPath, registerPhpFunctionNS)
 	);
 }
 
+/* {{{ */
+PHP_METHOD(DOMXPath, quote) {
+	char *input;
+	size_t input_len;
+	char *output;
+	size_t output_len = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &input, &input_len) ==
+			FAILURE) {
+		RETURN_THROWS();
+	}
+	if (memchr(input, '\'', input_len) == NULL) {
+		output_len = input_len + 2;
+		output = emalloc(output_len);
+		output[0] = '\'';
+		memcpy(output + 1, input, input_len);
+		output[output_len - 1] = '\'';
+	} else if (memchr(input, '"', input_len) == NULL) {
+		output_len = input_len + 2;
+		output = emalloc(output_len);
+		output[0] = '"';
+		memcpy(output + 1, input, input_len);
+		output[output_len - 1] = '"';
+	} else {
+		// need to do the concat() trick published by Robert Rossney at https://stackoverflow.com/a/1352556/1067003
+		// first lets calculate the length (probably faster than repeated reallocs)
+		output_len = strlen("concat(");
+		size_t i;
+		for (size_t i = 0; i < input_len; ++i) {
+			uintptr_t bytesUntilSingleQuote =
+					(uintptr_t)memchr(input + i, '\'', input_len - i);
+			if (bytesUntilSingleQuote == 0) {
+				bytesUntilSingleQuote = input_len - i;
+			} else {
+				bytesUntilSingleQuote = bytesUntilSingleQuote - (uintptr_t)(input + i);
+			}
+			uintptr_t bytesUntilDoubleQuote =
+					(uintptr_t)memchr(input + i, '"', input_len - i);
+			if (bytesUntilDoubleQuote == 0) {
+				bytesUntilDoubleQuote = input_len - i;
+			} else {
+				bytesUntilDoubleQuote = bytesUntilDoubleQuote - (uintptr_t)(input + i);
+			}
+			const size_t bytesUntilQuote =
+					(bytesUntilSingleQuote > bytesUntilDoubleQuote)
+							? bytesUntilSingleQuote
+							: bytesUntilDoubleQuote;
+			i += bytesUntilQuote - 1;
+			output_len += 1 + bytesUntilQuote + 1 + 1; // "bytesUntilQuote"[,)]
+		}
+		output = emalloc(output_len);
+		size_t outputPos = strlen("concat(");
+		memcpy(output, "concat(", outputPos);
+		for (size_t i = 0; i < input_len; ++i) {
+			uintptr_t bytesUntilSingleQuote =
+					(uintptr_t)memchr(input + i, '\'', input_len - i);
+			if (bytesUntilSingleQuote == 0) {
+				bytesUntilSingleQuote = input_len - i;
+			} else {
+				bytesUntilSingleQuote = bytesUntilSingleQuote - (uintptr_t)(input + i);
+			}
+			uintptr_t bytesUntilDoubleQuote =
+					(uintptr_t)memchr(input + i, '"', input_len - i);
+			if (bytesUntilDoubleQuote == 0) {
+				bytesUntilDoubleQuote = input_len - i;
+			} else {
+				bytesUntilDoubleQuote = bytesUntilDoubleQuote - (uintptr_t)(input + i);
+			}
+			const size_t bytesUntilQuote =
+					(bytesUntilSingleQuote > bytesUntilDoubleQuote)
+							? bytesUntilSingleQuote
+							: bytesUntilDoubleQuote;
+			const char quoteMethod =
+					(bytesUntilSingleQuote > bytesUntilDoubleQuote) ? '\'' : '"';
+			output[outputPos++] = quoteMethod;
+			memcpy(output + outputPos, input + i, bytesUntilQuote);
+			outputPos += bytesUntilQuote;
+			output[outputPos++] = quoteMethod;
+			i += bytesUntilQuote - 1;
+			output[outputPos++] = ',';
+		}
+		output[outputPos - 1] = ')';
+	}
+	RETVAL_STRINGL(output, output_len);
+}
+/* }}} */
+
 #endif /* LIBXML_XPATH_ENABLED */
 
 #endif
