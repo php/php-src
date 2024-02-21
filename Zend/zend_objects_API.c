@@ -179,11 +179,9 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 
 		if (object->handlers->dtor_obj != zend_objects_destroy_object
 				|| object->ce->destructor) {
-			zend_fiber_switch_block();
 			GC_SET_REFCOUNT(object, 1);
 			object->handlers->dtor_obj(object);
 			GC_DELREF(object);
-			zend_fiber_switch_unblock();
 		}
 	}
 

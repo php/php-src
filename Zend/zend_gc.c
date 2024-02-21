@@ -68,9 +68,13 @@
  */
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_compile.h"
+#include "zend_errors.h"
 #include "zend_fibers.h"
 #include "zend_hrtime.h"
+#include "zend_types.h"
 #include "zend_weakrefs.h"
+#include "zend_string.h"
 
 #ifndef GC_BENCH
 # define GC_BENCH 0
@@ -264,6 +268,10 @@ typedef struct _zend_gc_globals {
 	zend_hrtime_t collector_time;
 	zend_hrtime_t dtor_time;
 	zend_hrtime_t free_time;
+
+	uint32_t dtor_idx;			/* root buffer index */
+	zend_fiber *dtor_fiber;
+	bool dtor_fiber_running;
 
 #if GC_BENCH
 	uint32_t root_buf_length;
@@ -489,6 +497,10 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 	gc_globals->free_time = 0;
 	gc_globals->activated_at = 0;
 
+	gc_globals->dtor_idx = GC_FIRST_ROOT;
+	gc_globals->dtor_fiber = NULL;
+	gc_globals->dtor_fiber_running = false;
+
 #if GC_BENCH
 	gc_globals->root_buf_length = 0;
 	gc_globals->root_buf_peak = 0;
@@ -531,6 +543,10 @@ void gc_reset(void)
 		GC_G(collector_time) = 0;
 		GC_G(dtor_time) = 0;
 		GC_G(free_time) = 0;
+
+		GC_G(dtor_idx) = GC_FIRST_ROOT;
+		GC_G(dtor_fiber) = NULL;
+		GC_G(dtor_fiber_running) = false;
 
 #if GC_BENCH
 		GC_G(root_buf_length) = 0;
@@ -1776,6 +1792,65 @@ static void zend_get_gc_buffer_release(void);
 static void zend_gc_check_root_tmpvars(void);
 static void zend_gc_remove_root_tmpvars(void);
 
+static zend_internal_function gc_call_destructors_fn;
+
+static zend_fiber *gc_create_destructor_fiber(void)
+{
+	zval zobj;
+	zend_fiber *fiber;
+
+	GC_TRACE("starting destructor fiber");
+
+	if (object_init_ex(&zobj, zend_ce_fiber) != SUCCESS) {
+		zend_error_noreturn(E_ERROR, "Unable to create destructor fiber");
+	}
+
+	fiber = (zend_fiber *)Z_OBJ(zobj);
+	fiber->fci.size = sizeof(fiber->fci);
+	fiber->fci_cache.function_handler = (zend_function*) &gc_call_destructors_fn;
+
+	GC_G(dtor_fiber) = fiber;
+
+	if (zend_fiber_start(fiber, NULL) == FAILURE) {
+		zend_error_noreturn(E_ERROR, "Unable to start destructor fiber");
+	}
+
+	return fiber;
+}
+
+static void gc_call_destructors(void)
+{
+	ZEND_ASSERT(!GC_G(dtor_fiber_running));
+
+	zend_fiber *fiber = GC_G(dtor_fiber);
+
+	GC_G(dtor_idx) = GC_FIRST_ROOT;
+
+	if (!fiber) {
+		fiber = gc_create_destructor_fiber();
+	} else {
+		zend_fiber_resume(fiber, NULL, NULL);
+	}
+
+	for (;;) {
+		/* At this point, fiber has executed until suspension */
+		GC_TRACE("returned from destructor fiber");
+
+		if (UNEXPECTED(GC_G(dtor_fiber_running))) {
+			/* Fiber was suspended by a destructor. Start a new one for the
+			 * remaining destructors. */
+			GC_TRACE("destructor fiber suspended by destructor");
+			GC_G(dtor_fiber) = NULL;
+			fiber = gc_create_destructor_fiber();
+			continue;
+		} else {
+			/* Fiber suspended itself after calling all destructors */
+			GC_TRACE("destructor fiber suspended itself");
+			break;
+		}
+	}
+}
+
 ZEND_API int zend_gc_collect_cycles(void)
 {
 	int total_count = 0;
@@ -1823,8 +1898,6 @@ rerun_gc:
 			GC_G(gc_active) = 0;
 			goto finish;
 		}
-
-		zend_fiber_switch_block();
 
 		end = GC_G(first_unused);
 
@@ -1876,38 +1949,14 @@ rerun_gc:
 				idx++;
 			}
 
-			/* Actually call destructors.
-			 *
-			 * The root buffer might be reallocated during destructors calls,
-			 * make sure to reload pointers as necessary. */
+			/* Actually call destructors. */
 			zend_hrtime_t dtor_start_time = zend_hrtime();
-			idx = GC_FIRST_ROOT;
-			while (idx != end) {
-				current = GC_IDX2PTR(idx);
-				if (GC_IS_DTOR_GARBAGE(current->ref)) {
-					p = GC_GET_PTR(current->ref);
-					/* Mark this is as a normal root for the next GC run,
-					 * it's no longer garbage for this run. */
-					current->ref = p;
-					/* Double check that the destructor hasn't been called yet. It could have
-					 * already been invoked indirectly by some other destructor. */
-					if (!(OBJ_FLAGS(p) & IS_OBJ_DESTRUCTOR_CALLED)) {
-						zend_object *obj = (zend_object*)p;
-						GC_TRACE_REF(obj, "calling destructor");
-						GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
-						GC_ADDREF(obj);
-						obj->handlers->dtor_obj(obj);
-						GC_DELREF(obj);
-					}
-				}
-				idx++;
-			}
+			gc_call_destructors();
 			GC_G(dtor_time) += zend_hrtime() - dtor_start_time;
 
 			if (GC_G(gc_protected)) {
 				/* something went wrong */
 				zend_get_gc_buffer_release();
-				zend_fiber_switch_unblock();
 				GC_G(collector_time) += zend_hrtime() - start_time;
 				return 0;
 			}
@@ -1969,8 +2018,6 @@ rerun_gc:
 		}
 
 		GC_G(free_time) += zend_hrtime() - free_start_time;
-
-		zend_fiber_switch_unblock();
 
 		GC_TRACE("Collection finished");
 		GC_G(collected) += count;
@@ -2119,3 +2166,78 @@ size_t zend_gc_globals_size(void)
 	return sizeof(zend_gc_globals);
 }
 #endif
+
+ZEND_FUNCTION(gc_call_destructors)
+{
+	uint32_t idx, end;
+	gc_root_buffer *current;
+	zend_refcounted *p;
+
+	zend_fiber *fiber = GC_G(dtor_fiber);
+	ZEND_ASSERT(fiber == EG(active_fiber));
+
+	for (;;) {
+		GC_G(dtor_fiber_running) = true;
+
+		/* The root buffer might be reallocated during destructors calls,
+		 * make sure to reload pointers as necessary. */
+		idx = GC_G(dtor_idx);
+		end = GC_G(first_unused);
+		while (idx != end) {
+			current = GC_IDX2PTR(idx);
+			if (GC_IS_DTOR_GARBAGE(current->ref)) {
+				p = GC_GET_PTR(current->ref);
+				/* Mark this is as a normal root for the next GC run */
+				current->ref = p;
+				/* Double check that the destructor hasn't been called yet. It
+				 * could have already been invoked indirectly by some other
+				 * destructor. */
+				if (!(OBJ_FLAGS(p) & IS_OBJ_DESTRUCTOR_CALLED)) {
+					GC_G(dtor_idx) = idx;
+					zend_object *obj = (zend_object*)p;
+					GC_TRACE_REF(obj, "calling destructor");
+					GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
+					GC_ADDREF(obj);
+					obj->handlers->dtor_obj(obj);
+					GC_TRACE_REF(obj, "returned from destructor");
+					GC_DELREF(obj);
+					if (UNEXPECTED(GC_G(dtor_fiber) != fiber)) {
+						/* We resumed after suspension */
+						gc_check_possible_root((zend_refcounted*)&obj->gc);
+
+						GC_DELREF(&fiber->std);
+						gc_check_possible_root((zend_refcounted*)&fiber->std.gc);
+
+						return;
+					}
+				}
+			}
+			idx++;
+		}
+
+		GC_G(dtor_fiber_running) = false;
+
+		zend_fiber_suspend(fiber, NULL, NULL);
+
+		if (UNEXPECTED(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)) {
+			/* Fiber is being destroyed by shutdown sequence */
+			GC_DELREF(&fiber->std);
+			gc_check_possible_root((zend_refcounted*)&fiber->std.gc);
+			return;
+		}
+	}
+}
+
+static zend_internal_function gc_call_destructors_fn = {
+	.type = ZEND_INTERNAL_FUNCTION,
+	.fn_flags = ZEND_ACC_PUBLIC,
+	.handler = ZEND_FN(gc_call_destructors),
+};
+
+void gc_init(void)
+{
+	gc_call_destructors_fn.function_name = zend_string_init_interned(
+			"gc_call_destructors",
+			strlen("gc_call_destructors"),
+			true);
+}
