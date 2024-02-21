@@ -5,6 +5,9 @@ sockets
 --SKIPIF--
 <?php
 
+if (PHP_OS == 'Darwin') {
+    die('skip Not for OSX');
+}
 $filename = __FILE__ . '.root_check.tmp';
 $fp = fopen($filename, 'w');
 fclose($fp);
