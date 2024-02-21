@@ -473,7 +473,6 @@ PHP_METHOD(DOMXPath, quote) {
 		// need to do the concat() trick published by Robert Rossney at https://stackoverflow.com/a/1352556/1067003
 		// first lets calculate the length (probably faster than repeated reallocs)
 		output_len = strlen("concat(");
-		size_t i;
 		for (size_t i = 0; i < input_len; ++i) {
 			uintptr_t bytesUntilSingleQuote =
 					(uintptr_t)memchr(input + i, '\'', input_len - i);
