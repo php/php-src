@@ -12,18 +12,6 @@ AC_DEFUN([AC_FPM_STDLIBS],
   AC_SEARCH_LIBS(inet_addr, nsl)
 ])
 
-AC_DEFUN([AC_FPM_SETPFLAGS],
-[
-  AC_MSG_CHECKING([for setpflags])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <priv.h>]], [[setpflags(0, 0);]])], [
-    AC_DEFINE([HAVE_SETPFLAGS], 1, [do we have setpflags?])
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-])
-
 AC_DEFUN([AC_FPM_CLOCK],
 [
   have_clock_gettime=no
@@ -507,7 +495,6 @@ if test "$PHP_FPM" != "no"; then
   AC_MSG_RESULT($PHP_FPM)
 
   AC_FPM_STDLIBS
-  AC_FPM_SETPFLAGS
   AC_FPM_CLOCK
   AC_FPM_TRACE
   AC_FPM_BUILTIN_ATOMIC
@@ -519,6 +506,8 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_DEVPOLL
   AC_FPM_EPOLL
   AC_FPM_SELECT
+
+  AC_CHECK_HEADER([priv.h], [AC_CHECK_FUNCS([setpflags])])
 
   PHP_ARG_WITH([fpm-user],,
     [AS_HELP_STRING([[--with-fpm-user[=USER]]],
