@@ -66,7 +66,7 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 		zend_strerror_noreturn(E_ERROR, errno, "Could not create timer");
 	}
 
-	EG(pid) = getpid();
+	EG(pid) = pid;
 
 # ifdef MAX_EXECUTION_TIMERS_DEBUG
 		fprintf(stderr, "Timer %#jx created on thread %d\n", (uintmax_t) EG(max_execution_timer_timer), sev.sigev_notify_thread_id);
