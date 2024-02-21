@@ -19,9 +19,7 @@
 
 #include <php.h>
 
-#ifdef PHP_WIN32
-# include "win32/inet.h"
-#else
+#ifndef PHP_WIN32
 # undef closesocket
 # define closesocket close
 # include <netinet/tcp.h>
