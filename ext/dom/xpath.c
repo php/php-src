@@ -450,23 +450,27 @@ PHP_METHOD(DOMXPath, registerPhpFunctionNS)
 PHP_METHOD(DOMXPath, quote) {
 	const char *input;
 	size_t input_len;
-	smart_str output = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &input, &input_len) ==
 			FAILURE) {
 		RETURN_THROWS();
 	}
 	if (memchr(input, '\'', input_len) == NULL) {
-		smart_str_appendc(&output, '\'');
-		smart_str_appendl(&output, input, input_len);
-		smart_str_appendc(&output, '\'');
+		zend_string *output = zend_string_alloc(input_len + 2, 0);
+		output->val[0] = '\'';
+		memcpy(output->val + 1, input, input_len);
+		output->val[input_len + 1] = '\'';
+		RETURN_STR(output);
 	} else if (memchr(input, '"', input_len) == NULL) {
-		smart_str_appendc(&output, '"');
-		smart_str_appendl(&output, input, input_len);
-		smart_str_appendc(&output, '"');
+		zend_string *output = zend_string_alloc(input_len + 2, 0);
+		output->val[0] = '"';
+		memcpy(output->val + 1, input, input_len);
+		output->val[input_len + 1] = '"';
+		RETURN_STR(output);
 	} else {
+		smart_str output = {0};
 		// need to use the concat() trick published by Robert Rossney at https://stackoverflow.com/a/1352556/1067003
-		smart_str_appends(&output, "concat(");
+		smart_str_appendl(&output, "concat(", 7);
 		for (size_t i = 0; i < input_len;) {
 			uintptr_t bytesUntilSingleQuote =
 					(uintptr_t)memchr(input + i, '\'', input_len - i);
@@ -495,8 +499,8 @@ PHP_METHOD(DOMXPath, quote) {
 			smart_str_appendc(&output, ',');
 		}
 		output.s->val[output.s->len -1 ] = ')'; // is there a smart_str function for this? (probably not)
+		RETURN_STR(smart_str_extract(&output));
 	}
-	RETURN_STR(smart_str_extract(&output));
 }
 /* }}} */
 
