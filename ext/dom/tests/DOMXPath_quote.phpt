@@ -46,6 +46,7 @@ function UserlandDOMXPathQuote(string $string): string
 
 
 $tests = [
+    '' => "''", // empty string
     'foo' => "'foo'", // no quotes
     '"foo' => '\'"foo\'', // double quotes only
     '\'foo' => '"\'foo"', // single quotes only
@@ -74,6 +75,7 @@ foreach ($tests as $input => $expected) {
 }
 ?>
 --EXPECT--
+Pass:  => ''
 Pass: foo => 'foo'
 Pass: "foo => '"foo'
 Pass: 'foo => "'foo"
