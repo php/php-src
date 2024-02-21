@@ -261,6 +261,7 @@ PHP_MINFO_FUNCTION(curl)
 	php_info_print_table_row(2, "Age", str);
 
 	/* To update on each new cURL release using src/main.c in cURL sources */
+	/* make sure to sync this list with curl_version as well */
 	if (d->features) {
 		struct feat {
 			const char *name;
@@ -1000,6 +1001,68 @@ PHP_FUNCTION(curl_version)
 	CAAL("version_number", d->version_num);
 	CAAL("age", d->age);
 	CAAL("features", d->features);
+	/* Add an array of features */
+	{
+		struct feat {
+        	const char *name;
+        	int bitmask;
+		};
+
+		unsigned int i;
+		zval feature_list;
+		array_init(&feature_list);
+
+		/* Sync this list with PHP_MINFO_FUNCTION(curl) as well */
+		static const struct feat feats[] = {
+			{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
+			{"CharConv", CURL_VERSION_CONV},
+			{"Debug", CURL_VERSION_DEBUG},
+			{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
+			{"IDN", CURL_VERSION_IDN},
+			{"IPv6", CURL_VERSION_IPV6},
+			{"krb4", CURL_VERSION_KERBEROS4},
+			{"Largefile", CURL_VERSION_LARGEFILE},
+			{"libz", CURL_VERSION_LIBZ},
+			{"NTLM", CURL_VERSION_NTLM},
+			{"NTLMWB", CURL_VERSION_NTLM_WB},
+			{"SPNEGO", CURL_VERSION_SPNEGO},
+			{"SSL",  CURL_VERSION_SSL},
+			{"SSPI",  CURL_VERSION_SSPI},
+			{"TLS-SRP", CURL_VERSION_TLSAUTH_SRP},
+			{"HTTP2", CURL_VERSION_HTTP2},
+			{"GSSAPI", CURL_VERSION_GSSAPI},
+			{"KERBEROS5", CURL_VERSION_KERBEROS5},
+			{"UNIX_SOCKETS", CURL_VERSION_UNIX_SOCKETS},
+			{"PSL", CURL_VERSION_PSL},
+			{"HTTPS_PROXY", CURL_VERSION_HTTPS_PROXY},
+			{"MULTI_SSL", CURL_VERSION_MULTI_SSL},
+			{"BROTLI", CURL_VERSION_BROTLI},
+#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
+			{"ALTSVC", CURL_VERSION_ALTSVC},
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
+			{"HTTP3", CURL_VERSION_HTTP3},
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0 */
+			{"UNICODE", CURL_VERSION_UNICODE},
+			{"ZSTD", CURL_VERSION_ZSTD},
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
+			{"HSTS", CURL_VERSION_HSTS},
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
+			{"GSASL", CURL_VERSION_GSASL},
+#endif
+		};
+
+        for(i = 0; i < sizeof(feats) / sizeof(feats[0]); i++) {
+			if (feats[i].name) {
+				add_assoc_bool(&feature_list, feats[i].name, d->features & feats[i].bitmask ? true : false);
+			}
+		}
+
+		CAAZ("feature_list", &feature_list);
+	}
 	CAAL("ssl_version_number", d->ssl_version_num);
 	CAAS("version", d->version);
 	CAAS("host", d->host);

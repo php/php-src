@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
   . Bumped required libcurl version to 7.61.0. (Ayesh)
+  . Added feature_list key to the curl_version() return value (Ayesh)
 
 - Date:
   . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
