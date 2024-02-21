@@ -59,6 +59,11 @@ PHP                                                                        NEWS
   . Added NumberFormatter::ROUND_TOWARD_ZERO and ::ROUND_AWAY_FROM_ZERO as
     aliases for ::ROUND_DOWN and ::ROUND_UP. (Jorg Sowa)
   . Added NumberFormatter::ROUND_HALFODD. (Ayesh Karunaratne)
+  . Added UCHAR_IDS_UNARY_OPERATOR, UCHAR_ID_COMPAT_MATH_START and
+    UCHAR_ID_COMPAT_MATH_CONTINUE constants. (David Carlier)
+  . Added IntlDateFormatter::getIanaID/intltz_get_iana_id method/function.
+    (David Carlier)
+  . Set to C++17 standard for icu 74 and onwards.
 
 - LDAP:
   . Added LDAP_OPT_X_TLS_PROTOCOL_MAX/LDAP_OPT_X_TLS_PROTOCOL_TLS1_3

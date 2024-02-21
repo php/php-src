@@ -391,6 +391,10 @@ PHP 8.4 UPGRADE NOTES
   . Added DOMXPath::registerPhpFunctionNS().
     RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
 
+- Intl:
+  . Added IntlDateFormatter::getIanaID()/intltz_get_iana_id() to
+    the IANA identifier from a given timezone.
+
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim functions.
     RFC: https://wiki.php.net/rfc/mb_trim
@@ -462,6 +466,10 @@ PHP 8.4 UPGRADE NOTES
 - Intl:
   . The IntlDateFormatter class exposes now the new PATTERN constant
     reflecting udat api's UDAT_PATTERN.
+  . The IntlChar class exposes now the new PROPERTY_IDS_UNARY_OPERATOR (new
+    IDS binary operator), PROPERTY_ID_COMPT_MATH_START,
+    PROPERTY_ID_COMPT_MATH_CONTINUE (both for mathematical
+    identifier profiling purpose) constants.
 
 - LDAP:
   . LDAP_OPT_X_TLS_PROTOCOL_MAX.
