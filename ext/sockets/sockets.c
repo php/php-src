@@ -30,7 +30,6 @@
 #include "php_ini.h"
 #ifdef PHP_WIN32
 # include "windows_common.h"
-# include <win32/inet.h>
 # include <windows.h>
 # include <Ws2tcpip.h>
 # include "php_sockets.h"
