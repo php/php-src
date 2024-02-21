@@ -448,7 +448,7 @@ PHP_METHOD(DOMXPath, registerPhpFunctionNS)
 
 /* {{{ */
 PHP_METHOD(DOMXPath, quote) {
-	char *input;
+	const char *input;
 	size_t input_len;
 	smart_str output = {0};
 
