@@ -20,6 +20,7 @@
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_ini.h"
+#include "zend_variables.h"
 #include "zend_vm.h"
 #include "zend_exceptions.h"
 #include "zend_builtin_functions.h"
@@ -637,7 +638,11 @@ static zend_always_inline void zend_fiber_delegate_transfer_result(
 		RETURN_THROWS();
 	}
 
-	RETURN_COPY_VALUE(&transfer->value);
+	if (return_value != NULL) {
+		RETURN_COPY_VALUE(&transfer->value);
+	} else {
+		zval_ptr_dtor(&transfer->value);
+	}
 }
 
 static zend_always_inline zend_fiber_transfer zend_fiber_switch_to(
@@ -665,7 +670,7 @@ static zend_always_inline zend_fiber_transfer zend_fiber_switch_to(
 	return transfer;
 }
 
-static zend_always_inline zend_fiber_transfer zend_fiber_resume(zend_fiber *fiber, zval *value, bool exception)
+static zend_always_inline zend_fiber_transfer zend_fiber_resume_internal(zend_fiber *fiber, zval *value, bool exception)
 {
 	zend_fiber *previous = EG(active_fiber);
 
@@ -683,8 +688,10 @@ static zend_always_inline zend_fiber_transfer zend_fiber_resume(zend_fiber *fibe
 	return transfer;
 }
 
-static zend_always_inline zend_fiber_transfer zend_fiber_suspend(zend_fiber *fiber, zval *value)
+static zend_always_inline zend_fiber_transfer zend_fiber_suspend_internal(zend_fiber *fiber, zval *value)
 {
+	ZEND_ASSERT(!(fiber->flags & ZEND_FIBER_FLAG_DESTROYED));
+	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_RUNNING || fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED);
 	ZEND_ASSERT(fiber->caller != NULL);
 
 	zend_fiber_context *caller = fiber->caller;
@@ -693,6 +700,54 @@ static zend_always_inline zend_fiber_transfer zend_fiber_suspend(zend_fiber *fib
 	fiber->execute_data = EG(current_execute_data);
 
 	return zend_fiber_switch_to(caller, value, false);
+}
+
+ZEND_API zend_result zend_fiber_start(zend_fiber *fiber, zval *return_value)
+{
+	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_INIT);
+
+	if (zend_fiber_init_context(&fiber->context, zend_ce_fiber, zend_fiber_execute, EG(fiber_stack_size)) == FAILURE) {
+		return FAILURE;
+	}
+
+	fiber->previous = &fiber->context;
+
+	zend_fiber_transfer transfer = zend_fiber_resume_internal(fiber, NULL, false);
+
+	zend_fiber_delegate_transfer_result(&transfer, EG(current_execute_data), return_value);
+
+	return SUCCESS;
+}
+
+ZEND_API void zend_fiber_resume(zend_fiber *fiber, zval *value, zval *return_value)
+{
+	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED && fiber->caller == NULL);
+
+	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
+
+	zend_fiber_transfer transfer = zend_fiber_resume_internal(fiber, value, /* exception */ false);
+
+	zend_fiber_delegate_transfer_result(&transfer, EG(current_execute_data), return_value);
+}
+
+ZEND_API void zend_fiber_resume_exception(zend_fiber *fiber, zval *exception, zval *return_value)
+{
+	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED && fiber->caller == NULL);
+
+	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
+
+	zend_fiber_transfer transfer = zend_fiber_resume_internal(fiber, exception, /* exception */ true);
+
+	zend_fiber_delegate_transfer_result(&transfer, EG(current_execute_data), return_value);
+}
+
+ZEND_API void zend_fiber_suspend(zend_fiber *fiber, zval *value, zval *return_value)
+{
+	fiber->stack_bottom->prev_execute_data = NULL;
+
+	zend_fiber_transfer transfer = zend_fiber_suspend_internal(fiber, value);
+
+	zend_fiber_delegate_transfer_result(&transfer, EG(current_execute_data), return_value);
 }
 
 static zend_object *zend_fiber_object_create(zend_class_entry *ce)
@@ -720,7 +775,7 @@ static void zend_fiber_object_destroy(zend_object *object)
 
 	fiber->flags |= ZEND_FIBER_FLAG_DESTROYED;
 
-	zend_fiber_transfer transfer = zend_fiber_resume(fiber, &graceful_exit, true);
+	zend_fiber_transfer transfer = zend_fiber_resume_internal(fiber, &graceful_exit, true);
 
 	zval_ptr_dtor(&graceful_exit);
 
@@ -836,7 +891,7 @@ ZEND_METHOD(Fiber, start)
 
 	fiber->previous = &fiber->context;
 
-	zend_fiber_transfer transfer = zend_fiber_resume(fiber, NULL, false);
+	zend_fiber_transfer transfer = zend_fiber_resume_internal(fiber, NULL, false);
 
 	zend_fiber_delegate_transfer_result(&transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -871,7 +926,7 @@ ZEND_METHOD(Fiber, suspend)
 
 	fiber->stack_bottom->prev_execute_data = NULL;
 
-	zend_fiber_transfer transfer = zend_fiber_suspend(fiber, value);
+	zend_fiber_transfer transfer = zend_fiber_suspend_internal(fiber, value);
 
 	zend_fiber_delegate_transfer_result(&transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -900,7 +955,7 @@ ZEND_METHOD(Fiber, resume)
 
 	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
 
-	zend_fiber_transfer transfer = zend_fiber_resume(fiber, value, false);
+	zend_fiber_transfer transfer = zend_fiber_resume_internal(fiber, value, false);
 
 	zend_fiber_delegate_transfer_result(&transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -928,7 +983,7 @@ ZEND_METHOD(Fiber, throw)
 
 	fiber->stack_bottom->prev_execute_data = EG(current_execute_data);
 
-	zend_fiber_transfer transfer = zend_fiber_resume(fiber, exception, true);
+	zend_fiber_transfer transfer = zend_fiber_resume_internal(fiber, exception, true);
 
 	zend_fiber_delegate_transfer_result(&transfer, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
