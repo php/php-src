@@ -24,6 +24,9 @@
 #include <setjmp.h>
 #include <stdint.h>
 #include <sys/types.h>
+#ifdef __APPLE__
+#include <dispatch/dispatch.h>
+#endif
 
 #include "zend_globals_macros.h"
 
@@ -299,7 +302,12 @@ struct _zend_executor_globals {
 #endif
 
 #ifdef ZEND_MAX_EXECUTION_TIMERS
+# ifdef __APPLE__
+	dispatch_source_t max_execution_timer_timer;
+	bool max_execution_timer_suspended;
+# else
 	timer_t max_execution_timer_timer;
+# endif
 	pid_t pid;
 	struct sigaction oldact;
 #endif

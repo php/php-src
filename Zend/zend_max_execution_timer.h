@@ -21,6 +21,12 @@
 
 #include "zend_long.h"
 
+#  ifdef __APPLE__
+#define ZEND_MAX_EXECUTION_TIMERS_SIGNAL SIGALRM
+#  else
+#define ZEND_MAX_EXECUTION_TIMERS_SIGNAL SIGRTMIN
+#  endif
+
 /* Must be called after calls to fork() */
 ZEND_API void zend_max_execution_timer_init(void);
 void zend_max_execution_timer_settime(zend_long seconds);

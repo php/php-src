@@ -304,12 +304,24 @@ AC_ARG_ENABLE([zend-max-execution-timers],
     [ZEND_MAX_EXECUTION_TIMERS=$enableval],
     [ZEND_MAX_EXECUTION_TIMERS=$ZEND_ZTS])
 
-AS_CASE(["$host_alias"], [*linux*|*freebsd*], [], [ZEND_MAX_EXECUTION_TIMERS='no'])
+AS_CASE(
+  ["$host_alias"],
+  [*linux*|*freebsd*], [
+    PHP_CHECK_FUNC(timer_create, rt)
+    if test "$ac_cv_func_timer_create" != "yes"; then
+      ZEND_MAX_EXECUTION_TIMERS='no'
+    fi
+  ],
+  [*darwin*], [],
+  [ZEND_MAX_EXECUTION_TIMERS='no']
+)
 
-PHP_CHECK_FUNC(timer_create, rt)
-if test "$ac_cv_func_timer_create" != "yes"; then
-  ZEND_MAX_EXECUTION_TIMERS='no'
-fi
+AS_CASE(["$host_alias"], [*darwin*], [], [
+  PHP_CHECK_FUNC(timer_create, rt)
+  if test "$ac_cv_func_timer_create" != "yes"; then
+    ZEND_MAX_EXECUTION_TIMERS='no'
+  fi
+])
 
 if test "$ZEND_MAX_EXECUTION_TIMERS" = "yes"; then
   AC_DEFINE(ZEND_MAX_EXECUTION_TIMERS, 1, [Use zend max execution timers])

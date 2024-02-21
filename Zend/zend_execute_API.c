@@ -1411,6 +1411,7 @@ static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 	}
 #endif
 
+#ifndef __APPLE__
 	if (si->si_value.sival_ptr != &EG(max_execution_timer_timer)) {
 #ifdef MAX_EXECUTION_TIMERS_DEBUG
 		fprintf(stderr, "Executing previous handler (if set) for unexpected signal SIGRTMIN received on thread %d\n", (pid_t) syscall(SYS_gettid));
@@ -1425,6 +1426,7 @@ static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 
 		return;
 	}
+#endif
 # else
 static void zend_timeout_handler(int dummy) /* {{{ */
 {
@@ -1544,9 +1546,10 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		act.sa_sigaction = zend_timeout_handler;
 		sigemptyset(&act.sa_mask);
 		act.sa_flags = SA_ONSTACK | SA_SIGINFO;
-		sigaction(SIGRTMIN, &act, NULL);
+		sigaction(ZEND_MAX_EXECUTION_TIMERS_SIGNAL, &act, NULL);
+
 		sigemptyset(&sigset);
-		sigaddset(&sigset, SIGRTMIN);
+		sigaddset(&sigset, ZEND_MAX_EXECUTION_TIMERS_SIGNAL);
 		sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 	}
 #elif defined(HAVE_SETITIMER)

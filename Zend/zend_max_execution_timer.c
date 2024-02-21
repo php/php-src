@@ -16,6 +16,96 @@
 
 #ifdef ZEND_MAX_EXECUTION_TIMERS
 
+# ifdef __APPLE__
+
+#include <dispatch/dispatch.h>
+#  ifdef ZTS
+#include <pthread.h>
+#  endif
+
+#include "zend.h"
+#include "zend_globals.h"
+
+// macOS doesn't support timer_create(), fallback to Grand Central Dispatch
+
+static inline void zend_max_execution_timer_handler(void *arg)
+{
+	pthread_t *tid = (pthread_t *) arg;
+	pthread_kill(*tid, ZEND_MAX_EXECUTION_TIMERS_SIGNAL);
+}
+
+static inline void zend_max_execution_timer_cancel(void *arg)
+{
+	pthread_t *tid = (pthread_t *) arg;
+	free(tid);
+}
+
+ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
+{
+	pid_t pid = getpid();
+
+	if (EG(pid) == pid) {
+		return;
+	}
+
+	dispatch_queue_global_t queue = dispatch_get_global_queue(QOS_CLASS_UTILITY, 0);
+	EG(max_execution_timer_timer) = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
+	if (EG(max_execution_timer_timer) == NULL) {
+		zend_strerror_noreturn(E_ERROR, errno, "Could not create dispatch source");
+	}
+
+	EG(pid) = pid;
+	EG(max_execution_timer_suspended) = 1;
+
+#  ifdef ZTS
+	pthread_t lpid = pthread_self();
+	pthread_t *tid = malloc(sizeof(pthread_t));
+	memcpy(tid, &lpid, sizeof(pthread_t));
+	dispatch_set_context(EG(max_execution_timer_timer), tid);
+#  endif
+
+	dispatch_source_set_event_handler_f(EG(max_execution_timer_timer), zend_max_execution_timer_handler);
+	dispatch_source_set_cancel_handler_f(EG(max_execution_timer_timer), zend_max_execution_timer_cancel);
+} /* }}} */
+
+void zend_max_execution_timer_settime(zend_long seconds) /* {{{ */
+{
+	if (seconds == 0) {
+		if (!EG(max_execution_timer_suspended)) {
+			dispatch_suspend(EG(max_execution_timer_timer));
+			EG(max_execution_timer_suspended) = 1;
+		}
+
+		return;
+	}
+
+	dispatch_source_set_timer(
+		EG(max_execution_timer_timer),
+		dispatch_time(DISPATCH_TIME_NOW, seconds * NSEC_PER_SEC),
+		seconds * NSEC_PER_SEC,
+		0
+	);
+	if (EG(max_execution_timer_suspended)) {
+		dispatch_resume(EG(max_execution_timer_timer));
+		EG(max_execution_timer_suspended) = 0;
+	}
+} /* }}} */
+
+void zend_max_execution_timer_shutdown(void) /* {{{ */
+{
+	/* Don't try to delete a timer created before a call to fork() */
+	if (EG(pid) != getpid()) {
+		return;
+	}
+
+	EG(pid) = 0;
+
+	dispatch_source_cancel(EG(max_execution_timer_timer));
+	//dispatch_release(EG(max_execution_timer_timer));
+} /* }}} */
+
+# else
+
 #include <stdio.h>
 #include <signal.h>
 #include <time.h>
@@ -23,25 +113,25 @@
 #include <errno.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
-# ifdef __FreeBSD__
-# include <pthread_np.h>
-# endif
+#  ifdef __FreeBSD__
+#  include <pthread_np.h>
+#  endif
 
 #include "zend.h"
 #include "zend_globals.h"
 
 // Musl Libc defines this macro, glibc does not
 // According to "man 2 timer_create" this field should always be available, but it's not: https://sourceware.org/bugzilla/show_bug.cgi?id=27417
-# ifndef sigev_notify_thread_id
-# define sigev_notify_thread_id _sigev_un._tid
-# endif
+#  ifndef sigev_notify_thread_id
+#  define sigev_notify_thread_id _sigev_un._tid
+#  endif
 
 // FreeBSD doesn't support CLOCK_BOOTTIME
-# ifdef __FreeBSD__
-# define ZEND_MAX_EXECUTION_TIMERS_CLOCK CLOCK_MONOTONIC
-# else
-# define ZEND_MAX_EXECUTION_TIMERS_CLOCK CLOCK_BOOTTIME
-# endif
+#  ifdef __FreeBSD__
+#  define ZEND_MAX_EXECUTION_TIMERS_CLOCK CLOCK_MONOTONIC
+#  else
+#  define ZEND_MAX_EXECUTION_TIMERS_CLOCK CLOCK_BOOTTIME
+#  endif
 
 ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 {
@@ -54,12 +144,12 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 	struct sigevent sev;
 	sev.sigev_notify = SIGEV_THREAD_ID;
 	sev.sigev_value.sival_ptr = &EG(max_execution_timer_timer);
-	sev.sigev_signo = SIGRTMIN;
-# ifdef __FreeBSD__
+	sev.sigev_signo = ZEND_MAX_EXECUTION_TIMERS_SIGNAL;
+#  ifdef __FreeBSD__
 	sev.sigev_notify_thread_id = pthread_getthreadid_np();
-# else
+#  else
 	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
-# endif
+#  endif
 
 	// Measure wall time instead of CPU time as originally planned now that it is possible https://github.com/php/php-src/pull/6504#issuecomment-1370303727
 	if (timer_create(ZEND_MAX_EXECUTION_TIMERS_CLOCK, &sev, &EG(max_execution_timer_timer)) != 0) {
@@ -68,9 +158,9 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 
 	EG(pid) = pid;
 
-# ifdef MAX_EXECUTION_TIMERS_DEBUG
+#  ifdef MAX_EXECUTION_TIMERS_DEBUG
 		fprintf(stderr, "Timer %#jx created on thread %d\n", (uintmax_t) EG(max_execution_timer_timer), sev.sigev_notify_thread_id);
-# endif
+#  endif
 
 	sigaction(sev.sigev_signo, NULL, &EG(oldact));
 }
@@ -89,9 +179,9 @@ void zend_max_execution_timer_settime(zend_long seconds) /* {{{ }*/
 	its.it_value.tv_sec = seconds;
 	its.it_value.tv_nsec = its.it_interval.tv_sec = its.it_interval.tv_nsec = 0;
 
-# ifdef MAX_EXECUTION_TIMERS_DEBUG
+#  ifdef MAX_EXECUTION_TIMERS_DEBUG
 	fprintf(stderr, "Setting timer %#jx on thread %d (%ld seconds)...\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid), seconds);
-# endif
+#  endif
 
 	if (timer_settime(timer, 0, &its, NULL) != 0) {
 		zend_strerror_noreturn(E_ERROR, errno, "Could not set timer");
@@ -110,9 +200,9 @@ void zend_max_execution_timer_shutdown(void) /* {{{ */
 
 	timer_t timer = EG(max_execution_timer_timer);
 
-# ifdef MAX_EXECUTION_TIMERS_DEBUG
+#  ifdef MAX_EXECUTION_TIMERS_DEBUG
 	fprintf(stderr, "Deleting timer %#jx on thread %d...\n", (uintmax_t) timer, (pid_t) syscall(SYS_gettid));
-# endif
+#  endif
 
 	int err = timer_delete(timer);
 	if (err != 0) {
@@ -121,4 +211,5 @@ void zend_max_execution_timer_shutdown(void) /* {{{ */
 }
 /* }}}} */
 
+# endif
 #endif
