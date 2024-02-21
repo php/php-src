@@ -34,6 +34,9 @@ function php_cli_server_start(
     if ($output_file_fd === false) {
         die(sprintf("Failed opening output file %s\n", $output_file));
     }
+    register_shutdown_function(function () use ($output_file) {
+        unlink($output_file);
+    });
 
     $descriptorspec = array(
         0 => STDIN,
