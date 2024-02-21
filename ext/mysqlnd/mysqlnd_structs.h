@@ -183,8 +183,8 @@ typedef struct st_mysqlnd_charset
 	unsigned int	char_minlen;
 	unsigned int	char_maxlen;
 	const char		*comment;
-	unsigned int 	(*mb_charlen)(const unsigned int c);
-	unsigned int 	(*mb_valid)(const char * const start, const char * const end);
+	short			mb_charlen;
+	short			mb_valid;
 } MYSQLND_CHARSET;
 
 
