@@ -1219,6 +1219,7 @@ IR_ALWAYS_INLINE int8_t ir_get_alocated_reg(const ir_ctx *ctx, ir_ref ref, int o
 #define IR_SIMPLE    (1U<<29) /* Insn doesn't have any target constraints */
 #define IR_FUSED_REG (1U<<28) /* Register assignemnt may be stored in ctx->fused_regs instead of ctx->regs */
 #define IR_MAY_SWAP  (1U<<27) /* Allow swapping operands for better register allocation */
+#define IR_MAY_REUSE (1U<<26) /* Result may reuse register of the source */
 
 #define IR_RULE_MASK 0xff
 

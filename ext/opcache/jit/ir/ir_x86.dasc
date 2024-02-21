@@ -1737,7 +1737,7 @@ static uint32_t ir_match_insn(ir_ctx *ctx, ir_ref ref)
 						}
 						/* pass */
 					} else if (op2_insn->val.i64 == 0) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					} else if ((ir_type_size[insn->type] >= 4 && insn->op == IR_ADD && IR_IS_SIGNED_32BIT(op2_insn->val.i64)) ||
 							(ir_type_size[insn->type] >= 4 && insn->op == IR_SUB && IR_IS_SIGNED_NEG_32BIT(op2_insn->val.i64))) {
 lea:
@@ -1878,7 +1878,7 @@ binop_fp:
 					} else if (op2_insn->val.u64 == 0) {
 						// 0
 					} else if (op2_insn->val.u64 == 1) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					} else if (ir_type_size[insn->type] >= 4 &&
 							(op2_insn->val.u64 == 2 || op2_insn->val.u64 == 4 || op2_insn->val.u64 == 8)) {
 						/* MUL(X, 2|4|8) => LEA [X*2|4|8] */
@@ -1940,7 +1940,7 @@ binop_fp:
 					} else if (IR_IS_CONST_REF(insn->op1)) {
 						// const
 					} else if (op2_insn->val.u64 == 1) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					} else if (IR_IS_POWER_OF_TWO(op2_insn->val.u64)) {
 						/* DIV(X, PWR2) => SHR */
 						if (IR_IS_TYPE_UNSIGNED(insn->type)) {
@@ -2004,7 +2004,7 @@ binop_fp:
 				} else if (IR_IS_CONST_REF(insn->op1)) {
 					// const
 				} else if (op2_insn->val.i64 == 0) {
-					return IR_COPY_INT;
+					// return IR_COPY_INT;
 				} else if (op2_insn->val.i64 == -1) {
 					// -1
 				}
@@ -2020,7 +2020,7 @@ binop_fp:
 				} else if (op2_insn->val.i64 == 0) {
 					// 0
 				} else if (op2_insn->val.i64 == -1) {
-					return IR_COPY_INT;
+					// return IR_COPY_INT;
 				}
 			}
 			goto binop_int;
@@ -2043,7 +2043,7 @@ binop_fp:
 					} else if (IR_IS_CONST_REF(insn->op1)) {
 						// const
 					} else if (op2_insn->val.u64 == 0) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					} else if (ir_type_size[insn->type] >= 4) {
 						if (op2_insn->val.u64 == 1) {
 							// lea [op1*2]
@@ -2069,7 +2069,7 @@ binop_fp:
 					} else if (IR_IS_CONST_REF(insn->op1)) {
 						// const
 					} else if (op2_insn->val.u64 == 0) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					}
 				}
 				return IR_SHIFT_CONST;
@@ -2086,9 +2086,9 @@ binop_fp:
 //		case IR_COND:
 		case IR_COPY:
 			if (IR_IS_TYPE_INT(insn->type)) {
-				return IR_COPY_INT;
+				return IR_COPY_INT | IR_MAY_REUSE;
 			} else {
-				return IR_COPY_FP;
+				return IR_COPY_FP | IR_MAY_REUSE;
 			}
 			break;
 		case IR_CALL:
@@ -2556,13 +2556,21 @@ store_int:
 			return insn->op;
 		case IR_SEXT:
 		case IR_ZEXT:
-		case IR_TRUNC:
-		case IR_BITCAST:
 		case IR_FP2INT:
 		case IR_FP2FP:
-		case IR_PROTO:
 			ir_match_fuse_load(ctx, insn->op1, ref);
 			return insn->op;
+		case IR_TRUNC:
+		case IR_PROTO:
+			ir_match_fuse_load(ctx, insn->op1, ref);
+			return insn->op | IR_MAY_REUSE;
+		case IR_BITCAST:
+			ir_match_fuse_load(ctx, insn->op1, ref);
+			if (IR_IS_TYPE_INT(insn->type) && IR_IS_TYPE_INT(ctx->ir_base[insn->op1].type)) {
+				return insn->op | IR_MAY_REUSE;
+			} else {
+				return insn->op;
+			}
 		case IR_CTLZ:
 		case IR_CTTZ:
 			ir_match_fuse_load(ctx, insn->op1, ref);

@@ -688,26 +688,7 @@ static void ir_sccp_remove_unfeasible_merge_inputs(ir_ctx *ctx, ir_insn *_values
 	}
 }
 
-static void ir_replace_inputs(ir_ctx *ctx, ir_ref ref, ir_ref input, ir_ref new_input)
-{
-	ir_use_list *use_list = &ctx->use_lists[ref];
-	ir_ref n = use_list->count;
-	ir_ref *p = &ctx->use_edges[use_list->refs];
-
-	for (; n; p++, n--) {
-		ir_ref use = *p;
-		ir_insn *insn = &ctx->ir_base[use];
-		ir_ref k, l = insn->inputs_count;
-
-		for (k = 1; k <= l; k++) {
-			if (ir_insn_op(insn, k) == input) {
-				ir_insn_set_op(insn, k, new_input);
-			}
-		}
-	}
-}
-
-static bool ir_may_promote_d2f_op(ir_ctx *ctx, ir_ref ref)
+static bool ir_may_promote_d2f(ir_ctx *ctx, ir_ref ref)
 {
 	ir_insn *insn = &ctx->ir_base[ref];
 
@@ -723,7 +704,7 @@ static bool ir_may_promote_d2f_op(ir_ctx *ctx, ir_ref ref)
 			case IR_NEG:
 			case IR_ABS:
 				return ctx->use_lists[ref].count == 1 &&
-					ir_may_promote_d2f_op(ctx, insn->op1);
+					ir_may_promote_d2f(ctx, insn->op1);
 			case IR_ADD:
 			case IR_SUB:
 			case IR_MUL:
@@ -731,8 +712,8 @@ static bool ir_may_promote_d2f_op(ir_ctx *ctx, ir_ref ref)
 			case IR_MIN:
 			case IR_MAX:
 				return ctx->use_lists[ref].count == 1 &&
-					ir_may_promote_d2f_op(ctx, insn->op1) &&
-					ir_may_promote_d2f_op(ctx, insn->op2);
+					ir_may_promote_d2f(ctx, insn->op1) &&
+					ir_may_promote_d2f(ctx, insn->op2);
 			default:
 				break;
 		}
@@ -740,7 +721,7 @@ static bool ir_may_promote_d2f_op(ir_ctx *ctx, ir_ref ref)
 	return 0;
 }
 
-static bool ir_may_promote_f2d_op(ir_ctx *ctx, ir_ref ref)
+static bool ir_may_promote_f2d(ir_ctx *ctx, ir_ref ref)
 {
 	ir_insn *insn = &ctx->ir_base[ref];
 
@@ -756,7 +737,7 @@ static bool ir_may_promote_f2d_op(ir_ctx *ctx, ir_ref ref)
 			case IR_NEG:
 			case IR_ABS:
 				return ctx->use_lists[ref].count == 1 &&
-					ir_may_promote_f2d_op(ctx, insn->op1);
+					ir_may_promote_f2d(ctx, insn->op1);
 			case IR_ADD:
 			case IR_SUB:
 			case IR_MUL:
@@ -764,8 +745,8 @@ static bool ir_may_promote_f2d_op(ir_ctx *ctx, ir_ref ref)
 			case IR_MIN:
 			case IR_MAX:
 				return ctx->use_lists[ref].count == 1 &&
-					ir_may_promote_f2d_op(ctx, insn->op1) &&
-					ir_may_promote_f2d_op(ctx, insn->op2);
+					ir_may_promote_f2d(ctx, insn->op1) &&
+					ir_may_promote_f2d(ctx, insn->op2);
 			default:
 				break;
 		}
@@ -773,7 +754,7 @@ static bool ir_may_promote_f2d_op(ir_ctx *ctx, ir_ref ref)
 	return 0;
 }
 
-static ir_ref ir_promote_d2f_op(ir_ctx *ctx, ir_ref ref, ir_ref use)
+static ir_ref ir_promote_d2f(ir_ctx *ctx, ir_ref ref, ir_ref use)
 {
 	ir_insn *insn = &ctx->ir_base[ref];
 
@@ -799,7 +780,7 @@ static ir_ref ir_promote_d2f_op(ir_ctx *ctx, ir_ref ref, ir_ref use)
 //				return ref;
 			case IR_NEG:
 			case IR_ABS:
-				insn->op1 = ir_promote_d2f_op(ctx, insn->op1, ref);
+				insn->op1 = ir_promote_d2f(ctx, insn->op1, ref);
 				insn->type = IR_FLOAT;
 				return ref;
 			case IR_ADD:
@@ -809,10 +790,10 @@ static ir_ref ir_promote_d2f_op(ir_ctx *ctx, ir_ref ref, ir_ref use)
 			case IR_MIN:
 			case IR_MAX:
 				if (insn->op1 == insn->op2) {
-					insn->op2 = insn->op1 = ir_promote_d2f_op(ctx, insn->op1, ref);
+					insn->op2 = insn->op1 = ir_promote_d2f(ctx, insn->op1, ref);
 				} else {
-					insn->op1 = ir_promote_d2f_op(ctx, insn->op1, ref);
-					insn->op2 = ir_promote_d2f_op(ctx, insn->op2, ref);
+					insn->op1 = ir_promote_d2f(ctx, insn->op1, ref);
+					insn->op2 = ir_promote_d2f(ctx, insn->op2, ref);
 				}
 				insn->type = IR_FLOAT;
 				return ref;
@@ -824,7 +805,7 @@ static ir_ref ir_promote_d2f_op(ir_ctx *ctx, ir_ref ref, ir_ref use)
 	return ref;
 }
 
-static ir_ref ir_promote_f2d_op(ir_ctx *ctx, ir_ref ref, ir_ref use)
+static ir_ref ir_promote_f2d(ir_ctx *ctx, ir_ref ref, ir_ref use)
 {
 	ir_insn *insn = &ctx->ir_base[ref];
 
@@ -850,7 +831,7 @@ static ir_ref ir_promote_f2d_op(ir_ctx *ctx, ir_ref ref, ir_ref use)
 				return ref;
 			case IR_NEG:
 			case IR_ABS:
-				insn->op1 = ir_promote_f2d_op(ctx, insn->op1, ref);
+				insn->op1 = ir_promote_f2d(ctx, insn->op1, ref);
 				insn->type = IR_DOUBLE;
 				return ref;
 			case IR_ADD:
@@ -860,10 +841,10 @@ static ir_ref ir_promote_f2d_op(ir_ctx *ctx, ir_ref ref, ir_ref use)
 			case IR_MIN:
 			case IR_MAX:
 				if (insn->op1 == insn->op2) {
-					insn->op2 = insn->op1 = ir_promote_f2d_op(ctx, insn->op1, ref);
+					insn->op2 = insn->op1 = ir_promote_f2d(ctx, insn->op1, ref);
 				} else {
-					insn->op1 = ir_promote_f2d_op(ctx, insn->op1, ref);
-					insn->op2 = ir_promote_f2d_op(ctx, insn->op2, ref);
+					insn->op1 = ir_promote_f2d(ctx, insn->op1, ref);
+					insn->op2 = ir_promote_f2d(ctx, insn->op2, ref);
 				}
 				insn->type = IR_DOUBLE;
 				return ref;
@@ -875,43 +856,7 @@ static ir_ref ir_promote_f2d_op(ir_ctx *ctx, ir_ref ref, ir_ref use)
 	return ref;
 }
 
-static void ir_promote_d2f(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
-{
-	if (ir_may_promote_d2f_op(ctx, insn->op1)) {
-		ir_ref new_ref = ir_promote_d2f_op(ctx, insn->op1, ref);
-		if (insn->op1 == new_ref) {
-			ir_replace_inputs(ctx, ref, ref, insn->op1);
-			ctx->use_lists[insn->op1] = ctx->use_lists[ref];
-			ctx->use_lists[ref].count = 0;
-			ctx->use_lists[ref].refs = 0;
-			insn->optx = IR_NOP;
-			insn->op1 = IR_UNUSED;
-		} else {
-			insn->optx = IR_OPTX(IR_COPY, IR_FLOAT, 1);
-			insn->op1 = new_ref;
-		}
-	}
-}
-
-static void ir_promote_f2d(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
-{
-	if (ir_may_promote_f2d_op(ctx, insn->op1)) {
-		ir_ref new_ref = ir_promote_f2d_op(ctx, insn->op1, ref);
-		if (insn->op1 == new_ref) {
-			ir_replace_inputs(ctx, ref, ref, insn->op1);
-			ctx->use_lists[insn->op1] = ctx->use_lists[ref];
-			ctx->use_lists[ref].count = 0;
-			ctx->use_lists[ref].refs = 0;
-			insn->optx = IR_NOP;
-			insn->op1 = IR_UNUSED;
-		} else {
-			insn->optx = IR_OPTX(IR_COPY, IR_DOUBLE, 1);
-			insn->op1 = new_ref;
-		}
-	}
-}
-
-static bool ir_may_promote_i2i_op(ir_ctx *ctx, ir_type type, ir_ref ref)
+static bool ir_may_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref)
 {
 	ir_insn *insn = &ctx->ir_base[ref];
 
@@ -926,7 +871,7 @@ static bool ir_may_promote_i2i_op(ir_ctx *ctx, ir_type type, ir_ref ref)
 			case IR_ABS:
 			case IR_NOT:
 				return ctx->use_lists[ref].count == 1 &&
-					ir_may_promote_i2i_op(ctx, type, insn->op1);
+					ir_may_promote_i2i(ctx, type, insn->op1);
 			case IR_ADD:
 			case IR_SUB:
 			case IR_MUL:
@@ -937,8 +882,8 @@ static bool ir_may_promote_i2i_op(ir_ctx *ctx, ir_type type, ir_ref ref)
 			case IR_AND:
 			case IR_XOR:
 				return ctx->use_lists[ref].count == 1 &&
-					ir_may_promote_i2i_op(ctx, type, insn->op1) &&
-					ir_may_promote_i2i_op(ctx, type, insn->op2);
+					ir_may_promote_i2i(ctx, type, insn->op1) &&
+					ir_may_promote_i2i(ctx, type, insn->op2);
 			default:
 				break;
 		}
@@ -946,7 +891,7 @@ static bool ir_may_promote_i2i_op(ir_ctx *ctx, ir_type type, ir_ref ref)
 	return 0;
 }
 
-static ir_ref ir_promote_i2i_op(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref use)
+static ir_ref ir_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref use)
 {
 	ir_insn *insn = &ctx->ir_base[ref];
 
@@ -970,7 +915,7 @@ static ir_ref ir_promote_i2i_op(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref us
 			case IR_NEG:
 			case IR_ABS:
 			case IR_NOT:
-				insn->op1 = ir_promote_i2i_op(ctx, type, insn->op1, ref);
+				insn->op1 = ir_promote_i2i(ctx, type, insn->op1, ref);
 				insn->type = type;
 				return ref;
 			case IR_ADD:
@@ -983,10 +928,10 @@ static ir_ref ir_promote_i2i_op(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref us
 			case IR_AND:
 			case IR_XOR:
 				if (insn->op1 == insn->op2) {
-					insn->op2 = insn->op1 = ir_promote_i2i_op(ctx, type, insn->op1, ref);
+					insn->op2 = insn->op1 = ir_promote_i2i(ctx, type, insn->op1, ref);
 				} else {
-					insn->op1 = ir_promote_i2i_op(ctx, type, insn->op1, ref);
-					insn->op2 = ir_promote_i2i_op(ctx, type, insn->op2, ref);
+					insn->op1 = ir_promote_i2i(ctx, type, insn->op1, ref);
+					insn->op2 = ir_promote_i2i(ctx, type, insn->op2, ref);
 				}
 				insn->type = type;
 				return ref;
@@ -996,24 +941,6 @@ static ir_ref ir_promote_i2i_op(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref us
 	}
 	IR_ASSERT(0);
 	return ref;
-}
-
-static void ir_promote_trunc(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
-{
-	if (ir_may_promote_i2i_op(ctx, insn->type, insn->op1)) {
-		ir_ref new_ref = ir_promote_i2i_op(ctx, insn->type, insn->op1, ref);
-		if (insn->op1 == new_ref) {
-			ir_replace_inputs(ctx, ref, ref, insn->op1);
-			ctx->use_lists[insn->op1] = ctx->use_lists[ref];
-			ctx->use_lists[ref].count = 0;
-			ctx->use_lists[ref].refs = 0;
-			insn->optx = IR_NOP;
-			insn->op1 = IR_UNUSED;
-		} else {
-			insn->optx = IR_OPTX(IR_COPY, insn->type, 1);
-			insn->op1 = new_ref;
-		}
-	}
 }
 
 int ir_sccp(ir_ctx *ctx)
@@ -1343,24 +1270,33 @@ int ir_sccp(ir_ctx *ctx)
 				switch (insn->op) {
 					case IR_FP2FP:
 						if (insn->type == IR_FLOAT) {
-							ir_promote_d2f(ctx, i, insn);
+							if (ir_may_promote_d2f(ctx, insn->op1)) {
+								ir_ref ref = ir_promote_d2f(ctx, insn->op1, i);
+								ir_sccp_replace_insn2(ctx, i, ref, &worklist2);
+							}
 						} else {
-							ir_promote_f2d(ctx, i, insn);
+							if (ir_may_promote_f2d(ctx, insn->op1)) {
+								ir_ref ref = ir_promote_f2d(ctx, insn->op1, i);
+								ir_sccp_replace_insn2(ctx, i, ref, &worklist2);
+							}
 						}
 						break;
 					case IR_FP2INT:
 						if (ctx->ir_base[insn->op1].type == IR_DOUBLE) {
-							if (ir_may_promote_d2f_op(ctx, insn->op1)) {
-								insn->op1 = ir_promote_d2f_op(ctx, insn->op1, i);
+							if (ir_may_promote_d2f(ctx, insn->op1)) {
+								insn->op1 = ir_promote_d2f(ctx, insn->op1, i);
 							}
 						} else {
-							if (ir_may_promote_f2d_op(ctx, insn->op1)) {
-								insn->op1 = ir_promote_f2d_op(ctx, insn->op1, i);
+							if (ir_may_promote_f2d(ctx, insn->op1)) {
+								insn->op1 = ir_promote_f2d(ctx, insn->op1, i);
 							}
 						}
 						break;
 					case IR_TRUNC:
-						ir_promote_trunc(ctx, i, insn);
+						if (ir_may_promote_i2i(ctx, insn->type, insn->op1)) {
+							ir_ref ref = ir_promote_i2i(ctx, insn->type, insn->op1, i);
+							ir_sccp_replace_insn2(ctx, i, ref, &worklist2);
+						}
 						break;
 					default:
 						ir_sccp_fold2(ctx, i, &worklist2);
