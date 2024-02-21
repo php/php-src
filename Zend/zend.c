@@ -1128,6 +1128,7 @@ zend_result zend_post_startup(void) /* {{{ */
 #ifdef ZEND_CHECK_STACK_LIMIT
 	zend_call_stack_init();
 #endif
+	gc_init();
 
 	return SUCCESS;
 }
