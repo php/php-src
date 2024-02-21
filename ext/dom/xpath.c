@@ -529,6 +529,7 @@ PHP_METHOD(DOMXPath, quote) {
 		output[outputPos - 1] = ')';
 	}
 	RETVAL_STRINGL(output, output_len);
+	efree(output); // todo: directly return a string and avoid the copy, probably possible but idk how (reviewers may want to check this)
 }
 /* }}} */
 
