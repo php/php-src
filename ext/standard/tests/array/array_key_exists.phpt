@@ -205,5 +205,5 @@ bool(true)
 Cannot access offset of type array on array
 
 *** Testing operation on objects ***
-array_key_exists(): Argument #2 ($array) must be of type array, key_check given
+array_key_exists(): Argument #2 ($array) must be of type array|ArrayAccess, key_check given
 Done

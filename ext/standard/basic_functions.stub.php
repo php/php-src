@@ -1903,7 +1903,7 @@ function array_map(?callable $callback, array $array, array ...$arrays): array {
  * @param string|int $key
  * @compile-time-eval
  */
-function array_key_exists($key, array $array): bool {}
+function array_key_exists($key, array|ArrayAccess $array): bool {}
 
 /**
  * @param string|int $key

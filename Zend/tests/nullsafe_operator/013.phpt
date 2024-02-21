@@ -73,4 +73,4 @@ array(1) {
   string(3) "foo"
 }
 bool(false)
-string(74) "array_key_exists(): Argument #2 ($array) must be of type array, null given"
+string(86) "array_key_exists(): Argument #2 ($array) must be of type array|ArrayAccess, null given"

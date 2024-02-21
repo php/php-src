@@ -3055,6 +3055,27 @@ num_key:
 	}
 }
 
+static zend_never_inline bool ZEND_FASTCALL zend_array_key_exists_for_array_access(zend_object *obj, zval *key OPLINE_DC EXECUTE_DATA_DC)
+{
+	if (!instanceof_function(obj->ce, zend_ce_arrayaccess)) {
+		zend_argument_type_error(2, "must be of type array|ArrayAccess, %s given", zend_zval_value_name(key));
+		return false;
+	}
+
+	zval rv;
+
+	zend_call_method_with_1_params(obj, obj->ce, NULL, "offsetExists", &rv, key);
+	if (EG(exception)) {
+		return false;
+	}
+
+	bool result = zend_is_true(&rv);
+
+	zval_ptr_dtor(&rv);
+
+	return result;
+}
+
 static ZEND_COLD void ZEND_FASTCALL zend_array_key_exists_error(
 		zval *subject, zval *key OPLINE_DC EXECUTE_DATA_DC)
 {
@@ -3065,7 +3086,7 @@ static ZEND_COLD void ZEND_FASTCALL zend_array_key_exists_error(
 		ZVAL_UNDEFINED_OP2();
 	}
 	if (!EG(exception)) {
-		zend_type_error("array_key_exists(): Argument #2 ($array) must be of type array, %s given",
+		zend_type_error("array_key_exists(): Argument #2 ($array) must be of type array|ArrayAccess, %s given",
 			zend_zval_value_name(subject));
 	}
 }

@@ -6759,40 +6759,53 @@ PHP_FUNCTION(array_map)
 PHP_FUNCTION(array_key_exists)
 {
 	zval *key;
-	HashTable *ht;
+	zval *zv;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ZVAL(key)
-		Z_PARAM_ARRAY_HT(ht)
+		Z_PARAM_ARRAY_OR_OBJECT(zv)
 	ZEND_PARSE_PARAMETERS_END();
 
-	switch (Z_TYPE_P(key)) {
-		case IS_STRING:
-			RETVAL_BOOL(zend_symtable_exists(ht, Z_STR_P(key)));
-			break;
-		case IS_LONG:
-			RETVAL_BOOL(zend_hash_index_exists(ht, Z_LVAL_P(key)));
-			break;
-		case IS_NULL:
-			RETVAL_BOOL(zend_hash_exists(ht, ZSTR_EMPTY_ALLOC()));
-			break;
-		case IS_DOUBLE:
-			RETVAL_BOOL(zend_hash_index_exists(ht, zend_dval_to_lval_safe(Z_DVAL_P(key))));
-			break;
-		case IS_FALSE:
-			RETVAL_BOOL(zend_hash_index_exists(ht, 0));
-			break;
-		case IS_TRUE:
-			RETVAL_BOOL(zend_hash_index_exists(ht, 1));
-			break;
-		case IS_RESOURCE:
-			zend_use_resource_as_offset(key);
-			RETVAL_BOOL(zend_hash_index_exists(ht, Z_RES_HANDLE_P(key)));
-			break;
-		default:
-			zend_argument_type_error(1, "must be a valid array offset type");
-			break;
+	if (EXPECTED(Z_TYPE_P(zv) == IS_ARRAY)) {
+		HashTable *ht = Z_ARRVAL_P(zv);
+		switch (Z_TYPE_P(key)) {
+			case IS_STRING:
+				RETURN_BOOL(zend_symtable_exists(ht, Z_STR_P(key)));
+			case IS_LONG:
+				RETURN_BOOL(zend_hash_index_exists(ht, Z_LVAL_P(key)));
+			case IS_NULL:
+				RETURN_BOOL(zend_hash_exists(ht, ZSTR_EMPTY_ALLOC()));
+			case IS_DOUBLE:
+				RETURN_BOOL(zend_hash_index_exists(ht, zend_dval_to_lval_safe(Z_DVAL_P(key))));
+			case IS_FALSE:
+				RETURN_BOOL(zend_hash_index_exists(ht, 0));
+			case IS_TRUE:
+				RETURN_BOOL(zend_hash_index_exists(ht, 1));
+			case IS_RESOURCE:
+				zend_use_resource_as_offset(key);
+				RETURN_BOOL(zend_hash_index_exists(ht, Z_RES_HANDLE_P(key)));
+			default:
+				zend_argument_type_error(1, "must be a valid array offset type");
+				RETURN_THROWS();
+		}
 	}
+
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_OBJECT);
+
+	if (!zend_class_implements_interface(Z_OBJCE_P(zv), zend_ce_arrayaccess)) {
+		zend_argument_type_error(2, "must be of type array|ArrayAccess, %s given", zend_zval_value_name(zv));
+		RETURN_THROWS();
+	}
+
+	zval rv;
+
+	zend_call_method_with_1_params(Z_OBJ_P(zv), Z_OBJCE_P(zv), NULL, "offsetExists", &rv, key);
+	if (EG(exception)) {
+		RETURN_THROWS();
+	}
+
+	RETVAL_BOOL(zend_is_true(&rv));
+	zval_ptr_dtor(&rv);
 }
 /* }}} */
 
