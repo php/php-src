@@ -492,7 +492,7 @@ PHP_METHOD(DOMXPath, quote) {
 			smart_str_appendl(&output, input + i, bytesUntilQuote);
 			smart_str_appendc(&output, quoteMethod);
 			i += bytesUntilQuote;
-			smart_str_appends(&output, ",");
+			smart_str_appendc(&output, ',');
 		}
 		output.s->val[output.s->len -1 ] = ')'; // is there a smart_str function for this? (probably not)
 	}
