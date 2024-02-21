@@ -486,10 +486,7 @@ PHP_METHOD(DOMXPath, quote) {
 			} else {
 				bytesUntilDoubleQuote = bytesUntilDoubleQuote - (uintptr_t)(input + i);
 			}
-			const size_t bytesUntilQuote =
-					(bytesUntilSingleQuote > bytesUntilDoubleQuote)
-							? bytesUntilSingleQuote
-							: bytesUntilDoubleQuote;
+			const size_t bytesUntilQuote = MAX(bytesUntilSingleQuote, bytesUntilDoubleQuote);
 			const char quoteMethod =
 					(bytesUntilSingleQuote > bytesUntilDoubleQuote) ? '\'' : '"';
 			smart_str_appendc(&output, quoteMethod);
