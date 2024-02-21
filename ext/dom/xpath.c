@@ -465,6 +465,7 @@ PHP_METHOD(DOMXPath, quote) {
 		smart_str_appendl(&output, input, input_len);
 		smart_str_appendc(&output, '"');
 	} else {
+		// need to use the concat() trick published by Robert Rossney at https://stackoverflow.com/a/1352556/1067003
 		smart_str_appends(&output, "concat(");
 		for (size_t i = 0; i < input_len; ++i) {
 			uintptr_t bytesUntilSingleQuote =
