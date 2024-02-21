@@ -885,7 +885,7 @@ binop_fp:
 				return IR_COPY_FP | IR_MAY_REUSE;
 			}
 			break;
-		case IR_TRUNC:
+//		case IR_TRUNC:
 		case IR_PROTO:
 			return insn->op | IR_MAY_REUSE;
 		case IR_BITCAST:
