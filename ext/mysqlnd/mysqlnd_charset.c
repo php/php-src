@@ -838,27 +838,29 @@ PHPAPI zend_ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset
 
 	for (;escapestr < end; escapestr++) {
 		char esc = '\0';
-		unsigned int len = 0;
 
 		/* check unicode characters
 		 * Encodings that have a minimum length of 1 are compatible with ASCII.
 		 * So we can skip (for performance reasons) the check to mb_valid for them. */
-		if (cset->char_maxlen > 1 && (*((zend_uchar *) escapestr) > 0x80 || cset->char_minlen > 1) && (len = cset->mb_valid(escapestr, end))) {
-			/* check possible overflow */
-			if ((newstr + len) > newstr_e) {
-				escape_overflow = TRUE;
-				break;
+		if (cset->char_maxlen > 1 && (*((zend_uchar *) escapestr) > 0x80 || cset->char_minlen > 1)) {
+			unsigned int len = cset->mb_valid(escapestr, end);
+			if (len) {
+				/* check possible overflow */
+				if ((newstr + len) > newstr_e) {
+					escape_overflow = TRUE;
+					break;
+				}
+				/* copy mb char without escaping it */
+				while (len--) {
+					*newstr++ = *escapestr++;
+				}
+				escapestr--;
+				continue;
+			} else if (cset->mb_charlen(*escapestr) > 1) {
+				esc = *escapestr;
 			}
-			/* copy mb char without escaping it */
-			while (len--) {
-				*newstr++ = *escapestr++;
-			}
-			escapestr--;
-			continue;
 		}
-		if (cset->char_maxlen > 1 && cset->mb_charlen(*escapestr) > 1) {
-			esc = *escapestr;
-		} else {
+		if (!esc) {
 			switch (*escapestr) {
 				case 0:
 					esc = '0';
