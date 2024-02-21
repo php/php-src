@@ -12,7 +12,7 @@ const AF_UNIX = UNKNOWN;
  * @cvalue AF_INET
  */
 const AF_INET = UNKNOWN;
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue AF_INET6
@@ -649,7 +649,7 @@ const IP_MULTICAST_LOOP = UNKNOWN;
  */
 const IP_BIND_ADDRESS_NO_PORT = UNKNOWN;
 #endif
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue IPV6_MULTICAST_IF
@@ -1542,7 +1542,7 @@ const SOCKET_NO_ADDRESS = UNKNOWN;
  * @cvalue IPPROTO_IP
  */
 const IPPROTO_IP = UNKNOWN;
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue IPPROTO_IPV6
@@ -1568,7 +1568,7 @@ const SOL_UDP = UNKNOWN;
 const SOL_UDPLITE = UNKNOWN;
 #endif
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue IPV6_UNICAST_HOPS

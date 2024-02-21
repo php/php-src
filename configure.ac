@@ -601,7 +601,6 @@ getgrnam_r \
 getpwuid_r \
 getwd \
 glob \
-inet_pton \
 localtime_r \
 lchown \
 memcntl \
@@ -638,10 +637,8 @@ memrchr \
 mempcpy \
 )
 
-AC_CHECK_FUNC(inet_ntop,[],[
-    AC_MSG_ERROR([Cannot find inet_ntop which is required])
-]
-)
+AC_CHECK_FUNC([inet_ntop],,[AC_MSG_ERROR([Required inet_ntop not found.])])
+AC_CHECK_FUNC([inet_pton],,[AC_MSG_ERROR([Required inet_pton not found.])])
 
 dnl Check for strerror_r, and if its a POSIX-compatible or a GNU specific version.
 AC_FUNC_STRERROR_R

@@ -555,7 +555,6 @@ PHP_FUNCTION(inet_ntop)
 }
 /* }}} */
 
-#ifdef HAVE_INET_PTON
 /* {{{ Converts a human readable IP address to a packed binary string */
 PHP_FUNCTION(inet_pton)
 {
@@ -588,42 +587,22 @@ PHP_FUNCTION(inet_pton)
 	RETURN_STRINGL(buffer, af == AF_INET ? 4 : 16);
 }
 /* }}} */
-#endif /* HAVE_INET_PTON */
 
 /* {{{ Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
 PHP_FUNCTION(ip2long)
 {
 	char *addr;
 	size_t addr_len;
-#ifdef HAVE_INET_PTON
 	struct in_addr ip;
-#else
-	zend_ulong ip;
-#endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(addr, addr_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-#ifdef HAVE_INET_PTON
 	if (addr_len == 0 || inet_pton(AF_INET, addr, &ip) != 1) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(ntohl(ip.s_addr));
-#else
-	if (addr_len == 0 || (ip = inet_addr(addr)) == INADDR_NONE) {
-		/* The only special case when we should return -1 ourselves,
-		 * because inet_addr() considers it wrong. We return 0xFFFFFFFF and
-		 * not -1 or ~0 because of 32/64bit issues. */
-		if (addr_len == sizeof("255.255.255.255") - 1 &&
-			!memcmp(addr, "255.255.255.255", sizeof("255.255.255.255") - 1)
-		) {
-			RETURN_LONG(0xFFFFFFFF);
-		}
-		RETURN_FALSE;
-	}
-	RETURN_LONG(ntohl(ip));
-#endif
 }
 /* }}} */
 

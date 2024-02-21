@@ -326,7 +326,7 @@ PHP_FUNCTION(socket_cmsg_space)
 	RETURN_LONG((zend_long)CMSG_SPACE(entry->size + n * entry->var_el_size));
 }
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname, zval *arg4)
 {
 	struct err_s	err = {0};

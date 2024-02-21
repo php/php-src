@@ -116,9 +116,6 @@
 /* Win32 support proc_open */
 #define PHP_CAN_SUPPORT_PROC_OPEN 1
 
-/* inet_pton() */
-#define HAVE_INET_PTON 1
-
 /* vs.net 2005 has a 64-bit time_t.  This will likely break
  * 3rdParty libs that were built with older compilers; switch
  * back to 32-bit */

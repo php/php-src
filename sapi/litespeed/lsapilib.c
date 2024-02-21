@@ -2688,12 +2688,7 @@ int LSAPI_ParseSockAddr( const char * pBind, struct sockaddr * pAddr )
             ((struct sockaddr_in *)pAddr)->sin_addr.s_addr = htonl( INADDR_LOOPBACK );
         else
         {
-#ifdef HAVE_INET_PTON
             if (!inet_pton(AF_INET, p, &((struct sockaddr_in *)pAddr)->sin_addr))
-#else
-            ((struct sockaddr_in *)pAddr)->sin_addr.s_addr = inet_addr( p );
-            if ( ((struct sockaddr_in *)pAddr)->sin_addr.s_addr == INADDR_BROADCAST)
-#endif
             {
                 doAddrInfo = 1;
             }

@@ -514,7 +514,7 @@ static void to_zval_read_sa_family(const char *data, zval *zv, res_context *ctx)
 
 	ZVAL_LONG(zv, (zend_long)ival);
 }
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 static void to_zval_read_unsigned(const char *data, zval *zv, res_context *ctx)
 {
 	unsigned ival;
@@ -597,7 +597,7 @@ static void to_zval_read_sockaddr_in(const char *data, zval *zv, res_context *ct
 {
 	to_zval_read_aggregation(data, zv, descriptors_sockaddr_in, ctx);
 }
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_context *ctx)
 {
 	int					res;
@@ -753,7 +753,7 @@ static void from_zval_write_sockaddr_aux(const zval *container,
 		}
 		break;
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	case AF_INET6:
 		if (ctx->sock->type != AF_INET6) {
 			do_from_zval_err(ctx, "the specified family (AF_INET6) is not "
@@ -817,7 +817,7 @@ static void to_zval_read_sockaddr_aux(const char *sockaddr_c, zval *zv, res_cont
 		to_zval_read_sockaddr_in(sockaddr_c, zv, ctx);
 		break;
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	case AF_INET6:
 		to_zval_read_sockaddr_in6(sockaddr_c, zv, ctx);
 		break;
