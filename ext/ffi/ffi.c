@@ -4382,54 +4382,73 @@ ZEND_METHOD(FFI, alignof) /* {{{ */
 }
 /* }}} */
 
+static void *php_ffi_parse_cdata_to_ptr(zend_long size, zend_object *zobj, bool *is_error)
+{
+	void *result_ptr = NULL;
+	*is_error = false;
+
+	zend_ffi_cdata *cdata = (zend_ffi_cdata*)zobj;
+    zend_ffi_type *type = ZEND_FFI_TYPE(cdata->type);
+
+    if (type->kind == ZEND_FFI_TYPE_POINTER) {
+    	result_ptr = *(void**)cdata->ptr;
+    } else {
+    	if (type->kind != ZEND_FFI_TYPE_POINTER && size > type->size) {
+    		*is_error = true;
+    		return NULL;
+    	}
+    	result_ptr = cdata->ptr;
+    }
+
+    return result_ptr;
+}
+
+static void *php_ffi_parse_cdata_or_string_to_ptr(zend_long size, zend_object *zobj, zend_string *zstr, bool *is_error)
+{
+	void *result_ptr = NULL;
+	*is_error = false;
+
+	if (zstr) {
+		if (size > ZSTR_LEN(zstr)) {
+    		*is_error = true;
+			return NULL;
+		}
+		result_ptr = ZSTR_VAL(zstr);
+	} else {
+		result_ptr = php_ffi_parse_cdata_to_ptr(size, zobj, is_error);
+	}
+
+    return result_ptr;
+}
+
 ZEND_METHOD(FFI, memcpy) /* {{{ */
 {
-	zval *zv1, *zv2;
-	zend_ffi_cdata *cdata1, *cdata2;
-	zend_ffi_type *type1, *type2;
+	zval *zv1;
+	zend_object *op2_obj = NULL;
+	zend_string *op2_zstr = NULL;
 	void *ptr1, *ptr2;
 	zend_long size;
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_OBJECT_OF_CLASS_EX(zv1, zend_ffi_cdata_ce, 0, 1);
-		Z_PARAM_ZVAL(zv2)
+		Z_PARAM_OBJECT_OF_CLASS_EX(zv1, zend_ffi_cdata_ce, /* allow null */ false, /* deref */ true);
+		Z_PARAM_OBJ_OF_CLASS_OR_STR_EX(op2_obj, zend_ffi_cdata_ce, op2_zstr, /* allow null */ false, /* deref */ true);
 		Z_PARAM_LONG(size)
 	ZEND_PARSE_PARAMETERS_END();
 
-	cdata1 = (zend_ffi_cdata*)Z_OBJ_P(zv1);
-	type1 = ZEND_FFI_TYPE(cdata1->type);
-	if (type1->kind == ZEND_FFI_TYPE_POINTER) {
-		ptr1 = *(void**)cdata1->ptr;
-	} else {
-		ptr1 = cdata1->ptr;
-		if (type1->kind != ZEND_FFI_TYPE_POINTER && size > type1->size) {
-			zend_throw_error(zend_ffi_exception_ce, "Attempt to write over data boundary");
-			RETURN_THROWS();
-		}
+	bool is_error = false;
+	ptr1 = php_ffi_parse_cdata_to_ptr(size, Z_OBJ_P(zv1), &is_error);
+	if (is_error) {
+    	zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
+		RETURN_THROWS();
 	}
-
-	ZVAL_DEREF(zv2);
-	if (Z_TYPE_P(zv2) == IS_STRING) {
-		ptr2 = Z_STRVAL_P(zv2);
-		if (size > Z_STRLEN_P(zv2)) {
-			zend_throw_error(zend_ffi_exception_ce, "Attempt to read over string boundary");
-			RETURN_THROWS();
-		}
-	} else if (Z_TYPE_P(zv2) == IS_OBJECT && Z_OBJCE_P(zv2) == zend_ffi_cdata_ce) {
-		cdata2 = (zend_ffi_cdata*)Z_OBJ_P(zv2);
-		type2 = ZEND_FFI_TYPE(cdata2->type);
-		if (type2->kind == ZEND_FFI_TYPE_POINTER) {
-			ptr2 = *(void**)cdata2->ptr;
+	ptr2 = php_ffi_parse_cdata_or_string_to_ptr(size, op2_obj, op2_zstr, &is_error);
+	if (is_error) {
+		if (op2_zstr) {
+			zend_throw_error(zend_ffi_exception_ce, "attempt to read over string boundary");
 		} else {
-			ptr2 = cdata2->ptr;
-			if (type2->kind != ZEND_FFI_TYPE_POINTER && size > type2->size) {
-				zend_throw_error(zend_ffi_exception_ce, "Attempt to read over data boundary");
-				RETURN_THROWS();
-			}
+    		zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
 		}
-	} else {
-		zend_wrong_parameter_class_error(2, "FFI\\CData or string", zv2);
 		RETURN_THROWS();
 	}
 
@@ -4439,65 +4458,38 @@ ZEND_METHOD(FFI, memcpy) /* {{{ */
 
 ZEND_METHOD(FFI, memcmp) /* {{{ */
 {
-	zval *zv1, *zv2;
-	zend_ffi_cdata *cdata1, *cdata2;
-	zend_ffi_type *type1, *type2;
+	zend_object *op1_obj = NULL;
+	zend_string *op1_zstr = NULL;
+	zend_object *op2_obj = NULL;
+	zend_string *op2_zstr = NULL;
 	void *ptr1, *ptr2;
 	zend_long size;
 	int ret;
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
 	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_ZVAL(zv1);
-		Z_PARAM_ZVAL(zv2);
+		Z_PARAM_OBJ_OF_CLASS_OR_STR_EX(op1_obj, zend_ffi_cdata_ce, op1_zstr, /* allow null */ false, /* deref */ true);
+		Z_PARAM_OBJ_OF_CLASS_OR_STR_EX(op2_obj, zend_ffi_cdata_ce, op2_zstr, /* allow null */ false, /* deref */ true);
 		Z_PARAM_LONG(size)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_DEREF(zv1);
-	if (Z_TYPE_P(zv1) == IS_STRING) {
-		ptr1 = Z_STRVAL_P(zv1);
-		if (size > Z_STRLEN_P(zv1)) {
+	bool is_error = false;
+	ptr1 = php_ffi_parse_cdata_or_string_to_ptr(size, op1_obj, op1_zstr, &is_error);
+	if (is_error) {
+		if (op1_zstr) {
 			zend_throw_error(zend_ffi_exception_ce, "attempt to read over string boundary");
-			RETURN_THROWS();
-		}
-	} else if (Z_TYPE_P(zv1) == IS_OBJECT && Z_OBJCE_P(zv1) == zend_ffi_cdata_ce) {
-		cdata1 = (zend_ffi_cdata*)Z_OBJ_P(zv1);
-		type1 = ZEND_FFI_TYPE(cdata1->type);
-		if (type1->kind == ZEND_FFI_TYPE_POINTER) {
-			ptr1 = *(void**)cdata1->ptr;
 		} else {
-			ptr1 = cdata1->ptr;
-			if (type1->kind != ZEND_FFI_TYPE_POINTER && size > type1->size) {
-				zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
-				RETURN_THROWS();
-			}
+    		zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
 		}
-	} else {
-		zend_wrong_parameter_class_error(1, "FFI\\CData or string", zv1);
 		RETURN_THROWS();
 	}
-
-	ZVAL_DEREF(zv2);
-	if (Z_TYPE_P(zv2) == IS_STRING) {
-		ptr2 = Z_STRVAL_P(zv2);
-		if (size > Z_STRLEN_P(zv2)) {
-			zend_throw_error(zend_ffi_exception_ce, "Attempt to read over string boundary");
-			RETURN_THROWS();
-		}
-	} else if (Z_TYPE_P(zv2) == IS_OBJECT && Z_OBJCE_P(zv2) == zend_ffi_cdata_ce) {
-		cdata2 = (zend_ffi_cdata*)Z_OBJ_P(zv2);
-		type2 = ZEND_FFI_TYPE(cdata2->type);
-		if (type2->kind == ZEND_FFI_TYPE_POINTER) {
-			ptr2 = *(void**)cdata2->ptr;
+	ptr2 = php_ffi_parse_cdata_or_string_to_ptr(size, op2_obj, op2_zstr, &is_error);
+	if (is_error) {
+		if (op2_zstr) {
+			zend_throw_error(zend_ffi_exception_ce, "attempt to read over string boundary");
 		} else {
-			ptr2 = cdata2->ptr;
-			if (type2->kind != ZEND_FFI_TYPE_POINTER && size > type2->size) {
-				zend_throw_error(zend_ffi_exception_ce, "Attempt to read over data boundary");
-				RETURN_THROWS();
-			}
+    		zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
 		}
-	} else {
-		zend_wrong_parameter_class_error(2, "FFI\\CData or string", zv2);
 		RETURN_THROWS();
 	}
 
@@ -4515,8 +4507,6 @@ ZEND_METHOD(FFI, memcmp) /* {{{ */
 ZEND_METHOD(FFI, memset) /* {{{ */
 {
 	zval *zv;
-	zend_ffi_cdata *cdata;
-	zend_ffi_type *type;
 	void *ptr;
 	zend_long ch, size;
 
@@ -4527,16 +4517,11 @@ ZEND_METHOD(FFI, memset) /* {{{ */
 		Z_PARAM_LONG(size)
 	ZEND_PARSE_PARAMETERS_END();
 
-	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
-	type = ZEND_FFI_TYPE(cdata->type);
-	if (type->kind == ZEND_FFI_TYPE_POINTER) {
-		ptr = *(void**)cdata->ptr;
-	} else {
-		ptr = cdata->ptr;
-		if (type->kind != ZEND_FFI_TYPE_POINTER && size > type->size) {
-			zend_throw_error(zend_ffi_exception_ce, "attempt to write over data boundary");
-			RETURN_THROWS();
-		}
+	bool is_error = false;
+	ptr = php_ffi_parse_cdata_to_ptr(size, Z_OBJ_P(zv), &is_error);
+	if (is_error) {
+		zend_throw_error(zend_ffi_exception_ce, "attempt to write over data boundary");
+		RETURN_THROWS();
 	}
 
 	memset(ptr, ch, size);
@@ -4562,14 +4547,11 @@ ZEND_METHOD(FFI, string) /* {{{ */
 	cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
 	type = ZEND_FFI_TYPE(cdata->type);
 	if (!size_is_null) {
-		if (type->kind == ZEND_FFI_TYPE_POINTER) {
-			ptr = *(void**)cdata->ptr;
-		} else {
-			ptr = cdata->ptr;
-			if (type->kind != ZEND_FFI_TYPE_POINTER && size > type->size) {
-				zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
-				RETURN_THROWS();
-			}
+		bool is_error = false;
+		ptr = php_ffi_parse_cdata_to_ptr(size, Z_OBJ_P(zv), &is_error);
+		if (is_error) {
+			zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
+			RETURN_THROWS();
 		}
 		RETURN_STRINGL((char*)ptr, size);
 	} else {
