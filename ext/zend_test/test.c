@@ -643,7 +643,7 @@ static bool has_opline(zend_execute_data *execute_data)
 	;
 }
 
-void * zend_test_custom_malloc(size_t len)
+void * zend_test_custom_malloc(size_t len ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	if (has_opline(EG(current_execute_data))) {
 		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
@@ -651,7 +651,7 @@ void * zend_test_custom_malloc(size_t len)
 	return _zend_mm_alloc(ZT_G(zend_orig_heap), len ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
 }
 
-void zend_test_custom_free(void *ptr)
+void zend_test_custom_free(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	if (has_opline(EG(current_execute_data))) {
 		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
@@ -659,7 +659,7 @@ void zend_test_custom_free(void *ptr)
 	_zend_mm_free(ZT_G(zend_orig_heap), ptr ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
 }
 
-void * zend_test_custom_realloc(void * ptr, size_t len)
+void * zend_test_custom_realloc(void * ptr, size_t len ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	if (has_opline(EG(current_execute_data))) {
 		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
