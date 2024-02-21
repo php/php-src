@@ -1,5 +1,7 @@
 --TEST--
 Test DOMXPath::quote with various inputs
+--EXTENSIONS--
+dom
 --SKIPIF--
 <?php if (!class_exists('DOMXPath')) die('skip DOMXPath not available.'); ?>
 --FILE--
