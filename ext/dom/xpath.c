@@ -29,7 +29,7 @@
 /*
 * class DOMXPath
 */
-
+#define LIBXML_XPATH_ENABLED
 #ifdef LIBXML_XPATH_ENABLED
 
 void dom_xpath_objects_free_storage(zend_object *object)
@@ -447,6 +447,7 @@ PHP_METHOD(DOMXPath, registerPhpFunctionNS)
 }
 
 /* {{{ */
+#if 0
 PHP_METHOD(DOMXPath, quote) {
 	char *input;
 	size_t input_len;
@@ -530,6 +531,57 @@ PHP_METHOD(DOMXPath, quote) {
 	}
 	RETVAL_STRINGL(output, output_len);
 	efree(output); // todo: directly return a string and avoid the copy, probably possible but idk how (reviewers may want to check this)
+}
+#endif
+PHP_METHOD(DOMXPath, quote) {
+	char *input;
+	size_t input_len;
+	smart_str output = {0};
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &input, &input_len) ==
+			FAILURE) {
+		RETURN_THROWS();
+	}
+	if (memchr(input, '\'', input_len) == NULL) {
+		smart_str_appendc(&output, '\'');
+		smart_str_appendl(&output, input, input_len);
+		smart_str_appendc(&output, '\'');
+	} else if (memchr(input, '"', input_len) == NULL) {
+		smart_str_appendc(&output, '"');
+		smart_str_appendl(&output, input, input_len);
+		smart_str_appendc(&output, '"');
+	} else {
+		smart_str_appends(&output, "concat(");
+		for (size_t i = 0; i < input_len; ++i) {
+			uintptr_t bytesUntilSingleQuote =
+					(uintptr_t)memchr(input + i, '\'', input_len - i);
+			if (bytesUntilSingleQuote == 0) {
+				bytesUntilSingleQuote = input_len - i;
+			} else {
+				bytesUntilSingleQuote = bytesUntilSingleQuote - (uintptr_t)(input + i);
+			}
+			uintptr_t bytesUntilDoubleQuote =
+					(uintptr_t)memchr(input + i, '"', input_len - i);
+			if (bytesUntilDoubleQuote == 0) {
+				bytesUntilDoubleQuote = input_len - i;
+			} else {
+				bytesUntilDoubleQuote = bytesUntilDoubleQuote - (uintptr_t)(input + i);
+			}
+			const size_t bytesUntilQuote =
+					(bytesUntilSingleQuote > bytesUntilDoubleQuote)
+							? bytesUntilSingleQuote
+							: bytesUntilDoubleQuote;
+			const char quoteMethod =
+					(bytesUntilSingleQuote > bytesUntilDoubleQuote) ? '\'' : '"';
+			smart_str_appendc(&output, quoteMethod);
+			smart_str_appendl(&output, input + i, bytesUntilQuote);
+			smart_str_appendc(&output, quoteMethod);
+			i += bytesUntilQuote - 1;
+			smart_str_appends(&output, ",");
+		}
+		output.s->val[output.s->len -1 ] = ')'; // is there a smart_str function for this? (probably not)
+	}
+	RETURN_STR(smart_str_extract(&output));
 }
 /* }}} */
 
