@@ -116,11 +116,9 @@ static void dom_xpath_ext_function_trampoline(xmlXPathParserContextPtr ctxt, int
 PHP_METHOD(DOMXPath, __construct)
 {
 	zval *doc;
-	bool register_node_ns = 1;
+	bool register_node_ns = true;
 	xmlDocPtr docp = NULL;
 	dom_object *docobj;
-	dom_xpath_object *intern;
-	xmlXPathContextPtr ctx, oldctx;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &doc, dom_abstract_base_document_class_entry, &register_node_ns) == FAILURE) {
 		RETURN_THROWS();
@@ -128,14 +126,14 @@ PHP_METHOD(DOMXPath, __construct)
 
 	DOM_GET_OBJ(docp, doc, xmlDocPtr, docobj);
 
-	ctx = xmlXPathNewContext(docp);
+	xmlXPathContextPtr ctx = xmlXPathNewContext(docp);
 	if (ctx == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		RETURN_THROWS();
 	}
 
-	intern = Z_XPATHOBJ_P(ZEND_THIS);
-	oldctx = (xmlXPathContextPtr)intern->dom.ptr;
+	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
+	xmlXPathContextPtr oldctx = intern->dom.ptr;
 	if (oldctx != NULL) {
 		php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom);
 		xmlXPathFreeContext(oldctx);
@@ -194,20 +192,16 @@ zend_result dom_xpath_register_node_ns_write(dom_object *obj, zval *newval)
 /* {{{ */
 PHP_METHOD(DOMXPath, registerNamespace)
 {
-	zval *id;
-	xmlXPathContextPtr ctxp;
 	size_t prefix_len, ns_uri_len;
-	dom_xpath_object *intern;
 	unsigned char *prefix, *ns_uri;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	intern = Z_XPATHOBJ_P(id);
+	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
 
-	ctxp = (xmlXPathContextPtr) intern->dom.ptr;
+	xmlXPathContextPtr ctxp = intern->dom.ptr;
 	if (ctxp == NULL) {
 		zend_throw_error(NULL, "Invalid XPath Context");
 		RETURN_THROWS();
@@ -231,33 +225,27 @@ static void dom_xpath_iter(zval *baseobj, dom_object *intern) /* {{{ */
 
 static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 {
-	zval *id, retval, *context = NULL;
-	xmlXPathContextPtr ctxp;
+	zval *context = NULL;
 	xmlNodePtr nodep = NULL;
-	xmlXPathObjectPtr xpathobjp;
 	size_t expr_len, nsnbr = 0, xpath_type;
-	dom_xpath_object *intern;
 	dom_object *nodeobj;
 	char *expr;
-	xmlDoc *docp = NULL;
 	xmlNsPtr *ns = NULL;
-	bool register_node_ns;
 
-	id = ZEND_THIS;
-	intern = Z_XPATHOBJ_P(id);
-	register_node_ns = intern->register_node_ns;
+	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
+	bool register_node_ns = intern->register_node_ns;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|O!b", &expr, &expr_len, &context, dom_node_class_entry, &register_node_ns) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	ctxp = (xmlXPathContextPtr) intern->dom.ptr;
+	xmlXPathContextPtr ctxp = intern->dom.ptr;
 	if (ctxp == NULL) {
 		zend_throw_error(NULL, "Invalid XPath Context");
 		RETURN_THROWS();
 	}
 
-	docp = (xmlDocPtr) ctxp->doc;
+	xmlDocPtr docp = ctxp->doc;
 	if (docp == NULL) {
 		php_error_docref(NULL, E_WARNING, "Invalid XPath Document Pointer");
 		RETURN_FALSE;
@@ -283,15 +271,16 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 		ns = xmlGetNsList(docp, nodep);
 
 		if (ns != NULL) {
-			while (ns[nsnbr] != NULL)
-			nsnbr++;
+			while (ns[nsnbr] != NULL) {
+				nsnbr++;
+			}
 		}
 	}
 
 	ctxp->namespaces = ns;
 	ctxp->nsNr = nsnbr;
 
-	xpathobjp = xmlXPathEvalExpression((xmlChar *) expr, ctxp);
+	xmlXPathObjectPtr xpathobjp = xmlXPathEvalExpression((xmlChar *) expr, ctxp);
 	ctxp->node = NULL;
 
 	if (ns != NULL) {
@@ -315,13 +304,13 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 		case  XPATH_NODESET:
 		{
-			int i;
 			xmlNodeSetPtr nodesetp;
+			zval retval;
 
 			if (xpathobjp->type == XPATH_NODESET && NULL != (nodesetp = xpathobjp->nodesetval) && nodesetp->nodeNr) {
 				array_init_size(&retval, nodesetp->nodeNr);
 				zend_hash_real_init_packed(Z_ARRVAL_P(&retval));
-				for (i = 0; i < nodesetp->nodeNr; i++) {
+				for (int i = 0; i < nodesetp->nodeNr; i++) {
 					xmlNodePtr node = nodesetp->nodeTab[i];
 					zval child;
 
