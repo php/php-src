@@ -46,6 +46,9 @@ PHP_DOM_EXPORT void php_dom_xpath_callback_ns_dtor(php_dom_xpath_callback_ns *ns
 
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_ctor(php_dom_xpath_callbacks *registry)
 {
+	registry->php_ns = NULL;
+	registry->namespaces = NULL;
+	registry->node_list = NULL;
 }
 
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_clean_node_list(php_dom_xpath_callbacks *registry)
