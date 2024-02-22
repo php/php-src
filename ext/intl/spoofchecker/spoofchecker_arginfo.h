@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d74f65f808ec0f71ee0ae8c04e253c4412da885e */
+ * Stub hash: 86b6fe10bb533a039bd338fc18464c5de54ef556 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -29,6 +29,15 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Spoofchecker_set
 ZEND_END_ARG_INFO()
 #endif
 
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Spoofchecker_areBidiConfusable, 0, 3, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, direction, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, string1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string2, IS_STRING, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, errorCode, "null")
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_METHOD(Spoofchecker, __construct);
 ZEND_METHOD(Spoofchecker, isSuspicious);
 ZEND_METHOD(Spoofchecker, areConfusable);
@@ -36,6 +45,9 @@ ZEND_METHOD(Spoofchecker, setAllowedLocales);
 ZEND_METHOD(Spoofchecker, setChecks);
 #if U_ICU_VERSION_MAJOR_NUM >= 58
 ZEND_METHOD(Spoofchecker, setRestrictionLevel);
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+ZEND_METHOD(Spoofchecker, areBidiConfusable);
 #endif
 
 static const zend_function_entry class_Spoofchecker_methods[] = {
@@ -46,6 +58,9 @@ static const zend_function_entry class_Spoofchecker_methods[] = {
 	ZEND_ME(Spoofchecker, setChecks, arginfo_class_Spoofchecker_setChecks, ZEND_ACC_PUBLIC)
 #if U_ICU_VERSION_MAJOR_NUM >= 58
 	ZEND_ME(Spoofchecker, setRestrictionLevel, arginfo_class_Spoofchecker_setRestrictionLevel, ZEND_ACC_PUBLIC)
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+	ZEND_ME(Spoofchecker, areBidiConfusable, arginfo_class_Spoofchecker_areBidiConfusable, ZEND_ACC_PUBLIC)
 #endif
 	ZEND_FE_END
 };
@@ -162,6 +177,38 @@ static zend_class_entry *register_class_Spoofchecker(void)
 	zend_string *const_HIDDEN_OVERLAY_name = zend_string_init_interned("HIDDEN_OVERLAY", sizeof("HIDDEN_OVERLAY") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_HIDDEN_OVERLAY_name, &const_HIDDEN_OVERLAY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_HIDDEN_OVERLAY_name);
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+
+	zval const_UBIDI_LTR_value;
+	ZVAL_LONG(&const_UBIDI_LTR_value, UBIDI_LTR);
+	zend_string *const_UBIDI_LTR_name = zend_string_init_interned("UBIDI_LTR", sizeof("UBIDI_LTR") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_UBIDI_LTR_name, &const_UBIDI_LTR_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_UBIDI_LTR_name);
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+
+	zval const_UBIDI_RTL_value;
+	ZVAL_LONG(&const_UBIDI_RTL_value, UBIDI_RTL);
+	zend_string *const_UBIDI_RTL_name = zend_string_init_interned("UBIDI_RTL", sizeof("UBIDI_RTL") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_UBIDI_RTL_name, &const_UBIDI_RTL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_UBIDI_RTL_name);
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+
+	zval const_UBIDI_MIXED_value;
+	ZVAL_LONG(&const_UBIDI_MIXED_value, UBIDI_MIXED);
+	zend_string *const_UBIDI_MIXED_name = zend_string_init_interned("UBIDI_MIXED", sizeof("UBIDI_MIXED") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_UBIDI_MIXED_name, &const_UBIDI_MIXED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_UBIDI_MIXED_name);
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+
+	zval const_UBIDI_NEUTRAL_value;
+	ZVAL_LONG(&const_UBIDI_NEUTRAL_value, UBIDI_NEUTRAL);
+	zend_string *const_UBIDI_NEUTRAL_name = zend_string_init_interned("UBIDI_NEUTRAL", sizeof("UBIDI_NEUTRAL") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_UBIDI_NEUTRAL_name, &const_UBIDI_NEUTRAL_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_UBIDI_NEUTRAL_name);
 #endif
 
 	return class_entry;
