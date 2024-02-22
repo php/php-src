@@ -375,9 +375,6 @@ case $host_alias in
     ;;
 esac
 
-dnl Check for -lresolv.
-PHP_CHECK_FUNC(resolv)
-
 dnl Then headers.
 dnl ----------------------------------------------------------------------------
 
