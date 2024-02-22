@@ -90,6 +90,8 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_object_released_while_assigning_to_pr
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_cannot_add_element(void);
 
+ZEND_API bool ZEND_FASTCALL zend_array_key_exists_for_array_access(zend_object *obj, zval *key);
+
 ZEND_API bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, bool strict, bool is_internal_arg);
 ZEND_API ZEND_COLD void zend_verify_arg_error(
 		const zend_function *zf, const zend_arg_info *arg_info, uint32_t arg_num, zval *value);
