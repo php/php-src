@@ -450,19 +450,17 @@ PHP_METHOD(DOMXPath, registerPhpFunctionNS)
 PHP_METHOD(DOMXPath, quote) {
 	const char *input;
 	size_t input_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &input, &input_len) ==
-			FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &input, &input_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 	if (memchr(input, '\'', input_len) == NULL) {
-		zend_string *output = zend_string_alloc(input_len + 2, 0);
+		zend_string *const output = zend_string_alloc(input_len + 2, 0);
 		output->val[0] = '\'';
 		memcpy(output->val + 1, input, input_len);
 		output->val[input_len + 1] = '\'';
 		RETURN_STR(output);
 	} else if (memchr(input, '"', input_len) == NULL) {
-		zend_string *output = zend_string_alloc(input_len + 2, 0);
+		zend_string *const output = zend_string_alloc(input_len + 2, 0);
 		output->val[0] = '"';
 		memcpy(output->val + 1, input, input_len);
 		output->val[input_len + 1] = '"';
@@ -471,30 +469,22 @@ PHP_METHOD(DOMXPath, quote) {
 		smart_str output = {0};
 		// need to use the concat() trick published by Robert Rossney at https://stackoverflow.com/a/1352556/1067003
 		smart_str_appendl(&output, "concat(", 7);
-		for (size_t i = 0; i < input_len;) {
-			uintptr_t bytesUntilSingleQuote =
-					(uintptr_t)memchr(input + i, '\'', input_len - i);
-			if (bytesUntilSingleQuote == 0) {
-				bytesUntilSingleQuote = input_len - i;
-			} else {
-				bytesUntilSingleQuote = bytesUntilSingleQuote - (uintptr_t)(input + i);
-			}
-			uintptr_t bytesUntilDoubleQuote =
-					(uintptr_t)memchr(input + i, '"', input_len - i);
-			if (bytesUntilDoubleQuote == 0) {
-				bytesUntilDoubleQuote = input_len - i;
-			} else {
-				bytesUntilDoubleQuote = bytesUntilDoubleQuote - (uintptr_t)(input + i);
-			}
-			const size_t bytesUntilQuote = MAX(bytesUntilSingleQuote, bytesUntilDoubleQuote);
-			const char quoteMethod =
-					(bytesUntilSingleQuote > bytesUntilDoubleQuote) ? '\'' : '"';
+		const char *ptr = input;
+		const char *const end = input + input_len;
+		while (ptr < end) {
+			const char *const single_quote_ptr = memchr(ptr, '\'', end - ptr);
+			const char *const double_quote_ptr = memchr(ptr, '"', end - ptr);
+			const size_t distance_to_single_quote = single_quote_ptr ? single_quote_ptr - ptr : end - ptr;
+			const size_t distance_to_double_quote = double_quote_ptr ? double_quote_ptr - ptr : end - ptr;
+			const size_t bytesUntilQuote = MAX(distance_to_single_quote, distance_to_double_quote);
+			const char quoteMethod = (distance_to_single_quote > distance_to_double_quote) ? '\'' : '"';
 			smart_str_appendc(&output, quoteMethod);
-			smart_str_appendl(&output, input + i, bytesUntilQuote);
+			smart_str_appendl(&output, ptr, bytesUntilQuote);
 			smart_str_appendc(&output, quoteMethod);
-			i += bytesUntilQuote;
+			ptr += bytesUntilQuote;
 			smart_str_appendc(&output, ',');
 		}
+		ZEND_ASSERT(ptr == end);
 		output.s->val[output.s->len - 1] = ')';
 		RETURN_STR(smart_str_extract(&output));
 	}
