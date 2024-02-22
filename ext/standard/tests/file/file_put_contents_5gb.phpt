@@ -11,7 +11,7 @@ function get_system_memory(): int|float|false
         // Windows-based memory check
         @exec('wmic OS get FreePhysicalMemory', $output);
         if (isset($output[1])) {
-            return (int)trim($output[1]);
+            return ((int)trim($output[1])) * 1024;
         }
     } else {
         // Unix/Linux-based memory check
@@ -23,7 +23,7 @@ function get_system_memory(): int|float|false
     }
     return false;
 }
-if (get_system_memory() < 10 * 1024 * 1024) {
+if (get_system_memory() < 10 * 1024 * 1024 * 1024) {
     die('skip Reason: Insufficient RAM (less than 10GB)');
 }
 $tmpfile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "test_file_put_contents_5gb.bin";
