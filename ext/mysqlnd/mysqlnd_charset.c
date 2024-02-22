@@ -769,6 +769,12 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const name
 }
 /* }}} */
 
+static zend_always_inline bool mysqlnd_mb_validity_prerequisites_check(const MYSQLND_CHARSET * const cset, const zend_uchar *str)
+{
+	/* Encodings that have a minimum length of 1 are compatible with ASCII.
+	 * So we can skip (for performance reasons) the check to mb_valid for them. */
+	return cset->char_maxlen > 1 && (*str > 0x80 || cset->char_minlen > 1);
+}
 
 /* {{{ mysqlnd_cset_escape_quotes */
 PHPAPI zend_ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char * newstr,
@@ -784,7 +790,7 @@ PHPAPI zend_ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset,
 		unsigned int len = 0;
 		/* check unicode characters */
 
-		if (cset->char_maxlen > 1 && (len = cset->mb_valid(escapestr, end))) {
+		if (mysqlnd_mb_validity_prerequisites_check(cset, (const zend_uchar *) escapestr) && (len = cset->mb_valid(escapestr, end))) {
 			ZEND_ASSERT(newstr + len <= newstr_e);
 			/* copy mb char without escaping it */
 			while (len--) {
@@ -823,10 +829,8 @@ PHPAPI zend_ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset
 	for (;escapestr < end; escapestr++) {
 		char esc = '\0';
 
-		/* check unicode characters
-		 * Encodings that have a minimum length of 1 are compatible with ASCII.
-		 * So we can skip (for performance reasons) the check to mb_valid for them. */
-		if (cset->char_maxlen > 1 && (*((zend_uchar *) escapestr) > 0x80 || cset->char_minlen > 1)) {
+		/* check unicode characters */
+		if (mysqlnd_mb_validity_prerequisites_check(cset, (const zend_uchar *) escapestr)) {
 			unsigned int len = cset->mb_valid(escapestr, end);
 			if (len) {
 				ZEND_ASSERT(newstr + len <= newstr_e);
