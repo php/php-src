@@ -40,6 +40,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 * The inet_aton() and win32/inet.h on Windows have been removed. Use Windows
   native inet_pton() from ws2tcpip.h.
 
+* zend_mm_set_custom_debug_handlers() has been removed from ZendMM, use
+  zend_mm_set_custom_handlers() instead
+
 ========================
 2. Build system changes
 ========================
