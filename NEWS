@@ -188,6 +188,8 @@ PHP                                                                        NEWS
   . debug_zval_dump() now indicates whether an array is packed. (Max Semenik)
   . Fix GH-12143 (Optimize round). (SakiTakamachi)
   . Changed return type of long2ip to string from string|false. (Jorg Sowa)
+  . Fix GH-12143 (Extend the maximum precision round can handle by one digit).
+    (SakiTakamachi)
 
 - XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)

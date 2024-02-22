@@ -381,6 +381,8 @@ PHP 8.4 UPGRADE NOTES
     certain numbers, so this fix removes "pre-rounding" and changes the way numbers
     are compared, so that the values ​​are correctly rounded as decimal numbers.
   . long2ip() now returns string instead of string|false.
+  . The maximum precision that can be handled by round() has been extended by
+    one digit.
 
 ========================================
 6. New Functions
