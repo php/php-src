@@ -137,6 +137,8 @@ PHP_METHOD(DOMXPath, __construct)
 	if (oldctx != NULL) {
 		php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom);
 		xmlXPathFreeContext(oldctx);
+		php_dom_xpath_callbacks_dtor(&intern->xpath_callbacks);
+		php_dom_xpath_callbacks_ctor(&intern->xpath_callbacks);
 	}
 
 	xmlXPathRegisterFuncNS (ctx, (const xmlChar *) "functionString",
