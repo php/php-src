@@ -33,6 +33,7 @@ PHP                                                                        NEWS
   . Fix DOMElement->prefix with empty string creates bogus prefix. (nielsdos)
   . Handle OOM more consistently. (nielsdos)
   . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
+  . Added DOMXPath::quote() static method. (divinity76)
 
 - Fileinfo:
   . Update to libmagic 5.45. (nielsdos)

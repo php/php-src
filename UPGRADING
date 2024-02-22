@@ -392,6 +392,8 @@ PHP 8.4 UPGRADE NOTES
   . Added DOMNode::compareDocumentPosition().
   . Added DOMXPath::registerPhpFunctionNS().
     RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
+  . Added DOMXPath::quote() to quote a string for use in an XPath expression.
+    Example usage: "//span[contains(text()," . $xpath->quote($string) . ")]"
 
 - Intl:
   . Added IntlDateFormatter::getIanaID()/intltz_get_iana_id() to
