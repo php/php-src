@@ -454,16 +454,18 @@ PHP_METHOD(DOMXPath, quote) {
 		RETURN_THROWS();
 	}
 	if (memchr(input, '\'', input_len) == NULL) {
-		zend_string *const output = zend_string_alloc(input_len + 2, 0);
+		zend_string *const output = zend_string_safe_alloc(1, input_len, 2, false);
 		output->val[0] = '\'';
 		memcpy(output->val + 1, input, input_len);
 		output->val[input_len + 1] = '\'';
+		output->val[input_len + 2] = '\0';
 		RETURN_STR(output);
 	} else if (memchr(input, '"', input_len) == NULL) {
-		zend_string *const output = zend_string_alloc(input_len + 2, 0);
+		zend_string *const output = zend_string_safe_alloc(1, input_len, 2, false);
 		output->val[0] = '"';
 		memcpy(output->val + 1, input, input_len);
 		output->val[input_len + 1] = '"';
+		output->val[input_len + 2] = '\0';
 		RETURN_STR(output);
 	} else {
 		smart_str output = {0};
