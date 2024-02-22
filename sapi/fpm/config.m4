@@ -337,18 +337,6 @@ AC_DEFUN([AC_FPM_LQ],
   fi
 ])
 
-AC_DEFUN([AC_FPM_SYSCONF],
-[
-	AC_MSG_CHECKING([for sysconf])
-
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <unistd.h>]], [[sysconf(_SC_CLK_TCK);]])],[
-		AC_DEFINE([HAVE_SYSCONF], 1, [do we have sysconf?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
-])
-
 AC_DEFUN([AC_FPM_TIMES],
 [
 	AC_MSG_CHECKING([for times])
@@ -499,7 +487,6 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_TRACE
   AC_FPM_BUILTIN_ATOMIC
   AC_FPM_LQ
-  AC_FPM_SYSCONF
   AC_FPM_TIMES
   AC_FPM_KQUEUE
   AC_FPM_PORT
