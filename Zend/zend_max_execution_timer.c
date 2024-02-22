@@ -30,14 +30,18 @@
 
 static inline void zend_max_execution_timer_handler(void *arg)
 {
+#ifdef ZTS
 	pthread_t *tid = (pthread_t *) arg;
 	pthread_kill(*tid, ZEND_MAX_EXECUTION_TIMERS_SIGNAL);
+#else
+	pid_t *pid = (pid_t *) arg;
+	kill(*pid, ZEND_MAX_EXECUTION_TIMERS_SIGNAL);
+#endif
 }
 
 static inline void zend_max_execution_timer_cancel(void *arg)
 {
-	pthread_t *tid = (pthread_t *) arg;
-	free(tid);
+	free(arg);
 }
 
 ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
@@ -58,10 +62,14 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 	EG(max_execution_timer_suspended) = 1;
 
 #  ifdef ZTS
-	pthread_t lpid = pthread_self();
-	pthread_t *tid = malloc(sizeof(pthread_t));
-	memcpy(tid, &lpid, sizeof(pthread_t));
-	dispatch_set_context(EG(max_execution_timer_timer), tid);
+	pthread_t tid = pthread_self();
+	pthread_t *ptid = malloc(sizeof(pthread_t));
+	memcpy(ptid, &tid, sizeof(pthread_t));
+	dispatch_set_context(EG(max_execution_timer_timer), ptid);
+#else
+	pid_t *ppid = malloc(sizeof(pid_t));
+	*ppid = pid;
+	dispatch_set_context(EG(max_execution_timer_timer), ppid)
 #  endif
 
 	dispatch_source_set_event_handler_f(EG(max_execution_timer_timer), zend_max_execution_timer_handler);
