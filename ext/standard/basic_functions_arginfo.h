@@ -2199,6 +2199,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_generate_ctrl_event
 ZEND_END_ARG_INFO()
 #endif
 
+
 ZEND_FRAMELESS_FUNCTION(min, 2);
 static const zend_frameless_function_info frameless_function_infos_min[] = {
 	{ ZEND_FRAMELESS_FUNCTION_NAME(min, 2), 2 },
@@ -2304,7 +2305,6 @@ static const zend_frameless_function_info frameless_function_infos_is_numeric[] 
 	{ ZEND_FRAMELESS_FUNCTION_NAME(is_numeric, 1), 1 },
 	{ 0 },
 };
-
 
 ZEND_FUNCTION(set_time_limit);
 ZEND_FUNCTION(header_register_callback);
@@ -2923,7 +2923,6 @@ ZEND_FUNCTION(sapi_windows_set_ctrl_handler);
 #if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_generate_ctrl_event);
 #endif
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(set_time_limit, arginfo_set_time_limit)
@@ -3574,11 +3573,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class___PHP_Incomplete_Class_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_AssertionError_methods[] = {
 	ZEND_FE_END
