@@ -1338,7 +1338,6 @@ fi
 
 if test "$fiber_asm" = 'yes'; then
   AC_MSG_CHECKING([for fiber switching context])
-  AC_DEFINE([ZEND_FIBER_ASM], 1, [ ])
   PHP_ADD_SOURCES(Zend/asm, make_${fiber_asm_file}.S jump_${fiber_asm_file}.S, "$fiber_asm_cflag")
   AC_MSG_RESULT([$fiber_asm_file])
 else
