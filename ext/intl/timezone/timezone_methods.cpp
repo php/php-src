@@ -83,9 +83,7 @@ U_CFUNC PHP_FUNCTION(intltz_from_date_time_zone)
 
 	tzobj = Z_PHPTIMEZONE_P(zv_timezone);
 	if (!tzobj->initialized) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"DateTimeZone object is unconstructed",
-			0);
+		zend_throw_error(NULL, "DateTimeZone object is unconstructed");
 		RETURN_NULL();
 	}
 
@@ -150,9 +148,8 @@ U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
 int_offset:
 		if (UNEXPECTED(Z_LVAL_P(arg) < (zend_long)INT32_MIN ||
 				Z_LVAL_P(arg) > (zend_long)INT32_MAX)) {
-			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"value is out of range", 0);
-			RETURN_FALSE;
+			zend_argument_value_error(1, "value is out of range");
+			RETURN_THROWS();
 		} else {
 			se = TimeZone::createEnumeration((int32_t) Z_LVAL_P(arg));
 		}
@@ -179,9 +176,8 @@ double_offset:
 		/* else call string version */
 		se = TimeZone::createEnumeration(Z_STRVAL_P(arg));
 	} else {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"invalid argument type", 0);
-		RETURN_FALSE;
+		zend_argument_type_error(1, "invalid argument type");
+		RETURN_THROWS();
 	}
 
 	if (se) {
@@ -242,9 +238,8 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 
 	if (!arg3isnull) {
 		if (UNEXPECTED(offset_arg < (zend_long)INT32_MIN || offset_arg > (zend_long)INT32_MAX)) {
-			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"offset out of bounds", 0);
-			RETURN_FALSE;
+			zend_argument_value_error(3, "offset out of bounds");
+			RETURN_THROWS();
 		}
 		offset = (int32_t)offset_arg;
 		offsetp = &offset;
@@ -349,7 +344,8 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 	}
 
 	if (UNEXPECTED(index < (zend_long)INT32_MIN || index > (zend_long)INT32_MAX)) {
-		RETURN_FALSE;
+		zend_argument_value_error(2, "index out of range");
+		RETURN_THROWS();
 	}
 
 	UErrorCode status = UErrorCode();

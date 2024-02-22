@@ -6,8 +6,11 @@ intl
 <?php
 ini_set("intl.error_level", E_WARNING);
 
-var_dump(IntlTimeZone::createEnumeration(array()));
+try {
+	IntlTimeZone::createEnumeration(array());
+} catch (TypeError $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
 ?>
---EXPECTF--
-Warning: IntlTimeZone::createEnumeration(): invalid argument type in %s on line %d
-bool(false)
+--EXPECT--
+IntlTimeZone::createEnumeration(): Argument #1 ($countryOrRawOffset) invalid argument type
