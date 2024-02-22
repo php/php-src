@@ -135,26 +135,24 @@ PHP_METHOD(DOMXPath, __construct)
 	}
 
 	intern = Z_XPATHOBJ_P(ZEND_THIS);
-	if (intern != NULL) {
-		oldctx = (xmlXPathContextPtr)intern->dom.ptr;
-		if (oldctx != NULL) {
-			php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom);
-			xmlXPathFreeContext(oldctx);
-		}
-
-		xmlXPathRegisterFuncNS (ctx, (const xmlChar *) "functionString",
-					   (const xmlChar *) "http://php.net/xpath",
-					   dom_xpath_ext_function_string_php);
-		xmlXPathRegisterFuncNS (ctx, (const xmlChar *) "function",
-					   (const xmlChar *) "http://php.net/xpath",
-					   dom_xpath_ext_function_object_php);
-
-		intern->dom.ptr = ctx;
-		ctx->userData = (void *)intern;
-		intern->dom.document = docobj->document;
-		intern->register_node_ns = register_node_ns;
-		php_libxml_increment_doc_ref((php_libxml_node_object *) &intern->dom, docp);
+	oldctx = (xmlXPathContextPtr)intern->dom.ptr;
+	if (oldctx != NULL) {
+		php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom);
+		xmlXPathFreeContext(oldctx);
 	}
+
+	xmlXPathRegisterFuncNS (ctx, (const xmlChar *) "functionString",
+					(const xmlChar *) "http://php.net/xpath",
+					dom_xpath_ext_function_string_php);
+	xmlXPathRegisterFuncNS (ctx, (const xmlChar *) "function",
+					(const xmlChar *) "http://php.net/xpath",
+					dom_xpath_ext_function_object_php);
+
+	intern->dom.ptr = ctx;
+	ctx->userData = (void *)intern;
+	intern->dom.document = docobj->document;
+	intern->register_node_ns = register_node_ns;
+	php_libxml_increment_doc_ref((php_libxml_node_object *) &intern->dom, docp);
 }
 /* }}} end DOMXPath::__construct */
 
