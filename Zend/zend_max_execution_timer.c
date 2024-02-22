@@ -21,6 +21,8 @@
 #include <dispatch/dispatch.h>
 #  ifdef ZTS
 #include <pthread.h>
+#  else
+#include <signal.h>
 #  endif
 
 #include "zend.h"
@@ -69,7 +71,7 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 #else
 	pid_t *ppid = malloc(sizeof(pid_t));
 	*ppid = pid;
-	dispatch_set_context(EG(max_execution_timer_timer), ppid)
+	dispatch_set_context(EG(max_execution_timer_timer), ppid);
 #  endif
 
 	dispatch_source_set_event_handler_f(EG(max_execution_timer_timer), zend_max_execution_timer_handler);

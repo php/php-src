@@ -297,12 +297,16 @@ fi
 AC_MSG_CHECKING(whether to enable zend signal handling)
 AC_MSG_RESULT($ZEND_SIGNALS)
 
+
+dnl Enable Zend Max Execution Timers by default on macOS
+AS_CASE(["$host_alias"], [*darwin*], [ZEND_MAX_EXECUTION_TIMERS="yes"], [ZEND_MAX_EXECUTION_TIMERS=$ZEND_ZTS])
+
 dnl Don't enable Zend Max Execution Timers by default until PHP 8.3 to not break the ABI
 AC_ARG_ENABLE([zend-max-execution-timers],
   [AS_HELP_STRING([--enable-zend-max-execution-timers],
     [whether to enable zend max execution timers])],
     [ZEND_MAX_EXECUTION_TIMERS=$enableval],
-    [ZEND_MAX_EXECUTION_TIMERS=$ZEND_ZTS])
+    [])
 
 AS_CASE(
   ["$host_alias"],
