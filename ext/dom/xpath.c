@@ -476,12 +476,12 @@ PHP_METHOD(DOMXPath, quote) {
 			const char *const double_quote_ptr = memchr(ptr, '"', end - ptr);
 			const size_t distance_to_single_quote = single_quote_ptr ? single_quote_ptr - ptr : end - ptr;
 			const size_t distance_to_double_quote = double_quote_ptr ? double_quote_ptr - ptr : end - ptr;
-			const size_t bytesUntilQuote = MAX(distance_to_single_quote, distance_to_double_quote);
-			const char quoteMethod = (distance_to_single_quote > distance_to_double_quote) ? '\'' : '"';
-			smart_str_appendc(&output, quoteMethod);
-			smart_str_appendl(&output, ptr, bytesUntilQuote);
-			smart_str_appendc(&output, quoteMethod);
-			ptr += bytesUntilQuote;
+			const size_t bytes_until_quote = MAX(distance_to_single_quote, distance_to_double_quote);
+			const char quote_method = (distance_to_single_quote > distance_to_double_quote) ? '\'' : '"';
+			smart_str_appendc(&output, quote_method);
+			smart_str_appendl(&output, ptr, bytes_until_quote);
+			smart_str_appendc(&output, quote_method);
+			ptr += bytes_until_quote;
 			smart_str_appendc(&output, ',');
 		}
 		ZEND_ASSERT(ptr == end);
