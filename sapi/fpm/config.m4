@@ -5,13 +5,6 @@ PHP_ARG_ENABLE([fpm],,
   [no])
 
 dnl Configure checks.
-AC_DEFUN([AC_FPM_STDLIBS],
-[
-  AC_CHECK_FUNCS(clearenv setproctitle setproctitle_fast)
-
-  AC_SEARCH_LIBS(inet_addr, nsl)
-])
-
 AC_DEFUN([AC_FPM_CLOCK],
 [
   have_clock_gettime=no
@@ -482,7 +475,6 @@ AC_MSG_CHECKING(for FPM build)
 if test "$PHP_FPM" != "no"; then
   AC_MSG_RESULT($PHP_FPM)
 
-  AC_FPM_STDLIBS
   AC_FPM_CLOCK
   AC_FPM_TRACE
   AC_FPM_BUILTIN_ATOMIC
@@ -493,6 +485,8 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_DEVPOLL
   AC_FPM_EPOLL
   AC_FPM_SELECT
+
+  AC_CHECK_FUNCS([clearenv setproctitle setproctitle_fast])
 
   AC_CHECK_HEADER([priv.h], [AC_CHECK_FUNCS([setpflags])])
 
