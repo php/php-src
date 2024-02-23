@@ -1490,7 +1490,7 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 		dom_reconcile_ns_list(nodep->doc, new_child, last);
 	} else if (child->type == XML_DTD_NODE) {
 		if (nodep->doc->intSubset != NULL) {
-			php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "Document types must be the first child in a document", stricterror);
+			php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "A document may only contain one document type", stricterror);
 			RETURN_FALSE;
 		}
 		new_child = xmlAddChild(nodep, child);
