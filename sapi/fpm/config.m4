@@ -330,18 +330,6 @@ AC_DEFUN([AC_FPM_LQ],
   fi
 ])
 
-AC_DEFUN([AC_FPM_TIMES],
-[
-	AC_MSG_CHECKING([for times])
-
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/times.h>]], [[struct tms t; times(&t);]])],[
-		AC_DEFINE([HAVE_TIMES], 1, [do we have times?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
-])
-
 AC_DEFUN([AC_FPM_KQUEUE],
 [
 	AC_MSG_CHECKING([for kqueue])
@@ -479,7 +467,6 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_TRACE
   AC_FPM_BUILTIN_ATOMIC
   AC_FPM_LQ
-  AC_FPM_TIMES
   AC_FPM_KQUEUE
   AC_FPM_PORT
   AC_FPM_DEVPOLL
@@ -489,6 +476,7 @@ if test "$PHP_FPM" != "no"; then
   AC_CHECK_FUNCS([clearenv setproctitle setproctitle_fast])
 
   AC_CHECK_HEADER([priv.h], [AC_CHECK_FUNCS([setpflags])])
+  AC_CHECK_HEADER([sys/times.h], [AC_CHECK_FUNCS([times])])
 
   PHP_ARG_WITH([fpm-user],,
     [AS_HELP_STRING([[--with-fpm-user[=USER]]],
