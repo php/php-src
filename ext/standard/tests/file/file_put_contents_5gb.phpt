@@ -2,6 +2,10 @@
 Test file_put_contents() function with 5GB string
 --SKIPIF--
 <?php
+if (PHP_INT_SIZE < 5) {
+    // 4=4gb, 5=549gb, 8=9exabytes
+    skip("skip PHP_INT_SIZE<5 will not fit test string in RAM");
+}
 if (getenv('SKIP_SLOW_TESTS')) {
     die('skip slow test');
 }
