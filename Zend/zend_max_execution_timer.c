@@ -22,7 +22,7 @@
 #  ifdef ZTS
 #include <pthread.h>
 #  else
-#include <signal.h>
+#include "zend_execute.h"
 #  endif
 
 #include "zend.h"
@@ -36,8 +36,7 @@ static inline void zend_max_execution_timer_handler(void *arg)
 	pthread_t *tid = (pthread_t *) arg;
 	pthread_kill(*tid, ZEND_MAX_EXECUTION_TIMERS_SIGNAL);
 #else
-	pid_t *pid = (pid_t *) arg;
-	kill(*pid, ZEND_MAX_EXECUTION_TIMERS_SIGNAL);
+	zend_timeout_handler();
 #endif
 }
 
@@ -69,9 +68,7 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 	memcpy(ptid, &tid, sizeof(pthread_t));
 	dispatch_set_context(EG(max_execution_timer_source), ptid);
 #else
-	pid_t *ppid = malloc(sizeof(pid_t));
-	*ppid = pid;
-	dispatch_set_context(EG(max_execution_timer_source), ppid);
+	//dispatch_set_context(EG(max_execution_timer_source), NULL);
 #  endif
 
 	dispatch_source_set_event_handler_f(EG(max_execution_timer_source), zend_max_execution_timer_handler);

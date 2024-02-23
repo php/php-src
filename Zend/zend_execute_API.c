@@ -1401,7 +1401,11 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 
 #ifndef ZEND_WIN32
 # ifdef ZEND_MAX_EXECUTION_TIMERS
+#  if defined(__APPLE__) && !defined(ZTS)
+void zend_timeout_handler(void) /* {{{ */
+#  else
 static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
+#  endif
 {
 #  ifdef ZTS
 	if (!tsrm_is_managed_thread()) {
