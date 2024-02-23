@@ -55,8 +55,8 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 	}
 
 	dispatch_queue_global_t queue = dispatch_get_global_queue(QOS_CLASS_UTILITY, 0);
-	EG(max_execution_timer_timer) = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
-	if (EG(max_execution_timer_timer) == NULL) {
+	EG(max_execution_timer_source) = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
+	if (EG(max_execution_timer_source) == NULL) {
 		zend_strerror_noreturn(E_ERROR, errno, "Could not create dispatch source");
 	}
 
@@ -67,22 +67,22 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 	pthread_t tid = pthread_self();
 	pthread_t *ptid = malloc(sizeof(pthread_t));
 	memcpy(ptid, &tid, sizeof(pthread_t));
-	dispatch_set_context(EG(max_execution_timer_timer), ptid);
+	dispatch_set_context(EG(max_execution_timer_source), ptid);
 #else
 	pid_t *ppid = malloc(sizeof(pid_t));
 	*ppid = pid;
-	dispatch_set_context(EG(max_execution_timer_timer), ppid);
+	dispatch_set_context(EG(max_execution_timer_source), ppid);
 #  endif
 
-	dispatch_source_set_event_handler_f(EG(max_execution_timer_timer), zend_max_execution_timer_handler);
-	dispatch_source_set_cancel_handler_f(EG(max_execution_timer_timer), zend_max_execution_timer_cancel);
+	dispatch_source_set_event_handler_f(EG(max_execution_timer_source), zend_max_execution_timer_handler);
+	dispatch_source_set_cancel_handler_f(EG(max_execution_timer_source), zend_max_execution_timer_cancel);
 } /* }}} */
 
 void zend_max_execution_timer_settime(zend_long seconds) /* {{{ */
 {
 	if (seconds == 0) {
 		if (!EG(max_execution_timer_suspended)) {
-			dispatch_suspend(EG(max_execution_timer_timer));
+			dispatch_suspend(EG(max_execution_timer_source));
 			EG(max_execution_timer_suspended) = 1;
 		}
 
@@ -90,13 +90,13 @@ void zend_max_execution_timer_settime(zend_long seconds) /* {{{ */
 	}
 
 	dispatch_source_set_timer(
-		EG(max_execution_timer_timer),
+		EG(max_execution_timer_source),
 		dispatch_time(DISPATCH_TIME_NOW, seconds * NSEC_PER_SEC),
 		seconds * NSEC_PER_SEC,
 		0
 	);
 	if (EG(max_execution_timer_suspended)) {
-		dispatch_resume(EG(max_execution_timer_timer));
+		dispatch_resume(EG(max_execution_timer_source));
 		EG(max_execution_timer_suspended) = 0;
 	}
 } /* }}} */
@@ -110,8 +110,8 @@ void zend_max_execution_timer_shutdown(void) /* {{{ */
 
 	EG(pid) = 0;
 
-	dispatch_source_cancel(EG(max_execution_timer_timer));
-	//dispatch_release(EG(max_execution_timer_timer));
+	dispatch_source_cancel(EG(max_execution_timer_source));
+	//dispatch_release(EG(max_execution_timer_source));
 } /* }}} */
 
 # else

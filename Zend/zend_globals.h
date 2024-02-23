@@ -303,7 +303,7 @@ struct _zend_executor_globals {
 
 #ifdef ZEND_MAX_EXECUTION_TIMERS
 # ifdef __APPLE__
-	dispatch_source_t max_execution_timer_timer;
+	dispatch_source_t max_execution_timer_source;
 	bool max_execution_timer_suspended;
 # else
 	timer_t max_execution_timer_timer;

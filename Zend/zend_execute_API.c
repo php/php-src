@@ -1403,19 +1403,19 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 # ifdef ZEND_MAX_EXECUTION_TIMERS
 static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 {
-#ifdef ZTS
+#  ifdef ZTS
 	if (!tsrm_is_managed_thread()) {
 		fprintf(stderr, "zend_timeout_handler() called in a thread not managed by PHP. The expected signal handler will not be called. This is probably a bug.\n");
 
 		return;
 	}
-#endif
+#  endif
 
-#ifndef __APPLE__
+#  ifndef __APPLE__
 	if (si->si_value.sival_ptr != &EG(max_execution_timer_timer)) {
-#ifdef MAX_EXECUTION_TIMERS_DEBUG
+#   ifdef MAX_EXECUTION_TIMERS_DEBUG
 		fprintf(stderr, "Executing previous handler (if set) for unexpected signal SIGRTMIN received on thread %d\n", (pid_t) syscall(SYS_gettid));
-#endif
+#   endif
 
 		if (EG(oldact).sa_sigaction) {
 			EG(oldact).sa_sigaction(dummy, si, uc);
@@ -1426,7 +1426,7 @@ static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 
 		return;
 	}
-#endif
+#  endif /* ifndef __APPLE__ */
 # else
 static void zend_timeout_handler(int dummy) /* {{{ */
 {

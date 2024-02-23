@@ -22,7 +22,7 @@
 #include "zend_long.h"
 
 #  ifdef __APPLE__
-#define ZEND_MAX_EXECUTION_TIMERS_SIGNAL SIGALRM
+#define ZEND_MAX_EXECUTION_TIMERS_SIGNAL SIGIO
 #  else
 #define ZEND_MAX_EXECUTION_TIMERS_SIGNAL SIGRTMIN
 #  endif
