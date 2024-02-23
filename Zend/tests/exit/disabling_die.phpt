@@ -9,3 +9,4 @@ die();
 
 ?>
 --EXPECT--
+Warning: Cannot disable function die() in Unknown on line 0

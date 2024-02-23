@@ -302,7 +302,6 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 				}
 				break;
 			case ZEND_MATCH_ERROR:
-			case ZEND_EXIT:
 			case ZEND_THROW:
 				/* Don't treat THROW as terminator if it's used in expression context,
 				 * as we may lose live ranges when eliminating unreachable code. */
@@ -506,7 +505,6 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
 			case ZEND_GENERATOR_RETURN:
-			case ZEND_EXIT:
 			case ZEND_THROW:
 			case ZEND_MATCH_ERROR:
 			case ZEND_VERIFY_NEVER_TYPE:
