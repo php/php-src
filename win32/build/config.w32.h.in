@@ -86,7 +86,6 @@
 #undef HAVE_ALLOCA_H
 #undef HAVE_KILL
 #define HAVE_GETPID 1
-#define HAVE_LIBM 1
 #undef HAVE_RINT
 /* int and long are still 32bit in 64bit compiles */
 #define SIZEOF_INT 4

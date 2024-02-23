@@ -364,7 +364,7 @@ PHP_CHECK_FUNC(gethostname, nsl, network)
 PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
 AC_SEARCH_LIBS([dlopen], [dl],
   [AC_DEFINE([HAVE_LIBDL], [1], [Define to 1 if the dl library is available.])])
-AC_CHECK_LIB(m, sin)
+AC_SEARCH_LIBS([sin], [m])
 
 case $host_alias in
   riscv64*)
