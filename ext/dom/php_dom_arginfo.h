@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a6b729e2408545cdeb1feaf540584f18a2e73a2e */
+ * Stub hash: d5b84bd062c130448e2da2ca27205e91bf63aed0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1070,6 +1070,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOM_XPath_registerPhpFunctionNS arginfo_class_DOMXPath_registerPhpFunctionNS
 #endif
 
+#if defined(LIBXML_XPATH_ENABLED)
+#define arginfo_class_DOM_XPath_quote arginfo_class_DOMXPath_quote
+#endif
+
 ZEND_FUNCTION(dom_import_simplexml);
 ZEND_FUNCTION(DOM_import_simplexml);
 ZEND_METHOD(DOMCdataSection, __construct);
@@ -1580,11 +1584,11 @@ static const zend_function_entry class_DOM_NamedNodeMap_methods[] = {
 };
 
 static const zend_function_entry class_DOM_DTDNamedNodeMap_methods[] = {
-	ZEND_MALIAS(DOMNamedNodeMap, item, item, arginfo_class_DOM_DTDNamedNodeMap_item, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(DOMNamedNodeMap, getNamedItem, getNamedItem, arginfo_class_DOM_DTDNamedNodeMap_getNamedItem, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(DOMNamedNodeMap, getNamedItemNS, getNamedItemNS, arginfo_class_DOM_DTDNamedNodeMap_getNamedItemNS, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(DOMNamedNodeMap, count, count, arginfo_class_DOM_DTDNamedNodeMap_count, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(DOMNamedNodeMap, getIterator, getIterator, arginfo_class_DOM_DTDNamedNodeMap_getIterator, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("item", zim_DOMNamedNodeMap_item, arginfo_class_DOM_DTDNamedNodeMap_item, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getNamedItem", zim_DOMNamedNodeMap_getNamedItem, arginfo_class_DOM_DTDNamedNodeMap_getNamedItem, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getNamedItemNS", zim_DOMNamedNodeMap_getNamedItemNS, arginfo_class_DOM_DTDNamedNodeMap_getNamedItemNS, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("count", zim_DOMNamedNodeMap_count, arginfo_class_DOM_DTDNamedNodeMap_count, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getIterator", zim_DOMNamedNodeMap_getIterator, arginfo_class_DOM_DTDNamedNodeMap_getIterator, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -1758,6 +1762,7 @@ static const zend_function_entry class_DOM_XPath_methods[] = {
 	ZEND_RAW_FENTRY("registerNamespace", zim_DOMXPath_registerNamespace, arginfo_class_DOM_XPath_registerNamespace, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("registerPhpFunctions", zim_DOMXPath_registerPhpFunctions, arginfo_class_DOM_XPath_registerPhpFunctions, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("registerPhpFunctionNS", zim_DOMXPath_registerPhpFunctionNS, arginfo_class_DOM_XPath_registerPhpFunctionNS, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("quote", zim_DOMXPath_quote, arginfo_class_DOM_XPath_quote, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_FE_END
 };
 #endif

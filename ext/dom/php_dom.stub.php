@@ -1656,6 +1656,9 @@ namespace DOM
 
         /** @implementation-alias DOMXPath::registerPhpFunctionNS */
         public function registerPhpFunctionNS(string $namespaceURI, string $name, callable $callable): void {}
+
+        /** @implementation-alias DOMXPath::quote */
+        public static function quote(string $str): string {}
     }
 #endif
 
