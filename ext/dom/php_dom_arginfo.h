@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9065d5c713a6fb879f8116821eaabc3a01a4db20 */
+ * Stub hash: 1faa01d0564052dda0dc41f36033a076b8b4c31c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1079,6 +1079,38 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Dom_XMLDocument_saveXmlFile arginfo_class_Dom_HTMLDocument_saveXmlFile
 
+#define arginfo_class_Dom_TokenList___construct arginfo_class_DOMDocumentFragment___construct
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_TokenList_item, 0, 1, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_TokenList_contains, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, token, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_TokenList_add, 0, 0, IS_VOID, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, tokens, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Dom_TokenList_remove arginfo_class_Dom_TokenList_add
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_TokenList_toggle, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, token, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, force, _IS_BOOL, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_TokenList_replace, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, token, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, newToken, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Dom_TokenList_supports arginfo_class_Dom_TokenList_contains
+
+#define arginfo_class_Dom_TokenList_count arginfo_class_Dom_Node_getLineNo
+
+#define arginfo_class_Dom_TokenList_getIterator arginfo_class_DOMNodeList_getIterator
+
 #if defined(LIBXML_XPATH_ENABLED)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Dom_XPath___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, document, Dom\\Document, 0)
@@ -1323,6 +1355,15 @@ ZEND_METHOD(Dom_XMLDocument, createEmpty);
 ZEND_METHOD(Dom_XMLDocument, createFromFile);
 ZEND_METHOD(Dom_XMLDocument, createFromString);
 ZEND_METHOD(Dom_XMLDocument, xinclude);
+ZEND_METHOD(Dom_TokenList, item);
+ZEND_METHOD(Dom_TokenList, contains);
+ZEND_METHOD(Dom_TokenList, add);
+ZEND_METHOD(Dom_TokenList, remove);
+ZEND_METHOD(Dom_TokenList, toggle);
+ZEND_METHOD(Dom_TokenList, replace);
+ZEND_METHOD(Dom_TokenList, supports);
+ZEND_METHOD(Dom_TokenList, count);
+ZEND_METHOD(Dom_TokenList, getIterator);
 #if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(Dom_XPath, __construct);
 #endif
@@ -1836,6 +1877,20 @@ static const zend_function_entry class_Dom_XMLDocument_methods[] = {
 	ZEND_ME(Dom_XMLDocument, xinclude, arginfo_class_Dom_XMLDocument_xinclude, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_XMLDocument, saveXml, arginfo_class_Dom_XMLDocument_saveXml, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("saveXmlFile", zim_DOMDocument_save, arginfo_class_Dom_XMLDocument_saveXmlFile, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Dom_TokenList_methods[] = {
+	ZEND_RAW_FENTRY("__construct", zim_Dom_Node___construct, arginfo_class_Dom_TokenList___construct, ZEND_ACC_PRIVATE, NULL, NULL)
+	ZEND_ME(Dom_TokenList, item, arginfo_class_Dom_TokenList_item, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_TokenList, contains, arginfo_class_Dom_TokenList_contains, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_TokenList, add, arginfo_class_Dom_TokenList_add, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_TokenList, remove, arginfo_class_Dom_TokenList_remove, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_TokenList, toggle, arginfo_class_Dom_TokenList_toggle, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_TokenList, replace, arginfo_class_Dom_TokenList_replace, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_TokenList, supports, arginfo_class_Dom_TokenList_supports, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_TokenList, count, arginfo_class_Dom_TokenList_count, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_TokenList, getIterator, arginfo_class_Dom_TokenList_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -3080,6 +3135,13 @@ static zend_class_entry *register_class_Dom_Element(zend_class_entry *class_entr
 	zend_declare_typed_property(class_entry, property_className_name, &property_className_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_className_name);
 
+	zval property_classList_default_value;
+	ZVAL_UNDEF(&property_classList_default_value);
+	zend_string *property_classList_name = zend_string_init("classList", sizeof("classList") - 1, 1);
+	zend_string *property_classList_class_Dom_TokenList = zend_string_init("Dom\\TokenList", sizeof("Dom\\TokenList")-1, 1);
+	zend_declare_typed_property(class_entry, property_classList_name, &property_classList_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_classList_class_Dom_TokenList, 0, 0));
+	zend_string_release(property_classList_name);
+
 	zval property_attributes_default_value;
 	ZVAL_UNDEF(&property_attributes_default_value);
 	zend_string *property_attributes_name = zend_string_init("attributes", sizeof("attributes") - 1, 1);
@@ -3567,6 +3629,30 @@ static zend_class_entry *register_class_Dom_XMLDocument(zend_class_entry *class_
 	zend_string *property_formatOutput_name = zend_string_init("formatOutput", sizeof("formatOutput") - 1, 1);
 	zend_declare_typed_property(class_entry, property_formatOutput_name, &property_formatOutput_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property_formatOutput_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Dom_TokenList(zend_class_entry *class_entry_Dom_IteratorAggregate, zend_class_entry *class_entry_Dom_Countable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Dom", "TokenList", class_Dom_TokenList_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	zend_class_implements(class_entry, 2, class_entry_Dom_IteratorAggregate, class_entry_Dom_Countable);
+
+	zval property_length_default_value;
+	ZVAL_UNDEF(&property_length_default_value);
+	zend_string *property_length_name = zend_string_init("length", sizeof("length") - 1, 1);
+	zend_declare_typed_property(class_entry, property_length_name, &property_length_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_length_name);
+
+	zval property_value_default_value;
+	ZVAL_UNDEF(&property_value_default_value);
+	zend_string *property_value_name = zend_string_init("value", sizeof("value") - 1, 1);
+	zend_declare_typed_property(class_entry, property_value_name, &property_value_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_value_name);
 
 	return class_entry;
 }
