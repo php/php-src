@@ -23,9 +23,9 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-// using language construct 'exit' as 'callback'
+// using language construct 'isset' as 'callback'
 try {
-    var_dump( array_filter($input, 'exit') );
+    var_dump( array_filter($input, 'isset') );
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -63,5 +63,5 @@ array(6) {
   int(1000)
 }
 array_filter(): Argument #2 ($callback) must be a valid callback or null, function "echo" not found or invalid function name
-array_filter(): Argument #2 ($callback) must be a valid callback or null, function "exit" not found or invalid function name
+array_filter(): Argument #2 ($callback) must be a valid callback or null, function "isset" not found or invalid function name
 Done

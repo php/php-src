@@ -5012,6 +5012,13 @@ static zend_always_inline zend_result _zend_quick_get_constant(
 	}
 
 	if (!c) {
+		if (UNEXPECTED(
+			zend_string_equals_literal_ci(Z_STR_P(key), "exit")
+			|| zend_string_equals_literal_ci(Z_STR_P(key), "die")
+		)) {
+			zend_throw_unwind_exit();
+			return FAILURE;
+		}
 		if (!check_defined_only) {
 			zend_throw_error(NULL, "Undefined constant \"%s\"", Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)));
 			ZVAL_UNDEF(EX_VAR(opline->result.var));

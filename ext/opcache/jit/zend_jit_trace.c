@@ -314,7 +314,6 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 		case ZEND_FAST_RET:
 		case ZEND_GENERATOR_CREATE:
 		case ZEND_GENERATOR_RETURN:
-		case ZEND_EXIT:
 		case ZEND_YIELD:
 		case ZEND_YIELD_FROM:
 		case ZEND_INCLUDE_OR_EVAL:
@@ -2881,7 +2880,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 					RA_IVAL_DEL(ssa_op->op1_use);
 					count--;
 				} else if (!zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
-					zend_jit_trace_use_var(idx, ssa_op->op1_use, ssa_op->op1_def, ssa_op->op1_use_chain, 
+					zend_jit_trace_use_var(idx, ssa_op->op1_use, ssa_op->op1_def, ssa_op->op1_use_chain,
 						ra,
 						ssa, ssa_opcodes, op_array, op_array_ssa);
 					if (opline->op1_type != IS_CV) {

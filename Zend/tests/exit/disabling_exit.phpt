@@ -9,3 +9,4 @@ exit();
 
 ?>
 --EXPECT--
+Warning: Cannot disable function exit() in Unknown on line 0

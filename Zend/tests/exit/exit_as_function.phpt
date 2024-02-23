@@ -19,5 +19,24 @@ foreach ($values as $value) {
 }
 
 ?>
---EXPECTF--
-Parse error: syntax error, unexpected token "...", expecting ")" in %s on line %d
+--EXPECT--
+string(4) "exit"
+string(3) "die"
+object(Closure)#1 (2) {
+  ["function"]=>
+  string(4) "exit"
+  ["parameter"]=>
+  array(1) {
+    ["$code"]=>
+    string(10) "<optional>"
+  }
+}
+object(Closure)#2 (2) {
+  ["function"]=>
+  string(3) "die"
+  ["parameter"]=>
+  array(1) {
+    ["$code"]=>
+    string(10) "<optional>"
+  }
+}
