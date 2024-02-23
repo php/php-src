@@ -48,6 +48,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The configure option --with-pspell has been removed.
    - Symbol SIZEOF_SHORT removed (size of 2 on 32-bit and 64-bit platforms).
    - Symbol DBA_CDB_MAKE removed in ext/dba.
+   - Symbol HAVE_INET_ATON and function inet_aton removed.
 
  b. Unix build system changes
    - The configure option --with-imap-ssl has been removed.
