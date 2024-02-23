@@ -1,5 +1,5 @@
 --TEST--
-DOMNode::lookupNamespaceURI()
+DOM\Node::lookupNamespaceURI()
 --EXTENSIONS--
 dom
 --FILE--

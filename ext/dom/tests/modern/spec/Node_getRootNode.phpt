@@ -1,5 +1,5 @@
 --TEST--
-DOMNode::getRootNode()
+DOM\Node::getRootNode()
 --EXTENSIONS--
 dom
 --FILE--

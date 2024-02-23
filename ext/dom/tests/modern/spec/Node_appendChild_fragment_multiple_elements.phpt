@@ -1,5 +1,5 @@
 --TEST--
-DOMNode::appendChild() with fragment of multiple elements
+DOM\Node::appendChild() with fragment of multiple elements
 --EXTENSIONS--
 dom
 --FILE--

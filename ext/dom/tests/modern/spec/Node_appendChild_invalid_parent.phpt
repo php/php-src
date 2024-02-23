@@ -1,5 +1,5 @@
 --TEST--
-DOMNode::appendChild() invalid parent
+DOM\Node::appendChild() invalid parent
 --EXTENSIONS--
 dom
 --FILE--

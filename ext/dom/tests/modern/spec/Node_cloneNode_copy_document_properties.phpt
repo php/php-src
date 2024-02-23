@@ -1,5 +1,5 @@
 --TEST--
-DOMNode::cloneNode() should copy the document properties
+DOM\Node::cloneNode() should copy the document properties
 --EXTENSIONS--
 dom
 --FILE--

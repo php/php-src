@@ -1,5 +1,5 @@
 --TEST--
-DOMNode::isEqualNode edge cases 01
+DOM\Node::isEqualNode edge cases 01
 --EXTENSIONS--
 dom
 --FILE--

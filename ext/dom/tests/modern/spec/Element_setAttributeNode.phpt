@@ -1,5 +1,5 @@
 --TEST--
-DOMElement::setAttributeNode(NS) in the same document
+DOM\Element::setAttributeNode(NS) in the same document
 --EXTENSIONS--
 dom
 --FILE--

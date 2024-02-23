@@ -1,5 +1,5 @@
 --TEST--
-DOMNode::$nodeName
+DOM\Node::$nodeName
 --EXTENSIONS--
 dom
 --FILE--

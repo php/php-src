@@ -1,5 +1,5 @@
 --TEST--
-DOMElement::setAttributeNode(NS) inuse error
+DOM\Element::setAttributeNode(NS) inuse error
 --EXTENSIONS--
 dom
 --FILE--

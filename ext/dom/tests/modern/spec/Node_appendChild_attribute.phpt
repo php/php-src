@@ -1,5 +1,5 @@
 --TEST--
-DOMNode::appendChild() with attribute should fail
+DOM\Node::appendChild() with attribute should fail
 --EXTENSIONS--
 dom
 --FILE--

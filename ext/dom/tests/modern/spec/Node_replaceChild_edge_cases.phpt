@@ -1,5 +1,5 @@
 --TEST--
-DOMNode::replaceChild() edge cases
+DOM\Node::replaceChild() edge cases
 --EXTENSIONS--
 dom
 --FILE--

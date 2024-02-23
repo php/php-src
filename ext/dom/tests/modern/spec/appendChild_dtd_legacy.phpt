@@ -32,7 +32,7 @@ echo $other->saveXML();
 ?>
 --EXPECT--
 Found entity: foo
-Document types must be the first child in a document
+A document may only contain one document type
 <?xml version="1.0"?>
 <!DOCTYPE doc [
 <!ENTITY foo "bar">

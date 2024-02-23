@@ -1,5 +1,5 @@
 --TEST--
-DOMNode::normalize() edge case
+DOM\Node::normalize() edge case
 --EXTENSIONS--
 dom
 --FILE--

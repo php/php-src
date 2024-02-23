@@ -1,5 +1,5 @@
 --TEST--
-DOMNode::$nodeValue on an element
+DOM\Node::$nodeValue on an element
 --EXTENSIONS--
 dom
 --FILE--

@@ -1,5 +1,5 @@
 --TEST--
-DOMNode::normalize()
+DOM\Node::normalize()
 --EXTENSIONS--
 dom
 --FILE--

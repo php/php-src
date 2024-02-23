@@ -1,5 +1,5 @@
 --TEST--
-DOMElement::setAttributeNode(NS) adopting from another document
+DOM\Element::setAttributeNode(NS) adopting from another document
 --EXTENSIONS--
 dom
 --FILE--

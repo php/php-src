@@ -1,18 +1,17 @@
 --TEST--
-DOMNode::insertBefore() with DocumentFragment and dtd
+DOM\Node::insertBefore() with DocumentFragment and a document element
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
 $dom = DOM\HTMLDocument::createFromString('<!DOCTYPE html><html><head></head><body></body></html>');
-$dom->documentElement->remove();
 
 $fragment = $dom->createDocumentFragment();
 $fragment->appendChild($dom->createElement('a'));
 
 try {
-    $dom->insertBefore($fragment, $dom->doctype);
+    $dom->insertBefore($fragment, $dom->documentElement);
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
@@ -21,5 +20,5 @@ echo $dom->saveHTML(), "\n";
 
 ?>
 --EXPECT--
-Document types must be the first child in a document
-<!DOCTYPE html>
+Cannot have more than one element child in a document
+<!DOCTYPE html><html><head></head><body></body></html>

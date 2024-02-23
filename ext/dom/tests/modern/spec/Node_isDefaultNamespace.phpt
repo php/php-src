@@ -1,5 +1,5 @@
 --TEST--
-DOMNode::isDefaultNamespace()
+DOM\Node::isDefaultNamespace()
 --EXTENSIONS--
 dom
 --FILE--

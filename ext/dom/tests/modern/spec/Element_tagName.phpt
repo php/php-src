@@ -1,5 +1,5 @@
 --TEST--
-DOMElement::$tagName HTML-uppercased qualified name
+DOM\Element::$tagName HTML-uppercased qualified name
 --EXTENSIONS--
 dom
 --FILE--

@@ -1,5 +1,5 @@
 --TEST--
-DOMNode::lookupPrefix()
+DOM\Node::lookupPrefix()
 --EXTENSIONS--
 dom
 --FILE--
