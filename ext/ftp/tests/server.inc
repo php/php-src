@@ -19,7 +19,7 @@ if ($pid) {
     function dump_and_exit($buf)
     {
         var_dump($buf);
-        exit;
+        exit();
     }
 
     function anonymous()
@@ -75,7 +75,7 @@ if ($pid) {
                 fputs($s, "666 dummy\r\n");
                 sleep(1);
                 fputs($s, "666 bogus msg\r\n");
-                exit;
+                exit();
             }
 
             if (!stream_socket_enable_crypto($s, true, STREAM_CRYPTO_METHOD_SSLv23_SERVER)) {
@@ -110,7 +110,7 @@ if ($pid) {
         $user = $m[1];
         if ($user !== 'user' && $user !== 'anonymous') {
             fputs($s, "530 Not logged in.\r\n");
-            exit;
+            exit();
         }
 
         if (anonymous()) {
@@ -129,7 +129,7 @@ if ($pid) {
                 fputs($s, "230 User logged in\r\n");
             } else {
                 fputs($s, "530 Not logged in.\r\n");
-                exit;
+                exit();
             }
         }
     }
@@ -536,7 +536,7 @@ if ($pid) {
             dump_and_exit($buf);
         }
     }
-    exit;
+    exit();
 }
 
 fclose($socket);

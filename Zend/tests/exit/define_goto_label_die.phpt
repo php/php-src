@@ -10,5 +10,7 @@ die:
 echo "After\n";
 
 ?>
---EXPECTF--
-Parse error: syntax error, unexpected token ":" in %s on line %d
+--EXPECT--
+Before
+In between
+After

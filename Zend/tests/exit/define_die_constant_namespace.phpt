@@ -11,4 +11,4 @@ var_dump(die);
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected token "exit", expecting identifier in %s on line %d
+Fatal error: Cannot define constant with name die in %s on line %d

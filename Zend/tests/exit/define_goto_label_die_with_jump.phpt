@@ -10,5 +10,6 @@ die:
 echo "After\n";
 
 ?>
---EXPECTF--
-Parse error: syntax error, unexpected token "exit", expecting identifier in %s on line %d
+--EXPECT--
+Before
+After

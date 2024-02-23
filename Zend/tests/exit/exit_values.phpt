@@ -80,15 +80,15 @@ const FILE_PATH = __DIR__ . '/exit_values.inc';
 Using NULL as value:
 Exit status is: 0
 Output is:
-
+Deprecated: exit(): Passing null to parameter #1 ($code) of type string|int is deprecated in %s on line %d
 Using false as value:
 Exit status is: 0
 Output is:
 
 Using true as value:
-Exit status is: 0
+Exit status is: 1
 Output is:
-1
+
 Using 0 as value:
 Exit status is: 0
 Output is:
@@ -102,13 +102,13 @@ Exit status is: 20
 Output is:
 
 Using 10.0 as value:
-Exit status is: 0
+Exit status is: 10
 Output is:
-10
+
 Using 15.5 as value:
-Exit status is: 0
+Exit status is: 15
 Output is:
-15.5
+Deprecated: Implicit conversion from float 15.5 to int loses precision in %s on line %d
 Using 'Hello world' as value:
 Exit status is: 0
 Output is:
@@ -116,31 +116,31 @@ Hello world
 Using [] as value:
 Exit status is: 0
 Output is:
-Warning: Array to string conversion in %s on line 3Array
+TypeError: exit(): Argument #1 ($code) must be of type string|int, array given
 Using STDERR as value:
 Exit status is: 0
 Output is:
-Resource id #3
+TypeError: exit(): Argument #1 ($code) must be of type string|int, resource given
 Using new stdClass() as value:
 Exit status is: 0
 Output is:
-Error: Object of class stdClass could not be converted to string
+TypeError: exit(): Argument #1 ($code) must be of type string|int, stdClass given
 As a statement:
 Exit status is: 0
 Output is:
-Error: Object of class stdClass could not be converted to string
+TypeError: exit(): Argument #1 ($code) must be of type string|int, stdClass given
 Using NULL as value:
 Exit status is: 0
 Output is:
-
+Deprecated: die(): Passing null to parameter #1 ($code) of type string|int is deprecated in %s on line %d
 Using false as value:
 Exit status is: 0
 Output is:
 
 Using true as value:
-Exit status is: 0
+Exit status is: 1
 Output is:
-1
+
 Using 0 as value:
 Exit status is: 0
 Output is:
@@ -154,13 +154,13 @@ Exit status is: 20
 Output is:
 
 Using 10.0 as value:
-Exit status is: 0
+Exit status is: 10
 Output is:
-10
+
 Using 15.5 as value:
-Exit status is: 0
+Exit status is: 15
 Output is:
-15.5
+Deprecated: Implicit conversion from float 15.5 to int loses precision in %s on line %d
 Using 'Hello world' as value:
 Exit status is: 0
 Output is:
@@ -168,16 +168,16 @@ Hello world
 Using [] as value:
 Exit status is: 0
 Output is:
-Warning: Array to string conversion in %s on line 3Array
+TypeError: die(): Argument #1 ($code) must be of type string|int, array given
 Using STDERR as value:
 Exit status is: 0
 Output is:
-Resource id #3
+TypeError: die(): Argument #1 ($code) must be of type string|int, resource given
 Using new stdClass() as value:
 Exit status is: 0
 Output is:
-Error: Object of class stdClass could not be converted to string
+TypeError: die(): Argument #1 ($code) must be of type string|int, stdClass given
 As a statement:
 Exit status is: 0
 Output is:
-Error: Object of class stdClass could not be converted to string
+TypeError: die(): Argument #1 ($code) must be of type string|int, stdClass given

@@ -48,7 +48,6 @@ echo token_name(T_OBJECT_CAST), "\n";
 echo token_name(T_BOOL_CAST), "\n";
 echo token_name(T_UNSET_CAST), "\n";
 echo token_name(T_NEW), "\n";
-echo token_name(T_EXIT), "\n";
 echo token_name(T_IF), "\n";
 echo token_name(T_ELSEIF), "\n";
 echo token_name(T_ELSE), "\n";
@@ -173,7 +172,6 @@ T_OBJECT_CAST
 T_BOOL_CAST
 T_UNSET_CAST
 T_NEW
-T_EXIT
 T_IF
 T_ELSEIF
 T_ELSE
