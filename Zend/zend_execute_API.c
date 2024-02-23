@@ -1543,6 +1543,7 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 #elif defined(ZEND_MAX_EXECUTION_TIMERS)
 	zend_max_execution_timer_settime(seconds);
 
+# if !defined(__APPLE__) || defined(ZTS)
 	if (reset_signals) {
 		sigset_t sigset;
 		struct sigaction act;
@@ -1556,6 +1557,7 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		sigaddset(&sigset, ZEND_MAX_EXECUTION_TIMERS_SIGNAL);
 		sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 	}
+# endif
 #elif defined(HAVE_SETITIMER)
 	{
 		struct itimerval t_r;		/* timeout requested */
