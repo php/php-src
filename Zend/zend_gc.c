@@ -2242,8 +2242,6 @@ static ZEND_FUNCTION(gc_destructor_fiber)
 	for (;;) {
 		GC_G(dtor_fiber_running) = true;
 
-		/* The root buffer might be reallocated during destructors calls,
-		 * make sure to reload pointers as necessary. */
 		idx = GC_G(dtor_idx);
 		end = GC_G(dtor_end);
 		if (UNEXPECTED(gc_call_destructors(idx, end, fiber) == FAILURE)) {
