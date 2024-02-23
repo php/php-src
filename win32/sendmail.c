@@ -29,7 +29,6 @@
 #include <winbase.h>
 #include "sendmail.h"
 #include "php_ini.h"
-#include "inet.h"
 
 #include "php_win32_globals.h"
 

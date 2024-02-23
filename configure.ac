@@ -362,21 +362,15 @@ PHP_CHECK_FUNC(socketpair, socket, network)
 PHP_CHECK_FUNC(htonl, socket, network)
 PHP_CHECK_FUNC(gethostname, nsl, network)
 PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
-PHP_CHECK_FUNC(dlopen, dl)
-PHP_CHECK_FUNC(dlsym, dl)
-if test "$ac_cv_func_dlopen" = "yes"; then
-  AC_DEFINE(HAVE_LIBDL, 1, [ ])
-fi
-AC_CHECK_LIB(m, sin)
+AC_SEARCH_LIBS([dlopen], [dl],
+  [AC_DEFINE([HAVE_LIBDL], [1], [Define to 1 if the dl library is available.])])
+AC_SEARCH_LIBS([sin], [m])
 
 case $host_alias in
   riscv64*)
     PHP_CHECK_FUNC(__atomic_exchange_1, atomic)
     ;;
 esac
-
-dnl Check for inet_aton in -lc and -lresolv.
-PHP_CHECK_FUNC(inet_aton, resolv)
 
 dnl Then headers.
 dnl ----------------------------------------------------------------------------

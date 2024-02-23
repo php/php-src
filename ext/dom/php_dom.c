@@ -872,6 +872,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_xpath_object_handlers.offset = XtOffsetOf(dom_xpath_object, dom) + XtOffsetOf(dom_object, std);
 	dom_xpath_object_handlers.free_obj = dom_xpath_objects_free_storage;
 	dom_xpath_object_handlers.get_gc = dom_xpath_get_gc;
+	dom_xpath_object_handlers.clone_obj = NULL;
 
 	dom_xpath_class_entry = register_class_DOMXPath();
 	dom_xpath_class_entry->create_object = dom_xpath_objects_new;

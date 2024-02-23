@@ -41,6 +41,9 @@ PHP 8.4 UPGRADE NOTES
     DOMException now. This situation is extremely unlikely though and probably
     will not affect you. As a result DOMImplementation::createDocument() now has
     a tentative return type of DOMDocument instead of DOMDocument|false.
+  . Previously, DOMXPath objects could be cloned, but resulted in an unusable
+    object. This is no longer possible, and cloning a DOMXPath object now throws
+    an error.
 
 - MBString:
   . mb_encode_numericentity() and mb_decode_numericentity() now check that

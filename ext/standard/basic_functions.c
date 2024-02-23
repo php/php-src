@@ -68,8 +68,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 #ifndef PHP_WIN32
 # include <netdb.h>
-#else
-#include "win32/inet.h"
 #endif
 
 #ifdef HAVE_ARPA_INET_H
