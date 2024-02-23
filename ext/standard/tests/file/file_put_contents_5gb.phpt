@@ -55,7 +55,7 @@ if ($result !== strlen($large_string)) {
     echo "File written successfully.";
 }
 clearstatcache(true, $tmpfile);
-if (file_exists($tmpfile))  {
+if (file_exists($tmpfile)) {
     unlink($tmpfile);
 }
 ?>
