@@ -14,7 +14,7 @@ $gen = (function() {
     yield from (function () {
         $x = new stdClass;
         print "Before exit\n";
-        exit;
+        exit();
         print "Not executed\n";
         yield;
     })();
