@@ -51,7 +51,7 @@ $f->start();
 Exception: 1 exception in %s:%d
 Stack trace:
 #0 [internal function]: Cycle->__destruct()
-#1 [internal function]: gc_call_destructors()
+#1 [internal function]: gc_destructor_fiber()
 #2 %s(%d): gc_collect_cycles()
 #3 [internal function]: {closure}()
 #4 %s(%d): Fiber->start()
@@ -60,7 +60,7 @@ Stack trace:
 Next Exception: 2 exception in %s:%d
 Stack trace:
 #0 [internal function]: Cycle->__destruct()
-#1 [internal function]: gc_call_destructors()
+#1 [internal function]: gc_destructor_fiber()
 #2 %s(%d): gc_collect_cycles()
 #3 [internal function]: {closure}()
 #4 %s(%d): Fiber->start()
@@ -70,7 +70,7 @@ Stack trace:
 Fatal error: Uncaught Exception: 0 exception in %s:%d
 Stack trace:
 #0 [internal function]: Cycle->__destruct()
-#1 [internal function]: gc_call_destructors()
+#1 [internal function]: gc_destructor_fiber()
 #2 %s(%d): Fiber->resume()
 #3 [internal function]: {closure}()
 #4 %s(%d): Fiber->start()

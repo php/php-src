@@ -72,6 +72,7 @@
 #include "zend_errors.h"
 #include "zend_fibers.h"
 #include "zend_hrtime.h"
+#include "zend_portability.h"
 #include "zend_types.h"
 #include "zend_weakrefs.h"
 #include "zend_string.h"
@@ -270,6 +271,7 @@ typedef struct _zend_gc_globals {
 	zend_hrtime_t free_time;
 
 	uint32_t dtor_idx;			/* root buffer index */
+	uint32_t dtor_end;
 	zend_fiber *dtor_fiber;
 	bool dtor_fiber_running;
 
@@ -498,6 +500,7 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 	gc_globals->activated_at = 0;
 
 	gc_globals->dtor_idx = GC_FIRST_ROOT;
+	gc_globals->dtor_end = 0;
 	gc_globals->dtor_fiber = NULL;
 	gc_globals->dtor_fiber_running = false;
 
@@ -545,6 +548,7 @@ void gc_reset(void)
 		GC_G(free_time) = 0;
 
 		GC_G(dtor_idx) = GC_FIRST_ROOT;
+		GC_G(dtor_end) = 0;
 		GC_G(dtor_fiber) = NULL;
 		GC_G(dtor_fiber_running) = false;
 
@@ -1792,7 +1796,61 @@ static void zend_get_gc_buffer_release(void);
 static void zend_gc_check_root_tmpvars(void);
 static void zend_gc_remove_root_tmpvars(void);
 
-static zend_internal_function gc_call_destructors_fn;
+static zend_internal_function gc_destructor_fiber;
+
+static ZEND_COLD ZEND_NORETURN void gc_create_destructor_fiber_error(void)
+{
+	zend_error_noreturn(E_ERROR, "Unable to create destructor fiber");
+}
+
+static ZEND_COLD ZEND_NORETURN void gc_start_destructor_fiber_error(void)
+{
+	zend_error_noreturn(E_ERROR, "Unable to start destructor fiber");
+}
+
+static zend_always_inline zend_result gc_call_destructors(uint32_t idx, uint32_t end, zend_fiber *fiber)
+{
+	gc_root_buffer *current;
+	zend_refcounted *p;
+
+	/* The root buffer might be reallocated during destructors calls,
+	 * make sure to reload pointers as necessary. */
+	while (idx != end) {
+		current = GC_IDX2PTR(idx);
+		if (GC_IS_DTOR_GARBAGE(current->ref)) {
+			p = GC_GET_PTR(current->ref);
+			/* Mark this is as a normal root for the next GC run */
+			current->ref = p;
+			/* Double check that the destructor hasn't been called yet. It
+			 * could have already been invoked indirectly by some other
+			 * destructor. */
+			if (!(OBJ_FLAGS(p) & IS_OBJ_DESTRUCTOR_CALLED)) {
+				if (fiber != NULL) {
+					GC_G(dtor_idx) = idx;
+				}
+				zend_object *obj = (zend_object*)p;
+				GC_TRACE_REF(obj, "calling destructor");
+				GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
+				GC_ADDREF(obj);
+				obj->handlers->dtor_obj(obj);
+				GC_TRACE_REF(obj, "returned from destructor");
+				GC_DELREF(obj);
+				if (UNEXPECTED(fiber != NULL && GC_G(dtor_fiber) != fiber)) {
+					/* We resumed after suspension */
+					gc_check_possible_root((zend_refcounted*)&obj->gc);
+
+					GC_DELREF(&fiber->std);
+					gc_check_possible_root((zend_refcounted*)&fiber->std.gc);
+
+					return FAILURE;
+				}
+			}
+		}
+		idx++;
+	}
+
+	return SUCCESS;
+}
 
 static zend_fiber *gc_create_destructor_fiber(void)
 {
@@ -1801,32 +1859,33 @@ static zend_fiber *gc_create_destructor_fiber(void)
 
 	GC_TRACE("starting destructor fiber");
 
-	if (object_init_ex(&zobj, zend_ce_fiber) != SUCCESS) {
-		zend_error_noreturn(E_ERROR, "Unable to create destructor fiber");
+	if (UNEXPECTED(object_init_ex(&zobj, zend_ce_fiber) == FAILURE)) {
+		gc_create_destructor_fiber_error();
 	}
 
 	fiber = (zend_fiber *)Z_OBJ(zobj);
 	fiber->fci.size = sizeof(fiber->fci);
-	fiber->fci_cache.function_handler = (zend_function*) &gc_call_destructors_fn;
+	fiber->fci_cache.function_handler = (zend_function*) &gc_destructor_fiber;
 
 	GC_G(dtor_fiber) = fiber;
 
-	if (zend_fiber_start(fiber, NULL) == FAILURE) {
-		zend_error_noreturn(E_ERROR, "Unable to start destructor fiber");
+	if (UNEXPECTED(zend_fiber_start(fiber, NULL) == FAILURE)) {
+		gc_start_destructor_fiber_error();
 	}
 
 	return fiber;
 }
 
-static void gc_call_destructors(void)
+static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
 {
 	ZEND_ASSERT(!GC_G(dtor_fiber_running));
 
 	zend_fiber *fiber = GC_G(dtor_fiber);
 
 	GC_G(dtor_idx) = GC_FIRST_ROOT;
+	GC_G(dtor_end) = GC_G(first_unused);
 
-	if (!fiber) {
+	if (UNEXPECTED(!fiber)) {
 		fiber = gc_create_destructor_fiber();
 	} else {
 		zend_fiber_resume(fiber, NULL, NULL);
@@ -1834,13 +1893,14 @@ static void gc_call_destructors(void)
 
 	for (;;) {
 		/* At this point, fiber has executed until suspension */
-		GC_TRACE("returned from destructor fiber");
+		GC_TRACE("resumed from destructor fiber");
 
 		if (UNEXPECTED(GC_G(dtor_fiber_running))) {
 			/* Fiber was suspended by a destructor. Start a new one for the
 			 * remaining destructors. */
 			GC_TRACE("destructor fiber suspended by destructor");
 			GC_G(dtor_fiber) = NULL;
+			GC_G(dtor_idx)++;
 			fiber = gc_create_destructor_fiber();
 			continue;
 		} else {
@@ -1951,7 +2011,11 @@ rerun_gc:
 
 			/* Actually call destructors. */
 			zend_hrtime_t dtor_start_time = zend_hrtime();
-			gc_call_destructors();
+			if (EXPECTED(!EG(active_fiber))) {
+				gc_call_destructors(GC_FIRST_ROOT, end, NULL);
+			} else {
+				gc_call_destructors_in_fiber(end);
+			}
 			GC_G(dtor_time) += zend_hrtime() - dtor_start_time;
 
 			if (GC_G(gc_protected)) {
@@ -2167,13 +2231,12 @@ size_t zend_gc_globals_size(void)
 }
 #endif
 
-ZEND_FUNCTION(gc_call_destructors)
+static ZEND_FUNCTION(gc_destructor_fiber)
 {
 	uint32_t idx, end;
-	gc_root_buffer *current;
-	zend_refcounted *p;
 
 	zend_fiber *fiber = GC_G(dtor_fiber);
+	ZEND_ASSERT(fiber != NULL);
 	ZEND_ASSERT(fiber == EG(active_fiber));
 
 	for (;;) {
@@ -2182,41 +2245,15 @@ ZEND_FUNCTION(gc_call_destructors)
 		/* The root buffer might be reallocated during destructors calls,
 		 * make sure to reload pointers as necessary. */
 		idx = GC_G(dtor_idx);
-		end = GC_G(first_unused);
-		while (idx != end) {
-			current = GC_IDX2PTR(idx);
-			if (GC_IS_DTOR_GARBAGE(current->ref)) {
-				p = GC_GET_PTR(current->ref);
-				/* Mark this is as a normal root for the next GC run */
-				current->ref = p;
-				/* Double check that the destructor hasn't been called yet. It
-				 * could have already been invoked indirectly by some other
-				 * destructor. */
-				if (!(OBJ_FLAGS(p) & IS_OBJ_DESTRUCTOR_CALLED)) {
-					GC_G(dtor_idx) = idx;
-					zend_object *obj = (zend_object*)p;
-					GC_TRACE_REF(obj, "calling destructor");
-					GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
-					GC_ADDREF(obj);
-					obj->handlers->dtor_obj(obj);
-					GC_TRACE_REF(obj, "returned from destructor");
-					GC_DELREF(obj);
-					if (UNEXPECTED(GC_G(dtor_fiber) != fiber)) {
-						/* We resumed after suspension */
-						gc_check_possible_root((zend_refcounted*)&obj->gc);
-
-						GC_DELREF(&fiber->std);
-						gc_check_possible_root((zend_refcounted*)&fiber->std.gc);
-
-						return;
-					}
-				}
-			}
-			idx++;
+		end = GC_G(dtor_end);
+		if (UNEXPECTED(gc_call_destructors(idx, end, fiber) == FAILURE)) {
+			/* We resumed after being suspended by a destructor */
+			return;
 		}
 
+		/* We have called all destructors. Suspend fiber until the next GC run
+		 */
 		GC_G(dtor_fiber_running) = false;
-
 		zend_fiber_suspend(fiber, NULL, NULL);
 
 		if (UNEXPECTED(fiber->flags & ZEND_FIBER_FLAG_DESTROYED)) {
@@ -2228,16 +2265,16 @@ ZEND_FUNCTION(gc_call_destructors)
 	}
 }
 
-static zend_internal_function gc_call_destructors_fn = {
+static zend_internal_function gc_destructor_fiber = {
 	.type = ZEND_INTERNAL_FUNCTION,
 	.fn_flags = ZEND_ACC_PUBLIC,
-	.handler = ZEND_FN(gc_call_destructors),
+	.handler = ZEND_FN(gc_destructor_fiber),
 };
 
 void gc_init(void)
 {
-	gc_call_destructors_fn.function_name = zend_string_init_interned(
-			"gc_call_destructors",
-			strlen("gc_call_destructors"),
+	gc_destructor_fiber.function_name = zend_string_init_interned(
+			"gc_destructor_fiber",
+			strlen("gc_destructor_fiber"),
 			true);
 }
