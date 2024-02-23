@@ -25,7 +25,6 @@
 
 #ifdef PHP_WIN32
 # include <Ws2tcpip.h>
-# include "win32/inet.h"
 # include "win32/winutil.h"
 # define O_RDONLY _O_RDONLY
 # include "win32/param.h"
@@ -58,10 +57,6 @@
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#endif
-
-#ifndef HAVE_INET_ATON
-int inet_aton(const char *, struct in_addr *);
 #endif
 
 #include "php_network.h"

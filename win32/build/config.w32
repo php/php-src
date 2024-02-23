@@ -307,7 +307,7 @@ if (VS_TOOLSET && VCVERS >= 1914) {
 ADD_SOURCES("win32", "dllmain.c glob.c readdir.c \
 	registry.c select.c sendmail.c time.c winutil.c wsyslog.c globals.c \
 	getrusage.c ftok.c ioutil.c codepage.c nice.c \
-	inet.c fnmatch.c sockets.c console.c signal.c");
+	fnmatch.c sockets.c console.c signal.c");
 
 ADD_FLAG("CFLAGS_BD_WIN32", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 if (VS_TOOLSET && VCVERS >= 1914) {

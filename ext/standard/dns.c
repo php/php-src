@@ -25,7 +25,6 @@
 #endif
 
 #ifdef PHP_WIN32
-# include "win32/inet.h"
 # include <winsock2.h>
 # include <windows.h>
 # include <Ws2tcpip.h>
