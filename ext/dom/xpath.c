@@ -240,10 +240,9 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 {
 	zval *context = NULL;
 	xmlNodePtr nodep = NULL;
-	size_t expr_len, nsnbr = 0, xpath_type;
+	size_t expr_len, xpath_type;
 	dom_object *nodeobj;
 	char *expr;
-	xmlNsPtr *ns = NULL;
 
 	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
 	bool register_node_ns = intern->register_node_ns;
