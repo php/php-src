@@ -1361,28 +1361,35 @@ PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, 
 	return ret_refcount;
 }
 
+PHP_LIBXML_API int php_libxml_decrement_doc_ref_directly(php_libxml_ref_obj *document)
+{
+	int ret_refcount = --document->refcount;
+	if (ret_refcount == 0) {
+		if (document->ptr != NULL) {
+			xmlFreeDoc((xmlDoc *) document->ptr);
+		}
+		if (document->doc_props != NULL) {
+			if (document->doc_props->classmap) {
+				zend_hash_destroy(document->doc_props->classmap);
+				FREE_HASHTABLE(document->doc_props->classmap);
+			}
+			efree(document->doc_props);
+		}
+		if (document->private_data != NULL) {
+			document->private_data->dtor(document->private_data);
+		}
+		efree(document);
+	}
+
+	return ret_refcount;
+}
+
 PHP_LIBXML_API int php_libxml_decrement_doc_ref(php_libxml_node_object *object)
 {
 	int ret_refcount = -1;
 
 	if (object != NULL && object->document != NULL) {
-		ret_refcount = --object->document->refcount;
-		if (ret_refcount == 0) {
-			if (object->document->ptr != NULL) {
-				xmlFreeDoc((xmlDoc *) object->document->ptr);
-			}
-			if (object->document->doc_props != NULL) {
-				if (object->document->doc_props->classmap) {
-					zend_hash_destroy(object->document->doc_props->classmap);
-					FREE_HASHTABLE(object->document->doc_props->classmap);
-				}
-				efree(object->document->doc_props);
-			}
-			if (object->document->private_data != NULL) {
-				object->document->private_data->dtor(object->document->private_data);
-			}
-			efree(object->document);
-		}
+		ret_refcount = php_libxml_decrement_doc_ref_directly(object->document);
 		object->document = NULL;
 	}
 

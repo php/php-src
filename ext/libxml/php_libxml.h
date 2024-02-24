@@ -144,6 +144,7 @@ typedef void * (*php_libxml_export_node) (zval *object);
 PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data);
 PHP_LIBXML_API int php_libxml_decrement_node_ptr(php_libxml_node_object *object);
 PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp);
+PHP_LIBXML_API int php_libxml_decrement_doc_ref_directly(php_libxml_ref_obj *document);
 PHP_LIBXML_API int php_libxml_decrement_doc_ref(php_libxml_node_object *object);
 PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object);
 PHP_LIBXML_API zval *php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node export_function);

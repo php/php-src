@@ -168,19 +168,26 @@ static void xsl_build_ns_map(xmlHashTablePtr table, xsltStylesheetPtr sheet, php
 }
 
 /* Apply namespace corrections for new DOM */
-static zend_always_inline bool xsl_apply_ns_hash_corrections(xsltStylesheetPtr sheetp, xmlNodePtr nodep, xmlDocPtr doc)
+typedef enum {
+	XSL_NS_HASH_CORRECTION_NONE = 0,
+	XSL_NS_HASH_CORRECTION_APPLIED = 1,
+	XSL_NS_HASH_CORRECTION_FAILED = 2
+} xsl_ns_hash_correction_status;
+
+static zend_always_inline xsl_ns_hash_correction_status xsl_apply_ns_hash_corrections(xsltStylesheetPtr sheetp, xmlNodePtr nodep, xmlDocPtr doc)
 {
 	if (sheetp->nsHash == NULL) {
 		dom_object *node_intern = php_dom_object_get_data(nodep);
 		if (node_intern != NULL && php_dom_follow_spec_intern(node_intern)) {
 			sheetp->nsHash = xmlHashCreate(10);
 			if (UNEXPECTED(!sheetp->nsHash)) {
-				return false;
+				return XSL_NS_HASH_CORRECTION_FAILED;
 			}
 			xsl_build_ns_map(sheetp->nsHash, sheetp, php_dom_get_ns_mapper(node_intern), doc);
+			return XSL_NS_HASH_CORRECTION_APPLIED;
 		}
 	}
-	return true;
+	return XSL_NS_HASH_CORRECTION_NONE;
 }
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
@@ -190,8 +197,7 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 {
 	zval *id, *docp = NULL;
 	xmlDoc *doc = NULL, *newdoc = NULL;
-	xsltStylesheetPtr sheetp, oldsheetp;
-	xsl_object *intern;
+	xsltStylesheetPtr sheetp;
 	int clone_docu = 0;
 	xmlNode *nodep = NULL;
 	zval *cloneDocu, rv;
@@ -230,13 +236,23 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 		RETURN_FALSE;
 	}
 
-	if (UNEXPECTED(!xsl_apply_ns_hash_corrections(sheetp, nodep, doc))) {
+	xsl_object *intern = Z_XSL_P(id);
+
+	xsl_ns_hash_correction_status status = xsl_apply_ns_hash_corrections(sheetp, nodep, doc);
+	if (UNEXPECTED(status == XSL_NS_HASH_CORRECTION_FAILED)) {
 		xsltFreeStylesheet(sheetp);
 		xmlFreeDoc(newdoc);
 		RETURN_FALSE;
+	} else if (status == XSL_NS_HASH_CORRECTION_APPLIED) {
+		/* The namespace mappings need to be kept alive.
+		 * This is stored in the ref obj outside of libxml2, but that means that the sheet won't keep it alive
+		 * unlike with namespaces from old DOM. */
+		if (intern->sheet_ref_obj) {
+			php_libxml_decrement_doc_ref_directly(intern->sheet_ref_obj);
+		}
+		intern->sheet_ref_obj = Z_LIBXML_NODE_P(docp)->document;
+		intern->sheet_ref_obj->refcount++;
 	}
-
-	intern = Z_XSL_P(id);
 
 	member = ZSTR_INIT_LITERAL("cloneDocument", 0);
 	cloneDocu = zend_std_read_property(Z_OBJ_P(id), member, BP_VAR_R, NULL, &rv);
@@ -261,14 +277,7 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 		intern->hasKeys = true;
 	}
 
-	if ((oldsheetp = (xsltStylesheetPtr)intern->ptr)) {
-		/* free wrapper */
-		if (((xsltStylesheetPtr) intern->ptr)->_private != NULL) {
-			((xsltStylesheetPtr) intern->ptr)->_private = NULL;
-		}
-		xsltFreeStylesheet((xsltStylesheetPtr) intern->ptr);
-		intern->ptr = NULL;
-	}
+	xsl_free_sheet(intern);
 
 	php_xsl_set_object(id, sheetp);
 	RETVAL_TRUE;
