@@ -106,7 +106,7 @@ zend_class_entry *zend_optimizer_get_class_entry(
 zend_class_entry *zend_optimizer_get_class_entry_from_op1(
 		const zend_script *script, const zend_op_array *op_array, const zend_op *opline);
 const zend_class_constant *zend_fetch_class_const_info(
-		const zend_script *script, const zend_op_array *op_array, const zend_op *opline);
+		const zend_script *script, const zend_op_array *op_array, const zend_op *opline, bool *is_prototype);
 
 void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx);

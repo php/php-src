@@ -831,14 +831,14 @@ zend_class_entry *zend_optimizer_get_class_entry_from_op1(
 	return NULL;
 }
 
-const zend_class_constant *zend_fetch_class_const_info(const zend_script *script, const zend_op_array *op_array, const zend_op *opline)
-{
+const zend_class_constant *zend_fetch_class_const_info(
+	const zend_script *script, const zend_op_array *op_array, const zend_op *opline, bool *is_prototype) {
 	const zend_class_entry *ce = NULL;
+	bool is_static_or_parent_reference = false;
 
 	if (opline->op2_type != IS_CONST || Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
 		return NULL;
 	}
-
 	if (opline->op1_type == IS_CONST) {
 		zval *op1 = CRT_CONSTANT(opline->op1);
 		if (Z_TYPE_P(op1) == IS_STRING) {
@@ -846,38 +846,31 @@ const zend_class_constant *zend_fetch_class_const_info(const zend_script *script
 		}
 	} else if (opline->op1_type == IS_UNUSED && op_array->scope && !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)) {
 		int fetch_type = (int) opline->op1.num & ZEND_FETCH_CLASS_MASK;
-		switch (fetch_type) {
-			case ZEND_FETCH_CLASS_SELF:
-			case ZEND_FETCH_CLASS_STATIC:
-				/* We enforce that static property types cannot change during inheritance, so
-				 * handling static the same way as self here is legal. */
-				ce = op_array->scope;
-				break;
-			case ZEND_FETCH_CLASS_PARENT:
-				if (op_array->scope->ce_flags & ZEND_ACC_LINKED) {
-					ce = op_array->scope->parent;
-				}
-				break;
-			default:
-				break;
+		if (fetch_type == ZEND_FETCH_CLASS_SELF) {
+			ce = op_array->scope;
+		} else if (fetch_type == ZEND_FETCH_CLASS_STATIC) {
+			ce = op_array->scope;
+			is_static_or_parent_reference = true;
+		} else if (fetch_type == ZEND_FETCH_CLASS_PARENT) {
+			if (op_array->scope->ce_flags & ZEND_ACC_LINKED) {
+				ce = op_array->scope->parent;
+			}
+			is_static_or_parent_reference = true;
 		}
 	}
-
-	if (!ce) {
+	if (!ce || (ce->ce_flags & ZEND_ACC_TRAIT)) {
 		return NULL;
 	}
-
 	zend_class_constant *const_info = zend_hash_find_ptr(&ce->constants_table, Z_STR(ZEND_OP2_LITERAL(opline)));
 	if (!const_info) {
 		return NULL;
 	}
-
-	if ((ZEND_CLASS_CONST_FLAGS(const_info) & ZEND_ACC_DEPRECATED) ||
-		(ZEND_CLASS_CONST_FLAGS(const_info) & ZEND_ACC_PPP_MASK) != ZEND_ACC_PUBLIC ||
-		(ce->ce_flags & ZEND_ACC_TRAIT)
-	) {
+	if ((ZEND_CLASS_CONST_FLAGS(const_info) & ZEND_ACC_DEPRECATED)
+		|| ((ZEND_CLASS_CONST_FLAGS(const_info) & ZEND_ACC_PPP_MASK) != ZEND_ACC_PUBLIC && const_info->ce != op_array->scope)) {
 		return NULL;
 	}
+	*is_prototype = !is_static_or_parent_reference
+		|| (const_info->ce->ce_flags & ZEND_ACC_FINAL) || (ZEND_CLASS_CONST_FLAGS(const_info) & ZEND_ACC_FINAL);
 
 	return const_info;
 }
