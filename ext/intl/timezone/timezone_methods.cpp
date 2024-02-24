@@ -133,52 +133,43 @@ U_CFUNC PHP_FUNCTION(intltz_get_unknown)
 U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
 {
 	zval				*arg = NULL;
-	StringEnumeration	*se	  = NULL;
+	zend_string                     *args = NULL;
+	zend_long                       argl = 0;
+	StringEnumeration	        *se = NULL;
 	intl_error_reset(NULL);
 
-	/* double indirection to have the zend engine destroy the new zval that
-	 * results from separation */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
-		RETURN_THROWS();
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_LONG(args, argl);
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZEND_NUM_ARGS() == 0) {
+		se = TimeZone::createEnumeration();
+	} else {
+		if (args) {
+			double dval;
+			switch (is_numeric_string(ZSTR_VAL(args), ZSTR_LEN(args), &argl, &dval, 0)) {
+			case IS_DOUBLE:
+				argl = zend_dval_to_lval(dval);
+				if (!zend_is_long_compatible(argl, dval)) {
+					zend_incompatible_double_to_long_error(dval);
+				}
+			case IS_LONG:
+				goto long_value;
+			default:
+				se = TimeZone::createEnumeration(ZSTR_VAL(args));
+			}
+		} else {
+long_value:
+			if (UNEXPECTED(argl < (zend_long)INT32_MIN || argl > (zend_long)INT32_MAX)) {
+				zend_argument_value_error(1, "value must be between %d and %d", INT32_MIN, INT32_MAX);
+				RETURN_THROWS();
+			} else {
+				se = TimeZone::createEnumeration((int32_t) argl);
+			}
+		}
 	}
 
-	if (arg == NULL || Z_TYPE_P(arg) == IS_NULL) {
-		se = TimeZone::createEnumeration();
-	} else if (Z_TYPE_P(arg) == IS_LONG) {
-int_offset:
-		if (UNEXPECTED(Z_LVAL_P(arg) < (zend_long)INT32_MIN ||
-				Z_LVAL_P(arg) > (zend_long)INT32_MAX)) {
-			zend_argument_value_error(1, "value is out of range");
-			RETURN_THROWS();
-		} else {
-			se = TimeZone::createEnumeration((int32_t) Z_LVAL_P(arg));
-		}
-	} else if (Z_TYPE_P(arg) == IS_DOUBLE) {
-double_offset:
-		convert_to_long(arg);
-		goto int_offset;
-	} else if (Z_TYPE_P(arg) == IS_OBJECT || Z_TYPE_P(arg) == IS_STRING) {
-		zend_long lval;
-		double dval;
-		if (!try_convert_to_string(arg)) {
-			RETURN_THROWS();
-		}
-		switch (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, 0)) {
-		case IS_DOUBLE:
-			zval_ptr_dtor(arg);
-			ZVAL_DOUBLE(arg, dval);
-			goto double_offset;
-		case IS_LONG:
-			zval_ptr_dtor(arg);
-			ZVAL_LONG(arg, lval);
-			goto int_offset;
-		}
-		/* else call string version */
-		se = TimeZone::createEnumeration(Z_STRVAL_P(arg));
-	} else {
-		zend_argument_type_error(1, "invalid argument type");
-		RETURN_THROWS();
-	}
 
 	if (se) {
 		IntlIterator_from_StringEnumeration(se, return_value);
@@ -238,7 +229,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 
 	if (!arg3isnull) {
 		if (UNEXPECTED(offset_arg < (zend_long)INT32_MIN || offset_arg > (zend_long)INT32_MAX)) {
-			zend_argument_value_error(3, "offset out of bounds");
+			zend_argument_value_error(3, "offset must be between %d and %d", INT32_MIN, INT32_MAX);
 			RETURN_THROWS();
 		}
 		offset = (int32_t)offset_arg;
@@ -344,7 +335,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 	}
 
 	if (UNEXPECTED(index < (zend_long)INT32_MIN || index > (zend_long)INT32_MAX)) {
-		zend_argument_value_error(2, "index out of range");
+		zend_argument_value_error(2, "index must be between %d and %d", INT32_MIN, INT32_MAX);
 		RETURN_THROWS();
 	}
 
