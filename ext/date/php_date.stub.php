@@ -317,10 +317,41 @@ interface DateTimeInterface
     public function format(string $format): string;
 
     /** @tentative-return-type */
+    public function modify(string $modifier): DateTimeInterface|false;
+
+
+    /** @tentative-return-type */
+    public function add(DateInterval $interval): DateTimeInterface;
+
+    /** @tentative-return-type */
+    public function sub(DateInterval $interval): DateTimeInterface;
+
+    /** @tentative-return-type */
     public function getTimezone(): DateTimeZone|false;
 
     /** @tentative-return-type */
+    public function setTimezone(DateTimeZone $timezone): DateTimeInterface;
+
+    /** @tentative-return-type */
     public function getOffset(): int;
+
+    /** @tentative-return-type */
+    public function getMicroseconds(): int; // TODO: Rename https://github.com/php/php-src/pull/13486
+
+    /** @tentative-return-type */
+    public function setMicroseconds(int $microseconds): static; // TODO: Rename https://github.com/php/php-src/pull/13486
+
+    /** @tentative-return-type */
+    public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): DateTimeInterface;
+
+    /** @tentative-return-type */
+    public function setDate(int $year, int $month, int $day): DateTimeInterface;
+
+    /** @tentative-return-type */
+    public function setISODate(int $year, int $week, int $dayOfWeek = 1): DateTimeInterface;
+
+    /** @tentative-return-type */
+    public function setTimestamp(int $timestamp): DateTimeInterface;
 
     /** @tentative-return-type */
     public function getTimestamp(): int;
