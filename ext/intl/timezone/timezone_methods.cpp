@@ -124,6 +124,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_unknown)
 
 U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
 {
+<<<<<<< HEAD
 	zend_string *timezone = nullptr;
 	zend_long timezone_shift = 0;
 	bool is_null = true;
@@ -148,6 +149,46 @@ U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
 		}
 		se = TimeZone::createEnumeration(static_cast<int32_t>(timezone_shift));
 	}
+=======
+	zval				*arg = NULL;
+	zend_string                     *args = NULL;
+	zend_long                       argl = 0;
+	StringEnumeration	        *se = NULL;
+	intl_error_reset(NULL);
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_LONG(args, argl);
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZEND_NUM_ARGS() == 0) {
+		se = TimeZone::createEnumeration();
+	} else {
+		if (args) {
+			double dval;
+			switch (is_numeric_string(ZSTR_VAL(args), ZSTR_LEN(args), &argl, &dval, 0)) {
+			case IS_DOUBLE:
+				argl = zend_dval_to_lval(dval);
+				if (!zend_is_long_compatible(argl, dval)) {
+					zend_incompatible_double_to_long_error(dval);
+				}
+			case IS_LONG:
+				goto long_value;
+			default:
+				se = TimeZone::createEnumeration(ZSTR_VAL(args));
+			}
+		} else {
+long_value:
+			if (UNEXPECTED(argl < (zend_long)INT32_MIN || argl > (zend_long)INT32_MAX)) {
+				zend_argument_value_error(1, "value must be between %d and %d", INT32_MIN, INT32_MAX);
+				RETURN_THROWS();
+			} else {
+				se = TimeZone::createEnumeration((int32_t) argl);
+			}
+		}
+	}
+
+>>>>>>> d9ffb18432e (changes from remarks)
 
 	if (se) {
 		IntlIterator_from_StringEnumeration(se, return_value);
@@ -207,8 +248,13 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 	}
 
 	if (!arg3isnull) {
+<<<<<<< HEAD
 		if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(offset_arg))) {
 			zend_argument_value_error(1, "must be between %d and %d", INT32_MIN, INT32_MAX);
+=======
+		if (UNEXPECTED(offset_arg < (zend_long)INT32_MIN || offset_arg > (zend_long)INT32_MAX)) {
+			zend_argument_value_error(3, "offset must be between %d and %d", INT32_MIN, INT32_MAX);
+>>>>>>> d9ffb18432e (changes from remarks)
 			RETURN_THROWS();
 		}
 		offset = static_cast<int32_t>(offset_arg);
@@ -310,8 +356,13 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 		Z_PARAM_LONG(index)
 	ZEND_PARSE_PARAMETERS_END();
 
+<<<<<<< HEAD
 	if (UNEXPECTED(ZEND_LONG_EXCEEDS_INT(index))) {
 		zend_argument_value_error(2, "must be between %d and %d", INT32_MIN, INT32_MAX);
+=======
+	if (UNEXPECTED(index < (zend_long)INT32_MIN || index > (zend_long)INT32_MAX)) {
+		zend_argument_value_error(2, "index must be between %d and %d", INT32_MIN, INT32_MAX);
+>>>>>>> d9ffb18432e (changes from remarks)
 		RETURN_THROWS();
 	}
 
