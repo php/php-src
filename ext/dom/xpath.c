@@ -283,13 +283,13 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 
 	ctxp->node = nodep;
 
-	dom_in_scope_ns in_scope_ns;
+	php_dom_in_scope_ns in_scope_ns;
 	if (register_node_ns && nodep != NULL) {
 		if (modern) {
-			dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(&intern->dom);
-			in_scope_ns = dom_get_in_scope_ns(ns_mapper, nodep);
+			php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(&intern->dom);
+			in_scope_ns = php_dom_get_in_scope_ns(ns_mapper, nodep);
 		} else {
-			in_scope_ns = dom_get_in_scope_ns_legacy(nodep);
+			in_scope_ns = php_dom_get_in_scope_ns_legacy(nodep);
 		}
 		ctxp->namespaces = in_scope_ns.list;
 		ctxp->nsNr = in_scope_ns.count;
@@ -299,7 +299,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 	ctxp->node = NULL;
 
 	if (register_node_ns && nodep != NULL) {
-		dom_in_scope_ns_destroy(&in_scope_ns);
+		php_dom_in_scope_ns_destroy(&in_scope_ns);
 		ctxp->namespaces = NULL;
 		ctxp->nsNr = 0;
 	}

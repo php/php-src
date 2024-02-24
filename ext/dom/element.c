@@ -120,7 +120,7 @@ zend_result dom_element_tag_name_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	bool uppercase = php_dom_follow_spec_intern(obj) && dom_ns_is_html_and_document_is_html(nodep);
+	bool uppercase = php_dom_follow_spec_intern(obj) && php_dom_ns_is_html_and_document_is_html(nodep);
 
 	zend_string *result = dom_node_get_node_name_attribute_or_element((const xmlNode *) nodep, uppercase);
 	ZVAL_NEW_STR(retval, result);
@@ -395,7 +395,7 @@ PHP_METHOD(DOMElement, setAttribute)
 
 	if (php_dom_follow_spec_intern(intern)) {
 		xmlChar *name_processed = BAD_CAST name;
-		if (dom_ns_is_html_and_document_is_html(nodep)) {
+		if (php_dom_ns_is_html_and_document_is_html(nodep)) {
 			char *lowercase_copy = zend_str_tolower_dup_ex(name, name_len);
 			if (lowercase_copy != NULL) {
 				name_processed = BAD_CAST lowercase_copy;
@@ -969,8 +969,8 @@ static void dom_set_attribute_ns_modern(dom_object *intern, xmlNodePtr elemp, ze
 	int errorcode = dom_validate_and_extract(uri, name, &localname, &prefix);
 
 	if (errorcode == 0) {
-		dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
-		xmlNsPtr ns = dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
+		php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
+		xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
 		if (UNEXPECTED(xmlSetNsProp(elemp, ns, localname, BAD_CAST value) == NULL)) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		}

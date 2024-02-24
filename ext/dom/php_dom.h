@@ -114,8 +114,8 @@ typedef enum _dom_iterator_type {
 	DOM_HTMLCOLLECTION,
 } dom_iterator_type;
 
-struct _dom_libxml_ns_mapper;
-typedef struct _dom_libxml_ns_mapper dom_libxml_ns_mapper;
+struct _php_dom_libxml_ns_mapper;
+typedef struct _php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
 
 static inline dom_object_namespace_node *php_dom_namespace_node_obj_from_obj(zend_object *obj) {
 	return (dom_object_namespace_node*)((char*)(obj) - XtOffsetOf(dom_object_namespace_node, dom.std));
@@ -231,7 +231,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 int php_dom_get_namednodemap_length(dom_object *obj);
 int php_dom_get_nodelist_length(dom_object *obj);
 
-xmlNodePtr dom_clone_node(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive);
+xmlNodePtr dom_clone_node(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive);
 
 #define DOM_GET_INTERN(__id, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
@@ -310,10 +310,10 @@ static zend_always_inline bool php_dom_follow_spec_node(const xmlNode *node)
 	return false;
 }
 
-static zend_always_inline dom_libxml_ns_mapper *php_dom_get_ns_mapper(dom_object *intern)
+static zend_always_inline php_dom_libxml_ns_mapper *php_dom_get_ns_mapper(dom_object *intern)
 {
 	ZEND_ASSERT(intern->document != NULL);
-	return (dom_libxml_ns_mapper *) intern->document->private_data;
+	return (php_dom_libxml_ns_mapper *) intern->document->private_data;
 }
 
 PHP_MINIT_FUNCTION(dom);

@@ -90,7 +90,7 @@ zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
-			uppercase = php_dom_follow_spec_intern(obj) && dom_ns_is_html_and_document_is_html(nodep);
+			uppercase = php_dom_follow_spec_intern(obj) && php_dom_ns_is_html_and_document_is_html(nodep);
 			ZEND_FALLTHROUGH;
 		case XML_ATTRIBUTE_NODE:
 			ZVAL_NEW_STR(retval, dom_node_get_node_name_attribute_or_element(nodep, uppercase));
@@ -1604,11 +1604,11 @@ PHP_METHOD(DOMNode, cloneNode)
 
 	DOM_GET_OBJ(n, id, xmlNodePtr, intern);
 
-	dom_libxml_ns_mapper *ns_mapper = NULL;
+	php_dom_libxml_ns_mapper *ns_mapper = NULL;
 	bool clone_document = n->type == XML_DOCUMENT_NODE || n->type == XML_HTML_DOCUMENT_NODE;
 	if (php_dom_follow_spec_intern(intern)) {
 		if (clone_document) {
-			ns_mapper = dom_libxml_ns_mapper_create();
+			ns_mapper = php_dom_libxml_ns_mapper_create();
 		} else {
 			ns_mapper = php_dom_get_ns_mapper(intern);
 		}
@@ -1618,7 +1618,7 @@ PHP_METHOD(DOMNode, cloneNode)
 
 	if (!node) {
 		if (clone_document && ns_mapper != NULL) {
-			dom_libxml_ns_mapper_destroy(ns_mapper);
+			php_dom_libxml_ns_mapper_destroy(ns_mapper);
 		}
 		RETURN_FALSE;
 	}
@@ -1638,7 +1638,7 @@ PHP_METHOD(DOMNode, cloneNode)
 		}
 		php_dom_update_document_after_clone(intern, n, new_intern, node);
 		ZEND_ASSERT(new_intern->document->private_data == NULL);
-		new_intern->document->private_data = dom_libxml_ns_mapper_header(ns_mapper);
+		new_intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
 	} else {
 		if (node->type == XML_ATTRIBUTE_NODE && n->ns != NULL && node->ns == NULL) {
 			/* Let reconciliation deal with this. The lifetime of the namespace poses no problem
@@ -2078,7 +2078,7 @@ static const char *dom_locate_a_namespace(xmlNodePtr node, const zend_string *pr
 			*     or if prefix is null and it has an attribute whose namespace is the XMLNS namespace, namespace prefix is null, and local name is "xmlns",
 			*     then return its value if it is not the empty string, and null otherwise. */
 			for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
-				if (attr->ns == NULL || !dom_ns_is_fast_ex(attr->ns, dom_ns_is_xmlns_magic_token)) {
+				if (attr->ns == NULL || !php_dom_ns_is_fast_ex(attr->ns, php_dom_ns_is_xmlns_magic_token)) {
 					continue;
 				}
 				if ((prefix != NULL && xmlStrEqual(attr->ns->prefix, BAD_CAST "xmlns") && xmlStrEqual(attr->name, BAD_CAST ZSTR_VAL(prefix)))

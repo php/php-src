@@ -580,10 +580,10 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 	if (instanceof_function(intern->std.ce, dom_node_class_entry) || instanceof_function(intern->std.ce, dom_modern_node_class_entry)) {
 		xmlNodePtr node = (xmlNodePtr)dom_object_get_node(intern);
 		if (node != NULL) {
-			dom_libxml_ns_mapper *ns_mapper = NULL;
+			php_dom_libxml_ns_mapper *ns_mapper = NULL;
 			if (php_dom_follow_spec_intern(intern)) {
 				if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE) {
-					ns_mapper = dom_libxml_ns_mapper_create();
+					ns_mapper = php_dom_libxml_ns_mapper_create();
 				} else {
 					ns_mapper = php_dom_get_ns_mapper(intern);
 				}
@@ -593,7 +593,7 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 			if (cloned_node != NULL) {
 				dom_update_refcount_after_clone(intern, node, clone, cloned_node);
 			}
-			clone->document->private_data = dom_libxml_ns_mapper_header(ns_mapper);
+			clone->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
 		}
 	}
 
@@ -1663,7 +1663,7 @@ static bool dom_match_qualified_name_for_tag_name_equality(const xmlChar *local,
 		return xmlStrEqual(nodep->name, local);
 	}
 
-	const xmlChar *local_to_use = nodep->doc->type == XML_HTML_DOCUMENT_NODE && dom_ns_is_fast(nodep, dom_ns_is_html_magic_token) ? local_lower : local;
+	const xmlChar *local_to_use = nodep->doc->type == XML_HTML_DOCUMENT_NODE && php_dom_ns_is_fast(nodep, php_dom_ns_is_html_magic_token) ? local_lower : local;
 	return dom_match_qualified_name_according_to_spec(local_to_use, nodep);
 }
 
@@ -2227,7 +2227,7 @@ static int dom_nodemap_has_dimension(zend_object *object, zval *member, int chec
 	return offset >= 0 && offset < php_dom_get_namednodemap_length(php_dom_obj_from_obj(object));
 } /* }}} end dom_nodemap_has_dimension */
 
-static xmlNodePtr dom_clone_container_helper(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr src_node, xmlDocPtr dst_doc)
+static xmlNodePtr dom_clone_container_helper(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr src_node, xmlDocPtr dst_doc)
 {
 	xmlNodePtr clone = xmlDocCopyNode(src_node, dst_doc, 0);
 	if (EXPECTED(clone != NULL)) {
@@ -2240,7 +2240,7 @@ static xmlNodePtr dom_clone_container_helper(dom_libxml_ns_mapper *ns_mapper, xm
 			if (src_node->nsDef != NULL) {
 				xmlNsPtr current_ns = src_node->nsDef;
 				do {
-					dom_ns_compat_mark_attribute(ns_mapper, clone, current_ns);
+					php_dom_ns_compat_mark_attribute(ns_mapper, clone, current_ns);
 				} while ((current_ns = current_ns->next) != NULL);
 
 				last_added_attr = clone->properties;
@@ -2273,7 +2273,7 @@ static xmlNodePtr dom_clone_container_helper(dom_libxml_ns_mapper *ns_mapper, xm
 	return clone;
 }
 
-static xmlNodePtr dom_clone_helper(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr src_node, xmlDocPtr dst_doc, bool recursive)
+static xmlNodePtr dom_clone_helper(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr src_node, xmlDocPtr dst_doc, bool recursive)
 {
 	xmlNodePtr outer_clone = dom_clone_container_helper(ns_mapper, src_node, dst_doc);
 
@@ -2346,7 +2346,7 @@ static xmlNodePtr dom_clone_helper(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr s
 	return outer_clone;
 }
 
-xmlNodePtr dom_clone_node(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive)
+xmlNodePtr dom_clone_node(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive)
 {
 	if (node->type == XML_DTD_NODE) {
 		/* The behaviour w.r.t. the internal subset is implementation-defined according to DOM 3.
@@ -2362,10 +2362,10 @@ xmlNodePtr dom_clone_node(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlD
 		if (EXPECTED(clone != NULL)) {
 			if (clone->type == XML_DOCUMENT_NODE || clone->type == XML_HTML_DOCUMENT_NODE || clone->type == XML_DOCUMENT_FRAG_NODE) {
 				for (xmlNodePtr child = clone->children; child != NULL; child = child->next) {
-					dom_libxml_reconcile_modern(ns_mapper, child);
+					php_dom_libxml_reconcile_modern(ns_mapper, child);
 				}
 			} else {
-				dom_libxml_reconcile_modern(ns_mapper, clone);
+				php_dom_libxml_reconcile_modern(ns_mapper, clone);
 			}
 		}
 		return clone;
@@ -2427,7 +2427,7 @@ bool php_dom_has_sibling_preceding_node(xmlNodePtr node, xmlElementType type)
 xmlAttrPtr php_dom_get_attribute_node(xmlNodePtr elem, const xmlChar *name, size_t name_len)
 {
 	xmlChar *name_processed = BAD_CAST name;
-	if (dom_ns_is_html_and_document_is_html(elem)) {
+	if (php_dom_ns_is_html_and_document_is_html(elem)) {
 		char *lowercase_copy = zend_str_tolower_dup_ex((char *) name, name_len);
 		if (lowercase_copy != NULL) {
 			name_processed = BAD_CAST lowercase_copy;

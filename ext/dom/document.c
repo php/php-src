@@ -544,9 +544,9 @@ PHP_METHOD(DOM_Document, createElement)
 	}
 
 	if (docp->type == XML_HTML_DOCUMENT_NODE) {
-		dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
+		php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
 		char *lower = zend_str_tolower_dup_ex(ZSTR_VAL(name), ZSTR_LEN(name));
-		node = xmlNewDocRawNode(docp, dom_libxml_ns_mapper_ensure_html_ns(ns_mapper), BAD_CAST (lower ? lower : ZSTR_VAL(name)), NULL);
+		node = xmlNewDocRawNode(docp, php_dom_libxml_ns_mapper_ensure_html_ns(ns_mapper), BAD_CAST (lower ? lower : ZSTR_VAL(name)), NULL);
 		efree(lower);
 	} else {
 		node = xmlNewDocNode(docp, NULL, BAD_CAST ZSTR_VAL(name), NULL);
@@ -997,8 +997,8 @@ PHP_METHOD(DOM_Document, createElementNS)
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 			RETURN_THROWS();
 		}
-		dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
-		nodep->ns = dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
+		php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
+		nodep->ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
 		DOM_RET_OBJ(nodep, &ret, intern);
 	} else {
 		xmlFreeNode(nodep);
@@ -1052,8 +1052,8 @@ PHP_METHOD(DOMDocument, createAttributeNS)
 
 		if (uri != NULL && ZSTR_LEN(uri) > 0) {
 			if (php_dom_follow_spec_intern(intern)) {
-				dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
-				nsptr = dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
+				php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
+				nsptr = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
 			} else {
 				nsptr = xmlSearchNsByHref(docp, root, BAD_CAST ZSTR_VAL(uri));
 
@@ -1209,8 +1209,8 @@ bool php_dom_adopt_node(xmlNodePtr nodep, dom_object *dom_object_new_document, x
 		if (php_dom_follow_spec_intern(dom_object_new_document)) {
 			xmlUnlinkNode(nodep);
 			xmlSetTreeDoc(nodep, new_document);
-			dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(dom_object_new_document);
-			dom_libxml_reconcile_modern(ns_mapper, nodep);
+			php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(dom_object_new_document);
+			php_dom_libxml_reconcile_modern(ns_mapper, nodep);
 #if LIBXML_VERSION < 21000
 			libxml_fixup_name_and_content_element(original_document, new_document, nodep);
 #endif

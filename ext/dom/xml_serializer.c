@@ -318,7 +318,7 @@ static const xmlChar *dom_recording_the_namespace_information(
 		/* Steps 2.1-2.2 fetch namespace information from the attribute, but let's defer that for simplicity to the if's body. */
 
 		/* 2.3. If the attribute namespace is the XMLNS namespace, then: */
-		if (dom_ns_is_fast((xmlNodePtr) attr, dom_ns_is_xmlns_magic_token)) {
+		if (php_dom_ns_is_fast((xmlNodePtr) attr, php_dom_ns_is_xmlns_magic_token)) {
 			/* 2.3.1. If attribute prefix is null, then attr is a default namespace declaration.
 			 *        Set the default namespace attr value to attr's value and stop running these steps,
 			 *        returning to Main to visit the next attribute. */
@@ -637,7 +637,7 @@ static int dom_xml_serialize_attributes(
 			);
 
 			/* 3.5.2. If the value of attribute namespace is the XMLNS namespace, then run these steps: */
-			if (dom_ns_is_fast((xmlNodePtr) attr, dom_ns_is_xmlns_magic_token)) {
+			if (php_dom_ns_is_fast((xmlNodePtr) attr, php_dom_ns_is_xmlns_magic_token)) {
 				const xmlChar *attr_value = dom_get_attribute_value(attr);
 
 				/* 3.5.2.1. If any of the following are true, then stop running these steps and goto Loop to visit the next attribute: */
@@ -821,7 +821,7 @@ static int dom_xml_serialize_element_node(
 
 		/* 11.2. If ns is the XML namespace,
 		 *       then append to qualified name the concatenation of the string "xml:" and the value of node's localName. */
-		if (dom_ns_is_fast(element, dom_ns_is_xml_magic_token)) {
+		if (php_dom_ns_is_fast(element, php_dom_ns_is_xml_magic_token)) {
 			qualified_name.prefix = BAD_CAST "xml";
 			qualified_name.name = element->name;
 		}
@@ -950,7 +950,7 @@ static int dom_xml_serialize_element_node(
 	if (element->children == NULL) {
 		if (xmlSaveNoEmptyTags) {
 			/* Do nothing, use the <x></x> closing style. */
-		} else if (dom_ns_is_fast(element, dom_ns_is_html_magic_token)) {
+		} else if (php_dom_ns_is_fast(element, php_dom_ns_is_html_magic_token)) {
 			size_t name_length = strlen((const char *) element->name);
 			if (dom_local_name_compare_ex(element, "area", strlen("area"), name_length)
 				|| dom_local_name_compare_ex(element, "base", strlen("base"), name_length)

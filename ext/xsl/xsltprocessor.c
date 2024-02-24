@@ -136,7 +136,7 @@ static void xsl_add_ns_to_map(xmlHashTablePtr table, xsltStylesheetPtr sheet, co
 }
 
 /* Adds all namespace declaration (not using nsDef) into a hash map that maps prefix to uri. Warns on conflicting declarations. */
-static void xsl_build_ns_map(xmlHashTablePtr table, xsltStylesheetPtr sheet, dom_libxml_ns_mapper *ns_mapper, const xmlDoc *doc)
+static void xsl_build_ns_map(xmlHashTablePtr table, xsltStylesheetPtr sheet, php_dom_libxml_ns_mapper *ns_mapper, const xmlDoc *doc)
 {
 	const xmlNode *cur = xmlDocGetRootElement(doc);
 
@@ -147,13 +147,12 @@ static void xsl_build_ns_map(xmlHashTablePtr table, xsltStylesheetPtr sheet, dom
 			}
 
 			for (const xmlAttr *attr = cur->properties; attr != NULL; attr = attr->next) {
-				// TODO: stuff like dom_ns_is... should be exposed!
-				if (attr->ns != NULL && attr->ns->prefix != NULL && dom_ns_is_fast_ex(attr->ns, dom_ns_is_xmlns_magic_token)
+				if (attr->ns != NULL && attr->ns->prefix != NULL && php_dom_ns_is_fast_ex(attr->ns, php_dom_ns_is_xmlns_magic_token)
 					&& attr->children != NULL && attr->children->content != NULL) {
 					/* This attribute declares a namespace, get the relevant instance.
 					 * The declared namespace is not the same as the namespace of this attribute (which is xmlns). */
 					const xmlChar *prefix = attr->name;
-					xmlNsPtr ns = dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, (const char *) prefix, (const char *) attr->children->content);
+					xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, (const char *) prefix, (const char *) attr->children->content);
 					xsl_add_ns_to_map(table, sheet, cur, prefix, ns->href);
 				}
 			}

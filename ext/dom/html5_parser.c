@@ -62,14 +62,14 @@ static unsigned short sanitize_line_nr(size_t line)
     return (unsigned short) line;
 }
 
-static const dom_ns_magic_token *get_libxml_namespace_href(uintptr_t lexbor_namespace)
+static const php_dom_ns_magic_token *get_libxml_namespace_href(uintptr_t lexbor_namespace)
 {
     if (lexbor_namespace == LXB_NS_SVG) {
-        return dom_ns_is_svg_magic_token;
+        return php_dom_ns_is_svg_magic_token;
     } else if (lexbor_namespace == LXB_NS_MATH) {
-        return dom_ns_is_mathml_magic_token;
+        return php_dom_ns_is_mathml_magic_token;
     } else {
-        return dom_ns_is_html_magic_token;
+        return php_dom_ns_is_html_magic_token;
     }
 }
 
@@ -98,12 +98,12 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
     xmlDocPtr lxml_doc,
     bool compact_text_nodes,
     bool create_default_ns,
-    dom_libxml_ns_mapper *ns_mapper
+    php_dom_libxml_ns_mapper *ns_mapper
 )
 {
     lexbor_libxml2_bridge_status retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OK;
 
-    xmlNsPtr html_ns = dom_libxml_ns_mapper_ensure_html_ns(ns_mapper);
+    xmlNsPtr html_ns = php_dom_libxml_ns_mapper_ensure_html_ns(ns_mapper);
     xmlNsPtr xlink_ns = NULL;
     xmlNsPtr prefixed_xmlns_ns = NULL;
 
@@ -142,9 +142,9 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 if (entering_namespace == LXB_NS_HTML) {
                     current_lxml_ns = html_ns;
                 } else {
-                    const dom_ns_magic_token *magic_token = get_libxml_namespace_href(entering_namespace);
+                    const php_dom_ns_magic_token *magic_token = get_libxml_namespace_href(entering_namespace);
                     zend_string *uri = zend_string_init((char *) magic_token, strlen((char *) magic_token), false);
-                    current_lxml_ns = dom_libxml_ns_mapper_get_ns(ns_mapper, NULL, uri);
+                    current_lxml_ns = php_dom_libxml_ns_mapper_get_ns(ns_mapper, NULL, uri);
                     zend_string_release_ex(uri, false);
                     if (EXPECTED(current_lxml_ns != NULL)) {
                         current_lxml_ns->_private = (void *) magic_token;
@@ -200,17 +200,17 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 if (attr->node.ns == LXB_NS_XMLNS) {
                     if (strcmp((const char *) local_name, "xmlns") != 0) {
                         if (prefixed_xmlns_ns == NULL) {
-                            prefixed_xmlns_ns = dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, "xmlns", DOM_XMLNS_NS_URI);
+                            prefixed_xmlns_ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, "xmlns", DOM_XMLNS_NS_URI);
                         }
                         lxml_attr->ns = prefixed_xmlns_ns;
                     } else {
-                        lxml_attr->ns = dom_libxml_ns_mapper_ensure_prefixless_xmlns_ns(ns_mapper);
+                        lxml_attr->ns = php_dom_libxml_ns_mapper_ensure_prefixless_xmlns_ns(ns_mapper);
                     }
-                    lxml_attr->ns->_private = (void *) dom_ns_is_xmlns_magic_token;
+                    lxml_attr->ns->_private = (void *) php_dom_ns_is_xmlns_magic_token;
                 } else if (attr->node.ns == LXB_NS_XLINK) {
                     if (xlink_ns == NULL) {
-                        xlink_ns = dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, "xlink", DOM_XLINK_NS_URI);
-                        xlink_ns->_private = (void *) dom_ns_is_xlink_magic_token;
+                        xlink_ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, "xlink", DOM_XLINK_NS_URI);
+                        xlink_ns->_private = (void *) php_dom_ns_is_xlink_magic_token;
                     }
                     lxml_attr->ns = xlink_ns;
                 }
@@ -304,7 +304,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
     xmlDocPtr *doc_out,
     bool compact_text_nodes,
     bool create_default_ns,
-    dom_libxml_ns_mapper *ns_mapper
+    php_dom_libxml_ns_mapper *ns_mapper
 )
 {
 #ifdef LIBXML_HTML_ENABLED

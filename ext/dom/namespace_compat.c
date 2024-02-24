@@ -24,14 +24,14 @@
 #include "namespace_compat.h"
 #include "internal_helpers.h"
 
-const dom_ns_magic_token *dom_ns_is_html_magic_token = (const dom_ns_magic_token *) DOM_XHTML_NS_URI;
-const dom_ns_magic_token *dom_ns_is_mathml_magic_token = (const dom_ns_magic_token *) DOM_MATHML_NS_URI;
-const dom_ns_magic_token *dom_ns_is_svg_magic_token = (const dom_ns_magic_token *) DOM_SVG_NS_URI;
-const dom_ns_magic_token *dom_ns_is_xlink_magic_token = (const dom_ns_magic_token *) DOM_XLINK_NS_URI;
-const dom_ns_magic_token *dom_ns_is_xml_magic_token = (const dom_ns_magic_token *) DOM_XML_NS_URI;
-const dom_ns_magic_token *dom_ns_is_xmlns_magic_token = (const dom_ns_magic_token *) DOM_XMLNS_NS_URI;
+PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_html_magic_token = (const php_dom_ns_magic_token *) DOM_XHTML_NS_URI;
+PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_mathml_magic_token = (const php_dom_ns_magic_token *) DOM_MATHML_NS_URI;
+PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_svg_magic_token = (const php_dom_ns_magic_token *) DOM_SVG_NS_URI;
+PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_xlink_magic_token = (const php_dom_ns_magic_token *) DOM_XLINK_NS_URI;
+PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_xml_magic_token = (const php_dom_ns_magic_token *) DOM_XML_NS_URI;
+PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_xmlns_magic_token = (const php_dom_ns_magic_token *) DOM_XMLNS_NS_URI;
 
-struct _dom_libxml_ns_mapper {
+struct _php_dom_libxml_ns_mapper {
 	php_libxml_private_data_header header;
 	/* This is used almost all the time for HTML documents, so it makes sense to cache this. */
 	xmlNsPtr html_ns;
@@ -40,20 +40,20 @@ struct _dom_libxml_ns_mapper {
 	HashTable uri_to_prefix_map;
 };
 
-static void dom_libxml_ns_mapper_prefix_map_element_dtor(zval *zv)
+static void php_dom_libxml_ns_mapper_prefix_map_element_dtor(zval *zv)
 {
 	if (DOM_Z_IS_OWNED(zv)) {
 		efree(Z_PTR_P(zv));
 	}
 }
 
-static HashTable *dom_libxml_ns_mapper_ensure_prefix_map(dom_libxml_ns_mapper *mapper, zend_string **uri)
+static HashTable *php_dom_libxml_ns_mapper_ensure_prefix_map(php_dom_libxml_ns_mapper *mapper, zend_string **uri)
 {
 	zval *zv = zend_hash_find(&mapper->uri_to_prefix_map, *uri);
 	HashTable *prefix_map;
 	if (zv == NULL) {
 		prefix_map = emalloc(sizeof(HashTable));
-		zend_hash_init(prefix_map, 0, NULL, dom_libxml_ns_mapper_prefix_map_element_dtor, false);
+		zend_hash_init(prefix_map, 0, NULL, php_dom_libxml_ns_mapper_prefix_map_element_dtor, false);
 		zval zv;
 		ZVAL_ARR(&zv, prefix_map);
 		zend_hash_add_new(&mapper->uri_to_prefix_map, *uri, &zv);
@@ -69,48 +69,48 @@ static HashTable *dom_libxml_ns_mapper_ensure_prefix_map(dom_libxml_ns_mapper *m
 	return prefix_map;
 }
 
-static void dom_libxml_ns_mapper_header_destroy(php_libxml_private_data_header *header)
+static void php_dom_libxml_ns_mapper_header_destroy(php_libxml_private_data_header *header)
 {
-	dom_libxml_ns_mapper_destroy((dom_libxml_ns_mapper *) header);
+	php_dom_libxml_ns_mapper_destroy((php_dom_libxml_ns_mapper *) header);
 }
 
-dom_libxml_ns_mapper *dom_libxml_ns_mapper_create(void)
+PHP_DOM_EXPORT php_dom_libxml_ns_mapper *php_dom_libxml_ns_mapper_create(void)
 {
-	dom_libxml_ns_mapper *mapper = emalloc(sizeof(*mapper));
-	mapper->header.dtor = dom_libxml_ns_mapper_header_destroy;
+	php_dom_libxml_ns_mapper *mapper = emalloc(sizeof(*mapper));
+	mapper->header.dtor = php_dom_libxml_ns_mapper_header_destroy;
 	mapper->html_ns = NULL;
 	mapper->prefixless_xmlns_ns = NULL;
 	zend_hash_init(&mapper->uri_to_prefix_map, 0, NULL, ZVAL_PTR_DTOR, false);
 	return mapper;
 }
 
-void dom_libxml_ns_mapper_destroy(dom_libxml_ns_mapper *mapper)
+void php_dom_libxml_ns_mapper_destroy(php_dom_libxml_ns_mapper *mapper)
 {
 	zend_hash_destroy(&mapper->uri_to_prefix_map);
 	efree(mapper);
 }
 
-static xmlNsPtr dom_libxml_ns_mapper_ensure_cached_ns(dom_libxml_ns_mapper *mapper, xmlNsPtr *ptr, const char *uri, size_t length, const dom_ns_magic_token *token)
+static xmlNsPtr php_dom_libxml_ns_mapper_ensure_cached_ns(php_dom_libxml_ns_mapper *mapper, xmlNsPtr *ptr, const char *uri, size_t length, const php_dom_ns_magic_token *token)
 {
 	if (EXPECTED(*ptr != NULL)) {
 		return *ptr;
 	}
 
 	zend_string *uri_str = zend_string_init(uri, length, false);
-	*ptr = dom_libxml_ns_mapper_get_ns(mapper, NULL, uri_str);
+	*ptr = php_dom_libxml_ns_mapper_get_ns(mapper, NULL, uri_str);
 	(*ptr)->_private = (void *) token;
 	zend_string_release_ex(uri_str, false);
 	return *ptr;
 }
 
-xmlNsPtr dom_libxml_ns_mapper_ensure_html_ns(dom_libxml_ns_mapper *mapper)
+PHP_DOM_EXPORT xmlNsPtr php_dom_libxml_ns_mapper_ensure_html_ns(php_dom_libxml_ns_mapper *mapper)
 {
-	return dom_libxml_ns_mapper_ensure_cached_ns(mapper, &mapper->html_ns, DOM_XHTML_NS_URI, sizeof(DOM_XHTML_NS_URI) - 1, dom_ns_is_html_magic_token);
+	return php_dom_libxml_ns_mapper_ensure_cached_ns(mapper, &mapper->html_ns, DOM_XHTML_NS_URI, sizeof(DOM_XHTML_NS_URI) - 1, php_dom_ns_is_html_magic_token);
 }
 
-xmlNsPtr dom_libxml_ns_mapper_ensure_prefixless_xmlns_ns(dom_libxml_ns_mapper *mapper)
+PHP_DOM_EXPORT xmlNsPtr php_dom_libxml_ns_mapper_ensure_prefixless_xmlns_ns(php_dom_libxml_ns_mapper *mapper)
 {
-	return dom_libxml_ns_mapper_ensure_cached_ns(mapper, &mapper->prefixless_xmlns_ns, DOM_XMLNS_NS_URI, sizeof(DOM_XMLNS_NS_URI) - 1, dom_ns_is_xmlns_magic_token);
+	return php_dom_libxml_ns_mapper_ensure_cached_ns(mapper, &mapper->prefixless_xmlns_ns, DOM_XMLNS_NS_URI, sizeof(DOM_XMLNS_NS_URI) - 1, php_dom_ns_is_xmlns_magic_token);
 }
 
 static xmlNsPtr dom_create_owned_ns(zend_string *prefix, zend_string *uri)
@@ -130,7 +130,7 @@ static xmlNsPtr dom_create_owned_ns(zend_string *prefix, zend_string *uri)
 	return ns;
 }
 
-xmlNsPtr dom_libxml_ns_mapper_get_ns(dom_libxml_ns_mapper *mapper, zend_string *prefix, zend_string *uri)
+PHP_DOM_EXPORT xmlNsPtr php_dom_libxml_ns_mapper_get_ns(php_dom_libxml_ns_mapper *mapper, zend_string *prefix, zend_string *uri)
 {
 	if (uri == NULL) {
 		uri = zend_empty_string;
@@ -144,7 +144,7 @@ xmlNsPtr dom_libxml_ns_mapper_get_ns(dom_libxml_ns_mapper *mapper, zend_string *
 		return NULL;
 	}
 
-	HashTable *prefix_map = dom_libxml_ns_mapper_ensure_prefix_map(mapper, &uri);
+	HashTable *prefix_map = php_dom_libxml_ns_mapper_ensure_prefix_map(mapper, &uri);
 	xmlNsPtr found = zend_hash_find_ptr(prefix_map, prefix);
 	if (found != NULL) {
 		return found;
@@ -159,36 +159,36 @@ xmlNsPtr dom_libxml_ns_mapper_get_ns(dom_libxml_ns_mapper *mapper, zend_string *
 	return ns;
 }
 
-xmlNsPtr dom_libxml_ns_mapper_get_ns_raw_prefix_string(dom_libxml_ns_mapper *mapper, const xmlChar *prefix, size_t prefix_len, zend_string *uri)
+PHP_DOM_EXPORT xmlNsPtr php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(php_dom_libxml_ns_mapper *mapper, const xmlChar *prefix, size_t prefix_len, zend_string *uri)
 {
 	xmlNsPtr ns;
 	if (prefix_len == 0) {
 		/* Fast path */
-		ns = dom_libxml_ns_mapper_get_ns(mapper, zend_empty_string, uri);
+		ns = php_dom_libxml_ns_mapper_get_ns(mapper, zend_empty_string, uri);
 	} else {
 		zend_string *prefix_str = zend_string_init((const char *) prefix, prefix_len, false);
-		ns = dom_libxml_ns_mapper_get_ns(mapper, prefix_str, uri);
+		ns = php_dom_libxml_ns_mapper_get_ns(mapper, prefix_str, uri);
 		zend_string_release_ex(prefix_str, false);
 	}
 	return ns;
 }
 
-static xmlNsPtr dom_libxml_ns_mapper_get_ns_raw_strings_ex(dom_libxml_ns_mapper *mapper, const char *prefix, size_t prefix_len, const char *uri, size_t uri_len)
+static xmlNsPtr php_dom_libxml_ns_mapper_get_ns_raw_strings_ex(php_dom_libxml_ns_mapper *mapper, const char *prefix, size_t prefix_len, const char *uri, size_t uri_len)
 {
 	zend_string *prefix_str = zend_string_init(prefix, prefix_len, false);
 	zend_string *uri_str = zend_string_init(uri, uri_len, false);
-	xmlNsPtr ns = dom_libxml_ns_mapper_get_ns(mapper, prefix_str, uri_str);
+	xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns(mapper, prefix_str, uri_str);
 	zend_string_release_ex(prefix_str, false);
 	zend_string_release_ex(uri_str, false);
 	return ns;
 }
 
-static zend_always_inline xmlNsPtr dom_libxml_ns_mapper_get_ns_raw_strings(dom_libxml_ns_mapper *mapper, const char *prefix, const char *uri)
+static zend_always_inline xmlNsPtr php_dom_libxml_ns_mapper_get_ns_raw_strings(php_dom_libxml_ns_mapper *mapper, const char *prefix, const char *uri)
 {
-	return dom_libxml_ns_mapper_get_ns_raw_strings_ex(mapper, prefix, strlen(prefix), uri, strlen(uri));
+	return php_dom_libxml_ns_mapper_get_ns_raw_strings_ex(mapper, prefix, strlen(prefix), uri, strlen(uri));
 }
 
-xmlNsPtr dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(dom_libxml_ns_mapper *mapper, const char *prefix, const char *uri)
+PHP_DOM_EXPORT xmlNsPtr php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(php_dom_libxml_ns_mapper *mapper, const char *prefix, const char *uri)
 {
 	if (prefix == NULL) {
 		prefix = "";
@@ -196,16 +196,16 @@ xmlNsPtr dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(dom_libxml_ns_mapper *
 	if (uri == NULL) {
 		uri = "";
 	}
-	return dom_libxml_ns_mapper_get_ns_raw_strings(mapper, prefix, uri);
+	return php_dom_libxml_ns_mapper_get_ns_raw_strings(mapper, prefix, uri);
 }
 
-static xmlNsPtr dom_libxml_ns_mapper_store_and_normalize_parsed_ns(dom_libxml_ns_mapper *mapper, xmlNsPtr ns)
+static xmlNsPtr php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(php_dom_libxml_ns_mapper *mapper, xmlNsPtr ns)
 {
 	ZEND_ASSERT(ns != NULL);
 
 	zend_string *href_str = zend_string_init((const char *) ns->href, xmlStrlen(ns->href), false);
 	zend_string *href_str_orig = href_str;
-	HashTable *prefix_map = dom_libxml_ns_mapper_ensure_prefix_map(mapper, &href_str);
+	HashTable *prefix_map = php_dom_libxml_ns_mapper_ensure_prefix_map(mapper, &href_str);
 	zend_string_release_ex(href_str_orig, false);
 
 	const char *prefix = (const char *) ns->prefix;
@@ -229,7 +229,7 @@ static xmlNsPtr dom_libxml_ns_mapper_store_and_normalize_parsed_ns(dom_libxml_ns
 	return ns;
 }
 
-php_libxml_private_data_header *dom_libxml_ns_mapper_header(dom_libxml_ns_mapper *mapper)
+PHP_DOM_EXPORT php_libxml_private_data_header *php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper *mapper)
 {
 	return mapper == NULL ? NULL : &mapper->header;
 }
@@ -240,18 +240,18 @@ typedef struct {
 	/* It is common that the last created mapping will be used for a while,
 	 * cache it too to bypass the hash table. */
 	xmlNsPtr last_mapped_src, last_mapped_dst;
-	dom_libxml_ns_mapper *ns_mapper;
+	php_dom_libxml_ns_mapper *ns_mapper;
 } dom_libxml_reconcile_ctx;
 
-xmlAttrPtr dom_ns_compat_mark_attribute(dom_libxml_ns_mapper *mapper, xmlNodePtr node, xmlNsPtr ns)
+PHP_DOM_EXPORT xmlAttrPtr php_dom_ns_compat_mark_attribute(php_dom_libxml_ns_mapper *mapper, xmlNodePtr node, xmlNsPtr ns)
 {
 	xmlNsPtr xmlns_ns;
 	const xmlChar *name;
 	if (ns->prefix != NULL) {
-		xmlns_ns = dom_libxml_ns_mapper_get_ns_raw_strings(mapper, "xmlns", DOM_XMLNS_NS_URI);
+		xmlns_ns = php_dom_libxml_ns_mapper_get_ns_raw_strings(mapper, "xmlns", DOM_XMLNS_NS_URI);
 		name = ns->prefix;
 	} else {
-		xmlns_ns = dom_libxml_ns_mapper_ensure_prefixless_xmlns_ns(mapper);
+		xmlns_ns = php_dom_libxml_ns_mapper_ensure_prefixless_xmlns_ns(mapper);
 		name = BAD_CAST "xmlns";
 	}
 
@@ -260,7 +260,7 @@ xmlAttrPtr dom_ns_compat_mark_attribute(dom_libxml_ns_mapper *mapper, xmlNodePtr
 	return xmlSetNsProp(node, xmlns_ns, name, ns->href);
 }
 
-void dom_ns_compat_mark_attribute_list(dom_libxml_ns_mapper *mapper, xmlNodePtr node)
+PHP_DOM_EXPORT void php_dom_ns_compat_mark_attribute_list(php_dom_libxml_ns_mapper *mapper, xmlNodePtr node)
 {
 	if (node->nsDef == NULL) {
 		return;
@@ -274,8 +274,8 @@ void dom_ns_compat_mark_attribute_list(dom_libxml_ns_mapper *mapper, xmlNodePtr 
 	xmlNsPtr ns = node->nsDef;
 	xmlAttrPtr last_added = NULL;
 	do {
-		last_added = dom_ns_compat_mark_attribute(mapper, node, ns);
-		dom_libxml_ns_mapper_store_and_normalize_parsed_ns(mapper, ns);
+		last_added = php_dom_ns_compat_mark_attribute(mapper, node, ns);
+		php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(mapper, ns);
 		xmlNsPtr next = ns->next;
 		ns->next = NULL;
 		php_libxml_set_old_ns(node->doc, ns);
@@ -296,7 +296,7 @@ void dom_ns_compat_mark_attribute_list(dom_libxml_ns_mapper *mapper, xmlNodePtr 
 	node->nsDef = NULL;
 }
 
-bool dom_ns_is_fast_ex(xmlNsPtr ns, const dom_ns_magic_token *magic_token)
+PHP_DOM_EXPORT bool php_dom_ns_is_fast_ex(xmlNsPtr ns, const php_dom_ns_magic_token *magic_token)
 {
 	ZEND_ASSERT(ns != NULL);
 	/* cached for fast checking */
@@ -314,24 +314,24 @@ bool dom_ns_is_fast_ex(xmlNsPtr ns, const dom_ns_magic_token *magic_token)
 	return false;
 }
 
-bool dom_ns_is_fast(const xmlNode *nodep, const dom_ns_magic_token *magic_token)
+PHP_DOM_EXPORT bool php_dom_ns_is_fast(const xmlNode *nodep, const php_dom_ns_magic_token *magic_token)
 {
 	ZEND_ASSERT(nodep != NULL);
 	xmlNsPtr ns = nodep->ns;
 	if (ns != NULL) {
-		return dom_ns_is_fast_ex(ns, magic_token);
+		return php_dom_ns_is_fast_ex(ns, magic_token);
 	}
 	return false;
 }
 
-bool dom_ns_is_html_and_document_is_html(const xmlNode *nodep)
+PHP_DOM_EXPORT bool php_dom_ns_is_html_and_document_is_html(const xmlNode *nodep)
 {
 	ZEND_ASSERT(nodep != NULL);
-	return nodep->doc && nodep->doc->type == XML_HTML_DOCUMENT_NODE && dom_ns_is_fast(nodep, dom_ns_is_html_magic_token);
+	return nodep->doc && nodep->doc->type == XML_HTML_DOCUMENT_NODE && php_dom_ns_is_fast(nodep, php_dom_ns_is_html_magic_token);
 }
 
 /* will rename prefixes if there is a declaration with the same prefix but different uri. */
-void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp)
+PHP_DOM_EXPORT void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp)
 {
 	ZEND_ASSERT(attrp != NULL);
 
@@ -363,7 +363,7 @@ static zend_always_inline zend_long dom_mangle_pointer_for_key(void *ptr)
 #endif
 }
 
-static zend_always_inline void dom_libxml_reconcile_modern_single_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr ns_holder, xmlNodePtr node)
+static zend_always_inline void php_dom_libxml_reconcile_modern_single_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr ns_holder, xmlNodePtr node)
 {
 	ZEND_ASSERT(node->ns != NULL);
 
@@ -378,7 +378,7 @@ static zend_always_inline void dom_libxml_reconcile_modern_single_node(dom_libxm
 		/* We have to create an alternative declaration, and we'll add it to the map. */
 		const char *prefix = (const char *) node->ns->prefix;
 		const char *href = (const char *) node->ns->href;
-		new_ns = dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ctx->ns_mapper, prefix, href);
+		new_ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ctx->ns_mapper, prefix, href);
 		zend_hash_index_add_new_ptr(&ctx->old_ns_to_new_ns_ptr, dom_mangle_pointer_for_key(node->ns), new_ns);
 		ctx->last_mapped_src = node->ns;
 		ctx->last_mapped_dst = new_ns;
@@ -396,7 +396,7 @@ static zend_always_inline bool dom_libxml_reconcile_fast_element_skip(xmlNodePtr
 	return node->children == NULL && node->properties == NULL && node->ns == node->nsDef;
 }
 
-static zend_always_inline void dom_libxml_reconcile_modern_single_element_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr node)
+static zend_always_inline void php_dom_libxml_reconcile_modern_single_element_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr node)
 {
 	ZEND_ASSERT(node->type == XML_ELEMENT_NODE);
 
@@ -404,21 +404,21 @@ static zend_always_inline void dom_libxml_reconcile_modern_single_element_node(d
 	ZEND_ASSERT(node->nsDef == NULL);
 
 	if (node->ns != NULL) {
-		dom_libxml_reconcile_modern_single_node(ctx, node, node);
+		php_dom_libxml_reconcile_modern_single_node(ctx, node, node);
 	}
 
 	for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
 		if (attr->ns != NULL) {
-			dom_libxml_reconcile_modern_single_node(ctx, node, (xmlNodePtr) attr);
+			php_dom_libxml_reconcile_modern_single_node(ctx, node, (xmlNodePtr) attr);
 		}
 	}
 }
 
-void dom_libxml_reconcile_modern(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node)
+PHP_DOM_EXPORT void php_dom_libxml_reconcile_modern(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node)
 {
 	if (node->type == XML_ATTRIBUTE_NODE) {
 		if (node->ns != NULL) {
-			node->ns = dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, (const char *) node->ns->prefix, (const char *) node->ns->href);
+			node->ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, (const char *) node->ns->prefix, (const char *) node->ns->href);
 		}
 		return;
 	}
@@ -433,7 +433,7 @@ void dom_libxml_reconcile_modern(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr nod
 	ctx.last_mapped_dst = NULL;
 	ctx.ns_mapper = ns_mapper;
 
-	dom_libxml_reconcile_modern_single_element_node(&ctx, node);
+	php_dom_libxml_reconcile_modern_single_element_node(&ctx, node);
 
 	xmlNodePtr base = node;
 	node = node->children;
@@ -441,7 +441,7 @@ void dom_libxml_reconcile_modern(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr nod
 		ZEND_ASSERT(node != base);
 
 		if (node->type == XML_ELEMENT_NODE) {
-			dom_libxml_reconcile_modern_single_element_node(&ctx, node);
+			php_dom_libxml_reconcile_modern_single_element_node(&ctx, node);
 
 			if (node->children) {
 				node = node->children;
@@ -455,11 +455,11 @@ void dom_libxml_reconcile_modern(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr nod
 	zend_hash_destroy(&ctx.old_ns_to_new_ns_ptr);
 }
 
-dom_in_scope_ns dom_get_in_scope_ns(dom_libxml_ns_mapper *ns_mapper, const xmlNode *node)
+PHP_DOM_EXPORT php_dom_in_scope_ns php_dom_get_in_scope_ns(php_dom_libxml_ns_mapper *ns_mapper, const xmlNode *node)
 {
 	ZEND_ASSERT(node != NULL);
 
-	dom_in_scope_ns in_scope_ns;
+	php_dom_in_scope_ns in_scope_ns;
 	in_scope_ns.origin_is_ns_compat = true;
 
 	/* libxml fetches all nsDef items from bottom to top - left to right, ignoring prefixes already in the list.
@@ -479,12 +479,12 @@ dom_in_scope_ns dom_get_in_scope_ns(dom_libxml_ns_mapper *ns_mapper, const xmlNo
 
 			/* Register xmlns attributes */
 			for (const xmlAttr *attr = cur->properties; attr != NULL; attr = attr->next) {
-				if (attr->ns != NULL && attr->ns->prefix != NULL && dom_ns_is_fast_ex(attr->ns, dom_ns_is_xmlns_magic_token)
+				if (attr->ns != NULL && attr->ns->prefix != NULL && php_dom_ns_is_fast_ex(attr->ns, php_dom_ns_is_xmlns_magic_token)
 					&& attr->children != NULL && attr->children->content != NULL) {
 					/* This attribute declares a namespace, get the relevant instance.
 					 * The declared namespace is not the same as the namespace of this attribute (which is xmlns). */
 					const char *prefix = (const char *) attr->name;
-					xmlNsPtr ns = dom_libxml_ns_mapper_get_ns_raw_strings(ns_mapper, prefix, (const char *) attr->children->content);
+					xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns_raw_strings(ns_mapper, prefix, (const char *) attr->children->content);
 					zend_hash_str_add_ptr(&tmp_prefix_to_ns_table, prefix, strlen(prefix), ns);
 				}
 			}
@@ -505,11 +505,11 @@ dom_in_scope_ns dom_get_in_scope_ns(dom_libxml_ns_mapper *ns_mapper, const xmlNo
 	return in_scope_ns;
 }
 
-dom_in_scope_ns dom_get_in_scope_ns_legacy(const xmlNode *node)
+PHP_DOM_EXPORT php_dom_in_scope_ns php_dom_get_in_scope_ns_legacy(const xmlNode *node)
 {
 	ZEND_ASSERT(node != NULL);
 
-	dom_in_scope_ns in_scope_ns;
+	php_dom_in_scope_ns in_scope_ns;
 	in_scope_ns.origin_is_ns_compat = false;
 	in_scope_ns.list = xmlGetNsList(node->doc, node);
 	in_scope_ns.count = 0;
@@ -523,7 +523,7 @@ dom_in_scope_ns dom_get_in_scope_ns_legacy(const xmlNode *node)
 	return in_scope_ns;
 }
 
-void dom_in_scope_ns_destroy(dom_in_scope_ns *in_scope_ns)
+PHP_DOM_EXPORT void php_dom_in_scope_ns_destroy(php_dom_in_scope_ns *in_scope_ns)
 {
 	ZEND_ASSERT(in_scope_ns != NULL);
 	if (in_scope_ns->origin_is_ns_compat) {
