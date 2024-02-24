@@ -59,7 +59,6 @@ runs:
           unixodbc-dev \
           llvm \
           clang \
-          libc-client-dev \
           dovecot-core \
           dovecot-pop3d \
           dovecot-imapd \

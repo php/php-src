@@ -69,7 +69,6 @@ jobs:
               `#snmp-mibs-downloader` \
               freetds-dev \
               `#unixodbc-dev` \
-              libc-client-dev \
               dovecot-core \
               dovecot-pop3d \
               dovecot-imapd \
