@@ -53,15 +53,16 @@ xmlNsPtr dom_libxml_ns_mapper_ensure_prefixless_xmlns_ns(dom_libxml_ns_mapper *m
 xmlNsPtr dom_libxml_ns_mapper_get_ns(dom_libxml_ns_mapper *mapper, zend_string *prefix, zend_string *uri);
 xmlNsPtr dom_libxml_ns_mapper_get_ns_raw_prefix_string(dom_libxml_ns_mapper *mapper, const xmlChar *prefix, size_t prefix_len, zend_string *uri);
 xmlNsPtr dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(dom_libxml_ns_mapper *mapper, const char *prefix, const char *uri);
-php_libxml_private_data_header *dom_libxml_ns_mapper_header(dom_libxml_ns_mapper *mapper);
 
+php_libxml_private_data_header *dom_libxml_ns_mapper_header(dom_libxml_ns_mapper *mapper);
 void dom_ns_compat_mark_attribute_list(dom_libxml_ns_mapper *mapper, xmlNodePtr node);
-bool dom_ns_is_fast(const xmlNode *nodep, const dom_ns_magic_token *magic_token);
-bool dom_ns_is_fast_ex(xmlNsPtr ns, const dom_ns_magic_token *magic_token);
-bool dom_ns_is_html_and_document_is_html(const xmlNode *nodep);
 void dom_libxml_reconcile_modern(dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node);
 void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp);
 xmlAttrPtr dom_ns_compat_mark_attribute(dom_libxml_ns_mapper *mapper, xmlNodePtr node, xmlNsPtr ns);
+
+bool dom_ns_is_fast(const xmlNode *nodep, const dom_ns_magic_token *magic_token);
+bool dom_ns_is_fast_ex(xmlNsPtr ns, const dom_ns_magic_token *magic_token);
+bool dom_ns_is_html_and_document_is_html(const xmlNode *nodep);
 
 typedef struct _dom_in_scope_ns {
    xmlNsPtr *list;

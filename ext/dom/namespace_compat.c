@@ -478,7 +478,7 @@ dom_in_scope_ns dom_get_in_scope_ns(dom_libxml_ns_mapper *ns_mapper, const xmlNo
 			}
 
 			/* Register xmlns attributes */
-			for (xmlAttr *attr = cur->properties; attr != NULL; attr = attr->next) {
+			for (const xmlAttr *attr = cur->properties; attr != NULL; attr = attr->next) {
 				if (attr->ns != NULL && attr->ns->prefix != NULL && dom_ns_is_fast_ex(attr->ns, dom_ns_is_xmlns_magic_token)
 					&& attr->children != NULL && attr->children->content != NULL) {
 					/* This attribute declares a namespace, get the relevant instance.

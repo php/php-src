@@ -177,7 +177,7 @@ xmlChar *php_dom_libxml_fix_file_path(xmlChar *path);
 void dom_document_convert_to_modern(php_libxml_ref_obj *document, xmlDocPtr lxml_doc);
 dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_entry *ce, xmlNodePtr obj, dom_object *parent);
 
-static zend_always_inline xmlNodePtr php_dom_next_in_tree_order(xmlNodePtr nodep, xmlNodePtr basep)
+static zend_always_inline xmlNodePtr php_dom_next_in_tree_order(const xmlNode *nodep, const xmlNode *basep)
 {
 	if (nodep->next) {
 		return nodep->next;

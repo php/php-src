@@ -23,6 +23,8 @@
 #include "php_xsl.h"
 #include <libxslt/variables.h>
 #include "ext/libxml/php_libxml.h"
+#include "ext/dom/php_dom.h"
+#include "ext/dom/namespace_compat.h"
 
 
 static zend_result php_xsl_xslt_apply_params(xsltTransformContextPtr ctxt, HashTable *params)
@@ -122,6 +124,66 @@ static void xsl_ext_function_trampoline(xmlXPathParserContextPtr ctxt, int nargs
 	}
 }
 
+static void xsl_add_ns_to_map(xmlHashTablePtr table, xsltStylesheetPtr sheet, const xmlNode *cur, const xmlChar *prefix, const xmlChar *uri)
+{
+	const xmlChar *existing_url = xmlHashLookup(table, prefix);
+	if (existing_url != NULL && !xmlStrEqual(existing_url, uri)) {
+		xsltTransformError(NULL, sheet, (xmlNodePtr) cur, "Namespaces prefix %s used for multiple namespaces\n", prefix);
+		sheet->warnings++;
+	} else if (existing_url == NULL) {
+		xmlHashUpdateEntry(table, prefix, (void *) uri, NULL);
+	}
+}
+
+/* Adds all namespace declaration (not using nsDef) into a hash map that maps prefix to uri. Warns on conflicting declarations. */
+static void xsl_build_ns_map(xmlHashTablePtr table, xsltStylesheetPtr sheet, dom_libxml_ns_mapper *ns_mapper, const xmlDoc *doc)
+{
+	const xmlNode *cur = xmlDocGetRootElement(doc);
+
+	while (cur != NULL) {
+		if (cur->type == XML_ELEMENT_NODE) {
+			if (cur->ns != NULL && cur->ns->prefix != NULL) {
+				xsl_add_ns_to_map(table, sheet, cur, cur->ns->prefix, cur->ns->href);
+			}
+
+			for (const xmlAttr *attr = cur->properties; attr != NULL; attr = attr->next) {
+				// TODO: stuff like dom_ns_is... should be exposed!
+				if (attr->ns != NULL && attr->ns->prefix != NULL && dom_ns_is_fast_ex(attr->ns, dom_ns_is_xmlns_magic_token)
+					&& attr->children != NULL && attr->children->content != NULL) {
+					/* This attribute declares a namespace, get the relevant instance.
+					 * The declared namespace is not the same as the namespace of this attribute (which is xmlns). */
+					const xmlChar *prefix = attr->name;
+					xmlNsPtr ns = dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, (const char *) prefix, (const char *) attr->children->content);
+					xsl_add_ns_to_map(table, sheet, cur, prefix, ns->href);
+				}
+			}
+
+			if (cur->children != NULL) {
+				cur = cur->children;
+				continue;
+			}
+		}
+
+		cur = php_dom_next_in_tree_order(cur, (const xmlNode *) doc);
+	}
+}
+
+/* Apply namespace corrections for new DOM */
+static zend_always_inline bool xsl_apply_ns_hash_corrections(xsltStylesheetPtr sheetp, xmlNodePtr nodep, xmlDocPtr doc)
+{
+	if (sheetp->nsHash == NULL) {
+		dom_object *node_intern = php_dom_object_get_data(nodep);
+		if (node_intern != NULL && php_dom_follow_spec_intern(node_intern)) {
+			sheetp->nsHash = xmlHashCreate(10);
+			if (UNEXPECTED(!sheetp->nsHash)) {
+				return false;
+			}
+			xsl_build_ns_map(sheetp->nsHash, sheetp, php_dom_get_ns_mapper(node_intern), doc);
+		}
+	}
+	return true;
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
 Since:
 */
@@ -165,6 +227,12 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	PHP_LIBXML_RESTORE_GLOBALS(parse);
 
 	if (!sheetp) {
+		xmlFreeDoc(newdoc);
+		RETURN_FALSE;
+	}
+
+	if (UNEXPECTED(!xsl_apply_ns_hash_corrections(sheetp, nodep, doc))) {
+		xsltFreeStylesheet(sheetp);
 		xmlFreeDoc(newdoc);
 		RETURN_FALSE;
 	}
