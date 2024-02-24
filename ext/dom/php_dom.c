@@ -83,12 +83,12 @@ PHP_DOM_EXPORT zend_class_entry *dom_modern_xpath_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_namespace_node_class_entry;
 /* }}} */
 
-zend_object_handlers dom_object_handlers;
-zend_object_handlers dom_nnodemap_object_handlers;
-zend_object_handlers dom_nodelist_object_handlers;
+static zend_object_handlers dom_object_handlers;
+static zend_object_handlers dom_nnodemap_object_handlers;
+static zend_object_handlers dom_nodelist_object_handlers;
 static zend_object_handlers dom_modern_nnodemap_object_handlers;
 static zend_object_handlers dom_modern_nodelist_object_handlers;
-zend_object_handlers dom_object_namespace_node_handlers;
+static zend_object_handlers dom_object_namespace_node_handlers;
 #ifdef LIBXML_XPATH_ENABLED
 zend_object_handlers dom_xpath_object_handlers;
 #endif
