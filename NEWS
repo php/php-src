@@ -23,7 +23,7 @@ PHP                                                                        NEWS
 
 - Date:
   . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
-  . Added DateTime[Immutable]::[get|set]Microseconds. (Marc Bennewitz)
+  . Added DateTime[Immutable]::[get|set]Microsecond. (Marc Bennewitz)
 
 - DOM:
   . Added DOMNode::compareDocumentPosition(). (nielsdos)
