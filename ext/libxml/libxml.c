@@ -1054,7 +1054,6 @@ PHP_FUNCTION(libxml_set_streams_context)
 
 	if (!Z_ISUNDEF(LIBXML(stream_context))) {
 		zval_ptr_dtor(&LIBXML(stream_context));
-		ZVAL_UNDEF(&LIBXML(stream_context));
 	}
 	ZVAL_COPY(&LIBXML(stream_context), arg);
 }
