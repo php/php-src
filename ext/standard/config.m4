@@ -364,7 +364,7 @@ dnl
 
 PHP_CHECK_FUNC(res_search, resolv, socket)
 
-PHP_CHECK_FUNC(posix_spawn_file_actions_addchdir_np)
+AC_CHECK_FUNCS([posix_spawn_file_actions_addchdir_np])
 
 dnl
 dnl Check for strptime()
