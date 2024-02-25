@@ -76,7 +76,7 @@
 #define HAVE_TLS12 1
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x10101000 && !defined(OPENSSL_NO_TLS1_3)
+#ifndef OPENSSL_NO_TLS1_3
 #define HAVE_TLS13 1
 #endif
 
@@ -89,7 +89,7 @@
 #define HAVE_TLS_ALPN 1
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
+#ifndef LIBRESSL_VERSION_NUMBER
 #define HAVE_SEC_LEVEL 1
 #endif
 
@@ -676,11 +676,7 @@ static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, 
 {
 	PCCERT_CONTEXT cert_ctx = NULL;
 	PCCERT_CHAIN_CONTEXT cert_chain_ctx = NULL;
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	X509 *cert = x509_store_ctx->cert;
-#else
 	X509 *cert = X509_STORE_CTX_get0_cert(x509_store_ctx);
-#endif
 
 	php_stream *stream;
 	php_openssl_netstream_data_t *sslsock;

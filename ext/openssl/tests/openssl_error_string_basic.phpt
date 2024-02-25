@@ -95,8 +95,7 @@ while (($enc_error_new = openssl_error_string()) !== false) {
 var_dump($error_queue_size);
 echo "\n";
 
-$is_111 = OPENSSL_VERSION_NUMBER >= 0x10101000;
-$err_pem_no_start_line = $is_111 ? '0909006C': '0906D06C';
+$err_pem_no_start_line = '0909006C';
 
 // PKEY
 echo "PKEY errors\n";
