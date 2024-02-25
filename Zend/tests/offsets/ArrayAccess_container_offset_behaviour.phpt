@@ -40,6 +40,17 @@ VAR_DUMP_OF_OFFSET
 string(12) "CLASS_NAME::offsetGet"
 VAR_DUMP_OF_OFFSET
 int(5)
+Reference to dimension:
+string(12) "CLASS_NAME::offsetGet"
+VAR_DUMP_OF_OFFSET
+
+Notice: Indirect modification of overloaded element of CLASS_NAME has no effect in %s on line 55
+Value of reference:
+int(5)
+Value of container dimension after write to reference (should be int(100) if successful):
+string(12) "CLASS_NAME::offsetGet"
+VAR_DUMP_OF_OFFSET
+int(5)
 unset():
 string(14) "CLASS_NAME::offsetUnset"
 VAR_DUMP_OF_OFFSET
@@ -47,19 +58,19 @@ Nested read:
 string(12) "CLASS_NAME::offsetGet"
 VAR_DUMP_OF_OFFSET
 
-Warning: Trying to access array offset on int in %s on line 62
+Warning: Trying to access array offset on int in %s on line 74
 NULL
 Nested write:
 string(12) "CLASS_NAME::offsetGet"
 VAR_DUMP_OF_OFFSET
 
-Notice: Indirect modification of overloaded element of CLASS_NAME has no effect in %s on line 69
+Notice: Indirect modification of overloaded element of CLASS_NAME has no effect in %s on line 81
 Cannot use a scalar value as an array
 Nested Read-Write:
 string(12) "CLASS_NAME::offsetGet"
 VAR_DUMP_OF_OFFSET
 
-Notice: Indirect modification of overloaded element of CLASS_NAME has no effect in %s on line 76
+Notice: Indirect modification of overloaded element of CLASS_NAME has no effect in %s on line 88
 Cannot use a scalar value as an array
 Nested isset():
 string(15) "CLASS_NAME::offsetExists"
@@ -83,7 +94,7 @@ Nested unset():
 string(12) "CLASS_NAME::offsetGet"
 VAR_DUMP_OF_OFFSET
 
-Notice: Indirect modification of overloaded element of CLASS_NAME has no effect in %s on line 102
+Notice: Indirect modification of overloaded element of CLASS_NAME has no effect in %s on line 114
 Cannot unset offset in a non-array variable
 
 OUTPUT;
