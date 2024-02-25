@@ -5953,8 +5953,11 @@ PHP_FUNCTION(str_rot13)
 /* }}} */
 
 /* {{{ php_binary_string_shuffle */
-PHPAPI bool php_binary_string_shuffle(const php_random_algo *algo, php_random_status *status, char *str, zend_long len) /* {{{ */
+PHPAPI bool php_binary_string_shuffle(php_random_algo_with_state engine, char *str, zend_long len) /* {{{ */
 {
+	const php_random_algo *algo = engine.algo;
+	void *status = engine.status;
+
 	int64_t n_elems, rnd_idx, n_left;
 	char temp;
 
@@ -5996,8 +5999,7 @@ PHP_FUNCTION(str_shuffle)
 	RETVAL_STRINGL(ZSTR_VAL(arg), ZSTR_LEN(arg));
 	if (Z_STRLEN_P(return_value) > 1) {
 		php_binary_string_shuffle(
-			php_random_default_algo(),
-			php_random_default_status(),
+			php_random_default_engine(),
 			Z_STRVAL_P(return_value),
 			Z_STRLEN_P(return_value)
 		);

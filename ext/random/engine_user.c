@@ -21,9 +21,9 @@
 #include "php.h"
 #include "php_random.h"
 
-static php_random_result generate(php_random_status *status)
+static php_random_result generate(void *status)
 {
-	php_random_status_state_user *s = status->state;
+	php_random_status_state_user *s = status;
 	uint64_t result = 0;
 	size_t size;
 	zval retval;
@@ -65,9 +65,12 @@ static php_random_result generate(php_random_status *status)
 	};
 }
 
-static zend_long range(php_random_status *status, zend_long min, zend_long max)
+static zend_long range(void *status, zend_long min, zend_long max)
 {
-	return php_random_range(&php_random_algo_user, status, min, max);
+	return php_random_range((php_random_algo_with_state){
+		.algo = &php_random_algo_user,
+		.status = status,
+	}, min, max);
 }
 
 const php_random_algo php_random_algo_user = {
