@@ -179,8 +179,8 @@ foreach ($numbers as $number) {
 --- testing: float(9.223372036854776E+18)
 ... with precision 5: string(31) "9,223,372,036,854,775,808.00000"
 ... with precision 0: string(25) "9,223,372,036,854,775,808"
-... with precision -1: string(25) "9,223,372,036,854,775,808"
-... with precision -5: string(25) "9,223,372,036,854,800,384"
+... with precision -1: string(25) "9,223,372,036,854,775,800"
+... with precision -5: string(25) "9,223,372,036,854,800,000"
 ... with precision -10: string(25) "9,223,372,040,000,000,000"
 ... with precision -11: string(25) "9,223,372,000,000,000,000"
 ... with precision -17: string(25) "9,200,000,000,000,000,000"

@@ -1072,6 +1072,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	size_t reslen = 0;
 	int count = 0;
 	int is_negative = 0;
+	unsigned int udec = MAX(0, dec);
 
 	if (d < 0) {
 		is_negative = 1;
@@ -1079,8 +1080,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	}
 
 	d = _php_math_round(d, dec, PHP_ROUND_HALF_UP);
-	dec = MAX(0, dec);
-	tmpbuf = strpprintf(0, "%.*F", dec, d);
+	tmpbuf = strpprintf(0, "%.*F", udec, d);
 	if (tmpbuf == NULL) {
 		return NULL;
 	} else if (!isdigit((int)ZSTR_VAL(tmpbuf)[0])) {
@@ -1093,7 +1093,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	}
 
 	/* find decimal point, if expected */
-	if (dec) {
+	if (udec) {
 		dp = strpbrk(ZSTR_VAL(tmpbuf), ".,");
 	} else {
 		dp = NULL;
@@ -1114,8 +1114,8 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 
 	reslen = integral;
 
-	if (dec) {
-		reslen += dec;
+	if (udec) {
+		reslen += udec;
 
 		if (dec_point) {
 			reslen = zend_safe_addmult(reslen, 1, dec_point_len, "number formatting");
@@ -1135,9 +1135,9 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	/* copy the decimal places.
 	 * Take care, as the sprintf implementation may return less places than
 	 * we requested due to internal buffer limitations */
-	if (dec) {
+	if (udec) {
 		size_t declen = (dp ? s - dp : 0);
-		size_t topad = (size_t)dec > declen ? dec - declen : 0;
+		size_t topad = (size_t)udec > declen ? udec - declen : 0;
 
 		/* pad with '0's */
 		while (topad--) {
@@ -1162,7 +1162,14 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, const char *de
 	/* copy the numbers before the decimal point, adding thousand
 	 * separator every three digits */
 	while (s >= ZSTR_VAL(tmpbuf)) {
-		*t-- = *s--;
+		if (dec < 0) {
+			dec++;
+			s--;
+			*t-- = '0';
+		} else {
+			*t-- = *s--;
+		}
+
 		if (thousand_sep && (++count%3)==0 && s >= ZSTR_VAL(tmpbuf)) {
 			t -= thousand_sep_len;
 			memcpy(t + 1, thousand_sep, thousand_sep_len);
