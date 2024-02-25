@@ -8,7 +8,7 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'test_offset_helpers.inc';
 const EXPECTED_OUTPUT_VALID_OFFSETS = <<<OUTPUT
 Read before write:
 
-Warning: Trying to access array offset on null in %s on line 8
+Warning: Trying to access array offset on null in %s on line %d
 NULL
 Write:
 Read:
@@ -20,12 +20,17 @@ empty():
 bool(false)
 null coalesce:
 int(25)
+Reference to dimension:
+Value of reference:
+int(25)
+Value of container dimension after write to reference (should be int(100) if successful):
+int(100)
 unset():
 Nested read:
 
-Warning: Undefined array key %s in %s on line 62
+Warning: Undefined array key %s in %s on line %d
 
-Warning: Trying to access array offset on null in %s on line 62
+Warning: Trying to access array offset on null in %s on line %d
 NULL
 Nested write:
 Nested Read-Write:
@@ -44,74 +49,83 @@ $EXPECTED_OUTPUT_VALID_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_V
 const EXPECTF_OUTPUT_FLOAT_OFFSETS = <<<OUTPUT
 Read before write:
 
-Warning: Trying to access array offset on null in %s on line 8
+Warning: Trying to access array offset on null in %s on line %d
 NULL
 Write:
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 15
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 Read:
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 22
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 int(5)
 Read-Write:
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 29
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 isset():
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 36
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(true)
 empty():
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 42
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(false)
 null coalesce:
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 48
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 int(25)
+Reference to dimension:
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
+Value of reference:
+int(25)
+Value of container dimension after write to reference (should be int(100) if successful):
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
+int(100)
 unset():
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 55
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 Nested read:
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 62
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
-Warning: Undefined array key 0 in %s on line 62
+Warning: Undefined array key 0 in %s on line %d
 
-Warning: Trying to access array offset on null in %s on line 62
+Warning: Trying to access array offset on null in %s on line %d
 NULL
 Nested write:
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 69
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 69
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 Nested Read-Write:
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 76
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 76
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 Nested isset():
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 83
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 83
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(true)
 Nested empty():
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 89
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 89
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(false)
 Nested null coalesce:
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 95
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 95
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 int(30)
 Nested unset():
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 102
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 102
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
 OUTPUT;
 
@@ -120,7 +134,7 @@ $EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTF_OUTPUT_FL
 const EXPECTED_OUTPUT_INVALID_OFFSETS = <<<OUTPUT
 Read before write:
 
-Warning: Trying to access array offset on null in %s on line 8
+Warning: Trying to access array offset on null in %s on line %d
 NULL
 Write:
 Cannot access offset of type %s on array
@@ -133,6 +147,8 @@ Cannot access offset of type %s in isset or empty
 empty():
 Cannot access offset of type %s in isset or empty
 null coalesce:
+Cannot access offset of type %s on array
+Reference to dimension:
 Cannot access offset of type %s on array
 unset():
 Cannot unset offset of type %s on array
@@ -182,50 +198,59 @@ null coalesce:
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 48
 int(25)
-unset():
+Reference to dimension:
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 55
+Value of reference:
+int(25)
+Value of container dimension after write to reference (should be int(100) if successful):
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 60
+int(100)
+unset():
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 67
 Nested read:
 
-Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 62
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 74
 
-Warning: Undefined array key 3 in %s on line 62
+Warning: Undefined array key 3 in %s on line 74
 
-Warning: Trying to access array offset on null in %s on line 62
+Warning: Trying to access array offset on null in %s on line 74
 NULL
 Nested write:
 
-Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 69
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 81
 
-Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 69
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 81
 Nested Read-Write:
 
-Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 76
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 88
 
-Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 76
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 88
 Nested isset():
 
-Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 83
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 95
 
-Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 83
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 95
 bool(true)
 Nested empty():
 
-Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 89
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 101
 
-Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 89
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 101
 bool(false)
 Nested null coalesce:
 
-Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 95
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 107
 
-Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 95
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 107
 int(30)
 Nested unset():
 
-Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 102
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 114
 
-Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 102
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 114
 
 OUTPUT;
 

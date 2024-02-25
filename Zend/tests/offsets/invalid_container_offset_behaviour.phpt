@@ -36,13 +36,15 @@ empty():
 bool(true)
 null coalesce:
 string(7) "default"
+Reference to dimension:
+Cannot use a scalar value as an array
 unset():
 Cannot unset offset in a non-array variable
 Nested read:
 
-Warning: Trying to access array offset on $containerStr in %s on line 62
+Warning: Trying to access array offset on $containerStr in %s on line 74
 
-Warning: Trying to access array offset on null in %s on line 62
+Warning: Trying to access array offset on null in %s on line 74
 NULL
 Nested write:
 Cannot use a scalar value as an array

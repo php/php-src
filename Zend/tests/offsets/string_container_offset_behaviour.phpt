@@ -8,7 +8,7 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'test_offset_helpers.inc';
 const EXPECTED_OUTPUT_VALID_OFFSETS = <<<OUTPUT
 Read before write:
 
-Warning: Uninitialized string offset %d in %s on line 8
+Warning: Uninitialized string offset %d in %s on line %d
 string(0) ""
 Write:
 Read:
@@ -21,11 +21,13 @@ empty():
 bool(false)
 null coalesce:
 string(1) "5"
+Reference to dimension:
+Cannot create references %s string offsets
 unset():
 Cannot unset string offsets
 Nested read:
 
-Warning: Uninitialized string offset %d in %s on line 62
+Warning: Uninitialized string offset %d in %s on line %d
 string(0) ""
 Nested write:
 Cannot use string offset as an array
@@ -47,14 +49,14 @@ $EXPECTED_OUTPUT_VALID_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_V
 const EXPECTED_OUTPUT_VALID_OFFSETS_OUT_OF_RANGE = <<<OUTPUT
 Read before write:
 
-Warning: Uninitialized string offset %i in %s on line 8
+Warning: Uninitialized string offset %i in %s on line %d
 string(0) ""
 Write:
 
-Warning: Illegal string offset %i in %s on line 15
+Warning: Illegal string offset %i in %s on line %d
 Read:
 
-Warning: Uninitialized string offset %i in %s on line 22
+Warning: Uninitialized string offset %i in %s on line %d
 string(0) ""
 Read-Write:
 Cannot use assign-op operators with string offsets
@@ -64,13 +66,15 @@ empty():
 bool(true)
 null coalesce:
 string(7) "default"
+Reference to dimension:
+Cannot create references %s string offsets
 unset():
 Cannot unset string offsets
 Nested read:
 
-Warning: Uninitialized string offset %i in %s on line 62
+Warning: Uninitialized string offset %i in %s on line %d
 
-Warning: Uninitialized string offset %i in %s on line 62
+Warning: Uninitialized string offset %i in %s on line %d
 string(0) ""
 Nested write:
 Cannot use string offset as an array
@@ -92,20 +96,20 @@ $EXPECTED_OUTPUT_VALID_OFFSETS_OUT_OF_RANGE_REGEX = '/^' . expectf_to_regex(EXPE
 const EXPECTED_OUTPUT_STRING_CAST_OFFSETS = <<<OUTPUT
 Read before write:
 
-Warning: String offset cast occurred in %s on line 8
+Warning: String offset cast occurred in %s on line %d
 
-Warning: Uninitialized string offset %d in %s on line 8
+Warning: Uninitialized string offset %d in %s on line %d
 string(0) ""
 Write:
 
-Warning: String offset cast occurred in %s on line 15
+Warning: String offset cast occurred in %s on line %d
 Read:
 
-Warning: String offset cast occurred in %s on line 22
+Warning: String offset cast occurred in %s on line %d
 string(1) "5"
 Read-Write:
 
-Warning: String offset cast occurred in %s on line 29
+Warning: String offset cast occurred in %s on line %d
 Cannot use assign-op operators with string offsets
 isset():
 bool(true)
@@ -113,23 +117,27 @@ empty():
 bool(false)
 null coalesce:
 string(1) "5"
+Reference to dimension:
+
+Warning: String offset cast occurred in %s on line %d
+Cannot create references %s string offsets
 unset():
 Cannot unset string offsets
 Nested read:
 
-Warning: String offset cast occurred in %s on line 62
+Warning: String offset cast occurred in %s on line %d
 
-Warning: String offset cast occurred in %s on line 62
+Warning: String offset cast occurred in %s on line %d
 
-Warning: Uninitialized string offset %d in %s on line 62
+Warning: Uninitialized string offset %d in %s on line %d
 string(0) ""
 Nested write:
 
-Warning: String offset cast occurred in %s on line 69
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 Nested Read-Write:
 
-Warning: String offset cast occurred in %s on line 76
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 Nested isset():
 bool(false)
@@ -139,7 +147,7 @@ Nested null coalesce:
 string(7) "default"
 Nested unset():
 
-Warning: String offset cast occurred in %s on line 102
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 
 OUTPUT;
@@ -149,20 +157,20 @@ $EXPECTED_OUTPUT_STRING_CAST_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OU
 const EXPECTED_OUTPUT_STRING_CAST_OFFSETS_TO_0 = <<<OUTPUT
 Read before write:
 
-Warning: String offset cast occurred in %s on line 8
+Warning: String offset cast occurred in %s on line %d
 
-Warning: Uninitialized string offset 0 in %s on line 8
+Warning: Uninitialized string offset 0 in %s on line %d
 string(0) ""
 Write:
 
-Warning: String offset cast occurred in %s on line 15
+Warning: String offset cast occurred in %s on line %d
 Read:
 
-Warning: String offset cast occurred in %s on line 22
+Warning: String offset cast occurred in %s on line %d
 string(1) "5"
 Read-Write:
 
-Warning: String offset cast occurred in %s on line 29
+Warning: String offset cast occurred in %s on line %d
 Cannot use assign-op operators with string offsets
 isset():
 bool(true)
@@ -170,21 +178,25 @@ empty():
 bool(false)
 null coalesce:
 string(1) "5"
+Reference to dimension:
+
+Warning: String offset cast occurred in %s on line %d
+Cannot create references %s string offsets
 unset():
 Cannot unset string offsets
 Nested read:
 
-Warning: String offset cast occurred in %s on line 62
+Warning: String offset cast occurred in %s on line %d
 
-Warning: String offset cast occurred in %s on line 62
+Warning: String offset cast occurred in %s on line %d
 string(1) "5"
 Nested write:
 
-Warning: String offset cast occurred in %s on line 69
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 Nested Read-Write:
 
-Warning: String offset cast occurred in %s on line 76
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 Nested isset():
 bool(true)
@@ -194,7 +206,7 @@ Nested null coalesce:
 string(1) "5"
 Nested unset():
 
-Warning: String offset cast occurred in %s on line 102
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 
 OUTPUT;
@@ -204,24 +216,24 @@ $EXPECTED_OUTPUT_STRING_CAST_OFFSETS_TO_0_REGEX = '/^' . expectf_to_regex(EXPECT
 const EXPECTED_OUTPUT_STRING_CAST_OFFSETS_OUT_OF_RANGE = <<<OUTPUT
 Read before write:
 
-Warning: String offset cast occurred in %s on line 8
+Warning: String offset cast occurred in %s on line %d
 
-Warning: Uninitialized string offset %i in %s on line 8
+Warning: Uninitialized string offset %i in %s on line %d
 string(0) ""
 Write:
 
-Warning: String offset cast occurred in %s on line 15
+Warning: String offset cast occurred in %s on line %d
 
-Warning: Illegal string offset %i in %s on line 15
+Warning: Illegal string offset %i in %s on line %d
 Read:
 
-Warning: String offset cast occurred in %s on line 22
+Warning: String offset cast occurred in %s on line %d
 
-Warning: Uninitialized string offset %i in %s on line 22
+Warning: Uninitialized string offset %i in %s on line %d
 string(0) ""
 Read-Write:
 
-Warning: String offset cast occurred in %s on line 29
+Warning: String offset cast occurred in %s on line %d
 Cannot use assign-op operators with string offsets
 isset():
 bool(false)
@@ -229,25 +241,29 @@ empty():
 bool(true)
 null coalesce:
 string(7) "default"
+Reference to dimension:
+
+Warning: String offset cast occurred in %s on line %d
+Cannot create references %s string offsets
 unset():
 Cannot unset string offsets
 Nested read:
 
-Warning: String offset cast occurred in %s on line 62
+Warning: String offset cast occurred in %s on line %d
 
-Warning: Uninitialized string offset %i in %s on line 62
+Warning: Uninitialized string offset %i in %s on line %d
 
-Warning: String offset cast occurred in %s on line 62
+Warning: String offset cast occurred in %s on line %d
 
-Warning: Uninitialized string offset %i in %s on line 62
+Warning: Uninitialized string offset %i in %s on line %d
 string(0) ""
 Nested write:
 
-Warning: String offset cast occurred in %s on line 69
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 Nested Read-Write:
 
-Warning: String offset cast occurred in %s on line 76
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 Nested isset():
 bool(false)
@@ -257,7 +273,7 @@ Nested null coalesce:
 string(7) "default"
 Nested unset():
 
-Warning: String offset cast occurred in %s on line 102
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 
 OUTPUT;
@@ -267,54 +283,58 @@ $EXPECTED_OUTPUT_STRING_CAST_OFFSETS_OUT_OF_RANGE_REGEX = '/^' . expectf_to_rege
 const EXPECTF_OUTPUT_FLOAT_OFFSETS_OUT_OF_RANGE = <<<OUTPUT
 Read before write:
 
-Warning: String offset cast occurred in %s on line 8
+Warning: String offset cast occurred in %s on line %d
 
-Warning: Uninitialized string offset %i in %s on line 8
+Warning: Uninitialized string offset %i in %s on line %d
 string(0) ""
 Write:
 
-Warning: String offset cast occurred in %s on line 15
+Warning: String offset cast occurred in %s on line %d
 
-Warning: Illegal string offset %i in %s on line 15
+Warning: Illegal string offset %i in %s on line %d
 Read:
 
-Warning: String offset cast occurred in %s on line 22
+Warning: String offset cast occurred in %s on line %d
 
-Warning: Uninitialized string offset %i in %s on line 22
+Warning: Uninitialized string offset %i in %s on line %d
 string(0) ""
 Read-Write:
 
-Warning: String offset cast occurred in %s on line 29
+Warning: String offset cast occurred in %s on line %d
 Cannot use assign-op operators with string offsets
 isset():
 
-Deprecated: Implicit conversion from float %f to int loses precision in %s on line 36
+Deprecated: Implicit conversion from float %f to int loses precision in %s on line %d
 bool(false)
 empty():
 
-Deprecated: Implicit conversion from float %f to int loses precision in %s on line 42
+Deprecated: Implicit conversion from float %f to int loses precision in %s on line %d
 bool(true)
 null coalesce:
 string(7) "default"
+Reference to dimension:
+
+Warning: String offset cast occurred in %s on line %d
+Cannot create references %s string offsets
 unset():
 Cannot unset string offsets
 Nested read:
 
-Warning: String offset cast occurred in %s on line 62
+Warning: String offset cast occurred in %s on line %d
 
-Warning: Uninitialized string offset %i in %s on line 62
+Warning: Uninitialized string offset %i in %s on line %d
 
-Warning: String offset cast occurred in %s on line 62
+Warning: String offset cast occurred in %s on line %d
 
-Warning: Uninitialized string offset %i in %s on line 62
+Warning: Uninitialized string offset %i in %s on line %d
 string(0) ""
 Nested write:
 
-Warning: String offset cast occurred in %s on line 69
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 Nested Read-Write:
 
-Warning: String offset cast occurred in %s on line 76
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 Nested isset():
 bool(false)
@@ -324,7 +344,7 @@ Nested null coalesce:
 string(7) "default"
 Nested unset():
 
-Warning: String offset cast occurred in %s on line 102
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 
 OUTPUT;
@@ -334,60 +354,64 @@ $EXPECTF_OUTPUT_FLOAT_OFFSETS_OUT_OF_RANGE_REGEX = '/^' . expectf_to_regex(EXPEC
 const EXPECTED_OUTPUT_FLOAT_INF_NAN_OFFSETS = <<<OUTPUT
 Read before write:
 
-Warning: String offset cast occurred in %s on line 8
+Warning: String offset cast occurred in %s on line %d
 
-Warning: Uninitialized string offset %d in %s on line 8
+Warning: Uninitialized string offset %d in %s on line %d
 string(0) ""
 Write:
 
-Warning: String offset cast occurred in %s on line 15
+Warning: String offset cast occurred in %s on line %d
 Read:
 
-Warning: String offset cast occurred in %s on line 22
+Warning: String offset cast occurred in %s on line %d
 string(1) "5"
 Read-Write:
 
-Warning: String offset cast occurred in %s on line 29
+Warning: String offset cast occurred in %s on line %d
 Cannot use assign-op operators with string offsets
 isset():
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 36
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(true)
 empty():
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 42
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(false)
 null coalesce:
 string(1) "5"
+Reference to dimension:
+
+Warning: String offset cast occurred in %s on line %d
+Cannot create references %s string offsets
 unset():
 Cannot unset string offsets
 Nested read:
 
-Warning: String offset cast occurred in %s on line 62
+Warning: String offset cast occurred in %s on line %d
 
-Warning: String offset cast occurred in %s on line 62
+Warning: String offset cast occurred in %s on line %d
 string(1) "5"
 Nested write:
 
-Warning: String offset cast occurred in %s on line 69
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 Nested Read-Write:
 
-Warning: String offset cast occurred in %s on line 76
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 Nested isset():
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 83
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(true)
 Nested empty():
 
-Deprecated: Implicit conversion from float %F to int loses precision in %s on line 89
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(false)
 Nested null coalesce:
 string(1) "5"
 Nested unset():
 
-Warning: String offset cast occurred in %s on line 102
+Warning: String offset cast occurred in %s on line %d
 Cannot use string offset as an array
 
 OUTPUT;
@@ -408,6 +432,8 @@ bool(false)
 empty():
 bool(true)
 null coalesce:
+Cannot access offset of type %s on string
+Reference to dimension:
 Cannot access offset of type %s on string
 unset():
 Cannot unset string offsets
@@ -445,6 +471,8 @@ empty():
 bool(true)
 null coalesce:
 string(7) "default"
+Reference to dimension:
+Cannot access offset of type string on string
 unset():
 Cannot unset string offsets
 Nested read:
@@ -467,20 +495,20 @@ OUTPUT;
 const EXPECTED_OUTPUT_INVALID_OFFSETS_AS_LEADING_NUMERIC_STRINGS = <<<OUTPUT
 Read before write:
 
-Warning: Illegal string offset %s in %s on line 8
+Warning: Illegal string offset %s in %s on line %d
 
-Warning: Uninitialized string offset %d in %s on line 8
+Warning: Uninitialized string offset %d in %s on line %d
 string(0) ""
 Write:
 
-Warning: Illegal string offset %s in %s on line 15
+Warning: Illegal string offset %s in %s on line %d
 Read:
 
-Warning: Illegal string offset %s in %s on line 22
+Warning: Illegal string offset %s in %s on line %d
 string(1) "5"
 Read-Write:
 
-Warning: Illegal string offset %s in %s on line 29
+Warning: Illegal string offset %s in %s on line %d
 Cannot use assign-op operators with string offsets
 isset():
 bool(false)
@@ -488,39 +516,43 @@ empty():
 bool(true)
 null coalesce:
 
-Warning: Illegal string offset %s in %s on line 48
+Warning: Illegal string offset %s in %s on line %d
 string(1) "5"
+Reference to dimension:
+
+Warning: Illegal string offset %s in %s on line %d
+Cannot create references %s string offsets
 unset():
 Cannot unset string offsets
 Nested read:
 
-Warning: Illegal string offset %s in %s on line 62
+Warning: Illegal string offset %s in %s on line %d
 
-Warning: Illegal string offset %s in %s on line 62
+Warning: Illegal string offset %s in %s on line %d
 
-Warning: Uninitialized string offset %d in %s on line 62
+Warning: Uninitialized string offset %d in %s on line %d
 string(0) ""
 Nested write:
 
-Warning: Illegal string offset %s in %s on line 69
+Warning: Illegal string offset %s in %s on line %d
 Cannot use string offset as an array
 Nested Read-Write:
 
-Warning: Illegal string offset %s in %s on line 76
+Warning: Illegal string offset %s in %s on line %d
 Cannot use string offset as an array
 Nested isset():
 
-Warning: Illegal string offset %s in %s on line 83
+Warning: Illegal string offset %s in %s on line %d
 bool(false)
 Nested empty():
 
-Warning: Illegal string offset %s in %s on line 89
+Warning: Illegal string offset %s in %s on line %d
 bool(true)
 Nested null coalesce:
 
-Warning: Illegal string offset %s in %s on line 95
+Warning: Illegal string offset %s in %s on line %d
 
-Warning: Illegal string offset %s in %s on line 95
+Warning: Illegal string offset %s in %s on line %d
 string(7) "default"
 Nested unset():
 Cannot use string offset as an array
@@ -532,20 +564,20 @@ $EXPECTED_OUTPUT_INVALID_OFFSETS_AS_LEADING_NUMERIC_STRINGS_REGEX = '/^' . expec
 const EXPECTED_OUTPUT_INVALID_OFFSETS_AS_LEADING_NUMERIC_STRINGS_TO_0 = <<<OUTPUT
 Read before write:
 
-Warning: Illegal string offset %s in %s on line 8
+Warning: Illegal string offset %s in %s on line %d
 
-Warning: Uninitialized string offset 0 in %s on line 8
+Warning: Uninitialized string offset 0 in %s on line %d
 string(0) ""
 Write:
 
-Warning: Illegal string offset %s in %s on line 15
+Warning: Illegal string offset %s in %s on line %d
 Read:
 
-Warning: Illegal string offset %s in %s on line 22
+Warning: Illegal string offset %s in %s on line %d
 string(1) "5"
 Read-Write:
 
-Warning: Illegal string offset %s in %s on line 29
+Warning: Illegal string offset %s in %s on line %d
 Cannot use assign-op operators with string offsets
 isset():
 bool(false)
@@ -553,37 +585,41 @@ empty():
 bool(true)
 null coalesce:
 
-Warning: Illegal string offset %s in %s on line 48
+Warning: Illegal string offset %s in %s on line %d
 string(1) "5"
+Reference to dimension:
+
+Warning: Illegal string offset %s in %s on line %d
+Cannot create references %s string offsets
 unset():
 Cannot unset string offsets
 Nested read:
 
-Warning: Illegal string offset %s in %s on line 62
+Warning: Illegal string offset %s in %s on line %d
 
-Warning: Illegal string offset %s in %s on line 62
+Warning: Illegal string offset %s in %s on line %d
 string(1) "5"
 Nested write:
 
-Warning: Illegal string offset %s in %s on line 69
+Warning: Illegal string offset %s in %s on line %d
 Cannot use string offset as an array
 Nested Read-Write:
 
-Warning: Illegal string offset %s in %s on line 76
+Warning: Illegal string offset %s in %s on line %d
 Cannot use string offset as an array
 Nested isset():
 
-Warning: Illegal string offset %s in %s on line 83
+Warning: Illegal string offset %s in %s on line %d
 bool(false)
 Nested empty():
 
-Warning: Illegal string offset %s in %s on line 89
+Warning: Illegal string offset %s in %s on line %d
 bool(true)
 Nested null coalesce:
 
-Warning: Illegal string offset %s in %s on line 95
+Warning: Illegal string offset %s in %s on line %d
 
-Warning: Illegal string offset %s in %s on line 95
+Warning: Illegal string offset %s in %s on line %d
 string(1) "5"
 Nested unset():
 Cannot use string offset as an array

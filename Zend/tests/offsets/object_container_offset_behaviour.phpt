@@ -20,6 +20,8 @@ empty():
 Cannot use object of type stdClass as array
 null coalesce:
 Cannot use object of type stdClass as array
+Reference to dimension:
+Cannot use object of type stdClass as array
 unset():
 Cannot use object of type stdClass as array
 Nested read:
