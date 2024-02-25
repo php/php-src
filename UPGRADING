@@ -229,6 +229,8 @@ PHP 8.4 UPGRADE NOTES
 - Reflection:
   . ReflectionAttribute now contains a $name property to improve the debugging
     experience.
+  . ReflectionClassConstant::__toString() and ReflectionProperty::__toString()
+    now returns the attached doc comments.
 
 - SOAP:
   . Added support for clark notation for namespaces in class map.
