@@ -327,13 +327,6 @@ zend_module_entry xmlreader_module_entry = {
 ZEND_GET_MODULE(xmlreader)
 #endif
 
-/* {{{ xmlreader_objects_clone */
-void xmlreader_objects_clone(void *object, void **object_clone)
-{
-	/* TODO */
-}
-/* }}} */
-
 /* {{{ xmlreader_free_resources */
 static void xmlreader_free_resources(xmlreader_object *intern) {
 	if (intern->input) {
