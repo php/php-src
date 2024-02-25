@@ -239,6 +239,7 @@ zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval
 		return NULL;
 	}
 
+	ZVAL_DEREF(offset);
 	if (Z_TYPE_P(offset) == IS_LONG) {
 		return resource_bundle_array_fetch(object, /* offset_str */ NULL, Z_LVAL_P(offset), rv, /* fallback */ true, /* arg_num */ 0);
 	} else if (Z_TYPE_P(offset) == IS_STRING) {
