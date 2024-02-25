@@ -1181,7 +1181,8 @@ PHP_MINIT_FUNCTION(xmlreader)
 	prev_zend_post_startup_cb = zend_post_startup_cb;
 	zend_post_startup_cb = xmlreader_fixup_temporaries;
 
-	zend_hash_init(&xmlreader_prop_handlers, 0, NULL, NULL, true);
+	/* Note: update the size upon adding properties. */
+	zend_hash_init(&xmlreader_prop_handlers, 14, NULL, NULL, true);
 	XMLREADER_REGISTER_PROP_HANDLER(&xmlreader_prop_handlers, "attributeCount", xmlTextReaderAttributeCount, NULL, IS_LONG);
 	XMLREADER_REGISTER_PROP_HANDLER(&xmlreader_prop_handlers, "baseURI", NULL, xmlTextReaderConstBaseUri, IS_STRING);
 	XMLREADER_REGISTER_PROP_HANDLER(&xmlreader_prop_handlers, "depth", xmlTextReaderDepth, NULL, IS_LONG);
