@@ -168,84 +168,126 @@ PHP_FUNCTION( resourcebundle_create )
 /* }}} */
 
 /* {{{ resourcebundle_array_fetch */
-static void resourcebundle_array_fetch(zend_object *object, zval *offset, zval *return_value, int fallback)
+static zval *resource_bundle_array_fetch(
+	zend_object *object, zend_string *offset_str, zend_long offset_int,
+	zval *return_value, bool fallback, uint32_t offset_arg_num)
 {
-	int32_t     meindex = 0;
-	char *      mekey = NULL;
-	bool        is_numeric = 0;
-	char        *pbuf;
+	int32_t index = 0;
+	char *key = NULL;
+	bool is_numeric = offset_str == NULL;
+	char *pbuf;
 	ResourceBundle_object *rb;
 
 	rb = php_intl_resourcebundle_fetch_object(object);
 	intl_error_reset(NULL);
 	intl_error_reset(INTL_DATA_ERROR_P(rb));
 
-	if(Z_TYPE_P(offset) == IS_LONG) {
-		is_numeric = 1;
-		meindex = (int32_t)Z_LVAL_P(offset);
-		rb->child = ures_getByIndex( rb->me, meindex, rb->child, &INTL_DATA_ERROR_CODE(rb) );
-	} else if(Z_TYPE_P(offset) == IS_STRING) {
-		mekey = Z_STRVAL_P(offset);
-		rb->child = ures_getByKey(rb->me, mekey, rb->child, &INTL_DATA_ERROR_CODE(rb) );
+	if (offset_str) {
+		// TODO Check is not empty?
+		key = ZSTR_VAL(offset_str);
+		rb->child = ures_getByKey(rb->me, key, rb->child, &INTL_DATA_ERROR_CODE(rb) );
 	} else {
-		intl_errors_set(INTL_DATA_ERROR_P(rb), U_ILLEGAL_ARGUMENT_ERROR,
-			"resourcebundle_get: index should be integer or string", 0);
-		RETURN_NULL();
+		if (UNEXPECTED(offset_int < (zend_long)INT32_MIN || offset_int > (zend_long)INT32_MAX)) {
+			if (offset_arg_num) {
+				zend_argument_value_error(offset_arg_num, "index must be between %d and %d", INT32_MIN, INT32_MAX);
+			} else {
+				zend_value_error("Index must be between %d and %d", INT32_MIN, INT32_MAX);
+			}
+			return NULL;
+		}
+		index = (int32_t)offset_int;
+		rb->child = ures_getByIndex(rb->me, index, rb->child, &INTL_DATA_ERROR_CODE(rb));
 	}
 
 	intl_error_set_code( NULL, INTL_DATA_ERROR_CODE(rb) );
 	if (U_FAILURE(INTL_DATA_ERROR_CODE(rb))) {
 		if (is_numeric) {
-			spprintf( &pbuf, 0, "Cannot load resource element %d", meindex );
+			spprintf( &pbuf, 0, "Cannot load resource element %d", index );
 		} else {
-			spprintf( &pbuf, 0, "Cannot load resource element '%s'", mekey );
+			spprintf( &pbuf, 0, "Cannot load resource element '%s'", key );
 		}
 		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(rb), pbuf, 1 );
 		efree(pbuf);
-		RETURN_NULL();
+		RETVAL_NULL();
+		return return_value;
 	}
 
 	if (!fallback && (INTL_DATA_ERROR_CODE(rb) == U_USING_FALLBACK_WARNING || INTL_DATA_ERROR_CODE(rb) == U_USING_DEFAULT_WARNING)) {
 		UErrorCode icuerror;
 		const char * locale = ures_getLocaleByType( rb->me, ULOC_ACTUAL_LOCALE, &icuerror );
 		if (is_numeric) {
-			spprintf( &pbuf, 0, "Cannot load element %d without fallback from to %s", meindex, locale );
+			spprintf(&pbuf, 0, "Cannot load element %d without fallback from to %s", index, locale);
 		} else {
-			spprintf( &pbuf, 0, "Cannot load element '%s' without fallback from to %s", mekey, locale );
+			spprintf(&pbuf, 0, "Cannot load element '%s' without fallback from to %s", key, locale);
 		}
-		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(rb), pbuf, 1 );
+		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(rb), pbuf, 1);
 		efree(pbuf);
-		RETURN_NULL();
+		RETVAL_NULL();
+		return return_value;
 	}
 
 	resourcebundle_extract_value( return_value, rb );
+	return return_value;
 }
 /* }}} */
 
 /* {{{ resourcebundle_array_get */
 zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval *rv)
 {
-	if(offset == NULL) {
-		php_error( E_ERROR, "Cannot apply [] to ResourceBundle object" );
+	if (offset == NULL) {
+		zend_throw_error(NULL, "Cannot apply [] to ResourceBundle object");
+		return NULL;
 	}
-	ZVAL_NULL(rv);
-	resourcebundle_array_fetch(object, offset, rv, 1);
-	return rv;
+
+	if (Z_TYPE_P(offset) == IS_LONG) {
+		return resource_bundle_array_fetch(object, /* offset_str */ NULL, Z_LVAL_P(offset), rv, /* fallback */ true, /* arg_num */ 0);
+	} else if (Z_TYPE_P(offset) == IS_STRING) {
+		return resource_bundle_array_fetch(object, Z_STR_P(offset), /* offset_int */ 0, rv, /* fallback */ true, /* arg_num */ 0);
+	} else {
+		zend_illegal_container_offset(object->ce->name, offset, type);
+		return NULL;
+	}
 }
 /* }}} */
 
 /* {{{ Get resource identified by numerical index or key name. */
 PHP_FUNCTION( resourcebundle_get )
 {
-	bool   fallback = 1;
-	zval *		offset;
-	zval *      object;
+	bool fallback = true;
+	zend_object *resource_bundle = NULL;
+	zend_string *offset_str = NULL;
+	zend_long offset_long = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oz|b",	&object, ResourceBundle_ce_ptr, &offset, &fallback ) == FAILURE) {
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_OBJ_OF_CLASS(resource_bundle, ResourceBundle_ce_ptr)
+		Z_PARAM_STR_OR_LONG(offset_str, offset_long)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(fallback)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *retval = resource_bundle_array_fetch(resource_bundle, offset_str, offset_long, return_value, fallback, /* arg_num */ 2);
+	if (!retval) {
 		RETURN_THROWS();
 	}
+}
+/* }}} */
 
-	resourcebundle_array_fetch(Z_OBJ_P(object), offset, return_value, fallback);
+PHP_METHOD(ResourceBundle , get)
+{
+	bool fallback = true;
+	zend_string *offset_str = NULL;
+	zend_long offset_long = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR_OR_LONG(offset_str, offset_long)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(fallback)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *retval = resource_bundle_array_fetch(Z_OBJ_P(ZEND_THIS), offset_str, offset_long, return_value, fallback, /* arg_num */ 1);
+	if (!retval) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 
