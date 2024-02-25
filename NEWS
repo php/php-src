@@ -185,6 +185,7 @@ PHP                                                                        NEWS
   . Removed the deprecated inet_ntoa call support. (David Carlier)
   . Cast large floats that are within int range to int in number_format so
     the precision is not lost. (Marc Bennewitz)
+  . Zero out until negative decimals in number_format (Marc Bennewitz)
   . Add support for 4 new rounding modes to the round() function. (Jorg Sowa)
   . debug_zval_dump() now indicates whether an array is packed. (Max Semenik)
   . Fix GH-12143 (Optimize round). (SakiTakamachi)
