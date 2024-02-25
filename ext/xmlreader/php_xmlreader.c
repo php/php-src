@@ -181,19 +181,12 @@ zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *val
 /* {{{ */
 static zend_function *xmlreader_get_method(zend_object **obj, zend_string *name, const zval *key)
 {
-	if (ZSTR_LEN(name) == sizeof("open") - 1
-			&& (ZSTR_VAL(name)[0] == 'o' || ZSTR_VAL(name)[0] == 'O')
-			&& (ZSTR_VAL(name)[1] == 'p' || ZSTR_VAL(name)[1] == 'P')
-			&& (ZSTR_VAL(name)[2] == 'e' || ZSTR_VAL(name)[2] == 'E')
-			&& (ZSTR_VAL(name)[3] == 'n' || ZSTR_VAL(name)[3] == 'N')) {
+	if (zend_string_equals_literal_ci(name, "open")) {
 		return (zend_function*)&xmlreader_open_fn;
-	} else if (ZSTR_LEN(name) == sizeof("xml") - 1
-			&& (ZSTR_VAL(name)[0] == 'x' || ZSTR_VAL(name)[0] == 'X')
-			&& (ZSTR_VAL(name)[1] == 'm' || ZSTR_VAL(name)[1] == 'M')
-			&& (ZSTR_VAL(name)[2] == 'l' || ZSTR_VAL(name)[2] == 'L')) {
+	} else if (zend_string_equals_literal_ci(name, "xml")) {
 		return (zend_function*)&xmlreader_xml_fn;
 	}
-	return zend_std_get_method(obj, name, key);;
+	return zend_std_get_method(obj, name, key);
 }
 /* }}} */
 
