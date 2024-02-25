@@ -1529,7 +1529,7 @@ class FuncInfo {
             return null;
         }
 
-        return "\tF" . $this->return->refcount . '("' . $this->name->__toString() . '", ' . $type->toOptimizerTypeMask() . "),\n";
+        return "\tF" . $this->return->refcount . '("' . addslashes($this->name->__toString()) . '", ' . $type->toOptimizerTypeMask() . "),\n";
     }
 
     public function discardInfoForOldPhpVersions(): void {
