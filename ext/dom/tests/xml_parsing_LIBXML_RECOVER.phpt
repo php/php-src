@@ -6,18 +6,18 @@ dom
 <?php
 
 $dom = new DOMDocument;
-$dom->loadXML('<root>foo</root/>', options: LIBXML_RECOVER);
+$dom->loadXML('<root><child/>', options: LIBXML_RECOVER);
 echo $dom->saveXML();
 
-$dom = DOM\XMLDocument::createFromString('<root>foo</root/>', options: LIBXML_RECOVER);
+$dom = DOM\XMLDocument::createFromString('<root><child/>', options: LIBXML_RECOVER);
 echo $dom->saveXML(), "\n";
 
 ?>
 --EXPECTF--
-Warning: DOMDocument::loadXML(): expected '>' in Entity, line: 1 in %s on line %d
+Warning: DOMDocument::loadXML(): Premature end of data in tag root line 1 in Entity, line: 1 in %s on line %d
 <?xml version="1.0"?>
-<root>foo</root>
+<root><child/></root>
 
-Warning: DOM\XMLDocument::createFromString(): expected '>' in Entity, line: 1 in %s on line %d
+Warning: DOM\XMLDocument::createFromString(): Premature end of data in tag root line 1 in Entity, line: 1 in %s on line %d
 <?xml version="1.0" encoding="UTF-8"?>
-<root>foo</root>
+<root><child/></root>
