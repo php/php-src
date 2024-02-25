@@ -51,22 +51,12 @@ if test "$PHP_SOCKETS" != "no"; then
     AC_DEFINE(HAVE_AI_IDN,1,[Whether you have AI_IDN])
   fi
 
-  dnl Check for struct ucred
-  dnl checking the header is not enough	(eg DragonFlyBSD)
-  AC_CACHE_CHECK([if ancillary credentials uses ucred],[ac_cv_ucred],
-  [
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-#include <sys/socket.h>
-  ]], [[struct ucred u = {.gid = 0};]])],
-      [ac_cv_ucred=yes], [ac_cv_ucred=no])
-  ])
-
-  if test "$ac_cv_ucred" = yes; then
-    AC_DEFINE(ANC_CREDS_UCRED,1,[Uses ucred struct])
-  fi
+  dnl Check for struct ucred. Checking the header is not enough (DragonFlyBSD).
+  AC_CHECK_TYPES([struct ucred],,,
+    [#ifndef _GNU_SOURCE
+    # define _GNU_SOURCE
+    #endif
+    #include <sys/socket.h>])
 
   dnl Check for struct cmsgcred
   AC_CACHE_CHECK([if ancillary credentials uses cmsgcred],[ac_cv_cmsgcred],
