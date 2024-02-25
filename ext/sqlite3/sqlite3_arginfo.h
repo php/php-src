@@ -214,7 +214,7 @@ static const zend_function_entry class_SQLite3Exception_methods[] = {
 };
 
 static const zend_function_entry class_SQLite3_methods[] = {
-	ZEND_MALIAS(SQLite3, __construct, open, arginfo_class_SQLite3___construct, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__construct", zim_SQLite3_open, arginfo_class_SQLite3___construct, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(SQLite3, open, arginfo_class_SQLite3_open, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3, close, arginfo_class_SQLite3_close, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3, version, arginfo_class_SQLite3_version, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)

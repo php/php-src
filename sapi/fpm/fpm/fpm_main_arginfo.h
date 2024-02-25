@@ -19,7 +19,7 @@ ZEND_FUNCTION(fpm_get_status);
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(fastcgi_finish_request, arginfo_fastcgi_finish_request)
 	ZEND_FE(apache_request_headers, arginfo_apache_request_headers)
-	ZEND_FALIAS(getallheaders, apache_request_headers, arginfo_getallheaders)
+	ZEND_RAW_FENTRY("getallheaders", zif_apache_request_headers, arginfo_getallheaders, 0, NULL, NULL)
 	ZEND_FE(fpm_get_status, arginfo_fpm_get_status)
 	ZEND_FE_END
 };

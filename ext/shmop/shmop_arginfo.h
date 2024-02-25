@@ -42,7 +42,7 @@ ZEND_FUNCTION(shmop_delete);
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(shmop_open, arginfo_shmop_open)
 	ZEND_FE(shmop_read, arginfo_shmop_read)
-	ZEND_DEP_FE(shmop_close, arginfo_shmop_close)
+	ZEND_RAW_FENTRY("shmop_close", zif_shmop_close, arginfo_shmop_close, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(shmop_size, arginfo_shmop_size)
 	ZEND_FE(shmop_write, arginfo_shmop_write)
 	ZEND_FE(shmop_delete, arginfo_shmop_delete)

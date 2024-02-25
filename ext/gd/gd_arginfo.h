@@ -744,7 +744,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagesettile, arginfo_imagesettile)
 	ZEND_FE(imagesetbrush, arginfo_imagesetbrush)
 	ZEND_FE(imagecreate, arginfo_imagecreate)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(imagetypes, arginfo_imagetypes)
+	ZEND_RAW_FENTRY("imagetypes", zif_imagetypes, arginfo_imagetypes, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(imagecreatefromstring, arginfo_imagecreatefromstring)
 #if defined(HAVE_GD_AVIF)
 	ZEND_FE(imagecreatefromavif, arginfo_imagecreatefromavif)
@@ -841,10 +841,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagefttext, arginfo_imagefttext)
 #endif
 #if defined(HAVE_GD_FREETYPE)
-	ZEND_FALIAS(imagettfbbox, imageftbbox, arginfo_imagettfbbox)
+	ZEND_RAW_FENTRY("imagettfbbox", zif_imageftbbox, arginfo_imagettfbbox, 0, NULL, NULL)
 #endif
 #if defined(HAVE_GD_FREETYPE)
-	ZEND_FALIAS(imagettftext, imagefttext, arginfo_imagettftext)
+	ZEND_RAW_FENTRY("imagettftext", zif_imagefttext, arginfo_imagettftext, 0, NULL, NULL)
 #endif
 	ZEND_FE(imagefilter, arginfo_imagefilter)
 	ZEND_FE(imageconvolution, arginfo_imageconvolution)

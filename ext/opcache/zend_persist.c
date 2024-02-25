@@ -982,15 +982,15 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			zend_accel_store_string(ce->info.user.filename);
 		}
 
-		if (ce->info.user.doc_comment) {
+		if (ce->doc_comment) {
 			if (ZCG(accel_directives).save_comments) {
-				zend_accel_store_interned_string(ce->info.user.doc_comment);
+				zend_accel_store_interned_string(ce->doc_comment);
 			} else {
-				if (!zend_shared_alloc_get_xlat_entry(ce->info.user.doc_comment)) {
-					zend_shared_alloc_register_xlat_entry(ce->info.user.doc_comment, ce->info.user.doc_comment);
-					zend_string_release_ex(ce->info.user.doc_comment, 0);
+				if (!zend_shared_alloc_get_xlat_entry(ce->doc_comment)) {
+					zend_shared_alloc_register_xlat_entry(ce->doc_comment, ce->doc_comment);
+					zend_string_release_ex(ce->doc_comment, 0);
 				}
-				ce->info.user.doc_comment = NULL;
+				ce->doc_comment = NULL;
 			}
 		}
 

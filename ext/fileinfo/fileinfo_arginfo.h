@@ -72,10 +72,10 @@ static const zend_function_entry ext_functions[] = {
 };
 
 static const zend_function_entry class_finfo_methods[] = {
-	ZEND_ME_MAPPING(__construct, finfo_open, arginfo_class_finfo___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(file, finfo_file, arginfo_class_finfo_file, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(buffer, finfo_buffer, arginfo_class_finfo_buffer, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(set_flags, finfo_set_flags, arginfo_class_finfo_set_flags, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__construct", zif_finfo_open, arginfo_class_finfo___construct, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("file", zif_finfo_file, arginfo_class_finfo_file, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("buffer", zif_finfo_buffer, arginfo_class_finfo_buffer, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("set_flags", zif_finfo_set_flags, arginfo_class_finfo_set_flags, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 

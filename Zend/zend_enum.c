@@ -437,6 +437,7 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 	cases_function->handler = zend_enum_cases_func;
 	cases_function->function_name = ZSTR_KNOWN(ZEND_STR_CASES);
 	cases_function->fn_flags = fn_flags;
+	cases_function->doc_comment = NULL;
 	cases_function->arg_info = (zend_internal_arg_info *) (arginfo_class_UnitEnum_cases + 1);
 	zend_enum_register_func(ce, ZEND_STR_CASES, cases_function);
 
@@ -445,6 +446,7 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 		from_function->handler = zend_enum_from_func;
 		from_function->function_name = ZSTR_KNOWN(ZEND_STR_FROM);
 		from_function->fn_flags = fn_flags;
+		from_function->doc_comment = NULL;
 		from_function->num_args = 1;
 		from_function->required_num_args = 1;
 		from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_from + 1);
@@ -454,6 +456,7 @@ void zend_enum_register_funcs(zend_class_entry *ce)
 		try_from_function->handler = zend_enum_try_from_func;
 		try_from_function->function_name = ZSTR_KNOWN(ZEND_STR_TRYFROM);
 		try_from_function->fn_flags = fn_flags;
+		try_from_function->doc_comment = NULL;
 		try_from_function->num_args = 1;
 		try_from_function->required_num_args = 1;
 		try_from_function->arg_info = (zend_internal_arg_info *) (arginfo_class_BackedEnum_tryFrom + 1);

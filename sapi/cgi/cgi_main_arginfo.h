@@ -18,7 +18,7 @@ ZEND_FUNCTION(apache_response_headers);
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(apache_child_terminate, arginfo_apache_child_terminate)
 	ZEND_FE(apache_request_headers, arginfo_apache_request_headers)
-	ZEND_FALIAS(getallheaders, apache_request_headers, arginfo_getallheaders)
+	ZEND_RAW_FENTRY("getallheaders", zif_apache_request_headers, arginfo_getallheaders, 0, NULL, NULL)
 	ZEND_FE(apache_response_headers, arginfo_apache_response_headers)
 	ZEND_FE_END
 };

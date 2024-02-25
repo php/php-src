@@ -287,9 +287,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(socket_recvfrom, arginfo_socket_recvfrom)
 	ZEND_FE(socket_sendto, arginfo_socket_sendto)
 	ZEND_FE(socket_get_option, arginfo_socket_get_option)
-	ZEND_FALIAS(socket_getopt, socket_get_option, arginfo_socket_getopt)
+	ZEND_RAW_FENTRY("socket_getopt", zif_socket_get_option, arginfo_socket_getopt, 0, NULL, NULL)
 	ZEND_FE(socket_set_option, arginfo_socket_set_option)
-	ZEND_FALIAS(socket_setopt, socket_set_option, arginfo_socket_setopt)
+	ZEND_RAW_FENTRY("socket_setopt", zif_socket_set_option, arginfo_socket_setopt, 0, NULL, NULL)
 #if defined(HAVE_SOCKETPAIR)
 	ZEND_FE(socket_create_pair, arginfo_socket_create_pair)
 #endif

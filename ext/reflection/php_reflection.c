@@ -309,8 +309,8 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 	zend_string *sub_indent = strpprintf(0, "%s    ", indent);
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?) */
-	if (ce->type == ZEND_USER_CLASS && ce->info.user.doc_comment) {
-		smart_str_append_printf(str, "%s%s", indent, ZSTR_VAL(ce->info.user.doc_comment));
+	if (ce->doc_comment) {
+		smart_str_append_printf(str, "%s%s", indent, ZSTR_VAL(ce->doc_comment));
 		smart_str_appendc(str, '\n');
 	}
 
@@ -784,6 +784,8 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	 */
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
 		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(fptr->op_array.doc_comment));
+	} else if (fptr->type == ZEND_INTERNAL_FUNCTION && fptr->internal_function.doc_comment) {
+		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(fptr->internal_function.doc_comment));
 	}
 
 	smart_str_appendl(str, indent, strlen(indent));
@@ -1922,10 +1924,17 @@ ZEND_METHOD(ReflectionFunctionAbstract, getDocComment)
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
 	GET_REFLECTION_OBJECT_PTR(fptr);
+
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
 		RETURN_STR_COPY(fptr->op_array.doc_comment);
 	}
+
+	if (fptr->type == ZEND_INTERNAL_FUNCTION && ((zend_internal_function *) fptr)->doc_comment) {
+		RETURN_STR_COPY(((zend_internal_function *) fptr)->doc_comment);
+	}
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -4403,8 +4412,8 @@ ZEND_METHOD(ReflectionClass, getDocComment)
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (ce->type == ZEND_USER_CLASS && ce->info.user.doc_comment) {
-		RETURN_STR_COPY(ce->info.user.doc_comment);
+	if (ce->doc_comment) {
+		RETURN_STR_COPY(ce->doc_comment);
 	}
 	RETURN_FALSE;
 }

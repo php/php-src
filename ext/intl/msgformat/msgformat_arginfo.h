@@ -60,16 +60,16 @@ ZEND_FUNCTION(msgfmt_get_error_message);
 
 static const zend_function_entry class_MessageFormatter_methods[] = {
 	ZEND_ME(MessageFormatter, __construct, arginfo_class_MessageFormatter___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(create, msgfmt_create, arginfo_class_MessageFormatter_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(format, msgfmt_format, arginfo_class_MessageFormatter_format, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(formatMessage, msgfmt_format_message, arginfo_class_MessageFormatter_formatMessage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(parse, msgfmt_parse, arginfo_class_MessageFormatter_parse, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(parseMessage, msgfmt_parse_message, arginfo_class_MessageFormatter_parseMessage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(setPattern, msgfmt_set_pattern, arginfo_class_MessageFormatter_setPattern, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getPattern, msgfmt_get_pattern, arginfo_class_MessageFormatter_getPattern, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getLocale, msgfmt_get_locale, arginfo_class_MessageFormatter_getLocale, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getErrorCode, msgfmt_get_error_code, arginfo_class_MessageFormatter_getErrorCode, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getErrorMessage, msgfmt_get_error_message, arginfo_class_MessageFormatter_getErrorMessage, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("create", zif_msgfmt_create, arginfo_class_MessageFormatter_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("format", zif_msgfmt_format, arginfo_class_MessageFormatter_format, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("formatMessage", zif_msgfmt_format_message, arginfo_class_MessageFormatter_formatMessage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("parse", zif_msgfmt_parse, arginfo_class_MessageFormatter_parse, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("parseMessage", zif_msgfmt_parse_message, arginfo_class_MessageFormatter_parseMessage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setPattern", zif_msgfmt_set_pattern, arginfo_class_MessageFormatter_setPattern, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getPattern", zif_msgfmt_get_pattern, arginfo_class_MessageFormatter_getPattern, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getLocale", zif_msgfmt_get_locale, arginfo_class_MessageFormatter_getLocale, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getErrorCode", zif_msgfmt_get_error_code, arginfo_class_MessageFormatter_getErrorCode, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getErrorMessage", zif_msgfmt_get_error_message, arginfo_class_MessageFormatter_getErrorMessage, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 

@@ -183,7 +183,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(session_reset, arginfo_session_reset)
 	ZEND_FE(session_status, arginfo_session_status)
 	ZEND_FE(session_register_shutdown, arginfo_session_register_shutdown)
-	ZEND_FALIAS(session_commit, session_write_close, arginfo_session_commit)
+	ZEND_RAW_FENTRY("session_commit", zif_session_write_close, arginfo_session_commit, 0, NULL, NULL)
 	ZEND_FE(session_set_save_handler, arginfo_session_set_save_handler)
 	ZEND_FE(session_cache_limiter, arginfo_session_cache_limiter)
 	ZEND_FE(session_cache_expire, arginfo_session_cache_expire)
@@ -193,23 +193,23 @@ static const zend_function_entry ext_functions[] = {
 };
 
 static const zend_function_entry class_SessionHandlerInterface_methods[] = {
-	ZEND_ABSTRACT_ME_WITH_FLAGS(SessionHandlerInterface, open, arginfo_class_SessionHandlerInterface_open, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(SessionHandlerInterface, close, arginfo_class_SessionHandlerInterface_close, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(SessionHandlerInterface, read, arginfo_class_SessionHandlerInterface_read, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(SessionHandlerInterface, write, arginfo_class_SessionHandlerInterface_write, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(SessionHandlerInterface, destroy, arginfo_class_SessionHandlerInterface_destroy, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(SessionHandlerInterface, gc, arginfo_class_SessionHandlerInterface_gc, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_RAW_FENTRY("open", NULL, arginfo_class_SessionHandlerInterface_open, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("close", NULL, arginfo_class_SessionHandlerInterface_close, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("read", NULL, arginfo_class_SessionHandlerInterface_read, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("write", NULL, arginfo_class_SessionHandlerInterface_write, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("destroy", NULL, arginfo_class_SessionHandlerInterface_destroy, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("gc", NULL, arginfo_class_SessionHandlerInterface_gc, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_SessionIdInterface_methods[] = {
-	ZEND_ABSTRACT_ME_WITH_FLAGS(SessionIdInterface, create_sid, arginfo_class_SessionIdInterface_create_sid, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_RAW_FENTRY("create_sid", NULL, arginfo_class_SessionIdInterface_create_sid, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
 static const zend_function_entry class_SessionUpdateTimestampHandlerInterface_methods[] = {
-	ZEND_ABSTRACT_ME_WITH_FLAGS(SessionUpdateTimestampHandlerInterface, validateId, arginfo_class_SessionUpdateTimestampHandlerInterface_validateId, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(SessionUpdateTimestampHandlerInterface, updateTimestamp, arginfo_class_SessionUpdateTimestampHandlerInterface_updateTimestamp, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_RAW_FENTRY("validateId", NULL, arginfo_class_SessionUpdateTimestampHandlerInterface_validateId, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("updateTimestamp", NULL, arginfo_class_SessionUpdateTimestampHandlerInterface_updateTimestamp, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 

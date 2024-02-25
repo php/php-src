@@ -262,7 +262,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gmp_div_qr, arginfo_gmp_div_qr)
 	ZEND_FE(gmp_div_q, arginfo_gmp_div_q)
 	ZEND_FE(gmp_div_r, arginfo_gmp_div_r)
-	ZEND_FALIAS(gmp_div, gmp_div_q, arginfo_gmp_div)
+	ZEND_RAW_FENTRY("gmp_div", zif_gmp_div_q, arginfo_gmp_div, 0, NULL, NULL)
 	ZEND_FE(gmp_mod, arginfo_gmp_mod)
 	ZEND_FE(gmp_divexact, arginfo_gmp_divexact)
 	ZEND_FE(gmp_neg, arginfo_gmp_neg)

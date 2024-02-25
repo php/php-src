@@ -72,19 +72,19 @@ ZEND_FUNCTION(collator_get_sort_key);
 
 static const zend_function_entry class_Collator_methods[] = {
 	ZEND_ME(Collator, __construct, arginfo_class_Collator___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(create, collator_create, arginfo_class_Collator_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(compare, collator_compare, arginfo_class_Collator_compare, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(sort, collator_sort, arginfo_class_Collator_sort, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(sortWithSortKeys, collator_sort_with_sort_keys, arginfo_class_Collator_sortWithSortKeys, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(asort, collator_asort, arginfo_class_Collator_asort, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getAttribute, collator_get_attribute, arginfo_class_Collator_getAttribute, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(setAttribute, collator_set_attribute, arginfo_class_Collator_setAttribute, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getStrength, collator_get_strength, arginfo_class_Collator_getStrength, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(setStrength, collator_set_strength, arginfo_class_Collator_setStrength, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getLocale, collator_get_locale, arginfo_class_Collator_getLocale, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getErrorCode, collator_get_error_code, arginfo_class_Collator_getErrorCode, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getErrorMessage, collator_get_error_message, arginfo_class_Collator_getErrorMessage, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getSortKey, collator_get_sort_key, arginfo_class_Collator_getSortKey, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("create", zif_collator_create, arginfo_class_Collator_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("compare", zif_collator_compare, arginfo_class_Collator_compare, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("sort", zif_collator_sort, arginfo_class_Collator_sort, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("sortWithSortKeys", zif_collator_sort_with_sort_keys, arginfo_class_Collator_sortWithSortKeys, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("asort", zif_collator_asort, arginfo_class_Collator_asort, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getAttribute", zif_collator_get_attribute, arginfo_class_Collator_getAttribute, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setAttribute", zif_collator_set_attribute, arginfo_class_Collator_setAttribute, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getStrength", zif_collator_get_strength, arginfo_class_Collator_getStrength, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("setStrength", zif_collator_set_strength, arginfo_class_Collator_setStrength, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getLocale", zif_collator_get_locale, arginfo_class_Collator_getLocale, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getErrorCode", zif_collator_get_error_code, arginfo_class_Collator_getErrorCode, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getErrorMessage", zif_collator_get_error_message, arginfo_class_Collator_getErrorMessage, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getSortKey", zif_collator_get_sort_key, arginfo_class_Collator_getSortKey, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 

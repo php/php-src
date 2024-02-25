@@ -178,25 +178,25 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(hash_update_file, arginfo_hash_update_file)
 	ZEND_FE(hash_final, arginfo_hash_final)
 	ZEND_FE(hash_copy, arginfo_hash_copy)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(hash_algos, arginfo_hash_algos)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(hash_hmac_algos, arginfo_hash_hmac_algos)
+	ZEND_RAW_FENTRY("hash_algos", zif_hash_algos, arginfo_hash_algos, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("hash_hmac_algos", zif_hash_hmac_algos, arginfo_hash_hmac_algos, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(hash_pbkdf2, arginfo_hash_pbkdf2)
 	ZEND_FE(hash_equals, arginfo_hash_equals)
 	ZEND_FE(hash_hkdf, arginfo_hash_hkdf)
 #if defined(PHP_MHASH_BC)
-	ZEND_DEP_FE(mhash_get_block_size, arginfo_mhash_get_block_size)
+	ZEND_RAW_FENTRY("mhash_get_block_size", zif_mhash_get_block_size, arginfo_mhash_get_block_size, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_DEP_FE(mhash_get_hash_name, arginfo_mhash_get_hash_name)
+	ZEND_RAW_FENTRY("mhash_get_hash_name", zif_mhash_get_hash_name, arginfo_mhash_get_hash_name, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_DEP_FE(mhash_keygen_s2k, arginfo_mhash_keygen_s2k)
+	ZEND_RAW_FENTRY("mhash_keygen_s2k", zif_mhash_keygen_s2k, arginfo_mhash_keygen_s2k, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_DEP_FE(mhash_count, arginfo_mhash_count)
+	ZEND_RAW_FENTRY("mhash_count", zif_mhash_count, arginfo_mhash_count, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 #if defined(PHP_MHASH_BC)
-	ZEND_DEP_FE(mhash, arginfo_mhash)
+	ZEND_RAW_FENTRY("mhash", zif_mhash, arginfo_mhash, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 	ZEND_FE_END
 };

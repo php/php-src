@@ -88,14 +88,14 @@ ZEND_FUNCTION(preg_last_error);
 ZEND_FUNCTION(preg_last_error_msg);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FRAMELESS_FE(preg_match, arginfo_preg_match, 0, frameless_function_infos_preg_match)
+	ZEND_RAW_FENTRY("preg_match", zif_preg_match, arginfo_preg_match, 0, frameless_function_infos_preg_match, NULL)
 	ZEND_FE(preg_match_all, arginfo_preg_match_all)
-	ZEND_FRAMELESS_FE(preg_replace, arginfo_preg_replace, 0, frameless_function_infos_preg_replace)
+	ZEND_RAW_FENTRY("preg_replace", zif_preg_replace, arginfo_preg_replace, 0, frameless_function_infos_preg_replace, NULL)
 	ZEND_FE(preg_filter, arginfo_preg_filter)
 	ZEND_FE(preg_replace_callback, arginfo_preg_replace_callback)
 	ZEND_FE(preg_replace_callback_array, arginfo_preg_replace_callback_array)
 	ZEND_FE(preg_split, arginfo_preg_split)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(preg_quote, arginfo_preg_quote)
+	ZEND_RAW_FENTRY("preg_quote", zif_preg_quote, arginfo_preg_quote, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(preg_grep, arginfo_preg_grep)
 	ZEND_FE(preg_last_error, arginfo_preg_last_error)
 	ZEND_FE(preg_last_error_msg, arginfo_preg_last_error_msg)

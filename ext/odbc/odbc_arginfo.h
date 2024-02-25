@@ -331,7 +331,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(odbc_data_source, arginfo_odbc_data_source)
 #endif
 	ZEND_FE(odbc_exec, arginfo_odbc_exec)
-	ZEND_FALIAS(odbc_do, odbc_exec, arginfo_odbc_do)
+	ZEND_RAW_FENTRY("odbc_do", zif_odbc_exec, arginfo_odbc_do, 0, NULL, NULL)
 #if defined(PHP_ODBC_HAVE_FETCH_HASH)
 	ZEND_FE(odbc_fetch_object, arginfo_odbc_fetch_object)
 #endif
@@ -341,7 +341,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(odbc_fetch_into, arginfo_odbc_fetch_into)
 	ZEND_FE(odbc_fetch_row, arginfo_odbc_fetch_row)
 	ZEND_FE(odbc_result, arginfo_odbc_result)
-	ZEND_DEP_FE(odbc_result_all, arginfo_odbc_result_all)
+	ZEND_RAW_FENTRY("odbc_result_all", zif_odbc_result_all, arginfo_odbc_result_all, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(odbc_free_result, arginfo_odbc_free_result)
 	ZEND_FE(odbc_connect, arginfo_odbc_connect)
 	ZEND_FE(odbc_pconnect, arginfo_odbc_pconnect)
@@ -354,7 +354,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(odbc_field_name, arginfo_odbc_field_name)
 	ZEND_FE(odbc_field_type, arginfo_odbc_field_type)
 	ZEND_FE(odbc_field_len, arginfo_odbc_field_len)
-	ZEND_FALIAS(odbc_field_precision, odbc_field_len, arginfo_odbc_field_precision)
+	ZEND_RAW_FENTRY("odbc_field_precision", zif_odbc_field_len, arginfo_odbc_field_precision, 0, NULL, NULL)
 	ZEND_FE(odbc_field_scale, arginfo_odbc_field_scale)
 	ZEND_FE(odbc_field_num, arginfo_odbc_field_num)
 	ZEND_FE(odbc_autocommit, arginfo_odbc_autocommit)

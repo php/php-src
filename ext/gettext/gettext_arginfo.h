@@ -82,7 +82,7 @@ ZEND_FUNCTION(bind_textdomain_codeset);
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(textdomain, arginfo_textdomain)
 	ZEND_FE(gettext, arginfo_gettext)
-	ZEND_FALIAS(_, gettext, arginfo__)
+	ZEND_RAW_FENTRY("_", zif_gettext, arginfo__, 0, NULL, NULL)
 	ZEND_FE(dgettext, arginfo_dgettext)
 	ZEND_FE(dcgettext, arginfo_dcgettext)
 	ZEND_FE(bindtextdomain, arginfo_bindtextdomain)

@@ -320,7 +320,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(posix_setrlimit, arginfo_posix_setrlimit)
 #endif
 	ZEND_FE(posix_get_last_error, arginfo_posix_get_last_error)
-	ZEND_FALIAS(posix_errno, posix_get_last_error, arginfo_posix_errno)
+	ZEND_RAW_FENTRY("posix_errno", zif_posix_get_last_error, arginfo_posix_errno, 0, NULL, NULL)
 	ZEND_FE(posix_strerror, arginfo_posix_strerror)
 #if defined(HAVE_INITGROUPS)
 	ZEND_FE(posix_initgroups, arginfo_posix_initgroups)

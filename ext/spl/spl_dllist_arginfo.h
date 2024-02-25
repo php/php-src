@@ -141,8 +141,8 @@ static const zend_function_entry class_SplDoublyLinkedList_methods[] = {
 };
 
 static const zend_function_entry class_SplQueue_methods[] = {
-	ZEND_MALIAS(SplDoublyLinkedList, enqueue, push, arginfo_class_SplQueue_enqueue, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplDoublyLinkedList, dequeue, shift, arginfo_class_SplQueue_dequeue, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("enqueue", zim_SplDoublyLinkedList_push, arginfo_class_SplQueue_enqueue, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("dequeue", zim_SplDoublyLinkedList_shift, arginfo_class_SplQueue_dequeue, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 

@@ -139,37 +139,37 @@ ZEND_FUNCTION(intltz_use_daylight_time);
 
 static const zend_function_entry class_IntlTimeZone_methods[] = {
 	ZEND_ME(IntlTimeZone, __construct, arginfo_class_IntlTimeZone___construct, ZEND_ACC_PRIVATE)
-	ZEND_ME_MAPPING(countEquivalentIDs, intltz_count_equivalent_ids, arginfo_class_IntlTimeZone_countEquivalentIDs, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(createDefault, intltz_create_default, arginfo_class_IntlTimeZone_createDefault, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(createEnumeration, intltz_create_enumeration, arginfo_class_IntlTimeZone_createEnumeration, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(createTimeZone, intltz_create_time_zone, arginfo_class_IntlTimeZone_createTimeZone, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(createTimeZoneIDEnumeration, intltz_create_time_zone_id_enumeration, arginfo_class_IntlTimeZone_createTimeZoneIDEnumeration, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(fromDateTimeZone, intltz_from_date_time_zone, arginfo_class_IntlTimeZone_fromDateTimeZone, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getCanonicalID, intltz_get_canonical_id, arginfo_class_IntlTimeZone_getCanonicalID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getDisplayName, intltz_get_display_name, arginfo_class_IntlTimeZone_getDisplayName, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getDSTSavings, intltz_get_dst_savings, arginfo_class_IntlTimeZone_getDSTSavings, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getEquivalentID, intltz_get_equivalent_id, arginfo_class_IntlTimeZone_getEquivalentID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getErrorCode, intltz_get_error_code, arginfo_class_IntlTimeZone_getErrorCode, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getErrorMessage, intltz_get_error_message, arginfo_class_IntlTimeZone_getErrorMessage, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getGMT, intltz_get_gmt, arginfo_class_IntlTimeZone_getGMT, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_RAW_FENTRY("countEquivalentIDs", zif_intltz_count_equivalent_ids, arginfo_class_IntlTimeZone_countEquivalentIDs, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("createDefault", zif_intltz_create_default, arginfo_class_IntlTimeZone_createDefault, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("createEnumeration", zif_intltz_create_enumeration, arginfo_class_IntlTimeZone_createEnumeration, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("createTimeZone", zif_intltz_create_time_zone, arginfo_class_IntlTimeZone_createTimeZone, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("createTimeZoneIDEnumeration", zif_intltz_create_time_zone_id_enumeration, arginfo_class_IntlTimeZone_createTimeZoneIDEnumeration, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("fromDateTimeZone", zif_intltz_from_date_time_zone, arginfo_class_IntlTimeZone_fromDateTimeZone, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getCanonicalID", zif_intltz_get_canonical_id, arginfo_class_IntlTimeZone_getCanonicalID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getDisplayName", zif_intltz_get_display_name, arginfo_class_IntlTimeZone_getDisplayName, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getDSTSavings", zif_intltz_get_dst_savings, arginfo_class_IntlTimeZone_getDSTSavings, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getEquivalentID", zif_intltz_get_equivalent_id, arginfo_class_IntlTimeZone_getEquivalentID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getErrorCode", zif_intltz_get_error_code, arginfo_class_IntlTimeZone_getErrorCode, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getErrorMessage", zif_intltz_get_error_message, arginfo_class_IntlTimeZone_getErrorMessage, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getGMT", zif_intltz_get_gmt, arginfo_class_IntlTimeZone_getGMT, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 #if U_ICU_VERSION_MAJOR_NUM >= 74
-	ZEND_ME_MAPPING(getIanaID, intltz_get_iana_id, arginfo_class_IntlTimeZone_getIanaID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_RAW_FENTRY("getIanaID", zif_intltz_get_iana_id, arginfo_class_IntlTimeZone_getIanaID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 #endif
-	ZEND_ME_MAPPING(getID, intltz_get_id, arginfo_class_IntlTimeZone_getID, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getOffset, intltz_get_offset, arginfo_class_IntlTimeZone_getOffset, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getRawOffset, intltz_get_raw_offset, arginfo_class_IntlTimeZone_getRawOffset, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(getRegion, intltz_get_region, arginfo_class_IntlTimeZone_getRegion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getTZDataVersion, intltz_get_tz_data_version, arginfo_class_IntlTimeZone_getTZDataVersion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(getUnknown, intltz_get_unknown, arginfo_class_IntlTimeZone_getUnknown, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_RAW_FENTRY("getID", zif_intltz_get_id, arginfo_class_IntlTimeZone_getID, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getOffset", zif_intltz_get_offset, arginfo_class_IntlTimeZone_getOffset, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getRawOffset", zif_intltz_get_raw_offset, arginfo_class_IntlTimeZone_getRawOffset, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getRegion", zif_intltz_get_region, arginfo_class_IntlTimeZone_getRegion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getTZDataVersion", zif_intltz_get_tz_data_version, arginfo_class_IntlTimeZone_getTZDataVersion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("getUnknown", zif_intltz_get_unknown, arginfo_class_IntlTimeZone_getUnknown, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 #if U_ICU_VERSION_MAJOR_NUM >= 52
-	ZEND_ME_MAPPING(getWindowsID, intltz_get_windows_id, arginfo_class_IntlTimeZone_getWindowsID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_RAW_FENTRY("getWindowsID", zif_intltz_get_windows_id, arginfo_class_IntlTimeZone_getWindowsID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 #endif
 #if U_ICU_VERSION_MAJOR_NUM >= 52
-	ZEND_ME_MAPPING(getIDForWindowsID, intltz_get_id_for_windows_id, arginfo_class_IntlTimeZone_getIDForWindowsID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_RAW_FENTRY("getIDForWindowsID", zif_intltz_get_id_for_windows_id, arginfo_class_IntlTimeZone_getIDForWindowsID, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 #endif
-	ZEND_ME_MAPPING(hasSameRules, intltz_has_same_rules, arginfo_class_IntlTimeZone_hasSameRules, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(toDateTimeZone, intltz_to_date_time_zone, arginfo_class_IntlTimeZone_toDateTimeZone, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(useDaylightTime, intltz_use_daylight_time, arginfo_class_IntlTimeZone_useDaylightTime, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("hasSameRules", zif_intltz_has_same_rules, arginfo_class_IntlTimeZone_hasSameRules, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("toDateTimeZone", zif_intltz_to_date_time_zone, arginfo_class_IntlTimeZone_toDateTimeZone, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("useDaylightTime", zif_intltz_use_daylight_time, arginfo_class_IntlTimeZone_useDaylightTime, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
