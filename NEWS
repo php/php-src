@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - Curl:
   . Fix failing tests due to string changes in libcurl 8.6.0. (Ayesh)
 
+- DOM:
+  . Fix reference access in dimensions for DOMNodeList and DOMNodeMap.
+    (nielsdos)
+
 - Fileinfo:
   . Fixed bug GH-13344 (finfo::buffer(): Failed identify data 0:(null),
     backport). (nielsdos)
