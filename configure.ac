@@ -620,7 +620,6 @@ usleep \
 utime \
 vasprintf \
 asprintf \
-nanosleep \
 memmem \
 memrchr \
 mempcpy \
@@ -638,8 +637,9 @@ AC_CHECK_HEADER([sys/procctl.h], [AC_CHECK_FUNCS([procctl])])
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R
 
-dnl Some systems (like OpenSolaris) do not have nanosleep in libc.
-PHP_CHECK_FUNC_LIB(nanosleep, rt)
+dnl Some systems (Solaris 10) do not have nanosleep in libc.
+AC_CHECK_FUNCS([nanosleep],,
+  [AC_SEARCH_LIBS([nanosleep], [rt], [AC_DEFINE([HAVE_NANOSLEEP], [1])])])
 
 dnl Haiku does not have network api in libc.
 PHP_CHECK_FUNC_LIB(setsockopt, network)
