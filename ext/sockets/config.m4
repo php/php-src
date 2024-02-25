@@ -68,19 +68,7 @@ if test "$PHP_SOCKETS" != "no"; then
     AC_DEFINE(ANC_CREDS_UCRED,1,[Uses ucred struct])
   fi
 
-  dnl Check for struct cmsgcred
-  AC_CACHE_CHECK([if ancillary credentials uses cmsgcred],[ac_cv_cmsgcred],
-  [
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <sys/socket.h>
-  ]], [[struct cmsgcred c = {0};]])],
-      [ac_cv_cmsgcred=yes], [ac_cv_cmsgcred=no])
-  ])
-
-  if test "$ac_cv_cmsgcred" = yes; then
-    AC_DEFINE(ANC_CREDS_CMSGCRED,1,[Uses cmsgcred struct])
-  fi
-
+  AC_CHECK_TYPES([struct cmsgcred],,,[#include <sys/socket.h>])
 
   PHP_SOCKETS_CFLAGS=-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1
   case $host_alias in
