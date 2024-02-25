@@ -1261,7 +1261,7 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 	resolve_externals = doc_props->resolveexternals;
 	keep_blanks = doc_props->preservewhitespace;
 	substitute_ent = doc_props->substituteentities;
-	recover = doc_props->recover;
+	recover = doc_props->recover || (options & XML_PARSE_RECOVER) == XML_PARSE_RECOVER;
 
 	xmlInitParser();
 

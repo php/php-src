@@ -70,6 +70,9 @@ PHP                                                                        NEWS
   . Added LDAP_OPT_X_TLS_PROTOCOL_MAX/LDAP_OPT_X_TLS_PROTOCOL_TLS1_3
     constants. (StephenWall)
 
+- LibXML:
+  . Added LIBXML_RECOVER constant. (nielsdos)
+
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
 
