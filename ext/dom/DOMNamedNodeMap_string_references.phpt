@@ -35,7 +35,7 @@ $ref =& $str;
 var_dump(isset($attributes[$ref]), $attributes[$ref]->value);
 
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 string(2) "hi"
 bool(true)
@@ -43,9 +43,11 @@ string(3) "bar"
 bool(true)
 string(2) "hi"
 bool(true)
-string(2) "hi"
-bool(true)
-string(2) "hi"
+string(3) "bar"
+
+Warning: Attempt to read property "value" on null in %s on line %d
+bool(false)
+NULL
 bool(true)
 string(2) "hi"
 bool(true)
