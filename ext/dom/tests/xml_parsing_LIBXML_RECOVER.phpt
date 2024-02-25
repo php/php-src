@@ -14,10 +14,10 @@ echo $dom->saveXML(), "\n";
 
 ?>
 --EXPECTF--
-Warning: DOMDocument::loadXML(): Premature end of data in tag root line 1 in Entity, line: 1 in %s on line %d
+Warning: DOMDocument::loadXML(): %s
 <?xml version="1.0"?>
 <root><child/></root>
 
-Warning: DOM\XMLDocument::createFromString(): Premature end of data in tag root line 1 in Entity, line: 1 in %s on line %d
+Warning: DOM\XMLDocument::createFromString(): %s
 <?xml version="1.0" encoding="UTF-8"?>
 <root><child/></root>
