@@ -293,9 +293,7 @@ ftp_login(ftpbuf_t *ftp, const char *user, const size_t user_len, const char *pa
 			return 0;
 		}
 
-#if OPENSSL_VERSION_NUMBER >= 0x0090605fL
 		ssl_ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
-#endif
 		SSL_CTX_set_options(ctx, ssl_ctx_options);
 
 		/* Allow SSL to re-use sessions.

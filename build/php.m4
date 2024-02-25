@@ -1828,7 +1828,7 @@ dnl
 AC_DEFUN([PHP_SETUP_OPENSSL],[
   found_openssl=no
 
-  PKG_CHECK_MODULES([OPENSSL], [openssl >= 1.0.2], [found_openssl=yes])
+  PKG_CHECK_MODULES([OPENSSL], [openssl >= 1.1.1], [found_openssl=yes])
 
   if test "$found_openssl" = "yes"; then
     PHP_EVAL_LIBLINE($OPENSSL_LIBS, $1)

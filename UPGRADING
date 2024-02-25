@@ -498,6 +498,9 @@ PHP 8.4 UPGRADE NOTES
 - Intl:
   . The class constants are typed now.
 
+- Intl:
+  . The OpenSSL extension now requires at least OpenSSL 1.1.1.
+
 - PDO:
   . The class constants are typed now.
 
