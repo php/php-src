@@ -44,14 +44,12 @@ static zend_internal_function xmlreader_xml_fn;
 typedef int (*xmlreader_read_int_t)(xmlTextReaderPtr reader);
 typedef unsigned char *(*xmlreader_read_char_t)(xmlTextReaderPtr reader);
 typedef const unsigned char *(*xmlreader_read_const_char_t)(xmlTextReaderPtr reader);
-typedef int (*xmlreader_write_t)(xmlreader_object *obj, zval *newval);
 
 typedef unsigned char *(*xmlreader_read_one_char_t)(xmlTextReaderPtr reader, const unsigned char *);
 
 typedef struct _xmlreader_prop_handler {
 	xmlreader_read_int_t read_int_func;
 	xmlreader_read_const_char_t read_char_func;
-	xmlreader_write_t write_func;
 	int type;
 } xmlreader_prop_handler;
 
