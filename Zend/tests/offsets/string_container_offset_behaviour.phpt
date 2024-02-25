@@ -661,6 +661,40 @@ foreach ($offsets as $dimension) {
     }
     ++$testCasesTotal;
 }
+/* Using offsets as references */
+foreach ($offsets as $offset) {
+    $dimension = &$offset;
+    $container = '';
+    $error = '""[&' . zend_test_var_export($offset) . '] has different outputs' . "\n";
+
+    include $var_dim_filename;
+    $varOutput = ob_get_contents();
+    ob_clean();
+    $varOutput = str_replace(
+        [$var_dim_filename],
+        ['%s'],
+        $varOutput
+    );
+
+    if (
+        !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_OUT_OF_RANGE_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_TO_0_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_STRING_CAST_OFFSETS_OUT_OF_RANGE_REGEX, $varOutput)
+        && !preg_match($EXPECTF_OUTPUT_FLOAT_OFFSETS_OUT_OF_RANGE_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_FLOAT_INF_NAN_OFFSETS_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
+        && $varOutput !== EXPECTED_OUTPUT_INVALID_OFFSETS_AS_STRINGS
+        && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_AS_LEADING_NUMERIC_STRINGS_REGEX, $varOutput)
+        && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_AS_LEADING_NUMERIC_STRINGS_TO_0_REGEX, $varOutput)
+    ) {
+        file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_string_container_{$failuresNb}.txt", $varOutput);
+        ++$failuresNb;
+        $failures[] = $error;
+    }
+    ++$testCasesTotal;
+}
 ob_end_clean();
 
 echo "Executed tests\n";
